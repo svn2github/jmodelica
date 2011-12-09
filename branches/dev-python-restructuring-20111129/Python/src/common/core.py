@@ -41,13 +41,22 @@ class BaseModel(object):
         raise Exception("This is an abstract class it can not be instantiated.")
     
     def optimize(self):
-        raise NotImplementedError('This method is currently not supported.')
-                               
+        raise NotImplementedError('This method is not available in BaseModel.')
+
+    def optimize_options(self, algorithm):
+        raise NotImplementedError('This method is not available in BaseModel.')
+        
     def simulate(self):
-        raise NotImplementedError('This method is currently not supported.')
+        raise NotImplementedError('This method is not available in BaseModel.')
+
+    def simulate_options(self, algorithm):
+        raise NotImplementedError('This method is not available in BaseModel.')
     
     def initialize(self):
-        raise NotImplementedError('This method is currently not supported.')
+        raise NotImplementedError('This method is not available in BaseModel.')
+        
+    def initialize_options(self, algorithm):
+        raise NotImplementedError('This method is not available in BaseModel.')
     
     def set_real(self, valueref, value):
         raise NotImplementedError('This method is currently not supported.')
@@ -126,7 +135,7 @@ class BaseModel(object):
                 ret += [self._get(variable_name[i])]
             return ret
     
-    def _exec_algorithm(self, algorithm, options):
+    def _exec_algorithm(self, module, algorithm, options):
         """ 
         Helper function which performs all steps of an algorithm run which are 
         common to all initialize and optimize algortihms.
@@ -136,13 +145,13 @@ class BaseModel(object):
             Exception if algorithm is not a subclass of 
             jmodelica.algorithm_drivers.AlgorithmBase.
         """
-        base_path = 'jmodelica.algorithm_drivers'
-        algdrive = __import__(base_path)
-        algdrive = getattr(algdrive, 'algorithm_drivers')
+        base_path = 'algorithm_drivers'
+        algdrive = __import__(base_path, globals(), locals(), [], -1)
         AlgorithmBase = getattr(algdrive, 'AlgorithmBase')
         
         if isinstance(algorithm, basestring):
-            algorithm = getattr(algdrive, algorithm)
+            module = __import__(module, globals(), locals(), [algorithm], -1)
+            algorithm = getattr(module, algorithm)
         
         if not issubclass(algorithm, AlgorithmBase):
             raise Exception(str(algorithm)+
@@ -159,6 +168,7 @@ class BaseModel(object):
                                  start_time,
                                  final_time,
                                  input,
+                                 module, 
                                  algorithm, 
                                  options):
         """ 
@@ -170,94 +180,36 @@ class BaseModel(object):
             Exception if algorithm is not a subclass of 
             jmodelica.algorithm_drivers.AlgorithmBase.
         """
-        base_path = 'jmodelica.algorithm_drivers'
-        algdrive = __import__(base_path)
-        algdrive = getattr(algdrive, 'algorithm_drivers')
+        base_path = 'algorithm_drivers'
+        algdrive = __import__(base_path, globals(), locals(), [], -1)
         AlgorithmBase = getattr(algdrive, 'AlgorithmBase')
         
         if isinstance(algorithm, basestring):
-            algorithm = getattr(algdrive, algorithm)
+            module = __import__(module, globals(), locals(), [algorithm], -1)
+            algorithm = getattr(module, algorithm)
         
         if not issubclass(algorithm, AlgorithmBase):
             raise Exception(str(algorithm)+
             " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
 
         # initialize algorithm
-        alg = algorithm(start_time, final_time, input, self, 
-            options)
+        alg = algorithm(start_time, final_time, input, self, options)
         # simulate
         alg.solve()
         # get and return result
         return alg.get_result()
-        
-    def initialize_options(self, algorithm='IpoptInitializationAlg'):
-        """ 
-        Get an instance of the initialize options class, prefilled with default 
-        values. If called without argument then the options class for the 
-        default initialization algorithm will be returned.
-        
-        Parameters::
-        
-            algorithm --
-                The algorithm for which the options class should be fetched. 
-                Possible values are: 'IpoptInitializationAlg', 'KInitSolveAlg'.
-                Default: 'IpoptInitializationAlg'
-                
-        Returns::
-        
-            Options class for the algorithm specified with default values.
-        """
-        return self._default_options(algorithm)
-        
-    def simulate_options(self, algorithm='AssimuloAlg'):
-        """ 
-        Get an instance of the simulate options class, prefilled with default 
-        values. If called without argument then the options class for the 
-        default simulation algorithm will be returned.
 
-        Parameters::
         
-            algorithm --
-                The algorithm for which the options class should be fetched. 
-                Possible values are: 'AssimuloAlg', 'AssimuloFMIAlg'.
-                Default: 'AssimuloAlg'
-                
-        Returns::
-        
-            Options class for the algorithm specified with default values.
-        """
-        return self._default_options(algorithm)
-        
-    def optimize_options(self, algorithm='CollocationLagrangePolynomialsAlg'):
-        """
-        Returns an instance of the optimize options class containing options 
-        default values. If called without argument then the options class for 
-        the default optimization algorithm will be returned.
-        
-        Parameters::
-        
-            algorithm --
-                The algorithm for which the options class should be returned. 
-                Possible values are: 'CollocationLagrangePolynomialsAlg'.
-                Default: 'CollocationLagrangePolynomialsAlg'
-                
-        Returns::
-        
-            Options class for the algorithm specified with default values.
-        """
-        return self._default_options(algorithm)
-        
-    def _default_options(self, algorithm):
+    def _default_options(self, module, algorithm):
         """ 
         Help method. Gets the options class for the algorithm specified in 
         'algorithm'.
         """
-        base_path = 'jmodelica.algorithm_drivers'
-        algdrive = __import__(base_path)
-        algdrive = getattr(algdrive, 'algorithm_drivers')
-        algorithm = getattr(algdrive, algorithm)
+        module = __import__(module, globals(), locals(), [algorithm], -1)
+        algorithm = getattr(module, algorithm)
+        
         return algorithm.get_default_options()
-
+        
 
 def get_platform_suffix(type = "dynamic_lib"):
     """

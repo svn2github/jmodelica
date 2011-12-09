@@ -27,9 +27,9 @@ try:
 except:
     pass
 
-from jmodelica.fmi import compile_fmux, unzip_fmux
-from jmodelica.core import get_temp_location
-from jmodelica import xmlparser
+from pyfmi.fmi import compile_fmux, unzip_fmux
+from pyjmi.common.core import get_temp_location
+from pyjmi.common import xmlparser
 
 def convert_casadi_der_name(name):
     n = name.split('der_')[1]

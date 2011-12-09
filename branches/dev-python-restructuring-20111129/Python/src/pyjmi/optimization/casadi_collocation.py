@@ -32,10 +32,10 @@ except ImportError:
     logging.warning('Could not find CasADi package, aborting.')
 import numpy as N
     
-from jmodelica.optimization.polynomial import *
-from jmodelica import xmlparser
-from jmodelica.io import VariableNotFoundError
-from jmodelica.core import TrajectoryLinearInterpolation, TrajectoryUserFunction
+from pyjmi.optimization.polynomial import *
+from pyjmi.common import xmlparser
+from pyjmi.common.io import VariableNotFoundError
+from pyjmi.common.core import TrajectoryLinearInterpolation, TrajectoryUserFunction
 
 class CasADiCollocatorException(Exception):
     """

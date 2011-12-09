@@ -30,8 +30,8 @@ import numpy.ctypeslib as Nct
 import matplotlib.pyplot as plt
 
 import pyfmi
-from common import xmlparser
-from common.core import BaseModel, unzip_unit, get_unit_name, get_platform_suffix, get_files_in_archive, rename_to_tmp, load_DLL
+from pyfmi.common import xmlparser
+from pyfmi.common.core import BaseModel, unzip_unit, get_unit_name, get_platform_suffix, get_files_in_archive, rename_to_tmp, load_DLL
 from jmodelica.compiler import _get_compiler
 
 int = N.int32
@@ -1681,7 +1681,8 @@ class FMUModel(BaseModel):
         """
         return self._exec_simulate_algorithm(start_time, 
                                              final_time, 
-                                             input, 
+                                             input,
+                                             'pyfmi.fmi_algorithm_drivers', 
                                              algorithm,
                                              options)
                                
@@ -1702,7 +1703,7 @@ class FMUModel(BaseModel):
         
             Options class for the algorithm specified with default values.
         """
-        return self._default_options(algorithm)
+        return self._default_options('pyfmi.fmi_algorithm_drivers', algorithm)
     
     def _set(self, variable_name, value):
         """

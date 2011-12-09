@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from jmodelica.tests.general.base_simul import *
-from jmodelica.tests import testattr
+from pyjmi.tests.general.base_simul import *
+from pyjmi.tests import testattr
 
 class TestFunction1(SimulationTest):
     """

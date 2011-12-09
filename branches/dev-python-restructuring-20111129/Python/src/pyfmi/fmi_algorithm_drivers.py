@@ -26,16 +26,15 @@ import logging
 import time
 import numpy as N
 
-import common
-from common.algorithm_drivers import AlgorithmBase, AssimuloSimResult, OptionBase, InvalidAlgorithmOptionException, InvalidSolverArgumentException
-from common.io import ResultDymolaTextual
+from pyfmi.common.algorithm_drivers import AlgorithmBase, AssimuloSimResult, OptionBase, InvalidAlgorithmOptionException, InvalidSolverArgumentException
+from pyfmi.common.io import ResultDymolaTextual
 
 try:
-    import jmodelica
-    from jmodelica.simulation.assimulo_interface import FMIODE
-    from jmodelica.simulation.assimulo_interface import write_data
-    from common.core import TrajectoryLinearInterpolation
-    from common.core import TrajectoryUserFunction
+    import pyfmi
+    from pyfmi.simulation.assimulo_interface import FMIODE
+    from pyfmi.simulation.assimulo_interface import write_data
+    from pyfmi.common.core import TrajectoryLinearInterpolation
+    from pyfmi.common.core import TrajectoryUserFunction
     from assimulo.explicit_ode import *
     from assimulo import explicit_ode as expl_ode
     assimulo_present = True

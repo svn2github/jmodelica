@@ -22,12 +22,12 @@ This file holds base classes for simulation and optimization tests.
 
 import os
 
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-from jmodelica.fmi import compile_fmu
-from jmodelica.fmi import FMUModel
-from jmodelica.io import ResultDymolaTextual
-from jmodelica.tests import get_files_path
+from pyjmi.jmi import compile_jmu
+from pyjmi.jmi import JMUModel
+from pyfmi.fmi import compile_fmu
+from pyfmi.fmi import FMUModel
+from pyjmi.common.io import ResultDymolaTextual
+from pyjmi.tests import get_files_path
 
 _model_name = ''
 

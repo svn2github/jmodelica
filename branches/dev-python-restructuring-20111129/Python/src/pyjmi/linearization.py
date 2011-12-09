@@ -20,7 +20,7 @@
 
 import numpy as N
 
-import jmodelica.jmi as jmi
+import pyjmi.jmi as jmi
 
 int = N.int32
 N.int = N.int32

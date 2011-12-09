@@ -26,13 +26,13 @@ import nose
 import nose.tools
 import logging
 
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-from jmodelica.tests import testattr
-from jmodelica.tests import get_files_path
-from jmodelica.algorithm_drivers import InvalidAlgorithmOptionException
-from jmodelica.algorithm_drivers import InvalidSolverArgumentException
-from jmodelica.algorithm_drivers import UnrecognizedOptionError
+from pyjmi.jmi import compile_jmu
+from pyjmi.jmi import JMUModel
+from pyjmi.tests import testattr
+from pyjmi.tests import get_files_path
+from pyjmi.common.algorithm_drivers import InvalidAlgorithmOptionException
+from pyjmi.common.algorithm_drivers import InvalidSolverArgumentException
+from pyjmi.common.algorithm_drivers import UnrecognizedOptionError
 
 try:
     from assimulo.explicit_ode import *

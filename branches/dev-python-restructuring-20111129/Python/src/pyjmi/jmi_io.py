@@ -25,7 +25,8 @@ import numpy as N
 import scipy.io
 
 import jmi
-from common.xmlparser
+from pyjmi.common.io import ResultWriter
+from pyjmi.common import xmlparser
 
 def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
     """
@@ -190,7 +191,7 @@ def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
         cnt_2 = 1
         
         for i, name in enumerate(names):
-            (ref, type) = jmodelica.jmi._translate_value_ref(name[0])
+            (ref, type) = jmi._translate_value_ref(name[0])
             
             if int(ref) < n_parameters: # Put parameters in data set
                 if aliases[i][1] == 0: # no alias
@@ -218,7 +219,7 @@ def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
         z = model.z
 
         rescale = (model.get_scaling_method() == 
-            jmodelica.jmi.JMI_SCALING_VARIABLES) and (not scaled)
+            jmi.JMI_SCALING_VARIABLES) and (not scaled)
 
         # Write data
         # Write data set 1
@@ -437,7 +438,7 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         f.write('char name(%d,%d)\n' % (num_vars + 1, max_name_length))
         f.write('time\n')
         
-        self._rescale = (model.get_scaling_method() == jmodelica.jmi.JMI_SCALING_VARIABLES) and (not scaled)
+        self._rescale = (model.get_scaling_method() == jmi.JMI_SCALING_VARIABLES) and (not scaled)
 
         for name in names:
             f.write(name[1] +'\n')
@@ -471,7 +472,7 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         cnt_2 = 1
         
         for i, name in enumerate(names):
-            (ref, type) = jmodelica.jmi._translate_value_ref(name[0])
+            (ref, type) = jmi._translate_value_ref(name[0])
             
             if int(ref) < n_parameters: # Put parameters in data set
                 if aliases[i][1] == 0: # no alias
@@ -505,8 +506,8 @@ class ResultWriterDymolaSensitivity(ResultWriter):
             name_split = name.split('/')
             param = name_split[1][1:]
             var   = name_split[0][1:]
-            (ref_param, type) = jmodelica.jmi._translate_value_ref(model.get_value_reference(param))
-            (ref_var  , type) = jmodelica.jmi._translate_value_ref(model.get_value_reference(var))
+            (ref_param, type) = jmi._translate_value_ref(model.get_value_reference(param))
+            (ref_var  , type) = jmi._translate_value_ref(model.get_value_reference(var))
             
             if int(ref_var) < n_parameters: # Put parameters in data set
                 cnt_1 = cnt_1 + 1

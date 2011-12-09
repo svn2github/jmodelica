@@ -22,8 +22,8 @@ from ctypes import byref
 import numpy as N
 import numpy.ctypeslib as Nct
 
-from jmodelica import jmi
-from jmodelica import io
+from pyjmi import jmi
+from pyjmi.jmi_io import export_result_dymola as jmi_io_export_result_dymola
 
 int = N.int32
 N.int = N.int32
@@ -751,6 +751,6 @@ class NLPInitialization(object):
              n_u + n_w] = self._model.real_w
                         
         # Write result
-        io.export_result_dymola(self._model,data, file_name=file_name, 
+        jmi_io_export_result_dymola(self._model,data, file_name=file_name, 
             format=format, scaled = write_scaled_result)
 

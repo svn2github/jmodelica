@@ -24,14 +24,14 @@ import os.path
 import numpy as N
 import nose
 
-from jmodelica.tests import testattr
-from jmodelica.tests import get_files_path
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-from jmodelica.optimization import ipopt
-from jmodelica.linearization import *
-from jmodelica.initialization.ipopt import NLPInitialization
-from jmodelica.initialization.ipopt import InitializationOptimizer
+from pyjmi.tests import testattr
+from pyjmi.tests import get_files_path
+from pyjmi.jmi import compile_jmu
+from pyjmi.jmi import JMUModel
+from pyjmi.optimization import ipopt
+from pyjmi.linearization import *
+from pyjmi.initialization.ipopt import NLPInitialization
+from pyjmi.initialization.ipopt import InitializationOptimizer
 
 
 fpath = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')

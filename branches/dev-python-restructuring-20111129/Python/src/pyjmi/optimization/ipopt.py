@@ -26,8 +26,8 @@ import numpy as N
 import numpy.ctypeslib as Nct
 
 import pyjmi
-from pyjmi import jmi 
-from pyjmi.common import io
+from pyjmi import jmi
+from pyjmi.jmi_io import export_result_dymola as jmi_io_export_result_dymola
 from pyjmi.common.io import VariableNotFoundError
 
 int = N.int32
@@ -691,7 +691,7 @@ class NLPCollocation(object):
         p_opt, data = self.get_result()
         
         # Write result
-        io.export_result_dymola(self._model,data, file_name=file_name, 
+        jmi_io_export_result_dymola(self._model,data, file_name=file_name, 
             format=format, scaled=write_scaled_result)
 
     def export_result_dymola_element_interpolation(self, 
@@ -735,7 +735,7 @@ class NLPCollocation(object):
             n_interpolation_points)
         
         # Write result
-        io.export_result_dymola(self._model,data, file_name=file_name, 
+        jmi_io_export_result_dymola(self._model,data, file_name=file_name, 
             format=format, scaled=write_scaled_result)
 
     def export_result_dymola_mesh_interpolation(self, mesh, file_name='', 
@@ -774,7 +774,7 @@ class NLPCollocation(object):
         p_opt, data = self.get_result_mesh_interpolation(mesh)
         
         # Write result
-        io.export_result_dymola(self._model,data, file_name=file_name, 
+        jmi_io_export_result_dymola(self._model,data, file_name=file_name, 
             format=format, scaled=write_scaled_result)
 
 

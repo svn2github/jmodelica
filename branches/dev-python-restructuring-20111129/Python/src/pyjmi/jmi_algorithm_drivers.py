@@ -26,22 +26,19 @@ import logging
 import time
 import numpy as N
 
-import common
-from common.algorithm_drivers import AlgorithmBase, JMResultBase, AssimuloSimResult, OptionBase, InvalidAlgorithmOptionException, InvalidSolverArgumentException
-from common.io import ResultDymolaTextual
+from pyjmi.common.algorithm_drivers import AlgorithmBase, JMResultBase, AssimuloSimResult, OptionBase, InvalidAlgorithmOptionException, InvalidSolverArgumentException
+from pyjmi.common.io import ResultDymolaTextual
 
-import pyjmi
 from pyjmi.optimization import ipopt
 from pyjmi.initialization.ipopt import NLPInitialization
 from pyjmi.initialization.ipopt import InitializationOptimizer
 
 try:
-    import jmodelica
-    from jmodelica.simulation.assimulo_interface import JMIDAE, JMIODE
-    from jmodelica.simulation.assimulo_interface import JMIDAESens
-    from jmodelica.simulation.assimulo_interface import write_data
-    from common.core import TrajectoryLinearInterpolation
-    from common.core import TrajectoryUserFunction
+    from pyjmi.simulation.assimulo_interface import JMIDAE, JMIODE
+    from pyjmi.simulation.assimulo_interface import JMIDAESens
+    from pyjmi.simulation.assimulo_interface import write_data
+    from pyjmi.common.core import TrajectoryLinearInterpolation
+    from pyjmi.common.core import TrajectoryUserFunction
     from assimulo.implicit_ode import *
     from assimulo.explicit_ode import *
     from assimulo import implicit_ode as impl_ode
@@ -59,7 +56,8 @@ except:
 from pyjmi.optimization.casadi_collocation import *
 
 try:
-    ipopt_present = jmodelica.environ['IPOPT_HOME']
+    import pyjmi
+    ipopt_present = pyjmi.environ['IPOPT_HOME']
 except:
     ipopt_present = False
 

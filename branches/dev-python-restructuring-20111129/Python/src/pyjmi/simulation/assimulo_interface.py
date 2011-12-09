@@ -25,11 +25,12 @@ import numpy as N
 import numpy.linalg as LIN
 import pylab as P
 
-import jmodelica.io as io
-import jmodelica.jmi as jmi
-from jmodelica.initialization.ipopt import NLPInitialization
-from jmodelica.initialization.ipopt import InitializationOptimizer
-from jmodelica.core import TrajectoryLinearInterpolation
+from pyjmi.jmi_io import export_result_dymola
+from pyjmi.jmi_io import ResultWriterDymolaSensitivity
+import pyjmi.jmi as jmi
+from pyjmi.initialization.ipopt import NLPInitialization
+from pyjmi.initialization.ipopt import InitializationOptimizer
+from pyjmi.common.core import TrajectoryLinearInterpolation
 
 try:
     from assimulo.problem import Implicit_Problem
@@ -85,7 +86,7 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
         data = N.c_[data, y[
             :,len(model.real_x):len(model.real_x)+len(model.real_w)]]
 
-        io.export_result_dymola(model,data,scaled=write_scaled_result, \
+        export_result_dymola(model,data,scaled=write_scaled_result, \
                                 file_name=result_file_name)
     elif isinstance(simulator._problem, JMIODE):
         model = simulator._problem._model
@@ -115,7 +116,7 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
         data = N.c_[data, y]
         data = N.c_[data, u]
         
-        io.export_result_dymola(model,data,scaled=write_scaled_result, \
+        export_result_dymola(model,data,scaled=write_scaled_result, \
                                     file_name=result_file_name)
     elif isinstance(simulator._problem, JMIDAESens):
         
@@ -153,7 +154,7 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
         for i in range(len(p_data)):
             data = N.c_[data, p_data[i]]
 
-        export = io.ResultWriterDymolaSensitivity(model)
+        export = ResultWriterDymolaSensitivity(model)
         export.write_header(scaled=write_scaled_result, \
                             file_name=result_file_name)
         map(export.write_point,(row for row in data))
@@ -887,7 +888,7 @@ class JMIDAESens(Implicit_Problem):
         
         #Default values
         self.write_cont = False #Continuous writing
-        self.export = io.ResultWriterDymolaSensitivity(model)
+        self.export = ResultWriterDymolaSensitivity(model)
         
         #Determine the result file name
         if result_file_name == '':

@@ -26,8 +26,8 @@ import scipy.sparse as ss
 
 import time
 
-import jmodelica.jmi as jmi
-import jmodelica.io as io
+import pyjmi.jmi as jmi
+from pyjmi.jmi_io import export_result_dymola
 
 try:
     from assimulo.problem_algebraic import ProblemAlgebraic
@@ -634,4 +634,4 @@ def write_resdata(problem, file_name='', format='txt'):
              u_s + w_s] = model.real_w
                         
     # Write result
-    io.export_result_dymola(model,data, file_name=file_name, format=format)
+    export_result_dymola(model,data, file_name=file_name, format=format)

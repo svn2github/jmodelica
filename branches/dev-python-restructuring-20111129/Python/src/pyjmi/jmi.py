@@ -36,12 +36,12 @@ import _ctypes
 import atexit
 from lxml import etree
 
-import pyjmi
-from common import xmlparser
-from common.core import BaseModel, unzip_unit, get_unit_name, get_platform_suffix, get_files_in_archive, rename_to_tmp
+from pyjmi.common import xmlparser
+from pyjmi.common.core import BaseModel, unzip_unit, get_unit_name, get_platform_suffix, get_files_in_archive, rename_to_tmp
 from jmodelica.compiler import _get_compiler
-import common.io
-from common.core import TrajectoryLinearInterpolation
+
+from pyjmi.common.io import VariableNotFoundError
+from pyjmi.common.core import TrajectoryLinearInterpolation
 
 int = N.int32
 N.int = N.int32
@@ -1988,8 +1988,28 @@ class JMUModel(BaseModel):
             
             Result object, subclass of algorithm_drivers.ResultBase.
         """
-        return self._exec_algorithm(algorithm,
+        return self._exec_algorithm('pyjmi.jmi_algorithm_drivers',
+                                    algorithm,
                                     options)
+
+    def initialize_options(self, algorithm='IpoptInitializationAlg'):
+        """ 
+        Get an instance of the initialize options class, prefilled with default 
+        values. If called without argument then the options class for the 
+        default initialization algorithm will be returned.
+        
+        Parameters::
+        
+            algorithm --
+                The algorithm for which the options class should be fetched. 
+                Possible values are: 'IpoptInitializationAlg', 'KInitSolveAlg'.
+                Default: 'IpoptInitializationAlg'
+                
+        Returns::
+        
+            Options class for the algorithm specified with default values.
+        """
+        return self._default_options('pyjmi.jmi_algorithm_drivers', algorithm)
         
     def simulate(self, 
                  start_time=0.0,
@@ -2053,9 +2073,29 @@ class JMUModel(BaseModel):
         """
         return self._exec_simulate_algorithm(start_time, 
                                              final_time, 
-                                             input, 
+                                             input,
+                                             'pyjmi.jmi_algorithm_drivers',
                                              algorithm,
                                              options)
+
+    def simulate_options(self, algorithm='AssimuloAlg'):
+        """ 
+        Get an instance of the simulate options class, prefilled with default 
+        values. If called without argument then the options class for the 
+        default simulation algorithm will be returned.
+
+        Parameters::
+        
+            algorithm --
+                The algorithm for which the options class should be fetched. 
+                Possible values are: 'AssimuloAlg', 'AssimuloFMIAlg'.
+                Default: 'AssimuloAlg'
+                
+        Returns::
+        
+            Options class for the algorithm specified with default values.
+        """
+        return self._default_options('pyjmi.jmi_algorithm_drivers', algorithm)
         
     def optimize(self, 
                  algorithm='CollocationLagrangePolynomialsAlg', 
@@ -2098,8 +2138,28 @@ class JMUModel(BaseModel):
             
             A result object, subclass of algorithm_drivers.ResultBase.
         """
-        return self._exec_algorithm(algorithm,
+        return self._exec_algorithm('pyjmi.jmi_algorithm_drivers',
+                                    algorithm,
                                     options)
+
+    def optimize_options(self, algorithm='CollocationLagrangePolynomialsAlg'):
+        """
+        Returns an instance of the optimize options class containing options 
+        default values. If called without argument then the options class for 
+        the default optimization algorithm will be returned.
+        
+        Parameters::
+        
+            algorithm --
+                The algorithm for which the options class should be returned. 
+                Possible values are: 'CollocationLagrangePolynomialsAlg'.
+                Default: 'CollocationLagrangePolynomialsAlg'
+                
+        Returns::
+        
+            Options class for the algorithm specified with default values.
+        """
+        return self._default_options('pyjmi.jmi_algorithm_drivers', algorithm)
 
     def initialize_from_data(self,res,time=0.0):
         """
@@ -2155,7 +2215,7 @@ class JMUModel(BaseModel):
                     self.set(name,traj_li.eval(time))
                 else:
                     self.set(name,traj.x)
-            except jmodelica.io.VariableNotFoundError:
+            except VariableNotFoundError:
                 var_name = strip_der(name)
                 print var_name
                 found = False
@@ -2171,7 +2231,7 @@ class JMUModel(BaseModel):
                         else:
                             self.set(name,traj.x)
                             found = True
-                    except jmodelica.io.VariableNotFoundError:
+                    except VariableNotFoundError:
                         print "Did not find " + d_name
                 if not found:
                     print "Warning: Could not find trajectory for derivative variable " + name

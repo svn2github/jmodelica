@@ -20,13 +20,13 @@ Test module for Jacobian evaluation using CAD in jmodelica.
 """
 
 import os
-import jmodelica.jmi as jmi
 import numpy as N
 
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-from jmodelica.tests import testattr
-from jmodelica.tests import get_files_path
+import pyjmi.jmi as jmi
+from pyjmi.jmi import compile_jmu
+from pyjmi.jmi import JMUModel
+from pyjmi.tests import testattr
+from pyjmi.tests import get_files_path
 
 int = N.int32
 N.int = N.int32

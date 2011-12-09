@@ -25,9 +25,9 @@ import numpy as N
 import numpy.linalg as LIN
 import pylab as P
 
-import jmodelica.io as io
-import jmodelica.fmi as fmi
-from jmodelica.core import TrajectoryLinearInterpolation
+from pyfmi.common.io import ResultWriterDymola
+import pyfmi.fmi as fmi
+from pyfmi.common.core import TrajectoryLinearInterpolation
 
 try:
     from assimulo.problem import Implicit_Problem
@@ -65,7 +65,7 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
             -1,len(model._save_cont_valueref[2]))
         data = N.c_[data,b]
 
-    export = io.ResultWriterDymola(model)
+    export = ResultWriterDymola(model)
     export.write_header(file_name=result_file_name)
     map(export.write_point,(row for row in data))
     export.write_finalize()
@@ -130,7 +130,7 @@ class FMIODE(Explicit_Problem):
         
         #Default values
         self.write_cont = True #Continuous writing
-        self.export = io.ResultWriterDymola(model)
+        self.export = ResultWriterDymola(model)
         
         #Internal values
         self._sol_time = []

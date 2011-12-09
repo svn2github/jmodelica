@@ -19,8 +19,8 @@ Module for testing Simulation.
 """
 import numpy as N
 
-from jmodelica.tests.general.base_simul import *
-from jmodelica.tests import testattr
+from pyjmi.tests.general.base_simul import *
+from pyjmi.tests import testattr
 
 class TestNominal(SimulationTest):
 

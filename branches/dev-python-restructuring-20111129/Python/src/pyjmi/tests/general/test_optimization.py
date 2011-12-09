@@ -18,16 +18,16 @@ import matplotlib.pyplot as plt
 import numpy as N
 import os.path
 
-from jmodelica.initialization.ipopt import InitializationOptimizer
-from jmodelica.initialization.ipopt import NLPInitialization
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-from jmodelica.io import ResultDymolaTextual
-from jmodelica.optimization.ipopt import NLPCollocationLagrangePolynomials
-from jmodelica.optimization.ipopt import CollocationOptimizer
-from jmodelica.tests.general.base_simul import *
-from jmodelica.tests import testattr
-from jmodelica.tests import get_files_path
+from pyjmi.initialization.ipopt import InitializationOptimizer
+from pyjmi.initialization.ipopt import NLPInitialization
+from pyjmi.jmi import compile_jmu
+from pyjmi.jmi import JMUModel
+from pyjmi.common.io import ResultDymolaTextual
+from pyjmi.optimization.ipopt import NLPCollocationLagrangePolynomials
+from pyjmi.optimization.ipopt import CollocationOptimizer
+from pyjmi.tests.general.base_simul import *
+from pyjmi.tests import testattr
+from pyjmi.tests import get_files_path
 
 class TestOptimization(OptimizationTest):
 
