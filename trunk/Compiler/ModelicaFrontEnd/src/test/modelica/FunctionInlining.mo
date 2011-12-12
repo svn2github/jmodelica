@@ -346,9 +346,9 @@ equation
  temp_1[1] = y[1];
  temp_1[2] = y[2];
  temp_1[3] = y[3];
- temp_2[1] = temp_1[1];
+ temp_2[1] = temp_1[3];
  temp_2[2] = temp_1[2];
- temp_2[3] = temp_1[3];
+ temp_2[3] = temp_1[1];
  temp_3 = ( temp_1[1] ) * ( temp_2[1] ) + ( temp_1[2] ) * ( temp_2[2] ) + ( temp_1[3] ) * ( temp_2[3] );
  temp_4[1] = ( temp_3 ) * ( temp_1[1] + temp_2[1] );
  temp_4[2] = ( temp_3 ) * ( temp_1[2] + temp_2[2] );
@@ -537,9 +537,9 @@ equation
  temp_4[1] = temp_1[1];
  temp_4[2] = temp_1[2];
  temp_4[3] = temp_1[3];
- temp_5[1] = temp_4[1];
+ temp_5[1] = temp_4[3];
  temp_5[2] = temp_4[2];
- temp_5[3] = temp_4[3];
+ temp_5[3] = temp_4[1];
  temp_6 = ( temp_4[1] ) * ( temp_5[1] ) + ( temp_4[2] ) * ( temp_5[2] ) + ( temp_4[3] ) * ( temp_5[3] );
  temp_7[1] = ( temp_6 ) * ( temp_4[1] + temp_5[1] );
  temp_7[2] = ( temp_6 ) * ( temp_4[2] + temp_5[2] );
@@ -547,9 +547,9 @@ equation
  temp_8[1] = temp_2[1];
  temp_8[2] = temp_2[2];
  temp_8[3] = temp_2[3];
- temp_9[1] = temp_8[1];
+ temp_9[1] = temp_8[3];
  temp_9[2] = temp_8[2];
- temp_9[3] = temp_8[3];
+ temp_9[3] = temp_8[1];
  temp_10 = ( temp_8[1] ) * ( temp_9[1] ) + ( temp_8[2] ) * ( temp_9[2] ) + ( temp_8[3] ) * ( temp_9[3] );
  temp_11[1] = ( temp_10 ) * ( temp_8[1] + temp_9[1] );
  temp_11[2] = ( temp_10 ) * ( temp_8[2] + temp_9[2] );
@@ -690,5 +690,116 @@ end FunctionInlining.BasicInline9;
         parameter Real x = f(y - 1);
         parameter Real y = 2;
     end BasicInline9;
+
+
+    model BasicInline10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="BasicInline10",
+         description="Using array indices",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.BasicInline10
+ parameter Integer e = 2 /* 2 */;
+ Real x;
+ Real y;
+ Real z[1];
+ Real z[2];
+ Real z[3];
+ Real temp_1;
+ Real temp_2[1];
+ Real temp_2[2];
+ Real temp_2[3];
+ parameter Integer temp_3;
+ Real temp_4;
+parameter equation
+ temp_3 = e;
+equation
+ x = temp_4;
+ y = 2.2;
+ z[1] = 1;
+ z[2] = 2;
+ z[3] = 3;
+ temp_1 = y;
+ temp_2[1] = z[1];
+ temp_2[2] = z[2];
+ temp_2[3] = z[3];
+ temp_4 = ( temp_1 ) * ( temp_2[2] );
+
+ function FunctionInlining.BasicInline10.f
+  input Real a;
+  input Real[:] b;
+  input Integer c;
+  output Real d;
+ algorithm
+  d := ( a ) * ( b[c] );
+  return;
+ end FunctionInlining.BasicInline10.f;
+end FunctionInlining.BasicInline10;
+")})));
+
+        function f
+            input Real a;
+            input Real[:] b;
+            input Integer c;
+            output Real d;
+        algorithm
+            d := a * b[c];
+            end f;
+        
+        parameter Integer e = 2;
+        Real x = f(y, z, e);
+        Real y = 2.2;
+        Real[:] z = { 1, 2, 3 };
+    end BasicInline10;
+
+
+    model BasicInline11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="BasicInline11",
+         description="Function call as array index",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.BasicInline11
+ parameter Integer e = 1 /* 1 */;
+ Real x;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ parameter Integer temp_1;
+ parameter Integer temp_2;
+parameter equation
+ temp_1 = e;
+ temp_2 = 4 - ( temp_1 );
+equation
+ x = y[3];
+ y[1] = 1;
+ y[2] = 2;
+ y[3] = 3;
+
+ function FunctionInlining.BasicInline11.f
+  input Integer a;
+  output Integer b;
+ algorithm
+  b := 4 - ( a );
+  return;
+ end FunctionInlining.BasicInline11.f;
+end FunctionInlining.BasicInline11;
+")})));
+
+        function f
+            input Integer a;
+            output Integer b;
+        algorithm
+            b := 4 - a;
+            end f;
+        
+        parameter Integer e = 1;
+        Real x = y[f(e)];
+        Real[:] y = { 1, 2, 3 };
+    end BasicInline11;
 	
 end FunctionInlining;

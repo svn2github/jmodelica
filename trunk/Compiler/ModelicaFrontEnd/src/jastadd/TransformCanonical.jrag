@@ -4080,6 +4080,7 @@ aspect FunctionInlining {
 				name.setLastFArraySubscripts(value.size().flattenFArraySubscripts(new FQName()));
 			FVariable var = value.type().createFVariable(visibility, name, variability);
 			vars.add(var);
+			vars.getChild(vars.getNumChild() - 1);
 			
 			if (variability.constantVariability()) {
 				var.setBindingExp(value.ceval().buildLiteral());
@@ -4116,9 +4117,28 @@ aspect FunctionInlining {
 				return true;
 		return false;
 	}
-	// TODO: function calls in indices, etc
 	eq FFunctionCall.hasInlinableFunctions() =
 		isInlinableFunctionCall() || super.hasInlinableFunctions();
+	eq FIdUseExp.hasInlinableFunctions()     = 
+		getFIdUse().getFQName().hasInlinableFunctions();
+	
+	/**
+	 * Check if any array subscripts contain any calls to functions that we can inline.
+	 */
+	syn boolean FQName.hasInlinableFunctions() {
+		for (FQNamePart part : getFQNameParts())
+			if (part.hasFArraySubscripts())
+				for (FSubscript sub : part.getFArraySubscripts().getFSubscripts())
+					if (sub.hasInlinableFunctions())
+						return true;
+		return false;
+	}
+	
+	/**
+	 * Check if an array subscript contains any calls to functions that we can inline.
+	 */
+	syn boolean FSubscript.hasInlinableFunctions() = false;
+	eq FExpSubscript.hasInlinableFunctions()       = getFExp().hasInlinableFunctions();
 	
 	/**
 	 * Check if an expression is a call to a function that we can inline.
@@ -4157,7 +4177,30 @@ aspect FunctionInlining {
 			super.inlineFunctions(fi);
 		}
 	}
-	
+
+	public void FIdUseExp.inlineFunctions(FunctionInliner fi) {
+		getFIdUse().getFQName().inlineFunctions(fi);
+	}
+
+	/**
+	 * Inline all calls to functions that we can inline.
+	 */
+	public void FQName.inlineFunctions(FunctionInliner fi) {
+		for (FQNamePart part : getFQNameParts())
+			if (part.hasFArraySubscripts())
+				for (FSubscript sub : part.getFArraySubscripts().getFSubscripts())
+					sub.inlineFunctions(fi);
+	}
+
+	/**
+	 * Inline all calls to functions that we can inline.
+	 */
+	public void FSubscript.inlineFunctions(FunctionInliner fi) {}
+
+	public void FExpSubscript.inlineFunctions(FunctionInliner fi) {
+		getFExp().inlineFunctions(fi);
+	}
+
 	/**
 	 * Replace a child of this node.
 	 * 
@@ -4187,7 +4230,14 @@ aspect FunctionInlining {
 	 * Check if we can inline this function.
 	 */
 	syn boolean FFunctionDecl.isInlinable() {
-		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
+		return isAllInlinable(getFAlgorithmBlock().getFStatements());
+	}
+	
+	/**
+	 * Helper method to check if a list of statements are all inlinable.
+	 */
+	public static boolean ASTNode.isAllInlinable(Iterable<? extends FStatement> list) {
+		for (FStatement stmt : list)
 			if (!stmt.isInlinable())
 				return false;
 		return true;
@@ -4268,18 +4318,27 @@ aspect FunctionInlining {
 	
 	public FExp FIdUseExp.replaceReferences(Map<String,FVariable> varMap) {
 		// TODO: handle records
-		// TODO: handle array indices
 		FVariable var = varMap.get(getFIdUse().name());
 		FExp exp = this;
 		if (var != null) {
+			FIdUseExp use = (FIdUseExp) dynamicFExp(var.createUseExp());
+			FQName name = getFIdUse().getFQName();
+			if (name.hasFArraySubscripts()) {
+				FArraySubscripts fas = name.getLastFArraySubscripts().fullCopy();
+				FQName useName = use.getFIdUse().getFQName();
+				useName.setLastFArraySubscripts(fas);
+				useName.getLastFArraySubscripts();
+				fas.replaceReferences(varMap);
+			}
+			exp = use;
 			if (var.isConstant()) {
 				try {
-					exp = var.ceval().buildLiteral();
+					exp = exp.ceval().buildLiteral();
 				} catch (ConstantEvaluationException e) {}
 			}
-			if (exp == this) 
-				exp = var.createUseExp();
 			replaceMe(exp);
+		} else {
+			super.replaceReferences(varMap);
 		}
 		return exp;
 	}

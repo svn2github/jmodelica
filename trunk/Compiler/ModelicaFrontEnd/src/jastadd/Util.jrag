@@ -1219,27 +1219,27 @@ aspect FlatNames {
     /**
      * Create an access to this variable.
      */
-	public FExp FVariable.createUseExp() {
+	public FIdUseExp FVariable.createUseExp() {
 		 return getFQName().createFIdUseExp();
 	}
 
-	public FExp FDerivativeVariable.createUseExp() {
+	public FIdUseExp FDerivativeVariable.createUseExp() {
 		 return getFQName().createFDerExp();
 	}
 
-	public FExp FHDerivativeVariable.createUseExp() {
+	public FIdUseExp FHDerivativeVariable.createUseExp() {
 		 return getFQName().createFHDerExp(getOrder());
 	}
 
-	public FExp FDummyDerivativeVariable.createUseExp() {
+	public FIdUseExp FDummyDerivativeVariable.createUseExp() {
 		 return getFQName().createFDummyDerExp();
 	}
 
-	public FExp FHDummyDerivativeVariable.createUseExp() {
+	public FIdUseExp FHDummyDerivativeVariable.createUseExp() {
 		 return getFQName().createFHDummyDerExp(getOrder());
 	}
     
-	public FExp FFunctionVariable.createUseExp() {
+	public FIdUseExp FFunctionVariable.createUseExp() {
 		 return getFQName().createFIdUseExp();
 	}
     
