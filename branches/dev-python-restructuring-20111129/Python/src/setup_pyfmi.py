@@ -15,12 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from distutils.core import setup, Extension
+#from distutils.core import setup, Extension
+from distutils.ccompiler import new_compiler
+from distutils.command.build_clib import build_clib
+import distutils
+import os as O
+from numpy.distutils.misc_util import Configuration
+from numpy.distutils.core import setup
 
 NAME = "PyFMI"
 AUTHOR = "Modelon AB"
 AUTHOR_EMAIL = ""
-VERSION = "trunk"
+VERSION = "1.0b1"
 LICENSE = "GPL"
 URL = "http://www.jmodelica.org"
 DOWNLOAD_URL = "http://www.jmodelica.org/page/12"
@@ -51,6 +57,16 @@ simulation package Assimulo adds industrial grade simulation
 capabilities of FMUs to Python.
 """
 
+#Hack for compiling a C-file which is not an Extension
+#distutils.log.set_verbosity(1)
+
+#comp = new_compiler(compiler="mingw32",verbose=1)
+#comp.verbose=10
+#obj = comp.compile(['pyfmi'+O.path.sep+'util'+O.path.sep+'FMILogger.c'])
+#comp.link(comp.SHARED_LIBRARY,obj,"FMILogger")
+
+config = Configuration()
+config.add_installed_library("FMILogger",sources=['pyfmi'+O.path.sep+'util'+O.path.sep+'FMILogger.c'],install_dir='pyfmi')
 
 setup(name=NAME,
       version=VERSION,
@@ -62,4 +78,11 @@ setup(name=NAME,
       url=URL,
       download_url=DOWNLOAD_URL,
       platforms=PLATFORMS,
-      classifiers=CLASSIFIERS)
+      classifiers=CLASSIFIERS,
+      #cmdclass={"build_ext":build_clib},
+      package_dir = {'pyfmi':'pyfmi','pyfmi.common':'common'},
+      packages=['pyfmi','pyfmi.simulation','pyfmi.examples','pyfmi.tests','pyfmi.tests.simulation','pyfmi.common','pyfmi.common.plotting','pyfmi.common.tests'],
+      package_data = {'pyfmi':['examples'+O.path.sep+'files'+O.path.sep+'FMUs'+O.path.sep+'*','tests'+O.path.sep+'files'+O.path.sep+'FMUs'+O.path.sep+'*']},
+      **config.todict()
+      )
+#ext_modules=[Extension('pyfmi.util', ['pyfmi'+O.path.sep+'util'+O.path.sep+'FMILogger.c'])]
