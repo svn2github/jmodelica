@@ -3288,12 +3288,13 @@ model IndexReduction4_Err
 "
 2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
-Error: in file 'TransformCanonicalTests.IndexReduction4_Err.mof':
+Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/TransformCanonicalTests.IndexReduction4_Err.mof':
 Semantic error at line 0, column 0:
-  Cannot differentiate the expression 'TransformCanonicalTests.IndexReduction4_Err.F(x2)' in equation: 
-   x1 + TransformCanonicalTests.IndexReduction4_Err.F(x2) = 1
+  Cannot differentate the equation 
+   TransformCanonicalTests.IndexReduction4_Err.F(x2)
+  since the function TransformCanonicalTests.IndexReduction4_Err.F does not have a derivative annotation.
 
-Error: in file 'TransformCanonicalTests.IndexReduction4_Err.mof':
+Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/TransformCanonicalTests.IndexReduction4_Err.mof':
 Semantic error at line 0, column 0:
   The system is structurally singuar. The following varible(s) could not be matched to any equation:
    der(x2)
@@ -3844,6 +3845,241 @@ h = H/m;
 P*V=m*R*T;  
   end IndexReduction23_BasicVolume_Err;
 
+model IndexReduction24_DerFunc
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction24_DerFunc",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction24_DerFunc
+ Real x1;
+ Real x2;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + TransformCanonicalTests.IndexReduction24_DerFunc.f(x2) = 0;
+ der_x1 + TransformCanonicalTests.IndexReduction24_DerFunc.f_der(x2, der(x2)) = 0;
+
+ function TransformCanonicalTests.IndexReduction24_DerFunc.f_der
+  input Real x;
+  input Real der_x;
+  output Real der_y;
+ algorithm
+  der_y := ( ( 2 ) * ( x ) ) * ( der_x );
+  return;
+ end TransformCanonicalTests.IndexReduction24_DerFunc.f_der;
+
+ function TransformCanonicalTests.IndexReduction24_DerFunc.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x ^ 2;
+  return;
+ end TransformCanonicalTests.IndexReduction24_DerFunc.f;
+end TransformCanonicalTests.IndexReduction24_DerFunc;
+")})));
+
+function f
+  input Real x;
+  output Real y;
+algorithm
+  y := x^2;
+  annotation(derivative=f_der);
+end f;
+
+function f_der
+  input Real x;
+  input Real der_x;
+  output Real der_y;
+algorithm
+  der_y := 2*x*der_x;
+end f_der;
+
+  Real x1,x2;
+equation
+  der(x1) + der(x2) = 1;
+  x1 + f(x2) = 0;
+end IndexReduction24_DerFunc;
+
+model IndexReduction25_DerFunc
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction25_DerFunc",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction25_DerFunc
+ parameter Real A[1,1] = 1 /* 1 */;
+ parameter Real A[1,2] = 2 /* 2 */;
+ parameter Real A[2,1] = 3 /* 3 */;
+ parameter Real A[2,2] = 4 /* 4 */;
+ Real x1[1];
+ Real x1[2];
+ Real x2[1];
+ Real x2[2];
+ Real der_x1_1;
+ Real der_x1_2;
+initial equation 
+ x2[1] = 0.0;
+ x2[2] = 0.0;
+equation
+ der_x1_1 + der(x2[1]) = 1;
+ der_x1_2 + der(x2[2]) = 2;
+ x1[1] + TransformCanonicalTests.IndexReduction25_DerFunc.f({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}) = 0;
+ x1[2] = 0;
+ der_x1_1 + TransformCanonicalTests.IndexReduction25_DerFunc.f_der({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {der(x2[1]),der(x2[2])}, {{0,0},{0,0}}) = 0;
+ der_x1_2 = 0;
+
+ function TransformCanonicalTests.IndexReduction25_DerFunc.f_der
+  input Real[2] x;
+  input Real[2, 2] A;
+  input Real[2] der_x;
+  input Real[2, 2] der_A;
+  output Real der_y;
+ algorithm
+  der_y := ( ( ( 2 ) * ( x[1] ) ) * ( A[1,1] ) + ( ( 2 ) * ( x[2] ) ) * ( A[2,1] ) ) * ( der_x[1] ) + ( ( ( 2 ) * ( x[1] ) ) * ( A[1,2] ) + ( ( 2 ) * ( x[2] ) ) * ( A[2,2] ) ) * ( der_x[2] ) + ( ( x[1] ) * ( der_A[1,1] ) + ( x[2] ) * ( der_A[2,1] ) ) * ( x[1] ) + ( ( x[1] ) * ( der_A[1,2] ) + ( x[2] ) * ( der_A[2,2] ) ) * ( x[2] );
+  return;
+ end TransformCanonicalTests.IndexReduction25_DerFunc.f_der;
+
+ function TransformCanonicalTests.IndexReduction25_DerFunc.f
+  input Real[2] x;
+  input Real[2, 2] A;
+  output Real y;
+ algorithm
+  y := ( ( x[1] ) * ( A[1,1] ) + ( x[2] ) * ( A[2,1] ) ) * ( x[1] ) + ( ( x[1] ) * ( A[1,2] ) + ( x[2] ) * ( A[2,2] ) ) * ( x[2] );
+  return;
+ end TransformCanonicalTests.IndexReduction25_DerFunc.f;
+end TransformCanonicalTests.IndexReduction25_DerFunc;
+")})));
+
+function f
+  input Real x[2];
+  input Real A[2,2];
+  output Real y;
+algorithm
+  y := x*A*x;
+  annotation(derivative=f_der);
+end f;
+
+function f_der
+  input Real x[2];
+  input Real A[2,2];
+  input Real der_x[2];
+  input Real der_A[2,2];
+  output Real der_y;
+algorithm
+  der_y := 2*x*A*der_x + x*der_A*x;
+end f_der;
+  parameter Real A[2,2] = {{1,2},{3,4}};
+  Real x1[2],x2[2];
+equation
+  der(x1) + der(x2) = {1,2};
+  x1[1] + f(x2,A) = 0;
+  x1[2] = 0;
+end IndexReduction25_DerFunc;
+
+model IndexReduction26_DerFunc
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction26_DerFunc",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction26_DerFunc
+ Real x1[1];
+ Real x1[2];
+ Real x2[1];
+ Real x2[2];
+ Real der_x1_1;
+ Real der_x1_2;
+initial equation 
+ x2[1] = 0.0;
+ x2[2] = 0.0;
+equation
+ der_x1_1 + der(x2[1]) = 1;
+ der_x1_2 + der(x2[2]) = 2;
+ x1[1] + TransformCanonicalTests.IndexReduction26_DerFunc.f({x2[1],x2[2]}) = 0;
+ x1[2] = 0;
+ der_x1_1 + TransformCanonicalTests.IndexReduction26_DerFunc.f_der({x2[1],x2[2]}, {der(x2[1]),der(x2[2])}) = 0;
+ der_x1_2 = 0;
+
+ function TransformCanonicalTests.IndexReduction26_DerFunc.f_der
+  input Real[2] x;
+  input Real[2] der_x;
+  output Real der_y;
+ algorithm
+  der_y := ( ( 2 ) * ( x[1] ) ) * ( der_x[1] ) + ( ( 3 ) * ( x[2] ^ 2 ) ) * ( der_x[2] );
+  return;
+ end TransformCanonicalTests.IndexReduction26_DerFunc.f_der;
+
+ function TransformCanonicalTests.IndexReduction26_DerFunc.f
+  input Real[2] x;
+  output Real y;
+ algorithm
+  y := x[1] ^ 2 + x[2] ^ 3;
+  return;
+ end TransformCanonicalTests.IndexReduction26_DerFunc.f;
+end TransformCanonicalTests.IndexReduction26_DerFunc;
+")})));
+
+function f
+  input Real x[2];
+  output Real y;
+algorithm
+  y := x[1]^2 + x[2]^3;
+  annotation(derivative=f_der);
+end f;
+
+function f_der
+  input Real x[2];
+  input Real der_x[2];
+  output Real der_y;
+algorithm
+  der_y := 2*x[1]*der_x[1] + 3*x[2]^2*der_x[2];
+end f_der;
+
+  Real x1[2],x2[2];
+equation
+  der(x1) + der(x2) = {1,2};
+  x1[1] + f(x2) = 0;
+  x1[2] = 0;
+end IndexReduction26_DerFunc;
+
+/*
+model IndexReduction27_DerFunc
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction25_DerFunc",
+         description="Test of index reduction",
+         flatModel="
+
+")})));
+
+function f
+  input Real x[2];
+  input Real A[2,2];
+  output Real y[2];
+algorithm
+  y := A*x;
+  annotation(derivative=f_der);
+end f;
+
+function f_der
+  input Real x[2];
+  input Real A[2,2];
+  input Real der_x[2];
+  input Real der_A[2,2];
+  output Real der_y[2];
+algorithm
+  der_y := A*der_x;
+end f_der;
+  parameter Real A[2,2] = {{1,2},{3,4}};
+  Real x1[2],x2[2];
+equation
+  der(x1) + der(x2) = {2,3};
+  x1 + f(x2,A) = {0,0};
+end IndexReduction27_DerFunc;
+*/
 
 model DuplicateVariables1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

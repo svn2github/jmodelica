@@ -43,7 +43,15 @@ FClass : BaseNode ::= FQName
  *
  * Results from a class with the restriction "function" and an algorithm block.
  */
-FFunctionDecl : BaseNode ::= FQName FFunctionVariable* FAlgorithmBlock;
+FFunctionDecl : BaseNode ::= FQName FFunctionVariable* FAlgorithmBlock [FDerivativeFunction];
+
+/**
+ * \brief A derivative function reference.
+ * 
+ * The information in this node is extracted from the derivative 
+ * annotation in a function declaration.
+ */
+FDerivativeFunction : BaseNode ::= Name:FIdUse <Order:int>;
 
 /**
  * \brief A flattenend record declaration.

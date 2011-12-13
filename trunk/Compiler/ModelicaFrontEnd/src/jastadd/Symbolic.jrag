@@ -330,7 +330,19 @@ aspect Derivatives {
 			    "' in equation: \n   " + prettyPrint(""));
 		}
 	}
-
+/*
+	public FAbstractEquation FFunctionCallEquation.diff(String name) {
+		List lefts = new List();
+		for (FFunctionCallLeft l : getLefts()) {
+			if (l.hasFExp()) {
+				lefts.add(new FFunctionCallLeft(new Opt(l.getFExp().diff(name))));
+			} else {
+				lefts.add(new FFunctionCallLeft(new Opt()));
+			}
+		}
+		return dynamicFAbstractEquation(new FFunctionCallEquation(lefts, (FAbstractFunctionCall)getCall().diff(name)));
+	}
+*/
 	public FExp FExp.diff(String name, int n) {
 		return (n <= 1) ? diff(name) : diff(name, n - 1).diff(name);
 	}
@@ -523,6 +535,32 @@ aspect Derivatives {
 	
 	public FExp FTimeExp.diff(String name) {			
 			return dynamicFExp(new FRealLitExp("1"));		
+	}
+	
+	public FExp FFunctionCall.diff(String name) {
+		FFunctionDecl fd = myFFunctionDecl();
+		if (!fd.hasFDerivativeFunction()) {
+			throw new EquationDifferentiationException(myFEquation(), "Cannot differentate the equation \n   " 
+			                                                 + prettyPrint("") + "\n  since the function " + name() +
+			                                                 " does not have a derivative annotation.");	
+		}		
+		List args = new List();
+		for (FExp e : getArgs()) {
+			args.add(e.fullCopy());
+		}
+		for (FExp e : getArgs()) {
+			args.add(e.diff(name));
+		}
+		FFunctionCall der_f = new FFunctionCall(fd.getFDerivativeFunction().getName().fullCopy(), args, getSizes());		
+		return dynamicFExp(der_f);
+	}
+
+	public FExp FArray.diff(String name) {
+		FArray diff_farray = new FArray();
+		for (FExp e : getFExps()) {
+			diff_farray.addFExp(e.diff(name));	
+		}
+		return dynamicFExp(diff_farray);
 	}
 	
 }

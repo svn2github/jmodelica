@@ -963,7 +963,10 @@ aspect Scalarization {
 			stmt.scalarize(vars, stmts, emptyIndexMap);
 		
 		FQName name = (FQName) getFQName().fullCopy();
-		return new FFunctionDecl(name, vars, new FAlgorithmBlock(stmts));
+	
+	    FFunctionDecl fd = new FFunctionDecl(name, vars, new FAlgorithmBlock(stmts), getFDerivativeFunctionOpt());
+	
+		return fd;
 	}
 	
 	/**
