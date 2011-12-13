@@ -23,15 +23,14 @@ import nose
 import numpy as N
 import pylab as P
 
-from jmodelica.tests import testattr
-from jmodelica.tests import get_files_path
-from jmodelica.io import ResultDymolaTextual
-from jmodelica.examples import *
+from pyjmi.tests import testattr
+from pyjmi.tests import get_files_path
+from pyjmi.common.io import ResultDymolaTextual
 
 try:
-    from jmodelica.fmi import compile_fmux
-    from jmodelica.optimization.casadi_collocation import *
-    from jmodelica.casadi_interface import CasadiModel
+    from pyfmi.fmi import compile_fmux
+    from pyjmi.optimization.casadi_collocation import *
+    from pyjmi.casadi_interface import CasadiModel
 except NameError, ImportError:
     pass
     #logging.warning('Could not load casadi_collocation. Check jmodelica.check_packages()')

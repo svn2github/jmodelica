@@ -22,20 +22,21 @@ import os
 import numpy as N
 import pylab as P
 from scipy.io.matlab.mio import loadmat
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-from jmodelica.fmi import compile_fmu
-from jmodelica.fmi import FMUModel
-import jmodelica.fmi as fmi
-from jmodelica.io import ResultDymolaTextual
-from jmodelica.tests import testattr
-from jmodelica.tests import get_files_path
+from pyjmi.jmi import compile_jmu
+from pyjmi.jmi import JMUModel
+from pyfmi.fmi import compile_fmu
+from pyfmi.fmi import FMUModel
+import pyfmi.fmi as fmi
+from pyjmi.common.io import ResultDymolaTextual
+from pyjmi.tests import testattr
+from pyjmi.tests import get_files_path
 
 try:
-    from jmodelica.simulation.assimulo_interface import JMIODE, JMIDAE, FMIODE, JMIModel_Exception
-    from jmodelica.simulation.assimulo_interface import JMIDAESens
-    from jmodelica.simulation.assimulo_interface import write_data
-    from jmodelica.core import TrajectoryLinearInterpolation
+    from pyjmi.simulation.assimulo_interface import JMIODE, JMIDAE, JMIModel_Exception
+    from pyfmi.simulation.assimulo_interface import FMIODE
+    from pyjmi.simulation.assimulo_interface import JMIDAESens
+    from pyjmi.simulation.assimulo_interface import write_data
+    from pyjmi.common.core import TrajectoryLinearInterpolation
     from assimulo.explicit_ode import CVode
     from assimulo.implicit_ode import IDA
 except NameError, ImportError:

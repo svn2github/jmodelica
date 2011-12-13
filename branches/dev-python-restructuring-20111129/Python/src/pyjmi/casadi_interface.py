@@ -62,15 +62,14 @@ class CasadiModel(object):
         """
         return self.xmldoc.get_model_name().replace('.','_')
     
-    def _default_options(self, algorithm):
+    def _default_options(self, module, algorithm):
         """ 
         Help method. Gets the options class for the algorithm specified in 
         'algorithm'.
         """
-        base_path = 'jmodelica.algorithm_drivers'
-        algdrive = __import__(base_path)
-        algdrive = getattr(algdrive, 'algorithm_drivers')
-        algorithm = getattr(algdrive, algorithm)
+        module = __import__(module, globals(), locals(), [algorithm], -1)
+        algorithm = getattr(module, algorithm)
+        
         return algorithm.get_default_options()
     
     def optimize_options(self, algorithm='LocalDAECollocationAlg'):
@@ -91,7 +90,7 @@ class CasadiModel(object):
         
             Options class for the algorithm specified with default values.
         """
-        return self._default_options(algorithm)    
+        return self._default_options('pyjmi.jmi_algorithm_drivers', algorithm)    
     
     def optimize(self, 
                  algorithm='LocalDAECollocationAlg', 
@@ -136,10 +135,11 @@ class CasadiModel(object):
             
             A result object, subclass of algorithm_drivers.ResultBase.
         """
-        return self._exec_algorithm(algorithm,
+        return self._exec_algorithm('pyjmi.jmi_algorithm_drivers',
+                                    algorithm,
                                     options)
                                     
-    def _exec_algorithm(self, algorithm, options):
+    def _exec_algorithm(self, module, algorithm, options):
         """ 
         Helper function which performs all steps of an algorithm run which are 
         common to all initialize and optimize algortihms.
@@ -149,13 +149,13 @@ class CasadiModel(object):
             Exception if algorithm is not a subclass of 
             jmodelica.algorithm_drivers.AlgorithmBase.
         """
-        base_path = 'jmodelica.algorithm_drivers'
-        algdrive = __import__(base_path)
-        algdrive = getattr(algdrive, 'algorithm_drivers')
+        base_path = 'pyjmi.common.algorithm_drivers'
+        algdrive = __import__(base_path, globals(), locals(), ['AlgorithmBase'], -1)
         AlgorithmBase = getattr(algdrive, 'AlgorithmBase')
         
         if isinstance(algorithm, basestring):
-            algorithm = getattr(algdrive, algorithm)
+            module = __import__(module, globals(), locals(), [algorithm], -1)
+            algorithm = getattr(module, algorithm)
         
         if not issubclass(algorithm, AlgorithmBase):
             raise Exception(str(algorithm)+

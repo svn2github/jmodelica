@@ -24,13 +24,13 @@ import ctypes as ct
 from ctypes import byref
 import nose.tools
 
-from jmodelica.tests import testattr
-from jmodelica.tests import get_files_path
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-from jmodelica.initialization.ipopt import NLPInitialization
-from jmodelica.initialization.ipopt import InitializationOptimizer
-from jmodelica.io import ResultDymolaTextual
+from pyjmi.tests import testattr
+from pyjmi.tests import get_files_path
+from pyjmi.jmi import compile_jmu
+from pyjmi.jmi import JMUModel
+from pyjmi.initialization.ipopt import NLPInitialization
+from pyjmi.initialization.ipopt import InitializationOptimizer
+from pyjmi.common.io import ResultDymolaTextual
 
 int = N.int32
 N.int = N.int32

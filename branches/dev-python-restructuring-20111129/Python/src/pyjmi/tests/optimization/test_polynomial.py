@@ -22,8 +22,8 @@ import nose
 
 import numpy as N
 
-from jmodelica.tests import testattr
-from jmodelica.optimization.polynomial import *
+from pyjmi.tests import testattr
+from pyjmi.optimization.polynomial import *
 
 class TestPolynomialMethods:
     """ This tests the evaluation of various polynomial methods. """
