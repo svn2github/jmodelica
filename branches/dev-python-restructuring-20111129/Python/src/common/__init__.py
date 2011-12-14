@@ -18,7 +18,7 @@
 The JModelica.org Python package <http:/www.jmodelica.org/>
 """
 
-__all__ = ['algorithm_drivers', 'core', 'io', 'xmlparser', 'tests', 'plotting']
+__all__ = ['algorithm_drivers', 'core', 'io', 'xmlparser', 'plotting']
 
 __version__=''
 

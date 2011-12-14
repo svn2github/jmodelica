@@ -18,7 +18,7 @@
 The JModelica.org Python package <http:/www.jmodelica.org/>
 """
 
-__all__ = ['common', 'initialization', 'optimization', 'tests', 'examples', 'casadi_interface', 'linearization', 'jmi', 'jmi_algorithm_drivers']
+__all__ = ['common', 'initialization', 'optimization', 'simulation', 'examples', 'casadi_interface', 'linearization', 'jmi', 'jmi_algorithm_drivers']
 
 __version__=''
 

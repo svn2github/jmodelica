@@ -18,7 +18,7 @@
 The JModelica.org Python package <http:/www.jmodelica.org/>
 """
 
-__all__ = ['fmi_algorithm_drivers', 'examples', 'tests', 'fmi', 'common']
+__all__ = ['fmi_algorithm_drivers', 'examples', 'fmi', 'common']
 
 __version__=''
 

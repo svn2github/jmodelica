@@ -18,7 +18,7 @@
 The JModelica.org Python package <http:/www.jmodelica.org/>
 """
 
-__all__ = ['compiler', 'examples', 'tests', 'common']
+__all__ = ['compiler', 'examples', 'common']
 
 __version__=''
 
