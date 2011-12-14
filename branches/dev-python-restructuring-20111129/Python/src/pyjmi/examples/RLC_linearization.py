@@ -20,10 +20,10 @@ import os
 import numpy as N
 import pylab as p
 
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-from jmodelica.linearization import linearize_dae
-from jmodelica.linearization import linear_dae_to_ode
+from jmodelica.compiler import compile_jmu
+from pyjmi.jmi import JMUModel
+from pyjmi.linearization import linearize_dae
+from pyjmi.linearization import linear_dae_to_ode
 
 int = N.int32
 N.int = N.int32

@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """
-The JModelica Model example package.
+The pyfmi example package.
 """
 __all__ = ['fmi_bouncing_ball_native', 'fmi_bouncing_ball', 'fmu_with_input',
            'fmu_with_input_function', 'log_analysis']

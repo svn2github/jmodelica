@@ -22,8 +22,8 @@ import matplotlib.pyplot as plt
 import numpy as N
 from matplotlib.font_manager import fontManager, FontProperties
 
-from jmodelica.fmi import FMUModel
-from jmodelica.optimization import dfo
+from pyfmi.fmi import FMUModel
+from pyjmi.optimization import dfo
 
 def run_demo(with_plots=True):
 	"""

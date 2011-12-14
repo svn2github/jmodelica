@@ -23,10 +23,10 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
-from jmodelica.fmi import compile_fmu
-from jmodelica.fmi import FMUModel
+from jmodelica.compiler import compile_fmu
+from pyfmi.fmi import FMUModel
 
-import log_analysis as la
+import pyfmi.examples.log_analysis as la
 
 curr_dir = os.path.dirname(os.path.abspath(__file__));
     

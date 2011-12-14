@@ -23,8 +23,8 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
+from jmodelica.compiler import compile_jmu
+from pyjmi.jmi import JMUModel
 
 def run_demo(with_plots=True,with_blocking_factors = False):
     """ 

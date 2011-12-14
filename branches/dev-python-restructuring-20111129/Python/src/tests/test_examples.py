@@ -2,9 +2,9 @@
  
 """
 
-from jmodelica.tests import testattr
-from jmodelica.examples import *
-
+from tests import testattr
+from pyfmi.examples import *
+from pyjmi.examples import *
 
 @testattr(ipopt = True)
 def test_parameter_estimation_1():

@@ -20,8 +20,8 @@ import os
 from scipy.io.matlab.mio import loadmat
 import numpy as N
 
-from jmodelica.fmi import FMUModel
-from jmodelica.optimization import dfo
+from pyfmi.fmi import FMUModel
+from pyjmi.optimization import dfo
 
 curr_dir = os.path.dirname(os.path.abspath(__file__));
 

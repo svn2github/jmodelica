@@ -21,11 +21,10 @@ import os.path
 import numpy as N
 import matplotlib.pyplot as plt
 
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-
-from jmodelica.fmi import compile_fmux
-from jmodelica.casadi_interface import CasadiModel
+from jmodelica.compiler import compile_jmu
+from jmodelica.compiler import compile_fmux
+from pyjmi.jmi import JMUModel
+from pyjmi.casadi_interface import CasadiModel
 
 def run_demo(with_plots=True):
 

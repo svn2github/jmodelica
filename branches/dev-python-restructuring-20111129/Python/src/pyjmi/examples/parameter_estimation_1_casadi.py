@@ -24,10 +24,11 @@ import ctypes as ct
 import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
-from jmodelica.fmi import compile_fmux
-from jmodelica.casadi_interface import CasadiModel
-from jmodelica.jmi import compile_jmu, JMUModel
-from jmodelica.optimization.casadi_collocation import ParameterEstimationData
+from jmodelica.compiler import compile_fmux
+from jmodelica.compiler import compile_jmu
+from pyjmi.jmi import JMUModel
+from pyjmi.casadi_interface import CasadiModel
+from pyjmi.optimization.casadi_collocation import ParameterEstimationData
 
 import scipy.integrate as integr
 

@@ -25,15 +25,15 @@ import scipy.optimize as opt
 import ctypes as ct
 import matplotlib.pyplot as plt
 
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-from jmodelica.initialization.ipopt import NLPInitialization
-from jmodelica.initialization.ipopt import InitializationOptimizer
-from jmodelica.optimization import ipopt
-from jmodelica.io import ResultDymolaTextual
+from jmodelica.compiler import compile_jmu
+from pyjmi.jmi import JMUModel
+from pyjmi.initialization.ipopt import NLPInitialization
+from pyjmi.initialization.ipopt import InitializationOptimizer
+from pyjmi.optimization import ipopt
+from pyjmi.common.io import ResultDymolaTextual
 
 try:
-    from jmodelica.simulation.assimulo_interface import JMIDAE, write_data
+    from pyjmi.simulation.assimulo_interface import JMIDAE, write_data
     from assimulo.implicit_ode import IDA
 except:
     logging.warning(

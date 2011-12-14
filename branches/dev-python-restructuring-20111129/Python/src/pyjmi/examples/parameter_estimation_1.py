@@ -25,9 +25,9 @@ import matplotlib.pyplot as plt
 import scipy.integrate as integr
 
 # Import the JModelica.org Python packages
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-from jmodelica.optimization import ipopt
+from jmodelica.compiler import compile_jmu
+from pyjmi.jmi import JMUModel
+from pyjmi.optimization import ipopt
 
 def run_demo(with_plots=True):
     """

@@ -26,8 +26,6 @@ import matplotlib.pyplot as plt
 import jpype
 
 # Import the JModelica.org Python packages
-import jmodelica
-import jmodelica.jmi as jmi
 from jmodelica.compiler import ModelicaCompiler
 
 # Create a reference to the java package 'org'

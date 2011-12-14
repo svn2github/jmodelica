@@ -21,15 +21,13 @@ from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
 import numpy as N
 
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
+from jmodelica.compiler import compile_jmu
+from jmodelica.compiler import compile_fmux
+from pyjmi.jmi import JMUModel
+from pyjmi.casadi_interface import CasadiModel
+from pyjmi.common.core import TrajectoryLinearInterpolation
+from pyjmi.optimization.casadi_collocation import ParameterEstimationData
 
-from jmodelica.core import TrajectoryLinearInterpolation
-
-from jmodelica.fmi import compile_fmux
-
-from jmodelica.optimization.casadi_collocation import ParameterEstimationData
-from jmodelica.casadi_interface import CasadiModel
 
 def run_demo(with_plots=True):
     """
