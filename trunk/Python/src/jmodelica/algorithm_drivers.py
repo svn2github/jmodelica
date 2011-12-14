@@ -1971,7 +1971,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
                   dict will thus give all options with default values.
                 - A LocalDAECollocationAlgOptions object.
         """
-        self.t0 = time.clock()
+        self._t0 = time.clock()
         self.model = model
         
         # handle options argument
@@ -2056,11 +2056,11 @@ class LocalDAECollocationAlg(AlgorithmBase):
                                  "if algorithm option exact_Hessian is True.")
                                  
         # Check validity of result_mode and n_eval_points
-        if self.result_mode == "collocation_points":
-            if self.n_eval_points != defaults['n_eval_points']:
-                raise ValueError("n_eval_points is only used if algorithm " + \
-                                 "option result_mode is set to " + \
-                                 '"element_interpolation".')
+        if (self.result_mode != "element_interpolation" and
+            self.n_eval_points != defaults['n_eval_points']):
+            raise ValueError("n_eval_points is only used if algorithm " + \
+                             "option result_mode is set to " + \
+                             '"element_interpolation".')
         
         # Check validity of blocking_factors
         if (self.blocking_factors is not None and 
@@ -2086,13 +2086,8 @@ class LocalDAECollocationAlg(AlgorithmBase):
         times['sol'] = self.nlp.ipopt_solve()
         
         # Calculate times
-        times['tot'] = time.clock() - self.t0
+        times['tot'] = time.clock() - self._t0
         times['init'] = times['tot'] - times['sol']
-        
-        # Print times
-        print("\nTotal time: %.3f seconds" % times['tot'])
-        print("Initialization time: %.3f seconds" % times['init'])
-        print("Solution time: %.3f seconds" % times['sol'])
         
         # Store times as data attribute
         self.times = times
@@ -2114,6 +2109,11 @@ class LocalDAECollocationAlg(AlgorithmBase):
         
         # Get optimized element lengths
         h_opt = self.nlp.get_h_opt()
+        
+        # Calculate post-processing and total time
+        times = self.times
+        times['post_processing'] = time.clock() - self._t0 - times['tot']
+        times['tot'] += times['post_processing']
         
         # Create and return result object
         return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp,
@@ -2163,7 +2163,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
         
         free_element_lengths_data --
             Data used for optimizing the element lengths if they are free.
-            Should be None if and only if hs != "free".
+            Should be None when hs != "free".
             
             Type: None or
             jmodelica.optimization.casadi_collocation.FreeElementLengthsData
@@ -2206,7 +2206,8 @@ class LocalDAECollocationAlgOptions(OptionBase):
         result_mode --
             Specifies the output format of the optimization result.
             
-            Possible values: "collocation_points" and "element_interpolation"
+            Possible values: "collocation_points", "element_interpolation" and
+                "mesh_points"
             
             "collocation_points": The optimization result is given at the
             collocation points.
@@ -2215,6 +2216,9 @@ class LocalDAECollocationAlgOptions(OptionBase):
             are calculated by evaluating the collocation polynomials. The
             algorithm option n_evaluation_points is used to specify the
             evaluation points within each finite element.
+            
+            "mesh_points": The optimization result is given at the
+            mesh points.
             
             Type: str
             Default: "collocation_points"
@@ -2337,24 +2341,17 @@ class LocalDAECollocationAlgOptions(OptionBase):
     a complete list of IPOPT options, please consult the IPOPT documentation 
     available at http://www.coin-or.org/Ipopt/documentation/.
 
-    Some commonly used IPOPT options are provided by default::
+    The value for max_iter is provided by default::
 
         max_iter --
            Maximum number of iterations.
            
            Type: int
            Default: 2000
-                      
-        derivative_test --
-           Check the correctness of the NLP derivatives. Valid values are 
-           'none', 'first-order', 'second-order', 'only-second-order'.
-           
-           Type: str
-           Default: 'none'
 
     IPOPT options are set using the syntax for dictionaries::
 
-        >>> opts['IPOPT_options']['max_iter'] = 200
+        >>> opts['IPOPT_options']['max_iter'] = 500
     """
     
     def __init__(self, *args, **kw):
@@ -2379,9 +2376,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'casadi_options_f': {"name": "NLP objective function"},
                 'casadi_options_g': {"name": "NLP constraint function"},
                 'casadi_options_l': {"name": "NLP Lagrangian function"},
-                'IPOPT_options':{
-                        'max_iter': 2000,
-                        'derivative_test': 'none'}}
+                'IPOPT_options': {'max_iter': 2000}}
         
         super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
         self._update_keep_dict_defaults(*args, **kw)
@@ -2406,7 +2401,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
             Type: dict
         
         h_opt --
-            An array with the optimized element lengths.
+            An array with the normalized optimized element lengths.
             
             The element lengths are only optimized (and stored in a class
             instance) if the algorithm option "hs" == free. Otherwise this
@@ -2419,5 +2414,11 @@ class LocalDAECollocationAlgResult(JMResultBase):
                  result_data=None, options=None, times=None, h_opt=None):
         super(LocalDAECollocationAlgResult, self).__init__(
                 model, result_file_name, solver, result_data, options)
-        self.times = times
         self.h_opt = h_opt
+        self.times = times
+        
+        # Print times
+        print("\nTotal time: %.3f seconds" % times['tot'])
+        print("Initialization time: %.3f seconds" % times['init'])
+        print("Solution time: %.3f seconds" % times['sol'])
+        print("Post-processing time: %.3f seconds" % times['post_processing'])

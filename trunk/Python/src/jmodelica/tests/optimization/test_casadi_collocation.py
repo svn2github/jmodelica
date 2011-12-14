@@ -164,7 +164,7 @@ class TestLocalDAECollocator:
         
         # References values
         cost_ref = 1.8576873858261e3
-        u_norm_ref = 3.0526018951367553e2
+        u_norm_ref = 3.0536254817626696e2
         
         # Mayer
         opts = mayer_model.optimize_options(self.algorithm)
@@ -280,7 +280,7 @@ class TestLocalDAECollocator:
         
         # References values
         cost_ref = 4.226631156609e0
-        u_norm_ref = 3.89087345490e-1
+        u_norm_ref = 3.985402379035029e-1
         
         # Free element lengths data
         c = 0.5
@@ -300,7 +300,7 @@ class TestLocalDAECollocator:
         assert_results(res, cost_ref, u_norm_ref)
         indices = range(1, 4) + range(opts['n_e'] - 3, opts['n_e'])
         values = N.array([0.5, 0.5, 0.5, 2.0, 2.0, 2.0]).reshape([-1, 1])
-        N.testing.assert_allclose(res.h_opt[indices], values, 5e-3)
+        N.testing.assert_allclose(20. * res.h_opt[indices], values, 5e-3)
         
         # Element interpolation
         opts['result_mode'] = "element_interpolation"
@@ -360,9 +360,9 @@ class TestLocalDAECollocator:
         """
         Test the two different result modes.
         
-        The difference between the trajectories of the two result modes should
-        be very small if n_e * n_cp is sufficiently large. Eliminating
-        derivative variables is also tested for element interpolation.
+        The difference between the trajectories of the three result modes
+        should be very small if n_e * n_cp is sufficiently large. Eliminating
+        derivative variables is also tested.
         """
         model = self.model_vdp_bounds_lagrange
         
@@ -382,6 +382,12 @@ class TestLocalDAECollocator:
         opts['result_mode'] = "element_interpolation"
         opts['eliminate_der_var'] = True
         opts['n_eval_points'] = 15
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
+        
+        # Mesh points
+        opts['result_mode'] = "mesh_points"
+        opts['n_eval_points'] = 20 # Reset to default
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
     
@@ -446,7 +452,7 @@ class TestLocalDAECollocator:
         # References values
         cost_ref = 3.17619580332244e0
         u_norm_ref_radau = 2.8723837585e-1
-        u_norm_ref_gauss = 2.8618348702292551e-1
+        u_norm_ref_gauss = 2.852405405154352e-1
         
         # Keep continuity variables, Radau
         opts = model.optimize_options(self.algorithm)
@@ -479,23 +485,37 @@ class TestLocalDAECollocator:
     def test_quadrature_constraint(self):
         """
         Test that optimization results of the CSTR is consistent regardless of
-        quadrature_constraint for Gauss collocation.
+        quadrature_constraint and eliminate_cont_var for Gauss collocation.
         """
         model = self.model_cstr_mayer
         
         # References values
         cost_ref = 1.8576873858261e3
-        u_norm_ref = 3.0526018951367553e2
+        u_norm_ref = 3.0536254817626696e2
         
-        # Quadrature constraint
+        # Quadrature constraint, with continuity variables
         opts = model.optimize_options(self.algorithm)
         opts['discr'] = "LG"
         opts['quadrature_constraint'] = True
+        opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
-        # Evaluation constraint
+        # Quadrature constraint, without continuity variables
+        opts['quadrature_constraint'] = True
+        opts['eliminate_cont_var'] = True
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Evaluation constraint, with continuity variables
         opts['quadrature_constraint'] = False
+        opts['eliminate_cont_var'] = False
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Evaluation constraint, without continuity variables
+        opts['quadrature_constraint'] = False
+        opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     

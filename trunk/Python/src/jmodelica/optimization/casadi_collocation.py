@@ -821,8 +821,13 @@ class LocalDAECollocator(CasADiCollocator):
             n_xx += len(self.blocking_factors) * self.model.get_n_u()
         if not self.eliminate_cont_var:
             n_xx += (self.n_e - 1) * n_var['x']
+        self.final_mesh_point = False # Final mesh point needed?
         if self.discr == "LG":
             n_xx += (self.n_e - 1) * n_var['x']
+            if (self.model.get_opt_J() is not None or 
+                self.result_mode == "mesh_points"):
+                self.final_mesh_point = True
+                n_xx += N.sum(n_var.values())
         if self.hs == "free":
             n_xx += self.n_e
         
@@ -877,45 +882,63 @@ class LocalDAECollocator(CasADiCollocator):
         
         # Index state continuity variables
         if self.discr == "LGR":
-            for i in xrange(2, self.n_e + 1):
-                var_indices[i][0] = {}
-                var[i][0] = {}
-                
-                if self.eliminate_cont_var:
+            if self.eliminate_cont_var:
+                for i in xrange(2, self.n_e + 1):
+                    var_indices[i][0] = {}
+                    var[i][0] = {}
                     var_indices[i][0]['x'] = var_indices[i - 1][self.n_cp]['x']
                     var[i][0]['x'] = var[i - 1][self.n_cp]['x']
-                else:
+            else:
+                for i in xrange(2, self.n_e + 1):
+                    var_indices[i][0] = {}
+                    var[i][0] = {}
                     new_index = index + n_var['x']
                     var_indices[i][0]['x'] = range(index, new_index)
                     index = new_index
                     var[i][0]['x'] = xx[var_indices[i][0]['x']]
         elif self.discr == "LG":
+            # Index x_{i, n_cp + 1}
             for i in xrange(1, self.n_e):
                 var_indices[i][self.n_cp + 1] = {}
                 var[i][self.n_cp + 1] = {}
-                var_indices[i + 1][0] = {}
-                var[i + 1][0] = {}
                 
-                # Index x_{i, n_cp + 1}
                 new_index = index + n_var['x']
                 var_indices[i][self.n_cp + 1]['x'] = range(index, new_index)
                 index = new_index
                 var[i][self.n_cp + 1]['x'] = \
                         xx[var_indices[i][self.n_cp + 1]['x']]
-                
-                # Index x_{i + 1, 0}
-                if self.eliminate_cont_var:
-                    var_indices[i + 1][0]['x'] = \
-                            var_indices[i][self.n_cp + 1]['x']
-                    var[i + 1][0]['x'] = var[i][self.n_cp + 1]['x']
-                else:
+            
+            # Index x_{i, 0}
+            if self.eliminate_cont_var:
+                for i in xrange(2, self.n_e + 1):
+                    var_indices[i][0] = {}
+                    var[i][0] = {}
+                    var_indices[i][0]['x'] = \
+                            var_indices[i - 1][self.n_cp + 1]['x']
+                    var[i][0]['x'] = var[i - 1][self.n_cp + 1]['x']
+            else:
+                for i in xrange(2, self.n_e + 1):
+                    var_indices[i][0] = {}
+                    var[i][0] = {}
                     new_index = index + n_var['x']
-                    var_indices[i + 1][0]['x'] = range(index, new_index)
+                    var_indices[i][0]['x'] = range(index, new_index)
                     index = new_index
-                    var[i + 1][0]['x'] = xx[var_indices[i + 1][0]['x']]
+                    var[i][0]['x'] = xx[var_indices[i][0]['x']]
         else:
             raise ValueError("Unknown discretization scheme %s." %
                              self.discr)
+        
+        # Index variables for final mesh point
+        if self.final_mesh_point:
+            i = self.n_e
+            k = self.n_cp + 1
+            var_indices[i][k] = {}
+            var[i][k] = {}
+            for var_type in n_var.keys():
+                new_index = index + n_var[var_type]
+                var_indices[i][k][var_type] = range(index, new_index)
+                index = new_index
+                var[i][k][var_type] = xx[var_indices[i][k][var_type]]
         
         # Index the variables for the derivative initial values
         var[1][0] = {}
@@ -1094,7 +1117,7 @@ class LocalDAECollocator(CasADiCollocator):
         for k in xrange(self.n_cp + 1):
             der_vals_k = [self.pol.der_vals[:, k].reshape([1, self.n_cp + 1])]
             der_vals_k *= self.model.get_n_x()
-            der_vals += [casadi.vertcat(der_vals_k)]
+            der_vals.append(casadi.vertcat(der_vals_k))
         
         # Create collocation and DAE functions
         x_i = self._collocation['x_i']
@@ -1111,7 +1134,7 @@ class LocalDAECollocator(CasADiCollocator):
             sym_z += list(self.model.x)
             sym_z += list(self.model.u)
             sym_z += list(self.model.w)
-            sym_z += [self.model.t]
+            sym_z.append(self.model.t)
             
             dae_F_t0 = self.model.get_dae_F()
             dae_F = casadi.SXFunction([sym_z, x_i, der_vals_k, h_i], [dae])
@@ -1133,12 +1156,12 @@ class LocalDAECollocator(CasADiCollocator):
         ub = self.ocp.path_max()
         for i in xrange(len(path)):
             if lb[i] == ub[i]:
-                g_e += [path[i] - ub[i]]
+                g_e.append(path[i] - ub[i])
             else:
                 if lb[i] != -N.inf:
-                    g_i += [-path[i] + lb[i]]
+                    g_i.append(-path[i] + lb[i])
                 if ub[i] != N.inf:
-                    g_i += [path[i] - ub[i]]
+                    g_i.append(path[i] - ub[i])
         if self.eliminate_der_var:
             z = casadi.vertcat([self.model.p,
                                 self.model.x,
@@ -1194,12 +1217,12 @@ class LocalDAECollocator(CasADiCollocator):
         self.time_points[i] = {}
         t = self.ocp.t0()
         self.time_points[i][0] = t
-        time += [t]
+        time.append(t)
         ti = t # Time at start of element
         for k in xrange(1, self.n_cp + 1):
             t = ti + self.horizon * self.h[i] * self.pol.p[k]
             self.time_points[i][k] = t
-            time += [t]
+            time.append(t)
         for i in xrange(2, self.n_e + 1):
             self.time_points[i] = {}
             ti = (self.time_points[i - 1][self.n_cp] +
@@ -1207,7 +1230,17 @@ class LocalDAECollocator(CasADiCollocator):
             for k in xrange(1, self.n_cp + 1):
                 t = ti + self.horizon * self.h[i] * self.pol.p[k]
                 self.time_points[i][k] = t
-                time += [t]
+                time.append(t)
+        if self.final_mesh_point:
+            i = self.n_e
+            ti = (self.time_points[i - 1][self.n_cp] +
+                  (1. - self.pol.p[self.n_cp]) * self.horizon * self.h[i])
+            t = ti + self.horizon * self.h[i]
+            self.time_points[i][self.n_cp + 1] = t
+            time.append(t)
+        if self.final_mesh_point or self.discr == "LGR":
+            if self.hs != "free":
+                assert(N.allclose(time[-1], self.ocp.tf()))
         
         # Create list of state matrices
         x_list = [[]]
@@ -1215,7 +1248,7 @@ class LocalDAECollocator(CasADiCollocator):
         for i in xrange(1, self.n_e + 1):
             x_i = [var[i][k]['x'] for k in xrange(self.n_cp + 1)]
             x_i = casadi.horzcat(x_i)
-            x_list += [x_i]
+            x_list.append(x_i)
         
         # Initial conditions
         i = 1
@@ -1264,7 +1297,7 @@ class LocalDAECollocator(CasADiCollocator):
         # Continuity constraints for x_{i, n_cp + 1}
         if self.discr == "LG":
             if self.quadrature_constraint:
-                for i in xrange(1, self.n_e):
+                for i in xrange(1, self.n_e + self.final_mesh_point):
                     # Evaluate x_{i, n_cp + 1} based on quadrature
                     x_i_np1 = 0
                     for k in xrange(1, self.n_cp + 1):
@@ -1276,7 +1309,7 @@ class LocalDAECollocator(CasADiCollocator):
                     c_e = casadi.vertcat(
                             [c_e, var[i][self.n_cp + 1]['x'] - x_i_np1])
             else:
-                for i in xrange(1, self.n_e):
+                for i in xrange(1, self.n_e + self.final_mesh_point):
                     # Evaluate x_{i, n_cp + 1} based on polynomial x_i
                     x_i_np1 = 0
                     for k in xrange(self.n_cp + 1):
@@ -1286,6 +1319,23 @@ class LocalDAECollocator(CasADiCollocator):
                     # Add residual for x_i_np1 as constraint
                     c_e = casadi.vertcat(
                             [c_e, var[i][self.n_cp + 1]['x'] - x_i_np1])
+        
+        # Constraints for final mesh point values
+        if self.final_mesh_point:
+            var_types = ['u', 'w']
+            if not self.eliminate_der_var:
+                var_types.append('dx')
+            for var_type in var_types:
+                # Evaluate xx_{n_e, n_cp + 1} based on polynomial xx_{n_e}
+                xx_ne_np1 = 0
+                for k in xrange(1, self.n_cp + 1):
+                    xx_ne_np1 += (var[self.n_e][k][var_type] *
+                                  self.pol.eval_basis(k, 1, True))
+                
+                # Add residual for xx_ne_np1 as constraint
+                c_e = casadi.vertcat(
+                        [c_e,
+                         var[self.n_e][self.n_cp + 1][var_type] - xx_ne_np1])
         
         # Continuity constraints for x_{i, 0}
         if not self.eliminate_cont_var:
@@ -1302,8 +1352,20 @@ class LocalDAECollocator(CasADiCollocator):
         
         # Path constraints
         if self.eliminate_der_var:
+            # Handle t_1_0
+            i = 1
+            k = 0
+            z = self._get_z_elim_der(i, k)
+            [g_e_constr] = g_e_eval([z, x_list[i], der_vals[k],
+                                     self.horizon * self.h[i]])
+            [g_i_constr] = g_i_eval([z, x_list[i], der_vals[k],
+                                     self.horizon * self.h[i]])
+            c_e = casadi.vertcat([c_e, g_e_constr])
+            c_i = casadi.vertcat([c_i, g_i_constr])
+            
+            # Handle collocation points
             for i in xrange(1, self.n_e + 1):
-                for k in self.time_points[i]:
+                for k in xrange(1, self.n_cp + 1):
                     z = self._get_z_elim_der(i, k)
                     [g_e_constr] = g_e_eval([z, x_list[i], der_vals[k],
                                              self.horizon * self.h[i]])
@@ -1312,8 +1374,18 @@ class LocalDAECollocator(CasADiCollocator):
                     c_e = casadi.vertcat([c_e, g_e_constr])
                     c_i = casadi.vertcat([c_i, g_i_constr])
         else:
+            # Handle t_1_0
+            i = 1
+            k = 0
+            z = self._get_z(i, k)
+            [g_e_constr] = g_e_eval([z])
+            [g_i_constr] = g_i_eval([z])
+            c_e = casadi.vertcat([c_e, g_e_constr])
+            c_i = casadi.vertcat([c_i, g_i_constr])
+            
+            # Handle collocation points
             for i in xrange(1, self.n_e + 1):
-                for k in self.time_points[i]:
+                for k in xrange(1, self.n_cp + 1):
                     z = self._get_z(i, k)
                     [g_e_constr] = g_e_eval([z])
                     [g_i_constr] = g_i_eval([z])
@@ -1386,7 +1458,13 @@ class LocalDAECollocator(CasADiCollocator):
             # Mayer cost
             J = self.model.get_opt_J()
             if J is not None:
-                z = self._get_z_elim_der(self.n_e, self.n_cp)
+                if self.discr == "LGR":
+                    z = self._get_z_elim_der(self.n_e, self.n_cp)
+                elif self.discr == "LG":
+                    z = self._get_z_elim_der(self.n_e, self.n_cp + 1)
+                else:
+                    raise ValueError("Unknown discretization scheme %s." %
+                                     self.discr)
                 
                 # Use appropriate function evaluation based on graph
                 if self.graph == "MX" or self.graph == 'expanded_MX':
@@ -1405,7 +1483,7 @@ class LocalDAECollocator(CasADiCollocator):
                 sym_z += list(self.model.x)
                 sym_z += list(self.model.u)
                 sym_z += list(self.model.w)
-                sym_z += [self.model.t]
+                sym_z.append(self.model.t)
                 
                 if len(L) > 0:
                     L = casadi.substitute(L[0], self.model.dx, coll_der)
@@ -1803,30 +1881,33 @@ class LocalDAECollocator(CasADiCollocator):
         
         # Get element lengths
         if self.hs == "free":
-            h_opt = N.vstack([N.nan, self.horizon * 
-                                     self.nlp_opt[var_indices['h'][1:]]])
+            self.h_opt = N.vstack([N.nan, self.nlp_opt[var_indices['h'][1:]]])
+            h_scaled = self.horizon * self.h_opt
         else:
-            h_opt = self.horizon * N.array(self.h)
-        self.h_opt = h_opt
+            h_scaled = self.horizon * N.array(self.h)
         
         # Create array with discrete times
         if self.result_mode == "collocation_points":
             if self.hs == "free":
-                t_start = 0.
+                t_start = self.time[0]
                 t_opt = [t_start]
-                for h in h_opt:
+                for h in h_scaled[1:]:
                     for k in xrange(1, self.n_cp + 1):
-                        t_opt.append(t_start + 
-                                     self.pol.p[k] * h)
+                        t_opt.append(t_start + self.pol.p[k] * h)
                     t_start += h
                 t_opt = N.array(t_opt).reshape([-1, 1])
             else:
                 t_opt = self.get_time().reshape([-1, 1])
+        elif self.result_mode == "mesh_points":
+            t_opt = [self.time[0]]
+            for h in h_scaled[1:]:
+                t_opt.append(t_opt[-1] + h)
+            t_opt = N.array(t_opt).reshape([-1, 1])
         elif self.result_mode == "element_interpolation":
             t_opt = []
             t_start = 0.
             for i in xrange(1, self.n_e + 1):
-                t_end = t_start + h_opt[i]
+                t_end = t_start + h_scaled[i]
                 t_i = N.linspace(t_start, t_end, self.n_eval_points)
                 t_opt = N.hstack([t_opt, t_i])
                 t_start = t_opt[-1]
@@ -1870,7 +1951,7 @@ class LocalDAECollocator(CasADiCollocator):
                         dx_i_k = 0
                         for l in xrange(self.n_cp + 1):
                             x_i_l = self.nlp_opt[var_indices[i][l]['x']]
-                            dx_i_k += (1. / h_opt[i] * x_i_l * 
+                            dx_i_k += (1. / h_scaled[i] * x_i_l * 
                                        self.pol.eval_basis_der(
                                                l, self.pol.p[k]))
                         var_opt['dx'][t_index, :] = dx_i_k.reshape(-1)
@@ -1893,10 +1974,67 @@ class LocalDAECollocator(CasADiCollocator):
                     dx_i_tau = 0
                     for k in xrange(0, self.n_cp + 1):
                         x_i_k = self.nlp_opt[var_indices[i][k]['x']]
-                        dx_i_tau += (1. / h_opt[i] * x_i_k * 
+                        dx_i_tau += (1. / h_scaled[i] * x_i_k * 
                                      self.pol.eval_basis_der(k, tau))
                     var_opt['dx'][t_index, :] = dx_i_tau.reshape(-1)
                     
+                    t_index += 1
+        elif self.result_mode == "mesh_points":
+            # Start time
+            i = 1
+            k = 0
+            for var_type in var_types:
+                xx_i_k = self.nlp_opt[var_indices[i][k][var_type]]
+                var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
+            t_index += 1
+            k = self.n_cp + self.final_mesh_point
+            
+            # Mesh points
+            var_types.remove('x')
+            if self.discr == "LGR":
+                for i in xrange(1, self.n_e + 1):
+                    for var_type in var_types:
+                        xx_i_k = self.nlp_opt[var_indices[i][k][var_type]]
+                        var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
+                    t_index += 1
+            elif self.discr == "LG":
+                for i in xrange(1, self.n_e + 1):
+                    for var_type in var_types:
+                        # Evaluate xx_{i, n_cp + 1} based on polynomial xx_i
+                        xx_i_k = 0
+                        for l in xrange(1, self.n_cp + 1):
+                            xx_i_l = self.nlp_opt[var_indices[i][l][var_type]]
+                            xx_i_k += xx_i_l * self.pol.eval_basis(l, 1, False)
+                        var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
+                    t_index += 1
+            var_types.insert(0, 'x')
+            
+            # Handle states separately
+            t_index = 0
+            for i in xrange(1, self.n_e + 1):
+                x_i_k = self.nlp_opt[var_indices[i][k]['x']]
+                var_opt['x'][t_index, :] = x_i_k.reshape(-1)
+                t_index += 1
+            
+            # Handle state derivatives separately
+            if self.eliminate_der_var:
+                # dx_1_0
+                t_index = 0
+                i = 1
+                k = 0
+                dx_i_k = self.nlp_opt[var_indices[i][k]['dx']]
+                var_opt['dx'][t_index, :] = dx_i_k.reshape(-1)
+                t_index += 1
+                
+                # Mesh point state derivatives
+                t_index = 1
+                for i in xrange(1, self.n_e + 1):
+                    dx_i_k = 0
+                    for l in xrange(self.n_cp + 1):
+                        x_i_l = self.nlp_opt[var_indices[i][l]['x']]
+                        dx_i_k += (1. / h_scaled[i] * x_i_l * 
+                                   self.pol.eval_basis_der(l, 1.))
+                    var_opt['dx'][t_index, :] = dx_i_k.reshape(-1)
                     t_index += 1
         else:
             raise ValueError("Unknown result mode %s." % self.result_mode)
