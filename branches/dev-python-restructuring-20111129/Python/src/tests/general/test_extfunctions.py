@@ -19,10 +19,9 @@ Module for testing external function support.
 """
 import os
 
-from pyjmi.jmi import compile_jmu
+from jmodelica.compiler import compile_jmu
 from pyjmi.jmi import JMUModel
-from pyjmi.tests import testattr
-from pyjmi.tests import get_files_path
+from tests import testattr, get_files_path
 
 @testattr(stddist = True)
 def test_ModelicaUtilities():

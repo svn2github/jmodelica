@@ -25,12 +25,10 @@ import sys
 import nose
 import nose.tools
 
-from jmodelica.tests import testattr
-from jmodelica.tests import get_files_path
+from tests import testattr, get_files_path
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica as jm
-
 
 mc = ModelicaCompiler()
 ModelicaCompiler.set_log_level(ModelicaCompiler.LOG_ERROR)

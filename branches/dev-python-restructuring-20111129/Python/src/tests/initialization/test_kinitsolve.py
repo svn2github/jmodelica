@@ -24,12 +24,9 @@ import nose.tools
 
 import scipy.sparse as ss
 
-from pyjmi.jmi import compile_jmu
-from pyjmi.jmi import JMUModel
-from pyjmi.jmi import JMIException
-
-from pyjmi.tests import testattr
-from pyjmi.tests import get_files_path
+from jmodelica.compiler import compile_jmu
+from pyjmi.jmi import JMUModel, JMIException
+from tests import testattr, get_files_path
 from assimulo.kinsol import KINSOL, KINSOL_Exception
 from pyjmi.initialization.assimulo_interface import JMUAlgebraic, JMUAlgebraic_Exception
 

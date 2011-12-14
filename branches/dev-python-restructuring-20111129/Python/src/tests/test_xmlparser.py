@@ -24,9 +24,8 @@ import nose
 import nose.tools
 import numpy as n
 
-from jmodelica.tests import testattr
-from jmodelica.tests import get_files_path
-from jmodelica import xmlparser
+from tests import testattr, get_files_path
+from jmodelica.common import xmlparser
 
 #type defs
 int = n.int32

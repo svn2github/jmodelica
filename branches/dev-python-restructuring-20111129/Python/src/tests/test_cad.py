@@ -23,10 +23,9 @@ import os
 import numpy as N
 
 import pyjmi.jmi as jmi
-from pyjmi.jmi import compile_jmu
+from jmodelica.compiler import compile_jmu
 from pyjmi.jmi import JMUModel
-from pyjmi.tests import testattr
-from pyjmi.tests import get_files_path
+from tests import testattr, get_files_path
 
 int = N.int32
 N.int = N.int32

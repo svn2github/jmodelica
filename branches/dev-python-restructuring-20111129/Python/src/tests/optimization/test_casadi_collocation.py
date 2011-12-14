@@ -23,12 +23,10 @@ import nose
 import numpy as N
 import pylab as P
 
-from pyjmi.tests import testattr
-from pyjmi.tests import get_files_path
+from tests import testattr, get_files_path
 from pyjmi.common.io import ResultDymolaTextual
-
+from jmodelica.compiler import compile_fmux
 try:
-    from pyfmi.fmi import compile_fmux
     from pyjmi.optimization.casadi_collocation import *
     from pyjmi.casadi_interface import CasadiModel
 except NameError, ImportError:

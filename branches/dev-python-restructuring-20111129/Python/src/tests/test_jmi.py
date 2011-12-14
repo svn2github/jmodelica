@@ -27,13 +27,11 @@ import matplotlib.pyplot as plt
 import nose.tools as ntools
 import logging
 
-from pyjmi.tests import testattr
-from pyjmi.tests import get_files_path
+from tests import testattr, get_files_path
 
 import pyjmi.jmi as jmi
-from pyjmi.jmi import compile_jmu
-from pyjmi.jmi import JMUModel
-from pyjmi.jmi import JMIException
+from jmodelica.compiler import compile_jmu, get_jmu_name
+from pyjmi.jmi import JMUModel, JMIException
 import pyjmi.jmi_algorithm_drivers as ad
 
 try:
@@ -1379,7 +1377,7 @@ class TestNegativeNominalScaling(object):
         """
         jmu_name = compile_jmu(self._cpath, self._fpath, 
             compiler_options={'enable_variable_scaling':True})
-        self._model = JMUModel(jmi.get_jmu_name(self._cpath))
+        self._model = JMUModel(get_jmu_name(self._cpath))
 
     @testattr(stddist = True)
     def test_scaling_factors(self):
@@ -1474,11 +1472,11 @@ class Test_JMU_methods:
         """
         Test the method jmu_name.
         """
-        name = jmi.get_jmu_name('VDP_pack.VDP')
+        name = get_jmu_name('VDP_pack.VDP')
         assert name == 'VDP_pack_VDP.jmu'
-        name = jmi.get_jmu_name('VDP')
+        name = get_jmu_name('VDP')
         assert name == 'VDP.jmu'
-        name = jmi.get_jmu_name('VDP_pack')
+        name = get_jmu_name('VDP_pack')
         assert name == 'VDP_pack.jmu'
     
     @testattr(stddist = True)
@@ -1560,7 +1558,7 @@ class TestInitializeModelFromData(object):
         Sets up the test class.
         """
         jmu_name = compile_jmu(self._cpath, self._fpath)
-        self.model = JMUModel(jmi.get_jmu_name(self._cpath))
+        self.model = JMUModel(get_jmu_name(self._cpath))
         self.res = self.model.simulate(0,10)
 
     @testattr(ipopt = True)
@@ -1604,7 +1602,7 @@ class TestEmptyModelException(object):
        """
        Test that an exception is raised.
        """
-       nose.tools.assert_raises(JMIException,JMUModel,jmi.get_jmu_name(self._cpath))
+       nose.tools.assert_raises(JMIException,JMUModel,get_jmu_name(self._cpath))
 
 class TestOutputVrefs:
     """Test that output value references are generate correctly.

@@ -24,16 +24,14 @@ import os.path
 import numpy as N
 import nose
 
-from jmodelica.tests import testattr
-from jmodelica.tests import get_files_path
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-from jmodelica.io import ResultDymolaTextual
-from jmodelica.io import ResultWriterDymola
-from jmodelica.io import VariableNotTimeVarying
-from jmodelica.optimization import ipopt
-from jmodelica.fmi import *
-
+from tests import testattr, get_files_path
+from jmodelica.compiler import compile_jmu
+from jmodelica.common.io import ResultDymolaTextual, ResultWriterDymola
+from pyjmi.common.io import VariableNotTimeVarying
+from pyfmi.common.io import ResultWriterDymola as fmi_ResultWriterDymola
+from pyjmi.jmi import JMUModel
+from pyjmi.optimization import ipopt
+from pyfmi.fmi import FMUModel
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 
@@ -188,7 +186,7 @@ class test_ResultWriterDymola:
         """Tests the work flow of write_header, write_point, write_finalize."""
         
         
-        bouncingBall = ResultWriterDymola(self._bounce)
+        bouncingBall = fmi_ResultWriterDymola(self._bounce)
         
         bouncingBall.write_header()
         bouncingBall.write_point()

@@ -20,17 +20,18 @@ Module containing the tests for the FMI interface.
 """
 
 import nose
-import os as O
+import os
 import numpy as N
 import sys as S
-from pyfmi.tests import testattr
-from pyfmi.tests import get_files_path
-from pyfmi.fmi import *
+
+from tests import testattr, get_files_path
+from jmodelica.compiler import compile_fmu
+from pyfmi.fmi import unzip_fmu, FMUModel, FMUException
 import pyfmi.fmi_algorithm_drivers as ad
 from pyfmi.common.core import get_platform_dir
 
-path_to_fmus = O.path.join(get_files_path(), 'FMUs')
-path_to_mofiles = O.path.join(get_files_path(), 'Modelica')
+path_to_fmus = os.path.join(get_files_path(), 'FMUs')
+path_to_mofiles = os.path.join(get_files_path(), 'Modelica')
 
 @testattr(fmi = True)
 def test_unzip():
@@ -387,7 +388,7 @@ class Test_FMI_Compile:
     @testattr(fmi = True)
     def test_set_compiler_options(self):
         """ Test compiling with compiler options."""
-        libdir = O.path.join(get_files_path(), 'MODELICAPATH_test', 'LibLoc1',
+        libdir = os.path.join(get_files_path(), 'MODELICAPATH_test', 'LibLoc1',
             'LibA')
         co = {"index_reduction":True, "equation_sorting":True,
             "extra_lib_dirs":[libdir]}

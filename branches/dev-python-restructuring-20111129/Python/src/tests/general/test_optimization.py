@@ -20,14 +20,13 @@ import os.path
 
 from pyjmi.initialization.ipopt import InitializationOptimizer
 from pyjmi.initialization.ipopt import NLPInitialization
-from pyjmi.jmi import compile_jmu
+from jmodelica.compiler import compile_jmu
 from pyjmi.jmi import JMUModel
 from pyjmi.common.io import ResultDymolaTextual
 from pyjmi.optimization.ipopt import NLPCollocationLagrangePolynomials
 from pyjmi.optimization.ipopt import CollocationOptimizer
-from pyjmi.tests.general.base_simul import *
-from pyjmi.tests import testattr
-from pyjmi.tests import get_files_path
+from tests.general.base_simul import *
+from tests import testattr, get_files_path
 
 class TestOptimization(OptimizationTest):
 

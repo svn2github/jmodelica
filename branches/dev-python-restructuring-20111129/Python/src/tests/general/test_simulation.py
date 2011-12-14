@@ -19,8 +19,8 @@ Module for testing Simulation.
 """
 import numpy as N
 
-from pyjmi.tests.general.base_simul import *
-from pyjmi.tests import testattr
+from tests.general.base_simul import *
+from tests import testattr
 
 class TestNominal(SimulationTest):
 

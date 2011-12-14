@@ -24,9 +24,8 @@ import ctypes as ct
 from ctypes import byref
 import nose.tools
 
-from pyjmi.tests import testattr
-from pyjmi.tests import get_files_path
-from pyjmi.jmi import compile_jmu
+from tests import testattr, get_files_path
+from jmodelica.compiler import compile_jmu
 from pyjmi.jmi import JMUModel
 from pyjmi.initialization.ipopt import NLPInitialization
 from pyjmi.initialization.ipopt import InitializationOptimizer

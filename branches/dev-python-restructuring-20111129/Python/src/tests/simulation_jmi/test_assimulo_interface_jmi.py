@@ -22,14 +22,11 @@ import os
 import numpy as N
 import pylab as P
 from scipy.io.matlab.mio import loadmat
-from pyjmi.jmi import compile_jmu
+
+from jmodelica.compiler import compile_jmu, compile_fmu
 from pyjmi.jmi import JMUModel
-from pyfmi.fmi import compile_fmu
-from pyfmi.fmi import FMUModel
-import pyfmi.fmi as fmi
 from pyjmi.common.io import ResultDymolaTextual
-from pyjmi.tests import testattr
-from pyjmi.tests import get_files_path
+from tests import testattr, get_files_path
 
 try:
     from pyjmi.simulation.assimulo_interface import JMIODE, JMIDAE, JMIModel_Exception

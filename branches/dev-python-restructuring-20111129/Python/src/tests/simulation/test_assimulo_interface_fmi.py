@@ -23,13 +23,10 @@ import numpy as N
 import pylab as P
 from scipy.io.matlab.mio import loadmat
 
-from pyjmi.jmi import compile_jmu
-from pyfmi.fmi import compile_fmu
+from jmodelica.compiler import compile_jmu, compile_fmu
 from pyfmi.fmi import FMUModel
-import pyfmi.fmi as fmi
 from pyfmi.common.io import ResultDymolaTextual
-from pyfmi.tests import testattr
-from pyfmi.tests import get_files_path
+from tests import testattr, get_files_path
 
 try:
     from pyfmi.simulation.assimulo_interface import FMIODE
@@ -63,8 +60,8 @@ class Test_FMI_ODE:
         """
         Load the test model.
         """
-        self._bounce  = fmi.FMUModel('bouncingBall.fmu',path_to_fmus)
-        self._dq = fmi.FMUModel('dq.fmu',path_to_fmus)
+        self._bounce  = FMUModel('bouncingBall.fmu',path_to_fmus)
+        self._dq = FMUModel('dq.fmu',path_to_fmus)
         self._bounce.initialize()
         self._dq.initialize()
         self._bounceSim = FMIODE(self._bounce)
@@ -245,7 +242,7 @@ class Test_FMI_ODE:
         """
         This tests a simulation of a Pendulum with dynamic state selection.
         """
-        model = fmi.FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus)
+        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus)
         
         res = model.simulate(final_time=10)
     
@@ -257,7 +254,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(x1_sim[-1], 0.290109468, 4)
         nose.tools.assert_almost_equal(x2_sim[-1], -0.956993467, 4)
         
-        model = fmi.FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus)
+        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus)
         
         res = model.simulate(final_time=10, options={'ncp':1000})
     
@@ -274,7 +271,7 @@ class Test_FMI_ODE:
         """
         This tests a simulation with an event of terminate simulation.
         """
-        model = fmi.FMUModel('Robot.fmu', path_to_fmus)
+        model = FMUModel('Robot.fmu', path_to_fmus)
         
         res = model.simulate(final_time=2.0)
         solver = res.solver
@@ -286,7 +283,7 @@ class Test_FMI_ODE:
         """
         This tests a FMU with typeDefinitions including StringType and BooleanType
         """
-        model = fmi.FMUModel('Robot_Dym74FD01.fmu', path_to_fmus)
+        model = FMUModel('Robot_Dym74FD01.fmu', path_to_fmus)
         
         res = model.simulate(final_time=2.0)
         solver = res.solver
@@ -335,7 +332,7 @@ class Test_FMI_ODE:
         """
         This tests a simulation with different start time.
         """
-        bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
+        bounce = FMUModel('bouncingBall.fmu', path_to_fmus)
         #bounce.initialize()
         res = bounce.simulate(start_time=2.,final_time=5.)
         height = res['h']
@@ -352,7 +349,7 @@ class Test_FMI_ODE:
         This tests the basic simulation and writing.
         """
         #Writing continuous
-        bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
+        bounce = FMUModel('bouncingBall.fmu', path_to_fmus)
         #bounce.initialize()
         res = bounce.simulate(final_time=3.)
         height = res['h']
@@ -363,7 +360,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(time[-1],3.000000,5)
         
         #Writing after
-        bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
+        bounce = FMUModel('bouncingBall.fmu', path_to_fmus)
         bounce.initialize()
         opt = bounce.simulate_options()
         opt['CVode_options']['write_cont'] = False
@@ -378,7 +375,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(time[-1],3.000000,5)
         
         #Test with predefined FMUModel
-        model = fmi.FMUModel(os.path.join(path_to_fmus,'bouncingBall.fmu'))
+        model = FMUModel(os.path.join(path_to_fmus,'bouncingBall.fmu'))
         #model.initialize()
         res = model.simulate(final_time=3.)
 
@@ -396,7 +393,7 @@ class Test_FMI_ODE:
         This test the default values of the simulation using simulate.
         """
         #Writing continuous
-        bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
+        bounce = FMUModel('bouncingBall.fmu', path_to_fmus)
         #bounce.initialize()
         res = bounce.simulate(final_time=3.)
 
@@ -411,7 +408,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(time[-1],3.000000,5)
         
         #Writing continuous
-        bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
+        bounce = FMUModel('bouncingBall.fmu', path_to_fmus)
         #bounce.initialize(options={'initialize':False})
         res = bounce.simulate(final_time=3.,
             options={'initialize':True,'CVode_options':{'iter':'FixedPoint','rtol':1e-6}})
@@ -432,7 +429,7 @@ class Test_FMI_ODE:
         FMUs)
         """
         #Writing continuous
-        bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
+        bounce = FMUModel('bouncingBall.fmu', path_to_fmus)
         #bounce.initialize()
         res = bounce.simulate(final_time=3.)
 
