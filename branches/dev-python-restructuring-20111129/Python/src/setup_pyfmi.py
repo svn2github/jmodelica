@@ -81,8 +81,8 @@ setup(name=NAME,
       classifiers=CLASSIFIERS,
       #cmdclass={"build_ext":build_clib},
       package_dir = {'pyfmi':'pyfmi','pyfmi.common':'common'},
-      packages=['pyfmi','pyfmi.simulation','pyfmi.examples','pyfmi.tests','pyfmi.tests.simulation','pyfmi.common','pyfmi.common.plotting','pyfmi.common.tests'],
-      package_data = {'pyfmi':['examples'+O.path.sep+'files'+O.path.sep+'FMUs'+O.path.sep+'*','tests'+O.path.sep+'files'+O.path.sep+'FMUs'+O.path.sep+'*']},
+      packages=['pyfmi','pyfmi.simulation','pyfmi.examples','pyfmi.common','pyfmi.common.plotting'],
+      package_data = {'pyfmi':['examples'+O.path.sep+'files'+O.path.sep+'FMUs'+O.path.sep+'*']},
       **config.todict()
       )
 #ext_modules=[Extension('pyfmi.util', ['pyfmi'+O.path.sep+'util'+O.path.sep+'FMILogger.c'])]
