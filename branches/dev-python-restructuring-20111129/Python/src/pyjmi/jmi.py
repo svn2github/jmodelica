@@ -37,7 +37,7 @@ import atexit
 from lxml import etree
 
 from pyjmi.common import xmlparser
-from pyjmi.common.core import BaseModel, unzip_unit, get_unit_name, get_platform_suffix, get_files_in_archive, rename_to_tmp
+from pyjmi.common.core import BaseModel, unzip_unit, get_platform_suffix, get_files_in_archive, rename_to_tmp
 
 from pyjmi.common.io import VariableNotFoundError
 from pyjmi.common.core import TrajectoryLinearInterpolation

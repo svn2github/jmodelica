@@ -33,7 +33,7 @@ import jpype
 
 import jmodelica as jm
 from jmodelica.common import xmlparser
-from jmodelica.common.core import list_to_string
+from jmodelica.common.core import list_to_string, get_unit_name
 
 #start JVM
 # note that startJVM() fails after shutdownJVM(), hence, only one start
