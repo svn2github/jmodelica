@@ -18,8 +18,5 @@
 """
 The JModelica Model example package.
 """
-__all__ = [
-    'crane', 'planar_pendulum', 'mechanical_rotational_examples_first', 
-    'fmi_bouncing_ball_native', 'fmi_bouncing_ball', 'fmu_with_input', 
-    'distillation_fmu', 'multiple_nl_systems', 'fmu_with_input_function', 
-    'mechanical_rotational_examples_coupled_clutches', 'log_analysis']
+__all__ = ['fmi_bouncing_ball_native', 'fmi_bouncing_ball', 'fmu_with_input',
+           'fmu_with_input_function', 'log_analysis']
