@@ -32,6 +32,7 @@ from pyfmi.common.core import TrajectoryLinearInterpolation
 try:
     from assimulo.problem import Implicit_Problem
     from assimulo.problem import Explicit_Problem
+    from assimulo.sundials import Sundials_Exception
     from assimulo.exception import *
 except ImportError:
     logging.warning(
@@ -96,15 +97,14 @@ class FMIODE(Explicit_Problem):
     An Assimulo Explicit Model extended to FMI interface.
     """
     def __init__(self, model, input=None, result_file_name='',
-                 with_jacobian=False, t0=0.0):
+                 with_jacobian=False):
         """
         Initialize the problem.
         """
         self._model = model
         self.input = input
         self.input_names = []
-        
-        self.t0 = t0
+
         self.y0 = self._model.continuous_states
         self.problem_name = self._model.get_name()
 
@@ -150,10 +150,8 @@ class FMIODE(Explicit_Problem):
         
         if with_jacobian:
             self.jac = self.j #Activates the jacobian
-            
-        self.step_events = self.completed_step
         
-    def rhs(self, t, y, sw=None):
+    def f(self, t, y, sw=None):
         """
         The rhs (right-hand-side) for an ODE problem.
         """
@@ -286,16 +284,16 @@ class FMIODE(Explicit_Problem):
         This method is called when Assimulo finds an event.
         """
         #Moving data to the model
-        if solver.t != self._model.time:
-            self._model.time = solver.t
+        if solver.t_cur != self._model.time:
+            self._model.time = solver.t_cur
             #Check if there are any states
             if self._f_nbr != 0:
-                self._model.continuous_states = solver.y
+                self._model.continuous_states = solver.y_cur
             
             #Sets the inputs, if any
             if self.input!=None:
                 self._model.set(self.input[0], 
-                    self.input[1].eval(N.array([solver.t]))[0,:])
+                    self.input[1].eval(N.array([solver.t_cur]))[0,:])
             
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
@@ -313,7 +311,7 @@ class FMIODE(Explicit_Problem):
 
         #Check if the event affected the state values and if so sets them
         if eInfo.stateValuesChanged:
-            solver.y = self._model.continuous_states
+            solver.y_cur = self._model.continuous_states
         
         #Get new nominal values.
         if eInfo.stateValueReferencesChanged:
@@ -328,22 +326,22 @@ class FMIODE(Explicit_Problem):
         Method which is called at each successful step.
         """
         #Moving data to the model
-        if solver.t != self._model.time:
-            self._model.time = solver.t
+        if solver.t_cur != self._model.time:
+            self._model.time = solver.t_cur
             #Check if there are any states
             if self._f_nbr != 0:
-                self._model.continuous_states = solver.y
+                self._model.continuous_states = solver.y_cur
             
             #Sets the inputs, if any
             if self.input!=None:
                 self._model.set(self.input[0], 
-                    self.input[1].eval(N.array([solver.t]))[0,:])
+                    self.input[1].eval(N.array([solver.t_cur]))[0,:])
             
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
         
         if self._model.completed_integrator_step():
-            self._logg_step_event += [solver.t]
+            self._logg_step_event += [solver.t_cur]
             #Event have been detect, call event iteration.
             self.handle_event(solver,[0]) 
             return 1 #Tell to reinitiate the solver.
