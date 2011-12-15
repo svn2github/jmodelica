@@ -5313,7 +5313,7 @@ void func_CCodeGenTests_externalArrayFortran3_f_def(jmi_array_t* a_a, jmi_ad_var
     jmi_ad_var_t b_v;
     JMI_ARRAY_DYNAMIC(tmp_1, 2)
     extern jmi_ad_var_t f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
-    JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, ( : ) * ( : ), :, :)
+    JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, ( jmi_array_size(a_a, 0) ) * ( jmi_array_size(a_a, 1) ), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_transpose_matrix(a_a, a_a->var, tmp_1->var);
     b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1));
     if (b_o != NULL) *b_o = b_v;
@@ -5328,7 +5328,6 @@ jmi_ad_var_t func_CCodeGenTests_externalArrayFortran3_f_exp(jmi_array_t* a_a) {
 }
 
 ")})));
-
 
 	Real a_in[2,2];
 	Real b_out;
@@ -5410,9 +5409,8 @@ void func_CCodeGenTests_externalArrayFortran5_f_def(jmi_array_t* a_a, jmi_array_
     JMI_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
     jmi_transpose_matrix(a_a, a_a->var, tmp_1->var);
     JMI_ARRAY_STATIC_INIT_2(tmp_2, 2, 2)
-    f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), b_a->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
-    jmi_transpose_matrix(b_a, b_a->var, tmp_2->var);
-    b_a->var = tmp_2->var;
+    f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
+    jmi_transpose_matrix(tmp_2, tmp_2->var, b_a->var);
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -5455,12 +5453,11 @@ void func_CCodeGenTests_externalArrayFortran6_f_def(jmi_array_t* a_a, jmi_array_
         b_a = b_an;
     }
     extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
-    JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, ( : ) * ( : ), :, :)
+    JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, ( jmi_array_size(a_a, 0) ) * ( jmi_array_size(a_a, 1) ), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_transpose_matrix(a_a, a_a->var, tmp_1->var);
     JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, ( jmi_array_size(a_a, 0) ) * ( jmi_array_size(a_a, 1) ), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
-    f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), b_a->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
-    jmi_transpose_matrix(b_a, b_a->var, tmp_2->var);
-    b_a->var = tmp_2->var;
+    f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
+    jmi_transpose_matrix(tmp_2, tmp_2->var, b_a->var);
     JMI_DYNAMIC_FREE()
     return;
 }

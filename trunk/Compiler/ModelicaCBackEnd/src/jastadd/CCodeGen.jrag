@@ -623,9 +623,7 @@ aspect CCodeGen {
 	
 	public void MutableSize.printNumElements_C(Printer p, PrintStream str, String indent, FExp src) {
 		if (isUnknown()) {
-			FQName empty = new FQName();
-			// TODO: do we really need to flatten here?
-			FExp numElem = src.dynamicFExp(createNumElementsFExp().flatten(empty));
+			FExp numElem = src.dynamicFExp(createNumElementsFExp());
 			p.print(numElem, str, indent);
 		} else {
 			super.printNumElements_C(p, str, indent, src);
@@ -634,15 +632,13 @@ aspect CCodeGen {
 	
 	public void MutableSize.printDimensions_C(Printer p, PrintStream str, String indent, FExp src) {
 		if (isUnknown()) {
-			FQName empty = new FQName();
 			for (int i = 0; i < size.length; i++) {
 				if (i > 0)
 					str.print(", ");
 				if (exps[i] == null) {
 					str.print(size[i]);
 				} else {
-					// TODO: do we really need to flatten here?
-					FExp exp = src.dynamicFExp(exps[i].flatten(empty));
+					FExp exp = src.dynamicFExp(exps[i]);
 					p.print(exp, str, indent);
 				}
 			}
@@ -864,6 +860,15 @@ aspect CCodeGen {
 		getFExp().prettyPrintSize_C(p, str, indent, dimension());
 	}
 	
+	public void FUnknownSizeExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print("jmi_array_size(");
+		AbstractFVariable fv = (AbstractFVariable) getVariable();
+		str.print(fv.name_C());
+		str.print(", ");
+		str.print(getDim());
+		str.print(")");
+	}
+	
 	public void FExp.prettyPrintSize_C(Printer p, PrintStream str, String indent, int dim) {}
 	
 	public void FIdUseExp.prettyPrintSize_C(Printer p, PrintStream str, String indent, int dim) {
@@ -1080,31 +1085,24 @@ aspect CCodeGen {
 	
 	public void FFortran77ExternalLanguage.genPostFuncCall(Printer p, PrintStream str, String indent, FExternalStmt stmt) {
 		for (FExp arg: stmt.getArgs()) {
-			// We need to transpose (before, after, or both) if we have >2 dimensions
+			// We need to transpose (before, after, or both) if we have >=2 dimensions
 			if (arg.ndims() > 1) {			
 				
 				// check if array is output
 				if (arg instanceof FIdUseExp && ((FIdUseExp)arg).myFV() instanceof FFunctionVariable) {
 					FIdUseExp fid = (FIdUseExp)arg;
 					FFunctionVariable ffv = (FFunctionVariable)fid.myFV();
-					
+
 					if (ffv.isOutput()) {
 						String tempName = arg.tempName_C();
 						// is output array...
 						// ...then perform transformation
 						str.print(indent + "jmi_transpose_matrix(");
-						p.print(arg, str, indent);
-						str.print(", ");
+						str.print(tempName);
+						str.print(", " + tempName + "->var" + ", ");
 						p.print(arg, str, indent);
 						str.print("->var");
-						str.print(", " + tempName + "->var");
 						str.print(");\n");
-						
-						// copy result in temp array to output array
-						str.print(indent);
-						p.print(arg, str, indent);
-						str.print("->var = ");
-						str.print(tempName + "->var;\n");
 					}
 				}
 			}			
@@ -1152,15 +1150,14 @@ aspect CCodeGen {
 					FIdUseExp fid = (FIdUseExp)arg;
 					FFunctionVariable ffv = (FFunctionVariable)fid.myFV();
 					
-					if (ffv.isInput() && arg.ndims() > 1) {
-						// if is input argument and dim > 1 - use temp array (which has been transposed)
+					if (arg.ndims() > 1) {
+						// if dim > 1 - use temp array (which has been transposed if is input)
 						str.print(arg.tempName_C() + "->var");
-						
 					} else {
-						// array has dim <= 1 or is output argument = use "real" array (perform the transpose after the function call)
+						// array has dim <= 1
 						p.print(arg, str, indent);
 						str.print("->var");
-					}
+					}	
 				}
 				
 			} else {
