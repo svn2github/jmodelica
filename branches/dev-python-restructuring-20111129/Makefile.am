@@ -20,6 +20,9 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = JMI/src ThirdParty/Blas ThirdParty/Lapack
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
+jmodelica_install_dir=$(abs_builddir)/JModelica_install
+pyfmi_install_dir=$(abs_builddir)/PyFMI_install
+pyjmi_install_dir=$(abs_builddir)/PyJMI_install
 
 bindistdir=JModelica.org-$(VERSION)-bin
 
@@ -42,21 +45,22 @@ if !WITH_SUPERLU
 	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
 endif
 endif
+
+	cd $(abs_top_srcdir)/Python/src; \
+	python setup_jmodelica.py install --prefix=$(jmodelica_install_dir); \
+	rm -rf build
+
+	cd $(abs_top_srcdir)/Python/src; \
+	python setup_pyfmi.py install --prefix=$(pyfmi_install_dir); \
+	rm -rf build
+
+	cd $(abs_top_srcdir)/Python/src; \
+	python setup_pyjmi.py install --prefix=$(pyjmi_install_dir); \
+	rm -rf build
+
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
 	mkdir -p $(abs_builddir)/Options
 	$(abs_top_srcdir)/run_java.sh org.jmodelica.util.OptionRegistry $(abs_builddir)/Options/options.xml
-	mkdir -p $(abs_builddir)/build_tmp
-	$(CC) -c -fPIC $(abs_top_srcdir)/Python/util/FMILogger.c -o $(abs_builddir)/build_tmp/FMILogger.o
-	case $(build) in \
-	*-cygwin*) \
-	$(CC) -shared -Wl -o $(abs_builddir)/build_tmp/FMILogger.dll $(abs_builddir)/build_tmp/FMILogger.o ;; \
-  	*-mingw*) \
-	$(CC) -shared -Wl -o $(abs_builddir)/build_tmp/FMILogger.dll $(abs_builddir)/build_tmp/FMILogger.o ;; \
-  	*-apple*) \
-	$(CC) -dynamiclib -Wl -o $(abs_builddir)/build_tmp/FMILogger.dylib $(abs_builddir)/build_tmp/FMILogger.o ;; \
-  	*) \
-	$(CC) -shared -Wl,-soname,libFMILogger.so.1 -o $(abs_builddir)/build_tmp/FMILogger.so $(abs_builddir)/build_tmp/FMILogger.o ;; \
-	esac
 
 install-exec-local:
 if HAVE_ANT
@@ -88,7 +92,7 @@ endif
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python
 if WITH_SUNDIALS
-	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 Lib; do \
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 	if [ -e $(assimulo_install_dir)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(assimulo_install_dir)/$${pkgdir}/site-packages/; \
@@ -96,6 +100,31 @@ if WITH_SUNDIALS
 	fi; \
 	done
 endif 
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
+	if [ -e $(jmodelica_install_dir)/$${pkgdir}/site-packages/ ]; \
+	then \
+	cd $(jmodelica_install_dir)/$${pkgdir}/site-packages/; \
+	find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	fi; \
+	done
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
+	if [ -e $(pyjmi_install_dir)/$${pkgdir}/site-packages/ ]; \
+	then \
+	cd $(pyjmi_install_dir)/$${pkgdir}/site-packages/; \
+	find pyjmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	fi; \
+	done
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
+	if [ -e $(pyfmi_install_dir)/$${pkgdir}/site-packages/ ]; \
+	then \
+	cd $(pyfmi_install_dir)/$${pkgdir}/site-packages/; \
+	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	fi; \
+	done
+	cd $(abs_top_srcdir)/Python/src/; \
+	mkdir -p $(DESTDIR)$(prefix)/Python/tests; \
+	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests
+
 	mkdir -p $(DESTDIR)$(prefix)/bin
 	[ -e $(DESTDIR)$(prefix)/bin/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/bin/jm_python.sh
 	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
@@ -130,17 +159,6 @@ endif
 	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
 	cp jm_tests $(DESTDIR)$(prefix)/jm_tests
 	chmod ugo+x $(DESTDIR)$(prefix)/jm_tests
-	mkdir -p $(DESTDIR)$(prefix)/Python/util
-	case $(build) in \
-	*-cygwin*) \
-	cp  $(abs_builddir)/build_tmp/FMILogger.dll $(DESTDIR)$(prefix)/Python/util/ ;; \
-  	*-mingw*) \
-	cp  $(abs_builddir)/build_tmp/FMILogger.dll $(DESTDIR)$(prefix)/Python/util/ ;; \
-  	*-apple*) \
-	cp  $(abs_builddir)/build_tmp/FMILogger.dylib $(DESTDIR)$(prefix)/Python/util/ ;; \
-  	*) \
-	cp  $(abs_builddir)/build_tmp/FMILogger.so $(DESTDIR)$(prefix)/Python/util/ ;; \
-	esac
 
 
 bindistdir: install
@@ -190,14 +208,23 @@ bindist: bindistdir
 test: install
 	$(prefix)/jm_tests -i
 
-clean-local: clean-frontends clean-assimulo
+clean-local: clean-frontends clean-python-packages
 
-clean-assimulo:
+clean-python-packages:
 if WITH_SUNDIALS
 	cd $(abs_top_srcdir)/Assimulo; \
 	python setup_source.py clean --all --sundials-home=$(SUNDIALS_HOME) 
 	rm -rf $(assimulo_install_dir)
 endif
+	cd $(abs_top_srcdir)/Python/src; \
+	python setup_jmodelica.py clean --all 
+	rm -rf $(jmodelica_install_dir)
+	cd $(abs_top_srcdir)/Python/src; \
+	python setup_pyfmi.py clean --all 
+	rm -rf $(pyfmi_install_dir)
+	cd $(abs_top_srcdir)/Python/src; \
+	python setup_pyjmi.py clean --all 
+	rm -rf $(pyjmi_install_dir)
 
 clean-frontends:
 if HAVE_ANT

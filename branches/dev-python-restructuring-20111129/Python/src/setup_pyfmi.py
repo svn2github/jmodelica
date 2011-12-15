@@ -79,6 +79,8 @@ else:
 path_log_src = "pyfmi"+O.path.sep+"util" + O.path.sep + "FMILogger.c"
 path_log_dest = "pyfmi"+O.path.sep+"util" + O.path.sep + "FMILogger" + suffix
 
+print "**** " + path_log_src
+
 O.system("gcc -fPIC "+path_log_src+" -shared -o "+path_log_dest)
 
 setup(name=NAME,
