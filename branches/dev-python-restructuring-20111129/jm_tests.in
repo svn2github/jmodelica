@@ -86,7 +86,7 @@ function optimica_tests() {
   junit_test Optimica
 }
 
-TESTS_DIR="${JMODELICA_HOME}/Python/jmodelica/tests"
+TESTS_DIR="${JMODELICA_HOME}/Python/tests"
 function find_python_tests() {
   if [[ "${TESTS}" == "" ]]; then
     TESTS="$(find ${TESTS_DIR} -name \*.py | grep test_)"
@@ -109,7 +109,7 @@ function python_tests() {
         find_python_tests
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
-          echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'
+          echo ${TEST} | sed -e 's!^.*tests.!Running !'
           nosetests ${TAGS} -v ${TEST}
         done
       fi
@@ -134,7 +134,7 @@ function python_tests() {
         find_python_tests
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
-          echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'
+          echo ${TEST} | sed -e 's!^.*tests.!Running !'
           nosetests ${TAGS} -v ${TEST} 2>&1 \
 	    | egrep -v '^Exception .* ignored$' \
 	    | grep -B1 -A500 -e${PATTERN} \
