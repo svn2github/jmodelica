@@ -791,7 +791,7 @@ class LocalDAECollocator(CasADiCollocator):
         der_vals_k = casadi.ssym("der_vals[k]", self.model.get_n_x(),
                                      self.n_cp + 1)
         h_i = casadi.SX("h_i")
-        collocation['coll_der'] = casadi.sum(x_i * der_vals_k, 1) / h_i
+        collocation['coll_der'] = casadi.sumCols(x_i * der_vals_k) / h_i
         
         collocation['x_i'] = x_i
         collocation['der_vals_k'] = der_vals_k
@@ -1143,7 +1143,7 @@ class LocalDAECollocator(CasADiCollocator):
             dx_i_k = casadi.ssym("dx_i_k", self.model.get_n_x())
             coll_eq = casadi.SXFunction(
                     [x_i, der_vals_k, h_i, dx_i_k],
-                    [casadi.sum(x_i * der_vals_k, 1) - h_i * dx_i_k])
+                    [casadi.sumCols(x_i * der_vals_k) - h_i * dx_i_k])
             coll_eq.init()
             dae_F = self.model.get_dae_F()
         init_F0 = self.model.get_init_F0()
@@ -1347,7 +1347,7 @@ class LocalDAECollocator(CasADiCollocator):
                 
         # Element length constraints
         if self.hs == "free":
-            h_constr = casadi.sum(self.h[1:]) - 1
+            h_constr = casadi.sumRows(self.h[1:]) - 1
             c_e = casadi.vertcat([c_e, h_constr])
         
         # Path constraints
