@@ -47,6 +47,6 @@ setup(name=NAME,
       download_url=DOWNLOAD_URL,
       platforms=PLATFORMS,
       classifiers=CLASSIFIERS,
-      package_dir = {'jmodelica':'jmodelica'},
-      packages=['jmodelica'],
+      package_dir = {'jmodelica':'jmodelica','jmodelica.common':'common'},
+      packages=['jmodelica','jmodelica.common','jmodelica.common.plotting'],
       )
