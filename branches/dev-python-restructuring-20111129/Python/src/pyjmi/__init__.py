@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-The JModelica.org Python package <http:/www.jmodelica.org/>
+The JModelica.org Python package for working with simulation and optimization of
+JMUs <http:/www.jmodelica.org/>
 """
 
 __all__ = ['common', 'initialization', 'optimization', 'simulation', 'examples', 'casadi_interface', 'linearization', 'jmi', 'jmi_algorithm_drivers']
@@ -36,7 +37,7 @@ except KeyError, IOError:
 # set version
 f= None
 try:
-    _fpath=os.path.join(os.environ['JMODELICA_HOME'],'version.txt')    
+    _fpath=os.path.join(os.environ['JMODELICA_HOME'],'version.txt')
     f = open(_fpath)
     __version__=f.readline().strip()
 except IOError:
@@ -68,7 +69,7 @@ except:
 def check_packages():
     import sys, time
     le=30
-    startstr = "Performing JModelica package check"
+    startstr = "Performing pyjmi package check"
     sys.stdout.write("\n")
     sys.stdout.write(startstr+" \n")
     sys.stdout.write("="*len(startstr))
@@ -94,7 +95,7 @@ def check_packages():
     #check jmodelica version
     jmversion = jmodelica.__version__
     sys.stdout.write(
-        "%s %s" % ("JModelica version:".ljust(le,'.'),jmversion.ljust(le)))
+        "%s %s" % ("pyjmi version:".ljust(le,'.'),jmversion.ljust(le)))
     sys.stdout.write("\n")
     sys.stdout.flush()
     time.sleep(0.25)

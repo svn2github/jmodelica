@@ -19,17 +19,3 @@ The JModelica.org Python package <http:/www.jmodelica.org/>
 """
 
 __all__ = ['algorithm_drivers', 'core', 'io', 'xmlparser', 'plotting']
-
-__version__=''
-
-import os
-import logging
-
-try:
-    _p = os.environ['JMODELICA_HOME']
-    if not os.path.exists(_p):
-        raise IOError
-except KeyError, IOError:
-    raise EnvironmentError('The environment variable JMODELICA_HOME is not set \
-        or points to a non-existing location.')
-
