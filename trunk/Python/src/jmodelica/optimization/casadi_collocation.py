@@ -751,7 +751,7 @@ class LocalDAECollocator(CasADiCollocator):
             if self.hs is None:
                 self.h += self.n_e * [1. / self.n_e]
             else:
-                self.h += self.hs
+                self.h += list(self.hs)
         
         # Define polynomial for representation of solutions
         if self.discr == "LG":
@@ -818,6 +818,7 @@ class LocalDAECollocator(CasADiCollocator):
         if self.eliminate_der_var:
             n_xx += n_var['x'] # dx_1_0
         if self.blocking_factors is not None:
+            self.blocking_factors = list(self.blocking_factors)
             n_xx += len(self.blocking_factors) * self.model.get_n_u()
         if not self.eliminate_cont_var:
             n_xx += (self.n_e - 1) * n_var['x']

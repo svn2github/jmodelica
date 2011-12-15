@@ -2007,7 +2007,8 @@ class LocalDAECollocationAlg(AlgorithmBase):
         defaults = self.get_default_options()
         
         # Check validity of element lengths
-        if isinstance(self.hs, list):
+        if self.hs != "free" and self.hs is not None:
+            self.hs = list(self.hs)
             if len(self.hs) != self.n_e:
                 raise ValueError("The number of specified element lengths " +
                                  "must be equal to the number of elements.")
@@ -2144,13 +2145,13 @@ class LocalDAECollocationAlgOptions(OptionBase):
         hs --
             Element lengths.
             
-            Possible values: None, list of floats and "free"
+            Possible values: None, iterable of floats and "free"
             
             None: The element lengths are uniformly distributed.
             
-            list of floats: Component i of the list specifies the length of
-            element i. The lengths must be normalized in the sense that the sum
-            of all lengths must be equal to 1.
+            iterable of floats: Component i of the iterable specifies the
+            length of element i. The lengths must be normalized in the sense
+            that the sum of all lengths must be equal to 1.
             
             "free": The element lengths become optimization variables and are
             optimized according to the algorithm option
@@ -2158,7 +2159,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
             WARNING: This option is very experimental and will not always give
             desirable results.
             
-            Type: None, list of floats or string
+            Type: None, iterable of floats or string
             Default: None
         
         free_element_lengths_data --
@@ -2234,16 +2235,16 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Default: 20
         
         blocking_factors --
-            The list of blocking factors, where each element corresponds to the
-            number of elements for which all the control profiles should be
+            The iterable of blocking factors, where each element corresponds to
+            the number of elements for which all the control profiles should be
             constant. For example, if blocking_factors == [2, 1, 5], then
             u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum of all elements
-            in the list must be the same as the number of elements.
+            in the iterable must be the same as the number of elements.
             
             If blocking_factors is None, then the usual collocation polynomials
             are instead used to represent the controls.
             
-            Type: None or list of ints
+            Type: None or iterable of ints
             Default: None
         
         quadrature_constraint --

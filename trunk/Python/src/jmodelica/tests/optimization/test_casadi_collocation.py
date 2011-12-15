@@ -268,8 +268,8 @@ class TestLocalDAECollocator:
         model = self.model_vdp_bounds_mayer
         opts = model.optimize_options(self.algorithm)
         opts['n_e'] = 23
-        opts['hs'] = (4 * [0.01] + 2 * [0.05] + 10 * [0.02] + 5 * [0.02] + 
-                     2 * [0.28])
+        opts['hs'] = N.array(4 * [0.01] + 2 * [0.05] + 10 * [0.02] +
+                             5 * [0.02] + 2 * [0.28])
         res = model.optimize(self.algorithm, opts)
         assert_results(res, 3.174936706809e0, 3.707273799325e-1)
     
@@ -399,7 +399,7 @@ class TestLocalDAECollocator:
         opts = model.optimize_options(self.algorithm)
         opts['n_e'] = 40
         opts['n_cp'] = 3
-        opts['blocking_factors'] = opts['n_e'] * [1]
+        opts['blocking_factors'] = N.array(opts['n_e'] * [1])
         res = model.optimize(self.algorithm, opts)
         assert_results(res, 4.6794608506686e0, 3.23598449250e-1,
                        cost_rtol=8e-2, u_norm_rtol=3e-2)
