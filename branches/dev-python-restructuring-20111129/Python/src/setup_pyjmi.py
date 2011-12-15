@@ -46,4 +46,8 @@ setup(name=NAME,
       url=URL,
       download_url=DOWNLOAD_URL,
       platforms=PLATFORMS,
-      classifiers=CLASSIFIERS)
+      classifiers=CLASSIFIERS,
+      package_dir = {'pyjmi':'pyjmi','pyjmi.common':'common'},
+      packages=['pyjmi','pyjmi.simulation','pyjmi.optimization','pyjmi.initialization','pyjmi.examples','pyjmi.common','pyjmi.common.plotting'],
+      package_data = {'pyjmi':['examples'+O.path.sep+'files'+O.path.sep+'*.*']},
+      )

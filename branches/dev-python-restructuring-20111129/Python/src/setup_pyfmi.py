@@ -22,6 +22,7 @@ import distutils
 import os as O
 from numpy.distutils.misc_util import Configuration
 from numpy.distutils.core import setup
+from numpy.distutils.command.build_clib import build_clib
 
 NAME = "PyFMI"
 AUTHOR = "Modelon AB"
@@ -57,16 +58,14 @@ simulation package Assimulo adds industrial grade simulation
 capabilities of FMUs to Python.
 """
 
-#Hack for compiling a C-file which is not an Extension
-#distutils.log.set_verbosity(1)
 
-#comp = new_compiler(compiler="mingw32",verbose=1)
-#comp.verbose=10
-#obj = comp.compile(['pyfmi'+O.path.sep+'util'+O.path.sep+'FMILogger.c'])
-#comp.link(comp.SHARED_LIBRARY,obj,"FMILogger")
+class my_cbuild(build_clib):
+    def build_a_library(self, build_info, lib_name, libraries):
+        self.compiler.archiver = ["gcc", "-shared", "-Wl", "-o"]
+        return build_clib.build_a_library(self, build_info, lib_name, libraries)
 
 config = Configuration()
-config.add_installed_library("FMILogger",sources=['pyfmi'+O.path.sep+'util'+O.path.sep+'FMILogger.c'],install_dir='pyfmi')
+config.add_installed_library("FMILogger",sources=['pyfmi'+O.path.sep+'util'+O.path.sep+'FMILogger.c'],install_dir='pyfmi'+O.path.sep+'util')
 
 setup(name=NAME,
       version=VERSION,
@@ -79,10 +78,9 @@ setup(name=NAME,
       download_url=DOWNLOAD_URL,
       platforms=PLATFORMS,
       classifiers=CLASSIFIERS,
-      #cmdclass={"build_ext":build_clib},
+      cmdclass={"build_clib":my_cbuild},
       package_dir = {'pyfmi':'pyfmi','pyfmi.common':'common'},
       packages=['pyfmi','pyfmi.simulation','pyfmi.examples','pyfmi.common','pyfmi.common.plotting'],
       package_data = {'pyfmi':['examples'+O.path.sep+'files'+O.path.sep+'FMUs'+O.path.sep+'*']},
       **config.todict()
       )
-#ext_modules=[Extension('pyfmi.util', ['pyfmi'+O.path.sep+'util'+O.path.sep+'FMILogger.c'])]

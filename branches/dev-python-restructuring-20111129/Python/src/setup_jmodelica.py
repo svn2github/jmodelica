@@ -46,4 +46,7 @@ setup(name=NAME,
       url=URL,
       download_url=DOWNLOAD_URL,
       platforms=PLATFORMS,
-      classifiers=CLASSIFIERS)
+      classifiers=CLASSIFIERS,
+      package_dir = {'jmodelica':'jmodelica'},
+      packages=['jmodelica'],
+      )
