@@ -781,18 +781,18 @@ all-local:
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
 	mkdir -p $(abs_builddir)/Options
 	$(abs_top_srcdir)/run_java.sh org.jmodelica.util.OptionRegistry $(abs_builddir)/Options/options.xml
-	mkdir -p $(abs_builddir)/build_tmp
-	$(CC) -c -fPIC $(abs_top_srcdir)/Python/util/FMILogger.c -o $(abs_builddir)/build_tmp/FMILogger.o
-	case $(build) in \
-	*-cygwin*) \
-	$(CC) -shared -Wl -o $(abs_builddir)/build_tmp/FMILogger.dll $(abs_builddir)/build_tmp/FMILogger.o ;; \
-  	*-mingw*) \
-	$(CC) -shared -Wl -o $(abs_builddir)/build_tmp/FMILogger.dll $(abs_builddir)/build_tmp/FMILogger.o ;; \
-  	*-apple*) \
-	$(CC) -dynamiclib -Wl -o $(abs_builddir)/build_tmp/FMILogger.dylib $(abs_builddir)/build_tmp/FMILogger.o ;; \
-  	*) \
-	$(CC) -shared -Wl,-soname,libFMILogger.so.1 -o $(abs_builddir)/build_tmp/FMILogger.so $(abs_builddir)/build_tmp/FMILogger.o ;; \
-	esac
+	#mkdir -p $(abs_builddir)/build_tmp
+	#$(CC) -c -fPIC $(abs_top_srcdir)/Python/util/FMILogger.c -o $(abs_builddir)/build_tmp/FMILogger.o
+	#case $(build) in \
+	#*-cygwin*) \
+	#$(CC) -shared -Wl -o $(abs_builddir)/build_tmp/FMILogger.dll $(abs_builddir)/build_tmp/FMILogger.o ;; \
+  	#*-mingw*) \
+	#$(CC) -shared -Wl -o $(abs_builddir)/build_tmp/FMILogger.dll $(abs_builddir)/build_tmp/FMILogger.o ;; \
+  	#*-apple*) \
+	#$(CC) -dynamiclib -Wl -o $(abs_builddir)/build_tmp/FMILogger.dylib $(abs_builddir)/build_tmp/FMILogger.o ;; \
+  	#*) \
+	#$(CC) -shared -Wl,-soname,libFMILogger.so.1 -o $(abs_builddir)/build_tmp/FMILogger.so $(abs_builddir)/build_tmp/FMILogger.o ;; \
+	#esac
 
 install-exec-local:
 @HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
@@ -863,16 +863,16 @@ install-exec-local:
 	cp jm_tests $(DESTDIR)$(prefix)/jm_tests
 	chmod ugo+x $(DESTDIR)$(prefix)/jm_tests
 	mkdir -p $(DESTDIR)$(prefix)/Python/util
-	case $(build) in \
-	*-cygwin*) \
-	cp  $(abs_builddir)/build_tmp/FMILogger.dll $(DESTDIR)$(prefix)/Python/util/ ;; \
-  	*-mingw*) \
-	cp  $(abs_builddir)/build_tmp/FMILogger.dll $(DESTDIR)$(prefix)/Python/util/ ;; \
-  	*-apple*) \
-	cp  $(abs_builddir)/build_tmp/FMILogger.dylib $(DESTDIR)$(prefix)/Python/util/ ;; \
-  	*) \
-	cp  $(abs_builddir)/build_tmp/FMILogger.so $(DESTDIR)$(prefix)/Python/util/ ;; \
-	esac
+	#case $(build) in \
+	#*-cygwin*) \
+	#cp  $(abs_builddir)/build_tmp/FMILogger.dll $(DESTDIR)$(prefix)/Python/util/ ;; \
+  	#*-mingw*) \
+	#cp  $(abs_builddir)/build_tmp/FMILogger.dll $(DESTDIR)$(prefix)/Python/util/ ;; \
+  	#*-apple*) \
+	#cp  $(abs_builddir)/build_tmp/FMILogger.dylib $(DESTDIR)$(prefix)/Python/util/ ;; \
+  	#*) \
+	#cp  $(abs_builddir)/build_tmp/FMILogger.so $(DESTDIR)$(prefix)/Python/util/ ;; \
+	#esac
 
 bindistdir: install
 	rm -rf $(bindistdir)
