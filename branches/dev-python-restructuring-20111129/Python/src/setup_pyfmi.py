@@ -23,6 +23,7 @@ import os as O
 from numpy.distutils.misc_util import Configuration
 from numpy.distutils.core import setup
 from numpy.distutils.command.build_clib import build_clib
+import sys
 
 NAME = "PyFMI"
 AUTHOR = "Modelon AB"
@@ -59,13 +60,26 @@ capabilities of FMUs to Python.
 """
 
 
-class my_cbuild(build_clib):
-    def build_a_library(self, build_info, lib_name, libraries):
-        self.compiler.archiver = ["gcc", "-shared", "-Wl", "-o"]
-        return build_clib.build_a_library(self, build_info, lib_name, libraries)
+#class my_cbuild(build_clib):
+#    def build_a_library(self, build_info, lib_name, libraries):
+#        self.compiler.archiver = ["gcc", "-shared", "-Wl", "-o"]
+#        return build_clib.build_a_library(self, build_info, lib_name, libraries)
 
-config = Configuration()
-config.add_installed_library("FMILogger",sources=['pyfmi'+O.path.sep+'util'+O.path.sep+'FMILogger.c'],install_dir='pyfmi'+O.path.sep+'util')
+#config = Configuration()
+#config.add_installed_library("FMILogger",sources=['pyfmi'+O.path.sep+'util'+O.path.sep+'FMILogger.c'],install_dir='pyfmi'+O.path.sep+'util')
+
+#Load the helper function
+if sys.platform == 'win32':
+    suffix = '.dll'
+elif sys.platform == 'darwin':
+    suffix = '.dylib'
+else:
+    suffix = '.so'
+
+path_log_src = "pyfmi"+O.path.sep+"util" + O.path.sep + "FMILogger.c"
+path_log_dest = "pyfmi"+O.path.sep+"util" + O.path.sep + "FMILogger" + suffix
+
+O.system("gcc "+path_log_src+" -shared -o "+path_log_dest)
 
 setup(name=NAME,
       version=VERSION,
@@ -78,9 +92,8 @@ setup(name=NAME,
       download_url=DOWNLOAD_URL,
       platforms=PLATFORMS,
       classifiers=CLASSIFIERS,
-      cmdclass={"build_clib":my_cbuild},
+      #cmdclass={"build_clib":my_cbuild},
       package_dir = {'pyfmi':'pyfmi','pyfmi.common':'common'},
       packages=['pyfmi','pyfmi.simulation','pyfmi.examples','pyfmi.common','pyfmi.common.plotting'],
-      package_data = {'pyfmi':['examples'+O.path.sep+'files'+O.path.sep+'FMUs'+O.path.sep+'*']},
-      **config.todict()
+      package_data = {'pyfmi':['examples'+O.path.sep+'files'+O.path.sep+'FMUs'+O.path.sep+'*','util'+O.path.sep+'*']}
       )

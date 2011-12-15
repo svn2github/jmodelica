@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from distutils.core import setup, Extension
+import os as O
 
 NAME = "PyJMI"
 AUTHOR = "Modelon AB"
@@ -35,6 +36,7 @@ LONG_DESCRIPTION = """
 
 """
 
+sep = O.path.sep
 
 setup(name=NAME,
       version=VERSION,
@@ -49,5 +51,12 @@ setup(name=NAME,
       classifiers=CLASSIFIERS,
       package_dir = {'pyjmi':'pyjmi','pyjmi.common':'common'},
       packages=['pyjmi','pyjmi.simulation','pyjmi.optimization','pyjmi.initialization','pyjmi.examples','pyjmi.common','pyjmi.common.plotting'],
-      package_data = {'pyjmi':['examples'+O.path.sep+'files'+O.path.sep+'*.*']},
+      package_data = {'pyjmi':['examples'+sep+'files'+sep+'*.*','examples'+sep+'files'+sep+'DISTLib backup'+sep+'*.*',
+                               'examples'+sep+'files'+sep+'Resources'+sep+'Include'+sep+'*.*','examples'+sep+'files'+sep+'Resources'+sep+'src'+sep+'*.*',
+                               'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'darwin32'+sep+'*.*',
+                               'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'darwin64'+sep+'*.*',
+                               'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'linux32'+sep+'*.*',
+                               'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'linux64'+sep+'*.*',
+                               'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'win32'+sep+'*.*',
+                               'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'win64'+sep+'*.*']},
       )
