@@ -157,7 +157,7 @@ model: $(OBJS)
 else
 model: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_NOCPPAD) $(EXT_INC_DIRS) $(EXTERNAL_LIBS)
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_NOCPPAD) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)
 	$(RM) $(OBJS)
 endif
 
@@ -169,7 +169,7 @@ model_fmume:
 
 model_fmume_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMUME) $(EXT_INC_DIRS) $(EXTERNAL_LIBS)
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMUME) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)
 	$(RM) $(OBJS)
 
 model_fmucs:
@@ -177,7 +177,7 @@ model_fmucs:
 
 model_fmucs_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMICS) $(EXT_INC_DIRS) $(EXTERNAL_LIBS)
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMICS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)
 	$(RM) $(OBJS)
 
 algorithms: $(OBJS)
