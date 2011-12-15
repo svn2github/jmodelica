@@ -36,7 +36,7 @@ try:
     from pyfmi.common.core import TrajectoryLinearInterpolation
     from pyfmi.common.core import TrajectoryUserFunction
     from assimulo.explicit_ode import *
-    from assimulo import explicit_ode as expl_ode
+    import assimulo.solvers as solvers
     assimulo_present = True
 except:
     logging.warning(
@@ -125,6 +125,7 @@ class AssimuloFMIAlgOptions(OptionBase):
             'write_scaled_result':False,
             'result_file_name':'',
             'with_jacobian':False,
+            'continuous_output':True,
             'CVode_options':{'discr':'BDF','iter':'Newton',
                              'atol':"Default",'rtol':"Default",},
             'Radau5_options':{'atol':"Default",'rtol':"Default"}
@@ -212,13 +213,15 @@ class AssimuloFMIAlg(AlgorithmBase):
             self.model.initialize(relativeTolerance=self.solver_options['rtol'])
 
         if not self.input:
-            self.probl = FMIODE(self.model, result_file_name=self.result_file_name,with_jacobian=self.with_jacobian)
+            self.probl = FMIODE(self.model, result_file_name=self.result_file_name,with_jacobian=self.with_jacobian,
+                        t0=self.start_time)
         else:
             self.probl = FMIODE(
-                self.model, input_traj, result_file_name=self.result_file_name,with_jacobian=self.with_jacobian)
+                self.model, input_traj, result_file_name=self.result_file_name,with_jacobian=self.with_jacobian,
+                t0=self.start_time)
         
         # instantiate solver and set options
-        self.simulator = self.solver(self.probl, t0=self.start_time)
+        self.simulator = self.solver(self.probl)
         self._set_solver_options()
     
     def _set_options(self):
@@ -232,6 +235,8 @@ class AssimuloFMIAlg(AlgorithmBase):
 
         self.with_jacobian = self.options['with_jacobian']
         
+        
+        
         # result file name
         if self.options['result_file_name'] == '':
             self.result_file_name = self.model.get_name()+'_result.txt'
@@ -240,14 +245,15 @@ class AssimuloFMIAlg(AlgorithmBase):
         
         # solver
         solver = self.options['solver']
-        if hasattr(expl_ode, solver):
-            self.solver = getattr(expl_ode, solver)
+        if hasattr(solvers, solver):
+            self.solver = getattr(solvers, solver)
         else:
             raise InvalidAlgorithmOptionException(
                 "The solver: "+solver+ " is unknown.")
         
         # solver options
         self.solver_options = self.options[solver+'_options']
+        self.solver_options["continuous_output"] = self.options['continuous_output']
         
         #Check relative tolerance
         #If the tolerances are not set specifically, they are set 
@@ -283,6 +289,8 @@ class AssimuloFMIAlg(AlgorithmBase):
                 setattr(self.probl, k, v)
                 continue
             setattr(self.simulator, k, v)
+            
+        
                 
     def solve(self):
         """ 

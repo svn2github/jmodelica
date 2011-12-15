@@ -219,7 +219,7 @@ class FMUModel(BaseModel):
         self._free.argtypes = [C.c_void_p]
         
         #Get the path to the helper C function, logger
-        p = os.path.join(pyfmi.environ['JMODELICA_HOME'],'Python','pyfmi','util')
+        p = os.path.join(os.path.dirname(os.path.abspath(__file__)),'util')
         
         #Load the helper function
         if sys.platform == 'win32':
@@ -228,7 +228,8 @@ class FMUModel(BaseModel):
             suffix = '.dylib'
         else:
             suffix = '.so'
-        cFMILogger = C.CDLL(p+os.sep+'FMILogger'+suffix)        
+        cFMILogger = C.CDLL(p+os.sep+'libFMILogger.a')#+suffix)        
+        #cFMILogger = C.CDLL(p+os.sep+'libFMILogger'+suffix)        
         
         self._fmiHelperLogger = cFMILogger.pythonCallbacks
         
