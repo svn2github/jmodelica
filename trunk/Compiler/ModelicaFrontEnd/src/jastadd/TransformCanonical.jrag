@@ -762,10 +762,6 @@ aspect TransformCanonical {
 		}
 		
 		public ArrayList<FVariable> activeVariables() {
-			return null;
-		}	
-		
-		public ArrayList<FVariable> iterationVariables() {
 			ArrayList<FVariable> s = new ArrayList<FVariable>();
 			for(MatchingPair mp: solvedPairs){
 				s.add(mp.getFVariable());
