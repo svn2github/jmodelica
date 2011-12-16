@@ -491,9 +491,8 @@ aspect InstanceErrorCheck {
 	protected boolean BaseNode.errorChecked = false;
 
 	public void ASTNode.resetCollectErrors() {
-		int n = getNumChildNoTransform();
-		for (int i = 0; i < n; i++)
-			getChildNoTransform(i).resetCollectErrors();
+		for (ASTNode n : noTransform())
+			n.resetCollectErrors();
 	}
 	
 	public static void ASTNode.resetCollectErrorsOn(ASTNode n) {

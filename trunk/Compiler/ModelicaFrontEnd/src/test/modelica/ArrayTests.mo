@@ -6489,9 +6489,9 @@ equation
  x = ArrayTests.Other.ArrayConst3.f(1);
 
  function ArrayTests.Other.ArrayConst3.f
+  Real[2] testConst;
   input Real i;
   output Real o;
-  Real[2] testConst;
  algorithm
   testConst[1] := 1;
   testConst[2] := 2;

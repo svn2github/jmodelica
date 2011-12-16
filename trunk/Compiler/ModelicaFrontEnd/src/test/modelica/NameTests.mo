@@ -1538,9 +1538,9 @@ fclass NameTests.ConstantLookup32
  Real y = NameTests.ConstantLookup32.f(j);
 
  function NameTests.ConstantLookup32.f
+  NameTests.ConstantLookup32.A[2] d := {NameTests.ConstantLookup32.A(3),NameTests.ConstantLookup32.A(4)};
   input Integer i;
   output Real x;
-  NameTests.ConstantLookup32.A[2] d := {NameTests.ConstantLookup32.A(3),NameTests.ConstantLookup32.A(4)};
  algorithm
   x := d[i].b;
   return;
@@ -1583,9 +1583,9 @@ fclass NameTests.ConstantLookup33
  Real y = NameTests.ConstantLookup33.f(j);
 
  function NameTests.ConstantLookup33.f
+  NameTests.ConstantLookup33.D.A[2] d := {NameTests.ConstantLookup33.C.E.A(3),NameTests.ConstantLookup33.C.E.A(4)};
   input Integer i;
   output Real x;
-  NameTests.ConstantLookup33.D.A[2] d := {NameTests.ConstantLookup33.C.E.A(3),NameTests.ConstantLookup33.C.E.A(4)};
  algorithm
   x := d[i].b;
   return;

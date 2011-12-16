@@ -1384,11 +1384,11 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+         for (InstExtends ie : getInstExtendss())
+        	 l.addAll(ie.myInputs());
          for (InstComponentDecl icd : getInstComponentDecls())
              if (icd.isInput())
                  l.add(icd);
-         for (InstExtends ie : getInstExtendss())
-        	 l.addAll(ie.myInputs());
          return l;
      }
      
@@ -1397,11 +1397,11 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myNonInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+         for (InstExtends ie : getInstExtendss())
+        	 l.addAll(ie.myNonInputs());
          for (InstComponentDecl icd : getInstComponentDecls())
              if (!icd.isInput())
                  l.add(icd);
-         for (InstExtends ie : getInstExtendss())
-        	 l.addAll(ie.myNonInputs());
          return l;
      }
      
@@ -1410,11 +1410,11 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myOutputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+         for (InstExtends ie : getInstExtendss())
+        	 l.addAll(ie.myOutputs());
          for (InstComponentDecl icd : getInstComponentDecls())
              if (icd.isOutput())
                  l.add(icd);
-         for (InstExtends ie : getInstExtendss())
-        	 l.addAll(ie.myOutputs());
          return l;
      }
      
@@ -2093,6 +2093,43 @@ aspect GeneralHelpers {
 	inh boolean ASTNode.isLast();
 	eq List.getChild(int i).isLast()     = i == getNumChild() - 1;
 	eq ASTNode.getChild(int i).isLast()  = true;
+	
+	public class ASTNode {
+		
+		/**
+		 * Used to iterate over the children of an AST node without triggering rewrites.
+		 */
+		public Iterable<T> noTransform() { 
+			return new Iterable<T>() {
+				public Iterator<T> iterator() {
+					return new NoTransformIterator();
+				}
+			};
+		}
+		
+		/**
+		 * Used to iterate over the children of an AST node without triggering rewrites.
+		 */
+		public class NoTransformIterator implements Iterator<T> {
+			
+			private int i = 0;
+			private int n = getNumChildNoTransform();
+			
+			public boolean hasNext() {
+				return i < n;
+			}
+			
+			public T next() {
+				return getChildNoTransform(i++);
+			}
+			
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+			
+		}
+		
+	}
 	
 	/**
 	 * \brief Generic iterator over constant array.

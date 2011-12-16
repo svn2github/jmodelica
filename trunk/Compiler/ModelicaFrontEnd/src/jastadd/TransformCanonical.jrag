@@ -3930,24 +3930,24 @@ aspect FlushFClass {
 	public void ASTNode.flushAllRecursiveClearFinal() {
 		flushAll();
 		//is$Final = false;
-		for (int i=0;i<getNumChildNoTransform();i++) {
-			getChildNoTransform(i).flushAllRecursiveClearFinal();
+		for (ASTNode n : noTransform()) {
+			n.flushAllRecursiveClearFinal();
 		}
 	}
 	
 	public void FIdUseExp.flushAllRecursiveClearFinal() {
 		flushAll();
 		is$Final = false;
-		for (int i=0;i<getNumChildNoTransform();i++) {
-			getChildNoTransform(i).flushAllRecursiveClearFinal();
+		for (ASTNode n : noTransform()) {
+			n.flushAllRecursiveClearFinal();
 		}
 	}
 	
 	public void FDerExp.flushAllRecursiveClearFinal() {
 		flushAll();
 		is$Final = false;
-		for (int i=0;i<getNumChildNoTransform();i++) {
-			getChildNoTransform(i).flushAllRecursiveClearFinal();
+		for (ASTNode n : noTransform()) {
+			n.flushAllRecursiveClearFinal();
 		}
 	}
 
@@ -3957,8 +3957,8 @@ aspect FlushFClass {
 	 */
 	public void ASTNode.flushAllRecursive() {
 		flushAll();
-		for (int i=0;i<getNumChildNoTransform();i++) {
-			getChildNoTransform(i).flushAllRecursive();
+		for (ASTNode n : noTransform()) {
+			n.flushAllRecursive();
 		}
 	}
 	

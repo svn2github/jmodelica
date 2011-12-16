@@ -166,6 +166,8 @@ aspect Flattening {
 	private void InstBaseClassDecl.addLocalFunctionConstants(FFunctionDecl ffd, FClass fc) {
 		Set<InstAssignable> added = new HashSet<InstAssignable>();
 		Set<InstAssignable> all = localFunctionConstantList();
+		List<FFunctionVariable> ffvs = ffd.getFFunctionVariableListNoTransform();
+		ffd.setFFunctionVariableList(new List());
 		int n = 0;
 		while (n < all.size()) {
 			n = all.size();
@@ -178,13 +180,15 @@ aspect Flattening {
 				}
 			}
 		}
+		for (FFunctionVariable ffv : ffvs.noTransform())
+			ffd.addFFunctionVariable(ffv);
 	}
 	
 	public void InstNode.flattenComponentsInFunction(FFunctionDecl ffd, FClass fc) {
-   		for (InstComponentDecl icd : getInstComponentDecls())
-			icd.flattenInFunction(ffd, fc, false, null);
    		for (InstExtends ie : getInstExtendss())
    	   		ie.flattenComponentsInFunction(ffd, fc);
+   		for (InstComponentDecl icd : getInstComponentDecls())
+			icd.flattenInFunction(ffd, fc, false, null);
 	}
 	
 	syn FAlgorithmBlock InstNode.findFunctionAlgorithm() {

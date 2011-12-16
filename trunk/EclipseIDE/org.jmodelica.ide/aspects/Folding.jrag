@@ -76,8 +76,8 @@ aspect ModelicaFolding {
         	if (pos != null)
         		list.add(pos);
         }
-        for (int i = 0; i < getNumChildNoTransform(); i++) {
-            list.addAll(getChildNoTransform(i).foldingPositions(document));
+        for (ASTNode n : noTransform()) {
+            list.addAll(n.foldingPositions(document));
         }
         return list;
     }
@@ -93,9 +93,9 @@ aspect ModelicaFolding {
         	if (pos != null)
         		list.add(pos);
         }
-		for (int i = 0; i < getNumChildNoTransform(); i++) {
-			if (!(getChildNoTransform(i) instanceof ClassDecl))
-				list.addAll(getChildNoTransform(i).foldingPositions(document));
+		for (ASTNode n : noTransform()) {
+			if (!(n instanceof ClassDecl))
+				list.addAll(n.foldingPositions(document));
 		}
 		for (ClassDecl decl : classes())
 			list.addAll(decl.foldingPositions(document));

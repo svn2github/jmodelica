@@ -428,9 +428,9 @@ equation
  ({z[1],z[2]}) = FunctionTests.FunctionFlatten9.f({3,4});
 
  function FunctionTests.FunctionFlatten9.f
+  Real[3] a;
   input Real[2] x;
   output Real[2] y;
-  Real[3] a;
  algorithm
   a[1] := 1;
   a[2] := 2;
@@ -5083,8 +5083,8 @@ equation
  x = FunctionTests.UnknownArray29.f1();
 
  function FunctionTests.UnknownArray29.f1
-  output Real y1;
   Real[3] a;
+  output Real y1;
   Real[2] temp_1;
  algorithm
   a[1] := 1;
@@ -5731,6 +5731,50 @@ end FunctionTests.ExtendFunc1;
     
     Real x = f2(1.0);
 end ExtendFunc1;
+
+
+
+model ExtendFunc2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ExtendFunc2",
+         description="Order of variables in functions when inheriting and adding constants",
+         flatModel="
+fclass FunctionTests.ExtendFunc2
+ constant Real d[2] = {1,2};
+ Real x = FunctionTests.ExtendFunc2.f2(1, 2);
+
+ function FunctionTests.ExtendFunc2.f2
+  Real[2] d := {1,2};
+  input Real a;
+  output Real b;
+  input Integer c := 2;
+  Real f := a + d[c];
+ algorithm
+  b := f;
+  return;
+ end FunctionTests.ExtendFunc2.f2;
+end FunctionTests.ExtendFunc2;
+")})));
+
+	constant Real[2] d = { 1, 2 };
+	
+    function f1
+        input Real a;
+        output Real b;
+    end f1;
+    
+    function f2
+        extends f1;
+		input Integer c = 2;
+	protected
+		Real f = a + d[c];
+    algorithm
+        b := f;
+    end f2;
+
+    Real x = f2(1);
+end ExtendFunc2;
 
 
 
