@@ -121,7 +121,7 @@ endif
 	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi; \
 	done
-	cd $(abs_top_srcdir)/Python/src/; \
+	cd $(abs_top_srcdir)/Python/src/tests/; \
 	mkdir -p $(DESTDIR)$(prefix)/Python/tests; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests
 

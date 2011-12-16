@@ -267,9 +267,6 @@ assimulo_install_dir = $(abs_builddir)/Assimulo_install
 jmodelica_install_dir = $(abs_builddir)/JModelica_install
 pyfmi_install_dir = $(abs_builddir)/PyFMI_install
 pyjmi_install_dir = $(abs_builddir)/PyJMI_install
-jmodelica_build_dir = $(abs_builddir)/JModelica_build
-pyfmi_build_dir = $(abs_builddir)/PyFMI_build
-pyjmi_build_dir = $(abs_builddir)/PyJMI_build
 bindistdir = JModelica.org-$(VERSION)-bin
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -856,7 +853,7 @@ install-exec-local:
 	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi; \
 	done
-	cd $(abs_top_srcdir)/Python/src/; \
+	cd $(abs_top_srcdir)/Python/src/tests/; \
 	mkdir -p $(DESTDIR)$(prefix)/Python/tests; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests
 
