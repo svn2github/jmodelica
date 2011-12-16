@@ -484,14 +484,26 @@ def load_DLL(libname, path):
     # Temporarily add the value of 'path' to system library path in case the dll 
     # is dependent on other dlls. In that case they should be located in 'path'. 
     libpath = get_platform_libpath()
-    oldpath = os.getenv(libpath)
-    newpath = path + ";" + oldpath
-    os.putenv(libpath, newpath)
+            
+    if os.environ.has_key(libpath):
+        oldpath = os.environ[libpath]
+    else:
+        oldpath = None
+    
+    if oldpath is not None:
+        newpath = path + os.pathsep + oldpath
+    else:
+        newpath = path
+        
+    os.environ[libpath] = newpath
     # Don't catch this exception since it hides the actual source
     # of the error.
     dll = Nct.load_library(libname, path)
     # Set back to the old path
-    os.putenv(libpath, oldpath)
+    if oldpath is not None:
+        os.environ[libpath] = oldpath
+    else:
+        del os.environ[libpath]
     return dll
 
 class Trajectory:
