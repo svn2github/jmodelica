@@ -81,6 +81,13 @@ path_log_dest = "pyfmi"+O.path.sep+"util" + O.path.sep + "FMILogger" + suffix
 
 O.system("gcc -fPIC "+path_log_src+" -shared -o "+path_log_dest)
 
+copy_args=sys.argv[1:]
+
+# Fix path sep
+for x in sys.argv[1:]:
+    if not x.find('--prefix'):
+        copy_args[copy_args.index(x)] = x.replace('/',O.sep)
+
 setup(name=NAME,
       version=VERSION,
       license=LICENSE,
@@ -95,5 +102,6 @@ setup(name=NAME,
       #cmdclass={"build_clib":my_cbuild},
       package_dir = {'pyfmi':'pyfmi','pyfmi.common':'common'},
       packages=['pyfmi','pyfmi.simulation','pyfmi.examples','pyfmi.common','pyfmi.common.plotting'],
-      package_data = {'pyfmi':['examples'+O.path.sep+'files'+O.path.sep+'FMUs'+O.path.sep+'*','util'+O.path.sep+'*']}
+      package_data = {'pyfmi':['examples'+O.path.sep+'files'+O.path.sep+'FMUs'+O.path.sep+'*','util'+O.path.sep+'*']},
+      script_args=copy_args
       )

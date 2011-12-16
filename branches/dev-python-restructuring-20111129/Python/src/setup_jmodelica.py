@@ -16,6 +16,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from distutils.core import setup, Extension
+import sys as S
+import os as O
 
 NAME = "JModelica.org"
 AUTHOR = "Modelon AB"
@@ -35,7 +37,13 @@ LONG_DESCRIPTION = """
 
 """
 
+# Fix path sep
+copy_args=S.argv[1:]
 
+for x in S.argv[1:]:
+    if not x.find('--prefix'):
+        copy_args[copy_args.index(x)] = x.replace('/',O.sep)
+        
 setup(name=NAME,
       version=VERSION,
       license=LICENSE,
@@ -49,4 +57,5 @@ setup(name=NAME,
       classifiers=CLASSIFIERS,
       package_dir = {'jmodelica':'jmodelica','jmodelica.common':'common'},
       packages=['jmodelica','jmodelica.common','jmodelica.common.plotting'],
+      script_args=copy_args
       )

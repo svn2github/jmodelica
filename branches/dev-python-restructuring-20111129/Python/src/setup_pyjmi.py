@@ -17,6 +17,7 @@
 
 from distutils.core import setup, Extension
 import os as O
+import sys as S
 
 NAME = "PyJMI"
 AUTHOR = "Modelon AB"
@@ -37,6 +38,13 @@ LONG_DESCRIPTION = """
 """
 
 sep = O.path.sep
+
+# Fix path sep
+copy_args=S.argv[1:]
+
+for x in S.argv[1:]:
+    if not x.find('--prefix'):
+        copy_args[copy_args.index(x)] = x.replace('/',O.sep)
 
 setup(name=NAME,
       version=VERSION,
@@ -59,4 +67,5 @@ setup(name=NAME,
                                'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'linux64'+sep+'*.*',
                                'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'win32'+sep+'*.*',
                                'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'win64'+sep+'*.*']},
+      script_args=copy_args
       )
