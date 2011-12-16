@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-The JModelica.org Python package for compilation of Modelica and Optimica models
-<http:/www.jmodelica.org/>
+The JModelica.org Python package for working with simulation and optimization of
+JMUs <http:/www.jmodelica.org/>
 """
 
-__all__ = ['compiler', 'examples', 'common']
+__all__ = ['common', 'initialization', 'optimization', 'simulation', 'examples', 'casadi_interface', 'linearization', 'jmi', 'jmi_algorithm_drivers']
 
 __version__=''
 
@@ -61,10 +61,15 @@ import numpy as N
 int = N.int32
 N.int = N.int32
 
+try:
+    ipopt_present = jmodelica.environ['IPOPT_HOME']
+except:
+    ipopt_present = False
+
 def check_packages():
     import sys, time
     le=30
-    startstr = "Performing jmodelica package check"
+    startstr = "Performing pyjmi package check"
     sys.stdout.write("\n")
     sys.stdout.write(startstr+" \n")
     sys.stdout.write("="*len(startstr))
@@ -90,7 +95,7 @@ def check_packages():
     #check jmodelica version
     jmversion = jmodelica.__version__
     sys.stdout.write(
-        "%s %s" % ("jmodelica version:".ljust(le,'.'),jmversion.ljust(le)))
+        "%s %s" % ("pyjmi version:".ljust(le,'.'),jmversion.ljust(le)))
     sys.stdout.write("\n")
     sys.stdout.flush()
     time.sleep(0.25)
@@ -107,7 +112,10 @@ def check_packages():
         "%s %s" % (("-"*len(modstr)).ljust(le), ("-"*len(verstr)).ljust(le)))
     sys.stdout.write("\n")
     
-    packages=["numpy", "scipy", "jpype", "lxml", "nose", "wxPython", "cython"]
+    packages=["numpy", "scipy", "matplotlib", "jpype", "lxml", "nose", 
+        "assimulo","wxPython", "cython", "casadi"]
+    assimulo_path=os.path.join(jmodelica.environ['JMODELICA_HOME'],'Python',
+        'assimulo')
     
     if platform == "win32":
         packages.append("pyreadline")
@@ -119,8 +127,12 @@ def check_packages():
     for package in packages:
         try:
             vers="n/a"
-            fp, path, desc = imp.find_module(package)
-            mod = imp.load_module(package, fp, path, desc)
+            if package=='assimulo':
+                fp, path, desc = imp.find_module('problem', [assimulo_path])
+                mod = imp.load_module('problem', fp, path, desc)
+            else:    
+                fp, path, desc = imp.find_module(package)
+                mod = imp.load_module(package, fp, path, desc)
                 
             try:
                 if package == "pyreadline":
@@ -134,7 +146,7 @@ def check_packages():
                 pass
             sys.stdout.write("%s %s %s" %(package.ljust(le,'.'), vers.ljust(le), "Ok".ljust(le)))
         except ImportError, e:
-            if package == "nose" or package == "wxPython":
+            if package == "nose" or package == "assimulo" or package == "casadi" or package == "wxPython":
                 sys.stdout.write("%s %s %s" % (package.ljust(le,'.'), vers.ljust(le), "Package missing - Warning issued, see details below".ljust(le)))
                 warning_packages.append(package)
             else:
@@ -176,13 +188,25 @@ def check_packages():
         sys.stdout.write("\n\n")
         
         for w in warning_packages:
-            if w == 'nose':
+            if w == 'assimulo':
+                sys.stdout.write("** The package assimulo could not be found. \n  \
+ This package is needed to be able to use: \n\n   \
+- jmodelica.simulate with default argument \"algorithm\" = AssimuloAlg \n   \
+- The jmodelica.simulation package \n   \
+- Some of the examples in the jmodelica.examples package")
+            elif w == 'nose':
                 sys.stdout.write("** The package nose could not be found. \n   \
-This package is needed to run the tests.")
+This package is needed in the jmodelica.tests package. \
+You will not be able to run any tests.")
+            elif w == 'casadi':
+                sys.stdout.write("** The package casadi could not be found.\n \
+This package is needed to be able to use:\n\n \
+- The casadi_interface module.\n \
+- Some of the examples in the jmodelica.examples package")
             elif w == 'wxPython':
                 sys.stdout.write("** The package wxPython could not be found.\n \
 This package is needed to be able to use the plot-GUI.")
-
+		
             sys.stdout.write("\n\n")
 
 
