@@ -161,7 +161,51 @@ aspect FlatTypeAnalysis {
 	syn boolean FAbstractEquation.isInteger() = type().isInteger();
 	syn boolean FAbstractEquation.isBoolean() = type().isBoolean();
 	syn boolean FAbstractEquation.isString() = type().isString();
-		
+
+	eq FFunctionCallEquation.isReal() {
+		for (FFunctionCallLeft l : getLefts()) {
+			if (l.hasFExp()) {
+				if (!l.getFExp().type().isReal()) {
+					return false;
+				}
+			}	
+		}	
+		return true;
+	}
+
+	eq FFunctionCallEquation.isInteger() {
+		for (FFunctionCallLeft l : getLefts()) {
+			if (l.hasFExp()) {
+				if (!l.getFExp().type().isInteger()) {
+					return false;
+				}
+			}	
+		}	
+		return true;
+	}
+
+	eq FFunctionCallEquation.isBoolean() {
+		for (FFunctionCallLeft l : getLefts()) {
+			if (l.hasFExp()) {
+				if (!l.getFExp().type().isBoolean()) {
+					return false;
+				}
+			}	
+		}	
+		return true;
+	}
+
+	eq FFunctionCallEquation.isString() {
+		for (FFunctionCallLeft l : getLefts()) {
+			if (l.hasFExp()) {
+				if (!l.getFExp().type().isString()) {
+					return false;
+				}
+			}	
+		}	
+		return true;
+	}
+	
 	syn boolean FRelExp.isRealComparison() = getRight().type().numericPromotion(getLeft().type()).isReal();
 	syn boolean FRelExp.isIntegerComparison() = getRight().type().numericPromotion(getLeft().type()).isInteger();
 	syn boolean FRelExp.isBooleanComparison() = getRight().type().numericPromotion(getLeft().type()).isBoolean();
