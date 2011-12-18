@@ -185,7 +185,7 @@ class CasadiModel(object):
         Raises:: 
         
             Exception if algorithm is not a subclass of 
-            jmodelica.algorithm_drivers.AlgorithmBase.
+            pyjmi.jmi_algorithm_drivers.AlgorithmBase.
         """
         base_path = 'pyjmi.jmi_algorithm_drivers'
         algdrive = __import__(base_path)
@@ -197,7 +197,7 @@ class CasadiModel(object):
         
         if not issubclass(algorithm, AlgorithmBase):
             raise Exception(str(algorithm) +
-            " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
+            " must be a subclass of pyjmi.jmi_algorithm_drivers.AlgorithmBase")
 
         # initialize algorithm
         alg = algorithm(self, options)

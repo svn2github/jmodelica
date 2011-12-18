@@ -1100,7 +1100,7 @@ class CasadiPseudoSpectral(AlgorithmBase):
         Parameters::
               
             model -- 
-                jmodelica.casadi_interface.CasadiModel model object
+                pyjmi.casadi_interface.CasadiModel model object
 
             options -- 
                 The options that should be used by the algorithm. For 
@@ -1110,7 +1110,7 @@ class CasadiPseudoSpectral(AlgorithmBase):
                 
                 or look at the docstring with help:
                 
-                * help(jmodelica.algorithm_drivers.CasadiPseudoSpectral)
+                * help(pyjmi.jmi_algorithm_drivers.CasadiPseudoSpectral)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
@@ -1210,7 +1210,7 @@ class CasadiPseudoSpectral(AlgorithmBase):
     def get_default_options(cls):
         """ 
         Get an instance of the options class for the 
-        CollocationLagrangePolynomialsAlg algorithm, prefilled with default 
+        CasadiPseudoSpectral algorithm, prefilled with default 
         values. (Class method.)
         """
         return CasadiPseudoSpectralOptions()
@@ -1218,7 +1218,7 @@ class CasadiPseudoSpectral(AlgorithmBase):
 class CasadiPseudoSpectralOptions(OptionBase):
     
     """
-    Options for optimizing JMU models using a collocation algorithm. 
+    Options for optimizing CasADi models using a collocation algorithm. 
 
     Collocation algorithm options::
     
@@ -1266,7 +1266,7 @@ class CasadiPseudoSpectralOptions(OptionBase):
         init_traj --
             Variable trajectory data used for initialization of the optimization 
             problem. The data is represented by an object of the type 
-            jmodelica.io.DymolaResultTextual.
+            pyjmi.common.io.ResultDymolaTextual.
             Default: None
             
         result_mode --
@@ -1360,7 +1360,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
             model -- 
                 Model object
                 
-                Type: jmodelica.casadi_interface.CasadiModel
+                Type: pyjmi.casadi_interface.CasadiModel
 
             options -- 
                 The options that should be used by the algorithm. For 
@@ -1370,7 +1370,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
                 
                 or look at the docstring with help:
                 
-                help(jmodelica.algorithm_drivers.LocalDAECollocationAlgOptions)
+                help(pyjmi.jmi_algorithm_drivers.LocalDAECollocationAlgOptions)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
@@ -1539,7 +1539,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
 class LocalDAECollocationAlgOptions(OptionBase):
     
     """
-    Options for optimizing JMU models using a collocation algorithm. 
+    Options for optimizing CasADi models using a collocation algorithm. 
 
     Collocation algorithm options::
     
@@ -1574,7 +1574,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Should be None when hs != "free".
             
             Type: None or
-            jmodelica.optimization.casadi_collocation.FreeElementLengthsData
+            pyjmi.optimization.casadi_collocation.FreeElementLengthsData
             Default: None
         
         n_cp --
@@ -1615,7 +1615,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Specifies the output format of the optimization result.
             
             Possible values: "collocation_points", "element_interpolation" and
-                "mesh_points"
+            "mesh_points"
             
             "collocation_points": The optimization result is given at the
             collocation points as well as the start and final time point.
@@ -1704,14 +1704,15 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Variable trajectory data used for initialization of the
             optimization problem.
             
-            Type: None or jmodelica.io.DymolaResultTextual
+            Type: None or pyjmi.common.io.ResultDymolaTextual
             Default: None
         
         parameter_estimation_data --
             Parameter estimation data used for solving parameter estimation
             problems.
             
-            Type: None or jmodelica.optimization.parameter_estimation_data
+            Type: None or
+            pyjmi.optimization.casadi_collocation.ParameterEstimationData
             Default: None
         
         exact_hessian --

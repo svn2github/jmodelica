@@ -587,78 +587,80 @@ class ParameterEstimationData(object):
     
     """
     Data used to define the cost function for parameter estimation problems.
-    
-    Parameters::
-    
-        Q --
-            Weighting matrix.
-            
-            Type: rank 2 ndarray
-        
-        measured_variables --
-            List of the names of the measured variables.
-            
-            Type: list of strings
-        
-        data --
-            Object containing the measurement data.
-            
-            If data is a function, it should take a time point as its argument
-            and return an array where element j contains the measured value
-            of measured_variables[j] at the given time point.
-            
-            If data is a matrix,
-            data[i][0] should contain measurement point i and
-            data[i][j] should contain the measured value of
-            measured_variables[j] at measurement point i.
-            
-            Type: function or rank 2 ndarray
-        
-        discrete --
-            Whether to perform discrete or continuous parameter estimation.
-            
-            NOTE: Discrete parameter estimation is not yet supported!
-            
-            Continuous parameter estimation uses the cost function
-            
-            .. math::
-            
-                f = \int_{t_0}^{t_f} (y(t) - y_m(t)) \cdot Q \cdot
-                (y(t) - y_m(t))\,\mathrm{d}t,
-            
-            where y is a function created by gluing together the collocation
-            polynomials for the measured variables at all the mesh points and
-            y_m is a function providing the measured values given time. If the
-            parameter data is a matrix, the data is linearly interpolated to
-            create the y_m function. If data is a function, then this function
-            defines y_m.
-            
-            Discrete parameter estimation uses the cost function
-            
-            .. math::
-            
-                f = \sum_{i = 1}^{n_m} (y(t_i) - y_m(t_i)) \cdot
-                Q \cdot y(t_i) - y_m(t_i),
-            
-            where y is the optimized values of the measured variables and
-            y_m is the measured values of the measured variables. This option
-            requires the parameter data to be a matrix. It is also required
-            that each measurement point coincides with either a collocation
-            point or a mesh point.
-            
-            Type: bool
-            Default: False
-        
-        eps --
-            In the case of discrete parameter estimation, the measurement point
-            t is considered to coincide with the collocation or mesh point v
-            if and only if |t - v| / (t_f - t_0) < eps.
-            
-            Type: float
-            Default: 1e-5
     """
 
     def __init__(self, Q, measured_variables, data, discrete=False, eps=1e-5):
+        """
+        Parameters::
+            
+            Q --
+                Weighting matrix.
+                
+                Type: rank 2 ndarray
+            
+            measured_variables --
+                List of the names of the measured variables.
+                
+                Type: list of strings
+            
+            data --
+                Object containing the measurement data.
+                
+                If data is a function, it should take a time point as its
+                argument and return an array where element j contains the
+                measured value of measured_variables[j] at the given time
+                point.
+                
+                If data is a matrix,
+                data[i][0] should contain measurement point i and
+                data[i][j] should contain the measured value of
+                measured_variables[j] at measurement point i.
+                
+                Type: function or rank 2 ndarray
+            
+            discrete --
+                Whether to perform discrete or continuous parameter estimation.
+                
+                NOTE: Discrete parameter estimation is not yet supported!
+                
+                Continuous parameter estimation uses the cost function
+                
+                .. math::
+                
+                    f = \int_{t_0}^{t_f} (y(t) - y_m(t)) \cdot Q \cdot
+                    (y(t) - y_m(t))\,\mathrm{d}t,
+                
+                where y is a function created by gluing together the
+                collocation polynomials for the measured variables at all the
+                mesh points and y_m is a function providing the measured values
+                given time. If the parameter data is a matrix, the data is
+                linearly interpolated to create the y_m function. If data is a
+                function, then this function defines y_m.
+                
+                Discrete parameter estimation uses the cost function
+                
+                .. math::
+                
+                    f = \sum_{i = 1}^{n_m} (y(t_i) - y_m(t_i)) \cdot
+                    Q \cdot y(t_i) - y_m(t_i),
+                
+                where y is the optimized values of the measured variables and
+                y_m is the measured values of the measured variables. This
+                option requires the parameter data to be a matrix. It is also
+                required that each measurement point coincides with either a
+                collocation point or a mesh point.
+                
+                Type: bool
+                Default: False
+            
+            eps --
+                In the case of discrete parameter estimation, the measurement
+                point t is considered to coincide with the collocation or mesh
+                point v if and only if |t - v| / (t_f - t_0) < eps.
+                
+                Type: float
+                Default: 1e-5
+        """
         self.Q = Q
         self.measured_variables = measured_variables
         self.discrete = discrete
