@@ -26,13 +26,7 @@ pyjmi_install_dir=$(abs_builddir)/PyJMI_install
 
 bindistdir=JModelica.org-$(VERSION)-bin
 
-all-local:
-if HAVE_ANT
-	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
-	$(ANT_OPTS) $(ANT)
-	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
-	$(ANT_OPTS) $(ANT)
-endif
+build-python-packages:
 if WITH_SUNDIALS
 if WITH_SUPERLU
 	cd $(abs_top_srcdir)/Assimulo; \
@@ -45,7 +39,6 @@ if !WITH_SUPERLU
 	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
 endif
 endif
-
 	cd $(abs_top_srcdir)/Python/src; \
 	python setup_jmodelica.py install --prefix=$(jmodelica_install_dir); \
 	rm -rf build
@@ -58,39 +51,10 @@ endif
 	python setup_pyjmi.py install --prefix=$(pyjmi_install_dir); \
 	rm -rf build
 
-	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
-	mkdir -p $(abs_builddir)/Options
-	$(abs_top_srcdir)/run_java.sh org.jmodelica.util.OptionRegistry $(abs_builddir)/Options/options.xml
-
-install-exec-local:
-if HAVE_ANT
-	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
-	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/util.jar $(DESTDIR)$(prefix)/lib/
-	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/graphs.jar $(DESTDIR)$(prefix)/lib/
-	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
-endif
-	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
-	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
-	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(DESTDIR)$(prefix)/lib/
-	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/include/
-	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(DESTDIR)$(prefix)/include/
-	mkdir -p $(DESTDIR)$(prefix)/Makefiles
-	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/Makefiles/LICENSE
-	case $(build) in \
-	*-cygwin*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/Makefile ;; \
-  	*-mingw*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
-  	*-apple*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.macosx $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
-  	*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
-	esac
-	mkdir -p $(DESTDIR)$(prefix)/Options
-	cp $(abs_builddir)/Options/options.xml $(DESTDIR)$(prefix)/Options/options.xml
+install-python-packages: build-python-packages
 	mkdir -p $(DESTDIR)$(prefix)/Python
+	cp $(abs_top_srcdir)/Python/src/startup.py $(DESTDIR)$(prefix)/
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python
-	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python
 if WITH_SUNDIALS
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 	if [ -e $(assimulo_install_dir)/$${pkgdir}/site-packages/ ]; \
@@ -124,12 +88,48 @@ endif
 	cd $(abs_top_srcdir)/Python/src/tests/; \
 	mkdir -p $(DESTDIR)$(prefix)/Python/tests; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests
-
 	mkdir -p $(DESTDIR)$(prefix)/bin
 	[ -e $(DESTDIR)$(prefix)/bin/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/bin/jm_python.sh
 	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
-	cp $(abs_top_srcdir)/Python/src/startup.py $(DESTDIR)$(prefix)/
 	chmod ugo+x $(DESTDIR)$(prefix)/bin/jm_*.sh
+
+all-local: build-python-packages
+if HAVE_ANT
+	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
+	$(ANT_OPTS) $(ANT)
+	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
+	$(ANT_OPTS) $(ANT)
+endif
+	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
+	mkdir -p $(abs_builddir)/Options
+	$(abs_top_srcdir)/run_java.sh org.jmodelica.util.OptionRegistry $(abs_builddir)/Options/options.xml
+
+install-exec-local: install-python-packages
+if HAVE_ANT
+	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/util.jar $(DESTDIR)$(prefix)/lib/
+	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/graphs.jar $(DESTDIR)$(prefix)/lib/
+	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+endif
+	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
+	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
+	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(DESTDIR)$(prefix)/lib/
+	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/include/
+	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(DESTDIR)$(prefix)/include/
+	mkdir -p $(DESTDIR)$(prefix)/Makefiles
+	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/Makefiles/LICENSE
+	case $(build) in \
+	*-cygwin*) \
+	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/Makefile ;; \
+  	*-mingw*) \
+	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
+  	*-apple*) \
+	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.macosx $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
+  	*) \
+	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
+	esac
+	mkdir -p $(DESTDIR)$(prefix)/Options
+	cp $(abs_builddir)/Options/options.xml $(DESTDIR)$(prefix)/Options/options.xml
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/
@@ -159,7 +159,6 @@ endif
 	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
 	cp jm_tests $(DESTDIR)$(prefix)/jm_tests
 	chmod ugo+x $(DESTDIR)$(prefix)/jm_tests
-
 
 bindistdir: install
 	rm -rf $(bindistdir)
