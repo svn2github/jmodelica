@@ -1344,7 +1344,6 @@ class CasadiPseudoSpectralOptions(OptionBase):
 class CasadiPseudoSpectralResult(JMResultBase):
     pass
 
-
 class LocalDAECollocationAlg(AlgorithmBase):
     
     """
@@ -1619,7 +1618,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 "mesh_points"
             
             "collocation_points": The optimization result is given at the
-            collocation points.
+            collocation points as well as the start and final time point.
             
             "element_interpolation": The values of the variable trajectories
             are calculated by evaluating the collocation polynomials. The

@@ -106,9 +106,9 @@ class CasadiModel(object):
         Help method. Gets the options class for the algorithm specified in 
         'algorithm'.
         """
-        base_path = 'jmodelica.algorithm_drivers'
+        base_path = 'pyjmi.jmi_algorithm_drivers'
         algdrive = __import__(base_path)
-        algdrive = getattr(algdrive, 'algorithm_drivers')
+        algdrive = getattr(algdrive, 'jmi_algorithm_drivers')
         algorithm = getattr(algdrive, algorithm)
         return algorithm.get_default_options()
     
@@ -187,9 +187,9 @@ class CasadiModel(object):
             Exception if algorithm is not a subclass of 
             jmodelica.algorithm_drivers.AlgorithmBase.
         """
-        base_path = 'jmodelica.algorithm_drivers'
+        base_path = 'pyjmi.jmi_algorithm_drivers'
         algdrive = __import__(base_path)
-        algdrive = getattr(algdrive, 'algorithm_drivers')
+        algdrive = getattr(algdrive, 'jmi_algorithm_drivers')
         AlgorithmBase = getattr(algdrive, 'AlgorithmBase')
         
         if isinstance(algorithm, basestring):
