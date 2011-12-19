@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """
-This file contains code for mapping our JMI Models to the Problem specifications 
+This file contains code for mapping our JMU Models to the Problem specifications 
 required by Assimulo.
 """
 import logging
@@ -33,7 +33,7 @@ try:
     from assimulo.problem_algebraic import ProblemAlgebraic
 except ImportError:
     logging.warning(
-        'Could not find Assimulo package. Check jmodelica.check_packages()')
+        'Could not find Assimulo package. Check pyjmi.check_packages()')
 
 
 class JMUAlgebraic_Exception(Exception):

@@ -27,7 +27,7 @@ N.int = N.int32
 
 def linearize_dae(model):
     """ 
-    Linearize a DAE represented by a jmodelica.jmi.JMUModel object. The DAE is 
+    Linearize a DAE represented by a pyjmi.jmi.JMUModel object. The DAE is 
     represented by
 
       F(dx,x,u,w,t) = 0
@@ -246,7 +246,7 @@ def linear_dae_to_ode(E_dae,A_dae,B_dae,F_dae,g_dae):
 
 def linearize_ode(model):
     """ 
-    Linearize a DAE represented by a jmodelica.jmi.JMUModel object. The DAE is 
+    Linearize a DAE represented by a pyjmi.jmi.JMUModel object. The DAE is 
     represented by
 
       F(dx,x,u,w,t) = 0
@@ -257,9 +257,9 @@ def linearize_ode(model):
        w = H*x + M*u + q
 
     The linearization is performed performed by first linearizing the DAE using 
-    jmodelica.linearization.linearize_model and the resulting linear DAE is then 
+    pyjmi.linearization.linearize_dae and the resulting linear DAE is then 
     transformed into an ODE by the function 
-    jmodelica.linearization.linear_dae_ode.
+    pyjmi.linearization.linear_dae_to_ode.
 
     Notice that the conversion into ODE form works only if the linear DAE has 
     index 1.

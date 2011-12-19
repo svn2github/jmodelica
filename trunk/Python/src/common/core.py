@@ -34,7 +34,7 @@ tmp_location = os.path.join(tempfile._get_default_tempdir(),'JModelica.org')
 
 class BaseModel(object):
     """ 
-    Abstract base class for JMUModel and FMUModel.
+    Abstract Model class containing base functionality.
     """
     
     def __init__(self):
@@ -138,12 +138,12 @@ class BaseModel(object):
     def _exec_algorithm(self, module, algorithm, options):
         """ 
         Helper function which performs all steps of an algorithm run which are 
-        common to all initialize and optimize algortihms.
+        common to all initialize and optimize algorithms.
         
         Raises:: 
         
             Exception if algorithm is not a subclass of 
-            jmodelica.algorithm_drivers.AlgorithmBase.
+            common.algorithm_drivers.AlgorithmBase.
         """
         base_path = 'algorithm_drivers'
         algdrive = __import__(base_path, globals(), locals(), [], -1)
@@ -155,7 +155,7 @@ class BaseModel(object):
         
         if not issubclass(algorithm, AlgorithmBase):
             raise Exception(str(algorithm)+
-            " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
+            " must be a subclass of common.algorithm_drivers.AlgorithmBase")
 
         # initialize algorithm
         alg = algorithm(self, options)
@@ -173,12 +173,12 @@ class BaseModel(object):
                                  options):
         """ 
         Helper function which performs all steps of an algorithm run which are 
-        common to all simulate algortihms.
+        common to all simulate algorithms.
         
         Raises:: 
         
             Exception if algorithm is not a subclass of 
-            jmodelica.algorithm_drivers.AlgorithmBase.
+            common.algorithm_drivers.AlgorithmBase.
         """
         base_path = 'algorithm_drivers'
         algdrive = __import__(base_path, globals(), locals(), [], -1)
@@ -190,7 +190,7 @@ class BaseModel(object):
         
         if not issubclass(algorithm, AlgorithmBase):
             raise Exception(str(algorithm)+
-            " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
+            " must be a subclass of common.algorithm_drivers.AlgorithmBase")
 
         # initialize algorithm
         alg = algorithm(start_time, final_time, input, self, options)
@@ -403,7 +403,7 @@ def get_unit_name(class_name, unit_type='JMU'):
             The name of the model.
             
         unit_type --
-            The unit type, JMU or FMU.
+            The unit type. Possible values: JMU, FMU, FMUX.
             Default: 'JMU'
         
     Returns::

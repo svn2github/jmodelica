@@ -27,7 +27,6 @@ try:
 except:
     pass
 
-from jmodelica.compiler import compile_fmux
 from pyfmi.fmi import unzip_fmux
 from pyjmi.common.core import get_temp_location
 from pyjmi.common import xmlparser

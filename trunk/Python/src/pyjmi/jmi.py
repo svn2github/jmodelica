@@ -1995,7 +1995,7 @@ class JMUModel(BaseModel):
                 by passing the algorithm class as string or class object in this 
                 argument. 'algorithm' can be any class which implements the 
                 abstract class AlgorithmBase which is found in the module 
-                jmodelica.algorithm_drivers. In this way it is possible to write 
+                pyjmi.common.algorithm_drivers. In this way it is possible to write 
                 custom algorithms and use them with this function.
                 Default: 'AssimuloAlg'
                 
@@ -2119,7 +2119,7 @@ class JMUModel(BaseModel):
         Parameters::
             res --
                 A result data object of the class
-                jmodelica.io.ResultDymolaTextual
+                pyjmi.common.io.ResultDymolaTextual
             time --
                 The time at which variable values are extracted from
                 the result data.
@@ -2713,7 +2713,7 @@ class JMIModel(object):
     
     def __init__(self, libname, path='.', is_jmu = True):
         """ 
-        Create a jmi.JMIModel object from a binary file.
+        Create a pyjmi.jmi.JMUModel object from a binary file.
         """
         suffix = get_platform_suffix()
         if is_jmu:

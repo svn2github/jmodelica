@@ -1,4 +1,4 @@
-import jmodelica.optimization.shooting as shooting
+import pyjmi.optimization.shooting as shooting
 import matplotlib.pyplot as plt
 import numpy as N
 

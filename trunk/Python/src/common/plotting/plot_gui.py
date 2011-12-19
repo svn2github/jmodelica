@@ -34,11 +34,16 @@ except ImportError:
 
 #JModelica related imports
 try:
-    from jmodelica.io import ResultDymolaTextual
-    from jmodelica.io import ResultDymolaBinary
-    from jmodelica.io import JIOError
+    from pyjmi.common.io import ResultDymolaTextual
+    from pyjmi.common.io import ResultDymolaBinary
+    from pyjmi.common.io import JIOError
 except ImportError:
-    print "JModelica not found."
+    try:
+        from pyfmi.common.io import ResultDymolaTextual
+        from pyfmi.common.io import ResultDymolaBinary
+        from pyfmi.common.io import JIOError
+    except ImportError:
+        print "JModelica Python package was not found."
 
 #Import general modules
 import os as O

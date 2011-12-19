@@ -1486,7 +1486,7 @@ class FMUModel(BaseModel):
         
         Returns::
         
-            Result object, subclass of algorithm_drivers.ResultBase.
+            Result object, subclass of common.algorithm_drivers.ResultBase.
         """
         return self._exec_simulate_algorithm(start_time, 
                                              final_time, 

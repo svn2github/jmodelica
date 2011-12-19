@@ -16,9 +16,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 """ 
 Module for optimization, simulation and initialization algorithms to be used 
-together with jmodelica.jmi.JMUModel.optimize, jmodelica.jmi.JMUModel.simulate, 
-jmodelica.fmi.FMUModel.simulate and jmodelica.jmi.JMUModel.initialize 
-respectively.
+together with pyjmi.jmi.JMUModel.optimize, pyjmi.jmi.JMUModel.simulate and
+pyjmi.jmi.JMUModel.initialize respectively.
 """
 
 #from abc import ABCMeta, abstractmethod
@@ -50,7 +49,7 @@ try:
     assimulo_present = True
 except:
     logging.warning(
-        'Could not load Assimulo module. Check jmodelica.check_packages()')
+        'Could not load Assimulo module. Check pyjmi.check_packages()')
     assimulo_present = False
     
 from pyjmi.optimization.casadi_collocation import *
@@ -166,7 +165,7 @@ class IpoptInitializationAlg(AlgorithmBase):
                 
                 or look at the docstring with help:
                 
-                * help(jmodelica.algorithm_drivers.IpoptInitializationAlgOptions)
+                * help(pyjmi.jmi_algorithm_drivers.IpoptInitializationAlgOptions)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
@@ -192,7 +191,7 @@ class IpoptInitializationAlg(AlgorithmBase):
             
         if not ipopt_present:
             raise Exception(
-                'Could not find IPOPT. Check jmodelica.check_packages()')
+                'Could not find IPOPT. Check pyjmi.check_packages()')
 
         self.nlp = NLPInitialization(model,self.stat)
         self.nlp_ipopt = InitializationOptimizer(self.nlp)
@@ -396,7 +395,7 @@ class AssimuloAlg(AlgorithmBase):
                 
                 or look at the docstring with help:
                 
-                * help(jmodelica.algorithm_drivers.AssimuloAlgOptions)
+                * help(pyjmi.jmi_algorithm_drivers.AssimuloAlgOptions)
                 
                 Valid values are: 
                 - A dict which gives AssimuloAlgOptions with default values on 
@@ -411,7 +410,7 @@ class AssimuloAlg(AlgorithmBase):
         
         if not assimulo_present:
             raise Exception(
-                'Could not find Assimulo package. Check jmodelica.check_packages()')
+                'Could not find Assimulo package. Check pyjmi.check_packages()')
         
         # set start time, final time and input trajectory
         self.start_time = start_time
@@ -622,7 +621,7 @@ class CollocationLagrangePolynomialsAlgOptions(OptionBase):
         init_traj --
             Variable trajectory data used for initialization of the optimization 
             problem. The data is represented by an object of the type 
-            jmodelica.io.DymolaResultTextual.
+            pyjmi.common.io.DymolaResultTextual.
             Default: None
             
         result_mode --
@@ -727,7 +726,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         Parameters::
               
             model -- 
-                jmodelica.jmi.JMUModel model object
+                pyjmi.jmi.JMUModel model object
 
             options -- 
                 The options that should be used by the algorithm. For 
@@ -737,7 +736,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                 
                 or look at the docstring with help:
                 
-                * help(jmodelica.algorithm_drivers.CollocationLagrangePolynomialsAlgOptions)
+                * help(pyjmi.jmi_algorithm_drivers.CollocationLagrangePolynomialsAlgOptions)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
@@ -766,7 +765,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
             
         if not ipopt_present:
             raise Exception(
-                'Could not find IPOPT. Check jmodelica.check_packages()')
+                'Could not find IPOPT. Check pyjmi.check_packages()')
 
         if self.blocking_factors == None:
             self.nlp = ipopt.NLPCollocationLagrangePolynomials(
@@ -980,7 +979,7 @@ class KInitSolveAlg(AlgorithmBase):
         Parameters::
         
             model -- 
-                jmodelica.jmi.JMUModel object representation of the model.
+                pyjmi.jmi.JMUModel object representation of the model.
             options -- 
                 The options that should be used in the algorithm. For details on 
                 the options, see:
@@ -989,7 +988,7 @@ class KInitSolveAlg(AlgorithmBase):
                 
                 or look at the docstring with help:
                 
-                * help(jmodelica.algorithm_drivers.KInitSolveAlgOptions)
+                * help(pyjmi.jmi_algorithm_drivers.KInitSolveAlgOptions)
                 
                 Valid values are: 
                 - A dict which gives KInitSolveAlgOptions with default values on 
@@ -1136,7 +1135,7 @@ class CasadiPseudoSpectral(AlgorithmBase):
             
         if not casadi_present:
             raise Exception(
-                'Could not find CasADi. Check jmodelica.check_packages()')
+                'Could not find CasADi. Check pyjmi.check_packages()')
         
         self.nlp = PseudoSpectral(model, self.options)
         
@@ -1396,7 +1395,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
             
         if not casadi_present:
             raise Exception(
-                    'Could not find CasADi. Check jmodelica.check_packages()')
+                    'Could not find CasADi. Check pyjmi.check_packages()')
         
         self.nlp = LocalDAECollocator(model, self.options)
             

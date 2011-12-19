@@ -47,7 +47,7 @@ def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
             
         file_name --
             If no file name is given, the name of the model (as defined by 
-            JMIModel.get_name()) concatenated with the string '_result' is used. 
+            JMUModel.get_name()) concatenated with the string '_result' is used. 
             A file suffix equal to the format argument is then appended to the 
             file name.
             Default: Empty string.

@@ -15,10 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 """ 
-Module for optimization, simulation and initialization algorithms to be used 
-together with jmodelica.jmi.JMUModel.optimize, jmodelica.jmi.JMUModel.simulate, 
-jmodelica.fmi.FMUModel.simulate and jmodelica.jmi.JMUModel.initialize 
-respectively.
+Module for simulation algorithms to be used together with
+pyfmi.fmi.FMUModel.simulate.
 """
 
 #from abc import ABCMeta, abstractmethod
@@ -40,7 +38,7 @@ try:
     assimulo_present = True
 except:
     logging.warning(
-        'Could not load Assimulo module. Check jmodelica.check_packages()')
+        'Could not load Assimulo module. Check pyfmi.check_packages()')
     assimulo_present = False
 
 default_int = int
@@ -162,7 +160,7 @@ class AssimuloFMIAlg(AlgorithmBase):
                 
                 or look at the docstring with help:
                 
-                * help(jmodelica.algorithm_drivers.AssimuloFMIAlgOptions)
+                * help(pyfmi.fmi_algorithm_drivers.AssimuloFMIAlgOptions)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values

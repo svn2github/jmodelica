@@ -15,10 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 """ 
-Module for optimization, simulation and initialization algorithms to be used 
-together with jmodelica.jmi.JMUModel.optimize, jmodelica.jmi.JMUModel.simulate, 
-jmodelica.fmi.FMUModel.simulate and jmodelica.jmi.JMUModel.initialize 
-respectively.
+Module containing optimization, simulation and initialization algorithms.
 """
 
 #from abc import ABCMeta, abstractmethod
@@ -34,10 +31,9 @@ N.int = N.int32
 
 class AlgorithmBase(object):
     """ 
-    Abstract class which all algorithms that are to be used with 
-    jmodelica.jmi.JMUModel.optimize, jmodelica.jmi.JMUModel.simulate, 
-    jmodelica.fmi.FMUModel.simulate or jmodelica.jmi.JMUModel.initialize must 
-    implement.
+    Abstract class which all algorithms that are to be used in
+    simulating/optimization/initialization with Model classes extending
+    common.core.BaseModel must implement.
     """
 #    __metaclass__=ABCMeta
     
@@ -70,7 +66,8 @@ class ResultBase(object):
         Parameters::
         
             model -- 
-                The jmi.JMUModel object for the model used in the algorithm.
+                The Model (extending common.BaseModel) object for the model used
+                in the algorithm.
                 
             result_file_name --
                 Name of the file containing the algorithm result created on the 
