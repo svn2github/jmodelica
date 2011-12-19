@@ -37,7 +37,7 @@ import atexit
 from lxml import etree
 
 from pyjmi.common import xmlparser
-from pyjmi.common.core import BaseModel, unzip_unit, get_platform_suffix, get_files_in_archive, rename_to_tmp
+from pyjmi.common.core import BaseModel, unzip_unit, get_platform_suffix, get_files_in_archive, rename_to_tmp, load_DLL
 
 from pyjmi.common.io import VariableNotFoundError
 from pyjmi.common.core import TrajectoryLinearInterpolation
@@ -273,69 +273,6 @@ def _returns_ndarray(dll_func, dtype, shape, ndim=1, order=None):
     
     dll_func.restype = ct.POINTER(dtype)
     dll_func.errcheck = conv_function
-    
-def get_platform_libpath():
-    #Detect libray path depending on platform
-    if sys.platform == 'win32':
-        return 'PATH'
-    elif sys.platform == 'darwin':
-        return 'DYLD_LIBRARY_PATH'
-    else:
-        return 'LD_LIBRARY_PATH'
-
-## This is an api comment.
-# @param libname Name of library.
-# @param path Path to library.
-def load_DLL(libname, path):
-    """ 
-    Loads a model from a DLL file and returns it.
-    
-    The filepath can be be both with or without file suffixes (as long as 
-    standard file suffixes are used, that is).
-    
-    Example inputs that should work:
-      >> lib = loadDLL('model')
-      >> lib = loadDLL('model.dll')
-      >> lib = loadDLL('model.so')
-    . All of the above should work on the JModelica supported platforms.
-    However, the first one is recommended as it is the most platform independent 
-    syntax.
-    
-    Parameters::
-    
-        libname -- 
-            Name of the library without prefix.
-            
-        path -- 
-            The relative or absolute path to the library.
-    
-    See also http://docs.python.org/library/ct.html
-    """
-    # Temporarily add the value of 'path' to system library path in case the dll 
-    # is dependent on other dlls. In that case they should be located in 'path'. 
-    libpath = get_platform_libpath()
-    
-    if os.environ.has_key(libpath):
-        oldpath = os.environ[libpath]
-    else:
-        oldpath = None
-    
-    if oldpath is not None:
-        newpath = path + os.pathsep + oldpath
-    else:
-        newpath = path
-        
-    os.environ[libpath] = newpath
-    # Don't catch this exception since it hides the actual source
-    # of the error.
-    dll = Nct.load_library(libname, path)
-    # Set back to the old path
-    if oldpath is not None:
-        os.environ[libpath] = oldpath
-    else:
-        del os.environ[libpath]
-    return dll
-
 
 def _translate_value_ref(valueref):
     """ 
