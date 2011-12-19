@@ -42,12 +42,12 @@
     package included in JModelica.org so that FMUs can easily be
     simulated.</para>
 
-    <para>The interface is located in <literal>jmodelica.fmi</literal> and
-    consist of the class <literal>FMUModel</literal> together with methods for
+    <para>The interface is located in <literal>pyfmi.fmi</literal> and consist
+    of the class <literal>FMUModel</literal> together with methods for
     unzipping the FMU and for writing the simulation results. Connected to
     this interface is a wrapper for JModelica.org's simulation package to
     enable an easy simulation of the FMUs. The simulation wrapper is located
-    in <literal>jmodelica.simulation.assimulo</literal>,
+    in <literal>pyfmi.simulation.assimulo</literal>,
     <literal>FMIODE</literal>.</para>
 
     <para>In the table below is a list of the FMI C-interface and its
@@ -269,7 +269,7 @@
 
         <programlisting language="python">        import numpy as N 
         import pylab as P #Used for plotting
-        from jmodelica.fmi import FMUModel #The FMI Interface
+        from pyfmi.fmi import FMUModel #The FMI Interface
 </programlisting>
 
         <para>Next, the FMU is to be loaded and initialized,</para>

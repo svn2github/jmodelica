@@ -73,13 +73,13 @@
     results.</para>
 
     <para><programlisting language="python"># Import the RLC example
-from jmodelica.examples import RLC
+from pyjmi.examples import RLC
 
 # Run the RLC example and plot results
 RLC.run_demo()</programlisting></para>
 
-    <para> Open <filename>RLC.py</filename> in an editor and look at the
-    Python code to see what happens when the script is run.</para>
+    <para>Open <filename>RLC.py</filename> in an editor and look at the Python
+    code to see what happens when the script is run.</para>
   </section>
 
   <section>

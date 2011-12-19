@@ -420,7 +420,7 @@ make &amp;&amp; make install</programlisting></para>
               Python session from this start menu will set all the environment
               variables required to run the JModelica.org Python
               interface.<programlisting language="python"># Import the vdp example
-from jmodelica.examples import vdp
+from pyjmi.examples import vdp
 
 # Run the vdp example and plot results
 vdp.run_demo()</programlisting></para>

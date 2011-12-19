@@ -20,12 +20,12 @@
     textual formats).</para>
 
     <para>The GUI is located in the module
-    <literal>jmodelica.plotting.plot_gui</literal> and can be started by
-    Windows users by selecting the shortcut located in the start-menu under
-    JModelica.org. The GUI can also be started by typing the following
-    commands in a Python shell:</para>
+    <literal>(pyjmi/pyfmi).common.plotting.plot_gui</literal> and can be
+    started by Windows users by selecting the shortcut located in the
+    start-menu under JModelica.org. The GUI can also be started by typing the
+    following commands in a Python shell:</para>
 
-    <programlisting language="python">from jmodelica.plotting import plot_gui
+    <programlisting language="python">from pyjmi.common.plotting import plot_gui #or pyfmi.common.plotting import plot_gui
 plot_gui.startGUI()
 </programlisting>
 
