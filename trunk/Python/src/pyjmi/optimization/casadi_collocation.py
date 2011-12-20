@@ -791,7 +791,7 @@ class LocalDAECollocator(CasADiCollocator):
         collocation = {}
         x_i = casadi.ssym("x_i", self.model.get_n_x(), self.n_cp + 1)
         der_vals_k = casadi.ssym("der_vals[k]", self.model.get_n_x(),
-                                     self.n_cp + 1)
+                                 self.n_cp + 1)
         h_i = casadi.SX("h_i")
         collocation['coll_der'] = casadi.sumCols(x_i * der_vals_k) / h_i
         
@@ -1323,22 +1323,31 @@ class LocalDAECollocator(CasADiCollocator):
                     c_e = casadi.vertcat(
                             [c_e, var[i][self.n_cp + 1]['x'] - x_i_np1])
         
-        # Constraints for final mesh point values
+        # Constraints for terminal values
         if self.final_mesh_point:
-            var_types = ['u', 'w']
-            if not self.eliminate_der_var:
-                var_types.append('dx')
-            for var_type in var_types:
+            for var_type in ['u', 'w']:
                 # Evaluate xx_{n_e, n_cp + 1} based on polynomial xx_{n_e}
                 xx_ne_np1 = 0
                 for k in xrange(1, self.n_cp + 1):
                     xx_ne_np1 += (var[self.n_e][k][var_type] *
-                                  self.pol.eval_basis(k, 1, True))
+                                  self.pol.eval_basis(k, 1, False))
                 
                 # Add residual for xx_ne_np1 as constraint
                 c_e = casadi.vertcat(
                         [c_e,
                          var[self.n_e][self.n_cp + 1][var_type] - xx_ne_np1])
+            if not self.eliminate_der_var:
+                # Evaluate dx_{n_e, n_cp + 1} based on polynomial x_{n_e}
+                dx_ne_np1 = 0
+                for k in xrange(self.n_cp + 1):
+                    x_ne_k = var[self.n_e][k]['x']
+                    dx_ne_np1 += (1. / (self.horizon * self.h[self.n_e]) *
+                                  x_ne_k * self.pol.eval_basis_der(k, 1))
+                
+                # Add residual for dx_ne_np1 as constraint
+                c_e = casadi.vertcat(
+                        [c_e,
+                         var[self.n_e][self.n_cp + 1]['dx'] - dx_ne_np1])
         
         # Continuity constraints for x_{i, 0}
         if not self.eliminate_cont_var:
@@ -1347,7 +1356,7 @@ class LocalDAECollocator(CasADiCollocator):
                 cont_constr = (var[i][self.n_cp + gauss]['x'] - 
                                var[i + 1][0]['x'])
                 c_e = casadi.vertcat([c_e, cont_constr])
-                
+        
         # Element length constraints
         if self.hs == "free":
             h_constr = casadi.sumRows(self.h[1:]) - 1
@@ -1975,7 +1984,7 @@ class LocalDAECollocator(CasADiCollocator):
                     
                     # Derivatives
                     dx_i_tau = 0
-                    for k in xrange(0, self.n_cp + 1):
+                    for k in xrange(self.n_cp + 1):
                         x_i_k = self.nlp_opt[var_indices[i][k]['x']]
                         dx_i_tau += (1. / h_scaled[i] * x_i_k * 
                                      self.pol.eval_basis_der(k, tau))

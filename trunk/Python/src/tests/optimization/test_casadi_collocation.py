@@ -161,7 +161,7 @@ class TestLocalDAECollocator:
         
         # References values
         cost_ref = 1.8576873858261e3
-        u_norm_ref = 3.0536254817626696e2
+        u_norm_ref = 3.050971000653911e2
         
         # Mayer
         opts = mayer_model.optimize_options(self.algorithm)
@@ -488,7 +488,7 @@ class TestLocalDAECollocator:
         
         # References values
         cost_ref = 1.8576873858261e3
-        u_norm_ref = 3.0536254817626696e2
+        u_norm_ref = 3.050971000653911e2
         
         # Quadrature constraint, with continuity variables
         opts = model.optimize_options(self.algorithm)
