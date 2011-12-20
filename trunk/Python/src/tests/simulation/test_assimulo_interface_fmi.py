@@ -32,8 +32,8 @@ try:
     from pyfmi.simulation.assimulo_interface import FMIODE
     from pyfmi.simulation.assimulo_interface import write_data
     from pyfmi.common.core import TrajectoryLinearInterpolation
-    from assimulo.explicit_ode import CVode
-    from assimulo.implicit_ode import IDA
+    from assimulo.solvers import CVode
+    from assimulo.solvers import IDA
 except NameError, ImportError:
     logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
 
@@ -153,7 +153,7 @@ class Test_FMI_ODE:
         t = 1.0
         y = N.array([1.0,1.0])
         
-        rhs = self._bounceSim.f(t,y)
+        rhs = self._bounceSim.rhs(t,y)
         
         nose.tools.assert_almost_equal(rhs[0],1.00000000)
         nose.tools.assert_almost_equal(rhs[1],-9.8100000)
@@ -198,9 +198,12 @@ class Test_FMI_ODE:
         t = 1.0
         y = N.array([1.0,1.0])
         
+        solver = lambda x:1
+        solver.continuous_output = False
+        
         assert len(self._bounceSim._sol_real) == 0
         self._bounceSim.write_cont = False
-        self._bounceSim.handle_result(None,t,y)
+        self._bounceSim.handle_result(solver,t,y)
         
         assert len(self._bounceSim._sol_real) == 1
         
@@ -214,14 +217,15 @@ class Test_FMI_ODE:
         self._bounceSim._model.real_x = y
         solver = lambda x:1
         solver.rtol = 1.e-4
-        solver.t_cur = 1.0
-        solver.y_cur = y
-        solver.y = [y]
+        solver.t = 1.0
+        solver.y = y
+        solver.y_sol = [y]
+        solver.continuous_output = False
 
         self._bounceSim.handle_event(solver, None)
 
-        nose.tools.assert_almost_equal(solver.y_cur[0],1.00000000)
-        nose.tools.assert_almost_equal(solver.y_cur[1],-0.70000000)
+        nose.tools.assert_almost_equal(solver.y[0],1.00000000)
+        nose.tools.assert_almost_equal(solver.y[1],-0.70000000)
         
         #Further testing of the handle_event function is needed.
     
@@ -232,9 +236,9 @@ class Test_FMI_ODE:
         """
         y = N.array([1.,1.])
         solver = lambda x:1
-        solver.t_cur = 1.0
-        solver.y_cur = y
-        assert self._bounceSim.completed_step(solver) == 0
+        solver.t = 1.0
+        solver.y = y
+        assert self._bounceSim.step_events(solver) == 0
         #Further testing of the completed step function is needed.
         
     @testattr(windows = True)
@@ -276,7 +280,7 @@ class Test_FMI_ODE:
         res = model.simulate(final_time=2.0)
         solver = res.solver
         
-        nose.tools.assert_almost_equal(solver.t_cur, 1.856045, places=3)    
+        nose.tools.assert_almost_equal(solver.t, 1.856045, places=3)    
         
     @testattr(windows = True)
     def test_typeDefinitions_simulation(self):
@@ -288,7 +292,7 @@ class Test_FMI_ODE:
         res = model.simulate(final_time=2.0)
         solver = res.solver
         
-        nose.tools.assert_almost_equal(solver.t_cur, 1.856045, places=3)        
+        nose.tools.assert_almost_equal(solver.t, 1.856045, places=3)        
 
     @testattr(assimulo = True)
     def test_event_iteration(self):
@@ -363,7 +367,7 @@ class Test_FMI_ODE:
         bounce = FMUModel('bouncingBall.fmu', path_to_fmus)
         bounce.initialize()
         opt = bounce.simulate_options()
-        opt['CVode_options']['write_cont'] = False
+        opt['continuous_output'] = False
         opt['initialize']=False
         res = bounce.simulate(final_time=3., options=opt)
         

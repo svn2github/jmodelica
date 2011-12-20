@@ -32,7 +32,6 @@ from pyfmi.common.core import TrajectoryLinearInterpolation
 try:
     from assimulo.problem import Implicit_Problem
     from assimulo.problem import Explicit_Problem
-    from assimulo.sundials import Sundials_Exception
     from assimulo.exception import *
 except ImportError:
     logging.warning(
@@ -50,18 +49,18 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
     """
     #Determine the result file name
     if result_file_name == '':
-        result_file_name=simulator._problem._model.get_name()+'_result.txt'
+        result_file_name=simulator.problem._model.get_name()+'_result.txt'
   
-    model = simulator._problem._model
+    model = simulator.problem._model
         
-    t = N.array(simulator._problem._sol_time)
-    r = N.array(simulator._problem._sol_real)
+    t = N.array(simulator.problem._sol_time)
+    r = N.array(simulator.problem._sol_real)
     data = N.c_[t,r]
-    if len(simulator._problem._sol_int) > 0:
-        i = N.array(simulator._problem._sol_int)
+    if len(simulator.problem._sol_int) > 0:
+        i = N.array(simulator.problem._sol_int)
         data = N.c_[data,i]
-    if len(simulator._problem._sol_bool) > 0:
-        b = N.array(simulator._problem._sol_bool).reshape(
+    if len(simulator.problem._sol_bool) > 0:
+        b = N.array(simulator.problem._sol_bool).reshape(
             -1,len(model._save_cont_valueref[2]))
         data = N.c_[data,b]
 
@@ -97,14 +96,15 @@ class FMIODE(Explicit_Problem):
     An Assimulo Explicit Model extended to FMI interface.
     """
     def __init__(self, model, input=None, result_file_name='',
-                 with_jacobian=False):
+                 with_jacobian=False, start_time=0.0):
         """
         Initialize the problem.
         """
         self._model = model
         self.input = input
         self.input_names = []
-
+        
+        self.t0 = start_time
         self.y0 = self._model.continuous_states
         self.problem_name = self._model.get_name()
 
@@ -129,7 +129,6 @@ class FMIODE(Explicit_Problem):
             self.result_file_name = result_file_name
         
         #Default values
-        self.write_cont = True #Continuous writing
         self.export = ResultWriterDymola(model)
         
         #Internal values
@@ -151,7 +150,7 @@ class FMIODE(Explicit_Problem):
         if with_jacobian:
             self.jac = self.j #Activates the jacobian
         
-    def f(self, t, y, sw=None):
+    def rhs(self, t, y, sw=None):
         """
         The rhs (right-hand-side) for an ODE problem.
         """
@@ -233,18 +232,6 @@ class FMIODE(Explicit_Problem):
         else:
             return None
     
-    def _set_write_cont(self, cont):
-        self.__write_cont = cont
-        
-    def _get_write_cont(self):
-        return self.__write_cont
-
-    write_cont = property(_get_write_cont, _set_write_cont, doc = 
-    """
-    Property for accessing the values should be written to the file continuously 
-    during the simulation.
-    """)
-    
     def handle_result(self, solver, t, y):
         """
         Post processing (stores the time points).
@@ -264,7 +251,7 @@ class FMIODE(Explicit_Problem):
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
         
-        if self.write_cont:
+        if solver.continuous_output:
             if self._write_header:
                 self._write_header = False
                 self.export.write_header(file_name=self.result_file_name)
@@ -284,16 +271,16 @@ class FMIODE(Explicit_Problem):
         This method is called when Assimulo finds an event.
         """
         #Moving data to the model
-        if solver.t_cur != self._model.time:
-            self._model.time = solver.t_cur
+        if solver.t!= self._model.time:
+            self._model.time = solver.t
             #Check if there are any states
             if self._f_nbr != 0:
-                self._model.continuous_states = solver.y_cur
+                self._model.continuous_states = solver.y
             
             #Sets the inputs, if any
             if self.input!=None:
                 self._model.set(self.input[0], 
-                    self.input[1].eval(N.array([solver.t_cur]))[0,:])
+                    self.input[1].eval(N.array([solver.t]))[0,:])
             
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
@@ -311,7 +298,7 @@ class FMIODE(Explicit_Problem):
 
         #Check if the event affected the state values and if so sets them
         if eInfo.stateValuesChanged:
-            solver.y_cur = self._model.continuous_states
+            solver.y = self._model.continuous_states
         
         #Get new nominal values.
         if eInfo.stateValueReferencesChanged:
@@ -321,27 +308,27 @@ class FMIODE(Explicit_Problem):
         if eInfo.terminateSimulation:
             raise TerminateSimulation #Exception from Assimulo
         
-    def completed_step(self, solver):
+    def step_events(self, solver):
         """
         Method which is called at each successful step.
         """
         #Moving data to the model
-        if solver.t_cur != self._model.time:
-            self._model.time = solver.t_cur
+        if solver.t != self._model.time:
+            self._model.time = solver.t
             #Check if there are any states
             if self._f_nbr != 0:
-                self._model.continuous_states = solver.y_cur
+                self._model.continuous_states = solver.y
             
             #Sets the inputs, if any
             if self.input!=None:
                 self._model.set(self.input[0], 
-                    self.input[1].eval(N.array([solver.t_cur]))[0,:])
+                    self.input[1].eval(N.array([solver.t]))[0,:])
             
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
         
         if self._model.completed_integrator_step():
-            self._logg_step_event += [solver.t_cur]
+            self._logg_step_event += [solver.t]
             #Event have been detect, call event iteration.
             self.handle_event(solver,[0]) 
             return 1 #Tell to reinitiate the solver.
@@ -358,7 +345,7 @@ class FMIODE(Explicit_Problem):
         print '\nNumber of events: ',len(self._logg_step_event)
     
     def finalize(self, solver):
-        if self.write_cont:
+        if solver.continuous_output:
             self.export.write_finalize()
         
     def _set_input(self, input):

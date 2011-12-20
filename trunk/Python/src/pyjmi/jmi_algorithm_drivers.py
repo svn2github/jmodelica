@@ -31,17 +31,15 @@ from pyjmi.common.io import ResultDymolaTextual
 from pyjmi.optimization import ipopt
 from pyjmi.initialization.ipopt import NLPInitialization
 from pyjmi.initialization.ipopt import InitializationOptimizer
+from pyjmi.common.core import TrajectoryLinearInterpolation
+from pyjmi.common.core import TrajectoryUserFunction
 
 try:
-    from pyjmi.simulation.assimulo_interface import JMIDAE, JMIODE
+    from pyjmi.simulation.assimulo_interface import JMIDAE
     from pyjmi.simulation.assimulo_interface import JMIDAESens
     from pyjmi.simulation.assimulo_interface import write_data
-    from pyjmi.common.core import TrajectoryLinearInterpolation
-    from pyjmi.common.core import TrajectoryUserFunction
-    from assimulo.implicit_ode import *
-    from assimulo.explicit_ode import *
-    from assimulo import implicit_ode as impl_ode
-    from assimulo import explicit_ode as expl_ode
+    import assimulo.solvers as solvers
+    from assimulo.implicit_ode import Implicit_ODE
     from assimulo.kinsol import KINSOL
     from pyjmi.initialization.assimulo_interface import JMUAlgebraic
     from pyjmi.initialization.assimulo_interface import JMUAlgebraic_Exception
@@ -297,6 +295,11 @@ class AssimuloAlgOptions(OptionBase):
             written. Setting this option to an empty string results in a default 
             file name that is based on the name of the model class.
             Default: Empty string
+            
+        continuous_output --
+            Specifies if the result should be written to file at each result
+            point. This is necessary is some cases.
+            Default: False
 
     The different solvers provided by the Assimulo simulation package provides
     different options. These options are given in dictionaries with names
@@ -325,10 +328,13 @@ class AssimuloAlgOptions(OptionBase):
             parameters set to free in the model will be calculated.
             Default: False
             
-        write_cont --
-            Continuous writing of the result file instead. Currently only
-            supported when "sensitivity" is set to True.
+        suppress_alg --
+            Suppress the algebraic variables in the error test.
             Default: False
+            
+        suppress_sens --
+            Suppress the sensitivity variables in the error test.
+            Default: true
     
     Options for CVode::
     
@@ -355,9 +361,10 @@ class AssimuloAlgOptions(OptionBase):
             'initialize':True,
             'write_scaled_result':False,
             'result_file_name':'',
+            'continuous_output':False,
             'IDA_options':{'atol':1.0e-6,'rtol':1.0e-6,
                            'maxord':5,'sensitivity':False,
-                           'write_cont':False},
+                           'suppress_alg':False, 'suppress_sens':True},
             'CVode_options':{'discr':'BDF','iter':'Newton',
                              'atol':1.0e-6,'rtol':1.0e-6}
             }
@@ -446,24 +453,21 @@ class AssimuloAlg(AlgorithmBase):
         if issubclass(self.solver, Implicit_ODE):
             if not self.input:
                 if not self.sensitivity:
-                    self.probl = JMIDAE(model,result_file_name=self.result_file_name)
+                    self.probl = JMIDAE(model,result_file_name=self.result_file_name, start_time=self.start_time)
                 else:
-                    self.probl = JMIDAESens(model,result_file_name=self.result_file_name)
+                    self.probl = JMIDAESens(model,result_file_name=self.result_file_name, start_time=self.start_time)
             else:
                 if not self.sensitivity:
                     self.probl = JMIDAE(model,input_traj, \
-                                                      self.result_file_name)
+                                                      self.result_file_name, start_time=self.start_time)
                 else:
                     self.probl = JMIDAESens(model,input_traj, \
-                                                      self.result_file_name)
+                                                      self.result_file_name, start_time=self.start_time)
         else:
-            if not self.input:
-                self.probl = JMIODE(model,result_file_name=self.result_file_name)
-            else:
-                self.probl = JMIODE(model,input_traj, \
-                                                  self.result_file_name)
+            raise Exception("The solver does not support solving an DAE.")
+            
         # instantiate solver and set options
-        self.simulator = self.solver(self.probl, t0=self.start_time)
+        self.simulator = self.solver(self.probl)
         self._set_solver_options()
         
     def _set_options(self):
@@ -475,10 +479,8 @@ class AssimuloAlg(AlgorithmBase):
         
         # solver
         solver = self.options['solver']
-        if hasattr(impl_ode, solver):
-            self.solver = getattr(impl_ode, solver)
-        elif hasattr(expl_ode, solver):
-            self.solver = getattr(expl_ode, solver)
+        if hasattr(solvers, solver):
+            self.solver = getattr(solvers, solver)
         else:
             raise InvalidAlgorithmOptionException(
                 "The solver: "+solver+ " is unknown.")
@@ -502,12 +504,12 @@ class AssimuloAlg(AlgorithmBase):
         self.sensitivity = self.solver_options.get('sensitivity',False)
         #self.solver_options.pop('sensitivity',False)
 
-        # store cont is currently crucial when solving sensitivity problems
+        # continuous_output is currently crucial when solving sensitivity problems
         if self.sensitivity:
-            try:
-                self.solver_options['store_cont']
-            except KeyError:
-                self.solver_options['store_cont'] = True
+            if not self.options["continuous_output"]:
+                self.options["continuous_output"] = True
+                logging.warning("Continuous output is necessary when solving sensitivity problems, "
+                                "setting continuous_output to True.")
                 
         if self.sensitivity and self.solver_options['maxord']==5:
             logging.warning("Maximum order when using IDA for simulating "
@@ -518,6 +520,9 @@ class AssimuloAlg(AlgorithmBase):
         """ 
         Helper functions that sets options for the solver.
         """
+        #Continouous output
+        self.simulator.continuous_output = self.options["continuous_output"]
+        
         #loop solver_args and set properties of solver
         for k, v in self.solver_options.iteritems():
             if k == 'sensitivity':
@@ -528,7 +533,7 @@ class AssimuloAlg(AlgorithmBase):
                 try:
                     getattr(self.probl,k)
                 except AttributeError:
-                    raise InvalidSolverArgumentException(v)
+                    raise InvalidSolverArgumentException(k)
                 setattr(self.probl, k, v)
                 continue
             setattr(self.simulator, k, v)
@@ -544,7 +549,9 @@ class AssimuloAlg(AlgorithmBase):
             # Only run initiate if model has been compiled with CppAD
             # and if alg arg 'initialize' is True.
             if self.model.has_cppad_derivatives() and self.initialize:
-                self.simulator.initiate()
+                pass
+            else:
+                self.probl._no_initialization = True
         self.simulator.simulate(self.final_time, self.ncp)
  
     def get_result(self):
@@ -556,7 +563,7 @@ class AssimuloAlg(AlgorithmBase):
         
             The AssimuloSimResult object.
         """
-        if not self.probl.write_cont:
+        if not self.simulator.continuous_output:
             write_data(self.simulator,self.write_scaled_result, self.result_file_name)
         #write_data(self.simulator,self.write_scaled_result,self.result_file_name)
         # load result file

@@ -35,7 +35,6 @@ from pyjmi.common.core import TrajectoryLinearInterpolation
 try:
     from assimulo.problem import Implicit_Problem
     from assimulo.problem import Explicit_Problem
-    from assimulo.sundials import Sundials_Exception
     from assimulo.exception import *
 except ImportError:
     logging.warning(
@@ -53,26 +52,26 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
     """
     #Determine the result file name
     if result_file_name == '':
-        result_file_name=simulator._problem._model.get_name()+'_result.txt'
+        result_file_name=simulator.problem._model.get_name()+'_result.txt'
     
-    if isinstance(simulator._problem, JMIDAE):
+    if isinstance(simulator.problem, JMIDAE):
         
-        model = simulator._problem._model
-        problem = simulator._problem
+        model = simulator.problem._model
+        problem = simulator.problem
         
-        t = N.array(simulator.t)
-        y = N.array(simulator.y)
-        yd = N.array(simulator.yd)
-        if simulator._problem.input:
+        t = N.array(simulator.t_sol)
+        y = N.array(simulator.y_sol)
+        yd = N.array(simulator.yd_sol)
+        if simulator.problem.input:
             u_name = [k[1] for k in sorted(model.get_u_variable_names())]
             #u = N.zeros((len(t), len(u_name)))
             u = N.ones((len(t), len(u_name)))*model.real_u
-            u_mat = simulator._problem.input[1].eval(t)
+            u_mat = simulator.problem.input[1].eval(t)
 
-            if not isinstance(simulator._problem.input[0],list):
-                u_input_name = [simulator._problem.input[0]]
+            if not isinstance(simulator.problem.input[0],list):
+                u_input_name = [simulator.problem.input[0]]
             else:
-                u_input_name = simulator._problem.input[0]
+                u_input_name = simulator.problem.input[0]
 
             for i,n in enumerate(u_input_name):
                 u[:,u_name.index(n)] = u_mat[:,i]/problem._input_nominal[i]
@@ -88,61 +87,31 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
 
         export_result_dymola(model,data,scaled=write_scaled_result, \
                                 file_name=result_file_name)
-    elif isinstance(simulator._problem, JMIODE):
-        model = simulator._problem._model
-        problem = simulator._problem
-    
-        t = N.array(simulator.t)
-        y = N.array(simulator.y)
-        if simulator._problem.input:
+    elif isinstance(simulator.problem, JMIDAESens):
+        
+        model = simulator.problem._model
+        problem = simulator.problem
+        
+        t = N.array(simulator.t_sol)
+        y = N.array(simulator.y_sol)
+        yd = N.array(simulator.yd_sol)
+        if simulator.problem.input:
             u_name = [k[1] for k in sorted(model.get_u_variable_names())]
             #u = N.zeros((len(t), len(u_name)))
             u = N.ones((len(t), len(u_name)))*model.real_u
-            u_mat = simulator._problem.input[1].eval(t)
+            u_mat = simulator.problem.input[1].eval(t)
             
-            if not isinstance(simulator._problem.input[0],list):
-                u_input_name = [simulator._problem.input[0]]
+            if not isinstance(simulator.problem.input[0],list):
+                u_input_name = [simulator.problem.input[0]]
             else:
-                u_input_name = simulator._problem.input[0]
-            
-            for i,n in enumerate(u_input_name):
-                u[:,u_name.index(n)] = u_mat[:,i]/problem._input_nominal[i]
-        else:
-            u = N.ones((len(t),len(model.real_u)))*model.real_u
-        yd = N.array(map(simulator.f,t,y))
-
-        # extends the time array with the states columnwise
-        data = N.c_[t,yd]
-        data = N.c_[data, y]
-        data = N.c_[data, u]
-        
-        export_result_dymola(model,data,scaled=write_scaled_result, \
-                                    file_name=result_file_name)
-    elif isinstance(simulator._problem, JMIDAESens):
-        
-        model = simulator._problem._model
-        problem = simulator._problem
-        
-        t = N.array(simulator.t)
-        y = N.array(simulator.y)
-        yd = N.array(simulator.yd)
-        if simulator._problem.input:
-            u_name = [k[1] for k in sorted(model.get_u_variable_names())]
-            #u = N.zeros((len(t), len(u_name)))
-            u = N.ones((len(t), len(u_name)))*model.real_u
-            u_mat = simulator._problem.input[1].eval(t)
-            
-            if not isinstance(simulator._problem.input[0],list):
-                u_input_name = [simulator._problem.input[0]]
-            else:
-                u_input_name = simulator._problem.input[0]
+                u_input_name = simulator.problem.input[0]
             
             for i,n in enumerate(u_input_name):
                 u[:,u_name.index(n)] = u_mat[:,i]/problem._input_nominal[i]
         else:
             u = N.ones((len(t),len(model.real_u)))*model.real_u
         
-        p_names , p_data = simulator._problem.get_sens_result()
+        p_names , p_data = simulator.problem.get_sens_result()
         
         # extends the time array with the states columnwise
         data = N.c_[t,yd[:,0:len(model.real_dx)]]
@@ -183,171 +152,13 @@ def createLogger(model, minimum_level):
     log.addHandler(ch)
 
     return log
-
-class JMIODE(Explicit_Problem):
-    """
-    An Assimulo Explicit Model extended to JMI interface. 
-    
-    Not extended with handling for discontinuities.
-    
-    To use an explicit solver the problem have to be defined in specific way, 
-    namely: der(x) = f(t,x) in the modelica model. See 
-    http://www.jmodelica.org/page/10
-    """
-    
-    def __init__(self, model, input=None, result_file_name=''):
-        """
-        Sets the initial values.
-        """
-        if input != None and not isinstance(input[0],list):
-            input = ([input[0]], input[1])
-        
-        self._model = model
-        self.input = input
-        
-        self.y0 = self._model.real_x
-        
-        #Determine the result file name
-        if result_file_name == '':
-            self.result_file_name = model.get_name()+'_result.txt'
-        else:
-            self.result_file_name = result_file_name
-        
-        if len(self._model.real_w):
-            raise JMIModel_Exception(
-                'There can be no algebraic variables when using an ODE solver.')
-        
-        self.write_cont = False #Continuous writing false (True not supported)
-        
-        #Used for determine if there are discontinuities
-        [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() 
-        
-        #Construct the input nominal vector
-        if self.input != None:
-            self._input_nominal = N.array([1.0]*len(self.input[0]))
-            if (self._model.get_scaling_method() == jmi.JMI_SCALING_VARIABLES):
-                for i in range(len(self.input[0])):
-                    val_ref = self._model._xmldoc.get_value_reference(self.input[0][i])
-                    for j, nom in enumerate(self._model._xmldoc.get_u_nominal()):
-                        if val_ref == nom[0]:
-                            if nom[1] == None:
-                                self._input_nominal[i] = 1.0
-                            else:
-                                self._input_nominal[i] = nom[1]
-        
-        if g_nbr > 0:
-            raise JMIModel_Exception(
-                'There is no support for discontinuities when using an ODE solver.')
-        
-        if self._model.has_cppad_derivatives():
-            self.jac = self.j #Activates the jacobian
-    
-    def f(self, t, y, sw=None):
-        """
-        The rhs (right-hand-side) for an ODE problem.
-        """
-        #Moving data to the model
-        self._model.t = t
-        self._model.real_x = y
-        
-        #Sets the inputs, if any
-        if self.input!=None:
-            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
-        
-        #Evaluating the rhs
-        self._model.eval_ode_f()
-        rhs = self._model.real_dx
-
-        return rhs
-        
-    def j(self, t, y, sw=None):
-        """
-        The jacobian function for an ODE problem.
-        """
-        #Moving data to the model
-        self._model.t = t
-        self._model.real_x = y
-        
-        #Sets the inputs, if any
-        if self.input!=None:
-            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
-        
-        #Evaluating the jacobian
-        #-Setting options
-        #Used to give independent_vars full control
-        z_l = N.array([1]*len(self._model.z),dtype=N.int32) 
-        #Derivation with respect to X
-        independent_vars = [jmi.JMI_DER_X] 
-        sparsity = jmi.JMI_DER_DENSE_ROW_MAJOR
-        #Determine to use CPPAD
-        evaluation_options = jmi.JMI_DER_CPPAD 
-        
-        #-Evaluating
-        Jac = N.zeros(len(y)**2) #Matrix that holds the information
-        #Output Jac
-        self._model.jmimodel.ode_df(
-            evaluation_options, sparsity, independent_vars, z_l, Jac)
-        
-        #-Vector manipulation
-        Jac = Jac.reshape(len(y),len(y)) #Reshape to a matrix
-        
-        return Jac
-    
-    def g(self, t, y, sw):
-        """
-        The event indicator function for a ODE problem.
-        """
-        #Moving data to the model
-        self._model.t = t
-        self._model.real_x = y
-        
-        #Evaluating the switching functions
-        #TODO
-        raise JMIModel_Exception('Not implemented.')
-   
-    def _set_input(self, input):
-        self.__input = input
-        
-    def _get_input(self):
-        return self.__input
-        
-    input = property(_get_input, _set_input, doc = 
-    """
-    Property for accessing the input. The input must be a 2-tuple with the first 
-    object as a list of names of the input variables and with the other as a 
-    subclass of the class Trajectory.
-    """)
-    
-    def reset(self):
-        """
-        Resets the model to it's default values.
-        """
-        self._model.reset()
-        self._model.t = self.t0 #Set time to the default value
-        
-        self.y0 = self._model.real_x
-        
-    def _set_write_cont(self, cont):
-        if cont == True:
-            raise JMIModel_Exception("Continuous writing of the result file is "
-                                     "currently not supported for this option.")
-        self.__write_cont = cont
-        
-    def _get_write_cont(self):
-        return self.__write_cont
-    
-    write_cont = property(_get_write_cont, _set_write_cont, doc = 
-    """
-    Property for accessing the values should be written to the file continuously 
-    during the simulation.
-    """)
  
     
 class JMIDAE(Implicit_Problem):
     """
     An Assimulo Implicit Model extended to JMI interface.
     """
-    def __init__(self, model, input=None, result_file_name=''):
+    def __init__(self, model, input=None, result_file_name='', start_time=0.0):
         """
         Sets the initial values.
         """
@@ -357,6 +168,7 @@ class JMIDAE(Implicit_Problem):
         self._model = model
         self.input = input
         
+        self.t0 = start_time
         self.y0 = N.append(self._model.real_x,self._model.real_w)
         self.yd0 = N.append(self._model.real_dx,[0]*len(self._model.real_w))
         #Sets the algebraic components of the model
@@ -368,7 +180,7 @@ class JMIDAE(Implicit_Problem):
 
         if g_nbr > 0:
             #Change the models values of the switches from ints to booleans
-            self.switches0 = [bool(x) for x in self._model.sw] 
+            self.sw0 = [bool(x) for x in self._model.sw] 
             self.state_events = self.g_adjust #Activates the event function
         if g0_nbr > 0:
             self.switches_init = [bool(x) for x in self._model.sw_init]
@@ -396,7 +208,6 @@ class JMIDAE(Implicit_Problem):
         self.max_eIter = 50 #Maximum number of event iterations allowed.
         self.eps = 1e-9 #Epsilon for adjusting the event indicator.
         self.log_events = False #Are we to log the events?
-        self.write_cont = False #Continuous writing false (True not supported)
         
         if self._model.has_cppad_derivatives() or self._model.has_cad_derivatives():
             self.jac = self.j #Activates the jacobian
@@ -416,6 +227,7 @@ class JMIDAE(Implicit_Problem):
         self._temp_f = N.array([0.]*self._f_nbr)
         self._logLevel = logging.CRITICAL
         self._log = createLogger(model, self._logLevel)
+        self._no_initialization = False
         
     def _set_logging_level(self, level):
         if bool(level):
@@ -432,7 +244,7 @@ class JMIDAE(Implicit_Problem):
     be activated (True) or deactivated (False).
     """)
         
-    def f(self, t, y, yd, sw=None):
+    def res(self, t, y, yd, sw=None):
         """
         The residual function for an DAE problem.
         """
@@ -564,24 +376,24 @@ class JMIDAE(Implicit_Problem):
         """
         event_info = event_info[0] #Only look at the state event information
         
-        self._log.debug('State event occurred at time: %f'%solver.t_cur)
+        self._log.debug('State event occurred at time: %f'%solver.t)
         nbr_iteration = 0
 
         while self.max_eIter > nbr_iteration: #Event Iteration
             
-            self._log.debug(' Current switches: ' +str(solver.switches))
+            self._log.debug(' Current switches: ' +str(solver.sw))
             self._log.debug(' Event information: '+str(event_info))
-            self._log.debug(' Current States: '+str(solver.y_cur))
-            self._log.debug(' Current State Derivatives: '+str(solver.yd_cur))
+            self._log.debug(' Current States: '+str(solver.y))
+            self._log.debug(' Current State Derivatives: '+str(solver.yd))
             
             self.event_switch(solver, event_info) #Turns the switches
 
             b_mode = self.g(
-                solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches)
+                solver.t, solver.y, solver.yd, solver.sw)
             #Pass in the solver to the problem specified init_mode
             self.init_mode(solver) 
             a_mode = self.g(
-                solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches)
+                solver.t, solver.y, solver.yd, solver.sw)
 
             self._log.debug(' Root equations (pre)  : '+str(b_mode))
             self._log.debug(' Root equations (after): '+str(a_mode))
@@ -608,9 +420,9 @@ class JMIDAE(Implicit_Problem):
         """
         for i in range(len(event_info)): #Loop across all event functions
             if event_info[i] == -1:
-                solver.switches[i] = False
+                solver.sw[i] = False
             if event_info[i] == 1:
-                solver.switches[i] = True
+                solver.sw[i] = True
         
     def init_mode(self, solver):
         """
@@ -619,9 +431,9 @@ class JMIDAE(Implicit_Problem):
         if self._initiate_problem:
             #Check wheter or not it involves event functions
             if self._g_nbr > 0:
-                self._model.sw = [int(x) for x in solver.switches]
+                self._model.sw = [int(x) for x in solver.sw]
             if self._g0_nbr > 0:
-                self._model.sw_init = [int(x) for x in solver.switches_init]
+                self._model.sw_init = [int(x) for x in self.switches_init]
 
             #Initiate using IPOPT
             init_nlp = NLPInitialization(self._model)
@@ -629,10 +441,10 @@ class JMIDAE(Implicit_Problem):
             init_nlp_ipopt.init_opt_ipopt_solve()
             
             #Sets the calculated values
-            solver.y_cur = N.append(self._model.real_x,self._model.real_w)
-            solver.yd_cur = N.append(self._model.real_dx,[0]*len(self._model.real_w)) 
+            solver.y = N.append(self._model.real_x,self._model.real_w)
+            solver.yd = N.append(self._model.real_dx,[0]*len(self._model.real_w)) 
         else:
-            self._model.sw = [int(x) for x in solver.switches]
+            self._model.sw = [int(x) for x in solver.sw]
             
             if self.log_events:
                 self._log_initiate_mode = True #Logg f evaluations
@@ -730,30 +542,18 @@ class JMIDAE(Implicit_Problem):
     Property for accessing the epsilon used for adjusting the event indicators.
     """)
     
-    def _set_write_cont(self, cont):
-        if cont == True:
-            raise JMIModel_Exception("Continuous writing of the result file is "
-                                    "currently not supported for this option.")
-        self.__write_cont = cont
-        
-    def _get_write_cont(self):
-        return self.__write_cont
-    
-    write_cont = property(_get_write_cont, _set_write_cont, doc = 
-    """
-    Property for accessing the values should be written to the file continuously 
-    during the simulation.
-    """)
-    
-    def initiate(self,solver):
+    def initialize(self,solver):
         """
         Initiates the problem.
         """
         self._initiate_problem = True
         
+        if self._no_initialization == True:
+            return
+        
         if self._g0_nbr > 0:
             
-            solver.switches_init = [True]*(self._g0_nbr-self._g_nbr)
+            self.switches_init = [True]*(self._g0_nbr-self._g_nbr)
             #sw_val = N.array([.0]*len(self._model.sw))
             sw_val = N.array([0.0]*(self._g0_nbr))
             #self._model.jmimodel.dae_R(sw_val)
@@ -761,25 +561,25 @@ class JMIDAE(Implicit_Problem):
             
             for i in range(self._g_nbr):
                 if sw_val[i] >= 0.0:
-                    solver.switches[i] = True
+                    solver.sw[i] = True
                 else:
-                    solver.switches[i] = False
+                    solver.sw[i] = False
             for i in range(self._g0_nbr-self._g_nbr):
                 if sw_val[self._g_nbr+i] >= 0.0:
-                    solver.switches_init[i] = True
+                    self.switches_init[i] = True
                 else:
-                    solver.switches_init[i] = False
+                    self.switches_init[i] = False
                     
             nbr_iteration = 0
             while self.max_eIter > nbr_iteration: #Event Iteration
                 
                 b_mode = self.g_init(
-                    solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches+solver.switches_init)
+                    solver.t, solver.y, solver.yd, solver.sw+self.switches_init)
                 #Pass in the solver to the problem specified init_mode
                 self.init_mode(solver) 
                 
                 a_mode = self.g_init(
-                    solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches+solver.switches_init)
+                    solver.t, solver.y, solver.yd, solver.sw+self.switches_init)
 
                 [event_info, iter] = self.check_eIter(b_mode, a_mode)
                     
@@ -789,14 +589,14 @@ class JMIDAE(Implicit_Problem):
                 for i in range(len(event_info)): #Loop across all event functions
                     if i < self._g_nbr:
                         if event_info[i] == -1:
-                            solver.switches[i] = False
+                            solver.sw[i] = False
                         if event_info[i] == 1:
-                            solver.switches[i] = True
+                            solver.sw[i] = True
                     else:
                         if event_info[i] == -1:
-                            solver.switches_init[i-self._g_nbr] = False
+                            self.switches_init[i-self._g_nbr] = False
                         if event_info[i] == 1:
-                            solver.switches_init[i-self._g_nbr] = True
+                            self.switches_init[i-self._g_nbr] = True
             
                 nbr_iteration += 1
         
@@ -848,7 +648,7 @@ class JMIDAESens(Implicit_Problem):
     An Assimulo Implicit Model extended to JMI interface with support for 
     sensitivities.
     """
-    def __init__(self, model, input=None, result_file_name=''):
+    def __init__(self, model, input=None, result_file_name='', start_time=0.0):
         """
         Sets the initial values.
         """
@@ -858,6 +658,7 @@ class JMIDAESens(Implicit_Problem):
         self._model = model
         self.input = input
         
+        self.t0 = start_time
         self.y0 = N.append(self._model.real_x,self._model.real_w)
         self.yd0 = N.append(self._model.real_dx,[0]*len(self._model.real_w))
         #Sets the algebraic components of the model
@@ -887,7 +688,6 @@ class JMIDAESens(Implicit_Problem):
             self.jac = self.j #Activates the jacobian
         
         #Default values
-        self.write_cont = False #Continuous writing
         self.export = ResultWriterDymolaSensitivity(model)
         
         #Determine the result file name
@@ -990,7 +790,7 @@ class JMIDAESens(Implicit_Problem):
         
         return yS0
     
-    def f(self, t, y, yd, p=None):
+    def res(self, t, y, yd, p=None):
         """
         The residual function for an DAE problem.
         """
@@ -1068,7 +868,7 @@ class JMIDAESens(Implicit_Problem):
         """
         Post processing (stores the time points and the sensitivity result).
         """
-        if self.write_cont:
+        if solver.continuous_output:
             if self._write_header:
                 self._write_header = False
                 self.export.write_header(file_name=self.result_file_name)
@@ -1095,29 +895,17 @@ class JMIDAESens(Implicit_Problem):
             
             self.export.write_point(data)
         else:
-            solver.t  += [t]
-            solver.y  += [y]
-            solver.yd += [yd]
+            solver.t_sol  += [t]
+            solver.y_sol  += [y]
+            solver.yd_sol += [yd]
             
             #Store the sensitivity matrix
             for i in range(self._p_nbr):
                 self._sens_matrix[i] += [solver.interpolate_sensitivity(t, 0, i)]
     
     def finalize(self, solver):
-        if self.write_cont:
+        if solver.continuous_output:
             self.export.write_finalize()
-    
-    def _set_write_cont(self, cont):
-        self.__write_cont = cont
-        
-    def _get_write_cont(self):
-        return self.__write_cont
-        
-    write_cont = property(_get_write_cont, _set_write_cont, doc = 
-    """
-    Property for accessing the values should be written to the file continuously 
-    during the simulation.
-    """)
     
     def get_sens_result(self):
         """

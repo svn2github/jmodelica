@@ -35,11 +35,11 @@ from pyjmi.jmi import JMUModel, JMIException
 import pyjmi.jmi_algorithm_drivers as ad
 
 try:
-    from pyjmi.simulation.assimulo_interface import JMIODE
+    from pyjmi.simulation.assimulo_interface import JMIDAE
     #, JMIDAE, FMIODE, JMIModel_Exception
     #from jmodelica.simulation.assimulo_interface import write_data
     #from jmodelica.simulation.assimulo_interface import TrajectoryLinearInterpolation
-    from assimulo.explicit_ode import CVode
+    from assimulo.solvers import IDA
 except NameError, ImportError:
     logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
 
@@ -74,12 +74,15 @@ class TestModel_VDP:
         # compile VDP
         #jmu_name = compile_jmu(cpath, fpath, 
         #            compiler_options={'enable_variable_scaling':True})
+        cls.vdp = JMUModel("VDP_pack_VDP_Opt.jmu")
     
     def setUp(self):
         """
         Sets up the test case.
         """
-        self.vdp = JMUModel("VDP_pack_VDP_Opt.jmu")
+        pass
+        #if not hasattr(self, "vdp"):
+        #    self.vdp = JMUModel("VDP_pack_VDP_Opt.jmu")
         #self.vdp_scaled = JMUModel("VDP_pack_VDP_scaled_input.jmu")
     """
     @testattr(stddist = True)
@@ -463,8 +466,10 @@ class TestModel_VDP:
     @testattr(assimulo = True)
     def test_optimization_cost_eval(self):
         """Test evaluation of optimization cost function."""
-        simulator_mod = JMIODE(self.vdp)
-        simulator = CVode(simulator_mod)
+        self.vdp = JMUModel("VDP_pack_VDP_Opt.jmu")
+        
+        simulator_mod = JMIDAE(self.vdp)
+        simulator = IDA(simulator_mod)
         simulator.simulate(10)
 
         T, ys = [simulator.t, simulator.y]
@@ -480,8 +485,10 @@ class TestModel_VDP:
         Note:
         This test is model specific for the VDP oscillator.
         """
-        simulator_mod = JMIODE(self.vdp)
-        simulator = CVode(simulator_mod)
+        self.vdp = JMUModel("VDP_pack_VDP_Opt.jmu")
+        
+        simulator_mod = JMIDAE(self.vdp)
+        simulator = IDA(simulator_mod)
         simulator.simulate(10)
 
         T, ys = [simulator.t, simulator.y]
@@ -619,7 +626,8 @@ class TestModel_RLC:
         """
         Sets up the test case.
         """
-        self.rlc = JMUModel("RLC_Circuit.jmu")
+        if not hasattr(self, "rlc"):
+            self.rlc = JMUModel("RLC_Circuit.jmu")
 
     # removed method
     #@testattr(stddist = True)
@@ -649,6 +657,8 @@ class TestModel_RLC:
     @testattr(stddist = True)
     def test_setget_alias_value(self):
        """ Test set and get the value of a alias variable. """ 
+       self.rlc = JMUModel("RLC_Circuit.jmu")
+       
        alias_variable = 'capacitor.i'
        aliased_variable = 'capacitor.p.i'
        cap_i = self.rlc.get(aliased_variable)
@@ -682,12 +692,16 @@ class TestJMIModel_VDP:
         cpath_vdp = "VDP_pack.VDP_Opt"
         fname_vdp = compile_jmu(cpath_vdp, fpath_vdp, 
                     compiler_options={'state_start_values_fixed':True})
-    
+        
+        cls.vdp = JMUModel("VDP_pack_VDP_Opt.jmu")   
+        
     def setUp(self):
         """
         Sets up the test case.
         """
-        self.vdp = JMUModel("VDP_pack_VDP_Opt.jmu")               
+        pass
+        #if not hasattr(self, "vdp"):
+        #    self.vdp = JMUModel("VDP_pack_VDP_Opt.jmu")               
 
     @testattr(stddist = True)
     def test_initAD(self):
@@ -1557,9 +1571,10 @@ class TestInitializeModelFromData(object):
         """
         Sets up the test class.
         """
-        jmu_name = compile_jmu(self._cpath, self._fpath)
-        self.model = JMUModel(get_jmu_name(self._cpath))
-        self.res = self.model.simulate(0,10)
+        if not hasattr(self, "res"):
+            jmu_name = compile_jmu(self._cpath, self._fpath)
+            self.model = JMUModel(get_jmu_name(self._cpath))
+            self.res = self.model.simulate(0,10)
 
     @testattr(ipopt = True)
     def test_initialize_from_data1(self):

@@ -307,24 +307,26 @@ class Test_init_assimulo:
         opts['solver']='IDAR'
         nose.tools.assert_raises(InvalidAlgorithmOptionException,
                                  self.model_rlc.simulate,options=opts)
-      
-    @testattr(assimulo=True)
-    def test_simulate_w_ode(self):
-        """ Test jmodelica.simulate with ODE problem and setting solver 
-        options."""
-        jmu_name = compile_jmu(self.cpath_vdp, self.fpath_vdp, 
-            compiler_options={'state_start_values_fixed':True},target='model')
-        model = JMUModel(jmu_name)
-        opts = model.simulate_options()
-        opts['solver']='CVode'
-        sim_res = model.simulate(final_time=20, options=opts)
-        x1=sim_res['x1']
-        x2=sim_res['x2']
-        
-        assert N.abs(x1[-1] + 0.736680243) < 1e-5, \
-               "Wrong value in simulation result in VDP_assimulo.py" 
-        assert N.abs(x2[-1] - 1.57833994) < 1e-5, \
-               "Wrong value in simulation result in VDP_assimulo.py"
+    
+    ### TEST IS OBSOLETE, JMUMODELS NO LONGERS SUPPORTS ODES
+    #  
+    #@testattr(assimulo=True)
+    #def test_simulate_w_ode(self):
+    #    """ Test jmodelica.simulate with ODE problem and setting solver 
+    #    options."""
+    #    jmu_name = compile_jmu(self.cpath_vdp, self.fpath_vdp, 
+    #        compiler_options={'state_start_values_fixed':True},target='model')
+    #    model = JMUModel(jmu_name)
+    #    opts = model.simulate_options()
+    #    opts['solver']='CVode'
+    #    sim_res = model.simulate(final_time=20, options=opts)
+    #    x1=sim_res['x1']
+    #    x2=sim_res['x2']
+    #    
+    #    assert N.abs(x1[-1] + 0.736680243) < 1e-5, \
+    #           "Wrong value in simulation result in VDP_assimulo.py" 
+    #    assert N.abs(x2[-1] - 1.57833994) < 1e-5, \
+    #           "Wrong value in simulation result in VDP_assimulo.py"
     
     @testattr(assimulo=True)
     def test_simulate_initialize_arg(self):

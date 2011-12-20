@@ -774,9 +774,9 @@ uninstall-am:
 
 build-python-packages:
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	cd $(abs_top_srcdir)/Assimulo; \
-@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --prefix=$(assimulo_install_dir)
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --prefix=$(assimulo_install_dir)
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	cd $(abs_top_srcdir)/Assimulo; \
-@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	python setup.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
 	cd $(abs_top_srcdir)/Python/src; \
 	python setup_jmodelica.py install --prefix=$(jmodelica_install_dir); \
 	rm -rf build
@@ -937,7 +937,7 @@ clean-local: clean-frontends clean-python-packages
 
 clean-python-packages:
 @WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/Assimulo; \
-@WITH_SUNDIALS_TRUE@	python setup_source.py clean --all --sundials-home=$(SUNDIALS_HOME) 
+@WITH_SUNDIALS_TRUE@	python setup.py clean --all --sundials-home=$(SUNDIALS_HOME) 
 @WITH_SUNDIALS_TRUE@	rm -rf $(assimulo_install_dir)
 	cd $(abs_top_srcdir)/Python/src; \
 	python setup_jmodelica.py clean --all 

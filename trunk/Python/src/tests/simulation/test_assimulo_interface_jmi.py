@@ -29,276 +29,19 @@ from pyjmi.common.io import ResultDymolaTextual
 from tests import testattr, get_files_path
 
 try:
-    from pyjmi.simulation.assimulo_interface import JMIODE, JMIDAE, JMIModel_Exception
+    from pyjmi.simulation.assimulo_interface import JMIDAE, JMIModel_Exception
     from pyfmi.simulation.assimulo_interface import FMIODE
     from pyjmi.simulation.assimulo_interface import JMIDAESens
     from pyjmi.simulation.assimulo_interface import write_data
     from pyjmi.common.core import TrajectoryLinearInterpolation
-    from assimulo.explicit_ode import CVode
-    from assimulo.implicit_ode import IDA
+    from assimulo.solvers import CVode
+    from assimulo.solvers import IDA
 except NameError, ImportError:
     logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_mos  = os.path.join(get_files_path(), 'Modelica')
 
-class Test_JMI_ODE:
-    """
-    This class tests jmodelica.simulation.assimulo.JMIODE
-    """
-    
-    @classmethod
-    def setUpClass(cls):
-        """
-        Compile the test model.
-        """
-        fpath_ODE = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
-        cpath_ODE = 'VDP_pack.VDP_Opt'
-
-        # compile VDP
-        fname_ODE = compile_jmu(cpath_ODE, fpath_ODE, 
-                    compiler_options={'state_start_values_fixed':True})
-
-        fpath = os.path.join(get_files_path(), 'Modelica', 'DoubleInput.mo')
-        cpath = 'DoubleInput_Nominal'
-        fname = compile_jmu(cpath, fpath, 
-                    compiler_options={"enable_variable_scaling":True})
-        
-    def setUp(self):
-        """Load the test model."""
-        package_ODE = 'VDP_pack_VDP_Opt.jmu'
-        package_INPUT = 'DoubleInput_Nominal.jmu'
-
-        # Load the dynamic library and XML data
-        self.m_ODE = JMUModel(package_ODE)
-        self.m_INPUT = JMUModel(package_INPUT)
-        
-        # Creates the solvers
-        self.ODE = JMIODE(self.m_ODE)
-    
-    @testattr(assimulo = True)
-    def test_result_name_file(self):
-        """
-        Tests user naming of result file (JMIODE).
-        """
-        res = self.m_ODE.simulate()
-        
-        #Default name
-        assert res.result_file == "VDP_pack_VDP_Opt_result.txt"
-        assert os.path.exists(res.result_file)
-        
-        self.m_ODE.reset()
-        
-        res = self.m_ODE.simulate(options={"result_file_name":
-                                    "VDP_pack_VDP_Opt_result_test.txt"})
-                                    
-        #User defined name
-        assert res.result_file == "VDP_pack_VDP_Opt_result_test.txt"
-        assert os.path.exists(res.result_file)
-    
-    @testattr(assimulo = True)
-    def test_input(self):
-        """
-        Tests the input.
-        """
-        t = N.linspace(1,10.,100)
-        u = (0.75)*N.ones(N.size(t,0))
-        u_traj = TrajectoryLinearInterpolation(t,u.reshape(100,1))
-        
-        ODE =  JMIODE(self.m_ODE, ('u',u_traj))
-        
-        vdp_sim = CVode(ODE)
-
-        vdp_sim(10,100)
-    
-        write_data(vdp_sim)
-    
-        # Load the file we just wrote to file
-        res = ResultDymolaTextual('VDP_pack_VDP_Opt_result.txt')
-    
-        x1=res.get_variable_data('x1')
-        x2=res.get_variable_data('x2')
-        u =res.get_variable_data('u')
-        
-        assert u.x[-1] == 0.75
-        nose.tools.assert_almost_equal(x1.x[-1], -0.54108518, 5)
-        nose.tools.assert_almost_equal(x2.x[-1], -0.81364915, 5)
-    
-    @testattr(assimulo = True)
-    def test_scaled_input(self):
-        """
-        Tests that simulation of scaled input works.
-        """
-        t = N.linspace(0.,10.,100) 
-        u1 = N.cos(t)
-        u2 = N.sin(t)
-        u_traj = N.transpose(N.vstack((t,u1,u2)))
-        
-        opts = self.m_INPUT.simulate_options()
-        opts["solver"] = "CVode"
-        
-        res = self.m_INPUT.simulate(final_time=10, input=(['u1','u2'],u_traj),
-                                    options=opts)
-        
-        r1=res['u1']
-        r2=res['u2']
-        t1=res['time']
-        
-        #P.plot(t1,r1,t1,r2)
-        #P.show()
-        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
-        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
-        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
-        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
-    
-    @testattr(assimulo = True) 
-    def test_init(self):
-        """
-        Tests jmodelica.simulation.assimulo.JMIODE.__init__
-        """
-        assert self.m_ODE == self.ODE._model
-        
-        for i in range(len(self.ODE.y0)):
-            assert self.m_ODE.real_x[i] == self.ODE.y0[i]
-            
-        #Test for algebraic variables
-        fpath_DAE = os.path.join(get_files_path(), 'Modelica', 
-            'RLC_Circuit.mo')
-        cpath_DAE = 'RLC_Circuit'
-
-        fname_DAE = compile_jmu(cpath_DAE, fpath_DAE)
-        package_DAE = 'RLC_Circuit.jmu'
-        # Load the dynamic library and XML data
-        m_DAE = JMUModel(package_DAE)
-        
-        nose.tools.assert_raises(JMIModel_Exception, JMIODE, m_DAE)
-        
-
-        #Test for discontinious model
-        fpath_DISC = os.path.join(get_files_path(), 'Modelica', 'IfExpExamples.mo')
-        cpath_DISC = 'IfExpExamples.IfExpExample2'
-
-        fname_ODE = compile_jmu(cpath_DISC, fpath_DISC)
-        package_DISC = 'IfExpExamples_IfExpExample2.jmu'
-        # Load the dynamic library and XML data
-        m_DISC = JMUModel(package_DISC)
-        
-        nose.tools.assert_raises(JMIModel_Exception, JMIODE, m_DISC)
-    
-    @testattr(assimulo = True) 
-    def test_f(self):
-        """
-        Tests jmodelica.simulation.assimulo.JMIODE.f
-        """
-        test_x = N.array([1.,1.,1.])
-        test_t = 2
-        
-        temp_rhs = self.ODE.f(test_t,test_x)
-        
-        assert temp_rhs[0] == -1.0
-        assert temp_rhs[1] == 1.0
-        nose.tools.assert_almost_equal(temp_rhs[2], 14.77811, 5)
-    
-    @testattr(assimulo = True) 
-    def test_j(self):
-        """
-        Tests jmodelica.simulation.assimulo.JMIODE.j
-        """
-        test_x = N.array([1.,1.,1.])
-        test_t = 2
-        
-        temp_j = self.ODE.j(test_t,test_x)
-        #print temp_j
-        assert temp_j[0,0] == 0.0
-        assert temp_j[0,1] == -3.0
-        assert temp_j[0,2] == 0.0
-        assert temp_j[1,0] == 1.0
-        assert temp_j[1,1] == 0.0
-        assert temp_j[1,2] == 0.0
-        nose.tools.assert_almost_equal(temp_j[2,0], 14.7781122, 5)
-        nose.tools.assert_almost_equal(temp_j[2,1], 14.7781122, 5)
-        assert temp_j[2,2] == 0.0
-    
-    @testattr(assimulo = True) 
-    def test_reset(self):
-        """
-        Tests jmodelica.simulation.assimulo.JMIODE.reset
-        """
-        self.ODE.t0 = 10.0
-        self.ODE._model.real_x = N.array([2.,2.,2.])
-        
-        self.ODE.reset()
-        
-        assert self.ODE._model.t == 10.0
-        assert self.ODE._model.real_x[0] != 2.0
-        assert self.ODE._model.real_x[1] != 2.0
-        assert self.ODE._model.real_x[2] != 2.0
-    
-    @testattr(assimulo = True) 
-    def test_g(self):
-        """
-        Tests jmodelica.simulation.assimulo.JMIODE.g
-        """
-        #This is not implemented in JMIODE yet.
-        pass
-        
-    @testattr(assimulo = True)
-    def test_double_input(self):
-        """
-        This tests double input.
-        """
-        fpath = os.path.join(get_files_path(), 'Modelica', 'DoubleInput.mo')
-        cpath = 'DoubleInput'
-
-        # compile VDP
-        fname = compile_jmu(cpath, fpath, 
-                    compiler_options={'state_start_values_fixed':True})
-
-        # Load the dynamic library and XML data
-        dInput = JMUModel(fname)
-        
-        t = N.linspace(0.,10.,100) 
-        u1 = N.cos(t)
-        u2 = N.sin(t)
-        u_traj = N.transpose(N.vstack((t,u1,u2)))
-        
-        res = dInput.simulate(final_time=10, input=(['u1','u2'],u_traj),options={'solver':'CVode'})
-        
-        r1=res['u1']
-        r2=res['u2']
-        t1=res['time']
-        
-        #P.plot(t1,r1,t1,r2)
-        #P.show()
-        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
-        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
-        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
-        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
-        
-        #TEST REVERSE ORDER OF INPUT
-        
-        # Load the dynamic library and XML data
-        dInput = JMUModel(fname)
-        
-        t = N.linspace(0.,10.,100) 
-        u1 = N.cos(t)
-        u2 = N.sin(t)
-        u_traj = N.transpose(N.vstack((t,u2,u1)))
-        
-        res = dInput.simulate(final_time=10, input=(['u2','u1'],u_traj),options={'solver':'CVode'})
-        
-        r1=res['u1']
-        r2=res['u2']
-        t1=res['time']
-        
-        #P.plot(t1,r1,t1,r2)
-        #P.show()
-        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
-        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
-        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
-        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
-
-        
 class Test_JMI_DAE:
     """
     This class tests jmodelica.simulation.assimulo.JMIDAE
@@ -449,14 +192,14 @@ class Test_JMI_DAE:
         solver = lambda x:1
         solver.verbosity = 1
         solver.LOUD = 2
-        solver.switches = [False, False, True]
+        solver.sw = [False, False, True]
         event_info = [1, 0, -1]
         
         self.DAE.event_switch(solver,event_info)
         
-        assert solver.switches[0] == True
-        assert solver.switches[1] == False
-        assert solver.switches[2] == False
+        assert solver.sw[0] == True
+        assert solver.sw[1] == False
+        assert solver.sw[2] == False
     
     @testattr(assimulo = True) 
     def test_f(self):
@@ -467,7 +210,7 @@ class Test_JMI_DAE:
         test_dx = N.array([2.,2.,2.,2.])
         test_t = 2
         
-        temp_f = self.DAE.f(test_t,test_x,test_dx)
+        temp_f = self.DAE.res(test_t,test_x,test_dx)
         
         assert temp_f[0] == -1.0
         assert temp_f[2] == -1.0
@@ -607,13 +350,13 @@ class Test_JMI_DAE:
         solver = lambda x:1
         solver.verbosity = 1
         solver.NORMAL = solver.LOUD = 2
-        solver.t = [[1.0]]
-        solver.y = [[1.,1.]]
-        solver.yd = [[1.,1.]]
-        solver.t_cur = N.array(1.0)
-        solver.y_cur = N.array([1.,1.])
-        solver.yd_cur = N.array([1.,1.])
-        solver.switches = [False,True]
+        solver.t_sol = [[1.0]]
+        solver.y_sol = [[1.,1.]]
+        solver.yd_sol = [[1.,1.]]
+        solver.t = N.array(1.0)
+        solver.y = N.array([1.,1.])
+        solver.yd = N.array([1.,1.])
+        solver.sw = [False,True]
         self.DISC.event_switch = lambda x,y:1
         self.DISC.init_mode = lambda x:1
         self.DISC.check_eIter = lambda x,y: [True,False]
@@ -630,7 +373,7 @@ class Test_JMI_DAE:
         Tests jmodelica.simulation.assimulo.init_mode
         """
         solver = lambda x:1
-        solver.switches = [True, True]
+        solver.sw = [True, True]
         solver.make_consistent = lambda x:1
         
         self.DISC.init_mode(solver)
@@ -879,20 +622,21 @@ class Test_JMI_DAE_Sens:
         package_INPUT = 'DoubleInput_Nominal.jmu'
 
         # Load the dynamic library and XML data
-        self.m_DAE = JMUModel(package_DAE)
-        self.m_SENS = JMUModel(package_SENS)
-        self.m_DISC = JMUModel(package_DISC)
-        self.m_INPUT = JMUModel(package_INPUT)
+        #self.m_DAE = JMUModel('Pendulum_pack_Pendulum.jmu')
+        #self.m_SENS = JMUModel('QuadTankSens.jmu')
+        #self.m_DISC = JMUModel('IfExpExamples_IfExpExample2.jmu')
+        #self.m_INPUT = JMUModel('DoubleInput_Nominal.jmu')
 
         # Creates the solvers
-        self.DAE = JMIDAESens(self.m_DAE)
-        self.SENS = JMIDAESens(self.m_SENS)
+        #self.DAE = JMIDAESens(self.m_DAE)
+        #self.SENS = JMIDAESens(self.m_SENS)
     
     @testattr(assimulo = True)
     def test_no_events(self):
         """
         Tests that models containing events cannot be simulated with JMIDAESens.
         """
+        self.m_DISC = JMUModel('IfExpExamples_IfExpExample2.jmu')
         opts = self.m_DISC.simulate_options()
         opts["IDA_options"]["sensitivity"] = True
         nose.tools.assert_raises(JMIModel_Exception,self.m_DISC.simulate, 0, 1,None,"AssimuloAlg", opts)
@@ -902,6 +646,8 @@ class Test_JMI_DAE_Sens:
         """
         Tests user naming of result file (JMIDAESens).
         """
+        self.m_SENS = JMUModel('QuadTankSens.jmu')
+        
         path_result = os.path.join(get_files_path(), 'Results', 
                                 'qt_par_est_data.mat')
         
@@ -941,18 +687,24 @@ class Test_JMI_DAE_Sens:
         """
         This tests a simulation using JMIDAESens without any parameters.
         """
+        self.m_DAE = JMUModel('Pendulum_pack_Pendulum.jmu')
+        self.DAE = JMIDAESens(self.m_DAE)
+        
         sim = IDA(self.DAE)
         
         sim.simulate(1.0)
 
-        nose.tools.assert_almost_equal(sim.y[-1][0], 0.15420124, 4)
-        nose.tools.assert_almost_equal(sim.y[-1][1], 0.11721253, 4)
+        nose.tools.assert_almost_equal(sim.y_sol[-1][0], 0.15420124, 4)
+        nose.tools.assert_almost_equal(sim.y_sol[-1][1], 0.11721253, 4)
     
     @testattr(assimulo = True)
     def test_p0(self):
         """
         This test that the correct number of parameters are found.
         """
+        self.m_SENS = JMUModel('QuadTankSens.jmu')
+        self.SENS = JMIDAESens(self.m_SENS)
+        
         assert self.SENS._p_nbr == 4
         assert self.SENS._parameter_names[0] == 'a1'
         assert self.SENS._parameter_names[1] == 'a2'
@@ -964,6 +716,9 @@ class Test_JMI_DAE_Sens:
         """
         This tests that input simulation works.
         """
+        self.m_SENS = JMUModel('QuadTankSens.jmu')
+        self.SENS = JMIDAESens(self.m_SENS)
+        
         path_result = os.path.join(get_files_path(), 'Results', 
                                 'qt_par_est_data.mat')
         
@@ -988,7 +743,7 @@ class Test_JMI_DAE_Sens:
 
         #Store data continuous during the simulation, important when solving a 
         #problem with sensitivites.
-        qt_sim.store_cont = True 
+        qt_sim.continuous_output = True 
             
         #Value used when IDA estimates the tolerances on the parameters
         qt_sim.pbar = qt_mod.p0 
@@ -999,7 +754,7 @@ class Test_JMI_DAE_Sens:
         #Simulate
         qt_sim.simulate(60) #Simulate 4 seconds with 400 communication points
 
-        write_data(qt_sim)
+        #write_data(qt_sim)
 
         res = ResultDymolaTextual('QuadTankSens_result.txt')
     
@@ -1035,7 +790,7 @@ class Test_JMI_DAE_Sens:
         opts = model.simulate_options()
         
         opts["IDA_options"]["sensitivity"] = True
-        opts["IDA_options"]["write_cont"] = True
+        #opts["continuous_output"] = True #Should not be necessary
         
         res = model.simulate(0,2,input=inputtuple, options=opts)
         
@@ -1057,6 +812,8 @@ class Test_JMI_DAE_Sens:
         This tests that input simulation works when using high-level methods
         and the inputs are not in JModelica order.
         """
+        self.m_SENS = JMUModel('QuadTankSens.jmu')
+        
         model = self.m_SENS
         path_result = os.path.join(get_files_path(), 'Results', 
                                 'qt_par_est_data.mat')
@@ -1078,7 +835,7 @@ class Test_JMI_DAE_Sens:
         
         ##Store data continuous during the simulation, important when solving a 
         ##problem with sensitivites. FIXED INTERNALLY
-        opts['IDA_options']['write_cont']=True
+        opts['continuous_output']=True
         
         res = model.simulate(final_time=60, input=input_object, options=opts)
 
@@ -1099,6 +856,9 @@ class Test_JMI_DAE_Sens:
         """
         This tests that input simulation works using high-level methods.
         """
+        # Load the dynamic library and XML data
+        self.m_SENS = JMUModel('QuadTankSens.jmu')
+        
         model = self.m_SENS
         path_result = os.path.join(get_files_path(), 'Results', 
                                 'qt_par_est_data.mat')
@@ -1120,7 +880,7 @@ class Test_JMI_DAE_Sens:
         
         ##Store data continuous during the simulation, important when solving a 
         ##problem with sensitivites. FIXED INTERNALLY
-        opts['IDA_options']['write_cont']=True
+        opts['continuous_output']=True
         
         res = model.simulate(final_time=60, input=input_object, options=opts)
 
@@ -1141,6 +901,9 @@ class Test_JMI_DAE_Sens:
         """
         This tests the jacobian for simulation of sensitivites.
         """
+        # Load the dynamic library and XML data
+        self.m_SENS = JMUModel('QuadTankSens.jmu')
+        
         model = self.m_SENS
         
         opts = model.simulate_options()
@@ -1148,7 +911,7 @@ class Test_JMI_DAE_Sens:
         
         res = model.simulate(final_time=10, options=opts)
         
-        prob = res.solver._problem
+        prob = res.solver.problem
         
         assert res.solver.usejac == True
         assert prob.j == prob.jac
@@ -1188,6 +951,9 @@ class Test_JMI_DAE_Sens:
         """
         Tests that simulation of scaled input works.
         """
+        # Load the dynamic library and XML data
+        self.m_INPUT = JMUModel('DoubleInput_Nominal.jmu')
+
         t = N.linspace(0.,10.,100) 
         u1 = N.cos(t)
         u2 = N.sin(t)
@@ -1219,6 +985,9 @@ class Test_JMI_DAE_Sens:
         """
         Tests that simulation of scaled input works for writing continuous.
         """
+        # Load the dynamic library and XML data
+        self.m_INPUT = JMUModel('DoubleInput_Nominal.jmu')
+
         t = N.linspace(0.,10.,100) 
         u1 = N.cos(t)
         u2 = N.sin(t)
@@ -1228,7 +997,7 @@ class Test_JMI_DAE_Sens:
         opts['IDA_options']['atol'] = 1.0e-6
         opts['IDA_options']['rtol'] = 1.0e-6
         opts['IDA_options']['sensitivity'] = True
-        opts['IDA_options']['write_cont'] = True
+        #opts['IDA_options']['write_cont'] = True
         opts['ncp'] = 0
         
         res = self.m_INPUT.simulate(final_time=10, input=(['u1','u2'],u_traj),
@@ -1244,11 +1013,7 @@ class Test_JMI_DAE_Sens:
         nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
         nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
         nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
-        
-        
-        
-    
-    
+
     @testattr(assimulo = True)
     def test_scaling(self):
         """
@@ -1325,7 +1090,7 @@ class Test_JMI_DAE_Sens:
         opts = model.simulate_options()
         
         opts['IDA_options']['sensitivity'] = True
-        opts['IDA_options']['write_cont'] = True
+        opts['continuous_output'] = True
         
         res = model.simulate(options=opts)
         

@@ -30,13 +30,13 @@ build-python-packages:
 if WITH_SUNDIALS
 if WITH_SUPERLU
 	cd $(abs_top_srcdir)/Assimulo; \
-	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --prefix=$(assimulo_install_dir)
+	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --prefix=$(assimulo_install_dir)
 endif
 endif
 if WITH_SUNDIALS
 if !WITH_SUPERLU
 	cd $(abs_top_srcdir)/Assimulo; \
-	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
+	python setup.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
 endif
 endif
 	cd $(abs_top_srcdir)/Python/src; \
@@ -212,7 +212,7 @@ clean-local: clean-frontends clean-python-packages
 clean-python-packages:
 if WITH_SUNDIALS
 	cd $(abs_top_srcdir)/Assimulo; \
-	python setup_source.py clean --all --sundials-home=$(SUNDIALS_HOME) 
+	python setup.py clean --all --sundials-home=$(SUNDIALS_HOME) 
 	rm -rf $(assimulo_install_dir)
 endif
 	cd $(abs_top_srcdir)/Python/src; \

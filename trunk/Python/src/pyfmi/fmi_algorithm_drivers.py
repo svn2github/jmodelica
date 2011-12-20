@@ -26,15 +26,14 @@ import numpy as N
 
 from pyfmi.common.algorithm_drivers import AlgorithmBase, AssimuloSimResult, OptionBase, InvalidAlgorithmOptionException, InvalidSolverArgumentException
 from pyfmi.common.io import ResultDymolaTextual
+from pyfmi.common.core import TrajectoryLinearInterpolation
+from pyfmi.common.core import TrajectoryUserFunction
 
 try:
     import pyfmi
     from pyfmi.simulation.assimulo_interface import FMIODE
     from pyfmi.simulation.assimulo_interface import write_data
-    from pyfmi.common.core import TrajectoryLinearInterpolation
-    from pyfmi.common.core import TrajectoryUserFunction
-    from assimulo.explicit_ode import *
-    from assimulo import explicit_ode as expl_ode
+    import assimulo.solvers as solvers
     assimulo_present = True
 except:
     logging.warning(
@@ -87,6 +86,11 @@ class AssimuloFMIAlgOptions(OptionBase):
             Set to True if an FMU Jacobian for the ODE is available or
             False otherwise.
             Default: False
+            
+        continuous_output --
+            Specifies if the result should be written to file at each result
+            point. This is necessary in the FMI case.
+            Default: True
 
                  
     The different solvers provided by the Assimulo simulation package provides
@@ -123,6 +127,7 @@ class AssimuloFMIAlgOptions(OptionBase):
             'write_scaled_result':False,
             'result_file_name':'',
             'with_jacobian':False,
+            'continuous_output':True,
             'CVode_options':{'discr':'BDF','iter':'Newton',
                              'atol':"Default",'rtol':"Default",},
             'Radau5_options':{'atol':"Default",'rtol':"Default"}
@@ -210,13 +215,13 @@ class AssimuloFMIAlg(AlgorithmBase):
             self.model.initialize(relativeTolerance=self.solver_options['rtol'])
 
         if not self.input:
-            self.probl = FMIODE(self.model, result_file_name=self.result_file_name,with_jacobian=self.with_jacobian)
+            self.probl = FMIODE(self.model, result_file_name=self.result_file_name,with_jacobian=self.with_jacobian,start_time=self.start_time)
         else:
             self.probl = FMIODE(
-                self.model, input_traj, result_file_name=self.result_file_name,with_jacobian=self.with_jacobian)
+                self.model, input_traj, result_file_name=self.result_file_name,with_jacobian=self.with_jacobian,start_time=self.start_time)
         
         # instantiate solver and set options
-        self.simulator = self.solver(self.probl, t0=self.start_time)
+        self.simulator = self.solver(self.probl)
         self._set_solver_options()
     
     def _set_options(self):
@@ -238,8 +243,8 @@ class AssimuloFMIAlg(AlgorithmBase):
         
         # solver
         solver = self.options['solver']
-        if hasattr(expl_ode, solver):
-            self.solver = getattr(expl_ode, solver)
+        if hasattr(solvers, solver):
+            self.solver = getattr(solvers, solver)
         else:
             raise InvalidAlgorithmOptionException(
                 "The solver: "+solver+ " is unknown.")
@@ -268,7 +273,10 @@ class AssimuloFMIAlg(AlgorithmBase):
         Helper function that sets options for the solver.
         """
         solver_options = self.solver_options.copy()
-
+        
+        #Set solver option continuous_output
+        self.simulator.continuous_output = self.options["continuous_output"]
+        
         #loop solver_args and set properties of solver
         for k, v in solver_options.iteritems():
             try:
@@ -277,7 +285,7 @@ class AssimuloFMIAlg(AlgorithmBase):
                 try:
                     getattr(self.probl,k)
                 except AttributeError:
-                    raise InvalidSolverArgumentException(v)
+                    raise InvalidSolverArgumentException(k)
                 setattr(self.probl, k, v)
                 continue
             setattr(self.simulator, k, v)
@@ -297,7 +305,7 @@ class AssimuloFMIAlg(AlgorithmBase):
         
             The AssimuloSimResult object.
         """
-        if not self.probl.write_cont:
+        if not self.simulator.continuous_output:
             write_data(self.simulator,self.write_scaled_result, self.result_file_name)
         # load result file
         res = ResultDymolaTextual(self.result_file_name)
