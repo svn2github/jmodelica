@@ -228,7 +228,7 @@ class FMUModel(BaseModel):
             suffix = '.dylib'
         else:
             suffix = '.so'
-        print p+os.sep+'FMILogger'+suffix
+        
         cFMILogger = C.CDLL(p+os.sep+'FMILogger'+suffix)        
         
         self._fmiHelperLogger = cFMILogger.pythonCallbacks
