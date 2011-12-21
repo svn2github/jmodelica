@@ -15,8 +15,8 @@
 
     <para>JModelica.org can be installed on Linux, Mac OS X, and Windows (XP,
     Vista, 7) with 32-bit or 64-bit architectures. Most development work is
-    carried out on 32-bit Mac OS X , 32 and 64-bit Linux and 32 and 64-bit
-    Windows 7, so these platforms tend to be best tested.</para>
+    carried out on 32-bit Mac OS X , 32 and 64-bit Linux and 32-bit Windows 7,
+    so these platforms tend to be best tested.</para>
   </section>
 
   <section xml:id="inst_sec_prerequisites">
@@ -28,13 +28,14 @@
     <section>
       <title>Java</title>
 
-      <para>It is required to have a 32 bit Java Runtime Environment (JRE)
-      version 6 installed on your computer.<task>
+      <para>It is required to have a Java Runtime Environment (JRE) version 6
+      installed on your computer, for Windows a 32-bit version is
+      required.<task>
           <title>Install a JRE</title>
 
           <procedure>
             <step>
-              <para>Get a 32 bit <link
+              <para>Get a 32-bit / 64-bit <link
               xlink:href="http://www.java.com/en/download/index.jsp">JRE</link>
               installer suitable for your platform.</para>
             </step>
@@ -49,9 +50,10 @@
     <section xml:id="inst_sec_prereq_python">
       <title>Python</title>
 
-      <para>A 32 bit <link
+      <para>A <link
       xlink:href="http://www.python.org/download/releases/">Python 2.7</link>
-      with the following additional packages are required:</para>
+      with the following additional packages are required, for Windows a
+      32-bit version is required:</para>
 
       <table>
         <title>Python prerequisites</title>
@@ -321,15 +323,15 @@
 
       <para>The Python prerequisites for installing the JModelica.org SDK are
       the same as listed in <xref linkend="inst_sec_prereq_python" />. For
-      Java however it is required to have a 32 bit JDK installed, not only a
-      32 bit JRE as for the binary installation.</para>
+      Java however it is required to have a 32-bit JDK installed, not only a
+      32-bit JRE as for the binary installation.</para>
 
       <task>
         <title>Install a JDK</title>
 
         <procedure>
           <step>
-            <para>Get a 32bit <link
+            <para>Get a 32-bit <link
             xlink:href="http://java.sun.com/javase/downloads/">JDK</link>.</para>
           </step>
 

@@ -73,8 +73,8 @@ end VDP_Opt;
     following commands:</para>
 
     <programlisting language="python"># Import the function for compilation of models and the JMUModel class
-from jmodelica.compiler import compile_jmu
-from pyjmi.jmi import JMUModel
+from jmodelica import compile_jmu
+from pyjmi import JMUModel
 
 # Import the plotting library
 import matplotlib.pyplot as plt
@@ -844,8 +844,8 @@ x1 = res['x1']
       <programlisting language="python">import numpy as N
 import matplotlib.pyplot as plt
 
-from jmodelica.compiler import compile_jmu
-from pyjmi.jmi import JMUModel
+from jmodelica import compile_jmu
+from pyjmi import JMUModel
 </programlisting>
 
       <para>Before we can do operations on the model, such as optimizing it,
@@ -1771,8 +1771,8 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
-from jmodelica.compiler import compile_jmu
-from pyjmi.jmi import JMUModel
+from jmodelica import compile_jmu
+from pyjmi import JMUModel
 
 model_name = 'VDP_pack.VDP_Opt_Min_Time'
 
@@ -2320,8 +2320,8 @@ plt.show()
 import matplotlib.pyplot as plt
 import numpy as N
 
-from jmodelica.compiler import compile_jmu
-from pyjmi.jmi import JMUModel
+from jmodelica import compile_jmu
+from pyjmi import JMUModel
 </programlisting>
 
     <para>into the file. Next, we enter code to open the data file, extract
@@ -3025,13 +3025,13 @@ print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
     <literal>casadi_interface</literal> and contains a model class
     <literal>CasadiModel</literal>. A compiler method for creating models
     compliant with <literal>CasadiModel</literal> resides in
-    <literal>jmodelica.compiler</literal>, <literal>compile_fmux</literal>..
-    Usage of the methods is consistent with the work flow for optimization of
+    <literal>jmodelica</literal>, <literal>compile_fmux</literal>.. Usage of
+    the methods is consistent with the work flow for optimization of
     <literal>JMUModels</literal>. Shown below is a Python code example
     describing how to invoke the optimization method.</para>
 
-    <programlisting language="python">from jmodelica.compiler import compile_fmux
-from pyjmi.casadi_interface import CasadiModel
+    <programlisting language="python">from jmodelica import compile_fmux
+from pyjmi import CasadiModel
 
 casadi_name = compile_fmux("MyModel", "MyModels.mop")
 model = CasadiModel(casadi_name)
@@ -3280,8 +3280,8 @@ opts["free_phases"] = True #The phase boundary is allowed to be changed.
         we change the number of collocation points from the default 20 to 40
         via the options dictionary.</para>
 
-        <programlisting language="python">from jmodelica.compiler import compile_fmux
-from pyjmi.casadi_interface import CasadiModel
+        <programlisting language="python">from jmodelica import compile_fmux
+from pyjmi import CasadiModel
 
 casadi_name = compile_fmux("VDP_Opt", "VDP.mop")
 model = CasadiModel(casadi_name)
@@ -3409,11 +3409,11 @@ end HohmannTransfer;</programlisting>
         <programlisting language="python">import numpy as N
 import matplotlib.pyplot as plt
 
-from jmodelica.compiler import compile_jmu
-from pyjmi.jmi import JMUModel
+from jmodelica import compile_jmu
+from pyjmi import JMUModel
 
-from jmodelica.compiler import compile_fmux
-from pyjmi.casadi_interface import CasadiModel
+from jmodelica import compile_fmux
+from pyjmi import CasadiModel
 
 jmu_name  = compile_jmu("Orbital","Hohmann.mop")
 fmux_name = compile_fmux("HohmannTransfer", "Hohmann.mop")
@@ -3606,7 +3606,7 @@ plt.show()</programlisting>
           <m:mi>θ</m:mi>
         </m:math>
       </inlineequation>. Copy the file
-    $JMODELICA_HOME/Python/jmodelica/examples/files/FMUs/Furuta.fmu to your
+    $JMODELICA_HOME/Python/pyfmi/examples/files/FMUs/Furuta.fmu to your
     working directory. <emphasis role="bold">Notice that this the Furuta.fmu
     file currently only supports Windows.</emphasis> Measurement data for
     <inlineequation>
@@ -3618,15 +3618,15 @@ plt.show()</programlisting>
           <m:mi>θ</m:mi>
         </m:math>
       </inlineequation> is available in the file
-    $JMODELICA_HOME/Python/jmodelica/examples/files/FurutaData.mat. Copy this
-    file to your working directory as well. These measurements will be used
-    for the calibration. Open a text file, name it furuta_par_est.py and enter
-    the following imports:</para>
+    $JMODELICA_HOME/Python/pyjmi/examples/files/FurutaData.mat. Copy this file
+    to your working directory as well. These measurements will be used for the
+    calibration. Open a text file, name it furuta_par_est.py and enter the
+    following imports:</para>
 
     <programlisting language="python">from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
 import numpy as N
-from pyfmi.fmi import FMUModel
+from pyfmi import FMUModel
 from pyjmi.optimization import dfo
 </programlisting>
 
@@ -3888,7 +3888,7 @@ ub = (x0 + 1e-2)*1e3
     Open a new text file, name it furuta_cost.py and enter the following
     imports:</para>
 
-    <programlisting language="python">from pyfmi.fmi import FMUModel
+    <programlisting language="python">from pyfmi import FMUModel
 from pyjmi.optimization import dfo
 from scipy.io.matlab.mio import loadmat
 import numpy as N

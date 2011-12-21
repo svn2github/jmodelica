@@ -125,7 +125,6 @@ import os.path
 
 # Import the JModelica.org Python packages
 import jmodelica
-import jmodelica.jmi as jmi
 from jmodelica.compiler import ModelicaCompiler
 
 # Import numerical libraries

@@ -269,7 +269,7 @@
 
         <programlisting language="python">        import numpy as N 
         import pylab as P #Used for plotting
-        from pyfmi.fmi import FMUModel #The FMI Interface
+        from pyfmi import FMUModel #The FMI Interface
 </programlisting>
 
         <para>Next, the FMU is to be loaded and initialized,</para>
