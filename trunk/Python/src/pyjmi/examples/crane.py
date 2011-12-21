@@ -22,8 +22,8 @@ import numpy as N
 import pylab as p
 import matplotlib.pyplot as plt
 
-from jmodelica.compiler import compile_fmu
-from pyfmi.fmi import FMUModel
+from jmodelica import compile_fmu
+from pyfmi import FMUModel
 
 def run_demo(with_plots=True):
     """

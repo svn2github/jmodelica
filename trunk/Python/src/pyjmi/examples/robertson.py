@@ -21,8 +21,8 @@ import numpy as N
 import matplotlib.pyplot as plt
 import nose
 
-from jmodelica.compiler import compile_jmu
-from pyjmi.jmi import JMUModel
+from jmodelica import compile_jmu
+from pyjmi import JMUModel
 
 
 def run_demo(with_plots=True):

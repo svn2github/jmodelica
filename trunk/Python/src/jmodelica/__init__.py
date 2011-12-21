@@ -61,6 +61,9 @@ import numpy as N
 int = N.int32
 N.int = N.int32
 
+#Import the compile functions allowing for users to type: from jmodelica import compiler_*
+from compiler import compile_jmu, compile_fmu, compile_fmux
+
 def check_packages():
     import sys, time
     le=30

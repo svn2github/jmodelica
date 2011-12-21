@@ -20,7 +20,7 @@ import os
 from scipy.io.matlab.mio import loadmat
 import numpy as N
 
-from pyfmi.fmi import FMUModel
+from pyfmi import FMUModel
 from pyjmi.optimization import dfo
 
 curr_dir = os.path.dirname(os.path.abspath(__file__));

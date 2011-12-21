@@ -19,7 +19,7 @@ import os as O
 import pylab as P
 import numpy as N
 
-from pyfmi.fmi import FMUModel
+from pyfmi import FMUModel
 
 curr_dir = O.path.dirname(O.path.abspath(__file__));
 path_to_fmus = O.path.join(curr_dir, 'files', 'FMUs')

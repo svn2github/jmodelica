@@ -19,8 +19,8 @@ import os
 import pylab as p
 import numpy as N
 
-from jmodelica.compiler import compile_jmu
-from pyjmi.jmi import JMUModel
+from jmodelica import compile_jmu
+from pyjmi import JMUModel
 
 def run_demo(with_plots=True):
     

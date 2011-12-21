@@ -23,8 +23,8 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
-from jmodelica.compiler import compile_fmu
-from pyfmi.fmi import FMUModel
+from jmodelica import compile_fmu
+from pyfmi import FMUModel
 
 def run_demo(with_plots=True,with_blocking_factors = False):
     """ 

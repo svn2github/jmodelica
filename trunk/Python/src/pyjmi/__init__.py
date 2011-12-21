@@ -65,6 +65,11 @@ try:
     ipopt_present = jmodelica.environ['IPOPT_HOME']
 except:
     ipopt_present = False
+    
+#Import the model class allowing for users to type: from pyjmi import JMUModel
+from jmi import JMUModel
+#Import the model class allowing for users to type: from pyjmi import CasadiModel
+from casadi_interface import CasadiModel
 
 def check_packages():
     import sys, time
