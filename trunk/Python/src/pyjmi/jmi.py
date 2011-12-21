@@ -39,7 +39,7 @@ from lxml import etree
 from pyjmi.common import xmlparser
 from pyjmi.common.core import BaseModel, unzip_unit, get_platform_suffix, get_files_in_archive, rename_to_tmp, load_DLL
 
-from pyjmi.common.io import VariableNotFoundError
+from pyjmi.common.io import VariableNotFoundError, ResultDymolaTextual, ResultDymolaBinary
 from pyjmi.common.core import TrajectoryLinearInterpolation
 
 int = N.int32
@@ -2119,7 +2119,8 @@ class JMUModel(BaseModel):
         Parameters::
             res --
                 A result data object of the class
-                pyjmi.common.io.ResultDymolaTextual
+                pyjmi.common.io.(ResultDymolaTextual/ResultDymolaBinary 
+                or containing either.
             time --
                 The time at which variable values are extracted from
                 the result data.
@@ -2128,6 +2129,16 @@ class JMUModel(BaseModel):
             Only real variables are initialized.
             
         """
+        if isinstance(res, ResultDymolaTextual) or isinstance(res, ResultDymolaBinary):
+            pass
+        elif hasattr(res, "result_data"):
+            if isinstance(res.result_data, ResultDymolaTextual) or isinstance(res.result_data, ResultDymolaBinary):
+                res = res.result_data
+            else:
+                raise JMIException("Unknown input: res. Must be an result data object.")
+        else:
+            raise JMIException("Unknown input: res. Must be an result data object.")
+        
         # Obtain the names
         names = self.get_dx_variable_names(include_alias=False)
         dx_names=[]

@@ -1584,8 +1584,17 @@ class TestInitializeModelFromData(object):
        self.model.initialize_from_data(self.res.result_data)
        res = self.model.get(['der(x)','x','y','u'])
        res_true = N.array([-1.0, 1.0, 0.5, 0.0])
-       N.testing.assert_almost_equal(res_true,res)    
-
+       N.testing.assert_almost_equal(res_true,res)
+       
+    @testattr(ipopt = True)
+    def test_initialize_from_data1_res(self):
+       """
+       Test that the initalization is performed correctly. (Input res)
+       """
+       self.model.initialize_from_data(self.res)
+       res = self.model.get(['der(x)','x','y','u'])
+       res_true = N.array([-1.0, 1.0, 0.5, 0.0])
+       N.testing.assert_almost_equal(res_true,res) 
 
     @testattr(ipopt = True)
     def test_initialize_from_data2(self):
@@ -1595,7 +1604,24 @@ class TestInitializeModelFromData(object):
        self.model.initialize_from_data(self.res.result_data,1)
        res = self.model.get(['der(x)','x','y','u'])
        res_true = N.array([-0.36841480742239074, 0.36841480742239074, 0.18420740371169539, 0.0])
-       N.testing.assert_almost_equal(res_true,res)    
+       N.testing.assert_almost_equal(res_true,res)
+       
+    @testattr(ipopt = True)
+    def test_initialize_from_error(self):
+       """
+       Test that the initalization is performed correctly.
+       """
+       nose.tools.assert_raises(JMIException, self.model.initialize_from_data, "Test")
+       
+    @testattr(ipopt = True)
+    def test_initialize_from_data2_res(self):
+       """
+       Test that the initalization is performed correctly. (Input res)
+       """
+       self.model.initialize_from_data(self.res,1)
+       res = self.model.get(['der(x)','x','y','u'])
+       res_true = N.array([-0.36841480742239074, 0.36841480742239074, 0.18420740371169539, 0.0])
+       N.testing.assert_almost_equal(res_true,res)  
 
 class TestEmptyModelException(object):
     """
