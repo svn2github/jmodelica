@@ -24,7 +24,7 @@ import os.path
 import numpy as N
 import nose
 
-from tests import testattr, get_files_path
+from tests_jmodelica import testattr, get_files_path
 from jmodelica.compiler import compile_jmu
 from pyjmi.jmi import JMUModel
 from pyjmi.optimization import ipopt

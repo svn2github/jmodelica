@@ -26,7 +26,7 @@ from jmodelica.compiler import compile_jmu, compile_fmu
 from pyjmi.jmi import JMUModel
 from pyfmi.fmi import FMUModel
 from pyjmi.common.io import ResultDymolaTextual
-from tests import get_files_path
+from tests_jmodelica import get_files_path
 
 _model_name = ''
 

@@ -22,7 +22,7 @@ import nose
 
 import numpy as N
 
-from tests import testattr
+from tests_jmodelica import testattr
 from pyjmi.optimization.polynomial import *
 
 class TestPolynomialMethods:

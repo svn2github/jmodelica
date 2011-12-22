@@ -86,7 +86,7 @@ function optimica_tests() {
   junit_test Optimica
 }
 
-TESTS_DIR="${JMODELICA_HOME}/Python/tests"
+TESTS_DIR="${JMODELICA_HOME}/Python/tests_jmodelica"
 function find_python_tests() {
   if [[ "${TESTS}" == "" ]]; then
     TESTS="$(find ${TESTS_DIR} -name \*.py | grep test_)"

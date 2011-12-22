@@ -24,7 +24,7 @@ import nose
 import nose.tools
 import numpy as n
 
-from tests import testattr, get_files_path
+from tests_jmodelica import testattr, get_files_path
 from jmodelica.common import xmlparser
 
 #type defs

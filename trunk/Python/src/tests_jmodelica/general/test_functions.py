@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from tests.general.base_simul import *
-from tests import testattr
+from tests_jmodelica.general.base_simul import *
+from tests_jmodelica import testattr
 
 class TestFunction1(SimulationTest):
     """

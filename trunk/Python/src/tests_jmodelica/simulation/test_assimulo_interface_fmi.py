@@ -26,7 +26,7 @@ from scipy.io.matlab.mio import loadmat
 from jmodelica.compiler import compile_jmu, compile_fmu
 from pyfmi.fmi import FMUModel
 from pyfmi.common.io import ResultDymolaTextual
-from tests import testattr, get_files_path
+from tests_jmodelica import testattr, get_files_path
 
 try:
     from pyfmi.simulation.assimulo_interface import FMIODE

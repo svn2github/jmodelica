@@ -24,7 +24,7 @@ import os
 import numpy as N
 import sys as S
 
-from tests import testattr, get_files_path
+from tests_jmodelica import testattr, get_files_path
 from jmodelica.compiler import compile_fmu
 from pyfmi.fmi import unzip_fmu, FMUModel, FMUException
 import pyfmi.fmi_algorithm_drivers as ad

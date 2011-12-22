@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 import nose.tools as ntools
 import logging
 
-from tests import testattr, get_files_path
+from tests_jmodelica import testattr, get_files_path
 
 import pyjmi.jmi as jmi
 from jmodelica.compiler import compile_jmu, get_jmu_name

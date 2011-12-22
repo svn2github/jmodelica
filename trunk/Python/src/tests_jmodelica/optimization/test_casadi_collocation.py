@@ -23,7 +23,7 @@ import nose
 import numpy as N
 import pylab as P
 
-from tests import testattr, get_files_path
+from tests_jmodelica import testattr, get_files_path
 from pyjmi.common.io import ResultDymolaTextual
 from jmodelica.compiler import compile_fmux
 try:

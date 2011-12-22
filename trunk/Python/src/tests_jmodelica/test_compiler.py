@@ -25,7 +25,7 @@ import sys
 import nose
 import nose.tools
 
-from tests import testattr, get_files_path
+from tests_jmodelica import testattr, get_files_path
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica as jm

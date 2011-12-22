@@ -25,8 +25,8 @@ from pyjmi.jmi import JMUModel
 from pyjmi.common.io import ResultDymolaTextual
 from pyjmi.optimization.ipopt import NLPCollocationLagrangePolynomials
 from pyjmi.optimization.ipopt import CollocationOptimizer
-from tests.general.base_simul import *
-from tests import testattr, get_files_path
+from tests_jmodelica.general.base_simul import *
+from tests_jmodelica import testattr, get_files_path
 
 class TestOptimization(OptimizationTest):
 

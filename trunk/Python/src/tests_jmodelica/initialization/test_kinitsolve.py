@@ -26,7 +26,7 @@ import scipy.sparse as ss
 
 from jmodelica.compiler import compile_jmu
 from pyjmi.jmi import JMUModel, JMIException
-from tests import testattr, get_files_path
+from tests_jmodelica import testattr, get_files_path
 from assimulo.kinsol import KINSOL, KINSOL_Exception
 from pyjmi.initialization.assimulo_interface import JMUAlgebraic, JMUAlgebraic_Exception
 

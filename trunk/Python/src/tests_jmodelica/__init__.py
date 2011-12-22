@@ -65,4 +65,4 @@ def get_files_path():
     assert jmhome is not None, "You have to specify" \
                                " JMODELICA_HOME environment" \
                                " variable."
-    return os.path.join(jmhome, 'Python', 'tests', 'files')
+    return os.path.join(jmhome, 'Python', 'tests_jmodelica', 'files')

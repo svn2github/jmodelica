@@ -28,7 +28,7 @@ import logging
 
 from jmodelica.compiler import compile_jmu
 from pyjmi.jmi import JMUModel
-from tests import testattr, get_files_path
+from tests_jmodelica import testattr, get_files_path
 from pyjmi.common.algorithm_drivers import InvalidAlgorithmOptionException
 from pyjmi.common.algorithm_drivers import InvalidSolverArgumentException
 from pyjmi.common.algorithm_drivers import UnrecognizedOptionError

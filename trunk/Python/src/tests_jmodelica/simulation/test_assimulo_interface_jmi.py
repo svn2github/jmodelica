@@ -26,7 +26,7 @@ from scipy.io.matlab.mio import loadmat
 from jmodelica.compiler import compile_jmu, compile_fmu
 from pyjmi.jmi import JMUModel
 from pyjmi.common.io import ResultDymolaTextual
-from tests import testattr, get_files_path
+from tests_jmodelica import testattr, get_files_path
 
 try:
     from pyjmi.simulation.assimulo_interface import JMIDAE, JMIModel_Exception
