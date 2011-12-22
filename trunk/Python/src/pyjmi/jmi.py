@@ -358,7 +358,7 @@ class JMUModel(BaseModel):
         # Check that the file referenced by jmu_name has the correct file-ending
         ext = os.path.splitext(jmu_name)[1]
         if ext != ".jmu":
-            raise FMUException("JMUModel must be instantiated with an JMU (.jmu) file.")
+            raise JMIException("JMUModel must be instantiated with an JMU (.jmu) file.")
         
         # unzip unit and get files in archive
         path, jmu_name = os.path.split(jmu_name)
