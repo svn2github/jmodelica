@@ -691,8 +691,8 @@ class FreeElementLengthsData(object):
     
     .. math::
         
-        \hat{f} = f + c \cdot \sum_{i = 1}^{n_e} \left(h_i^p \cdot 
-        \int_{t_i}^{t_{i+1}} \dot{x}^T(t) \cdot Q \cdot
+        \hat{f} = f + c \cdot \sum_{i = 1}^{n_e} \left(h_i^a \cdot 
+        \int_{t_i}^{t_{i+1}} \dot{x}(t) \cdot Q \cdot
         \dot{x}(t)\,\mathrm{d}t\right).
     """
     

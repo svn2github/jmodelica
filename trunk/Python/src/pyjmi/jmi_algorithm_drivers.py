@@ -582,7 +582,41 @@ class AssimuloAlg(AlgorithmBase):
         return AssimuloAlgOptions()
 
 class CollocationLagrangePolynomialsResult(JMResultBase):
-    pass
+
+    """
+    A JMResultBase object with the additional attribute times.
+    
+    Attributes::
+    
+        times --
+            A dictionary with the keys 'init', 'sol', 'post_processing' and
+            'tot', which measure CPU time consumed during different algorithm
+            stages.
+
+            times['init'] is the time spent creating the NLP.
+            
+            times['sol'] is the time spent solving the NLP (total Ipopt
+            time).
+            
+            times['post_processing'] is the time spent processing the NLP
+            solution before it is returned.
+            
+            times['tot'] is the sum of all the other times.
+            
+            Type: dict
+    """
+    
+    def __init__(self, model=None, result_file_name=None, solver=None, 
+             result_data=None, options=None, times=None):
+        super(CollocationLagrangePolynomialsResult, self).__init__(
+                model, result_file_name, solver, result_data, options)
+        self.times = times
+
+        # Print times
+        print("\nTotal time: %.3f seconds" % times['tot'])
+        print("Initialization time: %.3f seconds" % times['init'])
+        print("Solution time: %.3f seconds" % times['sol'])
+        print("Post-processing time: %.3f seconds" % times['post_processing'])
 
 class CollocationLagrangePolynomialsAlgOptions(OptionBase):
     """
@@ -751,6 +785,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                   dict will thus give all options with default values.
                 - A CollocationLagrangePolynomialsAlgOptions object.
         """
+        self._t0 = time.clock()
         self.model = model
         
         # handle options argument
@@ -839,7 +874,17 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         """ 
         Solve the optimization problem using ipopt solver. 
         """
+        times = {}
+        solve_t0 = time.clock() - self._t0
         self.nlp_ipopt.opt_coll_ipopt_solve()
+        times['sol'] = time.clock() - self._t0 - solve_t0
+        
+        # Calculate times
+        times['tot'] = time.clock() - self._t0
+        times['init'] = times['tot'] - times['sol']
+        
+        # Store times as data attribute
+        self.times = times
         
     def get_result(self):
         """ 
@@ -868,9 +913,15 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         # load result file
         res = ResultDymolaTextual(resultfile)
         
+        # Calculate post-processing and total time
+        times = self.times
+        times['post_processing'] = time.clock() - self._t0 - times['tot']
+        times['tot'] += times['post_processing']
+        
         # create and return result object
-        return CollocationLagrangePolynomialsResult(self.model, 
-            resultfile, self.nlp_ipopt, res, self.options)
+        return CollocationLagrangePolynomialsResult(
+                self.model, resultfile, self.nlp_ipopt, res, self.options,
+                self.times)
         
     @classmethod
     def get_default_options(cls):
@@ -1693,10 +1744,10 @@ class LocalDAECollocationAlgOptions(OptionBase):
             element.
             
             False:
-            For Radau collocation, the extra variables x_{i, 0},
-            representing the states at the start of each element, are created
-            and then constrained to be equal to the corresponding variable at
-            the end of the previous element for continuity.
+            For Radau collocation, the extra variables x_{i, 0}, representing
+            the states at the start of each element, are created and then
+            constrained to be equal to the corresponding variable at the end of
+            the previous element for continuity.
             
             For Gauss collocation, the extra variables x_{i, n_cp + 1},
             representing the states at the end of each element, are created
@@ -1804,14 +1855,19 @@ class LocalDAECollocationAlgResult(JMResultBase):
     Attributes::
     
         times --
-            A dictionary with the keys 'sol', 'init' and 'tot'.
-            
-            times['sol'] is the (clock) time spent solving the NLP (total IPOPT
-            time).
-            
+            A dictionary with the keys 'init', 'sol', 'post_processing' and
+            'tot', which measure CPU time consumed during different algorithm
+            stages.
+
             times['init'] is the time spent creating the NLP.
             
-            times['tot'] is the sum of times['sol'] and times['init'].
+            times['sol'] is the time spent solving the NLP (total Ipopt
+            time).
+            
+            times['post_processing'] is the time spent processing the NLP
+            solution before it is returned.
+            
+            times['tot'] is the sum of all the other times.
             
             Type: dict
         
