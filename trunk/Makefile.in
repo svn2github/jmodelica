@@ -135,6 +135,7 @@ CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPAD_HOME = @CPPAD_HOME@
 CPPFLAGS = @CPPFLAGS@
+CURR_DIR = @CURR_DIR@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
@@ -202,6 +203,7 @@ SUPERLU_HOME = @SUPERLU_HOME@
 VERSION = @VERSION@
 WITH_CASADI = @WITH_CASADI@
 WITH_CPPAD = @WITH_CPPAD@
+WITH_SUNDIALS = @WITH_SUNDIALS@
 _JAVA_HOME_ = @_JAVA_HOME_@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -255,6 +257,7 @@ psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
+subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
@@ -263,7 +266,7 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 
 # EXTRA_DIST =
-SUBDIRS = JMI/src ThirdParty/Blas ThirdParty/Lapack
+SUBDIRS = ThirdParty/Sundials JMI/src ThirdParty/Blas ThirdParty/Lapack
 assimulo_install_dir = $(abs_builddir)/Assimulo_install
 jmodelica_install_dir = $(abs_builddir)/JModelica_install
 pyfmi_install_dir = $(abs_builddir)/PyFMI_install
@@ -868,6 +871,8 @@ install-exec-local: install-python-packages
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials	
+	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	cp $(CPPAD_HOME)/COPYING $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad	
@@ -918,12 +923,6 @@ bindistdir: install
 @WITH_MINGW_TRUE@	cd $(MINGW_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/MinGW
 # Copy symbolic links
 @WITH_MINGW_TRUE@	cd $(MINGW_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/MinGW
-
-@WITH_SUNDIALS_TRUE@	mkdir -p $(bindistdir)/ThirdParty/SUNDIALS
-# Copy files
-@WITH_SUNDIALS_TRUE@	cd $(SUNDIALS_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/SUNDIALS
-# Copy symbolic links
-@WITH_SUNDIALS_TRUE@	cd $(SUNDIALS_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/SUNDIALS
 
 bindist: bindistdir
 	tar -cf $(bindistdir).tar $(bindistdir)

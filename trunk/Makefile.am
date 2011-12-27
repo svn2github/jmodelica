@@ -17,7 +17,7 @@ AUTOMAKE_OPTIONS = foreign
 
 # EXTRA_DIST =
 
-SUBDIRS = JMI/src ThirdParty/Blas ThirdParty/Lapack
+SUBDIRS = ThirdParty/Sundials JMI/src ThirdParty/Blas ThirdParty/Lapack
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 jmodelica_install_dir=$(abs_builddir)/JModelica_install
@@ -135,6 +135,8 @@ endif
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials	
+	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	cp $(CPPAD_HOME)/COPYING $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad	
@@ -188,14 +190,6 @@ if WITH_MINGW
 	cd $(MINGW_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/MinGW
 # Copy symbolic links
 	cd $(MINGW_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/MinGW
-endif 
-
-if WITH_SUNDIALS	
-	mkdir -p $(bindistdir)/ThirdParty/SUNDIALS
-# Copy files
-	cd $(SUNDIALS_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/SUNDIALS
-# Copy symbolic links
-	cd $(SUNDIALS_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/SUNDIALS
 endif 
 
 bindist: bindistdir

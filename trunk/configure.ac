@@ -38,6 +38,8 @@ AC_SUBST(SHAREDEXT)
 AC_SUBST(SHARED_LDFLAGS)
 AC_SUBST(SEP)
 SEP=':'
+AC_SUBST(CURR_DIR)
+CURR_DIR=`pwd`
 case $build in
   *-cygwin*)
 	echo "Cygwin detected"   
@@ -155,10 +157,27 @@ AC_ARG_WITH([sundials],
    [with_sundials=no])
 
 AS_IF([test "x$with_sundials" = xno],
-      [AC_MSG_RESULT([SUNDIALS installation not specified.])],
-      [AC_CHECK_FILE($sundials/lib/libsundials_cvode.a,
-                     [],
-                     [AC_MSG_FAILURE([SUNDIALS installation specifed, but seems to be corrupt!])])])
+      [sundials="$CURR_DIR/sundials_install"])
+
+#AS_IF([test "x$with_sundials" = xno],
+#      [AC_MSG_RESULT([SUNDIALS installation not specified.])],
+#      [AC_CHECK_FILE($sundials/lib/libsundials_cvode.a,
+#                     [],
+#                     [AC_MSG_FAILURE([SUNDIALS installation specifed, but seems to be corrupt!])])])
+
+AS_IF([test "x$with_sundials" = xno],
+      [with_sundials=automatic])
+
+# Set output variables to be exported to the Makefiles
+AC_SUBST(SUNDIALS_HOME)
+AC_SUBST(WITH_SUNDIALS)
+#AS_IF([test "x$with_sundials" = xautomatic],
+#      [SUNDIALS_HOME=`cd $srcdir; pwd`/$sundials],
+#      [SUNDIALS_HOME=$sundials])
+
+#AS_IF([test "x$with_sundials" != xno],
+#      [WITH_SUNDIALS="true"],
+#      [WITH_SUNDIALS="false"]) 
 
 AM_CONDITIONAL([WITH_SUNDIALS],[test "x$with_sundials" != xno])
 
@@ -324,19 +343,21 @@ AC_CHECK_HEADERS([stdlib.h])
 AC_HEADER_STDBOOL
 AC_C_CONST
 
-# Checks for library functions.
+AC_CONFIG_SUBDIRS([ThirdParty/Sundials/sundials-2.4.0])
+
+#(mkdir -p sundials-build && cd sundials-build && sh configure $theoptionsthatiwant)
 
 AC_CONFIG_FILES([
  Makefile
  ThirdParty/Blas/Makefile
  ThirdParty/Lapack/Makefile
+ ThirdParty/Sundials/Makefile
  JMI/src/Makefile
  docbook/UsersGuide/Makefile
  Python/jm_ipython.sh
  Python/jm_python.sh
  jm_tests
 ])
-
 
 AC_OUTPUT
 

@@ -33,7 +33,7 @@ DEFAULT_ARGS=""
 JMODELICA_HOME="@prefix@"
 JMODELICA_SRC="@abs_top_srcdir@"
 IPOPT_HOME="@IPOPT_HOME@"
-SUNDIALS_HOME="@SUNDIALS_HOME@"
+SUNDIALS_HOME="@prefix@/ThirdParty/Sundials"
 ECLIPSE_HOME="@ECLIPSE_HOME@"
 BUILD="@abs_builddir@"
 if [[ "${JAVA_HOME}" == "" ]]; then
