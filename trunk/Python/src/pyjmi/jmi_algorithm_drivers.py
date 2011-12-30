@@ -1500,6 +1500,13 @@ class LocalDAECollocationAlg(AlgorithmBase):
                                       "not supported.")
         elif self.discr != "LG" and self.discr != "LGR":
             raise ValueError("Unknown discretization scheme %s." % self.discr)
+
+        # Check validity of rename_vars
+        if self.rename_vars:
+            if self.graph != "SX":
+                raise NotImplementedError('rename_vars is only compatible ' + \
+                                          'with graph == "SX".')
+            print("Warning: Variable renaming is currently activated.")
         
         # Check validity of quadrature_constraint
         if self.discr != "LG" and not self.quadrature_constraint:
@@ -1507,8 +1514,8 @@ class LocalDAECollocationAlg(AlgorithmBase):
                              "with Gauss collocation.")
         if (self.discr == "LG" and self.eliminate_der_var and
             self.quadrature_constraint):
-            raise ValueError("quadrature_constraint is not compatible " + \
-                             "with eliminate_der_var.")
+            raise NotImplementedError("quadrature_constraint is not " + \
+                                      "compatible with eliminate_der_var.")
         
         # Check validity of exact_hessian
         if self.exact_hessian:
@@ -1658,6 +1665,15 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: str
             Default: "SX"
+
+        rename_vars --
+            Rename NLP variables according to their corresponding
+            Modelica/Optimica names. This only works if graph == "SX". This is
+            done in an inefficient manner and should only be used for
+            investigative purposes.
+
+            Type: bool
+            Default: False
         
         write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
@@ -1829,6 +1845,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'n_cp': 3,
                 'discr': "LGR",
                 'graph': 'SX',
+                'rename_vars': False,
                 'write_scaled_result': False,
                 'result_mode': "collocation_points",
                 'n_eval_points': 20,

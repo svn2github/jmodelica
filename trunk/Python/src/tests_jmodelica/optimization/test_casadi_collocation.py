@@ -303,7 +303,41 @@ class TestLocalDAECollocator:
         opts['result_mode'] = "element_interpolation"
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=3e-2)
+    
+    @testattr(casadi = True)
+    def test_rename_vars(self):
+        """
+        Test variable renaming.
+
+        This test is by no means thorough.
+        """
+        model = self.model_vdp_bounds_mayer
         
+        # References values
+        cost_ref = 1.353983656973385e0
+        u_norm_ref = 2.4636859805244668e-1
+
+        # Common options
+        opts = model.optimize_options(self.algorithm)
+        opts['n_e'] = 2
+
+        # Without renaming
+        opts['rename_vars'] = False
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+
+        # WIth renameing
+        opts['rename_vars'] = True
+        res_renaming = model.optimize(self.algorithm, opts)
+        assert_results(res_renaming, cost_ref, u_norm_ref)
+
+        assert(repr(res_renaming.solver.get_equality_constraint()[10]) ==
+                "Matrix<SX>((der_x1_1_1-((((1-(x2_1_1*x2_1_1))*x1_1_1)" +
+                "-x2_1_1)+u_1_1)))")
+        assert(repr(res_renaming.solver.get_equality_constraint()[20]) ==
+                "Matrix<SX>((((((-3*x2_1_0)+(5.53197*x2_1_1))+" +
+                "(-7.53197*x2_1_2))+(5*x2_1_3))-(10*der_x2_1_3)))")
+    
     @testattr(casadi = True)
     def test_scaling(self):
         """

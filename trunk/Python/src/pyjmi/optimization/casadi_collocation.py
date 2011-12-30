@@ -987,14 +987,11 @@ class LocalDAECollocator(CasADiCollocator):
         manner and should only be used for debugging purposes. The NLP
         variables are essentially created twice; first with incorrect names and
         then recreated with correct names.
-        
-        The switch for enabling variable renaming exists internally.
         """
-        rename_switch = False # Internal switch for variable renaming
-        if rename_switch:
-            print("Warning: Variable renaming is currently activated.")
-            assert self.graph == "SX", \
-                   "Variable renaming is only allowed for SX graphs."
+        if self.rename_vars:
+            if self.graph != "SX":
+                raise NotImplementedError("Variable renaming only works " + \
+                                          "for SX graphs.")
             xx = casadi.SXMatrix(self.n_xx, 1, 0)
             var_indices = self.var_indices
             
