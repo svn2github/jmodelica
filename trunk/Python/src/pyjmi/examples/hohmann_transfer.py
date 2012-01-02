@@ -70,7 +70,7 @@ def run_demo(with_plots=True):
     model = JMUModel(jmu_name)
     
     #Simulation of Phase 1
-    res = model.simulate(final_time=t1,options={'ncp':100,'solver':"CVode"})
+    res = model.simulate(final_time=t1,options={'ncp':100,'solver':"IDA"})
 
     x_phase_1,y_phase_1 = res["x"], res["y"]
     
@@ -78,7 +78,7 @@ def run_demo(with_plots=True):
     model.set("vx",dx1+res["vx"][-1])
     model.set("vy",dy1+res["vy"][-1])
 
-    res = model.simulate(start_time=t1,final_time=tf,options={'ncp':100,'solver':"CVode"})
+    res = model.simulate(start_time=t1,final_time=tf,options={'ncp':100,'solver':"IDA"})
 
     x_phase_2,y_phase_2 = res["x"], res["y"]
 
@@ -86,7 +86,7 @@ def run_demo(with_plots=True):
     model.set("vx",dx2+res["vx"][-1])
     model.set("vy",dy2+res["vy"][-1])
 
-    res = model.simulate(start_time=tf,final_time=tf*2,options={'ncp':100,'solver':"CVode"})
+    res = model.simulate(start_time=tf,final_time=tf*2,options={'ncp':100,'solver':"IDA"})
 
     x_phase_3,y_phase_3 = res["x"], res["y"]
     
