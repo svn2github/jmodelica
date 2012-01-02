@@ -34,10 +34,10 @@ from pyjmi.common.io import ResultDymolaTextual
 
 try:
     from pyjmi.simulation.assimulo_interface import JMIDAE, write_data
-    from assimulo.implicit_ode import IDA
+    from assimulo.solvers import IDA
 except:
     logging.warning(
-        'Could not find Assimulo package. Check jmodelica.check_packages()')
+        'Could not find Assimulo package. Check pyjmi.check_packages()')
 
 def run_demo(with_plots=True):
     """ 
@@ -181,26 +181,25 @@ def run_demo(with_plots=True):
         # Set the value to the model
         sim_model.set('Tc',Tc_ctrl)
       
-        cstr_sim.initiate() #Calculate initial conditions (from the model)
         cstr_sim.simulate(t_mpc[i+1]) #Simulate
         
-        t_T_sim = cstr_sim.t
+        t_T_sim = cstr_sim.t_sol
         
         # Set terminal values of the states
-        cstr.set('cstr.c_init',cstr_sim.y_cur[0])
-        cstr.set('cstr.T_init',cstr_sim.y_cur[1])
-        sim_model.set('c_init',cstr_sim.y_cur[0])
-        sim_model.set('T_init',cstr_sim.y_cur[1])
+        cstr.set('cstr.c_init',cstr_sim.y[0])
+        cstr.set('cstr.T_init',cstr_sim.y[1])
+        sim_model.set('c_init',cstr_sim.y[0])
+        sim_model.set('T_init',cstr_sim.y[1])
         
         if with_plots:
             plt.figure(4)
             plt.subplot(3,1,1)
-            plt.plot(t_T_sim,N.array(cstr_sim.y)[:,0],'b')
-            plt.show()
+            plt.plot(t_T_sim,N.array(cstr_sim.y_sol)[:,0],'b')
+            #plt.show()
             
             plt.subplot(3,1,2)
-            plt.plot(t_T_sim,N.array(cstr_sim.y)[:,1],'b')
-            plt.show()
+            plt.plot(t_T_sim,N.array(cstr_sim.y_sol)[:,1],'b')
+            #plt.show()
         
             if t_mpc[i]==0:
                 plt.subplot(3,1,3)
@@ -216,7 +215,8 @@ def run_demo(with_plots=True):
             
         i = i+1
         if with_plots:
-            plt.show()
+            pass
+            #plt.show()
 
 
     if with_plots:
@@ -234,6 +234,7 @@ def run_demo(with_plots=True):
         plt.plot([0,T_final],[Tc_0_B,Tc_0_B],'--')
         plt.grid()
         plt.xlabel('t')
+        plt.show()
 
 
 if __name__ == "__main__":
