@@ -17,26 +17,44 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-#include "jmi_array_none.h"
+#include "jmi_common.h"
 
-void jmi_transpose_matrix(jmi_array_t* arr, jmi_ad_var_t* src, jmi_ad_var_t* dest) {
-	int i, j, tmp1, tmp2, k, n, dim;
-
-	n = arr->num_elems;
-	dim = arr->num_ndims;
-
-	for (i = 0; i < arr->n; i++) {
-		j = 0;
-		tmp1 = i;
-		tmp2 = 0;
-
-		for (k = 0; k < dim; k++) {
-			tmp2 = tmp1%(arr->size[k]);
-			tmp1 /= (arr->size[k]);
-			j *= (arr->size[k]);
-			j += tmp2;
-		}
-
-		dest[i] = src[j];
-	}
+#define TRANSPOSE_FUNC(name, src_type, dst_type) \
+void name(jmi_array_t* arr, src_type* src, dst_type* dest) { \
+	int i, j, tmp1, tmp2, k, n, dim, s; \
+ \
+	n = arr->num_elems; \
+	dim = arr->num_dims; \
+ \
+	for (i = 0; i < n; i++) { \
+		j = 0; \
+		tmp1 = i; \
+		tmp2 = 0; \
+ \
+		for (k = 0; k < dim; k++) { \
+			s = arr->size[k]; \
+			tmp2 = tmp1 % s; \
+			tmp1 /= s; \
+			j *= s; \
+			j += tmp2; \
+		} \
+ \
+		dest[i] = (dst_type) src[j]; \
+	} \
 }
+
+#define COPY_FUNC(name, src_type, dst_type) \
+void name(jmi_array_t* arr, src_type* src, dst_type* dest) { \
+	int i, n; \
+ \
+	n = arr->num_elems; \
+	for (i = 0; i < n; i++) { \
+		dest[i] = (dst_type) src[i]; \
+	} \
+}
+
+TRANSPOSE_FUNC(jmi_transpose_matrix, jmi_ad_var_t, jmi_ad_var_t)
+TRANSPOSE_FUNC(jmi_transpose_matrix_to_int, jmi_ad_var_t, jmi_int_t)
+TRANSPOSE_FUNC(jmi_transpose_matrix_from_int, jmi_int_t, jmi_ad_var_t)
+COPY_FUNC(jmi_copy_matrix_to_int, jmi_ad_var_t, jmi_int_t)
+COPY_FUNC(jmi_copy_matrix_from_int, jmi_int_t, jmi_ad_var_t)

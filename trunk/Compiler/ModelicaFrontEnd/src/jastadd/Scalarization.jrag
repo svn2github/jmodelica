@@ -1764,6 +1764,18 @@ aspect Scalarization {
 		return rc;
 	}
 	
+	public FExp FZeros.scalarizeExp(Map<String,FExp> indexMap) {
+		return new FIntegerLitExp(0);
+	}
+	
+	public FExp FOnes.scalarizeExp(Map<String,FExp> indexMap) {
+		return new FIntegerLitExp(1);
+	}
+	
+	public FExp FFillExp.scalarizeExp(Map<String,FExp> indexMap) {
+		return getFillExp().fullCopy();
+	}
+	
 	public FFunctionCall FFunctionCall.scalarizeFunction(Map<String,FExp> indexMap) {
 		List<FExp> args = new List<FExp>();
 		for (FExp arg : getArgs())

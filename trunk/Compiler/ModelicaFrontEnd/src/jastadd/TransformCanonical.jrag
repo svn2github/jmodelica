@@ -509,7 +509,39 @@ aspect TransformCanonical {
 			}*/
 		    str.append("**** Block ends ****\n");				
 			return str.toString();
-		}		
+		}
+		
+		protected ArrayList<FAbstractEquation> equationList(
+				ArrayList<MatchingPair> mps, MatchingPairFilter mpf) {
+			Set<FAbstractEquation> s = new LinkedHashSet<FAbstractEquation>();
+			for (MatchingPair mp : mps) {
+				if (mpf.filter(mp))
+					s.add(mp.getEquation());
+			}
+			ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>(s.size());
+			l.addAll(s);
+			return l;
+		}
+		
+		protected ArrayList<FVariable> variableList(
+				ArrayList<MatchingPair> mps, MatchingPairFilter mpf) {
+			ArrayList<FVariable> l = new ArrayList<FVariable>();
+			for (MatchingPair mp : mps) {
+				if (mpf.filter(mp))
+					l.add(mp.getFVariable());
+			}
+			return l;
+		}
+		
+		protected interface MatchingPairFilter {
+			public boolean filter(MatchingPair mp);
+		}
+		
+		protected MatchingPairFilter ALL_MATCHING_PAIR_FILTER = new MatchingPairFilter() {
+			public boolean filter(MatchingPair mp) {
+				return true;
+			}
+		};
 		
 		public abstract String toString();
 	
@@ -527,19 +559,11 @@ aspect TransformCanonical {
 		}	
 		
 		public ArrayList<FVariable> activeVariables() {
-			ArrayList<FVariable> s = new ArrayList<FVariable>();
-			for (MatchingPair mp : matchingPairs) {
-				s.add(mp.getFVariable());
-			}
-			return s;
+			return variableList(matchingPairs, ALL_MATCHING_PAIR_FILTER);
 		}		
 
 		public ArrayList<FAbstractEquation> equations() {
-			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
-			for (MatchingPair mp : matchingPairs) {
-				s.add(mp.getEquation());
-			}
-			return s;
+			return equationList(matchingPairs, ALL_MATCHING_PAIR_FILTER);
 		}
 		
 		public boolean isSolvable() {
@@ -591,48 +615,32 @@ aspect TransformCanonical {
 	 */
 	public class MixedEquationBlock extends EquationBlock {
 		
-		public ArrayList<FVariable> activeContinuousVariables() {
-			ArrayList<FVariable> s = new ArrayList<FVariable>();
-			for (MatchingPair mp : matchingPairs) {
-				//if (mp.getFVariable().isContinuous()) {
-				if (mp.getFVariable().isReal()) {
-					s.add(mp.getFVariable());
-				}
+		protected MatchingPairFilter REAL_MATCHING_PAIR_FILTER = new MatchingPairFilter() {
+			public boolean filter(MatchingPair mp) {
+				return mp.getFVariable().isReal();
 			}
-			return s;
+		};
+		
+		protected MatchingPairFilter NON_REAL_MATCHING_PAIR_FILTER = new MatchingPairFilter() {
+			public boolean filter(MatchingPair mp) {
+				return !mp.getFVariable().isReal();
+			}
+		};
+
+		public ArrayList<FVariable> activeContinuousVariables() {
+			return variableList(matchingPairs, REAL_MATCHING_PAIR_FILTER);
 		}		
 
 		public ArrayList<FVariable> activeDiscreteVariables() {
-			ArrayList<FVariable> s = new ArrayList<FVariable>();
-			for (MatchingPair mp : matchingPairs) {
-				//if (mp.getFVariable().isDiscrete()) {
-				if (!mp.getFVariable().isReal()) {
-					s.add(mp.getFVariable());
-				}
-			}
-			return s;
+			return variableList(matchingPairs, NON_REAL_MATCHING_PAIR_FILTER);
 		}		
 
 		public ArrayList<FAbstractEquation> continuousEquations() {
-			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
-			for (MatchingPair mp : matchingPairs) {
-				//if (mp.getEquation().isContinuous()) {
-				if (mp.getEquation().isReal()) {
-					s.add(mp.getEquation());
-				}
-			}
-			return s;
+			return equationList(matchingPairs, REAL_MATCHING_PAIR_FILTER);
 		}
 
 		public ArrayList<FAbstractEquation> discreteEquations() {
-			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
-			for (MatchingPair mp : matchingPairs) {
-				//if (mp.getEquation().isDiscrete()) {
-				if (!mp.getEquation().isReal()) {
-					s.add(mp.getEquation());
-				}
-			}
-			return s;
+			return equationList(matchingPairs, NON_REAL_MATCHING_PAIR_FILTER);
 		}
 									  						
 		public String toString() {
@@ -731,19 +739,11 @@ aspect TransformCanonical {
 		}	
 
 		public ArrayList<FAbstractEquation> unsolvedEquations() {
-			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
-			for (MatchingPair mp : unsolvedPairs) {
-				s.add(mp.getEquation());
-			}
-			return s;
+			return equationList(unsolvedPairs, ALL_MATCHING_PAIR_FILTER);
 		}
 
 		public ArrayList<FAbstractEquation> solvedEquations() {
-			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
-			for (MatchingPair mp : solvedPairs) {
-				s.add(mp.getEquation());
-			}
-			return s;
+			return equationList(solvedPairs, ALL_MATCHING_PAIR_FILTER);
 		}
 
 		public ArrayList<FAbstractEquation> equations() {

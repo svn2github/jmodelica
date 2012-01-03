@@ -109,7 +109,8 @@ function python_tests() {
         find_python_tests
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
-          echo ${TEST} | sed -e 's!^.*tests.!Running !'
+          echo ""
+          echo ${TEST} | sed -e 's!^.*jmodelica.!Running !'
           nosetests ${TAGS} -v ${TEST}
         done
       fi
@@ -134,10 +135,11 @@ function python_tests() {
         find_python_tests
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
-          echo ${TEST} | sed -e 's!^.*tests.!Running !'
+          echo ""
+          echo ${TEST} | sed -e 's!^.*jmodelica.!Running !'
           nosetests ${TAGS} -v ${TEST} 2>&1 \
 	    | egrep -v '^Exception .* ignored$' \
-	    | grep -B1 -A500 -e${PATTERN} \
+	    | grep -A500 -e${PATTERN} \
 	    | sed -e 's!^OK$!PASSED!' -e 's!^FAILED !TEST FAILED!'
         done | filter_python_separate
       fi

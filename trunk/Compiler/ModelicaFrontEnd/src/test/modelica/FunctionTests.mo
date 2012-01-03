@@ -5130,6 +5130,47 @@ end FunctionTests.UnknownArray29;
 end UnknownArray29;
 
 
+model UnknownArray30
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray30",
+         description="Fill type operators with unknown arguments in functions",
+         flatModel="
+fclass FunctionTests.UnknownArray30
+ Real x;
+equation
+ x = FunctionTests.UnknownArray30.f({1,2,3});
+
+ function FunctionTests.UnknownArray30.f
+  input Real[:] a;
+  output Real b;
+  Real temp_1;
+  Real temp_2;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(a, 1) loop
+   temp_1 := temp_1 + ( a[i1] ) * ( 1 );
+  end for;
+  temp_2 := 0.0;
+  for i1 in 1:size(a, 1) loop
+   temp_2 := temp_2 + ( 0 ) * ( a[1] );
+  end for;
+  b := temp_1 + temp_2;
+  return;
+ end FunctionTests.UnknownArray30.f;
+end FunctionTests.UnknownArray30;
+")})));
+
+	function f
+		input Real[:] a;
+		output Real b;
+	algorithm
+		b := a * ones(size(a, 1)) + zeros(size(a, 1)) * fill(a[1], size(a, 1));
+	end f;
+	
+	Real x = f({1,2,3});
+end UnknownArray30;
+
 
 // TODO: need more complex cases
 model IncompleteFunc1

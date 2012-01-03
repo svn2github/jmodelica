@@ -53,6 +53,7 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_opt_coll.h \
                     jmi_array_common.h \
                     jmi_array_none.h \
+                    jmi_array_none.c \
                     jmi_util.h \
                     jmi_util.c \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
