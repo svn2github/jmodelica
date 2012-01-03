@@ -24,13 +24,13 @@ import logging
 import time
 import numpy as N
 
+import pyfmi
 from pyfmi.common.algorithm_drivers import AlgorithmBase, AssimuloSimResult, OptionBase, InvalidAlgorithmOptionException, InvalidSolverArgumentException
 from pyfmi.common.io import ResultDymolaTextual
 from pyfmi.common.core import TrajectoryLinearInterpolation
 from pyfmi.common.core import TrajectoryUserFunction
 
 try:
-    import pyfmi
     from pyfmi.simulation.assimulo_interface import FMIODE
     from pyfmi.simulation.assimulo_interface import write_data
     import assimulo.solvers as solvers
