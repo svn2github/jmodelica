@@ -15,7 +15,7 @@ $(CASADI_BUILD_DIR):
 	*-cygwin*) \
 	IPOPT=$(IPOPT_HOME) SUNDIALS=$(SUNDIALS_HOME) cmake -G "MSYS Makefiles" $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
   	*-mingw*) \
-	IPOPT=$(IPOPT_HOME) SUNDIALS=$(SUNDIALS_HOME) cmake $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
+	IPOPT=$(IPOPT_HOME) SUNDIALS=$(SUNDIALS_HOME) cmake -G "MSYS Makefiles" $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
   	*-apple*) \
 	IPOPT=$(IPOPT_HOME) SUNDIALS=$(SUNDIALS_HOME) cmake $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
   	*) \
