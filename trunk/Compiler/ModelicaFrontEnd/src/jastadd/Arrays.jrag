@@ -600,19 +600,20 @@ aspect Arrays {
 		return s;
 	}
 	
+	syn boolean FRangeExp.hasStep() = getNumFExp() > 2;
+	
  	eq FRangeExp.size() {
  		MutableSize s = new MutableSize(1);
-		boolean hasStep = getNumFExp() > 2;
  		FExp start = getFExp(0);
- 		FExp stop = getFExp(hasStep ? 2 : 1);
- 		if (!hasStep && start.isIntegerLiteral(1) && stop.type().isInteger()) {
+ 		FExp stop = getFExp(hasStep() ? 2 : 1);
+ 		if (!hasStep() && start.isIntegerLiteral(1) && stop.type().isInteger()) {
  			s.append(stop);
  		} else {
  			start = start.makeRangeSizeExp();
  			stop = stop.makeRangeSizeExp();
- 	 		FExp step = hasStep ? getFExp(1).fullCopy() : null;
+ 	 		FExp step = hasStep() ? getFExp(1).fullCopy() : null;
  			FExp exp = new FSubExp(stop, start);
- 			if (hasStep)
+ 			if (hasStep())
  				exp = new FDivExp(exp, step);
  			exp = new FAddExp(new FIntegerExp(exp), new FIntegerLitExp(1));
  			exp = new FMaxExp(exp, new Opt(new FIntegerLitExp(0)));
@@ -1584,7 +1585,7 @@ aspect Arrays {
 		if (type().isReal()) {
 			double i1 = getFExp(0).ceval().realValue();
 			double i2 = 1.0;
-			if (getNumFExp() > 2) 
+			if (hasStep()) 
 				i2 = getFExp(1).ceval().realValue();
 			for (Index i : array.indices()) { 
 				array.set(i, new FRealLitExp(i1));
@@ -1593,7 +1594,7 @@ aspect Arrays {
 		} else {
 			int i1 = getFExp(0).ceval().intValue();
 			int i2 = 1;
-			if (getNumFExp() > 2) 
+			if (hasStep()) 
 				i2 = getFExp(1).ceval().intValue();
 			for (Index i : array.indices()) { 
 				array.set(i, type().createLiteral(i1));

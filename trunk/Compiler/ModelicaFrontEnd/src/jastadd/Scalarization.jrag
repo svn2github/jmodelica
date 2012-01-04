@@ -1667,11 +1667,10 @@ aspect Scalarization {
 	
 	public FExp FRangeExp.scalarizeExp(Map<String,FExp> indexMap) {
 		FExp res = new FIdUseExp(indexNames.get(0));
-		boolean hasStep = getNumFExp() > 2;
 		boolean startIsOne = getFExp(0).isIntegerLiteral(1);
-		if (!startIsOne || hasStep) {
+		if (!startIsOne || hasStep()) {
 			res = new FSubExp(res, new FIntegerLitExp(1));
-			if (hasStep)
+			if (hasStep())
 				res = new FMulExp(res, getFExp(1).fullCopy());
 			res = new FAddExp(getFExp(0).fullCopy(), res);
 		}

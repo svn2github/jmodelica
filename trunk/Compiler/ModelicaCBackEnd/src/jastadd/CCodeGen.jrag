@@ -778,7 +778,7 @@ aspect CCodeGen {
 	
 	public void FForStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		getIndex().genTempVars_C(p, str, indent);
-		getIndex().printForArrayDecl_C(p, str, indent);
+		getIndex().printForArrayInit_C(p, str, indent);
 		str.print(indent);
 		str.print("for (");
 		p.print(getIndex(), str, indent);
@@ -789,29 +789,41 @@ aspect CCodeGen {
 		str.print("}\n");		
 	}
 	
-	public void FForIndex.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		if (hasFExp()) 
-			getFExp().printForIndex_C(p, str, indent, getFVariable().name_C());
-	}
-	
-	// TODO: Declare in genVarDecls_C instead
-	public void FForIndex.printForArrayDecl_C(Printer p, PrintStream str, String indent) {
+	public void FForIndex.genVarDecls_C(Printer p, PrintStream str, String indent) {
+		super.genVarDecls_C(p, str, indent);
+		String name = getFVariable().name_C();
+		str.format("%sjmi_ad_var_t %s;\n", indent, name);
 		if (needsForArray()) {
-			str.print(indent);
-			str.print("jmi_ad_var_t ");
-			str.print(getFVariable().name_C());
-			str.print("a[] = { ");
-			getFExp().getArray().getFExps().prettyPrintWithSep(p, str, indent, ", ");
-			str.print(" };\n");
+			str.format("%sint %si;\n", indent, name);
+			str.format("%sjmi_ad_var_t %sa[%d];\n", indent, name, getFExp().size().numElements());
+		} else {
+			str.format("%sjmi_ad_var_t %se;\n", indent, name);
 		}
 	}
 	
-	// TODO: Declare in genVarDecls_C instead
+	public void FForIndex.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		getFExp().printForIndex_C(p, str, indent, getFVariable().name_C());
+	}
+	
+	public void FForIndex.printForArrayInit_C(Printer p, PrintStream str, String indent) {
+		if (needsForArray()) {
+			int i = 0;
+			for (FExp e : getFExp().getArray().iterable()) {
+				str.format("%s%sa[%d] = ", indent, getFVariable().name_C(), i++);
+				p.print(e, str, indent);
+				str.print(";\n");
+			}
+		} else {
+			str.format("%s%se = ", indent, getFVariable().name_C());
+			getFExp().printForEnd_C(p, str, indent);
+			str.print(";\n");
+		}
+	}
+	
 	public void FForIndex.printForArrayNext_C(Printer p, PrintStream str, String indent) {
 		if (needsForArray()) {
 			String name = getFVariable().name_C();
 			str.print(indent);
-			str.print("jmi_ad_var_t ");
 			str.print(name);
 			str.print(" = ");
 			str.print(name);
@@ -825,27 +837,33 @@ aspect CCodeGen {
 	syn boolean FExp.needsForArray()      = true;
 	eq FRangeExp.needsForArray()          = false;
 	
+	public void FExp.printForEnd_C(Printer p, PrintStream str, String indent) {
+		throw new UnsupportedOperationException(
+				"Must override printForEnd_C() if needsForArray() returns false");
+	}
+	
+	public void FRangeExp.printForEnd_C(Printer p, PrintStream str, String indent) {
+		p.print(getFExp(hasStep() ? 2 : 1), str, indent);
+		str.print(" - ");
+		printForStep_C(p, str, indent);
+		str.print(" / 2.0");
+	}
+	
 	public void FRangeExp.printForIndex_C(Printer p, PrintStream str, String indent, String name) {
-		boolean hasStep = getNumFExp() > 2;
-		str.print("jmi_ad_var_t ");
-		str.print(name);
-		str.print(" = ");
+		str.format("%s = ", name);
 		p.print(getFExp(0), str, indent);
-		str.print("; ");
-		str.print(name);
-		str.print(" <= ");
-		p.print(getFExp(hasStep ? 2 : 1), str, indent);
-		str.print("; ");
-		str.print(name);
-		str.print(" += ");
-		if (hasStep) 
+		str.format("; %s <= %se; %s += ", name, name, name);
+		printForStep_C(p, str, indent);
+	}
+	
+	protected void FRangeExp.printForStep_C(Printer p, PrintStream str, String indent) {
+		if (hasStep()) 
 			p.print(getFExp(1), str, indent);
 		else
 			str.print("1");
 	}
 	
 	public void FExp.printForIndex_C(Printer p, PrintStream str, String indent, String name) {
-		str.print("int ");
 		str.print(name);
 		str.print("i = 0; ");
 		str.print(name);

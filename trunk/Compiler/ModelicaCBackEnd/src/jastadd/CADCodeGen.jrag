@@ -1463,7 +1463,6 @@ aspect CADCodeGen {
 	}
 	
 	public void FRangeExp.printForIndex_CAD(Printer p, PrintStream str, String indent, String name) {
-		boolean hasStep = getNumFExp() > 2;
 		str.print("jmi_ad_var_t ");
 		str.print(name);
 		str.print(" = ");
@@ -1471,11 +1470,11 @@ aspect CADCodeGen {
 		str.print("; ");
 		str.print(name);
 		str.print(" <= ");
-		getFExp(hasStep ? 2 : 1).prettyPrint_C(p,str,indent);
+		getFExp(hasStep() ? 2 : 1).prettyPrint_C(p,str,indent);
 		str.print("; ");
 		str.print(name);
 		str.print(" += ");
-		if (hasStep) 
+		if (hasStep()) 
 			getFExp(1).prettyPrint_C(p,str,indent);
 		else
 			str.print("1");

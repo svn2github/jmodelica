@@ -321,7 +321,7 @@ aspect FlatTypeAnalysis {
 	
 	eq FRangeExp.type() {
 		FType tot = promoteTypeForFExpList(getFExps());
-		if (!tot.isScalar() || !tot.canBeRange() || (!tot.isNumeric() && getNumFExp() > 2))
+		if (!tot.isScalar() || !tot.canBeRange() || (!tot.isNumeric() && hasStep()))
 				return fUnknownType();
 		return tot.arrayType(size());
 	}
