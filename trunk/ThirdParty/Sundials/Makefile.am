@@ -9,7 +9,6 @@ $(abs_builddir)/../../sundials_install:
 	cd $(SUNDIALS_DIR) && $(MAKE) $(AM_MAKEFLAGS) install
 
 all-local: $(abs_builddir)/../../sundials_install
-#	install $(SUNDIALS_DIR) && $(MAKE) $(AM_MAKEFLAGS) install
 
 check-local:
 	cd $(SUNDIALS_DIR) && $(MAKE) $(AM_MAKEFLAGS) test

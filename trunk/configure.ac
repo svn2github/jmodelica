@@ -345,13 +345,12 @@ AC_C_CONST
 
 AC_CONFIG_SUBDIRS([ThirdParty/Sundials/sundials-2.4.0])
 
-#(mkdir -p sundials-build && cd sundials-build && sh configure $theoptionsthatiwant)
-
 AC_CONFIG_FILES([
  Makefile
  ThirdParty/Blas/Makefile
  ThirdParty/Lapack/Makefile
  ThirdParty/Sundials/Makefile
+ ThirdParty/CasADi/Makefile
  JMI/src/Makefile
  docbook/UsersGuide/Makefile
  Python/jm_ipython.sh

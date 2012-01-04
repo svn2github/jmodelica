@@ -33,7 +33,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = ThirdParty/Sundials
+subdir = ThirdParty/CasADi
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -191,7 +191,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUNDIALS_DIR = sundials-2.4.0
+CASADI_BUILD_DIR = $(abs_builddir)/../../casadi_build
 all: all-am
 
 .SUFFIXES:
@@ -204,9 +204,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu ThirdParty/Sundials/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu ThirdParty/CasADi/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu ThirdParty/Sundials/Makefile
+	  $(AUTOMAKE) --gnu ThirdParty/CasADi/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -384,16 +384,19 @@ uninstall-am:
 # in order to trigger a complete install, local in the build
 # directory, early in the build process.
 
-$(abs_builddir)/../../sundials_install:
-	cd $(SUNDIALS_DIR) && $(MAKE) $(AM_MAKEFLAGS) install
+$(CASADI_BUILD_DIR):
+	mkdir -p $(CASADI_BUILD_DIR) && \
+	cd $(CASADI_BUILD_DIR) && \
+	IPOPT=$(IPOPT_HOME) SUNDIALS=$(SUNDIALS_HOME) cmake $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/
 
-all-local: $(abs_builddir)/../../sundials_install
+all-local: $(CASADI_BUILD_DIR)
+	cd $(CASADI_BUILD_DIR) && make $(AM_MAKEFLAGS) python
 
 check-local:
-	cd $(SUNDIALS_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
+	cd $(CASADI_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
 
 clean-local:
-	cd $(SUNDIALS_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
+	cd $(CASADI_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -266,7 +266,7 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 
 # EXTRA_DIST =
-SUBDIRS = ThirdParty/Sundials JMI/src ThirdParty/Blas ThirdParty/Lapack
+SUBDIRS = ThirdParty/Sundials ThirdParty/CasADi JMI/src ThirdParty/Blas ThirdParty/Lapack
 assimulo_install_dir = $(abs_builddir)/Assimulo_install
 jmodelica_install_dir = $(abs_builddir)/JModelica_install
 pyfmi_install_dir = $(abs_builddir)/PyFMI_install
@@ -828,6 +828,8 @@ install-python-packages: build-python-packages
 	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
 	mkdir -p $(DESTDIR)$(prefix)/Python/tests_jmodelica; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests_jmodelica
+	cd $(abs_builddir)/casadi_build/swig/python/; \
+	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/
 	mkdir -p $(DESTDIR)$(prefix)/bin
 	[ -e $(DESTDIR)$(prefix)/bin/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/bin/jm_python.sh
 	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
