@@ -104,6 +104,9 @@ class FMIODE(Explicit_Problem):
         self.input = input
         self.input_names = []
         
+        #Set start time to the model
+        self._model.time = start_time
+        
         self.t0 = start_time
         self.y0 = self._model.continuous_states
         self.problem_name = self._model.get_name()

@@ -183,6 +183,7 @@ class AssimuloFMIAlg(AlgorithmBase):
         self.start_time = start_time
         self.final_time = final_time
         self.input = input
+        self.model.time = start_time #Also set start time into the model
         
         # handle options argument
         if isinstance(options, dict) and not \

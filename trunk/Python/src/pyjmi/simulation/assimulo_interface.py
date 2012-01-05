@@ -168,6 +168,9 @@ class JMIDAE(Implicit_Problem):
         self._model = model
         self.input = input
         
+        #Set start time to the model
+        self._model.t = start_time
+        
         self.t0 = start_time
         self.y0 = N.append(self._model.real_x,self._model.real_w)
         self.yd0 = N.append(self._model.real_dx,[0]*len(self._model.real_w))
@@ -657,6 +660,9 @@ class JMIDAESens(Implicit_Problem):
         
         self._model = model
         self.input = input
+        
+        #Set start time to the model
+        self._model.t = start_time
         
         self.t0 = start_time
         self.y0 = N.append(self._model.real_x,self._model.real_w)
