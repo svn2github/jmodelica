@@ -330,7 +330,7 @@ aspect Derivatives {
 			    "' in equation: \n   " + prettyPrint(""));
 		}
 	}
-/*
+	
 	public FAbstractEquation FFunctionCallEquation.diff(String name) {
 		List lefts = new List();
 		for (FFunctionCallLeft l : getLefts()) {
@@ -342,7 +342,7 @@ aspect Derivatives {
 		}
 		return dynamicFAbstractEquation(new FFunctionCallEquation(lefts, (FAbstractFunctionCall)getCall().diff(name)));
 	}
-*/
+	
 	public FExp FExp.diff(String name, int n) {
 		return (n <= 1) ? diff(name) : diff(name, n - 1).diff(name);
 	}

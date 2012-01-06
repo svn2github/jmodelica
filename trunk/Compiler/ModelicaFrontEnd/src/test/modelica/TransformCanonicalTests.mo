@@ -4045,14 +4045,55 @@ equation
   x1[2] = 0;
 end IndexReduction26_DerFunc;
 
-/*
+
 model IndexReduction27_DerFunc
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction25_DerFunc",
+         name="IndexReduction27_DerFunc",
          description="Test of index reduction",
          flatModel="
+fclass TransformCanonicalTests.IndexReduction27_DerFunc
+ parameter Real A[1,1] = 1 /* 1 */;
+ parameter Real A[1,2] = 2 /* 2 */;
+ parameter Real A[2,1] = 3 /* 3 */;
+ parameter Real A[2,2] = 4 /* 4 */;
+ Real x1[1];
+ Real x1[2];
+ Real x2[1];
+ Real x2[2];
+ Real der_x1_1;
+ Real der_x1_2;
+initial equation 
+ x2[1] = 0.0;
+ x2[2] = 0.0;
+equation
+ der_x1_1 + der(x2[1]) = 2;
+ der_x1_2 + der(x2[2]) = 3;
+ ({ - ( x1[1] ), - ( x1[2] )}) = TransformCanonicalTests.IndexReduction27_DerFunc.f({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}});
+ ({ - ( der_x1_1 ), - ( der_x1_2 )}) = TransformCanonicalTests.IndexReduction27_DerFunc.f_der({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {der(x2[1]),der(x2[2])}, {{0,0},{0,0}});
 
+ function TransformCanonicalTests.IndexReduction27_DerFunc.f_der
+  input Real[2] x;
+  input Real[2, 2] A;
+  input Real[2] der_x;
+  input Real[2, 2] der_A;
+  output Real[2] der_y;
+ algorithm
+  der_y[1] := ( A[1,1] ) * ( der_x[1] ) + ( A[1,2] ) * ( der_x[2] );
+  der_y[2] := ( A[2,1] ) * ( der_x[1] ) + ( A[2,2] ) * ( der_x[2] );
+  return;
+ end TransformCanonicalTests.IndexReduction27_DerFunc.f_der;
+
+ function TransformCanonicalTests.IndexReduction27_DerFunc.f
+  input Real[2] x;
+  input Real[2, 2] A;
+  output Real[2] y;
+ algorithm
+  y[1] := ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] );
+  y[2] := ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] );
+  return;
+ end TransformCanonicalTests.IndexReduction27_DerFunc.f;
+end TransformCanonicalTests.IndexReduction27_DerFunc;
 ")})));
 
 function f
@@ -4079,7 +4120,7 @@ equation
   der(x1) + der(x2) = {2,3};
   x1 + f(x2,A) = {0,0};
 end IndexReduction27_DerFunc;
-*/
+
 
 model DuplicateVariables1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
