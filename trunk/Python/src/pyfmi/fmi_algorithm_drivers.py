@@ -260,14 +260,14 @@ class AssimuloFMIAlg(AlgorithmBase):
         except KeyError: #Default solver options not found
             self.solver_options = {} #Empty dict
             try:
-                self.solver.__dict__["atol"]
+                self.solver.atol
                 self.solver_options["atol"] = "Default"
-            except KeyError:
+            except AttributeError:
                 pass
             try:
-                self.solver.__dict__["rtol"]
+                self.solver.rtol
                 self.solver_options["rtol"] = "Default"
-            except KeyError:
+            except AttributeError:
                 pass
         
         #Check relative tolerance
