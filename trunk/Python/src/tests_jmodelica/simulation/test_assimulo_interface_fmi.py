@@ -24,7 +24,7 @@ import pylab as P
 from scipy.io.matlab.mio import loadmat
 
 from jmodelica.compiler import compile_jmu, compile_fmu
-from pyfmi.fmi import FMUModel
+from pyfmi.fmi import FMUModel, FMUModel2
 from pyfmi.common.io import ResultDymolaTextual
 from tests_jmodelica import testattr, get_files_path
 
@@ -455,3 +455,122 @@ class Test_FMI_ODE:
         
         nose.tools.assert_almost_equal(height[0],1.000000,5)
         nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
+    
+class Test_ODE_JACOBIANS:
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        pass
+        
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        pass
+
+    @testattr(assimulo = True)
+    def test_ode_simulation_furuta(self): 
+        cname='Furuta'
+        fname = os.path.join(get_files_path(), 'Modelica', 'furuta.mo')
+        
+        fn_furuta = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'fmi_version':2.0})
+        m_furuta = FMUModel2(fn_furuta)
+        
+        m_furuta.initialize()
+        print "Starting simulation"
+        
+        opts = m_furuta.simulate_options()
+        opts['with_jacobian'] = True
+        res = m_furuta.simulate(final_time=100, options=opts)
+        
+        nose.tools.assert_almost_equal(m_furuta.get('theta'),5.68697138,5)
+        nose.tools.assert_almost_equal(m_furuta.get('dtheta'),-2.61197209,5)
+        nose.tools.assert_almost_equal(m_furuta.get('phi'),-0.68273686, 5)
+        nose.tools.assert_almost_equal(m_furuta.get('dphi'),1.1482119,5)
+        
+        opts['with_jacobian'] = False
+        res = m_furuta.simulate(final_time=100, options=opts)
+        
+        nose.tools.assert_almost_equal(m_furuta.get('theta'),3.8776305,5)
+        nose.tools.assert_almost_equal(m_furuta.get('dtheta'),-10.4606755,5)
+        nose.tools.assert_almost_equal(m_furuta.get('phi'),1.0685892, 5)
+        nose.tools.assert_almost_equal(m_furuta.get('dphi'),-3.77843691,5)
+    
+    @testattr(assimulo = True)
+    def test_ode_simulation_NonLinear(Self):
+        cname='NonLinear.MultiSystems'
+        fname = os.path.join(get_files_path(), 'Modelica', 'NonLinear.mo')
+        
+        fn_nonlin = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'fmi_version':2.0})
+        m_nonlin = FMUModel2(fn_nonlin)
+        
+        m_nonlin.initialize()
+        
+        opts = m_nonlin.simulate_options()
+        opts['with_jacobian'] = True
+        res = m_nonlin.simulate(final_time=50, options=opts)
+        
+        nose.tools.assert_almost_equal(m_nonlin.get('cLPANL[3].L1.p.i'),0.00316914, 5)
+        nose.tools.assert_almost_equal(m_nonlin.get('cLPANL[4].R1.p.i'),-0.02567021,5)
+        
+        print "Starting simulation"
+        
+        opts['with_jacobian'] = False
+        res = m_nonlin.simulate(final_time=50, options=opts)
+        
+        nose.tools.assert_almost_equal(m_nonlin.get('cLPANL[3].L1.p.i'),0.0031748, 5)
+        nose.tools.assert_almost_equal(m_nonlin.get('cLPANL[4].R1.p.i'),-0.02565374,5)
+        
+
+    @testattr(assimulo = True)
+    def test_ode_simulation_distlib(self): 
+        cname='DISTLib.Examples.Simulation'
+        fname = os.path.join(get_files_path(), 'Modelica', 'DISTLib.mo')
+        
+        fn_distlib = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'fmi_version':2.0})
+        m_distlib1 = FMUModel2(fn_distlib)
+        m_distlib2 = FMUModel2(fn_distlib)
+        m_distlib1.initialize()
+        m_distlib2.initialize()
+        
+        opts = m_distlib1.simulate_options()
+        opts['with_jacobian'] = True
+        res = m_distlib1.simulate(final_time=70, options=opts)
+        res = m_distlib2.simulate(final_time=70)
+        
+        nose.tools.assert_almost_equal(m_distlib1.get('binary_dist_initial.x[32]'),m_distlib2.get('binary_dist_initial.x[32]'),5)
+        nose.tools.assert_almost_equal(m_distlib1.get('binary_dist_initial.y[32]'),m_distlib2.get('binary_dist_initial.y[32]'),5)
+        
+        
+    @testattr(assimulo = True)
+    def test_ode_simulation_NonLinearIO(Self):
+        cname='NonLinear.TwoSystems_wIO'
+        fname = os.path.join(get_files_path(), 'Modelica', 'NonLinearIO.mo')
+        
+        fn_nonlinIO = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+        m_nonlinIO = FMUModel2(fn_nonlinIO)
+        
+        m_nonlinIO.set('u', 1)
+        m_nonlinIO.set('u1', 10000)
+        m_nonlinIO.set('u2', 1)
+        m_nonlinIO.set('u3', 10000)
+        
+        m_nonlinIO.initialize()
+        
+        opts = m_nonlinIO.simulate_options()
+        opts['with_jacobian'] = True
+        res = m_nonlinIO.simulate(final_time=20, options=opts)
+        
+        nose.tools.assert_almost_equal(m_nonlinIO.get('cLPANL1.L1.i'),0.00608301, 5)
+        nose.tools.assert_almost_equal(m_nonlinIO.get('cLPANL1.L2.i'),-0.00487041,5)
+        
+        print "Starting simulation"
+        
+        opts['with_jacobian'] = False
+        res = m_nonlinIO.simulate(final_time=20, options=opts)
+        
+        nose.tools.assert_almost_equal(m_nonlinIO.get('cLPANL1.L1.i'),0.00609025, 5)
+        nose.tools.assert_almost_equal(m_nonlinIO.get('cLPANL1.L2.i'),-0.00486129,5)
