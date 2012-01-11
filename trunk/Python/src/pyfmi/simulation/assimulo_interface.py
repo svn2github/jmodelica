@@ -200,8 +200,6 @@ class FMIODE(Explicit_Problem):
         
         #-Vector manipulation
         Jac = Jac.reshape(len(y),len(y)).transpose() #Reshape to a matrix
-
-        print Jac
         
         return Jac
 
