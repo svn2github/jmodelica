@@ -213,8 +213,12 @@ class AssimuloFMIAlg(AlgorithmBase):
 
         # Initialize?
         if self.options['initialize']:
-            self.model.initialize(relativeTolerance=self.solver_options['rtol'])
-
+            try:
+                self.model.initialize(relativeTolerance=self.solver_options['rtol'])
+            except KeyError:
+                rtol, atol = self.model.get_tolerances()
+                self.model.initialize(relativeTolerance=rtol)
+                
         if not self.input:
             self.probl = FMIODE(self.model, result_file_name=self.result_file_name,with_jacobian=self.with_jacobian,start_time=self.start_time)
         else:
@@ -251,23 +255,42 @@ class AssimuloFMIAlg(AlgorithmBase):
                 "The solver: "+solver+ " is unknown.")
         
         # solver options
-        self.solver_options = self.options[solver+'_options']
+        try:
+            self.solver_options = self.options[solver+'_options']
+        except KeyError: #Default solver options not found
+            self.solver_options = {} #Empty dict
+            try:
+                self.solver.__dict__["atol"]
+                self.solver_options["atol"] = "Default"
+            except KeyError:
+                pass
+            try:
+                self.solver.__dict__["rtol"]
+                self.solver_options["rtol"] = "Default"
+            except KeyError:
+                pass
         
         #Check relative tolerance
         #If the tolerances are not set specifically, they are set 
         #according to the 'DefaultExperiment' from the XML file.
-        if self.solver_options["rtol"] == "Default":
-            rtol, atol = self.model.get_tolerances()
-            self.solver_options['rtol'] = rtol
-                
+        try:
+            if self.solver_options["rtol"] == "Default":
+                rtol, atol = self.model.get_tolerances()
+                self.solver_options['rtol'] = rtol
+        except KeyError:
+            pass
+            
         #Check absolute tolerance
-        if self.solver_options["atol"] == "Default":
-            rtol, atol = self.model.get_tolerances()
-            fnbr, gnbr = self.model.get_ode_sizes()
-            if fnbr == 0:
-                self.solver_options['atol'] = 0.01*rtol
-            else:
-                self.solver_options['atol'] = atol
+        try:
+            if self.solver_options["atol"] == "Default":
+                rtol, atol = self.model.get_tolerances()
+                fnbr, gnbr = self.model.get_ode_sizes()
+                if fnbr == 0:
+                    self.solver_options['atol'] = 0.01*rtol
+                else:
+                    self.solver_options['atol'] = atol
+        except KeyError:
+            pass
     
     def _set_solver_options(self):
         """ 
