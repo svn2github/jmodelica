@@ -498,7 +498,10 @@ class AssimuloAlg(AlgorithmBase):
             self.result_file_name = self.options['result_file_name']
         
         # solver options
-        self.solver_options = self.options[solver+'_options']
+        try:
+            self.solver_options = self.options[solver+'_options']
+        except KeyError: #Default solver options not found
+            self.solver_options = {} #Empty dict
         
         # sensitivity
         self.sensitivity = self.solver_options.get('sensitivity',False)
