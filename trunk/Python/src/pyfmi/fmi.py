@@ -2192,8 +2192,6 @@ class FMUModel2(FMUModel):
             plt.axis([0, ncu+1, ncy+1, 0])
             
             plt.show()
-
- 
             
-        return Afd,Bfd,Cfd,Dfd
+        return Afd,Bfd,Cfd,Dfd,n_err
     
