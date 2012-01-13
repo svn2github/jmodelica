@@ -633,9 +633,9 @@ class ParameterEstimationData(object):
                 where y is a function created by gluing together the
                 collocation polynomials for the measured variables at all the
                 mesh points and y_m is a function providing the measured values
-                given time. If the parameter data is a matrix, the data is
-                linearly interpolated to create the y_m function. If data is a
-                function, then this function defines y_m.
+                at a given time point. If the parameter data is a matrix, the
+                data are linearly interpolated to create the y_m function. If
+                data is a function, then this function defines y_m.
                 
                 Discrete parameter estimation uses the cost function
                 
