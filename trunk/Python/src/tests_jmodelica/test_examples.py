@@ -169,7 +169,12 @@ def test_cstr_casadi():
 def test_vdp_casadi():
     """Run the VDP CasADi example."""
     vdp_casadi.run_demo(False)
-    
+
+@testattr(assimulo = True)
+def test_robertson():
+    """ Run the Robertson example """
+    robertson.run_demo(False)
+
 @testattr(casadi = True)
 def test_parameter_estimation_1_casadi():
     """Run the Parameter Estimation CasADi example."""

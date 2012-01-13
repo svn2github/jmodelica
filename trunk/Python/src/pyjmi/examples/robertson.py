@@ -41,7 +41,6 @@ def run_demo(with_plots=True):
     opts = model.simulate_options()
     opts['IDA_options']['atol'] = [1.0e-8, 1.0e-14, 1.0e-6]
     opts['IDA_options']['sensitivity'] = True
-    opts['IDA_options']['write_cont'] = False
     opts['ncp'] = 400
 
     #Simulate
@@ -56,9 +55,10 @@ def run_demo(with_plots=True):
     nose.tools.assert_almost_equal(dy2dp1[40],  3.9026e-04, 6)
     nose.tools.assert_almost_equal(dy3dp1[40],  3.5551e-01 , 3)
     
-    plt.plot(time, dy1dp1, time, dy2dp1, time, dy3dp1)
-    plt.legend(('dy1/dp1', 'dy2/dp1', 'dy3/dp1'))
-    plt.show()
+    if with_plots:
+        plt.plot(time, dy1dp1, time, dy2dp1, time, dy3dp1)
+        plt.legend(('dy1/dp1', 'dy2/dp1', 'dy3/dp1'))
+        plt.show()
     
     
 if __name__ == "__main__":
