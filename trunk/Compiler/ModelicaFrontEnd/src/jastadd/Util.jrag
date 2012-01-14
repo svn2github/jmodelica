@@ -1936,6 +1936,9 @@ aspect FlatExpressions {
     eq InstNode.getChild().inWhen()                  = false;
     eq FClass.getChild().inWhen()                    = false;
     
+    inh boolean FStatement.inWhen();
+    eq FWhenStmt.getFIfWhenClause().inWhen() = true;
+    
     /**
      * \brief Is this expression of a type that is valid for most uses?
      * 
