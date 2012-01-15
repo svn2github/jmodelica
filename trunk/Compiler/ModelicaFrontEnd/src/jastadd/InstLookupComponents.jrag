@@ -189,6 +189,8 @@ aspect InstLookupComponents {
 	eq InstNode.getChild().lookupInstConstant(String name) {
 		HashSet set = new HashSet(4);
 		set.addAll(memberInstConstantWithExtends(name));
+		for (InstImport ii : instImports()) 
+			set.addAll(ii.lookupInstConstantInImport(name));		
 		if (set.isEmpty())
 			set.addAll(lookupInstConstant(name));
 		return set.isEmpty() ? emptyHashSet() : set;
