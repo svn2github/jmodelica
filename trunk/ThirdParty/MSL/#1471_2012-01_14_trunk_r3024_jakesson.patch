@@ -2,7 +2,17 @@ Index: ThirdParty/MSL/Modelica/Blocks/Continuous.mo
 ===================================================================
 --- ThirdParty/MSL/Modelica/Blocks/Continuous.mo	(revision 3019)
 +++ ThirdParty/MSL/Modelica/Blocks/Continuous.mo	(working copy)
-@@ -683,10 +683,10 @@
+@@ -654,7 +654,8 @@
+   end PI;
+ 
+   block PID "PID-controller in additive description form"
+    import Modelica.Blocks.Types.InitPID;
++    import Modelica.Blocks.Types.Init;
+     extends Interfaces.SISO;
+ 
+     parameter Real k=1 "Gain";
+
+@@ -683,18 +683,18 @@
              rotation=0)));
      Blocks.Continuous.Integrator I(k=1/Ti, y_start=xi_start,
        initType=if initType==InitPID.SteadyState then 
@@ -11,10 +21,21 @@ Index: ThirdParty/MSL/Modelica/Blocks/Continuous.mo
                 if initType==InitPID.InitialState or 
                    initType==InitPID.DoNotUse_InitialIntegratorState then 
 -                  InitPID.InitialState else InitPID.NoInit)
-+                  Init.InitialState else InitPID.NoInit)
++                  Init.InitialState else Init.NoInit)
        "Integral part of PID controller" 
        annotation (Placement(transformation(extent={{-60,-20},{-20,20}},
              rotation=0)));
+     Blocks.Continuous.Derivative D(k=Td, T=max([Td/Nd, 100*Modelica.
+           Constants.eps]), x_start=xd_start,
+       initType=if initType==InitPID.SteadyState or 
+-                  initType==InitPID.InitialOutput then InitPID.SteadyState else 
+-               if initType==InitPID.InitialState then InitPID.InitialState else 
++                  initType==InitPID.InitialOutput then Init.SteadyState else 
++               if initType==InitPID.InitialState then Init.InitialState else 
+                   Init.NoInit) "Derivative part of PID controller" 
+       annotation (Placement(transformation(extent={{-60,-100},{-20,-60}},
+             rotation=0)));
+
 @@ -695,7 +695,7 @@
        initType=if initType==InitPID.SteadyState or 
                    initType==InitPID.InitialOutput then InitPID.SteadyState else 

@@ -654,7 +654,8 @@ This is discussed in the description of package
   end PI;
 
   block PID "PID-controller in additive description form"
-    import Modelica.Blocks.Types.InitPID;
+    import Modelica.Blocks.Types.Init;
+	import Modelica.Blocks.Types.InitPID;
     extends Interfaces.SISO;
 
     parameter Real k=1 "Gain";
@@ -686,15 +687,15 @@ This is discussed in the description of package
                   Init.SteadyState else 
                if initType==InitPID.InitialState or 
                   initType==InitPID.DoNotUse_InitialIntegratorState then 
-                  Init.InitialState else InitPID.NoInit)
+                  Init.InitialState else Init.NoInit)
       "Integral part of PID controller" 
       annotation (Placement(transformation(extent={{-60,-20},{-20,20}},
             rotation=0)));
     Blocks.Continuous.Derivative D(k=Td, T=max([Td/Nd, 100*Modelica.
           Constants.eps]), x_start=xd_start,
       initType=if initType==InitPID.SteadyState or 
-                  initType==InitPID.InitialOutput then InitPID.SteadyState else 
-               if initType==InitPID.InitialState then InitPID.InitialState else 
+                  initType==InitPID.InitialOutput then Init.SteadyState else 
+               if initType==InitPID.InitialState then Init.InitialState else 
                   Init.NoInit) "Derivative part of PID controller" 
       annotation (Placement(transformation(extent={{-60,-100},{-20,-60}},
             rotation=0)));
