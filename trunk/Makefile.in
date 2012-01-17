@@ -266,7 +266,7 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 
 # EXTRA_DIST =
-SUBDIRS = ThirdParty/Sundials ThirdParty/CasADi JMI/src ThirdParty/Blas ThirdParty/Lapack
+SUBDIRS = ThirdParty/Sundials JMI/src ThirdParty/Blas ThirdParty/Lapack
 assimulo_install_dir = $(abs_builddir)/Assimulo_install
 jmodelica_install_dir = $(abs_builddir)/JModelica_install
 pyfmi_install_dir = $(abs_builddir)/PyFMI_install
@@ -775,6 +775,10 @@ uninstall-am:
 	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
 	ps ps-am tags tags-recursive uninstall uninstall-am
 
+
+casadi:
+	cd $(abs_builddir)/ThirdParty/CasADi; \
+	make -f MakeFile
 
 build-python-packages:
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	cd $(abs_top_srcdir)/Assimulo; \

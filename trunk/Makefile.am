@@ -17,7 +17,7 @@ AUTOMAKE_OPTIONS = foreign
 
 # EXTRA_DIST =
 
-SUBDIRS = ThirdParty/Sundials ThirdParty/CasADi JMI/src ThirdParty/Blas ThirdParty/Lapack
+SUBDIRS = ThirdParty/Sundials JMI/src ThirdParty/Blas ThirdParty/Lapack
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 jmodelica_install_dir=$(abs_builddir)/JModelica_install
@@ -25,6 +25,10 @@ pyfmi_install_dir=$(abs_builddir)/PyFMI_install
 pyjmi_install_dir=$(abs_builddir)/PyJMI_install
 
 bindistdir=JModelica.org-$(VERSION)-bin
+
+casadi:
+	cd $(abs_builddir)/ThirdParty/CasADi; \
+	make -f MakeFile
 
 build-python-packages:
 if WITH_SUNDIALS
