@@ -30,6 +30,11 @@ casadi:
 	cd $(abs_builddir)/ThirdParty/CasADi; \
 	make -f MakeFile
 
+install_casadi: casadi
+	cd $(abs_builddir)/casadi_build/swig/python/; \
+	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/
+
+
 build-python-packages:
 if WITH_SUNDIALS
 if WITH_SUPERLU
@@ -92,8 +97,6 @@ endif
 	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
 	mkdir -p $(DESTDIR)$(prefix)/Python/tests_jmodelica; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests_jmodelica
-	cd $(abs_builddir)/casadi_build/swig/python/; \
-	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/
 	mkdir -p $(DESTDIR)$(prefix)/bin
 	[ -e $(DESTDIR)$(prefix)/bin/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/bin/jm_python.sh
 	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
