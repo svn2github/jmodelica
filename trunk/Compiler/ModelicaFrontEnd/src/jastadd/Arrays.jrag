@@ -418,8 +418,11 @@ aspect Arrays {
 	 */	
 	syn int InstNode.ndims() = 0;
 	
-	eq InstComponentDecl.ndims() = hasFArraySubscripts()? 
-			getFArraySubscripts().ndims(): 0;
+	eq InstComponentDecl.ndims()      = hasFArraySubscripts() ? getFArraySubscripts().ndims() : 0;
+	eq InstArrayComponentDecl.ndims() = retrieveArrayCompNdims();
+	
+	inh int InstArrayComponentDecl.retrieveArrayCompNdims();
+	eq InstNode.getChild().retrieveArrayCompNdims() = ndims() - 1;
 
 	syn int AbstractFVariable.ndims() = -1;
 	

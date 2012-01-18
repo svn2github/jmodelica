@@ -1718,6 +1718,37 @@ Semantic error at line 164, column 11:
   extends D;
 end ExtendsTest3;
 
+model ExtendsTest4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ExtendsTest4",
+         description="Array of components of a class extending class with components",
+         flatModel="
+fclass NameTests.ExtendsTest4
+ Real e[1].d = 1;
+ Real e[2].d = 1;
+ Real y;
+equation
+ y = e[1].d;
+end NameTests.ExtendsTest4;
+")})));
+
+  package A
+    model C
+      Real d = 1;
+    end C;
+    model B
+      extends A.C;
+    end B;
+  end A;
+
+  A.B e[2];
+  Real y;
+equation
+  y = e[1].d;
+end ExtendsTest4;
+
+
 model ImportTest1
    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="ImportTest1",
@@ -2009,11 +2040,8 @@ model ImportTest11
          description="Using constant from imported package.",
          flatModel="
 fclass NameTests.ImportTest11
- Real m.v(final quantity = \"ElectricPotential\",final unit = \"V\");
- Real m.x;
-equation
- m.v = 0;
- m.x = 1.2566370614359173E-6;
+ Real m.v(final quantity = \"ElectricPotential\",final unit = \"V\") = 0;
+ Real m.x = 1.2566370614359173E-6;
 end NameTests.ImportTest11;
 ")})));
 		

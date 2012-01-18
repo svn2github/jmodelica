@@ -999,7 +999,7 @@ public class ModelicaCompiler {
 			
 		} finally {
 			logCompilationInfo();
-			// The node count requires changeing ASTNode.java by hand - see dumpNodeCountFile()
+			// The node count requires changing ASTNode.java by hand - see dumpNodeCountFile()
 //			dumpNodeCountFile("node_count.txt");
 //			dumpMemoryUseFile(sr, "final source", "source2");
 		}
