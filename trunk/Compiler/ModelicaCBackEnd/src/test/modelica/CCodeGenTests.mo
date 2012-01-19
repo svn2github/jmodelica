@@ -4542,6 +4542,76 @@ der(x1) = -x1 + z1;
 
 end BlockTest2;
 
+model BlockTest3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="BlockTest3",
+         description="Test of code generation of mixed systems of equations.",
+         generate_ode=true,
+         equation_sorting=true,
+         template="$C_dae_blocks_residual_functions$",
+         generatedCode=" 
+		 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _a_4;
+    x[1] = _sa_7;
+    x[2] = _f_5;
+    x[3] = _der_v_13;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _a_4 = x[0];
+    _sa_7 = x[1];
+    _f_5 = x[2];
+    _der_v_13 = x[3];
+  (*res)[0] = _a_4 - (_der_v_13);
+  (*res)[1] = (COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8),JMI_TRUE,_sa_7 - ( AD_WRAP_LITERAL(1) ),(COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9),JMI_TRUE,_sa_7 + AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0))))) - (_a_4);
+  (*res)[2] = (COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8),JMI_TRUE,_f0_1 + ( _f1_2 ) * ( _v_3 ),(COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9),JMI_TRUE, - ( _f0_1 ) + ( _f1_2 ) * ( _v_3 ),( _f0_1 ) * ( _sa_7 ))))) - (_f_5);
+  (*res)[3] = _u_6 - ( _f_5 ) - (( _m_0 ) * ( _der_v_13 ));
+  } else if (init==JMI_BLOCK_EVALUATE_NON_REALS) {
+ _startBack_9 = LOG_EXP_AND(COND_EXP_EQ(pre_mode_10, 2, JMI_TRUE, JMI_FALSE), _sw(1));
+ _startFor_8 = LOG_EXP_AND(COND_EXP_EQ(pre_mode_10, 2, JMI_TRUE, JMI_FALSE), _sw(0));
+  }
+  return 0;
+}
+")})));
+
+ parameter Real m = 1;
+ parameter Real f0 = 1;
+ parameter Real f1 = 1;
+ Real v;
+ Real a;
+ Real f;
+ Real u;
+ Real sa;
+ Boolean startFor(start=false);
+ Boolean startBack(start=false);
+ Integer mode(start=2);
+ Real dummy;
+equation 
+ der(dummy) = 1;
+ u = 2*sin(time);
+ m*der(v) = u - f;
+ der(v) = a;
+ startFor = pre(mode)==2 and sa > 1;
+ startBack = pre(mode) == 2 and sa < -1;
+ a = if pre(mode) == 1 or startFor then sa-1 else 
+     if pre(mode) == 3 or startBack then 
+     sa + 1 else 0;
+ f = if pre(mode) == 1 or startFor then 
+     f0 + f1*v else 
+     if pre(mode) == 3 or startBack then 
+     -f0 + f1*v else f0*sa;
+ mode=if (pre(mode) == 1 or startFor)
+      and v>0 then 1 else 
+      if (pre(mode) == 3 or startBack)
+          and v<0 then 3 else 2;
+
+end BlockTest3;
+
+
+
+
+
 model OutputTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
