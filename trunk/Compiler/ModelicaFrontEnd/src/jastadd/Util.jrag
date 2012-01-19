@@ -1219,6 +1219,22 @@ aspect FlatNames {
     /**
      * Create an access to this variable.
      */
+	public FIdUse AbstractFVariable.createFIdUse() {
+		 return null;
+	}
+	// TODO: Add implementation for enum
+   
+	public FIdUse FVariable.createFIdUse() {
+		 return getFQName().createFIdUse();
+	}  
+   
+	public FIdUse FFunctionVariable.createFIdUse() {
+		 return getFQName().createFIdUse();
+	}  
+   
+    /**
+     * Create an access expression to this variable.
+     */
 	public FIdUseExp FVariable.createUseExp() {
 		 return getFQName().createFIdUseExp();
 	}
