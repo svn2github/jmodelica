@@ -20,7 +20,7 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = ThirdParty/Sundials JMI/src ThirdParty/Blas ThirdParty/Lapack
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
-jmodelica_install_dir=$(abs_builddir)/JModelica_install
+pymodelica_install_dir=$(abs_builddir)/pymodelica_install
 pyfmi_install_dir=$(abs_builddir)/PyFMI_install
 pyjmi_install_dir=$(abs_builddir)/PyJMI_install
 
@@ -49,7 +49,7 @@ if !WITH_SUPERLU
 endif
 endif
 	cd $(abs_top_srcdir)/Python/src; \
-	python setup_jmodelica.py install --prefix=$(jmodelica_install_dir); \
+	python setup_pymodelica.py install --prefix=$(pymodelica_install_dir); \
 	rm -rf build
 
 	cd $(abs_top_srcdir)/Python/src; \
@@ -74,10 +74,10 @@ if WITH_SUNDIALS
 	done
 endif 
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
-	if [ -e $(jmodelica_install_dir)/$${pkgdir}/site-packages/ ]; \
+	if [ -e $(pymodelica_install_dir)/$${pkgdir}/site-packages/ ]; \
 	then \
-	cd $(jmodelica_install_dir)/$${pkgdir}/site-packages/; \
-	find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	cd $(pymodelica_install_dir)/$${pkgdir}/site-packages/; \
+	find pymodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi; \
 	done
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
@@ -219,8 +219,8 @@ if WITH_SUNDIALS
 	rm -rf $(assimulo_install_dir)
 endif
 	cd $(abs_top_srcdir)/Python/src; \
-	python setup_jmodelica.py clean --all 
-	rm -rf $(jmodelica_install_dir)
+	python setup_pymodelica.py clean --all 
+	rm -rf $(pymodelica_install_dir)
 	cd $(abs_top_srcdir)/Python/src; \
 	python setup_pyfmi.py clean --all 
 	rm -rf $(pyfmi_install_dir)
