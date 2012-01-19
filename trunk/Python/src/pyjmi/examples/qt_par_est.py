@@ -21,7 +21,7 @@ from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
 import numpy as N
 
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 from pyjmi.common.core import TrajectoryLinearInterpolation
 

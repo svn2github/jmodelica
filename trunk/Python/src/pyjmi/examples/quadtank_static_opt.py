@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 import scipy.integrate as int
 
 # Import the JModelica.org Python packages
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 
 def run_demo(with_plots=True):

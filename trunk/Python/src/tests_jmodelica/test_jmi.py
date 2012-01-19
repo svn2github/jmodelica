@@ -30,18 +30,18 @@ import logging
 from tests_jmodelica import testattr, get_files_path
 
 import pyjmi.jmi as jmi
-from jmodelica.compiler import compile_jmu, get_jmu_name
+from pymodelica.compiler import compile_jmu, get_jmu_name
 from pyjmi.jmi import JMUModel, JMIException
 import pyjmi.jmi_algorithm_drivers as ad
 
 try:
     from pyjmi.simulation.assimulo_interface import JMIDAE
     #, JMIDAE, FMIODE, JMIModel_Exception
-    #from jmodelica.simulation.assimulo_interface import write_data
-    #from jmodelica.simulation.assimulo_interface import TrajectoryLinearInterpolation
+    #from pyjmi.simulation.assimulo_interface import write_data
+    #from pyjmi.simulation.assimulo_interface import TrajectoryLinearInterpolation
     from assimulo.solvers import IDA
 except NameError, ImportError:
-    logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
+    logging.warning('Could not load Assimulo module. Check pyjmi.check_packages()')
 
 int = N.int32
 N.int = N.int32
@@ -1350,7 +1350,7 @@ class TestJMIModel_VDP:
                "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE initialization equations."
                
 class TestModelGeneric:
-    """ Test methods in the jmodelica.jmi.JMUModel class
+    """ Test methods in the pyjmi.jmi.JMUModel class
     """
 
     @classmethod

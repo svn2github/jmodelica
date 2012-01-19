@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 import scipy.integrate as integr
 
 # Import the JModelica.org Python packages
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 from pyjmi.optimization import ipopt
 

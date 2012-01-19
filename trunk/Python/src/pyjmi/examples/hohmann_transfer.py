@@ -21,8 +21,8 @@ import os.path
 import numpy as N
 import matplotlib.pyplot as plt
 
-from jmodelica import compile_jmu
-from jmodelica import compile_fmux
+from pymodelica import compile_jmu
+from pymodelica import compile_fmux
 from pyjmi import JMUModel
 from pyjmi import CasadiModel
 

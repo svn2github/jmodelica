@@ -31,19 +31,19 @@ import string
 
 import jpype
 
-import jmodelica as jm
-from jmodelica.common import xmlparser
-from jmodelica.common.core import list_to_string, get_unit_name
+import pymodelica as pym
+from pymodelica.common import xmlparser
+from pymodelica.common.core import list_to_string, get_unit_name
 
 #start JVM
 # note that startJVM() fails after shutdownJVM(), hence, only one start
 if not jpype.isJVMStarted():
-    _jvm_args = string.split(jm.environ['JVM_ARGS'],' ')
-    _jvm_class_path = jm.environ['MC_JAR'] + os.pathsep + jm.environ['OC_JAR']+\
-        os.pathsep + jm.environ['UTIL_JAR'] + os.pathsep + \
-        jm.environ['GRAPHS_JAR']
-    _jvm_ext_dirs = jm.environ['BEAVER_PATH']
-    jpype.startJVM(jm.environ['JVM_PATH'], 
+    _jvm_args = string.split(pym.environ['JVM_ARGS'],' ')
+    _jvm_class_path = pym.environ['MC_JAR'] + os.pathsep + pym.environ['OC_JAR']+\
+        os.pathsep + pym.environ['UTIL_JAR'] + os.pathsep + \
+        pym.environ['GRAPHS_JAR']
+    _jvm_ext_dirs = pym.environ['BEAVER_PATH']
+    jpype.startJVM(pym.environ['JVM_PATH'], 
         '-Djava.class.path=%s' % _jvm_class_path, 
         '-Djava.ext.dirs=%s' % _jvm_ext_dirs,
         *_jvm_args)
@@ -388,7 +388,7 @@ class ModelicaCompiler(object):
     LOG_WARNING = ModelicaCompiler.WARNING
     LOG_INFO = ModelicaCompiler.INFO
     
-    jm_home = jm.environ['JMODELICA_HOME']
+    jm_home = pym.environ['JMODELICA_HOME']
 
     options_file_path = os.path.join(jm_home, 'Options','options.xml')
 
@@ -421,7 +421,7 @@ class ModelicaCompiler(object):
         except jpype.JavaException, ex:
             self._handle_exception(ex)
             
-        options.addStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
+        options.addStringOption('MODELICAPATH',pym.environ['MODELICAPATH'])
         
         self._compiler = self.ModelicaCompiler(options, 
                                                xml_template,
@@ -1067,7 +1067,7 @@ class OptimicaCompiler(ModelicaCompiler):
 
     OptimicaCompiler = org.jmodelica.optimica.compiler.OptimicaCompiler
 
-    jm_home = jm.environ['JMODELICA_HOME']
+    jm_home = pym.environ['JMODELICA_HOME']
 
     def __init__(self, xml_template = None, xml_values_template = None, 
                  c_template = None, optimica_c_template = None):
@@ -1103,7 +1103,7 @@ class OptimicaCompiler(ModelicaCompiler):
         except jpype.JavaException, ex:
             self._handle_exception(ex)
             
-        options.addStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
+        options.addStringOption('MODELICAPATH',pym.environ['MODELICAPATH'])
         
         self._compiler = self.OptimicaCompiler(options,
                                                xml_template,

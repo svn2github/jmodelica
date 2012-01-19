@@ -372,7 +372,7 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         sens_desc = []
         
         for j in range(len(sens_p)):
-            #(ref_param, type) = jmodelica.jmi._translate_value_ref(sens_p[j][0])
+            #(ref_param, type) = pyjmi.jmi._translate_value_ref(sens_p[j][0])
             for i in range(len(sens_xw)):
                 sens_names += ['d'+sens_xw[i][1]+'/d'+sens_p[j][1]]
                 sens_desc  += ['Sensitivity of '+sens_xw[i][1]+' with respect to '+sens_p[j][1]+'.']

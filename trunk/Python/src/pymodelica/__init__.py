@@ -54,20 +54,20 @@ except IOError:
                   % _f)
 
 
-import jmodelica
+import pymodelica
 
 import numpy as N
 
 int = N.int32
 N.int = N.int32
 
-#Import the compile functions allowing for users to type: from jmodelica import compiler_*
+#Import the compile functions allowing for users to type: from pymodelica import compiler_*
 from compiler import compile_jmu, compile_fmu, compile_fmux
 
 def check_packages():
     import sys, time
     le=30
-    startstr = "Performing jmodelica package check"
+    startstr = "Performing pymodelica package check"
     sys.stdout.write("\n")
     sys.stdout.write(startstr+" \n")
     sys.stdout.write("="*len(startstr))
@@ -90,10 +90,10 @@ def check_packages():
     sys.stdout.flush()
     time.sleep(0.25)
     
-    #check jmodelica version
-    jmversion = jmodelica.__version__
+    #check pymodelica version
+    jmversion = pymodelica.__version__
     sys.stdout.write(
-        "%s %s" % ("jmodelica version:".ljust(le,'.'),jmversion.ljust(le)))
+        "%s %s" % ("pymodelica version:".ljust(le,'.'),jmversion.ljust(le)))
     sys.stdout.write("\n")
     sys.stdout.flush()
     time.sleep(0.25)
@@ -168,7 +168,7 @@ def check_packages():
             sys.stdout.write("\n")
         sys.stdout.write("\n")
         sys.stdout.write("could not be found. It is not possible to run \
-        the jmodelica package without them.\n")
+        the pymodelica package without them.\n")
     
     if len(warning_packages) > 0:
         sys.stdout.write("\n")

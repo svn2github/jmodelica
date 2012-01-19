@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 import numpy as N
 from matplotlib.font_manager import fontManager, FontProperties
 
-from jmodelica import compile_fmu
+from pymodelica import compile_fmu
 from pyfmi import FMUModel
 from pyjmi.optimization import dfo
 

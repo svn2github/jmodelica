@@ -25,8 +25,8 @@ import numpy as N
 import nose
 
 from tests_jmodelica import testattr, get_files_path
-from jmodelica.compiler import compile_jmu
-from jmodelica.common.io import ResultDymolaTextual, ResultWriterDymola
+from pymodelica.compiler import compile_jmu
+from pymodelica.common.io import ResultDymolaTextual, ResultWriterDymola
 from pyjmi.common.io import VariableNotTimeVarying
 from pyfmi.common.io import ResultWriterDymola as fmi_ResultWriterDymola
 from pyjmi.jmi import JMUModel

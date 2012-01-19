@@ -21,7 +21,7 @@ import os.path
 import numpy as N
 import matplotlib.pyplot as plt
 
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 
 def run_demo(with_plots=True):

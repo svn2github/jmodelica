@@ -25,7 +25,7 @@ import numpy as N
 import sys as S
 
 from tests_jmodelica import testattr, get_files_path
-from jmodelica.compiler import compile_fmu
+from pymodelica.compiler import compile_fmu
 from pyfmi.fmi import unzip_fmu, FMUModel, FMUException
 import pyfmi.fmi_algorithm_drivers as ad
 from pyfmi.common.core import get_platform_dir
@@ -55,7 +55,7 @@ def test_unzip():
 
 class Test_FMI:
     """
-    This class tests jmodelica.fmi.FMIMODEL simulation functionality.
+    This class tests pyfmi.fmi.FMIMODEL simulation functionality.
     """
     
     @classmethod
@@ -356,7 +356,7 @@ class Test_FMI:
         
 class Test_FMI_Compile:
     """
-    This class tests jmodelica.fmi compilation functionality.
+    This class tests pymodelica.compile_fmu compilation functionality.
     """
     
     @classmethod

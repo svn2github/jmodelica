@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """
-Test module for functions directly in jmodelica.
+Test module for functions directly in jmodelica Python packages.
 """
 
 import os
@@ -26,7 +26,7 @@ import nose
 import nose.tools
 import logging
 
-from jmodelica.compiler import compile_jmu
+from pymodelica.compiler import compile_jmu
 from pyjmi.jmi import JMUModel
 from tests_jmodelica import testattr, get_files_path
 from pyjmi.common.algorithm_drivers import InvalidAlgorithmOptionException
@@ -36,10 +36,10 @@ from pyjmi.common.algorithm_drivers import UnrecognizedOptionError
 try:
     from assimulo.explicit_ode import *
 except ImportError:
-    logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
+    logging.warning('Could not load Assimulo module. Check pyjmi.check_packages()')
 
 try:
-    ipopt_present = jmodelica.environ['IPOPT_HOME']
+    ipopt_present = pyjmi.environ['IPOPT_HOME']
 except:
     ipopt_present = False
 
@@ -104,7 +104,7 @@ class Test_init_ipopt:
 
     @testattr(ipopt = True)
     def test_initialize(self):
-        """ Test the jmodelica.initialize function using all default parameters. """
+        """ Test the pyjmi.JMUModel.initialize function using all default parameters. """
         fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mop')
         cpath_pend = "Pendulum_pack.Pendulum"
         
@@ -123,25 +123,25 @@ class Test_init_ipopt:
         ddx=res['der(dx)']
     
         assert N.abs(theta[-1] - 0.1) < 1e-3, \
-            "Wrong value of variable theta using jmodelica.initialize."
+            "Wrong value of variable theta using pyjmi.JMUModel.initialize."
         assert N.abs(dtheta[-1] - 0.) < 1e-3, \
-            "Wrong value of variable dtheta using jmodelica.initialize."
+            "Wrong value of variable dtheta using pyjmi.JMUModel.initialize."
         assert N.abs(x[-1] - 0) < 1e-3, \
-            "Wrong value of variable x using jmodelica.initialize."
+            "Wrong value of variable x using pyjmi.JMUModel.initialize."
         assert N.abs(dx[-1] - 0) < 1e-3, \
-            "Wrong value of variable dx using jmodelica.initialize."
+            "Wrong value of variable dx using pyjmi.JMUModel.initialize."
         assert N.abs(_dtheta[-1] - 0) < 1e-3, \
-            "Wrong value of variable der(theta) using jmodelica.initialize."
+            "Wrong value of variable der(theta) using pyjmi.JMUModel.initialize."
         assert N.abs(ddtheta[-1] - 0.09983341) < 1e-3, \
-            "Wrong value of variable der(dtheta) using jmodelica.initialize."
+            "Wrong value of variable der(dtheta) using pyjmi.JMUModel.initialize."
         assert N.abs(_dx[-1] - 0) < 1e-3, \
-            "Wrong value of variable der(x) using jmodelica.initialize."
+            "Wrong value of variable der(x) using pyjmi.JMUModel.initialize."
         assert N.abs(ddx[-1] - 0) < 1e-3, \
-            "Wrong value of variable der(dx) using jmodelica.initialize."
+            "Wrong value of variable der(dx) using pyjmi.JMUModel.initialize."
         
     @testattr(ipopt = True)
     def test_initialize_with_solverargs(self):
-        """ Test the jmodelica.initialize function using all default parameters. """
+        """ Test the pyjmi.JMUModel.initialize function using all default parameters. """
         fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mop')
         cpath_pend = "Pendulum_pack.Pendulum"
         
@@ -160,25 +160,25 @@ class Test_init_ipopt:
         ddx=res['der(dx)']
     
         assert N.abs(theta[-1] - 0.1) < 1e-3, \
-            "Wrong value of variable theta using jmodelica.initialize."
+            "Wrong value of variable theta using pyjmi.JMUModel.initialize."
         assert N.abs(dtheta[-1] - 0.) < 1e-3, \
-            "Wrong value of variable dtheta using jmodelica.initialize."
+            "Wrong value of variable dtheta using pyjmi.JMUModel.initialize."
         assert N.abs(x[-1] - 0) < 1e-3, \
-            "Wrong value of variable x using jmodelica.initialize."
+            "Wrong value of variable x using pyjmi.JMUModel.initialize."
         assert N.abs(dx[-1] - 0) < 1e-3, \
-            "Wrong value of variable dx using jmodelica.initialize."
+            "Wrong value of variable dx using pyjmi.JMUModel.initialize."
         assert N.abs(_dtheta[-1] - 0) < 1e-3, \
-            "Wrong value of variable der(theta) using jmodelica.initialize."
+            "Wrong value of variable der(theta) using pyjmi.JMUModel.initialize."
         assert N.abs(ddtheta[-1] - 0.09983341) < 1e-3, \
-            "Wrong value of variable der(dtheta) using jmodelica.initialize."
+            "Wrong value of variable der(dtheta) using pyjmi.JMUModel.initialize."
         assert N.abs(_dx[-1] - 0) < 1e-3, \
-            "Wrong value of variable der(x) using jmodelica.initialize."
+            "Wrong value of variable der(x) using pyjmi.JMUModel.initialize."
         assert N.abs(ddx[-1] - 0) < 1e-3, \
-            "Wrong value of variable der(dx) using jmodelica.initialize."
+            "Wrong value of variable der(dx) using pyjmi.JMUModel.initialize."
 
     @testattr(ipopt = True)
     def test_optimize(self):
-        """ Test the jmodelica.optimize function using all default parameters. """
+        """ Test the pyjmi.JMUModel.optimize function using all default parameters. """
         fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mop')
         cpath_pend = "Pendulum_pack.Pendulum_Opt"
         jmu_pend = compile_jmu(cpath_pend, fpath_pend,compiler_options={'state_start_values_fixed':True})
@@ -188,23 +188,23 @@ class Test_init_ipopt:
         cost=res['cost']
         
         assert N.abs(cost[-1] - 1.2921683e-01) < 1e-3, \
-            "Wrong value of cost function using jmodelica.optimize with vdp."
+            "Wrong value of cost function using pyjmi.JMUModel.optimize with vdp."
    
 
     @testattr(ipopt = True)
     def test_optimize_set_n_cp(self):
-        """ Test the jmodelica.optimize function and setting n_cp in alg_args.
+        """ Test the pyjmi.JMUModel.optimize function and setting n_cp in alg_args.
         """
         res = self.model_vdp.optimize(options={'n_cp':10})
         cost=res['cost']
         
         assert N.abs(cost[-1] - 2.34602647e+01 ) < 1e-3, \
-                "Wrong value of cost function using jmodelica.optimize with vdp. \
+                "Wrong value of cost function using pyjmi.JMUModel.optimize with vdp. \
                 cost.x[-1] was: "+str(cost[-1])
             
     @testattr(ipopt = True)
     def test_optimize_set_args(self):
-        """Test the jmodelica.optimize function and setting some 
+        """Test the pyjmi.JMUModel.optimize function and setting some 
         algorithm and solver args.
         """
         res_file_name = 'test_optimize_set_result_mesh.txt'
@@ -215,12 +215,12 @@ class Test_init_ipopt:
         cost=res['cost']
         
         assert N.abs(cost[-1] - 2.3469089e+01) < 1e-3, \
-                "Wrong value of cost function using jmodelica.optimize with vdp."
+                "Wrong value of cost function using pyjmi.JMUModel.optimize with vdp."
 
 
     @testattr(ipopt = True)
     def test_optimize_invalid_options(self):
-        """ Test that the jmodelica.optimize function raises exception 
+        """ Test that the pyjmi.JMUModel.optimize function raises exception 
         for an invalid algorithm option.
         """
         nose.tools.assert_raises(UnrecognizedOptionError,
@@ -255,23 +255,23 @@ class Test_init_assimulo:
 
     @testattr(assimulo = True)
     def test_simulate(self):
-        """ Test the jmodelica.simulate function using all default parameters."""
+        """ Test the pyjmi.JMUModel.simulate function using all default parameters."""
         sim_res = self.model_rlc.simulate()
         resistor_v = sim_res['resistor.v']
         
         assert N.abs(resistor_v[-1] - 0.138037041741) < 1e-3, \
-            "Wrong value in simulation result using jmodelica.simulate with rlc."
+            "Wrong value in simulation result using pyjmi.JMUModel.simulate with rlc."
         
     @testattr(assimulo = True)
     def test_simulate_set_argument(self):
-        """ Test the jmodelica.simulate function and setting an 
+        """ Test the pyjmi.JMUModel.simulate function and setting an 
         algorithm argument.
         """
         sim_res = self.model_rlc.simulate(final_time=30.0)
         resistor_v = sim_res['resistor.v']
         
         assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3, \
-            "Wrong value in simulation result using jmodelica.simulate with rlc."
+            "Wrong value in simulation result using pyjmi.JMUModel.simulate with rlc."
         
     @testattr(assimulo = True)
     def test_simulate_set_probl_arg(self):
@@ -290,7 +290,7 @@ class Test_init_assimulo:
         
     @testattr(assimulo = True)
     def test_simulate_invalid_solver_arg(self):
-        """ Test that the jmodelica.simulate function raises an exception for an 
+        """ Test that the pyjmi.JMUModel.simulate function raises an exception for an 
             invalid solver argument.
         """
         opts = self.model_rlc.simulate_options()
@@ -300,7 +300,7 @@ class Test_init_assimulo:
 
     @testattr(assimulo = True)
     def test_simulate_invalid_solver(self):
-        """ Test that the jmodelica.optimize function raises exception 
+        """ Test that the pyjmi.JMUModel.optimize function raises exception 
         for an invalid solver.
         """
         opts = self.model_rlc.simulate_options()
@@ -330,7 +330,7 @@ class Test_init_assimulo:
     
     @testattr(assimulo=True)
     def test_simulate_initialize_arg(self):
-        """ Test jmodelica.simulate alg_arg 'initialize'. """
+        """ Test pyjmi.JMUModel.simulate alg_arg 'initialize'. """
         # This test is built on that simulation without initialization fails.
         # Since simulation without initialization fails far down in Sundials
         # no "proper" exception is thrown which means that I can only test that

@@ -20,7 +20,7 @@ import os
 import numpy as N
 import pylab as p
 
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 from pyjmi.linearization import linearize_dae
 from pyjmi.linearization import linear_dae_to_ode

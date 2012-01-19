@@ -16,14 +16,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """
-Test module for Jacobian evaluation using CAD in jmodelica.
+Test module for Jacobian evaluation using CAD in pyjmi.
 """
 
 import os
 import numpy as N
 
 import pyjmi.jmi as jmi
-from jmodelica.compiler import compile_jmu
+from pymodelica.compiler import compile_jmu
 from pyjmi.jmi import JMUModel
 from tests_jmodelica import testattr, get_files_path
 

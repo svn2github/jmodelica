@@ -25,7 +25,7 @@ import scipy.optimize as opt
 import ctypes as ct
 import matplotlib.pyplot as plt
 
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 from pyjmi.initialization.ipopt import NLPInitialization
 from pyjmi.initialization.ipopt import InitializationOptimizer

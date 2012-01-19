@@ -25,7 +25,7 @@ from ctypes import byref
 import nose.tools
 
 from tests_jmodelica import testattr, get_files_path
-from jmodelica.compiler import compile_jmu
+from pymodelica.compiler import compile_jmu
 from pyjmi.jmi import JMUModel
 from pyjmi.initialization.ipopt import NLPInitialization
 from pyjmi.initialization.ipopt import InitializationOptimizer

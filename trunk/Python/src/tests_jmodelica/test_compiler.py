@@ -26,9 +26,9 @@ import nose
 import nose.tools
 
 from tests_jmodelica import testattr, get_files_path
-from jmodelica.compiler import ModelicaCompiler
-from jmodelica.compiler import OptimicaCompiler
-import jmodelica as jm
+from pymodelica.compiler import ModelicaCompiler
+from pymodelica.compiler import OptimicaCompiler
+import pymodelica as pym
 
 mc = ModelicaCompiler()
 ModelicaCompiler.set_log_level(ModelicaCompiler.LOG_ERROR)
@@ -38,7 +38,7 @@ oc = OptimicaCompiler()
 OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
 oc.set_boolean_option('state_start_values_fixed',True)
 
-jm_home = jm.environ['JMODELICA_HOME']
+jm_home = pym.environ['JMODELICA_HOME']
 
 class Test_Compiler:
     """ This class tests the compiler module. """
@@ -147,15 +147,15 @@ class Test_Compiler:
         """ Test that a CompilerError is raised if compilation errors are found in the model."""
         path = os.path.join(get_files_path(), 'Modelica','CorruptCodeGenTests.mo')
         cl = 'CorruptCodeGenTests.CorruptTest1'
-        nose.tools.assert_raises(jm.compiler.CompilerError, mc.compile_JMU, cl, [path], 'model', '.')
-        nose.tools.assert_raises(jm.compiler.CompilerError, oc.compile_JMU, cl, [path], 'model', '.')
+        nose.tools.assert_raises(pym.compiler.CompilerError, mc.compile_JMU, cl, [path], 'model', '.')
+        nose.tools.assert_raises(pym.compiler.CompilerError, oc.compile_JMU, cl, [path], 'model', '.')
 
     @testattr(stddist = True)
     def test_class_not_found_error(self):
         """ Test that a ModelicaClassNotFoundError is raised if model class is not found. """
         errorcl = 'NonExisting.Class'
-        nose.tools.assert_raises(jm.compiler.ModelicaClassNotFoundError, mc.compile_JMU, errorcl, [self.fpath_mc], 'model', '.')
-        nose.tools.assert_raises(jm.compiler.OptimicaClassNotFoundError, oc.compile_JMU, errorcl, [self.fpath_oc], 'model', '.')
+        nose.tools.assert_raises(pym.compiler.ModelicaClassNotFoundError, mc.compile_JMU, errorcl, [self.fpath_mc], 'model', '.')
+        nose.tools.assert_raises(pym.compiler.OptimicaClassNotFoundError, oc.compile_JMU, errorcl, [self.fpath_oc], 'model', '.')
 
     @testattr(stddist = True)
     def test_IO_error(self):
@@ -247,7 +247,7 @@ class Test_Compiler:
         """ Test that boolean option getter raises the proper error. """
         option = 'nonexist_boolean'
         #try to get an unknown option
-        nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_boolean_option, option)
+        nose.tools.assert_raises(pym.compiler.UnknownOptionError, mc.get_boolean_option, option)
 
 # There are no integer options yet
 #    @testattr(stddist = True)
@@ -270,7 +270,7 @@ class Test_Compiler:
         """ Test that integer option getter raises the proper error. """
         option = 'nonexist_integer'
         #try to get an unknown option
-        nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_integer_option, option) 
+        nose.tools.assert_raises(pym.compiler.UnknownOptionError, mc.get_integer_option, option) 
 
 # There are no real options yet
 #    @testattr(stddist = True)
@@ -293,7 +293,7 @@ class Test_Compiler:
         """ Test that real option getter raises the proper error. """
         option = 'nonexist_real'
         #try to get an unknown option
-        nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_real_option, option)
+        nose.tools.assert_raises(pym.compiler.UnknownOptionError, mc.get_real_option, option)
 
     @testattr(stddist = True)
     def test_setget_string_option(self):
@@ -314,7 +314,7 @@ class Test_Compiler:
         """ Test that string option getter raises the proper error. """
         option = 'nonexist_real'
         #try to get an unknown option
-        nose.tools.assert_raises(jm.compiler.UnknownOptionError, 
+        nose.tools.assert_raises(pym.compiler.UnknownOptionError, 
             mc.get_string_option, option)
             
     @testattr(stddist = True)

@@ -54,15 +54,15 @@ except IOError:
                   % _f)
 
 
-import jmodelica
-
 import numpy as N
+
+import pyjmi
 
 int = N.int32
 N.int = N.int32
 
 try:
-    ipopt_present = jmodelica.environ['IPOPT_HOME']
+    ipopt_present = pyjmi.environ['IPOPT_HOME']
 except:
     ipopt_present = False
     
@@ -97,10 +97,10 @@ def check_packages():
     sys.stdout.flush()
     time.sleep(0.25)
     
-    #check jmodelica version
-    jmversion = jmodelica.__version__
+    #check pyjmi version
+    pyjmi = pyjmi.__version__
     sys.stdout.write(
-        "%s %s" % ("pyjmi version:".ljust(le,'.'),jmversion.ljust(le)))
+        "%s %s" % ("pyjmi version:".ljust(le,'.'),pyjmi.ljust(le)))
     sys.stdout.write("\n")
     sys.stdout.flush()
     time.sleep(0.25)
@@ -119,7 +119,7 @@ def check_packages():
     
     packages=["numpy", "scipy", "matplotlib", "jpype", "lxml", "nose", 
         "assimulo","wxPython", "cython", "casadi"]
-    assimulo_path=os.path.join(jmodelica.environ['JMODELICA_HOME'],'Python',
+    assimulo_path=os.path.join(pyjmi.environ['JMODELICA_HOME'],'Python',
         'assimulo')
     
     if platform == "win32":
@@ -182,7 +182,7 @@ def check_packages():
             sys.stdout.write("\n")
         sys.stdout.write("\n")
         sys.stdout.write("could not be found. It is not possible to run \
-        the jmodelica package without them.\n")
+        the pyjmi package without them.\n")
     
     if len(warning_packages) > 0:
         sys.stdout.write("\n")
@@ -196,18 +196,18 @@ def check_packages():
             if w == 'assimulo':
                 sys.stdout.write("** The package assimulo could not be found. \n  \
  This package is needed to be able to use: \n\n   \
-- jmodelica.simulate with default argument \"algorithm\" = AssimuloAlg \n   \
-- The jmodelica.simulation package \n   \
-- Some of the examples in the jmodelica.examples package")
+- pyjmi.simulate with default argument \"algorithm\" = AssimuloAlg \n   \
+- The pyjmi.simulation package \n   \
+- Some of the examples in the pyjmi.examples package")
             elif w == 'nose':
                 sys.stdout.write("** The package nose could not be found. \n   \
-This package is needed in the jmodelica.tests package. \
+This package is needed in the tests_jmodelica package. \
 You will not be able to run any tests.")
             elif w == 'casadi':
                 sys.stdout.write("** The package casadi could not be found.\n \
 This package is needed to be able to use:\n\n \
 - The casadi_interface module.\n \
-- Some of the examples in the jmodelica.examples package")
+- Some of the examples in the pyjmi.examples package")
             elif w == 'wxPython':
                 sys.stdout.write("** The package wxPython could not be found.\n \
 This package is needed to be able to use the plot-GUI.")

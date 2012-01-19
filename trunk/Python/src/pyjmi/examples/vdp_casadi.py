@@ -23,7 +23,7 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
-from jmodelica import compile_fmux
+from pymodelica import compile_fmux
 from pyjmi import CasadiModel
 
 def run_demo(with_plots=True):

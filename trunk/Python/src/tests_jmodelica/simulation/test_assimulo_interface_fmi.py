@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Tests for the jmodelica.simulation.assimulo module."""
+"""Tests for the pyfmi.simulation.assimulo module."""
 import logging
 import nose
 import os
@@ -23,7 +23,7 @@ import numpy as N
 import pylab as P
 from scipy.io.matlab.mio import loadmat
 
-from jmodelica.compiler import compile_jmu, compile_fmu
+from pymodelica.compiler import compile_jmu, compile_fmu
 from pyfmi.fmi import FMUModel, FMUModel2
 from pyfmi.common.io import ResultDymolaTextual
 from tests_jmodelica import testattr, get_files_path
@@ -35,14 +35,14 @@ try:
     from assimulo.solvers import CVode
     from assimulo.solvers import IDA
 except NameError, ImportError:
-    logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
+    logging.warning('Could not load Assimulo module. Check pyfmi.check_packages()')
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_mos  = os.path.join(get_files_path(), 'Modelica')
 
 class Test_FMI_ODE:
     """
-    This class tests jmodelica.simulation.assimulo.FMIODE and together
+    This class tests pyfmi.simulation.assimulo.FMIODE and together
     with Assimulo. Requires that Assimulo is installed.
     """
     

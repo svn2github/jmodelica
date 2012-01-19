@@ -25,13 +25,13 @@ import pylab as P
 
 from tests_jmodelica import testattr, get_files_path
 from pyjmi.common.io import ResultDymolaTextual
-from jmodelica.compiler import compile_fmux
+from pymodelica.compiler import compile_fmux
 try:
     from pyjmi.optimization.casadi_collocation import *
     from pyjmi.casadi_interface import CasadiModel
 except NameError, ImportError:
     pass
-    #logging.warning('Could not load casadi_collocation. Check jmodelica.check_packages()')
+    #logging.warning('Could not load casadi_collocation. Check pyjmi.check_packages()')
 
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
 
@@ -47,7 +47,7 @@ def assert_results(res, cost_ref, u_norm_ref,
 class TestLocalDAECollocator:
     
     """
-    Tests jmodelica.optimization.casadi_collocation.LocalDAECollocator.
+    Tests pyjmi.optimization.casadi_collocation.LocalDAECollocator.
     
     The models used for testing are based on the VDP oscillator, CSTR and a
     custom second order system.
@@ -675,7 +675,7 @@ class TestLocalDAECollocator:
 class TestPseudoSpectral:
     
     """
-    Tests jmodelica.optimization.casadi_collocation.PseudoSpectral.
+    Tests pyjmi.optimization.casadi_collocation.PseudoSpectral.
     """
     
     @classmethod

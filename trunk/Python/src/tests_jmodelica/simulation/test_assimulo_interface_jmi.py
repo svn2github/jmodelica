@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Tests for the jmodelica.simulation.assimulo module."""
+"""Tests for the pyjmi.simulation.assimulo module."""
 import logging
 import nose
 import os
@@ -23,7 +23,7 @@ import numpy as N
 import pylab as P
 from scipy.io.matlab.mio import loadmat
 
-from jmodelica.compiler import compile_jmu, compile_fmu
+from pymodelica.compiler import compile_jmu, compile_fmu
 from pyjmi.jmi import JMUModel
 from pyjmi.common.io import ResultDymolaTextual
 from tests_jmodelica import testattr, get_files_path
@@ -37,14 +37,14 @@ try:
     from assimulo.solvers import CVode
     from assimulo.solvers import IDA
 except NameError, ImportError:
-    logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
+    logging.warning('Could not load Assimulo module. Check pyjmi.check_packages()')
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_mos  = os.path.join(get_files_path(), 'Modelica')
 
 class Test_JMI_DAE:
     """
-    This class tests jmodelica.simulation.assimulo.JMIDAE
+    This class tests pyjmi.simulation.assimulo.JMIDAE
     """
     @classmethod
     def setUpClass(cls):
@@ -106,7 +106,7 @@ class Test_JMI_DAE:
     @testattr(assimulo = True) 
     def test_eps(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIDAE.get/set_eps
+        Tests pyjmi.simulation.assimulo.JMIDAE.get/set_eps
         """
         nose.tools.assert_raises(JMIModel_Exception, self.DAE._set_eps, 'Test')
         nose.tools.assert_raises(JMIModel_Exception, self.DAE._set_eps, -1)
@@ -121,7 +121,7 @@ class Test_JMI_DAE:
     @testattr(assimulo = True) 
     def test_max_eIteration(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIDAE.get/set_max_eIteration
+        Tests pyjmi.simulation.assimulo.JMIDAE.get/set_max_eIteration
         """
         nose.tools.assert_raises(JMIModel_Exception, self.DAE._set_max_eIteration, 'Test')
         nose.tools.assert_raises(JMIModel_Exception, self.DAE._set_max_eIteration, -1)
@@ -136,7 +136,7 @@ class Test_JMI_DAE:
     @testattr(assimulo = True) 
     def test_check_eIter(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIDAE.check_eIter
+        Tests pyjmi.simulation.assimulo.JMIDAE.check_eIter
         """
         self.DAE.eps = 1e-4
         
@@ -187,7 +187,7 @@ class Test_JMI_DAE:
     @testattr(assimulo = True) 
     def test_event_switch(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIDAE.event_switch
+        Tests pyjmi.simulation.assimulo.JMIDAE.event_switch
         """
         solver = lambda x:1
         solver.verbosity = 1
@@ -204,7 +204,7 @@ class Test_JMI_DAE:
     @testattr(assimulo = True) 
     def test_f(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIDAE.f
+        Tests pyjmi.simulation.assimulo.JMIDAE.f
         """
         test_x = N.array([1.,1.,1.,1.])
         test_dx = N.array([2.,2.,2.,2.])
@@ -220,7 +220,7 @@ class Test_JMI_DAE:
     @testattr(assimulo = True) 
     def test_g(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIDAE.g
+        Tests pyjmi.simulation.assimulo.JMIDAE.g
         """
         temp_g = self.DISC.g(2.,[1.,2.],[2.,0],[0,0])
         
@@ -230,7 +230,7 @@ class Test_JMI_DAE:
     @testattr(assimulo = True) 
     def test_g_adjust(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIDAE.g
+        Tests pyjmi.simulation.assimulo.JMIDAE.g
         """
         self.DISC.eps = 2.0
 
@@ -247,7 +247,7 @@ class Test_JMI_DAE:
     @testattr(assimulo = True) 
     def test_init(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIDAE.__init__
+        Tests pyjmi.simulation.assimulo.JMIDAE.__init__
         """
         assert self.m_DAE == self.DAE._model
         assert self.DAE.max_eIter == 50
@@ -270,7 +270,7 @@ class Test_JMI_DAE:
     @testattr(assimulo = True) 
     def test_reset(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIDAE.reset
+        Tests pyjmi.simulation.assimulo.JMIDAE.reset
         """   
         self.DAE.t0 = 10.0
         self.DAE._model.real_x = N.array([2.,2.,2.,2.])
@@ -328,7 +328,7 @@ class Test_JMI_DAE:
     @testattr(assimulo = True) 
     def test_j(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIDAE.j
+        Tests pyjmi.simulation.assimulo.JMIDAE.j
         """
         
         test_x = N.array([1.,1.,1.,1.])
@@ -345,7 +345,7 @@ class Test_JMI_DAE:
     @testattr(assimulo = True) 
     def test_handle_event(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIDAE.handle_event
+        Tests pyjmi.simulation.assimulo.JMIDAE.handle_event
         """
         solver = lambda x:1
         solver.verbosity = 1
@@ -370,7 +370,7 @@ class Test_JMI_DAE:
     @testattr(assimulo = True) 
     def test_init_mode(self):
         """
-        Tests jmodelica.simulation.assimulo.init_mode
+        Tests pyjmi.simulation.assimulo.init_mode
         """
         solver = lambda x:1
         solver.sw = [True, True]
@@ -384,7 +384,7 @@ class Test_JMI_DAE:
     @testattr(assimulo = True) 
     def test_initiate(self):
         """
-        Tests jmodelica.simulation.assimulo.initiate
+        Tests pyjmi.simulation.assimulo.initiate
         """
         #self.DAE.init_mode = lambda x:1
         #self.DAE.initiate('Test')
@@ -580,7 +580,7 @@ class Test_JMI_DAE:
         
 class Test_JMI_DAE_Sens:
     """
-    This class tests jmodelica.simulation.assimulo.JMIDAESens
+    This class tests pyjmi.simulation.assimulo.JMIDAESens
     """
     
     @classmethod

@@ -24,7 +24,7 @@ import nose.tools
 
 import scipy.sparse as ss
 
-from jmodelica.compiler import compile_jmu
+from pymodelica.compiler import compile_jmu
 from pyjmi.jmi import JMUModel, JMIException
 from tests_jmodelica import testattr, get_files_path
 from assimulo.kinsol import KINSOL, KINSOL_Exception

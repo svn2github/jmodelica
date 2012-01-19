@@ -20,7 +20,7 @@ import os.path
 
 from pyjmi.initialization.ipopt import InitializationOptimizer
 from pyjmi.initialization.ipopt import NLPInitialization
-from jmodelica.compiler import compile_jmu
+from pymodelica.compiler import compile_jmu
 from pyjmi.jmi import JMUModel
 from pyjmi.common.io import ResultDymolaTextual
 from pyjmi.optimization.ipopt import NLPCollocationLagrangePolynomials
