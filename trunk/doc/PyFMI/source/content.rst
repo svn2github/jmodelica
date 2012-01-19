@@ -15,6 +15,7 @@ Contents
 .. toctree::
    :maxdepth: 5
    
+   tutorial
    examples
    code
 

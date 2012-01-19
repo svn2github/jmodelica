@@ -13,7 +13,8 @@ def mark_examples():
         
         file.write(ex + '.py\n')
         file.write('===================================\n\n')
-        file.write('.. autofunction:: pyfmi.examples.'+ex+'.run_demo\n\n')
+        file.write('.. autofunction:: pyfmi.examples.'+ex+'.run_demo\n')
+        file.write('   :noindex:\n\n')
         file.write('.. note::\n\n')
         file.write('    Press [source] (to the right) to view the example.\n')
         file.close()
