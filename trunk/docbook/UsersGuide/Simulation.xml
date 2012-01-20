@@ -198,7 +198,7 @@ plt.show()
 
         <programlisting language="python">t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
 u = N.sin(t) #Create the input vector
-u_traj = N.transpose(N.hstack((t,u))) #Create the data matrix and transpose 
+u_traj = N.transpose(N.vstack((t,u))) #Create the data matrix and transpose 
                                       #it to the correct form
 </programlisting>
 
@@ -221,7 +221,7 @@ u_traj = N.transpose(N.hstack((t,u))) #Create the data matrix and transpose
         <programlisting language="python">t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
 u1 = N.sin(t) #Create the first input vector
 u2 = N.cos(t) #Create the second input vector
-u_traj = N.transpose(N.hstack((t,u1,u2))) #Create the data matrix and 
+u_traj = N.transpose(N.vstack((t,u1,u2))) #Create the data matrix and 
                                           #transpose it to the correct form
 
 input_object = (['u1','u2'], u_traj)
