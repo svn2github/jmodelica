@@ -11,9 +11,40 @@
   <title>Getting started</title>
 
   <para>This chapter is intended to give a brief introduction to using the
-  JModelica.org Python interface and will therefore not go into any details.
+  JModelica.org Python packages and will therefore not go into any details.
   Please refer to the other chapters of this manual for more information on
   each specific topic.</para>
+
+  <section>
+    <title>The JModelica.org Python packages</title>
+
+    <para>The JModelica.org Python interface enables users to use Python
+    scripting to interact with Modelica and Optimica models. The interface
+    consists of three packages:</para>
+
+    <para><itemizedlist>
+        <listitem>
+          <para><literal>pymodelica</literal> - Compile Modelica and Optimica
+          code into model units (FMUs and JMUs, see <xref
+          linkend="ch_models" /> for more information).</para>
+        </listitem>
+
+        <listitem>
+          <para><literal>pyfmi</literal> - Work with models that have been
+          compiled into FMUs (Functional Mock-up Units). Perform simulations,
+          parameter manipulation, plot results etc.</para>
+        </listitem>
+
+        <listitem>
+          <para><literal>pyjmi</literal> - Work with models that have been
+          compiled into JMUs. Perform simulations, solve optimization
+          problems, parameter manipulation, plot results etc.</para>
+        </listitem>
+      </itemizedlist></para>
+
+    <para>The Python packages will be further presented in the following
+    chapters.</para>
+  </section>
 
   <section xml:id="gs_sec_starting_a_python_session">
     <title>Starting a Python session</title>
@@ -60,14 +91,15 @@
   <section>
     <title>Run an example</title>
 
-    <para>There are several Python scripts in the
-    <filename>examples</filename> folder under the Python package in the
-    JModelica.org installation which run examples demonstrating compilation,
-    loading and simulation or optimization of models. The model files are
-    located in the subdirectory <filename>files</filename>. The following code
-    demonstrates how to run such an example. First a Python session must be
-    started, see <xref linkend="gs_sec_starting_a_python_session" /> above.
-    The example scripts are preferably run in the pylab python shell.</para>
+    <para>The Python packages <literal>pyfmi</literal> and
+    <literal>pyjmi</literal> each contain a folder called
+    <literal>examples</literal> in which there are several Python example
+    scripts. The scripts demonstrate compilation, loading and simulation or
+    optimization of models. The corresponding model files are located in the
+    subdirectory <filename>files</filename>. The following code demonstrates
+    how to run such an example. First a Python session must be started, see
+    <xref linkend="gs_sec_starting_a_python_session" /> above. The example
+    scripts are preferably run in the pylab python shell.</para>
 
     <para>The following code will run the RLC example and plot some
     results.</para>
@@ -78,31 +110,35 @@ from pyjmi.examples import RLC
 # Run the RLC example and plot results
 RLC.run_demo()</programlisting></para>
 
-    <para>Open <filename>RLC.py</filename> in an editor and look at the Python
-    code to see what happens when the script is run.</para>
+    <para>Open <filename>RLC.py</filename> in a text editor and look at the
+    Python code to see what happens when the script is run.</para>
   </section>
 
   <section>
     <title>Check your installation</title>
 
-    <para>The JModelica.org Python interface requires some Python packages in
-    order to run correctly. Use the function
-    <literal>jmodelica.check_packages()</literal> to list which Python
-    packages that are found on your computer. Missing or having the wrong
-    version of a package can be a source of errors. Therefore it can be useful
-    to run <literal>jmodelica.check_packages()</literal> after installation or
-    when trouble-shooting.<programlisting language="python"># Import the function from jmodelica
-from jmodelica import check_packages
+    <para>The JModelica.org Python packages requires some additional Python
+    packages in order to run correctly. Use the function
+    <literal>&lt;package&gt;.check_packages()</literal>, where
+    <literal>&lt;package&gt;</literal> is either
+    <literal>pymodelica</literal>, <literal>pyfmi</literal> or
+    <literal>pyjmi</literal>, to list which Python packages that are found on
+    your computer. Missing or having the wrong version of a package can be a
+    source of errors. Therefore it can be useful to run
+    <literal>&lt;package&gt;.check_packages()</literal> after installation or
+    when trouble-shooting.<programlisting language="python"># Import the function from pyfmi
+from pyfmi import check_packages
 
 # Run check_packages
 check_packages()
 
-Performing JModelica package check
-==================================
+Performing pyfmi package check
+==============================
 
 Platform...................... win32
+
 Python version:............... 2.7.2
-JModelica version:............ 1.6b1
+
 
 Dependencies:
 
@@ -111,13 +147,9 @@ Package                        Version
 numpy......................... 1.6.1                          Ok
 scipy......................... 0.9.0                          Ok
 matplotlib.................... 1.0.1                          Ok
-jpype......................... n/a                            Ok
 lxml.......................... 2.3.0                          Ok
-nose.......................... 1.1.2                          Ok
 assimulo...................... n/a                            Ok
 wxPython...................... 2.8.12.1                       Ok
-cython........................ n/a                            Ok
-casadi........................ n/a                            Ok
 pyreadline.................... 1.7                            Ok
 setuptools.................... 0.6c11                         Ok
 
@@ -127,7 +159,8 @@ setuptools.................... 0.6c11                         Ok
   <section>
     <title>Redefining the JModelica.org environment</title>
 
-    <para>When importing <literal>jmodelica</literal> in Python the script
+    <para>When importing <literal>pyjmi</literal> or
+    <literal>pymodelica</literal> in Python the script
     <filename>startup.py</filename> is run which sets the environment used by
     JModelica.org for the current Python session. For example, the environment
     variable <literal>JMODELICA_HOME</literal> points at the JModelica.org
@@ -189,11 +222,11 @@ os.environ['HOME']          // unix</programlisting>
 
         <listitem>
           <para>Check your changes by opening a Python shell, import
-          <literal>jmodelica</literal> and check the
-          <literal>IPOPT_HOME</literal> environment variable:</para>
+          <literal>pyjmi</literal> and check the <literal>IPOPT_HOME</literal>
+          environment variable:</para>
 
-          <programlisting language="python">import jmodelica
-jmodelica.environ['IPOPT_HOME']</programlisting>
+          <programlisting language="python">import pyjmi
+pyjmi.environ['IPOPT_HOME']</programlisting>
         </listitem>
       </orderedlist>
     </section>
@@ -205,7 +238,7 @@ jmodelica.environ['IPOPT_HOME']</programlisting>
     <para>Please use the <link
     xlink:href="http://www.jmodelica.org/forum">JModelica.org forum</link> for
     any questions related to JModelica.org. You can search in old threads to
-    see if someone has asked your question before or, if you are a member,
-    start a new thread.</para>
+    see if someone has asked your question before or start a new thread if you
+    are a member.</para>
   </section>
 </chapter>

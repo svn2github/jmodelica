@@ -29,146 +29,161 @@
       <title>Java</title>
 
       <para>It is required to have a Java Runtime Environment (JRE) version 6
-      installed on your computer, for Windows a 32-bit version is
-      required.<task>
-          <title>Install a JRE</title>
+      installed on your computer.</para>
 
-          <procedure>
-            <step>
-              <para>Get a 32-bit / 64-bit <link
-              xlink:href="http://www.java.com/en/download/index.jsp">JRE</link>
-              installer suitable for your platform.</para>
-            </step>
+      <para><emphasis role="bold">Install a JRE</emphasis></para>
 
-            <step>
-              <para>Run the installer.</para>
-            </step>
-          </procedure>
-        </task></para>
+      <procedure>
+        <step>
+          <para>Get a 32-bit / 64-bit <link
+          xlink:href="http://www.java.com/en/download/manual.jsp">JRE</link>
+          installer suitable for your platform. For Windows users the 32-bit
+          JRE must be installed, even for 64-bit computers.</para>
+        </step>
+
+        <step>
+          <para>Run the installer and follow the instructions to install the
+          JRE on your computer.</para>
+        </step>
+      </procedure>
     </section>
 
     <section xml:id="inst_sec_prereq_python">
       <title>Python</title>
 
-      <para>A <link
-      xlink:href="http://www.python.org/download/releases/">Python 2.7</link>
-      with the following additional packages are required, for Windows a
-      32-bit version is required:</para>
+      <para>Python 2.7 with the following additional packages are
+      required.</para>
 
-      <table>
-        <title>Python prerequisites</title>
+      <para><emphasis role="bold">Install Python 2.7</emphasis></para>
 
-        <tgroup cols="3">
-          <colspec align="left" colname="col–para" colwidth="2*" />
+      <procedure>
+        <step>
+          <para>Get a <link
+          xlink:href="http://www.python.org/download/releases/">Python
+          2.7</link> installer suitable for your platform. Note that for
+          Windows users the 32-bit version must be chosen, even for 64-bit
+          computers.</para>
+        </step>
 
-          <colspec align="left" colname="col–def" colwidth="2*" />
+        <step>
+          <para>Install the additional Python packages listed in the tables
+          below.<table>
+              <title>Required Python packages</title>
 
-          <colspec align="left" colname="col–descr" colwidth="3*" />
+              <tgroup cols="3">
+                <colspec align="left" colname="col–para" colwidth="2*" />
 
-          <thead>
-            <row>
-              <entry align="center">Package</entry>
+                <colspec align="left" colname="col–def" colwidth="2*" />
 
-              <entry align="center">Recommended version</entry>
+                <colspec align="left" colname="col–descr" colwidth="3*" />
 
-              <entry align="center">Description</entry>
-            </row>
-          </thead>
+                <thead>
+                  <row>
+                    <entry align="center">Package</entry>
 
-          <tbody>
-            <row>
-              <entry><link
-              xlink:href="http://sourceforge.net/projects/numpy/files/">NumPy</link></entry>
+                    <entry align="center">Recommended version</entry>
 
-              <entry>1.6.1</entry>
+                    <entry align="center">Description</entry>
+                  </row>
+                </thead>
 
-              <entry>The fundamental package needed for scientific computing
-              with Python.</entry>
-            </row>
+                <tbody>
+                  <row>
+                    <entry><link
+                    xlink:href="http://sourceforge.net/projects/numpy/files/NumPy/">NumPy</link></entry>
 
-            <row>
-              <entry><link
-              xlink:href="http://sourceforge.net/projects/scipy/files/">SciPy</link></entry>
+                    <entry>1.6.1</entry>
 
-              <entry>0.9.0</entry>
+                    <entry>The fundamental package needed for scientific
+                    computing with Python.</entry>
+                  </row>
 
-              <entry>A library of algorithms and mathematical tools for
-              Python.</entry>
-            </row>
+                  <row>
+                    <entry><link
+                    xlink:href="http://sourceforge.net/projects/scipy/files/scipy/">SciPy</link></entry>
 
-            <row>
-              <entry><link
-              xlink:href="http://sourceforge.net/projects/matplotlib/files/">matplotlib</link></entry>
+                    <entry>0.9.0</entry>
 
-              <entry>1.0.1</entry>
+                    <entry>A library of algorithms and mathematical tools for
+                    Python.</entry>
+                  </row>
 
-              <entry>A plotting library for Python, with a MATLAB like
-              interface.</entry>
-            </row>
+                  <row>
+                    <entry><link
+                    xlink:href="http://sourceforge.net/projects/matplotlib/files/matplotlib/">matplotlib</link></entry>
 
-            <row>
-              <entry><link
-              xlink:href="http://ipython.org/download.html">IPython</link></entry>
+                    <entry>1.0.1</entry>
 
-              <entry>0.11</entry>
+                    <entry>A plotting library for Python, with a MATLAB like
+                    interface.</entry>
+                  </row>
 
-              <entry>An interactive shell for Python with additional shell
-              syntax, code highlighting, tab completion, string completion,
-              and rich history.</entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </table>
+                  <row>
+                    <entry><link
+                    xlink:href="http://ipython.org/download.html">IPython</link></entry>
 
-      <para>Please note that IPython has extra dependencies on Windows
-      :</para>
+                    <entry>0.11</entry>
 
-      <table>
-        <title>IPython dependencies on Windows</title>
+                    <entry>An interactive shell for Python with additional
+                    shell syntax, code highlighting, tab completion, string
+                    completion, and rich history.</entry>
+                  </row>
+                </tbody>
+              </tgroup>
+            </table></para>
 
-        <tgroup cols="3">
-          <colspec align="left" colname="col–para" colwidth="2*" />
+          <para>IPython has extra dependencies on Windows, in this case these
+          extra Python packages must be installed:</para>
 
-          <colspec align="left" colname="col–def" colwidth="2*" />
+          <table>
+            <title>IPython dependencies on Windows</title>
 
-          <colspec align="left" colname="col–descr" colwidth="3*" />
+            <tgroup cols="3">
+              <colspec align="left" colname="col–para" colwidth="2*" />
 
-          <thead>
-            <row>
-              <entry align="center">Package</entry>
+              <colspec align="left" colname="col–def" colwidth="2*" />
 
-              <entry align="center">Recommended version</entry>
+              <colspec align="left" colname="col–descr" colwidth="3*" />
 
-              <entry align="center">Description</entry>
-            </row>
-          </thead>
+              <thead>
+                <row>
+                  <entry align="center">Package</entry>
 
-          <tbody>
-            <row>
-              <entry><link
-              xlink:href="http://pypi.python.org/pypi/pyreadline">Pyreadline</link></entry>
+                  <entry align="center">Recommended version</entry>
 
-              <entry>1.7</entry>
+                  <entry align="center">Description</entry>
+                </row>
+              </thead>
 
-              <entry>A Python implmementation of GNU readline.</entry>
-            </row>
+              <tbody>
+                <row>
+                  <entry><link
+                  xlink:href="http://pypi.python.org/pypi/pyreadline">Pyreadline</link></entry>
 
-            <row>
-              <entry><link
-              xlink:href="http://pypi.python.org/pypi/setuptools">setuptools</link></entry>
+                  <entry>1.7</entry>
 
-              <entry>0.6c11</entry>
+                  <entry>A Python implmementation of GNU readline.</entry>
+                </row>
 
-              <entry>A package for downloading, building, installing,
-              upgrading, and uninstalling Python packages.</entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </table>
+                <row>
+                  <entry><link
+                  xlink:href="http://pypi.python.org/pypi/setuptools">setuptools</link></entry>
 
-      <para>The recommended version of a package is not always the same as the
-      latest version available. It is the package version that JModelica.org
-      has been tested and verified to be working with.</para>
+                  <entry>0.6c11</entry>
+
+                  <entry>A package for downloading, building, installing,
+                  upgrading, and uninstalling Python packages.</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </table>
+
+          <para>Please note that the recommended version of a package is not
+          always the same as the latest version available. It is the package
+          version that JModelica.org has been tested and verified to be
+          working with.</para>
+        </step>
+      </procedure>
     </section>
   </section>
 
@@ -257,11 +272,14 @@
           <step>
             <para>Download a <link
             xlink:href="http://www.jmodelica.org/page/12">JModelica.org
-            Windows binary installer</link>.</para>
+            Windows binary installer</link> and save the executable file
+            somewhere on your computer.</para>
           </step>
 
           <step>
-            <para>Run the installer and follow the wizard.</para>
+            <para>Run the file by double-clicking and selecting "Run" if
+            prompted with a security warning. This will launch an installer
+            which should be self-explanatory.</para>
 
             <itemizedlist>
               <listitem>
@@ -315,7 +333,7 @@
     binary distribution which is built (for Windows) with every
     release.</para>
 
-    <para>The JModelica.org SDK windows installer sets up a complete
+    <para>The JModelica.org SDK Windows installer sets up a complete
     pre-configured environment with convenient start menu shortcuts.</para>
 
     <section xml:id="inst_sec_sdk_prereq">
@@ -326,20 +344,17 @@
       Java however it is required to have a 32-bit JDK installed, not only a
       32-bit JRE as for the binary installation.</para>
 
-      <task>
-        <title>Install a JDK</title>
-
-        <procedure>
+      <para><emphasis role="bold">Install a JDK</emphasis><procedure>
           <step>
             <para>Get a 32-bit <link
             xlink:href="http://java.sun.com/javase/downloads/">JDK</link>.</para>
           </step>
 
           <step>
-            <para>Run the installer.</para>
+            <para>Run the installer and follow the instructions to install the
+            JDK on your computer.</para>
           </step>
-        </procedure>
-      </task>
+        </procedure></para>
     </section>
 
     <section>
@@ -434,7 +449,7 @@ vdp.run_demo()</programlisting></para>
     <section>
       <title>Changing Ipopt solver</title>
 
-      <para>The solver bundled in JModelica.org is Ipopt-MUMPS, however, it is
+      <para>The solver bundled in JModelica.org is Ipopt-MUMPS. However, it is
       possible to use other Ipopt solvers. This requires a few changes in the
       setup and rebuilding JModelica. The procedure is:</para>
 
@@ -451,8 +466,8 @@ vdp.run_demo()</programlisting></para>
         </listitem>
 
         <listitem>
-          <para>Do the whole installation procedure, that is: run configure,
-          make and make install.</para>
+          <para>Do the whole installation procedure again, that is: run
+          configure, make and make install.</para>
         </listitem>
 
         <listitem>

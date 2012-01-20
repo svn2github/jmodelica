@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+<chapter version="5.0" xml:id="ch_initialization"
+         xmlns="http://docbook.org/ns/docbook"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns:xs="http://www.w3.org/2001/XMLSchema"
          xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -276,7 +277,7 @@ y = init_result['y']
       <para>KInitSolveAlg also implements an improved linear solver connected
       to KINSOL. This linear solver implements Tikhonov regularization to
       handle the problems of singular Jacobiansas well as support for SuperLU,
-      an efficient sparse linear solver. </para>
+      an efficient sparse linear solver.</para>
 
       <para>The options providable are summarized in <xref
       linkend="tab_options" />.</para>
@@ -303,7 +304,7 @@ y = init_result['y']
 
               <entry>A flag indicating whether constraints are to be used
               <emphasis>during</emphasis> initialization. Further explained in
-              <xref linkend="sec_const_usage" />. </entry>
+              <xref linkend="sec_const_usage" />.</entry>
             </row>
 
             <row>
