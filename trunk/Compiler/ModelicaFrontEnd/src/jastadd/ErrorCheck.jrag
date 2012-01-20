@@ -627,17 +627,19 @@ aspect InstanceErrorCheck {
 				node.error("Could not evaluate binding expression for " + varKind + " '" +
 						varName + "' due to circularity: " + exp);
 			} else {
-				CValue val = ceval();
-				if (val.isUnknown()) {
-					if (val.isUnsupported()) {
-						if (node.isConstant()) // TODO: Produce error for structural parameters as well
-							node.compliance("Constant evaluation not supported for expression(s) directly or indirectly " + 
-									"used by the binding expression for " + varKind + " '" + varName + "': " + exp);
-					} else {
-						node.error("Could not evaluate binding expression for " + 
-								varKind + " '" + varName + "': " + exp);
-					}
-				}	
+				if (root().options.getBooleanOption("check_evaluation_of_parameter_binding_expressions")) {
+					CValue val = ceval();
+					if (val.isUnknown()) {
+						if (val.isUnsupported()) {
+							if (node.isConstant()) // TODO: Produce error for structural parameters as well
+								node.compliance("Constant evaluation not supported for expression(s) directly or indirectly " + 
+										"used by the binding expression for " + varKind + " '" + varName + "': " + exp);
+						} else {
+							node.error("Could not evaluate binding expression for " + 
+									varKind + " '" + varName + "': " + exp);
+						}
+					}	
+				}
 			}
 		} catch (ConstantEvaluationException e) {
 			node.error("Could not evaluate binding expression for " + 
