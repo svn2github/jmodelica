@@ -2,7 +2,8 @@
 REM call "%VS90COMNTOOLS%\vsvars32.bat"
 
 cd "zlib-1.2.5"
-set OUT_F=%~dp0\tmpfolder
+setlocal
+set OUT_F=%~dp0zlibresults
 set C_F=.
 set C_S=%C_F%\adler32.c %C_F%\compress.c %C_F%\crc32.c %C_F%\deflate.c %C_F%\gzclose.c %C_F%\gzlib.c %C_F%\gzread.c %C_F%\gzwrite.c %C_F%\infback.c %C_F%\inffast.c %C_F%\inflate.c %C_F%\inftrees.c %C_F%\trees.c %C_F%\uncompr.c %C_F%\zutil.c
 

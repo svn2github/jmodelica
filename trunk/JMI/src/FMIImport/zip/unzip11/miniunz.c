@@ -519,7 +519,7 @@ int do_extract_onefile(uf,filename,opt_extract_without_path,opt_overwrite,passwo
 }
 
 
-int main(argc,argv)
+int miniunz(argc,argv)
     int argc;
     char *argv[];
 {
