@@ -73,7 +73,7 @@ end VDP_Opt;
     following commands:</para>
 
     <programlisting language="python"># Import the function for compilation of models and the JMUModel class
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 
 # Import the plotting library
@@ -418,7 +418,7 @@ x1 = res['x1']
                 <entry>Variable trajectory data used for initialization of the
                 optimization problem. The data is represented by an object of
                 the type
-                <literal>jmodelica.io.ResultDymolaTextual.</literal></entry>
+                <literal>pyjmi.common.io.ResultDymolaTextual.</literal></entry>
               </row>
 
               <row>
@@ -825,7 +825,7 @@ x1 = res['x1']
     cstr.py.</para>
 
     <para>Start the tutorial by creating a working directory and copy the file
-    $JMODELICA_HOME/Python/jmodelica/examples/files/CSTR.mop to your working
+    $JMODELICA_HOME/Python/pyjmi/examples/files/CSTR.mop to your working
     directory. An on-line version of <link
     xlink:href="https://svn.jmodelica.org/trunk/Python/src/jmodelica/examples/files/CSTR.mo">CSTR.mop</link>
     is also available (depending on which browser you use, you may have to
@@ -844,7 +844,7 @@ x1 = res['x1']
       <programlisting language="python">import numpy as N
 import matplotlib.pyplot as plt
 
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 </programlisting>
 
@@ -1771,7 +1771,7 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 
 model_name = 'VDP_pack.VDP_Opt_Min_Time'
@@ -2320,7 +2320,7 @@ plt.show()
 import matplotlib.pyplot as plt
 import numpy as N
 
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 </programlisting>
 
@@ -3025,12 +3025,12 @@ print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
     <literal>casadi_interface</literal> and contains a model class
     <literal>CasadiModel</literal>. A compiler method for creating models
     compliant with <literal>CasadiModel</literal> resides in
-    <literal>jmodelica</literal>, <literal>compile_fmux</literal>.. Usage of
+    <literal>pymodelica</literal>, <literal>compile_fmux</literal>.. Usage of
     the methods is consistent with the work flow for optimization of
     <literal>JMUModels</literal>. Shown below is a Python code example
     describing how to invoke the optimization method.</para>
 
-    <programlisting language="python">from jmodelica import compile_fmux
+    <programlisting language="python">from pymodelica import compile_fmux
 from pyjmi import CasadiModel
 
 casadi_name = compile_fmux("MyModel", "MyModels.mop")
@@ -3171,7 +3171,7 @@ opts? #View the help text</programlisting>
                 <entry>Variable trajectory data used for initialization of the
                 optimization problem. The data is represented by an object of
                 the type
-                <literal>jmodelica.io.ResultDymolaTextual.</literal></entry>
+                <literal>pyjmi.common.io.ResultDymolaTextual.</literal></entry>
               </row>
 
               <row>
@@ -3280,7 +3280,7 @@ opts["free_phases"] = True #The phase boundary is allowed to be changed.
         we change the number of collocation points from the default 20 to 40
         via the options dictionary.</para>
 
-        <programlisting language="python">from jmodelica import compile_fmux
+        <programlisting language="python">from pymodelica import compile_fmux
 from pyjmi import CasadiModel
 
 casadi_name = compile_fmux("VDP_Opt", "VDP.mop")
@@ -3409,10 +3409,10 @@ end HohmannTransfer;</programlisting>
         <programlisting language="python">import numpy as N
 import matplotlib.pyplot as plt
 
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 
-from jmodelica import compile_fmux
+from pymodelica import compile_fmux
 from pyjmi import CasadiModel
 
 jmu_name  = compile_jmu("Orbital","Hohmann.mop")

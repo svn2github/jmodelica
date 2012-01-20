@@ -56,7 +56,7 @@
     commands for compiling and loading a model:</para>
 
     <programlisting language="python"># Import the function for compilation of models and the FMUModel class
-from jmodelica import compile_fmu
+from pymodelica import compile_fmu
 from pyfmi import FMUModel
 
 # Import the plotting library
@@ -909,7 +909,7 @@ end QuadTank;
 import matplotlib.pyplot as plt
 import numpy as N
 
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 </programlisting>
 
@@ -1051,7 +1051,7 @@ plt.show()
       together with the library used for plotting:</para>
 
       <programlisting language="python"># Import the function for compilation of models and the JMUModel class
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 
 # Import the plotting library
@@ -1138,7 +1138,7 @@ plt.show()
       imports:</para>
 
       <programlisting language="python">import matplotlib.pyplot as plt
-from jmodelica import compile_fmu
+from pymodelica import compile_fmu
 from pyfmi import FMUModel
 </programlisting>
 
@@ -1232,7 +1232,7 @@ plt.show()
 
       <programlisting language="python">import numpy as N
 import pylab as P
-from jmodelica import compile_fmu
+from pymodelica import compile_fmu
 from pyfmi import FMUModel
 </programlisting>
 
@@ -1338,7 +1338,7 @@ end Robertson;
       script file. We start by importing the necessary objects:</para>
 
       <programlisting language="python"># Import the function for compilation of models and the JMUModel class
-from jmodelica import compile_jmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
 
 # Import the plotting library
