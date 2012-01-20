@@ -98,9 +98,9 @@ def check_packages():
     time.sleep(0.25)
     
     #check pyjmi version
-    pyjmi = pyjmi.__version__
+    pyjmiversion = pyjmi.__version__
     sys.stdout.write(
-        "%s %s" % ("pyjmi version:".ljust(le,'.'),pyjmi.ljust(le)))
+        "%s %s" % ("pyjmi version:".ljust(le,'.'),pyjmiversion.ljust(le)))
     sys.stdout.write("\n")
     sys.stdout.flush()
     time.sleep(0.25)
