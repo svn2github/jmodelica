@@ -1795,7 +1795,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
             True: The Hessian of the Lagrangian function is obtained via CasADi
             and supplied to Ipopt.
             
-            False: Ipopt uses a Quasi-Newton method.
+            False: Ipopt uses a quasi-Newton method.
             
             WARNING: exact_hessian is very slow in combination with MX graphs.
             

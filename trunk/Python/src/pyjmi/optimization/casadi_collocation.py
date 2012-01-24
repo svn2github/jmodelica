@@ -642,7 +642,7 @@ class ParameterEstimationData(object):
                 .. math::
                 
                     f = \sum_{i = 1}^{n_m} (y(t_i) - y_m(t_i)) \cdot
-                    Q \cdot y(t_i) - y_m(t_i),
+                    Q \cdot (y(t_i) - y_m(t_i)),
                 
                 where y is the optimized values of the measured variables and
                 y_m is the measured values of the measured variables. This
@@ -686,7 +686,7 @@ class FreeElementLengthsData(object):
     Data used to control the element lengths when they are free.
     
     The objective function f is adjusted to penalize large element lengths for
-    elements with high state derivatives, resulting in the modified objective
+    elements with high state derivatives, resulting in the augmented objective
     function \hat{f} defined as follows:
     
     .. math::
