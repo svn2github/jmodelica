@@ -46,8 +46,7 @@ void jm_vector_free(JM_TEMPLATE_INSTANCE_TYPE) (jm_vector(JM_TEMPLATE_INSTANCE_T
     a->callbacks->free(a);
 }
 
-size_t jm_vector_init(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INSTANCE_TYPE)* a, size_t initSize, jm_callbacks* c) {
-        int reserve;
+size_t jm_vector_init(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INSTANCE_TYPE)* a, size_t initSize, jm_callbacks* c) {        
         if(c)
             a->callbacks = c;
         else
@@ -75,7 +74,7 @@ size_t jm_vector_resize(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INSTANC
 size_t jm_vector_reserve(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INSTANCE_TYPE)* a, size_t size) {
         void* newmem;
         if(size <= a->capacity) return a->capacity;
-        newmem = a->callbacks->malloc(sizeof(JM_TEMPLATE_INSTANCE_TYPE));
+        newmem = a->callbacks->malloc(size * sizeof(JM_TEMPLATE_INSTANCE_TYPE));
         if(!newmem) return a->capacity;
         memcpy(newmem, a->items, a->size * sizeof(JM_TEMPLATE_INSTANCE_TYPE));
         if(a->items !=  a->preallocated) a->callbacks->free(a->items);

@@ -65,7 +65,7 @@ void fmifree ( void * ptr ){
 
 void *fmirealloc(void *pointer, size_t size) {
     fmiMemoryHeader* header;
-    fmiCallbacks* fmiCB;
+
     void* newmem;
     size_t copysize;
 

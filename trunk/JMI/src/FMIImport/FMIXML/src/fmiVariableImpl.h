@@ -24,4 +24,13 @@ struct fmiVariable {
     char name[1];
 };
 
+static int fmiCompareVR (const void* first, const void* second) {
+    fmiVariable* a = *(fmiVariable**)first;
+    fmiVariable* b = *(fmiVariable**)second;
+    fmiBaseType at = fmiGetVariableBaseType(a);
+    fmiBaseType bt = fmiGetVariableBaseType(b);
+    if(at!=bt) return at - bt;
+    return a->vr - b->vr;
+}
+
 #endif /* FMIVARIABLEIMPL_H */

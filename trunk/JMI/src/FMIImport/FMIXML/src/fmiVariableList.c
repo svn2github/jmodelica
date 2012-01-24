@@ -1,17 +1,18 @@
 #include "fmiModelDescriptionImpl.h"
 #include "fmiVariableListImpl.h"
 
-fmiVariableList* fmiVariableListAlloc(jm_callbacks* cb, size_t size) {
+fmiVariableList* fmiAllocVariableList(jm_callbacks* cb, size_t size) {
     fmiVariableList* vl = cb->malloc(sizeof(fmiVariableList));
     if(!vl) return 0;
     vl->vr = 0;
     if(jm_vector_init(jm_voidp)(&vl->variables,size,cb) < size) {
-        fmiVariableListFree(vl);
+        fmiFreeVariableList(vl);
         return 0;
     }
+    return vl;
 }
 
-void fmiVariableListFree(fmiVariableList* vl) {
+void fmiFreeVariableList(fmiVariableList* vl) {
     jm_callbacks* cb = vl->variables.callbacks;
     jm_vector_free(size_t)(vl->vr);
     jm_vector_free_data(jm_voidp)(&vl->variables);
@@ -25,7 +26,7 @@ unsigned int  fmiGetVariableListSize(fmiVariableList* vl) {
 
 /* Make a copy */
 fmiVariableList* fmiVariableListClone(fmiVariableList* vl) {
-    fmiVariableList* copy = fmiVariableListAlloc(vl->variables.callbacks, fmiGetVariableListSize(vl));
+    fmiVariableList* copy = fmiAllocVariableList(vl->variables.callbacks, fmiGetVariableListSize(vl));
     if(!copy) return 0;
     jm_vector_copy(jm_voidp)(&copy->variables, &vl->variables);
     return copy;
@@ -59,7 +60,7 @@ fmiVariableList* fmiGetSublist(fmiVariableList* vl, unsigned int  fromIndex, uns
     if(fromIndex > toIndex) return 0;
     if(toIndex >=  fmiGetVariableListSize(vl)) return 0;
     size = toIndex - fromIndex + 1;
-    out = fmiVariableListAlloc(vl->variables.callbacks, size);
+    out = fmiAllocVariableList(vl->variables.callbacks, size);
     if(!out ) return 0;
     for(i=0; i < size; i++) {
         jm_vector_set_item(jm_voidp)(&out->variables, i, jm_vector_get_item(jm_voidp)(&vl->variables, fromIndex+i));
@@ -71,7 +72,7 @@ fmiVariableList* fmiGetSublist(fmiVariableList* vl, unsigned int  fromIndex, uns
   It returns a sub-list list with the variables for which filter returned non-zero value. */
 fmiVariableList* fmiFilterVariables(fmiVariableList* vl, fmiVariableFilterFunction filter) {
     size_t nv, i;
-    fmiVariableList* out = fmiVariableListAlloc(vl->variables.callbacks, 0);
+    fmiVariableList* out = fmiAllocVariableList(vl->variables.callbacks, 0);
     nv = fmiGetVariableListSize(vl);
     for(i=0; i < nv;i++) {
         fmiVariable* variable = fmiGetVariable(vl, i);
@@ -80,7 +81,7 @@ fmiVariableList* fmiFilterVariables(fmiVariableList* vl, fmiVariableFilterFuncti
                 break;
     }
     if(i != nv) {
-        fmiVariableListFree(out);
+        fmiFreeVariableList(out);
         out = 0;
     }
     return out;

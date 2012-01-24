@@ -107,7 +107,7 @@ static size_t jm_stack_reserve(T)(jm_stack(T)* a, size_t capacity) { return jm_v
     \
 static T* jm_stack_push(T)(jm_stack(T)* a, T item) { return jm_vector_push_back(T)(a, item); }\
     \
-static jm_stack_is_empty(T)(jm_stack(T)* a) { return ((jm_stack_get_size(T)(a) > 0)? 0:1); } \
+static int jm_stack_is_empty(T)(jm_stack(T)* a) { return ((jm_stack_get_size(T)(a) > 0)? 0:1); } \
     \
 static T jm_stack_top(T)(jm_stack(T)* a) { \
     assert(!jm_stack_is_empty(T)(a)); \

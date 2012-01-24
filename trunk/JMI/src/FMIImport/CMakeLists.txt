@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 project (JM_CLIBS)
 
 IF(CMAKE_COMPILER_IS_GNUCC)
-   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c89 -pedantic")
+   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c89 -pedantic -Wall -Wno-unused-function -Werror")
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 IF(NOT CMAKE_BUILD_TYPE)

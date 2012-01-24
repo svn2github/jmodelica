@@ -72,6 +72,8 @@ struct fmiModelDescription {
     jm_string_set descriptions;
 
     jm_vector(jm_named_ptr) variables;
+
+    fmiVariableList* variablesByVR;
 };
 
 void fmiReportError(fmiModelDescription* md, const char* module, const char* fmt, va_list ap);

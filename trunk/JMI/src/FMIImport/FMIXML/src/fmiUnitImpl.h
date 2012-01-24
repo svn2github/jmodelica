@@ -17,6 +17,7 @@ struct fmiDisplayUnit {
 
 struct fmiUnit {
         jm_vector(jm_voidp) displayUnits;
+        fmiDisplayUnit defaultDisplay;
         char baseUnit[1];
 };
 
@@ -24,6 +25,6 @@ struct fmiUnitDefinitions {
     jm_vector(jm_named_ptr) definitions;
 };
 
-fmiUnit* fmiXMLGetUnit(fmiXMLParserContext *context, jm_vector(char)* name, int sorted);
+fmiDisplayUnit* fmiXMLGetUnit(fmiXMLParserContext *context, jm_vector(char)* name, int sorted);
 
 #endif /* FMIUNITIMPL_H */

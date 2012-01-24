@@ -11,6 +11,6 @@ struct fmiVariableList {
 };
 
 /* Allocate an empty list */
-fmiVariableList* fmiVariableListAlloc(jm_callbacks* cb, size_t size);
+fmiVariableList* fmiAllocVariableList(jm_callbacks* cb, size_t size);
 
 #endif /* FMIVARIABLELISTIMPL_H */

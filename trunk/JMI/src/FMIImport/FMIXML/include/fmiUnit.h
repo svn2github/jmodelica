@@ -35,6 +35,8 @@ fmiUnitDefinitions* fmiGetUnitDefinitions(fmiModelDescription* md);
 unsigned int  fmiGetUnitDefinitionsNumber(fmiUnitDefinitions*);
 fmiUnit* fmiGetUnit(fmiUnitDefinitions*, unsigned int  index);
 const char* fmiGetUnitName(fmiUnit*);
+unsigned int fmiGetUnitDisplayUnitsNumber(fmiUnit*);
+fmiDisplayUnit* fmiGetUnitDisplayUnit(fmiUnit*, size_t index);
 
 fmiDisplayUnit* fmiGetTypeDisplayUnit(fmiRealType*);
 fmiUnit* fmiGetBaseUnit(fmiDisplayUnit*);

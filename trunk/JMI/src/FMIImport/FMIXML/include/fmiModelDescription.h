@@ -131,7 +131,8 @@ const char* fmiGetDesciption(fmiModelDescription* md);
 
 const char* fmiGetAuthor(fmiModelDescription* md);
 
-const char* fmiGetVersion(fmiModelDescription* md);
+const char* fmiGetModelVersion(fmiModelDescription* md);
+const char* fmiGetModelStandardVersion(fmiModelDescription* md);
 const char* fmiGetGenerationTool(fmiModelDescription* md);
 const char* fmiGetGenerationDateAndTime(fmiModelDescription* md);
 

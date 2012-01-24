@@ -35,6 +35,7 @@ extern "C" {
 #endif
 
 const char* fmiGetVariableName(fmiVariable*);
+const char* fmiGetVariableDescription(fmiVariable*);
 
 fmiValueReference fmiGetVariableValueReference(fmiVariable*);
 
@@ -82,6 +83,8 @@ fmiReal fmiGetRealVariableStart(fmiRealVariable* v);
 fmiReal fmiGetRealVariableMax(fmiRealVariable* v);
 fmiReal fmiGetRealVariableMin(fmiRealVariable* v);
 fmiReal fmiGetRealVariableNominal(fmiRealVariable* v);
+fmiUnit* fmiGetRealVariableUnit(fmiRealVariable* v);
+fmiDisplayUnit* fmiGetRealVariableDisplayUnit(fmiRealVariable* v);
 
 const char* fmiGetStringVariableStart(fmiStringVariable* v);
 fmiBoolean fmiGetBooleanVariableStart(fmiBooleanVariable* v);

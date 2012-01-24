@@ -49,11 +49,11 @@ int fmiXMLHandle_Tool(fmiXMLParserContext *context, const char* data) {
             fmiXMLParseError(context, "Tool XML element must be a part of VendorAnnotations");
             return -1;
         }
-        {
-            int ret;
+        {            
             fmiModelDescription* md = context->modelDescription;
             jm_vector(char)* bufName = fmiXMLReserveParseBuffer(context,1,100);
             fmiVendor* vendor = 0;
+            fmiVendor dummyV;
             jm_voidp *pvendor;
 
             if(!bufName) return -1;
@@ -61,7 +61,7 @@ int fmiXMLHandle_Tool(fmiXMLParserContext *context, const char* data) {
             if( fmiXMLSetAttrString(context, fmiXMLElmID_Tool, fmiXMLAttrID_name, 1, bufName)) return -1;
             pvendor = jm_vector_push_back(jm_voidp)(&md->vendorList, vendor);
             if(pvendor )
-                *pvendor = vendor = jm_named_alloc_v(bufName,sizeof(fmiVendor), context->callbacks).ptr;
+                *pvendor = vendor = jm_named_alloc_v(bufName,sizeof(fmiVendor), dummyV.name - (char*)&dummyV, context->callbacks).ptr;
             if(!pvendor || !vendor) {
                 fmiXMLParseError(context, "Could not allocate memory");
                 return -1;
@@ -103,7 +103,7 @@ int fmiXMLHandle_Annotation(fmiXMLParserContext *context, const char* data) {
             named.ptr = 0;
             pnamed = jm_vector_push_back(jm_named_ptr)(&vendor->annotations, named);
 
-            if(pnamed) *pnamed = named = jm_named_alloc_v(bufName,sizeof(fmiAnnotation)+vallen+1,context->callbacks);
+            if(pnamed) *pnamed = named = jm_named_alloc_v(bufName,sizeof(fmiAnnotation)+vallen+1,sizeof(fmiAnnotation)+vallen,context->callbacks);
             annotation = named.ptr;
             if( !pnamed || !annotation ) {
                 fmiXMLParseError(context, "Could not allocate memory");

@@ -1,8 +1,11 @@
+#include <stdio.h>
+
 #include <jm_named_ptr.h>
 #include "fmiCallbacks.h"
 #include "fmiModelDescriptionImpl.h"
 #include "fmiVariableListImpl.h"
 #include "fmiVendorAnnotationsImpl.h"
+#include "fmiXMLParser.h"
 
 fmiModelDescription * fmiAllocateModelDescription( fmiCallbackFunctions* callbacks) {
     jm_callbacks* cb;
@@ -26,8 +29,8 @@ fmiModelDescription * fmiAllocateModelDescription( fmiCallbackFunctions* callbac
     md->status = fmiModelDescriptionEmpty;
 
     jm_vector_init(char)( & md->fmiStandardVersion, 0,cb);
-
     jm_vector_init(char)(&md->modelName, 0,cb);
+    jm_vector_init(char)(&md->modelIdentifier, 0,cb);
     jm_vector_init(char)(&md->GUID, 0,cb);
     jm_vector_init(char)(&md->description, 0,cb);
     jm_vector_init(char)(&md->author, 0,cb);
@@ -41,9 +44,9 @@ fmiModelDescription * fmiAllocateModelDescription( fmiCallbackFunctions* callbac
 
     md->defaultExperimentStartTime = 0;
 
-    md->defaultExperimentStopTime = 0;
+    md->defaultExperimentStopTime = 1.0;
 
-    md->defaultExperimentTolerance = 0;
+    md->defaultExperimentTolerance = 1e-6;
 
     jm_vector_init(jm_voidp)(&md->vendorList, 0, cb);
 
@@ -53,6 +56,8 @@ fmiModelDescription * fmiAllocateModelDescription( fmiCallbackFunctions* callbac
     fmiInitTypeDefinitions(&md->typeDefinitions, cb);
 
     jm_vector_init(jm_named_ptr)(&md->variables, 0, cb);
+
+    md->variablesByVR = 0;
 
     jm_vector_init(jm_string)(&md->descriptions, 0, cb);
 
@@ -66,6 +71,7 @@ void fmiClearModelDescription( fmiModelDescription* md) {
     md->status = fmiModelDescriptionEmpty;
     jm_vector_free_data(char)(&md->fmiStandardVersion);
     jm_vector_free_data(char)(&md->modelName);
+    jm_vector_free_data(char)(&md->modelIdentifier);
     jm_vector_free_data(char)(&md->GUID);
     jm_vector_free_data(char)(&md->description);
     jm_vector_free_data(char)(&md->author);
@@ -92,6 +98,7 @@ void fmiClearModelDescription( fmiModelDescription* md) {
     fmiFreeTypeDefinitionsData(&md->typeDefinitions);
 
     jm_named_vector_free_data(&md->variables);
+    if(md->variablesByVR) fmiFreeVariableList(md->variablesByVR);
 
     jm_vector_foreach(jm_string)(&md->descriptions, (void(*)(const char*))md->descriptions.callbacks->free);
     jm_vector_free_data(jm_string)(&md->descriptions);
@@ -117,35 +124,40 @@ void fmiFreeModelDescription(fmiModelDescription* md) {
 }
 
 const char* fmiGetModelName(fmiModelDescription* md) {
-    return jm_vector_get_itemp(char)(&md->modelName, 0);
+    return jm_vector_char2string(&md->modelName);
 }
 
 const char* fmiGetModelIdentifier(fmiModelDescription* md){
-    return jm_vector_get_itemp(char)(&md->modelIdentifier, 0);
+    return jm_vector_char2string(&md->modelIdentifier);
 }
 
 const char* fmiGetGUID(fmiModelDescription* md){
-    return jm_vector_get_itemp(char)(&md->GUID, 0);
+    return jm_vector_char2string(&md->GUID);
 }
 
 const char* fmiGetDesciption(fmiModelDescription* md){
-    return jm_vector_get_itemp(char)(&md->description, 0);
+    return jm_vector_char2string(&md->description);
 }
 
 const char* fmiGetAuthor(fmiModelDescription* md){
-    return jm_vector_get_itemp(char)(&md->author, 0);
+    return jm_vector_char2string(&md->author);
 }
 
-const char* fmiGetVersion(fmiModelDescription* md){
-    return jm_vector_get_itemp(char)(&md->version, 0);
+const char* fmiGetModelStandardVersion(fmiModelDescription* md){
+    return jm_vector_char2string(&md->fmiStandardVersion);
+}
+
+
+const char* fmiGetModelVersion(fmiModelDescription* md){
+    return jm_vector_char2string(&md->version);
 }
 
 const char* fmiGetGenerationTool(fmiModelDescription* md){
-    return jm_vector_get_itemp(char)(&md->generationTool, 0);
+    return jm_vector_char2string(&md->generationTool);
 }
 
 const char* fmiGetGenerationDateAndTime(fmiModelDescription* md){
-    return jm_vector_get_itemp(char)(&md->generationDateAndTime, 0);
+    return jm_vector_char2string(&md->generationDateAndTime);
 }
 
 fmiVariableNamingConvension fmiGetNamingConvension(fmiModelDescription* md) {
@@ -223,7 +235,7 @@ fmiVariableList* fmiGetVariableList(fmiModelDescription* md) {
     size_t nv, i;
     if(md->status != fmiModelDescriptionOK) return 0;
     nv = jm_vector_get_size(jm_named_ptr)(&md->variables);
-    vl = fmiVariableListAlloc(md->callbacks, nv);
+    vl = fmiAllocVariableList(md->callbacks, nv);
     if(!vl) return 0;
     for(i = 0; i< nv; i++) {
         jm_vector_set_item(jm_voidp)(&vl->variables, i, jm_vector_get_item(jm_named_ptr)(&md->variables, i).ptr);
@@ -232,3 +244,78 @@ fmiVariableList* fmiGetVariableList(fmiModelDescription* md) {
 }
 
 
+int fmiXMLHandle_fmiModelDescription(fmiXMLParserContext *context, const char* data) {
+    jm_name_ID_map_t namingConventionMap[] = {{"flat",fmiNamingFlat},{"structured", fmiNamingStructured},{0,0}};
+    fmiModelDescription* md = context->modelDescription;
+
+    if(!data) {
+        if(context -> currentElmHandle != 0) {
+            fmiXMLParseError(context, "fmiModelDescription must be the root XML element");
+            return -1;
+        }
+        /* process the attributes */
+        return (
+                    /* <xs:attribute name="fmiVersion" type="xs:normalizedString" use="required" fixed="1.0"/> */
+                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_fmiVersion, 1, &(md->fmiStandardVersion)) ||
+                    /* <xs:attribute name="modelName" type="xs:normalizedString" use="required"> */
+                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_modelName, 1, &(md->modelName)) ||
+                    /* <xs:attribute name="modelIdentifier" type="xs:normalizedString" use="required"> */
+                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_modelIdentifier, 1, &(md->modelIdentifier)) ||
+                    /* <xs:attribute name="guid" type="xs:normalizedString" use="required"> */
+                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_guid, 1, &(md->GUID)) ||
+                    /* <xs:attribute name="description" type="xs:string"/> */
+                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_description, 0, &(md->description)) ||
+                    /* <xs:attribute name="author" type="xs:string"/> */
+                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_author, 0, &(md->author)) ||
+                    /* <xs:attribute name="version" type="xs:normalizedString"> */
+                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_version, 0, &(md->version)) ||
+                    /* <xs:attribute name="generationTool" type="xs:normalizedString"/> */
+                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_generationTool, 0, &(md->generationTool)) ||
+                    /* <xs:attribute name="generationDateAndTime" type="xs:dateTime"/> */
+                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_generationDateAndTime, 0, &(md->generationDateAndTime)) ||
+                    /* <xs:attribute name="variableNamingConvention" use="optional" default="flat"> */
+                    fmiXMLSetAttrEnum(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_variableNamingConvention, 0, &(md->namingConvension), fmiNamingFlat, namingConventionMap) ||
+                    /* <xs:attribute name="numberOfContinuousStates" type="xs:unsignedInt" use="required"/> */
+                    fmiXMLSetAttrUint(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_numberOfContinuousStates, 1, &(md->numberOfContinuousStates),0) ||
+                    /* <xs:attribute name="numberOfEventIndicators" type="xs:unsignedInt" use="required"/> */
+                    fmiXMLSetAttrUint(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_numberOfEventIndicators, 1, &(md->numberOfEventIndicators),0)
+                    );
+    }
+    else {
+        /* don't do anything. might give out a warning if(data[0] != 0) */
+        return 0;
+    }
+}
+
+int fmiXMLHandle_DefaultExperiment(fmiXMLParserContext *context, const char* data) {
+    if(!data) {
+        fmiModelDescription* md = context->modelDescription;
+        if(  context -> currentElmHandle != fmiXMLHandle_fmiModelDescription)
+        {
+            fmiXMLParseError(context, "DefaultExperiment XML element must be a part of fmiModelDescription");
+            return -1;
+        }
+        if(  (context -> lastElmHandle != 0) &&
+             (context -> lastElmHandle != fmiXMLHandle_TypeDefinitions) &&
+              (context->lastElmHandle != fmiXMLHandle_UnitDefinitions)
+                )
+        {
+            fmiXMLParseError(context, "DefaultExperiment XML element must either be the first or follow TypeDefinitions or UnitDefinitions");
+            return -1;
+        }
+        /* process the attributes */
+        return (
+        /* <xs:attribute name="startTime" type="xs:double"/> */
+                    fmiXMLSetAttrDouble(context, fmiXMLElmID_DefaultExperiment, fmiXMLAttrID_startTime, 0, &md->defaultExperimentStartTime, 0) ||
+        /* <xs:attribute name="stopTime" type="xs:double"/>  */
+                    fmiXMLSetAttrDouble(context, fmiXMLElmID_DefaultExperiment, fmiXMLAttrID_stopTime, 0, &md->defaultExperimentStopTime, 1) ||
+        /* <xs:attribute name="tolerance" type="xs:double">  */
+                    fmiXMLSetAttrDouble(context, fmiXMLElmID_DefaultExperiment, fmiXMLAttrID_tolerance, 0, &md->defaultExperimentTolerance, 1e-6)
+                    );
+    }
+    else {
+        /* don't do anything. might give out a warning if(data[0] != 0) */
+        return 0;
+    }
+    return 0;
+}

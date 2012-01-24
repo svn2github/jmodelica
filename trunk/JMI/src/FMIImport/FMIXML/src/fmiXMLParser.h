@@ -133,8 +133,18 @@ struct fmiXMLParserContext {
 
 jm_vector(char) * fmiXMLReserveParseBuffer(fmiXMLParserContext *context, size_t index, size_t size);
 jm_vector(char) * fmiXMLGetParseBuffer(fmiXMLParserContext *context, size_t index);
+int fmiXMLAllocBuffer(fmiXMLParserContext *context, size_t items);
 
 void fmiXMLFreeBuffer(fmiXMLParserContext *context);
+
+void fmiXMLParseError(fmiXMLParserContext *context, const char* fmt, ...);
+int fmiXMLSetAttrString(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAttrEnum attrID, int required, jm_vector(char)* field);
+int fmiXMLSetAttrUint(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAttrEnum attrID, int required, unsigned int* field, unsigned int defaultVal);
+int fmiXMLSetAttrEnum(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAttrEnum attrID, int required, unsigned int* field, unsigned int defaultVal, jm_name_ID_map_t* nameMap);
+int fmiXMLSetAttrBoolean(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAttrEnum attrID, int required, unsigned int* field, unsigned int defaultVal);
+int fmiXMLSetAttrInt(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAttrEnum attrID, int required, int* field, int defaultVal);
+int fmiXMLSetAttrDouble(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAttrEnum attrID, int required, double* field, double defaultVal);
+int fmiXMLAttrIsDefined(fmiXMLParserContext *context, fmiXMLAttrEnum attrID);
 
 #endif /* FMIXMLPARSER_H */
 

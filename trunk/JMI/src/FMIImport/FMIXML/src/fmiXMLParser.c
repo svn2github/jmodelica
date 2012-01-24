@@ -18,15 +18,31 @@ fmiXMLElementHandleMap_t fmiXMLElementHandleMap[fmiXMLElmNum] = {
 };
 
 void fmiXMLParseFreeContext(fmiXMLParserContext *context) {
-
-    fmiClearModelDescription(context->modelDescription);
-    if(context->parser) XML_ParserFree(context->parser);
+    if(context->modelDescription)
+        fmiClearModelDescription(context->modelDescription);
+    if(context->parser) {
+        XML_ParserFree(context->parser);
+        context->parser = 0;
+    }
     fmiXMLFreeBuffer(context);
-    jm_vector_free(jm_named_ptr)(context->attrMap);
-    jm_vector_free(fmiXMLElementHandleMap_t)(context->elmMap);
-    jm_vector_free(jm_string)(context->attrBuffer);
+    if(context->attrMap) {
+        jm_vector_free(jm_named_ptr)(context->attrMap);
+        context->attrMap = 0;
+    }
+    if(context->elmMap) {
+        jm_vector_free(fmiXMLElementHandleMap_t)(context->elmMap);
+        context->elmMap = 0;
+    }
+    if(context->attrBuffer) {
+        jm_vector_free(jm_string)(context->attrBuffer);
+        context->attrBuffer = 0;
+    }
     jm_stack_free_data(elementHandleF_t)(& context->elmHandleStack );
     jm_vector_free_data(char)( &context->elmData );
+
+    jm_vector_free_data(jm_voidp)(&context->directDependencyBuf);
+    jm_vector_foreach(jm_string)(&context->directDependencyStringsStore, (void(*)(jm_string))context->callbacks->free);
+    jm_vector_free_data(jm_string)(&context->directDependencyStringsStore);
 }
 
 void fmiXMLParseError(fmiXMLParserContext *context, const char* fmt, ...) {
@@ -35,7 +51,7 @@ void fmiXMLParseError(fmiXMLParserContext *context, const char* fmt, ...) {
     va_start (args, fmt);
     fmiReportError(context->modelDescription, module, fmt, args);
     va_end (args);
-    fmiXMLParseFreeContext(context);
+    XML_StopParser(context->parser,0);
 }
 
 int fmiXMLAttrIsDefined(fmiXMLParserContext *context, fmiXMLAttrEnum attrID) {
@@ -43,12 +59,13 @@ int fmiXMLAttrIsDefined(fmiXMLParserContext *context, fmiXMLAttrEnum attrID) {
 }
 
 int fmiXMLGetAttrStr(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAttrEnum attrID, int required,const char** valp) {
-    char* str;
-    jm_string elmName, attrName;
+
+    jm_string elmName, attrName, value;
 
     elmName = fmiXMLElementHandleMap[elmID].elementName;
     attrName = fmiXMLAttrNames[attrID];
-    *valp =  jm_vector_get_item(jm_string)(context->attrBuffer, attrID);
+    value = jm_vector_get_item(jm_string)(context->attrBuffer, attrID);
+    *valp =  value;
     jm_vector_set_item(jm_string)(context->attrBuffer, attrID, 0);
     if(!(*valp)) {
         if (required) {
@@ -58,6 +75,7 @@ int fmiXMLGetAttrStr(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAt
         else
             return 0;
     }
+    return 0;
 }
 
 int fmiXMLSetAttrString(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAttrEnum attrID, int required, jm_vector(char)* field) {
@@ -66,7 +84,7 @@ int fmiXMLSetAttrString(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXM
     size_t len;
     ret = fmiXMLGetAttrStr(context, elmID, attrID,required,&val);
     if(ret) return ret;
-    if(!val[0] && !required) {
+    if((!val || !val[0]) && !required) {
         jm_vector_resize(char)(field, 1);
         jm_vector_set_item(char)(field, 0, 0);
         jm_vector_resize(char)(field, 0);
@@ -86,15 +104,13 @@ int fmiXMLSetAttrString(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXM
     return 0;
 }
 
-int fmiXMLSetAttrUint(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAttrEnum attrID, int required, unsigned int* field, unsigned int defaultVal) {
-    char* str;
+int fmiXMLSetAttrUint(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAttrEnum attrID, int required, unsigned int* field, unsigned int defaultVal) {    
     int ret;
-    jm_string elmName, attrName, strVal;
-    size_t len;
+    jm_string elmName, attrName, strVal;    
 
     ret = fmiXMLGetAttrStr(context, elmID, attrID,required,&strVal);
     if(ret) return ret;
-    if(!strVal[0] && !required) {
+    if(!strVal && !required) {
         *field = defaultVal;
         return 0;
     }
@@ -116,7 +132,7 @@ int fmiXMLSetAttrEnum(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLA
 
     ret = fmiXMLGetAttrStr(context, elmID, attrID,required,&strVal);
     if(ret) return ret;
-    if(!strVal[0] && !required) {
+    if(!strVal && !required) {
         *field = defaultVal;
         return 0;
     }
@@ -140,14 +156,12 @@ int fmiXMLSetAttrBoolean(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiX
 }
 
 int fmiXMLSetAttrInt(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAttrEnum attrID, int required, int* field, int defaultVal) {
-    char* str;
     int ret;
     jm_string elmName, attrName, strVal;
-    size_t len;
 
     ret = fmiXMLGetAttrStr(context, elmID, attrID,required,&strVal);
     if(ret) return ret;
-    if(!strVal[0] && !required) {
+    if(!strVal && !required) {
         *field = defaultVal;
         return 0;
     }
@@ -163,14 +177,14 @@ int fmiXMLSetAttrInt(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAt
 }
 
 int fmiXMLSetAttrDouble(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXMLAttrEnum attrID, int required, double* field, double defaultVal) {
-    char* str;
+
     int ret;
     jm_string elmName, attrName, strVal;
-    size_t len;
+
 
     ret = fmiXMLGetAttrStr(context, elmID, attrID,required,&strVal);
     if(ret) return ret;
-    if(!strVal[0] && !required) {
+    if(!strVal && !required) {
         *field = defaultVal;
         return 0;
     }
@@ -185,60 +199,16 @@ int fmiXMLSetAttrDouble(fmiXMLParserContext *context, fmiXMLElmEnum elmID, fmiXM
     return 0;
 }
 
-
-
-int fmiXMLHandle_fmiModelDescription(fmiXMLParserContext *context, const char* data) {
-    jm_name_ID_map_t namingConventionMap[] = {{"flat",fmiNamingFlat},{"structured", fmiNamingStructured},{0,0}};
-    fmiModelDescription* md = context->modelDescription;
-
-    if(!data) {
-        if(context -> currentElmHandle != 0) {
-            fmiXMLParseError(context, "fmiModelDescription must be the root XML element");
-            return -1;
-        }
-        /* process the attributes */
-        return (
-                    /* <xs:attribute name="fmiVersion" type="xs:normalizedString" use="required" fixed="1.0"/> */
-                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_fmiVersion, 1, &(md->fmiStandardVersion)) ||
-                    /* <xs:attribute name="modelName" type="xs:normalizedString" use="required"> */
-                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_modelName, 1, &(md->modelName)) ||
-                    /* <xs:attribute name="modelIdentifier" type="xs:normalizedString" use="required"> */
-                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_modelIdentifier, 1, &(md->modelIdentifier)) ||
-                    /* <xs:attribute name="guid" type="xs:normalizedString" use="required"> */
-                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_guid, 1, &(md->GUID)) ||
-                    /* <xs:attribute name="description" type="xs:string"/> */
-                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_description, 0, &(md->description)) ||
-                    /* <xs:attribute name="author" type="xs:string"/> */
-                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_author, 0, &(md->author)) ||
-                    /* <xs:attribute name="version" type="xs:normalizedString"> */
-                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_version, 0, &(md->version)) ||
-                    /* <xs:attribute name="generationTool" type="xs:normalizedString"/> */
-                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_generationTool, 0, &(md->generationTool)) ||
-                    /* <xs:attribute name="generationDateAndTime" type="xs:dateTime"/> */
-                    fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_generationDateAndTime, 0, &(md->generationDateAndTime)) ||
-                    /* <xs:attribute name="variableNamingConvention" use="optional" default="flat"> */
-                    fmiXMLSetAttrEnum(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_variableNamingConvention, 0, &(md->namingConvension), fmiNamingFlat, namingConventionMap) ||
-                    /* <xs:attribute name="numberOfContinuousStates" type="xs:unsignedInt" use="required"/> */
-                    fmiXMLSetAttrUint(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_numberOfContinuousStates, 1, &(md->numberOfContinuousStates),0) ||
-                    /* <xs:attribute name="numberOfEventIndicators" type="xs:unsignedInt" use="required"/> */
-                    fmiXMLSetAttrUint(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_numberOfEventIndicators, 1, &(md->numberOfEventIndicators),0)
-                    );
-    }
-    else {
-        /* don't do anything. might give out a warning if(data[0] != 0) */
-        return 0;
-    }
-}
-
-
 int fmiXMLAllocBuffer(fmiXMLParserContext *context, size_t items) {
-    int i;
+
     jm_vector(jm_voidp)* parseBuffer = &context->parseBuffer;
-    if(jm_vector_resize(jm_voidp)(parseBuffer, items) < items) {
+
+    if(jm_vector_init(jm_voidp)(parseBuffer,items,context->callbacks) < items) {
         fmiXMLParseError(context, "Could not allocate buffer for parsing XML");
         return -1;
     }
     jm_vector_zero(jm_voidp)(parseBuffer);
+    return 0;
 }
 
 void fmiXMLFreeBuffer(fmiXMLParserContext *context) {
@@ -253,7 +223,7 @@ void fmiXMLFreeBuffer(fmiXMLParserContext *context) {
 }
 
 jm_vector(char) * fmiXMLReserveParseBuffer(fmiXMLParserContext *context, size_t index, size_t size) {
-    int i;
+
     jm_vector(jm_voidp)* parseBuffer = &context->parseBuffer;
     jm_vector(char) * item = jm_vector_get_item(jm_voidp)(parseBuffer,index);
     if(!item) {
@@ -279,63 +249,6 @@ jm_vector(char) * fmiXMLGetParseBuffer(fmiXMLParserContext *context, size_t inde
 
 
 
-int fmiXMLHandle_DefaultExperiment(fmiXMLParserContext *context, const char* data) {
-    if(!data) {
-        fmiModelDescription* md = context->modelDescription;
-        if(  context -> currentElmHandle != fmiXMLHandle_fmiModelDescription)
-        {
-            fmiXMLParseError(context, "DefaultExperiment XML element must be a part of fmiModelDescription");
-            return -1;
-        }
-        if(  (context -> lastElmHandle != 0) &&
-             (context -> lastElmHandle != fmiXMLHandle_TypeDefinitions) &&
-              (context->lastElmHandle != fmiXMLHandle_UnitDefinitions)
-                )
-        {
-            fmiXMLParseError(context, "DefaultExperiment XML element must either be the first or follow TypeDefinitions or UnitDefinitions");
-            return -1;
-        }
-        /* process the attributes */
-        return (
-        /* <xs:attribute name="startTime" type="xs:double"/> */
-                    fmiXMLSetAttrDouble(context, fmiXMLElmID_DefaultExperiment, fmiXMLAttrID_startTime, 0, &md->defaultExperimentStartTime, 0) ||
-        /* <xs:attribute name="stopTime" type="xs:double"/>  */
-                    fmiXMLSetAttrDouble(context, fmiXMLElmID_DefaultExperiment, fmiXMLAttrID_stopTime, 0, &md->defaultExperimentStopTime, 1) ||
-        /* <xs:attribute name="tolerance" type="xs:double">  */
-                    fmiXMLSetAttrDouble(context, fmiXMLElmID_DefaultExperiment, fmiXMLAttrID_tolerance, 0, &md->defaultExperimentTolerance, 1e-6)
-                    );
-    }
-    else {
-        /* don't do anything. might give out a warning if(data[0] != 0) */
-        return 0;
-    }
-    return 0;
-}
-
-
-int fmiXMLHandle_ModelVariables(fmiXMLParserContext *context, const char* data) {
-    if(!data) {
-        if(context -> currentElmHandle != fmiXMLHandle_fmiModelDescription) {
-            fmiXMLParseError(context, "ModelVariables XML element must be a part of fmiModelDescription");
-            return -1;
-        }
-    }
-    else {
-
-        /* sort the variables by names */
-
-        /* create VR index (needed?) */
-
-        /* postprocess direct dependencies*/
-
-        /* postprocess alias information */
-
-        /* might give out a warning if(data[0] != 0) */
-    }
-    return 0;
-}
-
-
 int fmiXMLCreateAttrMap(fmiXMLParserContext* context) {
     int i;
     context->attrBuffer = jm_vector_alloc(jm_string)(fmiXMLAttrNum, fmiXMLAttrNum, context->callbacks);
@@ -346,7 +259,7 @@ int fmiXMLCreateAttrMap(fmiXMLParserContext* context) {
         jm_named_ptr map;
         jm_vector_set_item(jm_string)(context->attrBuffer, i, 0);
         map.name = fmiXMLAttrNames[i];
-        map.ptr = &(context->attrBuffer[i]);
+        map.ptr = jm_vector_get_itemp(jm_string)(context->attrBuffer, i);
         jm_vector_set_item(jm_named_ptr)(context->attrMap, i, map);
     }
     jm_vector_qsort(jm_named_ptr)(context->attrMap, jm_compare_named);
@@ -361,7 +274,7 @@ int fmiXMLCreateElmMap(fmiXMLParserContext* context) {
         fmiXMLElementHandleMap_t item = fmiXMLElementHandleMap[i];
         jm_vector_set_item(fmiXMLElementHandleMap_t)(context->elmMap, i, item);
     }
-    jm_vector_qsort(fmiXMLElementHandleMap_t)(context->elmMap, jm_compare_named);
+    jm_vector_qsort(fmiXMLElementHandleMap_t)(context->elmMap, fmiXML_compare_elmName);
     return 0;
 }
 
@@ -370,9 +283,8 @@ void XMLCALL fmiXMLParseElementStart(void *c, const char *elm, const char **attr
     fmiXMLElementHandleMap_t keyEl;
     fmiXMLElementHandleMap_t* currentElMap;
     jm_named_ptr* currentMap;
-    elementHandleF_t currentHandle;
-    char* errMessage;
-    int i, index;
+    elementHandleF_t currentHandle;    
+    int i;
     fmiXMLParserContext *context = c;
     keyEl.elementName = elm;
 
@@ -424,9 +336,7 @@ void XMLCALL fmiXMLParseElementEnd(void* c, const char *elm) {
 
     fmiXMLElementHandleMap_t keyEl;
     fmiXMLElementHandleMap_t* currentElMap;
-    elementHandleF_t currentHandle;
-    char* errMessage;
-    int i, index;
+    elementHandleF_t currentHandle;    
     fmiXMLParserContext *context = c;
 
     keyEl.elementName = elm;
@@ -493,11 +403,19 @@ int fmiParseXML(fmiModelDescription* md, const char* filename) {
         md->callbacks->logger(md, 0, -1, "ERROR", "Could not allocate memory for XML parser context");
     }
     context->callbacks = md->callbacks;
+    context->modelDescription = md;
     if(fmiXMLAllocBuffer(context, 16)) return -1;
     if(fmiXMLCreateAttrMap(context) || fmiXMLCreateElmMap(context)) {
         fmiXMLParseError(context, "Error in parsing initialization");
         return -1;
     }
+    context->lastBaseUnit = 0;
+    jm_vector_init(jm_voidp)(&context->directDependencyBuf, 0, context->callbacks);
+    jm_vector_init(jm_string)(&context->directDependencyStringsStore, 0, context->callbacks);
+    jm_stack_init(elementHandleF_t)(&context->elmHandleStack,  context->callbacks);
+    jm_vector_init(char)(&context->elmData, 0, context->callbacks);
+    context->lastElmHandle = 0;
+    context->currentElmHandle = 0;
 
     memsuite.malloc_fcn = context->callbacks->malloc;
     memsuite.realloc_fcn = context->callbacks->realloc;
@@ -536,15 +454,18 @@ int fmiParseXML(fmiModelDescription* md, const char* filename) {
                          XML_ErrorString(XML_GetErrorCode(parser)));
              fclose(file);
              return -1; /* failure */
-        }
+        }        
     }
-    XML_ParserFree(parser);
+    /* done later XML_ParserFree(parser);*/
     if(!jm_stack_is_empty(elementHandleF_t)(&context->elmHandleStack)) {
         fmiXMLParseError(context, "Unexpected end of file (not all elements ended) when parsing %s", filename);
         return -1;
     }
 
+    md->status = fmiModelDescriptionOK;
+    context->modelDescription = 0;
     fmiXMLParseFreeContext(context);
+
     return 0;
 }
 

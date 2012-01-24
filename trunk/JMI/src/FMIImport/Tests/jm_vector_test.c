@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+
+long int random(void);
+void srandom(unsigned int seed);
+
 #include <jm_vector.h>
 #include <jm_stack.h>
 
@@ -49,4 +53,5 @@ int main() {
 
     jm_vector_free_data(int)(v);
     jm_stack_free(double)(s);
+    return 0;
 }

@@ -20,9 +20,9 @@ struct T {
 It allocates memory for the object and the name string and sets pointer to it packed together with the name pointer.
 The "name" is copied into the allocated memory.
 */
-jm_named_ptr jm_named_alloc(jm_string name, size_t size, jm_callbacks* c);
+jm_named_ptr jm_named_alloc(jm_string name, size_t size, size_t nameoffset, jm_callbacks* c);
 
-jm_named_ptr jm_named_alloc_v(jm_vector(char)* name, size_t size, jm_callbacks* c);
+jm_named_ptr jm_named_alloc_v(jm_vector(char)* name, size_t size, size_t nameoffset, jm_callbacks* c);
 
 /* jm_named_free frees the memory allocated for the object pointed by jm_named_ptr */
 static void jm_named_free(jm_named_ptr np, jm_callbacks* c) { c->free(np.ptr); }

@@ -186,7 +186,7 @@ void fmiInitIntegerTypeProperties(fmiIntegerTypeProperties* type) {
 }
 
 void fmiInitEnumerationTypeProperties(fmiEnumerationTypeProperties* type, jm_callbacks* cb) {
-    fmiInitVariableTypeBase(&type->typeBase, fmiTypeStructProperties,fmiBaseTypeInteger);
+    fmiInitVariableTypeBase(&type->typeBase, fmiTypeStructProperties,fmiBaseTypeEnumeration);
     type->quantity = 0;
     type->typeMin = INT_MIN;
     type->typeMax = INT_MAX;
@@ -204,8 +204,12 @@ void fmiInitTypeDefinitions(fmiTypeDefinitions* td, jm_callbacks* cb) {
     jm_vector_init(jm_string)(&td->quantities, 0, cb);
 
     fmiInitRealTypeProperties(&td->defaultRealType);
+    td->defaultRealType.typeBase.structKind = fmiTypeStructBase;
     fmiInitEnumerationTypeProperties(&td->defaultEnumType,cb);
+    td->defaultEnumType.typeBase.structKind = fmiTypeStructBase;
     fmiInitIntegerTypeProperties(&td->defaultIntegerType);
+    td->defaultIntegerType.typeBase.structKind = fmiTypeStructBase;
+
     fmiInitVariableTypeBase(&td->defaultBooleanType, fmiTypeStructBase,fmiBaseTypeBoolean);
     fmiInitVariableTypeBase(&td->defaultStringType, fmiTypeStructBase,fmiBaseTypeString);
 
@@ -264,8 +268,7 @@ int fmiXMLHandle_Type(fmiXMLParserContext *context, const char* data) {
             fmiXMLParseError(context, "Type XML element must be a part of TypeDefinitions");
             return -1;
         }
-        {
-            int ret;
+        {            
             fmiModelDescription* md = context->modelDescription;
             fmiTypeDefinitions* td = &md->typeDefinitions;
             jm_named_ptr named, *pnamed;
@@ -282,7 +285,8 @@ int fmiXMLHandle_Type(fmiXMLParserContext *context, const char* data) {
             named.ptr = 0;
             pnamed = jm_vector_push_back(jm_named_ptr)(&td->typeDefinitions,named);
             if(pnamed) {
-                *pnamed = named = jm_named_alloc_v(bufName, sizeof(fmiVariableType), context->callbacks);
+                fmiVariableType dummy;
+                *pnamed = named = jm_named_alloc_v(bufName, sizeof(fmiVariableType), dummy.typeName - (char*)&dummy,  context->callbacks);
             }
             if(!pnamed || !named.ptr) {
                 fmiXMLParseError(context, "Could not allocate memory");
@@ -355,10 +359,9 @@ fmiVariableTypeBase* fmiAllocVariableTypeStart(fmiTypeDefinitions* td,fmiVariabl
 fmiRealTypeProperties* fmiParseRealTypeProperties(fmiXMLParserContext* context, fmiXMLElmEnum elmID) {
     jm_named_ptr named, *pnamed;
     fmiModelDescription* md = context->modelDescription;
-    fmiRealTypeProperties* props;
-    fmiUnit* unit;
-    fmiDisplayUnit* displayUnit;
+    fmiRealTypeProperties* props;    
     const char* quantity = 0;
+    unsigned int boolBuf;
 
 /*        jm_vector(char)* bufName = fmiXMLGetParseBuffer(context,1);
     jm_vector(char)* bufDescr = fmiXMLGetParseBuffer(context,2); */
@@ -383,7 +386,7 @@ fmiRealTypeProperties* fmiParseRealTypeProperties(fmiXMLParserContext* context, 
         quantity = jm_string_set_put(&md->typeDefinitions.quantities, jm_vector_get_itemp(char)(bufQuantity, 0));
 
     props->quantity = quantity;
-
+    props->displayUnit = 0;
     if(jm_vector_get_size(char)(bufDispUnit)) {
         named.name = jm_vector_get_itemp(char)(bufDispUnit, 0);
         pnamed = jm_vector_bsearch(jm_named_ptr)(&(md->displayUnitDefinitions), &named, jm_compare_named);
@@ -395,12 +398,11 @@ fmiRealTypeProperties* fmiParseRealTypeProperties(fmiXMLParserContext* context, 
     }
     else {
         if(jm_vector_get_size(char)(bufUnit)) {
-            fmiUnit* unit = fmiXMLGetUnit(context, bufUnit, 1);
-            props->displayUnit = (fmiDisplayUnit*)jm_vector_get_item(jm_voidp)(&unit->displayUnits, 0);
+            props->displayUnit = fmiXMLGetUnit(context, bufUnit, 1);
         }
     }
     if(    /*    <xs:attribute name="relativeQuantity" type="xs:boolean" default="false"> */
-            fmiXMLSetAttrBoolean(context, elmID, fmiXMLAttrID_relativeQuantity, 0, &(props->typeBase.relativeQuantity), 0) ||
+            fmiXMLSetAttrBoolean(context, elmID, fmiXMLAttrID_relativeQuantity, 0, &boolBuf, 0) ||
             /* <xs:attribute name="min" type="xs:double"/> */
             fmiXMLSetAttrDouble(context, elmID, fmiXMLAttrID_min, 0, &props->typeMin, -DBL_MAX) ||
             /* <xs:attribute name="max" type="xs:double"/> */
@@ -408,6 +410,7 @@ fmiRealTypeProperties* fmiParseRealTypeProperties(fmiXMLParserContext* context, 
             /*  <xs:attribute name="nominal" type="xs:double"/> */
             fmiXMLSetAttrDouble(context, elmID, fmiXMLAttrID_nominal, 0, &props->typeNominal, 1)
             ) return 0;
+    props->typeBase.relativeQuantity = boolBuf;
     return props;
 }
 
@@ -421,7 +424,7 @@ int fmiXMLHandle_RealType(fmiXMLParserContext *context, const char* data) {
 
         props = fmiParseRealTypeProperties(context, fmiXMLElmID_RealType);
         if(!props) return -1;
-        named = jm_vector_get_last(jm_named_ptr)(&context->modelDescription->typeDefinitions.typeDefinitions);
+        named = jm_vector_get_last(jm_named_ptr)(&md->typeDefinitions.typeDefinitions);
         type = named.ptr;
         type->typeBase.baseType = fmiBaseTypeReal;
         type->typeBase.baseTypeStruct = &props->typeBase;
@@ -434,7 +437,7 @@ int fmiXMLHandle_RealType(fmiXMLParserContext *context, const char* data) {
 }
 
 fmiIntegerTypeProperties * fmiParseIntegerTypeProperties(fmiXMLParserContext* context, fmiXMLElmEnum elmID) {
-    jm_named_ptr named, *pnamed;
+
     fmiModelDescription* md = context->modelDescription;
     fmiIntegerTypeProperties * props = 0;
     const char* quantity = 0;
@@ -474,7 +477,7 @@ int fmiXMLHandle_IntegerType(fmiXMLParserContext *context, const char* data) {
 
         props = fmiParseIntegerTypeProperties(context, fmiXMLElmID_IntegerType);
         if(!props) return -1;
-        named = jm_vector_get_last(jm_named_ptr)(&context->modelDescription->typeDefinitions.typeDefinitions);
+        named = jm_vector_get_last(jm_named_ptr)(&md->typeDefinitions.typeDefinitions);
         type = named.ptr;
         type->typeBase.baseType = fmiBaseTypeInteger;
         type->typeBase.baseTypeStruct = &props->typeBase;
@@ -527,7 +530,7 @@ int fmiXMLHandle_StringType(fmiXMLParserContext *context, const char* data) {
 
 int fmiXMLHandle_EnumerationType(fmiXMLParserContext *context, const char* data) {
     if(!data) {
-        jm_named_ptr named, *pnamed;
+        jm_named_ptr named;
         fmiModelDescription* md = context->modelDescription;
         fmiEnumerationTypeProperties * props;
         fmiVariableType* type;
@@ -600,7 +603,7 @@ int fmiXMLHandle_Item(fmiXMLParserContext *context, const char* data) {
             named.ptr = 0;
             pnamed = jm_vector_push_back(jm_named_ptr)(&enumProps->enumItems, named);
 
-            if(pnamed) *pnamed = named = jm_named_alloc_v(bufName,sizeof(fmiEnumerationTypeItem)+descrlen+1,context->callbacks);
+            if(pnamed) *pnamed = named = jm_named_alloc_v(bufName,sizeof(fmiEnumerationTypeItem)+descrlen+1,sizeof(fmiEnumerationTypeItem)+descrlen,context->callbacks);
             item = named.ptr;
             if( !pnamed || !item ) {
                 fmiXMLParseError(context, "Could not allocate memory");

@@ -2,13 +2,23 @@
 #include "fmiUnitImpl.h"
 
 fmiUnit* fmiGetUnit(fmiUnitDefinitions* ud, unsigned int  index) {
-    if(index > fmiGetUnitDefinitionsNumber(ud)) return 0;
+    if(index >= fmiGetUnitDefinitionsNumber(ud)) return 0;
     return jm_vector_get_item(jm_named_ptr)(&ud->definitions, index).ptr;
 }
 
 const char* fmiGetUnitName(fmiUnit* u) {
     return u->baseUnit;
 }
+
+unsigned int fmiGetUnitDisplayUnitsNumber(fmiUnit* u) {
+    return jm_vector_get_size(jm_voidp)(&u->displayUnits);
+}
+
+fmiDisplayUnit* fmiGetUnitDisplayUnit(fmiUnit* u, size_t index) {
+    if(index >= fmiGetUnitDisplayUnitsNumber(u)) return 0;
+    return jm_vector_get_item(jm_voidp)(&u->displayUnits, index);
+}
+
 
 fmiUnit* fmiGetBaseUnit(fmiDisplayUnit* du) {
     return du->baseUnit;
@@ -65,7 +75,7 @@ int fmiXMLHandle_UnitDefinitions(fmiXMLParserContext *context, const char* data)
 }
 
 
-fmiUnit* fmiXMLGetUnit(fmiXMLParserContext *context, jm_vector(char)* name, int sorted) {
+fmiDisplayUnit* fmiXMLGetUnit(fmiXMLParserContext *context, jm_vector(char)* name, int sorted) {
     fmiUnit* unit;
     jm_named_ptr named, *pnamed;
     fmiModelDescription* md = context->modelDescription;
@@ -78,12 +88,12 @@ fmiUnit* fmiXMLGetUnit(fmiXMLParserContext *context, jm_vector(char)* name, int 
 
     if(pnamed) {
         unit = pnamed->ptr;
-        return unit;
+        return &unit->defaultDisplay;
     }
 
     named.ptr = 0;
     pnamed = jm_vector_push_back(jm_named_ptr)(&(md->unitDefinitions),named);
-    if(pnamed) named = jm_named_alloc_v(name,sizeof(fmiUnit),context->callbacks);
+    if(pnamed) *pnamed = named = jm_named_alloc_v(name,sizeof(fmiUnit),unit->baseUnit - (char*)unit,context->callbacks);
 
     if(!pnamed || !named.ptr) {
         fmiXMLParseError(context, "Could not allocate memory");
@@ -91,10 +101,14 @@ fmiUnit* fmiXMLGetUnit(fmiXMLParserContext *context, jm_vector(char)* name, int 
     }
 
     unit = named.ptr;
+    unit->defaultDisplay.baseUnit = unit;
+    unit->defaultDisplay.offset = 0;
+    unit->defaultDisplay.gain = 1.0;
+    unit->defaultDisplay.displayUnit[0] = 0;
     jm_vector_init(jm_voidp)(&(unit->displayUnits),0,context->callbacks);
-    *pnamed = named;
+
     if(sorted) jm_vector_qsort_jm_named_ptr(&(md->unitDefinitions), jm_compare_named);
-    return unit;
+    return &unit->defaultDisplay;
 }
 
 int fmiXMLHandle_BaseUnit(fmiXMLParserContext *context, const char* data) {
@@ -104,15 +118,15 @@ int fmiXMLHandle_BaseUnit(fmiXMLParserContext *context, const char* data) {
             return -1;
         }
         {
-            fmiUnit* unit;
+            fmiDisplayUnit* unit;
             jm_vector(char)* buf = fmiXMLReserveParseBuffer(context,1,100);
 
             if(!buf) return -1;
             if( /*  <xs:attribute name="unit" type="xs:normalizedString" use="required"/> */
-                fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_unit, 1, buf) ||
+                fmiXMLSetAttrString(context, fmiXMLElmID_BaseUnit, fmiXMLAttrID_unit, 1, buf) ||
                 !(unit = fmiXMLGetUnit(context, buf, 0))
                ) return -1;
-            context->lastBaseUnit = unit;
+            context->lastBaseUnit = unit->baseUnit;
         }
     }
     else {
@@ -134,18 +148,19 @@ int fmiXMLHandle_DisplayUnitDefinition(fmiXMLParserContext *context, const char*
             /* this display unit belongs to the last created base unit */
             fmiUnit* unit = context->lastBaseUnit;
             fmiDisplayUnit *dispUnit = 0;
+            fmiDisplayUnit dummyDU;
             jm_named_ptr named, *pnamed;
             int ret;
 
             if(!buf) return -1;
             /* first read the required name attribute */
             /*  <xs:attribute name="displayUnit" type="xs:normalizedString" use="required"/> */
-            ret = fmiXMLSetAttrString(context, fmiXMLElmID_fmiModelDescription, fmiXMLAttrID_unit, 1, buf);
+            ret = fmiXMLSetAttrString(context, fmiXMLElmID_DisplayUnitDefinition, fmiXMLAttrID_displayUnit, 1, buf);
             if(ret) return ret;
             /* alloc memory to the correct size and put display unit on the list for the base unit */
             named.ptr = 0;
             pnamed = jm_vector_push_back(jm_named_ptr)(&(md->displayUnitDefinitions),named);
-            if(pnamed) *pnamed = jm_named_alloc(jm_vector_get_itemp_char(buf,0),sizeof(fmiDisplayUnit),context->callbacks);
+            if(pnamed) *pnamed = jm_named_alloc(jm_vector_get_itemp_char(buf,0),sizeof(fmiDisplayUnit), dummyDU.displayUnit - (char*)&dummyDU,context->callbacks);
             dispUnit = pnamed->ptr;
             if( !pnamed || !dispUnit ||
                 !jm_vector_push_back(jm_voidp)(&unit->displayUnits, dispUnit) ) {

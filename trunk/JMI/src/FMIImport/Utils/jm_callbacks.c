@@ -21,6 +21,7 @@ void jm_default_logger(jm_voidp c, jm_string instanceName, int status, jm_string
     }
     fprintf(stdout, "%s[status=%d]", curp, status);
     vfprintf (stdout, message, args);
+    fprintf(stdout, "\n");
     va_end (args);
 }
 

@@ -36,10 +36,10 @@ extern "C" {
 fmiVariableList* fmiGetVariableList(fmiModelDescription* md);
 
 /* Note that variable lists are allocated dynamically and must be freed when not needed any longer */
-void fmiVariableListFree(fmiVariableList*);
+void fmiFreeVariableList(fmiVariableList*);
 
 /* Make a copy */
-fmiVariableList* fmiVariableListClone(fmiVariableList*);
+fmiVariableList* fmiCloneVariableList(fmiVariableList*);
 
 /* Get number of variables in a list */
 size_t  fmiGetVariableListSize(fmiVariableList*);

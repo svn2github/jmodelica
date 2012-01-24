@@ -12,7 +12,14 @@ void print_dbl(double d,void* data) {
 }
 
 void printTypeInfo(fmiVariableType* vt) {
-    const char* quan = fmiGetTypeQuantity(vt);
+    const char* quan;
+
+    if(!vt) {
+        printf("No type definition\n");
+        return;
+    }
+
+    quan = fmiGetTypeQuantity(vt);
 
     printf("Type %s\n description: %s\n",  fmiGetTypeName(vt), fmiGetTypeDescription(vt));
 
@@ -82,33 +89,42 @@ void printTypeInfo(fmiVariableType* vt) {
 
 void printVariableInfo(fmiVariable* v) {
     printf("Variable name: %s\n", fmiGetVariableName(v));
-    printf("Description: %s\n", fmiGetVariableName(v));
+    printf("Description: %s\n", fmiGetVariableDescription(v));
     printf("VR: %d\n", fmiGetVariableValueReference(v));
     printf("Variability: %s\n", fmiVariabilityToString(fmiGetVariability(v)));
     printf("Causality: %s\n", fmiCausalityToString(fmiGetCausality(v)));
+
     printTypeInfo(fmiGetVariableDeclaredType(v));
+    if(fmiGetVariableBaseType(v) == fmiBaseTypeReal) {
+        fmiRealVariable *rv = fmiGetVariableAsReal(v);
+        fmiUnit * u = fmiGetRealVariableUnit(rv);
+        fmiDisplayUnit * du = fmiGetRealVariableDisplayUnit(rv);
+        printf("Unit: %s, display unit: %s\n", u ? fmiGetUnitName(u):0, du?fmiGetDisplayUnitName(du):0);
+    }
+
     if(fmiGetVariableHasStart(v)) {
         printf("There is a start value, fixed attribute is '%s'\n", (fmiGetVariableIsFixed(v))?"true":"false");
 
         switch(fmiGetVariableBaseType(v)) {
         case fmiBaseTypeReal: {
-            printf("start =%g", fmiGetRealVariableStart(fmiGetVariableAsReal(v)));
+            fmiRealVariable *rv = fmiGetVariableAsReal(v);
+            printf("start =%g\n", fmiGetRealVariableStart(rv));
             break;
         }
         case fmiBaseTypeInteger:{
-            printf("start =%d", fmiGetIntegerVariableStart(fmiGetVariableAsInteger(v)));
+            printf("start =%d\n", fmiGetIntegerVariableStart(fmiGetVariableAsInteger(v)));
             break;
         }
         case fmiBaseTypeBoolean:{
-            printf("start = %d", fmiGetBooleanVariableStart(fmiGetVariableAsBoolean(v)));
+            printf("start = %d\n", fmiGetBooleanVariableStart(fmiGetVariableAsBoolean(v)));
             break;
         }
         case fmiBaseTypeString:{
-            printf("start = '%s'", fmiGetStringVariableStart(fmiGetVariableAsString(v)));
+            printf("start = '%s'\n", fmiGetStringVariableStart(fmiGetVariableAsString(v)));
             break;
         }
         case fmiBaseTypeEnumeration:{
-            printf("start = %d", fmiGetEnumVariableStart(fmiGetVariableAsEnumeration(v)));
+            printf("start = %d\n", fmiGetEnumVariableStart(fmiGetVariableAsEnumeration(v)));
             break;
         }
         default:
@@ -123,7 +139,7 @@ int main(int argc, char* argv[]) {
 
     if(!md) abort();
 
-    if(!fmiParseXML(md, argv[1])) {
+    if(fmiParseXML(md, argv[1])) {
         printf("Error parsing XML file %s:%s\n", argv[1], fmiGetLastError(md));
         abort();
     }
@@ -133,10 +149,10 @@ int main(int argc, char* argv[]) {
     printf("Model GUID: %s\n", fmiGetGUID(md));
     printf("Description: %s\n", fmiGetDesciption(md));
     printf("Author: %s\n", fmiGetAuthor(md));
-    printf("Version: %s\n", fmiGetVersion(md));
+    printf("FMI Version: %s\n", fmiGetModelStandardVersion(md));
     printf("Generation tool: %s\n", fmiGetGenerationTool(md));
     printf("Generation date and time: %s\n", fmiGetGenerationDateAndTime(md));
-    printf("Version: %s\n", fmiGetVersion(md));
+    printf("Version: %s\n", fmiGetModelVersion(md));
     printf("Naming : %s\n", fmiNamingConvensionToString(fmiGetNamingConvension(md)));
 
     printf("NumberOfContinuousStates = %d\n", fmiGetNumberOfContinuousStates(md));
@@ -176,13 +192,15 @@ int main(int argc, char* argv[]) {
         fmiUnitDefinitions* ud = fmiGetUnitDefinitions(md);
         if(ud) {
             size_t  i, nu = fmiGetUnitDefinitionsNumber(ud);
+            printf("There are %d different units used \n", nu);
+
             for(i = 0; i <= nu; i++) {
                 fmiUnit* u = fmiGetUnit(ud, i);
                 if(!u) {
                     printf("Error getting unit for index %d (%s)\n", i, fmiGetLastError(md));
                     break;
                 }
-                printf("Unit [%d] is %s\n", i, fmiGetUnitName(u));
+                printf("Unit [%d] is %s, it has %d display units\n", i, fmiGetUnitName(u), fmiGetUnitDisplayUnitsNumber(u));
             }
         }
         else
@@ -191,10 +209,9 @@ int main(int argc, char* argv[]) {
     {
         fmiTypeDefinitions* td = fmiGetTypeDefinitions(md);
         if(td) {
-            fmiBaseType bt;
             {
                 size_t i, ntd = fmiGetTypeDefinitionsNumber(td);
-                printf("There are %d defs for %s types\n", ntd,fmiConvertBaseTypeToString(bt));
+                printf("There are %d defs\n", ntd);
                 for(i = 0; i <= ntd; i++) {
                     fmiVariableType* vt = fmiGetTypeDefinition(td, i);
                     if(!vt) {
@@ -219,4 +236,5 @@ int main(int argc, char* argv[]) {
             printVariableInfo(var);
         }
     }
+    return 0;
 }

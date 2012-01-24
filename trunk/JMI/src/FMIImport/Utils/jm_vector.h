@@ -1,6 +1,7 @@
 #ifndef jm_vector_h_
 #define jm_vector_h_
 #include <assert.h>
+#include <string.h>
 
 #include "jm_callbacks.h"
 
@@ -289,6 +290,11 @@ extern void jm_vector_foreach_c(T)(jm_vector(T)* a, void (*f)(T, void*), void * 
 extern void jm_vector_zero(T)(jm_vector(T)* a);    
 
 jm_vector_declare_template(char)
+static jm_string jm_vector_char2string(jm_vector(char)* v) {
+    if(v->size) return v->items;
+    return 0;
+}
+
 jm_vector_declare_template(int)
 jm_vector_declare_template(double)
 jm_vector_declare_template(jm_voidp)
