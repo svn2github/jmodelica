@@ -557,14 +557,28 @@ public class ModelicaCompiler {
 		log.debug("Compilation took " + time2 + " s");
 		
 		noteUsedMemory();  // Needed if an exception occurred
-		if (numUsedMemFilled > 1) {
+		int numFinishedSteps = numUsedMemFilled / 2;
+		if (numFinishedSteps > 0) {
 			log.debug("Changes in memory use:");
-			log.debug(" parseModel():       " + ASTNode.formatMem((int) (usedMem[1] - usedMem[0])));
+			logMemoryUseForStep("parseModel", 0);
 		}
-		if (numUsedMemFilled > 3)
-			log.debug(" instantiateModel(): " + ASTNode.formatMem((int) (usedMem[3] - usedMem[2])));
-		if (numUsedMemFilled > 5)
-			log.debug(" flattenModel():     " + ASTNode.formatMem((int) (usedMem[5] - usedMem[4])));
+		if (numFinishedSteps > 1)
+			logMemoryUseForStep("instantiateModel", 1);
+		if (numFinishedSteps > 2)
+			logMemoryUseForStep("flattenModel", 2);
+	}
+	
+	/**
+	 * Log memory change for a single compilation step.
+	 * 
+	 * Called by {@link #logCompilationInfo()}.
+	 * 
+	 * @param name   the name of the step
+	 * @param index  the index of the step (0-2)
+	 */
+	protected void logMemoryUseForStep(String name, int index) {
+		String mem = ASTNode.formatMem((int) (usedMem[2 * index + 1] - usedMem[2 * index]));
+		log.debug(String.format(" %-19s %8s", name + "():", mem));
 	}
 	
 	/**

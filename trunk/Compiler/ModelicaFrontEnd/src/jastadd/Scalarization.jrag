@@ -340,7 +340,7 @@ aspect Scalarization {
 			List<FFunctionVariable> vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
 		createArrayTemporaries(stmts, vars, indexMap, true);
 		if (type().isRecord()) 
-			type().scalarizeRecordArrayAssignment(vars, stmts, indexMap, getFQName(), getBindingExp());
+			type().scalarizeArrayAssignment(vars, stmts, indexMap, getFQName(), getBindingExp());
 		else
 			stmts.add(new FAssignStmt(new FIdUse(getFQName().fullCopy()), getBindingExp().scalarize(indexMap)));
 	}
@@ -348,7 +348,7 @@ aspect Scalarization {
 	public void FFunctionArray.scalarizeBindingExp(
 			List<FFunctionVariable> vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
 		if (type().isRecord()) {
-			type().scalarizeRecordArrayAssignment(vars, stmts, indexMap, getFQName(), getBindingExp());
+			type().scalarizeArrayAssignment(vars, stmts, indexMap, getFQName(), getBindingExp());
 		} else if (size().isUnknown()) {
 			scalarizeUnknownArrayAssignment(vars, stmts, indexMap, getBindingExp());
 		} else {
@@ -464,6 +464,13 @@ aspect Scalarization {
 		 */
 		public void promote(int i) {
 			add(names.get(names.size() - 2)[i]);
+		}
+		
+		/**
+		 * Checks if there are enough layers to promote a name.
+		 */
+		public boolean canPromote() {
+			return names.size() > 1;
 		}
 		
 		/**
@@ -770,51 +777,51 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Scalarize an assignment to a record and put the resulting statements in 
-	 *        the list of statements. 
+	 * Scalarize an assignment and put the resulting statements in the list of statements. 
 	 * 
-	 * This method delegates to scalarizeRecordAssignment() for each cell in the array, 
+	 * This method delegates to scalarizeAssignment() for each cell in the array, 
 	 * or for the entire scalar expression.
 	 */
-	public void FType.scalarizeRecordArrayAssignment(
+	public void FType.scalarizeArrayAssignment(
 			List<FFunctionVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap, FQName left, FExp right) {
 		if (isArray()) {
-			FQName fqn = left.fullCopy();
-			if (size().isUnknown()) {
+			if (size().isUnknown() && right.size().isUnknown()) {
+				FQName fqn = left.fullCopy();
 				ForNames names = new ForNames(ndims());
 				names.fillLayer(right);
 				List<FStatement> inner = names.createForLoops(stmts, left);
 				fqn.setLastFArraySubscripts(names.createFArraySubscripts());
-				FExp exp = right.extractUnknownRecordArrayCell(names);
-				scalarizeRecordAssignment(vars, inner, indexMap, fqn, exp);
+				FExp exp = right.extractUnknownArrayCell(indexMap, names);
+				scalarizeAssignment(vars, inner, indexMap, fqn, exp);
 			} else {
-				for (Index i : indices()) {
-					fqn.setLastFArraySubscripts(i.createFArraySubscripts());
-					FExp exp = right.getArray().get(i);
-					scalarizeRecordAssignment(vars, stmts, indexMap, fqn, exp);
+				Indices ind = size().isUnknown() ? right.indices() : indices();
+				for (Index i : ind) {
+					FQName fqn = left.specify(i, false);
+					FExp exp = right.extractArrayCell(i);
+					scalarizeAssignment(vars, stmts, indexMap, fqn, exp);
 				}
 			}
 		} else {
-			scalarizeRecordAssignment(vars, stmts, indexMap, left, right);
+			left = left.scalarize(indexMap);
+			right = right.dynamicFExp(right.scalarize(indexMap));
+			scalarizeAssignment(vars, stmts, indexMap, left, right);
 		}
 	}
 	
 	/**
-	 * \brief Scalarize an assignment to a record and put the resulting statements in 
-	 *        the list of statements.
+	 * Scalarize an assignment and put the resulting statements in the list of statements.
 	 */
-	public void FType.scalarizeRecordAssignment(
+	public void FType.scalarizeAssignment(
 			List<FFunctionVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap, FQName left, FExp right) {
-		stmts.add(new FAssignStmt(new FIdUse(left.fullCopy()), right.fullCopy()));
+		stmts.add(new FAssignStmt(new FIdUse(left.fullCopy()), right.unboundCopy()));
 	}
 	
 	/**
-	 * \brief Scalarize an assignment to a record and put the resulting statements in 
-	 *        the list of statements.
+	 * Scalarize an assignment and put the resulting statements in the list of statements.
 	 */
-	public void FRecordType.scalarizeRecordAssignment(
+	public void FRecordType.scalarizeAssignment(
 			List<FFunctionVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap, FQName left, FExp right) {
 		for (FRecordComponentType comp : getComponents()) {
@@ -822,8 +829,25 @@ aspect Scalarization {
 			FExp exp = right.scalarRecordFExp(indexMap, new FQName(comp.getName()));
 			exp = right.dynamicFExp(exp);
 			exp.clearScalarized();
-			comp.getFType().scalarizeRecordArrayAssignment(vars, stmts, indexMap, fqn, exp);
+			comp.getFType().scalarizeArrayAssignment(vars, stmts, indexMap, fqn, exp);
 		}
+	}
+	
+	/**
+	 * Extract or create an expression representing a specific array cell of 
+	 * this array expression.
+	 * 
+	 * Uses getArray() if size is known, and an expression type specific method 
+	 * otherwise.
+	 * 
+	 * @param i   the index of the cell to extract
+	 * @return  the expression for the cell
+	 */
+	public FExp FExp.extractArrayCell(Index i) {
+		if (size().isUnknown())
+			return extractUnknownArrayCell(i.createFArraySubscripts());
+		else
+			return getArray().get(i);
 	}
 	
 	/**
@@ -831,21 +855,32 @@ aspect Scalarization {
 	 * 
 	 * @param names  the names of the for indices to use as array subscripts
 	 */
-	public FExp FExp.extractUnknownRecordArrayCell(ForNames names) {
+	public FExp FExp.extractUnknownArrayCell(Map<String,FExp> indexMap, ForNames names) {
+		Map<String,FExp> myIndexMap = new HashMap<String,FExp>(indexMap);
+		addArrayUsesToIndexMap(myIndexMap, names);
+		return scalarize(myIndexMap);
+	}
+	
+	/**
+	 * \brief Create an expression describing a specific cell of an unknown array.
+	 * 
+	 * @param fas  the array subscripts to use
+	 */
+	public FExp FExp.extractUnknownArrayCell(FArraySubscripts fas) {
 		return null; // TODO: Implement this for all possible subtypes (or replace with default impl)
 	}
 	
-	public FExp FFunctionCall.extractUnknownRecordArrayCell(ForNames names) {
+	public FExp FFunctionCall.extractUnknownArrayCell(FArraySubscripts fas) {
 		FIdUseExp exp = new FIdUseExp(tempVarName());
 		FQName fqn = exp.getFIdUse().getFQName();
-		fqn.setLastFArraySubscripts(names.createFArraySubscripts());
+		fqn.setLastFArraySubscripts(fas);
 		return exp;
 	}
 	
-	public FExp FIdUseExp.extractUnknownRecordArrayCell(ForNames names) {
+	public FExp FIdUseExp.extractUnknownArrayCell(FArraySubscripts fas) {
 		FIdUseExp exp = fullCopy();
 		FQName fqn = exp.getFIdUse().getFQName();
-		fqn.setLastFArraySubscripts(names.createFArraySubscripts());
+		fqn.setLastFArraySubscripts(fas);
 		return exp;
 	}
 	
@@ -864,7 +899,7 @@ aspect Scalarization {
 		FExp right = getRight();
 		if (left.type().isRecord()) {
 			right.createArrayTemporaries(stmts, vars, indexMap, true);
-			left.type().scalarizeRecordArrayAssignment(vars, stmts, indexMap, left.getFQName(), right);
+			left.type().scalarizeArrayAssignment(vars, stmts, indexMap, left.getFQName(), right);
 		} else if (right.size().isUnknown()) {
 			left.myFV().scalarizeUnknownArrayAssignment(vars, stmts, indexMap, right);
 		} else {

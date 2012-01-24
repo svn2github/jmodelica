@@ -693,7 +693,7 @@ aspect PrettyPrint {
 	
 	syn String FType.toString() = isArray() ? name() + size() : name();
 	
-	syn String FRecordComponentType.toString() = getName() + " " + getFType();
+	syn String FRecordComponentType.toString() = getFType() + " " + getName();
 
 }
 

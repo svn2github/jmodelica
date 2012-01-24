@@ -159,7 +159,7 @@ aspect Flattening {
 			addLocalFunctionConstants(ffd, fc);
 			fc.addFFunctionDecl(ffd);
 			flattenUsedFuncsAndEnums(fc);
-	
+			ffd.updateRecordArraySizes();
 		}
 	}
 	
@@ -182,6 +182,29 @@ aspect Flattening {
 		}
 		for (FFunctionVariable ffv : ffvs.noTransform())
 			ffd.addFFunctionVariable(ffv);
+	}
+	
+	public void FFunctionDecl.updateRecordArraySizes() {
+		for (FFunctionVariable ffv : getFFunctionVariables())
+			ffv.updateRecordArraySizes();
+	}
+	
+	public void FFunctionVariable.updateRecordArraySizes() {
+		// TODO: this should probably be in attributes as well
+		// TODO: if exp is access to input with unknown array sizes, handle that
+		if (hasBindingExp() && isRecord())
+			getType().updateRecordArraySizes(getBindingExp().type());
+	}
+	
+	public void FType.updateRecordArraySizes(FType from) {
+		setSize(from.getSize());
+	}
+	
+	public void FRecordType.updateRecordArraySizes(FType from) {
+		super.updateRecordArraySizes(from);
+		FRecordType rfrom = (FRecordType) from;
+		for (FRecordComponentType comp : getComponents())
+			comp.getFType().updateRecordArraySizes(rfrom.componentType(comp.getName()));
 	}
 	
 	public void InstNode.flattenComponentsInFunction(FFunctionDecl ffd, FClass fc) {

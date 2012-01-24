@@ -1122,11 +1122,16 @@ aspect FlatNames {
     		return ((FVariable)lookupFV(fv.getFQName(),false)).variableIndex();
     	}
     }
-   
     eq FClass.getAliasVariable(int i).variableIndex() = getNumFVariable() + i;
-    eq FForIndex.getFVariable().variableIndex()       = -1;
+    eq FForIndex.getFVariable().variableIndex()       = forIndexIndex();
     eq FRecordDecl.getFVariable().variableIndex()     = -1;
     eq FEnumDecl.getChild().variableIndex()     = -1;
+    
+    inh lazy int FForIndex.forIndexIndex();
+    eq FClass.getChild().forIndexIndex() = nextForIndexIndex++;
+    eq Root.getChild().forIndexIndex()   = -1;
+    
+    private int FClass.nextForIndexIndex = 0;
 
     inh int FRecordDecl.recordIndex();
     eq FClass.getFRecordDecl(int i).recordIndex() = i;

@@ -420,19 +420,35 @@ aspect CCodeGen {
 
 	syn lazy String AbstractFVariable.name_C() = null;
 	eq FVariable.name_C()           = isForIndex() ? 
-			                                    nameUnderscore() + '_' + C_SUFFIX_INDEX :
-			                              '_' + nameUnderscore() + '_' + variableIndex();
-	eq FPreRealVariable.name_C()    =  "pre_" + nameUnderscore() + '_' + variableIndex();
-	eq FPreBooleanVariable.name_C() =  "pre_" + nameUnderscore() + '_' + variableIndex();
-	eq FPreIntegerVariable.name_C() =  "pre_" + nameUnderscore() + '_' + variableIndex();
-	eq FPreStringVariable.name_C()  =  "pre_" + nameUnderscore() + '_' + variableIndex();
-	eq FPreEnumVariable.name_C()    =  "pre_" + nameUnderscore() + '_' + variableIndex();
+										name_C(null, variableIndex() + C_SUFFIX_INDEX) : 
+										name_C(""); 
+	eq FPreRealVariable.name_C()    = name_C("pre");
+	eq FPreBooleanVariable.name_C() = name_C("pre");
+	eq FPreIntegerVariable.name_C() = name_C("pre");
+	eq FPreStringVariable.name_C()  = name_C("pre");
+	eq FPreEnumVariable.name_C()    = name_C("pre");
 
-	eq FFunctionVariable.name_C() = nameUnderscore() + "_" + C_SUFFIX_VARIABLE;
-	eq FFunctionArray.name_C()    = nameUnderscore() + "_" + C_SUFFIX_ARRAY;
+	eq FFunctionVariable.name_C()   = name_C(null, C_SUFFIX_VARIABLE);
+	eq FFunctionArray.name_C()      = name_C(null, C_SUFFIX_ARRAY);
+	
+	protected String FVariable.name_C(String prefix) {
+		return name_C(prefix, Integer.toString(variableIndex()));
+	}
+	
+	protected String AbstractFVariable.name_C(String prefix, String suffix) {
+		StringBuilder buf = new StringBuilder();
+		if (prefix != null) {
+			buf.append(prefix);
+			buf.append('_');
+		}
+		buf.append(nameUnderscore());
+		buf.append('_');
+		buf.append(suffix);
+		return buf.toString();
+	}
 	
 	syn String FFunctionVariable.nameReturn_C() = 
-		isRecord() ? name_C() : (getFQName().nameUnderscore() + "_" + C_SUFFIX_RETURN);
+		isRecord() ? name_C() : name_C(null, C_SUFFIX_RETURN);
 	syn String FFunctionArray.nameReturn_C()    = name_C();
 	
 	syn String AbstractFVariable.type_C() = type().type_C();
