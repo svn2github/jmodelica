@@ -1325,25 +1325,23 @@ aspect FlattPrettyPrint {
 	}
 	
 	public void FIfExp.prettyPrint(Printer p, PrintStream str, String indent) {
-		str.print("(if ");
+		str.print('(');
+		prettyPrintAsElseExp(p, str, indent);
+		str.print(')');
+	}
+	
+	public void FExp.prettyPrintAsElseExp(Printer p, PrintStream str, String indent) {
+		str.print(' ');
+		p.print(this, str, indent);
+	}
+	
+	public void FIfExp.prettyPrintAsElseExp(Printer p, PrintStream str, String indent) {
+		str.print("if ");
 		p.print(getIfExp(), str, indent);
 		str.print(" then ");
 		p.print(getThenExp(), str, indent);
-		str.print(" ");
-		for (FElseIfExp eie : getFElseIfExps()) {
-			p.print(eie, str, indent);
-			str.print(" ");
-		}
-		str.print("else ");
-		p.print(getElseExp(), str, indent);		
-		str.print(")");
-	}
-	
-	public void FElseIfExp.prettyPrint(Printer p, PrintStream str, String indent) {
-		str.print("elseif ");
-		p.print(getIfExp(),str,indent);
-		str.print(" then ");
-		p.print(getThenExp(),str,indent);
+		str.print(" else");
+		getElseExp().prettyPrintAsElseExp(p, str, indent);
 	}
 	
 	public void FRealLitExp.prettyPrint(Printer p, PrintStream str, String indent) {

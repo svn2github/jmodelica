@@ -974,20 +974,14 @@ Exp exp =
   ;
 
 IfExp if_exp =
-  IF exp.ifexp THEN
-  exp.thenexp
-  else_if_exp*
-  else_exp  
-  {: return new IfExp(ifexp,thenexp,else_if_exp,else_exp); :}
+  IF exp.ifexp THEN exp.thenexp else_if_exp 
+  		{: return new IfExp(ifexp, thenexp, else_if_exp); :}
   ;  
 
-ElseIfExp else_if_exp =
-  ELSEIF exp.eiexp THEN
-  exp.thenexp {: return new ElseIfExp(eiexp,thenexp); :}
-  ;
-
-Exp else_exp =
-  ELSE exp.e {: return e; :}
+Exp else_if_exp =
+   ELSEIF exp.ifexp THEN exp.thenexp else_if_exp 
+		{: return new IfExp(ifexp, thenexp, else_if_exp); :}
+ | ELSE exp   {: return exp; :}
   ;
 
 Exp simple_expression = 

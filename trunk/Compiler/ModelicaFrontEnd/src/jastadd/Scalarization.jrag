@@ -1679,18 +1679,9 @@ aspect Scalarization {
 	eq FFunctionCall.getArg().wantsRecordCon()      = !inFunction();
  
     public FExp FIfExp.scalarizeExp(Map<String,FExp> indexMap) {
-		List etl = new List();
-		for (FElseIfExp elif : getFElseIfExps()) 
-			etl.add(elif.scalarize(indexMap));
 		return new FIfExp(getIfExp().scalarize(indexMap),
 		                  getThenExp().scalarize(indexMap),
-		                  etl,
 		                  getElseExp().scalarize(indexMap));
-	}
-	
-	public FExp FElseIfExp.scalarizeExp(Map<String,FExp> indexMap) {
-		return new FElseIfExp(getIfExp().scalarize(indexMap),
-		                      getThenExp().scalarize(indexMap));
 	}
 	
 	public FExp FMulExp.scalarizeExp(Map<String,FExp> indexMap) {

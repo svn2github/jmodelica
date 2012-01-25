@@ -695,42 +695,15 @@ aspect CADCodeGen {
 		str.print(";\n");*/
 		
 		p.print(getThenExp(),str,indent);
-		for (FElseIfExp el_if : getFElseIfExps()) {
-			p.print(el_if.getThenExp(),str,indent);
-		}
 		p.print(getElseExp(),str,indent);
 		
-		int end_parenthesis = 1;
-		str.print("jmi_ad_var_t " + this.adVarName() + "= (COND_EXP_EQ(");
-		getIfExp().prettyPrint_C(str,indent);
-		str.print(",JMI_TRUE," + getThenExp().adVarName() + ",");
-		for (FElseIfExp el_if : getFElseIfExps()) {
-			end_parenthesis++;
-			str.print("(COND_EXP_EQ(");
-			el_if.getIfExp().prettyPrint_C(str,indent);
-			str.print(",JMI_TRUE," + el_if.getThenExp().adVarName() + ",");
-		}
-		str.print(getElseExp().adVarName());
-		for (int i=0;i<end_parenthesis*2;i++) {
-			str.print(")");
-		}
-		str.print(";\n");
+		str.format("jmi_ad_var_t %s = COND_EXP_EQ(", adVarName());
+		getIfExp().prettyPrint_C(str, indent);
+		str.format(", JMI_TRUE, %s, %s);\n", getThenExp().adVarName(), getElseExp().adVarName());
 		
-		end_parenthesis = 1;
-		str.print("jmi_ad_var_t " + this.adDerName() + "= (COND_EXP_EQ(");
-		getIfExp().prettyPrint_C(str,indent);
-		str.print(",JMI_TRUE," + getThenExp().adDerName() + ",");
-		for (FElseIfExp el_if : getFElseIfExps()) {
-			end_parenthesis++;
-			str.print("(COND_EXP_EQ(");
-			el_if.getIfExp().prettyPrint_C(str,indent);
-			str.print(",JMI_TRUE," + el_if.getThenExp().adDerName() + ",");
-		}
-		str.print(getElseExp().adDerName());
-		for (int i=0;i<end_parenthesis*2;i++) {
-			str.print(")");
-		}
-		str.print(";\n");
+		str.format("jmi_ad_var_t %s = COND_EXP_EQ(", adDerName());
+		getIfExp().prettyPrint_C(str, indent);
+		str.format(", JMI_TRUE, %s, %s);\n", getThenExp().adDerName(), getElseExp().adDerName());
 	}
 			
 	public void FAbstractEquation.genResidual_CAD(int i, String indent, PrintStream str) {}

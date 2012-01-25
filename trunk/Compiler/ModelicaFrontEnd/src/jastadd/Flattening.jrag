@@ -1375,21 +1375,10 @@ aspect FlatExpressions {
 	}
 
     public FExp FIfExp.flatten(FQName prefix) {
-		List etl = new List();
-		for (int i=0;i<getNumFElseIfExp();i++) {
-			etl.add(getFElseIfExp(i).flatten(prefix));
-		}
 		return new FIfExp(getIfExp().flatten(prefix),
 		                  getThenExp().flatten(prefix),
-		                  etl,
 		                  getElseExp().flatten(prefix));
 	}
-	
-	public FExp FElseIfExp.flatten(FQName prefix) {
-		return new FElseIfExp(getIfExp().flatten(prefix),
-		                      getThenExp().flatten(prefix));
-	}
-	
 
 	public FExp FBinExp.flatten(FQName prefix)     { return createNode(getLeft().flatten(prefix), getRight().flatten(prefix)); }
 	public FExp FUnaryExp.flatten(FQName prefix)   { return createNode(getFExp().flatten(prefix)); }
@@ -1793,21 +1782,11 @@ aspect InstantiatedExpressions {
 	}
 
     public FExp IfExp.instantiate() {
-		List etl = new List();
-		for (ElseIfExp e : getElseIfExps()) 
-			etl.add(e.instantiate());
 		FIfExp n = new FIfExp(getIfExp().instantiate(),
-		                  getThenExp().instantiate(),
-		                  etl,
-		                  getElseExp().instantiate());
+		                      getThenExp().instantiate(),
+		                      getElseExp().instantiate());
 		return copyLocationTo(n);
     }
-	
-	public FExp ElseIfExp.instantiate() {
-		FElseIfExp n = new FElseIfExp(getIfExp().instantiate(),
-		                      getThenExp().instantiate());
-		return copyLocationTo(n);
-	}
 
 	public FExp Matrix.instantiate() {
 		FMatrix m = new FMatrix();

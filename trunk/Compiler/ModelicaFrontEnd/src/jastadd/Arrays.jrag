@@ -237,8 +237,7 @@ aspect Arrays {
 		return left + right - 2;
 	}
 	
-	eq FIfExp.ndims()     = getThenExp().ndims();
-	eq FElseIfExp.ndims() = getThenExp().ndims();
+	eq FIfExp.ndims() = getThenExp().ndims();
 	
 	eq FSmoothExp.ndims() = getFExp().ndims();
 	
@@ -646,7 +645,7 @@ aspect Arrays {
  	}
  	
  	public FExp FBooleanType.wrapRangeSizeExp(FExp exp) {
- 		return new FIfExp(exp, new FIntegerLitExp(2), new List(), new FIntegerLitExp(1));
+ 		return new FIfExp(exp, new FIntegerLitExp(2), new FIntegerLitExp(1));
  	}
  	
  	syn boolean FExp.isIntegerLiteral(int v)  = false;
@@ -772,8 +771,15 @@ aspect Arrays {
 	eq FFunctionCall.size()    = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
 	eq InstFunctionCall.size() = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
 	
-	eq FIfExp.size()     = getThenExp().size();
-	eq FElseIfExp.size() = getThenExp().size();
+	eq FIfExp.size() {
+		if (isParameterIf()) {
+			try {
+				return cevalSelectExp().size();
+			} catch (ConstantEvaluationException e) {
+			}
+		}
+		return getThenExp().size();
+	}
 	
 	/**
 	 * \brief Get the array sizes.
@@ -1128,7 +1134,7 @@ aspect Arrays {
 	 * on the child in getArray() for the parent.
 	 * 
 	 * This ensures that the Array is created only once and that only as many copies 
-	 * as neccesary are made.
+	 * as necessary are made.
 	 */
 	syn Array FExp.copyArray() = (Array) createArray().unboundCopy();
 	
@@ -1396,27 +1402,18 @@ aspect Arrays {
 		if (!isArray())
 			return super.getArray();
 		
-		Array thenArr = getThenExp().getArray();
-		Array elseArr = getElseExp().getArray();
-		Array arr = new Array(indices());
-		for (Index i : arr.indices()) {
-			FExp ifExp = getIfExp().fullCopy();
-			FIfExp exp = new FIfExp(ifExp, thenArr.get(i), new List(), elseArr.get(i));
-			for (FElseIfExp eie : getFElseIfExps())
-				exp.addFElseIfExp((FElseIfExp) eie.getArray().get(i));
-			arr.set(i, exp);
+		if (getThenExp().size().equivalent(getElseExp().size(), inFunction())) {
+			Array arr = new Array(indices());
+			Array thenArr = getThenExp().getArray();
+			Array elseArr = getElseExp().getArray();
+			for (Index i : arr.indices()) {
+				FExp ifExp = getIfExp().fullCopy();
+				arr.set(i, new FIfExp(ifExp, thenArr.get(i), elseArr.get(i)));
+			}
+			return arr;
+		} else {
+			return cevalSelectExp().copyArray();
 		}
-		return arr;
-	}
-	
-	eq FElseIfExp.getArray() {
-		if (!isArray())
-			return super.getArray();
-		
-		Array arr = new Array(indices());
-		for (Index i : arr.indices()) 
-			arr.set(i, new FElseIfExp(getIfExp().fullCopy(), getThenExp().getArray().get(i)));
-		return arr;
 	}
 	
 	eq FIdUseExp.getArray() {

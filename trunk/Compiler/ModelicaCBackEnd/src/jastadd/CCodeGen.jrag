@@ -889,7 +889,7 @@ aspect CCodeGen {
 	
 	public void FRangeExp.printForEnd_C(Printer p, PrintStream str, String indent) {
 		p.print(getFExp(hasStep() ? 2 : 1), str, indent);
-		str.print(" - ");
+		str.print(" + ");
 		printForStep_C(p, str, indent);
 		str.print(" / 2.0");
 	}
@@ -897,7 +897,7 @@ aspect CCodeGen {
 	public void FRangeExp.printForIndex_C(Printer p, PrintStream str, String indent, String name) {
 		str.format("%s = ", name);
 		p.print(getFExp(0), str, indent);
-		str.format("; %s <= %se; %s += ", name, name, name);
+		str.format("; %s < %se; %s += ", name, name, name);
 		printForStep_C(p, str, indent);
 	}
 	
@@ -958,27 +958,13 @@ aspect CCodeGen {
 	}
 	
 	public void FIfExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		
-		int end_parenthesis = 1;
-		
-		str.print("(COND_EXP_EQ(");
-		p.print(getIfExp(),str,indent);
-		str.print(",JMI_TRUE,");
+		str.print("COND_EXP_EQ(");
+		p.print(getIfExp(), str, indent);
+		str.print(", JMI_TRUE, ");
 		p.print(getThenExp(),str,indent);
-		str.print(",");
-		for (FElseIfExp el_if : getFElseIfExps()) {
-			end_parenthesis++;
-
-			str.print("(COND_EXP_EQ(");
-			p.print(el_if.getIfExp(),str,indent);
-			str.print(",JMI_TRUE,");
-			p.print(el_if.getThenExp(),str,indent);
-			str.print(",");			
-		}
+		str.print(", ");
 		p.print(getElseExp(),str,indent);
-		for (int i=0;i<end_parenthesis*2;i++) {
-			str.print(")");
-		}
+		str.print(")");
 	}
 	
 	public void FAbsExp.prettyPrint_C(Printer p, PrintStream str, String indent) {

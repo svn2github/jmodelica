@@ -1166,7 +1166,7 @@ model PreTest1
          errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 1148, column 13:
-  Calling built-in operator pre() with a continuous variable access as an argument can only be done inside when cluases
+  Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses
 ")})));
 
 	Real x (start=3);
@@ -1180,5 +1180,151 @@ equation
                 z = 2*pre(x);
         end when;
 end PreTest1;
+
+
+model IfExpType1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfExpType1",
+         description="If expression with branches with different array sizes",
+         flatModel="
+fclass TypeTests.IfExpType1
+ parameter Integer n = 3 /* 3 */;
+ parameter Integer m.n;
+ Real m.y[1];
+ Real m.y[2];
+ Real m.y[3];
+parameter equation
+ m.n = n;
+equation
+ m.y[1] = 1;
+ m.y[2] = 2;
+ m.y[3] = 3;
+end TypeTests.IfExpType1;
+")})));
+
+    model M
+        parameter Integer n=1;
+        Real y[n];
+    end M;
+
+    parameter Integer n = 3;
+    M m(n=n, y = if n==1 then {2} else 1:n);
+end IfExpType1;
+
+
+model IfExpType2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="IfExpType2",
+         description="If expression errors: non-boolean test expression",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1217, column 17:
+  Test expression of if expression must be scalar boolean
+")})));
+
+    Real x = if 1 then 1 else 2;
+end IfExpType2;
+
+
+model IfExpType3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="IfExpType3",
+         description="If expression errors: incompatible types of branches",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1239, column 18:
+  Branches of if expression has incompatible types
+")})));
+
+    model M
+        parameter Integer n=1;
+        Real y[n];
+    end M;
+
+    parameter Integer n = 3;
+    M m(n=n, y = if n==1 then {true} else 1:n);
+end IfExpType3;
+
+
+model IfExpType4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="IfExpType4",
+         description="If expression errors: non-parameter test expression",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1262, column 18:
+  If expression with branches that have different array sizes must have parameter test expression
+")})));
+
+    model M
+        parameter Integer n=1;
+        Real y[n];
+    end M;
+
+    parameter Integer n = 3;
+    Integer k = n;
+    M m(n=n, y = if k==1 then {2} else 1:n);
+end IfExpType4;
+
+
+model IfExpType5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfExpType5",
+         description="If expression with branches with different array sizes, using function call",
+         flatModel="
+fclass TypeTests.IfExpType5
+ parameter Integer n = 3 /* 3 */;
+ parameter Integer m.n;
+ Real m.y[1];
+ Real m.y[2];
+ Real m.y[3];
+parameter equation
+ m.n = n;
+equation
+ ({m.y[1],m.y[2],m.y[3]}) = TypeTests.IfExpType5.F(3, 5, n);
+
+ function TypeTests.IfExpType5.F
+  input Real x1;
+  input Real x2;
+  input Integer n;
+  output Real[n] y;
+ algorithm
+  for i in 1:n loop
+   y[i] := i;
+  end for;
+  y[1] := x1 + x2;
+  return;
+ end TypeTests.IfExpType5.F;
+end TypeTests.IfExpType5;
+")})));
+
+  function F
+    input Real x1;
+    input Real x2;
+    input Integer n;
+    output Real y[n];
+  algorithm
+    for i in 1:n loop
+      y[i] := i;
+    end for;
+    y[1] := x1 + x2;
+  end F;
+
+  model M
+    parameter Integer n=1;
+    Real y[n];
+  end M;
+
+  parameter Integer n = 3;
+  M m(n=n, y = if n==1 then {2.} else F(3,5,n));
+end IfExpType5;
 
 end TypeTests;

@@ -161,7 +161,7 @@ abstract public class TestAnnotationizerHelper {
 		this.className = className;
 		this.description = prepare(description);
 		this.opts = (opts == null) ? new String[0] : opts.split(",");
-		testName = className.substring(className.lastIndexOf('.') + 1);
+		testName = className.substring(className.indexOf('.') + 1);
 		
 		String filesep = File.separator;
 		String modelicapath = System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";

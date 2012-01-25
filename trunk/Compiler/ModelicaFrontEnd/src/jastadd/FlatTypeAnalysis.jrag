@@ -369,20 +369,28 @@ aspect FlatTypeAnalysis {
 	eq FNotExp.type() = getFExp().type().isBoolean() ? getFExp().type() : fUnknownType();
 	
 	eq FIfExp.type() {
-		if (!getIfExp().type().isBoolean() || !getIfExp().type().isScalar())
+		FType thenType = getThenExp().type();
+		FType elseType = getElseExp().type();
+		if (!getIfExp().isOKTestExp() || thenType.ndims() != elseType.ndims())
 			return fUnknownType();
-		FType tot = getThenExp().type();
-		boolean func = inFunction();
-		for (FElseIfExp e : getFElseIfExps())
-			tot = tot.typePromotion(e.type(), func);
-		return tot.typePromotion(getElseExp().type(), func);
+
+		if (isParameterIf()) {
+			try {
+				FExp sel = cevalSelectExp();
+				FType scalar = thenType.scalarType();
+				scalar = scalar.typePromotion(elseType.scalarType());
+				return scalar.arrayType(sel.size());
+			} catch (ConstantEvaluationException e) {
+			}
+		}
+		
+		// Test doesn't seem to be parameter expression - require sizes to be same
+		return thenType.typePromotion(elseType, inFunction());
 	}
 	
-	eq FElseIfExp.type() {
-		if (!getIfExp().type().isBoolean() || !getIfExp().type().isScalar())
-			return fUnknownType();
-		return getThenExp().type();
-	}
+	syn boolean FIfExp.isParameterIf() = getIfExp().variability().parameterOrLess();
+	
+	syn boolean FExp.isOKTestExp() = type().isBoolean() && type().isScalar();
 
 	eq FRealLitExp.type() = fRealScalarType();
 	eq FIntegerLitExp.type() = fIntegerScalarType();

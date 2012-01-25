@@ -518,7 +518,6 @@ aspect InheritedFactoryMethods {
 	
 	// Misc expressions
 	public FIfExp          FIfExp.createEmptyNode()          { return new FIfExp();          }
-	public FElseIfExp      FElseIfExp.createEmptyNode()      { return new FElseIfExp();      }
 	public FTimeExp        FTimeExp.createEmptyNode()        { return new FTimeExp();        }
 	public FNoEventExp     FNoEventExp.createEmptyNode()     { return new FNoEventExp();     }
 	public FSmoothExp      FSmoothExp.createEmptyNode()      { return new FSmoothExp();      }

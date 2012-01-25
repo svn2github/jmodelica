@@ -395,23 +395,6 @@
             }
     }
 
-    // TODO: Dymola 6.0b does not support 'elseif'...
-    rewrite IfExp {
-        when (getElseExpNoTransform() instanceof IfExp)
-            to IfExp {
-                //log.debug("-------------IfExp rewritten: " +getElseIfExpList().getNumChild());
-                //log.debug(getIfExp()._prettyPrint(""));
-                IfExp e = (IfExp)getElseExpNoTransform();
-                List l = getElseIfExpList();
-                l.add(new ElseIfExp(e.getIfExp(),e.getThenExp()));
-                //log.debug(l.getNumChild());
-                //l.dumpTree("");
-                return new IfExp(getIfExp(),getThenExp(),
-                                 l,
-                                 e.getElseExpNoTransform());
-            }   
-    }
-
 
     rewrite ComponentModification {
         when (getName().isQualified())

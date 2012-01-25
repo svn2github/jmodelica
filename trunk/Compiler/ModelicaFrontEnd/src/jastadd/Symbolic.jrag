@@ -488,13 +488,7 @@ aspect Derivatives {
 	public FExp FIfExp.diff(String name) {
 		FExp e = getIfExp().fullCopy();
 		e.traverseSymbolic(getIfExp());
-		List l = new List();
-		for (FElseIfExp eie : getFElseIfExps()) {
-			FExp ee = eie.getIfExp().fullCopy();
-			ee.traverseSymbolic(eie.getIfExp());
-			l.add(new FElseIfExp(ee,eie.getThenExp().diff(name)));
-		}
-		return dynamicFExp(new FIfExp(e,getThenExp().diff(name),l,getElseExp().diff(name)));
+		return dynamicFExp(new FIfExp(e,getThenExp().diff(name),getElseExp().diff(name)));
 	}
 	
 	public FExp FIdUseExp.diff(String name) {	

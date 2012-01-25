@@ -162,6 +162,24 @@ aspect FlatTypeCheck {
 		  top.error("Illegal access to class in expression: " + top.name());
   }
   
+  public void FIfExp.typeError() {
+		FType thenType = getThenExp().type();
+		FType elseType = getElseExp().type();
+		FType scalar = thenType.scalarType();
+		scalar = scalar.typePromotion(elseType.scalarType());
+		
+		if (!getIfExp().isOKTestExp() || thenType.ndims() != elseType.ndims()) {
+			getIfExp().error("Test expression of if expression must be scalar boolean");
+		} else if (scalar.isUnknown()) { 
+			error("Branches of if expression has incompatible types");
+		} else {
+			if (isParameterIf())
+				error("Failed to evaluate test expression in if expression with branches that have different array sizes");
+			else
+				error("If expression with branches that have different array sizes must have parameter test expression");
+		}
+  }
+  
   public void FIdUseExp.typeCheck() {
 	  if (!getFIdUse().isUnknown() && type().isUnknown())
 		  typeError();
@@ -412,7 +430,7 @@ aspect FlatTypeCheck {
   		return;  		
   	}
     if ((getFExp().isContinuousExp() && !getFExp().inWhen())) {
-    	error("Calling built-in operator pre() with a continuous variable access as an argument can only be done inside when cluases");
+    	error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses");
     }     
   }
   

@@ -833,12 +833,7 @@ FForIndex : CommonForIndex ::= FVariable;
 /**
  * \brief If expression.
  */
-FIfExp : FExp ::= IfExp:FExp ThenExp:FExp FElseIfExp* ElseExp:FExp;
-
-/**
- * \brief Else if expression
- */
-FElseIfExp : FExp ::= IfExp:FExp ThenExp:FExp;
+FIfExp : FExp ::= IfExp:FExp ThenExp:FExp ElseExp:FExp;
 
 /**
  * \brief Declaration of a qualified name. 

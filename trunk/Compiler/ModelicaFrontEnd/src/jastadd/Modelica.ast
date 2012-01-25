@@ -333,8 +333,7 @@ ForStmt             : Statement ::= ForIndex* ForStmt:Statement*;
 WhileStmt           : Statement ::= Test:Exp WhileStmt:Statement*;
 AlgorithmAnnotation : Statement ::= Annotation;
 
-IfExp     : Exp ::= IfExp:Exp ThenExp:Exp ElseIfExp* ElseExp:Exp;
-ElseIfExp : Exp ::= IfExp:Exp ThenExp:Exp;
+IfExp     : Exp ::= IfExp:Exp ThenExp:Exp ElseExp:Exp;
 
 abstract BinExp : Exp ::= Left:Exp Right:Exp;
 

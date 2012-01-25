@@ -825,7 +825,7 @@ aspect InstanceErrorCheck {
 			//	myInstClassDecl().collectErrors();
 		}
 	}
-	
+
 	inh boolean FArraySubscripts.myAccessExists();
 	eq Root.getChild().myAccessExists()       = false;
 	eq InstAccess.getChild().myAccessExists() = !myInstComponentDecl().isUnknown();

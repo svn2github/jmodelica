@@ -1945,7 +1945,6 @@ aspect FlatExpressions {
 
     inh boolean FExp.inIfCondition();
     eq FIfExp.getChild().inIfCondition() = true;
-    eq FElseIfExp.getChild().inIfCondition() = true;
     eq FAbsExp.getChild().inIfCondition() = true;
     eq FAbstractEquation.getChild().inIfCondition() = false;
     eq SourceRoot.getChild().inIfCondition() = false;
