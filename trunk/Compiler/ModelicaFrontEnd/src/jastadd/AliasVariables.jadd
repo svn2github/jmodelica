@@ -563,16 +563,16 @@ aspect AliasVariables {
 			return score;
 		score--;
 		
-		// 2. non-parameter with fixed attribute set to true
-		if (!isParameter() && fixedAttributeSet() && fixedAttributeExp().ceval().booleanValue())
-			return score;
-		score--;
-		
 		// 3. parameter
 		if (isParameter())
 			return score;
 		score--;
 		
+		// 2. non-parameter with fixed attribute set to true
+		if (!isParameter() && fixedAttributeSet() && fixedAttributeExp().ceval().booleanValue())
+			return score;
+		score--;
+				
 		// 4. start attribute set
 		if (startAttributeSet())
 			return score;

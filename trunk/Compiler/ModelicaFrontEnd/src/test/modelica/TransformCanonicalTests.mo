@@ -978,7 +978,29 @@ equation
   cos(mmr1)+mmr3*mmr3=0;
 end AliasTest29;
 
-
+model AliasTest30
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AliasTest30",
+         description="",
+         flatModel="
+fclass TransformCanonicalTests.AliasTest30
+ parameter Boolean f = true;
+ Real y;
+ parameter Real p = 5;
+equation
+ 0.0 =  - ( y );
+end TransformCanonicalTests.AliasTest30;
+")})));
+		
+  parameter Boolean f = true;
+  Real x(start=3,fixed=f);
+  Real y;
+  parameter Real p = 5;
+equation
+ der(x) = -y;
+  x= p;
+end AliasTest30;
 
 model ParameterBindingExpTest1_Err
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
