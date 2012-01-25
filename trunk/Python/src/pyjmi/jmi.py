@@ -2129,16 +2129,16 @@ class JMUModel(BaseModel):
             Only real variables are initialized.
             
         """
-        if isinstance(res, ResultDymolaTextual) or isinstance(res, ResultDymolaBinary):
-            pass
-        elif hasattr(res, "result_data"):
-            if isinstance(res.result_data, ResultDymolaTextual) or isinstance(res.result_data, ResultDymolaBinary):
-                res = res.result_data
-            else:
-                raise JMIException("Unknown input: res. Must be an result data object.")
-        else:
-            raise JMIException("Unknown input: res. Must be an result data object.")
-        
+        #Check to see if the "res" contains any result data, if so interpret
+        #res.result_data as the intended input. This as to allow direct passing
+        #of a simulation result where the actual simulation result are stored in
+        #"result_data"
+        if hasattr(res, "result_data"):
+            res = res.result_data
+            
+        if not hasattr(res, "get_column"):
+            raise JMIException("Unknown input object to function.")
+
         # Obtain the names
         names = self.get_dx_variable_names(include_alias=False)
         dx_names=[]
