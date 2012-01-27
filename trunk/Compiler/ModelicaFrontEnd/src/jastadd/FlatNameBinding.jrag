@@ -47,9 +47,11 @@ aspect FlatNameBinding {
 	private Map<String,FVariable> FFunctionDecl.tempLookupMap = null;
 	
 	eq FFunctionDecl.getChild(int index).lookupFV(FQName fqn) {
-		Map<String,? extends AbstractFVariable> varMap = 
-			(tempLookupMap != null) ? tempLookupMap : fullyQualifiedVariablesMap();
-		AbstractFVariable variable = lookupFVFromMap(varMap, fqn, false, false);
+		AbstractFVariable variable = null;
+		if (tempLookupMap != null)
+			variable = lookupFVFromMap(tempLookupMap, fqn, false, false);
+		if (variable == null)
+			variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, false, false);
 		return (variable == null) ? unknownFVariable() : variable;
 	}
 

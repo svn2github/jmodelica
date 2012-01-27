@@ -801,5 +801,506 @@ end FunctionInlining.BasicInline11;
         Real x = y[f(e)];
         Real[:] y = { 1, 2, 3 };
     end BasicInline11;
+    
+    
+    model RecordInline1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordInline1",
+         description="Inlining function taking constant record arg",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.RecordInline1
+ Real x;
+ constant Real temp_1.a[1] = 1;
+ constant Real temp_1.a[2] = 2;
+ constant Real temp_1.a[3] = 3;
+ constant Integer temp_1.b = 4;
+ constant Integer temp_2 = 10;
+equation
+ x = 10;
+
+ function FunctionInlining.RecordInline1.f
+  input FunctionInlining.RecordInline1.R c;
+  output Real d;
+ algorithm
+  d := c.b + c.a[1] + c.a[2] + c.a[3];
+  return;
+ end FunctionInlining.RecordInline1.f;
+
+ record FunctionInlining.RecordInline1.R
+  Real a[3];
+  discrete Integer b;
+ end FunctionInlining.RecordInline1.R;
+end FunctionInlining.RecordInline1;
+")})));
+
+        record R
+            Real a[3];
+            Integer b;
+        end R;
+        
+        function f
+            input R c;
+            output Real d;
+        algorithm
+            d := c.b + sum(c.a);
+        end f;
+        
+        Real x = f(R({1,2,3}, 4));
+    end RecordInline1;
+    
+    
+    model RecordInline2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordInline2",
+         description="Inlining function returning recor, constant args",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.RecordInline2
+ Real x.a[1];
+ Real x.a[2];
+ Real x.a[3];
+ discrete Integer x.b;
+ constant Integer temp_1 = 1;
+ constant Real temp_2.a[1] = 1;
+ constant Real temp_2.a[2] = 2;
+ constant Real temp_2.a[3] = 3;
+ constant Integer temp_2.b = 2;
+initial equation 
+ x.pre(b) = 0;
+equation
+ x.a[1] = 1;
+ x.a[2] = 2;
+ x.a[3] = 3;
+ x.b = 2;
+
+ function FunctionInlining.RecordInline2.f
+  input Real c;
+  output FunctionInlining.RecordInline2.R d;
+ algorithm
+  d.a[1] := ( 1 ) * ( c );
+  d.a[2] := ( 2 ) * ( c );
+  d.a[3] := ( 3 ) * ( c );
+  d.b := 2;
+  return;
+ end FunctionInlining.RecordInline2.f;
+
+ record FunctionInlining.RecordInline2.R
+  Real a[3];
+  discrete Integer b;
+ end FunctionInlining.RecordInline2.R;
+end FunctionInlining.RecordInline2;
+")})));
+
+        record R
+            Real a[3];
+            Integer b;
+        end R;
+        
+        function f
+            input Real c;
+            output R d;
+        algorithm
+            d := R({1,2,3} * c, 2);
+        end f;
+        
+        R x = f(1);
+    end RecordInline2;
+    
+    
+    model RecordInline3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordInline3",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.RecordInline3
+ Real x;
+ constant Integer temp_1 = 1;
+ constant Real temp_2.a[1] = 1;
+ constant Real temp_2.a[2] = 2;
+ constant Real temp_2.a[3] = 3;
+ constant Integer temp_2.b = 4;
+ constant Integer temp_3 = 10;
+equation
+ x = 10;
+
+ function FunctionInlining.RecordInline3.f
+  input Real c;
+  output Real d;
+  FunctionInlining.RecordInline3.R e;
+ algorithm
+  e.a[1] := ( 1 ) * ( c );
+  e.a[2] := ( 2 ) * ( c );
+  e.a[3] := ( 3 ) * ( c );
+  e.b := 4;
+  d := e.a[1] + e.a[2] + e.a[3] + ( c ) * ( e.b );
+  return;
+ end FunctionInlining.RecordInline3.f;
+
+ record FunctionInlining.RecordInline3.R
+  Real a[3];
+  discrete Integer b;
+ end FunctionInlining.RecordInline3.R;
+end FunctionInlining.RecordInline3;
+")})));
+
+        record R
+            Real a[3];
+            Integer b;
+        end R;
+        
+        function f
+            input Real c;
+            output Real d;
+        protected
+            R e;
+        algorithm
+            e := R({1,2,3} * c, 4);
+            d := sum(e.a) + c * e.b;
+        end f;
+        
+        Real x = f(1);
+    end RecordInline3;
+    
+    
+    model RecordInline4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordInline4",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.RecordInline4
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+ Real x;
+ Real temp_1.a[1];
+ Real temp_1.a[2];
+ Real temp_1.a[3];
+ discrete Integer temp_1.b;
+ Real temp_2;
+initial equation 
+ temp_1.pre(b) = 0;
+equation
+ y[1] = 1;
+ y[2] = 2;
+ y[3] = 3;
+ y[4] = 4;
+ x = temp_2;
+ temp_1.a[1] = y[1];
+ temp_1.a[2] = y[2];
+ temp_1.a[3] = y[3];
+ temp_1.b = integer(y[4]);
+ temp_2 = temp_1.b + temp_1.a[1] + temp_1.a[2] + temp_1.a[3];
+
+ function FunctionInlining.RecordInline4.f
+  input FunctionInlining.RecordInline4.R c;
+  output Real d;
+ algorithm
+  d := c.b + c.a[1] + c.a[2] + c.a[3];
+  return;
+ end FunctionInlining.RecordInline4.f;
+
+ record FunctionInlining.RecordInline4.R
+  Real a[3];
+  discrete Integer b;
+ end FunctionInlining.RecordInline4.R;
+end FunctionInlining.RecordInline4;
+")})));
+
+        record R
+            Real a[3];
+            Integer b;
+        end R;
+        
+        function f
+            input R c;
+            output Real d;
+        algorithm
+            d := c.b + sum(c.a);
+        end f;
+        
+		Real y[4] = {1,2,3,4};
+        Real x = f(R(y[1:3], integer(y[4])));
+    end RecordInline4;
+    
+    
+    model RecordInline5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordInline5",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.RecordInline5
+ Real y;
+ Real x.a[1];
+ Real x.a[2];
+ Real x.a[3];
+ discrete Integer x.b;
+ Real temp_1;
+ Real temp_2.a[1];
+ Real temp_2.a[2];
+ Real temp_2.a[3];
+ discrete Integer temp_2.b;
+initial equation 
+ x.pre(b) = 0;
+ temp_2.pre(b) = 0;
+equation
+ y = 1;
+ x.a[1] = temp_2.a[1];
+ x.a[2] = temp_2.a[2];
+ x.a[3] = temp_2.a[3];
+ x.b = temp_2.b;
+ temp_1 = y;
+ temp_2.a[1] = ( 1 ) * ( temp_1 );
+ temp_2.a[2] = ( 2 ) * ( temp_1 );
+ temp_2.a[3] = ( 3 ) * ( temp_1 );
+ temp_2.b = 2;
+
+ function FunctionInlining.RecordInline5.f
+  input Real c;
+  output FunctionInlining.RecordInline5.R d;
+ algorithm
+  d.a[1] := ( 1 ) * ( c );
+  d.a[2] := ( 2 ) * ( c );
+  d.a[3] := ( 3 ) * ( c );
+  d.b := 2;
+  return;
+ end FunctionInlining.RecordInline5.f;
+
+ record FunctionInlining.RecordInline5.R
+  Real a[3];
+  discrete Integer b;
+ end FunctionInlining.RecordInline5.R;
+end FunctionInlining.RecordInline5;
+")})));
+
+        record R
+            Real a[3];
+            Integer b;
+        end R;
+        
+        function f
+            input Real c;
+            output R d;
+        algorithm
+            d := R({1,2,3} * c, 2);
+        end f;
+        
+		Real y = 1;
+        R x = f(y);
+    end RecordInline5;
+    
+    
+    model RecordInline6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordInline6",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.RecordInline6
+ Real y;
+ Real x;
+ Real temp_1;
+ Real temp_2.a[1];
+ Real temp_2.a[2];
+ Real temp_2.a[3];
+ discrete Integer temp_2.b;
+ Real temp_3;
+initial equation 
+ temp_2.pre(b) = 0;
+equation
+ y = 1;
+ x = temp_3;
+ temp_1 = y;
+ temp_2.a[1] = ( 1 ) * ( temp_1 );
+ temp_2.a[2] = ( 2 ) * ( temp_1 );
+ temp_2.a[3] = ( 3 ) * ( temp_1 );
+ temp_2.b = 4;
+ temp_3 = temp_2.a[1] + temp_2.a[2] + temp_2.a[3] + ( temp_1 ) * ( temp_2.b );
+
+ function FunctionInlining.RecordInline6.f
+  input Real c;
+  output Real d;
+  FunctionInlining.RecordInline6.R e;
+ algorithm
+  e.a[1] := ( 1 ) * ( c );
+  e.a[2] := ( 2 ) * ( c );
+  e.a[3] := ( 3 ) * ( c );
+  e.b := 4;
+  d := e.a[1] + e.a[2] + e.a[3] + ( c ) * ( e.b );
+  return;
+ end FunctionInlining.RecordInline6.f;
+
+ record FunctionInlining.RecordInline6.R
+  Real a[3];
+  discrete Integer b;
+ end FunctionInlining.RecordInline6.R;
+end FunctionInlining.RecordInline6;
+")})));
+
+        record R
+            Real a[3];
+            Integer b;
+        end R;
+        
+        function f
+            input Real c;
+            output Real d;
+        protected
+            R e;
+        algorithm
+            e := R({1,2,3} * c, 4);
+            d := sum(e.a) + c * e.b;
+        end f;
+        
+        Real y = 1;
+        Real x = f(y);
+    end RecordInline6;
+    
+    
+    model RecordInline7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordInline7",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.RecordInline7
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+ Real x.a[1];
+ Real x.a[2];
+ Real x.a[3];
+ discrete Integer x.b;
+ Real temp_1.a[1];
+ Real temp_1.a[2];
+ Real temp_1.a[3];
+ discrete Integer temp_1.b;
+ Real temp_2.a[1];
+ Real temp_2.a[2];
+ Real temp_2.a[3];
+ discrete Integer temp_2.b;
+ Real temp_3.a[1];
+ Real temp_3.a[2];
+ Real temp_3.a[3];
+ discrete Integer temp_3.b;
+ Real temp_4.a[1];
+ Real temp_4.a[2];
+ Real temp_4.a[3];
+ discrete Integer temp_4.b;
+ Real temp_5.a[1];
+ Real temp_5.a[2];
+ Real temp_5.a[3];
+ discrete Integer temp_5.b;
+initial equation 
+ x.pre(b) = 0;
+ temp_1.pre(b) = 0;
+ temp_2.pre(b) = 0;
+ temp_3.pre(b) = 0;
+ temp_4.pre(b) = 0;
+ temp_5.pre(b) = 0;
+equation
+ y[1] = 1;
+ y[2] = 2;
+ y[3] = 3;
+ y[4] = 4;
+ x.a[1] = temp_5.a[1];
+ x.a[2] = temp_5.a[2];
+ x.a[3] = temp_5.a[3];
+ x.b = temp_5.b;
+ temp_1.a[1] = y[1];
+ temp_1.a[2] = y[2];
+ temp_1.a[3] = y[3];
+ temp_1.b = integer(y[4]);
+ temp_2.a[1] = temp_1.a[1];
+ temp_2.a[2] = temp_1.a[2];
+ temp_2.a[3] = temp_1.a[3];
+ temp_2.b = temp_1.b;
+ temp_3.a[1] = temp_2.a[1] + temp_1.a[1];
+ temp_3.a[2] = temp_2.a[2] + temp_1.a[2];
+ temp_3.a[3] = temp_2.a[3] + temp_1.a[3];
+ temp_3.b = temp_2.b - ( temp_1.b );
+ temp_4.a[1] = ( ( temp_1.a[1] ) * ( temp_2.a[1] ) + ( temp_1.a[2] ) * ( temp_2.a[2] ) + ( temp_1.a[3] ) * ( temp_2.a[3] ) ) * ( temp_3.a[1] );
+ temp_4.a[2] = ( ( temp_1.a[1] ) * ( temp_2.a[1] ) + ( temp_1.a[2] ) * ( temp_2.a[2] ) + ( temp_1.a[3] ) * ( temp_2.a[3] ) ) * ( temp_3.a[2] );
+ temp_4.a[3] = ( ( temp_1.a[1] ) * ( temp_2.a[1] ) + ( temp_1.a[2] ) * ( temp_2.a[2] ) + ( temp_1.a[3] ) * ( temp_2.a[3] ) ) * ( temp_3.a[3] );
+ temp_4.b = 3;
+ temp_5.a[1] = temp_4.a[1] - ( temp_1.a[1] );
+ temp_5.a[2] = temp_4.a[2] - ( temp_1.a[2] );
+ temp_5.a[3] = temp_4.a[3] - ( temp_1.a[3] );
+ temp_5.b = temp_4.b + temp_3.b;
+
+ function FunctionInlining.RecordInline7.f
+  input FunctionInlining.RecordInline7.R c;
+  output FunctionInlining.RecordInline7.R d;
+  FunctionInlining.RecordInline7.R e;
+  FunctionInlining.RecordInline7.R g;
+  FunctionInlining.RecordInline7.R h;
+ algorithm
+  e.a[1] := c.a[1];
+  e.a[2] := c.a[2];
+  e.a[3] := c.a[3];
+  e.b := c.b;
+  g.a[1] := e.a[1] + c.a[1];
+  g.a[2] := e.a[2] + c.a[2];
+  g.a[3] := e.a[3] + c.a[3];
+  g.b := e.b - ( c.b );
+  h.a[1] := ( ( c.a[1] ) * ( e.a[1] ) + ( c.a[2] ) * ( e.a[2] ) + ( c.a[3] ) * ( e.a[3] ) ) * ( g.a[1] );
+  h.a[2] := ( ( c.a[1] ) * ( e.a[1] ) + ( c.a[2] ) * ( e.a[2] ) + ( c.a[3] ) * ( e.a[3] ) ) * ( g.a[2] );
+  h.a[3] := ( ( c.a[1] ) * ( e.a[1] ) + ( c.a[2] ) * ( e.a[2] ) + ( c.a[3] ) * ( e.a[3] ) ) * ( g.a[3] );
+  h.b := 3;
+  d.a[1] := h.a[1] - ( c.a[1] );
+  d.a[2] := h.a[2] - ( c.a[2] );
+  d.a[3] := h.a[3] - ( c.a[3] );
+  d.b := h.b + g.b;
+  return;
+ end FunctionInlining.RecordInline7.f;
+
+ record FunctionInlining.RecordInline7.R
+  Real a[3];
+  discrete Integer b;
+ end FunctionInlining.RecordInline7.R;
+end FunctionInlining.RecordInline7;
+")})));
+
+        record R
+            Real a[3];
+            Integer b;
+        end R;
+        
+        function f
+            input R c;
+            output R d;
+        protected
+            R e;
+            R g;
+            R h;
+        algorithm
+			e := c;
+			g := R(e.a + c.a, e.b - c.b);
+			h := R(c.a * e.a * g.a, 3);
+			d := R(h.a - c.a, h.b + g.b);
+        end f;
+        
+        Real y[4] = {1,2,3,4};
+        R x = f(R(y[1:3], integer(y[4])));
+    end RecordInline7;
 	
 end FunctionInlining;

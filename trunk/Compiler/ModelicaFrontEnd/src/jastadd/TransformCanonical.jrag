@@ -4317,18 +4317,22 @@ aspect FunctionInlining {
 	}
 	
 	public FExp FIdUseExp.replaceReferences(Map<String,FVariable> varMap) {
-		// TODO: handle records
-		FVariable var = varMap.get(getFIdUse().name());
 		FExp exp = this;
+		FQName name = getFIdUse().getFQName();
+		FVariable var = null;
+		int n = name.getNumFQNamePart();
+		int p = n;
+		while (p > 0 && var == null)
+			var = varMap.get(name.prefixName(p--, false, false));
 		if (var != null) {
-			FIdUseExp use = (FIdUseExp) dynamicFExp(var.createUseExp());
-			FQName name = getFIdUse().getFQName();
-			if (name.hasFArraySubscripts()) {
-				FArraySubscripts fas = name.getLastFArraySubscripts().fullCopy();
-				FQName useName = use.getFIdUse().getFQName();
-				useName.setLastFArraySubscripts(fas);
-				useName.getLastFArraySubscripts();
-				fas.replaceReferences(varMap);
+			FQName useName = var.getFQName().createUseFQName().appendSuffix(name, n - p - 1);
+			FIdUseExp use = (FIdUseExp) dynamicFExp(new FIdUseExp(useName));
+			if (name.getFQNamePart(p).hasFArraySubscripts()) {
+				FArraySubscripts fas = name.getFQNamePart(p).getFArraySubscripts().fullCopy();
+				// Start from use to make nodes final
+				FQNamePart first = use.getFIdUse().getFQName().getFQNamePart(0);
+				first.setFArraySubscripts(fas);
+				first.getFArraySubscripts().replaceReferences(varMap);
 			}
 			exp = use;
 			if (var.isConstant()) {

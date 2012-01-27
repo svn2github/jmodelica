@@ -827,14 +827,30 @@ aspect FlatNames {
         }
     }
 
+    /**
+     * Append a new name part.
+     */
     public FQName FQName.append(String name) {
         addFQNamePart(name);
         return this;
     }
 
-    public FQName FQName.append(FQName fqname) {
-        for (int i=0;i<fqname.getNumFQNamePart();i++)
-            addFQNamePart((FQNamePart)fqname.getFQNamePart(i).fullCopy());
+    /**
+     * Copy and append all name parts from <code>fqn</code>.
+     */
+    public FQName FQName.append(FQName fqn) {
+        for (FQNamePart part : fqn.getFQNameParts())
+            addFQNamePart((FQNamePart) part.fullCopy());
+        return this;
+    }
+
+    /**
+     * Copy and append the last <code>n</code> name parts from <code>fqn</code>.
+     */
+    public FQName FQName.appendSuffix(FQName fqn, int n) {
+    	int num = fqn.getNumFQNamePart();
+        for (int i = num - n; i < num; i++)
+            addFQNamePart((FQNamePart) fqn.getFQNamePart(i).fullCopy());
         return this;
     }
     
@@ -1325,15 +1341,24 @@ aspect FlatNames {
     }
     
     /**
+     * \brief Create a copy of this name that is suitable for an FIdUse.
+     * 
+     * It is assumed that this name is from a variable declaration.
+     */
+    public FQName FQName.createUseFQName() {
+    	FQName name = fullCopy();
+    	if (!isScalarized() && ndims() > 0)
+    		name.setLastFArraySubscripts(size().createExpandedFArraySubscripts());
+        return name; 
+    }
+    
+    /**
      * \brief Create an FIdUse using a copy of this name.
      * 
      * It is assumed that this name is from a variable declaration.
      */
     public FIdUse FQName.createFIdUse() {
-    	FQName name = fullCopy();
-    	if (!isScalarized() && ndims() > 0)
-    		name.setLastFArraySubscripts(size().createExpandedFArraySubscripts());
-        return new FIdUse(name); 
+        return new FIdUse(createUseFQName()); 
     }
     
     /**

@@ -235,7 +235,7 @@ aspect Scalarization {
 		Map<String, FExp> emptyIndexMap = Collections.emptyMap();
 		for (FVariable comp : myFRecordDecl().getFVariables()) {
 			if (bexp != null)
-				nbexp = bexp.scalarRecordFExp(emptyIndexMap, comp.getFQName());
+				nbexp = bexp.scalarRecordFExp(emptyIndexMap, new FQName(comp.name()));
 			else
 				nbexp = attributeExp(comp.name());
 			comp.scalarRecordFVariables(vars, name, tmp, nbexp);
@@ -1529,6 +1529,12 @@ aspect Scalarization {
 	public FVariable FStringType.createFVariable(FVisibilityType fvt, FQName name, 
 			FTypePrefixVariability variability) {
 		return new FStringVariable(fvt, variability, new Opt(), new List(), new Opt(), new Opt(), name);
+	}	
+	
+	public FVariable FRecordType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
+		return new FRecordVariable(fvt, variability, new Opt(), 
+				new List(), new Opt(), new Opt(), name, new FQName(getName()));
 	}	
 	
 	/**
