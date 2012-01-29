@@ -441,3 +441,68 @@ class TestFriction(SimulationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['v','a','f','sa'],rel_tol=1e-4, abs_tol=1e-4)
 
+
+class TestTearing1(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'TearingTests.mo',
+            'TearingTests.TearingTest1',
+            format='fmu',
+            options={"enable_tearing":True})
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=20,time_step=0.05,rel_tol=1e-6)
+        self.run()
+        self.load_expected_data(
+            'TearingTests_TearingTest1_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['iL','u1'],rel_tol=1e-4, abs_tol=1e-4)
+
+class TestTearing2(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'TearingTests.mo',
+            'TearingTests.Electro',
+            format='fmu',
+            options={"enable_tearing":True,"eliminate_alias_variables":False})
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1,time_step=0.002,rel_tol=1e-6)
+        self.run()
+        self.load_expected_data(
+            'TearingTests_Electro_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['resistor3.i','resistor25.i'],rel_tol=1e-4, abs_tol=1e-4)
+
+class TestTearing3(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'TearingTests.mo',
+            'TearingTests.NonLinear.MultiSystems',
+            format='fmu',
+            options={"enable_tearing":True})
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10,time_step=0.02,rel_tol=1e-6)
+        self.run()
+        self.load_expected_data(
+            'TearingTests_NonLinear_MultiSystems_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['R1.v','R1.i'],rel_tol=1e-4, abs_tol=1e-4)
+
+

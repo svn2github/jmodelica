@@ -6296,5 +6296,51 @@ model Smooth1
   Real x = smooth(2, if y < 0 then 0 else y ^ 3);
 end Smooth1;
 
+model TearingTest1
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="TearingTest1",
+         description="Test code generation of torn blocks",
+         generate_ode=true,
+         equation_sorting=true,
+		 enable_tearing=true,
+         template="$C_dae_blocks_residual_functions$", 
+         generatedCode=" 
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _i3_7;
+    x[1] = _i2_6;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _i3_7 = x[0];
+    _i2_6 = x[1];
+  _u2_2 = ( _R3_11 ) * ( _i3_7 );
+  _i1_5 = _i2_6 + _i3_7;
+  _u1_1 = ( _R1_9 ) * ( _i1_5 );
+  (*res)[0] = _u1_1 + _u2_2 - (_u0_0);
+  (*res)[1] = ( _R2_10 ) * ( _i2_6 ) - (_u2_2);
+  }
+  return 0;
+}
+		 
+")})));
+  Real u0,u1,u2,u3,uL;
+  Real i0,i1,i2,i3,iL;
+  parameter Real R1 = 1;
+  parameter Real R2 = 1;
+  parameter Real R3 = 1;
+  parameter Real L = 1;
+equation
+  u0 = sin(time);
+  u1 = R1*i1;
+  u2 = R2*i2;
+  u3 = R3*i3;
+  uL = L*der(iL);
+  u0 = u1 + u3;
+  uL = u1 + u2;
+  u2 = u3;
+  i0 = i1 + iL;
+  i1 = i2 + i3;
+end TearingTest1;
 
 end CCodeGenTests;

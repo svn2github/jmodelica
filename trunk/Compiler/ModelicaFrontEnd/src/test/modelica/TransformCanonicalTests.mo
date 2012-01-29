@@ -4413,6 +4413,72 @@ Solution:
     - y = x + 3 - y + 4*y;
     - z = x - y -z - 5*z;
   end SolveEqTest7;
+  
+ model TearingTest1
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="TearingTest1",
+      methodName="printDAEBLT",
+	equation_sorting = true,
+	enable_tearing = true,         
+        description="Test of tearing", methodResult=
+        "
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  u0
+Solution:
+  sin(time)
+-------------------------------
+Torn block of 2 tearing variables and 3 solved variables.
+Tearing variables:
+  i3
+  i2
+Solved equations:
+  u2 = ( R3 ) * ( i3 )
+  i1 = i2 + i3
+  u1 = ( R1 ) * ( i1 )
+Residual equations:
+  u0 = u1 + u2
+  u2 = ( R2 ) * ( i2 )
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  uL
+Solution:
+  u1 + u2
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  der(iL)
+Solution:
+  (  - ( uL ) ) / (  - ( L ) )
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  i0
+Solution:
+  i1 + iL
+-------------------------------
+        ")})));
+
+  Real u0,u1,u2,u3,uL;
+  Real i0,i1,i2,i3,iL;
+  parameter Real R1 = 1;
+  parameter Real R2 = 1;
+  parameter Real R3 = 1;
+  parameter Real L = 1;
+equation
+  u0 = sin(time);
+  u1 = R1*i1;
+  u2 = R2*i2;
+  u3 = R3*i3;
+  uL = L*der(iL);
+  u0 = u1 + u3;
+  uL = u1 + u2;
+  u2 = u3;
+  i0 = i1 + iL;
+  i1 = i2 + i3;
+  end TearingTest1;
 
 model VarDependencyTest1
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
