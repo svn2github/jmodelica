@@ -1,9 +1,10 @@
 import org.jmodelica.icons.Icon;
-import org.jmodelica.icons.parts.Component;
+import org.jmodelica.icons.Component;
 import org.jmodelica.icons.exceptions.FailedConstructionException;
 import org.jmodelica.icons.drawing.IconConstants.Context;
 import org.jmodelica.ide.ui.ImageLoader;
 import org.jmodelica.icons.drawing.AWTIconDrawer;
+import org.jmodelica.ide.outline.SWTIconDrawer;
 import java.awt.image.BufferedImage;
 
 aspect ModelicaEclipseIcons

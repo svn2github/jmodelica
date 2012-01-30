@@ -1,10 +1,10 @@
-package org.jmodelica.icons.parts.primitives;
+package org.jmodelica.icons.primitives;
 
-import org.jmodelica.icons.parts.coord.Extent;
-import org.jmodelica.icons.parts.coord.Point;
-import org.jmodelica.icons.parts.primitives.Color;
-import org.jmodelica.icons.parts.primitives.Types.FillPattern;
-import org.jmodelica.icons.parts.primitives.Types.LinePattern;
+import org.jmodelica.icons.coord.Extent;
+import org.jmodelica.icons.coord.Point;
+import org.jmodelica.icons.primitives.Color;
+import org.jmodelica.icons.primitives.Types.FillPattern;
+import org.jmodelica.icons.primitives.Types.LinePattern;
 
 
 public abstract class FilledRectShape extends FilledShape {

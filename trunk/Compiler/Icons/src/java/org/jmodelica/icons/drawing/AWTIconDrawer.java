@@ -34,25 +34,25 @@ import java.util.Stack;
 
 import javax.imageio.ImageIO;
 
+import org.jmodelica.icons.Component;
 import org.jmodelica.icons.Icon;
+import org.jmodelica.icons.coord.Extent;
+import org.jmodelica.icons.coord.Point;
+import org.jmodelica.icons.coord.Transformation;
 import org.jmodelica.icons.exceptions.CreateShapeFailedException;
-import org.jmodelica.icons.parts.Component;
-import org.jmodelica.icons.parts.coord.Extent;
-import org.jmodelica.icons.parts.coord.Point;
-import org.jmodelica.icons.parts.coord.Transformation;
-import org.jmodelica.icons.parts.primitives.Bitmap;
-import org.jmodelica.icons.parts.primitives.Color;
-import org.jmodelica.icons.parts.primitives.Ellipse;
-import org.jmodelica.icons.parts.primitives.FilledRectShape;
-import org.jmodelica.icons.parts.primitives.FilledShape;
-import org.jmodelica.icons.parts.primitives.Line;
-import org.jmodelica.icons.parts.primitives.Polygon;
-import org.jmodelica.icons.parts.primitives.Rectangle;
-import org.jmodelica.icons.parts.primitives.Text;
-import org.jmodelica.icons.parts.primitives.Types;
-import org.jmodelica.icons.parts.primitives.Types.FillPattern;
-import org.jmodelica.icons.parts.primitives.Types.LinePattern;
-import org.jmodelica.icons.parts.primitives.Types.TextAlignment;
+import org.jmodelica.icons.primitives.Bitmap;
+import org.jmodelica.icons.primitives.Color;
+import org.jmodelica.icons.primitives.Ellipse;
+import org.jmodelica.icons.primitives.FilledRectShape;
+import org.jmodelica.icons.primitives.FilledShape;
+import org.jmodelica.icons.primitives.Line;
+import org.jmodelica.icons.primitives.Polygon;
+import org.jmodelica.icons.primitives.Rectangle;
+import org.jmodelica.icons.primitives.Text;
+import org.jmodelica.icons.primitives.Types;
+import org.jmodelica.icons.primitives.Types.FillPattern;
+import org.jmodelica.icons.primitives.Types.LinePattern;
+import org.jmodelica.icons.primitives.Types.TextAlignment;
 
 
 public class AWTIconDrawer implements GraphicsInterface {

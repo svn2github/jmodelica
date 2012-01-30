@@ -1,4 +1,4 @@
-package org.jmodelica.icons.parts.primitives;
+package org.jmodelica.icons.primitives;
 public class Types {
 	
 	public enum LinePattern {

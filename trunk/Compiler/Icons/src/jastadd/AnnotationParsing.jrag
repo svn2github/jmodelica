@@ -1,31 +1,24 @@
-import org.jmodelica.icons.CoordinateSystem;
-import org.jmodelica.icons.Placement;
-import org.jmodelica.icons.Transformation;
-import org.jmodelica.icons.Types;
-import org.jmodelica.icons.Types.LinePattern;
-import org.jmodelica.icons.Types.FillPattern;
-import org.jmodelica.icons.Types.BorderPattern;
-import org.jmodelica.icons.Types.Smooth;
-import org.jmodelica.icons.Types.Arrow;
-import org.jmodelica.icons.Types.TextStyle;
-import org.jmodelica.icons.Types.TextAlignment;
-import org.jmodelica.icons.drawing.IconConstants.Context;
+import java.lang.IllegalArgumentException;
 import org.jmodelica.icons.Layer;
-import org.jmodelica.icons.Extent;
-import org.jmodelica.icons.FilledRectShape;
-import org.jmodelica.icons.FilledShape;
-import org.jmodelica.icons.GraphicItem;
-import org.jmodelica.icons.Ellipse;
-import org.jmodelica.icons.Line;
-import org.jmodelica.icons.Point;
-import org.jmodelica.icons.Text;
-import org.jmodelica.icons.Rectangle;
-import org.jmodelica.icons.Polygon;
-import org.jmodelica.icons.Color;
-import org.jmodelica.icons.Bitmap;
+import org.jmodelica.icons.coord.CoordinateSystem;
+import org.jmodelica.icons.coord.Extent;
+import org.jmodelica.icons.coord.Placement;
+import org.jmodelica.icons.coord.Point;
+import org.jmodelica.icons.coord.Transformation;
+import org.jmodelica.icons.drawing.IconConstants.Context;
 import org.jmodelica.icons.exceptions.FailedConstructionException;
 import org.jmodelica.icons.exceptions.NotEnoughParametersException;
-import java.lang.IllegalArgumentException;
+import org.jmodelica.icons.primitives.Bitmap;
+import org.jmodelica.icons.primitives.Color;
+import org.jmodelica.icons.primitives.Ellipse;
+import org.jmodelica.icons.primitives.FilledRectShape;
+import org.jmodelica.icons.primitives.FilledShape;
+import org.jmodelica.icons.primitives.GraphicItem;
+import org.jmodelica.icons.primitives.Line;
+import org.jmodelica.icons.primitives.Polygon;
+import org.jmodelica.icons.primitives.Rectangle;
+import org.jmodelica.icons.primitives.Text;
+import org.jmodelica.icons.primitives.Types;
 
 
 aspect AnnotationParsing {
@@ -406,7 +399,7 @@ aspect AnnotationParsing {
 		* @throws FailedConstructionException if the data provided is anything else than 2 
 		* String objects, or if one of the String objects doesn't match a legal Arrow value. 
 		*/
-		private Arrow[] createArrow() 
+		private Types.Arrow[] createArrow() 
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
 				if (a.name().equals("DynamicSelect")) {
@@ -414,15 +407,13 @@ aspect AnnotationParsing {
 				}
 			}
 			ArrayList<String> strings = stringList();
-			if (strings == null) {
-				throw new FailedConstructionException("Arrow");
-			} else if (strings.size() != 2) {
+			if (strings == null || strings.size() != 2) {
 				throw new FailedConstructionException("Arrow");
 			}
-			Arrow[] arrow = new Arrow[2];
+			Types.Arrow[] arrow = new Types.Arrow[2];
 			for (int i = 0; i < 2; i++) {
 				String s = strings.get(i);
-				arrow[i] = Arrow.valueOf(
+				arrow[i] = Types.Arrow.valueOf(
 					s.substring(s.indexOf(".")+1).toUpperCase()
 				);
 				if (arrow[i] == null) {
@@ -635,29 +626,8 @@ aspect AnnotationParsing {
 		* @return TextAlignment
 		* @throws FailedConstructionException if an illegal TextAlignment value was found.
 		*/
-		private TextAlignment createHorizontalAlignment() 
-				throws FailedConstructionException {
-			for (AnnotationNode a : this) {
-				if (a.name().equals("DynamicSelect")) {
-					return a.iterator().next().createHorizontalAlignment();
-				}
-			}
-			String alignmentStr = string();
-			if (alignmentStr == null) {
-				throw new FailedConstructionException("TextAlignment");
-			}
-			TextAlignment alignment = null;
-			try {
-				alignment = TextAlignment.valueOf(
-					alignmentStr.substring(
-						alignmentStr.indexOf(".")+1,
-						alignmentStr.length()
-					).toUpperCase()
-				); 
-			} catch (IllegalArgumentException e) {
-				throw new FailedConstructionException("TextAlignment");
-			}
-			return alignment;
+		private Types.TextAlignment createHorizontalAlignment() throws FailedConstructionException {
+			return createEnumValue(Types.TextAlignment.class); 
 		}
 		
 		/**
@@ -666,29 +636,8 @@ aspect AnnotationParsing {
 		* @throws FailedConstructionException if no String value was given or
 		* if an illegal fillPattern value was given. 
 		*/
-		private FillPattern createFillPattern()
-				throws FailedConstructionException {
-			for (AnnotationNode a : this) {
-				if (a.name().equals("DynamicSelect")) {
-					return a.iterator().next().createFillPattern();
-				}
-			}
-			String patternStr = string();
-			if (patternStr == null) {
-				throw new FailedConstructionException("FillPattern");
-			}
-			FillPattern pattern = null;
-			try {
-				pattern = FillPattern.valueOf(
-					patternStr.substring(
-						patternStr.indexOf(".")+1,
-						patternStr.length()
-					).toUpperCase()
-				); 
-			} catch (IllegalArgumentException e) {
-				throw new FailedConstructionException("FillPattern");
-			}
-			return pattern; 
+		private Types.FillPattern createFillPattern() throws FailedConstructionException {
+			return createEnumValue(Types.FillPattern.class); 
 		}
 		
 		/**
@@ -697,29 +646,8 @@ aspect AnnotationParsing {
 		* @throws FailedConstructionException if no String value was given or
 		* if an illegal linePattern value was given. 
 		*/
-		private LinePattern createLinePattern()
-				throws FailedConstructionException {
-			for (AnnotationNode a : this) {
-				if (a.name().equals("DynamicSelect")) {
-					return a.iterator().next().createLinePattern();
-				}
-			}
-			String patternStr = string();
-			if (patternStr == null) {
-				throw new FailedConstructionException("LinePattern");
-			}
-			LinePattern pattern = null;
-			try {
-				pattern = LinePattern.valueOf(
-					patternStr.substring(
-						patternStr.indexOf(".")+1,
-						patternStr.length()
-					).toUpperCase()
-				);
-			} catch (IllegalArgumentException e) {
-				throw new FailedConstructionException("LinePattern");
-			}
-			return pattern; 
+		private Types.LinePattern createLinePattern() throws FailedConstructionException {
+			return createEnumValue(Types.LinePattern.class); 
 		}
 		
 		/**
@@ -728,29 +656,8 @@ aspect AnnotationParsing {
 		* @throws FailedConstructionException if no String value was given or
 		* if an illegal borderPattern value was given. 
 		*/
-		private BorderPattern createBorderPattern()
-				throws FailedConstructionException {
-			for (AnnotationNode a : this) {
-				if (a.name().equals("DynamicSelect")) {
-					return a.iterator().next().createBorderPattern();
-				}
-			}
-			String patternStr = string();
-			if (patternStr == null) {
-				throw new FailedConstructionException("BorderPattern");
-			}
-			BorderPattern pattern = null;
-			try {
-				pattern = BorderPattern.valueOf(
-					patternStr.substring(
-						patternStr.indexOf(".")+1,
-						patternStr.length()
-					).toUpperCase()
-				); 
-			} catch (IllegalArgumentException e) {
-				throw new FailedConstructionException("BorderPattern");
-			}
-			return pattern; 
+		private Types.BorderPattern createBorderPattern() throws FailedConstructionException {
+			return createEnumValue(Types.BorderPattern.class); 
 		}
 		
 		/**
@@ -759,29 +666,30 @@ aspect AnnotationParsing {
 		* @throws FailedConstructionException if no String value was given or
 		* if an illegal smooth value was given. 
 		*/
-		private Smooth createSmooth()
+		private Types.Smooth createSmooth() throws FailedConstructionException {
+			return createEnumValue(Types.Smooth.class); 
+		}
+		
+		/**
+		* Returns the value represented by this AnnotationNode, given that it is a 
+		* value from the specified enumeration.
+		* 
+		* @param enumClass  the the enumeration to use
+		* @throws FailedConstructionException if no String value was given or
+		*         if an illegal value was given. 
+		*/
+		private <T extends Enum> T createEnumValue(Class<T> enumClass)
 				throws FailedConstructionException {
-			for (AnnotationNode a : this) {
-				if (a.name().equals("DynamicSelect")) {
-					return a.iterator().next().createSmooth();
-				}
-			}
-			String smoothStr = string();
-			if (smoothStr == null) {
-				throw new FailedConstructionException("Smooth");
-			}
-			Smooth smooth = null;
+			for (AnnotationNode a : this) 
+				if (a.name().equals("DynamicSelect")) 
+					return a.iterator().next().createEnumValue(enumClass);
 			try {
-				smooth = Smooth.valueOf(
-					smoothStr.substring(
-						smoothStr.indexOf(".")+1,
-						smoothStr.length()
-					).toUpperCase()
-				); 
+				String str = string().split("\\.", 2)[1].toUpperCase();
+				return (T) Enum.valueOf(enumClass, str);
+			} catch (NullPointerException e) {
 			} catch (IllegalArgumentException e) {
-				throw new FailedConstructionException("Smooth");
 			}
-			return smooth; 
+			throw new FailedConstructionException(enumClass.getSimpleName());
 		}
 		
 		/**

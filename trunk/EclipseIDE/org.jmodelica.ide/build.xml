@@ -94,7 +94,8 @@
 	<property name="modelica_frontend_aspects" value="${modelica_frontend_dir}/jastadd" />
 	<property name="modelica_compiler_aspects" value="${modelica_compiler_dir}/jastadd" />
 	<property name="modelica_cbackend_aspects" value="${modelica_cbackend_dir}/jastadd" />
-	<property name="modelica_xmlbackend_aspects" value="${modelica_xmlbackend_dir}/jastadd" />
+    <property name="modelica_xmlbackend_aspects" value="${modelica_xmlbackend_dir}/jastadd" />
+    <property name="modelica_icons_aspects" value="${modelica_icons_dir}/jastadd" />
 
 	<!-- "jflex" is an ant task class for the scanner generator in JFlex.jar -->
 	<!-- "beaver" is an ant task class for the parser generator in beaver.jar -->

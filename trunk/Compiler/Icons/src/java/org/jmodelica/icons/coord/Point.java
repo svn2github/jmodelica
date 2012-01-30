@@ -1,4 +1,4 @@
-package org.jmodelica.icons.parts.coord;
+package org.jmodelica.icons.coord;
 
 
 

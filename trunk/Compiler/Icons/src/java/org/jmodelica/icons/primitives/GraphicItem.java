@@ -1,7 +1,7 @@
-package org.jmodelica.icons.parts.primitives;
+package org.jmodelica.icons.primitives;
 
-import org.jmodelica.icons.parts.coord.Extent;
-import org.jmodelica.icons.parts.coord.Point;
+import org.jmodelica.icons.coord.Extent;
+import org.jmodelica.icons.coord.Point;
 
 public abstract class GraphicItem {
 	

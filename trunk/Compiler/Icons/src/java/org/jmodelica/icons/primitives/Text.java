@@ -1,11 +1,11 @@
 
-package org.jmodelica.icons.parts.primitives;
+package org.jmodelica.icons.primitives;
 
 import java.util.ArrayList;
 
-import org.jmodelica.icons.parts.coord.Extent;
-import org.jmodelica.icons.parts.primitives.Types.TextAlignment;
-import org.jmodelica.icons.parts.primitives.Types.TextStyle;
+import org.jmodelica.icons.coord.Extent;
+import org.jmodelica.icons.primitives.Types.TextAlignment;
+import org.jmodelica.icons.primitives.Types.TextStyle;
 
 
 public class Text extends FilledRectShape {
