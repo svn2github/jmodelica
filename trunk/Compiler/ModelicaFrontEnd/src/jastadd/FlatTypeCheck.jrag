@@ -483,14 +483,11 @@ aspect FlatTypeCheck {
   eq FFunctionCallStmt.getChild().functionCallDecription()     = getCall().functionCallDecription();
   
   public void InstFunctionArgument.typeCheck() {
-	  FType boundType = getBoundInput().type();
-	  if (!getFExp().type().isUnknown() && (getBoundInput() == null || !boundType.isUnknown())) {
+	  if (!getFExp().type().isUnknown() && (getBoundInput() == null || !getBoundInput().type().isUnknown())) {
 		  FType type = getFExp().type();
-		  if (isVectorized()) 
-			  type = type.sizedType(boundType.size());
 		  boolean typeOk;
 		  if (argumentDefinedTypeValid()) 
-			  typeOk = boundType.typeCompatible(type, true);		  
+			  typeOk = getBoundInput().type().typeCompatible(type, true);		  
 		  else
 			  typeOk = argumentTypeValid(type);
 		  if (!typeOk) {

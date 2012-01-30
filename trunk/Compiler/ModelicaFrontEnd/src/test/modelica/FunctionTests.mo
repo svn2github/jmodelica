@@ -6159,17 +6159,4 @@ end InputAsArraySize10;
 // TODO: Fler som ovan
 
 
-
-model VectorizedCall1
-	function f
-		input Real x;
-		output Real y;
-	algorithm
-		y := 2 * x;
-	end f;
-	
-	Real z[2] = f({1,2});
-end VectorizedCall1;
-
-
 end FunctionTests;
