@@ -1,4 +1,6 @@
-package org.jmodelica.icons;
+package org.jmodelica.icons.parts.primitives;
+
+import org.jmodelica.icons.parts.coord.Extent;
 
 
 

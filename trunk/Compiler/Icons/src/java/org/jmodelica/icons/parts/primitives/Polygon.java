@@ -1,6 +1,10 @@
-package org.jmodelica.icons;
+package org.jmodelica.icons.parts.primitives;
 
 import java.util.ArrayList;
+
+import org.jmodelica.icons.parts.coord.Extent;
+import org.jmodelica.icons.parts.coord.Point;
+import org.jmodelica.icons.parts.primitives.Types.Smooth;
 
 
 

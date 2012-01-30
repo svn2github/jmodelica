@@ -1,5 +1,8 @@
-package org.jmodelica.icons;
+package org.jmodelica.icons.parts;
 import java.util.ArrayList;
+
+import org.jmodelica.icons.parts.coord.CoordinateSystem;
+import org.jmodelica.icons.parts.primitives.GraphicItem;
 
 
 

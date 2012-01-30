@@ -1,4 +1,4 @@
-package org.jmodelica.icons;
+package org.jmodelica.icons.parts.primitives;
 
 public class Color {
 	

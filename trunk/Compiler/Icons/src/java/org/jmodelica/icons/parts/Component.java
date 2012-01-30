@@ -1,4 +1,7 @@
-package org.jmodelica.icons;
+package org.jmodelica.icons.parts;
+
+import org.jmodelica.icons.Icon;
+import org.jmodelica.icons.parts.coord.Placement;
 
 
 public class Component {

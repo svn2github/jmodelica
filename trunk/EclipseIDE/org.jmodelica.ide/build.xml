@@ -57,6 +57,7 @@
 	<property name="modelica_compiler_dir" value="${compiler_dir}/ModelicaCompiler/src" />
 	<property name="modelica_cbackend_dir" value="${compiler_dir}/ModelicaCBackEnd/src" />
 	<property name="modelica_xmlbackend_dir" value="${compiler_dir}/ModelicaXMLBackEnd/src" />
+    <property name="modelica_icons_dir" value="${compiler_dir}/Icons/src" />
 	<condition property="core_dir" value="../${jastadd.project}" else="${jastadd_dir}/org.jastadd.plugin">
 		<available file="../${jastadd.project}" type="dir" property="" />
 	</condition>
@@ -235,11 +236,16 @@
 				<include name="**/*.jrag" />
 				<include name="**/*.jadd" />
 			</fileset>
-			<fileset dir="${modelica_xmlbackend_aspects}">
-				<include name="**/*.ast" />
-				<include name="**/*.jrag" />
-				<include name="**/*.jadd" />
-			</fileset>
+            <fileset dir="${modelica_xmlbackend_aspects}">
+                <include name="**/*.ast" />
+                <include name="**/*.jrag" />
+                <include name="**/*.jadd" />
+            </fileset>
+            <fileset dir="${modelica_icons_aspects}">
+                <include name="**/*.ast" />
+                <include name="**/*.jrag" />
+                <include name="**/*.jadd" />
+            </fileset>
 			<fileset dir="${ide_aspects}">
 				<include name="**/*.ast" />
 				<include name="**/*.jrag" />
@@ -255,11 +261,16 @@
 
 	<!-- Copy required files from JModelica -->
 	<target name="copy">
-		<copy todir="${java_dir}">
-			<fileset dir="${modelica_frontend_dir}/java">
-				<include name="**/*" />
-			</fileset>
-		</copy>
+        <copy todir="${java_dir}">
+            <fileset dir="${modelica_frontend_dir}/java">
+                <include name="**/*" />
+            </fileset>
+        </copy>
+            <copy todir="${java_dir}">
+                <fileset dir="${modelica_icons_dir}/java">
+                    <include name="**/*" />
+                </fileset>
+            </copy>
 		<copy todir="${lib_dir}">
 			<fileset dir="${beaver_dir}">
 				<include name="beaver-rt*" />
@@ -334,7 +345,8 @@
 	<target name="cleanGen" depends="clean">
 		<delete dir="${package_dir}/generated" />
 		<delete dir="${package_dir}/modelica" />
-		<delete dir="${package_dir}/util" />
+        <delete dir="${package_dir}/icons" />
+        <delete dir="${package_dir}/util" />
 		<delete dir="${package_dir}/graph" />
 		<delete file="${lib_dir}/beaver-rt.jar" />
 		<delete file="${lib_dir}/beaver-rt-src.jar" />
