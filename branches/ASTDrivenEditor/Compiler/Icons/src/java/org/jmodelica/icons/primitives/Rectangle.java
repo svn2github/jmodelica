@@ -1,5 +1,8 @@
 
-package org.jmodelica.icons;
+package org.jmodelica.icons.primitives;
+
+import org.jmodelica.icons.coord.Extent;
+import org.jmodelica.icons.primitives.Types.BorderPattern;
 
 
 public class Rectangle extends FilledRectShape {

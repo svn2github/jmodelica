@@ -1,4 +1,4 @@
-package org.jmodelica.icons;
+package org.jmodelica.icons.primitives;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.xml.bind.DatatypeConverter;
+
+import org.jmodelica.icons.coord.Extent;
 
 public class Bitmap extends GraphicItem {
 

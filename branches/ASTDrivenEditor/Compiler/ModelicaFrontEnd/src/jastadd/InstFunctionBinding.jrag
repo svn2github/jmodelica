@@ -411,11 +411,10 @@ aspect InstFunctionBinding {
 	 * If function call was rewritten to a FBuiltinFunctionCall, then the InstFunctionArgument 
 	 * nodes describing them are gathered in originalArgs.
 	 */
-	boolean InstFunctionCall.rewritten = false;
 	rewrite InstFunctionCall {
-    	when (!rewritten) to FAbstractFunctionCall {
+    	when (!bound) to FAbstractFunctionCall {
 		    // Make sure we only do this once.
-		    rewritten = true;
+    		bound = true;
 
 		    // Get info
 		    InstClassDecl target = getName().myInstClassDecl();
@@ -486,7 +485,7 @@ aspect InstFunctionBinding {
 				} else {
 			    	InstFunctionCall ifc = new InstFunctionCall(getName(), new List());
 					ifc.unbindableArgs = unbindableArgs;
-					ifc.rewritten = true;
+					ifc.bound = true;
 					n = ifc;
 				}
 				for (InstFunctionArgument arg : temp)
@@ -497,6 +496,93 @@ aspect InstFunctionBinding {
 			return n;	
     	}
   	}
+	private boolean InstFunctionCall.bound = false;
+	
+	
+	/**
+	 * Calculate if this is a vectorized function call.
+	 */
+	rewrite InstFunctionCall {
+    	when (bound && !vectorizationChecked) to InstFunctionCall {
+    		vectorizationChecked = true;
+    		
+    		if (isFunctionCallClause() && myLefts().size() != 1)
+    			return this;
+    		if (getName().myInstClassDecl().isUnknown())
+    			return this;
+    		if (!hasOutputs() || myOutputs().get(0).isArray())
+    			return this;
+    		
+    		Size s = Size.SCALAR;
+    		for (InstFunctionArgument arg : getArgs()) 
+    			s = arg.combineVectorizationSize(s);
+    		if (s == null && s == Size.SCALAR)
+    			return this;
+    		
+    		InstFunctionCall res = new InstVectorFunctionCall(getName(), getArgs(), s);
+    		res.vectorizationChecked = res.bound = true;
+    		res.setLocation(this);
+    		return res;
+    	}
+	}
+	private boolean InstFunctionCall.vectorizationChecked = false;
+	
+	/**
+	 * Check if this argument can be a vectorized argument, given the 
+	 * results to calls to this function for previous arguments.
+	 * 
+	 * The argument <code>s</code> is the result from calls on other 
+	 * parameters. If <code>null</code>, then the return value will be 
+	 * <code>null</code>. If <code>Size.SCALAR</code>, then no vectorized 
+	 * arguments have been found so far. If any other size, then it is 
+	 * the vectorization size.
+	 * 
+	 * If this argument matches the size of the input, <code>s</code> 
+	 * is returned. If the function is definately not a correctly 
+	 * vectorized function, <code>null</code> is returned. Otherwise 
+	 * the vectorization size is returned.
+	 */
+	public Size InstFunctionArgument.combineVectorizationSize(Size s) {
+		return s;
+	}
+	
+	public Size InstPositionalArgument.combineVectorizationSize(Size s) {
+		return combineVectorizationSize(s, getFExp().size(), getBoundInput().size());
+	}
+	
+	public Size InstNamedArgument.combineVectorizationSize(Size s) {
+		return combineVectorizationSize(s, getFExp().size(), getBoundInput().size());
+	}
+
+	protected Size InstFunctionArgument.combineVectorizationSize(Size pre, Size exp, Size var) {
+		boolean func;
+		if (pre == null || exp.equivalent(var, func = inFunction()))
+			return pre;
+		if (var.ndims() >= exp.ndims())
+			return null;
+		Size res = exp.contract(0, var.ndims());
+		if (pre != Size.SCALAR && !pre.equivalent(res, func))
+			return null;
+		return res;
+	}
+
+	
+	/**
+	 * Check if this is an argument to a vectorized function call.
+	 */
+	inh boolean InstFunctionArgument.inVectorizedCall();
+	eq FAbstractFunctionCall.getChild().inVectorizedCall()  = false;
+	eq InstVectorFunctionCall.getChild().inVectorizedCall() = true;
+	
+	/**
+	 * Check if this is a vectorized function call.
+	 */
+	syn lazy boolean InstFunctionArgument.isVectorized() = false;
+	eq InstPositionalArgument.isVectorized()             = 
+		getFExp().ndims() > getBoundInput().ndims() && inVectorizedCall();
+	eq InstNamedArgument.isVectorized()                  = 
+		getFExp().ndims() > getBoundInput().ndims() && inVectorizedCall();
+	
 	
 	/**
 	 * \brief Replace initial node for construct "array(...)" with permanent one.

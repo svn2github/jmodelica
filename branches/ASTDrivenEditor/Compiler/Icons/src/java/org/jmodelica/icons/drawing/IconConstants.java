@@ -1,7 +1,7 @@
 package org.jmodelica.icons.drawing;
 
-import org.jmodelica.icons.FilledShape;
-import org.jmodelica.icons.Line;
+import org.jmodelica.icons.primitives.FilledShape;
+import org.jmodelica.icons.primitives.Line;
 
 
 

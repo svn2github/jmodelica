@@ -1,13 +1,17 @@
-package org.jmodelica.icons;
+package org.jmodelica.icons.primitives;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jmodelica.icons.Color;
-import org.jmodelica.icons.Types.Arrow;
-import org.jmodelica.icons.Types.FillPattern;
+import org.jmodelica.icons.coord.Extent;
+import org.jmodelica.icons.coord.Point;
 import org.jmodelica.icons.drawing.IconConstants;
+import org.jmodelica.icons.primitives.Color;
+import org.jmodelica.icons.primitives.Types.Arrow;
+import org.jmodelica.icons.primitives.Types.FillPattern;
+import org.jmodelica.icons.primitives.Types.LinePattern;
+import org.jmodelica.icons.primitives.Types.Smooth;
 
 public class Line extends GraphicItem {
 	

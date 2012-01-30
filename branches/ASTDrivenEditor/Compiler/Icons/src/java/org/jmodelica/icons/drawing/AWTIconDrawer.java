@@ -34,30 +34,25 @@ import java.util.Stack;
 
 import javax.imageio.ImageIO;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.graphics.RGB;
-import org.jmodelica.icons.Bitmap;
-import org.jmodelica.icons.Color;
 import org.jmodelica.icons.Component;
-import org.jmodelica.icons.Ellipse;
-import org.jmodelica.icons.Extent;
-import org.jmodelica.icons.FilledRectShape;
-import org.jmodelica.icons.FilledShape;
 import org.jmodelica.icons.Icon;
-import org.jmodelica.icons.Line;
-import org.jmodelica.icons.Point;
-import org.jmodelica.icons.Polygon;
-import org.jmodelica.icons.Rectangle;
-import org.jmodelica.icons.Text;
-import org.jmodelica.icons.Transformation;
-import org.jmodelica.icons.Types;
-import org.jmodelica.icons.Types.FillPattern;
-import org.jmodelica.icons.Types.LinePattern;
-import org.jmodelica.icons.Types.TextAlignment;
+import org.jmodelica.icons.coord.Extent;
+import org.jmodelica.icons.coord.Point;
+import org.jmodelica.icons.coord.Transformation;
 import org.jmodelica.icons.exceptions.CreateShapeFailedException;
+import org.jmodelica.icons.primitives.Bitmap;
+import org.jmodelica.icons.primitives.Color;
+import org.jmodelica.icons.primitives.Ellipse;
+import org.jmodelica.icons.primitives.FilledRectShape;
+import org.jmodelica.icons.primitives.FilledShape;
+import org.jmodelica.icons.primitives.Line;
+import org.jmodelica.icons.primitives.Polygon;
+import org.jmodelica.icons.primitives.Rectangle;
+import org.jmodelica.icons.primitives.Text;
+import org.jmodelica.icons.primitives.Types;
+import org.jmodelica.icons.primitives.Types.FillPattern;
+import org.jmodelica.icons.primitives.Types.LinePattern;
+import org.jmodelica.icons.primitives.Types.TextAlignment;
 
 
 public class AWTIconDrawer implements GraphicsInterface {
@@ -161,14 +156,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 		
 		icon.draw(this);
     }
-
-	/**	
-	 * Creates a BufferedImage representation of this object's ClassIcon.
-	 */
-
-	public BufferedImage getBufferedImage() {
-		return image;
-	}
 	
 	private double getAvgCurrentScaleFactor() {
 		return (
@@ -767,49 +754,9 @@ public class AWTIconDrawer implements GraphicsInterface {
 		);
 	}
 	
-	public BufferedImage getAWTImage() {
+	public BufferedImage getImage() {
 		return image;
 	}
-	
-	public Image getImage() {
-		ImageData imagedata = null;
-		if(image == null){
-			return null; 
-		}
-	    if(image.getColorModel() instanceof DirectColorModel) {
-	    	DirectColorModel colorModel
-	                = (DirectColorModel) image.getColorModel();
-	        PaletteData palette = new PaletteData(colorModel.getRedMask(),
-	                colorModel.getGreenMask(), colorModel.getBlueMask());
-	        	        
-	        imagedata = new ImageData(IconConstants.OUTLINE_IMAGE_SIZE,
-	        		IconConstants.OUTLINE_IMAGE_SIZE, colorModel.getPixelSize(),
-	                palette);
-	   
-	        
-	        int x = 0, y = 0;
-	        for (y = 0; y < imagedata.height; y++) 
-	        	imagedata.setAlpha(x, y, 0);
-	        
-	        y = imagedata.height-1;
-        	for (x = 0; x < imagedata.width; x++) 
-        		imagedata.setAlpha(x, y, 0);
-        	
-	        for (y = 0; y < image.getHeight(); y++) {
-	            for (x = 0; x < image.getWidth(); x++) {
-	            	int rgb = image.getRGB(x, y);
-	            	int pixel = palette.getPixel(new RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF));
-	            	imagedata.setPixel(x+1, y, pixel);
-	            	imagedata.setAlpha(x+1, y, (rgb >> 24) & 0xFF);
-	            }
-	        }
-	    }
-	    else {	
-	    	return null;
-	    }
-		ImageDescriptor desc = ImageDescriptor.createFromImageData(imagedata);
-		return desc.createImage(); 
-	}	
 
 	public Font setFont(Text text) {
 		

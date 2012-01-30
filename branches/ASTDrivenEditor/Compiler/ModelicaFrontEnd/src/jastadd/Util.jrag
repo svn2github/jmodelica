@@ -1567,6 +1567,7 @@ aspect FlatFunctionUtils {
       * \brief Check is this node is in a function.
       */
      inh boolean FQName.inFunction();
+     inh boolean InstFunctionArgument.inFunction();
      inh boolean InstAssignable.inFunction();
      inh boolean InstExternal.inFunction();
      inh boolean InstAccess.inFunction();

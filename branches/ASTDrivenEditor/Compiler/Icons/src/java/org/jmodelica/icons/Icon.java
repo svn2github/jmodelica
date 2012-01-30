@@ -2,8 +2,16 @@ package org.jmodelica.icons;
 
 import java.util.ArrayList;
 
+import org.jmodelica.icons.coord.CoordinateSystem;
+import org.jmodelica.icons.coord.Extent;
+import org.jmodelica.icons.coord.Point;
 import org.jmodelica.icons.drawing.GraphicsInterface;
 import org.jmodelica.icons.drawing.IconConstants.Context;
+import org.jmodelica.icons.primitives.Bitmap;
+import org.jmodelica.icons.primitives.FilledShape;
+import org.jmodelica.icons.primitives.GraphicItem;
+import org.jmodelica.icons.primitives.Line;
+import org.jmodelica.icons.primitives.Text;
 
 public class Icon {
 

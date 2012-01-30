@@ -1,4 +1,4 @@
-package org.jmodelica.icons;
+package org.jmodelica.icons.coord;
 
 
 public class Transformation {

@@ -1,6 +1,9 @@
 package org.jmodelica.icons;
 import java.util.ArrayList;
 
+import org.jmodelica.icons.coord.CoordinateSystem;
+import org.jmodelica.icons.primitives.GraphicItem;
+
 
 
 public class Layer {

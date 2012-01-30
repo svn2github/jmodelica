@@ -1462,13 +1462,25 @@ aspect FlatExpressions {
 			args.add(e.flatten(prefix));
 		FIdUse name = new FIdUse(new FQName(getName().myInstClassDecl().qualifiedName()));
 		Size[] sizes = new Size[myOutputs().size()];
-		FFunctionCall res = new FFunctionCall(name, args, sizes);
+		FFunctionCall res = createFFunctionCall(name, args, sizes);
 		if (isFunctionCallClause()) 
 			for (int i = 0; i < myLefts().size(); i++)
 				sizes[i] = myLefts().get(i).hasFExp() ? sizeOfOutput(i).flatten(prefix, res) : null;
 		else
 			sizes[0] = size().flatten(prefix, res);
 		return res;	
+	}
+
+	public FFunctionCall InstFunctionCall.createFFunctionCall(FIdUse name, List args, Size[] sizes) {
+		return new FFunctionCall(name, args, sizes);
+	}
+
+	public FFunctionCall InstVectorFunctionCall.createFFunctionCall(FIdUse name, List args, Size[] sizes) {
+		boolean[] vectorFlags = new boolean[myOutputs().size()];
+		int i = 0;
+		for (InstFunctionArgument e : getArgs())
+			vectorFlags[i++] = e.isVectorized();
+		return new FVectorFunctionCall(name, args, sizes, getSize(), vectorFlags);
 	}
 
 	public FExp InstFunctionArgument.flatten(FQName prefix) {
