@@ -1053,6 +1053,10 @@ aspect FlatExpressions {
 				               getRight().flatten(prefix));
 	}
 	
+	public FInitArrayStmt FInitArrayStmt.flatten(FQName prefix){
+		return new FInitArrayStmt((FIdUseExp) getFIdUseExp().flatten(prefix));
+	}
+	
 	public FFunctionCallStmt FFunctionCallStmt.flatten(FQName prefix) {
 		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
 		for (FFunctionCallLeft a : getLefts())

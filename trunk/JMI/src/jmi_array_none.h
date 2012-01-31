@@ -88,7 +88,7 @@ struct _jmi_dynamic_list {
 /* Dynamic record array creation macro */
 #define JMI_RECORD_ARRAY_DYNAMIC(type, arr, name, nd) \
     int name##_size[nd];\
-	arr name##_obj = { name##_size, (int) (nd), 0, 0 };\
+	arr name##_obj = { 0, (int) (nd), 0, 0 };\
 	arr* name = &name##_obj;
 
 /* Array initialization macros */
@@ -171,6 +171,7 @@ struct _jmi_dynamic_list {
 
 /* Dynamic array initialization macros */
 #define JMI_RECORD_ARRAY_DYNAMIC_INIT_1(type, name, ne, d1) \
+	name##_obj.size = name##_size;\
     name##_obj.var = (type*) malloc((int) ((ne) * sizeof(type)));\
     JMI_DYNAMIC_ADD_POINTER(name##_obj.var)\
     name##_obj.num_elems = (int) (ne);\

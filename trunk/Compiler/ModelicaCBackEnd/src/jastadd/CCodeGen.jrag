@@ -508,20 +508,35 @@ aspect CCodeGen {
 	
 	private FExp FFunctionVariable.dummyFExp = null;
 	
+	public void FFunctionVariable.setDummyExp() {
+		if (dummyFExp == null) 
+			dummyFExp = new FNoExp();
+		setBindingExp(dummyFExp);
+	}
+	
+	public void FFunctionVariable.resetDummyExp() {
+		if (dummyFExp != null)
+			setBindingExpOpt(new Opt());
+	}
+	
 	public void FFunctionVariable.printDeclOrInit_C(
 			Printer p, PrintStream str, String indent, String name, boolean decl) {
 		// This is a rather ugly hack, but we temporarily need an FExp that is in the tree
 		if (!hasBindingExp()) {
-			if (dummyFExp == null) 
-				dummyFExp = new FNoExp();
-			setBindingExp(dummyFExp);
+			setDummyExp();
+//			if (dummyFExp == null) 
+//				dummyFExp = new FNoExp();
+//			setBindingExp(dummyFExp);
 		}
 		if (decl)
 			type().printDecl_C(p, str, indent, name, getBindingExp());
 		else
-			type().printInit_C(p, str, indent, name, getBindingExp());
-		if (dummyFExp != null)
-			setBindingExpOpt(new Opt());
+			if (!hasInitArrayStmt)
+				type().printInit_C(p, str, indent, name, getBindingExp());
+		
+		resetDummyExp();
+//		if (dummyFExp != null)
+//			setBindingExpOpt(new Opt());
 	}	
 	
 	public void FFunctionVariable.prettyPrint_C(Printer p, PrintStream str, String indent) {
@@ -740,23 +755,58 @@ aspect CCodeGen {
 
 	
 	public void FExternalStmt.genVarDecls_C(Printer p, PrintStream str, String indent) {
-		super.genVarDecls_C(p, str, indent);
-		getFExternalLanguage().genVarDecls_C(p, str, indent, this);
+		FExternalLanguage lang = getFExternalLanguage();
+		lang.genVarDecls_C(p, str, indent, this);
+		lang.genFuncDecl(p, str, indent, this);
 	}
 	
 	public void FExternalLanguage.genVarDecls_C(
 			Printer p, PrintStream str, String indent, FExternalStmt stmt) {}
 	
+	public void FExp.genExtFortanVarDecls_C(Printer p, PrintStream str, String indent) {}
+	
+	public void FIdUseExp.genExtFortanVarDecls_C(Printer p, PrintStream str, String indent) {
+		FType type = type();
+		if (type.isInteger() || type.isReal() && ndims() > 1) 
+			// We need temp var if we have >2 dimensions (real) or int
+			type.printExternDecl_C(p, str, indent, tempName_C(), this);
+	}
+	
+	public void FExp.genExtCVarDecls_C(Printer p, PrintStream str, String indent) {}
+	
+	public void FIdUseExp.genExtCVarDecls_C(Printer p, PrintStream str, String indent) {
+		FType type = type();
+		if (type.isInteger()) 
+			// We need temp var if int
+			type.printExternDecl_C(p, str, indent, tempName_C(), this);
+	}
+	
+	public void FCExternalLanguage.genVarDecls_C(Printer p, PrintStream str, String indent, FExternalStmt stmt) {
+		for (FExp arg: stmt.getArgs()) {
+			arg.genExtCVarDecls_C(p, str, indent);
+		}
+	}
+	
 	public void FFortran77ExternalLanguage.genVarDecls_C(
 			Printer p, PrintStream str, String indent, FExternalStmt stmt) {
-		for (FExp arg: stmt.getArgs()) 
-			if (arg.ndims() > 1) // We need temp var if we have >2 dimensions
-				arg.type().printDecl_C(p, str, indent, arg.tempName_C(), arg);				
+		for (FExp arg: stmt.getArgs()) {
+			arg.genExtFortanVarDecls_C(p, str, indent);
+		}
 	}
 	
 	
 	public void FAlgorithmBlock.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		p.print(getFStatements(), str, indent);
+	}
+	
+	public void FInitArrayStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		FIdUseExp fexp = getFIdUseExp();
+		FType type = fexp.type();
+		// I know that myFV is an ffunctionvariable
+		FFunctionVariable fv = (FFunctionVariable) fexp.myFV();
+		fv.setDummyExp();
+		type.printInit_C(p, str, indent, fv.name_C(), fv.getBindingExp());
+		fv.resetDummyExp();
 	}
 	
 	public void FFunctionCallStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
@@ -1070,10 +1120,7 @@ aspect CCodeGen {
 		str.print("JMI_FALSE");
 	}
 	
-	public void FExternalStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		// Must generate extern function declaration for Fortran 77
-		getFExternalLanguage().genFuncDecl(p, str, indent, this);
-		
+	public void FExternalStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {		
 		// Generate temp arrays for all array inputs and outputs
 		// and transpose array for if array is input (Fortran 77 only)
 		getFExternalLanguage().genPreFuncCall(p, str, indent, this);
@@ -1102,9 +1149,9 @@ aspect CCodeGen {
 			this.function = function;
 		}
 		
-		public void genMatrixOp(Printer p, PrintStream str, String indent, String src, String dest) {
+		public void genMatrixOp(Printer p, PrintStream str, String indent, String arr, String src, String dest) {
 			str.print(indent + function + "(");
-			str.print(src + ", ");
+			str.print(arr + ", ");
 			str.print(src + "->var");
 			str.print(", " + dest + "->var");
 			str.print(");\n");				
@@ -1141,7 +1188,8 @@ aspect CCodeGen {
 			// create static or dynamic temp array
 			type().printExternInit_C(p, str, indent, tempName, this);
 			MatrixOp op = new MatrixOp("jmi_transpose_matrix");
-			op.genMatrixOp(p, str, indent, prettyPrint_C(indent), tempName);
+			String src = prettyPrint_C(indent);
+			op.genMatrixOp(p, str, indent, src, src, tempName);
 		}		
 	}
 	
@@ -1158,10 +1206,9 @@ aspect CCodeGen {
 			// if Fortran: cast to int and transpose (and copy - included in transpose)
 			// if c: cast to int and copy
 			MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_to_int") : new MatrixOp("jmi_transpose_matrix_to_int");
-			op.genMatrixOp(p, str, indent, prettyPrint_C(indent), tempName);			
+			String src = prettyPrint_C(indent);
+			op.genMatrixOp(p, str, indent, src, src, tempName);			
 		} else {
-			// create temp scalar
-			type().printExternDecl_C(p, str, indent, tempName, this);
 			// copy to temp and cast
 			str.print(indent + tempName + " = (int)");
 			p.print(this, str, indent);
@@ -1193,7 +1240,8 @@ aspect CCodeGen {
 			// generate tempname
 			String tempName = arg.tempName_C();
 			MatrixOp op = new MatrixOp("jmi_transpose_matrix");
-			op.genMatrixOp(p, str, indent, tempName, arg.prettyPrint_C(indent));
+			String dest = arg.prettyPrint_C(indent);
+			op.genMatrixOp(p, str, indent, dest, tempName, dest);
 		}		
 
 	}
@@ -1205,7 +1253,8 @@ aspect CCodeGen {
 			// if Fortran: cast to int and transpose (and copy - included in transpose)
 			// if c: cast to int and copy
 			MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_from_int") : new MatrixOp("jmi_transpose_matrix_from_int");
-			op.genMatrixOp(p, str, indent, tempName, arg.prettyPrint_C(indent));
+			String dest = arg.prettyPrint_C(indent);
+			op.genMatrixOp(p, str, indent, dest, tempName, dest);
 		} else {
 			// scalar, only copy needed
 			str.print(indent);

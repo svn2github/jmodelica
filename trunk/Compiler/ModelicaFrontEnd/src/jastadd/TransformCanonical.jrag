@@ -2511,12 +2511,23 @@ aspect TransformCanonical {
 		getFAlgorithmBlock().setFStatementList(stmts);
 	}
 	
+	protected boolean FFunctionVariable.hasInitArrayStmt = false;
+	
 	public void FFunctionVariable.genBindingAssignments(List<FStatement> stmts) {
 		if (!isInput() && hasBindingExp()) {
 			stmts.add(new FAssignStmt(getFQName().createFIdUse(), getBindingExp()));
 			setBindingExpOpt(new Opt());
 		}
 	}
+	
+	public void FFunctionArray.genBindingAssignments(List<FStatement> stmts) {
+		if (size().isUnknown() && !isInput() && !isOutput()) {
+			stmts.add(new FInitArrayStmt(getFQName().createFIdUseExp()));
+			hasInitArrayStmt = true;
+		}
+		super.genBindingAssignments(stmts);
+	}
+	
 	
 	public FExp FVariable.selectBindingFExp(FAttribute attr) {
 		if (attr != null && attr.hasValue())
@@ -4247,6 +4258,7 @@ aspect FunctionInlining {
 	 * Check if we can inline this statement.
 	 */
 	syn boolean FStatement.isInlinable() = false;
+	eq FInitArrayStmt.isInlinable()      = true;
 	eq FAssignStmt.isInlinable()         = true;
 	eq FReturnStmt.isInlinable()         = isLast();
 	// TODO: handle more types of stmts

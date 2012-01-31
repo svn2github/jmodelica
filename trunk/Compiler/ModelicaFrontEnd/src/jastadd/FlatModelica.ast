@@ -532,6 +532,11 @@ FBreakStmt : FStatement;
 FReturnStmt : FStatement;
 
 /**
+ * Class for array initalization statements.
+ */
+FInitArrayStmt : FStatement ::= FIdUseExp;
+
+/**
  * \brief Base class for flattened if and when statements.
  */
 abstract FIfWhenStmt : FStatement ::= FIfWhenClause*;

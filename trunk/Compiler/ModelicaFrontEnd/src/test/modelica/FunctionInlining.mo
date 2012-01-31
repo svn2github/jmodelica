@@ -357,10 +357,11 @@ equation
  function FunctionInlining.BasicInline6.f
   input Real[:] a;
   output Real[size(a, 1)] b;
-  Real[size(a, 1)] c;
+  Real[:] c;
   Real d;
   Real temp_1;
  algorithm
+  size(c) := {size(a, 1)};
   for i1 in 1:size(c, 1) loop
    c[i1] := a[i1];
   end for;
@@ -558,10 +559,11 @@ equation
  function FunctionInlining.BasicInline8.f2
   input Real[:] a;
   output Real[size(a, 1)] b;
-  Real[size(a, 1)] c;
+  Real[:] c;
   Real[size(a, 1)] temp_1;
   Real[size(c, 1)] temp_2;
  algorithm
+  size(c) := {size(a, 1)};
   for i1 in 1:size(c, 1) loop
    c[i1] := ( a[i1] ) * ( 2 );
   end for;
@@ -576,10 +578,11 @@ equation
  function FunctionInlining.BasicInline8.f1
   input Real[:] a;
   output Real[size(a, 1)] b;
-  Real[size(a, 1)] c;
+  Real[:] c;
   Real d;
   Real temp_1;
  algorithm
+  size(c) := {size(a, 1)};
   for i1 in 1:size(c, 1) loop
    c[i1] := a[i1];
   end for;

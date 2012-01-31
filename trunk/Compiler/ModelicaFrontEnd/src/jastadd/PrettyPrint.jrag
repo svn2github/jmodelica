@@ -902,8 +902,19 @@ aspect FlattPrettyPrint {
     		str.print(getFTypePrefixInputOutput());
     		str.print(" ");
     	}
-    	str.print(getType());
-		str.print(" ");
+    	if (hasInitArrayStmt) {
+    		str.print(getType().scalarType());
+    		str.print("[");
+    		for (int i = 0; i < ndims(); i++) {
+    			str.print(":");
+    			if (i < ndims()-1)
+    				str.print(",");
+    		}
+    		str.print("]");
+    	} else {
+    		str.print(getType());
+    	}
+    	str.print(" ");
     	str.print(name());
     	if (hasBindingExp()) {
     		str.print(" := ");
@@ -1127,6 +1138,12 @@ aspect FlattPrettyPrint {
 		str.print("(");
 		getArgs().prettyPrintWithSep(p, str, indent, ", ");
 		str.print(")");
+	}
+	
+	public void FInitArrayStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+		FFunctionVariable fv = (FFunctionVariable) getFIdUseExp().myFV();
+		str.print("size(" + fv.name() + ") := {");
+		str.print(fv.size().toUnclosedString() + "}");
 	}
 	
 	public void FExternalLanguage.prettyPrint(Printer p, PrintStream str, String indent) {
