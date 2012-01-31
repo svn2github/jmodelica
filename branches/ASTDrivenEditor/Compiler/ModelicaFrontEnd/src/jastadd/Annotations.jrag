@@ -57,7 +57,9 @@ aspect AnnotationAPI {
 	eq ShortClassDecl.annotation()          = getExtendsClauseShortClass().annotation();
 	eq ExtendsClauseShortClass.annotation() = getComment().annotation();
 	eq InstShortClassDecl.annotation()      = getClassDecl().annotation();
-	
+
+	eq ConnectClause.annotation() = getComment().annotation();
+
 	eq ComponentDecl.annotation()     = getComment().annotation();
 	eq InstComponentDecl.annotation() = getComponentDecl().annotation();
 	
@@ -68,14 +70,14 @@ aspect AnnotationAPI {
 	 */
 	syn AnnotationNode ASTNode.annotationNode()            = AnnotationNode.NO_ANNOTATION;
 	syn lazy AnnotationNode Modification.annotationNode()  = AnnotationNode.NO_ANNOTATION;
-	eq ClassModification.annotationNode()                  = new AnnotationNode.CMAnnotationNode(this);
-	eq ValueModification.annotationNode()                  = new AnnotationNode.VMAnnotationNode(this);
+	eq ClassModification.annotationNode()                  = new CMAnnotationNode(this);
+	eq ValueModification.annotationNode()                  = new VMAnnotationNode(this);
 	eq CompleteModification.annotationNode()               = getClassModification().annotationNode();
 	eq ComponentModification.annotationNode()              = 
 		hasModification() ? getModification().annotationNode() : AnnotationNode.NO_ANNOTATION;
-	syn lazy AnnotationNode Exp.annotationNode()           = new AnnotationNode.EAnnotationNode(this);
-	eq FunctionCall.annotationNode()                       = new AnnotationNode.FCAnnotationNode(this);
-	syn lazy AnnotationNode NamedArgument.annotationNode() = new AnnotationNode.NAAnnotationNode(this);
+	syn lazy AnnotationNode Exp.annotationNode()           = new EAnnotationNode(this);
+	eq FunctionCall.annotationNode()                       = new FCAnnotationNode(this);
+	syn lazy AnnotationNode NamedArgument.annotationNode() = new NAAnnotationNode(this);
 	
 	/**
 	 * \brief Describes a node in the tree formed by an annotation.
@@ -275,175 +277,175 @@ aspect AnnotationAPI {
 			
 		}
 		
-		/**
-		 * \brief Represents an annotation that is represented in the source tree by a ClassModification.
-		 */
-		public static class CMAnnotationNode extends AnnotationNode {
-			
-			private ClassModification mod;
-			
-			public CMAnnotationNode(ClassModification cm) {
-				mod = cm;
-			}
+	}
+	
+	/**
+	 * \brief Represents an annotation that is represented in the source tree by a ClassModification.
+	 */
+	public class CMAnnotationNode extends AnnotationNode {
+		
+		private ClassModification mod;
+		
+		public CMAnnotationNode(ClassModification cm) {
+			mod = cm;
+		}
 
-			public Iterator<AnnotationNode> iterator() {
-				return new AnnotationIterator(mod.getArguments());
-			}
-			
-			public String name() {
-				return mod.annotationName();
-			}
-			
-			protected AnnotationNode forPath(String[] path, int i) {
-				if (i >= path.length)
-					return this;
-				for (Argument arg : mod.getArguments()) 
-					if (arg.matches(path[i])) 
-						return arg.annotationNode().forPath(path, i+1);
-				return NO_ANNOTATION;
-			}
-
-			protected ASTNode ast() {
-				return mod;
-			}
-
+		public Iterator<AnnotationNode> iterator() {
+			return new AnnotationIterator(mod.getArguments());
 		}
 		
-		/**
-		 * \brief Represents an annotation that is represented in the source tree by a FunctionCall.
-		 */
-		public static class FCAnnotationNode extends AnnotationNode {
-			
-			private FunctionCall call;
-			
-			public FCAnnotationNode(FunctionCall fc) {
-				call = fc;
-			}
-
-			public Iterator<AnnotationNode> iterator() {
-				return new AnnotationIterator(new ChainedIterator(
-						call.getFunctionArguments().getExps().iterator(), 
-						call.getFunctionArguments().getNamedArguments().iterator()));
-			}
-			
-			public String name() {
-				return call.getName().name();
-			}
-			
-			protected AnnotationNode forPath(String[] path, int i) {
-				if (i >= path.length)
-					return this;
-				for (NamedArgument arg : call.getFunctionArguments().getNamedArguments()) 
-					if (arg.matches(path[i])) 
-						return arg.annotationNode().forPath(path, i+1);
-				return NO_ANNOTATION;
-			}
-			
-			protected ASTNode ast() {
-				return call;
-			}
-			
+		public String name() {
+			return mod.annotationName();
 		}
 		
-		protected static abstract class ExpAnnotationNode extends AnnotationNode {
-			
-			protected abstract Exp exp();
-			
-			public String string() {
-				return exp().avalueString();
-			}
+		protected AnnotationNode forPath(String[] path, int i) {
+			if (i >= path.length)
+				return this;
+			for (Argument arg : mod.getArguments()) 
+				if (arg.matches(path[i])) 
+					return arg.annotationNode().forPath(path, i+1);
+			return NO_ANNOTATION;
+		}
 
-			public boolean isValue() {
-				return !exp().isAnnotationExp();
-			}
-			
-			public ArrayList<String> stringList() {
-				return exp().avalueStringList();
-			}
+		protected ASTNode ast() {
+			return mod;
+		}
 
-			public Iterator<AnnotationNode> iterator() {
-				return isValue() ? super.iterator() : new AnnotationIterator(exp().annotationList());
-			}
-			
-			public double real() {
-				return exp().avalueReal();
-			}
-			
-			public double[] realVector() {
-				return exp().avalueRealVector();
-			}
-			
-			public double[][] realMatrix() {
-				return exp().avalueRealMatrix();
-			}
+	}
+	
+	/**
+	 * \brief Represents an annotation that is represented in the source tree by a FunctionCall.
+	 */
+	public class FCAnnotationNode extends AnnotationNode {
+		
+		private FunctionCall call;
+		
+		public FCAnnotationNode(FunctionCall fc) {
+			call = fc;
+		}
 
-			public boolean bool() {
-				return exp().avalueBool();
-			}
-			
-			protected ASTNode ast() {
-				return exp();
-			}
-
+		public Iterator<AnnotationNode> iterator() {
+			return new AnnotationIterator(new ChainedIterator(
+					call.getFunctionArguments().getExps().iterator(), 
+					call.getFunctionArguments().getNamedArguments().iterator()));
 		}
 		
-		/**
-		 * \brief Represents an annotation that is represented in the source tree by a ValueModification.
-		 */
-		public static class VMAnnotationNode extends ExpAnnotationNode {
-			
-			private ValueModification mod;
-			
-			public VMAnnotationNode(ValueModification vm) {
-				mod = vm;
-			}
-			
-			protected Exp exp() {
-				return mod.getExp();
-			}
-			
-			public String name() {
-				return mod.annotationName();
-			}
-			
+		public String name() {
+			return call.getName().name();
 		}
 		
-		/**
-		 * \brief Represents an annotation that is represented in the source tree by a NamedArgument.
-		 */
-		public static class NAAnnotationNode extends ExpAnnotationNode {
-			
-			private NamedArgument arg;
-			
-			public NAAnnotationNode(NamedArgument na) {
-				arg = na;
-			}
-			
-			protected Exp exp() {
-				return arg.getExp();
-			}
-			
-			public String name() {
-				return arg.getName().name();
-			}
-			
+		protected AnnotationNode forPath(String[] path, int i) {
+			if (i >= path.length)
+				return this;
+			for (NamedArgument arg : call.getFunctionArguments().getNamedArguments()) 
+				if (arg.matches(path[i])) 
+					return arg.annotationNode().forPath(path, i+1);
+			return NO_ANNOTATION;
 		}
 		
-		/**
-		 * \brief Represents an annotation that is represented in the source tree by an Exp.
-		 */
-		public static class EAnnotationNode extends ExpAnnotationNode {
-			
-			private Exp e;
-			
-			public EAnnotationNode(Exp exp) {
-				e = exp;
-			}
-			
-			protected Exp exp() {
-				return e;
-			}
-			
+		protected ASTNode ast() {
+			return call;
+		}
+		
+	}
+	
+	abstract class ExpAnnotationNode extends AnnotationNode {
+		
+		protected abstract Exp exp();
+		
+		public String string() {
+			return exp().avalueString();
+		}
+
+		public boolean isValue() {
+			return !exp().isAnnotationExp();
+		}
+		
+		public ArrayList<String> stringList() {
+			return exp().avalueStringList();
+		}
+
+		public Iterator<AnnotationNode> iterator() {
+			return isValue() ? super.iterator() : new AnnotationIterator(exp().annotationList());
+		}
+		
+		public double real() {
+			return exp().avalueReal();
+		}
+		
+		public double[] realVector() {
+			return exp().avalueRealVector();
+		}
+		
+		public double[][] realMatrix() {
+			return exp().avalueRealMatrix();
+		}
+
+		public boolean bool() {
+			return exp().avalueBool();
+		}
+		
+		protected ASTNode ast() {
+			return exp();
+		}
+
+	}
+	
+	/**
+	 * \brief Represents an annotation that is represented in the source tree by a ValueModification.
+	 */
+	public class VMAnnotationNode extends ExpAnnotationNode {
+		
+		private ValueModification mod;
+		
+		public VMAnnotationNode(ValueModification vm) {
+			mod = vm;
+		}
+		
+		protected Exp exp() {
+			return mod.getExp();
+		}
+		
+		public String name() {
+			return mod.annotationName();
+		}
+		
+	}
+	
+	/**
+	 * \brief Represents an annotation that is represented in the source tree by a NamedArgument.
+	 */
+	public class NAAnnotationNode extends ExpAnnotationNode {
+		
+		private NamedArgument arg;
+		
+		public NAAnnotationNode(NamedArgument na) {
+			arg = na;
+		}
+		
+		protected Exp exp() {
+			return arg.getExp();
+		}
+		
+		public String name() {
+			return arg.getName().name();
+		}
+		
+	}
+	
+	/**
+	 * \brief Represents an annotation that is represented in the source tree by an Exp.
+	 */
+	public class EAnnotationNode extends ExpAnnotationNode {
+		
+		private Exp e;
+		
+		public EAnnotationNode(Exp exp) {
+			e = exp;
+		}
+		
+		protected Exp exp() {
+			return e;
 		}
 		
 	}

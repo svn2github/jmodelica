@@ -97,6 +97,14 @@ aspect AnnotationParsing {
 			throw new FailedConstructionException("Placement");
 		}
 		
+		public Connection createConnection() throws FailedConstructionException {
+			AnnotationNode lineAnnotation = forPath("Line");
+			if (lineAnnotation.exists()) {
+				return (Connection) lineAnnotation.createLine(true);
+			}
+			throw new FailedConstructionException("Placement");
+		}
+		
 		public boolean hasPlacement() {
 			return forPath("Placement").exists();
 		}
@@ -325,7 +333,23 @@ aspect AnnotationParsing {
 		*/
 		private Line createLine() 
 				throws FailedConstructionException, NotEnoughParametersException {
-			Line line = new Line();
+			return createLine(false);
+		}
+		
+		/**
+		* Create a Line primitive that is represented by this AnnotationNode uses 
+		* 	default values for the attributes if the attributes are not set.
+		* @param boolean Set to true is this is a connectionline
+		* @return the created Line primitive
+		* @throws NotEnoughParametersException if two points were not given.
+		*/
+		private Line createLine(boolean isConnection) 
+				throws FailedConstructionException, NotEnoughParametersException {
+			Line line;
+			if (isConnection) 
+				line = new Connection();
+			else
+				line = new Line();
 			initializeGraphicItem(line);
 			boolean pointsSet = false;
 			for (AnnotationNode a : this) {

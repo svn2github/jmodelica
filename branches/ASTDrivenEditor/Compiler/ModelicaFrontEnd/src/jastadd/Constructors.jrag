@@ -56,9 +56,9 @@ aspect Constructors {
 	/**
 	 * \brief Constructs a connection clause that is not initial.
 	 */
-	public FConnectClause.FConnectClause(Opt<FStringComment> comment, FIdUseInstAccess left, FIdUseInstAccess right) {
-		this(new FNormalEquation(), comment, left, right);
-	}
+//	public FConnectClause.FConnectClause(Opt<FStringComment> comment, FIdUseInstAccess left, FIdUseInstAccess right) {
+//		this(new FNormalEquation(), comment, left, right);
+//	}
 	
 	/**
 	 * \brief Constructs a for clause equation that is not initial.

@@ -1546,7 +1546,7 @@ aspect InstantiatedExpressions {
 		   o = new Opt(new FStringComment(getComment().getStringComment().getComment()));
 	    else
 	    	o = new Opt();
-		FConnectClause c = new FConnectClause(equationType(), o, 
+		FConnectClause c = new FConnectClause(equationType(), o, this,
 				new FIdUseInstAccess(getConnector1().newInstAccess()),
 				new FIdUseInstAccess(getConnector2().newInstAccess()));
 		c.setLocation(this);

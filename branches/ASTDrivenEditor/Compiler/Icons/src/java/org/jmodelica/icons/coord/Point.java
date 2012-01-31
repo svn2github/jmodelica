@@ -1,33 +1,45 @@
 package org.jmodelica.icons.coord;
 
+import org.jmodelica.icons.listeners.Observable;
+import org.jmodelica.icons.listeners.PointListener;
 
-
-public class Point
-{
-	private double x; 
+public class Point extends Observable<PointListener> {
+	private double x;
 	private double y;
-	
+
 	public Point() {
-		x = 0;
-		y = 0;
+		this(0, 0);
 	}
-	public Point(double x, double y) {	
-		this.x = x;
-		this.y = y;
+
+	public Point(double x, double y) {
+		setX(x);
+		setY(y);
 	}
-	public void setY(double y) {
-		this.y = y;
+
+	public void setY(double newY) {
+		if (y == newY)
+			return;
+		y = newY;
+		for (PointListener l : getListeners())
+			l.pointYCordUpdated(this);
 	}
+
 	public double getY() {
 		return y;
 	}
-	public void setX(double x) {
-		this.x = x;
+
+	public void setX(double newX) {
+		if (x == newX)
+			return;
+		x = newX;
+		for (PointListener l : getListeners())
+			l.pointXCordUpdated(this);
 	}
+
 	public double getX() {
 		return x;
 	}
-	
+
 	public Point clone() {
 		return new Point(x, y);
 	}
@@ -42,9 +54,9 @@ public class Point
 		Point p = (Point) obj;
 		return x == p.x && y == p.y;
 	}
-	
+
 	public String toString() {
 		return "{" + x + "},{" + y + "}";
 	}
-	
+
 }

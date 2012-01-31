@@ -1,0 +1,75 @@
+
+
+aspect AnnotationEditing {
+	public void AnnotationNode.setReal(double value) {
+		
+	}
+	
+	public void ExpAnnotationNode.setReal(double value) {
+		
+	}
+	
+	public void AnnotationNode.setRealVector(double[] values) {}
+	
+	public void ExpAnnotationNode.setRealVector(double[] values) {
+		setExp(createRealVecor(values));
+	}
+	
+	public void AnnotationNode.setRealMatrix(double[][] values) {}
+	
+	public void ExpAnnotationNode.setRealMatrix(double[][] values) {
+		setExp(createRealMatrix(values));
+	}
+	
+	public Exp ExpAnnotationNode.createNumExp(double value) {
+		boolean neg = false;
+		if (value < 0) {
+			value = -value;
+			neg = true;
+		}
+		Exp e;
+		if ((int)value == value) {
+			e = new IntegerLitExp(Integer.toString((int)value));
+		} else {
+			e = new RealLitExp(Double.toString(value));
+		}
+		if (neg) {
+			e = new NegExp(e);
+		}
+		return e;
+	}
+	
+	public Exp ExpAnnotationNode.createRealVecor(double[] values) {
+		FunctionArguments funcArgs = new FunctionArguments();
+		for (double v : values) {
+			funcArgs.addExp(createNumExp(v));
+		}
+		return new ArrayConstructor(funcArgs);
+	}
+	
+	public Exp ExpAnnotationNode.createRealMatrix(double[][] values) {
+		FunctionArguments funcArgs = new FunctionArguments();
+		for (double[] v : values) {
+			funcArgs.addExp(createRealVecor(v));
+		}
+		return new ArrayConstructor(funcArgs);
+	}
+	
+	protected abstract void ExpAnnotationNode.setExp(Exp exp);
+	
+	protected void EAnnotationNode.setExp(Exp exp) {
+		e = exp;
+	}
+	
+	protected void NAAnnotationNode.setExp(Exp exp) {
+		arg.setExp(exp);
+	}
+	
+	protected void VMAnnotationNode.setExp(Exp exp) {
+		mod.setExp(exp);
+	}
+	
+	public void AnnotationNode.setPoint(Point point) {
+		
+	}
+}
