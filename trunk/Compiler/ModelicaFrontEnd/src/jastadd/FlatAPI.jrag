@@ -1206,6 +1206,7 @@ aspect FlatTypes {
 	syn boolean FExp.isComposite()              = isArray() || type().isRecord();
 	syn boolean FType.isComposite()             = isArray() || isRecord();
 	syn boolean AbstractFVariable.isComposite() = isArray() || isRecord();
+	syn boolean InstComponentDecl.isComposite() = isArray() || isRecord();
 	
 	inh boolean AbstractFVariable.inRecord();
 	eq FRecordDecl.getChild().inRecord() = true;

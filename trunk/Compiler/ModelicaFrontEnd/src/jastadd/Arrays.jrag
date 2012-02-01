@@ -215,10 +215,20 @@ aspect Arrays {
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	eq FNdimsExp.ndims() = 0;
 	
-	eq FInfArgsFunctionCall.ndims() = getNumFExp();
-	eq FFillExp.ndims()             = getNumFExp() + getFillExp().ndims();
-	eq FFunctionCall.ndims()        = hasOutputs() ? expOutput().ndims() : -1;
-	eq InstFunctionCall.ndims()     = hasOutputs() ? expOutput().ndims() : -1;
+	eq FInfArgsFunctionCall.ndims()   = getNumFExp();
+	eq FFillExp.ndims()               = getNumFExp() + getFillExp().ndims();
+	eq FFunctionCall.ndims()          = hasOutputs() ? expOutput().ndims() : -1;
+	eq FVectorFunctionCall.ndims()    = size().ndims();
+	eq InstFunctionCall.ndims()       = hasOutputs() ? expOutput().ndims() : -1;
+	eq InstVectorFunctionCall.ndims() = getDims();
+	
+	/**
+	 * Get array dimensions of function argument.
+	 */
+	syn int InstFunctionArgument.ndims() = -1;
+	eq InstDefaultArgument.ndims()       = getFExp().ndims();
+	eq InstPositionalArgument.ndims()    = getFExp().ndims();
+	eq InstNamedArgument.ndims()         = getFExp().ndims();
 	
 	eq FBinExp.ndims() = getLeft().ndims();
 	eq FUnaryExp.ndims() = getFExp().ndims();
@@ -765,6 +775,55 @@ aspect Arrays {
 			return s;
 		}
 	}
+	eq InstVectorFunctionCall.sizeOfOutput(int i) = 
+		(i == 0) ? vectorizedSize() : super.sizeOfOutput(i);
+
+	/**
+	 * Return the size the function call is expanded to. This is the size of the 
+	 * entire function call, and the size of a vectorized argument to a scalar input.
+	 * 
+	 * If arguments doesn't match, the size matching the most arguments is returned.
+	 */
+	syn lazy Size InstVectorFunctionCall.vectorizedSize() {
+		boolean func = inFunction();
+		int tot = getNumArg(), n = 0, ndims = ndims();
+		Size[] candidates = new Size[tot];
+		int[] freq = new int[tot];
+		
+		for (InstFunctionArgument arg : getArgs()) {
+			if (arg.isVectorized()) {
+				Size s = arg.size().contractRight(ndims);
+				for (int i = 0; i < n && s != null; i++) {
+					if (!candidates[i].equivalent(s, func)) {
+						if (func && candidates[i].isUnknown())
+							candidates[i] = candidates[i].createKnown(s);
+						s = null;
+						freq[i]++;
+					}
+				}
+				if (s != null)
+					candidates[n++] = s;
+			}
+		}
+	
+		int index = 0;
+		for (int i = 1; i < n; i++) 
+			if (freq[index] < freq[i]) 
+				index = i;
+		return candidates[index];
+	}
+	
+	inh Size InstFunctionArgument.vectorizedSize();
+	eq FAbstractFunctionCall.getChild().vectorizedSize() = Size.SCALAR;
+	eq InstVectorFunctionCall.getArg().vectorizedSize()  = vectorizedSize();
+	
+	/**
+	 * Get array sizes of function argument.
+	 */
+	syn Size InstFunctionArgument.size() = null;
+	eq InstDefaultArgument.size()        = getFExp().size();
+	eq InstPositionalArgument.size()     = getFExp().size();
+	eq InstNamedArgument.size()          = getFExp().size();
 	
 	syn Size FFunctionCall.sizeOfOutput(int i) = getSizes()[i];
 	
@@ -1363,6 +1422,20 @@ aspect Arrays {
 		return arr;
 	}
 	
+	eq FVectorFunctionCall.getArray() {
+		Array arr = new Array(indices());
+		Size[] sizes = (Size[]) getSizes().clone();
+		sizes[0] = Size.SCALAR;
+		
+		for (Index i : arr.indices()) {
+			List<FExp> args = new List<FExp>();
+			for (FExp arg : getArgs())
+				args.add(arg.getArray().subArrayFExp(i));
+			arr.set(i, new FFunctionCall(getName().fullCopy(), args, sizes));
+		}
+		return arr;
+	}
+	
 	/**
 	 * \brief Add a copy of this expression to arr at position i. 
 	 */
@@ -1951,7 +2024,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Check if all lengths have a value (fix length or integer).
+		 * \brief Check if all lengths have a value (fix length or expression).
 		 */
 		public boolean isComplete() {
 			for (int i = 0; i < size.length; i++)
@@ -2029,14 +2102,33 @@ aspect ArrayHelpers {
 		}
 		
 		/**
+		 * Return a Size that have the same lengths as this size where they are known, 
+		 * and any that are unknown int this size but known in <code>s</code> is copied from there. 
+		 */
+		public Size createKnown(Size s) {
+			Size known = clone();
+			for (int i = 0; i < size.length; i++)
+				if (known.size[i] == UNKNOWN && s.size[i] != UNKNOWN)
+					known.set(i, s.size[i]);
+			return known;
+		}
+		
+		/**
+		 * Sets length <code>i</code> to <code>s</code>.
+		 */
+		protected void set(int i, int s) {
+			size[i] = s;
+		}
+		
+		/**
 		 * \brief For each unknown length, copy the equivalent length from size of <code>exp</code>. 
 		 * 
-		 * If the size of <code>exp</code> have more dimensions, the last part is assumed to match this size.
+		 * If the size of <code>exp</code> have more dimensions than this, the last part is ignored.
 		 */
 		protected void fillUnknownFrom(FExp exp) {
 			Size other = exp.size();
 			if (other.size.length >= size.length)
-				for (int i = 0, j = other.size.length - size.length; i < size.length; i++, j++) 
+				for (int i = 0; i < size.length; i++) 
 					if (!hasValue(i))
 						copyFrom(i, exp, i);
 		}
@@ -2581,11 +2673,11 @@ aspect ArrayHelpers {
 				res = new FMulExp(res, new FIntegerLitExp(known));
 			return res;
 		}
-		
+
 		/**
-		 * \brief For each unknown length, copy the equivalent length from <code>other</code>. 
+		 * For each unknown length, copy the equivalent length from the size of <code>exp</code>. 
 		 * 
-		 * If <code>other</code> have more dimensions, the last part is assumed to match this size.
+		 * If <code>exp</code> has more dimensions, the last part is assumed to match this size.
 		 */
 		public void makeKnown(FExp exp) {
 			fillUnknownFrom(exp);
@@ -2699,7 +2791,7 @@ aspect ArrayHelpers {
 			if (ndims() < 2)
 				return new AIterator();
 			else
-				return new AIterator(i.first(), size().get(1));
+				return createMatrixRowIterator(i.first(), size().get(1));
 		}
 		
 		/**
@@ -2719,7 +2811,7 @@ aspect ArrayHelpers {
 			if (ndims() < 2)
 				return new AIterator();
 			else
-				return new AIterator(i.last(), size().get(1), size().get(0));
+				return createMatrixColIterator(i.last(), size().get(1), size().get(0));
 		}
 		
 		/**
@@ -2814,12 +2906,52 @@ aspect ArrayHelpers {
 	    protected FExp buildFArray(ElementBuilder builder) {
 	    	return buildFArray(iteratorFExp(), builder, 0);
 	    }
+	    
+	    /**
+	     * Create an FExp describing the part of this array indicated by <code>i</code>.
+	     * 
+	     * If <code>i</code> has fewer dimensions than this, an FArray is created.
+	     * Otherwise a copy of a specific cell is returned. 
+	     */
+	    public FExp subArrayFExp(Index i) {
+	    	if (i.ndims() >= ndims())
+	    		return get(i).fullCopy();
+	    	
+	    	Index j = i.promote(ndims());
+	    	int start = j.internal(indices);
+	    	Iterator<FExp> it = new AIterator(start, 1, length - start);
+	    	return buildFArray(it, new IdentityBuilder(), ndims() - i.ndims());
+	    }
+		
+		/**
+		 * Create an iterator that iterates over a row. Assumes the Array is a matrix.
+		 */
+		private AIterator createMatrixRowIterator(int row, int width) {
+			return new AIterator((row - 1) * width, 1, width);
+		}
+		
+		/**
+		 * Create an iterator that iterates over a column. Assumes the Array is a matrix.
+		 */
+		private AIterator createMatrixColIterator(int col, int width, int height) {
+			return new AIterator(col - 1, width, height);
+		}
+
 		
 	    /**
 	     * \brief Discribes the helper object for {@link #buildFArray(Iterator<FExp>,ElementBuilder,int)}. 
 	     */
 	    protected interface ElementBuilder {
 	    	public FExp build(FExp e);
+	    }
+	    
+	    /**
+	     * Builder for buildFArray(), that returns a straight copy of the FExp.
+	     */
+	    public class IdentityBuilder implements ElementBuilder {
+	    	public FExp build(FExp exp) {
+	    		return exp.fullCopy();
+	    	}
 	    }
 		
 	    
@@ -2843,21 +2975,13 @@ aspect ArrayHelpers {
 			}
 			
 			/**
-			 * Create an iterator that iterates over a row. Assumes the Array is a matrix.
+			 * Create an iterator that iterates over a consecutive strech of the elements 
+			 * in the Array. 
 			 */
-			public AIterator(int row, int width) {
-				s = (row - 1) * width;
-				l = 1;
-				n = width;
-			}
-			
-			/**
-			 * Create an iterator that iterates over a column. Assumes the Array is a matrix.
-			 */
-			public AIterator(int col, int width, int height) {
-				s = col - 1;
-				l = width;
-				n = height;
+			public AIterator(int start, int step, int number) {
+				s = start;
+				l = step;
+				n = number;
 			}
 			
 			public boolean hasNext() {
@@ -3023,6 +3147,16 @@ aspect ArrayHelpers {
 			Index copy = new Index(index.length - level);
 			System.arraycopy(index, level, copy.index, 0, copy.index.length);
 			return copy;
+		}
+		
+		/**
+		 * Creates a new Index that is a copy of this Index, but promoted to <code>ndims</code> 
+		 * dimensions by adding ones to the end.
+		 * 
+		 * The new Index will not be bound to any Indices object.
+		 */
+		public Index promote(int ndims) {
+			return adjusted(0, 0, ndims);
 		}
 		
 		/**

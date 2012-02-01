@@ -1330,6 +1330,11 @@ aspect Scalarization {
 		}
 	}
 	
+	public void FVectorFunctionCall.createArrayTemporaries(List clauses, 
+			List vars, Map<String,FExp> indexMap, boolean addVar) {
+		getArray().createArrayTemporaries(clauses, vars, indexMap, addVar);
+	}
+	
 	public void FSubscriptedExp.createArrayTemporaries(List clauses, 
 			List vars, Map<String,FExp> indexMap, boolean addVar) {
 		super.createArrayTemporaries(clauses, vars, indexMap, addVar);
@@ -1485,9 +1490,19 @@ aspect Scalarization {
 	public void FType.createTempCellFVariables(List vars, FQName name, boolean param) {
 		FQName fqn = name.fullCopy();
 		fqn.scalarized = true;
-		vars.add(createFVariable(new FTemporaryVisibilityType(), fqn, param));
+		vars.add(createTempFVariable(fqn, param));
 	}
 	
+	
+	/**
+	 * \brief Creates a new temporary variable with the given name.
+	 * 
+	 * All optional children in the new variable are empty.
+	 * If param is true, then variability is parameter, otherwise continous.
+	 */
+	public FVariable FType.createTempFVariable(FQName name, boolean param) {
+		return createFVariable(new FTemporaryVisibilityType(), name, param);
+	}
 	
 	/**
 	 * \brief Creates a new variable with the given visibility and name.
@@ -1497,6 +1512,17 @@ aspect Scalarization {
 	 */
 	public FVariable FType.createFVariable(FVisibilityType fvt, FQName name, boolean param) {
 		return createFVariable(fvt, name, param ? new FParameter() : new FContinuous());
+	}
+	
+	/**
+	 * \brief Creates a new temporary variable with the given visibility, name and visibility.
+	 * 
+	 * All optional children in the new variable are empty.
+	 * 
+	 * Default implementation returns <code>null</code>.
+	 */
+	public FVariable FType.createTempFVariable(FQName name, FTypePrefixVariability variability) {
+		return createFVariable(new FTemporaryVisibilityType(), name, variability);
 	}
 	
 	/**

@@ -4085,11 +4085,10 @@ aspect FunctionInlining {
 		 */
 		public FVariable addVarAndEqn(String oldName, FExp value) {
 			FTypePrefixVariability variability = value.variability().fullCopy();
-			FVisibilityType visibility = new FTemporaryVisibilityType();
 			FQName name = new FQName(fc.nextTempVarName());
 			if (value.isArray())
 				name.setLastFArraySubscripts(value.size().flattenFArraySubscripts(new FQName()));
-			FVariable var = value.type().createFVariable(visibility, name, variability);
+			FVariable var = value.type().createTempFVariable(name, variability);
 			vars.add(var);
 			vars.getChild(vars.getNumChild() - 1);
 			

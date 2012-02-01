@@ -483,17 +483,23 @@ aspect FlatTypeCheck {
   eq FFunctionCallStmt.getChild().functionCallDecription()     = getCall().functionCallDecription();
   
   public void InstFunctionArgument.typeCheck() {
-	  if (!getFExp().type().isUnknown() && (getBoundInput() == null || !getBoundInput().type().isUnknown())) {
-		  FType type = getFExp().type();
-		  boolean typeOk;
-		  if (argumentDefinedTypeValid()) 
-			  typeOk = getBoundInput().type().typeCompatible(type, true);		  
-		  else
+	  boolean typeOk = true;
+	  FType type = getFExp().type();
+	  if (!type.isUnknown()) {
+		  if (argumentDefinedTypeValid()) {
+			  FType boundType = getBoundInput().type();
+			  if (!boundType.isUnknown()) {
+				  if (isVectorized()) 
+					  boundType = boundType.sizedType(boundType.size().expand(vectorizedSize()));
+				  typeOk = boundType.typeCompatible(type, true);
+			  }
+		  } else {
 			  typeOk = argumentTypeValid(type);
-		  if (!typeOk) {
-			  error(functionCallDecription() + ": types of " + argumentDesc() + 
-					  " and input " + getBoundInput().name() + " are not compatible");
 		  }
+	  }
+	  if (!typeOk) {
+		  error(functionCallDecription() + ": types of " + argumentDesc() + 
+				  " and input " + getBoundInput().name() + " are not compatible");
 	  }
   }
   
