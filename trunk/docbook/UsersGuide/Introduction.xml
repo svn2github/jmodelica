@@ -18,20 +18,20 @@
     main objective of the project is to create an industrially viable open
     source platform for optimization of Modelica models, while offering a
     flexible platform serving as a virtual lab for algorithm development and
-    research. As such, JModelica.org is intended to provide a platform for
-    technology transfer where industrially relevant problems can inspire new
-    research and where state of the art algorithms can be propagated form
-    academia into industrial use. JModelica.org is a result of research at the
-    Department of Automatic Control, Lund University,
-    <citation>Jak2007</citation>and is now maintained and developed by Modelon
-    AB in collaboration with academia.</para>
+    research. JModelica.org is intended to provide a platform for technology
+    transfer where industrially relevant problems can inspire new research and
+    where state of the art algorithms can be propagated form academia into
+    industrial use. JModelica.org is a result of research at the Department of
+    Automatic Control, Lund University, <citation>Jak2007</citation>and is now
+    maintained and developed by Modelon AB in collaboration with
+    academia.</para>
   </section>
 
   <section>
     <title>Mission Statement</title>
 
     <para>To offer a community-based, free, open source, accessible, user and
-    application oriented Modelica environment for optimization and simulation
+    application-oriented Modelica environment for optimization and simulation
     of complex dynamic systems, built on well-recognized technology and
     supporting major platforms.</para>
   </section>
@@ -39,7 +39,7 @@
   <section>
     <title>Technology</title>
 
-    <para>JModelica.org relies on the established modeling language <link
+    <para>JModelica.org relies on the modeling language <link
     xlink:href="http://www.modelica.org">Modelica</link><indexterm
         class="singular">
         <primary>Modelica</primary>
@@ -49,26 +49,24 @@
     both free and commercial, including the freely available Modelica Standard
     Library (MSL).</para>
 
-    <para>A unique feature of JModelica.org is the support for the innovative
-    extension Optimica<indexterm class="singular">
+    <para>A unique feature of JModelica.org is the support for the extension
+    Optimica<indexterm class="singular">
         <primary>Optimica</primary>
-      </indexterm>. Optimica enables you to conveniently formulate
+      </indexterm>. Optimica enables users to conveniently formulate
     optimization problems based on Modelica models using simple but powerful
     constructs for encoding of optimization interval, cost function and
-    constraints. Optimica also features annotations for choosing and tailoring
-    the underlying numerical optimization algorithm a particular optimization
-    problem.</para>
+    constraints.</para>
 
     <para>The JModelica.org compilers are developed in the compiler
     construction framework JastAdd<indexterm class="singular">
         <primary>JastAdd</primary>
-      </indexterm>. JastAdd is based on established concepts, including object
-    orientation, aspect orientation and reference attributed grammars.
-    Compilers developed in JastAdd are specified in terms of declarative
-    attributes and equations which together forms an executable specification
-    of the language semantics. In addition, JastAdd targets extensible
-    compiler development which makes it easy to experiment with language
-    extensions.</para>
+      </indexterm>. JastAdd is based on a number of different concepts,
+    including object-orientation, aspect-orientation and reference attributed
+    grammars. Compilers developed in JastAdd are specified in terms of
+    declarative attributes and equations which together forms an executable
+    specification of the language semantics. In addition, JastAdd targets
+    extensible compiler development which makes it easy to experiment with
+    language extensions.</para>
 
     <para>For user interaction JModelica.org relies on the Python language.
     Python offers an interactive environment suitable for scripting,
@@ -76,7 +74,16 @@
     The Python packages Numpy and Scipy provide support for numerical
     computation, including matrix and vector operations, basic linear algebra
     and plotting. The JModelica.org compilers as well as the model
-    executables/dlls integrate seemlessly with Python and Numpy.</para>
+    executables/dlls integrate seamlessly with Python and Numpy.</para>
+
+    <para>JModelica.org offers strong support for the <link
+    xlink:href="http://www.functional-mockup-interface.org/">Functional
+    Mock-up Interface</link> (FMI) standard. FMI specifies a format for
+    exchange of compiled dynamic models and it is supported by a large number
+    of modeling and simulation tools, including established Modelica tools
+    such as Dymola, OpenModelica, and SimulationX. The JModelica.org compiler
+    support export of FMUs and FMUs can be imported into Python using the
+    Python packages included in the platform.</para>
   </section>
 
   <section xml:id="intro_sec_architecture">
@@ -106,7 +113,10 @@
         <para>The compiler back-ends generates C code and XML code for
         Modelica and Optimica. The C code contains the model equations, cost
         functions and constraints whereas the XML code contains model meta
-        data such as variable names and parameter values.</para>
+        data such as variable names and parameter values. There is also the
+        option to export flattened Modelica models, including equations, in
+        XML format. Export of Functional Mock-up Units (FMUs) is
+        supported.</para>
       </listitem>
 
       <listitem>
@@ -116,23 +126,36 @@
             class="singular">
             <primary>CppAD</primary>
           </indexterm>, a tool for computation of high accuracy derivatives by
-        means of automatic differentiation.</para>
+        means of automatic differentiation to provide derivatives for
+        optimization algorithm. The runtime system also contains the functions
+        provided in the FMI API.</para>
       </listitem>
 
       <listitem>
-        <para>Currently, JModelica.org features one particular algorithm for
-        solving dynamic optimization problems. The algorithm is based on
-        collocation on finite elements and relies on the solver
-        IPOPT<indexterm class="singular">
+        <para>Currently, JModelica.org features tree different algorithm for
+        solving dynamic optimization problems. There are two different
+        algorithms based on collocation on finite elements and relies on the
+        solver IPOPT<indexterm class="singular">
             <primary>IPOPT</primary>
-          </indexterm> for obtaining a solution of the resulting NLP.</para>
+          </indexterm> for obtaining a solution of the resulting NLP. The
+        default algorithm is encoded in C and relies on CppAD for computing
+        the NLP derivatives. The other algorithm is developed in Python and
+        relies on CasADi for computing derivatives. There is also a derivative
+        free optimization algorithm for model calibration based on measurement
+        data that is applicable to FMUs.</para>
       </listitem>
 
       <listitem>
-        <para>JModelica.org uses Python for scripting and prototyping. For
-        this purpose, a Python package is under development with the objective
-        of offering functions for driving the compilers and for accessing the
-        (compiled) functions in the runtime library/generated C code.</para>
+        <para>JModelica.org uses Python for scripting. For this purpose,
+        JModelica.org provides a number of different Python packages. The
+        Assimulo package provides integration with state of the art DAE and
+        ODE solvers (including the SUNDIALS suite), PyFMI provides FMU import,
+        whereas PyModelica interacts with the JModelica.org compilers.
+        Finally, PyJMI contains drivers for the optimization algorithms. All
+        packages are available as part of JModelica.org, and Assimulo and
+        PyFMI are also available as stand alone Python packages from <link
+        xlink:href="https://www.assimulo.org">www.assimulo.org</link> and
+        <link xlink:href="http://www.pyfmi.org">www.pyfmi.org</link>.</para>
       </listitem>
     </itemizedlist>
 
@@ -147,9 +170,11 @@
 
     <itemizedlist>
       <listitem>
-        <para>JModelica.org features a C interface for efficient evaluation of
-        model equations, the cost function and the constraints: the JModelica
-        Model Interface (JMI)<indexterm class="singular">
+        <para>The JModelica.org platform supports export and import of FMUs,
+        which are compliant with the FMI standard. In addition, JModelica.org
+        features a C interface for efficient evaluation of model equations,
+        the cost function and the constraints: the JModelica Model Interface
+        (JMI)<indexterm class="singular">
             <primary>JModelica Model Interface</primary>
 
             <see>JMI</see>
@@ -159,18 +184,16 @@
             <seealso>JModelica Model Interface</seealso>
           </indexterm>. JMI also contains functions for evaluation of
         derivatives and sparsity and is intended to offer a convenient
-        interface for integration of numerical algorithms.</para>
+        interface for integration of numerical algorithms. FMI is the default
+        format for simulation, whereas JMI is the default interface for
+        optimization.</para>
       </listitem>
 
       <listitem>
-        <para>In addition to the the C interface, model meta data can be
-        exported in XML<indexterm class="singular">
-            <primary>XML</primary>
-          </indexterm>. In the future this feature is intended to be extended
-        to include full model export in XML, which in turn enables use of XML
-        techniques such as XPATH<indexterm class="singular">
-            <primary>XPATH</primary>
-          </indexterm> and XSLT.</para>
+        <para>In addition to the FMI and JMI interfaces, JModelica.org
+        supports export of flat Modelica models in XML format. This format is
+        based on FMI, and is suitable for integration with symbolic algorithms
+        that can exploit access to the equations in symbolic form.</para>
       </listitem>
 
       <listitem>
