@@ -641,6 +641,10 @@ class ResultWriterDymola(ResultWriter):
             tuple(vrefs_noalias), 
             tuple(variabilities_noalias)), 
             key=itemgetter(0))
+        types_noalias = sorted(zip(
+            tuple(vrefs_noalias), 
+            tuple(types_noalias)), 
+            key=itemgetter(0))
         names = sorted(zip(
             tuple(vrefs), 
             tuple(names)), 
@@ -751,13 +755,13 @@ class ResultWriterDymola(ResultWriter):
         for i, name in enumerate(names_noalias):
             if variabilities_noalias[i][1] == xmlparser.CONSTANT or \
                 variabilities_noalias[i][1] == xmlparser.PARAMETER:
-                    if types_noalias[i] == xmlparser.REAL:
+                    if types_noalias[i][1] == xmlparser.REAL:
                         str_text = str_text + (
                             " %.14E" % (self.model.get_real([name[0]])))
-                    elif types_noalias[i] == xmlparser.INTEGER:
+                    elif types_noalias[i][1] == xmlparser.INTEGER:
                         str_text = str_text + (
                             " %.14E" % (self.model.get_integer([name[0]])))
-                    elif types_noalias[i] == xmlparser.BOOLEAN:
+                    elif types_noalias[i][1] == xmlparser.BOOLEAN:
                         str_text = str_text + (
                             " %.14E" % (float(
                                 self.model.get_boolean([name[0]])[0])))

@@ -387,6 +387,9 @@ class FMUModel(BaseModel):
             disc_valueref_b]
         self._save_cont_name = [cont_name+disc_name_r, disc_name_i, disc_name_b]
         self._save_nbr_points = 0
+        self._save_cont_length= [len(self._save_cont_valueref[0]),
+                                 len(self._save_cont_valueref[1]),
+                                 len(self._save_cont_valueref[2])]
         
     def _set_fmimodel_typedefs(self):
         """
@@ -821,9 +824,15 @@ class FMUModel(BaseModel):
         
             [r,i,b] = model.save_time_point()
         """
-        sol_real = self.get_real(self._save_cont_valueref[0])
-        sol_int  = self.get_integer(self._save_cont_valueref[1])
-        sol_bool = self.get_boolean(self._save_cont_valueref[2])
+        sol_real=N.array([])
+        sol_int=N.array([])
+        sol_bool=N.array([])
+        if self._save_cont_length[0] > 0:
+            sol_real = self.get_real(self._save_cont_valueref[0])
+        if self._save_cont_length[1] > 0:
+            sol_int  = self.get_integer(self._save_cont_valueref[1])
+        if self._save_cont_length[2] > 0:  
+            sol_bool = self.get_boolean(self._save_cont_valueref[2])
         
         return sol_real, sol_int, sol_bool
     
