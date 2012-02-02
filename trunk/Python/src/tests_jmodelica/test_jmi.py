@@ -571,7 +571,12 @@ class TestModel_VDP:
     @testattr(stddist = True)        
     def test_get_name(self):
         """Test jmi.JMUModel.get_name method."""
-        ntools.assert_equal(self.vdp.get_name(),"VDP_pack_VDP_Opt")
+        ntools.assert_equal(self.vdp.get_name(),"VDP_pack.VDP_Opt")
+    
+    @testattr(stddist = True)        
+    def test_get_identifier(self):
+        """Test jmi.JMUModel.get_name method."""
+        ntools.assert_equal(self.vdp.get_identifier(),"VDP_pack_VDP_Opt")
     
     @testattr(stddist = True)    
     def test_opt_interval_starttime_free(self):

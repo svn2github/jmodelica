@@ -367,15 +367,21 @@ class JMUModel(BaseModel):
         
         # Parse XML and set model name (needed when creating temp bin file name)
         self._parse_xml_md(self._xml_name)
+        self._modelid = self.get_identifier()
         self._modelname = self.get_name()
         
         # extract XML values file from JMU and parse
-        self._xml_values_name = os.path.join(self._jmufiles['resources_dir'], self._modelname+'_values.xml')
+        self._xml_values_name = os.path.join(self._jmufiles['resources_dir'], self._modelid+'_values.xml')
         self._parse_xml_values(self._xml_values_name)
         
         #Retrieve, rename and load the binary
         suffix = get_platform_suffix()
-        lib_name = self._jmufiles['binary'] = rename_to_tmp(self._modelname + suffix, self._jmufiles['binaries_dir'])
+        if os.path.exists(os.path.join(self._jmufiles['binaries_dir'], self._modelid + suffix)):
+            dllname = self._modelid + suffix
+        else:
+            dllname = self._modelname + suffix
+            
+        lib_name = self._jmufiles['binary'] = rename_to_tmp(dllname, self._jmufiles['binaries_dir'])
         self.jmimodel = JMIModel(lib_name, self._jmufiles['binaries_dir'])
 
         # sizes of all arrays
@@ -2379,15 +2385,26 @@ class JMUModel(BaseModel):
             self.jmimodel.opt_set_p_opt_indices(n_p_opt,N.array(
                 p_opt_indices,dtype=int))
 
-    def get_name(self):
+    def get_identifier(self):
         """ 
-        Get the name of the model that has been loaded. 
+        Return the model identifier, name of binary model file and prefix in 
+        the C-function names of the model. 
         
         Returns::
         
-            The name of the model.
+            The model identifier.
         """
-        return self._get_XMLDoc().get_model_name().replace('.','_')
+        return self._get_XMLDoc().get_model_identifier()
+    
+    def get_name(self):
+        """
+        Return the model name as used in the modeling environment. 
+        
+        Returns::
+        
+            The model name.
+        """
+        return self._get_XMLDoc().get_model_name()
 
     def _get(self, name):
         """
