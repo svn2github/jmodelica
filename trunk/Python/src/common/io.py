@@ -559,13 +559,13 @@ class ResultWriterDymola(ResultWriter):
         
             file_name --
                 If no file name is given, the name of the model (as defined by 
-                FMUModel.get_name()) concatenated with the string '_result' is 
+                FMUModel.get_identifier()) concatenated with the string '_result' is 
                 used. A file suffix equal to the format argument is then 
                 appended to the file name.
                 Default: Empty string.
         """
         if file_name=='':
-            file_name=self.model.get_name() + '_result.txt'
+            file_name=self.model.get_identifier() + '_result.txt'
 
         # Open file
         f = codecs.open(file_name,'w','utf-8')
