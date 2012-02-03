@@ -95,7 +95,7 @@
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/arch_0.preview.png" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>The JModelica.org platform consists of a number of different
@@ -158,8 +158,6 @@
         <link xlink:href="http://www.pyfmi.org">www.pyfmi.org</link>.</para>
       </listitem>
     </itemizedlist>
-
-    <para></para>
   </section>
 
   <section>

@@ -24,19 +24,19 @@
 
     <para><itemizedlist>
         <listitem>
-          <para><literal>pymodelica</literal> - Compile Modelica and Optimica
+          <para><literal>PyModelica</literal> - Compile Modelica and Optimica
           code into model units (FMUs and JMUs, see <xref
-          linkend="ch_models" /> for more information).</para>
+          linkend="ch_models"/> for more information).</para>
         </listitem>
 
         <listitem>
-          <para><literal>pyfmi</literal> - Work with models that have been
+          <para><literal>PyFMI</literal> - Work with models that have been
           compiled into FMUs (Functional Mock-up Units). Perform simulations,
           parameter manipulation, plot results etc.</para>
         </listitem>
 
         <listitem>
-          <para><literal>pyjmi</literal> - Work with models that have been
+          <para><literal>PyJMI</literal> - Work with models that have been
           compiled into JMUs. Perform simulations, solve optimization
           problems, parameter manipulation, plot results etc.</para>
         </listitem>
@@ -98,7 +98,7 @@
     optimization of models. The corresponding model files are located in the
     subdirectory <filename>files</filename>. The following code demonstrates
     how to run such an example. First a Python session must be started, see
-    <xref linkend="gs_sec_starting_a_python_session" /> above. The example
+    <xref linkend="gs_sec_starting_a_python_session"/> above. The example
     scripts are preferably run in the pylab python shell.</para>
 
     <para>The following code will run the RLC example and plot some

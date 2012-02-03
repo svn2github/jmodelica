@@ -11,7 +11,7 @@
   <info>
     <title><productname>JModelica.org</productname> User Guide</title>
 
-    <subtitle>Version <productnumber>1.6.1</productnumber></subtitle>
+    <subtitle>Version <productnumber>1.7</productnumber></subtitle>
 
     <pubdate>2012-01-15</pubdate>
 
@@ -30,31 +30,31 @@
     Computer Algebra and processed by JEuclid.</para>
   </acknowledgements>
 
-  <xi:include href="Introduction.xml" xpointer="element(/1)" />
+  <xi:include href="Introduction.xml" xpointer="element(/1)"/>
 
-  <xi:include href="Installation.xml" xpointer="element(/1)" />
+  <xi:include href="Installation.xml" xpointer="element(/1)"/>
 
-  <xi:include href="GettingStarted.xml" xpointer="element(/1)" />
+  <xi:include href="GettingStarted.xml" xpointer="element(/1)"/>
 
-  <xi:include href="Models.xml" xpointer="element(/1)" />
+  <xi:include href="Models.xml" xpointer="element(/1)"/>
 
-  <xi:include href="FMI.xml" xpointer="element(/1)" />
+  <xi:include href="FMI.xml" xpointer="element(/1)"/>
 
-  <xi:include href="Initialization.xml" xpointer="element(/1)" />
+  <xi:include href="Initialization.xml" xpointer="element(/1)"/>
 
-  <xi:include href="Simulation.xml" xpointer="element(/1)" />
+  <xi:include href="Simulation.xml" xpointer="element(/1)"/>
 
-  <xi:include href="Optimization.xml" xpointer="element(/1)" />
+  <xi:include href="Optimization.xml" xpointer="element(/1)"/>
 
-  <xi:include href="GraphicalUserInterface.xml" xpointer="element(/1)" />
+  <xi:include href="GraphicalUserInterface.xml" xpointer="element(/1)"/>
 
-  <xi:include href="Optimica.xml" xpointer="element(/1)" />
+  <xi:include href="Optimica.xml" xpointer="element(/1)"/>
 
-  <xi:include href="AdvancedTopics.xml" xpointer="element(/1)" />
+  <xi:include href="AdvancedTopics.xml" xpointer="element(/1)"/>
 
-  <xi:include href="Limitations.xml" xpointer="element(/1)" />
+  <xi:include href="Limitations.xml" xpointer="element(/1)"/>
 
-  <xi:include href="ReleaseNotes.xml" xpointer="element(/1)" />
+  <xi:include href="ReleaseNotes.xml" xpointer="element(/1)"/>
 
   <bibliography>
     <title>Bibliography</title>
@@ -153,7 +153,7 @@
 
           <author>
             <personname><firstname>Magnus
-            Gäfvert</firstname><surname></surname></personname>
+            Gäfvert</firstname><surname/></personname>
           </author>
 
           <author>
@@ -206,5 +206,5 @@
     </biblioentry>
   </bibliography>
 
-  <index></index>
+  <index/>
 </book>
