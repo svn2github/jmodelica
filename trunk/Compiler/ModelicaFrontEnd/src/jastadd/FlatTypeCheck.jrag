@@ -560,13 +560,12 @@ aspect FlatTypeCheck {
   
   public void InstComponentAccess.checkAccessCompInClassRight(InstClassDecl icd) {
 	  String type = null;
-	  if (icd.isPackage()) {
-		  if (!myInstComponentDecl().isConstant())
-			  type = "non-constant component in package";
-	  } else if (icd.extendsEnum()) {
+	  if (icd.extendsEnum()) {
 		  if (!myInstComponentDecl().isEnumLiteral())
 			  type = "attribute of primitive with dot notation";
-	  } else {
+	  } else if (icd.isPackage()) {
+		  icd.checkRestriction();
+	  } else if (!icd.isOkPackage()) {
 		  type = "component in non-package class";
 	  }
 	  if (type != null) {

@@ -215,7 +215,7 @@ model WhenContents1
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 215, column 3:
-  Only assignment equations are allowed in when clauses.
+  Only assignment equations are allowed in when clauses
 ")})));
 
 	Real x;
@@ -237,7 +237,7 @@ model WhenContents2
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 235, column 2:
-  Both branches in when equation must assign the same variables.
+  Both branches in when equation must assign the same variables
 ")})));
 
 	Real x;
@@ -261,7 +261,7 @@ model WhenContents3
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 262, column 3:
-  Both branches in if equation within when equation must assign the same variables.
+  Both branches in if equation within when equation must assign the same variables
 ")})));
 
 	Real x;

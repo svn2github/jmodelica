@@ -127,7 +127,7 @@ aspect ContentCheck {
 			error("Nestled when clauses are not allowed");
 		} else {
 			if (hasElse() && !assignedSet().equals(getElse().assignedSet()))
-				error("Both branches in when equation must assign the same variables.");
+				error("Both branches in when equation must assign the same variables");
 		}
 	}
 	
@@ -135,7 +135,7 @@ aspect ContentCheck {
 		super.contentCheck();
 		if (inWhen() && !getTest().variability().parameterOrLess()) {
 			if (hasElse() && !assignedSet().equals(getElse().assignedSet()))
-				error("Both branches in if equation within when equation must assign the same variables.");
+				error("Both branches in if equation within when equation must assign the same variables");
 		}
 	}
 	
@@ -143,8 +143,39 @@ aspect ContentCheck {
 		super.contentCheck();
 		if (inWhen()) {
 			if (assignedSet().isEmpty())
-				error("Only assignment equations are allowed in when clauses.");
+				error("Only assignment equations are allowed in when clauses");
 		}
+	}
+	
+	
+	public void InstMPackage.contentCheck() {
+		if (!myInstClassDecl().isOkPackage())
+			error("Packages may only contain classes and constants");
+	}
+	
+	/**
+	 * Check that the restriction of this class is fulfilled.
+	 */
+	public void InstClassDecl.checkRestriction() {}
+	
+	public void InstBaseClassDecl.checkRestriction() {
+		getInstRestriction().contentCheck();
+	}
+	
+	/**
+	 * Get the class this restriction is attached to.
+	 */
+	inh InstClassDecl InstRestriction.myInstClassDecl();
+	eq InstBaseClassDecl.getInstRestriction().myInstClassDecl() = this;
+	
+	/**
+	 * Check if this class fulfills the requirements of a package.
+	 */
+	syn boolean InstClassDecl.isOkPackage() {
+		for (InstComponentDecl icd : getInstComponentDecls())
+			if (!icd.isConstant())
+				return false;
+		return getNumFAbstractEquation() == 0;
 	}
 	
 }

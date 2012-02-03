@@ -1076,7 +1076,7 @@ aspect InstClassRestriction {
 	 * \brief Is this restriction "package"?
 	 */
 	syn boolean InstRestriction.isPackage() = false;
-	eq InstMPackage.isPackage() = true;
+	eq InstMPackage.isPackage()             = true;
 	
 	/**
 	 * \brief Is this class an enumeration?

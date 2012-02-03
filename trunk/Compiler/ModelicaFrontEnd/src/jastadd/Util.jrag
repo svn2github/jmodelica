@@ -2255,6 +2255,19 @@ aspect GeneralHelpers {
 	syn boolean InstClassDecl.isClass() = getClassDecl().isClass();
 	
 	/**
+	 * \brief Is this class a package?
+	 */
+	syn boolean ClassDecl.isPackage() = false;
+	eq BaseClassDecl.isPackage()      = getRestriction().isPackage();
+	eq UnknownClassDecl.isPackage()   = false;
+	
+	/**
+	 * \brief Is this restriction "package"?
+	 */
+	syn boolean Restriction.isPackage() = false;
+	eq MPackage.isPackage()             = true;
+	
+	/**
      * Check if this when equation is the else part of another when equation.
      */
     inh boolean FIfWhenElseEquation.isElse();
