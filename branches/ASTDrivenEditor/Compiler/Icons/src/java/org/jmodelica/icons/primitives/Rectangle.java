@@ -2,10 +2,13 @@
 package org.jmodelica.icons.primitives;
 
 import org.jmodelica.icons.coord.Extent;
-import org.jmodelica.icons.primitives.Types.BorderPattern;
 
 
 public class Rectangle extends FilledRectShape {
+	
+	public static final Object BORDER_PATTERN_CHANGED = new Object();
+	public static final Object RADIUS_CHANGED = new Object();
+	
 	
 	private Types.BorderPattern borderPattern;
 	private double radius;
@@ -15,19 +18,25 @@ public class Rectangle extends FilledRectShape {
 	
 	public Rectangle(){
 		super(Extent.NO_EXTENT);
-		borderPattern = DEFAULT_BORDER_PATTERN;
-		radius = DEFAULT_RADIUS;
+		setBorderPattern(DEFAULT_BORDER_PATTERN);
+		setRadius(DEFAULT_RADIUS);
 	}
-	public void setBorderPattern(Types.BorderPattern borderPattern) {
-		this.borderPattern = borderPattern;
+	public void setBorderPattern(Types.BorderPattern newBorderPattern) {
+		if (borderPattern == newBorderPattern)
+			return;
+		borderPattern = newBorderPattern;
+		notifyObservers(BORDER_PATTERN_CHANGED);
 	}
 
 	public Types.BorderPattern getBorderPattern() {
 		return borderPattern;
 	}
 
-	public void setRadius(double radius) {
-		this.radius = radius;
+	public void setRadius(double newRadius) {
+		if (radius == newRadius)
+			return;
+		radius = newRadius;
+		notifyObservers(RADIUS_CHANGED);
 	}
 
 	public double getRadius() {

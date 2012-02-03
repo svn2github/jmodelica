@@ -20,6 +20,8 @@ import org.jmodelica.icons.primitives.Rectangle;
 import org.jmodelica.icons.primitives.Text;
 import org.jmodelica.icons.primitives.Types;
 
+import sun.jdbc.odbc.ee.ConnectionAttributes;
+
 
 aspect AnnotationParsing {
 	
@@ -100,9 +102,11 @@ aspect AnnotationParsing {
 		public Connection createConnection() throws FailedConstructionException {
 			AnnotationNode lineAnnotation = forPath("Line");
 			if (lineAnnotation.exists()) {
-				return (Connection) lineAnnotation.createLine(true);
+				Connection con = new Connection();
+				lineAnnotation.initializeAbstractLine(con);
+				return con;
 			}
-			throw new FailedConstructionException("Placement");
+			throw new FailedConstructionException("Connection");
 		}
 		
 		public boolean hasPlacement() {
@@ -333,23 +337,17 @@ aspect AnnotationParsing {
 		*/
 		private Line createLine() 
 				throws FailedConstructionException, NotEnoughParametersException {
-			return createLine(false);
+			Line line = new Line();
+			initializeAbstractLine(line);
+			return line;
 		}
 		
 		/**
-		* Create a Line primitive that is represented by this AnnotationNode uses 
-		* 	default values for the attributes if the attributes are not set.
-		* @param boolean Set to true is this is a connectionline
-		* @return the created Line primitive
-		* @throws NotEnoughParametersException if two points were not given.
+		* Initializes a AbstractLine object with the information in the AnnotationNode.
+		* @param graphicItem
 		*/
-		private Line createLine(boolean isConnection) 
+		private void initializeAbstractLine(Line line) 
 				throws FailedConstructionException, NotEnoughParametersException {
-			Line line;
-			if (isConnection) 
-				line = new Connection();
-			else
-				line = new Line();
 			initializeGraphicItem(line);
 			boolean pointsSet = false;
 			for (AnnotationNode a : this) {
@@ -377,7 +375,6 @@ aspect AnnotationParsing {
 			if (!pointsSet) {
 				throw new NotEnoughParametersException("Line");
 			}
-			return line;
 		}
 	
 		/**

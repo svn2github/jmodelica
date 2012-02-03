@@ -1,0 +1,37 @@
+package org.jmodelica.icons;
+
+import java.util.Vector;
+
+
+public class Observable {
+	private Vector<Observer> observers = null;
+	
+	public void addObserver(Observer observer) {
+		if (observers == null) {
+			observers = new Vector<Observer>();
+		}
+		if (!observers.contains(observer))
+			observers.add(observer);
+	}
+	
+	public void removeObserver(Observer observer) {
+		if (observers == null)
+			return;
+		observers.remove(observer);
+	}
+	
+//	protected List<Observer> getListeners() {
+//		if (listeners == null)
+//			return Collections.emptyList();
+//		else
+//			return listeners;
+//	}
+	
+	protected void notifyObservers(Object flag) {
+		if (observers == null)
+			return;
+		for (Observer o : observers)
+			o.update(this, flag);
+	}
+	
+}

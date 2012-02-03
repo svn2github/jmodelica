@@ -1,9 +1,19 @@
 package org.jmodelica.icons.coord;
 
-import org.jmodelica.icons.listeners.Observable;
-import org.jmodelica.icons.listeners.PointListener;
+import org.jmodelica.icons.Observable;
 
-public class Point extends Observable<PointListener> {
+public class Point extends Observable {
+	
+	/**
+	 * Sent to observers when the point is moved in x.
+	 */
+	public static final Object X_UPDATED = new Object();
+	
+	/**
+	 * Sent to observers when the point is moved in y.
+	 */
+	public static final Object Y_UPDATED = new Object();
+	
 	private double x;
 	private double y;
 
@@ -20,8 +30,7 @@ public class Point extends Observable<PointListener> {
 		if (y == newY)
 			return;
 		y = newY;
-		for (PointListener l : getListeners())
-			l.pointYCordUpdated(this);
+		notifyObservers(Y_UPDATED);
 	}
 
 	public double getY() {
@@ -32,8 +41,7 @@ public class Point extends Observable<PointListener> {
 		if (x == newX)
 			return;
 		x = newX;
-		for (PointListener l : getListeners())
-			l.pointXCordUpdated(this);
+		notifyObservers(X_UPDATED);
 	}
 
 	public double getX() {

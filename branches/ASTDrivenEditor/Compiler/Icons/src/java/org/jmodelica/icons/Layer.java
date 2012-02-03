@@ -6,7 +6,10 @@ import org.jmodelica.icons.primitives.GraphicItem;
 
 
 
-public class Layer {
+public class Layer extends Observable implements Observer {
+	
+	public static final Object COORDINATE_SYSTEM_UPDATED = new Object();
+	public static final Object GRAPHICS_SWAPPED = new Object();
 	
 	private CoordinateSystem coordinateSystem;
 	private ArrayList<GraphicItem> graphics;
@@ -20,12 +23,11 @@ public class Layer {
 	 */
 	public Layer(CoordinateSystem coordinateSystem, ArrayList<GraphicItem> graphics) {
 		this.coordinateSystem = coordinateSystem;
-		this.graphics = graphics;
+		setGraphics(graphics);
 	}
 	
 	public Layer(CoordinateSystem coordinateSystem) {
-		this.graphics = new ArrayList<GraphicItem>();
-		this.coordinateSystem = coordinateSystem;
+		this(coordinateSystem, new ArrayList<GraphicItem>());
 	}
 	
 	private Layer() {
@@ -41,12 +43,23 @@ public class Layer {
 		return graphics;
 	}
 	
-	public void setGraphics(ArrayList<GraphicItem> graphics) {
-		this.graphics = graphics;
+	public void setGraphics(ArrayList<GraphicItem> newGraphics) {
+		if (graphics == newGraphics)
+			return;
+		graphics = newGraphics;
+		notifyObservers(GRAPHICS_SWAPPED);
 	}
 	
 	public String toString() {
 		String s = "coordinateSystem = " + coordinateSystem + "\ngraphics: " + graphics;
 		return s;
+	}
+
+	@Override
+	public void update(Observable o, Object flag) {
+		if (o == coordinateSystem)
+			notifyObservers(COORDINATE_SYSTEM_UPDATED);
+		else
+			o.removeObserver(this);
 	}
 }

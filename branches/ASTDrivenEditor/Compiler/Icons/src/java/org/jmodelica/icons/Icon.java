@@ -13,8 +13,15 @@ import org.jmodelica.icons.primitives.GraphicItem;
 import org.jmodelica.icons.primitives.Line;
 import org.jmodelica.icons.primitives.Text;
 
-public class Icon {
+public class Icon extends Observable {
 
+	public static final Object CLASS_NAME_CHANGED = new Object();
+	public static final Object COMPONENT_NAME_CHANGED = new Object();
+	public static final Object SUPERCLASS_ADDED = new Object();
+	public static final Object SUPERCLASS_REMOVED = new Object();
+	public static final Object SUBCOMPONENT_ADDED = new Object();
+	public static final Object SUBCOMPONENT_REMOVED = new Object();
+	
 	public static Icon NULL_ICON = new Icon();
 	
 	private String componentName;
@@ -105,16 +112,22 @@ public class Icon {
 		return componentName;
 	}
 
-	public void setComponentName(String componentName) {
-		this.componentName = componentName;
+	public void setComponentName(String newComponentName) {
+		if (componentName != null && componentName.equals(newComponentName))
+			return;
+		componentName = newComponentName;
+		notifyObservers(COMPONENT_NAME_CHANGED);
 	}
 	
 	public String getClassName() {
 		return className;
 	}
 
-	public void setClassName(String className) {
-		this.className = className;
+	public void setClassName(String newClassName) {
+		if (className != null && className.equals(newClassName))
+			return;
+		this.className = newClassName;
+		notifyObservers(CLASS_NAME_CHANGED);
 	}
 
 	public Layer getLayer() {
@@ -123,15 +136,18 @@ public class Icon {
 
 	public void addSuperclass(Icon superclass) {
 		superclasses.add(superclass);
+		notifyObservers(SUPERCLASS_ADDED);
 	}
 
 	public void addSubcomponent(Component component) {
 		if(subcomponents.isEmpty() && layer == Layer.NO_LAYER) {
 			if(subcomponents.add(component)) {
 				layer = new Layer(CoordinateSystem.DEFAULT_COORDINATE_SYSTEM);
+				notifyObservers(SUBCOMPONENT_ADDED);
 			} 
 		} else {
 			subcomponents.add(component);
+			notifyObservers(SUBCOMPONENT_ADDED);
 		}
 	}
 	

@@ -1,10 +1,13 @@
 package org.jmodelica.icons.coord;
 
-import org.jmodelica.icons.listeners.Observable;
-import org.jmodelica.icons.listeners.PlacementListener;
-import org.jmodelica.icons.listeners.TransformationListener;
+import org.jmodelica.icons.Observable;
+import org.jmodelica.icons.Observer;
 
-public class Placement extends Observable<PlacementListener> implements TransformationListener {
+public class Placement extends Observable implements Observer {
+	
+	public static final Object VISIBLE_UPDATED = new Object();
+	public static final Object TRANSFORMATION_UPDATED = new Object();
+	public static final Object TRANSFORMATION_SWAPPED = new Object();
 
 	private boolean visible;
 	private Transformation transformation;
@@ -34,7 +37,7 @@ public class Placement extends Observable<PlacementListener> implements Transfor
 		if (visible == newVisible)
 			return;
 		visible = newVisible;
-		notifyVisibleChange();
+		notifyObservers(VISIBLE_UPDATED);
 	}
 
 	public Transformation getTransformation() {
@@ -43,14 +46,14 @@ public class Placement extends Observable<PlacementListener> implements Transfor
 
 	//TODO: shouldn't it be called setTransformation, since placement has nothing to do with icon...
 	public void setIconTransformation(Transformation newTransformation) {
-		if (transformation != null && transformation.equals(newTransformation))
+		if (transformation == newTransformation)
 			return;
 		if (transformation != null)
-			transformation.removeListener(this);
+			transformation.removeObserver(this);
 		this.transformation = newTransformation;
 		if (newTransformation != null)
-			newTransformation.addlistener(this);
-		notifyTransformationChange();
+			newTransformation.addObserver(this);
+		notifyObservers(TRANSFORMATION_SWAPPED);
 	}
 
 	public String toString() {
@@ -61,33 +64,10 @@ public class Placement extends Observable<PlacementListener> implements Transfor
 	}
 
 	@Override
-	public void transformationOriginChanged(Transformation t) {
-		if (t != transformation)
-			return;
-		notifyTransformationChange();
-	}
-
-	@Override
-	public void transformationExtentChanged(Transformation t) {
-		if (t != transformation)
-			return;
-		notifyTransformationChange();
-	}
-
-	@Override
-	public void transformationRotationChanged(Transformation t) {
-		if (t != transformation)
-			return;
-		notifyTransformationChange();
-	}
-
-	private void notifyVisibleChange() {
-		for (PlacementListener l : getListeners())
-			l.placementVisibleChange(this);
-	}
-
-	private void notifyTransformationChange() {
-		for (PlacementListener l : getListeners())
-			l.placementTransformationChange(this);
+	public void update(Observable o, Object flag) {
+		if (o == transformation && (flag == Transformation.EXTENT_CHANGED || flag == Transformation.EXTENT_SWAPPED || flag == Transformation.ORIGIN_CHANGED || flag == Transformation.ORIGIN_SWAPPED || flag == Transformation.ROTATION_CHANGED))
+			notifyObservers(TRANSFORMATION_UPDATED);
+		else
+			o.removeObserver(this);
 	}
 }

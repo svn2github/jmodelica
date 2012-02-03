@@ -1,11 +1,16 @@
 package org.jmodelica.icons.coord;
 
-import org.jmodelica.icons.listeners.ExtentListener;
-import org.jmodelica.icons.listeners.Observable;
-import org.jmodelica.icons.listeners.PointListener;
-import org.jmodelica.icons.listeners.TransformationListener;
+import org.jmodelica.icons.Observable;
+import org.jmodelica.icons.Observer;
 
-public class Transformation extends Observable<TransformationListener> implements PointListener, ExtentListener {
+public class Transformation extends Observable implements Observer {
+	
+	public static final Object ORIGIN_CHANGED = new Object();
+	public static final Object ORIGIN_SWAPPED = new Object();
+	public static final Object EXTENT_CHANGED = new Object();
+	public static final Object EXTENT_SWAPPED = new Object();
+	public static final Object ROTATION_CHANGED = new Object();
+	
 	private Point origin;
 	private Extent extent;
 	private double rotation;
@@ -40,14 +45,14 @@ public class Transformation extends Observable<TransformationListener> implement
 	}
 
 	public void setOrigin(Point newOrigin) {
-		if (origin != null && origin.equals(newOrigin))
+		if (origin == newOrigin)
 			return;
 		if (origin != null)
-			origin.removeListener(this);
+			origin.removeObserver(this);
 		origin = newOrigin;
 		if (newOrigin != null)
-			newOrigin.addlistener(this);
-		notifyOriginChange();
+			newOrigin.addObserver(this);
+		notifyObservers(ORIGIN_SWAPPED);
 	}
 
 	public Extent getExtent() {
@@ -55,14 +60,14 @@ public class Transformation extends Observable<TransformationListener> implement
 	}
 
 	public void setExtent(Extent newExtent) {
-		if (extent != null && extent.equals(newExtent))
+		if (extent == newExtent)
 			return;
 		if (extent != null)
-			extent.removeListener(this);
+			extent.removeObserver(this);
 		extent = newExtent;
 		if (newExtent != null)
-			newExtent.addlistener(this);
-		notifyExtentChange();
+			newExtent.addObserver(this);
+		notifyObservers(EXTENT_SWAPPED);
 	}
 
 	public double getRotation() {
@@ -73,7 +78,7 @@ public class Transformation extends Observable<TransformationListener> implement
 		if (rotation == newRotation)
 			return;
 		rotation = newRotation;
-		notifyRotationChange();
+		notifyObservers(ROTATION_CHANGED);
 	}
 
 	public String toString() {
@@ -85,46 +90,13 @@ public class Transformation extends Observable<TransformationListener> implement
 	}
 
 	@Override
-	public void extentP1Updated(Extent e) {
-		if (e != extent)
-			return;
-		notifyExtentChange();
-	}
-
-	@Override
-	public void extentP2Updated(Extent e) {
-		if (e != extent)
-			return;
-		notifyExtentChange();
-	}
-
-	@Override
-	public void pointXCordUpdated(Point p) {
-		if (p != origin)
-			return;
-		notifyOriginChange();
-	}
-
-	@Override
-	public void pointYCordUpdated(Point p) {
-		if (p != origin)
-			return;
-		notifyOriginChange();
-	}
-
-	private void notifyOriginChange() {
-		for (TransformationListener l : getListeners())
-			l.transformationOriginChanged(this);
-	}
-
-	private void notifyExtentChange() {
-		for (TransformationListener l : getListeners())
-			l.transformationExtentChanged(this);
-	}
-
-	private void notifyRotationChange() {
-		for (TransformationListener l : getListeners())
-			l.transformationRotationChanged(this);
+	public void update(Observable o, Object flag) {
+		if (o == origin && (flag == Point.X_UPDATED || flag == Point.Y_UPDATED))
+			notifyObservers(ORIGIN_CHANGED);
+		else if (o == extent && (flag == Extent.P1_SWAPPED || flag == Extent.P1_UPDATED || flag == Extent.P2_SWAPPED || flag == Extent.P2_UPDATED))
+			notifyObservers(EXTENT_CHANGED);
+		else
+			o.removeObserver(this);
 	}
 
 }

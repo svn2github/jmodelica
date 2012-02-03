@@ -4,10 +4,12 @@ import org.jmodelica.icons.primitives.Line;
 
 public class Connection extends Line {
 	
+	
+	
 	private Connector sourceConnector;
 	private Connector targetConnector;
 	private boolean isConnected = true;
-
+	
 	public Connector getSourceConnector() {
 		return sourceConnector;
 	}

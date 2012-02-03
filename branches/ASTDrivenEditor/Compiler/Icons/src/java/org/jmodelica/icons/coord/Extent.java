@@ -1,10 +1,31 @@
 package org.jmodelica.icons.coord;
 
-import org.jmodelica.icons.listeners.ExtentListener;
-import org.jmodelica.icons.listeners.Observable;
-import org.jmodelica.icons.listeners.PointListener;
+import org.jmodelica.icons.Observable;
+import org.jmodelica.icons.Observer;
 
-public class Extent extends Observable<ExtentListener> implements PointListener {
+public class Extent extends Observable implements Observer {
+	
+	
+	/**
+	 * Sent to observers when the first point in the extent is moved.
+	 */
+	public static final Object P1_UPDATED = new Object();
+	
+	/**
+	 * Sent to observers when the first point in the extent is swapped for a new.
+	 */
+	public static final Object P1_SWAPPED = new Object();
+	
+	/**
+	 * Sent to observers when the second point in the extent is moved.
+	 */
+	public static final Object P2_UPDATED = new Object();
+	
+	/**
+	 * Sent to observers when the second point in the extent is swapped for a new.
+	 */
+	public static final Object P2_SWAPPED = new Object();
+	
 	private Point p1;
 	private Point p2;
 
@@ -128,11 +149,11 @@ public class Extent extends Observable<ExtentListener> implements PointListener 
 		if (p2 != null && p2.equals(newP2))
 			return;
 		if (p2 != null)
-			p2.removeListener(this);
+			p2.removeObserver(this);
 		p2 = newP2;
 		if (newP2 != null)
-			newP2.addlistener(this);
-		notifyP2Change();
+			newP2.addObserver(this);
+		notifyObservers(P2_SWAPPED);
 	}
 
 	public Point getP2() {
@@ -143,11 +164,11 @@ public class Extent extends Observable<ExtentListener> implements PointListener 
 		if (p1 != null && p1.equals(newP1))
 			return;
 		if (p1 != null)
-			p1.removeListener(this);
+			p1.removeObserver(this);
 		p1 = newP1;
 		if (newP1 != null)
-			newP1.addlistener(this);
-		notifyP1Change();
+			newP1.addObserver(this);
+		notifyObservers(P1_SWAPPED);
 	}
 
 	public Point getP1() {
@@ -158,27 +179,13 @@ public class Extent extends Observable<ExtentListener> implements PointListener 
 		return "P1 = " + getP1() + ", P2 = " + getP2() + ", width = " + getWidth() + ", height = " + getHeight();
 	}
 
-	public void pointXCordUpdated(Point p) {
-		if (p == p1)
-			notifyP1Change();
-		if (p == p2)
-			notifyP2Change();
-	}
-
-	public void pointYCordUpdated(Point p) {
-		if (p == p1)
-			notifyP1Change();
-		if (p == p2)
-			notifyP2Change();
-	}
-
-	private void notifyP1Change() {
-		for (ExtentListener l : getListeners())
-			l.extentP1Updated(this);
-	}
-
-	private void notifyP2Change() {
-		for (ExtentListener l : getListeners())
-			l.extentP2Updated(this);
+	@Override
+	public void update(Observable o, Object flag) {
+		if (o == p1 && (flag == Point.X_UPDATED || flag == Point.Y_UPDATED))
+			notifyObservers(P1_UPDATED);
+		else if (o == p2 && (flag == Point.X_UPDATED || flag == Point.Y_UPDATED))
+			notifyObservers(P2_UPDATED);
+		else
+			o.removeObserver(this);
 	}
 }

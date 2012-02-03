@@ -1,6 +1,12 @@
 package org.jmodelica.icons.primitives;
 
-public class Color {
+import org.jmodelica.icons.Observable;
+
+public class Color extends Observable {
+	
+	public static final Object RED_CHANGED = new Object();
+	public static final Object GREEN_CHANGED = new Object();
+	public static final Object BLUE_CHANGED = new Object();
 	
 	public static final Color BLACK = new Color(0, 0, 0);
 	public static final Color WHITE = new Color(255, 255, 255);
@@ -36,16 +42,25 @@ public class Color {
 		return b;
 	}
 	
-	public void setR(int r) {
-		this.r = r;
+	public void setR(int newR) {
+		if (r == newR)
+			return;
+		r = newR;
+		notifyObservers(RED_CHANGED);
 	}
 	
-	public void setG(int g) {
-		this.g = g;
+	public void setG(int newG) {
+		if (g == newG)
+			return;
+		g = newG;
+		notifyObservers(BLUE_CHANGED);
 	}
 	
-	public void setB(int b) {
-		this.b = b;
+	public void setB(int newB) {
+		if (b == newB)
+			return;
+		b = newB;
+		notifyObservers(GREEN_CHANGED);
 	}
 	
 	public Color brighter() {

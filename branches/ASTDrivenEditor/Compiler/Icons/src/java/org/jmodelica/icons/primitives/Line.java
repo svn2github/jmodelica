@@ -4,16 +4,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jmodelica.icons.Observable;
+import org.jmodelica.icons.Observer;
 import org.jmodelica.icons.coord.Extent;
 import org.jmodelica.icons.coord.Point;
 import org.jmodelica.icons.drawing.IconConstants;
-import org.jmodelica.icons.primitives.Color;
 import org.jmodelica.icons.primitives.Types.Arrow;
 import org.jmodelica.icons.primitives.Types.FillPattern;
-import org.jmodelica.icons.primitives.Types.LinePattern;
-import org.jmodelica.icons.primitives.Types.Smooth;
 
-public class Line extends GraphicItem {
+
+public class Line extends GraphicItem implements Observer {
+	
+	public static final Object POINTS_UPDATED = new Object();
+	public static final Object COLOR_UPDATE = new Object();
+	public static final Object COLOR_SWAPPED = new Object();
+	public static final Object LINE_PATTERN_UPDATED = new Object();
+	public static final Object THICKNESS_UPDATE = new Object();
+	public static final Object ARROW_UPDATED = new Object();
+	public static final Object ARROW_SIZE_UPDATED = new Object();
+	public static final Object SMOOTH_UPDATED = new Object();
 	
 	
 	private List<Point> points;
@@ -39,42 +48,57 @@ public class Line extends GraphicItem {
 	
 	public Line(List<Point> points) {
 		super();
-		color = DEFAULT_COLOR;
-		linePattern = DEFAULT_LINE_PATTERN;
-		thickness = DEFAULT_THICKNESS;
-		arrowSize = DEFAULT_ARROW_SIZE;
-		arrow = DEFAULT_ARROW;
-		smooth = DEFAULT_SMOOTH;
-		this.points = points;
-		arrowPolygons = null;
+		setColor(DEFAULT_COLOR);
+		setLinePattern(DEFAULT_LINE_PATTERN);
+		setThickness(DEFAULT_THICKNESS);
+		setArrowSize(DEFAULT_ARROW_SIZE);
+		setArrow(DEFAULT_ARROW);
+		setSmooth(DEFAULT_SMOOTH);
+		setPoints(points);
 	}
 	
-	public void setPoints(List<Point> point) {
-		this.points = point;
+	public void setPoints(List<Point> newPoint) {
+		if (points == newPoint)
+			return;
+		points = newPoint;
 		arrowPolygons = null;
+		notifyObservers(POINTS_UPDATED);
 	}
 		
 	public List<Point> getPoints() {
 		return points;
 	}
 
-	public void setColor(Color color) {
-		this.color = color;
+	public void setColor(Color newColor) {
+		if (color == newColor)
+			return;
+		if (color != null)
+			color.removeObserver(this);
+		color = newColor;
+		if (newColor != null)
+			newColor.addObserver(this);
+		notifyObservers(COLOR_SWAPPED);
 	}
 
 	public Color getColor() {
 		return color;
 	}
 
-	public void setLinePattern(Types.LinePattern linePattern) {
-		this.linePattern = linePattern;
+	public void setLinePattern(Types.LinePattern newLinePattern) {
+		if (linePattern == newLinePattern)
+			return;
+		linePattern = newLinePattern;
+		notifyObservers(LINE_PATTERN_UPDATED);
 	}
 
 	public Types.LinePattern getLinePattern() {
 		return linePattern;
 	}
-	public void setThickness(double thickness) {
-		this.thickness = thickness;
+	public void setThickness(double newThickness) {
+		if (thickness == newThickness)
+			return;
+		thickness = newThickness;
+		notifyObservers(THICKNESS_UPDATE);
 	}
 
 	public double getThickness() {
@@ -133,7 +157,7 @@ public class Line extends GraphicItem {
     	);
     	
     	ArrayList<Point> arrowpoints = new ArrayList<Point>();
-  
+
     	arrowpoints.add(p2);
     	arrowpoints.add(p4);
     	arrowpoints.add(p5);
@@ -148,25 +172,35 @@ public class Line extends GraphicItem {
 		return arrowPolygons;
 	}
 	
-	public void setArrow(Types.Arrow[] arrow) {
-		this.arrow = arrow;
+	public void setArrow(Types.Arrow[] newArrow) {
+		if (arrow == newArrow)
+			return;
+		arrow = newArrow;
 		arrowPolygons = null;
+		notifyObservers(ARROW_UPDATED);
 	}
 
 	public Types.Arrow[] getArrow() {
 		return arrow;
 	}
 
-	public void setArrowSize(double arrowSize) {
-		this.arrowSize = arrowSize;
+	public void setArrowSize(double newArrowSize) {
+		if (arrowSize == newArrowSize)
+			return;
+		arrowSize = newArrowSize;
+		arrowPolygons = null;
+		notifyObservers(ARROW_SIZE_UPDATED);
 	}
 
 	public double getArrowSize() {
 		return arrowSize;
 	}
 
-	public void setSmooth(Types.Smooth smooth) {
-		this.smooth = smooth;
+	public void setSmooth(Types.Smooth newSmooth) {
+		if (smooth == newSmooth)
+			return;
+		smooth = newSmooth;
+		notifyObservers(SMOOTH_UPDATED);
 	}
 
 	public Types.Smooth getSmooth() {
@@ -203,5 +237,13 @@ public class Line extends GraphicItem {
 		}
 		s += "\ncolor = " + color;
 		return s+super.toString(); 
+	}
+	
+	@Override
+	public void update(Observable o, Object flag) {
+		if (o == color && (flag == Color.RED_CHANGED || flag == Color.GREEN_CHANGED || flag == Color.BLUE_CHANGED))
+			notifyObservers(COLOR_UPDATE);
+		else
+			super.update(o, flag);
 	}
 }
