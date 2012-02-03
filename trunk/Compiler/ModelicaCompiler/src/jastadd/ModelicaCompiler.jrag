@@ -648,7 +648,7 @@ public class ModelicaCompiler {
 	 * Convenience metod, equivalent to compileJMU(className, fileName, "model", ".").
 	 * 
 	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file paths.
+	 * @param fileName Array of model file or library paths.
 	 */
 	public void compileJMU(String className, String fileName[]) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
@@ -664,7 +664,7 @@ public class ModelicaCompiler {
 	 * Convenience metod, equivalent to compileJMU(className, fileName, "model", compileTo).
 	 * 
 	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file paths.
+	 * @param fileName Array of model file or library paths.
 	 * @param compileTo Specify location of the compiled JMU. Directory will be created if it does not exist.
 	 */
 	public void compileJMU(String className, String fileName[], String compileTo) 
@@ -679,7 +679,7 @@ public class ModelicaCompiler {
 	 * binary file compilation) and packs the result in a JMU.
 	 * 
 	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file paths.
+	 * @param fileName Array of model file or library paths.
 	 * @param target The build target. Valid options are 'model', 'model_noad', 'algorithms' and 'ipopt'.
 	 * @param compileTo Specify location of the compiled JMU. Directory will be created if it does not exist.
 	 */
@@ -698,7 +698,7 @@ public class ModelicaCompiler {
 	 * Convenience metod, equivalent to compileFMUME(className, fileName, ".").
 	 * 
 	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file paths.
+	 * @param fileName Array of model file or library paths.
 	 */
 	public void compileFMUME(String className, String fileName[]) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
@@ -714,7 +714,7 @@ public class ModelicaCompiler {
 	 * Convenience metod, equivalent to compileFMUCS(className, fileName, ".").
 	 * 
 	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file paths.
+	 * @param fileName Array of model file or library paths.
 	 */
 	public void compileFMUCS(String className, String fileName[]) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
@@ -728,7 +728,7 @@ public class ModelicaCompiler {
 	 * binary file compilation) and packs the result in a FMU.
 	 * 
 	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file paths.
+	 * @param fileName Array of model file or library paths.
 	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
 	 */
 	public void compileFMUME(String className, String fileName[], String compileTo) 
@@ -743,7 +743,7 @@ public class ModelicaCompiler {
 	 * binary file compilation) and packs the result in a FMU.
 	 * 
 	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file paths.
+	 * @param fileName Array of model file or library paths.
 	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
 	 */
 	public void compileFMUCS(String className, String fileName[], String compileTo) 
@@ -758,7 +758,7 @@ public class ModelicaCompiler {
 	 * binary file compilation) and packs the result in a FMU.
 	 * 
 	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file paths.
+	 * @param fileName Array of model file or library paths.
 	 * @param target The build target. Valid options are 'model_noad', 'model_fmume' and 'model_fmucs'.
 	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
 	 */
@@ -790,7 +790,7 @@ public class ModelicaCompiler {
 	 * generation) and packs the result in a FMUX.
 	 * 
 	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file paths.
+	 * @param fileName Array of model file or library paths.
 	 * @param compileTo Specify location of the compiled FMUX. Directory will be created if it does not exist.
 	 */
 	public void compileFMUX(String className, String fileName[], String compileTo) 
@@ -962,7 +962,7 @@ public class ModelicaCompiler {
 	 * can not be found or if the parsing fails. Supports multiple model files.
 	 * 
 	 * @param name
-	 *            Array of names of the model files.
+	 *            Array of model file or library paths.
 	 * @param cl
 	 *            The name of the class in the model file to compile.
 	 * @throws beaver.Parser.Exception
@@ -1668,7 +1668,7 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * \brief Compile model given in command line options and  and print any error messages.
+	 * \brief Compile model given on command line options and print any error messages.
 	 */
 	protected void compileModelFromCommandLine(String[] args, Hashtable<String, String> programarguments) {
 		// Get files and class
