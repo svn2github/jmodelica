@@ -1481,7 +1481,13 @@ aspect CCodeGen {
 		str.print("  return 0;\n}\n\n");
 	}
 	
-	public void SolvedScalarBlock.genBlockResidualFunction_C(int block_counter, boolean inInit, String indent, PrintStream str) {
+	public void SolvedScalarEquationBlock.genBlockResidualFunction_C(int block_counter, boolean inInit, String indent, PrintStream str) {
+	}
+
+	public void SolvedFunctionCallEquationBlock.genBlockResidualFunction_C(int block_counter, boolean inInit, String indent, PrintStream str) {
+	}
+	
+	public void WhenEquationBlock.genBlockResidualFunction_C(int block_counter, boolean inInit, String indent, PrintStream str) {
 	}
 	
 	protected void AbstractEquationBlock.genVarDecls_C(PrintStream str, String indent) {
@@ -1489,7 +1495,7 @@ aspect CCodeGen {
 			n.genVarDecls_C(ASTNode.printer_C, str, indent);
 	}
 	
-	protected void SolvedScalarBlock.genVarDecls_C(PrintStream str, String indent) {
+	protected void SolvedScalarEquationBlock.genVarDecls_C(PrintStream str, String indent) {
 		solution().genVarDecls_C(ASTNode.printer_C, str, indent);
 	}
 	
@@ -1588,36 +1594,46 @@ aspect CCodeGen {
 		str.format("%sjmi_kinsol_solve(jmi->%s[%d]);\n", indent, var, i);
 	}
 
-	public void SolvedScalarBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
-		equations().get(0).genSolvedBlock_C(activeVariables().get(0),indent,str);
+	public void SolvedScalarEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
+	    FExp sol = eqn.solution(fv.name());
+		sol.genTempVars_C(eqn.printer_C, str, indent);
+		str.format("%s%s = ", indent, fv.name_C());
+		sol.prettyPrint_C(str, indent);
+		str.print(";\n");
 	}
 
-	public void FAbstractEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {}
-	
-	public void FEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {
-		FExp sol = solution(v.name());
-		sol.genTempVars_C(printer_C, str, indent);
-		str.format("%s%s = ", indent, v.name_C());
-		sol.prettyPrint_C(str, indent);
-		str.print(";\n");		
+	public void SolvedFunctionCallEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
+	 	if (!functionCallEquation.getCall().isIgnored()) {
+			functionCallEquation.genTempVars_C(functionCallEquation.printer_C, str, indent);
+			for (FFunctionCallLeft l : functionCallEquation.getLefts()) {
+				l.setBaseIndex(i);
+				l.genTempVar_C(indent, str);
+			}
+			functionCallEquation.getCall().prettyPrint_C(str, indent);
+			str.print(";\n");
+			for (FFunctionCallLeft l : functionCallEquation.getLefts()) {
+				l.genWriteBackAssignment_C(str, indent);
+			}
+		}
 	}
-	
-	public void FWhenEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {
-		/* 
-		  if (guard and !pre(guard)) {
-		  	_x = _pre_x + 1;
-		  }
-		*/
-		for (FExp g : guards()) {		
-			g.genTempVars_C(printer_C, str, indent);
+
+	public void WhenEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
+	//public void FWhenEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {
+		
+		 // if (guard and !pre(guard)) {
+		 // 	_x = _pre_x + 1;
+		 // }
+		
+		for (FExp g : whenEquation.guards()) {		
+			g.genTempVars_C(whenEquation.printer_C, str, indent);
 			str.format("%s_guards(%d) = ", indent, g.guardExpInEquationsIndex());
 			g.prettyPrint_C(str,"");
 			str.print(";\n");
 		}
-		int i = guards().size();
+		int j = whenEquation.guards().size();
 		str.print("  if(");
-		for (FExp g : guards()) {
-			if (i>1) {
+		for (FExp g : whenEquation.guards()) {
+			if (j>1) {
 				str.print("LOG_EXP_OR(");
 			}		
 			str.print("COND_EXP_EQ(LOG_EXP_AND(_guards(");
@@ -1625,30 +1641,39 @@ aspect CCodeGen {
 			str.print("),LOG_EXP_NOT(_pre_guards(");
 			str.print(g.guardExpInEquationsIndex());
 			str.print("))),JMI_TRUE,JMI_TRUE,JMI_FALSE)");
-			if (i>1) {
+			if (j>1) {
 				str.print(",\n    ");
 			}		
-			i--;
+			j--;
 		}		
-		for (int j = 0;j<guards().size()-1;j++) {
+		for (int k = 0;k<whenEquation.guards().size()-1;k++) {
 			str.print(")");
 		}
 		str.print(") {\n");
-		for (FAbstractEquation fe : getFAbstractEquations()) {
-			fe.genSolvedBlock_C(v,indent,str);
+		for (FAbstractEquation fe : whenEquation.getFAbstractEquations()) {
+			fe.genSolvedBlock_C(fv,indent,str);
 		}
 		str.print("  } else {\n");
 		str.print(indent);
-		str.print(v.name_C());
+		str.print(fv.name_C());
 		str.print(" = ");
 		str.print("pre");
-		str.print(v.name_C());
+		str.print(fv.name_C());
 		str.print(";\n");
 		str.print(indent);
 		str.print("}\n");
 	}
-	
-	
+
+	public void FAbstractEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {}
+    
+	public void FEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {
+		FExp sol = solution(v.name());
+		sol.genTempVars_C(printer_C, str, indent);
+		str.format("%s%s = ", indent, v.name_C());
+		sol.prettyPrint_C(str, indent);
+		str.print(";\n");		
+	}
+
 	public void FAbstractEquation.genResidual_C(int i, String indent, PrintStream str) {}
 	
 	public void FEquation.genResidual_C(int i, String indent, PrintStream str) {

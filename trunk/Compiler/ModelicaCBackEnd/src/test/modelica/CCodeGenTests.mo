@@ -1164,6 +1164,156 @@ w=f(z);
 end CFunctionTest12;
 
 
+model CFunctionTest13
+
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest13",
+         description="C code gen: solved function call equation",
+		 generate_ode=true,
+         equation_sorting=true,
+         template="
+$C_function_headers$
+$C_functions$
+$C_ode_derivatives$
+",
+         generatedCode="
+void func_CCodeGenTests_CFunctionTest13_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v, jmi_array_t* dx_a, jmi_array_t* y_a);
+
+void func_CCodeGenTests_CFunctionTest13_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v, jmi_array_t* dx_a, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARRAY_STATIC(dx_an, 2, 1)
+    JMI_ARRAY_STATIC(y_an, 2, 1)
+    if (dx_a == NULL) {
+        JMI_ARRAY_STATIC_INIT_1(dx_an, 2)
+        dx_a = dx_an;
+    }
+    if (y_a == NULL) {
+        JMI_ARRAY_STATIC_INIT_1(y_an, 2)
+        y_a = y_an;
+    }
+    jmi_array_ref_1(dx_a, 1) =  - ( jmi_array_val_1(x_a, 1) ) + u_v;
+    jmi_array_ref_1(dx_a, 2) =  - ( jmi_array_val_1(x_a, 2) ) + 0;
+    jmi_array_ref_1(y_a, 1) = ( 2 ) * ( jmi_array_val_1(x_a, 1) );
+    jmi_array_ref_1(y_a, 2) = ( 2 ) * ( jmi_array_val_1(x_a, 2) );
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+    JMI_ARRAY_STATIC(tmp_1, 2, 1)
+    JMI_ARRAY_STATIC(tmp_2, 2, 1)
+    JMI_ARRAY_STATIC(tmp_3, 2, 1)
+    model_ode_guards(jmi);
+/************* ODE section *********/
+  _der_x_1_7 =  - ( _x_1_0 );
+  _der_x_2_8 =  - ( _x_2_1 );
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+  _u_4 = 3;
+  JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
+  JMI_ARRAY_STATIC_INIT_1(tmp_2, 2)
+  JMI_ARRAY_STATIC_INIT_1(tmp_3, 2)
+  jmi_array_ref_1(tmp_3, 1) = _x_1_0;
+  jmi_array_ref_1(tmp_3, 2) = _x_2_1;
+  func_CCodeGenTests_CFunctionTest13_F_def(tmp_3, _u_4, tmp_1, tmp_2);
+  _z_1_2 = (jmi_array_val_1(tmp_1, 1));
+  _z_2_3 = (jmi_array_val_1(tmp_1, 2));
+  _y_1_5 = (jmi_array_val_1(tmp_2, 1));
+  _y_2_6 = (jmi_array_val_1(tmp_2, 2));
+	 
+")})));
+		
+		
+function F
+  input Real x[2];
+  input Real u;
+  output Real dx[2];
+  output Real y[2];
+algorithm
+  dx := -x + {u,0};
+  y := 2*x;
+end F;
+
+Real x[2](each start = 3);
+Real z[2];
+Real u = 3;
+Real y[2];
+equation
+ der(x) = -x;
+(z,y) = F(x,u);
+end CFunctionTest13;
+
+model CFunctionTest14
+
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest14",
+         description="C code gen: unsolved function call equation",
+		 generate_ode=true,
+         equation_sorting=true,
+         template="
+$C_function_headers$
+$C_functions$
+$C_ode_derivatives$
+",
+         generatedCode="
+void func_CCodeGenTests_CFunctionTest14_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v, jmi_array_t* dx_a, jmi_array_t* y_a);
+
+void func_CCodeGenTests_CFunctionTest14_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v, jmi_array_t* dx_a, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARRAY_STATIC(dx_an, 2, 1)
+    JMI_ARRAY_STATIC(y_an, 2, 1)
+    if (dx_a == NULL) {
+        JMI_ARRAY_STATIC_INIT_1(dx_an, 2)
+        dx_a = dx_an;
+    }
+    if (y_a == NULL) {
+        JMI_ARRAY_STATIC_INIT_1(y_an, 2)
+        y_a = y_an;
+    }
+    jmi_array_ref_1(dx_a, 1) =  - ( jmi_array_val_1(x_a, 1) ) + u_v;
+    jmi_array_ref_1(dx_a, 2) =  - ( jmi_array_val_1(x_a, 2) ) + 0;
+    jmi_array_ref_1(y_a, 1) = ( 2 ) * ( jmi_array_val_1(x_a, 1) );
+    jmi_array_ref_1(y_a, 2) = ( 2 ) * ( jmi_array_val_1(x_a, 2) );
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+    JMI_ARRAY_STATIC(tmp_1, 2, 1)
+    JMI_ARRAY_STATIC(tmp_2, 2, 1)
+    JMI_ARRAY_STATIC(tmp_3, 2, 1)
+    model_ode_guards(jmi);
+/************* ODE section *********/
+  _der_x_1_7 =  - ( _x_1_0 );
+  _der_x_2_8 =  - ( _x_2_1 );
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+  _u_4 = 3;
+  jmi_kinsol_solve(jmi->dae_block_residuals[0]);
+
+")})));
+		
+		
+function F
+  input Real x[2];
+  input Real u;
+  output Real dx[2];
+  output Real y[2];
+algorithm
+  dx := -x + {u,0};
+  y := 2*x;
+end F;
+
+Real x[2](each start = 3);
+Real z[2];
+Real u = 3;
+Real y[2];
+equation
+ der(x) = -x;
+(z,y) = F(z+x,u);
+end CFunctionTest14;
 
 model CForLoop1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

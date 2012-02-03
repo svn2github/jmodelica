@@ -807,7 +807,7 @@ aspect CADCodeGen {
 	}
 	
 	
-	public void SolvedScalarBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {	
+	public void SolvedScalarEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {	
 		equations().get(0).genSolvedBlock_CAD(activeVariables().get(0),indent,str);
 	}
 	
@@ -822,7 +822,7 @@ aspect CADCodeGen {
 			this.genSolvedBlock_C(v, indent, str);
 		}
 	}
-	
+/*	
 	public void TornEquationBlock.genBlockResidualFunction_CAD(int block_counter, boolean inInit, String indent, PrintStream str) {
 		str.print("static int dae_" + (inInit? "init_": "") + "block_dir_der_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {\n");
 		str.print("  jmi_real_t** res = &residual;\n");
@@ -891,7 +891,7 @@ aspect CADCodeGen {
 		str.print("  return 0;\n}\n\n");
 		
 	}
-	
+	*/
 	public ArrayList<ASTNode> AbstractEquationBlock.blockResidualNodes_CAD() {
 		ArrayList<ASTNode> res = new ArrayList<ASTNode>(activeVariables());
 		res.addAll(equations());
@@ -909,7 +909,7 @@ aspect CADCodeGen {
 			n.genVarDecls_CAD(ASTNode.printer_CAD, str, indent);
 	}
 	
-	protected void SolvedScalarBlock.genVarDecls_CAD(PrintStream str, String indent) {
+	protected void SolvedScalarEquationBlock.genVarDecls_CAD(PrintStream str, String indent) {
 		solution().genVarDecls_CAD(ASTNode.printer_CAD, str, indent);
 	}
 	
