@@ -6,10 +6,12 @@ import java.util.Map;
 public abstract class AbstractModelicaScanner extends beaver.Scanner {
 
 	private HashMap<Integer, Integer> lineBreakMap;
+	private FormattingInfo formattingInfo;
 
 	public AbstractModelicaScanner() {
 		lineBreakMap = new HashMap<Integer, Integer>();
 		lineBreakMap.put(0, 0);
+		formattingInfo = new FormattingInfo();
 	}
 
 	public Map<Integer, Integer> getLineBreakMap() {
@@ -19,6 +21,7 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 	public void reset(java.io.Reader reader) {
 		lineBreakMap = new HashMap<Integer, Integer>();
 		lineBreakMap.put(0, 0);
+		formattingInfo = new FormattingInfo();
 	}
 
 	protected void addLineBreaks(String text) {
@@ -36,6 +39,10 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 
 	protected void addLineBreak() {
 		lineBreakMap.put(matchLine() + 1, matchOffset() + matchLength());
+	}
+
+	protected void addFormattingInformation(short type, String data, int startColumn) {
+		formattingInfo.addItem(type, data, matchLine() + 1, startColumn + 1, matchLine() + 1, startColumn + matchLength());
 	}
 
 	protected abstract int matchLength();
