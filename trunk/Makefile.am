@@ -28,7 +28,7 @@ bindistdir=JModelica.org-$(VERSION)-bin
 
 casadi:
 	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f MakeFile
+	make -f Makefile
 
 install_casadi: casadi
 	cd $(abs_builddir)/casadi_build/swig/python/; \
