@@ -98,7 +98,13 @@ class CasadiModel(object):
         """
         Returns the model name.
         """
-        return self.xmldoc.get_model_name().replace('.', '_')
+        return self.xmldoc.get_model_name()
+
+    def get_identifier(self):
+        """
+        Returns the model identifier.
+        """
+        return self.xmldoc.get_model_identifier()
     
     def _default_options(self, algorithm):
         """ 
