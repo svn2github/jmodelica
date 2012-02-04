@@ -3965,10 +3965,11 @@ equation
  function FunctionTests.ArrayOutputScalarization18.f1
   input Real[:] a1;
   output Real x1;
-  Real[size(a1, 1)] b1;
+  Real[:] b1;
   Real[size(a1, 1)] temp_1;
   Real temp_2;
  algorithm
+  size(b1) := {size(a1, 1)};
   for i1 in 1:size(b1, 1) loop
    (temp_1) := FunctionTests.ArrayOutputScalarization18.f2(a1);
    b1[i1] := temp_1[i1];
@@ -6157,6 +6158,408 @@ model InputAsArraySize10
 	Real x = f(4, {1, 2, 3});
 end InputAsArraySize10;
 // TODO: Fler som ovan
+
+
+
+model VectorizedCall1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="VectorizedCall1",
+         description="Vectorization: basic test",
+         flatModel="
+fclass FunctionTests.VectorizedCall1
+ Real z[1];
+ Real z[2];
+equation
+ z[1] = FunctionTests.VectorizedCall1.f(1);
+ z[2] = FunctionTests.VectorizedCall1.f(2);
+
+ function FunctionTests.VectorizedCall1.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := ( 2 ) * ( x );
+  return;
+ end FunctionTests.VectorizedCall1.f;
+end FunctionTests.VectorizedCall1;
+")})));
+
+    function f
+        input Real x;
+        output Real y;
+    algorithm
+        y := 2 * x;
+    end f;
+    
+    Real z[2] = f({1,2});
+end VectorizedCall1;
+
+
+model VectorizedCall2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="VectorizedCall2",
+         description="Vectorization: one of two args vectorized",
+         flatModel="
+fclass FunctionTests.VectorizedCall2
+ Real z[1,1];
+ Real z[1,2];
+ Real z[2,1];
+ Real z[2,2];
+equation
+ z[1,1] = FunctionTests.VectorizedCall2.f(1, 5, 2);
+ z[1,2] = FunctionTests.VectorizedCall2.f(2, 5, 2);
+ z[2,1] = FunctionTests.VectorizedCall2.f(3, 5, 2);
+ z[2,2] = FunctionTests.VectorizedCall2.f(4, 5, 2);
+
+ function FunctionTests.VectorizedCall2.f
+  input Real x1;
+  input Real x2;
+  input Real x3;
+  output Real y;
+ algorithm
+  y := ( 2 ) * ( x1 ) + x2 + x3;
+  return;
+ end FunctionTests.VectorizedCall2.f;
+end FunctionTests.VectorizedCall2;
+")})));
+
+    function f
+        input Real x1;
+		input Real x2;
+		input Real x3 = 2;
+        output Real y;
+    algorithm
+        y := 2 * x1 + x2 + x3;
+    end f;
+    
+    Real z[2,2] = f({{1,2},{3,4}}, 5);
+end VectorizedCall2;
+
+
+model VectorizedCall3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="VectorizedCall3",
+         description="Vectorization: vectorised array arg, constant",
+         flatModel="
+fclass FunctionTests.VectorizedCall3
+ constant Real v[1,1] = (  - ( 1 ) ) * ( 1 );
+ constant Real v[1,2] = (  - ( 1 ) ) * ( 2 );
+ constant Real v[1,3] = (  - ( 1 ) ) * ( 3 );
+ constant Real v[2,1] = (  - ( 1 ) ) * ( 4 );
+ constant Real v[2,2] = (  - ( 1 ) ) * ( 5 );
+ constant Real v[2,3] = (  - ( 1 ) ) * ( 6 );
+ constant Real v[3,1] = (  - ( 1 ) ) * ( 7 );
+ constant Real v[3,2] = (  - ( 1 ) ) * ( 8 );
+ constant Real v[3,3] = (  - ( 1 ) ) * ( 9 );
+ constant Real w[1,1] = 1;
+ constant Real w[1,2] = 2;
+ constant Real w[1,3] = 3;
+ constant Real w[2,1] = 4;
+ constant Real w[2,2] = 5;
+ constant Real w[2,3] = 6;
+ constant Real w[3,1] = 7;
+ constant Real w[3,2] = 8;
+ constant Real w[3,3] = 9;
+ Real z[1,1];
+ Real z[1,2];
+ Real z[2,1];
+ Real z[2,2];
+equation
+ z[1,1] = FunctionTests.VectorizedCall3.f({{1.0,2.0,3.0},{4.0,5.0,6.0},{7.0,8.0,9.0}}, {{-1.0,-2.0,-3.0},{-4.0,-5.0,-6.0},{-7.0,-8.0,-9.0}});
+ z[1,2] = FunctionTests.VectorizedCall3.f({{( 2 ) * ( 1.0 ),( 2 ) * ( 2.0 ),( 2 ) * ( 3.0 )},{( 2 ) * ( 4.0 ),( 2 ) * ( 5.0 ),( 2 ) * ( 6.0 )},{( 2 ) * ( 7.0 ),( 2 ) * ( 8.0 ),( 2 ) * ( 9.0 )}}, {{( 2 ) * ( -1.0 ),( 2 ) * ( -2.0 ),( 2 ) * ( -3.0 )},{( 2 ) * ( -4.0 ),( 2 ) * ( -5.0 ),( 2 ) * ( -6.0 )},{( 2 ) * ( -7.0 ),( 2 ) * ( -8.0 ),( 2 ) * ( -9.0 )}});
+ z[2,1] = FunctionTests.VectorizedCall3.f({{( 3 ) * ( 1.0 ),( 3 ) * ( 2.0 ),( 3 ) * ( 3.0 )},{( 3 ) * ( 4.0 ),( 3 ) * ( 5.0 ),( 3 ) * ( 6.0 )},{( 3 ) * ( 7.0 ),( 3 ) * ( 8.0 ),( 3 ) * ( 9.0 )}}, {{( 3 ) * ( -1.0 ),( 3 ) * ( -2.0 ),( 3 ) * ( -3.0 )},{( 3 ) * ( -4.0 ),( 3 ) * ( -5.0 ),( 3 ) * ( -6.0 )},{( 3 ) * ( -7.0 ),( 3 ) * ( -8.0 ),( 3 ) * ( -9.0 )}});
+ z[2,2] = FunctionTests.VectorizedCall3.f({{( 4 ) * ( 1.0 ),( 4 ) * ( 2.0 ),( 4 ) * ( 3.0 )},{( 4 ) * ( 4.0 ),( 4 ) * ( 5.0 ),( 4 ) * ( 6.0 )},{( 4 ) * ( 7.0 ),( 4 ) * ( 8.0 ),( 4 ) * ( 9.0 )}}, {{( 4 ) * ( -1.0 ),( 4 ) * ( -2.0 ),( 4 ) * ( -3.0 )},{( 4 ) * ( -4.0 ),( 4 ) * ( -5.0 ),( 4 ) * ( -6.0 )},{( 4 ) * ( -7.0 ),( 4 ) * ( -8.0 ),( 4 ) * ( -9.0 )}});
+
+ function FunctionTests.VectorizedCall3.f
+  input Real[:, :] x1;
+  input Real[:, :] x2;
+  output Real y;
+  Real temp_1;
+  Real temp_2;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(x1, 1) loop
+   for i2 in 1:size(x2, 2) loop
+    temp_2 := 0.0;
+    for i3 in 1:size(x2, 1) loop
+     temp_2 := temp_2 + ( x1[i1,i3] ) * ( x2[i3,i2] );
+    end for;
+    temp_1 := temp_1 + temp_2;
+   end for;
+  end for;
+  y := temp_1;
+  return;
+ end FunctionTests.VectorizedCall3.f;
+end FunctionTests.VectorizedCall3;
+")})));
+
+    function f
+        input Real[:,:] x1;
+        input Real[:,:] x2;
+        output Real y;
+    algorithm
+        y := sum(x1 * x2);
+    end f;
+    
+    constant Real v[3,3] = -1 * [1,2,3;4,5,6;7,8,9];
+    constant Real w[3,3] = [1,2,3;4,5,6;7,8,9];
+    Real z[2,2] = f({{w, 2*w},{3*w, 4*w}}, {{v, 2*v},{3*v, 4*v}});
+end VectorizedCall3;
+
+
+model VectorizedCall4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="VectorizedCall4",
+         description="Vectorization: vectorised array arg, continous",
+         flatModel="
+fclass FunctionTests.VectorizedCall4
+ Real v2[1,1,1,1];
+ Real v2[1,1,1,2];
+ Real v2[1,1,1,3];
+ Real v2[1,1,2,1];
+ Real v2[1,1,2,2];
+ Real v2[1,1,2,3];
+ Real v2[1,1,3,1];
+ Real v2[1,1,3,2];
+ Real v2[1,1,3,3];
+ Real v2[1,2,1,1];
+ Real v2[1,2,1,2];
+ Real v2[1,2,1,3];
+ Real v2[1,2,2,1];
+ Real v2[1,2,2,2];
+ Real v2[1,2,2,3];
+ Real v2[1,2,3,1];
+ Real v2[1,2,3,2];
+ Real v2[1,2,3,3];
+ Real v2[2,1,1,1];
+ Real v2[2,1,1,2];
+ Real v2[2,1,1,3];
+ Real v2[2,1,2,1];
+ Real v2[2,1,2,2];
+ Real v2[2,1,2,3];
+ Real v2[2,1,3,1];
+ Real v2[2,1,3,2];
+ Real v2[2,1,3,3];
+ Real v2[2,2,1,1];
+ Real v2[2,2,1,2];
+ Real v2[2,2,1,3];
+ Real v2[2,2,2,1];
+ Real v2[2,2,2,2];
+ Real v2[2,2,2,3];
+ Real v2[2,2,3,1];
+ Real v2[2,2,3,2];
+ Real v2[2,2,3,3];
+ Real w2[1,1,1,1];
+ Real w2[1,1,1,2];
+ Real w2[1,1,1,3];
+ Real w2[1,1,2,1];
+ Real w2[1,1,2,2];
+ Real w2[1,1,2,3];
+ Real w2[1,1,3,1];
+ Real w2[1,1,3,2];
+ Real w2[1,1,3,3];
+ Real w2[1,2,1,1];
+ Real w2[1,2,1,2];
+ Real w2[1,2,1,3];
+ Real w2[1,2,2,1];
+ Real w2[1,2,2,2];
+ Real w2[1,2,2,3];
+ Real w2[1,2,3,1];
+ Real w2[1,2,3,2];
+ Real w2[1,2,3,3];
+ Real w2[2,1,1,1];
+ Real w2[2,1,1,2];
+ Real w2[2,1,1,3];
+ Real w2[2,1,2,1];
+ Real w2[2,1,2,2];
+ Real w2[2,1,2,3];
+ Real w2[2,1,3,1];
+ Real w2[2,1,3,2];
+ Real w2[2,1,3,3];
+ Real w2[2,2,1,1];
+ Real w2[2,2,1,2];
+ Real w2[2,2,1,3];
+ Real w2[2,2,2,1];
+ Real w2[2,2,2,2];
+ Real w2[2,2,2,3];
+ Real w2[2,2,3,1];
+ Real w2[2,2,3,2];
+ Real w2[2,2,3,3];
+ Real z[1,1];
+ Real z[1,2];
+ Real z[2,1];
+ Real z[2,2];
+equation
+ v2[1,1,1,1] = (  - ( 1 ) ) * ( 1 );
+ v2[1,1,1,2] = (  - ( 1 ) ) * ( 2 );
+ v2[1,1,1,3] = (  - ( 1 ) ) * ( 3 );
+ v2[1,1,2,1] = (  - ( 1 ) ) * ( 4 );
+ v2[1,1,2,2] = (  - ( 1 ) ) * ( 5 );
+ v2[1,1,2,3] = (  - ( 1 ) ) * ( 6 );
+ v2[1,1,3,1] = (  - ( 1 ) ) * ( 7 );
+ v2[1,1,3,2] = (  - ( 1 ) ) * ( 8 );
+ v2[1,1,3,3] = (  - ( 1 ) ) * ( 9 );
+ w2[1,1,1,1] = 1;
+ w2[1,1,1,2] = 2;
+ w2[1,1,1,3] = 3;
+ w2[1,1,2,1] = 4;
+ w2[1,1,2,2] = 5;
+ w2[1,1,2,3] = 6;
+ w2[1,1,3,1] = 7;
+ w2[1,1,3,2] = 8;
+ w2[1,1,3,3] = 9;
+ v2[1,2,1,1] = ( 2 ) * ( v2[1,1,1,1] );
+ v2[1,2,1,2] = ( 2 ) * ( v2[1,1,1,2] );
+ v2[1,2,1,3] = ( 2 ) * ( v2[1,1,1,3] );
+ v2[1,2,2,1] = ( 2 ) * ( v2[1,1,2,1] );
+ v2[1,2,2,2] = ( 2 ) * ( v2[1,1,2,2] );
+ v2[1,2,2,3] = ( 2 ) * ( v2[1,1,2,3] );
+ v2[1,2,3,1] = ( 2 ) * ( v2[1,1,3,1] );
+ v2[1,2,3,2] = ( 2 ) * ( v2[1,1,3,2] );
+ v2[1,2,3,3] = ( 2 ) * ( v2[1,1,3,3] );
+ v2[2,1,1,1] = ( 3 ) * ( v2[1,1,1,1] );
+ v2[2,1,1,2] = ( 3 ) * ( v2[1,1,1,2] );
+ v2[2,1,1,3] = ( 3 ) * ( v2[1,1,1,3] );
+ v2[2,1,2,1] = ( 3 ) * ( v2[1,1,2,1] );
+ v2[2,1,2,2] = ( 3 ) * ( v2[1,1,2,2] );
+ v2[2,1,2,3] = ( 3 ) * ( v2[1,1,2,3] );
+ v2[2,1,3,1] = ( 3 ) * ( v2[1,1,3,1] );
+ v2[2,1,3,2] = ( 3 ) * ( v2[1,1,3,2] );
+ v2[2,1,3,3] = ( 3 ) * ( v2[1,1,3,3] );
+ v2[2,2,1,1] = ( 4 ) * ( v2[1,1,1,1] );
+ v2[2,2,1,2] = ( 4 ) * ( v2[1,1,1,2] );
+ v2[2,2,1,3] = ( 4 ) * ( v2[1,1,1,3] );
+ v2[2,2,2,1] = ( 4 ) * ( v2[1,1,2,1] );
+ v2[2,2,2,2] = ( 4 ) * ( v2[1,1,2,2] );
+ v2[2,2,2,3] = ( 4 ) * ( v2[1,1,2,3] );
+ v2[2,2,3,1] = ( 4 ) * ( v2[1,1,3,1] );
+ v2[2,2,3,2] = ( 4 ) * ( v2[1,1,3,2] );
+ v2[2,2,3,3] = ( 4 ) * ( v2[1,1,3,3] );
+ w2[1,2,1,1] = ( 2 ) * ( w2[1,1,1,1] );
+ w2[1,2,1,2] = ( 2 ) * ( w2[1,1,1,2] );
+ w2[1,2,1,3] = ( 2 ) * ( w2[1,1,1,3] );
+ w2[1,2,2,1] = ( 2 ) * ( w2[1,1,2,1] );
+ w2[1,2,2,2] = ( 2 ) * ( w2[1,1,2,2] );
+ w2[1,2,2,3] = ( 2 ) * ( w2[1,1,2,3] );
+ w2[1,2,3,1] = ( 2 ) * ( w2[1,1,3,1] );
+ w2[1,2,3,2] = ( 2 ) * ( w2[1,1,3,2] );
+ w2[1,2,3,3] = ( 2 ) * ( w2[1,1,3,3] );
+ w2[2,1,1,1] = ( 3 ) * ( w2[1,1,1,1] );
+ w2[2,1,1,2] = ( 3 ) * ( w2[1,1,1,2] );
+ w2[2,1,1,3] = ( 3 ) * ( w2[1,1,1,3] );
+ w2[2,1,2,1] = ( 3 ) * ( w2[1,1,2,1] );
+ w2[2,1,2,2] = ( 3 ) * ( w2[1,1,2,2] );
+ w2[2,1,2,3] = ( 3 ) * ( w2[1,1,2,3] );
+ w2[2,1,3,1] = ( 3 ) * ( w2[1,1,3,1] );
+ w2[2,1,3,2] = ( 3 ) * ( w2[1,1,3,2] );
+ w2[2,1,3,3] = ( 3 ) * ( w2[1,1,3,3] );
+ w2[2,2,1,1] = ( 4 ) * ( w2[1,1,1,1] );
+ w2[2,2,1,2] = ( 4 ) * ( w2[1,1,1,2] );
+ w2[2,2,1,3] = ( 4 ) * ( w2[1,1,1,3] );
+ w2[2,2,2,1] = ( 4 ) * ( w2[1,1,2,1] );
+ w2[2,2,2,2] = ( 4 ) * ( w2[1,1,2,2] );
+ w2[2,2,2,3] = ( 4 ) * ( w2[1,1,2,3] );
+ w2[2,2,3,1] = ( 4 ) * ( w2[1,1,3,1] );
+ w2[2,2,3,2] = ( 4 ) * ( w2[1,1,3,2] );
+ w2[2,2,3,3] = ( 4 ) * ( w2[1,1,3,3] );
+ z[1,1] = FunctionTests.VectorizedCall4.f({{w2[1,1,1,1],w2[1,1,1,2],w2[1,1,1,3]},{w2[1,1,2,1],w2[1,1,2,2],w2[1,1,2,3]},{w2[1,1,3,1],w2[1,1,3,2],w2[1,1,3,3]}}, {{v2[1,1,1,1],v2[1,1,1,2],v2[1,1,1,3]},{v2[1,1,2,1],v2[1,1,2,2],v2[1,1,2,3]},{v2[1,1,3,1],v2[1,1,3,2],v2[1,1,3,3]}});
+ z[1,2] = FunctionTests.VectorizedCall4.f({{w2[1,2,1,1],w2[1,2,1,2],w2[1,2,1,3]},{w2[1,2,2,1],w2[1,2,2,2],w2[1,2,2,3]},{w2[1,2,3,1],w2[1,2,3,2],w2[1,2,3,3]}}, {{v2[1,2,1,1],v2[1,2,1,2],v2[1,2,1,3]},{v2[1,2,2,1],v2[1,2,2,2],v2[1,2,2,3]},{v2[1,2,3,1],v2[1,2,3,2],v2[1,2,3,3]}});
+ z[2,1] = FunctionTests.VectorizedCall4.f({{w2[2,1,1,1],w2[2,1,1,2],w2[2,1,1,3]},{w2[2,1,2,1],w2[2,1,2,2],w2[2,1,2,3]},{w2[2,1,3,1],w2[2,1,3,2],w2[2,1,3,3]}}, {{v2[2,1,1,1],v2[2,1,1,2],v2[2,1,1,3]},{v2[2,1,2,1],v2[2,1,2,2],v2[2,1,2,3]},{v2[2,1,3,1],v2[2,1,3,2],v2[2,1,3,3]}});
+ z[2,2] = FunctionTests.VectorizedCall4.f({{w2[2,2,1,1],w2[2,2,1,2],w2[2,2,1,3]},{w2[2,2,2,1],w2[2,2,2,2],w2[2,2,2,3]},{w2[2,2,3,1],w2[2,2,3,2],w2[2,2,3,3]}}, {{v2[2,2,1,1],v2[2,2,1,2],v2[2,2,1,3]},{v2[2,2,2,1],v2[2,2,2,2],v2[2,2,2,3]},{v2[2,2,3,1],v2[2,2,3,2],v2[2,2,3,3]}});
+
+ function FunctionTests.VectorizedCall4.f
+  input Real[:, :] x1;
+  input Real[:, :] x2;
+  output Real y;
+  Real temp_1;
+  Real temp_2;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(x1, 1) loop
+   for i2 in 1:size(x2, 2) loop
+    temp_2 := 0.0;
+    for i3 in 1:size(x2, 1) loop
+     temp_2 := temp_2 + ( x1[i1,i3] ) * ( x2[i3,i2] );
+    end for;
+    temp_1 := temp_1 + temp_2;
+   end for;
+  end for;
+  y := temp_1;
+  return;
+ end FunctionTests.VectorizedCall4.f;
+end FunctionTests.VectorizedCall4;
+")})));
+
+    function f
+        input Real[:,:] x1;
+        input Real[:,:] x2;
+        output Real y;
+    algorithm
+        y := sum(x1 * x2);
+    end f;
+    
+    Real v[3,3] = -1 * [1,2,3;4,5,6;7,8,9];
+    Real w[3,3] = [1,2,3;4,5,6;7,8,9];
+    Real v2[2,2,3,3] = {{v, 2*v},{3*v, 4*v}};
+    Real w2[2,2,3,3] = {{w, 2*w},{3*w, 4*w}};
+    Real z[2,2] = f(w2, v2);
+end VectorizedCall4;
+
+
+model VectorizedCall5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="VectorizedCall5",
+         description="Vectorization: scalarized record arg",
+         flatModel="
+fclass FunctionTests.VectorizedCall5
+ Real w[1].a;
+ Real w[1].b;
+ Real w[2].a;
+ Real w[2].b;
+ Real z[1];
+ Real z[2];
+equation
+ w[1].a = 1;
+ w[2].a = 3;
+ w[1].b = 2;
+ w[2].b = 4;
+ z[1] = FunctionTests.VectorizedCall5.f(FunctionTests.VectorizedCall5.R(w[1].a, w[1].b));
+ z[2] = FunctionTests.VectorizedCall5.f(FunctionTests.VectorizedCall5.R(w[2].a, w[2].b));
+
+ function FunctionTests.VectorizedCall5.f
+  input FunctionTests.VectorizedCall5.R x;
+  output Real y;
+ algorithm
+  y := ( 2 ) * ( x.a ) + x.b;
+  return;
+ end FunctionTests.VectorizedCall5.f;
+
+ record FunctionTests.VectorizedCall5.R
+  Real a;
+  Real b;
+ end FunctionTests.VectorizedCall5.R;
+end FunctionTests.VectorizedCall5;
+")})));
+
+	record R
+		Real a;
+		Real b;
+	end R;
+	
+    function f
+        input R x;
+        output Real y;
+    algorithm
+        y := 2 * x.a + x.b;
+    end f;
+    
+	R[2] w = {R(1,2), R(3,4)};
+    Real z[2] = f(w);
+end VectorizedCall5;
 
 
 end FunctionTests;

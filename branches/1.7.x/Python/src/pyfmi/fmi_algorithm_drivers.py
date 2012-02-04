@@ -242,7 +242,7 @@ class AssimuloFMIAlg(AlgorithmBase):
         
         # result file name
         if self.options['result_file_name'] == '':
-            self.result_file_name = self.model.get_name()+'_result.txt'
+            self.result_file_name = self.model.get_identifier()+'_result.txt'
         else:
             self.result_file_name = self.options['result_file_name']
         

@@ -731,13 +731,6 @@ end NameTest22;
 /* Used for tests ConstantLookup1-3. */
 constant Real constant_1 = 1.0;
 
-/* Used for tests ConstantLookup10,13-15 */
-package TestPackage
- parameter Real x;
-protected
- constant Real prot = 1.0;
-end TestPackage;
-
 class ConstantLookup1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
@@ -898,8 +891,8 @@ class ConstantLookup10
          errorMessage="
 3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 908, column 9:
-  Can not access non-constant component in package: NameTests.TestPackage.x
+Semantic error at line 904, column 2:
+  Packages may only contain classes and constants
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 909, column 17:
   Could not evaluate binding expression for parameter 'p': 'x'
@@ -908,7 +901,11 @@ Semantic error at line 909, column 21:
   Cannot find class or component declaration for x
 ")})));
 
- import NameTests.TestPackage.x;
+ package P
+  parameter Real x;
+ end P;
+ 
+ import NameTests.ConstantLookup10.P.x;
  parameter Real p = x;
 end ConstantLookup10;
 
@@ -921,17 +918,21 @@ class ConstantLookup11
          errorMessage="
 3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 931, column 14:
-  Can not access non-constant component in package: NameTests.TestPackage.x
+Semantic error at line 931, column 2:
+  Packages may only contain classes and constants
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 932, column 17:
+Semantic error at line 936, column 17:
   Could not evaluate binding expression for parameter 'p': 'x2'
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 932, column 21:
+Semantic error at line 936, column 21:
   Cannot find class or component declaration for x2
 ")})));
 
- import x2 = NameTests.TestPackage.x;
+ package P
+  parameter Real x;
+ end P;
+ 
+ import x2 = NameTests.ConstantLookup11.P.x;
  parameter Real p = x2;
 end ConstantLookup11;
 
@@ -952,7 +953,11 @@ Semantic error at line 740, column 21:
   Cannot find class or component declaration for x
 ")})));
 
- import NameTests.TestPackage.*;
+ package P
+  parameter Real x;
+ end P;
+ 
+ import NameTests.ConstantLookup12.P.*;
  parameter Real p = x;
 end ConstantLookup12;
 
@@ -960,19 +965,34 @@ end ConstantLookup12;
 /* TODO: Tests ConstantLookup13-15 should produce errors. Add annotations  
  *       when there are error checks for accesses to protected elements. */
 class ConstantLookup13
-  import NameTests.TestPackage.*;
+  package P
+  protected
+    constant Real prot = 1.0;
+  end P;
+  
+  import NameTests.ConstantLookup13.P.*;
   parameter Real p = prot;
 end ConstantLookup13;
 
 
 class ConstantLookup14
-  import NameTests.TestPackage.prot;
+  package P
+  protected
+    constant Real prot = 1.0;
+  end P;
+  
+  import NameTests.ConstantLookup14.P.prot;
   parameter Real p = prot;
 end ConstantLookup14;
 
 
 class ConstantLookup15
-  import prot2 = NameTests.TestPackage.prot;
+  package P
+  protected
+    constant Real prot = 1.0;
+  end P;
+  
+  import prot2 = NameTests.ConstantLookup15.P.prot;
   parameter Real p = prot2;
 end ConstantLookup15;
 
@@ -1010,13 +1030,10 @@ model ConstantLookup17
          name="ConstantLookup17",
          description="Illegal accesses of components in local classes",
          errorMessage="
-2 errors found:
+1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1023, column 11:
-  Can not access non-constant component in package: A.n
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1024, column 11:
-  Can not access component in non-package class: B.n
+Semantic error at line 1039, column 2:
+  Packages may only contain classes and constants
 ")})));
 
 	package A

@@ -47,7 +47,7 @@ def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
             
         file_name --
             If no file name is given, the name of the model (as defined by 
-            JMUModel.get_name()) concatenated with the string '_result' is used. 
+            JMUModel.get_identifier()) concatenated with the string '_result' is used. 
             A file suffix equal to the format argument is then appended to the 
             file name.
             Default: Empty string.
@@ -72,7 +72,7 @@ def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
     if (format=='txt'):
 
         if file_name=='':
-            file_name=model.get_name() + '_result.txt'
+            file_name=model.get_identifier() + '_result.txt'
 
         # Open file
         f = codecs.open(file_name,'w','utf-8')
@@ -309,14 +309,14 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         
             file_name --
                 If no file name is given, the name of the model (as 
-                defined by JMUModel.get_name()) concatenated with the 
+                defined by JMUModel.get_identifier()) concatenated with the 
                 string '_result' is used. A file suffix equal to the 
                 format argument is then appended to the file name.
                 Default: Empty string.
         """
         model = self.model
         if file_name=='':
-            file_name=model.get_name() + '_result.txt'
+            file_name=model.get_identifier() + '_result.txt'
 
         # Open file
         f = codecs.open(file_name,'w','utf-8')

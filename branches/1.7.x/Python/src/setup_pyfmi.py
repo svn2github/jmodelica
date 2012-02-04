@@ -28,7 +28,7 @@ import sys
 NAME = "PyFMI"
 AUTHOR = "Modelon AB"
 AUTHOR_EMAIL = ""
-VERSION = "1.0b1"
+VERSION = "1.0"
 LICENSE = "GPL"
 URL = "http://www.jmodelica.org"
 DOWNLOAD_URL = "http://www.jmodelica.org/page/12"

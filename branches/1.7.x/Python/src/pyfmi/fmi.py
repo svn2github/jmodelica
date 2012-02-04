@@ -148,11 +148,17 @@ class FMUModel(BaseModel):
         
         # Parse XML and set model name (needed when creating temp bin file name)
         self._parse_xml(self._tempxml)
-        self._modelname = self.get_name().replace('.','_')
+        self._modelid = self.get_identifier()
+        self._modelname = self.get_name()
         
         # find model binary in binaries folder and rename to something unique
         suffix = get_platform_suffix()
-        self._tempdll = self._fmufiles['binary'] = rename_to_tmp(self._modelname + suffix, self._fmufiles['binaries_dir'])
+        if os.path.exists(os.path.join(self._fmufiles['binaries_dir'], self._modelid + suffix)):
+            dllname = self._modelid + suffix
+        else:
+            dllname = self._modelname + suffix
+            
+        self._tempdll = self._fmufiles['binary'] = rename_to_tmp(dllname, self._fmufiles['binaries_dir'])
         
         #Retrieve and load the binary
         dllname = self._tempdll.split(os.sep)[-1]
@@ -381,16 +387,19 @@ class FMUModel(BaseModel):
             disc_valueref_b]
         self._save_cont_name = [cont_name+disc_name_r, disc_name_i, disc_name_b]
         self._save_nbr_points = 0
+        self._save_cont_length= [len(self._save_cont_valueref[0]),
+                                 len(self._save_cont_valueref[1]),
+                                 len(self._save_cont_valueref[2])]
         
     def _set_fmimodel_typedefs(self):
         """
         Connects the FMU to Python by retrieving the C-function by use of ctypes. 
         """
         self._validplatforms = self._dll.__getattr__(
-            self._modelname+'_fmiGetModelTypesPlatform')
+            self._modelid+'_fmiGetModelTypesPlatform')
         self._validplatforms.restype = C.c_char_p
     
-        self._version = self._dll.__getattr__(self._modelname+'_fmiGetVersion')
+        self._version = self._dll.__getattr__(self._modelid+'_fmiGetVersion')
         self._version.restype = C.c_char_p
         
         #Typedefs
@@ -452,65 +461,65 @@ class FMUModel(BaseModel):
         
         #Methods
         self._fmiInstantiateModel = self._dll.__getattr__(
-            self._modelname+'_fmiInstantiateModel')
+            self._modelid+'_fmiInstantiateModel')
         self._fmiInstantiateModel.restype = self._fmiComponent
         self._fmiInstantiateModel.argtypes = [self._fmiString, self._fmiString, 
             self._fmiCallbackFunctions, self._fmiBoolean]
         
         self._fmiFreeModelInstance = self._dll.__getattr__(
-            self._modelname+'_fmiFreeModelInstance')
+            self._modelid+'_fmiFreeModelInstance')
         self._fmiFreeModelInstance.restype = C.c_void_p
         self._fmiFreeModelInstance.argtypes = [self._fmiComponent]
         
         self._fmiSetDebugLogging = self._dll.__getattr__(
-            self._modelname+'_fmiSetDebugLogging')
+            self._modelid+'_fmiSetDebugLogging')
         self._fmiSetDebugLogging.restype = C.c_int
         self._fmiSetDebugLogging.argtypes = [
             self._fmiComponent, self._fmiBoolean]
         
-        self._fmiSetTime = self._dll.__getattr__(self._modelname+'_fmiSetTime')
+        self._fmiSetTime = self._dll.__getattr__(self._modelid+'_fmiSetTime')
         self._fmiSetTime.restype = C.c_int
         self._fmiSetTime.argtypes = [self._fmiComponent, self._fmiReal]
         
         self._fmiCompletedIntegratorStep = self._dll.__getattr__(
-            self._modelname+'_fmiCompletedIntegratorStep')
+            self._modelid+'_fmiCompletedIntegratorStep')
         self._fmiCompletedIntegratorStep.restype = self._fmiStatus
         self._fmiCompletedIntegratorStep.argtypes = [
             self._fmiComponent, C.POINTER(self._fmiBoolean)]
         
         self._fmiInitialize = self._dll.__getattr__(
-            self._modelname+'_fmiInitialize')
+            self._modelid+'_fmiInitialize')
         self._fmiInitialize.restype = self._fmiStatus
         self._fmiInitialize.argtypes = [self._fmiComponent, self._fmiBoolean, 
             self._fmiReal, C.POINTER(self._fmiEventInfo)]
         
         self._fmiTerminate = self._dll.__getattr__(
-            self._modelname+'_fmiTerminate')
+            self._modelid+'_fmiTerminate')
         self._fmiTerminate.restype = self._fmiStatus
         self._fmiTerminate.argtypes = [self._fmiComponent]
         
         self._fmiEventUpdate = self._dll.__getattr__(
-            self._modelname+'_fmiEventUpdate')
+            self._modelid+'_fmiEventUpdate')
         self._fmiEventUpdate.restype = self._fmiStatus
         self._fmiEventUpdate.argtypes = [self._fmiComponent, self._fmiBoolean, 
             C.POINTER(self._fmiEventInfo)]
         
         self._fmiSetContinuousStates = self._dll.__getattr__(
-            self._modelname+'_fmiSetContinuousStates')
+            self._modelid+'_fmiSetContinuousStates')
         self._fmiSetContinuousStates.restype = self._fmiStatus
         self._fmiSetContinuousStates.argtypes = [self._fmiComponent, 
             Nct.ndpointer(dtype=C.c_double,
                            ndim=1,
                            flags='C') ,C.c_size_t]
         self._fmiGetContinuousStates = self._dll.__getattr__(
-            self._modelname+'_fmiGetContinuousStates')
+            self._modelid+'_fmiGetContinuousStates')
         self._fmiGetContinuousStates.restype = self._fmiStatus
         self._fmiGetContinuousStates.argtypes = [self._fmiComponent, 
             Nct.ndpointer(dtype=C.c_double,
                            ndim=1,
                            flags='C') ,C.c_size_t]
         
-        self._fmiGetReal = self._dll.__getattr__(self._modelname+'_fmiGetReal')
+        self._fmiGetReal = self._dll.__getattr__(self._modelid+'_fmiGetReal')
         self._fmiGetReal.restype = self._fmiStatus
         self._fmiGetReal.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
                            ndim=1,
@@ -519,7 +528,7 @@ class FMUModel(BaseModel):
                            ndim=1,
                            flags='C')]
         self._fmiGetInteger = self._dll.__getattr__(
-            self._modelname+'_fmiGetInteger')
+            self._modelid+'_fmiGetInteger')
         self._fmiGetInteger.restype = self._fmiStatus
         self._fmiGetInteger.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
                            ndim=1,
@@ -528,7 +537,7 @@ class FMUModel(BaseModel):
                                             ndim=1,
                                             flags='C')]
         self._fmiGetBoolean = self._dll.__getattr__(
-            self._modelname+'_fmiGetBoolean')
+            self._modelid+'_fmiGetBoolean')
         self._fmiGetBoolean.restype = self._fmiStatus
         self._fmiGetBoolean.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
                            ndim=1,
@@ -537,7 +546,7 @@ class FMUModel(BaseModel):
                            ndim=1,
                            flags='C')]
         self._fmiGetString = self._dll.__getattr__(
-            self._modelname+'_fmiGetString')
+            self._modelid+'_fmiGetString')
         self._fmiGetString.restype = self._fmiStatus
         self._fmiGetString.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
                            ndim=1,
@@ -545,7 +554,7 @@ class FMUModel(BaseModel):
             C.c_size_t, self._PfmiString]
 
         
-        self._fmiSetReal = self._dll.__getattr__(self._modelname+'_fmiSetReal')
+        self._fmiSetReal = self._dll.__getattr__(self._modelid+'_fmiSetReal')
         self._fmiSetReal.restype = self._fmiStatus
         self._fmiSetReal.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
                            ndim=1,
@@ -554,7 +563,7 @@ class FMUModel(BaseModel):
                            ndim=1,
                            flags='C')]
         self._fmiSetInteger = self._dll.__getattr__(
-            self._modelname+'_fmiSetInteger')
+            self._modelid+'_fmiSetInteger')
         self._fmiSetInteger.restype = self._fmiStatus
         self._fmiSetInteger.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
                            ndim=1,
@@ -563,7 +572,7 @@ class FMUModel(BaseModel):
                            ndim=1,
                            flags='C')]
         self._fmiSetBoolean = self._dll.__getattr__(
-            self._modelname+'_fmiSetBoolean')
+            self._modelid+'_fmiSetBoolean')
         self._fmiSetBoolean.restype = self._fmiStatus
         self._fmiSetBoolean.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
                            ndim=1,
@@ -572,7 +581,7 @@ class FMUModel(BaseModel):
                            ndim=1,
                            flags='C')]
         self._fmiSetString = self._dll.__getattr__(
-            self._modelname+'_fmiSetString')
+            self._modelid+'_fmiSetString')
         self._fmiSetString.restype = self._fmiStatus
         self._fmiSetString.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
                            ndim=1,
@@ -580,7 +589,7 @@ class FMUModel(BaseModel):
             C.c_size_t,self._PfmiString]
         
         self._fmiGetDerivatives = self._dll.__getattr__(
-            self._modelname+'_fmiGetDerivatives')
+            self._modelid+'_fmiGetDerivatives')
         self._fmiGetDerivatives.restype = self._fmiStatus
         self._fmiGetDerivatives.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_double,
                            ndim=1,
@@ -588,7 +597,7 @@ class FMUModel(BaseModel):
             C.c_size_t]
         
         self._fmiGetEventIndicators = self._dll.__getattr__(
-            self._modelname+'_fmiGetEventIndicators')
+            self._modelid+'_fmiGetEventIndicators')
         self._fmiGetEventIndicators.restype = self._fmiStatus
         self._fmiGetEventIndicators.argtypes = [self._fmiComponent, 
             Nct.ndpointer(dtype=C.c_double,
@@ -596,7 +605,7 @@ class FMUModel(BaseModel):
                            flags='C'), C.c_size_t]
         
         self._fmiGetNominalContinuousStates = self._dll.__getattr__(
-            self._modelname+'_fmiGetNominalContinuousStates')
+            self._modelid+'_fmiGetNominalContinuousStates')
         self._fmiGetNominalContinuousStates.restype = self._fmiStatus
         self._fmiGetNominalContinuousStates.argtypes = [self._fmiComponent, 
             Nct.ndpointer(dtype=C.c_double,
@@ -604,7 +613,7 @@ class FMUModel(BaseModel):
                            flags='C'), C.c_size_t]
         
         self._fmiGetStateValueReferences = self._dll.__getattr__(
-            self._modelname+'_fmiGetStateValueReferences')
+            self._modelid+'_fmiGetStateValueReferences')
         self._fmiGetStateValueReferences.restype = self._fmiStatus
         self._fmiGetStateValueReferences.argtypes = [self._fmiComponent, 
             Nct.ndpointer(dtype=C.c_uint32,
@@ -612,7 +621,7 @@ class FMUModel(BaseModel):
                            flags='C'), C.c_size_t]
             
         #self._fmiExtractDebugInfo = self._dll.__getattr__(
-        #self._modelname+'_fmiExtractDebugInfo')      
+        #self._modelid+'_fmiExtractDebugInfo')      
         try:
             self._fmiExtractDebugInfo = self._dll.__getattr__(
                 'fmiExtractDebugInfo')
@@ -815,9 +824,15 @@ class FMUModel(BaseModel):
         
             [r,i,b] = model.save_time_point()
         """
-        sol_real = self.get_real(self._save_cont_valueref[0])
-        sol_int  = self.get_integer(self._save_cont_valueref[1])
-        sol_bool = self.get_boolean(self._save_cont_valueref[2])
+        sol_real=N.array([])
+        sol_int=N.array([])
+        sol_bool=N.array([])
+        if self._save_cont_length[0] > 0:
+            sol_real = self.get_real(self._save_cont_valueref[0])
+        if self._save_cont_length[1] > 0:
+            sol_int  = self.get_integer(self._save_cont_valueref[1])
+        if self._save_cont_length[2] > 0:  
+            sol_bool = self.get_boolean(self._save_cont_valueref[2])
         
         return sol_real, sol_int, sol_bool
     
@@ -1669,7 +1684,14 @@ class FMUModel(BaseModel):
     
     def get_name(self):
         """ 
-        Return the name of the model. 
+        Return the model name as used in the modeling environment.
+        """
+        return self._md.get_model_name()
+    
+    def get_identifier(self):
+        """ 
+        Return the model identifier, name of binary model file and prefix in 
+        the C-function names of the model. 
         """
         return self._md.get_model_identifier()
     
@@ -1718,13 +1740,13 @@ class FMUModel2(FMUModel):
         FMUModel._set_fmimodel_typedefs(self)
                 
         try:
-            self._fmiGetJacobian = self._dll.__getattr__(self._modelname+'_fmiGetJacobian')
+            self._fmiGetJacobian = self._dll.__getattr__(self._modelid+'_fmiGetJacobian')
             self._fmiGetJacobian.restype = self._fmiStatus
             self._fmiGetJacobian.argtypes = [self._fmiComponent, self._fmiInteger,
                                              self._fmiInteger, Nct.ndpointer(),
                                              C.c_size_t]
 
-            self._fmiGetDirectionalDerivative = self._dll.__getattr__(self._modelname+'_fmiGetDirectionalDerivative')
+            self._fmiGetDirectionalDerivative = self._dll.__getattr__(self._modelid+'_fmiGetDirectionalDerivative')
             self._fmiGetDirectionalDerivative.restype = self._fmiStatus
             self._fmiGetDirectionalDerivative.argtypes = [self._fmiComponent,
                                                           Nct.ndpointer(), C.c_size_t,
@@ -1747,7 +1769,7 @@ class FMUModel2(FMUModel):
                                                         self._fmiInteger, self._fmiReal)        
 
         self._fmiGetPartialDerivatives = self._dll.__getattr__(
-        self._modelname+'_fmiGetPartialDerivatives')
+        self._modelid+'_fmiGetPartialDerivatives')
         self._fmiGetPartialDerivatives.restype = self._fmiStatus
         self._fmiGetPartialDerivatives.argtypes = [self._fmiComponent,
                                                    self._fmiSetMatrixElementType,

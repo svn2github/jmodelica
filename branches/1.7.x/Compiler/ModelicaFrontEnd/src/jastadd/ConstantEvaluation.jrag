@@ -2125,6 +2125,10 @@ aspect ConstantEvaluation {
 	  values.clear();
 	  return EVAL_RETURN;
   }
+  
+  public int FInitArrayStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
+	  return EVAL_CONT;
+  }
 
   public int FFunctionCallStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  CValue[] vals = getCall().evaluate();

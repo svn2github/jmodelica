@@ -506,3 +506,24 @@ class TestTearing3(SimulationTest):
         self.assert_all_trajectories(['R1.v','R1.i'],rel_tol=1e-4, abs_tol=1e-4)
 
 
+class TestQR1(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'QRTests.mo',
+            'QRTests.QR1',
+            format='fmu')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1,time_step=0.02,rel_tol=1e-6)
+        self.run()
+        self.load_expected_data(
+            'QRTests_QR1_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['QR[1,1]','p[1]'],rel_tol=1e-4, abs_tol=1e-4)
+
+

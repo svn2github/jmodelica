@@ -68,14 +68,14 @@ def compile_fmu(class_name, file_name=[], compiler='modelica',
         - Class is assumed to be in MODELICAPATH.
     
     * class_name and file_name is passed:
-        - file_name can be a single file as a string or a list of file_names 
-          (strings).
+        - file_name can be a single path as a string or a list of paths 
+          (strings). The paths can be to files or libraries
     
     Library directories can be added to MODELICAPATH by listing them in a 
     special compiler option 'extra_lib_dirs', for example:
     
         compiler_options = 
-            {'extra_lib_dirs':['c:\MyLibs\MyLib1','c:\MyLibs\MyLib2']}
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
         
     Other options for the compiler should also be listed in the compiler_options 
     dict.
@@ -90,13 +90,13 @@ def compile_fmu(class_name, file_name=[], compiler='modelica',
             The name of the model class.
             
         file_name -- 
-            Model file (string) or files (list of strings), can be both .mo or 
-            .mop files.
+            A path (string) or paths (list of strings) to model files and/or 
+            libraries. Supports only be .mo files.
             Default: Empty list.
             
         compiler -- 
-            The compiler used to compile the model. The only possible compiler 
-            that can be used currently is ModelicaCompiler.
+            The compiler used to compile the model. Currently, only ModelicaCompiler 
+            can be used.
             Default: 'modelica'
             
         target --
@@ -152,14 +152,14 @@ def compile_fmux(class_name, file_name=[], compiler='auto',
         - Class is assumed to be in MODELICAPATH.
     
     * class_name and file_name is passed:
-        - file_name can be a single file as a string or a list of file_names 
-          (strings).
+        - file_name can be a single path as a string or a list of paths 
+          (strings). The paths can be to files or libraries
     
     Library directories can be added to MODELICAPATH by listing them in a 
     special compiler option 'extra_lib_dirs', for example:
     
         compiler_options = 
-            {'extra_lib_dirs':['c:\MyLibs\MyLib1','c:\MyLibs\MyLib2']}
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
         
     Other options for the compiler should also be listed in the compiler_options 
     dict.
@@ -171,8 +171,8 @@ def compile_fmux(class_name, file_name=[], compiler='auto',
             The name of the model class.
             
         file_name -- 
-            Model file (string) or files (list of strings), can be both .mo or 
-            .mop files.
+            A path (string) or paths (list of strings) to model files and/or 
+            libraries. Supports both be .mo and .mop files.
             Default: Empty list.
             
         compiler -- 
@@ -223,12 +223,12 @@ def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt',
     The different scenarios are:
     
     * Only class_name is passed: 
-        - Default compiler is ModelicaCompiler.
         - Class is assumed to be in MODELICAPATH.
+        - Default compiler is ModelicaCompiler.
     
     * class_name and file_name is passed:
-        - file_name can be a single file as a string or a list of file_names 
-          (strings).
+        - file_name can be a single path as a string or a list of paths 
+          (strings). The paths can be for files or libraries
         - Default compiler setting is 'auto' which means that the appropriate 
           compiler will be selected based on model file ending, i.e. 
           ModelicaCompiler if .mo file and OptimicaCompiler if a .mop file is 
@@ -238,7 +238,7 @@ def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt',
     special compiler option 'extra_lib_dirs', for example:
     
         compiler_options = 
-            {'extra_lib_dirs':['c:\MyLibs\MyLib1','c:\MyLibs\MyLib2']}
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
         
     Other options for the compiler should also be listed in the compiler_options 
     dict.
@@ -261,8 +261,8 @@ def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt',
             The name of the model class.
             
         file_name -- 
-            Model file (string) or files (list of strings), can be both .mo or 
-            .mop files.
+            A path (string) or paths (list of strings) to model files and/or 
+            libraries. Supports both be .mo and .mop files.
             Default: Empty list.
             
         compiler -- 
@@ -799,8 +799,8 @@ class ModelicaCompiler(object):
                 Name of model class in the model file to compile.
             
             file_name --
-                Path to file or list of paths to files in which the model is 
-                contained.
+                Path to file or list of paths to files or libraries 
+                in which the model is contained.
                 
             target --
                 The build target. Valid options are 'model_fmume' and 
@@ -827,8 +827,8 @@ class ModelicaCompiler(object):
                 Name of model class in the model file to compile.
             
             file_name --
-                Path to file or list of paths to files in which the model is 
-                contained.
+                Path to file or list of paths to files or libraries 
+                in which the model is contained.
                 
             compile_to --
                 Specify location of the compiled FMUX. Directory will be created 
@@ -848,8 +848,8 @@ class ModelicaCompiler(object):
         Parameters::
             
             model_file_name -- 
-                Path to file or list of paths to files in which the model is 
-                contained.
+                Path to file or list of paths to files or libraries 
+                in which the model is contained.
 
         Returns::
         

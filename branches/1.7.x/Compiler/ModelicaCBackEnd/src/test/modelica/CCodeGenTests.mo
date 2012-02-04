@@ -1164,6 +1164,156 @@ w=f(z);
 end CFunctionTest12;
 
 
+model CFunctionTest13
+
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest13",
+         description="C code gen: solved function call equation",
+		 generate_ode=true,
+         equation_sorting=true,
+         template="
+$C_function_headers$
+$C_functions$
+$C_ode_derivatives$
+",
+         generatedCode="
+void func_CCodeGenTests_CFunctionTest13_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v, jmi_array_t* dx_a, jmi_array_t* y_a);
+
+void func_CCodeGenTests_CFunctionTest13_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v, jmi_array_t* dx_a, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARRAY_STATIC(dx_an, 2, 1)
+    JMI_ARRAY_STATIC(y_an, 2, 1)
+    if (dx_a == NULL) {
+        JMI_ARRAY_STATIC_INIT_1(dx_an, 2)
+        dx_a = dx_an;
+    }
+    if (y_a == NULL) {
+        JMI_ARRAY_STATIC_INIT_1(y_an, 2)
+        y_a = y_an;
+    }
+    jmi_array_ref_1(dx_a, 1) =  - ( jmi_array_val_1(x_a, 1) ) + u_v;
+    jmi_array_ref_1(dx_a, 2) =  - ( jmi_array_val_1(x_a, 2) ) + 0;
+    jmi_array_ref_1(y_a, 1) = ( 2 ) * ( jmi_array_val_1(x_a, 1) );
+    jmi_array_ref_1(y_a, 2) = ( 2 ) * ( jmi_array_val_1(x_a, 2) );
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+    JMI_ARRAY_STATIC(tmp_1, 2, 1)
+    JMI_ARRAY_STATIC(tmp_2, 2, 1)
+    JMI_ARRAY_STATIC(tmp_3, 2, 1)
+    model_ode_guards(jmi);
+/************* ODE section *********/
+  _der_x_1_7 =  - ( _x_1_0 );
+  _der_x_2_8 =  - ( _x_2_1 );
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+  _u_4 = 3;
+  JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
+  JMI_ARRAY_STATIC_INIT_1(tmp_2, 2)
+  JMI_ARRAY_STATIC_INIT_1(tmp_3, 2)
+  jmi_array_ref_1(tmp_3, 1) = _x_1_0;
+  jmi_array_ref_1(tmp_3, 2) = _x_2_1;
+  func_CCodeGenTests_CFunctionTest13_F_def(tmp_3, _u_4, tmp_1, tmp_2);
+  _z_1_2 = (jmi_array_val_1(tmp_1, 1));
+  _z_2_3 = (jmi_array_val_1(tmp_1, 2));
+  _y_1_5 = (jmi_array_val_1(tmp_2, 1));
+  _y_2_6 = (jmi_array_val_1(tmp_2, 2));
+	 
+")})));
+		
+		
+function F
+  input Real x[2];
+  input Real u;
+  output Real dx[2];
+  output Real y[2];
+algorithm
+  dx := -x + {u,0};
+  y := 2*x;
+end F;
+
+Real x[2](each start = 3);
+Real z[2];
+Real u = 3;
+Real y[2];
+equation
+ der(x) = -x;
+(z,y) = F(x,u);
+end CFunctionTest13;
+
+model CFunctionTest14
+
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest14",
+         description="C code gen: unsolved function call equation",
+		 generate_ode=true,
+         equation_sorting=true,
+         template="
+$C_function_headers$
+$C_functions$
+$C_ode_derivatives$
+",
+         generatedCode="
+void func_CCodeGenTests_CFunctionTest14_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v, jmi_array_t* dx_a, jmi_array_t* y_a);
+
+void func_CCodeGenTests_CFunctionTest14_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v, jmi_array_t* dx_a, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARRAY_STATIC(dx_an, 2, 1)
+    JMI_ARRAY_STATIC(y_an, 2, 1)
+    if (dx_a == NULL) {
+        JMI_ARRAY_STATIC_INIT_1(dx_an, 2)
+        dx_a = dx_an;
+    }
+    if (y_a == NULL) {
+        JMI_ARRAY_STATIC_INIT_1(y_an, 2)
+        y_a = y_an;
+    }
+    jmi_array_ref_1(dx_a, 1) =  - ( jmi_array_val_1(x_a, 1) ) + u_v;
+    jmi_array_ref_1(dx_a, 2) =  - ( jmi_array_val_1(x_a, 2) ) + 0;
+    jmi_array_ref_1(y_a, 1) = ( 2 ) * ( jmi_array_val_1(x_a, 1) );
+    jmi_array_ref_1(y_a, 2) = ( 2 ) * ( jmi_array_val_1(x_a, 2) );
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+    JMI_ARRAY_STATIC(tmp_1, 2, 1)
+    JMI_ARRAY_STATIC(tmp_2, 2, 1)
+    JMI_ARRAY_STATIC(tmp_3, 2, 1)
+    model_ode_guards(jmi);
+/************* ODE section *********/
+  _der_x_1_7 =  - ( _x_1_0 );
+  _der_x_2_8 =  - ( _x_2_1 );
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+  _u_4 = 3;
+  jmi_kinsol_solve(jmi->dae_block_residuals[0]);
+
+")})));
+		
+		
+function F
+  input Real x[2];
+  input Real u;
+  output Real dx[2];
+  output Real y[2];
+algorithm
+  dx := -x + {u,0};
+  y := 2*x;
+end F;
+
+Real x[2](each start = 3);
+Real z[2];
+Real u = 3;
+Real y[2];
+equation
+ der(x) = -x;
+(z,y) = F(z+x,u);
+end CFunctionTest14;
 
 model CForLoop1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -3741,10 +3891,10 @@ void func_CCodeGenTests_IntegerExternal4_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_
     jmi_ad_var_t c_v;
     jmi_ad_var_t d_v;
     jmi_int_t tmp_1;
-    tmp_1 = (int)a_v;
     jmi_int_t tmp_2;
-    tmp_2 = (int)b_v;
     jmi_int_t tmp_3;
+    tmp_1 = (int)a_v;
+    tmp_2 = (int)b_v;
     tmp_3 = (int)c_v;
     d_v = my_f(tmp_1, tmp_2, &tmp_3);
     c_v = tmp_3;
@@ -5062,6 +5212,7 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalArray1_f_exp(jmi_array_t* a_a);
 void func_CCodeGenTests_IntegerExternalArray1_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t b_v;
+    JMI_INT_ARRAY_STATIC(tmp_1, 2, 1)
     JMI_INT_ARRAY_STATIC_INIT_1(tmp_1, 2)
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
     b_v = f(tmp_1->var, jmi_array_size(a_a, 0));
@@ -5105,6 +5256,7 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalArray2_f_exp(jmi_array_t* a_a);
 void func_CCodeGenTests_IntegerExternalArray2_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t b_v;
+    JMI_INT_ARRAY_STATIC(tmp_1, 4, 2)
     JMI_INT_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
     b_v = f(tmp_1->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
@@ -5147,6 +5299,7 @@ void func_CCodeGenTests_IntegerExternalArray3_f_def(jmi_ad_var_t a_v, jmi_array_
 void func_CCodeGenTests_IntegerExternalArray3_f_def(jmi_ad_var_t a_v, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARRAY_STATIC(b_an, 2, 1)
+    JMI_INT_ARRAY_STATIC(tmp_1, 2, 1)
     if (b_a == NULL) {
         JMI_ARRAY_STATIC_INIT_1(b_an, 2)
         b_a = b_an;
@@ -5154,7 +5307,7 @@ void func_CCodeGenTests_IntegerExternalArray3_f_def(jmi_ad_var_t a_v, jmi_array_
     JMI_INT_ARRAY_STATIC_INIT_1(tmp_1, 2)
     jmi_copy_matrix_to_int(b_a, b_a->var, tmp_1->var);
     f(a_v, tmp_1->var, jmi_array_size(b_a, 0));
-    jmi_copy_matrix_from_int(tmp_1, tmp_1->var, b_a->var);
+    jmi_copy_matrix_from_int(b_a, tmp_1->var, b_a->var);
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -5187,6 +5340,8 @@ void func_CCodeGenTests_IntegerExternalArray4_f_def(jmi_array_t* a_a, jmi_array_
 void func_CCodeGenTests_IntegerExternalArray4_f_def(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARRAY_STATIC(b_an, 4, 2)
+    JMI_INT_ARRAY_STATIC(tmp_1, 4, 2)
+    JMI_INT_ARRAY_STATIC(tmp_2, 4, 2)
     if (b_a == NULL) {
         JMI_ARRAY_STATIC_INIT_2(b_an, 2, 2)
         b_a = b_an;
@@ -5196,7 +5351,7 @@ void func_CCodeGenTests_IntegerExternalArray4_f_def(jmi_array_t* a_a, jmi_array_
     JMI_INT_ARRAY_STATIC_INIT_2(tmp_2, 2, 2)
     jmi_copy_matrix_to_int(b_a, b_a->var, tmp_2->var);
     f(tmp_1->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1), tmp_2->var, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1));
-    jmi_copy_matrix_from_int(tmp_2, tmp_2->var, b_a->var);
+    jmi_copy_matrix_from_int(b_a, tmp_2->var, b_a->var);
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -5664,8 +5819,8 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran1_f_exp(jmi_ad_var_t a_v);
 void func_CCodeGenTests_IntegerExternalFortran1_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t b_v;
-    extern jmi_ad_var_t f_(jmi_int_t*);
     jmi_int_t tmp_1;
+    extern jmi_ad_var_t f_(jmi_int_t*);
     tmp_1 = (int)a_v;
     b_v = f_(&tmp_1);
     if (b_o != NULL) *b_o = b_v;
@@ -5750,8 +5905,8 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran3_f_exp(jmi_ad_var_t a_v);
 void func_CCodeGenTests_IntegerExternalFortran3_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t b_v;
-    extern void my_f_(jmi_ad_var_t*, jmi_int_t*);
     jmi_int_t tmp_1;
+    extern void my_f_(jmi_ad_var_t*, jmi_int_t*);
     tmp_1 = (int)b_v;
     my_f_(&a_v, &tmp_1);
     b_v = tmp_1;
@@ -5796,12 +5951,12 @@ void func_CCodeGenTests_IntegerExternalFortran4_f_def(jmi_ad_var_t a_v, jmi_ad_v
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t c_v;
     jmi_ad_var_t d_v;
-    extern jmi_ad_var_t my_f_(jmi_int_t*, jmi_int_t*, jmi_int_t*);
     jmi_int_t tmp_1;
-    tmp_1 = (int)a_v;
     jmi_int_t tmp_2;
-    tmp_2 = (int)b_v;
     jmi_int_t tmp_3;
+    extern jmi_ad_var_t my_f_(jmi_int_t*, jmi_int_t*, jmi_int_t*);
+    tmp_1 = (int)a_v;
+    tmp_2 = (int)b_v;
     tmp_3 = (int)c_v;
     d_v = my_f_(&tmp_1, &tmp_2, &tmp_3);
     c_v = tmp_3;
@@ -5985,11 +6140,11 @@ void func_CCodeGenTests_ExternalArrayFortran4_f_def(jmi_array_t* a_a, jmi_array_
 void func_CCodeGenTests_ExternalArrayFortran4_f_def(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARRAY_STATIC(b_an, 2, 1)
+    extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*);
     if (b_a == NULL) {
         JMI_ARRAY_STATIC_INIT_1(b_an, 2)
         b_a = b_an;
     }
-    extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*);
     f_(a_a->var, &jmi_array_size(a_a, 0), b_a->var, &jmi_array_size(b_a, 0));
     JMI_DYNAMIC_FREE()
     return;
@@ -6028,17 +6183,17 @@ void func_CCodeGenTests_ExternalArrayFortran5_f_def(jmi_array_t* a_a, jmi_array_
     JMI_ARRAY_STATIC(b_an, 4, 2)
     JMI_ARRAY_STATIC(tmp_1, 4, 2)
     JMI_ARRAY_STATIC(tmp_2, 4, 2)
+    extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
     if (b_a == NULL) {
         JMI_ARRAY_STATIC_INIT_2(b_an, 2, 2)
         b_a = b_an;
     }
-    extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
     JMI_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
     jmi_transpose_matrix(a_a, a_a->var, tmp_1->var);
     JMI_ARRAY_STATIC_INIT_2(tmp_2, 2, 2)
     jmi_transpose_matrix(b_a, b_a->var, tmp_2->var);
     f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
-    jmi_transpose_matrix(tmp_2, tmp_2->var, b_a->var);
+    jmi_transpose_matrix(b_a, tmp_2->var, b_a->var);
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -6075,17 +6230,17 @@ void func_CCodeGenTests_ExternalArrayFortran6_f_def(jmi_array_t* a_a, jmi_array_
     JMI_ARRAY_DYNAMIC(b_an, 2)
     JMI_ARRAY_DYNAMIC(tmp_1, 2)
     JMI_ARRAY_DYNAMIC(tmp_2, 2)
+    extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
     if (b_a == NULL) {
         JMI_ARRAY_DYNAMIC_INIT_2(b_an, ( jmi_array_size(a_a, 0) ) * ( jmi_array_size(a_a, 1) ), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
         b_a = b_an;
     }
-    extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
     JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, ( jmi_array_size(a_a, 0) ) * ( jmi_array_size(a_a, 1) ), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_transpose_matrix(a_a, a_a->var, tmp_1->var);
     JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, ( jmi_array_size(a_a, 0) ) * ( jmi_array_size(a_a, 1) ), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_transpose_matrix(b_a, b_a->var, tmp_2->var);
     f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
-    jmi_transpose_matrix(tmp_2, tmp_2->var, b_a->var);
+    jmi_transpose_matrix(b_a, tmp_2->var, b_a->var);
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -6121,6 +6276,7 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalArrayFortran1_f_exp(jmi_array_t* 
 void func_CCodeGenTests_IntegerExternalArrayFortran1_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t b_v;
+    JMI_INT_ARRAY_STATIC(tmp_1, 2, 1)
     extern jmi_ad_var_t f_(jmi_int_t*, jmi_int_t*);
     JMI_INT_ARRAY_STATIC_INIT_1(tmp_1, 2)
     jmi_transpose_matrix_to_int(a_a, a_a->var, tmp_1->var);
@@ -6165,7 +6321,7 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalArrayFortran2_f_exp(jmi_array_t* 
 void func_CCodeGenTests_IntegerExternalArrayFortran2_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t b_v;
-    JMI_ARRAY_STATIC(tmp_1, 4, 2)
+    JMI_INT_ARRAY_STATIC(tmp_1, 4, 2)
     extern jmi_ad_var_t f_(jmi_int_t*, jmi_int_t*, jmi_int_t*);
     JMI_INT_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
     jmi_transpose_matrix_to_int(a_a, a_a->var, tmp_1->var);
@@ -6209,15 +6365,16 @@ void func_CCodeGenTests_IntegerExternalArrayFortran3_f_def(jmi_ad_var_t a_v, jmi
 void func_CCodeGenTests_IntegerExternalArrayFortran3_f_def(jmi_ad_var_t a_v, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARRAY_STATIC(b_an, 2, 1)
+    JMI_INT_ARRAY_STATIC(tmp_1, 2, 1)
+    extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
     if (b_a == NULL) {
         JMI_ARRAY_STATIC_INIT_1(b_an, 2)
         b_a = b_an;
     }
-    extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
     JMI_INT_ARRAY_STATIC_INIT_1(tmp_1, 2)
     jmi_transpose_matrix_to_int(b_a, b_a->var, tmp_1->var);
     f_(&a_v, tmp_1->var, &jmi_array_size(b_a, 0));
-    jmi_transpose_matrix_from_int(tmp_1, tmp_1->var, b_a->var);
+    jmi_transpose_matrix_from_int(b_a, tmp_1->var, b_a->var);
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -6250,19 +6407,19 @@ void func_CCodeGenTests_IntegerExternalArrayFortran4_f_def(jmi_array_t* a_a, jmi
 void func_CCodeGenTests_IntegerExternalArrayFortran4_f_def(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARRAY_STATIC(b_an, 4, 2)
-    JMI_ARRAY_STATIC(tmp_1, 4, 2)
-    JMI_ARRAY_STATIC(tmp_2, 4, 2)
+    JMI_INT_ARRAY_STATIC(tmp_1, 4, 2)
+    JMI_INT_ARRAY_STATIC(tmp_2, 4, 2)
+    extern void f_(jmi_int_t*, jmi_int_t*, jmi_int_t*, jmi_int_t*, jmi_int_t*, jmi_int_t*);
     if (b_a == NULL) {
         JMI_ARRAY_STATIC_INIT_2(b_an, 2, 2)
         b_a = b_an;
     }
-    extern void f_(jmi_int_t*, jmi_int_t*, jmi_int_t*, jmi_int_t*, jmi_int_t*, jmi_int_t*);
     JMI_INT_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
     jmi_transpose_matrix_to_int(a_a, a_a->var, tmp_1->var);
     JMI_INT_ARRAY_STATIC_INIT_2(tmp_2, 2, 2)
     jmi_transpose_matrix_to_int(b_a, b_a->var, tmp_2->var);
     f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
-    jmi_transpose_matrix_from_int(tmp_2, tmp_2->var, b_a->var);
+    jmi_transpose_matrix_from_int(b_a, tmp_2->var, b_a->var);
     JMI_DYNAMIC_FREE()
     return;
 }

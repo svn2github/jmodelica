@@ -209,6 +209,66 @@ compile_fmux(model_name, mo_file)
 </programlisting>
     </section>
 
+    <section>
+      <title>Compiling from libraries</title>
+
+      <para>The model to be compiled might not be in a loose .mo file, but
+      rather part of a library consisting of a directory structure containing
+      several Modelica files. In this case, the file within the library that
+      contains the model should <emphasis>not</emphasis> be given on the
+      command line. Instead, the entire library should to added to the list of
+      libraries the compiler searches for classes in. This can be done in
+      several ways (here <emphasis>library directory</emphasis> refers to the
+      top directory of the library, that should have the same name as the top
+      package in the library):</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Adding the directory containing the library directory to the
+          environment variable <code>MODELICAPATH</code>. The compiler will
+          search for classes in all libraries found in any on the directories
+          in <code>MODELICAPATH</code>. In this case the
+          <code>file_name</code> argument of the compilation function can be
+          omitted, assuming no additional Modelica files are needed.</para>
+        </listitem>
+
+        <listitem>
+          <para>Setting the <code>'extra_lib_dirs'</code> compiler option to
+          the path to the directory containing the library directory. This is
+          equivalent to adding it to the <code>MODELICAPATH</code>, but only
+          for that compilation.</para>
+        </listitem>
+
+        <listitem>
+          <para>Giving the path to the library directory in the
+          <code>file_name</code> argument of the compilation function. This
+          allows adding a specific library to the search list (as opposed to
+          adding all libraries in a specific directory).</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>By default, the script starting a JModelica.org Python shell sets
+      the MODELICAPATH to the directory containing the version of the Modelica
+      Standard Library (MSL) that is included in the installation. Thus, all
+      classes in the MSL are available without any need to specify its
+      location.</para>
+
+      <para>The Python code example below demonstrates these methods:</para>
+
+      <programlisting># Import the compiler function
+from pymodelica import compile_fmu
+
+# Compile an example model from the MSL
+fmu1 = compile_fmu('Modelica.Mechanics.Rotational.Examples.First')
+
+# Compile a model from the library MyLibrary, located in C:\MyLibs
+fmu2 = compile_fmu('MyLibrary.MyModel', compiler_options = {'extra_lib_dirs':'C:\MyLibs'})
+
+# The same as the last command, if no other libraries in C:\MyLibs are needed
+fmu3 = compile_fmu('MyLibrary.MyModel', 'C:\MyLibs\MyLibrary')
+</programlisting>
+    </section>
+
     <section xml:id="models_sec_compiler_settings">
       <title>Compiler settings</title>
 
@@ -240,12 +300,12 @@ compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt', compiler_
     The different scenarios are:
 
     * Only class_name is passed:
-        - Default compiler is ModelicaCompiler.
         - Class is assumed to be in MODELICAPATH.
-
+        - Default compiler is ModelicaCompiler.
+    
     * class_name and file_name is passed:
-        - file_name can be a single file as a string or a list of file_names
-          (strings).
+        - file_name can be a single path as a string or a list of paths 
+          (strings). The paths can be for files or libraries
         - Default compiler setting is 'auto' which means that the appropriate
           compiler will be selected based on model file ending, i.e.
           ModelicaCompiler if .mo file and OptimicaCompiler if a .mop file is
@@ -255,7 +315,7 @@ compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt', compiler_
     special compiler option 'extra_lib_dirs', for example:
 
         compiler_options =
-            {'extra_lib_dirs':['c:\MyLibs\MyLib1','c:\MyLibs\MyLib2']}
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
 
     Other options for the compiler should also be listed in the compiler_options
     dict.
@@ -278,8 +338,8 @@ compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt', compiler_
             The name of the model class.
 
         file_name --
-            Model file (string) or files (list of strings), can be both .mo or
-            .mop files.
+            A path (string) or paths (list of strings) to model files and/or 
+            libraries. Supports both be .mo and .mop files.
             Default: Empty list.
 
         compiler --
@@ -335,35 +395,35 @@ compile_fmu(class_name, file_name=[], compiler='modelica', target='model_fmume',
         - Class is assumed to be in MODELICAPATH.
 
     * class_name and file_name is passed:
-        - file_name can be a single file as a string or a list of file_names
-          (strings).
-
-    Library directories can be added to MODELICAPATH by listing them in a
+        - file_name can be a single path as a string or a list of paths 
+          (strings). The paths can be to files or libraries
+    
+    Library directories can be added to MODELICAPATH by listing them in a 
     special compiler option 'extra_lib_dirs', for example:
-
-        compiler_options =
-            {'extra_lib_dirs':['c:\MyLibs\MyLib1','c:\MyLibs\MyLib2']}
-
-    Other options for the compiler should also be listed in the compiler_options
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
+        
+    Other options for the compiler should also be listed in the compiler_options 
     dict.
-
-    The compiler target is 'model_fmume' by default which means that the shared
-    file contains the FMI for Model Exchange API. This is currently the only
+    
+    The compiler target is 'model_fmume' by default which means that the shared 
+    file contains the FMI for Model Exchange API. This is currently the only 
     target that is possible to use.
-
+    
     Parameters::
-
-        class_name --
+    
+        class_name -- 
             The name of the model class.
-
-        file_name --
-            Model file (string) or files (list of strings), can be both .mo or
-            .mop files.
+            
+        file_name -- 
+            A path (string) or paths (list of strings) to model files and/or 
+            libraries. Supports only be .mo files.
             Default: Empty list.
-
-        compiler --
-            The compiler used to compile the model. The only possible compiler
-            that can be used currently is ModelicaCompiler.
+            
+        compiler -- 
+            The compiler used to compile the model. Currently, only ModelicaCompiler 
+            can be used.
             Default: 'modelica'
 
         target --
@@ -412,27 +472,27 @@ compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={}, com
         - Class is assumed to be in MODELICAPATH.
 
     * class_name and file_name is passed:
-        - file_name can be a single file as a string or a list of file_names
-          (strings).
-
-    Library directories can be added to MODELICAPATH by listing them in a
+        - file_name can be a single path as a string or a list of paths 
+          (strings). The paths can be to files or libraries
+    
+    Library directories can be added to MODELICAPATH by listing them in a 
     special compiler option 'extra_lib_dirs', for example:
-
-        compiler_options =
-            {'extra_lib_dirs':['c:\MyLibs\MyLib1','c:\MyLibs\MyLib2']}
-
-    Other options for the compiler should also be listed in the compiler_options
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
+        
+    Other options for the compiler should also be listed in the compiler_options 
     dict.
-
-
+    
+    
     Parameters::
-
-        class_name --
+    
+        class_name -- 
             The name of the model class.
-
-        file_name --
-            Model file (string) or files (list of strings), can be both .mo or
-            .mop files.
+            
+        file_name -- 
+            A path (string) or paths (list of strings) to model files and/or 
+            libraries. Supports both be .mo and .mop files.
             Default: Empty list.
 
         compiler --

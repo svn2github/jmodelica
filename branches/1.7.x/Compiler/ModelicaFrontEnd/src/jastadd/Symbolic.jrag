@@ -16,31 +16,68 @@
 
 aspect EquationSolve {
 
-	syn boolean FAbstractEquation.isSolved(String name) {
-		return !(solution(name, false) instanceof FNoExp);
+	syn boolean FAbstractEquation.isSolved(String name) = isSolved(name, false);
+	
+	syn boolean FAbstractEquation.isSolved(String name, boolean duringTearing) = false;
+
+	eq FWhenEquation.isSolved(String name, boolean duringTearing) {
+		return !(solution(name, duringTearing) instanceof FNoExp);
+	}
+
+	eq FEquation.isSolved(String name, boolean duringTearing) {
+		return !(solution(name, duringTearing) instanceof FNoExp);
+	}
+
+	eq FFunctionCallEquation.isSolved(String name, boolean duringTearing) {
+		if (duringTearing) {
+			return false;	
+		}
+		Set<FVariable> leftVars = referencedFVariablesInLHS();
+		
+		boolean inLeft = false;
+		for (FVariable fv : leftVars) {
+			if (fv.name().equals(name)) {
+				inLeft = true;	
+			}	
+		}
+		if (!inLeft) {
+			return false;
+		}
+		
+		Set<FVariable> argVars = referencedFVariablesInRHS();
+
+		boolean inArgs = false;
+		for (FVariable fv : argVars) {
+			if (fv.name().equals(name)) {
+				inArgs = true;	
+			}	
+		}
+
+		if (inArgs) {
+			return false;
+		} else {
+			return true;
+		}
+				
 	}
 	
-	syn nta FExp FAbstractEquation.solution(String name) {
+	syn nta FExp FWhenEquation.solution(String name) {
 		return solution(name, false);
 	}
 	
-	syn boolean FAbstractEquation.isSolved(String name, boolean duringTearing) {
-		return !(solution(name, duringTearing) instanceof FNoExp);
-	}
-	
-	syn nta FExp FAbstractEquation.solution(String name, boolean duringTearing) {
-		return new FNoExp();
-	}
-	
-	eq FWhenEquation.solution(String name, boolean duringTearing) {
+	syn nta FExp FWhenEquation.solution(String name, boolean duringTearing) {
 		if (getNumFAbstractEquation()>1) {
 			return null;
 		} else {
-			return getFAbstractEquation(0).solution(name);
+			return ((FEquation)getFAbstractEquation(0)).solution(name);
 		}
 	}
+
+	syn nta FExp FEquation.solution(String name) {
+		return solution(name, false);
+	}
 	
-	eq FEquation.solution(String name, boolean duringTearing) {
+	syn nta FExp FEquation.solution(String name, boolean duringTearing) {
 		
 		// Get terms
 		ArrayList<FExp> t = terms();

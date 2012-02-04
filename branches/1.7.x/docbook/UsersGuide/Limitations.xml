@@ -25,11 +25,6 @@
 
       <itemizedlist>
         <listitem>
-          <para>Parsing of full Modelica 3.2 (Modelica 3.0 is
-          supported)</para>
-        </listitem>
-
-        <listitem>
           <para>Integer, Boolean and enumeration variables for optimizations
           (parameters and constants are supported, as are discrete variables
           in simulations)</para>
@@ -57,17 +52,14 @@
 
         <listitem>
           <para>Functions with array inputs with sizes declared as ':' are
-          only partially supported.</para>
+          only partially supported (there are some specific operations on such
+          functions that aren't supported).</para>
         </listitem>
 
         <listitem>
-          <para>Connect clauses does not handle arrays of connectors
-          properly.</para>
-        </listitem>
-
-        <listitem>
-          <para>Partial support for external functions, only external C
-          functions with scalar inputs and outputs are supported.</para>
+          <para>Partial support for external functions, record, Boolean,
+          enumeration and String arguments and return values are not
+          supported.</para>
         </listitem>
 
         <listitem>

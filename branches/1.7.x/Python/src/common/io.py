@@ -559,13 +559,13 @@ class ResultWriterDymola(ResultWriter):
         
             file_name --
                 If no file name is given, the name of the model (as defined by 
-                FMUModel.get_name()) concatenated with the string '_result' is 
+                FMUModel.get_identifier()) concatenated with the string '_result' is 
                 used. A file suffix equal to the format argument is then 
                 appended to the file name.
                 Default: Empty string.
         """
         if file_name=='':
-            file_name=self.model.get_name() + '_result.txt'
+            file_name=self.model.get_identifier() + '_result.txt'
 
         # Open file
         f = codecs.open(file_name,'w','utf-8')
@@ -640,6 +640,10 @@ class ResultWriterDymola(ResultWriter):
         variabilities_noalias = sorted(zip(
             tuple(vrefs_noalias), 
             tuple(variabilities_noalias)), 
+            key=itemgetter(0))
+        types_noalias = sorted(zip(
+            tuple(vrefs_noalias), 
+            tuple(types_noalias)), 
             key=itemgetter(0))
         names = sorted(zip(
             tuple(vrefs), 
@@ -751,13 +755,13 @@ class ResultWriterDymola(ResultWriter):
         for i, name in enumerate(names_noalias):
             if variabilities_noalias[i][1] == xmlparser.CONSTANT or \
                 variabilities_noalias[i][1] == xmlparser.PARAMETER:
-                    if types_noalias[i] == xmlparser.REAL:
+                    if types_noalias[i][1] == xmlparser.REAL:
                         str_text = str_text + (
                             " %.14E" % (self.model.get_real([name[0]])))
-                    elif types_noalias[i] == xmlparser.INTEGER:
+                    elif types_noalias[i][1] == xmlparser.INTEGER:
                         str_text = str_text + (
                             " %.14E" % (self.model.get_integer([name[0]])))
-                    elif types_noalias[i] == xmlparser.BOOLEAN:
+                    elif types_noalias[i][1] == xmlparser.BOOLEAN:
                         str_text = str_text + (
                             " %.14E" % (float(
                                 self.model.get_boolean([name[0]])[0])))

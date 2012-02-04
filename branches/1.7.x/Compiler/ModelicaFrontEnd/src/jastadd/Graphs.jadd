@@ -26,6 +26,137 @@ import java.util.Stack;
 
 aspect Graphs {
 
+public class EquationBlockFactory {
+
+	/*
+	 * This method groups the Eq objects in a BLT block so that Eqs that
+	 * originates from the same FAbstractEquation are grouped together.
+	 */
+	static ArrayList<Stack<Eq>> groupComponent(Stack<Eq> component) {
+	
+		Eq eqn1 = null;
+		Eq eqn2 = null;
+		Stack<Eq> newStack = null;
+		ArrayList<Stack<Eq>> l = new ArrayList<Stack<Eq>>();
+
+		for (Eq eqn : component) {
+			eqn1 = eqn2;
+			eqn2 = eqn;
+			if (eqn1==null || (eqn1.getEquation() != eqn2.getEquation())) {
+				newStack = new Stack<Eq>();
+				l.add(newStack);
+				newStack.add(eqn2);	
+			} else {
+				newStack.add(eqn2);
+			}
+		}	
+		return l;
+	}
+
+	/*
+	 * This method takes a list of Eq objects and reate an equation blocks
+	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
+	 */
+	static SimpleEquationBlock createSimpleEquationBlock(Stack<Eq> component, boolean solve) {
+				
+		if (component.size()==1 ) {
+			FAbstractEquation e = component.get(0).getEquation();
+			FVariable fv = component.get(0).getMatching().getVariable();
+			if (e instanceof FEquation) {
+				FEquation ee = (FEquation)e;
+				if (solve && ee.isSolved(fv.name())) { // Solved scalar equation
+					return new SolvedScalarEquationBlock(ee,fv);
+				} else { // Unsolved scalar equation
+					return new UnsolvedScalarEquationBlock(ee,fv);				
+				}
+			}
+			// When Equation
+			if (e instanceof FWhenEquation) {
+				FWhenEquation ee = (FWhenEquation)e;
+				if (solve && ee.isSolved(fv.name())) {
+					return new WhenEquationBlock(ee,fv);
+				} 
+			}
+			
+			// If equation TODO
+		}
+		
+		// Check if the component contains a single function call equation		
+		FAbstractEquation e = component.get(0).getEquation();
+		if (e instanceof FFunctionCallEquation) {		
+			FFunctionCallEquation fce = (FFunctionCallEquation)e;
+			boolean one_equation = true;
+			for (Eq eqn : component) {
+				if (eqn.getEquation() != e) {
+					one_equation = false;
+					break;
+				}
+			}
+			if (one_equation) {
+				// Loop over all unknowns in the component
+				boolean isSolvable = true;
+				ArrayList<FVariable> l = new ArrayList<FVariable>();
+				for (Eq eqn : component) {
+					l.add(eqn.getMatching().getVariable());
+					if (!eqn.getEquation().isSolved(eqn.getMatching().getVariable().name())) {
+						isSolvable = false;
+					}
+				} // Solved FunctionCallEquation				
+				if (isSolvable && solve) {
+					return new SolvedFunctionCallEquationBlock(fce,l);
+				} else { // Unsolved FunctionCallEquation
+					return new UnsolvedFunctionCallEquationBlock(fce,l);
+				}				
+			}
+		}
+		return null;
+	}
+
+	/*
+	 * This method takes as input a set of Eq objects corresponeing to
+	 * a BLT block. First the, the Eq objects are grouped using
+	 * groupComponent to simplify the analysis. Then, if there is
+	 * only one Eq, a SimpleEquationBlock is created, if possible. Otherwise
+	 * a real or mixed equation block is created.
+	 */
+	static AbstractEquationBlock createEquationBlock(Stack<Eq> component) {
+		
+		// System of equations
+		ArrayList<Stack<Eq>> l = EquationBlockFactory.groupComponent(component);
+
+		if (l.size()==1) {
+			SimpleEquationBlock seb = createSimpleEquationBlock(l.get(0),true);
+			if (seb!=null && seb.isSolvable()) {
+				return seb;
+			}	
+		}
+
+		ArrayList<SimpleEquationBlock> ls = new ArrayList<SimpleEquationBlock>();	
+			
+		for (Stack<Eq> s : l) {
+			ls.add(createSimpleEquationBlock(s,false));	
+		}	
+			
+		EquationBlock b = null;
+		boolean isMixed = false;
+		for (SimpleEquationBlock seb : ls) {
+			for (FAbstractEquation e : seb.equations()) {
+				if (!e.isReal()) {
+					isMixed = true;
+				}
+			}
+		}
+		
+		if (isMixed) {
+			b = new MixedEquationBlock(ls);		
+		} else {
+			b = new EquationBlock(ls);	
+		}
+
+		return b;
+	}	
+}
+
 public class BiPGraph {
 
 	public static int DERIVATIVE_VARIABLES = 1;
@@ -986,31 +1117,8 @@ public class BiPGraph {
         Var v = null;
 		for (Stack<Eq> bl : components) {
 			
-			if (bl.size()==1 && bl.get(0).getEquation().isSolved(bl.get(0).getMatching().getVariable().name())) {
-				v = bl.get(0).getMatching();
-				MatchingPair mp = new MatchingPair(bl.get(0).getEquation(),v.getVariable());
-				blt.add(new SolvedScalarBlock(mp));
-			} else {
-				EquationBlock b = null;
-				boolean isMixed = false;
-				for (Eq bl_eqn : bl) {
-					if (!bl_eqn.getEquation().isReal()) {
-						isMixed = true;
-						break;
-					}
-				}
-				if (isMixed) {
-					b = new MixedEquationBlock();
-				} else {
-					b = new EquationBlock();	
-				}
-				for (Eq bl_eqn : bl) {
-					v = bl_eqn.getMatching();
-					MatchingPair mp = new MatchingPair(bl_eqn.getEquation(),v.getVariable());
-					b.addMatchingPair(mp);
-				}
-				blt.add(b);
-			}			
+			blt.add(EquationBlockFactory.createEquationBlock(bl));
+					
 		}
 		return blt;
 	}

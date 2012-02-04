@@ -194,3 +194,8 @@ def test_vdp_casadi_ps():
 def test_hohmann_transfer():
     """Run the Hohmann Transfer example using CsadiPseudoSpectral."""
     hohmann_transfer.run_demo(False)
+    
+@testattr(assimulo = True)
+def test_QR():
+    """ Test the QR example. """    
+    QR.run_demo(False)

@@ -21,6 +21,19 @@
     xlink:href="http://www.jmodelica.org/assimulo">Assimulo</link></link> as
     standard which is a standalone Python package for solving ordinary
     differential and differential algebraic equations.</para>
+
+    <para>There are two different means to simulate a Modelica model in
+    JModelica.org: either as a Functional Mock-Up Unit (FMU) or as a
+    JModelica.org Model Unit (JMU). In the former case, the model is converted
+    into an Ordinary Differential Equation (ODE), whereas in the latter case,
+    the model is simulated as a Differential Algebraic Equation (DAE). The
+    default, and recommended, means to simulate models is to use FMUs, since
+    this approach provides better performance, more a more robust
+    initialization mechanism, and significantly better support for hybrid
+    systems. Simulation of JMU's may still be useful, however, in some
+    optimization applications where simulation of the model as a DAE/JMU, is
+    an important prerequisite for optimization by means of the collocation
+    algorithms.</para>
   </section>
 
   <section>

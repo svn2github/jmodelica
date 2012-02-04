@@ -532,6 +532,11 @@ FBreakStmt : FStatement;
 FReturnStmt : FStatement;
 
 /**
+ * Class for array initalization statements.
+ */
+FInitArrayStmt : FStatement ::= FIdUseExp;
+
+/**
  * \brief Base class for flattened if and when statements.
  */
 abstract FIfWhenStmt : FStatement ::= FIfWhenClause*;
@@ -973,11 +978,21 @@ abstract FAbstractFunctionCall : FExp;
  * \brief Generic function call expression.
  */
 FFunctionCall : FAbstractFunctionCall ::= Name:FIdUse Arg:FExp* <Sizes:Size[]>;
+ 
+/**
+ * Generic vectorized function call expression.
+ */
+FVectorFunctionCall : FFunctionCall ::= <VectorSize:Size> <Vectorized:boolean[]>;
 
 /**
  * \brief Generic function call expression in instance trees.
  */
 InstFunctionCall : FAbstractFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument*;
+
+/**
+ * Generic vectorized function call expression in instance trees.
+ */
+InstVectorFunctionCall : InstFunctionCall ::= <Dims:int>;
 
 /**
  * \brief Base class for function call arguments in the instance tree.

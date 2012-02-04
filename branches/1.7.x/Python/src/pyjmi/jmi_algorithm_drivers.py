@@ -243,7 +243,7 @@ class IpoptInitializationAlg(AlgorithmBase):
         # result file name
         resultfile = self.result_args['file_name']
         if not resultfile:
-            resultfile=self.model.get_name()+'_result.txt'
+            resultfile=self.model.get_identifier()+'_result.txt'
         # load result file
         res = ResultDymolaTextual(resultfile)
         
@@ -493,7 +493,7 @@ class AssimuloAlg(AlgorithmBase):
         
         # result file name
         if self.options['result_file_name'] == '':
-            self.result_file_name = self.model.get_name()+'_result.txt'
+            self.result_file_name = self.model.get_identifier()+'_result.txt'
         else:
             self.result_file_name = self.options['result_file_name']
         
@@ -911,7 +911,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         # result file name
         resultfile = self.result_args['file_name']
         if not resultfile:
-            resultfile=self.model.get_name()+'_result.txt'
+            resultfile=self.model.get_identifier()+'_result.txt'
         
         # load result file
         res = ResultDymolaTextual(resultfile)
@@ -1129,7 +1129,7 @@ class KInitSolveAlg(AlgorithmBase):
         # result file name
         resultfile = self.result_args['file_name']
         if not resultfile:
-            resultfile=self.model.get_name()+'_result.txt'
+            resultfile=self.model.get_identifier()+'_result.txt'
         # load result file
         res = ResultDymolaTextual(resultfile)
         
@@ -1257,7 +1257,7 @@ class CasadiPseudoSpectral(AlgorithmBase):
         # result file name
         resultfile = self.result_args['file_name']
         if not resultfile:
-            resultfile=self.model.get_name()+'_result.txt'
+            resultfile=self.model.get_identifier()+'_result.txt'
         
         # load result file
         res = ResultDymolaTextual(resultfile)
@@ -1579,7 +1579,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
         self.nlp.export_result_dymola()
         
         # Load result file
-        resultfile = self.model.get_name() + '_result.txt'
+        resultfile = self.model.get_identifier() + '_result.txt'
         res = ResultDymolaTextual(resultfile)
         
         # Get optimized element lengths

@@ -1,5 +1,6 @@
 package org.jmodelica.ide.editor;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import mock.MockFile;
@@ -45,7 +46,7 @@ public class EditorFile {
 
 			IURIEditorInput i = (IURIEditorInput) input;
 
-			path = i.getURI().getPath();
+			path = new File(i.getURI().getPath()).getAbsolutePath();
 			file = EclipseUtil.getFileForPath(path).value();
 
 		} else {
