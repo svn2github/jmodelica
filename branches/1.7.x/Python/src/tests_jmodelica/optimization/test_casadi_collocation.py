@@ -144,7 +144,7 @@ class TestLocalDAECollocator:
         opts['eliminate_der_var'] = True
         opts['eliminate_cont_var'] = True
         opts['init_traj'] = ResultDymolaTextual(
-                "VDP_pack_VDP_Opt_bounds_Lagrange_result.txt")
+                "VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt")
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
         
@@ -463,7 +463,7 @@ class TestLocalDAECollocator:
         # Mayer, eliminate derivative variables
         opts["eliminate_der_var"] = True
         opts['init_traj'] = ResultDymolaTextual(
-                "VDP_pack_VDP_Opt_bounds_Lagrange_result.txt")
+                "VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt")
         res = model_mayer.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
@@ -495,7 +495,7 @@ class TestLocalDAECollocator:
         # Eliminate continuity variables, Radau
         opts["eliminate_cont_var"] = True
         opts['init_traj'] = ResultDymolaTextual(
-                "VDP_pack_VDP_Opt_bounds_Mayer_result.txt")
+                "VDP_pack_VDP_Opt_Bounds_Mayer_result.txt")
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref_radau)
         
@@ -508,7 +508,7 @@ class TestLocalDAECollocator:
         # Eliminate continuity variables, Gauss
         opts["eliminate_cont_var"] = True
         opts['init_traj'] = ResultDymolaTextual(
-                "VDP_pack_VDP_Opt_bounds_Mayer_result.txt")
+                "VDP_pack_VDP_Opt_Bounds_Mayer_result.txt")
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref_gauss)
     
@@ -574,7 +574,7 @@ class TestLocalDAECollocator:
         opts['n_e'] = 20
         opts['n_cp'] = 8
         opts['init_traj'] = ResultDymolaTextual(
-                "VDP_pack_VDP_Opt_bounds_Mayer_result.txt")
+                "VDP_pack_VDP_Opt_Bounds_Mayer_result.txt")
         res = model.optimize(self.algorithm, opts)
         assert_results(res, 3.17620203643878e0, 2.803233013e-1)
         
@@ -597,7 +597,7 @@ class TestLocalDAECollocator:
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         opts['init_traj'] = ResultDymolaTextual(
-                "VDP_pack_VDP_Opt_bounds_Lagrange_result.txt")
+                "VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt")
         
         # SX with exact Hessian and eliminated variables
         opts['graph'] = "SX"
