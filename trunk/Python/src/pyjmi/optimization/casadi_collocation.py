@@ -177,7 +177,7 @@ class CasADiCollocator(object):
         if (format=='txt'):
 
             if file_name=='':
-                file_name=self.model.get_name() + '_result.txt'
+                file_name=self.model.get_identifier() + '_result.txt'
 
             # Open file
             f = codecs.open(file_name,'w','utf-8')
