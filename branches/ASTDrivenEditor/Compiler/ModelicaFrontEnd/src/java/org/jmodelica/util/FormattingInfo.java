@@ -1,6 +1,7 @@
 package org.jmodelica.util;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
@@ -36,6 +37,33 @@ public class FormattingInfo {
 			delimiterList.add(formattingItem);
 		}
 	}
+	
+	/**
+	 * Gets adjacent formatting items and merge those into fewer, larger items.
+	 */
+	public void mergeAdjacentFormattingItems() {
+		Collection<FormattingItem> newFormattingList = new LinkedList<FormattingItem>();
+
+		while (!formattingList.isEmpty()) {
+			Iterator<FormattingItem> formattingIterator = formattingList.iterator();
+			FormattingItem currentItem = formattingIterator.next();
+			formattingIterator.remove();
+
+			while (formattingIterator.hasNext()) {
+				FormattingItem otherItem = formattingIterator.next();
+				short adjacency = currentItem.getAdjacency(otherItem);
+
+				if (adjacency != FormattingItem.NO_ADJACENCY) {
+					currentItem = currentItem.mergeItems(adjacency, otherItem, true);
+					formattingIterator.remove();
+				}
+			}
+
+			newFormattingList.add(currentItem);
+		}
+
+		formattingList = newFormattingList;
+	}
 
 	/**
 	 * Gets the collection of formatting items this <code>FormattingInfo</code> holds.
@@ -43,5 +71,17 @@ public class FormattingInfo {
 	 */
 	public Collection<FormattingItem> getFormattingCollection() {
 		return formattingList;
+	}
+
+	public String toString() {
+		StringBuilder stringBuilder = new StringBuilder();
+
+		stringBuilder.append("<formatting size=\"" + formattingList.size() + "\">\n");
+		for (FormattingItem formattingItem : formattingList) {
+			stringBuilder.append("    " + formattingItem.toString() + "\n");
+		}
+		stringBuilder.append("</formatting>");
+
+		return stringBuilder.toString();
 	}
 }
