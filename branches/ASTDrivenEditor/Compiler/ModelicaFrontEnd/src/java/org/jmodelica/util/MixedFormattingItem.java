@@ -48,7 +48,6 @@ public class MixedFormattingItem extends FormattingItem {
 				data = otherItem.data + data;
 			}
 		} else if (where == BACK) {
-			System.out.println("Back merge: " + this + " with " + otherItem);
 			newEnd(otherItem.endLine, otherItem.endColumn);
 			subItems.addLast(otherItem);
 			if (appendData) {

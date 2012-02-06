@@ -1,0 +1,37 @@
+import org.jmodelica.util.FormattingInfo;
+import org.jmodelica.util.FormattingItem;
+
+aspect AddFormatting {
+	private String ASTNode.preFormatting = "";
+	private String ASTNode.postFormatting = "";
+
+	public void ASTNode.addFormattingInformation(FormattingInfo formattingInfo) {
+		Iterator<FormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
+
+		while (formattingIterator.hasNext()) {
+			FormattingItem formattingItem = formattingIterator.next();
+
+			if (formattingItem.getEndLine() == getLine(getStart()) &&
+					formattingItem.getEndColumn() + 1 == getColumn(getStart())) {
+				addPreFormatting(formattingItem.getData());
+				formattingIterator.remove();
+			} else if (formattingItem.getStartLine() == getLine(getEnd()) &&
+					formattingItem.getStartColumn() == getColumn(getEnd()) + 1) {
+				addPostFormatting(formattingItem.getData());
+				formattingIterator.remove();
+			}
+		}
+
+		for (int i = 0; i < getNumChild(); i++) {
+			getChild(i).addFormattingInformation(formattingInfo);
+		}
+	}
+	
+	protected void ASTNode.addPreFormatting(String formatting) {
+		preFormatting = formatting;
+	}
+	
+	protected void ASTNode.addPostFormatting(String formatting) {
+		postFormatting = formatting;
+	}
+}

@@ -45,6 +45,10 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 		formattingInfo.addItem(type, data, matchLine() + 1, startColumn + 1, matchLine() + 1, startColumn + matchLength());
 	}
 
+	public FormattingInfo getFormattingInfo() {
+		return formattingInfo;
+	}
+
 	protected abstract int matchLength();
 
 	protected abstract int matchLine();
