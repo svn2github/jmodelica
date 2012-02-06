@@ -20,9 +20,6 @@ import org.jmodelica.icons.primitives.Rectangle;
 import org.jmodelica.icons.primitives.Text;
 import org.jmodelica.icons.primitives.Types;
 
-import sun.jdbc.odbc.ee.ConnectionAttributes;
-
-
 aspect AnnotationParsing {
 	
 	public abstract class AnnotationNode {
