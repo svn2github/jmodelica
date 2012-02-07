@@ -69,12 +69,16 @@ aspect TransformCanonical {
 	  *  done by both the Modelica and the Optimica compilers.
 	  */
 	public void FClass.transformCanonicalBase() {
+		OptionRegistry opt = root().options;
 		genAlgorithmFunctions();
 		genBindingEquations();
-		if (root().options.getBooleanOption("inline_functions"))
+		if (opt.getBooleanOption("inline_functions")) {
 			inlineFunctions();
+			if (!opt.getBooleanOption("export_functions"))
+				removeUnusedFunctions();
+		}
 		scalarize();
-		if (root().options.getBooleanOption("eliminate_alias_variables")) {
+		if (opt.getBooleanOption("eliminate_alias_variables")) {
 			genAlias();
 			eliminateAliasVariables();
 		}
@@ -3839,4 +3843,45 @@ aspect FunctionInlining {
 	 */
 	refine FlatVariability eq FFunctionDecl.getChild().inDiscreteLocation() = !duringInlining;
 	
+	
+	
+	/**
+	 * Remove unused function declarations from the flat model.
+	 */
+	public void FClass.removeUnusedFunctions() {
+		getFEquationBlocks().markUsedFunctions();
+		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
+		for (FFunctionDecl func : getFFunctionDecls())
+			if (func.functionIsUsed())
+				funcs.add(func);
+		setFFunctionDeclList(funcs);
+	}
+	
+	private boolean FFunctionDecl.functionUsed = false;
+	
+	/**
+	 * Has this function been marked as used?
+	 */
+	syn boolean FFunctionDecl.functionIsUsed() = functionUsed;
+	
+	/**
+	 * Mark all called functions as used.
+	 */
+	public void ASTNode.markUsedFunctions() {
+		for (ASTNode node : this)
+			node.markUsedFunctions();
+	}
+	
+	public void FFunctionCall.markUsedFunctions() {
+		myFFunctionDecl().markUsedFunctions();
+		super.markUsedFunctions();
+	}
+	
+	public void FFunctionDecl.markUsedFunctions() {
+		if (!functionUsed) {
+			functionUsed = true;
+			super.markUsedFunctions();
+		}
+	}
+
 }

@@ -31,14 +31,6 @@ fclass FunctionInlining.BasicInline1
  constant Integer temp_2 = 1;
 equation
  x = 1;
-
- function FunctionInlining.BasicInline1.f
-  input Real a;
-  output Real b;
- algorithm
-  b := a;
-  return;
- end FunctionInlining.BasicInline1.f;
 end FunctionInlining.BasicInline1;
 ")})));
 
@@ -73,23 +65,6 @@ fclass FunctionInlining.BasicInline2
  constant Real temp_7 = 2.0;
 equation
  x = 2.0;
-
- function FunctionInlining.BasicInline2.f
-  input Real a;
-  output Real b;
-  Real c;
-  Real d;
-  Real e;
-  Real f;
- algorithm
-  c := a;
-  d := ( 2 ) * ( c ) + a;
-  c := ( d ) / ( 3 ) + 1;
-  e := c ^ d;
-  f := e - ( c ) - ( d ) - ( c );
-  b := f + 1;
-  return;
- end FunctionInlining.BasicInline2.f;
 end FunctionInlining.BasicInline2;
 ")})));
 
@@ -143,23 +118,6 @@ equation
  temp_5 = temp_4 ^ temp_3;
  temp_6 = temp_5 - ( temp_4 ) - ( temp_3 ) - ( temp_4 );
  temp_7 = temp_6 + 1;
-
- function FunctionInlining.BasicInline3.f
-  input Real a;
-  output Real b;
-  Real c;
-  Real d;
-  Real e;
-  Real f;
- algorithm
-  c := a;
-  d := ( 2 ) * ( c ) + a;
-  c := ( d ) / ( 3 ) + 1;
-  e := c ^ d;
-  f := e - ( c ) - ( d ) - ( c );
-  b := f + 1;
-  return;
- end FunctionInlining.BasicInline3.f;
 end FunctionInlining.BasicInline3;
 ")})));
 
@@ -198,23 +156,6 @@ fclass FunctionInlining.BasicInline4
 equation
  y = time;
  x = y + y;
-
- function FunctionInlining.BasicInline4.f
-  input Real a;
-  output Real b;
-  Real c;
-  Real d;
-  Real e;
-  Real f;
- algorithm
-  c := a;
-  d := c;
-  c := d;
-  e := c + d;
-  f := e;
-  b := f;
-  return;
- end FunctionInlining.BasicInline4.f;
 end FunctionInlining.BasicInline4;
 ")})));
 
@@ -269,23 +210,6 @@ equation
  temp_5 = temp_4 + temp_3;
  temp_6 = temp_5;
  temp_7 = temp_6;
-
- function FunctionInlining.BasicInline5.f
-  input Real a;
-  output Real b;
-  Real c;
-  Real d;
-  Real e;
-  Real f;
- algorithm
-  c := a;
-  d := c;
-  c := d;
-  e := c + d;
-  f := e;
-  b := f;
-  return;
- end FunctionInlining.BasicInline5.f;
 end FunctionInlining.BasicInline5;
 ")})));
 
@@ -353,28 +277,6 @@ equation
  temp_4[1] = ( temp_3 ) * ( temp_1[1] + temp_2[1] );
  temp_4[2] = ( temp_3 ) * ( temp_1[2] + temp_2[2] );
  temp_4[3] = ( temp_3 ) * ( temp_1[3] + temp_2[3] );
-
- function FunctionInlining.BasicInline6.f
-  input Real[:] a;
-  output Real[size(a, 1)] b;
-  Real[:] c;
-  Real d;
-  Real temp_1;
- algorithm
-  size(c) := {size(a, 1)};
-  for i1 in 1:size(c, 1) loop
-   c[i1] := a[i1];
-  end for;
-  temp_1 := 0.0;
-  for i1 in 1:size(a, 1) loop
-   temp_1 := temp_1 + ( a[i1] ) * ( c[i1] );
-  end for;
-  d := temp_1;
-  for i1 in 1:size(b, 1) loop
-   b[i1] := ( d ) * ( a[i1] + c[i1] );
-  end for;
-  return;
- end FunctionInlining.BasicInline6.f;
 end FunctionInlining.BasicInline6;
 ")})));
 
@@ -427,26 +329,6 @@ equation
  temp_7 = temp_2;
  temp_8 = ( temp_7 ) * ( 2 );
  temp_9 = temp_7 + temp_8;
-
- function FunctionInlining.BasicInline7.f2
-  input Real a;
-  output Real b;
-  Real c;
- algorithm
-  c := ( a ) * ( 2 );
-  b := FunctionInlining.BasicInline7.f1(a) + FunctionInlining.BasicInline7.f1(c);
-  return;
- end FunctionInlining.BasicInline7.f2;
-
- function FunctionInlining.BasicInline7.f1
-  input Real a;
-  output Real b;
-  Real c;
- algorithm
-  c := ( a ) * ( 2 );
-  b := a + c;
-  return;
- end FunctionInlining.BasicInline7.f1;
 end FunctionInlining.BasicInline7;
 ")})));
 
@@ -555,47 +437,6 @@ equation
  temp_11[1] = ( temp_10 ) * ( temp_8[1] + temp_9[1] );
  temp_11[2] = ( temp_10 ) * ( temp_8[2] + temp_9[2] );
  temp_11[3] = ( temp_10 ) * ( temp_8[3] + temp_9[3] );
-
- function FunctionInlining.BasicInline8.f2
-  input Real[:] a;
-  output Real[size(a, 1)] b;
-  Real[:] c;
-  Real[size(a, 1)] temp_1;
-  Real[size(c, 1)] temp_2;
- algorithm
-  size(c) := {size(a, 1)};
-  for i1 in 1:size(c, 1) loop
-   c[i1] := ( a[i1] ) * ( 2 );
-  end for;
-  for i1 in 1:size(b, 1) loop
-   (temp_1) := FunctionInlining.BasicInline8.f1(a);
-   (temp_2) := FunctionInlining.BasicInline8.f1(c);
-   b[i1] := temp_1[i1] + temp_2[i1];
-  end for;
-  return;
- end FunctionInlining.BasicInline8.f2;
-
- function FunctionInlining.BasicInline8.f1
-  input Real[:] a;
-  output Real[size(a, 1)] b;
-  Real[:] c;
-  Real d;
-  Real temp_1;
- algorithm
-  size(c) := {size(a, 1)};
-  for i1 in 1:size(c, 1) loop
-   c[i1] := a[i1];
-  end for;
-  temp_1 := 0.0;
-  for i1 in 1:size(a, 1) loop
-   temp_1 := temp_1 + ( a[i1] ) * ( c[i1] );
-  end for;
-  d := temp_1;
-  for i1 in 1:size(b, 1) loop
-   b[i1] := ( d ) * ( a[i1] + c[i1] );
-  end for;
-  return;
- end FunctionInlining.BasicInline8.f1;
 end FunctionInlining.BasicInline8;
 ")})));
 
@@ -653,23 +494,6 @@ parameter equation
  temp_6 = temp_5 - ( temp_4 ) - ( temp_3 ) - ( temp_4 );
  temp_7 = temp_6 + 1;
  x = temp_7;
-
- function FunctionInlining.BasicInline9.f
-  input Real a;
-  output Real b;
-  Real c;
-  Real d;
-  Real e;
-  Real f;
- algorithm
-  c := a;
-  d := ( 2 ) * ( c ) + a;
-  c := ( d ) / ( 3 ) + 1;
-  e := c ^ d;
-  f := e - ( c ) - ( d ) - ( c );
-  b := f + 1;
-  return;
- end FunctionInlining.BasicInline9.f;
 end FunctionInlining.BasicInline9;
 ")})));
 
@@ -729,16 +553,6 @@ equation
  temp_2[2] = z[2];
  temp_2[3] = z[3];
  temp_4 = ( temp_1 ) * ( temp_2[2] );
-
- function FunctionInlining.BasicInline10.f
-  input Real a;
-  input Real[:] b;
-  input Integer c;
-  output Real d;
- algorithm
-  d := ( a ) * ( b[c] );
-  return;
- end FunctionInlining.BasicInline10.f;
 end FunctionInlining.BasicInline10;
 ")})));
 
@@ -782,14 +596,6 @@ equation
  y[1] = 1;
  y[2] = 2;
  y[3] = 3;
-
- function FunctionInlining.BasicInline11.f
-  input Integer a;
-  output Integer b;
- algorithm
-  b := 4 - ( a );
-  return;
- end FunctionInlining.BasicInline11.f;
 end FunctionInlining.BasicInline11;
 ")})));
 
@@ -823,14 +629,6 @@ fclass FunctionInlining.RecordInline1
  constant Integer temp_2 = 10;
 equation
  x = 10;
-
- function FunctionInlining.RecordInline1.f
-  input FunctionInlining.RecordInline1.R c;
-  output Real d;
- algorithm
-  d := c.b + c.a[1] + c.a[2] + c.a[3];
-  return;
- end FunctionInlining.RecordInline1.f;
 
  record FunctionInlining.RecordInline1.R
   Real a[3];
@@ -881,17 +679,6 @@ equation
  x.a[3] = 3;
  x.b = 2;
 
- function FunctionInlining.RecordInline2.f
-  input Real c;
-  output FunctionInlining.RecordInline2.R d;
- algorithm
-  d.a[1] := ( 1 ) * ( c );
-  d.a[2] := ( 2 ) * ( c );
-  d.a[3] := ( 3 ) * ( c );
-  d.b := 2;
-  return;
- end FunctionInlining.RecordInline2.f;
-
  record FunctionInlining.RecordInline2.R
   Real a[3];
   discrete Integer b;
@@ -933,19 +720,6 @@ fclass FunctionInlining.RecordInline3
  constant Integer temp_3 = 10;
 equation
  x = 10;
-
- function FunctionInlining.RecordInline3.f
-  input Real c;
-  output Real d;
-  FunctionInlining.RecordInline3.R e;
- algorithm
-  e.a[1] := ( 1 ) * ( c );
-  e.a[2] := ( 2 ) * ( c );
-  e.a[3] := ( 3 ) * ( c );
-  e.b := 4;
-  d := e.a[1] + e.a[2] + e.a[3] + ( c ) * ( e.b );
-  return;
- end FunctionInlining.RecordInline3.f;
 
  record FunctionInlining.RecordInline3.R
   Real a[3];
@@ -1006,14 +780,6 @@ equation
  temp_1.b = integer(y[4]);
  temp_2 = temp_1.b + temp_1.a[1] + temp_1.a[2] + temp_1.a[3];
 
- function FunctionInlining.RecordInline4.f
-  input FunctionInlining.RecordInline4.R c;
-  output Real d;
- algorithm
-  d := c.b + c.a[1] + c.a[2] + c.a[3];
-  return;
- end FunctionInlining.RecordInline4.f;
-
  record FunctionInlining.RecordInline4.R
   Real a[3];
   discrete Integer b;
@@ -1072,17 +838,6 @@ equation
  temp_2.a[3] = ( 3 ) * ( temp_1 );
  temp_2.b = 2;
 
- function FunctionInlining.RecordInline5.f
-  input Real c;
-  output FunctionInlining.RecordInline5.R d;
- algorithm
-  d.a[1] := ( 1 ) * ( c );
-  d.a[2] := ( 2 ) * ( c );
-  d.a[3] := ( 3 ) * ( c );
-  d.b := 2;
-  return;
- end FunctionInlining.RecordInline5.f;
-
  record FunctionInlining.RecordInline5.R
   Real a[3];
   discrete Integer b;
@@ -1135,19 +890,6 @@ equation
  temp_2.a[3] = ( 3 ) * ( temp_1 );
  temp_2.b = 4;
  temp_3 = temp_2.a[1] + temp_2.a[2] + temp_2.a[3] + ( temp_1 ) * ( temp_2.b );
-
- function FunctionInlining.RecordInline6.f
-  input Real c;
-  output Real d;
-  FunctionInlining.RecordInline6.R e;
- algorithm
-  e.a[1] := ( 1 ) * ( c );
-  e.a[2] := ( 2 ) * ( c );
-  e.a[3] := ( 3 ) * ( c );
-  e.b := 4;
-  d := e.a[1] + e.a[2] + e.a[3] + ( c ) * ( e.b );
-  return;
- end FunctionInlining.RecordInline6.f;
 
  record FunctionInlining.RecordInline6.R
   Real a[3];
@@ -1250,32 +992,6 @@ equation
  temp_5.a[3] = temp_4.a[3] - ( temp_1.a[3] );
  temp_5.b = temp_4.b + temp_3.b;
 
- function FunctionInlining.RecordInline7.f
-  input FunctionInlining.RecordInline7.R c;
-  output FunctionInlining.RecordInline7.R d;
-  FunctionInlining.RecordInline7.R e;
-  FunctionInlining.RecordInline7.R g;
-  FunctionInlining.RecordInline7.R h;
- algorithm
-  e.a[1] := c.a[1];
-  e.a[2] := c.a[2];
-  e.a[3] := c.a[3];
-  e.b := c.b;
-  g.a[1] := e.a[1] + c.a[1];
-  g.a[2] := e.a[2] + c.a[2];
-  g.a[3] := e.a[3] + c.a[3];
-  g.b := e.b - ( c.b );
-  h.a[1] := ( ( c.a[1] ) * ( e.a[1] ) + ( c.a[2] ) * ( e.a[2] ) + ( c.a[3] ) * ( e.a[3] ) ) * ( g.a[1] );
-  h.a[2] := ( ( c.a[1] ) * ( e.a[1] ) + ( c.a[2] ) * ( e.a[2] ) + ( c.a[3] ) * ( e.a[3] ) ) * ( g.a[2] );
-  h.a[3] := ( ( c.a[1] ) * ( e.a[1] ) + ( c.a[2] ) * ( e.a[2] ) + ( c.a[3] ) * ( e.a[3] ) ) * ( g.a[3] );
-  h.b := 3;
-  d.a[1] := h.a[1] - ( c.a[1] );
-  d.a[2] := h.a[2] - ( c.a[2] );
-  d.a[3] := h.a[3] - ( c.a[3] );
-  d.b := h.b + g.b;
-  return;
- end FunctionInlining.RecordInline7.f;
-
  record FunctionInlining.RecordInline7.R
   Real a[3];
   discrete Integer b;
@@ -1306,4 +1022,103 @@ end FunctionInlining.RecordInline7;
         R x = f(R(y[1:3], integer(y[4])));
     end RecordInline7;
 	
+	
+	model UninlinableFunction1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UninlinableFunction1",
+         description="Make sure that only unused functions are removed",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.UninlinableFunction1
+ Real z[1];
+ Real z[2];
+ Real z[3];
+ Real w[1];
+ Real w[2];
+ Real temp_1;
+ Real temp_2;
+equation
+ w[1] = FunctionInlining.UninlinableFunction1.f1(z[2], z[3]);
+ w[2] = temp_2;
+ z[1] = 1;
+ z[2] = 2;
+ z[3] = 3;
+ temp_1 = z[1];
+ temp_2 = temp_1;
+
+ function FunctionInlining.UninlinableFunction1.f4
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ end FunctionInlining.UninlinableFunction1.f4;
+
+ function FunctionInlining.UninlinableFunction1.f1
+  input Real x1;
+  input Real x2;
+  output Real y;
+ algorithm
+  y := FunctionInlining.UninlinableFunction1.f4(x1);
+  while y < x2 loop
+   y := y + FunctionInlining.UninlinableFunction1.f3(x1, x2);
+  end while;
+  return;
+ end FunctionInlining.UninlinableFunction1.f1;
+
+ function FunctionInlining.UninlinableFunction1.f3
+  input Real x1;
+  input Real x2;
+  output Real y;
+ algorithm
+  y := 0;
+  while y < x2 loop
+   y := y + x1;
+  end while;
+  return;
+ end FunctionInlining.UninlinableFunction1.f3;
+end FunctionInlining.UninlinableFunction1;
+")})));
+
+		function f1
+			input Real x1;
+			input Real x2;
+			output Real y = f4(x1);
+		algorithm
+            while y < x2 loop
+				y := y + f3(x1, x2);
+            end while;
+		end f1;
+		
+		function f2
+			input Real x;
+			output Real y = x;
+		algorithm
+		end f2;
+		
+        function f3
+            input Real x1;
+            input Real x2;
+            output Real y;
+        algorithm
+            y := 0;
+            while y < x2 loop
+                y := y + x1;
+            end while;
+        end f3;
+        
+        function f4
+            input Real x;
+            output Real y = x;
+        algorithm
+        end f4;
+        
+		Real z[3] = 1:size(z,1);
+		Real w[2];
+	equation
+		w[1] = f1(z[2], z[3]);
+		w[2] = f2(z[1]);
+	end UninlinableFunction1;
 end FunctionInlining;
