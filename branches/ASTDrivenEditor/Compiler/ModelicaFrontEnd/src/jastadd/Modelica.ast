@@ -85,7 +85,7 @@ Program : BaseNode ::=
 
 StoredDefinition : BaseNode ::= [Within] Element*;
 
-Within : BaseNode ::= [PackageName:ParseAccess];
+Within : BaseNode ::= [PackageName:Access];
 
 abstract ClassDecl : Element;
 abstract BaseClassDecl : ClassDecl ::= VisibilityType 

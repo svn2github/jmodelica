@@ -1,10 +1,42 @@
 import org.jmodelica.util.FormattingInfo;
 import org.jmodelica.util.FormattingItem;
+import java.io.ByteArrayOutputStream;
 
-aspect AddFormatting {
+aspect FormattedPrint {
+	/**
+	 * A pretty printer that prints the AST in code, with the old formatting.
+	 */
+	class FormattedPrettyPrinter extends Printer {
+		/**
+		 * Creates a <code>FormattedPrettyPrinter</code>.
+		 */
+		public FormattedPrettyPrinter() {
+			super("");
+		}
+		
+		/**
+		 * Takes an AST node and prints it using a <code>PrintStream</code>. The formatting that the code that
+		 * generated this node is preserved.
+		 * @param node the AST node to print.
+		 * @param printStream the stream to which the node should be printed.
+		 * @param ident not used.
+		 */
+		@Override
+		@SuppressWarnings({"unchecked"})
+		public void print(ASTNode node, PrintStream printStream, String ident) {
+			node.prettyPrintFormatted(this, printStream);
+		}
+	}
+	
+	private FormattedPrettyPrinter ASTNode.formattedPrettyPrinter = new FormattedPrettyPrinter();
 	private String ASTNode.preFormatting = "";
 	private String ASTNode.postFormatting = "";
 
+	/**
+	 * Adds formatting information to this AST node and all its children, which can then be used by the method
+	 * <code>prettyPrintFormatted</code>.
+	 * @param formattingInfo the information to use to format this AST node.
+	 */
 	public void ASTNode.addFormattingInformation(FormattingInfo formattingInfo) {
 		Iterator<FormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
 
@@ -26,12 +58,44 @@ aspect AddFormatting {
 			getChild(i).addFormattingInformation(formattingInfo);
 		}
 	}
-	
+
+	/**
+	 * Sets the text string which should be used as formatting before (left-hand side of) this node.
+	 * @param formatting the formatting string.
+	 */
 	protected void ASTNode.addPreFormatting(String formatting) {
 		preFormatting = formatting;
 	}
 	
+	/**
+	 * Sets the text string which should be used as formatting after (right-hand side of) this node.
+	 * @param formatting the formatting string.
+	 */
 	protected void ASTNode.addPostFormatting(String formatting) {
 		postFormatting = formatting;
+	}
+
+	/**
+	 * Pretty prints this AST node and all its children, with preserved formatting.
+	 * @return a string, consisting of the formatted code printed from this AST node.
+	 */
+	public String ASTNode.prettyPrintFormatted() {
+		OutputStream outputStream = new ByteArrayOutputStream();
+		PrintStream printStream = new PrintStream(outputStream);
+
+		prettyPrintFormatted(formattedPrettyPrinter, printStream);
+
+		return outputStream.toString();
+	}
+	
+	/**
+	 * Pretty prints this AST node and all its childred, with preserved formatting.
+	 * @param printer the printer to use when pretty printing.
+	 * @param printStream the stream, to which the AST node should be printed.
+	 */
+	public void ASTNode.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		prettyPrint(printer, printStream, "");
+		printStream.print(postFormatting);
 	}
 }
