@@ -42,43 +42,64 @@ aspect Scalarization {
 	public void FClass.scalarize() {
 		List<FVariable> vars = new List<FVariable>();
 		List<FVariable> alias_vars = new List<FVariable>();
-		//log.debug("FClass.scalarize(): l1 " + vars + " l2 " + alias_vars);
-		// Scalarize all non-alias variables
+		scalarizeVars(vars, alias_vars);
+		scalarizeAllVarDependent(vars);
+		replaceScalarizedVars(vars, alias_vars);
+		scalarizeFuncs();
+		scalariztionExtra();
+		scalarized = true;
+		scalarizationCleanup();
+	}
+	
+	/**
+	 * Scalarize variable declarations.
+	 */
+	protected void FClass.scalarizeVars(List<FVariable> vars, List<FVariable> alias_vars) {
 		for (FVariable fv : getFVariables()) 
 			fv.scalarize(vars);
-		// Scalarize all alias variables
 		for (FVariable fv : getAliasVariables()) 
 			fv.scalarize(alias_vars);
-		
-		// Scalarize equations
+	}
+	
+	protected void FClass.scalarizeAllVarDependent(List<FVariable> vars) {
+		scalarizeEquations(vars);
+	}
+	
+	protected void FClass.scalarizeEquations(List<FVariable> vars) {
 		FEquationBlock eb = getFEquationBlock(0);
 		eb.setFAbstractEquationList(scalarizeEquationList(eb.getFAbstractEquations(), vars));
 		setFInitialEquationList(scalarizeEquationList(getFInitialEquations(), vars));
 		setFParameterEquationList(scalarizeEquationList(getFParameterEquations(), vars));
-
-		// Replace variables
+	}
+	
+	protected void FClass.replaceScalarizedVars(List<FVariable> vars, List<FVariable> alias_vars) {
 		Map<String,FExp> im = Collections.emptyMap();
 		getFVariables().createArrayTemporaries(getFParameterEquations(), vars, im, true);
 		getAliasVariables().createArrayTemporaries(getFParameterEquations(), vars, im, true);
 		setFVariableList(vars);
 		setAliasVariableList(alias_vars);
-		
-		// Scalarize functions
+	}
+	
+	protected void FClass.scalarizeFuncs() {
 		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
 		for (FFunctionDecl f : getFFunctionDecls()) 
 			funcs.add(f.scalarize());
 		setFFunctionDeclList(funcs);
 		funcs.clearScalarized();  // Functions need scalarized = false in FQNames
-		
-		// Replace subscript expressions with literals (enable rewrite)
+	}
+	
+	protected void FClass.scalariztionExtra() {
+		evaluateArraySubscripts();
+	}
+	
+	protected void FClass.evaluateArraySubscripts() {
 		clearFlatNameBinding();
-		eb.getFAbstractEquations().makeSubscriptsLiteral();
+		getFEquationBlock(0).makeSubscriptsLiteral();
 		getFInitialEquations().makeSubscriptsLiteral();
 		getFParameterEquations().makeSubscriptsLiteral();
-		
-		scalarized = true;
-
-		// This must be done after scalarization
+	}
+	
+	protected void FClass.scalarizationCleanup() {
 		enableStreamsRewrite();
 		flush();		
 	}

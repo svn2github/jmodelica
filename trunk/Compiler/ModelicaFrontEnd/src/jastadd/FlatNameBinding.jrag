@@ -64,17 +64,15 @@ aspect FlatNameBinding {
 			Map<String, ? extends AbstractFVariable> map, FQName fqn, boolean der, boolean resolve) {
 		String name = fqn.prefixName(0, der, resolve);
 		AbstractFVariable variable = map.get(name);
-		if (variable == null) {
-			int i = fqn.getNumFQNamePart();
-			do {
-				i--;
-				// Only last part should have "der()", and it isn't included here
-				String part = fqn.prefixName(i, false, resolve);
-				AbstractFVariable tmp = map.get(part);
-				if (tmp != null) 
-					// TODO: shouldn't we support der here?
-					variable = tmp.lookupFVInRecord(fqn, i);
-			} while (variable == null && i > 1);
+		int i = fqn.getNumFQNamePart();
+		while (variable == null && i > 1) {
+			i--;
+			// Only last part should have "der()", and it isn't included here
+			String part = fqn.prefixName(i, false, resolve);
+			AbstractFVariable tmp = map.get(part);
+			if (tmp != null) 
+				// TODO: shouldn't we support der here?
+				variable = tmp.lookupFVInRecord(fqn, i);
 		}
 		return variable;
 	}

@@ -157,66 +157,25 @@ aspect OptimicaTransformCanonical {
 	// Don't add initial equations for optimization problems
 	public void FOptClass.addInitialEquations() {}
 	
-	public void FOptClass.scalarize() {
-		
-		/* Note that it is not ok to call super.scalarize() here, since
-		 * then the scalarized variable lists will be set prior to
-		 * scalarizing the constraints and costfunctions, which will make
-		 * lookup in the constraint scalarization fail.
-		 */
-		
-		// TODO: refactor out parts of FClass.scalarize to reduce code duplication here
-				
-		List<FVariable> vars = new List<FVariable>();
-		List<FVariable> alias_vars = new List<FVariable>();
-		// Scalarize all non-alias variables
-		for (FVariable fv : getFVariables()) 
-			fv.scalarize(vars);
-		// Scalarize all alias variables
-		for (FVariable fv : getAliasVariables()) 
-			fv.scalarize(alias_vars);
-		
-		// Scalarize equations
-		FEquationBlock eb = getFEquationBlock(0);
-		List<FAbstractEquation> eqns = scalarizeEquationList(eb.getFAbstractEquations(), vars);
-		eb.setFAbstractEquationList(eqns);
-		setFInitialEquationList(scalarizeEquationList(getFInitialEquations(), vars));
-		setFParameterEquationList(scalarizeEquationList(getFParameterEquations(), vars));
-		
-		// Scalarize constraints
+	protected void FOptClass.scalarizeAllVarDependent(List<FVariable> vars) {
+		super.scalarizeAllVarDependent(vars);
+		scalarizeConstraints(vars);
+		scalarizeClassAttributes();
+	}
+	
+	protected void FOptClass.scalarizeConstraints(List<FVariable> vars) {
+		List<FAbstractEquation> eqns = getFEquationBlock(0).getFAbstractEquations();
 		List<FConstraint> constr = new List<FConstraint>();
 		for (FConstraint c : getFConstraints()) 
 			c.scalarize(constr, eqns, vars, Collections.<String,FExp>emptyMap());
 		setFConstraintList(constr);
-
-		// Scalarize class attributes
-		// Iterate over all attributes and scalarize.
+	}
+	
+	protected void FOptClass.scalarizeClassAttributes() {
 		List<FAttribute> al = new List<FAttribute>();
 		for (FAttribute a : getFAttributes()) 
 			al.add(a.scalarize(Index.NULL));
 		setFAttributeList(al);
-		
-		// Replace variables
-		Map<String,FExp> im = Collections.emptyMap();
-		getFVariables().createArrayTemporaries(getFParameterEquations(), vars, im, true);
-		getAliasVariables().createArrayTemporaries(getFParameterEquations(), vars, im, true);
-		setFVariableList(vars);
-		setAliasVariableList(alias_vars);
-		
-		// Replace subscript expressions with literals
-		eb.getFAbstractEquations().makeSubscriptsLiteral();
-		getFInitialEquations().makeSubscriptsLiteral();
-		getFParameterEquations().makeSubscriptsLiteral();
-		
-		// Scalarize functions
-		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
-		for (FFunctionDecl f : getFFunctionDecls()) 
-			funcs.add(f.scalarize());
-		setFFunctionDeclList(funcs);
-		
-		scalarized = true;
-
-		flush();		
 	}
 	
 	/**
