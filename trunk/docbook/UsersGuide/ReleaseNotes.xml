@@ -75,7 +75,7 @@
       <section>
         <title>Improved Modelica compliance</title>
 
-        <para></para>
+        <para/>
       </section>
 
       <section>
@@ -122,10 +122,13 @@
       </section>
 
       <section>
-        <title>External functions in FMUs</title>
+        <title>Support for shared libraries in FMUs</title>
 
-        <para>Support for external functions in shared libraries in
-        FMUs.</para>
+        <para>The FMU import and export now supports dependencies on extra
+        shared libraries. For the export, the shared libraries are placed in
+        the same folder as the model binary. Similarly, any shared libraries
+        packed with the model binary will be found when importing the
+        FMU.</para>
       </section>
     </section>
 
@@ -920,41 +923,12 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block">
-              <m:mrow>
-                <m:munderover>
-                  <m:mo>∫</m:mo>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>0</m:mi>
-                  </m:msub>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>f</m:mi>
-                  </m:msub>
-                </m:munderover>
-
-                <m:mrow>
-                  <m:mrow>
-                    <m:mi>L</m:mi>
-
-                    <m:mo>⁡</m:mo>
-
-                    <m:mfenced>
-                      <m:mi>.</m:mi>
-                    </m:mfenced>
-                  </m:mrow>
-
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
-
-                  <m:mtext>dt</m:mtext>
-                </m:mrow>
-              </m:mrow>
-            </m:math>
+            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
+            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
+            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
+            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
+            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
+            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
           </informalequation>
 
           <para>the Optimica class attribute
