@@ -4,7 +4,12 @@ import org.jmodelica.icons.primitives.Line;
 
 public class Connection extends Line {
 	
-	
+	public static final Object CONNECTED = new Object();
+	public static final Object DISCONNECTED = new Object();
+	public static final Object SOURCE_ADDED = new Object();
+	public static final Object SOURCE_REMOVED = new Object();
+	public static final Object TARGET_ADDED = new Object();
+	public static final Object TARGET_REMOVED = new Object();
 	
 	private Connector sourceConnector;
 	private Connector targetConnector;
@@ -19,15 +24,19 @@ public class Connection extends Line {
 	}
 	
 	public void setSourceConnector(Connector sourceConnector) {
+		removeSourceConnector();
 		this.sourceConnector = sourceConnector;
 		if (isConnected)
 			sourceConnector.addConnection(this);
+		notifyObservers(SOURCE_ADDED);
 	}
 	
 	public void setTargetConnector(Connector targetConnector) {
+		removeTargetConnector();
 		this.targetConnector = targetConnector;
 		if (isConnected)
 			targetConnector.addConnection(this);
+		notifyObservers(TARGET_ADDED);
 	}
 	
 	public void removeSourceConnector() {
@@ -36,6 +45,7 @@ public class Connection extends Line {
 		if (isConnected)
 			sourceConnector.removeConnection(this);
 		sourceConnector = null;
+		notifyObservers(SOURCE_REMOVED);
 	}
 	
 	public void removeTargetConnector() {
@@ -44,6 +54,7 @@ public class Connection extends Line {
 		if (isConnected)
 			targetConnector.removeConnection(this);
 		targetConnector = null;
+		notifyObservers(TARGET_REMOVED);
 	}
 	
 	public void connect() {
@@ -54,6 +65,7 @@ public class Connection extends Line {
 		if (sourceConnector != null)
 			sourceConnector.addConnection(this);
 		isConnected = true;
+		notifyObservers(CONNECTED);
 	}
 	
 	public void disconnect() {
@@ -64,6 +76,7 @@ public class Connection extends Line {
 		if (sourceConnector != null)
 			sourceConnector.removeConnection(this);
 		isConnected = false;
+		notifyObservers(DISCONNECTED);
 	}
 	
 }

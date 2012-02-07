@@ -6,6 +6,11 @@ import org.jmodelica.icons.coord.Placement;
 
 public class Connector extends Component {
 	
+	public static final Object SOURCE_ADDED = new Object();
+	public static final Object SOURCE_REMOVED = new Object();
+	public static final Object TARGET_ADDED = new Object();
+	public static final Object TARGET_REMOVED = new Object();
+	
 	private ArrayList<Connection> sourceConnections = new ArrayList<Connection>();
 	private ArrayList<Connection> targetConnections = new ArrayList<Connection>();
 
@@ -19,17 +24,25 @@ public class Connector extends Component {
 	
 	public void addConnection(Connection c) {
 		if (c.getSourceConnector() == this) {
-			sourceConnections.add(c);
+			if (sourceConnections.add(c)) {
+				notifyObservers(SOURCE_ADDED);
+			}
 		} else if (c.getTargetConnector() == this) {
-			targetConnections.add(c);
+			if (targetConnections.add(c)) {
+				notifyObservers(TARGET_ADDED);
+			}
 		}
 	}
 	
 	public void removeConnection(Connection c) {
 		if (c.getSourceConnector() == this) {
-			sourceConnections.remove(c);
+			if (sourceConnections.remove(c)) {
+				notifyObservers(SOURCE_REMOVED);
+			}
 		} else if (c.getTargetConnector() == this) {
-			targetConnections.remove(c);
+			if (targetConnections.remove(c)) {
+				notifyObservers(TARGET_REMOVED);
+			}
 		}
 	}
 	
