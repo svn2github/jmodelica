@@ -3901,7 +3901,7 @@ aspect FunctionInlining {
 			}
 			replaceMe(exp);
 		} else {
-			super.replaceReferences(varMap);
+			replaceMe(type().zeroLiteral());
 		}
 		return exp;
 	}

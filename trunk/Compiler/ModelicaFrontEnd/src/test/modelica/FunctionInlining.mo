@@ -1179,7 +1179,7 @@ end FunctionInlining.IfStatementInline1;
          eliminate_alias_variables=false,
          flatModel="
 fclass FunctionInlining.IfStatementInline2
- Real w;
+ Real v;
  Real z;
  Real temp_1;
  constant Integer temp_2 = 1;
@@ -1187,7 +1187,7 @@ fclass FunctionInlining.IfStatementInline2
  Real temp_4;
  Real temp_5;
 equation
- w = 2;
+ v = 2;
  z = temp_5;
  temp_1 = w;
  temp_4 = (if temp_1 > 2 then temp_1 else 1);
@@ -1210,7 +1210,7 @@ end FunctionInlining.IfStatementInline2;
             y := w1 + w2;
         end f;
         
-        Real w = 2;
+        Real v = 2;
         Real z = f(w);
     end IfStatementInline2;
     
@@ -1224,9 +1224,9 @@ end FunctionInlining.IfStatementInline2;
          eliminate_alias_variables=false,
          flatModel="
 fclass FunctionInlining.IfStatementInline3
- Real w1;
- Real w2;
- Real w3;
+ Real v1;
+ Real v2;
+ Real v3;
  Real z;
  Real temp_1;
  Real temp_2;
@@ -1237,13 +1237,13 @@ fclass FunctionInlining.IfStatementInline3
  Real temp_7;
  Real temp_8;
 equation
- w1 = 1;
- w2 = 2;
- w3 = 3;
+ v1 = 1;
+ v2 = 2;
+ v3 = 3;
  z = temp_8;
- temp_1 = w1;
- temp_2 = w2;
- temp_3 = w3;
+ temp_1 = v1;
+ temp_2 = v2;
+ temp_3 = v3;
  temp_4 = temp_2;
  temp_5 = temp_3;
  temp_6 = (if temp_1 > 2 then temp_1 else temp_4);
@@ -1266,15 +1266,55 @@ end FunctionInlining.IfStatementInline3;
             if x1 > 2 then
                 w1 := x1;
             else
-			    w2 := x1;
+                w2 := x1;
             end if;
             y := w1 + w2;
         end f;
         
-        Real w1 = 1;
-        Real w2 = 2;
-        Real w3 = 3;
-        Real z = f(w1, w2, w3);
+        Real v1 = 1;
+        Real v2 = 2;
+        Real v3 = 3;
+        Real z = f(v1, v2, v3);
     end IfStatementInline3;
+    
+    
+    model IfStatementInline4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfStatementInline4",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.IfStatementInline4
+ Real v;
+ Real z;
+ Real temp_1;
+ Real temp_2;
+ Real temp_3;
+equation
+ v = 1;
+ z = temp_3;
+ temp_1 = v;
+ temp_2 = (if temp_1 > 2 then temp_1 else 0.0);
+ temp_3 = (if temp_1 > 2 then temp_2 else temp_1 + 1);
+end FunctionInlining.IfStatementInline4;
+")})));
+
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            if x > 2 then
+                y := x;
+            else
+                y := x + 1;
+            end if;
+        end f;
+        
+        Real v = 1;
+        Real z = f(v);
+    end IfStatementInline4;
+
 	
 end FunctionInlining;
