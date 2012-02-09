@@ -3029,6 +3029,97 @@ end IfEqu11;
 
 */
 
+  model IfEqu12
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu12",
+		 compliance_as_warning=true,
+         description="Test of if equations.",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu12
+ Real x(start = 1);
+ Real u;
+initial equation 
+ x = 1;
+equation
+ (if time >= 1 then u - (  - ( 1 ) ) else u - ( 1 )) = 0.0;
+ der(x) =  - ( x ) + u;
+end TransformCanonicalTests.IfEqu12;
+		 ")})));
+	Real x(start=1);
+    Real u;
+  equation
+    if time>=1 then
+      u = -1;
+    else
+      u = 1;
+    end if;
+    der(x) = -x + u;
+  end IfEqu12;
+
+  model IfEqu13
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu13",
+		 compliance_as_warning=true,
+         description="Test of if equations.",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu13
+ Real x(start = 1);
+ Real u;
+initial equation 
+ x = 1;
+equation
+ (if time >= 1 then u - (  - ( 1 ) ) else u - ( 1 )) = 0.0;
+ (if time >= 1 then der(x) - ( (  - ( 3 ) ) * ( x ) + u ) else der(x) - ( ( 3 ) * ( x ) + u )) = 0.0;
+end TransformCanonicalTests.IfEqu13;
+		 ")})));
+		  
+    Real x(start=1);
+    Real u;
+  equation
+    if time>=1 then
+      u = -1;
+      der(x) = -3*x + u;
+    else
+      u = 1;
+    der(x) = 3*x + u;
+    end if;
+  end IfEqu13;
+
+  model IfEqu14
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu14",
+		 compliance_as_warning=true,
+         description="Test of if equations.",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu14
+ Real x(start = 1);
+ Real u;
+initial equation 
+ x = 1;
+equation
+ (if time >= 1 then (if time >= 3 then u - (  - ( 1 ) ) else u - ( 4 )) - ( 0.0 ) else u - ( 1 )) = 0.0;
+ (if time >= 1 then (if time >= 3 then der(x) - ( (  - ( 3 ) ) * ( x ) + u ) else der(x) - ( 0 )) - ( 0.0 ) else der(x) - ( ( 3 ) * ( x ) + u )) = 0.0;
+end TransformCanonicalTests.IfEqu14;
+		 ")})));
+    Real x(start=1);
+    Real u;
+  equation
+    if time>=1 then
+      if time >=3then
+        u = -1;
+        der(x) = -3*x + u;
+      else
+        u=4;
+        der(x) = 0;
+      end if;
+    else
+      u = 1;
+    der(x) = 3*x + u;
+    end if;
+  end IfEqu14;
 
 model IfExpLeft1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

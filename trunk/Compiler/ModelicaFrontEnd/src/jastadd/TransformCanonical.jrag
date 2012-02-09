@@ -83,13 +83,13 @@ aspect TransformCanonical {
 			eliminateAliasVariables();
 		}
 		enableWhenEquationRewrite();
+        enableIfEquationRewrite();
 		root().flushAllRecursive();
 //		log.debug(prettyPrint(""));
 		addFDerivativeVariables();
 		addFPreVariables();
 		genInitialEquations();
 		sortDependentParameters();
-
 	/*
 		for (FAbstractEquation eqn : equations()) {
 			FEquation e = (FEquation)eqn;
@@ -2932,7 +2932,6 @@ aspect MapWhenClauses{
 		return new FElseEquation((FEquationType)getType().fullCopy(),eqns);
 	}
 
-
 	public FIfWhenElseEquation FIfWhenElseEquation.createSimpleIfWhenElseEquation(String varName, boolean copyGuard) {
 		return null; //Not handled yet
 	}
@@ -3013,6 +3012,83 @@ aspect MapWhenClauses{
 	
 	// TODO: generalize to handle function calls with multiple outputs
 	
+}
+
+aspect IfEquations {
+
+	public void ASTNode.enableIfEquationRewrite() {
+		for (ASTNode n : this)
+			n.enableIfEquationRewrite();
+	}
+	
+	public void FIfEquation.enableIfEquationRewrite() {
+		super.enableIfEquationRewrite();
+		rewriteIfEquation = true;
+		is$Final = false;
+	}
+	
+	boolean FIfEquation.rewriteIfEquation = false;
+
+	syn FExp FAbstractEquation.createResidualExp() = null;
+	
+	eq FEquation.createResidualExp() {
+		return new FSubExp(getLeft().fullCopy(),getRight().fullCopy());	
+	}
+
+
+/*
+	public boolean IfEquation.isSimpleIfEquation() {
+		
+	}
+
+
+	syn boolean FIfWhenElseEquation.isSimpleIfWhenEquation(ArrayList<FVariable> vars) = false;
+	
+	eq FIfEquation.isSimpleIfWhenEquation(ArrayList<FVariable> vars) {
+		// If list is empty, populate list
+		for (FAbstractEquation eqn : getFAbstractEquations()) {
+			if (!(eqn instanceof FEquation)) {
+				return false;
+			} 
+			
+			else if (((FEquation).getLeft()) instanceof {
+				
+			}	
+		}
+		
+	}
+	*/
+
+    syn FExp FIfWhenElseEquation.createIfExpression(int eqIndex) = null;
+
+	eq FIfEquation.createIfExpression(int eqIndex) {
+		return new FIfExp(getTest().fullCopy(),getFAbstractEquation(eqIndex).createResidualExp(),getElse().createIfExpression(eqIndex));	
+	}
+	
+	eq FElseEquation.createIfExpression(int eqIndex) {
+		return getFAbstractEquation(eqIndex).createResidualExp();
+	}
+
+	syn List FIfEquation.createIfExpEquationList() {
+			List l = new List();
+			for (int i=0;i<getNumFAbstractEquation();i++) {
+				l.add(new FEquation(createIfExpression(i),new FRealLitExp("0.0")));	
+			}
+			return l;		
+	}
+
+	rewrite FIfEquation in FEquationBlock.getFAbstractEquation() {
+		when (rewriteIfEquation) to List {
+			return createIfExpEquationList();
+		}	
+	}	
+			
+	rewrite FIfEquation in FIfWhenElseEquation.getFAbstractEquation() {
+		when (rewriteIfEquation && !shouldEliminateIf()) to List {
+			return createIfExpEquationList();
+		}
+	}
+
 }
 
 aspect ParameterSorting {
