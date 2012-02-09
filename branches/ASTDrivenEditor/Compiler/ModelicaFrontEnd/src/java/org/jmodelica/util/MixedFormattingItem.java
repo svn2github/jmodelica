@@ -11,52 +11,73 @@ public class MixedFormattingItem extends FormattingItem {
 
 	/**
 	 * Creates a <code>MixedFormattingItem</code>.
-	 * @param data the string representation of what this item holds, such as an actual comment.
-	 * @param startLine the line in the source code at which this item begins.
-	 * @param startColumn the column in the source code at which this item begins.
-	 * @param endLine the line in the source code at which this item ends. 
-	 * @param endColumn the column in the source code at which this item ends.
+	 * @param formattingItem the initial item that this <code>MixedFormattingItem</code> should consist of.
 	 */
-	public MixedFormattingItem(String data, int startLine, int startColumn, int endLine, int endColumn) {
-		super(FormattingItem.TYPE_MIXED, data, startLine, startColumn, endLine, endColumn);
+	public MixedFormattingItem(FormattingItem formattingItem) {
+		super(FormattingItem.Type.MIXED, null, formattingItem.startLine, formattingItem.startColumn, formattingItem.endLine, formattingItem.endColumn);
 		subItems = new LinkedList<FormattingItem>();
+		subItems.add(formattingItem);
+	}
+
+	/**
+	 * Sets a new position of where this item begins.
+	 * @param newStartLine the line in the source code at which this item begins.
+	 * @param newStartColumn the column in the source code at which this item begins.
+	 */
+	public void newStart(int newStartLine, int newStartColumn) {
+		startLine = newStartLine;
+		startColumn = newStartColumn;
+	}
+
+	/**
+	 * Sets a new position of where this item extends to.
+	 * @param newEndLine the line in the source code at which this item ends.
+	 * @param newEndColumn the column in the source code at which this item ends.
+	 */
+	public void newEnd(int newEndLine, int newEndColumn) {
+		endLine = newEndLine;
+		endColumn = newEndColumn;
 	}
 	
 	@Override
-	protected short getAdjacency(FormattingItem otherItem) {
+	protected Adjacency getAdjacency(FormattingItem otherItem) {
     	if ((getStartLine() == otherItem.getEndLine() && getStartColumn() == otherItem.getEndColumn() + 1) ||
-    			(otherItem.getType() == FormattingItem.TYPE_LINE_TERMINATOR && getStartLine() == otherItem.getEndLine() + 1 && getStartColumn() == 1)) {
-    		return FRONT;
+    			(otherItem.getType() == FormattingItem.Type.LINE_BREAK && getStartLine() == otherItem.getEndLine() + 1 && getStartColumn() == 1)) {
+    		return Adjacency.FRONT;
     	} else if (getEndLine() == otherItem.getStartLine() && getEndColumn() + 1 == otherItem.getStartColumn() ||
-    			((subItems.getLast().getType() == FormattingItem.TYPE_LINE_TERMINATOR || subItems.getLast().getType() == FormattingItem.TYPE_COMMENT) && getEndLine() + 1 == otherItem.getStartLine() && otherItem.getStartColumn() == 1)) {
-    		return BACK;
+    			((subItems.getLast().getType() == FormattingItem.Type.LINE_BREAK || subItems.getLast().getType() == FormattingItem.Type.COMMENT) && getEndLine() + 1 == otherItem.getStartLine() && otherItem.getStartColumn() == 1)) {
+    		return Adjacency.BACK;
     	}
 
-    	return NO_ADJACENCY;
+    	return Adjacency.NONE;
     }
 	
 	@Override
-	protected FormattingItem mergeItems(short where, FormattingItem otherItem, boolean appendData) {
-		if (where == NO_ADJACENCY) {
+	protected FormattingItem mergeItems(Adjacency where, FormattingItem otherItem) {
+		if (where == Adjacency.NONE) {
 			return this;
 		}
 
-		if (where == FRONT) {
+		if (where == Adjacency.FRONT) {
 			newStart(otherItem.startLine, otherItem.startColumn);
 			subItems.addFirst(otherItem);
-			if (appendData) {
-				data = otherItem.data + data;
-			}
-		} else if (where == BACK) {
+		} else if (where == Adjacency.BACK) {
 			newEnd(otherItem.endLine, otherItem.endColumn);
 			subItems.addLast(otherItem);
-			if (appendData) {
-				data = data + otherItem.data;
-			}
 		}
 
-		subItems.add(otherItem);
 		return this;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder stringBuilder = new StringBuilder();
+
+		for (FormattingItem item : subItems) {
+			stringBuilder.append(item);
+		}
+
+		return stringBuilder.toString();
 	}
 
 }

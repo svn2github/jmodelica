@@ -22,16 +22,16 @@ public class FormattingInfo {
 	/**
 	 * Adds formatting item with information about what type of formatting this is and where it is positioned in
 	 * the source code.
-	 * @param type the type of formatting item this is, should be one of <code>FormattingItem.TYPE_*.</code>
-	 * @param data the string data of this item, for example actual whitespaces or comment.
+	 * @param type the type of formatting item this is.
+	 * @param data the string data of this item, for example actual white spaces or comment.
 	 * @param startLine the line at which this formatting item starts.
 	 * @param startColumn the column at which this formatting item starts.
 	 * @param endLine the line at which this formatting item ends.
 	 * @param endColumn the column at which this formatting item ends.
 	 */
-	public void addItem(short type, String data, int startLine, int startColumn, int endLine, int endColumn ) {
+	public void addItem(FormattingItem.Type type, String data, int startLine, int startColumn, int endLine, int endColumn ) {
 		FormattingItem formattingItem = new FormattingItem(type, data, startLine, startColumn, endLine, endColumn);
-		if (type != FormattingItem.TYPE_DELIMITER) {
+		if (type != FormattingItem.Type.DELIMITER) {
 			formattingList.add(formattingItem);
 		} else {
 			delimiterList.add(formattingItem);
@@ -51,10 +51,10 @@ public class FormattingInfo {
 
 			while (formattingIterator.hasNext()) {
 				FormattingItem otherItem = formattingIterator.next();
-				short adjacency = currentItem.getAdjacency(otherItem);
+				FormattingItem.Adjacency adjacency = currentItem.getAdjacency(otherItem);
 
-				if (adjacency != FormattingItem.NO_ADJACENCY) {
-					currentItem = currentItem.mergeItems(adjacency, otherItem, true);
+				if (adjacency != FormattingItem.Adjacency.NONE) {
+					currentItem = currentItem.mergeItems(adjacency, otherItem);
 					formattingIterator.remove();
 				}
 			}

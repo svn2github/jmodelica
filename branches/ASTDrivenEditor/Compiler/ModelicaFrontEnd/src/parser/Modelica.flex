@@ -236,25 +236,25 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
  
   
   
-  "("             { addFormattingInformation(FormattingItem.TYPE_DELIMITER, "(", yycolumn);
+  "("             { addFormattingInformation(FormattingItem.Type.DELIMITER, "(", yycolumn);
                     return newSymbol(Terminals.LPAREN); }
-  ")"             { addFormattingInformation(FormattingItem.TYPE_DELIMITER, ")", yycolumn);
+  ")"             { addFormattingInformation(FormattingItem.Type.DELIMITER, ")", yycolumn);
 	                return newSymbol(Terminals.RPAREN); }
-  "{"             { addFormattingInformation(FormattingItem.TYPE_DELIMITER, "{", yycolumn);
+  "{"             { addFormattingInformation(FormattingItem.Type.DELIMITER, "{", yycolumn);
                     return newSymbol(Terminals.LBRACE); }
-  "}"             { addFormattingInformation(FormattingItem.TYPE_DELIMITER, "}", yycolumn);
+  "}"             { addFormattingInformation(FormattingItem.Type.DELIMITER, "}", yycolumn);
                     return newSymbol(Terminals.RBRACE); }
-  "["             { addFormattingInformation(FormattingItem.TYPE_DELIMITER, "[", yycolumn);
+  "["             { addFormattingInformation(FormattingItem.Type.DELIMITER, "[", yycolumn);
                     return newSymbol(Terminals.LBRACK); }	
-  "]"             { addFormattingInformation(FormattingItem.TYPE_DELIMITER, "]", yycolumn);
+  "]"             { addFormattingInformation(FormattingItem.Type.DELIMITER, "]", yycolumn);
                     return newSymbol(Terminals.RBRACK); }	
-  ";"             { addFormattingInformation(FormattingItem.TYPE_DELIMITER, ";", yycolumn);
+  ";"             { addFormattingInformation(FormattingItem.Type.DELIMITER, ";", yycolumn);
                     return newSymbol(Terminals.SEMICOLON); }
-  ":"             { addFormattingInformation(FormattingItem.TYPE_DELIMITER, ":", yycolumn);
+  ":"             { addFormattingInformation(FormattingItem.Type.DELIMITER, ":", yycolumn);
                     return newSymbol(Terminals.COLON); }
-  "."             { addFormattingInformation(FormattingItem.TYPE_DELIMITER, ".", yycolumn);
+  "."             { addFormattingInformation(FormattingItem.Type.DELIMITER, ".", yycolumn);
                     return newSymbol(Terminals.DOT); }
-  ","             { addFormattingInformation(FormattingItem.TYPE_DELIMITER, ",", yycolumn);
+  ","             { addFormattingInformation(FormattingItem.Type.DELIMITER, ",", yycolumn);
 	                return newSymbol(Terminals.COMMA); }
 
 
@@ -290,10 +290,10 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   {UNSIGNED_NUMBER}        { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
   
   {Comment}                { addLineBreaks(yytext());
-                             addFormattingInformation(FormattingItem.TYPE_COMMENT, yytext(), yycolumn); }
-  {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingItem.TYPE_NON_BREAKING_WHITESPACE, yytext(), yycolumn); }
+                             addFormattingInformation(FormattingItem.Type.COMMENT, yytext(), yycolumn); }
+  {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext(), yycolumn); }
   {LineTerminator} 		   { addLineBreak();
-                             addFormattingInformation(FormattingItem.TYPE_LINE_TERMINATOR, yytext(), yycolumn); }
+                             addFormattingInformation(FormattingItem.Type.LINE_BREAK, yytext(), yycolumn); }
 }
 
 //.|\n                { throw new RuntimeException("Illegal character \""+yytext()+ "\" at line "+yyline+", column "+yycolumn); }

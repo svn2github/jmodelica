@@ -1,5 +1,6 @@
 import org.jmodelica.util.FormattingInfo;
 import org.jmodelica.util.FormattingItem;
+import org.jmodelica.util.EmptyFormattingItem;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
@@ -30,8 +31,8 @@ aspect FormattedPrint {
 	}
 	
 	private FormattedPrettyPrinter ASTNode.formattedPrettyPrinter = new FormattedPrettyPrinter();
-	protected String ASTNode.preFormatting = "";
-	protected String ASTNode.postFormatting = "";
+	protected FormattingItem ASTNode.preFormatting = new EmptyFormattingItem();
+	protected FormattingItem ASTNode.postFormatting = new EmptyFormattingItem();
 
 	/**
 	 * Adds formatting information to this AST node and all its children, which can then be used by the method
@@ -46,11 +47,11 @@ aspect FormattedPrint {
 
 			if (formattingItem.getEndLine() == getLine(getStart()) &&
 					formattingItem.getEndColumn() + 1 == getColumn(getStart())) {
-				addPreFormatting(formattingItem.getData());
+				addPreFormatting(formattingItem);
 				formattingIterator.remove();
 			} else if (formattingItem.getStartLine() == getLine(getEnd()) &&
 					formattingItem.getStartColumn() == getColumn(getEnd()) + 1) {
-				addPostFormatting(formattingItem.getData());
+				addPostFormatting(formattingItem);
 				formattingIterator.remove();
 			}
 		}
@@ -67,18 +68,18 @@ aspect FormattedPrint {
 	}
 
 	/**
-	 * Sets the text string which should be used as formatting before (left-hand side of) this node.
-	 * @param formatting the formatting string.
+	 * Sets the formatting that should be used before (left-hand side of) this node.
+	 * @param formatting the formatting item.
 	 */
-	protected void ASTNode.addPreFormatting(String formatting) {
+	protected void ASTNode.addPreFormatting(FormattingItem formatting) {
 		preFormatting = formatting;
 	}
 	
 	/**
-	 * Sets the text string which should be used as formatting after (right-hand side of) this node.
-	 * @param formatting the formatting string.
+	 * Sets the formatting that should be used after (right-hand side of) this node.
+	 * @param formatting the formatting item.
 	 */
-	protected void ASTNode.addPostFormatting(String formatting) {
+	protected void ASTNode.addPostFormatting(FormattingItem formatting) {
 		postFormatting = formatting;
 	}
 
