@@ -274,15 +274,15 @@ aspect ModelicaIcons
 						boolean isConnector = ((InstBaseClassDecl)subDecl).isConnector();
 						if (icon.getContext().equals(Context.ICON)) {
 							if (isConnector && !isProtected) {
-								componentDecl.iconConnector = new org.jmodelica.icons.Connector(componentDecl.icon(), placement);
+								componentDecl.iconConnector = new org.jmodelica.icons.Connector(componentDecl.icon(), placement, componentDecl.name());
 								icon.addSubcomponent(componentDecl.iconConnector);
 							}
 						} else {
 							if (isConnector) {
-								componentDecl.iconConnector = new org.jmodelica.icons.Connector(componentDecl.diagram(), placement);
+								componentDecl.iconConnector = new org.jmodelica.icons.Connector(componentDecl.diagram(), placement, componentDecl.name());
 								icon.addSubcomponent(componentDecl.iconConnector);
 							} else {
-								icon.addSubcomponent(new Component(componentDecl.icon(), placement));
+								icon.addSubcomponent(new Component(componentDecl.icon(), placement, componentDecl.name()));
 							}
 						}
 					}
