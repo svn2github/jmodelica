@@ -2,25 +2,40 @@ package org.jmodelica.icons;
 
 import org.jmodelica.icons.coord.Placement;
 
-public class Component extends Observable implements Observer {
+public class Component extends Observable implements Observer, Cloneable {
 	
 	public static final Object ICON_UPDATED = new Object();
 	public static final Object PLACEMENT_UPDATED = new Object();
 
-	private final Icon icon;
-	private final Placement placement;
+	private Icon icon;
+	private Placement placement;
 	private String componentName = null;
 	
 	public Component(Icon icon, Placement placement) {
 		this(icon, placement, null);
 	}
-
-	public Component(Icon icon, Placement placement,String componentName) {
+	
+	public Component(Icon icon, Placement placement, String componentName) {
 		this.icon = icon;
 		this.placement = placement;
 		this.componentName = componentName;
 	}
-
+	
+	/**
+	 * Makes a copy of this object, It will not be a "deep copy" nor a "shallow copy"
+	 * some of the attributes might get cloned but not all. 
+	 */
+	@Override
+	public Component clone() throws CloneNotSupportedException {
+		Component copy = (Component) super.clone();
+		if (componentName == null)
+			copy.componentName = null;
+		else
+			copy.componentName = new String(componentName);
+//		copy.icon = icon.clone();
+		return copy;
+	}
+	
 	public Icon getIcon() {
 		return icon;
 	}

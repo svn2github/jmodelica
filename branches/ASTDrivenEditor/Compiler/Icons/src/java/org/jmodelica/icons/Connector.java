@@ -13,13 +13,27 @@ public class Connector extends Component {
 	
 	private ArrayList<Connection> sourceConnections = new ArrayList<Connection>();
 	private ArrayList<Connection> targetConnections = new ArrayList<Connection>();
-
+	
+	
 	public Connector(Icon icon, Placement placement) {
 		super(icon, placement);
 	}
 	
 	public Connector(Icon icon, Placement placement, String componentName) {
 		super(icon, placement, componentName);
+	}
+	
+	
+	/**
+	 * Makes a copy of this object, It will not be a "deep copy" nor a "shallow copy"
+	 * some of the attributes might get cloned but not all. 
+	 */
+	@Override
+	public Component clone() throws CloneNotSupportedException {
+		Connector copy = (Connector)super.clone();
+		copy.sourceConnections = new ArrayList<Connection>();
+		copy.targetConnections = new ArrayList<Connection>();
+		return copy;
 	}
 	
 	public void addConnection(Connection c) {

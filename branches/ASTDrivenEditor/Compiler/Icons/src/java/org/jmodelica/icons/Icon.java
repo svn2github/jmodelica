@@ -13,7 +13,7 @@ import org.jmodelica.icons.primitives.GraphicItem;
 import org.jmodelica.icons.primitives.Line;
 import org.jmodelica.icons.primitives.Text;
 
-public class Icon extends Observable {
+public class Icon extends Observable implements Cloneable {
 
 	public static final Object CLASS_NAME_CHANGED = new Object();
 	public static final Object COMPONENT_NAME_CHANGED = new Object();
@@ -27,9 +27,9 @@ public class Icon extends Observable {
 	private String componentName;
 	private String className;
 	private Layer layer;
-	private final ArrayList<Icon> superclasses;
-	private final ArrayList<Component> subcomponents;
-	private final Context context;
+	private ArrayList<Icon> superClasses;
+	private ArrayList<Component> subComponents;
+	private Context context;
 	
 	/**
 	 * 
@@ -41,8 +41,8 @@ public class Icon extends Observable {
 		this.className = className;
 		this.context = context;
 		this.layer = layer;
-		this.superclasses = new ArrayList<Icon>();
-		this.subcomponents = new ArrayList<Component>();
+		this.superClasses = new ArrayList<Icon>();
+		this.subComponents = new ArrayList<Component>();
 	}
 	
 	
@@ -50,13 +50,35 @@ public class Icon extends Observable {
 		this("", Layer.NO_LAYER, null);
 	}
 	
+	
+	/**
+	 * Makes a copy of this object, It will not be a "deep copy" nor a "shallow copy"
+	 * some of the attributes might get cloned but not all. 
+	 */
+	@Override
+	public Icon clone() throws CloneNotSupportedException {
+		if (this == NULL_ICON)
+			return this;
+		Icon copy = (Icon)super.clone();
+		copy.className = new String(className);
+		copy.subComponents = new ArrayList<Component>();
+		for (Component component : subComponents) {
+			copy.subComponents.add(component.clone());
+		}
+		copy.superClasses = new ArrayList<Icon>();
+		for (Icon superClass : superClasses)
+			copy.superClasses.add(superClass.clone());
+		
+		return copy;
+	}
+	
 	public boolean isEmpty() {
 		if (layer != Layer.NO_LAYER)
 			return false;
-		for (Icon sup : superclasses) 
+		for (Icon sup : superClasses) 
 			if (!sup.isEmpty())
 				return false;
-		for (Component comp : subcomponents) 
+		for (Component comp : subComponents) 
 			if (!comp.getIcon().isEmpty())
 				return false;
 		return true;
@@ -135,28 +157,32 @@ public class Icon extends Observable {
 	}
 
 	public void addSuperclass(Icon superclass) {
-		superclasses.add(superclass);
+		superClasses.add(superclass);
 		notifyObservers(SUPERCLASS_ADDED);
 	}
 
 	public void addSubcomponent(Component component) {
-		if(subcomponents.isEmpty() && layer == Layer.NO_LAYER) {
-			if(subcomponents.add(component)) {
+		if(subComponents.isEmpty() && layer == Layer.NO_LAYER) {
+			if(subComponents.add(component)) {
 				layer = new Layer(CoordinateSystem.DEFAULT_COORDINATE_SYSTEM);
 				notifyObservers(SUBCOMPONENT_ADDED);
 			} 
 		} else {
-			subcomponents.add(component);
+			subComponents.add(component);
 			notifyObservers(SUBCOMPONENT_ADDED);
 		}
 	}
 	
+	public void removeSubComponent(Component component) {
+		
+	}
+	
 	public ArrayList<Icon> getSuperclasses() {
-		return superclasses;
+		return superClasses;
 	}
 
 	public ArrayList<Component> getSubcomponents() {
-		return subcomponents;
+		return subComponents;
 	}
 	
 	/*
@@ -167,13 +193,13 @@ public class Icon extends Observable {
 		if(layer != Layer.NO_LAYER) {
 			return layer.getCoordinateSystem().getExtent();
 		}		
-		for(Component comp : this.subcomponents) {
+		for(Component comp : this.subComponents) {
 	    	Icon compIcon = comp.getIcon(); 
 	    	if(compIcon.layer != Layer.NO_LAYER) {
 				return compIcon.layer.getCoordinateSystem().getExtent();	
 			}
 		}
-		for (Icon icon : superclasses) {
+		for (Icon icon : superClasses) {
 			Extent extent = icon.getExtent();
 			if(extent != Extent.NO_EXTENT) {
 				return extent;
@@ -201,7 +227,7 @@ public class Icon extends Observable {
 				}
 			}
 		}
-		for (Component component : subcomponents) {
+		for (Component component : subComponents) {
 			Extent p = component.getPlacement().getTransformation().getExtent().clone();
 			Point o = component.getPlacement().getTransformation().getOrigin();
 			p.getP1().setX(p.getP1().getX()+o.getX());
@@ -210,11 +236,38 @@ public class Icon extends Observable {
 			p.getP2().setY(p.getP2().getY()+o.getY());
 			bounds = bounds.contain(p);
 		}
-		for (Icon icon : superclasses) {
+		for (Icon icon : superClasses) {
 			bounds = icon.getBounds(bounds);
 		}
 		return bounds;
 	}
+//	
+//	
+//	/**
+//	 * This method manipulates all connectors and make them into unique objects.
+//	 * Listeners and connectors arn't copied from the old object.
+//	 */
+//	public void makeConnectorsUnique() {
+//		HashMap<Connector, Connector> replaceMap = new HashMap<Connector, Connector>();
+//		for (Component subComponent : subComponents) {
+//			if (subComponent instanceof Connector) {
+//				Connector oldConnector = (Connector)subComponent;
+//				Connector newConnector = new Connector(oldConnector.getIcon(), oldConnector.getPlacement(), oldConnector.getComponentName());
+//				
+//				replaceMap.put(oldConnector, newConnector);
+//			} else {
+//				subComponent.getIcon().makeConnectorsUnique();
+//			}
+//		}
+//		for (Map.Entry<Connector, Connector> pair : replaceMap.entrySet()) {
+//			subComponents.set(subComponents.indexOf(pair.getKey()), pair.getValue());
+//		}
+//		
+//		for (Icon superClass : superClasses) {
+//			superClass.makeConnectorsUnique();
+//		}
+//	}
+	
 	public String toString() {
 		String s = "";
 		s += "\nclassName = " + className;
@@ -222,11 +275,11 @@ public class Icon extends Observable {
 //		s += "\niconLayer: " + iconLayer.toString();
 //		s += "\ndiagramLayer: " + diagramLayer.toString();
 		//s += "\nplacement: " + placement.toString();
-		for (int i = 0; i < subcomponents.size(); i++) {
-			s += "\nSubcomponent " + (i+1) + ":" + "\n" + subcomponents.get(i);
+		for (int i = 0; i < subComponents.size(); i++) {
+			s += "\nSubcomponent " + (i+1) + ":" + "\n" + subComponents.get(i);
 		}
-		for (int i = 0; i < superclasses.size(); i++) {
-			s += "\nSuperclass " + (i+1) + ":" + "\n" + superclasses.get(i);
+		for (int i = 0; i < superClasses.size(); i++) {
+			s += "\nSuperclass " + (i+1) + ":" + "\n" + superClasses.get(i);
 		}
 		return s;
 	}
