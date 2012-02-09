@@ -3714,6 +3714,7 @@ aspect FunctionInlining {
 	syn boolean FStatement.isInlinable() = false;
 	eq FInitArrayStmt.isInlinable()      = true;
 	eq FAssignStmt.isInlinable()         = true;
+	eq FIfStmt.isInlinable()             = true;
 	eq FReturnStmt.isInlinable()         = isLast();
 	// TODO: handle more types of stmts
 	
@@ -3765,8 +3766,100 @@ aspect FunctionInlining {
 		FVariable var = fi.addVarAndEqn(getLeft().name(), exp);
 	}
 	
+	public void FIfStmt.inline(FunctionInliner fi, Map<String,FVariable> varMap) {
+		// Reduce to list of assignments
+		List<FAssignStmt> stmts = new List<FAssignStmt>();
+		inlinePrepare(fi, stmts);
+		
+		// Add assignments to tree temporarily
+		List<FStatement> oldElse = getElseStmts();
+		setElseStmtList((List) stmts);
+		getElseStmtList();
+		
+		// Inline them
+		for (FStatement stmt : stmts)
+			fi.inline(stmt);
+		
+		// Restore old else branch
+		setElseStmtList(oldElse);
+	}
+	
 	// TODO: handle more types of stmts
 	
+	/**
+	 * Simplify a statement into a list of assignments, that can then easily be inlined.
+	 */
+	public void FStatement.inlinePrepare(FunctionInliner fi, List<FAssignStmt> stmts) {}
+
+	public void FAssignStmt.inlinePrepare(FunctionInliner fi, List<FAssignStmt> stmts) {
+		stmts.add(fullCopy());
+	}
+
+	public void FIfStmt.inlinePrepare(FunctionInliner fi, List<FAssignStmt> stmts) {
+		List<FStatement> oldElse = getElseStmts();
+		List<FAssignStmt> newElse = new List<FAssignStmt>();
+		for (FStatement stmt : oldElse)
+			stmt.inlinePrepare(fi, newElse);
+		setElseStmtList((List) newElse);
+		for (int i = getNumFIfWhenClause() - 1; i >= 0; i--) {
+			newElse = getFIfWhenClause(i).inlineCombineBranches(fi, newElse);
+			setElseStmtList((List) newElse);
+		}
+		for (FAssignStmt stmt : newElse)
+			stmts.add(stmt);
+		setElseStmtList(oldElse);
+	}
+	
+	/**
+	 * Create a list of assign statements with if-else exceptions that is the 
+	 * equivalent of two branches of an if-else statement.
+	 * 
+	 * @param fi         the function inliner to use
+	 * @param elseStmts  the else branch to combine
+	 */
+	protected List<FAssignStmt> FIfWhenClause.inlineCombineBranches(
+			FunctionInliner fi, List<FAssignStmt> elseStmts) {
+		// Prepare contents
+		List<FStatement> oldStmts = getFStatements();
+		List<FAssignStmt> newStmts = new List<FAssignStmt>();
+		for (FStatement stmt : oldStmts)
+			stmt.inlinePrepare(fi, newStmts);
+		setFStatementList((List) newStmts);
+		
+		// First inefficient implementation
+		List<FAssignStmt> stmts = new List<FAssignStmt>();
+		for (FAssignStmt stmt : newStmts)
+			stmts.add(createIfElseAssignment(stmt, null));
+		for (FAssignStmt stmt : elseStmts)
+			stmts.add(createIfElseAssignment(null, stmt));
+		// End first implementation
+		
+		// Clean up
+		setFStatementList(oldStmts);
+		return stmts;
+	}
+	
+	/**
+	 * Create an assign statement with an if-else exception as the right side, 
+	 * that is equivalent to two assignments to the the same variable. One 
+	 * assignment from this if branch, and one other from the next branch.
+	 * If one of the assignments is null, then an access to the variable being 
+	 * assigned is used there (i.e. a no-op). At least one must be non-null.
+	 * 
+	 * @param left   the assignment from this branch
+	 * @param right  the assignment from the next branch
+	 */
+	protected FAssignStmt FIfWhenClause.createIfElseAssignment(FAssignStmt left, FAssignStmt right) {
+		FIdUse var = ((left != null) ? left : right).getLeft().fullCopy();
+		FExp test = getTest().fullCopy(); // TODO: use temp var instead
+		FExp leftExp = createIfElseExpBranch(left, var);
+		FExp rightExp = createIfElseExpBranch(right, var);
+		return new FAssignStmt(var, new FIfExp(test, leftExp, rightExp));
+	}
+	
+	private FExp FIfWhenClause.createIfElseExpBranch(FAssignStmt ass, FIdUse var) {
+		return (ass != null) ? ass.getRight().fullCopy() : new FIdUseExp(var.fullCopy());
+	}
 	
 	/**
 	 * Replace all variable references according to the map.

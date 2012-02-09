@@ -1121,4 +1121,160 @@ end FunctionInlining.UninlinableFunction1;
 		w[1] = f1(z[2], z[3]);
 		w[2] = f2(z[1]);
 	end UninlinableFunction1;
+    
+    
+    model IfStatementInline1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfStatementInline1",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.IfStatementInline1
+ Real z1;
+ Real z2;
+ constant Integer temp_1 = 3;
+ constant Integer temp_2 = 1;
+ constant Integer temp_3 = 2;
+ constant Integer temp_4 = 3;
+ constant Integer temp_5 = 5;
+ constant Integer temp_6 = 1;
+ constant Integer temp_7 = 1;
+ constant Integer temp_8 = 2;
+ constant Integer temp_9 = 1;
+ constant Integer temp_10 = 3;
+equation
+ z1 = 5;
+ z2 = 3;
+end FunctionInlining.IfStatementInline1;
+")})));
+
+        function f
+            input Real x;
+            output Real y;
+        protected
+            Real w1;
+            Real w2;
+        algorithm
+            w1 := 1;
+            w2 := 2;
+            if x > 2 then
+                w1 := x;
+            end if;
+            y := w1 + w2;
+        end f;
+        
+        Real z1 = f(3);
+        Real z2 = f(1);
+    end IfStatementInline1;
+    
+    
+    model IfStatementInline2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfStatementInline2",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.IfStatementInline2
+ Real w;
+ Real z;
+ Real temp_1;
+ constant Integer temp_2 = 1;
+ constant Integer temp_3 = 2;
+ Real temp_4;
+ Real temp_5;
+equation
+ w = 2;
+ z = temp_5;
+ temp_1 = w;
+ temp_4 = (if temp_1 > 2 then temp_1 else 1);
+ temp_5 = temp_4 + 2;
+end FunctionInlining.IfStatementInline2;
+")})));
+
+        function f
+            input Real x;
+            output Real y;
+        protected
+            Real w1;
+            Real w2;
+        algorithm
+            w1 := 1;
+            w2 := 2;
+            if x > 2 then
+                w1 := x;
+            end if;
+            y := w1 + w2;
+        end f;
+        
+        Real w = 2;
+        Real z = f(w);
+    end IfStatementInline2;
+    
+    
+    model IfStatementInline3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfStatementInline3",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.IfStatementInline3
+ Real w1;
+ Real w2;
+ Real w3;
+ Real z;
+ Real temp_1;
+ Real temp_2;
+ Real temp_3;
+ Real temp_4;
+ Real temp_5;
+ Real temp_6;
+ Real temp_7;
+ Real temp_8;
+equation
+ w1 = 1;
+ w2 = 2;
+ w3 = 3;
+ z = temp_8;
+ temp_1 = w1;
+ temp_2 = w2;
+ temp_3 = w3;
+ temp_4 = temp_2;
+ temp_5 = temp_3;
+ temp_6 = (if temp_1 > 2 then temp_1 else temp_4);
+ temp_7 = (if temp_1 > 2 then temp_5 else temp_1);
+ temp_8 = temp_6 + temp_7;
+end FunctionInlining.IfStatementInline3;
+")})));
+
+        function f
+            input Real x1;
+            input Real x2;
+            input Real x3;
+            output Real y;
+        protected
+            Real w1;
+            Real w2;
+        algorithm
+            w1 := x2;
+            w2 := x3;
+            if x1 > 2 then
+                w1 := x1;
+            else
+			    w2 := x1;
+            end if;
+            y := w1 + w2;
+        end f;
+        
+        Real w1 = 1;
+        Real w2 = 2;
+        Real w3 = 3;
+        Real z = f(w1, w2, w3);
+    end IfStatementInline3;
+	
 end FunctionInlining;

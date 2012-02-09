@@ -948,14 +948,14 @@ FSubscriptedExp : FExp ::= FExp FArraySubscripts;
 FUnknownSizeExp : FExp ::= <Variable:CommonVariableDecl> <Dim:int>;
 
 /**
- * \brief Range expression.
- */
-FRangeExp : FExp ::= FExp*;
-
-/**
  * \brief Dummy node.
  */
 FNoExp : FExp;
+
+/**
+ * \brief Range expression.
+ */
+FRangeExp : FExp ::= FExp*;
 
 /**
  * \brief Built-in variable time.
