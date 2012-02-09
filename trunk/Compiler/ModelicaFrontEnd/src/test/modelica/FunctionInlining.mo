@@ -1189,7 +1189,7 @@ fclass FunctionInlining.IfStatementInline2
 equation
  v = 2;
  z = temp_5;
- temp_1 = w;
+ temp_1 = v;
  temp_4 = (if temp_1 > 2 then temp_1 else 1);
  temp_5 = temp_4 + 2;
 end FunctionInlining.IfStatementInline2;
@@ -1211,7 +1211,7 @@ end FunctionInlining.IfStatementInline2;
         end f;
         
         Real v = 2;
-        Real z = f(w);
+        Real z = f(v);
     end IfStatementInline2;
     
     
