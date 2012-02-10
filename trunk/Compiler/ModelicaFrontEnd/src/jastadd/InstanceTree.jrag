@@ -617,8 +617,15 @@ aspect InstanceTreeConstruction {
 	public FExp FExp.dynamicFExp(FExp exp) {
 		if (exp == this)
 			return exp;
+		// Fool JastAdd into keeping the 
+		boolean finalFlag = is$Final();
+		if (!finalFlag)
+			log.debug("FExp.dynamicFExp(): adding '%s' to dynamic list of non-final exp '%s'.",	exp, this);
+		is$Final(true);
 		getDynamicFExpList().add(exp);
-		return getDynamicFExp(getNumDynamicFExp() - 1);
+		exp = getDynamicFExp(getNumDynamicFExp() - 1);
+		is$Final(finalFlag);
+		return exp;
 	}
 
 	/**
