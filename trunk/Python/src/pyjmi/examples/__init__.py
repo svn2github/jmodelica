@@ -18,8 +18,9 @@
 """
 The pyjmi example package.
 """
-__all__ = ['ast_example', 'crane', 'crystallizer', 'cstr', 'cstr_casadi',
-           'cstr_mpc', 'cstr2', 'distillation', 'distillation_fmu',
+__all__ = ['ast_example', 'cont_state', 'crane', 'crystallizer', 'cstr', 'cstr_casadi',
+           'cstr_mpc', 'cstr2', 'distillation', 'distillation_fmu', 'distillation1_fmu',
+		   'distillation2_fmu', 'distillation3_fmu', 'distillation4_fmu',
            'extfunctions', 'extFunctions_arrays', 'extFunctions_matrix',
            'furuta_dfo', 'furuta_dfo_cost', 'hohmann_transfer', 'if_example_1',
            'if_example_2', 'lagrange_cost', 'leadtransport',
