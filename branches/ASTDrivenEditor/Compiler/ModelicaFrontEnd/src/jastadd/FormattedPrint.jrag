@@ -103,10 +103,10 @@ aspect FormattedPrint {
 	 */
 	public void ASTNode.prettyPrintFormatted(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
-		/*for (int i = 0; i < getNumChild(); i++) {
-			getChild(0).prettyPrintFormatted(printer, printStream);
-		}*/
-		prettyPrint(printer, printStream, "");
+		for (int i = 0; i < getNumChild(); i++) {
+			getChild(i).prettyPrintFormatted(printer, printStream);
+		}
+		//prettyPrint(printer, printStream, "");
 		printStream.print(postFormatting);
 	}
 	
@@ -370,7 +370,91 @@ aspect FormattedPrint {
 		}
 		
 		printStream.print("end " + getName().getID());
-	} 
+	}
+	
+	public void CompleteModification.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+
+		getClassModification().prettyPrintFormatted(printer, printStream);
+		if (hasValueModification()) {
+			getValueModification().prettyPrintFormatted(printer, printStream);
+		}
+
+		printStream.print(postFormatting);
+	}
+	
+	public void ValueModification.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		getExp().prettyPrintFormatted(printer, printStream);
+		printStream.print(postFormatting);
+	}
+	
+	public void ElementModification.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		
+		if (hasEach()) {
+			getEach().prettyPrintFormatted(printer, printStream);
+		}
+		if (hasFinal()) {
+			getFinal().prettyPrintFormatted(printer, printStream);
+		}
+		getName().prettyPrintFormatted(printer, printStream);
+		if (hasModification()) {
+			getModification().prettyPrintFormatted(printer, printStream);
+		}
+		if (hasStringComment()) {
+			getStringComment().prettyPrintFormatted(printer, printStream);
+		}
+		
+		printStream.print(postFormatting);
+	}
+	
+	public void ClassRedeclare.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		
+		if (hasEach()) {
+			getEach().prettyPrintFormatted(printer, printStream);
+		}
+		if (hasFinal()) {
+			getFinal().prettyPrintFormatted(printer, printStream);
+		}
+		getBaseClassDecl().prettyPrintFormatted(printer, printStream);
+		
+		printStream.print(postFormatting);
+	}
+	
+	public void ComponentRedeclare.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		
+		if (hasEach()) {
+			getEach().prettyPrintFormatted(printer, printStream);
+		}
+		if (hasFinal()) {
+			getFinal().prettyPrintFormatted(printer, printStream);
+		}
+		getComponentDecl().prettyPrintFormatted(printer, printStream);
+		
+		printStream.print(postFormatting);
+	}
+	
+	public void RealLitExp.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		printStream.print(getUNSIGNED_NUMBER());
+		printStream.print(postFormatting);
+	}
+
+	public void IntegerLitExp.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		printStream.print(getUNSIGNED_INTEGER());
+		printStream.print(postFormatting);
+	}
+	
+	public void NegExp.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		printStream.print("-");
+		getExp().prettyPrintFormatted(printer, printStream);
+		printStream.print(postFormatting);
+	}
 
 	/** @TODO: Copy & pasted from pretty print, needs more customization */
 	public void ComponentDecl.prettyPrintFormatted(Printer printer, PrintStream printStream) {
