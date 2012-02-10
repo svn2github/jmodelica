@@ -35,18 +35,13 @@
         </listitem>
 
         <listitem>
-          <para>Support for export of Modelica functions in stand-alone
-          DLLs</para>
-        </listitem>
-
-        <listitem>
-          <para>Refactorization of the Python code: a new stand-alone package,
+          <para>Reorganization of the Python code: a new stand-alone package,
           PyFMI, provided</para>
         </listitem>
 
         <listitem>
           <para>A novel dynamic optimization algorithm implemented in Python
-          based on collocation and CasADi is provided.</para>
+          based on collocation and CasADi is provided</para>
         </listitem>
       </itemizedlist>
     </section>
@@ -75,7 +70,9 @@
       <section>
         <title>Improved Modelica compliance</title>
 
-        <para/>
+        <para>With added support for external Fortran function and many bug
+        fixes, the compiler now handles many models that previously would not
+        compile.</para>
       </section>
 
       <section>
@@ -923,12 +920,41 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
-            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
-            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
-            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
-            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
-            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
+            <m:math display="block">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>0</m:mi>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>f</m:mi>
+                  </m:msub>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>L</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>.</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
+
+                  <m:mtext>dt</m:mtext>
+                </m:mrow>
+              </m:mrow>
+            </m:math>
           </informalequation>
 
           <para>the Optimica class attribute
