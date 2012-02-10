@@ -21,6 +21,8 @@ public class Icon extends Observable implements Cloneable {
 	public static final Object SUPERCLASS_REMOVED = new Object();
 	public static final Object SUBCOMPONENT_ADDED = new Object();
 	public static final Object SUBCOMPONENT_REMOVED = new Object();
+	public static final Object IM_REMOVED = new Object();
+	public static final Object IM_ADDED = new Object();
 	
 	public static Icon NULL_ICON = new Icon();
 	
@@ -30,6 +32,8 @@ public class Icon extends Observable implements Cloneable {
 	private ArrayList<Icon> superClasses;
 	private ArrayList<Component> subComponents;
 	private Context context;
+	private boolean isAdded = false;
+	
 	
 	/**
 	 * 
@@ -165,16 +169,21 @@ public class Icon extends Observable implements Cloneable {
 		if(subComponents.isEmpty() && layer == Layer.NO_LAYER) {
 			if(subComponents.add(component)) {
 				layer = new Layer(CoordinateSystem.DEFAULT_COORDINATE_SYSTEM);
+				component.added();
 				notifyObservers(SUBCOMPONENT_ADDED);
 			} 
 		} else {
 			subComponents.add(component);
+			component.added();
 			notifyObservers(SUBCOMPONENT_ADDED);
 		}
 	}
 	
 	public void removeSubComponent(Component component) {
-		
+		if (subComponents.remove(component)) {
+			component.removed();
+			notifyObservers(SUBCOMPONENT_REMOVED);
+		}
 	}
 	
 	public ArrayList<Icon> getSuperclasses() {
@@ -241,32 +250,6 @@ public class Icon extends Observable implements Cloneable {
 		}
 		return bounds;
 	}
-//	
-//	
-//	/**
-//	 * This method manipulates all connectors and make them into unique objects.
-//	 * Listeners and connectors arn't copied from the old object.
-//	 */
-//	public void makeConnectorsUnique() {
-//		HashMap<Connector, Connector> replaceMap = new HashMap<Connector, Connector>();
-//		for (Component subComponent : subComponents) {
-//			if (subComponent instanceof Connector) {
-//				Connector oldConnector = (Connector)subComponent;
-//				Connector newConnector = new Connector(oldConnector.getIcon(), oldConnector.getPlacement(), oldConnector.getComponentName());
-//				
-//				replaceMap.put(oldConnector, newConnector);
-//			} else {
-//				subComponent.getIcon().makeConnectorsUnique();
-//			}
-//		}
-//		for (Map.Entry<Connector, Connector> pair : replaceMap.entrySet()) {
-//			subComponents.set(subComponents.indexOf(pair.getKey()), pair.getValue());
-//		}
-//		
-//		for (Icon superClass : superClasses) {
-//			superClass.makeConnectorsUnique();
-//		}
-//	}
 	
 	public String toString() {
 		String s = "";
@@ -286,5 +269,31 @@ public class Icon extends Observable implements Cloneable {
 	
 	public Context getContext() {
 		return context;
+	}
+	
+	public void added() {
+		if (isAdded)
+			return;
+		isAdded = true;
+		for (Component subComponent : subComponents)
+			subComponent.added();
+		for (Icon superClass : superClasses)
+			superClass.added();
+		notifyObservers(IM_ADDED);
+	}
+
+	public void removed() {
+		if (!isAdded)
+			return;
+		isAdded = false;
+		for (Component subComponent : subComponents)
+			subComponent.removed();
+		for (Icon superClass : superClasses)
+			superClass.removed();
+		notifyObservers(IM_REMOVED);
+	}
+	
+	public boolean isAdded() {
+		return isAdded;
 	}
 }

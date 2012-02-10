@@ -6,10 +6,13 @@ public class Component extends Observable implements Observer, Cloneable {
 	
 	public static final Object ICON_UPDATED = new Object();
 	public static final Object PLACEMENT_UPDATED = new Object();
+	public static final Object IM_REMOVED = new Object();
+	public static final Object IM_ADDED = new Object();
 
 	private Icon icon;
 	private Placement placement;
 	private String componentName = null;
+	private boolean isAdded = false;
 	
 	public Component(Icon icon, Placement placement) {
 		this(icon, placement, null);
@@ -32,7 +35,6 @@ public class Component extends Observable implements Observer, Cloneable {
 			copy.componentName = null;
 		else
 			copy.componentName = new String(componentName);
-//		copy.icon = icon.clone();
 		return copy;
 	}
 	
@@ -54,8 +56,26 @@ public class Component extends Observable implements Observer, Cloneable {
 			notifyObservers(ICON_UPDATED);
 		else if (o == placement)
 			notifyObservers(PLACEMENT_UPDATED);
-		else
-			o.removeObserver(this);
+	}
+
+	public void added() {
+		if (isAdded)
+			return;
+		isAdded = true;
+		icon.added();
+		notifyObservers(IM_ADDED);
+	}
+
+	public void removed() {
+		if (!isAdded)
+			return;
+		isAdded = false;
+		icon.removed();
+		notifyObservers(IM_REMOVED);
+	}
+	
+	public boolean isAdded() {
+		return isAdded;
 	}
 
 }

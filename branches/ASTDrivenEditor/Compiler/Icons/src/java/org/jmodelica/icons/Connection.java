@@ -23,47 +23,47 @@ public class Connection extends Line {
 		return targetConnector;
 	}
 	
-	public void setSourceConnector(Connector sourceConnector) {
-		removeSourceConnector();
-		this.sourceConnector = sourceConnector;
-		if (isConnected)
-			sourceConnector.addConnection(this);
+	public void setSourceConnector(Connector newSourceConnector) {
+		if (sourceConnector != null && isConnected) {
+			sourceConnector.removeConnection(this);
+			sourceConnector.removeObserver(this);
+		}
+		sourceConnector = newSourceConnector;
+		if (isConnected) {
+			if (newSourceConnector == null) {
+				disconnect();
+			} else {
+				newSourceConnector.addConnection(this);
+				newSourceConnector.addObserver(this);
+			}
+		}
 		notifyObservers(SOURCE_ADDED);
 	}
 	
-	public void setTargetConnector(Connector targetConnector) {
-		removeTargetConnector();
-		this.targetConnector = targetConnector;
-		if (isConnected)
-			targetConnector.addConnection(this);
-		notifyObservers(TARGET_ADDED);
-	}
-	
-	public void removeSourceConnector() {
-		if (sourceConnector == null)
-			return;
-		if (isConnected)
-			sourceConnector.removeConnection(this);
-		sourceConnector = null;
-		notifyObservers(SOURCE_REMOVED);
-	}
-	
-	public void removeTargetConnector() {
-		if (targetConnector == null)
-			return;
-		if (isConnected)
+	public void setTargetConnector(Connector newTargetConnector) {
+		if (targetConnector != null && isConnected) {
 			targetConnector.removeConnection(this);
-		targetConnector = null;
-		notifyObservers(TARGET_REMOVED);
+			targetConnector.removeObserver(this);
+		}
+		targetConnector = newTargetConnector;
+		if (isConnected) {
+			if (newTargetConnector == null) {
+				disconnect();
+			} else {
+				newTargetConnector.addConnection(this);
+				newTargetConnector.addObserver(this);
+			}
+		}
+		notifyObservers(TARGET_ADDED);
 	}
 	
 	public void connect() {
 		if (isConnected)
 			return;
-		if (targetConnector != null)
-			targetConnector.addConnection(this);
-		if (sourceConnector != null)
-			sourceConnector.addConnection(this);
+		if (sourceConnector == null || !sourceConnector.isAdded() || targetConnector == null || !targetConnector.isAdded())
+			return;
+		sourceConnector.addConnection(this);
+		targetConnector.addConnection(this);
 		isConnected = true;
 		notifyObservers(CONNECTED);
 	}
@@ -71,12 +71,28 @@ public class Connection extends Line {
 	public void disconnect() {
 		if (!isConnected)
 			return;
-		if (targetConnector != null)
-			targetConnector.removeConnection(this);
-		if (sourceConnector != null)
+		if (sourceConnector != null) {
 			sourceConnector.removeConnection(this);
+		}
+		if (targetConnector != null) {
+			targetConnector.removeConnection(this);
+		}
 		isConnected = false;
 		notifyObservers(DISCONNECTED);
+	}
+	
+	@Override
+	public void update(Observable o, Object flag) {
+		if (o == sourceConnector && flag == Connector.IM_ADDED)
+			connect();
+		else if (o == targetConnector && flag == Connector.IM_ADDED)
+			connect();
+		else if (o == sourceConnector && flag == Connector.IM_REMOVED)
+			disconnect();
+		else if (o == targetConnector && flag == Connector.IM_REMOVED)
+			disconnect();
+		else
+			super.update(o, flag);
 	}
 	
 }

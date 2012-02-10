@@ -101,8 +101,6 @@ public abstract class GraphicItem extends Observable implements Observer {
 	public void update(Observable o, Object flag) {
 		if (o == origin && (flag == Point.X_UPDATED || flag == Point.Y_UPDATED))
 			notifyObservers(ORIGIN_CHANGED);
-		else
-			o.removeObserver(this);
 	}
 	
 }

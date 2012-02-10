@@ -59,7 +59,5 @@ public class Layer extends Observable implements Observer {
 	public void update(Observable o, Object flag) {
 		if (o == coordinateSystem)
 			notifyObservers(COORDINATE_SYSTEM_UPDATED);
-		else
-			o.removeObserver(this);
 	}
 }

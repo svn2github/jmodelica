@@ -20,13 +20,6 @@ public class Observable {
 		observers.remove(observer);
 	}
 	
-//	protected List<Observer> getListeners() {
-//		if (listeners == null)
-//			return Collections.emptyList();
-//		else
-//			return listeners;
-//	}
-	
 	protected void notifyObservers(Object flag) {
 		if (observers == null)
 			return;

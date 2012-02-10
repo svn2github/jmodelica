@@ -100,8 +100,6 @@ public class CoordinateSystem extends Observable implements Observer {
 	public void update(Observable o, Object flag) {
 		if (o == extent)
 			notifyObservers(EXTENT_UPDATED);
-		else
-			o.removeObserver(this);
 	}
 
 }

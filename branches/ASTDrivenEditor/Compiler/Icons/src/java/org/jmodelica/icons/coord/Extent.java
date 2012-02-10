@@ -185,7 +185,5 @@ public class Extent extends Observable implements Observer {
 			notifyObservers(P1_UPDATED);
 		else if (o == p2 && (flag == Point.X_UPDATED || flag == Point.Y_UPDATED))
 			notifyObservers(P2_UPDATED);
-		else
-			o.removeObserver(this);
 	}
 }

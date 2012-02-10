@@ -95,8 +95,6 @@ public class Transformation extends Observable implements Observer {
 			notifyObservers(ORIGIN_CHANGED);
 		else if (o == extent && (flag == Extent.P1_SWAPPED || flag == Extent.P1_UPDATED || flag == Extent.P2_SWAPPED || flag == Extent.P2_UPDATED))
 			notifyObservers(EXTENT_CHANGED);
-		else
-			o.removeObserver(this);
 	}
 
 }
