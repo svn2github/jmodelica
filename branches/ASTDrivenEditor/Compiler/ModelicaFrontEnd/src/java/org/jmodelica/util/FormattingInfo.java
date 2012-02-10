@@ -9,14 +9,12 @@ import java.util.LinkedList;
  */
 public class FormattingInfo {
 	private Collection<FormattingItem> formattingList;
-	private Collection<FormattingItem> delimiterList;
 
 	/**
 	 * Creates a <code>FormattingInfo</code> instance.
 	 */
 	public FormattingInfo() {
 		formattingList = new LinkedList<FormattingItem>();
-		delimiterList = new LinkedList<FormattingItem>();
 	}
 
 	/**
@@ -31,11 +29,7 @@ public class FormattingInfo {
 	 */
 	public void addItem(FormattingItem.Type type, String data, int startLine, int startColumn, int endLine, int endColumn ) {
 		FormattingItem formattingItem = new FormattingItem(type, data, startLine, startColumn, endLine, endColumn);
-		if (type != FormattingItem.Type.DELIMITER) {
-			formattingList.add(formattingItem);
-		} else {
-			delimiterList.add(formattingItem);
-		}
+		formattingList.add(formattingItem);
 	}
 	
 	/**
