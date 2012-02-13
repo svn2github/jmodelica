@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
-#include "fmi_xml_model_description.h"
+#include <fmi_xml_model_description.h>
 
 void print_int(int i,void* data) {
     printf("%d\n", i);

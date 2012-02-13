@@ -24,8 +24,8 @@
 #define FMI_XML_MODELDESCRIPTION_H_
 
 #include <stddef.h>
-#include <fmi-me-1.0/fmiModelFunctions.h>
-#include <fmi-me-1.0/fmiModelTypes.h>
+#include <1.0-ME/fmiModelFunctions.h>
+#include <1.0-ME/fmiModelTypes.h>
 #include <jm_callbacks.h>
 
 #ifdef __cplusplus

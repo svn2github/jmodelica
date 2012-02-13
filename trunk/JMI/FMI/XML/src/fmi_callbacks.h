@@ -14,10 +14,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef FMI_XML_CALLBACKS_H
-#define FMI_XML_CALLBACKS_H
+#ifndef FMI_CALLBACKS_H
+#define FMI_CALLBACKS_H
 
-#include "fmi-me-1.0/fmiModelFunctions.h"
+#include <1.0-ME/fmiModelFunctions.h>
 #include <jm_callbacks.h>
 #ifdef __cplusplus
 extern "C" {
@@ -49,4 +49,4 @@ void fmi_init_callbacks(fmi_callbacks_t* callbacks, fmiCallbackFunctions* fmiFun
 #ifdef __cplusplus
 }
 #endif
-#endif /* FMI_XML_CALLBACKS_H */
+#endif /* FMI_CALLBACKS_H */
