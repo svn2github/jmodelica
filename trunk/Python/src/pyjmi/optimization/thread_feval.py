@@ -3,27 +3,28 @@ import os
 import numpy as N
 
 class FevalThread(threading.Thread):
-	def __init__(self,x,func_file_name,dir_name,debug):
-		self.x = x
-		self.func_file_name = func_file_name
-		self.dir_name = dir_name
-		self.debug = debug
-		threading.Thread.__init__(self)
-	def run(self):
-		curr_dir = os.path.dirname(os.path.abspath(__file__))
-		l = list()
-		for val in self.x:
-			l.append(str(val))
-		x_string = ' '.join(l)
-		if self.debug:
-			outfile = 'out_file_' + self.dir_name + '.txt'
-			errfile = 'err_file_' + self.dir_name + '.txt'
-			cmd = ' '.join([curr_dir+'/func_eval.py',x_string,self.func_file_name,
-							self.dir_name,'>',outfile,'2>',errfile])
-		else:
-			cmd = ' '.join([curr_dir+'/func_eval.py',x_string,self.func_file_name,
-							self.dir_name])
-		self.retval = os.system(cmd)
+    def __init__(self,x,func_file_name,dir_name,debug):
+        self.x = x
+        self.func_file_name = func_file_name
+        self.dir_name = dir_name
+        self.debug = debug
+        threading.Thread.__init__(self)
+
+    def run(self):
+        curr_dir = os.path.dirname(os.path.abspath(__file__))
+        l = list()
+        for val in self.x:
+            l.append(str(val))
+        x_string = ' '.join(l)
+        eval_path = os.path.join(curr_dir, 'func_eval.py')
+        python_path = sys.executable
+        cmd = ' '.join([python_path, eval_path, x_string, self.func_file_name, self.dir_name])
+        if self.debug:
+            outfile = 'out_file_' + self.dir_name + '.txt'
+            errfile = 'err_file_' + self.dir_name + '.txt'
+            cmd = ' '.join([cmd, '>', outfile, '2>', errfile])
+            
+        self.retval = os.system(cmd)
 
 def feval(func_file_name,x,debug):
 	"""
