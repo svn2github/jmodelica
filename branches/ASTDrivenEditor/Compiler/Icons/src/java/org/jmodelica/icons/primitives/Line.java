@@ -64,7 +64,11 @@ public class Line extends GraphicItem implements Observer {
 		arrowPolygons = null;
 		notifyObservers(POINTS_UPDATED);
 	}
-		
+	
+	public void pointsChanged() {
+		notifyObservers(POINTS_UPDATED);
+	}
+	
 	public List<Point> getPoints() {
 		return points;
 	}
