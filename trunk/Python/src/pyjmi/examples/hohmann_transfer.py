@@ -36,7 +36,7 @@ def run_demo(with_plots=True):
     #Optimization
     model = CasadiModel(fmux_name)
     
-    opts = model.optimize_options(algorithm="CasadiPseudoSpectral")
+    opts = model.optimize_options(algorithm="CasadiPseudoSpectralAlg")
 
     opts["n_cp"] = 40 #Number of collocation points
     opts["n_e"] = 2   #Number of phases
@@ -46,7 +46,7 @@ def run_demo(with_plots=True):
                                                            #The discontinuities are connected by dy1 and dx1
     
     #Optimize
-    res_opt = model.optimize(algorithm="CasadiPseudoSpectral",options=opts)
+    res_opt = model.optimize(algorithm="CasadiPseudoSpectralAlg",options=opts)
     
     #Get results
     dx1,dy1,dx2,dy2 = res_opt["dx1"],      res_opt["dy1"],    res_opt["dx2"],res_opt["dy2"]

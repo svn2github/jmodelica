@@ -1145,7 +1145,7 @@ class KInitSolveAlg(AlgorithmBase):
         """
         return KInitSolveAlgOptions()
 
-class CasadiPseudoSpectral(AlgorithmBase):
+class CasadiPseudoSpectralAlg(AlgorithmBase):
     """
     The algorithm is based on orthogonal collocation and relies on the solver 
     IPOPT for solving a non-linear programming problem. 
@@ -1155,7 +1155,7 @@ class CasadiPseudoSpectral(AlgorithmBase):
                  model, 
                  options):
         """
-        Create a CasadiPseudoSpectral algorithm.
+        Create a CasadiPseudoSpectralAlg algorithm.
         
         Parameters::
               
@@ -1166,26 +1166,26 @@ class CasadiPseudoSpectral(AlgorithmBase):
                 The options that should be used by the algorithm. For 
                 details on the options, see:
                 
-                * model.optimize_options('CasadiPseudoSpectral')
+                * model.optimize_options('CasadiPseudoSpectralAlg')
                 
                 or look at the docstring with help:
                 
-                * help(pyjmi.jmi_algorithm_drivers.CasadiPseudoSpectral)
+                * help(pyjmi.jmi_algorithm_drivers.CasadiPseudoSpectralAlg)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
-                  provided by CasadiPseudoSpectralOptions. An empty
+                  provided by CasadiPseudoSpectralAlgOptions. An empty
                   dict will thus give all options with default values.
-                - A CasadiPseudoSpectralOptions object.
+                - A CasadiPseudoSpectralAlgOptions object.
         """
         self.model = model
         
         # handle options argument
         if isinstance(options, dict) and not \
-            isinstance(options, CasadiPseudoSpectralOptions):
+            isinstance(options, CasadiPseudoSpectralAlgOptions):
             # user has passed dict with options or empty dict = default
-            self.options = CasadiPseudoSpectralOptions(options)
-        elif isinstance(options, CasadiPseudoSpectralOptions):
+            self.options = CasadiPseudoSpectralAlgOptions(options)
+        elif isinstance(options, CasadiPseudoSpectralAlgOptions):
             # user has passed CasadiPseudoSpectralOptions instance
             self.options = options
         else:
@@ -1208,7 +1208,7 @@ class CasadiPseudoSpectral(AlgorithmBase):
         
     def _set_options(self):
         """ 
-        Helper function that sets options for the CasadiPseudoSpectral 
+        Helper function that sets options for the CasadiPseudoSpectralAlg 
         algorithm.
         """
         self.n_e=self.options['n_e']
@@ -1243,11 +1243,11 @@ class CasadiPseudoSpectral(AlgorithmBase):
     def get_result(self):
         """ 
         Write result to file, load result data and create an 
-        CasadiPseudoSpectralResult object.
+        CasadiPseudoSpectralAlgResult object.
         
         Returns::
         
-            The CasadiPseudoSpectralResult object.
+            The CasadiPseudoSpectralAlgResult object.
         """
         if self.result_mode=='default':
             self.nlp.export_result_dymola(**self.result_args)
@@ -1263,19 +1263,19 @@ class CasadiPseudoSpectral(AlgorithmBase):
         res = ResultDymolaTextual(resultfile)
         
         # create and return result object
-        return CasadiPseudoSpectralResult(self.model, 
+        return CasadiPseudoSpectralAlgResult(self.model, 
             resultfile, self.nlp, res, self.options)
         
     @classmethod
     def get_default_options(cls):
         """ 
         Get an instance of the options class for the 
-        CasadiPseudoSpectral algorithm, prefilled with default 
+        CasadiPseudoSpectralAlg algorithm, prefilled with default 
         values. (Class method.)
         """
-        return CasadiPseudoSpectralOptions()
+        return CasadiPseudoSpectralAlgOptions()
 
-class CasadiPseudoSpectralOptions(OptionBase):
+class CasadiPseudoSpectralAlgOptions(OptionBase):
     
     """
     Options for optimizing CasADi models using a collocation algorithm. 
@@ -1395,13 +1395,13 @@ class CasadiPseudoSpectralOptions(OptionBase):
             'IPOPT_options':{'max_iter':1000,
                              'derivative_test':'none'}
             }
-        super(CasadiPseudoSpectralOptions,self).__init__(_defaults)
+        super(CasadiPseudoSpectralAlgOptions,self).__init__(_defaults)
         # for those key-value-sets where the value is a dict, don't 
         # overwrite the whole dict but instead update the default dict 
         # with the new values
         self._update_keep_dict_defaults(*args, **kw)
 
-class CasadiPseudoSpectralResult(JMResultBase):
+class CasadiPseudoSpectralAlgResult(JMResultBase):
     pass
 
 class LocalDAECollocationAlg(AlgorithmBase):

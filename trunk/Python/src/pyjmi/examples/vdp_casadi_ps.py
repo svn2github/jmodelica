@@ -37,11 +37,11 @@ def run_demo(with_plots=True):
 
     model = CasadiModel(jn)
 
-    opts = model.optimize_options(algorithm='CasadiPseudoSpectral')
+    opts = model.optimize_options(algorithm='CasadiPseudoSpectralAlg')
     opts['n_cp'] = 50
     #opts['IPOPT_options']['hessian_approximation'] = 'limited-memory'
 
-    res = model.optimize(algorithm='CasadiPseudoSpectral',options=opts)
+    res = model.optimize(algorithm='CasadiPseudoSpectralAlg',options=opts)
     
     # Extract variable profiles
     x1   = res['x1']
