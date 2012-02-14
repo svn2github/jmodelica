@@ -91,7 +91,7 @@ fmi_xml_variable_list_t* fmi_xml_prepend_to_var_list(fmi_xml_variable_list_t* li
 
 
 /* Get a pointer to the list of the value references for all the variables */
-const fmiValueReference* fmi_xml_get_value_referece_list(fmi_xml_variable_list_t* vl) {
+const fmi_xml_value_reference_t* fmi_xml_get_value_referece_list(fmi_xml_variable_list_t* vl) {
     if(!vl->vr) {
         size_t i, nv = fmi_xml_get_variable_list_size(vl);
         vl->vr = jm_vector_alloc(size_t)(nv,nv,vl->variables.callbacks);

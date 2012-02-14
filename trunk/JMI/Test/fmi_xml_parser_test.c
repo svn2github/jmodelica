@@ -32,9 +32,9 @@ void printTypeInfo(fmi_xml_variable_typedef_t* vt) {
     switch(fmi_xml_get_base_type(vt)) {
     case fmi_xml_base_type_enu_real: {
         fmi_xml_real_typedef_t* rt = fmi_xml_ret_type_as_real(vt);
-        fmiReal min = fmi_xml_get_real_type_min(rt);
-        fmiReal max = fmi_xml_get_real_type_max(rt);
-        fmiReal nom = fmi_xml_get_real_type_nominal(rt);
+        fmi_xml_real_t min = fmi_xml_get_real_type_min(rt);
+        fmi_xml_real_t max = fmi_xml_get_real_type_max(rt);
+        fmi_xml_real_t nom = fmi_xml_get_real_type_nominal(rt);
         fmi_xml_unit_t* u = fmi_xml_get_real_type_unit(rt);
         fmi_xml_display_unit_t* du = fmi_xml_get_type_display_unit(rt);
 

@@ -70,17 +70,17 @@ fmi_xml_enumeration_typedef_t* fmi_xml_get_type_as_enum(fmi_xml_variable_typedef
 /* Note that NULL-pointer is always returned for strings and booleans */
 const char* fmi_xml_get_type_quantity(fmi_xml_variable_typedef_t*);
 
-fmiReal fmi_xml_get_real_type_min(fmi_xml_real_typedef_t*);
-fmiReal fmi_xml_get_real_type_max(fmi_xml_real_typedef_t*);
-fmiReal fmi_xml_get_real_type_nominal(fmi_xml_real_typedef_t*);
+fmi_xml_real_t fmi_xml_get_real_type_min(fmi_xml_real_typedef_t*);
+fmi_xml_real_t fmi_xml_get_real_type_max(fmi_xml_real_typedef_t*);
+fmi_xml_real_t fmi_xml_get_real_type_nominal(fmi_xml_real_typedef_t*);
 fmi_xml_unit_t* fmi_xml_get_real_type_unit(fmi_xml_real_typedef_t*);
 int fmi_xml_get_real_type_is_relative_quantity(fmi_xml_real_typedef_t*);
 
-fmiInteger fmi_xml_get_integer_type_min(fmi_xml_integer_typedef_t*);
-fmiInteger fmi_xml_get_integer_type_max(fmi_xml_integer_typedef_t*);
+fmi_xml_int_t fmi_xml_get_integer_type_min(fmi_xml_integer_typedef_t*);
+fmi_xml_int_t fmi_xml_get_integer_type_max(fmi_xml_integer_typedef_t*);
 
-fmiInteger fmi_xml_get_enum_type_min(fmi_xml_enumeration_typedef_t*);
-fmiInteger fmi_xml_get_enum_type_max(fmi_xml_enumeration_typedef_t*);
+fmi_xml_int_t fmi_xml_get_enum_type_min(fmi_xml_enumeration_typedef_t*);
+fmi_xml_int_t fmi_xml_get_enum_type_max(fmi_xml_enumeration_typedef_t*);
 unsigned int  fmi_xml_get_enum_type_size(fmi_xml_enumeration_typedef_t*);
 const char* fmi_xml_get_enum_type_item_name(fmi_xml_enumeration_typedef_t*, unsigned int  item);
 const char* fmi_xml_get_enum_type_item_description(fmi_xml_enumeration_typedef_t*, unsigned int  item);

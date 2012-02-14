@@ -34,7 +34,7 @@ extern "C" {
 const char* fmi_xml_get_variable_name(fmi_xml_variable_t*);
 const char* fmi_xml_get_variable_description(fmi_xml_variable_t*);
 
-fmiValueReference fmi_xml_get_variable_vr(fmi_xml_variable_t*);
+fmi_xml_value_reference_t fmi_xml_get_variable_vr(fmi_xml_variable_t*);
 
 /*
     For scalar variable gives the type definition is present
@@ -76,23 +76,23 @@ fmi_xml_enum_variable_t* fmI_xml_get_variable_as_enum(fmi_xml_variable_t*);
 fmi_xml_string_variable_t* fmi_xml_get_variable_as_string(fmi_xml_variable_t*);
 fmi_xml_bool_variable_t* fmi_xml_get_variable_as_boolean(fmi_xml_variable_t*);
 
-fmiReal fmi_xml_get_real_variable_start(fmi_xml_real_variable_t* v);
-fmiReal fmi_xml_get_real_variable_max(fmi_xml_real_variable_t* v);
-fmiReal fmi_xml_get_real_variable_min(fmi_xml_real_variable_t* v);
-fmiReal fmi_xml_get_real_variable_nominal(fmi_xml_real_variable_t* v);
+fmi_xml_real_t fmi_xml_get_real_variable_start(fmi_xml_real_variable_t* v);
+fmi_xml_real_t fmi_xml_get_real_variable_max(fmi_xml_real_variable_t* v);
+fmi_xml_real_t fmi_xml_get_real_variable_min(fmi_xml_real_variable_t* v);
+fmi_xml_real_t fmi_xml_get_real_variable_nominal(fmi_xml_real_variable_t* v);
 fmi_xml_unit_t* fmi_xml_get_real_variable_unit(fmi_xml_real_variable_t* v);
 fmi_xml_display_unit_t* fmi_xml_get_real_variable_display_unit(fmi_xml_real_variable_t* v);
 
 const char* fmi_xml_get_string_variable_start(fmi_xml_string_variable_t* v);
 fmiBoolean fmi_xml_get_boolean_variable_start(fmi_xml_bool_variable_t* v);
 
-fmiInteger fmi_xml_get_integer_variable_start(fmi_xml_integer_variable_t* v);
-fmiInteger fmi_xml_get_integer_variable_min(fmi_xml_integer_variable_t* v);
-fmiInteger fmi_xml_get_integer_variable_max(fmi_xml_integer_variable_t* v);
+fmi_xml_int_t fmi_xml_get_integer_variable_start(fmi_xml_integer_variable_t* v);
+fmi_xml_int_t fmi_xml_get_integer_variable_min(fmi_xml_integer_variable_t* v);
+fmi_xml_int_t fmi_xml_get_integer_variable_max(fmi_xml_integer_variable_t* v);
 
-fmiInteger fmi_xml_get_enum_variable_start(fmi_xml_enum_variable_t* v);
-fmiInteger fmi_xml_get_enum_variable_min(fmi_xml_enum_variable_t* v);
-fmiInteger fmi_xml_get_enum_variable_max(fmi_xml_enum_variable_t* v);
+fmi_xml_int_t fmi_xml_get_enum_variable_start(fmi_xml_enum_variable_t* v);
+fmi_xml_int_t fmi_xml_get_enum_variable_min(fmi_xml_enum_variable_t* v);
+fmi_xml_int_t fmi_xml_get_enum_variable_max(fmi_xml_enum_variable_t* v);
 
 
 typedef enum fmi_xml_variable_alias_kind_enu_t {

@@ -82,9 +82,9 @@ typedef struct fmi_xml_real_type_props_t {
 
     fmi_xml_display_unit_t* displayUnit;
 
-    fmiReal typeMin;
-    fmiReal typeMax;
-    fmiReal typeNominal;
+    fmi_xml_real_t typeMin;
+    fmi_xml_real_t typeMax;
+    fmi_xml_real_t typeNominal;
 } fmi_xml_real_type_props_t;
 
 typedef struct fmi_xml_integer_type_props_t {
@@ -92,8 +92,8 @@ typedef struct fmi_xml_integer_type_props_t {
 
     jm_string  quantity;
 
-    fmiInteger typeMin;
-    fmiInteger typeMax;
+    fmi_xml_int_t typeMin;
+    fmi_xml_int_t typeMax;
 } fmi_xml_integer_type_props_t;
 
 typedef fmi_xml_variable_type_base_t fmi_xml_string_type_props_t;
@@ -108,20 +108,20 @@ typedef struct fmi_xml_enum_type_props_t {
     fmi_xml_variable_type_base_t typeBase;
 
     jm_string quantity;
-    fmiInteger typeMin;
-    fmiInteger typeMax;
+    fmi_xml_int_t typeMin;
+    fmi_xml_int_t typeMax;
     jm_vector(jm_named_ptr) enumItems;
 } fmi_xml_enum_type_props_t;
 
 typedef struct fmi_xml_variable_start_real_t {
     fmi_xml_variable_type_base_t typeBase;
-    fmiReal start;
+    fmi_xml_real_t start;
 } fmi_xml_variable_start_real_t ;
 
 /* fmi_xml_variable_start_integer is used for boolean and enums as well*/
 typedef struct fmi_xml_variable_start_integer_t {
     fmi_xml_variable_type_base_t typeBase;
-    fmiInteger start;
+    fmi_xml_int_t start;
 } fmi_xml_variable_start_integer_t ;
 
 typedef struct fmi_xml_variable_start_string_t {

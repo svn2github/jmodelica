@@ -98,19 +98,19 @@ const char* fmi_xml_get_type_quantity(fmi_xml_variable_typedef_t* t) {
     }
 }
 
-fmiReal fmi_xml_get_real_type_min(fmi_xml_real_typedef_t* t) {
+fmi_xml_real_t fmi_xml_get_real_type_min(fmi_xml_real_typedef_t* t) {
     fmi_xml_variable_typedef_t* vt = (void*)t;
     fmi_xml_real_type_props_t* props = (fmi_xml_real_type_props_t*)(vt->typeBase.baseTypeStruct);
     return props->typeMin;
 }
 
-fmiReal fmi_xml_get_real_type_max(fmi_xml_real_typedef_t* t) {
+fmi_xml_real_t fmi_xml_get_real_type_max(fmi_xml_real_typedef_t* t) {
     fmi_xml_variable_typedef_t* vt = (void*)t;
     fmi_xml_real_type_props_t* props = (fmi_xml_real_type_props_t*)(vt->typeBase.baseTypeStruct);
     return props->typeMax;
 }
 
-fmiReal fmi_xml_get_real_type_nominal(fmi_xml_real_typedef_t* t) {
+fmi_xml_real_t fmi_xml_get_real_type_nominal(fmi_xml_real_typedef_t* t) {
     fmi_xml_variable_typedef_t* vt = (void*)t;
     fmi_xml_real_type_props_t* props = (fmi_xml_real_type_props_t*)(vt->typeBase.baseTypeStruct);
     return props->typeNominal;
@@ -130,25 +130,25 @@ int fmi_xml_get_real_type_is_relative_quantity(fmi_xml_real_typedef_t* t) {
     return props->typeBase.relativeQuantity;
 }
 
-fmiInteger fmi_xml_get_integer_type_min(fmi_xml_integer_typedef_t* t) {
+fmi_xml_int_t fmi_xml_get_integer_type_min(fmi_xml_integer_typedef_t* t) {
     fmi_xml_variable_typedef_t* vt = (void*)t;
     fmi_xml_integer_type_props_t* props = (fmi_xml_integer_type_props_t*)(vt->typeBase.baseTypeStruct);
     return props->typeMin;
 }
 
-fmiInteger fmi_xml_get_integer_type_max(fmi_xml_integer_typedef_t* t){
+fmi_xml_int_t fmi_xml_get_integer_type_max(fmi_xml_integer_typedef_t* t){
     fmi_xml_variable_typedef_t* vt = (void*)t;
     fmi_xml_integer_type_props_t* props = (fmi_xml_integer_type_props_t*)(vt->typeBase.baseTypeStruct);
     return props->typeMax;
 }
 
-fmiInteger fmi_xml_get_enum_type_min(fmi_xml_enumeration_typedef_t* t){
+fmi_xml_int_t fmi_xml_get_enum_type_min(fmi_xml_enumeration_typedef_t* t){
     fmi_xml_variable_typedef_t* vt = (void*)t;
     fmi_xml_enum_type_props_t* props = (fmi_xml_enum_type_props_t*)(vt->typeBase.baseTypeStruct);
     return props->typeMin;
 }
 
-fmiInteger fmi_xml_get_enum_type_max(fmi_xml_enumeration_typedef_t* t){
+fmi_xml_int_t fmi_xml_get_enum_type_max(fmi_xml_enumeration_typedef_t* t){
     fmi_xml_variable_typedef_t* vt = (void*)t;
     fmi_xml_enum_type_props_t* props = (fmi_xml_enum_type_props_t*)(vt->typeBase.baseTypeStruct);
     return props->typeMax;
