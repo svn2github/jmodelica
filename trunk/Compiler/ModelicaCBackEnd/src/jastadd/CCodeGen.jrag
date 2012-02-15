@@ -1086,12 +1086,12 @@ aspect CCodeGen {
 		p.print(getFExp(), str, indent);
 		str.print(")");
 	}
-			 	
+	
 	public void FRealLitExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		boolean wrap = inIfCondition();
 		if (wrap) 
 			str.print("AD_WRAP_LITERAL(");
-		str.print(getUNSIGNED_NUMBER());
+		str.print(getValue());
 		if (wrap) 
 			str.print(")");
 	}
@@ -1100,7 +1100,7 @@ aspect CCodeGen {
 		boolean wrap = inIfCondition() || inFunctionArg();
 		if (wrap) 
 			str.print("AD_WRAP_LITERAL(");
-		str.print(getUNSIGNED_INTEGER());
+		str.print(getValue());
 		if (wrap) 
 			str.print(")");
 	}

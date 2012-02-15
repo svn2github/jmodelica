@@ -7,4 +7,6 @@ public abstract class AbstractFlatModelicaScanner {
 
 	public abstract String nextToken() throws IOException, RuntimeException;
 
+	public abstract int lastTokenStart();
+
 }

@@ -279,4 +279,37 @@ equation
 end WhenContents3;
 
 
+model LongIntConst1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="LongIntConst1",
+         description="",
+         flatModel="
+fclass ForbiddenOperationsTests.LongIntConst1
+ Real x;
+equation
+ x = 1.0E12;
+end ForbiddenOperationsTests.LongIntConst1;
+")})));
+
+    Real x = 1000000000000;
+end LongIntConst1;
+
+
+model LongIntConst2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.WarningTestCase(
+         name="LongIntConst2",
+         description="",
+         errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
+At line 300, column 14:
+  Integer literal \"1000000000000\" is too large to represent as 32-bit Integer, using Real instead.
+")})));
+
+    Real x = 1000000000000;
+end LongIntConst2;
+
+
 end ForbiddenOperationsTests;

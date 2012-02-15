@@ -1898,12 +1898,19 @@ aspect InstantiatedExpressions {
 		return copyLocationTo(new FAndExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 
-	public FExp RealLitExp.instantiate() { 
-		return copyLocationTo(new FRealLitExp(getUNSIGNED_NUMBER()));
+	public FExp RealLitExp.instantiate() {
+		double value = Double.parseDouble(getUNSIGNED_NUMBER());
+		return copyLocationTo(new FRealLitExp(value));
 	}
 	
 	public FExp IntegerLitExp.instantiate() { 
-		return copyLocationTo(new FIntegerLitExp(getUNSIGNED_INTEGER()));
+		try {
+			int value = Integer.parseInt(getUNSIGNED_INTEGER());
+			return copyLocationTo(new FIntegerLitExp(value));
+		} catch (NumberFormatException e) {
+			double value = Double.parseDouble(getUNSIGNED_INTEGER());
+			return copyLocationTo(new FOverflowIntLitExp(value, getUNSIGNED_INTEGER()));
+		}
 	}
 	
 	public FExp StringLitExp.instantiate() { 

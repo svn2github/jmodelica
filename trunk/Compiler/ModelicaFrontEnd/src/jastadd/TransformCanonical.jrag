@@ -1540,15 +1540,15 @@ aspect TransformCanonical {
 			    if (fv.isReal() && fv.isContinuous()) {
 					fe = new FEquation(new FIdUseExp(
 						new FIdUse(fv.getFQName().fullCopy())),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0.0"));
+						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp(0.0));
 				} else if (fv.isReal() && fv.isDiscrete()) {
 					fe = new FEquation(new FPreExp(new FIdUseExp(
 						new FIdUse(fv.getFQName().fullCopy()))),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0.0"));
-				}else if (fv.isInteger()) {
+						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp(0.0));
+				} else if (fv.isInteger()) {
 					fe = new FEquation(new FPreExp(new FIdUseExp(
 						new FIdUse(fv.getFQName().fullCopy()))),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0"));
+						fv.startAttributeSet()? fv.startAttributeExp(): new FIntegerLitExp(0));
 				}
 			    if (fv.isBoolean()) {
 					fe = new FEquation(new FPreExp(new FIdUseExp(
@@ -2467,14 +2467,14 @@ aspect TransformCanonical {
 							&& fv.startAttributeSet())) {
 				addFInitialEquation(new FEquation(new FIdUseExp(
 						new FIdUse(fv.getFQName().fullCopy())),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0.0")));
+						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp(0.0)));
 			}	
 		}
 		for (FRealVariable fv : algebraicRealVariables()) {
 			if (fv.fixedAttribute()) {
 				addFInitialEquation(new FEquation(new FIdUseExp(
 						new FIdUse(fv.getFQName().fullCopy())),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0.0")));
+						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp(0.0)));
 			}	
 		}
 //		log.debug(prettyPrint(""));
@@ -2482,14 +2482,14 @@ aspect TransformCanonical {
 			if (fv.fixedAttribute()) {
 				addFInitialEquation(new FEquation(new FPreExp(new FIdUseExp(
 						new FIdUse(fv.getFQName().fullCopy()))),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FIntegerLitExp("0")));
+						fv.startAttributeSet()? fv.startAttributeExp(): new FIntegerLitExp(0)));
 			}	
 		}
 		for (FIntegerVariable fv : discreteIntegerVariables()) {
 			if (fv.fixedAttribute()) {
 				addFInitialEquation(new FEquation(new FPreExp(new FIdUseExp(
 						new FIdUse(fv.getFQName().fullCopy()))),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FIntegerLitExp("0")));
+						fv.startAttributeSet()? fv.startAttributeExp(): new FIntegerLitExp(0)));
 			}	
 		}
 		for (FBooleanVariable fv : discreteBooleanVariables()) {
@@ -2893,7 +2893,7 @@ aspect TransformCanonical {
 	rewrite FDerExp {
 		when (!getFIdUse().myFV().isUnknown() &&
 				((FVariable)getFIdUse().myFV()).variability().lessOrEqual(fParameter())) to FExp {
-			return new FRealLitExp("0.0");
+			return new FRealLitExp(0.0);
 		}
 	}
 
@@ -3072,7 +3072,7 @@ aspect IfEquations {
 	syn List FIfEquation.createIfExpEquationList() {
 			List l = new List();
 			for (int i=0;i<getNumFAbstractEquation();i++) {
-				l.add(new FEquation(createIfExpression(i),new FRealLitExp("0.0")));	
+				l.add(new FEquation(createIfExpression(i),new FRealLitExp(0.0)));	
 			}
 			return l;		
 	}
@@ -3581,13 +3581,6 @@ aspect FunctionInlining {
 		}
 		
 		/**
-		 * Inline a single statement.
-		 */
-		public void inline(FStatement stmt) {
-			stmt.inline(this, replMap);
-		}
-		
-		/**
 		 * Prepare for inlining a new function call.
 		 * 
 		 * @return  the map to use for lookups in the function during inlining.
@@ -3599,13 +3592,22 @@ aspect FunctionInlining {
 		}
 
 		/**
-		 * Get the variable that represents a specific output of the function 
-		 * call currently being inlined.
+		 * Get the temporary variable that represents a specific variable of the function 
+		 * currently being inlined.
 		 * 
-		 * @param name  the name of the output
+		 * @param name  the name of the variable
 		 */
-		public FVariable getOutputVar(String name) {
+		public FVariable getReplacementVar(String name) {
 			return replMap.get(name);
+		}
+		
+		/**
+		 * Check if this function inliner has created a temporary variable of the specified name.
+		 * 
+		 * @param name  the name of the temporary variable
+		 */
+		public boolean isReplacementVar(String name) {
+			return lookupMap.get(name) != null;
 		}
 
 		/**
@@ -3790,8 +3792,14 @@ aspect FunctionInlining {
 	syn boolean FStatement.isInlinable() = false;
 	eq FInitArrayStmt.isInlinable()      = true;
 	eq FAssignStmt.isInlinable()         = true;
-	eq FIfStmt.isInlinable()             = true;
 	eq FReturnStmt.isInlinable()         = isLast();
+	eq FForStmt.isInlinable()            = isAllInlinable(getForStmts());
+	eq FIfStmt.isInlinable() {
+		for (FIfWhenClause branch : getFIfWhenClauses())
+			if (!isAllInlinable(branch.getFStatements()))
+				return false;
+		return isAllInlinable(getElseStmts());
+	}
 	// TODO: handle more types of stmts
 	
 	
@@ -3815,12 +3823,12 @@ aspect FunctionInlining {
 			fi.addVarAndEqn(inp.get(i).name(), args.getChild(i));
 		
 		for (FStatement stmt : getFAlgorithmBlock().getFStatements()) 
-			fi.inline(stmt);
+			stmt.inline(fi);
 		
 		ArrayList<FFunctionVariable> outp = myOutputs();
 		FVariable[] res = new FVariable[outp.size()];
 		for (int i = 0; i < res.length; i++) 
-			res[i] = fi.getOutputVar(outp.get(i).name());
+			res[i] = fi.getReplacementVar(outp.get(i).name());
 		
 		tempLookupMap = null;
 		duringInlining = false;
@@ -3831,18 +3839,17 @@ aspect FunctionInlining {
 	 * Inline this statement.
 	 * 
 	 * @param fi      the function inlining helper to use
-	 * @param varMap  the variables to use instead of the variables in the function
 	 */
-	public void FStatement.inline(FunctionInliner fi, Map<String,FVariable> varMap) {}
+	public void FStatement.inline(FunctionInliner fi) {}
 	
-	public void FAssignStmt.inline(FunctionInliner fi, Map<String,FVariable> varMap) {
+	public void FAssignStmt.inline(FunctionInliner fi) {
 		FExp exp = getRight().fullCopy();
 		exp = getRight().dynamicFExp(exp);
-		exp = exp.replaceReferences(varMap);
+		exp = exp.replaceReferences(fi);
 		FVariable var = fi.addVarAndEqn(getLeft().name(), exp);
 	}
 	
-	public void FIfStmt.inline(FunctionInliner fi, Map<String,FVariable> varMap) {
+	public void FIfStmt.inline(FunctionInliner fi) {
 		// Reduce to list of assignments
 		List<FAssignStmt> stmts = new List<FAssignStmt>();
 		inlinePrepare(fi, stmts);
@@ -3854,10 +3861,28 @@ aspect FunctionInlining {
 		
 		// Inline them
 		for (FStatement stmt : stmts)
-			fi.inline(stmt);
+			stmt.inline(fi);
 		
 		// Restore old else branch
 		setElseStmtList(oldElse);
+	}
+	
+	public void FForStmt.inline(FunctionInliner fi) {
+		// Reduce to list of assignments
+		List<FAssignStmt> stmts = new List<FAssignStmt>();
+		inlinePrepare(fi, stmts);
+		
+		// Add assignments to tree temporarily
+		List<FStatement> oldStmt = getForStmts();
+		setForStmtList((List) stmts);
+		getForStmtList();
+		
+		// Inline them
+		for (FStatement stmt : stmts)
+			stmt.inline(fi);
+		
+		// Restore old else branch
+		setForStmtList(oldStmt);
 	}
 	
 	// TODO: handle more types of stmts
@@ -3873,17 +3898,44 @@ aspect FunctionInlining {
 
 	public void FIfStmt.inlinePrepare(FunctionInliner fi, List<FAssignStmt> stmts) {
 		List<FStatement> oldElse = getElseStmts();
+		
+		// Prepare contents
 		List<FAssignStmt> newElse = new List<FAssignStmt>();
 		for (FStatement stmt : oldElse)
 			stmt.inlinePrepare(fi, newElse);
 		setElseStmtList((List) newElse);
+		
+		// Combine branches to assignments with if-else expressions
 		for (int i = getNumFIfWhenClause() - 1; i >= 0; i--) {
 			newElse = getFIfWhenClause(i).inlineCombineBranches(fi, newElse);
 			setElseStmtList((List) newElse);
 		}
+		
+		// Write result to target list
 		for (FAssignStmt stmt : newElse)
 			stmts.add(stmt);
 		setElseStmtList(oldElse);
+	}
+
+	public void FForStmt.inlinePrepare(FunctionInliner fi, List<FAssignStmt> stmts) {
+		List<FStatement> oldStmts = getForStmts();
+		
+		// Prepare contents
+		List<FAssignStmt> newStmts = new List<FAssignStmt>();
+		for (FStatement stmt : oldStmts)
+			stmt.inlinePrepare(fi, newStmts);
+		setForStmtList((List) newStmts);
+		
+		// Unroll loop
+		FVariable index = getIndex().getFVariable();
+		FExp loopExp = getIndex().getFExp();
+		loopExp = loopExp.dynamicFExp(loopExp.fullCopy()).replaceReferences(fi);
+		for (FExp e : loopExp.getArray().iterable()) {
+			stmts.add(new FAssignStmt(index.createFIdUse(), e.fullCopy()));
+			for (FAssignStmt stmt : newStmts)
+				stmts.add(stmt.fullCopy());
+		}
+		setForStmtList(oldStmts);
 	}
 	
 	/**
@@ -3940,25 +3992,37 @@ aspect FunctionInlining {
 	/**
 	 * Replace all variable references according to the map.
 	 */
-	public ASTNode ASTNode.replaceReferences(Map<String,FVariable> varMap) {
+	public ASTNode ASTNode.replaceReferences(FunctionInliner fi) {
 		for (ASTNode n : this)
-			n.replaceReferences(varMap);
+			n.replaceReferences(fi);
 		return this;
 	}
 	
-	public FExp FExp.replaceReferences(Map<String,FVariable> varMap) {
-		super.replaceReferences(varMap);
+	public FExp FExp.replaceReferences(FunctionInliner fi) {
+		super.replaceReferences(fi);
 		return this;
 	}
 	
-	public FExp FIdUseExp.replaceReferences(Map<String,FVariable> varMap) {
+	// TODO: Should probably be removed after simplification step has been added
+	public FExp FIfExp.replaceReferences(FunctionInliner fi) {
+		super.replaceReferences(fi);
+		if (getIfExp().isConstantExp()) {
+			boolean useThen = getIfExp().ceval().booleanValue();
+			FExp exp = useThen ? getThenExp() : getElseExp();
+			replaceMe(exp);
+			return exp;
+		}
+		return this;
+	}
+	
+	public FExp FIdUseExp.replaceReferences(FunctionInliner fi) {
 		FExp exp = this;
 		FQName name = getFIdUse().getFQName();
 		FVariable var = null;
 		int n = name.getNumFQNamePart();
 		int p = n;
 		while (p > 0 && var == null)
-			var = varMap.get(name.prefixName(p--, false, false));
+			var = fi.getReplacementVar(name.prefixName(p--, false, false));
 		if (var != null) {
 			FQName useName = var.getFQName().createUseFQName().appendSuffix(name, n - p - 1);
 			FIdUseExp use = (FIdUseExp) dynamicFExp(new FIdUseExp(useName));
@@ -3967,7 +4031,7 @@ aspect FunctionInlining {
 				// Start from use to make nodes final
 				FQNamePart first = use.getFIdUse().getFQName().getFQNamePart(0);
 				first.setFArraySubscripts(fas);
-				first.getFArraySubscripts().replaceReferences(varMap);
+				first.getFArraySubscripts().replaceReferences(fi);
 			}
 			exp = use;
 			if (var.isConstant()) {
@@ -3975,34 +4039,39 @@ aspect FunctionInlining {
 					exp = exp.ceval().buildLiteral();
 				} catch (ConstantEvaluationException e) {}
 			}
-			replaceMe(exp);
 		} else {
-			replaceMe(type().zeroLiteral());
+			if (fi.isReplacementVar(name()))
+				exp = this;
+			else
+				exp = type().zeroLiteral();
 		}
+		if (exp != this)
+			replaceMe(exp);
 		return exp;
 	}
 	
-	public FExp FFunctionCall.replaceReferences(Map<String,FVariable> varMap) {
-		super.replaceReferences(varMap);
+	public FExp FFunctionCall.replaceReferences(FunctionInliner fi) {
+		super.replaceReferences(fi);
 		Size[] old = getSizes();
 		Size[] sizes = new Size[old.length];
 		for (int i = 0; i < old.length; i++)
-			sizes[i] = old[i].copyAndReplaceReferences(varMap, this);
+			sizes[i] = old[i].copyAndReplaceReferences(fi, this);
 		setSizes(sizes);
 		return this;
 	}
 	
 	/**
-	 * Make a copy of this size with all variable references replaced according to the map.
+	 * Make a copy of this size with all variable references replaced according to the 
+     * function inliner.
 	 */
-	public Size Size.copyAndReplaceReferences(Map<String,FVariable> varMap, FExp context) {
+	public Size Size.copyAndReplaceReferences(FunctionInliner fi, FExp context) {
 		return clone();
 	}
 	
-	public MutableSize MutableSize.copyAndReplaceReferences(Map<String,FVariable> varMap, FExp context) {
+	public MutableSize MutableSize.copyAndReplaceReferences(FunctionInliner fi, FExp context) {
 		MutableSize res = clone();
 		for (int i = 0; i < exps.length; i++)
-			res.exps[i] = context.dynamicFExp(exps[i].fullCopy()).replaceReferences(varMap);
+			res.exps[i] = context.dynamicFExp(exps[i].fullCopy()).replaceReferences(fi);
 		return res;
 	}
 	

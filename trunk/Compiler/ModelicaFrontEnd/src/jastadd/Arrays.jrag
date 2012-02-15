@@ -439,6 +439,8 @@ aspect Arrays {
 	eq FFunctionArray.ndims()    = getType().ndims();
 	eq FFunctionVariable.ndims() = 0;
 	
+	syn int CommonForIndex.ndims() = hasFExp() ? getFExp().ndims() : 1;
+	
 	/**
 	 * \brief Get array dimensions.
 	 * 
@@ -659,7 +661,7 @@ aspect Arrays {
  	}
  	
  	syn boolean FExp.isIntegerLiteral(int v)  = false;
- 	eq FIntegerLitExp.isIntegerLiteral(int v) = Integer.parseInt(getUNSIGNED_INTEGER()) == v;
+ 	eq FIntegerLitExp.isIntegerLiteral(int v) = getValue() == v;
  	
  	eq FLinspace.size() {
 		MutableSize s = new MutableSize(ndims());
@@ -850,7 +852,7 @@ aspect Arrays {
 		MutableSize s = new MutableSize(ndims());
 		for (FArraySubscripts fas : allFArraySubscripts())
 			for (FSubscript fs : fas.getFSubscripts()) 
-				if (fs.ndims() == 1)
+				if (fs.ndims() >= 1)
 					s.append(fs.size());
 		return s;
 	}
@@ -900,6 +902,12 @@ aspect Arrays {
 	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().size();
 	eq FFunctionArray.size() = getType().size();
 		
+	/**
+	 * \brief Get the array sizes of the loop index expression. 
+	 */	
+	syn Size CommonForIndex.size() = hasFExp() ? getFExp().size() : Size.SCALAR;
+	// TODO: support automatic extrapolation of the loop expression
+	
 	/**
 	 * \brief Get the array sizes. 
 	 */

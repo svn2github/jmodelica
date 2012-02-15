@@ -1362,11 +1362,11 @@ aspect FlattPrettyPrint {
 	}
 	
 	public void FRealLitExp.prettyPrint(Printer p, PrintStream str, String indent) {
-		str.print(getUNSIGNED_NUMBER());
+		str.print(getValue());
 	}
 
 	public void FIntegerLitExp.prettyPrint(Printer p, PrintStream str, String indent) {
-		str.print(getUNSIGNED_INTEGER());
+		str.print(getValue());
 	}
 
 	public void FEnumLitExp.prettyPrint(Printer p, PrintStream str, String indent) {

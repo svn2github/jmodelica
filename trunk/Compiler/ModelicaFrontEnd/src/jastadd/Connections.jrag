@@ -157,7 +157,7 @@ aspect Connections {
 				FInStream then_exp = new FInStream(var_name.createFIdUseExp());
 				then_exp.rewriteStreams = true; // Enable further rewrite of the inStream operator.
 				FIdUseExp else_exp = var_name.createFIdUseExp();
-				FGtExp guard = new FGtExp(flow_var_name.createFIdUseExp(),new FRealLitExp("0"));
+				FGtExp guard = new FGtExp(flow_var_name.createFIdUseExp(),new FRealLitExp(0));
 				FIfExp if_exp = new FIfExp(guard,then_exp,else_exp);
 				return new FNoEventExp(if_exp);
 			}

@@ -329,7 +329,7 @@ aspect ConstantEvaluation {
          * @return AST node of type FLitExp.
          */
         public FLitExp buildLiteral() { 
-        	return new FIntegerLitExp(stringValue()); 
+        	return new FIntegerLitExp(value); 
         }
 
 	    /**
@@ -1218,8 +1218,8 @@ aspect ConstantEvaluation {
   eq FMinExp.selectLesser() = true;
   eq FMaxExp.selectLesser() = false;
 
-  eq FRealLitExp.cevalCalc()         = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));
-  eq FIntegerLitExp.cevalCalc()      = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));
+  eq FRealLitExp.cevalCalc()         = new CValueReal(getValue());
+  eq FIntegerLitExp.cevalCalc()      = new CValueInteger(getValue());
   eq FBooleanLitExpTrue.cevalCalc()  = new CValueBoolean(true);
   eq FBooleanLitExpFalse.cevalCalc() = new CValueBoolean(false);
   eq FStringLitExp.cevalCalc()       = new CValueString(getString());

@@ -375,13 +375,22 @@ aspect ErrorCheck {
 
   syn int ASTNode.lineNumber() = (start != 0 || getParent()==null)? beginLine() : getParent().lineNumber();
   syn int ASTNode.columnNumber() = (start != 0 || getParent()==null)? beginColumn() : getParent().columnNumber();
- 
+  
   /**
    * Register an error. Delegates to an {@link IErrorHandler}.
    * @param s	the error message.
    */
   void ASTNode.error(String s) {
 	  root().getErrorHandler().error(s, this);
+  }
+  
+  /**
+   * Register an error. Delegates to an {@link IErrorHandler}.
+   * 
+   * Builds error message using <code>format</code> as format string.
+   */
+  void ASTNode.error(String format, Object... args) {
+	  error(String.format(format, args));
   }
 
   /**
@@ -391,6 +400,15 @@ aspect ErrorCheck {
   void ASTNode.compliance(String s) {
 	  root().getErrorHandler().compliance(s, this);
   }
+  
+  /**
+   * Register a compliance error. Delegates to an {@link IErrorHandler}.
+   * 
+   * Builds error message using <code>format</code> as format string.
+   */
+  void ASTNode.compliance(String format, Object... args) {
+	  compliance(String.format(format, args));
+  }
 
   /**
    * Register a warning. Delegates to an {@link IErrorHandler}.
@@ -398,6 +416,15 @@ aspect ErrorCheck {
    */
   void ASTNode.warning(String s) {
 	  root().getErrorHandler().warning(s, this);
+  }
+  
+  /**
+   * Register a warning. Delegates to an {@link IErrorHandler}.
+   * 
+   * Builds warning message using <code>format</code> as format string.
+   */
+  void ASTNode.warning(String format, Object... args) {
+	  warning(String.format(format, args));
   }
 
   /**

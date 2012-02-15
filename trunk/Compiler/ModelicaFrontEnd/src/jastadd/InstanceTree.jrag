@@ -617,7 +617,7 @@ aspect InstanceTreeConstruction {
 	public FExp FExp.dynamicFExp(FExp exp) {
 		if (exp == this)
 			return exp;
-		// Fool JastAdd into keeping the 
+		// Fool JastAdd into keeping the list
 		boolean finalFlag = is$Final();
 		if (!finalFlag)
 			log.debug("FExp.dynamicFExp(): adding '%s' to dynamic list of non-final exp '%s'.",	exp, this);

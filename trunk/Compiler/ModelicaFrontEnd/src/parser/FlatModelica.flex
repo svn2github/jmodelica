@@ -29,9 +29,18 @@ import org.jmodelica.util.AbstractFlatModelicaScanner;
 %eofval{
   return null;
 %eofval}
-%line
-%column
+%char
 
+%{
+
+  /**
+   * Get the position of the start of the last token matched by nextToken().
+   */
+  public int lastTokenStart() {
+      return yychar;
+  }
+  
+%}
 
 ID = {NONDIGIT} ({DIGIT}|{NONDIGIT})* | {Q_IDENT}
 //IDWD = {NONDIGITWD} ({DIGIT}|{NONDIGITWD})* | {Q_IDENT}

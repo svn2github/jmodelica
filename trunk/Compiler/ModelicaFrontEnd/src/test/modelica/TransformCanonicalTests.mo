@@ -3189,8 +3189,8 @@ der(y) = vy;
 der_2_x = ( lambda ) * ( x );
 der(vy) = ( lambda ) * ( y ) - ( g );
 x ^ 2 + y ^ 2 = L;
-( ( 2 ) * ( x ) ) * ( der_x ) + ( ( 2 ) * ( y ) ) * ( der(y) ) = 0;
-( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der_x ) + ( 0 ) * ( x ) ) * ( der_x ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der(y) ) + ( 0 ) * ( y ) ) * ( der(y) ) = 0;
+( ( 2 ) * ( x ) ) * ( der_x ) + ( ( 2 ) * ( y ) ) * ( der(y) ) = 0.0;
+( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der_x ) + ( 0.0 ) * ( x ) ) * ( der_x ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der(y) ) + ( 0.0 ) * ( y ) ) * ( der(y) ) = 0.0;
 der_2_y = der(vy);
 end TransformCanonicalTests.IndexReduction1_PlanarPendulum;
 ")})));
@@ -3217,106 +3217,106 @@ end TransformCanonicalTests.IndexReduction1_PlanarPendulum;
          description="Test of index reduction",
          flatModel="
 fclass TransformCanonicalTests.IndexReduction2_Mechanical
-parameter Real amplitude(final quantity = \"Torque\",final unit = \"N.m\") = 10 \"Amplitude of driving torque\" /* 10 */;
-parameter Real freqHz(final quantity = \"Frequency\",final unit = \"Hz\") = 5 \"Frequency of driving torque\" /* 5 */;
-parameter Real Jmotor(min = 0,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") = 0.1 \"Motor inertia\" /* 0.1 */;
-parameter Real Jload(min = 0,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") = 2 \"Load inertia\" /* 2 */;
-parameter Real ratio = 10 \"Gear ratio\" /* 10 */;
-parameter Real damping = 10 \"Damping in bearing of gear\" /* 10 */;
-parameter Real fixed.phi0(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") = 0 \"Fixed offset angle of housing\" /* 0 */;
-Real fixed.flange.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-parameter Boolean torque.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
-Real torque.flange.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-parameter Real inertia1.J(min = 0,start = 1,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") \"Moment of inertia\";
-parameter StateSelect inertia1.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
-Real inertia1.phi(stateSelect = inertia1.stateSelect,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Absolute rotation angle of component\";
-Real inertia1.w(stateSelect = inertia1.stateSelect,final quantity = \"AngularVelocity\",final unit = \"rad/s\") \"Absolute angular velocity of component (= der(phi))\";
-Real inertia1.a(final quantity = \"AngularAcceleration\",final unit = \"rad/s2\") \"Absolute angular acceleration of component (= der(w))\";
-parameter Real idealGear.ratio(start = 1) \"Transmission ratio (flange_a.phi/flange_b.phi)\";
-Real idealGear.phi_a(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Angle between left shaft flange and support\";
-Real idealGear.phi_b(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Angle between right shaft flange and support\";
-parameter Boolean idealGear.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
-Real idealGear.flange_a.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-Real idealGear.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-Real idealGear.support.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Reaction torque in the support/housing\";
-Real inertia2.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-parameter Real inertia2.J(min = 0,start = 1,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") = 2 \"Moment of inertia\" /* 2 */;
-parameter StateSelect inertia2.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
-Real inertia2.phi(fixed = true,start = 0,stateSelect = inertia2.stateSelect,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Absolute rotation angle of component\";
-Real inertia2.w(fixed = true,stateSelect = inertia2.stateSelect,final quantity = \"AngularVelocity\",final unit = \"rad/s\") \"Absolute angular velocity of component (= der(phi))\";
-Real inertia2.a(final quantity = \"AngularAcceleration\",final unit = \"rad/s2\") \"Absolute angular acceleration of component (= der(w))\";
-parameter Real spring.c(final min = 0,start = 1.0e5,final quantity = \"RotationalSpringConstant\",final unit = \"N.m/rad\") = 1.e4 \"Spring constant\" /* 10000.0 */;
-parameter Real spring.phi_rel0(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") = 0 \"Unstretched spring angle\" /* 0 */;
-Real spring.phi_rel(fixed = true,start = 0,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
-Real spring.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-Real inertia3.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-parameter Real inertia3.J(min = 0,start = 1,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") \"Moment of inertia\";
-parameter StateSelect inertia3.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
-Real inertia3.phi(stateSelect = inertia3.stateSelect,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Absolute rotation angle of component\";
-Real inertia3.w(fixed = true,stateSelect = inertia3.stateSelect,final quantity = \"AngularVelocity\",final unit = \"rad/s\") \"Absolute angular velocity of component (= der(phi))\";
-Real inertia3.a(final quantity = \"AngularAcceleration\",final unit = \"rad/s2\") \"Absolute angular acceleration of component (= der(w))\";
-parameter Real damper.d(final min = 0,start = 0,final quantity = \"RotationalDampingConstant\",final unit = \"N.m.s/rad\") \"Damping constant\";
-Real damper.phi_rel(stateSelect = StateSelect.always,start = 0,nominal = damper.phi_nominal,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
-Real damper.w_rel(stateSelect = StateSelect.always,start = 0,final quantity = \"AngularVelocity\",final unit = \"rad/s\") \"Relative angular velocity (= der(phi_rel))\";
-Real damper.a_rel(start = 0,final quantity = \"AngularAcceleration\",final unit = \"rad/s2\") \"Relative angular acceleration (= der(w_rel))\";
-Real damper.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-parameter Real damper.phi_nominal(displayUnit = \"rad\",final quantity = \"Angle\",final unit = \"rad\") = 1e-4 \"Nominal value of phi_rel (used for scaling)\" /* 1.0E-4 */;
-parameter StateSelect damper.stateSelect = StateSelect.prefer \"Priority to use phi_rel and w_rel as states\" /* StateSelect.prefer */;
-parameter Real sine.amplitude \"Amplitude of sine wave\";
-parameter Real sine.freqHz(start = 1,final quantity = \"Frequency\",final unit = \"Hz\") \"Frequency of sine wave\";
-parameter Real sine.phase(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") = 0 \"Phase of sine wave\" /* 0 */;
-parameter Real sine.offset = 0 \"Offset of output signal\" /* 0 */;
-parameter Real sine.startTime(final quantity = \"Time\",final unit = \"s\") = 0 \"Output = offset for time < startTime\" /* 0 */;
-constant Real sine.pi = 3.141592653589793;
-Real der_idealGear_phi_a;
-Real der_idealGear_phi_b;
-Real der_2_idealGear_phi_a;
-Real der_2_idealGear_phi_b;
-Real der_2_damper_phi_rel;
+ parameter Real amplitude(final quantity = \"Torque\",final unit = \"N.m\") = 10 \"Amplitude of driving torque\" /* 10 */;
+ parameter Real freqHz(final quantity = \"Frequency\",final unit = \"Hz\") = 5 \"Frequency of driving torque\" /* 5 */;
+ parameter Real Jmotor(min = 0,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") = 0.1 \"Motor inertia\" /* 0.1 */;
+ parameter Real Jload(min = 0,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") = 2 \"Load inertia\" /* 2 */;
+ parameter Real ratio = 10 \"Gear ratio\" /* 10 */;
+ parameter Real damping = 10 \"Damping in bearing of gear\" /* 10 */;
+ parameter Real fixed.phi0(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") = 0 \"Fixed offset angle of housing\" /* 0 */;
+ Real fixed.flange.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
+ parameter Boolean torque.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
+ Real torque.flange.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
+ parameter Real inertia1.J(min = 0,start = 1,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") \"Moment of inertia\";
+ parameter StateSelect inertia1.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */; 
+ Real inertia1.phi(stateSelect = inertia1.stateSelect,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Absolute rotation angle of component\";
+ Real inertia1.w(stateSelect = inertia1.stateSelect,final quantity = \"AngularVelocity\",final unit = \"rad/s\") \"Absolute angular velocity of component (= der(phi))\";
+ Real inertia1.a(final quantity = \"AngularAcceleration\",final unit = \"rad/s2\") \"Absolute angular acceleration of component (= der(w))\";
+ parameter Real idealGear.ratio(start = 1) \"Transmission ratio (flange_a.phi/flange_b.phi)\";
+ Real idealGear.phi_a(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Angle between left shaft flange and support\";
+ Real idealGear.phi_b(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Angle between right shaft flange and support\";
+ parameter Boolean idealGear.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
+ Real idealGear.flange_a.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
+ Real idealGear.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
+ Real idealGear.support.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Reaction torque in the support/housing\";
+ Real inertia2.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
+ parameter Real inertia2.J(min = 0,start = 1,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") = 2 \"Moment of inertia\" /* 2 */;
+ parameter StateSelect inertia2.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
+ Real inertia2.phi(fixed = true,start = 0,stateSelect = inertia2.stateSelect,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Absolute rotation angle of component\";
+ Real inertia2.w(fixed = true,stateSelect = inertia2.stateSelect,final quantity = \"AngularVelocity\",final unit = \"rad/s\") \"Absolute angular velocity of component (= der(phi))\";
+ Real inertia2.a(final quantity = \"AngularAcceleration\",final unit = \"rad/s2\") \"Absolute angular acceleration of component (= der(w))\";
+ parameter Real spring.c(final min = 0,start = 100000.0,final quantity = \"RotationalSpringConstant\",final unit = \"N.m/rad\") = 10000.0 \"Spring constant\" /* 10000.0 */;
+ parameter Real spring.phi_rel0(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") = 0 \"Unstretched spring angle\" /* 0 */;
+ Real spring.phi_rel(fixed = true,start = 0,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
+ Real spring.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
+ Real inertia3.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
+ parameter Real inertia3.J(min = 0,start = 1,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") \"Moment of inertia\";
+ parameter StateSelect inertia3.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
+ Real inertia3.phi(stateSelect = inertia3.stateSelect,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Absolute rotation angle of component\";
+ Real inertia3.w(fixed = true,stateSelect = inertia3.stateSelect,final quantity = \"AngularVelocity\",final unit = \"rad/s\") \"Absolute angular velocity of component (= der(phi))\";
+ Real inertia3.a(final quantity = \"AngularAcceleration\",final unit = \"rad/s2\") \"Absolute angular acceleration of component (= der(w))\";
+ parameter Real damper.d(final min = 0,start = 0,final quantity = \"RotationalDampingConstant\",final unit = \"N.m.s/rad\") \"Damping constant\";
+ Real damper.phi_rel(stateSelect = StateSelect.always,start = 0,nominal = damper.phi_nominal,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
+ Real damper.w_rel(stateSelect = StateSelect.always,start = 0,final quantity = \"AngularVelocity\",final unit = \"rad/s\") \"Relative angular velocity (= der(phi_rel))\";
+ Real damper.a_rel(start = 0,final quantity = \"AngularAcceleration\",final unit = \"rad/s2\") \"Relative angular acceleration (= der(w_rel))\";
+ Real damper.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
+ parameter Real damper.phi_nominal(displayUnit = \"rad\",final quantity = \"Angle\",final unit = \"rad\") = 1.0E-4 \"Nominal value of phi_rel (used for scaling)\" /* 1.0E-4 */;
+ parameter StateSelect damper.stateSelect = StateSelect.prefer \"Priority to use phi_rel and w_rel as states\" /* StateSelect.prefer */;
+ parameter Real sine.amplitude \"Amplitude of sine wave\";
+ parameter Real sine.freqHz(start = 1,final quantity = \"Frequency\",final unit = \"Hz\") \"Frequency of sine wave\";
+ parameter Real sine.phase(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") = 0 \"Phase of sine wave\" /* 0 */;
+ parameter Real sine.offset = 0 \"Offset of output signal\" /* 0 */;
+ parameter Real sine.startTime(final quantity = \"Time\",final unit = \"s\") = 0 \"Output = offset for time < startTime\" /* 0 */;
+ constant Real sine.pi = 3.141592653589793;
+ Real der_idealGear_phi_a;
+ Real der_idealGear_phi_b;
+ Real der_2_idealGear_phi_a;
+ Real der_2_idealGear_phi_b;
+ Real der_2_damper_phi_rel;
 initial equation 
-inertia2.phi = 0;
-inertia2.w = 0.0;
-inertia3.w = 0.0;
-spring.phi_rel = 0;
-parameter equation
-inertia1.J = Jmotor;
-idealGear.ratio = ratio;
-inertia3.J = Jload;
-damper.d = damping;
-sine.amplitude = amplitude;
-sine.freqHz = freqHz;
+ inertia2.phi = 0;
+ inertia2.w = 0.0;
+ inertia3.w = 0.0;
+ spring.phi_rel = 0;
+ parameter equation
+ inertia1.J = Jmotor;
+ idealGear.ratio = ratio;
+ inertia3.J = Jload;
+ damper.d = damping;
+ sine.amplitude = amplitude;
+ sine.freqHz = freqHz;
 equation
-( inertia1.J ) * ( inertia1.a ) = - ( torque.flange.tau ) - ( idealGear.flange_a.tau );
-idealGear.phi_a = inertia1.phi - ( fixed.phi0 );
-idealGear.phi_b = inertia2.phi - ( fixed.phi0 );
-idealGear.phi_a = ( idealGear.ratio ) * ( idealGear.phi_b );
-0 = ( idealGear.ratio ) * ( idealGear.flange_a.tau ) + idealGear.flange_b.tau;
-( inertia2.J ) * ( inertia2.a ) = - ( idealGear.flange_b.tau ) + inertia2.flange_b.tau;
-spring.flange_b.tau = ( spring.c ) * ( spring.phi_rel - ( spring.phi_rel0 ) );
-spring.phi_rel = inertia3.phi - ( inertia2.phi );
-inertia3.w = inertia3.der(phi);
-inertia3.a = inertia3.der(w);
-( inertia3.J ) * ( inertia3.a ) = - ( spring.flange_b.tau ) + inertia3.flange_b.tau;
-damper.flange_b.tau = ( damper.d ) * ( damper.w_rel );
-damper.phi_rel = fixed.phi0 - ( inertia2.phi );
-damper.w_rel = damper.der(phi_rel);
-damper.a_rel = damper.der(w_rel);
-- ( torque.flange.tau ) = sine.offset + (if time < sine.startTime then 0 else ( sine.amplitude ) * ( sin(( ( ( 2 ) * ( 3.141592653589793 ) ) * ( sine.freqHz ) ) * ( time - ( sine.startTime ) ) + sine.phase) ));
-- ( damper.flange_b.tau ) + inertia2.flange_b.tau - ( spring.flange_b.tau ) = 0;
-damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau - ( torque.flange.tau ) = 0;
-inertia3.flange_b.tau = 0;
-idealGear.support.tau = - ( idealGear.flange_a.tau ) - ( idealGear.flange_b.tau );
-der_idealGear_phi_a = ( idealGear.ratio ) * ( der_idealGear_phi_b ) + ( 0 ) * ( idealGear.phi_b );
-der_idealGear_phi_a = inertia1.w - ( 0 );
-der_idealGear_phi_b = inertia2.w - ( 0 );
-der_2_idealGear_phi_a = ( idealGear.ratio ) * ( der_2_idealGear_phi_b ) + ( 0 ) * ( der_idealGear_phi_b ) + ( 0 ) * ( der_idealGear_phi_b ) + ( 0 ) * ( idealGear.phi_b );
-der_2_idealGear_phi_a = inertia1.a - ( 0 );
-der_2_idealGear_phi_b = inertia2.a - ( 0 );
-damper.der(phi_rel) = 0 - ( inertia2.w );
-der_2_damper_phi_rel = 0 - ( inertia2.a );
-damper.der(w_rel) = der_2_damper_phi_rel;
+ ( inertia1.J ) * ( inertia1.a ) =  - ( torque.flange.tau ) - ( idealGear.flange_a.tau );
+ idealGear.phi_a = inertia1.phi - ( fixed.phi0 );
+ idealGear.phi_b = inertia2.phi - ( fixed.phi0 );
+ idealGear.phi_a = ( idealGear.ratio ) * ( idealGear.phi_b );
+ 0 = ( idealGear.ratio ) * ( idealGear.flange_a.tau ) + idealGear.flange_b.tau;
+ ( inertia2.J ) * ( inertia2.a ) =  - ( idealGear.flange_b.tau ) + inertia2.flange_b.tau;
+ spring.flange_b.tau = ( spring.c ) * ( spring.phi_rel - ( spring.phi_rel0 ) );
+ spring.phi_rel = inertia3.phi - ( inertia2.phi );
+ inertia3.w = inertia3.der(phi);
+ inertia3.a = inertia3.der(w);
+ ( inertia3.J ) * ( inertia3.a ) =  - ( spring.flange_b.tau ) + inertia3.flange_b.tau;
+ damper.flange_b.tau = ( damper.d ) * ( damper.w_rel );
+ damper.phi_rel = fixed.phi0 - ( inertia2.phi );
+ damper.w_rel = damper.der(phi_rel);
+ damper.a_rel = damper.der(w_rel);
+  - ( torque.flange.tau ) = sine.offset + (if time < sine.startTime then 0 else ( sine.amplitude ) * ( sin(( ( ( 2 ) * ( 3.141592653589793 ) ) * ( sine.freqHz ) ) * ( time - ( sine.startTime ) ) + sine.phase) ));
+  - ( damper.flange_b.tau ) + inertia2.flange_b.tau - ( spring.flange_b.tau ) = 0;
+ damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau - ( torque.flange.tau ) = 0;
+ inertia3.flange_b.tau = 0;
+ idealGear.support.tau =  - ( idealGear.flange_a.tau ) - ( idealGear.flange_b.tau );
+ der_idealGear_phi_a = ( idealGear.ratio ) * ( der_idealGear_phi_b ) + ( 0.0 ) * ( idealGear.phi_b );
+ der_idealGear_phi_a = inertia1.w - ( 0.0 );
+ der_idealGear_phi_b = inertia2.w - ( 0.0 );
+ der_2_idealGear_phi_a = ( idealGear.ratio ) * ( der_2_idealGear_phi_b ) + ( 0.0 ) * ( der_idealGear_phi_b ) + ( 0.0 ) * ( der_idealGear_phi_b ) + ( 0.0 ) * ( idealGear.phi_b );
+ der_2_idealGear_phi_a = inertia1.a - ( 0.0 );
+ der_2_idealGear_phi_b = inertia2.a - ( 0.0 );
+ damper.der(phi_rel) = 0.0 - ( inertia2.w );
+ der_2_damper_phi_rel = 0.0 - ( inertia2.a );
+ damper.der(w_rel) = der_2_damper_phi_rel;
 
-type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 end TransformCanonicalTests.IndexReduction2_Mechanical;
 ")})));
 
@@ -3365,11 +3365,11 @@ uC = u1 + uL;
 i0 = i1 + iC;
 i1 = i2 + iL;
 der_uC = der_u1 + der_uL;
-der_u1 = ( R[1] ) * ( der_i1 ) + ( 0 ) * ( i1 );
+der_u1 = ( R[1] ) * ( der_i1 ) + ( 0.0 ) * ( i1 );
 der_i1 = der_i2 + der(iL);
-der_uL = ( R[2] ) * ( der_i2 ) + ( 0 ) * ( i2 );
+der_uL = ( R[2] ) * ( der_i2 ) + ( 0.0 ) * ( i2 );
 der_u0 = der_u1 + der_uL;
-der_u0 = ( 220 ) * ( ( cos(( time ) * ( omega )) ) * ( ( time ) * ( 0 ) + ( 1 ) * ( omega ) ) ) + ( 0 ) * ( sin(( time ) * ( omega )) );
+der_u0 = ( 220 ) * ( ( cos(( time ) * ( omega )) ) * ( ( time ) * ( 0.0 ) + ( 1.0 ) * ( omega ) ) ) + ( 0.0 ) * ( sin(( time ) * ( omega )) );
 end TransformCanonicalTests.IndexReduction3_Electrical;
 ")})));
   parameter Real omega=100;
@@ -3486,7 +3486,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + cos(x2) = 0;
- der_x1 - ( ( sin(x2) ) * ( der(x2) ) ) = 0;
+ der_x1 - ( ( sin(x2) ) * ( der(x2) ) ) = 0.0;
 end TransformCanonicalTests.IndexReduction6_Cos;
 ")})));
   Real x1,x2;
@@ -3510,7 +3510,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + sin(x2) = 0;
- der_x1 + ( cos(x2) ) * ( der(x2) ) = 0;
+ der_x1 + ( cos(x2) ) * ( der(x2) ) = 0.0;
 end TransformCanonicalTests.IndexReduction7_Sin;
 ")})));
   Real x1,x2;
@@ -3534,7 +3534,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
   - ( x1 ) + ( 2 ) * ( x2 ) = 0;
-  - ( der_x1 ) + ( 2 ) * ( der(x2) ) + ( 0 ) * ( x2 ) = 0;
+  - ( der_x1 ) + ( 2 ) * ( der(x2) ) + ( 0.0 ) * ( x2 ) = 0.0;
 end TransformCanonicalTests.IndexReduction8_Neg;
 ")})));
   Real x1,x2;
@@ -3559,7 +3559,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + exp(( ( x2 ) * ( p ) ) * ( time )) = 0;
- der_x1 + ( exp(( ( x2 ) * ( p ) ) * ( time )) ) * ( ( ( x2 ) * ( p ) ) * ( 1 ) + ( ( x2 ) * ( 0 ) + ( der(x2) ) * ( p ) ) * ( time ) ) = 0;
+ der_x1 + ( exp(( ( x2 ) * ( p ) ) * ( time )) ) * ( ( ( x2 ) * ( p ) ) * ( 1.0 ) + ( ( x2 ) * ( 0.0 ) + ( der(x2) ) * ( p ) ) * ( time ) ) = 0.0;
 end TransformCanonicalTests.IndexReduction9_Exp;
 ")})));
   Real x1,x2;
@@ -3585,7 +3585,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + tan(x2) = 0;
- der_x1 + ( der(x2) ) / ( ( cos(x2) ) ^ 2 ) = 0;
+ der_x1 + ( der(x2) ) / ( ( cos(x2) ) ^ 2 ) = 0.0;
 end TransformCanonicalTests.IndexReduction10_Tan;
 ")})));
   Real x1,x2;
@@ -3611,7 +3611,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + asin(x2) = 0;
- der_x1 + ( der(x2) ) / ( sqrt(1 - ( x2 ^ 2 )) ) = 0;
+ der_x1 + ( der(x2) ) / ( sqrt(1 - ( x2 ^ 2 )) ) = 0.0;
 end TransformCanonicalTests.IndexReduction11_Asin;
 ")})));
   Real x1,x2;
@@ -3637,7 +3637,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + acos(x2) = 0;
- der_x1 + (  - ( der(x2) ) ) / ( sqrt(1 - ( x2 ^ 2 )) ) = 0;
+ der_x1 + (  - ( der(x2) ) ) / ( sqrt(1 - ( x2 ^ 2 )) ) = 0.0;
 end TransformCanonicalTests.IndexReduction12_Acos;
 ")})));
   Real x1,x2;
@@ -3663,7 +3663,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + atan(x2) = 0;
- der_x1 + ( der(x2) ) / ( 1 + x2 ^ 2 ) = 0;
+ der_x1 + ( der(x2) ) / ( 1 + x2 ^ 2 ) = 0.0;
 end TransformCanonicalTests.IndexReduction13_Atan;
 ")})));
   Real x1,x2;
@@ -3704,7 +3704,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + sinh(x2) = 0;
- der_x1 + ( cosh(x2) ) * ( der(x2) ) = 0;
+ der_x1 + ( cosh(x2) ) * ( der(x2) ) = 0.0;
 end TransformCanonicalTests.IndexReduction15_Sinh;
 ")})));
   Real x1,x2;
@@ -3730,7 +3730,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + cosh(x2) = 0;
- der_x1 + ( sinh(x2) ) * ( der(x2) ) = 0;
+ der_x1 + ( sinh(x2) ) * ( der(x2) ) = 0.0;
 end TransformCanonicalTests.IndexReduction16_Cosh;
 ")})));
   Real x1,x2;
@@ -3756,7 +3756,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + tanh(x2) = 0;
- der_x1 + ( der(x2) ) / ( ( cosh(x2) ) ^ 2 ) = 0;
+ der_x1 + ( der(x2) ) / ( ( cosh(x2) ) ^ 2 ) = 0.0;
 end TransformCanonicalTests.IndexReduction17_Tanh;
 ")})));
   Real x1,x2;
@@ -3782,7 +3782,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + log(x2) = 0;
- der_x1 + ( der(x2) ) / ( x2 ) = 0;
+ der_x1 + ( der(x2) ) / ( x2 ) = 0.0;
 end TransformCanonicalTests.IndexReduction18_Log;
 ")})));
   Real x1,x2;
@@ -3808,7 +3808,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + log10(x2) = 0;
- der_x1 + ( der(x2) ) / ( ( x2 ) * ( log(10) ) ) = 0;
+ der_x1 + ( der(x2) ) / ( ( x2 ) * ( log(10) ) ) = 0.0;
 end TransformCanonicalTests.IndexReduction19_Log10;
 ")})));
   Real x1,x2;
@@ -3834,7 +3834,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + sqrt(x2) = 0;
- der_x1 + ( der(x2) ) / ( ( 2 ) * ( sqrt(x2) ) ) = 0;
+ der_x1 + ( der(x2) ) / ( ( 2 ) * ( sqrt(x2) ) ) = 0.0;
 end TransformCanonicalTests.IndexReduction20_Sqrt;
 ")})));
   Real x1,x2;
@@ -3860,7 +3860,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + (if p > 3 then ( 3 ) * ( x2 ) elseif p <= 3 then sin(x2) else ( 2 ) * ( x2 )) = 0;
- der_x1 + (if p > 3 then ( 3 ) * ( der(x2) ) + ( 0 ) * ( x2 ) elseif p <= 3 then ( cos(x2) ) * ( der(x2) ) else ( 2 ) * ( der(x2) ) + ( 0 ) * ( x2 )) = 0;
+ der_x1 + (if p > 3 then ( 3 ) * ( der(x2) ) + ( 0.0 ) * ( x2 ) elseif p <= 3 then ( cos(x2) ) * ( der(x2) ) else ( 2 ) * ( der(x2) ) + ( 0.0 ) * ( x2 )) = 0.0;
 end TransformCanonicalTests.IndexReduction21_If;
 ")})));
   Real x1,x2;
@@ -3886,7 +3886,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + x2 ^ p + x2 ^ 1.4 = 0;
- der_x1 + ( ( p ) * ( x2 ^ ( p - ( 1 ) ) ) ) * ( der(x2) ) + ( ( 1.4 ) * ( x2 ^ 0.3999999999999999 ) ) * ( der(x2) ) = 0;
+ der_x1 + ( ( p ) * ( x2 ^ ( p - ( 1 ) ) ) ) * ( der(x2) ) + ( ( 1.4 ) * ( x2 ^ 0.3999999999999999 ) ) * ( der(x2) ) = 0.0;
 end TransformCanonicalTests.IndexReduction22_Pow;
 ")})));
   Real x1,x2;
@@ -3973,7 +3973,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + TransformCanonicalTests.IndexReduction24_DerFunc.f(x2) = 0;
- der_x1 + TransformCanonicalTests.IndexReduction24_DerFunc.f_der(x2, der(x2)) = 0;
+ der_x1 + TransformCanonicalTests.IndexReduction24_DerFunc.f_der(x2, der(x2)) = 0.0;
 
  function TransformCanonicalTests.IndexReduction24_DerFunc.f_der
   input Real x;
@@ -4041,8 +4041,8 @@ equation
  der_x1_2 + der(x2[2]) = 2;
  x1[1] + TransformCanonicalTests.IndexReduction25_DerFunc.f({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}) = 0;
  x1[2] = 0;
- der_x1_1 + TransformCanonicalTests.IndexReduction25_DerFunc.f_der({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {der(x2[1]),der(x2[2])}, {{0,0},{0,0}}) = 0;
- der_x1_2 = 0;
+ der_x1_1 + TransformCanonicalTests.IndexReduction25_DerFunc.f_der({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {der(x2[1]),der(x2[2])}, {{0.0,0.0},{0.0,0.0}}) = 0.0;
+ der_x1_2 = 0.0;
 
  function TransformCanonicalTests.IndexReduction25_DerFunc.f_der
   input Real[2] x;
@@ -4113,8 +4113,8 @@ equation
  der_x1_2 + der(x2[2]) = 2;
  x1[1] + TransformCanonicalTests.IndexReduction26_DerFunc.f({x2[1],x2[2]}) = 0;
  x1[2] = 0;
- der_x1_1 + TransformCanonicalTests.IndexReduction26_DerFunc.f_der({x2[1],x2[2]}, {der(x2[1]),der(x2[2])}) = 0;
- der_x1_2 = 0;
+ der_x1_1 + TransformCanonicalTests.IndexReduction26_DerFunc.f_der({x2[1],x2[2]}, {der(x2[1]),der(x2[2])}) = 0.0;
+ der_x1_2 = 0.0;
 
  function TransformCanonicalTests.IndexReduction26_DerFunc.f_der
   input Real[2] x;
@@ -4183,7 +4183,7 @@ equation
  der_x1_1 + der(x2[1]) = 2;
  der_x1_2 + der(x2[2]) = 3;
  ({ - ( x1[1] ), - ( x1[2] )}) = TransformCanonicalTests.IndexReduction27_DerFunc.f({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}});
- ({ - ( der_x1_1 ), - ( der_x1_2 )}) = TransformCanonicalTests.IndexReduction27_DerFunc.f_der({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {der(x2[1]),der(x2[2])}, {{0,0},{0,0}});
+ ({ - ( der_x1_1 ), - ( der_x1_2 )}) = TransformCanonicalTests.IndexReduction27_DerFunc.f_der({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {der(x2[1]),der(x2[2])}, {{0.0,0.0},{0.0,0.0}});
 
  function TransformCanonicalTests.IndexReduction27_DerFunc.f_der
   input Real[2] x;
@@ -4310,13 +4310,13 @@ Solved block of 1 variables:
 Computed variable:
   y
 Solution:
-  ( x + 3 ) / (  - ( 1 ) )
+  ( x + 3 ) / (  - ( 1.0 ) )
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  ( x - ( y ) ) / (  - ( 1 ) )
+  ( x - ( y ) ) / (  - ( 1.0 ) )
 -------------------------------
 ")})));
 
@@ -4380,13 +4380,13 @@ Solved block of 1 variables:
 Computed variable:
   y
 Solution:
-  ( x + 3 ) / ( ( 1 ) / ( 2 ) )
+  ( x + 3 ) / ( ( 1.0 ) / ( 2 ) )
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  ( x - ( y ) ) / ( ( 1 ) / ( x ) )
+  ( x - ( y ) ) / ( ( 1.0 ) / ( x ) )
 -------------------------------
 ")})));
 
@@ -4415,13 +4415,13 @@ Solved block of 1 variables:
 Computed variable:
   y
 Solution:
-  ( x + 3 ) / ( 1 - ( 3 ) )
+  ( x + 3 ) / ( 1.0 - ( 3 ) )
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  ( x - ( y ) ) / ( 1 - ( x + 3 ) )
+  ( x - ( y ) ) / ( 1.0 - ( x + 3 ) )
 -------------------------------
 ")})));
 
@@ -4487,13 +4487,13 @@ Solved block of 1 variables:
 Computed variable:
   y
 Solution:
-  ( x + 3 ) / (  - ( 1 ) + 1 - ( 4 ) )
+  ( x + 3 ) / (  - ( 1.0 ) + 1.0 - ( 4 ) )
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  ( x - ( y ) ) / (  - ( 1 ) + 1 + 5 )
+  ( x - ( y ) ) / (  - ( 1.0 ) + 1.0 + 5 )
 -------------------------------
         ")})));
 
