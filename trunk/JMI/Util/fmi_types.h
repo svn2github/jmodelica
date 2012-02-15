@@ -20,36 +20,4 @@
 /* Standard FMI 1.0 ME and CS types */
 #include "fmiPlatformTypes.h"
 
-typedef enum {
-	fmiOK,
-	fmiWarning,
-	fmiDiscard,
-	fmiError,
-	fmiFatal,
-	fmiPending
-} fmiStatus;
-
-typedef struct {
-	fmiCallbackLogger         logger;
-	fmiCallbackAllocateMemory allocateMemory;
-	fmiCallbackFreeMemory     freeMemory;
-	fmiStepFinished           stepFinished;
-} fmiCallbackFunctions;
-
-typedef enum {
-	fmiDoStepStatus,
-	fmiPendingStatus,
-	fmiLastSuccessfulTime
-} fmiStatusKind;
-
-
-typedef struct {
-	fmiBoolean iterationConverged;
-	fmiBoolean stateValueReferencesChanged;
-	fmiBoolean stateValuesChanged;
-	fmiBoolean terminateSimulation;
-	fmiBoolean upcomingTimeEvent;
-	fmiReal    nextEventTime;
-} fmiEventInfo;
-
 #endif /* End of header file FMI_TYPES_H_ */
