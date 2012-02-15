@@ -297,28 +297,44 @@ aspect FormattedPrint {
 
     /** @TODO: Copy & pasted from pretty print, needs more customization */
 	public void FullClassDecl.prettyPrintFormatted(Printer printer, PrintStream printStream) {
-	    if (hasEncapsulated())
-	    	printStream.print("encapsulated ");
-	    if (hasPartial())
-	    	printStream.print("partial "); 		
- 	    if (hasRedeclare())
- 	    	printStream.print("redeclare ");
-	    if (hasFinal())
-	    	printStream.print("final ");
-	    if (hasInner())
-	    	printStream.print("inner ");
-	    if (hasOuter())
-	    	printStream.print("outer ");
-	    if (hasReplaceable())
-	    	printStream.print("replaceable ");
+	    printStream.print(preFormatting);
+
+	    if (hasEncapsulated()) {
+	    	getEncapsulated().prettyPrintFormatted(printer, printStream);
+	    }
+	    if (hasPartial()) {
+	    	getPartial().prettyPrintFormatted(printer, printStream);
+	    }
+	    if (hasRedeclare()) {
+	    	getRedeclare().prettyPrintFormatted(printer, printStream);
+	    }
+	    if (hasFinal()) {
+	    	getFinal().prettyPrintFormatted(printer, printStream);
+	    }
+	    if (hasInner()) {
+	    	getInner().prettyPrintFormatted(printer, printStream);
+	    }
+	    if (hasOuter()) {
+	    	getOuter().prettyPrintFormatted(printer, printStream);
+	    }
+	    if (hasReplaceable()) {
+	    	getReplaceable().prettyPrintFormatted(printer, printStream);
+	    }
 	    
- 		
-	    printStream.print(getRestriction().toString());
-	    printStream.print(getName().getID() + "\n");
+	    getRestriction().prettyPrintFormatted(printer, printStream);
+	    getName().prettyPrintFormatted(printer, printStream);
+
+	    /*getExtendsClauseShortClass().prettyPrintFormatted(printer, printStream);
+	    if (hasConstrainingClause()) {
+	    	getConstrainingClause().prettyPrintFormatted(printer, printStream);
+	    }
+	    if (hasConstrainingClauseComment()) {
+	    	getConstrainingClauseComment().prettyPrintFormatted(printer, printStream);
+	    }*/
 
 		
  		// Print all local classes
- 		int numPubClass = 0;
+ 		/*int numPubClass = 0;
 // 		str.print(indent + "public\n");
  		for (int i=0;i<getNumClassDecl();i++)
  			if (((BaseClassDecl)getClassDecl(i)).isPublic()) {
@@ -334,16 +350,26 @@ aspect FormattedPrint {
  					printer.print(getClassDecl(i), printStream, "");
 		 			printStream.print(";\n\n");
 		 		}
-		}
-			
-		// Print all extends clauses
- 		for (int i=0;i<getNumSuper();i++) {
- 			printer.print(getSuper(i), printStream, "");
- 			printStream.print(";\n");
-		} 			
+		}*/
+	    
+	    for (int i = 0; i < getNumClassDecl(); i++) {
+	    	getClassDecl(i).prettyPrintFormatted(printer, printStream);
+	    }
+	    for (int i = 0; i < getNumImport(); i++) {
+	    	getImport(i).prettyPrintFormatted(printer, printStream);
+	    }
+	    for (int i = 0; i < getNumSuper(); i++) {
+	    	getSuper(i).prettyPrintFormatted(printer, printStream);
+	    }
+	    for (int i = 0; i < getNumComponentDecl(); i++) {
+	    	getComponentDecl(i).prettyPrintFormatted(printer, printStream);
+	    }
+	    for (int i = 0; i < getNumEquation(); i++) {
+	    	getEquation(i).prettyPrintFormatted(printer, printStream);
+	    }
 			
  		// Print all components
- 		int numPubComp = 0;
+ 		/*int numPubComp = 0;
 // 		str.print(indent + "public\n");
  		for (int i=0;i<getNumComponentDecl();i++)
  			if (getComponentDecl(i).isPublic()) {
@@ -367,9 +393,28 @@ aspect FormattedPrint {
 				printer.print(getEquation(i), printStream, "");
 				printStream.print(";\n");
 			}
-		}
+		}*/
 		
+	    /** @TODO: Format end */
 		printStream.print("end " + getName().getID());
+
+		printStream.print(postFormatting);
+	}
+	
+	public void ExtendsClause.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		printStream.print("extends");
+		getSuper().prettyPrintFormatted(printer, printStream);
+		getClassModificationOpt().prettyPrintFormatted(printer, printStream);
+		printStream.print(postFormatting);
+	}
+	
+	public void ImportClause.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		printStream.print("import");
+		getPackageName().prettyPrintFormatted(printer, printStream);
+		getComment().prettyPrintFormatted(printer, printStream);
+		printStream.print(postFormatting);
 	}
 	
 	public void CompleteModification.prettyPrintFormatted(Printer printer, PrintStream printStream) {
@@ -505,12 +550,18 @@ aspect FormattedPrint {
 	}
 	
 	public void Comment.prettyPrintFormatted(Printer printer, PrintStream printStream) {
-		if (hasStringComment()) {
-			printStream.print("\"" + getStringComment() + "\"");
-		}
 		if (hasAnnotation()) {
 			getAnnotation().prettyPrintFormatted(printer, printStream);
 		}
+		if (hasStringComment()) {
+			getStringComment().prettyPrintFormatted(printer, printStream);
+		}
+	}
+	
+	public void StringComment.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting + "\"");
+		printStream.print(getComment());
+		printStream.print("\"" + postFormatting);
 	}
 
 	public void ParseAnnotation.prettyPrintFormatted(Printer printer, PrintStream printStream) {
