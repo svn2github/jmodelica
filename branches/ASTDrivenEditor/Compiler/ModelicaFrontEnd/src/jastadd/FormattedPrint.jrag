@@ -26,61 +26,130 @@ aspect FormattedPrint {
 		@Override
 		@SuppressWarnings({"unchecked"})
 		public void print(ASTNode node, PrintStream printStream, String ident) {
-			node.prettyPrintFormatted(this, printStream);
+			node.prettyPrintFormattedHelper(this, printStream);
 		}
 	}
 	
 	private FormattedPrettyPrinter ASTNode.formattedPrettyPrinter = new FormattedPrettyPrinter();
-	protected FormattingItem ASTNode.preFormatting = new EmptyFormattingItem();
-	protected FormattingItem ASTNode.postFormatting = new EmptyFormattingItem();
+	protected FormattingItem BaseNode.preFormatting = new EmptyFormattingItem();
+	protected FormattingItem BaseNode.postFormatting = new EmptyFormattingItem();
 
 	/**
 	 * Adds formatting information to this AST node and all its children, which can then be used by the method
 	 * <code>prettyPrintFormatted</code>.
 	 * @param formattingInfo the information to use to format this AST node.
-	 */
-	public void ASTNode.addFormattingInformation(FormattingInfo formattingInfo) {
+	 */	
+	protected void ASTNode.addFormattingInformation(FormattingInfo formattingInfo) {
 		Iterator<FormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
-
-		while (formattingIterator.hasNext()) {
-			FormattingItem formattingItem = formattingIterator.next();
-
-			if (formattingItem.getEndLine() == getLine(getStart()) &&
-					formattingItem.getEndColumn() + 1 == getColumn(getStart())) {
-				addPreFormatting(formattingItem);
-				formattingIterator.remove();
-			} else if (formattingItem.getStartLine() == getLine(getEnd()) &&
-					formattingItem.getStartColumn() == getColumn(getEnd()) + 1) {
-				addPostFormatting(formattingItem);
-				formattingIterator.remove();
-			}
-		}
-
+		formattingIterator = addPreFormatting(formattingIterator);
+		formattingIterator = addPostFormatting(formattingIterator);
 		for (int i = 0; i < getNumChild(); i++) {
 			getChild(i).addFormattingInformation(formattingInfo);
 		}
+	}
+	
+	protected void BaseNode.addFormattingInformation(FormattingInfo formattingInfo) {
+		if (formatting == null) {
+			return;
+		}
+
+		super.addFormattingInformation(formattingInfo);
+		formatting = null;
 	}
 	
 	public void Opt.addFormattingInformation(FormattingInfo formattingInfo) {
+		if (getNumChild() != 0) {
+			getChild(0).addFormattingInformation(formattingInfo);
+		}
+	}
+	
+	public void List.addFormattingInformation(FormattingInfo formattingInfo) {
 		for (int i = 0; i < getNumChild(); i++) {
 			getChild(i).addFormattingInformation(formattingInfo);
 		}
 	}
+	
+	public Iterator<FormattingItem> ASTNode.addPreFormatting(Iterator<FormattingItem> formattingIterator) {
+		return formattingIterator;
+	}
+	
+	public Iterator<FormattingItem> ASTNode.addPostFormatting(Iterator<FormattingItem> formattingIterator) {
+		return formattingIterator;
+	}
+	
+	public Iterator<FormattingItem> BaseNode.addPreFormatting(Iterator<FormattingItem> formattingIterator) {
+		int startLine = getLine(getStart());
+		int startColumn = getColumn(getStart());
 
-	/**
-	 * Sets the formatting that should be used before (left-hand side of) this node.
-	 * @param formatting the formatting item.
-	 */
-	protected void ASTNode.addPreFormatting(FormattingItem formatting) {
-		preFormatting = formatting;
+		while (formattingIterator.hasNext()) {
+			FormattingItem formattingItem = formattingIterator.next();
+			
+			if (formattingItem.getEndLine() < startLine || formattingItem.getEndColumn() + 1 < startColumn) {
+				continue;
+			} else if (formattingItem.getEndLine() == startLine &&
+					formattingItem.getEndColumn() + 1 == startColumn) {
+				preFormatting = formattingItem;
+				formattingIterator.remove();
+				break;
+			} else {
+				break;
+			}
+		}
+		
+		return formattingIterator;
+	}
+	
+	public Iterator<FormattingItem> BaseNode.addPostFormatting(Iterator<FormattingItem> formattingIterator) {
+		int endLine = getLine(getEnd());
+		int endColumnPlusOne = getColumn(getEnd()) + 1;
+
+		while (formattingIterator.hasNext()) {
+			FormattingItem formattingItem = formattingIterator.next();
+			
+			if (formattingItem.getStartLine() < endLine || formattingItem.getStartColumn() < endColumnPlusOne) {
+				continue;
+			} else if (formattingItem.getStartLine() == endLine &&
+					formattingItem.getStartColumn() == endColumnPlusOne) {
+				postFormatting = formattingItem;
+				formattingIterator.remove();
+				break;
+			} else {
+				break;
+			}
+		}
+		
+		return formattingIterator;
+	}
+	
+	protected FormattingInfo BaseNode.formatting = null;
+	public void ASTNode.setFormatting(FormattingInfo formattingInfo) {
+		for (int i = 0; i < getNumChild(); i++) {
+			getChild(i).setFormatting(formattingInfo);
+		}
+	}
+	
+	public void BaseNode.setFormatting(FormattingInfo formattingInfo) {
+		formatting = formattingInfo;
+		super.setFormatting(formattingInfo);
 	}
 	
 	/**
-	 * Sets the formatting that should be used after (right-hand side of) this node.
-	 * @param formatting the formatting item.
+	 * Propagates the formatting information downwards in the AST if this has not already been done.
 	 */
-	protected void ASTNode.addPostFormatting(FormattingItem formatting) {
-		postFormatting = formatting;
+	public void ASTNode.propagateFormatting() {
+		getParent().propagateFormatting();
+	}
+	
+	protected void ASTNode.propagateFormatting(FormattingInfo formattingInfo) {
+		if (formattingInfo != null) {
+			formattingInfo.mergeAdjacentFormattingItems();
+			addFormattingInformation(formattingInfo);
+		}
+	}
+	
+	@Override
+	public void BaseNode.propagateFormatting() {
+		propagateFormatting(formatting);
 	}
 
 	/**
@@ -90,9 +159,8 @@ aspect FormattedPrint {
 	public String ASTNode.prettyPrintFormatted() {
 		OutputStream outputStream = new ByteArrayOutputStream();
 		PrintStream printStream = new PrintStream(outputStream);
-
 		prettyPrintFormatted(formattedPrettyPrinter, printStream);
-
+		
 		return outputStream.toString();
 	}
 	
@@ -102,18 +170,29 @@ aspect FormattedPrint {
 	 * @param printStream the stream, to which the AST node should be printed.
 	 */
 	public void ASTNode.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+		propagateFormatting();
+		prettyPrintFormattedHelper(printer, printStream);
+	}
+	
+	void ASTNode.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		for (int i = 0; i < getNumChild(); i++) {
+			getChild(i).prettyPrintFormattedHelper(printer, printStream);
+		}
+	}
+
+	void BaseNode.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		for (int i = 0; i < getNumChild(); i++) {
-			getChild(i).prettyPrintFormatted(printer, printStream);
+			getChild(i).prettyPrintFormattedHelper(printer, printStream);
 		}
 		//prettyPrint(printer, printStream, "");
 		printStream.print(postFormatting);
 	}
 	
-	public void StoredDefinition.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void StoredDefinition.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
  		if (hasWithin()) {
- 			getWithin().prettyPrintFormatted(printer, printStream);
+ 			getWithin().prettyPrintFormattedHelper(printer, printStream);
  		}
 
  		for (Element element : getElements()) {
@@ -122,207 +201,196 @@ aspect FormattedPrint {
  		printStream.print(postFormatting);
 	}
 
-	public void Within.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void Within.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		printStream.print("within");
 		if (hasPackageName()) {
-			getPackageName().prettyPrintFormatted(printer, printStream);
+			getPackageName().prettyPrintFormattedHelper(printer, printStream);
 		}
 		printStream.print(postFormatting);
 	}
 
-    public void ShortClassDecl.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void ShortClassDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
 
 	    if (hasEncapsulated()) {
-	    	getEncapsulated().prettyPrintFormatted(printer, printStream);
+	    	getEncapsulated().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (hasPartial()) {
-	    	getPartial().prettyPrintFormatted(printer, printStream);
+	    	getPartial().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (hasRedeclare()) {
-	    	getRedeclare().prettyPrintFormatted(printer, printStream);
+	    	getRedeclare().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (hasFinal()) {
-	    	getFinal().prettyPrintFormatted(printer, printStream);
+	    	getFinal().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (hasInner()) {
-	    	getInner().prettyPrintFormatted(printer, printStream);
+	    	getInner().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (hasOuter()) {
-	    	getOuter().prettyPrintFormatted(printer, printStream);
+	    	getOuter().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (hasReplaceable()) {
-	    	getReplaceable().prettyPrintFormatted(printer, printStream);
+	    	getReplaceable().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    
-	    getRestriction().prettyPrintFormatted(printer, printStream);
-	    getName().prettyPrintFormatted(printer, printStream);
+	    getRestriction().prettyPrintFormattedHelper(printer, printStream);
+	    getName().prettyPrintFormattedHelper(printer, printStream);
 	    /** @TODO: Handle equals when scanning:
 	     * printStream.print(" = ");
 	     * */
-	    getExtendsClauseShortClass().prettyPrintFormatted(printer, printStream);
+	    getExtendsClauseShortClass().prettyPrintFormattedHelper(printer, printStream);
 	    if (hasConstrainingClause()) {
-	    	getConstrainingClause().prettyPrintFormatted(printer, printStream);
+	    	getConstrainingClause().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (hasConstrainingClauseComment()) {
-	    	getConstrainingClauseComment().prettyPrintFormatted(printer, printStream);
+	    	getConstrainingClauseComment().prettyPrintFormattedHelper(printer, printStream);
 	    }
 
 	    printStream.print(postFormatting);
 	}
     
-    public void Encapsulated.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void Encapsulated.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	printStream.print("encapsulated");
     	printStream.print(postFormatting);
     }
 
-    public void Partial.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void Partial.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	printStream.print("partial");
     	printStream.print(postFormatting);
     }
     
-    public void Redeclare.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void Redeclare.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	printStream.print("redeclare");
     	printStream.print(postFormatting);
     }
     
-    public void Final.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void Final.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	printStream.print("final");
     	printStream.print(postFormatting);
     }
     
-    public void Inner.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void Inner.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	printStream.print("inner");
     	printStream.print(postFormatting);
     }
     
-    public void Outer.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void Outer.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	printStream.print("outer");
     	printStream.print(postFormatting);
     }
     
-    public void Replaceable.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void Replaceable.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	printStream.print("replaceable");
     	printStream.print(postFormatting);
     }
     
-    public void Restriction.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void Restriction.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	printStream.print(this);
     	printStream.print(postFormatting);
     }
     
-    public void IdDecl.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void IdDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	printStream.print(getID());
     	printStream.print(postFormatting);
     }
     
-    public void ExtendsClauseShortClass.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void ExtendsClauseShortClass.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
 
-    	getSuper().prettyPrintFormatted(printer, printStream);
+    	getSuper().prettyPrintFormattedHelper(printer, printStream);
     	
     	if (hasArraySubscripts()) {
-	    	getArraySubscripts().prettyPrintFormatted(printer, printStream);
+	    	getArraySubscripts().prettyPrintFormattedHelper(printer, printStream);
     	}
 	    if (hasClassModification()) {
-	    	getClassModification().prettyPrintFormatted(printer, printStream);
+	    	getClassModification().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    
     	printStream.print(postFormatting);
     }
 
-    public void Access.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void Access.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	printStream.print(name());
     	printStream.print(postFormatting);
     }
     
-    public void ArraySubscripts.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void ArraySubscripts.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	for (int i = 0; i < getNumSubscript(); i++) {
-    		getSubscript(i).prettyPrintFormatted(printer, printStream);
+    		getSubscript(i).prettyPrintFormattedHelper(printer, printStream);
     	}
     	printStream.print(postFormatting);
     }
     
-    public void Subscript.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void Subscript.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	printStream.print("SUBSCRIPT"); /** @TODO: Recognize what should be printed here. */
     	printStream.print(postFormatting);
     }
 
-    public void ClassModification.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void ClassModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	for (int i = 0; i < getNumArgument(); i++) {
-    		getArgument(i).prettyPrintFormatted(printer, printStream);
+    		getArgument(i).prettyPrintFormattedHelper(printer, printStream);
     	}
     	printStream.print(postFormatting);
     }
     
-    /*public void Argument.prettyPrintFormatted(Printer printer, PrintStream printStream) {
-    	printStream.print(preFormatting);
-    	if (hasEach()) {
-    		getEach().prettyPrintFormatted(printer, printStream);
-    	}
-    	if (hasFinal()) {
-    		getFinal().prettyPrintFormatted(printer, printStream);
-    	}
-    	printStream.print(postFormatting);
-    }*/
-    
-    public void Each.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void Each.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
     	printStream.print("each");
     	printStream.print(postFormatting);
     }
     
-    public void ConstrainingClause.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void ConstrainingClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
-    	getAccess().prettyPrintFormatted(printer, printStream);
+    	getAccess().prettyPrintFormattedHelper(printer, printStream);
     	if (hasClassModification()) {
-    		getClassModification().prettyPrintFormatted(printer, printStream);
+    		getClassModification().prettyPrintFormattedHelper(printer, printStream);
     	}
     	printStream.print(postFormatting);
     }
 
     /** @TODO: Copy & pasted from pretty print, needs more customization */
-	public void FullClassDecl.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+    void FullClassDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 	    printStream.print(preFormatting);
 
 	    if (hasEncapsulated()) {
-	    	getEncapsulated().prettyPrintFormatted(printer, printStream);
+	    	getEncapsulated().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (hasPartial()) {
-	    	getPartial().prettyPrintFormatted(printer, printStream);
+	    	getPartial().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (hasRedeclare()) {
-	    	getRedeclare().prettyPrintFormatted(printer, printStream);
+	    	getRedeclare().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (hasFinal()) {
-	    	getFinal().prettyPrintFormatted(printer, printStream);
+	    	getFinal().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (hasInner()) {
-	    	getInner().prettyPrintFormatted(printer, printStream);
+	    	getInner().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (hasOuter()) {
-	    	getOuter().prettyPrintFormatted(printer, printStream);
+	    	getOuter().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (hasReplaceable()) {
-	    	getReplaceable().prettyPrintFormatted(printer, printStream);
+	    	getReplaceable().prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    
-	    getRestriction().prettyPrintFormatted(printer, printStream);
-	    getName().prettyPrintFormatted(printer, printStream);
+	    getRestriction().prettyPrintFormattedHelper(printer, printStream);
+	    getName().prettyPrintFormattedHelper(printer, printStream);
 
 	    /*getExtendsClauseShortClass().prettyPrintFormatted(printer, printStream);
 	    if (hasConstrainingClause()) {
@@ -353,19 +421,19 @@ aspect FormattedPrint {
 		}*/
 	    
 	    for (int i = 0; i < getNumClassDecl(); i++) {
-	    	getClassDecl(i).prettyPrintFormatted(printer, printStream);
+	    	getClassDecl(i).prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    for (int i = 0; i < getNumImport(); i++) {
-	    	getImport(i).prettyPrintFormatted(printer, printStream);
+	    	getImport(i).prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    for (int i = 0; i < getNumSuper(); i++) {
-	    	getSuper(i).prettyPrintFormatted(printer, printStream);
+	    	getSuper(i).prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    for (int i = 0; i < getNumComponentDecl(); i++) {
-	    	getComponentDecl(i).prettyPrintFormatted(printer, printStream);
+	    	getComponentDecl(i).prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    for (int i = 0; i < getNumEquation(); i++) {
-	    	getEquation(i).prettyPrintFormatted(printer, printStream);
+	    	getEquation(i).prettyPrintFormattedHelper(printer, printStream);
 	    }
 			
  		// Print all components
@@ -401,146 +469,146 @@ aspect FormattedPrint {
 		printStream.print(postFormatting);
 	}
 	
-	public void ExtendsClause.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void ExtendsClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		printStream.print("extends");
-		getSuper().prettyPrintFormatted(printer, printStream);
-		getClassModificationOpt().prettyPrintFormatted(printer, printStream);
+		getSuper().prettyPrintFormattedHelper(printer, printStream);
+		getClassModificationOpt().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(postFormatting);
 	}
 	
-	public void ImportClause.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void ImportClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		printStream.print("import");
-		getPackageName().prettyPrintFormatted(printer, printStream);
-		getComment().prettyPrintFormatted(printer, printStream);
+		getPackageName().prettyPrintFormattedHelper(printer, printStream);
+		getComment().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(postFormatting);
 	}
 	
-	public void CompleteModification.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void CompleteModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 
-		getClassModification().prettyPrintFormatted(printer, printStream);
+		getClassModification().prettyPrintFormattedHelper(printer, printStream);
 		if (hasValueModification()) {
-			getValueModification().prettyPrintFormatted(printer, printStream);
+			getValueModification().prettyPrintFormattedHelper(printer, printStream);
 		}
 
 		printStream.print(postFormatting);
 	}
 	
-	public void ValueModification.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void ValueModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
-		getExp().prettyPrintFormatted(printer, printStream);
+		getExp().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(postFormatting);
 	}
 	
-	public void ElementModification.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void ElementModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		
 		if (hasEach()) {
-			getEach().prettyPrintFormatted(printer, printStream);
+			getEach().prettyPrintFormattedHelper(printer, printStream);
 		}
 		if (hasFinal()) {
-			getFinal().prettyPrintFormatted(printer, printStream);
+			getFinal().prettyPrintFormattedHelper(printer, printStream);
 		}
-		getName().prettyPrintFormatted(printer, printStream);
+		getName().prettyPrintFormattedHelper(printer, printStream);
 		if (hasModification()) {
-			getModification().prettyPrintFormatted(printer, printStream);
+			getModification().prettyPrintFormattedHelper(printer, printStream);
 		}
 		if (hasStringComment()) {
-			getStringComment().prettyPrintFormatted(printer, printStream);
+			getStringComment().prettyPrintFormattedHelper(printer, printStream);
 		}
 		
 		printStream.print(postFormatting);
 	}
 	
-	public void ClassRedeclare.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void ClassRedeclare.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		
 		if (hasEach()) {
-			getEach().prettyPrintFormatted(printer, printStream);
+			getEach().prettyPrintFormattedHelper(printer, printStream);
 		}
 		if (hasFinal()) {
-			getFinal().prettyPrintFormatted(printer, printStream);
+			getFinal().prettyPrintFormattedHelper(printer, printStream);
 		}
-		getBaseClassDecl().prettyPrintFormatted(printer, printStream);
+		getBaseClassDecl().prettyPrintFormattedHelper(printer, printStream);
 		
 		printStream.print(postFormatting);
 	}
 	
-	public void ComponentRedeclare.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void ComponentRedeclare.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		
 		if (hasEach()) {
-			getEach().prettyPrintFormatted(printer, printStream);
+			getEach().prettyPrintFormattedHelper(printer, printStream);
 		}
 		if (hasFinal()) {
-			getFinal().prettyPrintFormatted(printer, printStream);
+			getFinal().prettyPrintFormattedHelper(printer, printStream);
 		}
-		getComponentDecl().prettyPrintFormatted(printer, printStream);
+		getComponentDecl().prettyPrintFormattedHelper(printer, printStream);
 		
 		printStream.print(postFormatting);
 	}
 	
-	public void RealLitExp.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void RealLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		printStream.print(getUNSIGNED_NUMBER());
 		printStream.print(postFormatting);
 	}
 
-	public void IntegerLitExp.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void IntegerLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		printStream.print(getUNSIGNED_INTEGER());
 		printStream.print(postFormatting);
 	}
 	
-	public void NegExp.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void NegExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		printStream.print("-");
-		getExp().prettyPrintFormatted(printer, printStream);
+		getExp().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(postFormatting);
 	}
 
 	/** @TODO: Copy & pasted from pretty print, needs more customization */
-	public void ComponentDecl.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void ComponentDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		
 		if (hasRedeclare()) {
-			getRedeclare().prettyPrintFormatted(printer, printStream); //str.print(getRedeclare().toString() + " ");
+			getRedeclare().prettyPrintFormattedHelper(printer, printStream); //str.print(getRedeclare().toString() + " ");
 		}
 		if (hasFinal()) {
-			getFinal().prettyPrintFormatted(printer, printStream);
+			getFinal().prettyPrintFormattedHelper(printer, printStream);
 		}
 		if (hasInner()) {
-			getInner().prettyPrintFormatted(printer, printStream);
+			getInner().prettyPrintFormattedHelper(printer, printStream);
 		}
 		if (hasOuter()) {
-			getOuter().prettyPrintFormatted(printer, printStream);
+			getOuter().prettyPrintFormattedHelper(printer, printStream);
 		}
 		if (hasReplaceable()) {
-			getReplaceable().prettyPrintFormatted(printer, printStream);
+			getReplaceable().prettyPrintFormattedHelper(printer, printStream);
 		}
 		if (hasTypePrefixFlow()) {
-			getTypePrefixFlow().prettyPrintFormatted(printer, printStream);
+			getTypePrefixFlow().prettyPrintFormattedHelper(printer, printStream);
 		}
 		if (hasTypePrefixVariability()) {
-			getTypePrefixVariability().prettyPrintFormatted(printer, printStream);
+			getTypePrefixVariability().prettyPrintFormattedHelper(printer, printStream);
 		}
 		if (hasTypePrefixInputOutput()) {
-			getTypePrefixInputOutput().prettyPrintFormatted(printer, printStream);
+			getTypePrefixInputOutput().prettyPrintFormattedHelper(printer, printStream);
 		}
 		
 		printer.print(getClassName(), printStream, ""); // WHY?
 		if (hasTypeArraySubscripts()) {
 			printer.print(getTypeArraySubscripts(), printStream, "");
 		}
-		getName().prettyPrintFormatted(printer, printStream); 
+		getName().prettyPrintFormattedHelper(printer, printStream); 
 	    if (hasVarArraySubscripts()) {
 	    	printer.print(getVarArraySubscripts(), printStream, "");
 	    }
 	    printer.print(getModificationOpt(), printStream, "");
 	    
-	    getComment().prettyPrintFormatted(printer, printStream);
+	    getComment().prettyPrintFormattedHelper(printer, printStream);
 				 
 		if (hasConstrainingClause()) {
 			printer.print(getConstrainingClause(), printStream, "");
@@ -549,25 +617,25 @@ aspect FormattedPrint {
 				    
 	}
 	
-	public void Comment.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void Comment.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		if (hasAnnotation()) {
-			getAnnotation().prettyPrintFormatted(printer, printStream);
+			getAnnotation().prettyPrintFormattedHelper(printer, printStream);
 		}
 		if (hasStringComment()) {
-			getStringComment().prettyPrintFormatted(printer, printStream);
+			getStringComment().prettyPrintFormattedHelper(printer, printStream);
 		}
 	}
 	
-	public void StringComment.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void StringComment.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting + "\"");
 		printStream.print(getComment());
 		printStream.print("\"" + postFormatting);
 	}
 
-	public void ParseAnnotation.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void ParseAnnotation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		printStream.print("annotation");
-		getClassModification().prettyPrintFormatted(printer, printStream);
+		getClassModification().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(postFormatting);
 	}
 }

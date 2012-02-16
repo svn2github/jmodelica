@@ -107,6 +107,7 @@ aspect RootAccess {
         beaver.Parser parser = createModelicaParser(scanner);
         sr = (SourceRoot) parser.parse(scanner);
         sr.setFileName(fileName);
+        sr.setFormatting(scanner.getFormattingInfo());
         reader.close();
         return sr;
     }
@@ -118,6 +119,7 @@ aspect RootAccess {
         beaver.Parser parser = createModelicaParser(scanner);
         sr = (SourceRoot) parser.parse(scanner);
         sr.setFileName(fileName);
+        sr.setFormatting(scanner.getFormattingInfo());
         return sr;
     }
     
