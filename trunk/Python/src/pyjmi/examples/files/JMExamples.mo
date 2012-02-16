@@ -1093,11 +1093,13 @@ end CSTR;
          //States
          Real x1(start = x1_0, fixed=true);
          Real x2(start = x2_0, fixed=true);
+         Real p;
 
          //Control Signal
           Modelica.Blocks.Interfaces.RealInput u
         annotation (Placement(transformation(extent={{-38,-8},{2,32}})));
     equation
+          p = 8*(time-0.5)^2-0.5-x2;
           der(x1) = x2;
           der(x2) = -x2+u;
       annotation (uses(Modelica(version="3.2")), Diagram(graphics));
@@ -1145,9 +1147,9 @@ end CSTR;
       Real x3(start = x3_0, fixed=true);
 
       //control
-      Modelica.Blocks.Interfaces.RealInput u2
+      Modelica.Blocks.Interfaces.RealInput u
         annotation (Placement(transformation(extent={{-58,26},{-18,66}})));
-      Modelica.Blocks.Interfaces.RealInput u1
+      Modelica.Blocks.Interfaces.RealInput v
         annotation (Placement(transformation(extent={{-60,-14},{-20,26}})));
 
       //parameter
@@ -1158,8 +1160,8 @@ end CSTR;
       parameter Real c = 6;
 
     equation
-      der(x1) = (-D/m*x1^2-g*sin(x2)+u1/m);
-      der(x2) = L/m*x1*(1-c*x2)-g*cos(x2)/x1+L*c/m*u2;
+      der(x1) = (-D/m*x1^2-g*sin(x2)+u/m);
+      der(x2) = L/m*x1*(1-c*x2)-g*cos(x2)/x1+L*c/m*v;
       der(x3) = (x1*sin(x2));
 
       annotation (experiment(StopTime=100), __Dymola_experimentSetupOutput);
@@ -1228,16 +1230,18 @@ end CSTR;
       parameter Real S1_0=0.5;
       parameter Real P1_0=0;
       parameter Real V1_0=150;
+      parameter Real u1_0=0.03;
 
       //state start values
-      Real X1(start=X1_0,fixed=true);
-      Real S1(start=S1_0,fixed=true);
-      Real P1(start=P1_0,fixed=true);
-      Real V1(start=V1_0,fixed=true);
+      Real X1(start=X1_0,fixed=true) "Cell mass concentration";
+      Real S1(start=S1_0,fixed=true) "Substrate concentration";
+      Real P1(start=P1_0,fixed=true) "Penicillin concentration";
+      Real V1(start=V1_0,fixed=true) "Volume of medium";
+      Real u1(start=u1_0,fixed=true);
       Real miu1;
 
       //control signal
-      Modelica.Blocks.Interfaces.RealInput u1
+      Modelica.Blocks.Interfaces.RealInput du1 "Feed Flowrate"
         annotation (Placement(transformation(extent={{-60,-10},{-20,30}})));
 
     equation
@@ -1246,76 +1250,11 @@ end CSTR;
       der(S1) = -miu1*X1/Yx - v*X1/Yp + u1/V1*(Sin - S1);
       der(P1) = v*X1 - u1/V1*P1;
       der(V1) = u1;
-
-      annotation (
-        experiment(StopTime=150, NumberOfIntervals=100),
-        __Dymola_experimentSetupOutput,
-        DymolaStoredErrors(thetext="model PenicillinPlant
-
-  import SI = Modelica.SIunits;
-
-  parameter Real miu_m = 0.02;
-  parameter Real Km =   0.05;
-  parameter Real Ki = 5;
-  parameter Real Yx =    0.5;
-  parameter Real Yp =   1.2;
-  parameter Real v = 0.004;
-  parameter Real Sin =   200;
-  parameter Real umin = 0;
-  parameter Real umax = 1;
-  parameter Real Xmin =  0;
-  parameter Real Xmax = 3.7;
-  parameter Real Smin = 0;
-
-  //state start values
-  parameter Real X1_0=1;
-  parameter Real S1_0=0.5;
-  parameter Real P1_0=0;
-  parameter Real V1_0=150;
-
-  //state start values
-  Real X1(start=X1_0,fixed=true) (\"Cell mass concentration\");
-  Real S1(start=S1_0,fixed=true) (\"Substrate concentration\");
-  Real P1(start=P1_0,fixed=true) (\"Penicillin concentration\");
-  Real V1(start=V1_0,fixed=true) (\"Volume of medium\");
-  Real miu1;
-
-  //control signal
-  Modelica.Blocks.Interfaces.RealInput u1 (\"Feed Flowrate\")
-    annotation (Placement(transformation(extent={{-60,-10},{-20,30}})));
-
-equation 
-  miu1 = (miu_m*S1)/(Km+S1+S1^2/Ki);
-  der(X1) = miu1*X1-u1/V1*X1;
-  der(S1) = -miu1*X1/Yx - v*X1/Yp + u1/V1*(Sin - S1);
-  der(P1) = v*X1 - u1/V1*P1;
-  der(V1) = u1;
-
-  annotation (experiment(StopTime=150, NumberOfIntervals=100),
-      __Dymola_experimentSetupOutput);
-end PenicillinPlant;
-"));
+      der(u1) = du1;
+      annotation (experiment(StopTime=150, NumberOfIntervals=100),
+          __Dymola_experimentSetupOutput);
     end PenicillinPlant1;
 
-    model PenicillinPlantTrapez
-      PenicillinPlant1 penicillinPlant1_1
-        annotation (Placement(transformation(extent={{0,0},{20,20}})));
-      Modelica.Blocks.Sources.Trapezoid trapezoid(
-        rising=75,
-        width=0,
-        falling=1,
-        period=100,
-        nperiod=1,
-        amplitude=0.07,
-        offset=0.018)
-        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-    equation
-      connect(trapezoid.y, penicillinPlant1_1.u1) annotation (Line(
-          points={{-19,10},{-6.5,10},{-6.5,11},{6,11}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (Diagram(graphics));
-    end PenicillinPlantTrapez;
 
     model PenicillinPlantinit
       PenicillinPlant1 penicillinPlant1_1
@@ -1337,6 +1276,114 @@ end PenicillinPlant;
           smooth=Smooth.None));
       annotation (Diagram(graphics));
     end PenicillinPlantinit;
+
+    model PenicillinPlant2
+          import SI = Modelica.SIunits;
+
+       //parameter
+          parameter Real miu_m = 0.02;
+          parameter Real Km =   0.05;
+          parameter Real Ki = 5;
+          parameter Real Yx = 0.5;
+          parameter Real Yp = 1.2;
+          parameter Real v = 0.004;
+          parameter Real Sin = 200;
+
+          //state start values, equal to final values of first phase
+          parameter Real X2_0 = 3.7;
+          parameter Real S2_0 = 0;
+          parameter Real P2_0 = 0.6;
+          parameter Real V2_0 = 150;
+          parameter Real u2_0 = 0.01;
+
+          //state start values
+          Real X2(start=X2_0,fixed=true);
+          Real S2(start=S2_0,fixed=true);
+          Real P2(start=P2_0,fixed=true);
+          Real V2(start=V2_0,fixed=true);
+          Real u2(start=u2_0,fixed=true);
+          Real miu2;
+
+          //control signal
+      Modelica.Blocks.Interfaces.RealInput du2 annotation (Placement(transformation(
+              extent={{-42,6},{-2,46}}), iconTransformation(extent={{-42,6},{-2,46}})));
+
+    equation
+          miu2 = (miu_m*S2)/(Km+S2+S2^2/Ki);
+          der(X2) = miu2*X2-u2/V2*X2;
+          der(S2) = -miu2*X2/Yx - v*X2/Yp + u2/V2*(Sin - S2);
+          der(P2) = v*X2 - u2/V2*P2;
+          der(V2) = u2;
+          der(u2) = du2;
+
+    end PenicillinPlant2;
+
+    model PenicillinPlantInput
+      PenicillinPlantTest penicillinPlantTest
+        annotation (Placement(transformation(extent={{0,0},{20,20}})));
+      Modelica.Blocks.Sources.Trapezoid trapezoid(
+        amplitude=0.09,
+        rising=75,
+        width=0,
+        falling=0.1,
+        period=150,
+        nperiod=1,
+        offset=0.01)
+        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+    equation
+      connect(trapezoid.y, penicillinPlantTest.u1) annotation (Line(
+          points={{-19,10},{-6.5,10},{-6.5,11},{6,11}},
+          color={0,0,127},
+          smooth=Smooth.None));
+      annotation (
+        Diagram(graphics),
+        experiment(StopTime=150),
+        __Dymola_experimentSetupOutput);
+    end PenicillinPlantInput;
+
+    model PenicillinPlantTest
+
+      import SI = Modelica.SIunits;
+
+      parameter Real miu_m = 0.02;
+      parameter Real Km =   0.05;
+      parameter Real Ki = 5;
+      parameter Real Yx =    0.3;
+      parameter Real Yp =   1.2;
+      parameter Real v = 0.004;
+      parameter Real Sin =   200;
+      parameter Real umin = 0;
+      parameter Real umax = 1;
+      parameter Real Xmin =  0;
+      parameter Real Xmax = 3.7;
+      parameter Real Smin = 0;
+
+      //state start values
+      parameter Real X1_0=1;
+      parameter Real S1_0=0.5;
+      parameter Real P1_0=0;
+      parameter Real V1_0=150;
+
+      //state start values
+      Real X1(start=X1_0,fixed=true) "Cell mass concentration";
+      Real S1(start=S1_0,fixed=true) "Substrate concentration";
+      Real P1(start=P1_0,fixed=true) "Penicillin concentration";
+      Real V1(start=V1_0,fixed=true) "Volume of medium";
+      Real miu1;
+
+      //control signal
+      Modelica.Blocks.Interfaces.RealInput u1 "Feed Flowrate"
+        annotation (Placement(transformation(extent={{-60,-10},{-20,30}})));
+
+    equation
+      miu1 = (miu_m*S1)/(Km+S1+S1^2/Ki);
+      der(X1) = miu1*X1-u1/V1*X1;
+      der(S1) = -miu1*X1/Yx - v*X1/Yp + u1/V1*(Sin - S1);
+      der(P1) = v*X1 - u1/V1*P1;
+      der(V1) = u1;
+      annotation (experiment(StopTime=150, NumberOfIntervals=100),
+          __Dymola_experimentSetupOutput);
+    end PenicillinPlantTest;
   end PenicillinPlant;
 
   package BloodGlucose
@@ -1434,35 +1481,11 @@ end PenicillinPlant;
     model MarinePopulation
 
       //parameter
-      parameter Real ym[21,8]=
-      {{ 20000, 17000, 10000, 15000, 12000, 9000, 7000, 3000},
-       { 12445, 15411, 13040, 13338, 13484, 8426, 6615, 4022},
-       {  7705, 13074, 14623, 11976, 12453, 9272, 6891, 5020},
-       {  4664,  8579, 12434, 12603, 11738, 9710, 6821, 5722},
-       {  2977,  7053, 11219, 11340, 13665, 8534, 6242, 5695},
-       {  1769,  5054, 10065, 11232, 12112, 9600, 6647, 7034},
-       {   943,  3907,  9473, 10334, 11115, 8826, 6842, 7348},
-       {   581,  2624,  7421, 10297, 12427, 8747, 7199, 7684},
-       {   355,  1744,  5369,  7748, 10057, 8698, 6542, 7410},
-       {   223,  1272,  4713,  6869,  9564, 8766, 6810, 6961},
-       {   137,   821,  3451,  6050,  8671, 8291, 6827, 7525},
-       {    87,   577,  2649,  5454,  8430, 7411, 6423, 8388},
-       {    49,   337,  2058,  4115,  7435, 7627, 6268, 7189},
-       {    32,   228,  1440,  3790,  6474, 6658, 5859, 7467},
-       {    17,   168,  1178,  3087,  6524, 5880, 5562, 7144},
-       {    11,    99,   919,  2596,  5360, 5762, 4480, 7256},
-       {     7,    65,   647,  1873,  4556, 5058, 4944, 7538},
-       {     4,    44,   509,  1571,  4009, 4527, 4233, 6649},
-       {     2,    27,   345,  1227,  3677, 4229, 3805, 6378},
-       {     1,    20,   231,   934,  3197, 3695, 3159, 6454},
-       {     1,    12,   198,   707,  2562, 3163, 3232, 5566}};
-
-      parameter Real tm[21]=  0:0.5:10;
-      parameter Real m[8]={20,0,0,0,0,0,0,0};
-      parameter Real g[7]={100,0,50,0,0,0,0};
+      parameter Real m[8]={0,0,0,0,0,0,0,0};
+      parameter Real g[7]={0,0,0,0,0,0,0};
 
       //states
-      Real y[8](start=ym[1,:]);
+      Real y[8](start={ 20000, 17000, 10000, 15000, 12000, 9000, 7000, 3000}, each fixed=true);
 
     equation
       der(y) = cat(1,{0},g).*cat(1,{0},y[1:7]) - (m+cat(1,g,{0})).*y;
@@ -1470,6 +1493,197 @@ end PenicillinPlant;
       annotation (experiment(StopTime=10), __Dymola_experimentSetupOutput);
     end MarinePopulation;
   end MarinePopulation;
+
+  package CatalyticCracking
+    model CatalyticCracking
+
+     //parameter
+      parameter Real y1_0=1;
+      parameter Real y2_0=0;
+      parameter Real theta1=1;
+      parameter Real theta2=1;
+      parameter Real theta3=1;
+
+      //states
+      Real y1(start=y1_0);
+      Real y2(start=y2_0);
+    equation
+      der(y1) = -(theta1+theta3)*y1^2;
+      der(y2) = theta1*y1^2-theta2*y2;
+
+    end CatalyticCracking;
+  end CatalyticCracking;
+
+  package Polyeth
+    model Polyeth
+
+        import SI = Modelica.SIunits;
+
+        //define constants:
+        parameter SI.Volume Vg = 500;
+        parameter SI.Volume Vp = 0.5;
+        parameter Real Pv = 17;
+        parameter SI.Mass Bw = 7e4;
+        parameter SI.SpecificHeatCapacity Cpm1 = 11*4.1868;
+        parameter Real Cv = 7.5;
+        parameter SI.SpecificHeatCapacity Cpw = 4.1868e3;
+        parameter SI.SpecificHeatCapacity CpIn = 6.9*4.1868;
+        parameter SI.SpecificHeatCapacity Cppol = 0.85e3 * 4.1868;
+        parameter SI.MolarMass Mw1 = 28.05e-3;
+        parameter SI.Mass Mw = 3.314e4;
+        parameter SI.AmountOfSubstance Mg = 6060.5;
+        parameter SI.HeatCapacity MrCpr = 1.4*4.1868e7;
+        parameter SI.SpecificEnergy Hreac = -894*4.1868e3;
+        parameter Real UA = 1.14*4.1868e6 "J/(K*s)";
+        parameter SI.MolarFlowRate FIn = 5;
+        parameter SI.MolarFlowRate FM1 = 190;
+        parameter SI.MolarFlowRate Fg = 8500;
+        parameter SI.MassFlowRate Fw = 3.11e5*18e-3;
+        parameter SI.Temperature Tf = 360;
+        parameter SI.Temperature Twi = 289.56;
+        parameter Real RR = 8.20575e-5;
+        parameter SI.MolarHeatCapacity R = 8.314;
+
+        //define parameter theta
+         parameter SI.IonicStrength ac = 0.548;
+         parameter Real kp0 = 85e-3;
+         parameter Real Ea = 9e3*4.1868 "J/mol";
+         parameter Real kd = 1e-4 "s^-1";
+
+        // Control Signal
+        parameter SI.MassFlowRate Fc = 1.5/3600;
+        parameter SI.Temperature Tfeed = 293 "scalar or vector??";
+        //Fc (start = Fc_ss) could be defined as input for optimization problems
+        //Tfeed (start = Tfeed_ss) step control signal value could be defined as input for optimization problems
+
+         //States
+         SI.Concentration In_con(start = 483.5818, fixed=true)
+        "Molar concentration of inert in the gas phase";
+         SI.Concentration M1_con(start = 218.6872, fixed=true)
+        "Molar concentration of ethylene in the gas phase";
+         SI.AmountOfSubstance Y1(start = 5.0385) "Moles of active site type 1";
+         SI.AmountOfSubstance Y2(start = 5.0385) "Moles of active site type 2";
+         SI.Temperature T(start = 360.069) "Reactor temperature";
+         SI.Temperature Tw(start = 290.3755)
+        "Cooling water temperature from exchanger";
+         SI.Temperature Tg(start = 294.3801) "Recycle gas temperature";
+         Real bt;
+         Real RM1;
+         Real Cpg;
+         Real Hf;
+         Real Hg1;
+         Real Hg0;
+         Real Hr;
+         Real Hpol;
+
+    equation
+         //Algebric equations:
+         0 = Vp * Cv * sqrt((M1_con+In_con) * RR * T - Pv) -bt;
+         0 = M1_con * kp0 * exp(-Ea/R*(1/T-1/Tf)) * (Y1+Y2) -RM1;
+         0 = M1_con/(M1_con + In_con) * Cpm1 + In_con/(M1_con + In_con) * CpIn-Cpg;
+         0 = FM1 * Cpm1 * ( Tfeed - Tf) + FIn * CpIn * (Tfeed - Tf)-Hf;
+         0 = Fg * (Tg - Tf) * Cpg-Hg1;
+         0 = (Fg + bt) * (T - Tf) * Cpg-Hg0;
+         0 = Hreac * Mw1 * RM1-Hr;
+         0 = Cppol * (T - Tf) * RM1 * Mw1-Hpol;
+
+         // Differential equations:
+         der(In_con) = (FIn - In_con/(M1_con + In_con) * bt)/Vg;
+         der(M1_con) = (FM1 - M1_con/(M1_con + In_con) * bt - RM1)/Vg;
+         der(Y1)     = Fc * ac - kd * Y1 - RM1 * Mw1 * Y1/ Bw;
+         der(Y2)     = Fc * ac - kd * Y2 - RM1 * Mw1 * Y2/ Bw;
+         der(T)      = (Hf + Hg1 - Hg0 - Hr - Hpol)/(MrCpr + Bw * Cppol);
+         der(Tw)     = Fw/Mw * (Twi - Tw) - UA/(Mw * Cpw) * (Tw - Tg);
+         der(Tg)     = Fg/Mg * (T - Tg)   + UA/(Mg * Cpg) * (Tw - Tg);
+
+      annotation (Icon(graphics));
+    end Polyeth;
+
+    model PolyethInput
+
+      import SI = Modelica.SIunits;
+
+        //define constants:
+        parameter SI.Volume Vg = 500;
+        parameter SI.Volume Vp = 0.5;
+        parameter Real Pv = 17;
+        parameter SI.Mass Bw = 7e4;
+        parameter SI.SpecificHeatCapacity Cpm1 = 11*4.1868;
+        parameter Real Cv = 7.5;
+        parameter SI.SpecificHeatCapacity Cpw = 4.1868e3;
+        parameter SI.SpecificHeatCapacity CpIn = 6.9*4.1868;
+        parameter SI.SpecificHeatCapacity Cppol = 0.85e3 * 4.1868;
+        parameter SI.MolarMass Mw1 = 28.05e-3;
+        parameter SI.Mass Mw = 3.314e4;
+        parameter SI.AmountOfSubstance Mg = 6060.5;
+        parameter SI.HeatCapacity MrCpr = 1.4*4.1868e7;
+        parameter SI.SpecificEnergy Hreac = -894*4.1868e3;
+        parameter Real UA = 1.14*4.1868e6 "J/(K*s)";
+        parameter SI.MolarFlowRate FIn = 5;
+        parameter SI.MolarFlowRate FM1 = 190;
+        parameter SI.MolarFlowRate Fg = 8500;
+        parameter SI.MassFlowRate Fw = 3.11e5*18e-3;
+        parameter SI.Temperature Tf = 360;
+        parameter SI.Temperature Twi = 289.56;
+        parameter Real RR = 8.20575e-5;
+        parameter SI.MolarHeatCapacity R = 8.314;
+        parameter SI.Temperature Tfeed=293;
+
+        //define parameter theta
+         parameter SI.IonicStrength ac = 0.548;
+         parameter Real kp0 = 85e-3;
+         parameter Real Ea = 9e3*4.1868 "J/mol";
+         parameter Real kd = 1e-4 "s^-1";
+
+         //States
+         SI.Concentration In_con(start = 483.5818, fixed=true)
+        "Molar concentration of inert in the gas phase";
+         SI.Concentration M1_con(start = 218.6872, fixed=true)
+        "Molar concentration of ethylene in the gas phase";
+         SI.AmountOfSubstance Y1(start = 5.0385) "Moles of active site type 1";
+         SI.AmountOfSubstance Y2(start = 5.0385) "Moles of active site type 2";
+         SI.Temperature T(start = 360.069) "Reactor temperature";
+         SI.Temperature Tw(start = 290.3755)
+        "Cooling water temperature from exchanger";
+         SI.Temperature Tg(start = 294.3801) "Recycle gas temperature";
+         Real bt;
+         Real RM1;
+         Real Cpg;
+         Real Hf;
+         Real Hg1;
+         Real Hg0;
+         Real Hr;
+         Real Hpol;
+
+         // Control Signal
+      Modelica.Blocks.Interfaces.RealInput Fc annotation (Placement(transformation(
+              extent={{-60,20},{-20,60}}), iconTransformation(extent={{-60,20},{-20,
+                60}})));
+    equation
+         //Algebric equations:
+         bt = Vp * Cv * sqrt((M1_con+In_con) * RR * T - Pv);
+         0 = M1_con * kp0 * exp(-Ea/R*(1/T-1/Tf)) * (Y1+Y2) -RM1;
+         0 = M1_con/(M1_con + In_con) * Cpm1 + In_con/(M1_con + In_con) * CpIn-Cpg;
+         0 = FM1 * Cpm1 * ( Tfeed - Tf) + FIn * CpIn * (Tfeed - Tf)-Hf;
+         0 = Fg * (Tg - Tf) * Cpg-Hg1;
+         0 = (Fg + bt) * (T - Tf) * Cpg-Hg0;
+         0 = Hreac * Mw1 * RM1-Hr;
+         0 = Cppol * (T - Tf) * RM1 * Mw1-Hpol;
+
+         // Differential equations:
+         der(In_con) = (FIn - In_con/(M1_con + In_con) * bt)/Vg;
+         der(M1_con) = (FM1 - M1_con/(M1_con + In_con) * bt - RM1)/Vg;
+         der(Y1)     = Fc * ac - kd * Y1 - RM1 * Mw1 * Y1/ Bw;
+         der(Y2)     = Fc * ac - kd * Y2 - RM1 * Mw1 * Y2/ Bw;
+         der(T)      = (Hf + Hg1 - Hg0 - Hr - Hpol)/(MrCpr + Bw * Cppol);
+         der(Tw)     = Fw/Mw * (Twi - Tw) - UA/(Mw * Cpw) * (Tw - Tg);
+         der(Tg)     = Fg/Mg * (T - Tg)   + UA/(Mg * Cpg) * (Tw - Tg);
+
+      annotation (Icon(graphics),
+        experiment(StopTime=36000),
+        __Dymola_experimentSetupOutput);
+    end PolyethInput;
+  end Polyeth;
   annotation (DymolaStoredErrors(thetext="package VDP_pack
 
   model VDP
@@ -1547,23 +1761,4 @@ end PenicillinPlant;
 end VDP_pack;"), uses(Modelica(version="3.2")),
     experiment(StopTime=6000, NumberOfIntervals=2000),
     __Dymola_experimentSetupOutput);
-  package CatalyticCracking
-    model CatalyticCracking
-
-     //parameter
-      parameter Real y1_0=1;
-      parameter Real y2_0=0;
-      parameter Real theta1=1;
-      parameter Real theta2=1;
-      parameter Real theta3=1;
-
-      //states
-      Real y1(start=y1_0);
-      Real y2(start=y2_0);
-    equation
-      der(y1) = -(theta1+theta3)*y1^2;
-      der(y2) = theta1*y1^2-theta2*y2;
-
-    end CatalyticCracking;
-  end CatalyticCracking;
 end JMExamples;

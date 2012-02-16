@@ -34,7 +34,8 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    jmu_name = compile_jmu("VDP_pack.VDP_Opt", curr_dir+"/files/VDP.mop")
+    jmu_name = compile_jmu("JMExamples_opt.VDP_Opt", 
+    (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
     vdp = JMUModel(jmu_name)
     
     res = vdp.optimize()

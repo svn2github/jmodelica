@@ -20,6 +20,7 @@ import os.path
 
 # Import numerical libraries
 import numpy as N
+import scipy as Sci
 import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
@@ -29,16 +30,20 @@ from pyjmi import JMUModel
 def run_demo(with_plots=True):
     """
     This is an example of parameter estimation of marine population dynamics.
+    reference:
+    Benchmarking Optimization Software with COPS Elizabeth D. 
+    Dolan and Jorge J. More ARGONNE NATIONAL LABORATORY
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    jmu_name = compile_jmu("MarinePopulation.MarinePopulation_opt", curr_dir+"/files/MarinePopulation.mop")
+    jmu_name = compile_jmu("JMExamples_opt.MarinePopulation_opt", (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
     mp = JMUModel(jmu_name)
 	
     # optimize
     opts = mp.optimize_options()
     opts['n_e'] = 20
+    opts['n_cp'] = 1
     res = mp.optimize(options=opts)
 	
 	#Extract variable profiles
@@ -153,9 +158,14 @@ def run_demo(with_plots=True):
         plt.ylabel('y8')
 
         print("** Optimal parameter values: **")
-        print('g = {0:.3f} {0:.3f} {0:.3f} {0:.3f} {0:.3f} {0:.3f} {0:.3f} '
+        print('g = {0:.3f} {1:.3f} {2:.3f} {3:.3f} {4:.3f} {5:.3f} {6:.3f} '
         .format(g1,g2,g3,g4,g5,g6,g7))
-        print('m = {0:.3f} {0:.3f} {0:.3f} {0:.3f} {0:.3f} {0:.3f} {0:.3f} {0:.3f}'
+        print('m = {0:.3f} {1:.3f} {2:.3f} {3:.3f} {4:.3f} {5:.3f} {6:.3f} {7:.3f}'
         .format(m1,m2,m3,m4,m5,m6,m7,m8))
+
+        J = Sci.linalg.norm(y1-y1_m)+Sci.linalg.norm(y2-y2_m)+Sci.linalg.norm(y3-y3_m)
+        +Sci.linalg.norm(y4-y4_m)+Sci.linalg.norm(y5-y5_m)+Sci.linalg.norm(y6-y6_m)
+        +Sci.linalg.norm(y7-y7_m)+Sci.linalg.norm(y8-y8_m)
+        print('J = ', repr(J))
 if __name__ == "__main__":
     run_demo()

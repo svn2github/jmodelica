@@ -33,13 +33,16 @@ def run_demo(with_plots=True):
     """
     Demonstrate how to solve a simple parameter estimation problem 
     in form of a model of catalytic cracking of gas oil.
+    reference:
+    Benchmarking Optimization Software with COPS 
+    Elizabeth D. Dolan and Jorge J. More ARGONNE NATIONAL LABORATORY
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
     # Compile the Optimica model to a JMU
-    jmu_name = compile_jmu("CatalyticCracking.CatalyticCracking_opt",
-    curr_dir+"/files/CatalyticCracking.mop")
+    jmu_name = compile_jmu("JMExamples_opt.CatalyticCracking_opt",
+    (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
     
     # Load the dynamic library
     cc=JMUModel(jmu_name)
@@ -85,7 +88,7 @@ def run_demo(with_plots=True):
         print("** Optimal parameter values: **")
         print("theta1 = %f"%theta1)
         print("theta2 = %f"%theta2)
-        print("theta2 = %f"%theta2)
+        print("theta3 = %f"%theta3)
 
 if __name__ == "__main__":
     run_demo()

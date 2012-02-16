@@ -33,7 +33,7 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    jmu_name = compile_jmu("FlightPath.FlightPath_opt", curr_dir+"/files/FlightPath.mop")
+    jmu_name = compile_jmu("JMExamples_opt.FlightPath_opt", (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
     fp = JMUModel(jmu_name)
     
     res = fp.optimize()

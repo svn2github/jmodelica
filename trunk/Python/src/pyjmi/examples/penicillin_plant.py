@@ -30,10 +30,14 @@ def run_demo(with_plots=True):
     """
     In this example, the objective is to maximize the concentration of penicillin, P, 
     produced in a fed-batch bioreactor, given a finite amount of time. 
+    reference:
+    Fed-batch Fermentor Control: Dynamic Optimization of Batch Processes II. Role of Measurements 
+    in Handling Uncertainty 2001, B. Srinivasan, D. Bonvin, E. Visser, S. Palanki
+    Illustrative example: Nominal Optimization of a Fed-Batch Fermentor for Penicillin Production.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-    jmu_name1 = compile_jmu("PenicillinPlant.PenicillinPlant_opt1", curr_dir+"/files/PenicillinPlant.mop")
+    jmu_name1 = compile_jmu("JMExamples_opt.PenicillinPlant_opt1", (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
     
 	# optimize
     pp1 = JMUModel(jmu_name1)
@@ -60,7 +64,7 @@ def run_demo(with_plots=True):
     print "len(t1) = ", repr(len(t1))
 	
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-    jmu_name2 = compile_jmu("PenicillinPlant.PenicillinPlant_opt2", curr_dir+"/files/PenicillinPlant.mop")
+    jmu_name2 = compile_jmu("JMExamples_opt.PenicillinPlant_opt2", (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
     pp2 = JMUModel(jmu_name2)
 	
 	#set results of the first state as input for the second state
@@ -88,7 +92,7 @@ def run_demo(with_plots=True):
     V2=res2['V2']
     u2=res2['u2']
 	
-    t2 = t1+75
+    t2 = t1+80
     t = range(182)
     t[0:91] = t1
     t[91:182] = t2
@@ -111,7 +115,7 @@ def run_demo(with_plots=True):
     
     if with_plots:
         # Plot
-        plt.figure(1)
+        plt.figure()
         plt.clf()
         plt.subplot(321)
         plt.plot(t,X)
@@ -180,6 +184,8 @@ def run_demo(with_plots=True):
 		
         # plt.xlabel('time')
         # plt.show()
+
+        print "Penicillin production:", repr(P2[len(P2)-1])
 		
 if __name__ == "__main__":
     run_demo()

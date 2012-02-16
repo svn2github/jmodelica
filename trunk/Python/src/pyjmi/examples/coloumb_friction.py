@@ -33,7 +33,8 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    jmu_name1 = compile_jmu("ColoumbFriction.ColoumbFriction_opt", curr_dir+"/files/ColoumbFriction.mop")
+    jmu_name1 = compile_jmu("JMExamples_opt.ColoumbFriction_opt", 
+    (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
     cf = JMUModel(jmu_name1)
     res = cf.optimize()
     

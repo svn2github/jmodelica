@@ -29,12 +29,13 @@ from pyjmi import JMUModel
 def run_demo(with_plots=True):
     """
     Demonstrate how to solve a continous state constraint optimization problem.
-    Example taken from : PROPT - Matlab Optimal Control Software (DAE, ODE)
+    reference : PROPT - Matlab Optimal Control Software (DAE, ODE)
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    jmu_name = compile_jmu("ContState.ContState_opt", curr_dir+"/files/ContState.mop")
+    jmu_name = compile_jmu("JMExamples_opt.ContState_opt", 
+    (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
     cs = JMUModel(jmu_name)
     
     res = cs.optimize()
