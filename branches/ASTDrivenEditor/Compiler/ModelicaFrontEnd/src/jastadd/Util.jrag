@@ -235,9 +235,21 @@ aspect NodeMethods {
      * @param end    the node to copy the <code>end</code> member from.
      */
     public void BaseNode.setLocationNoTree(ASTNode start, ASTNode end) {
+    	setLocationNoTree(start, end, start);
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within
+     *        the source to values copied from two other nodes, that might not be
+     *        in a proper AST.
+     * @param start      the node to copy the <code>start</code> member from.
+     * @param end        the node to copy the <code>end</code> member from.
+     * @param fNameNode  the node to copy the <code>fName</code> member from.
+     */
+    public void BaseNode.setLocationNoTree(ASTNode start, ASTNode end, ASTNode fNameNode) {
         super.setLocation(start, end);
-        if (start instanceof BaseNode)
-        	fName = ((BaseNode) start).fName;
+        if (fNameNode instanceof BaseNode)
+        	fName = ((BaseNode) fNameNode).fName;
     }
     
     public int ASTNode.beginLine() { return getLine(getStart()); }

@@ -389,7 +389,7 @@
                                                     getName(0).getComment(),
                                                     getConstrainingClauseOpt(),
                                                     getComment());
-                c.setLocationNoTree(getName(0), this);
+                c.setLocationNoTree(this, this, getName(0));
                 //log.debug("ComponentClause->ComponentDecl.getStart() = "+c.getStart());
                 return c;
             }

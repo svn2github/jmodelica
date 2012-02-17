@@ -2009,11 +2009,8 @@ model ImportTest11
          description="Using constant from imported package.",
          flatModel="
 fclass NameTests.ImportTest11
- Real m.v(final quantity = \"ElectricPotential\",final unit = \"V\");
- Real m.x;
-equation
- m.v = 0;
- m.x = 1.2566370614359173E-6;
+ Real m.v(final quantity = \"ElectricPotential\",final unit = \"V\") = 0;
+ Real m.x = 1.2566370614359173E-6;
 end NameTests.ImportTest11;
 ")})));
 		

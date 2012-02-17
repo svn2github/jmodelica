@@ -28,9 +28,13 @@ aspect FormattedPrint {
 		public void print(ASTNode node, PrintStream printStream, String ident) {
 			node.prettyPrintFormattedHelper(this, printStream);
 		}
+		
+		public String op(FBinExp exp) {
+			return exp.op();
+		}
 	}
 	
-	private FormattedPrettyPrinter ASTNode.formattedPrettyPrinter = new FormattedPrettyPrinter();
+	static FormattedPrettyPrinter ASTNode.formattedPrettyPrinter = new FormattedPrettyPrinter();
 	protected FormattingItem BaseNode.preFormatting = new EmptyFormattingItem();
 	protected FormattingItem BaseNode.postFormatting = new EmptyFormattingItem();
 
@@ -432,8 +436,11 @@ aspect FormattedPrint {
 	    for (int i = 0; i < getNumComponentDecl(); i++) {
 	    	getComponentDecl(i).prettyPrintFormattedHelper(printer, printStream);
 	    }
-	    for (int i = 0; i < getNumEquation(); i++) {
-	    	getEquation(i).prettyPrintFormattedHelper(printer, printStream);
+	    if (getNumEquation() > 0) {
+	    	printStream.print("equation");
+	    	for (int i = 0; i < getNumEquation(); i++) {
+	    		getEquation(i).prettyPrintFormattedHelper(printer, printStream);
+	    	}
 	    }
 			
  		// Print all components
@@ -600,13 +607,17 @@ aspect FormattedPrint {
 		
 		printer.print(getClassName(), printStream, ""); // WHY?
 		if (hasTypeArraySubscripts()) {
-			printer.print(getTypeArraySubscripts(), printStream, "");
+			//printer.print(getTypeArraySubscripts(), printStream, "");
+			getTypeArraySubscripts().prettyPrintFormattedHelper(printer, printStream);
 		}
+		//printStream.print(preFormatting);
 		getName().prettyPrintFormattedHelper(printer, printStream); 
 	    if (hasVarArraySubscripts()) {
-	    	printer.print(getVarArraySubscripts(), printStream, "");
+	    	//printer.print(getVarArraySubscripts(), printStream, "");
+	    	getVarArraySubscripts().prettyPrintFormattedHelper(printer, printStream);
 	    }
-	    printer.print(getModificationOpt(), printStream, "");
+	    //printer.print(getModificationOpt(), printStream, "");
+	    getModificationOpt().prettyPrintFormattedHelper(printer, printStream);
 	    
 	    getComment().prettyPrintFormattedHelper(printer, printStream);
 				 
