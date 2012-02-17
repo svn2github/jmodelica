@@ -215,12 +215,10 @@ aspect Arrays {
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	eq FNdimsExp.ndims() = 0;
 	
-	eq FInfArgsFunctionCall.ndims()   = getNumFExp();
-	eq FFillExp.ndims()               = getNumFExp() + getFillExp().ndims();
-	eq FFunctionCall.ndims()          = hasOutputs() ? expOutput().ndims() : -1;
-	eq FVectorFunctionCall.ndims()    = size().ndims();
-	eq InstFunctionCall.ndims()       = hasOutputs() ? expOutput().ndims() : -1;
-	eq InstVectorFunctionCall.ndims() = getSize().ndims();
+	eq FInfArgsFunctionCall.ndims() = getNumFExp();
+	eq FFillExp.ndims()             = getNumFExp() + getFillExp().ndims();
+	eq FFunctionCall.ndims()        = hasOutputs() ? expOutput().ndims() : -1;
+	eq InstFunctionCall.ndims()     = hasOutputs() ? expOutput().ndims() : -1;
 	
 	eq FBinExp.ndims() = getLeft().ndims();
 	eq FUnaryExp.ndims() = getFExp().ndims();
@@ -765,7 +763,6 @@ aspect Arrays {
 			return s;
 		}
 	}
-	eq InstVectorFunctionCall.sizeOfOutput(int i) = (i == 0) ? getSize() : super.sizeOfOutput(i);
 	
 	syn Size FFunctionCall.sizeOfOutput(int i) = getSizes()[i];
 	
@@ -1954,7 +1951,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Check if all lengths have a value (fix length or expression).
+		 * \brief Check if all lengths have a value (fix length or integer).
 		 */
 		public boolean isComplete() {
 			for (int i = 0; i < size.length; i++)
