@@ -215,8 +215,6 @@ class IpoptInitializationAlg(AlgorithmBase):
         Helper function that sets options for the solver.
         """
         for k, v in self.solver_options.iteritems():
-            print k
-            print v
             if isinstance(v, default_int):
                 self.nlp_ipopt.init_opt_ipopt_set_int_option(k, v)
             elif isinstance(v, float):
