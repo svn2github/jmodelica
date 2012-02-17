@@ -18,6 +18,7 @@
 #define FMI_FUNCTIONS_H_
 
 #include "fmi_types.h"
+#include <string.h>
 
 /* Type definitions */
 typedef enum {
@@ -55,11 +56,6 @@ typedef enum {
 	fmiPendingStatus,
 	fmiLastSuccessfulTime
 } fmiStatusKind;
-
-/* reset alignment policy to the one set before reading this file */
-#ifdef WIN32
-#pragma pack(pop)
-#endif
 
 /* FMI 1.0 common functions */
 typedef const char*		(*fmiGetVersion_ft)					();

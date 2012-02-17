@@ -14,22 +14,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef JM_TYPES_H
-#define JM_TYPES_H
 
-typedef const char* jm_string;
+#include "fmi_zip_unzip_impl.h"
+#include "jm_types.h"
 
-typedef void* jm_voidp;
+/* Returns 1 if the FMU was successfully unziped. Otherwise 0 is returned */
+jm_status_enu_t fmi_zip_unzip(char* zip_file_path, char* output_folder)
+{
+    int argc = 5;
+	char *argv[5] = {"miniunz", "-o", zip_file_path, "-d", output_folder};
 
-typedef struct jm_name_ID_map_t {
-    jm_string name;
-    unsigned int ID;
-} jm_name_ID_map_t;
-
-typedef enum {	
-	jm_status_success = 0,	
-	jm_status_error = -1
-} jm_status_enu_t;
-
-/* JM_TYPES_H */
-#endif
+	if (miniunz(argc, argv) == 0) {
+		return jm_status_success;
+	} else {
+		return jm_status_error;	
+	}
+}

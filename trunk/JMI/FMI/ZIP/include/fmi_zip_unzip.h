@@ -14,22 +14,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef JM_TYPES_H
-#define JM_TYPES_H
 
-typedef const char* jm_string;
+#ifndef FMI_ZIP_UNZIP_H_
+#define FMI_ZIP_UNZIP_H_
 
-typedef void* jm_voidp;
+#include "jm_types.h"
 
-typedef struct jm_name_ID_map_t {
-    jm_string name;
-    unsigned int ID;
-} jm_name_ID_map_t;
+jm_status_enu_t fmi_zip_unzip(char* zip_file_path, char* output_folder);
 
-typedef enum {	
-	jm_status_success = 0,	
-	jm_status_error = -1
-} jm_status_enu_t;
-
-/* JM_TYPES_H */
-#endif
+#endif FMI_ZIP_UNZIP_H_ /* End of header file C_FMI_UNZIP_H */

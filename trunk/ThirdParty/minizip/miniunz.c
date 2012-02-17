@@ -633,7 +633,7 @@ int miniunz(argc,argv)
 #endif
         {
           printf("Error changing into %s, aborting\n", dirname);
-          exit(-1);
+          return -1; /* exit(-1); */
         }
 
         if (filename_to_extract == NULL)

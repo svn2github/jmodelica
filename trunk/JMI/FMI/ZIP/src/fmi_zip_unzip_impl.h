@@ -14,22 +14,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef JM_TYPES_H
-#define JM_TYPES_H
+#ifndef FMI_ZIP_UNZIP_IMPL_H
+#define FMI_ZIP_UNZIP_IMPL_H
 
-typedef const char* jm_string;
+int miniunz(int argc , char *argv[]); /* Renamed the main function in miniunz */
 
-typedef void* jm_voidp;
-
-typedef struct jm_name_ID_map_t {
-    jm_string name;
-    unsigned int ID;
-} jm_name_ID_map_t;
-
-typedef enum {	
-	jm_status_success = 0,	
-	jm_status_error = -1
-} jm_status_enu_t;
-
-/* JM_TYPES_H */
-#endif
+#endif /* End of header file FMI_ZIP_UNZIP_IMPL_H */

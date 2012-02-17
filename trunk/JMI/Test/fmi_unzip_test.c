@@ -14,22 +14,30 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef JM_TYPES_H
-#define JM_TYPES_H
+#include <stdio.h>
+#include "fmi_zip_unzip.h"
+#include "jm_types.h"
 
-typedef const char* jm_string;
+#define PRINT_MY_DEBUG printf("Line: %d \t File: %s \n",__LINE__, __FILE__)
 
-typedef void* jm_voidp;
-
-typedef struct jm_name_ID_map_t {
-    jm_string name;
-    unsigned int ID;
-} jm_name_ID_map_t;
-
-typedef enum {	
-	jm_status_success = 0,	
-	jm_status_error = -1
-} jm_status_enu_t;
-
-/* JM_TYPES_H */
+void do_pause()
+{
+#ifdef _MSC_VER
+	system("PAUSE");
+#elif
 #endif
+}
+
+int main(int argc, char *argv[])
+{
+	jm_status_enu_t status;
+
+	status = fmi_zip_unzip("C:\\P510-JModelica\\FMIToolbox\\trunk\\src\\wrapperfolder\\Furuta.fmu", "C:\\Documents and Settings\\p418_baa\\Desktop\\XMLtest\\temporaryfolder\\");
+
+	if (status == jm_status_error) {
+		printf("Failed to unzip the file\n");
+	}
+	do_pause();
+}
+
+

@@ -14,22 +14,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef JM_TYPES_H
-#define JM_TYPES_H
+#ifndef FMI_IMPORT_UTIL_H_
+#define FMI_IMPORT_UTIL_H_
 
-typedef const char* jm_string;
+#include "fmi_functions.h"
 
-typedef void* jm_voidp;
+char* fmi_import_get_dll_path(char* fmu_unzipped_path, char* model_identifier, fmiCallbackFunctions callBackFunctions);
+char* fmi_import_get_model_description_path(char* fmu_unzipped_path, fmiCallbackFunctions callBackFunctions);
 
-typedef struct jm_name_ID_map_t {
-    jm_string name;
-    unsigned int ID;
-} jm_name_ID_map_t;
-
-typedef enum {	
-	jm_status_success = 0,	
-	jm_status_error = -1
-} jm_status_enu_t;
-
-/* JM_TYPES_H */
-#endif
+#endif /* End of header file FMI_IMPORT_UTIL_H_ */
