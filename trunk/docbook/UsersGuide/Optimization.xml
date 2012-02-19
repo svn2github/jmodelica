@@ -168,7 +168,7 @@ plt.show()
         problems. It is implemented in C, uses CppAD for computing function
         derivatives and IPOPT for solving the resulting NLP. Functions and
         records in models are supported by this algorithm. Use this method if
-        your model is a DAE and does not contain discontinuities. </para>
+        your model is a DAE and does not contain discontinuities.</para>
       </listitem>
 
       <listitem>
@@ -3088,7 +3088,7 @@ print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
     benefits of using CasADi, through its Python interface, is significantly
     increased flexibility and extensibility of the implementation on one hand
     and significantly improved performance on the other. The goal is for the
-    CasADi-based algorithm to replace the C-based algorithm. </para>
+    CasADi-based algorithm to replace the C-based algorithm.</para>
 
     <para>The implementation relies on the class
     <literal>CasadiModel</literal>. A compiler method for creating compiled
@@ -3119,7 +3119,7 @@ res = model.optimize(algorithm="LocalDAECollocationAlg")
     <para>An object containing all the options for the optimization algorithm
     can be retrieved from the model object. The object
     <literal>model</literal> in the code below s a
-    <literal>CasadiModel</literal> instance. </para>
+    <literal>CasadiModel</literal> instance.</para>
 
     <programlisting language="python">opts = model.optimize_options(algorithm="LocalDAECollocationAlg")
 
@@ -3506,14 +3506,14 @@ res = model.optimize(algorithm="CasadiPseudoSpectral")
       a <literal>CasadiModel</literal> instance. It is also shown how to use
       the interactive help.</para>
 
-      <programlisting language="python">opts = model.optimize_options(algorithm="CasadiPseudoSpectral")
+      <programlisting language="python">opts = model.optimize_options(algorithm="CasadiPseudoSpectralAlg")
 
 opts? #View the help text</programlisting>
 
       <para>To provide the options to the optimize call, use the options
       attribute.</para>
 
-      <programlisting language="python">res = model.optimize(algorithm="CasadiPseudoSpectral", options=opts)</programlisting>
+      <programlisting language="python">res = model.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)</programlisting>
 
       <para>In <xref linkend="opt-tab-pseudo-opts" /> the options for the
       PseudoSpectral methods are shown.<table xml:id="opt-tab-pseudo-opts">
@@ -3661,7 +3661,7 @@ opts? #View the help text</programlisting>
       phase one plus the discontinuity should be equal to our state in phase
       two.</para>
 
-      <programlisting language="python">opts = model.optimize_options(algorithm="CasadiPseudoSpectral")
+      <programlisting language="python">opts = model.optimize_options(algorithm="CasadiPseudoSpectralAlg")
 
 opts["n_e"]=2 #Two elements
 opts["link_options"] = [(1,"v","dv")] #The parameter dv should be connected
@@ -3727,10 +3727,10 @@ casadi_name = compile_fmux("VDP_Opt", "VDP.mop")
 model = CasadiModel(casadi_name)
 
 #Get the options dictionary
-opts = model.optimize_options(algorithm="CasadiPseudoSpectral")
+opts = model.optimize_options(algorithm="CasadiPseudoSpectralAlg")
 opts["n_cp"] = 40 #Number of collocation points
 
-res = model.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+res = model.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
 
 #Plot...</programlisting>
 
@@ -3865,7 +3865,7 @@ fmux_name = compile_fmux("HohmannTransfer", "Hohmann.mop")
         <programlisting language="python">#Optimization
 model = CasadiModel(fmux_name)
     
-opts = model.optimize_options(algorithm="CasadiPseudoSpectral")
+opts = model.optimize_options(algorithm="CasadiPseudoSpectralAlg")
 
 opts["n_cp"] = 40 #Number of collocation points
 opts["n_e"] = 2   #Number of phases
@@ -3892,7 +3892,7 @@ opts["link_options"] = [(1,"vy","dy1"),(1,"vx","dx1")] #Allow for discontinuitie
         <para>Now we are ready to optimize our problem.</para>
 
         <programlisting language="python">#Optimize
-res_opt = model.optimize(algorithm="CasadiPseudoSpectral",options=opts)
+res_opt = model.optimize(algorithm="CasadiPseudoSpectralAlg",options=opts)
     
 #Get results
 dx1,dy1,dx2,dy2 = res_opt["dx1"],      res_opt["dy1"],    res_opt["dx2"],res_opt["dy2"]
