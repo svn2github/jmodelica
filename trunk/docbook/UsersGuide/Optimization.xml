@@ -3097,7 +3097,7 @@ print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
     compilation functions for JMUs and FMUs, but rather than producing a model
     representation that is based on compiled C code,
     <literal>compile_fmux</literal> generates an XML model representation,
-    which in turn is imported into CasADi through creation of an
+    which in turn is imported into CasADi through creation of a
     <literal>CasadiModel</literal> object. The commands for invoking the
     compilation and optimization commands are shown below.</para>
 
@@ -3118,7 +3118,7 @@ res = model.optimize(algorithm="LocalDAECollocationAlg")
 
     <para>An object containing all the options for the optimization algorithm
     can be retrieved from the model object. The object
-    <literal>model</literal> in the code below s a
+    <literal>model</literal> in the code below is a
     <literal>CasadiModel</literal> instance.</para>
 
     <programlisting language="python">opts = model.optimize_options(algorithm="LocalDAECollocationAlg")
@@ -3431,13 +3431,11 @@ plt.show()</programlisting>These commands should produce a figure similar to
         <itemizedlist>
           <listitem>
             <para>Final time or start time cannot be explicitly in the cost
-            function. Although states of final time /start time can be
-            used.</para>
+            function. Although states of final time can be used.</para>
           </listitem>
 
           <listitem>
-            <para>No path constraints. However variable bounds can be
-            used.</para>
+            <para>No point constraints.</para>
           </listitem>
 
           <listitem>
