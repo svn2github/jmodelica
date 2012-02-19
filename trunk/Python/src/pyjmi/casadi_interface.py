@@ -128,7 +128,7 @@ class CasadiModel(object):
             algorithm --
                 The algorithm for which the options class should be returned. 
                 Possible values are: 'LocalDAECollocationAlg' and
-                'CasadiPseudoSpectral'
+                'CasadiPseudoSpectralAlg'
                 Default: 'LocalDAECollocationAlg'
                 
         Returns::
@@ -157,7 +157,7 @@ class CasadiModel(object):
                 - 'LocalDAECollocationAlg'. This algorithm is based on direct
                   collocation on finite elements and the algorithm IPOPT is
                   used to obtain a numerical solution to the problem.
-                - 'CasadiPseudoSpectral'
+                - 'CasadiPseudoSpectralAlg'
                 Default: 'LocalDAECollocationAlg'
                 
             options -- 

@@ -37,13 +37,13 @@ from pyjmi.common import xmlparser
 from pyjmi.common.io import VariableNotFoundError
 from pyjmi.common.core import TrajectoryLinearInterpolation, TrajectoryUserFunction
 
-class CasADiCollocatorException(Exception):
+class CasadiCollocatorException(Exception):
     """
-    A CasADiCollocator Exception.
+    A CasadiCollocator Exception.
     """
     pass
 
-class CasADiCollocator(object):
+class CasadiCollocator(object):
     # Parameters
     #UPPER = 1e20
     #LOWER = -1e20
@@ -734,7 +734,7 @@ class FreeElementLengthsData(object):
         self.Q = Q
         self.a = a
 
-class LocalDAECollocator(CasADiCollocator):
+class LocalDAECollocator(CasadiCollocator):
     
     """Solves an optimal control problem using local collocation."""
     
@@ -2319,7 +2319,7 @@ class LocalDAECollocator(CasADiCollocator):
                     self.get_xx_init()[self.var_indices[i][k]['w']] = w_init[cnt,:]
                 cnt = cnt + 1
 
-class PseudoSpectral(CasADiCollocator):
+class PseudoSpectral(CasadiCollocator):
     
     """
     This class discretize and solves optimization problem of the general kind,
@@ -2820,7 +2820,7 @@ class PseudoSpectral(CasADiCollocator):
                             self.vars[i]['t'] = self.vars[0]['p'][ind]
                             break
                     else:
-                        raise CasADiCollocatorException("Could not find the parameter for the phase bound.")
+                        raise CasadiCollocatorException("Could not find the parameter for the phase bound.")
                 else:
                     self.vars[i]['t'] = casadi.SX("t"+str(i))
             else:
@@ -2887,9 +2887,9 @@ class PseudoSpectral(CasADiCollocator):
                     break
             
             if xlink == -1:
-                raise CasADiCollocatorException("Could not find the linking variable, ",all[1], ".")
+                raise CasadiCollocatorException("Could not find the linking variable, ",all[1], ".")
             if plink == -1:
-                raise CasADiCollocatorException("Could not find the linking parameter, ",all[2], ".")
+                raise CasadiCollocatorException("Could not find the linking parameter, ",all[2], ".")
             self.link += [(all[0],xlink,plink)]
         
         """
