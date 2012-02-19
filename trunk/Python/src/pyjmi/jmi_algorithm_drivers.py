@@ -998,7 +998,7 @@ class KInitSolveAlgOptions(OptionBase):
             output from KINSOL. Must be set to one of:
                 0:  no information displayed.
                 1:  for each nonlinear iteration display the following information:
-                    - the scaled Euclidean ℓ2 norm of the residual evaluated at
+                    - the scaled Euclidean ‚Ñì2 norm of the residual evaluated at
                       the current iterate
                     - the scaled norm of the Newton step
                     - the number of function evaluations performed so far.
@@ -1651,11 +1651,11 @@ class LocalDAECollocationAlgOptions(OptionBase):
         discr --
             Determines the collocation scheme used to discretize the problem.
             
-            Possible values: "LG" and "LGR"
+            Possible values: "LG" and "LGR".
             
-            "LG": Gauss collocation (Legendre-Gauss)
+            "LG": Gauss collocation (Legendre-Gauss).
             
-            "LGR": Radau collocation (Legendre-Gauss-Radau)
+            "LGR": Radau collocation (Legendre-Gauss-Radau).
             
             Type: str
             Default: "LGR"
@@ -1696,7 +1696,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             "element_interpolation": The values of the variable trajectories
             are calculated by evaluating the collocation polynomials. The
-            algorithm option n_evaluation_points is used to specify the
+            algorithm option n_eval_points is used to specify the
             evaluation points within each finite element.
             
             "mesh_points": The optimization result is given at the
