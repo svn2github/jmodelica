@@ -6500,4 +6500,86 @@ equation
   i1 = i2 + i3;
 end TearingTest1;
 
+model MathSolve
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="MathSolve",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_Modelica_Math_Matrices_solve_def(jmi_array_t* A_a, jmi_array_t* b_a, jmi_array_t* x_a);
+void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(jmi_array_t* A_a, jmi_array_t* b_a, jmi_array_t* x_a, jmi_ad_var_t* info_o);
+
+void func_Modelica_Math_Matrices_solve_def(jmi_array_t* A_a, jmi_array_t* b_a, jmi_array_t* x_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARRAY_DYNAMIC(x_an, 1)
+    jmi_ad_var_t info_v;
+    if (x_a == NULL) {
+        JMI_ARRAY_DYNAMIC_INIT_1(x_an, jmi_array_size(b_a, 0), jmi_array_size(b_a, 0))
+        x_a = x_an;
+    }
+    func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(A_a, b_a, x_a, &info_v);
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(jmi_array_t* A_a, jmi_array_t* b_a, jmi_array_t* x_a, jmi_ad_var_t* info_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARRAY_DYNAMIC(x_an, 1)
+    jmi_ad_var_t info_v;
+    JMI_ARRAY_DYNAMIC(Awork_a, 2)
+    JMI_ARRAY_DYNAMIC(ipiv_a, 1)
+    jmi_ad_var_t i1_0i;
+    jmi_ad_var_t i1_0ie;
+    jmi_ad_var_t i1_1i;
+    jmi_ad_var_t i1_1ie;
+    jmi_ad_var_t i2_2i;
+    jmi_ad_var_t i2_2ie;
+    jmi_int_t tmp_1;
+    JMI_ARRAY_DYNAMIC(tmp_2, 2)
+    JMI_INT_ARRAY_DYNAMIC(tmp_3, 1)
+    jmi_int_t tmp_4;
+    extern void dgesv_(jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
+    if (x_a == NULL) {
+        JMI_ARRAY_DYNAMIC_INIT_1(x_an, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+        x_a = x_an;
+    }
+    i1_0ie = jmi_array_size(x_a, 0) + 1 / 2.0;
+    for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
+        jmi_array_ref_1(x_a, i1_0i) = jmi_array_val_1(b_a, i1_0i);
+    }
+    JMI_ARRAY_DYNAMIC_INIT_2(Awork_a, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(A_a, 0) ), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+    i1_1ie = jmi_array_size(Awork_a, 0) + 1 / 2.0;
+    for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
+        i2_2ie = jmi_array_size(Awork_a, 1) + 1 / 2.0;
+        for (i2_2i = 1; i2_2i < i2_2ie; i2_2i += 1) {
+            jmi_array_ref_2(Awork_a, i1_1i, i2_2i) = jmi_array_val_2(A_a, i1_1i, i2_2i);
+        }
+    }
+    JMI_ARRAY_DYNAMIC_INIT_1(ipiv_a, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+    tmp_1 = 1;
+    JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(A_a, 0) ), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+    jmi_transpose_matrix(Awork_a, Awork_a->var, tmp_2->var);
+    JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_3, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+    jmi_transpose_matrix_to_int(ipiv_a, ipiv_a->var, tmp_3->var);
+    tmp_4 = (int)info_v;
+    dgesv_(&jmi_array_size(A_a, 0), &tmp_1, tmp_2->var, &jmi_array_size(A_a, 0), tmp_3->var, x_a->var, &jmi_array_size(A_a, 0), &tmp_4);
+    info_v = tmp_4;
+    if (info_o != NULL) *info_o = info_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+
+	Real a[2,2] = [1,2;3,4];
+    Real b[2] = {-2,3};
+	Real x[2];
+equation
+	x = Modelica.Math.Matrices.solve(a, b);
+end MathSolve;
+
 end CCodeGenTests;

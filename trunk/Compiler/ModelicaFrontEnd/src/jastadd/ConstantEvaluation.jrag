@@ -2506,11 +2506,19 @@ aspect CircularExpressions {
 		if (inIsCircular)
 			return true;
 		inIsCircular = true;
+		if (!duringFunctionEval() && getFExp().isUnknownSizeVarUse())
+			return true;
 		Size s = getFExp().size();
 		boolean res = hasDim() ? s.isCircular(dimension()) : s.isCircular();
 		inIsCircular = false;
 		return res;
 	}
+	
+	syn boolean FExp.isUnknownSizeVarUse() = false;
+	eq FIdUseExp.isUnknownSizeVarUse()     = getFIdUse().myFV().isUnknownSizeVar();
+	
+	syn boolean AbstractFVariable.isUnknownSizeVar() = false;
+	eq FFunctionArray.isUnknownSizeVar()             = getType().size().isUnknown();
 	
 	public boolean Size.isCircular() {
 		for (int d = 0; d < size.length; d++)

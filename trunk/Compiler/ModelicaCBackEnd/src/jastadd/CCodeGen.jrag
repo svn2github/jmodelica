@@ -772,6 +772,10 @@ aspect CCodeGen {
 			type.printExternDecl_C(p, str, indent, tempName_C(), this);
 	}
 	
+	public void FLitExp.genExtFortanVarDecls_C(Printer p, PrintStream str, String indent) {
+		type().printExternDecl_C(p, str, indent, tempName_C(), this);
+	}
+	
 	public void FExp.genExtCVarDecls_C(Printer p, PrintStream str, String indent) {}
 	
 	public void FIdUseExp.genExtCVarDecls_C(Printer p, PrintStream str, String indent) {
@@ -1193,6 +1197,16 @@ aspect CCodeGen {
 		}		
 	}
 	
+	public void FLitExp.prepExternalRealInput(Printer p, PrintStream str, String indent, FExternalLanguage lang) {
+		if (lang instanceof FFortran77ExternalLanguage) {
+			String tempName = tempName_C();
+			useTempVar = true;
+			str.print(indent + tempName + " = ");
+			p.print(this, str, indent);
+			str.print(";\n");
+		}
+	}
+	
 	public void FExp.prepExternalIntegerInput(Printer p, PrintStream str, String indent, FExternalLanguage lang) {}
 	
 	public void FIdUseExp.prepExternalIntegerInput(Printer p, PrintStream str, String indent, FExternalLanguage lang) {
@@ -1215,6 +1229,16 @@ aspect CCodeGen {
 			str.print(";\n");
 		}
 	}	
+	
+	public void FLitExp.prepExternalIntegerInput(Printer p, PrintStream str, String indent, FExternalLanguage lang) {
+		if (lang instanceof FFortran77ExternalLanguage) {
+			String tempName = tempName_C();
+			useTempVar = true;
+			str.print(indent + tempName + " = ");
+			p.print(this, str, indent);
+			str.print(";\n");
+		}
+	}
 	
 	public void FExternalLanguage.genPostFuncCall(Printer p, PrintStream str, String indent, FExternalStmt stmt) {
 		for (FExp arg : stmt.getArgs()) {
