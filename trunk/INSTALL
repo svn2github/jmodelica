@@ -150,7 +150,7 @@ to run the JModelica.org test suites.
 
 To test that the Python packages are working, start Python or IPython. Type
 
- > import pjmi.examples.cstr as cstr
+ > import pyjmi.examples.cstr as cstr
  > cstr.run_demo()
 
 You should now see the output of Ipopt and windows containing plots showing the
