@@ -79,7 +79,7 @@
             
             getComposition().extractElementsTo(fc);
             
-            fc.setLocationNoTree(getRestriction(), this);
+            fc.setLocationNoTree(this, this, getRestriction());
             return fc;
         }
     }

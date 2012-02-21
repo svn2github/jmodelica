@@ -241,9 +241,7 @@ aspect FormattedPrint {
 	    
 	    getRestriction().prettyPrintFormattedHelper(printer, printStream);
 	    getName().prettyPrintFormattedHelper(printer, printStream);
-	    /** @TODO: Handle equals when scanning:
-	     * printStream.print(" = ");
-	     * */
+	    printStream.print("=");
 	    getExtendsClauseShortClass().prettyPrintFormattedHelper(printer, printStream);
 	    if (hasConstrainingClause()) {
 	    	getConstrainingClause().prettyPrintFormattedHelper(printer, printStream);
@@ -337,12 +335,6 @@ aspect FormattedPrint {
     	}
     	printStream.print(postFormatting);
     }
-    
-    void Subscript.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print(preFormatting);
-    	printStream.print("SUBSCRIPT"); /** @TODO: Recognize what should be printed here. */
-    	printStream.print(postFormatting);
-    }
 
     void ClassModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
@@ -395,6 +387,9 @@ aspect FormattedPrint {
 	    
 	    getRestriction().prettyPrintFormattedHelper(printer, printStream);
 	    getName().prettyPrintFormattedHelper(printer, printStream);
+	    if (hasStringComment()) {
+	    	getStringComment().prettyPrintFormattedHelper(printer, printStream);
+	    }
 
 	    /*getExtendsClauseShortClass().prettyPrintFormatted(printer, printStream);
 	    if (hasConstrainingClause()) {
@@ -442,33 +437,9 @@ aspect FormattedPrint {
 	    		getEquation(i).prettyPrintFormattedHelper(printer, printStream);
 	    	}
 	    }
-			
- 		// Print all components
- 		/*int numPubComp = 0;
-// 		str.print(indent + "public\n");
- 		for (int i=0;i<getNumComponentDecl();i++)
- 			if (getComponentDecl(i).isPublic()) {
- 			 	numPubComp++;
- 			 	printer.print(getComponentDecl(i), printStream, "");
-	 			printStream.print(";\n");
-			}
-			
-		if (getNumComponentDecl()-numPubComp>0) {	
-			printStream.print("protected\n");
- 			for (int i=0;i<getNumComponentDecl();i++)
- 				if (getComponentDecl(i).isProtected()) {
- 					printer.print(getComponentDecl(i), printStream, "");
-		 			printStream.print(";\n");
-			}
-		}	
-		
-		if (getNumEquation()>0) {
-			printStream.print("equation\n");
-			for (int i=0;i<getNumEquation();i++) {
-				printer.print(getEquation(i), printStream, "");
-				printStream.print(";\n");
-			}
-		}*/
+	    for (int i = 0; i < getNumAnnotation(); i++) {
+	    	getAnnotation(i).prettyPrintFormattedHelper(printer, printStream);
+	    }
 		
 	    /** @TODO: Format end */
 		printStream.print("end " + getName().getID());
@@ -505,6 +476,7 @@ aspect FormattedPrint {
 	
 	void ValueModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
+		printStream.print("=");
 		getExp().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(postFormatting);
 	}
@@ -557,6 +529,15 @@ aspect FormattedPrint {
 		printStream.print(postFormatting);
 	}
 	
+	void ConnectClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		printStream.print("connect");
+		getConnector1().prettyPrintFormattedHelper(printer, printStream);
+		getConnector2().prettyPrintFormattedHelper(printer, printStream);
+		getComment().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(postFormatting);
+	}
+	
 	void RealLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		printStream.print(getUNSIGNED_NUMBER());
@@ -566,6 +547,24 @@ aspect FormattedPrint {
 	void IntegerLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		printStream.print(getUNSIGNED_INTEGER());
+		printStream.print(postFormatting);
+	}
+	
+	void StringLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		printStream.print("\"" + getSTRING() + "\"");
+		printStream.print(postFormatting);
+	}
+	
+	void BooleanLitExpTrue.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		printStream.print("true");
+		printStream.print(postFormatting);
+	}
+	
+	void BooleanLitExpFalse.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		printStream.print("false");
 		printStream.print(postFormatting);
 	}
 	
@@ -629,11 +628,11 @@ aspect FormattedPrint {
 	}
 	
 	void Comment.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-		if (hasAnnotation()) {
-			getAnnotation().prettyPrintFormattedHelper(printer, printStream);
-		}
 		if (hasStringComment()) {
 			getStringComment().prettyPrintFormattedHelper(printer, printStream);
+		}
+		if (hasAnnotation()) {
+			getAnnotation().prettyPrintFormattedHelper(printer, printStream);
 		}
 	}
 	
