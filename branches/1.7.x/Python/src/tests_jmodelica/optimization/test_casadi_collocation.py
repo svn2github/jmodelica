@@ -700,13 +700,13 @@ class TestPseudoSpectral:
     @testattr(casadi = True)
     def test_two_state(self):
         """Tests the different discretization on the TwoState example."""
-        opts = self.model_two_state.optimize_options("CasadiPseudoSpectral")
+        opts = self.model_two_state.optimize_options("CasadiPseudoSpectralAlg")
         opts['n_e'] = 1
         opts['n_cp'] = 30
                 
         #Test LG points
         opts['discr'] = "LG"
-        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
         y1 = res["y1"]
         y2 = res["y2"]
@@ -718,7 +718,7 @@ class TestPseudoSpectral:
         
         #Test LGR points
         opts['discr'] = "LGR"
-        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
         y1 = res["y1"]
         y2 = res["y2"]
@@ -730,7 +730,7 @@ class TestPseudoSpectral:
         
         #Test LGL points
         opts['discr'] = "LGL"
-        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
         y1 = res["y1"]
         y2 = res["y2"]
@@ -747,17 +747,17 @@ class TestPseudoSpectral:
         
         NOTE: SHOULD ALSO TEST THAT THE NUMBER OF ITERATIONS SHOULD BE SMALLER.
         """
-        opts = self.model_two_state.optimize_options("CasadiPseudoSpectral")
+        opts = self.model_two_state.optimize_options("CasadiPseudoSpectralAlg")
         opts['n_e'] = 1
         opts['n_cp'] = 30
         opts['discr'] = "LG"
-        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
 
         #Test LG points
         opts['discr'] = "LG"
         opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
-        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
         y1 = res["y1"]
         y2 = res["y2"]
@@ -770,7 +770,7 @@ class TestPseudoSpectral:
         #Test LGL points
         opts['discr'] = "LGL"
         opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
-        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
         y1 = res["y1"]
         y2 = res["y2"]
@@ -783,7 +783,7 @@ class TestPseudoSpectral:
         #Test LGR points
         opts['discr'] = "LGR"
         opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
-        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
         y1 = res["y1"]
         y2 = res["y2"]
@@ -803,13 +803,13 @@ class TestPseudoSpectral:
         jn = compile_fmux("DoubleIntegrator", os.path.join(path_to_mos,"DoubleIntegrator.mop"))
         vdp = CasadiModel(jn)
         
-        opts = vdp.optimize_options("CasadiPseudoSpectral")
+        opts = vdp.optimize_options("CasadiPseudoSpectralAlg")
         opts['n_e'] = 8
         opts['n_cp'] = 5
                 
         #Test LG points
         opts['discr'] = "LG"
-        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = vdp.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
         y1 = res["x1"]
         y2 = res["x2"]
         u = res["u"]
@@ -820,7 +820,7 @@ class TestPseudoSpectral:
         
         #Test LGR points
         opts['discr'] = "LGR"
-        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = vdp.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
         y1 = res["x1"]
         y2 = res["x2"]
         u = res["u"]
@@ -830,7 +830,7 @@ class TestPseudoSpectral:
         nose.tools.assert_almost_equal(u[-1], 1.000000000, places=5)
         #Test LGL points
         opts['discr'] = "LGL"
-        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = vdp.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
         y1 = res["x1"]
         y2 = res["x2"]
         u = res["u"]
@@ -844,27 +844,27 @@ class TestPseudoSpectral:
     @testattr(casadi = True)
     def test_vdp(self):
         """Tests the different discretization options on a modified VDP."""
-        opts = self.model_vdp.optimize_options("CasadiPseudoSpectral")
+        opts = self.model_vdp.optimize_options("CasadiPseudoSpectralAlg")
         opts['n_e'] = 1
         opts['n_cp'] = 60
         
         #Test LG points
         opts['discr'] = "LG"
-        res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectral",
+        res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectralAlg",
                                       options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         
         #Test LGR points
         opts['discr'] = "LGR"
-        res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectral",
+        res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectralAlg",
                                       options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         
         #Test LGL points
         opts['discr'] = "LGL"
-        res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectral",
+        res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectralAlg",
                                       options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
@@ -874,19 +874,19 @@ class TestPseudoSpectral:
         
         #Test LG points
         opts['discr'] = "LG"
-        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = vdp.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         
         #Test LGR points
         opts['discr'] = "LGR"
-        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = vdp.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         
         #Test LGL points
         opts['discr'] = "LGL"
-        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = vdp.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         """

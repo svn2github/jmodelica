@@ -29,6 +29,8 @@ import java.io.BufferedReader;
  *
  */
 public class TokenTester {
+	
+	private String diff;
 
 	public boolean test(String s1, String s2) {
 		boolean testSuccess = true;
@@ -52,8 +54,13 @@ public class TokenTester {
 					match = t1.equals(t2);
 				}
 
-				if (!match) 
+				if (!match) {
 					testSuccess = false;
+					StringBuilder buf = new StringBuilder();
+					appendDiffLineTo(buf, s1, t1, fms1);
+					appendDiffLineTo(buf, s2, t2, fms2);
+					diff = buf.toString();
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -61,6 +68,33 @@ public class TokenTester {
 		}
 
 		return testSuccess;
+	}
+	
+	public String firstDiff() {
+		return diff;
+	}
+
+	private void appendDiffLineTo(StringBuilder buf, String s, String t, AbstractFlatModelicaScanner fms) {
+		if (t == null) {
+			char c = s.charAt(s.length() - 1);
+			if (isLineBreak(c))
+				buf.append("(EOF)\n");
+			else
+				buf.append(lineAround(s, s.length() - 1));
+		} else {
+			buf.append(lineAround(s, fms.lastTokenStart()));
+		}
+	}
+
+	private boolean isLineBreak(char c) {
+		return c == '\r' || c == '\n';
+	}
+
+	private String lineAround(String s, int i) {
+		int st, ln = s.length();
+		for (st = i; st > 0 && !isLineBreak(s.charAt(st - 1)); st--);
+		for (; i < ln && !isLineBreak(s.charAt(i)); i++);
+		return s.substring(st, i) + '\n';
 	}
 
 }

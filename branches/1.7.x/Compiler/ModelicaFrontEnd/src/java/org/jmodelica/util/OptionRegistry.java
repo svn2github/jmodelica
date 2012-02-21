@@ -116,9 +116,9 @@ public class OptionRegistry {
 			EXPORT_FUNCS_VBA ("export_functions_vba", false, 
 					"Create VBA-compatible wrappers for exported functions (default is false). Requires export_functions"), 
 			CHECK_PARAM_EVAL ("check_evaluation_of_parameter_binding_expressions", true, 
-							"Check if parameter an attribute binding expressions should be possible to evaluate during compilation." +
-							"Default is true."),
-					INLINE_FUNCS ("inline_functions", false, 
+					"Check if parameter an attribute binding expressions should be possible to evaluate during compilation." +
+					"Default is true."),
+			INLINE_FUNCS ("inline_functions", false, 
 					"Perform function inlining on model after flattening (default is false)");
 						
 			public String key;

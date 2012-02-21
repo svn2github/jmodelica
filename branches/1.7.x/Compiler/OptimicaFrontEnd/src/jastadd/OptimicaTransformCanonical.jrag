@@ -43,7 +43,7 @@ aspect OptimicaTransformCanonical {
 				fParameter(), new Opt(), 
 				startTime_attr!=null? (List<FAttribute>)startTime_attr.getFAttributeList().fullCopy(): new List(), 
 						(startTime_attr!=null && startTime_attr.hasValue())? new Opt(startTime_attr.getValue().fullCopy()): 
-							new Opt(new FRealLitExp("0.0")), 
+							new Opt(new FRealLitExp(0.0)), 
 							new Opt(), new FQName("startTime"));
 		addFVariable(fv_startTime);
 
@@ -61,7 +61,7 @@ aspect OptimicaTransformCanonical {
 				fParameter(), new Opt(), 
 				finalTime_attr!=null? (List<FAttribute>)finalTime_attr.getFAttributeList().fullCopy(): new List(), 
 				(finalTime_attr!=null && finalTime_attr.hasValue())? new Opt(finalTime_attr.getValue().fullCopy()):
-					new Opt(new FRealLitExp("1.0")), new Opt(), new FQName("finalTime"));
+					new Opt(new FRealLitExp(1.0)), new Opt(), new FQName("finalTime"));
 				addFVariable(fv_finalTime);
 
 		if (root().options.getBooleanOption("normalize_minimum_time_problems")) {
@@ -77,7 +77,7 @@ aspect OptimicaTransformCanonical {
 				// Attributes set for startTime?
 				if (startTime_attr!=null) {
 					// Fixed interval starting at 0.0
-					startTime_attr.setValue(new FRealLitExp("0.0"));
+					startTime_attr.setValue(new FRealLitExp(0.0));
 					FExp initialGuess_exp = null;
 					for (FAttribute a : startTime_attr.getFAttributes()) {
 						// Remove binding expression if startTime is free
@@ -91,13 +91,13 @@ aspect OptimicaTransformCanonical {
 						}
 						// Set start to 0.0
 						if (a.getName().name().equals("start")) {
-							a.setValue(new FRealLitExp("0.0"));
+							a.setValue(new FRealLitExp(0.0));
 							a.setAttributeSet(false);
 						}					
 						// Set initialGuess to 0.0
 						if (a.getName().name().equals("initialGuess")) {
 							initialGuess_exp = a.getValue().fullCopy();
-							a.setValue(new FRealLitExp("0.0"));
+							a.setValue(new FRealLitExp(0.0));
 							a.setAttributeSet(false);
 						}
 					}
@@ -106,7 +106,7 @@ aspect OptimicaTransformCanonical {
 					if (!fv_startTime.startAttributeSet()) {
 						fv_startTime.addFAttribute(new FAttribute(new FIdUse("Real"),
 	                            new FIdDecl(new FQName("start")),
-	                            new Opt(initialGuess_exp!=null? initialGuess_exp: new FRealLitExp("0.0")),
+	                            new Opt(initialGuess_exp!=null? initialGuess_exp: new FRealLitExp(0.0)),
 	                            true,
 	                            new Opt(),
 	                            new Opt(),
@@ -115,7 +115,7 @@ aspect OptimicaTransformCanonical {
 				} 
 				// Same as for startTime
 				if (finalTime_attr!=null) {
-					finalTime_attr.setValue(new FRealLitExp("1.0"));
+					finalTime_attr.setValue(new FRealLitExp(1.0));
 					FExp initialGuess_exp = null;
 					for (FAttribute a : finalTime_attr.getFAttributes()) {
 						if (finalTimeFreeAttribute()) {
@@ -126,19 +126,19 @@ aspect OptimicaTransformCanonical {
 							a.setAttributeSet(false);
 						}
 						if (a.getName().name().equals("start")) {
-							a.setValue(new FRealLitExp(("1.0")));
+							a.setValue(new FRealLitExp(1.0));
 							a.setAttributeSet(false);
 						}					
 						if (a.getName().name().equals("initialGuess")) {
 							initialGuess_exp = a.getValue().fullCopy();
-							a.setValue(new FRealLitExp("1.0"));
+							a.setValue(new FRealLitExp(1.0));
 							a.setAttributeSet(false);
 						}	
 					}	
 					if (!fv_finalTime.startAttributeSet()) {
 						fv_finalTime.addFAttribute(new FAttribute(new FIdUse("Real"),
 	                            new FIdDecl(new FQName("start")),
-	                            new Opt(initialGuess_exp!=null? initialGuess_exp: new FRealLitExp("1.0")),
+	                            new Opt(initialGuess_exp!=null? initialGuess_exp: new FRealLitExp(1.0)),
 	                            true,
 	                            new Opt(),
 	                            new Opt(),
@@ -157,66 +157,25 @@ aspect OptimicaTransformCanonical {
 	// Don't add initial equations for optimization problems
 	public void FOptClass.addInitialEquations() {}
 	
-	public void FOptClass.scalarize() {
-		
-		/* Note that it is not ok to call super.scalarize() here, since
-		 * then the scalarized variable lists will be set prior to
-		 * scalarizing the constraints and costfunctions, which will make
-		 * lookup in the constraint scalarization fail.
-		 */
-		
-		// TODO: refactor out parts of FClass.scalarize to reduce code duplication here
-				
-		List<FVariable> vars = new List<FVariable>();
-		List<FVariable> alias_vars = new List<FVariable>();
-		// Scalarize all non-alias variables
-		for (FVariable fv : getFVariables()) 
-			fv.scalarize(vars);
-		// Scalarize all alias variables
-		for (FVariable fv : getAliasVariables()) 
-			fv.scalarize(alias_vars);
-		
-		// Scalarize equations
-		FEquationBlock eb = getFEquationBlock(0);
-		List<FAbstractEquation> eqns = scalarizeEquationList(eb.getFAbstractEquations(), vars);
-		eb.setFAbstractEquationList(eqns);
-		setFInitialEquationList(scalarizeEquationList(getFInitialEquations(), vars));
-		setFParameterEquationList(scalarizeEquationList(getFParameterEquations(), vars));
-		
-		// Scalarize constraints
+	protected void FOptClass.scalarizeAllVarDependent(List<FVariable> vars) {
+		super.scalarizeAllVarDependent(vars);
+		scalarizeConstraints(vars);
+		scalarizeClassAttributes();
+	}
+	
+	protected void FOptClass.scalarizeConstraints(List<FVariable> vars) {
+		List<FAbstractEquation> eqns = getFEquationBlock(0).getFAbstractEquations();
 		List<FConstraint> constr = new List<FConstraint>();
 		for (FConstraint c : getFConstraints()) 
 			c.scalarize(constr, eqns, vars, Collections.<String,FExp>emptyMap());
 		setFConstraintList(constr);
-
-		// Scalarize class attributes
-		// Iterate over all attributes and scalarize.
+	}
+	
+	protected void FOptClass.scalarizeClassAttributes() {
 		List<FAttribute> al = new List<FAttribute>();
 		for (FAttribute a : getFAttributes()) 
 			al.add(a.scalarize(Index.NULL));
 		setFAttributeList(al);
-		
-		// Replace variables
-		Map<String,FExp> im = Collections.emptyMap();
-		getFVariables().createArrayTemporaries(getFParameterEquations(), vars, im, true);
-		getAliasVariables().createArrayTemporaries(getFParameterEquations(), vars, im, true);
-		setFVariableList(vars);
-		setAliasVariableList(alias_vars);
-		
-		// Replace subscript expressions with literals
-		eb.getFAbstractEquations().makeSubscriptsLiteral();
-		getFInitialEquations().makeSubscriptsLiteral();
-		getFParameterEquations().makeSubscriptsLiteral();
-		
-		// Scalarize functions
-		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
-		for (FFunctionDecl f : getFFunctionDecls()) 
-			funcs.add(f.scalarize());
-		setFFunctionDeclList(funcs);
-		
-		scalarized = true;
-
-		flush();		
 	}
 	
 	/**

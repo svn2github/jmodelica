@@ -7,21 +7,89 @@
 /* Query below has the following syntax:
   query =   elementary_query
                   | '(' query ')'
-          | query '|' query
-                  | query '&' query
-                  | '!' query
-  elementary_query =  "name" '=' <regexp>
+                  | query 'or' query
+                  | query 'and' query
+                  | 'not' query
+  elementary_query =  "name" '=' <string>
                     | "quantity" '=' <string>
+                    | "basetype" '=' (real| integer | enumeration |boolean |string)
                     | "type" '=' <string>
                     | "unit" '=' <string>
                     | "displayUnit" '=' <string>
                     | "fixed" '=' ("true"|"false")
                     | "hasStart" '='  ("true"|"false")
+                    | "isAlias"
                     | "alias" '=' ['-']<variable name> (negative value for negated-aliases)
-                    | "alias" '=' ['-']<value reference> (negative value for negated-aliases)
 
 Example: "name='a.*' & fixed=false"
 */
+
+#define FMI_XML_Q_KEYWORDS(HANDLE) \
+    HANDLE(not) \
+    HANDLE(and) \
+    HANDLE(or) \
+    HANDLE(name) \
+    HANDLE(type) \
+    HANDLE(basetype) \
+    HANDLE(unit) \
+    HANDLE(displayunit) \
+    HANDLE(fixed) \
+    HANDLE(hasstart) \
+    HANDLE(isalias) \
+    HANDLE(alias)
+
+typedef enum fmi_xml_keywords_enu_t {
+#define FMI_XML_Q_KEYWORDS_PREFIX(keyword) fmi_xml_q_key_enu_##keyword,
+    FMI_XML_Q_KEYWORDS(FMI_XML_Q_KEYWORDS_PREFIX)
+    fmi_xml_q_key_enu_num
+} fmi_xml_keywords_enu_t;
+
+const char* fmi_xml_keywords[fmi_xml_q_key_enu_num + 1] =
+{
+    #define FMI_XML_Q_KEYWORDS_STR(keyword) #keyword ,
+    FMI_XML_Q_KEYWORDS(FMI_XML_Q_KEYWORDS_STR)
+    0
+}
+
+typedef struct fmi_xml_q_context_t {
+    jm_vector(jm_string) fmi_xml_keywords_v;
+
+} fmi_xml_q_context_t;
+
+int fmi_xml_q_get_keyword(fmi_xml_q_context_t* context, char* cur, size_t* len, char* buf) {
+    char ch = *cur;
+    size_t i = 0, id;
+    *len = 0;
+    while(isalpha(ch)) {
+        buf[i++] = tolower(ch);
+        ch = cur[i];
+    }
+    if(!i) return -1;
+
+    id = jm_vector_bsearch_index(jm_string)(&context->fmi_xml_keywords_v,&buf,jm_compare_string);
+    if(id >= fmi_xml_q_key_enu_num) return -1;
+    *len = i;
+    return id;
+}
+
+int fmi_xml_q_get_string(fmi_xml_q_context_t* context, char* cur, size_t* len, char* buf) {
+    char ch = *cur;
+    char strterm ;
+    size_t i = 0;
+    *len = 0;
+    if((ch == '''') || (ch == '"')) strterm = ch;
+    else return -1;
+    do {
+        ch = cur[i+1];
+        buf[i] = ch;
+        i++;
+    } while((ch != strterm) && ch);
+    if(!ch) return -1;
+    i--;
+    buf[i] = 0;
+    *len = i;
+    return i;
+}
 
 typedef enum fmi_xml_q_terminal_enu {
     enuLParant,
@@ -138,8 +206,6 @@ fmi_xml_q_terminal* fmi_xml_get_terminal(jm_string str,size_t *offset) {
     switch(*cur) {
     case '(':
     case ')':
-    case '&':
-    case '|':
     case 0:
     default:
         fmi_xml_parse_elementary(cur, term);

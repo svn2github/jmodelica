@@ -1,8 +1,24 @@
+/*
+    Copyright (C) 2012 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
-#include "fmi_xml_model_description.h"
+#include <fmi_xml_model_description.h>
 
 void print_int(int i,void* data) {
     printf("%d\n", i);
@@ -32,9 +48,9 @@ void printTypeInfo(fmi_xml_variable_typedef_t* vt) {
     switch(fmi_xml_get_base_type(vt)) {
     case fmi_xml_base_type_enu_real: {
         fmi_xml_real_typedef_t* rt = fmi_xml_ret_type_as_real(vt);
-        fmiReal min = fmi_xml_get_real_type_min(rt);
-        fmiReal max = fmi_xml_get_real_type_max(rt);
-        fmiReal nom = fmi_xml_get_real_type_nominal(rt);
+        fmi_xml_real_t min = fmi_xml_get_real_type_min(rt);
+        fmi_xml_real_t max = fmi_xml_get_real_type_max(rt);
+        fmi_xml_real_t nom = fmi_xml_get_real_type_nominal(rt);
         fmi_xml_unit_t* u = fmi_xml_get_real_type_unit(rt);
         fmi_xml_display_unit_t* du = fmi_xml_get_type_display_unit(rt);
 

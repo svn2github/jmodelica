@@ -42,7 +42,7 @@ fmi_xml_variable_list_t* fmi_xml_clone_variable_list(fmi_xml_variable_list_t*);
 size_t  fmi_xml_get_variable_list_size(fmi_xml_variable_list_t*);
 
 /* Get a pointer to the list of the value references for all the variables */
-const fmiValueReference* fmi_xml_get_value_referece_list(fmi_xml_variable_list_t*);
+const fmi_xml_value_reference_t* fmi_xml_get_value_referece_list(fmi_xml_variable_list_t*);
 
 /* Get a single variable from the list*/
 fmi_xml_variable_t* fmi_xml_get_variable(fmi_xml_variable_list_t*, unsigned int  index);

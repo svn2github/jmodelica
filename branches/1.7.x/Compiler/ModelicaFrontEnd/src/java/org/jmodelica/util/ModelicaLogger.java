@@ -26,6 +26,16 @@ public class ModelicaLogger {
     public void log(Level level, String message) {}
     
     /**
+     * Build message using <code>format</code> as format string and log 
+     * on log level <code>level</code>.
+     * 
+     * Uses {@link #log(Level, String)} to log message.
+     */
+    public void log(Level level, String format, Object... args) {
+    	log(level, String.format(format, args));
+    }
+    
+    /**
      * \brief Get the current log level.
      * 
      * This implementation returns null.
@@ -47,6 +57,11 @@ public class ModelicaLogger {
     public void info(String message)    { log(Level.INFO,    message); }
     public void warning(String message) { log(Level.WARNING, message); }
     public void error(String message)   { log(Level.SEVERE,  message); }
+    
+    public void debug(String format, Object... args)   { log(Level.FINE,    format, args); }
+    public void info(String format, Object... args)    { log(Level.INFO,    format, args); }
+    public void warning(String format, Object... args) { log(Level.WARNING, format, args); }
+    public void error(String format, Object... args)   { log(Level.SEVERE,  format, args); }
     
     /**
      * Log stack trace of exception on debug log level.

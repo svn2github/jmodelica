@@ -44,15 +44,15 @@ const char* fmi_xml_get_display_unit_name(fmi_xml_display_unit_t* du) {
     return du->displayUnit;
 }
 
-fmiReal fmi_xml_get_display_unit_gain(fmi_xml_display_unit_t* du) {
+fmi_xml_real_t fmi_xml_get_display_unit_gain(fmi_xml_display_unit_t* du) {
     return du->gain;
 }
 
-fmiReal fmi_xml_get_display_unit_offset(fmi_xml_display_unit_t* du) {
+fmi_xml_real_t fmi_xml_get_display_unit_offset(fmi_xml_display_unit_t* du) {
     return du->offset;
 }
 
-fmiReal fmi_xml_convert_to_display_unit(fmiReal val , fmi_xml_display_unit_t* du, int isRelativeQuantity) {
+fmi_xml_real_t fmi_xml_convert_to_display_unit(fmi_xml_real_t val , fmi_xml_display_unit_t* du, int isRelativeQuantity) {
     double gain = fmi_xml_get_display_unit_gain(du);
     double offset = fmi_xml_get_display_unit_offset(du);
     if(isRelativeQuantity)
@@ -61,7 +61,7 @@ fmiReal fmi_xml_convert_to_display_unit(fmiReal val , fmi_xml_display_unit_t* du
         return (val*gain + offset);
 }
 
-fmiReal fmi_xml_convert_from_display_unit(fmiReal val, fmi_xml_display_unit_t* du, int isRelativeQuantity) {
+fmi_xml_real_t fmi_xml_convert_from_display_unit(fmi_xml_real_t val, fmi_xml_display_unit_t* du, int isRelativeQuantity) {
     double gain = fmi_xml_get_display_unit_gain(du);
     double offset = fmi_xml_get_display_unit_offset(du);
     if(isRelativeQuantity)

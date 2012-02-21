@@ -35,18 +35,13 @@
         </listitem>
 
         <listitem>
-          <para>Support for export of Modelica functions in stand-alone
-          DLLs</para>
-        </listitem>
-
-        <listitem>
-          <para>Refactorization of the Python code: a new stand-alone package,
+          <para>Reorganization of the Python code: a new stand-alone package,
           PyFMI, provided</para>
         </listitem>
 
         <listitem>
           <para>A novel dynamic optimization algorithm implemented in Python
-          based on collocation and CasADi is provided.</para>
+          based on collocation and CasADi is provided</para>
         </listitem>
       </itemizedlist>
     </section>
@@ -75,7 +70,9 @@
       <section>
         <title>Improved Modelica compliance</title>
 
-        <para></para>
+        <para>With added support for external Fortran function and many bug
+        fixes, the compiler now handles many models that previously would not
+        compile.</para>
       </section>
 
       <section>
@@ -122,10 +119,13 @@
       </section>
 
       <section>
-        <title>External functions in FMUs</title>
+        <title>Support for shared libraries in FMUs</title>
 
-        <para>Support for external functions in shared libraries in
-        FMUs.</para>
+        <para>The FMU import and export now supports dependencies on extra
+        shared libraries. For the export, the shared libraries are placed in
+        the same folder as the model binary. Similarly, any shared libraries
+        packed with the model binary will be found when importing the
+        FMU.</para>
       </section>
     </section>
 
@@ -162,6 +162,8 @@
     <section>
       <title>Contributors</title>
 
+      <para>Bengt-Arne Andersson</para>
+
       <para>Christian Andersson</para>
 
       <para>Tove Bergdahl</para>
@@ -175,6 +177,8 @@
       <para>Jesper Mattsson</para>
 
       <para>Patrik Meijer</para>
+
+      <para>Iakov Nakhimovski</para>
 
       <para>Johan Ylikiiskilä</para>
 

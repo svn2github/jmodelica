@@ -55,7 +55,7 @@ const char* fmi_xml_get_variable_description(fmi_xml_variable_t* v) {
 }
 
 
-fmiValueReference fmi_xml_get_variable_vr(fmi_xml_variable_t* v) {
+fmi_xml_value_reference_t fmi_xml_get_variable_vr(fmi_xml_variable_t* v) {
     return v->vr;
 }
 
@@ -85,7 +85,7 @@ fmi_xml_variable_t* fmi_xml_get_variable_alias_base(fmi_xml_model_description_t*
 fmi_xml_variable_list_t* fmi_xml_get_variable_aliases(fmi_xml_model_description_t* md,fmi_xml_variable_t*v) {
     fmi_xml_variable_t key, *cur;
     fmi_xml_variable_list_t* list = fmi_xml_alloc_variable_list(md->callbacks, 0);
-    fmiValueReference vr = fmi_xml_get_variable_vr(v);
+    fmi_xml_value_reference_t vr = fmi_xml_get_variable_vr(v);
     size_t baseIndex, i, num = fmi_xml_get_variable_list_size(md->variablesByVR);
     key = *v;
     key.aliasKind = 0;
@@ -151,7 +151,7 @@ fmi_xml_causality_enu_t fmi_xml_get_causality(fmi_xml_variable_t* v) {
     return v->causality;
 }
 
-fmiReal fmi_xml_get_real_variable_start(fmi_xml_real_variable_t* v) {
+fmi_xml_real_t fmi_xml_get_real_variable_start(fmi_xml_real_variable_t* v) {
     fmi_xml_variable_t* vv = (fmi_xml_variable_t*)v;
     if(fmi_xml_get_variable_has_start(vv)) {
         fmi_xml_variable_start_real_t* start = (fmi_xml_variable_start_real_t*)(vv->typeBase);
@@ -175,7 +175,7 @@ fmi_xml_display_unit_t* fmi_xml_get_real_variable_display_unit(fmi_xml_real_vari
 }
 
 
-fmiInteger fmi_xml_get_integer_variable_start(fmi_xml_integer_variable_t* v){
+fmi_xml_int_t fmi_xml_get_integer_variable_start(fmi_xml_integer_variable_t* v){
     fmi_xml_variable_t* vv = (fmi_xml_variable_t*)v;
     if(fmi_xml_get_variable_has_start(vv)) {
         fmi_xml_variable_start_integer_t* start = (fmi_xml_variable_start_integer_t*)(vv->typeBase);
@@ -193,7 +193,7 @@ const char* fmi_xml_get_string_variable_start(fmi_xml_string_variable_t* v){
     return 0;
 }
 
-fmiInteger fmi_xml_get_enum_variable_start(fmi_xml_enum_variable_t* v) {
+fmi_xml_int_t fmi_xml_get_enum_variable_start(fmi_xml_enum_variable_t* v) {
     fmi_xml_variable_t* vv = (fmi_xml_variable_t*)v;
     if(fmi_xml_get_variable_has_start(vv)) {
         fmi_xml_variable_start_integer_t* start = (fmi_xml_variable_start_integer_t*)(vv->typeBase);
@@ -211,7 +211,7 @@ fmiBoolean fmi_xml_get_boolean_variable_start(fmi_xml_bool_variable_t* v) {
         return 0;
 }
 
-fmiReal fmi_xml_get_real_variable_nominal(fmi_xml_real_variable_t* v) {
+fmi_xml_real_t fmi_xml_get_real_variable_nominal(fmi_xml_real_variable_t* v) {
     fmi_xml_variable_t* vv = (fmi_xml_variable_t*)v;
     fmi_xml_real_type_props_t* props = (fmi_xml_real_type_props_t*)fmi_xml_find_type_struct(vv->typeBase,fmi_xml_type_struct_enu_props);
     return props->typeNominal;
@@ -278,7 +278,7 @@ int fmi_xml_handle_ScalarVariable(fmi_xml_parser_context_t *context, const char*
             /*   <xs:attribute name="valueReference" type="xs:unsignedInt" use="required"> */
             if(fmi_xml_set_attr_uint(context, fmi_xml_elmID_ScalarVariable, fmi_attr_id_valueReference, 1, &vr, 0)) return -1;
 
-            if(vr == fmiUndefinedValueReference) {
+            if(vr == fmi_xml_value_reference_enu_undefined) {
                 context->skipOneVariableFlag = 1;
             }
 
@@ -800,7 +800,7 @@ void fmi_xml_eliminate_bad_alias(fmi_xml_parser_context_t *context, size_t index
     fmi_xml_model_description_t* md = context->modelDescription;
     jm_vector(jm_voidp)* varByVR = &md->variablesByVR->variables;
     fmi_xml_variable_t* v = (fmi_xml_variable_t*)jm_vector_get_item(jm_voidp)(varByVR, indexVR);
-    fmiValueReference vr = v->vr;
+    fmi_xml_value_reference_t vr = v->vr;
     fmi_xml_base_type_enu_t vt = fmi_xml_get_variable_base_type(v);
     size_t i, n = jm_vector_get_size(jm_voidp)(varByVR);
     for(i = 0; i< n; i++) {
@@ -839,7 +839,7 @@ int fmi_xml_handle_ModelVariables(fmi_xml_parser_context_t *context, const char*
         for(i = 0; i< numvar; i++) {
             jm_named_ptr named = jm_vector_get_item(jm_named_ptr)(&md->variables, i);
             fmi_xml_variable_t* v = named.ptr;
-            if(v->vr == fmiUndefinedValueReference) {
+            if(v->vr == fmi_xml_value_reference_enu_undefined) {
                 jm_vector_remove_item(jm_named_ptr)(&md->variables,i);
                 numvar--; i--;
                 fmi_xml_free_direct_dependencies(named);

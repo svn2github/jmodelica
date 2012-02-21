@@ -24,13 +24,25 @@
 #define FMI_XML_MODELDESCRIPTION_H_
 
 #include <stddef.h>
-#include <fmi-me-1.0/fmiModelFunctions.h>
-#include <fmi-me-1.0/fmiModelTypes.h>
 #include <jm_callbacks.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* \defgroup Basic types used in the interface. TODO move to some common area.
+*  @{
+*/
+    typedef double fmi_xml_real_t;
+    typedef int fmi_xml_int_t;
+    typedef unsigned int fmi_xml_value_reference_t;
+    typedef char fmiBoolean;
+    typedef enum fmi_xml_value_reference_enu_t {
+        fmi_xml_value_reference_enu_undefined =-1
+    } fmi_xml_value_reference_enu_t;
+/*
+  @}
+  */
 
 /**
  * \defgroup Forward declarations of structs used in the interface.

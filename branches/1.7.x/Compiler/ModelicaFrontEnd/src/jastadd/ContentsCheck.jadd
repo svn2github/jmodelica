@@ -97,6 +97,10 @@ aspect ContentCheck {
 			error("Reduction-expressions are only allowed with sum(), min(), max() and product()");
 	}
 	
+	public void FOverflowIntLitExp.contentCheck() {
+		warning("Integer literal \"%s\" is too large to represent as 32-bit Integer, using Real instead.", 
+				getString(), getString(), getValue());
+	}
 	
 	/**
      * Check if this equation is in a place that allows connect clauses.

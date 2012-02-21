@@ -28,8 +28,8 @@ extern "C" {
 /* Structure encapsulating base unit information */
 
 struct fmi_xml_display_unit_t {
-    fmiReal gain;
-    fmiReal offset;
+    fmi_xml_real_t gain;
+    fmi_xml_real_t offset;
     fmi_xml_unit_t* baseUnit;
     char displayUnit[1];
 };

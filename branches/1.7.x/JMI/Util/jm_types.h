@@ -26,5 +26,10 @@ typedef struct jm_name_ID_map_t {
     unsigned int ID;
 } jm_name_ID_map_t;
 
+typedef enum {	
+	jm_status_success = 0,	
+	jm_status_error = -1
+} jm_status_enu_t;
+
 /* JM_TYPES_H */
 #endif

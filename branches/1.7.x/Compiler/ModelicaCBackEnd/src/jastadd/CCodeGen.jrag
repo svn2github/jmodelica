@@ -772,6 +772,10 @@ aspect CCodeGen {
 			type.printExternDecl_C(p, str, indent, tempName_C(), this);
 	}
 	
+	public void FLitExp.genExtFortanVarDecls_C(Printer p, PrintStream str, String indent) {
+		type().printExternDecl_C(p, str, indent, tempName_C(), this);
+	}
+	
 	public void FExp.genExtCVarDecls_C(Printer p, PrintStream str, String indent) {}
 	
 	public void FIdUseExp.genExtCVarDecls_C(Printer p, PrintStream str, String indent) {
@@ -1086,12 +1090,12 @@ aspect CCodeGen {
 		p.print(getFExp(), str, indent);
 		str.print(")");
 	}
-			 	
+	
 	public void FRealLitExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		boolean wrap = inIfCondition();
 		if (wrap) 
 			str.print("AD_WRAP_LITERAL(");
-		str.print(getUNSIGNED_NUMBER());
+		str.print(getValue());
 		if (wrap) 
 			str.print(")");
 	}
@@ -1100,7 +1104,7 @@ aspect CCodeGen {
 		boolean wrap = inIfCondition() || inFunctionArg();
 		if (wrap) 
 			str.print("AD_WRAP_LITERAL(");
-		str.print(getUNSIGNED_INTEGER());
+		str.print(getValue());
 		if (wrap) 
 			str.print(")");
 	}
@@ -1187,10 +1191,20 @@ aspect CCodeGen {
 			useTempVar = true;
 			// create static or dynamic temp array
 			type().printExternInit_C(p, str, indent, tempName, this);
-			MatrixOp op = new MatrixOp("jmi_transpose_matrix");
+			MatrixOp op = new MatrixOp("jmi_matrix_to_fortran_real");
 			String src = prettyPrint_C(indent);
 			op.genMatrixOp(p, str, indent, src, src, tempName);
 		}		
+	}
+	
+	public void FLitExp.prepExternalRealInput(Printer p, PrintStream str, String indent, FExternalLanguage lang) {
+		if (lang instanceof FFortran77ExternalLanguage) {
+			String tempName = tempName_C();
+			useTempVar = true;
+			str.print(indent + tempName + " = ");
+			p.print(this, str, indent);
+			str.print(";\n");
+		}
 	}
 	
 	public void FExp.prepExternalIntegerInput(Printer p, PrintStream str, String indent, FExternalLanguage lang) {}
@@ -1205,7 +1219,7 @@ aspect CCodeGen {
 			type().printExternInit_C(p, str, indent, tempName, this);
 			// if Fortran: cast to int and transpose (and copy - included in transpose)
 			// if c: cast to int and copy
-			MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_to_int") : new MatrixOp("jmi_transpose_matrix_to_int");
+			MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_to_int") : new MatrixOp("jmi_matrix_to_fortran_int");
 			String src = prettyPrint_C(indent);
 			op.genMatrixOp(p, str, indent, src, src, tempName);			
 		} else {
@@ -1215,6 +1229,16 @@ aspect CCodeGen {
 			str.print(";\n");
 		}
 	}	
+	
+	public void FLitExp.prepExternalIntegerInput(Printer p, PrintStream str, String indent, FExternalLanguage lang) {
+		if (lang instanceof FFortran77ExternalLanguage) {
+			String tempName = tempName_C();
+			useTempVar = true;
+			str.print(indent + tempName + " = ");
+			p.print(this, str, indent);
+			str.print(";\n");
+		}
+	}
 	
 	public void FExternalLanguage.genPostFuncCall(Printer p, PrintStream str, String indent, FExternalStmt stmt) {
 		for (FExp arg : stmt.getArgs()) {
@@ -1239,7 +1263,7 @@ aspect CCodeGen {
 			// We need to transpose if Fortran and we have >1 dimensions
 			// generate tempname
 			String tempName = arg.tempName_C();
-			MatrixOp op = new MatrixOp("jmi_transpose_matrix");
+			MatrixOp op = new MatrixOp("jmi_matrix_from_fortran_real");
 			String dest = arg.prettyPrint_C(indent);
 			op.genMatrixOp(p, str, indent, dest, tempName, dest);
 		}		
@@ -1252,7 +1276,7 @@ aspect CCodeGen {
 		if (arg.isArray()) {
 			// if Fortran: cast to int and transpose (and copy - included in transpose)
 			// if c: cast to int and copy
-			MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_from_int") : new MatrixOp("jmi_transpose_matrix_from_int");
+			MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_from_int") : new MatrixOp("jmi_matrix_from_fortran_int");
 			String dest = arg.prettyPrint_C(indent);
 			op.genMatrixOp(p, str, indent, dest, tempName, dest);
 		} else {

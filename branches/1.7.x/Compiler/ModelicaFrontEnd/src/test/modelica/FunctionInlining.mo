@@ -31,14 +31,6 @@ fclass FunctionInlining.BasicInline1
  constant Integer temp_2 = 1;
 equation
  x = 1;
-
- function FunctionInlining.BasicInline1.f
-  input Real a;
-  output Real b;
- algorithm
-  b := a;
-  return;
- end FunctionInlining.BasicInline1.f;
 end FunctionInlining.BasicInline1;
 ")})));
 
@@ -73,23 +65,6 @@ fclass FunctionInlining.BasicInline2
  constant Real temp_7 = 2.0;
 equation
  x = 2.0;
-
- function FunctionInlining.BasicInline2.f
-  input Real a;
-  output Real b;
-  Real c;
-  Real d;
-  Real e;
-  Real f;
- algorithm
-  c := a;
-  d := ( 2 ) * ( c ) + a;
-  c := ( d ) / ( 3 ) + 1;
-  e := c ^ d;
-  f := e - ( c ) - ( d ) - ( c );
-  b := f + 1;
-  return;
- end FunctionInlining.BasicInline2.f;
 end FunctionInlining.BasicInline2;
 ")})));
 
@@ -143,23 +118,6 @@ equation
  temp_5 = temp_4 ^ temp_3;
  temp_6 = temp_5 - ( temp_4 ) - ( temp_3 ) - ( temp_4 );
  temp_7 = temp_6 + 1;
-
- function FunctionInlining.BasicInline3.f
-  input Real a;
-  output Real b;
-  Real c;
-  Real d;
-  Real e;
-  Real f;
- algorithm
-  c := a;
-  d := ( 2 ) * ( c ) + a;
-  c := ( d ) / ( 3 ) + 1;
-  e := c ^ d;
-  f := e - ( c ) - ( d ) - ( c );
-  b := f + 1;
-  return;
- end FunctionInlining.BasicInline3.f;
 end FunctionInlining.BasicInline3;
 ")})));
 
@@ -198,23 +156,6 @@ fclass FunctionInlining.BasicInline4
 equation
  y = time;
  x = y + y;
-
- function FunctionInlining.BasicInline4.f
-  input Real a;
-  output Real b;
-  Real c;
-  Real d;
-  Real e;
-  Real f;
- algorithm
-  c := a;
-  d := c;
-  c := d;
-  e := c + d;
-  f := e;
-  b := f;
-  return;
- end FunctionInlining.BasicInline4.f;
 end FunctionInlining.BasicInline4;
 ")})));
 
@@ -269,23 +210,6 @@ equation
  temp_5 = temp_4 + temp_3;
  temp_6 = temp_5;
  temp_7 = temp_6;
-
- function FunctionInlining.BasicInline5.f
-  input Real a;
-  output Real b;
-  Real c;
-  Real d;
-  Real e;
-  Real f;
- algorithm
-  c := a;
-  d := c;
-  c := d;
-  e := c + d;
-  f := e;
-  b := f;
-  return;
- end FunctionInlining.BasicInline5.f;
 end FunctionInlining.BasicInline5;
 ")})));
 
@@ -353,28 +277,6 @@ equation
  temp_4[1] = ( temp_3 ) * ( temp_1[1] + temp_2[1] );
  temp_4[2] = ( temp_3 ) * ( temp_1[2] + temp_2[2] );
  temp_4[3] = ( temp_3 ) * ( temp_1[3] + temp_2[3] );
-
- function FunctionInlining.BasicInline6.f
-  input Real[:] a;
-  output Real[size(a, 1)] b;
-  Real[:] c;
-  Real d;
-  Real temp_1;
- algorithm
-  size(c) := {size(a, 1)};
-  for i1 in 1:size(c, 1) loop
-   c[i1] := a[i1];
-  end for;
-  temp_1 := 0.0;
-  for i1 in 1:size(a, 1) loop
-   temp_1 := temp_1 + ( a[i1] ) * ( c[i1] );
-  end for;
-  d := temp_1;
-  for i1 in 1:size(b, 1) loop
-   b[i1] := ( d ) * ( a[i1] + c[i1] );
-  end for;
-  return;
- end FunctionInlining.BasicInline6.f;
 end FunctionInlining.BasicInline6;
 ")})));
 
@@ -427,26 +329,6 @@ equation
  temp_7 = temp_2;
  temp_8 = ( temp_7 ) * ( 2 );
  temp_9 = temp_7 + temp_8;
-
- function FunctionInlining.BasicInline7.f2
-  input Real a;
-  output Real b;
-  Real c;
- algorithm
-  c := ( a ) * ( 2 );
-  b := FunctionInlining.BasicInline7.f1(a) + FunctionInlining.BasicInline7.f1(c);
-  return;
- end FunctionInlining.BasicInline7.f2;
-
- function FunctionInlining.BasicInline7.f1
-  input Real a;
-  output Real b;
-  Real c;
- algorithm
-  c := ( a ) * ( 2 );
-  b := a + c;
-  return;
- end FunctionInlining.BasicInline7.f1;
 end FunctionInlining.BasicInline7;
 ")})));
 
@@ -555,47 +437,6 @@ equation
  temp_11[1] = ( temp_10 ) * ( temp_8[1] + temp_9[1] );
  temp_11[2] = ( temp_10 ) * ( temp_8[2] + temp_9[2] );
  temp_11[3] = ( temp_10 ) * ( temp_8[3] + temp_9[3] );
-
- function FunctionInlining.BasicInline8.f2
-  input Real[:] a;
-  output Real[size(a, 1)] b;
-  Real[:] c;
-  Real[size(a, 1)] temp_1;
-  Real[size(c, 1)] temp_2;
- algorithm
-  size(c) := {size(a, 1)};
-  for i1 in 1:size(c, 1) loop
-   c[i1] := ( a[i1] ) * ( 2 );
-  end for;
-  for i1 in 1:size(b, 1) loop
-   (temp_1) := FunctionInlining.BasicInline8.f1(a);
-   (temp_2) := FunctionInlining.BasicInline8.f1(c);
-   b[i1] := temp_1[i1] + temp_2[i1];
-  end for;
-  return;
- end FunctionInlining.BasicInline8.f2;
-
- function FunctionInlining.BasicInline8.f1
-  input Real[:] a;
-  output Real[size(a, 1)] b;
-  Real[:] c;
-  Real d;
-  Real temp_1;
- algorithm
-  size(c) := {size(a, 1)};
-  for i1 in 1:size(c, 1) loop
-   c[i1] := a[i1];
-  end for;
-  temp_1 := 0.0;
-  for i1 in 1:size(a, 1) loop
-   temp_1 := temp_1 + ( a[i1] ) * ( c[i1] );
-  end for;
-  d := temp_1;
-  for i1 in 1:size(b, 1) loop
-   b[i1] := ( d ) * ( a[i1] + c[i1] );
-  end for;
-  return;
- end FunctionInlining.BasicInline8.f1;
 end FunctionInlining.BasicInline8;
 ")})));
 
@@ -653,23 +494,6 @@ parameter equation
  temp_6 = temp_5 - ( temp_4 ) - ( temp_3 ) - ( temp_4 );
  temp_7 = temp_6 + 1;
  x = temp_7;
-
- function FunctionInlining.BasicInline9.f
-  input Real a;
-  output Real b;
-  Real c;
-  Real d;
-  Real e;
-  Real f;
- algorithm
-  c := a;
-  d := ( 2 ) * ( c ) + a;
-  c := ( d ) / ( 3 ) + 1;
-  e := c ^ d;
-  f := e - ( c ) - ( d ) - ( c );
-  b := f + 1;
-  return;
- end FunctionInlining.BasicInline9.f;
 end FunctionInlining.BasicInline9;
 ")})));
 
@@ -729,16 +553,6 @@ equation
  temp_2[2] = z[2];
  temp_2[3] = z[3];
  temp_4 = ( temp_1 ) * ( temp_2[2] );
-
- function FunctionInlining.BasicInline10.f
-  input Real a;
-  input Real[:] b;
-  input Integer c;
-  output Real d;
- algorithm
-  d := ( a ) * ( b[c] );
-  return;
- end FunctionInlining.BasicInline10.f;
 end FunctionInlining.BasicInline10;
 ")})));
 
@@ -782,14 +596,6 @@ equation
  y[1] = 1;
  y[2] = 2;
  y[3] = 3;
-
- function FunctionInlining.BasicInline11.f
-  input Integer a;
-  output Integer b;
- algorithm
-  b := 4 - ( a );
-  return;
- end FunctionInlining.BasicInline11.f;
 end FunctionInlining.BasicInline11;
 ")})));
 
@@ -823,14 +629,6 @@ fclass FunctionInlining.RecordInline1
  constant Integer temp_2 = 10;
 equation
  x = 10;
-
- function FunctionInlining.RecordInline1.f
-  input FunctionInlining.RecordInline1.R c;
-  output Real d;
- algorithm
-  d := c.b + c.a[1] + c.a[2] + c.a[3];
-  return;
- end FunctionInlining.RecordInline1.f;
 
  record FunctionInlining.RecordInline1.R
   Real a[3];
@@ -881,17 +679,6 @@ equation
  x.a[3] = 3;
  x.b = 2;
 
- function FunctionInlining.RecordInline2.f
-  input Real c;
-  output FunctionInlining.RecordInline2.R d;
- algorithm
-  d.a[1] := ( 1 ) * ( c );
-  d.a[2] := ( 2 ) * ( c );
-  d.a[3] := ( 3 ) * ( c );
-  d.b := 2;
-  return;
- end FunctionInlining.RecordInline2.f;
-
  record FunctionInlining.RecordInline2.R
   Real a[3];
   discrete Integer b;
@@ -933,19 +720,6 @@ fclass FunctionInlining.RecordInline3
  constant Integer temp_3 = 10;
 equation
  x = 10;
-
- function FunctionInlining.RecordInline3.f
-  input Real c;
-  output Real d;
-  FunctionInlining.RecordInline3.R e;
- algorithm
-  e.a[1] := ( 1 ) * ( c );
-  e.a[2] := ( 2 ) * ( c );
-  e.a[3] := ( 3 ) * ( c );
-  e.b := 4;
-  d := e.a[1] + e.a[2] + e.a[3] + ( c ) * ( e.b );
-  return;
- end FunctionInlining.RecordInline3.f;
 
  record FunctionInlining.RecordInline3.R
   Real a[3];
@@ -1006,14 +780,6 @@ equation
  temp_1.b = integer(y[4]);
  temp_2 = temp_1.b + temp_1.a[1] + temp_1.a[2] + temp_1.a[3];
 
- function FunctionInlining.RecordInline4.f
-  input FunctionInlining.RecordInline4.R c;
-  output Real d;
- algorithm
-  d := c.b + c.a[1] + c.a[2] + c.a[3];
-  return;
- end FunctionInlining.RecordInline4.f;
-
  record FunctionInlining.RecordInline4.R
   Real a[3];
   discrete Integer b;
@@ -1072,17 +838,6 @@ equation
  temp_2.a[3] = ( 3 ) * ( temp_1 );
  temp_2.b = 2;
 
- function FunctionInlining.RecordInline5.f
-  input Real c;
-  output FunctionInlining.RecordInline5.R d;
- algorithm
-  d.a[1] := ( 1 ) * ( c );
-  d.a[2] := ( 2 ) * ( c );
-  d.a[3] := ( 3 ) * ( c );
-  d.b := 2;
-  return;
- end FunctionInlining.RecordInline5.f;
-
  record FunctionInlining.RecordInline5.R
   Real a[3];
   discrete Integer b;
@@ -1135,19 +890,6 @@ equation
  temp_2.a[3] = ( 3 ) * ( temp_1 );
  temp_2.b = 4;
  temp_3 = temp_2.a[1] + temp_2.a[2] + temp_2.a[3] + ( temp_1 ) * ( temp_2.b );
-
- function FunctionInlining.RecordInline6.f
-  input Real c;
-  output Real d;
-  FunctionInlining.RecordInline6.R e;
- algorithm
-  e.a[1] := ( 1 ) * ( c );
-  e.a[2] := ( 2 ) * ( c );
-  e.a[3] := ( 3 ) * ( c );
-  e.b := 4;
-  d := e.a[1] + e.a[2] + e.a[3] + ( c ) * ( e.b );
-  return;
- end FunctionInlining.RecordInline6.f;
 
  record FunctionInlining.RecordInline6.R
   Real a[3];
@@ -1250,32 +992,6 @@ equation
  temp_5.a[3] = temp_4.a[3] - ( temp_1.a[3] );
  temp_5.b = temp_4.b + temp_3.b;
 
- function FunctionInlining.RecordInline7.f
-  input FunctionInlining.RecordInline7.R c;
-  output FunctionInlining.RecordInline7.R d;
-  FunctionInlining.RecordInline7.R e;
-  FunctionInlining.RecordInline7.R g;
-  FunctionInlining.RecordInline7.R h;
- algorithm
-  e.a[1] := c.a[1];
-  e.a[2] := c.a[2];
-  e.a[3] := c.a[3];
-  e.b := c.b;
-  g.a[1] := e.a[1] + c.a[1];
-  g.a[2] := e.a[2] + c.a[2];
-  g.a[3] := e.a[3] + c.a[3];
-  g.b := e.b - ( c.b );
-  h.a[1] := ( ( c.a[1] ) * ( e.a[1] ) + ( c.a[2] ) * ( e.a[2] ) + ( c.a[3] ) * ( e.a[3] ) ) * ( g.a[1] );
-  h.a[2] := ( ( c.a[1] ) * ( e.a[1] ) + ( c.a[2] ) * ( e.a[2] ) + ( c.a[3] ) * ( e.a[3] ) ) * ( g.a[2] );
-  h.a[3] := ( ( c.a[1] ) * ( e.a[1] ) + ( c.a[2] ) * ( e.a[2] ) + ( c.a[3] ) * ( e.a[3] ) ) * ( g.a[3] );
-  h.b := 3;
-  d.a[1] := h.a[1] - ( c.a[1] );
-  d.a[2] := h.a[2] - ( c.a[2] );
-  d.a[3] := h.a[3] - ( c.a[3] );
-  d.b := h.b + g.b;
-  return;
- end FunctionInlining.RecordInline7.f;
-
  record FunctionInlining.RecordInline7.R
   Real a[3];
   discrete Integer b;
@@ -1305,5 +1021,753 @@ end FunctionInlining.RecordInline7;
         Real y[4] = {1,2,3,4};
         R x = f(R(y[1:3], integer(y[4])));
     end RecordInline7;
+	
+	
+	model UninlinableFunction1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UninlinableFunction1",
+         description="Make sure that only unused functions are removed",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.UninlinableFunction1
+ Real z[1];
+ Real z[2];
+ Real z[3];
+ Real w[1];
+ Real w[2];
+ Real temp_1;
+ Real temp_2;
+equation
+ w[1] = FunctionInlining.UninlinableFunction1.f1(z[2], z[3]);
+ w[2] = temp_2;
+ z[1] = 1;
+ z[2] = 2;
+ z[3] = 3;
+ temp_1 = z[1];
+ temp_2 = temp_1;
+
+ function FunctionInlining.UninlinableFunction1.f4
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ end FunctionInlining.UninlinableFunction1.f4;
+
+ function FunctionInlining.UninlinableFunction1.f1
+  input Real x1;
+  input Real x2;
+  output Real y;
+ algorithm
+  y := FunctionInlining.UninlinableFunction1.f4(x1);
+  while y < x2 loop
+   y := y + FunctionInlining.UninlinableFunction1.f3(x1, x2);
+  end while;
+  return;
+ end FunctionInlining.UninlinableFunction1.f1;
+
+ function FunctionInlining.UninlinableFunction1.f3
+  input Real x1;
+  input Real x2;
+  output Real y;
+ algorithm
+  y := 0;
+  while y < x2 loop
+   y := y + x1;
+  end while;
+  return;
+ end FunctionInlining.UninlinableFunction1.f3;
+end FunctionInlining.UninlinableFunction1;
+")})));
+
+		function f1
+			input Real x1;
+			input Real x2;
+			output Real y = f4(x1);
+		algorithm
+            while y < x2 loop
+				y := y + f3(x1, x2);
+            end while;
+		end f1;
+		
+		function f2
+			input Real x;
+			output Real y = x;
+		algorithm
+		end f2;
+		
+        function f3
+            input Real x1;
+            input Real x2;
+            output Real y;
+        algorithm
+            y := 0;
+            while y < x2 loop
+                y := y + x1;
+            end while;
+        end f3;
+        
+        function f4
+            input Real x;
+            output Real y = x;
+        algorithm
+        end f4;
+        
+		Real z[3] = 1:size(z,1);
+		Real w[2];
+	equation
+		w[1] = f1(z[2], z[3]);
+		w[2] = f2(z[1]);
+	end UninlinableFunction1;
+    
+    
+    model IfStatementInline1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfStatementInline1",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.IfStatementInline1
+ Real z1;
+ Real z2;
+ constant Integer temp_1 = 3;
+ constant Integer temp_2 = 1;
+ constant Integer temp_3 = 2;
+ constant Integer temp_4 = 3;
+ constant Integer temp_5 = 5;
+ constant Integer temp_6 = 1;
+ constant Integer temp_7 = 1;
+ constant Integer temp_8 = 2;
+ constant Integer temp_9 = 1;
+ constant Integer temp_10 = 3;
+equation
+ z1 = 5;
+ z2 = 3;
+end FunctionInlining.IfStatementInline1;
+")})));
+
+        function f
+            input Real x;
+            output Real y;
+        protected
+            Real w1;
+            Real w2;
+        algorithm
+            w1 := 1;
+            w2 := 2;
+            if x > 2 then
+                w1 := x;
+            end if;
+            y := w1 + w2;
+        end f;
+        
+        Real z1 = f(3);
+        Real z2 = f(1);
+    end IfStatementInline1;
+    
+    
+    model IfStatementInline2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfStatementInline2",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.IfStatementInline2
+ Real v;
+ Real z;
+ Real temp_1;
+ constant Integer temp_2 = 1;
+ constant Integer temp_3 = 2;
+ Real temp_4;
+ Real temp_5;
+equation
+ v = 2;
+ z = temp_5;
+ temp_1 = v;
+ temp_4 = (if temp_1 > 2 then temp_1 else 1);
+ temp_5 = temp_4 + 2;
+end FunctionInlining.IfStatementInline2;
+")})));
+
+        function f
+            input Real x;
+            output Real y;
+        protected
+            Real w1;
+            Real w2;
+        algorithm
+            w1 := 1;
+            w2 := 2;
+            if x > 2 then
+                w1 := x;
+            end if;
+            y := w1 + w2;
+        end f;
+        
+        Real v = 2;
+        Real z = f(v);
+    end IfStatementInline2;
+    
+    
+    model IfStatementInline3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfStatementInline3",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.IfStatementInline3
+ Real v1;
+ Real v2;
+ Real v3;
+ Real z;
+ Real temp_1;
+ Real temp_2;
+ Real temp_3;
+ Real temp_4;
+ Real temp_5;
+ Real temp_6;
+ Real temp_7;
+ Real temp_8;
+equation
+ v1 = 1;
+ v2 = 2;
+ v3 = 3;
+ z = temp_8;
+ temp_1 = v1;
+ temp_2 = v2;
+ temp_3 = v3;
+ temp_4 = temp_2;
+ temp_5 = temp_3;
+ temp_6 = (if temp_1 > 2 then temp_1 else temp_4);
+ temp_7 = (if temp_1 > 2 then temp_5 else temp_1);
+ temp_8 = temp_6 + temp_7;
+end FunctionInlining.IfStatementInline3;
+")})));
+
+        function f
+            input Real x1;
+            input Real x2;
+            input Real x3;
+            output Real y;
+        protected
+            Real w1;
+            Real w2;
+        algorithm
+            w1 := x2;
+            w2 := x3;
+            if x1 > 2 then
+                w1 := x1;
+            else
+                w2 := x1;
+            end if;
+            y := w1 + w2;
+        end f;
+        
+        Real v1 = 1;
+        Real v2 = 2;
+        Real v3 = 3;
+        Real z = f(v1, v2, v3);
+    end IfStatementInline3;
+    
+    
+    model IfStatementInline4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfStatementInline4",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.IfStatementInline4
+ Real v;
+ Real z;
+ Real temp_1;
+ Real temp_2;
+ Real temp_3;
+equation
+ v = 1;
+ z = temp_3;
+ temp_1 = v;
+ temp_2 = (if temp_1 > 2 then temp_1 else 0.0);
+ temp_3 = (if temp_1 > 2 then temp_2 else temp_1 + 1);
+end FunctionInlining.IfStatementInline4;
+")})));
+
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            if x > 2 then
+                y := x;
+            else
+                y := x + 1;
+            end if;
+        end f;
+        
+        Real v = 1;
+        Real z = f(v);
+    end IfStatementInline4;
+    
+    
+    model ForStatementInline1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ForStatementInline1",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.ForStatementInline1
+ Real v;
+ Real z;
+ Real temp_1;
+ constant Integer temp_2 = 0;
+ Real temp_3;
+ Real temp_4;
+ Real temp_5;
+ Real temp_6;
+ Real temp_7;
+ Real temp_8;
+ Real temp_9;
+ Real temp_10;
+equation
+ v = 3;
+ z = temp_10;
+ temp_1 = v;
+ temp_3 = 1 + ( 0 ) * ( ( temp_1 - ( 1 ) ) / ( 3 ) );
+ temp_4 = 0 + ( temp_3 ) * ( temp_3 );
+ temp_5 = 1 + ( 1 ) * ( ( temp_1 - ( 1 ) ) / ( 3 ) );
+ temp_6 = temp_4 + ( temp_5 ) * ( temp_5 );
+ temp_7 = 1 + ( 2 ) * ( ( temp_1 - ( 1 ) ) / ( 3 ) );
+ temp_8 = temp_6 + ( temp_7 ) * ( temp_7 );
+ temp_9 = 1 + ( 3 ) * ( ( temp_1 - ( 1 ) ) / ( 3 ) );
+ temp_10 = temp_8 + ( temp_9 ) * ( temp_9 );
+end FunctionInlining.ForStatementInline1;
+")})));
+
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := 0;
+            for w in linspace(1, x, 4) loop
+                y := y + w * w;
+            end for;
+        end f;
+        
+        Real v = 3;
+        Real z = f(v);
+    end ForStatementInline1;
+    
+    
+    model ForStatementInline2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ForStatementInline2",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.ForStatementInline2
+ Real z;
+ constant Integer temp_1 = 3;
+ constant Integer temp_2 = 0;
+ constant Real temp_3 = 1.0;
+ constant Real temp_4 = 1.0;
+ constant Real temp_5 = 1.6666666666666665;
+ constant Real temp_6 = 3.7777777777777772;
+ constant Real temp_7 = 2.333333333333333;
+ constant Real temp_8 = 9.22222222222222;
+ constant Real temp_9 = 3.0;
+ constant Real temp_10 = 18.22222222222222;
+equation
+ z = 18.22222222222222;
+end FunctionInlining.ForStatementInline2;
+")})));
+
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := 0;
+            for w in linspace(1, x, 4) loop
+                y := y + w * w;
+            end for;
+        end f;
+        
+        Real z = f(3);
+    end ForStatementInline2;
+    
+    
+    model ForStatementInline3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ForStatementInline3",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.ForStatementInline3
+ Real v[1];
+ Real v[2];
+ Real v[3];
+ Real z;
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_1[3];
+ constant Integer temp_2 = 0;
+ Real temp_3;
+ Real temp_4;
+ Real temp_5;
+ Real temp_6;
+ Real temp_7;
+ Real temp_8;
+equation
+ v[1] = 1;
+ v[2] = 2;
+ v[3] = 3;
+ z = temp_8;
+ temp_1[1] = v[1];
+ temp_1[2] = v[2];
+ temp_1[3] = v[3];
+ temp_3 = temp_1[1];
+ temp_4 = 0 + ( temp_3 ) * ( temp_3 );
+ temp_5 = temp_1[2];
+ temp_6 = temp_4 + ( temp_5 ) * ( temp_5 );
+ temp_7 = temp_1[3];
+ temp_8 = temp_6 + ( temp_7 ) * ( temp_7 );
+end FunctionInlining.ForStatementInline3;
+")})));
+
+        function f
+            input Real[:] x;
+            output Real y;
+        algorithm
+            y := 0;
+            for w in x loop
+                y := y + w * w;
+            end for;
+        end f;
+        
+        Real v[3] = {1,2,3};
+        Real z = f(v);
+    end ForStatementInline3;
+    
+    
+    model ForStatementInline4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ForStatementInline4",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.ForStatementInline4
+ Real z;
+ constant Integer temp_1[1] = 1;
+ constant Integer temp_1[2] = 2;
+ constant Integer temp_1[3] = 3;
+ constant Integer temp_2 = 0;
+ constant Integer temp_3 = 1;
+ constant Integer temp_4 = 1;
+ constant Integer temp_5 = 2;
+ constant Integer temp_6 = 5;
+ constant Integer temp_7 = 3;
+ constant Integer temp_8 = 14;
+equation
+ z = 14;
+end FunctionInlining.ForStatementInline4;
+")})));
+
+        function f
+            input Real[:] x;
+            output Real y;
+        algorithm
+            y := 0;
+            for w in x loop
+                y := y + w * w;
+            end for;
+        end f;
+        
+        Real z = f({1,2,3});
+    end ForStatementInline4;
+
+
+    model ForStatementInline5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ForStatementInline5",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.ForStatementInline5
+ Real v[1];
+ Real v[2];
+ Real v[3];
+ Real z;
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_1[3];
+ constant Integer temp_2 = 0;
+ Real temp_3;
+ Real temp_4;
+ Real temp_5;
+ Real temp_6;
+ Real temp_7;
+ Real temp_8;
+ Real temp_9;
+ Real temp_10;
+ Real temp_11;
+equation
+ v[1] = 1;
+ v[2] = 2;
+ v[3] = 3;
+ z = temp_11;
+ temp_1[1] = v[1];
+ temp_1[2] = v[2];
+ temp_1[3] = v[3];
+ temp_3 = temp_1[1];
+ temp_4 = (if temp_3 > 2 then 0 + ( temp_3 ) * ( temp_3 ) else 0);
+ temp_5 = (if temp_3 > 2 then temp_4 else temp_4 + temp_3);
+ temp_6 = temp_1[2];
+ temp_7 = (if temp_6 > 2 then temp_5 + ( temp_6 ) * ( temp_6 ) else temp_5);
+ temp_8 = (if temp_6 > 2 then temp_7 else temp_7 + temp_6);
+ temp_9 = temp_1[3];
+ temp_10 = (if temp_9 > 2 then temp_8 + ( temp_9 ) * ( temp_9 ) else temp_8);
+ temp_11 = (if temp_9 > 2 then temp_10 else temp_10 + temp_9);
+end FunctionInlining.ForStatementInline5;
+")})));
+
+        function f
+            input Real[:] x;
+            output Real y;
+        algorithm
+            y := 0;
+            for w in x loop
+                if w > 2 then
+                    y := y + w * w;
+                else
+                    y := y + w;
+                end if;
+            end for;
+        end f;
+        
+        Real v[3] = {1,2,3};
+        Real z = f(v);
+    end ForStatementInline5;
+
+
+    model ForStatementInline6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ForStatementInline6",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.ForStatementInline6
+ Real z;
+ constant Integer temp_1[1] = 1;
+ constant Integer temp_1[2] = 2;
+ constant Integer temp_1[3] = 3;
+ constant Integer temp_2 = 0;
+ constant Integer temp_3 = 1;
+ constant Integer temp_4 = 0;
+ constant Integer temp_5 = 1;
+ constant Integer temp_6 = 2;
+ constant Integer temp_7 = 1;
+ constant Integer temp_8 = 3;
+ constant Integer temp_9 = 3;
+ constant Integer temp_10 = 12;
+ constant Integer temp_11 = 12;
+equation
+ z = 12;
+end FunctionInlining.ForStatementInline6;
+")})));
+
+        function f
+            input Real[:] x;
+            output Real y;
+        algorithm
+            y := 0;
+            for w in x loop
+                if w > 2 then
+                    y := y + w * w;
+                else
+                    y := y + w;
+                end if;
+            end for;
+        end f;
+        
+        Real z = f({1,2,3});
+    end ForStatementInline6;
+
+
+    model ForStatementInline7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ForStatementInline7",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.ForStatementInline7
+ Real v[1];
+ Real v[2];
+ Real v[3];
+ Real z;
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_1[3];
+ Real temp_2;
+ constant Integer temp_3 = 0;
+ constant Integer temp_4 = 1;
+ constant Integer temp_5 = 0;
+ Real temp_6;
+ constant Integer temp_7 = 2;
+ Real temp_8;
+ Real temp_9;
+ constant Integer temp_10 = 3;
+ Real temp_11;
+ Real temp_12;
+ constant Integer temp_13 = 4;
+ Real temp_14;
+ Real temp_15;
+equation
+ v[1] = 1;
+ v[2] = 2;
+ v[3] = 3;
+ z = temp_15;
+ temp_1[1] = v[1];
+ temp_1[2] = v[2];
+ temp_1[3] = v[3];
+ temp_2 = ( temp_1[1] ) * ( temp_1[1] ) + ( temp_1[2] ) * ( temp_1[2] ) + ( temp_1[3] ) * ( temp_1[3] );
+ temp_6 = 0 + temp_2;
+ temp_8 = temp_6;
+ temp_9 = temp_8 + temp_2;
+ temp_11 = temp_9 + ( 3 ) * ( temp_2 );
+ temp_12 = temp_11;
+ temp_14 = temp_12 + ( 4 ) * ( temp_2 );
+ temp_15 = temp_14;
+end FunctionInlining.ForStatementInline7;
+")})));
+
+        function f
+            input Real[:] x;
+            output Real y;
+		protected
+			Real t;
+        algorithm
+			t := x * x;
+            y := 0;
+            for w in 1:4 loop
+                if w > 2 then
+                    y := y + w * t;
+                else
+                    y := y + t;
+                end if;
+            end for;
+        end f;
+        
+        Real v[3] = {1,2,3};
+        Real z = f(v);
+    end ForStatementInline7;
+
+
+    model ForStatementInline8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ForStatementInline8",
+         description="",
+         inline_functions=true,
+         eliminate_alias_variables=false,
+         flatModel="
+fclass FunctionInlining.ForStatementInline8
+ Real v[1];
+ Real v[2];
+ Real v[3];
+ Real z;
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_1[3];
+ constant Integer temp_2 = 0;
+ Real temp_3;
+ Real temp_4;
+ Real temp_5;
+ Real temp_6;
+ Real temp_7;
+ Real temp_8;
+ Real temp_9;
+ Real temp_10;
+ Real temp_11;
+ Real temp_12;
+ Real temp_13;
+ Real temp_14;
+ Real temp_15;
+ Real temp_16;
+ Real temp_17;
+ Real temp_18;
+ Real temp_19;
+ Real temp_20;
+ Real temp_21;
+ Real temp_22;
+ Real temp_23;
+equation
+ v[1] = 1;
+ v[2] = 2;
+ v[3] = 3;
+ z = temp_23;
+ temp_1[1] = v[1];
+ temp_1[2] = v[2];
+ temp_1[3] = v[3];
+ temp_3 = temp_1[1];
+ temp_4 = temp_1[1];
+ temp_5 = 0 + ( temp_3 ) * ( temp_4 );
+ temp_6 = temp_1[2];
+ temp_7 = temp_5 + ( temp_3 ) * ( temp_6 );
+ temp_8 = temp_1[3];
+ temp_9 = temp_7 + ( temp_3 ) * ( temp_8 );
+ temp_10 = temp_1[2];
+ temp_11 = temp_1[1];
+ temp_12 = temp_9 + ( temp_10 ) * ( temp_11 );
+ temp_13 = temp_1[2];
+ temp_14 = temp_12 + ( temp_10 ) * ( temp_13 );
+ temp_15 = temp_1[3];
+ temp_16 = temp_14 + ( temp_10 ) * ( temp_15 );
+ temp_17 = temp_1[3];
+ temp_18 = temp_1[1];
+ temp_19 = temp_16 + ( temp_17 ) * ( temp_18 );
+ temp_20 = temp_1[2];
+ temp_21 = temp_19 + ( temp_17 ) * ( temp_20 );
+ temp_22 = temp_1[3];
+ temp_23 = temp_21 + ( temp_17 ) * ( temp_22 );
+end FunctionInlining.ForStatementInline8;
+")})));
+
+        function f
+            input Real[:] x;
+            output Real y;
+        algorithm
+            y := 0;
+            for w in x loop
+                for t in x loop
+                    y := y + w * t;
+                end for;
+            end for;
+        end f;
+        
+        Real v[3] = {1,2,3};
+        Real z = f(v);
+    end ForStatementInline8;
+
 	
 end FunctionInlining;

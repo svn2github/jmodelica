@@ -586,9 +586,19 @@ public class ModelicaCompiler {
 	 */
 	protected void noteUsedMemory() {
 		if (numUsedMemFilled < NUM_USED_MEMORY_SLOTS)
-			usedMem[numUsedMemFilled++] = RUNTIME.totalMemory() - RUNTIME.freeMemory();
+			usedMem[numUsedMemFilled++] = getUsedMemory();
 	}
+	
 	private static final Runtime RUNTIME = Runtime.getRuntime();
+	
+	/**
+	 * Get the amount of memory currently used.
+	 * 
+	 * This includes objects that are no longer reachable but not yet garbage collected.
+	 */
+	public static long getUsedMemory() {
+		return RUNTIME.totalMemory() - RUNTIME.freeMemory();
+	}
 
 	/**
 	 * \brief Save a dump of the memory use of an AST.

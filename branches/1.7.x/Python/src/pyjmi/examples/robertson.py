@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os as O
+import os.path
 
 import numpy as N
 import matplotlib.pyplot as plt
@@ -29,10 +29,10 @@ def run_demo(with_plots=True):
     """
     Demonstrates how to use JModelica.org for calculating sensitivities.
     """
-    
-    curr_dir = O.path.join(O.path.dirname(O.path.abspath(__file__)),'files')
-    
-    jmu_name = compile_jmu("Robertson", O.path.join(curr_dir,"Robertson.mop"))
+    curr_dir = os.path.dirname(os.path.abspath(__file__));
+
+    jmu_name = compile_jmu("JMExamples_opt.Robertson",curr_dir+"/files/JMExamples_opt.mop")
+	
     
     # Load a model instance into Python
     model = JMUModel(jmu_name)

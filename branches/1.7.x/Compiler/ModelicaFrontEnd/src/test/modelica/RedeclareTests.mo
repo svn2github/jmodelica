@@ -48,7 +48,7 @@ end RedeclareTests.RedeclareTestOx1;
  
 end RedeclareTestOx1;
  
-model RedeclareTestOx2_Err "Basic redeclare test, errounous"
+model RedeclareTestOx2_Err "Basic redeclare test, erroneous"
  
       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx2_Err",
@@ -1178,7 +1178,7 @@ model RedeclareTest3
 fclass RedeclareTests.RedeclareTest3
  Real r = 0.1 /*(0.1)*/;
  Real palette.q = 0.3 /*(0.3)*/;
- Real palette.p.b = 0.001 /*(0.0010)*/;
+ Real palette.p.b = 0.0010 /*(0.0010)*/;
  Real palette.p.c1.rr = 0 /*(0)*/;
  Real palette.p.c1.r = 1 /*(1)*/;
  Real palette.p.c1.g = 0.2 /*(0.2)*/;
@@ -1191,10 +1191,10 @@ fclass RedeclareTests.RedeclareTest3
  Real palette.p.c3.rr = 0 /*(0)*/;
  Real palette.p.c3.r = r;
  Real palette.p.c3.g = palette.p.c3.gg;
- Real palette.p.c3.b = 0.002 /*(0.0020)*/;
+ Real palette.p.c3.b = 0.0020 /*(0.0020)*/;
  Real palette.p.q = 0.4 /*(0.4)*/;
  Real q = 0.3 /*(0.3)*/;
- Real p.b = 0.001 /*(0.0010)*/;
+ Real p.b = 0.0010 /*(0.0010)*/;
  Real p.c1.rr = 0 /*(0)*/;
  Real p.c1.r = 1 /*(1)*/;
  Real p.c1.g = 0.1 /*(0.1)*/;
@@ -1282,7 +1282,7 @@ fclass RedeclareTests.RedeclareTest4
  Real c0.p.c2.b = 1 /*(1)*/;
  Real c0.p.c3.r = 0.1 /*(0.1)*/;
  Real c0.p.c3.g = 1 /*(1)*/;
- Real c0.p.c3.b = 0.001 /*(0.0010)*/;
+ Real c0.p.c3.b = 0.0010 /*(0.0010)*/;
  Real q = 0.3 /*(0.3)*/;
  Real p.c1.r = 1 /*(1)*/;
  Real p.c1.g = 0.1 /*(0.1)*/;
@@ -1731,7 +1731,7 @@ model RedeclareTest10
 fclass RedeclareTests.RedeclareTest10
  Real r = 0.1 /*(0.1)*/;
  Real palette.q = 0.3 /*(0.3)*/;
- Real palette.p.b = 0.001 /*(0.0010)*/;
+ Real palette.p.b = 0.0010 /*(0.0010)*/;
  Real palette.p.c1.rr = 0 /*(0)*/;
  Real palette.p.c1.r = 1 /*(1)*/;
  Real palette.p.c1.g = 0.2 /*(0.2)*/;
@@ -1744,10 +1744,10 @@ fclass RedeclareTests.RedeclareTest10
  Real palette.p.c3.rr = 0 /*(0)*/;
  Real palette.p.c3.r = r;
  Real palette.p.c3.g = palette.p.c3.gg;
- Real palette.p.c3.b = 0.002 /*(0.0020)*/;
+ Real palette.p.c3.b = 0.0020 /*(0.0020)*/;
  Real palette.p.q = 0.4 /*(0.4)*/;
  Real q = 0.3 /*(0.3)*/;
- Real p.b = 0.001 /*(0.0010)*/;
+ Real p.b = 0.0010 /*(0.0010)*/;
  Real p.c1.rr = 0 /*(0)*/;
  Real p.c1.r = 1 /*(1)*/;
  Real p.c1.g = 0.1 /*(0.1)*/;
@@ -1832,7 +1832,7 @@ fclass RedeclareTests.RedeclareTest11
  Real c0.p.c2.b = 1 /*(1)*/;
  Real c0.p.c3.r = 0.1 /*(0.1)*/;
  Real c0.p.c3.g = 1 /*(1)*/;
- Real c0.p.c3.b = 0.001 /*(0.0010)*/;
+ Real c0.p.c3.b = 0.0010 /*(0.0010)*/;
  Real q = 0.3 /*(0.3)*/;
  Real p.c1.r = 1 /*(1)*/;
  Real p.c1.g = 0.1 /*(0.1)*/;

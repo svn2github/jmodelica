@@ -82,20 +82,6 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs a real literal expression from a double.
-	 */
-	public FRealLitExp.FRealLitExp(double val) {
-		this(String.valueOf(val));
-	}
-	
-	/**
-	 * \brief Constructs an integer literal expression from an integer.
-	 */
-	public FIntegerLitExp.FIntegerLitExp(int val) {
-		this(String.valueOf(val));
-	}
-	
-	/**
 	 * \brief Constructs a boolean literal expression from a boolean.
 	 */
 	public static FBooleanLitExp FBooleanLitExp.create(boolean val) {

@@ -382,9 +382,12 @@ abstract public class TestCase {
 		TokenTester tt = new TokenTester();
 		String test = fc.prettyPrint("");
 		if (!tt.test(test, correct)) {
+			String diff = tt.firstDiff();
 			String err = "Flat class does not match expected.";
 			if (tt.test(sortLines(test), sortLines(correct)))
 				err += "\nOnly the order of the lines differ.";
+			else 
+				err += "\n--- First differing lines: ---\n" + diff;
 			fail(err + compareMsg(test, correct));
 		}
 	}
@@ -393,7 +396,7 @@ abstract public class TestCase {
 	 * \brief Sort lines in string alphabetically.
 	 */
 	protected String sortLines(String str) {
-		String[] lines = str.split("\n");
+		String[] lines = str.split("\n|\r|\r\n");
 		Arrays.sort(lines);
 		StringBuilder buf = new StringBuilder();
 		for (String line : lines) {
@@ -408,7 +411,7 @@ abstract public class TestCase {
 	 */
 	protected String compareMsg(String actual, String expected) {
 		expected =  expected.trim();
-		return "\n--- Expected: ---\n" + expected + "\n\n--- Actual: ---\n" + actual;
+		return "\n\n--- Actual: ---\n" + actual + "\n--- Expected: ---\n" + expected;
 	}
 
 }

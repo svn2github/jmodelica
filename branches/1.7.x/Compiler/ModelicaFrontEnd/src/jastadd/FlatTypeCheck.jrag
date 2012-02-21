@@ -400,10 +400,14 @@ aspect FlatTypeCheck {
   eq FCatExp.minNumArgs()      = 2;
   eq FAbstractCat.minNumArgs() = 0;
   
-  syn boolean FInfArgsFunctionCall.typeOfArgIsOK(FExp exp)        = fIntegerScalarType().typeCompatible(exp.type());
-  syn boolean FInfArgsFunctionCall.variabilityOfArgIsOK(FExp exp) = exp.variability().lessOrEqual(fParameter());
-  syn String FInfArgsFunctionCall.getOKArgTypeString()            = "compatible with Integer";
-  syn String FInfArgsFunctionCall.getOKArgVariabilityString()     = "constant or parameter";
+  syn boolean FInfArgsFunctionCall.typeOfArgIsOK(FExp exp)        = 
+		  fIntegerScalarType().typeCompatible(exp.type());
+  syn boolean FInfArgsFunctionCall.variabilityOfArgIsOK(FExp exp) = 
+		  exp.variability().lessOrEqual(fParameter()) || inFunction();
+  syn String FInfArgsFunctionCall.getOKArgTypeString()            = 
+		  "compatible with Integer";
+  syn String FInfArgsFunctionCall.getOKArgVariabilityString()     = 
+		  "constant or parameter";
    
   public void FBuiltInFunctionCall.typeCheck() {
 	  if (checkTypeAsExpression())
@@ -466,7 +470,7 @@ aspect FlatTypeCheck {
 			  FIdUse use = ((FIdUseExp) getFExp()).getFIdUse();
 			  if (use.isForIndex())
 				  error("Can not assign a value to a for loop index");
-			  else if (size().isUnknown())
+			  else if (size().isUnknown() && !inFunction())
 				  error(functionCallDecription() + ":could not evaluate array size of output " + 
 						  myOutput().name());
 			  else if (!use.type().typeCompatible(type())) 

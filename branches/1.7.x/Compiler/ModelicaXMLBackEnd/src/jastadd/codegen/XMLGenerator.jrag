@@ -501,7 +501,7 @@ public class XMLGenerator extends GenericGenerator {
 		//start
 		if (realvariable.isIndependentParameter() || realvariable.useBindingExpAsStart()) {
 			genPrinter.print("start=\""+realvariable.ceval().realValue()+"\" ");
-		} else if (realvariable.startAttributeSet()) {
+		} else if (realvariable.startAttributeSet() || (realvariable.fixedAttributeSet() && realvariable.fixedAttribute())) {
 			genPrinter.print("start=\""+realvariable.startAttribute()+"\" ");
 		}
 		// fixed

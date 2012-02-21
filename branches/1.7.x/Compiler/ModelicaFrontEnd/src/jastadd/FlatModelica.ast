@@ -784,12 +784,17 @@ abstract FLitExp : FExp;
 /**
  * \brief Real literal expression.
  */
-FRealLitExp : FLitExp ::= <UNSIGNED_NUMBER>;
+FRealLitExp : FLitExp ::= <Value:double>;
 
 /**
  * \brief Integer literal expression.
  */
-FIntegerLitExp : FLitExp ::= <UNSIGNED_INTEGER>;
+FIntegerLitExp : FLitExp ::= <Value:int>;
+
+/**
+ * Integer literal expression that is too large to actually fit in an int.
+ */
+FOverflowIntLitExp : FRealLitExp ::= <String>;
 
 /**
  * \brief Boolean literal expression.
@@ -948,14 +953,14 @@ FSubscriptedExp : FExp ::= FExp FArraySubscripts;
 FUnknownSizeExp : FExp ::= <Variable:CommonVariableDecl> <Dim:int>;
 
 /**
- * \brief Range expression.
- */
-FRangeExp : FExp ::= FExp*;
-
-/**
  * \brief Dummy node.
  */
 FNoExp : FExp;
+
+/**
+ * \brief Range expression.
+ */
+FRangeExp : FExp ::= FExp*;
 
 /**
  * \brief Built-in variable time.

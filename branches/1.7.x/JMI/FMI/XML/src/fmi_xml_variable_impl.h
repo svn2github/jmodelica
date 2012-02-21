@@ -34,7 +34,7 @@ struct fmi_xml_variable_t {
     const char* description;
     jm_vector(jm_voidp)* directDependency;
 
-    fmiValueReference vr;
+    fmi_xml_value_reference_t vr;
     char aliasKind;
     char variability;
     char causality;

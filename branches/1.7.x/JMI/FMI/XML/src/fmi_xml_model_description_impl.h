@@ -7,7 +7,6 @@
 #include <jm_vector.h>
 #include <jm_named_ptr.h>
 #include <jm_string_set.h>
-#include "fmi_xml_callbacks.h"
 #include "fmi_xml_model_description.h"
 
 #include "fmi_xml_unit_impl.h"
