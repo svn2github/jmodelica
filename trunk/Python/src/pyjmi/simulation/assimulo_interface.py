@@ -552,6 +552,7 @@ class JMIDAE(Implicit_Problem):
         self._initiate_problem = True
         
         if self._no_initialization == True:
+            self._initiate_problem = False
             return
         
         if self._g0_nbr > 0:
