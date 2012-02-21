@@ -19,7 +19,7 @@
 
 #include "jmi_common.h"
 
-#define TRANSPOSE_FUNC(name, src_type, dst_type) \
+#define TRANSPOSE_FUNC(name, src_type, dst_type, to_fortran) \
 void name(jmi_array_t* arr, src_type* src, dst_type* dest) { \
 	int i, j, tmp1, tmp2, k, n, dim, s; \
  \
@@ -32,7 +32,7 @@ void name(jmi_array_t* arr, src_type* src, dst_type* dest) { \
 		tmp2 = 0; \
  \
 		for (k = 0; k < dim; k++) { \
-			s = arr->size[k]; \
+			s = arr->size[to_fortran ? k : dim - k - 1]; \
 			tmp2 = tmp1 % s; \
 			tmp1 /= s; \
 			j *= s; \
@@ -53,8 +53,9 @@ void name(jmi_array_t* arr, src_type* src, dst_type* dest) { \
 	} \
 }
 
-TRANSPOSE_FUNC(jmi_transpose_matrix, jmi_ad_var_t, jmi_ad_var_t)
-TRANSPOSE_FUNC(jmi_transpose_matrix_to_int, jmi_ad_var_t, jmi_int_t)
-TRANSPOSE_FUNC(jmi_transpose_matrix_from_int, jmi_int_t, jmi_ad_var_t)
+TRANSPOSE_FUNC(jmi_matrix_to_fortran_real, jmi_ad_var_t, jmi_ad_var_t, 1)
+TRANSPOSE_FUNC(jmi_matrix_from_fortran_real, jmi_ad_var_t, jmi_ad_var_t, 0)
+TRANSPOSE_FUNC(jmi_matrix_to_fortran_int, jmi_ad_var_t, jmi_int_t, 1)
+TRANSPOSE_FUNC(jmi_matrix_from_fortran_int, jmi_int_t, jmi_ad_var_t, 0)
 COPY_FUNC(jmi_copy_matrix_to_int, jmi_ad_var_t, jmi_int_t)
 COPY_FUNC(jmi_copy_matrix_from_int, jmi_int_t, jmi_ad_var_t)

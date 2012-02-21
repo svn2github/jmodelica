@@ -1191,7 +1191,7 @@ aspect CCodeGen {
 			useTempVar = true;
 			// create static or dynamic temp array
 			type().printExternInit_C(p, str, indent, tempName, this);
-			MatrixOp op = new MatrixOp("jmi_transpose_matrix");
+			MatrixOp op = new MatrixOp("jmi_matrix_to_fortran_real");
 			String src = prettyPrint_C(indent);
 			op.genMatrixOp(p, str, indent, src, src, tempName);
 		}		
@@ -1219,7 +1219,7 @@ aspect CCodeGen {
 			type().printExternInit_C(p, str, indent, tempName, this);
 			// if Fortran: cast to int and transpose (and copy - included in transpose)
 			// if c: cast to int and copy
-			MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_to_int") : new MatrixOp("jmi_transpose_matrix_to_int");
+			MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_to_int") : new MatrixOp("jmi_matrix_to_fortran_int");
 			String src = prettyPrint_C(indent);
 			op.genMatrixOp(p, str, indent, src, src, tempName);			
 		} else {
@@ -1263,7 +1263,7 @@ aspect CCodeGen {
 			// We need to transpose if Fortran and we have >1 dimensions
 			// generate tempname
 			String tempName = arg.tempName_C();
-			MatrixOp op = new MatrixOp("jmi_transpose_matrix");
+			MatrixOp op = new MatrixOp("jmi_matrix_from_fortran_real");
 			String dest = arg.prettyPrint_C(indent);
 			op.genMatrixOp(p, str, indent, dest, tempName, dest);
 		}		
@@ -1276,7 +1276,7 @@ aspect CCodeGen {
 		if (arg.isArray()) {
 			// if Fortran: cast to int and transpose (and copy - included in transpose)
 			// if c: cast to int and copy
-			MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_from_int") : new MatrixOp("jmi_transpose_matrix_from_int");
+			MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_from_int") : new MatrixOp("jmi_matrix_from_fortran_int");
 			String dest = arg.prettyPrint_C(indent);
 			op.genMatrixOp(p, str, indent, dest, tempName, dest);
 		} else {
