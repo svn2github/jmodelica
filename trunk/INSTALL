@@ -35,6 +35,8 @@ The following Python packages are needed:
    the test suits.)
  - Setuptools 0.6c11 <http://pypi.python.org/pypi/setuptools>
 
+Note that some of the Python packages are needed also to build JModelica.org.
+
 The dependencies can be installed manually or through a package manager such as apt-get 
 on Ubuntu systems or mac ports on Mac OS X systems. Note that on Mac OS X systems, 
 it is possible to install a new Python distribution using the mac ports system and 
