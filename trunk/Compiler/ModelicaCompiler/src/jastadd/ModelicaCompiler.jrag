@@ -2176,9 +2176,9 @@ public abstract class CCompilerDelegator {
 		
 		public String op(String library) {
 			if (platform.startsWith("win")) 
-				return library += ".dll";
+				return library + ".dll";
 			else
-				return library += ".so";
+				return "lib" + library + ".so";
 		}
 
 	}

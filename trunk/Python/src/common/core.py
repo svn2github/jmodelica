@@ -443,15 +443,6 @@ def list_to_string(item_list):
         ret_str =ret_str+str(l)+os.pathsep
     return ret_str
 
-def get_platform_libpath():
-    #Detect libray path depending on platform
-    if sys.platform == 'win32':
-        return 'PATH'
-    elif sys.platform == 'darwin':
-        return 'DYLD_LIBRARY_PATH'
-    else:
-        return 'LD_LIBRARY_PATH'
-
 ## This is an api comment.
 # @param libname Name of library.
 # @param path Path to library.
@@ -480,30 +471,32 @@ def load_DLL(libname, path):
     
     See also http://docs.python.org/library/ct.html
     """
-
-    # Temporarily add the value of 'path' to system library path in case the dll 
-    # is dependent on other dlls. In that case they should be located in 'path'. 
-    libpath = get_platform_libpath()
-            
-    if os.environ.has_key(libpath):
-        oldpath = os.environ[libpath]
-    else:
-        oldpath = None
-    
-    if oldpath is not None:
-        newpath = path + os.pathsep + oldpath
-    else:
-        newpath = path
+    if sys.platform == 'win32':
+        # Temporarily add the value of 'path' to system library path in case the dll 
+        # is dependent on other dlls. In that case they should be located in 'path'.
+        libpath = 'PATH'
+        if os.environ.has_key(libpath):
+            oldpath = os.environ[libpath]
+        else:
+            oldpath = None
         
-    os.environ[libpath] = newpath
+        if oldpath is not None:
+            newpath = path + os.pathsep + oldpath
+        else:
+            newpath = path
+        os.environ[libpath] = newpath
+    
     # Don't catch this exception since it hides the actual source
     # of the error.
     dll = Nct.load_library(libname, path)
-    # Set back to the old path
-    if oldpath is not None:
-        os.environ[libpath] = oldpath
-    else:
-        del os.environ[libpath]
+    
+    if sys.platform == 'win32':
+        # Set back to the old path
+        if oldpath is not None:
+            os.environ[libpath] = oldpath
+        else:
+            del os.environ[libpath]
+            
     return dll
 
 class Trajectory:
