@@ -45,8 +45,8 @@ aspect FormattedPrint {
 	 */	
 	protected void ASTNode.addFormattingInformation(FormattingInfo formattingInfo) {
 		Iterator<FormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
-		formattingIterator = addPreFormatting(formattingIterator);
-		formattingIterator = addPostFormatting(formattingIterator);
+		FormattingItem nextItem = addPreFormatting(formattingIterator);
+		addPostFormatting(formattingIterator, nextItem);
 		for (int i = 0; i < getNumChild(); i++) {
 			getChild(i).addFormattingInformation(formattingInfo);
 		}
@@ -73,56 +73,49 @@ aspect FormattedPrint {
 		}
 	}
 	
-	public Iterator<FormattingItem> ASTNode.addPreFormatting(Iterator<FormattingItem> formattingIterator) {
-		return formattingIterator;
+	public FormattingItem ASTNode.addPreFormatting(Iterator<FormattingItem> formattingIterator) {
+		return new EmptyFormattingItem();
 	}
 	
-	public Iterator<FormattingItem> ASTNode.addPostFormatting(Iterator<FormattingItem> formattingIterator) {
-		return formattingIterator;
+	public void ASTNode.addPostFormatting(Iterator<FormattingItem> formattingIterator, FormattingItem startingFormattingItem) {
+		return;
 	}
 	
-	public Iterator<FormattingItem> BaseNode.addPreFormatting(Iterator<FormattingItem> formattingIterator) {
+	public FormattingItem BaseNode.addPreFormatting(Iterator<FormattingItem> formattingIterator) {
 		int startLine = getLine(getStart());
 		int startColumn = getColumn(getStart());
+		FormattingItem formattingItem = new EmptyFormattingItem();
 
-		while (formattingIterator.hasNext()) {
-			FormattingItem formattingItem = formattingIterator.next();
-			
-			if (formattingItem.getEndLine() < startLine || formattingItem.getEndColumn() + 1 < startColumn) {
-				continue;
-			} else if (formattingItem.getEndLine() == startLine &&
-					formattingItem.getEndColumn() + 1 == startColumn) {
-				preFormatting = formattingItem;
-				formattingIterator.remove();
-				break;
+		while (formattingIterator.hasNext() && (formattingItem.getEndLine() < startLine || formattingItem.getEndColumn() + 1 < startColumn)) {
+			formattingItem = formattingIterator.next();
+		}
+		
+		if (formattingItem.getEndLine() == startLine && formattingItem.getEndColumn() + 1 == startColumn) {
+			preFormatting = formattingItem;
+			formattingIterator.remove();
+			if (formattingIterator.hasNext()) {
+				formattingItem = formattingIterator.next();
 			} else {
-				break;
+				formattingItem = new EmptyFormattingItem();
 			}
 		}
 		
-		return formattingIterator;
+		return formattingItem;
 	}
 	
-	public Iterator<FormattingItem> BaseNode.addPostFormatting(Iterator<FormattingItem> formattingIterator) {
+	public void BaseNode.addPostFormatting(Iterator<FormattingItem> formattingIterator, FormattingItem startingFormattingItem) {
 		int endLine = getLine(getEnd());
 		int endColumnPlusOne = getColumn(getEnd()) + 1;
+		FormattingItem formattingItem = startingFormattingItem;
 
-		while (formattingIterator.hasNext()) {
-			FormattingItem formattingItem = formattingIterator.next();
-			
-			if (formattingItem.getStartLine() < endLine || formattingItem.getStartColumn() < endColumnPlusOne) {
-				continue;
-			} else if (formattingItem.getStartLine() == endLine &&
-					formattingItem.getStartColumn() == endColumnPlusOne) {
-				postFormatting = formattingItem;
-				formattingIterator.remove();
-				break;
-			} else {
-				break;
-			}
+		while (formattingIterator.hasNext() && (formattingItem.getStartLine() < endLine || formattingItem.getStartColumn() < endColumnPlusOne)) {
+			formattingItem = formattingIterator.next();
 		}
 		
-		return formattingIterator;
+		if (formattingItem.getStartLine() == endLine && formattingItem.getStartColumn() == endColumnPlusOne) {
+			postFormatting = formattingItem;
+			formattingIterator.remove();
+		}
 	}
 	
 	protected FormattingInfo BaseNode.formatting = null;
