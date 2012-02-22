@@ -117,7 +117,7 @@ CXXFLAGS += -DJMI_AD=${JMI_AD} -fPIC
 CFLAGS = -g -O2
 CFLAGS += -std=c89 -pedantic -DJMI_AD=$(JMI_AD) -fPIC
 
-SHARED_LDFLAGS = -shared -Wl,-rpath,'$ORIGIN'
+SHARED_LDFLAGS = -shared -Wl,-rpath,'$$ORIGIN'
 
 # Directories with header files
 JMI_INC_DIR = ${JMODELICA_HOME}/include
