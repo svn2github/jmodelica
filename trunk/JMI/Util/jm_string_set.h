@@ -21,6 +21,9 @@
 
 #include "jm_types.h"
 #include "jm_vector.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef jm_vector(jm_string) jm_string_set;
 
@@ -52,5 +55,8 @@ static jm_string jm_string_set_put(jm_string_set* s, jm_string str) {
     return found;
 }
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* JM_STRING_SET_H */

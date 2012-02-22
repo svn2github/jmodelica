@@ -68,7 +68,7 @@ const char* fmi_xml_causality_to_string(fmi_xml_causality_enu_t c);
 fmi_xml_causality_enu_t fmi_xml_get_causality(fmi_xml_variable_t*);
 
 /* DirectDependency is returned for variables with causality Output. Null pointer for others. */
-fmi_xml_variable_list_t* fmi_xml_get_direct_dependency(fmi_xml_variable_t*);
+fmi_xml_variable_list_t* fmi_xml_get_direct_dependency(fmi_xml_model_description_t* md,fmi_xml_variable_t*);
 
 fmi_xml_real_variable_t* fmi_xml_get_variable_as_real(fmi_xml_variable_t*);
 fmi_xml_integer_variable_t* fmi_xml_get_variable_as_integer(fmi_xml_variable_t*);

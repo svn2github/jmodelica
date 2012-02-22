@@ -20,6 +20,6 @@
 
 #include "jm_types.h"
 
-jm_status_enu_t fmi_zip_unzip(char* zip_file_path, char* output_folder);
+jm_status_enu_t fmi_zip_unzip(const char* zip_file_path, const char* output_folder);
 
 #endif FMI_ZIP_UNZIP_H_ /* End of header file C_FMI_UNZIP_H */

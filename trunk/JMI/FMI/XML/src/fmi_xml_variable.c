@@ -84,7 +84,7 @@ fmi_xml_variable_t* fmi_xml_get_variable_alias_base(fmi_xml_model_description_t*
 */
 fmi_xml_variable_list_t* fmi_xml_get_variable_aliases(fmi_xml_model_description_t* md,fmi_xml_variable_t*v) {
     fmi_xml_variable_t key, *cur;
-    fmi_xml_variable_list_t* list = fmi_xml_alloc_variable_list(md->callbacks, 0);
+    fmi_xml_variable_list_t* list = fmi_xml_alloc_variable_list(md, 0);
     fmi_xml_value_reference_t vr = fmi_xml_get_variable_vr(v);
     size_t baseIndex, i, num = fmi_xml_get_variable_list_size(md->variablesByVR);
     key = *v;
@@ -218,10 +218,10 @@ fmi_xml_real_t fmi_xml_get_real_variable_nominal(fmi_xml_real_variable_t* v) {
 }
 
 /* DirectDependency is returned for variables with causality Output. Null pointer for others. */
-fmi_xml_variable_list_t* fmi_xml_get_direct_dependency(fmi_xml_variable_t* v) {
+fmi_xml_variable_list_t* fmi_xml_get_direct_dependency(fmi_xml_model_description_t* md, fmi_xml_variable_t* v) {
     fmi_xml_variable_list_t* vl = 0;
     if(!v->directDependency) return 0;
-    vl = fmi_xml_alloc_variable_list(v->directDependency->callbacks, jm_vector_get_size(jm_voidp)(v->directDependency));
+    vl = fmi_xml_alloc_variable_list(md, jm_vector_get_size(jm_voidp)(v->directDependency));
     if(!vl) return 0;
     jm_vector_copy(jm_voidp)(&vl->variables,v->directDependency);
     return vl;

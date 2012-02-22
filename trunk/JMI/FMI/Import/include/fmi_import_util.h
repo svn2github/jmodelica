@@ -19,7 +19,7 @@
 
 #include "fmi_functions.h"
 
-char* fmi_import_get_dll_path(char* fmu_unzipped_path, char* model_identifier, fmiCallbackFunctions callBackFunctions);
-char* fmi_import_get_model_description_path(char* fmu_unzipped_path, fmiCallbackFunctions callBackFunctions);
+char* fmi_import_get_dll_path(const char* fmu_unzipped_path, const char* model_identifier, fmiCallbackFunctions callBackFunctions);
+char* fmi_import_get_model_description_path(const char* fmu_unzipped_path, fmiCallbackFunctions callBackFunctions);
 
 #endif /* End of header file FMI_IMPORT_UTIL_H_ */

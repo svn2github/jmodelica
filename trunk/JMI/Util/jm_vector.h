@@ -20,6 +20,9 @@
 #include <string.h>
 
 #include "jm_callbacks.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* jm_mange macro is used to construct names for the template instances
    Extra level (jm_mange_ex) is needed to force argument expansion (pre-scan)
@@ -269,7 +272,7 @@ extern size_t jm_vector_init(T)(jm_vector(T)* a, size_t size,jm_callbacks*);	\
 static void jm_vector_free_data(T)(jm_vector(T)* a) { \
     if(a) { \
         if(a->items != a->preallocated) { \
-          a->callbacks->free(a->items); \
+          a->callbacks->free((void*)(a->items)); \
           a->items = a->preallocated; \
           a->capacity=JM_VECTOR_MINIMAL_CAPACITY;\
         } \
@@ -325,10 +328,19 @@ jm_vector_declare_template(double)
 jm_vector_declare_template(jm_voidp)
 jm_vector_declare_template(size_t)
 jm_vector_declare_template(jm_string)
+jm_vector_declare_template(jm_name_ID_map_t)
 
 jm_define_comp_f(jm_compare_int, int, jm_diff)
 jm_define_comp_f(jm_compare_char, char, jm_diff)
 jm_define_comp_f(jm_compare_double, double, jm_diff)
 jm_define_comp_f(jm_compare_size_t, size_t, jm_diff)
 jm_define_comp_f(jm_compare_string, jm_string, strcmp)
+
+#define jm_diff_name(a, b) strcmp(a.name,b.name)
+jm_define_comp_f(jm_compare_name, jm_name_ID_map_t, jm_diff_name)
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

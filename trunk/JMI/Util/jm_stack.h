@@ -18,6 +18,9 @@
 #define jm_stack_h_
 
 #include "jm_vector.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* jm_stack is implemented on top of jm_vector right now. There is a couple of extra methonds that are convenient.
    TODO: Consider reimplementing on top of deque */
@@ -145,5 +148,9 @@ jm_stack_declare_template(double)
 jm_stack_declare_template(jm_voidp)
 jm_stack_declare_template(size_t)
 jm_stack_declare_template(jm_string)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,8 +1,27 @@
+/*
+    Copyright (C) 2012 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #ifndef FMI_XML_QUERY_H
 #define FMI_XML_QUERY_H
 
 #include <jm_vector.h>
 #include <jm_stack.h>
+#include <fmi_xml_variable.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Query below has the following syntax:
   query =   elementary_query
@@ -24,244 +43,92 @@
 Example: "name='a.*' & fixed=false"
 */
 
-#define FMI_XML_Q_KEYWORDS(HANDLE) \
-    HANDLE(not) \
-    HANDLE(and) \
-    HANDLE(or) \
+#define FMI_XML_Q_ELEMENTARY(HANDLE) \
     HANDLE(name) \
-    HANDLE(type) \
-    HANDLE(basetype) \
     HANDLE(unit) \
-    HANDLE(displayunit) \
+
+/*
+    HANDLE(type) \
     HANDLE(fixed) \
     HANDLE(hasstart) \
-    HANDLE(isalias) \
+    HANDLE(isalias) 
     HANDLE(alias)
+    HANDLE(basetype) \
+    HANDLE(displayunit) \
+*/
 
-typedef enum fmi_xml_keywords_enu_t {
-#define FMI_XML_Q_KEYWORDS_PREFIX(keyword) fmi_xml_q_key_enu_##keyword,
-    FMI_XML_Q_KEYWORDS(FMI_XML_Q_KEYWORDS_PREFIX)
-    fmi_xml_q_key_enu_num
-} fmi_xml_keywords_enu_t;
+typedef enum fmi_xml_elementary_enu_t {
+#define FMI_XML_Q_ELEMENTARY_PREFIX(elem) fmi_xml_q_elmentary_enu_##elem,
+    FMI_XML_Q_ELEMENTARY(FMI_XML_Q_ELEMENTARY_PREFIX)
+    fmi_xml_elementary_enu_num
+} fmi_xml_elementary_enu_t;
 
-const char* fmi_xml_keywords[fmi_xml_q_key_enu_num + 1] =
-{
-    #define FMI_XML_Q_KEYWORDS_STR(keyword) #keyword ,
-    FMI_XML_Q_KEYWORDS(FMI_XML_Q_KEYWORDS_STR)
-    0
-}
+typedef struct fmi_xml_q_context_t fmi_xml_q_context_t;
+typedef struct fmi_xml_q_terminal_t fmi_xml_q_terminal_t;
 
-typedef struct fmi_xml_q_context_t {
-    jm_vector(jm_string) fmi_xml_keywords_v;
+typedef int (*fmi_xml_q_scan_elementary_ft)(fmi_xml_q_context_t*, char* cur, fmi_xml_q_terminal_t* term);
 
-} fmi_xml_q_context_t;
+#define FMI_XML_Q_ELEMENTARY_DECLARE_SCAN(name) int fmi_xml_q_scan_elementary_##name(fmi_xml_q_context_t*, char* cur, fmi_xml_q_terminal_t* term);
+FMI_XML_Q_ELEMENTARY(FMI_XML_Q_ELEMENTARY_DECLARE_SCAN)
 
-int fmi_xml_q_get_keyword(fmi_xml_q_context_t* context, char* cur, size_t* len, char* buf) {
-    char ch = *cur;
-    size_t i = 0, id;
-    *len = 0;
-    while(isalpha(ch)) {
-        buf[i++] = tolower(ch);
-        ch = cur[i];
-    }
-    if(!i) return -1;
 
-    id = jm_vector_bsearch_index(jm_string)(&context->fmi_xml_keywords_v,&buf,jm_compare_string);
-    if(id >= fmi_xml_q_key_enu_num) return -1;
-    *len = i;
-    return id;
-}
+typedef int (*fmi_xml_q_eval_elementary_ft)(fmi_xml_variable_t* var, fmi_xml_q_terminal_t* term);
 
-int fmi_xml_q_get_string(fmi_xml_q_context_t* context, char* cur, size_t* len, char* buf) {
-    char ch = *cur;
-    char strterm ;
-    size_t i = 0;
-    *len = 0;
-    if((ch == '''') || (ch == '"')) strterm = ch;
-    else return -1;
-    do {
-        ch = cur[i+1];
-        buf[i] = ch;
-        i++;
-    } while((ch != strterm) && ch);
-    if(!ch) return -1;
-    i--;
-    buf[i] = 0;
-    *len = i;
-    return i;
-}
+#define FMI_XML_Q_ELEMENTARY_DECLARE_EVAL(name) int fmi_xml_q_eval_elementary_##name(fmi_xml_variable_t* var, fmi_xml_q_terminal_t* term);
+FMI_XML_Q_ELEMENTARY(FMI_XML_Q_ELEMENTARY_DECLARE_EVAL)
 
-typedef enum fmi_xml_q_terminal_enu {
-    enuLParant,
-    enuRParant,
-    enuAndOp,
-    enuOrOp,
-    enuQName,
-    enuQBaseType,
-    enuQUnit,
-    enuTrue,
-    enuFalse
-} fmi_xml_q_terminal_enu;
+typedef enum fmi_xml_q_term_enu_t {
+	fmi_xml_q_term_enu_elementary,
+	fmi_xml_q_term_enu_LP,
+	fmi_xml_q_term_enu_RP,
+	fmi_xml_q_term_enu_OR,
+	fmi_xml_q_term_enu_AND,
+	fmi_xml_q_term_enu_NOT,
+	fmi_xml_q_term_enu_TRUE,
+	fmi_xml_q_term_enu_FALSE
+} fmi_xml_q_terminal_enu_t;
 
-typedef struct fmi_xml_q_terminal {
-    fmi_xml_q_terminal_enu kind;
-    jm_vector(char) data;
-    fmi_xml_q_terminal* next;
-} fmi_xml_q_terminal;
 
-typedef struct fmi_xml_q_expression {
+typedef struct fmi_xml_q_terminal_t {
+	fmi_xml_q_terminal_enu_t kind;
+
+	fmi_xml_elementary_enu_t specific;
+
+	int param_i;
+	double param_d;
+	void* param_p;
+
+	jm_vector(char) param_cv;
+
+} fmi_xml_terminal_t;
+
+jm_vector_declare_template(fmi_xml_q_terminal_t)
+
+typedef jm_vector(fmi_xml_q_terminal_t) fmi_xml_q_term_vt;
+
+typedef struct fmi_xml_q_expression_t {
     jm_vector(jm_voidp) expression;
 
     jm_vector(jm_voidp) stack;
 
-    fmi_xml_q_terminal termFalse, termTrue;
-    fmi_xml_q_terminal * list;
-} fmi_xml_q_expression;
+    fmi_xml_q_terminal_t termFalse, termTrue;
+    fmi_xml_q_term_vt terms;
+} fmi_xml_q_expression_t;
 
-int pattern2regexp(const char* pattern, jm_vector(char)* re) {
-    size_t plen = strlen(pattern), i;
-    if(jm_vector_reserve_char(re, plen * 2 + 3) < plen) return -1;
-    jm_vector_resize_char(re, 0);
-    jm_vector_push_back_char(re, '^');
-    for(i=0; i < plen; i++) {
-        char cur = pattern[i];
-        switch(cur) {
-        case '*':
-            jm_vector_push_back_char('.');
-            jm_vector_push_back_char('*');
-            break;
-        case '?':
-            jm_vector_push_back_char('.');
-            break;
-        default:
-            jm_vector_push_back_char('\\');
-            jm_vector_push_back_char(cur);
-        }
-    }
-    jm_vector_push_back_char(re, '$');
-    jm_vector_push_back_char(re, 0);
-    return 0;
+typedef struct fmi_xml_q_context_t {
+    jm_vector(jm_name_ID_map_t) elementary_map;
+
+	jm_vector(char) buf;
+
+	fmi_xml_q_expression_t expr;
+} fmi_xml_q_context_t;
+
+void fmi_xml_q_init_context(fmi_xml_q_context_t*);
+void fmi_xml_q_free_context_data(fmi_xml_q_context_t*);
+int fmi_xml_q_filter_variable(fmi_xml_variable_t* var, fmi_xml_q_expression_t* );
+int fmi_xml_q_parse_query(fmi_xml_q_context_t* context, jm_string query);
+
+#ifdef __cplusplus
 }
-
-
-int fmi_xml_filter_variable(fmiVariable* var, fmi_xml_q_expression* exp) {
-    size_t cur, len = jm_vector_get_size_char(exp->expression);
-    for(cur = 0; cur < len; cur++) {
-        fmi_xml_q_terminal * term = jm_vector_get_item(jm_voidp)(exp->expression);
-        fmi_xml_q_terminal *argL, *argR;
-        size_t curlen = jm_vector_get_size(jm_voidp)(stack);
-
-        argL = (curlen > 0) ? jm_vector_get_item(jm_voidp)(stack,curlen -1):0;
-        argR = (curlen > 1) ? jm_vector_get_item(jm_voidp)(stack,curlen -2):0;
-
-        switch(term -> kind) {
-        case enuAndOp:
-            assert(argL && argR);
-            jm_vector_resize(jm_voidp)(stack, curlen -2);
-            if((argL->kind == enuFalse) || (argR->kind == enuFalse))
-                jm_vector_push_back(jm_voidp)(stack, &exp->termFalse);
-            else {
-                jm_vector_push_back(jm_voidp)(stack, fmi_xml_evaluate_terminal(argL) && fmi_xml_evaluate_terminal(argR));
-            }
-            break;
-        case enuOrOp:
-            assert(argL && argR);
-            jm_vector_resize(jm_voidp)(stack, curlen -2);
-            if((argL->kind == enuTrue) || (argR->kind == enuTrue))
-                jm_vector_push_back(jm_voidp)(stack, &exp->termTrue);
-            else {
-                jm_vector_push_back(jm_voidp)(stack, fmi_xml_evaluate_terminal(argL) || fmi_xml_evaluate_terminal(argR));
-            }
-            break;
-        default:
-            jm_vector_push_back(jm_voidp)(stack, term);
-        }
-    }
-    assert(jm_vector_get_size(jm_voidp)(stack) == 1);
-    fmi_xml_q_terminal * term = jm_vector_get_item(jm_voidp)(stack,0);
-    if(term->kind == enuFalse) return 0;
-    return 1;
-}
-
-fmi_xml_q_expression* fmi_xml_alloc_expression(jm_string query) {
-
-}
-
-static void fmi_xml_q_skip_space(char** cur) {
-    char* curChP = *cur;
-    char curCh;
-    if(!curChP) return;
-    curCh = *curChP;
-    while(curCh || (curCh == ' ') || (curCh == '\t')) {
-        curChP++; curCh = *curChP;
-    }
-    *cur = curChP;
-}
-
-fmi_xml_q_terminal* fmi_xml_get_terminal(jm_string str,size_t *offset) {
-    fmi_xml_q_terminal* term = fmi_xml_alloc_term();
-    if(!term) return 0;
-    char* cur = (char*)str;
-    fmi_xml_q_skip_space(&cur);
-    switch(*cur) {
-    case '(':
-    case ')':
-    case 0:
-    default:
-        fmi_xml_parse_elementary(cur, term);
-    }
-
-    return term;
-}
-
-int fmi_xml_parse_query(jm_string query, fmi_xml_q_expression* exp) {
-    size_t qlen = strlen(query), curCh = 0, offset = 0;
-    while(cur < qlen) {
-        fmi_xml_q_terminal* term = fmi_xml_get_terminal(&query[curCh], &offset);
-        size_t stacklen = jm_vector_get_size(jm_voidp)(exp->stack);
-        fmi_xml_q_terminal* stackTop =  stacklen? jm_vector_get_item(jm_voidp)(exp->stack,stacklen -1):0;
-        size_t explen = jm_vector_get_size(jm_voidp)(&exp->expression);
-        fmi_xml_q_terminal* expTop =  explen? jm_vector_get_item(jm_voidp)(&exp->expression,explen -1):0;
-
-        if(!term) return -1;
-
-        switch(term -> kind) {
-        case enuLParant:
-            jm_vector_push_back(jm_voidp)(&exp->stack, term);
-            break;
-        case enuRParant:
-            while(stackTop && (stackTop->kind != enuLParant)) {
-                jm_vector_push_back(jm_voidp)(&exp->expression, stackTop);
-                jm_vector_resize(jm_voidp)(exp->stack, stacklen -1);
-                stacklen--;
-                stackTop =  stacklen? jm_vector_get_item(jm_voidp)(exp->stack,stacklen -1):0;
-            }
-            if(!stackTop) return -1;
-            jm_vector_resize(jm_voidp)(&exp->stack, stacklen -1);
-            break;
-
-        case enuAndOp:
-            if(!expTop) return -1;
-            if(stackTop && (stackTop->kind == enuAndOp))
-                    jm_vector_push_back(jm_voidp)(&exp->expression, term);
-                else
-                    jm_vector_push_back(jm_voidp)(&exp->stack, term);
-            break;
-        case enuOrOp:
-            if(!expTop) return -1;
-            while(stackTop && ((stackTop->kind == enuAndOp)||(stackTop->kind == enuOrOp))) {
-                jm_vector_push_back(jm_voidp)(&exp->expression, stackTop);
-                jm_vector_resize(jm_voidp)(exp->stack, stacklen -1);
-                stacklen--;
-                stackTop =  stacklen? jm_vector_get_item(jm_voidp)(exp->stack,stacklen -1):0;
-            }
-            jm_vector_push_back(jm_voidp)(&exp->stack, term);
-            break;
-        default:
-            jm_vector_push_back(jm_voidp)(&exp->expression, term);
-        }
-    }
-    return 0;
-}
-
-#endif // FMI_XML_QUERY_H
+#endif
+#endif /* FMI_XML_QUERY_H */

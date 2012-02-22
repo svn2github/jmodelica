@@ -20,6 +20,10 @@
 
 #include "jm_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef jm_voidp (*jm_malloc_f)(size_t size);
 
 typedef jm_voidp (*jm_realloc_f)(void *ptr, size_t size);
@@ -43,5 +47,8 @@ extern void jm_set_default_callbacks(jm_callbacks* c);
 
 extern jm_callbacks* jm_get_default_callbacks();
 
+#ifdef __cplusplus
+}
+#endif
 /* JM_CONTEXT_H */
 #endif

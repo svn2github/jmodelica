@@ -53,11 +53,12 @@ fmi_xml_variable_list_t* fmi_xml_get_sublist(fmi_xml_variable_list_t*, unsigned 
 
 /* Callback function typedef for the fmiFilterVariables. The function should return 0 to prevent a 
  variable from coming to the output list. */
-typedef int (*fmi_xml_variable_filter_function_ft)(fmi_xml_variable_t*);
+typedef int (*fmi_xml_variable_filter_function_ft)(fmi_xml_variable_t*, void *);
 
 /* fmi_xml_filter_variables calls  the provided 'filter' function on every variable in the list.
+  The context parameter is forwarded to the filter function.
   It returns a sub-list list with the variables for which filter returned non-zero value. */
-fmi_xml_variable_list_t* fmi_xml_filter_variables(fmi_xml_variable_list_t*, fmi_xml_variable_filter_function_ft filter);
+fmi_xml_variable_list_t* fmi_xml_filter_variables(fmi_xml_variable_list_t*, fmi_xml_variable_filter_function_ft filter, void* context);
 
 /* Query below has the following syntax:
   query =   elementary_query 

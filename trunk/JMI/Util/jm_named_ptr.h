@@ -19,6 +19,9 @@
 
 #include "jm_vector.h"
 #include "jm_callbacks.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct jm_named_ptr jm_named_ptr;
 
@@ -66,6 +69,10 @@ static void jm_named_vector_free(jm_vector(jm_named_ptr)* v) {
     jm_vector_foreach_c(jm_named_ptr)(v,(void (*)(jm_named_ptr, void*))jm_named_free,v->callbacks);
     jm_vector_free(jm_named_ptr)(v);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 /* JM_NAMED_PTR_H */
 #endif

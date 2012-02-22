@@ -17,6 +17,6 @@
 #ifndef FMI_ZIP_UNZIP_IMPL_H
 #define FMI_ZIP_UNZIP_IMPL_H
 
-int miniunz(int argc , char *argv[]); /* Renamed the main function in miniunz */
+int miniunz(int argc , const char *argv[]); /* Renamed the main function in miniunz */
 
 #endif /* End of header file FMI_ZIP_UNZIP_IMPL_H */

@@ -193,6 +193,12 @@ int main(int argc, char* argv[]) {
 
     if(!md) abort();
 
+	if(argc != 2) {
+		printf("Expecting a single parameter (XML file name)\n");
+        fmi_xml_free_model_description(md);
+        abort();
+	}
+
     if(fmi_xml_parse(md, argv[1])) {
         printf("Error parsing XML file %s:%s\n", argv[1], fmi_xml_get_last_error(md));
         fmi_xml_free_model_description(md);

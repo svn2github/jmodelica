@@ -56,8 +56,8 @@ int main(int argc, char *argv[])
 	const char* modelIdentifier;
 	const char* modelName;
 	const char* model_description_path;
-	char* instanceName;
-	char*  GUID;
+	const char* instanceName;
+	const char*  GUID;
 	fmi_dll_standard_enu_t standard = 	FMI_ME1; /* or FMI_CS1 */	
 
 

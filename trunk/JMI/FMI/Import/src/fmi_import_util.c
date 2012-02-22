@@ -40,7 +40,7 @@
 #include "fmi_functions.h"
 #include "stdlib.h"
 
-char* fmi_import_get_dll_path(char* fmu_unzipped_path, char* model_identifier, fmiCallbackFunctions callBackFunctions)
+char* fmi_import_get_dll_path(const char* fmu_unzipped_path, const char* model_identifier, fmiCallbackFunctions callBackFunctions)
 {
 	char* dll_path;
 	int len;
@@ -62,7 +62,7 @@ char* fmi_import_get_dll_path(char* fmu_unzipped_path, char* model_identifier, f
 	return dll_path;
 }
 
-char* fmi_import_get_model_description_path(char* fmu_unzipped_path, fmiCallbackFunctions callBackFunctions)
+char* fmi_import_get_model_description_path(const char* fmu_unzipped_path, fmiCallbackFunctions callBackFunctions)
 {
 	char* model_description_path;
 	int len;

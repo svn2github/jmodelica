@@ -287,7 +287,7 @@ fmi_xml_variable_list_t* fmi_xml_get_variable_list(fmi_xml_model_description_t* 
     size_t nv, i;
     if(md->status != fmi_xml_model_description_enu_ok) return 0;
     nv = jm_vector_get_size(jm_named_ptr)(&md->variables);
-    vl = fmi_xml_alloc_variable_list(md->callbacks, nv);
+    vl = fmi_xml_alloc_variable_list(md, nv);
     if(!vl) return 0;
     for(i = 0; i< nv; i++) {
         jm_vector_set_item(jm_voidp)(&vl->variables, i, jm_vector_get_item(jm_named_ptr)(&md->variables, i).ptr);
@@ -326,7 +326,7 @@ int fmi_xml_handle_fmiModelDescription(fmi_xml_parser_context_t *context, const 
                     /* <xs:attribute name="generationDateAndTime" type="xs:dateTime"/> */
                     fmi_xml_set_attr_string(context, fmi_xml_elmID_fmiModelDescription, fmi_attr_id_generationDateAndTime, 0, &(md->generationDateAndTime)) ||
                     /* <xs:attribute name="variableNamingConvention" use="optional" default="flat"> */
-                    fmi_xml_set_attr_enum(context, fmi_xml_elmID_fmiModelDescription, fmi_attr_id_variableNamingConvention, 0, &(md->namingConvension), fmi_xml_naming_enu_flat, namingConventionMap) ||
+                    fmi_xml_set_attr_enum(context, fmi_xml_elmID_fmiModelDescription, fmi_attr_id_variableNamingConvention, 0, (unsigned*)&(md->namingConvension), fmi_xml_naming_enu_flat, namingConventionMap) ||
                     /* <xs:attribute name="numberOfContinuousStates" type="xs:unsignedInt" use="required"/> */
                     fmi_xml_set_attr_uint(context, fmi_xml_elmID_fmiModelDescription, fmi_attr_id_numberOfContinuousStates, 1, &(md->numberOfContinuousStates),0) ||
                     /* <xs:attribute name="numberOfEventIndicators" type="xs:unsignedInt" use="required"/> */

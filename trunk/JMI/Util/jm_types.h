@@ -16,6 +16,9 @@
 
 #ifndef JM_TYPES_H
 #define JM_TYPES_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef const char* jm_string;
 
@@ -30,6 +33,10 @@ typedef enum {
 	jm_status_success = 0,	
 	jm_status_error = -1
 } jm_status_enu_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 /* JM_TYPES_H */
 #endif

@@ -19,10 +19,10 @@
 #include "jm_types.h"
 
 /* Returns 1 if the FMU was successfully unziped. Otherwise 0 is returned */
-jm_status_enu_t fmi_zip_unzip(char* zip_file_path, char* output_folder)
+jm_status_enu_t fmi_zip_unzip(const char* zip_file_path, const char* output_folder)
 {
     int argc = 5;
-	char *argv[5] = {"miniunz", "-o", zip_file_path, "-d", output_folder};
+	const char *argv[5] = {"miniunz", "-o", zip_file_path, "-d", output_folder};
 
 	if (miniunz(argc, argv) == 0) {
 		return jm_status_success;

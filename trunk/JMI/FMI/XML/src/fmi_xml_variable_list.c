@@ -17,11 +17,14 @@
 
 #include "fmi_xml_model_description_impl.h"
 #include "fmi_xml_variable_list_impl.h"
+#include "fmi_xml_query.h"
 
-fmi_xml_variable_list_t* fmi_xml_alloc_variable_list(jm_callbacks* cb, size_t size) {
-    fmi_xml_variable_list_t* vl = cb->malloc(sizeof(fmi_xml_variable_list_t));
+fmi_xml_variable_list_t* fmi_xml_alloc_variable_list(fmi_xml_model_description_t* md, size_t size) {
+	jm_callbacks* cb = md->callbacks;
+	fmi_xml_variable_list_t* vl = cb->malloc(sizeof(fmi_xml_variable_list_t));
     if(!vl) return 0;
     vl->vr = 0;
+	vl->md = md;
     if(jm_vector_init(jm_voidp)(&vl->variables,size,cb) < size) {
         fmi_xml_free_variable_list(vl);
         return 0;
@@ -43,7 +46,7 @@ unsigned int  fmi_xml_get_variable_list_size(fmi_xml_variable_list_t* vl) {
 
 /* Make a copy */
 fmi_xml_variable_list_t* fmi_xml_clone_variable_list(fmi_xml_variable_list_t* vl) {
-    fmi_xml_variable_list_t* copy = fmi_xml_alloc_variable_list(vl->variables.callbacks, fmi_xml_get_variable_list_size(vl));
+    fmi_xml_variable_list_t* copy = fmi_xml_alloc_variable_list(vl->md, fmi_xml_get_variable_list_size(vl));
     if(!copy) return 0;
     jm_vector_copy(jm_voidp)(&copy->variables, &vl->variables);
     return copy;
@@ -53,7 +56,7 @@ fmi_xml_variable_list_t* fmi_xml_join_var_list(fmi_xml_variable_list_t* a, fmi_x
     size_t asize = fmi_xml_get_variable_list_size(a);
     size_t bsize = fmi_xml_get_variable_list_size(b);
     size_t joinSize = asize + bsize;
-    fmi_xml_variable_list_t* list = fmi_xml_alloc_variable_list(a->variables.callbacks,joinSize);
+    fmi_xml_variable_list_t* list = fmi_xml_alloc_variable_list(a->md,joinSize);
     if(!list) {
         return list;
     }
@@ -64,7 +67,7 @@ fmi_xml_variable_list_t* fmi_xml_join_var_list(fmi_xml_variable_list_t* a, fmi_x
 }
 
 fmi_xml_variable_list_t* fmi_xml_create_var_list(fmi_xml_model_description_t* md,fmi_xml_variable_t* v) {
-    fmi_xml_variable_list_t* list = fmi_xml_alloc_variable_list(md->callbacks,1);
+    fmi_xml_variable_list_t* list = fmi_xml_alloc_variable_list(md,1);
     if(!list ) {
         return list;
     }
@@ -73,7 +76,7 @@ fmi_xml_variable_list_t* fmi_xml_create_var_list(fmi_xml_model_description_t* md
 }
 
 fmi_xml_variable_list_t* fmi_xml_append_to_var_list(fmi_xml_variable_list_t* list, fmi_xml_variable_t* v) {
-    fmi_xml_variable_list_t* out = fmi_xml_alloc_variable_list(list->variables.callbacks, fmi_xml_get_variable_list_size(list)+1);
+    fmi_xml_variable_list_t* out = fmi_xml_alloc_variable_list(list->md, fmi_xml_get_variable_list_size(list)+1);
     if(!out) return 0;
     jm_vector_copy(jm_voidp)(&out->variables,&list->variables);
     jm_vector_push_back(jm_voidp)(&out->variables, v);
@@ -82,7 +85,7 @@ fmi_xml_variable_list_t* fmi_xml_append_to_var_list(fmi_xml_variable_list_t* lis
 
 fmi_xml_variable_list_t* fmi_xml_prepend_to_var_list(fmi_xml_variable_list_t* list, fmi_xml_variable_list_t* v) {
     size_t lsize = fmi_xml_get_variable_list_size(list);
-    fmi_xml_variable_list_t* out = fmi_xml_alloc_variable_list(list->variables.callbacks, lsize+1);
+    fmi_xml_variable_list_t* out = fmi_xml_alloc_variable_list(list->md, lsize+1);
     if(!out) return 0;
     jm_vector_set_item(jm_voidp)(&out->variables,0,v);
     memcpy((void*)jm_vector_get_itemp(jm_voidp)(&out->variables,1), (void*)jm_vector_get_itemp(jm_voidp)(&list->variables,0), sizeof(jm_voidp)*lsize);
@@ -118,7 +121,7 @@ fmi_xml_variable_list_t* fmi_xml_get_sublist(fmi_xml_variable_list_t* vl, unsign
     if(fromIndex > toIndex) return 0;
     if(toIndex >=  fmi_xml_get_variable_list_size(vl)) return 0;
     size = toIndex - fromIndex + 1;
-    out = fmi_xml_alloc_variable_list(vl->variables.callbacks, size);
+    out = fmi_xml_alloc_variable_list(vl->md, size);
     if(!out ) return 0;
     for(i=0; i < size; i++) {
         jm_vector_set_item(jm_voidp)(&out->variables, i, jm_vector_get_item(jm_voidp)(&vl->variables, fromIndex+i));
@@ -128,13 +131,13 @@ fmi_xml_variable_list_t* fmi_xml_get_sublist(fmi_xml_variable_list_t* vl, unsign
 
 /* fmi_xml_filter_variables calls  the provided 'filter' function on every variable in the list.
   It returns a sub-list list with the variables for which filter returned non-zero value. */
-fmi_xml_variable_list_t* fmi_xml_filter_variables(fmi_xml_variable_list_t* vl, fmi_xml_variable_filter_function_ft filter) {
+fmi_xml_variable_list_t* fmi_xml_filter_variables(fmi_xml_variable_list_t* vl, fmi_xml_variable_filter_function_ft filter, void* context) {
     size_t nv, i;
-    fmi_xml_variable_list_t* out = fmi_xml_alloc_variable_list(vl->variables.callbacks, 0);
+    fmi_xml_variable_list_t* out = fmi_xml_alloc_variable_list(vl->md, 0);
     nv = fmi_xml_get_variable_list_size(vl);
     for(i=0; i < nv;i++) {
         fmi_xml_variable_t* variable = fmi_xml_get_variable(vl, i);
-        if(filter(variable))
+        if(filter(variable, context))
             if(!jm_vector_push_back(jm_voidp)(&out->variables, variable))
                 break;
     }
@@ -145,3 +148,23 @@ fmi_xml_variable_list_t* fmi_xml_filter_variables(fmi_xml_variable_list_t* vl, f
     return out;
 }
 
+int fmi_xml_filter_variable_by_expression(fmi_xml_variable_t* var, void * c) {
+	fmi_xml_q_expression_t* expr = c;
+	return fmi_xml_q_filter_variable(var, expr);
+}
+
+fmi_xml_variable_list_t* fmi_xml_select_variables(fmi_xml_variable_list_t* vl, const char* query) {
+	fmi_xml_variable_list_t* ret = 0;
+	fmi_xml_q_context_t context;
+	int errCh;
+	fmi_xml_q_init_context(&context);
+
+	errCh = fmi_xml_q_parse_query(&context, query);
+	if(errCh == 0) {
+		ret = fmi_xml_filter_variables( vl, fmi_xml_filter_variable_by_expression, &context.expr);
+	}
+
+	fmi_xml_q_free_context_data(&context);
+
+	return ret; 
+}

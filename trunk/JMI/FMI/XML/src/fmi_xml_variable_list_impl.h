@@ -26,12 +26,13 @@ extern "C" {
 #endif
 
 struct fmi_xml_variable_list_t {
+	fmi_xml_model_description_t* md;
     jm_vector(jm_voidp) variables;
     jm_vector(size_t)* vr;
 };
 
 /* Allocate an empty list */
-fmi_xml_variable_list_t* fmi_xml_alloc_variable_list(jm_callbacks* cb, size_t size);
+fmi_xml_variable_list_t* fmi_xml_alloc_variable_list(fmi_xml_model_description_t* md, size_t size);
 
 #ifdef __cplusplus
 }
