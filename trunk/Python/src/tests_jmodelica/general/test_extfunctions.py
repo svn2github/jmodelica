@@ -17,12 +17,12 @@
 """
 Module for testing external function support.
 """
-import os, subprocess
+import os, subprocess, shutil
 
 from os.path import join as path
 
 from pymodelica import compile_jmu, compile_fmu
-from pymodelica.common.core import get_platform_dir
+from pymodelica.common.core import get_platform_dir, create_temp_dir
 from pyjmi import JMUModel
 from pyfmi import FMUModel
 from tests_jmodelica import testattr, get_files_path
@@ -41,12 +41,13 @@ def test_ModelicaUtilities():
 @testattr(stddist = True)
 def test_ExtFuncStatic():
     """ 
-    Testcompiling a model with external functions in a static library.
+    Test compiling a model with external functions in a static library.
     """
-    build_ext('add_static')
-    fpath = path(get_files_path(), 'Modelica', "ExtFunctionTests.mo")
+    dir = build_ext('add_static')
+    fpath = path(dir, "ExtFunctionTests.mo")
     cpath = "ExtFunctionTests.ExtFunctionTest1"
     fmu_name = compile_fmu(cpath, fpath)
+    shutil.rmtree(dir, True)
     model = FMUModel(fmu_name)
 
 @testattr(stddist = True)
@@ -54,14 +55,16 @@ def test_ExtFuncShared():
     """ 
     Test compiling a model with external functions in a shared library.
     """
-    build_ext('add_shared')
-    fpath = path(get_files_path(), 'Modelica', "ExtFunctionTests.mo")
+    dir = build_ext('add_shared')
+    fpath = path(dir, "ExtFunctionTests.mo")
     cpath = "ExtFunctionTests.ExtFunctionTest1"
     fmu_name = compile_fmu(cpath, fpath)
+    shutil.rmtree(dir, True)
     model = FMUModel(fmu_name)
 
 def build_ext(target):
     """
+    Build a library for an external function.
     """
     platform = get_platform_dir()
     if platform[:-2] == 'win':
@@ -70,5 +73,14 @@ def build_ext(target):
     else:
         make = 'make'
     cmd = '%s PLATFORM=%s clean %s' % (make, platform, target)
-    os.chdir(path(get_files_path(), 'Modelica', 'Resources', 'src'))
+    
+    src = path(get_files_path(), 'Modelica')
+    dst = create_temp_dir()
+    shutil.copytree(path(src, 'Resources'), path(dst, 'Resources'))
+    shutil.copy(path(src, 'ExtFunctionTests.mo'), dst)
+    old = os.getcwd()
+    os.chdir(path(dst, 'Resources', 'src'))
     subprocess.call(cmd, shell=True)
+    os.chdir(old)
+    
+    return dst

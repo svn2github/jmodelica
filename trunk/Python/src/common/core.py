@@ -379,16 +379,26 @@ def unzip_unit(archive, path='.'):
         archive = zipfile.ZipFile(os.path.join(path,archive))
     except IOError:
         raise IOError('Could not locate the file: ' + str(archive))
+
+    # create temporary directory
+    tmpdir = create_temp_dir()
     
+    # extract all into temp_dir
+    archive.extractall(path=tmpdir)
+    
+    return tmpdir
+
+
+def create_temp_dir():
+    """
+    Create a temporary directory for extracting an FMU in or similar
+    """
     # create JModelica directory for temporary files (if not already created)
     if not os.path.exists(tmp_location):
         os.mkdir(tmp_location)
 
     # create temporary directory
     tmpdir = tempfile.mkdtemp(prefix='jm_tmp', dir=tmp_location)
-    
-    # extract all into temp_dir
-    archive.extractall(path=tmpdir)
     
     return tmpdir
 
