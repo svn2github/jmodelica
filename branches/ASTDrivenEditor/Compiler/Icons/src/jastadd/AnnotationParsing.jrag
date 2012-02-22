@@ -96,11 +96,16 @@ aspect AnnotationParsing {
 			throw new FailedConstructionException("Placement");
 		}
 		
+		/**
+		 * Creates a Connection represented by this AnnotationNode
+		 * @return the created connection
+		 * @throws FailedConstructionExceptionException if transformation annotatioNode does not exist. 
+		 */
 		public Connection createConnection() throws FailedConstructionException {
 			AnnotationNode lineAnnotation = forPath("Line");
 			if (lineAnnotation.exists()) {
 				Connection con = new Connection();
-				lineAnnotation.initializeAbstractLine(con);
+				lineAnnotation.initializeLine(con);
 				return con;
 			}
 			throw new FailedConstructionException("Connection");
@@ -335,7 +340,7 @@ aspect AnnotationParsing {
 		private Line createLine() 
 				throws FailedConstructionException, NotEnoughParametersException {
 			Line line = new Line();
-			initializeAbstractLine(line);
+			initializeLine(line);
 			return line;
 		}
 		
@@ -343,7 +348,7 @@ aspect AnnotationParsing {
 		* Initializes a AbstractLine object with the information in the AnnotationNode.
 		* @param graphicItem
 		*/
-		private void initializeAbstractLine(Line line) 
+		private void initializeLine(Line line) 
 				throws FailedConstructionException, NotEnoughParametersException {
 			initializeGraphicItem(line);
 			boolean pointsSet = false;

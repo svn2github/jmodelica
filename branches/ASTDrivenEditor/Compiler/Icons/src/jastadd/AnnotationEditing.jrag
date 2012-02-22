@@ -1,5 +1,4 @@
 
-
 aspect AnnotationEditing {
 	
 	/**
@@ -16,80 +15,349 @@ aspect AnnotationEditing {
 	 */
 	
 	/**
-	 * Saves the placement <code>placement</code> to the current node.
+	 * Saves the bitmap <code>b</code> to this annotation node.
 	 * 
-	 * @param placement Placement to save
+	 * @param b Bitmap to save
 	 */
-	private void AnnotationNode.save(Placement placement) {
-		forPath("transformation").save(placement.getTransformation());
-		forPath("visible").save(placement.isVisible());
+	private void AnnotationNode.save(Bitmap b) {
+		forPath("extent").save(b.getExtent());
+		if (b.getImageSource() != null)
+			forPath("imageSource").save(b.getImageSource());
+		if (b.getFileName() != null)
+			forPath("fileName").save(b.getFileName());
 	}
 	
 	/**
-	 * Saves the transformation <code>transformation</code> to the current node.
+	 * Saves a boolean value <code>b</code> to this annotation node.
 	 * 
-	 * @param transformation Transformation to save
+	 * @param b Boolean value to save
 	 */
-	private void AnnotationNode.save(Transformation transformation) {
-		forPath("extent").save(transformation.getExtent());
-		if (!transformation.getOrigin().equals(Transformation.DEFAULT_ORIGIN))
-			forPath("origin").save(transformation.getOrigin());
-		if (transformation.getRotation() != Transformation.DEFAULT_ROTATION)
-			forPath("rotation").save(transformation.getRotation());
+	private void AnnotationNode.save(boolean b) {
+		setValue(b ? new BooleanLitExpTrue() : new BooleanLitExpFalse());
 	}
 	
 	/**
-	 * Saves the extent <code>extent</code> to the current node.
+	 * Saves the color <code>c</code> to this annotation node.
 	 * 
-	 * @param extent Extent to save
+	 * @param c Color to save
 	 */
-	private void AnnotationNode.save(Extent extent) {
-		save(new double[][]{{extent.getP1().getX(),extent.getP1().getY()},{extent.getP2().getX(),extent.getP2().getY()}});
+	private void AnnotationNode.save(Color c) {
+		save(new double[]{c.getR(), c.getG(), c.getB()});
+	}
+	
+//	/**
+//	 * Saves the connection <code>c</code> to this annotation node.
+//	 * 
+//	 * @param c Connection to save
+//	 */
+//	private void AnnotationNode.save(Connection c) {
+//		//TODO:implement!
+//	}
+	
+	/**
+	 * Saves the extent <code>e</code> to this annotation node.
+	 * 
+	 * @param e Extent to save
+	 */
+	private void AnnotationNode.save(CoordinateSystem cs) {
+		forPath("preserveAspectRatio").save(cs.shouldPreserveAspectRatio());
+		forPath("extent").save(cs.getExtent());
+		forPath("grid").save(cs.getGrid());
+		forPath("initialScale").save(cs.getInitialScale());
 	}
 	
 	/**
-	 * Saves the point <code>point</code> to the current node.
+	 * Saves a double value <code>d</code> to this annotation node.
 	 * 
-	 * @param point Point to save
+	 * @param d Double value to save
 	 */
-	private void AnnotationNode.save(Point point) {
-		save(new double[]{point.getX(),point.getY()});
+	private void AnnotationNode.save(double d) {
+		setValue(createReal(d));
 	}
 	
 	/**
-	 * Saves a boolean value <code>bool</code> to the current node.
+	 * Saves a double vector <code>v</code> to this annotation node.
 	 * 
-	 * @param bool Boolean value to save
+	 * @param v Double vector to save
 	 */
-	private void AnnotationNode.save(boolean bool) {
-		setValue(bool ? new BooleanLitExpTrue() : new BooleanLitExpFalse());
+	private void AnnotationNode.save(double[] v) {
+		setValue(createRealVector(v));
 	}
 	
 	/**
-	 * Saves a double value <code>val</code> to the current node.
+	 * Saves a double matrix <code>m</code> to this annotation node.
 	 * 
-	 * @param val Double value to save
+	 * @param m Double matrix to save
 	 */
-	private void AnnotationNode.save(double val) {
-		setValue(createReal(val));
+	private void AnnotationNode.save(double[][] m) {
+		setValue(createRealMatrix(m));
 	}
 	
 	/**
-	 * Saves a double vector <code>vector</code> to the current node.
+	 * Saves the ellipse <code>e</code> to this annotation node.
 	 * 
-	 * @param vector Double vector to save
+	 * @param e Ellipse to save
 	 */
-	private void AnnotationNode.save(double[] vector) {
-		setValue(createRealVector(vector));
+	private void AnnotationNode.save(Ellipse e) {
+		forPath("startAngle").save(e.getStartAngle());
+		forPath("endAngle").save(e.getEndAngle());
 	}
 	
 	/**
-	 * Saves a double matrix <code>matrix</code> to the current node.
+	 * Saves the extent <code>e</code> to this annotation node.
 	 * 
-	 * @param matrix Double matrix to save
+	 * @param e Extent to save
 	 */
-	private void AnnotationNode.save(double[][] matrix) {
-		setValue(createRealMatrix(matrix));
+	private void AnnotationNode.save(Extent e) {
+		save(new double[][]{{e.getP1().getX(),e.getP1().getY()},{e.getP2().getX(),e.getP2().getY()}});
+	}
+	
+	/**
+	 * Saves the filled rectangular shape <code>frs</code> to this annotation node.
+	 * 
+	 * @param frs FilledRectShape to save
+	 */
+	private void AnnotationNode.save(FilledRectShape frs) {
+		forPath("extent").save(frs.getExtent());
+		
+		if (frs instanceof Ellipse)
+			save((Ellipse) frs);
+		else if (frs instanceof Rectangle)
+			save((Rectangle) frs);
+		else if (frs instanceof Text)
+			save((Text) frs);
+		else
+			throw new AnnotationEditException("Unknown subclass of FilledRectShape");
+	}
+	
+	/**
+	 * Saves the filled shape <code>fs</code> to this annotation node.
+	 * 
+	 * @param fs FilledShape to save
+	 */
+	private void AnnotationNode.save(FilledShape fs) {
+		forPath("lineColor").save(fs.getLineColor());
+		forPath("pattern").save(fs.getLinePattern());
+		forPath("fillColor").save(fs.getFillColor());
+		forPath("fillPattern").save(fs.getFillPattern());
+		forPath("lineThickness").save(fs.getLineThickness());
+		
+		if (fs instanceof FilledRectShape)
+			save((FilledRectShape) fs);
+		else if (fs instanceof Polygon)
+			save((Polygon) fs);
+		else
+			throw new AnnotationEditException("Unknown subclass of FilledShape");
+	}
+	
+	/**
+	 * Saves the graphic item <code>gi</code> to this annotation node.
+	 * 
+	 * @param gi GraphicItem to save
+	 */
+	private void AnnotationNode.save(GraphicItem gi) {
+		forPath("visible").save(gi.isVisible());
+		forPath("origin").save(gi.getOrigin());
+		forPath("rotation").save(gi.getRotation());
+		
+		if (gi instanceof Bitmap)
+			save((Bitmap) gi);
+		else if (gi instanceof FilledShape)
+			save((FilledShape) gi);
+		else if (gi instanceof Line)
+			save((Line) gi);
+		else
+			throw new AnnotationEditException("Unknown subclass of GraphicItem");
+	}
+	
+	/**
+	 * Saves the list of graphic items <code>gis</code> to this annotation node.
+	 * 
+	 * @param gis GraphicItem[] to save
+	 */
+	private void AnnotationNode.save(GraphicItem[] gis) {
+		for (GraphicItem gi : gis) {
+			String nodeName;
+			if (gi instanceof Line)
+				nodeName = "Line";
+			else if (gi instanceof Rectangle)
+				nodeName = "Rectangle";
+			else if (gi instanceof Polygon)
+				nodeName = "Polygon";
+			else if (gi instanceof Ellipse)
+				nodeName = "Ellipse";
+			else if (gi instanceof Text)
+				nodeName = "Text";
+			else if (gi instanceof Bitmap)
+				nodeName = "Bitmap";
+			else
+				throw new AnnotationEditException("Unknown subclass of GraphicItem");
+			
+			addNode(nodeName).save(gi);
+		}
+	}
+	
+	/**
+	 * Saves the line <code>l</code> to this annotation node.
+	 * 
+	 * @param l Line to save
+	 */
+	private void AnnotationNode.save(Line l) {
+		forPath("points").save(l.getPoints().toArray(new Point[l.getPoints().size()]));
+		forPath("color").save(l.getColor());
+		forPath("thickness").save(l.getThickness());
+		forPath("pattern").save(l.getLinePattern());
+		forPath("smooth").save(l.getSmooth());
+		forPath("arrow").save(l.getArrow());
+		forPath("arrowSize").save(l.getArrowSize());
+	}
+	
+	/**
+	 * Saves the placement <code>p</code> to this annotation node.
+	 * 
+	 * @param p Placement to save
+	 */
+	private void AnnotationNode.save(Placement p) {
+		forPath("transformation").save(p.getTransformation());
+		forPath("visible").save(p.isVisible());
+	}
+	
+	/**
+	 * Saves the polygon <code>p</code> to this annotation node.
+	 * 
+	 * @param p Polygon to save
+	 */
+	private void AnnotationNode.save(Polygon r) {
+		forPath("points").save(r.getPoints().toArray(new Point[r.getPoints().size()]));
+		forPath("smooth").save(r.getSmooth());
+	}
+	
+	/**
+	 * Saves the point <code>p</code> to this annotation node.
+	 * 
+	 * @param p Point to save
+	 */
+	private void AnnotationNode.save(Point p) {
+		save(new double[]{p.getX(),p.getY()});
+	}
+	
+	/**
+	 * Saves the list of points <code>ps</code> to this annotation node.
+	 * 
+	 * @param ps Point[] to save
+	 */
+	private void AnnotationNode.save(Point[] ps) {
+		double[][] points = new double[ps.length][2];
+		for (int i = 0; i < ps.length; i++) {
+			points[i][0] = ps[i].getX();
+			points[i][1] = ps[i].getY();
+		}
+		save(points);
+	}
+	
+	/**
+	 * Saves the rectangle <code>r</code> to this annotation node.
+	 * 
+	 * @param r Rectangle to save
+	 */
+	private void AnnotationNode.save(Rectangle r) {
+		forPath("borderPattern").save(r.getBorderPattern());
+		forPath("radius").save(r.getRadius());
+	}
+	
+	/**
+	 * Saves the string <code>s</code> to this annotation node.
+	 * 
+	 * @param s String to save
+	 */
+	private void AnnotationNode.save(String s) {
+		//TODO:implement!
+	}
+	
+	
+	/**
+	 * Saves the text <code>t</code> to this annotation node.
+	 * 
+	 * @param t Text to save
+	 */
+	private void AnnotationNode.save(Text t) {
+		//TODO:implement!
+	}
+	
+	/**
+	 * Saves the transformation <code>t</code> to this annotation node.
+	 * 
+	 * @param t Transformation to save
+	 */
+	private void AnnotationNode.save(Transformation t) {
+		forPath("extent").save(t.getExtent());
+		if (!t.getOrigin().equals(Transformation.DEFAULT_ORIGIN))
+			forPath("origin").save(t.getOrigin());
+		if (t.getRotation() != Transformation.DEFAULT_ROTATION)
+			forPath("rotation").save(t.getRotation());
+	}
+	
+	/**
+	 * Saves the arrow <code>a</code> to this annotation node.
+	 * 
+	 * @param a Arrow to save
+	 */
+	private void AnnotationNode.save(Types.Arrow[] a) {
+		//TODO:implement!
+	}
+	
+	/**
+	 * Saves the border pattern <code>bp</code> to this annotation node.
+	 * 
+	 * @param bp BorderPattern to save
+	 */
+	private void AnnotationNode.save(Types.BorderPattern bp) {
+		//TODO:implement!
+	}
+	
+	/**
+	 * Saves the fill pattern <code>fp</code> to this annotation node.
+	 * 
+	 * @param fp FillPattern to save
+	 */
+	private void AnnotationNode.save(Types.FillPattern fp) {
+		//TODO:implement!
+	}
+	
+	/**
+	 * Saves the line pattern <code>lp</code> to this annotation node.
+	 * 
+	 * @param lp LinePattern to save
+	 */
+	private void AnnotationNode.save(Types.LinePattern lp) {
+		//TODO:implement!
+	}
+	
+	/**
+	 * Saves the smooth <code>s</code> to this annotation node.
+	 * 
+	 * @param s Smooth to save
+	 */
+	private void AnnotationNode.save(Types.Smooth s) {
+		//TODO:implement!
+	}
+	
+	/**
+	 * Saves the text alignment <code>ta</code> to this annotation node.
+	 * 
+	 * @param ta TextAlignment to save
+	 */
+	private void AnnotationNode.save(Types.TextAlignment ta) {
+		//TODO:implement!
+	}
+	
+	/**
+	 * Saves the text style <code>ts</code> to this annotation node.
+	 * 
+	 * @param ts TextStyle to save
+	 */
+	private void AnnotationNode.save(Types.TextStyle[] ts) {
+		//TODO:implement!
 	}
 	
 	/*
