@@ -1,17 +1,22 @@
+
 PLATFORM=win32
 
 ifeq (win, $(findstring win,$(PLATFORM)))
 SUFF=dll
 PREF=
-else
-ifeq (darwin, $(findstring win,$(PLATFORM)))
+LINKER_FLAGS=-shared -Wl,-soname,
+endif
+ifeq (darwin, $(findstring darwin,$(PLATFORM)))
 SUFF=dylib
-EXTRA="-install_name @rpath/$@"
+LINKER_FLAGS=-dynamiclib -Wl,-dylib_install_name,
+PREF=lib
 else
 SUFF=so
-endif
+LINKER_FLAGS=-shared -Wl,-soname,
 PREF=lib
 endif
+
+CC=gcc
 
 DIR=../Library/$(PLATFORM)
 INC=../Include
@@ -39,7 +44,7 @@ lib_dir:
 	$(CC) -c -fPIC -I$(INC) $< -o $@
 
 $(PREF)%.$(SUFF): %.o
-	$(CC) -shared -Wl,-soname,$@ $(EXTRA) -o $@ $^
+	$(CC) $(LINKER_FLAGS)$@ -o $@ $^
 
 lib%.a: %.o
 	$(AR) rcs $@ $<
