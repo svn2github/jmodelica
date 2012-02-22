@@ -51,6 +51,7 @@ def run_demo(with_plots=True):
     P1=res1['P1']
     V1=res1['V1']
     u1=res1['u1'] 
+    du1=res1['du1']
     t1=res1['time']
 	
     print "X1(final) = ", repr(X1[1])
@@ -60,6 +61,7 @@ def run_demo(with_plots=True):
     print "P1 = ", repr(N.array(P1))
     print "V1 = ", repr(N.array(V1))
     print "u1 = ", repr(N.array(u1))
+    print "du1 = ", repr(N.array(du1))
     print "len(u1) = ", repr(len(u1))
     print "len(t1) = ", repr(len(t1))
 	
@@ -73,12 +75,14 @@ def run_demo(with_plots=True):
     P2_init = P1[len(P1)-1]
     V2_init = V1[len(V1)-1]
     u2_init = u1[len(u1)-1]
+    du2_init = du1[len(du1)-1]
 	
     pp2.set('X2_0',X2_init)
     pp2.set('S2_0',S2_init)
     pp2.set('P2_0',P2_init)
     pp2.set('V2_0',V2_init)
     pp2.set('u2_0',u2_init)
+    pp2.set('du2_0',du2_init)
 
     opts = pp2.optimize_options()
     opts['n_e'] = 30
@@ -91,6 +95,7 @@ def run_demo(with_plots=True):
     P2=res2['P2']
     V2=res2['V2']
     u2=res2['u2']
+    du2=res2['du2']
 	
     t2 = t1+80
     t = range(182)
@@ -101,6 +106,7 @@ def run_demo(with_plots=True):
     P = range(182)
     V = range(182)
     u = range(182)
+    du= range(182)
     X[0:91] = X1
     X[91:182] = X2
     S[0:91] = S1
@@ -111,7 +117,8 @@ def run_demo(with_plots=True):
     V[91:182] = V2
     u[0:91] = u1
     u[91:182] = u2
-
+    du[0:91] = du1
+    du[91:182] = du2
     
     if with_plots:
         # Plot
@@ -147,43 +154,15 @@ def run_demo(with_plots=True):
         plt.grid()
         plt.ylabel('u')
 		
+        plt.subplot(326)
+        plt.plot(t,du)
+        plt.title('Derivative of Feed flowrate')
+        plt.grid()
+        plt.ylabel('du')
+		
         plt.xlabel('time')
         plt.show()
 
-        # plt.figure(2)
-        # plt.clf()
-        # plt.subplot(321)
-        # plt.plot(t2,X2)
-        # plt.title('Cell mass concentration')
-        # plt.grid()
-        # plt.ylabel('X2')
-
-        # plt.subplot(322)
-        # plt.plot(t2,S2)
-        # plt.title('Substrate concentration')
-        # plt.grid()
-        # plt.ylabel('S2')
-		
-        # plt.subplot(323)
-        # plt.plot(t2,P2)
-        # plt.title('Penicillin concentration')
-        # plt.grid()
-        # plt.ylabel('P2')
-        
-        # plt.subplot(324)
-        # plt.plot(t2,V2)
-        # plt.title('Volume of medium')
-        # plt.grid()
-        # plt.ylabel('V2')
-		
-        # plt.subplot(325)
-        # plt.plot(t2,u2)
-        # plt.title('Feed flowrate')
-        # plt.grid()
-        # plt.ylabel('u2')
-		
-        # plt.xlabel('time')
-        # plt.show()
 
         print "Penicillin production:", repr(P2[len(P2)-1])
 		

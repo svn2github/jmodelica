@@ -1708,6 +1708,7 @@ end CSTR;
           parameter Real P2_0 = 0.6;
           parameter Real V2_0 = 150;
           parameter Real u2_0 = 0.01;
+          parameter Real du2_0 = 0;
 
           //state start values
           Real X2(start=X2_0,fixed=true);
@@ -1797,6 +1798,22 @@ end CSTR;
       annotation (experiment(StopTime=150, NumberOfIntervals=100),
           __Dymola_experimentSetupOutput);
     end PenicillinPlantTest;
+
+    model PenicillinPlantInputConst
+      PenicillinPlantTest penicillinPlantTest
+        annotation (Placement(transformation(extent={{0,0},{20,20}})));
+      Modelica.Blocks.Sources.Constant const(k=0.03)
+        annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
+    equation
+      connect(const.y, penicillinPlantTest.u1) annotation (Line(
+          points={{-39,10},{-16,10},{-16,11},{6,11}},
+          color={0,0,127},
+          smooth=Smooth.None));
+      annotation (
+        Diagram(graphics),
+        experiment(StopTime=150),
+        __Dymola_experimentSetupOutput);
+    end PenicillinPlantInputConst;
   end PenicillinPlant;
 
   package BloodGlucose
@@ -2112,14 +2129,16 @@ end CSTR;
     model Polyethtest
       PolyethInput polyethInput
         annotation (Placement(transformation(extent={{20,0},{40,20}})));
-      Modelica.Blocks.Sources.Constant const "1"
+      Modelica.Blocks.Sources.Constant const(k=1/1800) "1"
         annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
     equation
       connect(const.y, polyethInput.Fc) annotation (Line(
           points={{-19,10},{4,10},{4,14},{26,14}},
           color={0,0,127},
           smooth=Smooth.None));
-      annotation (Diagram(graphics));
+      annotation (Diagram(graphics),
+        experiment(StopTime=36000),
+        __Dymola_experimentSetupOutput);
     end Polyethtest;
   end Polyeth;
   annotation (DymolaStoredErrors(thetext="package VDP_pack
@@ -2199,4 +2218,113 @@ end CSTR;
 end VDP_pack;"), uses(Modelica(version="3.2")),
     experiment(StopTime=6000, NumberOfIntervals=2000),
     __Dymola_experimentSetupOutput);
+  package CatalystMixing
+    model CatalystMixing
+
+      //state start values
+      parameter Real x1_0=1;
+      parameter Real x2_0=0;
+
+      //states
+      Real x1(start=x1_0,fixed=true);
+      Real x2(start=x2_0,fixed=true);
+
+      //control signal
+      Modelica.Blocks.Interfaces.RealInput u
+        annotation (Placement(transformation(extent={{-30,-10},{10,30}})));
+
+    equation
+      der(x1) = u*(10*x2-x1);
+      der(x2) = u*(x1-10*x2) - (1-u)*x2;
+      annotation (experiment, __Dymola_experimentSetupOutput);
+    end CatalystMixing;
+  end CatalystMixing;
+
+  package BangControl
+
+    model BangControl
+      //state start values
+      parameter Real x1_0=0;
+      parameter Real x2_0=0;
+
+      //states
+      Real x1(start=x1_0,fixed=true);
+      Real x2(start=x2_0,fixed=true);
+
+      //control signal
+      Modelica.Blocks.Interfaces.RealInput u
+        annotation (Placement(transformation(extent={{-30,-10},{10,30}})));
+
+    equation
+      der(x1) = x2;
+      der(x2) = u;
+      annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput);
+    end BangControl;
+
+    model BangControlInput
+      BangControl bangControl
+        annotation (Placement(transformation(extent={{20,20},{40,40}})));
+      Modelica.Blocks.Sources.Constant const(k=1)
+        annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
+    equation
+      connect(const.y, bangControl.u) annotation (Line(
+          points={{-19,30},{5,30},{5,31},{29,31}},
+          color={0,0,127},
+          smooth=Smooth.None));
+      annotation (Diagram(graphics));
+    end BangControlInput;
+
+    model BangControlTimetable
+      BangControl bangControl
+        annotation (Placement(transformation(extent={{20,0},{40,20}})));
+      Modelica.Blocks.Sources.TimeTable timeTable(table=[0,1; 20,1; 21,0; 30,0])
+        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+    equation
+      connect(timeTable.y, bangControl.u) annotation (Line(
+          points={{-19,10},{5,10},{5,11},{29,11}},
+          color={0,0,127},
+          smooth=Smooth.None));
+      annotation (Diagram(graphics));
+    end BangControlTimetable;
+  end BangControl;
+
+  package Greenhouse
+    model Greenhouse
+
+      import SI = Modelica.SIunits;
+
+      //parameter
+      parameter Real pW = 3e-6/40;
+      parameter Real pT = 1;
+      parameter Real pH = 0.1;
+      parameter Real pHc = 7.5e-2/220;
+      parameter Real pWc = 3e4/220;
+      parameter Real pi = 3.14159;
+      parameter Real tf = 48;
+
+      //state start values
+      parameter Real x1_0 = 0;
+      parameter Real x2_0 = 10;
+      parameter Real x3_0 = 0;
+
+      //states
+      SI.Mass x1(start=x1_0,fixed=true) "dry weight";
+      SI.Temp_C x2(start=x2_0,fixed=true) "Greenhouse temperature";
+      SI.Energy x3(start=x3_0,fixed=true);
+      SI.Power sun "sunlight";
+      SI.Temp_C temp "outside temperature";
+
+      //control signal
+      Modelica.Blocks.Interfaces.RealInput u
+        annotation (Placement(transformation(extent={{-30,-10},{10,30}})));
+
+    equation
+      der(x1) = pW*sun*x2;
+      der(x2) = pT*(temp-x2)+pH*u;
+      der(x3) = pHc*u;
+      sun = 800*sin(4*pi*time/tf-0.65*pi);
+      temp = 15+10*sin(4*pi*time/tf-0.65*pi);
+      annotation (experiment(StopTime=48), __Dymola_experimentSetupOutput);
+    end Greenhouse;
+  end Greenhouse;
 end JMExamples;

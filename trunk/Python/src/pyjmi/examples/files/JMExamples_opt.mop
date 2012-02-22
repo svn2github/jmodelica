@@ -1,5 +1,19 @@
 package JMExamples_opt  
 
+	optimization BangControl_opt (objective = finalTime,
+                            startTime = 0,
+                            finalTime(free=true,min=0))                
+      extends JMExamples.BangControl.BangControl(x1(fixed=true),x2(fixed=true));     
+														  
+   equation
+   constraint
+	  -2<=u;
+	  u<=1;
+	  x1(finalTime) = 300;
+	  x2(finalTime) = 0;
+   end BangControl_opt;
+
+
 	optimization BloodGlucose_opt(objective=(cost(finalTime)),
                       startTime=0,
                       finalTime=400)
@@ -19,11 +33,23 @@ package JMExamples_opt
 
 	constraint
 	  bc.G<=100;
-	  u>=2;
-	  u<=5;
+	  u>=0.5;
+	  u<=1.5;
 	end BloodGlucose_opt;
 
 
+	optimization CatalystMixing_opt (objective = -1+x1(finalTime)+x2(finalTime),
+                            startTime = 0,
+                            finalTime = 1)                
+      extends JMExamples.CatalystMixing.CatalystMixing(x1(fixed=true),x2(fixed=true));     
+														  
+   equation
+   constraint
+	  0<=u;
+	  u<=1;
+   end CatalystMixing_opt;
+	
+	
 	optimization CatalyticCracking_opt (objective = sum(((sys.y1(t[i]) - y1m[i])^2 + (sys.y2(t[i]) - y2m[i])^2) 
 					   for i in 1:21),
                        startTime = 0,
@@ -116,6 +142,21 @@ package JMExamples_opt
    end FlightPath_opt;
    
    
+   optimization Greenhouse_opt (objective = J(finalTime),
+                            startTime = 0,
+                            finalTime = 48)
+                            
+      extends JMExamples.Greenhouse.Greenhouse(x1(fixed=true),x2(fixed=true),x3(fixed=true),sun,temp);														
+	  Real J(fixed=true);     
+														  
+   equation
+	  der(J) = x3-pWc*x1;	  
+   constraint
+	  u  >= 0;
+	  u  <= 10;
+   end Greenhouse_opt;
+   
+   
    	optimization MarinePopulation_opt (objective = sum(sum((sys.y[j](tm[i])-ym[i,j])^2 for i in 1:21) for j in 1:8),
                             startTime = 0,
                             finalTime = 20)
@@ -152,6 +193,60 @@ package JMExamples_opt
 								
    equation 
 	end MarinePopulation_opt;
+   
+   
+    model PenicillinPlant_Init
+	  extends JMExamples.PenicillinPlant.PenicillinPlant1(X1(fixed=false),S1(fixed=false),P1(fixed=false),V1(fixed=false));
+	initial equation
+	  der(X1) = 0;
+      der(S1) = 0;
+	  der(P1) = 0;
+      der(V1) = 0;
+	end PenicillinPlant_Init;
+	
+	
+	model PenicillinPlant_Init_opt
+	  JMExamples.PenicillinPlant.PenicillinPlant1 pp;
+	  Real cost(start=0,fixed=true);
+	  Real u = du1_ref;
+	  parameter Real X1_ref = 1;
+	  parameter Real S1_ref = 0.5;
+	  parameter Real P1_ref = 0;
+	  parameter Real V1_ref = 150;
+	  parameter Real u1_ref = 0.03;
+	  parameter Real du1_ref = 5e-2;
+	equation
+	  pp.du1 = du1_ref; 
+	  der(cost) = (X1_ref-pp.X1)^2 + (S1_ref-pp.S1)^2 +(P1_ref-pp.P1)^2 +
+	  (V1_ref-pp.V1)^2 +(u1_ref-pp.u1)^2 +(du1_ref-pp.du1)^2;
+	end PenicillinPlant_Init_opt;
+	
+	
+	optimization PenicillinPlant_opt(objective= cost(finalTime),
+                      startTime=0.0,
+                      finalTime=150)
+					  
+	  input Real u(start = 5e-2,initialGuess=5e-2)=pp.du1; 	
+	  JMExamples.PenicillinPlant.PenicillinPlant1 pp(X1(initialGuess=1),S1(initialGuess=0.5),
+	  P1(initialGuess=0),V1(initialGuess=150),u1(initialGuess=0.03),du1(initialGuess=5e-4));
+	  
+	  Real cost(start=0,fixed=true,initialGuess=100);
+	  parameter Real X1_ref = 1;
+	  parameter Real S1_ref = 0.5;
+	  parameter Real P1_ref = 0;
+	  parameter Real V1_ref = 150;
+	  parameter Real u1_ref = 0.03;
+	  parameter Real du1_ref = 5e-2;
+	equation
+	  der(cost) = (X1_ref-pp.X1)^2 + (S1_ref-pp.S1)^2 +(P1_ref-pp.P1)^2 +
+	  (V1_ref-pp.V1)^2 +(u1_ref-pp.u1)^2 +(du1_ref-pp.du1)^2;
+	constraint
+	  pp.X1 >= 0;
+	  pp.S1 >= 0;
+	  pp.V1 >= 150;
+	  u <=1;
+	  u >=0;
+	end PenicillinPlant_opt;
    
    
    optimization PenicillinPlant_opt1 (objective = -P1(finalTime),
@@ -203,23 +298,21 @@ package JMExamples_opt
                             startTime = 0,
                             finalTime = 36000)
         
-	  input Real u(start = 3,initialGuess=0.5)=poly.Fc; 
+	  input Real u(start = 1/1800,initialGuess=0.0004)=poly.Fc; 
       JMExamples.Polyeth.PolyethInput poly(In_con(fixed=true),M1_con(fixed=true),Y1(fixed=true),
-	  Y2(fixed=true),T(fixed=true),Tw(fixed=true),Tg(fixed=true),Fc(initialGuess=3));														
+	  Y2(fixed=true),T(fixed=true),Tw(free=true),Tg(free=true),Fc(initialGuess=0.0004));														
 	  Real J(fixed=true); 
 	  parameter Real Tw_ref = 295;
 	  parameter Real Tg_ref = 295;
-	  parameter Real Fc_ref = 0.8;
+	  parameter Real Fc_ref = 1/2400;
 														  
    equation 
 	  der(J) = (Tw_ref-poly.Tw)^2 + (Tg_ref-poly.Tg)^2 + (Fc_ref-u)^2;
    constraint
 	  290  <= poly.Tg;
-	  poly.Tg <= 300;
-	  0  <= poly.Fc;
-	  poly.Fc <= 1;
-	  290  <= poly.Tw;
-	  poly.Tw <= 300;
+	  poly.Tg <= 310;
+	  0  <= u;
+	  u <= 1;
 	end Polyeth_opt;
 	
 	
