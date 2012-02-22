@@ -124,13 +124,13 @@ public abstract class FilledShape extends GraphicItem implements Observer {
 	}
 	
 	@Override
-	public void update(Observable o, Object flag) {
+	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == fillColor && (flag == Color.RED_CHANGED || flag == Color.GREEN_CHANGED || flag == Color.BLUE_CHANGED))
 			notifyObservers(FILL_COLOR_UPDATED);
 		else if (o == lineColor && (flag == Color.RED_CHANGED || flag == Color.GREEN_CHANGED || flag == Color.BLUE_CHANGED))
 			notifyObservers(LINE_COLOR_UPDATED);
 		else
-			super.update(o, flag);
+			super.update(o, flag, additionalInfo);
 	}
 	
 }

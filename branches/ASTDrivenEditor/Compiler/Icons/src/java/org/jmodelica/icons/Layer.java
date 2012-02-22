@@ -56,7 +56,7 @@ public class Layer extends Observable implements Observer {
 	}
 
 	@Override
-	public void update(Observable o, Object flag) {
+	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == coordinateSystem)
 			notifyObservers(COORDINATE_SYSTEM_UPDATED);
 	}

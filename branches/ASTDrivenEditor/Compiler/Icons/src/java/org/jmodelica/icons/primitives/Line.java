@@ -244,10 +244,10 @@ public class Line extends GraphicItem implements Observer {
 	}
 	
 	@Override
-	public void update(Observable o, Object flag) {
+	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == color && (flag == Color.RED_CHANGED || flag == Color.GREEN_CHANGED || flag == Color.BLUE_CHANGED))
 			notifyObservers(COLOR_UPDATE);
 		else
-			super.update(o, flag);
+			super.update(o, flag, additionalInfo);
 	}
 }

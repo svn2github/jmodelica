@@ -15,8 +15,9 @@ public class Transformation extends Observable implements Observer {
 	private Extent extent;
 	private double rotation;
 
-	private static final Point DEFAULT_ORIGIN = new Point(0, 0);
-	private static final double DEFAULT_ROTATION = 0;
+	public static final Point DEFAULT_ORIGIN = new Point(0, 0);
+	public static final Extent DEFAULT_EXTENT = new Extent(new Point(-10, -10), new Point(10, 10));
+	public static final double DEFAULT_ROTATION = 0;
 
 	public Transformation(Extent extent, Point origin, double rotation) {
 		setExtent(extent);
@@ -25,7 +26,7 @@ public class Transformation extends Observable implements Observer {
 	}
 
 	public Transformation() {
-		this(Extent.NO_EXTENT, DEFAULT_ORIGIN, DEFAULT_ROTATION);
+		this(DEFAULT_EXTENT, DEFAULT_ORIGIN, DEFAULT_ROTATION);
 	}
 
 	public Transformation(Extent extent) {
@@ -90,7 +91,7 @@ public class Transformation extends Observable implements Observer {
 	}
 
 	@Override
-	public void update(Observable o, Object flag) {
+	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == origin && (flag == Point.X_UPDATED || flag == Point.Y_UPDATED))
 			notifyObservers(ORIGIN_CHANGED);
 		else if (o == extent && (flag == Extent.P1_SWAPPED || flag == Extent.P1_UPDATED || flag == Extent.P2_SWAPPED || flag == Extent.P2_UPDATED))

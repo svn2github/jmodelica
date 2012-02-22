@@ -6,6 +6,7 @@ public class Component extends Observable implements Observer, Cloneable {
 	
 	public static final Object ICON_UPDATED = new Object();
 	public static final Object PLACEMENT_UPDATED = new Object();
+	public static final Object COMPONENT_NAME_CHANGED = new Object();
 	public static final Object IM_REMOVED = new Object();
 	public static final Object IM_ADDED = new Object();
 
@@ -20,7 +21,9 @@ public class Component extends Observable implements Observer, Cloneable {
 	
 	public Component(Icon icon, Placement placement, String componentName) {
 		this.icon = icon;
+		icon.addObserver(this);
 		this.placement = placement;
+		placement.addObserver(this);
 		this.componentName = componentName;
 	}
 	
@@ -49,9 +52,14 @@ public class Component extends Observable implements Observer, Cloneable {
 	public String getComponentName() {
 		return componentName;
 	}
+	
+	public void setComponentName(String componentName) {
+		this.componentName = componentName;
+		notifyObservers(COMPONENT_NAME_CHANGED);
+	}
 
 	@Override
-	public void update(Observable o, Object flag) {
+	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == icon)
 			notifyObservers(ICON_UPDATED);
 		else if (o == placement)

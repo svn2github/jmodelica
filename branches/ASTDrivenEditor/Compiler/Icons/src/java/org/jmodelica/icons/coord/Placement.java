@@ -11,9 +11,9 @@ public class Placement extends Observable implements Observer {
 
 	private boolean visible;
 	private Transformation transformation;
-
+	
 	private static final boolean DEFAULT_VISIBLE = true;
-
+	
 	/**
 	 * @param transformation Placement in the diagram layer.
 	 */
@@ -64,7 +64,7 @@ public class Placement extends Observable implements Observer {
 	}
 
 	@Override
-	public void update(Observable o, Object flag) {
+	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == transformation && (flag == Transformation.EXTENT_CHANGED || flag == Transformation.EXTENT_SWAPPED || flag == Transformation.ORIGIN_CHANGED || flag == Transformation.ORIGIN_SWAPPED || flag == Transformation.ROTATION_CHANGED))
 			notifyObservers(TRANSFORMATION_UPDATED);
 	}

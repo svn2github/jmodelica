@@ -21,10 +21,14 @@ public class Observable {
 	}
 	
 	protected void notifyObservers(Object flag) {
+		notifyObservers(flag, null);
+	}
+	
+	protected void notifyObservers(Object flag, Object additionalInfo) {
 		if (observers == null)
 			return;
 		for (Observer o : observers)
-			o.update(this, flag);
+			o.update(this, flag, additionalInfo);
 	}
 	
 }

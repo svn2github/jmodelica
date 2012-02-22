@@ -97,7 +97,7 @@ public class CoordinateSystem extends Observable implements Observer {
 	}
 
 	@Override
-	public void update(Observable o, Object flag) {
+	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == extent)
 			notifyObservers(EXTENT_UPDATED);
 	}

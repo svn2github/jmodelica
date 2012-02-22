@@ -1,27 +1,110 @@
 
 
 aspect AnnotationEditing {
-	public void AnnotationNode.setReal(double value) {
-		
+	
+	/**
+	 * Saves the placement <code>placement</code> to the sup node "Placement".
+	 * 
+	 * @param placement Placement to save
+	 */
+	public void AnnotationNode.savePlacement(Placement placement) {
+		forPath("Placement").save(placement);
 	}
 	
-	public void ExpAnnotationNode.setReal(double value) {
-		
+	/*
+	 * ======================== PRIVATE SAVE METHODS ==========================
+	 */
+	
+	/**
+	 * Saves the placement <code>placement</code> to the current node.
+	 * 
+	 * @param placement Placement to save
+	 */
+	private void AnnotationNode.save(Placement placement) {
+		forPath("transformation").save(placement.getTransformation());
+		forPath("visible").save(placement.isVisible());
 	}
 	
-	public void AnnotationNode.setRealVector(double[] values) {}
-	
-	public void ExpAnnotationNode.setRealVector(double[] values) {
-		setExp(createRealVecor(values));
+	/**
+	 * Saves the transformation <code>transformation</code> to the current node.
+	 * 
+	 * @param transformation Transformation to save
+	 */
+	private void AnnotationNode.save(Transformation transformation) {
+		forPath("extent").save(transformation.getExtent());
+		if (!transformation.getOrigin().equals(Transformation.DEFAULT_ORIGIN))
+			forPath("origin").save(transformation.getOrigin());
+		if (transformation.getRotation() != Transformation.DEFAULT_ROTATION)
+			forPath("rotation").save(transformation.getRotation());
 	}
 	
-	public void AnnotationNode.setRealMatrix(double[][] values) {}
-	
-	public void ExpAnnotationNode.setRealMatrix(double[][] values) {
-		setExp(createRealMatrix(values));
+	/**
+	 * Saves the extent <code>extent</code> to the current node.
+	 * 
+	 * @param extent Extent to save
+	 */
+	private void AnnotationNode.save(Extent extent) {
+		save(new double[][]{{extent.getP1().getX(),extent.getP1().getY()},{extent.getP2().getX(),extent.getP2().getY()}});
 	}
 	
-	public Exp ExpAnnotationNode.createNumExp(double value) {
+	/**
+	 * Saves the point <code>point</code> to the current node.
+	 * 
+	 * @param point Point to save
+	 */
+	private void AnnotationNode.save(Point point) {
+		save(new double[]{point.getX(),point.getY()});
+	}
+	
+	/**
+	 * Saves a boolean value <code>bool</code> to the current node.
+	 * 
+	 * @param bool Boolean value to save
+	 */
+	private void AnnotationNode.save(boolean bool) {
+		setValue(bool ? new BooleanLitExpTrue() : new BooleanLitExpFalse());
+	}
+	
+	/**
+	 * Saves a double value <code>val</code> to the current node.
+	 * 
+	 * @param val Double value to save
+	 */
+	private void AnnotationNode.save(double val) {
+		setValue(createReal(val));
+	}
+	
+	/**
+	 * Saves a double vector <code>vector</code> to the current node.
+	 * 
+	 * @param vector Double vector to save
+	 */
+	private void AnnotationNode.save(double[] vector) {
+		setValue(createRealVector(vector));
+	}
+	
+	/**
+	 * Saves a double matrix <code>matrix</code> to the current node.
+	 * 
+	 * @param matrix Double matrix to save
+	 */
+	private void AnnotationNode.save(double[][] matrix) {
+		setValue(createRealMatrix(matrix));
+	}
+	
+	/*
+	 * ======================== PRIVATE HELPER METHODS ========================
+	 */
+	
+	/**
+	 * A helper method that creates a expression representing a double value
+	 * <code>value</code>. If <code>value</code> is an even number (integer)
+	 * it will be represented as one.
+	 * 
+	 *  @param value Double value to create an expression from
+	 *  @return A Exp expression representing <code>value</code>
+	 */
+	private static Exp AnnotationNode.createReal(double value) {
 		boolean neg = false;
 		if (value < 0) {
 			value = -value;
@@ -29,9 +112,9 @@ aspect AnnotationEditing {
 		}
 		Exp e;
 		if ((int)value == value) {
-			e = new IntegerLitExp(Integer.toString((int)value));
+			e = new IntegerLitExp((int)value);
 		} else {
-			e = new RealLitExp(Double.toString(value));
+			e = new RealLitExp(value);
 		}
 		if (neg) {
 			e = new NegExp(e);
@@ -39,37 +122,35 @@ aspect AnnotationEditing {
 		return e;
 	}
 	
-	public Exp ExpAnnotationNode.createRealVecor(double[] values) {
+	/**
+	 * A helper method that creates a expression representing a double vector
+	 * <code>values</code>. If a value in <code>values</code> is an even number (integer)
+	 * it will be represented as one.
+	 * 
+	 *  @param values Double vector to create an expression from
+	 *  @return A Exp expression representing <code>values</code>
+	 */
+	private static Exp AnnotationNode.createRealVector(double[] values) {
 		FunctionArguments funcArgs = new FunctionArguments();
 		for (double v : values) {
-			funcArgs.addExp(createNumExp(v));
+			funcArgs.addExp(createReal(v));
 		}
 		return new ArrayConstructor(funcArgs);
 	}
 	
-	public Exp ExpAnnotationNode.createRealMatrix(double[][] values) {
+	/**
+	 * A helper method that creates a expression representing a double matrix
+	 * <code>values</code>. If a value in <code>values</code> is an even number (integer)
+	 * it will be represented as one.
+	 * 
+	 *  @param values Double matrix to create an expression from
+	 *  @return A Exp expression representing <code>values</code>
+	 */
+	private static Exp AnnotationNode.createRealMatrix(double[][] values) {
 		FunctionArguments funcArgs = new FunctionArguments();
 		for (double[] v : values) {
-			funcArgs.addExp(createRealVecor(v));
+			funcArgs.addExp(createRealVector(v));
 		}
 		return new ArrayConstructor(funcArgs);
-	}
-	
-	protected abstract void ExpAnnotationNode.setExp(Exp exp);
-	
-	protected void EAnnotationNode.setExp(Exp exp) {
-		e = exp;
-	}
-	
-	protected void NAAnnotationNode.setExp(Exp exp) {
-		arg.setExp(exp);
-	}
-	
-	protected void VMAnnotationNode.setExp(Exp exp) {
-		mod.setExp(exp);
-	}
-	
-	public void AnnotationNode.setPoint(Point point) {
-		
 	}
 }

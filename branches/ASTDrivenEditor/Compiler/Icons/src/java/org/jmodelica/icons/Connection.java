@@ -82,7 +82,7 @@ public class Connection extends Line {
 	}
 	
 	@Override
-	public void update(Observable o, Object flag) {
+	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == sourceConnector && flag == Connector.IM_ADDED)
 			connect();
 		else if (o == targetConnector && flag == Connector.IM_ADDED)
@@ -92,7 +92,7 @@ public class Connection extends Line {
 		else if (o == targetConnector && flag == Connector.IM_REMOVED)
 			disconnect();
 		else
-			super.update(o, flag);
+			super.update(o, flag, additionalInfo);
 	}
 	
 }

@@ -180,10 +180,18 @@ public class Extent extends Observable implements Observer {
 	}
 
 	@Override
-	public void update(Observable o, Object flag) {
+	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == p1 && (flag == Point.X_UPDATED || flag == Point.Y_UPDATED))
 			notifyObservers(P1_UPDATED);
 		else if (o == p2 && (flag == Point.X_UPDATED || flag == Point.Y_UPDATED))
 			notifyObservers(P2_UPDATED);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Extent))
+			return false;
+		Extent e = (Extent)obj;
+		return p1.equals(e.p1) && p2.equals(e.p2);
 	}
 }

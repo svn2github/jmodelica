@@ -94,11 +94,11 @@ public class Bitmap extends GraphicItem implements Observer {
 	}
 	
 	@Override
-	public void update(Observable o, Object flag) {
+	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == extent && (flag == Extent.P1_SWAPPED || flag == Extent.P1_UPDATED || flag == Extent.P2_SWAPPED || flag == Extent.P2_UPDATED))
 			notifyObservers(EXTENT_UPDATED);
 		else
-			super.update(o, flag);
+			super.update(o, flag, additionalInfo);
 	}
 
 }

@@ -58,11 +58,11 @@ public abstract class FilledRectShape extends FilledShape implements Observer {
 	}
 	
 	@Override
-	public void update(Observable o, Object flag) {
+	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == extent)
 			notifyObservers(EXTENT_UPDATED);
 		else
-			super.update(o, flag);
+			super.update(o, flag, additionalInfo);
 	}
 	
 }

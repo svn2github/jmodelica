@@ -98,7 +98,7 @@ public abstract class GraphicItem extends Observable implements Observer {
 	}
 	
 	@Override
-	public void update(Observable o, Object flag) {
+	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == origin && (flag == Point.X_UPDATED || flag == Point.Y_UPDATED))
 			notifyObservers(ORIGIN_CHANGED);
 	}

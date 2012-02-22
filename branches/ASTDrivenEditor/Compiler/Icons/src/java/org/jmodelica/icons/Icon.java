@@ -170,19 +170,19 @@ public class Icon extends Observable implements Cloneable {
 			if(subComponents.add(component)) {
 				layer = new Layer(CoordinateSystem.DEFAULT_COORDINATE_SYSTEM);
 				component.added();
-				notifyObservers(SUBCOMPONENT_ADDED);
+				notifyObservers(SUBCOMPONENT_ADDED, component);
 			} 
 		} else {
 			subComponents.add(component);
 			component.added();
-			notifyObservers(SUBCOMPONENT_ADDED);
+			notifyObservers(SUBCOMPONENT_ADDED, component);
 		}
 	}
 	
 	public void removeSubComponent(Component component) {
 		if (subComponents.remove(component)) {
 			component.removed();
-			notifyObservers(SUBCOMPONENT_REMOVED);
+			notifyObservers(SUBCOMPONENT_REMOVED, component);
 		}
 	}
 	

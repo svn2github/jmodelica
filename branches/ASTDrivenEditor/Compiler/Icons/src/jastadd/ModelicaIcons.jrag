@@ -6,6 +6,8 @@ import org.jmodelica.icons.exceptions.FailedConstructionException;
 import org.jmodelica.icons.drawing.IconConstants.Context;
 import org.jmodelica.icons.drawing.AWTIconDrawer;
 import java.awt.image.BufferedImage;
+import org.jmodelica.icons.Observer;
+import org.jmodelica.icons.Observable;
 
 aspect ModelicaIcons
 {
@@ -24,6 +26,43 @@ aspect ModelicaIcons
 
 
 	protected boolean ClassDecl.visitingDuringIconRendering;
+	
+	public class InstClassDecl implements Observer{}
+	public void InstClassDecl.update(Observable o, Object flag, Object additionalInfo) {
+		System.out.println(o.getClass().getName() + " " + flag + " " + additionalInfo);
+		if (o == diagram() && flag == Icon.SUBCOMPONENT_ADDED) {
+			Component component = (Component)additionalInfo;
+			ComponentDecl componentDecl = new ComponentDecl();
+			componentDecl.setVisibilityType(new PublicVisibilityType());
+			componentDecl.setName(new IdDecl(component.getComponentName()));
+			componentDecl.setClassName(Access.fromClassName(component.getIcon().getClassName()));
+			componentDecl.setComment(new Comment());
+			componentDecl.annotation().savePlacement(component.getPlacement());
+			((FullClassDecl)getClassDecl()).addComponentDecl(componentDecl);
+			InstComposite instComponentDecl = (InstComposite)createInstComponentDecl(componentDecl);
+			addInstComponentDecl(instComponentDecl);
+		} else if (o == diagram() && flag == Icon.SUBCOMPONENT_REMOVED) {
+			
+		} else if (o == diagram() && flag == Diagram.CONNECTION_ADDED) {
+//			Connection con = (Connection)additionalInfo;
+//			ConnectClause cc = new ConnectClause();
+//			cc.setComment(new Comment());
+//			cc.set
+//			con.gett
+//			
+		} else if (o == diagram() && flag == Diagram.CONNECTION_REMOVED) {
+			
+		}
+	}
+	
+	public class InstComponentDecl implements Observer{}
+	public void InstComponentDecl.update(Observable o, Object flag, Object additionalInfo) {
+		System.out.println(o.getClass().getName() + " " + flag + " " + additionalInfo);
+		if (o == component(Context.DIAGRAM) && flag == Component.PLACEMENT_UPDATED) {
+			getComponentDecl().annotation().savePlacement(component(Context.DIAGRAM).getPlacement());
+		}
+	}
+	
 	
 	eq ClassDecl.icon() { 
 		visitingDuringIconRendering = true;
@@ -55,35 +94,7 @@ aspect ModelicaIcons
 		visitingDuringIconRendering = false;
 		return icon;
 	}
-//	eq ClassDecl.diagram() { 
-//		Diagram diagram;
-//		Layer layer = Layer.NO_LAYER;
-//		AnnotationNode annotation = annotation();
-//		if (annotation.exists()) {
-//			layer = annotation.createDiagramLayer();
-//		}	
-//		diagram = new Diagram(qualifiedName(), layer, Context.DIAGRAM);
-//		// FIXME: this is a dangerous hack, it's supposed to be  diagram = addSuperClasses(diagram) but since the return type of addSuperClasses is icon, i can't do that. this should be fixed so that addSuperClasses don't return anything
-//		addSuperClasses(diagram);
-//		addSubComponents(diagram);
-//		return diagram;
-//	}
-//	eq ShortClassDecl.diagram() {
-//		visitingDuringIconRendering = true;
-//		Icon icon;
-//		Layer layer = Layer.NO_LAYER;
-//		AnnotationNode annotation = annotation();
-//		if (annotation.exists()) {
-//			layer = annotation.createIconLayer();
-//		}
-//		icon = new Icon(qualifiedName(), layer, Context.DIAGRAM);
-//		Icon superIcon = getExtendsClauseShortClass().findClassDecl().diagram();
-//		if (superIcon != Icon.NULL_ICON) {
-//			icon.addSuperclass(superIcon);
-//		}
-//		visitingDuringIconRendering = false;
-//		return icon;
-//	}
+
 	eq InstClassDecl.icon() {
 		Icon icon;
 		Layer layer = Layer.NO_LAYER;
@@ -99,11 +110,7 @@ aspect ModelicaIcons
 	
 	eq InstClassDecl.diagram() {
 		Diagram diagram;
-		Layer layer = Layer.NO_LAYER;
-		AnnotationNode annotation = annotation();
-		if (annotation.exists()) {
-			layer = annotation.createDiagramLayer();
-		}	
+		Layer layer = annotation().createIconLayer();
 		diagram = new Diagram(qualifiedName(), layer, Context.DIAGRAM);
 		addSuperClasses(diagram);
 		addSubComponents(diagram);
@@ -120,7 +127,7 @@ aspect ModelicaIcons
 				diagram.addConnection(con);
 			}
 		}
-		
+		diagram.addObserver(this);
 		return diagram;
 	}
 	
@@ -137,21 +144,6 @@ aspect ModelicaIcons
 		return icon;
 	}
 	
-//	eq InstComponentDecl.diagram() 	= 	myInstClass().diagram();
-//	eq InstComponentDecl.diagram() {
-//		Diagram diagram;
-//		Layer layer = Layer.NO_LAYER;
-//		AnnotationNode annotation = myInstClass().annotation();
-//		if (annotation.exists()) {
-//			layer = annotation.createDiagramLayer();
-//		}	
-//		diagram = new Diagram(qualifiedName(), layer, Context.DIAGRAM);
-//		// FIXME: this is a dangerous hack, it's supposed to be  diagram = addSuperClasses(diagram) but since the return type of addSuperClasses is icon, i can't do that. this should be fixed so that addSuperClasses don't return anything
-//		addSuperClasses(diagram);
-//		addSubComponents(diagram);
-//		return diagram;
-//	}
-	
 	eq InstExtends.icon() {
 		Icon icon;
 		Layer layer = Layer.NO_LAYER;
@@ -164,8 +156,6 @@ aspect ModelicaIcons
 		addSubComponents(icon);
 		return icon;
 	}
-	
-//	eq InstComponentDecl.diagram() 	= 	myInstClass().diagram();
 	
 	public BufferedImage BaseNode.render(Icon icon, int w, int h) {
 		return new AWTIconDrawer(icon, w, h).getImage();
@@ -260,204 +250,46 @@ aspect ModelicaIcons
 	
 	protected void InstNode.addSubComponents(Icon icon) {
 		for(InstComponentDecl componentDecl : getInstComponentDecls()) {
-			InstClassDecl subDecl = componentDecl.myInstClass();		
-			//sortera ut unknown classDecl
-			if(subDecl.isUnknown()) {
-				continue;
-			}
-			AnnotationNode placementAnnotation = componentDecl.annotation();
-			if(placementAnnotation.hasPlacement()) {	
-				try {
-					Placement placement = placementAnnotation.createPlacement(icon.getContext());
-					if (subDecl instanceof InstBaseClassDecl) {
-						boolean isProtected = componentDecl.getComponentDecl().isProtected();
-						boolean isConnector = ((InstBaseClassDecl)subDecl).isConnector();
-						if (icon.getContext().equals(Context.ICON)) {
-							if (isConnector && !isProtected) {
-								componentDecl.iconConnector = new org.jmodelica.icons.Connector(componentDecl.icon(), placement, componentDecl.name());
-								icon.addSubcomponent(componentDecl.iconConnector);
-							}
-						} else {
-							if (isConnector) {
-								componentDecl.iconConnector = new org.jmodelica.icons.Connector(componentDecl.diagram(), placement, componentDecl.name());
-								icon.addSubcomponent(componentDecl.iconConnector);
-							} else {
-								icon.addSubcomponent(new Component(componentDecl.icon(), placement, componentDecl.name()));
-							}
-						}
-					}
+			Component c = componentDecl.component(icon.getContext());
+			if (c != null)
+				icon.addSubcomponent(c);
+		}
+	}
+	
+	syn lazy Component InstComponentDecl.component(Context context) {
+		InstClassDecl subDecl = myInstClass();		
+		if(subDecl.isUnknown()) {
+			return null;
+		}
+		Placement placement;
+		try {
+			placement = annotation().createPlacement(context);
+		}
+		catch(FailedConstructionException fe) {
+			placement = new Placement(new Transformation(new Extent(new Point(-10, -10), new Point(10, 10))));
+		}
+		if (subDecl instanceof InstBaseClassDecl) {
+			boolean isProtected = getComponentDecl().isProtected();
+			boolean isConnector = ((InstBaseClassDecl)subDecl).isConnector();
+			if (context.equals(Context.ICON)) {
+				if (isConnector && !isProtected) {
+					iconConnector = new org.jmodelica.icons.Connector(icon(), placement, name());
+					return iconConnector;
 				}
-				catch(FailedConstructionException fe) {
-					System.out.println(fe.getMessage());
+			} else {
+				if (isConnector) {
+					iconConnector = new org.jmodelica.icons.Connector(diagram(), placement, name());
+					return iconConnector;
+				} else {
+					Component c = new Component(icon(), placement, name());
+					c.addObserver(this);
+					return c;
 				}
 			}
 		}
+		return null;
 	}
 
-//	private void InstClassDecl.addSuperClasses(Icon icon) {	
-//		for (InstExtends ie : instExtends()) {
-//			Icon superIcon;
-//			InstClassDecl superDecl = ie.myInstClass();
-//			if (icon.getContext().equals(Context.ICON)) {
-//				superIcon = superDecl.icon();
-//			} else {
-//				superIcon = superDecl.diagram();
-//			}
-//			if (superIcon != Icon.NULL_ICON) {
-//				icon.addSuperclass(superIcon);
-//			}
-//	 	}
-//	}
-//	
-//	
-//	private void InstClassDecl.addSubComponents(Icon icon) {
-//		for(InstComponentDecl componentDecl : getInstComponentDecls()) {
-//			InstClassDecl subDecl = componentDecl.myInstClass();		
-//			//sortera ut unknown classDecl
-//			if(subDecl.isUnknown()) {
-//				continue;
-//			}
-//			AnnotationNode placementAnnotation = componentDecl.annotation();
-//			if(placementAnnotation.hasPlacement()) {	
-//				try {
-//					Placement placement = placementAnnotation.createPlacement(icon.getContext());
-//					if (subDecl instanceof InstBaseClassDecl) {
-//						boolean isProtected = componentDecl.getComponentDecl().isProtected();
-//						boolean isConnector = ((InstBaseClassDecl)subDecl).isConnector();
-//						Icon subIcon = Icon.NULL_ICON;
-//						if (icon.getContext().equals(Context.ICON)) {
-//							if (isConnector && !isProtected) {
-//								subIcon = componentDecl.icon();
-//							}
-//						} else {
-//							if (isConnector) {
-//								subIcon = componentDecl.diagram();
-//							} else {
-//								subIcon = componentDecl.icon();
-//							}
-//						}
-//						if(!subIcon.equals(Icon.NULL_ICON)) {
-//							Component c = new Component(subIcon, placement);
-//							componentDecl.iconComponent = c;
-//							icon.addSubcomponent(c);
-//						}
-//					}
-//				}
-//				catch(FailedConstructionException fe) {
-//					System.out.println(fe.getMessage());
-//				}
-//			}
-//		}
-//	}
-//	
-//	private void InstComponentDecl.addSuperClasses(Icon icon) {	
-//		for (InstExtends ie : instExtends()) {
-//			Icon superIcon;
-//			if (icon.getContext().equals(Context.ICON)) {
-//				superIcon = ie.icon();
-//			} else {
-//				superIcon = ie.diagram();
-//			}
-//			if (superIcon != Icon.NULL_ICON) {
-//				icon.addSuperclass(superIcon);
-//			}
-//	 	}
-//	}
-//	
-//	private void InstComponentDecl.addSubComponents(Icon icon) {
-//		for(InstComponentDecl componentDecl : getInstComponentDecls()) {
-//			InstClassDecl subDecl = componentDecl.myInstClass();		
-//			//sortera ut unknown classDecl
-//			if(subDecl.isUnknown()) {
-//				continue;
-//			}
-//			AnnotationNode placementAnnotation = componentDecl.annotation();
-//			if(placementAnnotation.hasPlacement()) {	
-//				try {
-//					Placement placement = placementAnnotation.createPlacement(icon.getContext());
-//					if (subDecl instanceof InstBaseClassDecl) {
-//						boolean isProtected = componentDecl.getComponentDecl().isProtected();
-//						boolean isConnector = ((InstBaseClassDecl)subDecl).isConnector();
-//						Icon subIcon = Icon.NULL_ICON;
-//						if (icon.getContext().equals(Context.ICON)) {
-//							if (isConnector && !isProtected) {
-//								subIcon = componentDecl.icon();
-//							}
-//						} else {
-//							if (isConnector) {
-//								subIcon = componentDecl.diagram();
-//							} else {
-//								subIcon = componentDecl.icon();
-//							}
-//						}
-//						if(!subIcon.equals(Icon.NULL_ICON)) {
-//							Component c = new Component(subIcon, placement);
-//							componentDecl.iconComponent = c;
-//							icon.addSubcomponent(c);
-//						}
-//					}
-//				}
-//				catch(FailedConstructionException fe) {
-//					System.out.println(fe.getMessage());
-//				}
-//			}
-//		}
-//	}
-//	
-//	private void InstExtends.addSuperClasses(Icon icon) {	
-//		for (InstExtends ie : instExtends()) {
-//			Icon superIcon;
-//			if (icon.getContext().equals(Context.ICON)) {
-//				superIcon = ie.icon();
-//			} else {
-//				superIcon = ie.diagram();
-//			}
-//			if (superIcon != Icon.NULL_ICON) {
-//				icon.addSuperclass(superIcon);
-//			}
-//	 	}
-//	}
-//	
-//	private void InstExtends.addSubComponents(Icon icon) {
-//		for(InstComponentDecl componentDecl : getInstComponentDecls()) {
-//			InstClassDecl subDecl = componentDecl.myInstClass();		
-//			//sortera ut unknown classDecl
-//			if(subDecl.isUnknown()) {
-//				continue;
-//			}
-//			AnnotationNode placementAnnotation = componentDecl.annotation();
-//			if(placementAnnotation.hasPlacement()) {	
-//				try {
-//					Placement placement = placementAnnotation.createPlacement(icon.getContext());
-//					if (subDecl instanceof InstBaseClassDecl) {
-//						boolean isProtected = componentDecl.getComponentDecl().isProtected();
-//						boolean isConnector = ((InstBaseClassDecl)subDecl).isConnector();
-//						Icon subIcon = Icon.NULL_ICON;
-//						if (icon.getContext().equals(Context.ICON)) {
-//							if (isConnector && !isProtected) {
-//								subIcon = componentDecl.icon();
-//							}
-//						} else {
-//							if (isConnector) {
-//								subIcon = componentDecl.diagram();
-//							} else {
-//								subIcon = componentDecl.icon();
-//							}
-//						}
-//						if(!subIcon.equals(Icon.NULL_ICON)) {
-//							Component c = new Component(subIcon, placement);
-//							componentDecl.iconComponent = c;
-//							icon.addSubcomponent(c);
-//						}
-//					}
-//				}
-//				catch(FailedConstructionException fe) {
-//					System.out.println(fe.getMessage());
-//				}
-//			}
-//		}
-//	}
-	
 	/*
 	 * F�r tidtagning.
 	 */
