@@ -30,6 +30,7 @@ from pyjmi import jmi
 from pyjmi.jmi_io import export_result_dymola as jmi_io_export_result_dymola
 from pyjmi.common.io import VariableNotFoundError
 
+
 int = N.int32
 N.int = N.int32
 
@@ -833,56 +834,47 @@ class NLPCollocation(object):
         # Obtain vector sizes
         n_points = 0
         num_name_hits = 0
-        if len(dx_names) > 0:
-            for name in dx_names:
-                try:
-                    traj = res.get_variable_data(name)
-                    num_name_hits = num_name_hits + 1
-                    if N.size(traj.x)>2:
-                        break
-                except:
-                    pass
+        for name in dx_names:
+            try:
+                traj = res.get_variable_data(name)
+                num_name_hits = num_name_hits + 1
+                if N.size(traj.x)>2:
+                    break
+            except:
+                pass
+                
+        for name in x_names:
+            try:
+                traj = res.get_variable_data(name)
+                num_name_hits = num_name_hits + 1
+                if N.size(traj.x)>2:
+                    break
+            except:
+                pass
+        
+        for name in u_names:
+            try:
+                traj = res.get_variable_data(name)
+                num_name_hits = num_name_hits + 1
+                if N.size(traj.x)>2:
+                    break
+            except:
+                pass
 
-        elif len(x_names) > 0:
-            for name in x_names:
-                try:
-                    traj = res.get_variable_data(name)
-                    num_name_hits = num_name_hits + 1
-                    if N.size(traj.x)>2:
-                        break
-                except:
-                    pass
-
-        elif len(u_names) > 0:
-            for name in u_names:
-                try:
-                    traj = res.get_variable_data(name)
-                    num_name_hits = num_name_hits + 1
-                    if N.size(traj.x)>2:
-                        break
-                except:
-                    pass
-
-        elif len(w_names) > 0:
-            for name in w_names:
-                try:
-                    traj = res.get_variable_data(name)
-                    num_name_hits = num_name_hits + 1
-                    if N.size(traj.x)>2:
-                        break
-                except:
-                    pass
-        else:
-            raise Exception(
-                "None of the model variables not found in result file.")
+        for name in w_names:
+            try:
+                traj = res.get_variable_data(name)
+                num_name_hits = num_name_hits + 1
+                if N.size(traj.x)>2:
+                    break
+            except:
+                pass
 
         if num_name_hits==0:
             raise Exception(
                 "None of the model variables not found in result file.")
         
-        #print(traj.t)
-        
-        n_points = N.size(traj.t,0)
+        n_points = N.size(res.get_variable_data("time").t,0)
         n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
 
         var_data = N.zeros((n_points,n_cols))
@@ -928,7 +920,7 @@ class NLPCollocation(object):
                         p_opt_data[i_pi_opt] = traj.x[0]/sc[z_i]
                     else:
                         p_opt_data[i_pi_opt] = traj.x[0]
-                except VariableNotFoundError:
+                except:
                     print "Warning: Could not find value for parameter " + name
                     
         #print(N.size(var_data))
@@ -976,7 +968,7 @@ class NLPCollocation(object):
                     var_data[:,col_index] = traj.x
                 x_index = x_index + 1
                 col_index = col_index + 1
-            except VariableNotFoundError:
+            except:
                 x_index = x_index + 1
                 col_index = col_index + 1
                 print "Warning: Could not find trajectory for state variable " + name
@@ -998,7 +990,7 @@ class NLPCollocation(object):
                         var_data[:,col_index] = traj.x
                 u_index = u_index + 1
                 col_index = col_index + 1
-            except VariableNotFoundError:
+            except:
                 u_index = u_index + 1
                 col_index = col_index + 1
                 print "Warning: Could not find trajectory for input variable " + name
@@ -1020,7 +1012,7 @@ class NLPCollocation(object):
                         var_data[:,col_index] = traj.x
                 w_index = w_index + 1
                 col_index = col_index + 1
-            except VariableNotFoundError:
+            except:
                 w_index = w_index + 1
                 col_index = col_index + 1
                 print "Warning: Could not find trajectory for algebraic variable " + name
