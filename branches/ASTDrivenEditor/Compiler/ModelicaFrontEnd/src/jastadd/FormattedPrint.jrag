@@ -531,6 +531,14 @@ aspect FormattedPrint {
 		printStream.print(postFormatting);
 	}
 	
+	void NamedArgument.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		getName().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print("=");
+		getExp().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(postFormatting);
+	}
+	
 	void RealLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		printStream.print(getUNSIGNED_NUMBER());
