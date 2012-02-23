@@ -28,8 +28,15 @@ import numpy.ctypeslib as Nct
 import pyjmi
 from pyjmi import jmi
 from pyjmi.jmi_io import export_result_dymola as jmi_io_export_result_dymola
-from pyjmi.common.io import VariableNotFoundError
+from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
 
+#Check to see if pyfmi is installed so that we also catch the error generated
+#from that package
+try:
+    from pyfmi.common.io import VariableNotFoundError as fmiVariableNotFoundError
+    VariableNotFoundError = (jmiVariableNotFoundError, fmiVariableNotFoundError)
+except ImportError:
+    VariableNotFoundError = jmiVariableNotFoundError
 
 int = N.int32
 N.int = N.int32
@@ -840,7 +847,7 @@ class NLPCollocation(object):
                 num_name_hits = num_name_hits + 1
                 if N.size(traj.x)>2:
                     break
-            except:
+            except VariableNotFoundError:
                 pass
                 
         for name in x_names:
@@ -849,7 +856,7 @@ class NLPCollocation(object):
                 num_name_hits = num_name_hits + 1
                 if N.size(traj.x)>2:
                     break
-            except:
+            except VariableNotFoundError:
                 pass
         
         for name in u_names:
@@ -858,7 +865,7 @@ class NLPCollocation(object):
                 num_name_hits = num_name_hits + 1
                 if N.size(traj.x)>2:
                     break
-            except:
+            except VariableNotFoundError:
                 pass
 
         for name in w_names:
@@ -867,7 +874,7 @@ class NLPCollocation(object):
                 num_name_hits = num_name_hits + 1
                 if N.size(traj.x)>2:
                     break
-            except:
+            except VariableNotFoundError:
                 pass
 
         if num_name_hits==0:
@@ -920,7 +927,7 @@ class NLPCollocation(object):
                         p_opt_data[i_pi_opt] = traj.x[0]/sc[z_i]
                     else:
                         p_opt_data[i_pi_opt] = traj.x[0]
-                except:
+                except VariableNotFoundError:
                     print "Warning: Could not find value for parameter " + name
                     
         #print(N.size(var_data))
@@ -953,7 +960,7 @@ class NLPCollocation(object):
                     var_data[:,col_index] = traj.x*dx_factor
                 dx_index = dx_index + 1
                 col_index = col_index + 1
-            except:
+            except VariableNotFoundError:
                 dx_index = dx_index + 1
                 col_index = col_index + 1
                 print "Warning: Could not find trajectory for derivative variable " + name
@@ -968,7 +975,7 @@ class NLPCollocation(object):
                     var_data[:,col_index] = traj.x
                 x_index = x_index + 1
                 col_index = col_index + 1
-            except:
+            except VariableNotFoundError:
                 x_index = x_index + 1
                 col_index = col_index + 1
                 print "Warning: Could not find trajectory for state variable " + name
@@ -990,7 +997,7 @@ class NLPCollocation(object):
                         var_data[:,col_index] = traj.x
                 u_index = u_index + 1
                 col_index = col_index + 1
-            except:
+            except VariableNotFoundError:
                 u_index = u_index + 1
                 col_index = col_index + 1
                 print "Warning: Could not find trajectory for input variable " + name
@@ -1012,7 +1019,7 @@ class NLPCollocation(object):
                         var_data[:,col_index] = traj.x
                 w_index = w_index + 1
                 col_index = col_index + 1
-            except:
+            except VariableNotFoundError:
                 w_index = w_index + 1
                 col_index = col_index + 1
                 print "Warning: Could not find trajectory for algebraic variable " + name
