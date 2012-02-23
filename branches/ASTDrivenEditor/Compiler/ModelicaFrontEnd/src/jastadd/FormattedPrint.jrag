@@ -90,7 +90,7 @@ aspect FormattedPrint {
 			formattingItem = formattingIterator.next();
 		}
 		
-		if (formattingItem.getEndLine() == startLine && (formattingItem.getEndColumn() + 1 == startColumn || formattingItem.getEndColumn() == startColumn)) {
+		if (formattingItem.getEndLine() == startLine && formattingItem.getEndColumn() + 1 == startColumn) {
 			preFormatting = formattingItem;
 			formattingIterator.remove();
 			if (formattingIterator.hasNext()) {
@@ -105,14 +105,14 @@ aspect FormattedPrint {
 	
 	public void BaseNode.addPostFormatting(Iterator<FormattingItem> formattingIterator, FormattingItem startingFormattingItem) {
 		int endLine = getLine(getEnd());
-		int endColumn = getColumn(getEnd());
+		int endColumnPlusOne = getColumn(getEnd()) + 1;
 		FormattingItem formattingItem = startingFormattingItem;
 
-		while (formattingIterator.hasNext() && (formattingItem.getStartLine() < endLine || formattingItem.getStartColumn() < endColumn)) {
+		while (formattingIterator.hasNext() && (formattingItem.getStartLine() < endLine || formattingItem.getStartColumn() < endColumnPlusOne)) {
 			formattingItem = formattingIterator.next();
 		}
 		
-		if (formattingItem.getStartLine() == endLine && (formattingItem.getStartColumn() == endColumn || formattingItem.getStartColumn() == endColumn + 1)) {
+		if (formattingItem.getStartLine() == endLine && formattingItem.getStartColumn() == endColumnPlusOne) {
 			postFormatting = formattingItem;
 			formattingIterator.remove();
 		}

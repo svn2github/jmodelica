@@ -30,7 +30,6 @@ public class FormattingInfo {
 	 * @param endColumn the column at which this formatting item ends.
 	 */
 	public void addItem(FormattingItem.Type type, String data, int startLine, int startColumn, int endLine, int endColumn ) {
-		if (type == Type.DELIMITER) return;
 		FormattingItem formattingItem = new FormattingItem(type, data, startLine, startColumn, endLine, endColumn);
 		formattingList.add(formattingItem);
 	}
@@ -69,15 +68,33 @@ public class FormattingInfo {
 	public Collection<FormattingItem> getFormattingCollection() {
 		return formattingList;
 	}
-
-	public String toString() {
+	
+	public String getInformationString() {
 		StringBuilder stringBuilder = new StringBuilder();
 
 		stringBuilder.append("<formatting size=\"" + formattingList.size() + "\">\n");
 		for (FormattingItem formattingItem : formattingList) {
-			stringBuilder.append("    " + formattingItem.toString() + "\n");
+			stringBuilder.append("    " + formattingItem.getInformationString() + "\n");
 		}
 		stringBuilder.append("</formatting>");
+
+		return stringBuilder.toString();
+	}
+
+	public String toString() {
+		StringBuilder stringBuilder = new StringBuilder();
+
+		stringBuilder.append("[");
+		
+		for (FormattingItem formattingItem : formattingList) {
+			stringBuilder.append("\"" + formattingItem.toString() + "\", ");
+		}
+		
+		if (formattingList.size() > 0) {
+			stringBuilder.delete(stringBuilder.length() - 2, stringBuilder.length());
+		}
+		
+		stringBuilder.append("]");
 
 		return stringBuilder.toString();
 	}

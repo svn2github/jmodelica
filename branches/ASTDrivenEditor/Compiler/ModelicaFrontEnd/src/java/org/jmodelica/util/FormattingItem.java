@@ -9,7 +9,6 @@ public class FormattingItem {
 		NON_BREAKING_WHITESPACE,
 		LINE_BREAK,
 		COMMENT,
-		DELIMITER,
 		MIXED,
 		EMPTY;
 	};

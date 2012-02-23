@@ -236,26 +236,16 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
  
   
   
-  "("             { addFormattingInformation(FormattingItem.Type.DELIMITER, "(", yycolumn);
-                    return newSymbol(Terminals.LPAREN); }
-  ")"             { addFormattingInformation(FormattingItem.Type.DELIMITER, ")", yycolumn);
-	                return newSymbol(Terminals.RPAREN); }
-  "{"             { addFormattingInformation(FormattingItem.Type.DELIMITER, "{", yycolumn);
-                    return newSymbol(Terminals.LBRACE); }
-  "}"             { addFormattingInformation(FormattingItem.Type.DELIMITER, "}", yycolumn);
-                    return newSymbol(Terminals.RBRACE); }
-  "["             { addFormattingInformation(FormattingItem.Type.DELIMITER, "[", yycolumn);
-                    return newSymbol(Terminals.LBRACK); }	
-  "]"             { addFormattingInformation(FormattingItem.Type.DELIMITER, "]", yycolumn);
-                    return newSymbol(Terminals.RBRACK); }	
-  ";"             { addFormattingInformation(FormattingItem.Type.DELIMITER, ";", yycolumn);
-                    return newSymbol(Terminals.SEMICOLON); }
-  ":"             { addFormattingInformation(FormattingItem.Type.DELIMITER, ":", yycolumn);
-                    return newSymbol(Terminals.COLON); }
-  "."             { addFormattingInformation(FormattingItem.Type.DELIMITER, ".", yycolumn);
-                    return newSymbol(Terminals.DOT); }
-  ","             { addFormattingInformation(FormattingItem.Type.DELIMITER, ",", yycolumn);
-	                return newSymbol(Terminals.COMMA); }
+  "("             { return newSymbol(Terminals.LPAREN); }
+  ")"             { return newSymbol(Terminals.RPAREN); }
+  "{"             { return newSymbol(Terminals.LBRACE); }
+  "}"             { return newSymbol(Terminals.RBRACE); }
+  "["             { return newSymbol(Terminals.LBRACK); }
+  "]"             { return newSymbol(Terminals.RBRACK); }
+  ";"             { return newSymbol(Terminals.SEMICOLON); }
+  ":"             { return newSymbol(Terminals.COLON); }
+  "."             { return newSymbol(Terminals.DOT); }
+  ","             { return newSymbol(Terminals.COMMA); }
 
 
   "+"             { return newSymbol(Terminals.PLUS); }  
