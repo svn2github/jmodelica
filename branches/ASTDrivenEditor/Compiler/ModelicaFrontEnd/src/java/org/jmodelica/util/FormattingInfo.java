@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.jmodelica.util.FormattingItem.Type;
+
 /**
  * An object that holds formatting information such as indentation and comments. 
  */
@@ -28,6 +30,7 @@ public class FormattingInfo {
 	 * @param endColumn the column at which this formatting item ends.
 	 */
 	public void addItem(FormattingItem.Type type, String data, int startLine, int startColumn, int endLine, int endColumn ) {
+		if (type == Type.DELIMITER) return;
 		FormattingItem formattingItem = new FormattingItem(type, data, startLine, startColumn, endLine, endColumn);
 		formattingList.add(formattingItem);
 	}

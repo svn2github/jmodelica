@@ -90,7 +90,7 @@ aspect FormattedPrint {
 			formattingItem = formattingIterator.next();
 		}
 		
-		if (formattingItem.getEndLine() == startLine && formattingItem.getEndColumn() + 1 == startColumn) {
+		if (formattingItem.getEndLine() == startLine && (formattingItem.getEndColumn() + 1 == startColumn || formattingItem.getEndColumn() == startColumn)) {
 			preFormatting = formattingItem;
 			formattingIterator.remove();
 			if (formattingIterator.hasNext()) {
@@ -105,14 +105,14 @@ aspect FormattedPrint {
 	
 	public void BaseNode.addPostFormatting(Iterator<FormattingItem> formattingIterator, FormattingItem startingFormattingItem) {
 		int endLine = getLine(getEnd());
-		int endColumnPlusOne = getColumn(getEnd()) + 1;
+		int endColumn = getColumn(getEnd());
 		FormattingItem formattingItem = startingFormattingItem;
 
-		while (formattingIterator.hasNext() && (formattingItem.getStartLine() < endLine || formattingItem.getStartColumn() < endColumnPlusOne)) {
+		while (formattingIterator.hasNext() && (formattingItem.getStartLine() < endLine || formattingItem.getStartColumn() < endColumn)) {
 			formattingItem = formattingIterator.next();
 		}
 		
-		if (formattingItem.getStartLine() == endLine && formattingItem.getStartColumn() == endColumnPlusOne) {
+		if (formattingItem.getStartLine() == endLine && (formattingItem.getStartColumn() == endColumn || formattingItem.getStartColumn() == endColumn + 1)) {
 			postFormatting = formattingItem;
 			formattingIterator.remove();
 		}
@@ -204,6 +204,7 @@ aspect FormattedPrint {
 		if (hasPackageName()) {
 			getPackageName().prettyPrintFormattedHelper(printer, printStream);
 		}
+		printStream.print(";");
 		printStream.print(postFormatting);
 	}
 
@@ -328,12 +329,26 @@ aspect FormattedPrint {
     	}
     	printStream.print(postFormatting);
     }
+    
+    void ArrayConstructor.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+    	printStream.print(preFormatting);
+    	printStream.print("{");
+    	getFunctionArguments().prettyPrintFormattedHelper(printer, printStream);
+    	printStream.print("}");
+    	printStream.print(postFormatting);
+    }
 
     void ClassModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
-    	for (int i = 0; i < getNumArgument(); i++) {
+    	printStream.print("(");
+    	if (getNumArgument() > 0) {
+    		getArgument(0).prettyPrintFormattedHelper(printer, printStream);
+    	}
+    	for (int i = 1; i < getNumArgument(); i++) {
+    		printStream.print(",");
     		getArgument(i).prettyPrintFormattedHelper(printer, printStream);
     	}
+    	printStream.print(")");
     	printStream.print(postFormatting);
     }
     
@@ -412,6 +427,7 @@ aspect FormattedPrint {
 		 		}
 		}*/
 	    
+	    /** @TODO: Print public and private before respective class. */
 	    for (int i = 0; i < getNumClassDecl(); i++) {
 	    	getClassDecl(i).prettyPrintFormattedHelper(printer, printStream);
 	    }
@@ -432,10 +448,11 @@ aspect FormattedPrint {
 	    }
 	    for (int i = 0; i < getNumAnnotation(); i++) {
 	    	getAnnotation(i).prettyPrintFormattedHelper(printer, printStream);
+	    	printStream.print(";\n"); /** TODO: Fix ugly hack! */
 	    }
 		
 	    /** @TODO: Format end */
-		printStream.print("end " + getName().getID());
+		printStream.print("end " + getEndName() + ";");
 
 		printStream.print(postFormatting);
 	}
@@ -445,6 +462,7 @@ aspect FormattedPrint {
 		printStream.print("extends");
 		getSuper().prettyPrintFormattedHelper(printer, printStream);
 		getClassModificationOpt().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(";");
 		printStream.print(postFormatting);
 	}
 	
@@ -453,17 +471,16 @@ aspect FormattedPrint {
 		printStream.print("import");
 		getPackageName().prettyPrintFormattedHelper(printer, printStream);
 		getComment().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(";");
 		printStream.print(postFormatting);
 	}
 	
 	void CompleteModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
-
 		getClassModification().prettyPrintFormattedHelper(printer, printStream);
 		if (hasValueModification()) {
 			getValueModification().prettyPrintFormattedHelper(printer, printStream);
 		}
-
 		printStream.print(postFormatting);
 	}
 	
@@ -525,9 +542,44 @@ aspect FormattedPrint {
 	void ConnectClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		printStream.print("connect");
+		printStream.print("(");
 		getConnector1().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(",");
 		getConnector2().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(")");
 		getComment().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(";");
+		printStream.print(postFormatting);
+	}
+	
+	void FunctionCall.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		getName().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print("(");
+		if (hasFunctionArguments()) {
+			getFunctionArguments().prettyPrintFormattedHelper(printer, printStream);
+		}
+		printStream.print(")");
+		printStream.print(postFormatting);
+	}
+	
+	void FunctionArguments.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		int totalNumberOfArguments = getNumExp() + getNumNamedArgument();
+
+		for (int i = 0; i < getNumExp(); i++) {
+			getExp(i).prettyPrintFormattedHelper(printer, printStream);
+			if (i + 1 < totalNumberOfArguments) {
+				printStream.print(",");
+			}
+		}
+		for (int i = 0; i < getNumNamedArgument(); i++) {
+			getNamedArgument(i).prettyPrintFormattedHelper(printer, printStream);
+			if (i + 1 < totalNumberOfArguments) {
+				printStream.print(",");
+			}
+		}
+		
 		printStream.print(postFormatting);
 	}
 	
@@ -623,9 +675,9 @@ aspect FormattedPrint {
 				 
 		if (hasConstrainingClause()) {
 			printer.print(getConstrainingClause(), printStream, "");
-		}		 
-
-				    
+		}
+		printStream.print(";");
+		printStream.print(postFormatting);
 	}
 	
 	void Comment.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
