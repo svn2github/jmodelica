@@ -16,9 +16,9 @@ public abstract class GraphicItem extends Observable implements Observer {
 	protected Point origin;
 	protected double rotation;
 	
-	private static final boolean DEFAULT_VISIBLE = true;
-	private static final Point DEFAULT_ORIGIN = new Point(0, 0);
-	private static final double DEFAULT_ROTATION = 0;
+	public static final boolean DEFAULT_VISIBLE = true;
+	public static final Point DEFAULT_ORIGIN = new Point(0, 0);
+	public static final double DEFAULT_ROTATION = 0;
 
 	public GraphicItem(boolean visible, Point origin, double rotation) {
 		setVisible(visible);

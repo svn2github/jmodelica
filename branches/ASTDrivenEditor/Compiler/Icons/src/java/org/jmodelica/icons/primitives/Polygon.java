@@ -15,7 +15,7 @@ public class Polygon extends FilledShape {
 	private ArrayList<Point> points;
 	private Types.Smooth smooth;
 	
-	private static final Types.Smooth DEFAULT_SMOOTH = Types.Smooth.NONE;
+	public static final Types.Smooth DEFAULT_SMOOTH = Types.Smooth.NONE;
 	 
 	public Polygon() {
 		this(new ArrayList<Point>());

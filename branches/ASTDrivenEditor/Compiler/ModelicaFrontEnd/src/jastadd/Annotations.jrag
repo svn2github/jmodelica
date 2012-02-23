@@ -345,6 +345,11 @@ aspect AnnotationAPI {
 			}
 			
 			@Override
+			public boolean exists() {
+				return realNode != null;
+			}
+			
+			@Override
 			public void setValue(Exp exp) {
 				AnnotationNode parentNode = getRealParent();
 				if (parentNode instanceof CMAnnotationNode) {
@@ -533,6 +538,7 @@ aspect AnnotationAPI {
 	abstract class ExpAnnotationNode extends AnnotationNode {
 		
 		protected abstract Exp exp();
+		protected abstract void setExp(Exp exp);
 		
 		public String string() {
 			return exp().avalueString();
@@ -570,6 +576,12 @@ aspect AnnotationAPI {
 			return exp();
 		}
 
+		public void setValue(Exp exp) {
+			if (exp() != null && exp != null)
+				exp.copyFormattingFrom(exp());
+			setExp(exp);
+		}
+		
 	}
 	
 	/**
@@ -587,12 +599,12 @@ aspect AnnotationAPI {
 			return mod.getExp();
 		}
 		
-		public String name() {
-			return mod.annotationName();
+		protected void setExp(Exp exp) {
+			mod.setExp(exp);
 		}
 		
-		public void setValue(Exp exp) {
-			mod.setExp(exp);
+		public String name() {
+			return mod.annotationName();
 		}
 		
 	}
@@ -610,6 +622,10 @@ aspect AnnotationAPI {
 		
 		protected Exp exp() {
 			return arg.getExp();
+		}
+		
+		protected void setExp(Exp exp) {
+			arg.setExp(exp);
 		}
 		
 		public String name() {
@@ -631,6 +647,10 @@ aspect AnnotationAPI {
 		
 		protected Exp exp() {
 			return e;
+		}
+		
+		protected void setExp(Exp exp) {
+			e = exp;
 		}
 		
 	}

@@ -16,9 +16,9 @@ public class CoordinateSystem extends Observable implements Observer {
 	private double initialScale;
 	private double[] grid;
 
-	private static final boolean DEFAULT_PRESERVE_ASPECT_RATIO = true;
-	private static final double DEFAULT_INITIAL_SCALE = 0.1;
-	private static final double[] DEFAULT_GRID = { 2.0, 2.0 };
+	public static final boolean DEFAULT_PRESERVE_ASPECT_RATIO = true;
+	public static final double DEFAULT_INITIAL_SCALE = 0.1;
+	public static final double[] DEFAULT_GRID = { 2.0, 2.0 };
 
 	public static CoordinateSystem DEFAULT_COORDINATE_SYSTEM = new CoordinateSystem();
 

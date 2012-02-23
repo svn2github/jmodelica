@@ -701,4 +701,30 @@ aspect FormattedPrint {
 		getClassModification().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(postFormatting);
 	}
+	
+	void ASTNode.copyFormattingFrom(ASTNode node) {
+		if (this.getClass() != node.getClass())
+			return;
+		if (numChildren() != node.numChildren())
+			return;
+		for (int i = 0; i < numChildren(); i++) {
+			getChild(i).copyFormattingFrom(node.getChild(i));
+		}
+	}
+	
+	void List.copyFormattingFrom(ASTNode node) {
+		if (this.getClass() != node.getClass())
+			return;
+	}
+	
+	void BaseNode.copyFormattingFrom(ASTNode node) {
+		if (this.getClass() != node.getClass())
+			return;
+		BaseNode bn = (BaseNode) node;
+		node.propagateFormatting();
+		preFormatting = bn.preFormatting;
+		postFormatting = bn.postFormatting;
+		super.copyFormattingFrom(node);
+	}
+	
 }

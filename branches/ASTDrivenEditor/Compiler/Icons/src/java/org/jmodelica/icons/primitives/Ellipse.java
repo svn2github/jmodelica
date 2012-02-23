@@ -12,8 +12,8 @@ public class Ellipse extends FilledRectShape {
 	private double startAngle;
 	private double endAngle;
 	
-	private static final double DEFAULT_START_ANGLE = 0;
-	private static final double DEFAULT_END_ANGLE = 360;
+	public static final double DEFAULT_START_ANGLE = 0;
+	public static final double DEFAULT_END_ANGLE = 360;
 	
 	public Ellipse() {
 		this(Extent.NO_EXTENT);

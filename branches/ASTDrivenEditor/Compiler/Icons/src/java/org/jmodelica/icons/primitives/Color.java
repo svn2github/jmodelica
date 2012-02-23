@@ -78,4 +78,12 @@ public class Color extends Observable {
 	public String toString() {
 		return String.format("(%d, %d, %d)", r, g, b);
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Color))
+			return false;
+		Color c = (Color) obj;
+		return r == c.r && g == c.g && b == c.b; 
+	}
 }

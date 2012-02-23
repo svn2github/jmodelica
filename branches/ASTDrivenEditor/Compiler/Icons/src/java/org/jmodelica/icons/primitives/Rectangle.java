@@ -13,8 +13,8 @@ public class Rectangle extends FilledRectShape {
 	private Types.BorderPattern borderPattern;
 	private double radius;
 	
-	private static final Types.BorderPattern DEFAULT_BORDER_PATTERN = Types.BorderPattern.NONE;
-	private static final float DEFAULT_RADIUS = 0;
+	public static final Types.BorderPattern DEFAULT_BORDER_PATTERN = Types.BorderPattern.NONE;
+	public static final float DEFAULT_RADIUS = 0;
 	
 	public Rectangle(){
 		super(Extent.NO_EXTENT);

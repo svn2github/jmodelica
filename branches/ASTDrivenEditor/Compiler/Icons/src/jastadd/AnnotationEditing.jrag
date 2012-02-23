@@ -11,30 +11,116 @@ aspect AnnotationEditing {
 	}
 	
 	/*
-	 * ======================== PRIVATE SAVE METHODS ==========================
+	 * ====================== PRIVATE COORD SAVE METHODS =======================
 	 */
 	
 	/**
-	 * Saves the bitmap <code>b</code> to this annotation node.
+	 * Saves the extent <code>e</code> to this annotation node.
 	 * 
-	 * @param b Bitmap to save
+	 * @param e Extent to save
 	 */
-	private void AnnotationNode.save(Bitmap b) {
-		forPath("extent").save(b.getExtent());
-		if (b.getImageSource() != null)
-			forPath("imageSource").save(b.getImageSource());
-		if (b.getFileName() != null)
-			forPath("fileName").save(b.getFileName());
+	private void AnnotationNode.save(CoordinateSystem cs) {
+		forPath("extent").save(cs.getExtent());
+		forPath("preserveAspectRatio").save(cs.shouldPreserveAspectRatio(), CoordinateSystem.DEFAULT_PRESERVE_ASPECT_RATIO);
+		forPath("initialScale").save(cs.getInitialScale(), CoordinateSystem.DEFAULT_INITIAL_SCALE);
+		forPath("grid").save(cs.getGrid(), CoordinateSystem.DEFAULT_GRID);
 	}
 	
 	/**
-	 * Saves a boolean value <code>b</code> to this annotation node.
+	 * Saves the extent <code>e</code> to this annotation node.
 	 * 
-	 * @param b Boolean value to save
+	 * @param e Extent to save
 	 */
-	private void AnnotationNode.save(boolean b) {
-		setValue(b ? new BooleanLitExpTrue() : new BooleanLitExpFalse());
+	private void AnnotationNode.save(Extent e) {
+		save(new Point[]{e.getP1(), e.getP2()});
 	}
+	
+	/**
+	 * Saves an extent <code>e</code> to this annotation node if this
+	 * annotation exists or if <code>e</code> not equals <code>def</code>.
+	 * 
+	 * @param e Extent to save
+	 * @param def Default extent
+	 */
+	private void AnnotationNode.save(Extent e, Extent def) {
+		if (exists() || !def.equals(e))
+			save(e);
+	}
+	
+	/**
+	 * Saves the placement <code>p</code> to this annotation node.
+	 * 
+	 * @param p Placement to save
+	 */
+	private void AnnotationNode.save(Placement p) {
+		forPath("visible").save(p.isVisible(), Placement.DEFAULT_VISIBLE);
+		forPath("transformation").save(p.getTransformation());
+	}
+	
+	/**
+	 * Saves the point <code>p</code> to this annotation node.
+	 * 
+	 * @param p Point to save
+	 */
+	private void AnnotationNode.save(Point p) {
+		save(new double[]{p.getX(),p.getY()});
+	}
+	
+	/**
+	 * Saves a point <code>p</code> to this annotation node if this
+	 * annotation exists or if <code>p</code> not equals <code>def</code>.
+	 * 
+	 * @param p Point to save
+	 * @param def Default point
+	 */
+	private void AnnotationNode.save(Point p, Point def) {
+		if (exists() || !def.equals(p))
+			save(p);
+	}
+	
+	/**
+	 * Saves the list of points <code>ps</code> to this annotation node.
+	 * 
+	 * @param ps Point[] to save
+	 */
+	private void AnnotationNode.save(Point[] ps) {
+		double[][] points = new double[ps.length][2];
+		for (int i = 0; i < ps.length; i++) {
+			points[i][0] = ps[i].getX();
+			points[i][1] = ps[i].getY();
+		}
+		save(points);
+	}
+	
+	/**
+	 * Saves a point vector <code>ps</code> to this annotation node if this
+	 * annotation exists or if <code>ps</code> not equals <code>def</code>.
+	 * 
+	 * This method uses Arrays.equals() to determine if the two vectors are
+	 * equal.
+	 * 
+	 * @param ps Point vector to save
+	 * @param def Default point vector
+	 */
+	private void AnnotationNode.save(Point[] ps, Point[] def) {
+		if (exists() || !Arrays.equals(def, ps))
+			save(ps);
+	}
+	
+	/**
+	 * Saves the transformation <code>t</code> to this annotation node.
+	 * 
+	 * @param t Transformation to save
+	 */
+	private void AnnotationNode.save(Transformation t) {
+		forPath("origin").save(t.getOrigin(), Transformation.DEFAULT_ORIGIN);
+		forPath("extent").save(t.getExtent());
+		forPath("rotation").save(t.getRotation(), Transformation.DEFAULT_ROTATION);
+	}
+	
+	/*
+	 * =================== PRIVATE PRIMITIVES SAVE METHODS =====================
+	 */
 	
 	/**
 	 * Saves the color <code>c</code> to this annotation node.
@@ -45,109 +131,16 @@ aspect AnnotationEditing {
 		save(new double[]{c.getR(), c.getG(), c.getB()});
 	}
 	
-//	/**
-//	 * Saves the connection <code>c</code> to this annotation node.
-//	 * 
-//	 * @param c Connection to save
-//	 */
-//	private void AnnotationNode.save(Connection c) {
-//		//TODO:implement!
-//	}
-	
 	/**
-	 * Saves the extent <code>e</code> to this annotation node.
+	 * Saves a color <code>c</code> to this annotation node if this
+	 * annotation exists or if <code>c</code> not equals <code>def</code>.
 	 * 
-	 * @param e Extent to save
+	 * @param c Color to save
+	 * @param def Default color
 	 */
-	private void AnnotationNode.save(CoordinateSystem cs) {
-		forPath("preserveAspectRatio").save(cs.shouldPreserveAspectRatio());
-		forPath("extent").save(cs.getExtent());
-		forPath("grid").save(cs.getGrid());
-		forPath("initialScale").save(cs.getInitialScale());
-	}
-	
-	/**
-	 * Saves a double value <code>d</code> to this annotation node.
-	 * 
-	 * @param d Double value to save
-	 */
-	private void AnnotationNode.save(double d) {
-		setValue(createReal(d));
-	}
-	
-	/**
-	 * Saves a double vector <code>v</code> to this annotation node.
-	 * 
-	 * @param v Double vector to save
-	 */
-	private void AnnotationNode.save(double[] v) {
-		setValue(createRealVector(v));
-	}
-	
-	/**
-	 * Saves a double matrix <code>m</code> to this annotation node.
-	 * 
-	 * @param m Double matrix to save
-	 */
-	private void AnnotationNode.save(double[][] m) {
-		setValue(createRealMatrix(m));
-	}
-	
-	/**
-	 * Saves the ellipse <code>e</code> to this annotation node.
-	 * 
-	 * @param e Ellipse to save
-	 */
-	private void AnnotationNode.save(Ellipse e) {
-		forPath("startAngle").save(e.getStartAngle());
-		forPath("endAngle").save(e.getEndAngle());
-	}
-	
-	/**
-	 * Saves the extent <code>e</code> to this annotation node.
-	 * 
-	 * @param e Extent to save
-	 */
-	private void AnnotationNode.save(Extent e) {
-		save(new double[][]{{e.getP1().getX(),e.getP1().getY()},{e.getP2().getX(),e.getP2().getY()}});
-	}
-	
-	/**
-	 * Saves the filled rectangular shape <code>frs</code> to this annotation node.
-	 * 
-	 * @param frs FilledRectShape to save
-	 */
-	private void AnnotationNode.save(FilledRectShape frs) {
-		forPath("extent").save(frs.getExtent());
-		
-		if (frs instanceof Ellipse)
-			save((Ellipse) frs);
-		else if (frs instanceof Rectangle)
-			save((Rectangle) frs);
-		else if (frs instanceof Text)
-			save((Text) frs);
-		else
-			throw new AnnotationEditException("Unknown subclass of FilledRectShape");
-	}
-	
-	/**
-	 * Saves the filled shape <code>fs</code> to this annotation node.
-	 * 
-	 * @param fs FilledShape to save
-	 */
-	private void AnnotationNode.save(FilledShape fs) {
-		forPath("lineColor").save(fs.getLineColor());
-		forPath("pattern").save(fs.getLinePattern());
-		forPath("fillColor").save(fs.getFillColor());
-		forPath("fillPattern").save(fs.getFillPattern());
-		forPath("lineThickness").save(fs.getLineThickness());
-		
-		if (fs instanceof FilledRectShape)
-			save((FilledRectShape) fs);
-		else if (fs instanceof Polygon)
-			save((Polygon) fs);
-		else
-			throw new AnnotationEditException("Unknown subclass of FilledShape");
+	private void AnnotationNode.save(Color c, Color def) {
+		if (exists() || !def.equals(c))
+			save(c);
 	}
 	
 	/**
@@ -156,18 +149,70 @@ aspect AnnotationEditing {
 	 * @param gi GraphicItem to save
 	 */
 	private void AnnotationNode.save(GraphicItem gi) {
-		forPath("visible").save(gi.isVisible());
-		forPath("origin").save(gi.getOrigin());
-		forPath("rotation").save(gi.getRotation());
+		forPath("visible").save(gi.isVisible(), GraphicItem.DEFAULT_VISIBLE);
+		forPath("origin").save(gi.getOrigin(), GraphicItem.DEFAULT_ORIGIN);
+		forPath("rotation").save(gi.getRotation(), GraphicItem.DEFAULT_ROTATION);
 		
-		if (gi instanceof Bitmap)
-			save((Bitmap) gi);
-		else if (gi instanceof FilledShape)
-			save((FilledShape) gi);
-		else if (gi instanceof Line)
-			save((Line) gi);
-		else
+		if (gi instanceof Bitmap) {
+			Bitmap b = (Bitmap) gi;
+			forPath("extent").save(b.getExtent());
+		
+			if (b.getFileName() == null && b.getImageSource() == null)
+				throw new AnnotationEditException("Bitmap is missing image information, neither file name or images source is set.");
+			if (b.getFileName() != null)
+				forPath("fileName").save(b.getFileName());
+			if (b.getImageSource() != null)
+				forPath("imageSource").save(b.getImageSource());
+			
+		} else if (gi instanceof FilledShape) {
+			FilledShape fs = (FilledShape) gi;
+			forPath("lineColor").save(fs.getLineColor(), FilledShape.DEFAULT_LINE_COLOR);
+			forPath("fillColor").save(fs.getFillColor(), FilledShape.DEFAULT_FILL_COLOR);
+			forPath("pattern").save(fs.getLinePattern(), FilledShape.DEFAULT_LINE_PATTERN);
+			forPath("fillPattern").save(fs.getFillPattern(), FilledShape.DEFAULT_FILL_PATTERN);
+			forPath("lineThickness").save(fs.getLineThickness(), FilledShape.DEFAULT_LINE_THICKNESS);
+			
+			if (fs instanceof FilledRectShape) {
+				FilledRectShape frs = (FilledRectShape) fs;
+				forPath("extent").save(frs.getExtent());
+				
+				if (frs instanceof Ellipse) {
+					Ellipse e = (Ellipse) frs;
+					forPath("startAngle").save(e.getStartAngle(), Ellipse.DEFAULT_START_ANGLE);
+					forPath("endAngle").save(e.getEndAngle(), Ellipse.DEFAULT_END_ANGLE);
+				} else if (frs instanceof Rectangle) {
+					Rectangle r = (Rectangle) frs;
+					forPath("borderPattern").save(r.getBorderPattern(), Rectangle.DEFAULT_BORDER_PATTERN);
+					forPath("radius").save(r.getRadius(), Rectangle.DEFAULT_RADIUS);
+				} else if (frs instanceof Text) {
+					Text t = (Text) frs;
+					forPath("textString").save(t.getTextString());
+					forPath("fontSize").save(t.getFontSize(), Text.DEFAULT_FONT_SIZE);
+					forPath("fontName").save(t.getFontName(), Text.DEFAULT_FONT_NAME);
+					forPath("textStyle").save(t.getTextStyle().toArray(new Types.TextStyle[t.getTextStyle().size()]));
+					forPath("horizontalAlignment").save(t.getHorizontalAlignment(), Text.DEFAULT_HORIZONTAL_ALIGNMENT);
+				} else {
+					throw new AnnotationEditException("Unknown subclass of FilledRectShape");
+				}
+			} else if (fs instanceof Polygon) {
+				Polygon p = (Polygon) fs;
+				forPath("points").save(p.getPoints().toArray(new Point[p.getPoints().size()]));
+				forPath("smooth").save(p.getSmooth(), Polygon.DEFAULT_SMOOTH);
+			} else {
+				throw new AnnotationEditException("Unknown subclass of FilledShape");
+			}
+		} else if (gi instanceof Line) {
+			Line l = (Line) gi;
+			forPath("points").save(l.getPoints().toArray(new Point[l.getPoints().size()]));
+			forPath("color").save(l.getColor(), Line.DEFAULT_COLOR);
+			forPath("pattern").save(l.getLinePattern(), Line.DEFAULT_LINE_PATTERN);
+			forPath("thickness").save(l.getThickness(), Line.DEFAULT_THICKNESS);
+			forPath("arrow").save(l.getArrow(), Line.DEFAULT_ARROW);
+			forPath("arrowSize").save(l.getArrowSize(), Line.DEFAULT_ARROW_SIZE);
+			forPath("smooth").save(l.getSmooth(), Line.DEFAULT_SMOOTH);
+		} else {
 			throw new AnnotationEditException("Unknown subclass of GraphicItem");
+		}
 	}
 	
 	/**
@@ -176,6 +221,7 @@ aspect AnnotationEditing {
 	 * @param gis GraphicItem[] to save
 	 */
 	private void AnnotationNode.save(GraphicItem[] gis) {
+		//TODO: some sort of merge here.
 		for (GraphicItem gi : gis) {
 			String nodeName;
 			if (gi instanceof Line)
@@ -198,112 +244,44 @@ aspect AnnotationEditing {
 	}
 	
 	/**
-	 * Saves the line <code>l</code> to this annotation node.
-	 * 
-	 * @param l Line to save
-	 */
-	private void AnnotationNode.save(Line l) {
-		forPath("points").save(l.getPoints().toArray(new Point[l.getPoints().size()]));
-		forPath("color").save(l.getColor());
-		forPath("thickness").save(l.getThickness());
-		forPath("pattern").save(l.getLinePattern());
-		forPath("smooth").save(l.getSmooth());
-		forPath("arrow").save(l.getArrow());
-		forPath("arrowSize").save(l.getArrowSize());
-	}
-	
-	/**
-	 * Saves the placement <code>p</code> to this annotation node.
-	 * 
-	 * @param p Placement to save
-	 */
-	private void AnnotationNode.save(Placement p) {
-		forPath("transformation").save(p.getTransformation());
-		forPath("visible").save(p.isVisible());
-	}
-	
-	/**
-	 * Saves the polygon <code>p</code> to this annotation node.
-	 * 
-	 * @param p Polygon to save
-	 */
-	private void AnnotationNode.save(Polygon r) {
-		forPath("points").save(r.getPoints().toArray(new Point[r.getPoints().size()]));
-		forPath("smooth").save(r.getSmooth());
-	}
-	
-	/**
-	 * Saves the point <code>p</code> to this annotation node.
-	 * 
-	 * @param p Point to save
-	 */
-	private void AnnotationNode.save(Point p) {
-		save(new double[]{p.getX(),p.getY()});
-	}
-	
-	/**
-	 * Saves the list of points <code>ps</code> to this annotation node.
-	 * 
-	 * @param ps Point[] to save
-	 */
-	private void AnnotationNode.save(Point[] ps) {
-		double[][] points = new double[ps.length][2];
-		for (int i = 0; i < ps.length; i++) {
-			points[i][0] = ps[i].getX();
-			points[i][1] = ps[i].getY();
-		}
-		save(points);
-	}
-	
-	/**
-	 * Saves the rectangle <code>r</code> to this annotation node.
-	 * 
-	 * @param r Rectangle to save
-	 */
-	private void AnnotationNode.save(Rectangle r) {
-		forPath("borderPattern").save(r.getBorderPattern());
-		forPath("radius").save(r.getRadius());
-	}
-	
-	/**
-	 * Saves the string <code>s</code> to this annotation node.
-	 * 
-	 * @param s String to save
-	 */
-	private void AnnotationNode.save(String s) {
-		//TODO:implement!
-	}
-	
-	
-	/**
-	 * Saves the text <code>t</code> to this annotation node.
-	 * 
-	 * @param t Text to save
-	 */
-	private void AnnotationNode.save(Text t) {
-		//TODO:implement!
-	}
-	
-	/**
-	 * Saves the transformation <code>t</code> to this annotation node.
-	 * 
-	 * @param t Transformation to save
-	 */
-	private void AnnotationNode.save(Transformation t) {
-		forPath("extent").save(t.getExtent());
-		if (!t.getOrigin().equals(Transformation.DEFAULT_ORIGIN))
-			forPath("origin").save(t.getOrigin());
-		if (t.getRotation() != Transformation.DEFAULT_ROTATION)
-			forPath("rotation").save(t.getRotation());
-	}
-	
-	/**
 	 * Saves the arrow <code>a</code> to this annotation node.
 	 * 
 	 * @param a Arrow to save
 	 */
 	private void AnnotationNode.save(Types.Arrow[] a) {
-		//TODO:implement!
+		String[] ss = new String[a.length];
+		for (int i = 0; i < a.length; i++) {
+			switch (a[i]) {
+			case NONE:
+				ss[i] = "None";
+				break;
+			case OPEN:
+				ss[i] = "Open";
+				break;
+			case FILLED:
+				ss[i] = "Filled";
+				break;
+			case HALF:
+				ss[i] = "Half";
+				break;
+			}
+		}
+		save(ss);
+	}
+	
+	/**
+	 * Saves a arrow vector <code>as</code> to this annotation node if this
+	 * annotation exists or if <code>as</code> not equals <code>def</code>.
+	 * 
+	 * This method uses Arrays.equals() to determine if the two vectors are
+	 * equal.
+	 * 
+	 * @param as Arrow vector to save
+	 * @param def Default arrow vector
+	 */
+	private void AnnotationNode.save(Types.Arrow[] as, Types.Arrow[] def) {
+		if (exists() || !Arrays.equals(def, as))
+			save(as);
 	}
 	
 	/**
@@ -312,7 +290,32 @@ aspect AnnotationEditing {
 	 * @param bp BorderPattern to save
 	 */
 	private void AnnotationNode.save(Types.BorderPattern bp) {
-		//TODO:implement!
+		switch (bp) {
+		case NONE:
+			save("None");
+			break;
+		case RAISED:
+			save("Raised");
+			break;
+		case SUNKEN:
+			save("Sunken");
+			break;
+		case ENGRAVED:
+			save("Engraved");
+			break;
+		}
+	}
+	
+	/**
+	 * Saves a border pattern <code>bp</code> to this annotation node if this
+	 * annotation exists or if <code>bp</code> not equals <code>def</code>.
+	 * 
+	 * @param bp Border pattern to save
+	 * @param def Default border pattern
+	 */
+	private void AnnotationNode.save(Types.BorderPattern bp, Types.BorderPattern def) {
+		if (exists() || def != bp)
+			save(bp);
 	}
 	
 	/**
@@ -321,7 +324,53 @@ aspect AnnotationEditing {
 	 * @param fp FillPattern to save
 	 */
 	private void AnnotationNode.save(Types.FillPattern fp) {
-		//TODO:implement!
+		switch (fp) {
+		case NONE:
+			save("None");
+			break;
+		case SOLID:
+			save("Solid");
+			break;
+		case HORIZONTAL:
+			save("Horizontal");
+			break;
+		case VERTICAL:
+			save("Vertical");
+			break;
+		case CROSS:
+			save("Cross");
+			break;
+		case FORWARD:
+			save("Forward");
+			break;
+		case BACKWARD:
+			save("Backward");
+			break;
+		case CROSSDIAG:
+			save("CrossDiag");
+			break;
+		case HORIZONTALCYLINDER:
+			save("HorizontalCylinder");
+			break;
+		case VERTICALCYLINDER:
+			save("VerticalCylinder");
+			break;
+		case SPHERE:
+			save("Sphere");
+			break;
+		}
+	}
+	
+	/**
+	 * Saves a fill pattern <code>fp</code> to this annotation node if this
+	 * annotation exists or if <code>fp</code> not equals <code>def</code>.
+	 * 
+	 * @param fp Fill pattern to save
+	 * @param def Default fill pattern
+	 */
+	private void AnnotationNode.save(Types.FillPattern fp, Types.FillPattern def) {
+		if (exists() || def != fp)
+			save(fp);
 	}
 	
 	/**
@@ -330,7 +379,38 @@ aspect AnnotationEditing {
 	 * @param lp LinePattern to save
 	 */
 	private void AnnotationNode.save(Types.LinePattern lp) {
-		//TODO:implement!
+		switch (lp) {
+		case NONE:
+			save("None");
+			break;
+		case SOLID:
+			save("Solid");
+			break;
+		case DASH:
+			save("Dash");
+			break;
+		case DOT:
+			save("Dot");
+			break;
+		case DASHDOT:
+			save("DashDot");
+			break;
+		case DASHDOTDOT:
+			save("DashDotDot");
+			break;
+		}
+	}
+	
+	/**
+	 * Saves a line pattern <code>lp</code> to this annotation node if this
+	 * annotation exists or if <code>lp</code> not equals <code>def</code>.
+	 * 
+	 * @param lp Line pattern to save
+	 * @param def Default line pattern
+	 */
+	private void AnnotationNode.save(Types.LinePattern lp, Types.LinePattern def) {
+		if (exists() || def != lp)
+			save(lp);
 	}
 	
 	/**
@@ -339,7 +419,26 @@ aspect AnnotationEditing {
 	 * @param s Smooth to save
 	 */
 	private void AnnotationNode.save(Types.Smooth s) {
-		//TODO:implement!
+		switch (s) {
+		case NONE:
+			save("None");
+			break;
+		case BEZIER:
+			save("Bezier");
+			break;
+		}
+	}
+	
+	/**
+	 * Saves a smooth <code>s</code> to this annotation node if this
+	 * annotation exists or if <code>s</code> not equals <code>def</code>.
+	 * 
+	 * @param lp Smooth to save
+	 * @param def Default smooth
+	 */
+	private void AnnotationNode.save(Types.Smooth s, Types.Smooth def) {
+		if (exists() || def != s)
+			save(s);
 	}
 	
 	/**
@@ -348,7 +447,29 @@ aspect AnnotationEditing {
 	 * @param ta TextAlignment to save
 	 */
 	private void AnnotationNode.save(Types.TextAlignment ta) {
-		//TODO:implement!
+		switch (ta) {
+		case LEFT:
+			save("Left");
+			break;
+		case CENTER:
+			save("Center");
+			break;
+		case RIGHT:
+			save("Right");
+			break;
+		}
+	}
+	
+	/**
+	 * Saves a text alignment <code>ta</code> to this annotation node if this
+	 * annotation exists or if <code>ta</code> not equals <code>def</code>.
+	 * 
+	 * @param ta Text alignment to save
+	 * @param def Default text alignment
+	 */
+	private void AnnotationNode.save(Types.TextAlignment ta, Types.TextAlignment def) {
+		if (exists() || def != ta)
+			save(ta);
 	}
 	
 	/**
@@ -356,8 +477,191 @@ aspect AnnotationEditing {
 	 * 
 	 * @param ts TextStyle to save
 	 */
-	private void AnnotationNode.save(Types.TextStyle[] ts) {
-		//TODO:implement!
+	private void AnnotationNode.save(Types.TextStyle[] tss) {
+		String[] ss = new String[tss.length];
+		for (int i = 0; i < tss.length; i++) {
+			switch (tss[i]) {
+			case BOLD:
+				ss[i] = "Bold";
+				break;
+			case ITALIC:
+				ss[i] = "Italic";
+				break;
+			case UNDERLINE:
+				ss[i] = "UnderLine";
+				break;
+			}
+		}
+		save(ss);
+	}
+	
+	/**
+	 * Saves a text style vector <code>tss</code> to this annotation node if this
+	 * annotation exists or if <code>tss</code> not equals <code>def</code>.
+	 * 
+	 * This method uses Arrays.equals() to determine if the two vectors are
+	 * equal.
+	 * 
+	 * @param tss Text style vector to save
+	 * @param def Default text style vector
+	 */
+	private void AnnotationNode.save(Types.TextStyle[] tss, Types.TextStyle[] def) {
+		if (exists() || !Arrays.equals(def, tss))
+			save(tss);
+	}
+	
+	/*
+	 * ====================== PRIVATE LANG SAVE METHODS ========================
+	 */
+	
+	/**
+	 * Saves a boolean value <code>b</code> to this annotation node.
+	 * 
+	 * @param b Boolean value to save
+	 */
+	private void AnnotationNode.save(boolean b) {
+		setValue(b ? new BooleanLitExpTrue() : new BooleanLitExpFalse());
+	}
+	
+	/**
+	 * Saves a boolean value <code>b</code> to this annotation node if this
+	 * annotation exists or if <code>b</code> not equals <code>def</code>.
+	 * 
+	 * @param b Boolean value to save
+	 * @param def Default boolean value
+	 */
+	private void AnnotationNode.save(boolean b, boolean def) {
+		if (exists() || b != def)
+			save(b);
+	}
+	
+	/**
+	 * Saves a double value <code>d</code> to this annotation node.
+	 * 
+	 * @param d Double value to save
+	 */
+	private void AnnotationNode.save(double d) {
+		setValue(createReal(d));
+	}
+	
+	/**
+	 * Saves a double value <code>d</code> to this annotation node if this
+	 * annotation exists or if <code>d</code> not equals <code>def</code>.
+	 * 
+	 * @param d Double value to save
+	 * @param def Default double value
+	 */
+	private void AnnotationNode.save(double d, double def) {
+		if (exists() || def != d)
+			save(d);
+	}
+	
+	/**
+	 * Saves a double vector <code>ds</code> to this annotation node.
+	 * 
+	 * @param ds Double vector to save
+	 */
+	private void AnnotationNode.save(double[] ds) {
+		setValue(createRealVector(ds));
+	}
+	
+	/**
+	 * Saves a double vector <code>ds</code> to this annotation node if this
+	 * annotation exists or if <code>ds</code> not equals <code>def</code>.
+	 * 
+	 * This method uses Arrays.equals() to determine if the two vectors are
+	 * equal.
+	 * 
+	 * @param ds Double vector to save
+	 * @param def Default double vector
+	 */
+	private void AnnotationNode.save(double[] ds, double[] def) {
+		if (exists() || Arrays.equals(def, ds))
+			save(ds);
+	}
+	
+	/**
+	 * Saves a double matrix <code>dss</code> to this annotation node.
+	 * 
+	 * @param dss Double matrix to save
+	 */
+	private void AnnotationNode.save(double[][] dss) {
+		setValue(createRealMatrix(dss));
+	}
+	
+	/**
+	 * Saves a double matrix <code>dss</code> to this annotation node if this
+	 * annotation exists or if <code>dss</code> not equals <code>def</code>.
+	 * 
+	 * This method uses Arrays.equals() to determine if the two vectors are
+	 * equal.
+	 * 
+	 * @param dss Double matrix to save
+	 * @param def Default double matrix
+	 */
+	private void AnnotationNode.save(double[][] dss, double[][] def) {
+		if (exists()) {
+			save(dss);
+			return;
+		}
+		boolean equal = true;
+		if (dss.length != def.length) {
+			equal = false;
+		} else {
+			for (int i = 0; i < dss.length; i++) {
+				if (!Arrays.equals(def[i], dss[i])) {
+					equal = false;
+					break;
+				}
+			}
+		}
+		if (!equal)
+			save(dss);
+	}
+	
+	/**
+	 * Saves the string <code>s</code> to this annotation node.
+	 * 
+	 * @param s String to save
+	 */
+	private void AnnotationNode.save(String s) {
+		setValue(createString(s));
+	}
+	
+	/**
+	 * Saves a string <code>s</code> to this annotation node if this
+	 * annotation exists or if <code>s</code> not equals <code>def</code>.
+	 * 
+	 * @param s String to save
+	 * @param def Default string
+	 */
+	private void AnnotationNode.save(String s, String def) {
+		if (exists() || !def.equals(s))
+			save(s);
+	}
+	
+	/**
+	 * Saves the string vector <code>s</code> to this annotation node.
+	 * 
+	 * This method uses Arrays.equals() to determine if the two vectors are
+	 * equal.
+	 * 
+	 * @param s String[] to save
+	 */
+	private void AnnotationNode.save(String[] ss) {
+		setValue(createStringVector(ss));
+	}
+	
+	/**
+	 * Saves a string vector <code>ss</code> to this annotation node if this
+	 * annotation exists or if <code>ss</code> not equals <code>def</code>.
+	 * 
+	 * @param ss String vector to save
+	 * @param def Default string vector
+	 */
+	private void AnnotationNode.save(String[] ss, String[] def) {
+		if (exists() || Arrays.equals(def, ss))
+			save(ss);
 	}
 	
 	/*
@@ -391,7 +695,7 @@ aspect AnnotationEditing {
 	}
 	
 	/**
-	 * A helper method that creates a expression representing a double vector
+	 * A helper method that creates an expression representing a double vector
 	 * <code>values</code>. If a value in <code>values</code> is an even number (integer)
 	 * it will be represented as one.
 	 * 
@@ -407,7 +711,7 @@ aspect AnnotationEditing {
 	}
 	
 	/**
-	 * A helper method that creates a expression representing a double matrix
+	 * A helper method that creates an expression representing a double matrix
 	 * <code>values</code>. If a value in <code>values</code> is an even number (integer)
 	 * it will be represented as one.
 	 * 
@@ -418,6 +722,32 @@ aspect AnnotationEditing {
 		FunctionArguments funcArgs = new FunctionArguments();
 		for (double[] v : values) {
 			funcArgs.addExp(createRealVector(v));
+		}
+		return new ArrayConstructor(funcArgs);
+	}
+	
+	/**
+	 * A helper method that creates an expression representing a string
+	 * <code>s</code>.
+	 * 
+	 *  @param s String to create an expression from
+	 *  @return A Exp expression representing <code>s</code>
+	 */
+	private static Exp AnnotationNode.createString(String s) {
+		return new StringLitExp(s);
+	}
+	
+	/**
+	 * A helper method that creates an expression representing a string
+	 * vector <code>ss</code>.
+	 * 
+	 *  @param s String to create an expression from
+	 *  @return A Exp expression representing <code>s</code>
+	 */
+	private static Exp AnnotationNode.createStringVector(String[] ss) {
+		FunctionArguments funcArgs = new FunctionArguments();
+		for (String s : ss) {
+			funcArgs.addExp(createString(s));
 		}
 		return new ArrayConstructor(funcArgs);
 	}

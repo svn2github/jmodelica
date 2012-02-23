@@ -18,12 +18,12 @@ public abstract class FilledShape extends GraphicItem implements Observer {
 	public static final Object FILL_PATTERN_CHANGED = new Object();
 	public static final Object LINE_THICKNESS_CHANGED = new Object();
 	
-	protected static final Color DEFAULT_LINE_COLOR = Color.BLACK;
-	protected static final Color DEFAULT_FILL_COLOR = Color.BLACK;
-	protected static final Types.LinePattern DEFAULT_LINE_PATTERN = Types.LinePattern.SOLID;
-	protected static final Types.FillPattern DEFAULT_FILL_PATTERN = Types.FillPattern.NONE;
+	public static final Color DEFAULT_LINE_COLOR = Color.BLACK;
+	public static final Color DEFAULT_FILL_COLOR = Color.BLACK;
+	public static final Types.LinePattern DEFAULT_LINE_PATTERN = Types.LinePattern.SOLID;
+	public static final Types.FillPattern DEFAULT_FILL_PATTERN = Types.FillPattern.NONE;
 	public static final double DEFAULT_LINE_THICKNESS = 0.25;
-	protected static final double PATTERN_LINE_DISTANCE = 15.0;
+	public static final double PATTERN_LINE_DISTANCE = 15.0;
 	
 	protected Color lineColor;
 	protected Color fillColor;

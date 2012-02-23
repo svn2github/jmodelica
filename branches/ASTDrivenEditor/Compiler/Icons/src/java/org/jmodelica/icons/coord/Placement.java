@@ -12,7 +12,7 @@ public class Placement extends Observable implements Observer {
 	private boolean visible;
 	private Transformation transformation;
 	
-	private static final boolean DEFAULT_VISIBLE = true;
+	public static final boolean DEFAULT_VISIBLE = true;
 	
 	/**
 	 * @param transformation Placement in the diagram layer.

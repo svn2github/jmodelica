@@ -20,10 +20,10 @@ public class Text extends FilledRectShape {
 	private ArrayList<Types.TextStyle> textStyle;  
 	private Types.TextAlignment horizontalAlignment;
 	
-	private static final String DEFAULT_TEXT_STRING = "";
-	private static final String DEFAULT_FONT_NAME = "";
-	private static final double DEFAULT_FONT_SIZE = 0;
-	private static final Types.TextAlignment DEFAULT_HORIZONTAL_ALIGNMENT = Types.TextAlignment.CENTER;
+	public static final String DEFAULT_TEXT_STRING = "";
+	public static final String DEFAULT_FONT_NAME = "";
+	public static final double DEFAULT_FONT_SIZE = 0;
+	public static final Types.TextAlignment DEFAULT_HORIZONTAL_ALIGNMENT = Types.TextAlignment.CENTER;
 		
 	public Text() {
 		this(Extent.NO_EXTENT);
