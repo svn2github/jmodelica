@@ -1264,13 +1264,14 @@ class LocalDAECollocator(CasadiCollocator):
         c_e = casadi.vertcat([c_e, initial_F0])
         c_e = casadi.vertcat([c_e, initial_F])
         
-        # Evaluate u_1_0 based on polynomial u_1
-        u_1_0 = 0
-        for k in xrange(1, self.n_cp + 1):
-            u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0, False)
-            
-        # Add residual for u_1_0 as constraint
-        c_e = casadi.vertcat([c_e, var[1][0]['u'] - u_1_0])
+        if self.blocking_factors is None:
+            # Evaluate u_1_0 based on polynomial u_1
+            u_1_0 = 0
+            for k in xrange(1, self.n_cp + 1):
+                u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0, False)
+                
+            # Add residual for u_1_0 as constraint
+            c_e = casadi.vertcat([c_e, var[1][0]['u'] - u_1_0])
         
         # Collocation and DAE constraints
         if self.eliminate_der_var:

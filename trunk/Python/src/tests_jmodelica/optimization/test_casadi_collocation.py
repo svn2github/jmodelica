@@ -432,14 +432,14 @@ class TestLocalDAECollocator:
         opts['n_cp'] = 3
         opts['blocking_factors'] = N.array(opts['n_e'] * [1])
         res = model.optimize(self.algorithm, opts)
-        assert_results(res, 4.6794608506686e0, 3.23598449250e-1,
+        assert_results(res, 3.3109070531151135e0, 2.8718067708687645e-1,
                        cost_rtol=8e-2, u_norm_rtol=3e-2)
         
         opts['n_e'] = 20
         opts['n_cp'] = 4
         opts['blocking_factors'] = [1, 2, 1, 1, 2, 13]
         res = model.optimize(self.algorithm, opts)
-        assert_results(res, 9.508434744576, 4.173168764353e-1,
+        assert_results(res, 3.620908059907745e0, 3.049446667587375e-1,
                        cost_rtol=8e-2, u_norm_rtol=3e-2)
     
     @testattr(casadi = True)
