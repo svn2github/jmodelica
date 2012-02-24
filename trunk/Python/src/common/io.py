@@ -63,6 +63,9 @@ class ResultDymola:
         
             In integer index.
         """
+        #Strip name of spaces, for instace a[2, 1] to a[2,1]
+        name = name.replace(" ", "")
+        
         try:
             return self.name.index(name)
         except ValueError, ex:

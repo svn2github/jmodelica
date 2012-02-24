@@ -11,7 +11,7 @@ der(vdp.x1)
 der(vdp.x2)
 vdp.x1
 vdp.x2
-u
+u[2,1]
 vdp.u
 
 char description(9,11)
@@ -33,7 +33,7 @@ int dataInfo(9,4)
 2 3 0 -1 # der(vdp.x2)
 2 4 0 -1 # vdp.x1
 2 5 0 -1 # vdp.x2
-2 6 0 -1 # u
+2 6 0 -1 # u[2,1]
 2 6 0 -1 # vdp.u
 
 float data_1(2,3)
