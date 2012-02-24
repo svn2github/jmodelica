@@ -70,6 +70,9 @@ aspect TransformCanonical {
 	  */
 	public void FClass.transformCanonicalBase() {
 		OptionRegistry opt = root().options;
+		if (opt.getBooleanOption("state_initial_equations")) {
+			addStateInitialEquations();
+		}
 		genAlgorithmFunctions();
 		genBindingEquations();
 		if (opt.getBooleanOption("inline_functions")) {
@@ -2461,21 +2464,23 @@ aspect TransformCanonical {
 	 */
 	public void FClass.genInitialEquations() {
 		// TODO: Isn't there always a value for fv.startAttributeExp() now?
-		for (FRealVariable fv : differentiatedRealVariables()) {
-			if (fv.fixedAttribute() ||
-					(root().options.getBooleanOption("state_start_values_fixed") 
-							&& fv.startAttributeSet())) {
-				addFInitialEquation(new FEquation(new FIdUseExp(
-						new FIdUse(fv.getFQName().fullCopy())),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp(0.0)));
-			}	
-		}
-		for (FRealVariable fv : algebraicRealVariables()) {
-			if (fv.fixedAttribute()) {
-				addFInitialEquation(new FEquation(new FIdUseExp(
-						new FIdUse(fv.getFQName().fullCopy())),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp(0.0)));
-			}	
+		if (!root().options.getBooleanOption("state_initial_equations")) {
+			for (FRealVariable fv : differentiatedRealVariables()) {
+				if (fv.fixedAttribute() ||
+						(root().options.getBooleanOption("state_start_values_fixed") 
+								&& fv.startAttributeSet())) {
+					addFInitialEquation(new FEquation(new FIdUseExp(
+							new FIdUse(fv.getFQName().fullCopy())),
+							fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp(0.0)));
+				}	
+			}
+			for (FRealVariable fv : algebraicRealVariables()) {
+				if (fv.fixedAttribute()) {
+					addFInitialEquation(new FEquation(new FIdUseExp(
+							new FIdUse(fv.getFQName().fullCopy())),
+							fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp(0.0)));
+				}	
+			}
 		}
 //		log.debug(prettyPrint(""));
 		for (FRealVariable fv : discreteRealVariables()) {
@@ -4122,4 +4127,31 @@ aspect FunctionInlining {
 		}
 	}
 
+}
+
+aspect StateInitialEquations {
+	
+	public void FClass.addStateInitialEquations() {
+		
+		setFInitialEquationList(new List());
+		
+		for (FRealVariable fv : differentiatedRealVariables()) {
+            
+			FQName nameToAdd = fv.getFQName().fullCopy();
+			nameToAdd.getFQNamePart(0).setName("_start_" + nameToAdd.getFQNamePart(0).getName());
+			FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(),
+			                                      new FParameter(),
+			                                      new Opt(),
+			                                      new List(),
+			                                      new Opt(fv.startAttributeExp().fullCopy()),
+			                                      new Opt(),
+			                                      nameToAdd);
+			 addFVariable(fvToAdd);                
+			 FEquation eqnToAdd = new FEquation(new FIdUseExp(fv.getFQName().fullCopy()),
+			                                    new FIdUseExp(nameToAdd.fullCopy()));
+			 addFInitialEquation(eqnToAdd);    
+			 flushAllRecursive();               
+		}	
+	}
+	
 }

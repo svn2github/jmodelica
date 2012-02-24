@@ -118,6 +118,9 @@ public class OptionRegistry {
 			CHECK_PARAM_EVAL ("check_evaluation_of_parameter_binding_expressions", true, 
 					"Check if parameter an attribute binding expressions should be possible to evaluate during compilation." +
 					"Default is true."),
+			STATE_INIT_EQ ("state_initial_equations", false, 
+							"Neglect initial equations in the model and add initial equations, and parameters, for the states." +
+							"Default is false."),
 			INLINE_FUNCS ("inline_functions", false, 
 					"Perform function inlining on model after flattening (default is false)");
 						

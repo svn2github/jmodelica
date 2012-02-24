@@ -831,6 +831,20 @@ compile_jmu(model_name, mo_file, compiler_options={"enable_variable_scaling":Tru
                 </row>
 
                 <row>
+                  <entry><literal>state_initial_equations</literal></entry>
+
+                  <entry><literal>false</literal></entry>
+
+                  <entry>If this option is set to true, the default initial
+                  equations and fixed attributes in the model are discarded.
+                  Instead, one initial equation on the form
+                  _start_&lt;state_name&gt; = &lt;state_name&gt; is generated
+                  for each state. One parameter with the name
+                  _start_&lt;state_name&gt; for each state is added to the
+                  parameter.</entry>
+                </row>
+
+                <row>
                   <entry><literal>fmi_version</literal></entry>
 
                   <entry><literal>1.0</literal></entry>

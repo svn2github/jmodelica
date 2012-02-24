@@ -4234,7 +4234,113 @@ equation
   x1 + f(x2,A) = {0,0};
 end IndexReduction27_DerFunc;
 
+model StateInitialPars1
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StateInitialPars1",
+         description="Test the state initial equations option",
+		 state_initial_equations=true,
+         flatModel="
+		 fclass TransformCanonicalTests.StateInitialPars1
+ Real x(start = 3);
+ parameter Real _start_x = 3 /* 3 */;
+initial equation 
+ x = _start_x;
+equation
+ der(x) =  - ( x );
+end TransformCanonicalTests.StateInitialPars1; 
+")})));
+	Real x(start=3);
+equation
+	der(x) = -x;
+end StateInitialPars1;
 
+model StateInitialPars2
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StateInitialPars2",
+         description="Test the state initial equations option",
+		 state_initial_equations=true,
+         flatModel="
+		 fclass TransformCanonicalTests.StateInitialPars2
+ Real x(start = 3,fixed = true);
+ parameter Real _start_x = 3 /* 3 */;
+initial equation 
+ x = _start_x;
+equation
+ der(x) =  - ( x );
+end TransformCanonicalTests.StateInitialPars2;
+")})));
+	Real x(start=3, fixed = true);
+equation
+	der(x) = -x;
+end StateInitialPars2;
+	
+model StateInitialPars3
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StateInitialPars3",
+         description="Test the state initial equations option",
+		 state_initial_equations=true,
+         flatModel="
+fclass TransformCanonicalTests.StateInitialPars3
+ Real x(start = 3,fixed = true);
+ Real y(start = 4);
+ Real z(start = 6,fixed = true);
+ parameter Real _start_x = 3 /* 3 */;
+ parameter Real _start_y = 4 /* 4 */;
+initial equation 
+ x = _start_x;
+ y = _start_y;
+equation
+ der(x) =  - ( x );
+ der(y) =  - ( y ) + z;
+ z + ( 2 ) * ( y ) = 0;
+end TransformCanonicalTests.StateInitialPars3;
+")})));
+	Real x(start=3, fixed = true);
+	Real y(start = 4);
+	Real z(start = 6, fixed = true);
+equation
+	der(x) = -x;
+	der(y) = -y + z;
+	z + 2*y = 0;
+end StateInitialPars3;	
+	
+model StateInitialPars4
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StateInitialPars4",
+         description="Test the state initial equations option",
+		 state_initial_equations=true,
+         flatModel="
+fclass TransformCanonicalTests.StateInitialPars4
+ Real x(start = 3);
+ Real y(start = 4);
+ Real z(start = 6);
+ parameter Real _start_x = 3 /* 3 */;
+ parameter Real _start_y = 4 /* 4 */;
+initial equation 
+ x = _start_x;
+ y = _start_y;
+equation
+ der(x) =  - ( x );
+ der(y) =  - ( y ) + z;
+ z + ( 2 ) * ( y ) = 0;
+end TransformCanonicalTests.StateInitialPars4;
+")})));
+	Real x(start=3);
+	Real y(start = 4);
+	Real z(start = 6);
+initial equation
+	x = 3;
+	z = 5;
+equation
+	der(x) = -x;
+	der(y) = -y + z;
+	z + 2*y = 0;
+end StateInitialPars4;		
+	
 model DuplicateVariables1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
