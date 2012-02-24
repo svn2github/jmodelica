@@ -69,7 +69,15 @@ class TestIO:
         res = ResultDymolaTextual(os.path.join(path_to_results, "VDP_pack_VDP_Test_result_incorrect.txt"))
         assert res.get_variable_index("vdp.der(x1)") == res.get_variable_index("der(vdp.x1)")
         assert res.get_variable_index("u[2, 1]") == res.get_variable_index("u[2, 1]")
-        
+    
+    @testattr(stddist = True)
+    def test_result_dymola_textual_finding_derivative(self):
+        """
+        Test so that the correct alias derivatives are found.
+        """
+        res = ResultDymolaTextual(os.path.join(path_to_results, "VDP_pack_VDP_Test_result_modified_for_alias.txt"))
+        assert res.get_variable_index("vdp.der(x1)") == res.get_variable_index("der(vdp.u)")
+    
     @testattr(ipopt = True)
     def test_dymola_export_import(self):
         """
