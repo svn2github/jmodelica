@@ -39,8 +39,18 @@ from lxml import etree
 from pyjmi.common import xmlparser
 from pyjmi.common.core import BaseModel, unzip_unit, get_platform_suffix, get_files_in_archive, rename_to_tmp, load_DLL
 
-from pyjmi.common.io import VariableNotFoundError, ResultDymolaTextual, ResultDymolaBinary
+from pyjmi.common.io import ResultDymolaTextual, ResultDymolaBinary
 from pyjmi.common.core import TrajectoryLinearInterpolation
+
+from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
+
+#Check to see if pyfmi is installed so that we also catch the error generated
+#from that package
+try:
+    from pyfmi.common.io import VariableNotFoundError as fmiVariableNotFoundError
+    VariableNotFoundError = (jmiVariableNotFoundError, fmiVariableNotFoundError)
+except ImportError:
+    VariableNotFoundError = jmiVariableNotFoundError
 
 int = N.int32
 N.int = N.int32
