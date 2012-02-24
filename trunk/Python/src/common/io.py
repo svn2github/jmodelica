@@ -46,7 +46,62 @@ class Trajectory:
         self.t = t
         self.x = x
 
-class ResultDymolaTextual:
+class ResultDymola:
+    """
+    Base class for representation of a result file.
+    """
+    def get_variable_index(self,name): 
+        """
+        Retrieve the index in the name vector of a given variable.
+        
+        Parameters::
+        
+            name --
+                Name of variable.
+
+        Returns::
+        
+            In integer index.
+        """
+        try:
+            return self.name.index(name)
+        except ValueError, ex:
+            #Variable was not found so check if it was a derivative variable
+            #and check if there exists a variable with another naming
+            #convention
+            try:
+                return self.name.index(self._convert_dx_name(name))
+            except ValueError, ex:
+                raise VariableNotFoundError("Cannot find variable " +
+                                        name + " in data file.")
+    
+    def _convert_dx_name(self, name):
+        """
+        Internal method for converting the derivative variable into the 
+        "other" convention. A derivative variable can either be on the 
+        form PI.der(x) and der(PI.x).
+        
+        Returns the original name if the name was not a derivative name.
+        """
+        spl = name.split(".") #Split name
+        
+        if spl[0].startswith("der("): #der(PI.x)
+            spl[0] = spl[0][4:] #Remove der
+            spl[-1] = "der("+spl[-1] #Add der
+            
+            return ".".join(spl) #PI.der(x)
+
+        elif spl[-1].startswith("der("): #PI.der(x)
+            spl[0] = "der("+spl[0] #Add der
+            spl[-1] = spl[-1][4:] #Remove der
+            
+            return ".".join(spl)
+
+        else: #Variable was not a derivative variable
+            return name
+
+
+class ResultDymolaTextual(ResultDymola):
     """ 
     Class representing a simulation or optimization result loaded from a Dymola 
     binary file.
@@ -147,25 +202,6 @@ class ResultDymolaTextual:
             raise JIOError("The result does not seem to be of a supported format.")
         return tmp[2].partition(',')
 
-    def get_variable_index(self,name): 
-        """
-        Retrieve the index in the name vector of a given variable.
-        
-        Parameters::
-        
-            name --
-                Name of variable.
-        
-        Returns::
-        
-            In integer index.
-        """
-        try:
-            return self.name.index(name)
-        except ValueError, ex:
-            raise VariableNotFoundError("Cannot find variable " +
-                                        name + " in data file.")
-            
     def get_variable_data(self,name):
         """
         Retrieve the data sequence for a variable with a given name.
@@ -317,7 +353,7 @@ class ResultDymolaTextual:
         self.data[1] = N.vstack((self.data[1],res.data[1]))
         self.data[1][n_points:,0] = self.data[1][n_points:,0] + time_shift 
 
-class ResultDymolaBinary:
+class ResultDymolaBinary(ResultDymola):
     """ 
     Class representing a simulation or optimization result loaded from a Dymola 
     binary file.
@@ -345,25 +381,6 @@ class ResultDymolaBinary:
                 'u',
                 description[:,i].tolist()).tounicode().rstrip() \
                 for i in range(0,description[0,:].size)]
-        
-    def get_variable_index(self,name): 
-        """
-        Retrieve the index in the name vector of a given variable.
-        
-        Parameters::
-        
-            name --
-                Name of variable.
-
-        Returns::
-        
-            In integer index.
-        """
-        try:
-            return self.name.index(name)
-        except ValueError, ex:
-            raise VariableNotFoundError("Cannot find variable " +
-                                        name + " in data file.")
        
     def get_variable_data(self,name):
         """
