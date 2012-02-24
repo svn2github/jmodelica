@@ -204,6 +204,12 @@ aspect XMLCodeGen {
 		p.print(getFQName(), str, p.indent(indent));
 		close_XML(str, indent);
 	}
+
+	public void FEnumLitExp.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+		open_XML(str, indent);
+		p.print(new FQName(getEnum() + "." + getValue()), str, p.indent(indent));
+		close_XML(str, indent);
+	}
 	
 	public void FTimeExp.prettyPrint_XML(Printer p, PrintStream str, String indent) {
 		openLine_XML(str, indent);
@@ -511,6 +517,7 @@ aspect XMLTagBinding{
         //literals and identifiers
         eq FIdUse.xmlTag() = "Identifier";
         eq FIdUseExp.xmlTag() = "Identifier";
+        eq FEnumLitExp.xmlTag() = "Identifier";	
         eq FIntegerLitExp.xmlTag() = "IntegerLiteral";
         eq FRealLitExp.xmlTag() = "RealLiteral";
         eq FBooleanLitExpFalse.xmlTag() = "BooleanLiteral";
