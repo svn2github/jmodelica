@@ -2168,28 +2168,25 @@ public abstract class CCompilerDelegator {
 	
 	protected static class SharedLibOperation implements StringOperation {
 		
-		private String platform;
+		private String format;
 		
 		public SharedLibOperation(String platform) {
-			this.platform = platform;
+			if (platform.startsWith("win")) 
+				format = "%s.dll";
+			else if (platform.startsWith("darwin")) 
+				format = "lib%s.dylib";
+			else
+				format = "lib%s.so";
 		}
 		
 		public String op(String library) {
-			if (platform.startsWith("win")) 
-				return library + ".dll";
-			else
-				return "lib" + library + ".so";
+			return String.format(format, library);
 		}
 
 	}
 	
 	
 	protected static void copyFile(File sourceFile, File destFile) throws IOException {
-		
-		if(!destFile.exists()) {
-			destFile.createNewFile();
-		}
-
 		FileChannel source = null;
 		FileChannel destination = null;
 		try {
