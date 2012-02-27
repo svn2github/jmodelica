@@ -1163,13 +1163,10 @@ fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[],
 
 fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx) {
 	fmiInteger offset = ((fmi_t *)c)->jmi->offs_real_x;
-	fmiValueReference* valrefs = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiValueReference));
 	fmiValueReference i;
-    
 	for(i = 0; i<nx; i = i + 1) {
-		valrefs[i] = offset + i;
+		vrx[i] = offset + i;
 	}
-	memcpy (vrx, valrefs, nx*sizeof(fmiReal));
     return fmiOK;
 }
 
