@@ -95,7 +95,7 @@ public class FormattingItem {
 	 * item in the source code. <code>FormattingItem.Adjacency.BACK</code> if <code>otherItem</code> is located
 	 * right after this item in the source code. <code>FormattingItem.Adjacency.NONE</code> otherwise.
 	 */
-	protected Adjacency getAdjacency(FormattingItem otherItem) {
+	public Adjacency getAdjacency(FormattingItem otherItem) {
     	if ((getStartLine() == otherItem.getEndLine() && getStartColumn() == otherItem.getEndColumn() + 1) ||
     			(otherItem.type == FormattingItem.Type.LINE_BREAK && getStartLine() == otherItem.getEndLine() + 1 && getStartColumn() == 1)) {
     		return Adjacency.FRONT;
@@ -116,13 +116,19 @@ public class FormattingItem {
 	 * @return this formatting item if there is no adjacency or a new <code>MixedFormattingItem</code> containing
 	 * the merge if there is adjacency.
 	 */
-	protected FormattingItem mergeItems(Adjacency where, FormattingItem otherItem) {
-		if (where == Adjacency.NONE) {
+	public FormattingItem mergeItems(Adjacency where, FormattingItem otherItem) {
+		if (where == Adjacency.NONE || otherItem.type == Type.EMPTY) {
 			return this;
 		}
 		
 		MixedFormattingItem mergedItems = new MixedFormattingItem(this);
 		return mergedItems.mergeItems(where, otherItem);
+	}
+	
+	public FormattingItem[] splitAfterFirstLineBreak() {
+		FormattingItem[] result = new FormattingItem[1];
+		result[0] = this;
+		return result;
 	}
 
 	/**

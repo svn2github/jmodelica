@@ -59,6 +59,20 @@ public class FormattingInfo {
 		}
 
 		formattingList = newFormattingList;
+		splitAfterFirstLineBreak();
+	}
+	
+	private void splitAfterFirstLineBreak() {
+		Collection<FormattingItem> newFormattingList = new LinkedList<FormattingItem>();
+
+		for (FormattingItem item : formattingList) {
+			FormattingItem splitResult[] = item.splitAfterFirstLineBreak();
+			for (int i = 0; i < splitResult.length; i++) {
+				newFormattingList.add(splitResult[i]);
+			}
+		}
+		
+		formattingList = newFormattingList;
 	}
 
 	/**

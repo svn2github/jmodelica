@@ -35,8 +35,20 @@ aspect FormattedPrint {
 	}
 	
 	static FormattedPrettyPrinter ASTNode.formattedPrettyPrinter = new FormattedPrettyPrinter();
+	protected FormattingInfo BaseNode.formatting = new FormattingInfo();
 	protected FormattingItem BaseNode.preFormatting = new EmptyFormattingItem();
 	protected FormattingItem BaseNode.postFormatting = new EmptyFormattingItem();
+	
+	public void ASTNode.setFormatting(FormattingInfo formattingInfo) {
+		for (int i = 0; i < getNumChild(); i++) {
+			getChild(i).setFormatting(formattingInfo);
+		}
+	}
+	
+	public void BaseNode.setFormatting(FormattingInfo formattingInfo) {
+		formatting = formattingInfo;
+		super.setFormatting(formattingInfo);
+	}
 
 	/**
 	 * Adds formatting information to this AST node and all its children, which can then be used by the method
@@ -44,9 +56,6 @@ aspect FormattedPrint {
 	 * @param formattingInfo the information to use to format this AST node.
 	 */	
 	protected void ASTNode.addFormattingInformation(FormattingInfo formattingInfo) {
-		Iterator<FormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
-		FormattingItem nextItem = addPreFormatting(formattingIterator);
-		addPostFormatting(formattingIterator, nextItem);
 		for (int i = 0; i < getNumChild(); i++) {
 			getChild(i).addFormattingInformation(formattingInfo);
 		}
@@ -57,28 +66,11 @@ aspect FormattedPrint {
 			return;
 		}
 
+		setDefaultFormatting();
+		Iterator<FormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
+		FormattingItem nextItem = addPreFormatting(formattingIterator);
+		addPostFormatting(formattingIterator, nextItem);
 		super.addFormattingInformation(formattingInfo);
-		formatting = null;
-	}
-	
-	public void Opt.addFormattingInformation(FormattingInfo formattingInfo) {
-		if (getNumChild() != 0) {
-			getChild(0).addFormattingInformation(formattingInfo);
-		}
-	}
-	
-	public void List.addFormattingInformation(FormattingInfo formattingInfo) {
-		for (int i = 0; i < getNumChild(); i++) {
-			getChild(i).addFormattingInformation(formattingInfo);
-		}
-	}
-	
-	public FormattingItem ASTNode.addPreFormatting(Iterator<FormattingItem> formattingIterator) {
-		return new EmptyFormattingItem();
-	}
-	
-	public void ASTNode.addPostFormatting(Iterator<FormattingItem> formattingIterator, FormattingItem startingFormattingItem) {
-		return;
 	}
 	
 	public FormattingItem BaseNode.addPreFormatting(Iterator<FormattingItem> formattingIterator) {
@@ -118,18 +110,154 @@ aspect FormattedPrint {
 		}
 	}
 	
-	protected FormattingInfo BaseNode.formatting = null;
-	public void ASTNode.setFormatting(FormattingInfo formattingInfo) {
+	public void ASTNode.addFormattingRest(FormattingInfo formattingInfo) {
 		for (int i = 0; i < getNumChild(); i++) {
-			getChild(i).setFormatting(formattingInfo);
+			getChild(i).addFormattingRest(formattingInfo);
 		}
 	}
 	
-	public void BaseNode.setFormatting(FormattingInfo formattingInfo) {
-		formatting = formattingInfo;
-		super.setFormatting(formattingInfo);
+	public void BaseNode.addFormattingRest(FormattingInfo formattingInfo) {
+		Iterator<FormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
+		while (formattingIterator.hasNext()) {
+			FormattingItem formattingItem = formattingIterator.next();
+			FormattingItem.Adjacency preAdjacency = preFormatting.getAdjacency(formattingItem);
+			FormattingItem.Adjacency postAdjacency = postFormatting.getAdjacency(formattingItem);
+			if (preAdjacency != FormattingItem.Adjacency.NONE) {
+				preFormatting = preFormatting.mergeItems(preAdjacency, formattingItem);
+				formattingIterator.remove();
+			} else if (postAdjacency != FormattingItem.Adjacency.NONE) {
+				postFormatting = postFormatting.mergeItems(postAdjacency, formattingItem);
+				formattingIterator.remove();
+			}
+		}
+		super.addFormattingRest(formattingInfo);
+		formatting = null;
 	}
 	
+	/** TODO: Check the following nodes:
+	 * StoredDefinition
+	 * Access?
+	 * ExtendsClauseShortClass
+	 * ArraySubscripts?
+	 * ArrayConstructor?
+	 * ConstrainingClause
+	 * CompleteModification
+	 * ValueModification
+	 * ElementModification
+	 * ClassRedeclare
+	 * ComponentRedeclare
+	 * ConnectClause
+	 * FunctionCall
+	 * FunctionArguments
+	 * NamedArgument
+	 * *LitExp
+	 */
+	
+	protected void BaseNode.setDefaultFormatting() {
+		return;
+	}
+	
+	protected void Within.setDefaultFormatting() {
+		if (hasPackageName()) {
+			getPackageName().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		}
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.LINE_BREAK, "\n");
+	}
+	
+	protected void Encapsulated.setDefaultFormatting() {
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+	}
+	
+	protected void Partial.setDefaultFormatting() {
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+	}
+	
+	protected void Redeclare.setDefaultFormatting() {
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+	}
+	
+	protected void Final.setDefaultFormatting() {
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+	}
+	
+	protected void Inner.setDefaultFormatting() {
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+	}
+	
+	protected void Outer.setDefaultFormatting() {
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+	}
+	
+	protected void Replaceable.setDefaultFormatting() {
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+	}
+	
+	protected void Restriction.setDefaultFormatting() {
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+	}
+	
+	protected void FullClassDecl.setDefaultFormatting() {
+		if (hasStringComment()) {
+			getName().postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+			getStringComment().postFormatting = new DefaultFormattingItem(FormattingItem.Type.LINE_BREAK, "\n");
+		}
+		
+		if (getNumEquation() > 0) {
+			getEquation(0).preFormatting = new DefaultFormattingItem(FormattingItem.Type.MIXED, "\n ");
+		}
+		
+		for (Annotation annotation : getAnnotations()) {
+			annotation.preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		}
+	}
+	
+	public void AbstractEquation.setDefaultFormatting() {
+		preFormatting = preFormatting.mergeItems(FormattingItem.Adjacency.BACK, new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " "));
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.LINE_BREAK, "\n");
+	}
+	
+	protected void Each.setDefaultFormatting() {
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+	}
+	
+	public void ExtendsClause.setDefaultFormatting() {
+		preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		getSuper().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.LINE_BREAK, "\n");
+	}
+	
+	public void ImportClause.setDefaultFormatting() {
+		preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		getPackageName().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		if (getComment().hasStringComment() || getComment().hasAnnotation()) {
+			getPackageName().postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		}
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.LINE_BREAK, "\n");
+	}
+	
+	protected void ComponentDecl.setDefaultFormatting() {
+		getClassName().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		getClassName().postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		if (getComment().hasStringComment() || getComment().hasAnnotation()) {
+			if (hasModification()) {
+				getModification().postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+			} else {
+				getName().postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+			}
+		}
+		postFormatting = new DefaultFormattingItem(FormattingItem.Type.LINE_BREAK, "\n");
+	}
+	
+	protected void Comment.setDefaultFormatting() {
+		if (hasStringComment() && hasAnnotation()) {
+			getStringComment().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		}
+	}
+	
+	protected void ParseAnnotation.setDefaultFormatting() {
+		getClassModification().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+	}
+
 	/**
 	 * Propagates the formatting information downwards in the AST if this has not already been done.
 	 */
@@ -141,6 +269,7 @@ aspect FormattedPrint {
 		if (formattingInfo != null) {
 			formattingInfo.mergeAdjacentFormattingItems();
 			addFormattingInformation(formattingInfo);
+			addFormattingRest(formattingInfo);
 		}
 	}
 	
@@ -182,7 +311,6 @@ aspect FormattedPrint {
 		for (int i = 0; i < getNumChild(); i++) {
 			getChild(i).prettyPrintFormattedHelper(printer, printStream);
 		}
-		//prettyPrint(printer, printStream, "");
 		printStream.print(postFormatting);
 	}
 	

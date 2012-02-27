@@ -7,7 +7,7 @@ import java.util.LinkedList;
  * A <code>FormattingItem</code> that consists of several, smaller items.
  */
 public class MixedFormattingItem extends FormattingItem {
-	private Deque<FormattingItem> subItems;
+	private LinkedList<FormattingItem> subItems;
 
 	/**
 	 * Creates a <code>MixedFormattingItem</code>.
@@ -40,7 +40,7 @@ public class MixedFormattingItem extends FormattingItem {
 	}
 	
 	@Override
-	protected Adjacency getAdjacency(FormattingItem otherItem) {
+	public Adjacency getAdjacency(FormattingItem otherItem) {
     	if ((getStartLine() == otherItem.getEndLine() && getStartColumn() == otherItem.getEndColumn() + 1) ||
     			(otherItem.getType() == FormattingItem.Type.LINE_BREAK && getStartLine() == otherItem.getEndLine() + 1 && getStartColumn() == 1)) {
     		return Adjacency.FRONT;
@@ -53,8 +53,8 @@ public class MixedFormattingItem extends FormattingItem {
     }
 	
 	@Override
-	protected FormattingItem mergeItems(Adjacency where, FormattingItem otherItem) {
-		if (where == Adjacency.NONE) {
+	public FormattingItem mergeItems(Adjacency where, FormattingItem otherItem) {
+		if (where == Adjacency.NONE || otherItem.getType() == Type.EMPTY) {
 			return this;
 		}
 
@@ -67,6 +67,40 @@ public class MixedFormattingItem extends FormattingItem {
 		}
 
 		return this;
+	}
+	
+	@Override
+	public FormattingItem[] splitAfterFirstLineBreak() {
+		FormattingItem firstPart = new EmptyFormattingItem();
+		FormattingItem lastPart = new EmptyFormattingItem();
+		int currentSubItemIndex = 0;
+
+		while (currentSubItemIndex < subItems.size()) {
+			FormattingItem currentItem = subItems.get(currentSubItemIndex++);
+			firstPart = firstPart.mergeItems(Adjacency.BACK, currentItem);
+			if (currentItem.getType() == Type.LINE_BREAK) {
+				break;
+			}
+		}
+		
+		while (currentSubItemIndex < subItems.size()) {
+			lastPart = lastPart.mergeItems(Adjacency.BACK, subItems.get(currentSubItemIndex++));
+		}
+		
+		if (firstPart.getType() == Type.EMPTY) {
+			FormattingItem[] result = new FormattingItem[1];
+			result[0] = lastPart;
+			return result;
+		} else if (lastPart.getType() == Type.EMPTY) {
+			FormattingItem[] result = new FormattingItem[1];
+			result[0] = firstPart;
+			return result;
+		}
+		FormattingItem[] result = new FormattingItem[2];
+		result[0] = firstPart;
+		result[1] = lastPart;
+
+		return result;
 	}
 
 	@Override
