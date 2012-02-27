@@ -40,8 +40,8 @@ aspect FormattedPrint {
 	protected FormattingItem BaseNode.postFormatting = new EmptyFormattingItem();
 	
 	public void ASTNode.setFormatting(FormattingInfo formattingInfo) {
-		for (int i = 0; i < getNumChild(); i++) {
-			getChild(i).setFormatting(formattingInfo);
+		for (ASTNode childNode : this) {
+			childNode.setFormatting(formattingInfo);
 		}
 	}
 	
@@ -56,8 +56,8 @@ aspect FormattedPrint {
 	 * @param formattingInfo the information to use to format this AST node.
 	 */	
 	protected void ASTNode.addFormattingInformation(FormattingInfo formattingInfo) {
-		for (int i = 0; i < getNumChild(); i++) {
-			getChild(i).addFormattingInformation(formattingInfo);
+		for (ASTNode childNode : this) {
+			childNode.addFormattingInformation(formattingInfo);
 		}
 	}
 	
@@ -111,8 +111,8 @@ aspect FormattedPrint {
 	}
 	
 	public void ASTNode.addFormattingRest(FormattingInfo formattingInfo) {
-		for (int i = 0; i < getNumChild(); i++) {
-			getChild(i).addFormattingRest(formattingInfo);
+		for (ASTNode childNode : this) {
+			childNode.addFormattingRest(formattingInfo);
 		}
 	}
 	
@@ -213,6 +213,11 @@ aspect FormattedPrint {
 	
 	public void AbstractEquation.setDefaultFormatting() {
 		preFormatting = preFormatting.mergeItems(FormattingItem.Adjacency.BACK, new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " "));
+		if (getComment().hasStringComment()) {
+			getComment().getStringComment().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		} else if (getComment().hasAnnotation()) {
+			getComment().getAnnotation().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		}
 		postFormatting = new DefaultFormattingItem(FormattingItem.Type.LINE_BREAK, "\n");
 	}
 	
@@ -301,15 +306,15 @@ aspect FormattedPrint {
 	}
 	
 	void ASTNode.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-		for (int i = 0; i < getNumChild(); i++) {
-			getChild(i).prettyPrintFormattedHelper(printer, printStream);
+		for (ASTNode childNode : this) {
+			childNode.prettyPrintFormattedHelper(printer, printStream);
 		}
 	}
 
 	void BaseNode.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
-		for (int i = 0; i < getNumChild(); i++) {
-			getChild(i).prettyPrintFormattedHelper(printer, printStream);
+		for (ASTNode childNode : this) {
+			childNode.prettyPrintFormattedHelper(printer, printStream);
 		}
 		printStream.print(postFormatting);
 	}
@@ -452,8 +457,8 @@ aspect FormattedPrint {
     
     void ArraySubscripts.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(preFormatting);
-    	for (int i = 0; i < getNumSubscript(); i++) {
-    		getSubscript(i).prettyPrintFormattedHelper(printer, printStream);
+    	for (Subscript subscript : getSubscripts()) {
+    		subscript.prettyPrintFormattedHelper(printer, printStream);
     	}
     	printStream.print(postFormatting);
     }
@@ -556,26 +561,26 @@ aspect FormattedPrint {
 		}*/
 	    
 	    /** @TODO: Print public and private before respective class. */
-	    for (int i = 0; i < getNumClassDecl(); i++) {
-	    	getClassDecl(i).prettyPrintFormattedHelper(printer, printStream);
+	    for (ClassDecl classDecl : getClassDecls()) {
+	    	classDecl.prettyPrintFormattedHelper(printer, printStream);
 	    }
-	    for (int i = 0; i < getNumImport(); i++) {
-	    	getImport(i).prettyPrintFormattedHelper(printer, printStream);
+	    for (ImportClause importClause : getImports()) {
+	    	importClause.prettyPrintFormattedHelper(printer, printStream);
 	    }
-	    for (int i = 0; i < getNumSuper(); i++) {
-	    	getSuper(i).prettyPrintFormattedHelper(printer, printStream);
+	    for (ExtendsClause superClass : getSupers()) {
+	    	superClass.prettyPrintFormattedHelper(printer, printStream);
 	    }
-	    for (int i = 0; i < getNumComponentDecl(); i++) {
-	    	getComponentDecl(i).prettyPrintFormattedHelper(printer, printStream);
+	    for (ComponentDecl componentDecl : getComponentDecls()) {
+	    	componentDecl.prettyPrintFormattedHelper(printer, printStream);
 	    }
 	    if (getNumEquation() > 0) {
 	    	printStream.print("equation");
-	    	for (int i = 0; i < getNumEquation(); i++) {
-	    		getEquation(i).prettyPrintFormattedHelper(printer, printStream);
+	    	for (AbstractEquation equation : getEquations()) {
+	    		equation.prettyPrintFormattedHelper(printer, printStream);
 	    	}
 	    }
-	    for (int i = 0; i < getNumAnnotation(); i++) {
-	    	getAnnotation(i).prettyPrintFormattedHelper(printer, printStream);
+	    for (Annotation annotation : getAnnotations()) {
+	    	annotation.prettyPrintFormattedHelper(printer, printStream);
 	    	printStream.print(";\n"); /** TODO: Fix ugly hack! */
 	    }
 		
