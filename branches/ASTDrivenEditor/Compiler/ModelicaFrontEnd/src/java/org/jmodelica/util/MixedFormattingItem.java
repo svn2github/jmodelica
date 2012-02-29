@@ -1,21 +1,20 @@
 package org.jmodelica.util;
 
-import java.util.Deque;
 import java.util.LinkedList;
 
 /**
  * A <code>FormattingItem</code> that consists of several, smaller items.
  */
-public class MixedFormattingItem extends FormattingItem {
-	private LinkedList<FormattingItem> subItems;
+public class MixedFormattingItem extends ScannedFormattingItem {
+	private LinkedList<ScannedFormattingItem> subItems;
 
 	/**
 	 * Creates a <code>MixedFormattingItem</code>.
 	 * @param formattingItem the initial item that this <code>MixedFormattingItem</code> should consist of.
 	 */
-	public MixedFormattingItem(FormattingItem formattingItem) {
+	public MixedFormattingItem(ScannedFormattingItem formattingItem) {
 		super(FormattingItem.Type.MIXED, null, formattingItem.startLine, formattingItem.startColumn, formattingItem.endLine, formattingItem.endColumn);
-		subItems = new LinkedList<FormattingItem>();
+		subItems = new LinkedList<ScannedFormattingItem>();
 		subItems.add(formattingItem);
 	}
 
@@ -41,11 +40,16 @@ public class MixedFormattingItem extends FormattingItem {
 	
 	@Override
 	public Adjacency getAdjacency(FormattingItem otherItem) {
-    	if ((getStartLine() == otherItem.getEndLine() && getStartColumn() == otherItem.getEndColumn() + 1) ||
-    			(otherItem.getType() == FormattingItem.Type.LINE_BREAK && getStartLine() == otherItem.getEndLine() + 1 && getStartColumn() == 1)) {
+		if (!(otherItem instanceof ScannedFormattingItem)) {
+			return Adjacency.NONE;
+		}
+		ScannedFormattingItem otherScannedItem = (ScannedFormattingItem) otherItem;
+
+    	if ((startLine == otherScannedItem.endLine && startColumn == endColumn + 1) ||
+    			(otherScannedItem.type == Type.LINE_BREAK && startLine == otherScannedItem.endLine + 1 && startColumn == 1)) {
     		return Adjacency.FRONT;
-    	} else if (getEndLine() == otherItem.getStartLine() && getEndColumn() + 1 == otherItem.getStartColumn() ||
-    			((subItems.getLast().getType() == FormattingItem.Type.LINE_BREAK || subItems.getLast().getType() == FormattingItem.Type.COMMENT) && getEndLine() + 1 == otherItem.getStartLine() && otherItem.getStartColumn() == 1)) {
+    	} else if (endLine == otherScannedItem.startLine && endColumn + 1 == otherScannedItem.startColumn ||
+    			((subItems.getLast().type == Type.LINE_BREAK || subItems.getLast().type == Type.COMMENT) && endLine + 1 == otherScannedItem.startLine && otherScannedItem.startColumn == 1)) {
     		return Adjacency.BACK;
     	}
 
@@ -53,32 +57,43 @@ public class MixedFormattingItem extends FormattingItem {
     }
 	
 	@Override
-	public FormattingItem mergeItems(Adjacency where, FormattingItem otherItem) {
-		if (where == Adjacency.NONE || otherItem.getType() == Type.EMPTY) {
+	public ScannedFormattingItem mergeItems(Adjacency where, FormattingItem otherItem) {
+		if (where == Adjacency.NONE || !(otherItem instanceof ScannedFormattingItem)) {
 			return this;
 		}
 
+		ScannedFormattingItem scannedItem = (ScannedFormattingItem) otherItem;
 		if (where == Adjacency.FRONT) {
-			newStart(otherItem.startLine, otherItem.startColumn);
-			subItems.addFirst(otherItem);
+			newStart(scannedItem.startLine, scannedItem.startColumn);
+
+			if (scannedItem instanceof MixedFormattingItem) {
+				subItems.addAll(0, ((MixedFormattingItem) otherItem).subItems);
+			} else {
+				subItems.addFirst(scannedItem);
+			}
 		} else if (where == Adjacency.BACK) {
-			newEnd(otherItem.endLine, otherItem.endColumn);
-			subItems.addLast(otherItem);
+			newEnd(scannedItem.endLine, scannedItem.endColumn);
+
+			if (scannedItem instanceof MixedFormattingItem) {
+				subItems.addAll(subItems.size(), ((MixedFormattingItem) otherItem).subItems);
+			} else {
+				subItems.addLast(scannedItem);
+			}
 		}
 
 		return this;
 	}
 	
 	@Override
-	public FormattingItem[] splitAfterFirstLineBreak() {
+	public ScannedFormattingItem[] splitAfterFirstLineBreak() {
 		FormattingItem firstPart = new EmptyFormattingItem();
 		FormattingItem lastPart = new EmptyFormattingItem();
 		int currentSubItemIndex = 0;
 
 		while (currentSubItemIndex < subItems.size()) {
-			FormattingItem currentItem = subItems.get(currentSubItemIndex++);
+			ScannedFormattingItem currentItem = subItems.get(currentSubItemIndex++);
 			firstPart = firstPart.mergeItems(Adjacency.BACK, currentItem);
-			if (currentItem.getType() == Type.LINE_BREAK) {
+			if (currentItem.type == Type.LINE_BREAK) {
 				break;
 			}
 		}
@@ -87,18 +102,18 @@ public class MixedFormattingItem extends FormattingItem {
 			lastPart = lastPart.mergeItems(Adjacency.BACK, subItems.get(currentSubItemIndex++));
 		}
 		
-		if (firstPart.getType() == Type.EMPTY) {
-			FormattingItem[] result = new FormattingItem[1];
-			result[0] = lastPart;
+		if (firstPart.type == Type.EMPTY) {
+			ScannedFormattingItem[] result = new ScannedFormattingItem[1];
+			result[0] = (ScannedFormattingItem) lastPart;
 			return result;
-		} else if (lastPart.getType() == Type.EMPTY) {
-			FormattingItem[] result = new FormattingItem[1];
-			result[0] = firstPart;
+		} else if (lastPart.type == Type.EMPTY) {
+			ScannedFormattingItem[] result = new ScannedFormattingItem[1];
+			result[0] = (ScannedFormattingItem) firstPart;
 			return result;
 		}
-		FormattingItem[] result = new FormattingItem[2];
-		result[0] = firstPart;
-		result[1] = lastPart;
+		ScannedFormattingItem[] result = new ScannedFormattingItem[2];
+		result[0] = (ScannedFormattingItem) firstPart;
+		result[1] = (ScannedFormattingItem) lastPart;
 
 		return result;
 	}
@@ -107,7 +122,7 @@ public class MixedFormattingItem extends FormattingItem {
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 
-		for (FormattingItem item : subItems) {
+		for (ScannedFormattingItem item : subItems) {
 			stringBuilder.append(item);
 		}
 

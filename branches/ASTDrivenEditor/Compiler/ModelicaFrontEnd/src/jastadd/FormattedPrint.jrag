@@ -63,26 +63,27 @@ aspect FormattedPrint {
 	
 	protected void BaseNode.addFormattingInformation(FormattingInfo formattingInfo) {
 		if (formatting == null) {
+			super.addFormattingInformation(formattingInfo);
 			return;
 		}
 
 		setDefaultFormatting();
-		Iterator<FormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
+		Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
 		FormattingItem nextItem = addPreFormatting(formattingIterator);
 		addPostFormatting(formattingIterator, nextItem);
 		super.addFormattingInformation(formattingInfo);
 	}
 	
-	public FormattingItem BaseNode.addPreFormatting(Iterator<FormattingItem> formattingIterator) {
-		int startLine = getLine(getStart());
-		int startColumn = getColumn(getStart());
+	public FormattingItem BaseNode.addPreFormatting(Iterator<ScannedFormattingItem> formattingIterator) {
 		FormattingItem formattingItem = new EmptyFormattingItem();
+		FormattingItem.RelativePosition relativePosition = FormattingItem.RelativePosition.BEFORE;
 
-		while (formattingIterator.hasNext() && (formattingItem.getEndLine() < startLine || formattingItem.getEndColumn() + 1 < startColumn)) {
+		while (formattingIterator.hasNext() && relativePosition == FormattingItem.RelativePosition.BEFORE) {
 			formattingItem = formattingIterator.next();
+			relativePosition = formattingItem.getFrontRelativePosition(this);
 		}
 		
-		if (formattingItem.getEndLine() == startLine && formattingItem.getEndColumn() + 1 == startColumn) {
+		if (formattingItem.getFrontRelativePosition(this) == FormattingItem.RelativePosition.FRONT_ADJACENT) {
 			preFormatting = formattingItem;
 			formattingIterator.remove();
 			if (formattingIterator.hasNext()) {
@@ -95,16 +96,17 @@ aspect FormattedPrint {
 		return formattingItem;
 	}
 	
-	public void BaseNode.addPostFormatting(Iterator<FormattingItem> formattingIterator, FormattingItem startingFormattingItem) {
-		int endLine = getLine(getEnd());
-		int endColumnPlusOne = getColumn(getEnd()) + 1;
+	public void BaseNode.addPostFormatting(Iterator<ScannedFormattingItem> formattingIterator, FormattingItem startingFormattingItem) {
 		FormattingItem formattingItem = startingFormattingItem;
+		FormattingItem.RelativePosition relativePosition = formattingItem.getBackRelativePosition(this);
 
-		while (formattingIterator.hasNext() && (formattingItem.getStartLine() < endLine || formattingItem.getStartColumn() < endColumnPlusOne)) {
+		while (formattingIterator.hasNext() && (relativePosition == FormattingItem.RelativePosition.BEFORE ||
+				relativePosition == FormattingItem.RelativePosition.UNDEFINED)) {
 			formattingItem = formattingIterator.next();
+			relativePosition = formattingItem.getBackRelativePosition(this);
 		}
 		
-		if (formattingItem.getStartLine() == endLine && formattingItem.getStartColumn() == endColumnPlusOne) {
+		if (formattingItem.getBackRelativePosition(this) == FormattingItem.RelativePosition.BACK_ADJACENT) {
 			postFormatting = formattingItem;
 			formattingIterator.remove();
 		}
@@ -117,7 +119,7 @@ aspect FormattedPrint {
 	}
 	
 	public void BaseNode.addFormattingRest(FormattingInfo formattingInfo) {
-		Iterator<FormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
+		Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
 		while (formattingIterator.hasNext()) {
 			FormattingItem formattingItem = formattingIterator.next();
 			FormattingItem.Adjacency preAdjacency = preFormatting.getAdjacency(formattingItem);
@@ -159,108 +161,108 @@ aspect FormattedPrint {
 	
 	protected void Within.setDefaultFormatting() {
 		if (hasPackageName()) {
-			getPackageName().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+			getPackageName().preFormatting = new DefaultFormattingItem(" ");
 		}
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.LINE_BREAK, "\n");
+		postFormatting = new DefaultFormattingItem("\n");
 	}
 	
 	protected void Encapsulated.setDefaultFormatting() {
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		postFormatting = new DefaultFormattingItem(" ");
 	}
 	
 	protected void Partial.setDefaultFormatting() {
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		postFormatting = new DefaultFormattingItem(" ");
 	}
 	
 	protected void Redeclare.setDefaultFormatting() {
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		postFormatting = new DefaultFormattingItem(" ");
 	}
 	
 	protected void Final.setDefaultFormatting() {
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		postFormatting = new DefaultFormattingItem(" ");
 	}
 	
 	protected void Inner.setDefaultFormatting() {
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		postFormatting = new DefaultFormattingItem(" ");
 	}
 	
 	protected void Outer.setDefaultFormatting() {
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		postFormatting = new DefaultFormattingItem(" ");
 	}
 	
 	protected void Replaceable.setDefaultFormatting() {
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		postFormatting = new DefaultFormattingItem(" ");
 	}
 	
 	protected void Restriction.setDefaultFormatting() {
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		postFormatting = new DefaultFormattingItem(" ");
 	}
 	
 	protected void FullClassDecl.setDefaultFormatting() {
 		if (hasStringComment()) {
-			getName().postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
-			getStringComment().postFormatting = new DefaultFormattingItem(FormattingItem.Type.LINE_BREAK, "\n");
+			getName().postFormatting = new DefaultFormattingItem(" ");
+			getStringComment().postFormatting = new DefaultFormattingItem("\n");
 		}
 		
 		if (getNumEquation() > 0) {
-			getEquation(0).preFormatting = new DefaultFormattingItem(FormattingItem.Type.MIXED, "\n ");
+			getEquation(0).preFormatting = new DefaultFormattingItem("\n");
 		}
 		
 		for (Annotation annotation : getAnnotations()) {
-			annotation.preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+			annotation.preFormatting = new DefaultFormattingItem(" ");
 		}
 	}
 	
 	public void AbstractEquation.setDefaultFormatting() {
-		preFormatting = preFormatting.mergeItems(FormattingItem.Adjacency.BACK, new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " "));
+		preFormatting = preFormatting.mergeItems(FormattingItem.Adjacency.BACK, new DefaultFormattingItem(" "));
 		if (getComment().hasStringComment()) {
-			getComment().getStringComment().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+			getComment().getStringComment().preFormatting = new DefaultFormattingItem(" ");
 		} else if (getComment().hasAnnotation()) {
-			getComment().getAnnotation().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+			getComment().getAnnotation().preFormatting = new DefaultFormattingItem(" ");
 		}
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.LINE_BREAK, "\n");
+		postFormatting = new DefaultFormattingItem("\n");
 	}
 	
 	protected void Each.setDefaultFormatting() {
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		postFormatting = new DefaultFormattingItem(" ");
 	}
 	
 	public void ExtendsClause.setDefaultFormatting() {
-		preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
-		getSuper().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.LINE_BREAK, "\n");
+		preFormatting = new DefaultFormattingItem(" ");
+		getSuper().preFormatting = new DefaultFormattingItem(" ");
+		postFormatting = new DefaultFormattingItem("\n");
 	}
 	
 	public void ImportClause.setDefaultFormatting() {
-		preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
-		getPackageName().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		preFormatting = new DefaultFormattingItem(" ");
+		getPackageName().preFormatting = new DefaultFormattingItem(" ");
 		if (getComment().hasStringComment() || getComment().hasAnnotation()) {
-			getPackageName().postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+			getPackageName().postFormatting = new DefaultFormattingItem(" ");
 		}
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.LINE_BREAK, "\n");
+		postFormatting = new DefaultFormattingItem("\n");
 	}
 	
 	protected void ComponentDecl.setDefaultFormatting() {
-		getClassName().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
-		getClassName().postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		getClassName().preFormatting = new DefaultFormattingItem(" ");
+		getClassName().postFormatting = new DefaultFormattingItem(" ");
 		if (getComment().hasStringComment() || getComment().hasAnnotation()) {
 			if (hasModification()) {
-				getModification().postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+				getModification().postFormatting = new DefaultFormattingItem(" ");
 			} else {
-				getName().postFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+				getName().postFormatting = new DefaultFormattingItem(" ");
 			}
 		}
-		postFormatting = new DefaultFormattingItem(FormattingItem.Type.LINE_BREAK, "\n");
+		postFormatting = new DefaultFormattingItem("\n");
 	}
 	
 	protected void Comment.setDefaultFormatting() {
 		if (hasStringComment() && hasAnnotation()) {
-			getStringComment().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+			getStringComment().preFormatting = new DefaultFormattingItem(" ");
 		}
 	}
 	
 	protected void ParseAnnotation.setDefaultFormatting() {
-		getClassModification().preFormatting = new DefaultFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, " ");
+		getClassModification().preFormatting = new DefaultFormattingItem(" ");
 	}
 
 	/**
