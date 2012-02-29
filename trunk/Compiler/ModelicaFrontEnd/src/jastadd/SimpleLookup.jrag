@@ -60,7 +60,7 @@ aspect SimpleClassLookup {
 		String[] parts = name.split("\\.");
 		ClassDecl cd = this;
 		for (String part : parts) {
-			cd = cd.simpleLookupClass(part);
+			cd = cd.simpleLookupClassMemberScope(part);
 			if (cd == null)
 				return null;
 		}

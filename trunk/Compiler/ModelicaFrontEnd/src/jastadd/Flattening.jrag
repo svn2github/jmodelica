@@ -1003,6 +1003,7 @@ aspect FlatExpressions {
 	public FIfWhenElseEquation FIfWhenElseEquation.flattenEqn(FQName prefix, FClass fc) {
 		FIfWhenElseEquation res = createEmptyNode();
 		res.setType((FEquationType) getType().fullCopy());
+		res.eliminateOnParamTest = eliminateOnParamTest;
 		for (FAbstractEquation ae : getFAbstractEquations()) {
 			FAbstractEquation feqn = ae.flattenEqn(prefix, fc);
 			if (feqn != null)

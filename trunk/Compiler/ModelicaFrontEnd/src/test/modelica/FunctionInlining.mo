@@ -610,6 +610,25 @@ end FunctionInlining.BasicInline11;
         Real x = y[f(e)];
         Real[:] y = { 1, 2, 3 };
     end BasicInline11;
+
+
+    model BasicInline12
+        function f
+            input Real a;
+            output Real b;
+        algorithm
+            b := a;
+        end f;
+        
+		Real[2] y = {1,2};
+        Real x(start=1);
+	equation
+		if x > 3 then
+			der(x) = f(y[1]);
+	    else
+            der(x) = f(y[2]);
+		end if;
+    end BasicInline12;
     
     
     model RecordInline1
@@ -1021,6 +1040,47 @@ end FunctionInlining.RecordInline7;
         Real y[4] = {1,2,3,4};
         R x = f(R(y[1:3], integer(y[4])));
     end RecordInline7;
+    
+    
+    model RecordInline8
+        record R
+            Real a[3];
+            Integer b;
+        end R;
+        
+        function f
+            input Real c;
+            output R d;
+        algorithm
+            d.a[1] := 2 / c;
+            d.a[2] := 3 + c;
+            d.a[2] := 4 * c;
+            d.b := integer(5 - c);
+        end f;
+        
+        Real y = 1;
+        R x = f(y);
+    end RecordInline8;
+    
+    
+    model RecordInline9
+        record R
+            Real a[3];
+            Integer b;
+        end R;
+        
+        function f
+            input Real c;
+            output R d;
+        algorithm
+            d.a[1] := 2 / c;
+            d.a[2] := 3 + c;
+            d.a[2] := 4 * c;
+            d.b := integer(5 - c);
+        end f;
+        
+        R x = f(1);
+    end RecordInline9;
 	
 	
 	model UninlinableFunction1

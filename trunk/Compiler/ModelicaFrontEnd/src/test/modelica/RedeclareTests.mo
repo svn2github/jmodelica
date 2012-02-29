@@ -4128,4 +4128,27 @@ model ShortRedeclare1
 end ShortRedeclare1;
 
 
+model CyclicRedeclare1
+	package A
+		replaceable model B = C;
+	end A;
+	
+	model C
+		Real x = 1;
+	end C;
+    
+    package D
+        extends A;
+        redeclare model B = E.B;
+    end D;
+    
+    package E
+        extends A;
+        redeclare model B = D.B;
+    end E;
+	
+	E.B b;
+end CyclicRedeclare1;
+
+
 end RedeclareTests;

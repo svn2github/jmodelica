@@ -2126,9 +2126,52 @@ aspect StringComments {
 	
 }
 
+aspect Sorting {
+    
+	public static final Comparator<AbstractFVariable> AbstractFVariable.NAME_COMPARATOR = 
+		new Comparator<AbstractFVariable>() {
+			public int compare(AbstractFVariable fv1, AbstractFVariable fv2) {
+				String n1 = (fv1 == null) ? null : fv1.name();
+				String n2 = (fv2 == null) ? null : fv2.name();
+				if (n1 != null)
+					return n1.compareTo(n2);
+				else
+					return (n2 != null) ? 1 : 0;
+			}
+			
+			public boolean equals(Object obj) { 
+				return obj == this; 
+			}
+		};
+	    
+		public static final Comparator<ASTNode> ASTNode.CHILD_ORDER_COMPARATOR =
+		    new Comparator<ASTNode>() {
+				public int compare(ASTNode n1, ASTNode n2) {
+			    	return n1.childIndex - n2.childIndex;
+			    }
+			    
+				public boolean equals(Object obj) { 
+			    	return obj == this; 
+			    }
+			};
+		    
+		public static final Comparator<ASTNode> ASTNode.TOSTRING_COMPARATOR =
+		    new Comparator<ASTNode>() {
+				public int compare(ASTNode n1, ASTNode n2) {
+			    	return n1.toString().compareTo(n2.toString());
+			    }
+			    
+				public boolean equals(Object obj) { 
+			    	return obj == this; 
+			    }
+			};
+
+}
+
 aspect GeneralHelpers {
 	
 	abstract public FExp FExp.fullCopy();
+	abstract public FEquationType FEquationType.fullCopy();
 	abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
 	
 	abstract public FExp FExp.copy();

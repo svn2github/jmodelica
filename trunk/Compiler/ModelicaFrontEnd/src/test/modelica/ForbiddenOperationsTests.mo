@@ -224,6 +224,7 @@ equation
 	x = y + 1;
 	when time > 1 then
 		x + y = 3;
+		x = 2;
 	end when;
 end WhenContents1;
 
@@ -237,7 +238,7 @@ model WhenContents2
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 235, column 2:
-  Both branches in when equation must assign the same variables
+  All branches in when equation must assign the same variables
 ")})));
 
 	Real x;
@@ -261,7 +262,7 @@ model WhenContents3
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 262, column 3:
-  Both branches in if equation within when equation must assign the same variables
+  All branches in if equation with non-parameter tests within when equation must assign the same variables
 ")})));
 
 	Real x;

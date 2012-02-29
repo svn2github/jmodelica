@@ -303,7 +303,7 @@ aspect FlatAPI {
 	syn boolean FVariable.shouldContribute() = !isAlias() && !inRecord() && !isForIndex();
 	
 	public class FClass {
-		public static <T extends FVariable, C extends Collection<T>> C intersection(
+		public static <T extends FVariable, C extends Collection<T>> C intersectFVColl(
 				C a, Collection<? extends FVariable> b) {
 			try {
 				// To avoid having to have different versions for different collections
@@ -353,23 +353,23 @@ aspect FlatAPI {
 
 	syn int FClass.numIndependentRealConstants() = independentRealConstants().size();
 	syn lazy ArrayList<FRealVariable> FClass.independentRealConstants() = 
-		intersection(reals(), independentConstants());
+		intersectFVColl(reals(), independentConstants());
 	
 	syn int FClass.numIndependentIntegerConstants() = independentIntegerConstants().size();
 	syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerConstants() = 
-		intersection(integers(), independentConstants());
+		intersectFVColl(integers(), independentConstants());
 	
 	syn int FClass.numIndependentEnumConstants() = independentEnumConstants().size();
 	syn lazy ArrayList<FEnumVariable> FClass.independentEnumConstants() = 
-		intersection(enums(), independentConstants());
+		intersectFVColl(enums(), independentConstants());
 	
 	syn int FClass.numIndependentBooleanConstants() = independentBooleanConstants().size();
 	syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanConstants() = 
-		intersection(booleans(), independentConstants());
+		intersectFVColl(booleans(), independentConstants());
 	
 	syn int FClass.numIndependentStringConstants() = independentStringConstants().size();
 	syn lazy ArrayList<FStringVariable> FClass.independentStringConstants() = 
-		intersection(strings(), independentConstants());
+		intersectFVColl(strings(), independentConstants());
 
 	// TODO: Is there such a thing as a dependent constant??
     syn int FClass.numDependentConstants() = dependentConstants().size();
@@ -381,23 +381,23 @@ aspect FlatAPI {
 	
 	syn int FClass.numDependentRealConstants() = dependentRealConstants().size();
 	syn lazy ArrayList<FRealVariable> FClass.dependentRealConstants() =
-      intersection(reals(), dependentConstants());
+      intersectFVColl(reals(), dependentConstants());
 	
 	syn int FClass.numDependentIntegerConstants() = dependentIntegerConstants().size();
 	syn lazy ArrayList<FIntegerVariable> FClass.dependentIntegerConstants() =
-      intersection(integers(), dependentConstants());
+      intersectFVColl(integers(), dependentConstants());
 	
 	syn int FClass.numDependentEnumConstants() = dependentEnumConstants().size();
 	syn lazy ArrayList<FEnumVariable> FClass.dependentEnumConstants() =
-      intersection(enums(), dependentConstants());
+      intersectFVColl(enums(), dependentConstants());
 	
 	syn int FClass.numDependentBooleanConstants() = dependentBooleanConstants().size();
 	syn lazy ArrayList<FBooleanVariable> FClass.dependentBooleanConstants() =
-      intersection(booleans(), dependentConstants());
+      intersectFVColl(booleans(), dependentConstants());
 	
 	syn int FClass.numDependentStringConstants() = dependentStringConstants().size();
 	syn lazy ArrayList<FStringVariable> FClass.dependentStringConstants() =
-      intersection(strings(), dependentConstants());
+      intersectFVColl(strings(), dependentConstants());
 
     syn int FClass.numIndependentParameters() = independentParameters().size();
 	coll ArrayList<FVariable> FClass.independentParameters() 
@@ -408,23 +408,23 @@ aspect FlatAPI {
 	
 	syn int FClass.numIndependentRealParameters() = independentRealParameters().size();
 	syn lazy ArrayList<FRealVariable> FClass.independentRealParameters() =
-      intersection(reals(), independentParameters());
+      intersectFVColl(reals(), independentParameters());
 
 	syn int FClass.numIndependentIntegerParameters() = independentIntegerParameters().size();
 	syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerParameters() =
-      intersection(integers(), independentParameters());
+      intersectFVColl(integers(), independentParameters());
 
 	syn int FClass.numIndependentEnumParameters() = independentEnumParameters().size();
 	syn lazy ArrayList<FEnumVariable> FClass.independentEnumParameters() =
-      intersection(enums(), independentParameters());
+      intersectFVColl(enums(), independentParameters());
 	
 	syn int FClass.numIndependentBooleanParameters() = independentBooleanParameters().size();
 	syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanParameters() =
-      intersection(booleans(), independentParameters());
+      intersectFVColl(booleans(), independentParameters());
 
 	syn int FClass.numIndependentStringParameters() = independentStringParameters().size();
 	syn lazy ArrayList<FStringVariable> FClass.independentStringParameters() =
-      intersection(strings(), independentParameters());
+      intersectFVColl(strings(), independentParameters());
 
     syn int FClass.numDependentParameters() = dependentParameters().size();
 	coll ArrayList<FVariable> FClass.dependentParameters() 
@@ -435,43 +435,43 @@ aspect FlatAPI {
 
 	syn int FClass.numDependentRealParameters() = dependentRealParameters().size();
 	syn lazy ArrayList<FRealVariable> FClass.dependentRealParameters() =
-      intersection(reals(), dependentParameters());
+      intersectFVColl(reals(), dependentParameters());
 
 	syn int FClass.numDependentIntegerParameters() = dependentIntegerParameters().size();
 	syn lazy ArrayList<FIntegerVariable> FClass.dependentIntegerParameters() =
-      intersection(integers(), dependentParameters());
+      intersectFVColl(integers(), dependentParameters());
 
 	syn int FClass.numDependentEnumParameters() = dependentEnumParameters().size();
 	syn lazy ArrayList<FEnumVariable> FClass.dependentEnumParameters() =
-      intersection(enums(), dependentParameters());
+      intersectFVColl(enums(), dependentParameters());
 	
 	syn int FClass.numDependentBooleanParameters() = dependentBooleanParameters().size();
 	syn lazy ArrayList<FBooleanVariable> FClass.dependentBooleanParameters() =
-      intersection(booleans(), dependentParameters());
+      intersectFVColl(booleans(), dependentParameters());
 	
 	syn int FClass.numDependentStringParameters() = dependentStringParameters().size();
 	syn lazy ArrayList<FStringVariable> FClass.dependentStringParameters() =
-      intersection(strings(), dependentParameters());
+      intersectFVColl(strings(), dependentParameters());
 
 	syn int FClass.numDiscreteRealVariables() = discreteRealVariables().size();
 	syn lazy ArrayList<FRealVariable> FClass.discreteRealVariables() =
-      intersection(reals(), discreteVariables());
+      intersectFVColl(reals(), discreteVariables());
 
 	syn int FClass.numDiscreteIntegerVariables() = discreteIntegerVariables().size();
 	syn lazy ArrayList<FIntegerVariable> FClass.discreteIntegerVariables() =
-      intersection(integers(), discreteVariables());
+      intersectFVColl(integers(), discreteVariables());
 
 	syn int FClass.numDiscreteEnumVariables() = discreteEnumVariables().size();
 	syn lazy ArrayList<FEnumVariable> FClass.discreteEnumVariables() =
-      intersection(enums(), discreteVariables());
+      intersectFVColl(enums(), discreteVariables());
 
 	syn int FClass.numDiscreteBooleanVariables() = discreteBooleanVariables().size();
 	syn lazy ArrayList<FBooleanVariable> FClass.discreteBooleanVariables() =
-      intersection(booleans(), discreteVariables());
+      intersectFVColl(booleans(), discreteVariables());
 
 	syn int FClass.numDiscreteStringVariables() = discreteStringVariables().size();
 	syn lazy ArrayList<FStringVariable> FClass.discreteStringVariables() =
-      intersection(strings(), discreteVariables());
+      intersectFVColl(strings(), discreteVariables());
 		
     syn int FClass.numDifferentiatedRealVariables() = differentiatedRealVariables().size();
   	syn lazy ArrayList<FRealVariable> FClass.differentiatedRealVariables() {
@@ -553,27 +553,27 @@ aspect FlatAPI {
 	
 	syn int FClass.numRealVariables() = realVariables().size();
 	syn lazy ArrayList<FRealVariable> FClass.realVariables() =
-      intersection(reals(), variables());
+      intersectFVColl(reals(), variables());
 
 	syn int FClass.numIntegerVariables() = integerVariables().size();
 	syn lazy ArrayList<FIntegerVariable> FClass.integerVariables() =
-      intersection(integers(), variables());
+      intersectFVColl(integers(), variables());
 
 	syn int FClass.numEnumVariables() = enumVariables().size();
 	syn lazy ArrayList<FEnumVariable> FClass.enumVariables() =
-      intersection(enums(), variables());
+      intersectFVColl(enums(), variables());
 
 	syn int FClass.numBooleanVariables() = booleanVariables().size();
 	syn lazy ArrayList<FBooleanVariable> FClass.booleanVariables() =
-      intersection(booleans(), variables());
+      intersectFVColl(booleans(), variables());
 
 	syn int FClass.numStringVariables() = stringVariables().size();
 	syn lazy ArrayList<FStringVariable> FClass.stringVariables() =
-      intersection(strings(), variables());
+      intersectFVColl(strings(), variables());
 	
     syn int FClass.numAlgebraicRealVariables() = algebraicRealVariables().size();
 	syn lazy ArrayList<FRealVariable> FClass.algebraicRealVariables() { 
-	  ArrayList<FRealVariable> set = intersection(reals(),variables());
+	  ArrayList<FRealVariable> set = intersectFVColl(reals(),variables());
   	  set.removeAll(differentiatedRealVariables());
   	  set.removeAll(derivativeVariables());
   	  set.removeAll(discreteVariables());
@@ -604,19 +604,19 @@ aspect FlatAPI {
 	/*
     syn int FClass.numAlgebraicIntegerVariables() = algebraicIntegerVariables().size();
 	syn lazy ArrayList<FVariable> FClass.algebraicIntegerVariables() = 
-	  intersection(algebraicVariables(), integers());
+	  intersectFVColl(algebraicVariables(), integers());
 	
     syn int FClass.numAlgebraicEnumVariables() = algebraicEnumVariables().size();
 	syn lazy ArrayList<FVariable> FClass.algebraicEnumVariables() = 
-	  intersection(algebraicVariables(), enums());
+	  intersectFVColl(algebraicVariables(), enums());
 	
     syn int FClass.numAlgebraicBooleanVariables() = algebraicBooleanVariables().size();
 	syn lazy ArrayList<FVariable> FClass.algebraicBooleanVariables() = 
-	  intersection(algebraicVariables(), booleans());
+	  intersectFVColl(algebraicVariables(), booleans());
 
     syn int FClass.numAlgebraicStringVariables() = algebraicStringVariables().size();
 	syn lazy ArrayList<FVariable> FClass.algebraicStringVariables() = 
-	  intersection(algebraicVariables(), strings());
+	  intersectFVColl(algebraicVariables(), strings());
 */
 	
     syn int FClass.numVariablesWithBindingExp() = variablesWithBindingExp().size();
@@ -629,23 +629,23 @@ aspect FlatAPI {
 
 	syn int FClass.numRealVariablesWithBindingExp() = realVariablesWithBindingExp().size();
 	syn lazy ArrayList<FVariable> FClass.realVariablesWithBindingExp() =
-      intersection(variablesWithBindingExp(), reals());
+      intersectFVColl(variablesWithBindingExp(), reals());
 
 	syn int FClass.numIntegerVariablesWithBindingExp() = integerVariablesWithBindingExp().size();
 	syn lazy ArrayList<FVariable> FClass.integerVariablesWithBindingExp() =
-      intersection(variablesWithBindingExp(), integers());
+      intersectFVColl(variablesWithBindingExp(), integers());
 
 	syn int FClass.numEnumVariablesWithBindingExp() = enumVariablesWithBindingExp().size();
 	syn lazy ArrayList<FVariable> FClass.enumVariablesWithBindingExp() =
-      intersection(variablesWithBindingExp(), enums());
+      intersectFVColl(variablesWithBindingExp(), enums());
 
 	syn int FClass.numBooleanVariablesWithBindingExp() = booleanVariablesWithBindingExp().size();
 	syn lazy ArrayList<FVariable> FClass.booleanVariablesWithBindingExp() =
-      intersection(variablesWithBindingExp(), booleans());
+      intersectFVColl(variablesWithBindingExp(), booleans());
 
 	syn int FClass.numStringVariablesWithBindingExp() = stringVariablesWithBindingExp().size();
 	syn lazy ArrayList<FVariable> FClass.stringVariablesWithBindingExp() =
-      intersection(variablesWithBindingExp(), strings());
+      intersectFVColl(variablesWithBindingExp(), strings());
      
     syn int FClass.numInputs() = inputs().size();
 	coll ArrayList<FVariable> FClass.inputs() 
@@ -659,23 +659,23 @@ aspect FlatAPI {
 
 	syn int FClass.numRealInputs() = realInputs().size();
 	syn lazy ArrayList<FVariable> FClass.realInputs() =
-      intersection(inputs(), reals());
+      intersectFVColl(inputs(), reals());
 	
 	syn int FClass.numIntegerInputs() = integerInputs().size();
 	syn lazy ArrayList<FVariable> FClass.integerInputs() =
-      intersection(inputs(), integers());
+      intersectFVColl(inputs(), integers());
 	
 	syn int FClass.numEnumInputs() = enumInputs().size();
 	syn lazy ArrayList<FVariable> FClass.enumInputs() =
-      intersection(inputs(), enums());
+      intersectFVColl(inputs(), enums());
 
 	syn int FClass.numBooleanInputs() = booleanInputs().size();
 	syn lazy ArrayList<FVariable> FClass.booleanInputs() =
-      intersection(inputs(), booleans());
+      intersectFVColl(inputs(), booleans());
 
 	syn int FClass.numStringInputs() = stringInputs().size();
 	syn lazy ArrayList<FVariable> FClass.stringInputs() =
-      intersection(inputs(), strings());
+      intersectFVColl(inputs(), strings());
 
     syn int FClass.numOutputs() = outputs().size();
 	coll ArrayList<FVariable> FClass.outputs() 
@@ -686,23 +686,23 @@ aspect FlatAPI {
 
 	syn int FClass.numRealOutputs() = realOutputs().size();
 	syn lazy ArrayList<FVariable> FClass.realOutputs() =
-      intersection(outputs(), reals());
+      intersectFVColl(outputs(), reals());
 	
 	syn int FClass.numIntegerOutputs() = integerOutputs().size();
 	syn lazy ArrayList<FVariable> FClass.integerOutputs() =
-      intersection(outputs(), integers());
+      intersectFVColl(outputs(), integers());
 	
 	syn int FClass.numEnumOutputs() = enumOutputs().size();
 	syn lazy ArrayList<FVariable> FClass.enumOutputs() =
-      intersection(outputs(), enums());
+      intersectFVColl(outputs(), enums());
 
 	syn int FClass.numBooleanOutputs() = booleanOutputs().size();
 	syn lazy ArrayList<FVariable> FClass.booleanOutputs() =
-      intersection(outputs(), booleans());
+      intersectFVColl(outputs(), booleans());
 
 	syn int FClass.numStringOutputs() = stringOutputs().size();
 	syn lazy ArrayList<FVariable> FClass.stringOutputs() =
-      intersection(outputs(), strings());
+      intersectFVColl(outputs(), strings());
 
     syn lazy int FClass.numScalarEquations() {
     	int res = 0;
@@ -731,19 +731,33 @@ aspect FlatAPI {
 	}
 	
 	syn int FAbstractEquation.numScalarEquations() = 1;
-	eq FIfWhenEquation.numScalarEquations() {
-		int res = 0;
-		for (FAbstractEquation e : getFAbstractEquations()) {
-			res += e.numScalarEquations();
-		}
-		return res;
-	}
-	
+	eq FEquation.numScalarEquations()           = getLeft().size().numElements();
+	eq FConnectClause.numScalarEquations()      = getConnector1().size().numElements();
+	eq FAlgorithmBlock.numScalarEquations()     = -1;  // TODO: Support FAlgorithmBlock
+	eq FIfWhenElseEquation.numScalarEquations() = numScalarEqnsInList(getFAbstractEquations());
+	eq FForClauseE.numScalarEquations()         = 
+		numScalarEqnsInList(getFAbstractEquations()) * numForElems(getFForIndexs());
+	eq InstForClauseE.numScalarEquations()      = 
+		numScalarEqnsInList(getFAbstractEquations()) * numForElems(getInstForIndexs());
 	eq FFunctionCallEquation.numScalarEquations() {
 		 int res = 0;
 		 for (FFunctionCallLeft l : getLefts())
 			 res += l.numScalarVars();
 		 return res;
+	}
+	
+	protected static int FAbstractEquation.numForElems(List<? extends CommonForIndex> list) {
+		int res = 1;
+		for (CommonForIndex i : list)
+			res *= i.size().numElements();
+		return res;
+	}
+	
+	protected static int FAbstractEquation.numScalarEqnsInList(List<FAbstractEquation> list) {
+		int res = 0;
+		for (FAbstractEquation e : list) 
+			res += e.numScalarEquations();
+		return res;
 	}
 
 	syn int FClass.numSamplers() = 
@@ -1407,16 +1421,16 @@ aspect FVariableUses {
 		to AbstractFVariable.dependentParameters() for myFV();
 	
 	syn lazy ArrayList<FRealVariable> AbstractFVariable.dependentRealParameters() =
-        FClass.intersection(myFClass().reals(), dependentParameters());
+        FClass.intersectFVColl(myFClass().reals(), dependentParameters());
 
 	syn lazy ArrayList<FIntegerVariable> AbstractFVariable.dependentIntegerParameters() =
-	    FClass.intersection(myFClass().integers(), dependentParameters());
+	    FClass.intersectFVColl(myFClass().integers(), dependentParameters());
 
 	syn lazy ArrayList<FBooleanVariable> AbstractFVariable.dependentBooleanParameters() =
-	    FClass.intersection(myFClass().booleans(), dependentParameters());
+	    FClass.intersectFVColl(myFClass().booleans(), dependentParameters());
 
 	syn lazy ArrayList<FStringVariable> AbstractFVariable.dependentStringParameters() =
-	    FClass.intersection(myFClass().strings(), dependentParameters());
+	    FClass.intersectFVColl(myFClass().strings(), dependentParameters());
 
 	/**
 	 * \brief Collection attribute returning all input variables (FVariables)
@@ -1444,7 +1458,7 @@ aspect FVariableUses {
 	}
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.realInputs() = 
-		new LinkedHashSet<FVariable>(FClass.intersection(myFClass().realInputs(),inputs()));
+		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().realInputs(),inputs()));
 
 	
 	/**
@@ -1472,7 +1486,7 @@ aspect FVariableUses {
 	}
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicRealVariables() = 
-		new LinkedHashSet<FVariable>(FClass.intersection(myFClass().algebraicRealVariables(),algebraicVariables()));
+		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().algebraicRealVariables(),algebraicVariables()));
 
 	/**
 	 * \brief Collection attribute returning all derivative variables (FDerivativeVariables)
@@ -2206,8 +2220,8 @@ aspect Sparsity {
 
 	public void FFunctionCallEquation.calculateEquationSparsity(
 			ArrayList<Integer>[] sp, int i, Set<? extends FVariable> vars, int offset) {
-		Set<FVariable> rv = FClass.intersection(referencedFVariablesInRHS(), vars);
-//		Set<FVariable> lv = FClass.intersection(referencedFVariablesInLHS(), vars);
+		Set<FVariable> rv = FClass.intersectFVColl(referencedFVariablesInRHS(), vars);
+//		Set<FVariable> lv = FClass.intersectFVColl(referencedFVariablesInLHS(), vars);
 		Set<FVariable> lv = referencedFVariablesInLHS();
 		
 		for (FVariable fv : lv) {

@@ -2652,7 +2652,6 @@ equation
  end when;
 end WhenEqu11;
 
-/* // TODO: add these test when more support is implemented in the middle end
 model IfEqu1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
@@ -2808,31 +2807,21 @@ fclass TransformCanonicalTests.IfEqu6
  Real x[1];
  Real x[2];
  Real x[3];
- Boolean y[1];
- Boolean y[2];
+ discrete Boolean y[1];
+ discrete Boolean y[2];
+initial equation 
+ pre(y[1]) = false;
+ pre(y[2]) = false;
 equation
- if y[1] then
-  x[1] = 1;
-  x[2] = 2;
-  x[3] = 3;
- elseif y[2] then
-  x[1] = 4;
-  x[2] = 5;
-  x[3] = 6;
- else
-  x[1] = 7;
-  x[2] = 8;
-  x[3] = 9;
- end if;
- x[1] = 0;
- x[2] = 0;
- x[3] = 0;
+ x[1] = (if y[1] then 1 elseif y[2] then 4 else 7);
+ x[2] = (if y[1] then 2 elseif y[2] then 5 else 8);
+ x[3] = (if y[1] then 3 elseif y[2] then 6 else 9);
  y[1] = false;
  y[2] = true;
 end TransformCanonicalTests.IfEqu6;
 ")})));
 
-	Real x[3] = zeros(3);
+	Real x[3];
 	Boolean y[2] = { false, true };
 equation
 	if y[1] then
@@ -2855,33 +2844,29 @@ fclass TransformCanonicalTests.IfEqu7
  Real x[1];
  Real x[2];
  Real x[3];
- Boolean y[1];
- Boolean y[2];
+ discrete Boolean y[1];
+ discrete Boolean y[2];
+initial equation 
+ pre(y[1]) = false;
+ pre(y[2]) = false;
 equation
- if y[1] then
-  x[1] = 1;
-  x[2] = 2;
-  x[3] = 3;
- elseif y[2] then
-  x[1] = 4;
-  x[2] = 5;
-  x[3] = 6;
- end if;
- x[1] = 0;
- x[2] = 0;
- x[3] = 0;
+ x[1] = (if y[1] then 1 elseif y[2] then 4 else 7);
+ x[2] = (if y[1] then 2 elseif y[2] then 5 else 8);
+ x[3] = (if y[1] then 3 elseif y[2] then 6 else 9);
  y[1] = false;
  y[2] = true;
 end TransformCanonicalTests.IfEqu7;
 ")})));
 
-	Real x[3]= zeros(3);
+	Real x[3];
 	Boolean y[2] = { false, true };
 equation
 	if y[1] then
 		x = 1:3;
 	elseif y[2] then
 		x = 4:6;
+    else
+	   	x = 7:9;
 	end if;
 end IfEqu7;
 
@@ -2896,8 +2881,8 @@ fclass TransformCanonicalTests.IfEqu8
  Real x[1];
  Real x[2];
  Real x[3];
- parameter Boolean y[1] = false ;
- parameter Boolean y[2] = true ;
+ parameter Boolean y[1] = false;
+ parameter Boolean y[2] = true;
 equation
  x[1] = 4;
  x[2] = 5;
@@ -2914,6 +2899,7 @@ equation
 		x = 4:6;
 	else
 		x = 7:9;
+		x[2] = 10;
 	end if;
 end IfEqu8;
 
@@ -2927,22 +2913,17 @@ model IfEqu9
 fclass TransformCanonicalTests.IfEqu9
  Real x[1];
  Real x[2];
- Boolean y;
+ discrete Boolean y;
+initial equation 
+ pre(y) = false;
 equation
- if y then
-  x[1] = 3;
-  x[2] = 4;
- else
-  x[1] = 7;
-  x[2] = 8;
- end if;
- x[1] = 0;
- x[2] = 0;
+ x[1] = (if y then 3 else 7);
+ x[2] = (if y then 4 else 8);
  y = true;
 end TransformCanonicalTests.IfEqu9;
 ")})));
 
-	Real x[2] = zeros(2);
+	Real x[2];
 	Boolean y = true;
 equation
 	if false then
@@ -2966,22 +2947,17 @@ model IfEqu10
 fclass TransformCanonicalTests.IfEqu10
  Real x[1];
  Real x[2];
- Boolean y;
+ discrete Boolean y;
+initial equation 
+ pre(y) = false;
 equation
- if y then
-  x[1] = 3;
-  x[2] = 4;
- else
-  x[1] = 5;
-  x[2] = 6;
- end if;
- x[1] = 0;
- x[2] = 0;
+ x[1] = (if y then 3 else 5);
+ x[2] = (if y then 4 else 6);
  y = true;
 end TransformCanonicalTests.IfEqu10;
 ")})));
 
-	Real x[2] = zeros(2);
+	Real x[2];
 	Boolean y = true;
 equation
 	if false then
@@ -3005,7 +2981,9 @@ model IfEqu11
 fclass TransformCanonicalTests.IfEqu11
  Real x[1];
  Real x[2];
- Boolean y;
+ discrete Boolean y;
+initial equation 
+ pre(y) = false;
 equation
  x[1] = 1;
  x[2] = 2;
@@ -3027,13 +3005,10 @@ equation
 	end if;
 end IfEqu11;
 
-*/
-
   model IfEqu12
-	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="IfEqu12",
-		 compliance_as_warning=true,
          description="Test of if equations.",
          flatModel="
 fclass TransformCanonicalTests.IfEqu12
@@ -3042,10 +3017,11 @@ fclass TransformCanonicalTests.IfEqu12
 initial equation 
  x = 1;
 equation
- (if time >= 1 then u - (  - ( 1 ) ) else u - ( 1 )) = 0.0;
+ u = (if time >= 1 then  - ( 1 ) else 1);
  der(x) =  - ( x ) + u;
 end TransformCanonicalTests.IfEqu12;
-		 ")})));
+")})));
+
 	Real x(start=1);
     Real u;
   equation
@@ -3058,23 +3034,22 @@ end TransformCanonicalTests.IfEqu12;
   end IfEqu12;
 
   model IfEqu13
-	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="IfEqu13",
-		 compliance_as_warning=true,
          description="Test of if equations.",
          flatModel="
 fclass TransformCanonicalTests.IfEqu13
  Real x(start = 1);
  Real u;
-initial equation 
+initial equation
  x = 1;
 equation
- (if time >= 1 then u - (  - ( 1 ) ) else u - ( 1 )) = 0.0;
- (if time >= 1 then der(x) - ( (  - ( 3 ) ) * ( x ) + u ) else der(x) - ( ( 3 ) * ( x ) + u )) = 0.0;
+ der(x) = (if time >= 1 then (  - ( 3 ) ) * ( x ) + u else ( 3 ) * ( x ) + u);
+ u = (if time >= 1 then  - ( 1 ) else 1);
 end TransformCanonicalTests.IfEqu13;
-		 ")})));
-		  
+")})));
+
     Real x(start=1);
     Real u;
   equation
@@ -3083,15 +3058,14 @@ end TransformCanonicalTests.IfEqu13;
       der(x) = -3*x + u;
     else
       u = 1;
-    der(x) = 3*x + u;
+      der(x) = 3*x + u;
     end if;
   end IfEqu13;
 
   model IfEqu14
-	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="IfEqu14",
-		 compliance_as_warning=true,
          description="Test of if equations.",
          flatModel="
 fclass TransformCanonicalTests.IfEqu14
@@ -3100,10 +3074,11 @@ fclass TransformCanonicalTests.IfEqu14
 initial equation 
  x = 1;
 equation
- (if time >= 1 then (if time >= 3 then u - (  - ( 1 ) ) else u - ( 4 )) - ( 0.0 ) else u - ( 1 )) = 0.0;
- (if time >= 1 then (if time >= 3 then der(x) - ( (  - ( 3 ) ) * ( x ) + u ) else der(x) - ( 0 )) - ( 0.0 ) else der(x) - ( ( 3 ) * ( x ) + u )) = 0.0;
+ der(x) = (if time >= 1 then (if time >= 3 then (  - ( 3 ) ) * ( x ) + u else 0) else ( 3 ) * ( x ) + u);
+ u = (if time >= 1 then (if time >= 3 then  - ( 1 ) else 4) else 1);
 end TransformCanonicalTests.IfEqu14;
-		 ")})));
+")})));
+
     Real x(start=1);
     Real u;
   equation
@@ -3117,9 +3092,97 @@ end TransformCanonicalTests.IfEqu14;
       end if;
     else
       u = 1;
-    der(x) = 3*x + u;
+      der(x) = 3*x + u;
     end if;
   end IfEqu14;
+
+
+  model IfEqu15
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu15",
+         description="If equation with mixed assignment equations and non-assignment equations",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu15
+ Real x;
+ Real y;
+ Real z1;
+ Real z2;
+equation
+ x = (if time < 1 then ( y ) * ( y ) elseif time < 3 then y + 4 else 4);
+ y = (if time < 1 then z2 - ( 1 ) elseif time < 3 then 2 else x + 2);
+ 0.0 = (if time < 1 then z1 + z2 - ( x + y ) elseif time < 3 then z1 - ( z2 ) - ( x + y ) else z1 + z2 - ( x - ( y ) ));
+ 0.0 = (if time < 1 then z1 - ( 2 ) else z2 - ( (if time < 3 then ( y ) * ( x ) else ( 4 ) * ( x )) ));
+end TransformCanonicalTests.IfEqu15;
+")})));
+
+      Real x;
+      Real y;
+      Real z1;
+      Real z2;
+  equation
+      if time < 1 then
+          y = z2 - 1;
+          z1 = 2;
+          x = y * y;
+          z1 + z2 = x + y;
+      elseif time < 3 then
+          x = y + 4;
+          y = 2;
+          z2 = y * x;
+          z1 - z2 = x + y;
+      else
+          z2 = 4 * x;
+          x = 4;
+          y = x + 2;
+          z1 + z2 = x - y;
+      end if;
+  end IfEqu15;
+
+
+  model IfEqu16
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu16",
+         description="Nestled if equations with mixed assignment equations and non-assignment equations",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu16
+ Real x;
+ Real y;
+ Real z1;
+ Real z2;
+equation
+ x = (if time < 1 then ( y ) * ( y ) else 4);
+ y = (if time < 1 then z2 - ( 1 ) elseif time < 3 then 2 else x + 2);
+ 0.0 = (if time < 1 then z1 + z2 - ( x + y ) elseif time < 3 then z1 - ( ( y ) * ( x ) ) else z2 - ( ( 4 ) * ( x ) ));
+ 0.0 = (if time < 1 then z1 - ( 2 ) else z1 + z2 - ( x - ( y ) ));
+end TransformCanonicalTests.IfEqu16;
+")})));
+
+      Real x;
+      Real y;
+      Real z1;
+      Real z2;
+  equation
+      if time < 1 then
+          y = z2 - 1;
+          z1 = 2;
+          x = y * y;
+          z1 + z2 = x + y;
+      else
+          x = 4;
+		  if time < 3 then
+              y = 2;
+              z1 = y * x;
+          else
+              y = x + 2;
+			  z2 = 4 * x;
+	      end if;
+          z1 + z2 = x - y;
+      end if;
+  end IfEqu16;
+
+
 
 model IfExpLeft1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

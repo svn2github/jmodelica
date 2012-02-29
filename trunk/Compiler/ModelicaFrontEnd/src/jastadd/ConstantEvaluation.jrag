@@ -1054,7 +1054,7 @@ aspect ConstantEvaluation {
   /**
    * Check if this expression can be constant evaluated.
    * 
-   * Calls ceval anch checks that no exception is thrown and that the result isn't unknown.
+   * Calls ceval and checks that no exception is thrown, and that the result isn't unknown.
    */
   syn boolean FExp.canCeval() {
   	  try {

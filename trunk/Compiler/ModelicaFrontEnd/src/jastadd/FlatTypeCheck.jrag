@@ -471,7 +471,7 @@ aspect FlatTypeCheck {
 			  if (use.isForIndex())
 				  error("Can not assign a value to a for loop index");
 			  else if (size().isUnknown() && !inFunction())
-				  error(functionCallDecription() + ":could not evaluate array size of output " + 
+				  error(functionCallDecription() + ": could not evaluate array size of output " + 
 						  myOutput().name());
 			  else if (!use.type().typeCompatible(type())) 
 				  error(functionCallDecription() + ": types of component " + use.name() + 

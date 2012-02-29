@@ -106,10 +106,21 @@ aspect Scalarization {
 	
 	protected static List<FAbstractEquation> FClass.scalarizeEquationList(
 			List<FAbstractEquation> old, List<FVariable> vars) {
+		return FAbstractEquation.scalarizeList(old, vars, Collections.<String,FExp>emptyMap());
+	}
+	
+	public static List<FAbstractEquation> FAbstractEquation.scalarizeList(
+			List<FAbstractEquation> old, List<FVariable> vars, Map<String,FExp> indexMap) {
 		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
-		for (FAbstractEquation ae : old) 
-			ae.scalarize(eqns, vars, Collections.<String,FExp>emptyMap());
+		scalarizeList(old, eqns, vars, indexMap);
 		return eqns;
+	}
+	
+	public static void FAbstractEquation.scalarizeList(
+			List<FAbstractEquation> fromList, List<FAbstractEquation> toList, 
+			List<FVariable> vars, Map<String,FExp> indexMap) {
+		for (FAbstractEquation ae : fromList) 
+			ae.scalarize(toList, vars, indexMap);
 	}
 	
 	/**
@@ -1213,101 +1224,35 @@ aspect Scalarization {
 				myIndexMap.put(fi.getFVariable().name(), new FIntegerLitExp(ii[j]));
 				j++;
 			}
-			
-			for (FAbstractEquation ae : getFAbstractEquations()) {
-				ae.scalarize(eqns, vars, myIndexMap);
-			}
+			scalarizeList(getFAbstractEquations(), eqns, vars, myIndexMap);
 		}
 	}
 	
-	public void FWhenEquation.scalarize(List<FAbstractEquation> eqns, 
+	public void FIfWhenElseEquation.scalarize(List<FAbstractEquation> eqns, 
 			List<FVariable> vars, Map<String,FExp> indexMap) {
-		eqns.add(scalarizeTo(eqns, vars, indexMap));
+		eqns.add(scalarize(vars, indexMap));
 	}
 	
-	public void FIfEquation.scalarize(List<FAbstractEquation> eqns, 
+	public FIfWhenElseEquation FIfWhenElseEquation.scalarize(
 			List<FVariable> vars, Map<String,FExp> indexMap) {
-		if (shouldEliminateIf()) {
-			// TODO: handle case where testexp contains for loop index - does ceval() handle that?
-			if (getTest().ceval().booleanValue()) {
-				for (FAbstractEquation eqn : getFAbstractEquations())
-					eqn.scalarize(eqns, vars, indexMap);
-			} else if (hasElse()) { 
-				getElse().scalarize(eqns, vars, indexMap);
-			}
-		} else {
-			FIfWhenElseEquation res = scalarizeTo(new FIfEquation(), eqns, vars, indexMap);
-			if (res != null) 
-				eqns.add(res);
-		}
-	}
-	
-	public void FElseEquation.scalarize(List<FAbstractEquation> eqns, 
-			List<FVariable> vars, Map<String,FExp> indexMap) {
-		for (FAbstractEquation eqn : getFAbstractEquations())
-			eqn.scalarize(eqns, vars, indexMap);
-	}
-	
-	protected abstract FIfWhenElseEquation FIfWhenElseEquation.scalarizeTo(List<FAbstractEquation> eqns, 
-			List<FVariable> vars, Map<String,FExp> indexMap);
-	
-	protected FIfWhenElseEquation FIfEquation.scalarizeTo(List<FAbstractEquation> eqns, 
-			List<FVariable> vars, Map<String,FExp> indexMap) {
-		if (shouldEliminateIf()) {
-			// TODO: handle case where testexp contains for loop index - does ceval() handle that?
-			if (getTest().ceval().booleanValue()) {
-				FElseEquation res = new FElseEquation();
-				res.setType((FEquationType) getType().fullCopy());
-				List<FAbstractEquation> resEqns = res.getFAbstractEquations();
-				for (FAbstractEquation eqn : getFAbstractEquations())
-					eqn.scalarize(resEqns, vars, indexMap);
-				return res;
-			} else if (hasElse()) { 
-				return getElse().scalarizeTo(eqns, vars, indexMap);
-			} else {
-				return null;
-			}
-		} else {
-			return scalarizeTo(new FIfEquation(), eqns, vars, indexMap);
-		}
-	}
-	
-	protected FIfWhenElseEquation FWhenEquation.scalarizeTo(List<FAbstractEquation> eqns, 
-			List<FVariable> vars, Map<String,FExp> indexMap) {
-		return scalarizeTo(new FWhenEquation(), eqns, vars, indexMap);
-	}
-	
-	protected FIfWhenElseEquation FElseEquation.scalarizeTo(List<FAbstractEquation> eqns, 
-			List<FVariable> vars, Map<String,FExp> indexMap) {
-		return scalarizeTo(new FElseEquation(), eqns, vars, indexMap);
-	}
-	
-	protected FIfWhenElseEquation FIfWhenElseEquation.scalarizeTo(FIfWhenElseEquation res, 
-			List<FAbstractEquation> eqns, List<FVariable> vars, Map<String,FExp> indexMap) {
+		FIfWhenElseEquation res = createEmptyNode();
 		res.setType((FEquationType) getType().fullCopy());
-		List<FAbstractEquation> resEqns = res.getFAbstractEquations();
-		for (FAbstractEquation eqn : getFAbstractEquations())
-			eqn.scalarize(resEqns, vars, indexMap);
+		res.eliminateOnParamTest = eliminateOnParamTest;
+		scalarizeList(getFAbstractEquations(), res.getFAbstractEquations(), vars, indexMap);
+		scalarizeTestAndElse(res, vars, indexMap);
 		return res;
 	}
 	
-	protected FIfWhenEquation FIfWhenEquation.scalarizeTo(FIfWhenEquation res, 
-			List<FAbstractEquation> eqns, List<FVariable> vars, Map<String,FExp> indexMap) {
-		super.scalarizeTo(res, eqns, vars, indexMap);
-		if (hasElse()) {
-			FIfWhenElseEquation myElse = getElse().scalarizeTo(eqns, vars, indexMap);
-			if (myElse != null)
-				res.setElse(myElse);
-		}
-		getTest().createArrayTemporaries(eqns, vars, indexMap, true);
-		res.setTest(getTest().scalarize(indexMap));
-		return res;
-	}
+	public void FIfWhenElseEquation.scalarizeTestAndElse(FIfWhenElseEquation res, 
+			List<FVariable> vars, Map<String,FExp> indexMap) {}
 	
-	// TODO: probably shouldn't eliminate for testexp that is non-structural parameter
-	// TODO: handle case where testexp contains for loop index
-	syn boolean FIfEquation.shouldEliminateIf() = 
-		getTest().isParameterExp() || getTest().isConstantExp();
+	public void FIfWhenEquation.scalarizeTestAndElse(FIfWhenElseEquation res, 
+			List<FVariable> vars, Map<String,FExp> indexMap) {
+		FIfWhenEquation res2 = (FIfWhenEquation) res;
+		res2.setTest(getTest().scalarize(indexMap));
+		if (hasElse())
+			res2.setElse(getElse().scalarize(vars, indexMap));
+	}
 	
 	
 	public FFunctionCallLeft FFunctionCallLeft.scalarize(Map<String,FExp> indexMap) {

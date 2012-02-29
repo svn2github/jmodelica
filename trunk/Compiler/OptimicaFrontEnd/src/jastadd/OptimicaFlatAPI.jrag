@@ -971,19 +971,19 @@ aspect OptimicaFreeParameters {
 	syn int FClass.numFreeIndependentRealParameters() = 
 		freeIndependentRealParameters().size();
 	syn lazy ArrayList<FRealVariable> FClass.freeIndependentRealParameters() =
-      intersection(reals(), freeIndependentParameters());
+      intersectFVColl(reals(), freeIndependentParameters());
 
 	syn int FClass.numFreeIndependentIntegerParameters() = freeIndependentIntegerParameters().size();
 	syn lazy ArrayList<FIntegerVariable> FClass.freeIndependentIntegerParameters() =
-      intersection(integers(), freeIndependentParameters());
+      intersectFVColl(integers(), freeIndependentParameters());
 
 	syn int FClass.numFreeIndependentEnumParameters() = freeIndependentEnumParameters().size();
 	syn lazy ArrayList<FEnumVariable> FClass.freeIndependentEnumParameters() =
-      intersection(enums(), freeIndependentParameters());
+      intersectFVColl(enums(), freeIndependentParameters());
 
 	syn int FClass.numFreeIndependentBooleanParameters() = freeIndependentBooleanParameters().size();
 	syn lazy ArrayList<FBooleanVariable> FClass.freeIndependentBooleanParameters() =
-      intersection(booleans(), freeIndependentParameters());
+      intersectFVColl(booleans(), freeIndependentParameters());
 	
 	/**
 	 * \brief Get a list of all dependent parameters that depends on
@@ -1058,7 +1058,7 @@ aspect OptimicaFreeParameters {
 	}
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.realFreeParameters() = 
-		new LinkedHashSet<FVariable>(FClass.intersection(myFClass().reals(),freeParameters()));
+		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().reals(),freeParameters()));
 	
 }
 

@@ -69,28 +69,19 @@ aspect TransformCanonical {
 	  *  done by both the Modelica and the Optimica compilers.
 	  */
 	public void FClass.transformCanonicalBase() {
-		OptionRegistry opt = root().options;
-		if (opt.getBooleanOption("state_initial_equations")) {
-			addStateInitialEquations();
-		}
+		addStateInitialEquationsIfSet();
 		genAlgorithmFunctions();
 		genBindingEquations();
-		if (opt.getBooleanOption("inline_functions")) {
-			inlineFunctions();
-			if (!opt.getBooleanOption("export_functions"))
-				removeUnusedFunctions();
-		}
+		functionInliningIfSet();
 		scalarize();
-		if (opt.getBooleanOption("eliminate_alias_variables")) {
-			genAlias();
-			eliminateAliasVariables();
-		}
-		enableWhenEquationRewrite();
-        enableIfEquationRewrite();
-		root().flushAllRecursive();
-//		log.debug(prettyPrint(""));
+        enableIfEquationElimination();
+		aliasEliminationIfSet();
 		addFDerivativeVariables();
 		addFPreVariables();
+        enableIfEquationRewrite();
+		enableWhenEquationRewrite();
+		root().flushAllRecursive();
+//		log.debug(prettyPrint(""));
 		genInitialEquations();
 		sortDependentParameters();
 	/*
@@ -1376,10 +1367,7 @@ aspect TransformCanonical {
 				// trigger rewrites of FDerExp -> FDummyDerExp
 				root().flushAllRecursiveClearFinal();
 
-				if (root().options.getBooleanOption("eliminate_alias_variables")) {
-					genAlias();
-					eliminateAliasVariables();
-				}
+				aliasEliminationIfSet();
 
  				root().flushAllRecursive();
 
@@ -1672,7 +1660,7 @@ aspect TransformCanonical {
 						}
 						g.lightReset();
 					}
-					System.out.println(SUME.size());
+
 					// Now we have a Maximum Solvable Matching
 					
 					if(SUME.size()==0){ // If: there exist a Pefect Solvable Matching
@@ -2516,6 +2504,18 @@ aspect TransformCanonical {
 				root().flushAllRecursive();
 	}
 	
+
+	/**
+	 * Perform alias elimination if it is activated.
+	 */
+	public void FClass.aliasEliminationIfSet() {
+		if (root().options.getBooleanOption("eliminate_alias_variables")) {
+			genAlias();
+			eliminateAliasVariables();
+		}
+	}
+
+	
 	ArrayList<String> FClass.aliasErrors = new ArrayList<String>();
 	
 	
@@ -3020,6 +3020,80 @@ aspect MapWhenClauses{
 }
 
 aspect IfEquations {
+	
+	/*
+	 * First rewrite those if equations that has constant or stuctural parameter test
+	 * by evaluating the expressions and eliminating unreachable branches.
+	 */
+
+	public void ASTNode.enableIfEquationElimination() {
+		for (ASTNode n : this)
+			n.enableIfEquationElimination();
+	}
+
+	public void FClass.enableIfEquationElimination() {
+		super.enableIfEquationElimination();
+		// Workaround for JastAdd bug
+		setFInitialEquationList(cleanEmptyElse(getFInitialEquations()));
+		FEquationBlock b = getFEquationBlock(0);
+		b.setFAbstractEquationList(cleanEmptyElse(b.getFAbstractEquations()));
+	}
+	
+	public void FIfEquation.enableIfEquationElimination() {
+		super.enableIfEquationElimination();
+		eliminateIfEquation = true;
+		is$Final = false;
+	}
+	
+	private boolean FIfEquation.eliminateIfEquation = false;
+	
+	protected boolean FIfWhenElseEquation.hasEliminatedIfBranches = false;
+
+	protected boolean FIfWhenElseEquation.eliminateOnParamTest = false;
+
+	protected void FIfWhenElseEquation.setEliminateOnParamTest() {}
+
+	protected void FIfEquation.setEliminateOnParamTest() {
+		eliminateOnParamTest = true;
+		getTest().markAsStructuralParameter();
+		if (hasElse())
+			getElse().setEliminateOnParamTest();
+	}
+	
+	syn boolean FIfEquation.shouldEliminateIf() = 
+		getTest().isConstantExp() || getTest().isParameterExp() && eliminateOnParamTest;
+	
+	rewrite FIfEquation {
+		when (eliminateIfEquation && !hasEliminatedIfBranches) to FIfWhenElseEquation {
+			hasEliminatedIfBranches = true;
+			if (!shouldEliminateIf())
+				return this;
+			else if (getTest().ceval().booleanValue())
+				return new FElseEquation(getType(), getFAbstractEquations());
+			else if (hasElse())
+				return getElse();
+			else
+				return new FElseEquation(getType(), new List());
+		}	
+	}	
+	
+	rewrite FElseEquation in FEquationBlock.getFAbstractEquation() {
+		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
+	}	
+	
+	rewrite FElseEquation in FIfWhenElseEquation.getFAbstractEquation() {
+		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
+	}	
+			
+	rewrite FElseEquation in FForClauseE.getFAbstractEquation() {
+		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
+	}
+
+	/*
+	 * After we have eliminated if equations with constant (and possibly parameter)
+	 * test expressions, then all if equations must be balanced, so we can rewrite to 
+	 * a list of residual equations with if expressions.
+	 */
 
 	public void ASTNode.enableIfEquationRewrite() {
 		for (ASTNode n : this)
@@ -3032,14 +3106,145 @@ aspect IfEquations {
 		is$Final = false;
 	}
 	
-	boolean FIfEquation.rewriteIfEquation = false;
+	private boolean FIfEquation.rewriteIfEquation = false;
+	
+	syn Map<AbstractFVariable,FAbstractEquation> FIfWhenElseEquation.assignmentEquationMap() {
+		calcAssignmentEquations();
+		return assignmentEquationMap;
+	}
+	
+	syn Set<FAbstractEquation> FIfWhenElseEquation.nonAssignmentEquationSet() {
+		calcAssignmentEquations();
+		return nonAssignmentEquationSet;
+	}
+	
+	private Map<AbstractFVariable,FAbstractEquation> FIfWhenElseEquation.assignmentEquationMap = null;
+	private Set<FAbstractEquation> FIfWhenElseEquation.nonAssignmentEquationSet = null;
+	
+	private void FIfWhenElseEquation.calcAssignmentEquations() {
+		if (assignmentEquationMap == null || nonAssignmentEquationSet == null) {
+			assignmentEquationMap = new HashMap<AbstractFVariable,FAbstractEquation>();
+			nonAssignmentEquationSet = new HashSet<FAbstractEquation>();
+			for (FAbstractEquation eqn : getFAbstractEquations()) {
+				AbstractFVariable var = eqn.assignedFV();
+				if (var != null && !assignmentEquationMap.containsKey(var))
+					assignmentEquationMap.put(var, eqn);
+				else
+					nonAssignmentEquationSet.add(eqn);
+			}
+		}
+	}
+	
 
 	syn FExp FAbstractEquation.createResidualExp() = null;
-	
 	eq FEquation.createResidualExp() {
-		return new FSubExp(getLeft().fullCopy(),getRight().fullCopy());	
+		if (getLeft().isZeroLiteral())
+			return getRight().fullCopy();
+		if (getRight().isZeroLiteral())
+			return getLeft().fullCopy();
+		return new FSubExp(getLeft().fullCopy(), getRight().fullCopy());
+	}
+	
+	// TODO: move to better suited source file
+	syn boolean FExp.isZeroLiteral()  = false;
+	eq FIntegerLitExp.isZeroLiteral() = getValue() == 0;
+	eq FRealLitExp.isZeroLiteral()    = getValue() == 0.0;
+	eq FArray.isZeroLiteral() {
+		for (FExp e : getFExps())
+			if (!e.isZeroLiteral())
+				return false;
+		return true;
+	}
+	
+	syn FExp FAbstractEquation.assignmentExp() = null;
+	eq FEquation.assignmentExp() =
+		isAssignmentEqn() ? getRight() : null;	
+	
+
+	
+	public static List<FAbstractEquation> ASTNode.cleanEmptyElse(List<FAbstractEquation> oldList) {
+		List<FAbstractEquation> newList = new List<FAbstractEquation>();
+		for (FAbstractEquation eqn : oldList)
+			if (!(eqn instanceof FElseEquation))
+				newList.add(eqn);
+		return newList;
+	}
+	
+	public void FIfWhenElseEquation.cleanEmptyElse() {
+		setFAbstractEquationList(cleanEmptyElse(getFAbstractEquations()));
+	}
+	
+	public void FIfWhenEquation.cleanEmptyElse() {
+		super.cleanEmptyElse();
+		if (hasElse())
+			getElse().cleanEmptyElse();
+	}
+	
+	// TODO: Move to util
+	public class ASTNode {
+		
+		public static <K, V> Set<V> valuesOfUnNamedKeys(Map<K, V> map, Set<K> namedKeys) {
+			Set<V> res = new HashSet<V>();
+			for (Map.Entry<K,V> e : map.entrySet())
+				if (!namedKeys.contains(e.getKey()))
+					res.add(e.getValue());
+			return res;
+		}
+		
+		public static <T> Set<T> intersection(Set<T> a, Set<T> b) {
+			// TODO: use runtime type of a instead
+			Set<T> res = new HashSet<T>();
+			res.addAll(a);
+			res.retainAll(b);
+			return res;
+		}
+		
+		public static <T> ArrayList<T> toSortedList(Collection<T> elems, Comparator<? super T> cmp) {
+			ArrayList<T> res = new ArrayList<T>(elems.size());
+			res.addAll(elems);
+			Collections.sort(res, cmp);
+			return res;
+		}
+		
+	}
+	
+	protected static ArrayList<FAbstractEquation> FIfEquation.unmatchedEquations(
+			FIfWhenElseEquation ifEqn, Set<AbstractFVariable> varsInBoth) {
+		Set<FAbstractEquation> unMatchedAssign = 
+			valuesOfUnNamedKeys(ifEqn.assignmentEquationMap(), varsInBoth);
+		unMatchedAssign.addAll(ifEqn.nonAssignmentEquationSet());
+		// TODO: use CHILD_ORDER_COMPARATOR once the JastAdd bug with insertChild() is fixed
+		return toSortedList(unMatchedAssign, TOSTRING_COMPARATOR);
 	}
 
+	syn List FIfEquation.createIfExpEquationList() {
+		List<FAbstractEquation> l = new List<FAbstractEquation>();
+		
+		Set<AbstractFVariable> varsInBoth = 
+			intersection(assignmentEquationMap().keySet(), getElse().assignmentEquationMap().keySet()); 
+		for (AbstractFVariable v : toSortedList(varsInBoth, AbstractFVariable.NAME_COMPARATOR)) {
+			FExp left = assignmentEquationMap().get(v).assignmentExp();
+			FExp right = getElse().assignmentEquationMap().get(v).assignmentExp();
+			FExp ifExp = new FIfExp(getTest().fullCopy(), left, right);
+			l.add(new FEquation(getType().fullCopy(), v.createUseExp(), ifExp));
+		}
+		
+		ParallelIterable<FAbstractEquation> unmatched = new ParallelIterable(new FAbstractEquation[2], 
+				unmatchedEquations(this, varsInBoth), unmatchedEquations(getElse(), varsInBoth));
+		for (FAbstractEquation[] eqs : unmatched) {
+			FExp left = eqs[0].createResidualExp();
+			FExp right = eqs[1].createResidualExp();
+			FIfExp ifExp = new FIfExp(getTest().fullCopy(), left, right);
+			l.add(new FEquation(getType().fullCopy(), eqs[0].type().zeroLiteral(), ifExp));
+		}
+		
+		return l;
+	}
+	
+	rewrite FIfEquation {
+		when (rewriteIfEquation)
+		to FElseEquation new FElseEquation(getType(), createIfExpEquationList());
+	}
 
 /*
 	public boolean IfEquation.isSimpleIfEquation() {
@@ -3063,36 +3268,6 @@ aspect IfEquations {
 		
 	}
 	*/
-
-    syn FExp FIfWhenElseEquation.createIfExpression(int eqIndex) = null;
-
-	eq FIfEquation.createIfExpression(int eqIndex) {
-		return new FIfExp(getTest().fullCopy(),getFAbstractEquation(eqIndex).createResidualExp(),getElse().createIfExpression(eqIndex));	
-	}
-	
-	eq FElseEquation.createIfExpression(int eqIndex) {
-		return getFAbstractEquation(eqIndex).createResidualExp();
-	}
-
-	syn List FIfEquation.createIfExpEquationList() {
-			List l = new List();
-			for (int i=0;i<getNumFAbstractEquation();i++) {
-				l.add(new FEquation(createIfExpression(i),new FRealLitExp(0.0)));	
-			}
-			return l;		
-	}
-
-	rewrite FIfEquation in FEquationBlock.getFAbstractEquation() {
-		when (rewriteIfEquation) to List {
-			return createIfExpEquationList();
-		}	
-	}	
-			
-	rewrite FIfEquation in FIfWhenElseEquation.getFAbstractEquation() {
-		when (rewriteIfEquation && !shouldEliminateIf()) to List {
-			return createIfExpEquationList();
-		}
-	}
 
 }
 
@@ -3530,6 +3705,20 @@ aspect Tearing {
 
 
 aspect FunctionInlining {
+
+	/**
+	 * If function inlining is enabled, inline all function calls that we can.
+	 * 
+	 * Then remove functions that aren't needed anymore.
+	 */
+	public void FClass.functionInliningIfSet() {
+		OptionRegistry opt = root().options;
+		if (opt.getBooleanOption("inline_functions")) {
+			inlineFunctions();
+			if (!opt.getBooleanOption("export_functions"))
+				removeUnusedFunctions();
+		}
+	}
 	
 	/**
 	 * Inline all function calls that we can.
@@ -3797,6 +3986,7 @@ aspect FunctionInlining {
 	syn boolean FStatement.isInlinable() = false;
 	eq FInitArrayStmt.isInlinable()      = true;
 	eq FAssignStmt.isInlinable()         = true;
+	eq FFunctionCallStmt.isInlinable()   = getCall().isIgnored();
 	eq FReturnStmt.isInlinable()         = isLast();
 	eq FForStmt.isInlinable()            = isAllInlinable(getForStmts());
 	eq FIfStmt.isInlinable() {
@@ -3944,7 +4134,7 @@ aspect FunctionInlining {
 	}
 	
 	/**
-	 * Create a list of assign statements with if-else exceptions that is the 
+	 * Create a list of assign statements with if-else expressions that is the 
 	 * equivalent of two branches of an if-else statement.
 	 * 
 	 * @param fi         the function inliner to use
@@ -4060,7 +4250,8 @@ aspect FunctionInlining {
 		Size[] old = getSizes();
 		Size[] sizes = new Size[old.length];
 		for (int i = 0; i < old.length; i++)
-			sizes[i] = old[i].copyAndReplaceReferences(fi, this);
+			if (old[i] != null)
+				sizes[i] = old[i].copyAndReplaceReferences(fi, this);
 		setSizes(sizes);
 		return this;
 	}
@@ -4076,7 +4267,8 @@ aspect FunctionInlining {
 	public MutableSize MutableSize.copyAndReplaceReferences(FunctionInliner fi, FExp context) {
 		MutableSize res = clone();
 		for (int i = 0; i < exps.length; i++)
-			res.exps[i] = context.dynamicFExp(exps[i].fullCopy()).replaceReferences(fi);
+			if (res.exps[i] != null)
+				res.exps[i] = context.dynamicFExp(exps[i].fullCopy()).replaceReferences(fi);
 		return res;
 	}
 	
@@ -4131,27 +4323,30 @@ aspect FunctionInlining {
 
 aspect StateInitialEquations {
 	
-	public void FClass.addStateInitialEquations() {
+	public void FClass.addStateInitialEquationsIfSet() {
+		if (root().options.getBooleanOption("state_initial_equations")) {
 		
-		setFInitialEquationList(new List());
+			setFInitialEquationList(new List());
+			
+			for (FRealVariable fv : differentiatedRealVariables()) {
+	            
+				FQName nameToAdd = fv.getFQName().fullCopy();
+				nameToAdd.getFQNamePart(0).setName("_start_" + nameToAdd.getFQNamePart(0).getName());
+				FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(),
+				                                      new FParameter(),
+				                                      new Opt(),
+				                                      new List(),
+				                                      new Opt(fv.startAttributeExp().fullCopy()),
+				                                      new Opt(),
+				                                      nameToAdd);
+				 addFVariable(fvToAdd);                
+				 FEquation eqnToAdd = new FEquation(new FIdUseExp(fv.getFQName().fullCopy()),
+				                                    new FIdUseExp(nameToAdd.fullCopy()));
+				 addFInitialEquation(eqnToAdd);    
+				 flushAllRecursive();               
+			}
 		
-		for (FRealVariable fv : differentiatedRealVariables()) {
-            
-			FQName nameToAdd = fv.getFQName().fullCopy();
-			nameToAdd.getFQNamePart(0).setName("_start_" + nameToAdd.getFQNamePart(0).getName());
-			FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(),
-			                                      new FParameter(),
-			                                      new Opt(),
-			                                      new List(),
-			                                      new Opt(fv.startAttributeExp().fullCopy()),
-			                                      new Opt(),
-			                                      nameToAdd);
-			 addFVariable(fvToAdd);                
-			 FEquation eqnToAdd = new FEquation(new FIdUseExp(fv.getFQName().fullCopy()),
-			                                    new FIdUseExp(nameToAdd.fullCopy()));
-			 addFInitialEquation(eqnToAdd);    
-			 flushAllRecursive();               
-		}	
+		}
 	}
 	
 }
