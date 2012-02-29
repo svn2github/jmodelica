@@ -39,11 +39,11 @@ public class Connector extends Component {
 	public void addConnection(Connection c) {
 		if (c.getSourceConnector() == this) {
 			if (sourceConnections.add(c)) {
-				notifyObservers(SOURCE_ADDED);
+				notifyObservers(SOURCE_ADDED, c);
 			}
 		} else if (c.getTargetConnector() == this) {
 			if (targetConnections.add(c)) {
-				notifyObservers(TARGET_ADDED);
+				notifyObservers(TARGET_ADDED, c);
 			}
 		}
 	}
@@ -51,11 +51,11 @@ public class Connector extends Component {
 	public void removeConnection(Connection c) {
 		if (c.getSourceConnector() == this) {
 			if (sourceConnections.remove(c)) {
-				notifyObservers(SOURCE_REMOVED);
+				notifyObservers(SOURCE_REMOVED, c);
 			}
 		} else if (c.getTargetConnector() == this) {
 			if (targetConnections.remove(c)) {
-				notifyObservers(TARGET_REMOVED);
+				notifyObservers(TARGET_REMOVED, c);
 			}
 		}
 	}

@@ -13,7 +13,7 @@ public class Connection extends Line {
 	
 	private Connector sourceConnector;
 	private Connector targetConnector;
-	private boolean isConnected = true;
+	private boolean isConnected = false;
 	
 	public Connector getSourceConnector() {
 		return sourceConnector;
@@ -55,6 +55,7 @@ public class Connection extends Line {
 			}
 		}
 		notifyObservers(TARGET_ADDED);
+		connect();
 	}
 	
 	public void connect() {

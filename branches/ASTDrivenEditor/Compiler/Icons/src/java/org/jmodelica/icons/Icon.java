@@ -162,7 +162,7 @@ public class Icon extends Observable implements Cloneable {
 
 	public void addSuperclass(Icon superclass) {
 		superClasses.add(superclass);
-		notifyObservers(SUPERCLASS_ADDED);
+		notifyObservers(SUPERCLASS_ADDED, superclass);
 	}
 
 	public void addSubcomponent(Component component) {

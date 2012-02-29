@@ -10,6 +10,16 @@ aspect AnnotationEditing {
 		forPath("Placement").save(placement);
 	}
 	
+	/**
+	 * Saves the connection annotation from <code>connection</code> to this
+	 * annotation node.
+	 * 
+	 * @param connection Connection to save annotation from
+	 */
+	public void AnnotationNode.saveConnection(Connection connection) {
+		forPath("Line").save((Line)connection);
+	}
+	
 	/*
 	 * ====================== PRIVATE COORD SAVE METHODS =======================
 	 */
@@ -220,8 +230,8 @@ aspect AnnotationEditing {
 	 * 
 	 * @param gis GraphicItem[] to save
 	 */
-	private void AnnotationNode.save(GraphicItem[] gis) {
-		//TODO: some sort of merge here.
+	protected void AnnotationNode.save(GraphicItem[] gis) {
+		//TODO: some sort of merge here. Maybe using a global hashmap remembering annotationNode->GraphicItem or maybe FunctionCall->GraphicItem
 		for (GraphicItem gi : gis) {
 			String nodeName;
 			if (gi instanceof Line)
