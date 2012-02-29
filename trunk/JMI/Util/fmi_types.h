@@ -18,6 +18,6 @@
 #define FMI_TYPES_H_
 
 /* Standard FMI 1.0 ME and CS types */
-#include "fmiPlatformTypes.h"
+#include "1.0-CS/fmiPlatformTypes.h"
 
 #endif /* End of header file FMI_TYPES_H_ */

@@ -351,6 +351,8 @@ AC_CONFIG_FILES([
  ThirdParty/Lapack/Makefile
  ThirdParty/Sundials/Makefile
  ThirdParty/CasADi/Makefile
+ ThirdParty/zlib/Makefile
+ ThirdParty/minizip/Makefile
  JMI/src/Makefile
  JMI/Makefile
  docbook/UsersGuide/Makefile

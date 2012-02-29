@@ -19537,7 +19537,7 @@ fi
 subdirs="$subdirs ThirdParty/Sundials/sundials-2.4.0"
 
 
-ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/CasADi/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh jm_tests"
+ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/CasADi/Makefile ThirdParty/zlib/Makefile ThirdParty/minizip/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh jm_tests"
 
 
 cat >confcache <<\_ACEOF
@@ -20776,6 +20776,8 @@ do
     "ThirdParty/Lapack/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Lapack/Makefile" ;;
     "ThirdParty/Sundials/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Sundials/Makefile" ;;
     "ThirdParty/CasADi/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/CasADi/Makefile" ;;
+    "ThirdParty/zlib/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/zlib/Makefile" ;;
+    "ThirdParty/minizip/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/minizip/Makefile" ;;
     "JMI/src/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/src/Makefile" ;;
     "JMI/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/Makefile" ;;
     "docbook/UsersGuide/Makefile") CONFIG_FILES="$CONFIG_FILES docbook/UsersGuide/Makefile" ;;

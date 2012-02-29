@@ -18,15 +18,21 @@
 #
 
 FMI_XML_SRC=FMI/XML/src
+FMI_DLL_SRC=FMI/DLL/src
+FMI_ZIP_SRC=FMI/ZIP/src
 
 # Paths relative to the JModelica.org repo
 FMI_XML_INC=$(abs_top_srcdir)/JMI/FMI/XML/include
+FMI_DLL_INC=$(abs_top_srcdir)/JMI/FMI/DLL/include
+FMI_ZIP_INC=$(abs_top_srcdir)/JMI/FMI/ZIP/include
 JM_UTIL=$(abs_top_srcdir)/JMI/Util
-THIRDPARTY_FMI=$(abs_top_srcdir)/ThirdParty/FMI
+THIRDPARTY_FMI_INC=$(abs_top_srcdir)/ThirdParty/FMI
+THIRDPARTY_EXPAT_INC=$(abs_top_srcdir)/ThirdParty/Expat/include
+THIRDPARTY_MINIZIP=$(abs_top_srcdir)/ThirdParty/minizip
 
 AUTOMAKE_OPTIONS = foreign
 
-lib_LTLIBRARIES = libfmixml.la
+lib_LTLIBRARIES = libfmixml.la libfmidll_1_0_cs.la libfmidll_1_0_me.la libfmizip.la
 
 libfmixml_la_SOURCES = $(FMI_XML_SRC)/fmi_xml_model_description.c \
                        $(FMI_XML_SRC)/fmi_xml_unit_impl.h \
@@ -49,10 +55,30 @@ libfmixml_la_SOURCES = $(FMI_XML_SRC)/fmi_xml_model_description.c \
                        $(FMI_XML_SRC)/fmi_xml_cosim.c \
                        $(FMI_XML_SRC)/fmi_xml_unit.c 
 
-libfmixml_la_CFLAGS = -Wall -std=c89 -pedantic -Wno-unused-function -I$(JM_UTIL) -I$(FMI_XML_INC) -I$(THIRDPARTY_FMI)
+libfmixml_la_CFLAGS = -Wall -std=c89 -pedantic -Wno-unused-function -I$(JM_UTIL) -I$(FMI_XML_INC) -I$(THIRDPARTY_FMI_INC) -I$(THIRDPARTY_EXPAT_INC) 
 
-libfmixml_la_LDFLAGS = -no-undefined -static-libtool-libs                     
+libfmixml_la_LDFLAGS = -no-undefined -static-libtool-libs                       
                        
+libfmidll_1_0_cs_la_SOURCES = $(FMI_DLL_SRC)/1.0-CS/fmi_dll_1_0_cs.c \
+                              $(FMI_DLL_SRC)/Common/fmi_dll_common.c
+                     
+libfmidll_1_0_cs_la_CFLAGS = -Wall -std=c89 -pedantic -Wno-unused-function -I$(JM_UTIL) -I$(FMI_DLL_INC) -I$(THIRDPARTY_FMI_INC)
+
+libfmidll_1_0_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
+                       
+libfmidll_1_0_me_la_SOURCES = $(FMI_DLL_SRC)/1.0-ME/fmi_dll_1_0_me.c \
+                              $(FMI_DLL_SRC)/Common/fmi_dll_common.c
+                     
+libfmidll_1_0_me_la_CFLAGS = -Wall -std=c89 -pedantic -Wno-unused-function -I$(JM_UTIL) -I$(FMI_DLL_INC) -I$(THIRDPARTY_FMI_INC)
+
+libfmidll_1_0_me_la_LDFLAGS = -no-undefined -static-libtool-libs                      
+
+libfmizip_la_SOURCES = $(FMI_ZIP_SRC)/fmi_zip_unzip.c 
+                     
+libfmizip_la_CFLAGS = -Wall -std=c89 -pedantic -Wno-unused-function -I$(JM_UTIL) -I$(FMI_ZIP_INC) -I$(THIRDPARTY_MINIZIP)
+
+libfmizip_la_LDFLAGS = -no-undefined -static-libtool-libs                       
+         
 include_HEADERS = $(FMI_XML_INC)/fmi_xml_capabilities.h \
                   $(FMI_XML_INC)/fmi_xml_model_description.h \
                   $(FMI_XML_INC)/fmi_xml_unit.h \
@@ -60,4 +86,11 @@ include_HEADERS = $(FMI_XML_INC)/fmi_xml_capabilities.h \
                   $(FMI_XML_INC)/fmi_xml_cosim.h \
                   $(FMI_XML_INC)/fmi_xml_type.h \
                   $(FMI_XML_INC)/fmi_xml_variable.h \
-                  $(FMI_XML_INC)/fmi_xml_vendor_annotations.h
+                  $(FMI_XML_INC)/fmi_xml_vendor_annotations.h \
+                  $(FMI_DLL_INC)/fmi_dll_1_0_cs.h \
+                  $(FMI_DLL_INC)/fmi_dll_1_0_me.h \
+                  $(FMI_DLL_INC)/fmi_dll_common.h \
+                  $(FMI_DLL_INC)/fmi_dll_types.h \
+                  $(FMI_ZIP_INC)/fmi_zip_unzip.h
+                  
+                  

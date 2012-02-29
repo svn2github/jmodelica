@@ -38,13 +38,13 @@ static char* fmi_dll_get_last_error_from_dll_system()
 	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
 	sprintf(err_str, "%s", lpMsgBuf);
 #else
-	PRINT_MY_DEBUG_INFO_HERE
+/*	PRINT_MY_DEBUG_INFO_HERE*/
 	sprintf(err_str, "%s", dlerror());
 #endif	
 	return err_str;
 }
 
-static const char* fmi_dll_set_last_error(fmi_dll_t* fmu, const char* fmt, ...)
+void fmi_dll_set_last_error(fmi_dll_t* fmu, const char* fmt, ...)
 {
 	va_list ap;
 	va_start (ap, fmt);
@@ -70,7 +70,7 @@ static jm_status_enu_t fmi_dll_common_get_fcn_from_dll(fmi_dll_t* fmu, const cha
 #ifdef _MSC_VER
 	*fptr = tmpfptr = GetProcAddress(fmu->dllHandle, fname);
 #else
-	*fptr = tmpfptr = dlsym(fmu->dllHandle, name);
+	*fptr = tmpfptr = dlsym(fmu->dllHandle, fname);
 #endif
 	if (!tmpfptr) { /* Fail */
 		return jm_status_error;
