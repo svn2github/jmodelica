@@ -352,6 +352,7 @@ AC_CONFIG_FILES([
  ThirdParty/Sundials/Makefile
  ThirdParty/CasADi/Makefile
  JMI/src/Makefile
+ JMI/Makefile
  docbook/UsersGuide/Makefile
  Python/jm_ipython.sh
  Python/jm_python.sh
