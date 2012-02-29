@@ -53,11 +53,6 @@ aspect ComplianceCheck {
 		}
 	}
 
-	public void FIfEquation.complianceCheck() {
-		if (!shouldEliminateIf())
-			compliance("If equations are currently only supported with constant or parameter test expressions");
-	}
-
 	public void FUnsupportedEquation.collectErrors() {
 		compliance("Unsupported equation type");
 	}
