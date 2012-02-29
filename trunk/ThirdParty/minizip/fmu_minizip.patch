@@ -11,6 +11,15 @@ Index: miniunz.c
      int argc;
      char *argv[];
  {
+@@ -633,7 +633,7 @@
+ #endif
+         {
+           printf("Error changing into %s, aborting\n", dirname);
+-          exit(-1);
++          return -1; /* exit(-1); */
+         }
+ 
+         if (filename_to_extract == NULL)
 Index: miniunz.h
 ===================================================================
 --- miniunz.h	(revision 0)
