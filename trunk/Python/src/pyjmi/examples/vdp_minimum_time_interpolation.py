@@ -37,7 +37,12 @@ def run_demo(with_plots=True):
     jmu_name = compile_jmu("JMExamples_opt.VDP_Opt_Min_Time", 
     (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
     vdp = JMUModel(jmu_name)
-    res = vdp.optimize()
+    
+    opts = vdp.optimize_options()
+    
+    opts["result_mode"] = "element_interpolation"
+    
+    res = vdp.optimize(options=opts)
 
     # Extract variable profiles
     x1=res['x1']
