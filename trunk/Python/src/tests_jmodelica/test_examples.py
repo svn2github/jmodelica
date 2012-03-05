@@ -199,3 +199,93 @@ def test_hohmann_transfer():
 def test_QR():
     """ Test the QR example. """    
     QR.run_demo(False)
+
+@testattr(assimulo = True)
+def test_distillation1_fmu():
+    """ Test the distillation1_fmu example. """    
+    distillation1_fmu.run_demo(False)
+    
+@testattr(assimulo = True)
+def test_distillation2_fmu():
+    """ Test the distillation2_fmu example. """    
+    distillation2_fmu.run_demo(False)
+    
+@testattr(assimulo = True)
+def test_distillation4_fmu():
+    """ Test the distillation4_fmu example. """    
+    distillation4_fmu.run_demo(False)
+	
+@testattr(assimulo = True)
+def test_VDP_sim():
+    """ Test the VDP_sim example. """    
+    VDP_sim.run_demo(False)
+
+@testattr(ipopt = True)
+def test_cont_state():
+    """ Test the cont_state example. """    
+    cont_state.run_demo(False)
+    
+@testattr(ipopt = True)
+def test_flight_path():
+    """ Test the flight_path example. """    
+    flight_path.run_demo(False)
+    
+@testattr(ipopt = True)
+def test_penicillin_plant():
+    """ Test the penicillin_plant example. """    
+    penicillin_plant.run_demo(False)
+    
+@testattr(ipopt = True)
+def test_penicillin_plant_time():
+    """ Test the penicillin_plant_time example. """    
+    penicillin_plant_time.run_demo(False)
+	
+@testattr(assimulo = True)
+def test_blood_glucose():
+    """ Test the blood_glucose example. """    
+    blood_glucose.run_demo(False)
+    
+@testattr(ipopt = True)
+def test_coloumb_friction():
+    """ Test the coloumb_friction example. """    
+    coloumb_friction.run_demo(False)
+    
+@testattr(ipopt = True)
+def test_marine_population():
+    """ Test the marine_population example. """    
+    marine_population.run_demo(False)
+    
+@testattr(ipopt = True)
+def test_catalytic_cracking():
+    """ Test the catalytic_cracking example. """    
+    catalytic_cracking.run_demo(False)
+	
+@testattr(ipopt = True)
+def test_blood_glucose_opt():
+    """ Test the blood_glucose_opt example. """    
+    blood_glucose_opt.run_demo(False)
+	
+@testattr(ipopt = True)
+def test_blood_glucose_optconstraint():
+    """ Test the blood_glucose_optconstraint example. """    
+    blood_glucose_optconstraint.run_demo(False)
+	
+@testattr(ipopt = True)
+def test_catalyst_mixing():
+    """ Test the catalyst_mixing example. """    
+    catalyst_mixing.run_demo(False)
+	
+@testattr(ipopt = True)
+def test_bang_control():
+    """ Test the bang_control example. """    
+    bang_control.run_demo(False)
+	
+@testattr(ipopt = True)
+def test_greenhouse():
+    """ Test the greenhouse example. """    
+    greenhouse.run_demo(False)
+	
+@testattr(ipopt = True)
+def test_moon_lander():
+    """ Test the moon_lander example. """    
+    moon_lander.run_demo(False)
