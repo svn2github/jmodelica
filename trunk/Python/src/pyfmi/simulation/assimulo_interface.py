@@ -35,7 +35,7 @@ try:
     from assimulo.exception import *
 except ImportError:
     logging.warning(
-        'Could not find Assimulo package. Check jmodelica.check_packages()')
+        'Could not find Assimulo package. Check pyfmi.check_packages()')
     
 class FMIModel_Exception(Exception):
     """

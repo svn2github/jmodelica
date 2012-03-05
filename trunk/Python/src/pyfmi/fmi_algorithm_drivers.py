@@ -177,7 +177,7 @@ class AssimuloFMIAlg(AlgorithmBase):
         
         if not assimulo_present:
             raise Exception(
-                'Could not find Assimulo package. Check jmodelica.check_packages()')
+                'Could not find Assimulo package. Check pyfmi.check_packages()')
         
         # set start time, final time and input trajectory
         self.start_time = start_time
