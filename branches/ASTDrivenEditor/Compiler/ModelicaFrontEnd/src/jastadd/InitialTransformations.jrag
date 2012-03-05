@@ -75,7 +75,7 @@
                                           new List(),
                                           new List(),
                                           new Opt(),
-                                          getEndName());
+                                          getEndDecl());
             
             getComposition().extractElementsTo(fc);
             
@@ -110,7 +110,7 @@
                                           new List(),
                                           new List(),
                                           new Opt(),
-                                          getEndName());
+                                          getEndDecl());
             
             ClassAccess ca = new ClassAccess(getName().getID());
             InlineExtendsClause iec = new InlineExtendsClause(
@@ -147,7 +147,7 @@
         	ecd.setOuterOpt(getOuterOpt());
         	ecd.setReplaceableOpt(getReplaceableOpt());
         	ecd.setStringCommentOpt(getComment().getStringCommentOpt());
-        	ecd.setEndName(getName().getID());
+        	ecd.setEndDecl(new EndDecl(getName().getID()));
         	
         	// TODO: Copy min, max and start
         	
@@ -237,6 +237,7 @@
     }
     
     public void EquationAnnotation.addToFullClassDecl(FullClassDecl fcd) {
+    	getAnnotation().setLocationNoTree(getAnnotation(), this);
         fcd.addAnnotation(getAnnotation());
     }
     

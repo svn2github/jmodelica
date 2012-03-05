@@ -40,7 +40,7 @@ aspect UnknownDeclarations {
 		                            new List(),
 		                            new List(),
 		                            new Opt(),
-		                            "Unknown");
+		                            new EndDecl("Unknown"));
 	}
 
 	syn lazy UnknownComponentDecl Program.getUnknownComponentDecl() {

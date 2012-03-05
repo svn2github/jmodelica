@@ -128,7 +128,7 @@ aspect PredefinedTypes {
                         cd.getComponentDeclList(),
                         cd.getAnnotationList(),
                         new Opt(),
-                        cd.getEndName());
+                        cd.getEndDecl());
             	l.add(pcd); 
             } else {
             	pcd = new EnumClassDecl(new PublicVisibilityType(),
@@ -152,7 +152,7 @@ aspect PredefinedTypes {
                         cd.getComponentDeclList(),
                         cd.getAnnotationList(),
                         new Opt(),
-                        cd.getEndName());
+                        cd.getEndDecl());
             	l.add(pcd); 	
             }
         }   
@@ -213,7 +213,7 @@ aspect PredefinedTypes {
                                    cd.getComponentDeclList(),
                                    cd.getAnnotationList(),
                                    new Opt(),
-                                   cd.getEndName());
+                                   cd.getEndDecl());
         
         
         } catch(Exception e){e.printStackTrace();}
@@ -427,7 +427,7 @@ aspect PredefinedTypes {
             		// Add character that isn't allowed in identifiers to prevent collision with user class or the primitive class
             		name = "!" + name;
             		fcd.getName().setID(name);
-            		fcd.setEndName(name);
+            		fcd.setEndDecl(fcd.getEndDecl());
             	}
                 fcd.setExternalClause(builtin.fullCopy());
                 l.add(fcd);
@@ -491,7 +491,7 @@ aspect PredefinedTypes {
                                                     getComponentDeclList(),
                                                     getAnnotationList(),
                                                     getExternalClauseOpt(),
-                                                    getEndName());
+                                                    getEndDecl());
                 rcd.rewritten = true;
                 return rcd;
             }
@@ -521,7 +521,7 @@ aspect PredefinedTypes {
                                                     getComponentDeclList(),
                                                     getAnnotationList(),
                                                     getExternalClauseOpt(),
-                                                    getEndName());
+                                                    getEndDecl());
                 rcd.rewritten = true;
                 return rcd;
             }
@@ -551,7 +551,7 @@ aspect PredefinedTypes {
                                                     getComponentDeclList(),
                                                     getAnnotationList(),
                                                     getExternalClauseOpt(),
-                                                    getEndName());
+                                                    getEndDecl());
                 rcd.rewritten = true;
                 return rcd;
             }
@@ -581,7 +581,7 @@ aspect PredefinedTypes {
                                                     getComponentDeclList(),
                                                     getAnnotationList(),
                                                     getExternalClauseOpt(),
-                                                    getEndName());
+                                                    getEndDecl());
                 rcd.rewritten = true;
                 return rcd;
             }

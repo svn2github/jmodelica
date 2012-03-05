@@ -105,7 +105,7 @@ UnknownClassDecl : FullClassDecl;
 
 PN_FullClassDecl : BaseClassDecl ::= [StringComment] 
                                      Composition 
-                                     <EndName:String>;
+                                     EndDecl;
 	                      
 FullClassDecl : BaseClassDecl ::= [StringComment]  
                                   Equation:AbstractEquation* 
@@ -116,7 +116,7 @@ FullClassDecl : BaseClassDecl ::= [StringComment]
                                   ComponentDecl*
                                   Annotation* 
                                   [ExternalClause] 
-                                  <EndName:String>;
+                                  EndDecl;
 
 LibClassDecl : FullClassDecl ::= LibNode*;
 LibNode : BaseNode ::= <FileName:String> <Name:String> <Structured:boolean> <Version:String> /StoredDefinition/;
@@ -403,6 +403,8 @@ ExpSubscript   : Subscript ::= Exp;
 
 TimeExp : Exp;
 EndExp  : Exp;
+
+EndDecl : BaseNode ::= <EndID:String>;
 
 // Dummy node used in the compilation
 PN_DummyClause : Clause;

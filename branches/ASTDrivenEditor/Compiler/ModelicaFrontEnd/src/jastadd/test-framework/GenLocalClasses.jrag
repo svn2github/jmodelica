@@ -102,7 +102,7 @@ import java.util.Random;
                         new List(),
                         new List(),
                         new Opt(),
-                        name);
+                        new EndDecl(name));
 		}
 		
 		public FullClassDecl genLocClasses(String name,int n, int m) {
