@@ -1,5 +1,6 @@
 within ;
 package JMExamples
+package VDP
   model VDP "Van der Pol model"
 
      // State start values
@@ -23,75 +24,80 @@ package JMExamples
 The model represents the behavior of a free Van-der-Pol oscillator, which is an oscillatory system with non-linear damping.
 It evolves in time according to a second order differential equation, where x1 and x2 are the position coordinates.
 
-For small amplitudes the damping is negativ. The amplitude increases up to a certain limit, where the damping becomes positiv. 
-The system stabilises and a limit cycle developes.
+For small amplitudes the damping is negativ. The amplitude increases up to a certain limit, where the damping becomes positive. 
+The system stabilises and a limit cycle develops.
 </p>
 
-</HTML>"));
+</HTML>"),
+        experiment(StopTime=10),
+        __Dymola_experimentSetupOutput);
   end VDP;
 
-  model VDPsine
-    VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
-    Modelica.Blocks.Sources.Sine sine(amplitude=5, freqHz=1)
-      annotation (Placement(transformation(extent={{-32,0},{-12,20}})));
-  equation
-    connect(sine.y, vDP.u) annotation (Line(
-        points={{-11,10},{20,10}},
-        color={0,0,127},
-        smooth=Smooth.None));
-    annotation (Diagram(graphics));
-  end VDPsine;
+  package Examples
+    model VDPexpsin
+      VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
+      Modelica.Blocks.Sources.ExpSine expSine(amplitude=10)
+        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+    equation
+      connect(expSine.y, vDP.u) annotation (Line(
+          points={{-19,10},{20,10}},
+          color={0,0,127},
+          smooth=Smooth.None));
+      annotation (Diagram(graphics));
+    end VDPexpsin;
 
-  model VDPpulse
-    VDP vDP annotation (Placement(transformation(extent={{0,0},{20,20}})));
-    Modelica.Blocks.Sources.Pulse pulse(amplitude=10)
-      annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
-  equation
-    connect(pulse.y, vDP.u) annotation (Line(
-        points={{-39,10},{0,10}},
-        color={0,0,127},
-        smooth=Smooth.None));
-    annotation (Diagram(graphics));
-  end VDPpulse;
+    model VDPramp
+      VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
+      Modelica.Blocks.Sources.Ramp ramp
+        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+    equation
+      connect(ramp.y, vDP.u) annotation (Line(
+          points={{-19,10},{20,10}},
+          color={0,0,127},
+          smooth=Smooth.None));
+      annotation (
+        Diagram(graphics),
+        experiment(StopTime=10, NumberOfIntervals=50),
+        __Dymola_experimentSetupOutput);
+    end VDPramp;
 
-  model VDPexp
-    VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
-    Modelica.Blocks.Sources.Exponentials exponentials(riseTime=10)
-      annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-  equation
-    connect(exponentials.y, vDP.u) annotation (Line(
-        points={{-19,10},{20,10}},
-        color={0,0,127},
-        smooth=Smooth.None));
-    annotation (Diagram(graphics));
-  end VDPexp;
+    model VDPexp
+      VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
+      Modelica.Blocks.Sources.Exponentials exponentials(riseTime=10)
+        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+    equation
+      connect(exponentials.y, vDP.u) annotation (Line(
+          points={{-19,10},{20,10}},
+          color={0,0,127},
+          smooth=Smooth.None));
+      annotation (Diagram(graphics));
+    end VDPexp;
 
-  model VDPramp
-    VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
-    Modelica.Blocks.Sources.Ramp ramp
-      annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-  equation
-    connect(ramp.y, vDP.u) annotation (Line(
-        points={{-19,10},{20,10}},
-        color={0,0,127},
-        smooth=Smooth.None));
-    annotation (
-      Diagram(graphics),
-      experiment(StopTime=10, NumberOfIntervals=50),
-      __Dymola_experimentSetupOutput);
-  end VDPramp;
+    model VDPpulse
+      VDP vDP annotation (Placement(transformation(extent={{0,0},{20,20}})));
+      Modelica.Blocks.Sources.Pulse pulse(amplitude=10)
+        annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
+    equation
+      connect(pulse.y, vDP.u) annotation (Line(
+          points={{-39,10},{0,10}},
+          color={0,0,127},
+          smooth=Smooth.None));
+      annotation (Diagram(graphics));
+    end VDPpulse;
 
-  model VDPexpsin
-    VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
-    Modelica.Blocks.Sources.ExpSine expSine(amplitude=10)
-      annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-  equation
-    connect(expSine.y, vDP.u) annotation (Line(
-        points={{-19,10},{20,10}},
-        color={0,0,127},
-        smooth=Smooth.None));
-    annotation (Diagram(graphics));
-  end VDPexpsin;
+    model VDPsine
+      VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
+      Modelica.Blocks.Sources.Sine sine(amplitude=5, freqHz=1)
+        annotation (Placement(transformation(extent={{-32,0},{-12,20}})));
+    equation
+      connect(sine.y, vDP.u) annotation (Line(
+          points={{-11,10},{20,10}},
+          color={0,0,127},
+          smooth=Smooth.None));
+      annotation (Diagram(graphics));
+    end VDPsine;
+  end Examples;
+end VDP;
 
   package CSTR
     model CSTR "Continuous stirred tank reaction"
@@ -151,205 +157,58 @@ high temperature results in high reaction rate.
                       q_Tc*(Tc_ref-cstr.Tc)^2;
     end CSTR_Init_Optimization;
 
-    model CSTRtimetable
-      CSTR cSTR annotation (Placement(transformation(extent={{0,20},{20,40}})));
-      Modelica.Blocks.Sources.TimeTable timeTable(table=[0,264.4; 10,264.4; 10,
-            200; 50,280; 60,280])
-        annotation (Placement(transformation(extent={{-60,20},{-40,40}})));
-    equation
-      connect(timeTable.y, cSTR.Tc) annotation (Line(
-          points={{-39,30},{-18,30},{-18,34.8},{4.6,34.8}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (Diagram(graphics),
-        experiment(StopTime=60),
-        __Dymola_experimentSetupOutput);
-    end CSTRtimetable;
+    package Examples
+      model CSTRconst
+        CSTR cSTR annotation (Placement(transformation(extent={{20,0},{40,20}})));
+        Modelica.Blocks.Sources.Constant const(k=259)
+          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+      equation
+        connect(const.y, cSTR.Tc) annotation (Line(
+            points={{-19,10},{2,10},{2,14.8},{24.6,14.8}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics));
+      end CSTRconst;
 
-    model CSTRexp
-      CSTR cSTR annotation (Placement(transformation(extent={{20,0},{40,20}})));
-      Modelica.Blocks.Sources.Exponentials exponentials(
-        riseTime=10,
-        riseTimeConst=1,
-        offset=230,
-        outMax=39)
-        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-    equation
-      connect(exponentials.y, cSTR.Tc) annotation (Line(
-          points={{-19,10},{2,10},{2,14.8},{24.6,14.8}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (Diagram(graphics));
-    end CSTRexp;
+      model CSTRexp
+        CSTR cSTR annotation (Placement(transformation(extent={{20,0},{40,20}})));
+        Modelica.Blocks.Sources.Exponentials exponentials(
+          riseTime=10,
+          riseTimeConst=1,
+          offset=230,
+          outMax=39)
+          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+      equation
+        connect(exponentials.y, cSTR.Tc) annotation (Line(
+            points={{-19,10},{2,10},{2,14.8},{24.6,14.8}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics));
+      end CSTRexp;
 
-    model CSTRconst
-      CSTR cSTR annotation (Placement(transformation(extent={{20,0},{40,20}})));
-      Modelica.Blocks.Sources.Constant const(k=259)
-        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-    equation
-      connect(const.y, cSTR.Tc) annotation (Line(
-          points={{-19,10},{2,10},{2,14.8},{24.6,14.8}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (Diagram(graphics));
-    end CSTRconst;
-    annotation (DymolaStoredErrors(thetext="package CSTR
-model CSTR \"A CSTR\"
- 
-  parameter Modelica.SIunits.VolumeFlowRate F0=100/1000/60 \"Inflow\";
-  parameter Modelica.SIunits.Concentration c0=1000 \"Concentration of inflow\"; 
-  Modelica.Blocks.Interfaces.RealInput Tc \"Cooling temperature\"; 
-  parameter Modelica.SIunits.VolumeFlowRate F=100/1000/60 \"Outflow\"; 
-  parameter Modelica.SIunits.Temp_K T0 = 350;
-  parameter Modelica.SIunits.Length r = 0.219;
-  parameter Real k0 = 7.2e10/60;
-  parameter Real EdivR = 8750;
-  parameter Real U = 915.6;
-  parameter Real rho = 1000;
-  parameter Real Cp = 0.239*1000;
-  parameter Real dH = -5e4;
-  parameter Modelica.SIunits.Volume V = 100 \"Reactor Volume\";
-  parameter Modelica.SIunits.Concentration c_init = 1000;
-  parameter Modelica.SIunits.Temp_K T_init = 350;
-  Real c(start=c_init,fixed=true,nominal=c0);
-  Real T(start=T_init,fixed=true,nominal=T0);
-equation 
-  der(c) = F0*(c0-c)/V-k0*c*exp(-EdivR/T);
-  der(T) = F0*(T0-T)/V-dH/(rho*Cp)*k0*c*exp(-EdivR/T)+2*U/(r*rho*Cp)*(Tc-T);
-end CSTR;
-
-model CSTR_Init
-  extends CSTR(c(fixed=false),T(fixed=false));
-initial equation
-  der(c) = 0;
-  der(T) = 0;
-end CSTR_Init;
-
-model CSTR_Init_Optimization
-
-  CSTR cstr \"CSTR component\";
-  Real cost(start=0,fixed=true);
-  Real u = Tc_ref;
-  parameter Real c_ref = 500;
-  parameter Real T_ref = 320;
-  parameter Real Tc_ref = 350;
-  parameter Real q_c = 1;
-  parameter Real q_T = 1;
-  parameter Real q_Tc = 1;\t
-
-equation
-  cstr.Tc = Tc_ref; 
-  der(cost) = q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 + 
-                  q_Tc*(Tc_ref-cstr.Tc)^2;
-end CSTR_Init_Optimization;
-
-optimization CSTR_Opt(objective=(cost(finalTime)),
-                      startTime=0.0,
-                      finalTime=150)
- 
-  input Real u(start = 350,initialGuess=350)=cstr.Tc; 
-  CSTR cstr(c(initialGuess=300),T(initialGuess=300),Tc(initialGuess=350));
-
-  Real cost(start=0,fixed=true,initialGuess=500);
-  parameter Real c_ref = 500;
-  parameter Real T_ref = 320;
-  parameter Real Tc_ref = 300;
-  parameter Real q_c = 1;
-  parameter Real q_T = 1;
-  parameter Real q_Tc = 1;\t
-equation
-  der(cost) = q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 + 
-                  q_Tc*(Tc_ref-cstr.Tc)^2;
-constraint
-  cstr.T<=350;
-  u>=230;
-  u<=370;
-end CSTR_Opt;
-
-optimization CSTR_Opt2(objectiveIntegrand=1e-4*(q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 + 
-                  q_Tc*(Tc_ref-cstr.Tc)^2),
-                      startTime=0.0,
-                      finalTime=150)
- 
-  input Real u(start = 350,initialGuess=350,min=230,max=370)=cstr.Tc; 
-  CSTR cstr(c(initialGuess=300),T(initialGuess=300, max=350),Tc(initialGuess=350),
-            c_init=956.271065,T_init=250.051971);
-
-  parameter Real c_ref = 338.775766;
-  parameter Real T_ref = 280.099198;
-  parameter Real Tc_ref = 280;
-  parameter Real q_c = 1;
-  parameter Real q_T = 1;
-  parameter Real q_Tc = 1;
-  Real q = 2*u;
-end CSTR_Opt2;
-
-
-optimization CSTR_Opt_MPC(objective=(cost(finalTime)),
-                      startTime=0.0,
-                      finalTime=50)
- 
-  input Real u(start = 350,initialGuess=350)=cstr.Tc; 
-  CSTR cstr(c(initialGuess=300),T(initialGuess=300),Tc(initialGuess=350));
-
-  Real cost(start=0,fixed=true,initialGuess=500);
-  parameter Real c_ref = 500;
-  parameter Real T_ref = 320;
-  parameter Real Tc_ref = 300;
-  parameter Real q_c = 1;
-  parameter Real q_T = 1;
-  parameter Real q_Tc = 1;\t
-equation
-  der(cost) = q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 + 
-                  q_Tc*(Tc_ref-cstr.Tc)^2 + 
-                  1000*(noEvent(if cstr.T <= 345 then 0 else (cstr.T-345)^4));
-constraint
-  cstr.T<=350;
-  u>=230;
-  u<=370;
-end CSTR_Opt_MPC;
-
-end CSTR;
-"), Icon(graphics={
-          Rectangle(extent={{-60,60},{60,-80}}, lineColor={0,0,255}),
-          Rectangle(extent={{-4,74},{4,-50}}, lineColor={0,0,255}),
-          Ellipse(extent={{-4,74},{-2,74}}, lineColor={0,0,255}),
-          Ellipse(extent={{-4,-46},{-46,-54}}, lineColor={0,0,255}),
-          Ellipse(extent={{46,-46},{4,-54}}, lineColor={0,0,255}),
-          Line(
-            points={{-80,80},{-32,80},{-32,40},{-34,40},{-32,34},{-30,40},{-32,
-                40}},
-            color={0,0,255},
-            smooth=Smooth.None),
-          Line(
-            points={{0,23},{0,23},{0,-17},{-2,-17},{0,-23},{2,-17},{0,-17}},
-            color={0,0,255},
-            smooth=Smooth.None,
-            origin={62,-19},
-            rotation=90)}));
+      model CSTRtimetable
+        CSTR cSTR annotation (Placement(transformation(extent={{0,20},{20,40}})));
+        Modelica.Blocks.Sources.TimeTable timeTable(table=[0,264.4; 10,264.4; 10,
+              200; 50,280; 60,280])
+          annotation (Placement(transformation(extent={{-60,20},{-40,40}})));
+      equation
+        connect(timeTable.y, cSTR.Tc) annotation (Line(
+            points={{-39,30},{-18,30},{-18,34.8},{4.6,34.8}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics),
+          experiment(StopTime=60),
+          __Dymola_experimentSetupOutput);
+      end CSTRtimetable;
+    end Examples;
   end CSTR;
 
   package Distillation
     model Distillation1
 
-    // Binary Distillation Column from
-    // Hahn, J. and T.F. Edgar, An improved method for nonlinear model reduction using balancing of
-    // empirical gramians, Computers and Chemical Engineering, 26, pp. 1379-1397, (2002)
-
-    // Component A = cyclohexane
-    // Component B = heptane
-
-    // t -- time (choose final time t_f=7200 s)
-    // x -- mole fraction of A at each stage
-    // y -- vapor Mole Fractions of Component A
-    // From the equilibrium assumption and mole balances
-    // 1) vol = (yA/xA) / (yB/xB)
-    // 2) xA + xB = 1
-    // 3) yA + yB = 1
-
       import SI = Modelica.SIunits;
 
-      parameter Real rr=2.7 "reflux ratio; initial condition: rr_init=3";
+      parameter Real rr=3.7 "reflux ratio; initial condition: rr_init=3";
       parameter SI.MolarFlowRate Feed =  24.0/3600 "Feed Flowrate";
       parameter Real x_Feed = 0.5 "Mole Fraction of Feed";
       parameter SI.MolarFlowRate D=0.5*Feed "Distillate Flowrate";
@@ -412,31 +271,37 @@ end CSTR;
        der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
 
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
-        experiment(StopTime=120),
+        experiment(StopTime=7200),
         __Dymola_experimentSetupOutput,
-                    Placement(transformation(extent={{-118,0},{-78,40}})));
+                    Placement(transformation(extent={{-118,0},{-78,40}})),
+        Documentation(info="<HTML>
+<p>
+This distillation column is a separation of cyclohexane (component A) and n-heptane (component B). 
+The two components are separated over 30 theoretical trays. In general, distillation column models 
+are generally good test cases for nonlinear model reduction and identification. The concentrations 
+at each stage or tray are highly correlated. The dynamics of the distillation process can be described 
+by a relatively few number of underlying dynamic states. 
+</p>
+<p>
+From the equilibrium assumption and mole balances
+</p>
+<ul>
+<li>  vol = (yA/xA) / (yB/xB) </li>
+<li> xA + xB = 1 </li>
+<li> yA + yB = 1 </li>
+</ul>
+<p>
+Reference:
+</p>
+<p>
+Hahn, J. and T.F. Edgar, An improved method for nonlinear model reduction using balancing of
+empirical gramians, Computers and Chemical Engineering, 26, pp. 1379-1397, (2002)
+</p>
+
+</HTML>"));
     end Distillation1;
 
     model Distillation2
-
-    // Binary Distillation Column from
-
-    // Hahn, J. and T.F. Edgar, An improved method for nonlinear model reduction using balancing of
-    // empirical gramians, Computers and Chemical Engineering, 26, pp. 1379-1397, (2002)
-
-    // J.D. Hedengren added Wilson equation for the Vapor-Liquid Equilibrium. This improved the
-    // model through the Raoult's Law assumption (constant relative volatility)
-
-    // Component A = cyclohexane
-    // Component B = heptane
-
-    // t -- time (choose final time t_f=7200 s)
-    // x -- mole fraction of A at each stage
-    // y -- vapor Mole Fractions of Component A
-    // From the equilibrium assumption and mole balances
-    // 1) vol = (yA/xA) / (yB/xB)
-    // 2) xA + xB = 1
-    // 3) yA + yB = 1
 
       import SI = Modelica.SIunits;
 
@@ -525,31 +390,39 @@ end CSTR;
           inputs=false,
           outputs=false,
           auxiliaries=false),
-                    Placement(transformation(extent={{-118,0},{-78,40}})));
+                    Placement(transformation(extent={{-118,0},{-78,40}})),
+        Documentation(info="<HTML>
+<p>
+This distillation column is a separation of cyclohexane (component A) and n-heptane (component B). 
+The two components are separated over 30 theoretical trays. In general, distillation column models 
+are generally good test cases for nonlinear model reduction and identification. The concentrations 
+at each stage or tray are highly correlated. The dynamics of the distillation process can be described 
+by a relatively few number of underlying dynamic states. 
+</p>
+<p>
+From the equilibrium assumption and mole balances
+</p>
+<ul>
+<li>  vol = (yA/xA) / (yB/xB) </li>
+<li> xA + xB = 1 </li>
+<li> yA + yB = 1 </li>
+</ul>
+<p>
+J.D. Hedengren added a Wilson equation for the Vapor-Liquid Equilibrium. This improved the
+model through the Raoult's Law assumption (constant relative volatility).
+</p>
+<p>
+Reference:
+</p>
+<p>
+Hahn, J. and T.F. Edgar, An improved method for nonlinear model reduction using balancing of
+empirical gramians, Computers and Chemical Engineering, 26, pp. 1379-1397, (2002)
+</p>
+
+</HTML>"));
     end Distillation2;
 
     model Distillation3
-
-    // Binary Distillation Column from
-
-    // Hahn, J. and T.F. Edgar, An improved method for nonlinear model reduction using balancing of
-    // empirical gramians, Computers and Chemical Engineering, 26, pp. 1379-1397, (2002)
-
-    // J.D. Hedengren added Wilson equation for the Vapor-Liquid Equilibrium. This improved the
-    // model through the Raoult's Law assumption (constant relative volatility)and also made the
-    // model into a 64 state DAE with 32 DE and 32 AE (originally a 32 state ODE).
-
-    // Component A = cyclohexane
-    // Component B = heptane
-
-    // t -- time (choose final time t_f=7200 s)
-    // x -- mole fraction of A at each stage
-    // T -- Temperature at each state
-    // y -- vapor Mole Fractions of Component A
-    // From the equilibrium assumption and mole balances
-    // 1) vol = (yA/xA) / (yB/xB)
-    // 2) xA + xB = 1
-    // 3) yA + yB = 1
 
       import SI = Modelica.SIunits;
 
@@ -691,49 +564,51 @@ end CSTR;
           textual=true,
           doublePrecision=true,
           inputs=false),
-                    Placement(transformation(extent={{-118,0},{-78,40}})));
+                    Placement(transformation(extent={{-118,0},{-78,40}})),
+        Documentation(info="<HTML>
+<p>
+This distillation column is a separation of cyclohexane (component A) and n-heptane (component B). 
+The two components are separated over 30 theoretical trays. In general, distillation column models 
+are generally good test cases for nonlinear model reduction and identification. The concentrations 
+at each stage or tray are highly correlated. The dynamics of the distillation process can be described 
+by a relatively few number of underlying dynamic states. 
+</p>
+<p>
+From the equilibrium assumption and mole balances
+</p>
+<ul>
+<li>  vol = (yA/xA) / (yB/xB) </li>
+<li> xA + xB = 1 </li>
+<li> yA + yB = 1 </li>
+</ul>
+<p>
+J.D. Hedengren added the Wilson equation for the Vapor-Liquid Equilibrium. This improved the
+model through the Raoult's Law assumption (constant relative volatility)and also made the
+model into a 64 state DAE with 32 DE and 32 AE (originally a 32 state ODE).
+</p>
+<p>
+Reference:
+</p>
+<p>
+Hahn, J. and T.F. Edgar, An improved method for nonlinear model reduction using balancing of
+empirical gramians, Computers and Chemical Engineering, 26, pp. 1379-1397, (2002)
+</p>
+
+</HTML>"));
     end Distillation3;
 
     model Distillation4
-
-    // Binary Distillation Column model found in
-
-    // Diehl, M., "Real-Time Optimization for Large Scale Nonlinear Processes", PhD thesis, University
-    // of Heidelberg, 2001.
-    // The model is a 204 state DAE with 82 differential equations and 122 algebraic equations.
-    //
-    // and
-    //
-    // Diehl, M., et. al. "Real-Time Optimization for Large Scale Nonlinear Processes: Nonlinear
-    //   Model Predictive Control of a High Purity Distillation Column", In Groetschel, Krumke,
-    //   Rambau (editors): Online Optimization of Large Scale Systems: State of the Art, Springer 2001.
-    // The model is a 164 state DAE with 42 differential equations and 122 algebraic equations. This model
-    //   was used to control the pilot plant distillation column.  It is a simplification from Diehl's thesis
-    //   work in that constant molar holdup is assumed for each tray.
-    //
-    // For NMPC - t_control = 600 sec with 5 control intervals of 120 sec
-    // The iteration time constraint was 20 sec on a 1009 MHz AMD Athlon
-    //
-    // The model found here uses the data from the above two references but with one modification.  The liquid
-    //   flowrate from each tray can be solved explicitly thereby eliminating 40 algebraic equations.  The total
-    //   for this model is 42 differential equations and 125 algebraic equations.  The extra equation is an
-    //   energy balance to determine the vapor flowrate from the reboiler.
-    //
-    //  Component A = Methanol
-    //  Component B = n-Propanol
-    //
-    //  t -- time (not used)
-    //  x -- states
 
       import SI = Modelica.SIunits;
 
     // Parameters - Nominal Operating Conditions
       parameter SI.VolumeFlowRate Vdot_Feed =  14.0 / 3600 / 1000
         "Feed Flowrate (m^3/sec)";
+      parameter Real Q_elec = 2.45e3
+        "Input 1: Heat Input to the Reboiler from an Electric Heater Q_elec = u(1,1)";
       parameter SI.VolumeFlowRate Vdot_L1= 4.3 /1000/3600
         "Input 2: Flow Rate of the Recycled Distillate Vdot_L1 = u(2,1)";
-      parameter SI.HeatFlowRate Q_elec= 2.45e3
-        "Input 1: Heat Input to the Reboiler from an Electric Heater Q_elec = u(1,1)";
+      //parameter SI.HeatFlowRate Q_elec= 2.45e3"Input 1: Heat Input to the Reboiler from an Electric Heater Q_elec = u(1,1)"
       parameter Real xA_Feed = 0.32 "Mole Fraction of Feed";
       parameter SI.Temp_K Temp_Feed = 71.0 + 273.15 "Feed Temperature (K)";
       parameter SI.Pressure P_top = 0.97 * 1.0e5 "Top Pressure (Pa)";
@@ -1082,44 +957,64 @@ end CSTR;
 
       annotation (experiment(StopTime=6000, Algorithm="Dassl"),
           __Dymola_experimentSetupOutput,
-        Diagram(graphics));
+        Diagram(graphics),
+        DymolaStoredErrors,
+        Documentation(info="<HTML>
+<p>
+This distillation column is a separation of cyclohexane (component A) and n-heptane (component B). 
+The two components are separated over 30 theoretical trays. In general, distillation column models 
+are generally good test cases for nonlinear model reduction and identification. The concentrations 
+at each stage or tray are highly correlated. The dynamics of the distillation process can be described 
+by a relatively few number of underlying dynamic states. 
+</p>
+<p>
+From the equilibrium assumption and mole balances
+</p>
+<ul>
+<li>  vol = (yA/xA) / (yB/xB) </li>
+<li> xA + xB = 1 </li>
+<li> yA + yB = 1 </li>
+</ul>
+<p>
+The model found here uses the data from the above two references but with one modification.  The liquid
+flowrate from each tray can be solved explicitly thereby eliminating 40 algebraic equations.  The total
+for this model is 42 differential equations and 125 algebraic equations.  The extra equation is an
+energy balance to determine the vapor flowrate from the reboiler.
+</p>
+<p>
+Reference:
+</p>
+<p>
+Diehl, M., 'Real-Time Optimization for Large Scale Nonlinear Processes', PhD thesis, University
+of Heidelberg, 2001.
+</p>
+<p>
+The model is a 204 state DAE with 82 differential equations and 122 algebraic equations.
+</p>
+<p>
+and
+</p>
+<p>
+Diehl, M., et. al. 'Real-Time Optimization for Large Scale Nonlinear Processes: Nonlinear
+ Model Predictive Control of a High Purity Distillation Column', In Groetschel, Krumke,
+Rambau (editors): Online Optimization of Large Scale Systems: State of the Art, Springer 2001.
+</p>
+<p>
+The model is a 164 state DAE with 42 differential equations and 122 algebraic equations. This model
+was used to control the pilot plant distillation column.  It is a simplification from Diehl's thesis
+work in that constant molar holdup is assumed for each tray.
+</p>
+
+</HTML>"));
     end Distillation4;
 
     model Distillation4Input
-
-    // Binary Distillation Column model found in
-
-    // Diehl, M., "Real-Time Optimization for Large Scale Nonlinear Processes", PhD thesis, University
-    // of Heidelberg, 2001.
-    // The model is a 204 state DAE with 82 differential equations and 122 algebraic equations.
-    //
-    // and
-    //
-    // Diehl, M., et. al. "Real-Time Optimization for Large Scale Nonlinear Processes: Nonlinear
-    //   Model Predictive Control of a High Purity Distillation Column", In Groetschel, Krumke,
-    //   Rambau (editors): Online Optimization of Large Scale Systems: State of the Art, Springer 2001.
-    // The model is a 164 state DAE with 42 differential equations and 122 algebraic equations. This model
-    //   was used to control the pilot plant distillation column.  It is a simplification from Diehl's thesis
-    //   work in that constant molar holdup is assumed for each tray.
-    //
-    // For NMPC - t_control = 600 sec with 5 control intervals of 120 sec
-    // The iteration time constraint was 20 sec on a 1009 MHz AMD Athlon
-    //
-    // The model found here uses the data from the above two references but with one modification.  The liquid
-    //   flowrate from each tray can be solved explicitly thereby eliminating 40 algebraic equations.  The total
-    //   for this model is 42 differential equations and 125 algebraic equations.  The extra equation is an
-    //   energy balance to determine the vapor flowrate from the reboiler.
-    //
-    //  Component A = Methanol
-    //  Component B = n-Propanol
-    //
-    //  t -- time (not used)
-    //  x -- states
 
       import SI = Modelica.SIunits;
 
     //input
       Modelica.Blocks.Interfaces.RealInput Q_elec
+        "Input 1: Heat Input to the Reboiler from an Electric Heater Q_elec = u(1,1)"
         annotation (Placement(transformation(extent={{-42,8},{-2,48}})));
 
     // Parameters - Nominal Operating Conditions
@@ -1480,21 +1375,24 @@ end CSTR;
         DymolaStoredErrors);
     end Distillation4Input;
 
-    model Distillation4test
-      Distillation4Input distillation4Input
-        annotation (Placement(transformation(extent={{20,20},{40,40}})));
-      Modelica.Blocks.Sources.Constant const(k=2.3e3)
-        annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
-    equation
-      connect(const.y, distillation4Input.Q_elec) annotation (Line(
-          points={{-19,30},{4,30},{4,32.8},{27.8,32.8}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (
-        Diagram(graphics),
-        experiment(StopTime=6000),
-        __Dymola_experimentSetupOutput);
-    end Distillation4test;
+    package Examples
+      model Distillation4test
+        JMExamples.Distillation.Distillation4Input
+                           distillation4Input
+          annotation (Placement(transformation(extent={{20,20},{40,40}})));
+        Modelica.Blocks.Sources.Constant const(k=2.3e3)
+          annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
+      equation
+        connect(const.y, distillation4Input.Q_elec) annotation (Line(
+            points={{-19,30},{4,30},{4,32.8},{27.8,32.8}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (
+          Diagram(graphics),
+          experiment(StopTime=6000),
+          __Dymola_experimentSetupOutput);
+      end Distillation4test;
+    end Examples;
   end Distillation;
 
   package ContState
@@ -1519,32 +1417,34 @@ end CSTR;
       annotation (uses(Modelica(version="3.2")), Diagram(graphics));
     end ContState;
 
-    model ContStateSine
-      import JMExamples;
-      JMExamples.ContState contState
-        annotation (Placement(transformation(extent={{0,0},{20,20}})));
-      Modelica.Blocks.Sources.Sine sine
-        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-    equation
-      connect(sine.y, contState.u) annotation (Line(
-          points={{-19,10},{-5.4,10},{-5.4,11.2},{8.2,11.2}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (Diagram(graphics));
-    end ContStateSine;
+    package Examples
+      model ContStateExp
+        ContState contState
+          annotation (Placement(transformation(extent={{0,0},{20,20}})));
+        Modelica.Blocks.Sources.Exponentials exponentials
+          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+      equation
+        connect(exponentials.y, contState.u) annotation (Line(
+            points={{-19,10},{-5.4,10},{-5.4,11.2},{8.2,11.2}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics));
+      end ContStateExp;
 
-    model ContStateExp
-      ContState contState
-        annotation (Placement(transformation(extent={{0,0},{20,20}})));
-      Modelica.Blocks.Sources.Exponentials exponentials
-        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-    equation
-      connect(exponentials.y, contState.u) annotation (Line(
-          points={{-19,10},{-5.4,10},{-5.4,11.2},{8.2,11.2}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (Diagram(graphics));
-    end ContStateExp;
+      model ContStateSine
+        import JMExamples;
+        JMExamples.ContState contState
+          annotation (Placement(transformation(extent={{0,0},{20,20}})));
+        Modelica.Blocks.Sources.Sine sine
+          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+      equation
+        connect(sine.y, contState.u) annotation (Line(
+            points={{-19,10},{-5.4,10},{-5.4,11.2},{8.2,11.2}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics));
+      end ContStateSine;
+    end Examples;
   end ContState;
 
   package FlightPath
@@ -1578,46 +1478,62 @@ end CSTR;
       der(x2) = L/m*x1*(1-c*x2)-g*cos(x2)/x1+L*c/m*v;
       der(x3) = (x1*sin(x2));
 
-      annotation (experiment(StopTime=100), __Dymola_experimentSetupOutput);
+      annotation (experiment(StopTime=100), __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+Minimum Cost Optimal Control: An Application to Flight Level Tracking 
+</p>
+<p>
+Reference:
+</p>
+<p>
+John Lygeros, Department of Engineering, University of Cambridge, Cambridge, UK
+</p>
+<p>
+PROPT - Matlab Optimal Control Software (DAE, ODE)
+</p>
+</HTML>"));
     end FlightPath;
 
-    model FlightPathSine
-      FlightPath flightPath
-        annotation (Placement(transformation(extent={{20,0},{40,20}})));
-      Modelica.Blocks.Sources.Sine sine(amplitude=20, freqHz=10)
-        annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
-      Modelica.Blocks.Sources.Sine sine1(amplitude=20, freqHz=10)
-        annotation (Placement(transformation(extent={{-40,-20},{-20,0}})));
-    equation
-      connect(sine1.y, flightPath.u1) annotation (Line(
-          points={{-19,-10},{4,-10},{4,10.6},{26,10.6}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      connect(sine.y, flightPath.u2) annotation (Line(
-          points={{-19,30},{2,30},{2,14.6},{26.2,14.6}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (Diagram(graphics));
-    end FlightPathSine;
+    package Examples
+      model FlightPathExp
+        FlightPath flightPath
+          annotation (Placement(transformation(extent={{20,20},{40,40}})));
+        Modelica.Blocks.Sources.RealExpression realExpression(y=25)
+          annotation (Placement(transformation(extent={{-34,-2},{-14,18}})));
+        Modelica.Blocks.Sources.Exponentials exponentials(outMax=10, riseTime=80)
+          annotation (Placement(transformation(extent={{-40,40},{-20,60}})));
+      equation
+        connect(realExpression.y, flightPath.u1) annotation (Line(
+            points={{-13,8},{6,8},{6,30.6},{26,30.6}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        connect(exponentials.y, flightPath.u2) annotation (Line(
+            points={{-19,50},{2,50},{2,34.6},{26.2,34.6}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics));
+      end FlightPathExp;
 
-    model FlightPathExp
-      FlightPath flightPath
-        annotation (Placement(transformation(extent={{20,20},{40,40}})));
-      Modelica.Blocks.Sources.RealExpression realExpression(y=25)
-        annotation (Placement(transformation(extent={{-34,-2},{-14,18}})));
-      Modelica.Blocks.Sources.Exponentials exponentials(outMax=10, riseTime=80)
-        annotation (Placement(transformation(extent={{-40,40},{-20,60}})));
-    equation
-      connect(realExpression.y, flightPath.u1) annotation (Line(
-          points={{-13,8},{6,8},{6,30.6},{26,30.6}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      connect(exponentials.y, flightPath.u2) annotation (Line(
-          points={{-19,50},{2,50},{2,34.6},{26.2,34.6}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (Diagram(graphics));
-    end FlightPathExp;
+      model FlightPathSine
+        FlightPath flightPath
+          annotation (Placement(transformation(extent={{20,0},{40,20}})));
+        Modelica.Blocks.Sources.Sine sine(amplitude=20, freqHz=10)
+          annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
+        Modelica.Blocks.Sources.Sine sine1(amplitude=20, freqHz=10)
+          annotation (Placement(transformation(extent={{-40,-20},{-20,0}})));
+      equation
+        connect(sine1.y, flightPath.u1) annotation (Line(
+            points={{-19,-10},{4,-10},{4,10.6},{26,10.6}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        connect(sine.y, flightPath.u2) annotation (Line(
+            points={{-19,30},{2,30},{2,14.6},{26.2,14.6}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics));
+      end FlightPathSine;
+    end Examples;
   end FlightPath;
 
   package PenicillinPlant
@@ -1633,18 +1549,13 @@ end CSTR;
       parameter Real Yp =   1.2;
       parameter Real v = 0.004;
       parameter Real Sin =   200;
-      parameter Real umin = 0;
-      parameter Real umax = 1;
-      parameter Real Xmin =  0;
-      parameter Real Xmax = 3.7;
-      parameter Real Smin = 0;
 
       //state start values
       parameter Real X1_0=1;
       parameter Real S1_0=0.5;
       parameter Real P1_0=0;
       parameter Real V1_0=150;
-      parameter Real u1_0=0.03;
+      parameter Real u1_0=1;
 
       //state start values
       Real X1(start=X1_0,fixed=true) "Cell mass concentration";
@@ -1665,8 +1576,40 @@ end CSTR;
       der(P1) = v*X1 - u1/V1*P1;
       der(V1) = u1;
       der(u1) = du1;
+
       annotation (experiment(StopTime=150, NumberOfIntervals=100),
-          __Dymola_experimentSetupOutput);
+          __Dymola_experimentSetupOutput,
+     Documentation(info="<HTML>
+ <p>
+In this problem, the objective is to maximize the concentration of penicillin, P, produced 
+in a fed-batch bioreactor, given a finite amount of time.
+</p>
+<ul>
+<li> Reactions: S -> X, S -> P  </li>
+<li> Conditions: Fed-batch, isothermal </li>
+<li> Objective: Maximize the concentration of product P at a given final time </li>
+<li> Manipulated variable: Feed rate of S </li>
+<li> Constraints: Input bounds; upper limit on the biomass concentration,
+which is motivated by oxygen-transfer limitation typically occurring at
+large biomass concentration </li>
+</ul>
+ <p>
+Two phases occur in the model. After the cell mass concetration X has reached a certain value 
+(3.7), the constraint for u changes. In the Python file 'penicillin_plant_time.py' an optimal
+time for the phase change is determed (80.334).
+</p>
+ <p>
+Reference:
+</p>
+<p>
+Fed-batch Fermentor Control: Dynamic Optimization of Batch Processes II. Role of Measurements 
+in Handling Uncertainty 2001, B. Srinivasan, D. Bonvin, E. Visser, S. Palanki 
+</p>
+<p>
+PROPT - Matlab Optimal Control Software (DAE, ODE)
+</p>
+
+</HTML>"));
     end PenicillinPlant1;
 
     model PenicillinPlantinit
@@ -1691,7 +1634,7 @@ end CSTR;
     end PenicillinPlantinit;
 
     model PenicillinPlant2
-          import SI = Modelica.SIunits;
+      import SI = Modelica.SIunits;
 
        //parameter
           parameter Real miu_m = 0.02;
@@ -1707,7 +1650,7 @@ end CSTR;
           parameter Real S2_0 = 0;
           parameter Real P2_0 = 0.6;
           parameter Real V2_0 = 150;
-          parameter Real u2_0 = 0.01;
+          parameter Real u2_0 = 0.03;
           parameter Real du2_0 = 0;
 
           //state start values
@@ -1732,29 +1675,6 @@ end CSTR;
 
     end PenicillinPlant2;
 
-    model PenicillinPlantInput
-      PenicillinPlantTest penicillinPlantTest
-        annotation (Placement(transformation(extent={{0,0},{20,20}})));
-      Modelica.Blocks.Sources.Trapezoid trapezoid(
-        amplitude=0.09,
-        rising=75,
-        width=0,
-        falling=0.1,
-        period=150,
-        nperiod=1,
-        offset=0.01)
-        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-    equation
-      connect(trapezoid.y, penicillinPlantTest.u1) annotation (Line(
-          points={{-19,10},{-6.5,10},{-6.5,11},{6,11}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (
-        Diagram(graphics),
-        experiment(StopTime=150),
-        __Dymola_experimentSetupOutput);
-    end PenicillinPlantInput;
-
     model PenicillinPlantTest
 
       import SI = Modelica.SIunits;
@@ -1766,11 +1686,6 @@ end CSTR;
       parameter Real Yp =   1.2;
       parameter Real v = 0.004;
       parameter Real Sin =   200;
-      parameter Real umin = 0;
-      parameter Real umax = 1;
-      parameter Real Xmin =  0;
-      parameter Real Xmax = 3.7;
-      parameter Real Smin = 0;
 
       //state start values
       parameter Real X1_0=1;
@@ -1799,21 +1714,46 @@ end CSTR;
           __Dymola_experimentSetupOutput);
     end PenicillinPlantTest;
 
-    model PenicillinPlantInputConst
-      PenicillinPlantTest penicillinPlantTest
-        annotation (Placement(transformation(extent={{0,0},{20,20}})));
-      Modelica.Blocks.Sources.Constant const(k=0.03)
-        annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
-    equation
-      connect(const.y, penicillinPlantTest.u1) annotation (Line(
-          points={{-39,10},{-16,10},{-16,11},{6,11}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (
-        Diagram(graphics),
-        experiment(StopTime=150),
-        __Dymola_experimentSetupOutput);
-    end PenicillinPlantInputConst;
+    package Examples
+      model PenicillinPlantInput
+        PenicillinPlantTest penicillinPlantTest
+          annotation (Placement(transformation(extent={{0,0},{20,20}})));
+        Modelica.Blocks.Sources.Trapezoid trapezoid(
+          amplitude=0.09,
+          rising=75,
+          width=0,
+          falling=0.1,
+          period=150,
+          nperiod=1,
+          offset=0.01)
+          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+      equation
+        connect(trapezoid.y, penicillinPlantTest.u1) annotation (Line(
+            points={{-19,10},{-6.5,10},{-6.5,11},{6,11}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (
+          Diagram(graphics),
+          experiment(StopTime=150),
+          __Dymola_experimentSetupOutput);
+      end PenicillinPlantInput;
+
+      model PenicillinPlantInputConst
+        PenicillinPlantTest penicillinPlantTest
+          annotation (Placement(transformation(extent={{0,0},{20,20}})));
+        Modelica.Blocks.Sources.Constant const(k=0.03)
+          annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
+      equation
+        connect(const.y, penicillinPlantTest.u1) annotation (Line(
+            points={{-39,10},{-16,10},{-16,11},{6,11}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (
+          Diagram(graphics),
+          experiment(StopTime=150),
+          __Dymola_experimentSetupOutput);
+      end PenicillinPlantInputConst;
+    end Examples;
   end PenicillinPlant;
 
   package BloodGlucose
@@ -1826,8 +1766,9 @@ end CSTR;
 
       //States
       Real G(start = G_init, fixed=true) "Plasma Glucose Conc. (mmol/L)";
-      Real X(start = X_init, fixed=true) "Plasma Glucose Conc. (mmol/L)";
-      Real I(start = I_init, fixed=true) "Plasma Glucose Conc. (mmol/L)";
+      Real X(start = X_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
+      Real I(start = I_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
+      Real dist "Meal glucose disturbance (mmol/L)";
 
       //parameter
       parameter Real G_basal = 4.5 "mmol/L";
@@ -1840,13 +1781,39 @@ end CSTR;
       parameter Real n = 5/54;
 
       //Control Signal
-      Modelica.Blocks.Interfaces.RealInput D
+      Modelica.Blocks.Interfaces.RealInput D "Insulin Infusion rate"
        annotation (Placement(transformation(extent={{-38,-8},{2,32}})));
     equation
-      der(G) = -P1 * (G - G_basal) - (X - X_basal) * G + 3;
+      der(G) = -P1 * (G - G_basal) - (X - X_basal) * G + dist;
       der(X) = -P2 * (X - X_basal) + P3 * (I - I_basal);
       der(I) = -n * I + D / V1;
-      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput);
+      dist = 0.5*exp(-0.05*time);
+
+      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+This is a model that predicts the blood glucose levels of a type-I diabetic. 
+The objective is to predict the relationship between insulin injection and blood glucose levels. 
+With a sufficiently accurate mathematical model of a patient, the correct insulin injection rate 
+could be prescribed. 
+By automating the sensing of blood glucose and the injection of insulin, this system would serve 
+as an artificial pancreas. The model is composed of differential and algebraic equations. 
+</p>
+<p>
+Reference:
+</p>
+<p>
+S. M. Lynch and B. W. Bequette, Estimation based Model Predictive Control of Blood Glucose in 
+Type I Diabetes: A Simulation Study, Proc. 27th IEEE Northeast Bioengineering Conference, IEEE, 2001.
+</p>
+<p>
+and
+</p>
+<p>
+S. M. Lynch and B. W. Bequette, Model Predictive Control of Blood Glucose in type I Diabetics 
+using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002. 
+</p>
+</HTML>"));
     end BloodGlucose1;
 
     model BloodGlucose2
@@ -1900,21 +1867,104 @@ end CSTR;
       der(F) = -p7*(F-Fb) - p8*Y*F + 0.00021 * exp(-0.0055*G) * (F*G-Fb*Gb) + u3/VolF
         "Plasma Free Fatty Acid (FFA) dynamics";
       der(Z) = -k2*(Z-Zb) + k1*(F-Fb) "Remote FFA dynamics";
-      annotation (Diagram(graphics));
+
+      annotation (Diagram(graphics),
+        Documentation(info="<HTML>
+<p>
+This is a model that predicts the blood glucose levels of a type-I diabetic. 
+The objective is to predict the relationship between insulin injection and blood glucose levels. 
+With a sufficiently accurate mathematical model of a patient, the correct insulin injection rate 
+could be prescribed. 
+By automating the sensing of blood glucose and the injection of insulin, this system would serve 
+as an artificial pancreas. The model is composed of differential and algebraic equations. 
+</p>
+<p>
+Reference:
+</p>
+<p>
+A. Roy and R.S. Parker. Dynamic Modeling of Free Fatty Acids, Glucose, and Insulin: An Extended 
+Minimal Model, Diabetes Technology and Therapeutics 8(6), 617-626, 2006. 
+</p>
+</HTML>"));
     end BloodGlucose2;
 
-    model BloodGlucoseInput
-      BloodGlucose1 bloodGlucose1_1
-        annotation (Placement(transformation(extent={{20,20},{40,40}})));
-      Modelica.Blocks.Sources.Constant const(k=2)
-        annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
+    model BloodGlucoseconstraint
+
+      //State start values
+      parameter Real G_init = 4.5;
+      parameter Real X_init = 15;
+      parameter Real I_init = 15;
+
+      //States
+      Real G(start = G_init, fixed=true) "Plasma Glucose Conc. (mmol/L)";
+      Real X(start = X_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
+      Real I(start = I_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
+      Real dist "Meal glucose disturbance (mmol/L)";
+      Real D(start=16, fixed=true);
+
+      //parameter
+      parameter Real G_basal = 4.5 "mmol/L";
+      parameter Real X_basal = 15 "mU/L";
+      parameter Real I_basal = 15 "mU/L";
+      parameter Real P1 = 0.028735;
+      parameter Real P2 = 0.028344;
+      parameter Real P3 = 5.035e-5;
+      parameter Real V1 = 12;
+      parameter Real n = 5/54;
+
+      //Control Signal
+      Modelica.Blocks.Interfaces.RealInput dD "Insulin Infusion rate"
+       annotation (Placement(transformation(extent={{-38,-8},{2,32}})));
     equation
-      connect(const.y, bloodGlucose1_1.U) annotation (Line(
-          points={{-19,30},{4,30},{4,31.2},{28.2,31.2}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (Diagram(graphics));
-    end BloodGlucoseInput;
+      der(G) = -P1 * (G - G_basal) - (X - X_basal) * G + dist;
+      der(X) = -P2 * (X - X_basal) + P3 * (I - I_basal);
+      der(I) = -n * I + D / V1;
+      dist = 0.5*exp(-0.05*time);
+      der(D) =dD
+      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+This is a model that predicts the blood glucose levels of a type-I diabetic. 
+The objective is to predict the relationship between insulin injection and blood glucose levels. 
+With a sufficiently accurate mathematical model of a patient, the correct insulin injection rate 
+could be prescribed. 
+By automating the sensing of blood glucose and the injection of insulin, this system would serve 
+as an artificial pancreas. The model is composed of differential and algebraic equations. 
+</p>
+<p>
+Reference:
+</p>
+<p>
+S. M. Lynch and B. W. Bequette, Estimation based Model Predictive Control of Blood Glucose in 
+Type I Diabetes: A Simulation Study, Proc. 27th IEEE Northeast Bioengineering Conference, IEEE, 2001.
+</p>
+<p>
+and
+</p>
+<p>
+S. M. Lynch and B. W. Bequette, Model Predictive Control of Blood Glucose in type I Diabetics 
+using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002. 
+</p>
+</HTML>"));
+
+    end BloodGlucoseconstraint;
+
+    package Examples
+      model BloodGlucoseInput
+        BloodGlucose1 bloodGlucose1_1
+          annotation (Placement(transformation(extent={{20,20},{40,40}})));
+        Modelica.Blocks.Sources.Constant const(k=3)
+          annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
+      equation
+        connect(const.y, bloodGlucose1_1.D) annotation (Line(
+            points={{-19,30},{4,30},{4,31.2},{28.2,31.2}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics),
+          experiment(StopTime=400),
+          __Dymola_experimentSetupOutput);
+      end BloodGlucoseInput;
+    end Examples;
   end BloodGlucose;
 
   package MarinePopulation
@@ -1930,7 +1980,16 @@ end CSTR;
     equation
       der(y) = cat(1,{0},g).*cat(1,{0},y[1:7]) - (m+cat(1,g,{0})).*y;
 
-      annotation (experiment(StopTime=10), __Dymola_experimentSetupOutput);
+      annotation (experiment(StopTime=10), __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+Given estimates of the abundance of the population of a marine species at each stage (for
+example, nauplius, juvenile, adult) as a function of time, determine stage speci c growth
+and mortality rates.
+The objective is to minimize the error between computed and observed data.
+m and g are the unknown mortality and growth rates at the stages with g0=0.
+</p>
+</HTML>"));
     end MarinePopulation;
   end MarinePopulation;
 
@@ -1951,13 +2010,22 @@ end CSTR;
       der(y1) = -(theta1+theta3)*y1^2;
       der(y2) = theta1*y1^2-theta2*y2;
 
+       annotation (
+        Documentation(info="<HTML>
+<p>
+Determine the reaction coecients for the catalytic cracking of gas oil into gas and other
+byproducts. The objective is to minimize the error between the concentration measurements and
+the computed data.
+</p>
+
+</HTML>"));
     end CatalyticCracking;
   end CatalyticCracking;
 
   package Polyeth
     model Polyeth
 
-        import SI = Modelica.SIunits;
+      import SI = Modelica.SIunits;
 
         //define constants:
         parameter SI.Volume Vg = 500;
@@ -2038,7 +2106,24 @@ end CSTR;
 
       annotation (Icon(graphics),
         experiment(StopTime=36000),
-        __Dymola_experimentSetupOutput);
+        __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+reference:
+</p>
+<p>
+A. Gani et al. Journal of Process Control, 17 (2007), pp. 439-451
+</p>
+<p>
+temperature control of industrial gas phase polyethylene reactors, S. A. Dadebo, 
+P. J. McLellan and K. B. McAuley, J Proc. Cont. Vol. 7 No. 2, pp. 83 95, 1997.
+</p>
+<p>
+effects of perating conditions on stability of gas-phase polyethylene reactors, K. B. McAuley,
+D. A. Macdonald, and P. J. Mclellan, AIChE Journal, Vol. 41, pp. 868-879
+</p>
+
+</HTML>"));
     end Polyeth;
 
     model PolyethInput
@@ -2126,98 +2211,24 @@ end CSTR;
         __Dymola_experimentSetupOutput);
     end PolyethInput;
 
-    model Polyethtest
-      PolyethInput polyethInput
-        annotation (Placement(transformation(extent={{20,0},{40,20}})));
-      Modelica.Blocks.Sources.Constant const(k=1/1800) "1"
-        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-    equation
-      connect(const.y, polyethInput.Fc) annotation (Line(
-          points={{-19,10},{4,10},{4,14},{26,14}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (Diagram(graphics),
-        experiment(StopTime=36000),
-        __Dymola_experimentSetupOutput);
-    end Polyethtest;
+    package Examples
+      model Polyethtest
+        PolyethInput polyethInput
+          annotation (Placement(transformation(extent={{20,0},{40,20}})));
+        Modelica.Blocks.Sources.Constant const(k=1/1800) "1"
+          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+      equation
+        connect(const.y, polyethInput.Fc) annotation (Line(
+            points={{-19,10},{4,10},{4,14},{26,14}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics),
+          experiment(StopTime=36000),
+          __Dymola_experimentSetupOutput);
+      end Polyethtest;
+    end Examples;
   end Polyeth;
-  annotation (DymolaStoredErrors(thetext="package VDP_pack
 
-  model VDP
-    // State start values
-    parameter Real x1_0 = 0;
-    parameter Real x2_0 = 1;
-
-    // The states
-    Real x1(start = x1_0);
-    Real x2(start = x2_0);
-
-    // The control signal
-    input Real u;
-
-  equation
-    der(x1) = (1 - x2^2) * x1 - x2 + u;
-    der(x2) = x1;
-  end VDP;
-
-  model VDP_scaled_input
-    // State start values
-    parameter Real x1_0 = 0;
-    parameter Real x2_0 = 1;
-
-    // The states
-    Real x1(start = x1_0);
-    Real x2(start = x2_0);
-
-    // The control signal
-    input Real u(nominal=10);
-
-  equation
-    der(x1) = (1 - x2^2) * x1 - x2 + u;
-    der(x2) = x1;
-  end VDP_scaled_input;
-
-  optimization VDP_Opt (objective = cost(finalTime),
-                         startTime = 0,
-                         finalTime = 20)
-
-    parameter Real p1 = 2;
-
-    extends VDP(x1(fixed=true),x2(fixed=true));
-
-    Real cost(start=0,fixed=true);
-
-  equation
-    der(cost) = exp(p1) * (x1^2 + x2^2 + u^2);
-  constraint 
-     u<=0.75;
-  end VDP_Opt;
-
-  optimization VDP_Opt2 (objectiveIntegrand = exp(p1) * (x1^2 + x2^2 + u^2),
-                         startTime = 0,
-                         finalTime = 20)
-
-    parameter Real p1 = 2;
-
-    extends VDP(x1(fixed=true),x2(fixed=true),u(max=0.75));
-
-  end VDP_Opt2;
-
-  optimization VDP_Opt_Min_Time (objective = finalTime,
-                         startTime = 0,
-                         finalTime(free=true,min=0.2,initialGuess=1)) 
-
-    extends VDP(x1(fixed=true),x2(fixed=true),u(min=-1,max=1));
-
-  constraint
-    // terminal constraints
-    x1(finalTime)=0;
-    x2(finalTime)=0;
-  end VDP_Opt_Min_Time;
-
-end VDP_pack;"), uses(Modelica(version="3.2")),
-    experiment(StopTime=6000, NumberOfIntervals=2000),
-    __Dymola_experimentSetupOutput);
   package CatalystMixing
     model CatalystMixing
 
@@ -2258,34 +2269,49 @@ end VDP_pack;"), uses(Modelica(version="3.2")),
     equation
       der(x1) = x2;
       der(x2) = u;
-      annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput);
+
+      annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+This is a minimum-time problem with two states and one
+input. To convert this optimal control problem with free
+final time to static optimization problem, first it needs to be
+transcribed to a fixed final time problem by using an extra
+state variable. The idea is to specify a nominal time interval,
+[0, Tf ], and to use the extra state as a scale factor to scale
+the duration of the real time.
+</p>
+
+</HTML>"));
     end BangControl;
 
-    model BangControlInput
-      BangControl bangControl
-        annotation (Placement(transformation(extent={{20,20},{40,40}})));
-      Modelica.Blocks.Sources.Constant const(k=1)
-        annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
-    equation
-      connect(const.y, bangControl.u) annotation (Line(
-          points={{-19,30},{5,30},{5,31},{29,31}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (Diagram(graphics));
-    end BangControlInput;
+    package Examples
+      model BangControlInput
+        BangControl bangControl
+          annotation (Placement(transformation(extent={{20,20},{40,40}})));
+        Modelica.Blocks.Sources.Constant const(k=1)
+          annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
+      equation
+        connect(const.y, bangControl.u) annotation (Line(
+            points={{-19,30},{5,30},{5,31},{29,31}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics));
+      end BangControlInput;
 
-    model BangControlTimetable
-      BangControl bangControl
-        annotation (Placement(transformation(extent={{20,0},{40,20}})));
-      Modelica.Blocks.Sources.TimeTable timeTable(table=[0,1; 20,1; 21,0; 30,0])
-        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-    equation
-      connect(timeTable.y, bangControl.u) annotation (Line(
-          points={{-19,10},{5,10},{5,11},{29,11}},
-          color={0,0,127},
-          smooth=Smooth.None));
-      annotation (Diagram(graphics));
-    end BangControlTimetable;
+      model BangControlTimetable
+        BangControl bangControl
+          annotation (Placement(transformation(extent={{20,0},{40,20}})));
+        Modelica.Blocks.Sources.TimeTable timeTable(table=[0,1; 20,1; 21,0; 30,0])
+          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+      equation
+        connect(timeTable.y, bangControl.u) annotation (Line(
+            points={{-19,10},{5,10},{5,11},{29,11}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics));
+      end BangControlTimetable;
+    end Examples;
   end BangControl;
 
   package Greenhouse
@@ -2316,7 +2342,7 @@ end VDP_pack;"), uses(Modelica(version="3.2")),
 
       //control signal
       Modelica.Blocks.Interfaces.RealInput u
-        annotation (Placement(transformation(extent={{-30,-10},{10,30}})));
+        annotation (Placement(transformation(extent={{-140,-20},{-100,20}})));
 
     equation
       der(x1) = pW*sun*x2;
@@ -2324,7 +2350,139 @@ end VDP_pack;"), uses(Modelica(version="3.2")),
       der(x3) = pHc*u;
       sun = 800*sin(4*pi*time/tf-0.65*pi);
       temp = 15+10*sin(4*pi*time/tf-0.65*pi);
-      annotation (experiment(StopTime=48), __Dymola_experimentSetupOutput);
+
+      annotation (experiment(StopTime=48), __Dymola_experimentSetupOutput,
+        Icon(graphics),
+        Diagram(graphics),
+        Documentation(info="<HTML>
+<p>
+A solar greenhouse has been designed that maximizes solar energy use and minimizes
+fossil energy consumption. It is based on a conventional greenhouse extended with a heat
+pump, a heat exchanger, an aquifer and ventilation with heat recovery. The aim is to
+minimize fossil energy consumption, while maximizing crop dry weight and keeping
+temperature and humidity within certain limits. These requirements are defined in a goal
+function, which is minimized by optimal control. A greenhouse with crop model is used
+to simulate the process behaviour. It is found that open loop optimal control trajectories
+can be determined. The boiler use is reduced to a minimum, thus reducing fossil energy
+use. Compared to a conventional greenhouse it is found that the energy costs are
+decreased and the crop dry weight is increased.
+</p>
+<p>
+Reference:
+</p>
+<p>
+OPTIMAL CONTROL OF A SOLAR GREENHOUSE, R.J.C. van Ooteghem, J.D. Stigter, L.G. van Willigenburg, G. van Straten
+</p>
+</HTML>"));
     end Greenhouse;
   end Greenhouse;
+
+  package MoonLander
+    model MoonLander
+
+      import SI = Modelica.SIunits;
+      //parameter
+
+      //state start values
+      parameter SI.Height   h_0 = 1;
+      parameter SI.Velocity v_0 = -0.783;
+      parameter SI.Mass     m_0 = 1;
+
+      //states
+      SI.Height   h(start=h_0, fixed=true);
+      SI.Velocity v(start=v_0, fixed=true);
+      SI.Mass     m(start=m_0, fixed=true);
+
+      //control input
+      Modelica.Blocks.Interfaces.RealInput u "thrust" annotation (Placement(transformation(
+              extent={{-20,20},{20,60}}), iconTransformation(extent={{-20,20},{20,60}})));
+
+    equation
+      der(h) = v;
+      der(v) = -1+u/m;
+      der(m) = -u/2.349;
+
+      annotation (experiment(NumberOfIntervals=1),
+          __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+Example about landing an object.
+</p>
+</HTML>"));
+    end MoonLander;
+
+    package Examples
+      model MoonLanderInput
+        MoonLander moonLander
+          annotation (Placement(transformation(extent={{20,20},{40,40}})));
+        Modelica.Blocks.Sources.TimeTable timeTable(table=[0,0; 0.2,0; 0.25,1.227;
+              1.5,1.227])
+          annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
+      equation
+        connect(timeTable.y, moonLander.u) annotation (Line(
+            points={{-19,30},{6,30},{6,34},{30,34}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (
+          Diagram(graphics),
+          experiment(StopTime=1.5, NumberOfIntervals=1),
+          __Dymola_experimentSetupOutput);
+      end MoonLanderInput;
+    end Examples;
+  end MoonLander;
+
+  package BatchFermentor
+    model BatchFermentor
+
+      //state start values
+      parameter Real x1_0=1.5;
+      parameter Real x2_0=0;
+      parameter Real x3_0=0;
+      parameter Real x4_0=7;
+      parameter Real u_0=0;
+
+      //states
+      Real x1(start=x1_0, fixed=true);
+      Real x2(start=x2_0, fixed=true);
+      Real x3(start=x3_0, fixed=true);
+      Real x4(start=x4_0, fixed=true);
+      Real h1;
+      Real h2;
+
+      //control input
+      Modelica.Blocks.Interfaces.RealInput u
+        annotation (Placement(transformation(extent={{-32,10},{8,50}})));
+
+    equation
+      der(x1) = h1*x1-u*x1/500/x4;
+      der(x2) = h2*x1-0.01*x2-u*x2/500/x4;
+      der(x3) = -h1*x1/0.47-h2*x1/1.2-x1*0.029*x3/(0.0001+x3)+u/x4*(1-x3/500);
+      der(x4) = u/500;
+      h1 = 0.11*x3/(0.006*x1+x3);
+      h2 = 0.0055*x3/(0.0001+x3*(1+10*x3));
+
+      annotation (experiment(StopTime=150, NumberOfIntervals=1),
+          __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+</p>    
+<p>
+   This problem considers a fed-batch reactor for the production of penicillin. 
+   We consider here the free terminal time version where the objective is to maximize 
+   the amount of penicillin using the feed rate as the control variable.  
+<p>
+References:
+</p>    
+<p>
+Dynamic optimization of bioprocesses: efficient and robust numerical strategies 2003, 
+Julio R. Banga, Eva Balsa-Cantro, Carmen G. Moles and Antonio A. Alonso
+</p>    
+<p>
+Case Study I: Optimal Control of a Fed-Batch Fermentor for Penicillin Production
+</p>
+
+</HTML>"));
+    end BatchFermentor;
+  end BatchFermentor;
+
+  annotation (uses(Modelica(version="3.2")));
 end JMExamples;

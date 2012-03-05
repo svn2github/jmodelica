@@ -47,30 +47,30 @@ def run_demo(with_plots=True):
     res = mp.optimize(options=opts)
 	
 	#Extract variable profiles
-    y1=res['sys.y[1]']
-    y2=res['sys.y[2]']
-    y3=res['sys.y[3]']
-    y4=res['sys.y[4]']
-    y5=res['sys.y[5]']
-    y6=res['sys.y[6]']
-    y7=res['sys.y[7]']
-    y8=res['sys.y[8]']
-    g1=res['sys.g[1]']
-    g2=res['sys.g[2]']
-    g3=res['sys.g[3]']
-    g4=res['sys.g[4]']
-    g5=res['sys.g[5]']
-    g6=res['sys.g[6]']
-    g7=res['sys.g[7]']
-    g1=res['sys.m[1]']
-    m1=res['sys.m[1]']
-    m2=res['sys.m[2]']
-    m3=res['sys.m[3]']
-    m4=res['sys.m[4]']
-    m5=res['sys.m[5]']
-    m6=res['sys.m[6]']
-    m7=res['sys.m[7]']
-    m8=res['sys.m[8]']
+    y1=res['mp.y[1]']
+    y2=res['mp.y[2]']
+    y3=res['mp.y[3]']
+    y4=res['mp.y[4]']
+    y5=res['mp.y[5]']
+    y6=res['mp.y[6]']
+    y7=res['mp.y[7]']
+    y8=res['mp.y[8]']
+    g1=res['mp.g[1]']
+    g2=res['mp.g[2]']
+    g3=res['mp.g[3]']
+    g4=res['mp.g[4]']
+    g5=res['mp.g[5]']
+    g6=res['mp.g[6]']
+    g7=res['mp.g[7]']
+    g1=res['mp.m[1]']
+    m1=res['mp.m[1]']
+    m2=res['mp.m[2]']
+    m3=res['mp.m[3]']
+    m4=res['mp.m[4]']
+    m5=res['mp.m[5]']
+    m6=res['mp.m[6]']
+    m7=res['mp.m[7]']
+    m8=res['mp.m[8]']
     t =res['time']
 	
     ym=([[ 20000., 17000., 10000., 15000., 12000., 9000., 7000., 3000.],
@@ -111,49 +111,41 @@ def run_demo(with_plots=True):
         plt.clf()
         plt.subplot(421)
         plt.plot(t,y1,tm,y1_m,'x')
-        plt.title('y1')
         plt.grid()
         plt.ylabel('y1')
 		
         plt.subplot(422)
         plt.plot(t,y2,tm,y2_m,'x')
-        plt.title('y2')
         plt.grid()
         plt.ylabel('y2')
 		
         plt.subplot(423)
         plt.plot(t,y3,tm,y3_m,'x')
-        plt.title('y3')
         plt.grid()
         plt.ylabel('y3')
 		
         plt.subplot(424)
         plt.plot(t,y4,tm,y4_m,'x')
-        plt.title('y4')
         plt.grid()
         plt.ylabel('y4')
 
         plt.subplot(425)
         plt.plot(t,y5,tm,y5_m,'x')
-        plt.title('y5')
         plt.grid()
         plt.ylabel('y5')
 		
         plt.subplot(426)
         plt.plot(t,y6,tm,y6_m,'x')
-        plt.title('y6')
         plt.grid()
         plt.ylabel('y6')
 		
         plt.subplot(427)
         plt.plot(t,y7,tm,y7_m,'x')
-        plt.title('y7')
         plt.grid()
         plt.ylabel('y7')
 		
         plt.subplot(428)
         plt.plot(t,y8,tm,y8_m,'x')
-        plt.title('y8')
         plt.grid()
         plt.ylabel('y8')
 

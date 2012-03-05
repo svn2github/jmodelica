@@ -181,7 +181,7 @@ def run_demo(with_plots=True):
     n_e = 100
     opt_opts = pp.optimize_options()
     opt_opts['n_e'] = n_e
-    res1 = pp.optimize(options=opt_opts)
+    res1 = pp.optimize()
 	
     X1=res1['pp.X1']
     S1=res1['pp.S1']

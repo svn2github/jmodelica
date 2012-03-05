@@ -28,45 +28,53 @@ from pyjmi import JMUModel
 
 def run_demo(with_plots=True):
     """
-    The model describes a minimum time control problem with coloumb friction.
+    Blood Glucose model
     """
-
+    
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    jmu_name1 = compile_jmu("JMExamples_opt.ColoumbFriction_opt", 
-    (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
-    cf = JMUModel(jmu_name1)
-    res = cf.optimize()
+    jmu = compile_jmu("JMExamples_opt.BloodGlucose_optconstraint",(curr_dir+"/files/JMExamples_opt.mop", curr_dir+"/files/JMExamples.mo"))
+    bg = JMUModel(jmu)
     
+    res = bg.optimize()
+
     # Extract variable profiles
-    q =res['q']
-    dq=res['dq']
-    u =res['u'] 
-    t =res['time']
-	
+    G	= res['bc.G']
+    X	= res['bc.X']
+    I	= res['bc.I']
+    D	= res['bc.D']
+    t	= res['time']
+    
     print "t = ", repr(N.array(t))
-    print "q = ", repr(N.array(q))
-    print "dq = ", repr(N.array(dq))
-    print "u = ", repr(N.array(u))
-	
+    print "G = ", repr(N.array(G))
+    print "X = ", repr(N.array(X))
+    print "I = ", repr(N.array(I))
+    print "D = ", repr(N.array(D))
+
     if with_plots:
         # Plot
-        plt.figure(1)
-        plt.clf()
-        plt.subplot(311)
-        plt.plot(t,q)
-        plt.grid()
-        plt.ylabel('q')
-
-        plt.subplot(312)
-        plt.plot(t,dq)
-        plt.grid()
-        plt.ylabel('dq')
-		
-        plt.subplot(313)
-        plt.plot(t,u)
-        plt.grid()
-        plt.ylabel('u')
+        plt.figure()
+        plt.subplot(2,2,1)
+        plt.plot(t,G)
+        plt.title('Plasma Glucose Conc.')
+        plt.grid(True)
+        plt.ylabel('G')
+        plt.subplot(2,2,2)
+        plt.plot(t,X)
+        plt.title('Plasma Glucose Conc.')
+        plt.grid(True)
+        plt.ylabel('X')
+        plt.subplot(2,2,3)
+        plt.plot(t,I)
+        plt.title('Plasma Glucose Conc.')
+        plt.grid(True)
+        plt.ylabel('I')
+        plt.subplot(2,2,4)
+        plt.plot(t,D)
+        plt.title('Input')
+        plt.grid(True)
+        plt.ylabel('D')
+        
 		
         plt.xlabel('time')
         plt.show()

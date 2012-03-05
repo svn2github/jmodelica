@@ -12,30 +12,71 @@ package JMExamples_opt
 	  x1(finalTime) = 300;
 	  x2(finalTime) = 0;
    end BangControl_opt;
-
-
+   
+   
+   optimization BatchFermentor_opt (objective = -bf.x2(finalTime)*bf.x4(finalTime),
+                            startTime = 0,
+                            finalTime = 150)
+      input Real u = bf.u;
+      JMExamples.BatchFermentor.BatchFermentor bf(x1(fixed=true),x2(fixed=true),
+	  x3(fixed=true),x4(fixed=true),h1,h2,u(fixed=true),u(fixed=true));
+	  //Real J(fixed=true);
+														  
+   equation
+	  //der(J) = +(du)^2;
+   constraint
+	  0<=u;
+	  u<=50;
+	  0 <= bf.x1;
+	  bf.x1 <= 40;
+	  0 <= bf.x2;
+	  bf.x2 <= 50;
+	  0 <= bf.x3;
+	  bf.x3 <= 25;
+	  0 <= bf.x4;
+	  bf.x4 <= 10;
+   end BatchFermentor_opt;
+   
 	optimization BloodGlucose_opt(objective=(cost(finalTime)),
                       startTime=0,
                       finalTime=400)
  
 	  input Real u(start = 3,initialGuess=3)=bc.D; 
-	  JMExamples.BloodGlucose.BloodGlucose1 bc(G(initialGuess=10),X(initialGuess=14),
-	  I(initialGuess=5),D(initialGuess=3));
+	  JMExamples.BloodGlucose.BloodGlucose1 bc(G,X,I,D(start=15));
 
 	  Real cost(start=0,fixed=true,initialGuess=5);
-	  parameter Real G_ref = 20;
-	  parameter Real X_ref = 15;
-	  parameter Real I_ref = 4;
-	  parameter Real D_ref = 3;
+	  parameter Real G_ref = 6;
+	  parameter Real D_ref =12;
 	 
 	equation
-	  der(cost) = (G_ref-bc.G)^2 + (X_ref-bc.X)^2 + (I_ref-bc.I)^2 + (D_ref-u)^2;
+	  der(cost) = (G_ref-bc.G)^2 + (D_ref-bc.D)^2;
 
 	constraint
-	  bc.G<=100;
-	  u>=0.5;
-	  u<=1.5;
+	  1<=bc.G;
+	  bc.G<=20;
+	  u>=5;
+	  u<=15;
 	end BloodGlucose_opt;
+	
+	optimization BloodGlucose_optconstraint(objective=(cost(finalTime)),
+                      startTime=0,
+                      finalTime=400)
+ 
+	  input Real u=bc.dD; 
+	  JMExamples.BloodGlucose.BloodGlucoseconstraint bc(G,X,I,D(start=15));
+
+	  Real cost(start=0,fixed=true);
+	  parameter Real G_ref = 5;
+	 
+	equation
+	  der(cost) = (G_ref-bc.G)^2 + u^2;
+
+	constraint
+	  1<=bc.G;
+	  bc.G<=20;
+	  bc.D>=5;
+	  bc.D<=15;
+	end BloodGlucose_optconstraint;
 
 
 	optimization CatalystMixing_opt (objective = -1+x1(finalTime)+x2(finalTime),
@@ -157,16 +198,14 @@ package JMExamples_opt
    end Greenhouse_opt;
    
    
-   	optimization MarinePopulation_opt (objective = sum(sum((sys.y[j](tm[i])-ym[i,j])^2 for i in 1:21) for j in 1:8),
+   	optimization MarinePopulation_opt (objective = sum(sum((mp.y[j](tm[i])-ym[i,j])^2 for i in 1:21) for j in 1:8),
                             startTime = 0,
                             finalTime = 20)
-							
-	  // Create system instance
-	  // Set parameter g and m free and give initial guesses
-	  JMExamples.MarinePopulation.MarinePopulation sys(m(each free=true,initialGuess={0,0,0,0,0,0,0,0}),
-							  g(each free=true,initialGuess={0,0,0,0,0,0,0}),
-							  y(each fixed=true));
-								
+	
+		JMExamples.MarinePopulation.MarinePopulation mp(y(each fixed=true),
+		g(each free=true), m(each free=true));
+		
+		//parameter
 		parameter Real ym[21,8]=
 	  {{ 20000, 17000, 10000, 15000, 12000, 9000, 7000, 3000},
 	   { 12445, 15411, 13040, 13338, 13484, 8426, 6615, 4022},
@@ -190,9 +229,55 @@ package JMExamples_opt
 	   {     1,    20,   231,   934,  3197, 3695, 3159, 6454},
 	   {     1,    12,   198,   707,  2562, 3163, 3232, 5566}};
 		parameter Real tm[21]= 0:20;
-								
-   equation 
+					
+	equation 
 	end MarinePopulation_opt;
+	
+	
+	optimization MoonLander_opt (objective = J(finalTime),
+                            startTime = 0,
+                            finalTime = 1.5)
+                            
+      extends JMExamples.MoonLander.MoonLander(h(fixed=true),v(fixed=true),m(fixed=true));														
+	  Real J(fixed=true);     
+														  
+   equation
+	  der(J) = u;	
+   constraint
+      0   <= finalTime;
+	  finalTime <=1000;
+	  -20 <= h;
+	  h <=20;
+	  -20 <= v;
+	  v <= 20;
+	  0.01 <= m;
+	  m <= 1;
+	  0 <= u;
+	  u <= 1.227;
+	  h(finalTime) = 0;
+	  v(finalTime) = 0;
+   end MoonLander_opt;
+   
+   optimization MoonLander_opttime (objective = finalTime,
+                            startTime = 0,
+                            finalTime(free=true,min=0))
+                            
+      extends JMExamples.MoonLander.MoonLander(h(fixed=true),v(fixed=true),m(fixed=true));														  
+														  
+   equation
+   constraint
+	  finalTime <=1000;
+	  -20 <= h;
+	  h <=20;
+	  -20 <= v;
+	  v <= 20;
+	  0.01 <= m;
+	  m <= 1;
+	  0 <= u;
+	  u <= 1.227;
+	  h(finalTime) = 0;
+	  v(finalTime) = 0;
+   end MoonLander_opttime;
    
    
     model PenicillinPlant_Init
@@ -244,14 +329,14 @@ package JMExamples_opt
 	  pp.X1 >= 0;
 	  pp.S1 >= 0;
 	  pp.V1 >= 150;
-	  u <=1;
-	  u >=0;
+	  pp.u1 <=1;
+	  pp.u1 >=0;
 	end PenicillinPlant_opt;
    
    
    optimization PenicillinPlant_opt1 (objective = -P1(finalTime),
                             startTime = 0,
-                            finalTime = 80)
+                            finalTime = 80.277)
                             
       extends JMExamples.PenicillinPlant.PenicillinPlant1(X1(fixed=true),S1(fixed=true),P1(fixed=true),V1(fixed=true),miu1,u1);														
 	  //Real J(fixed=true);     
@@ -273,7 +358,7 @@ package JMExamples_opt
    
    optimization PenicillinPlant_opt2 (objective = -P2(finalTime),
                             startTime = 0,
-                            finalTime = 70)
+                            finalTime = 69.723)
                             
       extends JMExamples.PenicillinPlant.PenicillinPlant2(X2(fixed=true),S2(fixed=true),P2(fixed=true),V2(fixed=true),miu2,u2);														
 	  //Real J(fixed=true);     
@@ -294,6 +379,27 @@ package JMExamples_opt
    end PenicillinPlant_opt2;
    
    
+   optimization PenicillinPlant_opttime (objective = finalTime,
+                            startTime = 0,
+                            finalTime(free=true,min=0))              
+      extends JMExamples.PenicillinPlant.PenicillinPlant1(X1(fixed=true),S1(fixed=true),P1(fixed=true),V1(fixed=true),miu1,u1);	   
+														  
+   equation 	
+   constraint
+      0  <= X1;
+	  X1 <= 3.7;
+	  X1(finalTime) = 3.7;
+	  0  <= S1;
+	  S1 <= 0.5;
+	  0  <= P1;
+	  P1 <= 5;
+	  1  <= V1;
+	  V1 <= 300;
+	  0  <= u1;
+	  u1 <= 1;
+   end PenicillinPlant_opttime;
+   
+   
    optimization Polyeth_opt(objective = J(finalTime),
                             startTime = 0,
                             finalTime = 36000)
@@ -312,7 +418,7 @@ package JMExamples_opt
 	  290  <= poly.Tg;
 	  poly.Tg <= 310;
 	  0  <= u;
-	  u <= 1;
+	  u <= 5;
 	end Polyeth_opt;
 	
 	
@@ -336,7 +442,7 @@ package JMExamples_opt
 
     parameter Real p1 = 2;
 
-    extends JMExamples.VDP(x1(fixed=true),x2(fixed=true));
+    extends JMExamples.VDP.VDP(x1(fixed=true),x2(fixed=true));
 
     Real cost(start=0,fixed=true);
 
@@ -352,7 +458,7 @@ package JMExamples_opt
 
     parameter Real p1 = 2;
 
-    extends JMExamples.VDP(x1(fixed=true),x2(fixed=true),u(max=0.75));
+    extends JMExamples.VDP.VDP(x1(fixed=true),x2(fixed=true),u(max=0.75));
 
   end VDP_Opt2;
 
@@ -360,7 +466,7 @@ package JMExamples_opt
                          startTime = 0,
                          finalTime(free=true,min=0.2,initialGuess=1)) 
 
-    extends JMExamples.VDP(x1(fixed=true),x2(fixed=true),u(min=-1,max=1));
+    extends JMExamples.VDP.VDP(x1(fixed=true),x2(fixed=true),u(min=-1,max=1));
 
   constraint
     // terminal constraints

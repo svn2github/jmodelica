@@ -15,12 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
+import os.path
 import numpy as N
-import pylab as p
+import matplotlib.pyplot as plt
 
-from pymodelica import compile_jmu
-from pyjmi import JMUModel
+from pymodelica import compile_fmu
+from pyfmi import FMUModel
 
 def run_demo(with_plots=True):
     """
@@ -29,28 +29,23 @@ def run_demo(with_plots=True):
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     file_name = os.path.join(curr_dir,'files','VDP.mop')
     
-    jmu_name = compile_jmu('VDP_pack.VDP', file_name,
-                        compiler_options={'state_start_values_fixed':True})
+    fmu_name = compile_fmu("JMExamples.VDP.VDP", 
+    curr_dir+"/files/JMExamples.mo")
 
-    model = JMUModel(jmu_name)
+    model = FMUModel(fmu_name)
     
-    res = model.simulate(final_time=20, options={'solver':'CVode'})
+    res = model.simulate(final_time=10, options={'solver':'CVode'})
 
     x1 = res['x1']
     x2 = res['x2']
     t  = res['time']
     
-    assert N.abs(x1[-1] + 0.736680243) < 1e-3, \
-           "Wrong value in simulation result in VDP_assimulo.py" 
-    assert N.abs(x2[-1] - 1.57833994) < 1e-3, \
-           "Wrong value in simulation result in VDP_assimulo.py"
-    #assert VDP_sim.stats['Number of F-Eval During Jac-Eval         '] == 0
-    
     if with_plots:
-        fig = p.figure()
-        p.plot(t, x1, t, x2)
-        p.legend(('x1','x2'))
-        p.show()
+        plt.figure()
+        plt.plot(x2, x1)
+        plt.legend(('x1(x2)'))
+        plt.show()
+
         
 
 if __name__=="__main__":

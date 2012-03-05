@@ -40,9 +40,15 @@ def run_demo(with_plots=True):
     res = dist1.simulate(final_time=7200)
 
     # Extract variable profiles
+    x1  = res['x[1]']
+    x8  = res['x[8]']
     x16	= res['x[16]']
+    x24	= res['x[24]']
     x32	= res['x[32]']
+    y1  = res['y[1]']
+    y8  = res['y[8]']
     y16	= res['y[16]']
+    y24	= res['y[24]']
     y32	= res['y[32]']
     t	= res['time']
     
@@ -54,14 +60,14 @@ def run_demo(with_plots=True):
 
     if with_plots:
         # Plot
-        plt.figure(1)
-        plt.subplot(2,1,1)
-        plt.plot(t,x16,t,x32)
+        plt.figure()
+        plt.subplot(1,2,1)
+        plt.plot(t,x16,t,x32,t,x1,t,x8,t,x24)
         plt.title('Liquid composition')
         plt.grid(True)
         plt.ylabel('x')
-        plt.subplot(2,1,2)
-        plt.plot(t,y16,t,y32)
+        plt.subplot(1,2,2)
+        plt.plot(t,y16,t,y32,t,y1,t,y8,t,y24)
         plt.title('Vapor composition')
         plt.grid(True)
         plt.ylabel('y')

@@ -61,7 +61,6 @@ def run_demo(with_plots=True):
         plt.grid()
         plt.ylabel('x1')
 		
-        plt.clf()
         plt.subplot(312)
         plt.plot(t,x2)
         plt.grid()
