@@ -29,8 +29,15 @@ import numpy as N
 import numpy.ctypeslib as Nct
 
 # location for temporary JModelica files
-tmp_location = os.path.join(tempfile._get_default_tempdir(),'JModelica.org')
+def get_temp_location():
+    if sys.platform == 'win32':
+        return os.path.join(tempfile._get_default_tempdir(),'JModelica.org')
+    elif sys.platform == 'darwin':
+        return os.path.join(tempfile._get_default_tempdir(),'JModelica.org')
+    else:
+        return os.path.join(tempfile._get_default_tempdir(),os.environ['USER'],'JModelica.org')
 
+tmp_location = get_temp_location()
 
 class BaseModel(object):
     """ 
