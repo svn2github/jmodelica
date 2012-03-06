@@ -111,6 +111,7 @@ am_libfmixml_la_OBJECTS = libfmixml_la-fmi_xml_model_description.lo \
 	libfmixml_la-fmi_xml_variable.lo \
 	libfmixml_la-fmi_xml_parser.lo libfmixml_la-fmi_callbacks.lo \
 	libfmixml_la-fmi_xml_variable_list.lo \
+	libfmixml_la-fmi_xml_query.lo \
 	libfmixml_la-fmi_xml_capabilities.lo \
 	libfmixml_la-fmi_xml_type.lo \
 	libfmixml_la-fmi_xml_vendor_annotations.lo \
@@ -318,6 +319,7 @@ libfmixml_la_SOURCES = $(FMI_XML_SRC)/fmi_xml_model_description.c \
                        $(FMI_XML_SRC)/fmi_xml_variable_list.c \
                        $(FMI_XML_SRC)/fmi_callbacks.h \
                        $(FMI_XML_SRC)/fmi_xml_query.h \
+                       $(FMI_XML_SRC)/fmi_xml_query.c \
                        $(FMI_XML_SRC)/fmi_xml_variable_list_impl.h \
                        $(FMI_XML_SRC)/fmi_xml_capabilities.c \
                        $(FMI_XML_SRC)/fmi_xml_type.c \
@@ -446,6 +448,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmixml_la-fmi_xml_cosim.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmixml_la-fmi_xml_model_description.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmixml_la-fmi_xml_parser.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmixml_la-fmi_xml_query.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmixml_la-fmi_xml_type.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmixml_la-fmi_xml_unit.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmixml_la-fmi_xml_variable.Plo@am__quote@
@@ -536,6 +539,13 @@ libfmixml_la-fmi_xml_variable_list.lo: $(FMI_XML_SRC)/fmi_xml_variable_list.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(FMI_XML_SRC)/fmi_xml_variable_list.c' object='libfmixml_la-fmi_xml_variable_list.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmixml_la_CFLAGS) $(CFLAGS) -c -o libfmixml_la-fmi_xml_variable_list.lo `test -f '$(FMI_XML_SRC)/fmi_xml_variable_list.c' || echo '$(srcdir)/'`$(FMI_XML_SRC)/fmi_xml_variable_list.c
+
+libfmixml_la-fmi_xml_query.lo: $(FMI_XML_SRC)/fmi_xml_query.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmixml_la_CFLAGS) $(CFLAGS) -MT libfmixml_la-fmi_xml_query.lo -MD -MP -MF $(DEPDIR)/libfmixml_la-fmi_xml_query.Tpo -c -o libfmixml_la-fmi_xml_query.lo `test -f '$(FMI_XML_SRC)/fmi_xml_query.c' || echo '$(srcdir)/'`$(FMI_XML_SRC)/fmi_xml_query.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfmixml_la-fmi_xml_query.Tpo $(DEPDIR)/libfmixml_la-fmi_xml_query.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(FMI_XML_SRC)/fmi_xml_query.c' object='libfmixml_la-fmi_xml_query.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmixml_la_CFLAGS) $(CFLAGS) -c -o libfmixml_la-fmi_xml_query.lo `test -f '$(FMI_XML_SRC)/fmi_xml_query.c' || echo '$(srcdir)/'`$(FMI_XML_SRC)/fmi_xml_query.c
 
 libfmixml_la-fmi_xml_capabilities.lo: $(FMI_XML_SRC)/fmi_xml_capabilities.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmixml_la_CFLAGS) $(CFLAGS) -MT libfmixml_la-fmi_xml_capabilities.lo -MD -MP -MF $(DEPDIR)/libfmixml_la-fmi_xml_capabilities.Tpo -c -o libfmixml_la-fmi_xml_capabilities.lo `test -f '$(FMI_XML_SRC)/fmi_xml_capabilities.c' || echo '$(srcdir)/'`$(FMI_XML_SRC)/fmi_xml_capabilities.c
