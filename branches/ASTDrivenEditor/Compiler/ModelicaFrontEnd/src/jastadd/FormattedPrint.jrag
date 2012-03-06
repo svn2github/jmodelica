@@ -245,20 +245,28 @@ aspect FormattedPrint {
 	protected void ComponentDecl.setDefaultFormatting() {
 		if (hasRedeclare()) {
 			getRedeclare().preFormatting = new DefaultFormattingItem(" ");
+			getRedeclare().postFormatting = new DefaultFormattingItem(" ");
 		} else if (hasFinal()) {
 			getFinal().preFormatting = new DefaultFormattingItem(" ");
+			getFinal().postFormatting = new DefaultFormattingItem(" ");
 		} else if (hasInner()) {
 			getInner().preFormatting = new DefaultFormattingItem(" ");
+			getInner().postFormatting = new DefaultFormattingItem(" ");
 		} else if (hasOuter()) {
 			getOuter().preFormatting = new DefaultFormattingItem(" ");
+			getOuter().postFormatting = new DefaultFormattingItem(" ");
 		} else if (hasReplaceable()) {
 			getReplaceable().preFormatting = new DefaultFormattingItem(" ");
+			getReplaceable().postFormatting = new DefaultFormattingItem(" ");
 		} else if (hasTypePrefixFlow()) {
 			getTypePrefixFlow().preFormatting = new DefaultFormattingItem(" ");
+			getTypePrefixFlow().postFormatting = new DefaultFormattingItem(" ");
 		} else if (hasTypePrefixVariability()) {
 			getTypePrefixVariability().preFormatting = new DefaultFormattingItem(" ");
+			getTypePrefixVariability().postFormatting = new DefaultFormattingItem(" ");
 		} else if (hasTypePrefixInputOutput()) {
 			getTypePrefixInputOutput().preFormatting = new DefaultFormattingItem(" ");
+			getTypePrefixInputOutput().postFormatting = new DefaultFormattingItem(" ");
 		} else {
 			getClassName().preFormatting = new DefaultFormattingItem(" ");
 		}

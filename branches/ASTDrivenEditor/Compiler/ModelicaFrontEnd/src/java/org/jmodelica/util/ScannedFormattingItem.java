@@ -52,7 +52,7 @@ public class ScannedFormattingItem extends FormattingItem {
 	
 	@Override
 	public RelativePosition getFrontRelativePosition(int line, int column) {
-		if (endLine < line || endColumn + 1 < column) {
+		if (endLine < line || (endLine == line && endColumn + 1 < column)) {
 			return RelativePosition.BEFORE;
 		} else if (endLine == line && endColumn + 1 == column) {
 			return RelativePosition.FRONT_ADJACENT;
@@ -63,7 +63,7 @@ public class ScannedFormattingItem extends FormattingItem {
 	
 	@Override
 	public RelativePosition getBackRelativePosition(int line, int column) {
-		if (startLine < line || startColumn < column + 1) {
+		if (startLine < line || (startLine == line && startColumn < column + 1)) {
 			return RelativePosition.BEFORE;
 		} else if (startLine == line && startColumn == column + 1) {
 			return RelativePosition.BACK_ADJACENT;
