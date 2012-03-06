@@ -36,14 +36,18 @@ public class ScannedFormattingItem extends FormattingItem {
 		ScannedFormattingItem otherScannedItem = (ScannedFormattingItem) otherItem;
 
 		if ((startLine == otherScannedItem.endLine && startColumn == otherScannedItem.endColumn + 1) ||
-				(otherScannedItem.type == Type.LINE_BREAK && startLine == otherScannedItem.endLine + 1 && startColumn == 1)) {
+				(otherScannedItem.endsWithLineBreak() && startLine == otherScannedItem.endLine + 1 && startColumn == 1)) {
 			return Adjacency.FRONT;
 		} else if (endLine == otherScannedItem.startLine && endColumn + 1 == otherScannedItem.startColumn ||
-				((type == Type.LINE_BREAK || type == Type.COMMENT) && endLine + 1 == otherScannedItem.startLine && otherScannedItem.startColumn == 1)) {
+				(this.endsWithLineBreak() && endLine + 1 == otherScannedItem.startLine && otherScannedItem.startColumn == 1)) {
 			return Adjacency.BACK;
 		}
 
 		return Adjacency.NONE;
+	}
+	
+	protected boolean endsWithLineBreak() {
+		return (type == Type.LINE_BREAK);
 	}
 	
 	@Override

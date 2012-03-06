@@ -19,42 +19,27 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 	}
 
 	/**
-	 * Sets a new position of where this item begins.
-	 * @param newStartLine the line in the source code at which this item begins.
-	 * @param newStartColumn the column in the source code at which this item begins.
+	 * Sets a new position of where this item begins using another scanned formatting item's starting position.
+	 * @param itemToStartFrom the <code>ScannedFormattingItem</code> from which to get the new starting position.
 	 */
-	public void newStart(int newStartLine, int newStartColumn) {
-		startLine = newStartLine;
-		startColumn = newStartColumn;
+	public void newStart(ScannedFormattingItem itemToStartFrom) {
+		startLine = itemToStartFrom.startLine;
+		startColumn = itemToStartFrom.startColumn;
 	}
 
 	/**
-	 * Sets a new position of where this item extends to.
-	 * @param newEndLine the line in the source code at which this item ends.
-	 * @param newEndColumn the column in the source code at which this item ends.
+	 * Sets a new position of where this item ends using another scanned formatting item's ending position.
+	 * @param itemToEndAt the <code>ScannedFormattingItem</code> from which to get the new ending position.
 	 */
-	public void newEnd(int newEndLine, int newEndColumn) {
-		endLine = newEndLine;
-		endColumn = newEndColumn;
+	public void newEnd(ScannedFormattingItem itemToEndAt) {
+		endLine = itemToEndAt.endLine;
+		endColumn = itemToEndAt.endColumn;
 	}
-	
+
 	@Override
-	public Adjacency getAdjacency(FormattingItem otherItem) {
-		if (!(otherItem instanceof ScannedFormattingItem)) {
-			return Adjacency.NONE;
-		}
-		ScannedFormattingItem otherScannedItem = (ScannedFormattingItem) otherItem;
-
-    	if ((startLine == otherScannedItem.endLine && startColumn == endColumn + 1) ||
-    			(otherScannedItem.type == Type.LINE_BREAK && startLine == otherScannedItem.endLine + 1 && startColumn == 1)) {
-    		return Adjacency.FRONT;
-    	} else if (endLine == otherScannedItem.startLine && endColumn + 1 == otherScannedItem.startColumn ||
-    			((subItems.getLast().type == Type.LINE_BREAK || subItems.getLast().type == Type.COMMENT) && endLine + 1 == otherScannedItem.startLine && otherScannedItem.startColumn == 1)) {
-    		return Adjacency.BACK;
-    	}
-
-    	return Adjacency.NONE;
-    }
+	protected boolean endsWithLineBreak() {
+		return (!subItems.isEmpty() && subItems.getLast().endsWithLineBreak());
+	}
 	
 	@Override
 	public ScannedFormattingItem mergeItems(Adjacency where, FormattingItem otherItem) {
@@ -64,7 +49,7 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 
 		ScannedFormattingItem scannedItem = (ScannedFormattingItem) otherItem;
 		if (where == Adjacency.FRONT) {
-			newStart(scannedItem.startLine, scannedItem.startColumn);
+			newStart(scannedItem);
 
 			if (scannedItem instanceof MixedFormattingItem) {
 				subItems.addAll(0, ((MixedFormattingItem) otherItem).subItems);
@@ -72,7 +57,7 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 				subItems.addFirst(scannedItem);
 			}
 		} else if (where == Adjacency.BACK) {
-			newEnd(scannedItem.endLine, scannedItem.endColumn);
+			newEnd(scannedItem);
 
 			if (scannedItem instanceof MixedFormattingItem) {
 				subItems.addAll(subItems.size(), ((MixedFormattingItem) otherItem).subItems);
