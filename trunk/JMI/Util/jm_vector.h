@@ -34,17 +34,17 @@ extern "C" {
 #define jm_vector(T) jm_mangle(jm_vector, T)
 
 /*
-// Vector handling functions.
-//
-// jm_vector_alloc allocates a vector on heap with the specified size and specified number of preallocated items (can be larger than size).
-// Note that there is no need to call jm_vector_init for a vector allocated with this function.
-// Input:
-//   size - initial size of the vector, can be 0
-//   capacity - initial capacity of the vector, can be 0. At least initSize elements are allocated.
-//   c - jm_callbacks callbacks, can be zero
-// Returns:
-//   Newly allocated vector
-//extern jm_vector(T)* jm_vector_alloc(T)(size_t size, size_t capacity, jm_callbacks*c );
+*  Vector handling functions.
+*
+*  jm_vector_alloc allocates a vector on heap with the specified size and specified number of preallocated items (can be larger than size).
+*  Note that there is no need to call jm_vector_init for a vector allocated with this function.
+*  Input:
+*    size - initial size of the vector, can be 0
+*    capacity - initial capacity of the vector, can be 0. At least initSize elements are allocated.
+*    c - jm_callbacks callbacks, can be zero
+*  Returns:
+*    Newly allocated vector
+*  extern jm_vector(T)* jm_vector_alloc(T)(size_t size, size_t capacity, jm_callbacks*c );
 */
 #define jm_vector_alloc(T) jm_mangle(jm_vector_alloc, T)
 
@@ -54,22 +54,22 @@ extern void jm_vector_free(T)(jm_vector(T)* a); */
 #define jm_vector_free(T) jm_mangle(jm_vector_free, T)
 
 /*
-// jm_vector_init initializes a vector allocated on stack.
-// Input:
-//   a - pointer to the vector to be initialized;
-//   size - initial size of the vector, can be 0
-//   c - jm_callbacks callbacks, can be zero
-// Returns:
-//   size of the vector (can be zero for non-zero size if memory allocation failed)
-//   Note that for initSize < JM_VECTOR_MINIMAL_CAPACITY no heap memory allocation is needed
-// size_t jm_vector_init(T)(jm_vector(T)* a, size_t initSize, jm_callbacks* c)
+*  jm_vector_init initializes a vector allocated on stack.
+*  Input:
+*    a - pointer to the vector to be initialized;
+*    size - initial size of the vector, can be 0
+*    c - jm_callbacks callbacks, can be zero
+*  Returns:
+*    size of the vector (can be zero for non-zero size if memory allocation failed)
+*    Note that for initSize < JM_VECTOR_MINIMAL_CAPACITY no heap memory allocation is needed
+*  size_t jm_vector_init(T)(jm_vector(T)* a, size_t initSize, jm_callbacks* c)
 */
 #define jm_vector_init(T) jm_mangle(jm_vector_init, T)
 
 /*
-// jm_vector_free_data releases memory allocated for vector data
-// This only needs to be called for stack allocated vectors
-// (jm_vector_free does the job for heap vectors automatically)
+*  jm_vector_free_data releases memory allocated for vector data
+*  This only needs to be called for stack allocated vectors
+*  (jm_vector_free does the job for heap vectors automatically)
 //inline void jm_vector_free_data(T)(jm_vector(T)* a)
 */
 #define jm_vector_free_data(T) jm_mangle(jm_vector_free_data, T)
@@ -169,50 +169,50 @@ typedef int (*jm_compare_ft) (const void* , const void*);
 #define jm_vector_zero(T) jm_mangle(jm_vector_zero, T)
 
 /*
-// jm_vector_resize resizes the vector
-//  Input:
-//    a - the vector
-//    size - new size
-//  Return:
-//    size of the vector after operation. Can be less than size if memory allocation failed.
-//    Note: resizing to smaller vector does not release memory.
-// size_t jm_vector_resize(T)(jm_vector(T)* a, size_t size)
+*  jm_vector_resize resizes the vector
+*   Input:
+*     a - the vector
+*     size - new size
+*   Return:
+*     size of the vector after operation. Can be less than size if memory allocation failed.
+*     Note: resizing to smaller vector does not release memory.
+*  size_t jm_vector_resize(T)(jm_vector(T)* a, size_t size)
 */
 #define jm_vector_resize(T) jm_mangle(jm_vector_resize, T)
 
 /*
-// jm_vector_reserve preallocates memory for the vector (to speed up consequent push_back)
-// Returns: the actually reserved space. Can be smaller than requested "capacity" if memory allocation failed.
-// Can be larger than "capacity" if more memory was previously allocated.
-// size_t jm_vector_reserve(T)(jm_vector(T)* a, size_t capacity)
+*  jm_vector_reserve preallocates memory for the vector (to speed up consequent push_back)
+*  Returns: the actually reserved space. Can be smaller than requested "capacity" if memory allocation failed.
+*  Can be larger than "capacity" if more memory was previously allocated.
+*  size_t jm_vector_reserve(T)(jm_vector(T)* a, size_t capacity)
 */
 #define jm_vector_reserve(T) jm_mangle(jm_vector_reserve, T)
 
 /*
-// jm_vector_copy copies source vector into destination.
-// Returns the number of elements actually copied (may be less than the source size if allocation failed).
+*  jm_vector_copy copies source vector into destination.
+*  Returns the number of elements actually copied (may be less than the source size if allocation failed).
 //size_t jm_vector_copy(T)(jm_vector(T)* destination, jm_vector(T)* source)
 */
 #define jm_vector_copy(T) jm_mangle(jm_vector_copy, T)
 
 /*
-// jm_vector_clone creates a copy of the provided vector on heap and returns it.
-// Allocated capacity matches the size of the given vector. Returns the vector pointer or zero if memory allocation failed.
-// jm_vector(T)* jm_vector_clone(T)(jm_vector(T)* source)
+*  jm_vector_clone creates a copy of the provided vector on heap and returns it.
+*  Allocated capacity matches the size of the given vector. Returns the vector pointer or zero if memory allocation failed.
+*  jm_vector(T)* jm_vector_clone(T)(jm_vector(T)* source)
 */
 #define jm_vector_clone(T) jm_mangle(jm_vector_clone, T)
 
 /*
-// jm_vector_append appends source vector into destination.
-// Returns the number of elements actually appended (may be less than the source size if allocation failed).
+*  jm_vector_append appends source vector into destination.
+*  Returns the number of elements actually appended (may be less than the source size if allocation failed).
 //size_t jm_vector_append(T)(jm_vector(T)* destination, jm_vector(T)* source)
 */
 #define jm_vector_append(T) jm_mangle(jm_vector_append, T)
 
 /*
-// jm_vector_insert inserts an element at a given location.
-// Returns a pointer to the inserted element or zero pointer if failed
-// T* jm_vector_insert(T)(jm_vector(T)* a, size_t index, T item)
+*  jm_vector_insert inserts an element at a given location.
+*  Returns a pointer to the inserted element or zero pointer if failed
+*  T* jm_vector_insert(T)(jm_vector(T)* a, size_t index, T item)
 */
 #define jm_vector_insert(T) jm_mangle(jm_vector_insert, T)
 
@@ -224,17 +224,24 @@ typedef int (*jm_compare_ft) (const void* , const void*);
 #define jm_vector_remove_item(T) jm_mangle(jm_vector_remove_item, T)
 
 /*
-// jm_vector_push_back
-// Returns a pointer to the inserted element or zero pointer if failed.
-// T* jm_vector_push_back(jm_vector(T)* a, T item)
+* T* jm_vector_resize1(jm_vector(T)* a)
+* Increase the size of the vector by 1 and return a pointer to the last item. 
+* Return 0 if memory allocation failed.
+*/
+#define jm_vector_resize1(T)  jm_mangle(jm_vector_resize1, T)
+
+/*
+*  jm_vector_push_back
+*  Returns a pointer to the inserted element or zero pointer if failed.
+*  T* jm_vector_push_back(jm_vector(T)* a, T item)
 */
 #define jm_vector_push_back(T) jm_mangle(jm_vector_push_back, T)
 
 /*
-// jm_vector_foreach calls f for each element in the vector. "contect" parameter
-// is passed directly to the function as the second argument for the second version.
-// void jm_vector_foreach(T)(jm_vector(T)* a, void (*f)(T))
-// void jm_vector_foreach_c(T)(jm_vector(T)* a, void (*f)(T, void*), void * context)
+*  jm_vector_foreach calls f for each element in the vector. "contect" parameter
+*  is passed directly to the function as the second argument for the second version.
+*  void jm_vector_foreach(T)(jm_vector(T)* a, void (*f)(T))
+*  void jm_vector_foreach_c(T)(jm_vector(T)* a, void (*f)(T, void*), void * context)
 */
 #define jm_vector_foreach(T) jm_mangle(jm_vector_foreach, T)
 #define jm_vector_foreach_c(T) jm_mangle(jm_vector_foreach_c, T)
@@ -306,6 +313,7 @@ extern size_t jm_vector_reserve(T)(jm_vector(T)* a, size_t capacity); \
 extern size_t jm_vector_append(T)(jm_vector(T)* destination, jm_vector(T)* source); \
 extern T* jm_vector_insert(T)(jm_vector(T)* a, size_t index, T item);\
 extern T* jm_vector_push_back(T)(jm_vector(T)* a, T item);\
+extern T* jm_vector_resize1(T)(jm_vector(T)* a);\
 extern void jm_vector_remove_item(T)(jm_vector(T)* v, size_t index); \
 extern size_t jm_vector_find_index(T)(jm_vector(T)* a,  T *itemp, jm_compare_ft f); \
 extern T* jm_vector_find(T)(jm_vector(T)* a,  T *itemp, jm_compare_ft f); \

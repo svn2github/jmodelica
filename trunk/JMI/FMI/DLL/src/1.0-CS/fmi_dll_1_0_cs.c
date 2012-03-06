@@ -154,12 +154,12 @@ fmiStatus FNAME1(fmi_dll_t* fmu, const fmiValueReference vr[], size_t nvr, FTYPE
 	} \
 }
 
-FMISETX(fmi_dll_1_0_cs_set_real,	fmiSetReal,		fmiReal);
-FMISETX(fmi_dll_1_0_cs_set_integer, fmiSetInteger,	fmiInteger);
-FMISETX(fmi_dll_1_0_cs_set_boolean, fmiSetBoolean,	fmiBoolean);
-FMISETX(fmi_dll_1_0_cs_set_string,	fmiSetString,	fmiString);
+FMISETX(fmi_dll_1_0_cs_set_real,	fmiSetReal,		fmiReal)
+FMISETX(fmi_dll_1_0_cs_set_integer, fmiSetInteger,	fmiInteger)
+FMISETX(fmi_dll_1_0_cs_set_boolean, fmiSetBoolean,	fmiBoolean)
+FMISETX(fmi_dll_1_0_cs_set_string,	fmiSetString,	fmiString)
 
-FMIGETX(fmi_dll_1_0_cs_get_real,	fmiGetReal,		fmiReal);
-FMIGETX(fmi_dll_1_0_cs_get_integer,	fmiGetInteger,	fmiInteger);
-FMIGETX(fmi_dll_1_0_cs_get_boolean,	fmiGetBoolean,	fmiBoolean);
-FMIGETX(fmi_dll_1_0_cs_get_string,	fmiGetString,	fmiString);
+FMIGETX(fmi_dll_1_0_cs_get_real,	fmiGetReal,		fmiReal)
+FMIGETX(fmi_dll_1_0_cs_get_integer,	fmiGetInteger,	fmiInteger)
+FMIGETX(fmi_dll_1_0_cs_get_boolean,	fmiGetBoolean,	fmiBoolean)
+FMIGETX(fmi_dll_1_0_cs_get_string,	fmiGetString,	fmiString)

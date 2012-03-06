@@ -299,6 +299,7 @@ int fmi_xml_handle_Type(fmi_xml_parser_context_t *context, const char* data) {
                 fmi_xml_set_attr_string(context, fmi_xml_elmID_Type, fmi_attr_id_description, 0, bufDescr)
                     ) return -1;
             named.ptr = 0;
+			named.name = 0;
             pnamed = jm_vector_push_back(jm_named_ptr)(&td->typeDefinitions,named);
             if(pnamed) {
                 fmi_xml_variable_typedef_t dummy;
@@ -618,6 +619,7 @@ int fmi_xml_handle_Item(fmi_xml_parser_context_t *context, const char* data) {
                 return -1;
             descrlen = jm_vector_get_size(char)(bufDescr);
             named.ptr = 0;
+			named.name = 0;
             pnamed = jm_vector_push_back(jm_named_ptr)(&enumProps->enumItems, named);
 
             if(pnamed) *pnamed = named = jm_named_alloc_v(bufName,sizeof(fmi_xml_enum_type_item_t)+descrlen+1,sizeof(fmi_xml_enum_type_item_t)+descrlen,context->callbacks);

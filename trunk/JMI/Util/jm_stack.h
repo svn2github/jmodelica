@@ -27,14 +27,14 @@ extern "C" {
 #define jm_stack(T) jm_mangle(jm_stack, T)
 
 /*
-// Stack handling functions.
-// jm_stack_alloc allocates a stack with the given reserved memory
-// Input:
-//   capacity - initial stack capacity, can be 0
-//   c - jm_callbacks callbacks, can be zero
-// Returns:
-//   Newly allocated stack
-//extern jm_stack(T)* jm_stack_alloc(T)(size_t capacity,jm_callbacks*c );
+*  Stack handling functions.
+*  jm_stack_alloc allocates a stack with the given reserved memory
+*  Input:
+*    capacity - initial stack capacity, can be 0
+*    c - jm_callbacks callbacks, can be zero
+*  Returns:
+*    Newly allocated stack
+* extern jm_stack(T)* jm_stack_alloc(T)(size_t capacity,jm_callbacks*c );
 */
 #define jm_stack_alloc(T) jm_mangle(jm_stack_alloc, T)
 
@@ -42,18 +42,18 @@ extern "C" {
 #define jm_stack_free(T) jm_mangle(jm_stack_free, T)
 
 /*
-// jm_stack_init initializes a jm_stack allocated on stack.
-// Input:
-//   a - pointer to the stack to be initialized;
-//   c - jm_callbacks callbacks, can be zero
-//void jm_stack_init(T)(jm_stack(T)* a, jm_callbacks* c)
+*  jm_stack_init initializes a jm_stack allocated on stack.
+*  Input:
+*    a - pointer to the stack to be initialized;
+*    c - jm_callbacks callbacks, can be zero
+* void jm_stack_init(T)(jm_stack(T)* a, jm_callbacks* c)
 */
 #define jm_stack_init(T) jm_mangle(jm_stack_init, T)
 
 /*
-// jm_stack_free_data releases memory allocated for stack data
-// This only needs to be called both for stack allocated jm_stack
-//inline void jm_stack_free_data(T)(jm_stack(T)* a)
+*  jm_stack_free_data releases memory allocated for stack data
+*  This only needs to be called both for stack allocated jm_stack
+* inline void jm_stack_free_data(T)(jm_stack(T)* a)
 */
 #define jm_stack_free_data(T) jm_mangle(jm_stack_free_data, T)
 
@@ -63,17 +63,17 @@ inline size_t jm_stack_get_size(T)(jm_stack(T)* a)
 #define jm_stack_get_size(T) jm_mangle(jm_stack_get_size, T)
 
 /*
-// jm_stack_reserve preallocates memory for the stack (to speed up consequent push)
-// Returns: the actually reserved space. Can be smaller than "capacity" if memory allocation failed.
-// Can be larger than "capacity" if more memory was previously allocated.
-// size_t jm_stack_reserve(T)(jm_stack(T)* a, size_t capacity)
+*  jm_stack_reserve preallocates memory for the stack (to speed up consequent push)
+*  Returns: the actually reserved space. Can be smaller than "capacity" if memory allocation failed.
+*  Can be larger than "capacity" if more memory was previously allocated.
+*  size_t jm_stack_reserve(T)(jm_stack(T)* a, size_t capacity)
 */
 #define jm_stack_reserve(T) jm_mangle(jm_stack_reserve, T)
 
 /*
-// jm_stack_push puts an element on the stack.
-// Returns a pointer to the inserted element or zero pointer if failed.
-// T* jm_stack_push_back(jm_stack(T)* a, T item)
+*  jm_stack_push puts an element on the stack.
+*  Returns a pointer to the inserted element or zero pointer if failed.
+*  T* jm_stack_push_back(jm_stack(T)* a, T item)
 */
 #define jm_stack_push(T) jm_mangle(jm_stack_push, T)
 
@@ -84,21 +84,21 @@ inline size_t jm_stack_get_size(T)(jm_stack(T)* a)
 #define jm_stack_is_empty(T) jm_mangle(jm_stack_is_empty, T)
 
 /*
-// jm_stack_pop gets the stack head and moves to the next element. Popping an empty stack gives assertion failure.
-// T jm_stack_pop(jm_stack(T)* a)
+*  jm_stack_pop gets the stack head and moves to the next element. Popping an empty stack gives assertion failure.
+*  T jm_stack_pop(jm_stack(T)* a)
 */
 #define jm_stack_pop(T) jm_mangle(jm_stack_pop, T)
 
 /*
-// jm_stack_top gets the stack top. Call on an empty stack gives assertion failure.
-// T jm_stack_top(jm_stack(T)* a)
+*  jm_stack_top gets the stack top. Call on an empty stack gives assertion failure.
+*  T jm_stack_top(jm_stack(T)* a)
 */
 #define jm_stack_top(T) jm_mangle(jm_stack_top, T)
 
 /*
-// jm_stack_foreach calls f for each element in the stack. "data" parameter
-// is forwarded to the function as the second argument.
-// void jm_stack_foreach(T)(jm_stack(T)* a, void (*f)(T, void*), void * data)
+*  jm_stack_foreach calls f for each element in the stack. "data" parameter
+*  is forwarded to the function as the second argument.
+*  void jm_stack_foreach(T)(jm_stack(T)* a, void (*f)(T, void*), void * data)
 */
 #define jm_stack_foreach(T) jm_mangle(jm_stack_foreach, T)
 

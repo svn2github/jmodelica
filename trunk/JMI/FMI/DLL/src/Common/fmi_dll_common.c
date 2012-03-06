@@ -277,7 +277,7 @@ jm_status_enu_t fmi_dll_common_load_fcn(fmi_dll_t* fmu)
 jm_status_enu_t fmi_dll_common_load_dll(fmi_dll_t* fmu)
 {
 /* Load DLL */
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(WIN32) /* Microsoft Windows API */
 	fmu->dllHandle = LoadLibrary(fmu->dllPath);
 #else	
 	fmu->dllHandle = dlopen(fmu->dllPath, RTLD_LAZY);

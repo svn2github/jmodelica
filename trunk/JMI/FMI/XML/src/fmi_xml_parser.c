@@ -403,12 +403,12 @@ void XMLCALL fmi_parse_element_end(void* c, const char *elm) {
 }
 
 /*
-// Called to handle element data, e.g. "xy" in <Name>xy</Name>
-// Can be called many times, e.g. with "x" and then with "y" in the example above.
-// Feature in expat:
-// For some reason, if the element data is the empty string (Eg. <a></a>)
-// instead of an empty string with len == 0 we get "\n". The workaround is
-// to replace this with the empty string whenever we encounter "\n".
+*  Called to handle element data, e.g. "xy" in <Name>xy</Name>
+*  Can be called many times, e.g. with "x" and then with "y" in the example above.
+*  Feature in expat:
+*  For some reason, if the element data is the empty string (Eg. <a></a>)
+*  instead of an empty string with len == 0 we get "\n". The workaround is
+*  to replace this with the empty string whenever we encounter "\n".
 */
 void XMLCALL fmi_parse_element_data(void* c, const XML_Char *s, int len) {
         fmi_xml_parser_context_t *context = c;

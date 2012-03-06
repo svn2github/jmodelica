@@ -17,11 +17,12 @@
 
 #include "fmi_xml_model_description_impl.h"
 #include "fmi_xml_variable_list_impl.h"
+
 #include "fmi_xml_query.h"
 
 fmi_xml_variable_list_t* fmi_xml_alloc_variable_list(fmi_xml_model_description_t* md, size_t size) {
 	jm_callbacks* cb = md->callbacks;
-	fmi_xml_variable_list_t* vl = cb->malloc(sizeof(fmi_xml_variable_list_t));
+	fmi_xml_variable_list_t* vl = (fmi_xml_variable_list_t*)cb->malloc(sizeof(fmi_xml_variable_list_t));
     if(!vl) return 0;
     vl->vr = 0;
 	vl->md = md;
@@ -157,7 +158,7 @@ fmi_xml_variable_list_t* fmi_xml_select_variables(fmi_xml_variable_list_t* vl, c
 	fmi_xml_variable_list_t* ret = 0;
 	fmi_xml_q_context_t context;
 	int errCh;
-	fmi_xml_q_init_context(&context);
+	fmi_xml_q_init_context(&context, vl->md->callbacks);
 
 	errCh = fmi_xml_q_parse_query(&context, query);
 	if(errCh == 0) {

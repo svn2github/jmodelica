@@ -136,7 +136,7 @@ JM_TEMPLATE_INSTANCE_TYPE* jm_vector_insert(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector
         return pitem;
 }
 
-JM_TEMPLATE_INSTANCE_TYPE* jm_vector_push_back(JM_TEMPLATE_INSTANCE_TYPE) (jm_vector(JM_TEMPLATE_INSTANCE_TYPE) * a, JM_TEMPLATE_INSTANCE_TYPE item) {
+JM_TEMPLATE_INSTANCE_TYPE* jm_vector_resize1(JM_TEMPLATE_INSTANCE_TYPE) (jm_vector(JM_TEMPLATE_INSTANCE_TYPE) * a) {
         int reserve;
         JM_TEMPLATE_INSTANCE_TYPE* pitem;
         if(a->size == a->capacity) {
@@ -147,9 +147,15 @@ JM_TEMPLATE_INSTANCE_TYPE* jm_vector_push_back(JM_TEMPLATE_INSTANCE_TYPE) (jm_ve
                 if( jm_vector_reserve(JM_TEMPLATE_INSTANCE_TYPE)(a, reserve) != reserve) return 0;
         }
         assert(a->size < a->capacity);
-        a->items[a->size] = item;
         pitem = &(a->items[a->size]);
         a->size++;
+        return pitem;
+}
+
+JM_TEMPLATE_INSTANCE_TYPE* jm_vector_push_back(JM_TEMPLATE_INSTANCE_TYPE) (jm_vector(JM_TEMPLATE_INSTANCE_TYPE) * a, JM_TEMPLATE_INSTANCE_TYPE item) {
+        JM_TEMPLATE_INSTANCE_TYPE* pitem= jm_vector_resize1(JM_TEMPLATE_INSTANCE_TYPE) (a);
+        if(!pitem) return 0;
+        *pitem = item;
         return pitem;
 }
 

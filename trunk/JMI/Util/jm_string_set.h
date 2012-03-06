@@ -34,10 +34,10 @@ static jm_string jm_string_set_find(jm_string_set* s, jm_string str) {
 }
 
 /*
-// jm_set_put puts an element in the set if it is not there yet.
-// Returns a pointer to the inserted (or found) element or zero pointer if failed.
-// T* jm_set_put_item(jm_set(T)* a, T item)
-// T* jm_set_put_itemp(jm_set(T)* a, T& itemp)
+*  jm_set_put puts an element in the set if it is not there yet.
+*  Returns a pointer to the inserted (or found) element or zero pointer if failed.
+*  T* jm_set_put_item(jm_set(T)* a, T item)
+*  T* jm_set_put_itemp(jm_set(T)* a, T& itemp)
 */
 static jm_string jm_string_set_put(jm_string_set* s, jm_string str) {
     jm_string found = jm_string_set_find(s, str);

@@ -21,8 +21,9 @@
 #include "fmi_functions.h"
 #include "fmi_types.h"
 
+#include <config.h>
 /* Include platform dependent headers */
-#ifdef _MSC_VER /* Microsoft Windows API */
+#if defined(_MSC_VER) || defined(WIN32) /* Microsoft Windows API */
 #include <windows.h>
 #else /* Standard POSIX/UNIX API */
 #define HANDLE void* 

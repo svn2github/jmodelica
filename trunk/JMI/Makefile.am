@@ -45,6 +45,7 @@ libfmixml_la_SOURCES = $(FMI_XML_SRC)/fmi_xml_model_description.c \
                        $(FMI_XML_SRC)/fmi_xml_variable_list.c \
                        $(FMI_XML_SRC)/fmi_callbacks.h \
                        $(FMI_XML_SRC)/fmi_xml_query.h \
+                       $(FMI_XML_SRC)/fmi_xml_query.c \
                        $(FMI_XML_SRC)/fmi_xml_variable_list_impl.h \
                        $(FMI_XML_SRC)/fmi_xml_capabilities.c \
                        $(FMI_XML_SRC)/fmi_xml_type.c \

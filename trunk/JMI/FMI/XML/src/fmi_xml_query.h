@@ -66,9 +66,9 @@ typedef enum fmi_xml_elementary_enu_t {
 typedef struct fmi_xml_q_context_t fmi_xml_q_context_t;
 typedef struct fmi_xml_q_terminal_t fmi_xml_q_terminal_t;
 
-typedef int (*fmi_xml_q_scan_elementary_ft)(fmi_xml_q_context_t*, char* cur, fmi_xml_q_terminal_t* term);
+typedef int (*fmi_xml_q_scan_elementary_ft)(fmi_xml_q_context_t*, fmi_xml_q_terminal_t* term);
 
-#define FMI_XML_Q_ELEMENTARY_DECLARE_SCAN(name) int fmi_xml_q_scan_elementary_##name(fmi_xml_q_context_t*, char* cur, fmi_xml_q_terminal_t* term);
+#define FMI_XML_Q_ELEMENTARY_DECLARE_SCAN(name) int fmi_xml_q_scan_elementary_##name(fmi_xml_q_context_t*, fmi_xml_q_terminal_t* term);
 FMI_XML_Q_ELEMENTARY(FMI_XML_Q_ELEMENTARY_DECLARE_SCAN)
 
 
@@ -84,12 +84,13 @@ typedef enum fmi_xml_q_term_enu_t {
 	fmi_xml_q_term_enu_OR,
 	fmi_xml_q_term_enu_AND,
 	fmi_xml_q_term_enu_NOT,
+	fmi_xml_q_term_enu_END,
 	fmi_xml_q_term_enu_TRUE,
 	fmi_xml_q_term_enu_FALSE
 } fmi_xml_q_terminal_enu_t;
 
 
-typedef struct fmi_xml_q_terminal_t {
+struct fmi_xml_q_terminal_t {
 	fmi_xml_q_terminal_enu_t kind;
 
 	fmi_xml_elementary_enu_t specific;
@@ -97,33 +98,40 @@ typedef struct fmi_xml_q_terminal_t {
 	int param_i;
 	double param_d;
 	void* param_p;
+	char* param_str;
 
-	jm_vector(char) param_cv;
-
-} fmi_xml_terminal_t;
+};
 
 jm_vector_declare_template(fmi_xml_q_terminal_t)
 
 typedef jm_vector(fmi_xml_q_terminal_t) fmi_xml_q_term_vt;
 
-typedef struct fmi_xml_q_expression_t {
+typedef struct fmi_xml_q_expression_t fmi_xml_q_expression_t;
+
+struct fmi_xml_q_expression_t {
     jm_vector(jm_voidp) expression;
 
     jm_vector(jm_voidp) stack;
 
     fmi_xml_q_terminal_t termFalse, termTrue;
     fmi_xml_q_term_vt terms;
-} fmi_xml_q_expression_t;
+	jm_vector(char) strbuf;
+};
 
-typedef struct fmi_xml_q_context_t {
+struct fmi_xml_q_context_t {
     jm_vector(jm_name_ID_map_t) elementary_map;
+
+	jm_string query;
+
+	size_t qlen;
+	int curCh;
 
 	jm_vector(char) buf;
 
 	fmi_xml_q_expression_t expr;
-} fmi_xml_q_context_t;
+};
 
-void fmi_xml_q_init_context(fmi_xml_q_context_t*);
+void fmi_xml_q_init_context(fmi_xml_q_context_t*, jm_callbacks* cb);
 void fmi_xml_q_free_context_data(fmi_xml_q_context_t*);
 int fmi_xml_q_filter_variable(fmi_xml_variable_t* var, fmi_xml_q_expression_t* );
 int fmi_xml_q_parse_query(fmi_xml_q_context_t* context, jm_string query);
