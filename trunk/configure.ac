@@ -159,30 +159,39 @@ AC_ARG_WITH([sundials],
 AS_IF([test "x$with_sundials" = xno],
       [sundials="$CURR_DIR/sundials_install"])
 
-#AS_IF([test "x$with_sundials" = xno],
-#      [AC_MSG_RESULT([SUNDIALS installation not specified.])],
-#      [AC_CHECK_FILE($sundials/lib/libsundials_cvode.a,
-#                     [],
-#                     [AC_MSG_FAILURE([SUNDIALS installation specifed, but seems to be corrupt!])])])
-
 AS_IF([test "x$with_sundials" = xno],
       [with_sundials=automatic])
 
 # Set output variables to be exported to the Makefiles
 AC_SUBST(SUNDIALS_HOME)
 AC_SUBST(WITH_SUNDIALS)
-#AS_IF([test "x$with_sundials" = xautomatic],
-#      [SUNDIALS_HOME=`cd $srcdir; pwd`/$sundials],
-#      [SUNDIALS_HOME=$sundials])
-
-#AS_IF([test "x$with_sundials" != xno],
-#      [WITH_SUNDIALS="true"],
-#      [WITH_SUNDIALS="false"]) 
 
 AM_CONDITIONAL([WITH_SUNDIALS],[test "x$with_sundials" != xno])
 
 AC_SUBST(SUNDIALS_HOME)
 SUNDIALS_HOME=$sundials
+
+AC_ARG_WITH([expat],
+   [AS_HELP_STRING([--with-expat],
+     [Expat installation directory @<:@default=check@:>@])],
+   [expat=$withval],
+   [with_expat=no])
+
+AS_IF([test "x$with_expat" = xno],
+      [expat="$CURR_DIR/expat_install"])
+
+AS_IF([test "x$with_expat" = xno],
+      [with_expat=automatic])
+
+# Set output variables to be exported to the Makefiles
+AC_SUBST(EXPAT_HOME)
+AC_SUBST(WITH_EXPAT)
+
+AM_CONDITIONAL([WITH_EXPAT],[test "x$with_expat" != xno])
+
+AC_SUBST(EXPAT_HOME)
+EXPAT_HOME=$expat
+
 
 AC_ARG_WITH([superlu],
   [AS_HELP_STRING([--with-superlu],
@@ -345,11 +354,14 @@ AC_C_CONST
 
 AC_CONFIG_SUBDIRS([ThirdParty/Sundials/sundials-2.4.0])
 
+AC_CONFIG_SUBDIRS([ThirdParty/Expat/expat-2.0.1])
+
 AC_CONFIG_FILES([
  Makefile
  ThirdParty/Blas/Makefile
  ThirdParty/Lapack/Makefile
  ThirdParty/Sundials/Makefile
+ ThirdParty/Expat/Makefile
  ThirdParty/CasADi/Makefile
  ThirdParty/zlib/Makefile
  ThirdParty/minizip/Makefile

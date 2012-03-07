@@ -152,6 +152,7 @@ ECHO_T = @ECHO_T@
 ECLIPSE_HOME = @ECLIPSE_HOME@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+EXPAT_HOME = @EXPAT_HOME@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 FGREP = @FGREP@
@@ -203,6 +204,7 @@ SUPERLU_HOME = @SUPERLU_HOME@
 VERSION = @VERSION@
 WITH_CASADI = @WITH_CASADI@
 WITH_CPPAD = @WITH_CPPAD@
+WITH_EXPAT = @WITH_EXPAT@
 WITH_SUNDIALS = @WITH_SUNDIALS@
 _JAVA_HOME_ = @_JAVA_HOME_@
 abs_builddir = @abs_builddir@
@@ -266,7 +268,7 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 
 # EXTRA_DIST =
-SUBDIRS = ThirdParty/Sundials JMI/src ThirdParty/Blas ThirdParty/Lapack
+SUBDIRS = ThirdParty/Sundials ThirdParty/Expat JMI/src ThirdParty/Blas ThirdParty/Lapack
 assimulo_install_dir = $(abs_builddir)/Assimulo_install
 pymodelica_install_dir = $(abs_builddir)/pymodelica_install
 pyfmi_install_dir = $(abs_builddir)/PyFMI_install
@@ -786,9 +788,9 @@ install_casadi: casadi
 
 build-python-packages:
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	cd $(abs_top_srcdir)/Assimulo; \
-@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --prefix=$(assimulo_install_dir)
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --lapack-home=$(abs_builddir)/ThirdParty/Lapack/ --prefix=$(assimulo_install_dir)
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	cd $(abs_top_srcdir)/Assimulo; \
-@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	python setup.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	python setup.py install --sundials-home=$(SUNDIALS_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --lapack-home=$(abs_builddir)/ThirdParty/Lapack/ --prefix=$(assimulo_install_dir)
 	cd $(abs_top_srcdir)/Python/src; \
 	python setup_pymodelica.py install --prefix=$(pymodelica_install_dir); \
 	rm -rf build
@@ -881,6 +883,8 @@ install-exec-local: install-python-packages
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials	
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Expat	
+	cp -r $(EXPAT_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Expat
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	cp $(CPPAD_HOME)/COPYING $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad	

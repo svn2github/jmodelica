@@ -27,7 +27,7 @@ FMI_DLL_INC=$(abs_top_srcdir)/JMI/FMI/DLL/include
 FMI_ZIP_INC=$(abs_top_srcdir)/JMI/FMI/ZIP/include
 JM_UTIL=$(abs_top_srcdir)/JMI/Util
 THIRDPARTY_FMI_INC=$(abs_top_srcdir)/ThirdParty/FMI
-THIRDPARTY_EXPAT_INC=$(abs_top_srcdir)/ThirdParty/Expat/include
+THIRDPARTY_EXPAT_INC=$(EXPAT_HOME)/include
 THIRDPARTY_MINIZIP=$(abs_top_srcdir)/ThirdParty/minizip
 
 AUTOMAKE_OPTIONS = foreign
