@@ -41,7 +41,7 @@ void fmi_xml_free_variable_list(fmi_xml_variable_list_t* vl) {
 }
 
 /* Get number of variables in a list */
-unsigned int  fmi_xml_get_variable_list_size(fmi_xml_variable_list_t* vl) {
+size_t  fmi_xml_get_variable_list_size(fmi_xml_variable_list_t* vl) {
     return jm_vector_get_size(jm_voidp)(&vl->variables);
 }
 
