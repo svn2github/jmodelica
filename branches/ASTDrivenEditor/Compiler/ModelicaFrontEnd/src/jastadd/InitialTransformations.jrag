@@ -208,6 +208,7 @@
     }
     
     public void AlgorithmAnnotation.addToFullClassDecl(FullClassDecl fcd, Algorithm algo) {
+    	getAnnotation().setLocationNoTree(getAnnotation(), this);
     	fcd.addAnnotation(getAnnotation());
     }
     
@@ -224,6 +225,7 @@
     }
     
     public void ElementAnnotation.addToFullClassDecl(FullClassDecl fcd) {
+    	getAnnotation().setLocationNoTree(getAnnotation(), this);
     	fcd.addAnnotation(getAnnotation());
     }
     
