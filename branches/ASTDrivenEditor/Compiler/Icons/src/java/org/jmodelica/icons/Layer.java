@@ -31,8 +31,7 @@ public class Layer extends Observable implements Observer {
 	}
 	
 	private Layer() {
-		this.coordinateSystem = null;
-		this.graphics = null;
+		this(CoordinateSystem.DEFAULT_COORDINATE_SYSTEM);
 	}
 	
 	public CoordinateSystem getCoordinateSystem() {

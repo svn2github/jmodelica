@@ -53,6 +53,22 @@ public class Extent extends Observable implements Observer {
 		Extent ext = fix();
 		return new Point(ext.getP1().getX() + getWidth() / 2, ext.getP1().getY() + getHeight() / 2);
 	}
+	
+	public Point getTopRight() {
+		return new Point(Math.max(getP1().getX(), getP2().getX()), Math.max(getP1().getY(), getP2().getY()));
+	}
+
+	public Point getTopLeft() {
+		return new Point(Math.min(getP1().getX(), getP2().getX()), Math.max(getP1().getY(), getP2().getY()));
+	}
+
+	public Point getBottomRight() {
+		return new Point(Math.max(getP1().getX(), getP2().getX()), Math.min(getP1().getY(), getP2().getY()));
+	}
+
+	public Point getBottomLeft() {
+		return new Point(Math.min(getP1().getX(), getP2().getX()), Math.min(getP1().getY(), getP2().getY()));
+	}
 
 	/**
 	 * Returns an extent representing the same area as this extent but with
