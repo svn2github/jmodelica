@@ -72,56 +72,6 @@ aspect ModelicaIcons
 		return icon;
 	}
 	
-	eq InstClassDecl.diagram() {
-		Diagram diagram;
-		Layer layer = annotation().createIconLayer();
-		diagram = new Diagram(qualifiedName(), layer, Context.DIAGRAM, new DiagramFactory() {
-			public Component createComponent(String className, String componentName) {
-				ComponentDecl componentDecl = new ComponentDecl();
-				componentDecl.setClassName(Access.fromClassName(className));
-				componentDecl.setVisibilityType(new PublicVisibilityType());
-				componentDecl.setName(new IdDecl(componentName));
-				componentDecl.setComment(new Comment());
-				componentDecl.setCCComment(new Comment());
-				((FullClassDecl)getClassDecl()).addComponentDecl(componentDecl);
-				InstComponentDecl icd = (InstComponentDecl)createInstComponentDecl(componentDecl);
-				addInstComponentDecl(icd);
-				
-				icd.is$Final(true);
-				
-				Component c = icd.component(Context.DIAGRAM);
-				
-				removeInstComponentDecl(icd);
-				((FullClassDecl)getClassDecl()).removeComponentDecl(icd.getComponentDecl());
-				
-				if (c == null)
-					return null;
-				componentMap.put(c, icd);
-				return c;
-			}
-		});
-		addSuperClasses(diagram);
-		addSubComponents(diagram);
-		for (FAbstractEquation fae : getFAbstractEquations()) {
-			if (fae instanceof FConnectClause) {
-				FConnectClause fcc = (FConnectClause) fae;
-				Connection con;
-				try {
-					con = fcc.getConnectClause().annotation().createConnection();
-				} catch (FailedConstructionException e) {
-					con = new Connection();
-				}
-				con.setSourceConnector(fcc.getConnector1().getInstAccess().myInstComponentDecl().iconConnector);
-				con.setTargetConnector(fcc.getConnector2().getInstAccess().myInstComponentDecl().iconConnector);
-				connectionMap.put(con, fcc);
-				con.connect();
-				con.addObserver(fcc);
-			}
-		}
-		diagram.addObserver(this);
-		return diagram;
-	}
-	
 	eq InstComponentDecl.icon() {
 		Icon icon;
 		Layer layer = Layer.NO_LAYER;
@@ -146,6 +96,56 @@ aspect ModelicaIcons
 		addSuperClasses(icon);
 		addSubComponents(icon);
 		return icon;
+	}
+	
+	eq InstClassDecl.diagram() {
+		Diagram diagram;
+		Layer layer = annotation().createDiagramLayer();
+		diagram = new Diagram(qualifiedName(), layer, Context.DIAGRAM, new DiagramFactory() {
+			public Component createComponent(String className, String componentName) {
+				ComponentDecl componentDecl = new ComponentDecl();
+				componentDecl.setClassName(Access.fromClassName(className));
+				componentDecl.setVisibilityType(new PublicVisibilityType());
+				componentDecl.setName(new IdDecl(componentName));
+				componentDecl.setComment(new Comment());
+				componentDecl.setCCComment(new Comment());
+				((FullClassDecl)getClassDecl()).addComponentDecl(componentDecl);
+				InstComponentDecl icd = (InstComponentDecl)createInstComponentDecl(componentDecl);
+				addInstComponentDecl(icd);
+				
+				icd.is$Final(true);
+				
+				Component c = icd.component(Context.DIAGRAM);
+				
+				removeInstComponentDecl(icd);
+				((FullClassDecl)getClassDecl()).removeComponentDecl(icd.getComponentDecl());
+				
+				if (c == null)
+					return null;
+				icd.setComponent(c);
+				return c;
+			}
+		});
+		addSuperClasses(diagram);
+		addSubComponents(diagram);
+		for (FAbstractEquation fae : getFAbstractEquations()) {
+			if (fae instanceof FConnectClause) {
+				FConnectClause fcc = (FConnectClause) fae;
+				Connection con;
+				try {
+					con = fcc.getConnectClause().annotation().createConnection();
+				} catch (FailedConstructionException e) {
+					con = new Connection();
+				}
+				con.setSourceConnector((org.jmodelica.icons.Connector)fcc.getConnector1().getInstAccess().myInstComponentDecl().getComponent());
+				con.setTargetConnector((org.jmodelica.icons.Connector)fcc.getConnector2().getInstAccess().myInstComponentDecl().getComponent());
+				fcc.setConnection(con);
+				con.connect();
+				con.addObserver(fcc);
+			}
+		}
+		diagram.addObserver(this);
+		return diagram;
 	}
 	
 	public BufferedImage BaseNode.render(Icon icon, int w, int h) {
@@ -237,14 +237,12 @@ aspect ModelicaIcons
 	 	}
 	}
 	
-	protected org.jmodelica.icons.Connector InstComponentDecl.iconConnector = null;
-	
 	protected void InstNode.addSubComponents(Icon icon) {
 		for(InstComponentDecl componentDecl : getInstComponentDecls()) {
 			Component c = componentDecl.component(icon.getContext());
 			if (c != null) {
 				icon.addSubcomponent(c);
-				componentMap.put(c, componentDecl);
+				componentDecl.setComponent(c);
 			}
 		}
 	}
@@ -272,13 +270,11 @@ aspect ModelicaIcons
 							return null;
 						}
 					}
-					iconConnector = new org.jmodelica.icons.Connector(icon(), placement, qualifiedName());
-					return iconConnector;
+					return new org.jmodelica.icons.Connector(icon(), placement, qualifiedName());
 				}
 			} else {
 				if (isConnector) {
-					iconConnector = new org.jmodelica.icons.Connector(diagram(), placement, qualifiedName());
-					return iconConnector;
+					return new org.jmodelica.icons.Connector(diagram(), placement, qualifiedName());
 				} else {
 					Component c = new Component(icon(), placement, qualifiedName());
 					c.addObserver(this);
@@ -292,30 +288,88 @@ aspect ModelicaIcons
 	
 	
 	/*
+	 * =========== Methods for Connection->FConnectClause lookup ==============
+	 */
+
+	private Connection FConnectClause.connection = null;
+	
+	public void FConnectClause.setConnection(Connection con) {
+		if (connection != null)
+			throw new RuntimeException("Changing of Connection once it has been set is now allowed.");
+		connection = con;
+	}
+	
+	public Connection FConnectClause.getConnection() {
+		return connection;
+	}
+	
+	private FConnectClause InstClassDecl.findOwnerOf(Connection con) {
+		for (FAbstractEquation fae : getFAbstractEquations()) {
+			if (fae instanceof FConnectClause) {
+				FConnectClause fcc = (FConnectClause) fae;
+				if (fcc.getConnection() == con)
+					return fcc;
+			}
+		}
+		return null;
+	}
+	
+	/*
+	 * =========== Methods for Component->InstComponentDecl lookup ============
+	 */
+
+	private Component InstComponentDecl.component = null;
+	
+	public void InstComponentDecl.setComponent(Component c) {
+		if (component != null)
+			throw new RuntimeException("Changing of Component once it has been set is now allowed.");
+		component = c;
+	}
+	
+	public Component InstComponentDecl.getComponent() {
+		return component;
+	}
+	
+	protected InstComponentDecl InstNode.findOwnerOf(Component c) {
+		for(InstComponentDecl cd : getInstComponentDecls()) {
+			if (cd.getComponent() == c)
+				return cd;
+		}
+		for (InstExtends ie : instExtends()) {
+			InstComponentDecl result = ie.findOwnerOf(c);
+			if (result != null)
+				return result;
+		}
+		for(InstComponentDecl cd : getInstComponentDecls()) {
+			InstComponentDecl result = cd.findOwnerOf(c);
+			if (result != null)
+				return result;
+		}
+		return null;
+	}
+	
+	/*
 	 * ======================= Observer Related Methods =======================
 	 */
 
-	private static Map<Connection, FConnectClause> InstClassDecl.connectionMap = new HashMap<Connection, FConnectClause>();
-	protected static Map<Component, InstComponentDecl> InstNode.componentMap = new HashMap<Component, InstComponentDecl>();
-	
 	public class InstClassDecl implements Observer{}
 	public void InstClassDecl.update(Observable o, Object flag, Object additionalInfo) {
 		System.out.println(o.getClass().getName() + " " + flag + " " + additionalInfo);
 		if (o == diagram() && flag == Icon.SUBCOMPONENT_ADDED) {
-			InstComponentDecl icd = componentMap.get(additionalInfo);
+			InstComponentDecl icd = findOwnerOf((Component)additionalInfo);
 			if (icd == null)
 				throw new RuntimeException("This should not be null, the component has been created else where");
 			((FullClassDecl)getClassDecl()).addComponentDecl(icd.getComponentDecl());
 			addInstComponentDecl(icd);
 		} else if (o == diagram() && flag == Icon.SUBCOMPONENT_REMOVED) {
-			InstComponentDecl icd = componentMap.get((Component)additionalInfo);
+			InstComponentDecl icd = findOwnerOf((Component)additionalInfo);
 			if (icd == null)
 				throw new RuntimeException("This should not be null, the component has been created else where");
 			removeInstComponentDecl(icd);
 			((FullClassDecl)getClassDecl()).removeComponentDecl(icd.getComponentDecl());
 		} else if (o == diagram() && flag == Diagram.CONNECTION_ADDED) {
 			Connection con = (Connection)additionalInfo;
-			FConnectClause fcc = connectionMap.get(con);
+			FConnectClause fcc = findOwnerOf(con);
 			if (fcc == null) {
 				ConnectClause cc = new ConnectClause();
 				cc.setComment(new Comment());
@@ -325,21 +379,21 @@ aspect ModelicaIcons
 				System.out.println(con.getTargetConnector().getComponentName());
 				((FullClassDecl)getClassDecl()).addEquation(cc);
 				fcc = (FConnectClause)cc.instantiate();
-				connectionMap.put(con, fcc);
+				fcc.setConnection(con);
 				addFAbstractEquation(fcc);
 				con.addObserver(fcc);
 			} else {
 				((FullClassDecl)getClassDecl()).addEquation(fcc.getConnectClause());
 				addFAbstractEquation(fcc);
 			}
-			if (componentMap.get(con.getSourceConnector()) != fcc.getConnector1().getInstAccess().myInstComponentDecl()) {
+			if (findOwnerOf((Component)con.getSourceConnector()) != fcc.getConnector1().getInstAccess().myInstComponentDecl()) {
 				System.out.println("con1 differ");
 			}
-			if (componentMap.get(con.getTargetConnector()) != fcc.getConnector2().getInstAccess().myInstComponentDecl()) {
+			if (findOwnerOf((Component)con.getTargetConnector()) != fcc.getConnector2().getInstAccess().myInstComponentDecl()) {
 				System.out.println("con2 differ");
 			}
 		} else if (o == diagram() && flag == Diagram.CONNECTION_REMOVED) {
-			FConnectClause fcc = connectionMap.get(additionalInfo);
+			FConnectClause fcc = findOwnerOf((Connection)additionalInfo);
 			if (fcc == null)
 				throw new RuntimeException("This should not be null, the connection has been created else where");
 			removeFAbstractEquation(fcc);
@@ -391,7 +445,7 @@ aspect ModelicaIcons
 	public class InstComponentDecl implements Observer{}
 	public void InstComponentDecl.update(Observable o, Object flag, Object additionalInfo) {
 		System.out.println(o.getClass().getName() + " " + flag + " " + additionalInfo);
-		if (this == componentMap.get(o) && flag == Component.PLACEMENT_UPDATED) {
+		if (o == getComponent() && flag == Component.PLACEMENT_UPDATED) {
 			getComponentDecl().annotation().savePlacement(((Component)o).getPlacement());
 		}
 	}
