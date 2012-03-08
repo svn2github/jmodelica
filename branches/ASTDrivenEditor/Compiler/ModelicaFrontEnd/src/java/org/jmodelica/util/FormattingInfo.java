@@ -110,6 +110,15 @@ public class FormattingInfo {
 	public String getInformationString() {
 		return getInformationString(false);
 	}
+	
+	/**
+	 * Determines whether this <code>FormattingInfo</code> contains any scanned formatting items or not.
+	 * @return true if this <code>FormattingInfo</code> contains one or more scanned formatting items, otherwise
+	 * false.
+	 */
+	public boolean isEmpty() {
+		return formattingList.isEmpty();
+	}
 
 	@Override
 	public String toString() {

@@ -71,10 +71,16 @@ aspect FormattedPrint {
 			return;
 		}
 
-		setDefaultFormatting();
-		Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
-		FormattingItem nextItem = addPreFormatting(formattingIterator);
-		addPostFormatting(formattingIterator, nextItem);
+		if (formatting.isEmpty()) {
+			setDefaultFormatting();
+		} else {
+			preFormatting = new EmptyFormattingItem();
+			postFormatting = new EmptyFormattingItem();
+			Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
+			FormattingItem nextItem = addPreFormatting(formattingIterator);
+			addPostFormatting(formattingIterator, nextItem);
+		}
+
 		super.addFormattingInformation(formattingInfo);
 	}
 	
