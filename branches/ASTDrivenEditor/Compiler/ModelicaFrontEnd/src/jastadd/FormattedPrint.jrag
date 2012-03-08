@@ -30,7 +30,11 @@ aspect FormattedPrint {
 		}
 		
 		public String op(FBinExp exp) {
-			return exp.op();
+			return operatorFormatted(exp);
+		}
+		
+		public String operatorFormatted(FBinExp exp) {
+			return exp.operatorFormatted();
 		}
 	}
 	
@@ -110,6 +114,13 @@ aspect FormattedPrint {
 			postFormatting = formattingItem;
 			formattingIterator.remove();
 		}
+	}
+	
+	public FormattingItem Comment.addPreFormatting(Iterator<ScannedFormattingItem> formattingIterator) {
+		return new EmptyFormattingItem();
+	}
+	
+	public void Comment.addPostFormatting(Iterator<ScannedFormattingItem> formattingIterator, FormattingItem startingFormattingItem) {
 	}
 	
 	public void ASTNode.addFormattingRest(FormattingInfo formattingInfo) {
@@ -455,6 +466,21 @@ aspect FormattedPrint {
     	printStream.print(name());
     }
     
+    void ArrayAccess.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+    	printStream.print(name());
+    	if (hasArraySubscripts()) {
+    		printStream.print("[");
+    		getArraySubscripts().doPrettyPrintFormatted(printer, printStream);
+    		printStream.print("]");
+    	}
+    }
+    
+    void Dot.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+    	getLeft().doPrettyPrintFormatted(printer, printStream);
+    	printStream.print(".");
+    	getRight().doPrettyPrintFormatted(printer, printStream);
+    }
+    
     void ArraySubscripts.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	for (Subscript subscript : getSubscripts()) {
     		subscript.doPrettyPrintFormatted(printer, printStream);
@@ -527,43 +553,69 @@ aspect FormattedPrint {
 	    if (hasConstrainingClauseComment()) {
 	    	getConstrainingClauseComment().prettyPrintFormatted(printer, printStream);
 	    }*/
-
-		
- 		// Print all local classes
- 		/*int numPubClass = 0;
-// 		str.print(indent + "public\n");
- 		for (int i=0;i<getNumClassDecl();i++)
- 			if (((BaseClassDecl)getClassDecl(i)).isPublic()) {
- 			 	numPubClass++;
- 			 	printer.print(getClassDecl(i), printStream, "");
-	 			printStream.print(";\n\n");
-			}
-			
-		if (getNumClassDecl()-numPubClass>0) {	
-			printStream.print("protected\n");
- 			for (int i=0;i<getNumClassDecl();i++)
- 				if (((BaseClassDecl)getClassDecl(i)).isProtected()) {
- 					printer.print(getClassDecl(i), printStream, "");
-		 			printStream.print(";\n\n");
-		 		}
-		}*/
 	    
-	    /** @TODO: Print public and private before respective class. */
-	    for (ClassDecl classDecl : getClassDecls()) {
-	    	classDecl.doPrettyPrintFormatted(printer, printStream);
-	    }
 	    for (ImportClause importClause : getImports()) {
 	    	importClause.doPrettyPrintFormatted(printer, printStream);
 	    }
 	    for (ExtendsClause superClass : getSupers()) {
 	    	superClass.doPrettyPrintFormatted(printer, printStream);
 	    }
-	    for (ComponentDecl componentDecl : getComponentDecls()) {
-	    	componentDecl.doPrettyPrintFormatted(printer, printStream);
+	    
+	    LinkedList<ClassDecl> publicClassDecls = new LinkedList<ClassDecl>();
+	    LinkedList<ClassDecl> protectedClassDecls = new LinkedList<ClassDecl>();
+	    for (ClassDecl classDecl : getClassDecls()) {
+	    	if (((BaseClassDecl) classDecl).isPublic()) {
+	    		publicClassDecls.add(classDecl);
+	    	} else if (((BaseClassDecl) classDecl).isProtected()) {
+	    		protectedClassDecls.add(classDecl);
+	    	}
 	    }
+	    if (!publicClassDecls.isEmpty() && !protectedClassDecls.isEmpty()) {
+	    	printStream.print("public\n");
+	    }
+	    for (ClassDecl publicClassDecl : publicClassDecls) {
+	    	publicClassDecl.doPrettyPrintFormatted(printer, printStream);
+	    }
+	    if (!protectedClassDecls.isEmpty()) {
+	    	printStream.print("protected\n");
+	    }
+	    for (ClassDecl protectedClassDecl : protectedClassDecls) {
+	    	protectedClassDecl.doPrettyPrintFormatted(printer, printStream);
+	    }
+
+	    LinkedList<ComponentDecl> publicComponentDecls = new LinkedList<ComponentDecl>();
+	    LinkedList<ComponentDecl> protectedComponentDecls = new LinkedList<ComponentDecl>();
+	    for (ComponentDecl componentDecl : getComponentDecls()) {
+	    	if (componentDecl.isPublic()) {
+	    		publicComponentDecls.add(componentDecl);
+	    	} else if (componentDecl.isProtected()) {
+	    		protectedComponentDecls.add(componentDecl);
+	    	}
+	    }
+	    if (!publicComponentDecls.isEmpty() && !protectedClassDecls.isEmpty()) {
+	    	printStream.print("public\n");
+	    }
+	    for (ComponentDecl publicComponentDecl : publicComponentDecls) {
+	    	publicComponentDecl.doPrettyPrintFormatted(printer, printStream);
+	    }
+	    if (!protectedComponentDecls.isEmpty()) {
+	    	printStream.print("protected\n");
+	    }
+	    for (ComponentDecl protectedComponentDecl : protectedComponentDecls) {
+	    	protectedComponentDecl.doPrettyPrintFormatted(printer, printStream);
+	    }
+
 	    if (getNumEquation() > 0) {
-	    	printStream.print("equation");
+	    	boolean lastWasInitial = !getEquation(0).isInitial();
 	    	for (AbstractEquation equation : getEquations()) {
+	    		if (lastWasInitial != equation.isInitial()) {
+	    			lastWasInitial = !lastWasInitial;
+	    			if (lastWasInitial) {
+	    				printStream.print("initial equation");
+	    			} else {
+	    				printStream.print("equation");
+	    			}
+	    		}
 	    		equation.doPrettyPrintFormatted(printer, printStream);
 	    	}
 	    }
@@ -588,6 +640,15 @@ aspect FormattedPrint {
 	
 	void ImportClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("import");
+		getPackageName().doPrettyPrintFormatted(printer, printStream);
+		getComment().doPrettyPrintFormatted(printer, printStream);
+		printStream.print(";");
+	}
+	
+	void ImportClauseRename.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("import");
+		getIdDecl().doPrettyPrintFormatted(printer, printStream);
+		printStream.print("=");
 		getPackageName().doPrettyPrintFormatted(printer, printStream);
 		getComment().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(";");
@@ -641,6 +702,13 @@ aspect FormattedPrint {
 		getComponentDecl().doPrettyPrintFormatted(printer, printStream);
 	}
 	
+	void Equation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		getLeft().doPrettyPrintFormatted(printer, printStream);
+		printStream.print("=");
+		getRight().doPrettyPrintFormatted(printer, printStream);
+		printStream.print(";");
+	}
+	
 	void ConnectClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("connect");
 		printStream.print("(");
@@ -651,6 +719,8 @@ aspect FormattedPrint {
 		getComment().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(";");
 	}
+	
+	eq ExpandableConnector.toString() = "expandable connector";
 	
 	void FunctionCall.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream);
@@ -692,6 +762,10 @@ aspect FormattedPrint {
 		printStream.print(getUNSIGNED_INTEGER());
 	}
 	
+	public void TimeExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("time");
+	}
+	
 	void StringLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("\"" + getSTRING() + "\"");
 	}
@@ -708,6 +782,43 @@ aspect FormattedPrint {
 		printStream.print("-");
 		getExp().doPrettyPrintFormatted(printer, printStream);
 	}
+	
+	void NotExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("not");
+		getExp().doPrettyPrintFormatted(printer, printStream);
+	}
+	
+	void DerExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("der(");
+		getExp().doPrettyPrintFormatted(printer, printStream);
+		printStream.print(")");
+	}
+	
+	void BinExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		getLeft().doPrettyPrintFormatted(printer, printStream);
+		printStream.print(operatorFormatted());
+		getRight().doPrettyPrintFormatted(printer, printStream);
+	}
+	
+	syn String BinExp.operatorFormatted();
+	eq LtExp.operatorFormatted()     = "<";
+	eq LeqExp.operatorFormatted()    = "<=";
+	eq GtExp.operatorFormatted()     = ">";
+	eq GeqExp.operatorFormatted()    = ">=";
+	eq EqExp.operatorFormatted()     = "==";
+	eq NeqExp.operatorFormatted()    = "<>";
+	eq OrExp.operatorFormatted()     = "or";
+	eq AndExp.operatorFormatted()    = "and";
+	eq AddExp.operatorFormatted()    = "+";
+	eq SubExp.operatorFormatted()    = "-";
+	eq MulExp.operatorFormatted()    = "*";
+	eq DivExp.operatorFormatted()    = "/";
+	eq PowExp.operatorFormatted()    = "^";
+	eq DotAddExp.operatorFormatted() = ".+";
+	eq DotSubExp.operatorFormatted() = ".-";
+	eq DotMulExp.operatorFormatted() = ".*";
+	eq DotDivExp.operatorFormatted() = "./";
+	eq DotPowExp.operatorFormatted() = ".^";
 
 	/** @TODO: Copy & pasted from pretty print, needs more customization */
 	void ComponentDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -787,6 +898,26 @@ aspect FormattedPrint {
 	void EndDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("end " + getEndID() + ";");
 	}
+	
+	syn String FBinExp.operatorFormatted();
+	eq FLtExp.operatorFormatted()     = "<";
+	eq FLeqExp.operatorFormatted()    = "<=";
+	eq FGtExp.operatorFormatted()     = ">";
+	eq FGeqExp.operatorFormatted()    = ">=";
+	eq FEqExp.operatorFormatted()     = "==";
+	eq FNeqExp.operatorFormatted()    = "<>";
+	eq FOrExp.operatorFormatted()     = "or";
+	eq FAndExp.operatorFormatted()    = "and";
+	eq FAddExp.operatorFormatted()    = "+";
+	eq FSubExp.operatorFormatted()    = "-";
+	eq FMulExp.operatorFormatted()    = "*";
+	eq FDivExp.operatorFormatted()    = "/";
+	eq FPowExp.operatorFormatted()    = "^";
+	eq FDotAddExp.operatorFormatted() = ".+";
+	eq FDotSubExp.operatorFormatted() = ".-";
+	eq FDotMulExp.operatorFormatted() = ".*";
+	eq FDotDivExp.operatorFormatted() = "./";
+	eq FDotPowExp.operatorFormatted() = ".^";
 	
 	void ASTNode.copyFormattingFrom(ASTNode node) {
 		if (this.getClass() != node.getClass())
