@@ -2147,8 +2147,12 @@ aspect Sorting {
 		public static final Comparator<ASTNode> ASTNode.CHILD_ORDER_COMPARATOR =
 		    new Comparator<ASTNode>() {
 				public int compare(ASTNode n1, ASTNode n2) {
-			    	return n1.childIndex - n2.childIndex;
+			    	return childIndex(n1) - childIndex(n2);
 			    }
+				
+				private int childIndex(ASTNode n) {
+					return (n.parent == null) ? 0 : n.parent.getIndexOfChild(n);
+				}
 			    
 				public boolean equals(Object obj) { 
 			    	return obj == this; 

@@ -2512,6 +2512,7 @@ aspect TransformCanonical {
 		if (root().options.getBooleanOption("eliminate_alias_variables")) {
 			genAlias();
 			eliminateAliasVariables();
+			removeUnusedTemporaries();
 		}
 	}
 
@@ -2901,7 +2902,23 @@ aspect TransformCanonical {
 			return new FRealLitExp(0.0);
 		}
 	}
+	
+	
+	/**
+	 * Remove all unused temporary variables.
+	 */
+	public void FClass.removeUnusedTemporaries() {
+		// First version, only removing constants
+		ArrayList<FVariable> vars = new ArrayList<FVariable>();
+		for (FVariable fv : getFVariables())
+			if (!fv.shouldEliminateTemporary())
+				vars.add(fv);
+		setFVariableList(new List(vars));
+	}
 
+	syn boolean FVariable.shouldEliminateTemporary() = 
+		isConstant() && isTemporary() && uses().isEmpty();
+	
 }
 
 aspect MapWhenClauses{
@@ -3222,7 +3239,7 @@ aspect IfEquations {
 		
 		Set<AbstractFVariable> varsInBoth = 
 			intersection(assignmentEquationMap().keySet(), getElse().assignmentEquationMap().keySet()); 
-		for (AbstractFVariable v : toSortedList(varsInBoth, AbstractFVariable.NAME_COMPARATOR)) {
+		for (AbstractFVariable v : toSortedList(varsInBoth, AbstractFVariable.NAME_COMPARATOR)) {//
 			FExp left = assignmentEquationMap().get(v).assignmentExp();
 			FExp right = getElse().assignmentEquationMap().get(v).assignmentExp();
 			FExp ifExp = new FIfExp(getTest().fullCopy(), left, right);

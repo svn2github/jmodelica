@@ -23,12 +23,9 @@ package FunctionInlining
          name="BasicInline1",
          description="Most basic inlining case",
          inline_functions=true,
-         eliminate_alias_variables=false,
          flatModel="
 fclass FunctionInlining.BasicInline1
  Real x;
- constant Integer temp_1 = 1;
- constant Integer temp_2 = 1;
 equation
  x = 1;
 end FunctionInlining.BasicInline1;
@@ -51,18 +48,10 @@ end FunctionInlining.BasicInline1;
          name="BasicInline2",
          description="More complicated inlining case with only assignments and constant argument",
          inline_functions=true,
-         eliminate_alias_variables=false,
          flatModel="
 fclass FunctionInlining.BasicInline2
  Real x;
  constant Real y = 2;
- constant Real temp_1 = 1.0;
- constant Real temp_2 = 1.0;
- constant Real temp_3 = 3.0;
- constant Real temp_4 = 2.0;
- constant Real temp_5 = 8.0;
- constant Real temp_6 = 1.0;
- constant Real temp_7 = 2.0;
 equation
  x = 2.0;
 end FunctionInlining.BasicInline2;
@@ -637,15 +626,9 @@ end FunctionInlining.BasicInline11;
          name="RecordInline1",
          description="Inlining function taking constant record arg",
          inline_functions=true,
-         eliminate_alias_variables=false,
          flatModel="
 fclass FunctionInlining.RecordInline1
  Real x;
- constant Real temp_1.a[1] = 1;
- constant Real temp_1.a[2] = 2;
- constant Real temp_1.a[3] = 3;
- constant Integer temp_1.b = 4;
- constant Integer temp_2 = 10;
 equation
  x = 10;
 
@@ -678,18 +661,12 @@ end FunctionInlining.RecordInline1;
          name="RecordInline2",
          description="Inlining function returning recor, constant args",
          inline_functions=true,
-         eliminate_alias_variables=false,
          flatModel="
 fclass FunctionInlining.RecordInline2
  Real x.a[1];
  Real x.a[2];
  Real x.a[3];
  discrete Integer x.b;
- constant Integer temp_1 = 1;
- constant Real temp_2.a[1] = 1;
- constant Real temp_2.a[2] = 2;
- constant Real temp_2.a[3] = 3;
- constant Integer temp_2.b = 2;
 initial equation 
  x.pre(b) = 0;
 equation
@@ -727,16 +704,9 @@ end FunctionInlining.RecordInline2;
          name="RecordInline3",
          description="",
          inline_functions=true,
-         eliminate_alias_variables=false,
          flatModel="
 fclass FunctionInlining.RecordInline3
  Real x;
- constant Integer temp_1 = 1;
- constant Real temp_2.a[1] = 1;
- constant Real temp_2.a[2] = 2;
- constant Real temp_2.a[3] = 3;
- constant Integer temp_2.b = 4;
- constant Integer temp_3 = 10;
 equation
  x = 10;
 
@@ -1189,21 +1159,10 @@ end FunctionInlining.UninlinableFunction1;
          name="IfStatementInline1",
          description="",
          inline_functions=true,
-         eliminate_alias_variables=false,
          flatModel="
 fclass FunctionInlining.IfStatementInline1
  Real z1;
  Real z2;
- constant Integer temp_1 = 3;
- constant Integer temp_2 = 1;
- constant Integer temp_3 = 2;
- constant Integer temp_4 = 3;
- constant Integer temp_5 = 5;
- constant Integer temp_6 = 1;
- constant Integer temp_7 = 1;
- constant Integer temp_8 = 2;
- constant Integer temp_9 = 1;
- constant Integer temp_10 = 3;
 equation
  z1 = 5;
  z2 = 3;
@@ -1434,20 +1393,9 @@ end FunctionInlining.ForStatementInline1;
          name="ForStatementInline2",
          description="",
          inline_functions=true,
-         eliminate_alias_variables=false,
          flatModel="
 fclass FunctionInlining.ForStatementInline2
  Real z;
- constant Integer temp_1 = 3;
- constant Integer temp_2 = 0;
- constant Real temp_3 = 1.0;
- constant Real temp_4 = 1.0;
- constant Real temp_5 = 1.6666666666666665;
- constant Real temp_6 = 3.7777777777777772;
- constant Real temp_7 = 2.333333333333333;
- constant Real temp_8 = 9.22222222222222;
- constant Real temp_9 = 3.0;
- constant Real temp_10 = 18.22222222222222;
 equation
  z = 18.22222222222222;
 end FunctionInlining.ForStatementInline2;
@@ -1528,20 +1476,9 @@ end FunctionInlining.ForStatementInline3;
          name="ForStatementInline4",
          description="",
          inline_functions=true,
-         eliminate_alias_variables=false,
          flatModel="
 fclass FunctionInlining.ForStatementInline4
  Real z;
- constant Integer temp_1[1] = 1;
- constant Integer temp_1[2] = 2;
- constant Integer temp_1[3] = 3;
- constant Integer temp_2 = 0;
- constant Integer temp_3 = 1;
- constant Integer temp_4 = 1;
- constant Integer temp_5 = 2;
- constant Integer temp_6 = 5;
- constant Integer temp_7 = 3;
- constant Integer temp_8 = 14;
 equation
  z = 14;
 end FunctionInlining.ForStatementInline4;
@@ -1632,23 +1569,9 @@ end FunctionInlining.ForStatementInline5;
          name="ForStatementInline6",
          description="",
          inline_functions=true,
-         eliminate_alias_variables=false,
          flatModel="
 fclass FunctionInlining.ForStatementInline6
  Real z;
- constant Integer temp_1[1] = 1;
- constant Integer temp_1[2] = 2;
- constant Integer temp_1[3] = 3;
- constant Integer temp_2 = 0;
- constant Integer temp_3 = 1;
- constant Integer temp_4 = 0;
- constant Integer temp_5 = 1;
- constant Integer temp_6 = 2;
- constant Integer temp_7 = 1;
- constant Integer temp_8 = 3;
- constant Integer temp_9 = 3;
- constant Integer temp_10 = 12;
- constant Integer temp_11 = 12;
 equation
  z = 12;
 end FunctionInlining.ForStatementInline6;
