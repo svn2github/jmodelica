@@ -123,6 +123,7 @@ aspect ModelicaIcons
 				if (c == null)
 					return null;
 				icd.setComponent(c);
+				childComponentMap.put(c, icd);
 				return c;
 			}
 		});
@@ -331,17 +332,17 @@ aspect ModelicaIcons
 	}
 	
 	protected InstComponentDecl InstNode.findOwnerOf(Component c) {
-		for(InstComponentDecl cd : getInstComponentDecls()) {
-			if (cd.getComponent() == c)
-				return cd;
+		for(InstComponentDecl icd : getInstComponentDecls()) {
+			if (icd.getComponent() == c)
+				return icd;
 		}
 		for (InstExtends ie : instExtends()) {
 			InstComponentDecl result = ie.findOwnerOf(c);
 			if (result != null)
 				return result;
 		}
-		for(InstComponentDecl cd : getInstComponentDecls()) {
-			InstComponentDecl result = cd.findOwnerOf(c);
+		for(InstComponentDecl icd : getInstComponentDecls()) {
+			InstComponentDecl result = icd.findOwnerOf(c);
 			if (result != null)
 				return result;
 		}
@@ -351,12 +352,19 @@ aspect ModelicaIcons
 	/*
 	 * ======================= Observer Related Methods =======================
 	 */
+	
+	private Map<Component, InstComponentDecl> InstClassDecl.childComponentMap = new HashMap<Component, InstComponentDecl>();
 
 	public class InstClassDecl implements Observer{}
 	public void InstClassDecl.update(Observable o, Object flag, Object additionalInfo) {
 		System.out.println(o.getClass().getName() + " " + flag + " " + additionalInfo);
 		if (o == diagram() && flag == Icon.SUBCOMPONENT_ADDED) {
 			InstComponentDecl icd = findOwnerOf((Component)additionalInfo);
+			if (icd != null) {
+				System.err.println("Child already added!");
+				return;
+			}
+			icd = childComponentMap.remove(additionalInfo);
 			if (icd == null)
 				throw new RuntimeException("This should not be null, the component has been created else where");
 			((FullClassDecl)getClassDecl()).addComponentDecl(icd.getComponentDecl());
@@ -367,6 +375,7 @@ aspect ModelicaIcons
 				throw new RuntimeException("This should not be null, the component has been created else where");
 			removeInstComponentDecl(icd);
 			((FullClassDecl)getClassDecl()).removeComponentDecl(icd.getComponentDecl());
+			childComponentMap.put((Component)additionalInfo, icd);
 		} else if (o == diagram() && flag == Diagram.CONNECTION_ADDED) {
 			Connection con = (Connection)additionalInfo;
 			FConnectClause fcc = findOwnerOf(con);
