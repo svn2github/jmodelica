@@ -266,9 +266,9 @@ def test_blood_glucose_opt():
     blood_glucose_opt.run_demo(False)
 	
 @testattr(ipopt = True)
-def test_blood_glucose_optconstraint():
-    """ Test the blood_glucose_optconstraint example. """    
-    blood_glucose_optconstraint.run_demo(False)
+def test_blood_glucose_opt_scaled():
+    """ Test the blood_glucose_opt_scaled example. """    
+    blood_glucose_opt_scaled.run_demo(False)
 	
 @testattr(ipopt = True)
 def test_catalyst_mixing():
@@ -284,7 +284,12 @@ def test_bang_control():
 def test_greenhouse():
     """ Test the greenhouse example. """    
     greenhouse.run_demo(False)
-	
+
+@testattr(ipopt = True)
+def test_helicopter_der():
+    """ Test the helicopter_der example. """    
+    helicopter_der.run_demo(False)	
+
 @testattr(ipopt = True)
 def test_moon_lander():
     """ Test the moon_lander example. """    

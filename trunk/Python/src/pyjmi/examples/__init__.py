@@ -19,12 +19,13 @@
 The pyjmi example package.
 """
 __all__ = ['ast_example', 'bang_control', 'blood_glucose', 'blood_glucose_opt', 
-           'blood_glucose_optconstraint', 'catalyst_mixing',
+           'blood_glucose_opt_scaled', 'catalyst_mixing',
            'catalytic_cracking', 'coloumb_friction', 'cont_state', 'crane', 
            'crystallizer', 'cstr', 'cstr_casadi','cstr_mpc', 'cstr2', 'distillation', 
            'distillation_fmu', 'distillation1_fmu',  'distillation2_fmu', 'distillation4_fmu',
            'extfunctions', 'extFunctions_arrays', 'extFunctions_matrix', 'flight_path',
-           'furuta_dfo', 'furuta_dfo_cost', 'greenhouse', 'hohmann_transfer', 'if_example_1',
+           'furuta_dfo', 'furuta_dfo_cost', 'greenhouse', 
+           'helicopter_der', 'hohmann_transfer', 'if_example_1',
            'if_example_2', 'lagrange_cost', 'leadtransport', 'marine_population',
            'mechanical_rotational_examples_coupled_clutches',
            'mechanical_rotational_examples_first', 'moon_lander', 'multiple_nl_systems',

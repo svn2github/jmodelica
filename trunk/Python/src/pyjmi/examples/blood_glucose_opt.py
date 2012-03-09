@@ -35,8 +35,11 @@ def run_demo(with_plots=True):
 
     jmu = compile_jmu("JMExamples_opt.BloodGlucose_opt",(curr_dir+"/files/JMExamples_opt.mop", curr_dir+"/files/JMExamples.mo"))
     bg = JMUModel(jmu)
-    
     res = bg.optimize()
+	
+    jmu_final = compile_jmu("JMExamples_opt.BloodGlucose_opt_final",(curr_dir+"/files/JMExamples_opt.mop", curr_dir+"/files/JMExamples.mo"))
+    bg_final = JMUModel(jmu_final)
+    res_final = bg_final.optimize()
 
     # Extract variable profiles
     G	= res['bc.G']
@@ -44,6 +47,12 @@ def run_demo(with_plots=True):
     I	= res['bc.I']
     D	= res['bc.D']
     t	= res['time']
+	
+	# Extract variable profiles of final result
+    G_final	= res_final['bc.G']
+    X_final	= res_final['bc.X']
+    I_final	= res_final['bc.I']
+    D_final	= res_final['bc.D']
     
     print "t = ", repr(N.array(t))
     print "G = ", repr(N.array(G))
@@ -74,7 +83,32 @@ def run_demo(with_plots=True):
         plt.title('Input')
         plt.grid(True)
         plt.ylabel('D')
-        
+		
+        plt.xlabel('time')
+        plt.show()
+		
+		# Plot
+        plt.figure()
+        plt.subplot(2,2,1)
+        plt.plot(t,G_final)
+        plt.title('Plasma Glucose Conc.')
+        plt.grid(True)
+        plt.ylabel('G_final')
+        plt.subplot(2,2,2)
+        plt.plot(t,X_final)
+        plt.title('Plasma Glucose Conc.')
+        plt.grid(True)
+        plt.ylabel('X_final')
+        plt.subplot(2,2,3)
+        plt.plot(t,I_final)
+        plt.title('Plasma Glucose Conc.')
+        plt.grid(True)
+        plt.ylabel('I_final')
+        plt.subplot(2,2,4)
+        plt.plot(t,D_final)
+        plt.title('Input')
+        plt.grid(True)
+        plt.ylabel('D_final')
 		
         plt.xlabel('time')
         plt.show()
