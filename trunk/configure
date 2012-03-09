@@ -640,6 +640,10 @@ WITH_ECLIPSE_TRUE
 SUPERLU_HOME
 WITH_SUPERLU_FALSE
 WITH_SUPERLU_TRUE
+WITH_ZLIB_FALSE
+WITH_ZLIB_TRUE
+WITH_ZLIB
+ZLIB_HOME
 WITH_EXPAT_FALSE
 WITH_EXPAT_TRUE
 WITH_EXPAT
@@ -792,6 +796,7 @@ with_ipopt
 with_casadi
 with_sundials
 with_expat
+with_zlib
 with_superlu
 with_eclipse
 with_mingw
@@ -1454,6 +1459,7 @@ Optional Packages:
                           [default=check]
   --with-sundials         SUNDIALS installation directory [default=check]
   --with-expat            Expat installation directory [default=check]
+  --with-zlib             Zlib installation directory [default=check]
   --with-superlu          SuperLU installation directory [default=check]
   --with-eclipse          Eclipse installation directory [default=no]
   --with-mingw            MinGW installation directory. [default=no]
@@ -18836,6 +18842,7 @@ fi
 
 
 # Checks for libraries.
+# SUNDIALS
 
 # Check whether --with-sundials was given.
 if test "${with_sundials+set}" = set; then :
@@ -18869,6 +18876,7 @@ fi
 
 SUNDIALS_HOME=$sundials
 
+# Expat
 
 # Check whether --with-expat was given.
 if test "${with_expat+set}" = set; then :
@@ -18902,6 +18910,39 @@ fi
 
 EXPAT_HOME=$expat
 
+# Zlib
+
+# Check whether --with-zlib was given.
+if test "${with_zlib+set}" = set; then :
+  withval=$with_zlib; zlib=$withval
+else
+  with_zlib=no
+fi
+
+
+if test "x$with_zlib" = xno; then :
+  zlib="$CURR_DIR/zlib_install"
+fi
+
+if test "x$with_zlib" = xno; then :
+  with_zlib=automatic
+fi
+
+# Set output variables to be exported to the Makefiles
+
+
+
+ if test "x$with_zlib" != xno; then
+  WITH_ZLIB_TRUE=
+  WITH_ZLIB_FALSE='#'
+else
+  WITH_ZLIB_TRUE='#'
+  WITH_ZLIB_FALSE=
+fi
+
+
+
+ZLIB_HOME=$zlib
 
 
 # Check whether --with-superlu was given.
@@ -19568,7 +19609,7 @@ subdirs="$subdirs ThirdParty/Sundials/sundials-2.4.0"
 subdirs="$subdirs ThirdParty/Expat/expat-2.0.1"
 
 
-ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Expat/Makefile ThirdParty/CasADi/Makefile ThirdParty/zlib/Makefile ThirdParty/minizip/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh jm_tests"
+ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Expat/Makefile ThirdParty/Zlib/Makefile ThirdParty/CasADi/Makefile ThirdParty/zlib/Makefile ThirdParty/minizip/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh jm_tests"
 
 
 cat >confcache <<\_ACEOF
@@ -19710,6 +19751,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_EXPAT_TRUE}" && test -z "${WITH_EXPAT_FALSE}"; then
   as_fn_error $? "conditional \"WITH_EXPAT\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${WITH_ZLIB_TRUE}" && test -z "${WITH_ZLIB_FALSE}"; then
+  as_fn_error $? "conditional \"WITH_ZLIB\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_SUPERLU_TRUE}" && test -z "${WITH_SUPERLU_FALSE}"; then
@@ -20811,6 +20856,7 @@ do
     "ThirdParty/Lapack/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Lapack/Makefile" ;;
     "ThirdParty/Sundials/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Sundials/Makefile" ;;
     "ThirdParty/Expat/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Expat/Makefile" ;;
+    "ThirdParty/Zlib/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Zlib/Makefile" ;;
     "ThirdParty/CasADi/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/CasADi/Makefile" ;;
     "ThirdParty/zlib/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/zlib/Makefile" ;;
     "ThirdParty/minizip/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/minizip/Makefile" ;;

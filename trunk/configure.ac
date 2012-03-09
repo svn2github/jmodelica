@@ -150,6 +150,7 @@ AS_IF([test "x$with_ipopt" != xno],
 
 
 # Checks for libraries.
+# SUNDIALS
 AC_ARG_WITH([sundials],
    [AS_HELP_STRING([--with-sundials],
      [SUNDIALS installation directory @<:@default=check@:>@])],
@@ -171,6 +172,7 @@ AM_CONDITIONAL([WITH_SUNDIALS],[test "x$with_sundials" != xno])
 AC_SUBST(SUNDIALS_HOME)
 SUNDIALS_HOME=$sundials
 
+# Expat
 AC_ARG_WITH([expat],
    [AS_HELP_STRING([--with-expat],
      [Expat installation directory @<:@default=check@:>@])],
@@ -192,6 +194,27 @@ AM_CONDITIONAL([WITH_EXPAT],[test "x$with_expat" != xno])
 AC_SUBST(EXPAT_HOME)
 EXPAT_HOME=$expat
 
+# Zlib
+AC_ARG_WITH([zlib],
+   [AS_HELP_STRING([--with-zlib],
+     [Zlib installation directory @<:@default=check@:>@])],
+   [zlib=$withval],
+   [with_zlib=no])
+
+AS_IF([test "x$with_zlib" = xno],
+      [zlib="$CURR_DIR/zlib_install"])
+
+AS_IF([test "x$with_zlib" = xno],
+      [with_zlib=automatic])
+
+# Set output variables to be exported to the Makefiles
+AC_SUBST(ZLIB_HOME)
+AC_SUBST(WITH_ZLIB)
+
+AM_CONDITIONAL([WITH_ZLIB],[test "x$with_zlib" != xno])
+
+AC_SUBST(ZLIB_HOME)
+ZLIB_HOME=$zlib
 
 AC_ARG_WITH([superlu],
   [AS_HELP_STRING([--with-superlu],
@@ -362,6 +385,7 @@ AC_CONFIG_FILES([
  ThirdParty/Lapack/Makefile
  ThirdParty/Sundials/Makefile
  ThirdParty/Expat/Makefile
+ ThirdParty/Zlib/Makefile
  ThirdParty/CasADi/Makefile
  ThirdParty/zlib/Makefile
  ThirdParty/minizip/Makefile
