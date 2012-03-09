@@ -111,7 +111,7 @@
 		<mkdir dir="${base_output}" />
 		<!-- run jastadd to generate AST files -->
 		<jastadd package="${ast_package}" beaver="true" rewrite="true" outdir="${base_output}" 
-				NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" 
+				NoCacheCycle="false" ComponentCheck="false" visitcheck="false" LazyMaps="true" 
 				Deterministic="true" NoStatic="false" Debug="false">
 			<fileset dir="${local_ast}">
 				<include name="*.ast" />

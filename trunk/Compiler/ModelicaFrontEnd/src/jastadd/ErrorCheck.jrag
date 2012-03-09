@@ -546,12 +546,12 @@ aspect InstanceErrorCheck {
     if (!errorChecked) {
       errorChecked = true;
 	  allChecks();
-	  for(InstNode n : getInstComponentDecls()) 
+	  for (InstNode n : getInstComponentDecls()) 
 		  n.collectErrors();
 	  collectErrorsInClassDecls();
-	  for(InstNode n : getInstExtendss()) 
+	  for (InstNode n : getInstExtendss()) 
 		  n.collectErrors();
-	  for(FAbstractEquation e : getFAbstractEquations()) 
+	  for (FAbstractEquation e : getFAbstractEquations()) 
 		  e.collectErrors();
 	}
   }
@@ -638,7 +638,7 @@ aspect InstanceErrorCheck {
 	    	} else {
 	    		super.collectErrors();
   		  		errorChecked = true;
-	    		getClassName().collectErrors();
+  		  		collectErrorsInClassName();
 	    		if (hasInstModification())
 	    			getInstModification().collectErrors();
 	    		if (hasInstConstraining())
@@ -646,6 +646,15 @@ aspect InstanceErrorCheck {
 	    	}
 		}
 	}
+	
+	public void InstComponentDecl.collectErrorsInClassName() {
+		getClassName().collectErrors();
+	}	
+	
+	public void InstArrayComponentDecl.collectErrorsInClassName() {
+		// TODO: use correct class name instead of "ArrayDecl" so that name lookup suceeds instead?
+		//       need that for other things as well, but is there problems with it?
+	}	
 	
 	public void FExp.checkConstantExpression(InstPrimitive node, String varKind, String varName) {
 		String exp = "'" + prettyPrint("") + "'";
@@ -710,14 +719,6 @@ aspect InstanceErrorCheck {
 					}
 				}
 			}
-		}
-	}
-	
-	public void InstArrayComponentDecl.collectErrors() {
-	    if (!errorChecked) {
-    		errorChecked = true;
-	  	  	for(InstNode n : getInstComponentDecls()) 
-			  	n.collectErrors();
 		}
 	}
 	
@@ -1019,8 +1020,8 @@ aspect InstanceErrorCheck {
 	 */
 	syn boolean InstNode.isOfInstClassDecl(InstClassDecl icd) = false;
 	eq InstClassDecl.isOfInstClassDecl(InstClassDecl icd)     = icd == this;
-	eq InstComponentDecl.isOfInstClassDecl(InstClassDecl icd) = icd == myInstClass();
-	eq InstExtends.isOfInstClassDecl(InstClassDecl icd)       = icd == myInstClass();
+	eq InstComponentDecl.isOfInstClassDecl(InstClassDecl icd) = icd == myInstClass() && !icd.isUnknown();
+	eq InstExtends.isOfInstClassDecl(InstClassDecl icd)       = icd == myInstClass() && !icd.isUnknown();
 	
 }
 
