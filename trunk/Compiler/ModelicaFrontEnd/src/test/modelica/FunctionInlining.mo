@@ -1209,7 +1209,7 @@ equation
  v = 2;
  z = temp_5;
  temp_1 = v;
- temp_4 = (if temp_1 > 2 then temp_1 else 1);
+ temp_4 = noEvent((if temp_1 > 2 then temp_1 else 1));
  temp_5 = temp_4 + 2;
 end FunctionInlining.IfStatementInline2;
 ")})));
@@ -1265,8 +1265,8 @@ equation
  temp_3 = v3;
  temp_4 = temp_2;
  temp_5 = temp_3;
- temp_6 = (if temp_1 > 2 then temp_1 else temp_4);
- temp_7 = (if temp_1 > 2 then temp_5 else temp_1);
+ temp_6 = noEvent((if temp_1 > 2 then temp_1 else temp_4));
+ temp_7 = noEvent((if temp_1 > 2 then temp_5 else temp_1));
  temp_8 = temp_6 + temp_7;
 end FunctionInlining.IfStatementInline3;
 ")})));
@@ -1315,8 +1315,8 @@ equation
  v = 1;
  z = temp_3;
  temp_1 = v;
- temp_2 = (if temp_1 > 2 then temp_1 else 0.0);
- temp_3 = (if temp_1 > 2 then temp_2 else temp_1 + 1);
+ temp_2 = noEvent((if temp_1 > 2 then temp_1 else 0.0));
+ temp_3 = noEvent((if temp_1 > 2 then temp_2 else temp_1 + 1));
 end FunctionInlining.IfStatementInline4;
 ")})));
 
@@ -1533,14 +1533,14 @@ equation
  temp_1[2] = v[2];
  temp_1[3] = v[3];
  temp_3 = temp_1[1];
- temp_4 = (if temp_3 > 2 then 0 + ( temp_3 ) * ( temp_3 ) else 0);
- temp_5 = (if temp_3 > 2 then temp_4 else temp_4 + temp_3);
+ temp_4 = noEvent((if temp_3 > 2 then 0 + ( temp_3 ) * ( temp_3 ) else 0));
+ temp_5 = noEvent((if temp_3 > 2 then temp_4 else temp_4 + temp_3));
  temp_6 = temp_1[2];
- temp_7 = (if temp_6 > 2 then temp_5 + ( temp_6 ) * ( temp_6 ) else temp_5);
- temp_8 = (if temp_6 > 2 then temp_7 else temp_7 + temp_6);
+ temp_7 = noEvent((if temp_6 > 2 then temp_5 + ( temp_6 ) * ( temp_6 ) else temp_5));
+ temp_8 = noEvent((if temp_6 > 2 then temp_7 else temp_7 + temp_6));
  temp_9 = temp_1[3];
- temp_10 = (if temp_9 > 2 then temp_8 + ( temp_9 ) * ( temp_9 ) else temp_8);
- temp_11 = (if temp_9 > 2 then temp_10 else temp_10 + temp_9);
+ temp_10 = noEvent((if temp_9 > 2 then temp_8 + ( temp_9 ) * ( temp_9 ) else temp_8));
+ temp_11 = noEvent((if temp_9 > 2 then temp_10 else temp_10 + temp_9));
 end FunctionInlining.ForStatementInline5;
 ")})));
 

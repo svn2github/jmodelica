@@ -2564,163 +2564,77 @@ aspect TransformCanonical {
 	 * as alias equations and an AliasPair object is returned.
 	 */
 	public AliasPair FEquation.aliasVariables() {
-
-		AbstractFVariable afv1 = null;
-		AbstractFVariable afv2 = null;
-		
-		FVariable fv1 = null;
-		FVariable fv2 = null;
-		boolean negated = false;	
-		
-		if (getLeft() instanceof FIdUseExp && // x = y
-					getRight() instanceof FIdUseExp) {
-			afv1 = ((FIdUseExp)getLeft()).myFV();
-			afv2 = ((FIdUseExp)getRight()).myFV();
-			if (!afv1.isUnknown() && !afv2.isUnknown()) {
-				fv1 = (FVariable)afv1;
-				fv2 = (FVariable)afv2;
-				negated = false;
-			}
-		} else if (getLeft() instanceof FNegExp && // -x = y
-				((FNegExp)getLeft()).getFExp() instanceof FIdUseExp &&
-				getRight() instanceof FIdUseExp) {
-			afv1 = ((FIdUseExp)((FNegExp)getLeft()).getFExp()).myFV();
-			afv2 = ((FIdUseExp)getRight()).myFV();
-			if (!afv1.isUnknown() && !afv2.isUnknown()) {
-				fv1 = (FVariable)afv1;
-				fv2 = (FVariable)afv2;
-				negated = true;
-			}
-		} else if (getLeft() instanceof FIdUseExp && // x = -y
-					getRight() instanceof FNegExp &&
-				((FNegExp)getRight()).getFExp() instanceof FIdUseExp) {
-			afv1 = ((FIdUseExp)getLeft()).myFV();
-			afv2 = ((FIdUseExp)((FNegExp)getRight()).getFExp()).myFV();	
-			if (!afv1.isUnknown() && !afv2.isUnknown()) {
-				fv1 = (FVariable)afv1;
-				fv2 = (FVariable)afv2;
-				negated = true;
-			}
-		} else if (getLeft() instanceof FNegExp && // -x = -y
-				((FNegExp)getLeft()).getFExp() instanceof FIdUseExp &&
-				getRight() instanceof FNegExp &&
-				((FNegExp)getRight()).getFExp() instanceof FIdUseExp
-				) {
-			afv1 = ((FIdUseExp)((FNegExp)getLeft()).getFExp()).myFV();
-			afv2 = ((FIdUseExp)((FNegExp)getRight()).getFExp()).myFV();	
-			if (!afv1.isUnknown() && !afv2.isUnknown()) {
-				fv1 = (FVariable)afv1;
-				fv2 = (FVariable)afv2;
-				negated = false;
-			}
-		} else if (getLeft() instanceof FLitExp && getLeft().ceval().realValue() == 0 && // 0 = x + y
-				getRight() instanceof FDotAddExp &&
-				((FDotAddExp)getRight()).getLeft() instanceof FIdUseExp &&
-				((FDotAddExp)getRight()).getRight() instanceof FIdUseExp) {
-			afv1 = ((FIdUseExp)((FDotAddExp)getRight()).getLeft()).myFV();
-			afv2 = ((FIdUseExp)((FDotAddExp)getRight()).getRight()).myFV();
-			if (!afv1.isUnknown() && !afv2.isUnknown()) {
-				fv1 = (FVariable)afv1;
-				fv2 = (FVariable)afv2;
-				negated = true;
-			}
-		} else if ((getLeft() instanceof FDotAddExp &&  //  x + y = 0
-				((FDotAddExp)getLeft()).getLeft() instanceof FIdUseExp &&
-				((FDotAddExp)getLeft()).getRight() instanceof FIdUseExp) &&
-				(getRight() instanceof FLitExp && getRight().ceval().realValue() == 0)) {
-			afv1 = ((FIdUseExp)((FDotAddExp)getLeft()).getLeft()).myFV();
-			afv2 = ((FIdUseExp)((FDotAddExp)getLeft()).getRight()).myFV();
-			if (!afv1.isUnknown() && !afv2.isUnknown()) {
-				fv1 = (FVariable)afv1;
-				fv2 = (FVariable)afv2;
-				negated = true;
-			}
-			// The following might be redundant when using standard libraries... 
-		} else if ((getLeft() instanceof FDotSubExp &&  //  x - y = 0
-				((FDotSubExp)getLeft()).getLeft() instanceof FIdUseExp &&
-				((FDotSubExp)getLeft()).getRight() instanceof FIdUseExp) &&
-				(getRight() instanceof FLitExp && getRight().ceval().realValue() == 0)) {
-			afv1 = ((FIdUseExp)((FDotSubExp)getLeft()).getLeft()).myFV();
-			afv2 = ((FIdUseExp)((FDotSubExp)getLeft()).getRight()).myFV();
-			if (!afv1.isUnknown() && !afv2.isUnknown()) {
-				fv1 = (FVariable)afv1;
-				fv2 = (FVariable)afv2;
-				negated = false;
-			}
-		} else if ((getLeft() instanceof FDotAddExp &&  //  -x + y = 0
-				((FDotAddExp)getLeft()).getLeft() instanceof FNegExp &&
-				((FNegExp)((FDotAddExp)getLeft()).getLeft()).getFExp() instanceof FIdUseExp &&
-				((FDotAddExp)getLeft()).getRight() instanceof FIdUseExp) &&
-				(getRight() instanceof FLitExp && getRight().ceval().realValue() == 0)) {
-			afv1 = ((FIdUseExp)((FNegExp)((FDotAddExp)getLeft()).getLeft()).getFExp()).myFV();
-			afv2 = ((FIdUseExp)((FDotAddExp)getLeft()).getRight()).myFV();
-			if (!afv1.isUnknown() && !afv2.isUnknown()) {
-				fv1 = (FVariable)afv1;
-				fv2 = (FVariable)afv2;
-				negated = false;
-			}
-		}else if ((getLeft() instanceof FDotSubExp &&  //  -x - y = 0
-				((FDotSubExp)getLeft()).getLeft() instanceof FNegExp &&
-				((FNegExp)((FDotSubExp)getLeft()).getLeft()).getFExp() instanceof FIdUseExp &&
-				((FDotSubExp)getLeft()).getRight() instanceof FIdUseExp) &&
-				(getRight() instanceof FLitExp && getRight().ceval().realValue() == 0)) {
-			afv1 = ((FIdUseExp)((FNegExp)((FDotSubExp)getLeft()).getLeft()).getFExp()).myFV();
-			afv2 = ((FIdUseExp)((FDotSubExp)getLeft()).getRight()).myFV();
-			if (!afv1.isUnknown() && !afv2.isUnknown()) {
-				fv1 = (FVariable)afv1;
-				fv2 = (FVariable)afv2;
-				negated = true;
-			}
-			
-		} else if ((getRight() instanceof FDotSubExp &&  //  0= x - y
-				((FDotSubExp)getRight()).getLeft() instanceof FIdUseExp &&
-				((FDotSubExp)getRight()).getRight() instanceof FIdUseExp) &&
-				(getLeft() instanceof FLitExp && getLeft().ceval().realValue() == 0)) {
-			afv1 = ((FIdUseExp)((FDotSubExp)getRight()).getLeft()).myFV();
-			afv2 = ((FIdUseExp)((FDotSubExp)getRight()).getRight()).myFV();
-			if (!afv1.isUnknown() && !afv2.isUnknown()) {
-				fv1 = (FVariable)afv1;
-				fv2 = (FVariable)afv2;
-				negated = false;
-			}	
-		} else if ((getRight() instanceof FDotAddExp &&  //  0 = -x + y
-				((FDotAddExp)getRight()).getLeft() instanceof FNegExp &&
-				((FNegExp)((FDotAddExp)getRight()).getLeft()).getFExp() instanceof FIdUseExp &&
-				((FDotAddExp)getRight()).getRight() instanceof FIdUseExp) &&
-				(getLeft() instanceof FLitExp && getLeft().ceval().realValue() == 0)) {
-			afv1 = ((FIdUseExp)((FNegExp)((FDotAddExp)getRight()).getLeft()).getFExp()).myFV();
-			afv2 = ((FIdUseExp)((FDotAddExp)getRight()).getRight()).myFV();
-			if (!afv1.isUnknown() && !afv2.isUnknown()) {
-				fv1 = (FVariable)afv1;
-				fv2 = (FVariable)afv2;
-				negated = false;
-			}
-		}else if ((getRight() instanceof FDotSubExp &&  //  0= -x - y
-				((FDotSubExp)getRight()).getLeft() instanceof FNegExp &&
-				((FNegExp)((FDotSubExp)getRight()).getLeft()).getFExp() instanceof FIdUseExp &&
-				((FDotSubExp)getRight()).getRight() instanceof FIdUseExp) &&
-				(getLeft() instanceof FLitExp && getLeft().ceval().realValue() == 0)) {
-			afv1 = ((FIdUseExp)((FNegExp)((FDotSubExp)getRight()).getLeft()).getFExp()).myFV();
-			afv2 = ((FIdUseExp)((FDotSubExp)getRight()).getRight()).myFV();
-			if (!afv1.isUnknown() && !afv2.isUnknown()) {
-				fv1 = (FVariable)afv1;
-				fv2 = (FVariable)afv2;
-				negated = true;
-			}
-		}	
-			
+		AliasPair res = aliasVariables(getLeft(), getRight(), 1);
 		aliasClassified = true;
-		if ((fv1!=null) && 
-				(fv2!=null) &&
-				fv1.canBeAliasEliminated(fv2)) {
-			classifiedAsAlias = true;
-			//System.out.println("**** " + fv1.name() + " " +fv2.name());
-			return new AliasPair(fv1,fv2,negated);
-		} else {
-			return null;
-		}
-		
+		classifiedAsAlias = res != null;
+		return res;
 	}
+	
+	/**
+	 * Determine if two expressions would form an alias pair if on the left and right sides of 
+	 * an equation.
+	 * 
+	 * @param e1    an expression that would form one side of the equation
+	 * @param e2    an expression that would form the other side of the equation
+	 * @param sign  alias sign is multiplied with this - useful for e.g. 0 = x + y
+	 */
+	public static AliasPair ASTNode.aliasVariables(FExp e1, FExp e2, int sign) {
+		if (e1.canBeAlias() && e2.canBeAlias()) {   // x = y, etc.
+			FVariable fv1 = e1.variableThatCanBeAlias();
+			FVariable fv2 = e2.variableThatCanBeAlias();
+			boolean negated = e1.aliasSign() * e2.aliasSign() * sign < 0;
+			return new AliasPair(fv1, fv2, negated);
+		} else {                                    // 0 = x + y, etc
+			FExp eqZero = null;
+			if (e1.isConstantZero())
+				eqZero = e2;
+			else if (e2.isConstantZero())
+				eqZero = e1;
+			if (eqZero != null)
+				return eqZero.aliasVariables();
+			else
+				return null;
+		}
+	}
+	
+	/**
+	 * \brief Detection of alias variables in expressions
+	 * 
+	 * Only valid when in an equation that gives that the value of this expression is always 0.
+	 */
+	public AliasPair FExp.aliasVariables() {
+		return null;
+	}
+	
+	public AliasPair FDotAddExp.aliasVariables() {
+		return aliasVariables(getLeft(), getRight(), -1);
+	}
+	
+	public AliasPair FDotSubExp.aliasVariables() {
+		return aliasVariables(getLeft(), getRight(), 1);
+	}
+	
+	syn boolean FExp.canBeAlias() = false;
+	eq FIdUseExp.canBeAlias()     = myFV() instanceof FVariable;
+	eq FDerExp.canBeAlias()       = false;
+	eq FNegExp.canBeAlias()       = getFExp().canBeAlias();
+	
+	syn int FExp.aliasSign() = 1;
+	eq FNegExp.aliasSign()   = -getFExp().aliasSign();
+	
+	syn FVariable FExp.variableThatCanBeAlias() = null;
+	eq FIdUseExp.variableThatCanBeAlias()       = (FVariable) myFV();
+	eq FNegExp.variableThatCanBeAlias()         = getFExp().variableThatCanBeAlias();
+	
+	syn boolean FExp.isConstantZero() = 
+		isLiteralExp() && type().isNumericScalar() && ceval().realValue() == 0.0;
+	
+//	syn boolean FExp.isConstantOne() = 
+//		isLiteralExp() && type().isNumericScalar() && ceval().realValue() == 1.0;
+	
+	syn boolean FExp.isLiteralExp() = false;
+	eq FLitExp.isLiteralExp()       = true;
+	
 	
 	syn lazy boolean FAbstractEquation.isAliasEquation() = false;
 	// If an equation has been classified, the result needs to be cached 
@@ -3839,6 +3753,7 @@ aspect FunctionInlining {
 			if (variability.constantVariability()) {
 				var.setBindingExp(value.ceval().buildLiteral());
 			} else {
+				value = value.preventEvents();
 				FEquation eqn = new FEquation(new FNormalEquation(), var.createUseExp(), value);
 				if (variability.parameterVariability())
 					paramEqns.add(eqn);
@@ -3853,6 +3768,43 @@ aspect FunctionInlining {
 		
 	}
 	
+	/**
+	 * Encapsulate any event-generating expressions in noEvent().
+	 */
+	public FExp FExp.preventEvents() {
+		if (generatesEvents()) {
+			FNoEventExp res = new FNoEventExp();
+			replaceMe(res);
+			res.setFExp(this);
+			return res;
+		} else {
+			for (FExp e : childFExps())
+				e.preventEvents();
+			return this;
+		}
+	}
+	
+	public FExp FNoEventExp.preventEvents() {
+		return this;
+	}
+	
+	public FExp FIdUseExp.preventEvents() {
+		// TODO: traverse expressions in subscripts
+		return this;
+	}
+	
+	public FExp FFunctionCall.preventEvents() {
+		for (FExp e : getArgs())
+			e.preventEvents();
+	return this;
+	}
+	
+	/**
+	 * Check if this expression generates events.
+	 */
+	syn boolean FExp.generatesEvents() = false;
+	eq FIfExp.generatesEvents()        = true;
+	// TODO: support more event-generating expressions
 	
 	/**
 	 * Check if an equation contains any calls to functions that we can inline.
