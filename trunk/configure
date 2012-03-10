@@ -640,6 +640,10 @@ WITH_ECLIPSE_TRUE
 SUPERLU_HOME
 WITH_SUPERLU_FALSE
 WITH_SUPERLU_TRUE
+WITH_MINIZIP_FALSE
+WITH_MINIZIP_TRUE
+WITH_MINIZIP
+MINIZIP_HOME
 WITH_ZLIB_FALSE
 WITH_ZLIB_TRUE
 WITH_ZLIB
@@ -797,6 +801,7 @@ with_casadi
 with_sundials
 with_expat
 with_zlib
+with_minizip
 with_superlu
 with_eclipse
 with_mingw
@@ -818,7 +823,8 @@ CFLAGS
 CPP
 CXXCPP'
 ac_subdirs_all='ThirdParty/Sundials/sundials-2.4.0
-ThirdParty/Expat/expat-2.0.1'
+ThirdParty/Expat/expat-2.0.1
+ThirdParty/minizip/minizip'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -1460,6 +1466,7 @@ Optional Packages:
   --with-sundials         SUNDIALS installation directory [default=check]
   --with-expat            Expat installation directory [default=check]
   --with-zlib             Zlib installation directory [default=check]
+  --with-minizip          Minizip installation directory [default=check]
   --with-superlu          SuperLU installation directory [default=check]
   --with-eclipse          Eclipse installation directory [default=no]
   --with-mingw            MinGW installation directory. [default=no]
@@ -18944,6 +18951,40 @@ fi
 
 ZLIB_HOME=$zlib
 
+# Minizip
+
+# Check whether --with-minizip was given.
+if test "${with_minizip+set}" = set; then :
+  withval=$with_minizip; minizip=$withval
+else
+  with_minizip=no
+fi
+
+
+if test "x$with_minizip" = xno; then :
+  minizip="$CURR_DIR/minizip_install"
+fi
+
+if test "x$with_minizip" = xno; then :
+  with_minizip=automatic
+fi
+
+# Set output variables to be exported to the Makefiles
+
+
+
+ if test "x$with_minizip" != xno; then
+  WITH_MINIZIP_TRUE=
+  WITH_MINIZIP_FALSE='#'
+else
+  WITH_MINIZIP_TRUE='#'
+  WITH_MINIZIP_FALSE=
+fi
+
+
+
+MINIZIP_HOME=$minizip
+
 
 # Check whether --with-superlu was given.
 if test "${with_superlu+set}" = set; then :
@@ -19609,7 +19650,10 @@ subdirs="$subdirs ThirdParty/Sundials/sundials-2.4.0"
 subdirs="$subdirs ThirdParty/Expat/expat-2.0.1"
 
 
-ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Expat/Makefile ThirdParty/Zlib/Makefile ThirdParty/CasADi/Makefile ThirdParty/zlib/Makefile ThirdParty/minizip/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh jm_tests"
+subdirs="$subdirs ThirdParty/minizip/minizip"
+
+
+ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Expat/Makefile ThirdParty/Zlib/Makefile ThirdParty/minizip/Makefile ThirdParty/CasADi/Makefile ThirdParty/zlib/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh jm_tests"
 
 
 cat >confcache <<\_ACEOF
@@ -19755,6 +19799,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_ZLIB_TRUE}" && test -z "${WITH_ZLIB_FALSE}"; then
   as_fn_error $? "conditional \"WITH_ZLIB\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${WITH_MINIZIP_TRUE}" && test -z "${WITH_MINIZIP_FALSE}"; then
+  as_fn_error $? "conditional \"WITH_MINIZIP\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_SUPERLU_TRUE}" && test -z "${WITH_SUPERLU_FALSE}"; then
@@ -20857,9 +20905,9 @@ do
     "ThirdParty/Sundials/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Sundials/Makefile" ;;
     "ThirdParty/Expat/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Expat/Makefile" ;;
     "ThirdParty/Zlib/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Zlib/Makefile" ;;
+    "ThirdParty/minizip/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/minizip/Makefile" ;;
     "ThirdParty/CasADi/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/CasADi/Makefile" ;;
     "ThirdParty/zlib/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/zlib/Makefile" ;;
-    "ThirdParty/minizip/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/minizip/Makefile" ;;
     "JMI/src/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/src/Makefile" ;;
     "JMI/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/Makefile" ;;
     "docbook/UsersGuide/Makefile") CONFIG_FILES="$CONFIG_FILES docbook/UsersGuide/Makefile" ;;

@@ -104,6 +104,7 @@ LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MINGW_HOME = @MINGW_HOME@
+MINIZIP_HOME = @MINIZIP_HOME@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -133,6 +134,7 @@ VERSION = @VERSION@
 WITH_CASADI = @WITH_CASADI@
 WITH_CPPAD = @WITH_CPPAD@
 WITH_EXPAT = @WITH_EXPAT@
+WITH_MINIZIP = @WITH_MINIZIP@
 WITH_SUNDIALS = @WITH_SUNDIALS@
 WITH_ZLIB = @WITH_ZLIB@
 ZLIB_HOME = @ZLIB_HOME@
@@ -382,11 +384,6 @@ uninstall-am:
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am
 
-
-# This is to ensure that the install target of the Sundials
-# make system is run whenever make all is run. This is needed
-# in order to trigger a complete install, local in the build
-# directory, early in the build process.
 
 $(abs_builddir)/../../expat_install:
 	cd $(EXPAT_DIR) && $(MAKE) $(AM_MAKEFLAGS) install

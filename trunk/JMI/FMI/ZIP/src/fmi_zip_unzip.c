@@ -15,7 +15,7 @@
 */
 
 
-#include "miniunz.h"
+#include "minizip/miniunz.h"
 #include "jm_types.h"
 
 /* Returns 1 if the FMU was successfully unziped. Otherwise 0 is returned */

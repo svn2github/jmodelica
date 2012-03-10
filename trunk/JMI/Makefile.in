@@ -207,6 +207,7 @@ LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MINGW_HOME = @MINGW_HOME@
+MINIZIP_HOME = @MINIZIP_HOME@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -236,6 +237,7 @@ VERSION = @VERSION@
 WITH_CASADI = @WITH_CASADI@
 WITH_CPPAD = @WITH_CPPAD@
 WITH_EXPAT = @WITH_EXPAT@
+WITH_MINIZIP = @WITH_MINIZIP@
 WITH_SUNDIALS = @WITH_SUNDIALS@
 WITH_ZLIB = @WITH_ZLIB@
 ZLIB_HOME = @ZLIB_HOME@
@@ -309,7 +311,7 @@ FMI_ZIP_INC = $(abs_top_srcdir)/JMI/FMI/ZIP/include
 JM_UTIL = $(abs_top_srcdir)/JMI/Util
 THIRDPARTY_FMI_INC = $(abs_top_srcdir)/ThirdParty/FMI
 THIRDPARTY_EXPAT_INC = $(EXPAT_HOME)/include
-THIRDPARTY_MINIZIP = $(abs_top_srcdir)/ThirdParty/minizip
+THIRDPARTY_MINIZIP_INC = $(MINIZIP_HOME)/include
 AUTOMAKE_OPTIONS = foreign
 lib_LTLIBRARIES = libfmixml.la libfmidll_1_0_cs.la libfmidll_1_0_me.la libfmizip.la
 libfmixml_la_SOURCES = $(FMI_XML_SRC)/fmi_xml_model_description.c \
@@ -347,7 +349,7 @@ libfmidll_1_0_me_la_SOURCES = $(FMI_DLL_SRC)/1.0-ME/fmi_dll_1_0_me.c \
 libfmidll_1_0_me_la_CFLAGS = -Wall -std=c89 -pedantic -Wno-unused-function -I$(JM_UTIL) -I$(FMI_DLL_INC) -I$(THIRDPARTY_FMI_INC)
 libfmidll_1_0_me_la_LDFLAGS = -no-undefined -static-libtool-libs                      
 libfmizip_la_SOURCES = $(FMI_ZIP_SRC)/fmi_zip_unzip.c 
-libfmizip_la_CFLAGS = -Wall -std=c89 -pedantic -Wno-unused-function -I$(JM_UTIL) -I$(FMI_ZIP_INC) -I$(THIRDPARTY_MINIZIP)
+libfmizip_la_CFLAGS = -Wall -std=c89 -pedantic -Wno-unused-function -I$(JM_UTIL) -I$(FMI_ZIP_INC) -I$(THIRDPARTY_MINIZIP_INC)
 libfmizip_la_LDFLAGS = -no-undefined -static-libtool-libs                       
 include_HEADERS = $(FMI_XML_INC)/fmi_xml_capabilities.h \
                   $(FMI_XML_INC)/fmi_xml_model_description.h \

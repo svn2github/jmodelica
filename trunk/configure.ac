@@ -216,6 +216,28 @@ AM_CONDITIONAL([WITH_ZLIB],[test "x$with_zlib" != xno])
 AC_SUBST(ZLIB_HOME)
 ZLIB_HOME=$zlib
 
+# Minizip
+AC_ARG_WITH([minizip],
+   [AS_HELP_STRING([--with-minizip],
+     [Minizip installation directory @<:@default=check@:>@])],
+   [minizip=$withval],
+   [with_minizip=no])
+
+AS_IF([test "x$with_minizip" = xno],
+      [minizip="$CURR_DIR/minizip_install"])
+
+AS_IF([test "x$with_minizip" = xno],
+      [with_minizip=automatic])
+
+# Set output variables to be exported to the Makefiles
+AC_SUBST(MINIZIP_HOME)
+AC_SUBST(WITH_MINIZIP)
+
+AM_CONDITIONAL([WITH_MINIZIP],[test "x$with_minizip" != xno])
+
+AC_SUBST(MINIZIP_HOME)
+MINIZIP_HOME=$minizip
+
 AC_ARG_WITH([superlu],
   [AS_HELP_STRING([--with-superlu],
     [SuperLU installation directory @<:@default=check@:>@])],
@@ -379,6 +401,8 @@ AC_CONFIG_SUBDIRS([ThirdParty/Sundials/sundials-2.4.0])
 
 AC_CONFIG_SUBDIRS([ThirdParty/Expat/expat-2.0.1])
 
+AC_CONFIG_SUBDIRS([ThirdParty/minizip/minizip])
+
 AC_CONFIG_FILES([
  Makefile
  ThirdParty/Blas/Makefile
@@ -386,9 +410,9 @@ AC_CONFIG_FILES([
  ThirdParty/Sundials/Makefile
  ThirdParty/Expat/Makefile
  ThirdParty/Zlib/Makefile
+ ThirdParty/minizip/Makefile
  ThirdParty/CasADi/Makefile
  ThirdParty/zlib/Makefile
- ThirdParty/minizip/Makefile
  JMI/src/Makefile
  JMI/Makefile
  docbook/UsersGuide/Makefile

@@ -28,7 +28,7 @@ FMI_ZIP_INC=$(abs_top_srcdir)/JMI/FMI/ZIP/include
 JM_UTIL=$(abs_top_srcdir)/JMI/Util
 THIRDPARTY_FMI_INC=$(abs_top_srcdir)/ThirdParty/FMI
 THIRDPARTY_EXPAT_INC=$(EXPAT_HOME)/include
-THIRDPARTY_MINIZIP=$(abs_top_srcdir)/ThirdParty/minizip
+THIRDPARTY_MINIZIP_INC=$(MINIZIP_HOME)/include
 
 AUTOMAKE_OPTIONS = foreign
 
@@ -76,7 +76,7 @@ libfmidll_1_0_me_la_LDFLAGS = -no-undefined -static-libtool-libs
 
 libfmizip_la_SOURCES = $(FMI_ZIP_SRC)/fmi_zip_unzip.c 
                      
-libfmizip_la_CFLAGS = -Wall -std=c89 -pedantic -Wno-unused-function -I$(JM_UTIL) -I$(FMI_ZIP_INC) -I$(THIRDPARTY_MINIZIP)
+libfmizip_la_CFLAGS = -Wall -std=c89 -pedantic -Wno-unused-function -I$(JM_UTIL) -I$(FMI_ZIP_INC) -I$(THIRDPARTY_MINIZIP_INC)
 
 libfmizip_la_LDFLAGS = -no-undefined -static-libtool-libs                       
          
