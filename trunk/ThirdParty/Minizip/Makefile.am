@@ -1,4 +1,4 @@
-MINIZIP_DIR=Minizip
+MINIZIP_DIR=minizip
 
 $(abs_builddir)/../../minizip_install:
 	cd $(MINIZIP_DIR) && $(MAKE) $(AM_MAKEFLAGS) install
