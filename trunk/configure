@@ -824,7 +824,7 @@ CPP
 CXXCPP'
 ac_subdirs_all='ThirdParty/Sundials/sundials-2.4.0
 ThirdParty/Expat/expat-2.0.1
-ThirdParty/minizip/minizip'
+ThirdParty/Minizip/minizip'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -19650,7 +19650,7 @@ subdirs="$subdirs ThirdParty/Sundials/sundials-2.4.0"
 subdirs="$subdirs ThirdParty/Expat/expat-2.0.1"
 
 
-subdirs="$subdirs ThirdParty/minizip/minizip"
+subdirs="$subdirs ThirdParty/Minizip/minizip"
 
 
 ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Expat/Makefile ThirdParty/Zlib/Makefile ThirdParty/Minizip/Makefile ThirdParty/CasADi/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh jm_tests"

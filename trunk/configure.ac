@@ -401,7 +401,7 @@ AC_CONFIG_SUBDIRS([ThirdParty/Sundials/sundials-2.4.0])
 
 AC_CONFIG_SUBDIRS([ThirdParty/Expat/expat-2.0.1])
 
-AC_CONFIG_SUBDIRS([ThirdParty/minizip/minizip])
+AC_CONFIG_SUBDIRS([ThirdParty/Minizip/minizip])
 
 AC_CONFIG_FILES([
  Makefile
