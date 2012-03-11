@@ -19653,7 +19653,7 @@ subdirs="$subdirs ThirdParty/Expat/expat-2.0.1"
 subdirs="$subdirs ThirdParty/minizip/minizip"
 
 
-ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Expat/Makefile ThirdParty/Zlib/Makefile ThirdParty/minizip/Makefile ThirdParty/CasADi/Makefile ThirdParty/zlib/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh jm_tests"
+ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Expat/Makefile ThirdParty/Zlib/Makefile ThirdParty/Minizip/Makefile ThirdParty/CasADi/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh jm_tests"
 
 
 cat >confcache <<\_ACEOF
@@ -20905,9 +20905,8 @@ do
     "ThirdParty/Sundials/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Sundials/Makefile" ;;
     "ThirdParty/Expat/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Expat/Makefile" ;;
     "ThirdParty/Zlib/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Zlib/Makefile" ;;
-    "ThirdParty/minizip/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/minizip/Makefile" ;;
+    "ThirdParty/Minizip/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Minizip/Makefile" ;;
     "ThirdParty/CasADi/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/CasADi/Makefile" ;;
-    "ThirdParty/zlib/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/zlib/Makefile" ;;
     "JMI/src/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/src/Makefile" ;;
     "JMI/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/Makefile" ;;
     "docbook/UsersGuide/Makefile") CONFIG_FILES="$CONFIG_FILES docbook/UsersGuide/Makefile" ;;

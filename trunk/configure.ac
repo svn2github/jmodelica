@@ -412,7 +412,6 @@ AC_CONFIG_FILES([
  ThirdParty/Zlib/Makefile
  ThirdParty/Minizip/Makefile
  ThirdParty/CasADi/Makefile
- ThirdParty/Zlib/Makefile
  JMI/src/Makefile
  JMI/Makefile
  docbook/UsersGuide/Makefile
