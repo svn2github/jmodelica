@@ -88,6 +88,12 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
+libfmi1_imp_la_LIBADD =
+am_libfmi1_imp_la_OBJECTS = libfmi1_imp_la-fmi_import_util.lo
+libfmi1_imp_la_OBJECTS = $(am_libfmi1_imp_la_OBJECTS)
+libfmi1_imp_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libfmi1_imp_la_CFLAGS) \
+	$(CFLAGS) $(libfmi1_imp_la_LDFLAGS) $(LDFLAGS) -o $@
 libfmidll_1_0_cs_la_LIBADD =
 am_libfmidll_1_0_cs_la_OBJECTS =  \
 	libfmidll_1_0_cs_la-fmi_dll_1_0_cs.lo \
@@ -126,6 +132,15 @@ libfmizip_la_OBJECTS = $(am_libfmizip_la_OBJECTS)
 libfmizip_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libfmizip_la_CFLAGS) \
 	$(CFLAGS) $(libfmizip_la_LDFLAGS) $(LDFLAGS) -o $@
+libjm_util_la_LIBADD =
+am_libjm_util_la_OBJECTS = libjm_util_la-jm_callbacks.lo \
+	libjm_util_la-jm_named_ptr.lo \
+	libjm_util_la-jm_templates_inst.lo \
+	libjm_util_la-jm_wc_match.lo
+libjm_util_la_OBJECTS = $(am_libjm_util_la_OBJECTS)
+libjm_util_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libjm_util_la_CFLAGS) \
+	$(CFLAGS) $(libjm_util_la_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -139,12 +154,13 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libfmidll_1_0_cs_la_SOURCES) \
+SOURCES = $(libfmi1_imp_la_SOURCES) $(libfmidll_1_0_cs_la_SOURCES) \
 	$(libfmidll_1_0_me_la_SOURCES) $(libfmixml_la_SOURCES) \
-	$(libfmizip_la_SOURCES)
-DIST_SOURCES = $(libfmidll_1_0_cs_la_SOURCES) \
-	$(libfmidll_1_0_me_la_SOURCES) $(libfmixml_la_SOURCES) \
-	$(libfmizip_la_SOURCES)
+	$(libfmizip_la_SOURCES) $(libjm_util_la_SOURCES)
+DIST_SOURCES = $(libfmi1_imp_la_SOURCES) \
+	$(libfmidll_1_0_cs_la_SOURCES) $(libfmidll_1_0_me_la_SOURCES) \
+	$(libfmixml_la_SOURCES) $(libfmizip_la_SOURCES) \
+	$(libjm_util_la_SOURCES)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -303,17 +319,20 @@ top_srcdir = @top_srcdir@
 FMI_XML_SRC = FMI/XML/src
 FMI_DLL_SRC = FMI/DLL/src
 FMI_ZIP_SRC = FMI/ZIP/src
+FMI_IMP_SRC = FMI/Import
+JM_UTIL_SRC = Util
 
 # Paths relative to the JModelica.org repo
 FMI_XML_INC = $(abs_top_srcdir)/JMI/FMI/XML/include
 FMI_DLL_INC = $(abs_top_srcdir)/JMI/FMI/DLL/include
 FMI_ZIP_INC = $(abs_top_srcdir)/JMI/FMI/ZIP/include
+FMI_IMP_INC = $(abs_top_srcdir)/JMI/FMI/Import/include
 JM_UTIL = $(abs_top_srcdir)/JMI/Util
 THIRDPARTY_FMI_INC = $(abs_top_srcdir)/ThirdParty/FMI
 THIRDPARTY_EXPAT_INC = $(EXPAT_HOME)/include
 THIRDPARTY_MINIZIP_INC = $(MINIZIP_HOME)/include
 AUTOMAKE_OPTIONS = foreign
-lib_LTLIBRARIES = libfmixml.la libfmidll_1_0_cs.la libfmidll_1_0_me.la libfmizip.la
+lib_LTLIBRARIES = libfmixml.la libfmidll_1_0_cs.la libfmidll_1_0_me.la libfmizip.la libjm_util.la libfmi1_imp.la
 libfmixml_la_SOURCES = $(FMI_XML_SRC)/fmi_xml_model_description.c \
                        $(FMI_XML_SRC)/fmi_xml_unit_impl.h \
                        $(FMI_XML_SRC)/fmi_xml_model_description_impl.h \
@@ -351,6 +370,29 @@ libfmidll_1_0_me_la_LDFLAGS = -no-undefined -static-libtool-libs
 libfmizip_la_SOURCES = $(FMI_ZIP_SRC)/fmi_zip_unzip.c 
 libfmizip_la_CFLAGS = -Wall -std=c89 -pedantic -Wno-unused-function -I$(JM_UTIL) -I$(FMI_ZIP_INC) -I$(THIRDPARTY_MINIZIP_INC)
 libfmizip_la_LDFLAGS = -no-undefined -static-libtool-libs                       
+libfmi1_imp_la_SOURCES = $(FMI_IMP_SRC)/src/fmi_import_util.c \
+                         $(FMI_IMP_SRC)/include/fmi_import_util.h
+
+libfmi1_imp_la_CFLAGS = -Wall -std=c89 -pedantic -Wno-unused-function -I$(THIRDPARTY_FMI_INC) -I$(FMI_DLL_INC) -I$(FMI_IMP_INC) -I$(FMI_ZIP_INC) -I$(FMI_XML_INC) -I$(JM_UTIL)
+libfmi1_imp_la_LDFLAGS = -no-undefined -static-libtool-libs             
+libjm_util_la_SOURCES = $(JM_UTIL_SRC)/fmi_functions.h \
+                        $(JM_UTIL_SRC)/fmi_types.h \
+                        $(JM_UTIL_SRC)/jm_callbacks.c \
+                        $(JM_UTIL_SRC)/jm_callbacks.h \
+                        $(JM_UTIL_SRC)/jm_named_ptr.c \
+                        $(JM_UTIL_SRC)/jm_named_ptr.h \
+                        $(JM_UTIL_SRC)/jm_stack.h \
+                        $(JM_UTIL_SRC)/jm_stack_template.h \
+                        $(JM_UTIL_SRC)/jm_string_set.h \
+                        $(JM_UTIL_SRC)/jm_templates_inst.c \
+                        $(JM_UTIL_SRC)/jm_types.h \
+                        $(JM_UTIL_SRC)/jm_vector_template.h \
+                        $(JM_UTIL_SRC)/jm_vector.h \
+                        $(JM_UTIL_SRC)/jm_wc_match.c \
+                        $(JM_UTIL_SRC)/jm_wc_match.h
+
+libjm_util_la_CFLAGS = -Wall -std=c89 -pedantic -Wno-unused-function
+libjm_util_la_LDFLAGS = -no-undefined -static-libtool-libs  
 include_HEADERS = $(FMI_XML_INC)/fmi_xml_capabilities.h \
                   $(FMI_XML_INC)/fmi_xml_model_description.h \
                   $(FMI_XML_INC)/fmi_xml_unit.h \
@@ -430,6 +472,8 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
+libfmi1_imp.la: $(libfmi1_imp_la_OBJECTS) $(libfmi1_imp_la_DEPENDENCIES) 
+	$(libfmi1_imp_la_LINK) -rpath $(libdir) $(libfmi1_imp_la_OBJECTS) $(libfmi1_imp_la_LIBADD) $(LIBS)
 libfmidll_1_0_cs.la: $(libfmidll_1_0_cs_la_OBJECTS) $(libfmidll_1_0_cs_la_DEPENDENCIES) 
 	$(libfmidll_1_0_cs_la_LINK) -rpath $(libdir) $(libfmidll_1_0_cs_la_OBJECTS) $(libfmidll_1_0_cs_la_LIBADD) $(LIBS)
 libfmidll_1_0_me.la: $(libfmidll_1_0_me_la_OBJECTS) $(libfmidll_1_0_me_la_DEPENDENCIES) 
@@ -438,6 +482,8 @@ libfmixml.la: $(libfmixml_la_OBJECTS) $(libfmixml_la_DEPENDENCIES)
 	$(libfmixml_la_LINK) -rpath $(libdir) $(libfmixml_la_OBJECTS) $(libfmixml_la_LIBADD) $(LIBS)
 libfmizip.la: $(libfmizip_la_OBJECTS) $(libfmizip_la_DEPENDENCIES) 
 	$(libfmizip_la_LINK) -rpath $(libdir) $(libfmizip_la_OBJECTS) $(libfmizip_la_LIBADD) $(LIBS)
+libjm_util.la: $(libjm_util_la_OBJECTS) $(libjm_util_la_DEPENDENCIES) 
+	$(libjm_util_la_LINK) -rpath $(libdir) $(libjm_util_la_OBJECTS) $(libjm_util_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -445,6 +491,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmi1_imp_la-fmi_import_util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmidll_1_0_cs_la-fmi_dll_1_0_cs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmidll_1_0_cs_la-fmi_dll_common.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmidll_1_0_me_la-fmi_dll_1_0_me.Plo@am__quote@
@@ -461,6 +508,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmixml_la-fmi_xml_variable_list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmixml_la-fmi_xml_vendor_annotations.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmizip_la-fmi_zip_unzip.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjm_util_la-jm_callbacks.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjm_util_la-jm_named_ptr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjm_util_la-jm_templates_inst.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjm_util_la-jm_wc_match.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -482,6 +533,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+libfmi1_imp_la-fmi_import_util.lo: $(FMI_IMP_SRC)/src/fmi_import_util.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi1_imp_la_CFLAGS) $(CFLAGS) -MT libfmi1_imp_la-fmi_import_util.lo -MD -MP -MF $(DEPDIR)/libfmi1_imp_la-fmi_import_util.Tpo -c -o libfmi1_imp_la-fmi_import_util.lo `test -f '$(FMI_IMP_SRC)/src/fmi_import_util.c' || echo '$(srcdir)/'`$(FMI_IMP_SRC)/src/fmi_import_util.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfmi1_imp_la-fmi_import_util.Tpo $(DEPDIR)/libfmi1_imp_la-fmi_import_util.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(FMI_IMP_SRC)/src/fmi_import_util.c' object='libfmi1_imp_la-fmi_import_util.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi1_imp_la_CFLAGS) $(CFLAGS) -c -o libfmi1_imp_la-fmi_import_util.lo `test -f '$(FMI_IMP_SRC)/src/fmi_import_util.c' || echo '$(srcdir)/'`$(FMI_IMP_SRC)/src/fmi_import_util.c
 
 libfmidll_1_0_cs_la-fmi_dll_1_0_cs.lo: $(FMI_DLL_SRC)/1.0-CS/fmi_dll_1_0_cs.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmidll_1_0_cs_la_CFLAGS) $(CFLAGS) -MT libfmidll_1_0_cs_la-fmi_dll_1_0_cs.lo -MD -MP -MF $(DEPDIR)/libfmidll_1_0_cs_la-fmi_dll_1_0_cs.Tpo -c -o libfmidll_1_0_cs_la-fmi_dll_1_0_cs.lo `test -f '$(FMI_DLL_SRC)/1.0-CS/fmi_dll_1_0_cs.c' || echo '$(srcdir)/'`$(FMI_DLL_SRC)/1.0-CS/fmi_dll_1_0_cs.c
@@ -594,6 +652,34 @@ libfmizip_la-fmi_zip_unzip.lo: $(FMI_ZIP_SRC)/fmi_zip_unzip.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(FMI_ZIP_SRC)/fmi_zip_unzip.c' object='libfmizip_la-fmi_zip_unzip.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmizip_la_CFLAGS) $(CFLAGS) -c -o libfmizip_la-fmi_zip_unzip.lo `test -f '$(FMI_ZIP_SRC)/fmi_zip_unzip.c' || echo '$(srcdir)/'`$(FMI_ZIP_SRC)/fmi_zip_unzip.c
+
+libjm_util_la-jm_callbacks.lo: $(JM_UTIL_SRC)/jm_callbacks.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjm_util_la_CFLAGS) $(CFLAGS) -MT libjm_util_la-jm_callbacks.lo -MD -MP -MF $(DEPDIR)/libjm_util_la-jm_callbacks.Tpo -c -o libjm_util_la-jm_callbacks.lo `test -f '$(JM_UTIL_SRC)/jm_callbacks.c' || echo '$(srcdir)/'`$(JM_UTIL_SRC)/jm_callbacks.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjm_util_la-jm_callbacks.Tpo $(DEPDIR)/libjm_util_la-jm_callbacks.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(JM_UTIL_SRC)/jm_callbacks.c' object='libjm_util_la-jm_callbacks.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjm_util_la_CFLAGS) $(CFLAGS) -c -o libjm_util_la-jm_callbacks.lo `test -f '$(JM_UTIL_SRC)/jm_callbacks.c' || echo '$(srcdir)/'`$(JM_UTIL_SRC)/jm_callbacks.c
+
+libjm_util_la-jm_named_ptr.lo: $(JM_UTIL_SRC)/jm_named_ptr.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjm_util_la_CFLAGS) $(CFLAGS) -MT libjm_util_la-jm_named_ptr.lo -MD -MP -MF $(DEPDIR)/libjm_util_la-jm_named_ptr.Tpo -c -o libjm_util_la-jm_named_ptr.lo `test -f '$(JM_UTIL_SRC)/jm_named_ptr.c' || echo '$(srcdir)/'`$(JM_UTIL_SRC)/jm_named_ptr.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjm_util_la-jm_named_ptr.Tpo $(DEPDIR)/libjm_util_la-jm_named_ptr.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(JM_UTIL_SRC)/jm_named_ptr.c' object='libjm_util_la-jm_named_ptr.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjm_util_la_CFLAGS) $(CFLAGS) -c -o libjm_util_la-jm_named_ptr.lo `test -f '$(JM_UTIL_SRC)/jm_named_ptr.c' || echo '$(srcdir)/'`$(JM_UTIL_SRC)/jm_named_ptr.c
+
+libjm_util_la-jm_templates_inst.lo: $(JM_UTIL_SRC)/jm_templates_inst.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjm_util_la_CFLAGS) $(CFLAGS) -MT libjm_util_la-jm_templates_inst.lo -MD -MP -MF $(DEPDIR)/libjm_util_la-jm_templates_inst.Tpo -c -o libjm_util_la-jm_templates_inst.lo `test -f '$(JM_UTIL_SRC)/jm_templates_inst.c' || echo '$(srcdir)/'`$(JM_UTIL_SRC)/jm_templates_inst.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjm_util_la-jm_templates_inst.Tpo $(DEPDIR)/libjm_util_la-jm_templates_inst.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(JM_UTIL_SRC)/jm_templates_inst.c' object='libjm_util_la-jm_templates_inst.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjm_util_la_CFLAGS) $(CFLAGS) -c -o libjm_util_la-jm_templates_inst.lo `test -f '$(JM_UTIL_SRC)/jm_templates_inst.c' || echo '$(srcdir)/'`$(JM_UTIL_SRC)/jm_templates_inst.c
+
+libjm_util_la-jm_wc_match.lo: $(JM_UTIL_SRC)/jm_wc_match.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjm_util_la_CFLAGS) $(CFLAGS) -MT libjm_util_la-jm_wc_match.lo -MD -MP -MF $(DEPDIR)/libjm_util_la-jm_wc_match.Tpo -c -o libjm_util_la-jm_wc_match.lo `test -f '$(JM_UTIL_SRC)/jm_wc_match.c' || echo '$(srcdir)/'`$(JM_UTIL_SRC)/jm_wc_match.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjm_util_la-jm_wc_match.Tpo $(DEPDIR)/libjm_util_la-jm_wc_match.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(JM_UTIL_SRC)/jm_wc_match.c' object='libjm_util_la-jm_wc_match.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjm_util_la_CFLAGS) $(CFLAGS) -c -o libjm_util_la-jm_wc_match.lo `test -f '$(JM_UTIL_SRC)/jm_wc_match.c' || echo '$(srcdir)/'`$(JM_UTIL_SRC)/jm_wc_match.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

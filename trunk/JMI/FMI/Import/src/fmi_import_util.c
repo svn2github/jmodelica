@@ -38,7 +38,8 @@
 
 #include "fmi_import_util.h"
 #include "fmi_functions.h"
-#include "stdlib.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 char* fmi_import_get_dll_path(const char* fmu_unzipped_path, const char* model_identifier, fmiCallbackFunctions callBackFunctions)
 {
@@ -53,7 +54,8 @@ char* fmi_import_get_dll_path(const char* fmu_unzipped_path, const char* model_i
 
 	dll_path = callBackFunctions.allocateMemory(len, sizeof(char));
 	if (dll_path == NULL) {
-		callBackFunctions.logger(NULL, "", fmiFatal, "", "%s", strerror(errno));
+		/* TODO MAKE SURE THIS LINE COMPILES */
+		/*callBackFunctions.logger(NULL, "", fmiFatal, "", "%s", strerror(errno));*/
 		return NULL;
 	}
 
@@ -71,7 +73,8 @@ char* fmi_import_get_model_description_path(const char* fmu_unzipped_path, fmiCa
 
 	model_description_path = callBackFunctions.allocateMemory(len, sizeof(char));
 	if (model_description_path == NULL) {
-		callBackFunctions.logger(NULL, "", fmiFatal, "", "%s", strerror(errno));
+		/* TODO MAKE SURE THIS LINE COMPILES */
+		/*callBackFunctions.logger(NULL, "", fmiFatal, "", "%s", strerror(errno));*/
 		return NULL;
 	}
 
