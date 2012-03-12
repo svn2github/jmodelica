@@ -160,8 +160,10 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "external"      { return newSymbol(Terminals.EXTERNAL); }
   
   
-  "public"        { return newSymbol(Terminals.PUBLIC); }
-  "protected"     { return newSymbol(Terminals.PROTECTED); }
+  "public"        { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext(), yycolumn);
+	  				return newSymbol(Terminals.PUBLIC); }
+  "protected"     { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext(), yycolumn);
+	  				return newSymbol(Terminals.PROTECTED); }
   
   "extends"       { return newSymbol(Terminals.EXTENDS); }
   "constrainedby" { return newSymbol(Terminals.CONSTRAINEDBY); }

@@ -545,92 +545,15 @@ aspect FormattedPrint {
 	    if (hasReplaceable()) {
 	    	getReplaceable().doPrettyPrintFormatted(printer, printStream);
 	    }
-	    
 	    getRestriction().doPrettyPrintFormatted(printer, printStream);
 	    getName().doPrettyPrintFormatted(printer, printStream);
 	    if (hasStringComment()) {
 	    	getStringComment().doPrettyPrintFormatted(printer, printStream);
 	    }
-
-	    /*getExtendsClauseShortClass().prettyPrintFormatted(printer, printStream);
-	    if (hasConstrainingClause()) {
-	    	getConstrainingClause().prettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasConstrainingClauseComment()) {
-	    	getConstrainingClauseComment().prettyPrintFormatted(printer, printStream);
-	    }*/
 	    
-	    for (ImportClause importClause : getImports()) {
-	    	importClause.doPrettyPrintFormatted(printer, printStream);
-	    }
-	    for (ExtendsClause superClass : getSupers()) {
-	    	superClass.doPrettyPrintFormatted(printer, printStream);
-	    }
-	    
-	    LinkedList<ClassDecl> publicClassDecls = new LinkedList<ClassDecl>();
-	    LinkedList<ClassDecl> protectedClassDecls = new LinkedList<ClassDecl>();
-	    for (ClassDecl classDecl : getClassDecls()) {
-	    	if (((BaseClassDecl) classDecl).isPublic()) {
-	    		publicClassDecls.add(classDecl);
-	    	} else if (((BaseClassDecl) classDecl).isProtected()) {
-	    		protectedClassDecls.add(classDecl);
-	    	}
-	    }
-	    if (!publicClassDecls.isEmpty() && !protectedClassDecls.isEmpty()) {
-	    	printStream.print("public\n");
-	    }
-	    for (ClassDecl publicClassDecl : publicClassDecls) {
-	    	publicClassDecl.doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (!protectedClassDecls.isEmpty()) {
-	    	printStream.print("protected\n");
-	    }
-	    for (ClassDecl protectedClassDecl : protectedClassDecls) {
-	    	protectedClassDecl.doPrettyPrintFormatted(printer, printStream);
-	    }
-
-	    LinkedList<ComponentDecl> publicComponentDecls = new LinkedList<ComponentDecl>();
-	    LinkedList<ComponentDecl> protectedComponentDecls = new LinkedList<ComponentDecl>();
-	    for (ComponentDecl componentDecl : getComponentDecls()) {
-	    	if (componentDecl.isPublic()) {
-	    		publicComponentDecls.add(componentDecl);
-	    	} else if (componentDecl.isProtected()) {
-	    		protectedComponentDecls.add(componentDecl);
-	    	}
-	    }
-	    if (!publicComponentDecls.isEmpty() && !protectedClassDecls.isEmpty()) {
-	    	printStream.print("public\n");
-	    }
-	    for (ComponentDecl publicComponentDecl : publicComponentDecls) {
-	    	publicComponentDecl.doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (!protectedComponentDecls.isEmpty()) {
-	    	printStream.print("protected\n");
-	    }
-	    for (ComponentDecl protectedComponentDecl : protectedComponentDecls) {
-	    	protectedComponentDecl.doPrettyPrintFormatted(printer, printStream);
-	    }
-
-	    if (getNumEquation() > 0) {
-	    	boolean lastWasInitial = !getEquation(0).isInitial();
-	    	for (AbstractEquation equation : getEquations()) {
-	    		if (lastWasInitial != equation.isInitial()) {
-	    			lastWasInitial = !lastWasInitial;
-	    			if (lastWasInitial) {
-	    				printStream.print("initial equation");
-	    			} else {
-	    				printStream.print("equation");
-	    			}
-	    		}
-	    		equation.doPrettyPrintFormatted(printer, printStream);
-	    	}
-	    }
-	    for (Annotation annotation : getAnnotations()) {
-	    	printStream.print(annotation.preFormatting);
-			annotation.prettyPrintFormattedHelper(printer, printStream);
-	    	printStream.print(";");
-	    	printStream.print(annotation.postFormatting);
-	    }
+	    for (Clause clause : originalComposition.getClauses()) {
+    		clause.doPrettyPrintFormatted(printer, printStream);
+    	}
 
 	    getEndDecl().doPrettyPrintFormatted(printer, printStream);
 	}
@@ -708,6 +631,28 @@ aspect FormattedPrint {
 		getComponentDecl().doPrettyPrintFormatted(printer, printStream);
 	}
 	
+	void EquationClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		if (getNumAbstractEquation() > 0 && getAbstractEquation(0).isInitial()) {
+			printStream.print("initial ");
+		}
+		printStream.print("equation");
+
+		for (AbstractEquation abstractEquation : getAbstractEquations()) {
+			abstractEquation.doPrettyPrintFormatted(printer, printStream);
+		}
+	}
+	
+	void Algorithm.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		if (hasInitial()) {
+			printStream.print("initial ");
+		}
+		printStream.print("algorithm");
+		
+		for (Statement statement : getStatements()) {
+			statement.doPrettyPrintFormatted(printer, printStream);
+		}
+	}
+	
 	void Equation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getLeft().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("=");
@@ -724,6 +669,27 @@ aspect FormattedPrint {
 		printStream.print(")");
 		getComment().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(";");
+	}
+	
+	void EquationAnnotation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(getAnnotation().preFormatting);
+		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(";");
+		printStream.print(getAnnotation().postFormatting);
+	}
+	
+	void ElementAnnotation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(getAnnotation().preFormatting);
+		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(";");
+		printStream.print(getAnnotation().postFormatting);
+	}
+	
+	void AlgorithmAnnotation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(getAnnotation().preFormatting);
+		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(";");
+		printStream.print(getAnnotation().postFormatting);
 	}
 	
 	eq ExpandableConnector.toString() = "expandable connector";

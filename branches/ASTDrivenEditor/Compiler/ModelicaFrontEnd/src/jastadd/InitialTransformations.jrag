@@ -173,10 +173,14 @@
     	return l;
     }
     
+    Composition FullClassDecl.originalComposition;
+    
     /**
      * \brief Extract elements from Composition and add to a FullClassDecl.
      */
     public void Composition.extractElementsTo(FullClassDecl fcd) {
+    	fcd.originalComposition = this;
+
         for (Clause cl : getClauses()) 
 			cl.addToFullClassDecl(fcd);
         
