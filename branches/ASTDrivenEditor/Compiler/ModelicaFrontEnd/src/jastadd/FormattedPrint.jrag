@@ -362,6 +362,22 @@ aspect FormattedPrint {
 		prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(postFormatting);
 	}
+	
+	public boolean Exp.hasParenthesis = false;
+
+	void Exp.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+
+		if (hasParenthesis) {
+			printStream.print("(");
+			prettyPrintFormattedHelper(printer, printStream);
+			printStream.print(")");
+		} else {
+			prettyPrintFormattedHelper(printer, printStream);
+		}
+
+		printStream.print(postFormatting);
+	}
 
 	void BaseNode.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		for (ASTNode childNode: this) {
@@ -668,6 +684,21 @@ aspect FormattedPrint {
 		getConnector2().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(")");
 		getComment().doPrettyPrintFormatted(printer, printStream);
+		printStream.print(";");
+	}
+	
+	void FunctionCallEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		if (getNumLeft() > 0) {
+			printStream.print("(");
+			for (int i = 0 ; i < getNumLeft(); i++) {
+				getLeft(i).doPrettyPrintFormatted(printer, printStream);
+				if (i + 1 < getNumLeft()) {
+					printStream.print(",");
+				}
+			}
+			printStream.print(") = ");
+		}
+		getCall().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(";");
 	}
 	
