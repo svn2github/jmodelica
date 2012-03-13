@@ -189,6 +189,32 @@ end TransformCanonicalTests.TransformCanonicalTest6;
     parameter Real p12 = log(1);
     parameter Real p13 = log10(1);   	
   end TransformCanonicalTest6;
+  
+  
+  model TransformCanonicalTest7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="TransformCanonicalTest7",
+         description="Provokes a former bug that was due to tree traversals befor the flush after scalarization",
+         flatModel="
+fclass TransformCanonicalTests.TransformCanonicalTest7
+ parameter Integer p1 = 2 /* 2 */;
+ parameter Integer p2;
+ Real x[1];
+ Real y;
+parameter equation
+ p2 = p1;
+equation
+ x[1] = 1;
+ y = 2;
+end TransformCanonicalTests.TransformCanonicalTest7;
+")})));
+
+	  parameter Integer p1 = 2;
+	  parameter Integer p2 = p1;
+	  Real x[p2] = 1:p2;
+	  Real y = x[p2]; 
+  end TransformCanonicalTest7;
 
 
   model EvalTest1
@@ -3171,16 +3197,92 @@ end TransformCanonicalTests.IfEqu16;
           z1 + z2 = x + y;
       else
           x = 4;
-		  if time < 3 then
+          if time < 3 then
               y = 2;
               z1 = y * x;
           else
               y = x + 2;
-			  z2 = 4 * x;
-	      end if;
+              z2 = 4 * x;
+          end if;
           z1 + z2 = x - y;
       end if;
   end IfEqu16;
+
+
+  model IfEqu17
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu17",
+         description="Check that if equations with function call equations are eliminated",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu17
+ Real y1;
+ Real y2;
+ parameter Boolean p = false /* false */;
+equation
+ (y1, y2) = TransformCanonicalTests.IfEqu17.f();
+
+ function TransformCanonicalTests.IfEqu17.f
+  output Real x1;
+  output Real x2;
+ algorithm
+  x1 := 1;
+  x2 := 2;
+  return;
+ end TransformCanonicalTests.IfEqu17.f;
+end TransformCanonicalTests.IfEqu17;
+")})));
+
+      function f
+          output Real x1 = 1;
+          output Real x2 = 2;
+	  algorithm
+      end f;
+      
+      Real y1;
+      Real y2;
+      parameter Boolean p = false; 
+  equation
+      if p then
+          y1 = 3;
+          y2 = 3;
+      else
+          (y1, y2) = f();
+      end if;
+  end IfEqu17;
+
+
+  model IfEqu18
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="IfEqu18",
+         description="Check that if equations with function call equations and non-param tests are rejected",
+         errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Compliance error at line 3263, column 15:
+  Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Compliance error at line 3265, column 7:
+  If equations that has non-parameter tests and contains function calls using multiple outputs are not supported
+")})));
+
+      function f
+          output Real x1 = 1;
+          output Real x2 = 2;
+      algorithm
+      end f;
+      
+      Real y1;
+      Real y2;
+  equation
+      if time > 1 then
+          y1 = 3;
+          y2 = 3;
+      else
+          (y1, y2) = f();
+      end if;
+  end IfEqu18;
 
 
 

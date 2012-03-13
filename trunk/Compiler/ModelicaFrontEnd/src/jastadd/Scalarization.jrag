@@ -46,7 +46,6 @@ aspect Scalarization {
 		scalarizeAllVarDependent(vars);
 		replaceScalarizedVars(vars, alias_vars);
 		scalarizeFuncs();
-		scalariztionExtra();
 		scalarized = true;
 		scalarizationCleanup();
 	}
@@ -88,10 +87,6 @@ aspect Scalarization {
 		funcs.clearScalarized();  // Functions need scalarized = false in FQNames
 	}
 	
-	protected void FClass.scalariztionExtra() {
-		evaluateArraySubscripts();
-	}
-	
 	protected void FClass.evaluateArraySubscripts() {
 		clearFlatNameBinding();
 		getFEquationBlock(0).makeSubscriptsLiteral();
@@ -100,8 +95,9 @@ aspect Scalarization {
 	}
 	
 	protected void FClass.scalarizationCleanup() {
+		flush();  // Must flush before traversing
+		evaluateArraySubscripts();
 		enableStreamsRewrite();
-		flush();		
 	}
 	
 	protected static List<FAbstractEquation> FClass.scalarizeEquationList(

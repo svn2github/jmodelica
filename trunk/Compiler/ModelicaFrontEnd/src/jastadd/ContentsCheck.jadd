@@ -145,11 +145,15 @@ aspect ContentCheck {
 		if (isTopWhenIfEquation()) {
 			boolean inWhen = inWhen();
 			boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
-			if (!balanced) {
+			boolean functionCallEqu = hasFunctionCallEquations(); 
+			if (!balanced || functionCallEqu) {
 				if (hasOnlyParamTests())
 					setEliminateOnParamTest();
-				else
+				else if (!balanced)
 					error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
+				else
+					compliance("If equations that has non-parameter tests and contains " + 
+							"function calls using multiple outputs are not supported");
 			}
 		}
 	}
@@ -184,6 +188,23 @@ aspect ContentCheck {
 	
 	syn boolean FAbstractEquation.isAssignmentEqn() = false;
 	eq FEquation.isAssignmentEqn()                  = getLeft().isAccess();
+	
+	syn boolean FAbstractEquation.hasFunctionCallEquations() = false;
+	eq FFunctionCallEquation.hasFunctionCallEquations()      = true;
+	eq FIfWhenEquation.hasFunctionCallEquations()            = 
+		super.hasFunctionCallEquations() || (hasElse() && getElse().hasFunctionCallEquations());
+	eq FIfWhenElseEquation.hasFunctionCallEquations() {
+		for (FAbstractEquation equ : getFAbstractEquations())
+			if (equ.hasFunctionCallEquations())
+				return true;
+		return false;
+	}
+	eq FForClauseE.hasFunctionCallEquations() {
+		for (FAbstractEquation equ : getFAbstractEquations())
+			if (equ.hasFunctionCallEquations())
+				return true;
+		return false;
+	}
 	
 	
 	public void InstMPackage.contentCheck() {
