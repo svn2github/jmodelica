@@ -78,7 +78,6 @@ aspect TransformCanonical {
 		aliasEliminationIfSet();
 		addFDerivativeVariables();
 		addFPreVariables();
-		System.out.println(prettyPrint(""));
         enableIfEquationRewrite();
 		enableWhenEquationRewrite();
 		root().flushAllRecursive();
@@ -2843,12 +2842,6 @@ aspect MapWhenClauses{
 			n.enableWhenEquationRewrite();
 	}
 
-	public void FEquation.enableWhenEquationRewrite() {
-		System.out.println("RIGHT: " + getRight().prettyPrint(""));
-		System.out.println("LEFT: " + getLeft().prettyPrint(""));
-		for (ASTNode n : this)
-			n.enableWhenEquationRewrite();
-	}
 	
 	public void FWhenEquation.enableWhenEquationRewrite() {
 		super.enableWhenEquationRewrite();
