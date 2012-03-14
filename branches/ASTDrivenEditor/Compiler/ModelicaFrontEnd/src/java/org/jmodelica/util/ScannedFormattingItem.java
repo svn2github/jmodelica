@@ -47,18 +47,18 @@ public class ScannedFormattingItem extends FormattingItem {
 	}
 	
 	protected boolean endsWithLineBreak() {
-		return (type == Type.LINE_BREAK);
+		return (type == Type.LINE_BREAK || (type == Type.COMMENT && data.endsWith("\n")));
 	}
-	
+
 	@Override
 	public RelativePosition getFrontRelativePosition(int line, int column) {
-		if (endLine < line || (endLine == line && endColumn + 1 < column)) {
-			return RelativePosition.BEFORE;
-		} else if (endLine == line && endColumn + 1 == column) {
+		if ((endLine == line && endColumn + 1 == column) || (column == 1 && endLine + 1 == line && endsWithLineBreak())) {
 			return RelativePosition.FRONT_ADJACENT;
+		} else if (endLine > line || (endLine == line && endColumn + 1 > column)) {
+			return RelativePosition.AFTER;
 		}
-
-		return RelativePosition.AFTER;
+		
+		return RelativePosition.BEFORE;
 	}
 	
 	@Override
