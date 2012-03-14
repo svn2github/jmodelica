@@ -378,6 +378,27 @@ aspect FormattedPrint {
 
 		printStream.print(postFormatting);
 	}
+	
+	void AbstractEquation.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(";");
+		printStream.print(postFormatting);
+	}
+	
+	void EquationAnnotation.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(getAnnotation().preFormatting);
+		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(";");
+		printStream.print(getAnnotation().postFormatting);
+	}
+	
+	void Statement.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(";");
+		printStream.print(postFormatting);
+	}
 
 	void BaseNode.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		for (ASTNode childNode: this) {
@@ -491,9 +512,7 @@ aspect FormattedPrint {
     void ArrayAccess.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print(name());
     	if (hasArraySubscripts()) {
-    		printStream.print("[");
     		getArraySubscripts().doPrettyPrintFormatted(printer, printStream);
-    		printStream.print("]");
     	}
     }
     
@@ -504,9 +523,18 @@ aspect FormattedPrint {
     }
     
     void ArraySubscripts.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	for (Subscript subscript : getSubscripts()) {
-    		subscript.doPrettyPrintFormatted(printer, printStream);
+    	if (getNumSubscript() == 0) {
+    		return;
     	}
+
+    	printStream.print("[");
+    	for (int i = 0; i < getNumSubscript(); i++) {
+    		getSubscript(i).doPrettyPrintFormatted(printer, printStream);
+    		if (i + 1 < getNumSubscript()) {
+    			printStream.print(",");
+    		}
+    	}
+    	printStream.print("]");
     }
     
     void ArrayConstructor.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -514,6 +542,28 @@ aspect FormattedPrint {
     	getFunctionArguments().doPrettyPrintFormatted(printer, printStream);
     	printStream.print("}");
     }
+    
+    void Matrix.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+    	printStream.print("[");
+    	for (int i = 0; i < getNumRow(); i++) {
+    		getRow(i).doPrettyPrintFormatted(printer, printStream);
+
+    		if (i + 1 < getNumRow()) {
+    			printStream.print(";");
+    		}
+    	}
+    	printStream.print("]");
+    }
+    
+    void MatrixRow.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+    	for (int i = 0; i < getNumExp(); i++) {
+    		getExp(i).doPrettyPrintFormatted(printer, printStream);
+
+    		if (i + 1 < getNumExp()) {
+    			printStream.print(",");
+    		}
+    	}
+    }    
 
     void ClassModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
     	printStream.print("(");
@@ -669,11 +719,68 @@ aspect FormattedPrint {
 		}
 	}
 	
+	void BreakStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("break");
+	}
+	
+	void ReturnStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("return");
+	}
+	
+	void ForStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("for ");
+		for (int i = 0; i < getNumForIndex(); i++) {
+			getForIndex(i).getForIndexDecl().getName().doPrettyPrintFormatted(printer, printStream);
+			if (getForIndex(i).hasExp()) {
+				printStream.print("in");
+				getForIndex(i).getExp().doPrettyPrintFormatted(printer, printStream);
+			}
+			if (i + 1 < getNumForIndex()) {
+				printStream.print(",");
+			}
+		}
+		printStream.print(" loop");
+		for (Statement statement : getForStmts()) {
+			statement.doPrettyPrintFormatted(printer, printStream);
+		}
+		printStream.print("end for");
+	}
+	
+	void IfStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("if");
+		for (int i = 0; i < getNumIfWhenClause(); i++) {
+			getIfWhenClause(i).doPrettyPrintFormatted(printer, printStream);
+			if (i + 1 < getNumIfWhenClause()) {
+				printStream.print("elseif");
+			}
+		}
+		if (getNumElseStmt() > 0) {
+			printStream.print("else");
+			for (Statement elseStatement : getElseStmts()) {
+				elseStatement.doPrettyPrintFormatted(printer, printStream);
+			}
+		}
+		printStream.print("end if");
+	}
+	
+	void IfClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		getTest().doPrettyPrintFormatted(printer, printStream);
+		printStream.print("then");
+		for (Statement statement : getStatements()) {
+			statement.doPrettyPrintFormatted(printer, printStream);
+		}
+	}
+	
+	void AssignStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		getLeft().doPrettyPrintFormatted(printer, printStream);
+		printStream.print(":=");
+		getRight().doPrettyPrintFormatted(printer, printStream);
+	}
+	
 	void Equation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getLeft().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("=");
 		getRight().doPrettyPrintFormatted(printer, printStream);
-		printStream.print(";");
 	}
 	
 	void ConnectClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -684,7 +791,6 @@ aspect FormattedPrint {
 		getConnector2().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(")");
 		getComment().doPrettyPrintFormatted(printer, printStream);
-		printStream.print(";");
 	}
 	
 	void FunctionCallEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -699,14 +805,81 @@ aspect FormattedPrint {
 			printStream.print(") = ");
 		}
 		getCall().doPrettyPrintFormatted(printer, printStream);
-		printStream.print(";");
 	}
 	
-	void EquationAnnotation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-		printStream.print(getAnnotation().preFormatting);
-		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
-		printStream.print(";");
-		printStream.print(getAnnotation().postFormatting);
+	void ForClauseE.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("for ");
+		for (int i = 0; i < getNumForIndex(); i++) {
+			/** TODO: Create method for ForIndex or something instead. */
+			getForIndex(i).getForIndexDecl().getName().doPrettyPrintFormatted(printer, printStream);
+			if (getForIndex(i).hasExp()) {
+				printStream.print("in");
+				getForIndex(i).getExp().doPrettyPrintFormatted(printer, printStream);
+			}
+			if (i + 1 < getNumForIndex()) {
+				printStream.print(",");
+			}
+		}
+		printStream.print(" loop");
+		for (AbstractEquation abstractEquation : getAbstractEquations()) {
+			abstractEquation.doPrettyPrintFormatted(printer, printStream);
+		}
+		printStream.print("end for");
+	}
+	
+	abstract void IfWhenElseEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, boolean elseIfWhen);
+	
+	void IfWhenEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		prettyPrintFormattedHelper(printer, printStream, false);
+	}
+	
+	void WhenEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, boolean elseWhen) {
+		if (elseWhen) {
+			printStream.print(preFormatting);
+			printStream.print("else");
+		}
+		printStream.print("when");
+		getTest().doPrettyPrintFormatted(printer, printStream);
+		printStream.print("then");
+		for (AbstractEquation abstractEquation : getAbstractEquations()) {
+			abstractEquation.doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasElse()) {
+			getElse().prettyPrintFormattedHelper(printer, printStream, true);
+		}
+		if (elseWhen) {
+			printStream.print(postFormatting);
+		} else {
+			printStream.print("end when");
+		}
+	}
+	
+	void IfEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, boolean elseIf) {
+		if (elseIf) {
+			printStream.print(preFormatting);
+			printStream.print("else");
+		}
+		printStream.print("if");
+		getTest().doPrettyPrintFormatted(printer, printStream);
+		printStream.print("then");
+		for (AbstractEquation abstractEquation : getAbstractEquations()) {
+			abstractEquation.doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasElse()) {
+			getElse().prettyPrintFormattedHelper(printer, printStream, true);
+		}
+		if (elseIf) {
+			printStream.print(postFormatting);
+		} else {
+			printStream.print("end if");
+		}
+	}
+	
+	void ElseEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, boolean elseIf) {
+		printStream.print("else");
+		for (AbstractEquation abstractEquation : getAbstractEquations()) {
+			abstractEquation.doPrettyPrintFormatted(printer, printStream);
+		}
 	}
 	
 	void ElementAnnotation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -797,6 +970,34 @@ aspect FormattedPrint {
 		printStream.print(")");
 	}
 	
+	void RangeExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		for (int i = 0; i < getNumExp(); i++) {
+			getExp(i).doPrettyPrintFormatted(printer, printStream);
+			if (i + 1 < getNumExp()) {
+				printStream.print(":");
+			}
+		}
+	}
+	
+	void IfExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("if");
+		getIfExp().doPrettyPrintFormatted(printer, printStream);
+		printStream.print("then");
+		getThenExp().doPrettyPrintFormatted(printer, printStream);
+		for (ElseIfExp elseIfExp : getElseIfExps()) {
+			elseIfExp.doPrettyPrintFormatted(printer, printStream);
+		}
+		printStream.print("else");
+		getElseExp().doPrettyPrintFormatted(printer, printStream);
+	}
+	
+	void ElseIfExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("else if");
+		getIfExp().doPrettyPrintFormatted(printer, printStream);
+		printStream.print("then");
+		getThenExp().doPrettyPrintFormatted(printer, printStream);
+	}
+	
 	void BinExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getLeft().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(operatorFormatted());
@@ -865,6 +1066,9 @@ aspect FormattedPrint {
 	    if (hasModification()) {
 	    	getModification().doPrettyPrintFormatted(printer, printStream);
 	    }
+	    if (hasConditionalAttribute()) {
+	    	getConditionalAttribute().doPrettyPrintFormatted(printer, printStream);
+	    }
 	    
 	    getComment().doPrettyPrintFormatted(printer, printStream);
 				 
@@ -874,8 +1078,23 @@ aspect FormattedPrint {
 		printStream.print(";");
 	}
 	
-	void TypePrefixVariability.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-		printStream.print(this);
+	syn String TypePrefix.formattedToString();
+	eq Flow.formattedToString()			= "flow";
+	eq Stream.formattedToString()		= "stream";
+	eq Continuous.formattedToString()	= "continuous";
+	eq Discrete.formattedToString()		= "discrete";
+	eq Parameter.formattedToString()	= "parameter";
+	eq Constant.formattedToString()		= "constant";
+	eq Input.formattedToString()		= "input";
+	eq Output.formattedToString()		= "output";
+	
+	void TypePrefix.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(formattedToString());
+	}
+	
+	void ConditionalAttribute.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("if");
+		getExp().doPrettyPrintFormatted(printer, printStream);
 	}
 	
 	void Comment.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
