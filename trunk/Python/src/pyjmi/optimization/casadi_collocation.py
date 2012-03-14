@@ -1419,7 +1419,7 @@ class LocalDAECollocator(CasadiCollocator):
         """
         # Concatenate constraints
         c = casadi.vertcat([self.get_equality_constraint(),
-							self.get_inequality_constraint()])
+                            self.get_inequality_constraint()])
         
         # Create constraint function
         if self.graph == 'MX' or self.graph == 'expanded_MX':
