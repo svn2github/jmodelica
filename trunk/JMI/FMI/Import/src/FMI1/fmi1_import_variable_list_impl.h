@@ -14,24 +14,28 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef FMI1_IMPORT_VARIABLELISTIMPL_H
+#define FMI1_IMPORT_VARIABLELISTIMPL_H
 
-#include "miniunz.h"
-#include "jm_types.h"
+#include <jm_vector.h>
+#include <FMI1/fmi1_import.h>
+#include <FMI1/fmi1_import_variable_list.h>
 
-/* Returns 1 if the FMU was successfully unziped. Otherwise 0 is returned */
-jm_status_enu_t fmi_zip_unzip(const char* zip_file_path, const char* output_folder)
-{
-    int argc = 5;
-        const char *argv[5];
-        argv[0]="miniunz";
-        argv[1]="-o";
-        argv[2]=zip_file_path;
-        argv[3]="-d";
-        argv[4]=output_folder;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-        if (miniunz(argc, (char**)argv) == 0) {
-		return jm_status_success;
-	} else {
-		return jm_status_error;	
-	}
+struct fmi1_import_variable_list_t {
+	fmi1_import_t* fmu;
+    jm_vector(jm_voidp) variables;
+    jm_vector(size_t)* vr;
+};
+
+/* Allocate an empty list */
+fmi1_import_variable_list_t* fmi1_import_alloc_variable_list(fmi1_import_t* md, size_t size);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* FMI1_XML_VARIABLELISTIMPL_H */

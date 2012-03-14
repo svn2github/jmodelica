@@ -21,7 +21,7 @@
 #include "fmi_dll_common.h"
 #include "jm_types.h"
 #include "fmi_zip_unzip.h"
-#include <fmi_xml_model_description.h>
+#include <FMI1/fmi1_xml_model_description.h>
 #include "fmi_import_util.h"
 
 
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
 
 	fmiBoolean loggingOn = fmiTrue;
-	fmi_xml_model_description_t* md;
+	fmi1_xml_model_description_t* md;
 	jm_status_enu_t status;
 
 	PRINT_MY_DEBUG;
@@ -79,26 +79,26 @@ int main(int argc, char *argv[])
 
 	model_description_path = fmi_import_get_model_description_path(tmpPath, callBackFunctions);
 
-	md = fmi_xml_allocate_model_description(0);
+	md = fmi1_xml_allocate_model_description(0);
 
     if(!md) abort();
 
-    if(fmi_xml_parse(md, model_description_path)) {
-        printf("Error parsing XML file %s:%s\n", FMUPath, fmi_xml_get_last_error(md));
-        fmi_xml_free_model_description(md);
+    if(fmi1_xml_parse(md, model_description_path)) {
+        printf("Error parsing XML file %s:%s\n", FMUPath, fmi1_xml_get_last_error(md));
+        fmi1_xml_free_model_description(md);
         abort();
 	}
 
 	
-    printf("Model name: %s\n", fmi_xml_get_model_name(md));
-    printf("Model identifier: %s\n", fmi_xml_get_model_identifier(md));
-    printf("Model GUID: %s\n", fmi_xml_get_GUID(md));
+    printf("Model name: %s\n", fmi1_xml_get_model_name(md));
+    printf("Model identifier: %s\n", fmi1_xml_get_model_identifier(md));
+    printf("Model GUID: %s\n", fmi1_xml_get_GUID(md));
 
-	modelIdentifier = fmi_xml_get_model_identifier(md);
-	modelName = fmi_xml_get_model_name(md);
-	GUID = fmi_xml_get_GUID(md);
+	modelIdentifier = fmi1_xml_get_model_identifier(md);
+	modelName = fmi1_xml_get_model_name(md);
+	GUID = fmi1_xml_get_GUID(md);
 
-	modelIdentifier = fmi_xml_get_model_identifier(md);
+	modelIdentifier = fmi1_xml_get_model_identifier(md);
 
 	
 
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 	fmi_dll_common_free_dll(fmu);
 	fmi_dll_common_destroy_dllfmu(fmu);
 
-	fmi_xml_free_model_description(md);
+	fmi1_xml_free_model_description(md);
 
 	printf("Everything seems to be OK since you got this far=)!\n");
 

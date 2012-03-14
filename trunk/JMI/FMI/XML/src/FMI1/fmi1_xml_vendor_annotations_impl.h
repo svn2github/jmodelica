@@ -14,24 +14,35 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef FMI1_XML_VENDORANNOTATIONS_H
+#define FMI1_XML_VENDORANNOTATIONS_H
 
-#include "miniunz.h"
-#include "jm_types.h"
+#include <jm_named_ptr.h>
 
-/* Returns 1 if the FMU was successfully unziped. Otherwise 0 is returned */
-jm_status_enu_t fmi_zip_unzip(const char* zip_file_path, const char* output_folder)
-{
-    int argc = 5;
-        const char *argv[5];
-        argv[0]="miniunz";
-        argv[1]="-o";
-        argv[2]=zip_file_path;
-        argv[3]="-d";
-        argv[4]=output_folder;
+#include <FMI1/fmi1_xml_model_description.h>
 
-        if (miniunz(argc, (char**)argv) == 0) {
-		return jm_status_success;
-	} else {
-		return jm_status_error;	
-	}
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct fmi1_xml_annotation_t {
+    const char* name;
+    char value[1];
+};
+
+struct fmi1_xml_vendor_t {
+    jm_vector(jm_named_ptr) annotations;
+    char name[1];
+};
+
+void fmi1_xml_vendor_free(fmi1_xml_vendor_t* v);
+
+struct fmi1_xml_vendor_list_t {
+    jm_vector(jm_voidp) vendors;
+};
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* FMI1_XML_VENDORANNOTATIONS_H */

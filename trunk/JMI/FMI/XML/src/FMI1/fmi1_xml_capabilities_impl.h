@@ -14,24 +14,29 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef FMI1_XML_CAPABILITIES_IMPL_H
+#define FMI1_XML_CAPABILITIES_IMPL_H
 
-#include "miniunz.h"
-#include "jm_types.h"
+#include <FMI1/fmi1_xml_capabilities.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* Returns 1 if the FMU was successfully unziped. Otherwise 0 is returned */
-jm_status_enu_t fmi_zip_unzip(const char* zip_file_path, const char* output_folder)
-{
-    int argc = 5;
-        const char *argv[5];
-        argv[0]="miniunz";
-        argv[1]="-o";
-        argv[2]=zip_file_path;
-        argv[3]="-d";
-        argv[4]=output_folder;
+struct fmi1_xml_capabilities_t {
+    int canHandleVariableCommunicationStepSize;
+    int canHandleEvents;
+    int canRejectSteps;
+    int canInterpolateInputs;
+    unsigned int maxOutputDerivativeOrder;
+    int canRunAsynchronuously;
+    int canSignalEvents;
+    int canBeInstantiatedOnlyOncePerProcess;
+    int canNotUseMemoryManagementFunctions;
+};
 
-        if (miniunz(argc, (char**)argv) == 0) {
-		return jm_status_success;
-	} else {
-		return jm_status_error;	
-	}
+void fmi1_xml_init_capabilities(fmi1_xml_capabilities_t* c);
+
+#ifdef __cplusplus
 }
+#endif
+#endif /* FMI1_XML_CAPABILITIES_IMPL_H */
