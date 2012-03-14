@@ -1403,13 +1403,10 @@ class LocalDAECollocator(CasadiCollocator):
                     c_i = casadi.vertcat([c_i, g_i_constr])
         
         # Store constraints and time as data attributes
-        # This code can be simplified once
-        # https://sourceforge.net/apps/trac/casadi/ticket/180
-        # has been fixed.
         self.c_e = c_e
         if self.graph == 'MX' or self.graph == 'expanded_MX':
             if c_i.isNull():
-                self.c_i = casadi.MX(0, 0)
+                self.c_i = casadi.MX(0, 1)
             else:
                 self.c_i = c_i
         else:
@@ -1421,14 +1418,8 @@ class LocalDAECollocator(CasadiCollocator):
         Create constraint function and calculate its Jacobian.
         """
         # Concatenate constraints
-        c_e = self.get_equality_constraint()
-        if c_e.numel() == 0:
-            c_e = []
-        c_i = self.get_inequality_constraint()
-        if c_i.numel() == 0:
-            c_i = []
-        c = casadi.vertcat([c_e, c_i])
-        self.c = c
+        c = casadi.vertcat([self.get_equality_constraint(),
+							self.get_inequality_constraint()])
         
         # Create constraint function
         if self.graph == 'MX' or self.graph == 'expanded_MX':
@@ -1443,7 +1434,8 @@ class LocalDAECollocator(CasadiCollocator):
             c_fcn.setOption(k, v)
         c_fcn.init()
             
-        # Save constraint function as data attribute
+        # Save constraints as data attributes
+        self.c = c
         self.c_fcn = c_fcn
         
     def _create_cost_function(self):
