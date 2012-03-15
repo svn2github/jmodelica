@@ -108,6 +108,7 @@ import beaver.Scanner;
   }
 
   protected int matchLine()   { return yyline; }
+  protected int matchColumn() { return yycolumn; }
   protected int matchOffset() { return yychar; }
   protected int matchLength() { return yylength(); }
   
@@ -160,9 +161,9 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "external"      { return newSymbol(Terminals.EXTERNAL); }
   
   
-  "public"        { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext(), yycolumn);
+  "public"        { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext());
 	  				return newSymbol(Terminals.PUBLIC); }
-  "protected"     { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext(), yycolumn);
+  "protected"     { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext());
 	  				return newSymbol(Terminals.PROTECTED); }
   
   "extends"       { return newSymbol(Terminals.EXTENDS); }
@@ -180,20 +181,27 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "equation"      { return newSymbol(Terminals.EQUATION); }
   "algorithm"     { return newSymbol(Terminals.ALGORITHM); }
   
-  "initial" {WhiteSpace} "equation"   { addLineBreaks(yytext()); 
+  "initial" {WhiteSpace} "equation"   { addWhiteSpaces(yytext()); 
+	  									addLineBreaks(yytext()); 
   	                                    return newSymbol(Terminals.INITIAL_EQUATION); }
-  "initial" {WhiteSpace} "algorithm"  { addLineBreaks(yytext()); 
+  "initial" {WhiteSpace} "algorithm"  { addWhiteSpaces(yytext());
+  										addLineBreaks(yytext()); 
                                         return newSymbol(Terminals.INITIAL_ALGORITHM); }
 
-  "end" {WhiteSpace} "for"    { addLineBreaks(yytext()); 
+  "end" {WhiteSpace} "for"    { addWhiteSpaces(yytext());
+	  							addLineBreaks(yytext()); 
                                 return newSymbol(Terminals.END_FOR); }
-  "end" {WhiteSpace} "while"  { addLineBreaks(yytext()); 
+  "end" {WhiteSpace} "while"  { addWhiteSpaces(yytext()); 
+	  							addLineBreaks(yytext()); 
                                 return newSymbol(Terminals.END_WHILE); }
-  "end" {WhiteSpace} "if"     { addLineBreaks(yytext()); 
+  "end" {WhiteSpace} "if"     { addWhiteSpaces(yytext());
+	  							addLineBreaks(yytext()); 
                                 return newSymbol(Terminals.END_IF); }
-  "end" {WhiteSpace} "when"   { addLineBreaks(yytext()); 
+  "end" {WhiteSpace} "when"   { addWhiteSpaces(yytext());
+	  							addLineBreaks(yytext()); 
                                 return newSymbol(Terminals.END_WHEN); }
-  "end" {WhiteSpace} {ID}     { String s = yytext();
+  "end" {WhiteSpace} {ID}     { addWhiteSpaces(yytext());
+	  							String s = yytext();
   			                    return newSymbol(Terminals.END_ID, s); }
  
    "enumeration"     { return newSymbol(Terminals.ENUMERATION); }
@@ -281,11 +289,14 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   {UNSIGNED_INTEGER}       { return newSymbol(Terminals.UNSIGNED_INTEGER, yytext()); }
   {UNSIGNED_NUMBER}        { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
   
-  {Comment}                { addLineBreaks(yytext());
-                             addFormattingInformation(FormattingItem.Type.COMMENT, yytext(), yycolumn); }
-  {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext(), yycolumn); }
+  {Comment}                { int numberOfLineBreaks = addLineBreaks(yytext());
+  							 if (yytext().charAt(1) == '/') {
+  								 numberOfLineBreaks = 0;
+  							 }
+                             addFormattingInformation(FormattingItem.Type.COMMENT, yytext(), numberOfLineBreaks); }
+  {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext()); }
   {LineTerminator} 		   { addLineBreak();
-                             addFormattingInformation(FormattingItem.Type.LINE_BREAK, yytext(), yycolumn); }
+                             addFormattingInformation(FormattingItem.Type.LINE_BREAK, yytext()); }
 }
 
 //.|\n                { throw new RuntimeException("Illegal character \""+yytext()+ "\" at line "+yyline+", column "+yycolumn); }

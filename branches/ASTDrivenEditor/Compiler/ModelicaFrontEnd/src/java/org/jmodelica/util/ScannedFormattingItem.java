@@ -47,7 +47,7 @@ public class ScannedFormattingItem extends FormattingItem {
 	}
 	
 	protected boolean endsWithLineBreak() {
-		return (type == Type.LINE_BREAK || (type == Type.COMMENT && data.endsWith("\n")));
+		return (type == Type.LINE_BREAK || (type == Type.COMMENT && (data.endsWith("\r") || data.endsWith("\n"))));
 	}
 
 	@Override
