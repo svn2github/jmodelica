@@ -1,12 +1,10 @@
 package org.jmodelica.icons.coord;
 
 import org.jmodelica.icons.Observable;
-import org.jmodelica.icons.Observer;
 
-public class CoordinateSystem extends Observable implements Observer {
-	
+public class CoordinateSystem extends Observable {
+
 	public static final Object EXTENT_UPDATED = new Object();
-	public static final Object EXTENT_SWAPPED = new Object();
 	public static final Object PRESERVE_ASPECT_RATIO_CHANGED = new Object();
 	public static final Object INITIAL_SCALE_CHANGED = new Object();
 	public static final Object GRID_CHANGED = new Object();
@@ -52,13 +50,8 @@ public class CoordinateSystem extends Observable implements Observer {
 	public void setExtent(Extent newExtent) {
 		if (extent == newExtent)
 			return;
-		if (extent != null)
-			extent.removeObserver(this);
 		extent = newExtent;
-		if (newExtent != null) {
-			newExtent.addObserver(this);
-		}
-		notifyObservers(EXTENT_SWAPPED);
+		notifyObservers(EXTENT_UPDATED);
 	}
 
 	public boolean shouldPreserveAspectRatio() {
@@ -94,12 +87,6 @@ public class CoordinateSystem extends Observable implements Observer {
 
 	public String toString() {
 		return "extent = " + extent + "\ngrid x = " + grid[0] + ", grid y = " + grid[1];
-	}
-
-	@Override
-	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (o == extent)
-			notifyObservers(EXTENT_UPDATED);
 	}
 
 }

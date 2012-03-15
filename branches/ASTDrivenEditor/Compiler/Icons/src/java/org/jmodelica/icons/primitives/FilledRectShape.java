@@ -1,17 +1,14 @@
 package org.jmodelica.icons.primitives;
 
-import org.jmodelica.icons.Observable;
-import org.jmodelica.icons.Observer;
 import org.jmodelica.icons.coord.Extent;
 import org.jmodelica.icons.coord.Point;
 import org.jmodelica.icons.primitives.Types.FillPattern;
 import org.jmodelica.icons.primitives.Types.LinePattern;
 
 
-public abstract class FilledRectShape extends FilledShape implements Observer {
+public abstract class FilledRectShape extends FilledShape {
 	
 	public static final Object EXTENT_UPDATED = new Object();
-	public static final Object EXTENT_SWAPPED = new Object();
 	
 	protected Extent extent;
 	
@@ -37,12 +34,8 @@ public abstract class FilledRectShape extends FilledShape implements Observer {
 		newExtent = newExtent.fix();
 		if (extent == newExtent)
 			return;
-		if (extent != null)
-			extent.removeObserver(this);
 		extent = newExtent;
-		if (newExtent != null)
-			newExtent.addObserver(this);
-		notifyObservers(EXTENT_SWAPPED);
+		notifyObservers(EXTENT_UPDATED);
 	}
 
 	public Extent getExtent() {
@@ -55,14 +48,6 @@ public abstract class FilledRectShape extends FilledShape implements Observer {
 	
 	public String toString() {
 		return "extent = " + extent.toString() + super.toString();
-	}
-	
-	@Override
-	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (o == extent)
-			notifyObservers(EXTENT_UPDATED);
-		else
-			super.update(o, flag, additionalInfo);
 	}
 	
 }

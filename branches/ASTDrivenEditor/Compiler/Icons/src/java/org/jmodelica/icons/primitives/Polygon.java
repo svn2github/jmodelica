@@ -59,22 +59,6 @@ public class Polygon extends FilledShape {
 	 * @return
 	 */
 	public Extent getBounds() {
-		Point p = points.get(0);
-		Point min = new Point(p.getX(), p.getY());
-		Point max = new Point(p.getX(), p.getY());
-		for (Point point : points) {
-			if (point.getX() < min.getX()) {
-				min.setX(point.getX());
-			} else if (point.getX() > max.getX()) {
-				max.setX(point.getX());
-			}
-			if (point.getY() < min.getY()) {
-				min.setY(point.getY());
-			} else if (point.getY() > max.getY()) {
-				max.setY(point.getY());
-			}
-		}
-		Extent extent = new Extent(min, max);
-		return extent;
+		return Point.calculateExtent(points);
 	}
 }

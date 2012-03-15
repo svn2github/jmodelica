@@ -65,7 +65,7 @@ public class Placement extends Observable implements Observer {
 
 	@Override
 	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (o == transformation && (flag == Transformation.EXTENT_CHANGED || flag == Transformation.EXTENT_SWAPPED || flag == Transformation.ORIGIN_CHANGED || flag == Transformation.ORIGIN_SWAPPED || flag == Transformation.ROTATION_CHANGED))
+		if (o == transformation && (flag == Transformation.EXTENT_UPDATED || flag == Transformation.ORIGIN_UPDATED || flag == Transformation.ROTATION_CHANGED))
 			notifyObservers(TRANSFORMATION_UPDATED);
 	}
 }

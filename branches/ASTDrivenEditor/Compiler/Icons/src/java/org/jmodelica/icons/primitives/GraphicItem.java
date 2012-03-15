@@ -1,16 +1,14 @@
 package org.jmodelica.icons.primitives;
 
 import org.jmodelica.icons.Observable;
-import org.jmodelica.icons.Observer;
 import org.jmodelica.icons.coord.Extent;
 import org.jmodelica.icons.coord.Point;
 
-public abstract class GraphicItem extends Observable implements Observer {
+public abstract class GraphicItem extends Observable {
 	
 	public static final Object VISIBLE_UPDATED = new Object();
-	public static final Object ORIGIN_CHANGED = new Object();
-	public static final Object ORIGIN_SWAPPED = new Object();
-	public static final Object ROTATION_CHANGED = new Object();
+	public static final Object ORIGIN_UPDATED = new Object();
+	public static final Object ROTATION_UPDATED = new Object();
 	
 	protected boolean visible;
 	protected Point origin;
@@ -72,12 +70,8 @@ public abstract class GraphicItem extends Observable implements Observer {
 	public void setOrigin(Point newOrigin) {
 		if (origin == newOrigin)
 			return;
-		if (origin != null)
-			origin.removeObserver(this);
 		origin = newOrigin;
-		if (newOrigin != null)
-			newOrigin.addObserver(this);
-		notifyObservers(ORIGIN_SWAPPED);
+		notifyObservers(ORIGIN_UPDATED);
 	}
 	
 	public double getRotation() {
@@ -88,19 +82,13 @@ public abstract class GraphicItem extends Observable implements Observer {
 		if (rotation == newRotation)
 			return;
 		rotation = newRotation;
-		notifyObservers(ROTATION_CHANGED);
+		notifyObservers(ROTATION_UPDATED);
 	}
 	
 	public abstract Extent getBounds();
 	
 	public String toString() {
 		return "";
-	}
-	
-	@Override
-	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (o == origin && (flag == Point.X_UPDATED || flag == Point.Y_UPDATED))
-			notifyObservers(ORIGIN_CHANGED);
 	}
 	
 }

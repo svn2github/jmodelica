@@ -2,7 +2,7 @@ package org.jmodelica.icons;
 
 import org.jmodelica.icons.primitives.Line;
 
-public class Connection extends Line {
+public class Connection extends Line implements Observer {
 	
 	public static final Object CONNECTED = new Object();
 	public static final Object DISCONNECTED = new Object();
@@ -92,8 +92,6 @@ public class Connection extends Line {
 			disconnect();
 		else if (o == targetConnector && flag == Connector.IM_REMOVED)
 			disconnect();
-		else
-			super.update(o, flag, additionalInfo);
 	}
 	
 }

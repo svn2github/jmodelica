@@ -22,7 +22,6 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.DirectColorModel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -528,7 +527,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		Point last = null;
 		for (Point lp : linePoints) {
 			/* invert y to convert to screen coords */
-			lp.setY(-(lp.getY()));
+			lp = new Point(lp.getX(), -lp.getY());
 			if (last != null) {
 				bezierPoints.add(transform(last));
 				bezierPoints.add(transform(Point.midPoint(last, lp)));

@@ -7,14 +7,11 @@ import java.io.InputStream;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.jmodelica.icons.Observable;
-import org.jmodelica.icons.Observer;
 import org.jmodelica.icons.coord.Extent;
 
-public class Bitmap extends GraphicItem implements Observer {
+public class Bitmap extends GraphicItem {
 	
 	public static final Object EXTENT_UPDATED = new Object();
-	public static final Object EXTENT_SWAPPED = new Object();
 	public static final Object FILE_NAME_CHANGED = new Object();
 	public static final Object IMAGE_SOURCE_CHANGED = new Object();
 
@@ -34,12 +31,8 @@ public class Bitmap extends GraphicItem implements Observer {
 	public void setExtent(Extent newExtent) {
 		if (extent == newExtent)
 			return;
-		if (extent != null)
-			extent.removeObserver(this);
 		extent = newExtent;
-		if (newExtent != null)
-			newExtent.addObserver(this);
-		notifyObservers(EXTENT_SWAPPED);
+		notifyObservers(EXTENT_UPDATED);
 	}
 	
 	@Override
@@ -93,12 +86,4 @@ public class Bitmap extends GraphicItem implements Observer {
 				", imageSource = " + imageSource + super.toString(); 
 	}
 	
-	@Override
-	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (o == extent && (flag == Extent.P1_SWAPPED || flag == Extent.P1_UPDATED || flag == Extent.P2_SWAPPED || flag == Extent.P2_UPDATED))
-			notifyObservers(EXTENT_UPDATED);
-		else
-			super.update(o, flag, additionalInfo);
-	}
-
 }

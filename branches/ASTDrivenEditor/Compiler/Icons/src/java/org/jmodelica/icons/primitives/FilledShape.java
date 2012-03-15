@@ -1,19 +1,14 @@
 package org.jmodelica.icons.primitives;
 
 
-import org.jmodelica.icons.Observable;
-import org.jmodelica.icons.Observer;
 import org.jmodelica.icons.coord.Point;
-import org.jmodelica.icons.primitives.Color;
 import org.jmodelica.icons.primitives.Types.FillPattern;
 import org.jmodelica.icons.primitives.Types.LinePattern;
 
-public abstract class FilledShape extends GraphicItem implements Observer {
+public abstract class FilledShape extends GraphicItem {
 	
 	public static final Object LINE_COLOR_UPDATED = new Object();
-	public static final Object LINE_COLOR_SWAPPED = new Object();
 	public static final Object FILL_COLOR_UPDATED = new Object();
-	public static final Object FILL_COLOR_SWAPPED = new Object();
 	public static final Object LINE_PATTERN_CHANGED = new Object();
 	public static final Object FILL_PATTERN_CHANGED = new Object();
 	public static final Object LINE_THICKNESS_CHANGED = new Object();
@@ -80,12 +75,8 @@ public abstract class FilledShape extends GraphicItem implements Observer {
 	public void setFillColor(Color newFillColor) {
 		if (fillColor == newFillColor)
 			return;
-		if (fillColor != null)
-			fillColor.removeObserver(this);
 		fillColor = newFillColor;
-		if (newFillColor != null)
-			newFillColor.addObserver(this);
-		notifyObservers(FILL_COLOR_SWAPPED);
+		notifyObservers(FILL_COLOR_UPDATED);
 	}
 	
 	public Color getFillColor() {
@@ -94,12 +85,8 @@ public abstract class FilledShape extends GraphicItem implements Observer {
 	public void setLineColor(Color newLineColor) {
 		if (lineColor == newLineColor)
 			return;
-		if (lineColor != null)
-			lineColor.removeObserver(this);
 		lineColor = newLineColor;
-		if (newLineColor != null)
-			newLineColor.addObserver(this);
-		notifyObservers(LINE_COLOR_SWAPPED);
+		notifyObservers(LINE_COLOR_UPDATED);
 	}
 	public Color getLineColor() {
 		return lineColor;
@@ -121,16 +108,6 @@ public abstract class FilledShape extends GraphicItem implements Observer {
 		s += "\nlinePattern = " + linePattern;
 		s += "\nfillPattern = " + fillPattern;
 		return s+super.toString();
-	}
-	
-	@Override
-	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (o == fillColor && (flag == Color.RED_CHANGED || flag == Color.GREEN_CHANGED || flag == Color.BLUE_CHANGED))
-			notifyObservers(FILL_COLOR_UPDATED);
-		else if (o == lineColor && (flag == Color.RED_CHANGED || flag == Color.GREEN_CHANGED || flag == Color.BLUE_CHANGED))
-			notifyObservers(LINE_COLOR_UPDATED);
-		else
-			super.update(o, flag, additionalInfo);
 	}
 	
 }

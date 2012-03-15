@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jmodelica.icons.Observable;
-import org.jmodelica.icons.Observer;
 import org.jmodelica.icons.coord.Extent;
 import org.jmodelica.icons.coord.Point;
 import org.jmodelica.icons.drawing.IconConstants;
@@ -13,11 +11,10 @@ import org.jmodelica.icons.primitives.Types.Arrow;
 import org.jmodelica.icons.primitives.Types.FillPattern;
 
 
-public class Line extends GraphicItem implements Observer {
+public class Line extends GraphicItem {
 	
 	public static final Object POINTS_UPDATED = new Object();
 	public static final Object COLOR_UPDATE = new Object();
-	public static final Object COLOR_SWAPPED = new Object();
 	public static final Object LINE_PATTERN_UPDATED = new Object();
 	public static final Object THICKNESS_UPDATE = new Object();
 	public static final Object ARROW_UPDATED = new Object();
@@ -76,12 +73,8 @@ public class Line extends GraphicItem implements Observer {
 	public void setColor(Color newColor) {
 		if (color == newColor)
 			return;
-		if (color != null)
-			color.removeObserver(this);
 		color = newColor;
-		if (newColor != null)
-			newColor.addObserver(this);
-		notifyObservers(COLOR_SWAPPED);
+		notifyObservers(COLOR_UPDATE);
 	}
 
 	public Color getColor() {
@@ -212,26 +205,7 @@ public class Line extends GraphicItem implements Observer {
 	}
 	
 	public Extent getBounds() {
-		if (points == null || points.size() == 0) {
-			return null;
-		}
-		Point p = points.get(0);
-		Point min = new Point(p.getX(), p.getY());
-		Point max = new Point(p.getX(), p.getY());
-		for (Point point : points) {
-			if (point.getX() < min.getX()) {
-				min.setX(point.getX());
-			} else if (point.getX() > max.getX()) {
-				max.setX(point.getX());
-			}
-			if (point.getY() < min.getY()) {
-				min.setY(point.getY());
-			} else if (point.getY() > max.getY()) {
-				max.setY(point.getY());
-			}
-		}
-		Extent extent = new Extent(min, max);
-		return extent;
+		return Point.calculateExtent(points);
 	}
 	
 	public String toString() {
@@ -243,11 +217,4 @@ public class Line extends GraphicItem implements Observer {
 		return s+super.toString(); 
 	}
 	
-	@Override
-	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (o == color && (flag == Color.RED_CHANGED || flag == Color.GREEN_CHANGED || flag == Color.BLUE_CHANGED))
-			notifyObservers(COLOR_UPDATE);
-		else
-			super.update(o, flag, additionalInfo);
-	}
 }

@@ -1,14 +1,11 @@
 package org.jmodelica.icons.coord;
 
 import org.jmodelica.icons.Observable;
-import org.jmodelica.icons.Observer;
 
-public class Transformation extends Observable implements Observer {
+public class Transformation extends Observable {
 	
-	public static final Object ORIGIN_CHANGED = new Object();
-	public static final Object ORIGIN_SWAPPED = new Object();
-	public static final Object EXTENT_CHANGED = new Object();
-	public static final Object EXTENT_SWAPPED = new Object();
+	public static final Object ORIGIN_UPDATED = new Object();
+	public static final Object EXTENT_UPDATED = new Object();
 	public static final Object ROTATION_CHANGED = new Object();
 	
 	private Point origin;
@@ -48,12 +45,8 @@ public class Transformation extends Observable implements Observer {
 	public void setOrigin(Point newOrigin) {
 		if (origin == newOrigin)
 			return;
-		if (origin != null)
-			origin.removeObserver(this);
 		origin = newOrigin;
-		if (newOrigin != null)
-			newOrigin.addObserver(this);
-		notifyObservers(ORIGIN_SWAPPED);
+		notifyObservers(ORIGIN_UPDATED);
 	}
 
 	public Extent getExtent() {
@@ -63,12 +56,8 @@ public class Transformation extends Observable implements Observer {
 	public void setExtent(Extent newExtent) {
 		if (extent == newExtent)
 			return;
-		if (extent != null)
-			extent.removeObserver(this);
 		extent = newExtent;
-		if (newExtent != null)
-			newExtent.addObserver(this);
-		notifyObservers(EXTENT_SWAPPED);
+		notifyObservers(EXTENT_UPDATED);
 	}
 
 	public double getRotation() {
@@ -88,14 +77,6 @@ public class Transformation extends Observable implements Observer {
 		s += "\norigin = " + origin;
 		s += "\nrotation = " + rotation;
 		return s;
-	}
-
-	@Override
-	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (o == origin && (flag == Point.X_UPDATED || flag == Point.Y_UPDATED))
-			notifyObservers(ORIGIN_CHANGED);
-		else if (o == extent && (flag == Extent.P1_SWAPPED || flag == Extent.P1_UPDATED || flag == Extent.P2_SWAPPED || flag == Extent.P2_UPDATED))
-			notifyObservers(EXTENT_CHANGED);
 	}
 
 }
