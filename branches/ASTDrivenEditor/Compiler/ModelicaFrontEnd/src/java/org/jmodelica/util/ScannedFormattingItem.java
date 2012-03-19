@@ -28,6 +28,38 @@ public class ScannedFormattingItem extends FormattingItem {
 		this.endColumn = endColumn;
 	}
 	
+	/**
+	 * Gets the line number of where the start of this symbol was found when it was scanned.
+	 * @return the line at which this symbol started when it was scanned.
+	 */
+	public int getStartLine() {
+		return startLine;
+	}
+	
+	/**
+	 * Gets the column number of where the start of this symbol was found when it was scanned.
+	 * @return the column at which this symbol started when it was scanned.
+	 */
+	public int getStartColumn() {
+		return startColumn;
+	}
+	
+	/**
+	 * Gets the line number of where the end of this symbol was found when it was scanned.
+	 * @return the line at which this symbol ended when it was scanned.
+	 */
+	public int getEndLine() {
+		return endLine;
+	}
+	
+	/**
+	 * Gets the column number of where the end of this symbol was found when it was scanned.
+	 * @return the column at which this symbol ended when it was scanned.
+	 */
+	public int getEndColumn() {
+		return endColumn;
+	}
+	
 	@Override
 	public Adjacency getAdjacency(FormattingItem otherItem) {
 		if (!(otherItem instanceof ScannedFormattingItem)) {

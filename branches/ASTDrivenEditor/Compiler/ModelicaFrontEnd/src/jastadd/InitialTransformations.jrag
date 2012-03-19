@@ -410,12 +410,16 @@
                 //log.debug(getIfExp()._prettyPrint(""));
                 IfExp e = (IfExp)getElseExpNoTransform();
                 List l = getElseIfExpList();
-                l.add(new ElseIfExp(e.getIfExp(),e.getThenExp()));
+                ElseIfExp elseIfExp = new ElseIfExp(e.getIfExp(),e.getThenExp());
+                elseIfExp.setLocationNoTree(e);
+                l.add(elseIfExp);
                 //log.debug(l.getNumChild());
                 //l.dumpTree("");
-                return new IfExp(getIfExp(),getThenExp(),
-                                 l,
-                                 e.getElseExpNoTransform());
+                IfExp newIfExp = new IfExp(getIfExp(),getThenExp(),
+                        l,
+                        e.getElseExpNoTransform());
+                newIfExp.setLocationNoTree(this);
+                return newIfExp;
             }   
     }
 

@@ -37,11 +37,21 @@ aspect FormattedPrint {
 			return exp.operatorFormatted();
 		}
 	}
-	
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ADDING FORMATTING TO AST:
+	//
+	// This section of the aspect contains attributes and methods for adding formatting to the AST.
+	//
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	static FormattedPrettyPrinter ASTNode.formattedPrettyPrinter = new FormattedPrettyPrinter();
 	protected FormattingInfo BaseNode.formatting = new FormattingInfo();
 	protected FormattingItem BaseNode.preFormatting = new EmptyFormattingItem();
 	protected FormattingItem BaseNode.postFormatting = new EmptyFormattingItem();
+
+	protected FormattingItem IfExp.insideFormatting = new EmptyFormattingItem();
+	protected FormattingItem ElseIfExp.insideFormatting = new EmptyFormattingItem();
 	
 	public void ASTNode.setFormatting(FormattingInfo formattingInfo) {
 		for (ASTNode childNode : this) {
@@ -52,6 +62,26 @@ aspect FormattedPrint {
 	public void BaseNode.setFormatting(FormattingInfo formattingInfo) {
 		formatting = formattingInfo;
 		super.setFormatting(formattingInfo);
+	}
+	
+	/**
+	 * Propagates the formatting information downwards in the AST if this has not already been done.
+	 */
+	public void ASTNode.propagateFormatting() {
+		getParent().propagateFormatting();
+	}
+	
+	protected void ASTNode.propagateFormatting(FormattingInfo formattingInfo) {
+		if (formattingInfo != null) {
+			formattingInfo.mergeAdjacentFormattingItems();
+			addFormattingInformation(formattingInfo);
+			addFormattingRest(formattingInfo);
+		}
+	}
+	
+	@Override
+	public void BaseNode.propagateFormatting() {
+		propagateFormatting(formatting);
 	}
 
 	/**
@@ -150,8 +180,50 @@ aspect FormattedPrint {
 			}
 		}
 		super.addFormattingRest(formattingInfo);
+		insideFormatting(formattingInfo);
 		formatting = null;
 	}
+	
+	public void BaseNode.insideFormatting(FormattingInfo formattingInfo) {
+	}
+	
+	public void IfExp.insideFormatting(FormattingInfo formattingInfo) {
+		Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
+		while (formattingIterator.hasNext()) {
+			ScannedFormattingItem formattingItem = formattingIterator.next();
+			FormattingItem.Adjacency adjacency = insideFormatting.getAdjacency(formattingItem);
+			if (formattingItem.getStartLine() == getLine(getElseExp().getStart()) && formattingItem.getStartColumn() == getColumn(getElseExp().getStart()) + 4) {
+				insideFormatting = formattingItem;
+				formattingIterator.remove();
+			} else if (adjacency != FormattingItem.Adjacency.NONE) {
+				insideFormatting = insideFormatting.mergeItems(adjacency, formattingItem);
+				formattingIterator.remove();
+			}
+		}
+	}
+	
+	public void ElseIfExp.insideFormatting(FormattingInfo formattingInfo) {
+		Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
+		while (formattingIterator.hasNext()) {
+			ScannedFormattingItem formattingItem = formattingIterator.next();
+			FormattingItem.Adjacency adjacency = insideFormatting.getAdjacency(formattingItem);
+			if (formattingItem.getStartLine() == getLine(getStart()) && formattingItem.getStartColumn() == getColumn(getStart()) + 4) {
+				insideFormatting = formattingItem;
+				formattingIterator.remove();
+			} else if (adjacency != FormattingItem.Adjacency.NONE) {
+				insideFormatting = insideFormatting.mergeItems(adjacency, formattingItem);
+				formattingIterator.remove();
+			}
+		}
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// DEFAULT FORMATTING:
+	//
+	// Here, some default formatting is set to different nodes in the AST. This is used for when the nodes do not
+	// come from a scanned source file, but have been generated in other ways.
+	//
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	/** TODO: Check the following nodes:
 	 * StoredDefinition
@@ -308,26 +380,14 @@ aspect FormattedPrint {
 	protected void ParseAnnotation.setDefaultFormatting() {
 		getClassModification().preFormatting = new DefaultFormattingItem(" ");
 	}
-
-	/**
-	 * Propagates the formatting information downwards in the AST if this has not already been done.
-	 */
-	public void ASTNode.propagateFormatting() {
-		getParent().propagateFormatting();
-	}
 	
-	protected void ASTNode.propagateFormatting(FormattingInfo formattingInfo) {
-		if (formattingInfo != null) {
-			formattingInfo.mergeAdjacentFormattingItems();
-			addFormattingInformation(formattingInfo);
-			addFormattingRest(formattingInfo);
-		}
-	}
-	
-	@Override
-	public void BaseNode.propagateFormatting() {
-		propagateFormatting(formatting);
-	}
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// PRETTY PRINT AST WITH PRESERVED FORMATTING:
+	//
+	// This section of the aspect contains methods used for printing the AST with its original formatting
+	// preserved.
+	//
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Pretty prints this AST node and all its children, with preserved formatting.
@@ -987,12 +1047,17 @@ aspect FormattedPrint {
 		for (ElseIfExp elseIfExp : getElseIfExps()) {
 			elseIfExp.doPrettyPrintFormatted(printer, printStream);
 		}
+		printStream.print(getElseExp().preFormatting);
 		printStream.print("else");
-		getElseExp().doPrettyPrintFormatted(printer, printStream);
+		printStream.print(insideFormatting);
+		getElseExp().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(getElseExp().postFormatting);
 	}
 	
 	void ElseIfExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-		printStream.print("else if");
+		printStream.print("else");
+		printStream.print(insideFormatting);
+		printStream.print("if");
 		getIfExp().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("then");
 		getThenExp().doPrettyPrintFormatted(printer, printStream);
@@ -1140,6 +1205,14 @@ aspect FormattedPrint {
 	eq FDotMulExp.operatorFormatted() = ".*";
 	eq FDotDivExp.operatorFormatted() = "./";
 	eq FDotPowExp.operatorFormatted() = ".^";
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// MISCELLANEOUS:
+	//
+	// This section of the aspect contains attributes and methods for misscellaneous activities which are related
+	// to pretty printing with preserved formatting.
+	//
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	void ASTNode.copyFormattingFrom(ASTNode node) {
 		if (this.getClass() != node.getClass())
