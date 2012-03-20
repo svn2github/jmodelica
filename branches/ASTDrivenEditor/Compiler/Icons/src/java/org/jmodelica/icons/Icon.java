@@ -166,17 +166,15 @@ public class Icon extends Observable implements Cloneable {
 	}
 
 	public void addSubcomponent(Component component) {
+		if (subComponents.contains(component))
+			return;
+		
 		if (subComponents.isEmpty() && layer == Layer.NO_LAYER) {
-			if (subComponents.add(component)) {
 				layer = new Layer(CoordinateSystem.DEFAULT_COORDINATE_SYSTEM);
-				component.added();
-				notifyObservers(SUBCOMPONENT_ADDED, component);
-			}
-		} else {
-			subComponents.add(component);
-			component.added();
-			notifyObservers(SUBCOMPONENT_ADDED, component);
 		}
+		subComponents.add(component);
+		component.added();
+		notifyObservers(SUBCOMPONENT_ADDED, component);
 	}
 
 	public void removeSubComponent(Component component) {
