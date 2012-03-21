@@ -35,11 +35,11 @@
 #define PLATFORM "linux32"
 #endif
 
-
-#include <FMI1/fmi1_import_util.h>
-#include <FMI1/fmi1_functions.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+#include "fmi_import_util.h"
 
 char* fmi_import_get_dll_path(const char* fmu_unzipped_path, const char* model_identifier, jm_callbacks* callBackFunctions)
 {

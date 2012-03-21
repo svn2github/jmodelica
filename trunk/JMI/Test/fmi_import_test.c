@@ -74,19 +74,19 @@ int main(int argc, char *argv[])
     callbacks.context = 0;
 
 	context = fmi_import_allocate_context(&callbacks);
-#if 0
 
-	if (jm_status_error == fmi_import_unzip(context, FMUPath, tmpPath)) {
+#if 0
+	if (jm_status_error == fmi_import_unzip(FMUPath, tmpPath)) {
 		printf("Failed to unzip the FMU file\n");
 		do_exit(1);
 	}
 
-	version = fmi_import_get_fmi_version(context, tmpPath);
+	//version = fmi_import_get_fmi_version(context, tmpPath);
 
-	if(version != fmi_version_1_enu) {
-		printf("Only version 1.0 is supported so far\n");
-		do_exit(1);
-	}
+	//if(version != fmi_version_1_enu) {
+	//	printf("Only version 1.0 is supported so far\n");
+	//	do_exit(1);
+	//}
 
 	fmu = fmi1_import_parse_xml(context, tmpPath);
 
@@ -115,9 +115,9 @@ int main(int argc, char *argv[])
 	fmi_import_free_context(context);
 	
 	printf("Everything seems to be OK since you got this far=)!\n");
-#endif
 
 	do_exit(0);
+#endif
 }
 
 
