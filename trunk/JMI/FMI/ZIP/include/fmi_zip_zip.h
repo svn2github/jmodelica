@@ -14,23 +14,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <stdlib.h>
+
+#ifndef FMI_ZIP_ZIP_H_
+#define FMI_ZIP_ZIP_H_
+
 #include <jm_types.h>
-#include "miniunz.h"
 
-jm_status_enu_t fmi_import_unzip(const char* zip_file_path, const char* output_folder)
-{
-	int argc = 5;
-	const char *argv[5];
-	argv[0]="miniunz";
-	argv[1]="-o";
-	argv[2]=zip_file_path;
-	argv[3]="-d";
-	argv[4]=output_folder;
+jm_status_enu_t fmi_import_zip(const char* zip_file_path, int n_files_to_zip, const char** files_to_zip);
 
-	if (miniunz(argc, (char**)argv) == 0) {
-		return jm_status_success;
-	} else {
-		return jm_status_error;	
-	}
-}
+#endif /* End of header file FMI_ZIP_ZIP_H_ */
+

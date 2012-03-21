@@ -14,21 +14,43 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #include <stdlib.h>
 #include <jm_types.h>
 #include "miniunz.h"
 
-jm_status_enu_t fmi_import_unzip(const char* zip_file_path, const char* output_folder)
+jm_status_enu_t fmi_import_zip(const char* zip_file_path, int n_files_to_zip, const char** files_to_zip)
 {
-	int argc = 5;
-	const char *argv[5];
-	argv[0]="miniunz";
-	argv[1]="-o";
-	argv[2]=zip_file_path;
-	argv[3]="-d";
-	argv[4]=output_folder;
+	/*
+	Usage : minizip [-o] [-a] [-0 to -9] [-p password] [-j] file.zip [files_to_add]
 
-	if (miniunz(argc, (char**)argv) == 0) {
+	-o  Overwrite existing file.zip
+	-a  Append to existing file.zip
+	-0  Store only
+	-1  Compress faster
+	-9  Compress better
+
+	-j  exclude path. store only the file name.
+	*/
+#define N_BASIC_ARGS 5
+	int argc;
+	const char** argv;
+	int k;
+
+	argc = N_BASIC_ARGS + n_files_to_zip;
+	argv = calloc(sizeof(char*), argc);	
+
+	argv[0]="minizip";
+	argv[1]="-o";
+	argv[2]="-1";
+	argv[3]="-j";
+	argv[4]=zip_file_path;
+
+	for (k = 0; k < n_files_to_zip; k++) {
+		argv[N_BASIC_ARGS + k] = files_to_zip[k];
+	}
+
+	if (minizip(argc, (char**)argv) == 0) {
 		return jm_status_success;
 	} else {
 		return jm_status_error;	

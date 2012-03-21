@@ -15,29 +15,33 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <errno.h>
+
+#include <jm_types.h>
 #include "fmi_zip_unzip.h"
-#include "jm_types.h"
 
 #define PRINT_MY_DEBUG printf("Line: %d \t File: %s \n",__LINE__, __FILE__)
 
-void do_pause()
+void do_exit(int code)
 {
-#ifdef _MSC_VER
-	system("PAUSE");
-#elif
-#endif
+	printf("Press any key to exit\n");
+	getchar();
+	exit(code);
 }
 
 int main(int argc, char *argv[])
 {
 	jm_status_enu_t status;
 
-	status = fmi_zip_unzip("C:\\P510-JModelica\\FMIToolbox\\trunk\\src\\wrapperfolder\\Furuta.fmu", "C:\\Documents and Settings\\p418_baa\\Desktop\\XMLtest\\temporaryfolder\\");
+	status = fmi_import_unzip("C:\\P510-JModelica\\FMIToolbox\\trunk\\src\\wrapperfolder\\Furuta.fmu", "C:\\Documents and Settings\\p418_baa\\Desktop\\XMLtest\\temporaryfolder\\");
 
 	if (status == jm_status_error) {
 		printf("Failed to unzip the file\n");
 	}
-	do_pause();
+	do_exit(1);
 }
 
 

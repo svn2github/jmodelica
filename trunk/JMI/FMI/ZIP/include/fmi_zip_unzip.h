@@ -18,8 +18,10 @@
 #ifndef FMI_ZIP_UNZIP_H_
 #define FMI_ZIP_UNZIP_H_
 
-#include "jm_types.h"
+#include <stdlib.h>
+#include <jm_types.h>
+#include "miniunz.h"
 
-jm_status_enu_t fmi_zip_unzip(const char* zip_file_path, const char* output_folder);
+jm_status_enu_t fmi_import_unzip(const char* zip_file_path, const char* output_folder);
 
-#endif FMI_ZIP_UNZIP_H_ /* End of header file C_FMI_UNZIP_H */
+#endif /* End of header file FMI_ZIP_UNZIP_H_ */
