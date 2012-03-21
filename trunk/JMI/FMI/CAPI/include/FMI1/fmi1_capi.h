@@ -85,6 +85,14 @@ typedef struct { /* FMI1 CAPI struct */
 
 } fmi1_capi_t;
 
+/* Help function used in the instantiate functions */
+const char*		fmi1_capi_get_last_error(fmi1_capi_t* fmu);
+void			fmi1_capi_destroy_dllfmu(fmi1_capi_t* fmu);
+fmi1_capi_t*	fmi1_capi_create_dllfmu(const char* dllPath, const char* modelIdentifier, fmi1_callback_functions_t callBackFunctions, fmi1_fmu_kind_enu_t standard);
+jm_status_enu_t fmi1_capi_load_fcn(fmi1_capi_t* fmu);
+jm_status_enu_t fmi1_capi_load_dll(fmi1_capi_t* fmu);
+jm_status_enu_t fmi1_capi_free_dll(fmi1_capi_t* fmu);
+
 /* FMI 1.0 Common functions */
 const char*			fmi1_capi_get_version						(fmi1_capi_t* fmu);
 fmi1_status_t		fmi1_capi_set_debug_logging					(fmi1_capi_t* fmu, fmi1_boolean_t loggingOn);
@@ -131,8 +139,5 @@ fmi1_status_t		fmi1_capi_get_real_status					(fmi1_capi_t* fmu, const fmi1_statu
 fmi1_status_t		fmi1_capi_get_integer_status				(fmi1_capi_t* fmu, const fmi1_status_kind_t s, fmi1_integer_t* value);
 fmi1_status_t		fmi1_capi_get_boolean_status				(fmi1_capi_t* fmu, const fmi1_status_kind_t s, fmi1_boolean_t* value);
 fmi1_status_t		fmi1_capi_get_string_status					(fmi1_capi_t* fmu, const fmi1_status_kind_t s, fmi1_string_t*  value);
-
-/* Help function used in the instantiate functions */
-fmi1_capi_t* fmi1_capi_create_dllfmu(const char* dllPath, const char* modelIdentifier, fmi1_callback_functions_t callBackFunctions, fmi1_fmu_kind_enu_t standard);
 
 #endif /* End of header file FMI1_CAPI_H_ */

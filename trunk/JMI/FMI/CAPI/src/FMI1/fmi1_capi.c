@@ -50,6 +50,7 @@ static jm_status_enu_t fmi1_capi_get_fcn(fmi1_capi_t* fmu, const char* function_
 		return jm_status_error;
 	}
 
+	sprintf(fname,"%s_%s",fmu->modelIdentifier, function_name);
 	return jm_portability_load_dll_function(fmu->dllHandle, fname, dll_function_ptrptr);
 }
 
