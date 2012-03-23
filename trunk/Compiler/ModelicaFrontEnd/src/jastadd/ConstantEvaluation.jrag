@@ -1508,7 +1508,7 @@ aspect ConstantEvaluation {
 	  } else {
 		  CValue val;
 		  if (isForIndex())
-			  val = cevalForIndex();
+			  val = evaluationValue();
 		  else if (hasParameterEquation())
 			  val = parameterEquation().cevalParameter(this);
 		  else if (hasBindingExp())
@@ -1520,15 +1520,6 @@ aspect ConstantEvaluation {
 		  return val;
 	  }
   }
-  
-  inh CValue FVariable.cevalForIndex();
-  eq FForStmt.getIndex().cevalForIndex()        = currentEvaluationIndex;
-  /* TODO: This returns a zero because for indices may be evaluated during scalarization.
-   *       Perhaps it would be better to set the current value in the for index as with 
-   *       currentEvaluationIndex? */ 
-  eq FForClauseE.getFForIndex().cevalForIndex() = new CValueInteger(0); 
-  eq FIterExp.getForIndex().cevalForIndex()     = new CValueInteger(0);
-  eq FClass.getChild().cevalForIndex()          = CValue.UNKNOWN;
   
   /**
    * \brief Constant evaluation of binding equation for dependent parameter.
@@ -1823,7 +1814,21 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Set the current function evaluation value.
+   * Set the current function evaluation value.
+   */
+  public void AbstractFVariable.setEvaluationValue(CValue val) {
+	  evaluationValue = val;
+  }
+  
+  /**
+   * Set the current function evaluation value.
+   */
+  public void InstComponentDecl.setEvaluationValue(CValue val) {
+	  evaluationValue = val;
+  }
+  
+  /**
+   * Set the current function evaluation value.
    * 
    * Also updates value map.
    */
@@ -1834,7 +1839,7 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Set the current function evaluation value.
+   * Set the current function evaluation value.
    * 
    * Also updates value map.
    */
@@ -1845,7 +1850,7 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Set the current function evaluation value of referenced variable.
+   * Set the current function evaluation value of referenced variable.
    * 
    * Also updates value map.
    */
@@ -1885,14 +1890,28 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Get the current function evaluation value.
+   * Check if this variable has a current function evaluation value.
+   */
+  public boolean AbstractFVariable.hasEvaluationValue() {
+	  return evaluationValue != null;
+  }
+  
+  /**
+   * Check if this variable has a current function evaluation value.
+   */
+  public boolean InstComponentDecl.hasEvaluationValue() {
+	  return evaluationValue != null;
+  }
+  
+  /**
+   * Get the current function evaluation value.
    */
   public CValue AbstractFVariable.evaluationValue() {
 	  return evaluationValue == null ? CValue.UNKNOWN : evaluationValue;
   }
   
   /**
-   * \brief Get the current function evaluation value.
+   * Get the current function evaluation value.
    */
   public CValue InstComponentDecl.evaluationValue() {
 	  return evaluationValue == null ? CValue.UNKNOWN : evaluationValue;
@@ -2170,22 +2189,22 @@ aspect ConstantEvaluation {
   }
 
   public int FForStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
-	  CValue oldVal = currentEvaluationIndex;
+	  AbstractFVariable ind = getIndex().getFVariable();
+	  CValue oldVal = ind.hasEvaluationValue() ? ind.evaluationValue() : null;
 	  
 	  CValueArray ivals = getIndex().getFExp().ceval().array();
 	  for (Index i : ivals.indices()) {
-		  currentEvaluationIndex = ivals.getCell(i);
+		  ind.setEvaluationValue(ivals.getCell(i));
 		  int res = getForStmts().evaluateList(values);
 		  if (res != EVAL_CONT) {
-			  currentEvaluationIndex = oldVal;
+			  ind.setEvaluationValue(oldVal);
 			  return (res == EVAL_BREAK) ? EVAL_CONT : res;
 		  }
 	  }
 
-	  currentEvaluationIndex = oldVal;
+	  ind.setEvaluationValue(oldVal);
 	  return EVAL_CONT;
   }
-  private CValue FForStmt.currentEvaluationIndex = CValue.UNKNOWN;
 
   public int InstForStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  return getInstForIndex(0).evaluateInFunc(values, getInstForIndexList(), 0, getForStmts());

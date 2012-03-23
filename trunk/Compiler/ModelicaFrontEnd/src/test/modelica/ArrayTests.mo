@@ -6139,6 +6139,47 @@ end ArrayTests.For.ForEquation2;
 end ForEquation2;
 
 
+model ForEquation3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="For_ForEquation3",
+         description="Array expressions depending on for loop index",
+         flatModel="
+fclass ArrayTests.For.ForEquation3
+ parameter Integer n = 3 /* 3 */;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = ArrayTests.For.ForEquation3.f(1);
+ x[2] = ArrayTests.For.ForEquation3.f(1 + 2);
+ x[3] = ArrayTests.For.ForEquation3.f(1 + 2 + 3);
+
+ function ArrayTests.For.ForEquation3.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ end ArrayTests.For.ForEquation3.f;
+end ArrayTests.For.ForEquation3;
+")})));
+
+	function f
+		input Real x;
+		output Real y = x + 1;
+	algorithm
+	end f;
+	
+	parameter Integer n = 3;
+	Real x[n];
+equation
+	for i in 1:n loop
+		x[i] = f(sum(1:i));
+	end for;
+end ForEquation3;
+
+
 
 model ForInitial1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

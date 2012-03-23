@@ -986,7 +986,11 @@ aspect FlatNames {
     }
     
     public FSubscript FExpSubscript.createEvaluated() {
-    	return new FExpSubscript(getFExp().ceval().buildLiteral());
+    	try {
+    		return new FExpSubscript(getFExp().ceval().buildLiteral());
+    	} catch (ConstantEvaluationException e) {
+    		return fullCopy();
+    	}
     }
 
     syn lazy String FQName.name()            = prefixName(0);

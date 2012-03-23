@@ -4399,6 +4399,92 @@ equation
   x1 + f(x2,A) = {0,0};
 end IndexReduction27_DerFunc;
 
+
+model IndexReduction28_Record
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction28_Record",
+         description="Index reduction: function with record input & output",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction28_Record
+ parameter Real A[1,1] = 1 /* 1 */;
+ parameter Real A[1,2] = 2 /* 2 */;
+ parameter Real A[2,1] = 3 /* 3 */;
+ parameter Real A[2,2] = 4 /* 4 */;
+ Real x1.a[1];
+ Real x1.a[2];
+ Real x2.a[1];
+ Real x2.a[2];
+ Real der_x1_a_1;
+ Real der_x1_a_2;
+initial equation 
+ x2.a[1] = 0.0;
+ x2.a[2] = 0.0;
+equation
+ der_x1_a_1 + x2.der(a[1]) = 2;
+ der_x1_a_2 + x2.der(a[2]) = 3;
+ (TransformCanonicalTests.IndexReduction28_Record.R({ - ( x1.a[1] ), - ( x1.a[2] )})) = TransformCanonicalTests.IndexReduction28_Record.f({x2.a[1],x2.a[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}});
+ (TransformCanonicalTests.IndexReduction28_Record.R({ - ( der_x1_a_1 ), - ( der_x1_a_2 )})) = TransformCanonicalTests.IndexReduction28_Record.f_der({x2.a[1],x2.a[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {x2.der(a[1]),x2.der(a[2])}, {{0.0,0.0},{0.0,0.0}});
+
+ function TransformCanonicalTests.IndexReduction28_Record.f_der
+  input Real[2] x;
+  input Real[2, 2] A;
+  input Real[2] der_x;
+  input Real[2, 2] der_A;
+  output TransformCanonicalTests.IndexReduction28_Record.R der_y;
+ algorithm
+  der_y.a[1] := ( A[1,1] ) * ( der_x[1] ) + ( A[1,2] ) * ( der_x[2] );
+  der_y.a[2] := ( A[2,1] ) * ( der_x[1] ) + ( A[2,2] ) * ( der_x[2] );
+  return;
+ end TransformCanonicalTests.IndexReduction28_Record.f_der;
+
+ function TransformCanonicalTests.IndexReduction28_Record.f
+  input Real[2] x;
+  input Real[2, 2] A;
+  output TransformCanonicalTests.IndexReduction28_Record.R y;
+ algorithm
+  y.a[1] := ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] );
+  y.a[2] := ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] );
+  return;
+ end TransformCanonicalTests.IndexReduction28_Record.f;
+
+ record TransformCanonicalTests.IndexReduction28_Record.R
+  Real a[2];
+ end TransformCanonicalTests.IndexReduction28_Record.R;
+end TransformCanonicalTests.IndexReduction28_Record;
+")})));
+
+record R
+	Real[2] a;
+end R;
+
+function f
+  input Real x[2];
+  input Real A[2,2];
+  output R y;
+algorithm
+  y := R(A*x);
+  annotation(derivative=f_der);
+end f;
+
+function f_der
+  input Real x[2];
+  input Real A[2,2];
+  input Real der_x[2];
+  input Real der_A[2,2];
+  output R der_y;
+algorithm
+  der_y := R(A*der_x);
+end f_der;
+
+  parameter Real A[2,2] = {{1,2},{3,4}};
+  R x1,x2,x3;
+equation
+  der(x1.a) + der(x2.a) = {2,3};
+  x1.a + x3.a = {0,0};
+  x3 = f(x2.a,A);
+end IndexReduction28_Record;
+
 model StateInitialPars1
 	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(

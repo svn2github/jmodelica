@@ -540,6 +540,13 @@ aspect Derivatives {
 		}
 	}
 	
+	public FExp FRecordConstructor.diff(String name) {
+		FRecordConstructor res = new FRecordConstructor(getRecord().fullCopy(), new List());
+		for (FExp arg : getArgs())
+			res.addArg(arg.diff(name));
+		return res;
+	}
+	
 	public FExp FDerExp.diff(String name) {	
 		if (name.equals("time")) {
 			return dynamicFExp(new FHDerExp((FIdUse)getFIdUse().fullCopy(),2));

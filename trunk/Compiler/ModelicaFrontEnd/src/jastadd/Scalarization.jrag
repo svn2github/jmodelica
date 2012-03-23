@@ -643,7 +643,7 @@ aspect Scalarization {
 	syn boolean FExp.scalarizesToLoop() = false;
 	eq FMulExp.scalarizesToLoop()       = isArray() && !isElementWise();
 	eq FRangeExp.scalarizesToLoop()     = true;
-	eq FSumExp.scalarizesToLoop()       = getFExp().size().isUnknown();
+	eq FSumExp.scalarizesToLoop()       = getFExp().size().isUnknown() && inFunction();
 	
 	public void FIdUseExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
 		if (isArray()) {
@@ -1218,9 +1218,13 @@ aspect Scalarization {
 			int[] ii = indices.translate(i).index();
 			for (FForIndex fi : getFForIndexs()) {
 				myIndexMap.put(fi.getFVariable().name(), new FIntegerLitExp(ii[j]));
+				fi.getFVariable().setEvaluationValue(new CValueInteger(ii[j]));
 				j++;
 			}
 			scalarizeList(getFAbstractEquations(), eqns, vars, myIndexMap);
+			getFAbstractEquations().flushAllRecursive(); // Throw calculated sizes/arrays
+			for (FForIndex fi : getFForIndexs()) 
+				fi.getFVariable().setEvaluationValue(null);
 		}
 	}
 	
