@@ -52,6 +52,7 @@ aspect FormattedPrint {
 
 	protected FormattingItem IfExp.insideFormatting = new EmptyFormattingItem();
 	protected FormattingItem ElseIfExp.insideFormatting = new EmptyFormattingItem();
+	protected FormattingItem EndDecl.insideFormatting = new EmptyFormattingItem();
 	
 	public void ASTNode.setFormatting(FormattingInfo formattingInfo) {
 		for (ASTNode childNode : this) {
@@ -73,7 +74,12 @@ aspect FormattedPrint {
 	
 	protected void ASTNode.propagateFormatting(FormattingInfo formattingInfo) {
 		if (formattingInfo != null) {
-			formattingInfo.mergeAdjacentFormattingItems();
+			if (!formattingInfo.isEmpty()) {
+				LinkedList<ScannedFormattingItem> parenthesisList = new LinkedList<ScannedFormattingItem>();
+				collectParenthesis(parenthesisList);
+				formattingInfo.addAll(parenthesisList);
+				formattingInfo.mergeAdjacentFormattingItems();
+			}
 			addFormattingInformation(formattingInfo);
 			addFormattingRest(formattingInfo);
 		}
@@ -82,6 +88,20 @@ aspect FormattedPrint {
 	@Override
 	public void BaseNode.propagateFormatting() {
 		propagateFormatting(formatting);
+	}
+	
+	protected void ASTNode.collectParenthesis(LinkedList<ScannedFormattingItem> parenthesisList) {
+		for (ASTNode node : this) {
+			node.collectParenthesis(parenthesisList);
+		}
+	}
+	
+	protected void Exp.collectParenthesis(LinkedList<ScannedFormattingItem> parenthesisListt) {
+		for (ASTNode node : this) {
+			node.collectParenthesis(parenthesisListt);
+		}
+		parenthesisListt.addAll(parenthesisList);
+		parenthesisList = new LinkedList<ScannedFormattingItem>();
 	}
 
 	/**
@@ -208,6 +228,21 @@ aspect FormattedPrint {
 			ScannedFormattingItem formattingItem = formattingIterator.next();
 			FormattingItem.Adjacency adjacency = insideFormatting.getAdjacency(formattingItem);
 			if (formattingItem.getStartLine() == getLine(getStart()) && formattingItem.getStartColumn() == getColumn(getStart()) + 4) {
+				insideFormatting = formattingItem;
+				formattingIterator.remove();
+			} else if (adjacency != FormattingItem.Adjacency.NONE) {
+				insideFormatting = insideFormatting.mergeItems(adjacency, formattingItem);
+				formattingIterator.remove();
+			}
+		}
+	}
+	
+	public void EndDecl.insideFormatting(FormattingInfo formattingInfo) {
+		Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
+		while (formattingIterator.hasNext()) {
+			ScannedFormattingItem formattingItem = formattingIterator.next();
+			FormattingItem.Adjacency adjacency = insideFormatting.getAdjacency(formattingItem);
+			if (formattingItem.getStartLine() == getLine(getStart()) && formattingItem.getStartColumn() == getColumn(getStart()) + 3) {
 				insideFormatting = formattingItem;
 				formattingIterator.remove();
 			} else if (adjacency != FormattingItem.Adjacency.NONE) {
@@ -423,20 +458,14 @@ aspect FormattedPrint {
 		printStream.print(postFormatting);
 	}
 	
-	public boolean Exp.hasParenthesis = false;
-
-	void Exp.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
-		printStream.print(preFormatting);
-
-		if (hasParenthesis) {
-			printStream.print("(");
-			prettyPrintFormattedHelper(printer, printStream);
-			printStream.print(")");
-		} else {
-			prettyPrintFormattedHelper(printer, printStream);
-		}
-
-		printStream.print(postFormatting);
+	LinkedList<ScannedFormattingItem> Exp.parenthesisList = new LinkedList<ScannedFormattingItem>();
+	public void Exp.addParenthesis(Symbol left, Symbol right) {
+		parenthesisList.add(new ScannedFormattingItem(FormattingItem.Type.PARENTHESIS, "(",
+			Symbol.getLine(left.getStart()), Symbol.getColumn(left.getStart()), Symbol.getLine(left.getEnd()),
+			Symbol.getColumn(left.getEnd())));
+		parenthesisList.add(new ScannedFormattingItem(FormattingItem.Type.PARENTHESIS, ")",
+			Symbol.getLine(right.getStart()), Symbol.getColumn(right.getStart()), Symbol.getLine(right.getEnd()),
+			Symbol.getColumn(right.getEnd())));
 	}
 	
 	void AbstractEquation.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
@@ -1183,7 +1212,7 @@ aspect FormattedPrint {
 	}
 	
 	void EndDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-		printStream.print("end " + getEndID() + ";");
+		printStream.print("end" + insideFormatting + getEndID() + ";");
 	}
 	
 	syn String FBinExp.operatorFormatted();

@@ -13,6 +13,7 @@ public abstract class FormattingItem {
 		LINE_BREAK,
 		COMMENT,
 		VISIBILITY_INFO,
+		PARENTHESIS,
 		MIXED,
 		EMPTY;
 	};

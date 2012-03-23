@@ -1068,7 +1068,7 @@ Exp primary =
   | STRING.s               {: return new StringLitExp(s); :}
   | access_expression   {: return access_expression; :}
   | der_expression      {: return der_expression; :}
-  | LPAREN exp.a RPAREN {: a.hasParenthesis = true;
+  | LPAREN exp.a RPAREN {: a.addParenthesis(LPAREN, RPAREN);
 						   return a; :}
   | function_call        {: return function_call; :}
   | LBRACK matrix RBRACK {: return matrix; :}

@@ -1,20 +1,25 @@
 package org.jmodelica.util;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * An object that holds formatting information such as indentation and comments. 
  */
 public class FormattingInfo {
-	private Collection<ScannedFormattingItem> formattingList;
+	private LinkedList<ScannedFormattingItem> formattingList;
+	private boolean sorted;
 
 	/**
 	 * Creates a <code>FormattingInfo</code> instance.
 	 */
 	public FormattingInfo() {
 		formattingList = new LinkedList<ScannedFormattingItem>();
+		sorted = true;
 	}
 
 	/**
@@ -29,14 +34,35 @@ public class FormattingInfo {
 	 */
 	public void addItem(FormattingItem.Type type, String data, int startLine, int startColumn, int endLine, int endColumn ) {
 		ScannedFormattingItem formattingItem = new ScannedFormattingItem(type, data, startLine, startColumn, endLine, endColumn);
+		if (sorted && !formattingList.isEmpty() && formattingList.getLast().compareTo(formattingItem) > 0) {
+			sorted = false;
+		}
 		formattingList.add(formattingItem);
+	}
+
+	/**
+	 * Adds all formatting items in a collection to be part of the description of this formatting information.
+	 * @param formattingItems a collection of <code>ScannedFormattingItem</code>s that are supposed to be added to
+	 * this <code>FormattingInfo</code>.
+	 */
+	public void addAll(Collection<ScannedFormattingItem> formattingItems) {
+		for (ScannedFormattingItem formattingItem : formattingItems) {
+			if (sorted && !formattingList.isEmpty() && formattingList.getLast().compareTo(formattingItem) > 0) {
+				sorted = false;
+			}
+			formattingList.add(formattingItem);
+		}
 	}
 	
 	/**
 	 * Gets adjacent formatting items and merge those into fewer, larger items.
 	 */
 	public void mergeAdjacentFormattingItems() {
-		Collection<ScannedFormattingItem> newFormattingList = new LinkedList<ScannedFormattingItem>();
+		if (!sorted) {
+			Collections.sort(formattingList);
+			sorted = true;
+		}
+		LinkedList<ScannedFormattingItem> newFormattingList = new LinkedList<ScannedFormattingItem>();
 
 		while (!formattingList.isEmpty()) {
 			Iterator<ScannedFormattingItem> formattingIterator = formattingList.iterator();
@@ -61,7 +87,7 @@ public class FormattingInfo {
 	}
 
 	private void splitAfterFirstLineBreak() {
-		Collection<ScannedFormattingItem> newFormattingList = new LinkedList<ScannedFormattingItem>();
+		LinkedList<ScannedFormattingItem> newFormattingList = new LinkedList<ScannedFormattingItem>();
 
 		for (ScannedFormattingItem item : formattingList) {
 			ScannedFormattingItem splitResult[] = item.splitAfterFirstLineBreak();
@@ -74,10 +100,17 @@ public class FormattingInfo {
 	}
 
 	/**
-	 * Gets the collection of formatting items this <code>FormattingInfo</code> holds.
-	 * @return a collection of the formatting items.
+	 * Gets the sorted collection of scanned formatting items that this <code>FormattingInfo</code> holds. The
+	 * collection is sorted in the order in which the the formatting items appeared when scanned. That is depending
+	 * on their starting position and then their ending position.
+	 * @return a sorted collection of the formatting items.
 	 */
 	public Collection<ScannedFormattingItem> getFormattingCollection() {
+		if (!sorted) {
+			Collections.sort(formattingList);
+			sorted = true;
+		}
+
 		return formattingList;
 	}
 

@@ -4,7 +4,7 @@ package org.jmodelica.util;
  * An object that holds the value and position of some sort of formatting. It can, for example, hold the position,
  * extent and actual string representation of a comment or white spaces forming indentation.
  */
-public class ScannedFormattingItem extends FormattingItem {
+public class ScannedFormattingItem extends FormattingItem implements Comparable<ScannedFormattingItem> {
 	protected int startLine;
 	protected int startColumn;
 	protected int endLine;
@@ -151,5 +151,37 @@ public class ScannedFormattingItem extends FormattingItem {
 	 */
 	public String getInformationString() {
 		return getInformationString(false);
+	}
+
+	/**
+	 * Compares this scanned formatting item with another one to determine which item appeared first when scanned,
+	 * and if both items started at the same position, then which one ended first. If this item appeared first (or
+	 * if both items started at the same position, but this item ended first), then a negative value is returned.
+	 * If this item started after the other item (or if both items started at the same position, but this item
+	 * ended last), then a positive value is returned. Otherwise 0 is returned.
+	 * @return a negative value if this item started first (or if both items started at the same position, but this
+	 * item ended first). A positive value if this item started after the other item (or if both items started at
+	 * the same position, but this item ended last). Otherwise, the value 0.
+	 */
+	public int compareTo(ScannedFormattingItem otherItem) {
+		int result = this.getStartLine() - otherItem.getStartLine();
+		if (result == 0) {
+			result = this.getStartColumn() - otherItem.getStartColumn();
+			if (result == 0) {
+				result = this.getEndLine() - otherItem.getEndLine();
+				if (result == 0) {
+					result = this.getEndColumn() - otherItem.getEndColumn();
+				}
+			}
+		}
+		return result;
+	}
+
+	public boolean equals(Object otherObject) {
+		if (otherObject instanceof ScannedFormattingItem) {
+			return (this.compareTo((ScannedFormattingItem) otherObject) == 0);
+		}
+
+		return false;
 	}
 }
