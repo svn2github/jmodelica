@@ -154,7 +154,7 @@ fmi1_fmu_kind_enu_t fmi1_import_get_fmu_kind(fmi1_import_t* fmu);
 fmi1_import_capabilities_t* fmi1_import_get_capabilities(fmi1_import_t* fmu);
 
 /* @} */
-/* #include "fmi1_import_util.h" */
+#include <Common/fmi_import_util.h>
 /* #include "fmi1_import_type.h"
 #include "fmi1_import_unit.h"
 #include "fmi1_import_variable.h"

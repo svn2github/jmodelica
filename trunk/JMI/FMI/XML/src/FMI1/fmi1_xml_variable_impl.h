@@ -45,8 +45,8 @@ struct fmi1_xml_variable_t {
 static int fmi1_xml_compare_vr (const void* first, const void* second) {
     fmi1_xml_variable_t* a = *(fmi1_xml_variable_t**)first;
     fmi1_xml_variable_t* b = *(fmi1_xml_variable_t**)second;
-    fmi1_xml_base_type_enu_t at = fmi1_xml_get_variable_base_type(a);
-    fmi1_xml_base_type_enu_t bt = fmi1_xml_get_variable_base_type(b);
+    fmi1_base_type_enu_t at = fmi1_xml_get_variable_base_type(a);
+    fmi1_base_type_enu_t bt = fmi1_xml_get_variable_base_type(b);
     if(at!=bt) return at - bt;
     if(a->vr < b->vr) return -1;
     if(a->vr > b->vr) return 1;

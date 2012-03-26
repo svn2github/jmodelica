@@ -48,12 +48,12 @@ fmi1_xml_variable_t* fmi1_xml_get_variable_alias_base(fmi1_xml_model_description
     fmi1_xml_variable_t key;
     fmi1_xml_variable_t *pkey = &key, *base;
     void ** found;
-
+	if(!md->variablesByVR) return 0;
     if(v->aliasKind == fmi1_xml_variable_is_not_alias) return v;
     key = *v;
     key.aliasKind = fmi1_xml_variable_is_not_alias;
 
-    found = jm_vector_bsearch(jm_voidp)(&md->variablesByVR->variables,(void**)&pkey, fmi1_xml_compare_vr);
+    found = jm_vector_bsearch(jm_voidp)(md->variablesByVR,(void**)&pkey, fmi1_xml_compare_vr);
     assert(found);
     base = *found;
     return base;
@@ -63,45 +63,42 @@ fmi1_xml_variable_t* fmi1_xml_get_variable_alias_base(fmi1_xml_model_description
     Return the list of all the variables aliased to the given one (including the base one.
     The list is ordered: base variable, aliases, negated aliases.
 */
-fmi1_xml_variable_list_t* fmi1_xml_get_variable_aliases(fmi1_xml_model_description_t* md,fmi1_xml_variable_t*v) {
+jm_status_enu_t fmi1_xml_get_variable_aliases(fmi1_xml_model_description_t* md,fmi1_xml_variable_t* v, jm_vector(jm_voidp)* list) {
     fmi1_xml_variable_t key, *cur;
-    fmi1_xml_variable_list_t* list = fmi1_xml_alloc_variable_list(md, 0);
     fmi1_value_reference_t vr = fmi1_xml_get_variable_vr(v);
-    size_t baseIndex, i, num = fmi1_xml_get_variable_list_size(md->variablesByVR);
+    size_t baseIndex, i, num = jm_vector_get_size(jm_voidp)(md->variablesByVR);
     key = *v;
     key.aliasKind = 0;
     cur = &key;
-    baseIndex = jm_vector_bsearch_index(jm_voidp)(&md->variablesByVR->variables,(void**)&cur, fmi1_xml_compare_vr);
-    cur = fmi1_xml_get_variable(md->variablesByVR, baseIndex);
+    baseIndex = jm_vector_bsearch_index(jm_voidp)(md->variablesByVR,(void**)&cur, fmi1_xml_compare_vr);
+    cur = (fmi1_xml_variable_t*)jm_vector_get_item(jm_voidp)(md->variablesByVR, baseIndex);
     assert(cur);
     i = baseIndex + 1;
     while(fmi1_xml_get_variable_vr(cur) == vr) {
-        if(!jm_vector_push_back(jm_voidp)(&list->variables, cur)) {
+        if(!jm_vector_push_back(jm_voidp)(list, cur)) {
             fmi1_xml_report_error(md,"XML_Variable","Could not allocate memory");
-            fmi1_xml_free_variable_list(list);
-            return 0;
+            return jm_status_error;
         };
         if(i >= num) break;
-        cur = fmi1_xml_get_variable(md->variablesByVR, i);
+        cur = (fmi1_xml_variable_t*)jm_vector_get_item(jm_voidp)(md->variablesByVR, i);
         assert(cur);
         i++;
     }
     if(baseIndex) {
         i = baseIndex - 1;
-        cur = fmi1_xml_get_variable(md->variablesByVR, i);
+        cur = (fmi1_xml_variable_t*)jm_vector_get_item(jm_voidp)(md->variablesByVR, i);
         while(fmi1_xml_get_variable_vr(cur) == vr) {
-            if(!jm_vector_push_back(jm_voidp)(&list->variables, cur)) {
-                fmi1_xml_report_error(md,"XML_Variable","Could not allocate memory");
-                fmi1_xml_free_variable_list(list);
-                return 0;
+            if(!jm_vector_push_back(jm_voidp)(list, cur)) {
+                fmi1_xml_report_error(md,"XML_Variable","Could not allocate memory");                
+                return jm_status_error;
             };
             i--;
             if(!i) break;
-            cur = fmi1_xml_get_variable(md->variablesByVR, i - 1);
+            cur = (fmi1_xml_variable_t*)jm_vector_get_item(jm_voidp)(md->variablesByVR, i - 1);
             assert(cur);
         }
     }
-    return list;
+    return jm_status_success;
 }
 
 
@@ -109,7 +106,7 @@ fmi1_xml_variable_typedef_t* fmi1_xml_get_variable_declared_type(fmi1_xml_variab
     return (fmi1_xml_variable_typedef_t*)(fmi1_xml_find_type_struct(v->typeBase, fmi1_xml_type_struct_enu_typedef));
 }
 
-fmi1_xml_base_type_enu_t fmi1_xml_get_variable_base_type(fmi1_xml_variable_t* v) {
+fmi1_base_type_enu_t fmi1_xml_get_variable_base_type(fmi1_xml_variable_t* v) {
     fmi1_xml_variable_type_base_t* type = v->typeBase;
     type = fmi1_xml_find_type_struct(type, fmi1_xml_type_struct_enu_base);
     return (type->baseType);
@@ -125,11 +122,11 @@ int   fmi1_xml_get_variable_is_fixed(fmi1_xml_variable_t* v) {
 }
 
 fmi1_variability_enu_t fmi1_xml_get_variability(fmi1_xml_variable_t* v) {
-    return v->variability;
+    return (fmi1_variability_enu_t)v->variability;
 }
 
 fmi1_causality_enu_t fmi1_xml_get_causality(fmi1_xml_variable_t* v) {
-    return v->causality;
+    return (fmi1_causality_enu_t)v->causality;
 }
 
 double fmi1_xml_get_real_variable_start(fmi1_xml_real_variable_t* v) {
@@ -143,18 +140,38 @@ double fmi1_xml_get_real_variable_start(fmi1_xml_real_variable_t* v) {
 
 fmi1_xml_unit_t* fmi1_xml_get_real_variable_unit(fmi1_xml_real_variable_t* v) {
     fmi1_xml_variable_t* vv = (fmi1_xml_variable_t*)v;
-    doubleype_props_t* props = (doubleype_props_t*)(fmi1_xml_find_type_struct(vv->typeBase, fmi1_xml_type_struct_enu_props));
+    fmi1_xml_real_type_props_t* props = (fmi1_xml_real_type_props_t*)(fmi1_xml_find_type_struct(vv->typeBase, fmi1_xml_type_struct_enu_props));
     if(!props || !props->displayUnit) return 0;
     return props->displayUnit->baseUnit;
 }
 
 fmi1_xml_display_unit_t* fmi1_xml_get_real_variable_display_unit(fmi1_xml_real_variable_t* v) {
     fmi1_xml_variable_t* vv = (fmi1_xml_variable_t*)v;
-    doubleype_props_t* props = (doubleype_props_t*)(fmi1_xml_find_type_struct(vv->typeBase, fmi1_xml_type_struct_enu_props));
+    fmi1_xml_real_type_props_t* props = (fmi1_xml_real_type_props_t*)(fmi1_xml_find_type_struct(vv->typeBase, fmi1_xml_type_struct_enu_props));
     if(!props || !props->displayUnit || !props->displayUnit->displayUnit[0]) return 0;
     return props->displayUnit;
 }
 
+double fmi1_xml_get_real_variable_max(fmi1_xml_real_variable_t* v) {
+    fmi1_xml_variable_t* vv = (fmi1_xml_variable_t*)v;
+    fmi1_xml_real_type_props_t* props = (fmi1_xml_real_type_props_t*)(fmi1_xml_find_type_props(vv->typeBase));
+	assert(props);
+	return props->typeMax;
+}
+
+double fmi1_xml_get_real_variable_min(fmi1_xml_real_variable_t* v) {
+    fmi1_xml_variable_t* vv = (fmi1_xml_variable_t*)v;
+    fmi1_xml_real_type_props_t* props = (fmi1_xml_real_type_props_t*)(fmi1_xml_find_type_props(vv->typeBase));
+	assert(props);
+	return props->typeMin;
+}
+
+double fmi1_xml_get_real_variable_nominal(fmi1_xml_real_variable_t* v){
+    fmi1_xml_variable_t* vv = (fmi1_xml_variable_t*)v;
+    fmi1_xml_real_type_props_t* props = (fmi1_xml_real_type_props_t*)(fmi1_xml_find_type_props(vv->typeBase));
+	assert(props);
+	return props->typeNominal;
+}
 
 int fmi1_xml_get_integer_variable_start(fmi1_xml_integer_variable_t* v){
     fmi1_xml_variable_t* vv = (fmi1_xml_variable_t*)v;
@@ -163,6 +180,34 @@ int fmi1_xml_get_integer_variable_start(fmi1_xml_integer_variable_t* v){
         return start->start;
     }
         return 0;
+}
+
+int fmi1_xml_get_integer_variable_min(fmi1_xml_integer_variable_t* v){
+    fmi1_xml_variable_t* vv = (fmi1_xml_variable_t*)v;
+    fmi1_xml_integer_type_props_t* props = (fmi1_xml_integer_type_props_t*)(fmi1_xml_find_type_props(vv->typeBase));
+	assert(props);
+	return props->typeMin;
+}
+
+int fmi1_xml_get_integer_variable_max(fmi1_xml_integer_variable_t* v){
+    fmi1_xml_variable_t* vv = (fmi1_xml_variable_t*)v;
+    fmi1_xml_integer_type_props_t* props = (fmi1_xml_integer_type_props_t*)(fmi1_xml_find_type_props(vv->typeBase));
+	assert(props);
+	return props->typeMax;
+}
+
+int fmi1_xml_get_enum_variable_min(fmi1_xml_enum_variable_t* v){
+    fmi1_xml_variable_t* vv = (fmi1_xml_variable_t*)v;
+    fmi1_xml_enum_type_props_t* props = (fmi1_xml_enum_type_props_t*)(fmi1_xml_find_type_props(vv->typeBase));
+	assert(props);
+	return props->typeMin;
+}
+
+int fmi1_xml_get_enum_variable_max(fmi1_xml_enum_variable_t* v){
+    fmi1_xml_variable_t* vv = (fmi1_xml_variable_t*)v;
+    fmi1_xml_enum_type_props_t* props = (fmi1_xml_enum_type_props_t*)(fmi1_xml_find_type_props(vv->typeBase));
+	assert(props);
+	return props->typeMax;
 }
 
 const char* fmi1_xml_get_string_variable_start(fmi1_xml_string_variable_t* v){
@@ -192,41 +237,46 @@ fmi1_boolean_t fmi1_xml_get_boolean_variable_start(fmi1_xml_bool_variable_t* v) 
         return 0;
 }
 
-double fmi1_xml_get_real_variable_nominal(fmi1_xml_real_variable_t* v) {
-    fmi1_xml_variable_t* vv = (fmi1_xml_variable_t*)v;
-    doubleype_props_t* props = (doubleype_props_t*)fmi1_xml_find_type_struct(vv->typeBase,fmi1_xml_type_struct_enu_props);
-    return props->typeNominal;
+size_t fmi1_xml_get_direct_dependency_size(fmi1_xml_model_description_t* md,fmi1_xml_variable_t*v) {
+	if(v->directDependency) {
+		return jm_vector_get_size(jm_voidp)(v->directDependency);
+	}
+	else
+		return 0;
 }
 
 /* DirectDependency is returned for variables with causality Output. Null pointer for others. */
-fmi1_xml_variable_list_t* fmi1_xml_get_direct_dependency(fmi1_xml_model_description_t* md, fmi1_xml_variable_t* v) {
-    fmi1_xml_variable_list_t* vl = 0;
-    if(!v->directDependency) return 0;
-    vl = fmi1_xml_alloc_variable_list(md, jm_vector_get_size(jm_voidp)(v->directDependency));
-    if(!vl) return 0;
-    jm_vector_copy(jm_voidp)(&vl->variables,v->directDependency);
-    return vl;
+jm_status_enu_t fmi1_xml_get_direct_dependency(fmi1_xml_model_description_t* md, fmi1_xml_variable_t* v, jm_vector(jm_voidp)* list) {
+	size_t size = 0;
+	if(fmi1_xml_get_causality(v) != fmi1_causality_enu_output) return jm_status_error;
+	jm_vector_resize(jm_voidp)(list, 0);
+	if(v->directDependency) {
+		size = jm_vector_get_size(jm_voidp)(v->directDependency);
+		if(jm_vector_reserve(jm_voidp)(list, size) < size) return jm_status_error;
+	    jm_vector_copy(jm_voidp)(list,v->directDependency);
+	}
+	return jm_status_success;
 }
 
 fmi1_xml_real_variable_t* fmi1_xml_get_variable_as_real(fmi1_xml_variable_t* v) {
-    if(fmi1_xml_get_variable_base_type(v) == fmi1_xml_base_type_enu_real)  return (void*)v;
+    if(fmi1_xml_get_variable_base_type(v) == fmi1_base_type_real)  return (void*)v;
     return 0;
 }
 
 fmi1_xml_integer_variable_t* fmi1_xml_get_variable_as_integer(fmi1_xml_variable_t*v){
-    if(fmi1_xml_get_variable_base_type(v) == fmi1_xml_base_type_enu_int)  return (void*)v;
+    if(fmi1_xml_get_variable_base_type(v) == fmi1_base_type_int)  return (void*)v;
     return 0;
 }
-fmi1_xml_enum_variable_t* fmI_xml_get_variable_as_enum(fmi1_xml_variable_t* v){
-    if(fmi1_xml_get_variable_base_type(v) == fmi1_xml_base_type_enu_enum)  return (void*)v;
+fmi1_xml_enum_variable_t* fmi1_xml_get_variable_as_enum(fmi1_xml_variable_t* v){
+    if(fmi1_xml_get_variable_base_type(v) == fmi1_base_type_enum)  return (void*)v;
     return 0;
 }
 fmi1_xml_string_variable_t* fmi1_xml_get_variable_as_string(fmi1_xml_variable_t* v){
-    if(fmi1_xml_get_variable_base_type(v) == fmi1_xml_base_type_enu_str)  return (void*)v;
+    if(fmi1_xml_get_variable_base_type(v) == fmi1_base_type_str)  return (void*)v;
     return 0;
 }
 fmi1_xml_bool_variable_t* fmi1_xml_get_variable_as_boolean(fmi1_xml_variable_t* v){
-    if(fmi1_xml_get_variable_base_type(v) == fmi1_xml_base_type_enu_bool)  return (void*)v;
+    if(fmi1_xml_get_variable_base_type(v) == fmi1_base_type_bool)  return (void*)v;
     return 0;
 }
 
@@ -419,7 +469,7 @@ int fmi1_xml_handle_Real(fmi1_xml_parser_context_t *context, const char* data) {
         fmi1_xml_variable_t* variable = jm_vector_get_last(jm_named_ptr)(&md->variables).ptr;
         fmi1_xml_type_definitions_t* td = &md->typeDefinitions;
         fmi1_xml_variable_type_base_t * declaredType = 0;
-        doubleype_props_t * type = 0;
+        fmi1_xml_real_type_props_t * type = 0;
         int hasStart;
 
         if(context -> currentElmHandle != fmi1_xml_handle_ScalarVariable) {
@@ -446,12 +496,12 @@ int fmi1_xml_handle_Real(fmi1_xml_parser_context_t *context, const char* data) {
 
 
             if(hasUnit || hasMin || hasMax || hasNom || hasQuan || hasRelQ) {
-                doubleype_props_t* props = 0;
+                fmi1_xml_real_type_props_t* props = 0;
 
                 if(declaredType->structKind == fmi1_xml_type_struct_enu_typedef)
-                    props = (doubleype_props_t*)(declaredType->baseTypeStruct);
+                    props = (fmi1_xml_real_type_props_t*)(declaredType->baseTypeStruct);
                 else
-                    props = (doubleype_props_t* )declaredType;
+                    props = (fmi1_xml_real_type_props_t* )declaredType;
 
                 fmi1_xml_reserve_parse_buffer(context, 1, 0);
                 fmi1_xml_reserve_parse_buffer(context, 2, 0);
@@ -468,7 +518,7 @@ int fmi1_xml_handle_Real(fmi1_xml_parser_context_t *context, const char* data) {
                 if( !hasRelQ) type->typeBase.relativeQuantity = props->typeBase.relativeQuantity;
             }
             else
-                type = (doubleype_props_t*)declaredType;
+                type = (fmi1_xml_real_type_props_t*)declaredType;
         }
         variable->typeBase = &type->typeBase;
 
@@ -780,10 +830,10 @@ int fmi1_xml_handle_Enumeration(fmi1_xml_parser_context_t *context, const char* 
 
 void fmi1_xml_eliminate_bad_alias(fmi1_xml_parser_context_t *context, size_t indexVR) {
     fmi1_xml_model_description_t* md = context->modelDescription;
-    jm_vector(jm_voidp)* varByVR = &md->variablesByVR->variables;
+    jm_vector(jm_voidp)* varByVR = md->variablesByVR;
     fmi1_xml_variable_t* v = (fmi1_xml_variable_t*)jm_vector_get_item(jm_voidp)(varByVR, indexVR);
     fmi1_value_reference_t vr = v->vr;
-    fmi1_xml_base_type_enu_t vt = fmi1_xml_get_variable_base_type(v);
+    fmi1_base_type_enu_t vt = fmi1_xml_get_variable_base_type(v);
     size_t i, n = jm_vector_get_size(jm_voidp)(varByVR);
     for(i = 0; i< n; i++) {
         jm_named_ptr key;
@@ -835,13 +885,23 @@ int fmi1_xml_handle_ModelVariables(fmi1_xml_parser_context_t *context, const cha
 
         /* create VR index */
         md->status = fmi1_xml_model_description_enu_ok;
-        md->variablesByVR = fmi1_xml_get_variable_list(md);
+		{
+			size_t size = jm_vector_get_size(jm_named_ptr)(&md->variables);
+			md->variablesByVR = jm_vector_alloc(jm_voidp)(size,size,md->callbacks);
+			if(md->variablesByVR) {
+				size_t i;
+				for(i= 0; i < size; ++i) {
+					jm_vector_set_item(jm_voidp)(md->variablesByVR, i, jm_vector_get_item(jm_named_ptr)(&md->variables,i).ptr);
+				}
+			}
+		}
+
         md->status = fmi1_xml_model_description_enu_empty;
         if(!md->variablesByVR) {
             fmi1_xml_parse_error(context, "Could not allocate memory");
             return -1;
         }
-        varByVR = &md->variablesByVR->variables;
+        varByVR = md->variablesByVR;
         jm_vector_qsort(jm_voidp)(varByVR, fmi1_xml_compare_vr);
 
         {
@@ -853,7 +913,7 @@ int fmi1_xml_handle_ModelVariables(fmi1_xml_parser_context_t *context, const cha
 
                 if(a->aliasKind == fmi1_xml_variable_is_alias) {
                     fmi1_xml_parse_warning(context,"All variables with vr %d (base type %s) are marked as aliases.",
-                                          a->vr, fmi1_xml_base_type2string(fmi1_xml_get_variable_base_type(a)));
+                                          a->vr, fmi1_base_type_to_string(fmi1_xml_get_variable_base_type(a)));
                     fmi1_xml_eliminate_bad_alias(context,0);
                     foundBadAlias = 1;
                     continue;
@@ -867,14 +927,14 @@ int fmi1_xml_handle_ModelVariables(fmi1_xml_parser_context_t *context, const cha
                         /* a different vr */
                         if(a->aliasKind == fmi1_xml_variable_is_negated_alias) {
                             fmi1_xml_parse_warning(context,"All variables with vr %u (base type %s) are marked as negated aliases",
-                                                  a->vr, fmi1_xml_base_type2string(fmi1_xml_get_variable_base_type(a)));
+                                                  a->vr, fmi1_base_type_to_string(fmi1_xml_get_variable_base_type(a)));
                             fmi1_xml_eliminate_bad_alias(context,i-1);
                             foundBadAlias = 1;
                             break;
                         }
                         if(b->aliasKind == fmi1_xml_variable_is_alias) {
                             fmi1_xml_parse_warning(context,"All variables with vr %u (base type %s) are marked as aliases",
-                                                b->vr, fmi1_xml_base_type2string(fmi1_xml_get_variable_base_type(b)));
+                                                b->vr, fmi1_base_type_to_string(fmi1_xml_get_variable_base_type(b)));
                           fmi1_xml_eliminate_bad_alias(context,i);
                           foundBadAlias = 1;
                           break;
@@ -884,7 +944,7 @@ int fmi1_xml_handle_ModelVariables(fmi1_xml_parser_context_t *context, const cha
                         if(   (a->aliasKind == fmi1_xml_variable_is_negated_alias)
                                 && (b->aliasKind == fmi1_xml_variable_is_alias)) {
                             fmi1_xml_parse_error(context,"All variables with vr %u (base type %s) are marked as aliases",
-                                                b->vr, fmi1_xml_base_type2string(fmi1_xml_get_variable_base_type(b)));
+                                                b->vr, fmi1_base_type_to_string(fmi1_xml_get_variable_base_type(b)));
                           fmi1_xml_eliminate_bad_alias(context,i);
                           foundBadAlias = 1;
                           break;

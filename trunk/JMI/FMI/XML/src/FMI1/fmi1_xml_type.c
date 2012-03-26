@@ -23,20 +23,10 @@
 #include "fmi1_xml_unit_impl.h"
 #include "fmi1_xml_parser.h"
 
-const char* fmi1_xml_base_type2string(fmi1_xml_base_type_enu_t bt) {
-    switch(bt) {
-    case fmi1_xml_base_type_enu_real: return "Real";
-    case fmi1_xml_base_type_enu_int: return "Integer";
-    case fmi1_xml_base_type_enu_bool: return "Boolean";
-    case fmi1_xml_base_type_enu_str: return "String";
-    case fmi1_xml_base_type_enu_enum: return "Enumeration";
-    }
-    return "Error";
-}
 
 fmi1_xml_display_unit_t* fmi1_xml_get_type_display_unit(fmi1_xml_real_typedef_t* t) {
     fmi1_xml_variable_typedef_t* vt = (void*)t;
-    doubleype_props_t * props = (doubleype_props_t*)vt->typeBase.baseTypeStruct;
+    fmi1_xml_real_type_props_t * props = (fmi1_xml_real_type_props_t*)vt->typeBase.baseTypeStruct;
     fmi1_xml_display_unit_t* du = props->displayUnit;
     if(du->displayUnit) return du;
     return 0;
@@ -60,21 +50,21 @@ const char* fmi1_xml_get_type_description(fmi1_xml_variable_typedef_t* t) {
     return t->description;
 }
 
-fmi1_xml_base_type_enu_t fmi1_xml_get_base_type(fmi1_xml_variable_typedef_t* t) {
+fmi1_base_type_enu_t fmi1_xml_get_base_type(fmi1_xml_variable_typedef_t* t) {
     return t->typeBase.baseType;
 }
 
 fmi1_xml_real_typedef_t* fmi1_xml_ret_type_as_real(fmi1_xml_variable_typedef_t* t) {
-    if(fmi1_xml_get_base_type(t) == fmi1_xml_base_type_enu_real) return (fmi1_xml_real_typedef_t*)t;
+    if(fmi1_xml_get_base_type(t) == fmi1_base_type_real) return (fmi1_xml_real_typedef_t*)t;
     return 0;
 }
 fmi1_xml_integer_typedef_t* fmi1_xml_get_type_as_int(fmi1_xml_variable_typedef_t* t) {
-    if(fmi1_xml_get_base_type(t) == fmi1_xml_base_type_enu_int) return (fmi1_xml_integer_typedef_t*)t;
+    if(fmi1_xml_get_base_type(t) == fmi1_base_type_int) return (fmi1_xml_integer_typedef_t*)t;
     return 0;
 }
 
 fmi1_xml_enumeration_typedef_t* fmi1_xml_get_type_as_enum(fmi1_xml_variable_typedef_t* t) {
-    if(fmi1_xml_get_base_type(t) == fmi1_xml_base_type_enu_enum) return (fmi1_xml_enumeration_typedef_t*)t;
+    if(fmi1_xml_get_base_type(t) == fmi1_base_type_enum) return (fmi1_xml_enumeration_typedef_t*)t;
     return 0;
 }
 
@@ -83,15 +73,15 @@ const char* fmi1_xml_get_type_quantity(fmi1_xml_variable_typedef_t* t) {
     fmi1_xml_variable_type_base_t* props = t->typeBase.baseTypeStruct;
     if(props->structKind != fmi1_xml_type_struct_enu_props) return 0;
     switch(props->baseType) {
-    case fmi1_xml_base_type_enu_real:
-        return ((doubleype_props_t*)props)->quantity;
-    case fmi1_xml_base_type_enu_int:
+    case fmi1_base_type_real:
+        return ((fmi1_xml_real_type_props_t*)props)->quantity;
+    case fmi1_base_type_int:
         return ((fmi1_xml_integer_type_props_t*)props)->quantity;
-    case fmi1_xml_base_type_enu_bool:
+    case fmi1_base_type_bool:
         return 0;
-    case fmi1_xml_base_type_enu_str:
+    case fmi1_base_type_str:
         return 0;
-    case fmi1_xml_base_type_enu_enum:
+    case fmi1_base_type_enum:
         return ((fmi1_xml_enum_type_props_t*)props)->quantity;
     default:
         return 0;
@@ -100,25 +90,25 @@ const char* fmi1_xml_get_type_quantity(fmi1_xml_variable_typedef_t* t) {
 
 double fmi1_xml_get_real_type_min(fmi1_xml_real_typedef_t* t) {
     fmi1_xml_variable_typedef_t* vt = (void*)t;
-    doubleype_props_t* props = (doubleype_props_t*)(vt->typeBase.baseTypeStruct);
+    fmi1_xml_real_type_props_t* props = (fmi1_xml_real_type_props_t*)(vt->typeBase.baseTypeStruct);
     return props->typeMin;
 }
 
 double fmi1_xml_get_real_type_max(fmi1_xml_real_typedef_t* t) {
     fmi1_xml_variable_typedef_t* vt = (void*)t;
-    doubleype_props_t* props = (doubleype_props_t*)(vt->typeBase.baseTypeStruct);
+    fmi1_xml_real_type_props_t* props = (fmi1_xml_real_type_props_t*)(vt->typeBase.baseTypeStruct);
     return props->typeMax;
 }
 
 double fmi1_xml_get_real_type_nominal(fmi1_xml_real_typedef_t* t) {
     fmi1_xml_variable_typedef_t* vt = (void*)t;
-    doubleype_props_t* props = (doubleype_props_t*)(vt->typeBase.baseTypeStruct);
+    fmi1_xml_real_type_props_t* props = (fmi1_xml_real_type_props_t*)(vt->typeBase.baseTypeStruct);
     return props->typeNominal;
 }
 
 fmi1_xml_unit_t* fmi1_xml_get_real_type_unit(fmi1_xml_real_typedef_t* t) {    
     fmi1_xml_variable_typedef_t* vt = (void*)t;
-    doubleype_props_t* props = (doubleype_props_t*)(vt->typeBase.baseTypeStruct);
+    fmi1_xml_real_type_props_t* props = (fmi1_xml_real_type_props_t*)(vt->typeBase.baseTypeStruct);
     fmi1_xml_display_unit_t* du = props->displayUnit;
     if(du) return du->baseUnit;
     return 0;
@@ -126,7 +116,7 @@ fmi1_xml_unit_t* fmi1_xml_get_real_type_unit(fmi1_xml_real_typedef_t* t) {
 
 int fmi1_xml_get_real_type_is_relative_quantity(fmi1_xml_real_typedef_t* t) {
     fmi1_xml_variable_typedef_t* vt = (void*)t;
-    doubleype_props_t* props = (doubleype_props_t*)(vt->typeBase.baseTypeStruct);
+    fmi1_xml_real_type_props_t* props = (fmi1_xml_real_type_props_t*)(vt->typeBase.baseTypeStruct);
     return props->typeBase.relativeQuantity;
 }
 
@@ -176,7 +166,7 @@ const char* fmi1_xml_get_enum_type_item_description(fmi1_xml_enumeration_typedef
     return e->itemDesciption;
 }
 
-void fmi1_xml_init_variable_type_base(fmi1_xml_variable_type_base_t* type, fmi1_xml_type_struct_kind_enu_t kind, fmi1_xml_base_type_enu_t baseType) {
+void fmi1_xml_init_variable_type_base(fmi1_xml_variable_type_base_t* type, fmi1_xml_type_struct_kind_enu_t kind, fmi1_base_type_enu_t baseType) {
     type->baseTypeStruct = 0;
     type->next = 0;
     type->structKind = kind;
@@ -185,8 +175,8 @@ void fmi1_xml_init_variable_type_base(fmi1_xml_variable_type_base_t* type, fmi1_
     type->isFixed = 0;
 }
 
-void fmi1_xml_init_real_type_properties(doubleype_props_t* type) {
-    fmi1_xml_init_variable_type_base(&type->typeBase, fmi1_xml_type_struct_enu_props,fmi1_xml_base_type_enu_real);
+void fmi1_xml_init_real_type_properties(fmi1_xml_real_type_props_t* type) {
+    fmi1_xml_init_variable_type_base(&type->typeBase, fmi1_xml_type_struct_enu_props,fmi1_base_type_real);
     type->quantity = 0;    
     type->typeMin = -DBL_MAX;
     type->typeMax = DBL_MAX;
@@ -195,14 +185,14 @@ void fmi1_xml_init_real_type_properties(doubleype_props_t* type) {
 }
 
 void fmi1_xml_init_integer_type_properties(fmi1_xml_integer_type_props_t* type) {
-    fmi1_xml_init_variable_type_base(&type->typeBase, fmi1_xml_type_struct_enu_props,fmi1_xml_base_type_enu_int);
+    fmi1_xml_init_variable_type_base(&type->typeBase, fmi1_xml_type_struct_enu_props,fmi1_base_type_int);
     type->quantity = 0;
     type->typeMin = INT_MIN;
     type->typeMax = INT_MAX;
 }
 
 void fmi1_xml_init_enumeration_type_properties(fmi1_xml_enum_type_props_t* type, jm_callbacks* cb) {
-    fmi1_xml_init_variable_type_base(&type->typeBase, fmi1_xml_type_struct_enu_props,fmi1_xml_base_type_enu_enum);
+    fmi1_xml_init_variable_type_base(&type->typeBase, fmi1_xml_type_struct_enu_props,fmi1_base_type_enum);
     type->quantity = 0;
     type->typeMin = INT_MIN;
     type->typeMax = INT_MAX;
@@ -226,8 +216,8 @@ void fmi1_xml_init_type_definitions(fmi1_xml_type_definitions_t* td, jm_callback
     fmi1_xml_init_integer_type_properties(&td->defaultIntegerType);
     td->defaultIntegerType.typeBase.structKind = fmi1_xml_type_struct_enu_base;
 
-    fmi1_xml_init_variable_type_base(&td->defaultBooleanType, fmi1_xml_type_struct_enu_base,fmi1_xml_base_type_enu_bool);
-    fmi1_xml_init_variable_type_base(&td->defaultStringType, fmi1_xml_type_struct_enu_base,fmi1_xml_base_type_enu_str);
+    fmi1_xml_init_variable_type_base(&td->defaultBooleanType, fmi1_xml_type_struct_enu_base,fmi1_base_type_bool);
+    fmi1_xml_init_variable_type_base(&td->defaultStringType, fmi1_xml_type_struct_enu_base,fmi1_base_type_str);
 
     td->typePropsList = 0;
 }
@@ -243,7 +233,7 @@ void fmi1_xml_free_type_definitions_data(fmi1_xml_type_definitions_t* td) {
         fmi1_xml_variable_type_base_t* cur = td->typePropsList;
         while(cur) {
             next = cur->next;
-            if((cur->baseType == fmi1_xml_base_type_enu_enum) && (cur->structKind == fmi1_xml_type_struct_enu_props)) {
+            if((cur->baseType == fmi1_base_type_enum) && (cur->structKind == fmi1_xml_type_struct_enu_props)) {
                 fmi1_xml_enum_type_props_t* props = (fmi1_xml_enum_type_props_t*)cur;
                 fmi1_xml_free_enumeration_type_props(props);
             }
@@ -311,7 +301,7 @@ int fmi1_xml_handle_Type(fmi1_xml_parser_context_t *context, const char* data) {
             }
             else {
                 fmi1_xml_variable_typedef_t* type = named.ptr;
-                fmi1_xml_init_variable_type_base(&type->typeBase,fmi1_xml_type_struct_enu_typedef,fmi1_xml_base_type_enu_real);
+                fmi1_xml_init_variable_type_base(&type->typeBase,fmi1_xml_type_struct_enu_typedef,fmi1_base_type_real);
                 if(jm_vector_get_size(char)(bufDescr)) {
                     const char* description = jm_string_set_put(&md->descriptions, jm_vector_get_itemp(char)(bufDescr,0));
                     type->description = description;
@@ -374,10 +364,10 @@ fmi1_xml_variable_type_base_t* fmi1_xml_alloc_variable_type_start(fmi1_xml_type_
 }
 
 
-doubleype_props_t* fmi1_xml_parse_real_type_properties(fmi1_xml_parser_context_t* context, fmi1_xml_elm_enu_t elmID) {
+fmi1_xml_real_type_props_t* fmi1_xml_parse_real_type_properties(fmi1_xml_parser_context_t* context, fmi1_xml_elm_enu_t elmID) {
     jm_named_ptr named, *pnamed;
     fmi1_xml_model_description_t* md = context->modelDescription;
-    doubleype_props_t* props;
+    fmi1_xml_real_type_props_t* props;
     const char* quantity = 0;
     int boolBuf;
 
@@ -387,7 +377,7 @@ doubleype_props_t* fmi1_xml_parse_real_type_properties(fmi1_xml_parser_context_t
     jm_vector(char)* bufUnit = fmi1_xml_reserve_parse_buffer(context,4,100);
     jm_vector(char)* bufDispUnit = fmi1_xml_reserve_parse_buffer(context,5,100);
 
-    props = (doubleype_props_t*)fmi1_xml_alloc_variable_type_props(&md->typeDefinitions, &md->typeDefinitions.defaultRealType.typeBase, sizeof(doubleype_props_t));
+    props = (fmi1_xml_real_type_props_t*)fmi1_xml_alloc_variable_type_props(&md->typeDefinitions, &md->typeDefinitions.defaultRealType.typeBase, sizeof(fmi1_xml_real_type_props_t));
 
     if(!bufQuantity || !bufUnit || !bufDispUnit || !props ||
             /* <xs:attribute name="quantity" type="xs:normalizedString"/> */
@@ -437,14 +427,14 @@ int fmi1_xml_handle_RealType(fmi1_xml_parser_context_t *context, const char* dat
         fmi1_xml_model_description_t* md = context->modelDescription;
         jm_named_ptr named;
         fmi1_xml_variable_typedef_t* type;
-        doubleype_props_t * props;
+        fmi1_xml_real_type_props_t * props;
         if(fmi_check_last_elem_is_specific_type(context)) return -1;
 
         props = fmi1_xml_parse_real_type_properties(context, fmi1_xml_elmID_RealType);
         if(!props) return -1;
         named = jm_vector_get_last(jm_named_ptr)(&md->typeDefinitions.typeDefinitions);
         type = named.ptr;
-        type->typeBase.baseType = fmi1_xml_base_type_enu_real;
+        type->typeBase.baseType = fmi1_base_type_real;
         type->typeBase.baseTypeStruct = &props->typeBase;
     }
     else {
@@ -497,7 +487,7 @@ int fmi1_xml_handle_IntegerType(fmi1_xml_parser_context_t *context, const char* 
         if(!props) return -1;
         named = jm_vector_get_last(jm_named_ptr)(&md->typeDefinitions.typeDefinitions);
         type = named.ptr;
-        type->typeBase.baseType = fmi1_xml_base_type_enu_int;
+        type->typeBase.baseType = fmi1_base_type_int;
         type->typeBase.baseTypeStruct = &props->typeBase;
     }
     else {
@@ -517,7 +507,7 @@ int fmi1_xml_handle_BooleanType(fmi1_xml_parser_context_t *context, const char* 
 
         named = jm_vector_get_last(jm_named_ptr)(&context->modelDescription->typeDefinitions.typeDefinitions);
         type = named.ptr;
-        type->typeBase.baseType = fmi1_xml_base_type_enu_bool;
+        type->typeBase.baseType = fmi1_base_type_bool;
         type->typeBase.baseTypeStruct = &md->typeDefinitions.defaultBooleanType;
     }
     else {
@@ -536,7 +526,7 @@ int fmi1_xml_handle_StringType(fmi1_xml_parser_context_t *context, const char* d
 
         named = jm_vector_get_last(jm_named_ptr)(&context->modelDescription->typeDefinitions.typeDefinitions);
         type = named.ptr;
-        type->typeBase.baseType = fmi1_xml_base_type_enu_bool;
+        type->typeBase.baseType = fmi1_base_type_bool;
         type->typeBase.baseTypeStruct = &md->typeDefinitions.defaultBooleanType;
     }
     else {
@@ -581,7 +571,7 @@ int fmi1_xml_handle_EnumerationType(fmi1_xml_parser_context_t *context, const ch
                 ) return -1;
         named = jm_vector_get_last(jm_named_ptr)(&context->modelDescription->typeDefinitions.typeDefinitions);
         type = named.ptr;
-        type->typeBase.baseType = fmi1_xml_base_type_enu_enum;
+        type->typeBase.baseType = fmi1_base_type_enum;
         type->typeBase.baseTypeStruct = &props->typeBase;
     }
     else {
@@ -608,7 +598,7 @@ int fmi1_xml_handle_Item(fmi1_xml_parser_context_t *context, const char* data) {
             jm_named_ptr named, *pnamed;
             size_t descrlen;
 
-            assert((enumProps->typeBase.structKind == fmi1_xml_type_struct_enu_props) && (enumProps->typeBase.baseType == fmi1_xml_base_type_enu_enum));
+            assert((enumProps->typeBase.structKind == fmi1_xml_type_struct_enu_props) && (enumProps->typeBase.baseType == fmi1_base_type_enum));
 
             if(!bufName || !bufDescr ||
             /*  <xs:attribute name="name" type="xs:normalizedString" use="required"/> */

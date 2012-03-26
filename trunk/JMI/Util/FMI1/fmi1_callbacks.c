@@ -15,6 +15,7 @@
 */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <limits.h>
 #include <string.h>
 #include <assert.h>
@@ -88,13 +89,13 @@ void *fmi1_realloc(void *pointer, size_t size) {
     return newmem;
 }
 
-
 void fmi1_init_callbacks(fmi1_callbacks_t* callbacks, fmi1_callback_functions_t* fmiFunctions) {
+	assert(0); /* TODO: logger not implemented */
     callbacks->jmFunctions.malloc = fmi1_malloc;
     callbacks->jmFunctions.calloc = fmi1_calloc;
     callbacks->jmFunctions.realloc = fmi1_realloc;
     callbacks->jmFunctions.free = fmi1_free;
-    callbacks->jmFunctions.logger = (jm_logger_f)(fmiFunctions->logger);
+    callbacks->jmFunctions.logger = 0;
     callbacks->jmFunctions.context = callbacks;
 
     callbacks->fmiFunctions.logger = fmiFunctions->logger;
@@ -102,4 +103,45 @@ void fmi1_init_callbacks(fmi1_callbacks_t* callbacks, fmi1_callback_functions_t*
     callbacks->fmiFunctions.freeMemory = fmiFunctions->freeMemory;
 
     jm_set_default_callbacks(&callbacks->jmFunctions);
+}
+
+void  fmi1_default_callback_logger(fmi1_component_t c, fmi1_string_t instanceName, fmi1_status_t status, fmi1_string_t category, fmi1_string_t message, ...) {
+    va_list args;
+    char buf[500], *curp;
+    va_start (args, message);
+    curp = buf;
+    *curp = 0;
+    if(instanceName) {
+        sprintf(curp, "[%s]", instanceName);
+        curp += strlen(instanceName)+2;
+    }
+    if(category) {
+        sprintf(curp, "[%s]", category);
+        curp += strlen(category)+2;
+    }
+    fprintf(stdout, "%s[status=%s]", buf, fmi1_status_to_string(status));
+    vfprintf (stdout, message, args);
+    fprintf(stdout, "\n");
+    va_end (args);
+}
+
+void fmi1_logger(jm_callbacks* cb, jm_string module, jm_log_level_enu_t log_level, jm_string message) {
+	fmi1_logger_context_t* c = (fmi1_logger_context_t*)cb->context;
+	if(!c ||!c->logger) return;
+	switch(log_level) {
+	case jm_log_level_all:
+	case jm_log_level_info:
+		c->logger( c, module, fmi1_status_ok, "INFO", message);
+		break;
+	case jm_log_level_warning:
+		c->logger( c, module, fmi1_status_warning, "WARNING", message);
+		break;
+	default:
+		c->logger( c, module, fmi1_status_error, "ERROR", message);
+	}
+}
+
+void fmi1_import_init_logger(jm_callbacks* cb, fmi1_logger_context_t* context) {
+	cb->logger = fmi1_logger;
+	cb->context = context;
 }

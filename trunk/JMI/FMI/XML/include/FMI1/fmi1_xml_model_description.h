@@ -33,10 +33,6 @@
 extern "C" {
 #endif
 
-/*
-  @}
-  */
-
 /**
  * \defgroup Forward declarations of structs used in the interface.
  * \brief All the structures used in the interfaces are intended to
@@ -130,10 +126,9 @@ int fmi1_xml_is_model_description_empty(fmi1_xml_model_description_t* md);
 const char* fmi1_xml_get_last_error(fmi1_xml_model_description_t* md);
 
 /* 
-fmiClearLastError clears the error message and returns 0 if further processing is possible. If it returns 1 then the 
-error was not recoverable. Model desciption should be freed and recreated.
+fmiClearLastError clears the error message .
 */
-int fmi1_xml_clear_last_error(fmi1_xml_model_description_t* md);
+void fmi1_xml_clear_last_error(fmi1_xml_model_description_t* md);
 
 /* Release the memory allocated
 @param md A model description object as returned by fmi1_xml_allocate_model_description.
@@ -187,7 +182,6 @@ jm_vector(jm_named_ptr)* fmi1_xml_get_variables(fmi1_xml_model_description_t* md
 #include "fmi1_xml_type.h"
 #include "fmi1_xml_unit.h"
 #include "fmi1_xml_variable.h"
-#include "fmi1_xml_variable_list.h"
 #include "fmi1_xml_vendor_annotations.h"
 #include "fmi1_xml_capabilities.h"
 #include "fmi1_xml_cosim.h"

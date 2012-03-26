@@ -36,6 +36,10 @@ static fmi_import_context_t* fmi_import_allocate_context( jm_callbacks* callback
 	return fmi_xml_allocate_context(callbacks);
 }
 
+static void fmi_import_free_context( fmi_import_context_t* c) {
+	fmi_xml_free_context(c);
+}
+
 fmi_version_enu_t fmi_import_get_fmi_version( fmi_import_context_t*, const char* fileName, const char* dirName);
 
 typedef struct fmi1_import_t fmi1_import_t;
@@ -45,9 +49,3 @@ fmi1_import_t* fmi1_import_parse_xml( fmi_import_context_t* c, const char* dirNa
 }
 #endif
 #endif
-
-struct fmi_xml_context_t {
-	jm_callbacks* callbacks;
-
-	fmi_version_enu_t fmiVersion;
-};

@@ -37,18 +37,7 @@ fmi1_xml_display_unit_t* fmi1_xml_get_type_display_unit(fmi1_xml_real_typedef_t*
 
 fmi1_xml_type_definitions_t* fmi1_xml_get_type_definitions(fmi1_xml_model_description_t* md);
 
-/* Base types used in type definitions */
-typedef enum fmi1_xml_base_type_enu_t
-{
-        fmi1_xml_base_type_enu_real,
-        fmi1_xml_base_type_enu_int,
-        fmi1_xml_base_type_enu_bool,
-        fmi1_xml_base_type_enu_str,
-        fmi1_xml_base_type_enu_enum
-} fmi1_xml_base_type_enu_t;
-
 /* Convert base type constant to string */
-const char* fmi1_xml_base_type2string(fmi1_xml_base_type_enu_t bt);
 
 size_t fmi1_xml_get_type_definition_number(fmi1_xml_type_definitions_t* td);
 
@@ -59,7 +48,7 @@ const char* fmi1_xml_get_type_name(fmi1_xml_variable_typedef_t*);
 /* Note that NULL pointer is returned if the attribute is not present in the XML.*/
 const char* fmi1_xml_get_type_description(fmi1_xml_variable_typedef_t*);
 
-fmi1_xml_base_type_enu_t fmi1_xml_get_base_type(fmi1_xml_variable_typedef_t*);
+fmi1_base_type_enu_t fmi1_xml_get_base_type(fmi1_xml_variable_typedef_t*);
 
 /* Boolean and String has no extra attributes -> not needed*/
 

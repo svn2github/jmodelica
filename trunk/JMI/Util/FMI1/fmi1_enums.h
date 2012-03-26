@@ -59,4 +59,18 @@ typedef enum fmi1_variable_alias_kind_enu_t {
     fmi1_xml_variable_is_alias = 1
 } fmi1_variable_alias_kind_enu_t;
 
+/* Base types used in type definitions */
+typedef enum fmi1_base_type_enu_t
+{
+	fmi1_base_type_real,
+	fmi1_base_type_int,
+	fmi1_base_type_bool,
+	fmi1_base_type_str,
+	fmi1_base_type_enum
+} fmi1_base_type_enu_t;
+
+/* Convert base type constant to string */
+const char* fmi1_base_type_to_string(fmi1_base_type_enu_t bt);
+
+
 #endif /* End of header file FMI1_ENUMS_H_ */

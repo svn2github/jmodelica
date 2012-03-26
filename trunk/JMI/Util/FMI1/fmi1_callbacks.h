@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-typedef struct fmi1_callbacks_t {
+typedef struct fmi1_export_callbacks_t {
     jm_callbacks jmFunctions;
     fmi1_callback_functions_t fmiFunctions;
 } fmi1_callbacks_t;
@@ -45,7 +45,16 @@ typedef struct fmi_memory_header_t {
     jm_set_default_callbacks(&cb) to set memory handling functions to point to the correct context.
     Note that realloc and free get the correct context from heap memory directly if present.
 */
-void fmi1_init_callbacks(fmi1_callbacks_t* callbacks, fmi1_callback_functions_t* fmiFunctions);
+void fmi1_export_init_callbacks(fmi1_callbacks_t* callbacks, fmi1_callback_functions_t* fmiFunctions);
+
+/* Default logger may be used when instantiating FMUs */
+void  fmi1_default_callback_logger(fmi1_component_t c, fmi1_string_t instanceName, fmi1_status_t status, fmi1_string_t category, fmi1_string_t message, ...);
+
+typedef struct fmi1_logger_context_t {
+	fmi1_callback_logger_ft logger;
+} fmi1_logger_context_t;
+
+void fmi1_import_init_logger(jm_callbacks*, fmi1_logger_context_t*);
 
 #ifdef __cplusplus
 }

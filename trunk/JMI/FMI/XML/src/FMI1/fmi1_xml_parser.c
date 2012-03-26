@@ -428,9 +428,9 @@ int fmi1_xml_parse_model_description(fmi1_xml_model_description_t* md, const cha
     XML_Parser parser = NULL;
     FILE* file;
 
-    context = md->callbacks->calloc(1, sizeof(fmi1_xml_parser_context_t));
+    context = (fmi1_xml_parser_context_t*)md->callbacks->calloc(1, sizeof(fmi1_xml_parser_context_t));
     if(!context) {
-        md->callbacks->logger(md, 0, -1, "ERROR", "Could not allocate memory for XML parser context");
+        jm_log(md->callbacks, "FMIXML", jm_log_level_error, "Could not allocate memory for XML parser context");
     }
     context->callbacks = md->callbacks;
     context->modelDescription = md;

@@ -21,21 +21,17 @@
 #include <FMI1/fmi1_types.h>
 #include <FMI1/fmi1_functions.h>
 #include <Common/fmi_import_context.h>
+#include <FMI1/fmi1_import.h>
 
-void mylogger(fmi1_component_t c, fmi1_string_t instanceName, fmi1_status_t status, fmi1_string_t category, fmi1_string_t message, ...)
+
+void mylogger(jm_callbacks* c, jm_string module, jm_log_level_enu_t log_level, jm_string message)
 {
-	char msg[2024];
-	va_list argp;	
-	va_start(argp, message);
-	vsprintf(msg, message, argp);
-	if (!instanceName) instanceName = "?";
-	if (!category) category = "?";
-	printf("fmiStatus = %d;  %s (%s): %s\n", status, instanceName, category, msg);
+        printf("module = %s, log level = %d: %s\n", module, log_level, message);
 }
 
 void do_exit(int code)
 {
-	printf("Press any key to exit\n");
+	printf("Press 'Enter' to exit\n");
 	getchar();
 	exit(code);
 }
@@ -75,18 +71,12 @@ int main(int argc, char *argv[])
 
 	context = fmi_import_allocate_context(&callbacks);
 
-#if 0
-	if (jm_status_error == fmi_import_unzip(FMUPath, tmpPath)) {
-		printf("Failed to unzip the FMU file\n");
+	version = fmi_import_get_fmi_version(context, FMUPath, tmpPath);
+
+	if(version != fmi_version_1_enu) {
+		printf("Only version 1.0 is supported so far\n");
 		do_exit(1);
 	}
-
-	//version = fmi_import_get_fmi_version(context, tmpPath);
-
-	//if(version != fmi_version_1_enu) {
-	//	printf("Only version 1.0 is supported so far\n");
-	//	do_exit(1);
-	//}
 
 	fmu = fmi1_import_parse_xml(context, tmpPath);
 
@@ -95,13 +85,13 @@ int main(int argc, char *argv[])
 		do_exit(1);
 	}
 	modelIdentifier = fmi1_import_get_model_identifier(fmu);
-	modelName = fmi1_xml_get_model_name(fmu);
-	GUID = fmi1_xml_get_GUID(fmu);
+	modelName = fmi1_import_get_model_name(fmu);
+	GUID = fmi1_import_get_GUID(fmu);
 
 	printf("Model name: %s\n", modelName);
     printf("Model identifier: %s\n", modelIdentifier);
     printf("Model GUID: %s\n", GUID);
-
+#if 0
 	status = fmi1_import_load_dll(fmu);
 
 	if (status == jm_status_error) {
@@ -110,14 +100,13 @@ int main(int argc, char *argv[])
 	}
 
 	printf("Version returned from FMU:   %s\n", fmi1_import_get_version(fmu));
-
+#endif
 	fmi1_import_free(fmu);
 	fmi_import_free_context(context);
 	
 	printf("Everything seems to be OK since you got this far=)!\n");
 
 	do_exit(0);
-#endif
 }
 
 

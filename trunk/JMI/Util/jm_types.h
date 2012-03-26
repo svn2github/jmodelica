@@ -35,6 +35,15 @@ typedef enum {
 	jm_status_warning = 1
 } jm_status_enu_t;
 
+typedef enum {	
+	jm_log_level_all, /* "all" must be first in this enum*/
+	jm_log_level_info,
+	jm_log_level_warning,
+	jm_log_level_error,
+	jm_log_level_fatal,
+	jm_log_level_nothing /* "nothing" must be last in this enum*/
+} jm_log_level_enu_t;
+
 #ifdef __cplusplus
 }
 #endif

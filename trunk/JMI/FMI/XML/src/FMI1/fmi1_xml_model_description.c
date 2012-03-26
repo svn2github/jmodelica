@@ -32,11 +32,10 @@ fmi1_xml_model_description_t * fmi1_xml_allocate_model_description( jm_callbacks
     else {
         cb = jm_get_default_callbacks();
     }
-    md = cb->malloc(sizeof(fmi1_xml_model_description_t));
+    md = (fmi1_xml_model_description_t*)cb->malloc(sizeof(fmi1_xml_model_description_t));
     if(!md) return 0;
 
     md->callbacks = cb;
-    md->errMessageBuf[0] = 0;
 
     md->status = fmi1_xml_model_description_enu_empty;
 
@@ -70,7 +69,7 @@ fmi1_xml_model_description_t * fmi1_xml_allocate_model_description( jm_callbacks
 
     jm_vector_init(jm_named_ptr)(&md->variables, 0, cb);
 
-    md->variablesByVR = 0;
+	md->variablesByVR = 0;
 
     jm_vector_init(jm_string)(&md->descriptions, 0, cb);
 
@@ -89,7 +88,6 @@ fmi1_xml_model_description_t * fmi1_xml_allocate_model_description( jm_callbacks
 
 
 void fmi1_xml_clear_model_description( fmi1_xml_model_description_t* md) {
-    md->errMessageBuf[0] = 0;
 
     md->status = fmi1_xml_model_description_enu_empty;
     jm_vector_free_data(char)(&md->fmi1_xml_standard_version);
@@ -122,7 +120,10 @@ void fmi1_xml_clear_model_description( fmi1_xml_model_description_t* md) {
 
     jm_vector_foreach(jm_named_ptr)(&md->variables, fmi1_xml_free_direct_dependencies);
     jm_named_vector_free_data(&md->variables);
-    if(md->variablesByVR) fmi1_xml_free_variable_list(md->variablesByVR);
+    if(md->variablesByVR) {
+		jm_vector_free(jm_voidp)(md->variablesByVR);
+		md->variablesByVR = 0;
+	}
 
     jm_vector_foreach(jm_string)(&md->descriptions, (void(*)(const char*))md->callbacks->free);
     jm_vector_free_data(jm_string)(&md->descriptions);
@@ -140,12 +141,13 @@ int fmi1_xml_is_model_description_empty(fmi1_xml_model_description_t* md) {
 }
 
 const char* fmi1_xml_get_last_error(fmi1_xml_model_description_t* md) {
-    return md->errMessageBuf;
+	return jm_get_last_error(md->callbacks);
 }
 
-int fmi1_xml_clear_last_error(fmi1_xml_model_description_t* md) {
-    md->errMessageBuf[0] = 0;
-    return (md->status != fmi1_xml_model_description_enu_error);
+void fmi1_xml_clear_last_error(fmi1_xml_model_description_t* md) {
+	jm_clear_last_error(md->callbacks);
+    
+    /* return (md->status != fmi1_xml_model_description_enu_error); */
 }
 
 void fmi1_xml_free_model_description(fmi1_xml_model_description_t* md) {
@@ -262,9 +264,7 @@ void fmi1_xml_report_error(fmi1_xml_model_description_t* md, const char* module,
 }
 
 void fmi1_xml_report_error_v(fmi1_xml_model_description_t* md, const char* module, const char* fmt, va_list ap) {
-    vsprintf(md->errMessageBuf, fmt, ap);
-    if(md->callbacks->logger)
-        md->callbacks->logger(md, module, 0, "ERROR", md->errMessageBuf);
+	jm_log_v(md->callbacks, module, jm_log_level_error, fmt, ap);
 }
 
 void fmi1_xml_report_warning(fmi1_xml_model_description_t* md, const char* module, const char* fmt, ...){
@@ -275,24 +275,7 @@ void fmi1_xml_report_warning(fmi1_xml_model_description_t* md, const char* modul
 }
 
 void fmi1_xml_report_warning_v(fmi1_xml_model_description_t* md, const char* module, const char* fmt, va_list ap){
-    vsprintf(md->errMessageBuf, fmt, ap);
-    if(md->callbacks->logger)
-        md->callbacks->logger(md, module, 0, "WARNING", md->errMessageBuf);
-}
-
-
-/* Get the list of all the variables in the model */
-fmi1_xml_variable_list_t* fmi1_xml_get_variable_list(fmi1_xml_model_description_t* md) {
-    fmi1_xml_variable_list_t* vl;
-    size_t nv, i;
-    if(md->status != fmi1_xml_model_description_enu_ok) return 0;
-    nv = jm_vector_get_size(jm_named_ptr)(&md->variables);
-    vl = fmi1_xml_alloc_variable_list(md, nv);
-    if(!vl) return 0;
-    for(i = 0; i< nv; i++) {
-        jm_vector_set_item(jm_voidp)(&vl->variables, i, jm_vector_get_item(jm_named_ptr)(&md->variables, i).ptr);
-    }
-    return vl;
+	jm_log_v(md->callbacks, module, jm_log_level_warning, fmt, ap);
 }
 
 

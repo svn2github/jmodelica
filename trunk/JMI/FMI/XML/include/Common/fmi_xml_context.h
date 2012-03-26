@@ -35,6 +35,8 @@ typedef struct fmi_xml_context_t fmi_xml_context_t;
 
 fmi_xml_context_t* fmi_xml_allocate_context( jm_callbacks* callbacks);
 
+void fmi_xml_free_context(fmi_xml_context_t *context);
+
 typedef enum
 { 
 	fmi_version_unknown_enu = 0,

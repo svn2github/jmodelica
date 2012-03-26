@@ -20,7 +20,9 @@
 #include <jm_named_ptr.h>
 #include <Common/fmi_import_context.h>
 #include <fmi_zip_unzip.h>
-#include "../Common/fmi_import_util.h"
+#include <Common/fmi_import_util.h>
+
+#include "fmi_import_context_impl.h"
 
 fmi_version_enu_t fmi_import_get_fmi_version( fmi_import_context_t* c, const char* fileName, const char* dirName) {
 	fmi_version_enu_t ret = fmi_version_unknown_enu;

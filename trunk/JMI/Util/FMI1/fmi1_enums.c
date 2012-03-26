@@ -13,6 +13,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <assert.h>
+
+#include "fmi1_functions.h"
 
 #include "fmi1_enums.h"
 
@@ -48,5 +51,34 @@ const char* fmi1_causality_to_string(fmi1_causality_enu_t c) {
     case fmi1_causality_enu_internal: return "internal";
     case fmi1_causality_enu_none: return "none";
     };
+    return "Error";
+}
+
+const char* fmi1_status_to_string(fmi1_status_t status) {
+	switch(status) {
+	case fmi1_status_ok:
+		return "OK";
+	case fmi1_status_warning:
+		return "Warning";
+	case fmi1_status_discard:
+		return "Discard";
+	case fmi1_status_error:
+		return "Error";
+	case fmi1_status_fatal:
+		return "Fatal";
+	case fmi1_status_pending:
+		return "Pending";
+	}
+	return "Undefined";
+}
+
+const char* fmi1_base_type_to_string(fmi1_base_type_enu_t bt) {
+    switch(bt) {
+    case fmi1_base_type_real: return "Real";
+    case fmi1_base_type_int: return "Integer";
+    case fmi1_base_type_bool: return "Boolean";
+    case fmi1_base_type_str: return "String";
+    case fmi1_base_type_enum: return "Enumeration";
+    }
     return "Error";
 }

@@ -149,6 +149,7 @@ fmi1_xml_variable_list_t* fmi1_xml_filter_variables(fmi1_xml_variable_list_t* vl
     return out;
 }
 
+#if 0
 int fmi1_xml_filter_variable_by_expression(fmi1_xml_variable_t* var, void * c) {
 	fmi1_xml_q_expression_t* expr = c;
 	return fmi1_xml_q_filter_variable(var, expr);
@@ -169,3 +170,4 @@ fmi1_xml_variable_list_t* fmi1_xml_select_variables(fmi1_xml_variable_list_t* vl
 
 	return ret; 
 }
+#endif

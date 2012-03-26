@@ -65,7 +65,7 @@ struct fmi1_xml_variable_type_base_t {
 
     char structKind; /* one of fmi1_xml_type_contrains_kind.*/
     char baseType;   /* one of fmi1_xml_base_type */
-    char relativeQuantity; /* only used for fmi1_xml_type_struct_enu_props (in doubleype_props_t) */
+    char relativeQuantity; /* only used for fmi1_xml_type_struct_enu_props (in fmi1_xml_real_type_props_t) */
     char isFixed;   /* only used for fmi1_xml_type_struct_enu_start*/
 };
 
@@ -76,7 +76,7 @@ struct fmi1_xml_variable_typedef_t {
     char typeName[1];
 };
 
-typedef struct doubleype_props_t {
+typedef struct fmi1_xml_real_type_props_t {
     fmi1_xml_variable_type_base_t typeBase;
     jm_string quantity;
 
@@ -85,7 +85,7 @@ typedef struct doubleype_props_t {
     double typeMin;
     double typeMax;
     double typeNominal;
-} doubleype_props_t;
+} fmi1_xml_real_type_props_t;
 
 typedef struct fmi1_xml_integer_type_props_t {
     fmi1_xml_variable_type_base_t typeBase;
@@ -138,6 +138,16 @@ static fmi1_xml_variable_type_base_t* fmi1_xml_find_type_struct(fmi1_xml_variabl
     return 0;
 }
 
+static fmi1_xml_variable_type_base_t* fmi1_xml_find_type_props(fmi1_xml_variable_type_base_t* type) {
+    fmi1_xml_variable_type_base_t* typeBase = type;
+    while(typeBase) {
+        if((typeBase->structKind == fmi1_xml_type_struct_enu_base)
+			|| (typeBase->structKind == fmi1_xml_type_struct_enu_props)) return typeBase;
+        typeBase = typeBase->baseTypeStruct;
+    }	
+    return 0;
+}
+
 struct fmi1_xml_type_definitions_t {
     jm_vector(jm_named_ptr) typeDefinitions;
 
@@ -145,7 +155,7 @@ struct fmi1_xml_type_definitions_t {
 
     fmi1_xml_variable_type_base_t* typePropsList;
 
-    doubleype_props_t defaultRealType;
+    fmi1_xml_real_type_props_t defaultRealType;
     fmi1_xml_enum_type_props_t defaultEnumType;
     fmi1_xml_integer_type_props_t defaultIntegerType;
     fmi1_xml_bool_type_props_t defaultBooleanType;
@@ -166,7 +176,7 @@ fmi1_xml_variable_type_base_t* fmi1_xml_alloc_variable_type_props(fmi1_xml_type_
 
 fmi1_xml_variable_type_base_t* fmi1_xml_alloc_variable_type_start(fmi1_xml_type_definitions_t* td,fmi1_xml_variable_type_base_t* base, size_t typeSize);
 
-doubleype_props_t* fmi1_xml_parse_real_type_properties(fmi1_xml_parser_context_t* context, fmi1_xml_elm_enu_t elmID);
+fmi1_xml_real_type_props_t* fmi1_xml_parse_real_type_properties(fmi1_xml_parser_context_t* context, fmi1_xml_elm_enu_t elmID);
 
 fmi1_xml_integer_type_props_t *fmi1_xml_parse_integer_type_properties(fmi1_xml_parser_context_t* context, fmi1_xml_elm_enu_t elmID);
 

@@ -14,32 +14,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef FMI_XML_CONTEXT_IMPL_H
-#define FMI_XML_CONTEXT_IMPL_H
+#ifndef FMI1_IMPORT_UTIL_H_
+#define FMI1_IMPORT_UTIL_H_
 
-#include <expat.h>
+#include <jm_callbacks.h>
 
-#include <jm_vector.h>
-#include <jm_stack.h>
-#include <jm_named_ptr.h>
+char* fmi_import_get_dll_path(const char* fmu_unzipped_path, const char* model_identifier, jm_callbacks* callBackFunctions);
+char* fmi_import_get_model_description_path(const char* fmu_unzipped_path, jm_callbacks* callBackFunctions);
 
-#include <FMI1/fmi1_xml_model_description.h>
-#include <Common/fmi_xml_context.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct fmi_xml_context_t {
-	jm_callbacks* callbacks;
-	
-    XML_Parser parser;
-
-	fmi_version_enu_t fmi_version;
-};
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* FMI_XML_CONTEXT_H */
+#endif /* End of header file FMI1_IMPORT_UTIL_H_ */

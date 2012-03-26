@@ -40,7 +40,7 @@ fmi1_value_reference_t fmi1_xml_get_variable_vr(fmi1_xml_variable_t*);
     For scalar variable gives the type definition is present
 */
 fmi1_xml_variable_typedef_t* fmi1_xml_get_variable_declared_type(fmi1_xml_variable_t*);
-fmi1_xml_base_type_enu_t fmi1_xml_get_variable_base_type(fmi1_xml_variable_t*);
+fmi1_base_type_enu_t fmi1_xml_get_variable_base_type(fmi1_xml_variable_t*);
 
 int   fmi1_xml_get_variable_has_start(fmi1_xml_variable_t*);
 int   fmi1_xml_get_variable_is_fixed(fmi1_xml_variable_t*);
@@ -50,11 +50,12 @@ fmi1_variability_enu_t fmi1_xml_get_variability(fmi1_xml_variable_t*);
 fmi1_causality_enu_t fmi1_xml_get_causality(fmi1_xml_variable_t*);
 
 /* DirectDependency is returned for variables with causality Output. Null pointer for others. */
-fmi1_xml_variable_list_t* fmi1_xml_get_direct_dependency(fmi1_xml_model_description_t* md,fmi1_xml_variable_t*);
+size_t fmi1_xml_get_direct_dependency_size(fmi1_xml_model_description_t* md,fmi1_xml_variable_t*);
+jm_status_enu_t fmi1_xml_get_direct_dependency(fmi1_xml_model_description_t* md,fmi1_xml_variable_t*, jm_vector(jm_voidp)*);
 
 fmi1_xml_real_variable_t* fmi1_xml_get_variable_as_real(fmi1_xml_variable_t*);
 fmi1_xml_integer_variable_t* fmi1_xml_get_variable_as_integer(fmi1_xml_variable_t*);
-fmi1_xml_enum_variable_t* fmI_xml_get_variable_as_enum(fmi1_xml_variable_t*);
+fmi1_xml_enum_variable_t* fmi1_xml_get_variable_as_enum(fmi1_xml_variable_t*);
 fmi1_xml_string_variable_t* fmi1_xml_get_variable_as_string(fmi1_xml_variable_t*);
 fmi1_xml_bool_variable_t* fmi1_xml_get_variable_as_boolean(fmi1_xml_variable_t*);
 
@@ -84,7 +85,8 @@ fmi1_xml_variable_t* fmi1_xml_get_variable_alias_base(fmi1_xml_model_description
     Return the list of all the variables aliased to the given one (including the base one.
     The list is ordered: base variable, aliases, negated aliases.
 */
-fmi1_xml_variable_list_t* fmi1_xml_get_variable_aliases(fmi1_xml_model_description_t* md,fmi1_xml_variable_t*);
+jm_status_enu_t fmi1_xml_get_variable_aliases(fmi1_xml_model_description_t* md, fmi1_xml_variable_t*, jm_vector(jm_voidp)*);
+/* fmi1_xml_variable_list_t* fmi1_xml_get_variable_aliases(fmi1_xml_model_description_t* md,fmi1_xml_variable_t*); */
 
 #ifdef __cplusplus
 }

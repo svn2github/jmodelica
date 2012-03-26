@@ -53,9 +53,8 @@ void fmi_xml_error(fmi_xml_context_t *context, const char* fmt, ...) {
     const char * module = "FMIXML";
     va_start (args, fmt);
 
-	vsprintf(context->errMessageBuf, fmt, args);
-    if(context->callbacks->logger)
-        context->callbacks->logger(context, module, 0, "ERROR", context->errMessageBuf);
+	jm_log_v(context->callbacks, module, jm_log_level_error, fmt, args);
+
     va_end (args);
 
 	XML_StopParser(context->parser,0);

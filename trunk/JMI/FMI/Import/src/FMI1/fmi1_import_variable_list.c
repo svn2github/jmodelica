@@ -101,7 +101,7 @@ const fmi1_value_reference_t* fmi1_import_get_value_referece_list(fmi1_import_va
         vl->vr = jm_vector_alloc(size_t)(nv,nv,vl->variables.callbacks);
         if(vl->vr) {
             for(i = 0; i < nv; i++) {
-                jm_vector_set_item(size_t)(vl->vr, i, fmi1_import_get_variable_vr( fmi1_import_get_variable(vl, i)));
+				jm_vector_set_item(size_t)(vl->vr, i, fmi1_xml_get_variable_vr(fmi1_import_get_variable(vl, i)));
             }
         }
     }
@@ -110,8 +110,10 @@ const fmi1_value_reference_t* fmi1_import_get_value_referece_list(fmi1_import_va
 
 /* Get a single variable from the list*/
 fmi1_import_variable_t* fmi1_import_get_variable(fmi1_import_variable_list_t* vl, unsigned int  index) {
-    if(index >= fmi1_import_get_variable_list_size(vl)) return 0;
-    return jm_vector_get_item(jm_voidp)(&vl->variables, index);
+	if(index >= fmi1_import_get_variable_list_size(vl))
+		return 0;
+	else
+		return (fmi1_import_variable_t*)jm_vector_get_item(jm_voidp)(&vl->variables, index);
 }
 
 /* Operations on variable lists. Every operation creates a new list. */

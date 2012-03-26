@@ -23,6 +23,8 @@
 #ifndef FMI1_IMPORT_VARIABLE_H_
 #define FMI1_IMPORT_VARIABLE_H_
 
+#include <FMI1/fmi1_xml_variable.h>
+
 #include "fmi1_import.h"
 #include "fmi1_import_type.h"
 
@@ -40,7 +42,7 @@ fmi1_value_reference_t fmi1_import_get_variable_vr(fmi1_import_variable_t*);
     For scalar variable gives the type definition is present
 */
 fmi1_import_variable_typedef_t* fmi1_import_get_variable_declared_type(fmi1_import_variable_t*);
-fmi1_import_base_type_enu_t fmi1_import_get_variable_base_type(fmi1_import_variable_t*);
+fmi1_base_type_enu_t fmi1_import_get_variable_base_type(fmi1_import_variable_t*);
 
 int   fmi1_import_get_variable_has_start(fmi1_import_variable_t*);
 int   fmi1_import_get_variable_is_fixed(fmi1_import_variable_t*);

@@ -20,6 +20,7 @@
 #include <jm_named_ptr.h>
 #include "fmi1_import_impl.h"
 #include "fmi1_import_variable_list_impl.h"
+
 /*#include "fmi1_import_vendor_annotations_impl.h"
 #include "fmi1_import_parser.h"
 */
@@ -40,15 +41,13 @@ fmi1_import_t* fmi1_import_allocate(jm_callbacks* cb) {
 }
 
 void fmi_import_error(fmi_import_context_t *context, const char* fmt, ...) {
-	char errMessageBuf[2000];
+	
     va_list args;
     const char * module = "FMIIMPORT";
-    if(context->callbacks->logger) {
-	    va_start (args, fmt);
-		vsprintf(errMessageBuf, fmt, args);
-        context->callbacks->logger(context, module, 0, "ERROR", errMessageBuf);
-		va_end (args);
-	}
+
+    va_start (args, fmt);
+	jm_log_v(context->callbacks,module, jm_log_level_error, fmt, args);
+	va_end (args);
 }
 
 
@@ -186,11 +185,7 @@ fmi1_import_type_definitions_t* fmi1_import_get_type_definitions(fmi1_import_t* 
 }
 
 void fmi1_import_report_error_v(fmi1_import_t* fmu, const char* module, const char* fmt, va_list ap) {
-	char errMessageBuf[2000];
-    if(fmu->callbacks->logger) {
-		vsprintf(errMessageBuf, fmt, ap);
-        fmu->callbacks->logger(fmu, module, 0, "ERROR", errMessageBuf);
-	}
+	jm_log_v(fmu->callbacks, module, jm_log_level_error, fmt, ap);
 }
 
 void fmi1_import_report_error(fmi1_import_t* fmu, const char* module, const char* fmt, ...) {
@@ -201,11 +196,7 @@ void fmi1_import_report_error(fmi1_import_t* fmu, const char* module, const char
 }
 
 void fmi1_import_report_warning_v(fmi1_import_t* fmu, const char* module, const char* fmt, va_list ap) {
-	char errMessageBuf[2000];
-    if(fmu->callbacks->logger) {
-	    vsprintf(errMessageBuf, fmt, ap);
-        fmu->callbacks->logger(fmu, module, 0, "WARNING", errMessageBuf);
-	}
+	jm_log_v(fmu->callbacks, module, jm_log_level_warning, fmt, ap);
 }
 
 void fmi1_import_report_warning(fmi1_import_t* fmu, const char* module, const char* fmt, ...) {

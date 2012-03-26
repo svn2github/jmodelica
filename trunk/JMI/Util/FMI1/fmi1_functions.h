@@ -30,6 +30,8 @@ typedef enum {
 	fmi1_status_pending
 } fmi1_status_t;
 
+const char* fmi1_status_to_string(fmi1_status_t status);
+
 typedef void  (*fmi1_callback_logger_ft)        (fmi1_component_t c, fmi1_string_t instanceName, fmi1_status_t status, fmi1_string_t category, fmi1_string_t message, ...);
 typedef void* (*fmi1_callback_allocate_memory_ft)(size_t nobj, size_t size);
 typedef void  (*fmi1_callback_free_memory_ft)    (void* obj);

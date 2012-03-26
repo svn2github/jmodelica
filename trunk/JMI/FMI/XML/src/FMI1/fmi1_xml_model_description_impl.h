@@ -29,10 +29,6 @@ struct fmi1_xml_model_description_t {
 
     jm_callbacks* callbacks;
 
-    #define FMI_MAX_ERROR_MESSAGE_SIZE 1000
-
-    char errMessageBuf[FMI_MAX_ERROR_MESSAGE_SIZE];
-
     fmi1_xml_model_description_status_enu_t status;
 
     jm_vector(char) fmi1_xml_standard_version;
@@ -74,7 +70,7 @@ struct fmi1_xml_model_description_t {
 
     jm_vector(jm_named_ptr) variables;
 
-    fmi1_xml_variable_list_t* variablesByVR;
+    jm_vector(jm_voidp)* variablesByVR;
 
     fmi1_value_reference_t fmuKind;
 
