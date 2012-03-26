@@ -185,13 +185,13 @@ int makedir (newdir)
   return 1;
 }
 
-void do_banner()
+static void do_banner()
 {
     printf("MiniUnz 1.01b, demo of zLib + Unz package written by Gilles Vollant\n");
     printf("more info at http://www.winimage.com/zLibDll/unzip.html\n\n");
 }
 
-void do_help()
+static void do_help()
 {
     printf("Usage : miniunz [-e] [-x] [-v] [-l] [-o] [-p password] file.zip [file_to_extr.] [-d extractdir]\n\n" \
            "  -e  Extract without pathname (junk paths)\n" \

@@ -17,7 +17,7 @@
 
 #include <stdlib.h>
 #include <jm_types.h>
-#include "miniunz.h"
+#include "minizip.h"
 
 jm_status_enu_t fmi_zip_zip(const char* zip_file_path, int n_files_to_zip, const char** files_to_zip)
 {

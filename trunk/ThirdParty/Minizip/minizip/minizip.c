@@ -163,13 +163,13 @@ int check_exist_file(filename)
     return ret;
 }
 
-void do_banner()
+static void do_banner()
 {
     printf("MiniZip 1.1, demo of zLib + MiniZip64 package, written by Gilles Vollant\n");
     printf("more info on MiniZip at http://www.winimage.com/zLibDll/minizip.html\n\n");
 }
 
-void do_help()
+static void do_help()
 {
     printf("Usage : minizip [-o] [-a] [-0 to -9] [-p password] [-j] file.zip [files_to_add]\n\n" \
            "  -o  Overwrite existing file.zip\n" \
