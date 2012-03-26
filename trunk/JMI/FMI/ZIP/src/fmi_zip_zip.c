@@ -19,7 +19,7 @@
 #include <jm_types.h>
 #include "miniunz.h"
 
-jm_status_enu_t fmi_import_zip(const char* zip_file_path, int n_files_to_zip, const char** files_to_zip)
+jm_status_enu_t fmi_zip_zip(const char* zip_file_path, int n_files_to_zip, const char** files_to_zip)
 {
 	/*
 	Usage : minizip [-o] [-a] [-0 to -9] [-p password] [-j] file.zip [files_to_add]

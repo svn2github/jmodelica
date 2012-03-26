@@ -18,7 +18,7 @@
 #include <jm_types.h>
 #include "miniunz.h"
 
-jm_status_enu_t fmi_import_unzip(const char* zip_file_path, const char* output_folder)
+jm_status_enu_t fmi_zip_unzip(const char* zip_file_path, const char* output_folder)
 {
 	int argc = 5;
 	const char *argv[5];

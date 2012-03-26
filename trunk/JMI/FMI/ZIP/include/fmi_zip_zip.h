@@ -20,7 +20,7 @@
 
 #include <jm_types.h>
 
-jm_status_enu_t fmi_import_zip(const char* zip_file_path, int n_files_to_zip, const char** files_to_zip);
+jm_status_enu_t fmi_zip_zip(const char* zip_file_path, int n_files_to_zip, const char** files_to_zip);
 
 #endif /* End of header file FMI_ZIP_ZIP_H_ */
 
