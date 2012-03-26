@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 {
 	jm_status_enu_t status;
 
-	status = fmi_import_unzip("C:\\P510-JModelica\\FMIToolbox\\trunk\\src\\wrapperfolder\\Furuta.fmu", "C:\\Documents and Settings\\p418_baa\\Desktop\\XMLtest\\temporaryfolder\\");
+	status = fmi_zip_unzip("C:\\P510-JModelica\\FMIToolbox\\trunk\\src\\wrapperfolder\\Furuta.fmu", "C:\\Documents and Settings\\p418_baa\\Desktop\\XMLtest\\temporaryfolder\\");
 
 	if (status == jm_status_error) {
 		printf("Failed to unzip the file\n");

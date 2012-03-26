@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	const char* files_to_zip[] = {"C:\\Documents and Settings\\p418_baa\\Desktop\\Capi\\modelDescription.xml"};
 	int n_files_to_zip = 1;
 
-	status = fmi_import_zip("C:\\Documents and Settings\\p418_baa\\Desktop\\Capi\\Furuta.ziptest", n_files_to_zip, files_to_zip);
+	status = fmi_zip_zip("C:\\Documents and Settings\\p418_baa\\Desktop\\Capi\\Furuta.ziptest", n_files_to_zip, files_to_zip);
 
 	if (status == jm_status_error) {
 		printf("Failed to unzip the file\n");
