@@ -1,177 +1,986 @@
 within ;
 package JMExamples
-package VDP
-  model VDP "Van der Pol model"
+  package BangControl
 
-     // State start values
-     parameter Real x1_0 = 0;
-     parameter Real x2_0 = 1;
+    model BangControl
+      //state start values
+      parameter Real x1_0=0;
+      parameter Real x2_0=0;
 
-     // The states
-     Real x1(start = x1_0);
-     Real x2(start = x2_0);
+      //states
+      Real x1(start=x1_0,fixed=true);
+      Real x2(start=x2_0,fixed=true);
 
-     // The control signal
+      //control signal
+      Modelica.Blocks.Interfaces.RealInput u
+        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
+            iconTransformation(extent={{-120,-20},{-80,20}})));
 
-    Modelica.Blocks.Interfaces.RealInput u
-      annotation (Placement(transformation(extent={{-120,-20},{-80,20}})));
-  equation
-     der(x1) = (1 - x2^2) * x1 - x2 + u;
-     der(x2) = x1;
-    annotation (
-      Documentation(info="<HTML>
-<p>
-The model represents the behavior of a free Van-der-Pol oscillator, which is an oscillatory system with non-linear damping.
-It evolves in time according to a second order differential equation, where x1 and x2 are the position coordinates.
+    equation
+      der(x1) = x2;
+      der(x2) = u;
 
-For small amplitudes the damping is negativ. The amplitude increases up to a certain limit, where the damping becomes positive. 
-The system stabilises and a limit cycle develops.
-</p>
-<p>
-Simulation time: 10s
-</p>
-
-
+      annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+  <p>
+  This is a minimum-time problem with two states and one
+  input. To convert this optimal control problem with free
+  final time to static optimization problem, first it needs to be
+  transcribed to a fixed final time problem by using an extra
+  state variable. The idea is to specify a nominal time interval,
+  [0, Tf ], and to use the extra state as a scale factor to scale
+  the duration of the real time.
+  </p>
+  <p>
+  Simulation time: 30s
+  </p>
 </HTML>"),
-        experiment(StopTime=10),
-        __Dymola_experimentSetupOutput,
-      Icon(graphics={Line(
-            points={{40,4},{40,0},{38,-4},{34,-10},{28,-16},{22,-20},{16,-24},{0,-34},
-                {-6,-36},{-10,-36},{-14,-34},{-18,-32},{-22,-28},{-26,-22},{-30,-18},
-                {-32,-14},{-36,-8},{-36,-4},{-36,2},{-36,8},{-34,16},{-30,20},{-24,
-                26},{-14,32},{2,42},{12,50},{20,54},{30,56},{40,56},{46,54},{54,48},
-                {60,42},{64,34},{66,28},{66,22},{66,18},{66,12},{64,6},{62,2},{58,
-                -2},{48,-12},{38,-20},{24,-30},{6,-40},{-4,-44},{-14,-44},{-22,-42},
-                {-30,-36},{-36,-30},{-42,-24},{-46,-18},{-50,-10},{-50,0},{-48,12},
-                {-44,20},{-36,26},{-30,30}},
-            color={0,0,255},
-            smooth=Smooth.None)}));
-  end VDP;
+        Icon(graphics={
+            Ellipse(
+              extent={{-48,-26},{0,-74}},
+              lineColor={255,170,85},
+              lineThickness=0.5),
+            Ellipse(
+              extent={{-30,-2},{40,-60}},
+              lineColor={255,0,128},
+              lineThickness=0.5),
+            Ellipse(
+              extent={{-38,64},{82,-20}},
+              lineColor={0,0,255},
+              lineThickness=0.5),
+            Ellipse(
+              extent={{14,12},{88,-66}},
+              lineColor={255,170,213},
+              lineThickness=0.5),
+            Ellipse(
+              extent={{-68,58},{2,-18}},
+              lineColor={0,127,0},
+              lineThickness=0.5)}));
+    end BangControl;
 
-  package Examples
-    model VDPexpsin
+    package Examples
+      model BangControlInput
 
-      VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
-      Modelica.Blocks.Sources.ExpSine expSine(amplitude=10)
-        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+        BangControl bangControl
+          annotation (Placement(transformation(extent={{20,20},{40,40}})));
+        Modelica.Blocks.Sources.Constant const(k=1)
+          annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
+      equation
+        connect(const.y, bangControl.u) annotation (Line(
+            points={{-19,30},{5,30},{5,30},{20,30}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics),
+        Documentation(info="<HTML>
+    <p>
+    The model is based on BangControl and a constant input is set.
+    </p>
+    <p>
+    Simulation time: 30s
+    </p>
+    
+    </HTML>"));
+      end BangControlInput;
+
+      model BangControlTimetable
+
+        BangControl bangControl
+          annotation (Placement(transformation(extent={{20,0},{40,20}})));
+        Modelica.Blocks.Sources.TimeTable timeTable(table=[0,1; 20,1; 21,0; 30,0])
+          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+      equation
+        connect(timeTable.y, bangControl.u) annotation (Line(
+            points={{-19,10},{5,10},{5,10},{20,10}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics),
+        Documentation(info="<HTML>
+    <p>
+    The model is based on BangControl and a step function is set as an input.
+    </p>
+    <p>
+    Simulation time: 30s
+    </p>
+    
+    </HTML>"));
+      end BangControlTimetable;
+    end Examples;
+  end BangControl;
+
+  package BatchFermentor
+    model BatchFermentor
+
+      //state start values
+      parameter Real x1_0=1.5;
+      parameter Real x2_0=0;
+      parameter Real x3_0=0;
+      parameter Real x4_0=7;
+      parameter Real u_0=0;
+
+      //states
+      Real x1(start=x1_0, fixed=true);
+      Real x2(start=x2_0, fixed=true);
+      Real x3(start=x3_0, fixed=true);
+      Real x4(start=x4_0, fixed=true);
+      Real h1;
+      Real h2;
+
+      //control input
+      Modelica.Blocks.Interfaces.RealInput u
+        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
+            iconTransformation(extent={{-120,-20},{-80,20}})));
+
     equation
-      connect(expSine.y, vDP.u) annotation (Line(
-          points={{-19,10},{20,10}},
-          color={0,0,127},
-          smooth=Smooth.None));
+      der(x1) = h1*x1-u*x1/500/x4;
+      der(x2) = h2*x1-0.01*x2-u*x2/500/x4;
+      der(x3) = -h1*x1/0.47-h2*x1/1.2-x1*0.029*x3/(0.0001+x3)+u/x4*(1-x3/500);
+      der(x4) = u/500;
+      h1 = 0.11*x3/(0.006*x1+x3);
+      h2 = 0.0055*x3/(0.0001+x3*(1+10*x3));
+
+      annotation (experiment(StopTime=150, NumberOfIntervals=1),
+          __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>  
+<p>
+   This problem considers a fed-batch reactor for the production of penicillin. 
+   We consider here the free terminal time version where the objective is to maximize 
+   the amount of penicillin using the feed rate as the control variable.  
+</p>   
+<p>
+References:
+</p>    
+<p>
+Dynamic optimization of bioprocesses: efficient and robust numerical strategies 2003, 
+Julio R. Banga, Eva Balsa-Cantro, Carmen G. Moles and Antonio A. Alonso
+</p>    
+<p>
+Case Study I: Optimal Control of a Fed-Batch Fermentor for Penicillin Production
+</p>
+<p>
+Simulation time:150s
+</p>
+</HTML>"),
+        Icon(graphics));
+    end BatchFermentor;
+
+    model BatchFermentor2
+
+      //state start values
+      parameter Real x1_0=1.5;
+      parameter Real x2_0=0;
+      parameter Real x3_0=0;
+      parameter Real x4_0=7;
+      parameter Real u_0=0;
+
+      //states
+      Real x1(start=x1_0, fixed=true);
+      Real x2(start=x2_0, fixed=true);
+      Real x3(start=x3_0, fixed=true);
+      Real x4(start=x4_0, fixed=true);
+      Real u(start=0, fixed=true);
+      Real h1;
+      Real h2;
+
+      //control input
+      Modelica.Blocks.Interfaces.RealInput du
+        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
+            iconTransformation(extent={{-120,-20},{-80,20}})));
+
+    equation
+      der(x1) = h1*x1-u*x1/500/x4;
+      der(x2) = h2*x1-0.01*x2-u*x2/500/x4;
+      der(x3) = -h1*x1/0.47-h2*x1/1.2-x1*0.029*x3/(0.0001+x3)+u/x4*(1-x3/500);
+      der(x4) = u/500;
+      der(u) = du;
+      h1 = 0.11*x3/(0.006*x1+x3);
+      h2 = 0.0055*x3/(0.0001+x3*(1+10*x3));
+
+      annotation (experiment(StopTime=150, NumberOfIntervals=1),
+          __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+</p>    
+<p>
+   This problem considers a fed-batch reactor for the production of penicillin. 
+   We consider here the free terminal time version where the objective is to maximize 
+   the amount of penicillin using the feed rate as the control variable.  
+<p>
+References:
+</p>    
+<p>
+Dynamic optimization of bioprocesses: efficient and robust numerical strategies 2003, 
+Julio R. Banga, Eva Balsa-Cantro, Carmen G. Moles and Antonio A. Alonso
+</p>    
+<p>
+Case Study I: Optimal Control of a Fed-Batch Fermentor for Penicillin Production
+</p>
+<p>
+Simulation time:150s
+</p>
+</HTML>"),
+        Icon(graphics));
+    end BatchFermentor2;
+  end BatchFermentor;
+
+  package BloodGlucose
+    model BloodGlucose
+
+      //State start values
+      parameter Real G_init = 4.5;
+      parameter Real X_init = 15;
+      parameter Real I_init = 15;
+
+      //States
+      Real G(start = G_init, fixed=true) "Plasma Glucose Conc. (mmol/L)";
+      Real X(start = X_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
+      Real I(start = I_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
+      Real dist "Meal glucose disturbance (mmol/L)";
+      Real D;
+
+      //parameter
+      parameter Real P1 = 0.028735;
+      parameter Real P2 = 0.028344;
+      parameter Real P3 = 5.035e-5;
+      parameter Real V1 = 12;
+      parameter Real n = 5/54;
+
+      //Control Signal
+      Modelica.Blocks.Interfaces.RealInput dD "Insulin Infusion rate"
+       annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
+            iconTransformation(extent={{-120,-20},{-80,20}})));
+    equation
+      der(G) = -P1 * (G - G_init) - (X - X_init) * G + dist;
+      der(X) = -P2 * (X - X_init) + P3 * (I - I_init);
+      der(I) = -n * I + D / V1;
+      dist = 3*exp(-0.05*time);
+      der(D) =dD
+      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+This is a model that predicts the blood glucose levels of a type-I diabetic. 
+The objective is to predict the relationship between insulin injection and blood glucose levels. 
+With a sufficiently accurate mathematical model of a patient, the correct insulin injection rate 
+could be prescribed. 
+By automating the sensing of blood glucose and the injection of insulin, this system would serve 
+as an artificial pancreas. The model is composed of differential and algebraic equations. 
+</p>
+<p>
+Reference:
+</p>
+<p>
+S. M. Lynch and B. W. Bequette, Estimation based Model Predictive Control of Blood Glucose in 
+Type I Diabetes: A Simulation Study, Proc. 27th IEEE Northeast Bioengineering Conference, IEEE, 2001.
+</p>
+<p>
+and
+</p>
+<p>
+S. M. Lynch and B. W. Bequette, Model Predictive Control of Blood Glucose in type I Diabetics 
+using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002. 
+</p>
+</HTML>"));
+      annotation (Documentation(info="<HTML>
+      <p>
+      The model is equivalent to BloodGlucose1 but dD (the derivative of D) is set as an input instead of D. That makes it possible to use the derivative in the cost function when formulating the optimization problem.
+      </p>
+      <p>
+      Simulation time: 400s
+      </p>
+      </HTML>"),
+          Icon(graphics={
+            Ellipse(
+              extent={{-8,30},{-56,4}},
+              lineColor={255,0,128},
+              lineThickness=0.5,
+              fillColor={255,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{-34,-8},{26,-38}},
+              lineColor={255,0,128},
+              lineThickness=0.5,
+              fillColor={255,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{24,12},{84,-18}},
+              lineColor={255,0,128},
+              lineThickness=0.5,
+              fillColor={255,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{-18,-12},{8,-22}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillColor={168,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{40,8},{68,-4}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillColor={168,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{-46,26},{-20,16}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillColor={168,0,0},
+              fillPattern=FillPattern.Solid)}));
+    end BloodGlucose;
+
+    model BloodGlucose_scaled
+
+      import SI = Modelica.SIunits;
+
+      //State start values
+      parameter SI.Concentration G_init = 4.5;
+      parameter SI.MolecularConcentration X_init = 15;
+      parameter SI.MolecularConcentration I_init = 15;
+
+      //States
+      SI.Concentration G(start = G_init, fixed=true)
+        "Plasma Glucose Conc. (mol/m3)";
+      SI.MolecularConcentration X(start = X_init, fixed=true)
+        "Plasma Insulin Conc. (u/m3)";
+      SI.MolecularConcentration I(start = I_init, fixed=true)
+        "Plasma Insulin Conc. (u/m3)";
+      Real dist "Meal glucose disturbance (mol/m3/s)";
+      Real D;
+
+      //parameter
+      parameter Real P1 = 0.028735 "1/min";
+      parameter Real P2 = 0.028344 "1/min";
+      parameter Real P3 = 5.035e-5 "1/min";
+      parameter SI.Volume V1 = 12 "l";
+      parameter Real n = 5/54 "1/min";
+
+      //Control Signal
+      Modelica.Blocks.Interfaces.RealInput dD "Insulin Infusion rate"
+       annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
+            iconTransformation(extent={{-120,-20},{-80,20}})));
+    equation
+      der(G) = (-P1 * (G*5 - G_init) - (X - X_init) * G*5 + dist)/5;
+      der(X) = -P2 * (X - X_init) + P3 * (I - I_init);
+      der(I) = -n * I + D / V1;
+      dist = 3*exp(-0.05*time);
+      der(D) =dD
+      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+This is a model that predicts the blood glucose levels of a type-I diabetic. 
+The objective is to predict the relationship between insulin injection and blood glucose levels. 
+With a sufficiently accurate mathematical model of a patient, the correct insulin injection rate 
+could be prescribed. 
+By automating the sensing of blood glucose and the injection of insulin, this system would serve 
+as an artificial pancreas. The model is composed of differential and algebraic equations. 
+</p>
+<p>
+Reference:
+</p>
+<p>
+S. M. Lynch and B. W. Bequette, Estimation based Model Predictive Control of Blood Glucose in 
+Type I Diabetes: A Simulation Study, Proc. 27th IEEE Northeast Bioengineering Conference, IEEE, 2001.
+</p>
+<p>
+and
+</p>
+<p>
+S. M. Lynch and B. W. Bequette, Model Predictive Control of Blood Glucose in type I Diabetics 
+using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002. 
+</p>
+<p>
+Simulation time: 400s
+</p>
+</HTML>"),
+        Icon(graphics={
+            Ellipse(
+              extent={{-8,30},{-56,4}},
+              lineColor={255,0,128},
+              lineThickness=0.5,
+              fillColor={255,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{-34,-8},{26,-38}},
+              lineColor={255,0,128},
+              lineThickness=0.5,
+              fillColor={255,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{24,12},{84,-18}},
+              lineColor={255,0,128},
+              lineThickness=0.5,
+              fillColor={255,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{-18,-12},{8,-22}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillColor={168,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{40,8},{68,-4}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillColor={168,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{-46,26},{-20,16}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillColor={168,0,0},
+              fillPattern=FillPattern.Solid)}));
+
+    end BloodGlucose_scaled;
+
+    model BloodGlucoseSIunits
+
+      import SI = Modelica.SIunits;
+
+      //State start values
+      parameter SI.Concentration G_init = 4.5;
+      parameter SI.MolecularConcentration X_init = 15;
+      parameter SI.MolecularConcentration I_init = 15;
+
+      //States
+      SI.Concentration G(start = G_init, fixed=true)
+        "Plasma Glucose Conc. (mol/m3)";
+      SI.MolecularConcentration X(start = X_init, fixed=true)
+        "Plasma Insulin Conc. (u/m3)";
+      SI.MolecularConcentration I(start = I_init, fixed=true)
+        "Plasma Insulin Conc. (u/m3)";
+      Real dist "Meal glucose disturbance (mol/m3/s)";
+
+      //parameter
+      parameter SI.Frequency P1 = 0.028735/60 "1/min";
+      parameter SI.Frequency P2 = 0.028344/60 "1/min";
+      parameter SI.Frequency P3 = 5.035e-5/60 "1/min";
+      parameter SI.Volume V1 = 0.012 "m3";
+      parameter SI.Frequency n = 5/54/60 "1/min";
+      parameter SI.VolumeFlowRate f=1/60 "m3/s";
+
+      //Control Signal
+      Modelica.Blocks.Interfaces.RealInput D "Insulin Infusion rate"
+       annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
+            iconTransformation(extent={{-120,-20},{-80,20}})));
+    equation
+      der(G) = (-P1 * (G*4.5 - G_init) - (X - X_init) * G*4.5 *f + dist)/4.5;
+      der(X) = -P2 * (X - X_init) + P3 * (I - I_init);
+      der(I) = -n * I + D / V1;
+      dist = 3*exp(-0.05*time/60)/60;
+
+      annotation (experiment(StopTime=24000),
+                                            __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+This is a model that predicts the blood glucose levels of a type-I diabetic. 
+The objective is to predict the relationship between insulin injection and blood glucose levels. 
+With a sufficiently accurate mathematical model of a patient, the correct insulin injection rate 
+could be prescribed. 
+By automating the sensing of blood glucose and the injection of insulin, this system would serve 
+as an artificial pancreas. The model is composed of differential and algebraic equations. 
+</p>
+<p>
+Reference:
+</p>
+<p>
+S. M. Lynch and B. W. Bequette, Estimation based Model Predictive Control of Blood Glucose in 
+Type I Diabetes: A Simulation Study, Proc. 27th IEEE Northeast Bioengineering Conference, IEEE, 2001.
+</p>
+<p>
+and
+</p>
+<p>
+S. M. Lynch and B. W. Bequette, Model Predictive Control of Blood Glucose in type I Diabetics 
+using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002. 
+</p>
+<p>
+Simulation time: 400s
+</p>
+</HTML>"),
+        Icon(graphics={
+            Ellipse(
+              extent={{-8,30},{-56,4}},
+              lineColor={255,0,128},
+              lineThickness=0.5,
+              fillColor={255,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{-34,-8},{26,-38}},
+              lineColor={255,0,128},
+              lineThickness=0.5,
+              fillColor={255,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{24,12},{84,-18}},
+              lineColor={255,0,128},
+              lineThickness=0.5,
+              fillColor={255,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{-18,-12},{8,-22}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillColor={168,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{40,8},{68,-4}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillColor={168,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{-46,26},{-20,16}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillColor={168,0,0},
+              fillPattern=FillPattern.Solid)}));
+    end BloodGlucoseSIunits;
+
+    model BloodGlucose1
+
+      //State start values
+      parameter Real G_init = 4.5;
+      parameter Real X_init = 15;
+      parameter Real I_init = 15;
+
+      //States
+      Real G(start = G_init, fixed=true) "Plasma Glucose Conc. (mmol/L)";
+      Real X(start = X_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
+      Real I(start = I_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
+      Real dist "Meal glucose disturbance (mmol/L)";
+
+      //parameter
+      parameter Real D=3 "Insulin infusion rate (mU/min)";
+      parameter Real P1 = 0.028735;
+      parameter Real P2 = 0.028344;
+      parameter Real P3 = 5.035e-5;
+      parameter Real V1 = 12;
+      parameter Real n = 5/54;
+
+    equation
+      der(G) = -P1 * (G - G_init) - (X - X_init) * G + dist;
+      der(X) = -P2 * (X - X_init) + P3 * (I - I_init);
+      der(I) = -n * I + D / V1;
+      dist = 3*exp(-0.05*time);
+
+      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+This is a model that predicts the blood glucose levels of a type-I diabetic. 
+The objective is to predict the relationship between insulin injection and blood glucose levels. 
+With a sufficiently accurate mathematical model of a patient, the correct insulin injection rate 
+could be prescribed. 
+By automating the sensing of blood glucose and the injection of insulin, this system would serve 
+as an artificial pancreas. The model is composed of differential and algebraic equations. 
+</p>
+<p>
+Reference:
+</p>
+<p>
+S. M. Lynch and B. W. Bequette, Estimation based Model Predictive Control of Blood Glucose in 
+Type I Diabetes: A Simulation Study, Proc. 27th IEEE Northeast Bioengineering Conference, IEEE, 2001.
+</p>
+<p>
+and
+</p>
+<p>
+S. M. Lynch and B. W. Bequette, Model Predictive Control of Blood Glucose in type I Diabetics 
+using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002. 
+</p>
+</HTML>"),        Documentation(info="<HTML>
+      <p>
+      The model is equivalent to BloodGlucose1 but dD (the derivative of D) is set as an input instead of D. That makes it possible to use the derivative in the cost function when formulating the optimization problem.
+      </p>
+      <p>
+      Simulation time: 400s
+      </p>
+      </HTML>"),
+          Icon(graphics={
+            Ellipse(
+              extent={{-8,30},{-56,4}},
+              lineColor={255,0,128},
+              lineThickness=0.5,
+              fillColor={255,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{-34,-8},{26,-38}},
+              lineColor={255,0,128},
+              lineThickness=0.5,
+              fillColor={255,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{24,12},{84,-18}},
+              lineColor={255,0,128},
+              lineThickness=0.5,
+              fillColor={255,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{-18,-12},{8,-22}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillColor={168,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{40,8},{68,-4}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillColor={168,0,0},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{-46,26},{-20,16}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillColor={168,0,0},
+              fillPattern=FillPattern.Solid)}),
+        Diagram(graphics));
+    end BloodGlucose1;
+
+    model BloodGlucose2
+
+      //State start values
+      parameter Real Gb = 98;
+      parameter Real Xb = 0;
+      parameter Real Ib = 0;
+      parameter Real Yb = 0;
+      parameter Real Fb = 380;
+      parameter Real Zb = 380;
+
+      //States
+      Real G(start = Gb, fixed=true) "Blood Glucose (mg/dL)";
+      Real X(start = Xb, fixed=true) "Remote insulin (micro-U/mL)";
+      Real I(start = Ib, fixed=true) "Insulin (micro-U/mL)";
+      Real Y(start = Gb, fixed=true) "Insulin for Lipogenesis (micro-U/mL)";
+      Real F(start = Xb, fixed=true) "Plasma Free Fatty Acid (micro-mol/L)";
+      Real Z(start = Ib, fixed=true) "Remote Free Fatty Acid (micro-mol/L)";
+
+      //parameter
+      parameter Real U=3 "Insulin infusion rate (mU/min)";
+      parameter Real G_basal = 4.5 "mmol/L";
+      parameter Real X_basal = 15 "mU/L";
+      parameter Real I_basal = 15 "mU/L";
+      parameter Real p1 = 0.068;
+      parameter Real p2 = 0.037;
+      parameter Real p3 = 0.000012;
+      parameter Real p4 = 1.3;
+      parameter Real p5 = 0.000568;
+      parameter Real p6 = 0.00006;
+      parameter Real p7 = 0.03;
+      parameter Real p8 = 4.5;
+      parameter Real k1 = 0.02;
+      parameter Real k2 = 0.03;
+      parameter Real pF2 = 0.17;
+      parameter Real pF3 = 0.00001;
+      parameter Real n = 0.142;
+      parameter Real VolG = 117;
+      parameter Real VolF = 11.7;
+      parameter Real  u1 = 3 "insulin infusion rate";
+      parameter Real  u2 = 300 "glucose uptake rate";
+      parameter Real  u3 = 0 "external lipid infusion";
+
+    equation
+      der(G) = -p1*G - p4*X*G + p6*G*Z + p1*Gb - p6*Gb*Zb + u2/VolG
+        "Glucose dynamics";
+      der(X) = -p2*X + p3*I "Remote insulin compartment dynamics";
+      der(I) = -n * I + p5 / u1 "Insulin dynamics";
+      der(Y) = -pF2*Y + pF3*I "Insulin dynamics for lipogenesis";
+      der(F) = -p7*(F-Fb) - p8*Y*F + 0.00021 * exp(-0.0055*G) * (F*G-Fb*Gb) + u3/VolF
+        "Plasma Free Fatty Acid (FFA) dynamics";
+      der(Z) = -k2*(Z-Zb) + k1*(F-Fb) "Remote FFA dynamics";
+
       annotation (Diagram(graphics),
         Documentation(info="<HTML>
 <p>
-input: expsin function
+This is a model that predicts the blood glucose levels of a type-I diabetic. 
+The objective is to predict the relationship between insulin injection and blood glucose levels. 
+With a sufficiently accurate mathematical model of a patient, the correct insulin injection rate 
+could be prescribed. 
+By automating the sensing of blood glucose and the injection of insulin, this system would serve 
+as an artificial pancreas. The model is composed of differential and algebraic equations. 
 </p>
 <p>
-Simulation time: 10s
+Reference:
 </p>
-
-
+<p>
+A. Roy and R.S. Parker. Dynamic Modeling of Free Fatty Acids, Glucose, and Insulin: An Extended 
+Minimal Model, Diabetes Technology and Therapeutics 8(6), 617-626, 2006. 
+</p>
+<p>
+Simulation time: 400s
+</p>
 </HTML>"));
-    end VDPexpsin;
+    end BloodGlucose2;
 
-    model VDPramp
+    package Examples
+      model BloodGlucoseInput
 
-      VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
-      Modelica.Blocks.Sources.Ramp ramp
-        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+        Modelica.Blocks.Sources.Constant const(k=10)
+          annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
+        BloodGlucose bloodGlucose
+          annotation (Placement(transformation(extent={{20,20},{40,40}})));
+      equation
+        connect(const.y, bloodGlucose.D) annotation (Line(
+            points={{-19,30},{20,30}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics),
+          experiment(StopTime=400),
+          __Dymola_experimentSetupOutput,
+          Documentation(info="<HTML>
+    <p>
+    The model is based on BloodGlucose1 and a constant input is set.
+    </p>
+    <p>
+    Simulation time: 400s
+    </p>
+    
+    </HTML>"));
+      end BloodGlucoseInput;
+
+      model BloodGlucoseInputscaled
+        Modelica.Blocks.Sources.Constant const(k=2)
+          annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
+        BloodGlucose_scaled bloodGlucose_scaled
+          annotation (Placement(transformation(extent={{0,0},{20,20}})));
+      equation
+        connect(const.y, bloodGlucose_scaled.D) annotation (Line(
+            points={{-39,10},{0,10}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (
+          Diagram(graphics),
+          experiment(StopTime=400),
+          __Dymola_experimentSetupOutput);
+      end BloodGlucoseInputscaled;
+    end Examples;
+  end BloodGlucose;
+
+  package CatalystMixing
+    model CatalystMixing
+
+      //state start values
+      parameter Real x1_0=1;
+      parameter Real x2_0=0;
+
+      //states
+      Real x1(start=x1_0,fixed=true);
+      Real x2(start=x2_0,fixed=true);
+
+      //control signal
+      Modelica.Blocks.Interfaces.RealInput u
+        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
+            iconTransformation(extent={{-120,-20},{-80,20}})));
+
     equation
-      connect(ramp.y, vDP.u) annotation (Line(
-          points={{-19,10},{20,10}},
-          color={0,0,127},
-          smooth=Smooth.None));
+      der(x1) = u*(10*x2-x1);
+      der(x2) = u*(x1-10*x2) - (1-u)*x2;
+      annotation (experiment, __Dymola_experimentSetupOutput,
+      Documentation(info="<HTML>
+  <p>
+  This problem considers a plug-flow reactor, packed with two catalysts, involving the reactions S1 <-> S2 -> S3.
+  The optimal mixing policy of the two catalysts has to be determined in order to maximize the production of species S3. 
+  This dynamic optimization problem was originally proposed by Gunn and Thomas (1965), and subsequently considered by Logsdon (1990) and Vassiliadis (1993).
+  </p>
+  <p>
+  Reference:
+  </p>
+  <p>
+  Second-order sensitivities of general dynamic systems with application to optimal control problems. 1999, Vassilios S. Vassiliadis, Eva Balsa Canto, Julio R. Banga
+  Case Study 6.2: Catalyst mixing
+  </p>
+  <p>
+  Simulation time: 1s
+  </p>
+  </HTML>"),
+        Icon(graphics={
+            Ellipse(
+              extent={{-40,34},{62,6}},
+              lineColor={0,0,255},
+              lineThickness=0.5),
+            Ellipse(
+              extent={{-40,-26},{62,-54}},
+              lineColor={0,0,255},
+              lineThickness=0.5),
+            Line(
+              points={{-40,20},{-40,-40}},
+              color={0,0,255},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{62,20},{62,-40}},
+              color={0,0,255},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{62,66},{12,-14}},
+              color={255,0,0},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{10,-6},{4,-8},{2,-10},{2,-12},{2,-14},{4,-16},{6,-18},{10,-20},
+                  {16,-22},{20,-22},{24,-20},{26,-18},{26,-16},{24,-12},{22,-10}},
+              color={255,0,0},
+              thickness=0.5,
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled})}));
+    end CatalystMixing;
+  end CatalystMixing;
 
-      annotation (
-        Diagram(graphics),
-        experiment(StopTime=10, NumberOfIntervals=50),
-        __Dymola_experimentSetupOutput,
+  package CatalyticCracking
+    model CatalyticCracking
+
+     //parameter
+      parameter Real y1_0=1;
+      parameter Real y2_0=0;
+      parameter Real theta1=1;
+      parameter Real theta2=1;
+      parameter Real theta3=1;
+
+      //states
+      Real y1(start=y1_0);
+      Real y2(start=y2_0);
+    equation
+      der(y1) = -(theta1+theta3)*y1^2;
+      der(y2) = theta1*y1^2-theta2*y2;
+
+       annotation (
         Documentation(info="<HTML>
 <p>
-input: ramp function
+Determine the reaction coefficients for the catalytic cracking of gas oil into gas and other
+byproducts. The objective is to minimize the error between the concentration measurements and
+the computed data.
 </p>
 <p>
-Simulation time: 10s
+Simulation time: 1s
+</p>
+</HTML>"), Icon(graphics={
+            Line(
+              points={{-26,14},{-30,18},{-36,22},{-44,26},{-50,32},{-52,40},{
+                  -50,46},{-46,50},{-40,52},{-36,52},{-28,48},{-22,42},{-18,32},
+                  {-14,22},{-12,14},{-10,2},{-10,0},{-10,-8},{-12,-6},{-16,4},{
+                  -20,10},{-26,14}},
+              color={0,0,0},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{0,18},{-4,32},{-10,44},{-16,54},{-20,64},{-22,74},{-20,
+                  82},{-14,88},{-6,92},{2,92},{10,88},{14,78},{14,68},{10,52},{
+                  4,38},{2,28},{0,20}},
+              color={0,0,0},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{10,-20},{10,-4},{12,12},{20,28},{32,40},{42,44},{48,44},
+                  {52,42},{54,38},{54,30},{52,26},{46,22},{38,18},{30,14},{24,8},
+                  {20,0},{14,-8},{12,-14},{10,-20},{10,-24}},
+              color={0,0,0},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{0,-50},{-2,-38},{-8,-26},{-18,-18},{-30,-14},{-34,-16},{
+                  -36,-18},{-36,-20},{-34,-22},{-30,-24},{-24,-24},{-18,-24},{
+                  -12,-28},{-8,-34},{-4,-40},{-2,-44},{0,-48}},
+              color={0,0,0},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{2,-74},{4,-60},{8,-52},{14,-44},{20,-40},{26,-40},{28,
+                  -44},{28,-48},{26,-52},{22,-54},{20,-56},{16,-58},{14,-60},{
+                  10,-62},{8,-64},{4,-70},{2,-74},{2,-78}},
+              color={0,0,0},
+              thickness=0.5,
+              smooth=Smooth.None)}),
+        experiment,
+        __Dymola_experimentSetupOutput);
+    end CatalyticCracking;
+  end CatalyticCracking;
+
+  package ContState
+    model ContState
+
+         //State start values
+         parameter Real x1_0 = 0;
+         parameter Real x2_0= -1;
+
+         //States
+         Real x1(start = x1_0, fixed=true);
+         Real x2(start = x2_0, fixed=true);
+         Real p;
+
+         //Control Signal
+          Modelica.Blocks.Interfaces.RealInput u
+        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
+            iconTransformation(extent={{-120,-20},{-80,20}})));
+    equation
+          p = 8*(time-0.5)^2-0.5-x2;
+          der(x1) = x2;
+          der(x2) = -x2+u;
+
+      annotation (uses(Modelica(version="3.2")), Diagram(graphics),
+        Icon(graphics={Line(
+              points={{-66,0},{-58,-10},{-46,-18},{-28,-26},{52,-26},{62,-24},{
+                  68,-20},{76,-8},{80,2},{82,14}},
+              color={0,0,255},
+              thickness=0.5,
+              smooth=Smooth.None)}),
+                Documentation(info="<HTML>
+<p>
+Model with continous states and a path constraint
+</p>
+<p>
+Simulation time: 1s
 </p>
 
-
 </HTML>"));
-    end VDPramp;
+    end ContState;
 
-    model VDPexp
+    package Examples
+      model ContStateExp
 
-      VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
-      Modelica.Blocks.Sources.Exponentials exponentials(riseTime=10)
-        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-    equation
-      connect(exponentials.y, vDP.u) annotation (Line(
-          points={{-19,10},{20,10}},
-          color={0,0,127},
-          smooth=Smooth.None));
+        ContState contState
+          annotation (Placement(transformation(extent={{0,0},{20,20}})));
+        Modelica.Blocks.Sources.Exponentials exponentials
+          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+      equation
+        connect(exponentials.y, contState.u) annotation (Line(
+            points={{-19,10},{-5.4,10},{-5.4,10},{0,10}},
+            color={0,0,127},
+            smooth=Smooth.None));
 
-      annotation (Diagram(graphics),
-        Documentation(info="<HTML>
+        annotation (Diagram(graphics),
+          Documentation(info="<HTML>
 <p>
 input: exponential function
 </p>
 <p>
-Simulation time: 10s
+Simulation time: 1s
 </p>
 
 
 </HTML>"));
-    end VDPexp;
+      end ContStateExp;
 
-    model VDPpulse
-
-      VDP vDP annotation (Placement(transformation(extent={{0,0},{20,20}})));
-      Modelica.Blocks.Sources.Pulse pulse(amplitude=10)
-        annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
-    equation
-      connect(pulse.y, vDP.u) annotation (Line(
-          points={{-39,10},{0,10}},
-          color={0,0,127},
-          smooth=Smooth.None));
-
-      annotation (Diagram(graphics),
-        Documentation(info="<HTML>
-<p>
-input: pulse function
-</p>
-<p>
-Simulation time: 10s
-</p>
-
-
-</HTML>"));
-    end VDPpulse;
-
-    model VDPsine
-
-      VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
-      Modelica.Blocks.Sources.Sine sine(amplitude=5, freqHz=1)
-        annotation (Placement(transformation(extent={{-32,0},{-12,20}})));
-    equation
-      connect(sine.y, vDP.u) annotation (Line(
-          points={{-11,10},{20,10}},
-          color={0,0,127},
-          smooth=Smooth.None));
-
-      annotation (Diagram(graphics),
-        Documentation(info="<HTML>
+      model ContStateSine
+        import JMExamples;
+        JMExamples.ContState contState
+          annotation (Placement(transformation(extent={{0,0},{20,20}})));
+        Modelica.Blocks.Sources.Sine sine
+          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+      equation
+        connect(sine.y, contState.u) annotation (Line(
+            points={{-19,10},{-5.4,10},{-5.4,11.2},{8.2,11.2}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics),
+          Documentation(info="<HTML>
 <p>
 input: sine function
 </p>
 <p>
-Simulation time: 10s
+Simulation time: 1s
 </p>
 
 
 </HTML>"));
-    end VDPsine;
-  end Examples;
-end VDP;
+      end ContStateSine;
+    end Examples;
+  end ContState;
 
   package CSTR
     model CSTR "Continuous stirred tank reaction"
@@ -492,6 +1301,444 @@ Simulation time: 7200s
               smooth=Smooth.None,
               arrow={Arrow.None,Arrow.Filled})}));
     end Distillation1;
+
+    model Distillation1Input
+
+      import SI = Modelica.SIunits;
+
+    //parameters
+      parameter SI.MolarFlowRate Feed =  24.0/3600 "Feed Flowrate";
+      parameter SI.MassFraction x_Feed = 0.5 "Mole Fraction of Feed";
+      parameter SI.MolarFlowRate D=0.5*Feed "Distillate Flowrate";
+      parameter Real vol=1.6
+        "Relative Volatility = (yA/xA)/(yB/xB) = KA/KB = alpha(A,B)";
+      parameter SI.AmountOfSubstance atray=0.25
+        "Total Molar Holdup in the Condenser";
+      parameter SI.AmountOfSubstance acond=0.5
+        "Total Molar Holdup on each Tray";
+      parameter SI.AmountOfSubstance areb=1.0
+        "Total Molar Holdup in the Reboiler";
+
+    //initial conditions
+      parameter SI.MoleFraction x_init[32]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+        "initial conditions for the states";
+
+    //variables
+      SI.MoleFraction x[32](start=x_init, each min=0)
+        "mole fraction of A at each state, column vector";
+      SI.MoleFraction y[32](each min=0) "vapor Mole Fractions of Component A";
+      SI.MolarFlowRate L "Flowrate of the Liquid in the Rectification Section";
+      SI.MolarFlowRate V "Vapor Flowrate in the Column";
+      SI.MolarFlowRate FL "Flowrate of the Liquid in the Stripping Section";
+
+    //input
+      Modelica.Blocks.Interfaces.RealInput rr
+        annotation (Placement(transformation(extent={{-20,-10},{20,30}})));
+    equation
+     //ODE
+       der(x[1]) = 1/acond *(V*(y[2]-x[1])) "condenser";
+       der(x[2:16])  = 1/atray *(L*(x[1:15]-x[2:16]) - V*(y[2:16]-y[3:17]))
+        "15 column stages";
+       der(x[17]) = 1/atray * (Feed*x_Feed + L*x[16] - FL*x[17] - V*(y[17]-y[18]))
+        "feed tray";
+       der(x[18:31]) = 1/atray * (FL*(x[17:30]-x[18:31]) - V*(y[18:31]-y[19:32]))
+        "14 column stages";
+       der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
+
+     //DAE
+       y = (x*vol)./(1 .+((vol-1)*x));
+       L=rr*D;
+       V=L+D;
+       FL=Feed+L;
+
+        annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
+        experiment(StopTime=7200),
+        __Dymola_experimentSetupOutput,
+                    Placement(transformation(extent={{-118,0},{-78,40}})),
+        Documentation(info="<HTML>
+<p>
+This distillation column is a separation of cyclohexane (component A) and n-heptane (component B). 
+The two components are separated over 30 theoretical trays. In general, distillation column models 
+are generally good test cases for nonlinear model reduction and identification. The concentrations 
+at each stage or tray are highly correlated. The dynamics of the distillation process can be described 
+by a relatively few number of underlying dynamic states. 
+</p>
+<p>
+From the equilibrium assumption and mole balances
+</p>
+<ul>
+<li>  vol = (yA/xA) / (yB/xB) </li>
+<li> xA + xB = 1 </li>
+<li> yA + yB = 1 </li>
+</ul>
+<p>
+Reference:
+</p>
+<p>
+Hahn, J. and T.F. Edgar, An improved method for nonlinear model reduction using balancing of
+empirical gramians, Computers and Chemical Engineering, 26, pp. 1379-1397, (2002)
+</p>
+<p>
+Simulation time: 7200s
+</p>
+
+</HTML>"),
+        Icon(graphics={
+            Rectangle(extent={{-40,80},{40,-80}}, lineColor={127,0,127},
+              lineThickness=0.5),
+            Line(
+              points={{-40,40},{20,40},{20,30}},
+              color={127,0,127},
+              smooth=Smooth.None,
+              thickness=0.5),
+            Line(
+              points={{40,0},{-20,0},{-20,-12}},
+              color={127,0,127},
+              smooth=Smooth.None,
+              thickness=0.5),
+            Line(
+              points={{-40,-40},{20,-40},{20,-52}},
+              color={127,0,127},
+              smooth=Smooth.None,
+              thickness=0.5),
+            Line(
+              points={{0,-72},{0,-50},{0,-48}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{0,-30},{0,-12},{0,-12},{0,-8}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{0,10},{0,30}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{0,48},{0,68}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{88,10},{40,10}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{0,80},{0,90},{70,90}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{68,-90},{0,-90},{0,-80}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled})}),
+        Diagram(graphics));
+    end Distillation1Input;
+
+    model Distillation1Inputder
+
+      import SI = Modelica.SIunits;
+
+      parameter SI.MolarFlowRate Feed =  24.0/3600 "Feed Flowrate";
+      parameter SI.MassFraction x_Feed = 0.5 "Mole Fraction of Feed";
+      parameter SI.MolarFlowRate D=0.5*Feed "Distillate Flowrate";
+      parameter Real vol=1.6
+        "Relative Volatility = (yA/xA)/(yB/xB) = KA/KB = alpha(A,B)";
+      parameter SI.AmountOfSubstance atray=0.25
+        "Total Molar Holdup in the Condenser";
+      parameter SI.AmountOfSubstance acond=0.5
+        "Total Molar Holdup on each Tray";
+      parameter SI.AmountOfSubstance areb=1.0
+        "Total Molar Holdup in the Reboiler";
+      parameter SI.MoleFraction x_init[32]={0.93541941614016,
+       0.90052553715795,
+       0.86229645132283,
+       0.82169940277993,
+       0.77999079584355,
+       0.73857168629759,
+       0.69880490932694,
+       0.66184253445732,
+       0.62850777645505,
+       0.59925269993058,
+       0.57418567956453,
+       0.55314422743545,
+       0.53578454439850,
+       0.52166550959767,
+       0.51031495114413,
+       0.50127509227528,
+       0.49412891686784,
+       0.48544992019184,
+       0.47420248108803,
+       0.45980349896163,
+       0.44164297270225,
+       0.41919109776836,
+       0.39205549194059,
+       0.36024592617390,
+       0.32407993023343,
+       0.28467681591738,
+       0.24320921343484,
+       0.20181568276528,
+       0.16177269003094,
+       0.12514970961746,
+       0.09245832612765,
+       0.06458317697321} "initial conditions for the states";
+
+      SI.MoleFraction x[32](start=x_init, each min=0)
+        "mole fraction of A at each state, column vector";
+      SI.MoleFraction y[32](each min=0) "vapor Mole Fractions of Component A";
+      SI.MolarFlowRate L "Flowrate of the Liquid in the Rectification Section";
+      SI.MolarFlowRate V "Vapor Flowrate in the Column";
+      SI.MolarFlowRate FL "Flowrate of the Liquid in the Stripping Section";
+      Real rr(start=3.7) "reflux ratio";
+
+      //input
+
+      Modelica.Blocks.Interfaces.RealInput drr
+        annotation (Placement(transformation(extent={{-20,-10},{20,30}})));
+    equation
+        y = (x*vol)./(1 .+((vol-1)*x));
+       der(x[1]) = 1/acond *(V*(y[2]-x[1])) "condenser";
+       der(x[2:16])  = 1/atray *(L*(x[1:15]-x[2:16]) - V*(y[2:16]-y[3:17]))
+        "15 column stages";
+       der(x[17]) = 1/atray * (Feed*x_Feed + L*x[16] - FL*x[17] - V*(y[17]-y[18]))
+        "feed tray";
+       der(x[18:31]) = 1/atray * (FL*(x[17:30]-x[18:31]) - V*(y[18:31]-y[19:32]))
+        "14 column stages";
+       der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
+       der(rr) = drr;
+
+       //DAE
+       L=rr*D;
+       V=L+D;
+       FL=Feed+L;
+
+        annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
+        experiment(StopTime=7200),
+        __Dymola_experimentSetupOutput,
+                    Placement(transformation(extent={{-118,0},{-78,40}})),
+        Documentation(info="<HTML>
+<p>
+This distillation column is a separation of cyclohexane (component A) and n-heptane (component B). 
+The two components are separated over 30 theoretical trays. In general, distillation column models 
+are generally good test cases for nonlinear model reduction and identification. The concentrations 
+at each stage or tray are highly correlated. The dynamics of the distillation process can be described 
+by a relatively few number of underlying dynamic states. 
+</p>
+<p>
+From the equilibrium assumption and mole balances
+</p>
+<ul>
+<li>  vol = (yA/xA) / (yB/xB) </li>
+<li> xA + xB = 1 </li>
+<li> yA + yB = 1 </li>
+</ul>
+<p>
+Reference:
+</p>
+<p>
+Hahn, J. and T.F. Edgar, An improved method for nonlinear model reduction using balancing of
+empirical gramians, Computers and Chemical Engineering, 26, pp. 1379-1397, (2002)
+</p>
+<p>
+Simulation time: 7200s
+</p>
+
+</HTML>"),
+        Icon(graphics={
+            Rectangle(extent={{-40,80},{40,-80}}, lineColor={127,0,127},
+              lineThickness=0.5),
+            Line(
+              points={{-40,40},{20,40},{20,30}},
+              color={127,0,127},
+              smooth=Smooth.None,
+              thickness=0.5),
+            Line(
+              points={{40,0},{-20,0},{-20,-12}},
+              color={127,0,127},
+              smooth=Smooth.None,
+              thickness=0.5),
+            Line(
+              points={{-40,-40},{20,-40},{20,-52}},
+              color={127,0,127},
+              smooth=Smooth.None,
+              thickness=0.5),
+            Line(
+              points={{0,-72},{0,-50},{0,-48}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{0,-30},{0,-12},{0,-12},{0,-8}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{0,10},{0,30}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{0,48},{0,68}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{88,10},{40,10}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{0,80},{0,90},{70,90}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{68,-90},{0,-90},{0,-80}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled})}),
+        Diagram(graphics));
+    end Distillation1Inputder;
+
+    model Distillation1Input_init
+      extends Distillation1Input;
+    initial equation
+    //steady state
+    der(x) = zeros(32);
+      annotation (experiment(StopTime=7200), __Dymola_experimentSetupOutput);
+    end Distillation1Input_init;
+
+    model Distillation1Inputstep
+
+      import SI = Modelica.SIunits;
+
+      parameter SI.MolarFlowRate Feed =  24.0/3600 "Feed Flowrate";
+      parameter Real x_Feed = 0.5 "Mole Fraction of Feed";
+      parameter SI.MolarFlowRate D=0.5*Feed "Distillate Flowrate";
+      parameter Real vol=1.6
+        "Relative Volatility = (yA/xA)/(yB/xB) = KA/KB = alpha(A,B)";
+      parameter Real atray=0.25 "Total Molar Holdup in the Condenser";
+      parameter Real acond=0.5 "Total Molar Holdup on each Tray";
+      parameter Real areb=1.0 "Total Molar Holdup in the Reboiler";
+      parameter Real x_init[32]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+        "initial conditions for the states";
+
+      Real x[32](start=x_init, each min=0)
+        "mole fraction of A at each state, column vector";
+      Real y[32](each min=0) "vapor Mole Fractions of Component A";
+      SI.MolarFlowRate L "Flowrate of the Liquid in the Rectification Section";
+      SI.MolarFlowRate V "Vapor Flowrate in the Column";
+      SI.MolarFlowRate FL "Flowrate of the Liquid in the Stripping Section";
+      Real rr "reflux ratio";
+
+    equation
+        y = (x*vol)./(1 .+((vol-1)*x));
+       der(x[1]) = 1/acond *(V*(y[2]-x[1])) "condenser";
+       der(x[2:16])  = 1/atray *(L*(x[1:15]-x[2:16]) - V*(y[2:16]-y[3:17]))
+        "15 column stages";
+       der(x[17]) = 1/atray * (Feed*x_Feed + L*x[16] - FL*x[17] - V*(y[17]-y[18]))
+        "feed tray";
+       der(x[18:31]) = 1/atray * (FL*(x[17:30]-x[18:31]) - V*(y[18:31]-y[19:32]))
+        "14 column stages";
+       der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
+       rr = if time<=1000 then 3 else 3.7;
+
+       //DAE
+       L=rr*D;
+       V=L+D;
+       FL=Feed+L;
+
+        annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
+        experiment(StopTime=7200),
+        __Dymola_experimentSetupOutput,
+                    Placement(transformation(extent={{-118,0},{-78,40}})),
+        Documentation(info="<HTML>
+<p>
+This distillation column is a separation of cyclohexane (component A) and n-heptane (component B). 
+The two components are separated over 30 theoretical trays. In general, distillation column models 
+are generally good test cases for nonlinear model reduction and identification. The concentrations 
+at each stage or tray are highly correlated. The dynamics of the distillation process can be described 
+by a relatively few number of underlying dynamic states. 
+</p>
+<p>
+From the equilibrium assumption and mole balances
+</p>
+<ul>
+<li>  vol = (yA/xA) / (yB/xB) </li>
+<li> xA + xB = 1 </li>
+<li> yA + yB = 1 </li>
+</ul>
+<p>
+Reference:
+</p>
+<p>
+Hahn, J. and T.F. Edgar, An improved method for nonlinear model reduction using balancing of
+empirical gramians, Computers and Chemical Engineering, 26, pp. 1379-1397, (2002)
+</p>
+<p>
+Simulation time: 7200s
+</p>
+
+</HTML>"),
+        Icon(graphics={
+            Rectangle(extent={{-40,80},{40,-80}}, lineColor={127,0,127},
+              lineThickness=0.5),
+            Line(
+              points={{-40,40},{20,40},{20,30}},
+              color={127,0,127},
+              smooth=Smooth.None,
+              thickness=0.5),
+            Line(
+              points={{40,0},{-20,0},{-20,-12}},
+              color={127,0,127},
+              smooth=Smooth.None,
+              thickness=0.5),
+            Line(
+              points={{-40,-40},{20,-40},{20,-52}},
+              color={127,0,127},
+              smooth=Smooth.None,
+              thickness=0.5),
+            Line(
+              points={{0,-72},{0,-50},{0,-48}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{0,-30},{0,-12},{0,-12},{0,-8}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{0,10},{0,30}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{0,48},{0,68}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{88,10},{40,10}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{0,80},{0,90},{70,90}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled}),
+            Line(
+              points={{68,-90},{0,-90},{0,-80}},
+              color={0,0,255},
+              smooth=Smooth.None,
+              arrow={Arrow.None,Arrow.Filled})}),
+        Diagram(graphics));
+    end Distillation1Inputstep;
 
     model Distillation2
 
@@ -1617,99 +2864,80 @@ Simulation time: 7200s
 
 </HTML>"));
       end Distillation4test;
+
+      model Distillation1const
+        Modelica.Blocks.Sources.Constant const(k=3.7)
+          annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
+        Distillation1Input distillation1Input
+          annotation (Placement(transformation(extent={{0,0},{20,20}})));
+      equation
+        connect(const.y, distillation1Input.rr) annotation (Line(
+            points={{-39,10},{-14.5,10},{-14.5,11},{10,11}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (
+          Diagram(graphics),
+          experiment(StopTime=7200),
+          __Dymola_experimentSetupOutput);
+      end Distillation1const;
+
+      model Distillation1step
+        Modelica.Blocks.Sources.Step step(
+          height=0.7,
+          offset=3,
+          startTime=1000)
+          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+        Distillation1Input distillation1Input
+          annotation (Placement(transformation(extent={{0,0},{20,20}})));
+      equation
+        connect(step.y, distillation1Input.rr) annotation (Line(
+            points={{-19,10},{-4.5,10},{-4.5,11},{10,11}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics),
+          experiment(StopTime=7200),
+          __Dymola_experimentSetupOutput);
+      end Distillation1step;
     end Examples;
   end Distillation;
 
-  package ContState
-    model ContState
+  package DoubleTank
+    model DoubleTank
+
+         import SI = Modelica.SIunits;
 
          //State start values
          parameter Real x1_0 = 0;
-         parameter Real x2_0= -1;
+         parameter Real x2_0= 1;
 
          //States
          Real x1(start = x1_0, fixed=true);
          Real x2(start = x2_0, fixed=true);
-         Real p;
+         SI.DampingCoefficient gamma;
+         SI.DampingCoefficient delta;
+
+         //Parameter
+         parameter SI.Area A = 4.9*10e-4 "Tank cross section";
+         parameter SI.Area a = 3.1*10e-6 "Outlet cross section";
+         parameter SI.VolumeFlowRate alpha = 2.1*10e-5
+        "Conversion factor from control to flow";
+         parameter SI.PhaseCoefficient beta = 6.25
+        "Conversion factor from height to measurement";
+         parameter SI.Acceleration g = 9.81 "Acceleration of gravity";
 
          //Control Signal
           Modelica.Blocks.Interfaces.RealInput u
         annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
             iconTransformation(extent={{-120,-20},{-80,20}})));
     equation
-          p = 8*(time-0.5)^2-0.5-x2;
-          der(x1) = x2;
-          der(x2) = -x2+u;
+          gamma = a/A*sqrt(2*g*beta);
+          delta = alpha*beta/A;
+          der(x1) = -gamma*sqrt(x1)+delta*u;
+          der(x2) = gamma*(sqrt(x1)-sqrt(x2));
 
-      annotation (uses(Modelica(version="3.2")), Diagram(graphics),
-        Icon(graphics={Line(
-              points={{-66,0},{-58,-10},{-46,-18},{-28,-26},{52,-26},{62,-24},{
-                  68,-20},{76,-8},{80,2},{82,14}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None)}),
-                Documentation(info="<HTML>
-<p>
-Model with continous states and a path constraint
-</p>
-<p>
-Simulation time: 1s
-</p>
-
-</HTML>"));
-    end ContState;
-
-    package Examples
-      model ContStateExp
-
-        ContState contState
-          annotation (Placement(transformation(extent={{0,0},{20,20}})));
-        Modelica.Blocks.Sources.Exponentials exponentials
-          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-      equation
-        connect(exponentials.y, contState.u) annotation (Line(
-            points={{-19,10},{-5.4,10},{-5.4,10},{0,10}},
-            color={0,0,127},
-            smooth=Smooth.None));
-
-        annotation (Diagram(graphics),
-          Documentation(info="<HTML>
-<p>
-input: exponential function
-</p>
-<p>
-Simulation time: 1s
-</p>
-
-
-</HTML>"));
-      end ContStateExp;
-
-      model ContStateSine
-        import JMExamples;
-        JMExamples.ContState contState
-          annotation (Placement(transformation(extent={{0,0},{20,20}})));
-        Modelica.Blocks.Sources.Sine sine
-          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-      equation
-        connect(sine.y, contState.u) annotation (Line(
-            points={{-19,10},{-5.4,10},{-5.4,11.2},{8.2,11.2}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        annotation (Diagram(graphics),
-          Documentation(info="<HTML>
-<p>
-input: sine function
-</p>
-<p>
-Simulation time: 1s
-</p>
-
-
-</HTML>"));
-      end ContStateSine;
-    end Examples;
-  end ContState;
+      annotation (DymolaStoredErrors);
+    end DoubleTank;
+  end DoubleTank;
 
   package FlightPath
     model FlightPath
@@ -1834,6 +3062,663 @@ Simulation time: 100s
     annotation (Icon(graphics));
   end FlightPath;
 
+  package Greenhouse
+    model Greenhouse
+
+      import SI = Modelica.SIunits;
+
+      //parameter
+      parameter Real pW = 3e-6/40;
+      parameter Real pT = 1;
+      parameter Real pH = 0.1;
+      parameter Real pHc = 7.5e-2/220;
+      parameter Real pWc = 3e4/220;
+      parameter Real pi = 3.14159;
+      parameter Real tf = 48;
+
+      //state start values
+      parameter Real x1_0 = 0;
+      parameter Real x2_0 = 10;
+      parameter Real x3_0 = 0;
+
+      //states
+      SI.Mass x1(start=x1_0,fixed=true) "dry weight";
+      SI.Temp_C x2(start=x2_0,fixed=true) "Greenhouse temperature";
+      SI.Energy x3(start=x3_0,fixed=true);
+      SI.Power sun "sunlight";
+      SI.Temp_C temp "outside temperature";
+
+      //control signal
+      Modelica.Blocks.Interfaces.RealInput u
+        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
+            iconTransformation(extent={{-120,-20},{-80,20}})));
+
+    equation
+      der(x1) = pW*sun*x2;
+      der(x2) = pT*(temp-x2)+pH*u;
+      der(x3) = pHc*u;
+      sun = 800*sin(4*pi*time/tf-0.65*pi);
+      temp = 15+10*sin(4*pi*time/tf-0.65*pi);
+
+      annotation (experiment(StopTime=48), __Dymola_experimentSetupOutput,
+        Icon(graphics={
+            Ellipse(
+              extent={{-40,22},{-26,8}},
+              lineColor={255,255,0},
+              lineThickness=0.5,
+              fillPattern=FillPattern.Sphere,
+              fillColor={255,213,170}),
+            Ellipse(
+              extent={{54,38},{68,24}},
+              lineColor={0,0,255},
+              lineThickness=0.5,
+              fillColor={170,170,255},
+              fillPattern=FillPattern.Solid),
+            Line(
+              points={{-38,20},{-42,22},{-46,26},{-50,32},{-50,36},{-48,42},{-42,46},
+                  {-36,46},{-32,44},{-30,38},{-30,32},{-30,26},{-32,22}},
+              color={255,0,128},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Ellipse(
+              extent={{56,62},{62,38}},
+              lineColor={255,85,85},
+              lineThickness=0.5,
+              fillPattern=FillPattern.Solid,
+              fillColor={255,85,85}),
+            Ellipse(
+              extent={{68,34},{96,28}},
+              lineColor={255,85,85},
+              lineThickness=0.5,
+              fillPattern=FillPattern.Solid,
+              fillColor={255,85,85}),
+            Ellipse(
+              extent={{60,24},{68,2}},
+              lineColor={255,85,85},
+              lineThickness=0.5,
+              fillPattern=FillPattern.Solid,
+              fillColor={255,85,85}),
+            Ellipse(
+              extent={{54,30},{32,24}},
+              lineColor={255,85,85},
+              lineThickness=0.5,
+              fillColor={255,85,85},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{32,38},{54,32}},
+              lineColor={255,85,85},
+              lineThickness=0.5,
+              fillPattern=FillPattern.Solid,
+              fillColor={255,85,85}),
+            Ellipse(
+              extent={{68,28},{96,20}},
+              lineColor={255,85,85},
+              lineThickness=0.5,
+              fillPattern=FillPattern.Solid,
+              fillColor={255,85,85}),
+            Ellipse(
+              extent={{66,60},{62,38}},
+              lineColor={255,85,85},
+              lineThickness=0.5,
+              fillPattern=FillPattern.Solid,
+              fillColor={255,85,85}),
+            Ellipse(
+              extent={{54,24},{60,0}},
+              lineColor={255,85,85},
+              lineThickness=0.5,
+              fillColor={255,85,85},
+              fillPattern=FillPattern.Solid),
+            Ellipse(
+              extent={{48,46},{76,16}},
+              lineColor={170,170,255},
+              lineThickness=0.5),
+            Line(
+              points={{-28,20},{-26,28},{-22,32},{-14,36},{-6,34},{-4,28},{-4,
+                  24},{-6,20},{-14,18},{-20,18},{-26,18}},
+              color={255,0,128},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{-26,12},{-18,12},{-10,10},{-4,6},{-2,4},{-2,0},{-4,-4},{
+                  -10,-8},{-18,-8},{-26,-2},{-28,2},{-28,6},{-28,8}},
+              color={255,0,128},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{-34,8},{-32,4},{-32,-4},{-36,-10},{-44,-12},{-50,-10},{
+                  -52,-4},{-48,4},{-44,6},{-38,10}},
+              color={255,0,128},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{-40,18},{-46,24},{-52,28},{-60,28},{-66,26},{-68,22},{
+                  -68,18},{-66,14},{-62,10},{-54,8},{-46,8},{-40,10},{-38,10}},
+              color={255,0,128},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Ellipse(
+              extent={{-6,68},{28,38}},
+              lineColor={255,170,255},
+              lineThickness=0.5,
+              fillColor={255,170,255},
+              fillPattern=FillPattern.Solid),
+            Line(
+              points={{-4,54},{-12,60},{4,58},{0,70},{8,62},{20,72},{20,60},{34,
+                  56},{22,50},{26,40},{14,44},{8,34},{4,46},{-12,42},{-2,52},{
+                  -4,54}},
+              color={170,85,255},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{-32,8},{-26,-16},{-12,-42},{10,-68},{18,-84},{18,-60},{
+                  20,-42},{22,-26},{22,-6},{18,8},{14,24},{14,32},{14,38}},
+              color={0,127,0},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{52,12},{46,-2},{44,-28},{38,-48},{32,-62},{26,-72},{22,
+                  -78},{18,-84}},
+              color={0,127,0},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{4,-60},{-8,-54},{-24,-40},{-30,-32},{-34,-32},{-38,-36},
+                  {-36,-48},{-26,-54},{-14,-60},{-4,-62},{4,-64},{10,-70},{14,
+                  -74}},
+              color={0,127,0},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{36,-52},{44,-42},{54,-32},{66,-28},{72,-30},{78,-36},{78,-42},
+                  {74,-46},{64,-48},{48,-50},{42,-54},{36,-60},{32,-64},{30,-66}},
+              color={0,127,0},
+              thickness=0.5,
+              smooth=Smooth.None)}),
+        Diagram(graphics),
+        Documentation(info="<HTML>
+<p>
+A solar greenhouse has been designed that maximizes solar energy use and minimizes
+fossil energy consumption. It is based on a conventional greenhouse extended with a heat
+pump, a heat exchanger, an aquifer and ventilation with heat recovery. The aim is to
+minimize fossil energy consumption, while maximizing crop dry weight and keeping
+temperature and humidity within certain limits. These requirements are defined in a goal
+function, which is minimized by optimal control. A greenhouse with crop model is used
+to simulate the process behaviour. It is found that open loop optimal control trajectories
+can be determined. The boiler use is reduced to a minimum, thus reducing fossil energy
+use. Compared to a conventional greenhouse it is found that the energy costs are
+decreased and the crop dry weight is increased.
+</p>
+<p>
+Reference:
+</p>
+<p>
+OPTIMAL CONTROL OF A SOLAR GREENHOUSE, R.J.C. van Ooteghem, J.D. Stigter, L.G. van Willigenburg, G. van Straten
+</p>
+<p>
+  Simulation time: 48s
+  </p>
+</HTML>"));
+    end Greenhouse;
+  end Greenhouse;
+
+  package Helicopter
+    model Helicopter
+
+         import SI = Modelica.SIunits;
+
+         //State start values and parameters
+         parameter SI.MomentOfInertia Je = 0.91
+        "Moment of inertia about elevation axis";
+         parameter SI.Length la = 0.66
+        "Arm length from elevation axis to helicopter body";
+         parameter Real Kf = 0.5 "Motor force constant";
+         parameter SI.Force Fg = 0.5
+        "Differential force due to gravity and counter weight";
+         parameter SI.Torque Tg = 0.33 "Differential torque";
+         parameter SI.MomentOfInertia Jp = 0.0364
+        "Moment of inertia about pitch axis";
+         parameter SI.Length lh = 0.177
+        "Distance from pitch axis to either motor";
+         parameter SI.MomentOfInertia Jt = 0.91
+        "Moment of inertia about travel axis";
+
+         //States
+         Real te(fixed=true);
+         Real tr(fixed=true);
+         Real tp(fixed=true);
+         Real dte(fixed=true);
+         Real dtr(fixed=true);
+         Real dtp(fixed=true);
+
+         //Control Signal
+      Modelica.Blocks.Interfaces.RealInput Vf
+        annotation (Placement(transformation(extent={{-120,20},{-80,60}}),
+            iconTransformation(extent={{-120,20},{-80,60}})));
+      Modelica.Blocks.Interfaces.RealInput Vb
+        annotation (Placement(transformation(extent={{-120,-40},{-80,0}}),
+            iconTransformation(extent={{-120,-40},{-80,0}})));
+    equation
+         der(te) = dte;
+         der(tr) = dtr;
+         der(tp) = dtp;
+         der(dte)= (Kf*la/Je)*(Vf+Vb)-Tg/Je;
+         der(dtr)= -(Fg*la/Jt)*sin(tp);
+         der(dtp)= (Kf*lh/Jp)*(Vf-Vb);
+      annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput,
+      Documentation(info="<HTML>   
+  <p>
+   As an example of a process with fast dynamics, a helicopter is considered.
+   The helicopter consists of an arm mounted to a base, enabling the arm to rotate freely. 
+  </p>       
+  <p>
+  References:
+  </p>    
+  <p>
+  Operator Interaction and Optimization in Control Systems, Johan Åkesson
+  </p>    
+  <p>
+  Simulation time:150s
+  </p>
+  </HTML>"),
+        Icon(graphics={
+            Ellipse(
+              extent={{-34,36},{66,-22}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillPattern=FillPattern.Forward,
+              fillColor={255,170,170}),
+            Polygon(
+              points={{-80,20},{-28,20},{-34,12},{-80,20}},
+              lineColor={0,0,255},
+              lineThickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{-34,-22},{40,-36},{46,-36},{50,-34},{54,-32}},
+              color={0,0,255},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{-20,-14},{-22,-22},{-22,-24}},
+              color={0,0,255},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{20,-22},{18,-32}},
+              color={0,0,255},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{58,-24},{52,-28},{46,-30},{40,-30},{32,-28},{24,-26},{10,-22}},
+              color={0,0,255},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Polygon(
+              points={{26,26},{30,-4},{56,-4},{52,16},{26,26}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              smooth=Smooth.None,
+              fillPattern=FillPattern.Forward,
+              fillColor={255,170,170}),
+            Polygon(
+              points={{14,54},{6,32},{22,32},{14,54}},
+              lineColor={213,170,255},
+              lineThickness=0.5,
+              smooth=Smooth.None,
+              fillColor={213,170,255},
+              fillPattern=FillPattern.Forward),
+            Polygon(
+              points={{12,54},{-54,46},{-58,58},{12,54}},
+              lineColor={170,85,255},
+              lineThickness=0.5,
+              smooth=Smooth.None,
+              fillPattern=FillPattern.CrossDiag,
+              fillColor={213,170,255}),
+            Polygon(
+              points={{16,54},{84,68},{86,50},{16,54}},
+              lineColor={170,85,255},
+              lineThickness=0.5,
+              smooth=Smooth.None,
+              fillColor={213,170,255},
+              fillPattern=FillPattern.CrossDiag),
+            Polygon(
+              points={{-80,20},{-84,30},{-88,8},{-80,20}},
+              lineColor={0,0,255},
+              lineThickness=0.5,
+              smooth=Smooth.None)}));
+    end Helicopter;
+
+    model HelicopterDer
+
+      import SI = Modelica.SIunits;
+
+         //State start values and parameters
+         parameter SI.MomentOfInertia Je = 0.91
+        "Moment of inertia about elevation axis";
+         parameter SI.Length la = 0.66
+        "Arm length from elevation axis to helicopter body";
+         parameter Real Kf = 0.5 "Motor force constant";
+         parameter SI.Force Fg = 0.5
+        "Differential force due to gravity and counter weight";
+         parameter SI.Torque Tg = 0.33 "Differential torque";
+         parameter SI.MomentOfInertia Jp = 0.0364
+        "Moment of inertia about pitch axis";
+         parameter SI.Length lh = 0.177
+        "Distance from pitch axis to either motor";
+         parameter SI.MomentOfInertia Jt = 0.91
+        "Moment of inertia about travel axis";
+
+         //States
+         Real te(start=0,fixed=true);
+         Real tr(start=0,fixed=true);
+         Real tp(start=0,fixed=true);
+         Real dte(start=1,fixed=true);
+         Real dtr(start=0,fixed=true);
+         Real dtp(start=-2,fixed=true);
+         Real Vf(start=0,fixed=true);
+         Real Vb(start=0,fixed=true);
+
+         //Control Signal
+      Modelica.Blocks.Interfaces.RealInput dVf
+        annotation (Placement(transformation(extent={{-52,10},{-12,50}})));
+      Modelica.Blocks.Interfaces.RealInput dVb
+        annotation (Placement(transformation(extent={{-50,-46},{-10,-6}})));
+
+    equation
+         der(te) = dte;
+         der(tr) = dtr;
+         der(tp) = dtp;
+         der(dte)= (Kf*la/Je)*(Vf+Vb)-Tg/Je;
+         der(dtr)= -(Fg*la/Jt)*sin(tp);
+         der(dtp)= (Kf*lh/Jp)*(Vf-Vb);
+         der(Vf) = dVf;
+         der(Vb) = dVb;
+         annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput,
+        Diagram(graphics),
+        Documentation(info="<HTML>   
+    <p>
+     The model is equivalent to Helicopter but the derivatives of the input a given. That makes it possible to use the derivatives in the cost function when setting up the optimization problem.
+    </p>    
+    <p>
+    Simulation time:150s
+    </p>
+    </HTML>"),
+        Icon(graphics={
+            Ellipse(
+              extent={{-34,36},{66,-22}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              fillPattern=FillPattern.Forward,
+              fillColor={255,170,170}),
+            Polygon(
+              points={{-80,20},{-28,20},{-34,12},{-80,20}},
+              lineColor={0,0,255},
+              lineThickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{-34,-22},{40,-36},{46,-36},{50,-34},{54,-32}},
+              color={0,0,255},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{-20,-14},{-22,-22},{-22,-24}},
+              color={0,0,255},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{20,-22},{18,-32}},
+              color={0,0,255},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Line(
+              points={{58,-24},{52,-28},{46,-30},{40,-30},{32,-28},{24,-26},{10,-22}},
+              color={0,0,255},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Polygon(
+              points={{26,26},{30,-4},{56,-4},{52,16},{26,26}},
+              lineColor={255,0,0},
+              lineThickness=0.5,
+              smooth=Smooth.None,
+              fillPattern=FillPattern.Forward,
+              fillColor={255,170,170}),
+            Polygon(
+              points={{14,54},{6,32},{22,32},{14,54}},
+              lineColor={213,170,255},
+              lineThickness=0.5,
+              smooth=Smooth.None,
+              fillColor={213,170,255},
+              fillPattern=FillPattern.Forward),
+            Polygon(
+              points={{12,54},{-54,46},{-58,58},{12,54}},
+              lineColor={170,85,255},
+              lineThickness=0.5,
+              smooth=Smooth.None,
+              fillPattern=FillPattern.CrossDiag,
+              fillColor={213,170,255}),
+            Polygon(
+              points={{16,54},{84,68},{86,50},{16,54}},
+              lineColor={170,85,255},
+              lineThickness=0.5,
+              smooth=Smooth.None,
+              fillColor={213,170,255},
+              fillPattern=FillPattern.CrossDiag),
+            Polygon(
+              points={{-80,20},{-84,30},{-88,8},{-80,20}},
+              lineColor={0,0,255},
+              lineThickness=0.5,
+              smooth=Smooth.None)}));
+    end HelicopterDer;
+
+    package Examples
+      model HelicopterInput
+
+        HelicopterDer helicopterDer
+          annotation (Placement(transformation(extent={{20,0},{40,20}})));
+        Modelica.Blocks.Sources.TimeTable timeTable(table=[0,0.3; 7,0.3; 7,0; 15,
+              0; 15,0.3; 22,0.3; 22,0; 30,0])
+          annotation (Placement(transformation(extent={{-60,22},{-40,42}})));
+        Modelica.Blocks.Sources.TimeTable timeTable1(table=[0,3; 15,3; 15,0; 30,0])
+          annotation (Placement(transformation(extent={{-60,-40},{-40,-20}})));
+      equation
+        connect(timeTable.y, helicopterDer.u) annotation (Line(
+            points={{-39,32},{-8,32},{-8,13.4},{23.4,13.4}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        connect(timeTable1.y, helicopterDer.u1) annotation (Line(
+            points={{-39,-30},{-8,-30},{-8,7.8},{23,7.8}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (Diagram(graphics),
+        Documentation(info="<HTML>
+    <p>
+    The model is based on HelicopterDer and step functions are set as an input.
+    </p>
+    <p>
+    Simulation time: 150s
+    </p>
+    </HTML>"));
+      end HelicopterInput;
+    end Examples;
+  end Helicopter;
+
+  package MarinePopulation
+    model MarinePopulation
+
+      //parameter
+      parameter Real m[8]={0,0,0,0,0,0,0,0};
+      parameter Real g[7]={0,0,0,0,0,0,0};
+
+      //states
+      Real y[8](start={ 20000, 17000, 10000, 15000, 12000, 9000, 7000, 3000}, each fixed=true);
+
+    equation
+      der(y) = cat(1,{0},g).*cat(1,{0},y[1:7]) - (m+cat(1,g,{0})).*y;
+
+      annotation (experiment(StopTime=10), __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+Given estimates of the abundance of the population of a marine species at each stage (for
+example, nauplius, juvenile, adult) as a function of time, determine stage speci c growth
+and mortality rates.
+The objective is to minimize the error between computed and observed data.
+m and g are the unknown mortality and growth rates at the stages with g0=0.
+</p>
+<p>
+Simulation time: 10s
+</p>
+</HTML>"),
+        Diagram(graphics),
+        Icon(graphics={
+            Ellipse(
+              extent={{-40,20},{84,-20}},
+              lineColor={0,0,255},
+              fillPattern=FillPattern.Sphere),
+            Polygon(
+              points={{-36,2},{-76,22},{-76,-18},{-36,2}},
+              lineColor={0,0,255},
+              smooth=Smooth.None,
+              fillPattern=FillPattern.CrossDiag,
+              fillColor={167,167,0}),
+            Line(
+              points={{22,-6},{22,-12},{20,-18},{16,-26},{10,-28},{4,-28},{-2,
+                  -26},{-4,-24},{-4,-20},{0,-16},{4,-12},{8,-6}},
+              color={0,127,0},
+              smooth=Smooth.None,
+              thickness=1),
+            Ellipse(
+              extent={{56,10},{62,4}},
+              lineColor={0,0,255},
+              fillColor={0,127,0},
+              fillPattern=FillPattern.CrossDiag),
+            Line(
+              points={{74,-12},{66,-8},{78,-8}},
+              color={0,127,0},
+              thickness=1,
+              smooth=Smooth.None),
+            Line(
+              points={{-14,12},{-14,28},{-8,24},{-2,30},{4,26},{12,32},{18,28},
+                  {26,32},{30,26},{42,24},{42,14}},
+              color={0,127,0},
+              thickness=1,
+              smooth=Smooth.None)}));
+    end MarinePopulation;
+  end MarinePopulation;
+
+  package MoonLander
+    model MoonLander
+
+      import SI = Modelica.SIunits;
+      //parameter
+
+      //state start values
+      parameter SI.Height   h_0 = 1;
+      parameter SI.Velocity v_0 = -0.783;
+      parameter SI.Mass     m_0 = 1;
+
+      //states
+      SI.Height   h(start=h_0, fixed=true);
+      SI.Velocity v(start=v_0, fixed=true);
+      SI.Mass     m(start=m_0, fixed=true);
+
+      //control input
+      Modelica.Blocks.Interfaces.RealInput u "thrust" annotation (Placement(transformation(
+              extent={{-120,-20},{-80,20}}),
+                                          iconTransformation(extent={{-120,-20},
+                {-80,20}})));
+
+    equation
+      der(h) = v;
+      der(v) = -1+u/m;
+      der(m) = -u/2.349;
+
+      annotation (experiment(NumberOfIntervals=1),
+          __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+Example about landing an object.
+</p>
+<p>
+Simulation time: 1s 
+</p>
+</HTML>"),
+        Icon(graphics={
+            Ellipse(
+              extent={{0,38},{-10,36}},
+              lineColor={255,164,90},
+              lineThickness=0.5,
+              fillPattern=FillPattern.Sphere,
+              fillColor={255,213,170}),
+            Ellipse(
+              extent={{-54,60},{70,-58}},
+              lineColor={255,164,90},
+              lineThickness=0.5),
+            Ellipse(
+              extent={{28,16},{54,4}},
+              lineColor={255,164,90},
+              lineThickness=0.5,
+              fillPattern=FillPattern.Sphere,
+              fillColor={255,213,170}),
+            Ellipse(
+              extent={{-36,30},{-16,22}},
+              lineColor={255,164,90},
+              lineThickness=0.5,
+              fillColor={255,213,170},
+              fillPattern=FillPattern.Sphere),
+            Ellipse(
+              extent={{-26,-4},{0,-16}},
+              lineColor={255,164,90},
+              lineThickness=0.5,
+              fillPattern=FillPattern.Sphere,
+              fillColor={255,213,170}),
+            Ellipse(
+              extent={{8,-28},{38,-38}},
+              lineColor={255,164,90},
+              lineThickness=0.5,
+              fillPattern=FillPattern.Sphere,
+              fillColor={255,213,170}),
+            Line(
+              points={{10,48},{10,10},{10,10}},
+              color={127,0,0},
+              thickness=0.5,
+              smooth=Smooth.None),
+            Polygon(
+              points={{10,48},{38,44},{38,26},{10,30},{10,48}},
+              lineColor={127,0,0},
+              lineThickness=0.5,
+              smooth=Smooth.None,
+              fillColor={255,170,170},
+              fillPattern=FillPattern.Forward)}));
+    end MoonLander;
+
+    package Examples
+      model MoonLanderInput
+
+        MoonLander moonLander
+          annotation (Placement(transformation(extent={{20,20},{40,40}})));
+        Modelica.Blocks.Sources.TimeTable timeTable(table=[0,0; 0.2,0; 0.25,1.227;
+              1.5,1.227])
+          annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
+      equation
+        connect(timeTable.y, moonLander.u) annotation (Line(
+            points={{-19,30},{20,30}},
+            color={0,0,127},
+            smooth=Smooth.None));
+        annotation (
+          Diagram(graphics),
+          experiment(StopTime=1.5, NumberOfIntervals=1),
+          __Dymola_experimentSetupOutput,
+          Documentation(info="<HTML>
+    <p>
+    The model is based on MoonLander and a step function is set as an input.
+    </p>
+    <p>
+    Simulation time: 1s
+    </p>
+    </HTML>"));
+      end MoonLanderInput;
+    end Examples;
+  end MoonLander;
+
   package PenicillinPlant
 
     model PenicillinPlant1
@@ -1864,7 +3749,7 @@ Simulation time: 100s
       Real miu1;
 
       //control signal
-      Modelica.Blocks.Interfaces.RealInput du1 "Feed Flowrate"
+      Modelica.Blocks.Interfaces.RealInput du1 "Feed Flowrate derivative"
         annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
             iconTransformation(extent={{-120,-20},{-80,20}})));
 
@@ -2155,574 +4040,6 @@ Simulation time: 150s
     end Examples;
   end PenicillinPlant;
 
-  package BloodGlucose
-    model BloodGlucose
-
-      //State start values
-      parameter Real G_init = 4.5;
-      parameter Real X_init = 15;
-      parameter Real I_init = 15;
-
-      //States
-      Real G(start = G_init, fixed=true) "Plasma Glucose Conc. (mmol/L)";
-      Real X(start = X_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
-      Real I(start = I_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
-      Real dist "Meal glucose disturbance (mmol/L)";
-      Real D;
-
-      //parameter
-      parameter Real P1 = 0.028735;
-      parameter Real P2 = 0.028344;
-      parameter Real P3 = 5.035e-5;
-      parameter Real V1 = 12;
-      parameter Real n = 5/54;
-
-      //Control Signal
-      Modelica.Blocks.Interfaces.RealInput dD "Insulin Infusion rate"
-       annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-    equation
-      der(G) = -P1 * (G - G_init) - (X - X_init) * G + dist;
-      der(X) = -P2 * (X - X_init) + P3 * (I - I_init);
-      der(I) = -n * I + D / V1;
-      dist = 3*exp(-0.05*time);
-      der(D) =dD
-      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>
-<p>
-This is a model that predicts the blood glucose levels of a type-I diabetic. 
-The objective is to predict the relationship between insulin injection and blood glucose levels. 
-With a sufficiently accurate mathematical model of a patient, the correct insulin injection rate 
-could be prescribed. 
-By automating the sensing of blood glucose and the injection of insulin, this system would serve 
-as an artificial pancreas. The model is composed of differential and algebraic equations. 
-</p>
-<p>
-Reference:
-</p>
-<p>
-S. M. Lynch and B. W. Bequette, Estimation based Model Predictive Control of Blood Glucose in 
-Type I Diabetes: A Simulation Study, Proc. 27th IEEE Northeast Bioengineering Conference, IEEE, 2001.
-</p>
-<p>
-and
-</p>
-<p>
-S. M. Lynch and B. W. Bequette, Model Predictive Control of Blood Glucose in type I Diabetics 
-using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002. 
-</p>
-</HTML>"));
-
-      annotation (Documentation(info="<HTML>
-      <p>
-      The model is equivalent to BloodGlucose1 but dD (the derivative of D) is set as an input instead of D. That makes it possible to use the derivative in the cost function when formulating the optimization problem.
-      </p>
-      <p>
-      Simulation time: 400s
-      </p>
-      </HTML>"),
-          Icon(graphics={
-            Ellipse(
-              extent={{-8,30},{-56,4}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-34,-8},{26,-38}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{24,12},{84,-18}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-18,-12},{8,-22}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              fillColor={168,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{40,8},{68,-4}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              fillColor={168,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-46,26},{-20,16}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              fillColor={168,0,0},
-              fillPattern=FillPattern.Solid)}));
-    end BloodGlucose;
-
-
-
-    model BloodGlucose_scaled
-
-      import SI = Modelica.SIunits;
-
-      //State start values
-      parameter SI.Concentration G_init = 4.5;
-      parameter SI.MolecularConcentration X_init = 15;
-      parameter SI.MolecularConcentration I_init = 15;
-
-      //States
-      SI.Concentration G(start = G_init, fixed=true)
-        "Plasma Glucose Conc. (mol/m3)";
-      SI.MolecularConcentration X(start = X_init, fixed=true)
-        "Plasma Insulin Conc. (u/m3)";
-      SI.MolecularConcentration I(start = I_init, fixed=true)
-        "Plasma Insulin Conc. (u/m3)";
-      Real dist "Meal glucose disturbance (mol/m3/s)";
-      Real D;
-
-      //parameter
-      parameter Real P1 = 0.028735 "1/min";
-      parameter Real P2 = 0.028344 "1/min";
-      parameter Real P3 = 5.035e-5 "1/min";
-      parameter SI.Volume V1 = 12 "l";
-      parameter Real n = 5/54 "1/min";
-
-      //Control Signal
-      Modelica.Blocks.Interfaces.RealInput dD "Insulin Infusion rate"
-       annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-    equation
-      der(G) = (-P1 * (G*5 - G_init) - (X - X_init) * G*5 + dist)/5;
-      der(X) = -P2 * (X - X_init) + P3 * (I - I_init);
-      der(I) = -n * I + D / V1;
-      dist = 3*exp(-0.05*time);
-      der(D) =dD
-      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>
-<p>
-This is a model that predicts the blood glucose levels of a type-I diabetic. 
-The objective is to predict the relationship between insulin injection and blood glucose levels. 
-With a sufficiently accurate mathematical model of a patient, the correct insulin injection rate 
-could be prescribed. 
-By automating the sensing of blood glucose and the injection of insulin, this system would serve 
-as an artificial pancreas. The model is composed of differential and algebraic equations. 
-</p>
-<p>
-Reference:
-</p>
-<p>
-S. M. Lynch and B. W. Bequette, Estimation based Model Predictive Control of Blood Glucose in 
-Type I Diabetes: A Simulation Study, Proc. 27th IEEE Northeast Bioengineering Conference, IEEE, 2001.
-</p>
-<p>
-and
-</p>
-<p>
-S. M. Lynch and B. W. Bequette, Model Predictive Control of Blood Glucose in type I Diabetics 
-using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002. 
-</p>
-<p>
-Simulation time: 400s
-</p>
-</HTML>"),
-        Icon(graphics={
-            Ellipse(
-              extent={{-8,30},{-56,4}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-34,-8},{26,-38}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{24,12},{84,-18}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-18,-12},{8,-22}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              fillColor={168,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{40,8},{68,-4}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              fillColor={168,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-46,26},{-20,16}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              fillColor={168,0,0},
-              fillPattern=FillPattern.Solid)}));
-
-    end BloodGlucose_scaled;
-
-    model BloodGlucoseSIunits
-
-      import SI = Modelica.SIunits;
-
-      //State start values
-      parameter SI.Concentration G_init = 4.5;
-      parameter SI.MolecularConcentration X_init = 15;
-      parameter SI.MolecularConcentration I_init = 15;
-
-      //States
-      SI.Concentration G(start = G_init, fixed=true)
-        "Plasma Glucose Conc. (mol/m3)";
-      SI.MolecularConcentration X(start = X_init, fixed=true)
-        "Plasma Insulin Conc. (u/m3)";
-      SI.MolecularConcentration I(start = I_init, fixed=true)
-        "Plasma Insulin Conc. (u/m3)";
-      Real dist "Meal glucose disturbance (mol/m3/s)";
-
-      //parameter
-      parameter SI.Frequency P1 = 0.028735/60 "1/min";
-      parameter SI.Frequency P2 = 0.028344/60 "1/min";
-      parameter SI.Frequency P3 = 5.035e-5/60 "1/min";
-      parameter SI.Volume V1 = 0.012 "m3";
-      parameter SI.Frequency n = 5/54/60 "1/min";
-      parameter SI.VolumeFlowRate f=1/60 "m3/s";
-
-      //Control Signal
-      Modelica.Blocks.Interfaces.RealInput D "Insulin Infusion rate"
-       annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-    equation
-      der(G) = (-P1 * (G*4.5 - G_init) - (X - X_init) * G*4.5 *f + dist)/4.5;
-      der(X) = -P2 * (X - X_init) + P3 * (I - I_init);
-      der(I) = -n * I + D / V1;
-      dist = 3*exp(-0.05*time/60)/60;
-
-      annotation (experiment(StopTime=24000),
-                                            __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>
-<p>
-This is a model that predicts the blood glucose levels of a type-I diabetic. 
-The objective is to predict the relationship between insulin injection and blood glucose levels. 
-With a sufficiently accurate mathematical model of a patient, the correct insulin injection rate 
-could be prescribed. 
-By automating the sensing of blood glucose and the injection of insulin, this system would serve 
-as an artificial pancreas. The model is composed of differential and algebraic equations. 
-</p>
-<p>
-Reference:
-</p>
-<p>
-S. M. Lynch and B. W. Bequette, Estimation based Model Predictive Control of Blood Glucose in 
-Type I Diabetes: A Simulation Study, Proc. 27th IEEE Northeast Bioengineering Conference, IEEE, 2001.
-</p>
-<p>
-and
-</p>
-<p>
-S. M. Lynch and B. W. Bequette, Model Predictive Control of Blood Glucose in type I Diabetics 
-using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002. 
-</p>
-<p>
-Simulation time: 400s
-</p>
-</HTML>"),
-        Icon(graphics={
-            Ellipse(
-              extent={{-8,30},{-56,4}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-34,-8},{26,-38}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{24,12},{84,-18}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-18,-12},{8,-22}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              fillColor={168,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{40,8},{68,-4}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              fillColor={168,0,0},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-46,26},{-20,16}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              fillColor={168,0,0},
-              fillPattern=FillPattern.Solid)}));
-    end BloodGlucoseSIunits;
-
-
-    model BloodGlucose2
-
-      //State start values
-      parameter Real Gb = 98;
-      parameter Real Xb = 0;
-      parameter Real Ib = 0;
-      parameter Real Yb = 0;
-      parameter Real Fb = 380;
-      parameter Real Zb = 380;
-
-      //States
-      Real G(start = Gb, fixed=true) "Blood Glucose (mg/dL)";
-      Real X(start = Xb, fixed=true) "Remote insulin (micro-U/mL)";
-      Real I(start = Ib, fixed=true) "Insulin (micro-U/mL)";
-      Real Y(start = Gb, fixed=true) "Insulin for Lipogenesis (micro-U/mL)";
-      Real F(start = Xb, fixed=true) "Plasma Free Fatty Acid (micro-mol/L)";
-      Real Z(start = Ib, fixed=true) "Remote Free Fatty Acid (micro-mol/L)";
-
-      //parameter
-      parameter Real U=3 "Insulin infusion rate (mU/min)";
-      parameter Real G_basal = 4.5 "mmol/L";
-      parameter Real X_basal = 15 "mU/L";
-      parameter Real I_basal = 15 "mU/L";
-      parameter Real p1 = 0.068;
-      parameter Real p2 = 0.037;
-      parameter Real p3 = 0.000012;
-      parameter Real p4 = 1.3;
-      parameter Real p5 = 0.000568;
-      parameter Real p6 = 0.00006;
-      parameter Real p7 = 0.03;
-      parameter Real p8 = 4.5;
-      parameter Real k1 = 0.02;
-      parameter Real k2 = 0.03;
-      parameter Real pF2 = 0.17;
-      parameter Real pF3 = 0.00001;
-      parameter Real n = 0.142;
-      parameter Real VolG = 117;
-      parameter Real VolF = 11.7;
-      parameter Real  u1 = 3 "insulin infusion rate";
-      parameter Real  u2 = 300 "glucose uptake rate";
-      parameter Real  u3 = 0 "external lipid infusion";
-
-    equation
-      der(G) = -p1*G - p4*X*G + p6*G*Z + p1*Gb - p6*Gb*Zb + u2/VolG
-        "Glucose dynamics";
-      der(X) = -p2*X + p3*I "Remote insulin compartment dynamics";
-      der(I) = -n * I + p5 / u1 "Insulin dynamics";
-      der(Y) = -pF2*Y + pF3*I "Insulin dynamics for lipogenesis";
-      der(F) = -p7*(F-Fb) - p8*Y*F + 0.00021 * exp(-0.0055*G) * (F*G-Fb*Gb) + u3/VolF
-        "Plasma Free Fatty Acid (FFA) dynamics";
-      der(Z) = -k2*(Z-Zb) + k1*(F-Fb) "Remote FFA dynamics";
-
-      annotation (Diagram(graphics),
-        Documentation(info="<HTML>
-<p>
-This is a model that predicts the blood glucose levels of a type-I diabetic. 
-The objective is to predict the relationship between insulin injection and blood glucose levels. 
-With a sufficiently accurate mathematical model of a patient, the correct insulin injection rate 
-could be prescribed. 
-By automating the sensing of blood glucose and the injection of insulin, this system would serve 
-as an artificial pancreas. The model is composed of differential and algebraic equations. 
-</p>
-<p>
-Reference:
-</p>
-<p>
-A. Roy and R.S. Parker. Dynamic Modeling of Free Fatty Acids, Glucose, and Insulin: An Extended 
-Minimal Model, Diabetes Technology and Therapeutics 8(6), 617-626, 2006. 
-</p>
-<p>
-Simulation time: 400s
-</p>
-</HTML>"));
-    end BloodGlucose2;
-
-    package Examples
-      model BloodGlucoseInput
-
-        BloodGlucose1 bloodGlucose1_1
-          annotation (Placement(transformation(extent={{20,20},{40,40}})));
-        Modelica.Blocks.Sources.Constant const(k=6)
-          annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
-      equation
-        connect(const.y, bloodGlucose1_1.D) annotation (Line(
-            points={{-19,30},{20,30}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        annotation (Diagram(graphics),
-          experiment(StopTime=400),
-          __Dymola_experimentSetupOutput,
-          Documentation(info="<HTML>
-    <p>
-    The model is based on BloodGlucose1 and a constant input is set.
-    </p>
-    <p>
-    Simulation time: 400s
-    </p>
-    
-    </HTML>"));
-      end BloodGlucoseInput;
-
-      model BloodGlucoseInputscaled
-        JMExamples.BloodGlucose.BloodGlucose_scaled
-                            bloodGlucose1scaled
-          annotation (Placement(transformation(extent={{20,0},{40,20}})));
-        Modelica.Blocks.Sources.Constant const(k=0)
-          annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
-      equation
-        connect(const.y, bloodGlucose1scaled.D) annotation (Line(
-            points={{-39,10},{20,10}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        annotation (
-          Diagram(graphics),
-          experiment(StopTime=400),
-          __Dymola_experimentSetupOutput);
-      end BloodGlucoseInputscaled;
-    end Examples;
-  end BloodGlucose;
-
-  package MarinePopulation
-    model MarinePopulation
-
-      //parameter
-      parameter Real m[8]={0,0,0,0,0,0,0,0};
-      parameter Real g[7]={0,0,0,0,0,0,0};
-
-      //states
-      Real y[8](start={ 20000, 17000, 10000, 15000, 12000, 9000, 7000, 3000}, each fixed=true);
-
-    equation
-      der(y) = cat(1,{0},g).*cat(1,{0},y[1:7]) - (m+cat(1,g,{0})).*y;
-
-      annotation (experiment(StopTime=10), __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>
-<p>
-Given estimates of the abundance of the population of a marine species at each stage (for
-example, nauplius, juvenile, adult) as a function of time, determine stage speci c growth
-and mortality rates.
-The objective is to minimize the error between computed and observed data.
-m and g are the unknown mortality and growth rates at the stages with g0=0.
-</p>
-<p>
-Simulation time: 10s
-</p>
-</HTML>"),
-        Diagram(graphics),
-        Icon(graphics={
-            Ellipse(
-              extent={{-40,20},{84,-20}},
-              lineColor={0,0,255},
-              fillPattern=FillPattern.Sphere),
-            Polygon(
-              points={{-36,2},{-76,22},{-76,-18},{-36,2}},
-              lineColor={0,0,255},
-              smooth=Smooth.None,
-              fillPattern=FillPattern.CrossDiag,
-              fillColor={167,167,0}),
-            Line(
-              points={{22,-6},{22,-12},{20,-18},{16,-26},{10,-28},{4,-28},{-2,
-                  -26},{-4,-24},{-4,-20},{0,-16},{4,-12},{8,-6}},
-              color={0,127,0},
-              smooth=Smooth.None,
-              thickness=1),
-            Ellipse(
-              extent={{56,10},{62,4}},
-              lineColor={0,0,255},
-              fillColor={0,127,0},
-              fillPattern=FillPattern.CrossDiag),
-            Line(
-              points={{74,-12},{66,-8},{78,-8}},
-              color={0,127,0},
-              thickness=1,
-              smooth=Smooth.None),
-            Line(
-              points={{-14,12},{-14,28},{-8,24},{-2,30},{4,26},{12,32},{18,28},
-                  {26,32},{30,26},{42,24},{42,14}},
-              color={0,127,0},
-              thickness=1,
-              smooth=Smooth.None)}));
-    end MarinePopulation;
-  end MarinePopulation;
-
-  package CatalyticCracking
-    model CatalyticCracking
-
-     //parameter
-      parameter Real y1_0=1;
-      parameter Real y2_0=0;
-      parameter Real theta1=1;
-      parameter Real theta2=1;
-      parameter Real theta3=1;
-
-      //states
-      Real y1(start=y1_0);
-      Real y2(start=y2_0);
-    equation
-      der(y1) = -(theta1+theta3)*y1^2;
-      der(y2) = theta1*y1^2-theta2*y2;
-
-       annotation (
-        Documentation(info="<HTML>
-<p>
-Determine the reaction coefficients for the catalytic cracking of gas oil into gas and other
-byproducts. The objective is to minimize the error between the concentration measurements and
-the computed data.
-</p>
-<p>
-Simulation time: 1s
-</p>
-</HTML>"), Icon(graphics={
-            Line(
-              points={{-26,14},{-30,18},{-36,22},{-44,26},{-50,32},{-52,40},{
-                  -50,46},{-46,50},{-40,52},{-36,52},{-28,48},{-22,42},{-18,32},
-                  {-14,22},{-12,14},{-10,2},{-10,0},{-10,-8},{-12,-6},{-16,4},{
-                  -20,10},{-26,14}},
-              color={0,0,0},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{0,18},{-4,32},{-10,44},{-16,54},{-20,64},{-22,74},{-20,
-                  82},{-14,88},{-6,92},{2,92},{10,88},{14,78},{14,68},{10,52},{
-                  4,38},{2,28},{0,20}},
-              color={0,0,0},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{10,-20},{10,-4},{12,12},{20,28},{32,40},{42,44},{48,44},
-                  {52,42},{54,38},{54,30},{52,26},{46,22},{38,18},{30,14},{24,8},
-                  {20,0},{14,-8},{12,-14},{10,-20},{10,-24}},
-              color={0,0,0},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{0,-50},{-2,-38},{-8,-26},{-18,-18},{-30,-14},{-34,-16},{
-                  -36,-18},{-36,-20},{-34,-22},{-30,-24},{-24,-24},{-18,-24},{
-                  -12,-28},{-8,-34},{-4,-40},{-2,-44},{0,-48}},
-              color={0,0,0},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{2,-74},{4,-60},{8,-52},{14,-44},{20,-40},{26,-40},{28,
-                  -44},{28,-48},{26,-52},{22,-54},{20,-56},{16,-58},{14,-60},{
-                  10,-62},{8,-64},{4,-70},{2,-74},{2,-78}},
-              color={0,0,0},
-              thickness=0.5,
-              smooth=Smooth.None)}),
-        experiment,
-        __Dymola_experimentSetupOutput);
-    end CatalyticCracking;
-  end CatalyticCracking;
-
   package Polyeth
     model Polyeth
 
@@ -2951,930 +4268,6 @@ Simulation time: 36000s
     end Examples;
   end Polyeth;
 
-  package CatalystMixing
-    model CatalystMixing
-
-      //state start values
-      parameter Real x1_0=1;
-      parameter Real x2_0=0;
-
-      //states
-      Real x1(start=x1_0,fixed=true);
-      Real x2(start=x2_0,fixed=true);
-
-      //control signal
-      Modelica.Blocks.Interfaces.RealInput u
-        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-
-    equation
-      der(x1) = u*(10*x2-x1);
-      der(x2) = u*(x1-10*x2) - (1-u)*x2;
-      annotation (experiment, __Dymola_experimentSetupOutput,
-      Documentation(info="<HTML>
-  <p>
-  This problem considers a plug-flow reactor, packed with two catalysts, involving the reactions S1 <-> S2 -> S3.
-  The optimal mixing policy of the two catalysts has to be determined in order to maximize the production of species S3. 
-  This dynamic optimization problem was originally proposed by Gunn and Thomas (1965), and subsequently considered by Logsdon (1990) and Vassiliadis (1993).
-  </p>
-  <p>
-  Reference:
-  </p>
-  <p>
-  Second-order sensitivities of general dynamic systems with application to optimal control problems. 1999, Vassilios S. Vassiliadis, Eva Balsa Canto, Julio R. Banga
-  Case Study 6.2: Catalyst mixing
-  </p>
-  <p>
-  Simulation time: 1s
-  </p>
-  </HTML>"),
-        Icon(graphics={
-            Ellipse(
-              extent={{-40,34},{62,6}},
-              lineColor={0,0,255},
-              lineThickness=0.5),
-            Ellipse(
-              extent={{-40,-26},{62,-54}},
-              lineColor={0,0,255},
-              lineThickness=0.5),
-            Line(
-              points={{-40,20},{-40,-40}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{62,20},{62,-40}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{62,66},{12,-14}},
-              color={255,0,0},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{10,-6},{4,-8},{2,-10},{2,-12},{2,-14},{4,-16},{6,-18},{10,-20},
-                  {16,-22},{20,-22},{24,-20},{26,-18},{26,-16},{24,-12},{22,-10}},
-              color={255,0,0},
-              thickness=0.5,
-              smooth=Smooth.None,
-              arrow={Arrow.None,Arrow.Filled})}));
-    end CatalystMixing;
-  end CatalystMixing;
-
-  package BangControl
-
-    model BangControl
-      //state start values
-      parameter Real x1_0=0;
-      parameter Real x2_0=0;
-
-      //states
-      Real x1(start=x1_0,fixed=true);
-      Real x2(start=x2_0,fixed=true);
-
-      //control signal
-      Modelica.Blocks.Interfaces.RealInput u
-        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-
-    equation
-      der(x1) = x2;
-      der(x2) = u;
-
-      annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>
-  <p>
-  This is a minimum-time problem with two states and one
-  input. To convert this optimal control problem with free
-  final time to static optimization problem, first it needs to be
-  transcribed to a fixed final time problem by using an extra
-  state variable. The idea is to specify a nominal time interval,
-  [0, Tf ], and to use the extra state as a scale factor to scale
-  the duration of the real time.
-  </p>
-  <p>
-  Simulation time: 30s
-  </p>
-</HTML>"),
-        Icon(graphics={
-            Ellipse(
-              extent={{-48,-26},{0,-74}},
-              lineColor={255,170,85},
-              lineThickness=0.5),
-            Ellipse(
-              extent={{-30,-2},{40,-60}},
-              lineColor={255,0,128},
-              lineThickness=0.5),
-            Ellipse(
-              extent={{-38,64},{82,-20}},
-              lineColor={0,0,255},
-              lineThickness=0.5),
-            Ellipse(
-              extent={{14,12},{88,-66}},
-              lineColor={255,170,213},
-              lineThickness=0.5),
-            Ellipse(
-              extent={{-68,58},{2,-18}},
-              lineColor={0,127,0},
-              lineThickness=0.5)}));
-    end BangControl;
-
-    package Examples
-      model BangControlInput
-
-        BangControl bangControl
-          annotation (Placement(transformation(extent={{20,20},{40,40}})));
-        Modelica.Blocks.Sources.Constant const(k=1)
-          annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
-      equation
-        connect(const.y, bangControl.u) annotation (Line(
-            points={{-19,30},{5,30},{5,30},{20,30}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        annotation (Diagram(graphics),
-        Documentation(info="<HTML>
-    <p>
-    The model is based on BangControl and a constant input is set.
-    </p>
-    <p>
-    Simulation time: 30s
-    </p>
-    
-    </HTML>"));
-      end BangControlInput;
-
-      model BangControlTimetable
-
-        BangControl bangControl
-          annotation (Placement(transformation(extent={{20,0},{40,20}})));
-        Modelica.Blocks.Sources.TimeTable timeTable(table=[0,1; 20,1; 21,0; 30,0])
-          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-      equation
-        connect(timeTable.y, bangControl.u) annotation (Line(
-            points={{-19,10},{5,10},{5,10},{20,10}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        annotation (Diagram(graphics),
-        Documentation(info="<HTML>
-    <p>
-    The model is based on BangControl and a step function is set as an input.
-    </p>
-    <p>
-    Simulation time: 30s
-    </p>
-    
-    </HTML>"));
-      end BangControlTimetable;
-    end Examples;
-  end BangControl;
-
-  package Greenhouse
-    model Greenhouse
-
-      import SI = Modelica.SIunits;
-
-      //parameter
-      parameter Real pW = 3e-6/40;
-      parameter Real pT = 1;
-      parameter Real pH = 0.1;
-      parameter Real pHc = 7.5e-2/220;
-      parameter Real pWc = 3e4/220;
-      parameter Real pi = 3.14159;
-      parameter Real tf = 48;
-
-      //state start values
-      parameter Real x1_0 = 0;
-      parameter Real x2_0 = 10;
-      parameter Real x3_0 = 0;
-
-      //states
-      SI.Mass x1(start=x1_0,fixed=true) "dry weight";
-      SI.Temp_C x2(start=x2_0,fixed=true) "Greenhouse temperature";
-      SI.Energy x3(start=x3_0,fixed=true);
-      SI.Power sun "sunlight";
-      SI.Temp_C temp "outside temperature";
-
-      //control signal
-      Modelica.Blocks.Interfaces.RealInput u
-        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-
-    equation
-      der(x1) = pW*sun*x2;
-      der(x2) = pT*(temp-x2)+pH*u;
-      der(x3) = pHc*u;
-      sun = 800*sin(4*pi*time/tf-0.65*pi);
-      temp = 15+10*sin(4*pi*time/tf-0.65*pi);
-
-      annotation (experiment(StopTime=48), __Dymola_experimentSetupOutput,
-        Icon(graphics={
-            Ellipse(
-              extent={{-40,22},{-26,8}},
-              lineColor={255,255,0},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Sphere,
-              fillColor={255,213,170}),
-            Ellipse(
-              extent={{54,38},{68,24}},
-              lineColor={0,0,255},
-              lineThickness=0.5,
-              fillColor={170,170,255},
-              fillPattern=FillPattern.Solid),
-            Line(
-              points={{-38,20},{-42,22},{-46,26},{-50,32},{-50,36},{-48,42},{-42,46},
-                  {-36,46},{-32,44},{-30,38},{-30,32},{-30,26},{-32,22}},
-              color={255,0,128},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Ellipse(
-              extent={{56,62},{62,38}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Solid,
-              fillColor={255,85,85}),
-            Ellipse(
-              extent={{68,34},{96,28}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Solid,
-              fillColor={255,85,85}),
-            Ellipse(
-              extent={{60,24},{68,2}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Solid,
-              fillColor={255,85,85}),
-            Ellipse(
-              extent={{54,30},{32,24}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillColor={255,85,85},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{32,38},{54,32}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Solid,
-              fillColor={255,85,85}),
-            Ellipse(
-              extent={{68,28},{96,20}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Solid,
-              fillColor={255,85,85}),
-            Ellipse(
-              extent={{66,60},{62,38}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Solid,
-              fillColor={255,85,85}),
-            Ellipse(
-              extent={{54,24},{60,0}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillColor={255,85,85},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{48,46},{76,16}},
-              lineColor={170,170,255},
-              lineThickness=0.5),
-            Line(
-              points={{-28,20},{-26,28},{-22,32},{-14,36},{-6,34},{-4,28},{-4,
-                  24},{-6,20},{-14,18},{-20,18},{-26,18}},
-              color={255,0,128},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-26,12},{-18,12},{-10,10},{-4,6},{-2,4},{-2,0},{-4,-4},{
-                  -10,-8},{-18,-8},{-26,-2},{-28,2},{-28,6},{-28,8}},
-              color={255,0,128},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-34,8},{-32,4},{-32,-4},{-36,-10},{-44,-12},{-50,-10},{
-                  -52,-4},{-48,4},{-44,6},{-38,10}},
-              color={255,0,128},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-40,18},{-46,24},{-52,28},{-60,28},{-66,26},{-68,22},{
-                  -68,18},{-66,14},{-62,10},{-54,8},{-46,8},{-40,10},{-38,10}},
-              color={255,0,128},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Ellipse(
-              extent={{-6,68},{28,38}},
-              lineColor={255,170,255},
-              lineThickness=0.5,
-              fillColor={255,170,255},
-              fillPattern=FillPattern.Solid),
-            Line(
-              points={{-4,54},{-12,60},{4,58},{0,70},{8,62},{20,72},{20,60},{34,
-                  56},{22,50},{26,40},{14,44},{8,34},{4,46},{-12,42},{-2,52},{
-                  -4,54}},
-              color={170,85,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-32,8},{-26,-16},{-12,-42},{10,-68},{18,-84},{18,-60},{
-                  20,-42},{22,-26},{22,-6},{18,8},{14,24},{14,32},{14,38}},
-              color={0,127,0},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{52,12},{46,-2},{44,-28},{38,-48},{32,-62},{26,-72},{22,
-                  -78},{18,-84}},
-              color={0,127,0},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{4,-60},{-8,-54},{-24,-40},{-30,-32},{-34,-32},{-38,-36},
-                  {-36,-48},{-26,-54},{-14,-60},{-4,-62},{4,-64},{10,-70},{14,
-                  -74}},
-              color={0,127,0},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{36,-52},{44,-42},{54,-32},{66,-28},{72,-30},{78,-36},{78,-42},
-                  {74,-46},{64,-48},{48,-50},{42,-54},{36,-60},{32,-64},{30,-66}},
-              color={0,127,0},
-              thickness=0.5,
-              smooth=Smooth.None)}),
-        Diagram(graphics),
-        Documentation(info="<HTML>
-<p>
-A solar greenhouse has been designed that maximizes solar energy use and minimizes
-fossil energy consumption. It is based on a conventional greenhouse extended with a heat
-pump, a heat exchanger, an aquifer and ventilation with heat recovery. The aim is to
-minimize fossil energy consumption, while maximizing crop dry weight and keeping
-temperature and humidity within certain limits. These requirements are defined in a goal
-function, which is minimized by optimal control. A greenhouse with crop model is used
-to simulate the process behaviour. It is found that open loop optimal control trajectories
-can be determined. The boiler use is reduced to a minimum, thus reducing fossil energy
-use. Compared to a conventional greenhouse it is found that the energy costs are
-decreased and the crop dry weight is increased.
-</p>
-<p>
-Reference:
-</p>
-<p>
-OPTIMAL CONTROL OF A SOLAR GREENHOUSE, R.J.C. van Ooteghem, J.D. Stigter, L.G. van Willigenburg, G. van Straten
-</p>
-<p>
-  Simulation time: 48s
-  </p>
-</HTML>"));
-    end Greenhouse;
-  end Greenhouse;
-
-  package MoonLander
-    model MoonLander
-
-      import SI = Modelica.SIunits;
-      //parameter
-
-      //state start values
-      parameter SI.Height   h_0 = 1;
-      parameter SI.Velocity v_0 = -0.783;
-      parameter SI.Mass     m_0 = 1;
-
-      //states
-      SI.Height   h(start=h_0, fixed=true);
-      SI.Velocity v(start=v_0, fixed=true);
-      SI.Mass     m(start=m_0, fixed=true);
-
-      //control input
-      Modelica.Blocks.Interfaces.RealInput u "thrust" annotation (Placement(transformation(
-              extent={{-120,-20},{-80,20}}),
-                                          iconTransformation(extent={{-120,-20},
-                {-80,20}})));
-
-    equation
-      der(h) = v;
-      der(v) = -1+u/m;
-      der(m) = -u/2.349;
-
-      annotation (experiment(NumberOfIntervals=1),
-          __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>
-<p>
-Example about landing an object.
-</p>
-<p>
-Simulation time: 1s 
-</p>
-</HTML>"),
-        Icon(graphics={
-            Ellipse(
-              extent={{0,38},{-10,36}},
-              lineColor={255,164,90},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Sphere,
-              fillColor={255,213,170}),
-            Ellipse(
-              extent={{-54,60},{70,-58}},
-              lineColor={255,164,90},
-              lineThickness=0.5),
-            Ellipse(
-              extent={{28,16},{54,4}},
-              lineColor={255,164,90},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Sphere,
-              fillColor={255,213,170}),
-            Ellipse(
-              extent={{-36,30},{-16,22}},
-              lineColor={255,164,90},
-              lineThickness=0.5,
-              fillColor={255,213,170},
-              fillPattern=FillPattern.Sphere),
-            Ellipse(
-              extent={{-26,-4},{0,-16}},
-              lineColor={255,164,90},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Sphere,
-              fillColor={255,213,170}),
-            Ellipse(
-              extent={{8,-28},{38,-38}},
-              lineColor={255,164,90},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Sphere,
-              fillColor={255,213,170}),
-            Line(
-              points={{10,48},{10,10},{10,10}},
-              color={127,0,0},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Polygon(
-              points={{10,48},{38,44},{38,26},{10,30},{10,48}},
-              lineColor={127,0,0},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillColor={255,170,170},
-              fillPattern=FillPattern.Forward)}));
-    end MoonLander;
-
-    package Examples
-      model MoonLanderInput
-
-        MoonLander moonLander
-          annotation (Placement(transformation(extent={{20,20},{40,40}})));
-        Modelica.Blocks.Sources.TimeTable timeTable(table=[0,0; 0.2,0; 0.25,1.227;
-              1.5,1.227])
-          annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
-      equation
-        connect(timeTable.y, moonLander.u) annotation (Line(
-            points={{-19,30},{20,30}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        annotation (
-          Diagram(graphics),
-          experiment(StopTime=1.5, NumberOfIntervals=1),
-          __Dymola_experimentSetupOutput,
-          Documentation(info="<HTML>
-    <p>
-    The model is based on MoonLander and a step function is set as an input.
-    </p>
-    <p>
-    Simulation time: 1s
-    </p>
-    </HTML>"));
-      end MoonLanderInput;
-    end Examples;
-  end MoonLander;
-
-  package BatchFermentor
-    model BatchFermentor
-
-      //state start values
-      parameter Real x1_0=1.5;
-      parameter Real x2_0=0;
-      parameter Real x3_0=0;
-      parameter Real x4_0=7;
-      parameter Real u_0=0;
-
-      //states
-      Real x1(start=x1_0, fixed=true);
-      Real x2(start=x2_0, fixed=true);
-      Real x3(start=x3_0, fixed=true);
-      Real x4(start=x4_0, fixed=true);
-      Real h1;
-      Real h2;
-
-      //control input
-      Modelica.Blocks.Interfaces.RealInput u
-        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-
-    equation
-      der(x1) = h1*x1-u*x1/500/x4;
-      der(x2) = h2*x1-0.01*x2-u*x2/500/x4;
-      der(x3) = -h1*x1/0.47-h2*x1/1.2-x1*0.029*x3/(0.0001+x3)+u/x4*(1-x3/500);
-      der(x4) = u/500;
-      h1 = 0.11*x3/(0.006*x1+x3);
-      h2 = 0.0055*x3/(0.0001+x3*(1+10*x3));
-
-      annotation (experiment(StopTime=150, NumberOfIntervals=1),
-          __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>  
-<p>
-   This problem considers a fed-batch reactor for the production of penicillin. 
-   We consider here the free terminal time version where the objective is to maximize 
-   the amount of penicillin using the feed rate as the control variable.  
-</p>   
-<p>
-References:
-</p>    
-<p>
-Dynamic optimization of bioprocesses: efficient and robust numerical strategies 2003, 
-Julio R. Banga, Eva Balsa-Cantro, Carmen G. Moles and Antonio A. Alonso
-</p>    
-<p>
-Case Study I: Optimal Control of a Fed-Batch Fermentor for Penicillin Production
-</p>
-<p>
-Simulation time:150s
-</p>
-</HTML>"),
-        Icon(graphics));
-    end BatchFermentor;
-
-    model BatchFermentor2
-
-      //state start values
-      parameter Real x1_0=1.5;
-      parameter Real x2_0=0;
-      parameter Real x3_0=0;
-      parameter Real x4_0=7;
-      parameter Real u_0=0;
-
-      //states
-      Real x1(start=x1_0, fixed=true);
-      Real x2(start=x2_0, fixed=true);
-      Real x3(start=x3_0, fixed=true);
-      Real x4(start=x4_0, fixed=true);
-      Real u(start=0, fixed=true);
-      Real h1;
-      Real h2;
-
-      //control input
-      Modelica.Blocks.Interfaces.RealInput du
-        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-
-    equation
-      der(x1) = h1*x1-u*x1/500/x4;
-      der(x2) = h2*x1-0.01*x2-u*x2/500/x4;
-      der(x3) = -h1*x1/0.47-h2*x1/1.2-x1*0.029*x3/(0.0001+x3)+u/x4*(1-x3/500);
-      der(x4) = u/500;
-      der(u) = du;
-      h1 = 0.11*x3/(0.006*x1+x3);
-      h2 = 0.0055*x3/(0.0001+x3*(1+10*x3));
-
-      annotation (experiment(StopTime=150, NumberOfIntervals=1),
-          __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>
-</p>    
-<p>
-   This problem considers a fed-batch reactor for the production of penicillin. 
-   We consider here the free terminal time version where the objective is to maximize 
-   the amount of penicillin using the feed rate as the control variable.  
-<p>
-References:
-</p>    
-<p>
-Dynamic optimization of bioprocesses: efficient and robust numerical strategies 2003, 
-Julio R. Banga, Eva Balsa-Cantro, Carmen G. Moles and Antonio A. Alonso
-</p>    
-<p>
-Case Study I: Optimal Control of a Fed-Batch Fermentor for Penicillin Production
-</p>
-<p>
-Simulation time:150s
-</p>
-</HTML>"),
-        Icon(graphics));
-    end BatchFermentor2;
-  end BatchFermentor;
-
-  package Helicopter
-    model Helicopter
-
-         import SI = Modelica.SIunits;
-
-         //State start values and parameters
-         parameter SI.MomentOfInertia Je = 0.91
-        "Moment of inertia about elevation axis";
-         parameter SI.Length la = 0.66
-        "Arm length from elevation axis to helicopter body";
-         parameter Real Kf = 0.5 "Motor force constant";
-         parameter SI.Force Fg = 0.5
-        "Differential force due to gravity and counter weight";
-         parameter SI.Torque Tg = 0.33 "Differential torque";
-         parameter SI.MomentOfInertia Jp = 0.0364
-        "Moment of inertia about pitch axis";
-         parameter SI.Length lh = 0.177
-        "Distance from pitch axis to either motor";
-         parameter SI.MomentOfInertia Jt = 0.91
-        "Moment of inertia about travel axis";
-
-         //States
-         Real te(fixed=true);
-         Real tr(fixed=true);
-         Real tp(fixed=true);
-         Real dte(fixed=true);
-         Real dtr(fixed=true);
-         Real dtp(fixed=true);
-
-         //Control Signal
-      Modelica.Blocks.Interfaces.RealInput Vf
-        annotation (Placement(transformation(extent={{-120,20},{-80,60}}),
-            iconTransformation(extent={{-120,20},{-80,60}})));
-      Modelica.Blocks.Interfaces.RealInput Vb
-        annotation (Placement(transformation(extent={{-120,-40},{-80,0}}),
-            iconTransformation(extent={{-120,-40},{-80,0}})));
-    equation
-         der(te) = dte;
-         der(tr) = dtr;
-         der(tp) = dtp;
-         der(dte)= (Kf*la/Je)*(Vf+Vb)-Tg/Je;
-         der(dtr)= -(Fg*la/Jt)*sin(tp);
-         der(dtp)= (Kf*lh/Jp)*(Vf-Vb);
-      annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput,
-      Documentation(info="<HTML>   
-  <p>
-   As an example of a process with fast dynamics, a helicopter is considered.
-   The helicopter consists of an arm mounted to a base, enabling the arm to rotate freely. 
-  </p>       
-  <p>
-  References:
-  </p>    
-  <p>
-  Operator Interaction and Optimization in Control Systems, Johan Åkesson
-  </p>    
-  <p>
-  Simulation time:150s
-  </p>
-  </HTML>"),
-        Icon(graphics={
-            Ellipse(
-              extent={{-34,36},{66,-22}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Forward,
-              fillColor={255,170,170}),
-            Polygon(
-              points={{-80,20},{-28,20},{-34,12},{-80,20}},
-              lineColor={0,0,255},
-              lineThickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-34,-22},{40,-36},{46,-36},{50,-34},{54,-32}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-20,-14},{-22,-22},{-22,-24}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{20,-22},{18,-32}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{58,-24},{52,-28},{46,-30},{40,-30},{32,-28},{24,-26},{10,-22}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Polygon(
-              points={{26,26},{30,-4},{56,-4},{52,16},{26,26}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillPattern=FillPattern.Forward,
-              fillColor={255,170,170}),
-            Polygon(
-              points={{14,54},{6,32},{22,32},{14,54}},
-              lineColor={213,170,255},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillColor={213,170,255},
-              fillPattern=FillPattern.Forward),
-            Polygon(
-              points={{12,54},{-54,46},{-58,58},{12,54}},
-              lineColor={170,85,255},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillPattern=FillPattern.CrossDiag,
-              fillColor={213,170,255}),
-            Polygon(
-              points={{16,54},{84,68},{86,50},{16,54}},
-              lineColor={170,85,255},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillColor={213,170,255},
-              fillPattern=FillPattern.CrossDiag),
-            Polygon(
-              points={{-80,20},{-84,30},{-88,8},{-80,20}},
-              lineColor={0,0,255},
-              lineThickness=0.5,
-              smooth=Smooth.None)}));
-    end Helicopter;
-
-    model HelicopterDer
-
-      import SI = Modelica.SIunits;
-
-         //State start values and parameters
-         parameter SI.MomentOfInertia Je = 0.91
-        "Moment of inertia about elevation axis";
-         parameter SI.Length la = 0.66
-        "Arm length from elevation axis to helicopter body";
-         parameter Real Kf = 0.5 "Motor force constant";
-         parameter SI.Force Fg = 0.5
-        "Differential force due to gravity and counter weight";
-         parameter SI.Torque Tg = 0.33 "Differential torque";
-         parameter SI.MomentOfInertia Jp = 0.0364
-        "Moment of inertia about pitch axis";
-         parameter SI.Length lh = 0.177
-        "Distance from pitch axis to either motor";
-         parameter SI.MomentOfInertia Jt = 0.91
-        "Moment of inertia about travel axis";
-
-         //States
-         Real te(start=0,fixed=true);
-         Real tr(start=0,fixed=true);
-         Real tp(start=0,fixed=true);
-         Real dte(start=1,fixed=true);
-         Real dtr(start=0,fixed=true);
-         Real dtp(start=-2,fixed=true);
-         Real Vf(start=0,fixed=true);
-         Real Vb(start=0,fixed=true);
-
-         //Control Signal
-      Modelica.Blocks.Interfaces.RealInput dVf
-        annotation (Placement(transformation(extent={{-52,10},{-12,50}})));
-      Modelica.Blocks.Interfaces.RealInput dVb
-        annotation (Placement(transformation(extent={{-50,-46},{-10,-6}})));
-
-    equation
-         der(te) = dte;
-         der(tr) = dtr;
-         der(tp) = dtp;
-         der(dte)= (Kf*la/Je)*(Vf+Vb)-Tg/Je;
-         der(dtr)= -(Fg*la/Jt)*sin(tp);
-         der(dtp)= (Kf*lh/Jp)*(Vf-Vb);
-         der(Vf) = dVf;
-         der(Vb) = dVb;
-         annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput,
-        Diagram(graphics),
-        Documentation(info="<HTML>   
-    <p>
-     The model is equivalent to Helicopter but the derivatives of the input a given. That makes it possible to use the derivatives in the cost function when setting up the optimization problem.
-    </p>    
-    <p>
-    Simulation time:150s
-    </p>
-    </HTML>"),
-        Icon(graphics={
-            Ellipse(
-              extent={{-34,36},{66,-22}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Forward,
-              fillColor={255,170,170}),
-            Polygon(
-              points={{-80,20},{-28,20},{-34,12},{-80,20}},
-              lineColor={0,0,255},
-              lineThickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-34,-22},{40,-36},{46,-36},{50,-34},{54,-32}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-20,-14},{-22,-22},{-22,-24}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{20,-22},{18,-32}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{58,-24},{52,-28},{46,-30},{40,-30},{32,-28},{24,-26},{10,-22}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Polygon(
-              points={{26,26},{30,-4},{56,-4},{52,16},{26,26}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillPattern=FillPattern.Forward,
-              fillColor={255,170,170}),
-            Polygon(
-              points={{14,54},{6,32},{22,32},{14,54}},
-              lineColor={213,170,255},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillColor={213,170,255},
-              fillPattern=FillPattern.Forward),
-            Polygon(
-              points={{12,54},{-54,46},{-58,58},{12,54}},
-              lineColor={170,85,255},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillPattern=FillPattern.CrossDiag,
-              fillColor={213,170,255}),
-            Polygon(
-              points={{16,54},{84,68},{86,50},{16,54}},
-              lineColor={170,85,255},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillColor={213,170,255},
-              fillPattern=FillPattern.CrossDiag),
-            Polygon(
-              points={{-80,20},{-84,30},{-88,8},{-80,20}},
-              lineColor={0,0,255},
-              lineThickness=0.5,
-              smooth=Smooth.None)}));
-    end HelicopterDer;
-
-    package Examples
-      model HelicopterInput
-
-        HelicopterDer helicopterDer
-          annotation (Placement(transformation(extent={{20,0},{40,20}})));
-        Modelica.Blocks.Sources.TimeTable timeTable(table=[0,0.3; 7,0.3; 7,0; 15,
-              0; 15,0.3; 22,0.3; 22,0; 30,0])
-          annotation (Placement(transformation(extent={{-60,22},{-40,42}})));
-        Modelica.Blocks.Sources.TimeTable timeTable1(table=[0,3; 15,3; 15,0; 30,0])
-          annotation (Placement(transformation(extent={{-60,-40},{-40,-20}})));
-      equation
-        connect(timeTable.y, helicopterDer.u) annotation (Line(
-            points={{-39,32},{-8,32},{-8,13.4},{23.4,13.4}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        connect(timeTable1.y, helicopterDer.u1) annotation (Line(
-            points={{-39,-30},{-8,-30},{-8,7.8},{23,7.8}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        annotation (Diagram(graphics),
-        Documentation(info="<HTML>
-    <p>
-    The model is based on HelicopterDer and step functions are set as an input.
-    </p>
-    <p>
-    Simulation time: 150s
-    </p>
-    </HTML>"));
-      end HelicopterInput;
-    end Examples;
-  end Helicopter;
-
-  package DoubleTank
-    model DoubleTank
-
-         import SI = Modelica.SIunits;
-
-         //State start values
-         parameter Real x1_0 = 0;
-         parameter Real x2_0= 1;
-
-         //States
-         Real x1(start = x1_0, fixed=true);
-         Real x2(start = x2_0, fixed=true);
-         SI.DampingCoefficient gamma;
-         SI.DampingCoefficient delta;
-
-         //Parameter
-         parameter SI.Area A = 4.9*10e-4 "Tank cross section";
-         parameter SI.Area a = 3.1*10e-6 "Outlet cross section";
-         parameter SI.VolumeFlowRate alpha = 2.1*10e-5
-        "Conversion factor from control to flow";
-         parameter SI.PhaseCoefficient beta = 6.25
-        "Conversion factor from height to measurement";
-         parameter SI.Acceleration g = 9.81 "Acceleration of gravity";
-
-         //Control Signal
-          Modelica.Blocks.Interfaces.RealInput u
-        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-    equation
-          gamma = a/A*sqrt(2*g*beta);
-          delta = alpha*beta/A;
-          der(x1) = -gamma*sqrt(x1)+delta*u;
-          der(x2) = gamma*(sqrt(x1)-sqrt(x2));
-
-      annotation (DymolaStoredErrors);
-    end DoubleTank;
-  end DoubleTank;
-
   package QuadrupleTank
     model QuadrupleTank
 
@@ -3946,5 +4339,178 @@ Simulation time:150s
       end QuadrupleTankInput;
     end Examples;
   end QuadrupleTank;
+
+package VDP
+  model VDP "Van der Pol model"
+
+     // State start values
+     parameter Real x1_0 = 0;
+     parameter Real x2_0 = 1;
+
+     // The states
+     Real x1(start = x1_0);
+     Real x2(start = x2_0);
+
+     // The control signal
+
+    Modelica.Blocks.Interfaces.RealInput u
+      annotation (Placement(transformation(extent={{-120,-20},{-80,20}})));
+  equation
+     der(x1) = (1 - x2^2) * x1 - x2 + u;
+     der(x2) = x1;
+    annotation (
+      Documentation(info="<HTML>
+<p>
+The model represents the behavior of a free Van-der-Pol oscillator, which is an oscillatory system with non-linear damping.
+It evolves in time according to a second order differential equation, where x1 and x2 are the position coordinates.
+
+For small amplitudes the damping is negativ. The amplitude increases up to a certain limit, where the damping becomes positive. 
+The system stabilises and a limit cycle develops.
+</p>
+<p>
+Simulation time: 10s
+</p>
+
+
+</HTML>"),
+        experiment(StopTime=10),
+        __Dymola_experimentSetupOutput,
+      Icon(graphics={Line(
+            points={{40,4},{40,0},{38,-4},{34,-10},{28,-16},{22,-20},{16,-24},{0,-34},
+                {-6,-36},{-10,-36},{-14,-34},{-18,-32},{-22,-28},{-26,-22},{-30,-18},
+                {-32,-14},{-36,-8},{-36,-4},{-36,2},{-36,8},{-34,16},{-30,20},{-24,
+                26},{-14,32},{2,42},{12,50},{20,54},{30,56},{40,56},{46,54},{54,48},
+                {60,42},{64,34},{66,28},{66,22},{66,18},{66,12},{64,6},{62,2},{58,
+                -2},{48,-12},{38,-20},{24,-30},{6,-40},{-4,-44},{-14,-44},{-22,-42},
+                {-30,-36},{-36,-30},{-42,-24},{-46,-18},{-50,-10},{-50,0},{-48,12},
+                {-44,20},{-36,26},{-30,30}},
+            color={0,0,255},
+            smooth=Smooth.None)}));
+  end VDP;
+
+  package Examples
+    model VDPexpsin
+
+      VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
+      Modelica.Blocks.Sources.ExpSine expSine(amplitude=10)
+        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+    equation
+      connect(expSine.y, vDP.u) annotation (Line(
+          points={{-19,10},{20,10}},
+          color={0,0,127},
+          smooth=Smooth.None));
+      annotation (Diagram(graphics),
+        Documentation(info="<HTML>
+<p>
+input: expsin function
+</p>
+<p>
+Simulation time: 10s
+</p>
+
+
+</HTML>"));
+    end VDPexpsin;
+
+    model VDPramp
+
+      VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
+      Modelica.Blocks.Sources.Ramp ramp
+        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+    equation
+      connect(ramp.y, vDP.u) annotation (Line(
+          points={{-19,10},{20,10}},
+          color={0,0,127},
+          smooth=Smooth.None));
+
+      annotation (
+        Diagram(graphics),
+        experiment(StopTime=10, NumberOfIntervals=50),
+        __Dymola_experimentSetupOutput,
+        Documentation(info="<HTML>
+<p>
+input: ramp function
+</p>
+<p>
+Simulation time: 10s
+</p>
+
+
+</HTML>"));
+    end VDPramp;
+
+    model VDPexp
+
+      VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
+      Modelica.Blocks.Sources.Exponentials exponentials(riseTime=10)
+        annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+    equation
+      connect(exponentials.y, vDP.u) annotation (Line(
+          points={{-19,10},{20,10}},
+          color={0,0,127},
+          smooth=Smooth.None));
+
+      annotation (Diagram(graphics),
+        Documentation(info="<HTML>
+<p>
+input: exponential function
+</p>
+<p>
+Simulation time: 10s
+</p>
+
+
+</HTML>"));
+    end VDPexp;
+
+    model VDPpulse
+
+      VDP vDP annotation (Placement(transformation(extent={{0,0},{20,20}})));
+      Modelica.Blocks.Sources.Pulse pulse(amplitude=10)
+        annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
+    equation
+      connect(pulse.y, vDP.u) annotation (Line(
+          points={{-39,10},{0,10}},
+          color={0,0,127},
+          smooth=Smooth.None));
+
+      annotation (Diagram(graphics),
+        Documentation(info="<HTML>
+<p>
+input: pulse function
+</p>
+<p>
+Simulation time: 10s
+</p>
+
+
+</HTML>"));
+    end VDPpulse;
+
+    model VDPsine
+
+      VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
+      Modelica.Blocks.Sources.Sine sine(amplitude=5, freqHz=1)
+        annotation (Placement(transformation(extent={{-32,0},{-12,20}})));
+    equation
+      connect(sine.y, vDP.u) annotation (Line(
+          points={{-11,10},{20,10}},
+          color={0,0,127},
+          smooth=Smooth.None));
+
+      annotation (Diagram(graphics),
+        Documentation(info="<HTML>
+<p>
+input: sine function
+</p>
+<p>
+Simulation time: 10s
+</p>
+
+
+</HTML>"));
+    end VDPsine;
+  end Examples;
+end VDP;
   annotation (uses(Modelica(version="3.2")));
 end JMExamples;

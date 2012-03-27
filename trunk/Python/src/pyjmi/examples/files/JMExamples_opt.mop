@@ -20,10 +20,8 @@ package JMExamples_opt
       input Real u = bf.u;
       JMExamples.BatchFermentor.BatchFermentor bf(x1(fixed=true),x2(fixed=true),
 	  x3(fixed=true),x4(fixed=true),h1,h2,u(fixed=true));
-	  //Real J(fixed=true);
 														  
    equation
-	  //der(J) = +(du)^2;
    constraint
 	  0<=u;
 	  u<=50;
@@ -224,6 +222,41 @@ package JMExamples_opt
    end ContState_opt;
    
    
+   optimization Distillation1_opt(objective = cost(finalTime), startTime=0, finalTime=7200)
+    extends JMExamples.Distillation.Distillation1Input(rr(min=1,max=5));
+
+    Real cost(start = 0);
+    //parameter Real rr_ref = 2.0;
+    //parameter Real x1_ref = 0.8;
+	Real rr_ref;
+	Real x1_ref;
+
+   equation
+    der(cost)  = (x[1]-x1_ref)^2 + (rr-rr_ref)^2 ; 
+
+   constraint
+     rr>=0;
+	 rr<=5;
+	 //x[1]>=0.94;
+  end Distillation1_opt;
+  
+  
+  optimization Distillation1_opt2(objective = cost(finalTime), startTime=0, finalTime=7200)	
+	extends JMExamples.Distillation.Distillation1Inputder(rr(min=1,max=5));
+
+    Real cost(start = 0);
+    parameter Real x1_ref = 0.97;
+
+   equation
+    der(cost) = (x[1]-x1_ref)^2; 
+
+   constraint
+    rr>=0;
+	rr<=5;
+	//x[1]>=0.94;
+  end Distillation1_opt2;
+   
+   
    optimization FlightPath_opt (objective = J(finalTime),
                             startTime = 0,
                             finalTime = 100)
@@ -298,13 +331,19 @@ package JMExamples_opt
 	  tp(fixed=true),dte(fixed=true),dtr(fixed=true),dtp(fixed=true),Vf(fixed=true),
 	  Vb(fixed=true),dVb,dVf);														
 	  Real J(fixed=true);  
-	  Real u;
-	  Real u1;
+	  //Real u;
+	  //Real u1;
 	
     equation
-	  der(J) = dVf^2 + dVb^2 + (te-u)^2 + (tr-u1)^2;
-	  u = noEvent(if time>=22.5 then 0 else 0.3);
-	  u1= noEvent(if time>=15 then 0 else 3);
+	  //der(J) = dVf^2 + dVb^2 + (te-u)^2 + (tr-3)^2;
+	  //u = noEvent(if (time<=22.5 and time>=15) or time<=7.5 then 0.3 else 0);
+	  //u1= noEvent(if time<=15 then 3 else 0);
+	  
+	  der(J) = noEvent(if time<=7.5 then (te-0.3)^2 + (tr-3)^2
+			elseif (time>=7.5 and time<=15) then te^2 + (tr-3)^2
+			elseif (time>=15 and time<=22.5) then (te-0.3)^2 + tr^2
+			else te^2 + tr^2);
+	  
     constraint
       -0.5<= te;
 	  te  <= 0.6;
@@ -451,7 +490,7 @@ package JMExamples_opt
    
    optimization PenicillinPlant_opt1 (objective = -P1(finalTime),
                             startTime = 0,
-                            finalTime = 80.277)
+                            finalTime = 75)
                             
       extends JMExamples.PenicillinPlant.PenicillinPlant1(X1(fixed=true),S1(fixed=true),P1(fixed=true),V1(fixed=true),miu1,u1);														
 	  //Real J(fixed=true);     
@@ -473,7 +512,7 @@ package JMExamples_opt
    
    optimization PenicillinPlant_opt2 (objective = -P2(finalTime),
                             startTime = 0,
-                            finalTime = 69.723)
+                            finalTime = 75)
                             
       extends JMExamples.PenicillinPlant.PenicillinPlant2(X2(fixed=true),S2(fixed=true),P2(fixed=true),V2(fixed=true),miu2,u2);														
 	  //Real J(fixed=true);     

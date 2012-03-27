@@ -151,12 +151,14 @@ def run_demo(with_plots=True):
         plt.subplot(325)
         plt.plot(t,u)
         plt.title('Feed flowrate')
+        plt.axis([0,180,-0.02,0.12])
         plt.grid()
         plt.ylabel('u')
 		
         plt.subplot(326)
         plt.plot(t,du)
         plt.title('Derivative of Feed flowrate')
+        plt.axis([0,180,-1.5,1])
         plt.grid()
         plt.ylabel('du')
 		
