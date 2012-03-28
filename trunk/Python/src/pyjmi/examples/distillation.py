@@ -68,7 +68,7 @@ def run_demo(with_plots=True,with_blocking_factors = False):
         print '(' + str(i+1) + ', %f, %f)' %(x_A[i], y_A[i])
     
     # Set inputs for stationary point B
-    rr_0_B = 3.0 - 1
+    rr_0_B = 2.0
     init_model.set('rr',rr_0_B)
     init_result = init_model.initialize()
 
@@ -82,7 +82,7 @@ def run_demo(with_plots=True,with_blocking_factors = False):
         x_B[i] = init_model.get('x[' + str(i+1) + ']')
         print '(' + str(i+1) + ', %f, %f)' %(x_B[i], y_B[i])
 
-    # ## Set up and solve an optimal control problem. 
+    # Set up and solve an optimal control problem. 
 
     # Compile the JMU
     jmu_name = compile_jmu("DISTLib_Opt.Binary_Dist_Opt1", 

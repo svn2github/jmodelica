@@ -1154,7 +1154,7 @@ Simulation time: 150s
       import SI = Modelica.SIunits;
 
       parameter Real rr=3.7 "reflux ratio; initial condition: rr_init=3";
-      parameter SI.MolarFlowRate Feed =  24.0/3600 "Feed Flowrate";
+      parameter SI.MolarFlowRate Feed =  24.0/360 "Feed Flowrate";
       parameter Real x_Feed = 0.5 "Mole Fraction of Feed";
       parameter SI.MolarFlowRate D=0.5*Feed "Distillate Flowrate";
       parameter SI.MolarFlowRate L=rr*D
@@ -1307,7 +1307,7 @@ Simulation time: 7200s
       import SI = Modelica.SIunits;
 
     //parameters
-      parameter SI.MolarFlowRate Feed =  24.0/3600 "Feed Flowrate";
+      parameter SI.MolarFlowRate Feed =  24.0/60 "Feed Flowrate";
       parameter SI.MassFraction x_Feed = 0.5 "Mole Fraction of Feed";
       parameter SI.MolarFlowRate D=0.5*Feed "Distillate Flowrate";
       parameter Real vol=1.6
@@ -1332,7 +1332,7 @@ Simulation time: 7200s
       SI.MolarFlowRate FL "Flowrate of the Liquid in the Stripping Section";
 
     //input
-      Modelica.Blocks.Interfaces.RealInput rr
+      Modelica.Blocks.Interfaces.RealInput rr(start=1)
         annotation (Placement(transformation(extent={{-20,-10},{20,30}})));
     equation
      //ODE
@@ -1443,7 +1443,7 @@ Simulation time: 7200s
 
       import SI = Modelica.SIunits;
 
-      parameter SI.MolarFlowRate Feed =  24.0/3600 "Feed Flowrate";
+      parameter SI.MolarFlowRate Feed =  24.0/60 "Feed Flowrate";
       parameter SI.MassFraction x_Feed = 0.5 "Mole Fraction of Feed";
       parameter SI.MolarFlowRate D=0.5*Feed "Distillate Flowrate";
       parameter Real vol=1.6
@@ -1616,7 +1616,7 @@ Simulation time: 7200s
 
       import SI = Modelica.SIunits;
 
-      parameter SI.MolarFlowRate Feed =  24.0/3600 "Feed Flowrate";
+      parameter SI.MolarFlowRate Feed =  24.0/60 "Feed Flowrate";
       parameter Real x_Feed = 0.5 "Mole Fraction of Feed";
       parameter SI.MolarFlowRate D=0.5*Feed "Distillate Flowrate";
       parameter Real vol=1.6

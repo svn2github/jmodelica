@@ -87,7 +87,7 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     # Compile the JMU
     jmu_name = compile_jmu("JMExamples_opt.Distillation1_opt", 
     (curr_dir+"/files/JMExamples.mo",curr_dir+"/files/JMExamples_opt.mop"), 
-    compiler_options={'state_start_values_fixed':True}) 
+        compiler_options={'state_start_values_fixed':True}) 
 
     # Load the dynamic library and XML data
     model = JMUModel(jmu_name)
@@ -107,7 +107,7 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     opts['hs'] = N.ones(100)*1./100 # Equidistant points
     opts['n_e'] = 100 # Number of elements
     opts['n_cp'] = 3  # Number of collocation points in each element
-    opt_res = model.optimize(options=opts)
+    opt_res = model.optimize()
 
     # Extract variable profiles
     x1  = opt_res['x[1]']

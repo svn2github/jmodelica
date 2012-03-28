@@ -222,26 +222,23 @@ package JMExamples_opt
    end ContState_opt;
    
    
-   optimization Distillation1_opt(objective = cost(finalTime), startTime=0, finalTime=7200)
+   optimization Distillation1_opt(objective = cost(finalTime), startTime=0, finalTime=50)
     extends JMExamples.Distillation.Distillation1Input(rr(min=1,max=5));
 
     Real cost(start = 0);
-    //parameter Real rr_ref = 2.0;
-    //parameter Real x1_ref = 0.8;
-	Real rr_ref;
-	Real x1_ref;
+    parameter Real rr_ref = 2.0;
+    parameter Real x1_ref = 0.8;
 
    equation
-    der(cost)  = (x[1]-x1_ref)^2 + (rr-rr_ref)^2 ; 
+    der(cost)  = 1000*(x[1]-x1_ref)^2 + (rr-rr_ref)^2 ; 
 
    constraint
      rr>=0;
 	 rr<=5;
-	 //x[1]>=0.94;
   end Distillation1_opt;
   
   
-  optimization Distillation1_opt2(objective = cost(finalTime), startTime=0, finalTime=7200)	
+  optimization Distillation1_opt2(objective = cost(finalTime), startTime=0, finalTime=50)	
 	extends JMExamples.Distillation.Distillation1Inputder(rr(min=1,max=5));
 
     Real cost(start = 0);
@@ -253,7 +250,6 @@ package JMExamples_opt
    constraint
     rr>=0;
 	rr<=5;
-	//x[1]>=0.94;
   end Distillation1_opt2;
    
    
