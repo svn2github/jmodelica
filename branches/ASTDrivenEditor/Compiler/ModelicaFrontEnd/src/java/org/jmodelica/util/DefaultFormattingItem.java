@@ -53,4 +53,17 @@ public class DefaultFormattingItem extends FormattingItem {
 	public RelativePosition getBackRelativePosition(int line, int column) {
 		return RelativePosition.UNDEFINED;
 	}
+	
+	@Override
+	public DefaultFormattingItem copyWhitepacesFromFormatting() {
+		StringBuilder dataBuilder = new StringBuilder();
+		for (int i = 0; i < data.length(); i++) {
+			char currentChar = data.charAt(i);
+			if (currentChar == ' ' || currentChar == '\t' || currentChar == '\f' || currentChar == '\n' || currentChar == '\r') {
+				dataBuilder.append(data.charAt(i));
+			}
+		}
+		
+		return new DefaultFormattingItem(dataBuilder.toString());
+	}
 }

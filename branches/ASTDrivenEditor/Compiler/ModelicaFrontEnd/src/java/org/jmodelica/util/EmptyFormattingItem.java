@@ -26,4 +26,8 @@ public class EmptyFormattingItem extends DefaultFormattingItem {
 		return "";
 	}
 
+	@Override
+	public DefaultFormattingItem copyWhitepacesFromFormatting() {
+		return new EmptyFormattingItem();
+	}
 }

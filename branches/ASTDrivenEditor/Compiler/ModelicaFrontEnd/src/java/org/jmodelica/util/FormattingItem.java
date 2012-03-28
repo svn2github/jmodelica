@@ -137,4 +137,14 @@ public abstract class FormattingItem {
 	public String toString() {
 		return data;
 	}
+	
+	/**
+	 * Creates a new <code>DefaultFormattingItem</code> containing all the whitespaces that this
+	 * <code>FormattingItem</code> contains. If this <code>FormattingItem</code> is a
+	 * <code>ScannedFormattingItem</code> though, only the whitespaces after the last line break are preserved.
+	 * This should make it easy to get indentation from this <code>FormattingItem</code>.
+	 * @return a new <code>DefaultFormattingItem</code> containing all the whitespaces that this
+	 * <code>FormattingItem</code> contains
+	 */
+	public abstract DefaultFormattingItem copyWhitepacesFromFormatting();
 }

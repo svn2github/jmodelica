@@ -184,4 +184,13 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 
 		return false;
 	}
+	
+	@Override
+	public DefaultFormattingItem copyWhitepacesFromFormatting() {
+		if (type == FormattingItem.Type.NON_BREAKING_WHITESPACE || type == FormattingItem.Type.LINE_BREAK) {
+			return new DefaultFormattingItem(data);
+		}
+		
+		return new EmptyFormattingItem();
+	}
 }

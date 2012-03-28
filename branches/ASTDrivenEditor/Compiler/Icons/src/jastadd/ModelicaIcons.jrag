@@ -109,7 +109,7 @@ aspect ModelicaIcons
 				componentDecl.setName(new IdDecl(componentName));
 				componentDecl.setComment(new Comment());
 				componentDecl.setCCComment(new Comment());
-				((FullClassDecl)getClassDecl()).addComponentDecl(componentDecl);
+				((FullClassDecl)getClassDecl()).addNewComponentDecl(componentDecl);
 				InstComponentDecl icd = (InstComponentDecl)createInstComponentDecl(componentDecl);
 				addInstComponentDecl(icd);
 				
@@ -367,7 +367,7 @@ aspect ModelicaIcons
 			icd = childComponentMap.remove(additionalInfo);
 			if (icd == null)
 				throw new RuntimeException("This should not be null, the component has been created else where");
-			((FullClassDecl)getClassDecl()).addComponentDecl(icd.getComponentDecl());
+			((FullClassDecl)getClassDecl()).addNewComponentDecl(icd.getComponentDecl());
 			addInstComponentDecl(icd);
 		} else if (o == diagram() && flag == Icon.SUBCOMPONENT_REMOVED) {
 			InstComponentDecl icd = findOwnerOf((Component)additionalInfo);
@@ -386,13 +386,13 @@ aspect ModelicaIcons
 				cc.setConnector1(Access.fromClassName(con.getSourceConnector().getComponentName()));
 				cc.setConnector2(Access.fromClassName(con.getTargetConnector().getComponentName()));
 				System.out.println(con.getTargetConnector().getComponentName());
-				((FullClassDecl)getClassDecl()).addEquation(cc);
+				((FullClassDecl)getClassDecl()).addNewEquation(cc);
 				fcc = (FConnectClause)cc.instantiate();
 				fcc.setConnection(con);
 				addFAbstractEquation(fcc);
 				con.addObserver(fcc);
 			} else {
-				((FullClassDecl)getClassDecl()).addEquation(fcc.getConnectClause());
+				((FullClassDecl)getClassDecl()).addNewEquation(fcc.getConnectClause());
 				addFAbstractEquation(fcc);
 			}
 			if (findOwnerOf((Component)con.getSourceConnector()) != fcc.getConnector1().getInstAccess().myInstComponentDecl()) {
@@ -411,13 +411,18 @@ aspect ModelicaIcons
 	}
 	  
 	public boolean FullClassDecl.removeComponentDecl(ComponentDecl cd) {
-		for (int i = 0; i < getNumComponentDecl(); i++) {
-			if (getComponentDecl(i) == cd) {
-				getComponentDecls().removeChild(i);
-				return true;
-			}
+		int componentIndex = getComponentDecls().getIndexOfChild(cd);
+		if (componentIndex < 0) {
+			return false;
 		}
-		return false;
+		getComponentDecls().removeChild(componentIndex);
+
+		int clauseIndex = originalComposition.getClauses().getIndexOfChild(cd);
+		if (clauseIndex >= 0) {
+				originalComposition.getClauses().removeChild(clauseIndex);
+		}
+
+		return true;
 	}
 	
 	public boolean InstClassDecl.removeInstComponentDecl(InstComponentDecl icd) {
@@ -441,14 +446,31 @@ aspect ModelicaIcons
 	}
 	
 	public boolean FullClassDecl.removeEquation(AbstractEquation ae) {
-		for (int i = 0; i < getNumEquation(); i++) {
-			if (getEquation(i) == ae) {
-				getEquations().removeChild(i);
-				return true;
+		int equationIndex = getEquations().getIndexOfChild(ae);
+		if (equationIndex < 0) {
+			return false;
+		}
+		getEquations().removeChild(equationIndex);
+
+		int removeClause = -1;
+		for (int i = 0; i < originalComposition.getNumClause(); i++) {
+			if (originalComposition.getClause(i) instanceof EquationClause) {
+				EquationClause equationClause = (EquationClause) originalComposition.getClause(i);
+				int childIndex = equationClause.getAbstractEquations().getIndexOfChild(this);
+				if (childIndex >= 0) {
+					equationClause.getAbstractEquations().removeChild(childIndex);
+					if (equationClause.getNumAbstractEquation() == 0) {
+						removeClause = i;
+					}
+					break;
+				}
 			}
 		}
-		return false;
-		
+		if (removeClause >= 0) {
+			originalComposition.removeChild(removeClause);
+		}
+
+		return true;
 	}
 	
 	public class InstComponentDecl implements Observer{}

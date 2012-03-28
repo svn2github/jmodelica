@@ -1,6 +1,7 @@
 package org.jmodelica.util;
 
 import java.util.LinkedList;
+import java.util.Stack;
 
 /**
  * A <code>FormattingItem</code> that consists of several, smaller items.
@@ -112,6 +113,27 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 		}
 
 		return stringBuilder.toString();
+	}
+	
+	@Override
+	public DefaultFormattingItem copyWhitepacesFromFormatting() {
+		Stack<String> stringStack = new Stack<String>();
+		for (int i = subItems.size() - 1; i >= 0; i--) {
+			ScannedFormattingItem formattingItem = subItems.get(i);
+			if (formattingItem.endsWithLineBreak()) {
+				break;
+			}
+			if (formattingItem.type == Type.NON_BREAKING_WHITESPACE) {
+				stringStack.push(formattingItem.data);
+			}
+		}
+		
+		StringBuilder dataBuilder = new StringBuilder();
+		while (!stringStack.isEmpty()) {
+			dataBuilder.append(stringStack.pop());
+		}
+		
+		return new DefaultFormattingItem(dataBuilder.toString());
 	}
 
 }
