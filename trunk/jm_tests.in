@@ -101,7 +101,6 @@ function python_tests() {
   else
     TEST_DIR=$(mktemp -dq /tmp/jm_tests.XXXXXX)
   fi 
-  PATTERN=----------------------------------------------------------------------
   print_name Python
   case ${OUTPUT} in
     v)
@@ -113,15 +112,18 @@ function python_tests() {
           echo ${TEST} | sed -e 's!^.*jmodelica.!Running !'
           nosetests ${TAGS} -v ${TEST}
         done
-      fi
+      fi 2>&1 | log
       ;;
     q)
-      if build_jmodelica 2> /dev/null > /dev/null; then
+      if build_jmodelica 2>&1 | log > /dev/null; then
         find_python_tests
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
+          echo "" | log > /dev/null
+          echo ${TEST} | sed -e 's!^.*jmodelica.!Running !' | log > /dev/null
           nosetests ${TAGS} -v ${TEST} 2>&1 \
-	    | sed -n -e 's!^OK$!PASSED!ip' -e 's!^FAILED !TEST FAILED!p'
+          | log \
+	      | sed -n -e 's!^OK$!PASSED!ip' -e 's!^FAILED !TEST FAILED!p'
         done | filter_python_separate
       else
         echo BUILD FAILED
@@ -131,16 +133,18 @@ function python_tests() {
       if [[ "${NO_BUILD_JMODELICA}" != "1" ]]; then
         echo Building...
       fi
-      if build_jmodelica > /dev/null; then
+      if build_jmodelica | log > /dev/null; then
+        PATTERN="[-=]{40,}"
         find_python_tests
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
-          echo ""
-          echo ${TEST} | sed -e 's!^.*jmodelica.!Running !'
+          echo "" | log
+          echo ${TEST} | sed -e 's!^.*jmodelica.!Running !' | log
           nosetests ${TAGS} -v ${TEST} 2>&1 \
-	    | egrep -v '^Exception .* ignored$' \
-	    | grep -A500 -e${PATTERN} \
-	    | sed -e 's!^OK$!PASSED!' -e 's!^FAILED !TEST FAILED!'
+          | log \
+	      | egrep -v '^Exception .* ignored$' \
+	      | egrep -A500 "${PATTERN}" \
+	      | sed -e 's!^OK$!PASSED!' -e 's!^FAILED !TEST FAILED!'
         done | filter_python_separate
       fi
       ;;
@@ -157,6 +161,14 @@ function print_name() {
     echo -n "$1... "
   else
     echo ======= $1 =======
+  fi
+}
+
+function log() {
+  if [ "${LOG}" == 1 ]; then
+      tee -a "${LOGFILE}"
+  else
+      cat
   fi
 }
 
@@ -183,26 +195,31 @@ function junit_test() {
   cd ${JMODELICA_SRC}/Compiler/$1Compiler
   case ${OUTPUT} in
     v)
-      ant_test
+      ant_test 2>&1 \
+      | log
       ;;
     q)
       ant_test 2>&1 \
-        | egrep "(\[(jastadd|junit)\]|BUILD FAILED|\[java\] Error when parsing file:)" \
-	| sed -n \
-	    -e '1 i\
-                0 0' \
-            -e 's!^.*\[jastadd\] \(Semantic errors\|Syntax error\).*$!BUILD FAILED!' \
-	    -e 's!^.*\[java\] Error when parsing file:.*$!BUILD FAILED!' \
-	    -e 's!^.*Failures: \([0-9]*\), Errors: \([0-9]*\),.*$!r\1+r\2+!p' \
-	    -e 's!^.*\(BUILD FAILED\).*$![\1]pq!p' \
-	    -e '$ a\
-                [errors=]nn[, failures=]np' \
-	| dc \
-	| sed -e 's!errors=0, failures=0!PASSED!' \
+      | log \
+      | egrep "(\[(jastadd|junit)\]|BUILD FAILED|\[java\] Error when parsing file:)" \
+      | sed -n \
+        -e '1 i\
+            0 0' \
+        -e 's!^.*\[jastadd\] \(Semantic errors\|Syntax error\).*$!BUILD FAILED!' \
+        -e 's!^.*\[java\] Error when parsing file:.*$!BUILD FAILED!' \
+        -e 's!^.*Failures: \([0-9]*\), Errors: \([0-9]*\),.*$!r\1+r\2+!p' \
+        -e 's!^.*\(BUILD FAILED\).*$![\1]pq!p' \
+        -e '$ a\
+            [errors=]nn[, failures=]np' \
+      | dc \
+      | sed \
+        -e 's!errors=0, failures=0!PASSED!' \
 	    -e 's!\(errors=.*, failures=.*\)!TEST FAILED (\1)!'
       ;;
     n)
-      ant_test | egrep "(\[junit\]|\[(java|jastadd)\].*([Ee]rror|[A-Za-z.]*:[1-9][0-9]*))"
+      ant_test 2>&1 \
+      | log \
+      | egrep "(\[junit\]|\[(java|jastadd)\].*([Ee]rror|[A-Za-z.]*:[1-9][0-9]*))"
       ;;
   esac
 }
@@ -236,6 +253,112 @@ function switch_test_flags() {
   done
 }
 
+function read_args() {
+  TESTS=
+  ARG_TYPE=flag
+  for a in ${DEFAULT_ARGS} $*; do
+    if [[ "$(echo $a | head -c1)" == "-" ]]; then
+      ARG_TYPE=flag
+    fi
+    FLAG=0
+    case ${ARG_TYPE} in
+      flag)
+        FLAG=1
+        ;;
+      tag)
+        TAGS="${TAGS} -a ${a}"
+        ;;
+      file)
+        if [[ -f "${a}" ]]; then
+          FILE="${a}"
+        else
+          FILE="${TESTS_DIR}/${a}"
+        fi
+        if [[ -f ${FILE} ]]; then
+          TESTS="${TESTS} ${FILE}"
+        else
+          echo "Cannot find test file ${a}"
+          exit
+        fi
+        ;;
+    esac
+    if [[ ${FLAG} == 1 ]]; then
+      for b in $(echo "" ${a}|sed 's!\(.\)!\1 !g'); do
+        case ${b} in
+          -)
+            ;;
+          v|q|n)
+            OUTPUT=${b}
+            ;;
+          a|j|m|o|p)
+            test_set="test_set_${b}"
+            switch_test_flags ${!test_set}
+            ;;
+          c|C)
+            CLEAN_JUNIT=clean
+            if [[ "${b}" == C ]]; then
+              CLEAN_BUILD="make clean"
+            fi
+            ;;
+          i)
+            NO_BUILD_JMODELICA=1
+            ;;
+          k)
+            KEEP_PYTHON=1
+            ;;
+          l)
+            LOG=1
+            LOGFILE="$(pwd)/tests.log"
+            ;;
+          f)
+            ARG_TYPE=file
+            ;;
+          t)
+            TAGS=""
+            ARG_TYPE=tag
+            ;;
+          g)
+            ARG_TYPE=tag
+            ;;
+          h)
+            echo "usage: tests [-ajmopvnqcCh] { [-(t|g) [tag1 ...]] } [-f file1 ...]"
+            echo "The -ajmop options each control a set of tests, and select all tests in set "
+            echo "for running, or, if all in set are already selected, deselects them. "
+            echo "Thus, \"tests -am\" runs all tests except modelica. If no tests are chosen, "
+            echo "a default set is run (${DEFAULT_TESTS})." 
+            echo "  -a  Select/deselect all tests"
+            echo "  -j  Select/deselect junit tests"
+            echo "  -m  Select/deselect modelica tests"
+            echo "  -o  Select/deselect optimca tests"
+            echo "  -p  Select/deselect python tests"
+            echo "  -v  Verbose output, show everything"
+            echo "  -n  Normal output, only show results and compilation errors"
+            echo "  -q  Quiet output, only show brief results"
+            echo "  -c  Do a clean before junit tests"
+            echo "  -C  Do a clean before each test suite"
+            echo "  -i  Do not re-build before python tests"
+            echo "  -k  Keep generated files from python tests"
+            echo "  -l  Create log file with the equivalent of the output with -v"
+            echo "  -t  When running python tests, only run tests marked with one of the "
+            echo "      listed tags. If given without tags, all tests are run. If -t is "
+            echo "      given several times, only the last one will be used"
+            echo "  -g  When running python tests, add the listed tags to the tags to use"
+            echo "  -f  When running python tests, only run tests from the listed files. "
+            echo "      Paths relative to the tests directory are accepted, as well as "
+            echo "      absolute or relative to current directory"
+            echo "  -h  Print this help and exit"
+            exit
+            ;;
+          *)
+            echo "Unknown flag -${b}"
+            exit
+            ;;
+        esac
+      done
+    fi
+  done
+}
+
 # === Main ===
 OUTPUT=n
 i=0
@@ -246,104 +369,11 @@ done
 export JAVA_HOME JMODELICA_HOME IPOPT_HOME CPPAD_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS SUNDIALS_HOME
 TIME=$(date +%s)
 
-TESTS=
-ARG_TYPE=flag
-for a in ${DEFAULT_ARGS} $*; do
-  if [[ "$(echo $a | head -c1)" == "-" ]]; then
-    ARG_TYPE=flag
-  fi
-  FLAG=0
-  case ${ARG_TYPE} in
-    flag)
-      FLAG=1
-      ;;
-    tag)
-      TAGS="${TAGS} -a ${a}"
-      ;;
-    file)
-      if [[ -f "${a}" ]]; then
-        FILE="${a}"
-      else
-        FILE="${TESTS_DIR}/${a}"
-      fi
-      if [[ -f ${FILE} ]]; then
-        TESTS="${TESTS} ${FILE}"
-      else
-        echo "Cannot find test file ${a}"
-        exit
-      fi
-      ;;
-  esac
-  if [[ ${FLAG} == 1 ]]; then
-    for b in $(echo "" ${a}|sed 's!\(.\)!\1 !g'); do
-      case ${b} in
-        -)
-          ;;
-        v|q|n)
-          OUTPUT=${b}
-          ;;
-        a|j|m|o|p)
-          test_set="test_set_${b}"
-          switch_test_flags ${!test_set}
-          ;;
-        c|C)
-          CLEAN_JUNIT=clean
-          if [[ "${b}" == C ]]; then
-            CLEAN_BUILD="make clean"
-          fi
-          ;;
-        i)
-          NO_BUILD_JMODELICA=1
-          ;;
-        k)
-          KEEP_PYTHON=1
-          ;;
-        f)
-          ARG_TYPE=file
-          ;;
-        t)
-          TAGS=""
-          ARG_TYPE=tag
-          ;;
-        g)
-          ARG_TYPE=tag
-          ;;
-        h)
-          echo "usage: tests [-ajmopvnqcCh] { [-(t|g) [tag1 ...]] } [-f file1 ...]"
-          echo "The -ajmop options each control a set of tests, and select all tests in set "
-          echo "for running, or, if all in set are already selected, deselects them. "
-          echo "Thus, \"tests -am\" runs all tests except modelica. If no tests are chosen, "
-          echo "a default set is run (${DEFAULT_TESTS})." 
-          echo "  -a  Select/deselect all tests"
-          echo "  -j  Select/deselect junit tests"
-          echo "  -m  Select/deselect modelica tests"
-          echo "  -o  Select/deselect optimca tests"
-          echo "  -p  Select/deselect python tests"
-          echo "  -v  Verbose output, show everything"
-          echo "  -n  Normal output, only show results and compilation errors"
-          echo "  -q  Quiet output, only show brief results"
-          echo "  -c  Do a clean before junit tests"
-          echo "  -C  Do a clean before each test suite"
-          echo "  -i  Do not re-build before python tests"
-          echo "  -k  Keep generated files from python tests"
-          echo "  -t  When running python tests, only run tests marked with one of the "
-          echo "      listed tags. If given without tags, all tests are run. If -t is "
-          echo "      given several times, only the last one will be used"
-          echo "  -g  When running python tests, add the listed tags to the tags to use"
-          echo "  -f  When running python tests, only run tests from the listed files. "
-          echo "      Paths relative to the tests directory are accepted, as well as "
-          echo "      absolute or relative to current directory"
-          echo "  -h  Print this help and exit"
-	      exit
-          ;;
-        *)
-          echo "Unknown flag -${b}"
-	      exit
-	      ;;
-      esac
-    done
-  fi
-done
+read_args
+
+if [ "${LOG}" == 1 ]; then
+  echo "Log of jm_tests $(date):" > "${LOGFILE}"
+fi
 
 ANY_ON=0
 for a in ${tests}; do
