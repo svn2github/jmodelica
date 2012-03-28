@@ -467,7 +467,7 @@ aspect ModelicaIcons
 			}
 		}
 		if (removeClause >= 0) {
-			originalComposition.removeChild(removeClause);
+			originalComposition.getClauses().removeChild(removeClause);
 		}
 		
 		getEquations().removeChild(equationIndex);
