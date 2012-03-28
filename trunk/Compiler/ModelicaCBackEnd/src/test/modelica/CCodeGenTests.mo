@@ -692,11 +692,11 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_
 }
 
 
-    jmi_ad_var_t tmp_var_0;
-    jmi_ad_var_t tmp_var_1;
-    func_CCodeGenTests_TestFunction2_def(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), &tmp_var_0, &tmp_var_1);
-    (*res)[0] = tmp_var_0 - (_x_0);
-    (*res)[1] = tmp_var_1 - (_y_1);
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    func_CCodeGenTests_TestFunction2_def(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), &tmp_1, &tmp_2);
+    (*res)[0] = tmp_1 - (_x_0);
+    (*res)[1] = tmp_2 - (_y_1);
 ")})));
 
  Real x;
@@ -846,11 +846,11 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_
 }
 
 
-    jmi_ad_var_t tmp_var_0;
-    jmi_ad_var_t tmp_var_1;
-    func_CCodeGenTests_TestFunction3_def(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3), &tmp_var_0, &tmp_var_1, NULL);
-    (*res)[0] = tmp_var_0 - (_x_0);
-    (*res)[1] = tmp_var_1 - (_y_1);
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    func_CCodeGenTests_TestFunction3_def(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3), &tmp_1, &tmp_2, NULL);
+    (*res)[0] = tmp_1 - (_x_0);
+    (*res)[1] = tmp_2 - (_y_1);
 ")})));
 
   Real x;
@@ -895,11 +895,11 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_
 }
 
 
-    jmi_ad_var_t tmp_var_0;
-    jmi_ad_var_t tmp_var_1;
-    func_CCodeGenTests_TestFunction3_def(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3), &tmp_var_0, NULL, &tmp_var_1);
-    (*res)[0] = tmp_var_0 - (_x_0);
-    (*res)[1] = tmp_var_1 - (_z_1);
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    func_CCodeGenTests_TestFunction3_def(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3), &tmp_1, NULL, &tmp_2);
+    (*res)[0] = tmp_1 - (_x_0);
+    (*res)[1] = tmp_2 - (_z_1);
 ")})));
 
   Real x;
