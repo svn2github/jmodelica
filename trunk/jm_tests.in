@@ -142,9 +142,9 @@ function python_tests() {
           echo ${TEST} | sed -e 's!^.*jmodelica.!Running !' | log
           nosetests ${TAGS} -v ${TEST} 2>&1 \
           | log \
-	      | egrep -v '^Exception .* ignored$' \
-	      | egrep -A500 "${PATTERN}" \
-	      | sed -e 's!^OK$!PASSED!' -e 's!^FAILED !TEST FAILED!'
+          | egrep -v '^Exception .* ignored$' \
+          | egrep -A500 "${PATTERN}" \
+          | sed -e 's!^OK$!PASSED!' -e 's!^FAILED !TEST FAILED!'
         done | filter_python_separate
       fi
       ;;
@@ -217,7 +217,7 @@ function junit_test() {
 	    -e 's!\(errors=.*, failures=.*\)!TEST FAILED (\1)!'
       ;;
     n)
-      ant_test 2>&1 \
+      ant_test \
       | log \
       | egrep "(\[junit\]|\[(java|jastadd)\].*([Ee]rror|[A-Za-z.]*:[1-9][0-9]*))"
       ;;
