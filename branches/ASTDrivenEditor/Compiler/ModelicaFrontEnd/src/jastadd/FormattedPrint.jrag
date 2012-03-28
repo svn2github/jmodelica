@@ -332,14 +332,6 @@ aspect FormattedPrint {
 			getStringComment().postFormatting = new DefaultFormattingItem("\n");
 		}
 		
-		if (getNumEquation() > 0) {
-			for (Clause clause : originalComposition.getClauses()) {
-				if (clause instanceof EquationClause && ((EquationClause) clause).getNumAbstractEquation() > 0) {
-					((EquationClause) clause).getAbstractEquation(0).preFormatting = new DefaultFormattingItem("\n");
-				}
-			}
-		}
-		
 		for (Annotation annotation : getAnnotations()) {
 			annotation.preFormatting = new DefaultFormattingItem(" ");
 		}
@@ -364,6 +356,8 @@ aspect FormattedPrint {
 					int thisIndex = ((EquationClause) clause).getAbstractEquations().getIndexOfChild(this);
 					if (thisIndex > 0) {
 						return ((EquationClause) clause).getAbstractEquations().getChild(thisIndex - 1).preFormatting.copyWhitepacesFromFormatting();
+					} else if (thisIndex == 0) {
+						return new DefaultFormattingItem("\n   ");
 					}
 				}
 			}
@@ -795,7 +789,26 @@ aspect FormattedPrint {
     	for (int i = originalComposition.getNumClause() - 1; i >= 0; i--) {
     		Clause clause = originalComposition.getClause(i);
     		if (clause instanceof EquationClause && ((EquationClause) clause).getAbstractEquation(0).isInitial() == equation.isInitial()) {
-    			((EquationClause) clause).addAbstractEquation(equation);
+    			EquationClause equationClause = (EquationClause) clause;
+    			Stack<AbstractEquation> equationStack = new Stack<AbstractEquation>();
+    			boolean foundGoodPosition = false;
+    			for (int j = equationClause.getNumAbstractEquation() - 1; j >= 0; j--) {
+    				AbstractEquation currentEquation = equationClause.getAbstractEquation(j);
+    				if (currentEquation.getClass() == equation.getClass()) {
+    					equationStack.push(equation);
+    					foundGoodPosition = true;
+    					break;
+    				}
+    				equationStack.push(currentEquation);
+    				equationClause.getAbstractEquations().removeChild(j);
+    			}
+    			
+    			while (!equationStack.isEmpty()) {
+        			equationClause.addAbstractEquation(equationStack.pop());
+        		}
+    			if (!foundGoodPosition) {
+    				equationClause.addAbstractEquation(equation);
+    			}
     			addEquation(equation);
     			return;
     		}
