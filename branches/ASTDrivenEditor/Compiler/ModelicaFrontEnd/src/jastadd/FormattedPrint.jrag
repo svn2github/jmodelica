@@ -333,7 +333,11 @@ aspect FormattedPrint {
 		}
 		
 		if (getNumEquation() > 0) {
-			getEquation(0).preFormatting = new DefaultFormattingItem("\n");
+			for (Clause clause : originalComposition.getClauses()) {
+				if (clause instanceof EquationClause && ((EquationClause) clause).getNumAbstractEquation() > 0) {
+					((EquationClause) clause).getAbstractEquation(0).preFormatting = new DefaultFormattingItem("\n");
+				}
+			}
 		}
 		
 		for (Annotation annotation : getAnnotations()) {
@@ -365,7 +369,7 @@ aspect FormattedPrint {
 			}
 		}
 
-		return preFormatting.mergeItems(FormattingItem.Adjacency.BACK, new DefaultFormattingItem("    "));
+		return preFormatting.mergeItems(FormattingItem.Adjacency.BACK, new DefaultFormattingItem("   "));
 	}
 	
 	protected void Each.setDefaultFormatting() {

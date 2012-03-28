@@ -415,12 +415,13 @@ aspect ModelicaIcons
 		if (componentIndex < 0) {
 			return false;
 		}
-		getComponentDecls().removeChild(componentIndex);
 
 		int clauseIndex = originalComposition.getClauses().getIndexOfChild(cd);
 		if (clauseIndex >= 0) {
 				originalComposition.getClauses().removeChild(clauseIndex);
 		}
+		
+		getComponentDecls().removeChild(componentIndex);
 
 		return true;
 	}
@@ -450,13 +451,12 @@ aspect ModelicaIcons
 		if (equationIndex < 0) {
 			return false;
 		}
-		getEquations().removeChild(equationIndex);
 
 		int removeClause = -1;
 		for (int i = 0; i < originalComposition.getNumClause(); i++) {
 			if (originalComposition.getClause(i) instanceof EquationClause) {
 				EquationClause equationClause = (EquationClause) originalComposition.getClause(i);
-				int childIndex = equationClause.getAbstractEquations().getIndexOfChild(this);
+				int childIndex = equationClause.getAbstractEquations().getIndexOfChild(ae);
 				if (childIndex >= 0) {
 					equationClause.getAbstractEquations().removeChild(childIndex);
 					if (equationClause.getNumAbstractEquation() == 0) {
@@ -469,6 +469,8 @@ aspect ModelicaIcons
 		if (removeClause >= 0) {
 			originalComposition.removeChild(removeClause);
 		}
+		
+		getEquations().removeChild(equationIndex);
 
 		return true;
 	}

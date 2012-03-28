@@ -140,11 +140,10 @@ public abstract class FormattingItem {
 	
 	/**
 	 * Creates a new <code>DefaultFormattingItem</code> containing all the whitespaces that this
-	 * <code>FormattingItem</code> contains. If this <code>FormattingItem</code> is a
-	 * <code>ScannedFormattingItem</code> though, only the whitespaces after the last line break are preserved.
+	 * <code>FormattingItem</code> contains after its last line break.
 	 * This should make it easy to get indentation from this <code>FormattingItem</code>.
 	 * @return a new <code>DefaultFormattingItem</code> containing all the whitespaces that this
-	 * <code>FormattingItem</code> contains
+	 * <code>FormattingItem</code> contains after its last line break.
 	 */
 	public abstract DefaultFormattingItem copyWhitepacesFromFormatting();
 }

@@ -59,8 +59,10 @@ public class DefaultFormattingItem extends FormattingItem {
 		StringBuilder dataBuilder = new StringBuilder();
 		for (int i = 0; i < data.length(); i++) {
 			char currentChar = data.charAt(i);
-			if (currentChar == ' ' || currentChar == '\t' || currentChar == '\f' || currentChar == '\n' || currentChar == '\r') {
+			if (currentChar == ' ' || currentChar == '\t' || currentChar == '\f') {
 				dataBuilder.append(data.charAt(i));
+			} else if  (currentChar == '\n' || currentChar == '\r') {
+				dataBuilder = new StringBuilder();
 			}
 		}
 		
