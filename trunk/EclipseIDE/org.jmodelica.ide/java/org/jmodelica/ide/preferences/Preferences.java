@@ -109,7 +109,7 @@ public class Preferences extends AbstractPreferenceInitializer {
 	}
 
 	private static IEclipsePreferences getNode(IProject proj) {
-		return ((proj == null) ? new InstanceScope() : new ProjectScope(proj)).getNode(IDEConstants.PLUGIN_ID);
+		return ((proj == null) ? InstanceScope.INSTANCE : new ProjectScope(proj)).getNode(IDEConstants.PLUGIN_ID);
 	}
 	
 	@Override
