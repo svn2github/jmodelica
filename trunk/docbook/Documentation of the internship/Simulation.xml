@@ -15,9 +15,9 @@
     less time).</para>
 
     <para>The models are based on mathematical equations, ordinary
-    differential equations (ODE) as well as differential algebraic equations
-    (DAE). They contain states (variables) with related initial conditions,
-    parameter and inputs, which can be external set.</para>
+    differential equations (ODEs) as well as differential algebraic equations
+    (DAEs). They contain states (variables) with related initial conditions,
+    parameters and inputs, which can be set external.</para>
   </section>
 
   <section>
@@ -25,12 +25,13 @@
 
     <para>As a first example we consider a <emphasis>Van der Po</emphasis>l
     (VDP) oscillator, which is an oscillatory system with non-linear damping.
-    The model contains two states x1 and x2 and is represented by a second
-    order differential equation. For small amplitudes the damping is negative.
-    When the amplitude is increased up to a certain limit, the damping becomes
-    positive. The system stabilises and a limit cycle develops. In Dymola all
-    parameter, inputs and states with initial values have to be listed.
-    Introducing an additional state x2 the second order equation can be
+    The model contains two states <literal>x1</literal> and
+    <literal>x2</literal> and is represented by a second order differential
+    equation. For small amplitudes the damping is negative. When the amplitude
+    is increased up to a certain limit, the damping becomes positive. The
+    system stabilises and a limit cycle develops. In Modelica all parameters,
+    inputs and states with initial values have to be listed. Introducing an
+    additional state <literal>x2</literal> the second order equation can be
     transformed into two first order equations.</para>
 
     <programlisting>model VDP "Van der Pol model"
@@ -43,10 +44,14 @@
    Real x1(start = x1_0);
    Real x2(start = x2_0);
 
+   // Parameters
+   parameter Real d=1;
+
    // The control signal
    Modelica.Blocks.Interfaces.RealInput u
+
 equation 
-   der(x1) = (1 - x2^2) * x1 - x2 + u;
+   der(x1) = d*(1 - x2^2) * x1 - x2 + u;
    der(x2) = x1;
 end VDP;</programlisting>
 
@@ -88,10 +93,32 @@ end VDP;</programlisting>
       distillation column model the two components cyclohexane and n-heptane
       are separated over 30 and 40 trays respectively. The model is set up in
       four different ways. The first two models only contain ODEs of the mole
-      fraction x of cyclohexane at each tray. In the third version additional
-      to the 30 states of the mole fraction at each tray DAEs for the
-      temperature at each tray are adjoined. This version should be
-      represented more in detail later.</para>
+      fraction <literal>x</literal> of cyclohexane at each tray. From the
+      equilibrium assumption and mole balances the vapor mole fraction of the
+      first component as well as both values for the second component can be
+      calculated:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>vol = (yA/xA) / (yB/xB)</para>
+        </listitem>
+      </itemizedlist>
+
+      <itemizedlist>
+        <listitem>
+          <para>xA + xB = 1</para>
+        </listitem>
+      </itemizedlist>
+
+      <itemizedlist>
+        <listitem>
+          <para>yA + yB = 1</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>In the third version additional to the 30 states of the mole
+      fraction DAEs for the temperature at each tray are adjoined. This
+      version should be represented more in detail later.</para>
 
       <para>The fourth version represents the most complex model. The number
       of trays is raised to 40 and it is described through the following
@@ -99,8 +126,9 @@ end VDP;</programlisting>
 
       <itemizedlist>
         <listitem>
-          <para>42 ODEs for the mole fraction of cyclohexane xA at each tray
-          and for the reboiler and condenser</para>
+          <para>42 ODEs for the mole fraction of cyclohexane
+          <literal>xA</literal> at each tray and for the reboiler and
+          condenser</para>
         </listitem>
       </itemizedlist>
 
@@ -118,12 +146,16 @@ end VDP;</programlisting>
         </listitem>
       </itemizedlist>
 
-      <para>The model depends on two variable inputs: The heat input to the
-      reboiler provided by an electric heater and the reflux flow rate of the
-      recycled distillate Vdot_L1. To introduce an input Dymola provides a
-      special component Modelica.Blocks.Interfaces.RealInput. The use of this
-      component makes it possible to experiment with different values an even
-      time depended functions of the input.</para>
+      <para>The model depends on two inputs: The heat input to the reboiler
+      provided by an electric heater and the reflux flow rate of the recycled
+      distillate <literal>Vdot_L1</literal>. The reflux ratio displays the
+      amount of condensed overhead liquid product that is returned back to the
+      upper part of the system. The down flowing reflux ratio provides cooling
+      and condensation of the up flowing vapors and so the efficiency of
+      distillation column can be increased. To introduce an input Dymola
+      provides a special component Modelica.Blocks.Interfaces.RealInput. The
+      use of this component makes it possible to experiment with different
+      values an even time depended functions of the input.</para>
 
       <figure>
         <title>Picture of a distillation column (from Wikipedia: Fractional
@@ -140,15 +172,14 @@ end VDP;</programlisting>
     </section>
 
     <section>
-      <title>Set up and simulate the model in Dymola</title>
+      <title>Set up and simulate the model in Modelica</title>
 
-      <para>I am going to consider the third version of the distillation
-      column more in detail now. As before all parameter and variable
-      declarations as well as start values, ODEs and DAEs have to be defined.
-      To ensure the physical correctness of a model it is very helpful to work
-      with units. When using SIunits in Dymola the units of all equations are
-      automatically adjusted and in the case of a mismatch an error
-      occurs.</para>
+      <para>We consider the third version of the distillation column more in
+      detail now. As before all parameter and variable declarations as well as
+      start values, ODEs and DAEs have to be defined. To ensure the physical
+      correctness of a model it is very helpful to work with SIunits. Thus the
+      units of all equations are automatically adjusted and in the case of a
+      mismatch an error occurs.</para>
 
       <programlisting>model Distillation3
 
@@ -244,7 +275,8 @@ end Distillation3;
     </section>
 
     <section>
-      <title>Compile, load and simulate Modelica models in JModelica</title>
+      <title>Compile, load and simulate Modelica models in
+      JModelica.org</title>
 
       <para>To run simulations in JModelica the Python language is used. Some
       imports are necessary to be able to compile and load the models.</para>
@@ -264,11 +296,11 @@ from pyfmi import FMUModel</programlisting>
 
       <programlisting>curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    fmu_name1 = compile_fmu("JMExamples.Distillation.Distillation1", 
-    curr_dir+"/files/JMExamples.mo")
-    dist3 = FMUModel(fmu_name1)
+fmu_name1 = compile_fmu("JMExamples.Distillation.Distillation1", 
+curr_dir+"/files/JMExamples.mo")
+dist3 = FMUModel(fmu_name1)
     
-    res = dist3.simulate(final_time=7200)</programlisting>
+res = dist3.simulate(final_time=7200)</programlisting>
 
       <para>At the end all variables are extracted, the results can be printed
       and plotted. More details considering this topic can be found in the
@@ -278,10 +310,10 @@ from pyfmi import FMUModel</programlisting>
     <section>
       <title>Simulation results and interpretation</title>
 
-      <para>The plots of the mole fractions x and the vapor mole fractions y
-      of component A at tray 1,8,16 and 32 are shown. The reflux flow rate was
-      reduced from 3 to 2.7. Therefore the purity of the components at the top
-      and the bottom decreases.</para>
+      <para>The plots of the mole fractions <literal>x</literal> and the vapor
+      mole fractions <literal>y</literal> of component A at tray 1,8,16 and 32
+      are shown. The reflux flow rate was reduced from 3 to 2.7. Therefore the
+      purity of the components at the top and the bottom decreases.</para>
 
       <figure>
         <title>Distillation column (reflux ratio = 2.7)</title>
@@ -319,6 +351,23 @@ from pyfmi import FMUModel</programlisting>
       to get the highest purity considering all circumstances. In the next
       chapter I will go one step further using optimization which leads to the
       aim of finding the optimal solution.</para>
+
+      <para>To verify the existence of a steady state condition for rr=3, a
+      step function is created as an input, where rr=3 is kept constant for
+      1000s and is then increased to 3.7. In case of a steady state condition,
+      the derivative is 0, the states stay constant. </para>
+
+      <figure>
+        <title>Distillation column (reflux ratio = 3.0 for 1000s, then
+        3.7)</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata align="left" fileref="Doc%20pictures/dist1_step.png"
+                       scale="72"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
     </section>
   </section>
 </chapter>

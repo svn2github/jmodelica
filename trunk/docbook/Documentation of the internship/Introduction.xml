@@ -7,43 +7,48 @@
   <section>
     <title>Theme of the internship</title>
 
-    <para>The theme of the internship is to create and implement technical
-    models in JModelica for the example library based on mathematical
-    descriptions and Matlab source code. Model examples can be very useful for
-    customers to get an impression how their physical problem could possibly
-    be realized in JModelica. For this reason one of the created model
-    examples is supposed to be added to the .<emphasis>JModelica Users
+    <para>The theme of the internship is to create and implement case studies
+    for solutions of simulation and optimization problems based on technical
+    models in Modelica. The models are developed from mathematical
+    descriptions and Matlab source code and collected in the JModelica.org
+    example library. These case studies can be very useful for customers to
+    get an impression how their physical problem could possibly be realized
+    and solved using JModelica.org. Therefore one of the created case studies
+    is supposed to be added to the .<emphasis>JModelica Users
     Guide</emphasis></para>
   </section>
 
   <section>
     <title>Abstract</title>
 
-    <para>In a first step the models should be set up in Dymola. To get
-    started with Dymola I implemented several examples from an already
-    prepared workshop. For the examples of the "Van der Pol oscillator" (VDP)
-    and the "Continuous Stirred Tank Reactor" (CSTR) the source code was
-    already given and my task was to analyze and understand the problem,
-    simulate and interpret the results, experiment with different inputs and
-    finally write some documentation and create an icon in Dymola.</para>
+    <para>In a first step the models should be set up in Modelica. To get
+    started with Dymola, a software that uses the language Modelica, I
+    implemented several examples from an already prepared workshop. For the
+    examples of the "Van der Pol oscillator" (VDP) and the "Continuous Stirred
+    Tank Reactor" (CSTR) the source code was already given and my task was to
+    analyze and understand the problem, simulate and interpret the results,
+    experiment with different inputs and finally write some documentation and
+    create an icon in Dymola.</para>
 
     <para>The first example I implemented was the model of a distillation
-    column, which demonstrates a typical simulation problem. Based on four
-    different versions written in Matlab, I translated the problem into the
-    Modelica language, which is applied in Dymola. The models consist of
-    ordinary differential equations (ODE) as well as algebraic differential
-    equations (DAE). Comparing the plots I could verify the solution of the
-    models written in Matlab.</para>
+    column, which demonstrates a typical simulation problem. The models are
+    taken from the Hedengren repository
+    (http://www.hedengren.net/research/models.htm). Based on four different
+    versions written in Matlab, I translated the problem into the Modelica
+    language, which is applied in Dymola. The models consist of ordinary
+    differential equations (ODE) as well as algebraic differential equations
+    (DAE). Comparing the plots I could verify the solution of the models
+    written in Matlab.</para>
 
-    <para>Thereafter the Dymola examples should be run in JModelica. I went
-    through some examples to get started and learned how to compile and load
-    the Dymola models in JModelica. I acquired a basic knowledge of the Python
-    language, which is applied in addition to Modelica in JModelica. Due to
-    the fact that I was developing new code I was introduced to the subversion
-    system which offers the possibility to change and edit code by different
-    persons at the same time. On the JModelica project planing platform the
-    different projects are made public to provide an open base for team
-    work.</para>
+    <para>Thereafter the Dymola examples should be run in JModelica.org. I
+    went through some examples to get started and learned how to compile and
+    load the Dymola models in JModelica. I acquired a basic knowledge of the
+    Python language, which is applied in addition to Modelica in JModelica.
+    Due to the fact that I was developing new code I was introduced to the
+    subversion system which offers the possibility to change and edit code by
+    different persons at the same time. On the JModelica project planing
+    platform the different projects are made public to provide an open base
+    for team work.</para>
 
     <para>To solve not only simulation but also optimization problems the
     Modelica language involves the extension Optimica. In the next step I used

@@ -16,8 +16,8 @@
     <para>A distinction is drawn between optimization of dynamic and steady
     state models. For steady state models algebraic equations are given for
     the variables. In the case of a dynamic model a system of differential
-    equations has to be solved. JModelica supports both, steady state as well
-    as dynamic models.</para>
+    equations has to be solved. JModelica.org supports both, steady state as
+    well as dynamic models.</para>
 
     <para>Optimization problems can be divided into different classes. In the
     following section I am going to deal with optimal control, minimum time
@@ -27,7 +27,7 @@
     the Matlab models taken from the " PROPT - Matlab Optimal Control Software
     (DAE, ODE)" page. The challenge thereby was to modify them into the
     Modelica language and to solve the problem in Python. Furthermore it
-    offers the possibility to compare and verify my results and plots.</para>
+    offers the possibility to compare and verify the results and plots.</para>
 
     <para>In JModelica optimization problems are handled with the Modelica
     extension Optimica. In summary the Optimica extension consists of the
@@ -70,11 +70,11 @@
   <section>
     <title>Getting started</title>
 
-    <para>I start with introducing an optimal control problem to provide an
+    <para>We begin with introducing an optimal control problem to provide an
     insight into the theme. The example considered is the "Continuous state
-    constraint problem".</para>
+    constrained problem".</para>
 
-    <para>At first the model is set up in Dymola equivalent to a simulation
+    <para>At first the model is set up in Modelica equivalent to a simulation
     problem. States, start values, the control input and differential and
     algebraic equations are stated.</para>
 
@@ -135,15 +135,17 @@ end ContState_opt;</programlisting>
     variable declarations and equations. Though the separation of the the
     model into a <sgmltag class="element">model</sgmltag> and an <sgmltag
     class="element">optimization</sgmltag> class offers the possibility to
-    experiment with the input in Dymola.</para>
+    experiment with different inputs in Modelica and to reuse the
+    model.</para>
 
     <para>Now the problem is solved in Python, the results are printed and
     plotted. This is performed similar to the procedure described in the
-    simulation chapter. The only difference id that FMUModel is replaced by
-    JMUModel, accordingly compile_fmu is replaced by compile_jmu and the
-    <emphasis>optimize</emphasis> comment is used instead of
-    <emphasis>simulate</emphasis>. The states and the input are
-    plotted:</para>
+    simulation chapter. The only difference is that FMUModel is replaced by
+    JMUModel, accordingly <literal>compile_fmu</literal> is replaced by
+    <literal>compile_jmu</literal> and the
+    <emphasis><literal>optimize</literal></emphasis> command is used instead
+    of <emphasis><literal>simulate</literal></emphasis>. The states and the
+    input are plotted:</para>
 
     <figure>
       <title>ContState</title>
@@ -180,16 +182,16 @@ end ContState_opt;</programlisting>
       for the population dynamics at each stage is:</para>
 
       <equation>
-        <mathphrase>y'(N)= g(N-1)*y(N-1)- (m(N) + g(N))*y(N) ; for 1≤ N ≤
+        <mathphrase>y'[N] = g[N-1]*y[N-1] - (m[N] + g[N])*y[N] ; for 1≤ N ≤
         8</mathphrase>
       </equation>
 
       <para>Now the model is set up in Modelica and Optimica. In Modelica m
-      and g are at first defined as parameter. In Optimica the attribute
+      and g are at first defined as parameters. In Optimica the attribute
       <sgmltag class="element">each free</sgmltag> (which means free for each
-      component of the vector) is set to handle them as variable inputs. The
-      first line of the matrix of measured data should be consistent with the
-      initial value of y.</para>
+      component of the vector) is set to handle them as tunable parameters.
+      The first line of the matrix of measured data should be consistent with
+      the initial values of y.</para>
 
       <programlisting>model MarinePopulation
 
@@ -240,7 +242,7 @@ end MarinePopulation;</programlisting>
  equation 
 end MarinePopulation_opt;</programlisting>
 
-      <para>Before solving the optimization problem in Python I ensured that
+      <para>Before solving the optimization problem in Python we ensure that
       the number of computed points for each component of y is adapted to the
       number of measured data to be able to calculate the error at each point
       as well as the objective function. This can be realized by setting
@@ -253,12 +255,13 @@ end MarinePopulation_opt;</programlisting>
     opts['n_cp'] = 1
     res = mp.optimize(options=opts)</programlisting>
 
-      <para>The parameter 'n_e' represents the number of elements, 'n_cp' the
-      number of collocation points at each element, which is equal to the
-      order of the used Runge Kutta method. The number of elements of the
-      result vector of each variable results from: n_e*n_cp+1. In this example
-      the accuracy of the solution does not change if I use a different value
-      for n_cp.</para>
+      <para>The parameter <literal>n_e </literal>represents the number of
+      elements, <literal>n_cp</literal> the number of collocation points at
+      each element, which is equal to the order of the used Runge Kutta
+      method. The number of elements of the result vector of each variable
+      results from: <literal>n_e*n_cp+1</literal>. In this example the
+      accuracy of the solution does not change if a different value for
+      <literal>n_cp</literal> is used.</para>
 
       <figure>
         <title>MarinePopulation</title>
@@ -355,15 +358,13 @@ end ColoumbFriction_opt;</programlisting>
   </section>
 
   <section>
-    <title>A complex example for optimal control: Penicillin Plant</title>
+    <title>Optimal control: Penicillin Plant</title>
 
-    <para>This example is the most complex and in my opinion most interesting
-    model I dealt with. The example represents a penicillin fermentation
-    process and the objective is to maximize the concentration of penicillin
-    at a certain final time. The occurring isothermal reactions are thereby: S
-    -&gt; X and S -&gt; P. The input is the feed flow rate of the substrate
-    concentration S. The parameter, states and input can be find in the model
-    set up.</para>
+    <para>The example represents a penicillin fermentation process and the
+    objective is to maximize the concentration of penicillin at a certain
+    final time. The occurring isothermal reactions are thereby: S -&gt; X and
+    S -&gt; P. The input is the feed flow rate of the substrate S. The
+    parameters, states and input are defined in the model below.</para>
 
     <programlisting>model PenicillinPlant1
 
@@ -408,7 +409,7 @@ end PenicillinPlant1;</programlisting>
     <section>
       <title>Optimization</title>
 
-      <para>As already mentioned, the objective for this model is to get a
+      <para>As already mentioned, the objective of this model is to get a
       maximal value for P at the finalTime. Since the objective function is
       minimized in Optimica, it is -P(finalTime) in this case. A constraint is
       put on the biomass concentration. If the biomass concentration reaches
@@ -430,9 +431,9 @@ end PenicillinPlant1;</programlisting>
         </listitem>
       </itemizedlist>
 
-      <para>The first problem I solved by creating a second equivalent model
-      with a different upper constraint for u. At first I assumed that after
-      half of the time (finalTime=75) the phase change occurs.</para>
+      <para>The first problem is solved by creating a second equivalent model
+      with a different upper constraint for u. At first it is assumed that
+      after half of the time (finalTime=75) the phase change occurs.</para>
 
       <programlisting>optimization PenicillinPlant_opt1 (objective = -P1(finalTime),
                             startTime = 0,
@@ -454,10 +455,26 @@ end PenicillinPlant1;</programlisting>
   u1 &lt;= 1;
 end PenicillinPlant_opt1;</programlisting>
 
-      <para>The values at the final time of the first phase are then set as
-      initial values for the second phase in Python.</para>
+      <para>The variables are extracted and their values at the final time of
+      the first phase are set as initial values for the second phase in
+      Python.</para>
 
-      <programlisting>#set results of the first state as input for the second state
+      <programlisting># optimize
+    pp1 = JMUModel(jmu_name1)
+    opts = pp1.optimize_options()
+    opts['n_e'] = 30
+    res1 = pp1.optimize(options=opts)
+    
+    # Extract variable profiles
+    X1=res1['X1']
+    S1=res1['S1']
+    P1=res1['P1']
+    V1=res1['V1']
+    u1=res1['u1'] 
+    du1=res1['du1']
+    t1=res1['time']
+
+#set results of the first state as input for the second state
     X2_init = X1[len(X1)-1]
     S2_init = S1[len(S1)-1]
     P2_init = P1[len(P1)-1]
@@ -581,7 +598,7 @@ end PenicillinPlant_opttime;</programlisting>
     </itemizedlist>
 
     <section>
-      <title>Example: Blood Glucose</title>
+      <title>Blood Glucose model</title>
 
       <para>In the Blood Glucose model the plasma glucose concentration of a
       type-1 diabetic patient should be investigated subject to the insulin
@@ -611,7 +628,7 @@ end PenicillinPlant_opttime;</programlisting>
   Real G(start = G_init, fixed=true) "Plasma Glucose Conc. (mmol/L)";
   Real X(start = X_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
   Real I(start = I_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
-  Real dist "Meal glucose disturbance (mmol/L)";
+  Real dist "Meal glucose disturbance (mmol/L/min)";
 
   //parameter
   parameter Real G_basal = 4.5 "mmol/L";
@@ -644,7 +661,7 @@ end BloodGlucose1;</programlisting>
           <imageobject>
             <imagedata align="left"
                        fileref="Doc%20pictures/Blood%20Glucose/dymola_dist.png"
-                       scale="80"/>
+                       scale="100"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -653,20 +670,20 @@ end BloodGlucose1;</programlisting>
       concentration from the insulin infusion rate. At first a peak in the
       blood glucose concentration function is observable which is attributed
       to the large meal (disturbance function). The more insulin was injected,
-      the lower the glucose concentration in the blood decreases after the
-      peak. We can conclude that it is possible to control the glucose
+      the lower drops the glucose concentration in the blood decreases after
+      the peak. We can conclude that it is possible to control the glucose
       concentration through an insulin injection in the model and hence an
       optimal control problem can be stated.</para>
 
-      <para>But still the peak value for the blood glucose level seems much
-      too high compared to reference values. From different sources I
+      <para>But still the peak value of the blood glucose level seems much too
+      high compared to reference values. From different sources can be
       ascertained that the normal blood glucose level is between 3 and 6
       mmol/L, where the value gets up to 8 mmol/L after eating but should
       definitely be smaller than 10 mmol/L. Changing the disturbance function
-      the peak value of G can be controlled. Therefore dist =
-      0.5*exp(-0.05*time) seems to be reasonable since that keeps the value
-      for G smaller than 10 mmol/L. Again I set different constant values for
-      D.</para>
+      the peak value of G can be controlled. Therefore <literal>dist =
+      0.5*exp(-0.05*time)</literal> seems to be reasonable since that keeps
+      the value for G smaller than 10 mmol/L. Again different constant values
+      for D are set.</para>
 
       <figure>
         <title>BloodGlucose (constant values of D; scaled function
@@ -676,14 +693,14 @@ end BloodGlucose1;</programlisting>
           <imageobject>
             <imagedata align="left"
                        fileref="Doc%20pictures/Blood%20Glucose/dymola_betterdist.png"
-                       scale="86"/>
+                       scale="100"/>
           </imageobject>
         </mediaobject>
       </figure>
 
       <para>If the dist function is changed, the value still increases
-      unreasonably after the peak which seems to be unphysical. Therefore I
-      decided to scale G instead using the factor 5 to keep the peak value
+      unreasonably after the peak which seems to be unphysical. Therefore G
+      should preferable be scaled by the factor 5 to keep the peak value
       smaller than 10mmol/L. The ODE for G is replaced by:</para>
 
       <programlisting>der(G) = (-P1 * (G*5 - G_init) - (X - X_init) * G*5 + dist)/5;</programlisting>
@@ -697,14 +714,14 @@ end BloodGlucose1;</programlisting>
           <imageobject>
             <imagedata align="left"
                        fileref="Doc%20pictures/Blood%20Glucose/scaled/dymola_scaled.png"
-                       scale="120"/>
+                       scale="100"/>
           </imageobject>
         </mediaobject>
       </figure>
 
       <para>Now the peak value for G is smaller than 10 mmol/L and the
-      function is not rising too much after the peak. I will continue based on
-      this model.</para>
+      function is not rising too much after the peak. We will continue based
+      on this model.</para>
 
       <para>After these investigations the optimization problem can be
       created. The aim is to predict the relationship between the insulin
@@ -712,17 +729,18 @@ end BloodGlucose1;</programlisting>
       mathematical model of a patient, the correct insulin injection rate
       could be prescribed. I chose as an objective to minimize the error
       between the computed value and a reference value for G and D. The
-      difficult part is now to choose reference values. As a reference value
-      for the blood glucose level I set 5 mmol/L, which represents a normal
-      blood glucose level. From the plot above I assume that D = 2 mmol/L
-      presents a suitable approximation for D.</para>
+      difficult part is now to choose reference values. The reference value
+      for the blood glucose level is set to 5 mmol/L, which represents a
+      default blood glucose level. From the plot above can be assumed that D =
+      2 mmol/L presents a suitable approximation for D. Furthermore G is
+      constrained to keep the value in a physical range.</para>
 
       <programlisting>optimization BloodGlucose_opt(objective=(cost(finalTime)),
                       startTime=0,
                       finalTime=400)
  
   input Real u=bc.D; 
-  JMExamples.BloodGlucose.BloodGlucose1 bc(G,X,I,D);
+  JMExamples.BloodGlucose.BloodGlucose1 bc;
 
   Real cost(start=0,fixed=true);
   parameter Real G_ref = 5;
@@ -732,6 +750,8 @@ end BloodGlucose1;</programlisting>
   der(cost) = (G_ref-bc.G)^2 + (D_ref-u)^2;
 
  constraint
+  0&lt;=bc.G;
+  bc.G&lt;=10;
 end BloodGlucose_opt;</programlisting>
 
       <figure>
@@ -746,12 +766,34 @@ end BloodGlucose_opt;</programlisting>
         </mediaobject>
       </figure>
 
-      <para>The result looks smooth but does not really offer a big effort
-      compared to the simulation. Furthermore if a reference value for D is
-      given the example still seems to be a bit constructed. So I want to go
-      further and only set the error between the computed and the desired
-      value for G as an objective. D should at least be constrained by
-      reasonable values, for example 1 and 4 mmol/L.</para>
+      <para>The result is displayed in figure 3.9. Though the graphs look
+      smooth the result does not really offer a big effort compared to the
+      simulation. Furthermore if a reference value for D is given the example
+      still seems to be a bit constructed. So I want to go further and only
+      set the error between the computed and the desired value for G as an
+      objective. D should at least be constrained by reasonable values, for
+      example 1 and 4 mmol/L. The slightly changed optimization code and the
+      plots are displayed below.</para>
+
+      <programlisting>optimization BloodGlucose_opt(objective=(cost(finalTime)),
+                      startTime=0,
+                      finalTime=400)
+ 
+  input Real u=bc.D; 
+  JMExamples.BloodGlucose.BloodGlucose1 bc;
+
+  Real cost(start=0,fixed=true);
+  parameter Real G_ref = 5;
+  
+ equation
+  der(cost) = (G_ref-bc.G)^2;
+
+ constraint
+  0&lt;=bc.G;
+  bc.G&lt;=10;
+  bc.D&gt;=1;
+  bc.D&lt;=4;
+end BloodGlucose_opt;</programlisting>
 
       <figure>
         <title>BloodGlucose (reference value for G, constraints for D)</title>
@@ -765,23 +807,26 @@ end BloodGlucose_opt;</programlisting>
         </mediaobject>
       </figure>
 
-      <para>During half of the time the input is highly oscillating between
-      the constraints before it stabilises at 2 mmol/L. The graph for G looks
-      smooth and convenient.</para>
+      <para>In the plots in figure 3.10 we can detect that during half of the
+      time the input is highly oscillating between the constraints before it
+      stabilises at 2 mmol/L. The graph for G looks smooth and
+      convenient.</para>
 
       <para>To prevent oscillations for the input a common method is to add a
       penalty function to the objective. The sum of changes in the input
       function should be decreased and consequentially the penalty function is
       assembled of the sum of the squared derivatives of D. Therefore it is
       necessary to define D as a state variable and set dD as an input with
-      der(D) = dD. The optimization source code is then:</para>
+      der(D) = dD (this is already done in the model set up and hence not
+      displayed in the optimization code). The optimization source code is
+      then:</para>
 
       <programlisting>optimization BloodGlucose_optconstraint(objective=(cost(finalTime)),
                       startTime=0,
                       finalTime=400)
  
   input Real u=bc.dD; 
-  JMExamples.BloodGlucose.BloodGlucoseconstraint bc(G,X,I,D);
+  JMExamples.BloodGlucose.BloodGlucoseconstraint bc;
 
   Real cost(start=0,fixed=true);
   parameter Real G_ref = 5;
@@ -814,5 +859,11 @@ end BloodGlucose_optconstraint;</programlisting>
       additional demands the constraints and penalty function could be
       adapted.</para>
     </section>
+  </section>
+
+  <section>
+    <title>Distillation column</title>
+
+    <para/>
   </section>
 </chapter>
