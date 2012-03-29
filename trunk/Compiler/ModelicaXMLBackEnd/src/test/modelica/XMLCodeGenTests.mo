@@ -267,12 +267,12 @@ end XMLCodeGenTest2;
          generatedCode="
 
 		<ScalarVariable name=\"x\" valueReference=\"268435456\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest2.A\" start=\"1\"/>
+			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest2.A\" start=\"1\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"y\" valueReference=\"268435457\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest2.B\" start=\"3\"/>
+			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest2.B\" start=\"3\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>")})));
@@ -294,12 +294,12 @@ end XMLCodeGenTest2;
          generatedCode="
 
 		<ScalarVariable name=\"x\" valueReference=\"268435456\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest3.A\" quantity=\"a\" min=\"1\" max=\"3\" start=\"1\"/>
+			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest3.A\" quantity=\"a\" min=\"1\" max=\"3\"/>
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"y\" valueReference=\"268435457\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest3.B\" start=\"1\" fixed=\"true\"/>
+			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest3.B\" fixed=\"true\"/>
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>")})));
@@ -321,7 +321,7 @@ end XMLCodeGenTest2;
          generatedCode="
 
 		<ScalarVariable name=\"c\" valueReference=\"268435456\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest4.DigitalCurrentChoices\" start=\"2\" fixed=\"true\"/>
+			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest4.DigitalCurrentChoices\" start=\"2\" fixed=\"true\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>")})));
@@ -887,6 +887,48 @@ equation
   y1 = x[15] + x[1] + z[1];
   y2 = x[4] + sum(z);
 	end DirectDependencyTest1;
+
+
+model NonConstantStart1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="NonConstantStart1",
+         description="Check that only constant start valued are included in XML file",
+         template="$XML_variables$",
+         generatedCode="
+
+        <ScalarVariable name=\"a[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+            <Real relativeQuantity=\"false\" start=\"1.0\" />
+            <isLinear>true</isLinear>
+            <VariableCategory>independentParameter</VariableCategory>
+        </ScalarVariable>
+        <ScalarVariable name=\"a[2]\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+            <Real relativeQuantity=\"false\" start=\"2.0\" />
+            <isLinear>true</isLinear>
+            <VariableCategory>independentParameter</VariableCategory>
+        </ScalarVariable>
+        <ScalarVariable name=\"b\" valueReference=\"268435458\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+            <Integer start=\"1\" />
+            <isLinear>true</isLinear>
+            <VariableCategory>independentParameter</VariableCategory>
+        </ScalarVariable>
+        <ScalarVariable name=\"x\" valueReference=\"4\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+            <Real relativeQuantity=\"false\" start=\"2.0\" />
+            <isLinear>true</isLinear>
+            <VariableCategory>state</VariableCategory>
+        </ScalarVariable>
+        <ScalarVariable name=\"der(x)\" valueReference=\"3\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+            <Real relativeQuantity=\"false\" />
+            <isLinear>true</isLinear>
+            <VariableCategory>derivative</VariableCategory>
+        </ScalarVariable>")})));
+
+    Real x(start = 1 + a[b]);
+    parameter Real a[2] = { 1, 2 };
+    parameter Integer b = 1;
+equation
+    der(x) = x;
+end NonConstantStart1;
 
 		
 end XMLCodeGenTests;

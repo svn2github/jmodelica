@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -45,7 +46,52 @@ import java.util.Stack;
  */
 public class XMLGenerator extends GenericGenerator {
 	
-	private HashMap<String,String> illegalCharsSub;
+	private HashMap<Character,String> illegalCharsSub;
+	
+	/**
+	 * \brief Returns the string denoting the beginning of the copyright blurb.
+	 */
+	protected String startOfBlurb() { return "<!--"; }
+	
+	/**
+	 * \brief Returns the string denoting the end of the copyright blurb.
+	 */
+	protected String endOfBlurb() { return "-->"; }
+	
+	/**
+	 * Replace characters that are illegal in XML values with their HTML escape sequences.
+	 */
+	protected String replaceIllegalChars(String s) {
+		StringBuilder buf = new StringBuilder();
+		int l = s.length();
+		for (int i = 0; i < l; i++) {
+			char ch = s.charAt(i);
+			if (illegalCharsSub.containsKey(ch))
+				buf.append(illegalCharsSub.get(ch));
+			else
+				buf.append(ch);
+		}
+		return buf.toString();
+	}
+	
+	/**
+	 * Constructor.
+	 * 
+	 * @param expPrinter Printer object used to generate code for expressions.
+	 * @param escapeCharacter Escape characters used to decode tags.
+	 * @param fclass An FClass object used as a basis for the code generation.
+	 */
+	public XMLGenerator(Printer expPrinter, char escapeCharacter,
+			FClass fclass) {
+		super(expPrinter,escapeCharacter, fclass);
+		
+		illegalCharsSub = new HashMap<Character,String>();
+		illegalCharsSub.put('&',"&amp");
+		illegalCharsSub.put('<',"&lt;");
+		illegalCharsSub.put('>',"&gt;");
+		illegalCharsSub.put('"', "&quot;");
+	}
+	
 	
 	/**
 	 * Internal class used to generate the model root attributes.
@@ -443,19 +489,10 @@ public class XMLGenerator extends GenericGenerator {
 				}
 			}
 		}
+		
 	}
-	
-	protected String replaceIllegalChars(String s) {
-		Iterator<String> itr = illegalCharsSub.keySet().iterator();
-		while(itr.hasNext()) {
-			String illegalChar = itr.next();
-			if(s.contains(illegalChar)){
-				s = s.replace(illegalChar, illegalCharsSub.get(illegalChar));
-			}
-		}
-		return s;
-	}
-	
+
+
 	/*
 	 * Helper method generating linear variable tag such that it can be overridden in 
 	 * OptimicaXMLVariableGenerator.
@@ -463,6 +500,18 @@ public class XMLGenerator extends GenericGenerator {
 	protected void addLinearInfo(PrintStream genPrinter, FVariable variable){
 		//isLinear
 		genPrinter.print("\n\t\t\t<isLinear>"+variable.isLinear()+"</isLinear>");
+	}
+	
+	protected void addStartAttribute(PrintStream genPrinter, FVariable var) {
+		FExp e = null;
+		if (var.useBindingExpAsStart()) 
+			e = var.getBindingExp();
+		else if (var.startAttributeSet())
+			e = var.startAttributeExp();
+		if (!var.root().options.getBooleanOption("generate_dae") && e != null && !e.isConstantExp())
+			e = null;
+		if (e != null)
+			genPrinter.print("start=\"" + var.type().convert(e.ceval()).xmlValue() + "\" ");
 	}
 
 	/*
@@ -499,11 +548,7 @@ public class XMLGenerator extends GenericGenerator {
 			genPrinter.print("nominal=\""+realvariable.nominalAttribute()+"\" ");
 		}
 		//start
-		if (realvariable.isIndependentParameter() || realvariable.useBindingExpAsStart()) {
-			genPrinter.print("start=\""+realvariable.ceval().realValue()+"\" ");
-		} else if (realvariable.startAttributeSet() || (realvariable.fixedAttributeSet() && realvariable.fixedAttribute())) {
-			genPrinter.print("start=\""+realvariable.startAttribute()+"\" ");
-		}
+		addStartAttribute(genPrinter, realvariable);
 		// fixed
 		if (realvariable.fixedAttributeSet()) {
 			genPrinter.print("fixed=\""+realvariable.fixedAttribute()+"\" ");
@@ -529,11 +574,7 @@ public class XMLGenerator extends GenericGenerator {
 			genPrinter.print("max=\""+integervariable.maxAttribute()+"\" ");
 		}
 		//start
-		if (integervariable.isIndependentParameter() || integervariable.useBindingExpAsStart()) {
-			genPrinter.print("start=\"" +integervariable.ceval().intValue() +"\" ");
-		} else if (integervariable.startAttributeSet()) {
-			genPrinter.print("start=\"" +integervariable.startAttribute()+"\" ");
-		}
+		addStartAttribute(genPrinter, integervariable);
 		// fixed
 		if (integervariable.fixedAttributeSet()) {
 			genPrinter.print("fixed=\""+integervariable.fixedAttribute()+"\" ");
@@ -560,11 +601,7 @@ public class XMLGenerator extends GenericGenerator {
 			genPrinter.print("max=\""+enumvariable.maxAttribute()+"\" ");
 		}
 		//start
-		if (enumvariable.isIndependentParameter() || enumvariable.useBindingExpAsStart()) {
-			genPrinter.print("start=\"" +enumvariable.ceval().intValue() +"\" ");
-		} else if (enumvariable.startAttributeSet()){
-			genPrinter.print("start=\"" +enumvariable.startAttribute()+"\" ");
-		}
+		addStartAttribute(genPrinter, enumvariable);
 		// fixed
 		if (enumvariable.fixedAttributeSet()) {
 			genPrinter.print("fixed=\""+enumvariable.fixedAttribute()+"\" ");
@@ -579,11 +616,7 @@ public class XMLGenerator extends GenericGenerator {
 		//declaredType
 		//genPrinter.print("declaredType=\"String\" ");
 		//start attribute
-		if (booleanvariable.isIndependentParameter() || booleanvariable.useBindingExpAsStart()) {
-			genPrinter.print("start=\"" +booleanvariable.ceval().booleanValue() + "\" ");
-		} else if (booleanvariable.startAttributeSet()) {
-			genPrinter.print("start=\"" +booleanvariable.startAttribute()+"\" ");
-		}
+		addStartAttribute(genPrinter, booleanvariable);
 		// fixed
 		if (booleanvariable.fixedAttributeSet()) {
 			genPrinter.print("fixed=\""+booleanvariable.fixedAttribute()+"\" ");
@@ -597,11 +630,7 @@ public class XMLGenerator extends GenericGenerator {
 		//declaredType
 		//genPrinter.print("declaredType=\"String\" ");
 		//start attribute
-		if (stringvariable.isIndependentParameter() || stringvariable.useBindingExpAsStart()) {
-			genPrinter.print("start=\"" +stringvariable.ceval().stringValue() + "\" ");
-		} else if(stringvariable.startAttributeSet()) {
-			genPrinter.print("start=\""+stringvariable.startAttribute()+"\" ");
-		}
+		addStartAttribute(genPrinter, stringvariable);
 		// fixed - not supported
 		//if (stringvariable.fixedAttributeSet()) {
 		//	genPrinter.print("fixed=\""+stringvariable.fixedAttribute()+"\" ");
@@ -878,35 +907,6 @@ public class XMLGenerator extends GenericGenerator {
 
 		}
 	}
-	
-	
-	
-	/**
-	 * \brief Returns the string denoting the beginning of the copyright blurb.
-	 */
-	protected String startOfBlurb() { return "<!--"; }
-	
-	/**
-	 * \brief Returns the string denoting the end of the copyright blurb.
-	 */
-	protected String endOfBlurb() { return "-->"; }
-	
-	/**
-	 * Constructor.
-	 * 
-	 * @param expPrinter Printer object used to generate code for expressions.
-	 * @param escapeCharacter Escape characters used to decode tags.
-	 * @param fclass An FClass object used as a basis for the code generation.
-	 */
-	public XMLGenerator(Printer expPrinter, char escapeCharacter,
-			FClass fclass) {
-		super(expPrinter,escapeCharacter, fclass);
-		
-		illegalCharsSub=new LinkedHashMap<String,String>();
-		illegalCharsSub.put("&","&amp");
-		illegalCharsSub.put("<","&lt;");
-		illegalCharsSub.put("\"", "&quot;");
-	}
 }
 
 class VariableNameComparator implements Comparator<FVariable> {
@@ -943,6 +943,7 @@ class VariableNameComparator implements Comparator<FVariable> {
 		}
 		return res;
 	}
+
 }
 
 /**

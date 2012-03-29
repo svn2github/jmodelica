@@ -995,6 +995,7 @@ aspect BuiltInFlatTypes {
  	public FExp FIntegerType.zeroLiteral() { return new FIntegerLitExp(0); }
  	public FExp FStringType.zeroLiteral()  { return new FStringLitExp(""); }
  	public FExp FBooleanType.zeroLiteral() { return new FBooleanLitExpFalse(); }
+ 	public FExp FEnumType.zeroLiteral()    { return new FEnumLitExp(this, 1); }
  	
  	/**
  	 * \brief Create a literal of the given integer value for this type, if applicable.

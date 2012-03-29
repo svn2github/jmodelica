@@ -516,12 +516,8 @@ aspect ConstantEvaluation {
         	return new FStringLitExp(value); 
         }
 	    
-	    /**
-	     * \brief Get a string describing this CValue for use in 
-	     *        ConstantEvaluationExceptions.
-	     */
-	    public String errorDesc() {
-	    	return "CValueString (\"" + toString() + "\")";
+	    public String toString() {
+	    	return '"' + value + '"';
 	    }
                 
       }
@@ -971,6 +967,12 @@ aspect ConstantEvaluation {
  	public CValue FIntegerType.zeroCValueScalar() { return new CValueInteger(0); }
  	public CValue FStringType.zeroCValueScalar()  { return new CValueString(""); }
  	public CValue FBooleanType.zeroCValueScalar() { return new CValueBoolean(false); }
+
+ 	public CValue FType.convert(CValue v)        { return v; }
+ 	public CValue FRealType.convert(CValue v)    { return v.convertReal(); }
+ 	public CValue FIntegerType.convert(CValue v) { return v.convertInteger(); }
+ 	public CValue FStringType.convert(CValue v)  { return v.convertString(); }
+ 	public CValue FBooleanType.convert(CValue v) { return v.convertBoolean(); }
  	
     
     /** 

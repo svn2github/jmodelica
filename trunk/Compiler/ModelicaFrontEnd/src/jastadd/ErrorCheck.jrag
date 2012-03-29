@@ -663,7 +663,7 @@ aspect InstanceErrorCheck {
 				node.error("Could not evaluate binding expression for " + varKind + " '" +
 						varName + "' due to circularity: " + exp);
 			} else {
-				if (root().options.getBooleanOption("check_evaluation_of_parameter_binding_expressions")) {
+				if (root().options.getBooleanOption("generate_dae")) {
 					CValue val = ceval();
 					if (val.isUnknown()) {
 						if (val.isUnsupported()) {

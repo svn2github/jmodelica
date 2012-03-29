@@ -1904,60 +1904,36 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void FVariable.genStartValue_C(String indent, PrintStream str) {}
-	
-	public void FRealVariable.genStartValue_C(String indent, PrintStream str) {
-		str.print(indent);
-		str.print(name_C()+ " = ");
-		if (isIndependentParameter() || useBindingExpAsStart()) {
-			str.print(ceval().realValue());
-		} else {
-			str.print(startAttribute());
-		}
-		str.print(";\n");
+    
+    /**
+     * Convert to a string represenation to use in C source files.
+     * 
+     * @return Representation of value for C files.   
+     */
+	public String CValue.cCodeValue() {
+		return toString();
+	}
+    
+	public String CValueBoolean.cCodeValue() {
+		return value ? "JMI_TRUE" : "JMI_FALSE";
 	}
 	
-	public void FIntegerVariable.genStartValue_C(String indent, PrintStream str) {
-		str.print(indent);
-		str.print(name_C()+ " = ");
-		if (isIndependentParameter() || useBindingExpAsStart()) {
-			str.print(ceval().intValue());
-		} else {
-			str.print(startAttribute());
-		}
-		str.print(";\n");
+	public String CValueEnum.cCodeValue() {
+		return Integer.toString(intValue());
 	}
 	
-	public void FBooleanVariable.genStartValue_C(String indent, PrintStream str) {
-		str.print(indent);
-		str.print(name_C()+ " = ");
-		if (isIndependentParameter() || useBindingExpAsStart()) {
-			str.print(ceval().booleanValue() ? "JMI_TRUE" : "JMI_FALSE");
-		} else {
-			str.print(startAttribute() ? "JMI_TRUE" : "JMI_FALSE");
-		}
-		str.print(";\n");
-	}
-
-	public void FEnumVariable.genStartValue_C(String indent, PrintStream str) {
-		str.print(indent);
-		str.print(name_C()+ " = ");
-		if (isIndependentParameter() || useBindingExpAsStart()) {
-			str.print(ceval().intValue());
-		} else {
-			str.print(startAttribute());
-		}
-		str.print(";\n");
-	}
-	
-	public void FStringVariable.genStartValue_C(String indent, PrintStream str) {
-		str.print(indent);
-		str.print(name_C()+ " = ");
-		if (isIndependentParameter() || useBindingExpAsStart()) {
-			str.print(ceval().stringValue());
-		} else {
-			str.print(startAttribute());
-		}
+	public void FVariable.genStartValue_C(String indent, PrintStream str) {
+		str.print(indent + name_C() + " = ");
+		FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
+		boolean noExp = exp == null;
+		if (noExp)
+			setBindingExp(exp = type().zeroLiteral());
+		if (root().options.getBooleanOption("generate_dae"))
+			str.print(type().convert(exp.ceval()).cCodeValue());
+		else // this assumes that scaling factors is not used in FMUs
+			exp.prettyPrint_C(str,"");
+		if (noExp)
+			setBindingExpOpt(new Opt());
 		str.print(";\n");
 	}
 	

@@ -617,6 +617,19 @@ aspect XMLTagBinding{
     	
     	inh String BaseNode.parentXmlNamespace();
     	eq BaseNode.getChild().parentXmlNamespace() = xmlNamespace();
+	    
+	    /**
+	     * Convert to a string represenation to use in attributes in XML files.
+	     * 
+	     * @return Representation of value for XML attributes.	     
+	     */
+    	public String CValue.xmlValue() {
+    		return stringValue();
+    	}
+    	
+    	public String CValueEnum.xmlValue() {
+    		return Integer.toString(intValue());
+    	}
 
         //log.warning("Warning: the model can cointains unsopported expressions and the generated XML document can be unvalid");
    

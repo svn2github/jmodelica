@@ -1337,9 +1337,8 @@ aspect Attributes {
 	syn int     FEnumVariable.maxAttribute()          = maxAttributeCValue().intValue();
 
 	// start attribute
-	// TODO: What about independent parameters?
 	syn boolean FVariable.useBindingExpAsStart()  = 
-/*		(isDependentParameter() && !startAttributeSet()) || */ isIndependentConstant();
+		(isIndependentParameter() && hasBindingExp()) ||  isIndependentConstant();
 	
 	syn boolean FVariable.startAttributeSet()     = attributeSet(FAttribute.START);
 	syn FExp    FVariable.startAttributeExp()     = attributeExp(FAttribute.START);

@@ -1194,47 +1194,5 @@ equation
 end FunctionEval22;
 
 
-model ScalarizedLookup1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="ScalarizedLookup1",
-         description="",
-         template="$XML_variables$",
-         generatedCode="
-
-		<ScalarVariable name=\"a[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"1.0\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>independentParameter</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"a[2]\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"2.0\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>independentParameter</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"b\" valueReference=\"268435458\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Integer start=\"1\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>independentParameter</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x\" valueReference=\"4\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"2.0\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>state</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"der(x)\" valueReference=\"3\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>derivative</VariableCategory>
-		</ScalarVariable>")})));
-
-    Real x(start = 1 + a[b]);
-    parameter Real a[2] = { 1, 2 };
-    parameter Integer b = 1;
-equation
-    der(x) = x;
-end ScalarizedLookup1;
-
-
 
 end EvaluationTests;
