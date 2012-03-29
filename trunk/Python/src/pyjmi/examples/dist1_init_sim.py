@@ -60,7 +60,7 @@ def run_demo(with_plots=True):
         print '(' + str(i+1) + ', %f, %f)' %(x_A[i], y_A[i])
     
     # Set inputs for stationary point B
-    rr_0_B = 3.7
+    rr_0_B = 2.0
     init_model.set('rr',rr_0_B)
     init_result = init_model.initialize()
 
@@ -86,7 +86,7 @@ def run_demo(with_plots=True):
     for i in range(32):
         dist1.set('x_init[' + str(i+1) + ']', x_A[i])
 		
-    res = dist1.simulate(final_time=7200)
+    res = dist1.simulate(final_time=50)
 
     # Extract variable profiles
     x1  = res['x[1]']

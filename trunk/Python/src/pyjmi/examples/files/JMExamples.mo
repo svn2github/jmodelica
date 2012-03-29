@@ -1645,7 +1645,7 @@ Simulation time: 7200s
        der(x[18:31]) = 1/atray * (FL*(x[17:30]-x[18:31]) - V*(y[18:31]-y[19:32]))
         "14 column stages";
        der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
-       rr = if time<=1000 then 3 else 3.7;
+       rr = if time<=10 then 3 else 2.0;
 
        //DAE
        L=rr*D;
