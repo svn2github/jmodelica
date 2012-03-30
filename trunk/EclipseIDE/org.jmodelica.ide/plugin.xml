@@ -281,7 +281,7 @@
             class="org.jmodelica.ide.outline.ClassOutlineView"
             icon="resources/icons/class_outline.gif"
             id="org.jmodelica.ide.view.outline.class"
-            name="Class Outline">
+            name="Package Explorer">
          <description>
             Shows an outline of the class hierarchy in the current project.
          </description>
