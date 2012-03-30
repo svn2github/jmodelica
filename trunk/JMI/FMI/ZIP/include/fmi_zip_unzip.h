@@ -18,10 +18,25 @@
 #ifndef FMI_ZIP_UNZIP_H_
 #define FMI_ZIP_UNZIP_H_
 
+#ifdef __cplusplus 
+extern "C" {
+#endif
+
 #include <stdlib.h>
 #include <jm_types.h>
 #include "miniunz.h"
 
+/**
+ * \brief Uncompress a zip file
+ * 
+ * @param zip_file_path Full file path of the file to uncompress.
+ * @param output_folder Full file path of the directory where the uncompressed files are put. The folder must already exist. Files with the same name are overwritten.
+ * @return Error status.
+ */
 jm_status_enu_t fmi_zip_unzip(const char* zip_file_path, const char* output_folder);
+
+#ifdef __cplusplus 
+}
+#endif
 
 #endif /* End of header file FMI_ZIP_UNZIP_H_ */

@@ -23,7 +23,7 @@
 #include <jm_types.h>
 #include "fmi_zip_unzip.h"
 
-#define PRINT_MY_DEBUG printf("Line: %d \t File: %s \n",__LINE__, __FILE__)
+#include "config.h"
 
 void do_exit(int code)
 {
@@ -32,15 +32,22 @@ void do_exit(int code)
 	exit(code);
 }
 
+/**
+ * \brief Unzip test. Tests the fmi_zip_unzip function by uncompressing some file.
+ *
+ */
 int main(int argc, char *argv[])
 {
-	jm_status_enu_t status;
+	jm_status_enu_t status;	
 
-	status = fmi_zip_unzip("C:\\P510-JModelica\\FMIToolbox\\trunk\\src\\wrapperfolder\\Furuta.fmu", "C:\\Documents and Settings\\p418_baa\\Desktop\\XMLtest\\temporaryfolder\\");
+	status = fmi_zip_unzip(UNCOMPRESSED_DUMMY_FILE_PATH_SRC, UNCOMPRESSED_DUMMY_FOLDER_PATH_DIST);
 
 	if (status == jm_status_error) {
-		printf("Failed to unzip the file\n");
+		printf("Failed to uncompress the file\n");
+	} else {
+		printf("Succesfully uncompressed the file\n");
 	}
+
 	do_exit(1);
 }
 

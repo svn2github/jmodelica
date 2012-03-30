@@ -19,7 +19,11 @@
 #include <jm_types.h>
 #include "fmi_zip_zip.h"
 
+#include "config.h"
+
 #define PRINT_MY_DEBUG printf("Line: %d \t File: %s \n",__LINE__, __FILE__)
+
+
 
 void do_exit(int code)
 {
@@ -28,17 +32,23 @@ void do_exit(int code)
 	exit(code);
 }
 
+/**
+ * \brief Zip test. Tests the fmi_zip_zip function by compressing some file.
+ *
+ */
 int main(int argc, char *argv[])
 {
 	jm_status_enu_t status;
-
-	const char* files_to_zip[] = {"C:\\Documents and Settings\\p418_baa\\Desktop\\Capi\\modelDescription.xml"};
+	
+	const char* files_to_zip[] = {COMPRESS_DUMMY_FILE_PATH_SRC};
 	int n_files_to_zip = 1;
 
-	status = fmi_zip_zip("C:\\Documents and Settings\\p418_baa\\Desktop\\Capi\\Furuta.ziptest", n_files_to_zip, files_to_zip);
+	status = fmi_zip_zip(COMPRESS_DUMMY_FILE_PATH_DIST, n_files_to_zip, files_to_zip);
 
 	if (status == jm_status_error) {
-		printf("Failed to unzip the file\n");
+		printf("Failed to compress the file\n");
+	} else {
+		printf("Succesfully compressed the file\n");
 	}
 	do_exit(1);
 }

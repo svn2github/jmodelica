@@ -18,9 +18,25 @@
 #ifndef FMI_ZIP_ZIP_H_
 #define FMI_ZIP_ZIP_H_
 
+#ifdef __cplusplus 
+extern "C" {
+#endif
+
 #include <jm_types.h>
 
+/**
+ * \brief Compress files to the zip format
+ * 
+ * @param zip_file_path Full file path to the final compressed file. The folders must exist.
+ * @param n_files_to_zip Number of files to compress
+ * @param files_to_zip List of the full file names to compress
+ * @return Error status.
+ */
 jm_status_enu_t fmi_zip_zip(const char* zip_file_path, int n_files_to_zip, const char** files_to_zip);
+
+#ifdef __cplusplus 
+}
+#endif
 
 #endif /* End of header file FMI_ZIP_ZIP_H_ */
 
