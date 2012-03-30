@@ -180,15 +180,17 @@ Index: miniunz.c
      return ret;
  }
  
-@@ -172,13 +185,13 @@
+@@ -172,13 +185,15 @@
    return 1;
  }
  
 -void do_banner()
 +static void do_banner()
  {
++	/*
      printf("MiniUnz 1.01b, demo of zLib + Unz package written by Gilles Vollant\n");
      printf("more info at http://www.winimage.com/zLibDll/unzip.html\n\n");
++	*/
  }
  
 -void do_help()
@@ -196,7 +198,7 @@ Index: miniunz.c
  {
      printf("Usage : miniunz [-e] [-x] [-v] [-l] [-o] [-p password] file.zip [file_to_extr.] [-d extractdir]\n\n" \
             "  -e  Extract without pathname (junk paths)\n" \
-@@ -364,7 +377,7 @@
+@@ -364,7 +379,7 @@
          {
              char rep=0;
              FILE* ftestexist;
@@ -205,7 +207,7 @@ Index: miniunz.c
              if (ftestexist!=NULL)
              {
                  fclose(ftestexist);
-@@ -395,8 +408,7 @@
+@@ -395,8 +410,7 @@
  
          if ((skip==0) && (err==UNZ_OK))
          {
@@ -215,7 +217,7 @@ Index: miniunz.c
              /* some zipfile don't contain directory alone before file */
              if ((fout==NULL) && ((*popt_extract_without_path)==0) &&
                                  (filename_withoutpath!=(char*)filename_inzip))
-@@ -405,7 +417,7 @@
+@@ -405,7 +419,7 @@
                  *(filename_withoutpath-1)='\0';
                  makedir(write_filename);
                  *(filename_withoutpath-1)=c;
@@ -224,7 +226,7 @@ Index: miniunz.c
              }
  
              if (fout==NULL)
-@@ -519,7 +531,7 @@
+@@ -519,7 +533,7 @@
  }
  
  
@@ -233,7 +235,7 @@ Index: miniunz.c
      int argc;
      char *argv[];
  {
-@@ -633,7 +645,7 @@
+@@ -633,7 +647,7 @@
  #endif
          {
            printf("Error changing into %s, aborting\n", dirname);
@@ -323,15 +325,18 @@ Index: minizip.c
      if (ftestexist==NULL)
          ret = 0;
      else
-@@ -150,13 +163,13 @@
+@@ -150,13 +163,16 @@
      return ret;
  }
  
 -void do_banner()
 +static void do_banner()
  {
++	/*
      printf("MiniZip 1.1, demo of zLib + MiniZip64 package, written by Gilles Vollant\n");
      printf("more info on MiniZip at http://www.winimage.com/zLibDll/minizip.html\n\n");
++	*/
++
  }
  
 -void do_help()
@@ -339,7 +344,7 @@ Index: minizip.c
  {
      printf("Usage : minizip [-o] [-a] [-0 to -9] [-p password] [-j] file.zip [files_to_add]\n\n" \
             "  -o  Overwrite existing file.zip\n" \
-@@ -173,7 +186,8 @@
+@@ -173,7 +189,8 @@
  {
     unsigned long calculate_crc=0;
     int err=ZIP_OK;
@@ -349,7 +354,7 @@ Index: minizip.c
     unsigned long size_read = 0;
     unsigned long total_read = 0;
     if (fin==NULL)
-@@ -211,14 +225,13 @@
+@@ -211,14 +228,13 @@
  {
    int largeFile = 0;
    ZPOS64_T pos = 0;
@@ -367,7 +372,7 @@ Index: minizip.c
                  printf("File : %s is %lld bytes\n", filename, pos);
  
      if(pos >= 0xffffffff)
-@@ -230,7 +243,7 @@
+@@ -230,7 +246,7 @@
   return largeFile;
  }
  
@@ -376,7 +381,7 @@ Index: minizip.c
      int argc;
      char *argv[];
  {
-@@ -339,7 +352,7 @@
+@@ -339,7 +355,7 @@
                      ret = scanf("%1s",answer);
                      if (ret != 1)
                      {
@@ -385,7 +390,7 @@ Index: minizip.c
                      }
                      rep = answer[0] ;
                      if ((rep>='a') && (rep<='z'))
-@@ -447,7 +460,7 @@
+@@ -447,7 +463,7 @@
                      printf("error in opening %s in zipfile\n",filenameinzip);
                  else
                  {
