@@ -14,7 +14,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifdef __cplusplus 
+extern "C" {
+#endif
+
 #include <FMI1/fmi1_capi.h>
+#include <FMI1/fmi1_capi_impl.h>
+
 
 fmi1_component_t fmi1_capi_instantiate_model(fmi1_capi_t* fmu, fmi1_string_t instanceName, fmi1_string_t GUID, fmi1_boolean_t loggingOn)
 {
@@ -31,62 +37,61 @@ fmi1_status_t fmi1_capi_initialize(fmi1_capi_t* fmu, fmi1_boolean_t toleranceCon
 	return fmu->fmiInitialize(fmu->c, toleranceControlled, relativeTolerance, eventInfo);	
 }
 
-/* Call FMI function Macros */
-#define CALL_FMI_FUNCTION_RETURN_STRING(functioncall) return functioncall;
-
-#define CALL_FMI_FUNCTION_RETURN_FMISTATUS(functioncall) return functioncall;
-
 const char* fmi1_capi_get_model_types_platform(fmi1_capi_t* fmu)
 {
-	CALL_FMI_FUNCTION_RETURN_STRING(fmu->fmiGetModelTypesPlatform());
+	return fmu->fmiGetModelTypesPlatform();
 }
 
 fmi1_status_t fmi1_capi_set_time(fmi1_capi_t* fmu, fmi1_real_t time)
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiSetTime(fmu->c, time));
+	return fmu->fmiSetTime(fmu->c, time);
 }
 
 fmi1_status_t fmi1_capi_set_continuous_states(fmi1_capi_t* fmu, const fmi1_real_t x[], size_t nx)
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiSetContinuousStates(fmu->c, x, nx));
+	return fmu->fmiSetContinuousStates(fmu->c, x, nx);
 }
 
 fmi1_status_t fmi1_capi_completed_integrator_step(fmi1_capi_t* fmu, fmi1_boolean_t* callEventUpdate)
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiCompletedIntegratorStep(fmu->c, callEventUpdate));
+	return fmu->fmiCompletedIntegratorStep(fmu->c, callEventUpdate);
 }
 
 fmi1_status_t fmi1_capi_get_derivatives(fmi1_capi_t* fmu, fmi1_real_t derivatives[], size_t nx)
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiGetDerivatives(fmu->c, derivatives, nx));
+	return fmu->fmiGetDerivatives(fmu->c, derivatives, nx);
 }
 
 fmi1_status_t fmi1_capi_get_event_indicators(fmi1_capi_t* fmu, fmi1_real_t eventIndicators[], size_t ni)
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiGetEventIndicators(fmu->c, eventIndicators, ni));
+	return fmu->fmiGetEventIndicators(fmu->c, eventIndicators, ni);
 }
 
 fmi1_status_t fmi1_capi_eventUpdate(fmi1_capi_t* fmu, fmi1_boolean_t intermediateResults, fmi1_event_info_t* eventInfo)
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiEventUpdate(fmu->c, intermediateResults, eventInfo));
+	return fmu->fmiEventUpdate(fmu->c, intermediateResults, eventInfo);
 }
 
 fmi1_status_t fmi1_capi_get_continuous_states(fmi1_capi_t* fmu, fmi1_real_t states[], size_t nx)
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiGetContinuousStates(fmu->c, states, nx));
+	return fmu->fmiGetContinuousStates(fmu->c, states, nx);
 }
 
 fmi1_status_t fmi1_capi_get_nominal_continuous_states(fmi1_capi_t* fmu, fmi1_real_t x_nominal[], size_t nx)
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiGetNominalContinuousStates(fmu->c, x_nominal, nx));
+	return fmu->fmiGetNominalContinuousStates(fmu->c, x_nominal, nx);
 }
 
 fmi1_status_t fmi1_capi_get_state_value_references(fmi1_capi_t* fmu, fmi1_value_reference_t vrx[], size_t nx)
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiGetStateValueReferences(fmu->c, vrx, nx));
+	return fmu->fmiGetStateValueReferences(fmu->c, vrx, nx);
 }
 
 fmi1_status_t fmi1_capi_terminate(fmi1_capi_t* fmu)
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiTerminate(fmu->c));
+	return fmu->fmiTerminate(fmu->c);
 }
+
+#ifdef __cplusplus
+}
+#endif

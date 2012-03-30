@@ -14,7 +14,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifdef __cplusplus 
+extern "C" {
+#endif
+
 #include <FMI1/fmi1_capi.h>
+#include <FMI1/fmi1_capi_impl.h>
 
 fmi1_component_t fmi1_capi_instantiate_slave(fmi1_capi_t* fmu, fmi1_string_t instanceName, fmi1_string_t fmuGUID, fmi1_string_t fmuLocation, fmi1_string_t mimeType, fmi1_real_t timeout, fmi1_boolean_t visible, fmi1_boolean_t interactive, fmi1_boolean_t loggingOn)
 {
@@ -31,44 +36,40 @@ fmi1_status_t fmi1_capi_initialize_slave(fmi1_capi_t* fmu, fmi1_real_t tStart, f
 	return fmu->fmiInitializeSlave(fmu->c, tStart, StopTimeDefined, tStop);
 }
 
-/* Call FMI function Macros */
-#define CALL_FMI_FUNCTION_RETURN_STRING(functioncall) return functioncall; 
-
-#define CALL_FMI_FUNCTION_RETURN_FMISTATUS(functioncall) return functioncall; 
 
 const char* fmi1_capi_get_types_platform(fmi1_capi_t* fmu)
 {
-	CALL_FMI_FUNCTION_RETURN_STRING(fmu->fmiGetTypesPlatform());
+	return fmu->fmiGetTypesPlatform();
 }
 
 fmi1_status_t fmi1_capi_terminate_slave(fmi1_capi_t* fmu)
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiTerminateSlave(fmu->c));
+	return fmu->fmiTerminateSlave(fmu->c);
 }
 
 fmi1_status_t fmi1_capi_reset_slave(fmi1_capi_t* fmu)
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiResetSlave(fmu->c));
+	return fmu->fmiResetSlave(fmu->c);
 }
 
 fmi1_status_t fmi1_capi_set_real_input_derivatives(fmi1_capi_t* fmu, const  fmi1_value_reference_t vr[], size_t nvr, const fmi1_integer_t order[], const  fmi1_real_t value[])  
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiSetRealInputDerivatives(fmu->c, vr, nvr, order, value));
+	return fmu->fmiSetRealInputDerivatives(fmu->c, vr, nvr, order, value);
 }
 
 fmi1_status_t fmi1_capi_get_real_output_derivatives(fmi1_capi_t* fmu, const  fmi1_value_reference_t vr[], size_t nvr, const fmi1_integer_t order[], fmi1_real_t value[])   
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiGetRealOutputDerivatives(fmu->c, vr, nvr, order, value));
+	return fmu->fmiGetRealOutputDerivatives(fmu->c, vr, nvr, order, value);
 }
 
 fmi1_status_t fmi1_capi_cancel_step(fmi1_capi_t* fmu)   
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiCancelStep(fmu->c));
+	return fmu->fmiCancelStep(fmu->c);
 }
 
 fmi1_status_t fmi1_capi_do_step(fmi1_capi_t* fmu, fmi1_real_t currentCommunicationPoint, fmi1_real_t communicationStepSize, fmi1_boolean_t newStep)
 {
-	CALL_FMI_FUNCTION_RETURN_FMISTATUS(fmu->fmiDoStep(fmu->c, currentCommunicationPoint, communicationStepSize, newStep));
+	return fmu->fmiDoStep(fmu->c, currentCommunicationPoint, communicationStepSize, newStep);
 }
 
 /* fmiGetStatus* */
@@ -83,3 +84,7 @@ FMIGETSTATUSX(fmi1_capi_get_real_status,		fmiGetRealStatus,	fmi1_real_t)
 FMIGETSTATUSX(fmi1_capi_get_integer_status,	fmiGetIntegerStatus,	fmi1_integer_t)
 FMIGETSTATUSX(fmi1_capi_get_boolean_status,	fmiGetBooleanStatus,	fmi1_boolean_t)
 FMIGETSTATUSX(fmi1_capi_get_string_status,		fmiGetStringStatus,	fmi1_string_t)
+
+#ifdef __cplusplus
+}
+#endif
