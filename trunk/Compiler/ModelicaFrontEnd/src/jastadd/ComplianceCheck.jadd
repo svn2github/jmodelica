@@ -51,6 +51,9 @@ aspect ComplianceCheck {
 		if (!root().options.getBooleanOption("generate_ode")) {
 			compliance("When equations are currently only supported when compiling FMUs");
 		}
+		if (hasElse()) {
+			compliance("Else clauses in when equations are currently not supported");
+		}
 	}
 
 	public void FUnsupportedEquation.collectErrors() {

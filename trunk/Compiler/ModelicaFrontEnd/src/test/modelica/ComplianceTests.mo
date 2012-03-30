@@ -162,6 +162,26 @@ algorithm
  end when;
 end WhenStmt_ComplErr;
 
+model ElseWhenEq_ComplErr
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="ElseWhen_ComplErr",
+         description="Compliance error for else clauses in when equations",
+         errorMessage="
+0 error(s), 1 compliance error(s) and 0 warning(s) found:
+Error: in file '/Users/jakesson/svn_projects/JModelica.org/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 176, column 2:
+  Else clauses in when equations are currently not supported	 
+")})));
+
+ Real x;
+equation
+ when (time < 2) then
+  x = 5;
+ elsewhen time >5 then
+  x = 6;
+ end when;	
+end ElseWhenEq_ComplErr;
 
 model UnsupportedBuiltins1_ComplErr
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
