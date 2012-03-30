@@ -131,6 +131,22 @@ equation
 
 end WhenEqu10; 
 
+model WhenEqu11
+	function F
+		input Real x;
+		output Real y1;
+		output Real y2;
+	algorithm
+		y1 := 1 + x;
+		y2 := 2 + x;
+	end F;
+	Real x,y;
+	equation
+	when sample(0,1) then
+	  (x,y) = F(time);
+	end when;
+end WhenEqu11;
+
 model ZeroOrderHold1
 
   Modelica.Blocks.Discrete.ZeroOrderHold sampler(samplePeriod=0.1);

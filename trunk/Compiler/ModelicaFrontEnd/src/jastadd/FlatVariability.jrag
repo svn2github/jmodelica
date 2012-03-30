@@ -189,6 +189,15 @@ aspect FlatVariability {
 	eq InstForClauseE.assignedSet()      = assignedSetFromEqns(getFAbstractEquations());
 	eq FIfWhenElseEquation.assignedSet() = assignedSetFromEqns(getFAbstractEquations());
 	eq FEquation.assignedSet()           = getLeft().accessedVarSet();
+	eq FFunctionCallEquation.assignedSet() {
+		LinkedHashSet<InstComponentDecl> s = new LinkedHashSet<InstComponentDecl>();
+		for (FFunctionCallLeft left : getLefts()) {
+			if (left.hasFExp()) {
+				s.addAll(left.getFExp().accessedVarSet());
+			}
+		}
+		return s;
+	}
 	
 	/**
 	 * If this is an instance tree access, return set containing accessed var, otherwise empty set.

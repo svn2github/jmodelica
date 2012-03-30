@@ -1627,13 +1627,12 @@ aspect CCodeGen {
 		}
 	}
 
-	public void WhenEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
-	//public void FWhenEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {
-		
+	public void WhenEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {			
 		 // if (guard and !pre(guard)) {
 		 // 	_x = _pre_x + 1;
 		 // }
 		
+		// TODO: Add support for else when clauses
 		for (FExp g : whenEquation.guards()) {		
 			g.genTempVars_C(ASTNode.printer_C, str, indent);
 			str.format("%s_guards(%d) = ", indent, g.guardExpInEquationsIndex());
@@ -1660,17 +1659,19 @@ aspect CCodeGen {
 			str.print(")");
 		}
 		str.print(") {\n");
-		for (FAbstractEquation fe : whenEquation.getFAbstractEquations()) {
-			fe.genSolvedBlock_C(fv,indent,str);
+		for (SimpleEquationBlock b : blocks(0)) {
+			b.genBlock_C(i,inInitial,indent + " ",str);
 		}
 		str.print("  } else {\n");
-		str.print(indent);
-		str.print(fv.name_C());
-		str.print(" = ");
-		str.print("pre");
-		str.print(fv.name_C());
-		str.print(";\n");
-		str.print(indent);
+		for (FVariable fv : activeVariables()) {
+			str.print(indent);
+			str.print(fv.name_C());
+			str.print(" = ");
+			str.print("pre");
+			str.print(fv.name_C());
+			str.print(";\n");
+			str.print(indent);
+		}
 		str.print("}\n");
 	}
 

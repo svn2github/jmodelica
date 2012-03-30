@@ -21,7 +21,11 @@ aspect EquationSolve {
 	syn boolean FAbstractEquation.isSolved(String name, boolean duringTearing) = false;
 
 	eq FWhenEquation.isSolved(String name, boolean duringTearing) {
-		return !(solution(name, duringTearing) instanceof FNoExp);
+		if (getNumFAbstractEquation()>1) {
+			return false;
+		} else {
+			return getFAbstractEquation(0).isSolved(name);
+		}
 	}
 
 	eq FEquation.isSolved(String name, boolean duringTearing) {
@@ -59,18 +63,6 @@ aspect EquationSolve {
 			return true;
 		}
 				
-	}
-	
-	syn nta FExp FWhenEquation.solution(String name) {
-		return solution(name, false);
-	}
-	
-	syn nta FExp FWhenEquation.solution(String name, boolean duringTearing) {
-		if (getNumFAbstractEquation()>1) {
-			return null;
-		} else {
-			return ((FEquation)getFAbstractEquation(0)).solution(name);
-		}
 	}
 
 	syn nta FExp FEquation.solution(String name) {

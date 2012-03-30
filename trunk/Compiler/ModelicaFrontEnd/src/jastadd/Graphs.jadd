@@ -53,15 +53,12 @@ public class EquationBlockFactory {
 		return l;
 	}
 
-	/*
-	 * This method takes a list of Eq objects and reate an equation blocks
-	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
-	 */
-	static SimpleEquationBlock createSimpleEquationBlock(Stack<Eq> component, boolean solve) {
+	static SimpleEquationBlock createSimpleEquationBlock(ArrayList<FAbstractEquation> eqns, 
+	                                                     ArrayList<FVariable> fvs, boolean solve) {
 				
-		if (component.size()==1 ) {
-			FAbstractEquation e = component.get(0).getEquation();
-			FVariable fv = component.get(0).getMatching().getVariable();
+		if (eqns.size()==1 ) {
+			FAbstractEquation e = eqns.get(0);
+			FVariable fv = fvs.get(0);
 			if (e instanceof FEquation) {
 				FEquation ee = (FEquation)e;
 				if (solve && ee.isSolved(fv.name())) { // Solved scalar equation
@@ -70,46 +67,65 @@ public class EquationBlockFactory {
 					return new UnsolvedScalarEquationBlock(ee,fv);				
 				}
 			}
-			// When Equation
-			if (e instanceof FWhenEquation) {
-				FWhenEquation ee = (FWhenEquation)e;
-				if (solve && ee.isSolved(fv.name())) {
-					return new WhenEquationBlock(ee,fv);
-				} 
-			}
-			
+
 			// If equation TODO
 		}
 		
-		// Check if the component contains a single function call equation		
-		FAbstractEquation e = component.get(0).getEquation();
-		if (e instanceof FFunctionCallEquation) {		
-			FFunctionCallEquation fce = (FFunctionCallEquation)e;
-			boolean one_equation = true;
-			for (Eq eqn : component) {
-				if (eqn.getEquation() != e) {
-					one_equation = false;
-					break;
-				}
-			}
-			if (one_equation) {
-				// Loop over all unknowns in the component
-				boolean isSolvable = true;
-				ArrayList<FVariable> l = new ArrayList<FVariable>();
-				for (Eq eqn : component) {
-					l.add(eqn.getMatching().getVariable());
-					if (!eqn.getEquation().isSolved(eqn.getMatching().getVariable().name())) {
-						isSolvable = false;
-					}
-				} // Solved FunctionCallEquation				
-				if (isSolvable && solve) {
-					return new SolvedFunctionCallEquationBlock(fce,l);
-				} else { // Unsolved FunctionCallEquation
-					return new UnsolvedFunctionCallEquationBlock(fce,l);
-				}				
+		// Check if if the component corresponds to one single function 
+		// call equation or when equation
+		FAbstractEquation e = eqns.get(0);
+		boolean one_equation = true;
+		for (FAbstractEquation eqn : eqns) {
+			if (eqn != e) {
+				one_equation = false;
+				break;
 			}
 		}
+
+		// When Equation
+		if (e instanceof FWhenEquation && one_equation) {
+			FWhenEquation ee = (FWhenEquation)e;
+				return new WhenEquationBlock(ee);
+		}
+
+		
+		// Check if the component contains a single function call equation		
+		if (e instanceof FFunctionCallEquation && one_equation) {		
+			FFunctionCallEquation fce = (FFunctionCallEquation)e;
+			// Loop over all unknowns in the component
+			boolean isSolvable = true;
+			ArrayList<FVariable> l = new ArrayList<FVariable>();
+			for (int i=0;i<eqns.size();i++) {
+				l.add(fvs.get(i));
+				if (!eqns.get(i).isSolved(fvs.get(i).name())) {
+					isSolvable = false;
+				}
+			} // Solved FunctionCallEquation				
+			if (isSolvable && solve) {
+				return new SolvedFunctionCallEquationBlock(fce,l);
+			} else { // Unsolved FunctionCallEquation
+				return new UnsolvedFunctionCallEquationBlock(fce,l);
+			}				
+		}
 		return null;
+	}
+
+
+	/*
+	 * This method takes a list of Eq objects and reate an equation blocks
+	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
+	 */
+	static SimpleEquationBlock createSimpleEquationBlock(Stack<Eq> component, boolean solve) {
+		ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+		ArrayList<FVariable> fvs = new ArrayList<FVariable>();
+		
+		for (Eq eqn : component) {
+			fvs.add(eqn.getMatching().getVariable());
+			eqns.add(eqn.getEquation());
+		} 
+
+		return createSimpleEquationBlock(eqns,fvs,solve);
+		
 	}
 
 	/*
@@ -192,7 +208,9 @@ public class BiPGraph {
 	
 
 	public ArrayList<Eq> getEquations(FAbstractEquation eqn) {
-		return equationIndexMap.get(eqn);
+		ArrayList<Eq> l = new ArrayList<Eq>();
+		l.addAll(equationIndexMap.get(eqn));
+		return l;
 	}
 
 	public Eq addEquation(String name, String description,
@@ -218,6 +236,7 @@ public class BiPGraph {
 	
 	public Eq replaceEquation(String name, String description, FAbstractEquation eqn) {
 		Eq e = equationMap.get(name);
+		
 		if (e==null) {
 			e = new Eq(name,description,eqn);
 			equations.add(e);
@@ -236,8 +255,9 @@ public class BiPGraph {
 			Eq ee = new Eq(name,description,eqn);
 			equations.set(equations.indexOf(e),ee);
 			equationMap.put(e.getName(),ee);
+			ArrayList<Eq> l = equationIndexMap.get(e.getEquation());
 			removeFromEquationIndexMap(e.getEquation(),e);
-			insertIntoEquationIndexMap(eqn,ee);
+			insertIntoEquationIndexMap(e.getEquation(),ee);
 			e = ee;
 		}
 		return e;
@@ -355,7 +375,7 @@ public class BiPGraph {
 			int n_eq = e.numScalarEquations();
 			LinkedHashSet<Eq> groupMembers = new LinkedHashSet<Eq>();
 			for (int i=0;i<n_eq;i++) {
-				eqn = addEquation("eq_"+k,e.prettyPrint(""),e);
+				eqn = addEquation(eqNamePrefix+k,e.prettyPrint(""),e);
 				groupMembers.add(eqn);
 				k++;
 
@@ -1312,7 +1332,12 @@ public class BiPGraph {
 	public void removeFromEquationIndexMap(FAbstractEquation eqn, Eq e) {
 		ArrayList<Eq> l = equationIndexMap.get(eqn);
 		if (l!=null) {
-			l.remove(e);
+			for (Eq ee : l) {
+				if (e==ee) {
+        			l.remove(e);
+        			return;
+        		}
+        	}
 		}
 	}
 	

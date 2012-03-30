@@ -4379,59 +4379,59 @@ model WhenEqu4
                    $C_ode_initialization$", 
          generatedCode=" 
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
-jmi_real_t** res = &residual;
-if (init==JMI_BLOCK_INITIALIZE) {
-x[0] = pre_x_c_3;
-x[1] = _x_c_3;
-} else if (init==JMI_BLOCK_EVALUATE) {
-pre_x_c_3 = x[0];
-_x_c_3 = x[1];
-(*res)[0] = pre_x_c_3 - (_x_c_3);
-(*res)[1] = ( _a_c_8 ) * ( pre_x_c_3 ) + ( _b_c_9 ) * ( _u_c_4 ) - (_x_c_3);
-} 
-return 0;
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = pre_x_c_3;
+    x[1] = _x_c_3;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    pre_x_c_3 = x[0];
+    _x_c_3 = x[1];
+  (*res)[0] = ( _a_c_8 ) * ( pre_x_c_3 ) + ( _b_c_9 ) * ( _u_c_4 ) - (_x_c_3);
+  (*res)[1] = pre_x_c_3 - (_x_c_3);
+  }
+  return 0;
 }
-
-model_ode_guards(jmi);
+		 
+    model_ode_guards(jmi);
 /************* ODE section *********/
-_sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
-_guards(0) = _atInitial;
-_guards(1) = _sampleTrigger_0;
-if(LOG_EXP_OR(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE),
-COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE))) {
-_u_c_4 = ( _c_p_7 ) * ( _x_p_1 );
-} else {
-_u_c_4 = pre_u_c_4;
-}
-_guards(2) = _atInitial;
-_guards(3) = _sampleTrigger_0;
-if(LOG_EXP_OR(COND_EXP_EQ(LOG_EXP_AND(_guards(2),LOG_EXP_NOT(_pre_guards(2))),JMI_TRUE,JMI_TRUE,JMI_FALSE),
-COND_EXP_EQ(LOG_EXP_AND(_guards(3),LOG_EXP_NOT(_pre_guards(3))),JMI_TRUE,JMI_TRUE,JMI_FALSE))) {
-_x_c_3 = ( _a_c_8 ) * ( pre_x_c_3 ) + ( _b_c_9 ) * ( _u_c_4 );
-} else {
-_x_c_3 = pre_x_c_3;
-}
-_u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
-_der_x_p_12 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
+  _sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
+  _guards(0) = _atInitial;
+  _guards(1) = _sampleTrigger_0;
+  if(LOG_EXP_OR(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE),
+    COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE))) {
+   _u_c_4 = ( _c_p_7 ) * ( _x_p_1 );
+  } else {
+  _u_c_4 = pre_u_c_4;
+  }
+  _guards(2) = _atInitial;
+  _guards(3) = _sampleTrigger_0;
+  if(LOG_EXP_OR(COND_EXP_EQ(LOG_EXP_AND(_guards(2),LOG_EXP_NOT(_pre_guards(2))),JMI_TRUE,JMI_TRUE,JMI_FALSE),
+    COND_EXP_EQ(LOG_EXP_AND(_guards(3),LOG_EXP_NOT(_pre_guards(3))),JMI_TRUE,JMI_TRUE,JMI_FALSE))) {
+   _x_c_3 = ( _a_c_8 ) * ( pre_x_c_3 ) + ( _b_c_9 ) * ( _u_c_4 );
+  } else {
+  _x_c_3 = pre_x_c_3;
+  }
+  _u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
+  _der_x_p_12 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
+		 
 
-model_ode_guards(jmi);
-_x_p_1 = 1;
-_u_c_4 = ( _c_p_7 ) * ( _x_p_1 );
-jmi_kinsol_solve(jmi->dae_init_block_residuals[0]);
-_u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
-_der_x_p_12 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
-_sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
-pre_sampleTrigger_0 = JMI_FALSE;
-pre_u_c_4 = 0.0;
-
+      model_ode_guards(jmi);
+  _x_p_1 = 1;
+  _u_c_4 = ( _c_p_7 ) * ( _x_p_1 );
+  jmi_kinsol_solve(jmi->dae_init_block_residuals[0]);
+  _u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
+  _der_x_p_12 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
+  _sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
+  pre_sampleTrigger_0 = JMI_FALSE;
+  pre_u_c_4 = 0.0;
 ")})));
 
 
  discrete Boolean sampleTrigger;
- Real x_p(start=1);
+ Real x_p(start=1, fixed=true);
  Real u_p;
  discrete Real x_c;
  discrete Real u_c;
@@ -4467,62 +4467,61 @@ model WhenEqu5
                    $C_ode_initialization$",               
          generatedCode=" 
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
-jmi_real_t** res = &residual;
-if (init==JMI_BLOCK_INITIALIZE) {
-x[0] = pre_x_c_3;
-x[1] = _x_c_3;
-} else if (init==JMI_BLOCK_EVALUATE) {
-pre_x_c_3 = x[0];
-_x_c_3 = x[1];
-(*res)[0] = pre_x_c_3 - (_x_c_3);
-(*res)[1] = pre_x_c_3 - (_x_c_3);
-} 
-return 0;
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = pre_x_c_3;
+    x[1] = _x_c_3;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    pre_x_c_3 = x[0];
+    _x_c_3 = x[1];
+  (*res)[0] = pre_x_c_3 - (_x_c_3);
+  (*res)[1] = pre_x_c_3 - (_x_c_3);
+  }
+  return 0;
 }
-
-model_ode_guards(jmi);
+		 
+		 
+  model_ode_guards(jmi);
 /************* ODE section *********/
-_atInit_12 = LOG_EXP_AND(JMI_TRUE, _atInitial);
-_sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
-_guards(0) = _atInit_12;
-_guards(1) = _sampleTrigger_0;
-if(LOG_EXP_OR(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE),
-COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE))) {
-_u_c_4 = ( _c_p_7 ) * ( _x_p_1 );
-} else {
-_u_c_4 = pre_u_c_4;
-}
-_guards(2) = _atInit_12;
-_guards(3) = _sampleTrigger_0;
-if(LOG_EXP_OR(COND_EXP_EQ(LOG_EXP_AND(_guards(2),LOG_EXP_NOT(_pre_guards(2))),JMI_TRUE,JMI_TRUE,JMI_FALSE),
-COND_EXP_EQ(LOG_EXP_AND(_guards(3),LOG_EXP_NOT(_pre_guards(3))),JMI_TRUE,JMI_TRUE,JMI_FALSE))) {
-_x_c_3 = ( _a_c_8 ) * ( pre_x_c_3 ) + ( _b_c_9 ) * ( _u_c_4 );
-} else {
-_x_c_3 = pre_x_c_3;
-}
-_u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
-_der_x_p_13 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
+  _atInit_12 = LOG_EXP_AND(JMI_TRUE, _atInitial);
+  _sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
+  _guards(0) = _atInit_12;
+  _guards(1) = _sampleTrigger_0;
+  if(LOG_EXP_OR(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE),
+    COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE))) {
+   _u_c_4 = ( _c_p_7 ) * ( _x_p_1 );
+  } else {
+  _u_c_4 = pre_u_c_4;
+  }
+  _guards(2) = _atInit_12;
+  _guards(3) = _sampleTrigger_0;
+  if(LOG_EXP_OR(COND_EXP_EQ(LOG_EXP_AND(_guards(2),LOG_EXP_NOT(_pre_guards(2))),JMI_TRUE,JMI_TRUE,JMI_FALSE),
+    COND_EXP_EQ(LOG_EXP_AND(_guards(3),LOG_EXP_NOT(_pre_guards(3))),JMI_TRUE,JMI_TRUE,JMI_FALSE))) {
+   _x_c_3 = ( _a_c_8 ) * ( pre_x_c_3 ) + ( _b_c_9 ) * ( _u_c_4 );
+  } else {
+  _x_c_3 = pre_x_c_3;
+  }
+  _u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
+  _der_x_p_13 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-
-model_ode_guards(jmi);
-jmi_kinsol_solve(jmi->dae_init_block_residuals[0]);
-_u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
-_x_p_1 = 1;
-_der_x_p_13 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
-_sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
-pre_u_c_4 = 0.0;
-_u_c_4 = pre_u_c_4;
-_atInit_12 = LOG_EXP_AND(JMI_TRUE, _atInitial);
-pre_sampleTrigger_0 = JMI_FALSE;
-pre_atInit_12 = JMI_FALSE;
-
+    model_ode_guards(jmi);
+  jmi_kinsol_solve(jmi->dae_init_block_residuals[0]);
+  _u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
+  _x_p_1 = 1;
+  _der_x_p_13 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
+  _sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
+  _atInit_12 = LOG_EXP_AND(JMI_TRUE, _atInitial);
+  pre_u_c_4 = 0.0;
+  _u_c_4 = pre_u_c_4;
+  pre_sampleTrigger_0 = JMI_FALSE;
+  pre_atInit_12 = JMI_FALSE;
 ")})));
 
 
  discrete Boolean sampleTrigger;
- Real x_p(start=1);
+ Real x_p(start=1, fixed=true);
  Real u_p;
  discrete Real x_c;
  discrete Real u_c;
@@ -4545,6 +4544,57 @@ equation
    x_c = a_c*pre(x_c) + b_c*u_c;
  end when;
 end WhenEqu5;
+
+model WhenEqu6
+			annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="WhenTest6",
+         description="Test code generation when equations with function calls.",
+         generate_ode=true,    
+         equation_sorting=true,
+                  template="$C_dae_init_blocks_residual_functions$
+                   $C_ode_derivatives$ 
+                   $C_ode_initialization$",               
+         generatedCode=" 
+		       jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+  _guards(0) = jmi_sample(jmi,AD_WRAP_LITERAL(0),AD_WRAP_LITERAL(1));
+  if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+   func_CCodeGenTests_WhenEqu6_F_def(_time, &tmp_1, &tmp_2);
+   _x_0 = (tmp_1);
+   _y_1 = (tmp_2);
+  } else {
+  _x_0 = pre_x_0;
+    _y_1 = pre_y_1;
+  }
+		 
+      model_ode_guards(jmi);
+  pre_x_0 = 0.0;
+  _x_0 = pre_x_0;
+  pre_y_1 = 0.0;
+  _y_1 = pre_y_1;		 
+")})));
+				
+	function F
+		input Real x;
+		output Real y1;
+		output Real y2;
+	algorithm
+		y1 := 1;
+		y2 := 2;
+	end F;
+	Real x,y;
+	equation
+	when sample(0,1) then
+		(x,y) = F(time);
+	end when;
+end WhenEqu6;
+
 
 model NoDAEGenerationTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
