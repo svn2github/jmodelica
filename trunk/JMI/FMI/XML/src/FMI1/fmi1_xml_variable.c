@@ -20,7 +20,6 @@
 #include <jm_vector.h>
 
 #include "fmi1_xml_parser.h"
-#include "fmi1_xml_variable_list_impl.h"
 #include "fmi1_xml_type_impl.h"
 #include "fmi1_xml_model_description_impl.h"
 
@@ -49,9 +48,9 @@ fmi1_xml_variable_t* fmi1_xml_get_variable_alias_base(fmi1_xml_model_description
     fmi1_xml_variable_t *pkey = &key, *base;
     void ** found;
 	if(!md->variablesByVR) return 0;
-    if(v->aliasKind == fmi1_xml_variable_is_not_alias) return v;
+    if(v->aliasKind == fmi1_variable_is_not_alias) return v;
     key = *v;
-    key.aliasKind = fmi1_xml_variable_is_not_alias;
+    key.aliasKind = fmi1_variable_is_not_alias;
 
     found = jm_vector_bsearch(jm_voidp)(md->variablesByVR,(void**)&pkey, fmi1_xml_compare_vr);
     assert(found);
@@ -373,9 +372,9 @@ int fmi1_xml_handle_ScalarVariable(fmi1_xml_parser_context_t *context, const cha
                 /* <xs:attribute name="alias" default="noAlias"> */
                 if(fmi1_xml_set_attr_enum(context, fmi1_xml_elmID_ScalarVariable, fmi_attr_id_alias ,0,&alias,0,aliasConventionMap))
                     return -1;
-                if(alias == 0) variable->aliasKind = fmi1_xml_variable_is_not_alias;
-                else if (alias == 1) variable->aliasKind = fmi1_xml_variable_is_alias;
-                else if (alias == 2) variable->aliasKind = fmi1_xml_variable_is_negated_alias;
+                if(alias == 0) variable->aliasKind = fmi1_variable_is_not_alias;
+                else if (alias == 1) variable->aliasKind = fmi1_variable_is_alias;
+                else if (alias == 2) variable->aliasKind = fmi1_variable_is_negated_alias;
                 else assert(0);
             }
         }
@@ -911,7 +910,7 @@ int fmi1_xml_handle_ModelVariables(fmi1_xml_parser_context_t *context, const cha
                 fmi1_xml_variable_t* a = (fmi1_xml_variable_t*)jm_vector_get_item(jm_voidp)(varByVR, 0);
                 foundBadAlias = 0;
 
-                if(a->aliasKind == fmi1_xml_variable_is_alias) {
+                if(a->aliasKind == fmi1_variable_is_alias) {
                     fmi1_xml_parse_warning(context,"All variables with vr %d (base type %s) are marked as aliases.",
                                           a->vr, fmi1_base_type_to_string(fmi1_xml_get_variable_base_type(a)));
                     fmi1_xml_eliminate_bad_alias(context,0);
@@ -925,14 +924,14 @@ int fmi1_xml_handle_ModelVariables(fmi1_xml_parser_context_t *context, const cha
                     if((fmi1_xml_get_variable_base_type(a)!=fmi1_xml_get_variable_base_type(b))
                             || (a->vr != b->vr)) {
                         /* a different vr */
-                        if(a->aliasKind == fmi1_xml_variable_is_negated_alias) {
+                        if(a->aliasKind == fmi1_variable_is_negated_alias) {
                             fmi1_xml_parse_warning(context,"All variables with vr %u (base type %s) are marked as negated aliases",
                                                   a->vr, fmi1_base_type_to_string(fmi1_xml_get_variable_base_type(a)));
                             fmi1_xml_eliminate_bad_alias(context,i-1);
                             foundBadAlias = 1;
                             break;
                         }
-                        if(b->aliasKind == fmi1_xml_variable_is_alias) {
+                        if(b->aliasKind == fmi1_variable_is_alias) {
                             fmi1_xml_parse_warning(context,"All variables with vr %u (base type %s) are marked as aliases",
                                                 b->vr, fmi1_base_type_to_string(fmi1_xml_get_variable_base_type(b)));
                           fmi1_xml_eliminate_bad_alias(context,i);
@@ -941,20 +940,20 @@ int fmi1_xml_handle_ModelVariables(fmi1_xml_parser_context_t *context, const cha
                         }
                     }
                     else {
-                        if(   (a->aliasKind == fmi1_xml_variable_is_negated_alias)
-                                && (b->aliasKind == fmi1_xml_variable_is_alias)) {
+                        if(   (a->aliasKind == fmi1_variable_is_negated_alias)
+                                && (b->aliasKind == fmi1_variable_is_alias)) {
                             fmi1_xml_parse_error(context,"All variables with vr %u (base type %s) are marked as aliases",
                                                 b->vr, fmi1_base_type_to_string(fmi1_xml_get_variable_base_type(b)));
                           fmi1_xml_eliminate_bad_alias(context,i);
                           foundBadAlias = 1;
                           break;
                         }
-                        if((a->aliasKind == fmi1_xml_variable_is_not_alias) && (a->aliasKind == b->aliasKind)) {
+                        if((a->aliasKind == fmi1_variable_is_not_alias) && (a->aliasKind == b->aliasKind)) {
                             fmi1_xml_variable_t* c;
                             size_t j = i+1;
                             fmi1_xml_parse_warning(context,"Variables %s and %s reference the same vr %u. Marking '%s' as alias.",
                                                 a->name, b->name, b->vr, b->name);
-                            b->aliasKind = fmi1_xml_variable_is_alias;
+                            b->aliasKind = fmi1_variable_is_alias;
 
                             while(j < numvar) {
                                 c = (fmi1_xml_variable_t*)jm_vector_get_item(jm_voidp)(varByVR, j);

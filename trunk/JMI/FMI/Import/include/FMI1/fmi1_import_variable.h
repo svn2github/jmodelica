@@ -56,13 +56,14 @@ fmi1_import_variable_list_t* fmi1_import_get_direct_dependency(fmi1_import_t* fm
 
 fmi1_import_real_variable_t* fmi1_import_get_variable_as_real(fmi1_import_variable_t*);
 fmi1_import_integer_variable_t* fmi1_import_get_variable_as_integer(fmi1_import_variable_t*);
-fmi1_import_enum_variable_t* fmI_xml_get_variable_as_enum(fmi1_import_variable_t*);
+fmi1_import_enum_variable_t* fmi1_import_get_variable_as_enum(fmi1_import_variable_t*);
 fmi1_import_string_variable_t* fmi1_import_get_variable_as_string(fmi1_import_variable_t*);
 fmi1_import_bool_variable_t* fmi1_import_get_variable_as_boolean(fmi1_import_variable_t*);
 
 fmi1_real_t fmi1_import_get_real_variable_start(fmi1_import_real_variable_t* v);
 fmi1_real_t fmi1_import_get_real_variable_max(fmi1_import_real_variable_t* v);
 fmi1_real_t fmi1_import_get_real_variable_min(fmi1_import_real_variable_t* v);
+
 fmi1_real_t fmi1_import_get_real_variable_nominal(fmi1_import_real_variable_t* v);
 fmi1_import_unit_t* fmi1_import_get_real_variable_unit(fmi1_import_real_variable_t* v);
 fmi1_import_display_unit_t* fmi1_import_get_real_variable_display_unit(fmi1_import_real_variable_t* v);

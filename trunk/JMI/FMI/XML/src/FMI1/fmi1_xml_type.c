@@ -54,7 +54,7 @@ fmi1_base_type_enu_t fmi1_xml_get_base_type(fmi1_xml_variable_typedef_t* t) {
     return t->typeBase.baseType;
 }
 
-fmi1_xml_real_typedef_t* fmi1_xml_ret_type_as_real(fmi1_xml_variable_typedef_t* t) {
+fmi1_xml_real_typedef_t* fmi1_xml_get_type_as_real(fmi1_xml_variable_typedef_t* t) {
     if(fmi1_xml_get_base_type(t) == fmi1_base_type_real) return (fmi1_xml_real_typedef_t*)t;
     return 0;
 }
@@ -120,13 +120,13 @@ int fmi1_xml_get_real_type_is_relative_quantity(fmi1_xml_real_typedef_t* t) {
     return props->typeBase.relativeQuantity;
 }
 
-int fmi1_xml_get_integer_type_min(fmi1_xml_integer_typedef_t* t) {
+fmi1_integer_t fmi1_xml_get_integer_type_min(fmi1_xml_integer_typedef_t* t) {
     fmi1_xml_variable_typedef_t* vt = (void*)t;
     fmi1_xml_integer_type_props_t* props = (fmi1_xml_integer_type_props_t*)(vt->typeBase.baseTypeStruct);
     return props->typeMin;
 }
 
-int fmi1_xml_get_integer_type_max(fmi1_xml_integer_typedef_t* t){
+fmi1_integer_t fmi1_xml_get_integer_type_max(fmi1_xml_integer_typedef_t* t){
     fmi1_xml_variable_typedef_t* vt = (void*)t;
     fmi1_xml_integer_type_props_t* props = (fmi1_xml_integer_type_props_t*)(vt->typeBase.baseTypeStruct);
     return props->typeMax;

@@ -18,8 +18,6 @@
 #include "fmi1_import_impl.h"
 #include "fmi1_import_variable_list_impl.h"
 
-#include "fmi1_import_query.h"
-
 fmi1_import_variable_list_t* fmi1_import_alloc_variable_list(fmi1_import_t* fmu, size_t size) {
 	jm_callbacks* cb = fmu->callbacks;
 	fmi1_import_variable_list_t* vl = (fmi1_import_variable_list_t*)cb->malloc(sizeof(fmi1_import_variable_list_t));
@@ -149,25 +147,4 @@ fmi1_import_variable_list_t* fmi1_import_filter_variables(fmi1_import_variable_l
         out = 0;
     }
     return out;
-}
-
-int fmi1_import_filter_variable_by_expression(fmi1_import_variable_t* var, void * c) {
-	fmi1_import_q_expression_t* expr = c;
-	return fmi1_import_q_filter_variable(var, expr);
-}
-
-fmi1_import_variable_list_t* fmi1_import_select_variables(fmi1_import_variable_list_t* vl, const char* query) {
-	fmi1_import_variable_list_t* ret = 0;
-	fmi1_import_q_context_t context;
-	int errCh;
-	fmi1_import_q_init_context(&context, vl->fmu->callbacks);
-
-	errCh = fmi1_import_q_parse_query(&context, query);
-	if(errCh == 0) {
-		ret = fmi1_import_filter_variables( vl, fmi1_import_filter_variable_by_expression, &context.expr);
-	}
-
-	fmi1_import_q_free_context_data(&context);
-
-	return ret; 
 }

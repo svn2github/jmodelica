@@ -55,6 +55,10 @@ void fmi_import_error(fmi_import_context_t *context, const char* fmt, ...) {
 	va_end (args);
 }
 
+const char* fmi1_import_get_last_error(fmi1_import_t* fmu) {
+	return jm_get_last_error(fmu->callbacks);
+}
+
 
 fmi1_import_t* fmi1_import_parse_xml( fmi_import_context_t* context, const char* dirPath) {
 	char* xmlPath =  fmi_import_get_model_description_path(dirPath, context->callbacks);

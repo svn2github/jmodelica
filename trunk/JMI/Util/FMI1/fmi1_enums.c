@@ -19,13 +19,13 @@
 
 #include "fmi1_enums.h"
 
-const char* fmi1_naming_convention2string(fmi1_variable_naming_convension_enu_t convention) {
+const char* fmi1_naming_convention_to_string(fmi1_variable_naming_convension_enu_t convention) {
     if(convention == fmi1_naming_enu_flat) return "flat";
     if(convention == fmi1_naming_enu_structured) return "structured";
     return "Invalid";
 }
 
-const char* fmi1_fmu_kind2string(fmi1_fmu_kind_enu_t kind) {
+const char* fmi1_fmu_kind_to_string(fmi1_fmu_kind_enu_t kind) {
     switch (kind) {
     case fmi1_fmu_kind_enu_me: return "ModelExchange";
     case fmi1_fmu_kind_enu_cs_standalone: return "CoSimulation_StandAlone";

@@ -51,7 +51,7 @@ fmi1_base_type_enu_t fmi1_import_get_base_type(fmi1_import_variable_typedef_t*);
 
 /* Boolean and String has no extra attributes -> not needed*/
 
-fmi1_import_real_typedef_t* fmi1_import_ret_type_as_real(fmi1_import_variable_typedef_t*);
+fmi1_import_real_typedef_t* fmi1_import_get_type_as_real(fmi1_import_variable_typedef_t*);
 fmi1_import_integer_typedef_t* fmi1_import_get_type_as_int(fmi1_import_variable_typedef_t*);
 fmi1_import_enumeration_typedef_t* fmi1_import_get_type_as_enum(fmi1_import_variable_typedef_t*);
 
@@ -67,8 +67,8 @@ int fmi1_import_get_real_type_is_relative_quantity(fmi1_import_real_typedef_t*);
 int fmi1_import_get_integer_type_min(fmi1_import_integer_typedef_t*);
 int fmi1_import_get_integer_type_max(fmi1_import_integer_typedef_t*);
 
-int fmi1_import_get_enum_type_min(fmi1_import_enumeration_typedef_t*);
-int fmi1_import_get_enum_type_max(fmi1_import_enumeration_typedef_t*);
+unsigned int fmi1_import_get_enum_type_min(fmi1_import_enumeration_typedef_t*);
+unsigned int fmi1_import_get_enum_type_max(fmi1_import_enumeration_typedef_t*);
 unsigned int  fmi1_import_get_enum_type_size(fmi1_import_enumeration_typedef_t*);
 const char* fmi1_import_get_enum_type_item_name(fmi1_import_enumeration_typedef_t*, unsigned int  item);
 const char* fmi1_import_get_enum_type_item_description(fmi1_import_enumeration_typedef_t*, unsigned int  item);

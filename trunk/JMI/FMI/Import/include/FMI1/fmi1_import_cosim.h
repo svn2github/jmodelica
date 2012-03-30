@@ -14,27 +14,24 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef FMI1_XML_VARIABLELISTIMPL_H
-#define FMI1_XML_VARIABLELISTIMPL_H
-
-#include <jm_vector.h>
-#include <FMI1/fmi1_xml_model_description.h>
+#ifndef FMI1_IMPORT_COSIM_H
+#define FMI1_IMPORT_COSIM_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct fmi1_xml_variable_list_t {
-	fmi1_xml_model_description_t* md;
-    jm_vector(jm_voidp) variables;
-    jm_vector(size_t)* vr;
-};
+#include "fmi1_import.h"
 
-/* Allocate an empty list */
-fmi1_xml_variable_list_t* fmi1_xml_alloc_variable_list(fmi1_xml_model_description_t* md, size_t size);
+const char* fmi1_import_get_entry_point(fmi1_import_t* );
+const char* fmi1_import_get_mime_type(fmi1_import_t* );
+int fmi1_import_get_manual_start(fmi1_import_t* );
+
+size_t fmi1_import_get_number_of_additional_models(fmi1_import_t* fmu);
+
+const char* fmi1_import_get_additional_model_name(fmi1_import_t* fmu, size_t index);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* FMI1_XML_VARIABLELISTIMPL_H */
+#endif /* FMI1_IMPORT_COSIM_H */

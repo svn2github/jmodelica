@@ -54,9 +54,9 @@ typedef enum fmi1_causality_enu_t {
 const char* fmi1_causality_to_string(fmi1_causality_enu_t c);
 
 typedef enum fmi1_variable_alias_kind_enu_t {
-    fmi1_xml_variable_is_negated_alias = -1,
-    fmi1_xml_variable_is_not_alias = 0,
-    fmi1_xml_variable_is_alias = 1
+    fmi1_variable_is_negated_alias = -1,
+    fmi1_variable_is_not_alias = 0,
+    fmi1_variable_is_alias = 1
 } fmi1_variable_alias_kind_enu_t;
 
 /* Base types used in type definitions */

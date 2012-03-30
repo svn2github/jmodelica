@@ -17,7 +17,7 @@
 #include "fmi1_xml_model_description_impl.h"
 #include "fmi1_xml_parser.h"
 
-fmi1_value_reference_t fmi1_xml_get_fmu_kind(fmi1_xml_model_description_t* md) {
+fmi1_fmu_kind_enu_t fmi1_xml_get_fmu_kind(fmi1_xml_model_description_t* md) {
     return md->fmuKind;
 }
 

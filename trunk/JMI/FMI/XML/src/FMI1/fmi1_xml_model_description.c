@@ -18,7 +18,6 @@
 
 #include <jm_named_ptr.h>
 #include "fmi1_xml_model_description_impl.h"
-#include "fmi1_xml_variable_list_impl.h"
 #include "fmi1_xml_vendor_annotations_impl.h"
 #include "fmi1_xml_parser.h"
 

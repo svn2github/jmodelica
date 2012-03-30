@@ -38,59 +38,60 @@ extern "C" {
  * \brief All the structures used in the interfaces are intended to
  *  be treated as opaque objects by the client code.
  */
-/*  ModelDescription is the entry point for the package*/
+/** ModelDescription is the entry point for the package*/
 typedef struct fmi1_xml_model_description_t fmi1_xml_model_description_t;
 
-/* \defgroup Vendor annotation supporting structures*/
-/* @{ */
+/**\defgroup Vendor annotation supporting structures
+ * @{ 
+ */
 typedef struct fmi1_xml_vendor_list_t fmi1_xml_vendor_list_t;
 typedef struct fmi1_xml_vendor_t fmi1_xml_vendor_t;
 typedef struct fmi1_xml_annotation_t fmi1_xml_annotation_t;
-/* @} */
+/**@} */
 
-/* \defgroup  Type definitions supporting structures*/
-/* @{ */
+/**\defgroup  Type definitions supporting structures
+@{ */
 typedef struct fmi1_xml_real_typedef_t fmi1_xml_real_typedef_t;
 typedef struct fmi1_xml_integer_typedef_t fmi1_xml_integer_typedef_t;
 typedef struct fmi1_xml_enumeration_typedef_t fmi1_xml_enumeration_typedef_t;
 typedef struct fmi1_xml_variable_typedef_t fmi1_xml_variable_typedef_t;
 
 typedef struct fmi1_xml_type_definitions_t fmi1_xml_type_definitions_t;
-/* @} */
+/**@} */
 
-/* \defgroup Scalar Variable types */
-/* @{ */
-/* General variable type is convenien to unify all the variable list operations */
+/**\defgroup Scalar Variable types */
+/**@{ */
+/**General variable type is convenien to unify all the variable list operations */
 typedef struct fmi1_xml_variable_t fmi1_xml_variable_t;
-typedef struct fmi1_xml_variable_list_t fmi1_xml_variable_list_t;
-/* Typed variables are needed to support specific attributes */
+
+/**Typed variables are needed to support specific attributes */
 typedef struct fmi1_xml_real_variable_t fmi1_xml_real_variable_t;
 typedef struct fmi1_xml_integer_variable_t fmi1_xml_integer_variable_t;
 typedef struct fmi1_xml_string_variable_t fmi1_xml_string_variable_t;
 typedef struct fmi1_xml_enum_variable_t fmi1_xml_enum_variable_t;
 typedef struct fmi1_xml_bool_variable_t fmi1_xml_bool_variable_t;
-/* @} */
+/**@} */
 
-/* \defgroup Structures encapsulating unit information */
-/* @{ */
+/**\defgroup Structures encapsulating unit information */
+/**@{ */
 typedef struct fmi1_xml_unit_t fmi1_xml_unit_t;
 typedef struct fmi1_xml_display_unit_t fmi1_xml_display_unit_t;
 typedef struct fmi1_xml_unit_definitions_t fmi1_xml_unit_definitions_t;
-/* @} */
+/**@} */
 
-/* \defgroup FMU capabilities flags */
-/* @{ */
+/**\defgroup FMU capabilities flags */
+/**@{ */
 typedef struct fmi1_xml_capabilities_t fmi1_xml_capabilities_t;
-/* @} */
+/**@} */
 
-/* 
+/**
    \brief Allocate the ModelDescription structure and initialize as empty model.
    @return NULL pointer is returned if memory allocation fails.
    @param callbacks - Standard FMI callbacks may be sent into the module. The argument is optional (pointer can be zero).
 */
 fmi1_xml_model_description_t* fmi1_xml_allocate_model_description( jm_callbacks* callbacks);
 
-/* 
+/**
    \brief Parse XML file
    Repeaded calls invalidate the data structures created with the previous call to fmiParseXML,
    i.e., fmiClearModelDescrition is automatically called before reading in the new file.
@@ -101,7 +102,7 @@ fmi1_xml_model_description_t* fmi1_xml_allocate_model_description( jm_callbacks*
 */
 int fmi1_xml_parse_model_description( fmi1_xml_model_description_t* md, const char* fileName);
 
-/* 
+/**
    Clears the data associated with the model description. This is useful if the same object
    instance is used repeatedly to work with different XML files.
     @param md A model description object as returned by fmi1_xml_allocate_model_description.
@@ -114,7 +115,7 @@ void fmi1_xml_clear_model_description( fmi1_xml_model_description_t* md);
 */
 int fmi1_xml_is_model_description_empty(fmi1_xml_model_description_t* md);
 
-/* Error handling:
+/**Error handling:
 *  Many functions in the library return pointers to struct. An error is indicated by returning NULL/0-pointer.
 *  If error is returned than fmiGetLastError() functions can be used to retrieve the error message.
 *  If logging callbacks were specified then the same information is reported via logger.
@@ -125,17 +126,17 @@ int fmi1_xml_is_model_description_empty(fmi1_xml_model_description_t* md);
 */
 const char* fmi1_xml_get_last_error(fmi1_xml_model_description_t* md);
 
-/* 
+/**
 fmiClearLastError clears the error message .
 */
 void fmi1_xml_clear_last_error(fmi1_xml_model_description_t* md);
 
-/* Release the memory allocated
+/**Release the memory allocated
 @param md A model description object as returned by fmi1_xml_allocate_model_description.
 */
 void fmi1_xml_free_model_description(fmi1_xml_model_description_t*);
 
-/* \defgroup General information
+/**\defgroup General information
  * \brief Functions for retrieving general model information. Memory for the strings is allocated and deallocated in the module.
  *       All the functions take a model description object as returned by fmi1_xml_allocate_model_description as parameter.
  * @{
@@ -173,12 +174,12 @@ double fmi1_xml_get_default_experiment_tolerance(fmi1_xml_model_description_t* m
 
 void fmi1_xml_set_default_experiment_tolerance(fmi1_xml_model_description_t* md, double);
 
-fmi1_value_reference_t fmi1_xml_get_fmu_kind(fmi1_xml_model_description_t* md);
+fmi1_fmu_kind_enu_t fmi1_xml_get_fmu_kind(fmi1_xml_model_description_t* md);
 
 fmi1_xml_capabilities_t* fmi1_xml_get_capabilities(fmi1_xml_model_description_t* md);
 
 jm_vector(jm_named_ptr)* fmi1_xml_get_variables(fmi1_xml_model_description_t* md);
-/* @} */
+/**@} */
 #include "fmi1_xml_type.h"
 #include "fmi1_xml_unit.h"
 #include "fmi1_xml_variable.h"

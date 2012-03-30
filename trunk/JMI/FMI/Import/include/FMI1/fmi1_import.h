@@ -43,49 +43,49 @@ extern "C" {
  *  be treated as opaque objects by the client code.
  */
 
-/* \defgroup Vendor annotation supporting structures*/
-/* @{ */
+/**\defgroup Vendor annotation supporting structures*/
+/**@{ */
 typedef fmi1_xml_vendor_list_t fmi1_import_vendor_list_t;
 typedef fmi1_xml_vendor_t fmi1_import_vendor_t;
 typedef fmi1_xml_annotation_t fmi1_import_annotation_t;
-/* @} */
+/**@} */
 
-/* \defgroup  Type definitions supporting structures*/
-/* @{ */
+/**\defgroup  Type definitions supporting structures*/
+/**@{ */
 typedef fmi1_xml_real_typedef_t fmi1_import_real_typedef_t;
 typedef fmi1_xml_integer_typedef_t fmi1_import_integer_typedef_t;
 typedef fmi1_xml_enumeration_typedef_t fmi1_import_enumeration_typedef_t;
 typedef fmi1_xml_variable_typedef_t fmi1_import_variable_typedef_t;
 
 typedef fmi1_xml_type_definitions_t fmi1_import_type_definitions_t;
-/* @} */
+/**@} */
 
-/* \defgroup Scalar Variable types */
-/* @{ */
-/* General variable type is convenien to unify all the variable list operations */
+/**\defgroup Scalar Variable types */
+/**@{ */
+/**General variable type is convenien to unify all the variable list operations */
 typedef fmi1_xml_variable_t fmi1_import_variable_t;
 typedef struct fmi1_import_variable_list_t fmi1_import_variable_list_t;
-/* Typed variables are needed to support specific attributes */
+/**Typed variables are needed to support specific attributes */
 typedef fmi1_xml_real_variable_t fmi1_import_real_variable_t;
 typedef fmi1_xml_integer_variable_t fmi1_import_integer_variable_t;
 typedef fmi1_xml_string_variable_t fmi1_import_string_variable_t;
 typedef fmi1_xml_enum_variable_t fmi1_import_enum_variable_t;
 typedef fmi1_xml_bool_variable_t fmi1_import_bool_variable_t;
-/* @} */
+/**@} */
 
-/* \defgroup Structures encapsulating unit information */
-/* @{ */
+/**\defgroup Structures encapsulating unit information */
+/**@{ */
 typedef fmi1_xml_unit_t fmi1_import_unit_t;
 typedef fmi1_xml_display_unit_t fmi1_import_display_unit_t;
 typedef fmi1_xml_unit_definitions_t fmi1_import_unit_definitions_t;
-/* @} */
+/**@} */
 
-/* \defgroup FMU capabilities flags */
-/* @{ */
+/**\defgroup FMU capabilities flags */
+/**@{ */
 typedef fmi1_xml_capabilities_t fmi1_import_capabilities_t;
-/* @} */
+/**@} */
 
-/* 
+/**
    \brief Create fmi1_import_t structure and parse the XML file.
 
     @param context A context data strucutre is used to propagate the callbacks for memory handling and logging.
@@ -94,7 +94,7 @@ typedef fmi1_xml_capabilities_t fmi1_import_capabilities_t;
 */
 fmi1_import_t* fmi1_import_parse_xml( fmi_import_context_t* context, const char* dirPath);
 
-/* Error handling:
+/**Error handling:
 *  Many functions in the library return pointers to struct. An error is indicated by returning NULL/0-pointer.
 *  If error is returned than fmiGetLastError() functions can be used to retrieve the error message.
 *  If logging callbacks were specified then the same information is reported via logger.
@@ -105,18 +105,18 @@ fmi1_import_t* fmi1_import_parse_xml( fmi_import_context_t* context, const char*
 */
 const char* fmi1_import_get_last_error(fmi1_import_t* fmu);
 
-/* 
+/**
 fmiClearLastError clears the error message and returns 0 if further processing is possible. If it returns 1 then the 
 error was not recoverable. The fmu object should then be freed and recreated.
 */
 int fmi1_import_clear_last_error(fmi1_import_t* fmu);
 
-/* Release the memory allocated
+/**Release the memory allocated
 @param An fmu object as returned by fmi1_import_parse_xml.
 */
 void fmi1_import_free(fmi1_import_t*);
 
-/* \defgroup General information
+/**\defgroup General information
  * \brief Functions for retrieving general model information. Memory for the strings is allocated and deallocated in the module.
  *       All the functions take a model description object as returned by fmi1_import_allocate_model_description as parameter.
  * @{
@@ -158,7 +158,7 @@ fmi1_fmu_kind_enu_t fmi1_import_get_fmu_kind(fmi1_import_t* fmu);
 
 fmi1_import_capabilities_t* fmi1_import_get_capabilities(fmi1_import_t* fmu);
 
-/* @} */
+/**@} */
 #include <Common/fmi_import_util.h>
 /* #include "fmi1_import_type.h"
 #include "fmi1_import_unit.h"
@@ -605,5 +605,11 @@ fmi1_status_t fmi1_import_get_string_status(fmi1_import_t* fmu, const fmi1_statu
 #ifdef __cplusplus
 }
 #endif
-
+#include "fmi1_import_type.h"
+#include "fmi1_import_unit.h"
+#include "fmi1_import_variable.h"
+#include "fmi1_import_vendor_annotations.h"
+#include "fmi1_import_capabilities.h"
+#include "fmi1_import_cosim.h"
+#include "fmi1_import_variable_list.h"
 #endif

@@ -52,7 +52,7 @@ fmi1_base_type_enu_t fmi1_xml_get_base_type(fmi1_xml_variable_typedef_t*);
 
 /* Boolean and String has no extra attributes -> not needed*/
 
-fmi1_xml_real_typedef_t* fmi1_xml_ret_type_as_real(fmi1_xml_variable_typedef_t*);
+fmi1_xml_real_typedef_t* fmi1_xml_get_type_as_real(fmi1_xml_variable_typedef_t*);
 fmi1_xml_integer_typedef_t* fmi1_xml_get_type_as_int(fmi1_xml_variable_typedef_t*);
 fmi1_xml_enumeration_typedef_t* fmi1_xml_get_type_as_enum(fmi1_xml_variable_typedef_t*);
 
@@ -65,8 +65,8 @@ double fmi1_xml_get_real_type_nominal(fmi1_xml_real_typedef_t*);
 fmi1_xml_unit_t* fmi1_xml_get_real_type_unit(fmi1_xml_real_typedef_t*);
 int fmi1_xml_get_real_type_is_relative_quantity(fmi1_xml_real_typedef_t*);
 
-int fmi1_xml_get_integer_type_min(fmi1_xml_integer_typedef_t*);
-int fmi1_xml_get_integer_type_max(fmi1_xml_integer_typedef_t*);
+fmi1_integer_t fmi1_xml_get_integer_type_min(fmi1_xml_integer_typedef_t*);
+fmi1_integer_t fmi1_xml_get_integer_type_max(fmi1_xml_integer_typedef_t*);
 
 int fmi1_xml_get_enum_type_min(fmi1_xml_enumeration_typedef_t*);
 int fmi1_xml_get_enum_type_max(fmi1_xml_enumeration_typedef_t*);
