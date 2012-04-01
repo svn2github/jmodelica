@@ -1385,6 +1385,29 @@ aspect FlatNames {
     		fqn.lastFQNamePart().setFArraySubscripts(fas);
         return new FIdUse(fqn); 
     }
+
+    /**
+     * \brief Create an InstAccess based on an FQName.
+     * 
+     */    
+    public InstAccess FQName.createInstComponentAccess() {
+    	InstAccess ia;
+    	Iterator<FQNamePart> it = getFQNameParts().iterator();
+    	FQNamePart fqnp = it.next();
+    	ia = new InstComponentAccess(fqnp.getName(),(Opt)fqnp.getFArraySubscriptsOpt().fullCopy());
+    	while (it.hasNext()) {
+    		fqnp = it.next();
+    		ia = new InstDot(ia,new InstComponentAccess(fqnp.getName(),(Opt)fqnp.getFArraySubscriptsOpt().fullCopy()));
+    	}	
+    	ia.setParent(this);
+    	return ia;
+    }
+    
+    syn nta InstAccess InstComponentDecl.createNameInstAccess() {
+   		InstAccess ia = getFQName().createInstComponentAccess();
+   		ia = dynamicComponentName(ia);
+   		return ia;
+   	}
     
     syn String FType.name();
     eq FRealType.name()        = "Real";
@@ -1802,6 +1825,18 @@ aspect ComponentDeclMethods {
     syn boolean ComponentDecl.isOuter() = hasOuter();
 
     /**
+     * Check if a ClassDecl is declared inner.
+     */
+    syn boolean ClassDecl.isInner() = false;
+    eq BaseClassDecl.isInner() = hasInner();
+    
+    /**
+     * Check if a ClassDecl is declared outer.
+     */
+    syn boolean ClassDecl.isOuter() = false;
+    eq BaseClassDecl.isOuter() = hasOuter();
+
+    /**
      * Check if a ComponentDecl is declared parameter.
      */
     syn boolean ComponentDecl.isParameter() {
@@ -1876,6 +1911,50 @@ aspect ComponentDeclMethods {
     syn boolean InstComponentDecl.isFlow() {
     
         if (getComponentDecl().hasTypePrefixFlow())
+            return true;
+    
+        return false;
+    }
+
+    /**
+     * Check if a InstComponentDecl is declared inner.
+     */
+    syn boolean InstComponentDecl.isInner() {
+    
+        if (getComponentDecl().isInner())
+            return true;
+    
+        return false;
+    }
+
+    /**
+     * Check if a InstComponentDecl is declared inner.
+     */
+    syn boolean InstComponentDecl.isOuter() {
+    
+        if (getComponentDecl().isOuter())
+            return true;
+    
+        return false;
+    }
+    
+        /**
+     * Check if a InstClassDecl is declared inner.
+     */
+    syn boolean InstClassDecl.isInner() {
+    
+        if (getClassDecl().isInner())
+            return true;
+    
+        return false;
+    }
+
+    /**
+     * Check if a InstComponentDecl is declared inner.
+     */
+    syn boolean InstClassDecl.isOuter() {
+    
+        if (getClassDecl().isOuter())
             return true;
     
         return false;

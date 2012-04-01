@@ -82,7 +82,11 @@ aspect Flattening {
 	}
 	
 	public void InstFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
-		getName().myInstClassDecl().flattenFunction(fc);
+		if (getName().myInstClassDecl().inOrIsOuter()) {
+			getName().myInstClassDecl().myInnerInstClassDecl().flattenFunction(fc);
+		} else {
+			getName().myInstClassDecl().flattenFunction(fc);
+		}
 		getArgs().flattenUsedFuncsAndEnums(fc);
 	}
 	
@@ -482,7 +486,7 @@ aspect Flattening {
 	}
 	
 	public void InstComponentDecl.flatten(FClass fc) {
-		if (!isDisabled()) {
+		if (!isDisabled()  && !(isOuter() && !isInner())) {
 			super.flatten(fc);
 		}
 	}
@@ -501,7 +505,7 @@ aspect Flattening {
 	}
 	
 	public void InstPrimitive.flatten(FClass fc) {
-		if (!isDisabled()) {
+		if (!isDisabled() && !(isOuter() && !isInner())) {
 			fc.addUniqueFVariable(createFVariable());
 			if (isFlow()) {
 				// TODO: Add expanded array subscripts
@@ -1206,7 +1210,11 @@ aspect FlatExpressions {
 				}
 			}
 		} 
-		return new FIdUseExp(ia.flatten(prefix));
+		if (ia.myInstComponentDecl().inOrIsOuter()) {
+			return new FIdUseExp(ia.myInstComponentDecl().myInnerInstComponentDecl().createNameInstAccess().flatten(new FQName()));
+		} else {
+			return new FIdUseExp(ia.flatten(prefix));
+		}
 	}
 	
 	// TODO: This assumes that no InstDot has an InstDot as left child. 
@@ -1477,7 +1485,14 @@ aspect FlatExpressions {
 		List args = new List();
 		for (InstFunctionArgument e : getArgs()) 
 			args.add(e.flatten(prefix));
-		FIdUse name = new FIdUse(new FQName(getName().myInstClassDecl().qualifiedName()));
+		FIdUse name;	
+		if (getName().myInstClassDecl().inOrIsOuter()) {
+			name = new FIdUse(new FQName(getName().myInstClassDecl().myInnerInstClassDecl().qualifiedName()));
+			//return new FIdUseExp(ia.myInstComponentDecl().myInnerInstComponentDecl().createNameInstAccess().flatten(new FQName()));
+		} else {
+			name = new FIdUse(new FQName(getName().myInstClassDecl().qualifiedName()));	
+		}
+		//FIdUse name = new FIdUse(new FQName(getName().myInstClassDecl().qualifiedName()));
 		Size[] sizes = new Size[myOutputs().size()];
 		FFunctionCall res = createFFunctionCall(name, args, sizes);
 		if (isFunctionCallClause()) 

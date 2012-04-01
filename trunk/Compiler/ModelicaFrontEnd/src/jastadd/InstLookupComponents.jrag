@@ -237,7 +237,7 @@ aspect InstLookupComponents {
 	eq InstPrimitive.memberInstComponent(String name) = myInstClass().memberInstComponent(name);
 	eq InstExtends.memberInstComponent(String name) = extendsPrimitive()? myInstClass().memberInstComponent(name) : super.memberInstComponent(name);
 
-	public InstComponentDecl InstAccess.componentFromSet(HashSet set) {
+	public InstComponentDecl BaseNode.componentFromSet(HashSet set) {
 		if (set.size() > 0) {
 			return (InstComponentDecl)set.iterator().next();
 		} else

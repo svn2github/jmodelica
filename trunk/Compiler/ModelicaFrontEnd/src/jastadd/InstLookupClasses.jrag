@@ -422,9 +422,15 @@ aspect InstLookupClasses {
 	eq InstFullClassDecl.memberInstClass(String name) {
 		HashSet set = new HashSet();
 		
-		for (InstClassDecl icd : instClassDecls()) 
-			if (icd.matchInstClassDecl(name)) 
-				set.add(icd);
+		for (InstClassDecl icd : instClassDecls()) { 
+			if (icd.matchInstClassDecl(name)) {
+				if (icd.inOrIsOuter()) {
+					set.add(icd.myInnerInstClassDecl());
+				} else {
+					set.add(icd);
+				}
+			}
+		}
 		
 		for (InstExtends ie : instExtends()) 
 			set.addAll(ie.memberInstClass(name));
@@ -475,10 +481,15 @@ aspect InstLookupClasses {
 		} else {
 			HashSet set = new HashSet();
 			
-			for (InstClassDecl icd : instClassDecls()) 
-				if (icd.matchInstClassDecl(name)) 
-					set.add(icd);
-			
+			for (InstClassDecl icd : instClassDecls()) {
+				if (icd.matchInstClassDecl(name)) {
+					if (icd.inOrIsOuter()) {
+						set.add(icd.myInnerInstClassDecl());
+					} else {
+						set.add(icd);
+					}
+				}
+			}
 			for (InstExtends ie : instExtends()) 
 				set.addAll(ie.memberInstClass(name));
 			
@@ -502,10 +513,11 @@ aspect InstLookupClasses {
 	}
 	eq InstClassAccess.myInstClassDecl()  {
 		HashSet set = lookupInstClass(name());
-		if (set.size() > 0)
+		if (set.size() > 0) {
 			return (InstClassDecl) set.iterator().next();
-		else
+		} else {
 			return unknownInstClassDecl();
+		}
 	}
 	eq InstDot.myInstClassDecl()          = getRight().myInstClassDecl();
 	eq InstGlobalAccess.myInstClassDecl() = getInstAccess().myInstClassDecl();
@@ -530,6 +542,13 @@ aspect InstLookupClasses {
 			first = false;
 		}
 		return (InstClassDecl) icd;
+	}
+	
+	public InstClassDecl BaseNode.classFromSet(HashSet set) {
+		if (set.size() > 0) {
+			return (InstClassDecl)set.iterator().next();
+		} else
+			return unknownInstClassDecl();
 	}
 
 }
