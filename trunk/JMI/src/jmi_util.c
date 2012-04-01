@@ -30,7 +30,7 @@ int jmi_get_type_from_value_ref(int vref) {
     return vref & VREF_TYPE_MASK;
 }
 
-
+/*This function has been used during debugging*/
 int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi_real_t* dF, jmi_real_t* dv) {
 	jmi_real_t h = 0.0001;
 	
@@ -175,6 +175,8 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
 	return 0;
 }
 
+/*Performs graph coloring, sse documentation in function jmi_func_cad_df in jmi_common.c
+for a description of the output parameter*/
 int jmi_dae_cad_color_graph(jmi_t *jmi, jmi_func_t *func, int n_col, int n_nz, int *row, int *col, int *sparse_repr, int *offs, int *n_colors, int *map_info, int *map_off){
 	int i;
 	int j;
@@ -186,26 +188,30 @@ int jmi_dae_cad_color_graph(jmi_t *jmi, jmi_func_t *func, int n_col, int n_nz, i
 	int *row_off	=	(int*)calloc(n_col, sizeof(int));
 	int **incidence_v;
 	
+	/*inc_length number of connections for every node (One column corresponds to one node)*/
 	jmi_dae_cad_get_connection_length(n_col ,n_nz,row,col, inc_length);
 	
 	func->coloring_counter++;
-	/*printf("Running graph coloring: %d\n", func->coloring_counter);*/
 	
 	incidence_v = (int**)calloc(n_col, sizeof(int*));
 	for(i = 0; i<n_col; i++){
 		incidence_v[i] = (int*)calloc(inc_length[i], sizeof(int)); 
 	}
 	
+	/*Creates a matrix that contains all connections for every node*/
 	jmi_dae_cad_get_connections(n_col, n_nz,row,col, incidence_v, inc_length );
+	
+	/*Performs the graph coloring*/
 	jmi_dae_cad_first_fit( n_col, incidence_v, inc_length, color, numb_col);
 
+	/*Total number of colors*/
 	for(i = 0; i < n_col;i++){
 		if(n_color < color[i]){
 			n_color = color[i];
 		}
 	}
 	n_color++;
-	
+	 
 	j = 0;
 	for(i = 0; i < n_nz; i++){
 		if(col[i] == j){
@@ -222,6 +228,7 @@ int jmi_dae_cad_color_graph(jmi_t *jmi, jmi_func_t *func, int n_col, int n_nz, i
 		sparse_repr[i] = -1;
 	}
 	
+	/*Sets up the sparse_repr, map_info and map_off vectors*/ 
 	jmi_dae_cad_get_compression_info(n_nz, row, row_off, n_col, color, sparse_repr, offs, numb_col, map_info, map_off);
 	
 	for(i = 0; i < n_col; i++){

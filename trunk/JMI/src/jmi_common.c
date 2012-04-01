@@ -225,7 +225,6 @@ int jmi_func_sym_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
 		return -1;	
 }
 
-
 int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		int independent_vars, int* mask, jmi_real_t* jac) {
 	
@@ -257,17 +256,23 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 
 
 	max_columns  = func->cad_dF_col[func->cad_dF_n_nz-1]+1;
-	
+
+	/*Get number of columns and number of non-zeros, for the specific value of the independent_vars flag*/	
 	jmi_func_cad_dF_dim(jmi, func, sparsity, independent_vars, mask, &dF_n_cols, &dF_n_nz);
 
 	row_offs = (int*)calloc(dF_n_cols, sizeof(int));
 	dF_row = (int*)calloc(dF_n_nz, sizeof(int));
 	dF_col = (int*)calloc(dF_n_nz, sizeof(int));
 	dF_col_independent_ind = (int*)calloc(dF_n_nz,sizeof(int));
-	
+
+	/*Get vectors with new row and column indices, depending on independent_vars*/	
 	jmi_func_cad_dF_nz_indices(jmi, func, independent_vars, mask, dF_row, dF_col);
+	
+	/*The difference between dF_col_independent_ind and dF_col is that in dF_col_independent_ind,
+	the old indices are given, for those variables that are present (In dF_col the indices are shifted)*/ 
 	jmi_func_cad_dF_get_independent_ind(jmi, func, independent_vars, dF_col_independent_ind); 
 	
+	/*Set offset vector, which contains information about on which index a new column starts*/
 	j = 0;
 	for(i = 0; i < dF_n_nz; i++){
 		if(dF_col[i] == j){
@@ -276,17 +281,17 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		}
 	}
 	
-	/*offs = (int*)calloc(dF_n_cols, sizeof(int));
-	sparse_repr = (int*)calloc(dF_n_cols, sizeof(int));
-	map_info = (int*)calloc(dF_n_nz, sizeof(int));
-	map_off = (int*)calloc(dF_n_cols, sizeof(int));*/
-	
+	/*Here is a hack to handle JMI_DER_P_OPT as 32 instead of the orgingal value 8192. Then the 
+	bitmask value can be used as storage index of the graph coloring result*/   
 	c_index = 0;
 	if(independent_vars & JMI_DER_P_OPT){
 		c_index+=32;
 	}
 	c_index+=independent_vars>>4;
 	
+	/*If no graph coloring result is stored for the value of independent_vars, the run graph coloring algorithm and
+	store the result, coloring done contains information if the result is stored or not. func->c_info contains the 
+	graph coloring result. c_i is a struct that contains one specific graph coloring result*/
 	if(func->coloring_done[c_index] != 1){
 		func->coloring_done[c_index] = 1;
 		flag = jmi_new_color_info(&c_i, dF_n_cols, dF_n_nz);
@@ -297,12 +302,22 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		c_i = func->c_info[c_index];
 	}
 
+	/*Extract graph coloring information:
+	sparse_repr is a vector containg a several numbers of sub vectors, for which every 
+	vector contains the indices that corresponds to one color.
+	offs is an offset vector used to know where each subvector in sparse_repr starts.
+	map_info contains several vectors (One vector for each color), every vector contains the row indices which
+	corresponds to none zeros.
+	map_off is an offset vector that corresponds to map_info.
+	n_colors is the number of colors used.*/
+	  
 	sparse_repr = c_i->sparse_repr;
 	offs = c_i->offs;
 	map_info = c_i->map_info;
 	map_off = c_i->map_off;
 	n_colors = c_i->n_colors;
 
+	/*Extract number of equations*/
 	for(i = 0; i < func->cad_dF_n_nz;i++){
 		if(func->cad_dF_row[i] > dF_n_eq){
 			dF_n_eq = func->cad_dF_row[i];
@@ -337,7 +352,10 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		return -1;
 	}
 	
+	/*For every color...*/
 	for(i = 0; i < n_colors; i++){
+		
+		/*max_1: how many columns corresponds to the color?*/
 		int max_1 = 0;
 		
 		if(i != n_colors-1){
@@ -346,23 +364,33 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 			max_1 = dF_n_cols;
 		}
 		
+		/*The seed vector dv is set to 1 on indices that corresponds to the color*/
 		for(j = offs[i]; j < max_1;j++){
 			dv[dF_col_independent_ind[row_offs[sparse_repr[j]]]] = 1;
 		}
+		
+		/*Evaluate directional derivative*/
 		jmi_func_cad_directional_dF(jmi, jmi->dae->F, res, dF, dv);
 		
+		/*For every column that corresponds to one color...*/
 		for(j = offs[i]; j < max_1;j++){
 			
+			/*max_2: End index of the column*/
 			int max_2 = 0;	
 			if(j != dF_n_cols - 1){
 				max_2 = map_off[j+1];
 			} else{
 				max_2 = dF_n_nz;
 			}
+			
+			/*For every non zero element in the column...*/ 
 			for(k = map_off[j]; k < max_2; k++){
+				/*Extract column and row index for this jacobian element this_value*/
 				int this_column = sparse_repr[j];
 				int this_row = map_info[k];
 				jmi_real_t this_value = dF[map_info[k]];
+				
+				/*insert Jacobian value on correct index depending on sparsity representation*/
 				if(sparsity & JMI_DER_SPARSE){
 					l = row_offs[this_column];
 					while(dF_row[l] != this_row){
@@ -378,15 +406,12 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 				}
 			}
 		}
+		/*Reset seed vector*/
 		for(j = offs[i]; j < max_1;j++){
 			dv[dF_col_independent_ind[row_offs[sparse_repr[j]]]] = 0;
 		}
 	}
 	
-	/*free(map_off);
-	free(map_info);
-	free(sparse_repr);
-	free(offs);*/
 	free(res);
 	free(dF);
 	free(dv);
@@ -403,6 +428,8 @@ int jmi_func_cad_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz) {
 	return 0;
 }
 
+/*Returns the row (row) and column (col) indices, the infrastructure of p_opt 
+variables is not complete so this implemention might not work correctly for those*/
 int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_vars,
                            int *mask,int *row, int *col) {
 	
@@ -527,6 +554,9 @@ int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_var
 	return 0;
 }
 
+/*Returns the number of non-zeros dF_n_nz and the number of columns dF_n_cols, 
+the infrastructure of p_opt variables is not complete so this implemention might 
+not work correctly for those*/
 int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz) {
 	
@@ -639,6 +669,8 @@ int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independ
 	return 0;
 }
 
+/*Evaluates the Jacobian using finite differences, this code is not secured and has only been used
+for debugging purposes*/
 int jmi_func_fd_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		int independent_vars, int* mask, jmi_real_t* jac) {
 	int i;
@@ -764,6 +796,7 @@ int jmi_func_fd_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independe
 	return 0;
 }
 
+/*This implementation is not secured, it has only been used for debugging purposes*/
 int jmi_func_fd_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
 			 jmi_real_t *dF, jmi_real_t* dv) {
 	jmi_dae_directional_FD_dF(jmi, func, res, dF, dv);
@@ -1066,6 +1099,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
 	return 0;
 }
 
+/*Initiate struct containing graph coloring results*/
 int jmi_new_color_info(jmi_color_info** c_info, int dF_n_cols, int dF_n_nz){
 	jmi_color_info* c_i_temp = (jmi_color_info*)calloc(1,sizeof(jmi_color_info));
 	(*c_info) = c_i_temp;

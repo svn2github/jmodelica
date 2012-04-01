@@ -68,38 +68,7 @@ aspect CADCodeGen {
 		inFunction() ? getFIdUse().toString_der_CAD(printer_C) : (variability().lessOrEqual(fParameter()) || !getFIdUse().myFV().isReal()) ? "AD_WRAP_LITERAL(0)" :  getSeedName() + "[jmi_get_index_from_value_ref(" + this.myFV().valueReference() + ")-jmi->offs_real_dx]";
 		
 	//functions.. modified and added
-	public void FIdUseExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
-		/*if (inFunction()) {
-			str.print("jmi_ad_var_t ");
-			str.print(this.adVarName());
-			str.print(" = ");
-			str.print(getFIdUse().toString_var_CAD(p));
-			str.print(";\n");
-			str.print("jmi_ad_var_t ");
-			str.print(this.adDerName());
-			str.print(" = ");
-			str.print(getFIdUse().toString_der_CAD(p));
-			str.print(";\n");
-		} else {
-			str.print("jmi_ad_var_t ");
-			str.print(this.adVarName());
-			str.print(" = ");
-			this.prettyPrint_C(p,str,indent);
-			str.print(";\n");
-			if (variability().lessOrEqual(fParameter())){
-				str.print("jmi_ad_var_t ");
-				str.print(this.adDerName());
-				str.print(" = 0;\n");
-			} else{	
-				str.print("jmi_ad_var_t ");
-				str.print(this.adDerName());
-				str.print(" = " + getSeedName() + "[");
-				str.print(this.myFV().valueReference());
-				str.print("-jmi->offs_real_dx];\n");
-		
-			}
-		}*/
-	}
+	public void FIdUseExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {}
 	
 	syn String FIdUse.name_var_CAD() = toString_var_CAD(printer_C);
 	
@@ -180,22 +149,20 @@ aspect CADCodeGen {
 		return os.toString();
 	}
 	
-	//End function added
+	//Default implementation, use prettyPrint_C instead for literals instead. 
 	
-	public void FLitExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
-			/*str.print("jmi_ad_var_t ");
-			str.print(this.adVarName());
-			str.print(" = ");
-			this.prettyPrint_C(p, str, indent);
-			str.print(";\n");
-			
-			str.print("jmi_ad_var_t ");
-			str.print(this.adDerName());
-			str.print(" = 0;\n");
-			*/
-	}
+	public void FLitExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {}
 	
 	//Elementary functions
+	/* Generate AD-code for every elementary function, this.adVarName()  
+	 * is a String that corresponds to this variable name. And get getFExp() 
+	 * corresponds to its child node.
+	 * 
+	 * AD-code is printed recursively, hence AD-code for its child node is printed
+	 * on the first line.
+	 * 
+	 * For binary functions getLeft() and getRight() is used instead of getFExp()
+	 */
 	public void FSinExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {		
 			p.print(getFExp(),str,indent);
 			str.print("jmi_ad_var_t ");
@@ -644,7 +611,13 @@ aspect CADCodeGen {
 			str.print(";\n");
 	}
 	
+	 /*
+	 *If expressions
+	 * 
+	 */
 	public void FNoEventExp.prettyPrint_CAD(Printer p, PrintStream str, String indent){
+		// If no event occurs, the value of the derivative 
+		// and the variable are just passed on..
 		p.print(getFExp(), str, indent);
 		str.print("jmi_ad_var_t ");
 		str.print(adVarName());
@@ -658,45 +631,12 @@ aspect CADCodeGen {
 	}
 	
 	public void FIfExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
-		/*
-		str.print("jmi_ad_var_t temp_v_");
-		str.print(this.adIndex());
-		str.print(";\njmi_ad_var_t temp_d_");
-		str.print(this.adIndex());
-		str.print(";\n");
-		str.print("if(");
-		getIfExp().prettyPrint_C(str,indent);
-		str.print("){\n");
-		p.print(getThenExp(),str,indent);
-		str.print("temp_v_" + adIndex() + "=" + getThenExp().adVarName() + ";\n");
-		str.print("temp_d_" + adIndex() + "=" + getThenExp().adDerName() + ";\n}\n");
-		for (FElseIfExp el_if : getFElseIfExps()) {
 		
-			str.print("else if(");
-			el_if.getIfExp().prettyPrint_C(str,indent);
-			str.print("){\n");
-			p.print(el_if.getThenExp(),str,indent);
-			str.print("temp_v_" + adIndex() + "=" + el_if.getThenExp().adVarName() + ";\n");
-			str.print("temp_d_" + adIndex() + "=" + el_if.getThenExp().adDerName() + ";\n}\n");
-		}
-		str.print("else{\n");
-		p.print(getElseExp(),str,indent);
-		str.print("temp_v_" + adIndex() + "=" + getElseExp().adVarName() + ";\n");
-		str.print("temp_d_" + adIndex() + "=" + getElseExp().adDerName() + ";\n}\n");
-
-		str.print("jmi_ad_var_t ");
-		str.print(adVarName());
-		str.print(" = temp_v_");
-		str.print(adIndex());
-		str.print(";\njmi_ad_var_t ");
-		str.print(adDerName());
-		str.print(" = temp_d_");
-		str.print(adIndex());
-		str.print(";\n");*/
-		
+		//Print AD-code for the then resp. else expressions
 		p.print(getThenExp(),str,indent);
 		p.print(getElseExp(),str,indent);
 		
+		//Couple the print AD-code to the conditions
 		str.format("jmi_ad_var_t %s = COND_EXP_EQ(", adVarName());
 		getIfExp().prettyPrint_C(str, indent);
 		str.format(", JMI_TRUE, %s, %s);\n", getThenExp().adVarName(), getElseExp().adVarName());
@@ -705,7 +645,10 @@ aspect CADCodeGen {
 		getIfExp().prettyPrint_C(str, indent);
 		str.format(", JMI_TRUE, %s, %s);\n", getThenExp().adDerName(), getElseExp().adDerName());
 	}
-			
+	
+	/*
+	 * Generate AD-code for one residual equation
+	 */
 	public void FAbstractEquation.genResidual_CAD(int i, String indent, PrintStream str) {}
 	
 	public void FEquation.genResidual_CAD(int i, String indent, PrintStream str) {
@@ -734,19 +677,18 @@ aspect CADCodeGen {
 	
 	public void AbstractEquationBlock.genBlockResidualFunction_CAD(int block_counter, boolean inInit, String indent, PrintStream str) {
 	} 
-
+	
 	public void EquationBlock.genBlockResidualFunction_CAD(int block_counter, boolean inInit, String indent, PrintStream str) {
 		str.print("static int dae_" + (inInit? "init_": "") + "block_dir_der_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {\n");
 		str.print("  jmi_real_t** res = &residual;\n");
 		str.print("  jmi_real_t** dF = &dRes;\n");
 		str.print("  jmi_real_t** dv;\n");
-		genVarDecls_CAD(str, indent); // TODO: wrong indent (but so has rest of func...)
+		genVarDecls_CAD(str, indent);
 		str.print("  if (evaluation_mode == JMI_BLOCK_EVALUATE){\n");
 		str.print("      dv = jmi->dz_seed;\n");
 		// Loop over all active variables and write the values in x to the z vector
 		int var_counter = 0;
 		for (FVariable fv : activeVariables()) {
-			//str.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
 			str.print("    (*dv)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];\n");
 			var_counter++;
 		}
@@ -776,17 +718,19 @@ aspect CADCodeGen {
 		// Write AD-code
 		int equation_counter = 0;
 		for (FAbstractEquation e : equations()) {
+			//Generate AD-code for the unsolved expression
 			e.genResidual_CAD(equation_counter,indent,str);				
 			equation_counter += e.numScalarEquations();
 		}
+		//Reset seed vector
 		for (FVariable fv : activeVariables()) {
 			str.print("    (*dv)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = 0;\n");
 		}
 		str.print("   }else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
 		var_counter = 0;
+		//Code that stores the evaluated dz
 		for (FVariable fv : activeVariables()) {
 			str.print("    (*dv)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];\n");
-			//str.print("    (*(jmi->dz))[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];\n");
 			var_counter++;
 		}
 		str.print("  } else{\nreturn -1;\n}\n");
@@ -796,6 +740,7 @@ aspect CADCodeGen {
 	
 	public void AbstractEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str){}
 	
+	//Code that is printed in model_ode_derivatives, calls two functions that solves both z and dz resp.
 	public void EquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {	
 		if (inInitial) {
 			str.print(indent + "jmi_kinsol_solve(jmi->dae_init_block_residuals[" + i +"]);\n");
@@ -806,13 +751,13 @@ aspect CADCodeGen {
 		}	
 	}
 	
-	
 	public void SolvedScalarEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {	
 		equations().get(0).genSolvedBlock_CAD(activeVariables().get(0),indent,str);
 	}
 	
 	public void FAbstractEquation.genSolvedBlock_CAD(FVariable v, String indent, PrintStream str) {}
 
+	//Print AD-code for solved block in model_ode_derivatives
 	public void FEquation.genSolvedBlock_CAD(FVariable v, String indent, PrintStream str) {
 		if(v.isReal()){
 			solution(v.name()).prettyPrint_CAD(str,indent);
@@ -823,6 +768,7 @@ aspect CADCodeGen {
 		}
 	}
 
+	//Tornblock, works in similar way as the above given EquationBlock.genBlockResidulFunction_CAD
 	public void TornEquationBlock.genBlockResidualFunction_CAD(int block_counter, boolean inInit, String indent, PrintStream str) {
 		str.print("static int dae_" + (inInit? "init_": "") + "block_dir_der_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {\n");
 		str.print("  jmi_real_t** res = &residual;\n");
@@ -1338,11 +1284,8 @@ aspect CADCodeGen {
 		str.print(");\n");
 	}
 	
-	
-	//Methods to handle function calls ends here
-	
 	//Methods to handle If clauses starts here
-	
+	//This is incomplete works only for the most simple cases
 	public void FIfWhenStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 		for (FIfWhenClause clause : getFIfWhenClauses())
 			clause.getTest().genTempVars_C(p, str, indent);
@@ -1372,7 +1315,7 @@ aspect CADCodeGen {
 	
 	
 	//Methods to handle while loops starts here
-	
+	//This is incomplete and works only for the most simple cases
 	public void FWhileStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 		getTest().genTempVars_C(p, str, indent);
 		str.print(indent);
@@ -1402,7 +1345,7 @@ aspect CADCodeGen {
 	}
 	
 	//Methods to handle for-loops in functions starts here
-	
+	//This is incomplete and works only for the most simple cases
 	public void FForStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 		getIndex().genTempVars_C(p, str, indent);
 		getIndex().printForArrayDecl_CAD(p, str, indent);
@@ -1478,10 +1421,7 @@ aspect CADCodeGen {
 		str.print("i++");
 	}
 	
-	// Methods to handle for-loops in functions ends here.
-	
 	//Methods to handle functions starts here.
-	
 	public void FReturnStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 		str.print("\n");
 	}
@@ -1651,6 +1591,7 @@ aspect CADCodeGen {
 	
 	syn lazy String AbstractFVariable.name_var_CAD() = name_C();
 	syn lazy String AbstractFVariable.name_der_CAD() = "0";
+	
 	eq FFunctionVariable.name_var_CAD() = nameUnderscore() + "_var_" + C_SUFFIX_VARIABLE;
 	eq FFunctionArray.name_var_CAD()    = nameUnderscore() + "_var_" + C_SUFFIX_ARRAY;
 	eq FFunctionVariable.name_der_CAD() = nameUnderscore() + "_der_" + C_SUFFIX_VARIABLE;
@@ -1668,6 +1609,7 @@ aspect CADCodeGen {
 	
 	private int FClass.adIndex = 0;
 	
+	//Assign a unique AD-index for each node that is printed
 	public int FClass.nextADIndex() {
 		return adIndex++;
 	}
@@ -1679,10 +1621,13 @@ aspect CADCodeGen {
 	
 	syn String FExp.adDerName() = "d_" + adIndex();
 	
+	//Use prettyPrint_C for literals
 	syn String FLitExp.adVarName() = this.prettyPrint_C("");
 	
+	//The derivative of a constant or literal is 0
 	syn String FLitExp.adDerName() = "AD_WRAP_LITERAL(0)";
 	
+	//Different vector name depending on ODE or DAE
 	syn String FExp.getSeedName() = 
 		root().options.getBooleanOption("generate_dae_jacobian") ? "(*dz)" : "(*dv)";
 	
