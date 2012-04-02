@@ -3694,7 +3694,7 @@ aspect FunctionInlining {
 				while (eqn.hasInlinableFunctions()) {
 					// Note that this will add new equations to eqns, so we depend on
 					// List.iterator() to handle that correctly.
-					eqn.inlineFunctions(this);
+					eqn = eqn.inlineFunctions(this);
 					fc.clearFlatNameBinding();
 				}
 			}
@@ -3734,16 +3734,11 @@ aspect FunctionInlining {
 		 * Add a variable and (if not constant) an equation for an assignment.
 		 * 
 		 * @param oldName  the name of the variable that was assigned in the function
-		 * @param value    the right-hand side of the equation 
+		 * @param value    the right-hand side of the equation
 		 */
-		public FVariable addVarAndEqn(String oldName, FExp value) {
+		public void addVarAndEqn(String oldName, FExp value) {
 			FTypePrefixVariability variability = value.variability().fullCopy();
-			FQName name = new FQName(fc.nextTempVarName());
-			if (value.isArray())
-				name.setLastFArraySubscripts(value.size().flattenFArraySubscripts(new FQName()));
-			FVariable var = value.type().createTempFVariable(name, variability);
-			vars.add(var);
-			vars.getChild(vars.getNumChild() - 1);
+			FVariable var = addVar(oldName, variability, value.type());
 			
 			if (variability.constantVariability()) {
 				var.setBindingExp(value.ceval().buildLiteral());
@@ -3755,6 +3750,50 @@ aspect FunctionInlining {
 				else
 					normalEqns.add(eqn);
 			}
+		}
+
+		/**
+		 * Add variables and (if not constant) an equation for a function call statement.
+		 * 
+		 * @param lefts  the lefts of the function call statement
+		 * @param call   the new function call
+		 */
+		public void addVarsAndFCEqn(List<FFunctionCallLeft> lefts, FAbstractFunctionCall call) {
+			FTypePrefixVariability variability = call.variability().fullCopy();
+			ArrayList<FVariable> vars = new ArrayList<FVariable>(lefts.getNumChild());
+			for (FFunctionCallLeft left : lefts) 
+				vars.add(left.createInlineVar(this, variability));
+			
+			if (variability.constantVariability()) {
+				CValue[] values = call.evaluate();
+				for (int i = 0; i < vars.size(); i++)
+					if (vars.get(i) != null)
+						vars.get(i).setBindingExp(values[i].buildLiteral());
+			} else {
+				call = (FAbstractFunctionCall) call.preventEvents();
+				FFunctionCallEquation eqn = 
+					new FFunctionCallEquation(new FNormalEquation(), new List(), call);
+				for (FVariable var : vars) {
+					FFunctionCallLeft left = new FFunctionCallLeft();
+					if (var != null)
+						left.setFExp(var.createUseExp());
+					eqn.addLeft(left);
+				}
+				if (variability.parameterVariability())
+					paramEqns.add(eqn);
+				else
+					normalEqns.add(eqn);
+			}
+		}
+		
+		public FVariable addVar(String oldName, FTypePrefixVariability variability, FType type) {
+			FQName name = new FQName(fc.nextTempVarName());
+			if (type.isArray())
+				name.setLastFArraySubscripts(type.size().flattenFArraySubscripts(new FQName()));
+			
+			FVariable var = type.createTempFVariable(name, variability);
+			vars.add(var);
+			vars.getChild(vars.getNumChild() - 1);
 			
 			replMap.put(oldName, var);
 			lookupMap.put(var.name(), var);
@@ -3763,6 +3802,30 @@ aspect FunctionInlining {
 		
 	}
 	
+	
+	/**
+	 * Create a temporary variable for this access when inlining a function call that 
+	 * it is a left of.
+	 */
+	public FVariable FFunctionCallLeft.createInlineVar(
+			FunctionInliner fi, FTypePrefixVariability variability) {
+		return hasFExp() ? getFExp().createInlineVar(fi, variability) : null;
+	}
+	
+	/**
+	 * Create a temporary variable for this access when inlining a function call that 
+	 * it is a left of. Non-access expressions returns null.
+	 */
+	public FVariable FExp.createInlineVar(FunctionInliner fi, FTypePrefixVariability variability) {
+		return null;
+	}
+	
+	public FVariable FIdUseExp.createInlineVar(
+			FunctionInliner fi, FTypePrefixVariability variability) {
+		return fi.addVar(getFIdUse().name(), variability, type());
+	}
+	
+
 	/**
 	 * Encapsulate any event-generating expressions in noEvent().
 	 */
@@ -3791,7 +3854,7 @@ aspect FunctionInlining {
 	public FExp FFunctionCall.preventEvents() {
 		for (FExp e : getArgs())
 			e.preventEvents();
-	return this;
+		return this;
 	}
 	
 	/**
@@ -3805,7 +3868,7 @@ aspect FunctionInlining {
 	 * Check if an equation contains any calls to functions that we can inline.
 	 */
 	syn boolean FAbstractEquation.hasInlinableFunctions() = false;
-	eq FFunctionCallEquation.hasInlinableFunctions()      = false; // TODO: handle function call eqns
+	eq FFunctionCallEquation.hasInlinableFunctions()      = getCall().hasInlinableFunctions();
 	eq FEquation.hasInlinableFunctions()                  =
 		getLeft().hasInlinableFunctions() || getRight().hasInlinableFunctions();
 	
@@ -3851,15 +3914,35 @@ aspect FunctionInlining {
 	/**
 	 * Inline all calls to functions that we can inline.
 	 */
-	public void FAbstractEquation.inlineFunctions(FunctionInliner fi) {}
-	
-	public void FEquation.inlineFunctions(FunctionInliner fi) {
-		getLeft().inlineFunctions(fi);
-		getRight().inlineFunctions(fi);
+	public FAbstractEquation FAbstractEquation.inlineFunctions(FunctionInliner fi) {
+		return this;
 	}
 	
-	public void FFunctionCallEquation.inlineFunctions(FunctionInliner fi) {
-		// TODO: handle function call eqns
+	public FAbstractEquation FEquation.inlineFunctions(FunctionInliner fi) {
+		getLeft().inlineFunctions(fi);
+		getRight().inlineFunctions(fi);
+		return this;
+	}
+	
+	public FAbstractEquation FFunctionCallEquation.inlineFunctions(FunctionInliner fi) {
+		if (getCall().isInlinableFunctionCall()) {
+			FVariable[] vars = getCall().inline(fi);
+			int n = getNumLeft();
+			ArrayList<FEquation> list = new ArrayList<FEquation>();
+			for (int i = 0; i < n; i++) {
+				if (getLeft(i).hasFExp()) {
+					FEquationType type = getType().fullCopy();
+					FExp left = getLeft(i).getFExp();
+					FExp right = vars[i].createInlineUseFExp();
+					list.add(new FEquation(type, left, right));
+				}
+			}
+			replaceMeWithList(list);
+			return (list.size() > 0) ? list.get(0) : null;
+		} else {
+			getCall().inlineFunctions(fi);
+			return this;
+		}
 	}
 	
 	/**
@@ -3872,8 +3955,7 @@ aspect FunctionInlining {
 	
 	public void FFunctionCall.inlineFunctions(FunctionInliner fi) {
 		if (isInlinableFunctionCall()) {
-			FVariable var = myFFunctionDecl().inline(fi, getArgs())[0];
-			replaceMe(var.isConstant() ? var.ceval().buildLiteral() : var.createUseExp());
+			replaceMe(inline(fi)[0].createInlineUseFExp());
 		} else {
 			super.inlineFunctions(fi);
 		}
@@ -3901,6 +3983,36 @@ aspect FunctionInlining {
 	public void FExpSubscript.inlineFunctions(FunctionInliner fi) {
 		getFExp().inlineFunctions(fi);
 	}
+	
+	/**
+	 * Inline this function call and return an array of variables that represents 
+	 * the outputs of the function. 
+	 */
+	public FVariable[] FAbstractFunctionCall.inline(FunctionInliner fi) {
+		throw new UnsupportedOperationException();
+	}
+	
+	/**
+	 * Inline this function call and return an array of variables that represents 
+	 * the outputs of the function. 
+	 */
+	public FVariable[] FFunctionCall.inline(FunctionInliner fi) {
+		return myFFunctionDecl().inline(fi, getArgs());
+	}
+	
+	/**
+	 * Create a use exp for non-constant variables, and a literal for constant variables.
+	 */
+	public FExp FVariable.createInlineUseFExp() {
+		try {
+			return isConstant() ? ceval().buildLiteral() : createUseExp();
+		} catch (ConstantEvaluationException e) {
+			return createUseExp();
+		}
+	}
+	
+	private static final String ASTNode.REPLACE_UNKNOWN_CHILD_MSG = 
+		"Trying to replace a child that is not found in the given position.";
 
 	/**
 	 * Replace a child of this node.
@@ -3910,9 +4022,31 @@ aspect FunctionInlining {
 	 * @throws IllegalArgumentException  if <code>child</code> is not a child of this node
 	 */
 	private void ASTNode.replaceChild(ASTNode child, ASTNode repl) {
-		if (getChild(child.childIndex) != child)
-			throw new IllegalArgumentException("Trying to replace a child that is not found in the given position.");
-		setChild(repl, child.childIndex);
+		int i = getIndexOfChild(child);
+		if (i < 0)
+			throw new IllegalArgumentException(REPLACE_UNKNOWN_CHILD_MSG);
+		setChild(repl, i);
+	}
+
+	/**
+	 * Replace a child of this node with a list of new nodes.
+	 * 
+	 * @param child  the child to replace
+	 * @param repl   the node to replace it with
+	 * @throws IllegalArgumentException  if <code>child</code> is not a child of this node
+	 */
+	private void ASTNode.replaceChildWithList(ASTNode child, Iterable<? extends ASTNode> repl) {
+		int i = getIndexOfChild(child);
+		if (i < 0)
+			throw new IllegalArgumentException(REPLACE_UNKNOWN_CHILD_MSG);
+		Iterator<? extends ASTNode> it = repl.iterator();
+		if (it.hasNext()) {
+			setChild(it.next(), i);
+			while (it.hasNext())
+				insertChild(it.next(), ++i);
+		} else {
+			removeChild(i);
+		}
 	}
 	
 	/**
@@ -3926,11 +4060,22 @@ aspect FunctionInlining {
 			p.replaceChild(this, repl);
 	}
 	
+	/**
+	 * Replace this node in the tree with a list of new nodes.
+	 * 
+	 * @param repl  the list of nodes to replace it with
+	 */
+	protected void ASTNode.replaceMeWithList(Iterable<? extends ASTNode> repl) {
+		ASTNode p = getParent();
+		if (p != null)
+			p.replaceChildWithList(this, repl);
+	}
+	
 	
 	/**
 	 * Check if we can inline this function.
 	 */
-	syn boolean FFunctionDecl.isInlinable() {
+	syn lazy boolean FFunctionDecl.isInlinable() {
 		return isAllInlinable(getFAlgorithmBlock().getFStatements());
 	}
 	
@@ -3950,7 +4095,7 @@ aspect FunctionInlining {
 	syn boolean FStatement.isInlinable() = false;
 	eq FInitArrayStmt.isInlinable()      = true;
 	eq FAssignStmt.isInlinable()         = true;
-	eq FFunctionCallStmt.isInlinable()   = getCall().isIgnored();
+	eq FFunctionCallStmt.isInlinable()   = getCall().isIgnored() || !insideBranchedStmt();
 	eq FReturnStmt.isInlinable()         = isLast();
 	eq FForStmt.isInlinable()            = isAllInlinable(getForStmts());
 	eq FIfStmt.isInlinable() {
@@ -3972,6 +4117,7 @@ aspect FunctionInlining {
 	 * 
 	 * @param fi    the function inlining helper to use
 	 * @param args  the argument list for the function call
+	 * @return  an array of variables that represents the outputs of the function
 	 */
 	public FVariable[] FFunctionDecl.inline(FunctionInliner fi, List<FExp> args) {
 		duringInlining = true;
@@ -4005,12 +4151,19 @@ aspect FunctionInlining {
 		FExp exp = getRight().fullCopy();
 		exp = getRight().dynamicFExp(exp);
 		exp = exp.replaceReferences(fi);
-		FVariable var = fi.addVarAndEqn(getLeft().name(), exp);
+		fi.addVarAndEqn(getLeft().name(), exp);
+	}
+
+	public void FFunctionCallStmt.inline(FunctionInliner fi) {
+		FExp call = getCall().fullCopy();
+		call = getCall().dynamicFExp(call);
+		call = call.replaceReferences(fi);
+		fi.addVarsAndFCEqn(getLefts(), (FAbstractFunctionCall) call);
 	}
 	
 	public void FIfStmt.inline(FunctionInliner fi) {
 		// Reduce to list of assignments
-		List<FAssignStmt> stmts = new List<FAssignStmt>();
+		List<FStatement> stmts = new List<FStatement>();
 		inlinePrepare(fi, stmts);
 		
 		// Add assignments to tree temporarily
@@ -4028,7 +4181,7 @@ aspect FunctionInlining {
 	
 	public void FForStmt.inline(FunctionInliner fi) {
 		// Reduce to list of assignments
-		List<FAssignStmt> stmts = new List<FAssignStmt>();
+		List<FStatement> stmts = new List<FStatement>();
 		inlinePrepare(fi, stmts);
 		
 		// Add assignments to tree temporarily
@@ -4049,17 +4202,22 @@ aspect FunctionInlining {
 	/**
 	 * Simplify a statement into a list of assignments, that can then easily be inlined.
 	 */
-	public void FStatement.inlinePrepare(FunctionInliner fi, List<FAssignStmt> stmts) {}
+	public void FStatement.inlinePrepare(FunctionInliner fi, List<FStatement> stmts) {}
 
-	public void FAssignStmt.inlinePrepare(FunctionInliner fi, List<FAssignStmt> stmts) {
+	public void FAssignStmt.inlinePrepare(FunctionInliner fi, List<FStatement> stmts) {
 		stmts.add(fullCopy());
 	}
 
-	public void FIfStmt.inlinePrepare(FunctionInliner fi, List<FAssignStmt> stmts) {
+	public void FFunctionCallStmt.inlinePrepare(FunctionInliner fi, List<FStatement> stmts) {
+		if (!getCall().isIgnored())
+			stmts.add(fullCopy());
+	}
+
+	public void FIfStmt.inlinePrepare(FunctionInliner fi, List<FStatement> stmts) {
 		List<FStatement> oldElse = getElseStmts();
 		
 		// Prepare contents
-		List<FAssignStmt> newElse = new List<FAssignStmt>();
+		List<FStatement> newElse = new List<FStatement>();
 		for (FStatement stmt : oldElse)
 			stmt.inlinePrepare(fi, newElse);
 		setElseStmtList((List) newElse);
@@ -4071,16 +4229,16 @@ aspect FunctionInlining {
 		}
 		
 		// Write result to target list
-		for (FAssignStmt stmt : newElse)
+		for (FStatement stmt : newElse)
 			stmts.add(stmt);
 		setElseStmtList(oldElse);
 	}
 
-	public void FForStmt.inlinePrepare(FunctionInliner fi, List<FAssignStmt> stmts) {
+	public void FForStmt.inlinePrepare(FunctionInliner fi, List<FStatement> stmts) {
 		List<FStatement> oldStmts = getForStmts();
 		
 		// Prepare contents
-		List<FAssignStmt> newStmts = new List<FAssignStmt>();
+		List<FStatement> newStmts = new List<FStatement>();
 		for (FStatement stmt : oldStmts)
 			stmt.inlinePrepare(fi, newStmts);
 		setForStmtList((List) newStmts);
@@ -4091,7 +4249,7 @@ aspect FunctionInlining {
 		loopExp = loopExp.dynamicFExp(loopExp.fullCopy()).replaceReferences(fi);
 		for (FExp e : loopExp.getArray().iterable()) {
 			stmts.add(new FAssignStmt(index.createFIdUse(), e.fullCopy()));
-			for (FAssignStmt stmt : newStmts)
+			for (FStatement stmt : newStmts)
 				stmts.add(stmt.fullCopy());
 		}
 		setForStmtList(oldStmts);
@@ -4104,20 +4262,20 @@ aspect FunctionInlining {
 	 * @param fi         the function inliner to use
 	 * @param elseStmts  the else branch to combine
 	 */
-	protected List<FAssignStmt> FIfWhenClause.inlineCombineBranches(
-			FunctionInliner fi, List<FAssignStmt> elseStmts) {
+	protected List<FStatement> FIfWhenClause.inlineCombineBranches(
+			FunctionInliner fi, List<FStatement> elseStmts) {
 		// Prepare contents
 		List<FStatement> oldStmts = getFStatements();
-		List<FAssignStmt> newStmts = new List<FAssignStmt>();
+		List<FStatement> newStmts = new List<FStatement>();
 		for (FStatement stmt : oldStmts)
 			stmt.inlinePrepare(fi, newStmts);
 		setFStatementList((List) newStmts);
 		
 		// First inefficient implementation
-		List<FAssignStmt> stmts = new List<FAssignStmt>();
-		for (FAssignStmt stmt : newStmts)
+		List<FStatement> stmts = new List<FStatement>();
+		for (FStatement stmt : newStmts)
 			stmts.add(createIfElseAssignment(stmt, null));
-		for (FAssignStmt stmt : elseStmts)
+		for (FStatement stmt : elseStmts)
 			stmts.add(createIfElseAssignment(null, stmt));
 		// End first implementation
 		
@@ -4133,15 +4291,24 @@ aspect FunctionInlining {
 	 * If one of the assignments is null, then an access to the variable being 
 	 * assigned is used there (i.e. a no-op). At least one must be non-null.
 	 * 
+	 * If any of the statements is not an assign statement, then 
+	 * IllegalArgumentException is thrown.
+	 * 
 	 * @param left   the assignment from this branch
 	 * @param right  the assignment from the next branch
 	 */
-	protected FAssignStmt FIfWhenClause.createIfElseAssignment(FAssignStmt left, FAssignStmt right) {
-		FIdUse var = ((left != null) ? left : right).getLeft().fullCopy();
-		FExp test = getTest().fullCopy(); // TODO: use temp var instead
-		FExp leftExp = createIfElseExpBranch(left, var);
-		FExp rightExp = createIfElseExpBranch(right, var);
-		return new FAssignStmt(var, new FIfExp(test, leftExp, rightExp));
+	protected FAssignStmt FIfWhenClause.createIfElseAssignment(FStatement leftStmt, FStatement rightStmt) {
+		try {
+			FAssignStmt left = (FAssignStmt) leftStmt;
+			FAssignStmt right = (FAssignStmt) rightStmt;
+			FIdUse var = ((left != null) ? left : right).getLeft().fullCopy();
+			FExp test = getTest().fullCopy(); // TODO: use temp var instead
+			FExp leftExp = createIfElseExpBranch(left, var);
+			FExp rightExp = createIfElseExpBranch(right, var);
+			return new FAssignStmt(var, new FIfExp(test, leftExp, rightExp));
+		} catch (ClassCastException e) {
+			throw new IllegalArgumentException();
+		}
 	}
 	
 	private FExp FIfWhenClause.createIfElseExpBranch(FAssignStmt ass, FIdUse var) {

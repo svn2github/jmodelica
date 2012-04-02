@@ -1690,7 +1690,7 @@ public class ModelicaCompiler {
 		try {
 			if (programarguments.containsKey("parse"))
 				parseFiles(name);
-			else if (programarguments.containsKey("fmume"))
+			else if (programarguments.containsKey("fmume") || programarguments.containsKey("fmu"))
 				compileFMUME(cl, name);
 			else if (programarguments.containsKey("fmucs"))
 				compileFMUCS(cl, name);

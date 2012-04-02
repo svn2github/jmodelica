@@ -1751,6 +1751,190 @@ end FunctionInlining.ForStatementInline8;
         Real v[3] = {1,2,3};
         Real z = f(v);
     end ForStatementInline8;
+	
+    
+    
+    model MultipleOutputsInline1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MultipleOutputsInline1",
+         description="Inlining function call using multiple outputs",
+         inline_functions=true,
+         flatModel="
+fclass FunctionInlining.MultipleOutputsInline1
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real x[4];
+ Real x[5];
+ Real x[6];
+ Real x[7];
+ Real x[8];
+equation
+ x[1] = 2;
+ x[2] = 6;
+ x[3] = 3;
+ x[4] = 3 + x[2];
+ x[5] = x[3] + 1;
+ x[6] = x[5] + 3;
+ x[7] = x[5] + 1;
+ x[8] = x[7] + x[6];
+end FunctionInlining.MultipleOutputsInline1;
+")})));
+
+        function f
+            input Real a;
+            input Real b;
+            output Real c;
+            output Real d;
+        algorithm
+            c := a + 1;
+            d := c + b;
+        end f;
+        
+        Real x[8];
+    equation
+        (x[1], x[2]) = f(1, 2 * 2);
+        (x[3], x[4]) = f(2, x[2]);
+        (x[5], x[6]) = f(x[3], 3);
+        (x[7], x[8]) = f(x[5], x[6]);
+    end MultipleOutputsInline1;
+    
+    
+    model MultipleOutputsInline2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MultipleOutputsInline2",
+         description="Inlining function call using multiple (but not all) outputs",
+         inline_functions=true,
+         flatModel="
+fclass FunctionInlining.MultipleOutputsInline2
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real x[4];
+ Real x[5];
+ Real x[6];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+ Real y[5];
+ Real y[6];
+ Real temp_4;
+ Real temp_10;
+ Real temp_13;
+equation
+ y[1] = 1;
+ y[2] = 1;
+ y[3] = 1;
+ y[4] = 1;
+ y[5] = 1;
+ y[6] = 1;
+ x[1] = y[1] + y[2];
+ temp_4 = y[1] - ( y[2] );
+ x[2] = ( y[1] ) * ( y[2] );
+ x[3] = y[3] + y[4];
+ x[4] = y[3] - ( y[4] );
+ temp_10 = ( y[3] ) * ( y[4] );
+ temp_13 = y[5] + y[6];
+ x[5] = y[5] - ( y[6] );
+ x[6] = ( y[5] ) * ( y[6] );
+end FunctionInlining.MultipleOutputsInline2;
+")})));
+
+        function f
+            input Real a;
+            input Real b;
+            output Real c;
+            output Real d;
+            output Real e;
+        algorithm
+            c := a + b;
+            d := a - b;
+            e := a * b;
+        end f;
+        
+        Real x[6];
+		Real y[6] = ones(6);
+    equation
+        (x[1], , x[2]) = f(y[1], y[2]);
+        (x[3], x[4])   = f(y[3], y[4]);
+        (, x[5], x[6]) = f(y[5], y[6]);
+    end MultipleOutputsInline2;
+
+
+    model MultipleOutputsInline3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MultipleOutputsInline3",
+         description="Inlining function call using multiple (but not all) outputs",
+         inline_functions=true,
+         flatModel="
+fclass FunctionInlining.MultipleOutputsInline3
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real x[4];
+ Real x[5];
+ Real x[6];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+ Real y[5];
+ Real y[6];
+ Real temp_4;
+ Real temp_10;
+ Real temp_13;
+equation
+ y[1] = 1;
+ y[2] = 1;
+ y[3] = 1;
+ y[4] = 1;
+ y[5] = 1;
+ y[6] = 1;
+ x[1] = y[1] + y[2];
+ temp_4 = y[1] - ( y[2] );
+ x[2] = ( y[1] ) * ( y[2] );
+ x[3] = y[3] + y[4];
+ x[4] = y[3] - ( y[4] );
+ temp_10 = ( y[3] ) * ( y[4] );
+ temp_13 = y[5] + y[6];
+ x[5] = y[5] - ( y[6] );
+ x[6] = ( y[5] ) * ( y[6] );
+end FunctionInlining.MultipleOutputsInline3;
+")})));
+
+        function f1
+            input Real a;
+            input Real b;
+            output Real c;
+            output Real d;
+            output Real e;
+        algorithm
+            c := a + b;
+            d := a - b;
+            e := a * b;
+        end f1;
+		
+		function f2
+            input Real y1;
+            input Real y2;
+            output Real x1;
+	        output Real x2;
+            output Real x3;
+	    algorithm
+	        (x1, x2, x3) := f1(y1, y2);
+		end f2;
+        
+        Real x[6];
+        Real y[6] = ones(6);
+    equation
+        (x[1], , x[2]) = f2(y[1], y[2]);
+        (x[3], x[4])   = f2(y[3], y[4]);
+        (, x[5], x[6]) = f2(y[5], y[6]);
+    end MultipleOutputsInline3;
 
 	
 end FunctionInlining;

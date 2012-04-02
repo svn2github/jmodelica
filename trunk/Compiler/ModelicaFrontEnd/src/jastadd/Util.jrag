@@ -1678,12 +1678,16 @@ aspect FlatFunctionUtils {
      eq FFunctionCallEquation.getCall().isFunctionCallClause() = true;
      eq FFunctionCallStmt.getCall().isFunctionCallClause()     = true;
      
-     inh boolean FWhenStmt.insideBlockStmt();
+     inh boolean FStatement.insideBlockStmt();
      eq FAlgorithmBlock.getChild().insideBlockStmt() = false;
      eq FIfWhenStmt.getChild().insideBlockStmt()     = true;
      eq FWhileStmt.getChild().insideBlockStmt()      = true;
      eq FForStmt.getChild().insideBlockStmt()        = true;
      eq InstForStmt.getChild().insideBlockStmt()     = true;
+     
+     inh boolean FStatement.insideBranchedStmt();
+     eq FAlgorithmBlock.getChild().insideBranchedStmt() = false;
+     eq FIfWhenStmt.getChild().insideBranchedStmt()     = true;
      
      /**
       * \brief Return the index of the variable assigned by this FFunctionCallLeft among 
@@ -2258,6 +2262,8 @@ aspect Sorting {
 aspect GeneralHelpers {
 	
 	abstract public FExp FExp.fullCopy();
+	abstract public FAbstractFunctionCall FAbstractFunctionCall.fullCopy();
+	abstract public FStatement FStatement.fullCopy();
 	abstract public FEquationType FEquationType.fullCopy();
 	abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
 	
