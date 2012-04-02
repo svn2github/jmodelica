@@ -27,34 +27,43 @@
 extern "C" {
 #endif
 
-/* Basic support for vendor annotations. */
+/**
+* \addtogroup  fmi1_import
+* @{
+*	\addtogroup  fmi1_import_annotations Basic support for vendor annotations.
+*@}
+ * \addtogroup  fmi1_import_annotations Basic support for vendor annotations.
+ @{ 
+ */
 
+/** \brief Get the list of all the vendor annotations present in the XML file */
 fmi1_import_vendor_list_t* fmi1_import_get_vendor_list(fmi1_import_t* fmu);
 
+/** \brief Get the number of different vendors */
 unsigned int  fmi1_import_get_number_of_vendors(fmi1_import_vendor_list_t*);
 
+/** \brief Get the annotations associated with vendor specified by the index */
 fmi1_import_vendor_t* fmi1_import_get_vendor(fmi1_import_vendor_list_t*, unsigned int  index);
 
-/* fmi1_import_vendor* fmiAddVendor(fmiModelDescription* md, char* name);
-
-void* fmiRemoveVendor(fmi1_import_vendor*); */
-
+/** \brief Get the vendor name */
 const char* fmi1_import_get_vendor_name(fmi1_import_vendor_t*);
 
+/** \brief Get the number of annotations provided for the vendor */
 unsigned int  fmi1_import_get_number_of_vendor_annotations(fmi1_import_vendor_t*);
 
-/*Note: Annotations can be used in other places but have common interface name-value */
+/** \brief Get an annotation object for the vendor by index
+
+	Note: Annotations may later be used in other places but have common interface name-value 
+*/
 fmi1_import_annotation_t* fmi1_import_get_vendor_annotation(fmi1_import_vendor_t*, unsigned int  index);
 
+/** \brief Get the name of the annotation */
 const char* fmi1_import_get_annotation_name(fmi1_import_annotation_t*);
 
+/** \brief Get the value for the annotation */
 const char* fmi1_import_get_annotation_value(fmi1_import_annotation_t*);
 
-/* fmi1_import_annotation* fmi1_import_add_vendor_annotation(fmi1_import_vendor*, const char* name, const char* value);
-
-fmi1_import_annotation* fmi1_import_remove_vendor_annotation(fmi1_import_vendor*, const char* name, const char* value);
-*/
-
+/** @} */
 #ifdef __cplusplus
 }
 #endif

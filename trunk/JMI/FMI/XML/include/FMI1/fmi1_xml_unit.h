@@ -26,8 +26,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+		
+	/**
+	\addtogroup fmi1_xml
+	@{
+	\addtogroup fmi1_xml_units Functions for handling unit definitions.
+	@}
+	\addtogroup fmi1_xml_units Functions for handling unit definitions.
+	@{
+	*/
 
-/* Support for processing variable units */
+/** \brief Get a list of all the unit definitions */
 fmi1_xml_unit_definitions_t* fmi1_xml_get_unit_definitions(fmi1_xml_model_description_t* md);
 unsigned int  fmi1_xml_get_unit_definitions_number(fmi1_xml_unit_definitions_t*);
 fmi1_xml_unit_t* fmi1_xml_get_unit(fmi1_xml_unit_definitions_t*, unsigned int  index);
@@ -43,7 +52,9 @@ double fmi1_xml_get_display_unit_offset(fmi1_xml_display_unit_t*);
 
 double fmi1_xml_convert_to_display_unit(double, fmi1_xml_display_unit_t*, int isRelativeQuantity);
 double fmi1_xml_convert_from_display_unit(double, fmi1_xml_display_unit_t*, int isRelativeQuantity);
-
+/**
+@}
+*/
 #ifdef __cplusplus
 }
 #endif

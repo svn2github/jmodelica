@@ -17,15 +17,29 @@
 #ifndef FMI1_ENUMS_H_
 #define FMI1_ENUMS_H_
 
-/* fmi1_enums.h defines the enum types used with FMI 1.0 libs */
+/** \file fmi1_enums.h 
+	\brief Definions the enum types used with FMI 1.0 libs
+*/
+
+/**	\addtogroup fmi1_utils
+	@{
+	\addtogroup fmi1_enums
+	@}
+*/
+/** \addtogroup fmi1_enums Enum types used with FMI 1.0 libs
+	@{
+*/
+/** Naming convention for the variables in XML file*/
 typedef enum fmi1_variable_naming_convension_enu_t
 { 
         fmi1_naming_enu_flat,
         fmi1_naming_enu_structured
 } fmi1_variable_naming_convension_enu_t;
 
+/** \brief Convert a #fmi1_variable_naming_convension_enu_t constant into string */
 const char* fmi1_naming_convention_to_string(fmi1_variable_naming_convension_enu_t convention);
 
+/** FMU 1.0 kinds */
 typedef enum fmi1_fmu_kind_enu_t
 {
         fmi1_fmu_kind_enu_me = 0,
@@ -33,8 +47,10 @@ typedef enum fmi1_fmu_kind_enu_t
         fmi1_fmu_kind_enu_cs_tool
 } fmi1_fmu_kind_enu_t;
 
+/** \brief Convert a #fmi1_fmu_kind_enu_t constant into string  */
 const char* fmi1_fmu_kind_to_string(fmi1_fmu_kind_enu_t kind);
 
+/** Variability property for variables */
 typedef enum fmi1_variability_enu_t {
         fmi1_variability_enu_constant,
         fmi1_variability_enu_parameter,
@@ -42,8 +58,10 @@ typedef enum fmi1_variability_enu_t {
         fmi1_variability_enu_continuous
 } fmi1_variability_enu_t;
 
+/** \brief Convert a #fmi1_variability_enu_t constant into string  */
 const char* fmi1_variability_to_string(fmi1_variability_enu_t v);
 
+/** Causality property for variables */
 typedef enum fmi1_causality_enu_t {
         fmi1_causality_enu_input,
         fmi1_causality_enu_output,
@@ -51,15 +69,17 @@ typedef enum fmi1_causality_enu_t {
         fmi1_causality_enu_none
 } fmi1_causality_enu_t;
 
+/** \brief Convert a #fmi1_causality_enu_t constant into string  */
 const char* fmi1_causality_to_string(fmi1_causality_enu_t c);
 
+/** Alias property for variables */
 typedef enum fmi1_variable_alias_kind_enu_t {
     fmi1_variable_is_negated_alias = -1,
     fmi1_variable_is_not_alias = 0,
     fmi1_variable_is_alias = 1
 } fmi1_variable_alias_kind_enu_t;
 
-/* Base types used in type definitions */
+/** Base types used in type definitions */
 typedef enum fmi1_base_type_enu_t
 {
 	fmi1_base_type_real,
@@ -72,5 +92,8 @@ typedef enum fmi1_base_type_enu_t
 /* Convert base type constant to string */
 const char* fmi1_base_type_to_string(fmi1_base_type_enu_t bt);
 
+/**	
+ @}
+*/
 
 #endif /* End of header file FMI1_ENUMS_H_ */

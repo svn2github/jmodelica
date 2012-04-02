@@ -89,13 +89,14 @@ void *fmi1_realloc(void *pointer, size_t size) {
     return newmem;
 }
 
-void fmi1_init_callbacks(fmi1_callbacks_t* callbacks, fmi1_callback_functions_t* fmiFunctions) {
-	assert(0); /* TODO: logger not implemented */
+void fmi1_logger(jm_callbacks* cb, jm_string module, jm_log_level_enu_t log_level, jm_string message);
+
+void fmi1_export_init_callbacks(fmi1_callbacks_t* callbacks, fmi1_callback_functions_t* fmiFunctions) {
     callbacks->jmFunctions.malloc = fmi1_malloc;
     callbacks->jmFunctions.calloc = fmi1_calloc;
     callbacks->jmFunctions.realloc = fmi1_realloc;
     callbacks->jmFunctions.free = fmi1_free;
-    callbacks->jmFunctions.logger = 0;
+    callbacks->jmFunctions.logger = fmi1_logger;
     callbacks->jmFunctions.context = callbacks;
 
     callbacks->fmiFunctions.logger = fmiFunctions->logger;
@@ -126,22 +127,22 @@ void  fmi1_default_callback_logger(fmi1_component_t c, fmi1_string_t instanceNam
 }
 
 void fmi1_logger(jm_callbacks* cb, jm_string module, jm_log_level_enu_t log_level, jm_string message) {
-	fmi1_logger_context_t* c = (fmi1_logger_context_t*)cb->context;
-	if(!c ||!c->logger) return;
+	fmi1_callbacks_t* c = (fmi1_callbacks_t*)cb->context;
+	if(!c ||!c->fmiFunctions.logger) return;
 	switch(log_level) {
 	case jm_log_level_all:
 	case jm_log_level_info:
-		c->logger( c, module, fmi1_status_ok, "INFO", message);
+		c->fmiFunctions.logger( c, module, fmi1_status_ok, "INFO", message);
 		break;
 	case jm_log_level_warning:
-		c->logger( c, module, fmi1_status_warning, "WARNING", message);
+		c->fmiFunctions.logger( c, module, fmi1_status_warning, "WARNING", message);
 		break;
 	default:
-		c->logger( c, module, fmi1_status_error, "ERROR", message);
+		c->fmiFunctions.logger( c, module, fmi1_status_error, "ERROR", message);
 	}
 }
 
-void fmi1_import_init_logger(jm_callbacks* cb, fmi1_logger_context_t* context) {
+void fmi1_import_init_logger(jm_callbacks* cb, fmi1_callbacks_t* context) {
 	cb->logger = fmi1_logger;
 	cb->context = context;
 }

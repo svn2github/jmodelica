@@ -45,9 +45,9 @@ const char* fmi1_xml_get_type_name(fmi1_xml_variable_typedef_t* t) {
     return t->typeName;
 }
 
-/* Note that NULL pointer is returned if the attribute is not present in the XML.*/
 const char* fmi1_xml_get_type_description(fmi1_xml_variable_typedef_t* t) {
-    return t->description;
+	const char * ret = t->description;
+    return (ret ? ret : "");
 }
 
 fmi1_base_type_enu_t fmi1_xml_get_base_type(fmi1_xml_variable_typedef_t* t) {
@@ -71,21 +71,26 @@ fmi1_xml_enumeration_typedef_t* fmi1_xml_get_type_as_enum(fmi1_xml_variable_type
 /* Note that 0-pointer is returned for strings and booleans, empty string quantity if not defined*/
 const char* fmi1_xml_get_type_quantity(fmi1_xml_variable_typedef_t* t) {
     fmi1_xml_variable_type_base_t* props = t->typeBase.baseTypeStruct;
+	const char * ret;
     if(props->structKind != fmi1_xml_type_struct_enu_props) return 0;
     switch(props->baseType) {
     case fmi1_base_type_real:
-        return ((fmi1_xml_real_type_props_t*)props)->quantity;
+        ret = ((fmi1_xml_real_type_props_t*)props)->quantity;
+		break;
     case fmi1_base_type_int:
-        return ((fmi1_xml_integer_type_props_t*)props)->quantity;
+        ret = ((fmi1_xml_integer_type_props_t*)props)->quantity;
+		break;
     case fmi1_base_type_bool:
         return 0;
     case fmi1_base_type_str:
         return 0;
     case fmi1_base_type_enum:
-        return ((fmi1_xml_enum_type_props_t*)props)->quantity;
+        ret = ((fmi1_xml_enum_type_props_t*)props)->quantity;
+		break;
     default:
         return 0;
     }
+	return (ret ? ret : 0);
 }
 
 double fmi1_xml_get_real_type_min(fmi1_xml_real_typedef_t* t) {
@@ -194,7 +199,7 @@ void fmi1_xml_init_integer_type_properties(fmi1_xml_integer_type_props_t* type) 
 void fmi1_xml_init_enumeration_type_properties(fmi1_xml_enum_type_props_t* type, jm_callbacks* cb) {
     fmi1_xml_init_variable_type_base(&type->typeBase, fmi1_xml_type_struct_enu_props,fmi1_base_type_enum);
     type->quantity = 0;
-    type->typeMin = INT_MIN;
+    type->typeMin = 0;
     type->typeMax = INT_MAX;
     jm_vector_init(jm_named_ptr)(&type->enumItems,0,cb);
 }

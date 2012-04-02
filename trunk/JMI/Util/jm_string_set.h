@@ -24,20 +24,36 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/** \file jm_named_ptr.h Definition of ::jm_named_ptr and supporting functions
+	*
+	* \addtogroup jm_utils
+	* @{
+	*    \addtogroup jm_string_set
+	* @}
+	*/
 
+	/** \addtogroup jm_string_set A set of strings
+	 @{
+	*/
+
+/** \brief Set of string is based on a vector,
+	
+TODO: Some faster implementation based on binary tree or hash is desirable.
+*/
 typedef jm_vector(jm_string) jm_string_set;
 
+/**
+\brief Find a string in a set.
+*/
 static jm_string jm_string_set_find(jm_string_set* s, jm_string str) {
     jm_string* found = jm_vector_find(jm_string)(s,&str,jm_compare_string);
     if(found) return *found;
     return 0;
 }
 
-/*
-*  jm_set_put puts an element in the set if it is not there yet.
-*  Returns a pointer to the inserted (or found) element or zero pointer if failed.
-*  T* jm_set_put_item(jm_set(T)* a, T item)
-*  T* jm_set_put_itemp(jm_set(T)* a, T& itemp)
+/**
+*  \brief Put an element in the set if it is not there yet.
+*  @return A pointer to the inserted (or found) element or zero pointer if failed.
 */
 static jm_string jm_string_set_put(jm_string_set* s, jm_string str) {
     jm_string found = jm_string_set_find(s, str);
@@ -54,6 +70,8 @@ static jm_string jm_string_set_put(jm_string_set* s, jm_string str) {
     }
     return found;
 }
+/** @}
+	*/
 
 #ifdef __cplusplus
 }

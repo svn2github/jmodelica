@@ -23,7 +23,7 @@
 #include <jm_stack.h>
 #include <jm_named_ptr.h>
 
-#include "FMI1/fmi1_xml_model_description.h"
+#include <FMI1/fmi1_xml_model_description.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -19,8 +19,14 @@
 
 #include "fmi1_types.h"
 #include <string.h>
+/**	\file fmi1_functions.h
+	Mapping for the standard FMI 1.0 functions into fmi1_ namespace.
 
-/* Type definitions */
+	\addtogroup fmi1_utils
+	@{
+*/
+
+/** FMI 1.0 status codes */
 typedef enum {
 	fmi1_status_ok,
 	fmi1_status_warning,
@@ -30,13 +36,19 @@ typedef enum {
 	fmi1_status_pending
 } fmi1_status_t;
 
+/** Convert #fmi1_status_t variable to string  */
 const char* fmi1_status_to_string(fmi1_status_t status);
 
+/** FMI 1.0 logger function type */
 typedef void  (*fmi1_callback_logger_ft)        (fmi1_component_t c, fmi1_string_t instanceName, fmi1_status_t status, fmi1_string_t category, fmi1_string_t message, ...);
+/** FMI 1.0 allocate memory function type */
 typedef void* (*fmi1_callback_allocate_memory_ft)(size_t nobj, size_t size);
+/** FMI 1.0 free memory  function type */
 typedef void  (*fmi1_callback_free_memory_ft)    (void* obj);
+/** FMI 1.0 step finished callback function type */
 typedef void  (*fmi1_step_finished_ft)          (fmi1_component_t c, fmi1_status_t status);
 
+/** Unified structure for both FMI 1.0 ME and CS */
 typedef struct {
 	fmi1_callback_logger_ft         logger;
 	fmi1_callback_allocate_memory_ft allocateMemory;
@@ -44,6 +56,7 @@ typedef struct {
 	fmi1_step_finished_ft           stepFinished;
 } fmi1_callback_functions_t;
 
+/** Event info structure as used in FMI 1.0 ME */
 typedef struct {
 	fmi1_boolean_t iterationConverged;
 	fmi1_boolean_t stateValueReferencesChanged;
@@ -53,6 +66,7 @@ typedef struct {
 	fmi1_real_t    nextEventTime;
 } fmi1_event_info_t;
 
+/** FMI 1.0 asyncronous co-simulation  status */
 typedef enum {
 	fmi1_do_step_status,
 	fmi1_pending_status,
@@ -107,5 +121,8 @@ typedef fmi1_status_t		(*fmi1_get_real_status_ft)				(fmi1_component_t c, const 
 typedef fmi1_status_t		(*fmi1_get_integer_status_ft)			(fmi1_component_t c, const fmi1_status_kind_t s, fmi1_integer_t* value);
 typedef fmi1_status_t		(*fmi1_get_boolean_status_ft)			(fmi1_component_t c, const fmi1_status_kind_t s, fmi1_boolean_t* value);
 typedef fmi1_status_t		(*fmi1_get_string_status_ft)			(fmi1_component_t c, const fmi1_status_kind_t s, fmi1_string_t*  value); 
+
+/** @}
+*/
 
 #endif /* End of header file FMI_FUNCTIONS_H_ */

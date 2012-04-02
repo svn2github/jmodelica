@@ -20,10 +20,22 @@
 extern "C" {
 #endif
 
-/* Check if the string str matches pattern string (with '*' and '?').
-   Return 0 if not matched; 1 - if matched.
+
+/**
+* \file jm_wc_match.h
+* \brief Wildcard matching function.
+* \addtogroup jm_utils
+	* @{
+*/
+
+/** Check if the string str matches pattern string (with '*' and '?').
+   @return 0 if not matched; 1 - if matched.
 */
 int	jm_wc_match(const char* pattern, const char* str);
+
+/**
+* @}
+*/
 
 #ifdef __cplusplus
 }

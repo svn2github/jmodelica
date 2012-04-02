@@ -108,7 +108,7 @@ void printTypeInfo(fmi1_import_variable_typedef_t* vt) {
             ni = fmi1_import_get_enum_type_size(et);
             printf("There are %d items \n",ni);
             for(i = 0; i < ni; i++) {
-                printf("[%d] %s (%s) \n", i+1, fmi1_import_get_enum_type_item_name(et, i), fmi1_xml_get_enum_type_item_description(et, i));
+                printf("[%d] %s (%s) \n", i+1, fmi1_import_get_enum_type_item_name(et, i), fmi1_import_get_enum_type_item_description(et, i));
             }
         }
         break;
@@ -122,9 +122,9 @@ void printTypeInfo(fmi1_import_variable_typedef_t* vt) {
 void printVariableInfo(fmi1_import_t* fmu,
                        fmi1_import_variable_t* v) {
     fmi1_base_type_enu_t bt;
-    printf("Variable name: %s\n", fmi1_xml_get_variable_name(v));
-    printf("Description: %s\n", fmi1_xml_get_variable_description(v));
-    printf("VR: %d\n", fmi1_xml_get_variable_vr(v));
+    printf("Variable name: %s\n", fmi1_import_get_variable_name(v));
+    printf("Description: %s\n", fmi1_import_get_variable_description(v));
+    printf("VR: %d\n", fmi1_import_get_variable_vr(v));
     printf("Variability: %s\n", fmi1_variability_to_string(fmi1_import_get_variability(v)));
     printf("Causality: %s\n", fmi1_causality_to_string(fmi1_import_get_causality(v)));
 
@@ -306,13 +306,13 @@ int main(int argc, char *argv[])
             printf("Error getting unit definitions (%s)\n", fmi1_import_get_last_error(fmu));
     }
     {
-        fmi1_xml_type_definitions_t* td = fmi1_import_get_type_definitions(fmu);
+        fmi1_import_type_definitions_t* td = fmi1_import_get_type_definitions(fmu);
         if(td) {
             {
-                size_t i, ntd = fmi1_xml_get_type_definition_number(td);
+                size_t i, ntd = fmi1_import_get_type_definition_number(td);
                 printf("There are %d defs\n", ntd);
                 for(i = 0; i < ntd; i++) {
-                    fmi1_xml_variable_typedef_t* vt = fmi1_xml_get_typedef(td, i);
+                    fmi1_import_variable_typedef_t* vt = fmi1_import_get_typedef(td, i);
                     if(!vt) {
                         printf("Error getting vartype for index %d (%s)\n", i, fmi1_import_get_last_error(fmu));
                         break;

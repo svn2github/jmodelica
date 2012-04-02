@@ -20,21 +20,32 @@
 extern "C" {
 #endif
 
-typedef const char* jm_string;
+/**
+	@file jm_types.h Types used in the Utils module.
 
+	*/
+/** \defgroup jm_utils Utilities 
+  * @{
+*/
+/** \brief A constant string.*/
+typedef const char* jm_string;
+/** \brief A constant string.*/
 typedef void* jm_voidp;
 
+/** \brief Mapping between a string and an integer ID */
 typedef struct jm_name_ID_map_t {
     jm_string name;
     unsigned int ID;
 } jm_name_ID_map_t;
 
+/** \brief Return status codes */
 typedef enum {	
 	jm_status_error = -1,
 	jm_status_success = 0,
 	jm_status_warning = 1
 } jm_status_enu_t;
 
+/** \brief Log levels supported via the logger functions in ::jm_callbacks */
 typedef enum {	
 	jm_log_level_all, /* "all" must be first in this enum*/
 	jm_log_level_info,
@@ -44,6 +55,7 @@ typedef enum {
 	jm_log_level_nothing /* "nothing" must be last in this enum*/
 } jm_log_level_enu_t;
 
+/** @} */
 #ifdef __cplusplus
 }
 #endif

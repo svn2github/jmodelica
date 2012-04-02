@@ -30,7 +30,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+		/**
+	\addtogroup fmi1_xml
+	@{
+	\addtogroup fmi1_xml_variables Functions for handling variable definitions.
+	@}
+	\addtogroup fmi1_xml_variables Functions for handling variable definitions.
+	@{
+	*/
 const char* fmi1_xml_get_variable_name(fmi1_xml_variable_t*);
 const char* fmi1_xml_get_variable_description(fmi1_xml_variable_t*);
 
@@ -81,13 +88,16 @@ int fmi1_xml_get_enum_variable_max(fmi1_xml_enum_variable_t* v);
 fmi1_variable_alias_kind_enu_t fmi1_xml_get_variable_alias_kind(fmi1_xml_variable_t*);
 fmi1_xml_variable_t* fmi1_xml_get_variable_alias_base(fmi1_xml_model_description_t* md,fmi1_xml_variable_t*);
 
-/*
+/**
     Return the list of all the variables aliased to the given one (including the base one.
     The list is ordered: base variable, aliases, negated aliases.
 */
 jm_status_enu_t fmi1_xml_get_variable_aliases(fmi1_xml_model_description_t* md, fmi1_xml_variable_t*, jm_vector(jm_voidp)*);
 /* fmi1_xml_variable_list_t* fmi1_xml_get_variable_aliases(fmi1_xml_model_description_t* md,fmi1_xml_variable_t*); */
 
+/**
+@}
+*/
 #ifdef __cplusplus
 }
 #endif

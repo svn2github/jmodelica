@@ -27,9 +27,24 @@
 #endif
 
 #include "jm_types.h"
+/** \file jm_portability.h
+	Handling platform specific defines and functions.
+*/
+/**
+	\addtogroup jm_utils
+	@{
+		\addtogroup jm_portability
+	@}
+*/
+/** \addtogroup jm_portability Handling platform specific defines and functions
+@{*/
+/** Load a dll/so library into the process and return a handle. */
 DLL_HANDLE		jm_portability_load_dll_handle		(const char* dll_file_path);
+/** Unload a Dll and release the handle*/
 jm_status_enu_t jm_portability_free_dll_handle		(DLL_HANDLE dll_handle);
+/** Find a function in the Dll and return a function pointer */
 jm_status_enu_t jm_portability_load_dll_function	(DLL_HANDLE dll_handle, char* dll_function_name, void** dll_function_ptrptr);
+/** Return error associated with Dll handling */
 char*			jm_portability_get_last_dll_error	(void);
-
+/*@}*/
 #endif /* End of header file JM_PORTABILITY_H_ */

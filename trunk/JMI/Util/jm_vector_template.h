@@ -14,9 +14,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
+/**
 * \file jm_vector_template.h
 * \brief Vector template definition.
+*
 * This file is supposed to be included into a C-file that instantiate the template.
 * jm_vector.h must be included before this file.
 * It expects JM_TEMPLATE_INSTANCE_TYPE to be defined to the template type to be instantiated.
@@ -26,6 +27,9 @@
 #include <string.h>
 #include "jm_vector.h"
 
+/** \addtogroup jm_vector  A vector of items (dynamic array)
+	 @{
+*/
 
 #ifndef JM_TEMPLATE_INSTANCE_TYPE
 #error "JM_TEMPLATE_INSTANCE_TYPE must be defined before including this file"
@@ -229,3 +233,5 @@ size_t jm_vector_find_index(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INS
     return jm_vector_ptr2index(JM_TEMPLATE_INSTANCE_TYPE)(v,jm_vector_find(JM_TEMPLATE_INSTANCE_TYPE)(v, itemp, f));
 }
 
+/** @}
+*/
