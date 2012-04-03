@@ -45,6 +45,7 @@ fmi1_import_type_definitions_t* fmi1_import_get_type_definitions(fmi1_import_t* 
 size_t fmi1_import_get_type_definition_number(fmi1_import_type_definitions_t* td);
 
 /** \brief Get a type definition specified by the index 
+	@param td the type definition list object
 	@param index the index of type definition. Must be less than the numbere returned by fmi1_import_get_type_definition_number()
 	@return A type definition object or NULL if index is out of range.
 */

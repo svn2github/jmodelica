@@ -41,10 +41,11 @@ void fmi1_capi_destroy_dllfmu(fmi1_capi_t* fmu);
 /**
  * \brief Create a C-API struct. The C-API struct is a placeholder for the FMI DLL functions.
  * 
- * @param fmu A model description object returned by fmi1_import_allocate.
+ * @param callbacks ::jm_callbacks used to construct library objects.
  * @param dllPath Full path to the FMU shared library.
  * @param modelIdentifier The model indentifier.
  * @param standard FMI standard that the function should load.
+ * @param callBackFunctions callbacks passed to the FMU.
  * @return Error status. If the function returns with an error, it is not allowed to call any of the other C-API functions.
  */
 fmi1_capi_t* fmi1_capi_create_dllfmu(jm_callbacks* callbacks, const char* dllPath, const char* modelIdentifier, fmi1_callback_functions_t callBackFunctions, fmi1_fmu_kind_enu_t standard);
@@ -323,8 +324,8 @@ const char* fmi1_capi_get_types_platform(fmi1_capi_t* fmu);
  * 
  * @param fmu C-API struct that has succesfully loaded the FMI function.
  * @param instanceName The name of the instance.
- * @param GUID The GUID identifier.
- * @param Location Access path to the FMU archive.
+ * @param fmuGUID The GUID identifier.
+ * @param fmuLocation Access path to the FMU archive.
  * @param mimeType MIME type.
  * @param timeout Communication timeout value in milli-seconds.
  * @param visible Indicates whether or not the simulator application window shoule be visible.

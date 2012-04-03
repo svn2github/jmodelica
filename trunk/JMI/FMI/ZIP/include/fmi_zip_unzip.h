@@ -25,6 +25,13 @@ extern "C" {
 #include <stdlib.h>
 #include <jm_types.h>
 #include "miniunz.h"
+/**
+ \file fmi_zip_unzip.h
+ Declaration of fmi_zip_unzip() function.
+
+ \addtogroup fmi_zip Interface to zlib
+ @{
+*/
 
 /**
  * \brief Uncompress a zip file
@@ -34,6 +41,8 @@ extern "C" {
  * @return Error status.
  */
 jm_status_enu_t fmi_zip_unzip(const char* zip_file_path, const char* output_folder);
+
+/** @} */
 
 #ifdef __cplusplus 
 }

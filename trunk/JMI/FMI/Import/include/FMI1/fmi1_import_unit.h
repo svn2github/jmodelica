@@ -94,7 +94,7 @@ fmi1_real_t fmi1_import_convert_to_display_unit(fmi1_real_t value , fmi1_import_
 	@param du The display unit object
 	@param isRelativeQuantity specifies if "offset" should be incorporated into conversion
 */
-fmi1_real_t fmi1_import_convert_from_display_unit(fmi1_real_t, fmi1_import_display_unit_t*, int isRelativeQuantity);
+fmi1_real_t fmi1_import_convert_from_display_unit(fmi1_real_t value, fmi1_import_display_unit_t* du, int isRelativeQuantity);
 /** @} */
 #ifdef __cplusplus
 }

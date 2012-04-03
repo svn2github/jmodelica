@@ -23,6 +23,15 @@ extern "C" {
 #endif
 
 #include <jm_types.h>
+/**
+ \file fmi_zip_unzip.h
+ Declaration of fmi_zip_zip() function.
+
+ \addtogroup fmi_zip Interface to zlib
+ \brief Interface to Zlib library <http://www.zlib.net/> and Minizip <http://www.winimage.com/zLibDll/minizip.html>
+	to support zip and unzip of FMU modules.
+ @{
+*/
 
 /**
  * \brief Compress files to the zip format
@@ -33,6 +42,8 @@ extern "C" {
  * @return Error status.
  */
 jm_status_enu_t fmi_zip_zip(const char* zip_file_path, int n_files_to_zip, const char** files_to_zip);
+
+/** @} */
 
 #ifdef __cplusplus 
 }

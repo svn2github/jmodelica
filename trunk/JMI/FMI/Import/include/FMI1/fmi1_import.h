@@ -165,9 +165,9 @@ Clear the error message.
 int fmi1_import_clear_last_error(fmi1_import_t* fmu);
 
 /**Release the memory allocated
-@param An fmu object as returned by fmi1_import_parse_xml().
+@param fmu An fmu object as returned by fmi1_import_parse_xml().
 */
-void fmi1_import_free(fmi1_import_t*);
+void fmi1_import_free(fmi1_import_t* fmu);
 /** @}
 \addtogroup fmi1_import_gen
  * \brief Functions for retrieving general model information. Memory for the strings is allocated and deallocated in the module.
@@ -238,14 +238,14 @@ fmi1_import_capabilities_t* fmi1_import_get_capabilities(fmi1_import_t* fmu);
  */
 /** \brief Free a C-API struct. All memory allocated since the struct was created is freed.
  * 
- * @param fmu A model description object returned by fmi1_import_allocate().
+ * @param fmu A model description object returned by fmi1_import_parse_xml().
  */
 void fmi1_import_destroy_dllfmu(fmi1_import_t* fmu);
 
 /**
  * \brief Create a C-API struct. The C-API struct is a placeholder for the FMI DLL functions.
  * 
- * @param fmu A model description object returned by fmi1_import_allocate().
+ * @param fmu A model description object returned by fmi1_import_parse_xml().
  * @param callBackFunctions Callback functions used by the FMI functions internally.
  * @param standard FMI standard that the function should load.
  * @param unzipped_folder FMI standard that the function should load.
@@ -257,7 +257,7 @@ jm_status_enu_t fmi1_import_create_dllfmu(fmi1_import_t* fmu, fmi1_callback_func
 /**
  * \brief Loads the FMI functions from the shared library. The shared library must be loaded before this function can be called, see fmi1_import_load_dll.
  * 
- * @param fmu A model description object returned by fmi1_import_allocate().
+ * @param fmu A model description object returned by fmi1_import_parse_xml().
  * @return Error status. If the function returns with an error, no other C-API functions than fmi1_import_free_dll and fmi1_import_destroy_dllfmu are allowed to be called.
  */
 jm_status_enu_t fmi1_import_load_fcn(fmi1_import_t* fmu);
@@ -265,7 +265,7 @@ jm_status_enu_t fmi1_import_load_fcn(fmi1_import_t* fmu);
 /**
  * \brief Loads the FMU's shared library. The shared library functions are not loaded in this call, see fmi1_import_load_fcn().
  * 
- * @param fmu A model description object returned by fmi1_import_allocate().
+ * @param fmu A model description object returned by fmi1_import_parse_xml().
  * @return Error status. If the function returns with an error, no other C-API functions than fmi1_import_destroy_dllfmu are allowed to be called.
  */
 jm_status_enu_t fmi1_import_load_dll(fmi1_import_t* fmu);
@@ -273,7 +273,7 @@ jm_status_enu_t fmi1_import_load_dll(fmi1_import_t* fmu);
 /**
  * \brief Frees the handle to the FMU´s shared library. After this function returnes, no other C-API functions than fmi1_import_destroy_dllfmu() and fmi1_import_load_dll() are allowed to be called.
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMU´s shared library, see fmi1_import_load_dll().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMU´s shared library, see fmi1_import_load_dll().
  * @return Error status.
  */
 jm_status_enu_t fmi1_import_free_dll(fmi1_import_t* fmu);
@@ -281,7 +281,7 @@ jm_status_enu_t fmi1_import_free_dll(fmi1_import_t* fmu);
 /**
  * \brief Wrapper for the FMI function fmiGetVersion() 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @return FMI version.
  */
 const char* fmi1_import_get_version(fmi1_import_t* fmu);
@@ -289,7 +289,7 @@ const char* fmi1_import_get_version(fmi1_import_t* fmu);
 /**
  * \brief Wrapper for the FMI function fmiSetDebugLogging(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param loggingOn Enable or disable the debug logger.
  * @return FMI status.
  */
@@ -298,7 +298,7 @@ fmi1_status_t fmi1_import_set_debug_logging(fmi1_import_t* fmu, fmi1_boolean_t l
 /**
  * \brief Wrapper for the FMI function fmiSetReal(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param vr Array of value references.
  * @param nvr Number of array elements.
  * @param value Array of variable values.
@@ -309,7 +309,7 @@ fmi1_status_t fmi1_import_set_real(fmi1_import_t* fmu, const fmi1_value_referenc
 /**
  * \brief Wrapper for the FMI function fmiSetInteger(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param vr Array of value references.
  * @param nvr Number of array elements.
  * @param value Array of variable values.
@@ -320,7 +320,7 @@ fmi1_status_t fmi1_import_set_integer(fmi1_import_t* fmu, const fmi1_value_refer
 /**
  * \brief Wrapper for the FMI function fmiSetBoolean(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param vr Array of value references.
  * @param nvr Number of array elements.
  * @param value Array of variable values.
@@ -331,7 +331,7 @@ fmi1_status_t fmi1_import_set_boolean(fmi1_import_t* fmu, const fmi1_value_refer
 /**
  * \brief Wrapper for the FMI function fmiSetString(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param vr Array of value references.
  * @param nvr Number of array elements.
  * @param value Array of variable values.
@@ -343,7 +343,7 @@ fmi1_status_t fmi1_import_set_string(fmi1_import_t* fmu, const fmi1_value_refere
 /**
  * \brief Wrapper for the FMI function fmiGetReal(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param vr Array of value references.
  * @param nvr Number of array elements.
  * @param value (Output)Array of variable values.
@@ -354,7 +354,7 @@ fmi1_status_t fmi1_import_get_real(fmi1_import_t* fmu, const fmi1_value_referenc
 /**
  * \brief Wrapper for the FMI function fmiGetInteger(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param vr Array of value references.
  * @param nvr Number of array elements.
  * @param value (Output)Array of variable values.
@@ -365,7 +365,7 @@ fmi1_status_t fmi1_import_get_integer(fmi1_import_t* fmu, const fmi1_value_refer
 /**
  * \brief Wrapper for the FMI function fmiGetBoolean(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param vr Array of value references.
  * @param nvr Number of array elements.
  * @param value (Output)Array of variable values.
@@ -376,7 +376,7 @@ fmi1_status_t fmi1_import_get_boolean(fmi1_import_t* fmu, const fmi1_value_refer
 /**
  * \brief Wrapper for the FMI function fmiGetString(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param vr Array of value references.
  * @param nvr Number of array elements.
  * @param value (Output)Array of variable values.
@@ -387,7 +387,7 @@ fmi1_status_t fmi1_import_get_string(fmi1_import_t* fmu, const fmi1_value_refere
 /**
  * \brief Wrapper for the FMI function fmiGetModelTypesPlatform(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @return The platform the FMU was compiled for.
  */
 const char* fmi1_import_get_model_types_platform(fmi1_import_t* fmu);
@@ -395,7 +395,7 @@ const char* fmi1_import_get_model_types_platform(fmi1_import_t* fmu);
 /**
  * \brief Wrapper for the FMI function fmiInstantiateModel(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param instanceName The name of the instance.
  * @param GUID The GUID identifier.
  * @param loggingOn Enable or disable the debug logger.
@@ -406,14 +406,14 @@ jm_status_enu_t fmi1_import_instantiate_model(fmi1_import_t* fmu, fmi1_string_t 
 /**
  * \brief Wrapper for the FMI function fmiFreeModelInstance(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  */
 void fmi1_import_free_model_instance(fmi1_import_t* fmu);
 
 /**
  * \brief Wrapper for the FMI function fmiSetTime(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param time Set the current time.
  * @return FMI status.
  */
@@ -422,7 +422,7 @@ fmi1_status_t fmi1_import_set_time(fmi1_import_t* fmu, fmi1_real_t time);
 /**
  * \brief Wrapper for the FMI function fmiSetContinuousStates(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param x Array of state values.
  * @param nx Number of states.
  * @return FMI status.
@@ -432,7 +432,7 @@ fmi1_status_t fmi1_import_set_continuous_states(fmi1_import_t* fmu, const fmi1_r
 /**
  * \brief Wrapper for the FMI function fmiCompletedIntegratorStep(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param callEventUpdate (Output) Call fmiEventUpdate indicator.
  * @return FMI status.
  */
@@ -441,7 +441,7 @@ fmi1_status_t fmi1_import_completed_integrator_step(fmi1_import_t* fmu, fmi1_boo
 /**
  * \brief Wrapper for the FMI function fmiInitialize(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param toleranceControlled Enable or disable the use of relativeTolerance in the FMU.
  * @param relativeTolerance A relative tolerance used in the FMU.
  * @param eventInfo (Output) fmiEventInfo struct.
@@ -452,7 +452,7 @@ fmi1_status_t fmi1_import_initialize(fmi1_import_t* fmu, fmi1_boolean_t toleranc
 /**
  * \brief Wrapper for the FMI function fmiGetDerivatives(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param derivatives (Output) Array of the derivatives.
  * @param nx Number of derivatives.
  * @return FMI status.
@@ -462,7 +462,7 @@ fmi1_status_t fmi1_import_get_derivatives(fmi1_import_t* fmu, fmi1_real_t deriva
 /**
  * \brief Wrapper for the FMI function fmiGetEventIndicators(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param eventIndicators (Output) The event indicators.
  * @param ni Number of event indicators.
  * @return FMI status.
@@ -472,7 +472,7 @@ fmi1_status_t fmi1_import_get_event_indicators(fmi1_import_t* fmu, fmi1_real_t e
 /**
  * \brief Wrapper for the FMI function fmiEventUpdate(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param intermediateResults Indicate whether or not the fmiEventUpdate shall return after every internal event interation.
  * @param eventInfo (Output) An fmiEventInfo struct.
  * @return FMI status.
@@ -482,7 +482,7 @@ fmi1_status_t fmi1_import_eventUpdate(fmi1_import_t* fmu, fmi1_boolean_t interme
 /**
  * \brief Wrapper for the FMI function fmiGetContinuousStates(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param states (Output) Array of state values.
  * @param nx Number of states.
  * @return FMI status.
@@ -492,7 +492,7 @@ fmi1_status_t fmi1_import_get_continuous_states(fmi1_import_t* fmu, fmi1_real_t 
 /**
  * \brief Wrapper for the FMI function fmiGetNominalContinuousStates(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param x_nominal (Output) The nominal values.
  * @param nx Number of nominal values.
  * @return FMI status.
@@ -502,7 +502,7 @@ fmi1_status_t fmi1_import_get_nominal_continuous_states(fmi1_import_t* fmu, fmi1
 /**
  * \brief Wrapper for the FMI function fmiGetStateValueReferences(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param vrx (Output) The value-references of the states.
  * @param nx Number of value-references.
  * @return FMI status.
@@ -512,7 +512,7 @@ fmi1_status_t fmi1_import_get_state_value_references(fmi1_import_t* fmu, fmi1_va
 /**
  * \brief Wrapper for the FMI function fmiTerminate(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @return FMI status.
  */
 fmi1_status_t fmi1_import_terminate(fmi1_import_t* fmu);
@@ -520,7 +520,7 @@ fmi1_status_t fmi1_import_terminate(fmi1_import_t* fmu);
 /**
  * \brief Wrapper for the FMI function fmiGetTypesPlatform(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @return The platform the FMU was compiled for.
  */
 const char* fmi1_import_get_types_platform(fmi1_import_t* fmu);
@@ -528,10 +528,10 @@ const char* fmi1_import_get_types_platform(fmi1_import_t* fmu);
 /**
  * \brief Wrapper for the FMI function fmiInstantiateSlave(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param instanceName The name of the instance.
- * @param GUID The GUID identifier.
- * @param Location Access path to the FMU archive.
+ * @param fmuGUID The GUID identifier.
+ * @param fmuLocation Access path to the FMU archive.
  * @param mimeType MIME type.
  * @param timeout Communication timeout value in milli-seconds.
  * @param visible Indicates whether or not the simulator application window shoule be visible.
@@ -545,7 +545,7 @@ jm_status_enu_t fmi1_import_instantiate_slave(fmi1_import_t* fmu, fmi1_string_t 
 /**
  * \brief Wrapper for the FMI function fmiInitializeSlave(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param tStart Start time of the simulation
  * @param StopTimeDefined Indicates whether or not the stop time is used.
  * @param tStop The stop time of the simulation.
@@ -556,7 +556,7 @@ fmi1_status_t fmi1_import_initialize_slave(fmi1_import_t* fmu, fmi1_real_t tStar
 /**
  * \brief Wrapper for the FMI function fmiTerminateSlave(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @return FMI status.
  */
 fmi1_status_t fmi1_import_terminate_slave(fmi1_import_t* fmu);
@@ -564,7 +564,7 @@ fmi1_status_t fmi1_import_terminate_slave(fmi1_import_t* fmu);
 /**
  * \brief Wrapper for the FMI function fmiResetSlave(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @return FMI status.
  */
 fmi1_status_t fmi1_import_reset_slave(fmi1_import_t* fmu);
@@ -572,14 +572,14 @@ fmi1_status_t fmi1_import_reset_slave(fmi1_import_t* fmu);
 /**
  * \brief Wrapper for the FMI function fmiFreeSlaveInstance(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  */
 void fmi1_import_free_slave_instance(fmi1_import_t* fmu);
 
 /**
  * \brief Wrapper for the FMI function fmiSetRealInputDerivatives(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param vr Array of value references.
  * @param nvr Number of array elements.
  * @param order	Array of derivative orders.
@@ -591,7 +591,7 @@ fmi1_status_t fmi1_import_set_real_input_derivatives(fmi1_import_t* fmu, const f
 /**
  * \brief Wrapper for the FMI function fmiGetOutputDerivatives(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param vr Array of value references.
  * @param nvr Number of array elements.
  * @param order	Array of derivative orders.
@@ -603,7 +603,7 @@ fmi1_status_t fmi1_import_get_real_output_derivatives(fmi1_import_t* fmu, const 
 /**
  * \brief Wrapper for the FMI function fmiCancelStep(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @return FMI status.
  */
 fmi1_status_t fmi1_import_cancel_step(fmi1_import_t* fmu);
@@ -611,7 +611,7 @@ fmi1_status_t fmi1_import_cancel_step(fmi1_import_t* fmu);
 /**
  * \brief Wrapper for the FMI function fmiDoStep(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param currentCommunicationPoint Current communication point of the master.
  * @param communicationStepSize Communication step size.
  * @param newStep Indicates whether or not the last communication step was accepted by the master.
@@ -622,7 +622,7 @@ fmi1_status_t fmi1_import_do_step(fmi1_import_t* fmu, fmi1_real_t currentCommuni
 /**
  * \brief Wrapper for the FMI function fmiGetStatus(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param s Kind of status to return the value for.
  * @param value (Output) FMI status value.
  * @return FMI status.
@@ -632,7 +632,7 @@ fmi1_status_t fmi1_import_get_status(fmi1_import_t* fmu, const fmi1_status_kind_
 /**
  * \brief Wrapper for the FMI function fmiGetRealStatus(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param s Kind of status to return the value for.
  * @param value (Output) FMI real value.
  * @return FMI status.
@@ -642,7 +642,7 @@ fmi1_status_t fmi1_import_get_real_status(fmi1_import_t* fmu, const fmi1_status_
 /**
  * \brief Wrapper for the FMI function fmiGetIntegerStatus(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn.
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn.
  * @param s Kind of status to return the value for.
  * @param value (Output) FMI integer value.
  * @return FMI status.
@@ -652,7 +652,7 @@ fmi1_status_t fmi1_import_get_integer_status(fmi1_import_t* fmu, const fmi1_stat
 /**
  * \brief Wrapper for the FMI function fmiGetBooleanStatus(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn.
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn.
  * @param s Kind of status to return the value for.
  * @param value (Output) FMI boolean value.
  * @return FMI status.
@@ -662,7 +662,7 @@ fmi1_status_t fmi1_import_get_boolean_status(fmi1_import_t* fmu, const fmi1_stat
 /**
  * \brief Wrapper for the FMI function fmiGetStringStatus(...) 
  * 
- * @param fmu A model description object returned by fmi1_import_allocate() that has loaded the FMI functions, see fmi1_import_load_fcn().
+ * @param fmu A model description object returned by fmi1_import_parse_xml() that has loaded the FMI functions, see fmi1_import_load_fcn().
  * @param s Kind of status to return the value for.
  * @param value (Output) FMI string value.
  * @return FMI status.

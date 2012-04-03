@@ -271,6 +271,7 @@ Default definition below is jm_diff and is implemented as (int)(first-second)
 #define jm_vector_foreach(T) jm_mangle(jm_vector_foreach, T)
 #define jm_vector_foreach_c(T) jm_mangle(jm_vector_foreach_c, T)
 
+/** @} */
 
 /** number of items always allocated on the stack */
 #define JM_VECTOR_MINIMAL_CAPACITY 16

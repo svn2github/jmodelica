@@ -91,8 +91,13 @@ typedef struct fmi1_xml_unit_definitions_t fmi1_xml_unit_definitions_t;
 /**@{ */
 typedef struct fmi1_xml_capabilities_t fmi1_xml_capabilities_t;
 /**@} */
+/**	\addtogroup fmi1_xml_gen General information retrieval*/
+/**	\addtogroup fmi1_xml_init  Constuction, destruction and error checking */
+
 /** @} */
 
+/**	\addtogroup fmi1_xml_init
+@{ */
 /**
    \brief Allocate the ModelDescription structure and initialize as empty model.
    @return NULL pointer is returned if memory allocation fails.
@@ -106,7 +111,7 @@ fmi1_xml_model_description_t* fmi1_xml_allocate_model_description( jm_callbacks*
    i.e., fmiClearModelDescrition is automatically called before reading in the new file.
 
     @param md A model description object as returned by fmi1_xml_allocate_model_description.
-    @param filename A name (full path) of the XML file name with model definition.
+    @param fileName A name (full path) of the XML file name with model definition.
    @return 0 if parsing was successfull. Non-zero value indicates an error.
 */
 int fmi1_xml_parse_model_description( fmi1_xml_model_description_t* md, const char* fileName);
@@ -143,11 +148,13 @@ void fmi1_xml_clear_last_error(fmi1_xml_model_description_t* md);
 /**Release the memory allocated
 @param md A model description object as returned by fmi1_xml_allocate_model_description.
 */
-void fmi1_xml_free_model_description(fmi1_xml_model_description_t*);
+void fmi1_xml_free_model_description(fmi1_xml_model_description_t* md);
 
-/**\defgroup General information
+/** @} */
+/** \addtogroup fmi1_xml_gen
  * \brief Functions for retrieving general model information. Memory for the strings is allocated and deallocated in the module.
- *       All the functions take a model description object as returned by fmi1_xml_allocate_model_description as parameter.
+ *   All the functions take a model description object as returned by fmi1_xml_allocate_model_description() as a parameter. 
+ *   The information is retrieved from the XML file.
  * @{
 */
 const char* fmi1_xml_get_model_name(fmi1_xml_model_description_t* md);

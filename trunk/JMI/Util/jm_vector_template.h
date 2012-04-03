@@ -27,8 +27,8 @@
 #include <string.h>
 #include "jm_vector.h"
 
-/** \addtogroup jm_vector  A vector of items (dynamic array)
-	 @{
+/** \addtogroup jm_vector  A vector of items (dynamic array)*/
+/** @{
 */
 
 #ifndef JM_TEMPLATE_INSTANCE_TYPE
