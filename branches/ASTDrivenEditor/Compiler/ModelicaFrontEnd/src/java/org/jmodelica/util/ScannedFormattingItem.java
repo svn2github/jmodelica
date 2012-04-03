@@ -193,4 +193,28 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 		
 		return new EmptyFormattingItem();
 	}
+
+	/**
+	 * Checks whether <code>line</code> and <code>column</code> are equal to this
+	 * <code>ScannedFormattingItem</code>'s starting position.
+	 * @param line the line for which to determine if its equal to this item's starting position.
+	 * @param column the column for which to determine if its equal to this item's starting position.
+	 * @return true if <code>line</code> and <code>column</code> are equal to this
+	 * <code>ScannedFormattingItem</code>'s starting position. Otherwise false.
+	 */
+	public boolean atStart(int line, int column) {
+		return (getStartLine() == line && getStartColumn() == column);
+	}
+
+	/**
+	 * Checks whether <code>line</code> and <code>column</code> are equal to this
+	 * <code>ScannedFormattingItem</code>'s ending position.
+	 * @param line the line for which to determine if its equal to this item's ending position.
+	 * @param column the column for which to determine if its equal to this item's ending position.
+	 * @return true if <code>line</code> and <code>column</code> are equal to this
+	 * <code>ScannedFormattingItem</code>'s ending position. Otherwise false.
+	 */
+	public boolean atEnd(int line, int column) {
+		return (getEndLine() == line && getEndColumn() == column);
+	}
 }
