@@ -4560,6 +4560,85 @@ equation
   x3 = f(x2.a,A);
 end IndexReduction28_Record;
 
+model IndexReduction29_FunctionNoDerivative
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction29_FunctionNoDerivative",
+         description="Index reduction: function with record input & output",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction29_FunctionNoDerivative
+ Real x;
+ Real y;
+ Real der_x;
+initial equation 
+ y = 0.0;
+equation
+ der_x + der(y) = 0;
+ x + TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.F(y, x, 0, x) = 0;
+ der_x + TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.der_F(y, x, 0, x, der(y), der_x) = 0.0;
+
+ function TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.der_F
+  input Real p;
+  input Real h;
+  input Integer phase;
+  input Real z;
+  input Real der_p;
+  input Real der_h;
+  output Real der_rho;
+ algorithm
+  der_rho := der_p + der_h;
+  return;
+ end TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.der_F;
+
+ function TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.F
+  input Real p;
+  input Real h;
+  input Integer phase;
+  input Real z;
+  output Real rho;
+ algorithm
+  rho := p + h;
+  return;
+ end TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.F;
+end TransformCanonicalTests.IndexReduction29_FunctionNoDerivative;
+")})));
+	
+function der_F
+  import SI = Modelica.SIunits;
+
+ input SI.Pressure p;
+ input SI.SpecificEnthalpy h;
+ input Integer phase=0;
+ input Real z;
+ input Real der_p;
+ input Real der_h;
+ output Real der_rho;
+
+algorithm
+     der_rho := der_p + der_h;
+end der_F;
+
+function F 
+  import SI = Modelica.SIunits;
+
+  input SI.Pressure p;
+  input SI.SpecificEnthalpy h;
+  input Integer phase=0;
+  input Real z;
+  output SI.Density rho;
+
+algorithm
+	rho := p + h;
+  annotation(derivative(noDerivative=phase, noDerivative=z)=der_F);
+  
+end F;
+
+  Real x,y;
+equation
+  der(x) + der(y) = 0;
+  x + F(y,x,0,x) = 0;
+end IndexReduction29_FunctionNoDerivative;
+
 model StateInitialPars1
 	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(

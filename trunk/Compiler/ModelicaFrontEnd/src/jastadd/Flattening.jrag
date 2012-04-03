@@ -150,13 +150,28 @@ aspect Flattening {
 			fab.ensureReturn();
 			ffd.setFAlgorithmBlock(fab);
 			
-			String functionDerivative = annotation("derivative").string();
-			if (functionDerivative!=null) {
-				InstAccess func_der = dynamicClassName(new InstClassAccess(functionDerivative));
+			AnnotationNode functionDer = annotation("derivative");
+			
+			if (functionDer!=AnnotationNode.NO_ANNOTATION) {
+				String functionDerName = functionDer.string();
+				if (functionDerName==null) {
+					ValueModification vm = ((CompleteModification)((ClassModification)functionDer.ast()).getParent()).getValueModification();	
+					functionDerName = vm.getExp().prettyPrint("");
+				}
+				List<FIdUse> noDerivatives = new List<FIdUse>();
+				for (AnnotationNode nd : functionDer) {
+					if (nd!=null && "noDerivative".equals(nd.name())) {
+						if (nd.string() != null) {
+							noDerivatives.add(new FIdUse(nd.string()));
+						}
+					}	
+				}				
+
+				InstAccess func_der = dynamicClassName(new InstClassAccess(functionDerName));
 				InstBaseClassDecl fd_decl = (InstBaseClassDecl)func_der.myInstClassDecl();
 				if (!fd_decl.isUnknown()) {
 					fd_decl.flattenThisFunction(fc);
-					ffd.setFDerivativeFunction(new FDerivativeFunction(new FIdUse(new FQName(fd_decl.qualifiedName())),1));
+					ffd.setFDerivativeFunction(new FDerivativeFunction(new FIdUse(new FQName(fd_decl.qualifiedName())),1,noDerivatives));
 				}
 			}
 			

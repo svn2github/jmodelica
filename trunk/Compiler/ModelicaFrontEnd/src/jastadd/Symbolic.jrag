@@ -574,12 +574,18 @@ aspect Derivatives {
 			                                                 + prettyPrint("") + "\n  since the function " + name() +
 			                                                 " does not have a derivative annotation.");	
 		}		
+		FFunctionDecl myDecl = myFFunctionDecl();
 		List args = new List();
 		for (FExp e : getArgs()) {
 			args.add(e.fullCopy());
 		}
+		int i = 0;
 		for (FExp e : getArgs()) {
-			args.add(e.diff(name));
+			FFunctionVariable fv = myDecl.getFFunctionVariable(i);
+			if (!fv.isNoDerivative()) {
+				args.add(e.diff(name));
+			}
+			i++;
 		}
 		FFunctionCall der_f = new FFunctionCall(fd.getFDerivativeFunction().getName().fullCopy(), args, getSizes());		
 		return dynamicFExp(der_f);

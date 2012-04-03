@@ -190,3 +190,21 @@ aspect Types {
 
 }
 
+aspect DerivativeFunctions {
+
+	inh boolean FFunctionVariable.isNoDerivative();
+	
+	eq FFunctionDecl.getFFunctionVariable(int i).isNoDerivative() {
+		if (!hasFDerivativeFunction()) {
+			return false;
+		}
+		String n = getFFunctionVariable(i).name();
+		for (FIdUse fid : getFDerivativeFunction().getNoDerivatives()) {
+			if (fid.name().equals(n)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+}

@@ -303,7 +303,7 @@ aspect AnnotationAPI {
 				return NO_ANNOTATION;
 			}
 
-			protected ASTNode ast() {
+			public ASTNode ast() {
 				return mod;
 			}
 

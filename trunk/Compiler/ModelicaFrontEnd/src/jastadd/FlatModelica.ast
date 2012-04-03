@@ -51,7 +51,7 @@ FFunctionDecl : BaseNode ::= FQName FFunctionVariable* FAlgorithmBlock [FDerivat
  * The information in this node is extracted from the derivative 
  * annotation in a function declaration.
  */
-FDerivativeFunction : BaseNode ::= Name:FIdUse <Order:int>;
+FDerivativeFunction : BaseNode ::= Name:FIdUse <Order:int> NoDerivative:FIdUse*;
 
 /**
  * \brief A flattenend record declaration.
