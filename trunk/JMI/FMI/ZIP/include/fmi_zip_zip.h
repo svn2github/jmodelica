@@ -39,9 +39,10 @@ extern "C" {
  * @param zip_file_path Full file path to the final compressed file. The folders must exist.
  * @param n_files_to_zip Number of files to compress
  * @param files_to_zip List of the full file names to compress
+ * @param callbacks Callback functions
  * @return Error status.
  */
-jm_status_enu_t fmi_zip_zip(const char* zip_file_path, int n_files_to_zip, const char** files_to_zip);
+jm_status_enu_t fmi_zip_zip(const char* zip_file_path, int n_files_to_zip, const char** files_to_zip, jm_callbacks* callbacks);
 
 /** @} */
 

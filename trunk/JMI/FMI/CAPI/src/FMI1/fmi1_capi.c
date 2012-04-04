@@ -21,7 +21,6 @@ extern "C" {
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <errno.h>
 
 #include <jm_types.h>
 #include <jm_portability.h>
@@ -36,13 +35,14 @@ extern "C" {
 static jm_status_enu_t fmi1_capi_get_fcn(fmi1_capi_t* fmu, const char* function_name, void** dll_function_ptrptr)
 {
 	char fname[FUNCTION_NAME_LENGTH_MAX];
-
+	
 	if (strlen(fmu->modelIdentifier) + strlen(function_name) + 2 > FUNCTION_NAME_LENGTH_MAX) {
 		jm_log(fmu->callbacks, LOGGER_MODULE_NAME, jm_log_level_error,  "DLL function name is too long. Max name length is set to %s.", STRINGIFY(FUNCTION_NAME_LENGTH_MAX));
 		return jm_status_error;
-	}
+	}	
 
 	sprintf(fname,"%s_%s",fmu->modelIdentifier, function_name);
+
 	return jm_portability_load_dll_function(fmu->dllHandle, fname, dll_function_ptrptr);
 }
 
@@ -147,7 +147,7 @@ fmi1_capi_t* fmi1_capi_create_dllfmu(jm_callbacks* cb, const char* dllPath, cons
 	/* Allocate memory for the FMU instance */
 	fmu = (fmi1_capi_t*)cb->calloc(1, sizeof(fmi1_capi_t));
 	if (fmu == NULL) { /* Could not allocate memory for the FMU struct */
-		jm_log(cb, LOGGER_MODULE_NAME, jm_log_level_error, "Could not allocate memory for the FMU struct. %s", strerror(errno)); /* WARNING: No garanty that strerror(errno) prints anyting related to the error from the callback function */
+		jm_log(cb, LOGGER_MODULE_NAME, jm_log_level_error, "Could not allocate memory for the FMU struct.");
 		return NULL;
 	}
 
@@ -168,7 +168,7 @@ fmi1_capi_t* fmi1_capi_create_dllfmu(jm_callbacks* cb, const char* dllPath, cons
 	/* Copy DLL path */
 	fmu->dllPath = (char*)cb->calloc(sizeof(char), strlen(dllPath) + 1);
 	if (fmu->dllPath == NULL) {
-		jm_log(cb, LOGGER_MODULE_NAME, jm_log_level_error, "Could not allocate memory for the DLL path string. %s", strerror(errno));  /* WARNING: No garanty that strerror(errno) prints anyting related to the error from the callback function */
+		jm_log(cb, LOGGER_MODULE_NAME, jm_log_level_error, "Could not allocate memory for the DLL path string.");
 		fmi1_capi_destroy_dllfmu(fmu);
 		return NULL;
 	}
@@ -177,7 +177,7 @@ fmi1_capi_t* fmi1_capi_create_dllfmu(jm_callbacks* cb, const char* dllPath, cons
 	/* Copy the modelIdentifier */
 	fmu->modelIdentifier = (char*)cb->calloc(sizeof(char), strlen(modelIdentifier) + 1);
 	if (fmu->modelIdentifier == NULL) {
-		jm_log(cb, LOGGER_MODULE_NAME, jm_log_level_error, "Could not allocate memory for the modelIdentifier string. %s", strerror(errno)); /* WARNING: No garanty that strerror(errno) prints anyting related to the error from the callback function */
+		jm_log(cb, LOGGER_MODULE_NAME, jm_log_level_error, "Could not allocate memory for the modelIdentifier string.");
 		fmi1_capi_destroy_dllfmu(fmu);
 		return NULL;
 	}
@@ -207,9 +207,8 @@ jm_status_enu_t fmi1_capi_load_fcn(fmi1_capi_t* fmu)
 jm_status_enu_t fmi1_capi_load_dll(fmi1_capi_t* fmu)
 {
 	fmu->dllHandle = jm_portability_load_dll_handle(fmu->dllPath); /* Load the shared library */
-	
 	if (fmu->dllHandle == NULL) {
-		jm_log(fmu->callbacks, LOGGER_MODULE_NAME, jm_log_level_error, "Could not load the DLL. %s", jm_portability_get_last_dll_error());
+		jm_log(fmu->callbacks, LOGGER_MODULE_NAME, jm_log_level_error, "Could not load the DLL: %s", jm_portability_get_last_dll_error());
 		return jm_status_error;
 	} else {
 		return jm_status_success;
@@ -220,7 +219,7 @@ jm_status_enu_t fmi1_capi_free_dll(fmi1_capi_t* fmu)
 {
 	if (fmu->dllHandle) {		
 		if (jm_portability_free_dll_handle(fmu->dllHandle) == jm_status_error) { /* Free the library handle */
-			jm_log(fmu->callbacks, LOGGER_MODULE_NAME, jm_log_level_error, "Could not free the DLL. %s", jm_portability_get_last_dll_error());
+			jm_log(fmu->callbacks, LOGGER_MODULE_NAME, jm_log_level_error, "Could not free the DLL: %s", jm_portability_get_last_dll_error());
 			return jm_status_error;
 		} else {
 			return jm_status_success;

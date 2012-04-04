@@ -41,7 +41,7 @@
 
 #include "fmi_import_util.h"
 
-char* fmi_import_get_dll_path(const char* fmu_unzipped_path, const char* model_identifier, jm_callbacks* callBackFunctions)
+char* fmi_import_get_dll_path(const char* fmu_unzipped_path, const char* model_identifier, jm_callbacks* callbacks)
 {
 	char* dll_path;
 	int len;
@@ -52,10 +52,9 @@ char* fmi_import_get_dll_path(const char* fmu_unzipped_path, const char* model_i
 
 	len = strlen(fmu_unzipped_path) + strlen(FILE_SEP) + strlen(BINARIES) + strlen(FILE_SEP) + strlen(PLATFORM) + strlen(FILE_SEP) + strlen(model_identifier) + strlen(DLL_EXT) + 1;
 
-	dll_path = (char*)callBackFunctions->calloc(len, sizeof(char));
+	dll_path = (char*)callbacks->calloc(len, sizeof(char));
 	if (dll_path == NULL) {
-		/* TODO MAKE SURE THIS LINE COMPILES */
-		/*callBackFunctions.logger(NULL, "", fmi1_status_fatal, "", "%s", strerror(errno));*/
+		callbacks->logger(NULL, "FMIIMPORTUTIL", jm_log_level_error, "Failed to allocate memory.");
 		return NULL;
 	}
 
@@ -64,17 +63,16 @@ char* fmi_import_get_dll_path(const char* fmu_unzipped_path, const char* model_i
 	return dll_path;
 }
 
-char* fmi_import_get_model_description_path(const char* fmu_unzipped_path, jm_callbacks* callBackFunctions)
+char* fmi_import_get_model_description_path(const char* fmu_unzipped_path, jm_callbacks* callbacks)
 {
 	char* model_description_path;
 	int len;
 
 	len = strlen(fmu_unzipped_path) + strlen(FILE_SEP) + strlen(MODEL_DESCRIPTION_XML) + 1;
 
-	model_description_path = (char*)callBackFunctions->calloc(len, sizeof(char));
+	model_description_path = (char*)callbacks->calloc(len, sizeof(char));
 	if (model_description_path == NULL) {
-		/* TODO MAKE SURE THIS LINE COMPILES */
-		/*callBackFunctions.logger(NULL, "", fmi1_status_fatal, "", "%s", strerror(errno));*/
+		callbacks->logger(NULL, "FMIIMPORTUTIL", jm_log_level_error, "Failed to allocate memory.");
 		return NULL;
 	}
 

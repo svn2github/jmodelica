@@ -38,9 +38,10 @@ extern "C" {
  * 
  * @param zip_file_path Full file path of the file to uncompress.
  * @param output_folder Full file path of the directory where the uncompressed files are put. The folder must already exist. Files with the same name are overwritten.
+ * @param callbacks Callback functions
  * @return Error status.
  */
-jm_status_enu_t fmi_zip_unzip(const char* zip_file_path, const char* output_folder);
+jm_status_enu_t fmi_zip_unzip(const char* zip_file_path, const char* output_folder, jm_callbacks* callbacks);
 
 /** @} */
 

@@ -20,10 +20,26 @@ extern "C" {
 
 #include <stdlib.h>
 #include <jm_types.h>
+#include <jm_callbacks.h>
 #include "minizip.h"
 
-jm_status_enu_t fmi_zip_zip(const char* zip_file_path, int n_files_to_zip, const char** files_to_zip)
+jm_status_enu_t fmi_zip_zip(const char* zip_file_path, int n_files_to_zip, const char** files_to_zip, jm_callbacks* callbacks)
 {
+#define N_BASIC_ARGS 4
+	int argc;
+	const char** argv;
+	int k;
+	int status;
+
+	argc = N_BASIC_ARGS + n_files_to_zip;
+	argv = callbacks->calloc(sizeof(char*), argc);	
+	/* Failed to allocate memory, return error */
+	if (argv == NULL) {
+		callbacks->logger(NULL, "FMIZIP", jm_log_level_error, "Failed to allocate memory.");
+		return jm_status_error;	
+	}
+
+	/* Input arguments to the corresponding minizip main() function call */
 	/*
 	Usage : minizip [-o] [-a] [-0 to -9] [-p password] [-j] file.zip [files_to_add]
 
@@ -35,25 +51,24 @@ jm_status_enu_t fmi_zip_zip(const char* zip_file_path, int n_files_to_zip, const
 
 	-j  exclude path. store only the file name.
 	*/
-#define N_BASIC_ARGS 5
-	int argc;
-	const char** argv;
-	int k;
-
-	argc = N_BASIC_ARGS + n_files_to_zip;
-	argv = calloc(sizeof(char*), argc);	
-
 	argv[0]="minizip";
 	argv[1]="-o";
 	argv[2]="-1";
-	argv[3]="-j";
-	argv[4]=zip_file_path;
+	argv[3]=zip_file_path;
 
+	/* Append the input argument list with the files to unzip */
 	for (k = 0; k < n_files_to_zip; k++) {
 		argv[N_BASIC_ARGS + k] = files_to_zip[k];
 	}
 
-	if (minizip(argc, (char**)argv) == 0) {
+	/* Unzip */
+	status = minizip(argc, (char**)argv);
+
+	/* Free allocated memory */
+	callbacks->free(argv);
+
+	/* Return error status */
+	if (status == 0) {
 		return jm_status_success;
 	} else {
 		return jm_status_error;	

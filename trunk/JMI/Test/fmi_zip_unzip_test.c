@@ -21,6 +21,7 @@
 #include <errno.h>
 
 #include <jm_types.h>
+#include <jm_callbacks.h>
 #include "fmi_zip_unzip.h"
 
 #include "config.h"
@@ -28,8 +29,14 @@
 void do_exit(int code)
 {
 	printf("Press any key to exit\n");
-	getchar();
+	/* getchar(); */
 	exit(code);
+}
+
+/* Logger function */
+void importlogger(jm_callbacks* c, jm_string module, jm_log_level_enu_t log_level, jm_string message)
+{
+        printf("module = %s, log level = %d: %s\n", module, log_level, message);
 }
 
 /**
@@ -38,17 +45,25 @@ void do_exit(int code)
  */
 int main(int argc, char *argv[])
 {
+	jm_callbacks callbacks;
 	jm_status_enu_t status;	
 
-	status = fmi_zip_unzip(UNCOMPRESSED_DUMMY_FILE_PATH_SRC, UNCOMPRESSED_DUMMY_FOLDER_PATH_DIST);
+	callbacks.malloc = malloc;
+    callbacks.calloc = calloc;
+    callbacks.realloc = realloc;
+    callbacks.free = free;
+    callbacks.logger = importlogger;
+    callbacks.context = 0;
+
+	status = fmi_zip_unzip(UNCOMPRESSED_DUMMY_FILE_PATH_SRC, UNCOMPRESSED_DUMMY_FOLDER_PATH_DIST, &callbacks);
 
 	if (status == jm_status_error) {
 		printf("Failed to uncompress the file\n");
+		do_exit(CTEST_RETURN_FAIL);
 	} else {
 		printf("Succesfully uncompressed the file\n");
+		do_exit(CTEST_RETURN_SUCCESS);
 	}
-
-	do_exit(1);
 }
 
 
