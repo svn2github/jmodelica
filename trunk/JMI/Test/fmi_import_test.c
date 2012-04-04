@@ -253,7 +253,6 @@ int test_simulate_cs(fmi1_import_t* fmu)
 		for (k = 0; k < sizeof(compare_real_variables_vr)/sizeof(fmi1_value_reference_t); k++) {
 			fmi1_value_reference_t vr = compare_real_variables_vr[k];
 			fmi1_real_t rvalue;
-			fmi1_real_t res;	
 			fmistatus = fmi1_import_get_real(fmu, &vr, 1, &rvalue);
 			 if (k == 0) printf("Ball hight state[%d] = %f\n", k, rvalue);
 		}
@@ -356,23 +355,14 @@ int main(int argc, char *argv[])
     printf("Model identifier: %s\n", modelIdentifier);
     printf("Model GUID: %s\n", GUID);
 
-	status = fmi1_import_create_dllfmu(fmu, callBackFunctions, fmi_standard, tmpPath);
+	
+
+	status = fmi1_import_create_dllfmu(fmu, callBackFunctions);
 	if (status == jm_status_error) {
 		printf("Could not create the DLL loading mechanism(C-API).\n");
 		do_exit(CTEST_RETURN_FAIL);
 	}
-
-	status = fmi1_import_load_dll(fmu);
-	if (status == jm_status_error) {
-		printf("Could not load the dll handle\n");
-		do_exit(CTEST_RETURN_FAIL);
-	}
-
-	status = fmi1_import_load_fcn(fmu);  
-	if (status == jm_status_error) {
-		printf("Could not load the dll functions\n");
-		do_exit(CTEST_RETURN_FAIL);
-	}
+	
 
 	if (fmi_standard == fmi1_fmu_kind_enu_me) {
 		test_simulate_me(fmu);
@@ -380,7 +370,6 @@ int main(int argc, char *argv[])
 		test_simulate_cs(fmu);
 	}	
 
-	fmi1_import_free_dll(fmu);
 	fmi1_import_destroy_dllfmu(fmu);
 
 	fmi1_import_free(fmu);

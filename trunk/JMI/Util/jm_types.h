@@ -29,7 +29,7 @@ extern "C" {
 */
 /** \brief A constant string.*/
 typedef const char* jm_string;
-/** \brief A constant string.*/
+/** \brief A void pointer.*/
 typedef void* jm_voidp;
 
 /** \brief Mapping between a string and an integer ID */

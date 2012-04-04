@@ -32,8 +32,6 @@ extern "C" {
 
 /** 
  * \brief C-API struct used as a placeholder for the FMI funktions and shared library handler. 
- *
- *
  */
 typedef struct {
 	const char* dllPath;

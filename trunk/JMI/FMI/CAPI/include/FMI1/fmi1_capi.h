@@ -27,7 +27,24 @@
 extern "C" {
 #endif
 
-/** \addtogroup C-API 
+
+/** \addtogroup fmi1_capi Standard FMI 1.0 "C" API
+ * \brief The "C" API loads and frees the FMI functions and it is through theise functions all the communcation with the FMU occures. The FMI import library wrappes these functions in a more convenient way.
+ *  @{
+ */
+
+/**	\addtogroup fmi1_capi_const_destroy FMI 1.0 Utility functions
+ *		\brief Utility functions used to load and free the FMI functions.
+ *	\addtogroup fmi1_capi_me FMI 1.0 (ME) Model Exchange functions
+ *		\brief List of Model Exchange wrapper functions. Common functions are not listed.
+ *	\addtogroup fmi1_capi_cs FMI 1.0 (CS) Co-Simulation functions 
+ *		\brief List of Co-Simulation wrapper functions. Common functions are not listed.
+ *	\addtogroup fmi1_capi_common FMI 1.0 (ME & CS) Common functions
+ *		\brief List of wrapper functions that are in common for both Model Exchange and Co-Simulation.
+ */
+
+
+/** \addtogroup fmi1_capi_const_destroy
  *  @{
  */
 
@@ -73,6 +90,12 @@ jm_status_enu_t fmi1_capi_load_dll(fmi1_capi_t* fmu);
  * @return Error status.
  */
 jm_status_enu_t fmi1_capi_free_dll(fmi1_capi_t* fmu);
+
+/**@} */
+
+/** \addtogroup fmi1_capi_common
+ *  @{
+ */
 
 /**
  * \brief Calls the FMI function fmiGetVersion() 
@@ -178,6 +201,12 @@ fmi1_status_t fmi1_capi_get_boolean(fmi1_capi_t* fmu, const fmi1_value_reference
  * @return FMI status.
  */
 fmi1_status_t fmi1_capi_get_string(fmi1_capi_t* fmu, const fmi1_value_reference_t vr[], size_t nvr, fmi1_string_t  value[]);
+
+/**@} */
+
+/** \addtogroup fmi1_capi_me
+ *  @{
+ */
 
 /**
  * \brief Calls the FMI function fmiGetModelTypesPlatform(...) 
@@ -311,6 +340,12 @@ fmi1_status_t fmi1_capi_get_state_value_references(fmi1_capi_t* fmu, fmi1_value_
  * @return FMI status.
  */
 fmi1_status_t fmi1_capi_terminate(fmi1_capi_t* fmu);
+
+/**@} */
+
+/** \addtogroup fmi1_capi_cs
+ *  @{
+ */
 
 /**
  * \brief Calls the FMI function fmiGetTypesPlatform(...) 
@@ -462,6 +497,7 @@ fmi1_status_t fmi1_capi_get_boolean_status(fmi1_capi_t* fmu, const fmi1_status_k
  */
 fmi1_status_t fmi1_capi_get_string_status(fmi1_capi_t* fmu, const fmi1_status_kind_t s, fmi1_string_t*  value);
 
+/** @}*/
 /** @}*/
 
 #ifdef __cplusplus 
