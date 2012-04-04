@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* Standard FMI 1.0 ME and CS types */
 #include "1.0-CS/fmiPlatformTypes.h"
 #include "1.0-CS/fmiFunctions.h"
-#include "fmu1_model.h"
+#include "fmu1_model.h" 
 
 /* Model calculation functions */
 static int calc_initialize(component_ptr_t comp)
@@ -225,6 +225,8 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
 		sprintf(comp->GUID, "%s",GUID);
 		comp->functions		= functions;
 		comp->loggingOn		= loggingOn;
+
+		comp->callEventUpdate = fmiFalse;
 
 		/* Set default values */
 		for (k = 0; k < N_STATES;			k++) comp->states[k]			= 0.0;
@@ -516,56 +518,89 @@ fmiStatus fmi_cancel_step(fmiComponent c)
 fmiStatus fmi_do_step(fmiComponent c, fmiReal currentCommunicationPoint, fmiReal communicationStepSize, fmiBoolean newStep)
 {
 	component_ptr_t comp	= (fmiComponent)c;	
-	fmiReal t_cur = currentCommunicationPoint;
-	fmiReal t_end = currentCommunicationPoint + communicationStepSize;
-	fmiReal h_cur = 0.1; /* Default time step length */
+	fmiReal tstart = currentCommunicationPoint;
+	fmiReal tcur;
+	fmiReal tend = currentCommunicationPoint + communicationStepSize;
+	fmiReal hcur; 
+	fmiReal hdef = 0.01;	/* Default time step length */
 	fmiReal z_cur[N_EVENT_INDICATORS];
 	fmiReal z_pre[N_EVENT_INDICATORS];
+	fmiReal states[N_STATES];
+	fmiReal states_der[N_STATES];
 	fmiEventInfo eventInfo;
-
+	fmiBoolean callEventUpdate;
+	fmiBoolean intermediateResults = fmiFalse;
+	fmiStatus fmistatus;	
+	size_t k;
 
 	if (comp == NULL) {
 		return fmiFatal;
 	} else {
-		size_t k;
+		size_t counter = 0;
 
-		if (newStep == fmiTrue) {
-			memcpy(comp->states_prev, comp->states, sizeof(fmiReal) * N_STATES);
-		} else {
-			memcpy(comp->states, comp->states_prev, sizeof(fmiReal) * N_STATES);
-		}
+		fmi_get_continuous_states(comp, states, N_STATES);
+		fmi_get_event_indicators(comp, z_pre, N_EVENT_INDICATORS);
 
-		fmi_get_event_indicators(c, z_cur, N_EVENT_INDICATORS);
-		memcpy(z_pre, z_cur, sizeof(fmiReal) * N_EVENT_INDICATORS);
+		tcur = tstart;
+		hcur = hdef;
+		callEventUpdate = fmiFalse;
+		eventInfo = comp->eventInfo;
 
-		while (t_cur < t_end) {
-			/* Check event indicators */
-			fmi_get_event_indicators(c, z_cur, N_EVENT_INDICATORS);
+		while (tcur < tend && counter < 100) {
+			size_t k;
+			int zero_crossning_event = 0;
+			counter++;
+
+			fmi_set_time(comp, tcur);
+			fmi_get_event_indicators(comp, z_cur, N_EVENT_INDICATORS);
+
+			/* Check if an event inidcator has triggered */
 			for (k = 0; k < N_EVENT_INDICATORS; k++) {
-				if (z_cur[k] * z_pre[k] < 0) {
-					fmi_event_update(c, fmiFalse, &eventInfo);
-
-					/* Update previous event indicators */
-					fmi_get_event_indicators(c, z_pre, N_EVENT_INDICATORS);
+				if (z_cur[k]*z_pre[k] < 0) {
+					zero_crossning_event = 1;
 					break;
 				}
 			}
-			
-			/* Calculate length of the next step to take */
-			if (t_cur + h_cur > t_end) {
-				h_cur = t_end - t_cur;
-			}
-			
-			/* Take a step */
-			for (k = 0; k < N_STATES; k++) {
-				comp->states[k] = comp->states[k] + h_cur * comp->states_der[k];
+
+			/* Handle any events */
+			if (callEventUpdate || zero_crossning_event || (eventInfo.upcomingTimeEvent && tcur == eventInfo.nextEventTime)) {
+				fmistatus = fmi_event_update(comp, intermediateResults, &eventInfo);
+				fmistatus = fmi_get_continuous_states(comp, states, N_STATES);
+				fmistatus = fmi_get_event_indicators(comp, z_cur, N_EVENT_INDICATORS);
+				fmistatus = fmi_get_event_indicators(comp, z_pre, N_EVENT_INDICATORS);
 			}
 
-			/* Update current time */
-			t_cur += h_cur;
+			/* Updated next time step */
+			if (eventInfo.upcomingTimeEvent) {
+				if (tcur + hdef < eventInfo.nextEventTime) {
+					hcur = hdef;
+				} else {
+					hcur = eventInfo.nextEventTime - tcur;
+				}
+			} else {
+				hcur = hdef;
+			}
+			tcur += hcur;
+
+			/* Integrate a step */
+			fmistatus = fmi_get_derivatives(comp, states_der, N_STATES);
+			for (k = 0; k < N_STATES; k++) {
+				states[k] = states[k] + hcur*states_der[k];	
+				/* if (k == 0) printf("states[%u] = %f states_der[k] = %f hcur =%f\n", k, states[k], states_der[k], hcur); */
+			}
+
+			/* Set states */
+			fmistatus = fmi_set_continuous_states(comp, states, N_STATES);
+			/* Step is complete */
+			fmistatus = fmi_completed_integrator_step(comp, &callEventUpdate);
+
+
+		}
+		for (k = 0; k < N_STATES; k++) { /* Update states */
+			comp->reals[k] = comp->states[k];
 		}
 		return fmiOK;
-	}	
+	}
 }
 
 fmiStatus fmi_get_status(fmiComponent c, const fmiStatusKind s, fmiStatus*  value)

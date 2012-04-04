@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* This header is used to generate the FMU test DLL and in the C API test that uses the DLL */
 #ifndef FMU1_MODEL_DEFINES_H_
 
-#define MODEL_IDENTIFIER		Model
 #define STRINGIFY(a)			#a
 #define STRINGIFY2(a)			STRINGIFY(a)
 #define MODEL_IDENTIFIER_STR	STRINGIFY2(MODEL_IDENTIFIER)
@@ -31,8 +30,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define VAR_R_HIGHT				0
 #define VAR_R_HIGHT_SPEED		1
 /* Real */
-#define VAR_R_GRATIVY			0
-#define VAR_R_BOUNCE_CONF		1
+#define VAR_R_GRATIVY			2
+#define VAR_R_BOUNCE_CONF		3
 
 /* Event indicators */
 #define EVENT_HIGHT				0
@@ -40,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* Sizes */
 #define N_STATES				2
 #define N_EVENT_INDICATORS		1
-#define N_REAL					1
+#define N_REAL					4
 #define N_INTEGER				4
 #define N_BOOLEAN				4
 #define N_STRING				4

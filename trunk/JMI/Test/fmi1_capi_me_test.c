@@ -29,9 +29,9 @@
 
 #include "config.h" /* Defines path to the DLL file */
 #include "fmu1_model_defines.h"
+#define MODEL_IDENTIFIER FMU_DUMMY_ME_MODEL_IDENTIFIER
 
 /* #define PRINT_VERBOSE */
-
 #define INSTANCE_NAME		"Test Model"
 
 fmi1_capi_t* fmu;  /* Pointer to the C-API struct that is used in all tests */
@@ -56,7 +56,7 @@ void fmilogger(fmi1_component_t c, fmi1_string_t instanceName, fmi1_status_t sta
 void do_exit(int code)
 {
 	printf("Press any key to exit\n");
-	getchar();
+	/* getchar(); */
 	exit(code);
 }
 
@@ -87,7 +87,7 @@ int test_create_dllfmu()
 	fmu = fmi1_capi_create_dllfmu(callbacks, FMU1_DLL_ME_PATH, MODEL_IDENTIFIER_STR, callBackFunctions, standard);
 	if (fmu == NULL) {
 		printf("An error occured while fmi1_capi_create_dllfmu was called, an error message should been printed.\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("Success\n");
 	}
@@ -106,7 +106,7 @@ int test_load_dll()
 	status = fmi1_capi_load_dll(fmu);
 	if (status == jm_status_error) {
 		printf("Error in fmi1_capi_load_dll: %s\n", "fmi1_capi_get_last_error(fmu)");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("Success\n");
 	}
@@ -126,7 +126,7 @@ int test_load_dll_fcn()
 	if (status == jm_status_error) {
 		printf("\n");
 		printf("Error in fmi1_capi_load_fcn: %s\n", "fmi1_capi_get_last_error(fmu)");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {		
 		printf("Success\n");
 	}
@@ -144,7 +144,7 @@ int test_fmi_get_version()
 	printf("fmi1_capi_get_version:                   ");
 	if (strcmp(FMI_VERSION, version) != 0) {
 		printf("Expected \"%s\" but returned \"%s\"", FMI_VERSION, version);
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("Success\n");
 	}
@@ -162,7 +162,7 @@ int test_fmi_get_model_types_platform()
 	printf("fmi1_capi_get_model_types_platform:      ");
 	if (strcmp(FMI_PLATFORM_TYPE, platformtype) != 0) {
 		printf("Expected \"%s\" but returned \"%s\"", FMI_PLATFORM_TYPE, platformtype);
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("Success\n");
 	}
@@ -179,7 +179,7 @@ int test_instantiate_model()
 
 	if (fmi1_capi_instantiate_model(fmu, INSTANCE_NAME, FMI_GUID, loggingOn) == NULL) {		
 		printf("fmi1_capi_instantiate_model:	         Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_instantiate_model:	         Success\n");
 	}
@@ -196,7 +196,7 @@ int test_fmi_set_time()
 	status = fmi1_capi_set_time(fmu, 0.1);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_set_time:                      Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_set_time:                      Success\n");
 	}
@@ -220,7 +220,7 @@ int test_set_continuous_states()
 	status = fmi1_capi_set_continuous_states(fmu, states, N_STATES);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_set_continuous_states:        Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_set_continuous_states:         Success\n");
 #ifdef PRINT_VERBOSE
@@ -248,7 +248,7 @@ int test_initialize()
 	status = fmi1_capi_initialize(fmu, toleranceControlled, relativeTolerance, &eventInfo);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_initialize:                    Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_initialize:                    Success\n");
 #ifdef PRINT_VERBOSE
@@ -275,7 +275,7 @@ int test_completed_integrator_step()
 	status = fmi1_capi_completed_integrator_step(fmu, &callEventUpdate);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_completed_integrator_step:     Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_completed_integrator_step:     Success\n");
 #ifdef PRINT_VERBOSE
@@ -298,7 +298,7 @@ int test_get_derivatives()
 	status = fmi1_capi_get_derivatives(fmu, dstates, N_STATES);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_get_derivatives:              Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_get_derivatives:               Success\n");
 #ifdef PRINT_VERBOSE
@@ -319,7 +319,7 @@ int test_get_event_indicators()
 	status = fmi1_capi_get_event_indicators(fmu, zerocrossing, N_EVENT_INDICATORS);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_get_event_indicators:          Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_get_event_indicators:          Success\n");
 #ifdef PRINT_VERBOSE
@@ -344,7 +344,7 @@ int test_event_update()
 	status = fmi1_capi_eventUpdate(fmu, intermediateResults, &eventInfo);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_eventUpdate:                   Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_eventUpdate:                   Success\n");
 #ifdef PRINT_VERBOSE
@@ -373,7 +373,7 @@ int test_get_continuous_states()
 	status = fmi1_capi_get_continuous_states(fmu, states, N_STATES);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_get_continuous_states:         Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_get_continuous_states:         Success\n");
 #ifdef PRINT_VERBOSE
@@ -398,7 +398,7 @@ int test_get_nominal_continuous_states()
 	status = fmi1_capi_get_nominal_continuous_states(fmu, states, N_STATES);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_get_nominal_continuous_states: Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_get_nominal_continuous_states: Success\n");
 #ifdef PRINT_VERBOSE
@@ -423,7 +423,7 @@ int test_get_state_value_references()
 	status = fmi1_capi_get_state_value_references(fmu, vrs, N_STATES);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_get_state_value_references:    Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_get_state_value_references:    Success\n");
 #ifdef PRINT_VERBOSE
@@ -445,7 +445,7 @@ int test_set_debug_logging()
 	status = fmi1_capi_set_debug_logging(fmu, fmi1_true);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_set_debug_logging:             Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_set_debug_logging:             Success\n");
 	}
@@ -474,7 +474,7 @@ int test_set_get_string()
 	status = fmi1_capi_set_string(fmu, vrs, N_STRING, values);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_set_string:                    Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_set_string:                    Success\n");
 	}
@@ -483,12 +483,12 @@ int test_set_get_string()
 	status = fmi1_capi_get_string(fmu, vrs, N_STRING, values);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_get_string:                    Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		for (k = 0; k < N_STRING; k++) {
 			if (strcmp(values_ref[k], values[k]) != 0) {
 				printf("fmi1_capi_get_string returned values[%d] = \"%s\" expected \"%s\"\n", k, values[k], values_ref[k]);
-				do_exit(1);
+				do_exit(CTEST_RETURN_FAIL);;
 			}
 		}
 		printf("fmi1_capi_get_string:                    Success\n");
@@ -519,7 +519,7 @@ int test_set_get_integer()
 	status = fmi1_capi_set_integer(fmu, vrs, N_INTEGER, values);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_set_integer:                   Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_set_integer:                   Success\n");
 	}
@@ -528,12 +528,12 @@ int test_set_get_integer()
 	status = fmi1_capi_get_integer(fmu, vrs, N_INTEGER, values);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_get_integer:                   Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		for (k = 0; k < N_INTEGER; k++) {
 			if (values_ref[k] != values[k]) {
 				printf("fmi1_capi_get_integer returned values[%d] = \"%d\" expected \"%d\"\n", k, values[k], values_ref[k]);
-				do_exit(1);
+				do_exit(CTEST_RETURN_FAIL);;
 			}
 		}
 		printf("fmi1_capi_get_integer:                   Success\n");
@@ -564,7 +564,7 @@ int test_set_get_boolean()
 	status = fmi1_capi_set_boolean(fmu, vrs, N_BOOLEAN, values);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_set_boolean:                   Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_set_boolean:                   Success\n");
 	}
@@ -573,12 +573,12 @@ int test_set_get_boolean()
 	status = fmi1_capi_get_boolean(fmu, vrs, N_BOOLEAN, values);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_get_boolean:                   Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		for (k = 0; k < N_BOOLEAN; k++) {
 			if (values_ref[k] != values[k]) {
 				printf("fmi1_capi_get_boolean returned values[%d] = \"%s\" expected \"%s\"\n", k, values[k] ? "fmiTrue" : "fmiFalse", values_ref[k] ? "fmiTrue" : "fmiFalse");
-				do_exit(1);
+				do_exit(CTEST_RETURN_FAIL);;
 			}
 		}
 		printf("fmi1_capi_get_boolean:                   Success\n");
@@ -609,7 +609,7 @@ int test_set_get_real()
 	status = fmi1_capi_set_real(fmu, vrs, N_REAL, values);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_set_real:                      Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_set_real:                      Success\n");
 	}
@@ -618,13 +618,13 @@ int test_set_get_real()
 	status = fmi1_capi_get_real(fmu, vrs, N_REAL, values);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_get_real:                      Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		for (k = 0; k < N_REAL; k++) {
 			if (values_ref[k] != values[k]) {
 				printf("%f\n",12.0);
 				printf("fmi1_capi_get_real returned values[%d] = \"%f\" expected \"%f\"\n", k, (double)values[k], (double)values_ref[k]);
-				do_exit(1);
+				do_exit(CTEST_RETURN_FAIL);;
 			}
 		}
 		printf("fmi1_capi_get_real:                      Success\n");
@@ -644,7 +644,7 @@ int test_terminate()
 	status = fmi1_capi_terminate(fmu);
 	if (status == fmi1_status_error || status == fmi1_status_fatal) {
 		printf("fmi1_capi_terminate:                     Failed\n");
-		do_exit(1);
+		do_exit(CTEST_RETURN_FAIL);;
 	} else {
 		printf("fmi1_capi_terminate:                     Success\n");
 	}
@@ -727,7 +727,7 @@ int main(int argc, char *argv[])
 	printf("\n");
 	printf("Everything seems to be ok!\n");
 	printf("\n");
-	do_exit(0);
+	do_exit(CTEST_RETURN_SUCCESS);
 }
 
 
