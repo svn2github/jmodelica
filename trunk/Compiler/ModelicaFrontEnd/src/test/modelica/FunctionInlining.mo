@@ -609,15 +609,50 @@ end FunctionInlining.BasicInline11;
             b := a;
         end f;
         
-		Real[2] y = {1,2};
+        Real[2] y = {1,2};
         Real x(start=1);
-	equation
-		if x > 3 then
-			der(x) = f(y[1]);
-	    else
+    equation
+        if x > 3 then
+            der(x) = f(y[1]);
+        else
             der(x) = f(y[2]);
-		end if;
+        end if;
     end BasicInline12;
+
+
+    model BasicInline13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="BasicInline13",
+         description="Inlining of function using enumeration",
+         inline_functions=true,
+         flatModel="
+fclass FunctionInlining.BasicInline13
+ discrete FunctionInlining.BasicInline13.E p1;
+ discrete FunctionInlining.BasicInline13.E p2;
+initial equation 
+ pre(p1) = false;
+ pre(p2) = false;
+equation
+ p1 = FunctionInlining.BasicInline13.E.b;
+ p2 = noEvent((if p1 == FunctionInlining.BasicInline13.E.a then FunctionInlining.BasicInline13.E.b else FunctionInlining.BasicInline13.E.c));
+
+ type FunctionInlining.BasicInline13.E = enumeration(a, b, c);
+end FunctionInlining.BasicInline13;
+")})));
+
+		type E = enumeration(a, b, c);
+		
+        function next
+            input E x;
+            output E y;
+        algorithm
+            y := if x == E.a then E.b else E.c;
+        end next;
+        
+        E p1 = next(E.a);
+		E p2 = next(p1);
+    end BasicInline13;
     
     
     model RecordInline1

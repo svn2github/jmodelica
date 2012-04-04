@@ -1529,6 +1529,12 @@ aspect Scalarization {
 				new List(), new Opt(), new Opt(), name, new FQName(getName()));
 	}	
 	
+	public FVariable FEnumType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
+		return new FEnumVariable(fvt, variability, new Opt(), 
+				new List(), new Opt(), new Opt(), name, new FQName(getName()));
+	}	
+	
 	/**
 	 * \brief Creates temporary variables for a record with the given name.
 	 * 
