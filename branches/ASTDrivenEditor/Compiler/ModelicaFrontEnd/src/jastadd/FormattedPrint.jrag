@@ -149,7 +149,7 @@ aspect FormattedPrint {
 			return;
 		}
 
-		if (!formatting.isEmpty() && formattingInfo != null) {
+		if (formatting != null && !formatting.isEmpty() && formattingInfo != null) {
 			preFormatting = new EmptyFormattingItem();
 			postFormatting = new EmptyFormattingItem();
 			Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
