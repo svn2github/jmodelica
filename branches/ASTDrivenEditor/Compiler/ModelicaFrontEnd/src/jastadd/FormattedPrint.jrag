@@ -37,6 +37,30 @@ aspect FormattedPrint {
 			return exp.operatorFormatted();
 		}
 	}
+	
+	class DefaultFormattingIndentation {
+		private String indentation;
+		private String currentIndentation;
+		
+		public DefaultFormattingIndentation(String indentation) {
+			this.indentation = indentation;
+			this.currentIndentation = "";
+		}
+
+		public void stepIn() {
+			currentIndentation += indentation;
+		}
+		
+		public void stepOut() {
+			if (currentIndentation.length() >= indentation.length()) {
+				currentIndentation = currentIndentation.substring(0, currentIndentation.length() - indentation.length());
+			}
+		}
+		
+		public String toString() {
+			return currentIndentation;
+		}
+	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ADDING FORMATTING TO AST:
@@ -90,6 +114,7 @@ aspect FormattedPrint {
 	
 	@Override
 	public void BaseNode.propagateFormatting() {
+		setDefaultFormatting(new DefaultFormattingIndentation("   "));
 		propagateFormatting(formatting);
 	}
 	
@@ -124,9 +149,7 @@ aspect FormattedPrint {
 			return;
 		}
 
-		if (formatting.isEmpty()) {
-			setDefaultFormatting();
-		} else if (formattingInfo != null) {
+		if (!formatting.isEmpty() && formattingInfo != null) {
 			preFormatting = new EmptyFormattingItem();
 			postFormatting = new EmptyFormattingItem();
 			Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.getFormattingCollection().iterator();
@@ -140,13 +163,7 @@ aspect FormattedPrint {
 	protected void FullClassDecl.addFormattingInformation(FormattingInfo formattingInfo) {
 		super.addFormattingInformation(formattingInfo);
 
-		if (formatting.isEmpty()) {
-			for (Clause clause : originalComposition.getClauses()) {
-				if (clause instanceof EquationClause || clause instanceof Algorithm) {
-					clause.setDefaultFormatting();
-				}
-			}
-		} else if (formattingInfo != null) {
+		if (!formatting.isEmpty() && formattingInfo != null) {
 			for (Clause clause : originalComposition.getClauses()) {
 				if (clause instanceof EquationClause || clause instanceof Algorithm) {
 					clause.preFormatting = new EmptyFormattingItem();
@@ -510,136 +527,215 @@ aspect FormattedPrint {
 	// come from a scanned source file, but have been generated in other ways.
 	//
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	protected void BaseNode.setDefaultFormatting() {
-		return;
+
+	protected void ASTNode.setDefaultFormatting(DefaultFormattingIndentation indentation) {
+		for (ASTNode node : this) {
+			node.setDefaultFormatting(indentation);
+		}
+	}
+
+	@Override
+	protected void BaseNode.setDefaultFormatting(DefaultFormattingIndentation indentation) {
+		boolean addedIndentation = setDefaultFormattingHelper(indentation);
+		for (ASTNode node : this) {
+			node.setDefaultFormatting(indentation);
+		}
+		if (addedIndentation) {
+			indentation.stepOut();
+		}
 	}
 	
-	protected void Within.setDefaultFormatting() {
+	protected boolean BaseNode.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
+		return false;
+	}
+	
+	@Override
+	protected boolean Within.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		if (hasPackageName()) {
 			getPackageName().preFormatting = new DefaultFormattingItem(" ");
 		}
 		postFormatting = new DefaultFormattingItem("\n");
+		return false;
 	}
 	
-	protected void Encapsulated.setDefaultFormatting() {
+	@Override
+	protected boolean Encapsulated.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 	
-	protected void Partial.setDefaultFormatting() {
+	@Override
+	protected boolean Partial.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 	
-	protected void Redeclare.setDefaultFormatting() {
+	@Override
+	protected boolean Redeclare.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 	
-	protected void Final.setDefaultFormatting() {
+	@Override
+	protected boolean Final.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 	
-	protected void Inner.setDefaultFormatting() {
+	@Override
+	protected boolean Inner.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 	
-	protected void Outer.setDefaultFormatting() {
+	@Override
+	protected boolean Outer.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 	
-	protected void Replaceable.setDefaultFormatting() {
+	@Override
+	protected boolean Replaceable.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 	
-	protected void Restriction.setDefaultFormatting() {
+	@Override
+	protected boolean Restriction.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 	
-	protected void FullClassDecl.setDefaultFormatting() {
+	@Override
+	protected boolean FullClassDecl.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
+		indentation.stepIn();
 		if (hasStringComment()) {
-			getName().postFormatting = new DefaultFormattingItem("   ");
+			getName().postFormatting = new DefaultFormattingItem(indentation.toString());
 			getStringComment().postFormatting = new DefaultFormattingItem("\n");
+		}
+
+		for (Clause clause : originalComposition.getClauses()) {
+			if (clause instanceof EquationClause || clause instanceof Algorithm) {
+				clause.setDefaultFormattingHelper(indentation);
+			}
 		}
 		
 		for (Annotation annotation : getAnnotations()) {
-			annotation.preFormatting = new DefaultFormattingItem("   ");
+			annotation.preFormatting = new DefaultFormattingItem(indentation.toString());
 		}
+		return true;
 	}
 	
-	protected void EquationClause.setDefaultFormatting() {
+	@Override
+	protected boolean EquationClause.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
+		indentation.stepOut();
+		preFormatting = new DefaultFormattingItem(indentation.toString());
+		indentation.stepIn();
 		insideFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 	
-	protected void Algorithm.setDefaultFormatting() {
-		preFormatting = new DefaultFormattingItem("   ");
+	@Override
+	protected boolean Algorithm.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
+		indentation.stepOut();
+		preFormatting = new DefaultFormattingItem(indentation.toString());
+		indentation.stepIn();
 		insideFormatting = new DefaultFormattingItem(" ");
 		if (getNumStatement() > 0) {
 			getStatement(0).preFormatting = new DefaultFormattingItem("\n");
 		}
+		return false;
 	}
 	
-	protected void Statement.setDefaultFormatting() {
-		preFormatting = preFormatting.mergeItems(FormattingItem.Adjacency.BACK, new DefaultFormattingItem("   "));
-		postFormatting = new DefaultFormattingItem("\n");
+	@Override
+	protected boolean Statement.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
+		preFormatting = preFormatting.mergeItems(FormattingItem.Adjacency.BACK, new DefaultFormattingItem(indentation.toString()));
+		postFormatting = postFormatting.mergeItems(FormattingItem.Adjacency.FRONT, new DefaultFormattingItem("\n"));
+		return false;
 	}
 	
-	protected void ForStmt.setDefaultFormatting() {
-		super.setDefaultFormatting();
+	@Override
+	protected boolean ForStmt.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
 		if (getNumForStmt() > 0) {
 			getForStmt(0).preFormatting = new DefaultFormattingItem("\n");
+			getForStmt(getNumForStmt() - 1).postFormatting = new DefaultFormattingItem(indentation.toString());
 		}
+		super.setDefaultFormattingHelper(indentation);
+		indentation.stepIn();
+		return true;
 	}
 	
-	protected void ForIndex.setDefaultFormatting() {
+	@Override
+	protected boolean ForIndex.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		getForIndexDecl().getName().preFormatting = new DefaultFormattingItem(" ");
 		getForIndexDecl().getName().postFormatting = new DefaultFormattingItem(" ");
 		if (hasExp()) {
 			getExp().postFormatting = new DefaultFormattingItem(" ");
 		}
+		return false;
 	}
 	
-	protected void WhileStmt.setDefaultFormatting() {
-		super.setDefaultFormatting();
+	@Override
+	protected boolean WhileStmt.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
 		getTest().preFormatting = new DefaultFormattingItem(" ");
 		getTest().postFormatting = new DefaultFormattingItem(" ");
 		if (getNumWhileStmt() > 0) {
 			getWhileStmt(0).preFormatting = new DefaultFormattingItem("\n");
+			getWhileStmt(getNumWhileStmt() - 1).postFormatting = new DefaultFormattingItem(indentation.toString());
 		}
+		super.setDefaultFormattingHelper(indentation);
+		indentation.stepIn();
+		return true;
 	}
 	
-	protected void IfStmt.setDefaultFormatting() {
-		super.setDefaultFormatting();
+	@Override
+	protected boolean IfStmt.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
 		if (getNumElseStmt() > 0) {
 			getElseStmt(0).preFormatting = new DefaultFormattingItem("\n");
+			getElseStmt(getNumElseStmt() - 1).postFormatting = new DefaultFormattingItem(indentation.toString());
 		}
+		super.setDefaultFormattingHelper(indentation);
+		indentation.stepIn();
+		return true;
 	}
 	
-	protected void WhenStmt.setDefaultFormatting() {
-		super.setDefaultFormatting();
+	@Override
+	protected boolean WhenStmt.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
+		super.setDefaultFormattingHelper(indentation);
+		indentation.stepIn();
+		return true;
 	}
 	
-	protected void IfWhenClause.setDefaultFormatting() {
+	@Override
+	protected boolean IfWhenClause.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		getTest().preFormatting = new DefaultFormattingItem(" ");
 		getTest().postFormatting = new DefaultFormattingItem(" ");
 		if (getNumStatement() > 0) {
 			getStatement(0).preFormatting = new DefaultFormattingItem("\n");
+			indentation.stepOut();
+			getStatement(getNumStatement() - 1).postFormatting = new DefaultFormattingItem(indentation.toString());
+			indentation.stepIn();
 		}
+		return super.setDefaultFormattingHelper(indentation);
 	}
 	
-	protected void AbstractEquation.setDefaultFormatting() {
-		preFormatting = inheritFormatting();
+	@Override
+	protected boolean AbstractEquation.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
+		preFormatting = inheritFormatting(indentation);
 		if (getComment().hasStringComment()) {
 			getComment().getStringComment().preFormatting = new DefaultFormattingItem(" ");
 		} else if (getComment().hasAnnotation()) {
 			getComment().getAnnotation().preFormatting = new DefaultFormattingItem(" ");
 		}
-		postFormatting = new DefaultFormattingItem("\n");
+		postFormatting = postFormatting.mergeItems(FormattingItem.Adjacency.FRONT, new DefaultFormattingItem("\n"));
+		return false;
 	}
 	
-	private FormattingItem AbstractEquation.inheritFormatting() {
+	private FormattingItem AbstractEquation.inheritFormatting(DefaultFormattingIndentation indentation) {
 		if (getParent() instanceof List && getParent().getParent() instanceof FullClassDecl) {
 			List<Clause> clauseList = (List<Clause>) ((FullClassDecl) getParent().getParent()).originalComposition.getClauses();
 
@@ -649,51 +745,83 @@ aspect FormattedPrint {
 					if (thisIndex > 0) {
 						return ((EquationClause) clause).getAbstractEquations().getChild(thisIndex - 1).preFormatting.copyWhitepacesFromFormatting();
 					} else if (thisIndex == 0) {
-						return new DefaultFormattingItem("\n   ");
+						return new DefaultFormattingItem("\n" + indentation.toString());
 					}
 				}
 			}
 		}
 
-		return preFormatting.mergeItems(FormattingItem.Adjacency.BACK, new DefaultFormattingItem("   "));
+		return preFormatting.mergeItems(FormattingItem.Adjacency.BACK, new DefaultFormattingItem(indentation.toString()));
 	}
 	
-	protected void ForClauseE.setDefaultFormatting() {
-		super.setDefaultFormatting();
+	@Override
+	protected boolean ForClauseE.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
 		if (getNumAbstractEquation() > 0) {
 			getAbstractEquation(0).preFormatting = new DefaultFormattingItem("\n");
+			getAbstractEquation(getNumAbstractEquation() - 1).postFormatting = new DefaultFormattingItem(indentation.toString());
 		}
+		super.setDefaultFormattingHelper(indentation);
+		indentation.stepIn();
+		return true;
 	}
 	
-	protected void IfWhenElseEquation.setDefaultFormatting() {
-		super.setDefaultFormatting();
-		if (getParent() instanceof Opt && getClass() == getParent().getParent().getClass()) {
-			postFormatting = new EmptyFormattingItem();
-		}
-		if (getNumAbstractEquation() > 0) {
-			getAbstractEquation(0).preFormatting = new DefaultFormattingItem("\n");
-		}
-	}
-	
-	protected void IfWhenEquation.setDefaultFormatting() {
+	@Override
+	protected boolean IfWhenEquation.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
 		getTest().preFormatting = new DefaultFormattingItem(" ");
 		getTest().postFormatting = new DefaultFormattingItem(" ");
-		super.setDefaultFormatting();
+
+		if (getNumAbstractEquation() > 0) {
+			getAbstractEquation(0).preFormatting = new DefaultFormattingItem("\n");
+			if (!hasElse()) {
+				getAbstractEquation(getNumAbstractEquation() - 1).postFormatting = new DefaultFormattingItem(indentation.toString());
+			}
+		}
+
+		if (getParent() instanceof Opt && getClass() == getParent().getParent().getClass()) {
+			indentation.stepOut();
+			super.setDefaultFormattingHelper(indentation);
+			indentation.stepIn();
+			if (!hasElse()) {
+				indentation.stepOut();
+				getAbstractEquation(getNumAbstractEquation() - 1).postFormatting = new DefaultFormattingItem(indentation.toString());
+				indentation.stepIn();
+			}
+			postFormatting = new EmptyFormattingItem();
+			return false;
+		}
+
+		super.setDefaultFormattingHelper(indentation);
+		indentation.stepIn();
+		return true;
 	}
 	
-	protected void ElseEquation.setDefaultFormatting() {
-		super.setDefaultFormatting();
+	@Override
+	protected boolean ElseEquation.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
+		indentation.stepOut();
+		boolean addedIndentation = super.setDefaultFormattingHelper(indentation);
+		indentation.stepIn();
 		postFormatting = new EmptyFormattingItem();
+		
+		if (getNumAbstractEquation() > 0) {
+			getAbstractEquation(0).preFormatting = new DefaultFormattingItem("\n");
+			indentation.stepOut();
+			getAbstractEquation(getNumAbstractEquation() - 1).postFormatting = new DefaultFormattingItem(indentation.toString());
+			indentation.stepIn();
+		}
+		
+		return addedIndentation;
 	}
 	
-	protected void ExpandableConnector.setDefaultFormatting() {
+	@Override
+	protected boolean ExpandableConnector.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 	
-	protected void IfExp.setDefaultFormatting() {
-		super.setDefaultFormatting();
+	@Override
+	protected boolean IfExp.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		if (getElseExp() instanceof IfExp) {
 			insideFormatting = new EmptyFormattingItem();
 		} else {
@@ -704,37 +832,47 @@ aspect FormattedPrint {
 		getIfExp().postFormatting = new DefaultFormattingItem(" ");
 		getThenExp().preFormatting = new DefaultFormattingItem(" ");
 		getThenExp().postFormatting = new DefaultFormattingItem(" ");
+		return super.setDefaultFormattingHelper(indentation);
 	}
 	
-	protected void ElseIfExp.setDefaultFormatting() {
+	@Override
+	protected boolean ElseIfExp.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new EmptyFormattingItem();
 		getIfExp().preFormatting = new DefaultFormattingItem(" ");
 		getIfExp().postFormatting = new DefaultFormattingItem(" ");
 		getThenExp().preFormatting = new DefaultFormattingItem(" ");
 		getThenExp().postFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 
-	protected void Each.setDefaultFormatting() {
+	@Override
+	protected boolean Each.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 	
-	protected void ExtendsClause.setDefaultFormatting() {
+	@Override
+	protected boolean ExtendsClause.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		preFormatting = new DefaultFormattingItem(" ");
 		getSuper().preFormatting = new DefaultFormattingItem(" ");
 		postFormatting = new DefaultFormattingItem("\n");
+		return false;
 	}
 	
-	protected void ImportClause.setDefaultFormatting() {
+	@Override
+	protected boolean ImportClause.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		preFormatting = new DefaultFormattingItem(" ");
 		getPackageName().preFormatting = new DefaultFormattingItem(" ");
 		if (getComment().hasStringComment() || getComment().hasAnnotation()) {
 			getPackageName().postFormatting = new DefaultFormattingItem(" ");
 		}
 		postFormatting = new DefaultFormattingItem("\n");
+		return false;
 	}
 	
-	protected void ComponentDecl.setDefaultFormatting() {
-		FormattingItem inheritedPreFormatting = inheritFormatting();
+	@Override
+	protected boolean ComponentDecl.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
+		FormattingItem inheritedPreFormatting = inheritFormatting(indentation);
 		if (hasRedeclare()) {
 			getRedeclare().preFormatting = inheritedPreFormatting;
 			getRedeclare().postFormatting = new DefaultFormattingItem(" ");
@@ -772,9 +910,10 @@ aspect FormattedPrint {
 			}
 		}
 		postFormatting = new DefaultFormattingItem("\n");
+		return false;
 	}
 	
-	private FormattingItem ComponentDecl.inheritFormatting() {
+	private FormattingItem ComponentDecl.inheritFormatting(DefaultFormattingIndentation indentation) {
 		if (getParent() instanceof List && getParent().getParent() instanceof FullClassDecl) {
 			List<Clause> clauseList = (List<Clause>) ((FullClassDecl) getParent().getParent()).originalComposition.getClauses();
 			int thisIndex = clauseList.getIndexOfChild(this);
@@ -802,21 +941,27 @@ aspect FormattedPrint {
 				}
 			}
 		}
-		return new DefaultFormattingItem("   ");
+		return new DefaultFormattingItem(indentation.toString());
 	}
 	
-	protected void Comment.setDefaultFormatting() {
+	@Override
+	protected boolean Comment.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		if (hasStringComment() && hasAnnotation()) {
 			getStringComment().preFormatting = new DefaultFormattingItem(" ");
 		}
+		return false;
 	}
 	
-	protected void ParseAnnotation.setDefaultFormatting() {
+	@Override
+	protected boolean ParseAnnotation.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		getClassModification().preFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 	
-	protected void EndDecl.setDefaultFormatting() {
+	@Override
+	protected boolean EndDecl.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
+		return false;
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1425,25 +1570,7 @@ aspect FormattedPrint {
 			printStream.print(postFormatting);
 		}
 	}
-	
-//	void IfEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, boolean elseIf) {
-//		if (elseIf) {
-//			printStream.print("else");
-//		}
-//		printStream.print("if");
-//		getTest().doPrettyPrintFormatted(printer, printStream);
-//		printStream.print("then");
-//		for (AbstractEquation abstractEquation : getAbstractEquations()) {
-//			abstractEquation.doPrettyPrintFormatted(printer, printStream);
-//		}
-//		if (hasElse()) {
-//			getElse().prettyPrintFormattedHelper(printer, printStream, true);
-//		}
-//		if (!elseIf) {
-//			printStream.print("end" + insideFormatting + "if");
-//		}
-//	}
-	
+
 	void ElseEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, boolean elseIf) {
 		printStream.print(preFormatting);
 		printStream.print("else");
