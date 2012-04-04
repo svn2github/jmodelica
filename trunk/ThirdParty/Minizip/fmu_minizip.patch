@@ -165,7 +165,7 @@ Index: miniunz.c
    struct utimbuf ut;
    struct tm newdate;
    newdate.tm_sec = tmu_date.tm_sec;
-@@ -114,11 +127,11 @@
+@@ -114,11 +127,13 @@
      int ret=0;
  #ifdef _WIN32
      ret = _mkdir(dirname);
@@ -175,12 +175,14 @@ Index: miniunz.c
      ret = mkdir (dirname,0775);
 +#elif __APPLE__
 +    ret = mkdir (dirname,0775);
++#else
++#error Unknown platform
  #endif
 -#endif
      return ret;
  }
  
-@@ -172,13 +185,15 @@
+@@ -172,13 +187,15 @@
    return 1;
  }
  
@@ -198,7 +200,7 @@ Index: miniunz.c
  {
      printf("Usage : miniunz [-e] [-x] [-v] [-l] [-o] [-p password] file.zip [file_to_extr.] [-d extractdir]\n\n" \
             "  -e  Extract without pathname (junk paths)\n" \
-@@ -364,7 +379,7 @@
+@@ -364,7 +381,7 @@
          {
              char rep=0;
              FILE* ftestexist;
@@ -207,7 +209,7 @@ Index: miniunz.c
              if (ftestexist!=NULL)
              {
                  fclose(ftestexist);
-@@ -395,8 +410,7 @@
+@@ -395,8 +412,7 @@
  
          if ((skip==0) && (err==UNZ_OK))
          {
@@ -217,7 +219,7 @@ Index: miniunz.c
              /* some zipfile don't contain directory alone before file */
              if ((fout==NULL) && ((*popt_extract_without_path)==0) &&
                                  (filename_withoutpath!=(char*)filename_inzip))
-@@ -405,7 +419,7 @@
+@@ -405,7 +421,7 @@
                  *(filename_withoutpath-1)='\0';
                  makedir(write_filename);
                  *(filename_withoutpath-1)=c;
@@ -226,7 +228,7 @@ Index: miniunz.c
              }
  
              if (fout==NULL)
-@@ -519,7 +533,7 @@
+@@ -519,7 +535,7 @@
  }
  
  
@@ -235,7 +237,7 @@ Index: miniunz.c
      int argc;
      char *argv[];
  {
-@@ -633,7 +647,7 @@
+@@ -633,7 +649,7 @@
  #endif
          {
            printf("Error changing into %s, aborting\n", dirname);

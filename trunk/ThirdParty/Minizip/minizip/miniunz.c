@@ -131,6 +131,8 @@ int mymkdir(dirname)
     ret = mkdir (dirname,0775);
 #elif __APPLE__
     ret = mkdir (dirname,0775);
+#else
+#error Unknown platform
 #endif
     return ret;
 }
