@@ -163,7 +163,7 @@ aspect FormattedPrint {
 	protected void FullClassDecl.addFormattingInformation(FormattingInfo formattingInfo) {
 		super.addFormattingInformation(formattingInfo);
 
-		if (!formatting.isEmpty() && formattingInfo != null) {
+		if (formatting != null && !formatting.isEmpty() && formattingInfo != null) {
 			for (Clause clause : originalComposition.getClauses()) {
 				if (clause instanceof EquationClause || clause instanceof Algorithm) {
 					clause.preFormatting = new EmptyFormattingItem();
