@@ -521,7 +521,7 @@ class Trajectory:
     Base class for representation of trajectories.
     """
     
-    def __init__(self, abscissa, ordinate):
+    def __init__(self, abscissa, ordinate, tol=1e-8):
         """
         Default constructor for creating a tracjectory object.
 
@@ -530,27 +530,33 @@ class Trajectory:
             abscissa -- 
                 One dimensional numpy array containing the n abscissa 
                 (independent) values.
-                
+            
             ordinate -- 
                 Two dimensional n x m numpy matrix containing the ordiate 
                 values. The matrix has the same number of rows as the abscissa 
                 has elements. The number of columns is equal to the number of
                 output variables.
+            
+            tol --
+                Minimum distance between abcissae. If two abscissae are closer
+                than the given tolerance, the largest one is moved.
         """
-        self._abscissa = abscissa
+        self._abscissa = abscissa.astype('float')
         self._ordinate = ordinate
         self._n = N.size(abscissa)
         self._x0 = abscissa[0]
         self._xf = abscissa[-1]
-
-        if not N.all(N.diff(self.abscissa)>=0):
-            raise Exception("The abscissa must be increasing.")
-
-        small = 1e-8
-        double_point_indices = N.nonzero(N.abs(N.diff(self.abscissa))<=small)
-        for i in double_point_indices:
-            self.abscissa[i+1] = self.abscissa[i+1] + small
-
+        
+        if not N.all(N.diff(self.abscissa) >= 0):
+            raise Exception("The abscissae must be increasing.")
+        
+        [double_point_indices] = N.nonzero(N.abs(N.diff(self.abscissa)) <= tol)
+        while (len(double_point_indices) > 0):
+            for i in double_point_indices:
+                 self.abscissa[i+1] = self.abscissa[i+1] + tol
+            [double_point_indices] = N.nonzero(
+                    N.abs(N.diff(self.abscissa)) <= tol)
+    
     def eval(self,x):
         """
         Evaluate the trajectory at a specifed abscissa.
