@@ -4059,6 +4059,71 @@ end FunctionTests.ArrayOutputScalarization19;
 end ArrayOutputScalarization19;
 
 
+model ArrayOutputScalarization20
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization20",
+         description="Checks for bug in #1895",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization20
+ Real x.a;
+ Real x.b[1];
+ Real x.b[2];
+equation
+ (FunctionTests.ArrayOutputScalarization20.R(x.a, {x.b[1],x.b[2]})) = FunctionTests.ArrayOutputScalarization20.f1(1);
+
+ function FunctionTests.ArrayOutputScalarization20.f1
+  input Real c;
+  output FunctionTests.ArrayOutputScalarization20.R d;
+  FunctionTests.ArrayOutputScalarization20.R temp_1;
+ algorithm
+  (temp_1) := FunctionTests.ArrayOutputScalarization20.f2(c);
+  d.a := temp_1.a;
+  d.b[1] := temp_1.b[1];
+  d.b[2] := temp_1.b[2];
+  return;
+ end FunctionTests.ArrayOutputScalarization20.f1;
+
+ function FunctionTests.ArrayOutputScalarization20.f2
+  input Real e;
+  output FunctionTests.ArrayOutputScalarization20.R f;
+ algorithm
+  f.a := e;
+  f.b[1] := 1;
+  f.b[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization20.f2;
+
+ record FunctionTests.ArrayOutputScalarization20.R
+  Real a;
+  Real b[2];
+ end FunctionTests.ArrayOutputScalarization20.R;
+end FunctionTests.ArrayOutputScalarization20;
+")})));
+
+	record R
+		Real a;
+		Real b[2];		
+	end R;
+	
+    function f1
+        input Real c;
+        output R d;
+    algorithm
+        d := f2(c);
+    end f1;
+    
+    function f2
+        input Real e;
+        output R f;
+    algorithm
+        f := R(e, {1,2});
+    end f2;
+    
+    R x = f1(1);
+end ArrayOutputScalarization20;
+
+
 
 /* ======================= Unknown array sizes ======================*/
 

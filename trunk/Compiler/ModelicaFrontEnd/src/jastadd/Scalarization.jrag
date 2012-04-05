@@ -869,13 +869,20 @@ aspect Scalarization {
 	 * otherwise.
 	 * 
 	 * @param i   the index of the cell to extract
-	 * @return  the expression for the cell
+	 * @return    the expression for the cell
 	 */
 	public FExp FExp.extractArrayCell(Index i) {
 		if (size().isUnknown())
 			return extractUnknownArrayCell(i.createFArraySubscripts());
 		else
 			return getArray().get(i);
+	}
+	
+	public FExp FIdUseExp.extractArrayCell(Index i) {
+		if (getFIdUse().myFV().isUnknown())
+			return new FIdUseExp(getFIdUse().specify(i));
+		else
+			return super.extractArrayCell(i);
 	}
 	
 	/**

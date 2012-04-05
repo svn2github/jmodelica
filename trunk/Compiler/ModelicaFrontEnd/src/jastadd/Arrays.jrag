@@ -1545,11 +1545,33 @@ aspect Arrays {
 	/**
 	 * \brief Returns a scalar FIdUse, as specified by an index.
 	 * 
+	 * The use is marked scalarized if this use is.
+	 * 
+	 * @param i  the Index specifying what array subscripts to use
+	 */
+	public FIdUse FIdUse.specify(Index i) {
+		return new FIdUse(getFQName().specify(i));
+	}
+	
+	/**
+	 * \brief Returns a scalar FIdUse, as specified by an index.
+	 * 
 	 * @param i          the Index specifying what array subscripts to use
 	 * @param scalarize  <code>true</code> if the use should be marked as scalarized 
 	 */
 	public FIdUse FIdUse.specify(Index i, boolean scalarize) {
 		return new FIdUse(getFQName().specify(i, scalarize));
+	}
+	
+	/**
+	 * \brief Creates a new FQName with the FArraySubscripts taken from the given Index.
+	 * 
+	 * The FQName is marked scalarized if this use is.
+	 * 
+	 * @param i  the Index specifying what array subscripts to use
+	 */
+	public FQName FQName.specify(Index i) {
+		return specify(i, isScalarized());
 	}
 	
 	/**
