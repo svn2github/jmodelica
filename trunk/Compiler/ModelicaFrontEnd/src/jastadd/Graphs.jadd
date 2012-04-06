@@ -887,6 +887,9 @@ public class BiPGraph {
 			
 			Therefore, all equations in blocks containing differentiated
 			equations are treated in one block.
+			
+			NOTE: This algorithm is still a prototype and it needs to be refactored.
+			This will be done when the final algorithm have been settled.
 		*/
 		
 		BLT blt = computeBLT();
@@ -952,43 +955,67 @@ public class BiPGraph {
 				}
 			}
 									
-			// Step 4: Select independent columns: simple matching will do for 
-			// now
-			BiPGraph gd = new BiPGraph(getFClass(),"","");
+			// Step 4: Select independent columns.
+			// In a first attempt we don't add variables with StateSeclect.prefer
+			// If it is possible to find a matching, then we proceed. If not, then
+			// We start over and all all variables, also the ones with StateSelect.prefer
+			// This algorithm is a first approximation of what we need, since we must also
+			// have to support avoid and never.
+			BiPGraph gd = new BiPGraph(getFClass(),"",""); 
+			boolean addSSPrefer = false;
+			boolean done = false;			
+			while (!done) {
+				if (!addSSPrefer) {
+					ASTNode.log.info("First try if it is possible to adhere to StateSelect.prefer");
+				} else {
+					ASTNode.log.info("Not possible to adhere to StateSelect.prefer, neglect");
+				}
+				gd = new BiPGraph(getFClass(),"","");
+						
+				// Add variables to the graph
+				for (FVariable fv : z) {
+					gd.addVariable(fv.name(),"",fv);     
+				}
 					
-			// Add variables to the graph
-			for (FVariable fv : z) {
-				gd.addVariable(fv.name(),"",fv);     
-			}
+				int k = 1;
+				Eq eqn = null;
+				Var v = null;
+				// Add the equations to the graph
+				for (FAbstractEquation e : h) {
 				
-			int k = 1;
-			Eq eqn = null;
-			Var v = null;
-			// Add the equations to the graph
-			for (FAbstractEquation e : h) {
-			
-				int n_eq = e.numScalarEquations();
-				
-				for (int i=0;i<n_eq;i++) {
-					ASTNode.log.info("*** " + e.prettyPrint(""));
-					eqn = gd.addEquation("eq_"+k,e.prettyPrint(""),e);
-					k++;
-				
-					for (FVariable y : e.variables()) { 
-						ASTNode.log.info(" ** " + y.prettyPrint("") + " " + z.contains(y));
-						if (z.contains(y)) {
-							v = gd.getVariable(y.name()); 
-							gd.addEdge(eqn,v);
+					int n_eq = e.numScalarEquations();
+					
+					for (int i=0;i<n_eq;i++) {
+						ASTNode.log.info("*** " + e.prettyPrint(""));
+						eqn = gd.addEquation("eq_"+k,e.prettyPrint(""),e);
+						k++;
+					
+						for (FVariable y : e.variables()) { 
+							FRealVariable frv = (FRealVariable)((FRealVariable)y).getMeIntegrated();
+							if (z.contains(y) && (addSSPrefer || frv==null || (frv!=null && frv.stateSelectAttribute()!=FRealVariable.StateSelect.PREFER))) {
+								ASTNode.log.info(" ** " + y.prettyPrint("") + " " + z.contains(y));	
+								v = gd.getVariable(y.name()); 
+								gd.addEdge(eqn,v);
+							} 
 						} 
-					} 
+					}
+				}
+						
+				ASTNode.log.info(gd.toString());
+				// Run matching
+				gd.maximumMatching(true);	
+				ASTNode.log.info(gd.printMatching());
+			
+				// Check if we found a matching
+				if (gd.getUnmatchedEquations().size()==0) {
+					done = true;
+				} else if (!addSSPrefer && gd.getUnmatchedEquations().size()!=0) {
+					addSSPrefer = true;
+					done = false;
+				} else {
+					done = true;	
 				}
 			}
-					
-			ASTNode.log.info(gd.toString());
-			// Run matching
-			gd.maximumMatching(true);	
-			ASTNode.log.info(gd.printMatching());
-					
 			// The matched variables are selected as dummy derivatives
 			for (Var vv : gd.getMatchedVariables()) {
 				zHat.add(vv.getVariable());

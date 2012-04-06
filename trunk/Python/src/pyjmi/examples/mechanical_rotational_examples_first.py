@@ -51,7 +51,7 @@ def run_demo(with_plots=True):
     tau = res['torque.tau']
     t = res['time']
 
-    assert N.abs(w3[-1] - (-0.27404370774029602)) < 1e-3, \
+    assert N.abs(w3[-1] - (-0.27404370774029602)) < 1e-2, \
            "Wrong value in simulation result."  
 
     if with_plots:

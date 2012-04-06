@@ -4639,6 +4639,150 @@ equation
   x + F(y,x,0,x) = 0;
 end IndexReduction29_FunctionNoDerivative;
 
+  model IndexReduction30_PlanarPendulum_StatePrefer
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction30_PlanarPendulum_StatePrefer",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction30_PlanarPendulum_StatePrefer
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x(stateSelect = StateSelect.prefer) \"Cartesian x coordinate\";
+ Real y \"Cartesian x coordinate\";
+ Real vx(stateSelect = StateSelect.prefer) \"Velocity in x coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ Real der_y;
+ Real der_2_x;
+ Real der_2_y;
+initial equation 
+ x = 0.0;
+ vx = 0.0;
+equation
+ der(x) = vx;
+ der(vx) = ( lambda ) * ( x );
+ der_2_y = ( lambda ) * ( y ) - ( g );
+ x ^ 2 + y ^ 2 = L;
+ ( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
+ ( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der(x) ) + ( 0.0 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) + ( 0.0 ) * ( y ) ) * ( der_y ) = 0.0;
+ der_2_x = der(vx);
+
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+end TransformCanonicalTests.IndexReduction30_PlanarPendulum_StatePrefer;
+")})));
+
+    parameter Real L = 1 "Pendulum length";
+    parameter Real g =9.81 "Acceleration due to gravity";
+    Real x(stateSelect=StateSelect.prefer) "Cartesian x coordinate";
+    Real y "Cartesian x coordinate";
+    Real vx(stateSelect=StateSelect.prefer) "Velocity in x coordinate";
+    Real vy "Velocity in y coordinate";
+    Real lambda "Lagrange multiplier";
+  equation
+    der(x) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) = lambda*y - g;
+    x^2 + y^2 = L;
+  end IndexReduction30_PlanarPendulum_StatePrefer;
+
+model IndexReduction31_PlanarPendulum_StateAlways
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction31_PlanarPendulum_StateAlways",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction31_PlanarPendulum_StateAlways
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x(stateSelect = StateSelect.always) \"Cartesian x coordinate\";
+ Real y \"Cartesian x coordinate\";
+ Real vx(stateSelect = StateSelect.always) \"Velocity in x coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ Real der_y;
+ Real der_2_x;
+ Real der_2_y;
+initial equation 
+ x = 0.0;
+ vx = 0.0;
+equation
+ der(x) = vx;
+ der(vx) = ( lambda ) * ( x );
+ der_2_y = ( lambda ) * ( y ) - ( g );
+ x ^ 2 + y ^ 2 = L;
+ ( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
+ ( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der(x) ) + ( 0.0 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) + ( 0.0 ) * ( y ) ) * ( der_y ) = 0.0;
+ der_2_x = der(vx);
+
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+end TransformCanonicalTests.IndexReduction31_PlanarPendulum_StateAlways;
+")})));
+
+    parameter Real L = 1 "Pendulum length";
+    parameter Real g =9.81 "Acceleration due to gravity";
+    Real x(stateSelect=StateSelect.always) "Cartesian x coordinate";
+    Real y "Cartesian x coordinate";
+    Real vx(stateSelect=StateSelect.always) "Velocity in x coordinate";
+    Real vy "Velocity in y coordinate";
+    Real lambda "Lagrange multiplier";
+  equation
+    der(x) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) = lambda*y - g;
+    x^2 + y^2 = L;
+	
+  end IndexReduction31_PlanarPendulum_StateAlways;
+
+  model IndexReduction32_PlanarPendulum_StatePreferAlways
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction32_PlanarPendulum_StatePreferAlways",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction32_PlanarPendulum_StatePreferAlways
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x(stateSelect = StateSelect.prefer) \"Cartesian x coordinate\";
+ Real y(stateSelect = StateSelect.always) \"Cartesian x coordinate\";
+ Real vy(stateSelect = StateSelect.always) \"Velocity in y coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ Real der_x;
+ Real der_2_x;
+ Real der_2_y;
+initial equation 
+ y = 0.0;
+ vy = 0.0;
+equation
+ der(y) = vy;
+ der_2_x = ( lambda ) * ( x );
+ der(vy) = ( lambda ) * ( y ) - ( g );
+ x ^ 2 + y ^ 2 = L;
+ ( ( 2 ) * ( x ) ) * ( der_x ) + ( ( 2 ) * ( y ) ) * ( der(y) ) = 0.0;
+ ( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der_x ) + ( 0.0 ) * ( x ) ) * ( der_x ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der(y) ) + ( 0.0 ) * ( y ) ) * ( der(y) ) = 0.0;
+ der_2_y = der(vy);
+		 
+
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+end TransformCanonicalTests.IndexReduction32_PlanarPendulum_StatePreferAlways;
+")})));
+
+    parameter Real L = 1 "Pendulum length";
+    parameter Real g =9.81 "Acceleration due to gravity";
+    Real x(stateSelect=StateSelect.prefer) "Cartesian x coordinate";
+    Real y(stateSelect=StateSelect.always) "Cartesian x coordinate";
+    Real vx(stateSelect=StateSelect.prefer) "Velocity in x coordinate";
+    Real vy(stateSelect=StateSelect.always) "Velocity in y coordinate";
+    Real lambda "Lagrange multiplier";
+  equation
+    der(x) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) = lambda*y - g;
+    x^2 + y^2 = L;
+  end IndexReduction32_PlanarPendulum_StatePreferAlways;
+
+
 model StateInitialPars1
 	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
