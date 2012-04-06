@@ -3333,10 +3333,10 @@ Compliance error at line 3265, column 7:
 
   model IfEq19
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
+     JModelica.UnitTesting.TransformCanonicalTestCase(
          name="IfEqu19",
          description="Check that if equations inside when equations are treated correctly.",
-         errorMessage="
+         flatModel="
 fclass TransformCanonicalTests.IfEq19
  discrete Real x;
 initial equation 
@@ -3360,6 +3360,54 @@ end TransformCanonicalTests.IfEq19;
 	end when;
 			
   end IfEq19;
+
+model IfEq20
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu20",
+         description="Check that parameter if equations are rewritten in initial equation sections.",
+         flatModel="
+		 fclass TransformCanonicalTests.IfEq20
+ Real x;
+initial equation 
+ x = 3;
+equation
+ der(x) =  - ( x );
+end TransformCanonicalTests.IfEq20;
+		 ")})));	
+	Real x;
+initial equation
+    if true then
+		x = 3;
+	end if;
+equation
+	der(x) = -x;
+end IfEq20;
+
+model IfEq21
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu21",
+         description="Check that variable if equations are rewritten in initial equation sections.",
+         flatModel="
+		 fclass TransformCanonicalTests.IfEq21
+ Real x;
+initial equation 
+ x = (if time >= 3 then 3 else 4);
+equation
+ der(x) =  - ( x );
+end TransformCanonicalTests.IfEq21;
+		 ")})));	
+	Real x;
+initial equation
+    if  time>=3 then
+		x = 3;
+	else
+		x = 4;
+	end if;
+equation
+	der(x) = -x;
+end IfEq21;
 
 model IfExpLeft1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -4781,7 +4829,6 @@ end TransformCanonicalTests.IndexReduction32_PlanarPendulum_StatePreferAlways;
     der(vy) = lambda*y - g;
     x^2 + y^2 = L;
   end IndexReduction32_PlanarPendulum_StatePreferAlways;
-
 
 model StateInitialPars1
 	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

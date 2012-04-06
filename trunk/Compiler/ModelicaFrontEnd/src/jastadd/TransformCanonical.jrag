@@ -3002,6 +3002,10 @@ aspect IfEquations {
 				return new FElseEquation(getType(), new List());
 		}	
 	}	
+
+	rewrite FElseEquation in FClass.getFInitialEquation() {
+		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
+	}	
 	
 	rewrite FElseEquation in FEquationBlock.getFAbstractEquation() {
 		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
