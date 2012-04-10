@@ -85,7 +85,7 @@ aspect OptimicaInitialTransformations {
  	     	                              compd,
  	     	                              annotation,
  	     	                              ext_clause,
- 	     	                              getEndName(),
+ 	     	                              getEndDecl(),
  	     	                              getClassModificationOpt(),
  	     	                              constr);
  	     	fc.setLocationNoTree(getRestriction(), this);

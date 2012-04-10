@@ -152,7 +152,7 @@ aspect Flattening {
 			
 			AnnotationNode functionDer = annotation("derivative");
 			
-			if (functionDer!=AnnotationNode.NO_ANNOTATION) {
+			if (functionDer.exists()) {
 				String functionDerName = functionDer.string();
 				if (functionDerName==null) {
 					ValueModification vm = ((CompleteModification)((ClassModification)functionDer.ast()).getParent()).getValueModification();	
@@ -1593,7 +1593,7 @@ aspect InstantiatedExpressions {
 		   o = new Opt(new FStringComment(getComment().getStringComment().getComment()));
 	    else
 	    	o = new Opt();
-		FConnectClause c = new FConnectClause(equationType(), o, 
+		FConnectClause c = new FConnectClause(equationType(), o, this,
 				new FIdUseInstAccess(getConnector1().newInstAccess()),
 				new FIdUseInstAccess(getConnector2().newInstAccess()));
 		c.setLocation(this);

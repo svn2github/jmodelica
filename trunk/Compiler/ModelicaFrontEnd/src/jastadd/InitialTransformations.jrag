@@ -75,11 +75,11 @@
                                           new List(),
                                           new List(),
                                           new Opt(),
-                                          getEndName());
+                                          getEndDecl());
             
             getComposition().extractElementsTo(fc);
             
-            fc.setLocationNoTree(getRestriction(), this);
+            fc.setLocationNoTree(this, this, getRestriction());
             return fc;
         }
     }
@@ -110,7 +110,7 @@
                                           new List(),
                                           new List(),
                                           new Opt(),
-                                          getEndName());
+                                          getEndDecl());
             
             ClassAccess ca = new ClassAccess(getName().getID());
             InlineExtendsClause iec = new InlineExtendsClause(
@@ -147,7 +147,7 @@
         	ecd.setOuterOpt(getOuterOpt());
         	ecd.setReplaceableOpt(getReplaceableOpt());
         	ecd.setStringCommentOpt(getComment().getStringCommentOpt());
-        	ecd.setEndName(getName().getID());
+        	ecd.setEndDecl(new EndDecl(getName().getID()));
         	
         	// TODO: Copy min, max and start
         	
@@ -173,10 +173,14 @@
     	return l;
     }
     
+    Composition FullClassDecl.originalComposition;
+    
     /**
      * \brief Extract elements from Composition and add to a FullClassDecl.
      */
     public void Composition.extractElementsTo(FullClassDecl fcd) {
+    	fcd.originalComposition = this;
+
         for (Clause cl : getClauses()) 
 			cl.addToFullClassDecl(fcd);
         
@@ -208,6 +212,7 @@
     }
     
     public void AlgorithmAnnotation.addToFullClassDecl(FullClassDecl fcd, Algorithm algo) {
+    	getAnnotation().setLocationNoTree(getAnnotation(), this);
     	fcd.addAnnotation(getAnnotation());
     }
     
@@ -224,6 +229,7 @@
     }
     
     public void ElementAnnotation.addToFullClassDecl(FullClassDecl fcd) {
+    	getAnnotation().setLocationNoTree(getAnnotation(), this);
     	fcd.addAnnotation(getAnnotation());
     }
     
@@ -237,6 +243,7 @@
     }
     
     public void EquationAnnotation.addToFullClassDecl(FullClassDecl fcd) {
+    	getAnnotation().setLocationNoTree(getAnnotation(), this);
         fcd.addAnnotation(getAnnotation());
     }
     
@@ -389,7 +396,7 @@
                                                     getName(0).getComment(),
                                                     getConstrainingClauseOpt(),
                                                     getComment());
-                c.setLocationNoTree(getName(0), this);
+                c.setLocationNoTree(this, this, getName(0));
                 //log.debug("ComponentClause->ComponentDecl.getStart() = "+c.getStart());
                 return c;
             }

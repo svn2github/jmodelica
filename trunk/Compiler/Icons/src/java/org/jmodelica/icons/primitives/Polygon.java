@@ -4,41 +4,44 @@ import java.util.ArrayList;
 
 import org.jmodelica.icons.coord.Extent;
 import org.jmodelica.icons.coord.Point;
-import org.jmodelica.icons.primitives.Types.Smooth;
 
 
 
 public class Polygon extends FilledShape {
 	
+	public static final Object POINTS_CHANGED = new Object();
+	public static final Object SMOOTH_CHANGED = new Object();
+	
 	private ArrayList<Point> points;
 	private Types.Smooth smooth;
 	
-	private static final Types.Smooth DEFAULT_SMOOTH = Types.Smooth.NONE;
+	public static final Types.Smooth DEFAULT_SMOOTH = Types.Smooth.NONE;
 	 
-	public Polygon()
-	{
-		super();
-		smooth = DEFAULT_SMOOTH;
-		points = new ArrayList<Point>();
+	public Polygon() {
+		this(new ArrayList<Point>());
 	}
 	public Polygon(ArrayList<Point> points) {
 		super();
+		setSmooth(DEFAULT_SMOOTH);
 		setPoints(points);
 	}
 
-	public void setPoints(ArrayList<Point> points) {
-		this.points = points;
-		int n = points.size();
-		if (!points.get(0).equals(points.get(n - 1))) 
-			points.add(points.get(0));
+	public void setPoints(ArrayList<Point> newPoints) {
+		if (newPoints.size() != 0 && !newPoints.get(0).equals(newPoints.get(newPoints.size() - 1))) 
+			newPoints.add(newPoints.get(0));
+		points = newPoints;
+		notifyObservers(POINTS_CHANGED);
 	}
 
 	public ArrayList<Point> getPoints() {
 		return points;
 	}
 
-	public void setSmooth(Types.Smooth smooth) {
-		this.smooth = smooth;
+	public void setSmooth(Types.Smooth newSmooth) {
+		if (smooth == newSmooth)
+			return;
+		smooth = newSmooth;
+		notifyObservers(SMOOTH_CHANGED);
 	}
 	public Types.Smooth getSmooth() {
 		return smooth;
@@ -56,22 +59,6 @@ public class Polygon extends FilledShape {
 	 * @return
 	 */
 	public Extent getBounds() {
-		Point p = points.get(0);
-		Point min = new Point(p.getX(), p.getY());
-		Point max = new Point(p.getX(), p.getY());
-		for (Point point : points) {
-			if (point.getX() < min.getX()) {
-				min.setX(point.getX());
-			} else if (point.getX() > max.getX()) {
-				max.setX(point.getX());
-			}
-			if (point.getY() < min.getY()) {
-				min.setY(point.getY());
-			} else if (point.getY() > max.getY()) {
-				max.setY(point.getY());
-			}
-		}
-		Extent extent = new Extent(min, max);
-		return extent;
+		return Point.calculateExtent(points);
 	}
 }

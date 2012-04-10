@@ -65,7 +65,7 @@ public class ModelicaPerspective implements IPerspectiveFactory {
 		IFolderLayout outlinefolder = layout.createFolder("right", IPageLayout.RIGHT, (float)0.75, edit);
 		outlinefolder.addView(IDEConstants.CLASS_OUTLINE_VIEW_ID);
 		outlinefolder.addPlaceholder(IDEConstants.INSTANCE_OUTLINE_VIEW_ID);
-		outlinefolder.addView(IPageLayout.ID_OUTLINE);
+		outlinefolder.addPlaceholder(IPageLayout.ID_OUTLINE);
 		
 		// Actions
 		layout.addActionSet(IPageLayout.ID_NAVIGATE_ACTION_SET);

@@ -40,6 +40,45 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Constructs a real literal expression from a double.
+	 */
+	public RealLitExp.RealLitExp(double val) {
+		this(String.valueOf(val));
+	}
+	
+	/**
+	 * \brief Constructs an integer literal expression from an integer.
+	 */
+	public IntegerLitExp.IntegerLitExp(int val) {
+		this(String.valueOf(val));
+	}
+	
+	/**
+	 * \brief Constructs a parse access from a String.
+	 */
+	public ParseAccess.ParseAccess(String name) {
+		this();
+		setID(name);
+	}
+	
+	/**
+	 * \brief Constructs a component modification from an access and modification.
+	 */
+	public ComponentModification.ComponentModification(Access name, Modification mod) {
+		this();
+		setName(name);
+		setModification(mod);
+	}
+	
+	/**
+	 * \brief Constructs a complete modification from a class modification.
+	 */
+	public CompleteModification.CompleteModification(ClassModification cm) {
+		this();
+		setClassModification(cm);
+	}
+	
+	/**
 	 * \brief Constructs an equation that is not initial.
 	 */
 	public FEquation.FEquation(FExp left, FExp right) {
@@ -56,9 +95,9 @@ aspect Constructors {
 	/**
 	 * \brief Constructs a connection clause that is not initial.
 	 */
-	public FConnectClause.FConnectClause(Opt<FStringComment> comment, FIdUseInstAccess left, FIdUseInstAccess right) {
-		this(new FNormalEquation(), comment, left, right);
-	}
+//	public FConnectClause.FConnectClause(Opt<FStringComment> comment, FIdUseInstAccess left, FIdUseInstAccess right) {
+//		this(new FNormalEquation(), comment, left, right);
+//	}
 	
 	/**
 	 * \brief Constructs a for clause equation that is not initial.
@@ -220,6 +259,17 @@ aspect Constructors {
 	 */
 	public GlobalAccess.GlobalAccess(Access access) {
 		this("", access);
+	}
+	
+	/**
+	 * Create an access from a class name.
+	 */
+	public static Access Access.fromClassName(String name) {
+		String[] parts = name.split("\\.", 2);
+		if (parts.length == 1)
+			return new ClassAccess(parts[0]);
+		else
+			return new Dot(new ClassAccess(parts[0]), fromClassName(parts[1]));
 	}
 	
 	/**

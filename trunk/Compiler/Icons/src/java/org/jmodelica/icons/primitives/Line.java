@@ -7,13 +7,19 @@ import java.util.List;
 import org.jmodelica.icons.coord.Extent;
 import org.jmodelica.icons.coord.Point;
 import org.jmodelica.icons.drawing.IconConstants;
-import org.jmodelica.icons.primitives.Color;
 import org.jmodelica.icons.primitives.Types.Arrow;
 import org.jmodelica.icons.primitives.Types.FillPattern;
-import org.jmodelica.icons.primitives.Types.LinePattern;
-import org.jmodelica.icons.primitives.Types.Smooth;
+
 
 public class Line extends GraphicItem {
+	
+	public static final Object POINTS_UPDATED = new Object();
+	public static final Object COLOR_UPDATE = new Object();
+	public static final Object LINE_PATTERN_UPDATED = new Object();
+	public static final Object THICKNESS_UPDATE = new Object();
+	public static final Object ARROW_UPDATED = new Object();
+	public static final Object ARROW_SIZE_UPDATED = new Object();
+	public static final Object SMOOTH_UPDATED = new Object();
 	
 	
 	private List<Point> points;
@@ -39,42 +45,57 @@ public class Line extends GraphicItem {
 	
 	public Line(List<Point> points) {
 		super();
-		color = DEFAULT_COLOR;
-		linePattern = DEFAULT_LINE_PATTERN;
-		thickness = DEFAULT_THICKNESS;
-		arrowSize = DEFAULT_ARROW_SIZE;
-		arrow = DEFAULT_ARROW;
-		smooth = DEFAULT_SMOOTH;
-		this.points = points;
-		arrowPolygons = null;
+		setColor(DEFAULT_COLOR);
+		setLinePattern(DEFAULT_LINE_PATTERN);
+		setThickness(DEFAULT_THICKNESS);
+		setArrowSize(DEFAULT_ARROW_SIZE);
+		setArrow(DEFAULT_ARROW);
+		setSmooth(DEFAULT_SMOOTH);
+		setPoints(points);
 	}
 	
-	public void setPoints(List<Point> point) {
-		this.points = point;
+	public void setPoints(List<Point> newPoint) {
+		if (points == newPoint)
+			return;
+		points = newPoint;
 		arrowPolygons = null;
+		notifyObservers(POINTS_UPDATED);
 	}
-		
+	
+	public void pointsChanged() {
+		notifyObservers(POINTS_UPDATED);
+	}
+	
 	public List<Point> getPoints() {
 		return points;
 	}
 
-	public void setColor(Color color) {
-		this.color = color;
+	public void setColor(Color newColor) {
+		if (color == newColor)
+			return;
+		color = newColor;
+		notifyObservers(COLOR_UPDATE);
 	}
 
 	public Color getColor() {
 		return color;
 	}
 
-	public void setLinePattern(Types.LinePattern linePattern) {
-		this.linePattern = linePattern;
+	public void setLinePattern(Types.LinePattern newLinePattern) {
+		if (linePattern == newLinePattern)
+			return;
+		linePattern = newLinePattern;
+		notifyObservers(LINE_PATTERN_UPDATED);
 	}
 
 	public Types.LinePattern getLinePattern() {
 		return linePattern;
 	}
-	public void setThickness(double thickness) {
-		this.thickness = thickness;
+	public void setThickness(double newThickness) {
+		if (thickness == newThickness)
+			return;
+		thickness = newThickness;
+		notifyObservers(THICKNESS_UPDATE);
 	}
 
 	public double getThickness() {
@@ -133,7 +154,7 @@ public class Line extends GraphicItem {
     	);
     	
     	ArrayList<Point> arrowpoints = new ArrayList<Point>();
-  
+
     	arrowpoints.add(p2);
     	arrowpoints.add(p4);
     	arrowpoints.add(p5);
@@ -148,25 +169,35 @@ public class Line extends GraphicItem {
 		return arrowPolygons;
 	}
 	
-	public void setArrow(Types.Arrow[] arrow) {
-		this.arrow = arrow;
+	public void setArrow(Types.Arrow[] newArrow) {
+		if (arrow == newArrow)
+			return;
+		arrow = newArrow;
 		arrowPolygons = null;
+		notifyObservers(ARROW_UPDATED);
 	}
 
 	public Types.Arrow[] getArrow() {
 		return arrow;
 	}
 
-	public void setArrowSize(double arrowSize) {
-		this.arrowSize = arrowSize;
+	public void setArrowSize(double newArrowSize) {
+		if (arrowSize == newArrowSize)
+			return;
+		arrowSize = newArrowSize;
+		arrowPolygons = null;
+		notifyObservers(ARROW_SIZE_UPDATED);
 	}
 
 	public double getArrowSize() {
 		return arrowSize;
 	}
 
-	public void setSmooth(Types.Smooth smooth) {
-		this.smooth = smooth;
+	public void setSmooth(Types.Smooth newSmooth) {
+		if (smooth == newSmooth)
+			return;
+		smooth = newSmooth;
+		notifyObservers(SMOOTH_UPDATED);
 	}
 
 	public Types.Smooth getSmooth() {
@@ -174,26 +205,7 @@ public class Line extends GraphicItem {
 	}
 	
 	public Extent getBounds() {
-		if (points == null || points.size() == 0) {
-			return null;
-		}
-		Point p = points.get(0);
-		Point min = new Point(p.getX(), p.getY());
-		Point max = new Point(p.getX(), p.getY());
-		for (Point point : points) {
-			if (point.getX() < min.getX()) {
-				min.setX(point.getX());
-			} else if (point.getX() > max.getX()) {
-				max.setX(point.getX());
-			}
-			if (point.getY() < min.getY()) {
-				min.setY(point.getY());
-			} else if (point.getY() > max.getY()) {
-				max.setY(point.getY());
-			}
-		}
-		Extent extent = new Extent(min, max);
-		return extent;
+		return Point.calculateExtent(points);
 	}
 	
 	public String toString() {
@@ -204,4 +216,5 @@ public class Line extends GraphicItem {
 		s += "\ncolor = " + color;
 		return s+super.toString(); 
 	}
+	
 }

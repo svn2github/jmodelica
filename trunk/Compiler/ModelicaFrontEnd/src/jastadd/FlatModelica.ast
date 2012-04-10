@@ -456,7 +456,8 @@ FFunctionCallLeft : BaseNode ::= [FExp];
  * connect statements has been transformed into regular equations, but only
  * as an intermediate node type.
  */
-FConnectClause : FAbstractEquation ::= [FStringComment] 
+FConnectClause : FAbstractEquation ::= [FStringComment]
+                                       <ConnectClause:ConnectClause>
                                        Connector1:FIdUseInstAccess 
                                        Connector2:FIdUseInstAccess;
 

@@ -29,7 +29,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
@@ -85,7 +84,7 @@ public class ClassOutlineView extends OutlineView {
 	/**
 	 * Get the project connected to the given text editor's opened file, if any.
 	 */
-	protected IProject getProjectOfEditor(EditorPart editor) {
+	protected IProject getProjectOfEditor(AbstractTextEditor editor) {
 		IEditorInput input = editor.getEditorInput();
 		if (input instanceof IFileEditorInput) {
 			IFile file = ((IFileEditorInput) input).getFile();
@@ -96,8 +95,8 @@ public class ClassOutlineView extends OutlineView {
 	}
 
 	protected boolean isImportant(IWorkbenchPart part) {
-		if (part instanceof EditorPart) {
-			IProject project = getProjectOfEditor((EditorPart) part);
+		if (part instanceof AbstractTextEditor) {
+			IProject project = getProjectOfEditor((AbstractTextEditor) part);
 			return EclipseUtil.isModelicaProject(project);
 		} else {
 			return false;

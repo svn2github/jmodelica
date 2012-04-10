@@ -369,7 +369,7 @@ done
 export JAVA_HOME JMODELICA_HOME IPOPT_HOME CPPAD_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS SUNDIALS_HOME
 TIME=$(date +%s)
 
-read_args
+read_args $*
 
 if [ "${LOG}" == 1 ]; then
   echo "Log of jm_tests $(date):" > "${LOGFILE}"

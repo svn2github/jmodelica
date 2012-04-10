@@ -43,8 +43,8 @@ aspect AnnotationAPI {
 	 */
 	syn AnnotationNode ASTNode.annotation(String path) = annotation().forPath(path);
 	
-	eq Opt.annotation()  = (getNumChild() > 0) ? getChild(0).annotation() : AnnotationNode.NO_ANNOTATION;
-	eq List.annotation() = (getNumChild() > 0) ? getChild(0).annotation() : AnnotationNode.NO_ANNOTATION;
+	eq Opt.annotation()  = (getNumChild() > 0) ? getChild(0).annotation() : AnnotationNode.createNullAnnotationNodeFor(this);
+	eq List.annotation() = (getNumChild() > 0) ? getChild(0).annotation() : AnnotationNode.createNullAnnotationNodeFor(this);
 	
 	eq Comment.annotation()         = getAnnotationOpt().annotation();
 	eq ParseAnnotation.annotation() = getClassModification().annotationNode();
@@ -57,7 +57,9 @@ aspect AnnotationAPI {
 	eq ShortClassDecl.annotation()          = getExtendsClauseShortClass().annotation();
 	eq ExtendsClauseShortClass.annotation() = getComment().annotation();
 	eq InstShortClassDecl.annotation()      = getClassDecl().annotation();
-	
+
+	eq ConnectClause.annotation() = getComment().annotation();
+
 	eq ComponentDecl.annotation()     = getComment().annotation();
 	eq InstComponentDecl.annotation() = getComponentDecl().annotation();
 	
@@ -66,16 +68,16 @@ aspect AnnotationAPI {
 	 * Get the annotation node that represents this node when used as an annotation, if 
 	 * applicable.
 	 */
-	syn AnnotationNode ASTNode.annotationNode()            = AnnotationNode.NO_ANNOTATION;
-	syn lazy AnnotationNode Modification.annotationNode()  = AnnotationNode.NO_ANNOTATION;
-	eq ClassModification.annotationNode()                  = new AnnotationNode.CMAnnotationNode(this);
-	eq ValueModification.annotationNode()                  = new AnnotationNode.VMAnnotationNode(this);
+	syn AnnotationNode ASTNode.annotationNode()            = AnnotationNode.createNullAnnotationNodeFor(this);
+	syn lazy AnnotationNode Modification.annotationNode()  = AnnotationNode.createNullAnnotationNodeFor(this);
+	eq ClassModification.annotationNode()                  = new CMAnnotationNode(this);
+	eq ValueModification.annotationNode()                  = new VMAnnotationNode(this);
 	eq CompleteModification.annotationNode()               = getClassModification().annotationNode();
 	eq ComponentModification.annotationNode()              = 
-		hasModification() ? getModification().annotationNode() : AnnotationNode.NO_ANNOTATION;
-	syn lazy AnnotationNode Exp.annotationNode()           = new AnnotationNode.EAnnotationNode(this);
-	eq FunctionCall.annotationNode()                       = new AnnotationNode.FCAnnotationNode(this);
-	syn lazy AnnotationNode NamedArgument.annotationNode() = new AnnotationNode.NAAnnotationNode(this);
+		hasModification() ? getModification().annotationNode() : AnnotationNode.createNullAnnotationNodeFor(this);
+	syn lazy AnnotationNode Exp.annotationNode()           = new EAnnotationNode(this);
+	eq FunctionCall.annotationNode()                       = new FCAnnotationNode(this);
+	syn lazy AnnotationNode NamedArgument.annotationNode() = new NAAnnotationNode(this);
 	
 	/**
 	 * \brief Describes a node in the tree formed by an annotation.
@@ -212,6 +214,55 @@ aspect AnnotationAPI {
 		protected abstract ASTNode ast();
 		
 		/**
+		 * Set the expression <code>exp</code> of the node if possible.
+		 * 
+		 * @param exp Expresion to add.
+		 */
+		public void setValue(Exp exp) {
+			throw new AnnotationEditException("Set value is not supported on this type of annotation node");
+		}
+		
+		/**
+		 * Adds a node with the name <code>name</code> to this node if possible.
+		 * 
+		 * @param name Name of the new node.
+		 * @return An annotation node representation of the new node.
+		 */
+		public AnnotationNode addNode(String name) {
+			throw new AnnotationEditException("Add node is not supported on this type of annotation node");
+		}
+		
+		/**
+		 * A helper method that creates the corrent null annotation node depending on
+		 * the class of AST node <code>node</node>.
+		 * 
+		 * @param node The ast node that need a null annotation node.
+		 * @return A null annotation node for <code>node</code>.
+		 */
+		public static AnnotationNode createNullAnnotationNodeFor(ASTNode node) {
+			if (node.getParent() instanceof Comment)
+				return new NullCommentAnnotationNode((Comment)node.getParent());
+			return NO_ANNOTATION;
+		}
+		
+		/**
+		 * A helper method that creatse a list of editable null annotation nodes
+		 * from a path <code>path</code> starting at position <code>i</code> 
+		 * with the root parent <code>parent</code>.
+		 * 
+		 * @param parent The root annotation node
+		 * @param path The string path
+		 * @param i The position from where to start creating the list
+		 * @return The tail child in the list
+		 */
+		protected static AnnotationNode createSetableNullPath(AnnotationNode parent, String[] path, int i) {
+			AlmostNullAnnotationNode node = new AlmostNullAnnotationNode(parent, path[i]);
+			if (i + 1 == path.length)
+				return node;
+			else
+				return createSetableNullPath(node, path, i + 1);
+		}
+		/**
 		 * Iterates over the annotation nodes representing the nodes in the list.
 		 */
 		protected static class AnnotationIterator implements Iterator<AnnotationNode> {
@@ -276,176 +327,359 @@ aspect AnnotationAPI {
 		}
 		
 		/**
-		 * \brief Represents an annotation that is represented in the source tree by a ClassModification.
+		 * Representation a non-existing annotation but with the possibility to add content.
 		 */
-		public static class CMAnnotationNode extends AnnotationNode {
+		private static class AlmostNullAnnotationNode extends AnnotationNode {
 			
-			private ClassModification mod;
+			private AnnotationNode parent;
+			protected AnnotationNode realNode;
+			private String name;
 			
-			public CMAnnotationNode(ClassModification cm) {
-				mod = cm;
+			/**
+			 * Creates an instance form a parent annotation node <code>parent</code> and
+			 * the path name <code>name</code> of this instance. 
+			 */
+			protected AlmostNullAnnotationNode(AnnotationNode parent, String name) {
+				this.parent = parent;
+				this.name = name;
 			}
-
-			public Iterator<AnnotationNode> iterator() {
-				return new AnnotationIterator(mod.getArguments());
+			
+			@Override
+			public boolean exists() {
+				return realNode != null;
 			}
 			
-			public String name() {
-				return mod.annotationName();
+			@Override
+			public void setValue(Exp exp) {
+				AnnotationNode parentNode = getRealParent();
+				if (parentNode instanceof CMAnnotationNode) {
+					for (Argument arg : ((CMAnnotationNode) parentNode).ast().getArguments()) {
+						if (!arg.matches(name))
+							continue;
+						AnnotationNode realNode = arg.annotation();
+						if (realNode instanceof VMAnnotationNode)
+							realNode.setValue(exp);
+						else
+							throw new AnnotationEditException("The node with name " + name + " is already set and is not an assignment.");
+						return;
+					}
+					
+					ValueModification vm = new ValueModification(exp);
+					((CMAnnotationNode) parentNode).ast().addArgument(new ComponentModification(new ParseAccess(name), vm));
+					realNode = new VMAnnotationNode(vm);
+					return;
+				} else {
+					throw new AnnotationEditException("Unable to set node value.");
+				}
 			}
 			
+			/**
+			 * Creates the real annotation node representation of this node including the
+			 * underlying modifications or expressions.
+			 */
+			protected void createRealNode() {
+				if (realNode != null)
+					return;
+				
+				AnnotationNode parentNode = getRealParent();
+				
+				if (parentNode instanceof CMAnnotationNode) {
+					for (Argument arg : ((CMAnnotationNode) parentNode).ast().getArguments()) {
+						if (!arg.matches(name))
+							continue;
+						realNode = arg.annotation();
+						return;
+					}
+					
+					ClassModification cm = new ClassModification();
+					((CMAnnotationNode) parentNode).ast().addArgument(new ComponentModification(new ParseAccess(name), new CompleteModification(cm)));
+					realNode = new CMAnnotationNode(cm);
+					return;
+				} else {
+					throw new AnnotationEditException("Unable to create node.");
+				}
+			}
+			
+			/**
+			 * Retreives the real parent annotation node for this instance.
+			 * 
+			 * @return The real annotation node.
+			 */
+			private AnnotationNode getRealParent() {
+				AnnotationNode parentRealNode = parent;
+				if (parentRealNode instanceof AlmostNullAnnotationNode) {
+					((AlmostNullAnnotationNode) parent).createRealNode();
+					parentRealNode = ((AlmostNullAnnotationNode) parent).realNode;
+				}
+				return parentRealNode;
+			}
+			
+			@Override
 			protected AnnotationNode forPath(String[] path, int i) {
+				if (realNode != null)
+					return realNode.forPath(path, i);
+				
 				if (i >= path.length)
 					return this;
-				for (Argument arg : mod.getArguments()) 
-					if (arg.matches(path[i])) 
-						return arg.annotationNode().forPath(path, i+1);
-				return NO_ANNOTATION;
-			}
-
-			public ASTNode ast() {
-				return mod;
-			}
-
-		}
-		
-		/**
-		 * \brief Represents an annotation that is represented in the source tree by a FunctionCall.
-		 */
-		public static class FCAnnotationNode extends AnnotationNode {
-			
-			private FunctionCall call;
-			
-			public FCAnnotationNode(FunctionCall fc) {
-				call = fc;
-			}
-
-			public Iterator<AnnotationNode> iterator() {
-				return new AnnotationIterator(new ChainedIterator(
-						call.getFunctionArguments().getExps().iterator(), 
-						call.getFunctionArguments().getNamedArguments().iterator()));
+				return createSetableNullPath(this, path, i);
 			}
 			
-			public String name() {
-				return call.getName().name();
-			}
-			
-			protected AnnotationNode forPath(String[] path, int i) {
-				if (i >= path.length)
-					return this;
-				for (NamedArgument arg : call.getFunctionArguments().getNamedArguments()) 
-					if (arg.matches(path[i])) 
-						return arg.annotationNode().forPath(path, i+1);
-				return NO_ANNOTATION;
-			}
-			
+			@Override
 			protected ASTNode ast() {
-				return call;
-			}
-			
-		}
-		
-		protected static abstract class ExpAnnotationNode extends AnnotationNode {
-			
-			protected abstract Exp exp();
-			
-			public String string() {
-				return exp().avalueString();
-			}
-
-			public boolean isValue() {
-				return !exp().isAnnotationExp();
-			}
-			
-			public ArrayList<String> stringList() {
-				return exp().avalueStringList();
-			}
-
-			public Iterator<AnnotationNode> iterator() {
-				return isValue() ? super.iterator() : new AnnotationIterator(exp().annotationList());
-			}
-			
-			public double real() {
-				return exp().avalueReal();
-			}
-			
-			public double[] realVector() {
-				return exp().avalueRealVector();
-			}
-			
-			public double[][] realMatrix() {
-				return exp().avalueRealMatrix();
-			}
-
-			public boolean bool() {
-				return exp().avalueBool();
-			}
-			
-			protected ASTNode ast() {
-				return exp();
-			}
-
-		}
-		
-		/**
-		 * \brief Represents an annotation that is represented in the source tree by a ValueModification.
-		 */
-		public static class VMAnnotationNode extends ExpAnnotationNode {
-			
-			private ValueModification mod;
-			
-			public VMAnnotationNode(ValueModification vm) {
-				mod = vm;
-			}
-			
-			protected Exp exp() {
-				return mod.getExp();
-			}
-			
-			public String name() {
-				return mod.annotationName();
+				if (realNode != null)
+					return realNode.ast();
+				else
+					return null;
 			}
 			
 		}
 		
 		/**
-		 * \brief Represents an annotation that is represented in the source tree by a NamedArgument.
+		 * A null annotation node for a comment, it adds the possibility to add annotation.
 		 */
-		public static class NAAnnotationNode extends ExpAnnotationNode {
+		private static class NullCommentAnnotationNode extends AlmostNullAnnotationNode {
 			
-			private NamedArgument arg;
+			private Comment comment;
 			
-			public NAAnnotationNode(NamedArgument na) {
-				arg = na;
+			/**
+			 * Constructs an instance with the comment <code>comment</code>.
+			 */
+			protected NullCommentAnnotationNode(Comment comment) {
+				super(null, null);
+				this.comment = comment;
 			}
 			
-			protected Exp exp() {
-				return arg.getExp();
+			@Override
+			public void setValue(Exp exp) {
+				throw new AnnotationEditException("Set value is not supported on this type of annotation node");
 			}
-			
-			public String name() {
-				return arg.getName().name();
+		
+			@Override
+			protected void createRealNode() {
+				ClassModification cm = new ClassModification();
+				comment.setAnnotation(new ParseAnnotation(cm));
+				realNode = new CMAnnotationNode(cm);
 			}
-			
+		
+		}
+		
+	}
+	
+	/**
+	 * \brief Represents an annotation that is represented in the source tree by a ClassModification.
+	 */
+	public class CMAnnotationNode extends AnnotationNode {
+		
+		private ClassModification mod;
+		
+		public CMAnnotationNode(ClassModification cm) {
+			mod = cm;
+		}
+
+		public Iterator<AnnotationNode> iterator() {
+			return new AnnotationIterator(mod.getArguments());
+		}
+		
+		public String name() {
+			return mod.annotationName();
+		}
+		
+		protected AnnotationNode forPath(String[] path, int i) {
+			if (i >= path.length)
+				return this;
+			for (Argument arg : mod.getArguments()) 
+				if (arg.matches(path[i])) 
+					return arg.annotationNode().forPath(path, i+1);
+			return createSetableNullPath(this, path, i);
+		}
+
+		public ClassModification ast() {
+			return mod;
+		}
+
+	}
+	
+	/**
+	 * \brief Represents an annotation that is represented in the source tree by a FunctionCall.
+	 */
+	public class FCAnnotationNode extends AnnotationNode {
+		
+		private FunctionCall call;
+		
+		public FCAnnotationNode(FunctionCall fc) {
+			call = fc;
+		}
+
+		public Iterator<AnnotationNode> iterator() {
+			return new AnnotationIterator(new ChainedIterator(
+					call.getFunctionArguments().getExps().iterator(), 
+					call.getFunctionArguments().getNamedArguments().iterator()));
+		}
+		
+		public String name() {
+			return call.getName().name();
+		}
+		
+		protected AnnotationNode forPath(String[] path, int i) {
+			if (i >= path.length)
+				return this;
+			for (NamedArgument arg : call.getFunctionArguments().getNamedArguments()) 
+				if (arg.matches(path[i])) 
+					return arg.annotationNode().forPath(path, i+1);
+			return NO_ANNOTATION;
+		}
+		
+		protected ASTNode ast() {
+			return call;
+		}
+		
+	}
+	
+	abstract class ExpAnnotationNode extends AnnotationNode {
+		
+		protected abstract Exp exp();
+		protected abstract void setExp(Exp exp);
+		
+		public String string() {
+			return exp().avalueString();
+		}
+
+		public boolean isValue() {
+			return !exp().isAnnotationExp();
+		}
+		
+		public ArrayList<String> stringList() {
+			return exp().avalueStringList();
+		}
+
+		public Iterator<AnnotationNode> iterator() {
+			return isValue() ? super.iterator() : new AnnotationIterator(exp().annotationList());
+		}
+		
+		public double real() {
+			return exp().avalueReal();
+		}
+		
+		public double[] realVector() {
+			return exp().avalueRealVector();
+		}
+		
+		public double[][] realMatrix() {
+			return exp().avalueRealMatrix();
+		}
+
+		public boolean bool() {
+			return exp().avalueBool();
+		}
+		
+		protected ASTNode ast() {
+			return exp();
+		}
+
+		public void setValue(Exp exp) {
+			if (exp() != null && exp != null)
+				exp.copyFormattingFrom(exp());
+			setExp(exp);
+		}
+		
+	}
+	
+	/**
+	 * \brief Represents an annotation that is represented in the source tree by a ValueModification.
+	 */
+	public class VMAnnotationNode extends ExpAnnotationNode {
+		
+		private ValueModification mod;
+		
+		public VMAnnotationNode(ValueModification vm) {
+			mod = vm;
+		}
+		
+		protected Exp exp() {
+			return mod.getExp();
+		}
+		
+		protected void setExp(Exp exp) {
+			mod.setExp(exp);
+		}
+		
+		public String name() {
+			return mod.annotationName();
+		}
+		
+	}
+	
+	/**
+	 * \brief Represents an annotation that is represented in the source tree by a NamedArgument.
+	 */
+	public class NAAnnotationNode extends ExpAnnotationNode {
+		
+		private NamedArgument arg;
+		
+		public NAAnnotationNode(NamedArgument na) {
+			arg = na;
+		}
+		
+		protected Exp exp() {
+			return arg.getExp();
+		}
+		
+		protected void setExp(Exp exp) {
+			arg.setExp(exp);
+		}
+		
+		public String name() {
+			return arg.getName().name();
+		}
+		
+	}
+	
+	/**
+	 * \brief Represents an annotation that is represented in the source tree by an Exp.
+	 */
+	public class EAnnotationNode extends ExpAnnotationNode {
+		
+		private Exp e;
+		
+		public EAnnotationNode(Exp exp) {
+			e = exp;
+		}
+		
+		protected Exp exp() {
+			return e;
+		}
+		
+		protected void setExp(Exp exp) {
+			e = exp;
+		}
+		
+	}
+	
+	/**
+	 * A runtime exception that is thrown when an action fail while trying
+	 * to alter an annotation node and it's underlying structure.
+	 */
+	public class AnnotationEditException extends RuntimeException {
+		
+		/**
+		 * Constructs an instance from a string <code>s</code>.
+		 * 
+		 * @param s A string explaining the exception
+		 */
+		public AnnotationEditException(String s) {
+			super(s);
 		}
 		
 		/**
-		 * \brief Represents an annotation that is represented in the source tree by an Exp.
+		 * Constructs an instance from a string <code>s</code> and exception
+		 * <code>e</code>.
+		 * 
+		 * @param s A string explaining the exception
+		 * @param e An exception that caused this exception
 		 */
-		public static class EAnnotationNode extends ExpAnnotationNode {
-			
-			private Exp e;
-			
-			public EAnnotationNode(Exp exp) {
-				e = exp;
-			}
-			
-			protected Exp exp() {
-				return e;
-			}
-			
+		public AnnotationEditException(String s, Exception e) {
+			super(s, e);
 		}
-		
 	}
 	
 	syn boolean Argument.matches(String str) = false;
