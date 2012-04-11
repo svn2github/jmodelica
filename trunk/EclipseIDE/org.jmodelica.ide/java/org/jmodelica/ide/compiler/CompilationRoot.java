@@ -138,6 +138,7 @@ public class CompilationRoot {
 
 		try {
 			SourceRoot localRoot = (SourceRoot) parser.parse(scanner);
+			localRoot.setFormatting(scanner.getFormattingInfo());
 			for (StoredDefinition def : localRoot.getProgram().getUnstructuredEntitys()) 
 				list.add(annotatedDefinition(def, file));
 		} catch (Parser.Exception e) {
