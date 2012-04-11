@@ -567,6 +567,8 @@ aspect InheritedFactoryMethods {
 	public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp();      }
 	public InstDerExp     InstDerExp.createEmptyNode()     { return new InstDerExp();     }
 	public FDerExp        FDerExp.createEmptyNode()        { return new FDerExp();        }
+	public InstHDerExp    InstHDerExp.createEmptyNode()    { return new InstHDerExp();    }
+	public FHDerExp       FHDerExp.createEmptyNode()       { return new FHDerExp();       }
 	public FInstAccessExp FInstAccessExp.createEmptyNode() { return new FInstAccessExp(); }
 	
 	// Array expressions

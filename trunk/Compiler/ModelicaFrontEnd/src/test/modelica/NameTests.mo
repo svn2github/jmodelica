@@ -2759,4 +2759,68 @@ end AttributeDot1;
 
 
 
+model ComplexExpInDer1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ComplexExpInDer1",
+         description="",
+         flatModel="
+fclass NameTests.ComplexExpInDer1
+ Real x;
+ Real y;
+equation
+ ( x ) * ( der(y) ) + ( der(x) ) * ( y ) = 0;
+end NameTests.ComplexExpInDer1;
+")})));
+
+ Real x;
+ Real y;
+equation
+ der(x * y) = 0;
+end ComplexExpInDer1;
+
+
+model ComplexExpInDer2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ComplexExpInDer2",
+         description="",
+         flatModel="
+fclass NameTests.ComplexExpInDer2
+ Real x;
+ Real y;
+equation
+ der(x,2) + 0.0 - ( der(y) ) = 0;
+end NameTests.ComplexExpInDer2;
+")})));
+
+ Real x;
+ Real y;
+equation
+ der(der(x + 1) - y) = 0;
+end ComplexExpInDer2;
+
+
+model ComplexExpInDer3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ComplexExpInDer3",
+         description="",
+         flatModel="
+fclass NameTests.ComplexExpInDer3
+ Real x;
+ Real y;
+equation
+ {der(x),der(y)} = zeros(2);
+end NameTests.ComplexExpInDer3;
+")})));
+
+ Real x;
+ Real y;
+equation
+ der({x, y}) = zeros(2);
+end ComplexExpInDer3;
+
+
+
 end NameTests;

@@ -32,8 +32,15 @@ aspect ContentCheck {
 	public void FAlgorithmBlock.contentCheck() {}
 	
 	public void InstDerExp.contentCheck() {
-		if (!(getFExp() instanceof FInstAccessExp))
-			error("Expressions within der() not supported");
+		if (inFunction()) {
+			error("The der() operator may not be used inside functions");
+		} else {
+			try {
+				getFExp().diff(FExp.TIME);
+			} catch (ExpressionDifferentiationException e) {
+				e.generateError();
+			}
+		}
 	}
 	
 	public void InstExternal.contentCheck() {

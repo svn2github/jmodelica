@@ -3691,9 +3691,8 @@ model IndexReduction4_Err
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/TransformCanonicalTests.IndexReduction4_Err.mof':
 Semantic error at line 0, column 0:
-  Cannot differentate the equation 
-   TransformCanonicalTests.IndexReduction4_Err.F(x2)
-  since the function TransformCanonicalTests.IndexReduction4_Err.F does not have a derivative annotation.
+  Cannot differentiate call to function without derivative annotation 'TransformCanonicalTests.IndexReduction4_Err.F(x2)' in equation:
+   x1 + TransformCanonicalTests.IndexReduction4_Err.F(x2) = 1
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/TransformCanonicalTests.IndexReduction4_Err.mof':
 Semantic error at line 0, column 0:
@@ -3727,7 +3726,7 @@ model IndexReduction5_Err
 
 Error: in file 'TransformCanonicalTests.IndexReduction5_Err.mof':
 Semantic error at line 0, column 0:
-  Cannot differentate the equation 
+  Cannot differentiate call to function without derivative annotation 'TransformCanonicalTests.IndexReduction5_Err.F(x2)' in equation:
    (x1, x2) = TransformCanonicalTests.IndexReduction5_Err.F(x2)
 
 Error: in file 'TransformCanonicalTests.IndexReduction5_Err.mof':

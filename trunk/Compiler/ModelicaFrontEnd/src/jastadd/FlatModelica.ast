@@ -879,6 +879,11 @@ FDummyDerExp : FIdUseExp;
 /**
  * \brief Higher order derivatives occurring as a result of index reduction.
  */
+InstHDerExp : InstDerExp ::= <Order:int>; 
+
+/**
+ * \brief Higher order derivatives occurring as a result of index reduction.
+ */
 FHDerExp : FDerExp ::= <Order:int>; 
 
 /**

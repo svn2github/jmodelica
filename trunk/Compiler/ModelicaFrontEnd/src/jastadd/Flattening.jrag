@@ -1443,13 +1443,17 @@ aspect FlatExpressions {
 		return new FUnknownSizeExp(null, getDim());
 	}
 	
-	public FDerExp InstDerExp.flatten(FQName prefix) {
-		/* This should only ever be called on InstDerExps that has an FInstAccessExp 
-		 * as its FExp. All more complex "der()" expressions should have been either 
-		 * rewritten in the instance tree or have generated an error during checks. 
-		 */
-		FQName var = ((FInstAccessExp) getFExp()).getInstAccess().flatten(prefix);
-		return new FDerExp(new FIdUse(var));
+	public FExp InstDerExp.flatten(FQName prefix) {
+		return getFExp().flattenDer(prefix, order());
+	}
+	
+	public FExp FExp.flattenDer(FQName prefix, int order) {
+		return diff(TIME, order).flatten(prefix);
+	}
+	
+	public FDerExp FInstAccessExp.flattenDer(FQName prefix, int order) {
+		FIdUse use = new FIdUse(getInstAccess().flatten(prefix));
+		return (order == 1) ? new FDerExp(use) : new FHDerExp(use, order);
 	}
 	
 	public FInfArgsFunctionCall FInfArgsFunctionCall.flatten(FQName prefix) {

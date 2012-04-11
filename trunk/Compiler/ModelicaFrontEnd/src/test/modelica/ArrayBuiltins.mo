@@ -2254,4 +2254,16 @@ end ArrayBuiltins.VectorizedAbsTest;
 end VectorizedAbsTest;
 
 
+model VectorizedSmoothTest
+    Real x[3] = {1,2,3};
+    Real y[3] = smooth(2, x);
+end VectorizedSmoothTest;
+
+
+model NormalizeTest1
+	Real x[3] = {1,2,3};
+	Real y[3] = Modelica.Math.Vectors.normalize(x);
+end NormalizeTest1;
+
+
 end ArrayBuiltins;
