@@ -31,7 +31,6 @@ jm_status_enu_t fmi1_import_create_dllfmu(fmi1_import_t* fmu, fmi1_callback_func
 	const char* dllPath; 
 	const char* modelIdentifier;
 	fmi1_fmu_kind_enu_t standard;
-	jm_status_enu_t status;
 
 	if (fmu == NULL) {
 		return jm_status_error;

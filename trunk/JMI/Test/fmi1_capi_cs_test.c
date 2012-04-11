@@ -26,9 +26,10 @@
 #include <FMI1/fmi1_functions.h>
 #include <FMI1/fmi1_capi.h>
 #include <jm_callbacks.h>
-
+#include <fmu_dummy/fmu1_model_defines.h>
 #include "config.h" /* Defines path to the DLL file */
-#include "fmu1_model_defines.h"
+
+
 #define MODEL_IDENTIFIER FMU_DUMMY_CS_MODEL_IDENTIFIER
 
 /* #define PRINT_VERBOSE */

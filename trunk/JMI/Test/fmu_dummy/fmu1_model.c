@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 
 /* Standard FMI 1.0 ME and CS types */
-#include "1.0-CS/fmiPlatformTypes.h"
-#include "1.0-CS/fmiFunctions.h"
-#include "fmu1_model.h" 
+#include <1.0-CS/fmiPlatformTypes.h>
+#include <1.0-CS/fmiFunctions.h>
+#include <fmu_dummy/fmu1_model.h>
 
 /* Model calculation functions */
 static int calc_initialize(component_ptr_t comp)
@@ -517,25 +517,25 @@ fmiStatus fmi_cancel_step(fmiComponent c)
 
 fmiStatus fmi_do_step(fmiComponent c, fmiReal currentCommunicationPoint, fmiReal communicationStepSize, fmiBoolean newStep)
 {
-	component_ptr_t comp	= (fmiComponent)c;	
-	fmiReal tstart = currentCommunicationPoint;
-	fmiReal tcur;
-	fmiReal tend = currentCommunicationPoint + communicationStepSize;
-	fmiReal hcur; 
-	fmiReal hdef = 0.01;	/* Default time step length */
-	fmiReal z_cur[N_EVENT_INDICATORS];
-	fmiReal z_pre[N_EVENT_INDICATORS];
-	fmiReal states[N_STATES];
-	fmiReal states_der[N_STATES];
-	fmiEventInfo eventInfo;
-	fmiBoolean callEventUpdate;
-	fmiBoolean intermediateResults = fmiFalse;
-	fmiStatus fmistatus;	
-	size_t k;
+	component_ptr_t comp	= (fmiComponent)c;
 
 	if (comp == NULL) {
 		return fmiFatal;
 	} else {
+		fmiReal tstart = currentCommunicationPoint;
+		fmiReal tcur;
+		fmiReal tend = currentCommunicationPoint + communicationStepSize;
+		fmiReal hcur; 
+		fmiReal hdef = 0.01;	/* Default time step length */
+		fmiReal z_cur[N_EVENT_INDICATORS];
+		fmiReal z_pre[N_EVENT_INDICATORS];
+		fmiReal states[N_STATES];
+		fmiReal states_der[N_STATES];
+		fmiEventInfo eventInfo;
+		fmiBoolean callEventUpdate;
+		fmiBoolean intermediateResults = fmiFalse;
+		fmiStatus fmistatus;	
+		size_t k;
 		size_t counter = 0;
 
 		fmi_get_continuous_states(comp, states, N_STATES);

@@ -49,7 +49,7 @@ static jm_status_enu_t fmi1_capi_get_fcn(fmi1_capi_t* fmu, const char* function_
 
 /* Load FMI functions from DLL macro */
 #define LOAD_DLL_FUNCTION(FMIFUNCTION) if (fmi1_capi_get_fcn(fmu, #FMIFUNCTION, (void**)&fmu->FMIFUNCTION) == jm_status_error) { \
-	jm_log(fmu->callbacks, LOGGER_MODULE_NAME, jm_log_level_error, "Could not load the FMI function '"#FMIFUNCTION"'.", jm_portability_get_last_dll_error()); \
+	jm_log(fmu->callbacks, LOGGER_MODULE_NAME, jm_log_level_error, "Could not load the FMI function '"#FMIFUNCTION"'. %s", jm_portability_get_last_dll_error()); \
 	return jm_status_error; \
 }
 
