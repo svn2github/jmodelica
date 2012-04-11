@@ -16,10 +16,7 @@ Required keys:
   'SUNDIALS_HOME' : Path to Sundials installation directory
   'CPPAD_HOME' : Path to Cpp_AD installation directory
   'MINGW_HOME' : Path to mingw installation directory (only win32)
-  'MC_JAR' : Path to ModelicaCompiler jar file
-  'OC_JAR' : Path to OptimicaCompiler jar file
-  'UTIL_JAR' : Path to org.jmodelica.Util jar file
-  'GRAPHS_JAR' : Path to org.jmodelica.graphs jar file
+  'COMPILER_JARS' : Paths to compiler jar files (path-separated depending on operating system)
   'BEAVER_LIB' : Path to Beaver lib directory
   'CLASSPATH' : Java CLASSPATH
   'JVM_PATH' : Path to JVM dll file
@@ -42,13 +39,25 @@ _jm_home = os.environ['JMODELICA_HOME']
 environ = {}
 environ['JMODELICA_HOME'] = _jm_home
 
+# Compiler jar-files
+MC_JAR = os.path.join(_jm_home,'lib','ModelicaCompiler.jar')     #Path to ModelicaCompiler jar file
+OC_JAR = os.path.join(_jm_home,'lib','OptimicaCompiler.jar')     #Path to OptimicaCompiler jar file
+UTIL_JAR = os.path.join(_jm_home,'lib','util.jar')               #Path to org.jmodelica.Util jar file
+GRAPHS_JAR = os.path.join(_jm_home,'lib','graphs.jar')           #Path to org.jmodelica.graphs jar file
+COMPILER_JARS = MC_JAR + os.pathsep + OC_JAR + os.pathsep + UTIL_JAR + os.pathsep + GRAPHS_JAR
+
+# Compiler classes
+_modelica_class = 'org.jmodelica.modelica.compiler.ModelicaCompiler'
+_optimica_class = 'org.jmodelica.optimica.compiler.OptimicaCompiler'
+
+# Compiler constructors
+def _create_compiler(comp, options):
+    return comp(options)
+
 _defaults = [('IPOPT_HOME','',True),
              ('SUNDIALS_HOME','',True),
              ('CPPAD_HOME',os.path.join(_jm_home,'ThirdParty','CppAD'),True),
-             ('MC_JAR',os.path.join(_jm_home,'lib','OptimicaCompiler.jar'),True),
-             ('OC_JAR',os.path.join(_jm_home,'lib','ModelicaCompiler.jar'),True),
-             ('UTIL_JAR',os.path.join(_jm_home,'lib','util.jar'),True),
-             ('GRAPHS_JAR',os.path.join(_jm_home,'lib','graphs.jar'),True),
+             ('COMPILER_JARS',COMPILER_JARS,True),
              ('BEAVER_PATH',os.path.join(_jm_home,'ThirdParty','Beaver','lib'),True),
              ('MODELICAPATH',os.path.join(_jm_home,'ThirdParty','MSL'),True),
              ('JVM_PATH',jpype.getDefaultJVMPath(),True),
@@ -82,7 +91,7 @@ except IOError:
 
 # check paths
 for _e in _defaults:
-    if _e[0] == 'MODELICAPATH':
+    if _e[0] == 'MODELICAPATH' or 'COMPILER_JARS':
         if sys.platform == 'win32':
             paths = environ[_e[0]].split(';') #On windows the paths are separeted with semicolons, so split.
         else:

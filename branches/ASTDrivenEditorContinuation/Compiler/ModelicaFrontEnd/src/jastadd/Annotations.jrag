@@ -256,7 +256,7 @@ aspect AnnotationAPI {
 		 * @return The tail child in the list
 		 */
 		protected static AnnotationNode createSetableNullPath(AnnotationNode parent, String[] path, int i) {
-			AlmostNullAnnotationNode node = new AlmostNullAnnotationNode(parent, path[i]);
+			AssignableNullAnnotationNode node = new AssignableNullAnnotationNode(parent, path[i]);
 			if (i + 1 == path.length)
 				return node;
 			else
@@ -329,7 +329,7 @@ aspect AnnotationAPI {
 		/**
 		 * Representation a non-existing annotation but with the possibility to add content.
 		 */
-		private static class AlmostNullAnnotationNode extends AnnotationNode {
+		private static class AssignableNullAnnotationNode extends AnnotationNode {
 			
 			private AnnotationNode parent;
 			protected AnnotationNode realNode;
@@ -339,7 +339,7 @@ aspect AnnotationAPI {
 			 * Creates an instance form a parent annotation node <code>parent</code> and
 			 * the path name <code>name</code> of this instance. 
 			 */
-			protected AlmostNullAnnotationNode(AnnotationNode parent, String name) {
+			protected AssignableNullAnnotationNode(AnnotationNode parent, String name) {
 				this.parent = parent;
 				this.name = name;
 			}
@@ -407,9 +407,9 @@ aspect AnnotationAPI {
 			 */
 			private AnnotationNode getRealParent() {
 				AnnotationNode parentRealNode = parent;
-				if (parentRealNode instanceof AlmostNullAnnotationNode) {
-					((AlmostNullAnnotationNode) parent).createRealNode();
-					parentRealNode = ((AlmostNullAnnotationNode) parent).realNode;
+				if (parentRealNode instanceof AssignableNullAnnotationNode) {
+					((AssignableNullAnnotationNode) parent).createRealNode();
+					parentRealNode = ((AssignableNullAnnotationNode) parent).realNode;
 				}
 				return parentRealNode;
 			}
@@ -437,7 +437,7 @@ aspect AnnotationAPI {
 		/**
 		 * A null annotation node for a comment, it adds the possibility to add annotation.
 		 */
-		private static class NullCommentAnnotationNode extends AlmostNullAnnotationNode {
+		private static class NullCommentAnnotationNode extends AssignableNullAnnotationNode {
 			
 			private Comment comment;
 			
