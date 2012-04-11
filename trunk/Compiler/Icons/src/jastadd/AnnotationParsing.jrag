@@ -20,7 +20,6 @@ import org.jmodelica.icons.primitives.Rectangle;
 import org.jmodelica.icons.primitives.Text;
 import org.jmodelica.icons.primitives.Types;
 
-
 aspect AnnotationParsing {
 	
 	public abstract class AnnotationNode {
@@ -95,6 +94,21 @@ aspect AnnotationParsing {
 				throw new NotEnoughParametersException("Placement");
 			}
 			throw new FailedConstructionException("Placement");
+		}
+		
+		/**
+		 * Creates a Connection represented by this AnnotationNode
+		 * @return the created connection
+		 * @throws FailedConstructionExceptionException if transformation annotatioNode does not exist. 
+		 */
+		public Connection createConnection() throws FailedConstructionException {
+			AnnotationNode lineAnnotation = forPath("Line");
+			if (lineAnnotation.exists()) {
+				Connection con = new Connection();
+				lineAnnotation.initializeLine(con);
+				return con;
+			}
+			throw new FailedConstructionException("Connection");
 		}
 		
 		public boolean hasPlacement() {
@@ -281,7 +295,7 @@ aspect AnnotationParsing {
 				if (a.name().equals("startAngle")) {
 					ellipse.setStartAngle(a.createStartAngle());
 				} else if (a.name().equals("endAngle")) {
-					ellipse.setStartAngle(a.createEndAngle());
+					ellipse.setEndAngle(a.createEndAngle());
 				}
 			}
 			return ellipse;
@@ -326,6 +340,16 @@ aspect AnnotationParsing {
 		private Line createLine() 
 				throws FailedConstructionException, NotEnoughParametersException {
 			Line line = new Line();
+			initializeLine(line);
+			return line;
+		}
+		
+		/**
+		* Initializes a AbstractLine object with the information in the AnnotationNode.
+		* @param graphicItem
+		*/
+		private void initializeLine(Line line) 
+				throws FailedConstructionException, NotEnoughParametersException {
 			initializeGraphicItem(line);
 			boolean pointsSet = false;
 			for (AnnotationNode a : this) {
@@ -353,7 +377,6 @@ aspect AnnotationParsing {
 			if (!pointsSet) {
 				throw new NotEnoughParametersException("Line");
 			}
-			return line;
 		}
 	
 		/**
