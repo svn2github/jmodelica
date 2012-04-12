@@ -2255,12 +2255,78 @@ end VectorizedAbsTest;
 
 
 model VectorizedSmoothTest
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="VectorizedSmoothTest",
+         description="",
+         flatModel="
+fclass ArrayBuiltins.VectorizedSmoothTest
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+ y[1] = smooth(2, x[1]);
+ y[2] = smooth(2, x[2]);
+ y[3] = smooth(2, x[3]);
+end ArrayBuiltins.VectorizedSmoothTest;
+")})));
+
     Real x[3] = {1,2,3};
     Real y[3] = smooth(2, x);
 end VectorizedSmoothTest;
 
 
 model NormalizeTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="NormalizeTest1",
+         description="",
+         flatModel="
+fclass ArrayBuiltins.NormalizeTest1
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+ ({y[1],y[2],y[3]}) = Modelica.Math.Vectors.normalize({x[1],x[2],x[3]}, ( 100 ) * ( 1.0E-15 ));
+
+ function Modelica.Math.Vectors.normalize
+  input Real[:] v;
+  input Real eps;
+  output Real[size(v, 1)] result;
+ algorithm
+  for i1 in 1:size(result, 1) loop
+   result[i1] := smooth(0, (if Modelica.Math.Vectors.length(v[i1]) >= eps then ( v[i1] ) / ( Modelica.Math.Vectors.length(v[i1]) ) else ( v[i1] ) / ( eps )));
+  end for;
+  return;
+ end Modelica.Math.Vectors.normalize;
+
+ function Modelica.Math.Vectors.length
+  input Real[:] v;
+  output Real result;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(v, 1) loop
+   temp_1 := temp_1 + ( v[i1] ) * ( v[i1] );
+  end for;
+  result := sqrt(temp_1);
+  return;
+ end Modelica.Math.Vectors.length;
+end ArrayBuiltins.NormalizeTest1;
+")})));
+
 	Real x[3] = {1,2,3};
 	Real y[3] = Modelica.Math.Vectors.normalize(x);
 end NormalizeTest1;

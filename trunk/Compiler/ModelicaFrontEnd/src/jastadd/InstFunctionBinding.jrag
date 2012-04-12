@@ -573,7 +573,7 @@ aspect InstFunctionBinding {
 	eq InstVectorFunctionCall.getChild().inVectorizedCall() = true;
 	
 	/**
-	 * Check if this is a vectorized function call.
+	 * Check if this argument is vectorized.
 	 */
 	syn lazy boolean InstFunctionArgument.isVectorized() = false;
 	eq InstPositionalArgument.isVectorized()             = 

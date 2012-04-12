@@ -588,12 +588,12 @@ aspect FlatTypeCheck {
   eq FMinMaxExp.getChild().argumentDefinedTypeValid()            = false;
   eq FSumExp.getChild().argumentDefinedTypeValid()               = false;
   eq FNdimsExp.getChild().argumentDefinedTypeValid()             = false;
-  eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()   = i != 0;
   eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()  = false;
   eq FEnumIntegerExp.getChild().argumentDefinedTypeValid()       = false;
   eq FVectUnaryBuiltIn.getChild().argumentDefinedTypeValid()     = false;
   eq FPreExp.getChild().argumentDefinedTypeValid()               = false;
-  eq FSmoothExp.getChild(int i).argumentDefinedTypeValid()       = i != 0;
+  eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()   = i != 0;
+  eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid() = i == 0;
 
   /**
    * \brief Check if the type supplied is valid for this argument.
