@@ -28,7 +28,7 @@ except:
     pass
 
 from pyfmi.fmi import unzip_fmux
-from pyjmi.common.core import get_temp_location
+from pyjmi.common.core import BaseModel, get_temp_location
 from pyjmi.common import xmlparser
 
 def convert_casadi_der_name(name):
@@ -39,7 +39,7 @@ def convert_casadi_der_name(name):
         n = n + qnames[i] + '.'
     return n + 'der(' + qnames[len(qnames)-1] + ')' 
 
-class CasadiModel(object):
+class CasadiModel(BaseModel):
     
     """
     This class represents a dynamic optimization problem to be solved by an
@@ -91,6 +91,30 @@ class CasadiModel(object):
         self._load_xml_to_casadi(self._tempxml, scale_variables,
                                  scale_equations, verbose)
     
+    def simulate(self):
+        raise NotImplementedError('Simulation of CasadiModel objects is not ' +
+                                  'supported.')
+    
+    def simulate_options(self, algorithm):
+        raise NotImplementedError('Simulation of CasadiModel objects is not ' +
+                                  'supported.')
+    
+    def initialize(self):
+        raise NotImplementedError('Initialization of CasadiModel objects is ' +
+                                  'not supported.')
+    
+    def initialize_options(self, algorithm):
+        raise NotImplementedError('Initialization of CasadiModel objects is ' +
+                                  'not supported.')
+    
+    def _set(self, name, value, recompute_dependent_parameters=True):
+        raise NotImplementedError('Setting variable values is not yet ' +
+                                  'supported.')
+    
+    def _get(self, name):
+        raise NotImplementedError('Getting variable values using this ' +
+                                  'method is not yet supported.')
+    
     def get_model_description(self):
         return self.xmldoc
     
@@ -137,9 +161,7 @@ class CasadiModel(object):
         """
         return self._default_options(algorithm)    
     
-    def optimize(self, 
-                 algorithm='LocalDAECollocationAlg', 
-                 options={}):
+    def optimize(self, algorithm='LocalDAECollocationAlg', options={}):
         """
         Solve an optimization problem.
             
@@ -180,36 +202,8 @@ class CasadiModel(object):
             
             A result object, subclass of algorithm_drivers.ResultBase.
         """
-        return self._exec_algorithm(algorithm, options)
-                                    
-    def _exec_algorithm(self, algorithm, options):
-        """ 
-        Helper function which performs all steps of an algorithm run which are 
-        common to all initialize and optimize algortihms.
-        
-        Raises:: 
-        
-            Exception if algorithm is not a subclass of 
-            pyjmi.jmi_algorithm_drivers.AlgorithmBase.
-        """
-        base_path = 'pyjmi.jmi_algorithm_drivers'
-        algdrive = __import__(base_path)
-        algdrive = getattr(algdrive, 'jmi_algorithm_drivers')
-        AlgorithmBase = getattr(algdrive, 'AlgorithmBase')
-        
-        if isinstance(algorithm, basestring):
-            algorithm = getattr(algdrive, algorithm)
-        
-        if not issubclass(algorithm, AlgorithmBase):
-            raise Exception(str(algorithm) +
-            " must be a subclass of pyjmi.jmi_algorithm_drivers.AlgorithmBase")
-
-        # initialize algorithm
-        alg = algorithm(self, options)
-        # solve optimization problem/initialize
-        alg.solve()
-        # get and return result
-        return alg.get_result()
+        return self._exec_algorithm('pyjmi.jmi_algorithm_drivers',
+                                    algorithm, options)
     
     def get_casadi_ocp(self):
         return self.ocp
@@ -459,17 +453,16 @@ class CasadiModel(object):
                 self.opt_ode_L = list(self.opt_ode_L.eval(
                         [self.ocp_ode_inputs_scaled])[0])
             
-            self.ode_F = casadi.SXFunction([self.ocp_ode_inputs],
-                                           [self.ode_F])
-            self.ode_F0 = casadi.SXFunction([self.ocp_ode_init_inputs],
+            self.ode_F = casadi.SXFunction([self.ocp_ode_inputs], [self.ode_F])
+            self.ode_F0 = casadi.SXFunction([self.ocp_ode_init_inputs], 
                                             [self.ode_F0])
             
             if self.opt_ode_J != None:
-                self.opt_ode_J = casadi.SXFunction(
-                        [self.ocp_ode_mterm_inputs], [[self.opt_ode_J]])
+                self.opt_ode_J = casadi.SXFunction([self.ocp_ode_mterm_inputs],
+                                                   [[self.opt_ode_J]])
             if self.opt_ode_J != None:
-                self.opt_ode_L = casadi.SXFunction(
-                        [self.ocp_ode_inputs], [[self.opt_ode_L]])
+                self.opt_ode_L = casadi.SXFunction([self.ocp_ode_inputs],
+                                                   [[self.opt_ode_L]])
     
     def get_opt_ode_L(self):
         return self.opt_ode_L
