@@ -1028,6 +1028,12 @@ class LocalDAECollocator(CasadiCollocator):
                                                '_' +  str(i) + '_' + str(k)))
                         xx[var_indices[i][k]['w']] = w
             
+            if 'p_opt' in var_indices.keys():
+                p_opt = []
+                for j in range(self.model.get_n_p()):
+                    p_opt.append(casadi.SX(str(self.model.get_p()[j])))
+                xx[var_indices['p_opt']] = p_opt
+            
             # Derivative initial values
             if self.eliminate_der_var:
                 dx = []
