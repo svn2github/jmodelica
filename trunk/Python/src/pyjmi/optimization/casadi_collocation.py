@@ -776,8 +776,6 @@ class LocalDAECollocator(CasadiCollocator):
         self._create_constraints()
         self._create_constraint_function()
         self._create_cost_function()
-        self._expand_MX()
-        self._calc_Lagrangian_Hessian()
         self._compute_bounds_and_init()
         self._create_solver()
     
@@ -1441,8 +1439,7 @@ class LocalDAECollocator(CasadiCollocator):
             c_fcn.setOption(k, v)
         c_fcn.init()
             
-        # Save constraints as data attributes
-        self.c = c
+        # Save constraint function as data attribute
         self.c_fcn = c_fcn
         
     def _create_cost_function(self):
@@ -1636,76 +1633,7 @@ class LocalDAECollocator(CasadiCollocator):
         
         # Save cost function as data attribute
         self.cost_fcn = cost_fcn
-        
-    def _expand_MX(self):
-        """
-        Expand the MX graphs to SX graphs.
-        """
-        if self.graph == "expanded_MX":
-            # Replace NLP MX objects with SX objects from expansion
-            self.xx = casadi.ssym("xx", self.n_xx)
-            
-            # Recreate constraints
-            self.c_fcn = self.c_fcn.expand([self.xx])
-            n_c_e = self.c_e.numel()
-            self.c_e = self.c_fcn.outputSX()[:n_c_e]
-            self.c_i = self.c_fcn.outputSX()[n_c_e:]
-            self.c = casadi.vertcat([self.c_e, self.c_i])
-            
-            # Reset user provided options and initialize
-            for (k, v) in self.casadi_options_g.iteritems():
-                self.c_fcn.setOption(k, v)
-            self.c_fcn.init()
-            
-            # Recreate cost
-            self.cost_fcn = self.cost_fcn.expand([self.xx])
-            self.cost = self.cost_fcn.outputSX()
-            
-            # Reset user provided options and initialize
-            for (k, v) in self.casadi_options_f.iteritems():
-                self.cost_fcn.setOption(k, v)
-            self.cost_fcn.init()
-        
-    def _calc_Lagrangian_Hessian(self):
-        """
-        Calculate the exact Hessian of the NLP Lagrangian.
-        """
-        if self.exact_hessian:
-            # Lagrange multipliers and objective function scaling
-            if self.graph == 'MX':
-                lam = casadi.MX("lambda", self.c.numel())
-                sigma = casadi.MX("sigma")
-            elif self.graph == "SX" or self.graph == 'expanded_MX':
-                lam = casadi.ssym("lambda", self.c.numel())
-                sigma = casadi.ssym("sigma")
-            else:
-                raise ValueError('Unknown CasADi graph %s.' % self.graph)
-            
-            # Lagrangian
-            lag_exp = sigma * self.cost + casadi.inner_prod(lam, self.c)
-            if self.graph == 'MX':
-                L = casadi.MXFunction([self.xx, lam, sigma], [lag_exp])
-            elif self.graph == "SX" or self.graph == 'expanded_MX':
-                L = casadi.SXFunction([self.xx, lam, [sigma]], [lag_exp])
-            else:
-                raise ValueError('Unknown CasADi graph %s.' % self.graph)
-                
-            # Set user provided options and initialize
-            for (k, v) in self.casadi_options_l.iteritems():
-                L.setOption(k, v)
-            L.init()
-        
-            # Calculate Hessian
-            self.H_fcn = L.hessian()
-        else:
-            # Set Hessian of the Lagrangian to a null function
-            if self.graph == 'MX':
-                self.H_fcn = casadi.MXFunction()
-            elif self.graph == "SX" or self.graph == 'expanded_MX':
-                self.H_fcn = casadi.SXFunction()
-            else:
-                raise ValueError('Unknown CasADi graph %s.' % self.graph)
-                
+    
     def _compute_bounds_and_init(self):
         """
         Compute bounds and intial guesses for NLP variables.
@@ -1859,12 +1787,8 @@ class LocalDAECollocator(CasadiCollocator):
         return (nlp_lb, nlp_ub, nlp_init)
     
     def _create_solver(self):
-        if self.get_hessian().isNull():
-            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
-        else:
-            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn,
-                                             self.get_hessian())
-        
+        self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
+    
     def get_equality_constraint(self):
         return self.c_e
     
@@ -1873,9 +1797,6 @@ class LocalDAECollocator(CasadiCollocator):
     
     def get_cost(self):
         return self.cost_fcn
-    
-    def get_hessian(self):
-        return self.H_fcn
     
     def get_result(self):
         # Set model info
