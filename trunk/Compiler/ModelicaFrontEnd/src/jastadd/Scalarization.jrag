@@ -1680,10 +1680,15 @@ aspect Scalarization {
     }
 
     public FExp FIdUseExp.scalarizeExp(Map<String,FExp> indexMap) {
-    	if (indexMap.containsKey(name())) 
+    	if (indexMap.containsKey(name()) && !shouldKeepArrayDuringScalarization()) 
     		return indexMap.get(name()).fullCopy();
     	return new FIdUseExp(getFIdUse().scalarize(indexMap));
     }
+    
+    inh boolean FIdUseExp.shouldKeepArrayDuringScalarization();
+    eq BaseNode.getChild().shouldKeepArrayDuringScalarization() = false;
+    eq FFunctionCall.getArg(int i).shouldKeepArrayDuringScalarization() = 
+    	getArg(i).isArray() && myInputs().get(i).ndims() == getArg(i).ndims();
     
 	inh boolean FExp.wantsRecordCon();
 	eq BaseNode.getChild().wantsRecordCon()         = false;
