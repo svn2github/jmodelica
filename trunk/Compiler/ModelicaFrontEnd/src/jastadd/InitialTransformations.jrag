@@ -79,7 +79,13 @@
             
             getComposition().extractElementsTo(fc);
             
-            fc.setLocationNoTree(this, this, getRestriction());
+            ASTNode startNode = getRestriction();
+            if (hasEncapsulated()) {
+            	startNode = getEncapsulated();
+            } else if (hasPartial()) {
+            	startNode = getPartial();
+            }
+            fc.setLocationNoTree(startNode, this);
             return fc;
         }
     }
