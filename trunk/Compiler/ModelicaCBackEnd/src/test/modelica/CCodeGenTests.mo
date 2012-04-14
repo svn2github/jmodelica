@@ -335,16 +335,25 @@ model CCodeGenTest13
          description="Code generation for enumerations: variable aliases",
          template="$C_variable_aliases$",
          generatedCode="
-#define _aic_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
-#define _bic_1 ((*(jmi->z))[jmi->offs_integer_ci+1])
-#define _adc_2 ((*(jmi->z))[jmi->offs_integer_ci+2])
-#define _bdc_3 ((*(jmi->z))[jmi->offs_integer_ci+3])
-#define _aip_4 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _bip_5 ((*(jmi->z))[jmi->offs_integer_pi+1])
-#define _adp_6 ((*(jmi->z))[jmi->offs_integer_pd+0])
-#define _bdp_7 ((*(jmi->z))[jmi->offs_integer_pd+1])
-#define _time ((*(jmi->z))[jmi->offs_t])
+#define _ci_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
+#define _cd_1 ((*(jmi->z))[jmi->offs_integer_ci+1])
+#define _aic_4 ((*(jmi->z))[jmi->offs_integer_ci+2])
+#define _bic_5 ((*(jmi->z))[jmi->offs_integer_ci+3])
+#define _adc_6 ((*(jmi->z))[jmi->offs_integer_ci+4])
+#define _bdc_7 ((*(jmi->z))[jmi->offs_integer_ci+5])
+#define _pi_2 ((*(jmi->z))[jmi->offs_integer_pi+0])
+#define _aip_8 ((*(jmi->z))[jmi->offs_integer_pi+1])
+#define _bip_9 ((*(jmi->z))[jmi->offs_integer_pi+2])
+#define _pd_3 ((*(jmi->z))[jmi->offs_integer_pd+0])
+#define _adp_10 ((*(jmi->z))[jmi->offs_integer_pd+1])
+#define _bdp_11 ((*(jmi->z))[jmi->offs_integer_pd+2])
+#define _time ((*(jmi->z))[jmi->offs_t])	 
 ")})));
+
+	constant Integer ci = 1;
+	constant Integer cd = ci;
+	parameter Integer pi = 2;
+	parameter Integer pd = pi;
 
 	type A = enumeration(a, b, c);
 	type B = enumeration(d, e, f);
