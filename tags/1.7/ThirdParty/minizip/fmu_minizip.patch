@@ -1,0 +1,25 @@
+Index: miniunz.c
+===================================================================
+--- miniunz.c	(revision 3060)
++++ miniunz.c	(working copy)
+@@ -519,7 +519,7 @@
+ }
+ 
+ 
+-int main(argc,argv)
++int miniunz(argc,argv)
+     int argc;
+     char *argv[];
+ {
+Index: miniunz.h
+===================================================================
+--- miniunz.h	(revision 0)
++++ miniunz.h	(working copy)
+@@ -0,0 +1,6 @@
++#ifndef MINIUNZ_H
++#define MINIUNZ_H
++
++int miniunz(int argc , char *argv[]); /* Renamed the main function */
++
++#endif /* End of header file MINIUNZ_H */
+\ No newline at end of file
