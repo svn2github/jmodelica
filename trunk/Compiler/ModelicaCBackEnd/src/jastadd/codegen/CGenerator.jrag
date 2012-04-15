@@ -872,7 +872,20 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			for(FVariable fv : fclass.getFVariables()) {
+			for(FVariable fv : fclass.independentConstants()) {
+				fv.genStartValue_C(INDENT, genPrinter);
+			}
+			for(FVariable fv : fclass.dependentConstants()) {
+				fv.genStartValue_C(INDENT, genPrinter);
+			}
+			for(FVariable fv : fclass.independentParameters()) {
+				fv.genStartValue_C(INDENT, genPrinter);
+			}
+			genPrinter.print("   model_init_eval_parameters(jmi);\n");
+			for(FVariable fv : fclass.variables()) {
+				fv.genStartValue_C(INDENT, genPrinter);
+			}
+			for(FVariable fv : fclass.discretePreVariables()) {
 				fv.genStartValue_C(INDENT, genPrinter);
 			}
 		}

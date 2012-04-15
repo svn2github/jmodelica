@@ -4964,11 +4964,12 @@ model StartValues1
          description="",
          template="$C_set_start_values$",
          generatedCode="
-    _x_0 = 1.0;
-    _y_1 = 2.0;
-    _z_2 = 3.0;
-    _q_3 = 0.0;
-    _der_x_4 = 0.0;
+_y_1 = 2.0;
+_z_2 = 3.0;
+model_init_eval_parameters(jmi);
+_x_0 = 1.0;
+_q_3 = 0.0;
+_der_x_4 = 0.0;		 
 ")})));
 
   Real x(start=1);
@@ -4992,6 +4993,7 @@ model StartValues2
     _pr_0 = 1.5;
     _pi_1 = 2;
     _pb_2 = JMI_TRUE;
+	model_init_eval_parameters(jmi);
     _r_3 = 5.5;
     _i_4 = 10;
     _b_5 = JMI_FALSE;
