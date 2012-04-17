@@ -372,8 +372,7 @@ class ModelicaCompiler(object):
     options_file_path = os.path.join(jm_home, 'Options','options.xml')
 
 
-    def __init__(self, xml_template = None, xml_values_template = None, 
-                 c_template = None):
+    def __init__(self):
         """ 
         Create a Modelica compiler. The compiler can be used to compile pure 
         Modelica models. A compiler instance can be used multiple times.
@@ -1039,8 +1038,7 @@ class OptimicaCompiler(ModelicaCompiler):
 
     jm_home = pym.environ['JMODELICA_HOME']
 
-    def __init__(self, xml_template = None, xml_values_template = None, 
-                 c_template = None, optimica_c_template = None):
+    def __init__(self):
         """ 
         Create an Optimica compiler. The compiler can be used to compile both 
         Modelica and Optimica models. A compiler instance can be used multiple 
