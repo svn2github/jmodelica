@@ -56,6 +56,7 @@ ID_MOVE    = 15005
 ID_ZOOM    = 15006
 ID_RESIZE  = 15007
 ID_LINES   = 15008
+ID_CLEAR   = 15009
 
 class MainGUI(wx.Frame):
     sizeHeightDefault=900
@@ -81,9 +82,9 @@ class MainGUI(wx.Frame):
         self.PlotIndex = 0 #Index of the plot variables connected to the different plots
         
         #Settings variables
-        self.grid = False
-        self.zoom = False
-        self.move = True
+        self.grid = True
+        self.zoom = True
+        self.move = False
         
         #Create menus and status bars
         self.CreateStatusBar() #Create a statusbar at the bottom
@@ -163,6 +164,7 @@ class MainGUI(wx.Frame):
         
         # Edit
         self.editAdd  = editmenu.Append(wx.ID_ADD,"A&dd Plot","Add a plot window.")
+        self.editClear = editmenu.Append(wx.ID_CLEAR, "Clear Plot", "Clear the current plot window.")
         editmenu.AppendSeparator()
         self.editAxisLabels = editmenu.Append(ID_AXIS,"Axis / Labels", "Edit the axis and labels of the current plot.")
         self.editLinesLegends = editmenu.Append(ID_LINES, "Lines / Legends", "Edit the lines and the legend of the current plot.")
@@ -175,6 +177,10 @@ class MainGUI(wx.Frame):
         viewmenu.AppendSeparator()
         self.viewResize = viewmenu.Append(ID_RESIZE, "Resize", "Resize the current plot.")
         
+        #Check items
+        viewmenu.Check(ID_GRID, self.grid)
+        viewmenu.Check(ID_ZOOM, self.zoom)
+        viewmenu.Check(ID_MOVE, self.move)
         
         # Help
         self.helpLicense = helpmenu.Append(ID_LICENSE, "License","Show the license.")
@@ -191,6 +197,7 @@ class MainGUI(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnMenuSaveFig, self.menuSaveFig)
         self.Bind(wx.EVT_MENU, self.OnMenuExit,    self.menuExit)
         self.Bind(wx.EVT_MENU, self.OnMenuAdd,     self.editAdd)
+        self.Bind(wx.EVT_MENU, self.OnMenuClear,     self.editClear)
         self.Bind(wx.EVT_MENU, self.OnMenuAxisLabels,    self.editAxisLabels)
         self.Bind(wx.EVT_MENU, self.OnMenuLinesLegends,  self.editLinesLegends)
         self.Bind(wx.EVT_MENU, self.OnMenuResize,  self.viewResize)
@@ -314,6 +321,29 @@ class MainGUI(wx.Frame):
         
         #Enable labels and axis options
         self.editAxisLabels.Enable(True)
+    
+    def OnMenuClear(self, event):
+        #Clear the current activated plot window
+        
+        IDPlot = self.noteBook.GetSelection()
+        
+        if IDPlot != -1:
+            plotWindow = self.noteBook.GetPage(IDPlot)
+            
+            #Uncheck all variables
+            for i,var in enumerate(self.noteBook.GetPage(IDPlot).GetPlotVariables()):
+                self.tree.CheckItem2(var[1],checked=False,torefresh=True)
+            
+            #Delete all variables
+            plotWindow.DeleteAllPlotVariables()
+            
+            #Disable Lines and Legends
+            self.editLinesLegends.Enable(False)
+            
+            plotWindow.SetDefaultSettings()
+            plotWindow.UpdateSettings(axes=[0.0,1.0,0.0,1.0])
+            plotWindow.Draw()
+            plotWindow.UpdateSettings(axes=[None,None,None,None])
     
     def OnMenuLinesLegends(self, event):
         IDPlot = self.noteBook.GetSelection()
@@ -702,7 +732,7 @@ class DialogLinesLegends(wx.Dialog):
         self.ColorsDict = dict((item,i) for i,item in enumerate(colors))
         
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-        bagSizer = wx.GridBagSizer(10, 10)
+        bagSizer = wx.GridBagSizer(11, 11)
         
         plotLabelStatic  = wx.StaticText(self, -1, "Label")
         plotStyleStatic  = wx.StaticText(self, -1, "Style")
@@ -713,6 +743,7 @@ class DialogLinesLegends(wx.Dialog):
         plotPositionStatic = wx.StaticText(self, -1, "Position")
         plotWidthStatic = wx.StaticText(self, -1, "Width")
         plotColorStatic = wx.StaticText(self, -1, "Color")
+        plotMarkerSizeStatic = wx.StaticText(self, -1, "Size")
         
         sizeWidth = 170
         
@@ -727,6 +758,7 @@ class DialogLinesLegends(wx.Dialog):
         #Set the first label as default
         self.plotLineName = wx.TextCtrl(self, -1, "", style = wx.TE_LEFT , size =(sizeWidth,-1))
         self.plotWidth = wx.TextCtrl(self, -1, "", style = wx.TE_LEFT, size=(sizeWidth,-1))
+        self.plotMarkerSize = wx.TextCtrl(self, -1, "", style = wx.TE_LEFT, size=(sizeWidth,-1))
         self.plotColor = wx.ComboBox(self, -1, choices=colors, size=(sizeWidth,-1),style=wx.CB_READONLY)
         
         #Define the legend
@@ -756,11 +788,13 @@ class DialogLinesLegends(wx.Dialog):
         bagSizer.Add(plotMarkerStatic,(6,0),(1,1))
         bagSizer.Add(plotMarkerStyleStatic,(7,0))
         bagSizer.Add(self.plotMarkerStyle,(7,1))
+        bagSizer.Add(plotMarkerSizeStatic,(8,0))
+        bagSizer.Add(self.plotMarkerSize,(8,1))
         
         
-        bagSizer.Add(plotLegendStatic,(8,0),(1,1))
-        bagSizer.Add(plotPositionStatic,(9,0))
-        bagSizer.Add(self.plotLegend,(9,1))
+        bagSizer.Add(plotLegendStatic,(9,0),(1,1))
+        bagSizer.Add(plotPositionStatic,(10,0))
+        bagSizer.Add(self.plotLegend,(10,1))
         
         #Create OK,Cancel and Apply buttons
         self.buttonOK = wx.Button(self, wx.ID_OK)
@@ -808,6 +842,7 @@ class DialogLinesLegends(wx.Dialog):
         self.variables[ID][3].width = float(self.plotWidth.GetValue())
         self.variables[ID][3].color = None if self.plotColor.GetSelection()==0 else self.colors[self.plotColor.GetSelection()].lower()
         self.variables[ID][3].marker = self.markerStyles[self.plotMarkerStyle.GetSelection()]
+        self.variables[ID][3].markersize = float(self.plotMarkerSize.GetValue())
     
     def ChangeLine(self, var):
         
@@ -815,6 +850,7 @@ class DialogLinesLegends(wx.Dialog):
         self.plotMarkerStyle.SetSelection(self.MarkerStyleDict[var[3].marker])
         self.plotLineName.SetValue(var[3].name)
         self.plotWidth.SetValue(str(var[3].width))
+        self.plotMarkerSize.SetValue(str(var[3].markersize))
         
         if var[3].color == None:
             self.plotColor.SetSelection(0)
@@ -974,6 +1010,7 @@ class Lines_Settings:
         self.width = rcParams["lines.linewidth"]
         self.style = rcParams["lines.linestyle"]
         self.marker = rcParams["lines.marker"]
+        self.markersize = rcParams["lines.markersize"]
         self.color = None
         self.name = name
 
@@ -992,16 +1029,7 @@ class PlotPanel(wx.Panel):
         self.settings["Grid"] = grid
         self.settings["Zoom"] = zoom
         self.settings["Move"] = move
-        self.settings["Title"] = ""
-        self.settings["XLabel"] = "Time [s]"
-        self.settings["YLabel"] = ""
-        self.settings["XAxisMax"] = None
-        self.settings["XAxisMin"] = None
-        self.settings["YAxisMax"] = None
-        self.settings["YAxisMin"] = None
-        self.settings["XScale"] = "Linear"
-        self.settings["YScale"] = "Linear"
-        self.settings["LegendPosition"] = 0 #"Best" position
+        self.SetDefaultSettings() #Set the default settings
         
         self.plotVariables = []
 
@@ -1027,12 +1055,27 @@ class PlotPanel(wx.Panel):
         self._mouseLeftPressed = False
         self._mouseMoved = False
     
+    def SetDefaultSettings(self):
+        self.settings["Title"] = ""
+        self.settings["XLabel"] = "Time [s]"
+        self.settings["YLabel"] = ""
+        self.settings["XAxisMax"] = None
+        self.settings["XAxisMin"] = None
+        self.settings["YAxisMax"] = None
+        self.settings["YAxisMin"] = None
+        self.settings["XScale"] = "Linear"
+        self.settings["YScale"] = "Linear"
+        self.settings["LegendPosition"] = 0 #"Best" position
+    
     def AddPlotVariable(self, ID, item, data):
         lineSettings = Lines_Settings(data["name"])
         self.plotVariables.append([ID,item,data,lineSettings])
         
     def GetPlotVariables(self):
         return self.plotVariables
+        
+    def DeleteAllPlotVariables(self):
+        self.plotVariables = []
         
     def DeletePlotVariable(self, item=None, ID=None):
         
@@ -1234,9 +1277,9 @@ class PlotPanel(wx.Panel):
 
         for i in self.plotVariables:
             if i[3].color is None:
-                self.subplot.plot(i[2]["traj"].t, i[2]["traj"].x,label=i[3].name,linewidth=i[3].width,marker=i[3].marker,linestyle=i[3].style)
+                self.subplot.plot(i[2]["traj"].t, i[2]["traj"].x,label=i[3].name,linewidth=i[3].width,marker=i[3].marker,linestyle=i[3].style,markersize=i[3].markersize)
             else:
-                self.subplot.plot(i[2]["traj"].t, i[2]["traj"].x,label=i[3].name,linewidth=i[3].width,marker=i[3].marker,linestyle=i[3].style, color=i[3].color)
+                self.subplot.plot(i[2]["traj"].t, i[2]["traj"].x,label=i[3].name,linewidth=i[3].width,marker=i[3].marker,linestyle=i[3].style,markersize=i[3].markersize,color=i[3].color)
                 
         self.DrawSettings()
         
