@@ -435,6 +435,19 @@ aspect Derivatives {
 	}
 
 	public FExp FMulExp.diff(String name) {
+		FExp rd = getRight().diff(name);
+		FExp ld = getLeft().diff(name);
+		try {
+			if (ld.variability().lessOrEqual(fConstant()) && ld.ceval().realValue()==0.) {
+				return dynamicFExp(new FMulExp(getLeft().fullCopy(), getRight().diff(name)));
+			}
+			if (rd.variability().lessOrEqual(fConstant()) && rd.ceval().realValue()==0.) {
+				return dynamicFExp(new	FMulExp(getLeft().diff(name), getRight().fullCopy()));
+			}
+			
+		} catch(Exception e) {
+		}
+		
 		return dynamicFExp(new FAddExp(
 		    new FMulExp(getLeft().fullCopy(), getRight().diff(name)),
 			new	FMulExp(getLeft().diff(name), getRight().fullCopy())));
@@ -679,10 +692,16 @@ aspect Derivatives {
 
  aspect ExpressionSimplification {
 
-/* 
+/*
  	rewrite FMulExp {
 		when (getLeft().variability().lessOrEqual(fConstant()) && getLeft().ceval().realValue()==0.) to FExp {
 				return getRight();
+			}
+	}
+
+ 	rewrite FMulExp {
+		when (getRight().variability().lessOrEqual(fConstant()) && getRight().ceval().realValue()==0.) to FExp {
+				return getLeft();
 			}
 	}
 */

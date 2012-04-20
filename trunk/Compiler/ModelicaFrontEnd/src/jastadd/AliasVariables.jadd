@@ -553,6 +553,11 @@ aspect AliasVariables {
 		if (isTemporary())
 			score -= 100;
 		
+		// -1. Variables with StateSelect-information
+		if (isReal() && ((FRealVariable)this).stateSelectAttributeSet()) 
+			return score;
+		score--;
+		
 		// 0. Derivatives
 		if (isDerivativeVariable())
 			return score;
