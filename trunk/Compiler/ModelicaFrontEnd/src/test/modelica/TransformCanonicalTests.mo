@@ -5174,7 +5174,7 @@ Equations:
     x/z = x - y ;
   end SolveEqTest6;
 
-  model SolveEqTest7
+   model SolveEqTest7
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest7",
       methodName="printDAEBLT",
@@ -5209,6 +5209,28 @@ Solution:
     - y = x + 3 - y + 4*y;
     - z = x - y -z - 5*z;
   end SolveEqTest7;
+  
+
+  model SolveEqTest8
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest8",
+      methodName="printDAEBLT",
+	equation_sorting = true,         
+        description="Test solution of equations", methodResult=
+        "
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  der(x)
+Solution:
+  (  - ( x ) ) / (  - ( 1.0 ) - (  - ( 1.0 ) ) + ( (  - ( 1.0 ) ) * (  - ( 1.0 ) ) ) * (  - ( 1.0 ) ) )
+-------------------------------
+        ")})));
+
+    Real x;
+  equation
+   -der(x) + x = -der(x) - (-(-(-der(x))));
+ end SolveEqTest8;
   
  model TearingTest1
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

@@ -119,6 +119,7 @@ aspect EquationSolve {
 			ArrayList<FExp> inactiveFactors = new ArrayList<FExp>();
 			// Find terms
 			//System.out.println("Equation:\n" + prettyPrint(""));
+			//System.out.println("N factors: " + fac.size());
 			boolean negatedFactor = false;			
 			for (FExp ee : fac) {
 				//System.out.println("Factor" + (ee.isNegativeTerm()? "(-): ": "(+): ") + ee.prettyPrint(""));
@@ -128,7 +129,8 @@ aspect EquationSolve {
 					//System.out.println(" - active"); 
 					activeFactors.add(ee);
 				} else if (ee.nbrUses(name)==1 && !ee.isInvertedFactor() && 
-				    ((ee instanceof FNegExp) && ((FNegExp)ee).getFExp().isIdentifier(name))) {
+				    ((ee instanceof FNegExp) && ((FNegExp)ee).getFExp().isIdentifier(name))) { 
+				    // TODO: remove this branch since it is not general enough
 					//System.out.println(" - active"); 
 					activeFactors.add(((FNegExp)ee).getFExp());
 					negatedFactor = true;
@@ -140,6 +142,7 @@ aspect EquationSolve {
 				    return new FNoExp();
 				}
 			}
+						
 			FExp coeff = null;
 			for (FExp eee : inactiveFactors) {
 			    mulCoeffVar = mulCoeffVar.combine(eee.variability());			
@@ -158,6 +161,17 @@ aspect EquationSolve {
 			if (coeff==null) {
 				coeff = new FRealLitExp(1);
 			}
+/*			System.out.println("Coeff: ");
+			if (coeff!=null) 
+				System.out.println(coeff.prettyPrint(""));
+			else
+				System.out.println("null");
+			System.out.println("mulCoeff: ");
+			if (mulCoeff!=null) 
+				System.out.println(mulCoeff.prettyPrint(""));
+			else
+				System.out.println("null");
+*/
 			if (coeff!=null) {
 				if (mulCoeff==null) {
 					if (e.isNegativeTerm() || negatedFactor) {
@@ -173,6 +187,20 @@ aspect EquationSolve {
 					}	
 				}					
 			}	
+/*			System.out.println("Coeff: ");
+			if (coeff!=null) 
+				System.out.println(coeff.prettyPrint(""));
+			else
+				System.out.println("null");
+			System.out.println("mulCoeff: ");
+			if (mulCoeff!=null) 
+				System.out.println(mulCoeff.prettyPrint(""));
+			else
+				System.out.println("null");
+			
+			//System.out.println("*Coeff: " + coeff!=null? coeff.prettyPrint(""): "null");
+			//System.out.println("*MulCoeff: " + mulCoeff!=null? mulCoeff.prettyPrint(""): "null");
+*/
 		}
 	    	
 	    if (duringTearing && !root().options.getBooleanOption("divide_by_vars_in_tearing")) { 	   
@@ -235,6 +263,13 @@ aspect EquationSolve {
 		ArrayList<FExp> t = new ArrayList<FExp>();
 		t.addAll(getLeft().factors());
 		t.addAll(getRight().factors());
+		return t;
+	}
+	
+	eq FNegExp.factors() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.add(dynamicFExp(new FNegExp(new FRealLitExp(1.))));
+		t.addAll(getFExp().factors());
 		return t;
 	}
 
