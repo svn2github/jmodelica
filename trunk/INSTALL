@@ -20,6 +20,7 @@ The following tools need to be installed:
  - Subversion
  - Apache Ant
  - Cmake
+ - SWIG
  - Java development kit
 
 The following Python packages are needed: 
