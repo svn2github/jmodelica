@@ -3966,10 +3966,11 @@ equation
   input Real[:] a1;
   output Real x1;
   Real[:] b1;
-  Real[size(a1, 1)] temp_1;
+  Real[:] temp_1;
   Real temp_2;
  algorithm
   size(b1) := {size(a1, 1)};
+  size(temp_1) := {size(a1, 1)};
   for i1 in 1:size(b1, 1) loop
    (temp_1) := FunctionTests.ArrayOutputScalarization18.f2(a1);
    b1[i1] := temp_1[i1];
@@ -4028,8 +4029,9 @@ equation
   input Real[:] a1;
   output Real x1;
   Real[2] b1;
-  Real[size(a1, 1)] temp_1;
+  Real[:] temp_1;
  algorithm
+  size(temp_1) := {size(a1, 1)};
   for i1 in 1:size(b1, 1) loop
    (temp_1) := FunctionTests.ArrayOutputScalarization19.f2(a1);
    b1[i1] := temp_1[i1];

@@ -2527,10 +2527,13 @@ aspect CircularExpressions {
 		if (inIsCircular)
 			return true;
 		inIsCircular = true;
-		if (!duringFunctionEval() && getFExp().isUnknownSizeVarUse())
-			return true;
-		Size s = getFExp().size();
-		boolean res = hasDim() ? s.isCircular(dimension()) : s.isCircular();
+		boolean res;
+		if (getFExp().isUnknownSizeVarUse() && !duringFunctionEval() && !duringFunctionInlining()) {
+			res = true;
+		} else {
+			Size s = getFExp().size();
+			res = hasDim() ? s.isCircular(dimension()) : s.isCircular();
+		}
 		inIsCircular = false;
 		return res;
 	}

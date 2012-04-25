@@ -1012,6 +1012,14 @@ aspect FlatNames {
     syn lazy String FQName.derName()         = prefixName(0, true, false);
     syn lazy String FQName.resolvedDerName() = prefixName(0, true, true);
 
+    syn String FQName.scalarName() {
+    	boolean scalar = scalarized;
+    	scalarized = true;
+    	String res = prefixName(0, false, true);
+    	scalarized = scalar;
+    	return res;
+    }
+    
 	syn lazy String FQName.hDerName(int derOrder) {
 	   	StringBuilder str = new StringBuilder(derName());
 	   	int len = str.length();
@@ -1023,14 +1031,14 @@ aspect FlatNames {
     
     syn String FQNamePart.name() = getName();
 
-    syn String FIdUse.name() = getFQName().name();
-    syn String FIdUseExp.name() = getFIdUse().name();
-    eq FDerExp.name() = derName();
-    eq FDummyDerExp.name() = derName();
-    eq FHDerExp.name() = hDerName(getOrder());
-    eq FHDummyDerExp.name() = hDerName(getOrder());
-    eq FPreExp.name() = preName();
-    syn String FInstAccessExp.name() = getInstAccessNoTransform().name();
+    syn String FIdUse.name()           = getFQName().name();
+    syn String FIdUseExp.name()        = getFIdUse().name();
+    eq FDerExp.name()                  = derName();
+    eq FDummyDerExp.name()             = derName();
+    eq FHDerExp.name()                 = hDerName(getOrder());
+    eq FHDummyDerExp.name()            = hDerName(getOrder());
+    eq FPreExp.name()                  = preName();
+    syn String FInstAccessExp.name()   = getInstAccessNoTransform().name();
     syn String FIdUseInstAccess.name() = getInstAccessNoTransform().name();
     
     syn String FIdDecl.name() = getFQNameNoTransform().name();
@@ -1071,6 +1079,8 @@ aspect FlatNames {
     syn String FPreExp.preName() {
      	return ((FIdUseExp)getFExpNoTransform()).getFIdUse().preName();
 	}
+    syn String FIdUse.scalarName()    = getFQName().scalarName();
+    syn String FIdUseExp.scalarName() = getFIdUse().scalarName();
 	
     syn lazy String FQName.preName() {
         StringBuilder str = new StringBuilder();
@@ -1780,6 +1790,15 @@ aspect FlatFunctionUtils {
          do {
              name = "temp_" + nextTempVarIndex++;
          } while (vars.get(name) != null);
+         return name;
+     }
+     public String FClass.nextTempVarName(FFunctionDecl func) {
+         Map<String,FVariable> vars1 = fullyQualifiedVariablesMap();
+         Map<String,FFunctionVariable> vars2 = func.fullyQualifiedVariablesMap();
+         String name;
+         do {
+             name = "temp_" + nextTempVarIndex++;
+         } while (vars1.get(name) != null || vars2.get(name) != null);
          return name;
      }
      

@@ -150,7 +150,8 @@ aspect OptimicaTransformCanonical {
 			// Flush to reset cashes
 			root().flushAllRecursive();
 		}
-		super.transformCanonicalBase();		
+		transformCanonicalBase();		
+	    transformCanonicalCleanup();
 
 	}
 	
