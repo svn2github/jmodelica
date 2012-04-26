@@ -3063,29 +3063,41 @@ aspect IfEquations {
 	
 	private boolean FIfEquation.rewriteIfEquation = false;
 	
-	syn Map<AbstractFVariable,FAbstractEquation> FIfWhenElseEquation.assignmentEquationMap() {
+	syn Map<AbstractFVariable,FEquation> FIfWhenElseEquation.assignmentEquationMap() {
 		calcAssignmentEquations();
 		return assignmentEquationMap;
 	}
 	
-	syn Set<FAbstractEquation> FIfWhenElseEquation.nonAssignmentEquationSet() {
+	syn Set<FEquation> FIfWhenElseEquation.nonAssignmentEquationSet() {
 		calcAssignmentEquations();
 		return nonAssignmentEquationSet;
 	}
 	
-	private Map<AbstractFVariable,FAbstractEquation> FIfWhenElseEquation.assignmentEquationMap = null;
-	private Set<FAbstractEquation> FIfWhenElseEquation.nonAssignmentEquationSet = null;
+	syn Set<FAbstractEquation> FIfWhenElseEquation.nonFEquationSet() {
+		calcAssignmentEquations();
+		return nonFEquationSet;
+	}
+	
+	private Map<AbstractFVariable,FEquation> FIfWhenElseEquation.assignmentEquationMap = null;
+	private Set<FEquation> FIfWhenElseEquation.nonAssignmentEquationSet = null;
+	private Set<FAbstractEquation> FIfWhenElseEquation.nonFEquationSet = null;
 	
 	private void FIfWhenElseEquation.calcAssignmentEquations() {
-		if (assignmentEquationMap == null || nonAssignmentEquationSet == null) {
-			assignmentEquationMap = new HashMap<AbstractFVariable,FAbstractEquation>();
-			nonAssignmentEquationSet = new HashSet<FAbstractEquation>();
+		if (assignmentEquationMap == null || nonAssignmentEquationSet == null || nonFEquationSet == null) {
+			assignmentEquationMap = new HashMap<AbstractFVariable,FEquation>();
+			nonAssignmentEquationSet = new HashSet<FEquation>();
+			nonFEquationSet = new HashSet<FAbstractEquation>();
 			for (FAbstractEquation eqn : getFAbstractEquations()) {
-				AbstractFVariable var = eqn.assignedFV();
-				if (var != null && !assignmentEquationMap.containsKey(var))
-					assignmentEquationMap.put(var, eqn);
-				else
-					nonAssignmentEquationSet.add(eqn);
+				if (eqn instanceof FEquation) {
+					FEquation feqn = (FEquation) eqn;
+					AbstractFVariable var = feqn.assignedFV();
+					if (var != null && !assignmentEquationMap.containsKey(var))
+						assignmentEquationMap.put(var, feqn);
+					else
+						nonAssignmentEquationSet.add(feqn);
+				} else {
+					nonFEquationSet.add(eqn);
+				}
 			}
 		}
 	}
@@ -3163,13 +3175,12 @@ aspect IfEquations {
 		
 	}
 	
-	protected static ArrayList<FAbstractEquation> FIfEquation.unmatchedEquations(
+	protected static ArrayList<FEquation> FIfEquation.unmatchedEquations(
 			FIfWhenElseEquation ifEqn, Set<AbstractFVariable> varsInBoth) {
-		Set<FAbstractEquation> unMatchedAssign = 
+		Set<FEquation> unMatchedAssign = 
 			valuesOfUnNamedKeys(ifEqn.assignmentEquationMap(), varsInBoth);
 		unMatchedAssign.addAll(ifEqn.nonAssignmentEquationSet());
-		// TODO: use CHILD_ORDER_COMPARATOR once the JastAdd bug with insertChild() is fixed
-		return toSortedList(unMatchedAssign, TOSTRING_COMPARATOR);
+		return toSortedList(unMatchedAssign, CHILD_ORDER_COMPARATOR);
 	}
 
 	syn List FIfEquation.createIfExpEquationList() {
@@ -3184,14 +3195,17 @@ aspect IfEquations {
 			l.add(new FEquation(getType().fullCopy(), v.createUseExp(), ifExp));
 		}
 		
-		ParallelIterable<FAbstractEquation> unmatched = new ParallelIterable(new FAbstractEquation[2], 
+		ParallelIterable<FEquation> unmatched = new ParallelIterable(new FEquation[2], 
 				unmatchedEquations(this, varsInBoth), unmatchedEquations(getElse(), varsInBoth));
-		for (FAbstractEquation[] eqs : unmatched) {
+		for (FEquation[] eqs : unmatched) {
 			FExp left = eqs[0].createResidualExp();
 			FExp right = eqs[1].createResidualExp();
 			FIfExp ifExp = new FIfExp(getTest().fullCopy(), left, right);
 			l.add(new FEquation(getType().fullCopy(), eqs[0].type().zeroLiteral(), ifExp));
 		}
+		
+		for (FAbstractEquation eqn : nonFEquationSet())
+			l.add(eqn);
 		
 		return l;
 	}
