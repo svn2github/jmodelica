@@ -489,10 +489,16 @@ aspect Derivatives {
 	}
 
 	public FExp FDivExp.diff(String name) {
-		return dynamicFExp(new FDivExp(new FSubExp(
-		    new FMulExp(getLeft().fullCopy(), getRight().diff(name)),
-			new	FMulExp(getLeft().diff(name), getRight().fullCopy())),
-			new	FPowExp(getRight().fullCopy(), new FIntegerLitExp(2))));
+		if (getRight().variability().lessOrEqual(fParameter())) {
+			return dynamicFExp(new FDivExp(
+			    getLeft().diff(name),
+				getRight().fullCopy()));
+		} else {
+			return dynamicFExp(new FDivExp(new FSubExp(
+			    new FMulExp(getLeft().diff(name), getRight().fullCopy()),
+				new	FMulExp(getLeft().fullCopy(), getRight().diff(name))),
+				new	FPowExp(getRight().fullCopy(), new FIntegerLitExp(2))));
+		}
 	}
 
 	public FExp FPowExp.diff(String name) {

@@ -4888,6 +4888,60 @@ end TransformCanonicalTests.IndexReduction32_PlanarPendulum_StatePreferAlways;
     x^2 + y^2 = L;
   end IndexReduction32_PlanarPendulum_StatePreferAlways;
 
+ model IndexReduction33_Div
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction33_Div",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction33_Div
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ ( x1 + x2 ) / ( x1 + p ) = 0;
+ ( ( der_x1 + der(x2) ) * ( x1 + p ) - ( ( x1 + x2 ) * ( der_x1 + 0.0 ) ) ) / ( ( x1 + p ) ^ 2 ) = 0.0;
+end TransformCanonicalTests.IndexReduction33_Div;
+		 ")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ (x1 + x2)/(x1 + p) = 0;
+  end IndexReduction33_Div;
+
+ model IndexReduction34_Div
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction34_Div",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction34_Div
+ Real x1;
+ Real x2;
+ parameter Real p1 = 2 /* 2 */;
+ parameter Real p2 = 5 /* 5 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ ( x1 + x2 ) / ( ( p1 ) * ( p2 ) ) = 0;
+ ( der_x1 + der(x2) ) / ( ( p1 ) * ( p2 ) ) = 0.0;
+end TransformCanonicalTests.IndexReduction34_Div;
+		 ")})));
+  Real x1,x2;
+  parameter Real p1 = 2;
+  parameter Real p2 = 5;
+equation
+  der(x1) + der(x2) = 1;
+ (x1 + x2)/(p1*p2) = 0;
+  end IndexReduction34_Div;
+
 model StateInitialPars1
 	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
