@@ -26,12 +26,12 @@ By Jon Sten
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.gef" version="3.7.1" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ui.ide" version="3.7.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.core.resources" version="3.7.100" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.ide" version="3.6.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.resources" version="3.6.0" match="greaterOrEqual"/>
       <import plugin="org.jmodelica.ide"/>
       <import plugin="org.jastadd.plugin" version="1.0.9" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.navigator"/>
-      <import plugin="org.eclipse.ui.navigator.resources" version="3.4.300" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.navigator.resources" version="3.4.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
