@@ -197,6 +197,7 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 
 		protected IStatus run(IProgressMonitor monitor) {
 			localCompiles.put(file, cmp.compileFile(file));
+			new UpdateJob(file).schedule();
 			return Status.OK_STATUS;
 		}
 	}
