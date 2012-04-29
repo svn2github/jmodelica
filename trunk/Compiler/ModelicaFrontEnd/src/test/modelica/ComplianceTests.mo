@@ -1,7 +1,7 @@
 package ComplianceTests
 
 
-
+/*
 model String_ComplErr
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.ComplianceErrorTestCase(name="String_ComplErr",
@@ -20,6 +20,7 @@ Compliance error at line 74, column 19:
  parameter String str2="s2";
 
 end String_ComplErr;
+*/
 
 model IntegerVariable_ComplErr
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

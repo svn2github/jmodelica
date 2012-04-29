@@ -113,7 +113,7 @@ aspect ComplianceCheck {
 	public void InstPrimitive.complianceCheck() {
 		super.complianceCheck();
 		if (isString())
-			compliance("String variables are not supported");
+			warning("String variables and parameters are only partially supported");
 		if (!root().options.getBooleanOption("generate_ode")) {
 			if (isInteger() && !variability().lessOrEqual(fParameter()) && !inFunction())
 				compliance("Integer variables are supported only when compiling FMUs (constants and parameters are always supported)");
