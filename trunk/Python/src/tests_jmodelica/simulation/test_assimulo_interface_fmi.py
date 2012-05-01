@@ -507,17 +507,8 @@ class Test_ODE_JACOBIANS2:
         
         m_nonlin.initialize()
         
-        opts = m_nonlin.simulate_options()
-        opts['with_jacobian'] = True
-        res = m_nonlin.simulate(final_time=10, options=opts)
-        
-        A,B,C,D,n_err1 = m_nonlin.check_jacobians(tol=10)
-        
-        opts['with_jacobian'] = False
-        res = m_nonlin.simulate(final_time=10, options=opts)
-        
-        A,B,C,D,n_err2 = m_nonlin.check_jacobians(tol=10)
-        nose.tools.assert_equals(n_err1+n_err2, 0)
+        A,B,C,D,n_err = m_nonlin.check_jacobians()
+        nose.tools.assert_equals(n_err, 0)
         
         
 class Test_ODE_JACOBIANS3:
@@ -546,8 +537,6 @@ class Test_ODE_JACOBIANS3:
         res = m_distlib2.simulate(final_time=70)
         
         A,B,C,D,n_err1 = m_distlib1.check_jacobians()
-        
-        
 
         A,B,C,D,n_err2 = m_distlib2.check_jacobians()
         nose.tools.assert_equals(n_err1+n_err2, 0)
@@ -577,17 +566,8 @@ class Test_ODE_JACOBIANS4:
         
         m_nonlinIO.initialize()
         
-        opts = m_nonlinIO.simulate_options()
-        opts['with_jacobian'] = True
-        res = m_nonlinIO.simulate(final_time=10, options=opts)
-        
-        A,B,C,D,n_err1 = m_nonlinIO.check_jacobians(tol=10)
-        
-        opts['with_jacobian'] = False
-        res = m_nonlinIO.simulate(final_time=10, options=opts)
-        
-        A,B,C,D,n_err2 = m_nonlinIO.check_jacobians(tol=10)
-        nose.tools.assert_equals(n_err1+n_err2, 0)
+        A,B,C,D,n_err = m_nonlinIO.check_jacobians()
+        nose.tools.assert_equals(n_err, 0)
         
         
 class Test_ODE_JACOBIANS5:
