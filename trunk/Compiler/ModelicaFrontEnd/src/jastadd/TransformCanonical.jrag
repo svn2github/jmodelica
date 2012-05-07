@@ -4762,12 +4762,16 @@ aspect FunctionInlining {
 				} catch (ConstantEvaluationException e) {}
 			}
 		} else {
-			if (fi.isReplacementVar(name())) 
+			if (fi.isReplacementVar(name())) {
 				exp = this;
-			else if (isArray() && !size().isUnknown()) 
-				exp = dynamicFExp(getArray().buildWithReplacedReferences(fi, this));
-			else 
+			} else if (isArray() && !size().isUnknown()) { 
+				exp = getArray().buildWithReplacedReferences(fi, this);
+			} else if (type().isRecord()) {
+				exp = dynamicFExp(type().createRecordConstructor(getFIdUse().getFQName()));
+				exp = exp.replaceReferences(fi);
+			} else {
 				exp = type().zeroLiteral();
+			}
 		}
 		if (exp != this)
 			replaceMe(exp);
@@ -4848,6 +4852,10 @@ aspect FunctionInlining {
 		inFunction() && !duringFunctionInlining();
 	refine Scalarization eq FFunctionCall.getArg().canAcceptArray()      = 
 		inFunction() && !duringFunctionInlining();
+	refine Scalarization eq FFunctionCall.getArg().wantsRecordCon()      = 
+		!inFunction() || duringFunctionInlining();
+	eq FFunctionCallLeft.getFExp().wantsRecordCon()                      = 
+		inFunction() && duringFunctionInlining();
 
 	inh boolean FFunctionCallLeft.duringFunctionInlining();
 	inh boolean FExp.duringFunctionInlining();

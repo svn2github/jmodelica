@@ -1113,6 +1113,124 @@ end FunctionInlining.RecordInline9;
         
         R x = f(1);
     end RecordInline9;
+    
+    
+    model RecordInline10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordInline10",
+         description="",
+         inline_functions=true,
+         flatModel="
+fclass FunctionInlining.RecordInline10
+ Real x;
+ Real y;
+ Real temp_7;
+ Real temp_8;
+ Real temp_9;
+ discrete Integer temp_10;
+initial equation 
+ pre(temp_10) = 0;
+equation
+ y = 1;
+ temp_7 = ( 1 ) * ( y );
+ temp_8 = ( 2 ) * ( y );
+ temp_9 = ( 3 ) * ( y );
+ temp_10 = integer(5 - ( y ));
+ x = temp_7 + temp_8 + temp_9 + temp_10;
+
+ record FunctionInlining.RecordInline10.R
+  Real a[3];
+  discrete Integer b;
+ end FunctionInlining.RecordInline10.R;
+end FunctionInlining.RecordInline10;
+")})));
+
+        record R
+            Real a[3];
+            Integer b;
+        end R;
+        
+        function f1
+            input Real c;
+            output Real d;
+        protected
+            R e;
+        algorithm
+            e.a := { 1, 2, 3 } * c;
+            e.b := integer(5 - c);
+            d := f2(e);
+        end f1;
+        
+        function f2
+            input R f;
+            output Real g;
+        algorithm
+            g := sum(f.a) + f.b;
+        end f2;
+        
+        Real x = f1(y);
+        Real y = 1;
+    end RecordInline10;
+    
+    
+    model RecordInline11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordInline11",
+         description="",
+         inline_functions=true,
+         flatModel="
+fclass FunctionInlining.RecordInline11
+ Real x;
+ Real y;
+ Real temp_3;
+ Real temp_4;
+ Real temp_5;
+ Integer temp_6;
+initial equation 
+ pre(temp_6) = 0;
+equation
+ y = 1;
+ x = temp_3 + temp_4 + temp_5 + temp_6;
+ temp_3 = ( 1 ) * ( y );
+ temp_4 = ( 2 ) * ( y );
+ temp_5 = ( 3 ) * ( y );
+ temp_6 = integer(5 - ( y ));
+
+ record FunctionInlining.RecordInline11.R
+  Real a[3];
+  discrete Integer b;
+ end FunctionInlining.RecordInline11.R;
+end FunctionInlining.RecordInline11;
+")})));
+
+        record R
+            Real a[3];
+            Integer b;
+        end R;
+        
+        function f1
+            input Real f;
+            output Real g;
+        protected
+            R e;
+        algorithm
+			e := f2(f);
+            g := sum(e.a) + e.b;
+	    end f1;
+        
+        function f2
+            input Real c;
+            output R d;
+        algorithm
+            d.a := { 1, 2, 3 } * c;
+            d.b := integer(5 - c);
+        end f2;
+        
+        Real x = f1(y);
+        Real y = 1;
+    end RecordInline11;
 	
 	
 	model UninlinableFunction1
