@@ -35,7 +35,7 @@ from pymodelica.common.core import list_to_string, get_unit_name
 from compiler_interface import *
 
 
-def compile_fmu(class_name, file_name=[], compiler='modelica', 
+def compile_fmu(class_name, file_name=[], compiler='auto', 
     target='model_fmume', compiler_options={}, compile_to='.', 
     compiler_log_level='warning'):
     """ 
@@ -49,7 +49,11 @@ def compile_fmu(class_name, file_name=[], compiler='modelica',
     
     * class_name and file_name is passed:
         - file_name can be a single path as a string or a list of paths 
-          (strings). The paths can be to files or libraries
+          (strings). The paths can be file or library paths.
+        - Default compiler setting is 'auto' which means that the appropriate 
+          compiler will be selected based on model file ending, i.e. 
+          ModelicaCompiler if a .mo file and OptimicaCompiler if a .mop file is 
+          found in file_name list.
     
     Library directories can be added to MODELICAPATH by listing them in a 
     special compiler option 'extra_lib_dirs', for example:
@@ -75,9 +79,12 @@ def compile_fmu(class_name, file_name=[], compiler='modelica',
             Default: Empty list.
             
         compiler -- 
-            The compiler used to compile the model. Currently, only ModelicaCompiler 
-            can be used.
-            Default: 'modelica'
+            The compiler used to compile the model. The different options are:
+              - 'auto': the compiler is selected automatically depending on 
+                 file ending
+              - 'modelica': the ModelicaCompiler is used
+              - 'optimica': the OptimicaCompiler is used
+            Default: 'auto'
             
         target --
             Compiler target.
