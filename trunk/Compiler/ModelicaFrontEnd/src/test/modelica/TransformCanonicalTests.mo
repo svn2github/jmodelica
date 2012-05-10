@@ -3522,19 +3522,21 @@ Real y \"Cartesian x coordinate\";
 Real vx \"Velocity in x coordinate\";
 Real lambda \"Lagrange multiplier\";
 Real der_y;
-Real der_2_x;
+Real der_vx;
+Real _der_x;
 Real der_2_y;
 initial equation 
 x = 0.0;
-vx = 0.0;
+_der_x = 0.0;
 equation
 der(x) = vx;
-der(vx) = ( lambda ) * ( x );
+der_vx = ( lambda ) * ( x );
 der_2_y = ( lambda ) * ( y ) - ( g );
 x ^ 2 + y ^ 2 = L;
 ( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
-( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
-der_2_x = der(vx);
+( ( 2 ) * ( x ) ) * ( der(_der_x) ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
+der(_der_x) = der_vx;
+_der_x = der(x);
 end TransformCanonicalTests.IndexReduction1_PlanarPendulum;
 ")})));
 
@@ -4895,17 +4897,18 @@ end TransformCanonicalTests.IndexReduction32_PlanarPendulum_StatePreferAlways;
          description="Test of index reduction",
          flatModel="
 fclass TransformCanonicalTests.IndexReduction33_Div
- Real x1;
- Real x2;
- parameter Real p = 2 /* 2 */;
- Real der_x1;
+Real x1;
+Real x2;
+parameter Real p = 2 /* 2 */;
+Real der_x1;
 initial equation 
- x2 = 0.0;
+x2 = 0.0;
 equation
- der_x1 + der(x2) = 1;
- ( x1 + x2 ) / ( x1 + p ) = 0;
- ( ( der_x1 + der(x2) ) * ( x1 + p ) - ( ( x1 + x2 ) * ( der_x1 + 0.0 ) ) ) / ( ( x1 + p ) ^ 2 ) = 0.0;
+der_x1 + der(x2) = 1;
+( x1 + x2 ) / ( x1 + p ) = 0;
+( ( der_x1 + der(x2) ) * ( x1 + p ) - ( ( x1 + x2 ) * ( der_x1 + 0.0 ) ) ) / ( ( x1 + p ) ^ 2 ) = 0.0;
 end TransformCanonicalTests.IndexReduction33_Div;
+		 
 		 ")})));
   Real x1,x2;
   parameter Real p = 2;

@@ -617,6 +617,24 @@ aspect TransformCanonical {
 			for (FAbstractEquation feq : equations()) {
 				str.append("  " + feq.prettyPrint("") + "\n");			
 			}
+			/*
+			str.append("---- Block Jacobian:\n");
+			for (FAbstractEquation feq  : equations()) {
+				int j = 0;
+				str.append(feq.prettyPrint("") + "\n");
+				for (FVariable fv : activeVariables()) {
+					FExp dl = ((FEquation)feq).getLeft().dynamicFExp(((FEquation)feq).getLeft().diff(fv.name()));
+					FExp dr = ((FEquation)feq).getRight().dynamicFExp(((FEquation)feq).getRight().diff(fv.name()));
+					if (!(dl.variability().lessOrEqual(feq.fConstant()) && 
+					    dl.ceval().realValue()==0. &&
+					    dr.variability().lessOrEqual(feq.fConstant()) && 
+					    dr.ceval().realValue()==0.)) {
+						str.append("  " + fv.name() + " " + dl.prettyPrint("") + 
+						              " - " + dr.prettyPrint("") + "\n");
+					}
+				}
+			}
+			*/
 			return str.toString();
 		}
 	
@@ -862,7 +880,7 @@ aspect TransformCanonical {
 			str.append("Equations:\n");
 			for (FAbstractEquation feq : equations()) {
 				str.append("  " + feq.prettyPrint("") + "\n");			
-			}
+			}			
 			return str.toString();
 		}	
 		

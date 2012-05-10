@@ -229,10 +229,10 @@ public class MunkresProblem {
 	
 	public int[][] solve() {
 		minimizeRows();
-		System.out.println(this);
+		//System.out.println(this);
 		
 		match();
-		System.out.println(this);
+		//System.out.println(this);
 		
 		nextStep = COVER_MATCHED_COLUMNS;
 		
@@ -987,7 +987,7 @@ public class BiPGraph {
 		}
 	}
 	
-	public void matchMunkres() {
+	public void matchMunkres(HashMap<String,Integer> weights) {
 
 		if (equationMap.size()==0 || variableMap.size()==0) {
 			return;	
@@ -996,14 +996,22 @@ public class BiPGraph {
 		long cost[][] = new long[equationMap.size()][variableMap.size()];	
 
 		int i = 0;		
+		
+		//System.out.println("DD Jacobian:");
 		for (Eq e : getEquations()) {
 			int j = 0;
+			//System.out.println(e.getEquation().prettyPrint(""));
 			for (String vName : variableMap.keySet()) {
 				Var v = variableMap.get(vName);
 				if (e.getVariables().contains(v)) {
+					//System.out.println("  " + vName + " " + e.getEquation().diff(vName));
 					cost[i][j] = v.stateSelectionWeight();
 				} else {
 					cost[i][j] = FVariable.SS_UNMATCHED_WEIGHT;	
+				}
+				Integer weight = weights.get(vName);
+				if (weight!=null) {
+					cost[i][j] += weight.intValue();
 				}
 				j++;
 			}
@@ -1021,7 +1029,7 @@ public class BiPGraph {
 			Var var = variableMap.get(variableMap.keySet().toArray()[result[i][1]]);
 			eqn.setMatching(var);
 			var.setMatching(eqn);
-			ASTNode.log.info(eqn.toString() + ": " + var.getVariable().name() + " " + var.stateSelectionWeight());
+			ASTNode.log.info(eqn.toString() + ": " + var.getVariable().name() + " " + cost[result[i][0]][result[i][1]]);
 		}
 		ASTNode.log.info("Optimal cost: " + opt_cost);
 	}
@@ -1248,6 +1256,7 @@ public class BiPGraph {
 									groupMemberEquation.setMeDifferentiated(eqn);
 									eqn.setMeIntegrated(groupMemberEquation);
 								}
+								ASTNode.log.info("Equation added");
 							}
 							for (Var vv : visitedVariables) {
 								// Set matchings, Step 3b-5iii
@@ -1331,7 +1340,6 @@ public class BiPGraph {
 		ArrayList<FVariable> zHat = 
 		   new ArrayList<FVariable>();
 
-		
 		// Collect all blocks that contain differentiated equations
 		for (AbstractEquationBlock eb : blt) {
 			ArrayList<FAbstractEquation> diffedEqns = eb.differentiatedEquations();
@@ -1417,7 +1425,40 @@ public class BiPGraph {
 			//ASTNode.log.info(gd.toStringWeighted());	
 			
 			// Run matching
-			gd.matchMunkres();				
+			// Compute weights for variables based on linearity
+			HashMap<String,Integer> linearityWeights = new HashMap<String,Integer>();
+			for (FVariable fv : z) {
+		 		int w = 0;
+ 				for (FAbstractEquation feq : g) {
+ 					try {
+						FAbstractEquation feqd = feq.diff(fv.name());
+						//System.out.println(feqd.prettyPrint(""));
+						if (!feqd.variability().lessOrEqual(feqd.fParameter())) {
+							w += 2;
+						} else if (!feqd.variability().lessOrEqual(feqd.fConstant())) {
+							w += 1; 
+						}
+					} catch(Exception e) {}
+				}	
+				FRealVariable frv = (FRealVariable)fv.getMeIntegrated();
+				if (frv!=null) {
+					for (FAbstractEquation feq : g) {
+						try {
+							FAbstractEquation feqd = feq.diff(frv.name());
+							//System.out.println(feqd.prettyPrint(""));
+							if (!feqd.variability().lessOrEqual(feqd.fParameter())) {
+								w += 2;
+							} else if (!feqd.variability().lessOrEqual(feqd.fConstant())) {
+								w += 1; 
+							}
+						} catch(Exception e) {}							
+					}		
+				}
+				ASTNode.log.info("Linearity weight: " + fv.name() + " " + w);
+				linearityWeights.put(fv.name(),new Integer(w));
+			}
+			
+			gd.matchMunkres(linearityWeights);				
 			ASTNode.log.info(gd.printMatching());
 			
 			// The matched variables are selected as dummy derivatives

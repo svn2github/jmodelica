@@ -460,6 +460,19 @@ aspect Derivatives {
 	}
 	
 	public FExp FAddExp.diff(String name) {
+		/*FExp rd = dynamicFExp(getRight().diff(name));
+		FExp ld = dynamicFExp(getLeft().diff(name));
+		try {
+			if (ld.variability().lessOrEqual(fConstant()) && ld.ceval().realValue()==0. &&
+			rd.variability().lessOrEqual(fConstant()) && rd.ceval().realValue()==0.) {
+				return new FRealLitExp(0.0);
+			} if (ld.variability().lessOrEqual(fConstant()) && ld.ceval().realValue()==0.) {
+				return dynamicFExp(rd);
+			}
+			if (rd.variability().lessOrEqual(fConstant()) && rd.ceval().realValue()==0.) {
+				return dynamicFExp(ld);
+			}
+		} catch(Exception e) {}*/
 		return dynamicFExp(new FAddExp(getLeft().diff(name),
 			getRight().diff(name)));
 	}
@@ -470,19 +483,20 @@ aspect Derivatives {
 	}
 
 	public FExp FMulExp.diff(String name) {
-		FExp rd = getRight().diff(name);
-		FExp ld = getLeft().diff(name);
+		FExp rd = dynamicFExp((getRight().diff(name)));
+		FExp ld = dynamicFExp((getLeft().diff(name)));
 		try {
-			if (ld.variability().lessOrEqual(fConstant()) && ld.ceval().realValue()==0.) {
+			if (ld.variability().lessOrEqual(fConstant()) && ld.ceval().realValue()==0. &&
+			rd.variability().lessOrEqual(fConstant()) && rd.ceval().realValue()==0.) {
+				return new FRealLitExp(0.0);
+			} if (ld.variability().lessOrEqual(fConstant()) && ld.ceval().realValue()==0.) {
 				return dynamicFExp(new FMulExp(getLeft().fullCopy(), getRight().diff(name)));
 			}
 			if (rd.variability().lessOrEqual(fConstant()) && rd.ceval().realValue()==0.) {
 				return dynamicFExp(new	FMulExp(getLeft().diff(name), getRight().fullCopy()));
 			}
 			
-		} catch(Exception e) {
-		}
-		
+		} catch(Exception e) {}
 		return dynamicFExp(new FAddExp(
 		    new FMulExp(getLeft().fullCopy(), getRight().diff(name)),
 			new	FMulExp(getLeft().diff(name), getRight().fullCopy())));
@@ -526,16 +540,37 @@ aspect Derivatives {
 	}
 
 	public FExp FSinExp.diff(String name) {
+		FExp ed = dynamicFExp(getFExp().diff(name));
+		try {
+			if (ed.variability().lessOrEqual(fConstant()) && ed.ceval().realValue()==0.) {
+				return new FRealLitExp(0.0);
+			}
+		} catch(Exception e) {
+		}
 		return dynamicFExp(new FMulExp(new FCosExp(getFExp().fullCopy()),
 			getFExp().diff(name)));
 	}
 	
 	public FExp FCosExp.diff(String name) {
+		FExp ed = dynamicFExp(getFExp().diff(name));
+		try {
+			if (ed.variability().lessOrEqual(fConstant()) && ed.ceval().realValue()==0.) {
+				return new FRealLitExp(0.0);
+			}
+		} catch(Exception e) {
+		}
 		return dynamicFExp(new FNegExp(new FMulExp(new FSinExp(getFExp().fullCopy()),
 			getFExp().diff(name))));
 	}
 
 	public FExp FTanExp.diff(String name) {
+		FExp ed = dynamicFExp(getFExp().diff(name));
+		try {
+			if (ed.variability().lessOrEqual(fConstant()) && ed.ceval().realValue()==0.) {
+				return new FRealLitExp(0.0);
+			}
+		} catch(Exception e) {
+		}
 		return dynamicFExp(new FDivExp(getFExp().diff(name),
 		                               new FPowExp(new FCosExp(getFExp().fullCopy()), new FIntegerLitExp(2))));
 	}
