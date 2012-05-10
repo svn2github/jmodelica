@@ -50,8 +50,7 @@ def run_demo(with_plots=True):
     u = res['sys.u']
     t = res['time']
 
-    assert N.abs(x1[-1] - 0.20172085497700001) < 1e-3, \
-            "Wrong value of final state x[1] in lagrange_cost.py"  
+    assert N.abs(x1[-1] - 0.20172085497700001) < 1e-3  
 
     if with_plots:
         

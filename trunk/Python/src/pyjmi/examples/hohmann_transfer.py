@@ -58,11 +58,11 @@ def run_demo(with_plots=True):
     #Verify solution using theoretical results
     
     #Assert dv1 
-    assert N.abs( N.sqrt(dx1**2+dy1**2) - N.sqrt(my/r1)*(N.sqrt(2*r2/(r1+r2))-1) ) < 1e-1, "Wrong value of dv1."
+    assert N.abs( N.sqrt(dx1**2+dy1**2) - N.sqrt(my/r1)*(N.sqrt(2*r2/(r1+r2))-1) ) < 1e-1
     #Assert dv2 
-    assert N.abs( N.sqrt(dx2**2+dy2**2) - N.sqrt(my/r2)*(1-N.sqrt(2*r1/(r1+r2))) ) < 1e-1, "Wrong value of dv2."
+    assert N.abs( N.sqrt(dx2**2+dy2**2) - N.sqrt(my/r2)*(1-N.sqrt(2*r1/(r1+r2))) ) < 1e-1
     #Assert transfer time 
-    assert N.abs( tf-t1 - N.pi*((r1+r2)**3/(8*my))**0.5 ) < 1e-1, "Wrong value of transfer time."
+    assert N.abs( tf-t1 - N.pi*((r1+r2)**3/(8*my))**0.5 ) < 1e-1
 
     ###---###
 

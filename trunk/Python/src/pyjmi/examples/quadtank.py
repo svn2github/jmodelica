@@ -116,9 +116,8 @@ def run_demo(with_plots=True):
 
     cost=res['cost']
 
-    assert N.abs(cost[-1] - 5.0333257e+02) < 1e-3, \
-           "Wrong value of cost function in quadtank.py"  
-
+    assert N.abs(cost[-1] - 5.0333257e+02) < 1e-3
+    
     if with_plots:
         # Plot
         plt.figure(2)

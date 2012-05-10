@@ -37,8 +37,7 @@ def run_demo(with_plots=True):
     res_sum = res['sum']
     t = res['time']
 
-    assert N.abs(res_sum[-1] - 55) < 1e-6, \
-           "Wrong value in simulation result in extFunctions_arrays.py" 
+    assert N.abs(res_sum[-1] - 55) < 1e-6 
 
     if with_plots:
         fig = p.figure()

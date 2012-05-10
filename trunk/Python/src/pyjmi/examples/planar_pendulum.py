@@ -47,8 +47,7 @@ def run_demo(with_plots=True):
     vy = res['vy']
     t = res['time']
 
-    assert N.abs(x[-1] - 3.87669270e-01) < 1e-3, \
-           "Wrong value in simulation result."  
+    assert N.abs(x[-1] - 3.87669270e-01) < 1e-3
 
     if with_plots:
         plt.figure(1)

@@ -153,8 +153,7 @@ def run_demo(with_plots=True):
     cost=res['cost']
     time=res['time']
 
-    assert N.abs(cost[-1] - 1.4745648e+01) < 1e-3, \
-           "Wrong value of cost function in cstr2.py"
+    assert N.abs(cost[-1] - 1.4745648e+01) < 1e-3
     
     # Plot the results
     if with_plots:

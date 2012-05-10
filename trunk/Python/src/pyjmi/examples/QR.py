@@ -45,18 +45,17 @@ def run_demo(with_plots=True):
     tau_2  = res['tau[2]']
     t = res['time']
 
-    assert N.abs(qr_1_1[-1] + 4.47214) < 1e-3, \
-           "Wrong value of QR[1,1] in simulation result in QR.py"
-    assert N.abs(qr_1_2[-1] + 3.13049) < 1e-3, \
-           "Wrong value of QR[1,2] in simulation result in QR.py"
-    assert N.abs(qr_2_1[-1] - 0.618034) < 1e-3, \
-           "Wrong value of QR[2,1] in simulation result in QR.py"
-    assert N.abs(qr_2_2[-1] - 0.447214) < 1e-3, \
-           "Wrong value of QR[2,2] in simulation result in QR.py"
-    assert N.abs(tau_1[-1] - 1.44721) < 1e-3, \
-           "Wrong value of tau[1] in simulation result in QR.py"
-    assert N.abs(tau_2[-1] - 0) < 1e-3, \
-           "Wrong value of tau[2] in simulation result in QR.py"
+    assert N.abs(qr_1_1[-1] + 4.47214) < 1e-3
+    
+    assert N.abs(qr_1_2[-1] + 3.13049) < 1e-3
+    
+    assert N.abs(qr_2_1[-1] - 0.618034) < 1e-3
+    
+    assert N.abs(qr_2_2[-1] - 0.447214) < 1e-3
+    
+    assert N.abs(tau_1[-1] - 1.44721) < 1e-3
+    
+    assert N.abs(tau_2[-1] - 0) < 1e-3
     
     if with_plots:
         fig = p.figure()

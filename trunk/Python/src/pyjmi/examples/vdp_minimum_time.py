@@ -46,8 +46,7 @@ def run_demo(with_plots=True):
     tf=res['finalTime']
     t=res['time']
 
-    assert N.abs(tf - 2.2811587) < 1e-3, \
-            "Wrong value of cost function in cstr_minimum_time.py"
+    assert N.abs(tf - 2.2811587) < 1e-3
     
     if with_plots:
         # Plot

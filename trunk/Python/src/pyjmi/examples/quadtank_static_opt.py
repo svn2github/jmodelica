@@ -54,11 +54,9 @@ def run_demo(with_plots=True):
     print "a1: %2.2e (nominal: %2.2e)" % (qt_static.get("a1"),a1_nom)
     print "a2: %2.2e (nominal: %2.2e)" % (qt_static.get("a2"),a2_nom)
 
-    assert N.abs(qt_static.get("a1") - 7.95797110936e-06) < 1e-3, \
-           "Wrong value of parameter a1 function in quadtank_static_opt.py"  
+    assert N.abs(qt_static.get("a1") - 7.95797110936e-06) < 1e-3 
 
-    assert N.abs(qt_static.get("a2") - 7.73425542448e-06) < 1e-3, \
-           "Wrong value of parameter a2 function in quadtank_static_opt.py"  
+    assert N.abs(qt_static.get("a2") - 7.73425542448e-06) < 1e-3
 
     if __name__ == "__main__":
         run_demo()

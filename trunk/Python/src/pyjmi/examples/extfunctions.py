@@ -39,12 +39,11 @@ def run_demo(with_plots=True):
     sim_c = res['c']
     t     = res['time']
 
-    assert N.abs(sim_a[-1] - 1) < 1e-6, \
-           "Wrong value in simulation result in extfunctions.py" 
-    assert N.abs(sim_b[-1] - 2) < 1e-6, \
-           "Wrong value in simulation result in extfunctions.py"
-    assert N.abs(sim_c[-1] - 3) < 1e-6, \
-           "Wrong value in simulation result in extfunctions.py"
+    assert N.abs(sim_a[-1] - 1) < 1e-6
+     
+    assert N.abs(sim_b[-1] - 2) < 1e-6
+    
+    assert N.abs(sim_c[-1] - 3) < 1e-6
 
     if with_plots:
         fig = p.figure()

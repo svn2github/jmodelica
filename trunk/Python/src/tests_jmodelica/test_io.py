@@ -109,12 +109,10 @@ class TestIO:
         res = ResultDymolaTextual(self.fname[:-len('.jmu')]+'_result.txt')
 
         # Check that one of the trajectories match.
-        assert max(N.abs(traj[:,3]-res.get_variable_data('x1').x))<1e-12, \
-               "The result in the loaded result file does not match that of the loaded file."        
+        assert max(N.abs(traj[:,3]-res.get_variable_data('x1').x))<1e-12
 
         # Check that the value of the cost function is correct
-        assert N.abs(p_opt[0]-2.2811587)<1e-5, \
-               "The optimal value is not correct."
+        assert N.abs(p_opt[0]-2.2811587)<1e-5
 
     @testattr(assimulo = True)
     def test_parameter_alias(self):
@@ -188,8 +186,7 @@ class TestIO:
 
         time_shifted = res['time']
 
-        assert max(N.abs(time_shifted_fix-time_shifted))<1e-6, \
-               "Error in shifted time vector."        
+        assert max(N.abs(time_shifted_fix-time_shifted))<1e-6
 
 class test_ResultWriterDymola:
     """Tests the class ResultWriterDymola."""

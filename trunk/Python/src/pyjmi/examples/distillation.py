@@ -141,12 +141,9 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     cost=res.get_variable_data('cost')
     
     # if with_blocking_factors:
-        # assert N.abs(cost.x[-1]/1.e1 - 2.8549683) < 1e-3, \
-               # "Wrong value of cost function in distillation.py"
+        # assert N.abs(cost.x[-1]/1.e1 - 2.8549683) < 1e-3
     # else:
-        # assert N.abs(cost.x[-1]/1.e1 - 2.8527469) < 1e-3, \
-               # "Wrong value of cost function in distillation.py"
-
+        # assert N.abs(cost.x[-1]/1.e1 - 2.8527469) < 1e-3
 
     # Plot the results
     if with_plots:

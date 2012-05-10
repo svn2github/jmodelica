@@ -161,8 +161,8 @@ def run_demo(with_plots=True):
     print('a1: ' + str(a1_opt*1e4) + 'cm^2')
     print('a2: ' + str(a2_opt*1e4) + 'cm^2')
 
-    assert N.abs(a1_opt*1.e6 - 2.6574) < 1e-3, "Wrong value of parameter a1"  
-    assert N.abs(a2_opt*1.e6 - 2.7130) < 1e-3, "Wrong value of parameter a2"  
+    assert N.abs(a1_opt*1.e6 - 2.6574) < 1e-3 
+    assert N.abs(a2_opt*1.e6 - 2.7130) < 1e-3
 
     # Load state profiles
     x1_opt = res["qt.x1"]

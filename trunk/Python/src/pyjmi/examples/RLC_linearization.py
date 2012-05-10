@@ -66,8 +66,7 @@ def run_demo(with_plots=True):
     i_p1_i_2 = res2['x[3]']
     t_2 = res2['time']
 
-    assert N.abs(c_v_1[-1] - c_v_2[-1]) < 1e-3, \
-           "Wrong value in simulation result in RLC_linearization.py"
+    assert N.abs(c_v_1[-1] - c_v_2[-1]) < 1e-3
     
     if with_plots:
         

@@ -45,9 +45,7 @@ def run_demo(with_plots=True):
     inductor1_i = res['inductor1.i']
     t = res['time']
 
-    assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3, \
-           "Wrong value in simulation result in RLC.py"
-
+    assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3
     
     if with_plots:
         fig = p.figure()

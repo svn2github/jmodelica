@@ -52,8 +52,7 @@ def run_demo(with_plots=True):
     t=res['time']
     
     cost=res['cost']
-    assert N.abs(cost[-1] - 1.2921683e-01) < 1e-3, \
-           "Wrong value of cost function in pendulum.py"  
+    assert N.abs(cost[-1] - 1.2921683e-01) < 1e-3  
 
     if with_plots:
         # Plot

@@ -161,8 +161,7 @@ class TestNLPInit:
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
     
         assert N.abs(res_n_x-n_x) + N.abs(res_n_h-n_h) + \
-               N.abs(res_dh_n_nz-dh_n_nz)==0, \
-               "test_jmi.py: test_init_opt: init_opt_get_dimensions returns wrong problem dimensions." 
+               N.abs(res_dh_n_nz-dh_n_nz)==0
 
     @testattr(ipopt = True)    
     def test_init_opt_get_set_x_init(self):
@@ -174,16 +173,14 @@ class TestNLPInit:
         x_init = N.zeros(n_x)
         self.init_nlp.init_opt_get_initial(x_init)
         #print x_init
-        assert N.sum(N.abs(res_x_init-x_init))<1e-3, \
-               "test_jmi.py: test_init_opt: init_opt_get_x_init returns wrong values." 
+        assert N.sum(N.abs(res_x_init-x_init))<1e-3 
     
         # Test init_opt_set_x_init
         res_x_init = N.ones(n_x)
         x_init = N.ones(n_x)
         self.init_nlp.init_opt_set_initial(x_init)
         self.init_nlp.init_opt_get_initial(x_init)
-        assert N.sum(N.abs(res_x_init-x_init))<1e-3, \
-               "test_jmi.py: test_init_opt: init_opt_get_x_init returns wrong values after setting the initial values with init_opt_get_x_init." 
+        assert N.sum(N.abs(res_x_init-x_init))<1e-3 
 
     @testattr(ipopt = True)    
     def test_init_opt_get_set_bounds(self):
@@ -196,10 +193,8 @@ class TestNLPInit:
         x_lb = N.zeros(n_x)
         x_ub = N.zeros(n_x)
         self.init_nlp.init_opt_get_bounds(x_lb,x_ub)
-        assert N.sum(N.abs(res_x_lb-x_lb))<1e-3, \
-               "test_jmi.py: test_init_opt: init_opt_get_bounds returns wrong lower bounds." 
-        assert N.sum(N.abs(res_x_lb-x_lb))<1e-3, \
-               "test_jmi.py: test_init_opt: init_opt_get_bounds returns wrong upper bounds." 
+        assert N.sum(N.abs(res_x_lb-x_lb))<1e-3 
+        assert N.sum(N.abs(res_x_lb-x_lb))<1e-3
     
         # Test init_opt_set_bounds
         res_x_lb = -5000*N.ones(n_x)
@@ -208,10 +203,8 @@ class TestNLPInit:
         x_ub = 5000*N.ones(n_x)
         self.init_nlp.init_opt_set_bounds(x_lb,x_ub)
         self.init_nlp.init_opt_get_bounds(x_lb,x_ub)
-        assert N.sum(N.abs(res_x_lb-x_lb))<1e-3, \
-               "test_jmi.py: test_init_opt: init_opt_get_bounds returns wrong lower bounds after calling init_opt_set_bounds." 
-        assert N.sum(N.abs(res_x_lb-x_lb))<1e-3, \
-               "test_jmi.py: test_init_opt: init_opt_get_bounds returns wrong upper bounds after calling init_opt_set_bounds." 
+        assert N.sum(N.abs(res_x_lb-x_lb))<1e-3
+        assert N.sum(N.abs(res_x_lb-x_lb))<1e-3
 
     @testattr(ipopt = True)    
     def test_init_opt_f(self):
@@ -223,8 +216,7 @@ class TestNLPInit:
         f = N.zeros(1)
         self.init_nlp.init_opt_f(f)
         #print f
-        assert N.sum(N.abs(res_f-f))<1e-3, \
-               "test_jmi.py: test_init_opt: init_opt_f returns wrong value" 
+        assert N.sum(N.abs(res_f-f))<1e-3
 
     @testattr(ipopt = True)    
     def test_init_opt_df(self):
@@ -236,8 +228,7 @@ class TestNLPInit:
         df = N.ones(n_x)
         self.init_nlp.init_opt_df(df)
         #print df
-        assert N.sum(N.abs(res_df-df))<1e-3, \
-               "test_jmi.py: test_init_opt: init_opt_df returns wrong value" 
+        assert N.sum(N.abs(res_df-df))<1e-3
 
     @testattr(ipopt = True)    
     def test_init_opt_h(self):
@@ -249,8 +240,7 @@ class TestNLPInit:
         h = N.zeros(n_h)
         self.init_nlp.init_opt_h(h)
         #print h
-        assert N.sum(N.abs(res_h-h))<1e-3, \
-               "test_jmi.py: test_init_opt: init_opt_h returns wrong value" 
+        assert N.sum(N.abs(res_h-h))<1e-3
 
     @testattr(ipopt = True)    
     def test_init_opt_dh(self):
@@ -263,8 +253,7 @@ class TestNLPInit:
         dh = N.ones(dh_n_nz)
         self.init_nlp.init_opt_dh(dh)
         #print dh
-        assert N.sum(N.abs(res_dh-dh))<1e-3, \
-               "test_jmi.py: test_init_opt: init_opt_dh returns wrong value" 
+        assert N.sum(N.abs(res_dh-dh))<1e-3
 
     @testattr(ipopt = True)    
     def test_init_opt_dh_nz_indices(self):
@@ -277,10 +266,8 @@ class TestNLPInit:
         dh_irow = N.zeros(dh_n_nz,dtype=N.int32)
         dh_icol = N.zeros(dh_n_nz,dtype=N.int32)
         self.init_nlp.init_opt_dh_nz_indices(dh_irow,dh_icol)
-        assert N.sum(N.abs(res_dh_irow-dh_irow))<1e-3, \
-               "test_jmi.py: test_init_opt: init_opt_dh_nz_indices returns wrong values for the row indices." 
-        assert N.sum(N.abs(res_dh_icol-dh_icol))<1e-3, \
-               "test_jmi.py: test_init_opt: init_opt_dh_nz_indices returns wrong values for the column indices" 
+        assert N.sum(N.abs(res_dh_irow-dh_irow))<1e-3
+        assert N.sum(N.abs(res_dh_icol-dh_icol))<1e-3
 
     @testattr(ipopt = True)    
     def test_init_opt_solve(self):
@@ -305,8 +292,7 @@ class TestNLPInit:
                          -0.92009689684513785,
                          0.,0,0,0,0,0,0,0,0])
     
-        assert max(N.abs(res_Z-self.dae_init_test.z))<1e-3, \
-               "test_jmi.py: test_init_opt: Wrong solution to initialization system." 
+        assert max(N.abs(res_Z-self.dae_init_test.z))<1e-3
 
     @testattr(ipopt = True)
     def test_statistics(self):
@@ -316,8 +302,8 @@ class TestNLPInit:
         self.init_nlp_ipopt.init_opt_ipopt_solve()
         (return_status,iters,cost,time) = self.init_nlp_ipopt.init_opt_ipopt_get_statistics()
 
-        assert return_status==0, "Return status from Ipopt should be 0"
-        assert abs(cost-2.4134174e+06)<1, "Wrong value of cost function"
+        assert return_status==0
+        assert abs(cost-2.4134174e+06)<1
 
         
     @testattr(ipopt = True)    
@@ -345,24 +331,15 @@ class TestNLPInit:
                          -0.92009689684513785,
                          0.])
 
-        assert N.abs(res_Z[0] - res.get_variable_data("p").x[0])<1e-3, \
-               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable p." 
-        assert N.abs(res_Z[1] - res.get_variable_data("der(x1)").x[0])<1e-3, \
-               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable der(x1)." 
-        assert N.abs(res_Z[2] - res.get_variable_data("der(x2)").x[0])<1e-3, \
-               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable der(x2)." 
-        assert N.abs(res_Z[3] - res.get_variable_data("x1").x[0])<1e-3, \
-               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable x1." 
-        assert N.abs(res_Z[4] - res.get_variable_data("x2").x[0])<1e-3, \
-               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable x2." 
-        assert N.abs(res_Z[5] - res.get_variable_data("u").x[0])<1e-3, \
-               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable u." 
-        assert N.abs(res_Z[6] - res.get_variable_data("y1").x[0])<1e-3, \
-               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable y1." 
-        assert N.abs(res_Z[7] - res.get_variable_data("y2").x[0])<1e-3, \
-               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable y2." 
-        assert N.abs(res_Z[8] - res.get_variable_data("y3").x[0])<1e-3, \
-               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable y3."
+        assert N.abs(res_Z[0] - res.get_variable_data("p").x[0])<1e-3 
+        assert N.abs(res_Z[1] - res.get_variable_data("der(x1)").x[0])<1e-3
+        assert N.abs(res_Z[2] - res.get_variable_data("der(x2)").x[0])<1e-3
+        assert N.abs(res_Z[3] - res.get_variable_data("x1").x[0])<1e-3
+        assert N.abs(res_Z[4] - res.get_variable_data("x2").x[0])<1e-3
+        assert N.abs(res_Z[5] - res.get_variable_data("u").x[0])<1e-3
+        assert N.abs(res_Z[6] - res.get_variable_data("y1").x[0])<1e-3
+        assert N.abs(res_Z[7] - res.get_variable_data("y2").x[0])<1e-3
+        assert N.abs(res_Z[8] - res.get_variable_data("y3").x[0])<1e-3
         
     @testattr(ipopt = True)
     def test_invalid_string_option(self):
