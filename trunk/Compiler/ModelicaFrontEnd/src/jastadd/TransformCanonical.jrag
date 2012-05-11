@@ -1265,7 +1265,11 @@ aspect TransformCanonical {
      */	
 	public void FClass.computeMatchingsAndBLT() {
 		beginStep("computeMatchingsAndBLT()");
-		
+		computeMatchingsAndBLTWrapped();
+		endStep("computeMatchingsAndBLT()");
+	}
+	
+	private void FClass.computeMatchingsAndBLTWrapped() {
 		daeMatching = new ArrayList<MatchingPair>();
 		daeInitMatching = new ArrayList<MatchingPair>();		
 	    daeBLT = new BLT(this);
@@ -1622,8 +1626,6 @@ aspect TransformCanonical {
 			}	
 			log.info(daeInitBLT.toString());
 		}
-		
-		endStep("computeMatchingsAndBLT()");
 	}	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
