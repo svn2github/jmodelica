@@ -149,6 +149,8 @@ public class ModelicaCompiler {
 	private OptionRegistry options = null;
 	private DiagnosticsGenerator diagGenerator = null;
 	
+	protected boolean dumpMemoryUse = false;
+	
 	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
 	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
 	protected static CCompilerDelegator cCompiler = new GccCompilerDelegator();
@@ -454,6 +456,14 @@ public class ModelicaCompiler {
 	public String getOptionDescription(String key) throws UnknownOptionException {
 		return options.getDescription(key);
 	}
+	
+	public boolean willDumpMemoryUse() {
+		return dumpMemoryUse;
+	}
+
+	public void setDumpMemoryUse(boolean dump) {
+		dumpMemoryUse = dump;
+	}
 
 	/**
 	 * Returns the modelicapath attribute set for this compiler instance.
@@ -623,12 +633,14 @@ public class ModelicaCompiler {
 	 */
 	protected void dumpMemoryUseFile(ASTNode root, String type, String name) 
 			throws FileNotFoundException {
-		String file = "size_" + name + ".txt";
-		log.debug("Dumping " + type + " tree to '" + file + "'...");
-		long time = System.currentTimeMillis();
-		root.dumpMemoryUse(file, true, 25, 2 * 1024);
-		time = Math.round((System.currentTimeMillis() - time) / 1000.0);
-		log.debug(" Dumped tree in " + time + "s");
+		if (dumpMemoryUse) {
+			String file = "size_" + name + ".txt";
+			log.debug("Dumping " + type + " tree to '" + file + "'...");
+			long time = System.currentTimeMillis();
+			root.dumpMemoryUse(file, true, 25, 2 * 1024);
+			time = Math.round((System.currentTimeMillis() - time) / 1000.0);
+			log.debug(" Dumped tree in " + time + "s");
+		}
 	}
 
 	/**
@@ -1003,7 +1015,7 @@ public class ModelicaCompiler {
 
 			// build source tree
 			sr = parseModel(name);
-//			dumpMemoryUseFile(sr, "source");  // TODO: add command-line arg for this
+			dumpMemoryUseFile(sr, "source");
 
 			if (sr.options.getBooleanOption("generate_html_diagnostics")) {
 				setDiagnosticsGenerator(new DiagnosticsGenerator(cl));
@@ -1012,20 +1024,22 @@ public class ModelicaCompiler {
 			// compute instance tree
 			InstClassDecl icl = instantiateModel(sr, cl);
 			//icl.dumpTree("");
-//			dumpMemoryUseFile(icl, "instance");
+			dumpMemoryUseFile(icl, "instance");
 			
 			// flattening
 			fc = flattenModel(icl);
-//			dumpMemoryUseFile(fc, "flat");
+			dumpMemoryUseFile(fc, "flat");
 
 			// Generate code 
 			generateCode(fc);
 			
 		} finally {
-			logCompilationInfo();
+			log.debug("Time useage and memory usage change during compilation steps:");
+			ASTNode.getStepInfo().logReport();
+//			logCompilationInfo();
 			// The node count requires changing ASTNode.java by hand - see dumpNodeCountFile()
 //			dumpNodeCountFile("node_count.txt");
-//			dumpMemoryUseFile(sr, "final source", "source2");
+			dumpMemoryUseFile(sr, "final source", "source2");
 		}
 
 		if (sr.options.getBooleanOption("generate_html_diagnostics")) {
@@ -1112,7 +1126,8 @@ public class ModelicaCompiler {
 	public SourceRoot parseModel(String names[]) 
 	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
 		hookCheckAbort();
-		noteUsedMemory();
+//		noteUsedMemory();
+		ASTNode.beginStep("parseModel()");
 		
 		SourceRoot sr = new SourceRoot(new Program());
 		sr.options.copyAllOptions(this.options);
@@ -1128,7 +1143,8 @@ public class ModelicaCompiler {
 		}
 		
 		hookFilesParsed(sr);
-		noteUsedMemory();
+//		noteUsedMemory();
+		ASTNode.endStep("parseModel()");
 		
 		return sr;
 	}
@@ -1153,7 +1169,8 @@ public class ModelicaCompiler {
 	public InstClassDecl instantiateModel(SourceRoot sr, String cl) 
 		throws ModelicaClassNotFoundException, CompilerException {
 		hookCheckAbort();
-		noteUsedMemory();
+//		noteUsedMemory();
+		ASTNode.beginStep("instantiateModel()");
 		
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 		ipr.options = new OptionRegistry(sr.options);
@@ -1170,7 +1187,8 @@ public class ModelicaCompiler {
 		InstClassDecl icd = ipr.simpleLookupInstClassDecl(cl);
 		
 		hookModelInstantiatied(icd);
-		noteUsedMemory();
+//		noteUsedMemory();
+		ASTNode.endStep("instantiateModel()");
 		
 		return icd;
 	}
@@ -1243,7 +1261,8 @@ public class ModelicaCompiler {
 	public FClass flattenModel(InstClassDecl icl) 
 			throws CompilerException, ModelicaClassNotFoundException, IOException {
 		hookCheckAbort();
-		noteUsedMemory();
+//		noteUsedMemory();
+		ASTNode.beginStep("flattenModel()");
 		
 		File flatFile = new File(sourceDir, icl.qualifiedName() + ".mof");
 		FClass fc = createFlatTree(icl, flatFile.getPath());
@@ -1308,7 +1327,8 @@ public class ModelicaCompiler {
 			handleCompilerProblems(problems);
 
 		hookFlatModelChecked(fc);
-		noteUsedMemory();
+//		noteUsedMemory();
+		ASTNode.endStep("flattenModel()");
 
 		return fc;
 	}
@@ -1625,6 +1645,7 @@ public class ModelicaCompiler {
 					"  -log=<i or w or e> \n" +
 					"  -modelicapath=<path to modelica libraries> \n" +
 					"  -optfile=<path to XML options file> \n" + 
+					"  -dumpmemuse \n" + 
 					" and templates, if given, should be (in order): \n" + 
 					"  xml model description template \n" +
 					"  xml model values template \n" + 
@@ -1639,6 +1660,8 @@ public class ModelicaCompiler {
 		//log option
 		String level = programarguments.get("log");
 		setLogLevel(log, (level != null) ? level : ModelicaCompiler.ERROR);
+		
+		setDumpMemoryUse(programarguments.containsKey("dumpmemuse"));
 		
 		arg = programarguments.size();
 		if (args.length < arg+2 && !programarguments.containsKey("parse")) {

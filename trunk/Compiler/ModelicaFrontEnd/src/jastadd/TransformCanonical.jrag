@@ -94,6 +94,7 @@ aspect TransformCanonical {
 	}
 
 	public void FClass.transformCanonical() {
+    	beginStep("transformCanonical()");
 
 		transformCanonicalBase();
 
@@ -110,6 +111,7 @@ aspect TransformCanonical {
 		}
 	    
 	    transformCanonicalCleanup();
+    	endStep("transformCanonical()");
 	}
 		
 	public class BLT extends ArrayList<AbstractEquationBlock> {
@@ -1262,6 +1264,7 @@ aspect TransformCanonical {
 	 *    matchibng for the DAE initialization system.
      */	
 	public void FClass.computeMatchingsAndBLT() {
+		beginStep("computeMatchingsAndBLT()");
 		
 		daeMatching = new ArrayList<MatchingPair>();
 		daeInitMatching = new ArrayList<MatchingPair>();		
@@ -1618,9 +1621,9 @@ aspect TransformCanonical {
 				}
 			}	
 			log.info(daeInitBLT.toString());
-
-			
 		}
+		
+		endStep("computeMatchingsAndBLT()");
 	}	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1949,10 +1952,12 @@ aspect TransformCanonical {
 	 * Generate array initialization statements for unknown function arrays.
 	 */
 	public void FClass.genInitArrayStatements() {
+		beginStep("genInitArrayStatements()");
 		for (FFunctionDecl ffd : getFFunctionDecls()) {
 			ffd.genInitArrayStatements();
 			ffd.sortBindingAssignments();
 		}
+		endStep("genInitArrayStatements()");
 	}
 	
 	public void FFunctionDecl.genInitArrayStatements() {
@@ -2152,6 +2157,8 @@ aspect TransformCanonical {
 	 * \brief Convert variable binding equations into regular equations.
 	 */
 	public void FClass.genBindingEquations() {
+		beginStep("genBindingEquations()");
+		
 		FQName empty = new FQName();
 		for (FVariable fv : getFVariables()) 
 			if (!fv.isConstant()) 
@@ -2160,6 +2167,8 @@ aspect TransformCanonical {
 			ffd.genBindingAssignments();
 //		flush();
 		flushAllRecursive();
+
+		endStep("genBindingEquations()");
 	}
 	
 	public void FFunctionDecl.genBindingAssignments() {
@@ -2394,6 +2403,8 @@ aspect TransformCanonical {
 	 * \brief Generate functions from algorithms.
 	 */
 	public void FClass.genAlgorithmFunctions() {
+		beginStep("genAlgorithmFunctions()");
+
 		for (FAlgorithmBlock alg : myAlgorithms()) {
 			// Create function declaration
 			List<FFunctionVariable> vars = new List<FFunctionVariable>();
@@ -2472,6 +2483,8 @@ aspect TransformCanonical {
 			alg.addFStatement(new FReturnStmt());
 			addFFunctionDecl(new FFunctionDecl(funcName, vars, alg, new Opt()));
 		}
+		
+		endStep("genAlgorithmFunctions()");
 	}
 	
 	/**
@@ -2534,6 +2547,7 @@ aspect TransformCanonical {
 	 * differentiate variable.
 	 */
 	public void FClass.addFDerivativeVariables() {
+		beginStep("addFDerivativeVariables()");
 		ArrayList<FDerivativeVariable> l = new ArrayList<FDerivativeVariable>();
 		for (FVariable fv : differentiatedRealVariables()) {
 		    FDerivativeVariable fdv = new FDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
@@ -2551,7 +2565,8 @@ aspect TransformCanonical {
 			addFVariable(fv);
 		}
 //		flush();
-				root().flushAllRecursive();
+		root().flushAllRecursive();
+		endStep("addFDerivativeVariables()");
 	}
 
 	public FVariable FClass.addFDerivativeVariable(FVariable fv) {
@@ -2600,6 +2615,7 @@ aspect TransformCanonical {
 	 * discrete variable.
 	 */
 	public void FClass.addFPreVariables() {
+		beginStep("addFPreVariables()");
 		ArrayList<FVariable> l = new ArrayList<FVariable>();
 		for (FVariable fv : discreteRealVariables()) {
 			l.add(new FPreRealVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
@@ -2654,6 +2670,7 @@ aspect TransformCanonical {
 		}
 //		flush();
 		root().flushAllRecursive();
+		endStep("addFPreVariables()");
 	}
 
 	/**
@@ -2665,6 +2682,7 @@ aspect TransformCanonical {
 	 * attribute into account.
 	 */
 	public void FClass.genInitialEquations() {
+		beginStep("genInitialEquations()");
 		// TODO: Isn't there always a value for fv.startAttributeExp() now?
 		if (!root().options.getBooleanOption("state_initial_equations")) {
 			for (FRealVariable fv : differentiatedRealVariables()) {
@@ -2715,7 +2733,8 @@ aspect TransformCanonical {
 		}		
 
 		//flush();
-				root().flushAllRecursive();
+		root().flushAllRecursive();
+		endStep("genInitialEquations()");
 	}
 	
 
@@ -2724,9 +2743,11 @@ aspect TransformCanonical {
 	 */
 	public void FClass.aliasEliminationIfSet() {
 		if (root().options.getBooleanOption("eliminate_alias_variables")) {
+			beginStep("aliasEliminationIfSet()");
 			genAlias();
 			eliminateAliasVariables();
 			removeUnusedTemporaries();
+			endStep("aliasEliminationIfSet()");
 		}
 	}
 
@@ -3056,6 +3077,12 @@ aspect MapWhenClauses{
 			n.enableWhenEquationRewrite();
 	}
 
+	public void FClass.enableWhenEquationRewrite() {
+		beginStep("enableWhenEquationRewrite()");
+		super.enableWhenEquationRewrite();
+		endStep("enableWhenEquationRewrite()");
+	}
+
 	
 	public void FWhenEquation.enableWhenEquationRewrite() {
 		super.enableWhenEquationRewrite();
@@ -3185,11 +3212,13 @@ aspect IfEquations {
 	}
 
 	public void FClass.enableIfEquationElimination() {
+		beginStep("enableIfEquationElimination()");
 		super.enableIfEquationElimination();
 		// Workaround for JastAdd bug
 		setFInitialEquationList(cleanEmptyElse(getFInitialEquations()));
 		FEquationBlock b = getFEquationBlock(0);
 		b.setFAbstractEquationList(cleanEmptyElse(b.getFAbstractEquations()));
+		endStep("enableIfEquationElimination()");
 	}
 	
 	public void FIfEquation.enableIfEquationElimination() {
@@ -3255,6 +3284,12 @@ aspect IfEquations {
 	public void ASTNode.enableIfEquationRewrite() {
 		for (ASTNode n : this)
 			n.enableIfEquationRewrite();
+	}
+
+	public void FClass.enableIfEquationRewrite() {
+		beginStep("enableIfEquationRewrite()");
+		super.enableIfEquationRewrite();
+		endStep("enableIfEquationRewrite()");
 	}
 	
 	public void FIfEquation.enableIfEquationRewrite() {
@@ -3492,6 +3527,8 @@ aspect ParameterSorting {
 	 * algorithms later on.
 	 */
 	public void FClass.sortDependentParameters() {
+		beginStep("sortDependentParameters()");
+
 		// Get the list of parameter equations and set up preliminary data.
 		ArrayList<FAbstractEquation> eqns = getFParameterEquations().toArrayList();
 		int n_eqns = eqns.size();
@@ -3503,105 +3540,107 @@ aspect ParameterSorting {
 			fv.parameterEquation();  // Calculate these before changing anything
 		
 		// If there is nothing to do, return.
-		if (n_eqns == 0)
-			return;
-		
-		// Set up data structures for the adjacency graph.
-		ArrayList<HashSet<FAbstractEquation>> toNodes = new ArrayList<HashSet<FAbstractEquation>>(n_eqns);
-		ArrayList<HashSet<FAbstractEquation>> fromNodes = new ArrayList<HashSet<FAbstractEquation>>(n_eqns);
-		for (int i = 0; i < n_eqns; i++) {
-			toNodes.add(new HashSet<FAbstractEquation>());
-			fromNodes.add(new HashSet<FAbstractEquation>());
-		}
-		
-		// For each equation
-		for (FAbstractEquation eqn : eqns) {
-			// Retrieve all variables referenced in right hand side
-			Set<FVariable> deps = eqn.referencedFVariablesInRHS();
-			// Build the actual adjacency graph.
-			for (FVariable fv : deps) {
-				FAbstractEquation depEqn = fv.parameterEquation();
-				if (depEqn != null && depEqn.sortingIndex >= 0) {
-					toNodes.get(depEqn.sortingIndex).add(eqn);		
-					fromNodes.get(eqn.sortingIndex).add(depEqn);
+		if (n_eqns > 0) {
+			
+			// Set up data structures for the adjacency graph.
+			ArrayList<HashSet<FAbstractEquation>> toNodes = new ArrayList<HashSet<FAbstractEquation>>(n_eqns);
+			ArrayList<HashSet<FAbstractEquation>> fromNodes = new ArrayList<HashSet<FAbstractEquation>>(n_eqns);
+			for (int i = 0; i < n_eqns; i++) {
+				toNodes.add(new HashSet<FAbstractEquation>());
+				fromNodes.add(new HashSet<FAbstractEquation>());
+			}
+			
+			// For each equation
+			for (FAbstractEquation eqn : eqns) {
+				// Retrieve all variables referenced in right hand side
+				Set<FVariable> deps = eqn.referencedFVariablesInRHS();
+				// Build the actual adjacency graph.
+				for (FVariable fv : deps) {
+					FAbstractEquation depEqn = fv.parameterEquation();
+					if (depEqn != null && depEqn.sortingIndex >= 0) {
+						toNodes.get(depEqn.sortingIndex).add(eqn);		
+						fromNodes.get(eqn.sortingIndex).add(depEqn);
+					}
 				}
+			}	
+					
+			// Sort using algorithm described at
+			// http://en.wikipedia.org/wiki/Topological_sorting
+			List<FAbstractEquation> L = new List<FAbstractEquation>();
+			Queue<FAbstractEquation> S = 
+				new java.util.concurrent.ArrayBlockingQueue<FAbstractEquation>(n_eqns);
+			
+			// Add all nodes without incoming edges to S
+			for (int i = 0; i < n_eqns; i++) 
+				if (fromNodes.get(i).isEmpty()) 
+					S.add(eqns.get(i));
+			
+			// Repeat while S is not empty
+			int si = 0;
+			int n_indep = 0;
+			while (S.size() > 0) {
+				// Remove a node n from S
+				FAbstractEquation n = S.remove();
+				// Take care of n
+				if (n.isIndependentParameterEquation()) {
+					/* This equation should be the binding expression of an independent parameter.
+					 * There are several ways this could happen, e.g. using iteration expressions.
+					 * These could be removed from list before sorting, but this way is simpler. */ 
+					n.revertToBindingExp();
+					n_indep++;
+				} else {
+					// Insert n into L
+					L.add(n);
+				}
+				// For each node m with an edge e from n to m (in original order)
+				Set<FAbstractEquation> nodes = FAbstractEquation.sortingSet();
+				nodes.addAll(toNodes.get(n.sortingIndex));
+				for (FAbstractEquation m : nodes) {
+					// Remove edge e from fromNodes
+					fromNodes.get(m.sortingIndex).remove(n);
+					// If m has no incoming edges add m to S
+					if (fromNodes.get(m.sortingIndex).isEmpty()) 
+						S.add(m);
+				}
+				// Remove e from toNodes
+				toNodes.get(n.sortingIndex).clear();
+				// Done with n - update sortingIndex
+				n.sortingIndex = si++;
 			}
-		}	
-				
-		// Sort using algorithm described at
-		// http://en.wikipedia.org/wiki/Topological_sorting
-		List<FAbstractEquation> L = new List<FAbstractEquation>();
-		Queue<FAbstractEquation> S = 
-			new java.util.concurrent.ArrayBlockingQueue<FAbstractEquation>(n_eqns);
-		
-		// Add all nodes without incoming edges to S
-		for (int i = 0; i < n_eqns; i++) 
-			if (fromNodes.get(i).isEmpty()) 
-				S.add(eqns.get(i));
-		
-		// Repeat while S is not empty
-		int si = 0;
-		int n_indep = 0;
-		while (S.size() > 0) {
-			// Remove a node n from S
-			FAbstractEquation n = S.remove();
-			// Take care of n
-			if (n.isIndependentParameterEquation()) {
-				/* This equation should be the binding expression of an independent parameter.
-				 * There are several ways this could happen, e.g. using iteration expressions.
-				 * These could be removed from list before sorting, but this way is simpler. */ 
-				n.revertToBindingExp();
-				n_indep++;
+			
+			// Not possible to find an ordering without cycles?
+			if (L.getNumChild() != eqns.size() - n_indep) {
+				cyclicParameters = true;
 			} else {
-				// Insert n into L
-				L.add(n);
-			}
-			// For each node m with an edge e from n to m (in original order)
-			Set<FAbstractEquation> nodes = FAbstractEquation.sortingSet();
-			nodes.addAll(toNodes.get(n.sortingIndex));
-			for (FAbstractEquation m : nodes) {
-				// Remove edge e from fromNodes
-				fromNodes.get(m.sortingIndex).remove(n);
-				// If m has no incoming edges add m to S
-				if (fromNodes.get(m.sortingIndex).isEmpty()) 
-					S.add(m);
-			}
-			// Remove e from toNodes
-			toNodes.get(n.sortingIndex).clear();
-			// Done with n - update sortingIndex
-			n.sortingIndex = si++;
-		}
+			
+				// Replace old parameter equation list
+				setFParameterEquationList(L);
+				
+				// Rearrange parameters in same order as parameter equations
+				ArrayList<FVariable> depParams = new ArrayList<FVariable>(n_eqns);
+				ArrayList<Integer> depParamIndices = new ArrayList<Integer>(n_eqns);
+				for (int i = 0; i < n_vars; i++) {
+					FVariable fv = vars.getChild(i);
+					if (fv.hasParameterEquation()) {
+						depParams.add(fv);
+						depParamIndices.add(new Integer(i));
+					}
+				}
+				FVariable.sortParameters(depParams);
+				for (int i = 0; i < depParams.size(); i++)
+					vars.setChild(depParams.get(i), depParamIndices.get(i).intValue());
 		
-		// Not possible to find an ordering without cycles?
-		if (L.getNumChild() != eqns.size() - n_indep) {
-			cyclicParameters = true;
-			return;
-		}
-		
-		// Replace old parameter equation list
-		setFParameterEquationList(L);
-		
-		// Rearrange parameters in same order as parameter equations
-		ArrayList<FVariable> depParams = new ArrayList<FVariable>(n_eqns);
-		ArrayList<Integer> depParamIndices = new ArrayList<Integer>(n_eqns);
-		for (int i = 0; i < n_vars; i++) {
-			FVariable fv = vars.getChild(i);
-			if (fv.hasParameterEquation()) {
-				depParams.add(fv);
-				depParamIndices.add(new Integer(i));
+				// Flush AST since the structure has changed.
+				flush();
+				
+				// Remove any binding expressions of variables with parameter equations
+				for (FAbstractEquation eqn : L)
+					eqn.removeBindingExpOfAssignedVars();
 			}
 		}
-		FVariable.sortParameters(depParams);
-		for (int i = 0; i < depParams.size(); i++)
-			vars.setChild(depParams.get(i), depParamIndices.get(i).intValue());
 
-		// Flush AST since the structure has changed.
-		flush();
-		
-		// Remove any binding expressions of variables with parameter equations
-		for (FAbstractEquation eqn : L)
-			eqn.removeBindingExpOfAssignedVars();
-	}
+		endStep("sortDependentParameters()");
+}
 	
 	/**
 	 * Remove binding expression of variables assigned in this equation.
@@ -3893,8 +3932,10 @@ aspect FunctionInlining {
 	 * Inline all function calls that we can.
 	 */
 	public void FClass.inlineFunctions() {
+		beginStep("inlineFunctions()");
 		new FunctionInliner(this).inline();
 		flushAllRecursive();
+		endStep("inlineFunctions()");
 	}
 	
 	/**
@@ -4895,6 +4936,7 @@ aspect FunctionInlining {
 	 * Remove unused function declarations from the flat model.
 	 */
 	public void FClass.removeUnusedFunctions() {
+		beginStep("removeUnusedFunctions()");
 		getFVariables().markUsedFunctions();
 		getFInitialEquations().markUsedFunctions();
 		getFParameterEquations().markUsedFunctions();
@@ -4904,6 +4946,7 @@ aspect FunctionInlining {
 			if (func.functionIsUsed())
 				funcs.add(func);
 		setFFunctionDeclList(funcs);
+		endStep("removeUnusedFunctions()");
 	}
 	
 	private boolean FFunctionDecl.functionUsed = false;
@@ -4939,7 +4982,8 @@ aspect StateInitialEquations {
 	
 	public void FClass.addStateInitialEquationsIfSet() {
 		if (root().options.getBooleanOption("state_initial_equations")) {
-		
+			beginStep("addStateInitialEquationsIfSet()");
+			
 			setFInitialEquationList(new List());
 			
 			for (FRealVariable fv : differentiatedRealVariables()) {
@@ -4960,6 +5004,7 @@ aspect StateInitialEquations {
 				 flushAllRecursive();               
 			}
 		
+			endStep("addStateInitialEquationsIfSet()");
 		}
 	}
 	

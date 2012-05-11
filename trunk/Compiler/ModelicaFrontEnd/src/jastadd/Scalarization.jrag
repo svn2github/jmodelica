@@ -40,6 +40,7 @@ aspect Scalarization {
 	 * \brief Scalarize all variables and equations in the flat model.
 	 */
 	public void FClass.scalarize() {
+		beginStep("scalarize()");
 		List<FVariable> vars = new List<FVariable>();
 		List<FVariable> alias_vars = new List<FVariable>();
 		scalarizeVars(vars, alias_vars);
@@ -48,6 +49,7 @@ aspect Scalarization {
 		scalarizeFuncs();
 		scalarized = true;
 		scalarizationCleanup();
+		endStep("scalarize()");
 	}
 	
 	/**

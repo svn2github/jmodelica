@@ -2458,7 +2458,7 @@ aspect GeneralHelpers {
 	 * 
 	 * @param mem  size to format, in bytes. May be negative.
 	 */
-	public static String ASTNode.formatMem(int mem) {
+	public static String ASTNode.formatMem(long mem) {
 		int i = 0;
 		double scaledMem = Math.abs(mem);
 		for (; i < 4 && scaledMem >= 1000.0; i++)
@@ -2474,6 +2474,7 @@ aspect GeneralHelpers {
 		return buf.toString();
 	}
 	
-	private static final String[] ASTNode.memUnits = { " B", " kB", " MB", " GB", " TB" };
+	private static final String[] ASTNode.memUnits = { 
+		" B", " kB", " MB", " GB", " TB" , " PB" , " EB" };
 	
 }
