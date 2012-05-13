@@ -520,6 +520,22 @@ aspect OptimicaFlatAPI {
 	to FOptClass.geqConstraints() for myFClass();	
 
 	/**
+	 * \brief Get the number of path constraints.
+	 */
+    syn int FOptClass.numPathConstraints() = pathConstraints().size();
+
+	/**
+	 * \brief Get a list of path constraints.
+	 */
+    syn lazy ArrayList<FConstraint> FOptClass.pathConstraints() {
+    	ArrayList<FConstraint> list = new ArrayList<FConstraint>();
+		list.addAll(pathEqConstraints());
+		list.addAll(pathLeqConstraints());
+		list.addAll(pathGeqConstraints());
+    	return list;
+    }
+
+	/**
 	 * \brief Get the number of equality path constraints.
 	 */
     syn int FOptClass.numPathEqConstraints() = pathEqConstraints().size();
@@ -570,6 +586,22 @@ aspect OptimicaFlatAPI {
     			list.add((FConstraintGeq)c);
     		}
     	}
+    	return list;
+    }
+
+	/**
+	 * \brief Get the number of point constraints.
+	 */
+    syn int FOptClass.numPointConstraints() = pointConstraints().size();
+
+	/**
+	 * \brief Get a list of point constraints.
+	 */
+    syn lazy ArrayList<FConstraint> FOptClass.pointConstraints() {
+    	ArrayList<FConstraint> list = new ArrayList<FConstraint>();
+		list.addAll(pointEqConstraints());
+		list.addAll(pointLeqConstraints());
+		list.addAll(pointGeqConstraints());
     	return list;
     }
 

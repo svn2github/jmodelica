@@ -77,7 +77,16 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 						</xs:sequence>
 					</xs:complexType>
 				</xs:element>
-				<xs:element name="Constraints">
+				<xs:element name="PathConstraints">
+					<xs:complexType>
+						<xs:choice minOccurs="0" maxOccurs="unbounded">
+							<xs:element name="ConstraintEq" type="opt:Constraint"/>
+							<xs:element name="ConstraintGeq" type="opt:Constraint"/>
+							<xs:element name="ConstraintLeq" type="opt:Constraint"/>
+						</xs:choice>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="PointConstraints">
 					<xs:complexType>
 						<xs:choice minOccurs="0" maxOccurs="unbounded">
 							<xs:element name="ConstraintEq" type="opt:Constraint"/>

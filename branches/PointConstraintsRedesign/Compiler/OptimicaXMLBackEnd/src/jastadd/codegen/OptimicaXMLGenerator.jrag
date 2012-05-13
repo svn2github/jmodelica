@@ -169,10 +169,14 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 			
 			if(generateEqu){
 				//Constraints
-				genPrinter.println(indent+"<opt:Constraints>");
-				for(FConstraint c : optClass.constraints())
+				genPrinter.println(indent+"<opt:PathConstraints>");
+				for(FConstraint c : optClass.pathConstraints())
 					c.prettyPrint_XML(genPrinter,indent+"\t");	
-				genPrinter.println(indent+"</opt:Constraints>");
+				genPrinter.println(indent+"</opt:PathConstraints>");
+				genPrinter.println(indent+"<opt:PointConstraints>");
+				for(FConstraint c : optClass.pointConstraints())
+					c.prettyPrint_XML(genPrinter,indent+"\t");	
+				genPrinter.println(indent+"</opt:PointConstraints>");
 			}
 			genPrinter.println("\t</opt:Optimization>");
 		}
