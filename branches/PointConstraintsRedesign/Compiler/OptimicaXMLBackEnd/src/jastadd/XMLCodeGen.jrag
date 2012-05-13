@@ -26,15 +26,11 @@ aspect XMLCodeGen_Optimica {
 		FIdUse iduse = this.getName();
 		FExp arg = this.getArg();
 		
-		str.println(indent + "<" + namespace + ":" + tag + ">");
+		str.print(indent + "<" + namespace + ":" + tag);
+		str.println(" timePointIndex = \"" + myFOptClass().timePointIndex(arg.ceval().realValue()) + "\" >");
 		
 		//Identifier	
 		iduse.prettyPrint_XML(str,p.indent(indent));
-		
-		//Expression argument
-		str.print(indent+"\t<" + namespace + ":" + tagExp + ">");		
-		str.print(arg.ceval().realValue());
-		str.println("</" + namespace + ":" + tagExp + ">");
 		
 		str.println(indent + "</"+ namespace + ":" + tag + ">");	
 	}

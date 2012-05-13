@@ -217,11 +217,16 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	
 	//XML code generatorio for the time points
 	private void timePoints_XML(PrintStream genPrinter, FOptClass optClass, String indent){
+		
 		double[] points = optClass.timePoints();
 		
 		for(int i=0;i<points.length;i++) {
-			genPrinter.println(indent + "<opt:Index>" + optClass.timePointIndex(points[i]) + "</opt:Index>");
-			genPrinter.println(indent + "<opt:Value>" + points[i] + "</opt:Value>");
+			genPrinter.println(indent + "<opt:TimePoint index = \"" + optClass.timePointIndex(points[i]) + 
+			                 "\" value = \"" + points[i] + "\">");
+			for (FVariable fv : optClass.timePointFVariables(points[i])) {
+				fv.getFQName().prettyPrint_XML(genPrinter,indent+"\t");
+			}                 
+			genPrinter.println(indent + "</opt:TimePoint>");              
 		}
 	}
 	

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2010 (http://www.altova.com) by Magnus Gäfvert (Modelon AB) -->
+<!-- edited with XMLSpy v2008 rel. 2 (http://www.altova.com) by Magnus Gäfvert (Modelon AB) -->
 <xs:schema xmlns:opt="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<xs:redefine schemaLocation="daeExpressions.xsd"/>
 	<xs:annotation>
@@ -48,8 +48,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		</xs:annotation>
 		<xs:sequence>
 			<xs:element name="Identifier" type="opt:QualifiedName"/>
-			<xs:element name="Instant" type="xs:float"/>
 		</xs:sequence>
+		<xs:attribute name="timePointIndex" type="xs:integer" use="required"/>
 	</xs:complexType>
 	<xs:element name="TimedVariable" type="opt:TimedVariable">
 		<xs:annotation>

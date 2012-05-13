@@ -743,6 +743,18 @@ aspect OptimicaFlatAPI {
 		return -1;
 	}
 	
+	syn lazy ArrayList<FVariable> FOptClass.timePointFVariables(double t) {
+		HashSet<FVariable> s = new HashSet<FVariable>();
+		for (FTimedVariable tp : timedVariables()) {
+			if (tp.getArg().ceval().realValue() == t) {
+				s.add((FVariable)tp.getName().myFV());	
+			}
+		}
+		ArrayList<FVariable> l = new  ArrayList<FVariable>();
+		l.addAll(s);
+		return l;
+	}
+	
 	inh FOptClass AbstractFVariable.myFOptClass();
 	inh FOptClass FExp.myFOptClass();
 	inh FOptClass FIdUse.myFOptClass();
