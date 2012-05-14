@@ -51,8 +51,8 @@
     <section xml:id="inst_sec_prereq_python">
       <title>Python</title>
 
-      <para>Python 2.7 with the following additional packages are
-      required.</para>
+      <para>Python 2.7 (including development headers) with the following
+      additional packages are required.</para>
 
       <para><emphasis role="bold">Install Python 2.7</emphasis></para>
 
