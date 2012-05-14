@@ -1427,6 +1427,7 @@ public class ModelicaCompiler {
 	 *             If either of the three template files can not be found.
 	 */
 	public void generateCode(FClass fc) throws FileNotFoundException {
+		ASTNode.beginStep("generateCode()");
 		log.info("Generating code...");
 		String name = fc.nameUnderscore();
 		
@@ -1439,6 +1440,7 @@ public class ModelicaCompiler {
 		
 		hookCodeGenerated(outDir);
 		log.debug("... code generated.");
+		ASTNode.endStep("generateCode()");
 	}
 	
 	/**

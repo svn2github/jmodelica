@@ -90,7 +90,8 @@ aspect LightProfiling {
 			if (name == null)
 				throw new IllegalArgumentException("Must give a name");
 			if (!top.name.equals(name))
-				throw new IllegalArgumentException("Name does not match last opened step");
+				throw new IllegalArgumentException("Name does not match last opened step: " + 
+						name + ", last: " + top.name);
 			top.end();
 			open.remove(open.size() - 1);
 			top = open.get(open.size() -1);
@@ -129,7 +130,7 @@ aspect LightProfiling {
 			String fmt = buf.toString();
 			
 			for (String[] line : lines) 
-				ASTNode.log.debug(String.format(fmt, line));
+				ASTNode.log.error(String.format(fmt, (Object[]) line));
 		}
 		
 		
