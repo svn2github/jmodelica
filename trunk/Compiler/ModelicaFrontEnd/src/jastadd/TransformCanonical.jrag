@@ -2749,6 +2749,7 @@ aspect TransformCanonical {
 			genAlias();
 			eliminateAliasVariables();
 			removeUnusedTemporaries();
+			mergeEquivalentRecords();
 			endStep("aliasEliminationIfSet()");
 		}
 	}
@@ -3069,6 +3070,123 @@ aspect TransformCanonical {
 
 	syn boolean FVariable.shouldEliminateTemporary() = 
 		isConstant() && isTemporary() && uses().isEmpty();
+	
+	/**
+	 * Remove records that are equivalent, and update uses. 
+	 */
+	public void FClass.mergeEquivalentRecords() {
+		computeEquivalentRecords();
+		activateEquivalentRecordUseRewrite();
+		List<FRecordDecl> list = new List<FRecordDecl>();
+		for (FRecordDecl rec : getFRecordDecls())
+			if (rec.equivalentRecordToKeep)
+				list.add(rec);
+		setFRecordDeclList(list);
+	}
+	
+	public void FClass.computeEquivalentRecords() {
+		ArrayList<FType> distinctTypes = new ArrayList<FType>();
+		ArrayList<FRecordDecl> keptDecl = new ArrayList<FRecordDecl>();
+		for (FRecordDecl rec : getFRecordDecls()) {
+			boolean found = false;
+			FType type = rec.type();
+			for (int i = 0; !found && i < distinctTypes.size(); i++) {
+				if (type.typeCompatible(distinctTypes.get(i))) {
+					found = true;
+					rec.equivalentRecordGroup = i;
+					if (rec.name().compareTo(keptDecl.get(i).name()) < 0) {
+						keptDecl.get(i).equivalentRecordToKeep = false;
+						rec.equivalentRecordToKeep = true;
+						keptDecl.set(i, rec);
+					}
+				}
+			}
+			if (!found) {
+				rec.equivalentRecordToKeep = true;
+				rec.equivalentRecordGroup = distinctTypes.size();
+				distinctTypes.add(type);
+				keptDecl.add(rec);
+			}
+		}
+		equivalentRecordMap = new HashMap<String,FRecordDecl>();
+		for (FRecordDecl rec : getFRecordDecls())
+			equivalentRecordMap.put(rec.name(), keptDecl.get(rec.equivalentRecordGroup));
+	}
+	
+	protected Map<String,FRecordDecl> FClass.equivalentRecordMap;
+	
+	public boolean FRecordDecl.equivalentRecordToKeep = false;
+	public int FRecordDecl.equivalentRecordGroup = -1;
+	
+	public void ASTNode.activateEquivalentRecordUseRewrite() {
+		for (ASTNode n : this)
+			n.activateEquivalentRecordUseRewrite();
+	}
+	
+	public void FFunctionVariable.activateEquivalentRecordUseRewrite() {
+		super.activateEquivalentRecordUseRewrite();
+		if (type().isRecord()) {
+			rewriteEquivalentRecord = true;
+			is$Final = false;
+		}
+	}
+	
+	public void FRecordVariable.activateEquivalentRecordUseRewrite() {
+		super.activateEquivalentRecordUseRewrite();
+		rewriteEquivalentRecord = true;
+		is$Final = false;
+	}
+	
+	public void FRecordConstructor.activateEquivalentRecordUseRewrite() {
+		super.activateEquivalentRecordUseRewrite();
+		rewriteEquivalentRecord = true;
+		is$Final = false;
+	}
+	
+	private boolean FFunctionVariable.rewriteEquivalentRecord  = false;
+	private boolean FRecordVariable.rewriteEquivalentRecord    = false;
+	private boolean FRecordConstructor.rewriteEquivalentRecord = false;
+	
+	rewrite FFunctionVariable {
+		when (rewriteEquivalentRecord)
+		to FFunctionVariable {
+			rewriteEquivalentRecord = false;
+			setType(myFClass().createEquivalentRecordType(getType()));
+			flushAll();
+			return this;
+		}
+	}
+	
+	rewrite FRecordVariable {
+		when (rewriteEquivalentRecord)
+		to FRecordVariable {
+			rewriteEquivalentRecord = false;
+			setRecord(myFClass().createEquivalentRecordFQName(getRecord()));
+			flushAll();
+			return this;
+		}
+	}
+	
+	rewrite FRecordConstructor {
+		when (rewriteEquivalentRecord)
+		to FRecordConstructor {
+			rewriteEquivalentRecord = false;
+			getRecord().setFQName(myFClass().createEquivalentRecordFQName(getRecord().getFQName()));
+			getRecord().flushAll();
+			flushAll();
+			return this;
+		}
+	}
+
+	public FQName FClass.createEquivalentRecordFQName(FQName old) {
+		FRecordDecl rec = equivalentRecordMap.get(old.name());
+		return (rec != null) ? rec.getFQName().fullCopy() : old;
+	}
+
+	public FType FClass.createEquivalentRecordType(FType old) {
+		FRecordDecl rec = equivalentRecordMap.get(old.name());
+		return (rec != null) ? rec.type().sizedType(old.size()).fullCopy() : old;
+	}
 	
 }
 
