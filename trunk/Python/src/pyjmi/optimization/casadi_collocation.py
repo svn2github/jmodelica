@@ -51,29 +51,25 @@ class CasadiCollocator(object):
     LOWER = -N.inf
     
     def __init__(self, model):
-        # Store model (casadiModel)
+        # Store model and OCP object
         self.model = model
+        self.ocp = model.get_casadi_ocp()
         
-        # Compute bounds
-        self._compute_bounds_and_init()
+        # Update dependent parameters
+        casadi.updateDependent(self.ocp)
         
-        # Get constraints
-        c_e = self.get_equality_constraint()
-        c_i = self.get_inequality_constraint()
-        c = casadi.vertcat([c_e, c_i])
+        # Get start and final time
+        self.t0 = self.ocp.variable('startTime').getStart()
+        self.tf = self.ocp.variable('finalTime').getStart()
         
-        # Create constraint function
-        self.c_fcn = casadi.SXFunction([self.get_xx()], [c])
-        self.c_fcn.setOption("name", "NLP constraint function")
-        self.c_fcn.init()
-        
-        # Create solver
-        if self.get_hessian() is None:
-            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
-        else:
-            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn,
-                                             self.get_hessian())
-        
+        # Get OCP expressions
+        self.model.update_expressions()
+        self.initial = self.model.initial
+        self.dae = self.model.dae
+        self.path = self.model.path
+        self.mterm = self.model.mterm
+        self.lterm = self.model.lterm
+    
     def get_model(self):
         return self.model
         
@@ -467,121 +463,6 @@ class CasadiCollocator(object):
         self.nlp_opt = N.array(self.solver.output(casadi.NLP_X_OPT))
         sol_time = time.clock() - t0
         return sol_time
-    
-    def _compute_bounds_and_init(self):
-        # Create lower and upper bounds
-        nlp_lb = self.LOWER * N.ones(self.get_n_xx())
-        nlp_ub = self.UPPER * N.ones(self.get_n_xx())
-        nlp_init = N.zeros(self.get_n_xx())
-        
-        md = self.get_model_description()
-
-        _p_opt_max = md.get_p_opt_max(include_alias = False)
-        _dx_max = md.get_dx_max(include_alias = False)
-        _x_max = md.get_x_max(include_alias = False)
-        _u_max = md.get_u_max(include_alias = False)
-        _w_max = md.get_w_max(include_alias = False)
-        _p_opt_min = md.get_p_opt_min(include_alias = False)
-        _dx_min = md.get_dx_min(include_alias = False)
-        _x_min = md.get_x_min(include_alias = False)
-        _u_min = md.get_u_min(include_alias = False)
-        _w_min = md.get_w_min(include_alias = False)
-        _p_opt_start = md.get_p_opt_initial_guess(include_alias = False)
-        _dx_start = md.get_dx_initial_guess(include_alias = False)
-        _x_start = md.get_x_initial_guess(include_alias = False)
-        _u_start = md.get_u_initial_guess(include_alias = False)
-        _w_start = md.get_w_initial_guess(include_alias = False)
-
-        p_opt_max = self.UPPER*N.ones(len(_p_opt_max))
-        dx_max = self.UPPER*N.ones(len(_dx_max))
-        x_max = self.UPPER*N.ones(len(_x_max))
-        u_max = self.UPPER*N.ones(len(_u_max))
-        w_max = self.UPPER*N.ones(len(_w_max))
-        p_opt_min = self.LOWER*N.ones(len(_p_opt_min))
-        dx_min = self.LOWER*N.ones(len(_dx_min))
-        x_min = self.LOWER*N.ones(len(_x_min))
-        u_min = self.LOWER*N.ones(len(_u_min))
-        w_min = self.LOWER*N.ones(len(_w_min))
-        p_opt_start = self.UPPER*N.ones(len(_p_opt_start))
-        dx_start = self.LOWER*N.ones(len(_dx_start))
-        x_start = self.LOWER*N.ones(len(_x_start))
-        u_start = self.LOWER*N.ones(len(_u_start))
-        w_start = self.LOWER*N.ones(len(_w_start))
-
-        for vr, val in _p_opt_min:
-            if val != None:
-                p_opt_min[self.model.get_p_vr_map()[vr]] = val/self.model.get_p_sf()[self.model.get_p_vr_map()[vr]]
-        for vr, val in _p_opt_max:
-            if val != None:
-                p_opt_max[self.model.get_p_vr_map()[vr]] = val/self.model.get_p_sf()[self.model.get_p_vr_map()[vr]]
-        for vr, val in _p_opt_start:
-            if val != None:
-                p_opt_start[self.model.get_p_vr_map()[vr]] = val/self.model.get_p_sf()[self.model.get_p_vr_map()[vr]]
-
-        for vr, val in _dx_min:
-            if val != None:
-                dx_min[self.model.get_dx_vr_map()[vr]] = val/self.model.get_dx_sf()[self.model.get_dx_vr_map()[vr]]
-        for vr, val in _dx_max:
-            if val != None:
-                dx_max[self.model.get_dx_vr_map()[vr]] = val/self.model.get_dx_sf()[self.model.get_dx_vr_map()[vr]]
-        for vr, val in _dx_start:
-            if val != None:
-                dx_start[self.model.get_dx_vr_map()[vr]] = val/self.model.get_dx_sf()[self.model.get_dx_vr_map()[vr]]
-
-        for vr, val in _x_min:
-            if val != None:
-                x_min[self.model.get_x_vr_map()[vr]] = val/self.model.get_x_sf()[self.model.get_x_vr_map()[vr]]
-        for vr, val in _x_max:
-            if val != None:
-                x_max[self.model.get_x_vr_map()[vr]] = val/self.model.get_x_sf()[self.model.get_x_vr_map()[vr]]
-        for vr, val in _x_start:
-            if val != None:
-                x_start[self.model.get_x_vr_map()[vr]] = val/self.model.get_x_sf()[self.model.get_x_vr_map()[vr]]
-
-        for vr, val in _u_min:
-            if val != None:
-                u_min[self.model.get_u_vr_map()[vr]] = val/self.model.get_u_sf()[self.model.get_u_vr_map()[vr]]
-        for vr, val in _u_max:
-            if val != None:
-                u_max[self.model.get_u_vr_map()[vr]] = val/self.model.get_u_sf()[self.model.get_u_vr_map()[vr]]
-        for vr, val in _u_start:
-            if val != None:
-                u_start[self.model.get_u_vr_map()[vr]] = val/self.model.get_u_sf()[self.model.get_u_vr_map()[vr]]
-
-        for vr, val in _w_min:
-            if val != None:
-                w_min[self.model.get_w_vr_map()[vr]] = val/self.model.get_w_sf()[self.model.get_w_vr_map()[vr]]
-        for vr, val in _w_max:
-            if val != None:
-                w_max[self.model.get_w_vr_map()[vr]] = val/self.model.get_w_sf()[self.model.get_w_vr_map()[vr]]
-        for vr, val in _w_start:
-            if val != None:
-                w_start[self.model.get_w_vr_map()[vr]] = val/self.model.get_w_sf()[self.model.get_w_vr_map()[vr]]
-
-        nlp_lb[self.get_var_indices()['p_opt']] = p_opt_min
-        nlp_ub[self.get_var_indices()['p_opt']] = p_opt_max
-        nlp_init[self.get_var_indices()['p_opt']] = p_opt_start
-        
-        for i in xrange(1, self.n_e + 1):
-            for k in self.get_time_points()[i]:
-                nlp_lb[self.get_var_indices()[i][k]['dx']] = dx_min
-                nlp_ub[self.get_var_indices()[i][k]['dx']] = dx_max
-                nlp_init[self.get_var_indices()[i][k]['dx']] = dx_start
-                nlp_lb[self.get_var_indices()[i][k]['x']] = x_min
-                nlp_ub[self.get_var_indices()[i][k]['x']] = x_max
-                nlp_init[self.get_var_indices()[i][k]['x']] = x_start
-                nlp_lb[self.get_var_indices()[i][k]['u']] = u_min
-                nlp_ub[self.get_var_indices()[i][k]['u']] = u_max
-                nlp_init[self.get_var_indices()[i][k]['u']] = u_start
-                nlp_lb[self.get_var_indices()[i][k]['w']] = w_min
-                nlp_ub[self.get_var_indices()[i][k]['w']] = w_max
-                nlp_init[self.get_var_indices()[i][k]['w']] = w_start
-
-        self.xx_lb = nlp_lb
-        self.xx_ub = nlp_ub
-        self.xx_init = nlp_init
-
-        return (nlp_lb,nlp_ub,nlp_init)
 
 class ParameterEstimationData(object):
     
@@ -739,15 +620,13 @@ class LocalDAECollocator(CasadiCollocator):
     """Solves an optimal control problem using local collocation."""
     
     def __init__(self, model, options):
-        # Store the model
-        self.model = model
-        self.ocp = model.get_casadi_ocp()
+        super(LocalDAECollocator, self).__init__(model)
         
         # Get the options
         self.__dict__.update(options)
         
         # Define element lengths
-        self.horizon = self.ocp.tf - self.ocp.t0
+        self.horizon = self.tf - self.t0
         if self.hs != "free":
             self.h = [N.nan] # Element 0
             if self.hs is None:
@@ -825,7 +704,7 @@ class LocalDAECollocator(CasadiCollocator):
         self.final_mesh_point = False # Final mesh point needed?
         if self.discr == "LG":
             n_xx += (self.n_e - 1) * n_var['x']
-            if (self.model.get_opt_J() is not None or 
+            if (self.ocp.mterm.numel() > 0 or
                 self.result_mode == "mesh_points"):
                 self.final_mesh_point = True
                 n_xx += N.sum(n_var.values())
@@ -1129,9 +1008,9 @@ class LocalDAECollocator(CasadiCollocator):
         h_i = self._collocation['h_i']
         if self.eliminate_der_var:
             coll_der = self._collocation['coll_der']
-            init = casadi.substitute(self.ocp.initial, self.model.dx,
+            init = casadi.substitute(self.initial, self.model.dx,
                                      coll_der)
-            dae = casadi.substitute(self.ocp.dae, self.model.dx, coll_der)
+            dae = casadi.substitute(self.dae, self.model.dx, coll_der)
             
             sym_z = []
             sym_z += list(self.model.p)
@@ -1149,13 +1028,13 @@ class LocalDAECollocator(CasadiCollocator):
                     [x_i, der_vals_k, h_i, dx_i_k],
                     [casadi.sumCols(x_i * der_vals_k) - h_i * dx_i_k])
             coll_eq.init()
-            dae_F = self.model.get_dae_F()
-        init_F0 = self.model.get_init_F0()
+            dae_F = self.model.get_dae_F(False)
+        init_F0 = self.model.get_init_F0(False)
         
         # Create path constraint functions
         g_e = []
         g_i = []
-        path = self.ocp.path
+        path = self.path
         lb = self.ocp.path_min.toArray().reshape(-1)
         ub = self.ocp.path_max.toArray().reshape(-1)
         for i in xrange(path.numel()):
@@ -1220,7 +1099,7 @@ class LocalDAECollocator(CasadiCollocator):
         time = []
         i = 1
         self.time_points[i] = {}
-        t = self.ocp.t0
+        t = self.t0
         self.time_points[i][0] = t
         time.append(t)
         ti = t # Time at start of element
@@ -1245,7 +1124,7 @@ class LocalDAECollocator(CasadiCollocator):
             time.append(t)
         if self.final_mesh_point or self.discr == "LGR":
             if self.hs != "free":
-                assert(N.allclose(time[-1], self.ocp.tf))
+                assert(N.allclose(time[-1], self.tf))
         
         # Create list of state matrices
         x_list = [[]]
@@ -1462,7 +1341,7 @@ class LocalDAECollocator(CasadiCollocator):
             self.cost_lagrange = 0
             
             # Mayer cost
-            J = self.model.get_opt_J()
+            J = self.model.get_opt_J(False)
             if J is not None:
                 if self.discr == "LGR":
                     z = self._get_z_elim_der(self.n_e, self.n_cp)
@@ -1483,7 +1362,7 @@ class LocalDAECollocator(CasadiCollocator):
             
             # Lagrange cost
             if self.eliminate_der_var:
-                L = self.ocp.lterm
+                L = self.lterm
                 sym_z = []
                 sym_z += list(self.model.p)
                 sym_z += list(self.model.x)
@@ -1517,7 +1396,7 @@ class LocalDAECollocator(CasadiCollocator):
                                              self.horizon * self.h[i]])[0] *
                                      self.pol.w[k])
             else:
-                L = self.model.get_opt_L()
+                L = self.model.get_opt_L(False)
                 if L is not None:
                     # Define function evaluation method based on graph
                     if self.graph == "MX" or self.graph == 'expanded_MX':
@@ -2385,13 +2264,13 @@ class PseudoSpectral(CasadiCollocator):
     """
     
     def __init__(self, model, options):
+        super(PseudoSpectral, self).__init__(model)
+        
         #Make problem explicit
         model._convert_to_ode()
         
-        self.model = model
         self.options = options
         self.md  = model.get_model_description()
-        self.ocp = model.get_casadi_ocp()
         
         #Create the necessary vectors for a corresponding set of points
         if options['discr'] == "LG":
@@ -2437,8 +2316,25 @@ class PseudoSpectral(CasadiCollocator):
         self._create_collocation_constraints()
         self._create_bolza_functional()
         
-        # Necessary!
-        super(PseudoSpectral,self).__init__(model)
+        # Compute bounds
+        self._compute_bounds_and_init()
+        
+        # Get constraints
+        c_e = self.get_equality_constraint()
+        c_i = self.get_inequality_constraint()
+        c = casadi.vertcat([c_e, c_i])
+        
+        # Create constraint function
+        self.c_fcn = casadi.SXFunction([self.get_xx()], [c])
+        self.c_fcn.setOption("name", "NLP constraint function")
+        self.c_fcn.init()
+        
+        # Create solver
+        if self.get_hessian() is None:
+            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
+        else:
+            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn,
+                                             self.get_hessian())
         
         self._modify_init()
     
@@ -2483,7 +2379,7 @@ class PseudoSpectral(CasadiCollocator):
             #        xx_ub[self.get_var_indices()[i+1][DISCR[-1]]['t']] = x[2]
             #else:
             for i in PHASE[:-1]:
-                xx_init[self.get_var_indices()[i][DISCR[-1]]['t']] = i*(self.ocp.tf-self.ocp.t0)/len(PHASE)
+                xx_init[self.get_var_indices()[i][DISCR[-1]]['t']] = i*(self.tf-self.t0)/len(PHASE)
                 xx_lb[self.get_var_indices()[i][DISCR[-1]]['t']] = N.array(-1e20)
                 xx_ub[self.get_var_indices()[i][DISCR[-1]]['t']] = N.array(1e20)
         
@@ -2651,7 +2547,7 @@ class PseudoSpectral(CasadiCollocator):
         self.cost_mayer = 0
         self.cost_lagrange = 0
     
-        if self.model.get_opt_J() != None:
+        if self.model.get_opt_J(False) != None:
             # Assume Mayer cost
             z = []
             t = self.vars[PHASE[-1]]['t']
@@ -2663,7 +2559,7 @@ class PseudoSpectral(CasadiCollocator):
         #NOTE TEMPORARY!!!!
         #self.cost_mayer=self.vars[PHASE[-1]]['t']
         # Take care of Lagrange cost
-        if self.model.get_opt_L() != None:
+        if self.model.get_opt_L(False) != None:
             for i in PHASE:
                 for ind,j in enumerate(COLLO):
                     t = (self.vars[i]['t']-self.vars[i-1]['t'])*0.5*(ROOTS[ind]+(self.vars[i]['t']+self.vars[i-1]['t'])/(self.vars[i]['t']-self.vars[i-1]['t']))
@@ -2707,8 +2603,8 @@ class PseudoSpectral(CasadiCollocator):
         # Extended vars
         self.ext_vars = {}
         
-        t0 = self.ocp.t0
-        tf = self.ocp.tf
+        t0 = self.t0
+        tf = self.tf
         
         if self.md.get_opt_finaltime_free():
             tf = casadi.SX("tf")
@@ -2862,19 +2758,28 @@ class PseudoSpectral(CasadiCollocator):
         
         _x_max = md.get_x_max(include_alias = False)
         _u_max = md.get_u_max(include_alias = False)
-        _p_max = [(p.getValueReference(), p.getMax()) for p in ocp.p]
+        _p_max = [(p.getValueReference(), p.getMax()) for p in ocp.p_free]
         _x_min = md.get_x_min(include_alias = False)
         _u_min = md.get_u_min(include_alias = False)
-        _p_min = [(p.getValueReference(), p.getMin()) for p in ocp.p]
+        _p_min = [(p.getValueReference(), p.getMin()) for p in ocp.p_free]
         _x_start = md.get_x_start(include_alias = False)
         #_u_start = md.get_u_start(include_alias = False)
         _u_start = md.get_u_initial_guess(include_alias = False)
         _p_start = []
-        for p in ocp.p: #NOTE SHOULD BE CHANGED
+        for p in ocp.p_free: #NOTE SHOULD BE CHANGED
             for p_ori in md.get_p_opt_initial_guess():
                 if p.getValueReference() == p_ori[0]:
                     _p_start += [p_ori] 
         #_p_start = [(p.getValueReference(), p.getStart()) for p in ocp.p_]
+        
+        # Remove startTime and finalTime from parameters, should be changed
+        i = 0
+        for p in ocp.p_free:
+            if p.getName() == 'startTime' or p.getName() == 'finalTime':
+                del _p_max[i]
+                del _p_min[i]
+                del _p_start[i]
+            i += 1
         
         x_max = self.UPPER*N.ones(len(_x_max))
         u_max = self.UPPER*N.ones(len(_u_max))
@@ -3087,8 +2992,8 @@ class PseudoSpectral(CasadiCollocator):
         if non_fixed_interval:
             # A minimum time problem has been solved,
             # interval is normalized to [-1,1]
-            t0 = self.ocp.t0
-            tf = self.ocp.tf
+            t0 = self.t0
+            tf = self.tf
             dx_factor = tf-t0
             for i in range(N.size(var_data,0)):
                 var_data[i,0] = 2.0*var_data[i,0]/(tf-t0)-(tf+t0)/(tf-t0)
