@@ -136,7 +136,7 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 				"\"");
 
 		if (printData) {
-			stringBuilder.append(">" + data + "</formattingitem>");
+			stringBuilder.append(">" + toString() + "</formattingitem>");
 		} else {
 			stringBuilder.append(" />");
 		}

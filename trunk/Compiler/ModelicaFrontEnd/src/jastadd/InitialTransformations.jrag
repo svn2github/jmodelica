@@ -179,6 +179,7 @@
     	return l;
     }
     
+    // For preserved formatting.
     Composition FullClassDecl.originalComposition;
     
     /**
