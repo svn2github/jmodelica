@@ -438,6 +438,23 @@ aspect AliasVariables {
 			return str.toString();
 		}
 		
+		public String printAliasSetVerbose(LinkedHashSet<AliasVariable> aliasSet) {
+			StringBuilder str = new StringBuilder();
+			//str.append(getIterationVariable(aliasSet).getFVariable().name());
+			//str.append("(" + getIterationVariable(aliasSet).getFVariable().varKind() + ")");
+			//str.append(":");
+			str.append("Alias set: (" + getIterationVariable(aliasSet).getFVariable().name() + ")\n");
+			for (AliasVariable alias : aliasSet) {
+				if (alias.isNegated()) {
+					str.append("-");
+				}
+				str.append(alias.getFVariable().name());
+				str.append(" " + alias.getFVariable().aliasHeuristicScore() + " ");
+				str.append(" " + alias.getFVariable().varKind() + "\n");
+			}
+			return str.toString();
+		}
+		
 		/**
 		 * \brief Print the alias sets.
 		 * 
@@ -563,17 +580,22 @@ aspect AliasVariables {
 			return score;
 		score--;
 		
-		// 3. parameter
+		// 2. parameter
 		if (isParameter())
 			return score;
 		score--;
 		
-		// 2. non-parameter with fixed attribute set to true
+		// 3. non-parameter with fixed attribute set to true
 		if (!isParameter() && fixedAttributeSet() && fixedAttributeExp().ceval().booleanValue())
 			return score;
 		score--;
 				
-		// 4. start attribute set
+		// 4. Variables with StateSelect-information
+		if (isReal() && ((FRealVariable)this).stateSelectAttributeSet()) 
+			return score;
+		score--;		
+				
+		// 5. start attribute set
 		if (startAttributeSet())
 			return score;
 		score--;

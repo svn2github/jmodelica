@@ -335,16 +335,25 @@ model CCodeGenTest13
          description="Code generation for enumerations: variable aliases",
          template="$C_variable_aliases$",
          generatedCode="
-#define _aic_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
-#define _bic_1 ((*(jmi->z))[jmi->offs_integer_ci+1])
-#define _adc_2 ((*(jmi->z))[jmi->offs_integer_ci+2])
-#define _bdc_3 ((*(jmi->z))[jmi->offs_integer_ci+3])
-#define _aip_4 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _bip_5 ((*(jmi->z))[jmi->offs_integer_pi+1])
-#define _adp_6 ((*(jmi->z))[jmi->offs_integer_pd+0])
-#define _bdp_7 ((*(jmi->z))[jmi->offs_integer_pd+1])
-#define _time ((*(jmi->z))[jmi->offs_t])
+#define _ci_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
+#define _cd_1 ((*(jmi->z))[jmi->offs_integer_ci+1])
+#define _aic_4 ((*(jmi->z))[jmi->offs_integer_ci+2])
+#define _bic_5 ((*(jmi->z))[jmi->offs_integer_ci+3])
+#define _adc_6 ((*(jmi->z))[jmi->offs_integer_ci+4])
+#define _bdc_7 ((*(jmi->z))[jmi->offs_integer_ci+5])
+#define _pi_2 ((*(jmi->z))[jmi->offs_integer_pi+0])
+#define _aip_8 ((*(jmi->z))[jmi->offs_integer_pi+1])
+#define _bip_9 ((*(jmi->z))[jmi->offs_integer_pi+2])
+#define _pd_3 ((*(jmi->z))[jmi->offs_integer_pd+0])
+#define _adp_10 ((*(jmi->z))[jmi->offs_integer_pd+1])
+#define _bdp_11 ((*(jmi->z))[jmi->offs_integer_pd+2])
+#define _time ((*(jmi->z))[jmi->offs_t])	 
 ")})));
+
+	constant Integer ci = 1;
+	constant Integer cd = ci;
+	parameter Integer pi = 2;
+	parameter Integer pd = pi;
 
 	type A = enumeration(a, b, c);
 	type B = enumeration(d, e, f);
@@ -4955,11 +4964,12 @@ model StartValues1
          description="",
          template="$C_set_start_values$",
          generatedCode="
-    _x_0 = 1.0;
-    _y_1 = 2.0;
-    _z_2 = 3.0;
-    _q_3 = 0.0;
-    _der_x_4 = 0.0;
+_y_1 = 2.0;
+_z_2 = 3.0;
+model_init_eval_parameters(jmi);
+_x_0 = 1.0;
+_q_3 = 0.0;
+_der_x_4 = 0.0;		 
 ")})));
 
   Real x(start=1);
@@ -4983,6 +4993,7 @@ model StartValues2
     _pr_0 = 1.5;
     _pi_1 = 2;
     _pb_2 = JMI_TRUE;
+	model_init_eval_parameters(jmi);
     _r_3 = 5.5;
     _i_4 = 10;
     _b_5 = JMI_FALSE;
@@ -6597,11 +6608,12 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(jmi_array_t* A_a, jmi_arra
         JMI_ARRAY_DYNAMIC_INIT_1(x_an, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
         x_a = x_an;
     }
+    JMI_ARRAY_DYNAMIC_INIT_2(Awork_a, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(A_a, 0) ), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+    JMI_ARRAY_DYNAMIC_INIT_1(ipiv_a, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_0ie = jmi_array_size(x_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
         jmi_array_ref_1(x_a, i1_0i) = jmi_array_val_1(b_a, i1_0i);
     }
-    JMI_ARRAY_DYNAMIC_INIT_2(Awork_a, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(A_a, 0) ), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_1ie = jmi_array_size(Awork_a, 0) + 1 / 2.0;
     for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
         i2_2ie = jmi_array_size(Awork_a, 1) + 1 / 2.0;
@@ -6609,7 +6621,6 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(jmi_array_t* A_a, jmi_arra
             jmi_array_ref_2(Awork_a, i1_1i, i2_2i) = jmi_array_val_2(A_a, i1_1i, i2_2i);
         }
     }
-    JMI_ARRAY_DYNAMIC_INIT_1(ipiv_a, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     tmp_1 = 1;
     JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(A_a, 0) ), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_2->var);
@@ -6681,6 +6692,8 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def(jmi_array_t* A_a, jmi_array_t*
         JMI_ARRAY_DYNAMIC_INIT_2(X_an, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(B_a, 1) ), jmi_array_size(A_a, 0), jmi_array_size(B_a, 1))
         X_a = X_an;
     }
+    JMI_ARRAY_DYNAMIC_INIT_2(Awork_a, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(A_a, 0) ), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+    JMI_ARRAY_DYNAMIC_INIT_1(ipiv_a, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_0ie = jmi_array_size(X_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
         i2_1ie = jmi_array_size(X_a, 1) + 1 / 2.0;
@@ -6688,7 +6701,6 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def(jmi_array_t* A_a, jmi_array_t*
             jmi_array_ref_2(X_a, i1_0i, i2_1i) = jmi_array_val_2(B_a, i1_0i, i2_1i);
         }
     }
-    JMI_ARRAY_DYNAMIC_INIT_2(Awork_a, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(A_a, 0) ), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_2ie = jmi_array_size(Awork_a, 0) + 1 / 2.0;
     for (i1_2i = 1; i1_2i < i1_2ie; i1_2i += 1) {
         i2_3ie = jmi_array_size(Awork_a, 1) + 1 / 2.0;
@@ -6696,7 +6708,6 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def(jmi_array_t* A_a, jmi_array_t*
             jmi_array_ref_2(Awork_a, i1_2i, i2_3i) = jmi_array_val_2(A_a, i1_2i, i2_3i);
         }
     }
-    JMI_ARRAY_DYNAMIC_INIT_1(ipiv_a, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(A_a, 0) ), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_1->var);
     JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))

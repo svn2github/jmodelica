@@ -40,6 +40,7 @@ aspect Flattening {
     }
     
     public void InstClassDecl.flattenInstClassDecl(FClass fc) {
+    	beginStep("flatten()");
 		fc.setFQName(new FQName(qualifiedName()));
 		fc.addFEquationBlock(new FEquationBlock(new List()));			
 		FQName prefix = getFQName();
@@ -60,6 +61,7 @@ aspect Flattening {
 			log.error("Flat model contains InstAccesses!");
 			//return null;
 		}
+    	endStep("flatten()");
     }
 
     /**
@@ -151,6 +153,10 @@ aspect Flattening {
 			ffd.setFAlgorithmBlock(fab);
 			
 			AnnotationNode functionDer = annotation("derivative");
+			
+			if (!functionDer.exists() && ie != null) {
+				functionDer = ie.annotation("derivative");	
+			}
 			
 			if (functionDer.exists()) {
 				String functionDerName = functionDer.string();
@@ -1443,13 +1449,17 @@ aspect FlatExpressions {
 		return new FUnknownSizeExp(null, getDim());
 	}
 	
-	public FDerExp InstDerExp.flatten(FQName prefix) {
-		/* This should only ever be called on InstDerExps that has an FInstAccessExp 
-		 * as its FExp. All more complex "der()" expressions should have been either 
-		 * rewritten in the instance tree or have generated an error during checks. 
-		 */
-		FQName var = ((FInstAccessExp) getFExp()).getInstAccess().flatten(prefix);
-		return new FDerExp(new FIdUse(var));
+	public FExp InstDerExp.flatten(FQName prefix) {
+		return getFExp().flattenDer(prefix, order());
+	}
+	
+	public FExp FExp.flattenDer(FQName prefix, int order) {
+		return diff(TIME, order).flatten(prefix);
+	}
+	
+	public FDerExp FInstAccessExp.flattenDer(FQName prefix, int order) {
+		FIdUse use = new FIdUse(getInstAccess().flatten(prefix));
+		return (order == 1) ? new FDerExp(use) : new FHDerExp(use, order);
 	}
 	
 	public FInfArgsFunctionCall FInfArgsFunctionCall.flatten(FQName prefix) {

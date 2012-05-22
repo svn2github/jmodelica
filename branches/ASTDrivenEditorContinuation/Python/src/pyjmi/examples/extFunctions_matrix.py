@@ -40,14 +40,13 @@ def run_demo(with_plots=True):
     b2_2 = res['b_out[2,2]']
     t = res['time']
 
-    assert N.abs(b1_1[-1] - 1) < 1e-6, \
-           "Wrong value in simulation result in extFunctions_matrix.py" 
-    assert N.abs(b1_2[-1] - 3) < 1e-6, \
-           "Wrong value in simulation result in extFunctions_matrix.py" 
-    assert N.abs(b2_1[-1] - 2) < 1e-6, \
-           "Wrong value in simulation result in extFunctions_matrix.py" 
-    assert N.abs(b2_2[-1] - 4) < 1e-6, \
-           "Wrong value in simulation result in extFunctions_matrix.py" 
+    assert N.abs(b1_1[-1] - 1) < 1e-6
+     
+    assert N.abs(b1_2[-1] - 3) < 1e-6
+     
+    assert N.abs(b2_1[-1] - 2) < 1e-6
+     
+    assert N.abs(b2_2[-1] - 4) < 1e-6 
            
     if with_plots:
         fig = p.figure()

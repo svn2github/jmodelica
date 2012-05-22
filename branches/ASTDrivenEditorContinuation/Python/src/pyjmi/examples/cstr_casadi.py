@@ -28,7 +28,7 @@ from pyjmi import CasadiModel
 
 def run_demo(with_plots=True):
     """
-    Demonstrate how to optimize a CSTR using CasadiRadau2.
+    Demonstrate how to optimize a CSTR using LocalDAECollocationAlg.
     """
     # Compile and load model
     curr_dir = os.path.dirname(os.path.abspath(__file__));

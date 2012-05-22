@@ -1452,6 +1452,12 @@ aspect FlattPrettyPrint {
 		p.print(getFExp(),str,indent);
 		str.print(")");
 	}
+	
+	public void InstHDerExp.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print("der(");
+		p.print(getFExp(),str,indent);
+		str.format(",%d)", getOrder());
+	}
 
 	public void FSumExp.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print("sum(");

@@ -3966,10 +3966,11 @@ equation
   input Real[:] a1;
   output Real x1;
   Real[:] b1;
-  Real[size(a1, 1)] temp_1;
+  Real[:] temp_1;
   Real temp_2;
  algorithm
   size(b1) := {size(a1, 1)};
+  size(temp_1) := {size(a1, 1)};
   for i1 in 1:size(b1, 1) loop
    (temp_1) := FunctionTests.ArrayOutputScalarization18.f2(a1);
    b1[i1] := temp_1[i1];
@@ -4028,8 +4029,9 @@ equation
   input Real[:] a1;
   output Real x1;
   Real[2] b1;
-  Real[size(a1, 1)] temp_1;
+  Real[:] temp_1;
  algorithm
+  size(temp_1) := {size(a1, 1)};
   for i1 in 1:size(b1, 1) loop
    (temp_1) := FunctionTests.ArrayOutputScalarization19.f2(a1);
    b1[i1] := temp_1[i1];
@@ -6625,6 +6627,115 @@ end FunctionTests.VectorizedCall5;
 	R[2] w = {R(1,2), R(3,4)};
     Real z[2] = f(w);
 end VectorizedCall5;
+
+
+model Lapack1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="Lapack1",
+         description="Test scalarization of LAPACK function that has had some issues",
+         flatModel="
+fclass FunctionTests.Lapack1
+ Real A[1,1];
+ Real A[1,2];
+ Real A[2,1];
+ Real A[2,2];
+ Real QR[1,1];
+ Real QR[1,2];
+ Real QR[2,1];
+ Real QR[2,2];
+ Real tau[1];
+ Real tau[2];
+equation
+ ({{QR[1,1],QR[1,2]},{QR[2,1],QR[2,2]}}, {tau[1],tau[2]}, ) = Modelica.Math.Matrices.LAPACK.dgeqpf({{A[1,1],A[1,2]},{A[2,1],A[2,2]}});
+ A[1,1] = 1;
+ A[1,2] = 2;
+ A[2,1] = 3;
+ A[2,2] = 4;
+
+ function Modelica.Math.Matrices.LAPACK.dgeqpf
+  input Real[:, :] A;
+  output Real[size(A, 1), size(A, 2)] QR;
+  output Real[min(size(A, 1), size(A, 2))] tau;
+  output Integer[size(A, 2)] p;
+  Integer info;
+  Integer ncol;
+  Real[:] work;
+ algorithm
+  ncol := size(A, 2);
+  size(work) := {( 3 ) * ( ncol )};
+  for i1 in 1:size(QR, 1) loop
+   for i2 in 1:size(QR, 2) loop
+    QR[i1,i2] := A[i1,i2];
+   end for;
+  end for;
+  for i1 in 1:size(p, 1) loop
+   p[i1] := 0;
+  end for;
+  external \"FORTRAN 77\" dgeqpf(size(A, 1), ncol, QR, size(A, 1), p, tau, work, info);
+  return;
+ end Modelica.Math.Matrices.LAPACK.dgeqpf;
+end FunctionTests.Lapack1;
+")})));
+
+  Real A[2,2] = {{1,2},{3,4}};
+  Real QR[2,2];
+  Real tau[2];
+equation 
+  (QR,tau,) = Modelica.Math.Matrices.LAPACK.dgeqpf(A);
+end Lapack1;
+
+
+model BindingSort1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="BindingSort1",
+         description="Test sorting of binding expressions",
+         flatModel="
+fclass FunctionTests.BindingSort1
+ Real x;
+ Real y;
+equation
+ x = FunctionTests.BindingSort1.f(y);
+ y = 1;
+
+ function FunctionTests.BindingSort1.f
+  input Real x;
+  output Real y;
+  Real a;
+  Real b;
+  Real c;
+  Real d;
+  Real e;
+ algorithm
+  e := x + 1;
+  d := e + 1;
+  c := x + d;
+  b := c + d;
+  a := b + e;
+  y := a + 1;
+  y := y + x;
+  return;
+ end FunctionTests.BindingSort1.f;
+end FunctionTests.BindingSort1;
+")})));
+
+	function f
+		input Real x;
+		output Real y = a + 1;
+	protected
+        Real a = b + e;
+	    Real b = c + d;
+	    Real c = x + d;
+	    Real d = e + 1;
+	    Real e = x + 1;
+	algorithm
+		y := y + x;
+	end f;
+	
+	Real x = f(y);
+	Real y = 1;
+end BindingSort1;
 
 
 end FunctionTests;

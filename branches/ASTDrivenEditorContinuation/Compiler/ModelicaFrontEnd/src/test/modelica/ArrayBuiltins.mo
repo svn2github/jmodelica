@@ -2254,4 +2254,204 @@ end ArrayBuiltins.VectorizedAbsTest;
 end VectorizedAbsTest;
 
 
+model VectorizedSmoothTest
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="VectorizedSmoothTest",
+         description="",
+         flatModel="
+fclass ArrayBuiltins.VectorizedSmoothTest
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+ y[1] = smooth(2, x[1]);
+ y[2] = smooth(2, x[2]);
+ y[3] = smooth(2, x[3]);
+end ArrayBuiltins.VectorizedSmoothTest;
+")})));
+
+    Real x[3] = {1,2,3};
+    Real y[3] = smooth(2, x);
+end VectorizedSmoothTest;
+
+
+
+model NonVectorizedSalarization1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="NonVectorizedSalarization1",
+         description="Test of accesses that should be kept without indices during scalarization",
+         flatModel="
+fclass ArrayBuiltins.NonVectorizedSalarization1
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+ ({y[1],y[2],y[3]}) = ArrayBuiltins.NonVectorizedSalarization1.f1({x[1],x[2],x[3]});
+
+ function ArrayBuiltins.NonVectorizedSalarization1.f1
+  input Real[3] x1;
+  output Real[3] y1;
+ algorithm
+  y1[1] := ( ArrayBuiltins.NonVectorizedSalarization1.f2(x1) ) * ( x1[1] );
+  y1[2] := ( ArrayBuiltins.NonVectorizedSalarization1.f2(x1) ) * ( x1[2] );
+  y1[3] := ( ArrayBuiltins.NonVectorizedSalarization1.f2(x1) ) * ( x1[3] );
+  return;
+ end ArrayBuiltins.NonVectorizedSalarization1.f1;
+
+ function ArrayBuiltins.NonVectorizedSalarization1.f2
+  input Real[3] x2;
+  output Real y2;
+ algorithm
+  y2 := x2[1] + x2[2] + x2[3];
+  return;
+ end ArrayBuiltins.NonVectorizedSalarization1.f2;
+end ArrayBuiltins.NonVectorizedSalarization1;
+")})));
+
+    function f1
+        input Real x1[3];
+        output Real y1[3];
+    algorithm
+        y1 := f2(x1) * x1;
+    end f1;
+    
+    function f2
+        input Real x2[3];
+        output Real y2;
+    algorithm
+        y2 := sum(x2);
+    end f2;
+    
+    Real x[3] = {1,2,3};
+    Real y[3] = f1(x);
+end NonVectorizedSalarization1;
+
+
+model NonVectorizedSalarization2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="NonVectorizedSalarization2",
+         description="Test of accesses that should be kept without indices during scalarization",
+         flatModel="
+fclass ArrayBuiltins.NonVectorizedSalarization2
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+ ({y[1],y[2],y[3]}) = ArrayBuiltins.NonVectorizedSalarization2.f1({x[1],x[2],x[3]});
+
+ function ArrayBuiltins.NonVectorizedSalarization2.f1
+  input Real[:] x1;
+  output Real[size(x1, 1)] y1;
+ algorithm
+  for i1 in 1:size(y1, 1) loop
+   y1[i1] := ( ArrayBuiltins.NonVectorizedSalarization2.f2(x1) ) * ( x1[i1] );
+  end for;
+  return;
+ end ArrayBuiltins.NonVectorizedSalarization2.f1;
+
+ function ArrayBuiltins.NonVectorizedSalarization2.f2
+  input Real[:] x2;
+  output Real y2;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(x2, 1) loop
+   temp_1 := temp_1 + x2[i1];
+  end for;
+  y2 := temp_1;
+  return;
+ end ArrayBuiltins.NonVectorizedSalarization2.f2;
+end ArrayBuiltins.NonVectorizedSalarization2;
+")})));
+
+    function f1
+        input Real x1[:];
+        output Real y1[size(x1,1)];
+    algorithm
+        y1 := f2(x1) * x1;
+    end f1;
+    
+    function f2
+        input Real x2[:];
+        output Real y2;
+    algorithm
+        y2 := sum(x2);
+    end f2;
+    
+    Real x[3] = {1,2,3};
+    Real y[3] = f1(x);
+end NonVectorizedSalarization2;
+
+
+model NonVectorizedSalarization3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="NonVectorizedSalarization3",
+         description="Test of accesses that should be kept without indices during scalarization",
+         flatModel="
+fclass ArrayBuiltins.NonVectorizedSalarization3
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+ ({y[1],y[2],y[3]}) = Modelica.Math.Vectors.normalize({x[1],x[2],x[3]}, ( 100 ) * ( 1.0E-15 ));
+
+ function Modelica.Math.Vectors.normalize
+  input Real[:] v;
+  input Real eps;
+  output Real[size(v, 1)] result;
+ algorithm
+  for i1 in 1:size(result, 1) loop
+   result[i1] := smooth(0, (if Modelica.Math.Vectors.length(v) >= eps then ( v[i1] ) / ( Modelica.Math.Vectors.length(v) ) else ( v[i1] ) / ( eps )));
+  end for;
+  return;
+ end Modelica.Math.Vectors.normalize;
+
+ function Modelica.Math.Vectors.length
+  input Real[:] v;
+  output Real result;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(v, 1) loop
+   temp_1 := temp_1 + ( v[i1] ) * ( v[i1] );
+  end for;
+  result := sqrt(temp_1);
+  return;
+ end Modelica.Math.Vectors.length;
+end ArrayBuiltins.NonVectorizedSalarization3;
+")})));
+
+    Real x[3] = {1,2,3};
+    Real y[3] = Modelica.Math.Vectors.normalize(x);
+end NonVectorizedSalarization3;
+
+
 end ArrayBuiltins;

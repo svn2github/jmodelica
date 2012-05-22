@@ -40,6 +40,7 @@ aspect Scalarization {
 	 * \brief Scalarize all variables and equations in the flat model.
 	 */
 	public void FClass.scalarize() {
+		beginStep("scalarize()");
 		List<FVariable> vars = new List<FVariable>();
 		List<FVariable> alias_vars = new List<FVariable>();
 		scalarizeVars(vars, alias_vars);
@@ -48,6 +49,7 @@ aspect Scalarization {
 		scalarizeFuncs();
 		scalarized = true;
 		scalarizationCleanup();
+		endStep("scalarize()");
 	}
 	
 	/**
@@ -354,40 +356,7 @@ aspect Scalarization {
 		FFunctionVariable var = (FFunctionVariable) fullCopy();
 		var.getType().updateFUnknownSizeExps(var);
 		var.setBindingExpOpt(new Opt());
-//		if (hasBindingExp() && !isInput())
-//			scalarizeBindingExp(vars, stmts, indexMap);
 		vars.add(var);
-	}
-	
-	/**
-	 * \brief Scalarize the binding expression of this variable and add assignment to list of statements.
-	 * 
-	 * Assumes that the variable has a binding expression.
-	 */
-	public void FFunctionVariable.scalarizeBindingExp(
-			List<FFunctionVariable> vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
-		createArrayTemporaries(stmts, vars, indexMap, true);
-		if (type().isRecord()) 
-			type().scalarizeArrayAssignment(vars, stmts, indexMap, getFQName(), getBindingExp());
-		else
-			stmts.add(new FAssignStmt(new FIdUse(getFQName().fullCopy()), getBindingExp().scalarize(indexMap)));
-	}
-	
-	public void FFunctionArray.scalarizeBindingExp(
-			List<FFunctionVariable> vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
-		if (type().isRecord()) {
-			type().scalarizeArrayAssignment(vars, stmts, indexMap, getFQName(), getBindingExp());
-		} else if (size().isUnknown()) {
-			scalarizeUnknownArrayAssignment(vars, stmts, indexMap, getBindingExp());
-		} else {
-			createArrayTemporaries(stmts, vars, indexMap, true);
-			Array arr = getBindingExp().getArray();
-			for (Index i : arr.indices()) {
-				FExp exp = arr.get(i).scalarize(indexMap);
-				FIdUse id = new FIdUse(getFQName().specify(i, false));
-				stmts.add(new FAssignStmt(id, exp));
-			}
-		}
 	}
 	
 	/**
@@ -919,6 +888,17 @@ aspect Scalarization {
 		return exp;
 	}
 	
+	public void FStatement.scalarizeStmt(List<FFunctionVariable> vars, List<FStatement> stmts, 
+			Map<String,FExp> indexMap) {
+		int n1 = stmts.getNumChild();
+		scalarize(vars, stmts, indexMap);
+		if (shouldBeSorted) {
+			int n2 = stmts.getNumChild();
+			for (int i = n1; i < n2; i++) 
+				stmts.getChild(i).shouldBeSorted = true;
+		}
+	}
+	
 	/**
 	 * \brief Scalarize the statement and put all resulting statements in the
 	 *        list of statements.
@@ -1030,7 +1010,7 @@ aspect Scalarization {
 		for (FFunctionVariable var : getFFunctionVariables())
 			var.scalarize(vars, stmts, emptyIndexMap);
 		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
-			stmt.scalarize(vars, stmts, emptyIndexMap);
+			stmt.scalarizeStmt(vars, stmts, emptyIndexMap);
 		
 		FQName name = (FQName) getFQName().fullCopy();
 	
@@ -1680,10 +1660,15 @@ aspect Scalarization {
     }
 
     public FExp FIdUseExp.scalarizeExp(Map<String,FExp> indexMap) {
-    	if (indexMap.containsKey(name())) 
+    	if (indexMap.containsKey(name()) && !shouldKeepArrayDuringScalarization()) 
     		return indexMap.get(name()).fullCopy();
     	return new FIdUseExp(getFIdUse().scalarize(indexMap));
     }
+    
+    inh boolean FIdUseExp.shouldKeepArrayDuringScalarization();
+    eq BaseNode.getChild().shouldKeepArrayDuringScalarization() = false;
+    eq FFunctionCall.getArg(int i).shouldKeepArrayDuringScalarization() = 
+    	getArg(i).isArray() && myInputs().get(i).ndims() == getArg(i).ndims();
     
 	inh boolean FExp.wantsRecordCon();
 	eq BaseNode.getChild().wantsRecordCon()         = false;

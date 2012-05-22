@@ -52,12 +52,11 @@ def run_demo(with_plots=True):
     dy1p3,dy2p3,dy3p3=res['dy1/dp3'],res['dy2/dp3'],res['dy3/dp3']
     t=res['time']
     
-    assert N.abs(dy1p1[0] - 1.000) < 1e-3, \
-            "Wrong value of dy1p1 in leadtransport.py"
-    assert N.abs(dy1p2[0] - 1.000) < 1e-3, \
-            "Wrong value of dy1p1 in leadtransport.py"  
-    assert N.abs(dy2p2[0] - 1.000) < 1e-3, \
-            "Wrong value of dy1p1 in leadtransport.py"  
+    assert N.abs(dy1p1[0] - 1.000) < 1e-3
+    
+    assert N.abs(dy1p2[0] - 1.000) < 1e-3
+      
+    assert N.abs(dy2p2[0] - 1.000) < 1e-3 
 
     if with_plots:
         # Plot

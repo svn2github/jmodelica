@@ -77,9 +77,9 @@ class Test_init_std:
             compiler_options={'state_start_values_fixed':True})
         model = JMUModel(jmu_name)
         
-        assert (model.get('p1') == 1.0), 'Wrong value of independent parameter p1'
-        assert (model.get('p2') == 2.0), 'Wrong value of dependent parameter p2'
-        assert (model.get('p3') == 6.0), 'Wrong value of dependent parameter p3'
+        assert (model.get('p1') == 1.0)
+        assert (model.get('p2') == 2.0)
+        assert (model.get('p3') == 6.0)
         
         
 class Test_init_ipopt:
@@ -122,22 +122,14 @@ class Test_init_ipopt:
         _dx=res['der(x)']
         ddx=res['der(dx)']
     
-        assert N.abs(theta[-1] - 0.1) < 1e-3, \
-            "Wrong value of variable theta using pyjmi.JMUModel.initialize."
-        assert N.abs(dtheta[-1] - 0.) < 1e-3, \
-            "Wrong value of variable dtheta using pyjmi.JMUModel.initialize."
-        assert N.abs(x[-1] - 0) < 1e-3, \
-            "Wrong value of variable x using pyjmi.JMUModel.initialize."
-        assert N.abs(dx[-1] - 0) < 1e-3, \
-            "Wrong value of variable dx using pyjmi.JMUModel.initialize."
-        assert N.abs(_dtheta[-1] - 0) < 1e-3, \
-            "Wrong value of variable der(theta) using pyjmi.JMUModel.initialize."
-        assert N.abs(ddtheta[-1] - 0.09983341) < 1e-3, \
-            "Wrong value of variable der(dtheta) using pyjmi.JMUModel.initialize."
-        assert N.abs(_dx[-1] - 0) < 1e-3, \
-            "Wrong value of variable der(x) using pyjmi.JMUModel.initialize."
-        assert N.abs(ddx[-1] - 0) < 1e-3, \
-            "Wrong value of variable der(dx) using pyjmi.JMUModel.initialize."
+        assert N.abs(theta[-1] - 0.1) < 1e-3
+        assert N.abs(dtheta[-1] - 0.) < 1e-3
+        assert N.abs(x[-1] - 0) < 1e-3
+        assert N.abs(dx[-1] - 0) < 1e-3
+        assert N.abs(_dtheta[-1] - 0) < 1e-3
+        assert N.abs(ddtheta[-1] - 0.09983341) < 1e-3
+        assert N.abs(_dx[-1] - 0) < 1e-3
+        assert N.abs(ddx[-1] - 0) < 1e-3
         
     @testattr(ipopt = True)
     def test_initialize_with_solverargs(self):
@@ -159,22 +151,14 @@ class Test_init_ipopt:
         _dx=res['der(x)']
         ddx=res['der(dx)']
     
-        assert N.abs(theta[-1] - 0.1) < 1e-3, \
-            "Wrong value of variable theta using pyjmi.JMUModel.initialize."
-        assert N.abs(dtheta[-1] - 0.) < 1e-3, \
-            "Wrong value of variable dtheta using pyjmi.JMUModel.initialize."
-        assert N.abs(x[-1] - 0) < 1e-3, \
-            "Wrong value of variable x using pyjmi.JMUModel.initialize."
-        assert N.abs(dx[-1] - 0) < 1e-3, \
-            "Wrong value of variable dx using pyjmi.JMUModel.initialize."
-        assert N.abs(_dtheta[-1] - 0) < 1e-3, \
-            "Wrong value of variable der(theta) using pyjmi.JMUModel.initialize."
-        assert N.abs(ddtheta[-1] - 0.09983341) < 1e-3, \
-            "Wrong value of variable der(dtheta) using pyjmi.JMUModel.initialize."
-        assert N.abs(_dx[-1] - 0) < 1e-3, \
-            "Wrong value of variable der(x) using pyjmi.JMUModel.initialize."
-        assert N.abs(ddx[-1] - 0) < 1e-3, \
-            "Wrong value of variable der(dx) using pyjmi.JMUModel.initialize."
+        assert N.abs(theta[-1] - 0.1) < 1e-3
+        assert N.abs(dtheta[-1] - 0.) < 1e-3
+        assert N.abs(x[-1] - 0) < 1e-3
+        assert N.abs(dx[-1] - 0) < 1e-3
+        assert N.abs(_dtheta[-1] - 0) < 1e-3
+        assert N.abs(ddtheta[-1] - 0.09983341) < 1e-3
+        assert N.abs(_dx[-1] - 0) < 1e-3
+        assert N.abs(ddx[-1] - 0) < 1e-3
 
     @testattr(ipopt = True)
     def test_optimize(self):
@@ -187,8 +171,7 @@ class Test_init_ipopt:
         res = pend.optimize()
         cost=res['cost']
         
-        assert N.abs(cost[-1] - 1.2921683e-01) < 1e-3, \
-            "Wrong value of cost function using pyjmi.JMUModel.optimize with vdp."
+        assert N.abs(cost[-1] - 1.2921683e-01) < 1e-3
    
 
     @testattr(ipopt = True)
@@ -198,9 +181,7 @@ class Test_init_ipopt:
         res = self.model_vdp.optimize(options={'n_cp':10})
         cost=res['cost']
         
-        assert N.abs(cost[-1] - 2.34602647e+01 ) < 1e-3, \
-                "Wrong value of cost function using pyjmi.JMUModel.optimize with vdp. \
-                cost.x[-1] was: "+str(cost[-1])
+        assert N.abs(cost[-1] - 2.34602647e+01 ) < 1e-3
             
     @testattr(ipopt = True)
     def test_optimize_set_args(self):
@@ -214,8 +195,7 @@ class Test_init_ipopt:
                      'IPOPT_options':{'max_iter':100}})
         cost=res['cost']
         
-        assert N.abs(cost[-1] - 2.3469089e+01) < 1e-3, \
-                "Wrong value of cost function using pyjmi.JMUModel.optimize with vdp."
+        assert N.abs(cost[-1] - 2.3469089e+01) < 1e-3
 
 
     @testattr(ipopt = True)
@@ -259,8 +239,7 @@ class Test_init_assimulo:
         sim_res = self.model_rlc.simulate()
         resistor_v = sim_res['resistor.v']
         
-        assert N.abs(resistor_v[-1] - 0.138037041741) < 1e-3, \
-            "Wrong value in simulation result using pyjmi.JMUModel.simulate with rlc."
+        assert N.abs(resistor_v[-1] - 0.138037041741) < 1e-3
         
     @testattr(assimulo = True)
     def test_simulate_set_argument(self):
@@ -270,8 +249,7 @@ class Test_init_assimulo:
         sim_res = self.model_rlc.simulate(final_time=30.0)
         resistor_v = sim_res['resistor.v']
         
-        assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3, \
-            "Wrong value in simulation result using pyjmi.JMUModel.simulate with rlc."
+        assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3
         
     @testattr(assimulo = True)
     def test_simulate_set_probl_arg(self):
@@ -323,10 +301,8 @@ class Test_init_assimulo:
     #    x1=sim_res['x1']
     #    x2=sim_res['x2']
     #    
-    #    assert N.abs(x1[-1] + 0.736680243) < 1e-5, \
-    #           "Wrong value in simulation result in VDP_assimulo.py" 
-    #    assert N.abs(x2[-1] - 1.57833994) < 1e-5, \
-    #           "Wrong value in simulation result in VDP_assimulo.py"
+    #    assert N.abs(x1[-1] + 0.736680243) < 1e-5
+    #    assert N.abs(x2[-1] - 1.57833994) < 1e-5
     
     @testattr(assimulo=True)
     def test_simulate_initialize_arg(self):

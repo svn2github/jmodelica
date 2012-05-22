@@ -36,6 +36,7 @@ aspect OptimicaFlattening {
     }
         
     refine Flattening void InstClassDecl.flattenInstClassDecl(FClass fc) {
+    	beginStep("flatten()");
 		fc.setFQName(new FQName(qualifiedName())); 
 		fc.addFEquationBlock(new FEquationBlock(new List()));			
 		FQName prefix = getFQName();
@@ -71,6 +72,7 @@ aspect OptimicaFlattening {
 			//return null;
 		}
 	 	
+    	endStep("flatten()");
     }
 	
 	refine Flattening public void InstNode.flatten(FClass fc) {

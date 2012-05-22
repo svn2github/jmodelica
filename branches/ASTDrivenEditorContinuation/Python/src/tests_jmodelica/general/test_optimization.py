@@ -325,13 +325,13 @@ class TestStaticOptimizationDependentParameters:
     @testattr(ipopt = True)
     def test_parameter_value(self):
         k = self.res.get_variable_data("k")
-        assert k.x[0] == 1.1, "Wrong value of optimized parameter."
+        assert k.x[0] == 1.1
 
     @testattr(ipopt = True)
     def test_initialization_from_model(self):
         self.model.set("k",-1)
         self.nlp.init_opt_set_initial_from_model()
-        assert self.nlp.init_opt_get_x()[0] == -1, "Wrong value of parameter."
+        assert self.nlp.init_opt_get_x()[0] == -1
 
 class TestOptInitBlockingFactors:
     @classmethod
@@ -535,17 +535,17 @@ class TestOptInitBlockingFactors:
                            [ 1.11922602],
                            [ 0.56787771]])
         
-        assert N.sum(N.abs(m_x1_2-m_x1_2_res))<1e-3, "Error in initialization of x[1]"
-        assert N.sum(N.abs(m_x2_2-m_x2_2_res))<1e-3, "Error in initialization of x[2]"
-        assert N.sum(N.abs(m_u_2-m_u_2_res))<1e-3, "Error in initialization of u"
-        assert N.sum(N.abs(m_y_2-m_y_2_res))<1e-3, "Error in initialization of y"
+        assert N.sum(N.abs(m_x1_2-m_x1_2_res))<1e-3
+        assert N.sum(N.abs(m_x2_2-m_x2_2_res))<1e-3
+        assert N.sum(N.abs(m_u_2-m_u_2_res))<1e-3
+        assert N.sum(N.abs(m_y_2-m_y_2_res))<1e-3
         
-        assert N.sum(N.abs(x_el_junc-x_el_junc_res))<1e-3, "Error in initialization of x_el_junc"
+        assert N.sum(N.abs(x_el_junc-x_el_junc_res))<1e-3
         
-        assert N.sum(N.abs(dx_p-dx_p_res))<1e-3, "Error in initialization of dx_p"
-        assert N.sum(N.abs(x_p-x_p_res))<1e-3, "Error in initialization of x_p"
-        assert N.sum(N.abs(u_p-u_p_res))<1e-3, "Error in initialization of u_p"
-        assert N.sum(N.abs(w_p-w_p_res))<1e-3, "Error in initialization of w_p"
+        assert N.sum(N.abs(dx_p-dx_p_res))<1e-3
+        assert N.sum(N.abs(x_p-x_p_res))<1e-3
+        assert N.sum(N.abs(u_p-u_p_res))<1e-3
+        assert N.sum(N.abs(w_p-w_p_res))<1e-3
         
         optimizer = CollocationOptimizer(self.nlp)
         optimizer.opt_coll_ipopt_solve()

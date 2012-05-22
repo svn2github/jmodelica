@@ -27,6 +27,279 @@ import java.util.IdentityHashMap;
 import java.util.Map.Entry;
 import beaver.Symbol;
 
+aspect LightProfiling {
+	
+	private static StepInfo ASTNode.stepInfo = new StepInfo();
+	
+	public static StepInfo ASTNode.getStepInfo() {
+		return stepInfo;
+	}
+	
+	public static void ASTNode.beginStep(String name) {
+		stepInfo.begin(name);
+	}
+	
+	public static void ASTNode.endStep(String name) {
+		stepInfo.end(name);
+	}
+	
+	public class StepInfo {
+		
+		public static final boolean GC_BEFORE_MEM = false;
+		
+		public static final Class<? extends InfoItem> TIME = TimeItem.class;
+		public static final Class<? extends InfoItem> MEMORY_CHANGE = MemoryChangeItem.class;
+		
+		private ArrayList<Class<? extends InfoItem>> itemClasses;
+		private ArrayList<InfoNode> open;
+		private InfoNode top;
+		
+		public StepInfo() {
+			itemClasses = new ArrayList<Class<? extends InfoItem>>();
+			itemClasses.add(TIME);
+			itemClasses.add(MEMORY_CHANGE);
+			reset();
+		}
+		
+		public void reset() {
+			open = new ArrayList<InfoNode>();
+			top = new InfoNode("Total", 0);
+			open.add(top);
+			top.begin();
+		}
+		
+		public void addItemType(Class<? extends InfoItem> item) {
+			itemClasses.add(item);
+		}
+		
+		public void clearItemTypes() {
+			itemClasses.clear();
+		}
+		
+		public void begin(String name) {
+			if (name == null)
+				throw new IllegalArgumentException("Must give a name");
+			InfoNode n = new InfoNode(name, top.depth + 1);
+			top.add(n);
+			top = n;
+			open.add(top);
+			top.begin();
+		}
+		
+		public void end(String name) {
+			if (name == null)
+				throw new IllegalArgumentException("Must give a name");
+			if (!top.name.equals(name))
+				throw new IllegalArgumentException("Name does not match last opened step: " + 
+						name + ", last: " + top.name);
+			top.end();
+			open.remove(open.size() - 1);
+			top = open.get(open.size() -1);
+		}
+		
+		public void logReport() {
+			logReport(Integer.MAX_VALUE);
+		}
+		
+		public void logReport(int maxDepth) {
+			while (top.depth > 0) 
+				end(top.name);
+			top.end();
+			
+			ArrayList<String[]> lines = new ArrayList<String[]>();
+			lines.add(top.toStrings());
+			for (InfoNode n : top)
+				if (n.depth <= maxDepth)
+					lines.add(n.toStrings());
+			
+			int n = lines.get(0).length;
+			int[] lengths = new int[n];
+			for (String[] line : lines)
+				for (int i = 0; i < n; i++)
+					if (line[i].length() > lengths[i])
+						lengths[i] = line[i].length();
+			
+			StringBuilder buf = new StringBuilder("%-");
+			buf.append(lengths[0]);
+			buf.append("s: ");
+			for (int i = 1; i < n; i++) {
+				buf.append("%");
+				buf.append(lengths[i]);
+				buf.append((i < n - 1) ? "s, " : "s");
+			}
+			String fmt = buf.toString();
+			
+			for (String[] line : lines) 
+				ASTNode.log.debug(String.format(fmt, (Object[]) line));
+		}
+		
+		
+		private InfoItem[] createItems() {
+			InfoItem[] res = new InfoItem[itemClasses.size()];
+			Class x = null;
+			for (int i = 0; i < res.length; i++) {
+				try {
+					res[i] = itemClasses.get(i).newInstance();
+				} catch (Exception e) {
+					throw new IllegalArgumentException("Could not instantiate info item", e);
+				}
+			}
+			return res;
+		}
+		
+		private class InfoNode implements Iterable<InfoNode> {
+			
+			private static final char INDENT = ' ';
+			
+			private InfoItem[] items;
+			private ArrayList<InfoNode> children;
+			public String name;
+			public int depth;
+			
+			public InfoNode(String name, int depth) {
+				this.name = name;
+				this.depth = depth;
+				items = createItems();
+				children = null;
+			}
+			
+			public void begin() {
+				for (InfoItem it : items)
+					it.begin();
+			}
+			
+			public void end() {
+				for (InfoItem it : items)
+					it.end();
+			}
+			
+			public void add(InfoNode n) {
+				if (children == null)
+					children = new ArrayList<InfoNode>();
+				children.add(n);
+			}
+			
+			public String[] toStrings() {
+				String[] res = new String[items.length + 1];
+				StringBuilder buf = new StringBuilder();
+				for (int j = 0; j < depth; j++)
+					buf.append(INDENT);
+				buf.append(name);
+				res[0] = buf.toString();
+				int i = 1;
+				for (InfoItem it : items)
+					res[i++] = it.toString();
+				return res;
+			}
+			
+			public Iterator<InfoNode> iterator() {
+				return new NodeIterator();
+			}
+			
+			private class NodeIterator implements Iterator<InfoNode> {
+				
+				int i = 0;
+				Iterator<InfoNode> cur = null;
+				
+				public boolean hasNext() {
+					return children != null && i < children.size();
+				}
+				
+				public InfoNode next() {
+					InfoNode res;
+					if (cur != null) {
+						res = cur.next();
+					} else {
+						res = children.get(i);
+						cur = res.iterator();
+					}
+					if (!cur.hasNext()) {
+						cur = null;
+						i++;
+					}
+					return res;
+				}
+				
+				public void remove() {
+					throw new UnsupportedOperationException();
+				}
+				
+			}
+			
+		}
+		
+		public interface InfoItem {
+			public void begin();
+			public void end();
+			public String toString();
+		}
+		
+		public static abstract class StateDifferenceInfoItem implements InfoItem {
+			private long beginVal = 0;
+			private long endVal = 0;
+			
+			public void begin() {
+				beginVal = state();
+			}
+			
+			public void end() {
+				endVal = state();
+			}
+			
+			public String toString() {
+				return toString(endVal - beginVal);
+			}
+			
+			public abstract long state();
+			public abstract String toString(long diff);
+		}
+		
+		public static class TimeItem extends StateDifferenceInfoItem {
+			public long state() {
+				return System.currentTimeMillis();
+			}
+			
+			public String toString(long diff) {
+				return (Math.round(diff / 10.0) / 100.0) + " s";
+			}
+		}
+		
+		public static class MemoryChangeItem extends StateDifferenceInfoItem {
+			private static final Runtime RUNTIME = Runtime.getRuntime();
+
+			public long state() {
+				if (StepInfo.GC_BEFORE_MEM)
+					runGC();
+				return usedMemory();
+			}
+			
+			private static long usedMemory() {
+				return RUNTIME.totalMemory() - RUNTIME.freeMemory();
+			}
+			
+			private static void runGC() {
+				try {
+					long usedMem1 = usedMemory(), usedMem2 = Long.MAX_VALUE;
+					for (int i = 0; (usedMem1 < usedMem2) && (i < 500); ++i) {
+						RUNTIME.runFinalization();
+						RUNTIME.gc();
+						Thread.yield();
+	
+						usedMem2 = usedMem1;
+						usedMem1 = usedMemory();
+					}
+				} catch (Exception e) {}
+			}
+			
+			public String toString(long diff) {
+				return ASTNode.formatMem(diff);
+			}
+		}
+		
+	}
+	
+}
+
 aspect MemoryUse {
 	
 	/**
@@ -377,6 +650,8 @@ aspect MemoryUse {
 			Class type = o.getClass();
 			if (type.isArray())
 				return getArraySize(o, type);
+			if (o instanceof LinkedList)
+				return getLinkedListSize((LinkedList) o, type);
 			
 			int mem = getTotalShellSize(type);
 			for (; type != null; type = type.getSuperclass())
@@ -397,6 +672,20 @@ aspect MemoryUse {
 				System.err.println("Could not read member: " + o.getClass().getSimpleName() + "." + f.getName());
 				return OBJECT_SHELL_SIZE;
 			}
+		}
+
+		// Special case for linked list to avoid stack overflow
+		private static int getLinkedListSize(LinkedList l, Class type) {
+			int sum = getTotalShellSize(type);
+			int entrySize;
+			try {
+				entrySize = getTotalShellSize(type.getField("header").getType());
+			} catch (Exception e) {
+				entrySize = 3 * OBJREF_SIZE; // From inspecting source
+			}
+			for (Object o : l)
+				sum += entrySize + getObjectSize(o);
+			return sum;
 		}
 		
 		public static int getTotalShellSize(Class type) {

@@ -28,6 +28,8 @@ import nose.tools
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import ModelicaCompiler
 from pymodelica.compiler import OptimicaCompiler
+from pymodelica import compile_jmu
+from pymodelica import compile_fmu
 import pymodelica as pym
 
 mc = ModelicaCompiler()
@@ -65,46 +67,66 @@ class Test_Compiler:
     @testattr(stddist = True)
     def test_compile_JMU(self):
         """
-        Test that compilation is possible with compiler 
-        and that all obligatory files are created. 
+        Test that it is possible to compile a JMU from a .mo file with 
+        ModelicaCompiler.
         """
-
-        # detect platform specific shared library file extension
-        suffix = ''
-        if sys.platform == 'win32':
-            suffix = '.dll'
-        elif sys.platform == 'darwin':
-            suffix = '.dylib'
-        else:
-            suffix = '.so'
-            
         mc.compile_JMU(self.cpath_mc, [self.fpath_mc], 'model', '.')
         
         fname = self.cpath_mc.replace('.','_',1)
         assert os.access(fname+'.jmu',os.F_OK) == True, \
                fname+'.jmu'+" was not created."
+        os.remove(fname+'.jmu')
 
     @testattr(stddist = True)
     def test_optimica_compile_JMU(self):
         """
-        Test that compilation is possible with optimicacompiler
-        and that all obligatory files are created. 
+        Test that it is possible to compile a JMU from a .mop file with 
+        OptimicaCompiler. 
         """
-    
-        # detect platform specific shared library file extension
-        suffix = ''
-        if sys.platform == 'win32':
-            suffix = '.dll'
-        elif sys.platform == 'darwin':
-            suffix = '.dylib'
-        else:
-            suffix = '.so'
             
         oc.compile_JMU(self.cpath_oc, [self.fpath_oc], 'model', '.')
         
         fname = self.cpath_oc.replace('.','_',1)
         assert os.access(fname+'.jmu',os.F_OK) == True, \
                fname+'.jmu'+" was not created."
+        os.remove(fname+'.jmu')
+               
+    @testattr(stddist = True)
+    def test_compile_JMU_fnc(self):
+        """
+        Test that it is possible to compile a JMU from a .mop file with 
+        pymodelica.compile_jmu.
+        """
+        jmuname = compile_jmu(self.cpath_oc, self.fpath_oc)
+
+        assert os.access(jmuname, os.F_OK) == True, \
+               jmuname+" was not created."
+        os.remove(jmuname)
+               
+    @testattr(stddist = True)
+    def test_compile_FMU(self):
+        """
+        Test that it is possible to compile an FMU from a .mo file with 
+        ModelicaCompiler.
+        """ 
+        mc.compile_FMU(self.cpath_mc, [self.fpath_mc], 'model_fmume', '.')
+        
+        fname = self.cpath_mc.replace('.','_',1)
+        assert os.access(fname+'.fmu',os.F_OK) == True, \
+               fname+'.fmu'+" was not created."
+        os.remove(fname+'.fmu')
+               
+    @testattr(stddist = True)
+    def test_optimica_compile_FMU_fnc(self):
+        """
+        Test that it is possible to compile an FMU from a .mop file with 
+        pymodelica.compile_fmu.
+        """
+        fmuname = compile_fmu(self.cpath_mc, self.fpath_oc)
+
+        assert os.access(fmuname, os.F_OK) == True, \
+               fmuname+" was not created."
+        os.remove(fmuname)
                
     @testattr(stddist = True)
     def test_compile_wtarget_alg(self):
@@ -324,15 +346,6 @@ class Test_Compiler:
         MODELICAPATH) works.
         """
         cpath = "Modelica.Electrical.Analog.Examples.CauerLowPassAnalog"
-        
-        # detect platform specific shared library file extension
-        suffix = ''
-        if sys.platform == 'win32':
-            suffix = '.dll'
-        elif sys.platform == 'darwin':
-            suffix = '.dylib'
-        else:
-            suffix = '.so'
 
         # Turn off structural analysis since the problem is of high index
         mc.set_boolean_option("enable_structural_diagnosis",False)    
@@ -342,6 +355,7 @@ class Test_Compiler:
         fname = cpath.replace('.','_')
         assert os.access(fname+'.jmu',os.F_OK) == True, \
                fname+'.jmu'+" was not created."
+        os.remove(fname+'.jmu')
 
     @testattr(ipopt = True)
     def TO_ADDtest_MODELICAPATH(self):

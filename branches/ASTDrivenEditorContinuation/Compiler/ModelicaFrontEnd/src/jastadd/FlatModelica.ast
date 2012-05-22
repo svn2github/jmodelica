@@ -43,7 +43,11 @@ FClass : BaseNode ::= FQName
  *
  * Results from a class with the restriction "function" and an algorithm block.
  */
-FFunctionDecl : BaseNode ::= FQName FFunctionVariable* FAlgorithmBlock [FDerivativeFunction];
+FFunctionDecl : BaseNode ::= FQName 
+                             FFunctionVariable* 
+                             FAlgorithmBlock 
+                             [FDerivativeFunction] 
+                             /DummyExp:FExp/;
 
 /**
  * \brief A derivative function reference.
@@ -875,6 +879,11 @@ FDerExp : FIdUseExp;
  * \brief The built-in function der converted into a dummy derivative.
  */
 FDummyDerExp : FIdUseExp; 
+
+/**
+ * \brief Higher order derivatives occurring as a result of index reduction.
+ */
+InstHDerExp : InstDerExp ::= <Order:int>; 
 
 /**
  * \brief Higher order derivatives occurring as a result of index reduction.

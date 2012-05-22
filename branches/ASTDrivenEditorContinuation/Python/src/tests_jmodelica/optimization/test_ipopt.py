@@ -276,8 +276,7 @@ class TestNLP_CSTR():
         # Get the result
         self.nlp.opt_coll_get_result(p_opt2,t_2,dx_2,x_2,u_2,w_2)
         
-        assert max(N.abs(x_-x_2))<1e-12, \
-               "The values used in initialization does not match the values that were read back after initialization."        
+        assert max(N.abs(x_-x_2))<1e-12       
     @testattr(ipopt = True)
     def test_statistics(self):
         """ Test of 'jmi_opt_coll_get_statistics'."""
@@ -285,8 +284,8 @@ class TestNLP_CSTR():
         self.nlp_ipopt.opt_coll_ipopt_solve()
         (return_status,iters,cost,time) = self.nlp_ipopt.opt_coll_ipopt_get_statistics()
 
-        assert return_status==0, "Return status from Ipopt should be 0"
-        assert abs(cost-2.2811985e+00)<1e-3, "Wrong value of cost function"
+        assert return_status==0
+        assert abs(cost-2.2811985e+00)<1e-3
     
     @testattr(ipopt = True)
     def test_set_initial_from_dymola(self):
@@ -336,16 +335,11 @@ class TestNLP_CSTR():
         self.nlp.opt_coll_get_result(p_opt_2,t_2,dx_2,x_2,u_2,w_2)
     
     
-        assert max(N.abs(p_opt-p_opt_2))<1e-3, \
-               "The values used in initialization does not match the values that were read back after initialization." 
-        assert max(N.abs(dx_-dx_2))<1e-3, \
-               "The values used in initialization does not match the values that were read back after initialization." 
-        assert max(N.abs(x_-x_2))<1e-3, \
-               "The values used in initialization does not match the values that were read back after initialization." 
-        assert max(N.abs(u_-u_2))<1e-3, \
-               "The values used in initialization does not match the values that were read back after initialization." 
-    #    assert max(N.abs(w_-w_2))<1e-3, \
-    #           "The values used in initialization does not match the values that were read back after initialization." 
+        assert max(N.abs(p_opt-p_opt_2))<1e-3
+        assert max(N.abs(dx_-dx_2))<1e-3
+        assert max(N.abs(x_-x_2))<1e-3
+        assert max(N.abs(u_-u_2))<1e-3
+    #    assert max(N.abs(w_-w_2))<1e-3
     
     ##     print(p_opt)
     ##     print(p_opt_2)

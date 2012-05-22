@@ -17,6 +17,7 @@
 aspect OptimicaTransformCanonical {
 	
 	public void FOptClass.transformCanonical() {
+    	beginStep("transformCanonical()");
 		
 		FRealVariable fv_startTime = null;
 		FRealVariable fv_finalTime = null;
@@ -150,8 +151,10 @@ aspect OptimicaTransformCanonical {
 			// Flush to reset cashes
 			root().flushAllRecursive();
 		}
-		super.transformCanonicalBase();		
+		transformCanonicalBase();		
+	    transformCanonicalCleanup();
 
+    	endStep("transformCanonical()");
 	}
 	
 	// Don't add initial equations for optimization problems

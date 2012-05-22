@@ -79,7 +79,7 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 		while (currentSubItemIndex < subItems.size()) {
 			ScannedFormattingItem currentItem = subItems.get(currentSubItemIndex++);
 			firstPart = firstPart.mergeItems(Adjacency.BACK, currentItem);
-			if (currentItem.type == Type.LINE_BREAK) {
+			if (currentItem.endsWithLineBreak()) {
 				break;
 			}
 		}

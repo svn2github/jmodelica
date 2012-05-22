@@ -43,10 +43,9 @@ def run_demo(with_plots=True):
     u = res['u']
     t = res['time']
     
-    assert N.abs(x[-1] - 3.5297357) < 1e-3, \
-            "Wrong value, last value of x in if_example.py"
-    assert N.abs(u[-1] - (-0.2836625)) < 1e-3, \
-            "Wrong value, last value of u in if_example.py"
+    assert N.abs(x[-1] - 3.5297357) < 1e-3
+    
+    assert N.abs(u[-1] - (-0.2836625)) < 1e-3
 
     if with_plots:
         fig = p.figure()

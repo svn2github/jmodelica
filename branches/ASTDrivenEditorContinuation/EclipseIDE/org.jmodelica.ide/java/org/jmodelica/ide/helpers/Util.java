@@ -160,7 +160,6 @@ public class Util {
 			}
 			marker.setAttributes(keys, vals);
 		} catch (CoreException e) {
-			e.printStackTrace();
 		}
 	}
 

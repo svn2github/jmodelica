@@ -26,7 +26,6 @@ aspect ModelicaIcons
 	eq InstShortClassDecl.icon()	= 	getInstExtends(0).myInstClass().icon();
 	eq InstShortClassDecl.diagram()	= 	getInstExtends(0).myInstClass().diagram();
 
-
 	protected boolean ClassDecl.visitingDuringIconRendering;
 	
 	eq ClassDecl.icon() { 
@@ -43,6 +42,7 @@ aspect ModelicaIcons
 		visitingDuringIconRendering = false;
 		return icon;
 	}
+	
 	eq ShortClassDecl.icon() {
 		visitingDuringIconRendering = true;
 		Icon icon;
@@ -150,6 +150,29 @@ aspect ModelicaIcons
 		return diagram;
 	}
 	
+	eq InstNode.diagram() {
+		Layer layer = annotation().createDiagramLayer();
+		Diagram diagram = new Diagram(myInstClass().qualifiedName(), layer, Context.DIAGRAM, null);
+		addSuperClasses(diagram);
+		addSubComponents(diagram);
+		for (FAbstractEquation fae : getFAbstractEquations()) {
+			if (fae instanceof FConnectClause) {
+				FConnectClause fcc = (FConnectClause) fae;
+				Connection con;
+				try {
+					con = fcc.getConnectClause().annotation().createConnection();
+				} catch (FailedConstructionException e) {
+					con = new Connection();
+				}
+				con.setSourceConnector((org.jmodelica.icons.Connector)fcc.getConnector1().getInstAccess().myInstComponentDecl().getComponent());
+				con.setTargetConnector((org.jmodelica.icons.Connector)fcc.getConnector2().getInstAccess().myInstComponentDecl().getComponent());
+				fcc.setConnection(con);
+				con.connect();
+			}
+		}
+		return diagram;
+	}
+	
 	public BufferedImage BaseNode.render(Icon icon, int w, int h) {
 		return new AWTIconDrawer(icon, w, h).getImage();
 	}
@@ -250,7 +273,9 @@ aspect ModelicaIcons
 	}
 	
 	public Component InstComponentDecl.component(Context context) {
-		InstClassDecl subDecl = myInstClass();		
+		if (getComponent() != null)
+			return getComponent();
+		InstClassDecl subDecl = myInstClass();
 		if(subDecl.isUnknown()) {
 			return null;
 		}

@@ -1,14 +1,22 @@
 PLATFORM=win32
 
+COMPILED=false
+
 ifeq (win, $(findstring win,$(PLATFORM)))
 SUFF=dll
 PREF=
 SHARED_FLAGS=-shared -Wl,-soname,
-else ifeq (darwin, $(findstring darwin,$(PLATFORM)))
+COMPILED=true
+endif
+
+ifeq (darwin, $(findstring darwin,$(PLATFORM)))
 SUFF=dylib
 PREF=lib
 SHARED_FLAGS=-dynamiclib -Wl,-install_name,@rpath/
-else
+COMPILED=true
+endif
+
+ifeq (false, $(findstring false,$(COMPILED)))
 SUFF=so
 PREF=lib
 SHARED_FLAGS=-shared -Wl,-soname,

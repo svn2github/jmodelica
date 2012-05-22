@@ -828,6 +828,21 @@ equation
 end ConnectTest15;
 
 
+model ConnectTest16
+	connector A
+        Real x;
+	end A;
+	
+	model B
+		A a1[2];
+		A a2[2];
+	equation
+		connect(a1, a2);
+	end B;
+	
+	B b[2];
+end ConnectTest16;
+
 
 model Electrical
   

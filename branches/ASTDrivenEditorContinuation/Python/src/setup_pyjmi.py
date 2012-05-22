@@ -66,6 +66,7 @@ setup(name=NAME,
                                'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'linux32'+sep+'*.*',
                                'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'linux64'+sep+'*.*',
                                'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'win32'+sep+'*.*',
-                               'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'win64'+sep+'*.*']},
+                               'examples'+sep+'files'+sep+'Resources'+sep+'Library'+sep+'win64'+sep+'*.*',
+                               'examples'+sep+'files'+sep+'FMUS'+sep+'*.*',]},
       script_args=copy_args
       )

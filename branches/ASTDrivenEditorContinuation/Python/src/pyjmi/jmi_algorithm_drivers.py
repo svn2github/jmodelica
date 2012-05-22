@@ -1518,16 +1518,6 @@ class LocalDAECollocationAlg(AlgorithmBase):
             raise NotImplementedError("quadrature_constraint is not " + \
                                       "compatible with eliminate_der_var.")
         
-        # Check validity of exact_hessian
-        if self.exact_hessian:
-            if self.graph == "MX":
-                print("Warning: exact_hessian is currently not recommended " +
-                      "in combination with MX graphs.")
-        else:
-            if self.casadi_options_l != defaults['casadi_options_l']:
-                raise ValueError("casadi_options_l is only used " +
-                                 "if algorithm option exact_Hessian is True.")
-                                 
         # Check validity of result_mode and n_eval_points
         if (self.result_mode != "element_interpolation" and
             self.n_eval_points != defaults['n_eval_points']):
@@ -1661,8 +1651,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Default: "LGR"
         
         graph --
-            CasADi graph type. Possible values are "SX", "MX" and
-            "expanded_MX".
+            CasADi graph type. Possible values are "SX" and "MX".
             
             Type: str
             Default: "SX"
@@ -1788,17 +1777,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: None or
             pyjmi.optimization.casadi_collocation.ParameterEstimationData
             Default: None
-        
-        exact_hessian --
-            True: The Hessian of the Lagrangian function is obtained via CasADi
-            and supplied to Ipopt.
-            
-            False: Ipopt uses a quasi-Newton method.
-            
-            WARNING: exact_hessian is very slow in combination with MX graphs.
-            
-            Type: bool
-            Default: True
     
     Options are set by using the syntax for dictionaries::
 
@@ -1806,13 +1784,13 @@ class LocalDAECollocationAlgOptions(OptionBase):
         >>> opts['n_e'] = 100
         
     In addition, CasADi options can be provided in the options
-    casadi_options_f, casadi_options_g and casadi_options_l for the NLP
-    objective, constraint and Lagrangian functions respectively. For a complete
-    list of CasADi options, please consult the CasADi documentation.
+    casadi_options_f and casadi_options_g for the NLP objective and constraint
+    functions respectively. For a complete list of CasADi options, please
+    consult the CasADi documentation.
     
     See
     http://casadi.sourceforge.net/api/html/d2/d58/classCasADi_1_1SXFunction.html
-    for SX and expanded_MX graphs and
+    for SX and
     http://casadi.sourceforge.net/api/html/dc/d0b/classCasADi_1_1MXFunction.html
     for MX graphs.
     
@@ -1820,21 +1798,24 @@ class LocalDAECollocationAlgOptions(OptionBase):
 
         >>> opts['casadi_options_g']['numeric_jacobian'] = True
     
-    IPOPT options can be provided in the option IPOPT_options. For 
-    a complete list of IPOPT options, please consult the IPOPT documentation 
-    available at http://www.coin-or.org/Ipopt/documentation/.
-
-    The value for max_iter is provided by default::
-
-        max_iter --
-           Maximum number of iterations.
-           
-           Type: int
-           Default: 2000
-
+    IPOPT options can be provided in the option IPOPT_options. Since CasADi's
+    IPOPT interface is used for this algorithm, please see the documentation
+    for Casadi's IpoptSolver class for a complete list of IPOPT options, which
+    is available at
+    http://casadi.sourceforge.net/api/html/dd/df1/classCasADi_1_1IpoptSolver.html
+    
+    IPOPT options available via CasADi that are not a part of the original
+    IPOPT which are of particular interest are 'generate_hessian', which
+    computes the Hessian of the Lagrangian instead of using BFGS, and
+    'expand_f' as well as 'expand_g', which expand the NLP functions from MX
+    into SX if an MX graph is used.
+    
+    The default IPOPT options are given by CasADi, with the exception of
+    "generate_hessian", which is True rather than False.
+    
     IPOPT options are set using the syntax for dictionaries::
-
-        >>> opts['IPOPT_options']['max_iter'] = 500
+        
+        >>> opts['IPOPT_options']['expand_f'] = True
     """
     
     def __init__(self, *args, **kw):
@@ -1859,8 +1840,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'exact_hessian': True,
                 'casadi_options_f': {"name": "NLP objective function"},
                 'casadi_options_g': {"name": "NLP constraint function"},
-                'casadi_options_l': {"name": "NLP Lagrangian function"},
-                'IPOPT_options': {'max_iter': 2000}}
+                'IPOPT_options': {'generate_hessian': True}}
         
         super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
         self._update_keep_dict_defaults(*args, **kw)

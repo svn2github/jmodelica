@@ -1392,6 +1392,35 @@ aspect Attributes {
 			NEVER, AVOID, DEFAULT, PREFER, ALWAYS
 		}
 	}
+	
+	public static long FVariable.SS_NEVER_WEIGHT = 10L;
+	public static long FVariable.SS_AVOID_WEIGHT = 10000L;
+	public static long FVariable.SS_DEFAULT_WEIGHT = 10000000L;
+	public static long FVariable.SS_PREFER_WEIGHT = 10000000000L;
+	public static long FVariable.SS_ALWAYS_WEIGHT = 10000000000000L;
+	public static long FVariable.SS_UNMATCHED_WEIGHT = 10000000000000000L;
+	
+	syn long FVariable.stateSelectionWeight() = 0;
+	eq FRealVariable.stateSelectionWeight() {
+		FRealVariable frv = (FRealVariable)getMeIntegrated();
+		if (frv == null) {
+			return SS_DEFAULT_WEIGHT;	
+		}
+		if (frv.stateSelectAttribute() == StateSelect.NEVER) {
+			return SS_NEVER_WEIGHT;
+		} else if (frv.stateSelectAttribute() == StateSelect.AVOID) {
+			return SS_AVOID_WEIGHT;
+		} else if (frv.stateSelectAttribute() == StateSelect.DEFAULT) {
+			return SS_DEFAULT_WEIGHT;
+		} else if (frv.stateSelectAttribute() == StateSelect.PREFER) {
+			return SS_PREFER_WEIGHT;
+		} else if (frv.stateSelectAttribute() == StateSelect.ALWAYS) {
+			return SS_ALWAYS_WEIGHT;
+		} else {
+			return SS_UNMATCHED_WEIGHT;
+		}
+	}
+	
 }
 
 aspect FVariableUses {

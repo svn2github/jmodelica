@@ -54,8 +54,7 @@ def run_demo(with_plots=True):
     tau_c3 = res['clutch3.tau']
     t = res['time']
 
-    assert N.abs(w3[-1] - (2.46266652110568)) < 1e-3, \
-           "Wrong value in simulation result."  
+    assert N.abs(w3[-1] - (2.4648259915308199)) < 1e-3
 
     if with_plots:
         plt.figure(1)

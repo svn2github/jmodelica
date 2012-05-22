@@ -21,6 +21,8 @@ Test module for Jacobian evaluation using CAD in pyjmi.
 
 import os
 import numpy as N
+import numpy.linalg as lin
+import nose
 
 import pyjmi.jmi as jmi
 from pymodelica.compiler import compile_jmu
@@ -45,64 +47,203 @@ class Test_cad_std:
         Sets up the test case.
         """
         pass
-        
+
     @testattr(stddist = True)
-    def test_dependent_parameters(self):
-        """ Test evaluation of CAD with different dependent variables. """
-        path = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack_no_opt.mo')
-        jmu_name = compile_jmu('Pendulum_pack.Pendulum', path, 
-                               compiler_options={"generate_dae_jacobian":True},target='model_noad')
-        model = JMUModel(jmu_name)
+    def test_simulation(self):
+        
+        path = os.path.join(get_files_path(), 'Modelica', "VDP_pack.mo")
+        
+        jmu_name = compile_jmu("VDP_pack.VDP", path)
+        model_cppad = JMUModel(jmu_name)
+        sim_opts_cppad = model_cppad.simulate_options()
+        sim_opts_cppad['initialize'] = False
+        res_cppad = model_cppad.simulate(final_time=10, options = sim_opts_cppad)
+        
+        
+        jmu_name = compile_jmu("VDP_pack.VDP", path, compiler_options={"generate_dae_jacobian":True}, target='model_noad')
+        model_cad = JMUModel(jmu_name)
+        sim_opts_cad = model_cad.simulate_options()
+        sim_opts_cad['initialize'] = False
+        res_cad = model_cad.simulate(final_time=10, options = sim_opts_cad)
+        
+        x1_cppad = model_cppad.get('x1')
+        x2_cppad = model_cppad.get('x2')
+        x1_cad = model_cad.get('x1')
+        x2_cad = model_cad.get('x2')
+
+        nose.tools.assert_almost_equal(lin.norm(x1_cppad-x1_cad)+lin.norm(x2_cppad-x2_cad),0)
+
+    @testattr(stddist = True)
+    def test_dependent_variables1(self):    
+        """ Test evaluation of CAD with different dependent variables"""
+        path = os.path.join(get_files_path(), 'Modelica', 'furuta.mo')
+        
+        u = 0.01
+        
+        jmu_name = compile_jmu("Furuta",path)
+        model_cppad = JMUModel(jmu_name)
+        model_cppad.set('u', u)
+        
+        jmu_name = compile_jmu("Furuta",path, compiler_options={"generate_dae_jacobian":True}, target='model_noad')
+        model_cad = JMUModel(jmu_name)
+        model_cad.set('u', u)
         
         FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_U)
-        n_var = len(model.jmimodel.get_z())
-        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
-        FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_X)
-        n_var = len(model.jmimodel.get_z())
-        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
+        
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))
+        jac_cad_1 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_1)
+        jac_cppad_1 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_1)
+        
         FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_U)
-        n_var = len(model.jmimodel.get_z())
-        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
+        
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))
+        jac_cad_2 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_2)
+        jac_cppad_2 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_2)
+        
+        FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_X)
+
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))        
+        jac_cad_3 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_3)
+        jac_cppad_3 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_3)
+        
         FLAG = (jmi.JMI_DER_X, jmi.JMI_DER_U)
-        n_var = len(model.jmimodel.get_z())
-        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
+        
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))
+        jac_cad_4 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_4)
+        jac_cppad_4 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_4)
+        
         FLAG = (jmi.JMI_DER_DX)
-        n_var = len(model.jmimodel.get_z())
-        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
+        
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))
+        jac_cad_5 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_5)
+        jac_cppad_5 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_5)
+        
         FLAG = (jmi.JMI_DER_X)
-        n_var = len(model.jmimodel.get_z())
-        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
+        
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))
+        jac_cad_6 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_6)
+        jac_cppad_6 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_6)
+        
         FLAG = (jmi.JMI_DER_U)
-        n_var = len(model.jmimodel.get_z())
-        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
+        
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))
+        jac_cad_7 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_7)
+        jac_cppad_7 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_7)
+        
+        sumarray= lin.norm(N.array([lin.norm(jac_cad_1-jac_cppad_1),lin.norm(jac_cad_2-jac_cppad_2),lin.norm(jac_cad_3-jac_cppad_3),lin.norm(jac_cad_4-jac_cppad_4),lin.norm(jac_cad_5-jac_cppad_5),lin.norm(jac_cad_6-jac_cppad_6),lin.norm(jac_cad_7-jac_cppad_7)]))
+        nose.tools.assert_almost_equal(sumarray, 0)
+        
+    @testattr(stddist = True)
+    def test_dependent_variables2(self):
+        """ Test evaluation of CAD with different dependent variables after simulation. """
+        path = os.path.join(get_files_path(), 'Modelica', 'DISTLib.mo')
+        jmu_name = compile_jmu("DISTLib.Examples.Simulation", path)
+        
+        model_cppad = JMUModel(jmu_name)
+        model_cppad.initialize()
+        sim_opts_cppad = model_cppad.simulate_options()
+        sim_opts_cppad['IDA_options']['verbosity'] = 0
+        res_cppad = model_cppad.simulate(final_time=2, options = sim_opts_cppad)
+        
+        sim_opts_cppad['initialize'] = False
+        model_cppad.initialize_from_data(res_cppad.result_data,0.0)
+        model_cppad.jmimodel._sw[0] = 1.
+        res_cppad = model_cppad.simulate(final_time=80, options = sim_opts_cppad)
+        
+        jmu_name = compile_jmu("DISTLib.Examples.Simulation", path, compiler_options={"generate_dae_jacobian":True}, target='model_noad')
+        model_cad = JMUModel(jmu_name)
+        
+        sim_opts_cad = model_cad.simulate_options()
+        sim_opts_cad['initialize'] = False
+        model_cad.initialize_from_data(res_cppad.result_data,0.0)
+        model_cad.jmimodel._sw[0] = 1.
+        res_cad = model_cad.simulate(final_time=80, options = sim_opts_cad)
+        
+        FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_W)
+        
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))
+        jac_cad_1 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_1)
+        jac_cppad_1 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_1)
+        
+        FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_W)
+        
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))
+        jac_cad_2 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_2)
+        jac_cppad_2 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_2)
+        
+        FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_X)
+        
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))
+        jac_cad_3 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_3)
+        jac_cppad_3 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_3)
+        
+        FLAG = (jmi.JMI_DER_X, jmi.JMI_DER_W)
+        
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))
+        jac_cad_4 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_4)
+        jac_cppad_4 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_4)
+        
+        FLAG = (jmi.JMI_DER_DX)
+        
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))
+        jac_cad_5 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_5)
+        jac_cppad_5 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_5)
+        
+        FLAG = (jmi.JMI_DER_X)
+        
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))
+        jac_cad_6 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_6)
+        jac_cppad_6 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_6)
+        
+        FLAG = (jmi.JMI_DER_W)
+        
+        n_var = len(model_cad.jmimodel.get_z())
+        n_cols,n_z = model_cad.jmimodel.dae_dF_dim(jmi.JMI_DER_CAD, jmi.JMI_DER_SPARSE, FLAG , N.ones(n_var,dtype=int))
+        jac_cad_7 = N.zeros(n_z)
+        model_cad.jmimodel.dae_dF(jmi.JMI_DER_CAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cad_7)
+        jac_cppad_7 = N.zeros(n_z)
+        model_cppad.jmimodel.dae_dF(jmi.JMI_DER_CPPAD,jmi.JMI_DER_SPARSE, FLAG,N.ones(n_var,dtype=int),jac_cppad_7)
+        
+        sumarray= lin.norm(N.array([lin.norm(jac_cad_1-jac_cppad_1),lin.norm(jac_cad_2-jac_cppad_2),lin.norm(jac_cad_3-jac_cppad_3),lin.norm(jac_cad_4-jac_cppad_4),lin.norm(jac_cad_5-jac_cppad_5),lin.norm(jac_cad_6-jac_cppad_6),lin.norm(jac_cad_7-jac_cppad_7)]))
+
+        nose.tools.assert_almost_equal(sumarray, 0)
     
-    @testattr(stddist = True)    
-    def test_cad_functions(self):
-        """ Test evaluation of CAD for models with internal functions. """
-        path = os.path.join(get_files_path(), 'Modelica', 'JacTest.mo')
-        jmu_name = compile_jmu('JacFuncTests.sparseFunc1', path, compiler_options={"generate_dae_jacobian":True},target='model_noad')
-        model = JMUModel(jmu_name)   
-        FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_U, jmi.JMI_DER_W)
-        n_var = len(model.jmimodel.get_z())
-        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
-        jmu_name = compile_jmu('JacFuncTests.sparseFunc2', path, compiler_options={"generate_dae_jacobian":True},target='model_noad')
-        model = JMUModel(jmu_name)   
-        FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_U, jmi.JMI_DER_W)
-        n_var = len(model.jmimodel.get_z())
-        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
-        jmu_name = compile_jmu('JacFuncTests.sparseFunc3', path, compiler_options={"generate_dae_jacobian":True},target='model_noad')
-        model = JMUModel(jmu_name)   
-        FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_U, jmi.JMI_DER_W)
-        n_var = len(model.jmimodel.get_z())
-        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
-        path = os.path.join(get_files_path(), 'Modelica', 'FunctionTests.mo')
-        jmu_name = compile_jmu('FunctionTests.FunctionTest1', path, compiler_options={"generate_dae_jacobian":True},target='model_noad')
-        model = JMUModel(jmu_name)   
-        FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_U, jmi.JMI_DER_W)
-        n_var = len(model.jmimodel.get_z())
-        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
-        jmu_name = compile_jmu('FunctionTests.FunctionTest2', path, compiler_options={"generate_dae_jacobian":True},target='model_noad')
-        model = JMUModel(jmu_name)   
-        FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_U, jmi.JMI_DER_W)
-        n_var = len(model.jmimodel.get_z())
-        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'

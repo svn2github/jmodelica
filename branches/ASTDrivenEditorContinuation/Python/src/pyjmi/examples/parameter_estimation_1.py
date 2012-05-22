@@ -116,10 +116,9 @@ def run_demo(with_plots=True):
     z = res['sys.z']
     t = res['time']
     
-    assert N.abs(w - 1.053339) < 1e-3, \
-            "Wrong value of parameter w in parameter_estimation_1.py"  
-    assert N.abs(z - 0.449854 ) < 1e-3, \
-            "Wrong value of parameter z in parameter_estimation_1.py"  
+    assert N.abs(w - 1.053339) < 1e-3
+      
+    assert N.abs(z - 0.449854 ) < 1e-3  
     
     if with_plots:
         # Plot optimization result
