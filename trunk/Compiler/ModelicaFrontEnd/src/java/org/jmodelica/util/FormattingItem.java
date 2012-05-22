@@ -146,4 +146,22 @@ public abstract class FormattingItem {
 	 * <code>FormattingItem</code> contains after its last line break.
 	 */
 	public abstract DefaultFormattingItem copyWhitepacesFromFormatting();
+	
+	/**
+	 * Determines whether this <code>FormattingItem</code> is a <code>ScannedFormattingItem</code> or not.
+	 * @return true if this is a <code>ScannedFormattingItem</code>, otherwise false.
+	 */
+	public abstract boolean isScanned();
+
+	/**
+	 * Determines whether this <code>FormattingItem</code> is a <code>MixedFormattingItem</code> or not.
+	 * @return true if this is a <code>MixedFormattingItem</code>, otherwise false.
+	 */
+	public abstract boolean isScannedMixed();
+
+	/**
+	 * Determines whether this <code>FormattingItem</code> is a <code>EmptyFormattingItem</code> or not.
+	 * @return true if this is a <code>EmptyFormattingItem</code>, otherwise false.
+	 */
+	public abstract boolean isEmptyDefault();
 }

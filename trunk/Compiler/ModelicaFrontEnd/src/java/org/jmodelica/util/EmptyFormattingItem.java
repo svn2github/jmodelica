@@ -14,7 +14,7 @@ public class EmptyFormattingItem extends DefaultFormattingItem {
 
 	@Override
 	public FormattingItem mergeItems(Adjacency where, FormattingItem otherItem) {
-		if (!(otherItem instanceof EmptyFormattingItem)) {
+		if (!otherItem.isEmptyDefault()) {
 			return otherItem;
 		}
 
@@ -29,5 +29,10 @@ public class EmptyFormattingItem extends DefaultFormattingItem {
 	@Override
 	public DefaultFormattingItem copyWhitepacesFromFormatting() {
 		return new EmptyFormattingItem();
+	}
+	
+	@Override
+	public final boolean isEmptyDefault() {
+		return true;
 	}
 }
