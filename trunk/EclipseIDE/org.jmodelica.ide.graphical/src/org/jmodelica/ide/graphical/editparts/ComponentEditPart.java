@@ -26,6 +26,7 @@ import org.jmodelica.ide.graphical.editparts.primitives.AbstractPolygonEditPart;
 import org.jmodelica.ide.graphical.editparts.primitives.GraphicEditPart;
 import org.jmodelica.ide.graphical.editparts.primitives.TextEditPart;
 import org.jmodelica.ide.graphical.graphics.IconLayer;
+import org.jmodelica.ide.graphical.util.Converter;
 import org.jmodelica.ide.graphical.util.Transform;
 
 
@@ -93,6 +94,7 @@ public class ComponentEditPart extends AbstractIconEditPart implements EditPartL
 				((ComponentEditPart) part).refreshVisuals();
 
 		}
+		getFigure().setDeclaredBounds(Converter.convert(getComponentTransform().transform(Transform.yInverter.transform(getComponent().getPlacement().getTransformation().getExtent()))));
 		getFigure().figureMoved(null);
 		((GraphicalEditPart) getParent()).setLayoutConstraint(this, getFigure(), getFigure().getBounds());
 

@@ -7,8 +7,12 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Layer;
 import org.eclipse.draw2d.TreeSearch;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.handles.HandleBounds;
 
-public class IconLayer extends Layer implements FigureListener {
+public class IconLayer extends Layer implements FigureListener, HandleBounds {
+	private Rectangle realBounds = null;
+	private Rectangle declaredBounds = new Rectangle();
+
 	public IFigure findFigureAt(int x, int y, TreeSearch search) {
 		IFigure fig = super.findFigureAt(x, y, search);
 		if (fig == null)
@@ -19,19 +23,17 @@ public class IconLayer extends Layer implements FigureListener {
 			return this;
 	}
 
-//	private Rectangle bounds = null;
-
 	public Rectangle getBounds() {
-		if (bounds == null) {
-			bounds = calculateBounds();
+		if (realBounds == null) {
+			realBounds = calculateBounds();
 			fireFigureMoved();
 		}
-		return bounds;
+		return realBounds;
 	}
-	
+
 	@Override
 	public void setBounds(Rectangle rect) {
-		// Can't set bounds since it's calculated.
+		// Should not be possible to set the bounds!
 	}
 
 	private Rectangle calculateBounds() {
@@ -75,14 +77,23 @@ public class IconLayer extends Layer implements FigureListener {
 	}
 
 	private void childChanged() {
-		if (bounds != null)
-			getUpdateManager().addDirtyRegion(getParent(), bounds);
-		bounds = null;
+		if (realBounds != null)
+			getUpdateManager().addDirtyRegion(getParent(), realBounds);
+		realBounds = null;
 		revalidate();
 	}
-	
+
 	@Override
 	protected void paintFigure(Graphics graphics) {
 		// Left empty to prevent super implementation.
+	}
+
+	public void setDeclaredBounds(Rectangle rect) {
+		declaredBounds = rect;
+	}
+
+	@Override
+	public Rectangle getHandleBounds() {
+		return declaredBounds;
 	}
 }

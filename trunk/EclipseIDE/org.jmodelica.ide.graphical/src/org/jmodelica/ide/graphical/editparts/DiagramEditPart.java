@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
 import org.eclipse.draw2d.ConnectionLayer;
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.FreeformLayout;
@@ -17,7 +16,6 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.CompoundSnapToHelper;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
-import org.eclipse.gef.Handle;
 import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
@@ -26,7 +24,6 @@ import org.eclipse.gef.SnapToGrid;
 import org.eclipse.gef.SnapToHelper;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editpolicies.ComponentEditPolicy;
-import org.eclipse.gef.editpolicies.ResizableEditPolicy;
 import org.eclipse.gef.editpolicies.SnapFeedbackPolicy;
 import org.eclipse.gef.editpolicies.XYLayoutEditPolicy;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
@@ -39,7 +36,6 @@ import org.jmodelica.icons.coord.Transformation;
 import org.jmodelica.ide.graphical.commands.AddComponentCommand;
 import org.jmodelica.ide.graphical.commands.MoveComponentCommand;
 import org.jmodelica.ide.graphical.commands.ResizeComponentCommand;
-import org.jmodelica.ide.graphical.graphics.RotatableLocator;
 import org.jmodelica.ide.graphical.util.Converter;
 import org.jmodelica.ide.graphical.util.Transform;
 
@@ -63,7 +59,7 @@ public class DiagramEditPart extends AbstractIconEditPart {
 
 		return f;
 	}
-
+	
 	public void updateGrid() {
 		Transform transform = getTransform();
 		double[] realGrid = getModel().getLayer().getCoordinateSystem().getGrid();
@@ -122,45 +118,33 @@ public class DiagramEditPart extends AbstractIconEditPart {
 		});
 		installEditPolicy(EditPolicy.LAYOUT_ROLE, new XYLayoutEditPolicy() {
 
-			protected Command createChangeConstraintCommand(ChangeBoundsRequest request, EditPart child, final Object constraint) {
+			protected Command createChangeConstraintCommand(final ChangeBoundsRequest request, EditPart child, final Object constraint) {
 				if (child instanceof ComponentEditPart && constraint instanceof Rectangle) {
-					final ComponentEditPart iep = (ComponentEditPart) child;
+					final ComponentEditPart cep = (ComponentEditPart) child;
 					if (RequestConstants.REQ_RESIZE_CHILDREN.equals(request.getType())) {
-						return new ResizeComponentCommand(iep.getComponent(), request) {
+						return new ResizeComponentCommand(cep.getComponent(), request) {
 							@Override
 							protected Extent calculateNewExtent() {
 								Transform t = getTransform();
-								t.translate(iep.getComponent().getPlacement().getTransformation().getOrigin().getX(), -iep.getComponent().getPlacement().getTransformation().getOrigin().getY());
+								t.translate(cep.getComponent().getPlacement().getTransformation().getOrigin().getX(), -cep.getComponent().getPlacement().getTransformation().getOrigin().getY());
 								t = t.getInverseTransfrom();
-
-								Extent newActualExtent = Transform.yInverter.transform(t.transform(Converter.convert((Rectangle) constraint)));
-								Extent oldActualExtent = Transform.yInverter.transform(t.transform(Converter.convert(iep.getFigure().getBounds())));
-								Extent oldExtent = iep.getComponent().getPlacement().getTransformation().getExtent();
-								double scaleX = newActualExtent.getWidth() / oldActualExtent.getWidth();
-								double scaleY = newActualExtent.getHeight() / oldActualExtent.getHeight();
-
-								Point p1 = newActualExtent.getP1();
-								p1 = new Point(
-										p1.getX() + (oldExtent.getP1().getX() - oldActualExtent.getP1().getX()) * scaleX,
-										p1.getY() + (oldExtent.getP1().getY() - oldActualExtent.getP1().getY()) * scaleY);
-								Point p2 = newActualExtent.getP2();
-								p2 = new Point(
-										p2.getX() + (oldExtent.getP2().getX() - oldActualExtent.getP2().getX()) * scaleX,
-										p2.getY() + (oldExtent.getP2().getY() - oldActualExtent.getP2().getY()) * scaleY);
-								return new Extent(p1, p2);
+								
+								Rectangle newBounds = request.getTransformedRectangle(cep.getFigure().getHandleBounds());
+								Extent newExtent = Transform.yInverter.transform(t.transform(Converter.convert(newBounds)));
+								return newExtent;
 							}
 
 						};
 					}
 					if (RequestConstants.REQ_MOVE_CHILDREN.equals(request.getType())) {
-						return new MoveComponentCommand(iep.getComponent(), request) {
+						return new MoveComponentCommand(cep.getComponent(), request) {
 							@Override
 							protected Point calculateNewOrigin() {
 								Transform t = getTransform().getInverseTransfrom();
 
 								Point newActualOrigin = Transform.yInverter.transform(t.transform(Converter.convert(((Rectangle) constraint).getTopLeft())));
-								Point oldActualOrigin = Transform.yInverter.transform(t.transform(Converter.convert((iep.getFigure().getBounds()).getTopLeft())));
-								Point oldOrigin = iep.getComponent().getPlacement().getTransformation().getOrigin();
+								Point oldActualOrigin = Transform.yInverter.transform(t.transform(Converter.convert((cep.getFigure().getBounds()).getTopLeft())));
+								Point oldOrigin = cep.getComponent().getPlacement().getTransformation().getOrigin();
 
 								double deltaX = newActualOrigin.getX() - oldActualOrigin.getX();
 								double deltaY = newActualOrigin.getY() - oldActualOrigin.getY();
@@ -177,29 +161,30 @@ public class DiagramEditPart extends AbstractIconEditPart {
 				return null;
 			}
 			
-			@Override
-			protected EditPolicy createChildEditPolicy(final EditPart child) {
-				if (child instanceof AbstractIconEditPart) {
-					return new ResizableEditPolicy() {
-						
-						@Override
-						protected List<Handle> createSelectionHandles() {
-							List<Handle> list = new ArrayList<Handle>();
-							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.TOP_LEFT));
-							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.TOP_RIGHT));
-							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.BOTTOM_LEFT));
-							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.BOTTOM_RIGHT));
-							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.TOP_CENTER));
-							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.MIDDLE_LEFT));
-							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.MIDDLE_RIGHT));
-							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.BOTTOM_CENTER));
-							return list;
-						}
-					};
-				} else {
-					return super.createChildEditPolicy(child);
-				}
-			}
+			//TODO: #1976, the new selection handles are disabled for now.
+//			@Override
+//			protected EditPolicy createChildEditPolicy(final EditPart child) {
+//				if (child instanceof AbstractIconEditPart) {
+//					return new ResizableEditPolicy() {
+//						
+//						@Override
+//						protected List<Handle> createSelectionHandles() {
+//							List<Handle> list = new ArrayList<Handle>();
+//							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.TOP_LEFT));
+//							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.TOP_RIGHT));
+//							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.BOTTOM_LEFT));
+//							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.BOTTOM_RIGHT));
+//							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.TOP_CENTER));
+//							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.MIDDLE_LEFT));
+//							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.MIDDLE_RIGHT));
+//							list.add(new org.jmodelica.ide.graphical.graphics.RotatableHandle((ComponentEditPart) child, RotatableLocator.BOTTOM_CENTER));
+//							return list;
+//						}
+//					};
+//				} else {
+//					return super.createChildEditPolicy(child);
+//				}
+//			}
 		});
 	}
 
