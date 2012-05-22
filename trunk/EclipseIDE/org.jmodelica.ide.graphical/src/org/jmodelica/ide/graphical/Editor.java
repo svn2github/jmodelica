@@ -1,6 +1,7 @@
 package org.jmodelica.ide.graphical;
 
 import java.io.ByteArrayInputStream;
+import java.util.Iterator;
 import java.util.Stack;
 
 import org.eclipse.core.runtime.Assert;
@@ -36,8 +37,10 @@ import org.jmodelica.icons.Component;
 import org.jmodelica.ide.graphical.actions.OpenComponentAction;
 import org.jmodelica.ide.graphical.actions.RotateAction;
 import org.jmodelica.ide.graphical.editparts.EditPartFactory;
+import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
+import org.jmodelica.modelica.compiler.InstProgramRoot;
 import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
@@ -98,27 +101,27 @@ public class Editor extends GraphicalEditor {
 
 				@Override
 				public void handleEvent(Event event) {
-					openSubComponent(null);
+					openRootComponent();
 				}
 			});
 
-			int i = openComponentStack.size();
-			for (final InstComponentDecl icd : openComponentStack) {
+			Iterator<InstComponentDecl> it = openComponentStack.iterator();
+			while (it.hasNext()) {
+				final InstComponentDecl icd = it.next();
 				Label arrow = new Label(breadcrumbsBar, SWT.NONE);
 				arrow.setText(".");
-				if (--i == 0) {
-					Label componentLabel = new Label(breadcrumbsBar, SWT.NONE);
-					componentLabel.setText(icd.name());
-				} else {
+				if (it.hasNext()) {
 					Link componentLabel = new Link(breadcrumbsBar, SWT.NONE);
 					componentLabel.setText("<a>" + icd.name() + "</a>");
 					componentLabel.addListener(SWT.Selection, new Listener() {
-
 						@Override
 						public void handleEvent(Event event) {
-							openSubComponent(icd.getComponent());
+							openPrevComponent(icd.getComponent());
 						}
 					});
+				} else {
+					Label componentLabel = new Label(breadcrumbsBar, SWT.NONE);
+					componentLabel.setText(icd.name());
 				}
 			}
 		} else {
@@ -126,7 +129,7 @@ public class Editor extends GraphicalEditor {
 			((RowLayout) breadcrumbsBar.getLayout()).marginBottom = 0;
 			((RowLayout) breadcrumbsBar.getLayout()).marginTop = 0;
 		}
-		breadcrumbsBar.getParent().layout(true);
+		breadcrumbsBar.getParent().layout(true, true);
 	}
 
 	@Override
@@ -143,17 +146,20 @@ public class Editor extends GraphicalEditor {
 
 		getActionRegistry().registerAction(new ToggleSnapToGeometryAction(getGraphicalViewer()));
 		getActionRegistry().registerAction(new ToggleGridAction(getGraphicalViewer()));
-
 		ContextMenuProvider contextMenu = new EditorContexMenuProvider(viewer, getActionRegistry());
 		viewer.setContextMenu(contextMenu);
 	}
 
 	@Override
 	protected void initializeGraphicalViewer() {
-		SourceRoot sourceRoot = (SourceRoot) Activator.getASTRegistry().lookupAST(null, input.getProject());
-		icd = sourceRoot.getProgram().getInstProgramRoot().simpleLookupInstClassDecl(input.getClassName());
+		icd = getProgramRoot().simpleLookupInstClassDecl(input.getClassName());
 		openComponentStack = new Stack<InstComponentDecl>();
 		setContent();
+		getGraphicalViewer().getRootEditPart().refresh();
+	}
+
+	private InstProgramRoot getProgramRoot() {
+		return ((SourceRoot) Activator.getASTRegistry().lookupAST(null, input.getProject())).getProgram().getInstProgramRoot();
 	}
 
 	private void setContent() {
@@ -172,7 +178,7 @@ public class Editor extends GraphicalEditor {
 	public void doSave(final IProgressMonitor monitor) {
 		if (icd == null)
 			return;
-		
+
 		SafeRunner.run(new SafeRunnable() {
 			public void run() throws Exception {
 				StoredDefinition definition = icd.getDefinition();
@@ -225,35 +231,13 @@ public class Editor extends GraphicalEditor {
 	}
 
 	/**
-	 * Shows the diagram of a sub component. If <code>component</code> is null
-	 * the root model diagram will be shown. If the component is in the stack of
-	 * opened components it's diagram will be shown. If <code>component</code>
-	 * is a sub component to the currently shown component it will be shown. In
-	 * all other cases nothing will happen and false will be returned.
+	 * Shows the diagram of a sub component. If <code>component</code> is a sub
+	 * component to the currently shown component it will be shown.
 	 * 
 	 * @param component Component that we are trying to open
 	 * @return If the component was found and displayed
 	 */
 	public boolean openSubComponent(Component component) {
-		// Check if root should be displayed.
-		if (component == null) {
-			openComponentStack.clear();
-			setContent();
-			return true;
-		}
-
-		// Check if it's a component on the stack.
-		for (int i = 0; i < openComponentStack.size(); i++) {
-			if (component == openComponentStack.get(i).getComponent()) {
-				while (i + 1 < openComponentStack.size())
-					openComponentStack.pop();
-
-				setContent();
-				return true;
-			}
-		}
-
-		// Check if it's a sub component.
 		List<InstComponentDecl> decls;
 		if (openComponentStack.isEmpty())
 			decls = icd.getInstComponentDecls();
@@ -268,5 +252,72 @@ public class Editor extends GraphicalEditor {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Shows the diagram of a component currently on the open component stack.
+	 * 
+	 * @param component Component that we are trying to open
+	 * @return If the component was found and displayed
+	 */
+	public boolean openPrevComponent(Component component) {
+		for (int i = 0; i < openComponentStack.size(); i++) {
+			if (component == openComponentStack.get(i).getComponent()) {
+				while (i + 1 < openComponentStack.size())
+					openComponentStack.pop();
+
+				setContent();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Shows the diagram of the model that is open. Clears the component stack.
+	 * 
+	 * @return True on success
+	 */
+	public boolean openRootComponent() {
+		openComponentStack.clear();
+		setContent();
+		return true;
+	}
+
+	public void flushInst() {
+		long start = System.currentTimeMillis();
+		String[] openComponents = new String[openComponentStack.size()];
+		int i = 0;
+		for (InstComponentDecl c : openComponentStack) {
+			openComponents[i] = c.name();
+			i++;
+		}
+//		System.out.println("old hash" + icd.hashCode());
+//		System.out.println("copy stack, t+" + (System.currentTimeMillis() - start));
+		openComponentStack.clear();
+//		System.out.println("clear stack, t+" + (System.currentTimeMillis() - start));
+		ClassDecl cd = icd.getClassDecl();
+		cd.flushCache();
+//		System.out.println("flush src classDecl, t+" + (System.currentTimeMillis() - start));
+		getProgramRoot().flushAll();
+//		System.out.println("flush program root, t+" + (System.currentTimeMillis() - start));
+		icd = getProgramRoot().simpleLookupInstClassDecl(input.getClassName());
+//		System.out.println("lookup input class, t+" + (System.currentTimeMillis() - start));
+//		System.out.println("new hash" + icd.hashCode());
+		if (openComponents.length > 0) {
+			List<InstComponentDecl> icds = icd.getInstComponentDecls();
+			for (String s : openComponents) {
+				for (InstComponentDecl icd : icds) {
+					if (icd.name().equals(s)) {
+						openComponentStack.push(icd);
+						icds = icd.getInstComponentDecls();
+						break;
+					}
+				}
+			}
+		}
+//		System.out.println("rebuil open component stack, t+" + (System.currentTimeMillis() - start));
+		setContent();
+//		System.out.println("set content, t+" + (System.currentTimeMillis() - start));
 	}
 }
