@@ -25,7 +25,6 @@ aspect ModelicaIcons
 	eq ComponentDecl.diagram() 		= 	findClassDecl().diagram();
 	eq InstShortClassDecl.icon()	= 	getInstExtends(0).myInstClass().icon();
 	eq InstShortClassDecl.diagram()	= 	getInstExtends(0).myInstClass().diagram();
-	eq InstComponentDecl.diagram()	=	myInstClass().diagram();
 
 	protected boolean ClassDecl.visitingDuringIconRendering;
 	
