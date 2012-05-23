@@ -1,6 +1,7 @@
 package org.jmodelica.ide.graphical;
 
 import java.io.ByteArrayInputStream;
+import java.util.EventObject;
 import java.util.Iterator;
 import java.util.Stack;
 
@@ -32,6 +33,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.jastadd.plugin.Activator;
 import org.jmodelica.icons.Component;
 import org.jmodelica.ide.graphical.actions.OpenComponentAction;
@@ -156,6 +158,12 @@ public class Editor extends GraphicalEditor {
 		openComponentStack = new Stack<InstComponentDecl>();
 		setContent();
 		getGraphicalViewer().getRootEditPart().refresh();
+	}
+	
+	@Override
+	public void commandStackChanged(EventObject event) {
+		firePropertyChange(IEditorPart.PROP_DIRTY);
+		super.commandStackChanged(event);
 	}
 
 	private InstProgramRoot getProgramRoot() {
@@ -285,7 +293,7 @@ public class Editor extends GraphicalEditor {
 	}
 
 	public void flushInst() {
-		long start = System.currentTimeMillis();
+//		long start = System.currentTimeMillis();
 		String[] openComponents = new String[openComponentStack.size()];
 		int i = 0;
 		for (InstComponentDecl c : openComponentStack) {
