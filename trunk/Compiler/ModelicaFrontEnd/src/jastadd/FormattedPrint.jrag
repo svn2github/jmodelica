@@ -1862,4 +1862,36 @@ aspect FormattedPrint {
 		postFormatting = bn.postFormatting;
 		super.copyFormattingFrom(node);
 	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// DEBUGGING:
+	//
+	// This section of the aspect contains attributes and methods that can be used for debugging pretty printing
+	// with preserved formatting.
+	//
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	syn int ASTNode.numberOfDefaultFormattingItems() {
+		int result = 0;
+		for (ASTNode node : this) {
+			result += node.numberOfDefaultFormattingItems();
+		}
+		return result;
+	}
+	
+	eq BaseNode.numberOfDefaultFormattingItems() {
+		int result = 0;
+		if (!preFormatting.isScanned() && !preFormatting.isEmptyDefault()) {
+			++result;
+		}
+		if (!insideFormatting.isScanned() && !insideFormatting.isEmptyDefault()) {
+			++result;
+		}
+		if (!postFormatting.isScanned() && !postFormatting.isEmptyDefault()) {
+			++result;
+		}
+		for (ASTNode node : this) {
+			result += node.numberOfDefaultFormattingItems();
+		}
+		return result;
+	}
 }
