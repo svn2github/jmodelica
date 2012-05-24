@@ -179,6 +179,7 @@ aspect FormattedPrint {
 					FormattingItem nextItem = clause.addPreFormatting(formattingIterator);
 					clause.addPostFormatting(formattingIterator, nextItem);
 					clause.addInsideFormatting(formattingInfo);
+					clause.formatting = null;
 				}
 			}
 		}
@@ -331,7 +332,7 @@ aspect FormattedPrint {
 			column = getColumn(getEnd());
 		}
 
-		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 3);
+		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 4);
 	}
 
 	@Override
@@ -362,7 +363,7 @@ aspect FormattedPrint {
 			column = getColumn(getEnd());
 		}
 
-		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 3);
+		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 4);
 	}
 
 	@Override
@@ -393,7 +394,7 @@ aspect FormattedPrint {
 			column = getColumn(getEnd());
 		}
 
-		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 5);
+		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 6);
 	}
 
 	@Override
@@ -424,7 +425,7 @@ aspect FormattedPrint {
 			column = getColumn(getEnd());
 		}
 
-		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 2);
+		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 3);
 	}
 
 	@Override
@@ -455,7 +456,7 @@ aspect FormattedPrint {
 			column = getColumn(getEnd());
 		}
 
-		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 2);
+		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 3);
 	}
 
 	@Override
@@ -486,7 +487,7 @@ aspect FormattedPrint {
 			column = getColumn(getEnd());
 		}
 
-		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 4);
+		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 5);
 	}
 
 	@Override
@@ -517,7 +518,7 @@ aspect FormattedPrint {
 			column = getColumn(getEnd());
 		}
 
-		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 4);
+		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 5);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1257,7 +1258,7 @@ aspect FormattedPrint {
 	    }
 	    
 	    for (Clause clause : originalComposition.getClauses()) {
-    		clause.doPrettyPrintFormatted(printer, printStream);
+    		clause.prettyPrintFormatted(printer, printStream);
     	}
 
 	    getEndDecl().doPrettyPrintFormatted(printer, printStream);
@@ -1893,5 +1894,62 @@ aspect FormattedPrint {
 			result += node.numberOfDefaultFormattingItems();
 		}
 		return result;
+	}
+	
+	syn ArrayList<BaseNode> ASTNode.nonScannedNodes() {
+		ArrayList<BaseNode> result = new ArrayList<BaseNode>();
+		for (ASTNode node : this) {
+			result.addAll(node.nonScannedNodes());
+		}
+		return result;
+	}
+	
+	eq BaseNode.nonScannedNodes() {
+		ArrayList<BaseNode> result = new ArrayList<BaseNode>();
+		if (!preFormatting.isScanned() && !preFormatting.isEmptyDefault()) {
+			result.add(this);
+		} else if (!insideFormatting.isScanned() && !insideFormatting.isEmptyDefault()) {
+			result.add(this);
+		} else if (!postFormatting.isScanned() && !postFormatting.isEmptyDefault()) {
+			result.add(this);
+		}
+		for (ASTNode node : this) {
+			result.addAll(node.nonScannedNodes());
+		}
+		return result;
+	}
+	
+	syn BaseNode ASTNode.ownsFormattingItem(int startLine, int startColumn) {
+		BaseNode owner = null;
+		for (ASTNode node : this) {
+			owner = node.ownsFormattingItem(startLine, startColumn);
+			if (owner != null) {
+				return owner;
+			}
+		}
+		
+		return null;
+	}
+	
+	eq BaseNode.ownsFormattingItem(int startLine, int startColumn) {
+		if (preFormatting.isScanned() && ((ScannedFormattingItem) preFormatting).getStartLine() == startLine && ((ScannedFormattingItem) preFormatting).getStartColumn() == startColumn) {
+			return this;
+		}
+		if (insideFormatting.isScanned() && ((ScannedFormattingItem) insideFormatting).getStartLine() == startLine && ((ScannedFormattingItem) insideFormatting).getStartColumn() == startColumn) {
+			return this;
+		}
+		if (postFormatting.isScanned() && ((ScannedFormattingItem) postFormatting).getStartLine() == startLine && ((ScannedFormattingItem) postFormatting).getStartColumn() == startColumn) {
+			return this;
+		}
+
+		BaseNode owner = null;
+		for (ASTNode node : this) {
+			owner = node.ownsFormattingItem(startLine, startColumn);
+			if (owner != null) {
+				return owner;
+			}
+		}
+		
+		return null;
 	}
 }

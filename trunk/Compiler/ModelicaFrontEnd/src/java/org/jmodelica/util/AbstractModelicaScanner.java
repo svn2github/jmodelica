@@ -6,7 +6,7 @@ import java.util.Map;
 public abstract class AbstractModelicaScanner extends beaver.Scanner {
 
 	private HashMap<Integer, Integer> lineBreakMap;
-	protected FormattingInfo formattingInfo;
+	private FormattingInfo formattingInfo;
 
 	public AbstractModelicaScanner() {
 		lineBreakMap = new HashMap<Integer, Integer>();
@@ -95,7 +95,7 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 			default:
 				if (currentSpaces.length() > 0) {
 					formattingInfo.addItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, currentSpaces.toString(),
-							line, startColumn, line, currentColumn);
+							line, startColumn, line, currentColumn - 1);
 					currentSpaces = new StringBuilder();
 				}
 				break;
