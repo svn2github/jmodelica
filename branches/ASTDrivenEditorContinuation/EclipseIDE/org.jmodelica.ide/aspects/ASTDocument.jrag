@@ -1,0 +1,115 @@
+aspect ASTDocument {
+	public String ASTNode.printPart(int startLine, int startColumn, int endLine, int endColumn, int length) {
+		BaseNode match = matchSourcePosition(null, startLine, startColumn, endLine, endColumn);
+
+		if (match == null) {
+			return null;
+		}
+
+		return match.stripOverflow(startLine, startColumn, endLine, endColumn, length);
+	}
+
+	syn BaseNode ASTNode.matchSourcePosition(BaseNode bestMatch, int startLine, int startColumn, int endLine, int endColumn) {
+		for (ASTNode node : this) {
+			bestMatch = node.matchSourcePosition(bestMatch, startLine, startColumn, endLine, endColumn);
+		}
+		return bestMatch;
+	}
+	
+	eq BaseNode.matchSourcePosition(BaseNode bestMatch, int startLine, int startColumn, int endLine, int endColumn) {
+		bestMatch = BaseNode.bestMatch(bestMatch, this, startLine, startColumn, endLine, endColumn);
+		
+		for (ASTNode node : this) {
+			BaseNode childBestMatch = node.matchSourcePosition(bestMatch, startLine, startColumn, endLine, endColumn);
+			bestMatch = BaseNode.bestMatch(childBestMatch, bestMatch, startLine, startColumn, endLine, endColumn);
+		}
+
+		return bestMatch;
+	}
+	
+	syn boolean BaseNode.spansRegion(int startLine, int startColumn, int endLine, int endColumn) {
+		if (getStartLineWithFormatting() > startLine) {
+			return false;
+		}
+		if (getStartLineWithFormatting() == startLine && getStartColumnWithFormatting() > startColumn) {
+			return false;
+		}
+		if (getEndLineWithFormatting() < endLine) {
+			return false;
+		}
+		if (getEndLineWithFormatting() == endLine && getEndColumnWithFormatting() < endColumn) {
+			return false;
+		}
+		return true;
+	}
+	
+	static BaseNode BaseNode.bestMatch(BaseNode match1, BaseNode match2, int startLine, int startColumn, int endLine, int endColumn) {
+		if (match1 == null || !match1.spansRegion(startLine, startColumn, endLine, endColumn)) {
+			return match2;
+		} else if (match2 == null || !match2.spansRegion(startLine, startColumn, endLine, endColumn)) {
+			return match1;
+		}
+
+		int score = match2.getStartLineWithFormatting() - match1.getStartLineWithFormatting();
+		score += match1.getEndLineWithFormatting() - match2.getEndLineWithFormatting();
+		if (score < 0) {
+			return match1;
+		} else if (score > 0) {
+			return match2;
+		} else if (match1.getStartLineWithFormatting() > match2.getStartLineWithFormatting()) {
+			return match1;
+		} else if (match1.getStartLineWithFormatting() < match2.getStartLineWithFormatting()) {
+			return match2;
+		}
+
+		// If this code is reached, both matches start on the same line and end on the same line.
+		score = match2.getStartColumnWithFormatting() - match1.getStartColumnWithFormatting();
+		score += match1.getEndLineWithFormatting() - match2.getEndLineWithFormatting();
+		if (score < 0) {
+			return match1;
+		} else if (score > 0) {
+			return match2;
+		}
+
+		return match1;
+	}
+	
+	syn int BaseNode.getStartLineWithFormatting() = (preFormatting.isScanned() ? ((ScannedFormattingItem) preFormatting).getStartLine() : Symbol.getLine(getStart()));
+	syn int BaseNode.getStartColumnWithFormatting() = (preFormatting.isScanned() ? ((ScannedFormattingItem) preFormatting).getStartColumn() : Symbol.getColumn(getStart()));
+	syn int BaseNode.getEndLineWithFormatting() = (postFormatting.isScanned() ? ((ScannedFormattingItem) postFormatting).getEndLine() : Symbol.getLine(getEnd()));
+	syn int BaseNode.getEndColumnWithFormatting() = (postFormatting.isScanned() ? ((ScannedFormattingItem) postFormatting).getEndColumn() : Symbol.getColumn(getEnd()));
+	
+	syn String BaseNode.stripOverflow(int startLine, int startColumn, int endLine, int endColumn, int length) {
+		String result = prettyPrintFormatted();
+		int currentLine = getStartLineWithFormatting();
+		int currentColumn = getStartColumnWithFormatting();
+		if (currentLine == 0) ++currentLine; if (currentColumn == 0) ++currentColumn;
+		int offset = 0;
+		
+		while (currentLine < startLine) {
+			if (offset >= result.length()) {
+				System.err.println("Incorrect match (overflow): " + getClass().getName() + " (" + getStartLineWithFormatting() + ", " + getStartColumnWithFormatting() + "; " + getEndLineWithFormatting() + ", " + getEndColumnWithFormatting() + ")" + " is best match for (" + startLine + ", " + startColumn + "; " + endLine + ", " + endColumn + ").");
+			}
+			switch (result.charAt(offset++)) {
+			case '\r':
+				if (result.charAt(offset) == '\n') {
+					++offset;
+				}
+			case '\n':
+				++currentLine;
+				currentColumn = 1;
+				break;
+			default:
+				++currentColumn;
+			}
+		}
+
+		int substringStart = offset + (startColumn - currentColumn);
+		int substringEnd = substringStart + length;
+		if (substringEnd > result.length()) {
+			System.err.println("Incorrect match: " + getClass().getName() + " (" + getStartLineWithFormatting() + ", " + getStartColumnWithFormatting() + "; " + getEndLineWithFormatting() + ", " + getEndColumnWithFormatting() + ")" + " is best match for (" + startLine + ", " + startColumn + "; " + endLine + ", " + endColumn + "). It should be " + length + " characters long. [" + substringStart + ", " + substringEnd + "], " + result.length() + ". Result was [" + result + "].");
+		}
+
+		return result.substring(substringStart, substringEnd);		
+	}
+}

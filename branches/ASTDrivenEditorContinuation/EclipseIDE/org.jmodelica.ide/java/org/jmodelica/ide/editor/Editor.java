@@ -111,6 +111,7 @@ private AnnotationFoldUpdater annotationFolds;
  */
 public Editor() {
     super();
+    setDocumentProvider(new ASTDocumentProvider());
     fSourceOutlinePage = 
         new SourceOutlinePage(this);
     fInstanceOutlinePage = 
@@ -279,6 +280,11 @@ protected void doSetInput(IEditorInput input) throws CoreException {
         file.inModelicaProject()
             ? new GlobalCompilationResult(file, this)
             : new LocalCompilationResult(file, this);
+
+    IDocument doc = this.getDocumentProvider().getDocument(input);
+    if (doc != null && doc instanceof ASTDocument) {
+    	((ASTDocument) doc).setAST(compResult);
+    }
 
     if (getSourceViewer() != null)
         update();
