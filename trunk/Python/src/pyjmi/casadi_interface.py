@@ -30,6 +30,7 @@ except:
 from pyfmi.fmi import unzip_fmux
 from pyjmi.common.core import BaseModel, get_temp_location
 from pyjmi.common import xmlparser
+from pyjmi.common.xmlparser import XMLException
 
 def convert_casadi_der_name(name):
     n = name.split('der_')[1]
@@ -99,13 +100,156 @@ class CasadiModel(BaseModel):
         raise NotImplementedError('Initialization of CasadiModel objects is ' +
                                   'not supported.')
     
-    def _set(self, name, value, recompute_dependent_parameters=True):
-        raise NotImplementedError('Setting variable values is not yet ' +
-                                  'supported.')
+    def set(self, names, values, update_dependent=True):
+        """
+        Set the value of independent parameters and recompute dependents.
+        
+        Parameters::
+            
+            names -- 
+                The names of the parameters to set.
+                
+                Type: string or list of strings
+                
+            values -- 
+                The new parameter values.
+                
+                Type: float or list of floats
+            
+            update_dependent --
+                Whether to update dependent parameter values afterwards.
+                
+                Default: True
+                Type: bool
+        
+        Raises::
+            
+            XMLException if variable was not found or if variable is not an
+            independent parameter.
+        
+        Example::
+            
+            CasadiModel.set('damper.d', 1.1)
+            CasadiModel.set(['damper.d', 'gear.a'], [1.1, 10])
+        
+        Limitations::
+            
+            New parameter values only affect dynamic and initial equations.
+            Attributes like min and nominal that depend on parameters are not
+            updated. These instead use the parameter values set at compile
+            time.
+        """
+        if isinstance(names, basestring):
+            self._set(names, values)
+        else:
+            for (name, value) in zip(names, values):
+                self._set(name, value)
+        if update_dependent:
+            casadi.updateDependent(self.ocp)
+    
+    def _set(self, name, value):
+        """ 
+        Set the value of an independent parameter and recompute dependents.
+        
+        Parameters::
+            
+            name -- 
+                The name of the parameter to set.
+                
+                Type: string
+                
+            value -- 
+                The new parameter value.
+                
+                Type: float
+        
+        Raises::
+            
+            XMLException if name not present in model or if variable is not an
+            independent parameter.
+        """
+        try:
+            variable = self.ocp.variable(name)
+        except RuntimeError:
+            raise XMLException("Could not find variable: " + name)
+        if variable.getVariability() != casadi.PARAMETER:
+            raise XMLException(name + " is not a parameter.")
+        if variable.getFree():
+            raise XMLException(name + " is a free parameter.")
+        if variable.getCategory() == casadi.CAT_DEPENDENT_PARAMETER:
+            raise XMLException(name + " is a dependent parameter.")
+        variable.setStart(value)
+    
+    def get(self, names):
+        """
+        Get the values of non-free parameters.
+        
+        Parameters::
+            
+            names -- 
+                The name of the parameters to get.
+                
+                Type: string or list of strings
+        
+        Returns::
+            
+            values --
+                Parameter values.
+                
+                Type: float or list of floats
+        
+        Raises::
+            
+            XMLException if name not present in model or if variable is not a
+            non-free parameter.
+        
+        Example::
+            
+            CasadiModel.get('damper.d')
+            CasadiModel.get(['damper.d', 'gear.a'])
+        """
+        if isinstance(names, basestring):
+            return self._get(names)
+        else:
+            return [self._get(name) for name in names]
     
     def _get(self, name):
-        raise NotImplementedError('Getting variable values using this ' +
-                                  'method is not yet supported.')
+        """
+        Get the value of a non-free parameter.
+        
+        Parameters::
+            
+            name -- 
+                The name of the parameter to get.
+                
+                Type: string
+        
+        Returns::
+            
+            value --
+                Parameter value.
+                
+                Type: float
+        
+        Raises::
+            
+            XMLException if name not present in model or if variable is not a
+            non-free parameter.
+        
+        Example::
+            
+            CasadiModel.get('damper.d')
+            CasadiModel.get(['damper.d', 'gear.a'])
+        """
+        try:
+            variable = self.ocp.variable(name)
+        except RuntimeError:
+            raise XMLException("Could not find variable: " + name)
+        if variable.getVariability() != casadi.PARAMETER:
+            raise XMLException(name + " is not a parameter.")
+        if variable.getFree():
+            raise XMLException(name + " is a free parameter.")
+        return variable.getStart()
     
     def get_model_description(self):
         return self.xmldoc
