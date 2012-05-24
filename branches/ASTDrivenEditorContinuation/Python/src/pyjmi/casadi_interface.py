@@ -30,6 +30,7 @@ except:
 from pyfmi.fmi import unzip_fmux
 from pyjmi.common.core import BaseModel, get_temp_location
 from pyjmi.common import xmlparser
+from pyjmi.common.xmlparser import XMLException
 
 def convert_casadi_der_name(name):
     n = name.split('der_')[1]
@@ -64,12 +65,6 @@ class CasadiModel(BaseModel):
             Type: bool
             Default: False
         
-        scale_equations --
-            Whether to scale the equations using CasADi's algorithm.
-            
-            Type: bool
-            Default: False
-        
         verbose --
             Whether to enable verbose output from the XML parsing.
             
@@ -77,8 +72,7 @@ class CasadiModel(BaseModel):
             Default: True
     """
     
-    def __init__(self, name, path='.', scale_variables=False,
-                 scale_equations=False, verbose=True):
+    def __init__(self, name, path='.', scale_variables=False, verbose=True):
         
         #Create temp binary
         self._fmuxnames = unzip_fmux(archive=name, path=path)
@@ -88,8 +82,7 @@ class CasadiModel(BaseModel):
         self.xmldoc = xmlparser.ModelDescription(self._tempxml)
         
         #Load CasADi interface
-        self._load_xml_to_casadi(self._tempxml, scale_variables,
-                                 scale_equations, verbose)
+        self._load_xml_to_casadi(self._tempxml, scale_variables, verbose)
     
     def simulate(self):
         raise NotImplementedError('Simulation of CasadiModel objects is not ' +
@@ -107,13 +100,156 @@ class CasadiModel(BaseModel):
         raise NotImplementedError('Initialization of CasadiModel objects is ' +
                                   'not supported.')
     
-    def _set(self, name, value, recompute_dependent_parameters=True):
-        raise NotImplementedError('Setting variable values is not yet ' +
-                                  'supported.')
+    def set(self, names, values, update_dependent=True):
+        """
+        Set the value of independent parameters and recompute dependents.
+        
+        Parameters::
+            
+            names -- 
+                The names of the parameters to set.
+                
+                Type: string or list of strings
+                
+            values -- 
+                The new parameter values.
+                
+                Type: float or list of floats
+            
+            update_dependent --
+                Whether to update dependent parameter values afterwards.
+                
+                Default: True
+                Type: bool
+        
+        Raises::
+            
+            XMLException if variable was not found or if variable is not an
+            independent parameter.
+        
+        Example::
+            
+            CasadiModel.set('damper.d', 1.1)
+            CasadiModel.set(['damper.d', 'gear.a'], [1.1, 10])
+        
+        Limitations::
+            
+            New parameter values only affect dynamic and initial equations.
+            Attributes like min and nominal that depend on parameters are not
+            updated. These instead use the parameter values set at compile
+            time.
+        """
+        if isinstance(names, basestring):
+            self._set(names, values)
+        else:
+            for (name, value) in zip(names, values):
+                self._set(name, value)
+        if update_dependent:
+            casadi.updateDependent(self.ocp)
+    
+    def _set(self, name, value):
+        """ 
+        Set the value of an independent parameter and recompute dependents.
+        
+        Parameters::
+            
+            name -- 
+                The name of the parameter to set.
+                
+                Type: string
+                
+            value -- 
+                The new parameter value.
+                
+                Type: float
+        
+        Raises::
+            
+            XMLException if name not present in model or if variable is not an
+            independent parameter.
+        """
+        try:
+            variable = self.ocp.variable(name)
+        except RuntimeError:
+            raise XMLException("Could not find variable: " + name)
+        if variable.getVariability() != casadi.PARAMETER:
+            raise XMLException(name + " is not a parameter.")
+        if variable.getFree():
+            raise XMLException(name + " is a free parameter.")
+        if variable.getCategory() == casadi.CAT_DEPENDENT_PARAMETER:
+            raise XMLException(name + " is a dependent parameter.")
+        variable.setStart(value)
+    
+    def get(self, names):
+        """
+        Get the values of non-free parameters.
+        
+        Parameters::
+            
+            names -- 
+                The name of the parameters to get.
+                
+                Type: string or list of strings
+        
+        Returns::
+            
+            values --
+                Parameter values.
+                
+                Type: float or list of floats
+        
+        Raises::
+            
+            XMLException if name not present in model or if variable is not a
+            non-free parameter.
+        
+        Example::
+            
+            CasadiModel.get('damper.d')
+            CasadiModel.get(['damper.d', 'gear.a'])
+        """
+        if isinstance(names, basestring):
+            return self._get(names)
+        else:
+            return [self._get(name) for name in names]
     
     def _get(self, name):
-        raise NotImplementedError('Getting variable values using this ' +
-                                  'method is not yet supported.')
+        """
+        Get the value of a non-free parameter.
+        
+        Parameters::
+            
+            name -- 
+                The name of the parameter to get.
+                
+                Type: string
+        
+        Returns::
+            
+            value --
+                Parameter value.
+                
+                Type: float
+        
+        Raises::
+            
+            XMLException if name not present in model or if variable is not a
+            non-free parameter.
+        
+        Example::
+            
+            CasadiModel.get('damper.d')
+            CasadiModel.get(['damper.d', 'gear.a'])
+        """
+        try:
+            variable = self.ocp.variable(name)
+        except RuntimeError:
+            raise XMLException("Could not find variable: " + name)
+        if variable.getVariability() != casadi.PARAMETER:
+            raise XMLException(name + " is not a parameter.")
+        if variable.getFree():
+            raise XMLException(name + " is a free parameter.")
+        return variable.getStart()
     
     def get_model_description(self):
         return self.xmldoc
@@ -123,7 +259,7 @@ class CasadiModel(BaseModel):
         Returns the model name.
         """
         return self.xmldoc.get_model_name()
-
+    
     def get_identifier(self):
         """
         Returns the model identifier.
@@ -207,28 +343,28 @@ class CasadiModel(BaseModel):
     
     def get_casadi_ocp(self):
         return self.ocp
-        
+    
     def get_n_x(self):
         return self.n_x
     
     def get_n_p(self):
         return self.n_p
-
+    
     def get_n_u(self):
         return self.n_u
-
+    
     def get_n_w(self):
         return self.n_w
-        
+    
     def get_dx_sf(self):
         return self.dx_sf
-        
+    
     def get_dx(self):
         return self.dx
     
     def get_x(self):
         return self.x
-        
+    
     def get_u(self):
         return self.u
     
@@ -256,12 +392,26 @@ class CasadiModel(BaseModel):
         return self.xmldoc.get_variability(variablename)
     
     def get_pd_val(self):
-        parameters = [p for p in self.ocp.y
-                      if p.getVariability() == casadi.PARAMETER]
+        """
+        Get non-free parameter values.
+        
+        Returns::
+        
+            List of 3-tuples (a, b, c), where
+                
+                a is parameter name (string)
+                b is value reference number (int)
+                c is parameter value (float64)
+        """
+        pd_vals_fcn = casadi.SXFunction(
+                [[]], [[p.getStart() for p in self._parameters]])
+        pd_vals_fcn.init()
+        pd_vals_fcn.evaluate()
+        pd_vals = pd_vals_fcn.output().toArray().reshape(-1)
+        
         pd = []
-        pd_vals = self.ocp.dep.toArray().astype('float').reshape(-1)
-        for i in xrange(len(parameters)):
-            p = parameters[i]
+        for i in xrange(len(pd_vals)):
+            p = self._parameters[i]
             name = p.getName()
             if not name == "startTime" and not name == "finalTime":
                 pd += [(name, p.getValueReference(), pd_vals[i])]
@@ -275,240 +425,220 @@ class CasadiModel(BaseModel):
     
     def get_x_sf(self):
         return self.x_sf
-
+    
     def get_u_sf(self):
         return self.u_sf
-        
+    
     def get_p_sf(self):
         return self.p_sf
-
+    
     def get_w_sf(self):
         return self.w_sf
-
+    
     def get_dx_vr_map(self):
         return self.dx_vr_map
-
+    
     def get_x_vr_map(self):
         return self.x_vr_map
-        
+    
     def get_p_vr_map(self):
         return self.p_vr_map
-
+    
     def get_u_vr_map(self):
         return self.u_vr_map
-
+    
     def get_w_vr_map(self):
         return self.w_vr_map
-        
-    def get_dae_F(self):
-        return self.dae_F
-        
-    def get_init_F0(self):
-        return self.init_F0
-        
-    def get_opt_J(self):
+    
+    def get_dae_F(self, update_expressions=True):
         """
-        Get the Mayer cost functional.
+        Get function evaluating DAE residual.
+        
+        Parameters::
+            
+            update_expressions --
+                Whether to update OCP expressions using current parameter
+                values.
+        
+        Returns::
+            
+            dae_F --
+                Function evaluating DAE residual.
+                
+                Type: SXFunction
         """
-        return self.opt_J
-        
-    def get_opt_L(self):
+        if update_expressions:
+            self.update_expressions()
+        dae_F = casadi.SXFunction([self.ocp_inputs], [self.dae])
+        dae_F.init()
+        return dae_F
+    
+    def get_init_F0(self, update_expressions=True):
         """
-        Get the Lagrange cost functional.
+        Get function evaluating DAE initial equation residual.
+        
+        Parameters::
+            
+            update_expressions --
+                Whether to update OCP expressions using current parameter
+                values.
+        
+        Returns::
+            
+            init_F0 --
+                Function evaluating DAE initial equation residual.
+                
+                Type: SXFunction
         """
-        return self.opt_L
+        if update_expressions:
+            self.update_expressions()
+        init_F0 = casadi.SXFunction([self.ocp_inputs], [self.initial])
+        init_F0.init()
+        return init_F0
+    
+    def get_opt_J(self, update_expressions=True):
+        """
+        Get function evaluating Mayer cost function.
         
-    def _convert_to_ode(self):
-        self.ocp.makeExplicit()
+        Parameters::
+            
+            update_expressions --
+                Whether to update OCP expressions using current parameter
+                values.
         
-        if len(self.ocp.xa) > 0 or self.ocp.ode.empty():
-            raise RuntimeError("Unable to reformulate as ODE.")
-        
-        self.ocp_ode_inputs = []
-        self.ocp_ode_inputs += list(self.p)
-        self.ocp_ode_inputs += list(self.x)
-        self.ocp_ode_inputs += list(self.u)
-        self.ocp_ode_inputs += [self.t]
-        
-        self.ocp_ode_init_inputs = []
-        self.ocp_ode_init_inputs += list(self.p)
-        self.ocp_ode_init_inputs += list(self.x)
-        self.ocp_ode_init_inputs += [self.t]
-        
-        self.ode_F = casadi.SXFunction([self.ocp_ode_inputs],
-                                       [self.ocp.ode])
-        self.ode_F.init()
-        
-        # The initial equations
-        self.ode_F0 = casadi.SXFunction([self.ocp_ode_init_inputs],
-                                        [self.ocp.initial])
-        self.ode_F0.init()
-        
-        # The Lagrange cost function
-        if self.ocp.lterm.numel() > 0:
-            self.opt_ode_L = casadi.SXFunction([self.ocp_ode_inputs],
-                                               [[self.ocp.lterm[0]]])
-            self.opt_ode_L.init()
-        else:
-            self.opt_ode_L = None
-        
-        # The Mayer cost function
+        Returns::
+            
+            opt_J --
+                Function evaluating the Mayer cost term. None if there is no
+                Mayer term.
+                
+                Type: SXFunction or None
+        """
+        if update_expressions:
+            self.update_expressions()
         if self.ocp.mterm.numel() > 0:
-            self.ocp_ode_mterm_inputs = []
-            self.ocp_ode_mterm_inputs += list(self.p)
-            self.ocp_ode_mterm_inputs += [
-                    x.atTime(self.ocp.tf, True) for x in self.ocp.xd]
-            self.ocp_ode_mterm_inputs += [self.t]
-            self.opt_ode_J = casadi.SXFunction(
-                    [self.ocp_ode_mterm_inputs], [[self.ocp.mterm[0]]])
-            self.opt_ode_J.init()
+            tf = self.ocp.variable('finalTime').getStart()
+            mterm_inputs = []
+            mterm_inputs += list(self.p)
+            mterm_inputs += [x.atTime(tf, True) for
+                             x in self._var_vectors['x']]
+            mterm_inputs += [u.atTime(tf, True) for
+                             u in self._var_vectors['u']]
+            mterm_inputs += [w.atTime(tf, True) for
+                             w in self._var_vectors['w']]
+            mterm_inputs += [self.t]
+            opt_J = casadi.SXFunction([mterm_inputs],
+                                      [[self.mterm]])
+            opt_J.init()
         else:
-            self.opt_ode_J = None
+            opt_J = None
+        return opt_J
+    
+    def get_opt_L(self, update_expressions=True):
+        """
+        Get function evaluating Lagrange cost function.
         
-        # Boundary Constraints
-        self.opt_ode_Cineq = [] #Inequality
-        self.opt_ode_C = [] #Equality
-        # Modify equality constraints to be on type g(x)=0 (instead of g(x)=a)
-        lb = N.array(self.ocp.path_min, dtype=N.float)
-        ub = N.array(self.ocp.path_max, dtype=N.float)
-        for i in range(len(ub)):
-            if lb[i] == ub[i]: #The constraint is an equality
-                self.opt_ode_C += [self.ocp.path[i] -
-                                   self.ocp.path_max[i]]
-                #self.ocp.cfcn_ub[i] = casadi.SX(0.0)
-                #self.ocp.cfcn_lb[i] = casadi.SX(0.0)
-            else: #The constraint is an inequality
-                if   lb[i] == -N.inf:
-                    self.opt_ode_Cineq += [(1.0) * self.ocp.path[i] -
-                                           self.ocp.path_max[i]]
-                elif ub[i] == N.inf:
-                    self.opt_ode_Cineq += [(-1.0) * self.ocp.path[i] +
-                                           self.ocp.path_min[i]]
-                else:
-                    self.opt_ode_Cineq += [(1.0) * self.ocp.path[i] -
-                                           self.ocp.path_max[i]]
-                    self.opt_ode_Cineq += [(-1.0) * self.ocp.path[i] +
-                                           self.ocp.path_min[i]]
+        Parameters::
+            
+            update_expressions --
+                Whether to update OCP expressions using current parameter
+                values.
         
-        self.ocp_ode_boundary_inputs = []
-        self.ocp_ode_boundary_inputs += list(self.p)
-        self.ocp_ode_boundary_inputs += [x.atTime(self.ocp.t0, True) for
-                                         x in self.ocp.xd]
-        self.ocp_ode_boundary_inputs += [self.t]
-        self.ocp_ode_boundary_inputs += [x.atTime(self.ocp.tf, True) for
-                                         x in self.ocp.xd]
-        self.ocp_ode_boundary_inputs += [self.t]
-        self.opt_ode_C = casadi.SXFunction(
-                [self.ocp_ode_boundary_inputs], [self.opt_ode_C])
-        self.opt_ode_C.init()
-        self.opt_ode_Cineq = casadi.SXFunction(
-                [self.ocp_ode_boundary_inputs], [self.opt_ode_Cineq])
-        self.opt_ode_Cineq.init()
-        
-        if self.scale_variables:
-            # Scale model
-            # Get nominal values for scaling
-            x_nominal = self.xmldoc.get_x_nominal(include_alias = False)
-            u_nominal = self.xmldoc.get_u_nominal(include_alias = False)
+        Returns::
             
-            for vr, val in x_nominal:
-                if val != None:
-                    self.x_sf[self.x_vr_map[vr]] = N.abs(val)
-
-            for vr, val in u_nominal:
-                if val != None:
-                    self.u_sf[self.u_vr_map[vr]] = N.abs(val)
-
-            # Create new, scaled variables
-            self.x_scaled = self.x_sf*self.x
-            self.u_scaled = self.u_sf*self.u
-            
-            self.ocp_ode_inputs_scaled = []
-            self.ocp_ode_inputs_scaled += list(self.p)
-            self.ocp_ode_inputs_scaled += list(self.x_scaled)
-            self.ocp_ode_inputs_scaled += list(self.u_scaled)
-            self.ocp_ode_inputs_scaled += [self.t]
-            
-            self.ocp_ode_init_inputs_scaled = []
-            self.ocp_ode_init_inputs_scaled += list(self.p)
-            self.ocp_ode_init_inputs_scaled += list(self.x_scaled)
-            self.ocp_ode_init_inputs_scaled += [self.t]
-            
-            self.ocp_ode_mterm_inputs_scaled = []
-            self.ocp_ode_mterm_inputs_scaled += list(self.p)
-            self.ocp_ode_mterm_inputs_scaled += [
-                    self.x_sf[ind] * x.atTime(self.ocp.tf, True) for
-                    (ind, x) in enumerate(self.ocp.x)]
-            self.ocp_ode_mterm_inputs_scaled += [self.t]
-            
-            # Substitute scaled variables
-            self.ode_F = list(self.ode_F.eval(
-                    [self.ocp_ode_inputs_scaled])[0])
-            self.ode_F0 = list(self.ode_F0.eval(
-                    [self.ocp_ode_init_inputs_scaled])[0])
-            if self.opt_ode_J != None:
-                self.opt_ode_J = list(self.opt_ode_J.eval(
-                        [self.ocp_ode_mterm_inputs_scaled])[0])
-            if self.opt_L!=None:
-                self.opt_ode_L = list(self.opt_ode_L.eval(
-                        [self.ocp_ode_inputs_scaled])[0])
-            
-            self.ode_F = casadi.SXFunction([self.ocp_ode_inputs], [self.ode_F])
-            self.ode_F0 = casadi.SXFunction([self.ocp_ode_init_inputs], 
-                                            [self.ode_F0])
-            
-            if self.opt_ode_J != None:
-                self.opt_ode_J = casadi.SXFunction([self.ocp_ode_mterm_inputs],
-                                                   [[self.opt_ode_J]])
-            if self.opt_ode_J != None:
-                self.opt_ode_L = casadi.SXFunction([self.ocp_ode_inputs],
-                                                   [[self.opt_ode_L]])
+            opt_L --
+                Function evaluating the Lagrange cost term. None if there is no
+                Lagrange term.
+                
+                Type: SXFunction or None
+        """
+        if update_expressions:
+            self.update_expressions()
+        if self.ocp.lterm.numel() > 0:
+            self.opt_L = casadi.SXFunction([self.ocp_inputs], [[self.lterm]])
+            self.opt_L.init()
+        else:
+            self.opt_L = None
+        return self.opt_L
     
     def get_opt_ode_L(self):
         return self.opt_ode_L
-
+    
     def get_opt_ode_J(self):
         return self.opt_ode_J    
     
     def get_ode_F(self):
         return self.ode_F
-        
+    
     def get_ode_F0(self):
         return self.ode_F0
-        
-    def _load_xml_to_casadi(self, xml, scale_variables, scale_equations,
-                            verbose):
+    
+    def update_expressions(self):
+        """
+        Update OCP expressions using current parameter values.
+        """
+        [self.initial, self.dae, self.path, self.mterm, self.lterm] = \
+                casadi.substitute([self.ocp.initial, self.ocp.dae,
+                                   self.ocp.path, self.ocp.mterm,
+                                   self.ocp.lterm],
+                                  [p.var() for p in self._parameters],
+                                  [p.getStart() for p in self._parameters])
+    
+    def _load_xml_to_casadi(self, xml, scale_variables, verbose):
         # Create a symbolic OCP
         self.ocp = casadi.SymbolicOCP()
         options = {}
         self.scale_variables = scale_variables
         options["scale_variables"] = scale_variables
-        options["scale_equations"] = scale_equations
         options["verbose"] = verbose
+        options["sort_equations"] = False
+        options["eliminate_dependent"] = False
         self.ocp.parseFMI(xml, options)
+        self.ocp.sortType(True)
+        casadi.updateDependent(self.ocp)
+        
+        # Store list of non-free parameters
+        self._parameters = ([pi for pi in self.ocp.pi] +
+                            [pd for pd in self.ocp.pd])
+        
+        # Check the absence of multiple Mayer and Lagrange terms
+        if self.ocp.lterm.numel() > 1:
+            raise NotImplementedError("Multiple Lagrange terms are not " +
+                                      "supported.")
+        if self.ocp.mterm.numel() > 1:
+            raise NotImplementedError("Multiple Mayer terms are not " +
+                                      "supported.")
         
         # Identify variables
         names = {'x': self.xmldoc.get_x_variable_names,
                  'u': self.xmldoc.get_u_variable_names,
                  'w': self.xmldoc.get_w_variable_names,
                  'p_opt': self.xmldoc.get_p_opt_variable_names}
-        variables = {'u': self.ocp.u, 'p_opt': self.ocp.p}
+        variables = {}
         variables['x'] = [v for v in self.ocp.x if v.isDifferential()]
+        variables['u'] = self.ocp.u
         variables['w'] = [v for v in
                           self.ocp.x if not v.isDifferential()]
-        var_vectors = {}
+        variables['p_opt'] = self.ocp.p_free
         
         # Make sure the variables appear in value reference order
+        var_vectors = {}
         for var_type in names:
             var_dict = dict((repr(v), v) for v in variables[var_type])
             name_dict = dict((x[0], x[1]) for x in names[var_type](False))
-            var_vectors[var_type] = casadi.VariableVector(len(var_dict))
+            if var_type == 'p_opt':
+                var_vectors[var_type] = casadi.VariableVector(
+                        len(var_dict) - self.xmldoc.get_opt_finaltime_free() -
+                        self.xmldoc.get_opt_starttime_free())
+            else:
+                var_vectors[var_type] = casadi.VariableVector(len(var_dict))
             i = 0
             for vr in sorted(name_dict):
                 if name_dict[vr] == "finalTime":
                     continue
                 var_vectors[var_type][i] = var_dict[name_dict[vr]]
                 i = i + 1
+        self._var_vectors = var_vectors
         
         # Create symbolic variables
         self.dx = casadi.der(var_vectors['x'])
@@ -555,41 +685,6 @@ class CasadiModel(BaseModel):
         self.ocp_inputs += list(self.w)
         self.ocp_inputs += [self.t]
         
-        # The DAE residual function
-        self.dae_F = casadi.SXFunction([self.ocp_inputs],
-                                       [self.ocp.dae])
-        self.dae_F.init()
-        
-        # The initial equations
-        self.init_F0 = casadi.SXFunction([self.ocp_inputs],
-                                         [self.ocp.initial])
-        self.init_F0.init()
-        
-        # The Mayer cost function
-        if self.ocp.mterm.numel() > 0:
-            self.ocp_mterm_inputs = []
-            self.ocp_mterm_inputs += list(self.p)
-            self.ocp_mterm_inputs += [x.atTime(self.ocp.tf, True) for
-                                      x in var_vectors['x']]
-            self.ocp_mterm_inputs += [u.atTime(self.ocp.tf, True) for
-                                      u in var_vectors['u']]
-            self.ocp_mterm_inputs += [w.atTime(self.ocp.tf, True) for
-                                      w in var_vectors['w']]
-            self.ocp_mterm_inputs += [self.t]
-            self.opt_J = casadi.SXFunction([self.ocp_mterm_inputs],
-                                           [[self.ocp.mterm[0]]])
-            self.opt_J.init()
-        else:
-            self.opt_J = None
-        
-        # The Lagrange cost function
-        if self.ocp.lterm.numel() > 0:
-            self.opt_L = casadi.SXFunction([self.ocp_inputs],
-                                           [self.ocp.lterm[0]])
-            self.opt_L.init()
-        else:
-            self.opt_L = None
-        
         # Count variables
         self.n_x = len(self.x)
         self.n_u = len(self.u)
@@ -628,3 +723,158 @@ class CasadiModel(BaseModel):
             for vr, val in p_nominal:
                 if val != None:
                     self.p_sf[self.p_vr_map[vr]] = N.abs(val)
+    
+    def _convert_to_ode(self):
+        self.ocp.makeExplicit()
+        
+        if len(self.ocp.xa) > 0 or self.ocp.ode.empty():
+            raise RuntimeError("Unable to reformulate as ODE.")
+        
+        [self.ode] = casadi.substitute([self.ocp.ode],
+                                       [pi.var() for pi in self.ocp.pi] +
+                                       [pd.var() for pd in self.ocp.pd],
+                                       [pi.getStart() for pi in self.ocp.pi] +
+                                       [pd.getStart() for pd in self.ocp.pd])
+        
+        t0 = self.ocp.variable('startTime').getStart()
+        tf = self.ocp.variable('finalTime').getStart()
+        
+        self.ocp_ode_inputs = []
+        self.ocp_ode_inputs += list(self.p)
+        self.ocp_ode_inputs += list(self.x)
+        self.ocp_ode_inputs += list(self.u)
+        self.ocp_ode_inputs += [self.t]
+        
+        self.ocp_ode_init_inputs = []
+        self.ocp_ode_init_inputs += list(self.p)
+        self.ocp_ode_init_inputs += list(self.x)
+        self.ocp_ode_init_inputs += [self.t]
+        
+        
+        self.ode_F = casadi.SXFunction([self.ocp_ode_inputs], [self.ode])
+        self.ode_F.init()
+        
+        # The initial equations
+        self.ode_F0 = casadi.SXFunction([self.ocp_ode_init_inputs],
+                                        [self.initial])
+        self.ode_F0.init()
+        
+        # The Lagrange cost function
+        if self.lterm.numel() > 0:
+            self.opt_ode_L = casadi.SXFunction([self.ocp_ode_inputs],
+                                               [[self.lterm[0]]])
+            self.opt_ode_L.init()
+        else:
+            self.opt_ode_L = None
+        
+        # The Mayer cost function
+        if self.mterm.numel() > 0:
+            self.ocp_ode_mterm_inputs = []
+            self.ocp_ode_mterm_inputs += list(self.p)
+            self.ocp_ode_mterm_inputs += [
+                    x.atTime(tf, True) for x in self.ocp.xd]
+            self.ocp_ode_mterm_inputs += [self.t]
+            self.opt_ode_J = casadi.SXFunction(
+                    [self.ocp_ode_mterm_inputs], [[self.mterm[0]]])
+            self.opt_ode_J.init()
+        else:
+            self.opt_ode_J = None
+        
+        # Boundary Constraints
+        self.opt_ode_Cineq = [] #Inequality
+        self.opt_ode_C = [] #Equality
+        # Modify equality constraints to be on type g(x)=0 (instead of g(x)=a)
+        lb = N.array(self.ocp.path_min, dtype=N.float)
+        ub = N.array(self.ocp.path_max, dtype=N.float)
+        for i in range(len(ub)):
+            if lb[i] == ub[i]: #The constraint is an equality
+                self.opt_ode_C += [self.path[i] -
+                                   self.ocp.path_max[i]]
+                #self.ocp.cfcn_ub[i] = casadi.SX(0.0)
+                #self.ocp.cfcn_lb[i] = casadi.SX(0.0)
+            else: #The constraint is an inequality
+                if   lb[i] == -N.inf:
+                    self.opt_ode_Cineq += [(1.0) * self.path[i] -
+                                           self.ocp.path_max[i]]
+                elif ub[i] == N.inf:
+                    self.opt_ode_Cineq += [(-1.0) * self.path[i] +
+                                           self.ocp.path_min[i]]
+                else:
+                    self.opt_ode_Cineq += [(1.0) * self.path[i] -
+                                           self.ocp.path_max[i]]
+                    self.opt_ode_Cineq += [(-1.0) * self.path[i] +
+                                           self.ocp.path_min[i]]
+        
+        self.ocp_ode_boundary_inputs = []
+        self.ocp_ode_boundary_inputs += list(self.p)
+        self.ocp_ode_boundary_inputs += [x.atTime(t0, True) for
+                                         x in self.ocp.xd]
+        self.ocp_ode_boundary_inputs += [self.t]
+        self.ocp_ode_boundary_inputs += [x.atTime(tf, True) for
+                                         x in self.ocp.xd]
+        self.ocp_ode_boundary_inputs += [self.t]
+        self.opt_ode_C = casadi.SXFunction(
+                [self.ocp_ode_boundary_inputs], [self.opt_ode_C])
+        self.opt_ode_C.init()
+        self.opt_ode_Cineq = casadi.SXFunction(
+                [self.ocp_ode_boundary_inputs], [self.opt_ode_Cineq])
+        self.opt_ode_Cineq.init()
+        
+        if self.scale_variables:
+            # Scale model
+            # Get nominal values for scaling
+            x_nominal = self.xmldoc.get_x_nominal(include_alias = False)
+            u_nominal = self.xmldoc.get_u_nominal(include_alias = False)
+            
+            for vr, val in x_nominal:
+                if val != None:
+                    self.x_sf[self.x_vr_map[vr]] = N.abs(val)
+
+            for vr, val in u_nominal:
+                if val != None:
+                    self.u_sf[self.u_vr_map[vr]] = N.abs(val)
+
+            # Create new, scaled variables
+            self.x_scaled = self.x_sf*self.x
+            self.u_scaled = self.u_sf*self.u
+            
+            self.ocp_ode_inputs_scaled = []
+            self.ocp_ode_inputs_scaled += list(self.p)
+            self.ocp_ode_inputs_scaled += list(self.x_scaled)
+            self.ocp_ode_inputs_scaled += list(self.u_scaled)
+            self.ocp_ode_inputs_scaled += [self.t]
+            
+            self.ocp_ode_init_inputs_scaled = []
+            self.ocp_ode_init_inputs_scaled += list(self.p)
+            self.ocp_ode_init_inputs_scaled += list(self.x_scaled)
+            self.ocp_ode_init_inputs_scaled += [self.t]
+            
+            self.ocp_ode_mterm_inputs_scaled = []
+            self.ocp_ode_mterm_inputs_scaled += list(self.p)
+            self.ocp_ode_mterm_inputs_scaled += [
+                    self.x_sf[ind] * x.atTime(tf, True) for
+                    (ind, x) in enumerate(self.ocp.x)]
+            self.ocp_ode_mterm_inputs_scaled += [self.t]
+            
+            # Substitute scaled variables
+            self.ode_F = list(self.ode_F.eval(
+                    [self.ocp_ode_inputs_scaled])[0])
+            self.ode_F0 = list(self.ode_F0.eval(
+                    [self.ocp_ode_init_inputs_scaled])[0])
+            if self.opt_ode_J != None:
+                self.opt_ode_J = list(self.opt_ode_J.eval(
+                        [self.ocp_ode_mterm_inputs_scaled])[0])
+            if self.opt_L!=None:
+                self.opt_ode_L = list(self.opt_ode_L.eval(
+                        [self.ocp_ode_inputs_scaled])[0])
+            
+            self.ode_F = casadi.SXFunction([self.ocp_ode_inputs], [self.ode_F])
+            self.ode_F0 = casadi.SXFunction([self.ocp_ode_init_inputs], 
+                                            [self.ode_F0])
+            
+            if self.opt_ode_J != None:
+                self.opt_ode_J = casadi.SXFunction([self.ocp_ode_mterm_inputs],
+                                                   [[self.opt_ode_J]])
+            if self.opt_ode_J != None:
+                self.opt_ode_L = casadi.SXFunction([self.ocp_ode_inputs],
+                                                   [[self.opt_ode_L]])

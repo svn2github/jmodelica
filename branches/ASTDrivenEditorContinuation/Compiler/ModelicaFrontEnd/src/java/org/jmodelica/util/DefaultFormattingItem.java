@@ -29,9 +29,9 @@ public class DefaultFormattingItem extends FormattingItem {
 
 	@Override
 	public FormattingItem mergeItems(Adjacency where, FormattingItem otherItem) {
-		if (where == Adjacency.NONE || otherItem instanceof EmptyFormattingItem) {
+		if (where == Adjacency.NONE || otherItem.isEmptyDefault()) {
 			return this;
-		} else if (otherItem instanceof ScannedFormattingItem) {
+		} else if (otherItem.isScanned()) {
 			return otherItem;
 		}
 		
@@ -67,5 +67,20 @@ public class DefaultFormattingItem extends FormattingItem {
 		}
 		
 		return new DefaultFormattingItem(dataBuilder.toString());
+	}
+	
+	@Override
+	public final boolean isScanned() {
+		return false;
+	}
+	
+	@Override
+	public final boolean isScannedMixed() {
+		return false;
+	}
+	
+	@Override
+	public boolean isEmptyDefault() {
+		return false;
 	}
 }

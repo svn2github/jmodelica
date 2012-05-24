@@ -403,7 +403,27 @@
                                                     getName(0).getComment(),
                                                     getConstrainingClauseOpt(),
                                                     getComment());
-                c.setLocationNoTree(this, this, getName(0));
+
+                ASTNode startNode =  getClassName();
+                if (hasRedeclare()) {
+                	startNode = getRedeclare();
+                } else if (hasFinal()) {
+                	startNode = getFinal();
+                } else if (hasInner()) {
+                	startNode = getInner();
+                } else if (hasOuter()) {
+                	startNode = getOuter();
+                } else if (hasReplaceable()) {
+                	startNode = getReplaceable();
+                } else if (hasTypePrefixFlow()) {
+                	startNode = getTypePrefixFlow();
+                } else if (hasTypePrefixVariability()) {
+                	startNode = getTypePrefixVariability();
+                } else if (hasTypePrefixInputOutput()) {
+                	startNode = getTypePrefixInputOutput();
+                }
+
+                c.setLocationNoTree(startNode, this);
                 //log.debug("ComponentClause->ComponentDecl.getStart() = "+c.getStart());
                 return c;
             }

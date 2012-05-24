@@ -21,6 +21,10 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 	public void reset(java.io.Reader reader) {
 		lineBreakMap = new HashMap<Integer, Integer>();
 		lineBreakMap.put(0, 0);
+		resetFormatting();
+	}
+	
+	public void resetFormatting() {
 		formattingInfo = new FormattingInfo();
 	}
 
@@ -91,7 +95,7 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 			default:
 				if (currentSpaces.length() > 0) {
 					formattingInfo.addItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, currentSpaces.toString(),
-							line, startColumn, line, currentColumn);
+							line, startColumn, line, currentColumn - 1);
 					currentSpaces = new StringBuilder();
 				}
 				break;

@@ -101,7 +101,7 @@ optimization CSTR_Opt_Bounds_Mayer(objective=(cost(finalTime)),
  
   input Real u(start=350, initialGuess=350, min=230, max=370) = cstr.Tc; 
   CSTR cstr(c(initialGuess=300), T(initialGuess=300, max=350), Tc(initialGuess=350),
-            c_init=956.271065, T_init=250.051971);
+            c_init=956.271065, T_init=250.051971, F=cstr.F0);
 
   Real cost(start=0, fixed=true, initialGuess=500);
   parameter Real c_ref = 338.775766;

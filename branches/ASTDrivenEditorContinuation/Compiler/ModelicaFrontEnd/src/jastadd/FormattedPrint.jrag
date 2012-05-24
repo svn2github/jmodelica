@@ -179,6 +179,7 @@ aspect FormattedPrint {
 					FormattingItem nextItem = clause.addPreFormatting(formattingIterator);
 					clause.addPostFormatting(formattingIterator, nextItem);
 					clause.addInsideFormatting(formattingInfo);
+					clause.formatting = null;
 				}
 			}
 		}
@@ -241,11 +242,11 @@ aspect FormattedPrint {
 			ScannedFormattingItem formattingItem = formattingIterator.next();
 			FormattingItem.Adjacency preAdjacency = preFormatting.getAdjacency(formattingItem);
 			FormattingItem.Adjacency postAdjacency = postFormatting.getAdjacency(formattingItem);
-			if (preAdjacency != FormattingItem.Adjacency.NONE || (preFormatting instanceof DefaultFormattingItem &&
+			if (preAdjacency != FormattingItem.Adjacency.NONE || (!preFormatting.isScanned() &&
 					formattingItem.atEnd(Symbol.getLine(getStart()), Symbol.getColumn(getStart())))) {
 				preFormatting = preFormatting.mergeItems(preAdjacency, formattingItem);
 				formattingIterator.remove();
-			} else if (postAdjacency != FormattingItem.Adjacency.NONE || (postFormatting instanceof DefaultFormattingItem &&
+			} else if (postAdjacency != FormattingItem.Adjacency.NONE || (!postFormatting.isScanned() &&
 					formattingItem.atStart(Symbol.getLine(getEnd()), Symbol.getColumn(getEnd())))) {
 				postFormatting = postFormatting.mergeItems(postAdjacency, formattingItem);
 				formattingIterator.remove();
@@ -310,7 +311,7 @@ aspect FormattedPrint {
 
 		if (getComment().hasStringComment()) {
 			StringComment stringComment = getComment().getStringComment();
-			if (stringComment.preFormatting instanceof ScannedFormattingItem) {
+			if (stringComment.preFormatting.isScanned()) {
 				line = ((ScannedFormattingItem) stringComment.preFormatting).getStartLine();
 				column = ((ScannedFormattingItem) stringComment.preFormatting).getStartColumn();
 			} else {
@@ -319,7 +320,7 @@ aspect FormattedPrint {
 			}
 		} else if (getComment().hasAnnotation()) {
 			Annotation annotation = getComment().getAnnotation();
-			if (annotation.preFormatting instanceof ScannedFormattingItem) {
+			if (annotation.preFormatting.isScanned()) {
 				line = ((ScannedFormattingItem) annotation.preFormatting).getStartLine();
 				column = ((ScannedFormattingItem) annotation.preFormatting).getStartColumn();
 			} else {
@@ -331,7 +332,7 @@ aspect FormattedPrint {
 			column = getColumn(getEnd());
 		}
 
-		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 3);
+		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 4);
 	}
 
 	@Override
@@ -341,7 +342,7 @@ aspect FormattedPrint {
 
 		if (getComment().hasStringComment()) {
 			StringComment stringComment = getComment().getStringComment();
-			if (stringComment.preFormatting instanceof ScannedFormattingItem) {
+			if (stringComment.preFormatting.isScanned()) {
 				line = ((ScannedFormattingItem) stringComment.preFormatting).getStartLine();
 				column = ((ScannedFormattingItem) stringComment.preFormatting).getStartColumn();
 			} else {
@@ -350,7 +351,69 @@ aspect FormattedPrint {
 			}
 		} else if (getComment().hasAnnotation()) {
 			Annotation annotation = getComment().getAnnotation();
-			if (annotation.preFormatting instanceof ScannedFormattingItem) {
+			if (annotation.preFormatting.isScanned()) {
+				line = ((ScannedFormattingItem) annotation.preFormatting).getStartLine();
+				column = ((ScannedFormattingItem) annotation.preFormatting).getStartColumn();
+			} else {
+				line = getLine(annotation.getStart());
+				column = getColumn(annotation.getStart());
+			}
+		} else {
+			line = getLine(getEnd());
+			column = getColumn(getEnd());
+		}
+
+		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 4);
+	}
+
+	@Override
+	public boolean WhileStmt.matchInsideFormatting(ScannedFormattingItem formattingItem) {
+		int line = -1;
+		int column = -1;
+
+		if (getComment().hasStringComment()) {
+			StringComment stringComment = getComment().getStringComment();
+			if (stringComment.preFormatting.isScanned()) {
+				line = ((ScannedFormattingItem) stringComment.preFormatting).getStartLine();
+				column = ((ScannedFormattingItem) stringComment.preFormatting).getStartColumn();
+			} else {
+				line = getLine(stringComment.getStart());
+				column = getColumn(stringComment.getStart());
+			}
+		} else if (getComment().hasAnnotation()) {
+			Annotation annotation = getComment().getAnnotation();
+			if (annotation.preFormatting.isScanned()) {
+				line = ((ScannedFormattingItem) annotation.preFormatting).getStartLine();
+				column = ((ScannedFormattingItem) annotation.preFormatting).getStartColumn();
+			} else {
+				line = getLine(annotation.getStart());
+				column = getColumn(annotation.getStart());
+			}
+		} else {
+			line = getLine(getEnd());
+			column = getColumn(getEnd());
+		}
+
+		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 6);
+	}
+
+	@Override
+	public boolean IfEquation.matchInsideFormatting(ScannedFormattingItem formattingItem) {
+		int line = -1;
+		int column = -1;
+
+		if (getComment().hasStringComment()) {
+			StringComment stringComment = getComment().getStringComment();
+			if (stringComment.preFormatting.isScanned()) {
+				line = ((ScannedFormattingItem) stringComment.preFormatting).getStartLine();
+				column = ((ScannedFormattingItem) stringComment.preFormatting).getStartColumn();
+			} else {
+				line = getLine(stringComment.getStart());
+				column = getColumn(stringComment.getStart());
+			}
+		} else if (getComment().hasAnnotation()) {
+			Annotation annotation = getComment().getAnnotation();
+			if (annotation.preFormatting.isScanned()) {
 				line = ((ScannedFormattingItem) annotation.preFormatting).getStartLine();
 				column = ((ScannedFormattingItem) annotation.preFormatting).getStartColumn();
 			} else {
@@ -366,13 +429,13 @@ aspect FormattedPrint {
 	}
 
 	@Override
-	public boolean WhileStmt.matchInsideFormatting(ScannedFormattingItem formattingItem) {
+	public boolean IfStmt.matchInsideFormatting(ScannedFormattingItem formattingItem) {
 		int line = -1;
 		int column = -1;
 
 		if (getComment().hasStringComment()) {
 			StringComment stringComment = getComment().getStringComment();
-			if (stringComment.preFormatting instanceof ScannedFormattingItem) {
+			if (stringComment.preFormatting.isScanned()) {
 				line = ((ScannedFormattingItem) stringComment.preFormatting).getStartLine();
 				column = ((ScannedFormattingItem) stringComment.preFormatting).getStartColumn();
 			} else {
@@ -381,7 +444,38 @@ aspect FormattedPrint {
 			}
 		} else if (getComment().hasAnnotation()) {
 			Annotation annotation = getComment().getAnnotation();
-			if (annotation.preFormatting instanceof ScannedFormattingItem) {
+			if (annotation.preFormatting.isScanned()) {
+				line = ((ScannedFormattingItem) annotation.preFormatting).getStartLine();
+				column = ((ScannedFormattingItem) annotation.preFormatting).getStartColumn();
+			} else {
+				line = getLine(annotation.getStart());
+				column = getColumn(annotation.getStart());
+			}
+		} else {
+			line = getLine(getEnd());
+			column = getColumn(getEnd());
+		}
+
+		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 3);
+	}
+
+	@Override
+	public boolean WhenEquation.matchInsideFormatting(ScannedFormattingItem formattingItem) {
+		int line = -1;
+		int column = -1;
+
+		if (getComment().hasStringComment()) {
+			StringComment stringComment = getComment().getStringComment();
+			if (stringComment.preFormatting.isScanned()) {
+				line = ((ScannedFormattingItem) stringComment.preFormatting).getStartLine();
+				column = ((ScannedFormattingItem) stringComment.preFormatting).getStartColumn();
+			} else {
+				line = getLine(stringComment.getStart());
+				column = getColumn(stringComment.getStart());
+			}
+		} else if (getComment().hasAnnotation()) {
+			Annotation annotation = getComment().getAnnotation();
+			if (annotation.preFormatting.isScanned()) {
 				line = ((ScannedFormattingItem) annotation.preFormatting).getStartLine();
 				column = ((ScannedFormattingItem) annotation.preFormatting).getStartColumn();
 			} else {
@@ -397,106 +491,13 @@ aspect FormattedPrint {
 	}
 
 	@Override
-	public boolean IfEquation.matchInsideFormatting(ScannedFormattingItem formattingItem) {
-		int line = -1;
-		int column = -1;
-
-		if (getComment().hasStringComment()) {
-			StringComment stringComment = getComment().getStringComment();
-			if (stringComment.preFormatting instanceof ScannedFormattingItem) {
-				line = ((ScannedFormattingItem) stringComment.preFormatting).getStartLine();
-				column = ((ScannedFormattingItem) stringComment.preFormatting).getStartColumn();
-			} else {
-				line = getLine(stringComment.getStart());
-				column = getColumn(stringComment.getStart());
-			}
-		} else if (getComment().hasAnnotation()) {
-			Annotation annotation = getComment().getAnnotation();
-			if (annotation.preFormatting instanceof ScannedFormattingItem) {
-				line = ((ScannedFormattingItem) annotation.preFormatting).getStartLine();
-				column = ((ScannedFormattingItem) annotation.preFormatting).getStartColumn();
-			} else {
-				line = getLine(annotation.getStart());
-				column = getColumn(annotation.getStart());
-			}
-		} else {
-			line = getLine(getEnd());
-			column = getColumn(getEnd());
-		}
-
-		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 2);
-	}
-
-	@Override
-	public boolean IfStmt.matchInsideFormatting(ScannedFormattingItem formattingItem) {
-		int line = -1;
-		int column = -1;
-
-		if (getComment().hasStringComment()) {
-			StringComment stringComment = getComment().getStringComment();
-			if (stringComment.preFormatting instanceof ScannedFormattingItem) {
-				line = ((ScannedFormattingItem) stringComment.preFormatting).getStartLine();
-				column = ((ScannedFormattingItem) stringComment.preFormatting).getStartColumn();
-			} else {
-				line = getLine(stringComment.getStart());
-				column = getColumn(stringComment.getStart());
-			}
-		} else if (getComment().hasAnnotation()) {
-			Annotation annotation = getComment().getAnnotation();
-			if (annotation.preFormatting instanceof ScannedFormattingItem) {
-				line = ((ScannedFormattingItem) annotation.preFormatting).getStartLine();
-				column = ((ScannedFormattingItem) annotation.preFormatting).getStartColumn();
-			} else {
-				line = getLine(annotation.getStart());
-				column = getColumn(annotation.getStart());
-			}
-		} else {
-			line = getLine(getEnd());
-			column = getColumn(getEnd());
-		}
-
-		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 2);
-	}
-
-	@Override
-	public boolean WhenEquation.matchInsideFormatting(ScannedFormattingItem formattingItem) {
-		int line = -1;
-		int column = -1;
-
-		if (getComment().hasStringComment()) {
-			StringComment stringComment = getComment().getStringComment();
-			if (stringComment.preFormatting instanceof ScannedFormattingItem) {
-				line = ((ScannedFormattingItem) stringComment.preFormatting).getStartLine();
-				column = ((ScannedFormattingItem) stringComment.preFormatting).getStartColumn();
-			} else {
-				line = getLine(stringComment.getStart());
-				column = getColumn(stringComment.getStart());
-			}
-		} else if (getComment().hasAnnotation()) {
-			Annotation annotation = getComment().getAnnotation();
-			if (annotation.preFormatting instanceof ScannedFormattingItem) {
-				line = ((ScannedFormattingItem) annotation.preFormatting).getStartLine();
-				column = ((ScannedFormattingItem) annotation.preFormatting).getStartColumn();
-			} else {
-				line = getLine(annotation.getStart());
-				column = getColumn(annotation.getStart());
-			}
-		} else {
-			line = getLine(getEnd());
-			column = getColumn(getEnd());
-		}
-
-		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 4);
-	}
-
-	@Override
 	public boolean WhenStmt.matchInsideFormatting(ScannedFormattingItem formattingItem) {
 		int line = -1;
 		int column = -1;
 
 		if (getComment().hasStringComment()) {
 			StringComment stringComment = getComment().getStringComment();
-			if (stringComment.preFormatting instanceof ScannedFormattingItem) {
+			if (stringComment.preFormatting.isScanned()) {
 				line = ((ScannedFormattingItem) stringComment.preFormatting).getStartLine();
 				column = ((ScannedFormattingItem) stringComment.preFormatting).getStartColumn();
 			} else {
@@ -505,7 +506,7 @@ aspect FormattedPrint {
 			}
 		} else if (getComment().hasAnnotation()) {
 			Annotation annotation = getComment().getAnnotation();
-			if (annotation.preFormatting instanceof ScannedFormattingItem) {
+			if (annotation.preFormatting.isScanned()) {
 				line = ((ScannedFormattingItem) annotation.preFormatting).getStartLine();
 				column = ((ScannedFormattingItem) annotation.preFormatting).getStartColumn();
 			} else {
@@ -517,7 +518,7 @@ aspect FormattedPrint {
 			column = getColumn(getEnd());
 		}
 
-		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 4);
+		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 5);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1257,7 +1258,7 @@ aspect FormattedPrint {
 	    }
 	    
 	    for (Clause clause : originalComposition.getClauses()) {
-    		clause.doPrettyPrintFormatted(printer, printStream);
+    		clause.prettyPrintFormatted(printer, printStream);
     	}
 
 	    getEndDecl().doPrettyPrintFormatted(printer, printStream);
@@ -1861,5 +1862,94 @@ aspect FormattedPrint {
 		preFormatting = bn.preFormatting;
 		postFormatting = bn.postFormatting;
 		super.copyFormattingFrom(node);
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// DEBUGGING:
+	//
+	// This section of the aspect contains attributes and methods that can be used for debugging pretty printing
+	// with preserved formatting.
+	//
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	syn int ASTNode.numberOfDefaultFormattingItems() {
+		int result = 0;
+		for (ASTNode node : this) {
+			result += node.numberOfDefaultFormattingItems();
+		}
+		return result;
+	}
+	
+	eq BaseNode.numberOfDefaultFormattingItems() {
+		int result = 0;
+		if (!preFormatting.isScanned() && !preFormatting.isEmptyDefault()) {
+			++result;
+		}
+		if (!insideFormatting.isScanned() && !insideFormatting.isEmptyDefault()) {
+			++result;
+		}
+		if (!postFormatting.isScanned() && !postFormatting.isEmptyDefault()) {
+			++result;
+		}
+		for (ASTNode node : this) {
+			result += node.numberOfDefaultFormattingItems();
+		}
+		return result;
+	}
+	
+	syn ArrayList<BaseNode> ASTNode.nonScannedNodes() {
+		ArrayList<BaseNode> result = new ArrayList<BaseNode>();
+		for (ASTNode node : this) {
+			result.addAll(node.nonScannedNodes());
+		}
+		return result;
+	}
+	
+	eq BaseNode.nonScannedNodes() {
+		ArrayList<BaseNode> result = new ArrayList<BaseNode>();
+		if (!preFormatting.isScanned() && !preFormatting.isEmptyDefault()) {
+			result.add(this);
+		} else if (!insideFormatting.isScanned() && !insideFormatting.isEmptyDefault()) {
+			result.add(this);
+		} else if (!postFormatting.isScanned() && !postFormatting.isEmptyDefault()) {
+			result.add(this);
+		}
+		for (ASTNode node : this) {
+			result.addAll(node.nonScannedNodes());
+		}
+		return result;
+	}
+	
+	syn BaseNode ASTNode.ownsFormattingItem(int startLine, int startColumn) {
+		BaseNode owner = null;
+		for (ASTNode node : this) {
+			owner = node.ownsFormattingItem(startLine, startColumn);
+			if (owner != null) {
+				return owner;
+			}
+		}
+		
+		return null;
+	}
+	
+	eq BaseNode.ownsFormattingItem(int startLine, int startColumn) {
+		if (preFormatting.isScanned() && ((ScannedFormattingItem) preFormatting).getStartLine() == startLine && ((ScannedFormattingItem) preFormatting).getStartColumn() == startColumn) {
+			return this;
+		}
+		if (insideFormatting.isScanned() && ((ScannedFormattingItem) insideFormatting).getStartLine() == startLine && ((ScannedFormattingItem) insideFormatting).getStartColumn() == startColumn) {
+			return this;
+		}
+		if (postFormatting.isScanned() && ((ScannedFormattingItem) postFormatting).getStartLine() == startLine && ((ScannedFormattingItem) postFormatting).getStartColumn() == startColumn) {
+			return this;
+		}
+
+		BaseNode owner = null;
+		for (ASTNode node : this) {
+			owner = node.ownsFormattingItem(startLine, startColumn);
+			if (owner != null) {
+				return owner;
+			}
+		}
+		
+		return null;
 	}
 }

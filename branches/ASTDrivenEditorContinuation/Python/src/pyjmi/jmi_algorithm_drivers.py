@@ -1837,7 +1837,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'eliminate_cont_var': False,
                 'init_traj': None,
                 'parameter_estimation_data': None,
-                'exact_hessian': True,
                 'casadi_options_f': {"name": "NLP objective function"},
                 'casadi_options_g': {"name": "NLP constraint function"},
                 'IPOPT_options': {'generate_hessian': True}}

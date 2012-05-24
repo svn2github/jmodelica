@@ -105,6 +105,7 @@ import beaver.Scanner;
   
   public void reset(java.io.Reader reader) {
     yyreset(reader);
+    resetFormatting();
   }
 
   protected int matchLine()   { return yyline; }

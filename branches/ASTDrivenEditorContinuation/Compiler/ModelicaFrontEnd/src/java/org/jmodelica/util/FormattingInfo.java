@@ -99,21 +99,6 @@ public class FormattingInfo implements Iterable<ScannedFormattingItem> {
 	}
 
 	/**
-	 * Gets the sorted collection of scanned formatting items that this <code>FormattingInfo</code> holds. The
-	 * collection is sorted in the order in which the the formatting items appeared when scanned. That is depending
-	 * on their starting position and then their ending position.
-	 * @return a sorted collection of the formatting items.
-	 */
-	/*public Collection<ScannedFormattingItem> getFormattingCollection() {
-		if (!sorted) {
-			Collections.sort(formattingList);
-			sorted = true;
-		}
-
-		return formattingList;
-	}*/
-
-	/**
 	 * Gets information about this <code>FormattingInfo</code> in an XML styled text string, which might be usable
 	 * when debugging.
 	 * @param printData if true, also the string data of the formatting items is printed.
@@ -173,8 +158,11 @@ public class FormattingInfo implements Iterable<ScannedFormattingItem> {
 
 	@Override
 	public Iterator<ScannedFormattingItem> iterator() {
+		if (!sorted) {
+			Collections.sort(formattingList);
+			sorted = true;
+		}
 		Iterator<ScannedFormattingItem> iterator = formattingList.iterator();
-
 		return iterator;
 	}
 }
