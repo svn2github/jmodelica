@@ -1289,12 +1289,13 @@ aspect TransformCanonical {
 		
 		int k = 1;
 		
+		// First try a global matching with all variables
 		g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
 		g.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
 		
 		log.info(g.toString());
 		g.maximumMatching(true);	
-		log.info("DAE system ");
+		log.info("DAE system");
 		log.info(g.printMatching());
 			
 		daeMatching = g.getMatching();
@@ -1307,9 +1308,19 @@ aspect TransformCanonical {
 			daeUnmatchedEquations.add(ee.getEquation());
 		}
 	
-		// TODO: If no complete matching found, then try index reduction
+		// If no complete matching found, then try index reduction
 		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
 			if (root().options.getBooleanOption("index_reduction")) {
+				// Only do index reduction based on real variables and equations
+				g = new BiPGraph(this,name(),"");
+				g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.CONTINUOUS_ALGEBRAIC_VARIABLES);
+				g.addEquations(continuousEquations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.CONTINUOUS_ALGEBRAIC_VARIABLES,"eq_",1);
+				log.info("Index reduction starts");
+				log.info(g.toString());
+				g.maximumMatching(true);	
+				log.info("DAE system real variables only");
+				log.info(g.printMatching());
+
 				//System.out.println(prettyPrint(""));
 				
 				IndexReductionResult result = null;
@@ -1428,14 +1439,14 @@ aspect TransformCanonical {
 				g = new BiPGraph(this,name(),"");
 				g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
 				g.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
-		
+
 				log.info(g.toString());
 				g.maximumMatching(true);	
 				log.info("DAE system ");
 				log.info(g.printMatching());
-			
+		
 				daeMatching = g.getMatching();
-			
+		
 				daeUnmatchedVariables.clear();
 				for (Var var : g.getUnmatchedVariables()) {
 					daeUnmatchedVariables.add(var.getVariable());
@@ -1445,15 +1456,16 @@ aspect TransformCanonical {
 				for (Eq ee : g.getUnmatchedEquations()) {
 					daeUnmatchedEquations.add(ee.getEquation());
 				}
-				
+		
 				if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
 					return;
 				}
+				
 			} else {
 				return;
 			}
-		}
-	
+		} 
+			
 		// Perform BLT
 		if (root().options.getBooleanOption("equation_sorting") && g.getUnmatchedVariables().size()==0 && g.getUnmatchedEquations().size()==0) {	
 			
@@ -1478,7 +1490,6 @@ aspect TransformCanonical {
 		// Find matching for the initialization system	
 		g.addVariables(this, BiPGraph.DIFFERENTIATED_VARIABLES | BiPGraph.DISCRETE_PRE_VARIABLES);
 		g.addEquations(equations(), BiPGraph.DIFFERENTIATED_VARIABLES | BiPGraph.DISCRETE_PRE_VARIABLES, "eq_",1);
-
 
 	    // Replace when equations	
 		ArrayList<FAbstractEquation> equationsToReplace = 

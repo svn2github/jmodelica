@@ -2052,6 +2052,30 @@ Semantic error at line 0, column 0:
 equation
 end UnbalancedTest4_Err;
 
+model UnbalancedTest5_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="UnbalancedTest5_Err",
+        description="Test error messages for unbalanced systems.",
+                                               errorMessage=
+"
+2 error(s), 0 compliance error(s) and 0 warning(s) found:
+
+Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc3729100224648595936out/sources/TransformCanonicalTests.UnbalancedTest5_Err.mof':
+Semantic error at line 0, column 0:
+  The DAE system has 3 equations and 2 free variables.
+
+Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc3729100224648595936out/sources/TransformCanonicalTests.UnbalancedTest5_Err.mof':
+Semantic error at line 0, column 0:
+  The system is structurally singuar. The following equation(s) could not be matched to any variable:
+   x = 0
+")})));
+		
+    Real x = 0;
+    Boolean y = false;
+equation
+    x = if y then 1 else 2;
+end UnbalancedTest5_Err;
+
 model WhenEqu15
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
@@ -3677,45 +3701,46 @@ end TransformCanonicalTests.IndexReduction2_Mechanical;
          description="Test of index reduction",
          flatModel="
 fclass TransformCanonicalTests.IndexReduction3_Electrical
-parameter Real omega = 100 /* 100 */;
-parameter Real R[1] = 10 /* 10 */;
-parameter Real R[2] = 5 /* 5 */;
-parameter Real L = 1 /* 1 */;
-parameter Real C = 0.05 /* 0.05 */;
-Real iL(start = 1);
-Real uC(start = 1);
-Real u0;
-Real u1;
-Real uL;
-Real i0;
-Real i1;
-Real i2;
-Real iC;
-Real der_uC;
-Real der_u1;
-Real der_i1;
-Real der_i2;
-Real der_uL;
-Real der_u0;
+ parameter Real omega = 100 /* 100 */;
+ parameter Real R[1] = 10 /* 10 */;
+ parameter Real R[2] = 5 /* 5 */;
+ parameter Real L = 1 /* 1 */;
+ parameter Real C = 0.05 /* 0.05 */;
+ Real iL(start = 1);
+ Real uC(start = 1);
+ Real u0;
+ Real u1;
+ Real uL;
+ Real i0;
+ Real i1;
+ Real i2;
+ Real iC;
+ Real der_uC;
+ Real der_u1;
+ Real der_i1;
+ Real der_i2;
+ Real der_uL;
+ Real der_u0;
 initial equation 
-iL = 1;
+ iL = 1;
 equation
-u0 = ( 220 ) * ( sin(( time ) * ( omega )) );
-u1 = ( R[1] ) * ( i1 );
-uL = ( R[2] ) * ( i2 );
-uL = ( L ) * ( der(iL) );
-iC = ( C ) * ( der_uC );
-u0 = u1 + uL;
-uC = u1 + uL;
-i0 = i1 + iC;
-i1 = i2 + iL;
-der_uC = der_u1 + der_uL;
-der_u1 = ( R[1] ) * ( der_i1 );
-der_i1 = der_i2 + der(iL);
-der_uL = ( R[2] ) * ( der_i2 );
-der_u0 = der_u1 + der_uL;
-der_u0 = ( 220 ) * ( ( cos(( time ) * ( omega )) ) * ( ( 1.0 ) * ( omega ) ) );
+ u0 = ( 220 ) * ( sin(( time ) * ( omega )) );
+ u1 = ( R[1] ) * ( i1 );
+ uL = ( R[2] ) * ( i2 );
+ uL = ( L ) * ( der(iL) );
+ iC = ( C ) * ( der_uC );
+ u0 = u1 + uL;
+ uC = u1 + uL;
+ i0 = i1 + iC;
+ i1 = i2 + iL;
+ der_uC = der_u1 + der_uL;
+ der_u1 = ( R[1] ) * ( der_i1 );
+ der_i1 = der_i2 + der(iL);
+ der_uL = ( R[2] ) * ( der_i2 );
+ der_u0 = der_u1 + der_uL;
+ der_u0 = ( 220 ) * ( ( cos(( time ) * ( omega )) ) * ( ( 1.0 ) * ( omega ) ) );
 end TransformCanonicalTests.IndexReduction3_Electrical;
+		  
 ")})));
   parameter Real omega=100;
   parameter Real R[2]={10,5};
@@ -4944,6 +4969,62 @@ equation
   der(x1) + der(x2) = 1;
  (x1 + x2)/(p1*p2) = 0;
   end IndexReduction34_Div;
+
+model IndexReduction35_Boolean
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction35_Boolean",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction35_Boolean
+ Real x;
+ Real y;
+ discrete Boolean b;
+ Real der_x;
+initial equation 
+ y = 0.0;
+ pre(b) = false;
+equation
+ x = (if b then 1 else 2 + y);
+ der_x + der(y) = 0;
+ b = false;
+ der_x = (if b then 0.0 else 0.0 + der(y));
+end TransformCanonicalTests.IndexReduction35_Boolean;
+		 ")})));	
+    Real x,y;
+    Boolean b = false;
+equation
+    x = if b then 1 else 2 + y;
+    der(x) + der(y) = 0;
+end IndexReduction35_Boolean;
+
+model IndexReduction36_Integer
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction36_Integer",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction36_Integer
+ Real x;
+ Real y;
+ discrete Integer b;
+ Real der_x;
+initial equation 
+ y = 0.0;
+ pre(b) = 0;
+equation
+ x = (if b == 2 then 1 else 2 + y);
+ der_x + der(y) = 0;
+ b = 2;
+ der_x = (if b == 2 then 0.0 else 0.0 + der(y));
+end TransformCanonicalTests.IndexReduction36_Integer;
+		 ")})));		
+    Real x,y;
+    Integer b = 2;
+equation
+    x = if b==2 then 1 else 2 + y;
+    der(x) + der(y) = 0;
+end IndexReduction36_Integer;
 
 model StateInitialPars1
 	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

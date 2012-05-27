@@ -729,7 +729,20 @@ aspect FlatAPI {
 		}
 		return l;
 	}
-	
+
+    syn int FClass.numContinousEquations() = continuousEquations().size();
+	syn lazy ArrayList<FAbstractEquation> FClass.continuousEquations() {
+		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+		for (FEquationBlock b : getFEquationBlocks()) {
+			for (FAbstractEquation e : b.getFAbstractEquations()) {
+				if (!e.isIgnored() && e.isContinuous()) {
+					l.add(e);
+				}
+			}
+		}
+		return l;
+	}
+
 	syn int FAbstractEquation.numScalarEquations() = 1;
 	eq FEquation.numScalarEquations()           = getLeft().size().numElements();
 	eq FConnectClause.numScalarEquations()      = getConnector1().size().numElements();
@@ -1515,6 +1528,23 @@ aspect FVariableUses {
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicRealVariables() = 
 		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().algebraicRealVariables(),algebraicVariables()));
+
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.discreteRealVariables() = 
+		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().discreteRealVariables(),algebraicVariables()));
+
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.discreteIntegerVariables() = 
+		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().discreteIntegerVariables(),algebraicVariables()));
+
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.discreteBooleanVariables() = 
+		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().discreteBooleanVariables(),algebraicVariables()));
+
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.discreteStringVariables() = 
+		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().discreteStringVariables(),algebraicVariables()));
+
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.discreteEnumVariables() = 
+		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().discreteStringVariables(),algebraicVariables()));
+
+
 
 	/**
 	 * \brief Collection attribute returning all derivative variables (FDerivativeVariables)

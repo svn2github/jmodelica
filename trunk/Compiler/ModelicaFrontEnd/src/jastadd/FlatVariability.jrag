@@ -91,6 +91,20 @@ aspect FlatVariability {
 	
 	syn FTypePrefixVariability FAbstractEquation.variability() = fContinuous();
 	eq FEquation.variability() = getLeft().variability().combine(getRight().variability());
+	eq FFunctionCallEquation.variability() {
+		FTypePrefixVariability var = fConstant();
+		// Check all output arguments
+		for (FFunctionCallLeft fl : getLefts()) {
+			if (fl.hasFExp()) {
+				var = var.combine(fl.getFExp().variability());
+			}	
+		}
+		// Check all input arguments
+		for (FVariable fv : referencedFVariablesInRHS()) {
+			var = var.combine(fv.variability());
+		}
+		return var;
+	}
 	
 	syn boolean FAbstractEquation.isConstant() = false;
 	syn boolean FAbstractEquation.isParameter() = false;
@@ -101,6 +115,11 @@ aspect FlatVariability {
 	eq FEquation.isParameter() = variability().parameterVariability();
 	eq FEquation.isDiscrete() = variability().discreteVariability();
 	eq FEquation.isContinuous() = variability().continuousVariability();
+
+	eq FFunctionCallEquation.isConstant() = variability().constantVariability();
+	eq FFunctionCallEquation.isParameter() = variability().parameterVariability();
+	eq FFunctionCallEquation.isDiscrete() = variability().discreteVariability();
+	eq FFunctionCallEquation.isContinuous() = variability().continuousVariability();
 	
 	syn boolean AbstractFVariable.isConstant()   = false;
     syn boolean AbstractFVariable.isParameter()  = false;

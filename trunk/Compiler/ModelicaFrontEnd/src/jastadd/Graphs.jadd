@@ -560,7 +560,9 @@ public class BiPGraph {
 	public static int DERIVATIVE_VARIABLES = 1;
 	public static int DIFFERENTIATED_VARIABLES = 2;
 	public static int ALGEBRAIC_VARIABLES = 4;
-	public static int DISCRETE_PRE_VARIABLES = 8;
+	public static int CONTINUOUS_ALGEBRAIC_VARIABLES = 8;
+	public static int DISCRETE_ALGEBRAIC_VARIABLES = 16;
+	public static int DISCRETE_PRE_VARIABLES = 32;
 
 	public static int MAX_N_EQ_DIFFS = 5;
 
@@ -740,6 +742,31 @@ public class BiPGraph {
 			}
 		}
 	
+		if ((variableMask & CONTINUOUS_ALGEBRAIC_VARIABLES) != 0) {
+			for (FVariable fv : fclass.algebraicRealVariables()) {
+				addVariable(fv.name(),"",fv);     
+			}
+		}
+	
+		if ((variableMask & DISCRETE_ALGEBRAIC_VARIABLES) != 0) {
+		
+			for (FVariable fv : fclass.discreteRealVariables()) {
+				addVariable(fv.name(),"",fv);     
+			}
+			for (FVariable fv : fclass.discreteIntegerVariables()) {
+				addVariable(fv.name(),"",fv);     
+			}
+			for (FVariable fv : fclass.discreteBooleanVariables()) {
+				addVariable(fv.name(),"",fv);     
+			}
+			for (FVariable fv : fclass.discreteStringVariables()) {
+				addVariable(fv.name(),"",fv);     
+			}
+			for (FVariable fv : fclass.discreteEnumVariables()) {
+				addVariable(fv.name(),"",fv);     
+			}
+		}
+	
 		if ((variableMask & DISCRETE_PRE_VARIABLES) != 0) {
 			for (FVariable fv : fclass.discretePreVariables()) {
 				addVariable(fv.name(),"",fv);     
@@ -777,6 +804,40 @@ public class BiPGraph {
 
 				if ((variableMask & ALGEBRAIC_VARIABLES) != 0) {
 					for (FVariable y : e.algebraicVariables()) { 
+						v = getVariable(y.name()); 
+						addEdge(eqn,v); 
+					} 
+				}
+				
+				if ((variableMask & CONTINUOUS_ALGEBRAIC_VARIABLES) != 0) {
+					for (FVariable y : e.algebraicRealVariables()) { 
+						v = getVariable(y.name()); 
+						addEdge(eqn,v); 
+					} 
+				}
+	
+				if ((variableMask & DISCRETE_ALGEBRAIC_VARIABLES) != 0) {
+					for (FVariable y : e.discreteRealVariables()) { 
+						v = getVariable(y.name()); 
+						addEdge(eqn,v); 
+					} 
+			
+					for (FVariable y : e.discreteIntegerVariables()) { 
+						v = getVariable(y.name()); 
+						addEdge(eqn,v); 
+					} 
+
+					for (FVariable y : e.discreteBooleanVariables()) { 
+						v = getVariable(y.name()); 
+						addEdge(eqn,v); 
+					} 
+
+					for (FVariable y : e.discreteStringVariables()) { 
+						v = getVariable(y.name()); 
+						addEdge(eqn,v); 
+					} 
+
+					for (FVariable y : e.discreteEnumVariables()) { 
 						v = getVariable(y.name()); 
 						addEdge(eqn,v); 
 					} 
@@ -1158,8 +1219,12 @@ public class BiPGraph {
 		ArrayList<Var> visitedVariables;		
 				
 		LinkedHashSet<Eq> es = new LinkedHashSet<Eq>();
-		es.addAll(getEquations());
-		
+		for (Eq e : getEquations()) {
+			if (e.getEquation().isContinuous()) {
+				es.add(e);
+			}
+		}
+				
 		// If there are no equations, we cannot do index reduction.
 		if (es.size()==0) {
 			return null;
@@ -1274,6 +1339,7 @@ public class BiPGraph {
 							for (Eq groupMemberEquation : eqToMatch.getGroupMembers()) {
 								eqToMatchStack.push(groupMemberEquation.getMeDifferentiated());
 							}
+
 							eqToMatch = eqToMatchStack.pop();
 						
 							ASTNode.log.info("Graph after addition of equations and variables:");
