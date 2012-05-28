@@ -712,7 +712,7 @@ class LocalDAECollocator(CasadiCollocator):
             n_xx += self.n_e
         
         # Create NLP variables
-        if self.graph == "MX" or self.graph == 'expanded_MX':
+        if self.graph == "MX":
             xx = casadi.MX("xx", n_xx)
         elif self.graph == "SX":
             xx = casadi.ssym("xx", n_xx)
@@ -1069,7 +1069,7 @@ class LocalDAECollocator(CasadiCollocator):
         g_i_fcn.init()
         
         # Define function evaluation methods based on graph
-        if self.graph == 'MX' or self.graph == 'expanded_MX':
+        if self.graph == 'MX':
             init_F0_eval = init_F0.call
             dae_F_eval = dae_F.call
             if self.eliminate_der_var:
@@ -1145,8 +1145,8 @@ class LocalDAECollocator(CasadiCollocator):
             z = self._get_z(i, k)
             [initial_F0] = init_F0_eval([z])
             [initial_F] = dae_F_eval([z])
-        c_e = casadi.vertcat([c_e, initial_F0])
-        c_e = casadi.vertcat([c_e, initial_F])
+        c_e.append(initial_F0)
+        c_e.append(initial_F)
         
         if self.blocking_factors is None:
             # Evaluate u_1_0 based on polynomial u_1
@@ -1155,7 +1155,7 @@ class LocalDAECollocator(CasadiCollocator):
                 u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0, False)
                 
             # Add residual for u_1_0 as constraint
-            c_e = casadi.vertcat([c_e, var[1][0]['u'] - u_1_0])
+            c_e.append(var[1][0]['u'] - u_1_0)
         
         # Collocation and DAE constraints
         if self.eliminate_der_var:
@@ -1164,7 +1164,7 @@ class LocalDAECollocator(CasadiCollocator):
                     z = self._get_z_elim_der(i, k)
                     [dae_constr] = dae_F_eval([z, x_list[i], der_vals[k],
                                                self.horizon * self.h[i]])
-                    c_e = casadi.vertcat([c_e, dae_constr])
+                    c_e.append(dae_constr)
         else:
             for i in xrange(1, self.n_e + 1):
                 for k in xrange(1, self.n_cp + 1):
@@ -1172,12 +1172,12 @@ class LocalDAECollocator(CasadiCollocator):
                     [coll_constr] = coll_eq_eval([x_list[i], der_vals[k], 
                                                   self.horizon * self.h[i],
                                                   var[i][k]['dx']])
-                    c_e = casadi.vertcat([c_e, coll_constr])
+                    c_e.append(coll_constr)
                     
                     # DAE constraint
                     z = self._get_z(i, k)
                     [dae_constr] = dae_F_eval([z])
-                    c_e = casadi.vertcat([c_e, dae_constr])
+                    c_e.append(dae_constr)
                 
         # Continuity constraints for x_{i, n_cp + 1}
         if self.discr == "LG":
@@ -1191,8 +1191,7 @@ class LocalDAECollocator(CasadiCollocator):
                                self.horizon * self.h[i] * x_i_np1)
                     
                     # Add residual for x_i_np1 as constraint
-                    c_e = casadi.vertcat(
-                            [c_e, var[i][self.n_cp + 1]['x'] - x_i_np1])
+                    c_e.append(var[i][self.n_cp + 1]['x'] - x_i_np1)
             else:
                 for i in xrange(1, self.n_e + self.final_mesh_point):
                     # Evaluate x_{i, n_cp + 1} based on polynomial x_i
@@ -1202,8 +1201,7 @@ class LocalDAECollocator(CasadiCollocator):
                                                                         True)
                     
                     # Add residual for x_i_np1 as constraint
-                    c_e = casadi.vertcat(
-                            [c_e, var[i][self.n_cp + 1]['x'] - x_i_np1])
+                    c_e.append(var[i][self.n_cp + 1]['x'] - x_i_np1)
         
         # Constraints for terminal values
         if self.final_mesh_point:
@@ -1215,9 +1213,7 @@ class LocalDAECollocator(CasadiCollocator):
                                   self.pol.eval_basis(k, 1, False))
                 
                 # Add residual for xx_ne_np1 as constraint
-                c_e = casadi.vertcat(
-                        [c_e,
-                         var[self.n_e][self.n_cp + 1][var_type] - xx_ne_np1])
+                c_e.append(var[self.n_e][self.n_cp + 1][var_type] - xx_ne_np1)
             if not self.eliminate_der_var:
                 # Evaluate dx_{n_e, n_cp + 1} based on polynomial x_{n_e}
                 dx_ne_np1 = 0
@@ -1227,9 +1223,7 @@ class LocalDAECollocator(CasadiCollocator):
                                   x_ne_k * self.pol.eval_basis_der(k, 1))
                 
                 # Add residual for dx_ne_np1 as constraint
-                c_e = casadi.vertcat(
-                        [c_e,
-                         var[self.n_e][self.n_cp + 1]['dx'] - dx_ne_np1])
+                c_e.append(var[self.n_e][self.n_cp + 1]['dx'] - dx_ne_np1)
         
         # Continuity constraints for x_{i, 0}
         if not self.eliminate_cont_var:
@@ -1237,12 +1231,12 @@ class LocalDAECollocator(CasadiCollocator):
             for i in xrange(1, self.n_e):
                 cont_constr = (var[i][self.n_cp + gauss]['x'] - 
                                var[i + 1][0]['x'])
-                c_e = casadi.vertcat([c_e, cont_constr])
+                c_e.append(cont_constr)
         
         # Element length constraints
         if self.hs == "free":
             h_constr = casadi.sumRows(self.h[1:]) - 1
-            c_e = casadi.vertcat([c_e, h_constr])
+            c_e.append(h_constr)
         
         # Path constraints
         if self.eliminate_der_var:
@@ -1254,8 +1248,8 @@ class LocalDAECollocator(CasadiCollocator):
                                      self.horizon * self.h[i]])
             [g_i_constr] = g_i_eval([z, x_list[i], der_vals[k],
                                      self.horizon * self.h[i]])
-            c_e = casadi.vertcat([c_e, g_e_constr])
-            c_i = casadi.vertcat([c_i, g_i_constr])
+            c_e.append(g_e_constr)
+            c_i.append(g_i_constr)
             
             # Handle collocation points
             for i in xrange(1, self.n_e + 1):
@@ -1265,8 +1259,8 @@ class LocalDAECollocator(CasadiCollocator):
                                              self.horizon * self.h[i]])
                     [g_i_constr] = g_i_eval([z, x_list[i], der_vals[k],
                                              self.horizon * self.h[i]])
-                    c_e = casadi.vertcat([c_e, g_e_constr])
-                    c_i = casadi.vertcat([c_i, g_i_constr])
+                    c_e.append(g_e_constr)
+                    c_i.append(g_i_constr)
         else:
             # Handle t_1_0
             i = 1
@@ -1274,8 +1268,8 @@ class LocalDAECollocator(CasadiCollocator):
             z = self._get_z(i, k)
             [g_e_constr] = g_e_eval([z])
             [g_i_constr] = g_i_eval([z])
-            c_e = casadi.vertcat([c_e, g_e_constr])
-            c_i = casadi.vertcat([c_i, g_i_constr])
+            c_e.append(g_e_constr)
+            c_i.append(g_i_constr)
             
             # Handle collocation points
             for i in xrange(1, self.n_e + 1):
@@ -1283,12 +1277,12 @@ class LocalDAECollocator(CasadiCollocator):
                     z = self._get_z(i, k)
                     [g_e_constr] = g_e_eval([z])
                     [g_i_constr] = g_i_eval([z])
-                    c_e = casadi.vertcat([c_e, g_e_constr])
-                    c_i = casadi.vertcat([c_i, g_i_constr])
+                    c_e.append(g_e_constr)
+                    c_i.append(g_i_constr)
         
         # Store constraints and time as data attributes
         self.c_e = c_e
-        if self.graph == 'MX' or self.graph == 'expanded_MX':
+        if self.graph == 'MX':
             if c_i.isNull():
                 self.c_i = casadi.MX(0, 1)
             else:
@@ -1306,7 +1300,7 @@ class LocalDAECollocator(CasadiCollocator):
                             self.get_inequality_constraint()])
         
         # Create constraint function
-        if self.graph == 'MX' or self.graph == 'expanded_MX':
+        if self.graph == 'MX':
             c_fcn = casadi.MXFunction([self.get_xx()], [c])
         elif self.graph == 'SX':
             c_fcn = casadi.SXFunction([self.get_xx()], [c])
@@ -1352,7 +1346,7 @@ class LocalDAECollocator(CasadiCollocator):
                                      self.discr)
                 
                 # Use appropriate function evaluation based on graph
-                if self.graph == "MX" or self.graph == 'expanded_MX':
+                if self.graph == "MX":
                     [self.cost_mayer] = J.call([z])
                 elif self.graph == "SX":
                     [self.cost_mayer] = J.eval([z])
@@ -1377,7 +1371,7 @@ class LocalDAECollocator(CasadiCollocator):
                     L_fcn.init()
                     
                     # Define function evaluation method based on graph
-                    if self.graph == "MX" or self.graph == 'expanded_MX':
+                    if self.graph == "MX":
                         L_eval = L_fcn.call
                     elif self.graph == "SX":
                         L_eval = L_fcn.eval
@@ -1399,7 +1393,7 @@ class LocalDAECollocator(CasadiCollocator):
                 L = self.model.get_opt_L(False)
                 if L is not None:
                     # Define function evaluation method based on graph
-                    if self.graph == "MX" or self.graph == 'expanded_MX':
+                    if self.graph == "MX":
                         L_eval = L.call
                     elif self.graph == "SX":
                         L_eval = L.eval
@@ -1497,8 +1491,6 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Define NLP objective function based on graph
         if self.graph == "MX":
-            cost_fcn = casadi.MXFunction([self.xx], [self.cost])
-        elif self.graph == 'expanded_MX':
             cost_fcn = casadi.MXFunction([self.xx], [self.cost])
         elif self.graph == "SX":
             cost_fcn = casadi.SXFunction([self.xx], [self.cost])
