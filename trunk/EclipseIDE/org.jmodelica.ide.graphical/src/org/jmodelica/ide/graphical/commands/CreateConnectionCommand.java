@@ -1,8 +1,11 @@
 package org.jmodelica.ide.graphical.commands;
 
+import java.util.Arrays;
+
 import org.eclipse.gef.commands.Command;
 import org.jmodelica.icons.Connection;
 import org.jmodelica.icons.Connector;
+import org.jmodelica.icons.coord.Point;
 
 public abstract class CreateConnectionCommand extends Command {
 	
@@ -39,6 +42,7 @@ public abstract class CreateConnectionCommand extends Command {
 		initConnection(connection);
 		connection.setSourceConnector(source);
 		connection.setTargetConnector(target);
+		connection.setPoints(Arrays.asList(new Point(), new Point()));
 		redo();
 	}
 	
