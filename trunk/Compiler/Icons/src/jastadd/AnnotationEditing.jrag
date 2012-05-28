@@ -586,7 +586,7 @@ aspect AnnotationEditing {
 	 * @param def Default double vector
 	 */
 	private void AnnotationNode.save(double[] ds, double[] def) {
-		if (exists() || Arrays.equals(def, ds))
+		if (exists() || !Arrays.equals(def, ds))
 			save(ds);
 	}
 	

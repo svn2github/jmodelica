@@ -322,13 +322,14 @@ aspect ModelicaIcons
 					return new org.jmodelica.icons.Connector(icon(), placement, qualifiedName());
 				}
 			} else {
+				Component c;
 				if (isConnector) {
-					return new org.jmodelica.icons.Connector(diagram(), placement, qualifiedName());
+					c = new org.jmodelica.icons.Connector(diagram(), placement, qualifiedName());
 				} else {
-					Component c = new Component(icon(), placement, qualifiedName());
-					c.addObserver(this);
-					return c;
+					c = new Component(icon(), placement, qualifiedName());
 				}
+				c.addObserver(this);
+				return c;
 			}
 		}
 		return null;
