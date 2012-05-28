@@ -1545,18 +1545,23 @@ aspect FormattedPrint {
 		}
 	}
 
-	abstract void IfWhenElseEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, boolean elseIfWhen);
+	inh boolean BaseNode.isElse();
+	eq BaseNode.getChild().isElse() = false;
+	eq IfWhenEquation.getElse().isElse() = true;
+	eq IfExp.getElseExp().isElse() = true;
+
 	syn String IfWhenEquation.keyword();
 	eq IfEquation.keyword() = "if";
 	eq WhenEquation.keyword() = "when";
 	
-	void IfWhenEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-		prettyPrintFormattedHelper(printer, printStream, false);
+	void IfWhenElseEquation.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(postFormatting);
 	}
 	
-	void IfWhenEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, boolean elseIfWhen) {
-		if (elseIfWhen) {
-			printStream.print(preFormatting);
+	void IfWhenEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		if (isElse()) {
 			printStream.print("else");
 		}
 		printStream.print(keyword());
@@ -1566,22 +1571,18 @@ aspect FormattedPrint {
 			abstractEquation.doPrettyPrintFormatted(printer, printStream);
 		}
 		if (hasElse()) {
-			getElse().prettyPrintFormattedHelper(printer, printStream, true);
+			getElse().doPrettyPrintFormatted(printer, printStream);
 		}
-		if (!elseIfWhen) {
-			printStream.print("end" + insideFormatting + keyword());
-		} else {
-			printStream.print(postFormatting);
+		if (!isElse()) {
+			printStream.print("end" + insideFormatting + keyword() + ";");
 		}
 	}
 
-	void ElseEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, boolean elseIf) {
-		printStream.print(preFormatting);
+	void ElseEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("else");
 		for (AbstractEquation abstractEquation : getAbstractEquations()) {
 			abstractEquation.doPrettyPrintFormatted(printer, printStream);
 		}
-		printStream.print(postFormatting);
 	}
 	
 	void ElementAnnotation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1681,16 +1682,22 @@ aspect FormattedPrint {
 		}
 	}
 	
+	void Exp.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(preFormatting);
+		if (isElse()) {
+			printStream.print("else");
+			printStream.print(((IfExp) getParent()).insideFormatting);
+		}
+		prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(postFormatting);
+	}
+
 	void IfExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("if");
 		getIfExp().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("then");
 		getThenExp().doPrettyPrintFormatted(printer, printStream);
-		printStream.print(getElseExp().preFormatting);
-		printStream.print("else");
-		printStream.print(insideFormatting);
-		getElseExp().prettyPrintFormattedHelper(printer, printStream);
-		printStream.print(getElseExp().postFormatting);
+		getElseExp().doPrettyPrintFormatted(printer, printStream);
 	}
 	
 	void BinExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
