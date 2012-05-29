@@ -45,9 +45,9 @@ aspect InstLookupComponents {
 	eq InstGlobalAccess.getInstAccess().lookupInstComponent(String name)      = emptyHashSet();
 	
 	syn HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
-	eq InstClassAccess.qualifiedLookupInstComponent(String name)     = myInstClassDecl().memberInstComponent(name);
+	eq InstClassAccess.qualifiedLookupInstComponent(String name)     = myInstClassDecl().memberInstComponentConstrained(name);
 	eq InstComponentAccess.qualifiedLookupInstComponent(String name) = 
-		lookupArrayElement(myInstComponentDecl()).memberInstComponent(name);
+		lookupArrayElement(myInstComponentDecl()).memberInstComponentConstrained(name);
 
 	/**
 	 * Lookup the specific array component corresponding to this access, using current ceval() 
@@ -178,10 +178,15 @@ aspect InstLookupComponents {
 			for (InstExtends ie : instExtends()) 
 				set.addAll(ie.memberInstComponent(name));
 		
-			if (set.size() > 0 && constrainMemberInstComponent(name)) 
-				return set;
-			return emptyHashSet();
+			return set;
 		}
+	}
+	
+	syn HashSet InstNode.memberInstComponentConstrained(String name)  {
+		HashSet set = memberInstComponent(name);
+		if (!isArray() && set.size() > 0 && !constrainMemberInstComponent(name)) 
+			set = emptyHashSet();
+		return set;
 	}
 	
 	inh lazy HashSet InstNode.lookupInstConstant(String name);
@@ -273,14 +278,14 @@ aspect LookupInstComponentsInModifications {
 	
 	eq InstNamedModification.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
 	
-	eq InstConstrainingClass.getInstClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
-	eq InstConstrainingComponent.getInstClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
+	eq InstConstrainingClass.getInstClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponentConstrained(name);
+	eq InstConstrainingComponent.getInstClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponentConstrained(name);
 	     
-	eq InstComponentDecl.getInstModification().lookupInstComponentInInstElement(String name) = myInstClass().memberInstComponent(name); 
+	eq InstComponentDecl.getInstModification().lookupInstComponentInInstElement(String name) = myInstClass().memberInstComponentConstrained(name); 
 	
-	eq InstElementModification.getInstModification().lookupInstComponentInInstElement(String name) = getName().myInstComponentDecl().memberInstComponent(name);
+	eq InstElementModification.getInstModification().lookupInstComponentInInstElement(String name) = getName().myInstComponentDecl().memberInstComponentConstrained(name);
     
-	eq InstExtends.getInstClassModification().lookupInstComponentInInstElement(String name) = myInstClass().memberInstComponent(name);
+	eq InstExtends.getInstClassModification().lookupInstComponentInInstElement(String name) = myInstClass().memberInstComponentConstrained(name);
 	
 //	eq InstShortClassDecl.getInstClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
 	

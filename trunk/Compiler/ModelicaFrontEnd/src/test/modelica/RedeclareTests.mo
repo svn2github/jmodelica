@@ -3015,6 +3015,61 @@ end RedeclareTests.RedeclareTest29;
 end RedeclareTest29;
 
 
+model RedeclareTest30
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareTest30",
+         description="Test that constrainedby does not prevent accesses within same class",
+         flatModel="
+fclass RedeclareTests.RedeclareTest30
+ parameter Real a.y = 2 /* 2 */;
+ Real a.x;
+equation
+ a.x = a.y;
+end RedeclareTests.RedeclareTest30;
+")})));
+
+    model A
+        Real x;
+    end A;
+    
+    model B
+        extends A;
+        parameter Real y = 2;
+    equation
+        x = y;
+    end B;
+    
+    replaceable B a constrainedby A;
+end RedeclareTest30;
+
+
+model RedeclareTest31
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RedeclareTest31",
+         description="Test that constrainedby prevents accesses to elements not in constraining class from outside component",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
+Semantic error at line 3061, column 10:
+  Cannot find class or component declaration for y
+")})));
+
+    model A
+        Real x;
+    end A;
+    
+    model B
+        extends A;
+        parameter Real y = 2;
+    end B;
+    
+    replaceable B a constrainedby A;
+equation
+	a.x = a.y;
+end RedeclareTest31;
+
 
 model RedeclareElement1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
