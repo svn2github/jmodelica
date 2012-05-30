@@ -3574,6 +3574,8 @@ aspect IfEquations {
 		
 		for (FAbstractEquation eqn : nonFEquationSet())
 			l.add(eqn);
+		for (FAbstractEquation eqn : getElse().nonFEquationSet())
+			l.add(eqn);
 		
 		return l;
 	}
