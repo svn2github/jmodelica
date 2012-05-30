@@ -829,19 +829,83 @@ end ConnectTest15;
 
 
 model ConnectTest16
-	connector A
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConnectTest16",
+         description="Connecting arrays of connectors within an array of component instances, no indices",
+         flatModel="
+fclass ConnectTests.ConnectTest16
+ Real b[1].a1[1].x;
+ Real b[1].a1[2].x;
+ Real b[1].a2[1].x;
+ Real b[1].a2[2].x;
+ Real b[2].a1[1].x;
+ Real b[2].a1[2].x;
+ Real b[2].a2[1].x;
+ Real b[2].a2[2].x;
+equation
+ b[1].a1[1].x = b[1].a2[1].x;
+ b[1].a1[2].x = b[1].a2[2].x;
+ b[2].a1[1].x = b[2].a2[1].x;
+ b[2].a1[2].x = b[2].a2[2].x;
+end ConnectTests.ConnectTest16;
+")})));
+
+    connector A
         Real x;
-	end A;
-	
-	model B
-		A a1[2];
-		A a2[2];
-	equation
-		connect(a1, a2);
-	end B;
-	
-	B b[2];
+    end A;
+    
+    model B
+        A a1[2];
+        A a2[2];
+    equation
+        connect(a1, a2);
+    end B;
+    
+    B b[2];
 end ConnectTest16;
+
+
+model ConnectTest17
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConnectTest17",
+         description="Connecting arrays of connectors within an array of component instances, slices",
+         flatModel="
+fclass ConnectTests.ConnectTest17
+ Real b[1].a1[1].x;
+ Real b[1].a1[2].x;
+ Real b[1].a1[3].x;
+ Real b[1].a2[1].x;
+ Real b[1].a2[2].x;
+ Real b[1].a2[3].x;
+ Real b[2].a1[1].x;
+ Real b[2].a1[2].x;
+ Real b[2].a1[3].x;
+ Real b[2].a2[1].x;
+ Real b[2].a2[2].x;
+ Real b[2].a2[3].x;
+equation
+ b[1].a1[1].x = b[1].a2[2].x;
+ b[1].a1[2].x = b[1].a2[3].x;
+ b[2].a1[1].x = b[2].a2[2].x;
+ b[2].a1[2].x = b[2].a2[3].x;
+end ConnectTests.ConnectTest17;
+")})));
+
+    connector A
+        Real x;
+    end A;
+    
+    model B
+        A a1[3];
+        A a2[3];
+    equation
+        connect(a1[1:2], a2[2:3]);
+    end B;
+    
+    B b[2];
+end ConnectTest17;
 
 
 model Electrical

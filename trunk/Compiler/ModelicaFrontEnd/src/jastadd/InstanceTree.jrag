@@ -1544,7 +1544,21 @@ aspect SourceAST_API {
 aspect InstArrays {
 	
 	/**
-	 * \brief Find the length of the dimension corresponding to this InstArrayComponentDecl. 
+	 * Find the number of the dimension corresponding to this InstArrayComponentDecl.
+	 */
+	inh int InstArrayComponentDecl.myDimension();
+	eq InstNode.getChild().myDimension()               = 1;
+	eq InstArrayComponentDecl.getChild().myDimension() = myDimension() + 1;
+	
+	/**
+	 * Efficiently check if this InstArrayComponentDecl is in the top dimension of the array.
+	 */
+	inh boolean InstArrayComponentDecl.isTopDimension();
+	eq InstNode.getChild().isTopDimension()               = true;
+	eq InstArrayComponentDecl.getChild().isTopDimension() = false;
+	
+	/**
+	 * \brief Find the length of the dimension corresponding to this InstArrayComponentDecl.
 	 */
 	inh int InstArrayComponentDecl.myDimensionLength();
 	eq InstNode.getChild().myDimensionLength() = getNumInstComponentDecl();

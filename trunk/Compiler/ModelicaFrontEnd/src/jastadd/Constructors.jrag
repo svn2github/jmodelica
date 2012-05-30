@@ -458,7 +458,14 @@ aspect Constructors {
 	public FArraySubscripts.FArraySubscripts(Index i, int j, int n) {
 		this();
 		for (int k = j; k < n+j; k++)
-			addFSubscript(new FExpSubscript(i.get(k)));
+			addFSubscript(i.get(k));
+	}
+	
+	/**
+	 * Add a new FExpSubscript with an integer literal as expression to the list of FSubscripts.
+	 */
+	public void FArraySubscripts.addFSubscript(int i) {
+		addFSubscript(new FExpSubscript(i));
 	}
 	
 	/**

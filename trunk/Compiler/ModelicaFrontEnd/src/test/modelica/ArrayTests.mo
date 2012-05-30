@@ -1156,9 +1156,9 @@ model UnknownSize4
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 789, column 7:
-  Array size mismatch in declaration of x, size of declaration is [1, :] and size of binding expression is [2]
-Semantic error at line 789, column 7:
   Can not infer array size of the variable x
+Semantic error at line 789, column 7:
+  Array size mismatch in declaration of x, size of declaration is [1, :] and size of binding expression is [2]
 ")})));
 
  Real x[1,:] = {1,2};

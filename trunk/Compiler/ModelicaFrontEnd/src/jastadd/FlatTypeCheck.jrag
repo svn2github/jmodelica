@@ -28,18 +28,18 @@ aspect FlatTypeCheck {
     		error("Can not infer array size of the variable " + name());
     	if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown()) {
     		if (myBindingExpHasEach() && !inArrayComponent()) {
-    			error("The 'each' keyword cannot be applied to members of non-array components");
+    			bexp.error("The 'each' keyword cannot be applied to members of non-array components");
      		} else {
 				FType expectedBT = bindingType();
 				FType actualBT = bexp.type();
     			if (!expectedBT.typeCompatible(actualBT, func) && !expectedBT.isUnknown()) {
     				if (!myBindingExpHasEach() && type().typeCompatible(actualBT, func)) {
-						warning("Assuming 'each' for the binding expression to the variable " + name());
+						bexp.warning("Assuming 'each' for the binding expression to the variable " + name());
     				} else if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
-    					error("The binding expression of the variable " + name() +
+    					bexp.error("The binding expression of the variable " + name() +
     							" does not match the declared type of the variable");
     				} else {
-    					error("Array size mismatch in declaration of " + 
+    					bexp.error("Array size mismatch in declaration of " + 
     							(myBindingExpHasEach() ? "each " : "") + name() +
     							", size of declaration is " + expectedBT.size() + 
     							" and size of binding expression is " + actualBT.size());
