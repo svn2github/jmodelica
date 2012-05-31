@@ -140,5 +140,64 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 	public final boolean isScannedMixed() {
 		return true;
 	}
+	
+	protected ScannedFormattingItem insertItem(ScannedFormattingItem otherItem) {
+		ScannedFormattingItem newItem = null;
+		int offset = -1;
+		int newItemOffsettingLines = otherItem.spanningLines();
+		int newItemOffsettingColumns = 0;
 
+		for (ScannedFormattingItem item : subItems) {
+			if (offset < 0) {
+				offset = item.getOffset(otherItem.getStartLine(), otherItem.getEndColumn());
+				if (offset != -1) {
+					newItem = insertItem(otherItem, item, offset, newItem);
+					if (offset < 0 && item.spanningLines() == 0) {
+						newItemOffsettingColumns = otherItem.spanningColumnsOnLastLine();
+					}
+				} else if (newItem == null) {
+					newItem = new MixedFormattingItem(item);
+				} else {
+					newItem = newItem.mergeItems(Adjacency.BACK, item);
+				}
+			} else {
+				if (newItemOffsettingColumns != 0 && item.spanningLines() > 0) {
+					newItem = newItem.mergeItems(Adjacency.BACK, new ScannedFormattingItem(item.type, item.data, item.getStartLine() + newItemOffsettingLines, item.getStartColumn() + newItemOffsettingColumns,
+							item.getEndLine() + newItemOffsettingLines, item.getEndColumn()));
+					newItemOffsettingColumns = 0;
+				} else {
+					newItem = newItem.mergeItems(Adjacency.BACK, new ScannedFormattingItem(item.type, item.data, item.getStartLine() + newItemOffsettingLines, item.getStartColumn() + newItemOffsettingColumns,
+							item.getEndLine() + newItemOffsettingLines, item.getEndColumn() + newItemOffsettingColumns));
+				}
+			}
+		}
+
+		if (offset < 0) {
+			System.err.println("Could not find valid offset.");
+			return null;
+		}
+		
+		return newItem;
+	}
+
+	private ScannedFormattingItem insertItem(ScannedFormattingItem itemToInsert, ScannedFormattingItem itemToInsertInto, int offset, ScannedFormattingItem resultingItem) {
+		ScannedFormattingItem firstItem = new ScannedFormattingItem(itemToInsertInto.type, itemToInsertInto.data.substring(0, offset),
+				itemToInsertInto.getStartLine(), itemToInsertInto.getStartColumn(), itemToInsert.getEndLine(), itemToInsert.getEndColumn() - 1);
+		if (resultingItem == null) {
+			resultingItem = new MixedFormattingItem(firstItem);						
+		} else {
+			resultingItem = resultingItem.mergeItems(Adjacency.BACK, firstItem);
+		}
+
+		resultingItem = resultingItem.mergeItems(Adjacency.BACK, itemToInsert);
+		int startLine = itemToInsert.getEndLine();
+		int startColumn = itemToInsert.getEndColumn() + 1;
+		int endLine = itemToInsertInto.getEndLine() - firstItem.spanningLines() + itemToInsert.spanningLines();
+		int endColumn = itemToInsertInto.getEndColumn();
+		if (itemToInsertInto.spanningLines() == 0) {
+			endColumn = itemToInsert.spanningColumnsOnLastLine() + itemToInsertInto.getEndColumn();
+		}
+
+		return resultingItem.mergeItems(Adjacency.BACK, new ScannedFormattingItem(itemToInsertInto.type, itemToInsertInto.data.substring(offset), startLine, startColumn, endLine, endColumn));
+	}
 }

@@ -35,4 +35,24 @@ public class EmptyFormattingItem extends DefaultFormattingItem {
 	public final boolean isEmptyDefault() {
 		return true;
 	}
+	
+	@Override
+	public FormattingItem combineItems(ScannedFormattingItem otherItem) {
+		return otherItem;
+	}
+	
+	@Override
+	public int spanningLines() {
+		return 0;
+	}
+
+	@Override
+	public int spanningColumnsOnLastLine() {
+		return 0;
+	}
+	
+	@Override
+	public boolean inside(int line, int column) {
+		return false;
+	}
 }

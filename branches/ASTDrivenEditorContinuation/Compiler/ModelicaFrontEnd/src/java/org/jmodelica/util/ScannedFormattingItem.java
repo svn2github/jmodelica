@@ -232,4 +232,90 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 	public final boolean isEmptyDefault() {
 		return false;
 	}
+	
+	@Override
+	public FormattingItem combineItems(ScannedFormattingItem otherItem) {
+		FormattingItem newItem = null;
+		
+		if (atStart(otherItem.getStartLine(), otherItem.getStartColumn())) {
+			/* Front */
+			if (type == Type.NON_BREAKING_WHITESPACE && otherItem.type == Type.NON_BREAKING_WHITESPACE) {
+				String newData = otherItem.data + data;
+				newItem = new ScannedFormattingItem(Type.NON_BREAKING_WHITESPACE, newData, getStartLine(), getStartColumn(),
+						getEndLine(), getStartColumn() + newData.length() - 1);
+			} else {
+				newItem = new MixedFormattingItem(this);
+				newItem = newItem.mergeItems(Adjacency.FRONT, otherItem); // TODO: Does this give correct end position??
+			}
+		} else if (atEnd(otherItem.getStartLine(), otherItem.getStartColumn())) {
+			/* Back */
+			if (type == Type.NON_BREAKING_WHITESPACE && otherItem.type == Type.NON_BREAKING_WHITESPACE) {
+				String newData = data + otherItem.data;
+				newItem = new ScannedFormattingItem(Type.NON_BREAKING_WHITESPACE, newData, getStartLine(), getStartColumn(),
+						getEndLine(), getStartColumn() + newData.length() - 1);
+			} else {
+				newItem = new MixedFormattingItem(this);
+				newItem = newItem.mergeItems(Adjacency.BACK, otherItem); // TODO: Does this give correct end position??
+			}
+		} else if (getBackRelativePosition(otherItem.getStartLine(), otherItem.getStartColumn()) == RelativePosition.BEFORE &&
+				getFrontRelativePosition(otherItem.getStartLine(), otherItem.getStartColumn()) == RelativePosition.AFTER) {
+			newItem = new MixedFormattingItem(this);
+			newItem = ((MixedFormattingItem) newItem).insertItem(otherItem);
+		} /* Else unrelated */
+		
+		return newItem;
+	}
+	
+	protected int getOffset(int line, int column) {
+		int currentLine = getStartLine();
+		int currentColumn = getStartColumn();
+		int offset = (currentLine < line ? -1 : 0);
+		
+		if (line < currentLine || (line == currentLine && column < currentColumn)) {
+			return -1; // Trying to offset out of bounds (before this item).
+		}
+
+		while (currentLine < line) {
+			if (++offset >= data.length()) {
+				return -1; // Invalid column.
+			}
+			
+			switch (data.charAt(offset)) {
+			case '\r':
+				if (offset < data.length() && data.charAt(offset) == '\n') {
+					++offset;
+				}
+			case '\n':
+				++currentLine;
+				currentColumn = 1;
+				break;
+			default:
+				++currentColumn;
+				break;
+			}
+		}
+		offset = offset + (column - currentColumn);
+		
+		if (offset >= data.length()) {
+			return -1; // Trying to offset out of bounds (after this item).
+		}
+		
+		return offset;
+	}
+	
+	@Override
+	public int spanningLines() {
+		return (getEndLine() - getStartLine());
+	}
+	
+	@Override
+	public int spanningColumnsOnLastLine() {
+		return (getStartLine() == getEndLine() ? (getEndColumn() - getStartColumn() + 1) : getEndColumn());
+	}
+	
+	@Override
+	public boolean inside(int line, int column) {
+		return ((line > getStartLine() || (line == getStartLine() && column >= getStartColumn())) &&
+				(line < getEndLine() || (line == getEndLine() && column <= getEndColumn())));
+	}
 }

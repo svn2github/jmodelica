@@ -83,4 +83,54 @@ public class DefaultFormattingItem extends FormattingItem {
 	public boolean isEmptyDefault() {
 		return false;
 	}
+	
+	@Override
+	public FormattingItem combineItems(ScannedFormattingItem otherItem) {
+		throw new RuntimeException("This method has not been implemented for DefaultFormattingItem.");
+	}
+	
+	@Override
+	public int spanningLines() {
+		int numberOfLines = 0;
+		for (int i = 0; i < data.length(); i++) {
+			switch (data.charAt(i)) {
+			case '\r':
+				if (i + 1 < data.length() && data.charAt(i + 1) == '\n') {
+					++i;
+				}
+			case '\n':
+				if (i + 1 < data.length()) {
+					++numberOfLines;
+				}
+				break;
+			default:
+				break;
+			}
+		}
+
+		return numberOfLines;
+	}
+
+	@Override
+	public int spanningColumnsOnLastLine() {
+		int columns = 0;
+		for (int i = data.length() - 1; i >= 0; i--) {
+			if (data.charAt(i) != '\r' && data.charAt(i) != '\n') {
+				++columns;
+			} else {
+				return columns;
+			}
+		}
+		
+		return columns;
+	}
+	
+	@Override
+	public boolean inside(int line, int column) {
+		int endLine = 1 + spanningLines();
+		int endColumn = spanningColumnsOnLastLine();
+
+		return (line > 1 || (line == 1 && column >= 1)) &&
+				(line < endLine || (line == endLine && column <= endColumn));
+	}
 }

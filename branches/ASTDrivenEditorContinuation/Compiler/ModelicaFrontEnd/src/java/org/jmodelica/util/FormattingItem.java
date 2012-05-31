@@ -164,4 +164,37 @@ public abstract class FormattingItem {
 	 * @return true if this is a <code>EmptyFormattingItem</code>, otherwise false.
 	 */
 	public abstract boolean isEmptyDefault();
+	
+	/**
+	 * Combines two formatting items if they are adjacent or if the items overlap. The result is a new item that
+	 * contains all characters from both items, but with their relative position taken into consideration. A
+	 * formatting item inside another formatting item is thus inserted into the right place.
+	 * @param otherItem
+	 * @return a new <code>FormattingItem</code> that consists of this item combined with <code>otherItem</code>. 
+	 */
+	public abstract FormattingItem combineItems(ScannedFormattingItem otherItem);
+	
+	/**
+	 * Determines the number of lines that this <code>FormattingItem</code> spans. If this item does not contain
+	 * any line breaks, this value will be 0. 
+	 * @return the number of lines that this <code>FormattingItem</code> spans. That is, how many line breaks it
+	 * contains minus the last one if the last character is a line break.
+	 */
+	public abstract int spanningLines();
+	
+	/**
+	 * Determines how many characters the last line in this formatting item contains.
+	 * @return the number of characters that the last line in this <code>FormattingItem</code> contains.
+	 */
+	public abstract int spanningColumnsOnLastLine();
+	
+	/**
+	 * Determines if a point is inside a formatting item. The start and end point of the formatting item are
+	 * included. For <code>DefaultFormattingItems</code> the starting point is always considered to be (1, 1).
+	 * @param line The line number of the point to determine whether it is inside this formatting item or not.
+	 * @param column The column number of the point to determine whether it is inside this formatting item or not.
+	 * @return true if the point (<code>line</code>, <code>column</code>) is inside this formatting item
+	 * (boundaries included). Otherwise, false.
+	 */
+	public abstract boolean inside(int line, int column);
 }
