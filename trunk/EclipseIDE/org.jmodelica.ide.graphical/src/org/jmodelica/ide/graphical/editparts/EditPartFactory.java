@@ -15,13 +15,20 @@ import org.jmodelica.ide.graphical.editparts.primitives.LineEditPart;
 import org.jmodelica.ide.graphical.editparts.primitives.PolygonEditPart;
 import org.jmodelica.ide.graphical.editparts.primitives.RectangleEditPart;
 import org.jmodelica.ide.graphical.editparts.primitives.TextEditPart;
+import org.jmodelica.ide.graphical.util.ASTResourceProvider;
 
 
 public class EditPartFactory implements org.eclipse.gef.EditPartFactory {
+	
+	private ASTResourceProvider provider;
+	
+	public EditPartFactory(ASTResourceProvider provider) {
+		this.provider = provider;
+	}
 
 	public EditPart createEditPart(EditPart context, Object model) {
 		if (model instanceof Diagram) {
-			return new DiagramEditPart((Diagram)model);
+			return new DiagramEditPart((Diagram)model, provider);
 		}
 		if (model instanceof Connector) {
 			return new ConnectorEditPart((Connector)model);

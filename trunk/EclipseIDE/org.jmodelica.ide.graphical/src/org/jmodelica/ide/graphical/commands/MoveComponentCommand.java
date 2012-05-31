@@ -1,47 +1,49 @@
 package org.jmodelica.ide.graphical.commands;
 
-import org.eclipse.gef.RequestConstants;
-import org.eclipse.gef.commands.Command;
-import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.jmodelica.icons.Component;
 import org.jmodelica.icons.coord.Point;
+import org.jmodelica.ide.graphical.util.ASTResourceProvider;
 
+public abstract class MoveComponentCommand extends AbstractCommand {
 
-public abstract class MoveComponentCommand extends Command {
-	
 	private Point newOrigin;
 	private Point oldOrigin;
-	private ChangeBoundsRequest request;
-	private Component component;
+	private String componentName;
 
-	public MoveComponentCommand(Component component, ChangeBoundsRequest req) {
-		if (component == null || req == null) {
-			throw new IllegalArgumentException();
-		}
-		this.component = component;
-		this.request = req;
+	public MoveComponentCommand(String componentName, ASTResourceProvider provider) {
+		super(provider);
+		this.componentName = componentName;
 		setLabel("move");
 	}
 
-	public boolean canExecute() {
-		Object type = request.getType();
-		return (RequestConstants.REQ_MOVE_CHILDREN.equals(type));
-	}
-	
-	
 	protected abstract Point calculateNewOrigin();
-	
+
+	@Override
 	public void execute() {
+		Component component = getASTResourceProvider().getComponentByName(componentName);
+		if (component == null)
+			return;
+
 		oldOrigin = component.getPlacement().getTransformation().getOrigin();
 		newOrigin = calculateNewOrigin();
 		redo();
 	}
 
+	@Override
 	public void redo() {
+		Component component = getASTResourceProvider().getComponentByName(componentName);
+		if (component == null)
+			return;
+
 		component.getPlacement().getTransformation().setOrigin(newOrigin);
 	}
 
+	@Override
 	public void undo() {
+		Component component = getASTResourceProvider().getComponentByName(componentName);
+		if (component == null)
+			return;
+
 		component.getPlacement().getTransformation().setOrigin(oldOrigin);
 	}
 }

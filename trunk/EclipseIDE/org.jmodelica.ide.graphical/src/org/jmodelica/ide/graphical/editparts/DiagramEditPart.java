@@ -1,6 +1,5 @@
 package org.jmodelica.ide.graphical.editparts;
 
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,20 +29,24 @@ import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.CreateRequest;
 import org.jmodelica.icons.Component;
 import org.jmodelica.icons.Diagram;
+import org.jmodelica.icons.Icon;
 import org.jmodelica.icons.coord.Extent;
 import org.jmodelica.icons.coord.Point;
 import org.jmodelica.icons.coord.Transformation;
 import org.jmodelica.ide.graphical.commands.AddComponentCommand;
 import org.jmodelica.ide.graphical.commands.MoveComponentCommand;
 import org.jmodelica.ide.graphical.commands.ResizeComponentCommand;
+import org.jmodelica.ide.graphical.util.ASTResourceProvider;
 import org.jmodelica.ide.graphical.util.Converter;
 import org.jmodelica.ide.graphical.util.Transform;
 
-
 public class DiagramEditPart extends AbstractIconEditPart {
 
-	public DiagramEditPart(Diagram diagram) {
+	private ASTResourceProvider provider;
+
+	public DiagramEditPart(Diagram diagram, ASTResourceProvider provider) {
 		super(diagram);
+		this.provider = provider;
 	}
 
 	protected IFigure createFigure() {
@@ -59,7 +62,7 @@ public class DiagramEditPart extends AbstractIconEditPart {
 
 		return f;
 	}
-	
+
 	public void updateGrid() {
 		Transform transform = getTransform();
 		double[] realGrid = getModel().getLayer().getCoordinateSystem().getGrid();
@@ -71,40 +74,49 @@ public class DiagramEditPart extends AbstractIconEditPart {
 	}
 
 	protected void createEditPolicies() {
-//		// disallows the removal of this edit part from its parent
-//		installEditPolicy(EditPolicy.COMPONENT_ROLE, new RootComponentEditPolicy());
 		installEditPolicy("Snap Feedback", new SnapFeedbackPolicy());
 		installEditPolicy(EditPolicy.COMPONENT_ROLE, new ComponentEditPolicy() {
 			@Override
 			public Command getCommand(Request request) {
 				if (NativeDropRequest.ID.equals(request.getType())) {
-					NativeDropRequest ndr = (NativeDropRequest) request;
+					final NativeDropRequest ndr = (NativeDropRequest) request;
+					final String className = (String) ndr.getData();
+					return new AddComponentCommand(provider) {
 
-					String className = (String) ndr.getData();
-					String baseAutoName = className;
-					int index = baseAutoName.lastIndexOf('.');
-					if (index != -1)
-						baseAutoName = baseAutoName.substring(index + 1);
-					Set<String> usedNames = new HashSet<String>();
-					for (Object part : getChildren()) {
-						if (part instanceof ComponentEditPart)
-							usedNames.add(((ComponentEditPart) part).getComponent().getComponentName());
-					}
-					int i = 1;
-					String autoName = baseAutoName;
-					while (usedNames.contains(autoName)) {
-						i++;
-						autoName = baseAutoName + i;
-					}
+						@Override
+						protected Component createComponent() {
+							String baseAutoName = className;
+							int index = baseAutoName.lastIndexOf('.');
+							if (index != -1)
+								baseAutoName = baseAutoName.substring(index + 1);
+							Set<String> usedNames = new HashSet<String>();
 
-					Component c = getModel().getFactory().createComponent(className, autoName);
+							List<Icon> diagrams = new ArrayList<Icon>(provider.getDiagram().getSuperclasses());
+							diagrams.add(provider.getDiagram());
 
-					org.eclipse.draw2d.geometry.Point draw2dOrigin = ndr.getPoint().getCopy();
-					getFigure().translateToRelative(draw2dOrigin);
-					Point origin = Transform.yInverter.transform(getTransform().getInverseTransfrom().transform(Converter.convert(draw2dOrigin)));
-					c.getPlacement().setIconTransformation(new Transformation(new Extent(new Point(-10, -10), new Point(10, 10)), origin));
+							for (Icon diagram : diagrams) {
+								for (Component c : diagram.getSubcomponents()) {
+									usedNames.add(c.getComponentName());
+								}
+							}
 
-					return new AddComponentCommand(getModel(), c);
+							int i = 1;
+							String autoName = baseAutoName;
+							while (usedNames.contains(autoName)) {
+								i++;
+								autoName = baseAutoName + i;
+							}
+
+							Component c = provider.getDiagram().getFactory().createComponent(className, autoName);
+
+							org.eclipse.draw2d.geometry.Point draw2dOrigin = ndr.getPoint().getCopy();
+							getFigure().translateToRelative(draw2dOrigin);
+							Point origin = Transform.yInverter.transform(getTransform().getInverseTransfrom().transform(Converter.convert(draw2dOrigin)));
+							c.getPlacement().setIconTransformation(new Transformation(new Extent(new Point(-10, -10), new Point(10, 10)), origin));
+							return c;
+						}
+
+					};
 				}
 				return super.getCommand(request);
 			}
@@ -122,13 +134,13 @@ public class DiagramEditPart extends AbstractIconEditPart {
 				if (child instanceof ComponentEditPart && constraint instanceof Rectangle) {
 					final ComponentEditPart cep = (ComponentEditPart) child;
 					if (RequestConstants.REQ_RESIZE_CHILDREN.equals(request.getType())) {
-						return new ResizeComponentCommand(cep.getComponent(), request) {
+						return new ResizeComponentCommand(cep.getComponent().getComponentName(), provider) {
 							@Override
 							protected Extent calculateNewExtent() {
 								Transform t = getTransform();
 								t.translate(cep.getComponent().getPlacement().getTransformation().getOrigin().getX(), -cep.getComponent().getPlacement().getTransformation().getOrigin().getY());
 								t = t.getInverseTransfrom();
-								
+
 								Rectangle newBounds = request.getTransformedRectangle(cep.getFigure().getHandleBounds());
 								Extent newExtent = Transform.yInverter.transform(t.transform(Converter.convert(newBounds)));
 								return newExtent;
@@ -137,7 +149,7 @@ public class DiagramEditPart extends AbstractIconEditPart {
 						};
 					}
 					if (RequestConstants.REQ_MOVE_CHILDREN.equals(request.getType())) {
-						return new MoveComponentCommand(cep.getComponent(), request) {
+						return new MoveComponentCommand(cep.getComponent().getComponentName(), provider) {
 							@Override
 							protected Point calculateNewOrigin() {
 								Transform t = getTransform().getInverseTransfrom();
@@ -160,7 +172,7 @@ public class DiagramEditPart extends AbstractIconEditPart {
 			protected Command getCreateCommand(CreateRequest request) {
 				return null;
 			}
-			
+
 			//TODO: #1976, the new selection handles are disabled for now.
 //			@Override
 //			protected EditPolicy createChildEditPolicy(final EditPart child) {

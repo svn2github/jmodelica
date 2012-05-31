@@ -1,25 +1,18 @@
 package org.jmodelica.ide.graphical.commands;
 
-import org.eclipse.gef.commands.Command;
 import org.jmodelica.icons.Component;
-import org.jmodelica.icons.Diagram;
-import org.jmodelica.icons.Layer;
+import org.jmodelica.ide.graphical.util.ASTResourceProvider;
 
-public class AddComponentCommand extends Command {
+public abstract class AddComponentCommand extends AbstractCommand {
 	
-	private Diagram diagram;
-	private Component component;
+	private String componentName;
 	
-	public AddComponentCommand(Diagram d, Component c) {
-		diagram = d;
-		component = c;
+	public AddComponentCommand(ASTResourceProvider provider) {
+		super(provider);
 		setLabel("add component");
 	}
 	
-	@Override
-	public boolean canExecute() {
-		return component.getIcon().getLayer() != Layer.NO_LAYER;
-	}
+	protected abstract Component createComponent();
 	
 	@Override
 	public void execute() {
@@ -28,12 +21,20 @@ public class AddComponentCommand extends Command {
 	
 	@Override
 	public void redo() {
-		diagram.addSubcomponent(component);
+		Component c = createComponent();
+		componentName = c.getComponentName();
+		getASTResourceProvider().getDiagram().addSubcomponent(c);
 	}
 	
 	@Override
 	public void undo() {
-		diagram.removeSubComponent(component);
+		System.out.println(componentName);
+		Component c = getASTResourceProvider().getComponentByName(componentName);
+		System.out.println(c);
+		if (c == null)
+			return;
+		
+		getASTResourceProvider().getDiagram().removeSubComponent(c);
 	}
-
+	
 }

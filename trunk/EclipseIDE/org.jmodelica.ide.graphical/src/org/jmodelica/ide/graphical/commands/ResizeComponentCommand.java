@@ -1,46 +1,49 @@
 package org.jmodelica.ide.graphical.commands;
 
-import org.eclipse.gef.RequestConstants;
-import org.eclipse.gef.commands.Command;
-import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.jmodelica.icons.Component;
 import org.jmodelica.icons.coord.Extent;
+import org.jmodelica.ide.graphical.util.ASTResourceProvider;
 
+public abstract class ResizeComponentCommand extends AbstractCommand {
 
-public abstract class ResizeComponentCommand extends Command {
-	
 	private Extent newExtent;
 	private Extent oldExtent;
-	private ChangeBoundsRequest request;
-	private Component component;
+	private String componentName;
 
-	public ResizeComponentCommand(Component component, ChangeBoundsRequest req) {
-		if (component == null || req == null) {
-			throw new IllegalArgumentException();
-		}
-		this.component = component;
-		this.request = req;
+	public ResizeComponentCommand(String componentName, ASTResourceProvider provider) {
+		super(provider);
+		this.componentName = componentName;
 		setLabel("resize");
 	}
 
-	public boolean canExecute() {
-		return RequestConstants.REQ_RESIZE_CHILDREN.equals(request.getType());
-	}
-	
-
 	protected abstract Extent calculateNewExtent();
-	
+
+	@Override
 	public void execute() {
+		Component component = getASTResourceProvider().getComponentByName(componentName);
+		if (component == null)
+			return;
+
 		oldExtent = component.getPlacement().getTransformation().getExtent();
 		newExtent = calculateNewExtent();
 		redo();
 	}
 
+	@Override
 	public void redo() {
+		Component component = getASTResourceProvider().getComponentByName(componentName);
+		if (component == null)
+			return;
+
 		component.getPlacement().getTransformation().setExtent(newExtent);
 	}
 
+	@Override
 	public void undo() {
+		Component component = getASTResourceProvider().getComponentByName(componentName);
+		if (component == null)
+			return;
+
 		component.getPlacement().getTransformation().setExtent(oldExtent);
 	}
 }

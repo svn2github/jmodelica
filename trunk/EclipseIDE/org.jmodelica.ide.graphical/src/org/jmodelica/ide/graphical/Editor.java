@@ -36,9 +36,11 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.jastadd.plugin.Activator;
 import org.jmodelica.icons.Component;
+import org.jmodelica.icons.Diagram;
 import org.jmodelica.ide.graphical.actions.OpenComponentAction;
 import org.jmodelica.ide.graphical.actions.RotateAction;
 import org.jmodelica.ide.graphical.editparts.EditPartFactory;
+import org.jmodelica.ide.graphical.util.ASTResourceProvider;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
@@ -47,7 +49,7 @@ import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
-public class Editor extends GraphicalEditor {
+public class Editor extends GraphicalEditor implements ASTResourceProvider {
 
 	private GraphicalEditorInput input;
 	private InstClassDecl icd;
@@ -138,7 +140,7 @@ public class Editor extends GraphicalEditor {
 	protected void configureGraphicalViewer() {
 		super.configureGraphicalViewer();
 		GraphicalViewer viewer = getGraphicalViewer();
-		viewer.setEditPartFactory(new EditPartFactory());
+		viewer.setEditPartFactory(new EditPartFactory(this));
 		viewer.setRootEditPart(new ScalableFreeformRootEditPart());
 		viewer.setKeyHandler(new GraphicalViewerKeyHandler(viewer));
 		viewer.addDropTargetListener(new TextTransferDropTargetListener(viewer, TextTransfer.getInstance()));
@@ -327,5 +329,21 @@ public class Editor extends GraphicalEditor {
 //		System.out.println("rebuil open component stack, t+" + (System.currentTimeMillis() - start));
 		setContent();
 //		System.out.println("set content, t+" + (System.currentTimeMillis() - start));
+	}
+
+	@Override
+	public Component getComponentByName(String componentName) {
+		for (InstComponentDecl icd : this.icd.getInstComponentDecls()) {
+			if (icd.name().equals(componentName))
+				return icd.getComponent();
+		}
+		
+		System.err.println("MoveComponentCommand.execute(): Unable to find component \"" + componentName + "\"");
+		return null;
+	}
+
+	@Override
+	public Diagram getDiagram() {
+		return icd.diagram();
 	}
 }
