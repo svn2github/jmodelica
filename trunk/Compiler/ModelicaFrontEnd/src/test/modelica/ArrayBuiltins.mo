@@ -560,7 +560,7 @@ model MinExp9
 fclass ArrayBuiltins.Min.MinExp9
  Real x;
 equation
- x = min(min(min(min(min(min(min(min(( 1 ) * ( 2 ), ( 1 ) * ( 3 )), ( 1 ) * ( 5 )), ( 2 ) * ( 2 )), ( 2 ) * ( 3 )), ( 2 ) * ( 5 )), ( 3 ) * ( 2 )), ( 3 ) * ( 3 )), ( 3 ) * ( 5 ));
+ x = min(min(min(min(min(min(min(min(( 1 ) * ( 2 ), ( 2 ) * ( 2 )), ( 3 ) * ( 2 )), ( 1 ) * ( 3 )), ( 2 ) * ( 3 )), ( 3 ) * ( 3 )), ( 1 ) * ( 5 )), ( 2 ) * ( 5 )), ( 3 ) * ( 5 ));
 end ArrayBuiltins.Min.MinExp9;
 ")})));
 
@@ -779,7 +779,7 @@ model MaxExp9
 		 description="Reduction-expression with max(): basic test",
 		 flatModel="
 fclass ArrayBuiltins.Max.MaxExp9
- constant Real x = max(max(max(max(max(max(max(max(max(max(max(( 1 ) * ( 2 ), ( 1 ) * ( 3 )), ( 1 ) * ( 5 )), ( 2 ) * ( 2 )), ( 2 ) * ( 3 )), ( 2 ) * ( 5 )), ( 3 ) * ( 2 )), ( 3 ) * ( 3 )), ( 3 ) * ( 5 )), ( 4 ) * ( 2 )), ( 4 ) * ( 3 )), ( 4 ) * ( 5 ));
+ constant Real x = max(max(max(max(max(max(max(max(max(max(max(( 1 ) * ( 2 ), ( 2 ) * ( 2 )), ( 3 ) * ( 2 )), ( 4 ) * ( 2 )), ( 1 ) * ( 3 )), ( 2 ) * ( 3 )), ( 3 ) * ( 3 )), ( 4 ) * ( 3 )), ( 1 ) * ( 5 )), ( 2 ) * ( 5 )), ( 3 ) * ( 5 )), ( 4 ) * ( 5 ));
  Real y;
 equation
  y = 20.0;
@@ -862,7 +862,7 @@ model SumExp2
 		 description="sum() expressions: reduction-expression",
 		 flatModel="
 fclass ArrayBuiltins.Sum.SumExp2
- constant Real x = ( 1 ) * ( 1 ) + ( 1 ) * ( 2 ) + ( 1 ) * ( 3 ) + ( 2 ) * ( 1 ) + ( 2 ) * ( 2 ) + ( 2 ) * ( 3 ) + ( 3 ) * ( 1 ) + ( 3 ) * ( 2 ) + ( 3 ) * ( 3 );
+ constant Real x = ( 1 ) * ( 1 ) + ( 2 ) * ( 1 ) + ( 3 ) * ( 1 ) + ( 1 ) * ( 2 ) + ( 2 ) * ( 2 ) + ( 3 ) * ( 2 ) + ( 1 ) * ( 3 ) + ( 2 ) * ( 3 ) + ( 3 ) * ( 3 );
  Real y;
 equation
  y = 36.0;
@@ -881,8 +881,8 @@ model SumExp3
 		 description="sum() expressions: reduction-expression over array",
 		 flatModel="
 fclass ArrayBuiltins.Sum.SumExp3
- constant Real x[1] = 1 + 1 + 1 + 2 + 2 + 2 + 3 + 3 + 3;
- constant Real x[2] = 2 + 3 + 4 + 2 + 3 + 4 + 2 + 3 + 4;
+ constant Real x[1] = 1 + 2 + 3 + 1 + 2 + 3 + 1 + 2 + 3;
+ constant Real x[2] = 2 + 2 + 2 + 3 + 3 + 3 + 4 + 4 + 4;
  Real y[1];
  Real y[2];
 equation
@@ -903,7 +903,7 @@ model SumExp4
 		 description="sum() expressions: over array constructor with iterators",
 		 flatModel="
 fclass ArrayBuiltins.Sum.SumExp4
- constant Real x = 1 + 2 + 1 + 3 + 1 + 4 + 2 + 2 + 2 + 3 + 2 + 4 + 3 + 2 + 3 + 3 + 3 + 4;
+ constant Real x = 1 + 2 + 2 + 2 + 3 + 2 + 1 + 3 + 2 + 3 + 3 + 3 + 1 + 4 + 2 + 4 + 3 + 4;
  Real y;
 equation
  y = 45.0;

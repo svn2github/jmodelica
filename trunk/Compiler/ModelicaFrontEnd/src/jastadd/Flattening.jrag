@@ -1826,8 +1826,9 @@ aspect InstantiatedExpressions {
 	
 	public FExp IterExp.instantiate() {
 		List<CommonForIndex> ifil = new List<CommonForIndex>();
-		for (ForIndex fi : getForIndexList())
-			ifil.add(fi.instantiate());
+		// Add indices backwards, since they should be interpreted in the opposite order compared to for loops
+		for (int i = getNumForIndex() - 1; i >= 0; i--)
+			ifil.add(getForIndex(i).instantiate());
 		return copyLocationTo(new FIterExp(getExp().instantiate(), ifil));
 	}
 

@@ -5867,8 +5867,8 @@ fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
  Real y[1];
  Real y[2];
  parameter Real D[1,1] = ( 1 ) * ( 1 ) /* 1 */;
- parameter Real D[1,2] = ( 1 ) * ( 2 ) /* 2 */;
- parameter Real D[2,1] = ( 2 ) * ( 1 ) /* 2 */;
+ parameter Real D[1,2] = ( 2 ) * ( 1 ) /* 2 */;
+ parameter Real D[2,1] = ( 1 ) * ( 2 ) /* 2 */;
  parameter Real D[2,2] = ( 2 ) * ( 2 ) /* 4 */;
 equation
  y[1] = 0.0 + ( D[1,1] ) * ( u[1] ) + ( D[1,2] ) * ( u[2] );
@@ -5914,13 +5914,13 @@ fclass ArrayTests.Constructors.Iterators.ArrayIterTest1
  Real x[3,3];
 equation
  x[1,1] = ( 1 ) * ( 2 );
- x[1,2] = ( 1 ) * ( 3 );
- x[1,3] = ( 1 ) * ( 5 );
- x[2,1] = ( 2 ) * ( 2 );
+ x[1,2] = ( 2 ) * ( 2 );
+ x[1,3] = ( 3 ) * ( 2 );
+ x[2,1] = ( 1 ) * ( 3 );
  x[2,2] = ( 2 ) * ( 3 );
- x[2,3] = ( 2 ) * ( 5 );
- x[3,1] = ( 3 ) * ( 2 );
- x[3,2] = ( 3 ) * ( 3 );
+ x[2,3] = ( 3 ) * ( 3 );
+ x[3,1] = ( 1 ) * ( 5 );
+ x[3,2] = ( 2 ) * ( 5 );
  x[3,3] = ( 3 ) * ( 5 );
 end ArrayTests.Constructors.Iterators.ArrayIterTest1;
 ")})));
@@ -5947,10 +5947,10 @@ fclass ArrayTests.Constructors.Iterators.ArrayIterTest2
 equation
  x[1,1,1] = ( 1 ) * ( 1 );
  x[1,1,2] = 2;
- x[1,2,1] = ( 1 ) * ( 1 );
- x[1,2,2] = 5;
- x[2,1,1] = ( 2 ) * ( 2 );
- x[2,1,2] = 2;
+ x[1,2,1] = ( 2 ) * ( 2 );
+ x[1,2,2] = 2;
+ x[2,1,1] = ( 1 ) * ( 1 );
+ x[2,1,2] = 5;
  x[2,2,1] = ( 2 ) * ( 2 );
  x[2,2,2] = 5;
 end ArrayTests.Constructors.Iterators.ArrayIterTest2;
