@@ -112,7 +112,7 @@ public class BrowserContent implements LocationListener{
 		content = new StringBuilder(HTMLHeader);
 		renderBreadCrumBar();
 		if(histIndex > 0){
-			content.append("<h2><a href=\"" + BACK + "\"><</a>");
+			content.append("<h2><a href=\"" + BACK + "\">< </a>");
 		}else{
 			content.append("<h2>");
 		}
@@ -205,7 +205,7 @@ public class BrowserContent implements LocationListener{
 			content.append("None</p>");
 		}
 		//EXTENSIONS
-		content.append("<h3>Extensions</h3><p>");
+		content.append("<h3>Extensions</h3><p>"); //TODO following this link should reset the breadcrumBar?
 		for (int i=0; i < fcd.getNumSuper(); i++) {
 			ExtendsClause ec = fcd.getSuper(i);
 			VisibilityType vt = ec.getVisibilityType();
@@ -213,7 +213,7 @@ public class BrowserContent implements LocationListener{
 			FullClassDecl extension = (FullClassDecl) ec.findClassDecl();
 			hyperlinks.put(extension.name(), extension);
 
-			content.append("<a href=\"" + extension.name() + "\">" + ec.getSuper().name() + "</a>"); 
+			content.append("<a href=\"" + extension.name() + "\">" + ec.getSuper().name() + "</a> <i> (Following this link should probably reset the breadcrumBar</i>)"); 
 		}
 		if (fcd.getNumSuper() == 0){
 			content.append("None</p>");
@@ -363,7 +363,7 @@ public class BrowserContent implements LocationListener{
 	
 	public void renderBreadCrumBar(){
 		for (int i = 0; i < breadcrumBar.size() - 1; i++){
-			content.append(breadcrumBar.get(i).name() + ".");
+			content.append(breadcrumBar.get(i).name() + " > ");
 		}
 		if (breadcrumBar.size() > 0){
 			content.append(breadcrumBar.get(breadcrumBar.size() - 1).name());
