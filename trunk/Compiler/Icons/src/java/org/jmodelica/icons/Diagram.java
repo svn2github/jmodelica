@@ -10,6 +10,8 @@ public class Diagram extends Icon implements Observer {
 	public static final Object CONNECTION_ADDED = new Object();
 	public static final Object CONNECTION_REMOVED = new Object();
 	
+	public static Diagram NULL_DIAGRAM = new Diagram();
+	
 	private Set<Connection> activeConnections = new HashSet<Connection>();
 	
 	private DiagramFactory factory;
@@ -22,6 +24,10 @@ public class Diagram extends Icon implements Observer {
 	
 	public Diagram(String className, Layer layer, Context context) {
 		this(className, layer, context, null);
+	}
+	
+	private Diagram() {
+		super("", Layer.NO_LAYER, null);
 	}
 	
 	private void startObserving(Icon icon) {

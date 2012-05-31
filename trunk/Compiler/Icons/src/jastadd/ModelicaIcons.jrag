@@ -14,12 +14,12 @@ import org.jmodelica.icons.Observable;
 aspect ModelicaIcons
 {
 	syn lazy Icon BaseNode.icon() 		= Icon.NULL_ICON;
-	syn lazy Icon BaseNode.diagram() 	= Icon.NULL_ICON;
+	syn lazy Diagram BaseNode.diagram() = Diagram.NULL_DIAGRAM;
 	
 	eq UnknownClassDecl.icon()	 		= Icon.NULL_ICON;
-	eq UnknownClassDecl.diagram() 		= Icon.NULL_ICON;
+	eq UnknownClassDecl.diagram() 		= Diagram.NULL_DIAGRAM;
 	eq UnknownInstClassDecl.icon() 		= Icon.NULL_ICON;
-	eq UnknownInstClassDecl.diagram() 	= Icon.NULL_ICON;
+	eq UnknownInstClassDecl.diagram() 	= Diagram.NULL_DIAGRAM;
 
 	eq ComponentDecl.icon() 		= 	findClassDecl().icon();
 	eq ComponentDecl.diagram() 		= 	findClassDecl().diagram();
