@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Stack;
+import java.util.LinkedList;
 
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
@@ -51,7 +52,7 @@ public class BrowserContent implements LocationListener{
 	private HashMap<String, ClassDecl> hyperlinks;
 	private ArrayList<String> history;
 	private int histIndex;
-	private Stack<String> breadCrumBar;
+	private LinkedList<ClassDecl> breadcrumBar;
 	private int histSize;
 	private InstClassDecl icd;
 	private static final String FORWARD = "f";
@@ -101,13 +102,15 @@ public class BrowserContent implements LocationListener{
 		hyperlinks.put(fullClassDecl.name(), fullClassDecl);
 		history.add(fullClassDecl.name());
 		this.browser = browser;
+		breadcrumBar = new LinkedList<ClassDecl>();
+		breadcrumBar.add(fullClassDecl);
 		browser.addLocationListener(this);
 		renderClassDecl(hyperlinks.get(fullClassDecl.name()));
 	}
 	
 	private void renderClassDecl(ClassDecl fcd){
-		
 		content = new StringBuilder(HTMLHeader);
+		renderBreadCrumBar();
 		if(histIndex > 0){
 			content.append("<h2><a href=\"" + BACK + "\"><</a>");
 		}else{
@@ -295,7 +298,7 @@ public class BrowserContent implements LocationListener{
 	
 	private void renderShortClassDecl(ShortClassDecl scd){
 		content.append("<h1>" + scd.getRestriction() + " " + scd.name() + "</h1>");
-		content.append(scd.prettyPrint(""));
+		content.append(scd.prettyPrint("") + ". (<i>This is a ShortClassDecl, currently just prettyPrinting it.</i>)");
 		browser.setText(content.toString());
 	}
 
@@ -336,25 +339,37 @@ public class BrowserContent implements LocationListener{
 		String location = stripAbout(event.location);
 		if (location.equals("blank")) return;
 		if (location.equals(BACK)){
-			location = history.get(histIndex-1);
 			histIndex--;
+			location = history.get(histIndex);
+			breadcrumBar.removeLast();
 		}else if (location.equals(FORWARD)){
 			histIndex++;
 			location = history.get(histIndex);
+			breadcrumBar.add(hyperlinks.get(location));
 
 
 		}else{
 			histIndex++;
-			if (histIndex >= history.size()){ //double buffer
+			if (histIndex >= history.size()){
 				history.add(location);
 			}else{
 				history.set(histIndex, location);
 			}
 			histSize = histIndex;
+			breadcrumBar.add(hyperlinks.get(location));
 		}
 		renderClassDecl(hyperlinks.get(location));
 	}
-
+	
+	public void renderBreadCrumBar(){
+		for (int i = 0; i < breadcrumBar.size() - 1; i++){
+			content.append(breadcrumBar.get(i).name() + ".");
+		}
+		if (breadcrumBar.size() > 0){
+			content.append(breadcrumBar.get(breadcrumBar.size() - 1).name());
+		}
+	}
+	
 	@Override
 	public String toString(){
 		return content.toString();

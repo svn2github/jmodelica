@@ -6,7 +6,7 @@
       <editor
             class="org.jmodelica.ide.documentation.MyEditor"
             default="false"
-            id="org.jmodelica.ide.graphicalhtml.myEditor"
+            id="org.jmodelica.ide.documentation.myEditor"
             name="Modelica Documentation Viewer">
       </editor>
    </extension>
