@@ -89,6 +89,7 @@ aspect ASTDocument {
 		while (currentLine < startLine) {
 			if (offset >= result.length()) {
 				System.err.println("Incorrect match (overflow): " + getClass().getName() + " (" + getStartLineWithFormatting() + ", " + getStartColumnWithFormatting() + "; " + getEndLineWithFormatting() + ", " + getEndColumnWithFormatting() + ")" + " is best match for (" + startLine + ", " + startColumn + "; " + endLine + ", " + endColumn + ").");
+				return null;
 			}
 			switch (result.charAt(offset++)) {
 			case '\r':
@@ -108,8 +109,26 @@ aspect ASTDocument {
 		int substringEnd = substringStart + length;
 		if (substringEnd > result.length()) {
 			System.err.println("Incorrect match: " + getClass().getName() + " (" + getStartLineWithFormatting() + ", " + getStartColumnWithFormatting() + "; " + getEndLineWithFormatting() + ", " + getEndColumnWithFormatting() + ")" + " is best match for (" + startLine + ", " + startColumn + "; " + endLine + ", " + endColumn + "). It should be " + length + " characters long. [" + substringStart + ", " + substringEnd + "], " + result.length() + ". Result was [" + result + "].");
+			return null;
 		}
 
 		return result.substring(substringStart, substringEnd);		
+	}
+	
+	public boolean BaseNode.insertMoreFormatting(ScannedFormattingItem addedFormattingItem) {
+		if (preFormatting.inside(addedFormattingItem.getStartLine(), addedFormattingItem.getStartColumn())) {
+			preFormatting = preFormatting.combineItems(addedFormattingItem);
+			return true;
+		}
+		if (insideFormatting.inside(addedFormattingItem.getStartLine(), addedFormattingItem.getStartColumn())) {
+			insideFormatting = insideFormatting.combineItems(addedFormattingItem);
+			return true;
+		}
+		if (postFormatting.inside(addedFormattingItem.getStartLine(), addedFormattingItem.getStartColumn())) {
+			postFormatting = postFormatting.combineItems(addedFormattingItem);
+			return true;
+		}
+		
+		return false; // Unable to find matching formatting item.
 	}
 }
