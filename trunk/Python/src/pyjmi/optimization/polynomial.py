@@ -869,8 +869,12 @@ def gauss_quadrature_weights(type, K):
     
     .. math::
     
-        w_i = \\frac{2}{ K \cdot (K-1) } \cdot \\frac{1}{P_{n-1}(t_i)^2}, \quad i=1,...,K
-              
+        w_i = \\frac{2}{ K \cdot (K-1) } \cdot \\frac{1}{P_{n-1}(t_i)^2}, \quad i=2,...,K-1
+    
+    .. math::
+        
+        w_1 = w_K = \\frac{2}{K \cdot (K-1)}
+    
     "LGR", corresponding to (flipped) Legendre-Gauss-Radau points, i.e the end 
     point 1 is included instead of -1. Weights are calculated for the K 
     Legendre-Gauss-Radau points as:
