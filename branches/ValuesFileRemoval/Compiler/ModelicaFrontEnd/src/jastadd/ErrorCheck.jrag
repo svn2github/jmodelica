@@ -658,29 +658,28 @@ aspect InstanceErrorCheck {
 	
 	public void FExp.checkConstantExpression(InstPrimitive node, String varKind, String varName) {
 		String exp = "'" + prettyPrint("") + "'";
+		boolean failed = false;
 		try {
 			if (isCircular()) {
 				node.error("Could not evaluate binding expression for " + varKind + " '" +
 						varName + "' due to circularity: " + exp);
 			} else {
-				if (root().options.getBooleanOption("generate_dae")) {
-					CValue val = ceval();
-					if (val.isUnknown()) {
-						if (val.isUnsupported()) {
-							if (node.isConstant()) // TODO: Produce error for structural parameters as well
-								node.compliance("Constant evaluation not supported for expression(s) directly or indirectly " + 
-										"used by the binding expression for " + varKind + " '" + varName + "': " + exp);
-						} else {
-							node.error("Could not evaluate binding expression for " + 
-									varKind + " '" + varName + "': " + exp);
-						}
-					}	
+				CValue val = ceval();
+				if (val.isUnknown()) {
+					if (val.isUnsupported()) {
+						node.compliance("Constant evaluation not supported for expression(s) directly or indirectly " + 
+								"used by the binding expression for " + varKind + " '" + varName + "': " + exp);
+					} else {
+						failed = true;
+					}
 				}
 			}
 		} catch (ConstantEvaluationException e) {
+			failed = true;
+		}
+		if (failed)
 			node.error("Could not evaluate binding expression for " + 
 					varKind + " '" + varName + "': " + exp);
-		}
 	}
 	
 	public void InstPrimitive.collectErrors() {
@@ -690,15 +689,19 @@ aspect InstanceErrorCheck {
     		errorChecked = true;
 	
 			// Check binding expression
-			if (isParameter() || isConstant()) {
-				String type = isParameter() ? "parameter" : "constant";
-				// Check if the binding expression of constants and parameters can be evaluated
-				if (myBindingInstExp() != null)
-					myBindingInstExp().checkConstantExpression(this, type, qualifiedName());
+    		if (myBindingInstExp() != null) {
+    			String type = isParameter() ? "parameter" : "constant";
+	    		// TODO: Check structural parameters as well
+				// Check if the binding expression of constants can be evaluated
+				if (isConstant()) 
+					myBindingInstExp().checkConstantExpression(this, "constant", qualifiedName());
+    		} else {
 				// Warn if constant or parameter does not have a binding expression (start is used)
-				else if (!isForIndex())
+				if ((isConstant() || isParameter()) && !isForIndex()) {
+					String type = isParameter() ? "parameter" : "constant";
 					warning("The " + type + " " + qualifiedName() + " does not have a binding expression");
-			}
+				}
+    		}
 			
 			// Check array indices
 			getClassName().collectErrors();
