@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: First
 Bundle-SymbolicName: org.jmodelica.ide.documentation;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: org.jmodelica.ide.graphicalhtml.Activator
+Bundle-Activator: org.jmodelica.ide.documentation.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.ui.ide;bundle-version="3.7.0",

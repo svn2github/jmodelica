@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.jmodelica.ide.graphicalhtml.MyEditor"
+            class="org.jmodelica.ide.documentation.MyEditor"
             default="false"
             id="org.jmodelica.ide.graphicalhtml.myEditor"
             name="Modelica Documentation Viewer">
@@ -13,8 +13,8 @@
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
       <actionProvider
-            class="org.jmodelica.ide.graphicalhtml.ExplorerActionProvider"
-            id="org.jmodelica.ide.graphicalhtml.ExplorerActionProvider"
+            class="org.jmodelica.ide.documentation.ExplorerActionProvider"
+            id="org.jmodelica.ide.documentation.ExplorerActionProvider"
             priority="highest">
          <enablement>
             <instanceof
@@ -28,7 +28,7 @@
             viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
             <actionExtension
-                  pattern="org.jmodelica.ide.graphicalhtml.ExplorerActionProvider">
+                  pattern="org.jmodelica.ide.documentation.ExplorerActionProvider">
             </actionExtension>
          </includes>
       </viewerActionBinding>
@@ -36,8 +36,8 @@
    <extension
          point="org.eclipse.ui.elementFactories">
       <factory
-            class="org.jmodelica.ide.graphicalhtml.MyEditorInputFactory"
-            id="org.jmodelica.ide.graphicalhtml.MyEditorInputFactory">
+            class="org.jmodelica.ide.documentation.MyEditorInputFactory"
+            id="org.jmodelica.ide.documentation.MyEditorInputFactory">
       </factory>
    </extension>
 </plugin>

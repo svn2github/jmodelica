@@ -1,4 +1,4 @@
-package org.jmodelica.ide.graphicalhtml;
+package org.jmodelica.ide.documentation;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -8,7 +8,7 @@ import org.eclipse.ui.IMemento;
 
 public class MyEditorInputFactory implements IElementFactory {
 
-	public static final String ID_FACTORY = "org.jmodelica.ide.graphicalhtml.MyEditorInputFactory";
+	public static final String ID_FACTORY = "org.jmodelica.ide.documentation.MyEditorInputFactory";
 	private static final String TAG_PROJECT = "project";
 	private static final String TAG_NAME = "name";
 	

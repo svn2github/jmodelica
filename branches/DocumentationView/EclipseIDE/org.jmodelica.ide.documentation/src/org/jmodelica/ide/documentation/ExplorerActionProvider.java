@@ -1,4 +1,4 @@
-package org.jmodelica.ide.graphicalhtml;
+package org.jmodelica.ide.documentation;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.ui.navigator.CommonActionProvider;

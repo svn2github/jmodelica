@@ -1,4 +1,4 @@
-package org.jmodelica.ide.graphicalhtml;
+package org.jmodelica.ide.documentation;
 
 import java.io.File;
 

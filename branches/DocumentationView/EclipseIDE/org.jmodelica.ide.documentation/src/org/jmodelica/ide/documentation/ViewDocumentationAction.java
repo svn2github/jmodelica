@@ -1,4 +1,4 @@
-package org.jmodelica.ide.graphicalhtml;
+package org.jmodelica.ide.documentation;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -31,7 +31,7 @@ public class ViewDocumentationAction extends Action{
 		Object elem = Util.getSelected(selectionProvider.getSelection());
 		if (elem instanceof FullClassDecl) {
 			try {
-				IDE.openEditor(page, new MyEditorInput((FullClassDecl) elem), "org.jmodelica.ide.graphicalhtml.myEditor", true);
+				IDE.openEditor(page, new MyEditorInput((FullClassDecl) elem), "org.jmodelica.ide.documentation.myEditor", true);
 			} catch (PartInitException e) {
 				System.err.println("Unable to open file: " + elem);
 			}
