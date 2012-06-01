@@ -115,20 +115,43 @@ aspect ASTDocument {
 		return result.substring(substringStart, substringEnd);		
 	}
 	
-	public boolean BaseNode.insertMoreFormatting(ScannedFormattingItem addedFormattingItem) {
-		if (preFormatting.inside(addedFormattingItem.getStartLine(), addedFormattingItem.getStartColumn())) {
+	public BaseNode ASTNode.insertMoreFormatting(ScannedFormattingItem addedFormattingItem) {
+		for (ASTNode node : this) {
+			BaseNode result = node.insertMoreFormatting(addedFormattingItem);
+			if (result != null) {
+				return result;
+			}
+		}
+
+		return null;
+	}
+	
+	@Override
+	public BaseNode BaseNode.insertMoreFormatting(ScannedFormattingItem addedFormattingItem) {
+		int line = addedFormattingItem.getStartLine();
+		int column = addedFormattingItem.getStartColumn();
+
+		if (preFormatting.inside(line, column) || preFormatting.getAdjacency(addedFormattingItem) != FormattingItem.Adjacency.NONE) {
+			System.out.flush();
 			preFormatting = preFormatting.combineItems(addedFormattingItem);
-			return true;
+			return this;
 		}
-		if (insideFormatting.inside(addedFormattingItem.getStartLine(), addedFormattingItem.getStartColumn())) {
+		if (insideFormatting.inside(line, column) || insideFormatting.getAdjacency(addedFormattingItem) != FormattingItem.Adjacency.NONE) {
 			insideFormatting = insideFormatting.combineItems(addedFormattingItem);
-			return true;
+			return this;
 		}
-		if (postFormatting.inside(addedFormattingItem.getStartLine(), addedFormattingItem.getStartColumn())) {
+		if (postFormatting.inside(line, column) || postFormatting.getAdjacency(addedFormattingItem) != FormattingItem.Adjacency.NONE) {
 			postFormatting = postFormatting.combineItems(addedFormattingItem);
-			return true;
+			return this;
 		}
 		
-		return false; // Unable to find matching formatting item.
+		for (ASTNode node : this) {
+			BaseNode result = node.insertMoreFormatting(addedFormattingItem);
+			if (result != null) {
+				return result;
+			}
+		}
+		
+		return null; // Unable to find matching formatting item.
 	}
 }

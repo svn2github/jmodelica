@@ -100,19 +100,18 @@ public class ASTDocument extends Document {
 	protected void fireDocumentAboutToBeChanged(DocumentEvent event) {
 		super.fireDocumentAboutToBeChanged(event);		
 		if (event.getText().matches("[ \t\f]*")) {
-			printLog("Adding formatting...", true);
 			try {
 				int startLine = getLineOfOffset(event.getOffset()) + 1;
 				int startColumn = event.getOffset() - getLineInformationOfOffset(event.getOffset()).getOffset() + 1;
 				int endLine = getLineOfOffset(event.getOffset() + event.getLength()) + 1;
-				int endColumn = (event.getOffset() + event.getLength()) - getLineInformationOfOffset(event.getOffset() + event.getLength()).getOffset();
-				BaseNode match = ast.matchSourcePosition(null, startLine, startColumn, endLine, endColumn);
-				boolean success = match.insertMoreFormatting(new ScannedFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, event.getText(),
+				int endColumn = (event.getOffset() + event.getLength()) - getLineInformationOfOffset(event.getOffset() + event.getLength()).getOffset() + 1;
+				printLog("Adding formatting item with the position (" + startLine + ", " + startColumn + "; " + endLine + ", " + endColumn + ")...", true);
+				BaseNode match = ast.insertMoreFormatting(new ScannedFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, event.getText(),
 						startLine, startColumn, endLine, endColumn));
-				if (success) {
+				if (match != null) {
 					printLog("Done!", true);
 				} else {
-					printLog("Nowhere to place it!", true);
+					printLog("Unable to find anywhere to place the formatting item.", true);
 				}
 			} catch (BadLocationException badLocationException) {
 				System.err.println(badLocationException.getMessage());
