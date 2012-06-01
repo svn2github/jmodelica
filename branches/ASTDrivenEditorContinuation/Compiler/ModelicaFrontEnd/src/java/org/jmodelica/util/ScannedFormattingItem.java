@@ -236,18 +236,18 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 	@Override
 	public FormattingItem combineItems(ScannedFormattingItem otherItem) {
 		FormattingItem newItem = null;
-		
-		if (atStart(otherItem.getStartLine(), otherItem.getStartColumn())) {
+		Adjacency adjacency = getAdjacency(otherItem);
+		if (adjacency == Adjacency.FRONT) {
 			/* Front */
 			if (type == Type.NON_BREAKING_WHITESPACE && otherItem.type == Type.NON_BREAKING_WHITESPACE) {
 				String newData = otherItem.data + data;
-				newItem = new ScannedFormattingItem(Type.NON_BREAKING_WHITESPACE, newData, getStartLine(), getStartColumn(),
-						getEndLine(), getStartColumn() + newData.length() - 1);
+				newItem = new ScannedFormattingItem(Type.NON_BREAKING_WHITESPACE, newData, otherItem.getStartLine(), otherItem.getStartColumn(),
+						getEndLine(), otherItem.getStartColumn() + newData.length() - 1);
 			} else {
 				newItem = new MixedFormattingItem(this);
-				newItem = newItem.mergeItems(Adjacency.FRONT, otherItem); // TODO: Does this give correct end position??
+				newItem = newItem.mergeItems(Adjacency.FRONT, otherItem);
 			}
-		} else if (atEnd(otherItem.getStartLine(), otherItem.getStartColumn())) {
+		} else if (adjacency == Adjacency.BACK) {
 			/* Back */
 			if (type == Type.NON_BREAKING_WHITESPACE && otherItem.type == Type.NON_BREAKING_WHITESPACE) {
 				String newData = data + otherItem.data;
@@ -255,7 +255,7 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 						getEndLine(), getStartColumn() + newData.length() - 1);
 			} else {
 				newItem = new MixedFormattingItem(this);
-				newItem = newItem.mergeItems(Adjacency.BACK, otherItem); // TODO: Does this give correct end position??
+				newItem = newItem.mergeItems(Adjacency.BACK, otherItem);
 			}
 		} else if (getBackRelativePosition(otherItem.getStartLine(), otherItem.getStartColumn()) == RelativePosition.BEFORE &&
 				getFrontRelativePosition(otherItem.getStartLine(), otherItem.getStartColumn()) == RelativePosition.AFTER) {
@@ -269,18 +269,18 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 	protected int getOffset(int line, int column) {
 		int currentLine = getStartLine();
 		int currentColumn = getStartColumn();
-		int offset = (currentLine < line ? -1 : 0);
+		int offset = 0;
 		
 		if (line < currentLine || (line == currentLine && column < currentColumn)) {
 			return -1; // Trying to offset out of bounds (before this item).
 		}
 
 		while (currentLine < line) {
-			if (++offset >= data.length()) {
+			if (offset >= data.length()) {
 				return -1; // Invalid column.
 			}
 			
-			switch (data.charAt(offset)) {
+			switch (data.charAt(offset++)) {
 			case '\r':
 				if (offset < data.length() && data.charAt(offset) == '\n') {
 					++offset;

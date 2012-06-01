@@ -14,9 +14,14 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 	 * @param formattingItem the initial item that this <code>MixedFormattingItem</code> should consist of.
 	 */
 	public MixedFormattingItem(ScannedFormattingItem formattingItem) {
-		super(FormattingItem.Type.MIXED, null, formattingItem.startLine, formattingItem.startColumn, formattingItem.endLine, formattingItem.endColumn);
+		super(FormattingItem.Type.MIXED, null, formattingItem.getStartLine(), formattingItem.getStartColumn(),
+				formattingItem.getEndLine(), formattingItem.getEndColumn());
 		subItems = new LinkedList<ScannedFormattingItem>();
-		subItems.add(formattingItem);
+		if (formattingItem.isScannedMixed()) {
+			subItems.addAll(((MixedFormattingItem) formattingItem).subItems);
+		} else {
+			subItems.add(formattingItem);
+		}
 	}
 
 	/**
@@ -152,7 +157,7 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 				offset = item.getOffset(otherItem.getStartLine(), otherItem.getEndColumn());
 				if (offset != -1) {
 					newItem = insertItem(otherItem, item, offset, newItem);
-					if (offset < 0 && item.spanningLines() == 0) {
+					if (item.spanningLines() == 0) {
 						newItemOffsettingColumns = otherItem.spanningColumnsOnLastLine();
 					}
 				} else if (newItem == null) {
