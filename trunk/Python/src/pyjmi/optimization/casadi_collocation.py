@@ -1515,131 +1515,46 @@ class LocalDAECollocator(CasadiCollocator):
         nlp_init = N.zeros(self.get_n_xx())
         
         # Retrieve model data
-        vr_map_p = self.model.get_p_vr_map()
-        vr_map_x = self.model.get_x_vr_map()
-        vr_map_u = self.model.get_u_vr_map()
-        vr_map_w = self.model.get_w_vr_map()
-        sf_p = self.model.get_p_sf()
-        sf_x = self.model.get_x_sf()
-        sf_u = self.model.get_u_sf()
-        sf_w = self.model.get_w_sf()
         var_indices = self.get_var_indices()
-        md = self.get_model_description()
-        
-        # Get model bounds and initial guesses
-        _p_opt_max = md.get_p_opt_max(include_alias=False)
-        _x_max = md.get_x_max(include_alias=False)
-        _u_max = md.get_u_max(include_alias=False)
-        _w_max = md.get_w_max(include_alias=False)
-        _p_opt_min = md.get_p_opt_min(include_alias=False)
-        _x_min = md.get_x_min(include_alias=False)
-        _u_min = md.get_u_min(include_alias=False)
-        _w_min = md.get_w_min(include_alias=False)
-        _p_opt_init = md.get_p_opt_initial_guess(include_alias=False)
-        _x_init = md.get_x_initial_guess(include_alias=False)
-        _u_init = md.get_u_initial_guess(include_alias=False)
-        _w_init = md.get_w_initial_guess(include_alias=False)
+        ocp = self.ocp
+        var_types = ['x', 'u', 'w', 'p_opt']
+        vr_maps = {'x': self.model.get_x_vr_map(),
+                   'u': self.model.get_u_vr_map(),
+                   'w': self.model.get_w_vr_map(),
+                   'p_opt': self.model.get_p_vr_map()}
+        sfs = {'x': self.model.get_x_sf(),
+               'u': self.model.get_u_sf(),
+               'w': self.model.get_w_sf(),
+               'p_opt': self.model.get_p_sf()}
+        var_vectors = self.model._var_vectors
         
         # Set preliminary bounds and initial guesses
-        p_opt_max = self.UPPER * N.ones(len(_p_opt_max))
-        x_max = self.UPPER * N.ones(len(_x_max))
-        u_max = self.UPPER * N.ones(len(_u_max))
-        w_max = self.UPPER * N.ones(len(_w_max))
-        p_opt_min = self.LOWER * N.ones(len(_p_opt_min))
-        x_min = self.LOWER * N.ones(len(_x_min))
-        u_min = self.LOWER * N.ones(len(_u_min))
-        w_min = self.LOWER * N.ones(len(_w_min))
-        p_opt_init = self.UPPER * N.ones(len(_p_opt_init))
-        x_init = self.LOWER * N.ones(len(_x_init))
-        u_init = self.LOWER * N.ones(len(_u_init))
-        w_init = self.LOWER * N.ones(len(_w_init))
+        var_max = {'x': N.empty(self.model.get_n_x()),
+                   'u': N.empty(self.model.get_n_u()),
+                   'w': N.empty(self.model.get_n_w()),
+                   'p_opt': N.empty(self.model.get_n_p())}
+        var_min = copy.deepcopy(var_max)
+        var_init = copy.deepcopy(var_max)
         
-        # Set scaled bounds and initial guesses for parameters
-        for (vr, val) in _p_opt_min:
-            if val is not None:
-                p_opt_min[vr_map_p[vr]] = val / sf_p[vr_map_p[vr]]
-        for (vr, val) in _p_opt_max:
-            if val is not None:
-                p_opt_max[vr_map_p[vr]] = val / sf_p[vr_map_p[vr]]
-        for (vr, val) in _p_opt_init:
-            if val is not None:
-                p_opt_init[vr_map_p[vr]] = val / sf_p[vr_map_p[vr]]
-        
-        # Set scaled bounds and initial guesses for states
-        for (vr, val) in _x_min:
-            if val is not None:
-                x_min[vr_map_x[vr]] = val / sf_x[vr_map_x[vr]]
-        for (vr, val) in _x_max:
-            if val is not None:
-                x_max[vr_map_x[vr]] = val / sf_x[vr_map_x[vr]]
-        for (vr, val) in _x_init:
-            if val is not None:
-                x_init[vr_map_x[vr]] = val / sf_x[vr_map_x[vr]]
-        
-        # Set scaled bounds and initial guesses for controls
-        for (vr, val) in _u_min:
-            if val is not None:
-                u_min[vr_map_u[vr]] = val / sf_u[vr_map_u[vr]]
-        for (vr, val) in _u_max:
-            if val is not None:
-                u_max[vr_map_u[vr]] = val / sf_u[vr_map_u[vr]]
-        for (vr, val) in _u_init:
-            if val is not None:
-                u_init[vr_map_u[vr]] = val / sf_u[vr_map_u[vr]]
-        
-        # Set scaled bounds and initial guesses for algebraic variables
-        for (vr, val) in _w_min:
-            if val is not None:
-                w_min[vr_map_w[vr]] = val / sf_w[vr_map_w[vr]]
-        for (vr, val) in _w_max:
-            if val is not None:
-                w_max[vr_map_w[vr]] = val / sf_w[vr_map_w[vr]]
-        for (vr, val) in _w_init:
-            if val is not None:
-                w_init[vr_map_w[vr]] = val / sf_w[vr_map_w[vr]]
+        # Set scaled bounds and initial guesses
+        for vt in var_types:
+            for var in var_vectors[vt]:
+                vr = vr_maps[vt][var.getValueReference()] 
+                sf = sfs[vt][vr]
+                var_min[vt][vr] = var.getMin() / sf
+                var_max[vt][vr] = var.getMax() / sf
+                var_init[vt][vr] = var.getInitialGuess() / sf
         
         # Compose bounds and initial guesses
-        nlp_lb[var_indices['p_opt']] = p_opt_min
-        nlp_ub[var_indices['p_opt']] = p_opt_max
-        nlp_init[var_indices['p_opt']] = p_opt_init
+        nlp_lb[var_indices['p_opt']] = var_min['p_opt']
+        nlp_ub[var_indices['p_opt']] = var_max['p_opt']
+        nlp_init[var_indices['p_opt']] = var_init['p_opt']
         for i in xrange(1, self.n_e + 1):
             for k in self.get_time_points()[i]:
-                nlp_lb[var_indices[i][k]['x']] = x_min
-                nlp_ub[var_indices[i][k]['x']] = x_max
-                nlp_init[var_indices[i][k]['x']] = x_init
-                nlp_lb[var_indices[i][k]['u']] = u_min
-                nlp_ub[var_indices[i][k]['u']] = u_max
-                nlp_init[var_indices[i][k]['u']] = u_init
-                nlp_lb[var_indices[i][k]['w']] = w_min
-                nlp_ub[var_indices[i][k]['w']] = w_max
-                nlp_init[var_indices[i][k]['w']] = w_init
-        
-        # Handle derivatives independently
-        if not self.eliminate_der_var:
-            vr_map_dx = self.model.get_dx_vr_map()
-            sf_dx = self.model.get_dx_sf()
-            _dx_max = md.get_dx_max(include_alias=False)
-            _dx_min = md.get_dx_min(include_alias=False)
-            _dx_init = md.get_dx_initial_guess(include_alias=False)
-            dx_max = self.UPPER * N.ones(len(_dx_max))
-            dx_min = self.LOWER * N.ones(len(_dx_min))
-            dx_init = self.LOWER * N.ones(len(_dx_init))
-            
-            for (vr, val) in _dx_min:
-                if val is not None:
-                    dx_min[vr_map_dx[vr]] = val / sf_dx[vr_map_dx[vr]]
-            for (vr, val) in _dx_max:
-                if val is not None:
-                    dx_max[vr_map_dx[vr]] = val / sf_dx[vr_map_dx[vr]]
-            for (vr, val) in _dx_init:
-                if val is not None:
-                    dx_init[vr_map_dx[vr]] = val / sf_dx[vr_map_dx[vr]]
-            
-            for i in xrange(1, self.n_e + 1):
-                for k in self.get_time_points()[i]:
-                    nlp_lb[var_indices[i][k]['dx']] = dx_min
-                    nlp_ub[var_indices[i][k]['dx']] = dx_max
-                    nlp_init[var_indices[i][k]['dx']] = dx_init
+                for vt in ['x', 'u', 'w']:
+                    nlp_lb[var_indices[i][k][vt]] = var_min[vt]
+                    nlp_ub[var_indices[i][k][vt]] = var_max[vt]
+                    nlp_init[var_indices[i][k][vt]] = var_init[vt]
         
         # Compute bounds and initial guesses for element lengths
         if self.hs == "free":
@@ -1654,7 +1569,7 @@ class LocalDAECollocator(CasadiCollocator):
         self.xx_lb = nlp_lb
         self.xx_ub = nlp_ub
         self.xx_init = nlp_init
-
+        
         return (nlp_lb, nlp_ub, nlp_init)
     
     def _create_solver(self):

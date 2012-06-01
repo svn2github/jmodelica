@@ -50,24 +50,20 @@ class CasadiModel(BaseModel):
         
         name --
             Optimica class name.
-            
             Type: str
         
         path --
             Path to optimica file.
-            
             Type: str
             Default: '.'
         
         scale_variables --
             Whether to scale the variables with their nominal values.
-            
             Type: bool
             Default: False
         
         verbose --
             Whether to enable verbose output from the XML parsing.
-            
             Type: bool
             Default: True
     """
@@ -102,29 +98,26 @@ class CasadiModel(BaseModel):
     
     def set(self, names, values, update_dependent=True):
         """
-        Set the value of independent parameters and recompute dependents.
+        Set the values of independent parameters and recompute dependents.
         
         Parameters::
             
             names -- 
                 The names of the parameters to set.
-                
                 Type: string or list of strings
                 
             values -- 
                 The new parameter values.
-                
                 Type: float or list of floats
             
             update_dependent --
                 Whether to update dependent parameter values afterwards.
-                
                 Default: True
                 Type: bool
         
         Raises::
             
-            XMLException if variable was not found or if variable is not an
+            XMLException if name not present in model or if variable is not an
             independent parameter.
         
         Example::
@@ -134,10 +127,9 @@ class CasadiModel(BaseModel):
         
         Limitations::
             
-            New parameter values only affect dynamic and initial equations.
-            Attributes like min and nominal that depend on parameters are not
-            updated. These instead use the parameter values set at compile
-            time.
+            New parameter values only affect equations. Attributes like min and
+            nominal that depend on parameters are not updated. These instead
+            use the parameter values set at compile time.
         """
         if isinstance(names, basestring):
             self._set(names, values)
@@ -155,12 +147,10 @@ class CasadiModel(BaseModel):
             
             name -- 
                 The name of the parameter to set.
-                
                 Type: string
                 
             value -- 
                 The new parameter value.
-                
                 Type: float
         
         Raises::
@@ -188,14 +178,12 @@ class CasadiModel(BaseModel):
             
             names -- 
                 The name of the parameters to get.
-                
                 Type: string or list of strings
         
         Returns::
             
             values --
                 Parameter values.
-                
                 Type: float or list of floats
         
         Raises::
@@ -221,14 +209,12 @@ class CasadiModel(BaseModel):
             
             name -- 
                 The name of the parameter to get.
-                
                 Type: string
         
         Returns::
             
             value --
                 Parameter value.
-                
                 Type: float
         
         Raises::
@@ -356,6 +342,102 @@ class CasadiModel(BaseModel):
     def get_n_w(self):
         return self.n_w
     
+    def set_min(self, names, values):
+        """
+        Set the minimum value of variables.
+        
+        Parameters::
+            
+            names -- 
+                The names of the variables to set new minimum values for.
+                Type: string or list of strings
+                
+            values -- 
+                The new minimum values.
+                Type: float or list of floats
+        
+        Raises::
+            
+            XMLException if name not present in model.
+        """
+        if isinstance(names, basestring):
+            self._set_min(names, values)
+        else:
+            for (name, value) in zip(names, values):
+                self._set_min(name, value)
+    
+    def _set_min(self, name, value):
+        """ 
+        Set the minimum value of a variable.
+        
+        Parameters::
+            
+            name -- 
+                The names of the variable to set new minimum value for.
+                Type: string
+                
+            value -- 
+                The new minimum value.
+                Type: float
+        
+        Raises::
+            
+            XMLException if name not present in model.
+        """
+        try:
+            variable = self.ocp.variable(name)
+        except RuntimeError:
+            raise XMLException("Could not find variable: " + name)
+        variable.setMin(value)
+    
+    def set_max(self, names, values):
+        """
+        Set the maximum value of variables.
+        
+        Parameters::
+            
+            names -- 
+                The names of the variables to set new maximum values for.
+                Type: string or list of strings
+                
+            values -- 
+                The new maximum values.
+                Type: float or list of floats
+        
+        Raises::
+            
+            XMLException if name not present in model.
+        """
+        if isinstance(names, basestring):
+            self._set_max(names, values)
+        else:
+            for (name, value) in zip(names, values):
+                self._set_max(name, value)
+    
+    def _set_max(self, name, value):
+        """ 
+        Set the maximum value of a variable.
+        
+        Parameters::
+            
+            name -- 
+                The names of the variable to set new maximum value for.
+                Type: string
+                
+            value -- 
+                The new maximum value.
+                Type: float
+        
+        Raises::
+            
+            XMLException if name not present in model.
+        """
+        try:
+            variable = self.ocp.variable(name)
+        except RuntimeError:
+            raise XMLException("Could not find variable: " + name)
+        variable.setMax(value)
+    
     def get_dx_sf(self):
         return self.dx_sf
     
@@ -464,7 +546,6 @@ class CasadiModel(BaseModel):
             
             dae_F --
                 Function evaluating DAE residual.
-                
                 Type: SXFunction
         """
         if update_expressions:
@@ -487,7 +568,6 @@ class CasadiModel(BaseModel):
             
             init_F0 --
                 Function evaluating DAE initial equation residual.
-                
                 Type: SXFunction
         """
         if update_expressions:
@@ -511,7 +591,6 @@ class CasadiModel(BaseModel):
             opt_J --
                 Function evaluating the Mayer cost term. None if there is no
                 Mayer term.
-                
                 Type: SXFunction or None
         """
         if update_expressions:
@@ -549,7 +628,6 @@ class CasadiModel(BaseModel):
             opt_L --
                 Function evaluating the Lagrange cost term. None if there is no
                 Lagrange term.
-                
                 Type: SXFunction or None
         """
         if update_expressions:
@@ -627,14 +705,19 @@ class CasadiModel(BaseModel):
             var_dict = dict((repr(v), v) for v in variables[var_type])
             name_dict = dict((x[0], x[1]) for x in names[var_type](False))
             if var_type == 'p_opt':
-                var_vectors[var_type] = casadi.VariableVector(
-                        len(var_dict) - self.xmldoc.get_opt_finaltime_free() -
-                        self.xmldoc.get_opt_starttime_free())
+                free_times = 0
+                if self.xmldoc.get_opt_finaltime_free():
+                    free_times += 1
+                if self.xmldoc.get_opt_starttime_free():
+                    free_times += 1
+                var_vectors[var_type] = casadi.VariableVector(len(var_dict) -
+                                                              free_times)
             else:
                 var_vectors[var_type] = casadi.VariableVector(len(var_dict))
             i = 0
             for vr in sorted(name_dict):
-                if name_dict[vr] == "finalTime":
+                if (name_dict[vr] == "finalTime" or
+                    name_dict[vr] == "startTime"):
                     continue
                 var_vectors[var_type][i] = var_dict[name_dict[vr]]
                 i = i + 1
