@@ -107,11 +107,9 @@ class TestLocalDAECollocator:
         self.model_cstr_lagrange = CasadiModel(fmux_cstr_lagrange,
                                                verbose=False)
         self.model_cstr_scaled_lagrange = CasadiModel(
-                fmux_cstr_lagrange, scale_variables=True,
-                scale_equations=False, verbose=False)
+                fmux_cstr_lagrange, scale_variables=True, verbose=False)
         self.model_cstr_scaled_equations_lagrange = CasadiModel(
-                fmux_cstr_lagrange, scale_variables=True, scale_equations=True,
-                verbose=False)
+                fmux_cstr_lagrange, scale_variables=True, verbose=False)
         
         fmux_cstr_mayer = "CSTR_CSTR_Opt_Bounds_Mayer.fmux"
         self.model_cstr_mayer = CasadiModel(fmux_cstr_mayer, verbose=False)
@@ -230,12 +228,12 @@ class TestLocalDAECollocator:
         
         # Without exact Hessian
         opts = model.optimize_options(self.algorithm)
-        opts['exact_hessian'] = False
+        opts['IPOPT_options']['generate_hessian'] = False
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # With exact Hessian
-        opts['exact_hessian'] = True
+        opts['IPOPT_options']['generate_hessian'] = True
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
@@ -579,9 +577,9 @@ class TestLocalDAECollocator:
         assert_results(res, 3.17620203643878e0, 2.803233013e-1)
         
     @testattr(casadi = True)
-    def test_graphs_and_exact_hessian(self):
+    def test_graphs_and_hessian(self):
         """
-        Test that results are consistent regardless of graph and exact_hessian.
+        Test that results are consistent regardless of graph and Hessian.
         
         The test also checks the elimination of derivative and continuity
         variables.
@@ -601,7 +599,7 @@ class TestLocalDAECollocator:
         
         # SX with exact Hessian and eliminated variables
         opts['graph'] = "SX"
-        opts['exact_hessian'] = True
+        opts['IPOPT_options']['generate_hessian'] = True
         opts['eliminate_der_var'] = True
         opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
@@ -609,7 +607,7 @@ class TestLocalDAECollocator:
         assert_results(res, cost_ref, u_norm_ref)
         
         # SX without exact Hessian and eliminated variables
-        opts['exact_hessian'] = False
+        opts['IPOPT_options']['generate_hessian'] = False
         opts['eliminate_der_var'] = False
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
@@ -617,17 +615,19 @@ class TestLocalDAECollocator:
         nose.tools.assert_true(sol_with < 0.5 * sol_without)
         assert_results(res, cost_ref, u_norm_ref)
         
-        # expanded_MX with exact Hessian and eliminated variables
-        opts['graph'] = "expanded_MX"
-        opts['exact_hessian'] = True
+        # Expanded MX with exact Hessian and eliminated variables
+        opts['graph'] = "MX"
+        opts['IPOPT_options']['expand_f'] = True
+        opts['IPOPT_options']['expand_g'] = True
+        opts['IPOPT_options']['generate_hessian'] = True
         opts['eliminate_der_var'] = True
         opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
         sol_with = res.times['sol']
         assert_results(res, cost_ref, u_norm_ref)
         
-        # expanded_MX without exact Hessian and eliminated variables
-        opts['exact_hessian'] = False
+        # Expanded MX without exact Hessian and eliminated variables
+        opts['IPOPT_options']['generate_hessian'] = False
         opts['eliminate_der_var'] = False
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
@@ -636,15 +636,16 @@ class TestLocalDAECollocator:
         assert_results(res, cost_ref, u_norm_ref)
         
         # MX with exact Hessian and eliminated variables
-        opts['graph'] = "MX"
-        opts['exact_hessian'] = True
+        opts['IPOPT_options']['expand_f'] = False
+        opts['IPOPT_options']['expand_g'] = False
+        opts['IPOPT_options']['generate_hessian'] = True
         opts['eliminate_der_var'] = True
         opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # MX without exact Hessian and eliminated variables
-        opts['exact_hessian'] = False
+        opts['IPOPT_options']['generate_hessian'] = True
         opts['eliminate_der_var'] = False
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)

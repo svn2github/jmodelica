@@ -1758,11 +1758,6 @@ equation
   Real x;
   Real y;
  end RecordTests.RecordFunc3b.A;
-
- record RecordTests.RecordFunc3b.B
-  Real x;
-  Real y;
- end RecordTests.RecordFunc3b.B;
 end RecordTests.RecordFunc3b;
 ")})));
 
@@ -3139,6 +3134,54 @@ end RecordTests.RecordParam6;
 	A a2;
 end RecordParam6;
 
+
+model RecordMerge1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordMerge1",
+         description="",
+         flatModel="
+fclass RecordTests.RecordMerge1
+ Real r2.x;
+ Real r2.y;
+equation
+ (RecordTests.RecordMerge1.R1(r2.x, r2.y)) = RecordTests.RecordMerge1.F(RecordTests.RecordMerge1.R1(1, 2));
+
+ function RecordTests.RecordMerge1.F
+  input RecordTests.RecordMerge1.R1 rin;
+  output RecordTests.RecordMerge1.R1 rout;
+ algorithm
+  rout.x := rin.x;
+  rout.y := rin.y;
+  return;
+ end RecordTests.RecordMerge1.F;
+
+ record RecordTests.RecordMerge1.R1
+  Real x;
+  Real y;
+ end RecordTests.RecordMerge1.R1;
+end RecordTests.RecordMerge1;
+")})));
+
+    record R1
+        Real x;
+        Real y;
+    end R1;
+ 
+    record R2
+        Real x;
+        Real y;
+    end R2;
+ 
+    function F
+        input R1 rin;
+        output R2 rout;
+    algorithm
+        rout := rin;
+    end F;
+ 
+    R2 r2 = F(R1(1,2));
+end RecordMerge1;
 
 
 end RecordTests;

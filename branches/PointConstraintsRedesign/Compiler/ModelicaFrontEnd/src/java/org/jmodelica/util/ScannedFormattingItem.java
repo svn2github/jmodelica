@@ -62,7 +62,7 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 	
 	@Override
 	public Adjacency getAdjacency(FormattingItem otherItem) {
-		if (!(otherItem instanceof ScannedFormattingItem)) {
+		if (!otherItem.isScanned()) {
 			return Adjacency.NONE;
 		}
 		ScannedFormattingItem otherScannedItem = (ScannedFormattingItem) otherItem;
@@ -136,7 +136,7 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 				"\"");
 
 		if (printData) {
-			stringBuilder.append(">" + data + "</formattingitem>");
+			stringBuilder.append(">" + toString() + "</formattingitem>");
 		} else {
 			stringBuilder.append(" />");
 		}
@@ -216,5 +216,20 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 	 */
 	public boolean atEnd(int line, int column) {
 		return (getEndLine() == line && getEndColumn() == column);
+	}
+	
+	@Override
+	public final boolean isScanned() {
+		return true;
+	}
+	
+	@Override
+	public boolean isScannedMixed() {
+		return false;
+	}
+	
+	@Override
+	public final boolean isEmptyDefault() {
+		return false;
 	}
 }

@@ -44,7 +44,7 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 	
 	@Override
 	public ScannedFormattingItem mergeItems(Adjacency where, FormattingItem otherItem) {
-		if (where == Adjacency.NONE || !(otherItem instanceof ScannedFormattingItem)) {
+		if (where == Adjacency.NONE || !otherItem.isScanned()) {
 			return this;
 		}
 
@@ -52,7 +52,7 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 		if (where == Adjacency.FRONT) {
 			newStart(scannedItem);
 
-			if (scannedItem instanceof MixedFormattingItem) {
+			if (scannedItem.isScannedMixed()) {
 				subItems.addAll(0, ((MixedFormattingItem) otherItem).subItems);
 			} else {
 				subItems.addFirst(scannedItem);
@@ -60,7 +60,7 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 		} else if (where == Adjacency.BACK) {
 			newEnd(scannedItem);
 
-			if (scannedItem instanceof MixedFormattingItem) {
+			if (scannedItem.isScannedMixed()) {
 				subItems.addAll(subItems.size(), ((MixedFormattingItem) otherItem).subItems);
 			} else {
 				subItems.addLast(scannedItem);
@@ -79,7 +79,7 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 		while (currentSubItemIndex < subItems.size()) {
 			ScannedFormattingItem currentItem = subItems.get(currentSubItemIndex++);
 			firstPart = firstPart.mergeItems(Adjacency.BACK, currentItem);
-			if (currentItem.type == Type.LINE_BREAK) {
+			if (currentItem.endsWithLineBreak()) {
 				break;
 			}
 		}
@@ -88,11 +88,11 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 			lastPart = lastPart.mergeItems(Adjacency.BACK, subItems.get(currentSubItemIndex++));
 		}
 		
-		if (firstPart.type == Type.EMPTY) {
+		if (firstPart.isEmptyDefault()) {
 			ScannedFormattingItem[] result = new ScannedFormattingItem[1];
 			result[0] = (ScannedFormattingItem) lastPart;
 			return result;
-		} else if (lastPart.type == Type.EMPTY) {
+		} else if (lastPart.isEmptyDefault()) {
 			ScannedFormattingItem[] result = new ScannedFormattingItem[1];
 			result[0] = (ScannedFormattingItem) firstPart;
 			return result;
@@ -134,6 +134,11 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 		}
 		
 		return new DefaultFormattingItem(dataBuilder.toString());
+	}
+	
+	@Override
+	public final boolean isScannedMixed() {
+		return true;
 	}
 
 }

@@ -154,6 +154,10 @@ aspect Flattening {
 			
 			AnnotationNode functionDer = annotation("derivative");
 			
+			if (!functionDer.exists() && ie != null) {
+				functionDer = ie.annotation("derivative");	
+			}
+			
 			if (functionDer.exists()) {
 				String functionDerName = functionDer.string();
 				if (functionDerName==null) {

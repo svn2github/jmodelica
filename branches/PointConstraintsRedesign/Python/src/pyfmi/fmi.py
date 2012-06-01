@@ -1607,7 +1607,7 @@ class FMUModel(BaseModel):
                     
         return N.array(valrefs,dtype=N.int)
     
-    def get_variable_names(self, type=None, include_alias=True):
+    def get_variable_names(self, data_type=None, include_alias=True):
         """
         Extract the names of the variables in a model.
 
@@ -1616,23 +1616,23 @@ class FMUModel(BaseModel):
             Dict with variable name as key and value reference as value.
         """
         
-        if type != None:
+        if data_type != None:
             variables = self._md.get_model_variables()
             names = []
             valuerefs = []
             if include_alias:
                 for var in variables:
-                    if var.get_variability()==type:
+                    if xmlparser._translate_fundamental_type(var.get_fundamental_type())==data_type:
                         names.append(var.get_name())
                         valuerefs.append(var.get_value_reference())
-                return zip(tuple(vrefs), tuple(names))
+                return zip(tuple(valuerefs), tuple(names))
             else:
                 for var in variables: 
-                    if var.get_variability()==type and \
+                    if xmlparser._translate_fundamental_type(var.get_fundamental_type())==data_type and \
                         var.get_alias() == xmlparser.NO_ALIAS:
                             names.append(var.get_name())
                             valuerefs.append(var.get_value_reference())
-                return zip(tuple(vrefs), tuple(names))
+                return zip(tuple(valuerefs), tuple(names))
         else:
             return self._md.get_variable_names(include_alias)
     

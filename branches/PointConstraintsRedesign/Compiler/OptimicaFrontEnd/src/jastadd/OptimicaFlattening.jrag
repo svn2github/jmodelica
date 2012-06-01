@@ -72,7 +72,7 @@ aspect OptimicaFlattening {
 			//return null;
 		}
 	 	
-    	beginStep("flatten()");
+    	endStep("flatten()");
     }
 	
 	refine Flattening public void InstNode.flatten(FClass fc) {

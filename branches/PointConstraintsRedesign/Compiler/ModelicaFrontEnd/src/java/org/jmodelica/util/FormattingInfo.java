@@ -2,15 +2,13 @@ package org.jmodelica.util;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * An object that holds formatting information such as indentation and comments. 
  */
-public class FormattingInfo {
+public class FormattingInfo implements Iterable<ScannedFormattingItem> {
 	private LinkedList<ScannedFormattingItem> formattingList;
 	private boolean sorted;
 
@@ -71,14 +69,15 @@ public class FormattingInfo {
 
 			while (formattingIterator.hasNext()) {
 				ScannedFormattingItem otherItem = formattingIterator.next();
-				FormattingItem.Adjacency adjacency = currentItem.getAdjacency(otherItem);
+				FormattingItem.RelativePosition relativePosition = currentItem.getFrontRelativePosition(otherItem.getStartLine(), otherItem.getStartColumn());
 
-				if (adjacency != FormattingItem.Adjacency.NONE) {
-					currentItem = currentItem.mergeItems(adjacency, otherItem);
+				if (relativePosition == FormattingItem.RelativePosition.FRONT_ADJACENT) {
+					currentItem = currentItem.mergeItems(FormattingItem.Adjacency.BACK, otherItem);
 					formattingIterator.remove();
+				} else if (relativePosition == FormattingItem.RelativePosition.AFTER) {
+					break;
 				}
 			}
-
 			newFormattingList.add(currentItem);
 		}
 
@@ -97,21 +96,6 @@ public class FormattingInfo {
 		}
 		
 		formattingList = newFormattingList;
-	}
-
-	/**
-	 * Gets the sorted collection of scanned formatting items that this <code>FormattingInfo</code> holds. The
-	 * collection is sorted in the order in which the the formatting items appeared when scanned. That is depending
-	 * on their starting position and then their ending position.
-	 * @return a sorted collection of the formatting items.
-	 */
-	public Collection<ScannedFormattingItem> getFormattingCollection() {
-		if (!sorted) {
-			Collections.sort(formattingList);
-			sorted = true;
-		}
-
-		return formattingList;
 	}
 
 	/**
@@ -170,5 +154,15 @@ public class FormattingInfo {
 		stringBuilder.append("]");
 
 		return stringBuilder.toString();
+	}
+
+	@Override
+	public Iterator<ScannedFormattingItem> iterator() {
+		if (!sorted) {
+			Collections.sort(formattingList);
+			sorted = true;
+		}
+		Iterator<ScannedFormattingItem> iterator = formattingList.iterator();
+		return iterator;
 	}
 }

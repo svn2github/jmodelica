@@ -51,7 +51,7 @@ class Test_cad_std:
     @testattr(stddist = True)
     def test_simulation(self):
         
-        path = os.path.join(get_files_path(), 'Modelica', "vdp_pack.mo")
+        path = os.path.join(get_files_path(), 'Modelica', "VDP_pack.mo")
         
         jmu_name = compile_jmu("VDP_pack.VDP", path)
         model_cppad = JMUModel(jmu_name)

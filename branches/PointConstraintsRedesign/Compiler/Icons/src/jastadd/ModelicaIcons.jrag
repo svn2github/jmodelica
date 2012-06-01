@@ -25,7 +25,6 @@ aspect ModelicaIcons
 	eq ComponentDecl.diagram() 		= 	findClassDecl().diagram();
 	eq InstShortClassDecl.icon()	= 	getInstExtends(0).myInstClass().icon();
 	eq InstShortClassDecl.diagram()	= 	getInstExtends(0).myInstClass().diagram();
-	eq InstComponentDecl.diagram()	=	myInstClass().diagram();
 
 	protected boolean ClassDecl.visitingDuringIconRendering;
 	
@@ -75,13 +74,12 @@ aspect ModelicaIcons
 	}
 	
 	eq InstComponentDecl.icon() {
-		Icon icon;
 		Layer layer = Layer.NO_LAYER;
 		AnnotationNode annotation = myInstClass().annotation();
 		if (annotation.exists()) {
 			layer = annotation.createIconLayer();
 		}
-		icon = new Icon(qualifiedName(), layer, Context.ICON);
+		Icon icon = new Icon(qualifiedName(), layer, Context.ICON);
 		addSuperClasses(icon);
 		addSubComponents(icon);
 		return icon;
@@ -153,6 +151,29 @@ aspect ModelicaIcons
 	
 	eq InstNode.diagram() {
 		Layer layer = annotation().createDiagramLayer();
+		Diagram diagram = new Diagram(myInstClass().qualifiedName(), layer, Context.DIAGRAM, null);
+		addSuperClasses(diagram);
+		addSubComponents(diagram);
+		for (FAbstractEquation fae : getFAbstractEquations()) {
+			if (fae instanceof FConnectClause) {
+				FConnectClause fcc = (FConnectClause) fae;
+				Connection con;
+				try {
+					con = fcc.getConnectClause().annotation().createConnection();
+				} catch (FailedConstructionException e) {
+					con = new Connection();
+				}
+				con.setSourceConnector((org.jmodelica.icons.Connector)fcc.getConnector1().getInstAccess().myInstComponentDecl().getComponent());
+				con.setTargetConnector((org.jmodelica.icons.Connector)fcc.getConnector2().getInstAccess().myInstComponentDecl().getComponent());
+				fcc.setConnection(con);
+				con.connect();
+			}
+		}
+		return diagram;
+	}
+	
+	eq InstComponentDecl.diagram() {
+		Layer layer = myInstClass().annotation().createDiagramLayer();
 		Diagram diagram = new Diagram(myInstClass().qualifiedName(), layer, Context.DIAGRAM, null);
 		addSuperClasses(diagram);
 		addSubComponents(diagram);
