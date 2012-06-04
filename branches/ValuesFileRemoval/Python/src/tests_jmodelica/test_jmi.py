@@ -518,56 +518,6 @@ class TestModel_VDP:
         for index, val in enumerate(new_values):
             nose.tools.assert_equal(val, self.vdp.get(parameters[index]))
             
-    @testattr(stddist = True)
-    def test_writeload_parameters_from_XML(self):
-        """ Test writing and loading parameters parameters from XML."""
-        original_values = self.vdp.real_pi
-        new_values = N.ones(len(original_values))
-        self.vdp.real_pi = new_values
-
-        # new values are set
-        N.testing.assert_array_equal(self.vdp.real_pi,new_values)
-      
-        #load original values, pi are now = old values
-        self.vdp.load_parameters_from_XML()
-        N.testing.assert_array_equal(self.vdp.real_pi,original_values)
-       
-        # set new values and write to xml
-        self.vdp.real_pi = new_values
-        self.vdp.write_parameters_to_XML()
-       
-        #load values, pi are now = new values
-        self.vdp.load_parameters_from_XML()
-        N.testing.assert_array_equal(self.vdp.real_pi,new_values)
-
-    @testattr(stddist = True)
-    def test_writeload_params_new_file(self):
-        """ Test writing and loading parameters parameters from XML 
-            with new file. 
-        """
-        original_values = self.vdp.real_pi
-        new_values = N.ones(len(original_values))
-        self.vdp.real_pi = new_values
-
-        # new values are set
-        N.testing.assert_array_equal(self.vdp.real_pi,new_values)
-       
-        #load original values, pi are now = old values
-        self.vdp.load_parameters_from_XML()
-        N.testing.assert_array_equal(self.vdp.real_pi,original_values)
-        
-        # set new values and write to xml
-        self.vdp.real_pi = new_values
-        self.vdp.write_parameters_to_XML("test_jmi.xml")
-        
-        #load values, pi are now = new values
-        self.vdp.load_parameters_from_XML("test_jmi.xml")
-        N.testing.assert_array_equal(self.vdp.real_pi,new_values)
-        
-        #load original values, pi are now = old values
-        self.vdp.load_parameters_from_XML()
-        N.testing.assert_array_equal(self.vdp.real_pi,original_values)          
-            
     @testattr(stddist = True)        
     def test_get_name(self):
         """Test jmi.JMUModel.get_name method."""
