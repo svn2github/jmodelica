@@ -1930,10 +1930,7 @@ aspect CCodeGen {
 		if (noExp)
 			setBindingExp(exp = type().zeroLiteral());
 		OptionRegistry opt = root().options;
-		if (opt.getBooleanOption("generate_dae")) 
-			str.print(type().convert(exp.ceval()).cCodeValue());
-		else // this assumes that scaling factors is not used in FMUs
-			exp.prettyPrint_C(str,"");
+		exp.prettyPrint_C(str,"");
 		if (isReal() && opt.getBooleanOption("enable_variable_scaling"))
 			str.format("/sf(%d)", valueReference());
 		if (noExp)
