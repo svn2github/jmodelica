@@ -82,7 +82,7 @@ aspect FormattedPrint {
 	}
 	
 	public boolean BaseNode.hasScannedNonCachedFormatting() {
-		return (!hasCachedFormatting() && !formatting.isEmpty());
+		return (!hasCachedFormatting() && !formatting.hasAlwaysBeenEmpty());
 	}
 	
 	public void ASTNode.setFormatting(FormattingInfo formattingInfo) {

@@ -11,6 +11,7 @@ import java.util.LinkedList;
 public class FormattingInfo implements Iterable<ScannedFormattingItem> {
 	private LinkedList<ScannedFormattingItem> formattingList;
 	private boolean sorted;
+	private boolean hasAlwaysBeenEmpty;
 
 	/**
 	 * Creates a <code>FormattingInfo</code> instance.
@@ -18,6 +19,7 @@ public class FormattingInfo implements Iterable<ScannedFormattingItem> {
 	public FormattingInfo() {
 		formattingList = new LinkedList<ScannedFormattingItem>();
 		sorted = true;
+		hasAlwaysBeenEmpty = true;
 	}
 
 	/**
@@ -36,6 +38,7 @@ public class FormattingInfo implements Iterable<ScannedFormattingItem> {
 			sorted = false;
 		}
 		formattingList.add(formattingItem);
+		hasAlwaysBeenEmpty = false;
 	}
 
 	/**
@@ -49,6 +52,9 @@ public class FormattingInfo implements Iterable<ScannedFormattingItem> {
 				sorted = false;
 			}
 			formattingList.add(formattingItem);
+		}
+		if (!isEmpty()) {
+			hasAlwaysBeenEmpty = false;
 		}
 	}
 	
@@ -135,6 +141,15 @@ public class FormattingInfo implements Iterable<ScannedFormattingItem> {
 	 */
 	public boolean isEmpty() {
 		return formattingList.isEmpty();
+	}
+	
+	/**
+	 * Determines if this <code>FormattingInfo</code> always has been empty.
+	 * @return true if one or more <code>ScannedFormattingItem</code> has ever been added to this
+	 * <code>FormattingInfo</code>. Otherwise, false.
+	 */
+	public boolean hasAlwaysBeenEmpty() {
+		return hasAlwaysBeenEmpty;
 	}
 
 	@Override
