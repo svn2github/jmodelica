@@ -656,19 +656,19 @@ aspect InstanceErrorCheck {
 		//       need that for other things as well, but is there problems with it?
 	}	
 	
-	public void FExp.checkConstantExpression(InstPrimitive node, String varKind, String varName) {
+	public void FExp.checkConstantExpression(String varKind, String varName) {
 		String exp = "'" + prettyPrint("") + "'";
 		boolean failed = false;
 		try {
 			if (isCircular()) {
-				node.error("Could not evaluate binding expression for " + varKind + " '" +
-						varName + "' due to circularity: " + exp);
+				error("Could not evaluate binding expression for %s '%s' due to circularity: %s", 
+						varKind, varName, exp);
 			} else {
 				CValue val = ceval();
 				if (val.isUnknown()) {
 					if (val.isUnsupported()) {
-						node.compliance("Constant evaluation not supported for expression(s) directly or indirectly " + 
-								"used by the binding expression for " + varKind + " '" + varName + "': " + exp);
+						compliance("Constant evaluation not supported for expression(s) directly or indirectly " + 
+								"used by the binding expression for %s '%s': %s", varKind, varName, exp);
 					} else {
 						failed = true;
 					}
@@ -678,8 +678,7 @@ aspect InstanceErrorCheck {
 			failed = true;
 		}
 		if (failed)
-			node.error("Could not evaluate binding expression for " + 
-					varKind + " '" + varName + "': " + exp);
+			error("Could not evaluate binding expression for %s '%s': %s", varKind, varName, exp);
 	}
 	
 	public void InstPrimitive.collectErrors() {
@@ -689,17 +688,21 @@ aspect InstanceErrorCheck {
     		errorChecked = true;
 	
 			// Check binding expression
-    		if (myBindingInstExp() != null) {
+    		FExp bexp = myBindingInstExp();
+    		if (bexp != null) {
     			String type = isParameter() ? "parameter" : "constant";
 	    		// TODO: Check structural parameters as well
 				// Check if the binding expression of constants can be evaluated
 				if (isConstant()) 
-					myBindingInstExp().checkConstantExpression(this, "constant", qualifiedName());
+					bexp.checkConstantExpression("constant", qualifiedName());
+				else if (isParameter() && bexp.isCircular())
+					bexp.error("Circularity in binding expression of parameter: %s = %s", 
+							qualifiedName(), bexp);
     		} else {
 				// Warn if constant or parameter does not have a binding expression (start is used)
 				if ((isConstant() || isParameter()) && !isForIndex()) {
 					String type = isParameter() ? "parameter" : "constant";
-					warning("The " + type + " " + qualifiedName() + " does not have a binding expression");
+					warning("The %s %s does not have a binding expression", type, qualifiedName());
 				}
     		}
 			
@@ -718,7 +721,7 @@ aspect InstanceErrorCheck {
 					InstComponentModification icm = (InstComponentModification)im;
 					if (icm.hasInstModification() && icm.getInstModification().hasInstValueMod()) {
 						FExp val_mod = icm.getInstModification().instValueMod();
-						val_mod.checkConstantExpression(this, "attribute", icm.getName().name());
+						val_mod.checkConstantExpression("attribute", icm.getName().name());
 					}
 				}
 			}

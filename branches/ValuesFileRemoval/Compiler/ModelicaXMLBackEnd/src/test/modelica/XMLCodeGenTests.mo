@@ -896,7 +896,6 @@ model NonConstantStart1
          description="Check that only constant start valued are included in XML file",
          template="$XML_variables$",
          generatedCode="
-
         <ScalarVariable name=\"a[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
             <Real relativeQuantity=\"false\" start=\"1.0\" />
             <isLinear>true</isLinear>
@@ -913,7 +912,7 @@ model NonConstantStart1
             <VariableCategory>independentParameter</VariableCategory>
         </ScalarVariable>
         <ScalarVariable name=\"x\" valueReference=\"4\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-            <Real relativeQuantity=\"false\" start=\"2.0\" />
+            <Real relativeQuantity=\"false\" />
             <isLinear>true</isLinear>
             <VariableCategory>state</VariableCategory>
         </ScalarVariable>
@@ -921,7 +920,8 @@ model NonConstantStart1
             <Real relativeQuantity=\"false\" />
             <isLinear>true</isLinear>
             <VariableCategory>derivative</VariableCategory>
-        </ScalarVariable>")})));
+        </ScalarVariable>
+")})));
 
     Real x(start = 1 + a[b]);
     parameter Real a[2] = { 1, 2 };

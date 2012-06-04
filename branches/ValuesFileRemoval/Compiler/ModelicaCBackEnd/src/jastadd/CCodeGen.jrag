@@ -1934,7 +1934,7 @@ aspect CCodeGen {
 			str.print(type().convert(exp.ceval()).cCodeValue());
 		else // this assumes that scaling factors is not used in FMUs
 			exp.prettyPrint_C(str,"");
-		if (!inFunction() && isReal() && opt.getBooleanOption("enable_variable_scaling"))
+		if (isReal() && opt.getBooleanOption("enable_variable_scaling"))
 			str.format("/sf(%d)", valueReference());
 		if (noExp)
 			setBindingExpOpt(new Opt());

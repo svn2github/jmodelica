@@ -85,7 +85,7 @@ public class EvalTestCase extends TestCase {
 	 * @param values the values to set
 	 */
 	public void setValues(String values) {
-		this.values = values.split("[\\r\\n]+");
+		this.values = values.trim().split("[\\r\\n]+");
 	}
 	
 	/**
@@ -98,7 +98,7 @@ public class EvalTestCase extends TestCase {
 	 * @param variables the variables to set
 	 */
 	public void setVariables(String variables) {
-		this.variables = variables.split("[\\r\\n]+");
+		this.variables = variables.trim().split("[\\r\\n]+");
 	}
 	
 }

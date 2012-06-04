@@ -678,8 +678,30 @@ abstract public class TestAnnotationizerHelper {
 			super(filePath, className, description, opts, data);
 			fc = compile();
 			checkData(data);
-			variables = data.replace(',', '\n');
-			values = evaluateVars(fc, variables.split("[\\n\\r]+"));
+			variables = makeVariableList(data);
+			values = evaluateVars(variables.split("[\\n\\r]+"));
+		}
+		
+		/**
+		 * Create newline-separated list of scalarized variables from comma-separated list of 
+		 * possibly non-scalarized variables.
+		 */
+		public String makeVariableList(String vars) {
+			String[] list = vars.replace(',', '\n').split("[\\n\\r]+");
+			StringBuilder res = new StringBuilder();
+			Map<String,FVariable> map = fc.fullyQualifiedVariablesMap();
+			for (String name : list) {
+				name = name.trim();
+				if (map.containsKey(name)) {
+					res.append(name + "\n");
+				} else {
+					Pattern p = Pattern.compile(name + "[\\[.].*");
+					for (String var : map.keySet()) 
+						if (p.matcher(var).matches()) 
+							res.append(var + "\n");
+				}
+			}
+			return res.toString().trim();
 		}
 		
 		/**
@@ -687,7 +709,7 @@ abstract public class TestAnnotationizerHelper {
 		 * 
 		 * @return the resulting values, as a string, one value per line.
 		 */
-		public static String evaluateVars(FClass fc, String[] variables) {
+		public String evaluateVars(String[] variables) {
 			StringBuilder res = new StringBuilder();
 			for (int i = 0; i < variables.length; i++) {
 				if (i != 0)
