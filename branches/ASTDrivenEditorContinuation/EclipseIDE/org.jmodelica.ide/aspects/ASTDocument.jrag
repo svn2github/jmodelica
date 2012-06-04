@@ -132,7 +132,6 @@ aspect ASTDocument {
 		int column = addedFormattingItem.getStartColumn();
 
 		if (preFormatting.inside(line, column) || preFormatting.getAdjacency(addedFormattingItem) != FormattingItem.Adjacency.NONE) {
-			System.out.flush();
 			preFormatting = preFormatting.combineItems(addedFormattingItem);
 			return this;
 		}
@@ -153,5 +152,37 @@ aspect ASTDocument {
 		}
 		
 		return null; // Unable to find matching formatting item.
+	}
+	
+	public void ASTNode.offsetNodesAfter(int line, int column, int byLines, int byColumnsOnLastLine) {
+		for (ASTNode node : this) {
+			node.offsetNodesAfter(line, column, byLines, byColumnsOnLastLine);
+		}
+	}
+	
+	public void BaseNode.offsetNodesAfter(int line, int column, int byLines, int byColumnsOnLastLine) {
+		if (getStartLineWithFormatting() > line || (getStartLineWithFormatting() == line && getStartColumnWithFormatting() >= column)) {
+			preFormatting.offsetItemAfter(line, column, byLines, byColumnsOnLastLine);
+			insideFormatting.offsetItemAfter(line, column, byLines, byColumnsOnLastLine);
+			postFormatting.offsetItemAfter(line, column, byLines, byColumnsOnLastLine);
+
+			if (Symbol.getLine(getStart()) > line || (Symbol.getLine(getStart()) == line && Symbol.getColumn(getStart()) >= column)) {
+				int newStartColumn = Symbol.getColumn(getStart());
+				int newEndColumn = Symbol.getColumn(getEnd());
+				if (Symbol.getLine(getStart()) == line) {
+					newStartColumn += byColumnsOnLastLine;
+					if (Symbol.getLine(getStart()) == Symbol.getLine(getEnd())) {
+						newEndColumn += byColumnsOnLastLine;
+					}
+				}
+				start = Symbol.makePosition(Symbol.getLine(getStart()) + byLines, newStartColumn);
+				end = Symbol.makePosition(Symbol.getLine(getEnd()) + byLines, newEndColumn);
+			}
+		}
+		
+		for (ASTNode node : this) {
+			node.offsetNodesAfter(line, column , byLines, byColumnsOnLastLine);
+		}
+		
 	}
 }
