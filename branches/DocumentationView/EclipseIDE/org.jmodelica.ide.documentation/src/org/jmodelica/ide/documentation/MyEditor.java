@@ -57,12 +57,13 @@ public class MyEditor extends EditorPart {
 		//openComponentStack = new Stack<InstComponentDecl>();
 		//program = sourceRoot.getProgram();
 		//String s = input.getClassName();
+		
 		fullClassDecl = input.getFullClassDecl();
 //		if (fullClassDecl == null){
 //			//fullClassDecl = (FullClassDecl) program.simpleLookupClassDotted(input.getClassName());
 //		}
 		browser = new Browser(parent, SWT.NONE);
-		browserContent = new BrowserContent(fullClassDecl, browser, icd);
+		browserContent = new BrowserContent(fullClassDecl, browser, icd, sourceRoot.getProgram());
      }
 	
 	@Override

@@ -1,6 +1,7 @@
 package org.jmodelica.ide.documentation;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -12,6 +13,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
 import org.jastadd.plugin.Activator;
 import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.FullClassDecl;
 import org.jmodelica.modelica.compiler.Program;
@@ -33,7 +35,22 @@ public class MyEditorInput implements IEditorInput, IPersistableElement{
 //				
 //			}
 //		}
-		className = fullClassDecl.name();
+		ArrayList<String> path = new ArrayList<String>();
+		String name = fullClassDecl.name();
+		StringBuilder sb = new StringBuilder();
+		BaseClassDecl tmp = fullClassDecl;
+		do{
+			path.add(tmp.name());
+			tmp = tmp.enclosingClassDecl();
+			
+		}while(tmp != null && !name.equals(tmp.name()));
+		for (int i = path.size() - 1; i >= 0; i--){
+			sb.append(path.get(i));
+			if (i != 0){
+				sb.append(".");
+			}
+		}
+		className = sb.toString();// fullClassDecl.name();
 		project = lookupIProject(new File(fullClassDecl.containingFileName()));
 		this.fullClassDecl = fullClassDecl;
 	}
