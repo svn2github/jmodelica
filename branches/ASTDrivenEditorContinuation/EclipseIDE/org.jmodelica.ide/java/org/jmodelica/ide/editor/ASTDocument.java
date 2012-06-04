@@ -99,17 +99,32 @@ public class ASTDocument extends Document {
 	@Override
 	protected void fireDocumentAboutToBeChanged(DocumentEvent event) {
 		super.fireDocumentAboutToBeChanged(event);		
-		if (event.getText().matches("[ \t\f]*")) {
+		if (event.getText().matches("[ \t\f\r\n]*")) {
 			try {
 				int startLine = getLineOfOffset(event.getOffset()) + 1;
 				int startColumn = event.getOffset() - getLineInformationOfOffset(event.getOffset()).getOffset() + 1;
 				int endLine = getLineOfOffset(event.getOffset() + event.getLength()) + 1;
 				int endColumn = (event.getOffset() + event.getLength()) - getLineInformationOfOffset(event.getOffset() + event.getLength()).getOffset() + 1;
+				FormattingItem.Type type = FormattingItem.Type.NON_BREAKING_WHITESPACE;
+				if (event.getText().matches("[\r\n]*")) {
+					type = FormattingItem.Type.LINE_BREAK;
+				}
 				printLog("Adding formatting item with the position (" + startLine + ", " + startColumn + "; " + endLine + ", " + endColumn + ")...", true);
-				BaseNode match = ast.insertMoreFormatting(new ScannedFormattingItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, event.getText(),
-						startLine, startColumn, endLine, endColumn));
+				ScannedFormattingItem newItem = new ScannedFormattingItem(type, event.getText(),
+						startLine, startColumn, endLine, endColumn);
+				BaseNode match = ast.insertMoreFormatting(newItem);
 				if (match != null) {
 					printLog("Done!", true);
+					int newLines = newItem.spanningLines();
+					if (event.getText().endsWith("\n")) {
+						++newLines;
+					}
+					printLog("Offsetting trailing AST nodes by (" + newItem.spanningLines() + newLines + ", " + newItem.spanningColumnsOnLastLine() + ")...", true);
+					long start = System.currentTimeMillis();
+					ast.offsetNodesAfter(startLine, startColumn, newLines, newItem.spanningColumnsOnLastLine());
+					long time = System.currentTimeMillis() - start;
+					printLog("Done after " + (time / 1000) + "." + ((((time % 1000) < 100) ? ((time % 1000) < 10) ? "00" : "0" : "") + (time % 1000)) + " seconds.", true);
+					printLog(ast.prettyPrintFormatted(), true);
 				} else {
 					printLog("Unable to find anywhere to place the formatting item.", true);
 				}
