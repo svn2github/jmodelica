@@ -133,4 +133,9 @@ public class DefaultFormattingItem extends FormattingItem {
 		return (line > 1 || (line == 1 && column >= 1)) &&
 				(line < endLine || (line == endLine && column <= endColumn));
 	}
+
+	@Override
+	public void offsetItemAfter(int line, int column, int byLines, int byColumnsOnLastLine) {
+		return;
+	}
 }

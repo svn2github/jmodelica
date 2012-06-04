@@ -197,4 +197,17 @@ public abstract class FormattingItem {
 	 * (boundaries included). Otherwise, false.
 	 */
 	public abstract boolean inside(int line, int column);
+
+	/**
+	 * If this is a <code>ScannedFormattingItem</code> that starts at (<code>line</code>, <code>column</code>) or
+	 * further into the source code, its position is offset. The item is offset by <code>byLines</code> lines and,
+	 * if this item starts on <code>line</code>, by <code>byColumnsOnLastLine</code> columns.
+	 * <code>DefaultFormattingItem</code>s have no absolute position, so this method does not alter those items in
+	 * any way. 
+	 * @param line the first line to be affected by this offset.
+	 * @param column the first column on <code>line</code> to be affected by this offset.
+	 * @param byLines the number of lines to offset the item by.
+	 * @param byColumnsOnLastLine the number of columns to offset the item by if it starts on <code>line</code>.
+	 */
+	public abstract void offsetItemAfter(int line, int column, int byLines, int byColumnsOnLastLine);
 }

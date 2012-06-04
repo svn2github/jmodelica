@@ -310,6 +310,10 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 	
 	@Override
 	public int spanningColumnsOnLastLine() {
+		if (endsWithLineBreak()) {
+			return 0;
+		}
+
 		return (getStartLine() == getEndLine() ? (getEndColumn() - getStartColumn() + 1) : getEndColumn());
 	}
 	
@@ -317,5 +321,19 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 	public boolean inside(int line, int column) {
 		return ((line > getStartLine() || (line == getStartLine() && column >= getStartColumn())) &&
 				(line < getEndLine() || (line == getEndLine() && column <= getEndColumn())));
+	}
+
+	@Override
+	public void offsetItemAfter(int line, int column, int byLines, int byColumnsOnLastLine) {
+		if (line < getStartLine() || (line == getStartLine() && column <= getStartColumn())) {
+			if (line == getStartLine()) {
+				startColumn += byColumnsOnLastLine;
+				if (getStartLine() == getEndLine()) {
+					endColumn += byColumnsOnLastLine;
+				}
+			}
+			startLine += byLines;
+			endLine += byLines;
+		}
 	}
 }
