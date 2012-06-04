@@ -230,6 +230,19 @@ abstract public class TestAnnotationizerHelper {
 			return false;
 		}
 	}
+	
+	protected void printSpecificLine(
+			PrintStream out, String indent, String name, String value, boolean last) {
+		int nl = Math.max(value.lastIndexOf('\n'), value.lastIndexOf('\r'));
+		boolean multi = nl >= 0;
+		if (multi) 
+			value = "\n" + value + (nl < value.length() - 1 ? "\n" : "");
+		out.print(indent + name +"=\"" + value + "\"");
+		if (!last)
+			out.print(",\n");
+		else if (!multi) 
+			out.print("\n ");
+	}
 
 	/**
 	 * \brief Prints the resulting test annotation to stdout.
@@ -415,13 +428,8 @@ abstract public class TestAnnotationizerHelper {
 		 */
 		@Override
 		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			out.print(indent + "template=\"");
-			if (template.indexOf('\n') < 0 && template.indexOf('\r') < 0) 
-				out.print(template);
-			else
-				out.print("\n" + template + "\n");
-			out.print("\",\n" + indent + "generatedCode=\"\n" + code);
-			out.print("\"");
+			printSpecificLine(out, indent, "template", template, false);
+			printSpecificLine(out, indent, "generatedCode", code, true);
 		}
 		
 	}
@@ -548,7 +556,7 @@ abstract public class TestAnnotationizerHelper {
 		 */
 		@Override
 		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			out.print(indent + "errorMessage=\"\n" + message + "\"");
+			printSpecificLine(out, indent, "errorMessage", message, true);
 		}
 
 	}
@@ -639,13 +647,8 @@ abstract public class TestAnnotationizerHelper {
 		 */
 		@Override
 		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			int nl = Math.max(methodResult.lastIndexOf('\n'), methodResult.lastIndexOf('\r'));
-			if (nl >= 0) 
-				methodResult = "\n" + methodResult + (nl < methodResult.length() - 1 ? "\n" : "");
-			out.print(indent + "methodName=\"" + methodName + "\",\n");
-			out.print(indent + "methodResult=\"" + methodResult + "\"");
-			if (nl < 0) 
-				out.print("\n ");
+			printSpecificLine(out, indent, "methodName", methodName, false);
+			printSpecificLine(out, indent, "methodResult", methodResult, true);
 		}
 		
 		/**
@@ -653,6 +656,62 @@ abstract public class TestAnnotationizerHelper {
 		 */
 		public static void usage(String cl, String extra) {
 			TestAnnotationizerHelper.usage(cl, "method name");
+		}
+
+	}
+
+	/**
+	 * \brief A constant evaluation test case.
+	 */
+	public static class EvalTestCase extends TestAnnotationizerHelper {
+
+		private String values;
+		private String variables;
+		protected FClass fc;
+		
+		/**
+		 * \brief Constructor for FClass method test case.
+		 * 
+		 * Compiles the model.
+		 */
+		public EvalTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+			super(filePath, className, description, opts, data);
+			fc = compile();
+			checkData(data);
+			variables = data.replace(',', '\n');
+			values = evaluateVars(fc, variables.split("[\\n\\r]+"));
+		}
+		
+		/**
+		 * Evaluate variables in an FClass.
+		 * 
+		 * @return the resulting values, as a string, one value per line.
+		 */
+		public static String evaluateVars(FClass fc, String[] variables) {
+			StringBuilder res = new StringBuilder();
+			for (int i = 0; i < variables.length; i++) {
+				if (i != 0)
+					res.append('\n');
+				res.append(fc.lookupFV(new FQName(variables[i]), false).ceval().toString());
+			}
+			return res.toString();
+		}
+		
+		/**
+		 * \brief Generate and print the part of the annotation that is specific to 
+	     *        this test case type.
+		 */
+		@Override
+		protected void printSpecific(PrintStream out, String indent) throws Exception {
+			printSpecificLine(out, indent, "variables", variables, false);
+			printSpecificLine(out, indent, "values", values, true);
+		}
+		
+		/**
+		 * \brief Prints a usage message for this test case type.
+		 */
+		public static void usage(String cl, String extra) {
+			TestAnnotationizerHelper.usage(cl, "variable list");
 		}
 
 	}

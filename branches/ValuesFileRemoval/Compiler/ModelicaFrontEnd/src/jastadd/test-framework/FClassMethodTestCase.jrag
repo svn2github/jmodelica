@@ -21,8 +21,6 @@ import org.jmodelica.util.*;
 public class FClassMethodTestCase extends TestCase {
 	private String output = "";
     private String methodName = "";
-    private String outputFileName = "";
-    private boolean resultOnFile = false;
 	    
 	public FClassMethodTestCase() {}
     
@@ -41,16 +39,10 @@ public class FClassMethodTestCase extends TestCase {
 			                  String sourceFileName, 
 			                  String className, 
 			                  String result,
-			                  String methodName,
-			                  boolean resultOnFile) {
+			                  String methodName) {
 		super(name, description, sourceFileName, className);
 		this.methodName = methodName;
-		this.resultOnFile = resultOnFile;		
-		if (!resultOnFile) {
-			this.output = result;
-		} else {
-			this.outputFileName = result;
-		}
+		this.output = result;
 		
 	}
 
@@ -85,8 +77,6 @@ public class FClassMethodTestCase extends TestCase {
 	 */
 	public void setOutput(String output) {
 		this.output = output;
-		this.outputFileName = "";
-		this.resultOnFile = false;
 	}
 	
 	/**
@@ -107,34 +97,6 @@ public class FClassMethodTestCase extends TestCase {
 	 */
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
-	}
-
-	/**
-	 * @return the outputFileName
-	 */
-	public String getOutputFileName() {
-		return outputFileName;
-	}
-	/**
-	 * @param outputFileName the outputFileName to set
-	 */
-	public void setOutputFileName(String outputFileName) {
-		this.outputFileName = outputFileName;
-		this.output = "";
-		this.resultOnFile = true;
-	}
-	/**
-	 * @return the resultOnFile
-	 */
-	public boolean isResultOnFile() {
-		return resultOnFile;
-	}
-	
-	/**
-	 * @param resultOnFile the resultOnFile to set
-	 */
-	public void setResultOnFile(boolean resultOnFile) {
-		this.resultOnFile = resultOnFile;
 	}
 	
 }
