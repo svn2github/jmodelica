@@ -4,10 +4,10 @@ if (document.getElementById && document.createElement) {
 	var btn = document.createElement('BUTTON');
 	var buttext = document.createTextNode('Save');
 	btn.appendChild(buttext);
-	btn.onclick = saveEdit;
+	btn.onclick = saveChanges;
 }
 
-function catchIt(e) {
+function onClick(e) {
 	if (editing) return;
 	if (!document.getElementById || !document.createElement) return;
 	if (!e) var obj = window.event.srcElement;
@@ -31,7 +31,7 @@ function catchIt(e) {
 	editing = true;
 }
 
-function saveEdit() {
+function saveChanges() {
 	var area = document.getElementsByTagName('TEXTAREA')[0];
 	var y = document.createElement('P');
 	var z = area.parentNode;
@@ -42,4 +42,4 @@ function saveEdit() {
 	editing = false;
 }
 
-document.onclick = catchIt;
+document.onclick = onClick;
