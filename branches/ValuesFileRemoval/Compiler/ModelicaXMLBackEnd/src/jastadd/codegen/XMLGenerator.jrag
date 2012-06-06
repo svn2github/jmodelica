@@ -508,7 +508,7 @@ public class XMLGenerator extends GenericGenerator {
 			e = var.getBindingExp();
 		else if (var.startAttributeSet())
 			e = var.startAttributeExp();
-		if (e != null && !e.isConstantExp())
+		if (!var.root().options.getBooleanOption("generate_xml_equations") && e != null && !e.isConstantExp())
 			e = null;
 		if (e != null)
 			genPrinter.print("start=\"" + var.type().convert(e.ceval()).xmlValue() + "\" ");
