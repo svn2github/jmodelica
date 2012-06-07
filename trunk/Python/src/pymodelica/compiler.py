@@ -383,23 +383,6 @@ class ModelicaCompiler(object):
         """ 
         Create a Modelica compiler. The compiler can be used to compile pure 
         Modelica models. A compiler instance can be used multiple times.
-        
-        Parameters::
-        
-            xml_template --
-                Path to the model description XML template file. If None then 
-                the default template will be used.
-                Default: None
-                
-            xml_values_template --
-                Path to the model values XML template file. If None then the 
-                default template will be used.
-                Default: None
-                
-            c_template --
-                Path to the C template file. If None then the default template 
-                will be used.
-                Default: None
         """
         try:
             options = OptionRegistryInterface(self.options_file_path)
@@ -690,27 +673,6 @@ class ModelicaCompiler(object):
                 The new XML model description template.       
         """
         self._compiler.setXMLTpl(template)
-
-    def get_XML_values_tpl(self):
-        """ 
-        Get the file path to the XML model values template. 
-        
-        Returns::
-        
-            The file path for the XML model values template.
-        """
-        return self._compiler.getXMLValuesTpl()
-    
-    def set_XML_values_tpl(self, template):
-        """ 
-        Set the XML values template to the file pointed out by template.
-        
-        Parameters::
-        
-            template --
-                The new XML model values template.       
-        """
-        self._compiler.setXMLValuesTpl(template)
         
     def get_cTemplate(self):
         """ 
@@ -1050,28 +1012,6 @@ class OptimicaCompiler(ModelicaCompiler):
         Create an Optimica compiler. The compiler can be used to compile both 
         Modelica and Optimica models. A compiler instance can be used multiple 
         times.
-        
-        Parameters::
-        
-            xml_template --
-                Path to the model description XML template file. If None then 
-                the default template will be used.
-                Default: None
-                
-            xml_values_template --
-                Path to the model values XML template file. If None then the 
-                default template will be used.
-                Default: None
-                
-            c_template --
-                Path to the C template file. If None then the default template 
-                will be used.
-                Default: None
-                
-            optimica_c_template --
-                Path to the Optimica C template file. If None then the default 
-                template will be used.
-                Default: None
         """
         try:
             options = OptionRegistryInterface(self.options_file_path)

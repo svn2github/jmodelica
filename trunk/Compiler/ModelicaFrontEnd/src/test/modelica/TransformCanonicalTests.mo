@@ -68,17 +68,16 @@ end TransformCanonicalTests.TransformCanonicalTest2;
       JModelica.UnitTesting.ErrorTestCase(name="TransformCanonical3_Err",
                                                description="Test parameter sorting.",
                                                errorMessage=
-" 3 errors found...
+"3 errors found...
 Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 79, column 19:
-  Could not evaluate binding expression for parameter 'p4' due to circularity: '( p3 ) * ( p3 )'
+Semantic error at line 86, column 24:
+  Circularity in binding expression of parameter: p4 = ( p3 ) * ( p3 )
 Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 80, column 19:
-  Could not evaluate binding expression for parameter 'p3' due to circularity: 'p2 + p1'
+Semantic error at line 87, column 24:
+  Circularity in binding expression of parameter: p3 = p2 + p1
 Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 81, column 19:
-  Could not evaluate binding expression for parameter 'p2' due to circularity: '( p4 ) * ( p1 )'
-
+Semantic error at line 88, column 24:
+  Circularity in binding expression of parameter: p2 = ( p4 ) * ( p1 )
 ")})));
     
     parameter Real p6 = p5;
@@ -96,15 +95,14 @@ Semantic error at line 81, column 19:
                                                errorMessage=
 " 3 errors found...
 Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 103, column 19:
-  Could not evaluate binding expression for parameter 'p4' due to circularity: '( p3 ) * ( p3 )'
+Semantic error at line 112, column 24:
+  Circularity in binding expression of parameter: p4 = ( p3 ) * ( p3 )
 Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 104, column 19:
-  Could not evaluate binding expression for parameter 'p3' due to circularity: 'p2 + p1'
+Semantic error at line 113, column 24:
+  Circularity in binding expression of parameter: p3 = p2 + p1
 Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 105, column 19:
-  Could not evaluate binding expression for parameter 'p2' due to circularity: '( p1 ) * ( p2 )'
-
+Semantic error at line 114, column 24:
+  Circularity in binding expression of parameter: p2 = ( p1 ) * ( p2 )
 ")})));
 
     parameter Real p6 = p5;
@@ -1028,39 +1026,6 @@ equation
   x= p;
 end AliasTest30;
 
-model ParameterBindingExpTest1_Err
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ParameterBindingExpTest1_Err",
-                                               description="Test error in dependent parameter binding expression.",
-                                               errorMessage=
-" 1 error found...
-Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 650, column 17:
-  Could not evaluate binding expression for parameter 'p': 'x'
-
-")})));
-
-	Real x = 2;
-	parameter Real p = x;
-end ParameterBindingExpTest1_Err;
-
-model ParameterBindingExpTest2_Err
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ParameterBindingExpTest2_Err",
-                                               description="Test error in dependent parameter binding expression.",
-                                               errorMessage=
-" 2 errors found...
-Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 654, column 17:
-  Could not evaluate binding expression for parameter 'p': 'x'
-Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 654, column 21:
-  Cannot find class or component declaration for x
-
-")})));
-	parameter Real p = x;
-end ParameterBindingExpTest2_Err;
-
 
 model ParameterBindingExpTest3_Warn
 
@@ -1077,41 +1042,6 @@ At line 110, column 18:
   parameter Real p;
 end ParameterBindingExpTest3_Warn;
 
-model ParameterBindingExpTest4_Err
-
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ParameterBindingExpTest4_Err",
-        description="Test errors in binding expressions.",
-                                               errorMessage=
-"
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 712, column 18:
-  Could not evaluate binding expression for parameter 'p3': 'p1 + p2'
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 712, column 21:
-  Type error in expression: p1 + p2
-")})));
-
-  parameter Boolean p1=true;
-  parameter Real p2 = 3;
-  parameter Real p3=p1+p2;
-end ParameterBindingExpTest4_Err;
-
-model ParameterBindingExpTest5_Err
-
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ParameterBindingExpTest5_Err",
-        description="Test errors in binding expressions.",
-                                               errorMessage=
-"
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 736, column 18:
-  Could not evaluate binding expression for parameter 'p2': 'p1 + 2'
-")})));
-
-  Real p1;
-  parameter Real p2=p1+2;
-end ParameterBindingExpTest5_Err;
 
 model AttributeBindingExpTest1_Err
 
@@ -1181,13 +1111,13 @@ model AttributeBindingExpTest4_Err
                                                errorMessage=
 "
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 815, column 18:
-  Could not evaluate binding expression for parameter 'p1' due to circularity: 'p2'
+Semantic error at line 1126, column 23:
+  Circularity in binding expression of parameter: p1 = p2
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 816, column 18:
-  Could not evaluate binding expression for parameter 'p2' due to circularity: 'p1'
+Semantic error at line 1127, column 23:
+  Circularity in binding expression of parameter: p2 = p1
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 818, column 8:
+Semantic error at line 1129, column 16:
   Could not evaluate binding expression for attribute 'start' due to circularity: 'p1'
 ")})));
 

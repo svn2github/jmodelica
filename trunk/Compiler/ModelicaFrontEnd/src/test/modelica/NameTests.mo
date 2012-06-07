@@ -337,11 +337,8 @@ Semantic error at line 297, column 4:
                                                description="Test that names are looked up correct.",
                                                errorMessage=
 "
-  1 error(s) found...
-  Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 363, column 18:
-  Could not evaluate binding expression for parameter 'a.p1': 'p1'
-In file 'src/test/modelica/NameTests.mo':
+1 errors found:
+Error: In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 320, column 9:
   Cannot find class or component declaration for p1
 ")})));
@@ -889,13 +886,10 @@ class ConstantLookup10
          name="ConstantLookup10",
          description="Constant lookup: trying to import non-constant component",
          errorMessage="
-3 errors found:
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 904, column 2:
   Packages may only contain classes and constants
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 909, column 17:
-  Could not evaluate binding expression for parameter 'p': 'x'
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 909, column 21:
   Cannot find class or component declaration for x
@@ -916,13 +910,10 @@ class ConstantLookup11
          name="ConstantLookup11",
          description="Constant lookup: trying to import non-constant component (named import)",
          errorMessage="
-3 errors found:
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 931, column 2:
   Packages may only contain classes and constants
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 936, column 17:
-  Could not evaluate binding expression for parameter 'p': 'x2'
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 936, column 21:
   Cannot find class or component declaration for x2
@@ -944,10 +935,7 @@ class ConstantLookup12
          name="ConstantLookup12",
          description="Constant lookup: trying to import non-constant component (unqualified import)",
          errorMessage="
-2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 740, column 17:
-  Could not evaluate binding expression for parameter 'p': 'x'
+1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 740, column 21:
   Cannot find class or component declaration for x
@@ -1011,11 +999,11 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 797, column 22:
   Could not evaluate array index expression: c
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 799, column 19:
-  Could not evaluate binding expression for constant 'c': 'd'
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 799, column 23:
   Cannot find class or component declaration for d
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 799, column 19:
+  Could not evaluate binding expression for constant 'c': 'd'
 ")})));
 
 	constant Real a = b[c];

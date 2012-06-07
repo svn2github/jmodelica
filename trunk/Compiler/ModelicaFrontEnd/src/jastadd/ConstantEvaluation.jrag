@@ -1573,6 +1573,23 @@ aspect ConstantEvaluation {
 	  return null;
   }
   
+  
+  /**
+   * Constant evaluate all dimensions described by expressions.
+   */
+  public Size Size.ceval() {
+	  return this;
+  }
+  
+  public Size MutableSize.ceval() {
+	  int[] ns = size.clone();
+	  for (int i = 0; i < size.length; i++) 
+		  if (size[i] == UNKNOWN && exps[i] != null) 
+			  ns[i] = exps[i].ceval().intValue();
+	  return new Size(ns);
+  }
+  
+  
   /**
    * \brief Check if this node is in a function that is being evaluated.
    */
@@ -2125,7 +2142,7 @@ aspect ConstantEvaluation {
   public CValue FType.assignToLastInFuncEval(CommonNamePart name, CValue left, CValue right) {
 	  if (left.isUnknown() || !isArray()) {
 		  if (isArray() && name.hasFArraySubscripts())
-			  left = new CValueArray(size());
+			  left = new CValueArray(size().ceval());
 		  else
 			  return right;
 	  }

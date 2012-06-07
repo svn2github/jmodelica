@@ -380,9 +380,10 @@ class JMUModel(BaseModel):
         self._modelid = self.get_identifier()
         self._modelname = self.get_name()
         
+        # DELETE HERE
         # extract XML values file from JMU and parse
-        self._xml_values_name = os.path.join(self._jmufiles['resources_dir'], self._modelid+'_values.xml')
-        self._parse_xml_values(self._xml_values_name)
+        #self._xml_values_name = os.path.join(self._jmufiles['resources_dir'], self._modelid+'_values.xml')
+        #self._parse_xml_values(self._xml_values_name)
         
         #Retrieve, rename and load the binary
         suffix = get_platform_suffix()
@@ -394,6 +395,32 @@ class JMUModel(BaseModel):
         lib_name = self._jmufiles['binary'] = rename_to_tmp(dllname, self._jmufiles['binaries_dir'])
         self.jmimodel = JMIModel(lib_name, self._jmufiles['binaries_dir'])
 
+        # init arrays (variables and offsets) with sizes and values
+        self._init_arrays()
+        
+        #n_p_opt set in _setDefaultValuesFromMetadata() -> _set_p_opt_indices()
+        self._n_p_opt=0
+        
+        self._init_variables()
+        self.jmimodel.initAD()
+
+        if self._n_z.value <= 1: # The time variable is always present
+            raise JMIException("Model contains no variables.")
+
+    def _init_variables(self):
+        self._set_scaling_factors()
+        self._set_start_values()
+        
+        # set optimizataion interval, time points and optimization 
+        # indices
+        if self._is_optimica():
+            self._set_opt_interval()
+            self._set_timepoints()
+            self._set_p_opt_indices()
+            
+        self._set_dependent_parameters()
+
+    def _init_arrays(self):
         # sizes of all arrays
         self._n_real_ci = ct.c_int()
         self._n_real_cd = ct.c_int()
@@ -465,23 +492,13 @@ class JMUModel(BaseModel):
         self._offs_pre_integer_d = ct.c_int()
         self._offs_pre_integer_u = ct.c_int()
         self._offs_pre_boolean_d = ct.c_int()
-        self._offs_pre_boolean_u = ct.c_int()        
+        self._offs_pre_boolean_u = ct.c_int()
         self._offs_pre_sw = ct.c_int()
         self._offs_pre_sw_init = ct.c_int()
         self._offs_pre_guards = ct.c_int()
         self._offs_pre_guards_init = ct.c_int()
 
         self.get_offsets()
-        
-        #n_p_opt set in _setDefaultValuesFromMetadata() -> _set_p_opt_indices()
-        self._n_p_opt=0
-        
-        self._setDefaultValuesFromMetadata()
-        self._set_dependent_parameters()
-        self.jmimodel.initAD()
-
-        if self._n_z.value <= 1: # The time variable is always present
-            raise JMIException("Model contains no variables.")
 
     def has_cppad_derivatives(self):
         """ 
@@ -509,9 +526,11 @@ class JMUModel(BaseModel):
         
         Calling this function is equivalent to reopening the model.
         """
-        self._setDefaultValuesFromMetadata()
-        self._set_iparam_values
-        self._set_dependent_parameters
+        self._init_variables()
+        
+        #self._setDefaultValuesFromMetadata()
+        #self._set_iparam_values
+        #self._set_dependent_parameters
         
     def _reset_jmimodel_typedefs(self):
         """ 
@@ -538,30 +557,33 @@ class JMUModel(BaseModel):
         # tempdir specified by core.get_temp_location()
         self._set_XMLDoc(xmlparser.ModelDescription(fname))
         
-    def _parse_xml_values(self, fname):
-        # xml file has been unzipped from JMU and is located in the 
-        # tempdir specified by core.get_temp_location()
-        self._set_XMLValuesDoc(xmlparser.IndependentParameters(fname))
+    #def _parse_xml_values(self, fname):
+        ## xml file has been unzipped from JMU and is located in the 
+        ## tempdir specified by core.get_temp_location()
+        #self._set_XMLValuesDoc(xmlparser.IndependentParameters(fname))
                
-    def _setDefaultValuesFromMetadata(self, libname=None, path=None):
-        """ 
-        Load metadata saved in XML files.
+    #def _setDefaultValuesFromMetadata(self, libname=None, path=None):
+        #""" 
+        #Load metadata saved in XML files.
         
-        Meta data can be things like time points, initial states, initial cost 
-        etc.
-        """
-        self._set_scaling_factors()
-        self._set_start_attributes()
+        #Meta data can be things like time points, initial states, initial cost 
+        #etc.
+        #"""
+        #self._set_scaling_factors()
+        #self._set_jmi_start_values()
+        
+        ##self._set_start_attributes()
+        
+        ## set independent parameter values
+        ##TA BORT 
+        ##self._set_iparam_values()
 
-        # set independent parameter values
-        self._set_iparam_values()
-
-        # set optimizataion interval, time points and optimization 
-        # indices
-        if self._is_optimica():
-            self._set_opt_interval()
-            self._set_timepoints()
-            self._set_p_opt_indices()
+        ## set optimizataion interval, time points and optimization 
+        ## indices
+        #if self._is_optimica():
+            #self._set_opt_interval()
+            #self._set_timepoints()
+            #self._set_p_opt_indices()
         
     def _is_optimica(self):
         """ 
@@ -614,7 +636,13 @@ class JMUModel(BaseModel):
 #            pd_tmp[:] = pd
 #        self.set_real_pd(pd)
 
-    def _set_start_values(self, p_opt_start, dx_start, x_start, u_start, 
+    def _set_start_values(self):
+        """
+        Sets the default start values of the model.
+        """
+        self.jmimodel.set_start_values()
+
+    def _set_xml_start_values(self, p_opt_start, dx_start, x_start, u_start, 
         w_start):
         """ 
         Set start values from the XML meta data file. 
@@ -2257,94 +2285,94 @@ class JMUModel(BaseModel):
         """
         self._xmldoc = doc
 
-    def _get_XMLValuesDoc(self):
-        """ 
-        Get the XMLDoc for independent parameter values. 
-        """
-        return self._xmlvaluesdoc
+    #def _get_XMLValuesDoc(self):
+        #""" 
+        #Get the XMLDoc for independent parameter values. 
+        #"""
+        #return self._xmlvaluesdoc
     
-    def _set_XMLValuesDoc(self, doc):
-        """ 
-        Set the XMLDoc for independent parameter values. 
-        """
-        self._xmlvaluesdoc = doc
+    #def _set_XMLValuesDoc(self, doc):
+        #""" 
+        #Set the XMLDoc for independent parameter values. 
+        #"""
+        #self._xmlvaluesdoc = doc
        
-    def _set_start_attributes(self):
-        """ 
-        Set start attributes for all variables. The start attributes are fetched 
-        together with the corresponding valueReferences from the XMLDoc 
-        instance. The valueReferences are mapped to which primitive type vector 
-        and index in vector each start value belongs to using the protocol 
-        implemented in _translateValueRef.
-        """
-        xmldoc = self._get_XMLDoc()
-        start_attr = xmldoc.get_variable_start_attributes(include_alias=False)
+    #def _set_start_attributes(self):
+        #""" 
+        #Set start attributes for all variables. The start attributes are fetched 
+        #together with the corresponding valueReferences from the XMLDoc 
+        #instance. The valueReferences are mapped to which primitive type vector 
+        #and index in vector each start value belongs to using the protocol 
+        #implemented in _translateValueRef.
+        #"""
+        #xmldoc = self._get_XMLDoc()
+        #start_attr = xmldoc.get_variable_start_attributes(include_alias=False)
         
-        #Real variables vector
-        z = self.z
-        sc = self.variable_scaling_factors
+        ##Real variables vector
+        #z = self.z
+        #sc = self.variable_scaling_factors
 
-        # First reset the start values
-        for i in range(len(z)):
-            z[i] = 0
+        ## First reset the start values
+        #for i in range(len(z)):
+            #z[i] = 0
         
-        for attr in start_attr:
-            (i, ptype) = _translate_value_ref(attr[0])
-            value = attr[1]
+        #for attr in start_attr:
+            #(i, ptype) = _translate_value_ref(attr[0])
+            #value = attr[1]
             
-            if value != None: # if no start attr is set then value is None
-                if ptype == 0:
-                    # Primitive type is Real
-                    if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0: 
-                        z[i] = value/sc[i]
-                    else:
-                        z[i] = value
-                elif(ptype == 1):
-                    # Primitive type is Integer
-                    z[i] = value
-                elif(ptype == 2):
-                    # Primitive type is Boolean
-                    z[i] = value
-                elif(ptype == 3):
-                    # Primitive type is String
-                    pass
-                else:
-                    raise JMIException("Unknown type: index=" + str(i) + ", type=" + str(ptype))
+            #if value != None: # if no start attr is set then value is None
+                #if ptype == 0:
+                    ## Primitive type is Real
+                    #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0: 
+                        #z[i] = value/sc[i]
+                    #else:
+                        #z[i] = value
+                #elif(ptype == 1):
+                    ## Primitive type is Integer
+                    #z[i] = value
+                #elif(ptype == 2):
+                    ## Primitive type is Boolean
+                    #z[i] = value
+                #elif(ptype == 3):
+                    ## Primitive type is String
+                    #pass
+                #else:
+                    #raise JMIException("Unknown type: index=" + str(i) + ", type=" + str(ptype))
     
-    def _set_iparam_values(self, xml_values_doc=None):
-        """ 
-        Set the values for the independent parameters. 
-        """
-        if not xml_values_doc:
-            xml_values_doc = self._get_XMLValuesDoc()
-        values = xml_values_doc.get_iparam_values() #{variablename:value}
-        xmldoc = self._get_XMLDoc()
+    #def _set_iparam_values(self, xml_values_doc=None):
+        #""" 
+        #Set the values for the independent parameters. 
+        #"""
+        #if not xml_values_doc:
+            #xml_values_doc = self._get_XMLValuesDoc()
+        #values = xml_values_doc.get_iparam_values() #{variablename:value}
+        #xmldoc = self._get_XMLDoc()
        
-        z = self.z
-        sc = self.variable_scaling_factors
+        #z = self.z
+        #sc = self.variable_scaling_factors
 
-        for name in values.keys():
-            value = values.get(name)
-            #value_ref = variables.get(name)
-            (i, ptype) = _translate_value_ref(xmldoc.get_value_reference(name))
+        #for name in values.keys():
+            #value = values.get(name)
+            ##value_ref = variables.get(name)
+            #(i, ptype) = _translate_value_ref(xmldoc.get_value_reference(name))
 
-            if(ptype == 0):
-                # Primitive type is Real
-                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0: 
-                    z[i] = value/sc[i]
-                else:
-                    z[i] = value
-            elif(ptype == 1):
-                # Primitive type is Integer
-                z[i] = value
-            elif(ptype == 2):
-                # Primitive type is Boolean
-                z[i] = value
-            elif(ptype == 3):
-                # Primitive type is String
-                pass
-            else:
-                raise JMIException("Unknown type")
+            #if(ptype == 0):
+                ## Primitive type is Real
+                #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0: 
+                    #z[i] = value/sc[i]
+                #else:
+                    #z[i] = value
+            #elif(ptype == 1):
+                ## Primitive type is Integer
+                #z[i] = value
+            #elif(ptype == 2):
+                ## Primitive type is Boolean
+                #z[i] = value
+            #elif(ptype == 3):
+                ## Primitive type is String
+                #pass
+            #else:
+                #raise JMIException("Unknown type")
             
     def _set_opt_interval(self):
         """ 
@@ -2509,82 +2537,82 @@ class JMUModel(BaseModel):
             raise Exception("Parameter or variable "+name+" could not be found \
                 in model.")
     
-    def load_parameters_from_XML(self, filename=''):
-        """ 
-        Reset the pi vector with values from the XML file created when the model 
-        was compiled. If an XML file other than this should be used instead, set 
-        the filename of the file to load.
+    #def load_parameters_from_XML(self, filename=''):
+        #""" 
+        #Reset the pi vector with values from the XML file created when the model 
+        #was compiled. If an XML file other than this should be used instead, set 
+        #the filename of the file to load.
         
-        Parameters::
+        #Parameters::
         
-            filename -- 
-                The name of XML file that should be loaded.
-                Default: Empty string.
+            #filename -- 
+                #The name of XML file that should be loaded.
+                #Default: Empty string.
         
-        Raises::
+        #Raises::
         
-            IOError if file could not be found.
-        """
-        if filename:
-            if os.path.exists(filename):
-                self._parse_xml_values(filename)
-            else:
-                raise IOError("The file: "+filename+" could not be found.")
-        else:
-            self._parse_xml_values(self._xml_values_name)
+            #IOError if file could not be found.
+        #"""
+        #if filename:
+            #if os.path.exists(filename):
+                #self._parse_xml_values(filename)
+            #else:
+                #raise IOError("The file: "+filename+" could not be found.")
+        #else:
+            #self._parse_xml_values(self._xml_values_name)
             
-        self._set_iparam_values(self._get_XMLValuesDoc())
+        #self._set_iparam_values(self._get_XMLValuesDoc())
         
-    def write_parameters_to_XML(self, filename=''):
-        """ 
-        Write parameter values (real, integer, boolean supported) in the pi 
-        vector to XML. The default behaviour is to overwrite the XML file 
-        created when model was compiled. To write to a new file, set the file 
-        name of the new file to write to. 
+    #def write_parameters_to_XML(self, filename=''):
+        #""" 
+        #Write parameter values (real, integer, boolean supported) in the pi 
+        #vector to XML. The default behaviour is to overwrite the XML file 
+        #created when model was compiled. To write to a new file, set the file 
+        #name of the new file to write to. 
         
-        Parameters::
+        #Parameters::
         
-            filename -- 
-                The filename of the XML file that the parameter vector should be 
-                written to.
-                Default: Empty string.
-        """       
-        # get xmldoc and z-vector
-        xmldoc = self._get_XMLDoc()
-        z = self.z
+            #filename -- 
+                #The filename of the XML file that the parameter vector should be 
+                #written to.
+                #Default: Empty string.
+        #"""       
+        ## get xmldoc and z-vector
+        #xmldoc = self._get_XMLDoc()
+        #z = self.z
         
-        # create temp XMLValuesDoc from the xml values file for writing 
-        # the new parameters to
-        temp_doc = xmlparser.IndependentParameters(self._xml_values_name)
+        ## create temp XMLValuesDoc from the xml values file for writing 
+        ## the new parameters to
+        #temp_doc = xmlparser.IndependentParameters(self._xml_values_name)
         
-        # get all parameters
-        parameters = temp_doc.get_all_parameters()
+        ## get all parameters
+        #parameters = temp_doc.get_all_parameters()
         
-        for p in parameters:
-            #get value reference
-            name = p.get_name()
+        #for p in parameters:
+            ##get value reference
+            #name = p.get_name()
             
-            #get index in z-vector
-            index, type = _translate_value_ref(
-                xmldoc.get_value_reference(name)) 
+            ##get index in z-vector
+            #index, type = _translate_value_ref(
+                #xmldoc.get_value_reference(name)) 
             
-            # set value in xml values doc for name = name 
-            # to value from z-vector
-            if type == 2:
-                #is boolean
-                p.set_value((bool(z[index])))
-            else:
-                p.set_value(z[index])
+            ## set value in xml values doc for name = name 
+            ## to value from z-vector
+            #if type == 2:
+                ##is boolean
+                #p.set_value((bool(z[index])))
+            #else:
+                #p.set_value(z[index])
             
-        # finally, write to file
-        if filename:
-            # create directory if it does not exist
-            dir = os.path.dirname(filename)
-            if dir and not os.path.exists(dir):
-                os.mkdir(dir)
-            temp_doc.write_to_file(filename)
-        else:
-            temp_doc.write_to_file(self._xml_values_name)
+        ## finally, write to file
+        #if filename:
+            ## create directory if it does not exist
+            #dir = os.path.dirname(filename)
+            #if dir and not os.path.exists(dir):
+                #os.mkdir(dir)
+            #temp_doc.write_to_file(filename)
+        #else:
+            #temp_doc.write_to_file(self._xml_values_name)
             
     def get_aliases_for_variable(self, variable):
         """ 
@@ -3371,9 +3399,11 @@ class JMIModel(object):
                                                              shape=n_z.value,
                                                              flags='C'),
                                                ct.POINTER(ct.c_int),
-                                               ct.POINTER(ct.c_int)]   
+                                               ct.POINTER(ct.c_int)]
 
         self._dll.jmi_init_eval_parameters.argtypes = [ct.c_void_p]
+
+        self._dll.jmi_set_start_values.argtypes = [ct.c_void_p]
 
         self._dll.jmi_init_R0.argtypes = [ct.c_void_p,
                                           Nct.ndpointer(dtype=c_jmi_real_t,
@@ -5160,6 +5190,13 @@ class JMIModel(object):
         if self._dll.jmi_init_eval_parameters(self._jmi) is not 0:
             raise JMIException("Evaluation of parameters failed")
 
+    def set_start_values(self):
+        """ 
+        Set the start values.
+        """
+        if self._dll.jmi_set_start_values(self._jmi) is not 0:
+            raise JMIException("Setting the start values failed")
+
     def init_R0(self, res):
         """ 
         Evaluate the DAE initialization event indicators.
@@ -6219,7 +6256,7 @@ def unzip_jmu(archive, path='.'):
             - resources_dir : Directory containing resources needed by the model (optional)
     
     
-     If the model_desc and/or binaries_dir and/or resources_dir are not found, 
+     If the model_desc and/or binaries_dir are not found, 
      an exception will be raised.
     
     Parameters::
@@ -6233,17 +6270,14 @@ def unzip_jmu(archive, path='.'):
             
     Raises::
     
-        IOError if any file is missing in the FMU.
+        IOError if any file is missing in the JMU.
     """
     tmpdir = unzip_unit(archive, path)
     jmu_files = get_files_in_archive(tmpdir)
     
-    # check if all obligatory (but the binary and model values) files have been found during unzip
+    # check if all obligatory (but the binary) files have been found during unzip
     if jmu_files['model_desc'] == None:
         raise IOError('ModelDescription.xml not found in JMU archive: '+str(archive))
-    
-    if jmu_files['resources_dir'] == None:
-        raise IOError('resource directory not found in JMU archive: '+str(archive))
     
     if jmu_files['binaries_dir'] == None:
         raise IOError('binaries directory not found in JMU archive: '+str(archive))

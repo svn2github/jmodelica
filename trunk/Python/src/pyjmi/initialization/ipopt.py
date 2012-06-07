@@ -244,7 +244,7 @@ class NLPInitialization(object):
         _w_ub = 1.0e20*N.ones(model._n_real_w.value)
 
         if stat==0:
-            self._model._set_start_values(
+            self._model._set_xml_start_values(
                 _p_opt_start, _dx_start, _x_start, _u_start, _w_start)
         else:
             self._model._set_initial_values(

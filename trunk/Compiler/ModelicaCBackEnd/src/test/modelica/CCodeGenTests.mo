@@ -489,6 +489,38 @@ equation
 
 end CCodeGenDiscreteVariables1;
 
+
+model CCodeGenParameters1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenParameters1",
+         description="Make sure scaling is applied properly when setting to parameter values",
+         generate_dae=true,
+         enable_variable_scaling=true,
+         template="
+$C_DAE_initial_dependent_parameter_assignments$
+$C_set_start_values$
+",
+         generatedCode="
+    _y_1 = ((_x_0*sf(0)))/sf(2);
+
+    _x_0 = 1/sf(0);
+    _z_2 = func_CCodeGenTests_CCodeGenParameters1_f_exp(AD_WRAP_LITERAL(1))/sf(1);
+   model_init_eval_parameters(jmi);
+")})));
+
+	function f
+		input Real x;
+		output Real y;
+		external "C";
+	end f;
+	
+	parameter Real x = 1;
+	parameter Real y = x;
+	parameter Real z = f(1);
+	Real dummy = x;
+end CCodeGenParameters1;
+
 model CCodeGenUniqueNames
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
@@ -4964,11 +4996,11 @@ model StartValues1
          description="",
          template="$C_set_start_values$",
          generatedCode="
-_y_1 = 2.0;
-_z_2 = 3.0;
+_y_1 = 2;
+_z_2 = 3;
 model_init_eval_parameters(jmi);
-_x_0 = 1.0;
-_q_3 = 0.0;
+_x_0 = 1;
+_q_3 = 0;
 _der_x_4 = 0.0;		 
 ")})));
 

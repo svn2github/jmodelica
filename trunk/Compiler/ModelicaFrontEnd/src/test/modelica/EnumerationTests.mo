@@ -221,10 +221,7 @@ end EnumerationTests.EnumerationTest10;
          name="EnumerationTest11",
          description="Using the Integer() operator: wrong type of argument",
          errorMessage="
-4 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
-Semantic error at line 219, column 22:
-  Could not evaluate binding expression for parameter 'is': 'Integer(\"1\")'
+3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
 Semantic error at line 219, column 35:
   Calling function Integer(): types of positional argument 1 and input x are not compatible

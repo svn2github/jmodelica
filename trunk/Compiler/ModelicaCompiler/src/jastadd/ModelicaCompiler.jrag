@@ -143,7 +143,6 @@ public class ModelicaCompiler {
 	public static final String DEFAULT_LEVEL = ERROR;
 	
 	protected String xmlTpl = null;
-	protected String xmlValuesTpl = null;
 	protected String cTemplatefile = null;
 	
 	private OptionRegistry options = null;
@@ -163,10 +162,9 @@ public class ModelicaCompiler {
 	protected File sourceDir = null;
 	protected File resourceDir = null;
 	
-	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String xmlValuesTpl, String cTemplatefile) {
+	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String cTemplatefile) {
 		this(options);
 		this.xmlTpl = xmlTpl;
-		this.xmlValuesTpl = xmlValuesTpl;
 		this.cTemplatefile = cTemplatefile;
 	}
 	
@@ -205,28 +203,24 @@ public class ModelicaCompiler {
 	public void defaultTemplatePathsJMU() {
 		File dir = getTemplatesDir();
 		xmlTpl = (xmlTpl == null) ? new File(dir, "jmodelica_model_description.tpl").getPath(): xmlTpl;
-		xmlValuesTpl = (xmlValuesTpl == null) ? new File(dir, "jmodelica_model_values.tpl").getPath() : xmlValuesTpl;
 		cTemplatefile = (cTemplatefile == null) ? new File(dir, "jmi_modelica_template.c").getPath(): cTemplatefile;
 	}
 	
 	public void defaultTemplatePathsFMUME() {
 		File dir = getTemplatesDir();
 		xmlTpl  = (xmlTpl == null) ?  new File(dir, "fmi_model_description.tpl").getPath() : xmlTpl;
-		xmlValuesTpl = null;
 		cTemplatefile = (cTemplatefile == null) ? new File(dir, "fmi_me_modelica_template.c").getPath() : cTemplatefile;
 	}
 
 	public void defaultTemplatePathsFMUCS() {
 		File dir = getTemplatesDir();
 		xmlTpl = (xmlTpl == null) ? new File(dir, "fmi_model_description.tpl").getPath() : xmlTpl;
-		xmlValuesTpl = null;
 		cTemplatefile = (cTemplatefile == null) ? new File(dir, "fmi_cs_modelica_template.c").getPath() : cTemplatefile;
 	}
 	
 	public void defaultTemplatePathsFMUX() {
 		File dir = getTemplatesDir();
 		xmlTpl = (xmlTpl == null) ? new File(dir, "jmodelica_model_description.tpl").getPath() : xmlTpl;
-		xmlValuesTpl = null;
 		cTemplatefile = null;
 	}
 
@@ -501,25 +495,6 @@ public class ModelicaCompiler {
 	 */
 	public void setXMLTpl(String template) {
 		this.xmlTpl = template;
-	}
-	
-	/**
-	 * Returns the XML values template file path set for this compiler instance.
-	 * 
-	 * @return Reference to the XML values template file path attribute.
-	 * 
-	 */
-	public String getXMLValuesTpl() {
-		return this.xmlValuesTpl;
-	}
-
-	/**
-	 * Set the XML values template file path attribute.
-	 * 
-	 * @param template The new XML values template file path.
-	 */
-	public void setXMLValuesTpl(String template) {
-		this.xmlValuesTpl = template;
 	}
 
 	/**
@@ -1343,15 +1318,6 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * \brief Create a new XMLValueGenerator object.
-	 * 
-	 * Override for subclasses needing another subclass of XMLValueGenerator.
-	 */
-	protected XMLValueGenerator createXMLValueGenerator(FClass fc) {
-		return new XMLValueGenerator(new PrettyPrinter(), '$', fc);
-	}
-	
-	/**
 	 * \brief Create a new CGenerator object.
 	 * 
 	 * Override for subclasses needing another subclass of CGenerator.
@@ -1369,17 +1335,6 @@ public class ModelicaCompiler {
 	 */
 	protected String getXmlTpl(FClass fc) {
 		return this.xmlTpl;
-	}
-
-	/**
-	 * \brief get the XML values template. 
-	 * 
-	 * @param fc A reference to an FClass object. This is convenient in
-	 * extensions of ModelicaCompiler that need to distinguish between
-	 * different kinds of flattened classes.
-	 */
-	protected String getXmlValuesTpl(FClass fc) {
-		return this.xmlValuesTpl;
 	}
 
 	/**
@@ -1433,8 +1388,6 @@ public class ModelicaCompiler {
 		
 		generateFile(fc, getXmlTpl(fc),        createXMLGenerator(fc), 
 				outDir,      "modelDescription.xml");
-		generateFile(fc, getXmlValuesTpl(fc),  createXMLValueGenerator(fc), 
-				resourceDir, name + "_values.xml");
 		generateFile(fc, getCTemplatefile(fc), createCGenerator(fc), 
 				sourceDir,   name + ".c");
 		
@@ -1650,7 +1603,6 @@ public class ModelicaCompiler {
 					"  -dumpmemuse \n" + 
 					" and templates, if given, should be (in order): \n" + 
 					"  xml model description template \n" +
-					"  xml model values template \n" + 
 					"  c template \n" +
 					" If no target type option is given, -jmu is assumed.");
 			System.exit(1);
@@ -1676,10 +1628,9 @@ public class ModelicaCompiler {
 		}
 		
 		// set templates and options		
-		if (args.length >= arg+5) {
+		if (args.length >= arg+4) {
 			this.xmlTpl = args[arg+2];
-			this.xmlValuesTpl = args[arg+3];
-			this.cTemplatefile = args[arg+4];
+			this.cTemplatefile = args[arg+3];
 		}
 		
 		// set options

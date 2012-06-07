@@ -77,9 +77,8 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	private String optimicaCTemplatefile = null;
 	
 	public OptimicaCompiler(OptionRegistry options, String xmlTpl, 
-			String xmlValuesTpl, String cTemplatefile, 
-			String optimicaCTemplatefile) {
-		super(options, xmlTpl, xmlValuesTpl, cTemplatefile);
+			String cTemplatefile, String optimicaCTemplatefile) {
+		super(options, xmlTpl, cTemplatefile);
 		this.optimicaCTemplatefile = optimicaCTemplatefile;
 	}
 	
