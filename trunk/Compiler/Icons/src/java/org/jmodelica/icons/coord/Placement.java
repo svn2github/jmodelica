@@ -19,7 +19,7 @@ public class Placement extends Observable implements Observer {
 	 */
 	public Placement(boolean visible, Transformation transformation) {
 		setVisible(visible);
-		setIconTransformation(transformation);
+		setTransformation(transformation);
 	}
 
 	/**
@@ -44,16 +44,16 @@ public class Placement extends Observable implements Observer {
 		return transformation;
 	}
 
-	//TODO: shouldn't it be called setTransformation, since placement has nothing to do with icon...
-	public void setIconTransformation(Transformation newTransformation) {
+	public void setTransformation(Transformation newTransformation) {
 		if (transformation == newTransformation)
 			return;
 		if (transformation != null)
 			transformation.removeObserver(this);
+		Transformation oldTransformation = transformation;
 		this.transformation = newTransformation;
 		if (newTransformation != null)
 			newTransformation.addObserver(this);
-		notifyObservers(TRANSFORMATION_SWAPPED);
+		notifyObservers(TRANSFORMATION_SWAPPED, oldTransformation);
 	}
 
 	public String toString() {
