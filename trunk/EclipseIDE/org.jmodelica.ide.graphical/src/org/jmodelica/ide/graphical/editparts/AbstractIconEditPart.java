@@ -17,20 +17,20 @@ public abstract class AbstractIconEditPart extends AbstractGraphicalEditPart imp
 
 	private Transform transform;
 	
-	public AbstractIconEditPart(Icon model) {
+	public AbstractIconEditPart(Object model) {
 		setModel(model);
 	}
 
 	@Override
 	public void activate() {
 		super.activate();
-		getModel().addObserver(this);
+		getIcon().addObserver(this);
 	}
 	
 	@Override
 	public void deactivate() {
 		super.deactivate();
-		getModel().removeObserver(this);
+		getIcon().removeObserver(this);
 	}
 	
 	public Transform getTransform() {
@@ -49,15 +49,13 @@ public abstract class AbstractIconEditPart extends AbstractGraphicalEditPart imp
 	}
 	
 	protected abstract Transform calculateTransform();
-
-	public Icon getModel() {
-		return (Icon) super.getModel();
-	}
+	
+	public abstract Icon getIcon();
 
 	protected List<Object> getModelChildren() {
 		List<Object> list = new ArrayList<Object>();
-		getSuperclassGraphics(getModel(), list);
-		getSuperclassComponents(getModel(), list);
+		getSuperclassGraphics(getIcon(), list);
+		getSuperclassComponents(getIcon(), list);
 		return list;
 	}
 

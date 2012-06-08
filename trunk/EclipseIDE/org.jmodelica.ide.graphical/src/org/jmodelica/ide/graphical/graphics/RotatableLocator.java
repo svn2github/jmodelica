@@ -85,7 +85,7 @@ public abstract class RotatableLocator implements Locator {
 		if (target instanceof RotatableHandle) {
 			RotatableHandle handle = (RotatableHandle) target;
 			
-			Extent e = handle.getOwner().getComponent().getPlacement().getTransformation().getExtent();
+			Extent e = handle.getOwner().getModel().getPlacement().getTransformation().getExtent();
 			Point p = getLocation(e);
 			
 			Transform t = handle.getOwner().getComponentTransform();

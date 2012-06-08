@@ -1,6 +1,5 @@
 package org.jmodelica.ide.graphical.editparts;
 
-
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartListener;
 import org.eclipse.gef.EditPolicy;
@@ -13,6 +12,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.jmodelica.icons.Component;
+import org.jmodelica.icons.Icon;
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.coord.Extent;
@@ -29,29 +29,23 @@ import org.jmodelica.ide.graphical.graphics.IconLayer;
 import org.jmodelica.ide.graphical.util.Converter;
 import org.jmodelica.ide.graphical.util.Transform;
 
-
-
-public class ComponentEditPart extends AbstractIconEditPart implements EditPartListener, IPropertySource{
-
-	private Component component;
+public class ComponentEditPart extends AbstractIconEditPart implements EditPartListener, IPropertySource {
 
 	public ComponentEditPart(Component component) {
-		super(component.getIcon());
-		this.component = component;
+		super(component);
 		this.addEditPartListener(this);
 	}
 
 	@Override
 	public void deactivate() {
 		super.deactivate();
-		component.getPlacement().getTransformation().removeObserver(this);
+		getModel().getPlacement().getTransformation().removeObserver(this);
 	}
 
 	@Override
 	public void activate() {
 		super.activate();
-		component.getPlacement().getTransformation().addObserver(this);
-		getModel().addObserver(this);
+		getModel().getPlacement().getTransformation().addObserver(this);
 	}
 
 	@Override
@@ -65,24 +59,29 @@ public class ComponentEditPart extends AbstractIconEditPart implements EditPartL
 	}
 
 	@Override
+	public Component getModel() {
+		return (Component) super.getModel();
+	}
+
+	@Override
 	protected void createEditPolicies() {
 		installEditPolicy(EditPolicy.COMPONENT_ROLE, new RotationEditPolicy() {
 
 			@Override
 			protected Command createRotateCommand(Request request, double angle) {
-				return new RotateComponentCommand(getComponent(), angle);
+				return new RotateComponentCommand(getModel(), angle);
 			}
 
 			@Override
 			protected Command createDeleteCommand(GroupRequest deleteRequest) {
-				return new DeleteComponentCommand(getParent().getModel(), getComponent());
+				return new DeleteComponentCommand(getParent().getIcon(), getModel());
 			}
 		});
 	}
 
 	@Override
 	protected void refreshVisuals() {
-		if (getModel().getLayer() == Layer.NO_LAYER) {
+		if (getIcon().getLayer() == Layer.NO_LAYER) {
 			getFigure().setVisible(false);
 			return;
 		}
@@ -94,14 +93,10 @@ public class ComponentEditPart extends AbstractIconEditPart implements EditPartL
 				((ComponentEditPart) part).refreshVisuals();
 
 		}
-		getFigure().setDeclaredBounds(Converter.convert(getComponentTransform().transform(Transform.yInverter.transform(getComponent().getPlacement().getTransformation().getExtent()))));
+		getFigure().setDeclaredBounds(Converter.convert(getComponentTransform().transform(Transform.yInverter.transform(getModel().getPlacement().getTransformation().getExtent()))));
 		getFigure().figureMoved(null);
 		((GraphicalEditPart) getParent()).setLayoutConstraint(this, getFigure(), getFigure().getBounds());
 
-	}
-
-	public Component getComponent() {
-		return component;
 	}
 
 	@Override
@@ -127,9 +122,9 @@ public class ComponentEditPart extends AbstractIconEditPart implements EditPartL
 	@Override
 	protected Transform calculateTransform() {
 		// Based on org.jmodelica.icons.drawing.AWTIconDrawer.setTransformation()
-		Transformation compTransformation = getComponent().getPlacement().getTransformation();
+		Transformation compTransformation = getModel().getPlacement().getTransformation();
 		Extent transformationExtent = compTransformation.getExtent();
-		Extent componentExtent = getModel().getLayer().getCoordinateSystem().getExtent();
+		Extent componentExtent = getIcon().getLayer().getCoordinateSystem().getExtent();
 		Transform transform = getParentTransform().clone();
 		transform.translate(Transform.yInverter.transform(compTransformation.getOrigin()));
 		componentTransform = transform.clone();
@@ -154,18 +149,18 @@ public class ComponentEditPart extends AbstractIconEditPart implements EditPartL
 	}
 
 	public Extent declaredExtent() {
-		Extent e = getComponent().getPlacement().getTransformation().getExtent();
-		Point o = getComponent().getPlacement().getTransformation().getOrigin();
+		Extent e = getModel().getPlacement().getTransformation().getExtent();
+		Point o = getModel().getPlacement().getTransformation().getOrigin();
 		return new Extent(new Point(o.getX() + e.getP1().getX(), o.getY() + e.getP1().getY()), new Point(o.getX() + e.getP2().getX(), o.getY() + e.getP2().getY()));
 	}
 
 	@Override
 	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (o == getComponent().getPlacement().getTransformation() && (flag == Transformation.ORIGIN_UPDATED))
+		if (o == getModel().getPlacement().getTransformation() && (flag == Transformation.ORIGIN_UPDATED))
 			refreshVisuals();
-		else if (o == getComponent().getPlacement().getTransformation() && (flag == Transformation.EXTENT_UPDATED))
+		else if (o == getModel().getPlacement().getTransformation() && (flag == Transformation.EXTENT_UPDATED))
 			refreshVisuals();
-		else if (o == getComponent().getPlacement().getTransformation() && (flag == Transformation.ROTATION_CHANGED))
+		else if (o == getModel().getPlacement().getTransformation() && (flag == Transformation.ROTATION_CHANGED))
 			refreshVisuals();
 		else
 			super.update(o, flag, additionalInfo);
@@ -175,7 +170,7 @@ public class ComponentEditPart extends AbstractIconEditPart implements EditPartL
 	public void childAdded(EditPart child, int index) {
 		if (child instanceof TextEditPart) {
 			if (((TextEditPart) child).getTextString().equals("%name"))
-				((TextEditPart) child).setOverrideTextString(getComponent().getComponentName());
+				((TextEditPart) child).setOverrideTextString(getModel().getComponentName());
 		}
 	}
 
@@ -213,16 +208,13 @@ public class ComponentEditPart extends AbstractIconEditPart implements EditPartL
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new TextPropertyDescriptor("componentName", "Component Name"),
-				new PropertyDescriptor("readOnly", "Read only")
-		};
+		return new IPropertyDescriptor[] { new TextPropertyDescriptor("componentName", "Component Name"), new PropertyDescriptor("readOnly", "Read only") };
 	}
 
 	@Override
 	public Object getPropertyValue(Object id) {
 		if ("componentName".equals(id))
-			return getComponent().getComponentName();
+			return getModel().getComponentName();
 		else if ("readOnly".equals(id))
 			return "value";
 		else
@@ -243,6 +235,11 @@ public class ComponentEditPart extends AbstractIconEditPart implements EditPartL
 	@Override
 	public void setPropertyValue(Object id, Object value) {
 		System.out.println("setPropertyValue");
+	}
+
+	@Override
+	public Icon getIcon() {
+		return getModel().getIcon();
 	}
 
 }

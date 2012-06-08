@@ -30,6 +30,6 @@ public class OpenComponentAction extends SelectionAction {
 	@Override
 	public void run() {
 		ComponentEditPart cep = (ComponentEditPart) getSelectedObjects().get(0);
-		getWorkbenchPart().openSubComponent(cep.getComponent());
+		getWorkbenchPart().openSubComponent(cep.getModel());
 	}
 }

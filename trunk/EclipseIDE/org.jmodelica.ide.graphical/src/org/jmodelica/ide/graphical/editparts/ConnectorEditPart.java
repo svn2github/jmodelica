@@ -37,20 +37,20 @@ public class ConnectorEditPart extends ComponentEditPart implements NodeEditPart
 		super(connector);
 	}
 	
-	public Connector getComponent() {
-		return (Connector) super.getComponent();
+	public Connector getModel() {
+		return (Connector) super.getModel();
 	}
 	
 	@Override
 	public void activate() {
 		super.activate();
-		getComponent().addObserver(this);
+		getModel().addObserver(this);
 	}
 	
 	@Override
 	public void deactivate() {
 		super.deactivate();
-		getComponent().removeObserver(this);
+		getModel().removeObserver(this);
 	}
 	
 	protected void setFigure(IFigure figure) {
@@ -87,7 +87,7 @@ public class ConnectorEditPart extends ComponentEditPart implements NodeEditPart
 			
 			@Override
 			protected Command getConnectionCreateCommand(CreateConnectionRequest request) {
-				Connector source = (Connector)((ConnectorEditPart)getHost()).getComponent();
+				Connector source = (Connector)((ConnectorEditPart)getHost()).getModel();
 				CreateConnectionCommand cmd = new CreateConnectionCommand(source) {
 
 					@Override
@@ -103,7 +103,7 @@ public class ConnectorEditPart extends ComponentEditPart implements NodeEditPart
 			@Override
 			protected Command getConnectionCompleteCommand(CreateConnectionRequest request) {
 				CreateConnectionCommand cmd = (CreateConnectionCommand) request.getStartCommand();
-				cmd.setTarget((Connector)((ConnectorEditPart)getHost()).getComponent());
+				cmd.setTarget((Connector)((ConnectorEditPart)getHost()).getModel());
 				return cmd;
 			}
 
@@ -134,11 +134,11 @@ public class ConnectorEditPart extends ComponentEditPart implements NodeEditPart
 	}
 	
 	public List<Connection> getModelSourceConnections() {
-		return getComponent().getSourceConnections();
+		return getModel().getSourceConnections();
 	}
 	
 	public List<Connection> getModelTargetConnections() {
-		return getComponent().getTargetConnections();
+		return getModel().getTargetConnections();
 	}
 	
 	public ConnectionAnchor getSourceConnectionAnchor(ConnectionEditPart connection) {
@@ -159,22 +159,22 @@ public class ConnectorEditPart extends ComponentEditPart implements NodeEditPart
 	
 	@Override
 	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (o == getComponent() && (flag == Connector.SOURCE_ADDED || flag == Connector.SOURCE_REMOVED))
+		if (o == getModel() && (flag == Connector.SOURCE_ADDED || flag == Connector.SOURCE_REMOVED))
 			refreshSourceConnections();
-		else if (o == getComponent() && (flag == Connector.TARGET_ADDED || flag == Connector.TARGET_REMOVED))
+		else if (o == getModel() && (flag == Connector.TARGET_ADDED || flag == Connector.TARGET_REMOVED))
 			refreshTargetConnections();
 		else
 			super.update(o, flag, additionalInfo);
 	}
 	
 	public int calculateConnectorLocation() {
-		Extent e = getParent().getModel().getExtent();
+		Extent e = getParent().getIcon().getExtent();
 		int loc = PositionConstants.NONE;
 		
 		Point bl = e.getBottomLeft();
 		
-		Point p = getComponent().getPlacement().getTransformation().getOrigin();
-		Point p2 = getComponent().getPlacement().getTransformation().getExtent().getMiddle();
+		Point p = getModel().getPlacement().getTransformation().getOrigin();
+		Point p2 = getModel().getPlacement().getTransformation().getExtent().getMiddle();
 		double xProcent = (p.getX() + p2.getX() - bl.getX()) / e.getWidth();
 		if (xProcent <= 0.25)
 			loc |= PositionConstants.WEST;

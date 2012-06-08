@@ -134,11 +134,11 @@ public class DiagramEditPart extends AbstractIconEditPart {
 				if (child instanceof ComponentEditPart && constraint instanceof Rectangle) {
 					final ComponentEditPart cep = (ComponentEditPart) child;
 					if (RequestConstants.REQ_RESIZE_CHILDREN.equals(request.getType())) {
-						return new ResizeComponentCommand(cep.getComponent().getComponentName(), provider) {
+						return new ResizeComponentCommand(cep.getModel().getComponentName(), provider) {
 							@Override
 							protected Extent calculateNewExtent() {
 								Transform t = getTransform();
-								t.translate(cep.getComponent().getPlacement().getTransformation().getOrigin().getX(), -cep.getComponent().getPlacement().getTransformation().getOrigin().getY());
+								t.translate(cep.getModel().getPlacement().getTransformation().getOrigin().getX(), -cep.getModel().getPlacement().getTransformation().getOrigin().getY());
 								t = t.getInverseTransfrom();
 
 								Rectangle newBounds = request.getTransformedRectangle(cep.getFigure().getHandleBounds());
@@ -149,14 +149,14 @@ public class DiagramEditPart extends AbstractIconEditPart {
 						};
 					}
 					if (RequestConstants.REQ_MOVE_CHILDREN.equals(request.getType())) {
-						return new MoveComponentCommand(cep.getComponent().getComponentName(), provider) {
+						return new MoveComponentCommand(cep.getModel().getComponentName(), provider) {
 							@Override
 							protected Point calculateNewOrigin() {
 								Transform t = getTransform().getInverseTransfrom();
 
 								Point newActualOrigin = Transform.yInverter.transform(t.transform(Converter.convert(((Rectangle) constraint).getTopLeft())));
 								Point oldActualOrigin = Transform.yInverter.transform(t.transform(Converter.convert((cep.getFigure().getBounds()).getTopLeft())));
-								Point oldOrigin = cep.getComponent().getPlacement().getTransformation().getOrigin();
+								Point oldOrigin = cep.getModel().getPlacement().getTransformation().getOrigin();
 
 								double deltaX = newActualOrigin.getX() - oldActualOrigin.getX();
 								double deltaY = newActualOrigin.getY() - oldActualOrigin.getY();
@@ -245,6 +245,11 @@ public class DiagramEditPart extends AbstractIconEditPart {
 
 	public Diagram getModel() {
 		return (Diagram) super.getModel();
+	}
+
+	@Override
+	public Icon getIcon() {
+		return getModel();
 	}
 
 }
