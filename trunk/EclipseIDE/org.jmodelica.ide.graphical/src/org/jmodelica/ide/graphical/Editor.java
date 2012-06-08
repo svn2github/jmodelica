@@ -190,6 +190,7 @@ public class Editor extends GraphicalEditor implements ASTResourceProvider {
 			return;
 
 		SafeRunner.run(new SafeRunnable() {
+			@Override
 			public void run() throws Exception {
 				StoredDefinition definition = icd.getDefinition();
 				definition.getFile().setContents(new ByteArrayInputStream(definition.prettyPrintFormatted().getBytes()), false, true, monitor);

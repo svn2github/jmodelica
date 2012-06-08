@@ -26,6 +26,7 @@ public class MySnapToGrid extends SnapToGrid {
 	/**
 	 * Based on org.eclipse.gef.SnapToGrid.snapRectangle()
 	 */
+	@Override
 	public int snapRectangle(Request request, int snapLocations, PrecisionRectangle rect, PrecisionRectangle result) {
 
 //		int resizeDirection = NONE;

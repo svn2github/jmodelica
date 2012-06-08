@@ -1,9 +1,7 @@
 package org.jmodelica.ide.graphical.editparts;
 
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.XYAnchor;
@@ -30,8 +28,6 @@ import org.jmodelica.ide.graphical.graphics.ConnectionFigure;
 import org.jmodelica.ide.graphical.util.Converter;
 import org.jmodelica.ide.graphical.util.Transform;
 
-
-
 public class ConnectionEditPart extends LineEditPart implements org.eclipse.gef.ConnectionEditPart, PropertyChangeListener {
 
 	private ConnectorEditPart sourceEditPart;
@@ -42,18 +38,21 @@ public class ConnectionEditPart extends LineEditPart implements org.eclipse.gef.
 		super(model);
 	}
 
+	@Override
 	protected IFigure createFigure() {
 		ConnectionFigure cf = new ConnectionFigure();
 		cf.addPropertyChangeListener(ConnectionFigure.REAL_POINTS_CHANGED, this);
 		return cf;
 	}
 
+	@Override
 	protected void setFigurePoints(PointList points) {
 		updatingFigurePoints = true;
 		getFigure().setRealPoints(points);
 		updatingFigurePoints = false;
 	}
 
+	@Override
 	public void refresh() {
 		refreshAnchors();
 		super.refresh();
@@ -72,14 +71,17 @@ public class ConnectionEditPart extends LineEditPart implements org.eclipse.gef.
 			getFigure().setTargetAnchor(getTarget().getTargetConnectionAnchor(this));
 	}
 
+	@Override
 	public ConnectionFigure getFigure() {
 		return (ConnectionFigure) super.getFigure();
 	}
 
+	@Override
 	public Connection getModel() {
 		return (Connection) super.getModel();
 	}
 
+	@Override
 	public void setParent(EditPart parent) {
 		while (parent != null && !(parent instanceof DiagramEditPart)) {
 			parent = parent.getParent();
@@ -93,14 +95,17 @@ public class ConnectionEditPart extends LineEditPart implements org.eclipse.gef.
 			addNotify();
 	}
 
+	@Override
 	public ConnectorEditPart getSource() {
 		return sourceEditPart;
 	}
 
+	@Override
 	public ConnectorEditPart getTarget() {
 		return targetEditPart;
 	}
 
+	@Override
 	public void setSource(EditPart source) {
 		if (source == sourceEditPart)
 			return;
@@ -116,6 +121,7 @@ public class ConnectionEditPart extends LineEditPart implements org.eclipse.gef.
 			refresh();
 	}
 
+	@Override
 	public void setTarget(EditPart target) {
 		if (target == targetEditPart)
 			return;
@@ -131,14 +137,17 @@ public class ConnectionEditPart extends LineEditPart implements org.eclipse.gef.
 			refresh();
 	}
 
+	@Override
 	public DiagramEditPart getParent() {
 		return (DiagramEditPart) super.getParent();
 	}
 
+	@Override
 	protected Transform getTransform() {
 		return getParent().getTransform();
 	}
 
+	@Override
 	protected void createEditPolicies() {
 		installEditPolicy(EditPolicy.CONNECTION_BENDPOINTS_ROLE, new BendpointEditPolicy() {
 
@@ -191,7 +200,7 @@ public class ConnectionEditPart extends LineEditPart implements org.eclipse.gef.
 			}
 		});
 		installEditPolicy(EditPolicy.CONNECTION_ROLE, new ConnectionEditPolicy() {
-			
+
 			@Override
 			protected Command getDeleteCommand(GroupRequest request) {
 				return new DeleteConnectionCommand(getModel());
@@ -199,11 +208,13 @@ public class ConnectionEditPart extends LineEditPart implements org.eclipse.gef.
 		});
 	}
 
+	@Override
 	public void addNotify() {
 		getLayer(LayerConstants.CONNECTION_LAYER).add(getFigure());
 		super.addNotify();
 	}
 
+	@Override
 	public void removeNotify() {
 		getLayer(LayerConstants.CONNECTION_LAYER).remove(getFigure());
 		getFigure().setSourceAnchor(null);

@@ -26,6 +26,7 @@ public class EditPartFactory implements org.eclipse.gef.EditPartFactory {
 		this.provider = provider;
 	}
 
+	@Override
 	public EditPart createEditPart(EditPart context, Object model) {
 		if (model instanceof Diagram) {
 			return new DiagramEditPart((Diagram)model, provider);

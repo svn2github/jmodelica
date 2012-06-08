@@ -18,6 +18,7 @@ public class TransformableTextLabel extends Figure {
 	private Point textLocation = new Point();
 	private double rotation = 0;
 	
+	@Override
 	protected void paintFigure(Graphics graphics) {
 		if (DEBUG) {
 			System.out.println("location:" + textLocation + " bounds:" + getBounds() + " rotation:" + (rotation * 180 / Math.PI + " font:" + getFont().getFontData()[0].height + " text:\"" + getText() + "\""));

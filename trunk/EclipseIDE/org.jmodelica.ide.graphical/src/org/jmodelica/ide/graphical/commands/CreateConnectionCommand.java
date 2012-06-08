@@ -18,6 +18,7 @@ public abstract class CreateConnectionCommand extends Command {
 		setLabel("add connection");
 	}
 	
+	@Override
 	public boolean canExecute() {
 		if (source == target) {
 			return false;
@@ -37,6 +38,7 @@ public abstract class CreateConnectionCommand extends Command {
 	
 	protected abstract void initConnection(Connection c);
 	
+	@Override
 	public void execute() {
 		connection = new Connection();
 		initConnection(connection);
@@ -46,10 +48,12 @@ public abstract class CreateConnectionCommand extends Command {
 		redo();
 	}
 	
+	@Override
 	public void undo() {
 		connection.disconnect();
 	}
 	
+	@Override
 	public void redo() {
 		connection.connect();
 	}

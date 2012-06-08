@@ -13,10 +13,12 @@ public class TextTransferDropTargetListener extends AbstractTransferDropTargetLi
 		super(viewer, xfer);
 	}
 
+	@Override
 	protected Request createTargetRequest() {
 		return new NativeDropRequest();
 	}
 
+	@Override
 	protected void updateTargetRequest() {
 		((NativeDropRequest) getTargetRequest()).setData(getCurrentEvent().data);
 		((NativeDropRequest) getTargetRequest()).setPoint(getDropLocation());

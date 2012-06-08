@@ -1,8 +1,6 @@
 package org.jmodelica.ide.graphical.editparts;
 
-
 import java.util.List;
-
 
 import org.eclipse.draw2d.ChopboxAnchor;
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -28,36 +26,39 @@ import org.jmodelica.ide.graphical.commands.CreateConnectionCommand;
 import org.jmodelica.ide.graphical.graphics.TemporaryConnectionFigure;
 import org.jmodelica.ide.graphical.util.Converter;
 
-
 public class ConnectorEditPart extends ComponentEditPart implements NodeEditPart {
-	
+
 	ChopboxAnchor anchor;
 
 	public ConnectorEditPart(Connector connector) {
 		super(connector);
 	}
-	
+
+	@Override
 	public Connector getModel() {
 		return (Connector) super.getModel();
 	}
-	
+
 	@Override
 	public void activate() {
 		super.activate();
 		getModel().addObserver(this);
 	}
-	
+
 	@Override
 	public void deactivate() {
-		super.deactivate();
 		getModel().removeObserver(this);
+		super.deactivate();
 	}
-	
+
+	@Override
 	protected void setFigure(IFigure figure) {
 		super.setFigure(figure);
 		figure.setOpaque(true);
 		anchor = new ChopboxAnchor(figure);
 	}
+
+	@Override
 	protected void createEditPolicies() {
 		super.createEditPolicies();
 		installEditPolicy(EditPolicy.GRAPHICAL_NODE_ROLE, new GraphicalNodeEditPolicy() {
@@ -68,14 +69,14 @@ public class ConnectorEditPart extends ComponentEditPart implements NodeEditPart
 				tcf.setSourceDirection(((ConnectorEditPart) ((CreateConnectionRequest) req).getSourceEditPart()).calculateConnectorLocation());
 				return tcf;
 			}
-			
+
 			@Override
 			public void showSourceFeedback(Request request) {
 				super.showSourceFeedback(request);
 				if (RequestConstants.REQ_CONNECTION_END.equals(request.getType())) {
 					CreateConnectionRequest ccr = (CreateConnectionRequest) request;
 					TemporaryConnectionFigure tcf = (TemporaryConnectionFigure) connectionFeedback;
-					
+
 					if (ccr.getTargetEditPart() == null) {
 						tcf.setTargetDirection(PositionConstants.NONE);
 					} else {
@@ -84,26 +85,26 @@ public class ConnectorEditPart extends ComponentEditPart implements NodeEditPart
 					}
 				}
 			}
-			
+
 			@Override
 			protected Command getConnectionCreateCommand(CreateConnectionRequest request) {
-				Connector source = (Connector)((ConnectorEditPart)getHost()).getModel();
+				Connector source = (Connector) ((ConnectorEditPart) getHost()).getModel();
 				CreateConnectionCommand cmd = new CreateConnectionCommand(source) {
 
 					@Override
 					protected void initConnection(Connection c) {
 						c.setColor(calculateConnectionColor());
 					}
-					
+
 				};
 				request.setStartCommand(cmd);
 				return cmd;
 			}
-			
+
 			@Override
 			protected Command getConnectionCompleteCommand(CreateConnectionRequest request) {
 				CreateConnectionCommand cmd = (CreateConnectionCommand) request.getStartCommand();
-				cmd.setTarget((Connector)((ConnectorEditPart)getHost()).getModel());
+				cmd.setTarget((Connector) ((ConnectorEditPart) getHost()).getModel());
 				return cmd;
 			}
 
@@ -129,34 +130,41 @@ public class ConnectorEditPart extends ComponentEditPart implements NodeEditPart
 		});
 	}
 
+	@Override
 	public DragTracker getDragTracker(Request request) {
 		return new ConnectionDragCreationTool();
 	}
-	
+
+	@Override
 	public List<Connection> getModelSourceConnections() {
 		return getModel().getSourceConnections();
 	}
-	
+
+	@Override
 	public List<Connection> getModelTargetConnections() {
 		return getModel().getTargetConnections();
 	}
-	
+
+	@Override
 	public ConnectionAnchor getSourceConnectionAnchor(ConnectionEditPart connection) {
 		return anchor;
 	}
 
+	@Override
 	public ConnectionAnchor getTargetConnectionAnchor(ConnectionEditPart connection) {
 		return anchor;
 	}
 
+	@Override
 	public ConnectionAnchor getSourceConnectionAnchor(Request request) {
 		return anchor;
 	}
 
+	@Override
 	public ConnectionAnchor getTargetConnectionAnchor(Request request) {
 		return anchor;
 	}
-	
+
 	@Override
 	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == getModel() && (flag == Connector.SOURCE_ADDED || flag == Connector.SOURCE_REMOVED))
@@ -166,13 +174,13 @@ public class ConnectorEditPart extends ComponentEditPart implements NodeEditPart
 		else
 			super.update(o, flag, additionalInfo);
 	}
-	
+
 	public int calculateConnectorLocation() {
 		Extent e = getParent().getIcon().getExtent();
 		int loc = PositionConstants.NONE;
-		
+
 		Point bl = e.getBottomLeft();
-		
+
 		Point p = getModel().getPlacement().getTransformation().getOrigin();
 		Point p2 = getModel().getPlacement().getTransformation().getExtent().getMiddle();
 		double xProcent = (p.getX() + p2.getX() - bl.getX()) / e.getWidth();
@@ -180,7 +188,7 @@ public class ConnectorEditPart extends ComponentEditPart implements NodeEditPart
 			loc |= PositionConstants.WEST;
 		else if (xProcent >= 0.75)
 			loc |= PositionConstants.EAST;
-		
+
 		double yProcent = (p.getY() + p2.getY() - bl.getY()) / e.getHeight();
 		if (yProcent <= 0.25)
 			loc |= PositionConstants.SOUTH;
@@ -189,5 +197,5 @@ public class ConnectorEditPart extends ComponentEditPart implements NodeEditPart
 		loc = getParentTransform().getInverseTransfrom().transformDirection(loc);
 		return loc;
 	}
-	
+
 }

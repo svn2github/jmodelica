@@ -48,6 +48,7 @@ public class Transform implements Cloneable {
 	 * 
 	 * @return a identical copy.
 	 */
+	@Override
 	public Transform clone() {
 		return new Transform(this);
 	}
@@ -331,6 +332,7 @@ public class Transform implements Cloneable {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return "Transform(" + aMatrix[A11] + ", " + aMatrix[A12] + ", " + aMatrix[A21] + ", " + aMatrix[A22] + ")(" + bMatrix[B1] + ", " + bMatrix[B2] + ")";
 	}
@@ -340,6 +342,7 @@ public class Transform implements Cloneable {
 	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof Transform)) {
 			return false;

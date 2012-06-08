@@ -13,6 +13,7 @@ public class IconLayer extends Layer implements FigureListener, HandleBounds {
 	private Rectangle realBounds = null;
 	private Rectangle declaredBounds = new Rectangle();
 
+	@Override
 	public IFigure findFigureAt(int x, int y, TreeSearch search) {
 		IFigure fig = super.findFigureAt(x, y, search);
 		if (fig == null)
@@ -23,6 +24,7 @@ public class IconLayer extends Layer implements FigureListener, HandleBounds {
 			return this;
 	}
 
+	@Override
 	public Rectangle getBounds() {
 		if (realBounds == null) {
 			realBounds = calculateBounds();
@@ -60,18 +62,21 @@ public class IconLayer extends Layer implements FigureListener, HandleBounds {
 		return bounds;
 	}
 
+	@Override
 	public void add(IFigure figure, Object constraint, int index) {
 		super.add(figure, constraint, index);
 		figure.addFigureListener(this);
 		childChanged();
 	}
 
+	@Override
 	public void remove(IFigure figure) {
 		super.remove(figure);
 		figure.removeFigureListener(this);
 		childChanged();
 	}
 
+	@Override
 	public void figureMoved(IFigure source) {
 		childChanged();
 	}

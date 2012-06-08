@@ -16,6 +16,7 @@ import org.jmodelica.icons.Icon;
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.coord.Extent;
+import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.icons.coord.Point;
 import org.jmodelica.icons.coord.Transformation;
 import org.jmodelica.icons.primitives.Color;
@@ -37,15 +38,17 @@ public class ComponentEditPart extends AbstractIconEditPart implements EditPartL
 	}
 
 	@Override
-	public void deactivate() {
-		super.deactivate();
-		getModel().getPlacement().getTransformation().removeObserver(this);
-	}
-
-	@Override
 	public void activate() {
 		super.activate();
 		getModel().getPlacement().getTransformation().addObserver(this);
+		getModel().getPlacement().addObserver(this);
+	}
+
+	@Override
+	public void deactivate() {
+		getModel().getPlacement().getTransformation().removeObserver(this);
+		getModel().getPlacement().removeObserver(this);
+		super.deactivate();
 	}
 
 	@Override
@@ -61,6 +64,11 @@ public class ComponentEditPart extends AbstractIconEditPart implements EditPartL
 	@Override
 	public Component getModel() {
 		return (Component) super.getModel();
+	}
+
+	@Override
+	public Icon getIcon() {
+		return getModel().getIcon();
 	}
 
 	@Override
@@ -156,14 +164,48 @@ public class ComponentEditPart extends AbstractIconEditPart implements EditPartL
 
 	@Override
 	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (o == getModel().getPlacement().getTransformation() && (flag == Transformation.ORIGIN_UPDATED))
-			refreshVisuals();
-		else if (o == getModel().getPlacement().getTransformation() && (flag == Transformation.EXTENT_UPDATED))
-			refreshVisuals();
-		else if (o == getModel().getPlacement().getTransformation() && (flag == Transformation.ROTATION_CHANGED))
-			refreshVisuals();
-		else
-			super.update(o, flag, additionalInfo);
+		if (o == getModel().getPlacement()) {
+			if (flag == Placement.TRANSFORMATION_SWAPPED)
+				updateTransformation((Transformation) additionalInfo);
+			else if (flag == Placement.VISIBLE_UPDATED)
+				updateVisible();
+		}
+		if (o == getModel().getPlacement().getTransformation()) {
+			if (flag == Transformation.ORIGIN_UPDATED)
+				updateOrigin();
+			else if (flag == Transformation.EXTENT_UPDATED)
+				updateExtent();
+			else if (flag == Transformation.ROTATION_CHANGED)
+				updateRotation();
+		}
+//		if (o == getModel()) {
+//			if (flag == Component.COMPONENT_NAME_CHANGED)
+//				//TODO: this should probably not be supported
+//		}
+
+		super.update(o, flag, additionalInfo);
+	}
+
+	private void updateTransformation(Transformation oldTransformation) {
+		if (oldTransformation != null)
+			oldTransformation.removeObserver(this);
+		getModel().getPlacement().getTransformation().addObserver(this);
+	}
+
+	private void updateVisible() {
+		figure.setVisible(false);
+	}
+
+	private void updateOrigin() {
+		refreshVisuals();
+	}
+
+	private void updateExtent() {
+		refreshVisuals();
+	}
+
+	private void updateRotation() {
+		refreshVisuals();
 	}
 
 	@Override
@@ -235,11 +277,6 @@ public class ComponentEditPart extends AbstractIconEditPart implements EditPartL
 	@Override
 	public void setPropertyValue(Object id, Object value) {
 		System.out.println("setPropertyValue");
-	}
-
-	@Override
-	public Icon getIcon() {
-		return getModel().getIcon();
 	}
 
 }

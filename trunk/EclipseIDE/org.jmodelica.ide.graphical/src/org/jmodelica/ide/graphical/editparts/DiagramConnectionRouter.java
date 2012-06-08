@@ -18,6 +18,7 @@ import org.jmodelica.ide.graphical.graphics.TemporaryConnectionFigure;
 
 public class DiagramConnectionRouter implements ConnectionRouter {
 
+	@Override
 	public List<Bendpoint> getConstraint(Connection connection) {
 		if (connection instanceof ConnectionFigure) {
 			PointList constraint = ((ConnectionFigure) connection).getPoints();
@@ -29,10 +30,11 @@ public class DiagramConnectionRouter implements ConnectionRouter {
 		return null;
 	}
 
+	@Override
 	public void invalidate(Connection connection) {
-		// TODO Auto-generated method stub
 	}
 
+	@Override
 	public void route(Connection connection) {
 		PointList constraint;
 		if (connection instanceof ConnectionFigure) {
@@ -99,10 +101,11 @@ public class DiagramConnectionRouter implements ConnectionRouter {
 		connection.setPoints(points);
 	}
 
+	@Override
 	public void remove(Connection connection) {
-		// TODO Auto-generated method stub
 	}
 
+	@Override
 	public void setConstraint(Connection connection, Object constraint) {
 		@SuppressWarnings("unchecked")
 		List<Bendpoint> bendpoints = (List<Bendpoint>)constraint;

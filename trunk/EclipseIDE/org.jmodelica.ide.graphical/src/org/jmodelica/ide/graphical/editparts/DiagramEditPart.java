@@ -49,6 +49,7 @@ public class DiagramEditPart extends AbstractIconEditPart {
 		this.provider = provider;
 	}
 
+	@Override
 	protected IFigure createFigure() {
 		IFigure f = new FreeformLayer();
 		f.setBorder(new MarginBorder(3));
@@ -63,16 +64,17 @@ public class DiagramEditPart extends AbstractIconEditPart {
 		return f;
 	}
 
-	public void updateGrid() {
-		Transform transform = getTransform();
-		double[] realGrid = getModel().getLayer().getCoordinateSystem().getGrid();
-		Point grid = transform.transform(new Point(realGrid[0], realGrid[0]));
-		Point origin = transform.transform(new Point(0, 0));
-
-		getViewer().setProperty(SnapToGrid.PROPERTY_GRID_ORIGIN, Converter.convert(origin));
-		getViewer().setProperty(SnapToGrid.PROPERTY_GRID_SPACING, new Dimension((int) Math.abs(grid.getX() - origin.getX()), (int) Math.abs(grid.getY() - origin.getY())));
+	@Override
+	public Diagram getModel() {
+		return (Diagram) super.getModel();
 	}
 
+	@Override
+	public Icon getIcon() {
+		return getModel();
+	}
+
+	@Override
 	protected void createEditPolicies() {
 		installEditPolicy("Snap Feedback", new SnapFeedbackPolicy());
 		installEditPolicy(EditPolicy.COMPONENT_ROLE, new ComponentEditPolicy() {
@@ -130,6 +132,7 @@ public class DiagramEditPart extends AbstractIconEditPart {
 		});
 		installEditPolicy(EditPolicy.LAYOUT_ROLE, new XYLayoutEditPolicy() {
 
+			@Override
 			protected Command createChangeConstraintCommand(final ChangeBoundsRequest request, EditPart child, final Object constraint) {
 				if (child instanceof ComponentEditPart && constraint instanceof Rectangle) {
 					final ComponentEditPart cep = (ComponentEditPart) child;
@@ -169,6 +172,7 @@ public class DiagramEditPart extends AbstractIconEditPart {
 				return super.createChangeConstraintCommand(request, child, constraint);
 			}
 
+			@Override
 			protected Command getCreateCommand(CreateRequest request) {
 				return null;
 			}
@@ -217,6 +221,7 @@ public class DiagramEditPart extends AbstractIconEditPart {
 		return super.getAdapter(key);
 	}
 
+	@Override
 	protected List<Object> getModelChildren() {
 		List<Object> children = super.getModelChildren();
 //		ArrayList<Object> newChildren = new ArrayList<Object>();
@@ -236,6 +241,7 @@ public class DiagramEditPart extends AbstractIconEditPart {
 		return children;
 	}
 
+	@Override
 	protected Transform calculateTransform() {
 		Transform transform = new Transform();
 		transform.translate(300, 300);
@@ -243,13 +249,15 @@ public class DiagramEditPart extends AbstractIconEditPart {
 		return transform;
 	}
 
-	public Diagram getModel() {
-		return (Diagram) super.getModel();
-	}
-
 	@Override
-	public Icon getIcon() {
-		return getModel();
+	public void updateGrid() {
+		Transform transform = getTransform();
+		double[] realGrid = getModel().getLayer().getCoordinateSystem().getGrid();
+		Point grid = transform.transform(new Point(realGrid[0], realGrid[0]));
+		Point origin = transform.transform(new Point(0, 0));
+
+		getViewer().setProperty(SnapToGrid.PROPERTY_GRID_ORIGIN, Converter.convert(origin));
+		getViewer().setProperty(SnapToGrid.PROPERTY_GRID_SPACING, new Dimension((int) Math.abs(grid.getX() - origin.getX()), (int) Math.abs(grid.getY() - origin.getY())));
 	}
 
 }

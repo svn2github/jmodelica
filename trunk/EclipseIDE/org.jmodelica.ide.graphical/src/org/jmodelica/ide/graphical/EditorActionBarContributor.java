@@ -14,6 +14,7 @@ import org.eclipse.ui.actions.RetargetAction;
 
 public class EditorActionBarContributor extends ActionBarContributor {
 
+	@Override
 	protected void buildActions() {
 		addRetargetAction(new DeleteRetargetAction());
 		addRetargetAction(new UndoRetargetAction());
@@ -23,18 +24,21 @@ public class EditorActionBarContributor extends ActionBarContributor {
 
 	}
 
+	@Override
 	public void contributeToToolBar(IToolBarManager toolBarManager) {
 		toolBarManager.add(getAction(ActionFactory.UNDO.getId()));
 		toolBarManager.add(getAction(ActionFactory.REDO.getId()));
 		toolBarManager.add(getAction(GEFActionConstants.TOGGLE_GRID_VISIBILITY));
 	    toolBarManager.add(getAction(GEFActionConstants.TOGGLE_SNAP_TO_GEOMETRY));
 	    toolBarManager.add(new Action("Rebuild") {
+	    	@Override
 	    	public void run() {
 	    		((Editor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor()).flushInst();
 	    	}
 	    });
 	}
 
+	@Override
 	protected void declareGlobalActionKeys() {
 		// currently none
 	}
