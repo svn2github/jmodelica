@@ -721,7 +721,13 @@ aspect InstanceErrorCheck {
 					InstComponentModification icm = (InstComponentModification)im;
 					if (icm.hasInstModification() && icm.getInstModification().hasInstValueMod()) {
 						FExp val_mod = icm.getInstModification().instValueMod();
-						val_mod.checkConstantExpression("attribute", icm.getName().name());
+						if (val_mod.variability().lessOrEqual(fConstant())) {
+							val_mod.checkConstantExpression("attribute", icm.getName().name());
+						} else if (!val_mod.variability().lessOrEqual(fParameter())) {
+							val_mod.error("Variability of binding expression for attribute '%s' is not less than or equal to parameter variability: %s",icm.getName().name(),val_mod);
+						}
+						if (val_mod.isCircular())
+							error("Could not evaluate binding expression for attribute '%s' due to circularity: %s", icm.getName().name(), val_mod);
 					}
 				}
 			}

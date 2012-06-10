@@ -1051,11 +1051,10 @@ model AttributeBindingExpTest1_Err
                                                errorMessage=
 "
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 756, column 8:
-  Could not evaluate binding expression for attribute 'start': 'p1'
+Semantic error at line 1057, column 16:
+  Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
 ")})));
-
-
+	
   Real p1;
   Real x(start=p1);
 equation
@@ -1068,11 +1067,10 @@ model AttributeBindingExpTest2_Err
       JModelica.UnitTesting.ErrorTestCase(name="AttributeBindingExpTest2_Err",
         description="Test errors in binding expressions..",
                                                errorMessage=
-"
+											   "
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 775, column 8:
-  Could not evaluate binding expression for attribute 'start': 'p1 + 2'
-
+Semantic error at line 1079, column 16:
+  Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1 + 2
 ")})));
 
 
@@ -1090,10 +1088,10 @@ model AttributeBindingExpTest3_Err
                                                errorMessage=
 "
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 795, column 8:
-  Could not evaluate binding expression for attribute 'start': 'p1 + 2 + p'
+Semantic error at line 1099, column 16:
+  Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1 + 2 + p
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 795, column 21:
+Semantic error at line 1099, column 21:
   Cannot find class or component declaration for p
 ")})));
 
@@ -1111,14 +1109,14 @@ model AttributeBindingExpTest4_Err
                                                errorMessage=
 "
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 1126, column 23:
+Semantic error at line 1122, column 23:
   Circularity in binding expression of parameter: p1 = p2
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 1127, column 23:
   Circularity in binding expression of parameter: p2 = p1
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 1129, column 16:
-  Could not evaluate binding expression for attribute 'start' due to circularity: 'p1'
+Semantic error at line 1123, column 25:
+  Could not evaluate binding expression for attribute 'start' due to circularity: p1
 ")})));
 
   parameter Real p1 = p2;
@@ -1137,11 +1135,11 @@ model AttributeBindingExpTest5_Err
                                                errorMessage=
 "
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 843, column 10:
-  Could not evaluate binding expression for attribute 'start': 'p1'
+Semantic error at line 1147, column 18:
+  Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 843, column 10:
-  Could not evaluate binding expression for attribute 'start': 'p2'
+Semantic error at line 1151, column 15:
+  Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p2
 ")})));
 
   model A
