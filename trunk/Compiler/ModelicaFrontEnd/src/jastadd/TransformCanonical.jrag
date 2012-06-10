@@ -269,6 +269,57 @@ aspect TransformCanonical {
 			return otherBlocks;
 		}
 
+		public String printGraphPython() {
+			StringBuffer str = new StringBuffer();
+			str.append("##############################\n");
+			int max_depth = 0;
+			HashMap<String,ArrayList<AbstractEquationBlock>> map = new HashMap<String,ArrayList<AbstractEquationBlock>>();
+			for (AbstractEquationBlock eb : allBlocks) {
+				int d = eb.depth();
+				if (d>max_depth) {
+					max_depth = d;
+				}
+				if (map.get("" + d)==null) {
+					map.put("" + d,new ArrayList<AbstractEquationBlock>());
+				}
+				map.get("" + d).add(eb);	
+			}
+			str.append("blocks={\n");
+			int l = 0;
+			
+//			for (String key : map.keySet()) {
+			for (int i=0;i<=max_depth;i++) {
+				String key = "" + i;
+				int k=0;
+				str.append(key + ":[");
+				for (AbstractEquationBlock eb : map.get(key)) {
+					str.append("{'index':" + allBlocks.indexOf(eb) + ",'depth':" + l + ",'pred':" + "[" );
+					int j = 0;
+					for (AbstractEquationBlock peb : eb.getPredecessors()) {
+						str.append(allBlocks.indexOf(peb));	
+						if (j<eb.getPredecessors().size()-1) {
+							str.append(",");
+						}
+						j++;
+					}
+					str.append("]}");
+					if (k<map.get(key).size()-1) {
+						str.append(",\n");
+					}
+					k++;
+				}	
+				str.append("]");
+				if (l<max_depth) {
+					str.append(",\n");
+				}
+				l++;		
+			}	
+
+			str.append("}\n");
+			str.append("##############################");
+			return str.toString();
+		}
+
 		public String toString() {
 			
 			HashSet<FVariable> solvedVars = new HashSet<FVariable>();
@@ -343,6 +394,9 @@ aspect TransformCanonical {
 				str.append(eb.toString());
 				str.append("******\n");
 			}
+
+			str.append(">>\n\n\n");
+			str.append(printGraphPython());
 
 			return str.toString();
 		}
@@ -469,6 +523,17 @@ aspect TransformCanonical {
 		
 		public boolean isPredecessorsSet() {
 			return predecessorsSet;
+		}
+	
+		public int depth() {
+			int max_predecessor_depth = -1;
+			for (AbstractEquationBlock eb : getAllPredecessors()) {
+				int d = eb.depth();
+				if (d>max_predecessor_depth) {
+					max_predecessor_depth = d;
+				}
+			}
+			return max_predecessor_depth + 1;
 		}
 	
 		public boolean isVisited() {
