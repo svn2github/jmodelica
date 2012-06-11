@@ -42,7 +42,7 @@ aspect AliasVariables {
 	syn lazy AliasVariable FVariable.aliasVariable() {
 		AliasManager aliasManager = myFClass().getAliasManager();
 		LinkedHashSet<AliasVariable> aliasSet = aliasManager.getAliasSet(this);
-		if (aliasSet == null) {
+		if (aliasSet == null || inRecord()) {
 			return null;
 		}
 		AliasVariable av = aliasManager.getIterationVariable(aliasSet);

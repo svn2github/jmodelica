@@ -395,8 +395,8 @@ aspect TransformCanonical {
 				str.append("******\n");
 			}
 
-			str.append(">>\n\n\n");
-			str.append(printGraphPython());
+//			str.append(">>\n\n\n");
+//			str.append(printGraphPython());
 
 			return str.toString();
 		}
@@ -3043,6 +3043,9 @@ aspect TransformCanonical {
 		is$Final = false;
 	}
 	
+	public void FFunctionDecl.enableAliasRewrite() {
+	}
+	
 	boolean FIdUseExp.rewriteAlias = false;
 	
 	/**
@@ -5106,13 +5109,13 @@ aspect FunctionInlining {
 	 * We want to be able to scalarize all expressions (except size exps) fully during inlining.
 	 */
 	refine Scalarization eq FFunctionCallLeft.getFExp().canAcceptArray() = 
-		inFunction() && !duringFunctionInlining();
+		Scalarization.FFunctionCallLeft.getFExp().canAcceptArray() && !duringFunctionInlining();
 	refine Scalarization eq FFunctionCall.getArg().canAcceptArray()      = 
-		inFunction() && !duringFunctionInlining();
+		Scalarization.FFunctionCallLeft.getArg().canAcceptArray() && !duringFunctionInlining();
 	refine Scalarization eq FFunctionCall.getArg().wantsRecordCon()      = 
-		!inFunction() || duringFunctionInlining();
+		Scalarization.FFunctionCall.getArg().wantsRecordCon() || duringFunctionInlining();
 	eq FFunctionCallLeft.getFExp().wantsRecordCon()                      = 
-		inFunction() && duringFunctionInlining();
+		!inFunction() || duringFunctionInlining();
 
 	inh boolean FFunctionCallLeft.duringFunctionInlining();
 	inh boolean FExp.duringFunctionInlining();

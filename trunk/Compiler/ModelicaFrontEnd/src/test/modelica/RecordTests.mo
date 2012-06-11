@@ -1573,6 +1573,74 @@ end RecordTests.RecordScalarize18;
  B x(b1(a(start=3)), b2.a(start=4)) = B(A(1),A(2));
 end RecordScalarize18;
 
+
+model RecordScalarize19
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordScalarize19",
+         description="Scalarization of attributes of record members, from modification",
+         flatModel="
+fclass RecordTests.RecordScalarize19
+ Real a1.x[1](stateSelect = StateSelect.default,start = 1);
+ Real a1.x[2](stateSelect = StateSelect.default,start = 2);
+initial equation 
+ a1.x[1] = 0.0;
+ a1.x[2] = 0.0;
+equation
+ a1.der(x[1]) =  - ( a1.x[1] );
+ a1.der(x[2]) =  - ( a1.x[2] );
+
+ record RecordTests.RecordScalarize19.A
+  Real x[2];
+ end RecordTests.RecordScalarize19.A;
+
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+end RecordTests.RecordScalarize19;
+")})));
+
+    record A
+        Real x[2];
+    end A;
+	
+    A a1(x(stateSelect={StateSelect.default,StateSelect.default},start={1,2}));
+equation
+    der(a1.x) = -a1.x;
+end RecordScalarize19;
+
+
+model RecordScalarize20
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordScalarize20",
+         description="Scalarization of attributes of record members, from record declaration",
+         flatModel="
+fclass RecordTests.RecordScalarize20
+ Real a1.x[1](stateSelect = StateSelect.default,start = 1);
+ Real a1.x[2](stateSelect = StateSelect.default,start = 2);
+initial equation 
+ a1.x[1] = 1;
+ a1.x[2] = 2;
+equation
+ a1.der(x[1]) =  - ( a1.x[1] );
+ a1.der(x[2]) =  - ( a1.x[2] );
+
+ record RecordTests.RecordScalarize20.A
+  Real x[2](stateSelect = {StateSelect.default,StateSelect.default},start = {1,2});
+ end RecordTests.RecordScalarize20.A;
+
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+end RecordTests.RecordScalarize20;
+")})));
+
+    record A
+        Real x[2](stateSelect={StateSelect.default,StateSelect.default},start={1,2});
+    end A;
+
+    A a1;
+equation
+    der(a1.x) = -a1.x;
+end RecordScalarize20;
+
 // TODO: Add more complicated combinations of arrays, records and modifiers
 
 
@@ -2283,6 +2351,108 @@ end RecordTests.RecordOutput4;
  
  B x = f();
 end RecordOutput4;
+
+
+model RecordOutput5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordOutput5",
+         description="Test scalarization of function call equation left of record type",
+         flatModel="
+fclass RecordTests.RecordOutput5
+ Real ry.x;
+ Real ry.y;
+ Real z;
+equation
+ (RecordTests.RecordOutput5.R(ry.x, ry.y), z) = RecordTests.RecordOutput5.f(3);
+
+ function RecordTests.RecordOutput5.f
+  input Real u;
+  output RecordTests.RecordOutput5.R ry;
+  output Real y;
+ algorithm
+  ry.x := 1;
+  ry.y := 2;
+  y := u;
+  return;
+ end RecordTests.RecordOutput5.f;
+
+ record RecordTests.RecordOutput5.R
+  Real x;
+  Real y;
+ end RecordTests.RecordOutput5.R;
+end RecordTests.RecordOutput5;
+")})));
+
+    record R
+        Real x;
+        Real y;
+    end R;
+
+    function f
+        input Real u;
+        output R ry;
+        output Real y;
+    algorithm
+        ry := R(1,2);
+        y := u;
+    end f;
+
+    R ry;
+    Real z;
+equation
+    (ry,z) = f(3);
+end RecordOutput5;
+
+
+model RecordOutput6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordOutput6",
+         description="Test that access to record member with same name as alias variable isn't changed in alias elimination",
+         flatModel="
+fclass RecordTests.RecordOutput6
+ Real ry.x;
+ Real ry.y;
+ Real y;
+equation
+ (RecordTests.RecordOutput6.R(ry.x, ry.y)) = RecordTests.RecordOutput6.f(RecordTests.RecordOutput6.R(5, 6));
+ y = 3;
+
+ function RecordTests.RecordOutput6.f
+  input RecordTests.RecordOutput6.R rx;
+  output RecordTests.RecordOutput6.R ry;
+ algorithm
+  ry.x := rx.x;
+  ry.y := rx.y;
+  return;
+ end RecordTests.RecordOutput6.f;
+
+ record RecordTests.RecordOutput6.R
+  Real x;
+  Real y;
+ end RecordTests.RecordOutput6.R;
+end RecordTests.RecordOutput6;
+")})));
+
+    record R
+        Real x;
+        Real y;
+    end R;
+
+    function f
+        input R rx;
+        output R ry;
+    algorithm
+        ry := rx;
+    end f;
+
+    R ry = f(R(5,6));
+    Real u;
+    Real y = 3;
+equation
+    y = u;
+end RecordOutput6;
 
 
 

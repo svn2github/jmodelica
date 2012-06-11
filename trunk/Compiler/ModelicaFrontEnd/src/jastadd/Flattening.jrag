@@ -755,7 +755,19 @@ aspect Flattening {
 		(node == this) ? fe : splitBindingFExp(fe, node);
 	
 	/**
-	 * \brief Return the expression corresponding to the given index in this array expression. 
+	 * \Return the expression corresponding to the given index in this array expression. 
+	 * 
+	 * Will not create new nodes unless necessary.
+	 */
+	syn FExp FExp.splitArrayExp(Index index) {
+		FExp res = this;
+		for (int i : index.index())
+			res = res.splitArrayExp(i);
+		return res;
+	}
+	
+	/**
+	 * \Return the expression corresponding to the given index in this array expression. 
 	 * 
 	 * Will not create new nodes unless necessary.
 	 */

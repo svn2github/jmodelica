@@ -4612,10 +4612,10 @@ parameter Real A[1,1] = 1 /* 1 */;
 parameter Real A[1,2] = 2 /* 2 */;
 parameter Real A[2,1] = 3 /* 3 */;
 parameter Real A[2,2] = 4 /* 4 */;
-Real x1.a[1](stateSelect = {StateSelect.prefer,StateSelect.default});
-Real x1.a[2](stateSelect = {StateSelect.prefer,StateSelect.default});
-Real x2.a[1](stateSelect = {StateSelect.prefer,StateSelect.default});
-Real x2.a[2](stateSelect = {StateSelect.prefer,StateSelect.default});
+Real x1.a[1](stateSelect = StateSelect.prefer);
+Real x1.a[2](stateSelect = StateSelect.default);
+Real x2.a[1](stateSelect = StateSelect.prefer);
+Real x2.a[2](stateSelect = StateSelect.default);
 Real der_x1_a_2;
 Real der_x2_a_2;
 initial equation 

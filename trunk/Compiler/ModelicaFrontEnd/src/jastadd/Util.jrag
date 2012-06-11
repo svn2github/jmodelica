@@ -2299,6 +2299,8 @@ aspect GeneralHelpers {
 	abstract public FStatement FStatement.fullCopy();
 	abstract public FEquationType FEquationType.fullCopy();
 	abstract public FType FType.fullCopy();
+	abstract public FVisibilityType FVisibilityType.fullCopy();
+	abstract public FTypePrefixInputOutput FTypePrefixInputOutput.fullCopy();
 	abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
 	
 	abstract public FExp FExp.copy();

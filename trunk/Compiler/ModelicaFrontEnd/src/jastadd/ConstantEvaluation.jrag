@@ -2021,9 +2021,12 @@ aspect ConstantEvaluation {
    */
   public void InstAccess.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right) {
 	  InstAccess firstPart = getFirstInstAccess();
-	  InstAssignable var = (InstAssignable) firstPart.myInstComponentDecl();
-	  CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(), right);
-	  var.setEvaluationValue(val, values);
+	  InstComponentDecl comp = firstPart.myInstComponentDecl();
+	  if (comp instanceof InstAssignable) {
+		  InstAssignable var = (InstAssignable) firstPart.myInstComponentDecl();
+		  CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(), right);
+		  var.setEvaluationValue(val, values);
+	  }
   }
   
   /**

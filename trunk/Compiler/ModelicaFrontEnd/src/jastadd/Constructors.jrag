@@ -779,7 +779,10 @@ aspect InheritedFactoryMethods {
 	public FStringVariable  FStringVariable.createEmptyNode()  { return new FStringVariable(); }
 	public FEnumVariable    FEnumVariable.createEmptyNode()    { return new FEnumVariable(); }
 	public FRecordVariable  FRecordVariable.createEmptyNode()  { return new FRecordVariable(); }
-	
+
+	public FAttribute         FAttribute.createEmptyNode()         { return new FAttribute(); }
+	public FInternalAttribute FInternalAttribute.createEmptyNode() { return new FInternalAttribute(); }
+
 	/**
 	 * \brief Create new node of same class as this, with the specified 
 	 *        children.

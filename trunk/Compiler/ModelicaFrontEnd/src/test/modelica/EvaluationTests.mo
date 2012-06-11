@@ -784,6 +784,34 @@ model FunctionEval22
     parameter Real x = f1(1,2);
 end FunctionEval22;
 
+model FunctionEval23
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="FunctionEval23",
+         description="",
+         errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EvaluationTests.mo':
+Semantic error at line 792, column 9:
+  Cannot find class or component declaration for z
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EvaluationTests.mo':
+Semantic error at line 793, column 18:
+  Cannot find class or component declaration for z
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EvaluationTests.mo':
+Semantic error at line 796, column 23:
+  Could not evaluate binding expression for constant 'p': 'f(3)'
+")})));
+
+    function f
+        input Real x;
+        output Real y;
+    algorithm
+        z := 5;
+        y := x + z;
+    end f;
+	
+    constant Real p = f(3);
+end FunctionEval23;
 
 
 end EvaluationTests;

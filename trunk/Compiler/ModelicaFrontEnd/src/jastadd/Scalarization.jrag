@@ -243,7 +243,7 @@ aspect Scalarization {
 	 */
 	public void FVariable.scalarRecordCellFVariables(
 			List<FVariable> vars, FQName name, FVariable last, FExp bexp) {
-		FVariable fv = (FVariable) fullCopy();
+		FVariable fv = copyForName(name);
 		Map<String,FExp> im = Collections.emptyMap();
 		if (bexp != null)
 			fv.setBindingExp(bexp.scalarizeExp(im));
@@ -252,8 +252,6 @@ aspect Scalarization {
 		else
 			fv.setBindingExpOpt(new Opt());
 		fv.inheritFrom(last);
-		fv.setFQName(name.fullCopy());
-		fv.getFQName().scalarized = true;
 		vars.add(fv);
 	}
 	
@@ -302,23 +300,84 @@ aspect Scalarization {
 			setFTypePrefixInputOutput(other.getFTypePrefixInputOutput());
 
 		// Attributes
-		String myName = getFQName().getFQNamePart(0).getName();
+		FQNamePart myPart = getFQName().lastFQNamePart();
+		String myName = myPart.getName();
+		Index myCell = null;
+		if (myPart.hasFArraySubscripts()) 
+			myCell = myPart.getFArraySubscripts().asIndex();
 		for (FAttribute a : other.getFAttributes()) {
 			// TODO: support attributes on single cell in array (#599)
 			// TODO: don't these need scalarizing as well?
-			String attrName = a.getName().getFQName().getFQNamePart(0).getName();
+			FQNamePart attrPart = a.getName().getFQName().getFQNamePart(0);
+			String attrName = attrPart.getName();
+			FAttribute na = a.copyForCell(myCell);
 			if (myName.equals(attrName)) {
 				if (a.getName().getFQName().getNumFQNamePart() > 1) {
-					FAttribute na = a.fullCopy();
 					na.getName().setFQName(a.getName().getFQName().copySuffix());
 					addFAttribute(na);
 				} else {
-					for (FAttribute ia : a.getFAttributes()) 
+					for (FAttribute ia : na.getFAttributes()) 
 						if (!ia.isInternal())
 							addFAttribute(ia);
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Create a copy of the variable with a specific name.
+	 * 
+	 * The new variable is marked as scalaraized, and if it refers to a specific cell in an array 
+	 * then attributes are updated accordingly.
+	 */
+	public FVariable FVariable.copyForName(FQName name) {
+		FVariable fv = createEmptyNode();
+		fv.setFQName(name.fullCopy());
+		fv.getFQName().scalarized = true;
+		fv.setFVisibilityType(getFVisibilityType().fullCopy());
+		fv.setFTypePrefixVariability(getFTypePrefixVariability().fullCopy());
+		if (hasFTypePrefixInputOutput())
+			fv.setFTypePrefixInputOutput(getFTypePrefixInputOutput().fullCopy());
+		if (hasBindingExp())
+			fv.setBindingExp(getBindingExp().fullCopy());
+		if (hasFStringComment())
+			fv.setFStringComment(getFStringComment().fullCopy());
+		
+		Index myCell = null;
+		if (name.lastFQNamePart().hasFArraySubscripts()) 
+			myCell = name.lastFQNamePart().getFArraySubscripts().asIndex();
+		for (FAttribute a : getFAttributes())
+			if (!a.isInternal())
+				fv.addFAttribute(a.copyForCell(myCell));
+		return fv;
+	}
+		
+	/**
+	 * Create a copy of the attibute with dimensions removed from all array expressions according 
+	 * to an index.
+	 */
+	public FAttribute FAttribute.copyForCell(Index i) {
+		if (i == null)
+			return fullCopy();
+		FAttribute res = createEmptyNode();
+		res.setType(getType().fullCopy());
+		res.setName(getName().fullCopy());
+		if (hasValue()) {
+			FExp val = getValue();
+			if (val.ndims() < i.ndims() || isInternal())
+				val = val.fullCopy();
+			else
+				val = val.splitArrayExp(i).unboundCopy();
+			res.setValue(val);
+		}
+		res.setAttributeSet(getAttributeSet());
+		if (hasFEach())
+			res.setFEach(getFEach().fullCopy());
+		if (hasFFinal())
+			res.setFFinal(getFFinal().fullCopy());
+		for (FAttribute a : getFAttributes())
+			res.addFAttribute(a.copyForCell(i));
+		return res;
 	}
 	
 	/**
