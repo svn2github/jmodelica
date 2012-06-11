@@ -1,7 +1,5 @@
 package org.jmodelica.ide.graphical.editparts;
 
-import org.eclipse.gef.EditPart;
-import org.eclipse.gef.EditPartListener;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.Request;
@@ -25,16 +23,14 @@ import org.jmodelica.ide.graphical.commands.DeleteComponentCommand;
 import org.jmodelica.ide.graphical.commands.RotateComponentCommand;
 import org.jmodelica.ide.graphical.editparts.primitives.AbstractPolygonEditPart;
 import org.jmodelica.ide.graphical.editparts.primitives.GraphicEditPart;
-import org.jmodelica.ide.graphical.editparts.primitives.TextEditPart;
 import org.jmodelica.ide.graphical.graphics.IconLayer;
 import org.jmodelica.ide.graphical.util.Converter;
 import org.jmodelica.ide.graphical.util.Transform;
 
-public class ComponentEditPart extends AbstractIconEditPart implements EditPartListener, IPropertySource {
+public class ComponentEditPart extends AbstractIconEditPart implements IPropertySource {
 
 	public ComponentEditPart(Component component) {
 		super(component);
-		this.addEditPartListener(this);
 	}
 
 	@Override
@@ -207,26 +203,6 @@ public class ComponentEditPart extends AbstractIconEditPart implements EditPartL
 	private void updateRotation() {
 		refreshVisuals();
 	}
-
-	@Override
-	public void childAdded(EditPart child, int index) {
-		if (child instanceof TextEditPart) {
-			if (((TextEditPart) child).getTextString().equals("%name"))
-				((TextEditPart) child).setOverrideTextString(getModel().getComponentName());
-		}
-	}
-
-	@Override
-	public void partActivated(EditPart editpart) {}
-
-	@Override
-	public void partDeactivated(EditPart editpart) {}
-
-	@Override
-	public void removingChild(EditPart child, int index) {}
-
-	@Override
-	public void selectedStateChanged(EditPart editpart) {}
 
 	protected Color calculateConnectionColor() {
 		for (Object o : getChildren()) {

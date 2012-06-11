@@ -1,5 +1,7 @@
 package org.jmodelica.ide.graphical.editparts.primitives;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.TextUtilities;
@@ -22,7 +24,9 @@ public class TextEditPart extends GraphicEditPart {
 	private static int MIN_TEXT_SIZE = 7;
 	private static double TEXT_FLIP_ANGLE_POS = Math.PI / 2 - 0.001;
 	private static double TEXT_FLIP_ANGLE_NEG = TEXT_FLIP_ANGLE_POS - Math.PI;
-	private String overrideTextString = null;
+	private static Pattern idPattern = Pattern.compile("%(%|(\\p{Alpha}\\p{Alnum}*)|('([^'\\\\]|\\\\.)*'))", Pattern.CASE_INSENSITIVE);
+
+	private String cachedString = null;
 
 	public TextEditPart(Text model) {
 		super(model);
@@ -32,19 +36,19 @@ public class TextEditPart extends GraphicEditPart {
 	public Text getModel() {
 		return (Text) super.getModel();
 	}
-	
+
 	@Override
 	protected IFigure createFigure() {
 		return new TransformableTextLabel();
 	}
-	
+
 	@Override
 	public void addNotify() {
 		updateFillColor();
 		refreshTextLabel();
 		super.addNotify();
 	}
-	
+
 	@Override
 	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == getModel()) {
@@ -73,8 +77,6 @@ public class TextEditPart extends GraphicEditPart {
 		}
 		super.update(o, flag, additionalInfo);
 	}
-	
-	
 
 	private void updateFontName() {
 		refreshTextLabel();
@@ -119,7 +121,7 @@ public class TextEditPart extends GraphicEditPart {
 	private void updateLineThickness() {
 		//TODO: Implement line thickness
 	}
-	
+
 	private void refreshTextLabel() {
 		int fontStyle = SWT.NORMAL;
 		for (Types.TextStyle style : getModel().getTextStyle()) {
@@ -207,18 +209,34 @@ public class TextEditPart extends GraphicEditPart {
 		if (getModel().isVisible())
 			getFigure().setVisible(true);
 	}
-	
 
 	public String getTextString() {
-		if (overrideTextString != null)
-			return overrideTextString;
-		else
-			return getModel().getTextString();
-	}
+		if (cachedString == null) {
+			String str = getModel().getTextString();
+			Matcher matcher = idPattern.matcher(str);
+			StringBuffer sb = new StringBuffer(str.length());
+			while (matcher.find()) {
+				String match = matcher.group(1);
+				String replace;
+				if (match.equals("%")) {
+					replace = "%";
+				} else if (match.equals("name")) {
+					replace = null;
+				} else if (match.equals("class")) {
+					replace = null;
+				} else {
+					replace = null;
+				}
+				if (replace == null)
+					matcher.appendReplacement(sb, matcher.group());
+				else
+					matcher.appendReplacement(sb, replace);
+			}
+			matcher.appendTail(sb);
+			cachedString = sb.toString();
+		}
 
-	public void setOverrideTextString(String overrideTextString) {
-		this.overrideTextString = overrideTextString;
-		refreshTextLabel();
+		return cachedString;
 	}
 
 	@Override
