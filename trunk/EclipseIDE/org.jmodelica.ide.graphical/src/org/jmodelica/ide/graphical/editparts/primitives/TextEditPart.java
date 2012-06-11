@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.TextUtilities;
 import org.eclipse.draw2d.geometry.Dimension;
+import org.eclipse.gef.EditPart;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.jmodelica.icons.Observable;
@@ -16,6 +17,7 @@ import org.jmodelica.icons.primitives.FilledShape;
 import org.jmodelica.icons.primitives.Text;
 import org.jmodelica.icons.primitives.Types;
 import org.jmodelica.ide.graphical.graphics.TransformableTextLabel;
+import org.jmodelica.ide.graphical.util.ASTNodeResourceProvider;
 import org.jmodelica.ide.graphical.util.Converter;
 import org.jmodelica.ide.graphical.util.Transform;
 
@@ -211,31 +213,31 @@ public class TextEditPart extends GraphicEditPart {
 	}
 
 	public String getTextString() {
-		if (cachedString == null) {
-			String str = getModel().getTextString();
-			Matcher matcher = idPattern.matcher(str);
-			StringBuffer sb = new StringBuffer(str.length());
-			while (matcher.find()) {
-				String match = matcher.group(1);
-				String replace;
-				if (match.equals("%")) {
-					replace = "%";
-				} else if (match.equals("name")) {
-					replace = null;
-				} else if (match.equals("class")) {
-					replace = null;
-				} else {
-					replace = null;
-				}
-				if (replace == null)
-					matcher.appendReplacement(sb, matcher.group());
-				else
-					matcher.appendReplacement(sb, replace);
+		if (cachedString != null)
+			return cachedString;
+		
+		String str = getModel().getTextString();
+		Matcher matcher = idPattern.matcher(str);
+		StringBuffer sb = new StringBuffer(str.length());
+		while (matcher.find()) {
+			String match = matcher.group(1);
+			String replace;
+			if (match.equals("%")) {
+				replace = "%";
+			} else if (match.equals("name")) {
+				replace = getASTNodeResourceProvider().getComponentName();
+			} else if (match.equals("class")) {
+				replace = getASTNodeResourceProvider().getClassName();
+			} else {
+				replace = getASTNodeResourceProvider().getParameterValue(match);
 			}
-			matcher.appendTail(sb);
-			cachedString = sb.toString();
+			if (replace == null)
+				matcher.appendReplacement(sb, matcher.group());
+			else
+				matcher.appendReplacement(sb, replace);
 		}
-
+		matcher.appendTail(sb);
+		cachedString = sb.toString();
 		return cachedString;
 	}
 
@@ -247,6 +249,17 @@ public class TextEditPart extends GraphicEditPart {
 	@Override
 	protected void transformInvalid() {
 		refreshTextLabel();
+	}
+	
+	private ASTNodeResourceProvider getASTNodeResourceProvider() {
+		EditPart parent = getParent();
+		while (parent != null) {
+			if (parent instanceof ASTNodeResourceProvider) {
+				return (ASTNodeResourceProvider) parent;
+			}
+			parent = parent.getParent();
+		}
+		return null;
 	}
 
 }

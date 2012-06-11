@@ -24,14 +24,15 @@ import org.jmodelica.icons.coord.Extent;
 import org.jmodelica.icons.coord.Point;
 import org.jmodelica.ide.graphical.commands.CreateConnectionCommand;
 import org.jmodelica.ide.graphical.graphics.TemporaryConnectionFigure;
+import org.jmodelica.ide.graphical.util.ASTResourceProvider;
 import org.jmodelica.ide.graphical.util.Converter;
 
 public class ConnectorEditPart extends ComponentEditPart implements NodeEditPart {
 
 	ChopboxAnchor anchor;
 
-	public ConnectorEditPart(Connector connector) {
-		super(connector);
+	public ConnectorEditPart(Connector connector, ASTResourceProvider provider) {
+		super(connector, provider);
 	}
 
 	@Override

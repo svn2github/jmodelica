@@ -36,11 +36,11 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.jastadd.plugin.Activator;
 import org.jmodelica.icons.Component;
-import org.jmodelica.icons.Diagram;
 import org.jmodelica.ide.graphical.actions.OpenComponentAction;
 import org.jmodelica.ide.graphical.actions.RotateAction;
 import org.jmodelica.ide.graphical.editparts.EditPartFactory;
 import org.jmodelica.ide.graphical.util.ASTResourceProvider;
+import org.jmodelica.ide.graphical.util.ComponentASTResourceProvider;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
@@ -49,7 +49,7 @@ import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
-public class Editor extends GraphicalEditor implements ASTResourceProvider {
+public class Editor extends GraphicalEditor {
 
 	private GraphicalEditorInput input;
 	private InstClassDecl icd;
@@ -140,7 +140,7 @@ public class Editor extends GraphicalEditor implements ASTResourceProvider {
 	protected void configureGraphicalViewer() {
 		super.configureGraphicalViewer();
 		GraphicalViewer viewer = getGraphicalViewer();
-		viewer.setEditPartFactory(new EditPartFactory(this));
+		viewer.setEditPartFactory(new EditPartFactory(new EditorASTResourceProvider(this)));
 		viewer.setRootEditPart(new ScalableFreeformRootEditPart());
 		viewer.setKeyHandler(new GraphicalViewerKeyHandler(viewer));
 		viewer.addDropTargetListener(new TextTransferDropTargetListener(viewer, TextTransfer.getInstance()));
@@ -161,7 +161,7 @@ public class Editor extends GraphicalEditor implements ASTResourceProvider {
 		setContent();
 		getGraphicalViewer().getRootEditPart().refresh();
 	}
-	
+
 	@Override
 	public void commandStackChanged(EventObject event) {
 		firePropertyChange(IEditorPart.PROP_DIRTY);
@@ -177,11 +177,26 @@ public class Editor extends GraphicalEditor implements ASTResourceProvider {
 			getGraphicalViewer().setContents(icd.icon());
 		} else {
 			refreshBreadcrumbsBar();
+			ASTResourceProvider provider = new EditorASTResourceProvider(this);
+			for (InstComponentDecl icd : openComponentStack)
+				provider = new ComponentASTResourceProvider(provider, icd.name());
+
+			getEditPartFactory().setASTResourceProvider(provider);
+
 			if (openComponentStack.isEmpty())
 				getGraphicalViewer().setContents(icd.diagram());
 			else
 				getGraphicalViewer().setContents(openComponentStack.peek().myInstClass().diagram());
 		}
+	}
+
+	/**
+	 * A convenient method for retrieving the EditPartFactory.
+	 * 
+	 * @return the EditPartFactory
+	 */
+	private EditPartFactory getEditPartFactory() {
+		return (EditPartFactory) getGraphicalViewer().getEditPartFactory();
 	}
 
 	@Override
@@ -327,24 +342,18 @@ public class Editor extends GraphicalEditor implements ASTResourceProvider {
 				}
 			}
 		}
-//		System.out.println("rebuil open component stack, t+" + (System.currentTimeMillis() - start));
+//		System.out.println("rebuild open component stack, t+" + (System.currentTimeMillis() - start));
 		setContent();
 //		System.out.println("set content, t+" + (System.currentTimeMillis() - start));
 	}
 
-	@Override
-	public Component getComponentByName(String componentName) {
-		for (InstComponentDecl icd : this.icd.getInstComponentDecls()) {
-			if (icd.name().equals(componentName))
-				return icd.getComponent();
-		}
-		
-		System.err.println("MoveComponentCommand.execute(): Unable to find component \"" + componentName + "\"");
-		return null;
-	}
-
-	@Override
-	public Diagram getDiagram() {
-		return icd.diagram();
+	/**
+	 * Returns the current {@link InstClassDecl}. References should never be
+	 * saved or cached as it may change at any time.
+	 * 
+	 * @return current {@link InstClassDecl}
+	 */
+	public InstClassDecl getInstClassDecl() {
+		return icd;
 	}
 }

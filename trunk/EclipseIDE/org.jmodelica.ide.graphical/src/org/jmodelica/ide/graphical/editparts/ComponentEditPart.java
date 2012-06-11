@@ -24,13 +24,20 @@ import org.jmodelica.ide.graphical.commands.RotateComponentCommand;
 import org.jmodelica.ide.graphical.editparts.primitives.AbstractPolygonEditPart;
 import org.jmodelica.ide.graphical.editparts.primitives.GraphicEditPart;
 import org.jmodelica.ide.graphical.graphics.IconLayer;
+import org.jmodelica.ide.graphical.util.ASTNodeResourceProvider;
+import org.jmodelica.ide.graphical.util.ASTResourceProvider;
 import org.jmodelica.ide.graphical.util.Converter;
 import org.jmodelica.ide.graphical.util.Transform;
+import org.jmodelica.modelica.compiler.InstComponentDecl;
+import org.jmodelica.modelica.compiler.InstPrimitive;
 
-public class ComponentEditPart extends AbstractIconEditPart implements IPropertySource {
+public class ComponentEditPart extends AbstractIconEditPart implements IPropertySource, ASTNodeResourceProvider {
 
-	public ComponentEditPart(Component component) {
+	private ASTResourceProvider provider;
+	
+	public ComponentEditPart(Component component, ASTResourceProvider provider) {
 		super(component);
+		this.provider = provider;
 	}
 
 	@Override
@@ -253,6 +260,45 @@ public class ComponentEditPart extends AbstractIconEditPart implements IProperty
 	@Override
 	public void setPropertyValue(Object id, Object value) {
 		System.out.println("setPropertyValue");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.jmodelica.ide.graphical.util.ASTNodeResourceProvider#getComponentName()
+	 */
+	@Override
+	public String getComponentName() {
+		return getModel().getComponentName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.jmodelica.ide.graphical.util.ASTNodeResourceProvider#getClassName()
+	 */
+	@Override
+	public String getClassName() {
+		return getModel().getIcon().getClassName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.jmodelica.ide.graphical.util.ASTNodeResourceProvider#getParameterValue(java.lang.String)
+	 */
+	@Override
+	public String getParameterValue(String parameter) {
+		InstComponentDecl icd = provider.getInstComponentDeclByName(getModel().getComponentName());
+		if (icd == null)
+			return null;
+		for (Object o : icd.memberInstComponent(parameter)) {
+			if (o instanceof InstPrimitive) {
+				InstPrimitive ip = (InstPrimitive) o;
+				return ip.ceval().toString();
+			}
+		}
+		
+		
+		
+		return null;
 	}
 
 }

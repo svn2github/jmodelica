@@ -32,10 +32,10 @@ public class EditPartFactory implements org.eclipse.gef.EditPartFactory {
 			return new DiagramEditPart((Diagram)model, provider);
 		}
 		if (model instanceof Connector) {
-			return new ConnectorEditPart((Connector)model);
+			return new ConnectorEditPart((Connector)model, provider);
 		}
 		if (model instanceof Component) {
-			return new ComponentEditPart((Component)model);
+			return new ComponentEditPart((Component)model, provider);
 		}
 		if (model instanceof Polygon) {
 			return new PolygonEditPart((Polygon)model);
@@ -56,6 +56,10 @@ public class EditPartFactory implements org.eclipse.gef.EditPartFactory {
 			return new EllipseEditPart((Ellipse)model);
 		}
 		return null;
+	}
+	
+	public void setASTResourceProvider(ASTResourceProvider provider) {
+		this.provider = provider;
 	}
 	
 }
