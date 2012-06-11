@@ -73,12 +73,13 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
         jmi_log_category_t category;
         char buffer[4000];
         jmi_block_residual_t *block = eh_data;
+        jmi_t *jmi = block->jmi;
         if (err_code > 0){ /*Warning*/
             category = logWarning;
-	}else if (err_code < 0){ /*Error*/
+        }else if (err_code < 0){ /*Error*/
             category = logError;
-	}
-        sprintf(buffer, "[KINSOL] %s %s", function, msg);
+        }
+        sprintf(buffer, "[KINSOL] %s: Error occured at time %3.2fs when solving block %d: %s", function, *(jmi_get_t(jmi)), block->index, msg);
         jmi_log(block->jmi, category, buffer);
 }
 
@@ -212,7 +213,7 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 			Ith(block->kin_y,i)=block->x[i];
 		}
 
-                block->kin_mem = KINCreate();
+        block->kin_mem = KINCreate();
 		flag = KINInit(block->kin_mem, kin_f, block->kin_y); /*Initialize Kinsol*/
 		jmi_kinsol_error_handling(block->jmi, flag);
 		
@@ -233,40 +234,67 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		
         if(block->dF != NULL){
 			flag = KINDlsSetDenseJacFn(block->kin_mem, kin_dF);
-			jmi_kinsol_error_handling(block->jmi, flag);
+			if (flag<0) {
+				jmi_kinsol_error_handling(block->jmi, flag);
+				return flag;
+			}
 		}
 		
 		/*Stopping tolerance of F*/
 		flag = KINSetFuncNormTol(block->kin_mem, block->kin_ftol); 
-		jmi_kinsol_error_handling(block->jmi, flag);
+		if (flag<0) {
+			jmi_kinsol_error_handling(block->jmi, flag);
+			return flag;
+		}
 		
 		/*Stepsize tolerance*/
 		flag = KINSetScaledStepTol(block->kin_mem, 0.001*(block->kin_stol)); 
-		jmi_kinsol_error_handling(block->jmi, flag);
+		if (flag<0) {
+			jmi_kinsol_error_handling(block->jmi, flag);
+			return flag;
+		}
 		
 		/* Allow long steps */
 		flag = KINSetMaxNewtonStep(block->kin_mem, 1e30);
-		jmi_kinsol_error_handling(block->jmi, flag);
+		if (flag<0) {
+			jmi_kinsol_error_handling(block->jmi, flag);
+			return flag;
+		}
 		
 		/* Disable residual monitoring */
 		flag = KINSetNoResMon(block->kin_mem,1);
-		jmi_kinsol_error_handling(block->jmi, flag);
+		if (flag<0) {
+			jmi_kinsol_error_handling(block->jmi, flag);
+			return flag;
+		}
   
 		/*Verbosity*/
 		flag = KINSetPrintLevel(block->kin_mem, verbosity);
-		jmi_kinsol_error_handling(block->jmi, flag);
+		if (flag<0) {
+			jmi_kinsol_error_handling(block->jmi, flag);
+			return flag;
+		}
 		
 		/*Error function*/
-                flag = KINSetErrHandlerFn(block->kin_mem, kin_err, block);
-		jmi_kinsol_error_handling(block->jmi, flag);
+        flag = KINSetErrHandlerFn(block->kin_mem, kin_err, block);
+		if (flag<0) {
+			jmi_kinsol_error_handling(block->jmi, flag);
+			return flag;
+		}
 		
 		/*Info function*/
-                flag = KINSetInfoHandlerFn(block->kin_mem, kin_info, block);
-		jmi_kinsol_error_handling(block->jmi, flag);
+        flag = KINSetInfoHandlerFn(block->kin_mem, kin_info, block);
+		if (flag<0) {
+			jmi_kinsol_error_handling(block->jmi, flag);
+			return flag;
+		}
 		
 		/*Solve the block*/
 		flag = KINSol(block->kin_mem, block->kin_y, KIN_LINESEARCH, block->kin_y_scale, block->kin_f_scale);
-		jmi_kinsol_error_handling(block->jmi, flag);
+		if (flag<0) {
+			jmi_kinsol_error_handling(block->jmi, flag);
+			return flag;
+		}
 		
 		block->init = 0; /*The block is initialized*/
 
@@ -278,7 +306,10 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 	
 		if(block->dF != NULL){
 			flag = KINDlsSetDenseJacFn(block->kin_mem, kin_dF);
-			jmi_kinsol_error_handling(block->jmi, flag);
+			if (flag<0) {
+				jmi_kinsol_error_handling(block->jmi, flag);
+				return flag;
+			}
 		}
 
 		/*
@@ -291,10 +322,18 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		}
 
 		flag = KINSol(block->kin_mem, block->kin_y, KIN_LINESEARCH, block->kin_y_scale, block->kin_f_scale);
+		if (flag<0) {
+			jmi_kinsol_error_handling(block->jmi, flag);
+			return flag;
+		}
 
 		if (block->jmi->atEvent) {
 			block->F(block->jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
 			flag = KINSol(block->kin_mem, block->kin_y, KIN_LINESEARCH, block->kin_y_scale, block->kin_f_scale);
+			if (flag<0) {
+				jmi_kinsol_error_handling(block->jmi, flag);
+				return flag;
+			}
 		}
 
 
@@ -302,12 +341,17 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		   it seems as if the  Jacobian has to be reevaluated */
 		if (flag ==1) {
 		  flag = KINSetNoInitSetup(block->kin_mem, 0);
-		  jmi_kinsol_error_handling(block->jmi, flag);
+			if (flag<0) {
+				jmi_kinsol_error_handling(block->jmi, flag);
+				return flag;
+			}
 		} else {
 		  flag = KINSetNoInitSetup(block->kin_mem, 1);
-		  jmi_kinsol_error_handling(block->jmi, flag);
+			if (flag<0) {
+				jmi_kinsol_error_handling(block->jmi, flag);
+				return flag;
+			}
 		}
-
 	}
 	c1 = clock();
 	
@@ -318,11 +362,17 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 	/* Get debug information */
 	nniters = 0;
 	flag = KINGetNumNonlinSolvIters(block->kin_mem, &nniters);
-	jmi_kinsol_error_handling(block->jmi, flag);
+	if (flag<0) {
+		jmi_kinsol_error_handling(block->jmi, flag);
+		return flag;
+	}
 
 	njevals = 0;
 	flag = KINPinvGetNumJacEvals(block->kin_mem, &njevals);
-	jmi_kinsol_error_handling(block->jmi, flag);
+	if (flag<0) {
+		jmi_kinsol_error_handling(block->jmi, flag);
+		return flag;
+	}
 
 	/* Store debug information */
 	block->nb_calls++;

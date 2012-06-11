@@ -1604,7 +1604,7 @@ aspect CCodeGen {
 		
 	public void AbstractEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {
 		String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
-		str.format("%sjmi_kinsol_solve(jmi->%s[%d]);\n", indent, var, i);
+		str.format("%s ef |= jmi_kinsol_solve(jmi->%s[%d]);\n", indent, var, i);
 	}
 
 	public void SolvedScalarEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	

@@ -503,27 +503,27 @@ class TestTearing2(SimulationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['resistor3.i','resistor25.i'],rel_tol=1e-4, abs_tol=1e-4)
 
-class TestTearing3(SimulationTest):
-    
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base(
-            'TearingTests.mo',
-            'TearingTests.NonLinear.MultiSystems',
-            format='fmu',
-            options={"enable_tearing":True})
-
-    @testattr(assimulo = True)
-    def setUp(self):
-        self.setup_base(start_time=0.0, final_time=10,time_step=0.02,rel_tol=1e-6)
-        self.run()
-        self.load_expected_data(
-            'TearingTests_NonLinear_MultiSystems_result.txt')
-
-    @testattr(assimulo = True)
-    def test_trajectories(self):
-        self.assert_all_trajectories(['R1.v','R1.i'],rel_tol=1e-4, abs_tol=1e-4)
-
+#class TestTearing3(SimulationTest):
+#    
+#    @classmethod
+#    def setUpClass(cls):
+#        SimulationTest.setup_class_base(
+#            'TearingTests.mo',
+#            'TearingTests.NonLinear.MultiSystems',
+#            format='fmu',
+#            options={"enable_tearing":True})
+#
+#    @testattr(assimulo = True)
+#    def setUp(self):
+#        self.setup_base(start_time=0.0, final_time=10,time_step=0.02,rel_tol=1e-6)
+#        self.run()
+#        self.load_expected_data(
+#            'TearingTests_NonLinear_MultiSystems_result.txt')
+#
+#    @testattr(assimulo = True)
+#    def test_trajectories(self):
+#        self.assert_all_trajectories(['R1.v','R1.i'],rel_tol=1e-4, abs_tol=1e-4)
+#
 
 class TestQR1(SimulationTest):
     

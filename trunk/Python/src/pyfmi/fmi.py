@@ -132,7 +132,7 @@ class FMUModel(BaseModel):
     An FMI Model loaded from a DLL.
     """
     
-    def __init__(self, fmu, path='.', enable_logging=False):
+    def __init__(self, fmu, path='.', enable_logging=True):
         """
         Constructor.
         """

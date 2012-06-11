@@ -234,6 +234,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     
     jmi_real_t* switchesR;   /* Switches */
     jmi_real_t* switchesR0;  /* Initial Switches */
+    jmi_real_t* b_mode;
 
     /* Update eventInfo */
 
@@ -284,7 +285,29 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     /* Write values to the pre vector*/
     jmi_copy_pre_values(((fmi_t*)c)->jmi);
 
-    /* Call the initialization algorithm */
+    /* Set the switches */
+    b_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR0, sizeof(jmi_real_t));
+    retval = jmi_init_R0(((fmi_t *)c)->jmi, b_mode);
+    switchesR0 = jmi_get_sw_init(((fmi_t *)c)->jmi);
+    switchesR = jmi_get_sw(((fmi_t *)c)->jmi);
+    for (i=0; i < nR0; i=i+1){
+        if (b_mode[i] > 0.0){
+            if (i >= nR){
+                switchesR0[i-nR] = 1.0;
+            }else{
+                switchesR[i] = 1.0;
+            }
+        }else{
+            if (i >= nR){
+                switchesR0[i-nR] = 0.0;
+            }else{
+                switchesR[i] = 0.0;
+            }
+        }
+    }
+
+    ((fmi_t*)c) -> fmi_functions.freeMemory(b_mode);
+    /* Call the initialization function */
     retval = jmi_ode_initialize(((fmi_t *)c)->jmi);
 
     if(retval != 0) { /* Error check */
@@ -295,16 +318,13 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     while (initComplete == 0){                            /* Loop during event iteration */
 
         if (nR0 > 0){                                     /* Specify the switches if any */
-            jmi_real_t* b_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR0, sizeof(jmi_real_t));
+            b_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR0, sizeof(jmi_real_t));
             retval = jmi_init_R0(((fmi_t *)c)->jmi, b_mode);
 
             if(retval != 0) {
                 (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed when trying to retrieve the event indicators.");
                 return fmiError;
             }
-            
-            switchesR0 = jmi_get_sw_init(((fmi_t *)c)->jmi);
-            switchesR = jmi_get_sw(((fmi_t *)c)->jmi);
             
             for (i=0; i < nR0; i=i+1){
                 if (b_mode[i] > 0.0){

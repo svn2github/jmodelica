@@ -334,9 +334,9 @@ class Test_FMI:
         model = FMUModel('bouncingBall.fmu',path_to_fmus)
         model.initialize()
         model.set_debug_logging(True) #Activates the logging
-        assert len(model.get_log()) == 0 #Get the current log (empty)
+        assert len(model.get_log()) == 4 #Get the current log (empty)
         model.set_real([0],[1.0]) #Set value which generates log message
-        assert len(model.get_log()) > 0 
+        assert len(model.get_log()) > 5 
         
     @testattr(fmi = True)
     def test_get_fmi_options(self):
