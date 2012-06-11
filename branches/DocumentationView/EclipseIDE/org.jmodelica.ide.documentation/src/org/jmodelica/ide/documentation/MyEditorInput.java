@@ -27,14 +27,6 @@ public class MyEditorInput implements IEditorInput, IPersistableElement{
 	private FullClassDecl fullClassDecl;
 
 	public MyEditorInput(FullClassDecl fullClassDecl){
-		VisibilityType vt = fullClassDecl.getVisibilityType();
-//		ASTNode parent = fullClassDecl.getParent();
-//		
-//		if (parent instanceof FullClassDecl){
-//			if (((FullClassDecl) parent).getRestriction().getNodeName().equals("MPackage")){
-//				
-//			}
-//		}
 		ArrayList<String> path = new ArrayList<String>();
 		String name = fullClassDecl.name();
 		StringBuilder sb = new StringBuilder();

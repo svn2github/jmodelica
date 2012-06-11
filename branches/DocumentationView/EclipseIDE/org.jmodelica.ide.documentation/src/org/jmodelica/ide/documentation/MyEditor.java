@@ -19,9 +19,12 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.services.ISourceProviderService;
 import org.jastadd.plugin.Activator;
 import org.jmodelica.icons.Icon;
+import org.jmodelica.ide.documentation.commands.NavigationProvider;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.AnnotationNode;
 import org.jmodelica.modelica.compiler.ClassDecl;
@@ -52,6 +55,9 @@ public class MyEditor extends EditorPart {
 	
 	@Override
 	public void createPartControl(Composite parent) {
+		ISourceProviderService sourceProviderService = (ISourceProviderService)this.getSite().getWorkbenchWindow().getService(ISourceProviderService.class);
+		NavigationProvider navProv = (NavigationProvider) sourceProviderService.getSourceProvider(NavigationProvider.NAVIGATION_FORWARD);
+		IHandlerService handlerService = (IHandlerService) getSite().getService(IHandlerService.class);
 		sourceRoot = (SourceRoot) Activator.getASTRegistry().lookupAST(null, this.input.getProject());
 		icd = sourceRoot.getProgram().getInstProgramRoot().simpleLookupInstClassDecl(this.input.getClassName());
 		//openComponentStack = new Stack<InstComponentDecl>();
@@ -63,8 +69,15 @@ public class MyEditor extends EditorPart {
 //			//fullClassDecl = (FullClassDecl) program.simpleLookupClassDotted(input.getClassName());
 //		}
 		browser = new Browser(parent, SWT.NONE);
-		browserContent = new BrowserContent(fullClassDecl, browser, icd, sourceRoot.getProgram());
+		browserContent = new BrowserContent(fullClassDecl, browser, icd, sourceRoot.getProgram(), navProv);
      }
+	
+	public boolean back(){
+		return browserContent.back();
+	}
+	public boolean forward(){
+		return browserContent.forward();
+	}
 	
 	@Override
 	protected void setInput(IEditorInput input){

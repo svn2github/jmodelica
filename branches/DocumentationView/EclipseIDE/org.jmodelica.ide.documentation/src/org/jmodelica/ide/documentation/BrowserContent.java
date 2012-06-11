@@ -3,12 +3,17 @@ package org.jmodelica.ide.documentation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.ui.AbstractSourceProvider;
+import org.eclipse.ui.ISources;
+import org.eclipse.ui.services.ISourceProviderService;
+import org.jmodelica.ide.documentation.commands.NavigationProvider;
 import org.jmodelica.modelica.compiler.AbstractEquation;
 import org.jmodelica.modelica.compiler.Access;
 import org.jmodelica.modelica.compiler.Algorithm;
@@ -51,22 +56,28 @@ public class BrowserContent implements LocationListener, MouseListener{
 	private InstClassDecl icd;
 	private static final String FORWARD = "f";
 	private static final String BACK = "b";
+	private static final String PRIMITIVE_TYPE = "primitive type";
 	private String head;
 	private Program program;
+	private boolean forwardEnabled, backEnabled;
+	private NavigationProvider navProv;
 	private void genHead(String scriptPath){
 		head = "<head><style type=\"text/css\">body{background-color:#fffffa;}" +
-				"h1{margin-left:20;font-family:\"Arial\";color:black;font-size:36px;}" +
-				"h2{margin-left:20;color:black;text-align:left;font-size:26px;}" +
+				"h1{margin-left:20;font-family:\"Arial\";color:black;font-size:32px;}" +
+				"h2{margin-left:20;color:black;text-align:left;font-size:24px;}" +
 				"h3{margin-left:20;color:black;text-align:left;font-size:20px;font-style=\"bold\";}" +
+				"span{font-family:Georgia, \"Times New Roman\", Times, serif;font-size:18px;}" +
+				"span.text {}" +
+				"span.code {font-family:Monospace, \"Courier New\", Times, serif;}" +
+				"div{margin-left:20; font-family:Georgia, \"Times New Roman\", Times, serif;font-size:18px;}" +
+				"div.text {}" +
+				"div.code {font-family:Monospace, \"Courier New\", Times, serif;}" +
 				"a {font-family:Georgia, \"Times New Roman\", Times, serif;font-size:18px;cursor: auto}" +
-				//				".TableHeadingColor     { background: #CCCCFF }" +
-				//				".TableRowColor         { background: #FFFFFF }" +
-				//				"a:link {color:blue;}" +
-				//				"a:visited {color: #660066;}" +
-				//				"a:hover {text-decoration: none; color: #ff9900; font-weight:bold;}" +
-				//				"a:active {color: #ff0000;text-decoration: none}" +
+				"a:link {color:blue;}" +
+				"a:visited {color: #660066;}" +
+				"a:hover {text-decoration: none;}" +
+				"a:active {text-decoration: none}" +
 				"p{margin-top:10; margin-bottom:10;margin-left:20;font-family:Georgia, \"Times New Roman\", Times, serif;font-size:18px;}" +
-				"span{id=\"text\"; font-family:Georgia, \"Times New Roman\", Times, serif;font-size:18px;}" +
 				"</style><script type=\"text/javascript\" src=\"" + scriptPath + "\"></script>" +
 				"</head><body>";
 	}
@@ -143,7 +154,8 @@ public class BrowserContent implements LocationListener, MouseListener{
                                   [ExternalClause] 
                                   EndDecl;
 	 */
-	public BrowserContent(FullClassDecl fullClassDecl, Browser browser, InstClassDecl icd, Program program){
+	public BrowserContent(FullClassDecl fullClassDecl, Browser browser, InstClassDecl icd, Program program, NavigationProvider navProv){
+		this.navProv = navProv;
 		this.program = program;
 		this.icd = icd; //unused
 		String path = this.getClass().getProtectionDomain().getCodeSource().getLocation() + this.getClass().getResource("/resources/script.js").getPath();
@@ -167,15 +179,17 @@ public class BrowserContent implements LocationListener, MouseListener{
 	private void renderClassDecl(ClassDecl fcd){
 		content = new StringBuilder(head);
 		genBreadCrumBar(fcd);
+		genHeader();
+		genFooter();
 		if(histIndex > 0){
-			content.append("<h2><a href=\"" + BACK + "\">< </a>");
+			navProv.setBackEnabled(true);
 		}else{
-			content.append("<h2>");
+			navProv.setBackEnabled(false);
 		}
 		if (histSize > histIndex){
-			content.append(" <a href=\"" + FORWARD + "\">></a></h2>");
+			navProv.setForwardEnabled(true);
 		}else{
-			content.append("</h2>");
+			navProv.setForwardEnabled(false);
 		}
 		if (fcd instanceof UnknownClassDecl){
 			renderUnknownClassDecl((UnknownClassDecl)fcd);
@@ -198,17 +212,32 @@ public class BrowserContent implements LocationListener, MouseListener{
 	}
 
 	private void renderUnknownClassDecl(UnknownClassDecl fcd) {
-		content.append("<p>Error: unknown class declaration</p>");
+		content.append("<span class=\"text\">Error: unknown class declaration</span>");
 		browser.setText(content.toString());
 
 	}
 
+	public String processEmbeddedHTML(String htmlCode){
+		return htmlCode; //TODO replace links, remove <html> etc.
+		//also parse in full-path-on-hoover for all links!
+	}
 	private void renderPackage(FullClassDecl fcd){
-		content.append("<h1>" + fcd.getRestriction() + " " + fcd.getName().getID() + "</h1><h2>Containing Classes</h2>");
+		content.append("<h1>" + fcd.getRestriction() + " " + fcd.getName().getID() + "</h1>");
+		if(fcd.hasStringComment()){
+			content.append("<div class=\"text\"><i>" + fcd.stringComment() + "</i></div>");
+			Opt<StringComment> opt = fcd.getStringCommentOpt();
+		}
+		//ANNOTATION
+		String embeddedHTML = fcd.annotation().forPath("Documentation/info").string();
+		if (embeddedHTML != null){
+			content.append("<h2>Information</h2>");
+			content.append(processEmbeddedHTML(embeddedHTML));
+		}
+		content.append("<h2>Containing Classes</h2>");
 		ArrayList<ClassDecl> fcds = fcd.classes();
 		content.append("<table BORDER=\"3\" CELLPADDING=\"3\" CELLSPACING=\"0\" >" +
 				"<tr BGCOLOR=\"#CCCCFF\" align=\"center\">" + 
-				"<td><b><span id=\"text\">Class</span></b></td><td><b><span id=\"text\">Type</span></b></td><td><b><span id=\"text\">Description</span></b></td></b></tr>");
+				"<td><b><span class=\"text\">Class</span></b></td><td><b><span class=\"text\">Type</span></b></td><td><b><span class=\"text\">Description</span></b></td></b></tr>");
 		for (ClassDecl cd : fcds){
 			content.append("<tr>");
 			hyperlinks.put(cd.name(), cd);
@@ -217,7 +246,7 @@ public class BrowserContent implements LocationListener, MouseListener{
 			if (cd instanceof FullClassDecl){
 				classCategory = ((FullClassDecl)cd).getRestriction().toString();
 			}else if (cd instanceof ShortClassDecl){
-				classCategory = "primitive type";
+				classCategory = PRIMITIVE_TYPE;
 			}else{
 				classCategory = "";
 			}
@@ -227,7 +256,7 @@ public class BrowserContent implements LocationListener, MouseListener{
 			}
 
 			content.append("<td><a href=\"" + cd.name() + "\" title = \"" + cd.name() + "\">" + cd.name() + "</a></td>" + 
-					"<td><span id=\"text\">" + classCategory + "</span></td>" + "<td><span id=\"text\">" + comment + "&nbsp;" + "</span></td>");
+					"<td><span class=\"text\">" + classCategory + "</span></td>" + "<td><span class=\"text\">" + comment + "&nbsp;" + "</span></td>");
 			content.append("</tr>");
 		}
 		content.append("</table>");
@@ -257,59 +286,42 @@ public class BrowserContent implements LocationListener, MouseListener{
 		String name = fcd.getName().getID();
 		content.append("<h1>" + fcd.getRestriction() + " " + name + "</h1>");
 		if(fcd.hasStringComment()){
-			content.append("<p>" + fcd.stringComment() + "</p>");
+			content.append("<div class=\"text\"><i>" + fcd.stringComment() + "</i></div>");
 			Opt<StringComment> opt = fcd.getStringCommentOpt();
 		}
 
 		//ANNOTATION
-		AnnotationNode annotationNode = fcd.annotation();
-		AnnotationNode annotationNodeHTML = annotationNode.forPath("html");
-		String annotationNodeHTMLString = annotationNodeHTML.string() == null ? "<p><i>No HTML annotation available</i></p>" : annotationNodeHTML.string();
-		content.append("<p>" + annotationNodeHTMLString + "</p>");
-		//IMPORTS
-		content.append("<h2>Imports</h2><p>");
-		for (int i = 0; i < fcd.getNumImport(); i++){
-			ImportClause ic = fcd.getImport(i);
-			ic.findClassDecl();
-			content.append(classDeclLink(ic.findClassDecl(), true));
-//			for (int j = 0; j < ic.getNumChild(); j++){
-//				if (ic.getChild(i).toString().length() > 0 && ic.getChild(i) instanceof ClassDecl){
-//					ClassDecl cd = (ClassDecl) ic.getChild(j);
-//					content.append(classDeclLink(cd, getFullPath(cd)));
-//				}else{
-//					content.append("unknown import: " + ic.getChild(i));
-//				}
-//			}
-
+		String embeddedHTML = fcd.annotation().forPath("Documentation/info").string();
+		if (embeddedHTML != null){
+			content.append("<h2>Information</h2>");
+			content.append(processEmbeddedHTML(embeddedHTML));
 		}
-		if (fcd.getNumImport() == 0){
-			content.append("None</p>");
+		//IMPORTS
+		if (fcd.getNumImport() > 0){
+			content.append("<h2>Imports</h2>");
+			for (int i = 0; i < fcd.getNumImport(); i++){
+				ImportClause ic = fcd.getImport(i);
+				ic.findClassDecl();
+				content.append("<div class=\"text\">" + classDeclLink(ic.findClassDecl(), true) + "</div>");
+			}
 		}
 		//EXTENSIONS
-		content.append("<h2>Extensions</h2><p>");
-		for (int i=0; i < fcd.getNumSuper(); i++) {
-			content.append(classDeclLink(fcd.getSuper(i).findClassDecl(), true));
-//			ExtendsClause ec = fcd.getSuper(i);
-//			VisibilityType vt = ec.getVisibilityType();
-//			Access a = ec.getSuper();
-//			FullClassDecl extension = (FullClassDecl) ec.findClassDecl();
-//			String fullName = getFullPath(extension);
-//			hyperlinks.put(fullName, extension);
-//			content.append("<a href=\"" + fullName + "\" title = \"" + fullName + "\">" + fullName + "</a>"); 
+		if (fcd.getNumSuper() > 0){
+			content.append("<h2>Extends</h2>");
+			for (int i=0; i < fcd.getNumSuper(); i++) {
+				content.append("<div class=\"text\">" + classDeclLink(fcd.getSuper(i).findClassDecl(), true) + "</div>");
+			}
 		}
-		if (fcd.getNumSuper() == 0){
-			content.append("None");
-		}
-		content.append("</p>");
+
 		//COMPONENTS
 		if (fcd.getNumComponentDecl() > 0){
 			content.append("<h2> Components</h2><table BORDER=\"3\" CELLPADDING=\"3\" CELLSPACING=\"0\" >" +
 					"<tr BGCOLOR=\"#CCCCFF\" align=\"center\">" + 
-					"<td><b><span id=\"text\">Type</span></b></td><td><b><span id=\"text\">Name</span></b></td><td><b><span id=\"text\">Description</span></b></td></b></tr>");
+					"<td><b><span class=\"text\">Type</span></b></td><td><b><span class=\"text\">Name</span></b></td><td><b><span class=\"text\">Description</span></b></td></b></tr>");
 			for (int i=0;i<fcd.getNumComponentDecl();i++){
-				content.append("<tr CLASS=\"TableRowColor\">");
+				content.append("<tr>");
 				ComponentDecl cd = fcd.getComponentDecl(i);
-				String stringComment = "None";
+				String stringComment = "&nbsp;"; //without the html whitespace the cell isn't drawn properly, tmp fix
 				if (cd.getComment().hasStringComment()){
 					stringComment = cd.getComment().getStringComment().stringComment();
 					stringComment = cd.getComment().getStringComment().getComment();
@@ -318,9 +330,9 @@ public class BrowserContent implements LocationListener, MouseListener{
 				String s = a.name(); //correct path
 				ClassDecl cdd = cd.findClassDecl();
 				if (cdd.isUnknown()){//just print its name without a hyperlink
-					content.append("<td>" + "<span id=\"text\">" + s + "</span></td><td><span id=\"text\">" + cd.getName().getID() + "</span></td><td><p>" + stringComment + "</p></td>");
+					content.append("<td>" + "<span class=\"text\">" + s + "</span></td><td><span class=\"text\">" + cd.getName().getID() + "</span></td><td><span class=\"text\">" + stringComment + "</span></td>");
 				}else{
-					content.append("<td>" + classDeclLink(cdd, false) + "</td><td><span id=\"text\">" + cd.getName().getID() + "</span></td><td><p>" + stringComment + "</p></td>");
+					content.append("<td>" + classDeclLink(cdd, false) + "</td><td><span class=\"text\">" + cd.getName().getID() + "</span></td><td><span class=\"text\">" + stringComment + "</span></td>");
 				}
 
 				VisibilityType vt = cd.getVisibilityType();
@@ -359,13 +371,13 @@ public class BrowserContent implements LocationListener, MouseListener{
 		}
 
 		//EQUATIONS
-		content.append("<h2> Equations</h2>");
-		for (int i=0;i<fcd.getNumEquation();i++) {
-			AbstractEquation ae = fcd.getEquation(i);
-			content.append("<p><code>" + ae + "</code></p>");
-		}
-		if (fcd.getNumEquation() == 0){
-			content.append("<span id=\"text\"> None</span>");
+
+		if (fcd.getNumEquation() > 0){
+			content.append("<h2> Equations</h2>");
+			for (int i=0;i<fcd.getNumEquation();i++) {
+				AbstractEquation ae = fcd.getEquation(i);
+				content.append("<div class=\"code\"> " + ae + "</div>");
+			}
 		}
 		//link style: code.append("<a href=\"Modelica://MultiBody.Tutorial\">MultiBody.Tutorial</a>");
 		browser.setText(content.toString());
@@ -373,7 +385,7 @@ public class BrowserContent implements LocationListener, MouseListener{
 
 	private void renderShortClassDecl(ShortClassDecl scd){
 		content.append("<h1>" + scd.getRestriction() + " " + scd.name() + "</h1>");
-		content.append("<span id=\"text\"><code>" + scd.prettyPrint("") + "</code>" + " (<i>This is a ShortClassDecl, currently just prettyPrinting it.</i>)</span>");
+		content.append("<div class=\"code\">" + scd.prettyPrint("") + "</div>" + " (<span class=\"text\"><i>This is a ShortClassDecl, currently just prettyPrinting it.</i>)</span>");
 		browser.setText(content.toString());
 	}
 
@@ -415,7 +427,7 @@ public class BrowserContent implements LocationListener, MouseListener{
 		for (int i = path.size() - 1; i >= 0; i--){
 			sb.append(path.get(i));
 			if (i == 0) {//dont add link to self
-				content.append("<span id=\"text\">" + program.simpleLookupClassDotted(sb.toString()).name() + "</span>");
+				content.append("<span class=\"text\">" + program.simpleLookupClassDotted(sb.toString()).name() + "</span>");
 			}else{
 				content.append(classDeclLink(program.simpleLookupClassDotted(sb.toString()), false));
 			}
@@ -425,6 +437,13 @@ public class BrowserContent implements LocationListener, MouseListener{
 			}
 		}
 		content.append("<br><hr>");
+	}
+
+	public void genHeader(){
+		//TODO ?
+	}
+	public void genFooter(){
+		//TODO ?
 	}
 
 	private String stripAbout(String location){
@@ -441,26 +460,35 @@ public class BrowserContent implements LocationListener, MouseListener{
 		}
 	}
 
+	public boolean forward(){
+		histIndex++;
+		String location = history.get(histIndex);
+		renderClassDecl(hyperlinks.get(location));
+		return histSize > histIndex;
+	}
+	public boolean back(){
+		histIndex--;
+		String location = history.get(histIndex);
+		renderClassDecl(hyperlinks.get(location));
+		return histIndex > 0;
+	}
+
 	@Override
 	public void changed(LocationEvent event) {
 
 		String location = stripAbout(event.location);
+
 		if (location.equals("blank")) return;
-		if (location.equals(BACK)){
-			histIndex--;
-			location = history.get(histIndex);
-		}else if (location.equals(FORWARD)){
-			histIndex++;
-			location = history.get(histIndex);
-		}else{
-			histIndex++;
-			if (histIndex >= history.size()){
-				history.add(location);
-			}else{
-				history.set(histIndex, location);
-			}
-			histSize = histIndex;
+		if (location.startsWith("http://")){
+			//TODO: just render the website, not the class decl. Update history though
 		}
+		histIndex++;
+		if (histIndex >= history.size()){
+			history.add(location);
+		}else{
+			history.set(histIndex, location);
+		}
+		histSize = histIndex;
 		renderClassDecl(hyperlinks.get(location));
 	}
 
@@ -477,7 +505,7 @@ public class BrowserContent implements LocationListener, MouseListener{
 
 	@Override
 	public void mouseDown(MouseEvent e) {
-
+		//TODO 
 	}
 
 	@Override
