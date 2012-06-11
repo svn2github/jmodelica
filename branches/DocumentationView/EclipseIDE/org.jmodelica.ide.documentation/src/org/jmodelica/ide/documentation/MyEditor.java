@@ -65,9 +65,9 @@ public class MyEditor extends EditorPart {
 		//String s = input.getClassName();
 		
 		fullClassDecl = input.getFullClassDecl();
-//		if (fullClassDecl == null){
-//			//fullClassDecl = (FullClassDecl) program.simpleLookupClassDotted(input.getClassName());
-//		}
+		if (fullClassDecl == null){
+			//fullClassDecl = (FullClassDecl) program.simpleLookupClassDotted(input.getClassName());
+		}
 		browser = new Browser(parent, SWT.NONE);
 		browserContent = new BrowserContent(fullClassDecl, browser, icd, sourceRoot.getProgram(), navProv);
      }

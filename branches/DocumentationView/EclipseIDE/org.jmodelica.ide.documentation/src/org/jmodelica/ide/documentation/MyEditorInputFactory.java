@@ -8,7 +8,7 @@ import org.eclipse.ui.IMemento;
 
 public class MyEditorInputFactory implements IElementFactory {
 
-	public static final String ID_FACTORY = "org.jmodelica.ide.documentation.MyEditorInputFactory";
+	public static final String ID_FACTORY = "org.jmodelica.ide.documentation.myEditorInputFactory";
 	private static final String TAG_PROJECT = "project";
 	private static final String TAG_NAME = "name";
 	

@@ -18,18 +18,9 @@ public class ForwardHandler extends AbstractHandler implements IHandler  {
 		if (e instanceof MyEditor){
 			isEnabled = ((MyEditor)e).forward();
 		}
-		
-		// Get the source provider service
 		ISourceProviderService sourceProviderService = (ISourceProviderService) HandlerUtil.getActiveWorkbenchWindow(event).getService(ISourceProviderService.class);
-		// Now get my service
 		NavigationProvider navProv = (NavigationProvider) sourceProviderService.getSourceProvider(NavigationProvider.NAVIGATION_FORWARD);
 		navProv.setForwardEnabled(isEnabled);
-		//forwardEnabled.toogleEnabled();
 		return null;
 	}
-	
-//	@Override
-//	public boolean isEnabled(){
-//		return isEnabled;
-//	}
 }

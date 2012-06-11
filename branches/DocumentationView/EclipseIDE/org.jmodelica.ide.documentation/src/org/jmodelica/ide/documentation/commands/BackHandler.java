@@ -18,16 +18,9 @@ public class BackHandler extends AbstractHandler implements IHandler {
 		if (e instanceof MyEditor){
 			isEnabled = ((MyEditor)e).back();
 		}
-		// Get the source provider service 
 		ISourceProviderService sourceProviderService = (ISourceProviderService) HandlerUtil.getActiveWorkbenchWindow(event).getService(ISourceProviderService.class);
-		// Now get my service
 		NavigationProvider navProv = (NavigationProvider) sourceProviderService.getSourceProvider(NavigationProvider.NAVIGATION_BACK);
 		navProv.setBackEnabled(isEnabled);
 		return null;
 	}
-
-//	@Override
-//	public boolean isEnabled(){
-//		return isEnabled;
-//	}
 }
