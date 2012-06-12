@@ -183,6 +183,58 @@ aspect ASTDocument {
 		for (ASTNode node : this) {
 			node.offsetNodesAfter(line, column , byLines, byColumnsOnLastLine);
 		}
+	}
+	
+	public void ASTNode.addNewElement(Element element, int offset, IDocument document) throws BadLocationException {
+		Maybe<ClassDecl> maybeClassDecl = getClassDeclAt(document, offset);
+		if (maybeClassDecl.isNothing()) {
+			System.err.println("Unable to find a class declaration to put the new element in.");
+			return;
+		}
+
+		int startLine = document.getLineOfOffset(offset) + 1;
+		int startColumn = offset - document.getLineInformationOfOffset(offset).getOffset() + 1;
+		element.offsetNodesAfter(1, 1, startLine - 1, startColumn - 1);
+		for (FormattingItem item : element.formatting) {
+			item.offsetItemAfter(1, 1, startLine - 1, startColumn - 1);
+		}
+		maybeClassDecl.value().insertNewElement(element, startLine, startColumn);
+	}
+	
+	void ClassDecl.insertNewElement(Element element, int line, int column) {
+		System.err.println("This method (ClassDecl.insertNewElement(...) in the ASTDocument aspect) has only been implemented for FullClassDecl. This object instantiates the class " + getClass().getSimpleName() + ".");
+	}
+	
+	@Override
+	void FullClassDecl.insertNewElement(Element element, int line, int column) {
+		int clauseNumber = originalComposition.clauseAt(line, column);
+		// TODO: offsetNodesAfter(...) in ASTNode.addNewElement(...) instead.
+		offsetNodesAfter(line, column, 1, 0);
+		if (clauseNumber < 0) {
+			originalComposition.addClause(element);
+		} else {
+			originalComposition.getClauses().insertChild(element, clauseNumber);
+		}
+		originalComposition.extractElementsTo(this);
+	}
+	
+	syn int Composition.clauseAt(int line, int column);
+	syn boolean Clause.clauseAt(int line, int column);
+	
+	eq Composition.clauseAt(int line, int column) {
+		int i = 0;
+		for (Clause clause : getClauses()) {
+			if (clause.clauseAt(line, column)) {
+				return i;
+			}
+			++i;
+		}
 		
+		return -1;
+	}
+	
+	eq Clause.clauseAt(int line, int column) {
+		return ((getStartLineWithFormatting() < line || (getStartLineWithFormatting() == line && getStartColumnWithFormatting() <= column)) &&
+				(getEndLineWithFormatting() > line || (getEndLineWithFormatting() == line && getEndColumnWithFormatting() >= column)));
 	}
 }
