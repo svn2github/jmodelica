@@ -103,7 +103,7 @@ aspect FormattedPrint {
 		getParent().propagateFormatting();
 	}
 	
-	protected void ASTNode.propagateFormatting(FormattingInfo formattingInfo) {
+	protected void BaseNode.propagateFormatting(FormattingInfo formattingInfo) {
 		if (formattingInfo == null) {
 			addFormattingInformation(formattingInfo);
 			return;
@@ -153,7 +153,10 @@ aspect FormattedPrint {
 	
 	protected void BaseNode.addFormattingInformation(FormattingInfo formattingInfo) {
 		if (hasCachedFormatting()) {
+			super.addFormattingInformation(formattingInfo);
 			return;
+		} else if (formattingInfo == null || formattingInfo.hasAlwaysBeenEmpty()) {
+			formattingInfo = formatting;
 		}
 
 		if (hasScannedNonCachedFormatting() && formattingInfo != null) {

@@ -84,6 +84,10 @@ aspect RootAccess {
     	return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.exp;
     }
     
+    public static short ParserHandler.elementModelicaGoal() {
+    	return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.element;
+    }
+    
     public SourceRoot ParserHandler.parseFile(String fileName) 
        throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         return parseModelicaFile(fileName);
@@ -97,6 +101,11 @@ aspect RootAccess {
     public Exp ParserHandler.parseExpString(String str)
        throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         return parseModelicaExpString(str);
+    }
+    
+    public Element ParserHandler.parseElementString(String str)
+       throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
+    	return parseModelicaElementString(str);
     }
     
     public SourceRoot ParserHandler.parseModelicaFile(String fileName) 
@@ -132,6 +141,16 @@ aspect RootAccess {
         //log.debug("ModelicaParser.parseExpString: "+str);
         //exp.dumpTreeBasic("");
         return exp;
+    }
+    
+    public Element ParserHandler.parseModelicaElementString(String str)
+       throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
+    	Element element = null;
+    	AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(str));
+    	beaver.Parser parser = createModelicaParser(scanner);
+    	element = (Element) parser.parse(scanner, elementModelicaGoal());
+    	element.setFormatting(scanner.getFormattingInfo());
+    	return element;
     }
     
     public static Reader ParserHandler.fileReader(File file) throws FileNotFoundException {

@@ -85,6 +85,7 @@
             } else if (hasPartial()) {
             	startNode = getPartial();
             }
+            fc.formatting = formatting;
             fc.setLocationNoTree(startNode, this);
             return fc;
         }
@@ -295,6 +296,7 @@
                                                     l,
                                                     getConstrainingClauseOpt(),
                                                     getComment());
+            c.formatting = formatting;
             c.setLocationNoTree(this);
             //log.debug("PN_ComponentClause->ComponentClause.getStart() = "+c.getStart());
             return c;
@@ -360,6 +362,7 @@
                                                                 new List().add(getName(i)),
                                                                 (Opt)getConstrainingClauseOpt().fullCopy(),
                                                                 (Comment)getComment().fullCopy());
+                        c.formatting = formatting;
                         c.setLocationNoTree(this);
                         //log.debug("ComponentClause->ComponentClause.getStart() = "+c.getStart());
                         l.add(c);
@@ -423,6 +426,7 @@
                 	startNode = getTypePrefixInputOutput();
                 }
 
+                c.formatting = formatting;
                 c.setLocationNoTree(startNode, this);
                 //log.debug("ComponentClause->ComponentDecl.getStart() = "+c.getStart());
                 return c;

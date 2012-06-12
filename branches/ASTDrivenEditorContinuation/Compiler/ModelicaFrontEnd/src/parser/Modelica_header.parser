@@ -17,6 +17,7 @@
 
 %goal source_root;
 %goal exp;
+%goal element;
 
 %header {:
  package org.jmodelica.modelica.parser;
