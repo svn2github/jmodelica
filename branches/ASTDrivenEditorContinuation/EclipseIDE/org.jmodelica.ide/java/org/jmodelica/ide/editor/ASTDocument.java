@@ -1,5 +1,7 @@
 package org.jmodelica.ide.editor;
 
+import java.io.FileNotFoundException;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.Document;
@@ -7,6 +9,9 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.Position;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BaseNode;
+import org.jmodelica.modelica.compiler.Element;
+import org.jmodelica.modelica.compiler.ParserException;
+import org.jmodelica.modelica.compiler.ParserHandler;
 import org.jmodelica.util.FormattingItem;
 import org.jmodelica.util.ScannedFormattingItem;
 
@@ -15,14 +20,14 @@ public class ASTDocument extends Document {
 	private boolean verbose;
 	private ASTNode<?> ast;
 
-	ASTDocument() {
+	public ASTDocument() {
 		super();
 		verbose = false;
 		ast = null;
 		printLog("Default constructor for ASTDocument called.");
 	}
 	
-	ASTDocument(String initialContent) {
+	public ASTDocument(String initialContent) {
 		super(initialContent);
 		verbose = false;
 		ast = null;
@@ -131,29 +136,19 @@ public class ASTDocument extends Document {
 			} catch (BadLocationException badLocationException) {
 				System.err.println(badLocationException.getMessage());
 			}
+		} else {
+			ParserHandler parserHandler = new ParserHandler();
+			try {
+				Element element = parserHandler.parseElementString(event.getText());
+				ast.addNewElement(element, event.getOffset(), this);
+			} catch (ParserException e) {
+				e.printStackTrace();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		
-		
-//		ParserHandler parserHandler = new ParserHandler();
-//		try {
-//			int startLine = getLineOfOffset(event.getOffset()) + 1;
-//			int startColumn = event.getOffset() - getLineInformationOfOffset(event.getOffset()).getOffset() + 1;
-//			int endLine = getLineOfOffset(event.getOffset() + event.getLength()) + 1;
-//			int endColumn = (event.getOffset() + event.getLength()) - getLineInformationOfOffset(event.getOffset() + event.getLength()).getOffset();
-//			Element element = parserHandler.parseElementString("    Real newReal;\n");
-//			element.propagateFormatting();
-//			element.changeOffset();
-//			ClassDecl classDecl = ast.getClassDeclAt(this, event.getOffset()).value();
-//			((FullClassDecl) classDecl).addNewComponentDecl((ComponentDecl) element);
-//		} catch (ParserException e) {
-//			e.printStackTrace();
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
 		printLog("fireDocumentAboutToBeChanged([event = " + event + "])");
 	}
 
@@ -210,8 +205,8 @@ public class ASTDocument extends Document {
 		printLog("set([text = " + text + ", modificationStamp = " + modificationStamp + "])");
 	}
 	
-	public void setAST(CompilationResult compilationResult) {
-		this.ast = compilationResult.root();
+	public void setAST(ASTNode<?> ast) {
+		this.ast = ast;
 		ast.propagateFormatting();
 	}
 }

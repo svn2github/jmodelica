@@ -283,7 +283,7 @@ protected void doSetInput(IEditorInput input) throws CoreException {
 
     IDocument doc = this.getDocumentProvider().getDocument(input);
     if (doc != null && doc instanceof ASTDocument) {
-    	((ASTDocument) doc).setAST(compResult);
+    	((ASTDocument) doc).setAST(compResult.root());
     }
 
     if (getSourceViewer() != null)
