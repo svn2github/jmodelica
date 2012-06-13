@@ -7,7 +7,7 @@ import org.eclipse.core.commands.IHandler;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.services.ISourceProviderService;
-import org.jmodelica.ide.documentation.MyEditor;
+import org.jmodelica.ide.documentation.DocumentationEditor;
 
 public class ForwardHandler extends AbstractHandler implements IHandler  {
 	
@@ -15,8 +15,8 @@ public class ForwardHandler extends AbstractHandler implements IHandler  {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IEditorPart e = HandlerUtil.getActiveEditor(event);
 		boolean isEnabled = false;
-		if (e instanceof MyEditor){
-			isEnabled = ((MyEditor)e).forward();
+		if (e instanceof DocumentationEditor){
+			isEnabled = ((DocumentationEditor)e).forward();
 		}
 		ISourceProviderService sourceProviderService = (ISourceProviderService) HandlerUtil.getActiveWorkbenchWindow(event).getService(ISourceProviderService.class);
 		NavigationProvider navProv = (NavigationProvider) sourceProviderService.getSourceProvider(NavigationProvider.NAVIGATION_FORWARD);

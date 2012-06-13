@@ -4,9 +4,9 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.jmodelica.ide.documentation.MyEditor"
+            class="org.jmodelica.ide.documentation.DocumentationEditor"
             default="false"
-            id="org.jmodelica.ide.documentation.myEditor"
+            id="org.jmodelica.ide.documentation.documentationEditor"
             name="Modelica Documentation Viewer">
       </editor>
    </extension>
@@ -36,8 +36,8 @@
    <extension
          point="org.eclipse.ui.elementFactories">
       <factory
-            class="org.jmodelica.ide.documentation.MyEditorInputFactory"
-            id="org.jmodelica.ide.documentation.myEditorInputFactory">
+            class="org.jmodelica.ide.documentation.DocumentationEditorInputFactory"
+            id="org.jmodelica.ide.documentation.documentationEditorInputFactory">
       </factory>
    </extension>
    
@@ -106,7 +106,7 @@
                      <with
                          variable="activePartId">
                           <equals
-                             value="org.jmodelica.ide.documentation.myEditor">
+                             value="org.jmodelica.ide.documentation.documentationEditor">
                           </equals>
                      </with>
           </visibleWhen>
@@ -122,7 +122,7 @@
                      <with
                          variable="activePartId">
                           <equals
-                             value="org.jmodelica.ide.documentation.myEditor">
+                             value="org.jmodelica.ide.documentation.documentationEditor">
                           </equals>
                      </with>
           </visibleWhen>

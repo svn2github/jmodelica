@@ -2,29 +2,27 @@ package org.jmodelica.ide.documentation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
+import org.eclipse.swt.browser.TitleEvent;
+import org.eclipse.swt.browser.TitleListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
-import org.eclipse.ui.AbstractSourceProvider;
-import org.eclipse.ui.ISources;
-import org.eclipse.ui.services.ISourceProviderService;
 import org.jmodelica.ide.documentation.commands.NavigationProvider;
 import org.jmodelica.modelica.compiler.AbstractEquation;
 import org.jmodelica.modelica.compiler.Access;
 import org.jmodelica.modelica.compiler.Algorithm;
-import org.jmodelica.modelica.compiler.AnnotationNode;
-import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.Comment;
 import org.jmodelica.modelica.compiler.ComponentDecl;
 import org.jmodelica.modelica.compiler.ConstrainingClause;
 import org.jmodelica.modelica.compiler.Encapsulated;
-import org.jmodelica.modelica.compiler.ExtendsClause;
 import org.jmodelica.modelica.compiler.ExternalClause;
 import org.jmodelica.modelica.compiler.Final;
 import org.jmodelica.modelica.compiler.FullClassDecl;
@@ -41,11 +39,12 @@ import org.jmodelica.modelica.compiler.Redeclare;
 import org.jmodelica.modelica.compiler.Replaceable;
 import org.jmodelica.modelica.compiler.ShortClassDecl;
 import org.jmodelica.modelica.compiler.StringComment;
+import org.jmodelica.modelica.compiler.StringLitExp;
 import org.jmodelica.modelica.compiler.TypePrefixFlow;
 import org.jmodelica.modelica.compiler.UnknownClassDecl;
 import org.jmodelica.modelica.compiler.VisibilityType;
 
-public class BrowserContent implements LocationListener, MouseListener{
+public class BrowserContent implements LocationListener, MouseListener, TitleListener{
 
 	private StringBuilder content;
 	private Browser browser;
@@ -53,34 +52,22 @@ public class BrowserContent implements LocationListener, MouseListener{
 	private ArrayList<String> history;
 	private int histIndex;
 	private int histSize;
-	private InstClassDecl icd;
-	private static final String FORWARD = "f";
-	private static final String BACK = "b";
 	private static final String PRIMITIVE_TYPE = "primitive type";
 	private String head;
 	private Program program;
-	private boolean forwardEnabled, backEnabled;
 	private NavigationProvider navProv;
-	private void genHead(String scriptPath){
-		head = "<head><style type=\"text/css\">body{background-color:#fffffa;}" +
-				"h1{margin-left:20;font-family:\"Arial\";color:black;font-size:32px;}" +
-				"h2{margin-left:20;color:black;text-align:left;font-size:24px;}" +
-				"h3{margin-left:20;color:black;text-align:left;font-size:20px;font-style=\"bold\";}" +
-				"span{font-family:Georgia, \"Times New Roman\", Times, serif;font-size:18px;}" +
-				"span.text {}" +
-				"span.code {font-family:Monospace, \"Courier New\", Times, serif;}" +
-				"div{margin-left:20; font-family:Georgia, \"Times New Roman\", Times, serif;font-size:18px;}" +
-				"div.text {}" +
-				"div.code {font-family:Monospace, \"Courier New\", Times, serif;}" +
-				"a {font-family:Georgia, \"Times New Roman\", Times, serif;font-size:18px;cursor: auto}" +
-				"a:link {color:blue;}" +
-				"a:visited {color: #660066;}" +
-				"a:hover {text-decoration: none;}" +
-				"a:active {text-decoration: none}" +
-				"p{margin-top:10; margin-bottom:10;margin-left:20;font-family:Georgia, \"Times New Roman\", Times, serif;font-size:18px;}" +
-				"</style><script type=\"text/javascript\" src=\"" + scriptPath + "\"></script>" +
-				"</head><body>";
-	}
+	private static final String SAVE_SCRIPT =
+			"var area = document.getElementsByTagName('TEXTAREA')[0];"+
+			"var y = document.createElement('P');"+
+			"var z = area.parentNode;"+
+			"var tmp = area.value;"+
+			"y.innerHTML = area.value;"+
+			"z.insertBefore(y,area);"+
+			"z.removeChild(area);"+
+			"z.removeChild(document.getElementsByTagName('button')[0]);"+
+			"editing = false;"+
+			"document.title = \"\";"+
+			"return tmp;";
 	private static final String EDIT_SCRIPT = 
 			"var editing  = false;" +
 
@@ -125,44 +112,11 @@ public class BrowserContent implements LocationListener, MouseListener{
 	"	editing = false;"+
 	"}"+
 	"document.onclick = catchIt;";
-
-	/*
-	 * 
-	 * abstract BaseClassDecl : ClassDecl ::= VisibilityType 
-									   [Encapsulated] 
-	                                   [Partial] 
-	                                   Restriction 
-	                                   Name:IdDecl  
-                                       [Redeclare]
-	                                   [Final]
-	                                   [Inner]
-	                                   [Outer]
-	                                   [Replaceable]
-	                                   [ConstrainingClause]
-                                       [ConstrainingClauseComment:Comment];
-	 */
-
-	/*
-	 * FullClassDecl : BaseClassDecl ::= [StringComment]  
-                                  Equation:AbstractEquation* 
-                                  Algorithm*
-                                  Super:ExtendsClause*  
-                                  Import:ImportClause* 
-                                  ClassDecl* 
-                                  ComponentDecl*
-                                  Annotation* 
-                                  [ExternalClause] 
-                                  EndDecl;
-	 */
+	
 	public BrowserContent(FullClassDecl fullClassDecl, Browser browser, InstClassDecl icd, Program program, NavigationProvider navProv){
 		this.navProv = navProv;
 		this.program = program;
-		this.icd = icd; //unused
 		String path = this.getClass().getProtectionDomain().getCodeSource().getLocation() + this.getClass().getResource("/resources/script.js").getPath();
-		//		URL url2 = this.getClass().getProtectionDomain().getCodeSource().getLocation();
-		//		URL url = this.getClass().getResource("/resources/script.js");
-		//		String urlPath = url.getPath();
-		//		String t = url2 + urlPath;
 		genHead(path);
 		hyperlinks = new HashMap<String, ClassDecl>();
 		history = new ArrayList<String>();
@@ -173,24 +127,37 @@ public class BrowserContent implements LocationListener, MouseListener{
 		this.browser = browser;
 		browser.addLocationListener(this);
 		browser.addMouseListener(this);
+		browser.addTitleListener(this);
 		renderClassDecl(hyperlinks.get(fullClassDecl.name()));
 	}
 
+	private void genHead(String scriptPath){
+		head = "<head><style type=\"text/css\">body{background-color:#fffffa;}" +
+				"h1{margin-left:20;font-family:\"Arial\";color:black;font-size:32px;}" +
+				"h2{margin-left:20;color:black;text-align:left;font-size:24px;}" +
+				"h3{margin-left:20;color:black;text-align:left;font-size:20px;font-style=\"bold\";}" +
+				"span{font-family:Georgia, \"Times New Roman\", Times, serif;font-size:18px;}" +
+				"span.text {}" +
+				"span.code {font-family:Monospace, \"Courier New\", Times, serif;}" +
+				"div{margin-left:20; font-family:Georgia, \"Times New Roman\", Times, serif;font-size:18px;}" +
+				"div.text {}" +
+				"div.code {font-family:Monospace, \"Courier New\", Times, serif;}" +
+				"a {font-family:Georgia, \"Times New Roman\", Times, serif;font-size:18px;cursor: auto}" +
+				"a:link {color:blue;}" +
+				"a:visited {color: #660066;}" +
+				"a:hover {text-decoration: none;}" +
+				"a:active {text-decoration: none}" +
+				"p{margin-top:10; margin-bottom:10;margin-left:20;font-family:Georgia, \"Times New Roman\", Times, serif;font-size:18px;}" +
+				"</style><script type=\"text/javascript\" src=\"" + scriptPath + "\"></script>" +
+				"</head><body>";
+	}
+	
 	private void renderClassDecl(ClassDecl fcd){
 		content = new StringBuilder(head);
 		genBreadCrumBar(fcd);
 		genHeader();
 		genFooter();
-		if(histIndex > 0){
-			navProv.setBackEnabled(true);
-		}else{
-			navProv.setBackEnabled(false);
-		}
-		if (histSize > histIndex){
-			navProv.setForwardEnabled(true);
-		}else{
-			navProv.setForwardEnabled(false);
-		}
+
 		if (fcd instanceof UnknownClassDecl){
 			renderUnknownClassDecl((UnknownClassDecl)fcd);
 			return;
@@ -208,24 +175,66 @@ public class BrowserContent implements LocationListener, MouseListener{
 			renderShortClassDecl((ShortClassDecl) fcd);
 			return;
 		}
-
 	}
 
 	private void renderUnknownClassDecl(UnknownClassDecl fcd) {
-		content.append("<span class=\"text\">Error: unknown class declaration</span>");
+		content.append("<span class=\"text\">Error: The class <b>" + history.get(histIndex) + "</b> could not be found."+
+										" To get the latest version of the Modelica standard library, please visit " +
+										"<a href=\"https://www.modelica.org/libraries/Modelica\">https://www.modelica.org/libraries/Modelica</a></span>");
 		browser.setText(content.toString());
 
 	}
 
 	public String processEmbeddedHTML(String htmlCode){
-		return htmlCode; //TODO replace links, remove <html> etc.
-		//also parse in full-path-on-hoover for all links!
+		String urlPrefix = "a href=";
+		Pattern urlPattern = Pattern.compile(urlPrefix + "\"(.+)\"", Pattern.CASE_INSENSITIVE | Pattern.CANON_EQ);
+		Matcher urlMatcher = urlPattern.matcher(htmlCode);
+		StringBuffer urlSb = new StringBuffer();
+		while (urlMatcher.find()){
+			//append hoover text
+			MatchResult mr = urlMatcher.toMatchResult();
+			String match = htmlCode.substring(mr.start() + urlPrefix.length(), mr.end()); //e.g "Modelica://Modelica.UsersGuide.Overview"
+			String matchWithoutParentesis = match.substring(1, match.length() -1);
+			if (matchWithoutParentesis.startsWith("Modelica://")){
+				String classPath = matchWithoutParentesis.substring("Modelica://".length());
+				hyperlinks.put(classPath, program.simpleLookupClassDotted(classPath));
+			}
+			urlMatcher.appendReplacement(urlSb, htmlCode.substring(mr.start(), mr.end()) + " title=" + match);
+		}
+		urlMatcher.appendTail(urlSb);
+		
+		String code = urlSb.toString();
+		String imPrefix = "img src=";
+		Pattern imgPattern = Pattern.compile(imPrefix + "\"(.+)\"", Pattern.CASE_INSENSITIVE | Pattern.CANON_EQ);
+		Matcher imgMatcher = imgPattern.matcher(code);
+		StringBuffer imgSb = new StringBuffer();
+		while(imgMatcher.find()){
+			MatchResult mr = imgMatcher.toMatchResult();
+			String match = code.substring(mr.start() + imPrefix.length(), mr.end());
+			imgMatcher.appendReplacement(imgSb, code.substring(mr.start(), mr.end()) + " title=" + match);
+		}
+		imgMatcher.appendTail(imgSb);
+		
+		return imgSb.toString();
 	}
+	
+	public void saveNewDocumentationAnnotation(String newVal){
+		ClassDecl fcd = hyperlinks.get(history.get(histIndex));
+		StringLitExp exp = new StringLitExp(newVal);
+		fcd.annotation().forPath("Documentation/info").setValue(exp);
+		SaveSafeRunnable ssr = new SaveSafeRunnable(fcd);
+		SafeRunner.run(ssr);
+//		try {
+//			definition.getFile().setContents(new ByteArrayInputStream(s.getBytes()), false, true, null);
+//		} catch (CoreException e) {
+//			e.printStackTrace();
+//		}
+	}
+	
 	private void renderPackage(FullClassDecl fcd){
 		content.append("<h1>" + fcd.getRestriction() + " " + fcd.getName().getID() + "</h1>");
 		if(fcd.hasStringComment()){
 			content.append("<div class=\"text\"><i>" + fcd.stringComment() + "</i></div>");
-			Opt<StringComment> opt = fcd.getStringCommentOpt();
 		}
 		//ANNOTATION
 		String embeddedHTML = fcd.annotation().forPath("Documentation/info").string();
@@ -237,11 +246,12 @@ public class BrowserContent implements LocationListener, MouseListener{
 		ArrayList<ClassDecl> fcds = fcd.classes();
 		content.append("<table BORDER=\"3\" CELLPADDING=\"3\" CELLSPACING=\"0\" >" +
 				"<tr BGCOLOR=\"#CCCCFF\" align=\"center\">" + 
-				"<td><b><span class=\"text\">Class</span></b></td><td><b><span class=\"text\">Type</span></b></td><td><b><span class=\"text\">Description</span></b></td></b></tr>");
+				"<td><b><span class=\"text\">Class</span></b></td>" + 
+				"<td><b><span class=\"text\">Type</span></b></td>" +
+				"<td><b><span class=\"text\">Description</span></b></td></b></tr>");
 		for (ClassDecl cd : fcds){
 			content.append("<tr>");
 			hyperlinks.put(cd.name(), cd);
-			String name = cd.name();
 			String classCategory;
 			if (cd instanceof FullClassDecl){
 				classCategory = ((FullClassDecl)cd).getRestriction().toString();
@@ -255,7 +265,7 @@ public class BrowserContent implements LocationListener, MouseListener{
 				comment = cd.stringComment();
 			}
 
-			content.append("<td><a href=\"" + cd.name() + "\" title = \"" + cd.name() + "\">" + cd.name() + "</a></td>" + 
+			content.append("<td>" + classDeclLink(cd, false) + "</td>" + 
 					"<td><span class=\"text\">" + classCategory + "</span></td>" + "<td><span class=\"text\">" + comment + "&nbsp;" + "</span></td>");
 			content.append("</tr>");
 		}
@@ -264,32 +274,12 @@ public class BrowserContent implements LocationListener, MouseListener{
 	}
 
 	private void renderFullClassDecl(FullClassDecl fcd){
-		Redeclare rd;
-		if(fcd.hasRedeclare()){
-			rd = fcd.getRedeclare();
-		}
-		List<Algorithm> al = fcd.getAlgorithmList();
-		List<ClassDecl> classDecls = fcd.getClassDeclList();
-		if (fcd.hasExternalClause()){
-			ExternalClause ec = fcd.getExternalClause();
-			System.out.println("");
-		}
-		if (fcd.hasEncapsulated()){
-			Encapsulated e = fcd.getEncapsulated();
-		}
-		if (fcd.hasReplaceable()){
-			Replaceable r = fcd.getReplaceable();
-		}
-		if (fcd.hasPartial()){
-			Partial p = fcd.getPartial();
-		}
 		String name = fcd.getName().getID();
 		content.append("<h1>" + fcd.getRestriction() + " " + name + "</h1>");
 		if(fcd.hasStringComment()){
 			content.append("<div class=\"text\"><i>" + fcd.stringComment() + "</i></div>");
-			Opt<StringComment> opt = fcd.getStringCommentOpt();
 		}
-
+		
 		//ANNOTATION
 		String embeddedHTML = fcd.annotation().forPath("Documentation/info").string();
 		if (embeddedHTML != null){
@@ -333,37 +323,6 @@ public class BrowserContent implements LocationListener, MouseListener{
 					content.append("<td>" + "<span class=\"text\">" + s + "</span></td><td><span class=\"text\">" + cd.getName().getID() + "</span></td><td><span class=\"text\">" + stringComment + "</span></td>");
 				}else{
 					content.append("<td>" + classDeclLink(cdd, false) + "</td><td><span class=\"text\">" + cd.getName().getID() + "</span></td><td><span class=\"text\">" + stringComment + "</span></td>");
-				}
-
-				VisibilityType vt = cd.getVisibilityType();
-				Comment c1 = cd.getCCComment();
-				Comment c2 = cd.getComment();
-				Modification m;
-				ConstrainingClause cc;
-				if (cd.hasRedeclare()){
-					Redeclare r = cd.getRedeclare();
-				}
-				if (cd.hasFinal()){
-					Final f = cd.getFinal();
-				}
-				if (cd.hasInner()){
-					Inner in = cd.getInner();
-				}
-				if (cd.hasOuter()){
-					Outer o = cd.getOuter();
-				}
-				if (cd.hasReplaceable()){
-					Replaceable r = cd.getReplaceable();
-				}
-				if (cd.hasTypePrefixFlow()){
-					TypePrefixFlow  tpf = cd.getTypePrefixFlow();
-				}
-
-				if (cd.hasModification()){
-					m = cd.getModification();
-				}
-				if (cd.hasConstrainingClause()){
-					cc = cd.getConstrainingClause();
 				}
 				content.append("</tr>");
 			}
@@ -414,7 +373,11 @@ public class BrowserContent implements LocationListener, MouseListener{
 		}
 		return sb.toString();
 	}
+	
+	
 	private void genBreadCrumBar(ClassDecl bcd) {
+		if (bcd == null) return; //link that didnt fall under any existing category and therefore is assumed its a classDecl
+								// even if it isnt.
 		StringBuilder sb = new StringBuilder();
 		ClassDecl tmp = bcd;
 		ArrayList<String> path = new ArrayList<String>();
@@ -440,16 +403,54 @@ public class BrowserContent implements LocationListener, MouseListener{
 	}
 
 	public void genHeader(){
-		//TODO ?
+		//TODO header
 	}
+	
 	public void genFooter(){
-		//TODO ?
+		//TODO footer
 	}
 
 	private String stripAbout(String location){
 		return location.contains(":") ? location.substring(location.lastIndexOf(":")+1) : location;
 	}
 
+	public boolean forward(){
+		histIndex++;
+		String location = history.get(histIndex);
+		renderLink(location);
+		//renderClassDecl(hyperlinks.get(location));
+		return histSize > histIndex;
+	}
+	
+	public boolean back(){
+		histIndex--;
+		String location = history.get(histIndex);
+		renderLink(location);
+		return histIndex > 0;
+	}
+
+	public void renderLink(String link){
+		navProv.setBackEnabled(histIndex > 0 ? true : false);
+		navProv.setForwardEnabled(histSize > histIndex ? true : false);
+		if (link.startsWith("//www")){
+			renderHTTP(link);
+		}else{
+			String s = link.startsWith("//Modelica") ? link.substring("//".length(), link.length()-1) : link;
+			renderClassDecl(hyperlinks.get(s));
+		}
+//		}else if (link.startsWith("//Modelica")){
+//			renderModelica(link);
+//		}else{
+//			renderClassDecl(hyperlinks.get(link));
+//		}
+	}
+	
+	public void renderHTTP(String url){
+		//String content = browser.gettext();
+		//browser.setUrl(url);
+		//browser.setText("rendered http");
+	}
+	
 	@Override
 	public void changing(LocationEvent event) {
 		String location = stripAbout(event.location);
@@ -459,29 +460,13 @@ public class BrowserContent implements LocationListener, MouseListener{
 			event.doit = false;
 		}
 	}
-
-	public boolean forward(){
-		histIndex++;
-		String location = history.get(histIndex);
-		renderClassDecl(hyperlinks.get(location));
-		return histSize > histIndex;
-	}
-	public boolean back(){
-		histIndex--;
-		String location = history.get(histIndex);
-		renderClassDecl(hyperlinks.get(location));
-		return histIndex > 0;
-	}
-
+	
 	@Override
 	public void changed(LocationEvent event) {
 
-		String location = stripAbout(event.location);
+		String location = stripAbout(event.location).replace("/", "");
 
 		if (location.equals("blank")) return;
-		if (location.startsWith("http://")){
-			//TODO: just render the website, not the class decl. Update history though
-		}
 		histIndex++;
 		if (histIndex >= history.size()){
 			history.add(location);
@@ -489,9 +474,29 @@ public class BrowserContent implements LocationListener, MouseListener{
 			history.set(histIndex, location);
 		}
 		histSize = histIndex;
-		renderClassDecl(hyperlinks.get(location));
+		renderLink(location);
 	}
 
+//	public boolean save(ClassDecl cd){
+//		StoredDefinition definition = cd.getDefinition();
+//		String s = definition.prettyPrintFormatted();
+//		try {
+//			definition.getFile().setContents(new ByteArrayInputStream(s.getBytes()), false, true, null);
+//		} catch (CoreException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		SafeRunner.run(new SafeRunnable() {
+//			public void run() throws Exception {
+//				StoredDefinition definition = cd.getDefinition();
+//				
+//				definition.getFile().setContents(new ByteArrayInputStream(definition.prettyPrintFormatted().getBytes()), false, true, null);
+//			}
+//		});
+//		return true;
+//	}
+	
 	@Override
 	public String toString(){
 		return content.toString();
@@ -499,18 +504,22 @@ public class BrowserContent implements LocationListener, MouseListener{
 
 	@Override
 	public void mouseDoubleClick(MouseEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void mouseDown(MouseEvent e) {
-		//TODO 
 	}
 
 	@Override
 	public void mouseUp(MouseEvent e) {
-		// TODO Auto-generated method stub
+	}
 
+	@Override
+	public void changed(TitleEvent event) {
+		if (((String)browser.evaluate("return document.title")).equals("dynamicChange")){
+			String s = (String)browser.evaluate(SAVE_SCRIPT);
+			browser.evaluate("document.title = \"\"");
+			saveNewDocumentationAnnotation("<p>" + s + "</p>");
+		}
 	}
 }

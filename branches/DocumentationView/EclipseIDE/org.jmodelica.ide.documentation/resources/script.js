@@ -4,7 +4,7 @@ if (document.getElementById && document.createElement) {
 	var btn = document.createElement('BUTTON');
 	var buttext = document.createTextNode('Save');
 	btn.appendChild(buttext);
-	btn.onclick = saveChanges;
+	btn.onclick = preSaveChanges;
 }
 
 function onClick(e) {
@@ -30,16 +30,21 @@ function onClick(e) {
 	y.focus();
 	editing = true;
 }
-
+function preSaveChanges() {
+	document.title = "dynamicChange";
+}
 function saveChanges() {
 	var area = document.getElementsByTagName('TEXTAREA')[0];
 	var y = document.createElement('P');
 	var z = area.parentNode;
+	var tmp = area.value;
 	y.innerHTML = area.value;
 	z.insertBefore(y,area);
 	z.removeChild(area);
 	z.removeChild(document.getElementsByTagName('button')[0]);
 	editing = false;
+	document.title = "";
+	return tmp;
 }
 
 document.onclick = onClick;
