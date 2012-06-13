@@ -387,6 +387,55 @@ equation
 end RecordType5;
 
 
+model RecordType6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RecordType6",
+         description="Records: Inheritance",
+         flatModel="
+fclass RecordTests.RecordType6
+ RecordTests.RecordType6.A x(a = 1,b = 2);
+ RecordTests.RecordType6.B y;
+equation
+ y = x;
+
+ record RecordTests.RecordType6.A
+  Real a;
+  Real b;
+ end RecordTests.RecordType6.A;
+
+ record RecordTests.RecordType6.B
+  Real a;
+  Real b;
+ end RecordTests.RecordType6.B;
+end RecordTests.RecordType6;
+")})));
+
+ record A
+  Real a;
+  Real b;
+ end A;
+
+ record B
+  extends C;
+ end B;
+
+ record C
+  extends D;
+  Real a;
+ end C;
+
+ record D
+  Real b;
+ end D;
+ 
+ A x(a=1, b=2);
+ B y;
+equation
+ y = x;		
+end RecordType6;
+
+
 
 model RecordBinding1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

@@ -274,7 +274,7 @@ BaseClassDecl base_class_decl
     
     :}
   | error {: 
-      return new BadClassDecl(); 
+      return new BadClassDecl();
   :};
 
 EnumSpecification enum_specification =

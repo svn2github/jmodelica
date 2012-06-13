@@ -114,6 +114,10 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		optimicaCTemplatefile = null;
 	}
 	
+	public boolean hasModelicaFileExt(String file) {
+		return super.hasModelicaFileExt(file) || file.endsWith(".mop");
+	}
+	
 	/**
 	 * \brief Create a new FOptClass object.
 	 * @param icd A reference to a instance class - in compiler extensions

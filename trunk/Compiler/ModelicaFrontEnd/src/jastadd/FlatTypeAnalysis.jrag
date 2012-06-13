@@ -92,7 +92,7 @@ aspect FlatTypeAnalysis {
 		if (isArray() && getNumInstComponentDecl() == 0)
 			return fUnknownType();
 		InstComponentDecl root = isArray() ? getInstComponentDecl(0) : this;
-		for (InstComponentDecl icd : root.getInstComponentDecls()) 
+		for (InstComponentDecl icd : root.allInstComponentDecls()) 
 			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
 		FRecordType type = new FRecordType(size(), myInstClass().qualifiedName(), new List());
 		for (FRecordComponentType comp : comps)

@@ -16,6 +16,7 @@
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 
     /**
      * TODO: Is it a good idea to inherit? Should env be a component?
@@ -1414,6 +1415,61 @@ aspect InstanceAST_API {
 	eq InstClassDecl.getChild().containingInstComponent()     = null;
 	eq InstRoot.getChild().containingInstComponent()          = null;
 	eq FlatRoot.getChild().containingInstComponent()          = null;
+
+	
+	/**
+	 * Iterate over all components in this node and all InstExtends (recursively).
+	 * 
+	 * @return  an Iterable over the components
+	 */
+	public Iterable<InstComponentDecl> InstNode.allInstComponentDecls() {
+		return new Iterable<InstComponentDecl>() {
+			public Iterator<InstComponentDecl> iterator() {
+				return allInstComponentDeclsIterator();
+			}
+		};
+	}
+	
+	protected Iterator<InstComponentDecl> InstNode.allInstComponentDeclsIterator() {
+		return new InstComponentIterator();
+	}
+	
+	public class InstNode {
+		
+		private class InstComponentIterator implements Iterator<InstComponentDecl> {
+			
+			private Iterator<InstComponentDecl> current;
+			private Iterator<InstExtends> exts;
+			
+			public InstComponentIterator() {
+				current = getInstComponentDecls().iterator();
+				exts = getInstExtendss().iterator();
+				update();
+			}
+			
+			public boolean hasNext() {
+				return current.hasNext();
+			}
+
+			public InstComponentDecl next() {
+				InstComponentDecl res = current.next();
+				update();
+				return res;
+			}
+
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+			
+			private void update() {
+				while (!current.hasNext() && exts.hasNext()) {
+					current = exts.next().allInstComponentDeclsIterator();
+				}
+			}
+			
+		}
+		
+	}
 	
 }
 

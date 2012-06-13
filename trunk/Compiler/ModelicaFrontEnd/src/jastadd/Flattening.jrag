@@ -288,7 +288,7 @@ aspect Flattening {
 			FRecordDecl frd = new FRecordDecl();
 	   		frd.setFQName(new FQName(qualifiedName()));
 	   		
-	   		for (InstComponentDecl icd : getInstComponentDecls())
+	   		for (InstComponentDecl icd : allInstComponentDecls())
 				icd.flattenInRecord(frd, fc);
 			
 			fc.addFRecordDecl(frd);
@@ -1447,6 +1447,7 @@ aspect FlatExpressions {
 	public FSampleExp  FSampleExp.flatten(FQName prefix)  { return new FSampleExp(getOffset().flatten(prefix), getInterval().flatten(prefix)); }
 	public FInitialExp FInitialExp.flatten(FQName prefix) { return new FInitialExp(); }
 	public FSmoothExp  FSmoothExp.flatten(FQName prefix)  { return new FSmoothExp(getOrder().flatten(prefix), getFExp().flatten(prefix)); }
+	
 	
 	public FMinMaxExp FMinMaxExp.flatten(FQName prefix) { 
 		return createNode(getX().flatten(prefix), hasY() ? getY().flatten(prefix) : null); 
