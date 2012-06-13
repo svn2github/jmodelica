@@ -103,10 +103,21 @@ aspect FormattedPrint {
 		getParent().propagateFormatting();
 	}
 	
+	protected void ASTNode.propagateFormatting(FormattingInfo formattingInfo) {
+		for (ASTNode<?> node : this) {
+			node.propagateFormatting(formattingInfo);
+		}
+	}
+	
+	@Override
 	protected void BaseNode.propagateFormatting(FormattingInfo formattingInfo) {
 		if (formattingInfo == null) {
-			addFormattingInformation(formattingInfo);
-			return;
+			if (hasScannedNonCachedFormatting()) {
+				formattingInfo = formatting;
+			} else {
+				super.propagateFormatting(formattingInfo);
+				return;
+			}
 		}
 
 		if (!formattingInfo.isEmpty()) {
@@ -153,10 +164,7 @@ aspect FormattedPrint {
 	
 	protected void BaseNode.addFormattingInformation(FormattingInfo formattingInfo) {
 		if (hasCachedFormatting()) {
-			super.addFormattingInformation(formattingInfo);
 			return;
-		} else if (formattingInfo == null || formattingInfo.hasAlwaysBeenEmpty()) {
-			formattingInfo = formatting;
 		}
 
 		if (hasScannedNonCachedFormatting() && formattingInfo != null) {
