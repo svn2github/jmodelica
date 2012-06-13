@@ -136,7 +136,7 @@ public class ASTDocument extends Document {
 			} catch (BadLocationException badLocationException) {
 				System.err.println(badLocationException.getMessage());
 			}
-		} else {
+		} else if (event.getModificationStamp() != 0) {
 			ParserHandler parserHandler = new ParserHandler();
 			try {
 				Element element = parserHandler.parseElementString(event.getText());

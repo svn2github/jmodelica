@@ -194,9 +194,9 @@ aspect ASTDocument {
 
 		int startLine = document.getLineOfOffset(offset) + 1;
 		int startColumn = offset - document.getLineInformationOfOffset(offset).getOffset() + 1;
-		element.offsetNodesAfter(1, 1, startLine - 1, startColumn - 1);
+		element.offsetNodesAfter(0, 0, startLine - 1, startColumn - 1);
 		for (FormattingItem item : element.formatting) {
-			item.offsetItemAfter(1, 1, startLine - 1, startColumn - 1);
+			item.offsetItemAfter(0, 0, startLine - 1, startColumn - 1);
 		}
 		maybeClassDecl.value().insertNewElement(element, startLine, startColumn);
 	}
