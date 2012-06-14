@@ -2018,7 +2018,7 @@ class FMUModel2(FMUModel):
             raise FMUException('Failed to evaluate the directional derivative.')
 
     def check_jacobians(self, delta_abs=1e-2, delta_rel=1e-6, tol=1e-3, 
-                        plot_sparsity_check=False):
+                        plot_sparsity_check=False,check_sparsity_structure=False):
         """
         Check if the Jacobians are correct by means of finite differences.
         
@@ -2053,7 +2053,6 @@ class FMUModel2(FMUModel):
         """
         A,B,C,D = self.get_partial_derivatives()
         A_st,B_st,C_st,D_st = self.get_partial_derivatives_incidence()
-        
         nx = self._md.get_number_of_continuous_states()
         ncu = self._md.get_number_of_continuous_inputs()
         ncy = self._md.get_number_of_continuous_outputs()
@@ -2117,7 +2116,7 @@ class FMUModel2(FMUModel):
             
 
         n_err = 0
-        print "Errors in Jaobians:"
+        print "Errors in Jacobians:"
         for i in range(nx):
             for j in range(nx):
                 if N.abs((A[i,j]-Afd[i,j])/(N.abs(Afd[i,j]) + 1)) > tol:                    
@@ -2127,7 +2126,6 @@ class FMUModel2(FMUModel):
                     " - err: " + "{0: e}".format(A[i,j]-Afd[i,j])
                     n_err = n_err + 1
                     
-
         for i in range(nx):
             for j in range(ncu):
                 if N.abs((B[i,j]-Bfd[i,j])/(N.abs(Bfd[i,j]) + 1)) > tol:
@@ -2156,6 +2154,50 @@ class FMUModel2(FMUModel):
                     n_err = n_err + 1
 
         print "Found " + repr(n_err) + " errors"
+
+        n_spar_errs = 0
+        if check_sparsity_structure:
+            m_eps = 1e-14
+            
+            A_sp = N.zeros((nx,nx))
+            for i in range(A_st.shape[0]):
+                A_sp[A_st[i,0],A_st[i,1]] = 1
+            for i in range(nx):
+                for j in range(nx):
+                    if(N.abs(Afd[i,j]) > m_eps):
+                        if(not A_sp[i,j] == 1 ):
+                            n_spar_errs = n_spar_errs + 1
+
+
+            B_sp = N.zeros((nx,ncu))
+            for i in range(B_st.shape[0]):
+                B_sp[B_st[i,0],B_st[i,1]] = 1
+            for i in range(nx):
+                for j in range(ncu):
+                    if(N.abs(Bfd[i,j]) > m_eps):
+                        if(not B_sp[i,j] == 1 ):
+                            n_spar_errs = n_spar_errs + 1
+        
+            C_sp = N.zeros((ncy,nx))
+            for i in range(C_st.shape[0]):
+                C_sp[C_st[i,0],C_st[i,1]] = 1
+            for i in range(ncy):
+                for j in range(nx):
+                    if(N.abs(Cfd[i,j]) > m_eps):
+                        if(not C_sp[i,j] == 1 ):
+                            n_spar_errs = n_spar_errs + 1
+
+
+            D_sp = N.zeros((ncy,ncu))
+            for i in range(D_st.shape[0]):
+                D_sp[D_st[i,0],D_st[i,1]] = 1
+            for i in range(ncy):
+                for j in range(ncu):
+                    if(N.abs(Dfd[i,j]) > m_eps):
+                        if(not D_sp[i,j] == 1 ):
+                            n_spar_errs = n_spar_errs + 1                            
+        
+            print "Errors in the sparsity pattern: " + str(n_spar_errs)
 
         if plot_sparsity_check:
             
@@ -2214,6 +2256,7 @@ class FMUModel2(FMUModel):
             plt.axis([0, ncu+1, ncy+1, 0])
             
             plt.show()
-            
+        if check_sparsity_structure:
+            return Afd,Bfd,Cfd,Dfd,n_err,n_spar_errs    
         return Afd,Bfd,Cfd,Dfd,n_err
     
