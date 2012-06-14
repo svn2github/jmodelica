@@ -1,19 +1,11 @@
 package org.jmodelica.ide.editor;
 
-import java.io.FileNotFoundException;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.Position;
 import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.BaseNode;
-import org.jmodelica.modelica.compiler.Element;
-import org.jmodelica.modelica.compiler.ParserException;
-import org.jmodelica.modelica.compiler.ParserHandler;
-import org.jmodelica.util.FormattingItem;
-import org.jmodelica.util.ScannedFormattingItem;
 
 
 public class ASTDocument extends Document {
@@ -104,7 +96,7 @@ public class ASTDocument extends Document {
 	@Override
 	protected void fireDocumentAboutToBeChanged(DocumentEvent event) {
 		super.fireDocumentAboutToBeChanged(event);		
-		if (event.getText().matches("[ \t\f\r\n]*")) {
+		/*if (event.getText().matches("[ \t\f\r\n]*")) {
 			try {
 				int startLine = getLineOfOffset(event.getOffset()) + 1;
 				int startColumn = event.getOffset() - getLineInformationOfOffset(event.getOffset()).getOffset() + 1;
@@ -136,17 +128,22 @@ public class ASTDocument extends Document {
 			} catch (BadLocationException badLocationException) {
 				System.err.println(badLocationException.getMessage());
 			}
-		} else if (event.getModificationStamp() != 0) {
-			ParserHandler parserHandler = new ParserHandler();
+		} else*/ if (event.getModificationStamp() != 0) {
+//			ParserHandler parserHandler = new ParserHandler();
+//			try {
+//				Element element = parserHandler.parseElementString(event.getText());
+//				ast.addNewElement(element, event.getOffset(), this);
+//			} catch (ParserException e) {
+//				e.printStackTrace();
+//			} catch (FileNotFoundException e) {
+//				e.printStackTrace();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 			try {
-				Element element = parserHandler.parseElementString(event.getText());
-				ast.addNewElement(element, event.getOffset(), this);
-			} catch (ParserException e) {
-				e.printStackTrace();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
+				ast.addNewText(event.getText(), event.getOffset(), this);
+			} catch (BadLocationException badLocationException) {
+				badLocationException.printStackTrace();
 			}
 		}
 		printLog("fireDocumentAboutToBeChanged([event = " + event + "])");

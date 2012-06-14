@@ -161,7 +161,7 @@ aspect ASTDocument {
 	}
 	
 	public void BaseNode.offsetNodesAfter(int line, int column, int byLines, int byColumnsOnLastLine) {
-		if (getStartLineWithFormatting() > line || (getStartLineWithFormatting() == line && getStartColumnWithFormatting() >= column)) {
+		if (line < getEndLineWithFormatting() || (line == getEndLineWithFormatting() && column <= getEndColumnWithFormatting())) {
 			preFormatting.offsetItemAfter(line, column, byLines, byColumnsOnLastLine);
 			insideFormatting.offsetItemAfter(line, column, byLines, byColumnsOnLastLine);
 			postFormatting.offsetItemAfter(line, column, byLines, byColumnsOnLastLine);
@@ -177,11 +177,52 @@ aspect ASTDocument {
 				}
 				start = Symbol.makePosition(Symbol.getLine(getStart()) + byLines, newStartColumn);
 				end = Symbol.makePosition(Symbol.getLine(getEnd()) + byLines, newEndColumn);
+			} else if (line < Symbol.getLine(getEnd()) || (line == Symbol.getLine(getEnd()) && column <= Symbol.getColumn(getEnd()))) {
+				int newEndColumn = Symbol.getColumn(getEnd());
+				end = Symbol.makePosition(Symbol.getLine(getEnd()) + byLines, newEndColumn);
 			}
 		}
 		
 		for (ASTNode node : this) {
 			node.offsetNodesAfter(line, column , byLines, byColumnsOnLastLine);
+		}
+	}
+	
+	public void ASTNode.addNewText(String text, int offset, IDocument document) throws BadLocationException {
+		Maybe<ClassDecl> maybeClassDecl = getClassDeclAt(document, offset);
+		if (maybeClassDecl.isNothing()) {
+			System.err.println("Unable to find a class declaration to add the text to. This is currently an unrecoverable error.");
+			return;
+		}
+		
+		maybeClassDecl.value().addTextAtAppropriateNode(text, offset, document);
+	}
+	
+	void ClassDecl.addTextAtAppropriateNode(String text, int offset, IDocument document) throws BadLocationException {
+		System.err.println("This method (addTextAtAppropriateNode(...) in the ASTDocument aspect) has only been implemented for FullClassDecl. Current object instantiates the class " + getClass().getSimpleName() + ".");
+	}
+	
+	@Override
+	void FullClassDecl.addTextAtAppropriateNode(String text, int offset, IDocument document) throws BadLocationException {
+		int line = document.getLineOfOffset(offset) + 1;
+		int column = offset - document.getLineInformationOfOffset(offset).getOffset() + 1;
+		int clauseNumber = originalComposition.clauseAt(line, column);
+		String result = originalComposition.getClause(clauseNumber).addTextHere(text, line, column);
+	}
+	
+	String Clause.addTextHere(String text, int line, int column) {
+		if (preFormatting.inside(line, column)) {
+			preFormatting = preFormatting.combineItems(new ScannedFormattingItem(FormattingItem.Type.UNKNOWN, text, line, column));
+			return preFormatting.toString();
+		} else if (postFormatting.inside(line, column)) {
+			postFormatting = postFormatting.combineItems(new ScannedFormattingItem(FormattingItem.Type.UNKNOWN, text, line, column));
+			return preFormatting.toString();
+		} else {
+			System.out.println("Should add text to " + getClass().getSimpleName() + ":=[" + prettyPrintFormatted() + "] @ (" + line + ", " + column + "). My prefix formatting is [" + preFormatting + "] and my suffix formatting is [" + postFormatting + "].");
+			StringBuilder stringBuilder = new StringBuilder(prettyPrintFormatted());
+			// TODO: Use correct value instead of mock 0...
+			stringBuilder.insert(0, text);
+			return stringBuilder.toString();
 		}
 	}
 	
