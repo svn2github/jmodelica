@@ -1184,19 +1184,19 @@ end FunctionInlining.RecordInline10;
 fclass FunctionInlining.RecordInline11
  Real x;
  Real y;
+ Real temp_2;
  Real temp_3;
  Real temp_4;
- Real temp_5;
- Integer temp_6;
+ Integer temp_5;
 initial equation 
- pre(temp_6) = 0;
+ pre(temp_5) = 0;
 equation
  y = 1;
- x = temp_3 + temp_4 + temp_5 + temp_6;
- temp_3 = ( 1 ) * ( y );
- temp_4 = ( 2 ) * ( y );
- temp_5 = ( 3 ) * ( y );
- temp_6 = integer(5 - ( y ));
+ x = temp_2 + temp_3 + temp_4 + temp_5;
+ temp_2 = ( 1 ) * ( y );
+ temp_3 = ( 2 ) * ( y );
+ temp_4 = ( 3 ) * ( y );
+ temp_5 = integer(5 - ( y ));
 
  record FunctionInlining.RecordInline11.R
   Real a[3];

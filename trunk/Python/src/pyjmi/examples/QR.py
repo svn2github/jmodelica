@@ -43,6 +43,8 @@ def run_demo(with_plots=True):
     qr_2_2 = res['QR[2,2]']
     tau_1  = res['tau[1]']
     tau_2  = res['tau[2]']
+    p_1    = res['p[1]']
+    p_2    = res['p[2]']
     t = res['time']
 
     assert N.abs(qr_1_1[-1] + 4.47214) < 1e-3
@@ -56,6 +58,10 @@ def run_demo(with_plots=True):
     assert N.abs(tau_1[-1] - 1.44721) < 1e-3
     
     assert N.abs(tau_2[-1] - 0) < 1e-3
+    
+    assert N.abs(p_1[-1] - 2) < 1e-3
+    
+    assert N.abs(p_2[-1] - 1) < 1e-3  
     
     if with_plots:
         fig = p.figure()

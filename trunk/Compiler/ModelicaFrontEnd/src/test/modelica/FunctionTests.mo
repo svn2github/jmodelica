@@ -3374,11 +3374,8 @@ equation
   output Real x;
   Real[2] y;
   Real temp_1;
-  Real[2] temp_2;
  algorithm
-  (temp_2) := FunctionTests.ArrayOutputScalarization6.f1();
-  y[1] := temp_2[1];
-  y[2] := temp_2[2];
+  (y) := FunctionTests.ArrayOutputScalarization6.f1();
   x := y[1];
   return;
  end FunctionTests.ArrayOutputScalarization6.f2;
@@ -3392,6 +3389,7 @@ equation
  end FunctionTests.ArrayOutputScalarization6.f1;
 end FunctionTests.ArrayOutputScalarization6;
 ")})));
+
 
  function f1
   output Real x[2] = {1, 2};
@@ -3428,7 +3426,6 @@ equation
   Real[2] temp_1;
   Real[2] temp_2;
   Real[2] temp_3;
-  Real[2] temp_4;
  algorithm
   (temp_1) := FunctionTests.ArrayOutputScalarization7.f1();
   (temp_2) := FunctionTests.ArrayOutputScalarization7.f1();
@@ -3442,9 +3439,7 @@ equation
    y[2] := 4;
   else
    x := 1;
-   (temp_4) := FunctionTests.ArrayOutputScalarization7.f1();
-   y[1] := temp_4[1];
-   y[2] := temp_4[2];
+   (y) := FunctionTests.ArrayOutputScalarization7.f1();
   end if;
   x := y[1];
   return;
@@ -3500,14 +3495,11 @@ equation
   output Real x;
   Real[2] y;
   Real[2] temp_1;
-  Real[2] temp_2;
  algorithm
   (temp_1) := FunctionTests.ArrayOutputScalarization8.f1();
   for i in {temp_1[1],temp_1[2]} loop
    y[1] := i;
-   (temp_2) := FunctionTests.ArrayOutputScalarization8.f1();
-   y[1] := temp_2[1];
-   y[2] := temp_2[2];
+   (y) := FunctionTests.ArrayOutputScalarization8.f1();
   end for;
   x := y[1];
   return;
@@ -3654,11 +3646,8 @@ equation
  function FunctionTests.ArrayOutputScalarization11.f2
   output Real x;
   Real[2] y;
-  Real[2] temp_1;
  algorithm
-  (temp_1) := FunctionTests.ArrayOutputScalarization11.f1();
-  y[1] := temp_1[1];
-  y[2] := temp_1[2];
+  (y) := FunctionTests.ArrayOutputScalarization11.f1();
   x := y[1];
   return;
  end FunctionTests.ArrayOutputScalarization11.f2;
@@ -3848,14 +3837,11 @@ equation
   output Real o;
   Real[2] x;
   Real[2] y;
-  Real[2] temp_1;
  algorithm
   o := 2;
   x[1] := 1;
   x[2] := 2;
-  (temp_1) := FunctionTests.ArrayOutputScalarization16.f2(x);
-  y[1] := temp_1[1];
-  y[2] := temp_1[2];
+  (y) := FunctionTests.ArrayOutputScalarization16.f2(x);
   return;
  end FunctionTests.ArrayOutputScalarization16.f1;
 
@@ -3903,13 +3889,10 @@ equation
   output Real o;
   Real[2] y;
   Real[2] temp_1;
-  Real[2] temp_2;
  algorithm
   o := 2;
   (temp_1) := FunctionTests.ArrayOutputScalarization17.f2({1,2});
-  (temp_2) := FunctionTests.ArrayOutputScalarization17.f2(temp_1);
-  y[1] := temp_2[1];
-  y[2] := temp_2[2];
+  (y) := FunctionTests.ArrayOutputScalarization17.f2(temp_1);
   return;
  end FunctionTests.ArrayOutputScalarization17.f1;
 
@@ -3966,20 +3949,15 @@ equation
   input Real[:] a1;
   output Real x1;
   Real[:] b1;
-  Real[:] temp_1;
-  Real temp_2;
+  Real temp_1;
  algorithm
   size(b1) := {size(a1, 1)};
-  size(temp_1) := {size(a1, 1)};
-  for i1 in 1:size(b1, 1) loop
-   (temp_1) := FunctionTests.ArrayOutputScalarization18.f2(a1);
-   b1[i1] := temp_1[i1];
-  end for;
-  temp_2 := 0.0;
+  (b1) := FunctionTests.ArrayOutputScalarization18.f2(a1);
+  temp_1 := 0.0;
   for i1 in 1:size(a1, 1) loop
-   temp_2 := temp_2 + ( a1[i1] ) * ( b1[i1] );
+   temp_1 := temp_1 + ( a1[i1] ) * ( b1[i1] );
   end for;
-  x1 := temp_2;
+  x1 := temp_1;
   return;
  end FunctionTests.ArrayOutputScalarization18.f1;
 end FunctionTests.ArrayOutputScalarization18;
@@ -4029,13 +4007,8 @@ equation
   input Real[:] a1;
   output Real x1;
   Real[2] b1;
-  Real[:] temp_1;
  algorithm
-  size(temp_1) := {size(a1, 1)};
-  for i1 in 1:size(b1, 1) loop
-   (temp_1) := FunctionTests.ArrayOutputScalarization19.f2(a1);
-   b1[i1] := temp_1[i1];
-  end for;
+  (b1) := FunctionTests.ArrayOutputScalarization19.f2(a1);
   x1 := b1[1] + b1[2];
   return;
  end FunctionTests.ArrayOutputScalarization19.f1;
@@ -4077,12 +4050,8 @@ equation
  function FunctionTests.ArrayOutputScalarization20.f1
   input Real c;
   output FunctionTests.ArrayOutputScalarization20.R d;
-  FunctionTests.ArrayOutputScalarization20.R temp_1;
  algorithm
-  (temp_1) := FunctionTests.ArrayOutputScalarization20.f2(c);
-  d.a := temp_1.a;
-  d.b[1] := temp_1.b[1];
-  d.b[2] := temp_1.b[2];
+  (d) := FunctionTests.ArrayOutputScalarization20.f2(c);
   return;
  end FunctionTests.ArrayOutputScalarization20.f1;
 
@@ -5239,6 +5208,54 @@ end FunctionTests.UnknownArray30;
 	Real x = f({1,2,3});
 end UnknownArray30;
 
+model UnknownArray31
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray31",
+         description="Assignstatement with right hand side function call.",
+         flatModel="
+fclass FunctionTests.UnknownArray31
+ Real x[1];
+ Real x[2];
+equation
+ ({x[1],x[2]}) = FunctionTests.UnknownArray31.f2({1,2});
+
+ function FunctionTests.UnknownArray31.f2
+  input Real[:] c;
+  output Real[size(c, 1)] d;
+ algorithm
+  (d) := FunctionTests.UnknownArray31.f1(c);
+  return;
+ end FunctionTests.UnknownArray31.f2;
+
+ function FunctionTests.UnknownArray31.f1
+  input Real[:] a;
+  output Real[size(a, 1)] b;
+ algorithm
+  for i1 in 1:size(b, 1) loop
+   b[i1] := ( 2 ) * ( a[i1] );
+  end for;
+  return;
+ end FunctionTests.UnknownArray31.f1;
+end FunctionTests.UnknownArray31;
+")})));
+
+	function f1
+		input Real[:] a;
+		output Real[size(a,1)] b;
+	algorithm
+		b := 2 * a;
+	end f1;
+	
+	function f2
+		input Real[:] c;
+		output Real[size(c,1)] d;
+	algorithm
+		d := f1(c);
+	end f2;
+	
+	Real[2] x = f2({1,2});
+end UnknownArray31;
 
 // TODO: need more complex cases
 model IncompleteFunc1
@@ -6629,13 +6646,13 @@ end FunctionTests.VectorizedCall5;
 end VectorizedCall5;
 
 
-model Lapack1
+model Lapack_dgeqpf
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="Lapack1",
+         name="Lapack_dgeqpf",
          description="Test scalarization of LAPACK function that has had some issues",
          flatModel="
-fclass FunctionTests.Lapack1
+fclass FunctionTests.Lapack_dgeqpf
  Real A[1,1];
  Real A[1,2];
  Real A[2,1];
@@ -6675,7 +6692,7 @@ equation
   external \"FORTRAN 77\" dgeqpf(size(A, 1), ncol, QR, size(A, 1), p, tau, work, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgeqpf;
-end FunctionTests.Lapack1;
+end FunctionTests.Lapack_dgeqpf;
 ")})));
 
   Real A[2,2] = {{1,2},{3,4}};
@@ -6683,8 +6700,113 @@ end FunctionTests.Lapack1;
   Real tau[2];
 equation 
   (QR,tau,) = Modelica.Math.Matrices.LAPACK.dgeqpf(A);
-end Lapack1;
+end Lapack_dgeqpf;
 
+model Lapack_QR
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="Lapack_QR",
+         description="",
+         flatModel="
+fclass FunctionTests.Lapack_QR
+ Real A[1,1];
+ Real A[1,2];
+ Real A[2,1];
+ Real A[2,2];
+ Real Q[1,1];
+ Real Q[1,2];
+ Real Q[2,1];
+ Real Q[2,2];
+ Real R[1,1];
+ Real R[1,2];
+ Real R[2,1];
+ Real R[2,2];
+equation
+ ({{Q[1,1],Q[1,2]},{Q[2,1],Q[2,2]}}, {{R[1,1],R[1,2]},{R[2,1],R[2,2]}}, ) = Modelica.Math.Matrices.QR({{A[1,1],A[1,2]},{A[2,1],A[2,2]}});
+ A[1,1] = 5;
+ A[1,2] = 6;
+ A[2,1] = 7;
+ A[2,2] = 8;
+
+ function Modelica.Math.Matrices.QR
+  input Real[:, :] A;
+  output Real[size(A, 1), size(A, 2)] Q;
+  output Real[size(A, 2), size(A, 2)] R;
+  output Integer[size(A, 2)] p;
+  Integer nrow;
+  Integer ncol;
+  Real[:] tau;
+ algorithm
+  ncol := size(A, 2);
+  size(tau) := {ncol};
+  nrow := size(A, 1);
+  ();
+  (Q, tau, p) := Modelica.Math.Matrices.LAPACK.dgeqpf(A);
+  for i1 in 1:size(R, 1) loop
+   for i2 in 1:size(R, 2) loop
+    R[i1,i2] := 0;
+   end for;
+  end for;
+  for i in 1:ncol loop
+   for j in i:ncol loop
+    R[i,j] := Q[i,j];
+   end for;
+  end for;
+  (Q) := Modelica.Math.Matrices.LAPACK.dorgqr(Q, tau);
+  return;
+ end Modelica.Math.Matrices.QR;
+
+ function Modelica.Math.Matrices.LAPACK.dgeqpf
+  input Real[:, :] A;
+  output Real[size(A, 1), size(A, 2)] QR;
+  output Real[min(size(A, 1), size(A, 2))] tau;
+  output Integer[size(A, 2)] p;
+  Integer info;
+  Integer ncol;
+  Real[:] work;
+ algorithm
+  ncol := size(A, 2);
+  size(work) := {( 3 ) * ( ncol )};
+  for i1 in 1:size(QR, 1) loop
+   for i2 in 1:size(QR, 2) loop
+    QR[i1,i2] := A[i1,i2];
+   end for;
+  end for;
+  for i1 in 1:size(p, 1) loop
+   p[i1] := 0;
+  end for;
+  external \"FORTRAN 77\" dgeqpf(size(A, 1), ncol, QR, size(A, 1), p, tau, work, info);
+  return;
+ end Modelica.Math.Matrices.LAPACK.dgeqpf;
+
+ function Modelica.Math.Matrices.LAPACK.dorgqr
+  input Real[:, :] QR;
+  input Real[min(size(QR, 1), size(QR, 2))] tau;
+  output Real[size(QR, 1), size(QR, 2)] Q;
+  Integer info;
+  Integer lwork;
+  Real[:] work;
+ algorithm
+  lwork := ( min(10, size(QR, 2)) ) * ( size(QR, 2) );
+  size(work) := {lwork};
+  for i1 in 1:size(Q, 1) loop
+   for i2 in 1:size(Q, 2) loop
+    Q[i1,i2] := QR[i1,i2];
+   end for;
+  end for;
+  external \"FORTRAN 77\" dorgqr(size(QR, 1), size(QR, 2), size(tau, 1), Q, size(Q, 1), tau, work, lwork, info);
+  return;
+ end Modelica.Math.Matrices.LAPACK.dorgqr;
+end FunctionTests.Lapack_QR;
+")})));
+
+ Real A[2,2] = {{5,6},{7,8}};
+ Real Q[2,2];
+ Real R[2,2];
+ //Integer piv[2];
+equation 
+ (Q,R,) = Modelica.Math.Matrices.QR(A);
+end Lapack_QR;
 
 model BindingSort1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -6736,6 +6858,5 @@ end FunctionTests.BindingSort1;
 	Real x = f(y);
 	Real y = 1;
 end BindingSort1;
-
 
 end FunctionTests;

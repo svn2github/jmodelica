@@ -971,7 +971,14 @@ aspect Scalarization {
 			Map<String,FExp> indexMap) {
 		FIdUse left = getLeft();
 		FExp right = getRight();
-		if (left.type().isRecord()) {
+		if (left.type().isComposite() && right instanceof FFunctionCall) {
+			FFunctionCall call = (FFunctionCall) right;
+			call.getArgs().createArrayTemporaries(stmts, vars, indexMap, true);
+			FFunctionCallStmt res = new FFunctionCallStmt();
+			res.addLeft(new FFunctionCallLeft(new Opt(left.myFV().createUseExp())));
+			res.setCall(call.scalarizeFunction(indexMap));
+			stmts.add(res);
+		} else if (left.type().isRecord()) {
 			right.createArrayTemporaries(stmts, vars, indexMap, true);
 			left.type().scalarizeArrayAssignment(vars, stmts, indexMap, left.getFQName(), right);
 		} else if (right.size().isUnknown()) {
