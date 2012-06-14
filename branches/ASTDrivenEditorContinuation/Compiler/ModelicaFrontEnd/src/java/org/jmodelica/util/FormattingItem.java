@@ -15,7 +15,8 @@ public abstract class FormattingItem {
 		VISIBILITY_INFO,
 		PARENTHESIS,
 		MIXED,
-		EMPTY;
+		EMPTY,
+		UNKNOWN;
 	};
 
 	public enum Adjacency {
@@ -210,4 +211,48 @@ public abstract class FormattingItem {
 	 * @param byColumnsOnLastLine the number of columns to offset the item by if it starts on <code>line</code>.
 	 */
 	public abstract void offsetItemAfter(int line, int column, int byLines, int byColumnsOnLastLine);
+
+	/**
+	 * Count the number of lines in a text string.
+	 * @param data the text string whose lines should be counted.
+	 * @return the number of lines that <code>data</code> spans.
+	 */
+	protected static int countLines(String data) {
+		int numberOfLines = 0;
+		for (int i = 0; i < data.length(); i++) {
+			switch (data.charAt(i)) {
+			case '\r':
+				if (i + 1 < data.length() && data.charAt(i + 1) == '\n') {
+					++i;
+				}
+			case '\n':
+				if (i + 1 < data.length()) {
+					++numberOfLines;
+				}
+				break;
+			default:
+				break;
+			}
+		}
+
+		return numberOfLines;
+	}
+	
+	/**
+	 * Count the number of columns (characters) on the last line in a text string.
+	 * @param data the text string whose columns should be counted.
+	 * @return the number of columns on the last line of <code>data</code>.
+	 */
+	protected static int countColumnsOnLastLine(String data) {
+		int columns = 0;
+		for (int i = data.length() - 1; i >= 0; i--) {
+			if (data.charAt(i) != '\r' && data.charAt(i) != '\n') {
+				++columns;
+			} else {
+				return columns;
+			}
+		}
+		
+		return columns;
+	}
 }

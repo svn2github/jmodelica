@@ -27,6 +27,18 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 		this.endLine = endLine;
 		this.endColumn = endColumn;
 	}
+
+	/**
+	 * Creates a <code>ScannedFormattingItem</code>. The end line and end column is calculated from the text data.
+	 * @param type the type of this item
+	 * @param data the string representation of what this item holds, such as an actual comment.
+	 * @param startLine the line in the source code at which this item begins.
+	 * @param startColumn the column in the source code at which this item begins.
+	 */
+	public ScannedFormattingItem(Type type, String data, int startLine, int startColumn) {
+		this(type, data, startLine, startColumn, startLine + countLines(data),
+				(countLines(data) == 0 ? startColumn + data.length() - 1 : countColumnsOnLastLine(data)));
+	}
 	
 	/**
 	 * Gets the line number of where the start of this symbol was found when it was scanned.

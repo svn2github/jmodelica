@@ -154,7 +154,7 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 
 		for (ScannedFormattingItem item : subItems) {
 			if (offset < 0) {
-				offset = item.getOffset(otherItem.getStartLine(), otherItem.getEndColumn());
+				offset = item.getOffset(otherItem.getStartLine(), otherItem.getStartColumn());
 				if (offset != -1) {
 					newItem = insertItem(otherItem, item, offset, newItem);
 					if (item.spanningLines() == 0) {

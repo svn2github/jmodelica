@@ -91,38 +91,12 @@ public class DefaultFormattingItem extends FormattingItem {
 	
 	@Override
 	public int spanningLines() {
-		int numberOfLines = 0;
-		for (int i = 0; i < data.length(); i++) {
-			switch (data.charAt(i)) {
-			case '\r':
-				if (i + 1 < data.length() && data.charAt(i + 1) == '\n') {
-					++i;
-				}
-			case '\n':
-				if (i + 1 < data.length()) {
-					++numberOfLines;
-				}
-				break;
-			default:
-				break;
-			}
-		}
-
-		return numberOfLines;
+		return countLines(data);
 	}
 
 	@Override
 	public int spanningColumnsOnLastLine() {
-		int columns = 0;
-		for (int i = data.length() - 1; i >= 0; i--) {
-			if (data.charAt(i) != '\r' && data.charAt(i) != '\n') {
-				++columns;
-			} else {
-				return columns;
-			}
-		}
-		
-		return columns;
+		return countColumnsOnLastLine(data);
 	}
 	
 	@Override
