@@ -281,13 +281,9 @@ package JacGenTests
   
   
   // Models for testing Jacobian generation for harder case involving if, when etc. follows
-  
-  
-  // Raises compliance error: "Else clauses in when equations are currently not supported". 
-  // Even if generate_ode_jacobian is set to false. 
   model JacTestWhenElse
 	discrete Real x[3];
-    Real z[3];
+    Real z[3] = {1,2,3};
   equation
 	der(z) = z .* { 0.1, 0.2, 0.3 };
 	when { z[i] > 2 for i in 1:3 } then
@@ -299,17 +295,32 @@ package JacGenTests
 	end when;
   end JacTestWhenElse;
   
-  // Raises the following error
-  /*
-	CcodeCompilationError: 
-	Message: Compilation of generated C code failed.
-	C file location: C:\Users\BJRN~1\AppData\Local\Temp\jmc1482706606785370032out\sources\JacGenTests_JacTestWhenSimple.c
-	Stacktrace: org.jmodelica.modelica.compiler.CcodeCompilationException: Compilation of generated C code failed.
-	C file location: C:\Users\BJRN~1\AppData\Local\Temp\jmc1482706606785370032out\sources\JacGenTests_JacTestWhenSimple.c
-	at org.jmodelica.modelica.compiler.GccCompilerDelegator.compileCCode(GccCompilerDelegator.java:231)
-	at org.jmodelica.modelica.compiler.ModelicaCompiler.compileUnit(ModelicaCompiler.java:1116)
-	at org.jmodelica.modelica.compiler.ModelicaCompiler.compileFMU(ModelicaCompiler.java:1057)
-	*/
+  
+  model JacTestWhenPre
+	Real xx(start=2);
+	discrete Real x; 
+	discrete Real y; 
+	discrete Boolean w(start=true); 
+	discrete Boolean v(start=true); 
+	discrete Boolean z(start=true);
+	discrete Boolean b1; 
+  equation
+	der(xx) = -x; 
+  when b1 and pre(z) then 
+	w = false; 
+  end when; 
+  when b1 and z then 
+	v = false; 
+  end when; 
+  when b1 then 
+	z = false; 
+  end when; 
+  when (time>1 and time<1.1) or  (time>2 and time<2.1) or  (time>3 and time<3.1) then 
+	x = pre(x) + 1.1; 
+	y = pre(y) + 1.1; 
+  end when; 
+	b1 = y>2;
+  end JacTestWhenPre;
   
   model JacTestWhenSimple
 	Real xx(start=10);
@@ -324,18 +335,6 @@ package JacGenTests
 	y = xx;
   end JacTestWhenSimple; 
   
-  // Raises the following error:
-    /*
-	CcodeCompilationError: 
-	Message: Compilation of generated C code failed.
-	C file location: C:\Users\BJRN~1\AppData\Local\Temp\jmc6823091668054956466out\sources\JacGenTests_JacTestWhenSample.c
-	Stacktrace: org.jmodelica.modelica.compiler.CcodeCompilationException: Compilation of generated C code failed.
-	C file location: C:\Users\BJRN~1\AppData\Local\Temp\jmc6823091668054956466out\sources\JacGenTests_JacTestWhenSample.c
-	at org.jmodelica.modelica.compiler.GccCompilerDelegator.compileCCode(GccCompilerDelegator.java:231)
-	at org.jmodelica.modelica.compiler.ModelicaCompiler.compileUnit(ModelicaCompiler.java:1116)
-	at org.jmodelica.modelica.compiler.ModelicaCompiler.compileFMU(ModelicaCompiler.java:1057)
-    */
-  
   model JacTestWhenSample 
 	discrete Real x,y;
 	Real dummy(start = 1);
@@ -348,19 +347,29 @@ package JacGenTests
 		y = pre(y) + 1;
 	end when;
   end JacTestWhenSample; 
+  
+  model JacTestWhenFunction
+	function F
+		input Real x;
+		output Real y1;
+		output Real y2;
+	algorithm
+		y1 := 1;
+		y2 := 2;
+	end F;
+	Real x(start = 1);
+	Real y(start = 1);
+	Real z;
+	Real xx;
+  equation
+	0 = x+y+z;
+	der(xx) = x*y*z;
+	when sample(0,1) then
+		(x,y) = F(time);
+	end when;
+  end JacTestWhenFunction;
 
- // Fails, raises the following error:
- /*
-	CcodeCompilationError: 
-	Message: Compilation of generated C code failed.
-	C file location: C:\Users\BJRN~1\AppData\Local\Temp\jmc2325151140567958547out\sources\JacGenTests_JacTestWhenSample.c
-	Stacktrace: org.jmodelica.modelica.compiler.CcodeCompilationException: Compilation of generated C code failed.
-	C file location: C:\Users\BJRN~1\AppData\Local\Temp\jmc2325151140567958547out\sources\JacGenTests_JacTestWhenSample.c
-	at org.jmodelica.modelica.compiler.GccCompilerDelegator.compileCCode(GccCompilerDelegator.java:231)
-	at org.jmodelica.modelica.compiler.ModelicaCompiler.compileUnit(ModelicaCompiler.java:1116)
-	at org.jmodelica.modelica.compiler.ModelicaCompiler.compileFMU(ModelicaCompiler.java:1057)
-*/
-  model JacTestIfSimple1
+  model JacTestIfExpression1
 	Real x[3] = 7:9;
 	Real z(start=1);
   equation
@@ -369,70 +378,129 @@ package JacGenTests
 	elseif false then
 		x = 4:6;
 	end if;
-	der(z) = sum(x);
-  end JacTestIfSimple1; 
+	der(z) = z + sum(x);
+  end JacTestIfExpression1; 
+  
+  
+  model JacTestIfExpression2
+	Real x[3] = 7:9;
+	Real z(start=1);
+	Boolean y[2] = {false, 	true};
+  equation
+	if y[1] then
+		x = 1:3;
+	elseif y[2] then
+		if false then
+			x = 1:3;
+		else
+			x = 4:6;
+		end if;
+	end if;
+	der(z) = sum(x); 
+  end JacTestIfExpression2;
+  
+  
+  model JacTestIfExpression3
+      Real x(start =1);
+      Real y(start = 2);
+      Real z1(start = 3);
+      Real z2(start = 4);
+  equation
+	if time < 1 then
+	  y = z2 - 1;
+	  z1 = 2;
+	  x = y * y;
+	  z1 + z2 = x + y;
+	else
+	  x = 4;
+	  if time < 3 then
+		  y = 2;
+		  z1 = y * x;
+	  else
+		  y = x + 2;
+		  z2 = 4 * x;
+	  end if;
+	  z1 + z2 = x - y;
+	end if;
+  end JacTestIfExpression3;
+  
 
   // Example from Petter Lindholms (see above) thesis.
-  model JacTestIfSimple2
+  model JacTestIfEquation1
 	Real x(start=1);
 	Real u(start=2);
   equation
 	u = if time<=Modelica.Constants.pi /2 then sin(time) elseif
 	time<= Modelica.Constants.pi  then 1 else sin(time -Modelica.Constants.pi /2);
 	der(x) = u ;
-  end JacTestIfSimple2;
+  end JacTestIfEquation1;
+  
+  model JacTestIfEquation2
+    Real x(start = 3);
+	input Real u(start = 10);
+	output Real y;
+  equation
+    der(x) = if(x < 2) then 0.3 else u;
+	y = x;
+  end JacTestIfEquation2;
+  
+  
+  model JacTestIfFunctionRecord
+    record R
+        Real x;
+        Real y;
+    end R;
+	
+    function F
+        input Real x;
+        input Real y;
+        output R r;
+    algorithm
+        r.x := x;
+        r.y := y;
+    end F;
+	
+    Real x(start=1);
+    Real y = 2;
+    R r;
+  equation
+	der(x) = log(x);
+    if time > 1 then
+        r=F(x,y);
+    else
+        r = F(x+y,y);
+    end if;
+  end JacTestIfFunctionRecord;
+  
+  model JacTestFunction1
+	function F
+		input Real x;
+		output Real y;
+	algorithm
+		y := x^2;
+	end F;
+	Real a(start=5);
+	equation
+		der(a) = F(a)+a;
+  end JacTestFunction1;
+  
+  
+  model JacTestFunction2
+	function F
+		input Real x;
+		output Real y;
+	algorithm
+		y := x^2;
+	end F;
+	function F2
+		input Real x;
+		output Real y;
+	algorithm
+		y := x^2;
+	end F2;
+	Real a(start=5);
+	equation
+		der(a) = F(a)+F2(a);
+  end JacTestFunction2;
   
 end JacGenTests;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

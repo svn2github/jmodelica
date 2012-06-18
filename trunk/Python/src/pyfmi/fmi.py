@@ -2158,7 +2158,10 @@ class FMUModel2(FMUModel):
         n_spar_errs = 0
         if check_sparsity_structure:
             m_eps = 1e-14
-            
+            # First put the sparsity information from A_st into a full matrix, then compare
+            # it to the finite difference matrix. If there's a non-zero element in the
+            # finite difference matrix at the same time as the sparsity structure says that
+            # the jacobian is idenpendent of that variable then count that as an error. 
             A_sp = N.zeros((nx,nx))
             for i in range(A_st.shape[0]):
                 A_sp[A_st[i,0],A_st[i,1]] = 1

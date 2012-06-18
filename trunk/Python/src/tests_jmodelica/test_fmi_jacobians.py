@@ -95,7 +95,8 @@ class Test_FMI_Jaobians_Elementary_operators:
 	
 class Test_FMI_Jaobians_Elementary_functions:
 	"""
-	This class tests the elemenary functions as described in section 3.7.1.2 in the modelica specification v. 3.2
+	This class tests the elemenary functions that Jmodelica.org has implemented according to
+	Petter Lindhomlms thesis "Efficient implementation of Jacobians using automatic differentiation", p. 35
 	"""
 
 
@@ -261,8 +262,8 @@ class Test_FMI_Jaobians_Whencases:
 		self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
 	
 	"""
-	Raises compliance error: "Else clauses in when equations are currently not supported". 
-	Even if generate_ode_jacobian is set to false. 
+	#Raises compliance error: "Else clauses in when equations are currently not supported". 
+	#Even if generate_ode_jacobian is set to false. 
 	@testattr(stddist = True)
 	def test_elementary_whenElse(self):
 		cname = "JacGenTests.JacTestWhenElse"
@@ -292,6 +293,32 @@ class Test_FMI_Jaobians_Whencases:
 	Raises: CcodeCompilationError: 
 	Message: Compilation of generated C code failed.
 	@testattr(stddist = True)
+	def test_elementary_whenPre(self):
+		cname = "JacGenTests.JacTestWhenPre"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		Afd,Bfd,Cfd,Dfd,n_errs, s_errs = m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5,check_sparsity_structure=True)
+		assert n_errs ==0 and s_errs == 0
+	"""
+
+	"""
+	Raises: CcodeCompilationError: 
+	Message: Compilation of generated C code failed.	
+	@testattr(stddist = True)
+	def test_elementary_whenFunction(self):
+		cname = "JacGenTests.JacTestWhenFunction"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		Afd,Bfd,Cfd,Dfd,n_errs, s_errs = m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5,check_sparsity_structure=True)
+		assert n_errs ==0 and s_errs == 0
+	"""
+
+	"""
+	Raises: CcodeCompilationError: 
+	Message: Compilation of generated C code failed.
+	@testattr(stddist = True)
 	def test_elementary_whenSample(self):
 		cname = "JacGenTests.JacTestWhenSample"
 		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
@@ -301,34 +328,108 @@ class Test_FMI_Jaobians_Whencases:
 		assert n_errs ==0 and s_errs == 0
 	"""
 
-	@testattr(stddist = True)
-	def test_elementary_IfSimple(self):
-		cname = "JacGenTests.JacTestIfSimple1"
-		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
-		m = FMUModel2(fn)
-		m.set_debug_logging(True)
-		Afd,Bfd,Cfd,Dfd,n_errs, s_errs = m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5,check_sparsity_structure=True)
-		assert n_errs ==0 and s_errs == 0		
-		
 	
+	
+class Test_FMI_Jaobians_Ifcases:
+	
+	def setUp(self):
+		self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
+
+
 	@testattr(stddist = True)
-	def test_elementary_IfSimple2(self):
-		cname = "JacGenTests.JacTestIfSimple2"
+	def test_elementary_IfExpression1(self):
+		cname = "JacGenTests.JacTestIfExpression1"
 		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
 		Afd,Bfd,Cfd,Dfd,n_errs, s_errs = m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5,check_sparsity_structure=True)
 		assert n_errs ==0 and s_errs == 0
+		
+	"""
+	This on raises a compiler error even though I think it's legal
+	@testattr(stddist = True)
+	def test_elementary_IfExpression2(self):
+		cname = "JacGenTests.JacTestIfExpression2"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		Afd,Bfd,Cfd,Dfd,n_errs, s_errs = m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5,check_sparsity_structure=True)
+		assert n_errs ==0 and s_errs == 0
+	"""
+
+	
+	#This one doesn't really test anything, the ODE jacobians are empty. I don't know how to
+	#rewrite it in such a way that it performs a sensible test, my attempts have resulted in
+	#a singular system (more free variables than variables). At least it compiles. 
+	@testattr(stddist = True)
+	def test_elementary_IfExpression3(self):
+		cname = "JacGenTests.JacTestIfExpression3"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		m.simulate(final_time=10);
+		Afd,Bfd,Cfd,Dfd,n_errs, s_errs = m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5,check_sparsity_structure=True)
+		assert n_errs ==0 and s_errs == 0
 	
 	
+	@testattr(stddist = True)
+	def test_elementary_IfEquation1(self):
+		cname = "JacGenTests.JacTestIfEquation1"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		Afd,Bfd,Cfd,Dfd,n_errs, s_errs = m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5,check_sparsity_structure=True)
+		assert n_errs ==0 and s_errs == 0
+
+	@testattr(stddist = True)
+	def test_elementary_IfEquation2(self):
+		cname = "JacGenTests.JacTestIfEquation2"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		Afd,Bfd,Cfd,Dfd,n_errs, s_errs = m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5,check_sparsity_structure=True)
+		assert n_errs ==0 and s_errs == 0
+
+	@testattr(stddist = True)
+	def test_elementary_IfFunctionRecord(self):
+		cname = "JacGenTests.JacTestIfFunctionRecord"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		Afd,Bfd,Cfd,Dfd,n_errs, s_errs = m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5,check_sparsity_structure=True)
+		assert n_errs ==0 and s_errs == 0		
+
+class Test_FMI_Jaobians_Functions:
+
+	def setUp(self):
+		self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
 
 
+	"""
+	Raises: CcodeCompilationError: 
+	Message: Compilation of generated C code failed.
+	@testattr(stddist = True)
+	def test_elementary_Function1(self):
+		cname = "JacGenTests.JacTestFunction1"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		Afd,Bfd,Cfd,Dfd,n_errs, s_errs = m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5,check_sparsity_structure=True)
+		assert n_errs ==0 and s_errs == 0
+	"""
 
-
-
-
-
-
+	"""
+	Raises: CcodeCompilationError: 
+	Message: Compilation of generated C code failed.
+	@testattr(stddist = True)
+	def test_elementary_Function2(self):
+		cname = "JacGenTests.JacTestFunction2"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		Afd,Bfd,Cfd,Dfd,n_errs, s_errs = m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5,check_sparsity_structure=True)
+		assert n_errs ==0 and s_errs == 0	
+	"""
 
 
 
