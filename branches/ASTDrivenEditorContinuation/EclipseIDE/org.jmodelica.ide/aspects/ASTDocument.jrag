@@ -155,16 +155,27 @@ aspect ASTDocument {
 	}
 	
 	public void ASTNode.offsetNodesAfter(int line, int column, int byLines, int byColumnsOnLastLine) {
-		for (ASTNode node : this) {
-			node.offsetNodesAfter(line, column, byLines, byColumnsOnLastLine);
-		}
+		offsetNodesAfter(line, column, byLines, byColumnsOnLastLine, BaseNode.NO_FORMATTING);
 	}
 	
-	public void BaseNode.offsetNodesAfter(int line, int column, int byLines, int byColumnsOnLastLine) {
+	public void ASTNode.offsetNodesAfter(int line, int column, int byLines, int byColumnsOnLastLine, FormattingItem excludedFormattingItem) {
+		for (ASTNode node : this) {
+			node.offsetNodesAfter(line, column, byLines, byColumnsOnLastLine, excludedFormattingItem);
+		}
+	}
+
+	@Override
+	public void BaseNode.offsetNodesAfter(int line, int column, int byLines, int byColumnsOnLastLine, FormattingItem excludedFormattingItem) {
 		if (line < getEndLineWithFormatting() || (line == getEndLineWithFormatting() && column <= getEndColumnWithFormatting())) {
-			preFormatting.offsetItemAfter(line, column, byLines, byColumnsOnLastLine);
-			insideFormatting.offsetItemAfter(line, column, byLines, byColumnsOnLastLine);
-			postFormatting.offsetItemAfter(line, column, byLines, byColumnsOnLastLine);
+			if (preFormatting != excludedFormattingItem) {
+				preFormatting.offsetItemAfter(line, column, byLines, byColumnsOnLastLine);
+			}
+			if (insideFormatting != excludedFormattingItem) {
+				insideFormatting.offsetItemAfter(line, column, byLines, byColumnsOnLastLine);
+			}
+			if (postFormatting != excludedFormattingItem) {
+				postFormatting.offsetItemAfter(line, column, byLines, byColumnsOnLastLine);
+			}
 
 			if (Symbol.getLine(getStart()) > line || (Symbol.getLine(getStart()) == line && Symbol.getColumn(getStart()) >= column)) {
 				int newStartColumn = Symbol.getColumn(getStart());
@@ -184,45 +195,80 @@ aspect ASTDocument {
 		}
 		
 		for (ASTNode node : this) {
-			node.offsetNodesAfter(line, column , byLines, byColumnsOnLastLine);
+			node.offsetNodesAfter(line, column , byLines, byColumnsOnLastLine, excludedFormattingItem);
 		}
 	}
 	
 	public void ASTNode.addNewText(String text, int offset, IDocument document) throws BadLocationException {
-		Maybe<ClassDecl> maybeClassDecl = getClassDeclAt(document, offset);
-		if (maybeClassDecl.isNothing()) {
-			System.err.println("Unable to find a class declaration to add the text to. This is currently an unrecoverable error.");
+		int line = document.getLineOfOffset(offset) + 1;
+		int column = offset - document.getLineInformationOfOffset(offset).getOffset() + 1;
+		BaseNode node = classDeclAt(line, column);
+		if (node == null) {
+			node = getStoredDefinitionAt(line, column);
+		}
+		if (node == null) {
+			node = getStoredDefinitionAt(line, column - 1);
+			ScannedFormattingItem formattingItemFromText = new ScannedFormattingItem(FormattingItem.Type.UNKNOWN, text, line, column);
+			node.postFormatting = node.postFormatting.combineItems(formattingItemFromText);
+			offsetNodesAfter(line, column, formattingItemFromText.spanningLines(), formattingItemFromText.spanningColumnsOnLastLine(),
+					node.postFormatting);
 			return;
 		}
-		
-		maybeClassDecl.value().addTextAtAppropriateNode(text, offset, document);
+		if (node == null) {
+			System.err.println("Unable to find a proper place to put the text in.");
+			return;
+		}
+
+		ScannedFormattingItem formattingItemFromText = new ScannedFormattingItem(FormattingItem.Type.UNKNOWN, text, line, column);
+		FormattingItem formattingNotToOffset = node.addTextAtAppropriateNode(formattingItemFromText, line, column);
+		offsetNodesAfter(line, column, formattingItemFromText.spanningLines(), formattingItemFromText.spanningColumnsOnLastLine(),
+				formattingNotToOffset);
 	}
 	
-	void ClassDecl.addTextAtAppropriateNode(String text, int offset, IDocument document) throws BadLocationException {
-		System.err.println("This method (addTextAtAppropriateNode(...) in the ASTDocument aspect) has only been implemented for FullClassDecl. Current object instantiates the class " + getClass().getSimpleName() + ".");
+	FormattingItem BaseNode.addTextAtAppropriateNode(ScannedFormattingItem formattingItemFromText, int line, int column) throws BadLocationException {
+		System.err.println("addTextAtAppropriateNode only works for FullClassDecl and StoredDefinition. Current object instantiates the class " + getClass().getSimpleName() + ".");
+		return BaseNode.NO_FORMATTING;
 	}
 	
 	@Override
-	void FullClassDecl.addTextAtAppropriateNode(String text, int offset, IDocument document) throws BadLocationException {
-		int line = document.getLineOfOffset(offset) + 1;
-		int column = offset - document.getLineInformationOfOffset(offset).getOffset() + 1;
-		int clauseNumber = originalComposition.clauseAt(line, column);
-		String result = originalComposition.getClause(clauseNumber).addTextHere(text, line, column);
+	FormattingItem StoredDefinition.addTextAtAppropriateNode(ScannedFormattingItem formattingItemFromText, int line, int column) throws BadLocationException {
+		return addTextHere(formattingItemFromText, line, column);
 	}
 	
-	String Clause.addTextHere(String text, int line, int column) {
-		if (preFormatting.inside(line, column)) {
-			preFormatting = preFormatting.combineItems(new ScannedFormattingItem(FormattingItem.Type.UNKNOWN, text, line, column));
-			return preFormatting.toString();
-		} else if (postFormatting.inside(line, column)) {
-			postFormatting = postFormatting.combineItems(new ScannedFormattingItem(FormattingItem.Type.UNKNOWN, text, line, column));
-			return preFormatting.toString();
+	@Override
+	FormattingItem FullClassDecl.addTextAtAppropriateNode(ScannedFormattingItem formattingItemFromText, int line, int column) throws BadLocationException {
+		BaseNode node = null;
+		int clauseNumber = originalComposition.clauseAt(line, column);
+		
+		if (clauseNumber >= 0) {
+			node = originalComposition.getClause(clauseNumber);
+		} else if (getEndDecl().pointIsInside(line, column)) {
+			node = getEndDecl();
+		}
+		
+		if (node == null) {
+			System.err.println("A class definition was found here, but still no proper node to put the data in.");
+			return BaseNode.NO_FORMATTING;
+		 }
+		
+		FormattingItem result = node.addTextHere(formattingItemFromText, line, column);
+		//System.out.println("The resulting string [" + result.toString() + "] should be parsed and the AST should be modified.");
+		return result;
+	}
+	
+	FormattingItem BaseNode.addTextHere(ScannedFormattingItem formattingItemFromText, int line, int column) {
+		if (preFormatting.inside(line, column) || line == Symbol.getLine(getStart()) && column == Symbol.getColumn(getStart())) {
+			preFormatting = preFormatting.combineItems(formattingItemFromText);
+			return preFormatting;
+		} else if (postFormatting.inside(line, column) || line == Symbol.getLine(getEnd()) && column == Symbol.getColumn(getEnd())) {
+			postFormatting = postFormatting.combineItems(formattingItemFromText);
+			return postFormatting;
 		} else {
-			System.out.println("Should add text to " + getClass().getSimpleName() + ":=[" + prettyPrintFormatted() + "] @ (" + line + ", " + column + "). My prefix formatting is [" + preFormatting + "] and my suffix formatting is [" + postFormatting + "].");
-			StringBuilder stringBuilder = new StringBuilder(prettyPrintFormatted());
-			// TODO: Use correct value instead of mock 0...
-			stringBuilder.insert(0, text);
-			return stringBuilder.toString();
+			//System.out.println("Should add text to " + getClass().getSimpleName() + ":=[" + prettyPrintFormatted() + "] @ (" + line + ", " + column + "). My prefix formatting is [" + preFormatting + "] and my suffix formatting is [" + postFormatting + "].");
+			FormattingItem tempFormattingItem = new ScannedFormattingItem(FormattingItem.Type.UNKNOWN, prettyPrintFormatted(),
+					getStartLineWithFormatting(), getStartColumnWithFormatting(), getEndLineWithFormatting(), getEndColumnWithFormatting());
+			tempFormattingItem = tempFormattingItem.combineItems(formattingItemFromText);
+			return tempFormattingItem;
 		}
 	}
 	
@@ -259,6 +305,29 @@ aspect ASTDocument {
 		originalComposition.extractElementsTo(this);
 	}
 	
+	syn ClassDecl ASTNode.classDeclAt(int line, int column);
+
+	eq ASTNode.classDeclAt(int line, int column) {
+		for (ASTNode<?> node : this) {
+			ClassDecl result = node.classDeclAt(line, column);
+			if (result != null) {
+				return result;
+			}
+		}
+
+		return null;
+	}
+
+	eq ClassDecl.classDeclAt(int line, int column) {
+		ClassDecl result = super.classDeclAt(line, column);
+		if (result != null) {
+			return result;
+		} else if (pointIsInside(line, column)) {
+			return this;
+		}
+		return null;
+	}
+	
 	syn int Composition.clauseAt(int line, int column);
 	syn boolean Clause.clauseAt(int line, int column);
 	
@@ -275,7 +344,32 @@ aspect ASTDocument {
 	}
 	
 	eq Clause.clauseAt(int line, int column) {
+		return pointIsInside(line, column);
+	}
+	
+	syn boolean BaseNode.pointIsInside(int line, int column);
+	
+	eq BaseNode.pointIsInside(int line, int column) {
 		return ((getStartLineWithFormatting() < line || (getStartLineWithFormatting() == line && getStartColumnWithFormatting() <= column)) &&
 				(getEndLineWithFormatting() > line || (getEndLineWithFormatting() == line && getEndColumnWithFormatting() >= column)));
+	}
+	
+	syn StoredDefinition ASTNode.getStoredDefinitionAt(int line, int column);
+	
+	eq ASTNode.getStoredDefinitionAt(int line, int column) {
+		for (ASTNode<?> node : this) {
+			StoredDefinition result = node.getStoredDefinitionAt(line, column);
+			if (result != null) {
+				return result;
+			}
+		}
+		return null;
+	}
+	
+	eq StoredDefinition.getStoredDefinitionAt(int line, int column) {
+		if (pointIsInside(line, column)) {
+			return this;
+		}
+		return super.getStoredDefinitionAt(line, column);
 	}
 }
