@@ -697,7 +697,7 @@ aspect PrettyPrint {
 
 }
 
-aspect FlattPrettyPrint {
+aspect FlatPrettyPrint {
 	
 	public void FClass.prettyPrint(Printer p, PrintStream str, String indent) {
 		String nextInd = p.indent(indent);
@@ -739,16 +739,24 @@ aspect FlattPrettyPrint {
 	    	block_index++;
 	    }
 	    
-    	p.print(getFFunctionDecls(), str, nextInd);
-    	p.print(getFRecordDecls(), str, nextInd);
-    	p.print(getFEnumDecls(), str, nextInd);
+  		if (getNumFFunctionDecl() > 0 || getNumFRecordDecl() > 0 || 
+  				getNumFEnumDecl() > 0 || getNumFDerivedType() > 0) {
+	  		str.print("\n" + indent + "public\n");
+	    	p.print(getFFunctionDecls(), str, nextInd);
+	    	p.print(getFRecordDecls(), str, nextInd);
+	    	p.print(getFEnumDecls(), str, nextInd);
+	    	p.print(getFDerivedTypes(), str, nextInd);
+  		}
     	
   		str.print(indent);
   		str.print("end ");
   		str.print(name());
   		str.print(";\n");
 	}
-	
+
+	syn String FVariable.prettyPrintType() = 
+		getDerivedType().isEmpty() ? type().scalarType().toString() : getDerivedType();
+
 	public void FVariable.prettyPrint(Printer p, PrintStream str, String indent) {
 			str.print(indent);
 			
@@ -759,7 +767,7 @@ aspect FlattPrettyPrint {
 				str.print(" ");
 			}
 			
-			str.print(type().scalarType());
+			str.print(prettyPrintType());
 			str.print(" ");
 			p.print(getFQName(),str,"");
 		
@@ -772,11 +780,7 @@ aspect FlattPrettyPrint {
 				
 			}
 	    	
-	    if (hasFStringComment()) {
-	    	str.print(" \"");
-	    	str.print(getFStringComment().getComment());
-	    	str.print("\"");
-	    }
+		p.print(getFStringCommentOpt(),str,indent);
 
 	    if (isIndependentParameter() && hasBindingExp()) {
 	    	str.print(" /* ");
@@ -849,7 +853,7 @@ aspect FlattPrettyPrint {
 						if (hasFFinal())
 							str.print("final ");	
 		    			str.print(getName().name());
-		    			getFAttributeList().prettyPrintFAttributeList(str,p);
+		    			getFAttributeList().prettyPrintFAttributeList(str, p);
 		    			if (hasValue()) {
 		    				str.print(" = ");
 	    					p.print(getValue(),str,"");
@@ -857,22 +861,38 @@ aspect FlattPrettyPrint {
 	}
 
     public void FFunctionDecl.prettyPrint(Printer p, PrintStream str, String indent) {
-    	str.print("\n" + indent + "function " + name() + "\n");
+    	str.print(indent + "function " + name() + "\n");
     	getFFunctionVariables().prettyPrintWithIndent(p, str, p.indent(indent), ";");
     	p.print(getFAlgorithmBlock(), str, indent);
-    	str.print(indent + "end " + name() + ";\n");
+    	str.print(indent + "end " + name() + ";\n\n");
     }
 
     public void FRecordDecl.prettyPrint(Printer p, PrintStream str, String indent) {
-    	str.print("\n" + indent + "record " + name() + "\n");
+    	str.print(indent + "record " + name() + "\n");
     	getFVariables().prettyPrintWithFix(p, str, p.indent(indent), "", ";\n");
-    	str.print(indent + "end " + name() + ";\n");
+    	str.print(indent + "end " + name() + ";\n\n");
     }
 
     public void FEnumDecl.prettyPrint(Printer p, PrintStream str, String indent) {
-    	str.print("\n" + indent + "type " + getName().name() + " = enumeration(");
+    	str.print(indent + "type " + getName().name() + " = enumeration(");
     	p.print(getFEnumSpecification(),str,indent);
-    	str.print(");\n");
+    	str.print(")");
+    	FDerivedType t = myFDerivedType();
+    	if (t != null && t.getFAttributes().getNumChild() > 0) {
+        	str.print("(");
+        	t.getFAttributes().prettyPrintWithSep(p, str, indent, ", ");
+        	str.print(")");
+    	}
+    	str.print(";\n\n");
+    }
+
+    public void FDerivedType.prettyPrint(Printer p, PrintStream str, String indent) {
+    	if (!getBaseType().isEnum()) {
+	    	str.print(indent + "type " + getName() + " = ");
+	    	str.print(getBaseType());
+	    	getFAttributeList().prettyPrintFAttributeList(str, p);
+	    	str.print(";\n");
+    	}
     }
     
     public abstract void FEnumSpecification.prettyPrint(Printer p, PrintStream str, String indent);
@@ -882,21 +902,20 @@ aspect FlattPrettyPrint {
     }
 
     public void FEnumLiteralList.prettyPrint(Printer p, PrintStream str, String indent) {
-    	int i = 0;
-    	for (FEnumLiteral fe : getFEnumLiterals()) {
-    		p.print(fe.getName(),str,indent);
-    		if (fe.hasFStringComment()) {
-    		   	str.print(" \"");
-    		   	str.print(fe.getFStringComment().getComment());
-    		   	str.print("\"");
-    		}
-    		if (i<getNumFEnumLiteral()-1) {
-    			str.print(", ");
-    		}
-    		i++;
-    	}
+    	getFEnumLiterals().prettyPrintWithSep(p, str, indent, ", ");
     }
-    
+
+    public void FEnumLiteral.prettyPrint(Printer p, PrintStream str, String indent) {
+		p.print(getName(), str, indent);
+		p.print(getFStringCommentOpt(), str, indent);
+    }
+
+    public void FStringComment.prettyPrint(Printer p, PrintStream str, String indent) {
+	   	str.print(" \"");
+	   	str.print(getComment());
+	   	str.print("\"");
+    }
+
     public void FFunctionVariable.prettyPrint(Printer p, PrintStream str, String indent) {
     	if (hasFTypePrefixInputOutput()) {
     		str.print(getFTypePrefixInputOutput());
@@ -1727,7 +1746,7 @@ aspect PrettyPrint_MC {
 				str.print(" ");
 			}
 			
-			str.print(type().scalarType());
+			str.print(prettyPrintType());
 			str.print(" ");
 			str.print(nameUnderscore());
 //			p.print(getFQName(),str,"");
@@ -1744,11 +1763,7 @@ aspect PrettyPrint_MC {
 				p.print(bindingExp,str,indent);				
 		}
 	    	
-	    if (hasFStringComment()) {
-	    	str.print(" \"");
-	    	str.print(getFStringComment().getComment());
-	    	str.print("\"");
-	    }
+		p.print(getFStringCommentOpt(),str,indent);
 
 	    if (isIndependentParameter() && hasBindingExp()) {
 	    	str.print(" /* ");
@@ -1765,9 +1780,10 @@ aspect PrettyPrint_MC {
 	public void FClass.prettyPrint_MC(Printer p, PrintStream str, String indent) {
 		String nextInd = p.indent(indent);
 	
-	    p.print(getFFunctionDecls(), str, nextInd);
-    	p.print(getFRecordDecls(), str, nextInd);
-    	p.print(getFEnumDecls(), str, nextInd);
+	    p.print(getFFunctionDecls(), str, indent);
+    	p.print(getFRecordDecls(), str, indent);
+    	p.print(getFEnumDecls(), str, indent);
+    	p.print(getFDerivedTypes(), str, indent);
 	
 		str.print(indent + "model " + nameUnderscore() + "\n");
 		for (FVariable fv : getFVariables()) {

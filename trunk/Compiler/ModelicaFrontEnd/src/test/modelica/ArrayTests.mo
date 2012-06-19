@@ -30,6 +30,7 @@ fclass ArrayTests.General.ArrayTest1
 equation 
  x[1] = 3;
  x[2] = 4;
+
 end ArrayTests.General.ArrayTest1;
 ")})));
   
@@ -52,6 +53,7 @@ fclass ArrayTests.General.ArrayTest1b
 equation 
  x[1] = 3;
  x[2] = 4; 
+
 end ArrayTests.General.ArrayTest1b;
 ")})));
 
@@ -77,6 +79,7 @@ fclass ArrayTests.General.ArrayTest1c
 equation 
  der(x[1]) = 3;
  der(x[2]) = 4;
+
 end ArrayTests.General.ArrayTest1c;
 ")})));
   
@@ -104,6 +107,7 @@ equation
  x[1,2] = 2;
  x[2,1] = 3;
  x[2,2] = 4;
+
 end ArrayTests.General.ArrayTest2;
 ")})));
 
@@ -176,6 +180,7 @@ equation
  m[2].x[1] = 4;
  m[2].x[2] = 5;
  m[2].x[3] = 6;
+
 end ArrayTests.General.ArrayTest5;
 ")})));
 
@@ -205,6 +210,7 @@ equation
  m[2].x[1] = 4;
  m[2].x[2] = 5;
  m[2].x[3] = 6;
+
 end ArrayTests.General.ArrayTest6;
 ")})));
 
@@ -230,6 +236,7 @@ equation
  x[1] = 1;
  x[2] = 2;
  x[3] = 3;
+
 end ArrayTests.General.ArrayTest7;
 ")})));
 
@@ -250,6 +257,7 @@ fclass ArrayTests.General.ArrayTest8
  Real m[1].x[1] = ones(m[1].n);
  parameter Integer m[2].n = 2 /* 2 */;
  Real m[2].x[2] = ones(m[2].n);
+
 end ArrayTests.General.ArrayTest8;
 ")})));
 
@@ -299,6 +307,7 @@ equation
  nn.m[2,2].x[2] = 1;
  nn.m[2,3].x[1] = 1;
  nn.m[2,3].x[2] = 1;
+
 end ArrayTests.General.ArrayTest9;
 ")})));
 
@@ -325,6 +334,7 @@ fclass ArrayTests.General.ArrayTest95
  parameter Integer n[1].m.n1 = 3 /* 3 */;
  parameter Integer n[2].n2 = 2 /* 2 */;
  parameter Integer n[2].m.n1 = 4 /* 4 */;
+
 end ArrayTests.General.ArrayTest95;
 ")})));
 
@@ -349,6 +359,7 @@ end ArrayTests.General.ArrayTest95;
          flatModel="
 fclass ArrayTests.General.ArrayTest10
  parameter Integer n;
+
 end ArrayTests.General.ArrayTest10;
 ")})));
 
@@ -384,6 +395,7 @@ equation
  m2[2].x[2] = 4;
  m2[3].x[1] = 1;
  m2[3].x[2] = 2;
+
 end ArrayTests.General.ArrayTest11;
 ")})));
 
@@ -418,6 +430,7 @@ equation
  n[1].m[2].x[2] = 4;
  n[1].m[3].x[1] = 5;
  n[1].m[3].x[2] = 6;
+
 end ArrayTests.General.ArrayTest12;
 ")})));
 
@@ -444,6 +457,7 @@ fclass ArrayTests.General.ArrayTest13
  parameter Integer c.n = 2 /* 2 */;
  parameter Integer cv[1].n = 2 /* 2 */;
  parameter Integer cv[2].n = 2 /* 2 */;
+
 end ArrayTests.General.ArrayTest13;
 ")})));
 
@@ -474,6 +488,7 @@ equation
  n.m[2,2].x[1] = 1;
  n.m[3,1].x[1] = 1;
  n.m[3,2].x[1] = 1;
+
 end ArrayTests.General.ArrayTest14;
 ")})));
 
@@ -541,6 +556,7 @@ equation
  n[1].m[2,1].x[2] = 1;
  n[2].m[1,1].x[2] = 1;
  n[2].m[2,1].x[2] = 1;
+
 end ArrayTests.General.ArrayTest17;
 ")})));
 
@@ -571,6 +587,7 @@ fclass ArrayTests.General.ArrayTest21
 equation 
  x[1] = 0;
  x[2] = 0;
+
 end ArrayTests.General.ArrayTest21;
 
 ")})));
@@ -594,6 +611,7 @@ fclass ArrayTests.General.ArrayTest22
 equation 
  x[1] = 1;
  x[2] = 1;
+
 end ArrayTests.General.ArrayTest22;
 
 ")})));
@@ -621,6 +639,7 @@ equation
  x[1,2] = 1;
  x[2,1] = 1;
  x[2,2] = 1;
+
 end ArrayTests.General.ArrayTest23;
 ")})));
   
@@ -656,6 +675,7 @@ equation
  y[2,1] = x[2,1] + 1;
  x[2,2] = 2;
  y[2,2] = x[2,2] + 2;
+
 end ArrayTests.General.ArrayTest24;
 ")})));
   
@@ -701,6 +721,7 @@ equation
  y[2,2] = x[2,2] + 2;
  x[2,3] = 2;
  y[2,3] = x[2,3] + 3;
+
 end ArrayTests.General.ArrayTest25;
 ")})));
   
@@ -887,6 +908,7 @@ equation
  der(x[2,2]) =  - ( 4 );
  der(x[3,1]) =  - ( 5 );
  der(x[3,2]) =  - ( 6 );
+
 end ArrayTests.General.ArrayTest30;
 ")})));
 
@@ -930,6 +952,7 @@ initial equation
 equation
  der(x[1]) =  - ( x[1] );
  der(x[2]) =  - ( x[2] );
+
 end ArrayTests.General.ArrayTest32;
 ")})));
 
@@ -955,6 +978,7 @@ equation
  c[1].x = 1;
  c[2].x = 1;
  c[3].x = 1;
+
 end ArrayTests.General.ArrayTest33;
 ")})));
 
@@ -1000,6 +1024,7 @@ equation
  a[2].b[2].x = a[2].b[2].c[1].x;
  a[2].b[2].c[1].x = 1;
  a[2].b[2].c[2].x = 1;
+
 end ArrayTests.General.ArrayTest34;
 ")})));
 
@@ -1040,6 +1065,7 @@ fclass ArrayTests.General.ArrayTest35
 equation
  ({z[1],z[2],z[3],z[4],z[5]}) = ArrayTests.General.ArrayTest35.f({1,2});
 
+public
  function ArrayTests.General.ArrayTest35.f
   input Real[:] x;
   output Real[( 2 ) * ( size(x, 1) ) + 1] y;
@@ -1049,6 +1075,7 @@ equation
   end for;
   return;
  end ArrayTests.General.ArrayTest35.f;
+
 end ArrayTests.General.ArrayTest35;
 ")})));
 
@@ -1082,6 +1109,7 @@ equation
  x[1,2] = 2;
  x[2,1] = 3;
  x[2,2] = 4;
+
 end ArrayTests.UnknownSize.UnknownSize1;
 ")})));
 
@@ -1113,6 +1141,7 @@ equation
  x[2].y[1].z[2] = 2;
  x[2].y[2].z[1] = 3;
  x[2].y[2].z[2] = 4;
+
 end ArrayTests.UnknownSize.UnknownSize2;
 ")})));
 
@@ -1140,6 +1169,7 @@ fclass ArrayTests.UnknownSize.UnknownSize3
 equation
  x[1,1] = 1;
  x[1,2] = 2;
+
 end ArrayTests.UnknownSize.UnknownSize3;
 ")})));
 
@@ -1221,6 +1251,7 @@ equation
  x[2] = ( x[1] ) * ( 2 );
  x[3] = ( x[2] ) * ( 2 );
  x[4] = ( x[3] ) * ( 2 );
+
 end ArrayTests.Subscripts.SubscriptExpression1;
 ")})));
 
@@ -1349,6 +1380,7 @@ equation
  x[14] = 4 + ( 2 ) * ( 2 );
  x[15] = 4 + ( 3 ) * ( 2 );
  x[16] = 4 + ( 4 ) * ( 2 );
+
 end ArrayTests.Subscripts.SubscriptExpression6;
 ")})));
 
@@ -1402,6 +1434,7 @@ equation
  x[4,4] = 4 + ( 2 ) * ( 2 );
  x[4,4] = 4 + ( 3 ) * ( 2 );
  x[4,4] = 4 + ( 4 ) * ( 2 );
+
 end ArrayTests.Subscripts.SubscriptExpression7;
 ")})));
 
@@ -1492,6 +1525,7 @@ equation
  x[2] = y[2] + 20;
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Add.ArrayAdd1;
 ")})));
 
@@ -1526,6 +1560,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Add.ArrayAdd2;
 ")})));
 
@@ -1576,6 +1611,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Add.ArrayAdd3;
 ")})));
 
@@ -1774,6 +1810,7 @@ equation
  x[2] = y[2] .+ 20;
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd1;
 ")})));
 
@@ -1808,6 +1845,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd2;
 ")})));
 
@@ -1858,6 +1896,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd3;
 ")})));
 
@@ -1884,6 +1923,7 @@ equation
  x[2] = y[2] .+ 10;
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd4;
 ")})));
 
@@ -1918,6 +1958,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd5;
 ")})));
 
@@ -1968,6 +2009,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd6;
 ")})));
 
@@ -1992,6 +2034,7 @@ equation
  x[1] = y .+ 10;
  x[2] = y .+ 20;
  y = 1;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd7;
 ")})));
 
@@ -2020,6 +2063,7 @@ equation
  x[2,1] = y .+ 30;
  x[2,2] = y .+ 40;
  y = 1;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd8;
 ")})));
 
@@ -2056,6 +2100,7 @@ equation
  x[2,2,1] = y .+ 70;
  x[2,2,2] = y .+ 80;
  y = 1;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd9;
 ")})));
 
@@ -2143,6 +2188,7 @@ equation
  x[2] = y[2] - ( 20 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Sub.ArraySub1;
 ")})));
 
@@ -2177,6 +2223,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Sub.ArraySub2;
 ")})));
 
@@ -2227,6 +2274,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Sub.ArraySub3;
 ")})));
 
@@ -2425,6 +2473,7 @@ equation
  x[2] = y[2] .- ( 20 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub1;
 ")})));
 
@@ -2459,6 +2508,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub2;
 ")})));
 
@@ -2509,6 +2559,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub3;
 ")})));
 
@@ -2535,6 +2586,7 @@ equation
  x[2] = y[2] .- ( 10 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub4;
 ")})));
 
@@ -2569,6 +2621,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub5;
 ")})));
 
@@ -2619,6 +2672,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub6;
 ")})));
 
@@ -2643,6 +2697,7 @@ equation
  x[1] = y .- ( 10 );
  x[2] = y .- ( 20 );
  y = 1;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub7;
 ")})));
 
@@ -2671,6 +2726,7 @@ equation
  x[2,1] = y .- ( 30 );
  x[2,2] = y .- ( 40 );
  y = 1;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub8;
 ")})));
 
@@ -2707,6 +2763,7 @@ equation
  x[2,2,1] = y .- ( 70 );
  x[2,2,2] = y .- ( 80 );
  y = 1;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub9;
 ")})));
 
@@ -2794,6 +2851,7 @@ equation
  y[1] = 1;
  y[2] = 2;
  y[3] = 3;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK1;
 ")})));
 
@@ -2828,6 +2886,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK2;
 ")})));
 
@@ -2886,6 +2945,7 @@ equation
  y[2,2] = 6;
  y[2,3] = 7;
  y[2,4] = 8;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK3;
 ")})));
 
@@ -2912,6 +2972,7 @@ equation
  x[2] = ( y[1] ) * ( 20 ) + ( y[2] ) * ( 40 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK4;
 ")})));
 
@@ -2942,6 +3003,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK5;
 ")})));
 
@@ -2968,6 +3030,7 @@ equation
  x[2] = ( y[2] ) * ( 10 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK6;
 ")})));
 
@@ -3002,6 +3065,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK7;
 ")})));
 
@@ -3052,6 +3116,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK8;
 ")})));
 
@@ -3076,6 +3141,7 @@ equation
  x[1] = ( y ) * ( 10 );
  x[2] = ( y ) * ( 20 );
  y = 1;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK9;
 ")})));
 
@@ -3104,6 +3170,7 @@ equation
  x[2,1] = ( y ) * ( 30 );
  x[2,2] = ( y ) * ( 40 );
  y = 1;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK10;
 ")})));
 
@@ -3140,6 +3207,7 @@ equation
  x[2,2,1] = ( y ) * ( 70 );
  x[2,2,2] = ( y ) * ( 80 );
  y = 1;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK11;
 ")})));
 
@@ -3170,6 +3238,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK12;
 ")})));
 
@@ -3200,6 +3269,7 @@ equation
  y[1] = ( ( x[1] ) * ( x[1] ) + ( x[2] ) * ( x[2] ) + ( x[3] ) * ( x[3] ) ) * ( x[1] );
  y[2] = ( ( x[1] ) * ( x[1] ) + ( x[2] ) * ( x[2] ) + ( x[3] ) * ( x[3] ) ) * ( x[2] );
  y[3] = ( ( x[1] ) * ( x[1] ) + ( x[2] ) * ( x[2] ) + ( x[3] ) * ( x[3] ) ) * ( x[3] );
+
 end ArrayTests.Algebra.Mul.ArrayMulOK13;
 ")})));
 
@@ -3396,6 +3466,7 @@ equation
  x[2] = ( y[2] ) .* ( 20 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul1;
 ")})));
 
@@ -3430,6 +3501,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul2;
 ")})));
 
@@ -3480,6 +3552,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul3;
 ")})));
 
@@ -3506,6 +3579,7 @@ equation
  x[2] = ( y[2] ) .* ( 10 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul4;
 ")})));
 
@@ -3540,6 +3614,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul5;
 ")})));
 
@@ -3590,6 +3665,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul6;
 ")})));
 
@@ -3614,6 +3690,7 @@ equation
  x[1] = ( y ) .* ( 10 );
  x[2] = ( y ) .* ( 20 );
  y = 1;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul7;
 ")})));
 
@@ -3642,6 +3719,7 @@ equation
  x[2,1] = ( y ) .* ( 30 );
  x[2,2] = ( y ) .* ( 40 );
  y = 1;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul8;
 ")})));
 
@@ -3678,6 +3756,7 @@ equation
  x[2,2,1] = ( y ) .* ( 70 );
  x[2,2,2] = ( y ) .* ( 80 );
  y = 1;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul9;
 ")})));
 
@@ -3803,6 +3882,7 @@ equation
  x[2] = ( y[2] ) / ( 10 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Div.ArrayDiv3;
 ")})));
 
@@ -3837,6 +3917,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Div.ArrayDiv4;
 ")})));
 
@@ -3887,6 +3968,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Div.ArrayDiv5;
 ")})));
 
@@ -3971,6 +4053,7 @@ equation
  x[2] = ( y[2] ) ./ ( 20 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv1;
 ")})));
 
@@ -4005,6 +4088,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv2;
 ")})));
 
@@ -4055,6 +4139,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv3;
 ")})));
 
@@ -4081,6 +4166,7 @@ equation
  x[2] = ( y[2] ) ./ ( 10 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv4;
 ")})));
 
@@ -4115,6 +4201,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv5;
 ")})));
 
@@ -4165,6 +4252,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv6;
 ")})));
 
@@ -4189,6 +4277,7 @@ equation
  x[1] = ( y ) ./ ( 10 );
  x[2] = ( y ) ./ ( 20 );
  y = 1;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv7;
 ")})));
 
@@ -4217,6 +4306,7 @@ equation
  x[2,1] = ( y ) ./ ( 30 );
  x[2,2] = ( y ) ./ ( 40 );
  y = 1;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv8;
 ")})));
 
@@ -4253,6 +4343,7 @@ equation
  x[2,2,1] = ( y ) ./ ( 70 );
  x[2,2,2] = ( y ) ./ ( 80 );
  y = 1;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv9;
 ")})));
 
@@ -4340,6 +4431,7 @@ equation
  x[2] = y[2] .^ 20;
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow1;
 ")})));
 
@@ -4374,6 +4466,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow2;
 ")})));
 
@@ -4424,6 +4517,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow3;
 ")})));
 
@@ -4450,6 +4544,7 @@ equation
  x[2] = y[2] .^ 10;
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow4;
 ")})));
 
@@ -4484,6 +4579,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow5;
 ")})));
 
@@ -4534,6 +4630,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow6;
 ")})));
 
@@ -4558,6 +4655,7 @@ equation
  x[1] = y .^ 10;
  x[2] = y .^ 20;
  y = 1;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow7;
 ")})));
 
@@ -4586,6 +4684,7 @@ equation
  x[2,1] = y .^ 30;
  x[2,2] = y .^ 40;
  y = 1;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow8;
 ")})));
 
@@ -4622,6 +4721,7 @@ equation
  x[2,2,1] = y .^ 70;
  x[2,2,2] = y .^ 80;
  y = 1;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow9;
 ")})));
 
@@ -4706,6 +4806,7 @@ equation
  x[1,2] = 0;
  x[2,1] = 0;
  x[2,2] = 1;
+
 end ArrayTests.Algebra.Pow.ArrayPow1;
 ")})));
 
@@ -4729,6 +4830,7 @@ equation
  x[1,2] = 2;
  x[2,1] = 3;
  x[2,2] = 4;
+
 end ArrayTests.Algebra.Pow.ArrayPow2;
 ")})));
 
@@ -4752,6 +4854,7 @@ equation
  x[1,2] = ( 1 ) * ( 2 ) + ( 2 ) * ( 4 );
  x[2,1] = ( 3 ) * ( 1 ) + ( 4 ) * ( 3 );
  x[2,2] = ( 3 ) * ( 2 ) + ( 4 ) * ( 4 );
+
 end ArrayTests.Algebra.Pow.ArrayPow3;
 ")})));
 
@@ -4775,6 +4878,7 @@ equation
  x[1,2] = ( ( 1 ) * ( 1 ) + ( 2 ) * ( 3 ) ) * ( 2 ) + ( ( 1 ) * ( 2 ) + ( 2 ) * ( 4 ) ) * ( 4 );
  x[2,1] = ( ( 3 ) * ( 1 ) + ( 4 ) * ( 3 ) ) * ( 1 ) + ( ( 3 ) * ( 2 ) + ( 4 ) * ( 4 ) ) * ( 3 );
  x[2,2] = ( ( 3 ) * ( 1 ) + ( 4 ) * ( 3 ) ) * ( 2 ) + ( ( 3 ) * ( 2 ) + ( 4 ) * ( 4 ) ) * ( 4 );
+
 end ArrayTests.Algebra.Pow.ArrayPow4;
 ")})));
 
@@ -4808,6 +4912,7 @@ equation
  x[3,1] = ( 7 ) * ( 1 ) + ( 8 ) * ( 4 ) + ( 9 ) * ( 7 );
  x[3,2] = ( 7 ) * ( 2 ) + ( 8 ) * ( 5 ) + ( 9 ) * ( 8 );
  x[3,3] = ( 7 ) * ( 3 ) + ( 8 ) * ( 6 ) + ( 9 ) * ( 9 );
+
 end ArrayTests.Algebra.Pow.ArrayPow5;
 ")})));
 
@@ -4839,6 +4944,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Pow.ArrayPow6;
 ")})));
 
@@ -4873,6 +4979,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Pow.ArrayPow7;
 ")})));
 
@@ -4981,6 +5088,7 @@ equation
  x[1,2] = ( 1 ) * ( 2 ) + ( 2 ) * ( 4 );
  x[2,1] = ( 3 ) * ( 1 ) + ( 4 ) * ( 3 );
  x[2,2] = ( 3 ) * ( 2 ) + ( 4 ) * ( 4 );
+
 end ArrayTests.Algebra.Pow.ArrayPow13;
 ")})));
 
@@ -5016,6 +5124,7 @@ fclass ArrayTests.Algebra.Pow.ArrayPow15
  Real x[1,1];
 equation
  x[1,1] = ( 1 ) * ( 1 );
+
 end ArrayTests.Algebra.Pow.ArrayPow15;
 ")})));
 
@@ -5049,6 +5158,7 @@ fclass ArrayTests.Algebra.Pow.ArrayPow17
  Real x;
 equation
  x = 1 ^ 2;
+
 end ArrayTests.Algebra.Pow.ArrayPow17;
 ")})));
 
@@ -5078,6 +5188,7 @@ equation
  x[1] =  - ( 1 );
  x[2] =  - ( 0 );
  x[3] =  - (  - ( 1 ) );
+
 end ArrayTests.Algebra.Neg.ArrayNeg1;
 ")})));
 
@@ -5113,6 +5224,7 @@ equation
  y[1] = 1;
  y[2] = 0;
  y[3] =  - ( 1 );
+
 end ArrayTests.Algebra.Neg.ArrayNeg2;
 ")})));
 
@@ -5142,6 +5254,7 @@ equation
  x[1] = -1;
  x[2] = 0;
  x[3] = 1;
+
 end ArrayTests.Algebra.Neg.ArrayNeg3;
 ")})));
 
@@ -5207,6 +5320,7 @@ initial equation
 equation
  x[1] = true and true;
  x[2] = true and false;
+
 end ArrayTests.Logical.And.ArrayAnd1;
 ")})));
 
@@ -5234,6 +5348,7 @@ equation
  y[2] = false;
  x[1] = true and y[1];
  x[2] = true and y[2];
+
 end ArrayTests.Logical.And.ArrayAnd2;
 ")})));
 
@@ -5362,6 +5477,7 @@ equation
  x[1] = true;
  x[2] = false;
  x[3] = false;
+
 end ArrayTests.Logical.And.ArrayAnd9;
 ")})));
 
@@ -5389,6 +5505,7 @@ initial equation
 equation
  x[1] = true or true;
  x[2] = true or false;
+
 end ArrayTests.Logical.Or.ArrayOr1;
 ")})));
 
@@ -5417,6 +5534,7 @@ equation
  y[2] = false;
  x[1] = true or y[1];
  x[2] = true or y[2];
+
 end ArrayTests.Logical.Or.ArrayOr2;
 ")})));
 
@@ -5545,6 +5663,7 @@ equation
  x[1] = true;
  x[2] = true;
  x[3] = false;
+
 end ArrayTests.Logical.Or.ArrayOr9;
 ")})));
 
@@ -5573,6 +5692,7 @@ initial equation
 equation
  x[1] = not true;
  x[2] = not false;
+
 end ArrayTests.Logical.Not.ArrayNot1;
 ")})));
 
@@ -5601,6 +5721,7 @@ equation
  x[2] = not y[2];
  y[1] = true;
  y[2] = false;
+
 end ArrayTests.Logical.Not.ArrayNot2;
 ")})));
 
@@ -5626,6 +5747,7 @@ initial equation
 equation
  x[1] = false;
  x[2] = true;
+
 end ArrayTests.Logical.Not.ArrayNot3;
 ")})));
 
@@ -5684,6 +5806,7 @@ model LongArrayForm1
          flatModel="
 fclass ArrayTests.Constructors.LongForm.LongArrayForm1
  Real x[3] = array(1,2,3);
+
 end ArrayTests.Constructors.LongForm.LongArrayForm1;
 ")})));
 
@@ -5705,6 +5828,7 @@ equation
  x[1] = 1;
  x[2] = 2;
  x[3] = 3;
+
 end ArrayTests.Constructors.LongForm.LongArrayForm2;
 ")})));
 
@@ -5722,6 +5846,7 @@ fclass ArrayTests.Constructors.LongForm.LongArrayForm3
  Real x1[3] = array(1,2,3);
  Real x2[3] = {4,5,6};
  Real x3[3,3] = array(x1[1:3],x2[1:3],{7,8,9});
+
 end ArrayTests.Constructors.LongForm.LongArrayForm3;
 ")})));
 
@@ -5757,6 +5882,7 @@ equation
  x3[3,1] = 7;
  x3[3,2] = 8;
  x3[3,3] = 9;
+
 end ArrayTests.Constructors.LongForm.LongArrayForm4;
 ")})));
 
@@ -5777,6 +5903,7 @@ model EmptyArray1
          description="Empty arrays, basic test",
          flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray1
+
 end ArrayTests.Constructors.EmptyArray.EmptyArray1;
 ")})));
 
@@ -5791,6 +5918,7 @@ model EmptyArray2
          description="Empty arrays, addition",
          flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray2
+
 end ArrayTests.Constructors.EmptyArray.EmptyArray2;
 ")})));
 
@@ -5816,6 +5944,7 @@ equation
  xx[1,2] = 2;
  xx[2,1] = 3;
  xx[2,2] = 4;
+
 end ArrayTests.Constructors.EmptyArray.EmptyArray3;
 ")})));
 
@@ -5843,6 +5972,7 @@ equation
  y[1,2] = 0;
  y[2,1] = 0;
  y[2,2] = 0;
+
 end ArrayTests.Constructors.EmptyArray.EmptyArray4;
 ")})));
 
@@ -5873,6 +6003,7 @@ fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
 equation
  y[1] = 0.0 + ( D[1,1] ) * ( u[1] ) + ( D[1,2] ) * ( u[2] );
  y[2] = 0.0 + ( D[2,1] ) * ( u[1] ) + ( D[2,2] ) * ( u[2] );
+
 end ArrayTests.Constructors.EmptyArray.EmptyArray5;
 ")})));
 
@@ -5922,6 +6053,7 @@ equation
  x[3,1] = ( 1 ) * ( 5 );
  x[3,2] = ( 2 ) * ( 5 );
  x[3,3] = ( 3 ) * ( 5 );
+
 end ArrayTests.Constructors.Iterators.ArrayIterTest1;
 ")})));
 
@@ -5953,6 +6085,7 @@ equation
  x[2,1,2] = 5;
  x[2,2,1] = ( 2 ) * ( 2 );
  x[2,2,2] = 5;
+
 end ArrayTests.Constructors.Iterators.ArrayIterTest2;
 ")})));
 
@@ -6024,6 +6157,7 @@ equation
  x[2,2,1,2] = 1;
  x[2,2,2,1] = 4;
  x[2,2,2,2] = 2;
+
 end ArrayTests.Constructors.Iterators.ArrayIterTest4;
 ")})));
 
@@ -6042,6 +6176,7 @@ fclass ArrayTests.Constructors.Iterators.ArrayIterTest5
  Real x[1,1,1];
 equation
  x[1,1,1] = 1;
+
 end ArrayTests.Constructors.Iterators.ArrayIterTest5;
 ")})));
 
@@ -6088,6 +6223,7 @@ equation
  for i in 1:3 loop
   y.x[i] = ( i ) * ( i );
  end for;
+
 end ArrayTests.For.ForEquation1;
 ")})));
 
@@ -6121,6 +6257,7 @@ equation
  a.x[1] = 1;
  a.x[2] = 2;
  a.x[3] = 3;
+
 end ArrayTests.For.ForEquation2;
 ")})));
 
@@ -6155,6 +6292,7 @@ equation
  x[2] = ArrayTests.For.ForEquation3.f(1 + 2);
  x[3] = ArrayTests.For.ForEquation3.f(1 + 2 + 3);
 
+public
  function ArrayTests.For.ForEquation3.f
   input Real x;
   output Real y;
@@ -6162,6 +6300,7 @@ equation
   y := x + 1;
   return;
  end ArrayTests.For.ForEquation3.f;
+
 end ArrayTests.For.ForEquation3;
 ")})));
 
@@ -6200,6 +6339,7 @@ equation
  der(x[1]) =  - ( x[1] );
  der(x[2]) =  - ( x[2] );
  der(x[3]) =  - ( x[3] );
+
 end ArrayTests.For.ForInitial1;
 ")})));
 
@@ -6229,6 +6369,7 @@ fclass ArrayTests.Slices.SliceTest1
  Real x[1].a[2] = {1,2};
  Real x[2].a[2] = {3,4};
  Real y[2,2] = x[1:2].a[1:2] .+ 1;
+
 end ArrayTests.Slices.SliceTest1;
 ")})));
 
@@ -6265,6 +6406,7 @@ equation
  y[1,2] = x[1].a[2] .+ 1;
  y[2,1] = x[2].a[1] .+ 1;
  y[2,2] = x[2].a[2] .+ 1;
+
 end ArrayTests.Slices.SliceTest2;
 ")})));
 
@@ -6325,6 +6467,7 @@ equation
  y[1,2] = x[2].a[4] .+ 1;
  y[2,1] = x[3].a[2] .+ 1;
  y[2,2] = x[3].a[4] .+ 1;
+
 end ArrayTests.Slices.SliceTest3;
 ")})));
 
@@ -6379,6 +6522,7 @@ equation
  z[2,1,2] = 0;
  z[2,2,1] = 0;
  z[2,2,2] = 1;
+
 end ArrayTests.Slices.MixedIndices1;
 ")})));
 
@@ -6429,6 +6573,7 @@ equation
  z[1,2] = 0;
  z[2,1] = 0;
  z[2,2] = 1;
+
 end ArrayTests.Slices.MixedIndices2;
 ")})));
 
@@ -6488,6 +6633,7 @@ fclass ArrayTests.Other.ArrayConst1
 equation
  x[1] = ( 1 ) / ( 1.0 );
  x[2] = ( 1 ) / ( 2.0 );
+
 end ArrayTests.Other.ArrayConst1;
 ")})));
 
@@ -6507,6 +6653,7 @@ fclass ArrayTests.Other.ArrayConst2
 equation
  x[1] = 1.0;
  x[2] = 2.0;
+
 end ArrayTests.Other.ArrayConst2;
 ")})));
 
@@ -6529,6 +6676,7 @@ fclass ArrayTests.Other.ArrayConst3
 equation
  x = ArrayTests.Other.ArrayConst3.f(1);
 
+public
  function ArrayTests.Other.ArrayConst3.f
   Real[2] testConst;
   input Real i;
@@ -6539,6 +6687,7 @@ equation
   o := testConst[integer(i)];
   return;
  end ArrayTests.Other.ArrayConst3.f;
+
 end ArrayTests.Other.ArrayConst3;
 ")})));
 
@@ -6564,6 +6713,7 @@ fclass ArrayTests.Other.ArrayConst4
  Real x;
 equation
  x = 1.0;
+
 end ArrayTests.Other.ArrayConst4;
 ")})));
 

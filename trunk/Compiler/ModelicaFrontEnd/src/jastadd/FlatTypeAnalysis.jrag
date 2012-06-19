@@ -67,17 +67,26 @@ aspect FlatTypeAnalysis {
 	syn lazy FType InstAssignable.type();
 	
 	eq InstPrimitive.type() {
-		FType scalar = fUnknownType();
-		if (isReal()) 
-			scalar = fRealScalarType();
-		else if (isInteger()) 
-			scalar = fIntegerScalarType();
-		else if (isBoolean()) 
-			scalar = fBooleanScalarType();
-		else if (isString()) 
-			scalar = fStringScalarType();
+		FType scalar = primitiveScalarType();
 		return isArray() ? scalar.arrayType(size()) : scalar;
 	}
+	
+	/**
+	 * The scalar type of this class or component, if it is a primitive type, otherwise the unknown type.
+	 */
+	syn FType InstNode.primitiveScalarType() {
+		if (isReal()) 
+			return fRealScalarType();
+		else if (isInteger()) 
+			return fIntegerScalarType();
+		else if (isBoolean()) 
+			return fBooleanScalarType();
+		else if (isString()) 
+			return fStringScalarType();
+		return fUnknownType();
+	}
+	eq InstEnum.primitiveScalarType()      = myInstClass().enumType();
+	eq InstClassDecl.primitiveScalarType() = isEnum() ? enumType() : super.primitiveScalarType();
 	
 	// TODO: Reduce code duplication here
 	syn lazy FRecordType FRecordDecl.type() {
@@ -827,30 +836,31 @@ aspect FTypeEquivalent {
 
 aspect BuiltInFlatTypes {
  	
- 	syn boolean InstAssignable.isReal()    = false;
- 	syn boolean InstAssignable.isInteger() = false;
- 	syn boolean InstAssignable.isBoolean() = false;
- 	syn boolean InstAssignable.isString()  = false;
- 	syn boolean InstAssignable.isEnum()    = false;
+ 	syn boolean InstNode.isReal()    = false;
+ 	syn boolean InstNode.isInteger() = false;
+ 	syn boolean InstNode.isBoolean() = false;
+ 	syn boolean InstNode.isString()  = false;
+ 	syn boolean InstNode.isEnum()    = false;
  	
- 	eq InstPrimitive.isReal()    = myInstClass().isRealClass();
- 	eq InstPrimitive.isInteger() = myInstClass().isIntegerClass();
- 	eq InstPrimitive.isBoolean() = myInstClass().isBooleanClass();
- 	eq InstPrimitive.isString()  = myInstClass().isStringClass();
+ 	eq InstPrimitive.isReal()    = myInstClass().isReal();
+ 	eq InstPrimitive.isInteger() = myInstClass().isInteger();
+ 	eq InstPrimitive.isBoolean() = myInstClass().isBoolean();
+ 	eq InstPrimitive.isString()  = myInstClass().isString();
  	eq InstEnum.isEnum()         = true;
  	
- 	syn boolean InstClassDecl.isRealClass()    = finalClass().primitiveName().equals("Real");
- 	syn boolean InstClassDecl.isIntegerClass() = finalClass().primitiveName().equals("Integer");
- 	syn boolean InstClassDecl.isBooleanClass() = finalClass().primitiveName().equals("Boolean");
- 	syn boolean InstClassDecl.isStringClass()  = finalClass().primitiveName().equals("String");
+ 	eq InstClassDecl.isReal()    = finalClass().primitiveName().equals("Real");
+ 	eq InstClassDecl.isInteger() = finalClass().primitiveName().equals("Integer");
+ 	eq InstClassDecl.isBoolean() = finalClass().primitiveName().equals("Boolean");
+ 	eq InstClassDecl.isString()  = finalClass().primitiveName().equals("String");
+ 	eq InstClassDecl.isEnum()    = extendsEnum();
 
- 	syn boolean InstBuiltIn.isReal() = 
+ 	eq InstBuiltIn.isReal() = 
  		myInstClass().finalClass().primitiveName().equals("RealType");
- 	syn boolean InstBuiltIn.isInteger() = 
+ 	eq InstBuiltIn.isInteger() = 
  		myInstClass().finalClass().primitiveName().equals("IntegerType");
- 	syn boolean InstBuiltIn.isBoolean() = 
+ 	eq InstBuiltIn.isBoolean() = 
  		myInstClass().finalClass().primitiveName().equals("BooleanType");
- 	syn boolean InstBuiltIn.isString() = 
+ 	eq InstBuiltIn.isString() = 
  		myInstClass().finalClass().primitiveName().equals("StringType");
 
 	 
@@ -1078,11 +1088,6 @@ aspect InstClassRestriction {
 	 */
 	syn boolean InstRestriction.isPackage() = false;
 	eq InstMPackage.isPackage()             = true;
-	
-	/**
-	 * \brief Is this class an enumeration?
-	 */
-	syn boolean InstClassDecl.isEnum() = false;
-	eq InstEnumClassDecl.isEnum()      = true;
+
 	
 }

@@ -1322,6 +1322,13 @@ aspect FlatNames {
 	public FIdUseExp InstComponentDecl.createUseExp() {
 		 return new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name(), new Opt())));
 	}
+	
+	/**
+	 * Create a pre() expression for this variable.
+	 */
+	public FPreExp FVariable.createFPreExp() {
+		return new FPreExp(getFQName().createFIdUseExp());
+	}
 
     /**
      * \brief Create an FDerExp using a copy of this name.

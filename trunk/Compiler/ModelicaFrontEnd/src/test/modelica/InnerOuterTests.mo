@@ -14,6 +14,7 @@ equation
  b.T0 = time;
  b.a1.z = sin(b.T0);
  b.a2.z = sin(b.T0);
+
 end InnerOuterTests.InnerOuterTest1;
 ")})));
 model A 
@@ -62,6 +63,7 @@ equation
  i.a.b.TI = 1;
  i.a.b.c.TI = 2;
  i.a.b.c.d.x = ( 3 ) * ( i.TI );
+
 end InnerOuterTests.InnerOuterTest2;
 ")})));
 	model A
@@ -125,6 +127,7 @@ fclass InnerOuterTests.InnerOuterTest4
 equation
  c.a.x = sin(time);
  c.b.x = ( 2 ) * ( c.a.x );
+
 end InnerOuterTests.InnerOuterTest4;
 ")})));
 	model A

@@ -256,6 +256,7 @@ fclass ForbiddenOperationsTests.LongIntConst1
  Real x;
 equation
  x = 1.0E12;
+
 end ForbiddenOperationsTests.LongIntConst1;
 ")})));
 

@@ -1280,10 +1280,25 @@ aspect Attributes {
 	public static final String FAttribute.STATE_SELECT = "stateSelect";
 	public static final String FAttribute.SIZE         = "size()";
 	
-	eq FAttribute.matches(String str) = getName().name().equals(str);
+	syn lazy FDerivedType FVariable.myFDerivedType() = findFDerivedType(getDerivedType());
+	syn FDerivedType FEnumDecl.myFDerivedType()      = findFDerivedType(name());
 	
-	syn lazy FAttribute FVariable.findAttribute(String name)  = findMatching(getFAttributes(), name);
-	syn      FAttribute FAttribute.findAttribute(String name) = findMatching(getFAttributes(), name);
+	inh FDerivedType FVariable.findFDerivedType(String name);
+	inh FDerivedType FEnumDecl.findFDerivedType(String name);
+	eq FClass.getChild().findFDerivedType(String name) = findMatching(getFDerivedTypes(), name);
+	eq Root.getChild().findFDerivedType(String name)   = null;
+	
+	eq FAttribute.matches(String str)   = getName().name().equals(str);
+	eq FDerivedType.matches(String str) = getName().equals(str);
+	
+	syn lazy FAttribute FVariable.findAttribute(String name) {
+		FAttribute res = findMatching(getFAttributes(), name);
+		if (res == null && myFDerivedType() != null)
+			res = myFDerivedType().findAttribute(name);
+		return res;
+	}
+	syn FAttribute FAttribute.findAttribute(String name)   = findMatching(getFAttributes(), name);
+	syn FAttribute FDerivedType.findAttribute(String name) = findMatching(getFAttributes(), name);
 	syn boolean FVariable.attributeSet(FAttribute a)   = (a != null) && a.getAttributeSet();
 	syn FExp    FVariable.attributeExp(FAttribute a)   = (a != null && a.hasValue()) ? a.getValue() : null;
 	syn boolean FVariable.attributeSet(String name)    = attributeSet(findAttribute(name));
@@ -1355,6 +1370,10 @@ aspect Attributes {
 	
 	syn boolean FVariable.startAttributeSet()     = attributeSet(FAttribute.START);
 	syn FExp    FVariable.startAttributeExp()     = attributeExp(FAttribute.START);
+	syn FExp    FVariable.createStartAttributeExp() {
+		FExp e = startAttributeExp();
+		return (e == null) ? startAttributeCValue().buildLiteral() : e.fullCopy();
+	}
 	
 	syn CValue FVariable.startAttributeCValue()   = CValue.UNKNOWN;
 	eq FRealVariable.startAttributeCValue()       = attributeCValueReal(FAttribute.START, 0.0);

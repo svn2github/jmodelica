@@ -1409,23 +1409,13 @@ aspect TransformCanonical {
 				for (FVariable fv : getFVariables()) {
 					if (result.getDummyDerivatives().contains(fv)) {
 						if (fv instanceof FHDerivativeVariable) {
-							FHDummyDerivativeVariable fdv = new FHDummyDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-								fv.getFTypePrefixVariability().fullCopy(),
-								new Opt(),
-								new List(),
-								new Opt(),
-								new Opt(),
-								fv.getFQName().fullCopy(),
+							FHDummyDerivativeVariable fdv = new FHDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+								fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy(),
 								((FHDerivativeVariable)fv).getOrder());
 							l.add(fdv);
 						} else if (fv instanceof FDerivativeVariable) {
-							FDummyDerivativeVariable fdv = new FDummyDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-								fv.getFTypePrefixVariability().fullCopy(),
-								new Opt(),
-								new List(),
-								new Opt(),
-								new Opt(),
-								fv.getFQName().fullCopy());
+							FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+								fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
 							l.add(fdv);					
 						} else {
 							l.add(fv);
@@ -1451,20 +1441,10 @@ aspect TransformCanonical {
 							FQName fqn2 = (FQName)fv.getFQName().fullCopy();
 							str.append(fqn.getFQNamePart(fqn.getNumFQNamePart()-1).name());
 							fqn.setFQNamePart(new FQNamePart(str.toString(),fqn.getFQNamePart(fqn.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn.getNumFQNamePart()-1);
-							l.add(new FRealVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-								fv.getFTypePrefixVariability().fullCopy(),
-								new Opt(),
-								new List(),
-								new Opt(),
-								new Opt(),
-							fqn));
-							l.add(new FDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-								fv.getFTypePrefixVariability().fullCopy(),
-								new Opt(),
-								new List(),
-								new Opt(),
-								new Opt(),
-								(FQName)fqn.fullCopy()));
+							l.add(new FRealVariable(fv.getFVisibilityType().fullCopy(),
+								fv.getFTypePrefixVariability().fullCopy(), fqn));
+							l.add(new FDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+								fv.getFTypePrefixVariability().fullCopy(), (FQName)fqn.fullCopy()));
 							str2.append(fqn2.getFQNamePart(fqn2.getNumFQNamePart()-1).name());
 							fqn2.setFQNamePart(new FQNamePart(str2.toString(),fqn2.getFQNamePart(fqn2.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn2.getNumFQNamePart()-1);
 							// Add equations for the new variables
@@ -2591,11 +2571,11 @@ aspect TransformCanonical {
 	public FExp FVariable.createAlgorithmArgument(boolean init) {
 		if (init) {
 			if (isDiscrete())
-				return null; // TODO: Return pre() value.
+				return createFPreExp();
 			if (isContinuous())
-				return startAttributeExp();
+				return createStartAttributeExp();
 		}
-		return getFQName().createFIdUseExp();
+		return createUseExp();
 	}
 	
 	/**
@@ -2628,13 +2608,8 @@ aspect TransformCanonical {
 		beginStep("addFDerivativeVariables()");
 		ArrayList<FDerivativeVariable> l = new ArrayList<FDerivativeVariable>();
 		for (FVariable fv : differentiatedRealVariables()) {
-		    FDerivativeVariable fdv = new FDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-					fv.getFTypePrefixVariability().fullCopy(),
-					new Opt(),
-					new List(),
-					new Opt(),
-					new Opt(),
-					fv.getFQName().fullCopy());
+		    FDerivativeVariable fdv = new FDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+					fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
 			fdv.setMeIntegrated(fv);
 			fv.setMeDifferentiated(fdv);
 			l.add(fdv);
@@ -2660,32 +2635,17 @@ aspect TransformCanonical {
 
 	public FVariable FRealVariable.createFDerivativeVariable() {
 		return new FDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
-					getFTypePrefixVariability().fullCopy(),
-					new Opt(),
-					new List(),
-					new Opt(),
-					new Opt(),
-					getFQName().fullCopy());
+					getFTypePrefixVariability().fullCopy(), getFQName().fullCopy());
 	}
 
 	public FVariable FDerivativeVariable.createFDerivativeVariable() {
 		return new FHDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
-					getFTypePrefixVariability().fullCopy(),
-					new Opt(),
-					new List(),
-					new Opt(),
-					new Opt(),
-					getFQName().fullCopy(),2);
+					getFTypePrefixVariability().fullCopy(), getFQName().fullCopy(), 2);
 	}
 
 	public FVariable FHDerivativeVariable.createFDerivativeVariable() {
 		return new FHDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
-					getFTypePrefixVariability().fullCopy(),
-					new Opt(),
-					new List(),
-					new Opt(),
-					new Opt(),
-					getFQName().fullCopy(),getOrder()+1);
+					getFTypePrefixVariability().fullCopy(), getFQName().fullCopy(), getOrder() + 1);
 	}
 
 	/**
@@ -2695,54 +2655,9 @@ aspect TransformCanonical {
 	public void FClass.addFPreVariables() {
 		beginStep("addFPreVariables()");
 		ArrayList<FVariable> l = new ArrayList<FVariable>();
-		for (FVariable fv : discreteRealVariables()) {
-			l.add(new FPreRealVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-					fv.getFTypePrefixVariability().fullCopy(),
-					new Opt(),
-					(List)fv.getFAttributeList().fullCopy(),
-					new Opt(),
-					new Opt(),
-					fv.getFQName().fullCopy()));
+		for (FVariable fv : discreteVariables()) {
+			l.add(fv.createPreVariable());
 		}
-		for (FVariable fv : discreteIntegerVariables()) {
-			l.add(new FPreIntegerVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-					fv.getFTypePrefixVariability().fullCopy(),
-					new Opt(),
-					(List)fv.getFAttributeList().fullCopy(),
-					new Opt(),
-					new Opt(),
-					fv.getFQName().fullCopy()));
-		}
-		for (FVariable fv : discreteBooleanVariables()) {
-			l.add(new FPreBooleanVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-					fv.getFTypePrefixVariability().fullCopy(),
-					new Opt(),
-					(List)fv.getFAttributeList().fullCopy(),
-					new Opt(),
-					new Opt(),
-					fv.getFQName().fullCopy()));
-		}
-		for (FVariable fv : discreteStringVariables()) {
-			l.add(new FPreStringVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-					fv.getFTypePrefixVariability().fullCopy(),
-					new Opt(),
-					(List)fv.getFAttributeList().fullCopy(),
-					new Opt(),
-					new Opt(),
-					fv.getFQName().fullCopy()));
-		}
-		
-		for (FEnumVariable fv : discreteEnumVariables()) {
-			l.add(new FPreEnumVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-					fv.getFTypePrefixVariability().fullCopy(),
-					new Opt(),
-					(List)fv.getFAttributeList().fullCopy(),
-					new Opt(),
-					new Opt(),
-					fv.getFQName().fullCopy(),fv.getEnum().fullCopy()));
-		}
-
-
 		for (FVariable fv : l) {
 			addFVariable(fv);
 		}
@@ -2750,6 +2665,36 @@ aspect TransformCanonical {
 		root().flushAllRecursive();
 		endStep("addFPreVariables()");
 	}
+	
+	/**
+	 * Create a pre variable for this variable.
+	 */
+	abstract public FVariable FVariable.createPreVariable();
+	
+	public FVariable FRealVariable.createPreVariable() {
+		return new FPreRealVariable(this);
+	}
+	
+	public FVariable FIntegerVariable.createPreVariable() {
+		return new FPreIntegerVariable(this);
+	}
+	
+	public FVariable FEnumVariable.createPreVariable() {
+		return new FPreEnumVariable(this);
+	}
+	
+	public FVariable FBooleanVariable.createPreVariable() {
+		return new FPreBooleanVariable(this);
+	}
+	
+	public FVariable FStringVariable.createPreVariable() {
+		return new FPreStringVariable(this);
+	}
+	
+	public FVariable FRecordVariable.createPreVariable() {
+		throw new UnsupportedOperationException();
+	}
+
 
 	/**
 	 * \brief Generate initial equations from variables with fixed start
@@ -5191,18 +5136,14 @@ aspect StateInitialEquations {
 	            
 				FQName nameToAdd = fv.getFQName().fullCopy();
 				nameToAdd.getFQNamePart(0).setName("_start_" + nameToAdd.getFQNamePart(0).getName());
-				FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(),
-				                                      new FParameter(),
-				                                      new Opt(),
-				                                      new List(),
-				                                      new Opt(fv.startAttributeExp().fullCopy()),
-				                                      new Opt(),
-				                                      nameToAdd);
-				 addFVariable(fvToAdd);                
-				 FEquation eqnToAdd = new FEquation(new FIdUseExp(fv.getFQName().fullCopy()),
-				                                    new FIdUseExp(nameToAdd.fullCopy()));
-				 addFInitialEquation(eqnToAdd);    
-				 flushAllRecursive();               
+				FRealVariable fvToAdd = new FRealVariable(
+						new FPublicVisibilityType(), new FParameter(), nameToAdd);
+				fvToAdd.setBindingExp(fv.startAttributeExp().fullCopy());
+				addFVariable(fvToAdd);                
+				FEquation eqnToAdd = new FEquation(new FIdUseExp(fv.getFQName().fullCopy()),
+				                                   new FIdUseExp(nameToAdd.fullCopy()));
+				addFInitialEquation(eqnToAdd);    
+				flushAllRecursive();               
 			}
 		
 			endStep("addStateInitialEquationsIfSet()");

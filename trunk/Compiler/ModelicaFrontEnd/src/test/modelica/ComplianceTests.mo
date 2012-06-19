@@ -350,6 +350,7 @@ model UnsupportedBuiltins6
          description="Check that ignored built-ins aren't printed and doesn't cause exceptions",
          flatModel="
 fclass ComplianceTests.UnsupportedBuiltins6
+
 end ComplianceTests.UnsupportedBuiltins6;
 ")})));
 
@@ -541,6 +542,7 @@ equation
  when sample(0, 1) then
   y = pre(y) + 1.1;
  end when;
+
 end ComplianceTests.HybridFMU1;
 ")})));
 
@@ -632,6 +634,7 @@ equation
  when initial() then
   y = pre(y) + 1;
  end when;
+
 end ComplianceTests.HybridFMU2;
 ")})));
 

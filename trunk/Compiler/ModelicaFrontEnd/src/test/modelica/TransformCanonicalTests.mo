@@ -20,6 +20,7 @@ equation
  der(v) = 4;
  y + v = 1;
  w = 2;
+
 end TransformCanonicalTests.TransformCanonicalTest1;
 ")})));
 
@@ -52,6 +53,7 @@ parameter equation
  p2 = ( p1 ) * ( p1 );
  p3 = p2 + p1;
  p4 = ( p3 ) * ( p3 );
+
 end TransformCanonicalTests.TransformCanonicalTest2;
 ")})));
 
@@ -134,6 +136,7 @@ parameter equation
  p10 = ( p11 ) * ( p3 );
  p2 = p11;
  p9 = ( p11 ) * ( p8 );
+
 end TransformCanonicalTests.TransformCanonicalTest5;
 ")})));
 
@@ -169,6 +172,7 @@ fclass TransformCanonicalTests.TransformCanonicalTest6
  parameter Real p11 = exp(1) /* 2.7182818284590455 */;
  parameter Real p12 = log(1) /* 0.0 */;
  parameter Real p13 = log10(1) /* 0.0 */;
+
 end TransformCanonicalTests.TransformCanonicalTest6;
 ")})));
 
@@ -205,6 +209,7 @@ parameter equation
 equation
  x[1] = 1;
  y = 2;
+
 end TransformCanonicalTests.TransformCanonicalTest7;
 ")})));
 
@@ -736,6 +741,7 @@ fclass TransformCanonicalTests.AliasTest20
  Real x1;
 equation 
  x1 = 1;
+
 end TransformCanonicalTests.AliasTest20;
 
 ")})));
@@ -776,6 +782,7 @@ fclass TransformCanonicalTests.AliasTest22
 equation 
  x1 = 1;
  x3 = (  - ( x1 ) ) ^ 2;
+
 end TransformCanonicalTests.AliasTest22;
 ")})));
 
@@ -798,6 +805,7 @@ fclass TransformCanonicalTests.AliasTest23
  Real x1;
 equation 
   - ( der(x1) ) = 0;
+
 end TransformCanonicalTests.AliasTest23;
 ")})));
 
@@ -819,6 +827,7 @@ fclass TransformCanonicalTests.AliasTest24
  input Real u;
 equation 
  der(x1) = u;
+
 end TransformCanonicalTests.AliasTest24;
 ")})));
 
@@ -842,6 +851,7 @@ initial equation
  x2 = 0.0;
 equation 
  der(x2) = 1;
+
 end TransformCanonicalTests.AliasTest25;
 ")})));
 
@@ -865,6 +875,7 @@ fclass TransformCanonicalTests.AliasTest26
  Real y;
 equation
  y = p + 3;
+
 end TransformCanonicalTests.AliasTest26;
 ")})));
 
@@ -885,6 +896,7 @@ fclass TransformCanonicalTests.AliasTest27
  Real x1;
 equation
  x1 = 1;
+
 end TransformCanonicalTests.AliasTest27;
 ")})));
 
@@ -913,6 +925,7 @@ fclass TransformCanonicalTests.AliasTest28
  parameter Real p = 1 /* 1.0 */;
 equation
  y =  - ( p ) + 1;
+
 end TransformCanonicalTests.AliasTest28;
 ")})));
 
@@ -955,6 +968,7 @@ equation
  cos(mpr1) + ( mpr3 ) * ( mpr3 ) = 0;
  mmr3 + (  - ( mmr1 ) ) * (  - ( mmr1 ) ) = 0;
  cos(mmr1) + ( mmr3 ) * ( mmr3 ) = 0;
+
 end TransformCanonicalTests.AliasTest29;
 ")})));
 
@@ -1014,6 +1028,7 @@ fclass TransformCanonicalTests.AliasTest30
  parameter Real p = 5;
 equation
  0.0 =  - ( y );
+
 end TransformCanonicalTests.AliasTest30;
 ")})));
 		
@@ -1262,6 +1277,7 @@ equation
  der(x2) = x1 - ( x2 ) + y2;
  y1 = ( 3 ) * ( x1 );
  y2 = ( 4 ) * ( x2 );
+
 end TransformCanonicalTests.InitialEqTest1;
 ")})));
 
@@ -1305,6 +1321,7 @@ equation
  v2 = 1;
  v9 + v10 = 1;
  v10 = 1;
+
 end TransformCanonicalTests.InitialEqTest2;
 ")})));
 
@@ -1351,6 +1368,7 @@ equation
  der(x2) = x1 - ( x2 ) + y2;
  y1 = ( 3 ) * ( x1 );
  y2 = ( 4 ) * ( x2 );
+
 end TransformCanonicalTests.InitialEqTest3;
 ")})));
 
@@ -1384,6 +1402,7 @@ equation
  der(x2) = x1 - ( x2 ) + y2;
  y1 = ( 3 ) * ( x1 );
  y2 = ( 4 ) * ( x2 );
+
 end TransformCanonicalTests.InitialEqTest4;
 ")})));
     Real x1(start=1,fixed=true);
@@ -1416,6 +1435,7 @@ equation
  der(x2) = x1 - ( x2 ) + y2;
  y1 = ( 3 ) * ( x1 );
  y2 = ( 4 ) * ( x2 );
+
 end TransformCanonicalTests.InitialEqTest5;
 ")})));
 
@@ -1451,6 +1471,7 @@ equation
  der(x2) = x1 - ( x2 ) + y2;
  y1 = ( 3 ) * ( x1 );
  y2 = ( 4 ) * ( x2 );
+
 end TransformCanonicalTests.InitialEqTest6;
 ")})));
 
@@ -1490,6 +1511,7 @@ fclass TransformCanonicalTests.InitialEqTest7
 equation
  (x, y) = TransformCanonicalTests.f1(1, 2);
 
+public
  function TransformCanonicalTests.f1
   input Real x;
   input Real y;
@@ -1500,6 +1522,7 @@ equation
   z := y;
   return;
  end TransformCanonicalTests.f1;
+
 end TransformCanonicalTests.InitialEqTest7;
 ")})));
 
@@ -1523,6 +1546,7 @@ equation
  der(x) =  - ( x );
  der(y) =  - ( y );
 
+public
  function TransformCanonicalTests.f1
   input Real x;
   input Real y;
@@ -1533,6 +1557,7 @@ equation
   z := y;
   return;
  end TransformCanonicalTests.f1;
+
 end TransformCanonicalTests.InitialEqTest8;
 ")})));
 
@@ -1571,6 +1596,7 @@ fclass TransformCanonicalTests.InitialEqTest9
 equation
  ({x[1],x[2],x[3]}, {y[1],y[2],y[3],y[4]}) = TransformCanonicalTests.f2({1,1,1}, {1,1,1,1});
 
+public
  function TransformCanonicalTests.f2
   input Real[3] x;
   input Real[4] y;
@@ -1586,6 +1612,7 @@ equation
   z[4] := y[4];
   return;
  end TransformCanonicalTests.f2;
+
 end TransformCanonicalTests.InitialEqTest9;
 ")})));
 
@@ -1619,6 +1646,7 @@ equation
  der(y[3]) =  - ( y[3] );
  der(y[4]) =  - ( y[4] );
 
+public
  function TransformCanonicalTests.f2
   input Real[3] x;
   input Real[4] y;
@@ -1634,6 +1662,7 @@ equation
   z[4] := y[4];
   return;
  end TransformCanonicalTests.f2;
+
 end TransformCanonicalTests.InitialEqTest10;
 ")})));
 
@@ -1667,6 +1696,7 @@ equation
  der(x[3]) =  - ( x[3] );
  (, {y[1],y[2],y[3],y[4]}) = TransformCanonicalTests.f2({1,1,1}, {1,1,1,1});
 
+public
  function TransformCanonicalTests.f2
   input Real[3] x;
   input Real[4] y;
@@ -1682,6 +1712,7 @@ equation
   z[4] := y[4];
   return;
  end TransformCanonicalTests.f2;
+
 end TransformCanonicalTests.InitialEqTest11;
 ")})));
 
@@ -1717,6 +1748,7 @@ equation
  der(x[3]) =  - ( x[3] );
  (, {y[1],y[2],y[3],y[4]}) = TransformCanonicalTests.f2({1,1,1}, {1,1,1,1});
 
+public
  function TransformCanonicalTests.f2
   input Real[3] x;
   input Real[4] y;
@@ -1732,6 +1764,7 @@ equation
   z[4] := y[4];
   return;
  end TransformCanonicalTests.f2;
+
 end TransformCanonicalTests.InitialEqTest12;
 ")})));
     Real x[3](each start=3), y[4];
@@ -1755,6 +1788,7 @@ initial equation
 equation
  der(x1) =  - ( x1 );
  der(x2) = x1;
+
 end TransformCanonicalTests.InitialEqTest13;
 ")})));
     Real x1 (start=1);
@@ -1798,6 +1832,7 @@ equation
  when time > 1 then
   m.x2 = m.pre(x2) + 1;
  end when;
+
 end TransformCanonicalTests.InitialEqTest14;
 ")})));
   model M
@@ -1877,6 +1912,7 @@ fclass TransformCanonicalTests.ParameterDerivativeTest
  parameter Real p = 2 /* 2 */;
 equation
  y = 0.0 + 0.0;
+
 end TransformCanonicalTests.ParameterDerivativeTest;
 ")})));
 
@@ -2023,6 +2059,7 @@ equation
  elsewhen sum(z[1:3]) > 4.5 then
   x[1:3] = 7:9;
  end when;
+
 end TransformCanonicalTests.WhenEqu15;
 ")})));
 
@@ -2085,6 +2122,7 @@ equation
  elsewhen z[1] + z[2] + z[3] > 4.5 then
   x[3] = 9;
  end when;
+
 end TransformCanonicalTests.WhenEqu1;
 ")})));
 
@@ -2139,6 +2177,7 @@ equation
  when time > 1 and time < 1.1 or time > 2 and time < 2.1 or time > 3 and time < 3.1 then
   y = pre(y) + 1.1;
  end when;
+
 end TransformCanonicalTests.WhenEqu2;
 ")})));
 
@@ -2206,6 +2245,7 @@ equation
   y = pre(y) + 1.1;
  end when;
  b1 = y > 2;
+
 end TransformCanonicalTests.WhenEqu3;
 ")})));
 
@@ -2275,6 +2315,7 @@ v = 4;
 elsewhen time > 4 then
 v = 1;
 end when;
+
 end TransformCanonicalTests.WhenEqu4;
 ")})));
   discrete Real x,y,z,v;
@@ -2300,7 +2341,7 @@ model WhenEqu45
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="WhenEqu45",
          description="Basic test of when equations",
-         equation_sorting = true,         
+         equation_sorting = true,
          flatModel="
 		 
 fclass TransformCanonicalTests.WhenEqu45
@@ -2315,7 +2356,9 @@ equation
   e = TransformCanonicalTests.WhenEqu45.E.c;
  end when;
 
+public
  type TransformCanonicalTests.WhenEqu45.E = enumeration(a, b, c);
+
 end TransformCanonicalTests.WhenEqu45;
 		 
 ")})));
@@ -2364,6 +2407,7 @@ end when;
 when h2 then
 z = true;
 end when;
+
 end TransformCanonicalTests.WhenEqu5;
 ")})));
 
@@ -2405,6 +2449,7 @@ equation
  when dummy >  - ( 1 ) then
   x = pre(x) + 1;
  end when;
+
 end TransformCanonicalTests.WhenEqu7;
 ")})));
 
@@ -2441,6 +2486,7 @@ equation
  when sample(0, ( 2 ) / ( 3 )) then
   y = pre(y) + 1;
  end when;
+
 end TransformCanonicalTests.WhenEqu8;
 ")})));
 
@@ -2485,6 +2531,7 @@ equation
   u = ( K ) * ( ref - ( x ) ) + ( ( 1 ) / ( Ti ) ) * ( I );
  end when;
  ref = (if time < 1 then 0 else 1);
+
 end TransformCanonicalTests.WhenEqu9;
 ")})));
  Real x,ref;
@@ -2539,6 +2586,7 @@ equation
  when {initial(),sampleTrigger} then
   x_c = ( a_c ) * ( pre(x_c) ) + ( b_c ) * ( u_c );
  end when;
+
 end TransformCanonicalTests.WhenEqu10;
 ")})));
 
@@ -2604,6 +2652,7 @@ equation
   x_c = ( a_c ) * ( pre(x_c) ) + ( b_c ) * ( u_c );
  end when;
  atInit = true and initial();
+
 end TransformCanonicalTests.WhenEqu11;
 ")})));
 
@@ -2650,6 +2699,7 @@ equation
   (x, y) = TransformCanonicalTests.WhenEqu12.F(time);
  end when;
 
+public
  function TransformCanonicalTests.WhenEqu12.F
   input Real x;
   output Real y1;
@@ -3221,6 +3271,7 @@ fclass TransformCanonicalTests.IfEqu17
 equation
  (y1, y2) = TransformCanonicalTests.IfEqu17.f();
 
+public
  function TransformCanonicalTests.IfEqu17.f
   output Real x1;
   output Real x2;
@@ -3229,6 +3280,7 @@ equation
   x2 := 2;
   return;
  end TransformCanonicalTests.IfEqu17.f;
+
 end TransformCanonicalTests.IfEqu17;
 ")})));
 
@@ -3383,6 +3435,7 @@ equation
  ({temp_1[1],temp_1[2]}) = TransformCanonicalTests.IfEqu22.f({1,2});
  b = true;
 
+public
  function TransformCanonicalTests.IfEqu22.f
   input Real[2] u;
   output Real[2] y;
@@ -3391,6 +3444,7 @@ equation
   u[2] := ( 2 ) * ( y[2] );
   return;
  end TransformCanonicalTests.IfEqu22.f;
+
 end TransformCanonicalTests.IfEqu22;
 ")})));
 
@@ -3438,6 +3492,7 @@ equation
  x = 1;
  y = 2;
 
+public
  function TransformCanonicalTests.IfEqu23.F
   input Real x;
   input Real y;
@@ -3452,6 +3507,7 @@ equation
   Real x;
   Real y;
  end TransformCanonicalTests.IfEqu23.R;
+
 end TransformCanonicalTests.IfEqu23;
 ")})));
 
@@ -3579,106 +3635,119 @@ end TransformCanonicalTests.IndexReduction1_PlanarPendulum;
          description="Test of index reduction",
          flatModel="
 fclass TransformCanonicalTests.IndexReduction2_Mechanical
-parameter Real amplitude(final quantity = \"Torque\",final unit = \"N.m\") = 10 \"Amplitude of driving torque\" /* 10 */;
-parameter Real freqHz(final quantity = \"Frequency\",final unit = \"Hz\") = 5 \"Frequency of driving torque\" /* 5 */;
-parameter Real Jmotor(min = 0,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") = 0.1 \"Motor inertia\" /* 0.1 */;
-parameter Real Jload(min = 0,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") = 2 \"Load inertia\" /* 2 */;
-parameter Real ratio = 10 \"Gear ratio\" /* 10 */;
-parameter Real damping = 10 \"Damping in bearing of gear\" /* 10 */;
-parameter Real fixed.phi0(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") = 0 \"Fixed offset angle of housing\" /* 0 */;
-Real fixed.flange.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-parameter Boolean torque.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
-Real torque.flange.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-parameter Real inertia1.J(min = 0,start = 1,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") \"Moment of inertia\";
-parameter StateSelect inertia1.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
-Real inertia1.phi(stateSelect = inertia1.stateSelect,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Absolute rotation angle of component\";
-Real inertia1.w(stateSelect = inertia1.stateSelect,final quantity = \"AngularVelocity\",final unit = \"rad/s\") \"Absolute angular velocity of component (= der(phi))\";
-Real inertia1.a(final quantity = \"AngularAcceleration\",final unit = \"rad/s2\") \"Absolute angular acceleration of component (= der(w))\";
-parameter Real idealGear.ratio(start = 1) \"Transmission ratio (flange_a.phi/flange_b.phi)\";
-Real idealGear.phi_a(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Angle between left shaft flange and support\";
-Real idealGear.phi_b(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Angle between right shaft flange and support\";
-parameter Boolean idealGear.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
-Real idealGear.flange_a.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-Real idealGear.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-Real idealGear.support.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Reaction torque in the support/housing\";
-Real inertia2.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-parameter Real inertia2.J(min = 0,start = 1,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") = 2 \"Moment of inertia\" /* 2 */;
-parameter StateSelect inertia2.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
-Real inertia2.phi(fixed = true,start = 0,stateSelect = inertia2.stateSelect,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Absolute rotation angle of component\";
-Real inertia2.w(fixed = true,stateSelect = inertia2.stateSelect,final quantity = \"AngularVelocity\",final unit = \"rad/s\") \"Absolute angular velocity of component (= der(phi))\";
-Real inertia2.a(final quantity = \"AngularAcceleration\",final unit = \"rad/s2\") \"Absolute angular acceleration of component (= der(w))\";
-parameter Real spring.c(final min = 0,start = 100000.0,final quantity = \"RotationalSpringConstant\",final unit = \"N.m/rad\") = 10000.0 \"Spring constant\" /* 10000.0 */;
-parameter Real spring.phi_rel0(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") = 0 \"Unstretched spring angle\" /* 0 */;
-Real spring.phi_rel(fixed = true,start = 0,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
-Real spring.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-Real inertia3.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-parameter Real inertia3.J(min = 0,start = 1,final quantity = \"MomentOfInertia\",final unit = \"kg.m2\") \"Moment of inertia\";
-parameter StateSelect inertia3.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
-Real inertia3.phi(stateSelect = inertia3.stateSelect,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Absolute rotation angle of component\";
-Real inertia3.w(fixed = true,stateSelect = inertia3.stateSelect,final quantity = \"AngularVelocity\",final unit = \"rad/s\") \"Absolute angular velocity of component (= der(phi))\";
-Real inertia3.a(final quantity = \"AngularAcceleration\",final unit = \"rad/s2\") \"Absolute angular acceleration of component (= der(w))\";
-parameter Real damper.d(final min = 0,start = 0,final quantity = \"RotationalDampingConstant\",final unit = \"N.m.s/rad\") \"Damping constant\";
-Real damper.phi_rel(stateSelect = StateSelect.always,start = 0,nominal = damper.phi_nominal,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
-Real damper.w_rel(stateSelect = StateSelect.always,start = 0,final quantity = \"AngularVelocity\",final unit = \"rad/s\") \"Relative angular velocity (= der(phi_rel))\";
-Real damper.a_rel(start = 0,final quantity = \"AngularAcceleration\",final unit = \"rad/s2\") \"Relative angular acceleration (= der(w_rel))\";
-Real damper.flange_b.tau(final quantity = \"Torque\",final unit = \"N.m\") \"Cut torque in the flange\";
-parameter Real damper.phi_nominal(displayUnit = \"rad\",final quantity = \"Angle\",final unit = \"rad\") = 1.0E-4 \"Nominal value of phi_rel (used for scaling)\" /* 1.0E-4 */;
-parameter StateSelect damper.stateSelect = StateSelect.prefer \"Priority to use phi_rel and w_rel as states\" /* StateSelect.prefer */;
-parameter Real sine.amplitude \"Amplitude of sine wave\";
-parameter Real sine.freqHz(start = 1,final quantity = \"Frequency\",final unit = \"Hz\") \"Frequency of sine wave\";
-parameter Real sine.phase(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\") = 0 \"Phase of sine wave\" /* 0 */;
-parameter Real sine.offset = 0 \"Offset of output signal\" /* 0 */;
-parameter Real sine.startTime(final quantity = \"Time\",final unit = \"s\") = 0 \"Output = offset for time < startTime\" /* 0 */;
-constant Real sine.pi = 3.141592653589793;
-Real der_idealGear_phi_a;
-Real der_idealGear_phi_b;
-Real der_2_idealGear_phi_a;
-Real der_2_idealGear_phi_b;
-Real der_2_damper_phi_rel;
+ parameter Modelica.SIunits.Torque amplitude = 10 \"Amplitude of driving torque\" /* 10 */;
+ parameter Modelica.SIunits.Frequency freqHz = 5 \"Frequency of driving torque\" /* 5 */;
+ parameter Modelica.SIunits.Inertia Jmotor(min = 0) = 0.1 \"Motor inertia\" /* 0.1 */;
+ parameter Modelica.SIunits.Inertia Jload(min = 0) = 2 \"Load inertia\" /* 2 */;
+ parameter Real ratio = 10 \"Gear ratio\" /* 10 */;
+ parameter Real damping = 10 \"Damping in bearing of gear\" /* 10 */;
+ parameter Modelica.SIunits.Angle fixed.phi0 = 0 \"Fixed offset angle of housing\" /* 0 */;
+ Modelica.SIunits.Torque fixed.flange.tau \"Cut torque in the flange\";
+ parameter Boolean torque.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
+ Modelica.SIunits.Torque torque.flange.tau \"Cut torque in the flange\";
+ parameter Modelica.SIunits.Inertia inertia1.J(min = 0,start = 1) \"Moment of inertia\";
+ parameter StateSelect inertia1.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
+ Modelica.SIunits.Angle inertia1.phi(stateSelect = inertia1.stateSelect) \"Absolute rotation angle of component\";
+ Modelica.SIunits.AngularVelocity inertia1.w(stateSelect = inertia1.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
+ Modelica.SIunits.AngularAcceleration inertia1.a \"Absolute angular acceleration of component (= der(w))\";
+ parameter Real idealGear.ratio(start = 1) \"Transmission ratio (flange_a.phi/flange_b.phi)\";
+ Modelica.SIunits.Angle idealGear.phi_a \"Angle between left shaft flange and support\";
+ Modelica.SIunits.Angle idealGear.phi_b \"Angle between right shaft flange and support\";
+ parameter Boolean idealGear.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
+ Modelica.SIunits.Torque idealGear.flange_a.tau \"Cut torque in the flange\";
+ Modelica.SIunits.Torque idealGear.flange_b.tau \"Cut torque in the flange\";
+ Modelica.SIunits.Torque idealGear.support.tau \"Reaction torque in the support/housing\";
+ Modelica.SIunits.Torque inertia2.flange_b.tau \"Cut torque in the flange\";
+ parameter Modelica.SIunits.Inertia inertia2.J(min = 0,start = 1) = 2 \"Moment of inertia\" /* 2 */;
+ parameter StateSelect inertia2.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
+ Modelica.SIunits.Angle inertia2.phi(fixed = true,start = 0,stateSelect = inertia2.stateSelect) \"Absolute rotation angle of component\";
+ Modelica.SIunits.AngularVelocity inertia2.w(fixed = true,stateSelect = inertia2.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
+ Modelica.SIunits.AngularAcceleration inertia2.a \"Absolute angular acceleration of component (= der(w))\";
+ parameter Modelica.SIunits.RotationalSpringConstant spring.c(final min = 0,start = 100000.0) = 10000.0 \"Spring constant\" /* 10000.0 */;
+ parameter Modelica.SIunits.Angle spring.phi_rel0 = 0 \"Unstretched spring angle\" /* 0 */;
+ Modelica.SIunits.Angle spring.phi_rel(fixed = true,start = 0) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
+ Modelica.SIunits.Torque spring.flange_b.tau \"Cut torque in the flange\";
+ Modelica.SIunits.Torque inertia3.flange_b.tau \"Cut torque in the flange\";
+ parameter Modelica.SIunits.Inertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
+ parameter StateSelect inertia3.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
+ Modelica.SIunits.Angle inertia3.phi(stateSelect = inertia3.stateSelect) \"Absolute rotation angle of component\";
+ Modelica.SIunits.AngularVelocity inertia3.w(fixed = true,stateSelect = inertia3.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
+ Modelica.SIunits.AngularAcceleration inertia3.a \"Absolute angular acceleration of component (= der(w))\";
+ parameter Modelica.SIunits.RotationalDampingConstant damper.d(final min = 0,start = 0) \"Damping constant\";
+ Modelica.SIunits.Angle damper.phi_rel(stateSelect = StateSelect.always,start = 0,nominal = damper.phi_nominal) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
+ Modelica.SIunits.AngularVelocity damper.w_rel(stateSelect = StateSelect.always,start = 0) \"Relative angular velocity (= der(phi_rel))\";
+ Modelica.SIunits.AngularAcceleration damper.a_rel(start = 0) \"Relative angular acceleration (= der(w_rel))\";
+ Modelica.SIunits.Torque damper.flange_b.tau \"Cut torque in the flange\";
+ parameter Modelica.SIunits.Angle damper.phi_nominal(displayUnit = \"rad\") = 1.0E-4 \"Nominal value of phi_rel (used for scaling)\" /* 1.0E-4 */;
+ parameter StateSelect damper.stateSelect = StateSelect.prefer \"Priority to use phi_rel and w_rel as states\" /* StateSelect.prefer */;
+ parameter Real sine.amplitude \"Amplitude of sine wave\";
+ parameter Modelica.SIunits.Frequency sine.freqHz(start = 1) \"Frequency of sine wave\";
+ parameter Modelica.SIunits.Angle sine.phase = 0 \"Phase of sine wave\" /* 0 */;
+ parameter Real sine.offset = 0 \"Offset of output signal\" /* 0 */;
+ parameter Modelica.SIunits.Time sine.startTime = 0 \"Output = offset for time < startTime\" /* 0 */;
+ constant Real sine.pi = 3.141592653589793;
+ Real der_idealGear_phi_a;
+ Real der_idealGear_phi_b;
+ Real der_2_idealGear_phi_a;
+ Real der_2_idealGear_phi_b;
+ Real der_2_damper_phi_rel;
 initial equation 
-inertia2.phi = 0;
-inertia2.w = 0.0;
-inertia3.w = 0.0;
-spring.phi_rel = 0;
+ inertia2.phi = 0;
+ inertia2.w = 0.0;
+ inertia3.w = 0.0;
+ spring.phi_rel = 0;
 parameter equation
-inertia1.J = Jmotor;
-idealGear.ratio = ratio;
-inertia3.J = Jload;
-damper.d = damping;
-sine.amplitude = amplitude;
-sine.freqHz = freqHz;
+ inertia1.J = Jmotor;
+ idealGear.ratio = ratio;
+ inertia3.J = Jload;
+ damper.d = damping;
+ sine.amplitude = amplitude;
+ sine.freqHz = freqHz;
 equation
-( inertia1.J ) * ( inertia1.a ) = - ( torque.flange.tau ) - ( idealGear.flange_a.tau );
-idealGear.phi_a = inertia1.phi - ( fixed.phi0 );
-idealGear.phi_b = inertia2.phi - ( fixed.phi0 );
-idealGear.phi_a = ( idealGear.ratio ) * ( idealGear.phi_b );
-0 = ( idealGear.ratio ) * ( idealGear.flange_a.tau ) + idealGear.flange_b.tau;
-( inertia2.J ) * ( inertia2.a ) = - ( idealGear.flange_b.tau ) + inertia2.flange_b.tau;
-spring.flange_b.tau = ( spring.c ) * ( spring.phi_rel - ( spring.phi_rel0 ) );
-spring.phi_rel = inertia3.phi - ( inertia2.phi );
-inertia3.w = inertia3.der(phi);
-inertia3.a = inertia3.der(w);
-( inertia3.J ) * ( inertia3.a ) = - ( spring.flange_b.tau ) + inertia3.flange_b.tau;
-damper.flange_b.tau = ( damper.d ) * ( damper.w_rel );
-damper.phi_rel = fixed.phi0 - ( inertia2.phi );
-damper.w_rel = damper.der(phi_rel);
-damper.a_rel = damper.der(w_rel);
-- ( torque.flange.tau ) = sine.offset + (if time < sine.startTime then 0 else ( sine.amplitude ) * ( sin(( ( ( 2 ) * ( 3.141592653589793 ) ) * ( sine.freqHz ) ) * ( time - ( sine.startTime ) ) + sine.phase) ));
-- ( damper.flange_b.tau ) + inertia2.flange_b.tau - ( spring.flange_b.tau ) = 0;
-damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau - ( torque.flange.tau ) = 0;
-inertia3.flange_b.tau = 0;
-idealGear.support.tau = - ( idealGear.flange_a.tau ) - ( idealGear.flange_b.tau );
-der_idealGear_phi_a = ( idealGear.ratio ) * ( der_idealGear_phi_b );
-der_idealGear_phi_a = inertia1.w - ( 0.0 );
-der_idealGear_phi_b = inertia2.w - ( 0.0 );
-der_2_idealGear_phi_a = ( idealGear.ratio ) * ( der_2_idealGear_phi_b );
-der_2_idealGear_phi_a = inertia1.a - ( 0.0 );
-der_2_idealGear_phi_b = inertia2.a - ( 0.0 );
-damper.der(phi_rel) = 0.0 - ( inertia2.w );
-der_2_damper_phi_rel = 0.0 - ( inertia2.a );
-damper.der(w_rel) = der_2_damper_phi_rel;
+ ( inertia1.J ) * ( inertia1.a ) =  - ( torque.flange.tau ) - ( idealGear.flange_a.tau );
+ idealGear.phi_a = inertia1.phi - ( fixed.phi0 );
+ idealGear.phi_b = inertia2.phi - ( fixed.phi0 );
+ idealGear.phi_a = ( idealGear.ratio ) * ( idealGear.phi_b );
+ 0 = ( idealGear.ratio ) * ( idealGear.flange_a.tau ) + idealGear.flange_b.tau;
+ ( inertia2.J ) * ( inertia2.a ) =  - ( idealGear.flange_b.tau ) + inertia2.flange_b.tau;
+ spring.flange_b.tau = ( spring.c ) * ( spring.phi_rel - ( spring.phi_rel0 ) );
+ spring.phi_rel = inertia3.phi - ( inertia2.phi );
+ inertia3.w = inertia3.der(phi);
+ inertia3.a = inertia3.der(w);
+ ( inertia3.J ) * ( inertia3.a ) =  - ( spring.flange_b.tau ) + inertia3.flange_b.tau;
+ damper.flange_b.tau = ( damper.d ) * ( damper.w_rel );
+ damper.phi_rel = fixed.phi0 - ( inertia2.phi );
+ damper.w_rel = damper.der(phi_rel);
+ damper.a_rel = damper.der(w_rel);
+  - ( torque.flange.tau ) = sine.offset + (if time < sine.startTime then 0 else ( sine.amplitude ) * ( sin(( ( ( 2 ) * ( 3.141592653589793 ) ) * ( sine.freqHz ) ) * ( time - ( sine.startTime ) ) + sine.phase) ));
+  - ( damper.flange_b.tau ) + inertia2.flange_b.tau - ( spring.flange_b.tau ) = 0;
+ damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau - ( torque.flange.tau ) = 0;
+ inertia3.flange_b.tau = 0;
+ idealGear.support.tau =  - ( idealGear.flange_a.tau ) - ( idealGear.flange_b.tau );
+ der_idealGear_phi_a = ( idealGear.ratio ) * ( der_idealGear_phi_b );
+ der_idealGear_phi_a = inertia1.w - ( 0.0 );
+ der_idealGear_phi_b = inertia2.w - ( 0.0 );
+ der_2_idealGear_phi_a = ( idealGear.ratio ) * ( der_2_idealGear_phi_b );
+ der_2_idealGear_phi_a = inertia1.a - ( 0.0 );
+ der_2_idealGear_phi_b = inertia2.a - ( 0.0 );
+ damper.der(phi_rel) = 0.0 - ( inertia2.w );
+ der_2_damper_phi_rel = 0.0 - ( inertia2.a );
+ damper.der(w_rel) = der_2_damper_phi_rel;
 
-type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ type Modelica.SIunits.Torque = Real(final quantity = \"Torque\",final unit = \"N.m\");
+ type Modelica.SIunits.Frequency = Real(final quantity = \"Frequency\",final unit = \"Hz\");
+ type Modelica.SIunits.Inertia = Real(final quantity = \"MomentOfInertia\",final unit = \"kg.m2\");
+ type Modelica.SIunits.Angle = Real(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\");
+ type Modelica.Blocks.Interfaces.RealInput = Real;
+ type Modelica.SIunits.AngularVelocity = Real(final quantity = \"AngularVelocity\",final unit = \"rad/s\");
+ type Modelica.SIunits.AngularAcceleration = Real(final quantity = \"AngularAcceleration\",final unit = \"rad/s2\");
+ type Modelica.SIunits.RotationalSpringConstant = Real(final quantity = \"RotationalSpringConstant\",final unit = \"N.m/rad\");
+ type Modelica.SIunits.RotationalDampingConstant = Real(final quantity = \"RotationalDampingConstant\",final unit = \"N.m.s/rad\");
+ type Modelica.SIunits.Time = Real(final quantity = \"Time\",final unit = \"s\");
+ type Modelica.Blocks.Interfaces.RealOutput = Real;
 end TransformCanonicalTests.IndexReduction2_Mechanical;
 ")})));
 
@@ -3897,7 +3966,10 @@ equation
 der_x1 + der(x2) = 1;
 - ( x1 ) + ( 2 ) * ( x2 ) = 0;
 - ( der_x1 ) + ( 2 ) * ( der(x2) ) = 0.0;
+
+public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
 end TransformCanonicalTests.IndexReduction8_Neg;
 ")})));
   Real x1,x2(stateSelect=StateSelect.prefer);
@@ -3923,7 +3995,10 @@ equation
 der_x1 + der(x2) = 1;
 x1 + exp(( ( x2 ) * ( p ) ) * ( time )) = 0;
 der_x1 + ( exp(( ( x2 ) * ( p ) ) * ( time )) ) * ( ( ( x2 ) * ( p ) ) * ( 1.0 ) + ( ( der(x2) ) * ( p ) ) * ( time ) ) = 0.0;
+
+public
 type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
 end TransformCanonicalTests.IndexReduction9_Exp;
 ")})));
   Real x1,x2(stateSelect=StateSelect.prefer);
@@ -4225,7 +4300,10 @@ equation
 der_x1 + der(x2) = 1;
 x1 + (if p > 3 then ( 3 ) * ( x2 ) elseif p <= 3 then sin(x2) else ( 2 ) * ( x2 )) = 0;
 der_x1 + (if p > 3 then ( 3 ) * ( der(x2) ) elseif p <= 3 then ( cos(x2) ) * ( der(x2) ) else ( 2 ) * ( der(x2) )) = 0.0;
+
+public
 type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
 end TransformCanonicalTests.IndexReduction21_If;
 ")})));
   Real x1,x2(stateSelect=StateSelect.prefer);
@@ -4340,6 +4418,7 @@ equation
  x1 + TransformCanonicalTests.IndexReduction24_DerFunc.f(x2) = 0;
  der_x1 + TransformCanonicalTests.IndexReduction24_DerFunc.f_der(x2, der(x2)) = 0.0;
 
+public
  function TransformCanonicalTests.IndexReduction24_DerFunc.f_der
   input Real x;
   input Real der_x;
@@ -4356,6 +4435,7 @@ equation
   y := x ^ 2;
   return;
  end TransformCanonicalTests.IndexReduction24_DerFunc.f;
+
 end TransformCanonicalTests.IndexReduction24_DerFunc;
 ")})));
 
@@ -4409,6 +4489,7 @@ equation
  der_x1_1 + TransformCanonicalTests.IndexReduction25_DerFunc.f_der({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {der(x2[1]),der(x2[2])}, {{0.0,0.0},{0.0,0.0}}) = 0.0;
  der_x1_2 = 0.0;
 
+public
  function TransformCanonicalTests.IndexReduction25_DerFunc.f_der
   input Real[2] x;
   input Real[2, 2] A;
@@ -4428,6 +4509,7 @@ equation
   y := ( ( x[1] ) * ( A[1,1] ) + ( x[2] ) * ( A[2,1] ) ) * ( x[1] ) + ( ( x[1] ) * ( A[1,2] ) + ( x[2] ) * ( A[2,2] ) ) * ( x[2] );
   return;
  end TransformCanonicalTests.IndexReduction25_DerFunc.f;
+
 end TransformCanonicalTests.IndexReduction25_DerFunc;
 ")})));
 
@@ -4481,6 +4563,7 @@ equation
  der_x1_1 + TransformCanonicalTests.IndexReduction26_DerFunc.f_der({x2[1],x2[2]}, {der(x2[1]),der(x2[2])}) = 0.0;
  der_x1_2 = 0.0;
 
+public
  function TransformCanonicalTests.IndexReduction26_DerFunc.f_der
   input Real[2] x;
   input Real[2] der_x;
@@ -4497,6 +4580,7 @@ equation
   y := x[1] ^ 2 + x[2] ^ 3;
   return;
  end TransformCanonicalTests.IndexReduction26_DerFunc.f;
+
 end TransformCanonicalTests.IndexReduction26_DerFunc;
 ")})));
 
@@ -4550,6 +4634,7 @@ equation
  ({ - ( x1[1] ), - ( x1[2] )}) = TransformCanonicalTests.IndexReduction27_DerFunc.f({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}});
  ({ - ( der_x1_1 ), - ( der_x1_2 )}) = TransformCanonicalTests.IndexReduction27_DerFunc.f_der({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {der(x2[1]),der(x2[2])}, {{0.0,0.0},{0.0,0.0}});
 
+public
  function TransformCanonicalTests.IndexReduction27_DerFunc.f_der
   input Real[2] x;
   input Real[2, 2] A;
@@ -4571,7 +4656,9 @@ equation
   y[2] := ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] );
   return;
  end TransformCanonicalTests.IndexReduction27_DerFunc.f;
+ 
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
 end TransformCanonicalTests.IndexReduction27_DerFunc;
 ")})));
 
@@ -4626,7 +4713,8 @@ x1.der(a[1]) + x2.der(a[1]) = 2;
 der_x1_a_2 + der_x2_a_2 = 3;
 (TransformCanonicalTests.IndexReduction28_Record.R({ - ( x1.a[1] ), - ( x1.a[2] )})) = TransformCanonicalTests.IndexReduction28_Record.f({x2.a[1],x2.a[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}});
 (TransformCanonicalTests.IndexReduction28_Record.R({ - ( x1.der(a[1]) ), - ( der_x1_a_2 )})) = TransformCanonicalTests.IndexReduction28_Record.f_der({x2.a[1],x2.a[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {x2.der(a[1]),der_x2_a_2}, {{0.0,0.0},{0.0,0.0}});
-		
+
+public
  function TransformCanonicalTests.IndexReduction28_Record.f_der
   input Real[2] x;
   input Real[2, 2] A;
@@ -4652,7 +4740,9 @@ der_x1_a_2 + der_x2_a_2 = 3;
  record TransformCanonicalTests.IndexReduction28_Record.R
   Real a[2];
  end TransformCanonicalTests.IndexReduction28_Record.R;
+
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
  end TransformCanonicalTests.IndexReduction28_Record;
 ")})));
 
@@ -4704,6 +4794,7 @@ equation
  x + TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.F(y, x, 0, x) = 0;
  der_x + TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.der_F(y, x, 0, x, der(y), der_x) = 0.0;
 
+public
  function TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.der_F
   input Real p;
   input Real h;
@@ -4727,6 +4818,7 @@ equation
   rho := p + h;
   return;
  end TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.F;
+
 end TransformCanonicalTests.IndexReduction29_FunctionNoDerivative;
 ")})));
 	
@@ -4794,7 +4886,9 @@ x ^ 2 + y ^ 2 = L;
 ( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
 der_2_x = der(vx);
 
+public
 type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
 end TransformCanonicalTests.IndexReduction30_PlanarPendulum_StatePrefer; 		 
 ")})));
 
@@ -4841,7 +4935,9 @@ x ^ 2 + y ^ 2 = L;
 ( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
 der_2_x = der(vx);
 
+public
 type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
 end TransformCanonicalTests.IndexReduction31_PlanarPendulum_StateAlways;	
 ")})));
 
@@ -4889,7 +4985,9 @@ x ^ 2 + y ^ 2 = L;
 ( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( vx ) ) * ( vx ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der(y) ) ) * ( der(y) ) = 0.0;
 der_2_y = der(vy);
 
+public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
 end TransformCanonicalTests.IndexReduction32_PlanarPendulum_StatePreferAlways;
 ")})));
 

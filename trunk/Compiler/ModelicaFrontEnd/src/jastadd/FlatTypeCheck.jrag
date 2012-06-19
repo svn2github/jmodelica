@@ -297,7 +297,7 @@ aspect FlatTypeCheck {
   syn boolean FIdUse.isComponentSizeClass()     = false;
   eq FIdUseInstAccess.isComponentSizeClass()    = getInstAccess().isComponentSizeClass();
   
-  syn boolean InstClassDecl.isComponentSizeClass() = isBooleanClass();
+  syn boolean InstClassDecl.isComponentSizeClass() = isBoolean();
   eq InstEnumClassDecl.isComponentSizeClass()      = true;
   
   inh boolean InstClassAccess.isInstComponentSize();

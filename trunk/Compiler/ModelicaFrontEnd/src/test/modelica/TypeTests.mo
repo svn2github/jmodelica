@@ -146,6 +146,7 @@ fclass TypeTests.TypeRel1
  discrete Boolean ge = 1.0 >= 2.0;
  discrete Boolean lt = 1.0 < 2.0;
  discrete Boolean le = 1.0 <= 2.0;
+
 end TypeTests.TypeRel1;
 ")})));
 
@@ -169,6 +170,7 @@ fclass TypeTests.TypeRel2
  discrete Boolean ge = 1 >= 2.0;
  discrete Boolean lt = 1 < 2.0;
  discrete Boolean le = 1 <= 2.0;
+
 end TypeTests.TypeRel2;
 ")})));
 
@@ -192,6 +194,7 @@ fclass TypeTests.TypeRel3
  discrete Boolean ge = true >= false;
  discrete Boolean lt = true < false;
  discrete Boolean le = true <= false;
+
 end TypeTests.TypeRel3;
 ")})));
 
@@ -217,6 +220,7 @@ fclass TypeTests.TypeRel4
  discrete Boolean ge = \"1.0\" >= \"2.0\";
  discrete Boolean lt = \"1.0\" < \"2.0\";
  discrete Boolean le = \"1.0\" <= \"2.0\";
+
 end TypeTests.TypeRel4;
 ")})));
 
@@ -311,6 +315,7 @@ model AbsType1
 fclass TypeTests.AbsType1
  Real x = abs(y);
  Real y =  - ( 2.0 );
+
 end TypeTests.AbsType1;
 ")})));
 
@@ -330,6 +335,7 @@ fclass TypeTests.AbsType2
  constant Real x2 = abs(2.0);
  Real y1 = 2.0;
  Real y2 = 2.0;
+
 end TypeTests.AbsType2;
 ")})));
 
@@ -349,6 +355,7 @@ model AbsType3
 fclass TypeTests.AbsType3
  discrete Integer x = abs(y);
  discrete Integer y =  - ( 2 );
+
 end TypeTests.AbsType3;
 ")})));
 
@@ -368,6 +375,7 @@ fclass TypeTests.AbsType4
  constant Integer x2 = abs(2);
  discrete Integer y1 = 2;
  discrete Integer y2 = 2;
+
 end TypeTests.AbsType4;
 ")})));
 
@@ -402,6 +410,7 @@ model AbsType6
          flatModel="
 fclass TypeTests.AbsType6
  Real x[2] = abs({1, - ( 1 )});
+
 end TypeTests.AbsType6;
 ")})));
 
@@ -455,6 +464,7 @@ initial equation
  pre(y) = 0;
 equation
  y = 1;
+
 end TypeTests.IntegerExp1;
 ")})));
 
@@ -477,6 +487,7 @@ initial equation
 equation
  x = 1.0;
  y = integer(x);
+
 end TypeTests.IntegerExp2;
 ")})));
 
@@ -519,6 +530,7 @@ initial equation
 equation
  x = false;
  y = true;
+
 end TypeTests.ConstCmpEq;
 ")})));
 
@@ -546,6 +558,7 @@ initial equation
 equation
  x = true;
  y = false;
+
 end TypeTests.ConstCmpNeq;
 ")})));
 
@@ -577,6 +590,7 @@ equation
  x = true;
  y = true;
  z = false;
+
 end TypeTests.ConstCmpLeq;
 ")})));
 
@@ -610,6 +624,7 @@ equation
  x = true;
  y = false;
  z = false;
+
 end TypeTests.ConstCmpLt;
 ")})));
 
@@ -643,6 +658,7 @@ equation
  x = false;
  y = true;
  z = true;
+
 end TypeTests.ConstCmpGeq;
 ")})));
 
@@ -676,6 +692,7 @@ equation
  x = false;
  y = false;
  z = true;
+
 end TypeTests.ConstCmpGt;
 ")})));
 
@@ -730,11 +747,13 @@ model RealEq3
 fclass TypeTests.RealEq3
  discrete Boolean b = TypeTests.RealEq3.f();
 
+public
  function TypeTests.RealEq3.f
   output Boolean a := 1.0 == 2;
  algorithm
   return;
  end TypeTests.RealEq3.f;
+
 end TypeTests.RealEq3;
 ")})));
 
@@ -756,11 +775,13 @@ model RealEq4
 fclass TypeTests.RealEq4
  discrete Boolean b = TypeTests.RealEq4.f();
 
+public
  function TypeTests.RealEq4.f
   output Boolean a := 1.0 <> 2;
  algorithm
   return;
  end TypeTests.RealEq4.f;
+
 end TypeTests.RealEq4;
 ")})));
 
@@ -785,6 +806,7 @@ fclass TypeTests.ParameterStart1
  Real y;
 equation
  y = 2.0;
+
 end TypeTests.ParameterStart1;
 ")})));
 
@@ -804,6 +826,7 @@ fclass TypeTests.ParameterStart2
  Real y;
 equation
  y = 0.0;
+
 end TypeTests.ParameterStart2;
 ")})));
 
@@ -816,17 +839,20 @@ model ArrayTypeTest1
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ArrayTypeTest1",
          description="Check that short type declarations with array indices are expanded correctly.",
-         flatModel="fclass TypeTests.ArrayTypeTest1
- Real x[1](unit = \"m\");
- Real x[2](unit = \"m\");
- Real x[3](unit = \"m\");
+         flatModel="
+fclass TypeTests.ArrayTypeTest1
+ TypeTests.ArrayTypeTest1.T x[1];
+ TypeTests.ArrayTypeTest1.T x[2];
+ TypeTests.ArrayTypeTest1.T x[3];
 equation
  x[1] = 1;
  x[2] = 2;
  x[3] = 4;
+
+public
+ type TypeTests.ArrayTypeTest1.T = Real(unit = \"m\");
 end TypeTests.ArrayTypeTest1;
 ")})));
-
 
   type T = Real[3](unit="m");
   T x = {1,2,4};
@@ -837,22 +863,23 @@ model ArrayTypeTest2
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ArrayTypeTest2",
          description="Check that short type declarations with array indices are expanded correctly.",
-         flatModel="fclass TypeTests.ArrayTypeTest2
- Real x[1](unit = \"l\");
- Real x[2](unit = \"l\");
- Real x[3](unit = \"l\");
- Real y[1,1](start = 3,unit = \"m\");
- Real y[1,2](start = 3,unit = \"m\");
- Real y[1,3](start = 3,unit = \"m\");
- Real y[2,1](start = 3,unit = \"m\");
- Real y[2,2](start = 3,unit = \"m\");
- Real y[2,3](start = 3,unit = \"m\");
- Real y[3,1](start = 3,unit = \"m\");
- Real y[3,2](start = 3,unit = \"m\");
- Real y[3,3](start = 3,unit = \"m\");
- Real y[4,1](start = 3,unit = \"m\");
- Real y[4,2](start = 3,unit = \"m\");
- Real y[4,3](start = 3,unit = \"m\");
+         flatModel="
+fclass TypeTests.ArrayTypeTest2
+ TypeTests.ArrayTypeTest2.T x[1];
+ TypeTests.ArrayTypeTest2.T x[2];
+ TypeTests.ArrayTypeTest2.T x[3];
+ TypeTests.ArrayTypeTest2.S y[1,1];
+ TypeTests.ArrayTypeTest2.S y[1,2];
+ TypeTests.ArrayTypeTest2.S y[1,3];
+ TypeTests.ArrayTypeTest2.S y[2,1];
+ TypeTests.ArrayTypeTest2.S y[2,2];
+ TypeTests.ArrayTypeTest2.S y[2,3];
+ TypeTests.ArrayTypeTest2.S y[3,1];
+ TypeTests.ArrayTypeTest2.S y[3,2];
+ TypeTests.ArrayTypeTest2.S y[3,3];
+ TypeTests.ArrayTypeTest2.S y[4,1];
+ TypeTests.ArrayTypeTest2.S y[4,2];
+ TypeTests.ArrayTypeTest2.S y[4,3];
 equation
  x[1] = 1;
  x[2] = 2;
@@ -869,6 +896,10 @@ equation
  y[4,1] = 0;
  y[4,2] = 0;
  y[4,3] = 0;
+
+public
+ type TypeTests.ArrayTypeTest2.T = Real(unit = \"l\");
+ type TypeTests.ArrayTypeTest2.S = Real(start = 3,unit = \"m\");
 end TypeTests.ArrayTypeTest2;
 ")})));
 
@@ -879,7 +910,6 @@ end TypeTests.ArrayTypeTest2;
 end ArrayTypeTest2;
 
 model ArrayTypeTest3
-
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ArrayTypeTest3",
@@ -1200,6 +1230,7 @@ equation
  m.y[1] = 1;
  m.y[2] = 2;
  m.y[3] = 3;
+
 end TypeTests.IfExpType1;
 ")})));
 
@@ -1291,6 +1322,7 @@ parameter equation
 equation
  ({m.y[1],m.y[2],m.y[3]}) = TypeTests.IfExpType5.F(3, 5, n);
 
+public
  function TypeTests.IfExpType5.F
   input Real x1;
   input Real x2;
@@ -1303,6 +1335,7 @@ equation
   y[1] := x1 + x2;
   return;
  end TypeTests.IfExpType5.F;
+
 end TypeTests.IfExpType5;
 ")})));
 

@@ -61,6 +61,7 @@ equation
  a.b.c.y=2;
  a.b1.c.y=2;
  a.c.y=2;
+
 end NameTests.NameTest2;
 ")})));
 
@@ -500,6 +501,7 @@ class NameTest15
 "
 fclass NameTests.NameTest15
  Real x = 1;
+
 end NameTests.NameTest15;
 ")})));
 
@@ -516,6 +518,7 @@ class NameTest16
 fclass NameTests.NameTest16
 constant Real c = 1.0;
 parameter Real p = 1.0;
+
 end NameTests.NameTest16;
 ")})));
 
@@ -534,6 +537,7 @@ fclass NameTests.NameTest17
  Real x;
 equation
  x = 2;
+
 end NameTests.NameTest17;
 ")})));
 
@@ -551,6 +555,7 @@ model NameTest18
          flatModel="
 fclass NameTests.NameTest18
  Real y.x;
+
 end NameTests.NameTest18;
 ")})));
 
@@ -590,6 +595,7 @@ fclass NameTests.NameTest19
  Real y.x[1];
 equation
  y.x[1] = 1;
+
 end NameTests.NameTest19;
 ")})));
 
@@ -618,12 +624,14 @@ fclass NameTests.NameTest20
 equation
  y.x = NameTests.NameTest20.A.f();
 
+public
  function NameTests.NameTest20.A.f
   output Real z;
  algorithm
   z := 1;
   return;
  end NameTests.NameTest20.A.f;
+
 end NameTests.NameTest20;
 ")})));
 
@@ -657,6 +665,7 @@ model NameTest21
          flatModel="
 fclass NameTests.NameTest21
  Real d.b.c.x = 2.0;
+
 end NameTests.NameTest21;
 ")})));
 
@@ -700,6 +709,7 @@ model NameTest22
          flatModel="
 fclass NameTests.NameTest22
  Real d.x = 3.0;
+
 end NameTests.NameTest22;
 ")})));
 
@@ -736,6 +746,7 @@ class ConstantLookup1
          flatModel="
 fclass NameTests.ConstantLookup1
  Real x = 1.0;
+
 end NameTests.ConstantLookup1;
 ")})));
 
@@ -751,6 +762,7 @@ class ConstantLookup2
          flatModel="
 fclass NameTests.ConstantLookup2
  Real i.x = 1.0;
+
 end NameTests.ConstantLookup2;
 ")})));
 
@@ -771,6 +783,7 @@ class ConstantLookup3
 fclass NameTests.ConstantLookup3
  constant Real constant_1 = 2.0;
  Real i.x = 2.0;
+
 end NameTests.ConstantLookup3;
 ")})));
 
@@ -792,6 +805,7 @@ class ConstantLookup4
          flatModel="
 fclass NameTests.ConstantLookup4
  parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
+
 end NameTests.ConstantLookup4;
 ")})));
 
@@ -807,6 +821,7 @@ class ConstantLookup5
          flatModel="
 fclass NameTests.ConstantLookup5
  parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
+
 end NameTests.ConstantLookup5;
 ")})));
 
@@ -823,6 +838,7 @@ class ConstantLookup6
          flatModel="
 fclass NameTests.ConstantLookup6
  parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
+
 end NameTests.ConstantLookup6;
 ")})));
 
@@ -839,6 +855,7 @@ class ConstantLookup7
          flatModel="
 fclass NameTests.ConstantLookup7
  parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
+
 end NameTests.ConstantLookup7;
 ")})));
 
@@ -855,6 +872,7 @@ class ConstantLookup8
          flatModel="
 fclass NameTests.ConstantLookup8
  parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
+
 end NameTests.ConstantLookup8;
 ")})));
 
@@ -871,6 +889,7 @@ class ConstantLookup9
          flatModel="
 fclass NameTests.ConstantLookup9
  parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
+
 end NameTests.ConstantLookup9;
 ")})));
 
@@ -1052,6 +1071,7 @@ equation
  b.x[1] = 1;
  b.x[2] = 1;
  b.x[3] = 1;
+
 end NameTests.ConstantLookup18;
 ")})));
 
@@ -1089,6 +1109,7 @@ model ConstantLookup19
          flatModel="
 fclass NameTests.ConstantLookup19
  Real y.x[3] = fill(1, 3);
+
 end NameTests.ConstantLookup19;
 ")})));
 
@@ -1138,6 +1159,7 @@ fclass NameTests.ConstantLookup20
  Real y;
 equation
  y = 3.0;
+
 end NameTests.ConstantLookup20;
 ")})));
 
@@ -1161,6 +1183,7 @@ model ConstantLookup21
          flatModel="
 fclass NameTests.ConstantLookup21
  Real a.x[2] = ones(2);
+
 end NameTests.ConstantLookup21;
 ")})));
 
@@ -1190,6 +1213,7 @@ model ConstantLookup22
 fclass NameTests.ConstantLookup22
  Real f.d.a[2] = f.e[1:2];
  Real f.e[2] = ones(2);
+
 end NameTests.ConstantLookup22;
 ")})));
 
@@ -1310,9 +1334,11 @@ fclass NameTests.ConstantLookup25
  constant Real y[2] = {1.0,2.0};
  Real z[2] = {1.0,2.0};
 
+public
  record NameTests.ConstantLookup25.A
   Real a;
  end NameTests.ConstantLookup25.A;
+
 end NameTests.ConstantLookup25;
 ")})));
 
@@ -1370,6 +1396,7 @@ model ConstantLookup26
 fclass NameTests.ConstantLookup26
  constant Real x[2] = {1.0,2.0};
  Real y[2] = {1.0,2.0};
+
 end NameTests.ConstantLookup26;
 ")})));
 
@@ -1389,10 +1416,12 @@ fclass NameTests.ConstantLookup27
  constant Real e[2] = {1.0,2.0};
  Real f[2] = {1.0,2.0};
 
+public
  record NameTests.ConstantLookup27.A
   Real a;
   Real b;
  end NameTests.ConstantLookup27.A;
+
 end NameTests.ConstantLookup27;
 ")})));
 
@@ -1424,6 +1453,7 @@ model ConstantLookup28
          flatModel="
 fclass NameTests.ConstantLookup28
  Real y.x = 2.0;
+
 end NameTests.ConstantLookup28;
 ")})));
 
@@ -1457,6 +1487,7 @@ fclass NameTests.ConstantLookup29
  Real a.x(start = 1.0);
 equation
  a.x = 2;
+
 end NameTests.ConstantLookup29;
 ")})));
 
@@ -1485,9 +1516,12 @@ model ConstantLookup30
          flatModel="
 fclass NameTests.ConstantLookup30
  parameter Real p = 3.1 /* 3.1 */;
- Real f(final quantity = \"Force\",final unit = \"N\");
+ Modelica.SIunits.Force f;
 equation
  f = 1;
+
+public
+ type Modelica.SIunits.Force = Real(final quantity = \"Force\",final unit = \"N\");
 end NameTests.ConstantLookup30;
 ")})));
 
@@ -1520,6 +1554,7 @@ package ConstantLookup31
 fclass NameTests.ConstantLookup31.NameTests.ConstantLookup31.ConstantLookup31_m
  constant Integer a = 1;
  constant Integer b = 2;
+
 end NameTests.ConstantLookup31.NameTests.ConstantLookup31.ConstantLookup31_m;
 ")})));
 
@@ -1542,6 +1577,7 @@ fclass NameTests.ConstantLookup32
  parameter Integer j = 1 /* 1 */;
  Real y = NameTests.ConstantLookup32.f(j);
 
+public
  function NameTests.ConstantLookup32.f
   NameTests.ConstantLookup32.A[2] d := {NameTests.ConstantLookup32.A(3),NameTests.ConstantLookup32.A(4)};
   input Integer i;
@@ -1554,6 +1590,7 @@ fclass NameTests.ConstantLookup32
  record NameTests.ConstantLookup32.A
   Real b;
  end NameTests.ConstantLookup32.A;
+
 end NameTests.ConstantLookup32;
 ")})));
 
@@ -1587,6 +1624,7 @@ fclass NameTests.ConstantLookup33
  parameter Integer j = 1 /* 1 */;
  Real y = NameTests.ConstantLookup33.f(j);
 
+public
  function NameTests.ConstantLookup33.f
   NameTests.ConstantLookup33.D.A[2] d := {NameTests.ConstantLookup33.C.E.A(3),NameTests.ConstantLookup33.C.E.A(4)};
   input Integer i;
@@ -1603,6 +1641,7 @@ fclass NameTests.ConstantLookup33
  record NameTests.ConstantLookup33.D.A
   Real b;
  end NameTests.ConstantLookup33.D.A;
+
 end NameTests.ConstantLookup33;
 ")})));
 
@@ -1686,6 +1725,7 @@ fclass NameTests.ExtendsTest2
  Real d.x;
 equation 
  d.x=3;
+
 end NameTests.ExtendsTest2;
 ")})));
   
@@ -1735,6 +1775,7 @@ fclass NameTests.ExtendsTest4
  Real y;
 equation
  y = e[1].d;
+
 end NameTests.ExtendsTest4;
 ")})));
 
@@ -1765,6 +1806,7 @@ fclass NameTests.ImportTest1
  Real b.y;
  Real x;
  Real y;
+
 end NameTests.ImportTest1;
 ")})));
   
@@ -1797,6 +1839,7 @@ model ImportTest2
 fclass NameTests.ImportTest2
  Real a.x;
  Real x;
+
 end NameTests.ImportTest2;
 ")})));
 
@@ -1855,6 +1898,7 @@ model ImportTest4
 fclass NameTests.ImportTest4
  Real a.x;
  Real x;
+
 end NameTests.ImportTest4;
 ")})));
 
@@ -1878,6 +1922,7 @@ model ImportTest5
 "
 fclass NameTests.ImportTest5
  Real d.z=3;
+
 end NameTests.ImportTest5;
 ")})));
   package P 
@@ -1904,13 +1949,16 @@ end ImportTest5;
 
 
 model ImportTest6
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ImportTest6",
-        description="Test name lookup in a more complex case.",
-                                               flatModel=
-"
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ImportTest6",
+         description="Test name lookup in a more complex case",
+         flatModel="
 fclass NameTests.ImportTest6
- Real m.R(start = 1,unit = \"Ohm\");
+ NameTests.ImportTest6.P.SIunits.Resistance m.R(start = 1);
+
+public
+ type NameTests.ImportTest6.P.SIunits.Resistance = Real(unit = \"Ohm\");
 end NameTests.ImportTest6;
 ")})));
 
@@ -1931,13 +1979,16 @@ end NameTests.ImportTest6;
 end ImportTest6;
 
 model ImportTest7
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ImportTest7",
-        description="Test name lookup in a more complex case.",
-                                               flatModel=
-"
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ImportTest7",
+         description="Test name lookup in a more complex case",
+         flatModel="
 fclass NameTests.ImportTest7
- Real m.R(start = 1,unit = \"Ohm\");
+ NameTests.ImportTest7.P.SIunits.Resistance m.R(start = 1);
+
+public
+ type NameTests.ImportTest7.P.SIunits.Resistance = Real(unit = \"Ohm\");
 end NameTests.ImportTest7;
 ")})));
 
@@ -1960,40 +2011,48 @@ end NameTests.ImportTest7;
 end ImportTest7;
 
 model ImportTest8
-	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	   JModelica.UnitTesting.FlatteningTestCase(name="ImportTest8",
-		 description="Test name lookup in a structured library.",
-												flatModel=
- "
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ImportTest8",
+         description="Test name lookup in a structured library",
+         flatModel="
 fclass NameTests.ImportTest8
-parameter Real r.R(start = 1,final quantity = \"Resistance\",final unit = \"Ohm\") \"Resistance at temperature T_ref\";
-parameter Real r.T_ref(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 300.15 \"Reference temperature\" /* 300.15 */;
-parameter Real r.alpha(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\") = 0 \"Temperature coefficient of resistance (R_actual = R*(1 + alpha*(T_heatPort - T_ref))\" /* 0 */;
-Real r.R_actual(final quantity = \"Resistance\",final unit = \"Ohm\") \"Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))\";
-Real r.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Voltage drop between the two pins (= p.v - n.v)\";
-Real r.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing from pin p to pin n\";
-Real r.p.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
-Real r.p.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
-Real r.n.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
-Real r.n.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
-parameter Boolean r.useHeatPort = false \"=true, if HeatPort is enabled\" /* false */;
-parameter Real r.T(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = r.T_ref \"Fixed device temperature if useHeatPort = false\";
-Real r.LossPower(final quantity = \"Power\",final unit = \"W\") \"Loss power leaving component via HeatPort\";
-Real r.T_heatPort(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") \"Temperature of HeatPort\";
+ parameter Modelica.SIunits.Resistance r.R(start = 1) \"Resistance at temperature T_ref\";
+ parameter Modelica.SIunits.Temperature r.T_ref = 300.15 \"Reference temperature\" /* 300.15 */;
+ parameter Modelica.SIunits.LinearTemperatureCoefficient r.alpha = 0 \"Temperature coefficient of resistance (R_actual = R*(1 + alpha*(T_heatPort - T_ref))\" /* 0 */;
+ Modelica.SIunits.Resistance r.R_actual \"Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))\";
+ Modelica.SIunits.Voltage r.v \"Voltage drop between the two pins (= p.v - n.v)\";
+ Modelica.SIunits.Current r.i \"Current flowing from pin p to pin n\";
+ Modelica.SIunits.Voltage r.p.v \"Potential at the pin\";
+ Modelica.SIunits.Current r.p.i \"Current flowing into the pin\";
+ Modelica.SIunits.Voltage r.n.v \"Potential at the pin\";
+ Modelica.SIunits.Current r.n.i \"Current flowing into the pin\";
+ parameter Boolean r.useHeatPort = false \"=true, if HeatPort is enabled\" /* false */;
+ parameter Modelica.SIunits.Temperature r.T = r.T_ref \"Fixed device temperature if useHeatPort = false\";
+ Modelica.SIunits.Power r.LossPower \"Loss power leaving component via HeatPort\";
+ Modelica.SIunits.Temperature r.T_heatPort \"Temperature of HeatPort\";
 equation
-r.R_actual = ( r.R ) * ( 1 + ( r.alpha ) * ( r.T_heatPort - ( r.T_ref ) ) );
-r.v = ( r.R_actual ) * ( r.i );
-r.LossPower = ( r.v ) * ( r.i );
-r.v = r.p.v - ( r.n.v );
-0 = r.p.i + r.n.i;
-r.i = r.p.i;
-if not r.useHeatPort then
-r.T_heatPort = r.T;
-end if;
-r.p.i = 0;
-r.n.i = 0;
+ r.R_actual = ( r.R ) * ( 1 + ( r.alpha ) * ( r.T_heatPort - ( r.T_ref ) ) );
+ r.v = ( r.R_actual ) * ( r.i );
+ r.LossPower = ( r.v ) * ( r.i );
+ r.v = r.p.v - ( r.n.v );
+ 0 = r.p.i + r.n.i;
+ r.i = r.p.i;
+ if not r.useHeatPort then
+  r.T_heatPort = r.T;
+ end if;
+ r.p.i = 0;
+ r.n.i = 0;
+
+public
+ type Modelica.SIunits.Resistance = Real(final quantity = \"Resistance\",final unit = \"Ohm\");
+ type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\");
+ type Modelica.SIunits.LinearTemperatureCoefficient = Real(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\");
+ type Modelica.SIunits.Voltage = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
+ type Modelica.SIunits.Current = Real(final quantity = \"ElectricCurrent\",final unit = \"A\");
+ type Modelica.SIunits.Power = Real(final quantity = \"Power\",final unit = \"W\");
 end NameTests.ImportTest8;
- ")})));
+")})));
 
   Modelica.Electrical.Analog.Basic.Resistor r;
 	
@@ -2027,6 +2086,7 @@ model ImportTest10
          flatModel="
 fclass NameTests.ImportTest10
  Real y.x = 3.141592653589793;
+
 end NameTests.ImportTest10;
 ")})));
 
@@ -2039,14 +2099,17 @@ end NameTests.ImportTest10;
 end ImportTest10;
 
 model ImportTest11
-	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
          name="ImportTest11",
          description="Using constant from imported package.",
          flatModel="
 fclass NameTests.ImportTest11
- Real m.v(final quantity = \"ElectricPotential\",final unit = \"V\") = 0;
+ Modelica.SIunits.Voltage m.v = 0;
  Real m.x = 1.2566370614359173E-6;
+
+public
+ type Modelica.SIunits.Voltage = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
 end NameTests.ImportTest11;
 ")})));
 		
@@ -2104,11 +2167,15 @@ end ShortClassDeclTest2;
 
 model ShortClassDeclTest3
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest3",
-        description="Short class declaration of Real.",
-                                               flatModel=
-"fclass NameTests.ShortClassDeclTest3
- Real x(start=3,min=-(3));
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ShortClassDeclTest3",
+         description="Short class declaration of Real",
+         flatModel="
+fclass NameTests.ShortClassDeclTest3
+ NameTests.ShortClassDeclTest3.MyReal x(start = 3);
+
+public
+ type NameTests.ShortClassDeclTest3.MyReal = Real(min =  - ( 3 ));
 end NameTests.ShortClassDeclTest3;
 ")})));
   
@@ -2119,12 +2186,15 @@ end ShortClassDeclTest3;
 
 model ShortClassDeclTest31
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest31",
-        description="Short class declaration of Real.",
-                                               flatModel=
-"
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ShortClassDeclTest31",
+         description="Short class declaration of Real",
+         flatModel="
 fclass NameTests.ShortClassDeclTest31
- Real x(start = 3,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\");
+ Modelica.SIunits.Angle x(start = 3);
+
+public
+ type Modelica.SIunits.Angle = Real(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\");
 end NameTests.ShortClassDeclTest31;
 ")})));
   
@@ -2157,11 +2227,15 @@ end ShortClassDeclTest35_Err;
 
 model ShortClassDeclTest4
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest4",
-        description="Test short class declarations and inheritance from primitive types",
-                                               flatModel=
-"fclass NameTests.ShortClassDeclTest4
- input Real u(min=3,max=5,nominal=34,unit=\"V\");
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ShortClassDeclTest4",
+         description="Test short class declarations and inheritance from primitive types",
+         flatModel="
+fclass NameTests.ShortClassDeclTest4
+ input NameTests.ShortClassDeclTest4.MyRealInput u(min = 3);
+
+public
+ type NameTests.ShortClassDeclTest4.MyRealInput = Real(max = 5,nominal = 34,unit = \"V\");
 end NameTests.ShortClassDeclTest4;
 ")})));
   
@@ -2181,12 +2255,15 @@ end ShortClassDeclTest4;
 
 model ShortClassDeclTest5
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest5",
-        description="Test short class declarations and inheritance from primitive types",
-                                               flatModel=
-"
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ShortClassDeclTest5",
+         description="Test short class declarations and inheritance from primitive types",
+         flatModel="
 fclass NameTests.ShortClassDeclTest5
- input Real u(nominal=4,start=3,max=2,min=1,unit=\"V\");
+ input NameTests.ShortClassDeclTest5.MyRealInput u(nominal = 4);
+
+public
+ type NameTests.ShortClassDeclTest5.MyRealInput = Real(start = 3,nominal = 3,max = 2,min = 1,unit = \"V\");
 end NameTests.ShortClassDeclTest5;
 ")})));
   
@@ -2216,6 +2293,7 @@ model ShortClassDeclTest6
 fclass NameTests.ShortClassDeclTest6
  parameter Real R = 1;
  parameter Real a.R = R /*(0.0)*/;
+
 end NameTests.ShortClassDeclTest6;
 ")})));
   
@@ -2264,13 +2342,17 @@ end ShortClassDeclTest7_Err;
 
 model ShortClassDeclTest8
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest8",
-        description="Test short class declarations.",
-                                               flatModel=
-"
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ShortClassDeclTest8",
+         description="Test short class declarations",
+         flatModel="
 fclass NameTests.ShortClassDeclTest8
- input Real u;
- input Real u2;
+ input NameTests.ShortClassDeclTest8.RealInput u;
+ input Modelica.Blocks.Interfaces.RealInput u2;
+
+public
+ type NameTests.ShortClassDeclTest8.RealInput = Real;
+ type Modelica.Blocks.Interfaces.RealInput = Real;
 end NameTests.ShortClassDeclTest8;
 ")})));
 
@@ -2323,6 +2405,7 @@ fclass NameTests.EndExpTest1
  Real x[1];
 equation 
  x[end] = 2;
+
 end NameTests.EndExpTest1;
 ")})));
 
@@ -2344,6 +2427,7 @@ equation
  for i in 1:3, j in 1:3 loop
   x[i,j] = i + j;
  end for;
+
 end NameTests.ForTest1;
 ")})));
 
@@ -2391,7 +2475,10 @@ equation
  der(z) = 1;
  der(w) = 1;
  der(v) = 1;
-type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
 end NameTests.StateSelectTest;
 ")})));
 
@@ -2420,6 +2507,7 @@ fclass NameTests.IndexLookup1
  parameter Integer i = 2 /* 2 */;
  Real y.z[2] = {1,2};
  Real x = y.z[i];
+
 end NameTests.IndexLookup1;
 ")})));
 
@@ -2444,6 +2532,7 @@ fclass NameTests.IndexLookup2
  parameter Integer y.i = 1 /* 1 */;
  Real y.z[2] = {1,2};
  Real x = y.z[i];
+
 end NameTests.IndexLookup2;
 ")})));
 
@@ -2514,6 +2603,7 @@ model ConditionalComponentTest4
 fclass NameTests.ConditionalComponentTest4
  parameter Boolean b = true /* true */;
  parameter Real x = 1 /* 1 */;
+
 end NameTests.ConditionalComponentTest4;
 ")})));
 
@@ -2530,6 +2620,7 @@ model ConditionalComponentTest5
          flatModel="
 fclass NameTests.ConditionalComponentTest5
  parameter Real x = 1 /* 1 */;
+
 end NameTests.ConditionalComponentTest5;
 ")})));
 
@@ -2580,6 +2671,7 @@ model ConditionalComponentTest8
          flatModel="
 fclass NameTests.ConditionalComponentTest8
  parameter Boolean b = false /* false */;
+
 end NameTests.ConditionalComponentTest8;
 ")})));
 
@@ -2595,6 +2687,7 @@ model ConditionalComponentTest9
          flatModel="
 fclass NameTests.ConditionalComponentTest9
  parameter Boolean b = false /* false */;
+
 end NameTests.ConditionalComponentTest9;
 ")})));
 
@@ -2626,15 +2719,19 @@ model ConditionalComponentTest10
 fclass NameTests.ConditionalComponentTest10
  parameter Boolean b = true /* true */;
  parameter Boolean m.b = b;
- Real m.u1;
- Real m.y;
- Real source1.y = source1.p;
+ NameTests.ConditionalComponentTest10.RealInput m.u1;
+ NameTests.ConditionalComponentTest10.RealOutput m.y;
+ NameTests.ConditionalComponentTest10.RealOutput source1.y = source1.p;
  parameter Real source1.p = 1 /* 1 */;
- Real sink.u;
+ NameTests.ConditionalComponentTest10.RealInput sink.u;
 equation
  m.u1 = source1.y;
  m.y = sink.u;
  m.u1 = m.y;
+
+public
+ type NameTests.ConditionalComponentTest10.RealInput = Real;
+ type NameTests.ConditionalComponentTest10.RealOutput = Real;
 end NameTests.ConditionalComponentTest10;
 ")})));
 
@@ -2681,15 +2778,19 @@ model ConditionalComponentTest11
 fclass NameTests.ConditionalComponentTest11
  parameter Boolean b = false /* false */;
  parameter Boolean m.b = b;
- Real m.u2;
- Real m.y;
- Real source2.y = source2.p;
+ NameTests.ConditionalComponentTest11.RealInput m.u2;
+ NameTests.ConditionalComponentTest11.RealOutput m.y;
+ NameTests.ConditionalComponentTest11.RealOutput source2.y = source2.p;
  parameter Real source2.p = 1 /* 1 */;
- Real sink.u;
+ NameTests.ConditionalComponentTest11.RealInput sink.u;
 equation
  m.u2 = source2.y;
  m.y = sink.u;
  m.u2 = m.y;
+
+public
+ type NameTests.ConditionalComponentTest11.RealInput = Real;
+ type NameTests.ConditionalComponentTest11.RealOutput = Real;
 end NameTests.ConditionalComponentTest11;
 ")})));
 
@@ -2758,6 +2859,7 @@ fclass NameTests.ComplexExpInDer1
  Real y;
 equation
  ( x ) * ( der(y) ) + ( der(x) ) * ( y ) = 0;
+
 end NameTests.ComplexExpInDer1;
 ")})));
 

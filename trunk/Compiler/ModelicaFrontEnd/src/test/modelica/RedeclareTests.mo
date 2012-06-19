@@ -3625,6 +3625,7 @@ equation
  z.y = RedeclareTests.RedeclareElement15.C.f(z.x);
  z.x = 1;
 
+public
  function RedeclareTests.RedeclareElement15.C.f
   input Real i;
   output Real o;
@@ -3673,6 +3674,7 @@ equation
  z.x = 1;
  z.y = RedeclareTests.RedeclareElement16.D.f(z.x);
 
+public
  function RedeclareTests.RedeclareElement16.D.f
   input Real i;
   output Real o;
@@ -3680,6 +3682,7 @@ equation
   o := ( i ) * ( 2 );
   return;
  end RedeclareTests.RedeclareElement16.D.f;
+
 end RedeclareTests.RedeclareElement16;
 ")})));
 
@@ -3726,6 +3729,7 @@ equation
  z.x = 1;
  z.y = RedeclareTests.RedeclareElement17.D.f(z.x);
 
+public
  function RedeclareTests.RedeclareElement17.D.f
   input Real i;
   output Real o;
@@ -3733,6 +3737,7 @@ equation
   o := ( i ) * ( 2 );
   return;
  end RedeclareTests.RedeclareElement17.D.f;
+
 end RedeclareTests.RedeclareElement17;
 ")})));
 
@@ -3887,6 +3892,7 @@ model RedeclareFunction1
 fclass RedeclareTests.RedeclareFunction1
  Real x[2] = RedeclareTests.RedeclareFunction1.C.B({1,2});
 
+public
  function RedeclareTests.RedeclareFunction1.C.B
   input Real[2] i;
   output Real[2] o;
@@ -3894,6 +3900,7 @@ fclass RedeclareTests.RedeclareFunction1
   o := i;
   return;
  end RedeclareTests.RedeclareFunction1.C.B;
+
 end RedeclareTests.RedeclareFunction1;
 ")})));
 
@@ -3927,6 +3934,7 @@ model RedeclareFunction2
 fclass RedeclareTests.RedeclareFunction2
  RedeclareTests.RedeclareFunction2.C.D x = RedeclareTests.RedeclareFunction2.C.B({1,2});
 
+public
  function RedeclareTests.RedeclareFunction2.C.B
   input Real[2] i;
   output RedeclareTests.RedeclareFunction2.C.D o;
@@ -3938,6 +3946,7 @@ fclass RedeclareTests.RedeclareFunction2
  record RedeclareTests.RedeclareFunction2.C.D
   Real a[2];
  end RedeclareTests.RedeclareFunction2.C.D;
+
 end RedeclareTests.RedeclareFunction2;
 ")})));
 
@@ -3983,6 +3992,7 @@ equation
  z.x = RedeclareTests.RedeclareFunction3.z.D.f(z.y);
  z.y = 1;
 
+public
  function RedeclareTests.RedeclareFunction3.z.D.f
   input Real i;
   output Real o;
@@ -3990,6 +4000,7 @@ equation
   o := ( i ) * ( 2 );
   return;
  end RedeclareTests.RedeclareFunction3.z.D.f;
+
 end RedeclareTests.RedeclareFunction3;
 ")})));
 
@@ -4041,6 +4052,7 @@ equation
  b.x = RedeclareTests.RedeclareFunction4.b.A2.f({1,2});
  b.y = RedeclareTests.RedeclareFunction4.b.A3.f({1,2,3});
 
+public
  function RedeclareTests.RedeclareFunction4.b.A2.f
   input Real[2] a;
   output Real b;
@@ -4056,6 +4068,7 @@ equation
   b := ( a[1] ) * ( 1 ) + ( a[2] ) * ( 2 ) + ( a[3] ) * ( 3 );
   return;
  end RedeclareTests.RedeclareFunction4.b.A3.f;
+
 end RedeclareTests.RedeclareFunction4;
 ")})));
 

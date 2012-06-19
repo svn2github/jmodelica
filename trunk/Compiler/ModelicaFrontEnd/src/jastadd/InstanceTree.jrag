@@ -549,14 +549,7 @@ aspect Environments {
 	 * InstExtendsShortClass children. The final node in such a chain holds the total merged environment of 
 	 * the InstPrimitive. InstRecords can of course have InstExtends.
 	 */
-	syn lazy Environment InstAssignable.totalMergedEnvironment() {
-		if (getNumInstExtends()==0)
-			return getMergedEnvironment();
-		else
-			return getInstExtends(0).totalMergedEnvironment();
-	}
-
-	syn Environment InstExtends.totalMergedEnvironment() {
+	syn lazy Environment InstNode.totalMergedEnvironment() {
 		if (getNumInstExtends()==0)
 			return getMergedEnvironment();
 		else

@@ -56,7 +56,8 @@ aspect OptimicaFlattening {
 			OptClassDecl ocd = (OptClassDecl)iocd.getClassDecl();
 			if (iocd.hasInstClassModification()) {
 				List attr = new List();
-				iocd.getInstClassModification().collectAttributes(attr, new FQName(new List()), AttributeExpRetriever.DEFAULT);
+				iocd.getInstClassModification().collectAttributes(
+						attr, new FQName(), AttributeExpRetriever.DEFAULT, true);
 				foc.setFAttributeList(attr);
 			}
 		}

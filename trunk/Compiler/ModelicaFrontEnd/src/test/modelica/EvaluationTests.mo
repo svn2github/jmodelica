@@ -288,6 +288,7 @@ fclass EvaluationTests.FunctionEval10
  constant Real x = EvaluationTests.FunctionEval10.f(5);
  Real y = 120.0;
 
+public
  function EvaluationTests.FunctionEval10.f
   input Real i;
   output Real o;
@@ -301,6 +302,7 @@ fclass EvaluationTests.FunctionEval10
   end while;
   return;
  end EvaluationTests.FunctionEval10.f;
+
 end EvaluationTests.FunctionEval10;
 ")})));
 
@@ -361,6 +363,7 @@ fclass EvaluationTests.FunctionEval12
  constant Real x = EvaluationTests.FunctionEval12.f2(EvaluationTests.FunctionEval12.f1(2));
  Real y = 6.0;
 
+public
  function EvaluationTests.FunctionEval12.f2
   input EvaluationTests.FunctionEval12.R a;
   output Real x;
@@ -381,6 +384,7 @@ fclass EvaluationTests.FunctionEval12
   Real a;
   Real b;
  end EvaluationTests.FunctionEval12.R;
+
 end EvaluationTests.FunctionEval12;
 ")})));
 
@@ -418,6 +422,7 @@ fclass EvaluationTests.FunctionEval13
  constant EvaluationTests.FunctionEval13.R x = EvaluationTests.FunctionEval13.f(2);
  EvaluationTests.FunctionEval13.R y = EvaluationTests.FunctionEval13.R(2, 4.0);
 
+public
  function EvaluationTests.FunctionEval13.f
   input Real a;
   output EvaluationTests.FunctionEval13.R x;
@@ -430,6 +435,7 @@ fclass EvaluationTests.FunctionEval13
   Real a;
   Real b;
  end EvaluationTests.FunctionEval13.R;
+
 end EvaluationTests.FunctionEval13;
 ")})));
 
@@ -460,6 +466,7 @@ fclass EvaluationTests.FunctionEval14
  constant Real x = EvaluationTests.FunctionEval14.f(EvaluationTests.FunctionEval14.R(1, 2));
  Real y = 3.0;
 
+public
  function EvaluationTests.FunctionEval14.f
   input EvaluationTests.FunctionEval14.R a;
   output Real x;
@@ -472,6 +479,7 @@ fclass EvaluationTests.FunctionEval14
   Real a;
   Real b;
  end EvaluationTests.FunctionEval14.R;
+
 end EvaluationTests.FunctionEval14;
 ")})));
 
@@ -502,6 +510,7 @@ fclass EvaluationTests.FunctionEval15
  constant Real x = EvaluationTests.FunctionEval15.f1(EvaluationTests.FunctionEval15.f2());
  Real y = 50.0;
 
+public
  function EvaluationTests.FunctionEval15.f1
   input EvaluationTests.FunctionEval15.R2[2] a;
   output Real x;
@@ -535,6 +544,7 @@ fclass EvaluationTests.FunctionEval15
   EvaluationTests.FunctionEval15.R1 a[2];
   EvaluationTests.FunctionEval15.R1 b[3];
  end EvaluationTests.FunctionEval15.R2;
+
 end EvaluationTests.FunctionEval15;
 ")})));
 

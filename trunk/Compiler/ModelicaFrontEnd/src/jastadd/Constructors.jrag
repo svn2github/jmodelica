@@ -282,8 +282,8 @@ aspect Constructors {
 	public FForIndex.FForIndex(String name, FExp end) {
 		this();
 		setFExp(new FRangeExp(new FIntegerLitExp(1), end));
-		setFVariable(new FIntegerVariable(new FTemporaryVisibilityType(), fParameter(), 
-				new Opt(), new List(), new Opt(), new Opt(), new FQName(name)));
+		setFVariable(new FIntegerVariable(new FTemporaryVisibilityType(), 
+				fParameter(), new FQName(name)));
 	}
 	
 	/**
@@ -406,12 +406,145 @@ aspect Constructors {
 	}
 	
 	/**
+	 * Create a real variable with only the required children.
+	 */
+	public FRealVariable.FRealVariable(FVisibilityType fvt, 
+			FTypePrefixVariability variability, FQName name) {
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+	}
+	
+	/**
+	 * Create a derivative variable with only the required children.
+	 */
+	public FDerivativeVariable.FDerivativeVariable(FVisibilityType fvt, 
+			FTypePrefixVariability variability, FQName name) {
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+	}
+	
+	/**
+	 * Create a derivative variable with only the required children.
+	 */
+	public FDummyDerivativeVariable.FDummyDerivativeVariable(FVisibilityType fvt, 
+			FTypePrefixVariability variability, FQName name) {
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+	}
+	
+	/**
+	 * Create a derivative variable with only the required children.
+	 */
+	public FHDerivativeVariable.FHDerivativeVariable(FVisibilityType fvt, 
+			FTypePrefixVariability variability, FQName name, int order) {
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
+	}
+	
+	/**
+	 * Create a derivative variable with only the required children.
+	 */
+	public FHDummyDerivativeVariable.FHDummyDerivativeVariable(FVisibilityType fvt, 
+			FTypePrefixVariability variability, FQName name, int order) {
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
+	}
+	
+	/**
+	 * Create a pre variable for a discrete real variable.
+	 */
+	public FPreRealVariable.FPreRealVariable(FRealVariable fv) {
+		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
+				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				new Opt(), new Opt(), fv.getFQName().fullCopy());
+	}
+	
+	/**
+	 * Create a integer variable with only the required children.
+	 */
+	public FIntegerVariable.FIntegerVariable(FVisibilityType fvt, 
+			FTypePrefixVariability variability, FQName name) {
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+	}
+	
+	/**
+	 * Create a pre variable for an integer variable.
+	 */
+	public FPreIntegerVariable.FPreIntegerVariable(FIntegerVariable fv) {
+		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
+				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				new Opt(), new Opt(), fv.getFQName().fullCopy());
+	}
+	
+	/**
+	 * Create a enum variable with only the required children.
+	 */
+	public FEnumVariable.FEnumVariable(FVisibilityType fvt, 
+			FTypePrefixVariability variability, FQName name, FQName enumName) {
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, enumName);
+	}
+	
+	/**
+	 * Create a pre variable for a enum variable.
+	 */
+	public FPreEnumVariable.FPreEnumVariable(FEnumVariable fv) {
+		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
+				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getEnum().fullCopy());
+	}
+	
+	/**
+	 * Create a boolean variable with only the required children.
+	 */
+	public FBooleanVariable.FBooleanVariable(FVisibilityType fvt, 
+			FTypePrefixVariability variability, FQName name) {
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+	}
+	
+	/**
+	 * Create a pre variable for a boolean variable.
+	 */
+	public FPreBooleanVariable.FPreBooleanVariable(FBooleanVariable fv) {
+		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
+				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				new Opt(), new Opt(), fv.getFQName().fullCopy());
+	}
+	
+	/**
+	 * Create a string variable with only the required children.
+	 */
+	public FStringVariable.FStringVariable(FVisibilityType fvt, 
+			FTypePrefixVariability variability, FQName name) {
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+	}
+	
+	/**
+	 * Create a pre variable for a string variable.
+	 */
+	public FPreStringVariable.FPreStringVariable(FStringVariable fv) {
+		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
+				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				new Opt(), new Opt(), fv.getFQName().fullCopy());
+	}
+	
+	/**
+	 * Create a record variable with only the required children.
+	 */
+	public FRecordVariable.FRecordVariable(FVisibilityType fvt, 
+			FTypePrefixVariability variability, FQName name, FQName record) {
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, record);
+	}
+
+	
+	/**
 	 * \brief Create an FInternalAttribute with only the children that are 
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name, FExp value) {
 		this(new FIdUse(new FQName()), new FIdDecl(new FQName(name)), new Opt(value), 
 				true, new Opt(), new Opt(), new List());
+	}
+	
+	/**
+	 * \brief Create an attribute with only the required children.
+	 */
+	public FAttribute.FAttribute(FIdUse typeName, FIdDecl name, boolean isSet) {
+		this(typeName, name, new Opt(), isSet, new Opt(), new Opt(), new List());
 	}
 	
 	/**

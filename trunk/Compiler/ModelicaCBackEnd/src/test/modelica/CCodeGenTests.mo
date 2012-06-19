@@ -5000,7 +5000,7 @@ _y_1 = 2;
 _z_2 = 3;
 model_init_eval_parameters(jmi);
 _x_0 = 1;
-_q_3 = 0;
+_q_3 = 0.0;
 _der_x_4 = 0.0;		 
 ")})));
 

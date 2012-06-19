@@ -44,6 +44,7 @@ equation
  r.fluidPort.h_outflow = r.h0;
  r.fluidPort.m_flow = 0;
  h = r.fluidPort.h_outflow;
+
 end StreamTests.StreamTest1;
 ")})));
 
@@ -71,6 +72,7 @@ equation
  r.fluidPort.h_outflow = r.h0;
  r.fluidPort.m_flow = 0;
  h = noEvent((if r.fluidPort.m_flow > 0.0 then r.fluidPort.h_outflow else r.fluidPort.h_outflow));
+
 end StreamTests.StreamTest2;
 
 ")})));
@@ -116,6 +118,7 @@ equation
  r1.fluidPort.p = res.port_a.p;
  r2.fluidPort.m_flow + res.port_b.m_flow = 0;
  r2.fluidPort.p = res.port_b.p;
+
 end StreamTests.StreamTest3;
 
 ")})));
@@ -158,6 +161,7 @@ equation
  r[2].fluidPort.m_flow = 0;
  h[1] = r[1].fluidPort.h_outflow;
  h[2] = r[2].fluidPort.h_outflow;
+
 end StreamTests.StreamTest4;
 ")})));
 
@@ -194,6 +198,7 @@ equation
  r[2].fluidPort.m_flow = 0;
  h[1] = noEvent((if r[1].fluidPort.m_flow > 0.0 then r[1].fluidPort.h_outflow else r[1].fluidPort.h_outflow));
  h[2] = noEvent((if r[2].fluidPort.m_flow > 0.0 then r[2].fluidPort.h_outflow else r[2].fluidPort.h_outflow));
+
 end StreamTests.StreamTest5;
 ")})));
 
@@ -222,6 +227,7 @@ equation
  f[2] = 2;
  d.c = 0;
  d.a = 0;
+
 end StreamTests.StreamTest6;
 ")})));
 
@@ -492,65 +498,65 @@ package StreamExample
          eliminate_alias_variables=false,
          flatModel="
 fclass StreamTests.StreamExample.Examples.Systems.HeatedGas
- parameter Real R_gas(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\") = ( 8.314472 ) / ( 0.0289651159 ) /* 287.0512249529787 */;
- parameter Real cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\") = 1000 /* 1000 */;
- parameter Real flowSource.mflow0(quantity = \"MassFlowRate\",final unit = \"kg/s\") = 1 /* 1 */;
- parameter Real flowSource.T0(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 303.15 /* 303.15 */;
- parameter Real flowSource.cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
- Real flowSource.h(nominal = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real flowSource.flowPort.m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- Real flowSource.flowPort.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
- Real flowSource.flowPort.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
+ parameter Modelica.SIunits.SpecificHeatCapacity R_gas = ( 8.314472 ) / ( 0.0289651159 ) /* 287.0512249529787 */;
+ parameter Modelica.SIunits.SpecificHeatCapacity cp = 1000 /* 1000 */;
+ parameter Modelica.SIunits.MassFlowRate flowSource.mflow0 = 1 /* 1 */;
+ parameter Modelica.SIunits.Temperature flowSource.T0 = 303.15 /* 303.15 */;
+ parameter Modelica.SIunits.SpecificHeatCapacity flowSource.cp;
+ Modelica.SIunits.SpecificEnthalpy flowSource.h(nominal = 400000);
+ Modelica.SIunits.MassFlowRate flowSource.flowPort.m_flow;
+ Modelica.SIunits.Pressure flowSource.flowPort.p(nominal = 100000,start = 100000);
+ Modelica.SIunits.SpecificEnthalpy flowSource.flowPort.h_outflow(nominal = 400000,start = 400000);
  parameter Integer multiPortVolume.nP = 2 \"Number of flow ports\" /* 2 */;
- parameter Real multiPortVolume.V(final quantity = \"Volume\",final unit = \"m3\") = 1 /* 1 */;
- parameter Real multiPortVolume.T_start(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 303.15 /* 303.15 */;
- parameter Real multiPortVolume.p_start(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\") = 100000 /* 100000 */;
- parameter Real multiPortVolume.cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
- parameter Real multiPortVolume.R(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
- Real multiPortVolume.heatPort.T(start = multiPortVolume.T_start,final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") \"Port temperature\";
- Real multiPortVolume.heatPort.Q_flow(final quantity = \"Power\",final unit = \"W\") \"Heat flow rate (positive if flowing from outside into the component)\";
- Real multiPortVolume.flowPort[1].m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- Real multiPortVolume.flowPort[1].p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
- Real multiPortVolume.flowPort[1].h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real multiPortVolume.flowPort[2].m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- Real multiPortVolume.flowPort[2].p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
- Real multiPortVolume.flowPort[2].h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real multiPortVolume.H_flow[1](nominal = 400000,start = 400000,final quantity = \"EnthalpyFlowRate\",final unit = \"W\") \"Enthalpy flow rates\";
- Real multiPortVolume.H_flow[2](nominal = 400000,start = 400000,final quantity = \"EnthalpyFlowRate\",final unit = \"W\") \"Enthalpy flow rates\";
- Real multiPortVolume.dM(quantity = \"MassFlowRate\",final unit = \"kg/s\") \"Mass storage\";
- Real multiPortVolume.dU(nominal = 100000,start = 100000,final quantity = \"Power\",final unit = \"W\") \"Internal energy storage\";
+ parameter Modelica.SIunits.Volume multiPortVolume.V = 1 /* 1 */;
+ parameter Modelica.SIunits.Temperature multiPortVolume.T_start = 303.15 /* 303.15 */;
+ parameter Modelica.SIunits.Pressure multiPortVolume.p_start = 100000 /* 100000 */;
+ parameter Modelica.SIunits.SpecificHeatCapacity multiPortVolume.cp;
+ parameter Modelica.SIunits.SpecificHeatCapacity multiPortVolume.R;
+ Modelica.SIunits.Temperature multiPortVolume.heatPort.T(start = multiPortVolume.T_start) \"Port temperature\";
+ Modelica.SIunits.HeatFlowRate multiPortVolume.heatPort.Q_flow \"Heat flow rate (positive if flowing from outside into the component)\";
+ Modelica.SIunits.MassFlowRate multiPortVolume.flowPort[1].m_flow;
+ Modelica.SIunits.Pressure multiPortVolume.flowPort[1].p(nominal = 100000,start = 100000);
+ Modelica.SIunits.SpecificEnthalpy multiPortVolume.flowPort[1].h_outflow(nominal = 400000,start = 400000);
+ Modelica.SIunits.MassFlowRate multiPortVolume.flowPort[2].m_flow;
+ Modelica.SIunits.Pressure multiPortVolume.flowPort[2].p(nominal = 100000,start = 100000);
+ Modelica.SIunits.SpecificEnthalpy multiPortVolume.flowPort[2].h_outflow(nominal = 400000,start = 400000);
+ Modelica.SIunits.EnthalpyFlowRate multiPortVolume.H_flow[1](nominal = 400000,start = 400000) \"Enthalpy flow rates\";
+ Modelica.SIunits.EnthalpyFlowRate multiPortVolume.H_flow[2](nominal = 400000,start = 400000) \"Enthalpy flow rates\";
+ Modelica.SIunits.MassFlowRate multiPortVolume.dM \"Mass storage\";
+ Modelica.SIunits.EnergyFlowRate multiPortVolume.dU(nominal = 100000,start = 100000) \"Internal energy storage\";
  Real multiPortVolume.du(nominal = 100000,start = 100000);
- Real multiPortVolume.M(quantity = \"Mass\",final unit = \"kg\",min = 0);
- Real multiPortVolume.T(start = multiPortVolume.T_start,nominal = 300,final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") \"Temperature\";
- Real multiPortVolume.p(start = multiPortVolume.p_start,nominal = 100000.0,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
- Real multiPortVolume.h(nominal = 400000,start = 300000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real multiPortVolume.u(nominal = 250000,start = 250000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real multiPortVolume.rho(nominal = 1.0,final quantity = \"Density\",final unit = \"kg/m3\",displayUnit = \"g/cm3\",min = 0);
- Real multiPortVolume.U(nominal = 250000,start = 250000,final quantity = \"Energy\",final unit = \"J\");
- parameter Real heatSource.Q_flow(final quantity = \"Power\",final unit = \"W\") = 100000 \"Fixed heat flow rate at port\" /* 100000 */;
- parameter Real heatSource.T_ref(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 373.15 \"Reference temperature\" /* 373.15 */;
- parameter Real heatSource.alpha(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\") = 0 \"Temperature coefficient of heat flow rate\" /* 0 */;
- Real heatSource.port.T(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") \"Port temperature\";
- Real heatSource.port.Q_flow(final quantity = \"Power\",final unit = \"W\") \"Heat flow rate (positive if flowing from outside into the component)\";
- Real linearResistance.port_a.m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- Real linearResistance.port_a.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
- Real linearResistance.port_a.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real linearResistance.port_b.m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- Real linearResistance.port_b.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
- Real linearResistance.port_b.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real linearResistance.u(start = 1);
- parameter Real reservoir.p0(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\") = 100000 /* 100000 */;
- parameter Real reservoir.T0(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 303.15 /* 303.15 */;
- parameter Real reservoir.cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
- parameter Real reservoir.h0(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real reservoir.flowPort.m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- Real reservoir.flowPort.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
- Real reservoir.flowPort.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
+ Modelica.SIunits.Mass multiPortVolume.M;
+ Modelica.SIunits.Temperature multiPortVolume.T(start = multiPortVolume.T_start,nominal = 300) \"Temperature\";
+ Modelica.SIunits.Pressure multiPortVolume.p(start = multiPortVolume.p_start,nominal = 100000.0);
+ Modelica.SIunits.SpecificEnthalpy multiPortVolume.h(nominal = 400000,start = 300000);
+ Modelica.SIunits.SpecificInternalEnergy multiPortVolume.u(nominal = 250000,start = 250000);
+ Modelica.SIunits.Density multiPortVolume.rho(nominal = 1.0);
+ Modelica.SIunits.InternalEnergy multiPortVolume.U(nominal = 250000,start = 250000);
+ parameter Modelica.SIunits.HeatFlowRate heatSource.Q_flow = 100000 \"Fixed heat flow rate at port\" /* 100000 */;
+ parameter Modelica.SIunits.Temperature heatSource.T_ref = 373.15 \"Reference temperature\" /* 373.15 */;
+ parameter Modelica.SIunits.LinearTemperatureCoefficient heatSource.alpha = 0 \"Temperature coefficient of heat flow rate\" /* 0 */;
+ Modelica.SIunits.Temperature heatSource.port.T \"Port temperature\";
+ Modelica.SIunits.HeatFlowRate heatSource.port.Q_flow \"Heat flow rate (positive if flowing from outside into the component)\";
+ Modelica.SIunits.MassFlowRate linearResistance.port_a.m_flow;
+ Modelica.SIunits.Pressure linearResistance.port_a.p(nominal = 100000,start = 100000);
+ Modelica.SIunits.SpecificEnthalpy linearResistance.port_a.h_outflow(nominal = 400000,start = 400000);
+ Modelica.SIunits.MassFlowRate linearResistance.port_b.m_flow;
+ Modelica.SIunits.Pressure linearResistance.port_b.p(nominal = 100000,start = 100000);
+ Modelica.SIunits.SpecificEnthalpy linearResistance.port_b.h_outflow(nominal = 400000,start = 400000);
+ Modelica.Blocks.Interfaces.RealInput linearResistance.u(start = 1);
+ parameter Modelica.SIunits.Pressure reservoir.p0 = 100000 /* 100000 */;
+ parameter Modelica.SIunits.Temperature reservoir.T0 = 303.15 /* 303.15 */;
+ parameter Modelica.SIunits.SpecificHeatCapacity reservoir.cp;
+ parameter Modelica.SIunits.SpecificEnthalpy reservoir.h0;
+ Modelica.SIunits.MassFlowRate reservoir.flowPort.m_flow;
+ Modelica.SIunits.Pressure reservoir.flowPort.p(nominal = 100000,start = 100000);
+ Modelica.SIunits.SpecificEnthalpy reservoir.flowPort.h_outflow(nominal = 400000,start = 400000);
  parameter Real ramp.height = 10000.0 \"Height of ramps\" /* 10000.0 */;
- parameter Real ramp.duration(min = 1.0E-60,start = 2,final quantity = \"Time\",final unit = \"s\") = 1 \"Durations of ramp\" /* 1 */;
+ parameter Modelica.SIunits.Time ramp.duration(min = 1.0E-60,start = 2) = 1 \"Durations of ramp\" /* 1 */;
  parameter Real ramp.offset = 10000.0 \"Offset of output signal\" /* 10000.0 */;
- parameter Real ramp.startTime(final quantity = \"Time\",final unit = \"s\") = 5 \"Output = offset for time < startTime\" /* 5 */;
- Real ramp.y \"Connector of Real output signal\";
+ parameter Modelica.SIunits.Time ramp.startTime = 5 \"Output = offset for time < startTime\" /* 5 */;
+ Modelica.Blocks.Interfaces.RealOutput ramp.y \"Connector of Real output signal\";
 initial equation 
  multiPortVolume.p = multiPortVolume.p_start;
  multiPortVolume.T = multiPortVolume.T_start;
@@ -598,6 +604,25 @@ equation
  linearResistance.port_a.m_flow + multiPortVolume.flowPort[2].m_flow = 0;
  linearResistance.port_a.p = multiPortVolume.flowPort[2].p;
  linearResistance.u = ramp.y;
+
+public
+ type Modelica.SIunits.SpecificHeatCapacity = Real(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
+ type Modelica.SIunits.MassFlowRate = Real(quantity = \"MassFlowRate\",final unit = \"kg/s\");
+ type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\");
+ type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
+ type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
+ type Modelica.SIunits.Volume = Real(final quantity = \"Volume\",final unit = \"m3\");
+ type Modelica.SIunits.HeatFlowRate = Real(final quantity = \"Power\",final unit = \"W\");
+ type Modelica.SIunits.EnthalpyFlowRate = Real(final quantity = \"EnthalpyFlowRate\",final unit = \"W\");
+ type Modelica.SIunits.EnergyFlowRate = Real(final quantity = \"Power\",final unit = \"W\");
+ type Modelica.SIunits.Mass = Real(quantity = \"Mass\",final unit = \"kg\",min = 0);
+ type Modelica.SIunits.SpecificInternalEnergy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
+ type Modelica.SIunits.Density = Real(final quantity = \"Density\",final unit = \"kg/m3\",displayUnit = \"g/cm3\",min = 0);
+ type Modelica.SIunits.InternalEnergy = Real(final quantity = \"Energy\",final unit = \"J\");
+ type Modelica.SIunits.LinearTemperatureCoefficient = Real(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\");
+ type Modelica.Blocks.Interfaces.RealInput = Real;
+ type Modelica.SIunits.Time = Real(final quantity = \"Time\",final unit = \"s\");
+ type Modelica.Blocks.Interfaces.RealOutput = Real;
 end StreamTests.StreamExample.Examples.Systems.HeatedGas;
 ")})));
 
@@ -713,41 +738,41 @@ end StreamTests.StreamExample.Examples.Systems.HeatedGas;
          eliminate_alias_variables=false,
          flatModel="
 fclass StreamTests.StreamExample.Examples.Systems.HeatedGas_SimpleWrap
- parameter Real R_gas(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\") = ( 8.314472 ) / ( 0.0289651159 ) /* 287.0512249529787 */;
- parameter Real cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\") = 1000 /* 1000 */;
- parameter Real flowSource.mflow0(quantity = \"MassFlowRate\",final unit = \"kg/s\") = 1 /* 1 */;
- parameter Real flowSource.T0(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 303.15 /* 303.15 */;
- parameter Real flowSource.cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
- Real flowSource.h(nominal = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real flowSource.flowPort.m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- Real flowSource.flowPort.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
- Real flowSource.flowPort.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- parameter Real reservoir.p0(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\") = 100000 /* 100000 */;
- parameter Real reservoir.T0(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 303.15 /* 303.15 */;
- parameter Real reservoir.cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
- parameter Real reservoir.h0(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real reservoir.flowPort.m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- Real reservoir.flowPort.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
- Real reservoir.flowPort.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
+ parameter Modelica.SIunits.SpecificHeatCapacity R_gas = ( 8.314472 ) / ( 0.0289651159 ) /* 287.0512249529787 */;
+ parameter Modelica.SIunits.SpecificHeatCapacity cp = 1000 /* 1000 */;
+ parameter Modelica.SIunits.MassFlowRate flowSource.mflow0 = 1 /* 1 */;
+ parameter Modelica.SIunits.Temperature flowSource.T0 = 303.15 /* 303.15 */;
+ parameter Modelica.SIunits.SpecificHeatCapacity flowSource.cp;
+ Modelica.SIunits.SpecificEnthalpy flowSource.h(nominal = 400000);
+ Modelica.SIunits.MassFlowRate flowSource.flowPort.m_flow;
+ Modelica.SIunits.Pressure flowSource.flowPort.p(nominal = 100000,start = 100000);
+ Modelica.SIunits.SpecificEnthalpy flowSource.flowPort.h_outflow(nominal = 400000,start = 400000);
+ parameter Modelica.SIunits.Pressure reservoir.p0 = 100000 /* 100000 */;
+ parameter Modelica.SIunits.Temperature reservoir.T0 = 303.15 /* 303.15 */;
+ parameter Modelica.SIunits.SpecificHeatCapacity reservoir.cp;
+ parameter Modelica.SIunits.SpecificEnthalpy reservoir.h0;
+ Modelica.SIunits.MassFlowRate reservoir.flowPort.m_flow;
+ Modelica.SIunits.Pressure reservoir.flowPort.p(nominal = 100000,start = 100000);
+ Modelica.SIunits.SpecificEnthalpy reservoir.flowPort.h_outflow(nominal = 400000,start = 400000);
  parameter Real ramp.height = 10000.0 \"Height of ramps\" /* 10000.0 */;
- parameter Real ramp.duration(min = 1.0E-60,start = 2,final quantity = \"Time\",final unit = \"s\") = 1 \"Durations of ramp\" /* 1 */;
+ parameter Modelica.SIunits.Time ramp.duration(min = 1.0E-60,start = 2) = 1 \"Durations of ramp\" /* 1 */;
  parameter Real ramp.offset = 10000.0 \"Offset of output signal\" /* 10000.0 */;
- parameter Real ramp.startTime(final quantity = \"Time\",final unit = \"s\") = 5 \"Output = offset for time < startTime\" /* 5 */;
- Real ramp.y \"Connector of Real output signal\";
- Real linearResistanceWrap.port_a.m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- Real linearResistanceWrap.port_a.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
- Real linearResistanceWrap.port_a.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real linearResistanceWrap.port_b.m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- Real linearResistanceWrap.port_b.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
- Real linearResistanceWrap.port_b.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real linearResistanceWrap.u;
- Real linearResistanceWrap.linearResistance.port_a.m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- Real linearResistanceWrap.linearResistance.port_a.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
- Real linearResistanceWrap.linearResistance.port_a.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real linearResistanceWrap.linearResistance.port_b.m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- Real linearResistanceWrap.linearResistance.port_b.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
- Real linearResistanceWrap.linearResistance.port_b.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- Real linearResistanceWrap.linearResistance.u(start = 1);
+ parameter Modelica.SIunits.Time ramp.startTime = 5 \"Output = offset for time < startTime\" /* 5 */;
+ Modelica.Blocks.Interfaces.RealOutput ramp.y \"Connector of Real output signal\";
+ Modelica.SIunits.MassFlowRate linearResistanceWrap.port_a.m_flow;
+ Modelica.SIunits.Pressure linearResistanceWrap.port_a.p(nominal = 100000,start = 100000);
+ Modelica.SIunits.SpecificEnthalpy linearResistanceWrap.port_a.h_outflow(nominal = 400000,start = 400000);
+ Modelica.SIunits.MassFlowRate linearResistanceWrap.port_b.m_flow;
+ Modelica.SIunits.Pressure linearResistanceWrap.port_b.p(nominal = 100000,start = 100000);
+ Modelica.SIunits.SpecificEnthalpy linearResistanceWrap.port_b.h_outflow(nominal = 400000,start = 400000);
+ Modelica.Blocks.Interfaces.RealInput linearResistanceWrap.u;
+ Modelica.SIunits.MassFlowRate linearResistanceWrap.linearResistance.port_a.m_flow;
+ Modelica.SIunits.Pressure linearResistanceWrap.linearResistance.port_a.p(nominal = 100000,start = 100000);
+ Modelica.SIunits.SpecificEnthalpy linearResistanceWrap.linearResistance.port_a.h_outflow(nominal = 400000,start = 400000);
+ Modelica.SIunits.MassFlowRate linearResistanceWrap.linearResistance.port_b.m_flow;
+ Modelica.SIunits.Pressure linearResistanceWrap.linearResistance.port_b.p(nominal = 100000,start = 100000);
+ Modelica.SIunits.SpecificEnthalpy linearResistanceWrap.linearResistance.port_b.h_outflow(nominal = 400000,start = 400000);
+ Modelica.Blocks.Interfaces.RealInput linearResistanceWrap.linearResistance.u(start = 1);
 parameter equation
  flowSource.cp = cp;
  reservoir.cp = cp;
@@ -775,6 +800,16 @@ equation
  linearResistanceWrap.linearResistance.port_a.m_flow - ( linearResistanceWrap.port_a.m_flow ) = 0;
  linearResistanceWrap.linearResistance.port_a.p = linearResistanceWrap.port_a.p;
  linearResistanceWrap.linearResistance.u = linearResistanceWrap.u;
+
+public
+ type Modelica.SIunits.SpecificHeatCapacity = Real(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
+ type Modelica.SIunits.MassFlowRate = Real(quantity = \"MassFlowRate\",final unit = \"kg/s\");
+ type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\");
+ type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
+ type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
+ type Modelica.SIunits.Time = Real(final quantity = \"Time\",final unit = \"s\");
+ type Modelica.Blocks.Interfaces.RealOutput = Real;
+ type Modelica.Blocks.Interfaces.RealInput = Real;
 end StreamTests.StreamExample.Examples.Systems.HeatedGas_SimpleWrap;
 ")})));
 

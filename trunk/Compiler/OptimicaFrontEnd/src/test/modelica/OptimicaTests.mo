@@ -857,6 +857,7 @@ fclass OptimicaTests.OptFunctionFlatten1
 equation
  y.x = OptimicaTests.TestFunction1(1);
 
+public
  function OptimicaTests.TestFunction1
   input Real i;
   output Real o;
@@ -864,6 +865,7 @@ equation
   o := i;
   return;
  end OptimicaTests.TestFunction1;
+
 end OptimicaTests.OptFunctionFlatten1;
 ")})));
 

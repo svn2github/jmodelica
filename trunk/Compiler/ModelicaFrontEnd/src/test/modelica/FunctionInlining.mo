@@ -28,6 +28,7 @@ fclass FunctionInlining.BasicInline1
  Real x;
 equation
  x = 1;
+
 end FunctionInlining.BasicInline1;
 ")})));
 
@@ -54,6 +55,7 @@ fclass FunctionInlining.BasicInline2
  constant Real y = 2;
 equation
  x = 2.0;
+
 end FunctionInlining.BasicInline2;
 ")})));
 
@@ -107,6 +109,7 @@ equation
  temp_5 = temp_4 ^ temp_3;
  temp_6 = temp_5 - ( temp_4 ) - ( temp_3 ) - ( temp_4 );
  temp_7 = temp_6 + 1;
+
 end FunctionInlining.BasicInline3;
 ")})));
 
@@ -145,6 +148,7 @@ fclass FunctionInlining.BasicInline4
 equation
  y = time;
  x = y + y;
+
 end FunctionInlining.BasicInline4;
 ")})));
 
@@ -199,6 +203,7 @@ equation
  temp_5 = temp_4 + temp_3;
  temp_6 = temp_5;
  temp_7 = temp_6;
+
 end FunctionInlining.BasicInline5;
 ")})));
 
@@ -257,6 +262,7 @@ equation
  x[1] = ( temp_18 ) * ( y[1] + temp_6 );
  x[2] = ( temp_18 ) * ( y[2] + temp_8 );
  x[3] = ( temp_18 ) * ( y[3] + temp_10 );
+
 end FunctionInlining.BasicInline6;
 ")})));
 
@@ -309,6 +315,7 @@ equation
  temp_7 = temp_2;
  temp_8 = ( temp_7 ) * ( 2 );
  temp_9 = temp_7 + temp_8;
+
 end FunctionInlining.BasicInline7;
 ")})));
 
@@ -473,6 +480,7 @@ equation
  temp_32 = ( temp_167 ) * ( temp_59 + temp_155 );
  temp_33 = ( temp_167 ) * ( temp_60 + temp_157 );
  temp_34 = ( temp_167 ) * ( temp_61 + temp_159 );
+
 end FunctionInlining.BasicInline8;
 ")})));
 
@@ -530,6 +538,7 @@ parameter equation
  temp_6 = temp_5 - ( temp_4 ) - ( temp_3 ) - ( temp_4 );
  temp_7 = temp_6 + 1;
  x = temp_7;
+
 end FunctionInlining.BasicInline9;
 ")})));
 
@@ -578,6 +587,7 @@ equation
  z[2] = 2;
  z[3] = 3;
  x = ( y ) * ( z[2] );
+
 end FunctionInlining.BasicInline10;
 ")})));
 
@@ -616,6 +626,7 @@ equation
  y[1] = 1;
  y[2] = 2;
  y[3] = 3;
+
 end FunctionInlining.BasicInline11;
 ")})));
 
@@ -668,7 +679,9 @@ equation
  p1 = FunctionInlining.BasicInline13.E.b;
  p2 = noEvent((if p1 == FunctionInlining.BasicInline13.E.a then FunctionInlining.BasicInline13.E.b else FunctionInlining.BasicInline13.E.c));
 
+public
  type FunctionInlining.BasicInline13.E = enumeration(a, b, c);
+
 end FunctionInlining.BasicInline13;
 ")})));
 
@@ -698,10 +711,12 @@ fclass FunctionInlining.RecordInline1
 equation
  x = 10;
 
+public
  record FunctionInlining.RecordInline1.R
   Real a[3];
   discrete Integer b;
  end FunctionInlining.RecordInline1.R;
+
 end FunctionInlining.RecordInline1;
 ")})));
 
@@ -741,10 +756,12 @@ equation
  x.a[3] = 3;
  x.b = 2;
 
+public
  record FunctionInlining.RecordInline2.R
   Real a[3];
   discrete Integer b;
  end FunctionInlining.RecordInline2.R;
+
 end FunctionInlining.RecordInline2;
 ")})));
 
@@ -776,10 +793,12 @@ fclass FunctionInlining.RecordInline3
 equation
  x = 10;
 
+public
  record FunctionInlining.RecordInline3.R
   Real a[3];
   discrete Integer b;
  end FunctionInlining.RecordInline3.R;
+
 end FunctionInlining.RecordInline3;
 ")})));
 
@@ -826,10 +845,12 @@ equation
  temp_4 = integer(y[4]);
  x = temp_4 + y[1] + y[2] + y[3];
 
+public
  record FunctionInlining.RecordInline4.R
   Real a[3];
   discrete Integer b;
  end FunctionInlining.RecordInline4.R;
+
 end FunctionInlining.RecordInline4;
 ")})));
 
@@ -872,10 +893,12 @@ equation
  x.a[2] = ( 2 ) * ( y );
  x.a[3] = ( 3 ) * ( y );
 
+public
  record FunctionInlining.RecordInline5.R
   Real a[3];
   discrete Integer b;
  end FunctionInlining.RecordInline5.R;
+
 end FunctionInlining.RecordInline5;
 ")})));
 
@@ -916,10 +939,12 @@ equation
  temp_4 = ( 3 ) * ( y );
  x = temp_2 + temp_3 + temp_4 + ( y ) * ( 4 );
 
+public
  record FunctionInlining.RecordInline6.R
   Real a[3];
   discrete Integer b;
  end FunctionInlining.RecordInline6.R;
+
 end FunctionInlining.RecordInline6;
 ")})));
 
@@ -989,10 +1014,12 @@ equation
  x.a[3] = temp_16 - ( y[3] );
  x.b = 3 + temp_13;
 
+public
  record FunctionInlining.RecordInline7.R
   Real a[3];
   discrete Integer b;
  end FunctionInlining.RecordInline7.R;
+
 end FunctionInlining.RecordInline7;
 ")})));
 
@@ -1042,10 +1069,12 @@ equation
  x.a[3] = ( 4 ) * ( y );
  x.b = integer(5 - ( y ));
 
+public
  record FunctionInlining.RecordInline8.R
   Real a[3];
   discrete Integer b;
  end FunctionInlining.RecordInline8.R;
+
 end FunctionInlining.RecordInline8;
 ")})));
 
@@ -1089,10 +1118,12 @@ equation
  x.a[3] = 4;
  x.b = 4;
 
+public
  record FunctionInlining.RecordInline9.R
   Real a[3];
   discrete Integer b;
  end FunctionInlining.RecordInline9.R;
+
 end FunctionInlining.RecordInline9;
 ")})));
 
@@ -1139,10 +1170,12 @@ equation
  temp_10 = integer(5 - ( y ));
  x = temp_7 + temp_8 + temp_9 + temp_10;
 
+public
  record FunctionInlining.RecordInline10.R
   Real a[3];
   discrete Integer b;
  end FunctionInlining.RecordInline10.R;
+
 end FunctionInlining.RecordInline10;
 ")})));
 
@@ -1198,10 +1231,12 @@ equation
  temp_4 = ( 3 ) * ( y );
  temp_5 = integer(5 - ( y ));
 
+public
  record FunctionInlining.RecordInline11.R
   Real a[3];
   discrete Integer b;
  end FunctionInlining.RecordInline11.R;
+
 end FunctionInlining.RecordInline11;
 ")})));
 
@@ -1258,6 +1293,7 @@ equation
  temp_1 = z[1];
  temp_2 = temp_1;
 
+public
  function FunctionInlining.UninlinableFunction1.f4
   input Real x;
   output Real y;
@@ -1289,6 +1325,7 @@ equation
   end while;
   return;
  end FunctionInlining.UninlinableFunction1.f3;
+
 end FunctionInlining.UninlinableFunction1;
 ")})));
 
@@ -1346,6 +1383,7 @@ fclass FunctionInlining.IfStatementInline1
 equation
  z1 = 5;
  z2 = 3;
+
 end FunctionInlining.IfStatementInline1;
 ")})));
 
@@ -1391,6 +1429,7 @@ equation
  temp_1 = v;
  temp_4 = noEvent((if temp_1 > 2 then temp_1 else 1));
  temp_5 = temp_4 + 2;
+
 end FunctionInlining.IfStatementInline2;
 ")})));
 
@@ -1448,6 +1487,7 @@ equation
  temp_6 = noEvent((if temp_1 > 2 then temp_1 else temp_4));
  temp_7 = noEvent((if temp_1 > 2 then temp_5 else temp_1));
  temp_8 = temp_6 + temp_7;
+
 end FunctionInlining.IfStatementInline3;
 ")})));
 
@@ -1497,6 +1537,7 @@ equation
  temp_1 = v;
  temp_2 = noEvent((if temp_1 > 2 then temp_1 else 0.0));
  temp_3 = noEvent((if temp_1 > 2 then temp_2 else temp_1 + 1));
+
 end FunctionInlining.IfStatementInline4;
 ")})));
 
@@ -1549,6 +1590,7 @@ equation
  temp_8 = temp_6 + ( temp_7 ) * ( temp_7 );
  temp_9 = 1 + ( 3 ) * ( ( temp_1 - ( 1 ) ) / ( 3 ) );
  temp_10 = temp_8 + ( temp_9 ) * ( temp_9 );
+
 end FunctionInlining.ForStatementInline1;
 ")})));
 
@@ -1578,6 +1620,7 @@ fclass FunctionInlining.ForStatementInline2
  Real z;
 equation
  z = 18.22222222222222;
+
 end FunctionInlining.ForStatementInline2;
 ")})));
 
@@ -1616,6 +1659,7 @@ equation
  temp_6 = 0 + ( v[1] ) * ( v[1] );
  temp_8 = temp_6 + ( v[2] ) * ( v[2] );
  z = temp_8 + ( v[3] ) * ( v[3] );
+
 end FunctionInlining.ForStatementInline3;
 ")})));
 
@@ -1645,6 +1689,7 @@ fclass FunctionInlining.ForStatementInline4
  Real z;
 equation
  z = 14;
+
 end FunctionInlining.ForStatementInline4;
 ")})));
 
@@ -1689,6 +1734,7 @@ equation
  temp_10 = noEvent((if v[2] > 2 then temp_9 else temp_9 + v[2]));
  temp_12 = noEvent((if v[3] > 2 then temp_10 + ( v[3] ) * ( v[3] ) else temp_10));
  z = noEvent((if v[3] > 2 then temp_12 else temp_12 + v[3]));
+
 end FunctionInlining.ForStatementInline5;
 ")})));
 
@@ -1722,6 +1768,7 @@ fclass FunctionInlining.ForStatementInline6
  Real z;
 equation
  z = 12;
+
 end FunctionInlining.ForStatementInline6;
 ")})));
 
@@ -1772,6 +1819,7 @@ equation
  temp_19 = temp_18 + temp_12;
  temp_22 = temp_19 + ( 3 ) * ( temp_12 );
  z = temp_22 + ( 4 ) * ( temp_12 );
+
 end FunctionInlining.ForStatementInline7;
 ")})));
 
@@ -1830,6 +1878,7 @@ equation
  temp_21 = temp_18 + ( v[3] ) * ( v[1] );
  temp_23 = temp_21 + ( v[3] ) * ( v[2] );
  z = temp_23 + ( v[3] ) * ( v[3] );
+
 end FunctionInlining.ForStatementInline8;
 ")})));
 
@@ -1876,6 +1925,7 @@ equation
  x[6] = x[5] + 3;
  x[7] = x[5] + 1;
  x[8] = x[7] + x[6];
+
 end FunctionInlining.MultipleOutputsInline1;
 ")})));
 
@@ -1937,6 +1987,7 @@ equation
  temp_13 = y[5] + y[6];
  x[5] = y[5] - ( y[6] );
  x[6] = ( y[5] ) * ( y[6] );
+
 end FunctionInlining.MultipleOutputsInline2;
 ")})));
 
@@ -2000,6 +2051,7 @@ equation
  temp_13 = y[5] + y[6];
  x[5] = y[5] - ( y[6] );
  x[6] = ( y[5] ) * ( y[6] );
+
 end FunctionInlining.MultipleOutputsInline3;
 ")})));
 
@@ -2047,6 +2099,7 @@ fclass FunctionInlining.IfEquationInline1
 equation
  y = (if time > 1 then x else 0);
  x = 1;
+
 end FunctionInlining.IfEquationInline1;
 ")})));
 
@@ -2080,6 +2133,7 @@ fclass FunctionInlining.IfEquationInline2
  Real y;
 equation
  y = 1;
+
 end FunctionInlining.IfEquationInline2;
 ")})));
 
@@ -2114,6 +2168,7 @@ fclass FunctionInlining.IfEquationInline3
 equation
  y = 0;
  x = 1;
+
 end FunctionInlining.IfEquationInline3;
 ")})));
 
@@ -2152,6 +2207,7 @@ equation
  y = (if time > 1 then x1 else x2);
  x1 = 1;
  x2 = 2;
+
 end FunctionInlining.IfEquationInline4;
 ")})));
 
@@ -2188,6 +2244,7 @@ fclass FunctionInlining.IfEquationInline5
 equation
  y = 1;
  x2 = 2;
+
 end FunctionInlining.IfEquationInline5;
 ")})));
 
@@ -2225,6 +2282,7 @@ fclass FunctionInlining.IfEquationInline6
 equation
  x1 = 1;
  y = 2;
+
 end FunctionInlining.IfEquationInline6;
 ")})));
 

@@ -425,6 +425,7 @@ model ShortClassDeclModTest1
 "
 fclass ModificationTests.ShortClassDeclModTest1
  Real aa.x=3;
+
 end ModificationTests.ShortClassDeclModTest1;
 ")})));
 
@@ -446,6 +447,7 @@ end ShortClassDeclModTest1;
 "
 fclass ModificationTests.ShortClassDeclModTest2
  Real aa.x=2.5;
+
 end ModificationTests.ShortClassDeclModTest2;
 ")})));
 
@@ -467,6 +469,7 @@ model ShortClassDeclModTest3
 "
 fclass ModificationTests.ShortClassDeclModTest3
  Real aa.x=3;
+
 end ModificationTests.ShortClassDeclModTest3;
 ")})));
 
@@ -502,6 +505,7 @@ equation
  b[1] = 0;
  b[2] = 0;
  b[3] = 0;
+
 end ModificationTests.ArrayModifications1;
 ")})));
 
@@ -590,6 +594,7 @@ equation
  b[2].y[1] = 10;
  b[2].y[2] = 20;
  b[2].y[3] = 30;
+
 end ModificationTests.ArrayModifications5;
 ")})));
 
@@ -674,6 +679,7 @@ equation
  x[2].y[2].x[2] = 2;
  x[2].x[1] = 30;
  x[2].x[2] = 40;
+
 end ModificationTests.ArrayModifications8;
 ")})));
 
@@ -722,6 +728,7 @@ equation
  x[2].y[2].x[2] = 0;
  x[2].x[1] = 0;
  x[2].x[2] = 0;
+
 end ModificationTests.ArrayModifications9;
 ")})));
 
@@ -770,6 +777,7 @@ equation
  x[2].y[2].z[1] = 10;
  x[2].y[2].z[2] = 11;
  x[2].y[2].z[3] = 12;
+
 end ModificationTests.ArrayModifications10;
 ")})));
 
@@ -817,6 +825,7 @@ equation
  x[2].y[2].z[1] = 0;
  x[2].y[2].z[2] = 0;
  x[2].y[2].z[3] = 0;
+
 end ModificationTests.ArrayModifications11;
 ")})));
 
@@ -844,6 +853,7 @@ fclass ModificationTests.ArrayModifications12
  Real xa[2].yb[1].zc[3] = ya[2,1,1:3];
  Real xa[2].yb[2].zc[3] = ya[2,2,1:3];
  Real ya[2,2,3] = {{{1,2,3},{4,5,6}},{{7,8,9},{10,11,12}}};
+
 end ModificationTests.ArrayModifications12;
 ")})));
 
@@ -904,6 +914,7 @@ equation
  xa[2].yb[2].zc[1] = 0;
  xa[2].yb[2].zc[2] = 0;
  xa[2].yb[2].zc[3] = 0;
+
 end ModificationTests.ArrayModifications13;
 ")})));
 
@@ -936,6 +947,7 @@ equation
  x[1].yb[2] = ( 1 ) * ( 20 ) + ( 2 ) * ( 40 );
  x[2].yb[1] = ( 3 ) * ( 10 ) + ( 4 ) * ( 30 );
  x[2].yb[2] = ( 3 ) * ( 20 ) + ( 4 ) * ( 40 );
+
 end ModificationTests.ArrayModifications14;
 ")})));
 
@@ -979,6 +991,7 @@ equation
  z[1,2] = 20;
  z[2,1] = 30;
  z[2,2] = 40;
+
 end ModificationTests.ArrayModifications15;
 ")})));
 
@@ -1091,6 +1104,7 @@ fclass ModificationTests.ArrayModifications19
  parameter Real c[5].a[2] = 2 /* 2.0 */;
  parameter Real c[5].a[3] = 3 /* 3.0 */;
  parameter Real c[5].d = 5 /* 5.0 */;
+
 end ModificationTests.ArrayModifications19;
 ")})));
 
@@ -1299,6 +1313,7 @@ equation
  y[2,2,1] = 10;
  y[2,2,2] = 11;
  y[2,2,3] = 12;
+
 end ModificationTests.ArrayModifications26;
 ")})));
 
@@ -1324,6 +1339,7 @@ equation
  x[1].yb[2] = 2;
  x[2].yb[1] = 3;
  x[2].yb[2] = 4;
+
 end ModificationTests.ArrayModifications27;
 ")})));
 
@@ -1359,6 +1375,7 @@ equation
  x[1].yb[2] = 2;
  x[2].yb[1] = 3;
  x[2].yb[2] = 4;
+
 end ModificationTests.ArrayModifications28;
 ")})));
 
@@ -1438,6 +1455,7 @@ equation
  x[2].y[1].x[2] = 2;
  x[2].y[2].x[1] = 1;
  x[2].y[2].x[2] = 2;
+
 end ModificationTests.ArrayModifications31;
 ")})));
 
@@ -1477,6 +1495,7 @@ equation
  x[2].y[1].x[2] = 4;
  x[2].y[2].x[1] = 3;
  x[2].y[2].x[2] = 4;
+
 end ModificationTests.ArrayModifications32;
 ")})));
 
@@ -1516,6 +1535,7 @@ equation
  x[2].y[1].x[2] = 2;
  x[2].y[2].x[1] = 3;
  x[2].y[2].x[2] = 4;
+
 end ModificationTests.ArrayModifications33;
 ")})));
 
@@ -1555,6 +1575,7 @@ equation
  x[2].y[1].x[2] = 4;
  x[2].y[2].x[1] = 3;
  x[2].y[2].x[2] = 4;
+
 end ModificationTests.ArrayModifications34;
 ")})));
 
@@ -1642,6 +1663,7 @@ equation
  x[2].y[1].x[2] = 2;
  x[2].y[2].x[1] = 1;
  x[2].y[2].x[2] = 2;
+
 end ModificationTests.ArrayModifications37;
 ")})));
 
@@ -1837,6 +1859,7 @@ fclass ModificationTests.ArrayModifications45
 equation
  x[1] = 1;
  x[2] = 2;
+
 end ModificationTests.ArrayModifications45;
 ")})));
 
@@ -1860,6 +1883,7 @@ equation
  y[1].x[2] = 2;
  y[2].x[1] = 1;
  y[2].x[2] = 2;
+
 end ModificationTests.ArrayModifications46;
 ")})));
 
@@ -1884,7 +1908,10 @@ model TypeModifications1
          description="Type declarations with modifications: array of new type",
          flatModel="
 fclass ModificationTests.TypeModifications1
- Real x[3](final quantity = \"A\",unit = \"1\") = {1,2,3};
+ ModificationTests.TypeA x[3] = {1,2,3};
+
+public
+ type ModificationTests.TypeA = Real(final quantity = \"A\",unit = \"1\");
 end ModificationTests.TypeModifications1;
 ")})));
 
@@ -1899,9 +1926,12 @@ model TypeModifications2
          description="Type declarations with modifications: array of components containing array of new type",
          flatModel="
 fclass ModificationTests.TypeModifications2
- Real y[1].x[3](final quantity = \"A\",unit = \"1\") = {1,2,3};
- Real y[2].x[3](final quantity = \"A\",unit = \"1\") = {1,2,3};
- Real y[3].x[3](final quantity = \"A\",unit = \"1\") = {1,2,3};
+ ModificationTests.TypeA y[1].x[3] = {1,2,3};
+ ModificationTests.TypeA y[2].x[3] = {1,2,3};
+ ModificationTests.TypeA y[3].x[3] = {1,2,3};
+
+public
+ type ModificationTests.TypeA = Real(final quantity = \"A\",unit = \"1\");
 end ModificationTests.TypeModifications2;
 ")})));
 
@@ -1927,9 +1957,12 @@ model TypeModifications3
          flatModel="
 fclass ModificationTests.TypeModifications3
  Real z[1].x(start = 1) = 1;
- Real z[1].y(start = 2,final quantity = \"A\",unit = \"1\") = 1;
+ ModificationTests.TypeA z[1].y(start = 2) = 1;
  Real z[2].x(start = 1) = 1;
- Real z[2].y(start = 3,final quantity = \"A\",unit = \"1\") = 1;
+ ModificationTests.TypeA z[2].y(start = 3) = 1;
+
+public
+ type ModificationTests.TypeA = Real(final quantity = \"A\",unit = \"1\");
 end ModificationTests.TypeModifications3;
 ")})));
 

@@ -518,6 +518,7 @@ aspect Flattening {
 	
 	public void InstPrimitive.flattenInRecord(FRecordDecl frd, FClass fc) {
 		frd.addFVariable(createFVariable());
+		myInstClass().addFDerivedType(fc);
 	}
 	
 	public void InstRecord.flattenInRecord(FRecordDecl frd, FClass fc) {
@@ -528,6 +529,7 @@ aspect Flattening {
 	public void InstPrimitive.flatten(FClass fc) {
 		if (!isDisabled() && !(isOuter() && !isInner())) {
 			fc.addUniqueFVariable(createFVariable());
+			myInstClass().addFDerivedType(fc);
 			if (isFlow()) {
 				// TODO: Add expanded array subscripts
 				// TODO: Can we use getFQName() here instead?
@@ -540,12 +542,6 @@ aspect Flattening {
 	public void InstRecord.flatten(FClass fc) {
 		fc.addFVariable(createFVariable());
 		myInstClass().flattenRecord(fc);
-	}
-	
-	public FVariable InstEnum.createFVariable() {
-		FEnumVariable fv = (FEnumVariable) super.createFVariable();
-		fv.setEnum(new FQName(myInstClass().qualifiedName()));
-		return fv;
 	}
 
 	public void InstEnum.flatten(FClass fc) {
@@ -577,6 +573,7 @@ aspect Flattening {
 			else 
 				comment = new Opt();
 			fc.addFEnumDecl(new FEnumDecl(id, l, comment));	
+			addFDerivedType(fc);
 		}
 	}
 	
@@ -595,36 +592,15 @@ aspect Flattening {
 	}	
 
 	public FEnumVariable InstEnum.createEmptyFVariable() {
-		return new FEnumVariable();
+		FEnumVariable fv = new FEnumVariable();
+		fv.setEnum(new FQName(myInstClass().qualifiedName()));
+		return fv;
 	}	
 	
 	public FVariable InstRecord.createEmptyFVariable() {
 		FRecordVariable rec = new FRecordVariable();
 		rec.setRecord(new FQName(myInstClass().qualifiedName()));
 		return rec;
-	}
-	
-	public void InstAssignable.addParametersToFV(List<FAttribute> attr) {}
-	
-	public void InstPrimitive.addParametersToFV(List<FAttribute> attr) {
-		// Add default values for parameters from primitive class
-		// TODO: Maybe this needs a more generalized solution? Or to be moved to instantiation step?
-		PrimitiveClassDecl pcd = (PrimitiveClassDecl) myInstClass().getBaseInstClass().getClassDecl();
-		for (ComponentDecl c : pcd.getComponentDecls()) {
-			if (c.isParameter() && c.hasModification()) {
-				FIdDecl name = new FIdDecl(new FQName(c.getName().name()));
-				boolean exists = false;
-				for (FAttribute a2 : attr)
-					if (a2.getName().name().equals(name.name()))
-						exists = true;
-				if (!exists) {
-					FIdUse type = new FIdUse(new FQName(c.getClassName().name()));
-					FExp value = ((ValueModification) c.getModification()).getExp().instantiate();
-					value = dynamicFExp(value).flatten(new FQName());
-					attr.add(new FAttribute(type, name, new Opt(value), false, new Opt(), new Opt(), new List()));				
-				}
-			}
-		}
 	}
 	
 	public void InstAssignable.addAttributesToFV(List<FAttribute> attr) {
@@ -636,9 +612,17 @@ aspect Flattening {
 						exp : exp.dynamicFExp(splitBindingFExp(exp, decl));
 			}
 		};
-		for (InstModification im : totalMergedEnvironment()) 
-			im.collectAttributes(attr, im.myInstNode().getFQNamePrefix(), mut);
-		addParametersToFV(attr);
+		addAttributes(attr, totalMergedEnvironment(), mut, false);
+	}
+	
+	public void InstNode.addAttributes(List<FAttribute> attr, Environment env) {
+		addAttributes(attr, env, AttributeExpRetriever.DEFAULT, true);
+	}
+	
+	public void InstNode.addAttributes(
+			List<FAttribute> attr, Environment env, AttributeExpRetriever aer, boolean cls) {
+		for (InstModification im : env) 
+			im.collectAttributes(attr, im.myInstNode().getFQNamePrefix(), aer, cls);
 	}
 	
 	public void InstRecord.addAttributesToFV(List<FAttribute> attr) {
@@ -667,6 +651,18 @@ aspect Flattening {
 		}
 	}
 	
+	private boolean InstClassDecl.derivedTypeAdded;
+	
+	public void InstClassDecl.addFDerivedType(FClass fc) {
+		if (!derivedTypeAdded && extendsPrimitive()) {
+			derivedTypeAdded = true;
+			List<FAttribute> attr = new List<FAttribute>();
+			addAttributes(attr, totalMergedEnvironment());
+			FType baseType = primitiveScalarType().fullCopy();
+			fc.addFDerivedType(new FDerivedType(qualifiedName(), baseType, attr));
+		}
+	}
+	
 	public FVariable InstAssignable.createFVariable() {
 		FVariable fv = createEmptyFVariable();
 		
@@ -683,6 +679,8 @@ aspect Flattening {
 			fv.setFTypePrefixInputOutput(new FOutput());
 		
 		addAttributesToFV(fv.getFAttributes());
+		if (myInstClass().extendsPrimitive())
+			fv.setDerivedType(myInstClass().qualifiedName());
 		
 		FExp e = flattenBindingFExp();
 		if (e != null)
@@ -917,48 +915,47 @@ aspect Flattening {
 		public static final AttributeExpRetriever DEFAULT = new AttributeExpRetriever();
 	}
 
-	public void ASTNode.collectAttributes(List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer) {
+	public void ASTNode.collectAttributes(
+			List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer, boolean cls) {
 		for (int i = 0; i < getNumChild(); i++)
-			getChild(i).collectAttributes(attrs, prefix, aer);
+			getChild(i).collectAttributes(attrs, prefix, aer, cls);
 	}
 
 	// This is just to avoid collecting ComponentModification:s that resides inside
 	// ClassRedeclares.
-    public void InstClassRedeclare.collectAttributes(List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer) {}
+    public void InstClassRedeclare.collectAttributes(
+    		List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer, boolean cls) {}
 
-	public void InstComponentModification.collectAttributes(List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer) {
+	public void InstComponentModification.collectAttributes(
+			List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer, boolean cls) {
 		if (hasInstModification()) {
-			FQName fqn = new FQName(new List().add(new FQNamePart(getName().getID(),new Opt())));
-            boolean attr_set = false;
-            // Check if attribute is already set
-            for (int i = 0; !attr_set && i < attrs.getNumChild(); i++)
-            	if (attrs.getChild(i).getName().name().equals(getName().name()))
-					attr_set = true;
+			InstModification im = getInstModification();
+            boolean attr_set = findMatching(attrs, getName().name()) != null;
             // If attribute is not set, add to list
-			if (!attr_set) {
-				List<FAttribute> my_attr = new List<FAttribute>();
-				getInstModification().collectAttributes(my_attr, prefix, aer);
-				FQName fqn2 = new FQName();
-				fqn2.addFQNamePart(getName().myInstComponentDecl().myInstClass().name());
-				boolean isEach  = getComponentModification().hasEach();
+			if (!attr_set && (cls || !im.isOnPrimitiveTypeDecl())) {
+				FIdUse typeName = new FIdUse(getName().myInstComponentDecl().myInstClass().name());
+				FIdDecl name = new FIdDecl(new FQName(getName().getID()));
+				FAttribute a = new FAttribute(typeName, name, true);
+				boolean isEach = getComponentModification().hasEach();
 				boolean isFinal = getComponentModification().hasFinal();
-				Opt oe;
 				if (getInstModification().hasInstValueMod()) {
-					InstValueModification im = getInstModification().getInstValueMod();
-					oe = new Opt(aer.retrieve(im, isEach).flatten(prefix));
-				} else {
-					oe = new Opt();
+					InstValueModification ivm = getInstModification().getInstValueMod();
+					a.setValue(aer.retrieve(ivm, isEach).flatten(prefix));
 				}
-				attrs.add(new FAttribute(new FIdUse(fqn2),
-									new FIdDecl(fqn),
-			                        oe,
-			                        true,
-			                        isEach ? new Opt(new FEach()) : new Opt(),
-			                        isFinal ? new Opt(new FFinal()) : new Opt(),
-			                   		my_attr));
+				if (isEach)
+					a.setFEach(new FEach());
+				if (isFinal)
+					a.setFFinal(new FFinal());
+				im.collectAttributes(a.getFAttributes(), prefix, aer, cls);
+				attrs.add(a);
 			}
 		}
 	}
+
+	inh boolean InstModification.isOnPrimitiveTypeDecl();
+	eq InstExtends.getChild().isOnPrimitiveTypeDecl() = extendsPrimitive();
+	eq InstNode.getChild().isOnPrimitiveTypeDecl()    = false;
+
 }
 
 aspect FlatteningDebug {

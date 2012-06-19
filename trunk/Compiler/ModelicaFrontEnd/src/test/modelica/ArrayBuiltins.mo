@@ -31,6 +31,7 @@ fclass ArrayBuiltins.Size.SizeExp1
  Real x;
 equation
  x = 2;
+
 end ArrayBuiltins.Size.SizeExp1;
 ")})));
 
@@ -48,6 +49,7 @@ fclass ArrayBuiltins.Size.SizeExp2
  Real x;
 equation
  x = 3;
+
 end ArrayBuiltins.Size.SizeExp2;
 ")})));
 
@@ -65,6 +67,7 @@ fclass ArrayBuiltins.Size.SizeExp3
  Real x[1];
 equation
  x[1] = 2;
+
 end ArrayBuiltins.Size.SizeExp3;
 ")})));
 
@@ -84,6 +87,7 @@ fclass ArrayBuiltins.Size.SizeExp4
 equation
  x[1] = 2;
  x[2] = 3;
+
 end ArrayBuiltins.Size.SizeExp4;
 ")})));
 
@@ -102,6 +106,7 @@ fclass ArrayBuiltins.Size.SizeExp5
  Real x;
 equation
  x = 2;
+
 end ArrayBuiltins.Size.SizeExp5;
 ")})));
 
@@ -211,6 +216,7 @@ fclass ArrayBuiltins.Fill.FillExp1
 equation
  x[1] = 1 + 2;
  x[2] = 1 + 2;
+
 end ArrayBuiltins.Fill.FillExp1;
 ")})));
 
@@ -274,6 +280,7 @@ equation
  x[2,3,2] = 1 + 2;
  x[2,3,3] = 1 + 2;
  x[2,3,4] = 1 + 2;
+
 end ArrayBuiltins.Fill.FillExp2;
 ")})));
 
@@ -388,6 +395,7 @@ equation
  x[2,2] = 2;
  x[3,1] = 1;
  x[3,2] = 2;
+
 end ArrayBuiltins.Fill.FillExp8;
 ")})));
 
@@ -411,6 +419,7 @@ fclass ArrayBuiltins.Min.MinExp1
  Real y;
 equation
  y = 3.0;
+
 end ArrayBuiltins.Min.MinExp1;
 ")})));
 
@@ -430,6 +439,7 @@ fclass ArrayBuiltins.Min.MinExp2
  Real y;
 equation
  y = 1.0;
+
 end ArrayBuiltins.Min.MinExp2;
 ")})));
 
@@ -452,6 +462,7 @@ initial equation
  pre(y) = \"\";
 equation
  y = \"bar\";
+
 end ArrayBuiltins.Min.MinExp3;
 ")})));
 
@@ -473,6 +484,7 @@ initial equation
  pre(y) = false;
 equation
  y = false;
+
 end ArrayBuiltins.Min.MinExp4;
 ")})));
 
@@ -543,6 +555,7 @@ fclass ArrayBuiltins.Min.MinExp8
  Real y;
 equation
  y = 1.0;
+
 end ArrayBuiltins.Min.MinExp8;
 ")})));
 
@@ -561,6 +574,7 @@ fclass ArrayBuiltins.Min.MinExp9
  Real x;
 equation
  x = min(min(min(min(min(min(min(min(( 1 ) * ( 2 ), ( 2 ) * ( 2 )), ( 3 ) * ( 2 )), ( 1 ) * ( 3 )), ( 2 ) * ( 3 )), ( 3 ) * ( 3 )), ( 1 ) * ( 5 )), ( 2 ) * ( 5 )), ( 3 ) * ( 5 ));
+
 end ArrayBuiltins.Min.MinExp9;
 ")})));
 
@@ -635,6 +649,7 @@ fclass ArrayBuiltins.Max.MaxExp1
  Real y;
 equation
  y = 7.0;
+
 end ArrayBuiltins.Max.MaxExp1;
 ")})));
 
@@ -654,6 +669,7 @@ fclass ArrayBuiltins.Max.MaxExp2
  Real y;
 equation
  y = 4.0;
+
 end ArrayBuiltins.Max.MaxExp2;
 ")})));
 
@@ -675,6 +691,7 @@ initial equation
  pre(y) = \"\";
 equation
  y = \"foo\";
+
 end ArrayBuiltins.Max.MaxExp3;
 ")})));
 
@@ -696,6 +713,7 @@ initial equation
  pre(y) = false;
 equation
  y = true;
+
 end ArrayBuiltins.Max.MaxExp4;
 ")})));
 
@@ -765,6 +783,7 @@ fclass ArrayBuiltins.Max.MaxExp8
  Real x;
 equation
  x = max(max(max(max(max(max(max(max(max(max(max(1.0, 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0);
+
 end ArrayBuiltins.Max.MaxExp8;
 ")})));
 
@@ -783,6 +802,7 @@ fclass ArrayBuiltins.Max.MaxExp9
  Real y;
 equation
  y = 20.0;
+
 end ArrayBuiltins.Max.MaxExp9;
 ")})));
 
@@ -847,6 +867,7 @@ fclass ArrayBuiltins.Sum.SumExp1
  Real y;
 equation
  y = 10.0;
+
 end ArrayBuiltins.Sum.SumExp1;
 ")})));
 
@@ -866,6 +887,7 @@ fclass ArrayBuiltins.Sum.SumExp2
  Real y;
 equation
  y = 36.0;
+
 end ArrayBuiltins.Sum.SumExp2;
 ")})));
 
@@ -888,6 +910,7 @@ fclass ArrayBuiltins.Sum.SumExp3
 equation
  y[1] = 18.0;
  y[2] = 27.0;
+
 end ArrayBuiltins.Sum.SumExp3;
 ")})));
 
@@ -907,6 +930,7 @@ fclass ArrayBuiltins.Sum.SumExp4
  Real y;
 equation
  y = 45.0;
+
 end ArrayBuiltins.Sum.SumExp4;
 ")})));
 
@@ -963,6 +987,7 @@ model SumExp8
          flatModel="
 fclass ArrayBuiltins.Sum.SumExp8
  parameter Real x = 0 /* 0 */;
+
 end ArrayBuiltins.Sum.SumExp8;
 ")})));
 
@@ -991,6 +1016,7 @@ equation
  x[1,2] = 3;
  x[2,1] = 2;
  x[2,2] = 4;
+
 end ArrayBuiltins.Transpose.Transpose1;
 ")})));
 
@@ -1018,6 +1044,7 @@ equation
  x[2,1] = 2;
  x[2,2] = 4;
  x[2,3] = 6;
+
 end ArrayBuiltins.Transpose.Transpose2;
 ")})));
 
@@ -1037,6 +1064,7 @@ fclass ArrayBuiltins.Transpose.Transpose3
 equation
  x[1,1] = 1;
  x[2,1] = 2;
+
 end ArrayBuiltins.Transpose.Transpose3;
 ")})));
 
@@ -1077,6 +1105,7 @@ equation
  x[2,1,2] = 4;
  x[2,2,1] = 7;
  x[2,2,2] = 8;
+
 end ArrayBuiltins.Transpose.Transpose4;
 ")})));
 
@@ -1167,6 +1196,7 @@ equation
  y[2,1] = x[1,2] .+ 1;
  y[2,2] = x[2,2] .+ 1;
  y[2,3] = x[3,2] .+ 1;
+
 end ArrayBuiltins.Transpose.Transpose8;
 ")})));
 
@@ -1194,6 +1224,7 @@ equation
  x[1] = ( 2 ) * ( 6 ) - ( ( 3 ) * ( 5 ) );
  x[2] = ( 3 ) * ( 4 ) - ( ( 1.0 ) * ( 6 ) );
  x[3] = ( 1.0 ) * ( 5 ) - ( ( 2 ) * ( 4 ) );
+
 end ArrayBuiltins.Cross.Cross1;
 ")})));
 
@@ -1209,6 +1240,7 @@ model Cross2
 		 flatModel="
 fclass ArrayBuiltins.Cross.Cross2
  discrete Integer x[3] = cross({1,2,3}, {4,5,6});
+
 end ArrayBuiltins.Cross.Cross2;
 ")})));
 
@@ -1341,6 +1373,7 @@ equation
  x[4,2] = 8;
  x[5,1] = 9;
  x[5,2] = 0;
+
 end ArrayBuiltins.Cat.ArrayCat1;
 ")})));
 
@@ -1376,6 +1409,7 @@ equation
  x[2,3] = 8;
  x[2,4] = 9;
  x[2,5] = 0;
+
 end ArrayBuiltins.Cat.ArrayCat2;
 ")})));
 
@@ -1391,6 +1425,7 @@ model ArrayCat3
 		 flatModel="
 fclass ArrayBuiltins.Cat.ArrayCat3
  discrete String x[2,5] = cat(2, {{\"1\",\"2\"},{\"6\",\"7\"}}, {{\"3\"},{\"8\"}}, {{\"4\",\"5\"},{\"9\",\"0\"}});
+
 end ArrayBuiltins.Cat.ArrayCat3;
 ")})));
 
@@ -1488,6 +1523,7 @@ model ArrayCat8
 fclass ArrayBuiltins.Cat.ArrayCat8
  parameter Integer d = 1 /* 1 */;
  discrete Integer x[4] = cat(d, {1,2}, {4,5});
+
 end ArrayBuiltins.Cat.ArrayCat8;
 ")})));
 
@@ -1549,6 +1585,7 @@ equation
  x[2,1] = 4;
  x[2,2] = 5;
  x[2,3] = 6;
+
 end ArrayBuiltins.Cat.ArrayShortCat1;
 ")})));
 
@@ -1581,6 +1618,7 @@ equation
  x[2,3] = 6;
  x[3,2] = 8;
  x[3,3] = 9;
+
 end ArrayBuiltins.Cat.ArrayShortCat2;
 ")})));
 
@@ -1616,6 +1654,7 @@ equation
  x[2,1,2,1] = 6;
  x[2,2,1,1] = 7;
  x[2,2,2,1] = 8;
+
 end ArrayBuiltins.Cat.ArrayShortCat3;
 ")})));
 
@@ -1680,6 +1719,7 @@ equation
  x[4] = 4;
  y[1] = ( x[2] ) * ( 2 );
  y[2] = ( x[3] ) * ( 2 );
+
 end ArrayBuiltins.End.ArrayEnd1;
 ")})));
 
@@ -1732,6 +1772,7 @@ equation
  x2[5] = 9;
  y[1] = x2[3];
  y[2] = x2[2];
+
 end ArrayBuiltins.End.ArrayEnd3;
 ")})));
 
@@ -1759,6 +1800,7 @@ equation
  x[2] = 1 + ( 1 ) * ( ( 3 - ( 1 ) ) / ( 3 ) );
  x[3] = 1 + ( 2 ) * ( ( 3 - ( 1 ) ) / ( 3 ) );
  x[4] = 1 + ( 3 ) * ( ( 3 - ( 1 ) ) / ( 3 ) );
+
 end ArrayBuiltins.Linspace1;
 ")})));
 
@@ -1785,6 +1827,7 @@ equation
  x[1] = a + ( 0 ) * ( ( b - ( a ) ) / ( 2 ) );
  x[2] = a + ( 1 ) * ( ( b - ( a ) ) / ( 2 ) );
  x[3] = a + ( 2 ) * ( ( b - ( a ) ) / ( 2 ) );
+
 end ArrayBuiltins.Linspace2;
 ")})));
 
@@ -1866,6 +1909,7 @@ parameter equation
  a[1].x = b + ( 0 ) * ( ( c - ( b ) ) / ( 2 ) );
  a[2].x = b + ( 1 ) * ( ( c - ( b ) ) / ( 2 ) );
  a[3].x = b + ( 2 ) * ( ( c - ( b ) ) / ( 2 ) );
+
 end ArrayBuiltins.Linspace6;
 ")})));
 
@@ -1895,6 +1939,7 @@ initial equation
  pre(x) = 0;
 equation
  x = ( 2 ) * ( 2 );
+
 end ArrayBuiltins.NdimsExp1;
 ")})));
 
@@ -1927,6 +1972,7 @@ equation
  der(x[1]) = (if time >= 3 then ( ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] ) + ( A[1,3] ) * ( x[3] ) ) / ( N ) else ( (  - ( A[1,1] ) ) * ( x[1] ) + (  - ( A[1,2] ) ) * ( x[2] ) + (  - ( A[1,3] ) ) * ( x[3] ) ) / ( N ));
  der(x[2]) = (if time >= 3 then ( ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] ) + ( A[2,3] ) * ( x[3] ) ) / ( N ) else ( (  - ( A[2,1] ) ) * ( x[1] ) + (  - ( A[2,2] ) ) * ( x[2] ) + (  - ( A[2,3] ) ) * ( x[3] ) ) / ( N ));
  der(x[3]) = (if time >= 3 then ( ( A[3,1] ) * ( x[1] ) + ( A[3,2] ) * ( x[2] ) + ( A[3,3] ) * ( x[3] ) ) / ( N ) else ( (  - ( A[3,1] ) ) * ( x[1] ) + (  - ( A[3,2] ) ) * ( x[2] ) + (  - ( A[3,3] ) ) * ( x[3] ) ) / ( N ));
+
 end ArrayBuiltins.ArrayIfExp1;
 ")})));
 
@@ -1949,6 +1995,7 @@ fclass ArrayBuiltins.ArrayIfExp2
  Real b;
 equation
  b = 6.0;
+
 end ArrayBuiltins.ArrayIfExp2;
 ")})));
 
@@ -1974,6 +2021,7 @@ fclass ArrayBuiltins.Identity1
  parameter Real A[3,1] = 0 /* 0.0 */;
  parameter Real A[3,2] = 0 /* 0.0 */;
  parameter Real A[3,3] = 1 /* 1.0 */;
+
 end ArrayBuiltins.Identity1;
 ")})));
 
@@ -2039,6 +2087,7 @@ model ScalarSize1
 		 flatModel="
 fclass ArrayBuiltins.ScalarSize1
  Real x[1] = cat(1, {1}, size(3.141592653589793));
+
 end ArrayBuiltins.ScalarSize1;
 ")})));
 
@@ -2079,6 +2128,7 @@ equation
  x[2] = 2;
  y[1] = noEvent(x[1]);
  y[2] = noEvent(x[2]);
+
 end ArrayBuiltins.NoEventArray1;
 ")})));
 
@@ -2101,6 +2151,7 @@ fclass ArrayBuiltins.NoEventArray2
 parameter equation
  y[1] = noEvent(x[1]);
  y[2] = noEvent(x[2]);
+
 end ArrayBuiltins.NoEventArray2;
 ")})));
 
@@ -2126,10 +2177,12 @@ equation
  y.a = noEvent(x.a);
  y.b = noEvent(x.b);
 
+public
  record ArrayBuiltins.NoEventRecord1.A
   Real a;
   Real b;
  end ArrayBuiltins.NoEventRecord1.A;
+
 end ArrayBuiltins.NoEventRecord1;
 ")})));
 
@@ -2168,6 +2221,7 @@ equation
  x2[2] = 1;
  y2[1] = pre(x2[1]);
  y2[2] = pre(x2[2]);
+
 end ArrayBuiltins.PreTest1;
 ")})));
 
@@ -2195,6 +2249,7 @@ initial equation
  pre(x) = false;
 equation
  x = sample(0, 1);
+
 end ArrayBuiltins.SampleTest1;
 ")})));
 
@@ -2243,6 +2298,7 @@ equation
  z[1,2] = abs(x[1,2]);
  z[2,1] = abs(x[2,1]);
  z[2,2] = abs(x[2,2]);
+
 end ArrayBuiltins.VectorizedAbsTest;
 ")})));
 
@@ -2274,6 +2330,7 @@ equation
  y[1] = smooth(2, x[1]);
  y[2] = smooth(2, x[2]);
  y[3] = smooth(2, x[3]);
+
 end ArrayBuiltins.VectorizedSmoothTest;
 ")})));
 
@@ -2302,6 +2359,7 @@ equation
  x[3] = 3;
  ({y[1],y[2],y[3]}) = ArrayBuiltins.NonVectorizedSalarization1.f1({x[1],x[2],x[3]});
 
+public
  function ArrayBuiltins.NonVectorizedSalarization1.f1
   input Real[3] x1;
   output Real[3] y1;
@@ -2319,6 +2377,7 @@ equation
   y2 := x2[1] + x2[2] + x2[3];
   return;
  end ArrayBuiltins.NonVectorizedSalarization1.f2;
+
 end ArrayBuiltins.NonVectorizedSalarization1;
 ")})));
 
@@ -2360,6 +2419,7 @@ equation
  x[3] = 3;
  ({y[1],y[2],y[3]}) = ArrayBuiltins.NonVectorizedSalarization2.f1({x[1],x[2],x[3]});
 
+public
  function ArrayBuiltins.NonVectorizedSalarization2.f1
   input Real[:] x1;
   output Real[size(x1, 1)] y1;
@@ -2382,6 +2442,7 @@ equation
   y2 := temp_1;
   return;
  end ArrayBuiltins.NonVectorizedSalarization2.f2;
+
 end ArrayBuiltins.NonVectorizedSalarization2;
 ")})));
 
@@ -2423,6 +2484,7 @@ equation
  x[3] = 3;
  ({y[1],y[2],y[3]}) = Modelica.Math.Vectors.normalize({x[1],x[2],x[3]}, ( 100 ) * ( 1.0E-15 ));
 
+public
  function Modelica.Math.Vectors.normalize
   input Real[:] v;
   input Real eps;
@@ -2446,6 +2508,7 @@ equation
   result := sqrt(temp_1);
   return;
  end Modelica.Math.Vectors.length;
+
 end ArrayBuiltins.NonVectorizedSalarization3;
 ")})));
 

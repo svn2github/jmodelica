@@ -159,12 +159,14 @@ fclass FunctionTests.FunctionFlatten1
 equation
  x = FunctionTests.TestFunction1(1);
 
+public
  function FunctionTests.TestFunction1
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
   return;
  end FunctionTests.TestFunction1;
+
 end FunctionTests.FunctionFlatten1;
 ")})));
 
@@ -185,6 +187,7 @@ fclass FunctionTests.FunctionFlatten2
 equation
  x = FunctionTests.TestFunction2(1, 0);
 
+public
  function FunctionTests.TestFunction2
   input Real i1 := 0;
   input Real i2 := 0;
@@ -194,6 +197,7 @@ equation
   o1 := i1;
   return;
  end FunctionTests.TestFunction2;
+
 end FunctionTests.FunctionFlatten2;
 ")})));
 
@@ -215,6 +219,7 @@ fclass FunctionTests.FunctionFlatten3
 equation
  x = FunctionTests.TestFunction1(( y ) * ( 2 ));
 
+public
  function FunctionTests.TestFunction2
   input Real i1 := 0;
   input Real i2 := 0;
@@ -231,6 +236,7 @@ equation
  algorithm
   return;
  end FunctionTests.TestFunction1;
+
 end FunctionTests.FunctionFlatten3;
 ")})));
 
@@ -250,12 +256,14 @@ model FunctionFlatten4
 fclass FunctionTests.FunctionFlatten4
  Real x = FunctionTests.TestFunctionWithConst(2);
 
+public
  function FunctionTests.TestFunctionWithConst
   input Real x := 1;
   output Real y := x + 1.0 + 2.0 + 3.0;
  algorithm
   return;
  end FunctionTests.TestFunctionWithConst;
+
 end FunctionTests.FunctionFlatten4;
 ")})));
 
@@ -274,12 +282,14 @@ fclass FunctionTests.FunctionFlatten5
 equation
  y.x = FunctionTests.TestFunction1(1);
 
+public
  function FunctionTests.TestFunction1
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
   return;
  end FunctionTests.TestFunction1;
+
 end FunctionTests.FunctionFlatten5;
 ")})));
 
@@ -306,12 +316,14 @@ model FunctionFlatten6
 fclass FunctionTests.FunctionFlatten6
  Real y.x = FunctionTests.TestFunction1(1);
 
+public
  function FunctionTests.TestFunction1
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
   return;
  end FunctionTests.TestFunction1;
+
 end FunctionTests.FunctionFlatten6;
 ")})));
 
@@ -336,6 +348,7 @@ fclass FunctionTests.FunctionFlatten7
  Real y = FunctionTests.FunctionFlatten7.B.f();
  Real z = FunctionTests.FunctionFlatten7.C.f();
 
+public
  function FunctionTests.FunctionFlatten7.A.f
   output Real a := 1.0;
  algorithm
@@ -353,6 +366,7 @@ fclass FunctionTests.FunctionFlatten7
  algorithm
   return;
  end FunctionTests.FunctionFlatten7.C.f;
+
 end FunctionTests.FunctionFlatten7;
 ")})));
 
@@ -389,11 +403,13 @@ fclass FunctionTests.FunctionFlatten8
 equation
  y.x = FunctionTests.FunctionFlatten8.f();
 
+public
  function FunctionTests.FunctionFlatten8.f
   output Real x := 1;
  algorithm
   return;
  end FunctionTests.FunctionFlatten8.f;
+
 end FunctionTests.FunctionFlatten8;
 ")})));
 
@@ -427,6 +443,7 @@ fclass FunctionTests.FunctionFlatten9
 equation
  ({z[1],z[2]}) = FunctionTests.FunctionFlatten9.f({3,4});
 
+public
  function FunctionTests.FunctionFlatten9.f
   Real[3] a;
   input Real[2] x;
@@ -439,6 +456,7 @@ equation
   y[2] := x[2] + a[2] + a[2];
   return;
  end FunctionTests.FunctionFlatten9.f;
+
 end FunctionTests.FunctionFlatten9;
 ")})));
 
@@ -464,6 +482,7 @@ model FunctionFlatten10
 fclass FunctionTests.FunctionFlatten10
  Real z = FunctionTests.FunctionFlatten10.f3(1);
 
+public
  function FunctionTests.FunctionFlatten10.f3
   input Real x;
   output Real y;
@@ -471,6 +490,7 @@ fclass FunctionTests.FunctionFlatten10
   y := x;
   return;
  end FunctionTests.FunctionFlatten10.f3;
+
 end FunctionTests.FunctionFlatten10;
 ")})));
 
@@ -504,12 +524,14 @@ model FunctionBinding1
 fclass FunctionTests.FunctionBinding1
  Real x = FunctionTests.TestFunction1(0);
 
+public
  function FunctionTests.TestFunction1
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
   return;
  end FunctionTests.TestFunction1;
+
 end FunctionTests.FunctionBinding1;
 ")})));
 
@@ -524,12 +546,14 @@ model FunctionBinding2
 fclass FunctionTests.FunctionBinding2
  Real x = FunctionTests.TestFunction1(1);
 
+public
  function FunctionTests.TestFunction1
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
   return;
  end FunctionTests.TestFunction1;
+
 end FunctionTests.FunctionBinding2;
 ")})));
 
@@ -591,6 +615,7 @@ model FunctionBinding6
 fclass FunctionTests.FunctionBinding6
  Real x = FunctionTests.TestFunction3(1, 2, 0);
 
+public
  function FunctionTests.TestFunction3
   input Real i1;
   input Real i2;
@@ -601,6 +626,7 @@ fclass FunctionTests.FunctionBinding6
  algorithm
   return;
  end FunctionTests.TestFunction3;
+
 end FunctionTests.FunctionBinding6;
 ")})));
 
@@ -615,11 +641,13 @@ model FunctionBinding7
 fclass FunctionTests.FunctionBinding7
  Real x = FunctionTests.TestFunction0();
 
+public
  function FunctionTests.TestFunction0
   output Real o1 := 0;
  algorithm
   return;
  end FunctionTests.TestFunction0;
+
 end FunctionTests.FunctionBinding7;
 ")})));
 
@@ -634,12 +662,14 @@ model FunctionBinding8
 fclass FunctionTests.FunctionBinding8
  Real x = FunctionTests.TestFunction1(1);
 
+public
  function FunctionTests.TestFunction1
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
   return;
  end FunctionTests.TestFunction1;
+
 end FunctionTests.FunctionBinding8;
 ")})));
 
@@ -654,6 +684,7 @@ model FunctionBinding9
 fclass FunctionTests.FunctionBinding9
  Real x = FunctionTests.TestFunction2(1, 2);
 
+public
  function FunctionTests.TestFunction2
   input Real i1 := 0;
   input Real i2 := 0;
@@ -663,6 +694,7 @@ fclass FunctionTests.FunctionBinding9
   o1 := i1;
   return;
  end FunctionTests.TestFunction2;
+
 end FunctionTests.FunctionBinding9;
 ")})));
 
@@ -753,12 +785,14 @@ model FunctionBinding15
 fclass FunctionTests.FunctionBinding15
  Real d.c = FunctionTests.FunctionBinding15.A.f(1.0);
 
+public
  function FunctionTests.FunctionBinding15.A.f
   input Real b := 1.0;
   output Real c := b;
  algorithm
   return;
  end FunctionTests.FunctionBinding15.A.f;
+
 end FunctionTests.FunctionBinding15;
 ")})));
 
@@ -894,6 +928,7 @@ fclass FunctionTests.MultipleOutput1
 equation
  (x, y) = FunctionTests.TestFunction2(1, 2);
 
+public
  function FunctionTests.TestFunction2
   input Real i1 := 0;
   input Real i2 := 0;
@@ -903,6 +938,7 @@ equation
   o1 := i1;
   return;
  end FunctionTests.TestFunction2;
+
 end FunctionTests.MultipleOutput1;
 ")})));
 
@@ -923,6 +959,7 @@ fclass FunctionTests.MultipleOutput2
 equation
  (x, y) = FunctionTests.TestFunction3(1, 2, 3);
 
+public
  function FunctionTests.TestFunction3
   input Real i1;
   input Real i2;
@@ -933,6 +970,7 @@ equation
  algorithm
   return;
  end FunctionTests.TestFunction3;
+
 end FunctionTests.MultipleOutput2;
 ")})));
 
@@ -953,6 +991,7 @@ fclass FunctionTests.MultipleOutput3
 equation
  (x, , z) = FunctionTests.TestFunction3(1, 2, 3);
 
+public
  function FunctionTests.TestFunction3
   input Real i1;
   input Real i2;
@@ -963,6 +1002,7 @@ equation
  algorithm
   return;
  end FunctionTests.TestFunction3;
+
 end FunctionTests.MultipleOutput3;
 ")})));
 
@@ -983,6 +1023,7 @@ fclass FunctionTests.MultipleOutput4
 equation
  FunctionTests.TestFunction2(1, 2);
 
+public
  function FunctionTests.TestFunction2
   input Real i1 := 0;
   input Real i2 := 0;
@@ -992,6 +1033,7 @@ equation
   o1 := i1;
   return;
  end FunctionTests.TestFunction2;
+
 end FunctionTests.MultipleOutput4;
 ")})));
 
@@ -1009,6 +1051,7 @@ model RecursionTest1
 fclass FunctionTests.RecursionTest1
  Real x = FunctionTests.TestFunctionCallingFunction(1);
 
+public
  function FunctionTests.TestFunctionCallingFunction
   input Real i1;
   output Real o1;
@@ -1023,6 +1066,7 @@ fclass FunctionTests.RecursionTest1
  algorithm
   return;
  end FunctionTests.TestFunction1;
+
 end FunctionTests.RecursionTest1;
 ")})));
 
@@ -1037,6 +1081,7 @@ model RecursionTest2
 fclass FunctionTests.RecursionTest2
  Real x = FunctionTests.TestFunctionRecursive(5);
 
+public
  function FunctionTests.TestFunctionRecursive
   input Integer i1;
   output Integer o1;
@@ -1048,6 +1093,7 @@ fclass FunctionTests.RecursionTest2
   end if;
   return;
  end FunctionTests.TestFunctionRecursive;
+
 end FunctionTests.RecursionTest2;
 ")})));
 
@@ -1064,12 +1110,14 @@ model FunctionType0
 fclass FunctionTests.FunctionType0
  Real x = FunctionTests.TestFunction1(1.0);
 
+public
  function FunctionTests.TestFunction1
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
   return;
  end FunctionTests.TestFunction1;
+
 end FunctionTests.FunctionType0;
 ")})));
 
@@ -1084,12 +1132,14 @@ model FunctionType1
 fclass FunctionTests.FunctionType1
  Real x = FunctionTests.TestFunction1(1);
 
+public
  function FunctionTests.TestFunction1
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
   return;
  end FunctionTests.TestFunction1;
+
 end FunctionTests.FunctionType1;
 ")})));
 
@@ -1120,12 +1170,14 @@ fclass FunctionTests.FunctionType3
  parameter Real a = 1.0 /* 1.0 */;
  Real x = FunctionTests.TestFunction1(a);
 
+public
  function FunctionTests.TestFunction1
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
   return;
  end FunctionTests.TestFunction1;
+
 end FunctionTests.FunctionType3;
 ")})));
 
@@ -1142,12 +1194,14 @@ fclass FunctionTests.FunctionType4
  parameter Integer a = 1 /* 1 */;
  Real x = FunctionTests.TestFunction1(a);
 
+public
  function FunctionTests.TestFunction1
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
   return;
  end FunctionTests.TestFunction1;
+
 end FunctionTests.FunctionType4;
 ")})));
 
@@ -1195,6 +1249,7 @@ fclass FunctionTests.FunctionType7
  parameter Integer a = 1 /* 1 */;
  Real x = FunctionTests.TestFunction2(FunctionTests.TestFunction2(0, 0), FunctionTests.TestFunction2(1, 0));
 
+public
  function FunctionTests.TestFunction2
   input Real i1 := 0;
   input Real i2 := 0;
@@ -1204,6 +1259,7 @@ fclass FunctionTests.FunctionType7
   o1 := i1;
   return;
  end FunctionTests.TestFunction2;
+
 end FunctionTests.FunctionType7;
 ")})));
 
@@ -1235,12 +1291,14 @@ model FunctionType9
 fclass FunctionTests.FunctionType9
  discrete String x = FunctionTests.TestFunctionString(\"test\");
 
+public
  function FunctionTests.TestFunctionString
   input String i1;
   output String o1 := i1;
  algorithm
   return;
  end FunctionTests.TestFunctionString;
+
 end FunctionTests.FunctionType9;
 ")})));
 
@@ -1256,12 +1314,14 @@ fclass FunctionTests.FunctionType10
  parameter String a = \"test\" /* test */;
  discrete String x = FunctionTests.TestFunctionString(a);
 
+public
  function FunctionTests.TestFunctionString
   input String i1;
   output String o1 := i1;
  algorithm
   return;
  end FunctionTests.TestFunctionString;
+
 end FunctionTests.FunctionType10;
 ")})));
 
@@ -1434,6 +1494,7 @@ model BuiltInCallType3
           flatModel="
 fclass FunctionTests.BuiltInCallType3
  Real x = sqrt(1);
+
 end FunctionTests.BuiltInCallType3;
 ")})));
 
@@ -1508,6 +1569,7 @@ model BuiltInCallType8
 fclass FunctionTests.BuiltInCallType8
  Real x[3] = zeros(3);
  Real y[3,2] = ones(3, 2);
+
 end FunctionTests.BuiltInCallType8;
 ")})));
 
@@ -1561,6 +1623,7 @@ fclass FunctionTests.AlgorithmFlatten1
 algorithm
  x := 5;
  x := x + 2;
+
 end FunctionTests.AlgorithmFlatten1;
 ")})));
 
@@ -1579,6 +1642,7 @@ fclass FunctionTests.AlgorithmFlatten2
  Real x;
 algorithm
  break;
+
 end FunctionTests.AlgorithmFlatten2;
 ")})));
 
@@ -1608,6 +1672,7 @@ algorithm
  else
   x := 3;
  end if;
+
 end FunctionTests.AlgorithmFlatten3;
 ")})));
 
@@ -1647,6 +1712,7 @@ algorithm
    x := 3;
   end if;
  end when;
+
 end FunctionTests.AlgorithmFlatten4;
 ")})));
 
@@ -1680,6 +1746,7 @@ algorithm
    end while;
   end while;
  end while;
+
 end FunctionTests.AlgorithmFlatten5;
 ")})));
 
@@ -1708,6 +1775,7 @@ algorithm
    x := x + ( i ) * ( j );
   end for;
  end for;
+
 end FunctionTests.AlgorithmFlatten6;
 ")})));
 
@@ -1813,6 +1881,7 @@ algorithm
  if true then
   x := 1.0;
  end if;
+
 end FunctionTests.AlgorithmTypeIf5;
 ")})));
 
@@ -1896,6 +1965,7 @@ algorithm
  when {true,false} then
   x := 1.0;
  end when;
+
 end FunctionTests.AlgorithmTypeWhen4;
 ")})));
 
@@ -1918,6 +1988,7 @@ algorithm
  when true then
   x := 1.0;
  end when;
+
 end FunctionTests.AlgorithmTypeWhen5;
 ")})));
 
@@ -2020,6 +2091,7 @@ algorithm
  while true loop
   x := 1.0;
  end while;
+
 end FunctionTests.AlgorithmTypeWhile5;
 ")})));
 
@@ -2057,6 +2129,7 @@ fclass FunctionTests.AlgorithmTypeAssign2
  Real x;
 algorithm
  x := 1;
+
 end FunctionTests.AlgorithmTypeAssign2;
 ")})));
 
@@ -2075,6 +2148,7 @@ fclass FunctionTests.AlgorithmTypeAssign3
  Real x;
 algorithm
  x := 1.0;
+
 end FunctionTests.AlgorithmTypeAssign3;
 ")})));
 
@@ -2160,6 +2234,7 @@ equation
  a = 1;
  b = 2;
 
+public
  function FunctionTests.AlgorithmTransformation1.algorithm_1
   output Real x;
   output Real y;
@@ -2170,6 +2245,7 @@ equation
   y := b;
   return;
  end FunctionTests.AlgorithmTransformation1.algorithm_1;
+
 end FunctionTests.AlgorithmTransformation1;
 ")})));
 
@@ -2197,6 +2273,7 @@ equation
  (x, y) = FunctionTests.AlgorithmTransformation2.algorithm_1(a);
  a = 1;
 
+public
  function FunctionTests.AlgorithmTransformation2.algorithm_1
   output Real x;
   output Real y;
@@ -2208,6 +2285,7 @@ equation
   y := a;
   return;
  end FunctionTests.AlgorithmTransformation2.algorithm_1;
+
 end FunctionTests.AlgorithmTransformation2;
 ")})));
 
@@ -2238,6 +2316,7 @@ equation
  a = 1;
  b = 2;
 
+public
  function FunctionTests.AlgorithmTransformation3.algorithm_1
   output Real x;
   output Real y;
@@ -2250,6 +2329,7 @@ equation
   end if;
   return;
  end FunctionTests.AlgorithmTransformation3.algorithm_1;
+
 end FunctionTests.AlgorithmTransformation3;
 ")})));
 
@@ -2281,6 +2361,7 @@ equation
  a = 1;
  b = 2;
 
+public
  function FunctionTests.AlgorithmTransformation4.algorithm_1
   output Real x;
   output Real y;
@@ -2297,6 +2378,7 @@ equation
   end while;
   return;
  end FunctionTests.AlgorithmTransformation4.algorithm_1;
+
 end FunctionTests.AlgorithmTransformation4;
 ")})));
 
@@ -2328,6 +2410,7 @@ fclass FunctionTests.AlgorithmTransformation5
 equation
  (x, y) = FunctionTests.AlgorithmTransformation5.algorithm_1();
 
+public
  function FunctionTests.AlgorithmTransformation5.algorithm_1
   output Real x;
   output Real y;
@@ -2336,6 +2419,7 @@ equation
   y := 2;
   return;
  end FunctionTests.AlgorithmTransformation5.algorithm_1;
+
 end FunctionTests.AlgorithmTransformation5;
 ")})));
 
@@ -2360,6 +2444,7 @@ equation
  (x) = FunctionTests.AlgorithmTransformation6.algorithm_1();
  (y) = FunctionTests.AlgorithmTransformation6.algorithm_2();
 
+public
  function FunctionTests.AlgorithmTransformation6.algorithm_1
   output Real x;
  algorithm
@@ -2373,6 +2458,7 @@ equation
   y := 2;
   return;
  end FunctionTests.AlgorithmTransformation6.algorithm_2;
+
 end FunctionTests.AlgorithmTransformation6;
 ")})));
 
@@ -2396,6 +2482,7 @@ fclass FunctionTests.AlgorithmTransformation7
 equation
  (x) = FunctionTests.AlgorithmTransformation7.algorithm_2();
 
+public
  function FunctionTests.AlgorithmTransformation7.algorithm_1
   input Real i;
   output Real o;
@@ -2410,6 +2497,7 @@ equation
   x := FunctionTests.AlgorithmTransformation7.algorithm_1(2);
   return;
  end FunctionTests.AlgorithmTransformation7.algorithm_2;
+
 end FunctionTests.AlgorithmTransformation7;
 ")})));
 
@@ -2437,6 +2525,7 @@ fclass FunctionTests.AlgorithmTransformation8
 equation
  (x.a, x.b) = FunctionTests.AlgorithmTransformation8.algorithm_1();
 
+public
  function FunctionTests.AlgorithmTransformation8.algorithm_1
   output Real x.a;
   output Real x.b;
@@ -2445,6 +2534,7 @@ equation
   x.b := 3;
   return;
  end FunctionTests.AlgorithmTransformation8.algorithm_1;
+
 end FunctionTests.AlgorithmTransformation8;
 ")})));
 
@@ -2473,6 +2563,7 @@ equation
  (algorithm_1) = FunctionTests.AlgorithmTransformation9.algorithm_2();
  (algorithm_3) = FunctionTests.AlgorithmTransformation9.algorithm_4();
 
+public
  function FunctionTests.AlgorithmTransformation9.algorithm_2
   output Real algorithm_1;
  algorithm
@@ -2486,6 +2577,7 @@ equation
   algorithm_3 := 3;
   return;
  end FunctionTests.AlgorithmTransformation9.algorithm_4;
+
 end FunctionTests.AlgorithmTransformation9;
 ")})));
 
@@ -2510,8 +2602,9 @@ fclass FunctionTests.AlgorithmTransformation10
  Real x_1;
 equation
  x_0 = 0;
- (x, x_1) = FunctionTests.AlgorithmTransformation10.algorithm_1(x_0, 0);
+ (x, x_1) = FunctionTests.AlgorithmTransformation10.algorithm_1(x_0, 0.0);
 
+public
  function FunctionTests.AlgorithmTransformation10.algorithm_1
   output Real x;
   output Real x_1;
@@ -2523,6 +2616,7 @@ equation
   x_1 := x;
   return;
  end FunctionTests.AlgorithmTransformation10.algorithm_1;
+
 end FunctionTests.AlgorithmTransformation10;
 ")})));
 
@@ -2547,8 +2641,9 @@ fclass FunctionTests.AlgorithmTransformation11
  Real x;
  Real y;
 equation
- (x, y) = FunctionTests.AlgorithmTransformation11.algorithm_1(0);
+ (x, y) = FunctionTests.AlgorithmTransformation11.algorithm_1(0.0);
 
+public
  function FunctionTests.AlgorithmTransformation11.algorithm_1
   output Real x;
   output Real y;
@@ -2559,6 +2654,7 @@ equation
   y := x;
   return;
  end FunctionTests.AlgorithmTransformation11.algorithm_1;
+
 end FunctionTests.AlgorithmTransformation11;
 ")})));
 
@@ -2582,8 +2678,9 @@ fclass FunctionTests.AlgorithmTransformation12
  Real x2(start = 2);
  Real y;
 equation
- (x0, x1, x2, y) = FunctionTests.AlgorithmTransformation12.algorithm_1(0, 1, 2);
+ (x0, x1, x2, y) = FunctionTests.AlgorithmTransformation12.algorithm_1(0.0, 1, 2);
 
+public
  function FunctionTests.AlgorithmTransformation12.algorithm_1
   output Real x0;
   output Real x1;
@@ -2602,6 +2699,7 @@ equation
   y := x2;
   return;
  end FunctionTests.AlgorithmTransformation12.algorithm_1;
+
 end FunctionTests.AlgorithmTransformation12;
 ")})));
 
@@ -2629,6 +2727,7 @@ equation
  FunctionTests.AlgorithmTransformation13.algorithm_1(x);
  x = 2;
 
+public
  function FunctionTests.TestFunction1
   input Real i1;
   output Real o1;
@@ -2645,6 +2744,7 @@ equation
   end if;
   return;
  end FunctionTests.AlgorithmTransformation13.algorithm_1;
+
 end FunctionTests.AlgorithmTransformation13;
 ")})));
 
@@ -2665,8 +2765,9 @@ model AlgorithmTransformation14
 fclass FunctionTests.AlgorithmTransformation14
  Real x;
 equation
- (x) = FunctionTests.AlgorithmTransformation14.algorithm_1(0);
+ (x) = FunctionTests.AlgorithmTransformation14.algorithm_1(0.0);
 
+public
  function FunctionTests.AlgorithmTransformation14.algorithm_1
   output Real x;
   input Real x_0;
@@ -2678,6 +2779,7 @@ equation
   end for;
   return;
  end FunctionTests.AlgorithmTransformation14.algorithm_1;
+
 end FunctionTests.AlgorithmTransformation14;
 ")})));
 
@@ -2706,6 +2808,7 @@ equation
  a_in = 1;
  b_in = 2;
 
+public
  function FunctionTests.AlgorithmTransformation15.f
   input Real a;
   input Real b;
@@ -2726,6 +2829,7 @@ equation
   (c_out, d_out) := FunctionTests.AlgorithmTransformation15.f(a_in, b_in);
   return;
  end FunctionTests.AlgorithmTransformation15.algorithm_1;
+
 end FunctionTests.AlgorithmTransformation15;
 ")})));
 
@@ -2761,6 +2865,7 @@ fclass FunctionTests.ArrayExpInFunc1
 equation
  x = FunctionTests.ArrayExpInFunc1.f();
 
+public
  function FunctionTests.ArrayExpInFunc1.f
   output Real o;
   Real[3] x;
@@ -2771,6 +2876,7 @@ equation
   x[3] := 3;
   return;
  end FunctionTests.ArrayExpInFunc1.f;
+
 end FunctionTests.ArrayExpInFunc1;
 ")})));
 
@@ -2796,6 +2902,7 @@ fclass FunctionTests.ArrayExpInFunc2
 equation
  x = FunctionTests.ArrayExpInFunc2.f();
 
+public
  function FunctionTests.ArrayExpInFunc2.f
   output Real o;
   Real[2, 2] x;
@@ -2807,6 +2914,7 @@ equation
   x[2,2] := ( 3 ) * ( 2 ) + ( 4 ) * ( 4 );
   return;
  end FunctionTests.ArrayExpInFunc2.f;
+
 end FunctionTests.ArrayExpInFunc2;
 ")})));
 
@@ -2832,6 +2940,7 @@ fclass FunctionTests.ArrayExpInFunc3
 equation
  x = FunctionTests.ArrayExpInFunc3.f();
 
+public
  function FunctionTests.ArrayExpInFunc3.f
   output Real o;
   Real[2, 2] x;
@@ -2843,6 +2952,7 @@ equation
   x[2,2] := 4;
   return;
  end FunctionTests.ArrayExpInFunc3.f;
+
 end FunctionTests.ArrayExpInFunc3;
 ")})));
 
@@ -2869,6 +2979,7 @@ fclass FunctionTests.ArrayExpInFunc4
 equation
  x = FunctionTests.ArrayExpInFunc4.f();
 
+public
  function FunctionTests.ArrayExpInFunc4.f
   output Real o;
   Real[2, 2] x;
@@ -2880,6 +2991,7 @@ equation
   x[2,2] := ( 3 ) * ( 2 ) + ( 4 ) * ( 4 );
   return;
  end FunctionTests.ArrayExpInFunc4.f;
+
 end FunctionTests.ArrayExpInFunc4;
 ")})));
 
@@ -2904,6 +3016,7 @@ fclass FunctionTests.ArrayExpInFunc5
 equation
  x = FunctionTests.ArrayExpInFunc5.f(( 1 ) * ( 1 ) + ( 2 ) * ( 2 ) + ( 3 ) * ( 3 ));
 
+public
  function FunctionTests.ArrayExpInFunc5.f
   input Real a;
   output Real o;
@@ -2924,6 +3037,7 @@ equation
   c := a;
   return;
  end FunctionTests.ArrayExpInFunc5.f2;
+
 end FunctionTests.ArrayExpInFunc5;
 ")})));
 
@@ -2959,6 +3073,7 @@ fclass FunctionTests.ArrayExpInFunc6
 equation
  x = FunctionTests.ArrayExpInFunc6.f();
 
+public
  function FunctionTests.ArrayExpInFunc6.f
   output Real o;
   Real[3] x;
@@ -2979,6 +3094,7 @@ equation
   end if;
   return;
  end FunctionTests.ArrayExpInFunc6.f;
+
 end FunctionTests.ArrayExpInFunc6;
 ")})));
 
@@ -3014,6 +3130,7 @@ equation
  ({x[1], x[2], x[3]}) = FunctionTests.ArrayExpInFunc7.algorithm_1(o);
  o = 1.0;
 
+public
  function FunctionTests.ArrayExpInFunc7.algorithm_1
   output Real[3] x;
   input Real o;
@@ -3029,6 +3146,7 @@ equation
   end when;
   return;
  end FunctionTests.ArrayExpInFunc7.algorithm_1;
+
 end FunctionTests.ArrayExpInFunc7;
 ")})));
 
@@ -3054,6 +3172,7 @@ fclass FunctionTests.ArrayExpInFunc8
 equation
  x = FunctionTests.ArrayExpInFunc8.f();
 
+public
  function FunctionTests.ArrayExpInFunc8.f
   output Real o;
   Real[3] x;
@@ -3068,6 +3187,7 @@ equation
   end for;
   return;
  end FunctionTests.ArrayExpInFunc8.f;
+
 end FunctionTests.ArrayExpInFunc8;
 ")})));
 
@@ -3097,6 +3217,7 @@ fclass FunctionTests.ArrayExpInFunc9
 equation
  x = FunctionTests.ArrayExpInFunc9.f();
 
+public
  function FunctionTests.ArrayExpInFunc9.f
   output Real o;
   Real[3] x;
@@ -3113,6 +3234,7 @@ equation
   end while;
   return;
  end FunctionTests.ArrayExpInFunc9.f;
+
 end FunctionTests.ArrayExpInFunc9;
 ")})));
 
@@ -3147,6 +3269,7 @@ fclass FunctionTests.ArrayOutputScalarization1
 equation
  ({x[1],x[2]}, {y[1],y[2]}) = FunctionTests.ArrayOutputScalarization1.f();
 
+public
  function FunctionTests.ArrayOutputScalarization1.f
   output Real[2] x;
   output Real[2] y;
@@ -3157,6 +3280,7 @@ equation
   y[2] := 2;
   return;
  end FunctionTests.ArrayOutputScalarization1.f;
+
 end FunctionTests.ArrayOutputScalarization1;
 ")})));
 
@@ -3189,6 +3313,7 @@ equation
  x[1] = 3 + temp_1[1];
  x[2] = 4 + temp_1[2];
 
+public
  function FunctionTests.ArrayOutputScalarization2.f
   output Real[2] x;
  algorithm
@@ -3196,6 +3321,7 @@ equation
   x[2] := 2;
   return;
  end FunctionTests.ArrayOutputScalarization2.f;
+
 end FunctionTests.ArrayOutputScalarization2;
 ")})));
 
@@ -3232,6 +3358,7 @@ equation
  temp_1 = 2;
  temp_3 = 3;
 
+public
  function FunctionTests.ArrayOutputScalarization3.f
   output Real[2] x;
  algorithm
@@ -3239,6 +3366,7 @@ equation
   x[2] := 2;
   return;
  end FunctionTests.ArrayOutputScalarization3.f;
+
 end FunctionTests.ArrayOutputScalarization3;
 ")})));
 
@@ -3267,6 +3395,7 @@ fclass FunctionTests.ArrayOutputScalarization4
 equation
  x = FunctionTests.ArrayOutputScalarization4.f2();
 
+public
  function FunctionTests.ArrayOutputScalarization4.f2
   output Real x;
   Real[2] y;
@@ -3287,6 +3416,7 @@ equation
   y[2] := 2;
   return;
  end FunctionTests.ArrayOutputScalarization4.f1;
+
 end FunctionTests.ArrayOutputScalarization4;
 ")})));
 
@@ -3320,6 +3450,7 @@ fclass FunctionTests.ArrayOutputScalarization5
 equation
  x = FunctionTests.ArrayOutputScalarization5.f2();
 
+public
  function FunctionTests.ArrayOutputScalarization5.f2
   output Real x;
   Real[2] y;
@@ -3339,6 +3470,7 @@ equation
   x[2] := 2;
   return;
  end FunctionTests.ArrayOutputScalarization5.f1;
+
 end FunctionTests.ArrayOutputScalarization5;
 ")})));
 
@@ -3370,6 +3502,7 @@ fclass FunctionTests.ArrayOutputScalarization6
 equation
  x = FunctionTests.ArrayOutputScalarization6.f2();
 
+public
  function FunctionTests.ArrayOutputScalarization6.f2
   output Real x;
   Real[2] y;
@@ -3387,6 +3520,7 @@ equation
   x[2] := 2;
   return;
  end FunctionTests.ArrayOutputScalarization6.f1;
+
 end FunctionTests.ArrayOutputScalarization6;
 ")})));
 
@@ -3420,6 +3554,7 @@ fclass FunctionTests.ArrayOutputScalarization7
 equation
  x = FunctionTests.ArrayOutputScalarization7.f2();
 
+public
  function FunctionTests.ArrayOutputScalarization7.f2
   output Real x;
   Real[2] y;
@@ -3452,6 +3587,7 @@ equation
   x[2] := 2;
   return;
  end FunctionTests.ArrayOutputScalarization7.f1;
+
 end FunctionTests.ArrayOutputScalarization7;
 ")})));
 
@@ -3491,6 +3627,7 @@ fclass FunctionTests.ArrayOutputScalarization8
 equation
  x = FunctionTests.ArrayOutputScalarization8.f2();
 
+public
  function FunctionTests.ArrayOutputScalarization8.f2
   output Real x;
   Real[2] y;
@@ -3512,6 +3649,7 @@ equation
   x[2] := 2;
   return;
  end FunctionTests.ArrayOutputScalarization8.f1;
+
 end FunctionTests.ArrayOutputScalarization8;
 ")})));
 
@@ -3552,6 +3690,7 @@ equation
  x[1] = temp_1[1];
  x[2] = temp_1[2];
 
+public
  function FunctionTests.ArrayOutputScalarization9.f
   output Real[2] x;
  algorithm
@@ -3559,6 +3698,7 @@ equation
   x[2] := 2;
   return;
  end FunctionTests.ArrayOutputScalarization9.f;
+
 end FunctionTests.ArrayOutputScalarization9;
 ")})));
 
@@ -3584,6 +3724,7 @@ fclass FunctionTests.ArrayOutputScalarization10
 equation
  x = FunctionTests.ArrayOutputScalarization10.f2();
 
+public
  function FunctionTests.ArrayOutputScalarization10.f2
   output Real x;
   Real[2] temp_1;
@@ -3604,6 +3745,7 @@ equation
   x[2] := 2;
   return;
  end FunctionTests.ArrayOutputScalarization10.f1;
+
 end FunctionTests.ArrayOutputScalarization10;
 ")})));
 
@@ -3635,6 +3777,7 @@ fclass FunctionTests.ArrayOutputScalarization11
 equation
  x = FunctionTests.ArrayOutputScalarization11.f2();
 
+public
  function FunctionTests.ArrayOutputScalarization11.f1
   output Real[2] x;
  algorithm
@@ -3651,6 +3794,7 @@ equation
   x := y[1];
   return;
  end FunctionTests.ArrayOutputScalarization11.f2;
+
 end FunctionTests.ArrayOutputScalarization11;
 ")})));
 
@@ -3681,6 +3825,7 @@ fclass FunctionTests.ArrayOutputScalarization12
 equation
  x = FunctionTests.ArrayOutputScalarization12.f2();
 
+public
  function FunctionTests.ArrayOutputScalarization12.f1
   output Real[2] x;
  algorithm
@@ -3700,6 +3845,7 @@ equation
   x := y[1];
   return;
  end FunctionTests.ArrayOutputScalarization12.f2;
+
 end FunctionTests.ArrayOutputScalarization12;
 ")})));
 
@@ -3730,6 +3876,7 @@ fclass FunctionTests.ArrayOutputScalarization13
 equation
  x = FunctionTests.ArrayOutputScalarization13.f2();
 
+public
  function FunctionTests.ArrayOutputScalarization13.f1
   output Real[2] x;
  algorithm
@@ -3748,6 +3895,7 @@ equation
   x := y;
   return;
  end FunctionTests.ArrayOutputScalarization13.f2;
+
 end FunctionTests.ArrayOutputScalarization13;
 ")})));
 
@@ -3781,6 +3929,7 @@ equation
  ({temp_1[1],temp_1[2]}) = FunctionTests.ArrayOutputScalarization14.f();
  x = ( temp_1[1] ) * ( 3 ) + ( temp_1[2] ) * ( 4 );
 
+public
  function FunctionTests.ArrayOutputScalarization14.f
   output Real[2] x;
  algorithm
@@ -3788,6 +3937,7 @@ equation
   x[2] := 2;
   return;
  end FunctionTests.ArrayOutputScalarization14.f;
+
 end FunctionTests.ArrayOutputScalarization14;
 ")})));
 
@@ -3833,6 +3983,7 @@ fclass FunctionTests.ArrayOutputScalarization16
 equation
  x = FunctionTests.ArrayOutputScalarization16.f1();
 
+public
  function FunctionTests.ArrayOutputScalarization16.f1
   output Real o;
   Real[2] x;
@@ -3853,6 +4004,7 @@ equation
   y[2] := x[2];
   return;
  end FunctionTests.ArrayOutputScalarization16.f2;
+
 end FunctionTests.ArrayOutputScalarization16;
 ")})));
 
@@ -3885,6 +4037,7 @@ fclass FunctionTests.ArrayOutputScalarization17
 equation
  x = FunctionTests.ArrayOutputScalarization17.f1();
 
+public
  function FunctionTests.ArrayOutputScalarization17.f1
   output Real o;
   Real[2] y;
@@ -3904,6 +4057,7 @@ equation
   y[2] := x[2];
   return;
  end FunctionTests.ArrayOutputScalarization17.f2;
+
 end FunctionTests.ArrayOutputScalarization17;
 ")})));
 
@@ -3935,6 +4089,7 @@ fclass FunctionTests.ArrayOutputScalarization18
 equation
  x = FunctionTests.ArrayOutputScalarization18.f1({1,2});
 
+public
  function FunctionTests.ArrayOutputScalarization18.f2
   input Real[:] a2;
   output Real[size(a2, 1)] x2;
@@ -3960,6 +4115,7 @@ equation
   x1 := temp_1;
   return;
  end FunctionTests.ArrayOutputScalarization18.f1;
+
 end FunctionTests.ArrayOutputScalarization18;
 ")})));
 
@@ -3993,6 +4149,7 @@ fclass FunctionTests.ArrayOutputScalarization19
 equation
  x = FunctionTests.ArrayOutputScalarization19.f1({1,2});
 
+public
  function FunctionTests.ArrayOutputScalarization19.f2
   input Real[:] a2;
   output Real[size(a2, 1)] x2;
@@ -4012,6 +4169,7 @@ equation
   x1 := b1[1] + b1[2];
   return;
  end FunctionTests.ArrayOutputScalarization19.f1;
+
 end FunctionTests.ArrayOutputScalarization19;
 ")})));
 
@@ -4047,6 +4205,7 @@ fclass FunctionTests.ArrayOutputScalarization20
 equation
  (FunctionTests.ArrayOutputScalarization20.R(x.a, {x.b[1],x.b[2]})) = FunctionTests.ArrayOutputScalarization20.f1(1);
 
+public
  function FunctionTests.ArrayOutputScalarization20.f1
   input Real c;
   output FunctionTests.ArrayOutputScalarization20.R d;
@@ -4069,6 +4228,7 @@ equation
   Real a;
   Real b[2];
  end FunctionTests.ArrayOutputScalarization20.R;
+
 end FunctionTests.ArrayOutputScalarization20;
 ")})));
 
@@ -4108,6 +4268,7 @@ fclass FunctionTests.UnknownArray1
  Real x[3] = FunctionTests.UnknownArray1.f({1,2,3});
  Real y[2] = FunctionTests.UnknownArray1.f({4,5});
 
+public
  function FunctionTests.UnknownArray1.f
   input Real[:] a;
   output Real[size(a, 1)] b;
@@ -4115,6 +4276,7 @@ fclass FunctionTests.UnknownArray1
   b := a;
   return;
  end FunctionTests.UnknownArray1.f;
+
 end FunctionTests.UnknownArray1;
 ")})));
 
@@ -4140,12 +4302,14 @@ fclass FunctionTests.UnknownArray2
  Real x[3] = FunctionTests.UnknownArray2.f({1,2,3});
  Real y[2] = FunctionTests.UnknownArray2.f({4,5});
 
+public
  function FunctionTests.UnknownArray2.f
   input Real[:] a;
   output Real[size(a, 1)] b := a;
  algorithm
   return;
  end FunctionTests.UnknownArray2.f;
+
 end FunctionTests.UnknownArray2;
 ")})));
 
@@ -4170,6 +4334,7 @@ fclass FunctionTests.UnknownArray3
  Real x[3] = FunctionTests.UnknownArray3.f({1,2,3});
  Real y[2] = FunctionTests.UnknownArray3.f({4,5});
 
+public
  function FunctionTests.UnknownArray3.f
   input Real[:] a;
   output Real[size(c, 1)] b;
@@ -4178,6 +4343,7 @@ fclass FunctionTests.UnknownArray3
   b := a;
   return;
  end FunctionTests.UnknownArray3.f;
+
 end FunctionTests.UnknownArray3;
 ")})));
 
@@ -4204,6 +4370,7 @@ fclass FunctionTests.UnknownArray4
  Real x[3] = FunctionTests.UnknownArray4.f({1,2,3});
  Real y[2] = FunctionTests.UnknownArray4.f({4,5});
 
+public
  function FunctionTests.UnknownArray4.f
   input Real[:] a;
   output Real[size(a, 1)] b := c;
@@ -4211,6 +4378,7 @@ fclass FunctionTests.UnknownArray4
  algorithm
   return;
  end FunctionTests.UnknownArray4.f;
+
 end FunctionTests.UnknownArray4;
 ")})));
 
@@ -4238,6 +4406,7 @@ fclass FunctionTests.UnknownArray5
 equation
  (x[1:3], y[1:3]) = FunctionTests.UnknownArray5.f({1,2,3});
 
+public
  function FunctionTests.UnknownArray5.f
   input Real[:] a;
   output Real[size(a, 1)] b := c;
@@ -4245,6 +4414,7 @@ equation
  algorithm
   return;
  end FunctionTests.UnknownArray5.f;
+
 end FunctionTests.UnknownArray5;
 ")})));
 
@@ -4346,6 +4516,7 @@ model UnknownArray9
 fclass FunctionTests.UnknownArray9
  Real x[5,2] = FunctionTests.UnknownArray9.f({{1,2},{3,4}}, {{5,6},{7,8},{9,0}});
 
+public
  function FunctionTests.UnknownArray9.f
   input Real[:, :] a;
   input Real[:, size(a, 2)] b;
@@ -4355,6 +4526,7 @@ fclass FunctionTests.UnknownArray9
   c := d;
   return;
  end FunctionTests.UnknownArray9.f;
+
 end FunctionTests.UnknownArray9;
 ")})));
 
@@ -4383,6 +4555,7 @@ fclass FunctionTests.UnknownArray10
 equation
  ({x[1],x[2]}) = FunctionTests.UnknownArray10.f({1,2});
 
+public
  function FunctionTests.UnknownArray10.f
   input Real[:] a;
   output Real[size(a, 1)] b;
@@ -4392,6 +4565,7 @@ equation
   end for;
   return;
  end FunctionTests.UnknownArray10.f;
+
 end FunctionTests.UnknownArray10;
 ")})));
 
@@ -4418,6 +4592,7 @@ fclass FunctionTests.UnknownArray11
 equation
  ({x[1],x[2]}) = FunctionTests.UnknownArray11.f({1,2});
 
+public
  function FunctionTests.UnknownArray11.f
   input Real[:] a;
   output Real[size(a, 1)] b;
@@ -4427,6 +4602,7 @@ equation
   end for;
   return;
  end FunctionTests.UnknownArray11.f;
+
 end FunctionTests.UnknownArray11;
 ")})));
 
@@ -4452,6 +4628,7 @@ fclass FunctionTests.UnknownArray12
 equation
  ({x[1],x[2]}) = FunctionTests.UnknownArray12.f({1,2}, {3,4}, 5);
 
+public
  function FunctionTests.UnknownArray12.f
   input Real[:] a;
   input Real[:] b;
@@ -4463,6 +4640,7 @@ equation
   end for;
   return;
  end FunctionTests.UnknownArray12.f;
+
 end FunctionTests.UnknownArray12;
 ")})));
 
@@ -4491,6 +4669,7 @@ fclass FunctionTests.UnknownArray13
 equation
  ({x[1],x[2]}) = FunctionTests.UnknownArray13.f({1,2}, {3,4}, 5);
 
+public
  function FunctionTests.UnknownArray13.f
   input Real[:] a;
   input Real[:] b;
@@ -4502,6 +4681,7 @@ equation
   end for;
   return;
  end FunctionTests.UnknownArray13.f;
+
 end FunctionTests.UnknownArray13;
 ")})));
 
@@ -4531,6 +4711,7 @@ fclass FunctionTests.UnknownArray14
 equation
  ({{x[1,1],x[1,2]},{x[2,1],x[2,2]}}) = FunctionTests.UnknownArray14.f({{1,2},{3,4}}, {{5,6},{7,8}});
 
+public
  function FunctionTests.UnknownArray14.f
   input Real[:, :] a;
   input Real[size(a, 2), :] b;
@@ -4548,6 +4729,7 @@ equation
   end for;
   return;
  end FunctionTests.UnknownArray14.f;
+
 end FunctionTests.UnknownArray14;
 ")})));
 
@@ -4573,6 +4755,7 @@ fclass FunctionTests.UnknownArray15
 equation
  x = FunctionTests.UnknownArray15.f({1,2}, {3,4});
 
+public
  function FunctionTests.UnknownArray15.f
   input Real[:] a;
   input Real[size(a, 1)] b;
@@ -4586,6 +4769,7 @@ equation
   o := temp_1;
   return;
  end FunctionTests.UnknownArray15.f;
+
 end FunctionTests.UnknownArray15;
 ")})));
 
@@ -4611,6 +4795,7 @@ fclass FunctionTests.UnknownArray16
 equation
  x = FunctionTests.UnknownArray16.f({1,2}, {3,4});
 
+public
  function FunctionTests.UnknownArray16.f
   input Real[:] a;
   input Real[size(a, 1)] b;
@@ -4627,6 +4812,7 @@ equation
   end if;
   return;
  end FunctionTests.UnknownArray16.f;
+
 end FunctionTests.UnknownArray16;
 ")})));
 
@@ -4666,6 +4852,7 @@ equation
  y[2,2] = 4;
  ({{x[1,1],x[1,2]},{x[2,1],x[2,2]}}) = FunctionTests.UnknownArray17.f({{y[1,1],y[1,2]},{y[2,1],y[2,2]}}, {{y[1,1],y[1,2]},{y[2,1],y[2,2]}}, {{y[1,1],y[1,2]},{y[2,1],y[2,2]}});
 
+public
  function FunctionTests.UnknownArray17.f
   input Real[:, :] a;
   input Real[size(a, 2), :] b;
@@ -4689,6 +4876,7 @@ equation
   end for;
   return;
  end FunctionTests.UnknownArray17.f;
+
 end FunctionTests.UnknownArray17;
 ")})));
 
@@ -4717,6 +4905,7 @@ fclass FunctionTests.UnknownArray18
 equation
  ({x[1],x[2]}) = FunctionTests.UnknownArray18.f({1,2});
 
+public
  function FunctionTests.UnknownArray18.f
   input Real[:] a;
   output Real[size(a, 1)] o;
@@ -4726,6 +4915,7 @@ equation
   end for;
   return;
  end FunctionTests.UnknownArray18.f;
+
 end FunctionTests.UnknownArray18;
 ")})));
 
@@ -4782,6 +4972,7 @@ fclass FunctionTests.UnknownArray20
 equation
  ({x[1],x[2]}) = FunctionTests.UnknownArray20.f({{1,2},{3,4}});
 
+public
  function FunctionTests.UnknownArray20.f
   input Real[:, :] a;
   output Real[2] c;
@@ -4790,6 +4981,7 @@ equation
   c[2] := a[size(a, 1),size(a, 2)];
   return;
  end FunctionTests.UnknownArray20.f;
+
 end FunctionTests.UnknownArray20;
 ")})));
 
@@ -4816,6 +5008,7 @@ fclass FunctionTests.UnknownArray21
 equation
  x = FunctionTests.UnknownArray21.f({1,2}, {3,4});
 
+public
  function FunctionTests.UnknownArray21.f
   input Real[:] a;
   input Real[:] b;
@@ -4829,6 +5022,7 @@ equation
   c := temp_1;
   return;
  end FunctionTests.UnknownArray21.f;
+
 end FunctionTests.UnknownArray21;
 ")})));
 
@@ -4854,6 +5048,7 @@ fclass FunctionTests.UnknownArray22
 equation
  x = FunctionTests.UnknownArray22.f({1,2}, {3,4});
 
+public
  function FunctionTests.UnknownArray22.f
   input Real[:] a;
   input Real[:] b;
@@ -4867,6 +5062,7 @@ equation
   c := temp_1;
   return;
  end FunctionTests.UnknownArray22.f;
+
 end FunctionTests.UnknownArray22;
 ")})));
 
@@ -4893,6 +5089,7 @@ fclass FunctionTests.UnknownArray23
 equation
  x = FunctionTests.UnknownArray23.f({1,2,3});
 
+public
  function FunctionTests.UnknownArray23.f
   input Real[:] a;
   output Real c;
@@ -4909,6 +5106,7 @@ equation
   c := temp_1;
   return;
  end FunctionTests.UnknownArray23.f;
+
 end FunctionTests.UnknownArray23;
 ")})));
 
@@ -4939,6 +5137,7 @@ fclass FunctionTests.UnknownArray24
 equation
  ({{x[1,1],x[1,2]},{x[2,1],x[2,2]},{x[3,1],x[3,2]}}) = FunctionTests.UnknownArray24.f({{5,6},{7,8},{9,0}});
 
+public
  function FunctionTests.UnknownArray24.f
   input Real[:, 2] x;
   output Real[size(x, 1), 2] y;
@@ -4960,6 +5159,7 @@ equation
   end for;
   return;
  end FunctionTests.UnknownArray24.f;
+
 end FunctionTests.UnknownArray24;
 ")})));
 
@@ -4985,6 +5185,7 @@ fclass FunctionTests.UnknownArray25
 equation
  x = FunctionTests.UnknownArray25.f({1,2});
 
+public
  function FunctionTests.UnknownArray25.f
   input Real[:] y;
   output Real x;
@@ -4997,6 +5198,7 @@ equation
   x := temp_1;
   return;
  end FunctionTests.UnknownArray25.f;
+
 end FunctionTests.UnknownArray25;
 ")})));
 
@@ -5022,6 +5224,7 @@ fclass FunctionTests.UnknownArray26
 equation
  x = FunctionTests.UnknownArray26.f({1,2});
 
+public
  function FunctionTests.UnknownArray26.f
   input Real[:] y;
   output Real x;
@@ -5034,6 +5237,7 @@ equation
   x := temp_1;
   return;
  end FunctionTests.UnknownArray26.f;
+
 end FunctionTests.UnknownArray26;
 ")})));
 
@@ -5059,6 +5263,7 @@ fclass FunctionTests.UnknownArray27
 equation
  x = FunctionTests.UnknownArray27.f({1,2}, {{1,2},{3,4}});
 
+public
  function FunctionTests.UnknownArray27.f
   input Real[:] y;
   input Real[size(y, 1), size(y, 1)] z;
@@ -5077,6 +5282,7 @@ equation
   x := temp_1;
   return;
  end FunctionTests.UnknownArray27.f;
+
 end FunctionTests.UnknownArray27;
 ")})));
 
@@ -5119,6 +5325,7 @@ fclass FunctionTests.UnknownArray29
 equation
  x = FunctionTests.UnknownArray29.f1();
 
+public
  function FunctionTests.UnknownArray29.f1
   Real[3] a;
   output Real y1;
@@ -5145,6 +5352,7 @@ equation
   y2 := temp_1;
   return;
  end FunctionTests.UnknownArray29.f2;
+
 end FunctionTests.UnknownArray29;
 ")})));
 
@@ -5178,6 +5386,7 @@ fclass FunctionTests.UnknownArray30
 equation
  x = FunctionTests.UnknownArray30.f({1,2,3});
 
+public
  function FunctionTests.UnknownArray30.f
   input Real[:] a;
   output Real b;
@@ -5195,6 +5404,7 @@ equation
   b := temp_1 + temp_2;
   return;
  end FunctionTests.UnknownArray30.f;
+
 end FunctionTests.UnknownArray30;
 ")})));
 
@@ -5220,6 +5430,7 @@ fclass FunctionTests.UnknownArray31
 equation
  ({x[1],x[2]}) = FunctionTests.UnknownArray31.f2({1,2});
 
+public
  function FunctionTests.UnknownArray31.f2
   input Real[:] c;
   output Real[size(c, 1)] d;
@@ -5237,6 +5448,7 @@ equation
   end for;
   return;
  end FunctionTests.UnknownArray31.f1;
+
 end FunctionTests.UnknownArray31;
 ")})));
 
@@ -5338,6 +5550,7 @@ model ExternalFunc1
 fclass FunctionTests.ExternalFunc1
  Real x = FunctionTests.ExternalFunc1.f(2);
 
+public
  function FunctionTests.ExternalFunc1.f
   input Real x;
   output Real y;
@@ -5345,6 +5558,7 @@ fclass FunctionTests.ExternalFunc1
   external \"C\" y = f(x);
   return;
  end FunctionTests.ExternalFunc1.f;
+
 end FunctionTests.ExternalFunc1;
 ")})));
 
@@ -5367,6 +5581,7 @@ model ExternalFunc2
 fclass FunctionTests.ExternalFunc2
  Real x = FunctionTests.ExternalFunc2.f({{1,2},{3,4}}, 5);
 
+public
  function FunctionTests.ExternalFunc2.f
   input Real[:, 2] x;
   input Real y;
@@ -5377,6 +5592,7 @@ fclass FunctionTests.ExternalFunc2
   external \"C\" f(x, size(x, 1), size(x, 2), y, z, q, a);
   return;
  end FunctionTests.ExternalFunc2.f;
+
 end FunctionTests.ExternalFunc2;
 ")})));
 
@@ -5402,6 +5618,7 @@ model ExternalFunc3
 fclass FunctionTests.ExternalFunc3
  Real x = FunctionTests.ExternalFunc3.f({{1,2},{3,4}}, 5);
 
+public
  function FunctionTests.ExternalFunc3.f
   input Real[:, 2] x;
   input Real y;
@@ -5411,6 +5628,7 @@ fclass FunctionTests.ExternalFunc3
   external \"C\" foo(size(x, 1), 2, x, z, y, q);
   return;
  end FunctionTests.ExternalFunc3.f;
+
 end FunctionTests.ExternalFunc3;
 ")})));
 
@@ -5435,6 +5653,7 @@ model ExternalFunc4
 fclass FunctionTests.ExternalFunc4
  Real x = FunctionTests.ExternalFunc4.f({{1,2},{3,4}}, 5);
 
+public
  function FunctionTests.ExternalFunc4.f
   input Real[:, 2] x;
   input Real y;
@@ -5444,6 +5663,7 @@ fclass FunctionTests.ExternalFunc4
   external \"C\" q = foo(size(x, 1), 2, x, z, y);
   return;
  end FunctionTests.ExternalFunc4.f;
+
 end FunctionTests.ExternalFunc4;
 ")})));
 
@@ -5468,6 +5688,7 @@ model ExternalFunc5
 fclass FunctionTests.ExternalFunc5
  Real x = FunctionTests.ExternalFunc5.f(2);
 
+public
  function FunctionTests.ExternalFunc5.f
   input Real x;
   output Real y;
@@ -5475,6 +5696,7 @@ fclass FunctionTests.ExternalFunc5
   external \"C\" y = f(x);
   return;
  end FunctionTests.ExternalFunc5.f;
+
 end FunctionTests.ExternalFunc5;
 ")})));
 
@@ -5497,6 +5719,7 @@ model ExternalFunc6
 fclass FunctionTests.ExternalFunc6
  Real x = FunctionTests.ExternalFunc6.f(2);
 
+public
  function FunctionTests.ExternalFunc6.f
   input Real x;
   output Real y;
@@ -5504,6 +5727,7 @@ fclass FunctionTests.ExternalFunc6
   external \"FORTRAN 77\" y = f(x);
   return;
  end FunctionTests.ExternalFunc6.f;
+
 end FunctionTests.ExternalFunc6;
 ")})));
 
@@ -5834,6 +6058,7 @@ model ExtendFunc1
 fclass FunctionTests.ExtendFunc1
  Real x = FunctionTests.ExtendFunc1.f2(1.0);
 
+public
  function FunctionTests.ExtendFunc1.f2
   input Real a;
   output Real b;
@@ -5841,6 +6066,7 @@ fclass FunctionTests.ExtendFunc1
   b := a;
   return;
  end FunctionTests.ExtendFunc1.f2;
+
 end FunctionTests.ExtendFunc1;
 ")})));
 
@@ -5870,6 +6096,7 @@ fclass FunctionTests.ExtendFunc2
  constant Real d[2] = {1,2};
  Real x = FunctionTests.ExtendFunc2.f2(1, 2);
 
+public
  function FunctionTests.ExtendFunc2.f2
   Real[2] d := {1,2};
   input Real a;
@@ -5880,6 +6107,7 @@ fclass FunctionTests.ExtendFunc2
   b := f;
   return;
  end FunctionTests.ExtendFunc2.f2;
+
 end FunctionTests.ExtendFunc2;
 ")})));
 
@@ -5921,6 +6149,7 @@ equation
  x[1] = 3;
  x[2] = 4;
 
+public
  function FunctionTests.AttributeTemp1.f
   output Real[2] o;
  algorithm
@@ -5928,6 +6157,7 @@ equation
   o[2] := 2;
   return;
  end FunctionTests.AttributeTemp1.f;
+
 end FunctionTests.AttributeTemp1;
 ")})));
 
@@ -5954,6 +6184,7 @@ fclass FunctionTests.InputAsArraySize1
 equation
  ({x[1],x[2],x[3]}) = FunctionTests.InputAsArraySize1.f(3);
 
+public
  function FunctionTests.InputAsArraySize1.f
   input Integer n;
   output Real[n] x;
@@ -5963,6 +6194,7 @@ equation
   end for;
   return;
  end FunctionTests.InputAsArraySize1.f;
+
 end FunctionTests.InputAsArraySize1;
 ")})));
 
@@ -5991,6 +6223,7 @@ fclass FunctionTests.InputAsArraySize2
 equation
  ({x[1],x[2],x[3]}) = FunctionTests.InputAsArraySize2.f(n);
 
+public
  function FunctionTests.InputAsArraySize2.f
   input Integer n;
   output Real[n] x;
@@ -6000,6 +6233,7 @@ equation
   end for;
   return;
  end FunctionTests.InputAsArraySize2.f;
+
 end FunctionTests.InputAsArraySize2;
 ")})));
 
@@ -6029,6 +6263,7 @@ fclass FunctionTests.InputAsArraySize3
 equation
  ({x[1],x[2],x[3]}) = FunctionTests.InputAsArraySize3.f(n);
 
+public
  function FunctionTests.InputAsArraySize3.f
   input Integer n;
   output Real[n] x;
@@ -6038,6 +6273,7 @@ equation
   end for;
   return;
  end FunctionTests.InputAsArraySize3.f;
+
 end FunctionTests.InputAsArraySize3;
 ")})));
 
@@ -6066,6 +6302,7 @@ fclass FunctionTests.InputAsArraySize4
 equation
  ({x[1],x[2],x[3]}) = FunctionTests.InputAsArraySize4.f(3);
 
+public
  function FunctionTests.InputAsArraySize4.f
   input Integer n;
   output Real[n] x;
@@ -6075,6 +6312,7 @@ equation
   end for;
   return;
  end FunctionTests.InputAsArraySize4.f;
+
 end FunctionTests.InputAsArraySize4;
 ")})));
 
@@ -6150,6 +6388,7 @@ fclass FunctionTests.InputAsArraySize7
 equation
  x = FunctionTests.InputAsArraySize7.f(3, {1,2,3});
 
+public
  function FunctionTests.InputAsArraySize7.f
   input Integer n;
   input Real[n] y;
@@ -6163,6 +6402,7 @@ equation
   x := temp_1;
   return;
  end FunctionTests.InputAsArraySize7.f;
+
 end FunctionTests.InputAsArraySize7;
 ")})));
 
@@ -6202,6 +6442,7 @@ fclass FunctionTests.InputAsArraySize9
 equation
  x = FunctionTests.InputAsArraySize9.f(3, {1,2,3});
 
+public
  function FunctionTests.InputAsArraySize9.f
   input Integer n;
   input Real[n] y;
@@ -6215,6 +6456,7 @@ equation
   x := temp_1;
   return;
  end FunctionTests.InputAsArraySize9.f;
+
 end FunctionTests.InputAsArraySize9;
 ")})));
 
@@ -6258,6 +6500,7 @@ equation
  z[1] = FunctionTests.VectorizedCall1.f(1);
  z[2] = FunctionTests.VectorizedCall1.f(2);
 
+public
  function FunctionTests.VectorizedCall1.f
   input Real x;
   output Real y;
@@ -6265,6 +6508,7 @@ equation
   y := ( 2 ) * ( x );
   return;
  end FunctionTests.VectorizedCall1.f;
+
 end FunctionTests.VectorizedCall1;
 ")})));
 
@@ -6296,6 +6540,7 @@ equation
  z[2,1] = FunctionTests.VectorizedCall2.f(3, 5, 2);
  z[2,2] = FunctionTests.VectorizedCall2.f(4, 5, 2);
 
+public
  function FunctionTests.VectorizedCall2.f
   input Real x1;
   input Real x2;
@@ -6305,6 +6550,7 @@ equation
   y := ( 2 ) * ( x1 ) + x2 + x3;
   return;
  end FunctionTests.VectorizedCall2.f;
+
 end FunctionTests.VectorizedCall2;
 ")})));
 
@@ -6356,6 +6602,7 @@ equation
  z[2,1] = FunctionTests.VectorizedCall3.f({{( 3 ) * ( 1.0 ),( 3 ) * ( 2.0 ),( 3 ) * ( 3.0 )},{( 3 ) * ( 4.0 ),( 3 ) * ( 5.0 ),( 3 ) * ( 6.0 )},{( 3 ) * ( 7.0 ),( 3 ) * ( 8.0 ),( 3 ) * ( 9.0 )}}, {{( 3 ) * ( -1.0 ),( 3 ) * ( -2.0 ),( 3 ) * ( -3.0 )},{( 3 ) * ( -4.0 ),( 3 ) * ( -5.0 ),( 3 ) * ( -6.0 )},{( 3 ) * ( -7.0 ),( 3 ) * ( -8.0 ),( 3 ) * ( -9.0 )}});
  z[2,2] = FunctionTests.VectorizedCall3.f({{( 4 ) * ( 1.0 ),( 4 ) * ( 2.0 ),( 4 ) * ( 3.0 )},{( 4 ) * ( 4.0 ),( 4 ) * ( 5.0 ),( 4 ) * ( 6.0 )},{( 4 ) * ( 7.0 ),( 4 ) * ( 8.0 ),( 4 ) * ( 9.0 )}}, {{( 4 ) * ( -1.0 ),( 4 ) * ( -2.0 ),( 4 ) * ( -3.0 )},{( 4 ) * ( -4.0 ),( 4 ) * ( -5.0 ),( 4 ) * ( -6.0 )},{( 4 ) * ( -7.0 ),( 4 ) * ( -8.0 ),( 4 ) * ( -9.0 )}});
 
+public
  function FunctionTests.VectorizedCall3.f
   input Real[:, :] x1;
   input Real[:, :] x2;
@@ -6376,6 +6623,7 @@ equation
   y := temp_1;
   return;
  end FunctionTests.VectorizedCall3.f;
+
 end FunctionTests.VectorizedCall3;
 ")})));
 
@@ -6554,6 +6802,7 @@ equation
  z[2,1] = FunctionTests.VectorizedCall4.f({{w2[2,1,1,1],w2[2,1,1,2],w2[2,1,1,3]},{w2[2,1,2,1],w2[2,1,2,2],w2[2,1,2,3]},{w2[2,1,3,1],w2[2,1,3,2],w2[2,1,3,3]}}, {{v2[2,1,1,1],v2[2,1,1,2],v2[2,1,1,3]},{v2[2,1,2,1],v2[2,1,2,2],v2[2,1,2,3]},{v2[2,1,3,1],v2[2,1,3,2],v2[2,1,3,3]}});
  z[2,2] = FunctionTests.VectorizedCall4.f({{w2[2,2,1,1],w2[2,2,1,2],w2[2,2,1,3]},{w2[2,2,2,1],w2[2,2,2,2],w2[2,2,2,3]},{w2[2,2,3,1],w2[2,2,3,2],w2[2,2,3,3]}}, {{v2[2,2,1,1],v2[2,2,1,2],v2[2,2,1,3]},{v2[2,2,2,1],v2[2,2,2,2],v2[2,2,2,3]},{v2[2,2,3,1],v2[2,2,3,2],v2[2,2,3,3]}});
 
+public
  function FunctionTests.VectorizedCall4.f
   input Real[:, :] x1;
   input Real[:, :] x2;
@@ -6574,6 +6823,7 @@ equation
   y := temp_1;
   return;
  end FunctionTests.VectorizedCall4.f;
+
 end FunctionTests.VectorizedCall4;
 ")})));
 
@@ -6614,6 +6864,7 @@ equation
  z[1] = FunctionTests.VectorizedCall5.f(FunctionTests.VectorizedCall5.R(w[1].a, w[1].b));
  z[2] = FunctionTests.VectorizedCall5.f(FunctionTests.VectorizedCall5.R(w[2].a, w[2].b));
 
+public
  function FunctionTests.VectorizedCall5.f
   input FunctionTests.VectorizedCall5.R x;
   output Real y;
@@ -6626,6 +6877,7 @@ equation
   Real a;
   Real b;
  end FunctionTests.VectorizedCall5.R;
+
 end FunctionTests.VectorizedCall5;
 ")})));
 
@@ -6670,6 +6922,7 @@ equation
  A[2,1] = 3;
  A[2,2] = 4;
 
+public
  function Modelica.Math.Matrices.LAPACK.dgeqpf
   input Real[:, :] A;
   output Real[size(A, 1), size(A, 2)] QR;
@@ -6692,6 +6945,7 @@ equation
   external \"FORTRAN 77\" dgeqpf(size(A, 1), ncol, QR, size(A, 1), p, tau, work, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgeqpf;
+
 end FunctionTests.Lapack_dgeqpf;
 ")})));
 
@@ -6728,6 +6982,7 @@ equation
  A[2,1] = 7;
  A[2,2] = 8;
 
+public
  function Modelica.Math.Matrices.QR
   input Real[:, :] A;
   output Real[size(A, 1), size(A, 2)] Q;
@@ -6797,6 +7052,7 @@ equation
   external \"FORTRAN 77\" dorgqr(size(QR, 1), size(QR, 2), size(tau, 1), Q, size(Q, 1), tau, work, lwork, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dorgqr;
+
 end FunctionTests.Lapack_QR;
 ")})));
 
@@ -6821,6 +7077,7 @@ equation
  x = FunctionTests.BindingSort1.f(y);
  y = 1;
 
+public
  function FunctionTests.BindingSort1.f
   input Real x;
   output Real y;
@@ -6839,6 +7096,7 @@ equation
   y := y + x;
   return;
  end FunctionTests.BindingSort1.f;
+
 end FunctionTests.BindingSort1;
 ")})));
 

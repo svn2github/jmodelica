@@ -10,7 +10,9 @@ package EnumerationTests
 fclass EnumerationTests.EnumerationTest1
  parameter EnumerationTests.EnumerationTest1.Size t_shirt_size = EnumerationTests.EnumerationTest1.Size.medium;
 
+public
  type EnumerationTests.EnumerationTest1.Size = enumeration(small \"1st\", medium, large, xlarge);
+
 end EnumerationTests.EnumerationTest1;
 ")})));
 
@@ -30,7 +32,9 @@ fclass EnumerationTests.EnumerationTest2
  parameter EnumerationTests.EnumerationTest2.Size a2.t_shirt_size(start = EnumerationTests.EnumerationTest2.Size.large) = EnumerationTests.EnumerationTest2.Size.medium /* EnumerationTests.EnumerationTest2.Size.medium */;
  parameter EnumerationTests.EnumerationTest2.Size s = EnumerationTests.EnumerationTest2.Size.large /* EnumerationTests.EnumerationTest2.Size.large */;
 
+public
  type EnumerationTests.EnumerationTest2.Size = enumeration(small \"1st\", medium, large, xlarge);
+
 end EnumerationTests.EnumerationTest2;
 ")})));
 
@@ -56,7 +60,9 @@ fclass EnumerationTests.EnumerationTest3
  constant EnumerationTests.EnumerationTest3.A x = EnumerationTests.EnumerationTest3.A.b;
  parameter EnumerationTests.EnumerationTest3.A y = EnumerationTests.EnumerationTest3.A.b;
 
+public
  type EnumerationTests.EnumerationTest3.A = enumeration(a, b, c);
+
 end EnumerationTests.EnumerationTest3;
 ")})));
 
@@ -113,9 +119,11 @@ Semantic error at line 92, column 4:
 fclass EnumerationTests.EnumerationTest6
  parameter EnumerationTests.EnumerationTest6.A x = EnumerationTests.EnumerationTest6.B.a;
 
+public
  type EnumerationTests.EnumerationTest6.A = enumeration(a, b, c);
 
  type EnumerationTests.EnumerationTest6.B = enumeration(a, b, c);
+
 end EnumerationTests.EnumerationTest6;
 ")})));
 
@@ -155,7 +163,9 @@ fclass EnumerationTests.EnumerationTest8
  constant EnumerationTests.EnumerationTest8.A c[3] = EnumerationTests.EnumerationTest8.A.b:EnumerationTests.EnumerationTest8.A.d;
  parameter EnumerationTests.EnumerationTest8.A d[3] = {EnumerationTests.EnumerationTest8.A.b,EnumerationTests.EnumerationTest8.A.c,EnumerationTests.EnumerationTest8.A.d} /* { EnumerationTests.EnumerationTest8.A.b, EnumerationTests.EnumerationTest8.A.c, EnumerationTests.EnumerationTest8.A.d } */;
 
+public
  type EnumerationTests.EnumerationTest8.A = enumeration(a, b, c, d, e);
+
 end EnumerationTests.EnumerationTest8;
 ")})));
 
@@ -178,7 +188,9 @@ fclass EnumerationTests.EnumerationTest9
  constant Boolean x[6,3] = {{EnumerationTests.EnumerationTest9.A.c < EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c < EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c < EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c <= EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c <= EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c <= EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c > EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c > EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c > EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c >= EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c >= EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c >= EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c == EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c == EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c == EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c <> EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c <> EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c <> EnumerationTests.EnumerationTest9.A.d}};
  parameter Boolean y[6,3] = {{false,false,true},{false,true,true},{true,false,false},{true,true,false},{false,true,false},{true,false,true}} /* { { false, false, true }, { false, true, true }, { true, false, false }, { true, true, false }, { false, true, false }, { true, false, true } } */;
 
+public
  type EnumerationTests.EnumerationTest9.A = enumeration(a, b, c, d, e);
+
 end EnumerationTests.EnumerationTest9;
 ")})));
 
@@ -205,7 +217,9 @@ fclass EnumerationTests.EnumerationTest10
  constant Integer i[3] = {Integer(EnumerationTests.EnumerationTest10.A.a),Integer(EnumerationTests.EnumerationTest10.A.c),Integer(EnumerationTests.EnumerationTest10.A.e)};
  parameter Integer j[3] = {1,3,5} /* { 1, 3, 5 } */;
 
+public
  type EnumerationTests.EnumerationTest10.A = enumeration(a, b, c, d, e);
+
 end EnumerationTests.EnumerationTest10;
 ")})));
 
@@ -246,11 +260,13 @@ Semantic error at line 221, column 35:
          description="",
          flatModel="
 fclass EnumerationTests.EnumerationTest12
- parameter EnumerationTests.EnumerationTest12.DigitalCurrent c(quantity = \"Current\",start = EnumerationTests.EnumerationTest12.DigitalCurrentChoices.one,fixed = true) = EnumerationTests.EnumerationTest12.DigitalCurrentChoices.one /* EnumerationTests.EnumerationTest12.DigitalCurrentChoices.one */;
+ parameter EnumerationTests.EnumerationTest12.DigitalCurrent c = EnumerationTests.EnumerationTest12.DigitalCurrentChoices.one /* EnumerationTests.EnumerationTest12.DigitalCurrentChoices.one */;
 
- type EnumerationTests.EnumerationTest12.DigitalCurrent = enumeration(zero, one);
+public
+ type EnumerationTests.EnumerationTest12.DigitalCurrent = enumeration(zero, one)(quantity = \"Current\",start = EnumerationTests.EnumerationTest12.DigitalCurrentChoices.one,fixed = true);
 
  type EnumerationTests.EnumerationTest12.DigitalCurrentChoices = enumeration(zero, one);
+
 end EnumerationTests.EnumerationTest12;
 ")})));
 

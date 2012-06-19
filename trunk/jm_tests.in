@@ -42,6 +42,9 @@ fi
 
 # ====== End variables to set ======
 
+# Configure Bash
+set -o pipefail
+
 CPPAD_HOME="${JMODELICA_HOME}/ThirdParty/CppAD/"
 PYTHONPATH="$(merge_path "${PYTHONPATH}" "${JMODELICA_HOME}/Python/")"
 
@@ -106,9 +109,8 @@ function find_python_tests() {
 
 function python_tests() {
   if [ "${KEEP_PYTHON}" == 1 ]; then
-    TEST_DIR=tests_$(date "+%F_%H-%M-%S")
+    TEST_DIR="$(pwd)/tests_$(date "+%F_%H-%M-%S")"
     mkdir ${TEST_DIR}
-    TEST_DIR=${TEST_DIR:a}
   else
     TEST_DIR=$(mktemp -dq /tmp/jm_tests.XXXXXX)
   fi 

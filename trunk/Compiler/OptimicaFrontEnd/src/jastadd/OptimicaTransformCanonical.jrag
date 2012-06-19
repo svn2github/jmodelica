@@ -19,51 +19,19 @@ aspect OptimicaTransformCanonical {
 	public void FOptClass.transformCanonical() {
     	beginStep("transformCanonical()");
 		
-		FRealVariable fv_startTime = null;
-		FRealVariable fv_finalTime = null;
-		
-		// Are there class attributes set for startTime?
-		FAttribute startTime_attr = null;
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("startTime")) {
-				startTime_attr = a;
-				break;
-			}
-		}
-		
 		if (root().options.getBooleanOption("convert_free_dependent_parameters_to_algebraics")) {
 			for (FVariable fv : freeDependentParameters()) {
 				fv.setFTypePrefixVariability(new FContinuous());
 			}
-		}		
+		}
 
 		root().flushAllRecursive();
-	
-		// Create a parameter for the startTime attribute
-		fv_startTime = new FRealVariable(new FPublicVisibilityType(), 
-				fParameter(), new Opt(), 
-				startTime_attr!=null? (List<FAttribute>)startTime_attr.getFAttributeList().fullCopy(): new List(), 
-						(startTime_attr!=null && startTime_attr.hasValue())? new Opt(startTime_attr.getValue().fullCopy()): 
-							new Opt(new FRealLitExp(0.0)), 
-							new Opt(), new FQName("startTime"));
-		addFVariable(fv_startTime);
-
-		// Are there attributes set for finalTime
-		FAttribute finalTime_attr = null;
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("finalTime")) {
-				finalTime_attr = a;
-				break;
-			}
-		}
 		
-		// Create a parameter for the finalTime attribute
-		fv_finalTime = new FRealVariable(new FPublicVisibilityType(), 
-				fParameter(), new Opt(), 
-				finalTime_attr!=null? (List<FAttribute>)finalTime_attr.getFAttributeList().fullCopy(): new List(), 
-				(finalTime_attr!=null && finalTime_attr.hasValue())? new Opt(finalTime_attr.getValue().fullCopy()):
-					new Opt(new FRealLitExp(1.0)), new Opt(), new FQName("finalTime"));
-				addFVariable(fv_finalTime);
+		FAttribute startTime_attr = findMatching(getFAttributes(), "startTime");
+		FAttribute finalTime_attr = findMatching(getFAttributes(), "finalTime");
+		
+		FRealVariable fv_startTime = addExperimentTimeParameter("startTime", startTime_attr, 0.0);
+		FRealVariable fv_finalTime = addExperimentTimeParameter("finalTime", finalTime_attr, 1.0);
 
 		if (root().options.getBooleanOption("normalize_minimum_time_problems")) {
 			// Add 'finalTime' parameter if free
@@ -155,6 +123,19 @@ aspect OptimicaTransformCanonical {
 	    transformCanonicalCleanup();
 
     	endStep("transformCanonical()");
+	}
+	
+	private FRealVariable FOptClass.addExperimentTimeParameter(
+			String name, FAttribute attr, double defaultValue) {
+		FRealVariable fv = new FRealVariable(new FPublicVisibilityType(), fParameter(), new FQName(name));
+		if (attr != null) 
+			fv.setFAttributeList(attr.getFAttributeList().fullCopy());
+		if (attr != null && attr.hasValue())
+			fv.setBindingExp(attr.getValue().fullCopy());
+		else 
+			fv.setBindingExp(new FRealLitExp(defaultValue));
+		addFVariable(fv);
+		return fv;
 	}
 	
 	// Don't add initial equations for optimization problems

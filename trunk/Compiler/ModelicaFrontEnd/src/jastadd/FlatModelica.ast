@@ -36,6 +36,7 @@ FClass : BaseNode ::= FQName
                       FFunctionDecl*
                       FRecordDecl*
                       FEnumDecl*
+                      FDerivedType*
                       /UnknownFVariable/; 
 
 /**
@@ -117,10 +118,18 @@ abstract FVariable : AbstractFVariable ::= FVisibilityType
                                            FTypePrefixVariability
                                            [FTypePrefixInputOutput]
                                            FAttribute*
+                                           <DerivedType>
                                            [BindingExp:FExp]
                                            [FStringComment]
                                            FQName;
 
+/**
+ * Represents a set of attributes that can be used by several variables.
+ * 
+ * Any attributes on the variable itself overrides attributes with the same name in the set.
+ */
+FDerivedType : BaseNode ::= <Name> BaseType:FType FAttribute*;
+ 
 /**
  * \brief Base class for variable type prefixes.
  */
