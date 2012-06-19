@@ -187,7 +187,7 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 
 	private ScannedFormattingItem insertItem(ScannedFormattingItem itemToInsert, ScannedFormattingItem itemToInsertInto, int offset, ScannedFormattingItem resultingItem) {
 		ScannedFormattingItem firstItem = new ScannedFormattingItem(itemToInsertInto.type, itemToInsertInto.data.substring(0, offset),
-				itemToInsertInto.getStartLine(), itemToInsertInto.getStartColumn(), itemToInsert.getEndLine(), itemToInsert.getEndColumn() - 1);
+				itemToInsertInto.getStartLine(), itemToInsertInto.getStartColumn());
 		if (resultingItem == null) {
 			resultingItem = new MixedFormattingItem(firstItem);						
 		} else {
@@ -201,13 +201,8 @@ public class MixedFormattingItem extends ScannedFormattingItem {
 			startLine = itemToInsert.getEndLine() + 1;
 			startColumn = 1;
 		}
-		int endLine = startLine + itemToInsertInto.spanningLines() - (firstItem.spanningLines() + itemToInsert.spanningLines());
-		int endColumn = itemToInsertInto.getEndColumn();
-		if (itemToInsertInto.spanningLines() == 0) {
-			endColumn = itemToInsert.spanningColumnsOnLastLine() + itemToInsertInto.getEndColumn();
-		}
 
-		return resultingItem.mergeItems(Adjacency.BACK, new ScannedFormattingItem(itemToInsertInto.type, itemToInsertInto.data.substring(offset), startLine, startColumn, endLine, endColumn));
+		return resultingItem.mergeItems(Adjacency.BACK, new ScannedFormattingItem(itemToInsertInto.type, itemToInsertInto.data.substring(offset), startLine, startColumn));
 	}
 	
 	@Override

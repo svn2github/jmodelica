@@ -91,7 +91,7 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 	}
 	
 	protected boolean endsWithLineBreak() {
-		return (type == Type.LINE_BREAK || (type == Type.COMMENT && (data.endsWith("\r") || data.endsWith("\n"))));
+		return (type == Type.LINE_BREAK || data.endsWith("\r") || data.endsWith("\n"));
 	}
 
 	@Override
@@ -317,7 +317,7 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 	
 	@Override
 	public int spanningLines() {
-		return (getEndLine() - getStartLine());
+		return (getEndLine() - getStartLine()) + (endsWithLineBreak() ? 1 : 0);
 	}
 	
 	@Override
