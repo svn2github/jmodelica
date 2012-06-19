@@ -228,7 +228,9 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 			genPrinter.println(indent + "<opt:TimePoint index = \"" + optClass.timePointIndex(points[i]) + 
 			                 "\" value = \"" + points[i] + "\">");
 			for (FVariable fv : optClass.timePointFVariables(points[i])) {
-				fv.getFQName().prettyPrint_XML(genPrinter,indent+"\t");
+                                genPrinter.println(indent + "\t" + "<opt:QualifiedName>");
+					fv.getFQName().prettyPrint_XML(genPrinter,indent+"\t\t");
+                                genPrinter.println(indent + "\t" + "</opt:QualifiedName>");
 			}                 
 			genPrinter.println(indent + "</opt:TimePoint>");              
 		}
