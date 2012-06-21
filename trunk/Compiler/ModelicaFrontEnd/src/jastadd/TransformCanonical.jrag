@@ -1970,6 +1970,24 @@ aspect TransformCanonical {
 		return Tear(g,eb);
 	}
 		
+	
+	
+	protected FResidues FAbstractEquation.buildResidues() {
+		AnnotationNode residue = annotation("__JModelica/residue");
+		if (!residue.exists())
+			return null;
+		
+		FResidues residues = new FResidues();
+		for (AnnotationNode var : residue) {
+			if ("der".equals(var.name()))
+				residues.addFIdUseExp(new FDerExp(new FIdUse(var.iterator().next().name())));
+			else
+				residues.addFIdUseExp(new FIdUseExp(var.name()));
+		}
+		return residues;
+	}
+	
+	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			
 	
 	syn lazy ArrayList<String> FClass.structuralErrors() {

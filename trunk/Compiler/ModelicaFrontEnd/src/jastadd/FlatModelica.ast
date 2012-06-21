@@ -433,8 +433,10 @@ FInitialEquation : FEquationType;
  * The NTA InitialEquation is used to represent default initial equations for
  * when equations that are not active during initialization.
  */
-abstract FAbstractEquation : BaseNode ::= Type:FEquationType /InitialEquation:FEquation*/ 
-	/DynamicFAbstractEquation:FAbstractEquation*/; 
+abstract FAbstractEquation : BaseNode ::= Type:FEquationType
+                                          /InitialEquation:FEquation*/ 
+                                          /DynamicFAbstractEquation:FAbstractEquation*/
+                                          [Residues:FResidues]; 
 
 /**
  * \brief Unsupported equation.
@@ -453,6 +455,11 @@ FEquation : FAbstractEquation ::= Left:FExp Right:FExp;
  * Example: (x, y, z) = func(a, b);
  */
 FFunctionCallEquation : FAbstractEquation ::= Left:FFunctionCallLeft* Call:FAbstractFunctionCall;
+
+/**
+ * \brief A class for storing hand guided tearing variables.
+ */
+FResidues : BaseNode ::= FIdUseExp*;
 
 /**
  * \brief One of the left hand side variables in a function call equation. 

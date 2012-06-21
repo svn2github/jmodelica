@@ -79,17 +79,56 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs an equation that is not initial.
+	 * \brief Construcs a connect clause without any residues.
+	 */
+	public FConnectClause.FConnectClause(FEquationType type, Opt<FStringComment> comment, ConnectClause connectClause, FIdUseInstAccess left, FIdUseInstAccess right) {
+		this(type, new Opt<FResidues>(), comment, connectClause, left, right);
+	}
+	
+	/**
+	 * \brief Construcs a else equation without any residues.
+	 */
+	public FElseEquation.FElseEquation(FEquationType type, List<FAbstractEquation> eqns) {
+		this(type, new Opt<FResidues>(), eqns);
+	}
+	
+	/**
+	 * \brief Constructs an equation that is not initial and is not marked as
+	 * residue and have no residue variables.
 	 */
 	public FEquation.FEquation(FExp left, FExp right) {
-		this(new FNormalEquation(), left, right);
+		this(new FNormalEquation(), new Opt<FResidues>(), left, right);
+	}
+	
+	/**
+	 * \brief Constructs an equation that is not marked as residue and have no
+	 * residue variables.
+	 */
+	public FEquation.FEquation(FEquationType type, FExp left, FExp right) {
+		this(type, new Opt<FResidues>(), left, right);
+	}
+	
+	/**
+	 * \brief Constructs an equation
+	 */
+	public FEquation.FEquation(FEquationType type, FResidues residues, FExp left, FExp right) {
+		this(type, new Opt<FResidues>(), left, right);
+		if (residues != null)
+			setResidues(residues);
 	}
 	
 	/**
 	 * \brief Constructs a function call equation that is not initial.
 	 */
 	public FFunctionCallEquation.FFunctionCallEquation(List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
-		this(new FNormalEquation(), left, call);
+		this(new FNormalEquation(), new Opt<FResidues>(), left, call);
+	}
+	
+	/**
+	 * \brief Constructs a function call equation.
+	 */
+	public FFunctionCallEquation.FFunctionCallEquation(FEquationType type, List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
+		this(type, new Opt<FResidues>(), left, call);
 	}
 	
 	/**
@@ -103,21 +142,35 @@ aspect Constructors {
 	 * \brief Constructs a for clause equation that is not initial.
 	 */
 	public FForClauseE.FForClauseE(List<FForIndex> indices, List<FAbstractEquation> eqns) {
-		this(new FNormalEquation(), indices, eqns);
+		this(new FNormalEquation(), new Opt<FResidues>(), indices, eqns);
 	}
 	
 	/**
 	 * \brief Constructs a for clause equation that is not initial.
 	 */
 	public InstForClauseE.InstForClauseE(List<InstForIndex> indices, List<FAbstractEquation> eqns) {
-		this(new FNormalEquation(), indices, eqns);
+		this(new FNormalEquation(), new Opt<FResidues>(), indices, eqns);
+	}
+	
+	/**
+	 * \brief Constructs a for clause equation.
+	 */
+	public InstForClauseE.InstForClauseE(FEquationType type, List<InstForIndex> indices, List<FAbstractEquation> eqns) {
+		this(type, new Opt<FResidues>(), indices, eqns);
 	}
 	
 	/**
 	 * \brief Constructs an algorithm block that is not initial.
 	 */
 	public FAlgorithmBlock.FAlgorithmBlock(List<FStatement> stmts) {
-		this(new FNormalEquation(), stmts);
+		this(new FNormalEquation(), new Opt<FResidues>(), stmts);
+	}
+	
+	/**
+	 * \brief Constructs an algorithm block.
+	 */
+	public FAlgorithmBlock.FAlgorithmBlock(FEquationType type, List<FStatement> stmts) {
+		this(type, new Opt<FResidues>(), stmts);
 	}
 	
 	/**
@@ -162,6 +215,13 @@ aspect Constructors {
 	 */
 	public FIdUse.FIdUse(String name, FArraySubscripts fas) {
 		this(new FQName(name, fas));
+	}
+	
+	/**
+	 * \brief Constructs an if equation.
+	 */
+	public FIfEquation.FIfEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
+		this(type, new Opt<FResidues>(), eqns, guard, elseClause);
 	}
     
 	/**
@@ -231,6 +291,20 @@ aspect Constructors {
 	 */
 	public FIdUseInstAccess.FIdUseInstAccess(InstAccess ia) {
 		this(new FQName(), ia);
+	}
+	
+	/**
+	 * \brief Constructs an unsuported equation.
+	 */
+	public FUnsupportedEquation.FUnsupportedEquation(FEquationType type) {
+		this(type, new Opt<FResidues>());
+	}
+	
+	/**
+	 * \brief Constructs a when equation.
+	 */
+	public FWhenEquation.FWhenEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
+		this(type, new Opt<FResidues>(), eqns, guard, elseClause);
 	}
 	
 	/**

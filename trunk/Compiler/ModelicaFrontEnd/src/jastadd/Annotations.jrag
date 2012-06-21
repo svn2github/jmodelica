@@ -58,7 +58,7 @@ aspect AnnotationAPI {
 	eq ExtendsClauseShortClass.annotation() = getComment().annotation();
 	eq InstShortClassDecl.annotation()      = getClassDecl().annotation();
 
-	eq ConnectClause.annotation() = getComment().annotation();
+	eq AbstractEquation.annotation() = getComment().annotation();
 
 	eq ComponentDecl.annotation()     = getComment().annotation();
 	eq InstComponentDecl.annotation() = getComponentDecl().annotation();
@@ -70,11 +70,10 @@ aspect AnnotationAPI {
 	 */
 	syn AnnotationNode ASTNode.annotationNode()            = AnnotationNode.createNullAnnotationNodeFor(this);
 	syn lazy AnnotationNode Modification.annotationNode()  = AnnotationNode.createNullAnnotationNodeFor(this);
-	eq ClassModification.annotationNode()                  = new CMAnnotationNode(this);
-	eq ValueModification.annotationNode()                  = new VMAnnotationNode(this);
-	eq CompleteModification.annotationNode()               = getClassModification().annotationNode();
-	eq ComponentModification.annotationNode()              = 
-		hasModification() ? getModification().annotationNode() : AnnotationNode.createNullAnnotationNodeFor(this);
+	eq ClassModification.annotationNode()                  = new ClassModAnnotationNode(this);
+	eq ValueModification.annotationNode()                  = new ValueModAnnotationNode(this);
+	eq CompleteModification.annotationNode()               = new CompleteModAnnotationNode(this);
+	eq ComponentModification.annotationNode()              = new ComponentModAnnotationNode(this);
 	syn lazy AnnotationNode Exp.annotationNode()           = new EAnnotationNode(this);
 	eq FunctionCall.annotationNode()                       = new FCAnnotationNode(this);
 	syn lazy AnnotationNode NamedArgument.annotationNode() = new NAAnnotationNode(this);
@@ -352,12 +351,12 @@ aspect AnnotationAPI {
 			@Override
 			public void setValue(Exp exp) {
 				AnnotationNode parentNode = getRealParent();
-				if (parentNode instanceof CMAnnotationNode) {
-					for (Argument arg : ((CMAnnotationNode) parentNode).ast().getArguments()) {
+				if (parentNode instanceof ClassModAnnotationNode) {
+					for (Argument arg : ((ClassModAnnotationNode) parentNode).ast().getArguments()) {
 						if (!arg.matches(name))
 							continue;
 						AnnotationNode realNode = arg.annotation();
-						if (realNode instanceof VMAnnotationNode)
+						if (realNode instanceof ValueModAnnotationNode)
 							realNode.setValue(exp);
 						else
 							throw new AnnotationEditException("The node with name " + name + " is already set and is not an assignment.");
@@ -365,8 +364,8 @@ aspect AnnotationAPI {
 					}
 					
 					ValueModification vm = new ValueModification(exp);
-					((CMAnnotationNode) parentNode).ast().addArgument(new ComponentModification(new ParseAccess(name), vm));
-					realNode = new VMAnnotationNode(vm);
+					((ClassModAnnotationNode) parentNode).ast().addArgument(new ComponentModification(new ParseAccess(name), vm));
+					realNode = new ValueModAnnotationNode(vm);
 					return;
 				} else {
 					throw new AnnotationEditException("Unable to set node value.");
@@ -383,8 +382,8 @@ aspect AnnotationAPI {
 				
 				AnnotationNode parentNode = getRealParent();
 				
-				if (parentNode instanceof CMAnnotationNode) {
-					for (Argument arg : ((CMAnnotationNode) parentNode).ast().getArguments()) {
+				if (parentNode instanceof ClassModAnnotationNode) {
+					for (Argument arg : ((ClassModAnnotationNode) parentNode).ast().getArguments()) {
 						if (!arg.matches(name))
 							continue;
 						realNode = arg.annotation();
@@ -392,8 +391,8 @@ aspect AnnotationAPI {
 					}
 					
 					ClassModification cm = new ClassModification();
-					((CMAnnotationNode) parentNode).ast().addArgument(new ComponentModification(new ParseAccess(name), new CompleteModification(cm)));
-					realNode = new CMAnnotationNode(cm);
+					((ClassModAnnotationNode) parentNode).ast().addArgument(new ComponentModification(new ParseAccess(name), new CompleteModification(cm)));
+					realNode = new ClassModAnnotationNode(cm);
 					return;
 				} else {
 					throw new AnnotationEditException("Unable to create node.");
@@ -458,7 +457,7 @@ aspect AnnotationAPI {
 			protected void createRealNode() {
 				ClassModification cm = new ClassModification();
 				comment.setAnnotation(new ParseAnnotation(cm));
-				realNode = new CMAnnotationNode(cm);
+				realNode = new ClassModAnnotationNode(cm);
 			}
 		
 		}
@@ -468,11 +467,11 @@ aspect AnnotationAPI {
 	/**
 	 * \brief Represents an annotation that is represented in the source tree by a ClassModification.
 	 */
-	public class CMAnnotationNode extends AnnotationNode {
+	public class ClassModAnnotationNode extends AnnotationNode {
 		
 		private ClassModification mod;
 		
-		public CMAnnotationNode(ClassModification cm) {
+		public ClassModAnnotationNode(ClassModification cm) {
 			mod = cm;
 		}
 
@@ -526,7 +525,7 @@ aspect AnnotationAPI {
 			for (NamedArgument arg : call.getFunctionArguments().getNamedArguments()) 
 				if (arg.matches(path[i])) 
 					return arg.annotationNode().forPath(path, i+1);
-			return NO_ANNOTATION;
+			return createSetableNullPath(this, path, i);
 		}
 		
 		protected ASTNode ast() {
@@ -541,35 +540,56 @@ aspect AnnotationAPI {
 		protected abstract void setExp(Exp exp);
 		
 		public String string() {
-			return exp().avalueString();
+			if (exp() == null)
+				return super.string();
+			else
+				return exp().avalueString();
 		}
 
 		public boolean isValue() {
-			return !exp().isAnnotationExp();
+			if (exp() == null)
+				return super.isValue();
+			else
+				return !exp().isAnnotationExp();
 		}
 		
 		public ArrayList<String> stringList() {
-			return exp().avalueStringList();
+			if (exp() == null)
+				return super.stringList();
+			else
+				return exp().avalueStringList();
 		}
 
 		public Iterator<AnnotationNode> iterator() {
-			return isValue() ? super.iterator() : new AnnotationIterator(exp().annotationList());
+			return exp() == null || isValue() ? super.iterator() : new AnnotationIterator(exp().annotationList());
 		}
 		
 		public double real() {
-			return exp().avalueReal();
+			if (exp() == null)
+				return super.real();
+			else
+				return exp().avalueReal();
 		}
 		
 		public double[] realVector() {
-			return exp().avalueRealVector();
+			if (exp() == null)
+				return super.realVector();
+			else
+				return exp().avalueRealVector();
 		}
 		
 		public double[][] realMatrix() {
-			return exp().avalueRealMatrix();
+			if (exp() == null)
+				return super.realMatrix();
+			else
+				return exp().avalueRealMatrix();
 		}
 
 		public boolean bool() {
-			return exp().avalueBool();
+			if (exp() == null)
+				return super.bool();
+			else
+				return exp().avalueBool();
 		}
 		
 		protected ASTNode ast() {
@@ -587,11 +607,11 @@ aspect AnnotationAPI {
 	/**
 	 * \brief Represents an annotation that is represented in the source tree by a ValueModification.
 	 */
-	public class VMAnnotationNode extends ExpAnnotationNode {
+	public class ValueModAnnotationNode extends ExpAnnotationNode {
 		
 		private ValueModification mod;
 		
-		public VMAnnotationNode(ValueModification vm) {
+		public ValueModAnnotationNode(ValueModification vm) {
 			mod = vm;
 		}
 		
@@ -607,6 +627,118 @@ aspect AnnotationAPI {
 			return mod.annotationName();
 		}
 		
+	}
+	
+	/**
+	 * \brief Represents an annotation that is represented in the source tree by a ComponentModification.
+	 */
+	public class ComponentModAnnotationNode extends ExpAnnotationNode {
+		
+		private ComponentModification mod;
+		
+		public ComponentModAnnotationNode(ComponentModification mod) {
+			this.mod = mod;
+		}
+		
+		@Override
+		protected Exp exp() {
+			if (mod.hasModification() && mod.getModification().annotationNode() instanceof ExpAnnotationNode)
+				return ((ExpAnnotationNode) mod.getModification().annotationNode()).exp();
+			else
+				return null; 
+		}
+		
+		@Override
+		protected void setExp(Exp exp) {
+			if (mod.hasModification())
+				mod.getModification().annotationNode().setValue(exp);
+			else
+			throw new UnsupportedOperationException();
+		}
+		
+		@Override
+		public String name() {
+			return mod.getName().name();
+		}
+		
+		@Override
+		public boolean isValue() {
+			if (mod.hasModification())
+				return mod.getModification().annotationNode().isValue();
+			else
+				return false;
+		}
+		
+		@Override
+		public Iterator<AnnotationNode> iterator() {
+			if (mod.hasModification())
+				return mod.getModification().annotationNode().iterator();
+			else
+				return super.iterator();
+		}
+
+		@Override
+		protected AnnotationNode forPath(String[] path, int i) {
+			if (i >= path.length)
+				return this;
+			if (mod.hasModification())
+				return mod.getModification().annotationNode().forPath(path, i);
+			else
+				return createSetableNullPath(this, path, i);
+		}
+
+	}
+	
+	/**
+	 * \brief Represents an annotation that is represented in the source tree by a CompleteModification.
+	 */
+	public class CompleteModAnnotationNode extends ExpAnnotationNode {
+		
+		private CompleteModification mod;
+		
+		public CompleteModAnnotationNode(CompleteModification mod) {
+			this.mod = mod;
+		}
+		
+		@Override
+		protected Exp exp() {
+			if (mod.hasValueModification())
+				return mod.getValueModification().getExp();
+			else
+				return null;
+		}
+		
+		@Override
+		protected void setExp(Exp exp) {
+			if (mod.hasValueModification())
+				mod.getValueModification().annotationNode().setValue(exp);
+			else
+				mod.setValueModification(new ValueModification(exp));
+		}
+		
+		@Override
+		public String name() {
+			return mod.annotationName();
+		} 
+		
+		@Override
+		public boolean isValue() {
+			if (mod.hasValueModification())
+				return mod.getValueModification().annotationNode().isValue();
+			else
+				return false;
+		}
+		
+		@Override
+		public Iterator<AnnotationNode> iterator() {
+			return mod.getClassModification().annotationNode().iterator();
+		}
+		
+		@Override
+		protected AnnotationNode forPath(String[] path, int i) {
+			return mod.getClassModification().annotationNode().forPath(path, i);
+		}
+
 	}
 	
 	/**

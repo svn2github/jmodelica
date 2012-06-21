@@ -160,10 +160,6 @@ aspect Flattening {
 			
 			if (functionDer.exists()) {
 				String functionDerName = functionDer.string();
-				if (functionDerName==null) {
-					ValueModification vm = ((CompleteModification)((ClassModification)functionDer.ast()).getParent()).getValueModification();	
-					functionDerName = vm.getExp().prettyPrint("");
-				}
 				List<FIdUse> noDerivatives = new List<FIdUse>();
 				for (AnnotationNode nd : functionDer) {
 					if (nd!=null && "noDerivative".equals(nd.name())) {
@@ -1018,7 +1014,7 @@ aspect FlatExpressions {
 	}
 
 	public FEquation FEquation.flattenEqn(FQName prefix, FClass fc) {
-		return new FEquation(getType().flatten(prefix), getLeft().flatten(prefix), getRight().flatten(prefix));
+		return new FEquation(getType().flatten(prefix), buildResidues(), getLeft().flatten(prefix), getRight().flatten(prefix));
 	}
 
 	public FForClauseE InstForClauseE.flattenEqn(FQName prefix, FClass fc) {
