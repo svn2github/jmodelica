@@ -1,3 +1,19 @@
+/*
+    Copyright (C) 2012 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package JacGenTests
 // Models used to test different aspects of the Jacobian generation.
   
@@ -70,8 +86,7 @@ package JacGenTests
     y =   x3^x1;
   end JacTestPow;
   
-  // Fails.
-  model JacTestAbs
+  model JacTestAbs1
     Real x1(start=0);
     Real x2(start=5);
 	Real x3(start=-5);
@@ -82,7 +97,37 @@ package JacGenTests
     der(x2) = abs(x2);
 	der(x3) = abs(x3);
     y =   abs(x1);
-  end JacTestAbs;  
+  end JacTestAbs1; 
+  
+  model JacTestAbs2
+    Real x1(start=1);
+    Real x2(start=5);
+	Real x3(start=-5);
+    input Real u;
+    output Real y;
+  equation
+    der(x1) = abs(x1);
+    der(x2) = abs(x2);
+	der(x3) = abs(x3);
+    y =   abs(x1);
+  end JacTestAbs2;  
+  
+  // TODO: incorporate these tests, the first one is fine, the other one fails.
+   model JacTestAbs2
+    Real x1(start=-2);
+    Real x2(start=3);
+  equation
+    0 = abs(x1) + x2;
+    der(x1) = abs(x2);
+  end JacTestAbs2;
+  
+    model JacTest2
+    Real x1(start=2);
+    Real x2(start=3);
+  equation
+    0 = x1 + abs(x2);
+    der(x1) = x2;
+  end JacTest2;
   
   model JacTestSqrt
     Real x1(start=0);
