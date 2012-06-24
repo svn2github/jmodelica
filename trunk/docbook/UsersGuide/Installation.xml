@@ -322,7 +322,7 @@
   </section>
 
   <section xml:id="inst_sec_sdk">
-    <title>Software Development Kit</title>
+    <title>Compilation on MS Windows systems</title>
 
     <para>The JModelica.org Software Development Kit (SDK) is a bundle of
     tools needed to build the JModelica.org sources on Windows. The SDK is
@@ -481,6 +481,131 @@ vdp.run_demo()</programlisting></para>
           your solver.</para>
         </listitem>
       </orderedlist>
+    </section>
+  </section>
+
+  <section xml:id="inst_sec_sdk">
+    <title>Compilation on Linux systems</title>
+
+    <para>This section describes a procedure for compiling JModelica.org from
+    sources on Linux. The instructions have been verified to work on Ubuntu
+    Linux release 12.04, 64bit.</para>
+
+    <section xml:id="inst_sec_sdk_prereq">
+      <title>Prerequisites</title>
+
+      <section>
+        <title>Installing pre-compiled packages</title>
+
+        <para>It is convenient to use a package management system, if
+        available, of the Linux distribution to install the prerequisites. On
+        Ubuntu systems, the apt-get command line program may be used:</para>
+
+        <programlisting>sudo apt-get -y install g++
+sudo apt-get -y install subversion
+sudo apt-get -y install gfortran
+sudo apt-get -y install ipython
+sudo apt-get -y install cmake
+sudo apt-get -y install swig
+sudo apt-get -y install ant
+sudo apt-get -y install openjdk-6-jdk
+sudo apt-get -y install python-dev
+sudo apt-get -y install python-numpy
+sudo apt-get -y install python-scipy
+sudo apt-get -y install python-matplotlib
+sudo apt-get -y install cython
+sudo apt-get -y install python-lxml
+sudo apt-get -y install python-nose
+sudo apt-get -y install python-jpype
+</programlisting>
+      </section>
+
+      <section>
+        <title>Compiling Ipopt</title>
+
+        <para>While Ipopt is available as a pre-compiled package for Ubuntu,
+        it is recommended to build Ipopt from sources. The Ipopt packages
+        provided for Ubuntu have had flaws (including the version provided for
+        Ubuntu 12.04) that prevented usage with JModelica.org. Also, compiling
+        Ipopt from sources is required when using the linear solvers MA27 or
+        MA57 from the HSL library, since these are not available as open
+        source software.</para>
+
+        <para>First, download the Ipopt sources from <link
+        xlink:href="https://projects.coin-or.org/Ipopt">https://projects.coin-or.org/Ipopt</link>
+        and unpack the content:</para>
+
+        <programlisting>tar xvf Ipopt-3.10.2.tgz</programlisting>
+
+        <para>Then, retrieve the third party dependencies:</para>
+
+        <programlisting>cd Ipopt-3.10.2/ThirdParty/Blas
+./get.Blas
+cd ../Lapack
+./get.Lapack
+cd ../Mumps
+./get.Mumps
+cd ../Metis
+./get.Metis
+cd ../../
+</programlisting>
+
+        <para>If you have access to the HSL codes MA57 or MA27, copy their
+        sources into the directory <literal>ThirdParty/HSL</literal>. In the
+        next step, configure and compile Ipopt:</para>
+
+        <programlisting>mkdir build
+cd build
+../configure --prefix=/home/&lt;user_name&gt;/&lt;ipopt_installation_location&gt;
+make install
+</programlisting>
+
+        <para>where <literal>&lt;user_name&gt;</literal> and
+        <literal>&lt;ipopt_installation_location&gt;</literal> are replaced by
+        the user directory and the installation directory of choice for
+        Ipopt.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Compiling </title>
+
+      <para>Make sure that all prerequisite are installed before compiling the
+      JModelica.org platform. First, check out the JModelica.org
+      sources:</para>
+
+      <programlisting>svn co https://svn.jmodelica.org/trunk JModelica.org
+</programlisting>
+
+      <para>Then configure and build JModelica.org:</para>
+
+      <programlisting>cd JModelica.org
+mkdir build
+cd build
+../configure --prefix=/home/&lt;user_name&gt;/&lt;jmodelica_install_location&gt; --with-ipopt=/home/&lt;user_name&gt;/&lt;ipopt_install_location&gt; 
+make install
+make install_casadi
+</programlisting>
+
+      <para>where <literal>&lt;user_name&gt;</literal> and
+      <literal>&lt;jmodelica_installation_location&gt;</literal> are replaced
+      by the user directory and the installation directory of choice for
+      JModelica.org.</para>
+    </section>
+
+    <section>
+      <title>Testing JModelica.org</title>
+
+      <para>In order to verify that JModelica.org has been installed
+      correctly, start an Ipython shell using the command
+      <literal>/home/&lt;user_name&gt;/&lt;jmodelica_install_location&gt;/bin/jm_ipython</literal>
+      and enter the the commands:</para>
+
+      <programlisting language="python">from pyjmi.examples import *
+cstr.run_demo()
+cstr_casadi.run_demo()
+distillation_fmu.run_demo()
+</programlisting>
     </section>
   </section>
 </chapter>
