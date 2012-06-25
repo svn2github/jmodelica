@@ -2225,9 +2225,9 @@ aspect FlatExternalFunctionAPI {
 		includeDir = n.annotation("IncludeDirectory").string();
 		
 		if (libraryDir == null || includeDir == null) {
-			String packageName = n.packageName();
-			if (packageName != null) {
-				String defDir = "modelica://" + packageName + "/Resources";
+			String libraryName = n.libraryName();
+			if (libraryName != null) {
+				String defDir = "modelica://" + libraryName + "/Resources";
 				libraryDir = (libraryDir == null && library != null) ? 
 						defDir + "/Library" : libraryDir;
 				includeDir = (includeDir == null && include != null) ? 
@@ -2239,7 +2239,6 @@ aspect FlatExternalFunctionAPI {
 			includeDir = n.uri2path(includeDir);
 		if (libraryDir != null) {
 			libraryDir = n.uri2path(libraryDir);
-			// TODO: If platform-specific subdir exists, use it instead. Always use linux?
 		}
 	}
 	

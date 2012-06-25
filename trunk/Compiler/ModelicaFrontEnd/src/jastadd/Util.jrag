@@ -551,6 +551,18 @@ aspect Names {
   eq InstBaseClassDecl.getChild().packageName() = isPackage() ? qualifiedName() : packageName();
   eq Root.getChild().packageName() = null;
   
+  syn String InstExternal.libraryName() = findLibraryName();
+  syn String InstNode.libraryName() {
+	  InstClassDecl icd = myInstClass();
+	  String res = icd.isUnknown() ? findLibraryName() : icd.findLibraryName();
+	  return (res == null) ? name() : res;
+  }
+  
+  inh String InstExternal.findLibraryName();
+  inh String InstNode.findLibraryName();
+  eq InstNode.getChild().findLibraryName() = libraryName();
+  eq InstRoot.getChild().findLibraryName() = null;
+  
   inh String ASTNode.packagePath(String name);
   eq Root.getChild().packagePath(String name) = null;
   eq InstNode.getChild().packagePath(String name) {

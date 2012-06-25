@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.Collection;
 import java.util.Arrays;
@@ -206,10 +207,29 @@ abstract public class TestCase {
 	protected String filter(String str) {
 		if (filter) {
 			// TODO: Add more filters
-			String dir = getSourceFileName().replaceFirst("[\\\\/][^\\\\/]*$", "");
-			str = str.replace("%dir%", dir);
+			str = str.replace("%dir%", testFileDirectory());
+			str = str.replace("%msl%", mslDirectory());
 		}
 		return str;
+	}
+	
+	/**
+	 * Get the path to the directory containing the test file.
+	 */
+	protected String testFileDirectory() {
+		return getSourceFileName().replaceFirst("[\\\\/][^\\\\/]*$", "");
+	}
+	
+	/**
+	 * Get the path to the directory containing the MSL.
+	 */
+	protected String mslDirectory() {
+		for (String path : options.getStringOption("MODELICAPATH").split(File.pathSeparator)) {
+			File f = new File(path, "Modelica");
+			if (f.isDirectory())
+				return f.getAbsolutePath();
+		}
+		return null;
 	}
 	
 	/**
