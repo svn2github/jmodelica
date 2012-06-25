@@ -34,8 +34,17 @@ import numpy as N
     
 from pyjmi.optimization.polynomial import *
 from pyjmi.common import xmlparser
-from pyjmi.common.io import VariableNotFoundError
 from pyjmi.common.core import TrajectoryLinearInterpolation, TrajectoryUserFunction
+
+from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
+
+#Check to see if pyfmi is installed so that we also catch the error generated
+#from that package
+try:
+    from pyfmi.common.io import VariableNotFoundError as fmiVariableNotFoundError
+    VariableNotFoundError = (jmiVariableNotFoundError, fmiVariableNotFoundError)
+except ImportError:
+    VariableNotFoundError = jmiVariableNotFoundError
 
 class CasadiCollocatorException(Exception):
     """

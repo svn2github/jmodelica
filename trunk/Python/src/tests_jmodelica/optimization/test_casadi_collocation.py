@@ -27,6 +27,7 @@ from tests_jmodelica import testattr, get_files_path
 from pyjmi.common.io import ResultDymolaTextual
 from pyjmi.common.xmlparser import XMLException
 from pymodelica.compiler import compile_fmux
+from pyfmi.common.io import ResultDymolaTextual as fmiResultDymolaTextual
 try:
     from pyjmi.optimization.casadi_collocation import *
     from pyjmi.casadi_interface import CasadiModel
@@ -62,6 +63,10 @@ class TestLocalDAECollocator:
         compile_fmux(class_path, file_path)
         
         file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        class_path = "VDP_pack.VDP_Opt_Bounds_Lagrange_Renamed_Input"
+        compile_fmux(class_path, file_path)
+        
+        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt_Bounds_Mayer"
         compile_fmux(class_path, file_path)
         
@@ -91,6 +96,11 @@ class TestLocalDAECollocator:
         fmux_vdp_bounds_lagrange = 'VDP_pack_VDP_Opt_Bounds_Lagrange.fmux'
         self.model_vdp_bounds_lagrange = CasadiModel(fmux_vdp_bounds_lagrange,
                                                      verbose=False)
+        
+        fmux_vdp_bounds_lagrange_renamed = 'VDP_pack_VDP_Opt_Bounds_Lagrange_Renamed_Input.fmux'
+        self.model_vdp_bounds_lagrange_renamed = CasadiModel(fmux_vdp_bounds_lagrange_renamed,
+                                                     verbose=False)
+        
         
         fmux_vdp_bounds_mayer = 'VDP_pack_VDP_Opt_Bounds_Mayer.fmux'
         self.model_vdp_bounds_mayer = CasadiModel(fmux_vdp_bounds_mayer,
@@ -144,6 +154,15 @@ class TestLocalDAECollocator:
                 "VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt")
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
+        
+        #Test that no exception is raised when supplying a result from
+        #PyFMI
+        opts = model.optimize_options()
+        local_col = LocalDAECollocator(
+                            self.model_vdp_bounds_lagrange_renamed,opts)
+        
+        local_col.set_initial_from_file(fmiResultDymolaTextual(
+                         "VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt"))
         
     @testattr(casadi = True)
     def test_cstr(self):

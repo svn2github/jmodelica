@@ -80,6 +80,20 @@ package VDP_pack
     der(x2) = x1;
   end VDP_Opt_Bounds_Lagrange;
   
+  optimization VDP_Opt_Bounds_Lagrange_Renamed_Input(
+        objectiveIntegrand=x1^2 + x2^2 + q^2,
+        startTime=0, finalTime=20)
+    
+    Real x1(start=0, fixed=true) "First state";
+    Real x2(start=1, fixed=true) "Second state";
+    
+    input Real q(max=0.75) "Control signal";
+  
+  equation
+    der(x1) = (1 - x2^2) * x1 - x2 + q;
+    der(x2) = x1;
+  end VDP_Opt_Bounds_Lagrange_Renamed_Input;
+  
   optimization VDP_Opt_Constraints_Lagrange (
         objectiveIntegrand = x1^2 + x2^2 + u^2,
         startTime=0, finalTime=20)
