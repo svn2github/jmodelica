@@ -892,10 +892,8 @@ class CasadiModel(BaseModel):
         self.ocp_ode_boundary_inputs += list(self.p)
         self.ocp_ode_boundary_inputs += [x.atTime(t0, True) for
                                          x in self.ocp.xd]
-        self.ocp_ode_boundary_inputs += [self.t]
         self.ocp_ode_boundary_inputs += [x.atTime(tf, True) for
                                          x in self.ocp.xd]
-        self.ocp_ode_boundary_inputs += [self.t]
         self.opt_ode_C = casadi.SXFunction(
                 [self.ocp_ode_boundary_inputs], [self.opt_ode_C])
         self.opt_ode_C.init()

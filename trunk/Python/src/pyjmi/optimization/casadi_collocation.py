@@ -669,7 +669,7 @@ class LocalDAECollocator(CasadiCollocator):
         x_i = casadi.ssym("x_i", self.model.get_n_x(), self.n_cp + 1)
         der_vals_k = casadi.ssym("der_vals[k]", self.model.get_n_x(),
                                  self.n_cp + 1)
-        h_i = casadi.SX("h_i")
+        h_i = casadi.ssym("h_i")
         collocation['coll_der'] = casadi.sumCols(x_i * der_vals_k) / h_i
         
         collocation['x_i'] = x_i
@@ -874,48 +874,48 @@ class LocalDAECollocator(CasadiCollocator):
             
             for i in range(1, self.n_e+1):
                 if self.hs == "free":
-                    xx[var_indices['h'][i]] = casadi.SX("h_" + str(i))
+                    xx[var_indices['h'][i]] = casadi.ssym("h_" + str(i))
                 for k in var_indices[i].keys():
                     if (not self.eliminate_der_var and
                         'dx' in var_indices[i][k].keys()):
                         dx = []
                         for j in range(self.model.get_n_x()):
-                            dx.append(casadi.SX(str(self.model.get_dx()[j]) +
+                            dx.append(casadi.ssym(str(self.model.get_dx()[j]) +
                                                 '_' + str(i) + '_' + str(k)))
                         xx[var_indices[i][k]['dx']] = dx
                     
                     if 'x' in var_indices[i][k].keys():
                         x = []
                         for j in range(self.model.get_n_x()):
-                            x.append(casadi.SX(str(self.model.get_x()[j]) +
+                            x.append(casadi.ssym(str(self.model.get_x()[j]) +
                                                '_' +  str(i) + '_' + str(k)))
                         xx[var_indices[i][k]['x']] = x
                     
                     if 'u' in var_indices[i][k].keys():
                         u = []
                         for j in range(self.model.get_n_u()):
-                            u.append(casadi.SX(str(self.model.get_u()[j]) +
+                            u.append(casadi.ssym(str(self.model.get_u()[j]) +
                                                '_' +  str(i) + '_' + str(k)))
                         xx[var_indices[i][k]['u']] = u
                     
                     if 'w' in var_indices[i][k].keys():
                         w = []
                         for j in range(self.model.get_n_w()):
-                            w.append(casadi.SX(str(self.model.get_w()[j]) +
+                            w.append(casadi.ssym(str(self.model.get_w()[j]) +
                                                '_' +  str(i) + '_' + str(k)))
                         xx[var_indices[i][k]['w']] = w
             
             if 'p_opt' in var_indices.keys():
                 p_opt = []
                 for j in range(self.model.get_n_p()):
-                    p_opt.append(casadi.SX(str(self.model.get_p()[j])))
+                    p_opt.append(casadi.ssym(str(self.model.get_p()[j])))
                 xx[var_indices['p_opt']] = p_opt
             
             # Derivative initial values
             if self.eliminate_der_var:
                 dx = []
                 for j in range(self.model.get_n_x()):
-                    dx.append(casadi.SX(str(self.model.get_dx()[j]) + '_1_0'))
+                    dx.append(casadi.ssym(str(self.model.get_dx()[j]) + '_1_0'))
                 xx[var_indices[1][0]['dx']] = dx
             
             self.xx = xx
@@ -2416,9 +2416,7 @@ class PseudoSpectral(CasadiCollocator):
         z = []
         z += self.vars[0]['p']
         z += self.vars[PHASE[0]][DISCR[0]]['x']
-        z += [self.vars[0]['t']]
         z += self.vars[PHASE[-1]][DISCR[-1]]['x']
-        z += [self.vars[PHASE[-1]]['t']]
         [boundary_constr] = self.model.opt_ode_C.eval([z])
         boundary_constr = list(boundary_constr.data())
         self.h += boundary_constr
@@ -2428,9 +2426,7 @@ class PseudoSpectral(CasadiCollocator):
         z = []
         z += self.vars[0]['p']
         z += self.vars[PHASE[0]][DISCR[0]]['x']
-        z += [self.vars[0]['t']]
         z += self.vars[PHASE[-1]][DISCR[-1]]['x']
-        z += [self.vars[PHASE[-1]]['t']]
         [boundary_constr_ineq] = self.model.opt_ode_Cineq.eval([z])
         boundary_constr_ineq = list(boundary_constr_ineq.data())
         self.g += boundary_constr_ineq
@@ -2483,15 +2479,15 @@ class PseudoSpectral(CasadiCollocator):
         self.cost_fcn = casadi.SXFunction([self.xx], [[self.cost]])  
         
         # Hessian
-        self.sigma = casadi.SX('sigma')
+        self.sigma = casadi.ssym('sigma')
         
         self.lam = []
         self.Lag = self.sigma*self.cost
         for i in range(len(self.h)):
-            self.lam.append(casadi.SX('lambda_' + str(i)))
+            self.lam.append(casadi.ssym('lambda_' + str(i)))
             self.Lag = self.Lag + self.h[i]*self.lam[i]
         for i in range(len(self.g)):
-            self.lam.append(casadi.SX('lambda_' + str(i+len(self.h))))
+            self.lam.append(casadi.ssym('lambda_' + str(i+len(self.h))))
             self.Lag = self.Lag + self.g[i]*self.lam[i+len(self.h)]
             
         self.Lag_fcn = casadi.SXFunction([self.xx, self.lam, [self.sigma]],[[self.Lag]])
@@ -2514,25 +2510,25 @@ class PseudoSpectral(CasadiCollocator):
         tf = self.tf
         
         if self.md.get_opt_finaltime_free():
-            tf = casadi.SX("tf")
+            tf = casadi.ssym("tf")
         if self.md.get_opt_starttime_free():
-            t0 = casadi.SX("t0")
+            t0 = casadi.ssym("t0")
         
         self.vars[0] = {}
         for i in PHASE: #Phases
             for j in DISCR: #Discretization
-                xi = [casadi.SX(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_x()]
+                xi = [casadi.ssym(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_x()]
                 if j==0:
                     self.vars[i] = {}
                 self.vars[i][j] = {}
                 self.vars[i][j]['x'] = xi
                     
             for j in COLLO: #Collocation
-                ui = [casadi.SX(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_u()]
+                ui = [casadi.ssym(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_u()]
                 self.vars[i][j]['u'] = ui
         
         
-        pi = [casadi.SX(str(x)) for x in self.model.get_p()]
+        pi = [casadi.ssym(str(x)) for x in self.model.get_p()]
         self.vars[0]['p'] = pi
         
         
@@ -2546,7 +2542,7 @@ class PseudoSpectral(CasadiCollocator):
                     else:
                         raise CasadiCollocatorException("Could not find the parameter for the phase bound.")
                 else:
-                    self.vars[i]['t'] = casadi.SX("t"+str(i))
+                    self.vars[i]['t'] = casadi.ssym("t"+str(i))
             else:
                 self.vars[i]['t'] = i*(tf-t0)/len(PHASE)
 
