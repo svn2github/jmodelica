@@ -1970,23 +1970,29 @@ aspect TransformCanonical {
 		return Tear(g,eb);
 	}
 		
-	
-	
-	protected FResidues FAbstractEquation.buildResidues() {
-		AnnotationNode residue = annotation("__JModelica/residue");
-		if (!residue.exists())
+	/**
+	 * Builds a FResidues instance for "this" equation.  
+	 */
+	protected FResidues AbstractEquation.buildResidues() {
+		AnnotationNode residues = annotation("__JModelica/residue");
+		if (!residues.exists())
 			return null;
 		
-		FResidues residues = new FResidues();
-		for (AnnotationNode var : residue) {
-			if ("der".equals(var.name()))
-				residues.addFIdUseExp(new FDerExp(new FIdUse(var.iterator().next().name())));
-			else
-				residues.addFIdUseExp(new FIdUseExp(var.name()));
+		FResidues fResidues = new FResidues();
+		for (AnnotationNode residue : residues) {
+			String var = residue.string();
+			FExp e;
+			if (residue.string().startsWith("der(")) {
+				var = var.substring(4, var.length() - 1);
+				e = new InstDerExp(new FIdUseExp(new FIdUseInstAccess(new InstParseAccess(var))));
+			} else {
+				e = new FIdUseExp(new FIdUseInstAccess(new InstParseAccess(var)));
+			}
+			residue.ast().copyLocationTo(e);
+			fResidues.addResidue(e);
 		}
-		return residues;
+		return fResidues;
 	}
-	
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			
 	

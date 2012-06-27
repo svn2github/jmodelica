@@ -109,6 +109,13 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Constructs an equation that is not initial
+	 */
+	public FEquation.FEquation(FResidues residues, FExp left, FExp right) {
+		this(new FNormalEquation(), residues, left, right);
+	}
+	
+	/**
 	 * \brief Constructs an equation
 	 */
 	public FEquation.FEquation(FEquationType type, FResidues residues, FExp left, FExp right) {
@@ -157,6 +164,13 @@ aspect Constructors {
 	 */
 	public InstForClauseE.InstForClauseE(FEquationType type, List<InstForIndex> indices, List<FAbstractEquation> eqns) {
 		this(type, new Opt<FResidues>(), indices, eqns);
+	}
+	
+	/**
+	 * \brief Construcs a inst parse access.
+	 */
+	public InstParseAccess.InstParseAccess(String id) {
+		this(id, new Opt<FArraySubscripts>());
 	}
 	
 	/**

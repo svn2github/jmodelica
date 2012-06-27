@@ -459,7 +459,7 @@ FFunctionCallEquation : FAbstractEquation ::= Left:FFunctionCallLeft* Call:FAbst
 /**
  * \brief A class for storing hand guided tearing variables.
  */
-FResidues : BaseNode ::= FIdUseExp*;
+FResidues : BaseNode ::= Residue:FExp*;
 
 /**
  * \brief One of the left hand side variables in a function call equation. 

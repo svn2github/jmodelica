@@ -731,7 +731,11 @@ aspect AnnotationAPI {
 		
 		@Override
 		public Iterator<AnnotationNode> iterator() {
-			return mod.getClassModification().annotationNode().iterator();
+			Iterator<AnnotationNode> it = mod.getClassModification().annotationNode().iterator();
+			if (mod.hasValueModification() && !it.hasNext())
+				return mod.getValueModification().annotationNode().iterator();
+			else
+				return it;
 		}
 		
 		@Override
@@ -876,7 +880,7 @@ aspect AnnotationAPI {
 	syn boolean Exp.isAnnotationExp()     = false;
 	eq FunctionCall.isAnnotationExp()     = true;
 	eq ArrayConstructor.isAnnotationExp() = 
-		getFunctionArguments().getNumExp() > 0 && getFunctionArguments().getExp(0).isFunctionCall();
+		getFunctionArguments().getNumExp() > 0;
 		
 	syn Iterable<? extends ASTNode> Exp.annotationList() = new ArrayList<ASTNode>(0);
 	eq ArrayConstructor.annotationList()                 = getFunctionArguments().getExps();
