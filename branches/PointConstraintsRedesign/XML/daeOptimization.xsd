@@ -68,7 +68,31 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 							<xs:element name="TimePoint">
 								<xs:complexType>
 									<xs:sequence maxOccurs="unbounded">
-										<xs:element name="Identifier" type="exp:QualifiedName"/>
+										<xs:element name="QualifiedName">
+											<xs:complexType>
+												<xs:sequence maxOccurs="unbounded">
+													<xs:element name="QualifiedNamePart" maxOccurs="unbounded">
+														<xs:complexType>
+															<xs:sequence>
+																<xs:element name="ArraySubscripts" minOccurs="0">
+																	<xs:complexType>
+																		<xs:choice minOccurs="0" maxOccurs="unbounded">
+																			<xs:element name="IndexExpression" type="exp:Exp">
+																				<xs:annotation>
+																					<xs:documentation>Array index</xs:documentation>
+																				</xs:annotation>
+																			</xs:element>
+																			<xs:element ref="exp:UndefinedDimension"/>
+																		</xs:choice>
+																	</xs:complexType>
+																</xs:element>
+															</xs:sequence>
+															<xs:attribute name="name" type="xs:normalizedString" use="required"/>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
 									</xs:sequence>
 									<xs:attribute name="index" type="xs:integer" use="required"/>
 									<xs:attribute name="value" type="xs:double" use="required"/>
