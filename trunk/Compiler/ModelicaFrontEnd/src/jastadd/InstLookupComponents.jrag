@@ -297,4 +297,19 @@ aspect LookupInstComponentsInModifications {
 	  
 }
 
+aspect SimpleLookupInstComponentDecl {
+	syn InstComponentDecl InstNode.simpleLookupInstComponentDecl(String name) {
+		for (InstComponentDecl icd : getInstComponentDecls()) {
+			if (icd.name().matches(name))
+				return icd;
+		}
+		for (InstExtends ie : getInstExtendss()) {
+			InstComponentDecl match = ie.simpleLookupInstComponentDecl(name);
+			if (match != null)
+				return match;
+		}
+		return null;
+	}
+}
+
   
