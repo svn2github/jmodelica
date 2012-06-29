@@ -67,6 +67,7 @@ class CasadiCollocator(object):
         self.initial = self.model.initial
         self.dae = self.model.dae
         self.path = self.model.path
+        self.point = self.model.point
         self.mterm = self.model.mterm
         self.lterm = self.model.lterm
     
@@ -701,13 +702,10 @@ class LocalDAECollocator(CasadiCollocator):
             n_xx += len(self.blocking_factors) * self.model.get_n_u()
         if not self.eliminate_cont_var:
             n_xx += (self.n_e - 1) * n_var['x']
-        self.final_mesh_point = False # Final mesh point needed?
-        if self.discr == "LG":
-            n_xx += (self.n_e - 1) * n_var['x']
-            if (self.ocp.mterm.numel() > 0 or
-                self.result_mode == "mesh_points"):
-                self.final_mesh_point = True
-                n_xx += N.sum(n_var.values())
+        self.is_gauss = (self.discr == "LG")
+        if self.is_gauss:
+            n_xx += (self.n_e - 1) * n_var['x'] # Mesh points
+            n_xx += N.sum(n_var.values()) # tf
         if self.hs == "free":
             n_xx += self.n_e
         
@@ -809,7 +807,7 @@ class LocalDAECollocator(CasadiCollocator):
                              self.discr)
         
         # Index variables for final mesh point
-        if self.final_mesh_point:
+        if self.is_gauss:
             i = self.n_e
             k = self.n_cp + 1
             var_indices[i][k] = {}
@@ -1001,6 +999,37 @@ class LocalDAECollocator(CasadiCollocator):
             der_vals_k = [self.pol.der_vals[:, k].reshape([1, self.n_cp + 1])]
             der_vals_k *= self.model.get_n_x()
             der_vals.append(casadi.vertcat(der_vals_k))
+            
+        # Calculate time points
+        self.time_points = {}
+        time = []
+        i = 1
+        self.time_points[i] = {}
+        t = self.t0
+        self.time_points[i][0] = t
+        time.append(t)
+        ti = t # Time at start of element
+        for k in xrange(1, self.n_cp + 1):
+            t = ti + self.horizon * self.h[i] * self.pol.p[k]
+            self.time_points[i][k] = t
+            time.append(t)
+        for i in xrange(2, self.n_e + 1):
+            self.time_points[i] = {}
+            ti = (self.time_points[i - 1][self.n_cp] +
+                  (1. - self.pol.p[self.n_cp]) * self.horizon * self.h[i])
+            for k in xrange(1, self.n_cp + 1):
+                t = ti + self.horizon * self.h[i] * self.pol.p[k]
+                self.time_points[i][k] = t
+                time.append(t)
+        if self.is_gauss:
+            i = self.n_e
+            ti = (self.time_points[i - 1][self.n_cp] +
+                  (1. - self.pol.p[self.n_cp]) * self.horizon * self.h[i])
+            t = ti + self.horizon * self.h[i]
+            self.time_points[i][self.n_cp + 1] = t
+            time.append(t)
+        if self.hs != "free":
+            assert(N.allclose(time[-1], self.tf))
         
         # Create collocation and DAE functions
         x_i = self._collocation['x_i']
@@ -1031,6 +1060,53 @@ class LocalDAECollocator(CasadiCollocator):
             dae_F = self.model.get_dae_F(False)
         init_F0 = self.model.get_init_F0(False)
         
+        # Map constraint points to collocation points
+        if not self.ocp.point.empty() and self.hs == "free":
+            raise CasadiCollocatorException("Point constraints can not be " +
+                                            "combined with free element " +
+                                            "lengths.")
+        if self.graph == "SX":
+            nlp_timed_variables = casadi.SXMatrix()
+        else:
+            nlp_timed_variables = casadi.MX()
+        if self.hs == "free":
+            timed_variables = []
+        else:
+            collocation_constraint_points = []
+            for constraint_point in self.ocp.tp:
+                tp_index = None
+                if self.is_gauss:
+                    time_enumeration = enumerate(time[1:-1])
+                else:
+                    time_enumeration = enumerate(time[1:])
+                for (index, time_point) in time_enumeration:
+                    if N.allclose(constraint_point, time_point):
+                        tp_index = index
+                        break
+                if tp_index is None:
+                    if N.allclose(constraint_point, self.t0):
+                        collocation_constraint_points.append((1, 0))
+                    elif self.is_gauss and N.allclose(constraint_point, self.tf):
+                        collocation_constraint_points.append(
+                                (self.n_e, self.n_cp + 1))
+                    else:
+                        raise CasadiCollocatorException(
+                                "Constraint point " + `constraint_point` +
+                                " does not coincide with any collocation point.")
+                else:
+                    (e, cp) = divmod(tp_index, self.n_cp)
+                    collocation_constraint_points.append((e + 1, cp + 1))
+        
+            # Compose timed variables and corresponding NLP variables
+            var_vectors = [self.model._var_vectors['x'],
+                           self.model._var_vectors['u'],
+                           self.model._var_vectors['w']]
+            timed_variables = [vari.atTime(tp, True) for tp in self.ocp.tp for
+                               var_vector in var_vectors for vari in var_vector]
+            for (i, k) in collocation_constraint_points:
+                for var_type in ['x', 'u', 'w']:
+                    nlp_timed_variables.append(var[i][k][var_type])
+        
         # Create path constraint functions
         g_e = []
         g_i = []
@@ -1054,8 +1130,10 @@ class LocalDAECollocator(CasadiCollocator):
                                 self.model.t])
             g_e = casadi.substitute(g_e, self.model.dx, coll_der)
             g_i = casadi.substitute(g_i, self.model.dx, coll_der)
-            g_e_fcn = casadi.SXFunction([z, x_i, der_vals_k, h_i], [g_e])
-            g_i_fcn = casadi.SXFunction([z, x_i, der_vals_k, h_i], [g_i])
+            g_e_fcn = casadi.SXFunction(
+                    [z, x_i, der_vals_k, h_i, timed_variables], [g_e])
+            g_i_fcn = casadi.SXFunction(
+                    [z, x_i, der_vals_k, h_i, timed_variables], [g_i])
         else:
             z = casadi.vertcat([self.model.p,
                                 self.model.dx,
@@ -1063,10 +1141,30 @@ class LocalDAECollocator(CasadiCollocator):
                                 self.model.u,
                                 self.model.w,
                                 self.model.t])
-            g_e_fcn = casadi.SXFunction([z], [g_e])
-            g_i_fcn = casadi.SXFunction([z], [g_i])
+            g_e_fcn = casadi.SXFunction([z, timed_variables], [g_e])
+            g_i_fcn = casadi.SXFunction([z, timed_variables], [g_i])
         g_e_fcn.init()
         g_i_fcn.init()
+        
+        # Create point constraint functions
+        G_e = []
+        G_i = []
+        point = self.point
+        lb = self.ocp.point_min.toArray().reshape(-1)
+        ub = self.ocp.point_max.toArray().reshape(-1)
+        for i in xrange(point.numel()):
+            if lb[i] == ub[i]:
+                G_e.append(point[i] - ub[i])
+            else:
+                if lb[i] != -N.inf:
+                    G_i.append(-point[i] + lb[i])
+                if ub[i] != N.inf:
+                    G_i.append(point[i] - ub[i])
+        
+        G_e_fcn = casadi.SXFunction([self.model.p, timed_variables], [G_e])
+        G_i_fcn = casadi.SXFunction([self.model.p, timed_variables], [G_i])
+        G_e_fcn.init()
+        G_i_fcn.init()
         
         # Define function evaluation methods based on graph
         if self.graph == 'MX':
@@ -1078,6 +1176,8 @@ class LocalDAECollocator(CasadiCollocator):
                 coll_eq_eval = coll_eq.call
             g_e_eval = g_e_fcn.call
             g_i_eval = g_i_fcn.call
+            G_e_eval = G_e_fcn.call
+            G_i_eval = G_i_fcn.call
             c_e = casadi.MX() 
             c_i = casadi.MX()
         elif self.graph == 'SX':
@@ -1089,42 +1189,12 @@ class LocalDAECollocator(CasadiCollocator):
                 coll_eq_eval = coll_eq.eval
             g_e_eval = g_e_fcn.eval
             g_i_eval = g_i_fcn.eval
+            G_e_eval = G_e_fcn.eval
+            G_i_eval = G_i_fcn.eval
             c_e = casadi.SXMatrix()
             c_i = casadi.SXMatrix()
         else:
             raise ValueError('Unknown CasADi graph %s.' % graph)
-            
-        # Calculate time points
-        self.time_points = {}
-        time = []
-        i = 1
-        self.time_points[i] = {}
-        t = self.t0
-        self.time_points[i][0] = t
-        time.append(t)
-        ti = t # Time at start of element
-        for k in xrange(1, self.n_cp + 1):
-            t = ti + self.horizon * self.h[i] * self.pol.p[k]
-            self.time_points[i][k] = t
-            time.append(t)
-        for i in xrange(2, self.n_e + 1):
-            self.time_points[i] = {}
-            ti = (self.time_points[i - 1][self.n_cp] +
-                  (1. - self.pol.p[self.n_cp]) * self.horizon * self.h[i])
-            for k in xrange(1, self.n_cp + 1):
-                t = ti + self.horizon * self.h[i] * self.pol.p[k]
-                self.time_points[i][k] = t
-                time.append(t)
-        if self.final_mesh_point:
-            i = self.n_e
-            ti = (self.time_points[i - 1][self.n_cp] +
-                  (1. - self.pol.p[self.n_cp]) * self.horizon * self.h[i])
-            t = ti + self.horizon * self.h[i]
-            self.time_points[i][self.n_cp + 1] = t
-            time.append(t)
-        if self.final_mesh_point or self.discr == "LGR":
-            if self.hs != "free":
-                assert(N.allclose(time[-1], self.tf))
         
         # Create list of state matrices
         x_list = [[]]
@@ -1180,9 +1250,9 @@ class LocalDAECollocator(CasadiCollocator):
                     c_e.append(dae_constr)
                 
         # Continuity constraints for x_{i, n_cp + 1}
-        if self.discr == "LG":
+        if self.is_gauss:
             if self.quadrature_constraint:
-                for i in xrange(1, self.n_e + self.final_mesh_point):
+                for i in xrange(1, self.n_e + 1):
                     # Evaluate x_{i, n_cp + 1} based on quadrature
                     x_i_np1 = 0
                     for k in xrange(1, self.n_cp + 1):
@@ -1193,7 +1263,7 @@ class LocalDAECollocator(CasadiCollocator):
                     # Add residual for x_i_np1 as constraint
                     c_e.append(var[i][self.n_cp + 1]['x'] - x_i_np1)
             else:
-                for i in xrange(1, self.n_e + self.final_mesh_point):
+                for i in xrange(1, self.n_e + 1):
                     # Evaluate x_{i, n_cp + 1} based on polynomial x_i
                     x_i_np1 = 0
                     for k in xrange(self.n_cp + 1):
@@ -1204,7 +1274,7 @@ class LocalDAECollocator(CasadiCollocator):
                     c_e.append(var[i][self.n_cp + 1]['x'] - x_i_np1)
         
         # Constraints for terminal values
-        if self.final_mesh_point:
+        if self.is_gauss:
             for var_type in ['u', 'w']:
                 # Evaluate xx_{n_e, n_cp + 1} based on polynomial xx_{n_e}
                 xx_ne_np1 = 0
@@ -1227,9 +1297,8 @@ class LocalDAECollocator(CasadiCollocator):
         
         # Continuity constraints for x_{i, 0}
         if not self.eliminate_cont_var:
-            gauss = int(self.discr == "LG")
             for i in xrange(1, self.n_e):
-                cont_constr = (var[i][self.n_cp + gauss]['x'] - 
+                cont_constr = (var[i][self.n_cp + self.is_gauss]['x'] - 
                                var[i + 1][0]['x'])
                 c_e.append(cont_constr)
         
@@ -1244,10 +1313,12 @@ class LocalDAECollocator(CasadiCollocator):
             i = 1
             k = 0
             z = self._get_z_elim_der(i, k)
-            [g_e_constr] = g_e_eval([z, x_list[i], der_vals[k],
-                                     self.horizon * self.h[i]])
-            [g_i_constr] = g_i_eval([z, x_list[i], der_vals[k],
-                                     self.horizon * self.h[i]])
+            [g_e_constr] = g_e_eval(
+                    [z, x_list[i], der_vals[k], self.horizon * self.h[i],
+                     nlp_timed_variables])
+            [g_i_constr] = g_i_eval(
+                    [z, x_list[i], der_vals[k], self.horizon * self.h[i],
+                     nlp_timed_variables])
             c_e.append(g_e_constr)
             c_i.append(g_i_constr)
             
@@ -1255,10 +1326,12 @@ class LocalDAECollocator(CasadiCollocator):
             for i in xrange(1, self.n_e + 1):
                 for k in xrange(1, self.n_cp + 1):
                     z = self._get_z_elim_der(i, k)
-                    [g_e_constr] = g_e_eval([z, x_list[i], der_vals[k],
-                                             self.horizon * self.h[i]])
-                    [g_i_constr] = g_i_eval([z, x_list[i], der_vals[k],
-                                             self.horizon * self.h[i]])
+                    [g_e_constr] = g_e_eval(
+                            [z, x_list[i], der_vals[k],
+                             self.horizon * self.h[i], nlp_timed_variables])
+                    [g_i_constr] = g_i_eval(
+                            [z, x_list[i], der_vals[k],
+                             self.horizon * self.h[i], nlp_timed_variables])
                     c_e.append(g_e_constr)
                     c_i.append(g_i_constr)
         else:
@@ -1266,8 +1339,8 @@ class LocalDAECollocator(CasadiCollocator):
             i = 1
             k = 0
             z = self._get_z(i, k)
-            [g_e_constr] = g_e_eval([z])
-            [g_i_constr] = g_i_eval([z])
+            [g_e_constr] = g_e_eval([z, nlp_timed_variables])
+            [g_i_constr] = g_i_eval([z, nlp_timed_variables])
             c_e.append(g_e_constr)
             c_i.append(g_i_constr)
             
@@ -1275,10 +1348,16 @@ class LocalDAECollocator(CasadiCollocator):
             for i in xrange(1, self.n_e + 1):
                 for k in xrange(1, self.n_cp + 1):
                     z = self._get_z(i, k)
-                    [g_e_constr] = g_e_eval([z])
-                    [g_i_constr] = g_i_eval([z])
+                    [g_e_constr] = g_e_eval([z, nlp_timed_variables])
+                    [g_i_constr] = g_i_eval([z, nlp_timed_variables])
                     c_e.append(g_e_constr)
                     c_i.append(g_i_constr)
+        
+        # Point constraints
+        [G_e_constr] = G_e_eval([var['p_opt'], nlp_timed_variables])
+        [G_i_constr] = G_i_eval([var['p_opt'], nlp_timed_variables])
+        c_e.append(G_e_constr)
+        c_i.append(G_i_constr)
         
         # Store constraints and time as data attributes
         self.c_e = c_e
@@ -1293,7 +1372,7 @@ class LocalDAECollocator(CasadiCollocator):
         
     def _create_constraint_function(self):
         """
-        Create constraint function and calculate its Jacobian.
+        Create constraint function.
         """
         # Concatenate constraints
         c = casadi.vertcat([self.get_equality_constraint(),
@@ -1703,7 +1782,7 @@ class LocalDAECollocator(CasadiCollocator):
                 xx_i_k = self.nlp_opt[var_indices[i][k][var_type]]
                 var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
             t_index += 1
-            k = self.n_cp + self.final_mesh_point
+            k = self.n_cp + self.is_gauss
             
             # Mesh points
             var_types.remove('x')

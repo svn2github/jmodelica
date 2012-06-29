@@ -162,8 +162,8 @@ package VDP_pack
     x2(finalTime)=0;
   end VDP_Opt_Min_Time;
   
-  optimization VDP_Opt_Unscaled_Min_Time (objective=finalTime, startTime=0,
-                                          finalTime(free=true, initialGuess=1))
+  optimization VDP_Opt_Unscaled_Min_Time(objective=finalTime, startTime=0,
+                                         finalTime(free=true, initialGuess=5))
     
     Real x1(start=0, fixed=true) "First state";
     Real x2(start=1, fixed=true) "Second state";
