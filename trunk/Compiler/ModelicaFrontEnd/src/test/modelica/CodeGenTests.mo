@@ -24,6 +24,7 @@ package CodeGenTests
         description="Test of code generation",
          automatic_add_initial_equations = false,
          enable_structural_diagnosis = false,
+		 compliance_as_warning=true,
         template = 
         "n_ci: $n_ci$
 n_real_ci: $n_real_ci$

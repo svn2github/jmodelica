@@ -639,11 +639,22 @@ aspect InstanceErrorCheck {
 	    		super.collectErrors();
   		  		errorChecked = true;
   		  		collectErrorsInClassName();
-	    		if (hasInstModification())
+	    		if (hasConditionalAttribute()) 
+	    			getConditionalAttribute().collectErrors();
+	    		if (isActive() && hasInstModification())
 	    			getInstModification().collectErrors();
 	    		if (hasInstConstraining())
 	    			getInstConstraining().collectErrors();
 	    	}
+		}
+	}
+	
+	// TODO: move to better place (InstanceTree.jrag?)
+	syn boolean InstComponentDecl.isActive() {
+		try {
+			return !hasConditionalAttribute() || getConditionalAttribute().ceval().booleanValue();
+		} catch (ConstantEvaluationException e) {
+			return false;
 		}
 	}
 	

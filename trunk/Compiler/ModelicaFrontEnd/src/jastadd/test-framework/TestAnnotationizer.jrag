@@ -679,7 +679,7 @@ abstract public class TestAnnotationizerHelper {
 			fc = compile();
 			checkData(data);
 			variables = makeVariableList(data);
-			values = evaluateVars(variables.split("[\\n\\r]+"));
+			values = prepare(evaluateVars(variables.split("[\\n\\r]+")));
 		}
 		
 		/**

@@ -1350,13 +1350,13 @@ aspect Scalarization {
 			boolean equation = !inFunction();
 			FExp temp = createTemporaryExp(indexMap, equation);
 			if (temp != null) {
-				if (addVar)
-					addTemporaryVars(vars, equation);
 				List lefts = new List().add(new FFunctionCallLeft(new Opt(temp)));
-				if (equation)
-					clauses.add(new FFunctionCallEquation(lefts, scalarizeFunction(indexMap)));
-				else
-					clauses.add(new FFunctionCallStmt(lefts, scalarizeFunction(indexMap)));
+				ASTNode clause = equation ? 
+						new FFunctionCallEquation(lefts, scalarizeFunction(indexMap)) :
+						new FFunctionCallStmt(lefts, scalarizeFunction(indexMap));
+				clauses.add(clause);
+				if (addVar)
+					addTemporaryVars(vars, equation, clause);
 			}
 		}
 	}
@@ -1393,14 +1393,16 @@ aspect Scalarization {
 	 * 
 	 * @param vars      list of variable to add the new variables to
 	 * @param equation  if <code>true</code>, generate FVariables, otherwise a FFunctionVariable
+	 * @param src       the equation or statement where the temporaries are given their value
 	 */
-	protected void FExp.addTemporaryVars(List vars, boolean equation) {
+	protected void FExp.addTemporaryVars(List vars, boolean equation, ASTNode src) {
 		boolean param = inParameterEquation() || inAttributeValue();
 		if (type().isRecord()) {
-			type().createRecordTemporaries(vars, equation, tempVarName(), param);
+			type().createRecordTemporaries(vars, equation, tempVarName(), param, src);
 		} else {
 			if (equation) 
-				type().createTempFVariables(vars, new FQName(tempVarName()), param);
+				type().createTempFVariables(
+						vars, new FQName(tempVarName()), param, (FAbstractEquation) src);
 			else 
 				vars.add(new FFunctionArray((FType) type().fullCopy(), tempVarName()));
 		}
@@ -1439,12 +1441,15 @@ aspect Scalarization {
 	 * @param equation  if <code>true</code>, generate FVariables, otherwise a FFunctionVariable
 	 * @param name      the name of the record variable
 	 * @param param     if <code>true</code>, generate parameters
+	 * @param src       the equation or statement where the temporaries are given their value
 	 */
-	public void FType.createRecordTemporaries(List vars, boolean equation, String name, boolean param) {}	
+	public void FType.createRecordTemporaries(
+			List vars, boolean equation, String name, boolean param, ASTNode src) {}	
 	
-	public void FRecordType.createRecordTemporaries(List vars, boolean equation, String name, boolean param) {
+	public void FRecordType.createRecordTemporaries(
+			List vars, boolean equation, String name, boolean param, ASTNode src) {
 		if (equation) {
-			createTempFVariables(vars, new FQName(name), param);
+			createTempFVariables(vars, new FQName(name), param, (FAbstractEquation) src);
 		} else {
 			FFunctionVariable var = isArray() ? new FFunctionArray() : new FFunctionVariable();
 			var.setType(fullCopy());
@@ -1497,31 +1502,57 @@ aspect Scalarization {
 	 * \brief Creates a new temporary varable with the given name.
 	 *        If this is an array, variables are created for each cell.
 	 * 
-	 * @param vars  list of variable to add the new variable to
-	 * @param name  the name of the new variable
+	 * @param vars   list of variable to add the new variable to
+	 * @param name   the name of the new variable
+	 * @param param  if <code>true</code>, create parameters instead of variables
+	 * @param eqn    the equation where the temporaries are given their value
 	 */
-	public void FType.createTempFVariables(List vars, FQName name, boolean param) {
+	public void FType.createTempFVariables(
+			List vars, FQName name, boolean param, FAbstractEquation eqn) {
 		if (isArray()) {
 			FQName fqn = name.fullCopy();
 			for (Index i : indices()) {
 				fqn.setLastFArraySubscripts(i.createFArraySubscripts());
-				createTempCellFVariables(vars, fqn, param);
+				createTempCellFVariables(vars, fqn, param, eqn);
 			}
 		} else {
-			createTempCellFVariables(vars, name, param);
+			createTempCellFVariables(vars, name, param, eqn);
 		}
 	}
 	
 	/**
-	 * \brief Creates a new temporary variable with the given name.
+	 * Creates a new temporary variable with the given name.
 	 * 
-	 * @param vars  list of variable to add the new variable to
-	 * @param name  the name of the new variable
+	 * @param vars   list of variable to add the new variable to
+	 * @param name   the name of the new variable
+	 * @param param  if <code>true</code>, create parameters instead of variables
+	 * @param eqn    the equation where the temporaries are given their value
 	 */
-	public void FType.createTempCellFVariables(List vars, FQName name, boolean param) {
+	public void FType.createTempCellFVariables(
+			List vars, FQName name, boolean param, FAbstractEquation eqn) {
 		FQName fqn = name.fullCopy();
 		fqn.scalarized = true;
-		vars.add(createTempFVariable(fqn, param));
+		
+		AbstractFVariable var = createTempFVariable(fqn, param);
+		vars.add(var);
+		if (eqn != null)
+			eqn.addOwnedTempVariable(var);
+	}
+	
+	/**
+	 * \brief Creates temporary variables for a record with the given name.
+	 * 
+	 * @param vars   list of variable to add the new variable to
+	 * @param name   the name of the new variable
+	 * @param param  if <code>true</code>, create parameters instead of variables
+	 * @param eqn    the equation where the temporaries are given their value
+	 */
+	public void FRecordType.createTempCellFVariables(
+			List vars, FQName name, boolean param, FAbstractEquation eqn) {
+		for (FRecordComponentType comp : getComponents()) {
+			FQName next = name.copyAndAppend(comp.getName());
+			comp.getFType().createTempFVariables(vars, next, param, eqn);
+		}
 	}
 	
 	
@@ -1597,19 +1628,6 @@ aspect Scalarization {
 			FTypePrefixVariability variability) {
 		return new FEnumVariable(fvt, variability, name, new FQName(getName()));
 	}	
-	
-	/**
-	 * \brief Creates temporary variables for a record with the given name.
-	 * 
-	 * @param vars  list of variable to add the new variables to
-	 * @param name  the name of the record variable
-	 */
-	public void FRecordType.createTempCellFVariables(List vars, FQName name, boolean param) {
-		for (FRecordComponentType comp : getComponents()) {
-			FQName next = name.copyAndAppend(comp.getName());
-			comp.getFType().createTempFVariables(vars, next, param);
-		}
-	}
 	
 	
 	/* Scalarization of expressions is needed in order to compute a simple

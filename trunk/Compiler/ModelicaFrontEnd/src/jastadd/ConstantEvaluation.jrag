@@ -2277,6 +2277,8 @@ aspect ConstantEvaluation {
 	  new CValueReal(v1.realValue() + v2.realValue());
   eq FIntegerType.add(CValue v1, CValue v2) = 
 	  new CValueInteger(v1.intValue() + v2.intValue());
+  eq FStringType.add(CValue v1, CValue v2) = 
+	  new CValueString(v1.stringValue() + v2.stringValue());
 
   /**
    * \brief Subtraction of constant values.

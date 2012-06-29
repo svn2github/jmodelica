@@ -48,14 +48,14 @@ aspect FlatTypeCheck {
     		}
 	    }
     	if (hasConditionalAttribute()) {
-    		if (!getConditionalAttribute().type().isScalar()) {
-    			error ("The guard expression of a conditional component should be a scalar expression");
-    		}
-    		if (!getConditionalAttribute().type().isBoolean()) {
-    			error ("The guard expression of a conditional component should be a boolean expression");
-    		}
-    		if (!getConditionalAttribute().variability().lessOrEqual(fParameter())) {
-    			error ("The guard expression of a conditional component should have parameter or constant variability");
+    		FExp cond = getConditionalAttribute();
+    		if (!cond.type().isUnknown()) {
+	    		if (!cond.type().isScalar()) 
+	    			error("The guard expression of a conditional component should be a scalar expression");
+	    		if (!cond.type().isBoolean()) 
+	    			error("The guard expression of a conditional component should be a boolean expression");
+	    		if (!cond.variability().lessOrEqual(fParameter())) 
+	    			error("The guard expression of a conditional component should have parameter or constant variability");
     		}
     	}
 	  

@@ -1285,21 +1285,20 @@ end FunctionType8;
 
 model FunctionType9
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="FunctionType9",
-          description="Function type checks: String literal arg, String input",
-          flatModel="
-fclass FunctionTests.FunctionType9
- discrete String x = FunctionTests.TestFunctionString(\"test\");
-
-public
- function FunctionTests.TestFunctionString
-  input String i1;
-  output String o1 := i1;
- algorithm
-  return;
- end FunctionTests.TestFunctionString;
-
-end FunctionTests.FunctionType9;
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="FunctionType9",
+         description="Function type checks: String literal arg, String input (error for now)",
+         errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Compliance error at line 52, column 27:
+  String variables are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Compliance error at line 53, column 17:
+  String variables are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Compliance error at line 1303, column 7:
+  String variables are not supported
 ")})));
 
  String x = TestFunctionString("test");
@@ -1307,22 +1306,20 @@ end FunctionType9;
 
 model FunctionType10
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="FunctionType10",
-          description="Function type checks: String component arg, String input",
-          flatModel="
-fclass FunctionTests.FunctionType10
- parameter String a = \"test\" /* test */;
- discrete String x = FunctionTests.TestFunctionString(a);
-
-public
- function FunctionTests.TestFunctionString
-  input String i1;
-  output String o1 := i1;
- algorithm
-  return;
- end FunctionTests.TestFunctionString;
-
-end FunctionTests.FunctionType10;
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="FunctionType10",
+         description="Function type checks: String component arg, String input (error for now)",
+         errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Compliance error at line 52, column 27:
+  String variables are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Compliance error at line 53, column 17:
+  String variables are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Compliance error at line 1327, column 29:
+  String variables are not supported
 ")})));
 
  parameter String a = "test";
@@ -1331,12 +1328,22 @@ end FunctionType10;
 
 model FunctionType11
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="FunctionType11",
-          description="Function type checks: Integer literal arg, String input",
-          errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="FunctionType11",
+         description="Function type checks: Integer literal arg, String input",
+         errorMessage="
+4 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Compliance error at line 52, column 27:
+  String variables are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Compliance error at line 53, column 17:
+  String variables are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Compliance error at line 1338, column 7:
+  String variables are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1340, column 32:
   Calling function TestFunctionString(): types of positional argument 1 and input i1 are not compatible
 ")})));
 
