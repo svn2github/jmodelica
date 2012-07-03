@@ -123,12 +123,10 @@ fmiVersion="1.0" modelName="CSTR.CSTR_Opt" modelIdentifier="CSTR_CSTR_Opt" guid=
 
 
 		<opt:TimePoints>
-			<opt:Index>0</opt:Index>
-			<opt:Value>150.0</opt:Value>
-			<opt:Index>1</opt:Index>
-			<opt:Value>150.0</opt:Value>
-			<opt:Index>2</opt:Index>
-			<opt:Value>150.0</opt:Value>
+                        <opt:TimePoint index = "0" value = "150.0">
+                                        <exp:QualifiedNamePart name="cost"/>
+                </opt:TimePoint>
+
 		</opt:TimePoints>
 	</opt:Optimization>
 

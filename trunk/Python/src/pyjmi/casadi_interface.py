@@ -655,12 +655,13 @@ class CasadiModel(BaseModel):
         """
         Update OCP expressions using current parameter values.
         """
-        [self.initial, self.dae, self.path, self.mterm, self.lterm] = \
-                casadi.substitute([self.ocp.initial, self.ocp.dae,
-                                   self.ocp.path, self.ocp.mterm,
-                                   self.ocp.lterm],
-                                  [p.var() for p in self._parameters],
-                                  [p.getStart() for p in self._parameters])
+        ocp_expressions = [self.ocp.initial, self.ocp.dae, self.ocp.path,
+                           self.ocp.point, self.ocp.mterm, self.ocp.lterm]
+        parameters = [p.var() for p in self._parameters]
+        parameter_values = [p.getStart() for p in self._parameters]
+        [self.initial, self.dae, self.path, self.point, self.mterm,
+         self.lterm] = casadi.substitute(ocp_expressions, parameters,
+                                         parameter_values)
     
     def _load_xml_to_casadi(self, xml, scale_variables, verbose):
         # Create a symbolic OCP
@@ -867,26 +868,26 @@ class CasadiModel(BaseModel):
         self.opt_ode_Cineq = [] #Inequality
         self.opt_ode_C = [] #Equality
         # Modify equality constraints to be on type g(x)=0 (instead of g(x)=a)
-        lb = N.array(self.ocp.path_min, dtype=N.float)
-        ub = N.array(self.ocp.path_max, dtype=N.float)
+        lb = N.array(self.ocp.point_min, dtype=N.float)
+        ub = N.array(self.ocp.point_max, dtype=N.float)
         for i in range(len(ub)):
             if lb[i] == ub[i]: #The constraint is an equality
-                self.opt_ode_C += [self.path[i] -
-                                   self.ocp.path_max[i]]
+                self.opt_ode_C += [self.point[i] -
+                                   self.ocp.point_max[i]]
                 #self.ocp.cfcn_ub[i] = casadi.SX(0.0)
                 #self.ocp.cfcn_lb[i] = casadi.SX(0.0)
             else: #The constraint is an inequality
                 if   lb[i] == -N.inf:
-                    self.opt_ode_Cineq += [(1.0) * self.path[i] -
-                                           self.ocp.path_max[i]]
+                    self.opt_ode_Cineq += [(1.0) * self.point[i] -
+                                           self.ocp.point_max[i]]
                 elif ub[i] == N.inf:
-                    self.opt_ode_Cineq += [(-1.0) * self.path[i] +
-                                           self.ocp.path_min[i]]
+                    self.opt_ode_Cineq += [(-1.0) * self.point[i] +
+                                           self.ocp.point_min[i]]
                 else:
-                    self.opt_ode_Cineq += [(1.0) * self.path[i] -
-                                           self.ocp.path_max[i]]
-                    self.opt_ode_Cineq += [(-1.0) * self.path[i] +
-                                           self.ocp.path_min[i]]
+                    self.opt_ode_Cineq += [(1.0) * self.point[i] -
+                                           self.ocp.point_max[i]]
+                    self.opt_ode_Cineq += [(-1.0) * self.point[i] +
+                                           self.ocp.point_min[i]]
         
         self.ocp_ode_boundary_inputs = []
         self.ocp_ode_boundary_inputs += list(self.p)

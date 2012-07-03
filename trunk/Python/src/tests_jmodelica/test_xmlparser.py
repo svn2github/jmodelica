@@ -1220,7 +1220,7 @@ class TestXMLParser:
         Test xmlparser.ModelDescription.get_opt_timepoints method.
         
         """
-        timepoints = [150.0, 150.0, 150.0]
+        timepoints = [150.0]
         
         nose.tools.assert_equal(self.md.get_opt_timepoints(), timepoints)
         
