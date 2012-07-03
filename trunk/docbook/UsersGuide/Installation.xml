@@ -14,9 +14,7 @@
     <title>Supported platforms</title>
 
     <para>JModelica.org can be installed on Linux, Mac OS X, and Windows (XP,
-    Vista, 7) with 32-bit or 64-bit architectures. Most development work is
-    carried out on 32-bit Mac OS X , 32 and 64-bit Linux and 32-bit Windows 7,
-    so these platforms tend to be best tested.</para>
+    Vista, 7) with 32-bit or 64-bit architectures.</para>
   </section>
 
   <section xml:id="inst_sec_prerequisites">
@@ -61,21 +59,22 @@
           <para>Get a <link
           xlink:href="http://www.python.org/download/releases/">Python
           2.7</link> installer suitable for your platform. Note that for
-          Windows users the 32-bit version must be chosen, even for 64-bit
+          Windows users, the 32-bit version must be chosen, even for 64-bit
           computers.</para>
         </step>
 
         <step>
           <para>Install the additional Python packages listed in the tables
-          below.<table>
+          below. Make sure that you pick the distribution suitable for Python
+          2.7.<table>
               <title>Required Python packages</title>
 
               <tgroup cols="3">
-                <colspec align="left" colname="col–para" colwidth="2*" />
+                <colspec align="left" colname="col–para" colwidth="2*"/>
 
-                <colspec align="left" colname="col–def" colwidth="2*" />
+                <colspec align="left" colname="col–def" colwidth="2*"/>
 
-                <colspec align="left" colname="col–descr" colwidth="3*" />
+                <colspec align="left" colname="col–descr" colwidth="3*"/>
 
                 <thead>
                   <row>
@@ -92,7 +91,7 @@
                     <entry><link
                     xlink:href="http://sourceforge.net/projects/numpy/files/NumPy/">NumPy</link></entry>
 
-                    <entry>1.6.1</entry>
+                    <entry>1.6.2</entry>
 
                     <entry>The fundamental package needed for scientific
                     computing with Python.</entry>
@@ -102,7 +101,7 @@
                     <entry><link
                     xlink:href="http://sourceforge.net/projects/scipy/files/scipy/">SciPy</link></entry>
 
-                    <entry>0.9.0</entry>
+                    <entry>0.10.1</entry>
 
                     <entry>A library of algorithms and mathematical tools for
                     Python.</entry>
@@ -112,7 +111,7 @@
                     <entry><link
                     xlink:href="http://sourceforge.net/projects/matplotlib/files/matplotlib/">matplotlib</link></entry>
 
-                    <entry>1.0.1</entry>
+                    <entry>1.1.0</entry>
 
                     <entry>A plotting library for Python, with a MATLAB like
                     interface.</entry>
@@ -122,7 +121,7 @@
                     <entry><link
                     xlink:href="http://ipython.org/download.html">IPython</link></entry>
 
-                    <entry>0.11</entry>
+                    <entry>0.13</entry>
 
                     <entry>An interactive shell for Python with additional
                     shell syntax, code highlighting, tab completion, string
@@ -139,11 +138,11 @@
             <title>IPython dependencies on Windows</title>
 
             <tgroup cols="3">
-              <colspec align="left" colname="col–para" colwidth="2*" />
+              <colspec align="left" colname="col–para" colwidth="2*"/>
 
-              <colspec align="left" colname="col–def" colwidth="2*" />
+              <colspec align="left" colname="col–def" colwidth="2*"/>
 
-              <colspec align="left" colname="col–descr" colwidth="3*" />
+              <colspec align="left" colname="col–descr" colwidth="3*"/>
 
               <thead>
                 <row>
@@ -160,16 +159,16 @@
                   <entry><link
                   xlink:href="http://pypi.python.org/pypi/pyreadline">Pyreadline</link></entry>
 
-                  <entry>1.7</entry>
+                  <entry>1.7.1</entry>
 
                   <entry>A Python implmementation of GNU readline.</entry>
                 </row>
 
                 <row>
                   <entry><link
-                  xlink:href="http://pypi.python.org/pypi/setuptools">setuptools</link></entry>
+                  xlink:href="http://pypi.python.org/pypi/distribute/">distribute</link></entry>
 
-                  <entry>0.6c11</entry>
+                  <entry>0.6.27</entry>
 
                   <entry>A package for downloading, building, installing,
                   upgrading, and uninstalling Python packages.</entry>
@@ -199,9 +198,9 @@
 
       <para>The JModelica.org Windows installer contains a binary distribution
       of JModelica.org built using the JModelica.org-SDK, bundled with
-      required third-party software components. The JModelica.org Windows
-      installer sets up a pre-configured complete environment with convenient
-      start menu shortcuts.</para>
+      required third-party software components. The installer sets up a
+      pre-configured complete environment with convenient start menu
+      shortcuts.</para>
 
       <section xml:id="inst_subsec_bundles">
         <title>Bundled tools, libraries and Python packages</title>
@@ -256,16 +255,16 @@
 
           <listitem>
             <para><link
-            xlink:href="http://sourceforge.net/apps/trac/casadi/">Casadi</link></para>
+            xlink:href="http://sourceforge.net/apps/trac/casadi/">CasADi</link></para>
           </listitem>
         </itemizedlist>
       </section>
 
       <section>
-        <title>Installing JModelica.org with Windows installer</title>
+        <title>Running the Windows installer</title>
 
         <para>Make sure that all prerequisite components described in <xref
-        linkend="inst_sec_prerequisites" /> are installed before
+        linkend="inst_sec_prerequisites"/> are installed before
         continuing.</para>
 
         <procedure>
@@ -299,7 +298,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center" fileref="images/Setup_components.png"
-                         scalefit="1" width="50%"></imagedata>
+                         scalefit="1" width="50%"/>
             </imageobject>
           </mediaobject>
         </figure>
@@ -326,23 +325,23 @@
 
     <para>The JModelica.org Software Development Kit (SDK) is a bundle of
     tools needed to build the JModelica.org sources on Windows. The SDK is
-    mainly intended for those of you who want to do some developement work on
-    the platform. Another reason to work with the SDK is if you want to be
-    able to build new versions with the latest code changes. For a well
-    documented, tested and stable version of JModelica.org, we refer to our
-    binary distribution which is built (for Windows) with every
-    release.</para>
+    intended for those of you who want to do some developement work on the
+    platform or if you want to be able to continuously build new versions to
+    be updated with the latest code changes. For a well documented, tested and
+    stable version of JModelica.org, we refer to our binary distribution which
+    is built (for Windows) with every release.</para>
 
     <para>The JModelica.org SDK Windows installer sets up a complete
-    pre-configured environment with convenient start menu shortcuts.</para>
+    pre-configured development environment with convenient start menu
+    shortcuts.</para>
 
     <section xml:id="inst_sec_sdk_prereq">
       <title>Prerequisites</title>
 
       <para>The Python prerequisites for installing the JModelica.org SDK are
-      the same as listed in <xref linkend="inst_sec_prereq_python" />. For
-      Java however it is required to have a 32-bit JDK installed, not only a
-      32-bit JRE as for the binary installation.</para>
+      the same as listed in <xref linkend="inst_sec_prereq_python"/>. For Java
+      however it is required to have a 32-bit JDK installed, not only a 32-bit
+      JRE as for the binary installation.</para>
 
       <para><emphasis role="bold">Install a JDK</emphasis><procedure>
           <step>
@@ -361,14 +360,14 @@
       <title>Installing the JModelica.org SDK</title>
 
       <para>Make sure that the prerequisites listed in <xref
-      linkend="inst_sec_sdk_prereq" /> are installed before starting the
+      linkend="inst_sec_sdk_prereq"/> are installed before starting the
       JModelica.org SDK installation.</para>
 
       <section>
         <title>Bundled tools, libraries and Python packages</title>
 
         <para>All tools, libraries and Python packages included in the binary
-        distribution, see <xref linkend="inst_subsec_bundles" />, are also
+        distribution, see <xref linkend="inst_subsec_bundles"/>, are also
         included in the SDK. The SDK also includes a few extra tools:</para>
 
         <itemizedlist>
@@ -426,7 +425,7 @@
                     <para>Compile the sources with <literal>make</literal>
                     from the <filename>build</filename>
                     folder:<programlisting>cd build
-make &amp;&amp; make install</programlisting></para>
+make &amp;&amp; make install &amp;&amp; make install_casadi </programlisting></para>
                   </listitem>
                 </orderedlist></para>
             </listitem>
@@ -450,13 +449,13 @@ vdp.run_demo()</programlisting></para>
       <title>Changing Ipopt solver</title>
 
       <para>The solver bundled in JModelica.org is Ipopt-MUMPS. However, it is
-      possible to use other Ipopt solvers. This requires a few changes in the
-      setup and rebuilding JModelica. The procedure is:</para>
+      possible to use other Ipopt solvers instead. This requires a few changes
+      in the setup and rebuilding JModelica.org. The procedure is:</para>
 
       <orderedlist>
         <listitem>
-          <para>Open the script file <filename>configure.sh,</filename>
-          located in the SDK root folder, in a text editor.</para>
+          <para>Open the script file <filename>configure.sh,</filename> which
+          is located in the SDK root folder, in a text editor.</para>
         </listitem>
 
         <listitem>
@@ -467,7 +466,8 @@ vdp.run_demo()</programlisting></para>
 
         <listitem>
           <para>Do the whole installation procedure again, that is: run
-          configure, make and make install.</para>
+          <literal>configure</literal>, <literal>make</literal>, <literal>make
+          install</literal> and <literal>make install_casadi</literal>.</para>
         </listitem>
 
         <listitem>
@@ -568,7 +568,7 @@ make install
     </section>
 
     <section>
-      <title>Compiling </title>
+      <title>Compiling</title>
 
       <para>Make sure that all prerequisite are installed before compiling the
       JModelica.org platform. First, check out the JModelica.org
