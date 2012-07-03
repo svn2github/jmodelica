@@ -162,6 +162,25 @@ package VDP_pack
     x2(finalTime)=0;
   end VDP_Opt_Min_Time;
   
+  optimization VDP_Opt_Scaled_Min_Time(objective=tf) 
+
+    parameter Real tf(free=true, min=0.2, initialGuess=3);
+
+    Real x1(start=0, fixed=true);
+    Real x2(start=1, fixed=true);
+    
+    input Real u(min=-1, max=1);
+  
+  equation
+    der(x1) = tf *((1 - x2^2) * x1 - x2 + u);
+    der(x2) = tf * x1;
+  
+  constraint
+    x1(finalTime) = 0;
+    x2(finalTime) = 0;
+  
+  end VDP_Opt_Scaled_Min_Time;
+  
   optimization VDP_Opt_Unscaled_Min_Time(objective=finalTime, startTime=0,
                                          finalTime(free=true, initialGuess=5))
     
