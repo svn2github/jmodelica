@@ -27,12 +27,12 @@ The following tools need to be installed:
 The following Python packages are needed: 
  - JPype 0.5.4.2 (http://jpype.sourceforge.net/) 
  - lxml 2.3 (http://codespeak.net/lxml/) 
- - NumPy 1.6.1 (http://numpy.scipy.org/)
- - SciPy 0.9.0 (http://www.scipy.org/)
+ - NumPy 1.6.2 (http://numpy.scipy.org/)
+ - SciPy 0.10.1 (http://www.scipy.org/)
  - Cython 0.15 (http://www.cython.org/)
- - Matplotlib 1.0.1 (http://matplotlib.sourceforge.net/)
+ - Matplotlib 1.1.0 (http://matplotlib.sourceforge.net/)
  - wxPython 2.8 <http://www.wxpython.org/>
- - IPython 0.11 <http://ipython.org/>
+ - IPython 0.13 <http://ipython.org/>
  - Nose 1.1.2 <http://readthedocs.org/docs/nose/en/latest/> (Only needed to run
    the test suits.)
  - Setuptools 0.6c11 <http://pypi.python.org/pypi/setuptools>
