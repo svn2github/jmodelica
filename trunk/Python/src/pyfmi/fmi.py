@@ -2244,7 +2244,7 @@ class FMUModel2(FMUModel):
                             " in fd = " + "{0: e}".format(Dfd[i,j])
 
         print "Found " + repr(n_err+n_spar_errs) + " errors and " + repr(n_spar_warns) + \
-              " warnings altogether"
+              " warnings"
         if(not n_err==0):
             print "  - Value errors: " + str(n_err)
         if(not n_spar_errs ==0):
