@@ -1135,7 +1135,28 @@ aspect CADCodeGen {
 			}
 			str.print(")");
 		} else{
-			str.print(",&" + this.adVarName() + ", &" + this.adDerName() + ");\n");
+			// Check if the function has several outputs, if so we should only use
+			// the first output.
+			if(myOutputs().size() <= 1){
+				str.print(",&" + this.adVarName() + ", &" + this.adDerName() + ");\n");
+			} else {
+				Boolean var = true;
+				for(int i = 1; i <= 2; i++){
+					for(int j = 1; j <= myOutputs().size(); j++){
+						if(j==1){
+							if(var){
+								str.print(",&" + this.adVarName());	
+							} else {
+								str.print(",&" + this.adDerName());
+							}
+						} else {
+							str.print(", NULL");
+						}
+					}
+					var = false;
+				}
+				str.print(");\n");
+			}
 		}
 	}
 	
@@ -1163,7 +1184,12 @@ aspect CADCodeGen {
 		if (isComposite() && !keepAsArray()){
 			str.print(tempName_var_CAD());
 		} else{
-			this.prettyPrint_C(p, str, indent);
+			try {
+				FIdUseExp e = (FIdUseExp)this;
+				str.print(e.adVarName());
+			} catch (java.lang.ClassCastException e) {
+				this.prettyPrint_C(p, str, indent);
+			}
 		}
 	}
 	
@@ -1171,8 +1197,12 @@ aspect CADCodeGen {
 		if (isComposite() && !keepAsArray()){
 			str.print(tempName_der_CAD());
 		} else{
-			FIdUseExp e = (FIdUseExp)this;
-			str.print(e.adDerName());
+			try {
+				FIdUseExp e = (FIdUseExp)this;
+				str.print(e.adDerName());
+			} catch (java.lang.ClassCastException e) {
+				this.prettyPrint_C(p, str, indent);
+			}
 		}
 	}
 	
