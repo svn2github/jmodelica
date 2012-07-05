@@ -23,6 +23,7 @@
 #include "fmiModelFunctions.h"
 #include "fmiModelTypes.h"
 #include "jmi.h"
+#include <time.h>
 
 #ifdef USE_FMI_ALLOC
 #include "fmi_alloc.h"
@@ -230,7 +231,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     fmiInteger initComplete = 0;    /* If the initialization are complete */
     jmi_real_t nextTimeEvent;       /* Next time event instant */
     fmiReal safety_factor_events = 0.0001;
-    fmiReal safety_factor_newton = 0.000001;
+    fmiReal safety_factor_newton = 0.0001;
     
     jmi_real_t* switchesR;   /* Switches */
     jmi_real_t* switchesR0;  /* Initial Switches */
@@ -526,6 +527,13 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 
 	char msg[100]; /* Holder for the logger function's messages */
 
+	clock_t c0, c1, d0, d1;
+	jmi_real_t setElementTime;
+
+	c0 = clock();
+
+	setElementTime = 0;
+
 	/* Get number of outputs that are variability = "continuous", ny */
 	n_outputs = ny = jmi->n_outputs;
 	if (!(output_vrefs = (int*)fmi -> fmi_functions.allocateMemory(n_outputs, sizeof(int)))) {
@@ -549,6 +557,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 	nC = ny*nx;
 	nD = ny*nu;
 
+	/*
 	if (fmi -> fmi_logging_on) {
 		sprintf(msg,"size of A  = %d %d",nx,nx);
 		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiOK, "OK", msg);
@@ -559,6 +568,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 		sprintf(msg,"size of D  = %d %d",ny,nu);
 		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiOK, "OK", msg);
 	}
+	 */
 
 	/* Allocate a big chunk of memory that is enough to compute all Jacobians */
 	jac_size = nA + nB + nC + nD;
@@ -584,7 +594,10 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 	/* Update external A matrix */
 	for (row=0;row<nx;row++) {
 		for (col=0;col<nx;col++) {
+			d0 = clock();
 			fmiFlag = setMatrixElement(A,row+1,col+1,jac[row + col*nx]);
+			d1 = clock();
+			setElementTime += ((realtype) ((long)(d1-d0))/(CLOCKS_PER_SEC));
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix A");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -603,7 +616,10 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 	/* Update external B matrix */
 	for (row=0;row<nx;row++) {
 		for (col=0;col<nu;col++) {
+			d0 = clock();
 			fmiFlag = setMatrixElement(B,row+1,col+1,jac[row + col*nx]);
+			d1 = clock();
+			setElementTime += ((realtype) ((long)(d1-d0))/(CLOCKS_PER_SEC));
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix B");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -622,7 +638,10 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 	/* Update external C matrix */
 	for (row=0;row<ny;row++) {
 		for (col=0;col<nx;col++) {
+			d0 = clock();
 			fmiFlag = setMatrixElement(C,row + 1, col + 1, jac[row+col*ny]);
+			d1 = clock();
+			setElementTime += ((realtype) ((long)(d1-d0))/(CLOCKS_PER_SEC));
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix C");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -643,7 +662,10 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 	/* Update external D matrix */
 	for (row=0;row<ny;row++) {
 		for (col=0;col<nu;col++) {
+			d0 = clock();
 			fmiFlag = setMatrixElement(D,row + 1, col + 1,jac[row + col*ny]);
+			d1 = clock();
+			setElementTime += ((realtype) ((long)(d1-d0))/(CLOCKS_PER_SEC));
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix D");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -653,6 +675,10 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 	}
 
 	fmi -> fmi_functions.freeMemory(jac);
+
+	c1 = clock();
+	/*printf("Jac eval call: %f\n", ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
+	/*printf(" - setMatrixElementTime: %f\n", setElementTime);*/
 	return fmiOK;
 }
 
@@ -782,6 +808,10 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	int offs;
 	jmi_real_t** dv;
 	jmi_real_t** dz;
+
+	clock_t c0, c1;
+
+	c0 = clock();
 
 	/*Used for debugging 
 	fmiReal tol = 0.001;	
@@ -915,6 +945,9 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	free(output_vrefs);
 	free(output_vrefs2);
 	
+	c1 = clock();
+
+	/*printf("Jac eval call: %f\n", ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
 	return fmiOK;
 }
 

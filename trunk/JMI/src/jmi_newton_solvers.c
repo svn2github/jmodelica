@@ -70,7 +70,8 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 }
 
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data){
-        jmi_log_category_t category;
+        /*int i,j;*/
+	    jmi_log_category_t category;
         char buffer[4000];
         jmi_block_residual_t *block = eh_data;
         jmi_t *jmi = block->jmi;
@@ -79,7 +80,34 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
         }else if (err_code < 0){ /*Error*/
             category = logError;
         }
+
         sprintf(buffer, "[KINSOL] %s: Error occured at time %3.2fs when solving block %d: %s", function, *(jmi_get_t(jmi)), block->index, msg);
+        jmi_simple_newton_jac(block);
+/*
+        jmi_log(block->jmi, category, buffer);
+
+        buffer[0] = 0;
+        for(i=0; i<block->n; i++) {
+       		sprintf(buffer + strlen(buffer), "%12.12f ", block->x[i]);
+         }
+        jmi_log(block->jmi, category, buffer);
+
+		block->F(block->jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
+
+        buffer[0] = 0;
+        for(i=0; i<block->n; i++) {
+       		sprintf(buffer + strlen(buffer), "%12.12f ", block->res[i]);
+         }
+        jmi_log(block->jmi, category, buffer);
+
+        buffer[0] = 0;
+        for(i=0; i<block->n; i++) {
+        	for(j=0; j<block->n; j++) {
+        		sprintf(buffer + strlen(buffer), "%12.12f ", block->jac[j*(block->n) + i]);
+        	}
+        	sprintf(buffer + strlen(buffer), "\n");
+        }
+*/
         jmi_log(block->jmi, category, buffer);
 }
 
