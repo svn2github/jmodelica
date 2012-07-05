@@ -26,7 +26,7 @@ import nose.tools
 
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_jmu
-from pyjmi.jmi import JMUModel
+from pyjmi.jmi import JMUModel, IpoptException
 from pyjmi.initialization.ipopt import NLPInitialization
 from pyjmi.initialization.ipopt import InitializationOptimizer
 from pyjmi.common.io import ResultDymolaTextual
@@ -356,3 +356,38 @@ class TestNLPInit:
         """Test that exceptions are thrown when invalid IPOPT options are set."""
         nose.tools.assert_raises(Exception, self.init_nlp_ipopt.init_opt_ipopt_set_num_option, 'invalid_option',1.0)
 
+class TestIpoptException:
+    """
+    Check that an exception is thrown if Ipopt returns with return status != 0, 1, 6 (succeeded, acceptable, feasible point found)
+    """
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        # compile cstr
+        fpath_cstr = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
+        cpath_cstr = "CSTR.CSTR_Init"
+        compile_jmu(cpath_cstr, fpath_cstr,
+            compiler_options={"enable_variable_scaling":True}) 
+    
+    def setUp(self):
+        """Test setUp. Load the test model."""   
+        cpath_cstr = "CSTR.CSTR_Init"
+        fname_cstr = cpath_cstr.replace('.','_',1)
+        self.fname_cstr = fname_cstr   
+        self.cstr = JMUModel(fname_cstr+'.jmu')
+
+    @testattr(ipopt = True)
+    def test_exception_thrown(self):
+        """
+        Test that an IpoptException is thrown if initialization fails.
+        """
+        opts = self.cstr.initialize_options()
+        opts['IPOPT_options']['max_iter'] = 1
+        try:
+            self.cstr.initialize(options = opts)
+        except IpoptException as e:
+            assert str(e) == "Ipopt failed with return code: -1 Please see Ipopt documentation for more information."
+        else:
+            assert False, "No IpoptException thrown when initialization fails (running VDP with max_iter = 1)."

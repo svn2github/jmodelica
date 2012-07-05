@@ -158,6 +158,11 @@ class JMIException(Exception):
     """
     pass
 
+class IpoptException(Exception):
+    """ 
+    An exception caused by Ipopt failing.
+    """
+    pass
 
 def fail_error_check(message):
     """ 
@@ -678,7 +683,7 @@ class JMUModel(BaseModel):
             self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
             p_opt_indices = p_opt_indices.tolist()
             
-            for attr in startattributes():
+            for attr in startattributes:
                 if attr[1] != None:
                     (z_i, ptype) = _translate_value_ref(attr[0])
                     i_pi = z_i - self._offs_real_pi.value

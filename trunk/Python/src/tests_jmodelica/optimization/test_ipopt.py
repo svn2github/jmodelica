@@ -26,7 +26,7 @@ import nose.tools
 
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_jmu
-from pyjmi.jmi import JMUModel
+from pyjmi.jmi import JMUModel, IpoptException
 from pyjmi.optimization import ipopt
 from pyjmi.common.io import ResultDymolaTextual
 
@@ -408,3 +408,39 @@ class TestCollocationEventException:
                 operator or rewriting the model."
         else:
             assert False, "No exception thrown when creating a collocation optimization object based on a model containing events."
+
+class TestIpoptException:
+    """
+    Check that an exception is thrown if Ipopt returns with return status != 0, 1, 6 (succeeded, acceptable, feasible point found)
+    """
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        # compile vdp
+        fpath_vdp = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        cpath_vdp = "VDP_pack.VDP_Opt_Min_Time"
+        compile_jmu(cpath_vdp, fpath_vdp,
+            compiler_options={'state_start_values_fixed':True}) 
+    
+    def setUp(self):
+        """Test setUp. Load the test model."""   
+        cpath_vdp = "VDP_pack.VDP_Opt_Min_Time"
+        fname_vdp = cpath_vdp.replace('.','_',1)
+        self.fname_vdp = fname_vdp   
+        self.vdp = JMUModel(fname_vdp+'.jmu')
+
+    @testattr(ipopt = True)
+    def test_exception_thrown(self):
+        """
+        Test that an IpoptException is thrown if optimization fails.
+        """
+        opts = self.vdp.optimize_options()
+        opts['IPOPT_options']['max_iter'] = 1
+        try:
+            self.vdp.optimize(options = opts)
+        except IpoptException as e:
+            assert str(e) == "Ipopt failed with return code: -1 Please see Ipopt documentation for more information."
+        else:
+            assert False, "No IpoptException thrown when optimizing fails (running VDP with max_iter = 1)."

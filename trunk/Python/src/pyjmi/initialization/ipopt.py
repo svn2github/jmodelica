@@ -22,7 +22,8 @@ from ctypes import byref
 import numpy as N
 import numpy.ctypeslib as Nct
 
-from pyjmi import jmi
+from pyjmi.jmi import JMIException, IpoptException, _translate_value_ref, _returns_ndarray
+from pyjmi.jmi import JMI_DER_CPPAD
 from pyjmi.jmi_io import export_result_dymola as jmi_io_export_result_dymola
 
 int = N.int32
@@ -56,7 +57,7 @@ class InitializationOptimizer(object):
                 byref(self._ipopt_init), self._nlp_init._jmi_init_opt) == 0, \
                    "jmi_init_opt_ipopt_new returned non-zero"
         except AttributeError, e:
-            raise jmi.JMIException(
+            raise JMIException(
                 "Can not create InitializationOptimizer object. \ "
                 "Please recompile model with target='ipopt")
         
@@ -97,7 +98,17 @@ class InitializationOptimizer(object):
         Solve the NLP problem.
         """
         if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_solve(self._ipopt_init) > 1:
-            raise jmi.JMIException("Solving IPOPT failed.")
+            raise JMIException("Solving IPOPT failed.")
+        
+        # Check return status from Ipopt and raise exception if not ok
+        (return_status, nbr_iters, obj_final, tot_exec_time) = self.init_opt_ipopt_get_statistics()
+        # Return code should be one of (taken from IpReturnCodes.inc):
+        # 0: IP_SOLVE_SUCCEEDED
+        # 1: IP_ACCEPTABLE_LEVEL
+        # 6: IP_FEASIBLE_POINT_FOUND
+        if return_status not in (0, 1, 6):
+            raise IpoptException("Ipopt failed with return code: " + str(return_status) + \
+                                 " Please see Ipopt documentation for more information.")
     
     def init_opt_ipopt_set_string_option(self, key, val):
         """ 
@@ -112,7 +123,7 @@ class InitializationOptimizer(object):
         """
         if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_string_option(
             self._ipopt_init, key, val) is not 0:
-            raise jmi.JMIException(
+            raise JMIException(
                 "The Ipopt string option " + key + " is unknown")
         
     def init_opt_ipopt_set_int_option(self, key, val):
@@ -128,7 +139,7 @@ class InitializationOptimizer(object):
         """        
         if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_int_option(
             self._ipopt_init, key, val) is not 0:
-            raise jmi.JMIException(
+            raise JMIException(
                 "The Ipopt integer option " + key + " is unknown")
 
     def init_opt_ipopt_set_num_option(self, key, val):
@@ -144,7 +155,7 @@ class InitializationOptimizer(object):
         """
         if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_num_option(
             self._ipopt_init, key, val) is not 0:
-            raise jmi.JMIException(
+            raise JMIException(
                 "The Ipopt real option " + key + " is unknown")
 
     def init_opt_ipopt_get_statistics(self):
@@ -175,7 +186,7 @@ class InitializationOptimizer(object):
             byref(iters),
             byref(objective),
             byref(exec_time)) is not 0:
-            raise jmi.JMIException(
+            raise JMIException(
                 "Error when retrieve statistics - optimization problem may not be solved.")
         return (return_code.value,iters.value,objective.value,exec_time.value)
 
@@ -282,7 +293,7 @@ class NLPInitialization(object):
             fixeds = self._model._xmldoc.get_x_fixed(include_alias=False)
             for fix in fixeds:
                 if fix[1] == False:
-                    (z_i, ptype) = jmi._translate_value_ref(fix[0])
+                    (z_i, ptype) = _translate_value_ref(fix[0])
                     i_x = z_i - self._model._offs_real_x.value
                     _x_lin[i_x] = 0
                             
@@ -290,7 +301,7 @@ class NLPInitialization(object):
             fixeds = self._model._xmldoc.get_w_fixed(include_alias=False)
             for fix in fixeds:
                 if fix[1] == False:
-                    (z_i, ptype) = jmi._translate_value_ref(fix[0])
+                    (z_i, ptype) = _translate_value_ref(fix[0])
                     i_w = z_i - self._model._offs_real_w.value
                     _w_lin[i_w] = 0
         
@@ -321,10 +332,10 @@ class NLPInitialization(object):
             _dx_lin, 
             _x_lin, 
             _w_lin, 
-            jmi.JMI_DER_CPPAD,stat) is 0, \
+            JMI_DER_CPPAD,stat) is 0, \
                 " jmi_opt_lp_new returned non-zero."
         #        except AttributeError,e:
-#             raise jmi.JMIException("Can not create NLPInitialization object.")
+#             raise JMIException("Can not create NLPInitialization object.")
         assert self._jmi_init_opt.value is not None, \
             "jmi_init_opt struct has not returned correctly."
             
@@ -525,7 +536,7 @@ class NLPInitialization(object):
             #                                       Nct.ndpointer(dtype=c_jmi_real_t,
             #                                                     ndim=1,
             #                                                     flags='C')]
-            jmi._returns_ndarray(self._jmi_model._dll.jmi_init_opt_get_x, 
+            _returns_ndarray(self._jmi_model._dll.jmi_init_opt_get_x, 
                 c_jmi_real_t, n_real_x.value, order='C')
         except AttributeError, e:
             pass
@@ -547,7 +558,7 @@ class NLPInitialization(object):
         if self._jmi_model._dll.jmi_init_opt_get_dimensions(
             self._jmi_init_opt, byref(n_real_x), 
             byref(n_h), byref(dh_n_nz)) is not 0:
-            raise jmi.JMIException(
+            raise JMIException(
                 "Getting the number of variables and constraints failed.")
         return n_real_x.value, n_h.value, dh_n_nz.value 
         
@@ -572,7 +583,7 @@ class NLPInitialization(object):
         """
         if self._jmi_model._dll.jmi_init_opt_get_initial(
             self._jmi_init_opt, x_init) is not 0:
-            raise jmi.JMIException("Getting the initial point failed.")
+            raise JMIException("Getting the initial point failed.")
 
     def init_opt_set_initial(self, x_init):
         """ 
@@ -585,7 +596,7 @@ class NLPInitialization(object):
         """
         if self._jmi_model._dll.jmi_init_opt_set_initial(
             self._jmi_init_opt, x_init) is not 0:
-            raise jmi.JMIException("Setting the initial point failed.")
+            raise JMIException("Setting the initial point failed.")
  
     def init_opt_get_bounds(self, x_lb, x_ub):
         """ 
@@ -601,7 +612,7 @@ class NLPInitialization(object):
         """
         if self._jmi_model._dll.jmi_init_opt_get_bounds(
             self._jmi_init_opt, x_lb, x_ub) is not 0:
-            raise jmi.JMIException(
+            raise JMIException(
                 "Getting upper and lower bounds of the optimization variables failed.")
 
     def init_opt_set_bounds(self, x_lb, x_ub):
@@ -618,7 +629,7 @@ class NLPInitialization(object):
         """
         if self._jmi_model._dll.jmi_init_opt_set_bounds(
             self._jmi_init_opt, x_lb, x_ub) is not 0:
-            raise jmi.JMIException(
+            raise JMIException(
                 "Getting upper and lower bounds of the optimization variables failed.")
 
     def init_opt_f(self, f):
@@ -631,7 +642,7 @@ class NLPInitialization(object):
                 The value of the cost function. (Return variable)
         """
         if self._jmi_model._dll.jmi_init_opt_f(self._jmi_init_opt, f) is not 0:
-            raise jmi.JMIException("Getting the cost function failed.")
+            raise JMIException("Getting the cost function failed.")
         
     def init_opt_df(self, df):
         """ 
@@ -645,7 +656,7 @@ class NLPInitialization(object):
                 variable)
         """
         if self._jmi_model._dll.jmi_init_opt_df(self._jmi_init_opt, df) is not 0:
-            raise jmi.JMIException(
+            raise JMIException(
                 "Getting the gradient of the cost function value failed.")
                
     def init_opt_h(self, res):
@@ -659,7 +670,7 @@ class NLPInitialization(object):
         """
         if self._jmi_model._dll.jmi_init_opt_h(
             self._jmi_init_opt, res) is not 0:
-            raise jmi.JMIException(
+            raise JMIException(
                 "Getting the residual of the equality constraints failed.")
         
     def init_opt_dh(self, jac):
@@ -674,7 +685,7 @@ class NLPInitialization(object):
         """
         if self._jmi_model._dll.jmi_init_opt_dh(
             self._jmi_init_opt, jac) is not 0:
-            raise jmi.JMIException(
+            raise JMIException(
                 "Getting the Jacobian of the residual of the equality constraints.")
         
     def init_opt_dh_nz_indices(self, irow, icol):
@@ -693,7 +704,7 @@ class NLPInitialization(object):
         """
         if self._jmi_model._dll.jmi_init_opt_dh_nz_indices(
             self._jmi_init_opt, irow, icol) is not 0:
-            raise jmi.JMIException(
+            raise JMIException(
                 "Getting the indices of the non-zeros in the equality constraint Jacobian failed.")
 
     def init_opt_set_initial_from_model(self):
@@ -702,7 +713,7 @@ class NLPInitialization(object):
         """
         if self._jmi_model._dll.jmi_init_opt_set_initial_from_model(
             self._jmi_init_opt) is not 0:
-            raise jmi.JMIException("Could not set initial point from model.")
+            raise JMIException("Could not set initial point from model.")
 
     def export_result_dymola(self, file_name='', format='txt', 
         write_scaled_result = False):
