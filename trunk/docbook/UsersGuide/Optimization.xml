@@ -3478,8 +3478,7 @@ cstr = CasadiModel(fmux, scale_variables=True)
 
           <para>Next, we specify the initial and reference values, according
           to the two stationary points computed in <xref
-          linkend="opt-sec-dae-casadi-cstr-init"
-          xrefstyle="select: label"/>.</para>
+          linkend="opt-sec-dae-casadi-cstr-init"/>.</para>
 
           <programlisting># Set reference values
 cstr.set('Tc_ref', Tc_0_B)
@@ -3495,9 +3494,8 @@ cstr.set('cstr.T_init', T_0_A)
           We first obtain an options object, containing all the default
           options. We then change number of finite elements from the default
           value of 50 to 100. We also specify that the trajectories computed
-          in <xref linkend="opt-sec-dae-casadi-cstr-guess"
-          xrefstyle="select: label"/> are to be used as initial guesses for
-          the NLP variables.</para>
+          in <xref linkend="opt-sec-dae-casadi-cstr-guess"/> are to be used as
+          initial guesses for the NLP variables.</para>
 
           <programlisting># Set options
 opt_opts = cstr.optimize_options()
