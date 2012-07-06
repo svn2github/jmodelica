@@ -214,4 +214,10 @@ This package is needed to be able to use the plot-GUI.")
 		
             sys.stdout.write("\n\n")
 
-
+def get_files_path():
+    """Get the absolute path to the example files directory."""
+    jmhome = os.environ.get('JMODELICA_HOME')
+    assert jmhome is not None, "You have to specify" \
+                               " JMODELICA_HOME environment" \
+                               " variable."
+    return os.path.join(jmhome, 'Python', 'pyjmi', 'examples', 'files')

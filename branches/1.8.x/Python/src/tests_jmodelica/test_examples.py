@@ -118,10 +118,10 @@ def test_extfunctions_matrix():
     """ Test of simulation with external functions using matrix input and output. """
     extFunctions_matrix.run_demo(False)
 	
-@testattr(ipopt = True)
-def test_flight_path():
-    """ Test the flight_path example. """    
-    flight_path.run_demo(False)
+#@testattr(ipopt = True)
+#def test_flight_path():
+#    """ Test the flight_path example. """    
+#    flight_path.run_demo(False)
 	
 @testattr(fmi = True)
 def test_fmi_bouncing_ball_raw():

@@ -285,6 +285,10 @@ aspect PredefinedTypes {
 +"  input Real x;\n"      // Type not used
 +"  output Integer y;\n"
 +"end Integer;\n"
++"function String"
++"  input Real x;\n"      // Type not used
++"  output String y;\n"
++"end String;\n"
 +"//function String end String;\n"
 +"function delay end delay;\n"
 +"function cardinality end cardinality;\n"

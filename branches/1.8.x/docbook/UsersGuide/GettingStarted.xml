@@ -201,7 +201,7 @@ setuptools.................... 0.6c11                         Ok
         <listitem>
           <para>Place the file in
           <filename>$USERPROFILE/.jmodelica.org/</filename> (Windows) or
-          <filename>$HOME/.jmodelica.org/</filename> (unix). To find out what
+          <filename>$HOME/.jmodelica.org/</filename> (unix). To find out where
           <literal>$USERPROFILE</literal> or <literal>$HOME</literal> points
           to, open a Python shell and type:</para>
 

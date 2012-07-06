@@ -242,7 +242,7 @@ package JacGenTests
   equation
     der(x1) = atan2(x1, x2);
     der(x2) = atan2(x2, x1);
-	der(x2) = atan2(x2, x3);
+	der(x3) = atan2(x2, x3);
     y =   x1;
   end JacTestAtan2;
   
@@ -340,7 +340,6 @@ package JacGenTests
 	end when;
   end JacTestWhenElse;
   
-  
   model JacTestWhenPre
 	Real xx(start=2);
 	discrete Real x; 
@@ -427,22 +426,29 @@ package JacGenTests
   end JacTestIfExpression1; 
   
   
-  model JacTestIfExpression2
-	Real x[3] = 7:9;
-	Real z(start=1);
-	Boolean y[2] = {false, 	true};
-  equation
-	if y[1] then
-		x = 1:3;
-	elseif y[2] then
-		if false then
-			x = 1:3;
-		else
-			x = 4:6;
+	model JacTestIfExpression2
+		Real x1(start = 7);
+		Real x2(start = 8);
+		Real z(start=2);
+		Boolean y = true;
+	equation
+		if not y then
+			der(x1) = 2;
+			der(x2) = 3;
+		elseif y then
+			if y then
+				der(x1) = 4;
+				der(x2) = 5;
+			else
+				der(x1) = 6;
+				der(x2) = 7;
+			end if;
+		else 
+			der(x1) = 1;
+			der(x2) = 1;
 		end if;
-	end if;
-	der(z) = sum(x); 
-  end JacTestIfExpression2;
+		der(z) = x1+x2; 
+	end JacTestIfExpression2;
   
   
   model JacTestIfExpression3
@@ -452,22 +458,24 @@ package JacGenTests
       Real z2(start = 4);
   equation
 	if time < 1 then
-	  y = z2 - 1;
-	  z1 = 2;
-	  x = y * y;
-	  z1 + z2 = x + y;
+	  der(x)=y;
+	  der(y)=y;
+	  der(z1)=y;
+	  der(z2)=y;
 	else
-	  x = 4;
+	  der(x) = x;
 	  if time < 3 then
-		  y = 2;
-		  z1 = y * x;
+		  der(y) = x;
+		  der(z1) = y * x;
 	  else
-		  y = x + 2;
-		  z2 = 4 * x;
+		  der(y) = x;
+		  der(z1) = y * x;
 	  end if;
-	  z1 + z2 = x - y;
+	  der(z2) = x;
 	end if;
   end JacTestIfExpression3;
+  
+  
   
 
   // Example from Petter Lindholms (see above) thesis.
@@ -488,6 +496,18 @@ package JacGenTests
     der(x) = if(x < 2) then 0.3 else u;
 	y = x;
   end JacTestIfEquation2;
+  
+    model JacTestIfEquation3
+    Real x(start = 3);
+	input Real u(start = 10);
+	output Real y;
+  equation
+    der(x) = if(time < 1) then 
+				if(x < 2) then 0.3 else u
+			else
+				if(x > 1) then 0.8 else 2*u;
+	y = x;
+  end JacTestIfEquation3;
   
   
   model JacTestIfFunctionRecord
@@ -522,11 +542,11 @@ package JacGenTests
 		input Real x;
 		output Real y;
 	algorithm
-		y := x^2;
+		y := x;
 	end F;
-	Real a(start=5);
+	Real a(start=2);
 	equation
-		der(a) = F(a)+a;
+		der(a) = F(a);
   end JacTestFunction1;
   
   
@@ -547,5 +567,111 @@ package JacGenTests
 	equation
 		der(a) = F(a)+F2(a);
   end JacTestFunction2;
+  
+  model JacTestFunction3
+	function F
+		input Real x;
+		output Real y;
+	algorithm
+		y := log(x);
+	end F;
+	function F2
+		input Real x;
+		output Real y;
+	algorithm
+		y := F(x);
+	end F2;
+	Real x(start=5);
+	equation
+		der(x) = F2(x);
+  end JacTestFunction3; 
+  
+  model JacTestFunction4
+	function F
+		input Real x;
+		output Real a;
+		output Real b;
+		output Real c;
+	algorithm
+		a := x*2;
+		b := x*4;
+		c := x*8;
+	end F;
+	Real x(start=5);
+	equation
+		der(x) = F(x);
+  end JacTestFunction4; 
+  
+  
+  model JacTestFunction5
+	function F
+		input Real x;
+		output Real a;
+		output Real b;
+		output Real c;
+	algorithm
+		a := x*2;
+		b := x*4;
+		c := x*8;
+	end F;
+	function F2
+		input Real x;
+		output Real a;
+	algorithm
+		a := F(x)*x;
+	end F2;
+	Real x(start=5);
+	equation
+		der(x) = F2(x);
+  end JacTestFunction5; 
+  
+  model JacTestFunction6
+	function F
+		input Real x;
+		output Real a;
+		output Real b;
+		output Real c;
+	algorithm
+		a := x*2;
+		b := x*4;
+		c := x*8;
+	end F;
+	Real x(start=5);
+	Real y(start=10);
+	Real z(start=10);
+	Real a(start=15);
+	equation
+		(x,y,z) = F(a);
+		der(a)  = x+y+z;
+  end JacTestFunction6; 
+  
+  model JacTestFunction7
+	function F
+		input Real x;
+		output Real a;
+		output Real b;
+		output Real c;
+	algorithm
+		a := x*2;
+		b := x*4;
+		c := x*8;
+	end F;
+	Real x(start=5);
+	Real y(start=10);
+	Real a(start=15);
+	equation
+		(x,y) = F(a);
+		der(a)  = x+y;
+  end JacTestFunction7; 
+  
+  
+  model JacTestInput
+	Real x(start=1);
+	input Real u;
+  equation
+	der(x) = if(u>5) then x else u;
+  
+  end JacTestInput;
+  
   
 end JacGenTests;

@@ -824,4 +824,31 @@ Semantic error at line 796, column 23:
 end FunctionEval23;
 
 
+model StringConcat
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.EvalTestCase(
+         name="StringConcat",
+         description="",
+         variables="
+b
+c[1]
+c[2]
+d[1]
+d[2]
+",
+         values="
+\"12\"
+\"13\"
+\"23\"
+\"13\"
+\"24\"
+")})));
+
+ Real a = 1;
+ parameter String b = "1" + "2";
+ parameter String[2] c = { "1", "2" } .+ "3";
+ parameter String[2] d = { "1", "2" } + { "3", "4" };
+end StringConcat;
+
+
 end EvaluationTests;

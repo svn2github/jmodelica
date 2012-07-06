@@ -132,17 +132,17 @@
       </listitem>
 
       <listitem>
-        <para>Currently, JModelica.org features tree different algorithm for
-        solving dynamic optimization problems. There are two different
-        algorithms based on collocation on finite elements and relies on the
-        solver IPOPT<indexterm class="singular">
+        <para>Currently, JModelica.org features four different algorithms for
+        solving dynamic optimization problems. There are three different
+        algorithms based on direct collocation, which rely on the solver
+        IPOPT<indexterm class="singular">
             <primary>IPOPT</primary>
-          </indexterm> for obtaining a solution of the resulting NLP. The
+          </indexterm> for obtaining a solution to the resulting NLP. The
         default algorithm is encoded in C and relies on CppAD for computing
-        the NLP derivatives. The other algorithm is developed in Python and
-        relies on CasADi for computing derivatives. There is also a derivative
-        free optimization algorithm for model calibration based on measurement
-        data that is applicable to FMUs.</para>
+        the NLP derivatives. The other two algorithms are developed in Python
+        and rely on CasADi for computing derivatives. There is also a
+        derivative free optimization algorithm for model calibration based on
+        measurement data that is applicable to FMUs.</para>
       </listitem>
 
       <listitem>

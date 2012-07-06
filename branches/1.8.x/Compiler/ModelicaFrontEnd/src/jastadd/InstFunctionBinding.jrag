@@ -266,6 +266,7 @@ aspect InstFunctionBinding {
 				map.put("zeros",        new InfArgsBuiltInCreator(new FZeros(),      0));
 				map.put("fill",         new InfArgsBuiltInCreator(new FFillExp(),    1));
 				map.put("cat",          new InfArgsBuiltInCreator(new FCatExp(),     1));
+				map.put("String",       new InfArgsBuiltInCreator(new FStringExp(),  1));
 				//       name                                         node        min/max # args
 				map.put("size",         new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
 				map.put("min",          new VarArgsBuiltInCreator(new FMinExp(),  1, 2));

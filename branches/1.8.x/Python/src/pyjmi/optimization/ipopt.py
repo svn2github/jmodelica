@@ -26,7 +26,8 @@ import numpy as N
 import numpy.ctypeslib as Nct
 
 import pyjmi
-from pyjmi import jmi
+from pyjmi.jmi import JMIException, IpoptException, _returns_ndarray, _translate_value_ref
+from pyjmi.jmi import JMI_SCALING_VARIABLES, JMI_DER_CPPAD
 from pyjmi.jmi_io import export_result_dymola as jmi_io_export_result_dymola
 from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
 
@@ -71,7 +72,7 @@ class CollocationOptimizer(object):
                 byref(self._ipopt_opt), self._nlp_collocation._jmi_opt_coll) == 0, \
                    "jmi_opt_coll_ipopt_new returned non-zero"
         except AttributeError, e:
-            raise jmi.JMIException("Can not create JMISimultaneousOptIPOPT \
+            raise JMIException("Can not create JMISimultaneousOptIPOPT \
             object. Please recompile model with target='ipopt")
         
         assert self._ipopt_opt.value is not None, \
@@ -111,7 +112,17 @@ class CollocationOptimizer(object):
         """
         if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_solve(
             self._ipopt_opt) > 1:
-            raise jmi.JMIException("Solving IPOPT failed.")
+            raise JMIException("Solving IPOPT failed.")
+        
+        # Check return status from Ipopt and raise exception if not ok
+        (return_status, nbr_iters, obj_final, tot_exec_time) = self.opt_coll_ipopt_get_statistics()
+        # Return code should be one of (taken from IpReturnCodes.inc):
+        # 0: IP_SOLVE_SUCCEEDED
+        # 1: IP_ACCEPTABLE_LEVEL
+        # 6: IP_FEASIBLE_POINT_FOUND
+        if return_status not in (0, 1, 6):
+            raise IpoptException("Ipopt failed with return code: " + str(return_status) + \
+                                 " Please see Ipopt documentation for more information.")
     
     def opt_coll_ipopt_set_string_option(self, key, val):
         """ 
@@ -127,7 +138,7 @@ class CollocationOptimizer(object):
         """
         if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_string_option(
             self._ipopt_opt, key, val) is not 0: 
-                raise jmi.JMIException("The Ipopt string option \
+                raise JMIException("The Ipopt string option \
                 " + key + " is unknown")
         
     def opt_coll_ipopt_set_int_option(self, key, val):
@@ -144,7 +155,7 @@ class CollocationOptimizer(object):
         """        
         if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_int_option(
             self._ipopt_opt, key, val) is not 0:
-            raise jmi.JMIException("The Ipopt integer option \
+            raise JMIException("The Ipopt integer option \
             " + key + " is unknown")
 
     def opt_coll_ipopt_set_num_option(self, key, val):
@@ -161,7 +172,7 @@ class CollocationOptimizer(object):
         """
         if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_num_option(
             self._ipopt_opt, key, val) is not 0:
-            raise jmi.JMIException("The Ipopt real option \
+            raise JMIException("The Ipopt real option \
             " + key + " is unknown")
 
     def opt_coll_ipopt_get_statistics(self):
@@ -192,7 +203,7 @@ class CollocationOptimizer(object):
             byref(iters),
             byref(objective),
             byref(exec_time)) is not 0:
-            raise jmi.JMIException(
+            raise JMIException(
                 "Error when retrieve statistics - optimization problem may not be solved.")
         return (return_code.value,iters.value,objective.value,exec_time.value)
 
@@ -211,7 +222,7 @@ class NLPCollocation(object):
         
             JMIException if used.
          """
-        raise jmi.JMIException("This class can not be instantiated. ")
+        raise JMIException("This class can not be instantiated. ")
     
     def _initialize(self, model):
         self._model = model
@@ -443,7 +454,7 @@ class NLPCollocation(object):
 
 
             # n_real_x from jmi_opt_coll_get_dimensions
-            jmi._returns_ndarray(self._model.jmimodel._dll.jmi_opt_coll_get_x, 
+            _returns_ndarray(self._model.jmimodel._dll.jmi_opt_coll_get_x, 
                 c_jmi_real_t, n_real_x.value, order='C')
         except AttributeError, e:
             pass
@@ -919,11 +930,11 @@ class NLPCollocation(object):
             for name in p_opt_names:
                 try:
                     ref = self._model.get_value_reference(name)
-                    (z_i, ptype) = jmi._translate_value_ref(ref)
+                    (z_i, ptype) = _translate_value_ref(ref)
                     i_pi = z_i - self._model._offs_real_pi.value
                     i_pi_opt = p_opt_indices.index(i_pi)
                     traj = res.get_variable_data(name)
-                    if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+                    if self._model.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
                         p_opt_data[i_pi_opt] = traj.x[0]/sc[z_i]
                     else:
                         p_opt_data[i_pi_opt] = traj.x[0]
@@ -954,7 +965,7 @@ class NLPCollocation(object):
                 #print(name)
                 #print(col_index)
                 traj = res.get_variable_data(name)
-                if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+                if self._model.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
                     var_data[:,col_index] = traj.x/sc_dx[dx_index]*dx_factor
                 else:
                     var_data[:,col_index] = traj.x*dx_factor
@@ -969,7 +980,7 @@ class NLPCollocation(object):
                 #print(name)
                 #print(col_index)
                 traj = res.get_variable_data(name)
-                if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+                if self._model.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
                     var_data[:,col_index] = traj.x/sc_x[x_index]
                 else:
                     var_data[:,col_index] = traj.x
@@ -986,12 +997,12 @@ class NLPCollocation(object):
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 if not res.is_variable(name):
-                    if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+                    if self._model.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
                         var_data[:,col_index] = N.ones(n_points)*traj.x[0]/sc_u[u_index]
                     else:
                         var_data[:,col_index] = N.ones(n_points)*traj.x[0]
                 else:
-                    if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+                    if self._model.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
                         var_data[:,col_index] = traj.x/sc_u[u_index]
                     else:
                         var_data[:,col_index] = traj.x
@@ -1008,12 +1019,12 @@ class NLPCollocation(object):
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 if not res.is_variable(name):
-                    if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+                    if self._model.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
                         var_data[:,col_index] = N.ones(n_points)*traj.x[0]/sc_w[w_index]
                     else:
                         var_data[:,col_index] = N.ones(n_points)*traj.x[0]
                 else:
-                    if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+                    if self._model.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
                         var_data[:,col_index] = traj.x/sc_w[w_index]
                     else:
                         var_data[:,col_index] = traj.x
@@ -1051,7 +1062,7 @@ class NLPCollocation(object):
         if self._model.jmimodel._dll.jmi_opt_coll_get_dimensions(
             self._jmi_opt_coll, byref(n_real_x), byref(n_g), byref(n_h), 
             byref(dg_n_nz), byref(dh_n_nz)) is not 0:
-            raise jmi.JMIException("Getting the number of variables and \
+            raise JMIException("Getting the number of variables and \
             constraints failed.")
         return n_real_x.value, n_g.value, n_h.value, dg_n_nz.value, dh_n_nz.value
 
@@ -1066,7 +1077,7 @@ class NLPCollocation(object):
         n_e = ct.c_int()
         if self._model.jmimodel._dll.jmi_opt_coll_get_n_e(
             self._jmi_opt_coll,byref(n_e)) is not 0:
-            raise jmi.JMIException("Getting the optimization interval \
+            raise JMIException("Getting the optimization interval \
             data failed.")
         return n_e.value
 
@@ -1092,7 +1103,7 @@ class NLPCollocation(object):
         if self._model.jmimodel._dll.jmi_opt_coll_get_interval_spec(
             self._jmi_opt_coll, start_time, start_time_free, final_time, 
             final_time_free) is not 0:
-            raise jmi.JMIException("Getting the optimization interval \
+            raise JMIException("Getting the optimization interval \
             data failed.")
         
     def opt_coll_get_x(self):
@@ -1117,7 +1128,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_get_initial(
             self._jmi_opt_coll, x_init) is not 0:
-            raise jmi.JMIException("Getting the initial point failed.")
+            raise JMIException("Getting the initial point failed.")
 
     def opt_coll_set_initial(self, x_init):
         """ 
@@ -1130,7 +1141,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_set_initial(
             self._jmi_opt_coll, x_init) is not 0:
-            raise jmi.JMIException("Setting the initial point failed.")
+            raise JMIException("Setting the initial point failed.")
  
     def opt_coll_set_initial_from_trajectory(self, p_opt_init, 
         trajectory_data_init, traj_n_points, hs_init, start_time_init, 
@@ -1175,7 +1186,7 @@ class NLPCollocation(object):
         sum = self._model._n_real_x.value + self._model._n_real_dx.value \
             + self._model._n_real_u.value + self._model._n_real_w.value + 1
         if sum*traj_n_points != len(trajectory_data_init):
-            raise jmi.JMIException(
+            raise JMIException(
                 "trajectory_data_init vector has the wrong size.")
         if self._model.jmimodel._dll.jmi_opt_coll_set_initial_from_trajectory(
             self._jmi_opt_coll, \
@@ -1185,7 +1196,7 @@ class NLPCollocation(object):
             hs_init, \
             start_time_init, \
             final_time_init) is not 0:
-            raise jmi.JMIException("Setting the initial point failed.")
+            raise JMIException("Setting the initial point failed.")
 
     def opt_coll_get_bounds(self, x_lb, x_ub):
         """ 
@@ -1201,7 +1212,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_get_bounds(
             self._jmi_opt_coll, x_lb, x_ub) is not 0:
-            raise jmi.JMIException("Getting upper and lower bounds of the \
+            raise JMIException("Getting upper and lower bounds of the \
             optimization variables failed.")
 
     def opt_coll_set_bounds(self, x_lb, x_ub):
@@ -1218,7 +1229,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_set_bounds(
             self._jmi_opt_coll, x_lb, x_ub) is not 0:
-            raise jmi.JMIException("Getting upper and lower bounds of the \
+            raise JMIException("Getting upper and lower bounds of the \
             optimization variables failed.")
         
     def opt_coll_f(self, f):
@@ -1232,7 +1243,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_f(
             self._jmi_opt_coll, f) is not 0:
-            raise jmi.JMIException("Getting the cost function failed.")
+            raise JMIException("Getting the cost function failed.")
         
     def opt_coll_df(self, df):
         """ 
@@ -1246,7 +1257,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_df(
             self._jmi_opt_coll, df) is not 0:
-            raise jmi.JMIException("Getting the gradient of the cost function \
+            raise JMIException("Getting the gradient of the cost function \
             value failed.")
         
     def opt_coll_g(self, res):
@@ -1260,7 +1271,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_g(
             self._jmi_opt_coll, res) is not 0:
-            raise jmi.JMIException("Getting the residual of the inequality \
+            raise JMIException("Getting the residual of the inequality \
             constraints failed.")
         
     def opt_coll_dg(self, jac):
@@ -1275,7 +1286,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_dg(
             self._jmi_opt_coll, jac) is not 0:
-            raise jmi.JMIException("Getting the Jacobian of the residual of \
+            raise JMIException("Getting the Jacobian of the residual of \
             the inequality constraints failed.")
         
     def opt_coll_dg_nz_indices(self, irow, icol):
@@ -1294,7 +1305,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_dg_nz_indices(
             self._jmi_opt_coll, irow, icol) is not 0:
-            raise jmi.JMIException("Getting the indices of the non-zeros in \
+            raise JMIException("Getting the indices of the non-zeros in \
             the equality constraint Jacobian failed.")
         
     def opt_coll_h(self, res):
@@ -1308,7 +1319,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_h(
             self._jmi_opt_coll, res) is not 0:
-            raise jmi.JMIException("Getting the residual of the equality \
+            raise JMIException("Getting the residual of the equality \
             constraints failed.")
         
     def opt_coll_dh(self, jac):
@@ -1323,7 +1334,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_dh(
             self._jmi_opt_coll, jac) is not 0:
-            raise jmi.JMIException("Getting the Jacobian of the residual of \
+            raise JMIException("Getting the Jacobian of the residual of \
             the equality constraints.")
         
     def opt_coll_dh_nz_indices(self, irow, icol):
@@ -1342,7 +1353,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_dh_nz_indices(
             self._jmi_opt_coll, irow, icol) is not 0:
-            raise jmi.JMIException("Getting the indices of the non-zeros in \
+            raise JMIException("Getting the indices of the non-zeros in \
             the equality constraint Jacobian failed.")
         
     def opt_coll_write_file_matlab(self, file_name):
@@ -1356,7 +1367,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_write_file_matlab(
             self._jmi_opt_coll, file_name) is not 0:
-            raise jmi.JMIException("Writing the optimization result to file in \
+            raise JMIException("Writing the optimization result to file in \
             Matlab format failed.")
         
     def opt_coll_get_result_variable_vector_length(self):
@@ -1370,7 +1381,7 @@ class NLPCollocation(object):
         n = ct.c_int()
         if self._model.jmimodel._dll.jmi_opt_coll_get_result_variable_vector_length(
             self._jmi_opt_coll, byref(n)) is not 0:
-            raise jmi.JMIException("Getting the length of the result variable \
+            raise JMIException("Getting the length of the result variable \
             vectors failed.")
         return n.value
         
@@ -1401,7 +1412,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_get_result(
             self._jmi_opt_coll, p_opt, t, dx, x, u, w) is not 0:
-            raise jmi.JMIException("Getting the results failed.")
+            raise JMIException("Getting the results failed.")
 
     def opt_coll_get_result_element_interpolation(self, 
         n_interpolation_points, p_opt, t, dx, x, u, w):
@@ -1434,7 +1445,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_get_result_element_interpolation(
             self._jmi_opt_coll, n_interpolation_points,p_opt, t, dx, x, u, w) is not 0:
-            raise jmi.JMIException("Getting the results failed.")
+            raise JMIException("Getting the results failed.")
 
     def opt_coll_get_result_mesh_interpolation(self, mesh, n_mesh, p_opt, t, dx, 
         x, u, w):
@@ -1467,7 +1478,7 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_coll_get_result_mesh_interpolation(
             self._jmi_opt_coll, mesh,n_mesh,p_opt, t, dx, x, u, w) is not 0:
-            raise jmi.JMIException("Getting the results failed.")
+            raise JMIException("Getting the results failed.")
             
 
 class NLPCollocationLagrangePolynomials(NLPCollocation):
@@ -1528,7 +1539,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                 operator or rewriting the model.")
         
         if len(hs) != n_e:
-            raise jmi.JMIException("arg hs is not of length n_e")
+            raise JMIException("arg hs is not of length n_e")
         
         self._model=model
         self._n_e = n_e
@@ -1598,11 +1609,11 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                 _tf_ub, _hs_ub, _linearity_information_provided, 
                 _p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin, _dx_tp_lin, 
                 _x_tp_lin, _u_tp_lin, _w_tp_lin, n_cp,
-                jmi.JMI_DER_CPPAD,N.size(self._blocking_factors),
+                JMI_DER_CPPAD,N.size(self._blocking_factors),
                 self._blocking_factors) is 0, \
                 " jmi_opt_lp_new returned non-zero."
         except AttributeError,e:
-             raise jmi.JMIException("Can not create \
+             raise JMIException("Can not create \
              NLPCollocationLagrangePolynomials object. Try recompiling \
              model with target='algorithms'")
         
@@ -1803,11 +1814,11 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                 Specify evaluation of the k:th Lagrange polynomial.
         """
         if len(pol)!=n*n:
-            raise jmi.JMIException(
+            raise JMIException(
                 "argument pol has the wrong size. Should be n*n.")
         if self._model.jmimodel._dll.jmi_opt_coll_radau_eval_pol(
             tau, n, pol, k) is not 0:
-            raise jmi.JMIException("Evaluating Lagrange polynomial failed.")
+            raise JMIException("Evaluating Lagrange polynomial failed.")
         
     
     def opt_coll_radau_get_pols(self, n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, 
@@ -1886,5 +1897,5 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         if self._model.jmimodel._dll.jmi_opt_coll_radau_get_pols(
             n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, Lpp_dot_coeffs, 
             Lp_dot_vals, Lpp_dot_vals) is not 0:
-            raise jmi.JMIException("Getting sim lp pols failed.")
+            raise JMIException("Getting sim lp pols failed.")
 

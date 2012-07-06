@@ -78,6 +78,10 @@ class TestLocalDAECollocator:
         class_path = "VDP_pack.VDP_Opt_Initial_Equations"
         compile_fmux(class_path, file_path)
         
+        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        class_path = "VDP_pack.VDP_Opt_Scaled_Min_Time"
+        compile_fmux(class_path, file_path)
+        
         file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR_Opt_Bounds_Lagrange"
         compile_fmux(class_path, file_path)
@@ -113,6 +117,10 @@ class TestLocalDAECollocator:
         fmux_vdp_initial_equations = 'VDP_pack_VDP_Opt_Initial_Equations.fmux'
         self.model_vdp_initial_equations = CasadiModel(
                 fmux_vdp_initial_equations, verbose=False)
+        
+        fmux_vdp_scaled_min_time = 'VDP_pack_VDP_Opt_Scaled_Min_Time.fmux'
+        self.model_vdp_scaled_min_time = CasadiModel(
+                fmux_vdp_scaled_min_time, verbose=False)
         
         fmux_cstr_lagrange = "CSTR_CSTR_Opt_Bounds_Lagrange.fmux"
         self.model_cstr_lagrange = CasadiModel(fmux_cstr_lagrange,
@@ -234,6 +242,25 @@ class TestLocalDAECollocator:
         z_scaled = res['sys.z']
         N.testing.assert_allclose(w_scaled, w_ref, 1e-2)
         N.testing.assert_allclose(z_scaled, z_ref, 1e-2)
+    
+    @testattr(casadi = True)
+    def test_point_constraints(self):
+        """Test point constraints for a scaled minimum time problem."""
+        model = self.model_vdp_scaled_min_time
+        
+        # References values
+        cost_ref = 2.2811590707107996e0
+        u_norm_ref = 9.991517452037317e-1
+        
+        # Radau
+        opts = model.optimize_options(self.algorithm)
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Gauss
+        opts['discr'] = "LG"
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
     
     @testattr(casadi = True)
     def test_path_constraints(self):

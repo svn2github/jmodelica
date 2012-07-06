@@ -169,10 +169,14 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 			
 			if(generateEqu){
 				//Constraints
-				genPrinter.println(indent+"<opt:Constraints>");
-				for(FConstraint c : optClass.constraints())
+				genPrinter.println(indent+"<opt:PathConstraints>");
+				for(FConstraint c : optClass.pathConstraints())
 					c.prettyPrint_XML(genPrinter,indent+"\t");	
-				genPrinter.println(indent+"</opt:Constraints>");
+				genPrinter.println(indent+"</opt:PathConstraints>");
+				genPrinter.println(indent+"<opt:PointConstraints>");
+				for(FConstraint c : optClass.pointConstraints())
+					c.prettyPrint_XML(genPrinter,indent+"\t");	
+				genPrinter.println(indent+"</opt:PointConstraints>");
 			}
 			genPrinter.println("\t</opt:Optimization>");
 		}
@@ -217,11 +221,18 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	
 	//XML code generatorio for the time points
 	private void timePoints_XML(PrintStream genPrinter, FOptClass optClass, String indent){
+		
 		double[] points = optClass.timePoints();
 		
 		for(int i=0;i<points.length;i++) {
-			genPrinter.println(indent + "<opt:Index>" + optClass.timePointIndex(points[i]) + "</opt:Index>");
-			genPrinter.println(indent + "<opt:Value>" + points[i] + "</opt:Value>");
+			genPrinter.println(indent + "<opt:TimePoint index = \"" + optClass.timePointIndex(points[i]) + 
+			                 "\" value = \"" + points[i] + "\">");
+			for (FVariable fv : optClass.timePointFVariables(points[i])) {
+                                genPrinter.println(indent + "\t" + "<opt:QualifiedName>");
+					fv.getFQName().prettyPrint_XML(genPrinter,indent+"\t\t");
+                                genPrinter.println(indent + "\t" + "</opt:QualifiedName>");
+			}                 
+			genPrinter.println(indent + "</opt:TimePoint>");              
 		}
 	}
 	

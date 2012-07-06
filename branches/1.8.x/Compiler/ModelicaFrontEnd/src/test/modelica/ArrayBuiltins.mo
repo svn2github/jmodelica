@@ -457,17 +457,12 @@ model MinExp3
 		 flatModel="
 fclass ArrayBuiltins.Min.MinExp3
  constant String x = min(\"foo\", \"bar\");
- discrete String y;
-initial equation 
- pre(y) = \"\";
-equation
- y = \"bar\";
-
+ parameter String y = \"bar\";
 end ArrayBuiltins.Min.MinExp3;
 ")})));
 
  constant String x = min("foo", "bar");
- String y = x;
+ parameter String y = x;
 end MinExp3;
 
 
@@ -686,17 +681,12 @@ model MaxExp3
 		 flatModel="
 fclass ArrayBuiltins.Max.MaxExp3
  constant String x = max(\"foo\", \"bar\");
- discrete String y;
-initial equation 
- pre(y) = \"\";
-equation
- y = \"foo\";
-
+ parameter String y = \"foo\";
 end ArrayBuiltins.Max.MaxExp3;
 ")})));
 
  constant String x = max("foo", "bar");
- String y = x;
+ parameter String y = x;
 end MaxExp3;
 
 
@@ -1310,9 +1300,12 @@ model Cross6
 		 errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Compliance error at line 6454, column 7:
+  String variables are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 6456, column 22:
   Calling function cross(): types of positional argument 1 and input x are not compatible
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+  Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 6456, column 37:
   Calling function cross(): types of positional argument 2 and input y are not compatible
 ")})));
@@ -1424,12 +1417,12 @@ model ArrayCat3
 		 description="cat() operator: using strings",
 		 flatModel="
 fclass ArrayBuiltins.Cat.ArrayCat3
- discrete String x[2,5] = cat(2, {{\"1\",\"2\"},{\"6\",\"7\"}}, {{\"3\"},{\"8\"}}, {{\"4\",\"5\"},{\"9\",\"0\"}});
+ parameter String x[2,5] = cat(2, {{\"1\",\"2\"},{\"6\",\"7\"}}, {{\"3\"},{\"8\"}}, {{\"4\",\"5\"},{\"9\",\"0\"}});
 
 end ArrayBuiltins.Cat.ArrayCat3;
 ")})));
 
- String x[2,5] = cat(2, {{"1","2"},{"6","7"}}, {{"3"},{"8"}}, {{"4","5"},{"9","0"}});
+ parameter String x[2,5] = cat(2, {{"1","2"},{"6","7"}}, {{"3"},{"8"}}, {{"4","5"},{"9","0"}});
 end ArrayCat3;
 
 

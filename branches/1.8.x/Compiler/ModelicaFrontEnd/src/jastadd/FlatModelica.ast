@@ -143,7 +143,7 @@ abstract FTypePrefixVariability : FTypePrefix;
 /**
  * \brief Continuous (default) variability.
  *
- * Continuous is not a valid prefix but is used to identify  expressions that 
+ * Continuous is not a valid prefix but is used to identify expressions that 
  * are not declared as parameters, constants, or discrete.
  */
 FContinuous : FTypePrefixVariability;
@@ -372,8 +372,7 @@ FAttribute : BaseNode ::= Type:FIdUse
                           FAttribute*;
 
 /**
- * \brief An internal generated attribute that is removed during the transform 
- *        canonical step.
+ * \brief An internal generated attribute that is removed during the scalarization step.
  */
 FInternalAttribute : FAttribute;
 
@@ -459,7 +458,7 @@ FFunctionCallEquation : FAbstractEquation ::= Left:FFunctionCallLeft* Call:FAbst
 /**
  * \brief A class for storing hand guided tearing variables.
  */
-FResidues : BaseNode ::= FIdUseExp*;
+FResidues : BaseNode ::= Residue:FExp*;
 
 /**
  * \brief One of the left hand side variables in a function call equation. 
@@ -1256,6 +1255,11 @@ FFillExp : FInfArgsFunctionCall ::= FillExp:FExp;
  * \brief Common base class for FMinExp & FMaxExp.
  */
 abstract FMinMaxExp : FBuiltInFunctionCall ::= X:FExp [Y:FExp];
+
+/**
+ * String conversion operator.
+ */
+FStringExp : FInfArgsFunctionCall ::= Value:FExp;
 
 /**
  * \brief Min built-in function.

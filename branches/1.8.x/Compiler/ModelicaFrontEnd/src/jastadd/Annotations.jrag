@@ -731,7 +731,11 @@ aspect AnnotationAPI {
 		
 		@Override
 		public Iterator<AnnotationNode> iterator() {
-			return mod.getClassModification().annotationNode().iterator();
+			Iterator<AnnotationNode> it = mod.getClassModification().annotationNode().iterator();
+			if (mod.hasValueModification() && !it.hasNext())
+				return mod.getValueModification().annotationNode().iterator();
+			else
+				return it;
 		}
 		
 		@Override

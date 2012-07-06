@@ -951,6 +951,15 @@ aspect Flattening {
 	inh boolean InstModification.isOnPrimitiveTypeDecl();
 	eq InstExtends.getChild().isOnPrimitiveTypeDecl() = extendsPrimitive();
 	eq InstNode.getChild().isOnPrimitiveTypeDecl()    = false;
+	
+	
+	public FResidues FResidues.flatten(FQName prefix) {
+		FResidues flattened = new FResidues();
+		for (FExp e : getResidues()) {
+			flattened.addResidue(e.flatten(prefix));
+		}
+		return flattened;
+	}
 
 }
 
@@ -1014,7 +1023,7 @@ aspect FlatExpressions {
 	}
 
 	public FEquation FEquation.flattenEqn(FQName prefix, FClass fc) {
-		return new FEquation(getType().flatten(prefix), buildResidues(), getLeft().flatten(prefix), getRight().flatten(prefix));
+		return new FEquation(getType().flatten(prefix), hasResidues() ? getResidues().flatten(prefix) : null, getLeft().flatten(prefix), getRight().flatten(prefix));
 	}
 
 	public FForClauseE InstForClauseE.flattenEqn(FQName prefix, FClass fc) {
@@ -1441,6 +1450,8 @@ aspect FlatExpressions {
 	public FInitialExp FInitialExp.flatten(FQName prefix) { return new FInitialExp(); }
 	public FSmoothExp  FSmoothExp.flatten(FQName prefix)  { return new FSmoothExp(getOrder().flatten(prefix), getFExp().flatten(prefix)); }
 	
+	public FStringExp  FStringExp.flatten(FQName prefix)  { return new FStringExp(new List(), getValue().flatten(prefix)); }
+	
 	
 	public FMinMaxExp FMinMaxExp.flatten(FQName prefix) { 
 		return createNode(getX().flatten(prefix), hasY() ? getY().flatten(prefix) : null); 
@@ -1599,7 +1610,7 @@ aspect InstantiatedExpressions {
 	}
 
 	public FAbstractEquation Equation.instantiate() {
-		return copyLocationTo(new FEquation(equationType(), 
+		return copyLocationTo(new FEquation(equationType(), buildResidues(), 
 				getLeft().instantiate(), getRight().instantiate()));
 	}
 

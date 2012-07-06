@@ -398,7 +398,7 @@ Semantic error at line 338, column 17:
   Calling function abs(): types of positional argument 1 and input v are not compatible
 ")})));
 
- String x = abs("-1");
+ parameter String x = abs("-1");
 end AbsType5;
 
 

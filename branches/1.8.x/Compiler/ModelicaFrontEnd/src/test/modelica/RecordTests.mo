@@ -765,7 +765,7 @@ public
  record RecordTests.RecordConstructor1.A
   Real a;
   discrete Integer b;
-  discrete String c;
+  parameter String c;
  end RecordTests.RecordConstructor1.A;
 
 end RecordTests.RecordConstructor1;
@@ -774,7 +774,7 @@ end RecordTests.RecordConstructor1;
  record A
   Real a;
   Integer b;
-  String c;
+  parameter String c;
  end A;
  
  A x = A(1.0, 2, "foo");
@@ -794,7 +794,7 @@ public
  record RecordTests.RecordConstructor2.A
   Real a;
   discrete Integer b;
-  discrete String c;
+  parameter String c;
  end RecordTests.RecordConstructor2.A;
 
 end RecordTests.RecordConstructor2;
@@ -803,7 +803,7 @@ end RecordTests.RecordConstructor2;
  record A
   Real a;
   Integer b;
-  String c;
+  parameter String c;
  end A;
  
  A x = A(c="foo", a=1.0, b=2);
@@ -823,7 +823,7 @@ public
  record RecordTests.RecordConstructor3.A
   Real a;
   discrete Integer b = 0;
-  discrete String c = \"foo\";
+  constant String c = \"foo\";
  end RecordTests.RecordConstructor3.A;
 
 end RecordTests.RecordConstructor3;
@@ -832,7 +832,7 @@ end RecordTests.RecordConstructor3;
  record A
   Real a;
   Integer b = 0;
-  String c = "foo";
+  constant String c = "foo";
  end A;
  
  A x = A(1, 2);
@@ -854,7 +854,7 @@ Semantic error at line 775, column 18:
  record A
   Real a;
   Integer b;
-  String c;
+  parameter String c;
  end A;
  
  A x = A(1.0, 2, 3);
@@ -876,7 +876,7 @@ Semantic error at line 786, column 8:
  record A
   Real a;
   Integer b;
-  String c;
+  parameter String c;
  end A;
  
  A x = A(1.0, 2);
@@ -898,7 +898,7 @@ Semantic error at line 808, column 25:
  record A
   Real a;
   Integer b;
-  String c;
+  parameter String c;
  end A;
  
  A x = A(1.0, 2, "foo", 0);

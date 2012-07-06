@@ -35,6 +35,14 @@ from pyjmi.common.core import TrajectoryLinearInterpolation
 from pyjmi.common.core import TrajectoryUserFunction
 
 try:
+    import assimulo
+    assimulo_present = True
+except:
+    logging.warning(
+        'Could not load Assimulo module. Check pyjmi.check_packages()')
+    assimulo_present = False
+
+if assimulo_present:
     from pyjmi.simulation.assimulo_interface import JMIDAE
     from pyjmi.simulation.assimulo_interface import JMIDAESens
     from pyjmi.simulation.assimulo_interface import write_data
@@ -44,11 +52,6 @@ try:
     from pyjmi.initialization.assimulo_interface import JMUAlgebraic
     from pyjmi.initialization.assimulo_interface import JMUAlgebraic_Exception
     from pyjmi.initialization.assimulo_interface import write_resdata
-    assimulo_present = True
-except:
-    logging.warning(
-        'Could not load Assimulo module. Check pyjmi.check_packages()')
-    assimulo_present = False
     
 from pyjmi.optimization.casadi_collocation import *
 
@@ -60,11 +63,13 @@ except:
 
 try:
     import casadi
-    from pyjmi.optimization.casadi_collocation import *
-    from pyjmi.optimization.polynomial import *
     casadi_present = True
 except:
     casadi_present = False
+    
+if casadi_present:
+    from pyjmi.optimization.casadi_collocation import *
+    from pyjmi.optimization.polynomial import *
 
 default_int = int
 int = N.int32

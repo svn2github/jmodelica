@@ -33,12 +33,17 @@ from pyjmi.initialization.ipopt import InitializationOptimizer
 from pyjmi.common.core import TrajectoryLinearInterpolation
 
 try:
+    import assimulo
+    assimulo_present = True
+except:
+    logging.warning(
+        'Could not load Assimulo module. Check pyfmi.check_packages()')
+    assimulo_present = False
+
+if assimulo_present:
     from assimulo.problem import Implicit_Problem
     from assimulo.problem import Explicit_Problem
     from assimulo.exception import *
-except ImportError:
-    logging.warning(
-        'Could not find Assimulo package. Check pyjmi.check_packages()')
 
 class JMIModel_Exception(Exception):
     """

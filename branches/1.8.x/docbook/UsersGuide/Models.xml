@@ -14,13 +14,13 @@
   <section xml:id="models_sec_introduction">
     <title>Introduction to models</title>
 
-    <para>Modelica and Optimica models can be compiled and loaded in the
-    JModelica.org Python interface as model objects. These model objects can
-    then be used for simulation and optimization purposes. This chapter will
-    cover how to compile Modelica and Optimica models, set compiler parameters
-    and options, load the compiled model in a Python model object and use the
-    model object to perform model manipulations such as setting and getting
-    parameters.</para>
+    <para>Modelica and Optimica models can be compiled and then loaded as
+    model objects using the JModelica.org Python interface. These model
+    objects can be used for both simulation and optimization purposes. This
+    chapter will cover how to compile Modelica and Optimica models, set
+    compiler options, load the compiled model in a Python model object and use
+    the model object to perform model manipulations such as setting and
+    getting parameters.</para>
 
     <section>
       <title>The different model objects in JModelica.org</title>
@@ -32,10 +32,11 @@
       <emphasis>JMU</emphasis>, which is a compressed file with a
       JModelica.org specific structure. The <literal>FMUModel</literal> is
       created by loading an <emphasis>FMU</emphasis> (Functional Mock-up
-      Unit), which is a compressed file following the FMI (Functional Mock-up
-      Interface) standard. The <literal>CasadiModel</literal> is created by
-      loading an <emphasis>FMUX</emphasis> which is a compressed file
-      containing the XML file needed to work with CasADI.</para>
+      Unit), which is a compressed file compliant with the FMI (Functional
+      Mock-up Interface) standard. The <literal>CasadiModel</literal> is
+      created by loading an <emphasis>FMUX</emphasis> which is a compressed
+      file containing the XML file needed to work with <link
+      xlink:href="http://sourceforge.net/apps/trac/casadi/">CasADI</link>.</para>
 
       <para>JMUs are created by compiling Modelica or Optimica models with
       JModelica.org. The JMU can then be loaded in a
@@ -56,8 +57,8 @@
       and thereby use the automatic differentiation tool CasADi for
       optimization purposes. Read more about CasADi and how a
       <literal>CasadiModel</literal> object can be used for optimization in
-      <xref linkend="opt_sec_pseudo-spectral" /> in <xref
-      linkend="ch_optimization" />.</para>
+      <xref linkend="opt_sec_pseudo-spectral"/> in <xref
+      linkend="ch_optimization"/>.</para>
     </section>
   </section>
 
@@ -68,15 +69,15 @@
     compiler function from the JModelica.org Python package
     <literal>pymodelica</literal>, specifying a model class and file location
     and performing the actual compilation. This will be demonstrated in <xref
-    linkend="models_sec_simple_jmu_compilation" /> for the JMU, in <xref
-    linkend="models_sec_simple_fmu_compilation" /> for the FMU and in <xref
-    linkend="models_sec_simple_fmux_compilation" /> for the FMUX.</para>
+    linkend="models_sec_simple_jmu_compilation"/> for the JMU, in <xref
+    linkend="models_sec_simple_fmu_compilation"/> for the FMU and in <xref
+    linkend="models_sec_simple_fmux_compilation"/> for the FMUX.</para>
 
     <para>For more advanced usage of the compiler functions, there are
     compiler options and parameters which can be modified. These will be
-    explained in <xref linkend="models_sec_compiler_settings" />.</para>
+    explained in <xref linkend="models_sec_compiler_settings"/>.</para>
 
-    <para><xref linkend="models_sec_compilation_in_more_detail" />, will go
+    <para><xref linkend="models_sec_compilation_in_more_detail"/>, will go
     through some parts of the compilation process and how to perform these
     steps one by one.</para>
 
@@ -104,30 +105,29 @@
       language="python"># Import the compiler function
 from pymodelica import compile_jmu
 
-# Specify Modelica model and model file
+# Specify Modelica or Optimica model and model file (.mo or .mop)
 model_name = 'myPackage.myModel'
-mo_file = 'myPackage.mo'
+mo_file = 'myModelFile.mo'
 
-# Compile the model, return argument is the file name of the JMU
-compile_jmu(model_name, mo_file)
-&gt;&gt; '.\\myPackage_myModel.jmu'
+# Compile the model and save the return argument, which is the file name of the JMU
+jmu_file = compile_jmu(model_name, mo_file)
 </programlisting></para>
 
-      <para>Once compilation has completed successfully a JMU file will have
+      <para>Once compilation has completed successfully, a JMU file will have
       been created on the file system. The JMU file is essentially a
-      compressed file archive containing files created during compilation that
-      are needed when instantiating a model object. Return argument for
+      compressed file archive containing the files created during compilation
+      that are needed when instantiating a model object. Return argument for
       <literal>compile_jmu</literal> is the full file path of the JMU that has
       just been created, this will be useful later when we want to create
       model objects. More about the JMU file and loading models can be found
-      in <xref linkend="models_sec_loading_models" />.</para>
+      in <xref linkend="models_sec_loading_models"/>.</para>
 
-      <para>In the above example, compilation has been performed with default
-      parameters and options. The only parameters specified are the model
-      class name and file. <literal>compile_jmu</literal> has several other
-      parameters which can be modified. The different parameters, their
-      default values and interpretation will be explained in <xref
-      linkend="models_sec_compiler_settings" />.</para>
+      <para>In the above example, compilation has been performed using default
+      parameters and options. The only parameters set are the model class and
+      file name, which always have to be set. <literal>compile_jmu</literal>
+      has several other parameters which can be modified. The different
+      parameters, their default values and interpretation will be explained in
+      <xref linkend="models_sec_compiler_settings"/>.</para>
     </section>
 
     <section xml:id="models_sec_simple_fmu_compilation">
@@ -155,13 +155,12 @@ compile_jmu(model_name, mo_file)
       how to compile an FMU.<programlisting language="python"># Import the compiler function
 from pymodelica import compile_fmu
 
-# Specify Modelica model and model file
+# Specify Modelica model and model file (.mo or .mop)
 model_name = 'myPackage.myModel'
-mo_file = 'myPackage.mo'
+mo_file = 'myModelFile.mo'
 
-# Compile the model, return argument is the file name of the FMU
-compile_fmu(model_name, mo_file)
-&gt;&gt; '.\\myPackage_myModel.fmu'
+# Compile the model and save the return argument, which is the file name of the FMU
+fmu_file = compile_fmu(model_name, mo_file)
 </programlisting></para>
 
       <para>As in the JMU case, when the compilation has completed
@@ -169,7 +168,7 @@ compile_fmu(model_name, mo_file)
       return argument is also the full file path of the FMU that has just been
       created, which will be useful later when we want to create model
       objects. More about the FMU file and loading models can be found in
-      <xref linkend="models_sec_loading_models" />.</para>
+      <xref linkend="models_sec_loading_models"/>.</para>
     </section>
 
     <section xml:id="models_sec_simple_fmux_compilation">
@@ -201,11 +200,10 @@ from pymodelica import compile_fmux
 
 # Specify Modelica model and model file
 model_name = 'myPackage.myModel'
-mo_file = 'myPackage.mo'
+mo_file = 'myModelFile.mo'
 
 # Compile the model, return argument is the file name of the FMUX
-compile_fmux(model_name, mo_file)
-&gt;&gt; '.\\myPackage_myModel.fmux'
+fmux_file = compile_fmux(model_name, mo_file)
 </programlisting>
     </section>
 
@@ -279,9 +277,9 @@ fmu3 = compile_fmu('MyLibrary.MyModel', 'C:\MyLibs\MyLibrary')
       below.</para>
 
       <para>The parameter <literal>target</literal>, is further explained in
-      <xref linkend="models_sec_compiler_targets_jmu" />, <xref
-      linkend="models_sec_compiler_targets_fmu" /> and <xref
-      linkend="models_sec_compiler_targets_fmux" />.</para>
+      <xref linkend="models_sec_compiler_targets_jmu"/>, <xref
+      linkend="models_sec_compiler_targets_fmu"/> and <xref
+      linkend="models_sec_compiler_targets_fmux"/>.</para>
 
       <section xml:id="models_sec_compile_jmu_parameters">
         <title>compile_jmu parameters</title>
@@ -529,31 +527,34 @@ compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={}, com
         when a compiler is created, that is when
         <literal>compile_jmu</literal>, <literal>compile_fmu</literal> or
         <literal>compile_fmux</literal> is run. Options for a compiler
-        instance can be modified interactively when compiling using the
-        parameter <literal>compiler_options</literal>. This is shown in an
-        example compiling an Optimica model below.</para>
+        instance can also be modified interactively when compiling using the
+        parameter dict <literal>compiler_options</literal>. This is shown in
+        an example compiling an Optimica model below.</para>
 
         <programlisting language="python"># Compile with the compiler option 'enable_variable_scaling' set to True
 
 # Specify Optimica model and model file
 model_name = 'myPackage.myModel'
-mo_file = 'myPackage.mop'
+mo_file = 'myModelFile.mop'
 
-compile_jmu(model_name, mo_file, compiler_options={"enable_variable_scaling":True})
+# Compile
+my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_scaling":True})
 </programlisting>
 
-        <para>There are four type categories: string, real, integer and
-        boolean. The available options, default values and description are
-        listed in <xref linkend="models_tab_compiler_options" />.<table
+        <para>There are four type categories: <literal>string</literal>,
+        <literal>real</literal>, <literal>integer</literal> and
+        <literal>boolean</literal>. The available options, default values and
+        description are listed in <xref
+        linkend="models_tab_compiler_options"/>.<table
             xml:id="models_tab_compiler_options">
             <title>Compiler options</title>
 
             <tgroup cols="3">
-              <colspec align="left" colname="col–para" colwidth="2.75*" />
+              <colspec align="left" colname="col–para" colwidth="2.75*"/>
 
-              <colspec align="left" colname="col–def" colwidth="1*" />
+              <colspec align="left" colname="col–def" colwidth="1*"/>
 
-              <colspec align="left" colname="col–descr" colwidth="3.25*" />
+              <colspec align="left" colname="col–descr" colwidth="3.25*"/>
 
               <thead>
                 <row>
@@ -835,13 +836,8 @@ compile_jmu(model_name, mo_file, compiler_options={"enable_variable_scaling":Tru
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is set to true, the default initial
-                  equations and fixed attributes in the model are discarded.
-                  Instead, one initial equation on the form
-                  _start_&lt;state_name&gt; = &lt;state_name&gt; is generated
-                  for each state. One parameter with the name
-                  _start_&lt;state_name&gt; for each state is added to the
-                  parameter.</entry>
+                  <entry>Neglect initial equations in the model and add
+                  initial equations, and parameters, for the states.</entry>
                 </row>
 
                 <row>
@@ -900,8 +896,8 @@ compile_jmu(model_name, mo_file, compiler_options={"enable_variable_scaling":Tru
 
         <para>Currently, the only possible target available for
         <literal>compile_fmu</literal> is '<literal>model_fmume</literal>'.
-        With this target the compiled model will include the FMI for Model
-        Exchange API.</para>
+        With this target the compiled model will be compliant with the FMI for
+        Model Exchange API.</para>
       </section>
 
       <section xml:id="models_sec_compiler_targets_fmux">
@@ -921,23 +917,18 @@ compile_jmu(model_name, mo_file, compiler_options={"enable_variable_scaling":Tru
       bundles quite a few steps required for the compilation from model file
       to JMU, FMU or FMUX. Some of these steps will be described briefly here,
       for a more detailed review on the compilation steps see <xref
-      linkend="intro_sec_architecture" /> in <xref
-      linkend="ch_intro" />.</para>
+      linkend="intro_sec_architecture"/> in <xref linkend="ch_intro"/>.</para>
 
       <section>
         <title>Create a compiler</title>
 
         <para>A compiler, can be either a Modelica or Optimica compiler, is
-        created by importing the Python classes from the compiler module. The
-        compiler constructors only has optional arguments. These are the paths
-        to the template XML and C files which in most cases can be left to the
-        default values. (Note that in the <literal>compile_fmux</literal> case
-        the only template needed is to the Model description XML template file
-        since no C code is produced.) This example code will create a Modelica
-        compiler.<programlisting language="python"># import the class ModelicaCompiler from the compiler module
+        created by importing the Python classes from the compiler module. This
+        example code will create a Modelica compiler.<programlisting
+        language="python"># Import the class ModelicaCompiler from the compiler module
 from pymodelica.compiler import ModelicaCompiler
 
-# create a compiler instance
+# Create a compiler instance
 mc = ModelicaCompiler()
 </programlisting></para>
       </section>
@@ -949,7 +940,7 @@ mc = ModelicaCompiler()
         instantiated. Then the model is transformed into a flat representation
         which can be used to generate C and XML code. If there are errors in
         the model, for example syntax or type errors, Python exceptions will
-        be thrown during these steps. <programlisting language="python"># Parse the model and get a reference to the source root
+        be thrown during these steps. <programlisting language="python"># Parse the model and get a reference to the root of the source AST
 source_root = mc.parse_model('myPackage.mo')
 
 # Generate an instance tree representation and get a reference to the model instance
@@ -965,9 +956,9 @@ flat_rep = mc.flatten_model(model_instance)
 
         <para>The next step is the code generation which produces C code
         containing the model equations and a couple of XML files containing
-        model meta data such as variable names and types and parameter values.
-        Note that in the <literal>compile_fmux</literal> case, only XML code
-        is generated in this step.<programlisting language="python"># Generate code
+        model meta data such as variable names and types. Note that in the
+        <literal>compile_fmux</literal> case, only XML code is generated in
+        this step.<programlisting language="python"># Generate code
 mc.generate_code(flat_rep)
 </programlisting></para>
       </section>
@@ -983,34 +974,35 @@ mc.generate_code(flat_rep)
     class from the <literal>pyfmi</literal> module and the
     <literal>CasadiModel</literal> class from the <literal>pyjmi</literal>
     module respectively. This will be demonstrated in <xref
-    linkend="models_sec_loading_a_jmu" />, <xref
-    linkend="models_sec_loading_an_fmu" /> and <xref
-    linkend="models_sec_loading_an_fmux" />.</para>
+    linkend="models_sec_loading_a_jmu"/>, <xref
+    linkend="models_sec_loading_an_fmu"/> and <xref
+    linkend="models_sec_loading_an_fmux"/>.</para>
 
     <para>The model classes contain many methods with which models can be
     manipulated after instantiation. Amongst the most important methods are
     <literal>initialize</literal>, <literal>simulate</literal> and
     <literal>optimize</literal>. (<literal>optimize</literal> is only relevant
-    for JMU model instances.) These are explained in <xref
-    linkend="ch_simulation" /> and <xref linkend="ch_optimization" />. For
-    more information on how to use the CasadiModel for optimization purposes,
-    see <xref linkend="opt_sec_pseudo-spectral" /> in <xref
-    linkend="ch_optimization" />. The more basic methods for variable and
-    parameter manipulation are explained in <xref
-    linkend="models_sec_variable_and_parameter_manipulation" />.</para>
+    for JMU model instances) which are used when simulating and optimizing.
+    These are explained in <xref linkend="ch_simulation"/> and <xref
+    linkend="ch_optimization"/>. For more information on how to use the
+    CasadiModel for optimization purposes, see <xref
+    linkend="opt_sec_pseudo-spectral"/> in <xref linkend="ch_optimization"/>.
+    The more basic methods for variable and parameter manipulation are
+    explained in <xref
+    linkend="models_sec_variable_and_parameter_manipulation"/>.</para>
 
     <section xml:id="models_sec_the_jmu_file">
       <title>The JMU</title>
 
       <para>The JMU is a compressed file which contains all files needed to
       load and work with the compiled model in JModelica.org. The JMU contains
-      the shared object file, the XML files with model variable and parameter
-      data and some other files created during compilation of the model. The
-      JMU file format is a JModelica.org specific format but is designed to
-      follow the FMU file format from the FMI standard as much as possible. A
-      JMU is created when compiling a Modelica or Optimica model with
+      the shared object file, an XML file with model variable data and some
+      other files created during compilation of the model. The JMU file format
+      is a JModelica.org specific format but is designed to follow the FMU
+      file format from the FMI standard as much as possible. A JMU is created
+      when compiling a Modelica or Optimica model with
       <literal>pymodelica.compile_jmu</literal>, see <xref
-      linkend="models_sec_compilation" />.</para>
+      linkend="models_sec_compilation"/>.</para>
     </section>
 
     <section>
@@ -1022,7 +1014,7 @@ mc.generate_code(flat_rep)
       <literal>pymodelica.compile_fmu</literal>.</para>
 
       <para>Read more about the FMI/FMU standard in <xref
-      linkend="ch_fmi" />.</para>
+      linkend="ch_fmi"/>.</para>
     </section>
 
     <section>
@@ -1058,7 +1050,7 @@ from pymodelica import compile_jmu
 from pyjmi import JMUModel
 
 # Compile and load model
-jmu_name = compile_jmu('myPackage.myModel','myPackage.mo')
+jmu_name = compile_jmu('myPackage.myModel','myModelFile.mo')
 myModel = JMUModel(jmu_name)
 </programlisting></para>
     </section>
@@ -1092,53 +1084,22 @@ myModel = CasadiModel('myFMUX.fmux')
   </section>
 
   <section xml:id="models_sec_variable_and_parameter_manipulation">
-    <title>Variable and parameter manipulation</title>
+    <title>Changing model parameters</title>
 
-    <para>Model variables and parameters can be manipulated with methods in
-    the model classes once the model has been loaded. Some short examples in
-    <xref linkend="models_sec_setting_and_getting_variables" /> will
-    demonstrate this. Model variable meta data and parameter values are saved
-    in XML files which are generated during compilation, these are briefly
-    explained in <xref linkend="models_sec_model_variable_XML_files" />. The
-    XML file containing the parameters can be used to save different sets of
-    parameters for one model, see <xref
-    linkend="models_sec_loading_and_saving_parameters" />.</para>
+    <para>Model parameters can be altered with methods in the model classes
+    once the model has been loaded. Some short examples in <xref
+    linkend="models_sec_setting_and_getting_params"/> will demonstrate this.
+    </para>
 
-    <section xml:id="models_sec_model_variable_XML_files">
-      <title>Model variable XML files</title>
+    <section xml:id="models_sec_setting_and_getting_params">
+      <title>Setting and getting parameters</title>
 
-      <para>The model variable meta data and parameter values are saved in XML
-      files which are generated during the compilation. They follow the name
-      convention:</para>
-
-      <itemizedlist>
-        <listitem>
-          <para><filename>modelDescription.xml</filename></para>
-        </listitem>
-
-        <listitem>
-          <para><filename>&lt;model_class_name&gt;_values.xml</filename></para>
-        </listitem>
-      </itemizedlist>
-
-      <para>The variable meta data is saved in
-      <filename>modelDescription.xml</filename> and the parameter values in
-      <filename>&lt;model_class_name&gt;_values.xml</filename>. Note that the
-      parameter values file is JModelica.org specific and is not a part of the
-      FMI standard and it is not part of the FMUX either. The name of the
-      parameter is used to map a parameter value in the XML values file to a
-      parameter specification in the XML variables file.</para>
-    </section>
-
-    <section xml:id="models_sec_setting_and_getting_variables">
-      <title>Setting and getting variables</title>
-
-      <para>The model variables can be accessed with via the model class
-      interfaces. It is possible to set and get one specific variable at a
-      time or a whole list of variables.</para>
+      <para>The model parameters can be accessed with via the model class
+      interfaces. It is possible to set and get one specific parameter at a
+      time or a whole list of parameters.</para>
 
       <para>The following code example demonstrates how to get and set a
-      specific variable using an example JMU model from the
+      specific parameter using an example JMU model from the
       <literal>pyjmi.examples</literal> package.<programlisting
       language="python"># Compile and load the model
 from pymodelica import compile_jmu
@@ -1146,123 +1107,25 @@ from pyjmi import JMUModel
 jmu_name = compile_jmu('RLC_Circuit','RLC_Circuit.mo')
 rlc_circuit = JMUModel(jmu_name)
 
-# Get the value of the variable 'resistor.R'
+# Get the value of the parameter 'resistor.R' and save the result in a variable 'resistor_r'
 resistor_r = rlc_circuit.get('resistor.R')
-resistor_r
-&gt;&gt; 1.0
 
 # Give 'resistor.R' a new value
 resistor_r = 2.0
 rlc_circuit.set('resistor.R', resistor_r)
-rlc_circuit.get('resistor.R')
-&gt;&gt; 2.0
 </programlisting></para>
 
       <para>The following example demonstrates how to get and set a list of
-      variables using the same example model as above. The model is assumed to
-      already be compiled and loaded.<programlisting language="python"># Create a list of variables and values
+      parameters using the same example model as above. The model is assumed
+      to already be compiled and loaded.<programlisting language="python"># Create a list of parameters, get and save the corresponding values in a variable 'values'
 vars = ['resistor.R', 'resistor.v', 'capacitor.C', 'capacitor.v']
 values = rlc_circuit.get(vars)
-values
-&gt;&gt; [2.0, 0.0, 1.0, 0.0]
 
 # Change some of the values
 values[0] = 3.0
 values[3] = 1.0
 rlc_circuit.set(vars, values)
-rlc_circuit.get(vars)
-&gt;&gt; [3.0, 0.0, 1.0, 1.0]
 </programlisting></para>
-    </section>
-
-    <section xml:id="models_sec_loading_and_saving_parameters">
-      <title>Loading and saving parameters</title>
-
-      <para>This section is only relevant for the
-      <literal>JMUModel</literal>.</para>
-
-      <section>
-        <title>Loading XML values file</title>
-
-        <para>It is possible to (re)load the parameter values from an XML file
-        as is done automatically when the <literal>pyjmi.JMUModel</literal>
-        object was first created. If, for example, there were many local
-        changes to parameters it could be desirable to reset everything as it
-        was from the beginning. The following example shows how reloading the
-        parameter values from the XML file resets the parameters in the model.
-        The model is taken from the <literal>pyjmi.examples</literal> package
-        and is assumed to be compiled and loaded.</para>
-
-        <programlisting language="python"># Look at parameters 'resistor.R' and 'sine.offset'
-rlc_circuit.get('resistor.R)
-&gt;&gt; 1.0
-rlc_circuit.get('sine.offset')
-&gt;&gt; 0.0
-
-# Change them
-rlc_circuit.set('resistor.R', 2.0)
-rlc_circuit.set('sine.offset', 0.5)
-
-# Look at them again
-rlc_circuit.get('resistor.R)
-&gt;&gt; 2.0
-rlc_circuit.get('sine.offset')
-&gt;&gt; 0.5
-
-# Reset them by loading the original XML values file
-rlc_circuit.load_parameters_from_XML()
-
-# 'resistor.R' and 'sine.offset' have now been reset
-rlc_circuit.get('resistor.R)
-&gt;&gt; 1.0
-rlc_circuit.get('sine.offset')
-&gt;&gt; 0.0
-</programlisting>
-
-        <para>The default behaviour is to load the same file as was created
-        during compilation. If another file should be used this must be passed
-        as an argument to the method.</para>
-
-        <programlisting language="python"># Load other XML file
-rlc_circuit.load_parameters_from_XML('new_values.xml')
-</programlisting>
-      </section>
-
-      <section>
-        <title>Writing to XML values file</title>
-
-        <para>Setting a parameter value with <literal>JMUModel.set</literal>
-        only changes the value in the vector loaded when
-        <literal>pyjmi.JMUModel</literal> was created, which means that it
-        will not be saved when the model is discarded. To save all local
-        changes made to the model parameters, the values have to be written to
-        the XML values file.</para>
-
-        <programlisting language="python"># Set a parameter
-rlc_circuit.set('inductor.L', 1.5)
-
-# Save parameters to the XML values file
-rlc_circuit.write_parameters_to_XML()
-
-# Load the XML values file once again and see that the changed parameter was saved in 
-# the XML file
-rlc_circuit.load_parameters_from_XML()
-rlc_circuit.get('inductor.L')
-&gt;&gt; 1.5
-</programlisting>
-
-        <para>If <literal>write_parameters_to_XML()</literal> is called
-        without arguments the values will be written to the XML values file in
-        the JMU which was created when the model was compiled (following the
-        name conventions mentioned above). It is also possible to save the
-        changes in a new XML file. This is quite convenient since different
-        parameter value settings can then easily be saved and reloaded in the
-        model.</para>
-
-        <programlisting language="python"># Save to specific XML file
-rlc_circuit.write_parameters_to_XML('test_values.xml')
-</programlisting>
-      </section>
     </section>
   </section>
 
