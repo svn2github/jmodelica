@@ -10,9 +10,9 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Limitations</title>
 
-  <para>This page lists the current limitations of the JModelica.org platform,
-  as of version 1.5.0. The development of the platform can be followed at the
-  <link xlink:href="http://trac.jmodelica.org">Trac</link> site, where future
+  <para>This page lists the current limitations of the JModelica.org platform.
+  The development of the platform can be followed at the <link
+  xlink:href="http://trac.jmodelica.org">Trac</link> site, where future
   releases and associated features are planned. In order to get an idea of the
   current Modelica compliance of the compiler front-end, you may look at the
   associated test suite. All models with a test annotation can be
@@ -36,18 +36,12 @@
         </listitem>
 
         <listitem>
-          <para>Strings</para>
+          <para>The support for String variables and parameters is
+          limited</para>
         </listitem>
 
         <listitem>
           <para>Arrays indexed with enumerations or Booleans</para>
-        </listitem>
-
-        <listitem>
-          <para>If equations are only supported with parameter or constant
-          test expressions, and recompilation is required for a change of a
-          parameter used in the test expression to take effect on the if
-          equation.</para>
         </listitem>
 
         <listitem>

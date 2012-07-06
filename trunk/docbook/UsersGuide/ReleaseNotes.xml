@@ -68,8 +68,14 @@
             <listitem>
               <para>Function call equations in when equations</para>
             </listitem>
-          </itemizedlist>Also, many bug fixes in the compiler are included in
-        this release.</para>
+
+            <listitem>
+              <para>Limited support for String parameters. String parameters
+              are now supported in the compiler front-end, although they are
+              discarded in the code generation.</para>
+            </listitem>
+          </itemizedlist>Also, many bug fixes and performance improvements in
+        the compiler are included in this release.</para>
       </section>
 
       <section>
@@ -82,7 +88,10 @@
       <section>
         <title>New state selection algorithm</title>
 
-        <para/>
+        <para>The new state selection algorithm takes user input (stateSelect
+        attribute) into account and implements heuristics to select states
+        that avoids, if possible, iteration of non-linear systems of
+        equations.</para>
       </section>
     </section>
 
@@ -104,16 +113,29 @@
     </section>
 
     <section>
-      <title>Simulation</title>
-    </section>
-
-    <section>
       <title>Optimization</title>
 
       <section>
         <title>Improvements to CasADi-based collocation algorithm</title>
 
-        <para/>
+        <para>The CasADi-based collocation algorithm has been improved with
+        new features</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Support for point constraints</para>
+          </listitem>
+
+          <listitem>
+            <para>Setting of parameter values from Python in loaded
+            models</para>
+          </listitem>
+
+          <listitem>
+            <para>Setting of min/max attributes from Python in loaded
+            models</para>
+          </listitem>
+        </itemizedlist>
       </section>
     </section>
 
@@ -134,8 +156,6 @@
 
       <para>Tobias Mattsson</para>
 
-      <para>Patrik Meijer</para>
-
       <para>Iakov Nakhimovski</para>
 
       <para>Jon Sten</para>
@@ -154,6 +174,8 @@
         <para>Lennart Moraeus</para>
 
         <para>Philip Nilsson</para>
+
+        <para>Patrik Meijer</para>
 
         <para>Kristina Olsson</para>
 
@@ -1080,12 +1102,41 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
-            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
-            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
-            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
-            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
-            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
+            <m:math display="block">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>0</m:mi>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>f</m:mi>
+                  </m:msub>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>L</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>.</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
+
+                  <m:mtext>dt</m:mtext>
+                </m:mrow>
+              </m:mrow>
+            </m:math>
           </informalequation>
 
           <para>the Optimica class attribute
