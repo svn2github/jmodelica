@@ -3360,7 +3360,7 @@ init_model = FMUModel(init_fmu)</programlisting>
           <programlisting># Set input for Stationary point A
 Tc_0_A = 250
 init_model.set('Tc', Tc_0_A)
-S
+
 # Solve the initialization problem using FMI
 init_model.initialize()
 
@@ -3470,7 +3470,7 @@ plt.show()
           compilation.</para>
 
           <programlisting># Compile model
-fmux = compile_fmux("CSTR.CSTR_Opt", "CSTR.mop")
+fmux = compile_fmux("CSTR.CSTR_Opt2", "CSTR.mop")
 
 # Load model and enable scaling
 cstr = CasadiModel(fmux, scale_variables=True)
