@@ -92,6 +92,8 @@ $C_DAE_output_vrefs$
 
 $C_DAE_equation_sparsity$
 
+$C_DAE_ODE_jacobian_sparsity$
+
 $C_variable_aliases$
 
 $C_point_variable_aliases$
@@ -285,6 +287,10 @@ int jmi_new(jmi_t** jmi) {
 	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,
 		     *model_dae_dir_dF,
 		     CAD_dae_n_nz,(int (*))CAD_dae_nz_rows,(int (*))CAD_dae_nz_cols,
+		     CAD_ODE_A_n_nz, (int (*))CAD_ODE_A_nz_rows, (int(*))CAD_ODE_A_nz_cols,
+		     CAD_ODE_B_n_nz, (int (*))CAD_ODE_B_nz_rows, (int(*))CAD_ODE_B_nz_cols,
+		     CAD_ODE_C_n_nz, (int (*))CAD_ODE_C_nz_rows, (int(*))CAD_ODE_C_nz_cols,
+		     CAD_ODE_D_n_nz, (int (*))CAD_ODE_D_nz_rows, (int(*))CAD_ODE_D_nz_cols,
 		     *model_dae_R, N_eq_R, NULL, 0, NULL, NULL,*model_ode_derivatives,
 		     *model_ode_derivatives_dir_der,
                      *model_ode_outputs,*model_ode_initialize,*model_ode_guards,*model_ode_guards_init,

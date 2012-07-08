@@ -697,10 +697,12 @@ aspect CADCodeGen {
 	//Code that is printed in model_ode_derivatives, calls two functions that solves both z and dz resp.
 	public void EquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {	
 		if (inInitial) {
-			str.print(indent + "jmi_kinsol_solve(jmi->dae_init_block_residuals[" + i +"]);\n");
+			// Assuming that the model has been evaluated prior to Jacobian evaluation, no iteration is needed here
+			//str.print(indent + "jmi_kinsol_solve(jmi->dae_init_block_residuals[" + i +"]);\n");
 			str.print(indent + "jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_init_block_residuals[" + i +"]);\n");
 		} else {
-			str.print(indent + "jmi_kinsol_solve(jmi->dae_block_residuals[" + i +"]);\n");
+			// Assuming that the model has been evaluated prior to Jacobian evaluation, no iteration is needed here
+			//str.print(indent + "jmi_kinsol_solve(jmi->dae_block_residuals[" + i +"]);\n");
 			str.print(indent + "jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[" + i +"]);\n");
 		}	
 	}

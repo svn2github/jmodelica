@@ -384,6 +384,108 @@ int jmi_dae_cad_get_connections( int n_col, int n_nz, int *row, int *col, int **
 	return 0;
 }
 
+void compute_cpr_groups(jmi_simple_color_info_t *color_info) {
+	int n_cols_in_group; /* Counter for the number of columns in a group */
+	int n_selected_cols; /* Total number of columns added to groups */
+
+	int i,j,k,l,compatible;
+
+	int n_c_g = color_info->n_cols_in_grouping;
+	int offs_c_g = color_info->col_offset;
+
+	int* selected_groups = (int*)calloc(n_c_g,sizeof(int));
+	for (i=0;i<n_c_g;i++) {
+		selected_groups[i] = 0;
+	}
+
+	/*clock_t start = clock();*/
+
+	/*
+	printf("**********\n");
+	for (i=0;i<n_c_g;i++) {
+		for (j=0;j<func->ad->dF_z_col_n_nz[i+offs_c_g];j++) {
+			printf(" - %d %d\n", i+offs_c_g,func->ad->dF_z_row[func->ad->dF_z_col_start_index[i+offs_c_g]+j]);
+		}
+	}
+
+
+	printf("n_cols_in_grouping=%d\n",n_c_g);
+*/
+
+	color_info->n_groups = 0;
+    color_info->group_start_index[0] = 0;
+	n_cols_in_group = 0;
+	n_selected_cols = 0;
+	/* Loop until all column have been added to a graph */
+	while(n_selected_cols<n_c_g) {
+	    /*printf("Starting sweep, n_groups = %d\n",color_info->n_groups);*/
+		/* Reset group column counter */
+		n_cols_in_group = 0;
+		/* Loop over all colums and add the ones that are i) compatible
+		 and ii) have not been selected */
+		for(i=0;i<n_c_g;i++) {
+		    /*printf("About to check, col = %d\n",i+offs_c_g);*/
+			/* If the column has not been added to a group... */
+			if (selected_groups[i]!=1) {
+			    /*printf("Col %d has not been selected\n",i+offs_c_g);*/
+				/* ...make compatibility check */
+				compatible = 1;
+				/* Loop over all columns that have been added to group */
+				for (j=color_info->group_start_index[color_info->n_groups];
+						j<color_info->group_start_index[color_info->n_groups] +
+						n_cols_in_group;j++) {
+
+					/*printf("a row index: %d\n", color_info->col_start_index[color_info->group_cols[j]]);
+					printf("b row index: %d\n", color_info->col_start_index[i + offs_c_g]);
+					printf("qew: %d, %d\n", i, offs_c_g);*/
+					int* col_a_row_ind = &color_info->rows[color_info->col_start_index[color_info->group_cols[j]]];
+					int* col_b_row_ind = &color_info->rows[color_info->col_start_index[i + offs_c_g]];
+					int col_a_n_nz = color_info->col_n_nz[color_info->group_cols[j]];
+					int col_b_n_nz = color_info->col_n_nz[i+offs_c_g];
+
+					/*printf("Checking col %d, n_nz=%d, against %d, n_n_z=%d (in group)\n",
+							i+offs_c_g,col_b_n_nz,color_info->group_cols[j],col_a_n_nz);*/
+
+					for (k=0;k<col_a_n_nz;k++) {
+						for (l=0;l<col_b_n_nz;l++) {
+						    /*printf(" ** %d %d\n",col_a_row_ind[k],col_b_row_ind[l]);*/
+							if (col_a_row_ind[k] == col_b_row_ind[l]) {
+								compatible = 0;
+								break;
+							}
+						}
+					}
+				}
+				if (compatible==1) {
+				    /*printf("Col %d added to group\n",i+offs_c_g);*/
+					selected_groups[i] = 1;
+					color_info->group_cols[n_selected_cols] = i + offs_c_g;
+					n_selected_cols++;
+					n_cols_in_group++;
+				} else {
+				    /*printf("Col %d incompatible\n",i+offs_c_g);*/
+				}
+			} else {
+			       /* printf("Col %d has already been selected\n",i+offs_c_g);*/
+			}
+		}
+		color_info->n_groups++;
+		color_info->group_start_index[color_info->n_groups] =
+				color_info->group_start_index[color_info->n_groups - 1] + n_cols_in_group;
+		color_info->n_cols_in_group[color_info->n_groups - 1] = n_cols_in_group;
+		/*printf("End iteration over cols, col = %d, n_cols_in_group = %d\n",i,n_cols_in_group);*/
+	}
+
+	free(selected_groups);
+	/*
+	printf("Computed CPR groups: %d groups computed from %d columns\n",color_info->n_groups,color_info->n_cols_in_grouping);
+	for (i=0;i<color_info->n_groups;i++) {
+		for (j=0;j<color_info->n_cols_in_group[i];j++) {
+			printf(" >> %d %d\n",i,color_info->group_cols[color_info->group_start_index[i]+j]);
+		}
+	}*/
+
+}
 
 int jmi_util_dae_derivative_checker(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		int independent_vars, int screen_use, int *mask){

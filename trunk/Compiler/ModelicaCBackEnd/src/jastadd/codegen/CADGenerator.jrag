@@ -243,6 +243,214 @@ public class CADGenerator extends CGenerator {
 		}
 	}
 	
+	
+	
+	class DAETag_C_ODESparsity extends DAETag {
+		
+		public DAETag_C_ODESparsity(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_ODE_jacobian_sparsity","C: DAE ODE Jacobian sparsity",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			if (fclass.root().options.getBooleanOption("generate_ode_jacobian")) {
+			    
+			    int A_n_nz = 0;
+			    int B_n_nz = 0;
+			    int C_n_nz = 0;
+			    int D_n_nz = 0;
+			    
+			    for (FDerivativeVariable v : fclass.derivativeVariables()) {
+					for (FVariable vv : v.dependsOn()) {
+						if (vv.isDifferentiatedVariable()) {
+							A_n_nz++;
+						}
+					}
+					for (FVariable vv : v.dependsOn()) {
+						if (vv.isInput()) {
+							B_n_nz++;
+						}
+					}
+				}	
+
+				for (FVariable v : fclass.outputs()) {
+					for (FVariable vv : v.dependsOn()) {
+						if (vv.isDifferentiatedVariable()) {
+							C_n_nz++;
+						}
+					}
+					for (FVariable vv : v.dependsOn()) {
+						if (vv.isInput()) {
+							D_n_nz++;
+						}
+					}
+				}	
+			    
+				genPrinter.print("static const int CAD_ODE_A_n_nz = ");
+				genPrinter.print(A_n_nz);
+				genPrinter.print(";\n");	
+				genPrinter.print("static const int CAD_ODE_B_n_nz = ");	
+				genPrinter.print(B_n_nz);
+				genPrinter.print(";\n");	
+				genPrinter.print("static const int CAD_ODE_C_n_nz = ");	
+				genPrinter.print(C_n_nz);
+				genPrinter.print(";\n");	
+				genPrinter.print("static const int CAD_ODE_D_n_nz = ");	
+				genPrinter.print(D_n_nz);
+				genPrinter.print(";\n");	
+				
+				StringBuffer A_str_row = new StringBuffer();
+				StringBuffer A_str_col = new StringBuffer();	
+				StringBuffer B_str_row = new StringBuffer();
+				StringBuffer B_str_col = new StringBuffer();	
+				StringBuffer C_str_row = new StringBuffer();
+				StringBuffer C_str_col = new StringBuffer();	
+				StringBuffer D_str_row = new StringBuffer();
+				StringBuffer D_str_col = new StringBuffer();	
+				
+				A_str_row.append("static const int CAD_ODE_A_nz_rows[" + (A_n_nz==0? 1: A_n_nz) + "] = {");
+				A_str_col.append("static const int CAD_ODE_A_nz_cols[" + (A_n_nz==0? 1: A_n_nz) + "] = {");
+				B_str_row.append("static const int CAD_ODE_B_nz_rows[" + (B_n_nz==0? 1: B_n_nz) + "] = {");
+				B_str_col.append("static const int CAD_ODE_B_nz_cols[" + (B_n_nz==0? 1: B_n_nz) + "] = {");
+				C_str_row.append("static const int CAD_ODE_C_nz_rows[" + (C_n_nz==0? 1: C_n_nz) + "] = {");
+				C_str_col.append("static const int CAD_ODE_C_nz_cols[" + (C_n_nz==0? 1: C_n_nz) + "] = {");
+				D_str_row.append("static const int CAD_ODE_D_nz_rows[" + (D_n_nz==0? 1: D_n_nz) + "] = {");
+				D_str_col.append("static const int CAD_ODE_D_nz_cols[" + (D_n_nz==0? 1: D_n_nz) + "] = {");
+			    
+			    int row_index = 0;
+			    int A_i = 0;
+			    int B_i = 0; 
+			    boolean A_p = false;
+			    boolean B_p = false;	
+			    for (FDerivativeVariable v : fclass.derivativeVariables()) {
+					for (FVariable vv : v.dependsOn()) {
+						A_p = false;
+						B_p = false;
+						if (vv.isDifferentiatedVariable()) {
+							A_str_col.append(vv.differentiatedRealVariableIndex());
+							A_str_row.append(row_index);
+							A_i++;
+							A_p = true;
+						}
+						if (A_i<A_n_nz && A_p) {
+							A_str_col.append(",");
+							A_str_row.append(",");	
+						}
+						if (vv.isInput()) {
+							B_str_col.append(vv.inputIndex());
+							B_str_row.append(row_index);
+							B_i++;
+							B_p = true;
+						}
+						if (B_i<B_n_nz && B_p) {
+							B_str_col.append(",");
+							B_str_row.append(",");	
+						}
+					}
+					row_index++;
+				}	
+
+			    row_index = 0;
+			    int C_i = 0;
+			    int D_i = 0; 
+			    boolean C_p = false;
+			    boolean D_p = false;
+			    for (FVariable v : fclass.outputs()) {
+					for (FVariable vv : v.dependsOn()) {
+						C_p = false;
+						D_p = false;
+						if (vv.isDifferentiatedVariable()) {
+							C_str_col.append(vv.differentiatedRealVariableIndex());
+							C_str_row.append(row_index);
+							C_i++;
+							C_p = true;
+						}
+						if (C_i<C_n_nz && C_p) {
+							C_str_col.append(",");
+							C_str_row.append(",");	
+						}
+						if (vv.isInput()) {
+							D_str_col.append(vv.inputIndex());
+							D_str_row.append(row_index);
+							D_i++;
+							D_p = true;
+						}
+						if (D_i<D_n_nz & D_p) {
+							D_str_col.append(",");
+							D_str_row.append(",");	
+						}
+					}
+					row_index++;
+				}	
+
+/*
+				for (FVariable v : fclass.outputs()) {
+					genPrinter.print("\t\t<Output name=\"");
+					genPrinter.print(v.name());
+					genPrinter.print("\" stateDependency=\"");
+					i = 0;
+					for (FVariable vv : v.dependsOn()) {
+						if (vv.isDifferentiatedVariable()) {
+							genPrinter.print(vv.differentiatedRealVariableIndex()+1);
+							genPrinter.print(" ");
+						}
+						i++;
+					}
+					if (v.isDifferentiatedVariable()) {
+							genPrinter.print(v.differentiatedRealVariableIndex()+1);		
+							genPrinter.print(" ");					
+					}
+					genPrinter.print("\" inputDependency=\"");
+					i = 0;
+					for (FVariable vv : v.dependsOn()) {
+						if (vv.isInput()) {
+							genPrinter.print(vv.inputIndex()+1);	
+							genPrinter.print(" ");
+						}
+						i++;
+					}
+					genPrinter.print("\"/>\n");	
+				}	
+				genPrinter.print("\t</Outputs>\n");	
+				*/
+				
+				A_str_row.append(A_n_nz==0? "-1};\n": "};\n");
+				A_str_col.append(A_n_nz==0? "-1};\n": "};\n");	
+				B_str_row.append(B_n_nz==0? "-1};\n": "};\n");
+				B_str_col.append(B_n_nz==0? "-1};\n": "};\n");	
+				C_str_row.append(C_n_nz==0? "-1};\n": "};\n");
+				C_str_col.append(C_n_nz==0? "-1};\n": "};\n");	
+				D_str_row.append(D_n_nz==0? "-1};\n": "};\n");
+				D_str_col.append(D_n_nz==0? "-1};\n": "};\n");	
+
+				genPrinter.print(A_str_row.toString());
+				genPrinter.print(A_str_col.toString());				
+				genPrinter.print(B_str_row.toString());
+				genPrinter.print(B_str_col.toString());				
+				genPrinter.print(C_str_row.toString());
+				genPrinter.print(C_str_col.toString());				
+				genPrinter.print(D_str_row.toString());
+				genPrinter.print(D_str_col.toString());				  	    
+			} else {
+				genPrinter.print("static const int CAD_ODE_A_n_nz = 0;\n");
+				genPrinter.print("static const int CAD_ODE_B_n_nz = 0;\n");	
+				genPrinter.print("static const int CAD_ODE_C_n_nz = 0;\n");	
+				genPrinter.print("static const int CAD_ODE_D_n_nz = 0;\n");	
+				
+				genPrinter.print("static const int CAD_ODE_A_nz_rows[1] = {-1};\n");
+				genPrinter.print("static const int CAD_ODE_A_nz_cols[1] = {-1};\n");
+				genPrinter.print("static const int CAD_ODE_B_nz_rows[1] = {-1};\n");
+				genPrinter.print("static const int CAD_ODE_B_nz_cols[1] = {-1};\n");
+				genPrinter.print("static const int CAD_ODE_C_nz_rows[1] = {-1};\n");
+				genPrinter.print("static const int CAD_ODE_C_nz_cols[1] = {-1};\n");
+				genPrinter.print("static const int CAD_ODE_D_nz_rows[1] = {-1};\n");
+				genPrinter.print("static const int CAD_ODE_D_nz_cols[1] = {-1};\n");
+			
+			}
+		} 
+	}
+	
 	class DAETag_C_equationSparsity extends DAETag {
 		
 		public DAETag_C_equationSparsity(AbstractGenerator myGenerator, 

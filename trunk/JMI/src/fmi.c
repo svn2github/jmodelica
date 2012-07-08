@@ -63,6 +63,7 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     char* tmpguid;
     size_t inst_name_len;
     size_t guid_len;
+    char buffer[400];
 
     /* Create jmi struct -> No need  since jmi_init allocates it
      jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t)); */
@@ -110,6 +111,35 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     /* set start values*/
     jmi_set_start_values(component -> jmi);
     
+    /* Print some info about Jacobians, if available. */
+    if (jmi->color_info_A != NULL) {
+    	sprintf(buffer,"Number of non-zeros in Jacobian A: %d", jmi->color_info_A->n_nz);
+    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+    	sprintf(buffer,"Number of colors in Jacobian A: %d", jmi->color_info_A->n_groups);
+    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+    }
+
+    if (jmi->color_info_B != NULL) {
+    	sprintf(buffer,"Number of non-zeros in Jacobian B: %d", jmi->color_info_B->n_nz);
+    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+    	sprintf(buffer,"Number of colors in Jacobian B: %d", jmi->color_info_B->n_groups);
+    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+    }
+
+    if (jmi->color_info_C != NULL) {
+    	sprintf(buffer,"Number of non-zeros in Jacobian C: %d", jmi->color_info_C->n_nz);
+    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+    	sprintf(buffer,"Number of colors in Jacobian C: %d", jmi->color_info_C->n_groups);
+    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+    }
+
+    if (jmi->color_info_D != NULL) {
+    	sprintf(buffer,"Number of non-zeros in Jacobian D: %d", jmi->color_info_D->n_nz);
+    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+    	sprintf(buffer,"Number of colors in Jacobian D: %d", jmi->color_info_D->n_groups);
+    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+    }
+
     return (fmiComponent)component;
 }
 
@@ -822,11 +852,11 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	
 	int n_outputs;
 	int* output_vrefs;
-	int n_outputs2;
-	int* output_vrefs2;
+	int n_outputs_real;
+	int* output_vrefs_real;
 	jmi_t* jmi = ((fmi_t *)c)->jmi;
 	n_outputs = jmi->n_outputs;
-	n_outputs2 = n_outputs;
+	n_outputs_real = n_outputs;
 	
 	/*dv and the dz are stored in the same vector*/
 	dv = jmi->dv;
@@ -836,21 +866,64 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	jac2 = (fmiReal*)calloc(njac, sizeof(fmiReal));
 	*/
 	output_vrefs = (int*)calloc(n_outputs, sizeof(int));
-	output_vrefs2 = (int*)calloc(n_outputs, sizeof(int)); 
+	output_vrefs_real = (int*)calloc(n_outputs, sizeof(int));
 	
 	jmi_get_output_vrefs(jmi, output_vrefs);
 	j = 0;
 	for(i = 0; i < n_outputs; i++){
 		if(get_type_from_value_ref(output_vrefs[i]) == 0){
-			output_vrefs2[j] = output_vrefs[i];	
+			output_vrefs_real[j] = output_vrefs[i];
 			j++;		
 		}else{
-			n_outputs2--;
+			n_outputs_real--;
 		}
 	}
 	
 	offs = jmi->n_real_dx;
 	
+ 	for(i = 0; i<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;i++){
+ 		(*dz)[i] = 0;
+ 		(*dv)[i] = 0;
+	}
+
+	for(i = 0; i < jmi->n_real_u; i++){
+		(*(jmi->z))[i+jmi->offs_real_u] = (*(jmi->z_val))[i+jmi->offs_real_u];
+	}
+
+	if ((dependents==FMI_DERIVATIVES) && (independents==FMI_STATES) && jmi->color_info_A != NULL) {
+		/* Compute Jacobian A with compression */
+		for (i=0;i<jmi->color_info_A->n_groups;i++) {
+		 	for(k = 0; k<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;k++){
+		 		(*dz)[k] = 0;
+			}
+			/* Set the seed vector */
+			for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
+				(*dv)[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j] + jmi->n_real_dx] = 1.;
+			}
+			/*
+			for (j=0;j<jmi->n_z;j++) {
+				printf(" * %d %f\n",j,d_z[j]);
+			}*/
+			/* Evaluate directional derivative */
+			jmi->dae->ode_derivatives_dir_der(jmi);
+			/* Extract Jacobian values */
+			for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
+				for (k=jmi->color_info_A->col_start_index[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j]];
+					 k<jmi->color_info_A->col_start_index[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j]]+
+					   jmi->color_info_A->col_n_nz[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j]];
+						k++) {
+					jac[(jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j])*(jmi->n_real_x) +
+					    jmi->color_info_A->rows[k]] = (*dz)[jmi->color_info_A->rows[k]];
+				}
+			}
+			/* Reset seed vector */
+			for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
+				(*dv)[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j] + jmi->n_real_dx] = 0.;
+			}
+		}
+	} else {
+
+
 	/*nvvr: number of x and/or u variables used
 	  nzvr: number of dx and/or w variables used*/
 	
@@ -867,17 +940,9 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 		output_off = jmi->n_real_dx;
  	}
 	if(dependents&FMI_OUTPUTS){
-		nzvr += n_outputs2;
+		nzvr += n_outputs_real;
  	}
- 	
- 	for(i = 0; i<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;i++){
-		(*dz)[i] = 0;
-	}
-	
-	for(i = 0; i < jmi->n_real_u; i++){
-		(*(jmi->z))[i+jmi->offs_real_u] = (*(jmi->z_val))[i+jmi->offs_real_u];
-	}
-	
+
 	/*For every x and/or u variable...*/
 	for(i = 0; i < nvvr; i++){
 		(*dv)[i+offs] = 1;
@@ -894,8 +959,8 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 		
 		/*Jacobian elements dy/dx and/or dy/du*/
 		if(dependents&FMI_OUTPUTS){
-			for(j = 0; j<n_outputs2;j++){
-				index = get_index_from_value_ref(output_vrefs2[j]);
+			for(j = 0; j<n_outputs_real;j++){
+				index = get_index_from_value_ref(output_vrefs_real[j]);
 				if(index < jmi->n_real_x + jmi->n_real_u){
 					  if(index == i + offs){
 					  	jac[i*nzvr+output_off+j] = 1;
@@ -911,6 +976,8 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 		for(j = 0; j<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;j++){
 			(*dz)[j] = 0;
 		}
+	}
+
 	}
 	/*
 	---This section has been used for debugging---
@@ -943,7 +1010,7 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	free(jac2);
 	*/
 	free(output_vrefs);
-	free(output_vrefs2);
+	free(output_vrefs_real);
 	
 	c1 = clock();
 

@@ -52,6 +52,9 @@ int jmi_get_type_from_value_ref(int vref);
  */
 int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t* res, jmi_real_t* dF, jmi_real_t* dv);
 
+
+void compute_cpr_groups(jmi_simple_color_info_t *color_info);
+
 /**
  * \brief Performs the graph coloring, that is used in the CAD approach.
  *
