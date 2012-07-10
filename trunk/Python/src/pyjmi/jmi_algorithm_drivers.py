@@ -1711,10 +1711,11 @@ class LocalDAECollocationAlgOptions(OptionBase):
         
         blocking_factors --
             The iterable of blocking factors, where each element corresponds to
-            the number of elements for which all the control profiles should be
-            constant. For example, if blocking_factors == [2, 1, 5], then
-            u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum of all elements
-            in the iterable must be the same as the number of elements.
+            the number of collocation elements for which all the control
+            profiles should be constant. For example, if blocking_factors ==
+            [2, 1, 5], then u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum
+            of all elements in the iterable must be the same as the number of
+            elements.
             
             If blocking_factors is None, then the usual collocation polynomials
             are instead used to represent the controls.

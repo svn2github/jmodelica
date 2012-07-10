@@ -1,25 +1,20 @@
 within ;
 package JMExamples
   package BangControl
-
     model BangControl
       //state start values
       parameter Real x1_0=0;
       parameter Real x2_0=0;
-
       //states
       Real x1(start=x1_0,fixed=true);
       Real x2(start=x2_0,fixed=true);
-
       //control signal
       Modelica.Blocks.Interfaces.RealInput u
         annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
             iconTransformation(extent={{-120,-20},{-80,20}})));
-
     equation
       der(x1) = x2;
       der(x2) = u;
-
       annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
   <p>
@@ -60,7 +55,6 @@ package JMExamples
 
     package Examples
       model BangControlInput
-
         BangControl bangControl
           annotation (Placement(transformation(extent={{20,20},{40,40}})));
         Modelica.Blocks.Sources.Constant const(k=1)
@@ -83,7 +77,6 @@ package JMExamples
       end BangControlInput;
 
       model BangControlTimetable
-
         BangControl bangControl
           annotation (Placement(transformation(extent={{20,0},{40,20}})));
         Modelica.Blocks.Sources.TimeTable timeTable(table=[0,1; 20,1; 21,0; 30,0])
@@ -109,14 +102,12 @@ package JMExamples
 
   package BatchFermentor
     model BatchFermentor
-
       //state start values
       parameter Real x1_0=1.5;
       parameter Real x2_0=0;
       parameter Real x3_0=0;
       parameter Real x4_0=7;
       parameter Real u_0=0;
-
       //states
       Real x1(start=x1_0, fixed=true);
       Real x2(start=x2_0, fixed=true);
@@ -124,12 +115,10 @@ package JMExamples
       Real x4(start=x4_0, fixed=true);
       Real h1;
       Real h2;
-
       //control input
       Modelica.Blocks.Interfaces.RealInput u
         annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
             iconTransformation(extent={{-120,-20},{-80,20}})));
-
     equation
       der(x1) = h1*x1-u*x1/500/x4;
       der(x2) = h2*x1-0.01*x2-u*x2/500/x4;
@@ -137,7 +126,6 @@ package JMExamples
       der(x4) = u/500;
       h1 = 0.11*x3/(0.006*x1+x3);
       h2 = 0.0055*x3/(0.0001+x3*(1+10*x3));
-
       annotation (experiment(StopTime=150, NumberOfIntervals=1),
           __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>  
@@ -164,14 +152,12 @@ Simulation time:150s
     end BatchFermentor;
 
     model BatchFermentor2
-
       //state start values
       parameter Real x1_0=1.5;
       parameter Real x2_0=0;
       parameter Real x3_0=0;
       parameter Real x4_0=7;
       parameter Real u_0=0;
-
       //states
       Real x1(start=x1_0, fixed=true);
       Real x2(start=x2_0, fixed=true);
@@ -180,12 +166,10 @@ Simulation time:150s
       Real u(start=0, fixed=true);
       Real h1;
       Real h2;
-
       //control input
       Modelica.Blocks.Interfaces.RealInput du
         annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
             iconTransformation(extent={{-120,-20},{-80,20}})));
-
     equation
       der(x1) = h1*x1-u*x1/500/x4;
       der(x2) = h2*x1-0.01*x2-u*x2/500/x4;
@@ -194,7 +178,6 @@ Simulation time:150s
       der(u) = du;
       h1 = 0.11*x3/(0.006*x1+x3);
       h2 = 0.0055*x3/(0.0001+x3*(1+10*x3));
-
       annotation (experiment(StopTime=150, NumberOfIntervals=1),
           __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
@@ -223,26 +206,22 @@ Simulation time:150s
 
   package BloodGlucose
     model BloodGlucose
-
       //State start values
       parameter Real G_init = 4.5;
       parameter Real X_init = 15;
       parameter Real I_init = 15;
-
       //States
       Real G(start = G_init, fixed=true) "Plasma Glucose Conc. (mmol/L)";
       Real X(start = X_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
       Real I(start = I_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
       Real dist "Meal glucose disturbance (mmol/L)";
       Real D;
-
       //parameter
       parameter Real P1 = 0.028735;
       parameter Real P2 = 0.028344;
       parameter Real P3 = 5.035e-5;
       parameter Real V1 = 12;
       parameter Real n = 5/54;
-
       //Control Signal
       Modelica.Blocks.Interfaces.RealInput dD "Insulin Infusion rate"
        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
@@ -326,14 +305,11 @@ using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002.
     end BloodGlucose;
 
     model BloodGlucose_scaled
-
       import SI = Modelica.SIunits;
-
       //State start values
       parameter SI.Concentration G_init = 4.5;
       parameter SI.MolecularConcentration X_init = 15;
       parameter SI.MolecularConcentration I_init = 15;
-
       //States
       SI.Concentration G(start = G_init, fixed=true)
         "Plasma Glucose Conc. (mol/m3)";
@@ -343,14 +319,12 @@ using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002.
         "Plasma Insulin Conc. (u/m3)";
       Real dist "Meal glucose disturbance (mol/m3/s)";
       Real D;
-
       //parameter
       parameter Real P1 = 0.028735 "1/min";
       parameter Real P2 = 0.028344 "1/min";
       parameter Real P3 = 5.035e-5 "1/min";
       parameter SI.Volume V1 = 12 "l";
       parameter Real n = 5/54 "1/min";
-
       //Control Signal
       Modelica.Blocks.Interfaces.RealInput dD "Insulin Infusion rate"
        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
@@ -426,18 +400,14 @@ Simulation time: 400s
               lineThickness=0.5,
               fillColor={168,0,0},
               fillPattern=FillPattern.Solid)}));
-
     end BloodGlucose_scaled;
 
     model BloodGlucoseSIunits
-
       import SI = Modelica.SIunits;
-
       //State start values
       parameter SI.Concentration G_init = 4.5;
       parameter SI.MolecularConcentration X_init = 15;
       parameter SI.MolecularConcentration I_init = 15;
-
       //States
       SI.Concentration G(start = G_init, fixed=true)
         "Plasma Glucose Conc. (mol/m3)";
@@ -446,7 +416,6 @@ Simulation time: 400s
       SI.MolecularConcentration I(start = I_init, fixed=true)
         "Plasma Insulin Conc. (u/m3)";
       Real dist "Meal glucose disturbance (mol/m3/s)";
-
       //parameter
       parameter SI.Frequency P1 = 0.028735/60 "1/min";
       parameter SI.Frequency P2 = 0.028344/60 "1/min";
@@ -454,7 +423,6 @@ Simulation time: 400s
       parameter SI.Volume V1 = 0.012 "m3";
       parameter SI.Frequency n = 5/54/60 "1/min";
       parameter SI.VolumeFlowRate f=1/60 "m3/s";
-
       //Control Signal
       Modelica.Blocks.Interfaces.RealInput D "Insulin Infusion rate"
        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
@@ -464,7 +432,6 @@ Simulation time: 400s
       der(X) = -P2 * (X - X_init) + P3 * (I - I_init);
       der(I) = -n * I + D / V1;
       dist = 3*exp(-0.05*time/60)/60;
-
       annotation (experiment(StopTime=24000),
                                             __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
@@ -534,18 +501,15 @@ Simulation time: 400s
     end BloodGlucoseSIunits;
 
     model BloodGlucose1
-
       //State start values
       parameter Real G_init = 4.5;
       parameter Real X_init = 15;
       parameter Real I_init = 15;
-
       //States
       Real G(start = G_init, fixed=true) "Plasma Glucose Conc. (mmol/L)";
       Real X(start = X_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
       Real I(start = I_init, fixed=true) "Plasma Insulin Conc. (mu/L)";
       Real dist "Meal glucose disturbance (mmol/L)";
-
       //parameter
       parameter Real D=3 "Insulin infusion rate (mU/min)";
       parameter Real P1 = 0.028735;
@@ -553,13 +517,11 @@ Simulation time: 400s
       parameter Real P3 = 5.035e-5;
       parameter Real V1 = 12;
       parameter Real n = 5/54;
-
     equation
       der(G) = -P1 * (G - G_init) - (X - X_init) * G + dist;
       der(X) = -P2 * (X - X_init) + P3 * (I - I_init);
       der(I) = -n * I + D / V1;
       dist = 3*exp(-0.05*time);
-
       annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
 <p>
@@ -633,7 +595,6 @@ using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002.
     end BloodGlucose1;
 
     model BloodGlucose2
-
       //State start values
       parameter Real Gb = 98;
       parameter Real Xb = 0;
@@ -641,7 +602,6 @@ using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002.
       parameter Real Yb = 0;
       parameter Real Fb = 380;
       parameter Real Zb = 380;
-
       //States
       Real G(start = Gb, fixed=true) "Blood Glucose (mg/dL)";
       Real X(start = Xb, fixed=true) "Remote insulin (micro-U/mL)";
@@ -649,7 +609,6 @@ using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002.
       Real Y(start = Gb, fixed=true) "Insulin for Lipogenesis (micro-U/mL)";
       Real F(start = Xb, fixed=true) "Plasma Free Fatty Acid (micro-mol/L)";
       Real Z(start = Ib, fixed=true) "Remote Free Fatty Acid (micro-mol/L)";
-
       //parameter
       parameter Real U=3 "Insulin infusion rate (mU/min)";
       parameter Real G_basal = 4.5 "mmol/L";
@@ -673,7 +632,6 @@ using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002.
       parameter Real  u1 = 3 "insulin infusion rate";
       parameter Real  u2 = 300 "glucose uptake rate";
       parameter Real  u3 = 0 "external lipid infusion";
-
     equation
       der(G) = -p1*G - p4*X*G + p6*G*Z + p1*Gb - p6*Gb*Zb + u2/VolG
         "Glucose dynamics";
@@ -683,7 +641,6 @@ using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002.
       der(F) = -p7*(F-Fb) - p8*Y*F + 0.00021 * exp(-0.0055*G) * (F*G-Fb*Gb) + u3/VolF
         "Plasma Free Fatty Acid (FFA) dynamics";
       der(Z) = -k2*(Z-Zb) + k1*(F-Fb) "Remote FFA dynamics";
-
       annotation (Diagram(graphics),
         Documentation(info="<HTML>
 <p>
@@ -709,7 +666,6 @@ Simulation time: 400s
 
     package Examples
       model BloodGlucoseInput
-
         Modelica.Blocks.Sources.Constant const(k=10)
           annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
         BloodGlucose bloodGlucose
@@ -753,20 +709,16 @@ Simulation time: 400s
 
   package CatalystMixing
     model CatalystMixing
-
       //state start values
       parameter Real x1_0=1;
       parameter Real x2_0=0;
-
       //states
       Real x1(start=x1_0,fixed=true);
       Real x2(start=x2_0,fixed=true);
-
       //control signal
       Modelica.Blocks.Interfaces.RealInput u
         annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
             iconTransformation(extent={{-120,-20},{-80,20}})));
-
     equation
       der(x1) = u*(10*x2-x1);
       der(x2) = u*(x1-10*x2) - (1-u)*x2;
@@ -824,21 +776,18 @@ Simulation time: 400s
 
   package CatalyticCracking
     model CatalyticCracking
-
      //parameter
       parameter Real y1_0=1;
       parameter Real y2_0=0;
       parameter Real theta1=1;
       parameter Real theta2=1;
       parameter Real theta3=1;
-
       //states
       Real y1(start=y1_0);
       Real y2(start=y2_0);
     equation
       der(y1) = -(theta1+theta3)*y1^2;
       der(y2) = theta1*y1^2-theta2*y2;
-
        annotation (
         Documentation(info="<HTML>
 <p>
@@ -893,16 +842,13 @@ Simulation time: 1s
 
   package ContState
     model ContState
-
          //State start values
          parameter Real x1_0 = 0;
          parameter Real x2_0= -1;
-
          //States
          Real x1(start = x1_0, fixed=true);
          Real x2(start = x2_0, fixed=true);
          Real p;
-
          //Control Signal
           Modelica.Blocks.Interfaces.RealInput u
         annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
@@ -911,7 +857,6 @@ Simulation time: 1s
           p = 8*(time-0.5)^2-0.5-x2;
           der(x1) = x2;
           der(x2) = -x2+u;
-
       annotation (uses(Modelica(version="3.2")), Diagram(graphics),
         Icon(graphics={Line(
               points={{-66,0},{-58,-10},{-46,-18},{-28,-26},{52,-26},{62,-24},{
@@ -932,7 +877,6 @@ Simulation time: 1s
 
     package Examples
       model ContStateExp
-
         ContState contState
           annotation (Placement(transformation(extent={{0,0},{20,20}})));
         Modelica.Blocks.Sources.Exponentials exponentials
@@ -942,7 +886,6 @@ Simulation time: 1s
             points={{-19,10},{-5.4,10},{-5.4,10},{0,10}},
             color={0,0,127},
             smooth=Smooth.None));
-
         annotation (Diagram(graphics),
           Documentation(info="<HTML>
 <p>
@@ -984,7 +927,6 @@ Simulation time: 1s
 
   package CSTR
     model CSTR "Continuous stirred tank reaction"
-
       parameter Modelica.SIunits.VolumeFlowRate F0=100/1000/60 "Inflow";
       parameter Modelica.SIunits.Concentration c0=1000
         "Concentration of inflow";
@@ -1008,7 +950,6 @@ Simulation time: 1s
     equation
       der(c) = F0*(c0-c)/V-k0*c*exp(-EdivR/T);
       der(T) = F0*(T0-T)/V-dH/(rho*Cp)*k0*c*exp(-EdivR/T)+2*U/(r*rho*Cp)*(Tc-T);
-
       annotation (
         Documentation(info="<HTML>
 <p>
@@ -1052,7 +993,6 @@ Simulation time: 150s
     end CSTR;
 
     model CSTR_Init_Optimization
-
       CSTR cstr "CSTR component";
       Real cost(start=0,fixed=true);
       Real u = Tc_ref;
@@ -1062,7 +1002,6 @@ Simulation time: 150s
       parameter Real q_c = 1;
       parameter Real q_T = 1;
       parameter Real q_Tc = 1;
-
     equation
       cstr.Tc = Tc_ref;
       der(cost) = q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 +
@@ -1071,7 +1010,6 @@ Simulation time: 150s
 
     package Examples
       model CSTRconst
-
         CSTR cSTR annotation (Placement(transformation(extent={{20,0},{40,20}})));
         Modelica.Blocks.Sources.Constant const(k=259)
           annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
@@ -1080,7 +1018,6 @@ Simulation time: 150s
             points={{-19,10},{2,10},{2,10},{20,10}},
             color={0,0,127},
             smooth=Smooth.None));
-
         annotation (Diagram(graphics),
           Documentation(info="<HTML>
 <p>
@@ -1094,7 +1031,6 @@ Simulation time: 150s
       end CSTRconst;
 
       model CSTRexp
-
         CSTR cSTR annotation (Placement(transformation(extent={{20,0},{40,20}})));
         Modelica.Blocks.Sources.Exponentials exponentials(
           riseTime=10,
@@ -1107,7 +1043,6 @@ Simulation time: 150s
             points={{-19,10},{2,10},{2,10},{20,10}},
             color={0,0,127},
             smooth=Smooth.None));
-
         annotation (Diagram(graphics),
           Documentation(info="<HTML>
 <p>
@@ -1121,7 +1056,6 @@ Simulation time: 150s
       end CSTRexp;
 
       model CSTRtimetable
-
         CSTR cSTR annotation (Placement(transformation(extent={{0,20},{20,40}})));
         Modelica.Blocks.Sources.TimeTable timeTable(table=[0,264.4; 10,264.4; 10,
               200; 50,280; 60,280])
@@ -1131,7 +1065,6 @@ Simulation time: 150s
             points={{-39,30},{-18,30},{-18,30},{0,30}},
             color={0,0,127},
             smooth=Smooth.None));
-
         annotation (Diagram(graphics),
           experiment(StopTime=60),
           __Dymola_experimentSetupOutput,
@@ -1150,9 +1083,7 @@ Simulation time: 150s
 
   package Distillation
     model Distillation1
-
       import SI = Modelica.SIunits;
-
       parameter Real rr=3.7 "reflux ratio; initial condition: rr_init=3";
       parameter SI.MolarFlowRate Feed =  24.0/360 "Feed Flowrate";
       parameter Real x_Feed = 0.5 "Mole Fraction of Feed";
@@ -1199,11 +1130,9 @@ Simulation time: 150s
        0.12514970961746,
        0.09245832612765,
        0.06458317697321} "initial conditions for the states";
-
       Real x[32](start=x_init)
         "mole fraction of A at each state, column vector";
       Real y[32] "vapor Mole Fractions of Component A";
-
     equation
         y = (x*vol)./(1 .+((vol-1)*x));
        der(x[1]) = 1/acond *(V*(y[2]-x[1])) "condenser";
@@ -1214,7 +1143,6 @@ Simulation time: 150s
        der(x[18:31]) = 1/atray * (FL*(x[17:30]-x[18:31]) - V*(y[18:31]-y[19:32]))
         "14 column stages";
        der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
-
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200),
         __Dymola_experimentSetupOutput,
@@ -1303,9 +1231,7 @@ Simulation time: 7200s
     end Distillation1;
 
     model Distillation1Input
-
       import SI = Modelica.SIunits;
-
     //parameters
       parameter SI.MolarFlowRate Feed =  24.0/60 "Feed Flowrate";
       parameter SI.MassFraction x_Feed = 0.5 "Mole Fraction of Feed";
@@ -1318,11 +1244,9 @@ Simulation time: 7200s
         "Total Molar Holdup on each Tray";
       parameter SI.AmountOfSubstance areb=1.0
         "Total Molar Holdup in the Reboiler";
-
     //initial conditions
       parameter SI.MoleFraction x_init[32]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
         "initial conditions for the states";
-
     //variables
       SI.MoleFraction x[32](start=x_init, each min=0)
         "mole fraction of A at each state, column vector";
@@ -1330,7 +1254,6 @@ Simulation time: 7200s
       SI.MolarFlowRate L "Flowrate of the Liquid in the Rectification Section";
       SI.MolarFlowRate V "Vapor Flowrate in the Column";
       SI.MolarFlowRate FL "Flowrate of the Liquid in the Stripping Section";
-
     //input
       Modelica.Blocks.Interfaces.RealInput rr(start=1)
         annotation (Placement(transformation(extent={{-20,-10},{20,30}})));
@@ -1344,13 +1267,11 @@ Simulation time: 7200s
        der(x[18:31]) = 1/atray * (FL*(x[17:30]-x[18:31]) - V*(y[18:31]-y[19:32]))
         "14 column stages";
        der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
-
      //DAE
        y = (x*vol)./(1 .+((vol-1)*x));
        L=rr*D;
        V=L+D;
        FL=Feed+L;
-
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200),
         __Dymola_experimentSetupOutput,
@@ -1440,9 +1361,7 @@ Simulation time: 7200s
     end Distillation1Input;
 
     model Distillation1Inputder
-
       import SI = Modelica.SIunits;
-
       parameter SI.MolarFlowRate Feed =  24.0/60 "Feed Flowrate";
       parameter SI.MassFraction x_Feed = 0.5 "Mole Fraction of Feed";
       parameter SI.MolarFlowRate D=0.5*Feed "Distillate Flowrate";
@@ -1486,7 +1405,6 @@ Simulation time: 7200s
        0.12514970961746,
        0.09245832612765,
        0.06458317697321} "initial conditions for the states";
-
       SI.MoleFraction x[32](start=x_init, each min=0)
         "mole fraction of A at each state, column vector";
       SI.MoleFraction y[32](each min=0) "vapor Mole Fractions of Component A";
@@ -1494,9 +1412,7 @@ Simulation time: 7200s
       SI.MolarFlowRate V "Vapor Flowrate in the Column";
       SI.MolarFlowRate FL "Flowrate of the Liquid in the Stripping Section";
       Real rr(start=3.7) "reflux ratio";
-
       //input
-
       Modelica.Blocks.Interfaces.RealInput drr
         annotation (Placement(transformation(extent={{-20,-10},{20,30}})));
     equation
@@ -1510,12 +1426,10 @@ Simulation time: 7200s
         "14 column stages";
        der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
        der(rr) = drr;
-
        //DAE
        L=rr*D;
        V=L+D;
        FL=Feed+L;
-
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200),
         __Dymola_experimentSetupOutput,
@@ -1613,9 +1527,7 @@ Simulation time: 7200s
     end Distillation1Input_init;
 
     model Distillation1Inputstep
-
       import SI = Modelica.SIunits;
-
       parameter SI.MolarFlowRate Feed =  24.0/60 "Feed Flowrate";
       parameter Real x_Feed = 0.5 "Mole Fraction of Feed";
       parameter SI.MolarFlowRate D=0.5*Feed "Distillate Flowrate";
@@ -1626,7 +1538,6 @@ Simulation time: 7200s
       parameter Real areb=1.0 "Total Molar Holdup in the Reboiler";
       parameter Real x_init[32]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
         "initial conditions for the states";
-
       Real x[32](start=x_init, each min=0)
         "mole fraction of A at each state, column vector";
       Real y[32](each min=0) "vapor Mole Fractions of Component A";
@@ -1634,7 +1545,6 @@ Simulation time: 7200s
       SI.MolarFlowRate V "Vapor Flowrate in the Column";
       SI.MolarFlowRate FL "Flowrate of the Liquid in the Stripping Section";
       Real rr "reflux ratio";
-
     equation
         y = (x*vol)./(1 .+((vol-1)*x));
        der(x[1]) = 1/acond *(V*(y[2]-x[1])) "condenser";
@@ -1646,12 +1556,10 @@ Simulation time: 7200s
         "14 column stages";
        der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
        rr = if time<=10 then 3 else 2.0;
-
        //DAE
        L=rr*D;
        V=L+D;
        FL=Feed+L;
-
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200),
         __Dymola_experimentSetupOutput,
@@ -1741,9 +1649,7 @@ Simulation time: 7200s
     end Distillation1Inputstep;
 
     model Distillation2
-
       import SI = Modelica.SIunits;
-
       parameter Real rr=2.7 "reflux ratio; initial condition: rr_init=3";
       parameter SI.MolarFlowRate Feed =  24.0/3600 "Feed Flowrate";
       parameter Real x_Feed = 0.5 "Mole Fraction of Feed";
@@ -1793,24 +1699,20 @@ Simulation time: 7200s
        0.06092130595344,
        0.04141387478979,
        0.02660747253544} "initial conditions for the states";
-
       Real x[32](start=x_init)
         "mole fraction of A at each state, column vector";
       Real y[32] "vapor Mole Fractions of Component A";
       Real gammaA[32];
       Real gammaB[32];
       Real vol[ 32];
-
     equation
        for i in 1:32 loop
           gammaA[i] = exp(-log(x[i] + L12 * (1 - x[i])) + (1 - x[i]) * (L12 / (x[i] + L12 * (1 - x[i])) - (L21 / (L21 * x[i] + (1 - x[i])))));
           gammaB[i] = exp(-log((1 - x[i]) + L21 * x[i]) + x[i] * (L21 / ((1 - x[i]) + L21 * x[i]) - (L12 / (L12 * (1 - x[i]) + x[i]))));
        end for "Wilson Equations";
-
        vol = sp_ratio * (gammaA ./gammaB) "Compute the Relative Volatility";
        y = (x .*vol) ./(1 .+((vol .-1) .*x))
         "Vapor Mole Fractions of Component A";
-
        der(x[1]) = 1/acond *(V*(y[2]-x[1])) "condenser";
        der(x[2:16])  = 1/atray *(L*(x[1:15]-x[2:16]) - V*(y[2:16]-y[3:17]))
         "15 column stages";
@@ -1819,7 +1721,6 @@ Simulation time: 7200s
        der(x[18:31]) = 1/atray * (FL*(x[17:30]-x[18:31]) - V*(y[18:31]-y[19:32]))
         "14 column stages";
        der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
-
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=120, Algorithm="Dassl"),
         __Dymola_experimentSetupOutput(
@@ -1865,9 +1766,7 @@ Simulation time: 7200s
     end Distillation2;
 
     model Distillation3
-
       import SI = Modelica.SIunits;
-
       parameter Real rr=2.7 "reflux ratio";
       parameter SI.MolarFlowRate Feed =  24.0/3600 "Feed Flowrate";
       parameter Real x_Feed = 0.5 "Mole Fraction of Feed";
@@ -1891,7 +1790,6 @@ Simulation time: 7200s
         "Activity Coefficients of Liquid Mixture";
       parameter Real L21 = 0.50253532
         "Wilson Activity Coefficient Model Parameters";
-
       parameter Real x_init[32]={0.97287970129754,
        0.95636038934316,
        0.93661040294083,
@@ -1956,7 +1854,6 @@ Simulation time: 7200s
        3.70090876480212,
        3.70499767004852,
        3.70819628750959};
-
       Real x[32](start=x_init)
         "mole fraction of A at each state, column vector";
       SI.Temperature T[32](start=T_init) "Temperature at each state";
@@ -1965,7 +1862,6 @@ Simulation time: 7200s
       Real PsatB[32];
       Real gammaA[32];
       Real gammaB[32];
-
     equation
       for i in 1:32 loop
        PsatA[i] = exp(DIPPR[1,1] + DIPPR[2,1]/T[i] + DIPPR[3,1] * log(T[i]) +
@@ -1973,17 +1869,14 @@ Simulation time: 7200s
        PsatB[i] = exp(DIPPR[1,2] + DIPPR[2,2]/T[i] + DIPPR[3,2] * log(T[i]) +
           DIPPR[4,2] * (T[i]^DIPPR[5,2]));
       end for;
-
       for i in 1:32 loop
          gammaA[i] = exp(-log(x[i] + L12 * (1 - x[i])) + (1 - x[i]) * (L12 / (x[i] + L12 * (1 - x[i])) - (L21 / (L21 * x[i] + (1 - x[i])))));
          gammaB[i] = exp(-log((1 - x[i]) + L21 * x[i]) + x[i] * (L21 / ((1 - x[i]) + L21 * x[i]) - (L12 / (L12 * (1 - x[i]) + x[i]))));
       end for "Wilson Equations";
-
       for i in 1:32 loop
          y[i] = x[i]*gammaA[i]*(PsatA[i] / P)
           "Vapor Mole Fractions of Component A";
       end for;
-
     //ODE
        der(x[1]) = 1/acond *(V*(y[2]-x[1])) "condenser";
        der(x[2:16])  = 1/atray *(L*(x[1:15]-x[2:16]) - V*(y[2:16]-y[3:17]))
@@ -1993,13 +1886,11 @@ Simulation time: 7200s
        der(x[18:31]) = 1/atray * (FL*(x[17:30]-x[18:31]) - V*(y[18:31]-y[19:32]))
         "14 column stages";
        der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
-
     //DAE
        for i in 1:32 loop
           0= ((x[i]*gammaA[i]*PsatA[i]) + ((1-x[i])*gammaB[i]*PsatB[i])-P)/P
           "der( T[i])=0";
        end for;
-
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200, Algorithm="Dassl"),
         __Dymola_experimentSetupOutput(
@@ -2043,17 +1934,21 @@ Simulation time: 7200s
     end Distillation3;
 
     model Distillation4
-
       import SI = Modelica.SIunits;
-
+    // Inputs
+      Modelica.Blocks.Interfaces.RealInput Q_elec(start=Q_elec_ref)
+        "Input 1: Heat Input to the Reboiler from an Electric Heater Q_elec = u(1,1)";
+      Modelica.Blocks.Interfaces.RealInput Vdot_L1(start=Vdot_L1_ref)
+        "Input 2: Flow Rate of the Recycled Distillate Vdot_L1 = u(2,1)";
+    // Parameters - Steady-state reference values
+      parameter Real Q_elec_ref = 2.45e3;
+      parameter SI.VolumeFlowRate Vdot_L1_ref = 4.3/1000/3600;
+      constant Real absolute_zero = -273.15;
+      parameter Real T_14_ref = 88 - absolute_zero;
+      parameter Real T_28_ref = 70 - absolute_zero;
     // Parameters - Nominal Operating Conditions
       parameter SI.VolumeFlowRate Vdot_Feed =  14.0 / 3600 / 1000
         "Feed Flowrate (m^3/sec)";
-      parameter Real Q_elec = 2.45e3
-        "Input 1: Heat Input to the Reboiler from an Electric Heater Q_elec = u(1,1)";
-      parameter SI.VolumeFlowRate Vdot_L1= 4.3 /1000/3600
-        "Input 2: Flow Rate of the Recycled Distillate Vdot_L1 = u(2,1)";
-      //parameter SI.HeatFlowRate Q_elec= 2.45e3"Input 1: Heat Input to the Reboiler from an Electric Heater Q_elec = u(1,1)"
       parameter Real xA_Feed = 0.32 "Mole Fraction of Feed";
       parameter SI.Temp_K Temp_Feed = 71.0 + 273.15 "Feed Temperature (K)";
       parameter SI.Pressure P_top = 0.97 * 1.0e5 "Top Pressure (Pa)";
@@ -2067,7 +1962,6 @@ Simulation time: 7200s
         "Pressure Drop in Below Feed Section(Pa)";
       parameter Real alpha_rect = 0.35;
       parameter Real alpha_strip = 0.62 "Tray Efficiencies";
-
     // Parameters - Physical Properties
       // Molar Volume (m^3/mol) of Component A and B
       parameter Real a1_A = 2.288e3 "Units (mol/m^3)";
@@ -2080,7 +1974,6 @@ Simulation time: 7200s
       parameter SI.Temp_K c1_B = 536.4 "Units (K)";
       parameter SI.MolarVolume V_mol_A_Feed = (1 / a1_A) * (b1_A ^ (1 + (1 - (Temp_Feed / c1_A)) ^ d1_A));
       parameter SI.MolarVolume V_mol_B_Feed = (1 / a1_B) * (b1_B ^ (1 + (1 - (Temp_Feed / c1_B)) ^ d1_B));
-
     // Parameters Pure Component A Saturation Pressure - Antione Equation
       parameter Real a2_A = 23.48 "Units (dimensionless)";
       parameter Real a2_B = 22.437 "Units (dimensionless)";
@@ -2088,7 +1981,6 @@ Simulation time: 7200s
       parameter SI.Temp_K b2_B = 3166.4 "Units (K)";
       parameter Real c2_A = -34.29 "Units (dimensionless)";
       parameter Real c2_B = -80.15 "Units (dimensionless)";
-
     // Enthalpy Coefficients
       parameter Real h1_A = 18.31 "Units (1/K)";
       parameter Real h1_B = 31.92 "Units (1/K)";
@@ -2112,7 +2004,6 @@ Simulation time: 7200s
       parameter SI.Enthalpy hL_B_Feed = c1*(h1_B*(Temp_Feed - To) + h2_B*(Temp_Feed - To)^2 + h3_B*(Temp_Feed - To)^3);
       parameter SI.Enthalpy hL_Feed = xA_Feed * hL_A_Feed + (1 - xA_Feed) * hL_B_Feed
         "Feed Enthalpy";
-
     //initial values
       parameter Real xA_init[42]= {0.9929,
         0.9891,
@@ -2197,68 +2088,39 @@ Simulation time: 7200s
         0.0507,
         0.0512,
         0.0516};
-      parameter SI.Temp_K Temp_init[42]= { 336.7037,
-        337.2658,
-        337.8392,
-        338.4292,
-        339.0418,
-        339.6848,
-        340.3672,
-        341.1000,
-        341.8960,
-        342.7699,
-        343.7382,
-        344.8181,
-        346.0258,
-        347.3745,
-        348.8695,
-        350.5037,
-        352.2530,
-        354.0735,
-        355.9048,
-        357.6824,
-        359.4009,
-        362.1238,
-        362.6950,
-        363.2875,
-        363.9119,
-        364.5823,
-        365.3167,
-        366.1379,
-        367.0730,
-        368.1526,
-        369.4068,
-        370.8586,
-        372.5146,
-        374.3528,
-        376.3160,
-        378.3143,
-        380.2436,
-        382.0123,
-        383.5625,
-        384.8769,
-        385.9711,
-        387.0558};
+      parameter SI.Temp_K Temp_init[42]={
+          337.0,         337.82926829, 338.65853659, 339.48780488,
+          340.31707317,  341.14634146,  341.97560976,  342.80487805,
+          343.63414634,  344.46341463,  345.29268293,  346.12195122,
+          346.95121951,  347.7804878,   348.6097561,   349.43902439,
+          350.26829268,  351.09756098,  351.92682927,  352.75609756,
+          353.58536585,  354.41463415,  355.24390244,  356.07317073,
+          356.90243902,  357.73170732,  358.56097561,  359.3902439,
+          360.2195122,   361.04878049,  361.87804878,  362.70731707,
+          363.53658537,  364.36585366,  365.19512195,  366.02439024,
+          366.85365854,  367.68292683,  368.51219512,  369.34146341,
+          370.17073171,  371.0};
 
     // Oridinary Differential Equations (ODEs)
-      Real xA[42](start=xA_init) "Liquid Mole Fraction of Component A";
+      Real xA[42](start=xA_init, each fixed=true)
+        "Liquid Mole Fraction of Component A";
     // Algebraic Equations (AEs)
-      SI.MolarFlowRate V[41](start=V_init) "Vapor Molar Flux";
-      SI.Temp_K Temp[42](start=Temp_init) "Temperature (K)";
-
+      SI.MolarFlowRate V[41](start=V_init, each fixed=true) "Vapor Molar Flux";
+      SI.Temp_K Temp[42](start=Temp_init, each fixed=true) "Temperature (K)";
     // other variables
-      SI.Pressure Press[42];
+      SI.Pressure Press[42](each start=1.4e5);
       SI.MolarVolume V_mol_A[42] "Pure Component Molar Volumes (m^3/mol)";
       SI.MolarVolume V_mol_B[42];
       SI.MolarVolume V_mol[42] "Mixture Molar Volumes (m^3/mol)";
-      SI.MolarVolume V_mol_Feed "Feed Tray Molar Volume (m^3/mol)";
+      SI.MolarVolume V_mol_Feed(start=7.2e-5)
+        "Feed Tray Molar Volume (m^3/mol)";
       SI.MolarFlowRate Feed "Feed Tray Molar Flowrate (mol/sec)";
       SI.MolarFlowRate F[42] "Feed Flow rates";
-      Real L[41];
+      Real L[41](each start=0.05);
       SI.Enthalpy hL_A[42] "Pure Component Liquid Enthalpies (J/mol)";
       SI.Enthalpy hL_B[42] "Pure Component Liquid Enthalpies (J/mol)";
       SI.Enthalpy hL[42] "Mixture Liquid Enthalpies (J/mol)";
-    //  Real nL[42];
+    // Real nL[42];
       SI.Pressure Psat_A[42] "Pure Component Saturation Pressures (Pa)";
       SI.Pressure Psat_B[42] "Pure Component Saturation Pressures (Pa)";
       SI.Enthalpy hV_A[42] "Pure Component Vapor Enthalpies (J/mol)";
@@ -2270,13 +2132,14 @@ Simulation time: 7200s
       Real dhL_A_dTemp[42];
       Real dhL_B_dTemp[42];
       Real dh_dTemp[42];
-      Real dPsat_A_dTemp[42];
-      Real dPsat_B_dTemp[42];
+      Real dPsat_A_dTemp[42](each start=3e5);
+      Real dPsat_B_dTemp[42](each start=9e4);
       Real h_dot[42];
-      SI.Temp_K Temp_dot[42] "help variables";
       SI.MolarFlowRate Dist "Distillate Molar Flowrate Flowrate";
       SI.MolarFlowRate Bott "Determine the Bottoms Molar Flow Rate";
-
+      SI.Temp_K Temp_dot[42] "help variables";
+      Real ent_term_A[42](each max=1) "help variables for vapor enthalpies";
+      Real ent_term_B[42](each max=1) "help variables for vapor enthalpies";
     equation
     //Pressure
       Press[1] = P_top;
@@ -2286,7 +2149,6 @@ Simulation time: 7200s
       for i in 22:42 loop
       Press[i] = Press[i-1] + dP_strip;
       end for;
-
     //Molar Volumes
       for i in 1:42 loop
          V_mol_A[i] = (1 / a1_A) * (b1_A ^ (1 + (1 - (Temp[i] / c1_A)) ^ d1_A));
@@ -2295,7 +2157,6 @@ Simulation time: 7200s
       end for;
       V_mol_Feed = xA_Feed * V_mol_A[42] + (1 - xA_Feed) * V_mol_B[42];
       Feed =  Vdot_Feed / V_mol_Feed;
-
     //Feed
       for i in 1:21 loop
          F[i] = 0;
@@ -2304,40 +2165,36 @@ Simulation time: 7200s
       for i in 23:42 loop
         F[i] = 0;
       end for;
-
     //Condenser Recycle Molar Flowrate (mol/sec)
       L[1] =  Vdot_L1 / V_mol[1];
       L[2:41] = L[1:40] + V[2:41] - V[1:40] + F[2:41]
         "Solve for the Liquid Flow rates (mol/sec) explicitly";
-
        Dist = V[1] - L[1];
        Bott = L[41] - V[41] "Determine the Bottoms Molar Flow Rate";
-
     //Pure Component Saturation Pressures (Pa)
       for i in 1:42 loop
          Psat_A[i] = exp(a2_A - b2_A/(Temp[i] + c2_A));
          Psat_B[i] = exp(a2_B - b2_B/(Temp[i] + c2_B));
       end for;
-
     //Enthalpies
       for i in 1:42 loop
          hL_A[i] = c1 * (h1_A * (Temp[i] - To) + h2_A * (Temp[i] - To)^2 + h3_A * (Temp[i] - To)^3);
          hL_B[i] = c1 * (h1_B * (Temp[i] - To) + h2_B * (Temp[i] - To)^2 + h3_B * (Temp[i] - To)^3);
          hL[i] = xA[i] * hL_A[i] + (1 - xA[i]) * hL_B[i];
       end for;
-
     //Pure Component Vapor Enthalpies (J/mol)"
       for i in 1:42 loop
-         hV_A[i] = hL_A[i] + Univ_R * Tc_A * sqrt(abs(1 - (Press[i]/Pc_A) / (Temp[i]/Tc_A)^3)) *
+         ent_term_A[i] = (Press[i]/Pc_A) / (Temp[i]/Tc_A)^3;
+         ent_term_B[i] = (Press[i]/Pc_B) / (Temp[i]/Tc_B)^3;
+         hV_A[i] = hL_A[i] + Univ_R * Tc_A * sqrt(1 - ent_term_A[i]) *
             (c2[1] - c2[2]*(Temp[i]/Tc_A) + c2[3]*(Temp[i]/Tc_A)^7 +
             Omega_A * (c2[4] - c2[5]*(Temp[i]/Tc_A) + c2[6]*(Temp[i]/Tc_A)^7));
-         hV_B[i] = hL_B[i] + Univ_R * Tc_B * sqrt(abs(1 - (Press[i]/Pc_B) / (Temp[i]/Tc_B)^3)) *
+         hV_B[i] = hL_B[i] + Univ_R * Tc_B * sqrt(1 - ent_term_B[i]) *
             (c2[1] - c2[2]*(Temp[i]/Tc_B) + c2[3]*(Temp[i]/Tc_B)^7 +
             Omega_A * (c2[4] - c2[5]*(Temp[i]/Tc_B) + c2[6]*(Temp[i]/Tc_B)^7));
          hV[i] = xA[i] * hV_A[i] + (1 - xA[i]) * hV_B[i]
           "Mixture Vapor Enthalpies (J/mol)";
        end for;
-
     //Raoult's Law for Phase Equilibrium
       yA_equil[1]=0;
       for i in 2:41 loop
@@ -2351,7 +2208,6 @@ Simulation time: 7200s
       for i in 1:20 loop
          yA[22-i] = alpha_rect * (yA_equil[22-i] - yA[23-i]) + yA[23-i];
       end for;
-
     //Mole Balance for A at Each State
         der(xA[1])= 1/2.1221253477356540 * (yA[2] * V[1] - xA[1] * L[1] - xA[1] * Dist)
         "Condenser";
@@ -2361,7 +2217,6 @@ Simulation time: 7200s
         end for;
         der(xA[42]) = 1/113 * (xA[41]*L[41] - xA[42]*Bott - yA[42]*V[41])
         "Reboiler";
-
     //Enthalpy Balance at Each Stage - Algebraic Equations to Determine the Vapor Flow Rates
       for i in 2:42 loop
          dh_dxA[i] = hL_A[i] - hL_B[i] "Partial of Liquid Enthalpy w.r.t. xA";
@@ -2369,14 +2224,12 @@ Simulation time: 7200s
          dhL_B_dTemp[i] = c1 * (h1_B + 2 * h2_B * (Temp[i] - To) + 3 * h3_B * (Temp[i] - To)^2);
          dh_dTemp[i] = xA[i] * dhL_A_dTemp[i] + (1 - xA[i]) * dhL_B_dTemp[i]
           "Partial of Liquid Enthalpy w.r.t. Temp";
-
          dPsat_A_dTemp[i] = Psat_A[i] * b2_A / (Temp[i] + c2_A)^2;
          dPsat_B_dTemp[i] = Psat_B[i] * b2_B / (Temp[i] + c2_B)^2;
          Temp_dot[i] = (Psat_B[i] - Psat_A[i]) * der(xA[i]) / (dPsat_A_dTemp[i] * xA[i] + dPsat_B_dTemp[i] * (1 - xA[i]));
          h_dot[i] = dh_dTemp[i] * Temp_dot[i] + dh_dxA[i] * der(xA[i])
           "Enthalpy Total Differential";
       end for;
-
     //Set up Algebraic Equations, der(V[i])=0
       for i in 2:41 loop
           der(V[i-1]) = (1/2.1221253477356540 * (hV[i+1] * V[i] + hL[i-1] * L[i-1] - hV[i] * V[i-1] -
@@ -2384,12 +2237,10 @@ Simulation time: 7200s
       end for;
       der(V[41])= 1/113* (hL[41]*L[41] - hL[42]*Bott - hV[42]*V[41] + Q_elec - Q_loss) - h_dot[42]
         "Reboiler";
-
     // Algebraic equations to determine the temperature at each stage; der(Temp[i])=0
     for i in 1:42 loop
        der(Temp[i]) = (Press[i] - Psat_A[i] * xA[i] - Psat_B[i] * (1 - xA[i])) / Press[i];
     end for;
-
     dh_dTemp[1]=0;
     dh_dxA[1]=0;
     dhL_A_dTemp[1]=0;
@@ -2399,7 +2250,6 @@ Simulation time: 7200s
     h_dot[1]=0;
     Temp_dot[1]=0;
     yA[1]=0;
-
       annotation (experiment(StopTime=6000, Algorithm="Dassl"),
           __Dymola_experimentSetupOutput,
         Diagram(graphics),
@@ -2456,15 +2306,50 @@ Simulation time: 7200s
 </HTML>"));
     end Distillation4;
 
+    model Distillation4Init
+      Distillation4 d(xA(each fixed=false), V(each fixed=false),
+                      Temp(each fixed=false));
+    equation
+      der(d.Q_elec) = 0;
+      der(d.Vdot_L1) = 0;
+    initial equation
+      for i in 1:41 loop
+        der(d.xA[i]) = 0;
+        der(d.V[i]) = 0;
+        der(d.Temp[i]) = 0;
+      end for;
+      der(d.xA[42]) = 0;
+      der(d.Temp[42]) = 0;
+      d.Temp[14] = d.T_28_ref;
+      d.Temp[28] = d.T_14_ref;
+    end Distillation4Init;
+
+    model Distillation4Breakdown
+      Distillation4 d;
+    equation
+      d.Q_elec = d.Q_elec_ref;
+      d.Vdot_L1 = if noEvent(time < 700) then
+                  d.Vdot_L1_ref else
+                  (0.5 / 1000 / 3600);
+    end Distillation4Breakdown;
+
+    model Distillation4Reference
+      Distillation4 d;
+      
+      constant Real time_constant = 35;
+    equation
+      d.Q_elec = d.Q_elec_ref;
+      d.Vdot_L1 = (1 - time_constant / 2 / (time_constant + 5000 - 0.005)) * d.Vdot_L1_ref +
+                  time_constant / 2 * d.Vdot_L1_ref / (time_constant + time);
+      // d.Vdot_L1 = d.Vdot_L1_ref;
+    end Distillation4Reference;
+
     model Distillation4Input
-
       import SI = Modelica.SIunits;
-
     //input
       Modelica.Blocks.Interfaces.RealInput Q_elec
         "Input 1: Heat Input to the Reboiler from an Electric Heater Q_elec = u(1,1)"
         annotation (Placement(transformation(extent={{-42,8},{-2,48}})));
-
     // Parameters - Nominal Operating Conditions
       parameter SI.VolumeFlowRate Vdot_Feed =  14.0 / 3600 / 1000
         "Feed Flowrate (m^3/sec)";
@@ -2484,7 +2369,6 @@ Simulation time: 7200s
         "Pressure Drop in Below Feed Section(Pa)";
       parameter Real alpha_rect = 0.35;
       parameter Real alpha_strip = 0.62 "Tray Efficiencies";
-
     // Parameters - Physical Properties
       // Molar Volume (m^3/mol) of Component A and B
       parameter Real a1_A = 2.288e3 "Units (mol/m^3)";
@@ -2497,7 +2381,6 @@ Simulation time: 7200s
       parameter SI.Temp_K c1_B = 536.4 "Units (K)";
       parameter SI.MolarVolume V_mol_A_Feed = (1 / a1_A) * (b1_A ^ (1 + (1 - (Temp_Feed / c1_A)) ^ d1_A));
       parameter SI.MolarVolume V_mol_B_Feed = (1 / a1_B) * (b1_B ^ (1 + (1 - (Temp_Feed / c1_B)) ^ d1_B));
-
     // Parameters Pure Component A Saturation Pressure - Antione Equation
       parameter Real a2_A = 23.48 "Units (dimensionless)";
       parameter Real a2_B = 22.437 "Units (dimensionless)";
@@ -2505,7 +2388,6 @@ Simulation time: 7200s
       parameter SI.Temp_K b2_B = 3166.4 "Units (K)";
       parameter Real c2_A = -34.29 "Units (dimensionless)";
       parameter Real c2_B = -80.15 "Units (dimensionless)";
-
     // Enthalpy Coefficients
       parameter Real h1_A = 18.31 "Units (1/K)";
       parameter Real h1_B = 31.92 "Units (1/K)";
@@ -2529,7 +2411,6 @@ Simulation time: 7200s
       parameter SI.Enthalpy hL_B_Feed = c1*(h1_B*(Temp_Feed - To) + h2_B*(Temp_Feed - To)^2 + h3_B*(Temp_Feed - To)^3);
       parameter SI.Enthalpy hL_Feed = xA_Feed * hL_A_Feed + (1 - xA_Feed) * hL_B_Feed
         "Feed Enthalpy";
-
     //initial values
       parameter Real xA_init[42]= {0.9929,
         0.9891,
@@ -2656,13 +2537,11 @@ Simulation time: 7200s
         384.8769,
         385.9711,
         387.0558};
-
     // Oridinary Differential Equations (ODEs)
       Real xA[42](start=xA_init) "Liquid Mole Fraction of Component A";
     // Algebraic Equations (AEs)
       SI.MolarFlowRate V[41](start=V_init) "Vapor Molar Flux";
       SI.Temp_K Temp[42](start=Temp_init) "Temperature (K)";
-
     // other variables
       SI.Pressure Press[42];
       SI.MolarVolume V_mol_A[42] "Pure Component Molar Volumes (m^3/mol)";
@@ -2693,7 +2572,6 @@ Simulation time: 7200s
       SI.Temp_K Temp_dot[42] "help variables";
       SI.MolarFlowRate Dist "Distillate Molar Flowrate Flowrate";
       SI.MolarFlowRate Bott "Determine the Bottoms Molar Flow Rate";
-
     equation
     //Pressure
       Press[1] = P_top;
@@ -2703,7 +2581,6 @@ Simulation time: 7200s
       for i in 22:42 loop
       Press[i] = Press[i-1] + dP_strip;
       end for;
-
     //Molar Volumes
       for i in 1:42 loop
          V_mol_A[i] = (1 / a1_A) * (b1_A ^ (1 + (1 - (Temp[i] / c1_A)) ^ d1_A));
@@ -2712,7 +2589,6 @@ Simulation time: 7200s
       end for;
       V_mol_Feed = xA_Feed * V_mol_A[42] + (1 - xA_Feed) * V_mol_B[42];
       Feed =  Vdot_Feed / V_mol_Feed;
-
     //Feed
       for i in 1:21 loop
          F[i] = 0;
@@ -2721,28 +2597,23 @@ Simulation time: 7200s
       for i in 23:42 loop
         F[i] = 0;
       end for;
-
     //Condenser Recycle Molar Flowrate (mol/sec)
       L[1] =  Vdot_L1 / V_mol[1];
       L[2:41] = L[1:40] + V[2:41] - V[1:40] + F[2:41]
         "Solve for the Liquid Flow rates (mol/sec) explicitly";
-
        Dist = V[1] - L[1];
        Bott = L[41] - V[41] "Determine the Bottoms Molar Flow Rate";
-
     //Pure Component Saturation Pressures (Pa)
       for i in 1:42 loop
          Psat_A[i] = exp(a2_A - b2_A/(Temp[i] + c2_A));
          Psat_B[i] = exp(a2_B - b2_B/(Temp[i] + c2_B));
       end for;
-
     //Enthalpies
       for i in 1:42 loop
          hL_A[i] = c1 * (h1_A * (Temp[i] - To) + h2_A * (Temp[i] - To)^2 + h3_A * (Temp[i] - To)^3);
          hL_B[i] = c1 * (h1_B * (Temp[i] - To) + h2_B * (Temp[i] - To)^2 + h3_B * (Temp[i] - To)^3);
          hL[i] = xA[i] * hL_A[i] + (1 - xA[i]) * hL_B[i];
       end for;
-
     //Pure Component Vapor Enthalpies (J/mol)"
       for i in 1:42 loop
          hV_A[i] = hL_A[i] + Univ_R * Tc_A * sqrt(abs(1 - (Press[i]/Pc_A) / (Temp[i]/Tc_A)^3)) *
@@ -2754,7 +2625,6 @@ Simulation time: 7200s
          hV[i] = xA[i] * hV_A[i] + (1 - xA[i]) * hV_B[i]
           "Mixture Vapor Enthalpies (J/mol)";
        end for;
-
     //Raoult's Law for Phase Equilibrium
       yA_equil[1]=0;
       for i in 2:41 loop
@@ -2768,7 +2638,6 @@ Simulation time: 7200s
       for i in 1:20 loop
          yA[22-i] = alpha_rect * (yA_equil[22-i] - yA[23-i]) + yA[23-i];
       end for;
-
     //Mole Balance for A at Each State
         der(xA[1])= 1/2.1221253477356540 * (yA[2] * V[1] - xA[1] * L[1] - xA[1] * Dist)
         "Condenser";
@@ -2778,7 +2647,6 @@ Simulation time: 7200s
         end for;
         der(xA[42]) = 1/113 * (xA[41]*L[41] - xA[42]*Bott - yA[42]*V[41])
         "Reboiler";
-
     //Enthalpy Balance at Each Stage - Algebraic Equations to Determine the Vapor Flow Rates
       for i in 2:42 loop
          dh_dxA[i] = hL_A[i] - hL_B[i] "Partial of Liquid Enthalpy w.r.t. xA";
@@ -2786,14 +2654,12 @@ Simulation time: 7200s
          dhL_B_dTemp[i] = c1 * (h1_B + 2 * h2_B * (Temp[i] - To) + 3 * h3_B * (Temp[i] - To)^2);
          dh_dTemp[i] = xA[i] * dhL_A_dTemp[i] + (1 - xA[i]) * dhL_B_dTemp[i]
           "Partial of Liquid Enthalpy w.r.t. Temp";
-
          dPsat_A_dTemp[i] = Psat_A[i] * b2_A / (Temp[i] + c2_A)^2;
          dPsat_B_dTemp[i] = Psat_B[i] * b2_B / (Temp[i] + c2_B)^2;
          Temp_dot[i] = (Psat_B[i] - Psat_A[i]) * der(xA[i]) / (dPsat_A_dTemp[i] * xA[i] + dPsat_B_dTemp[i] * (1 - xA[i]));
          h_dot[i] = dh_dTemp[i] * Temp_dot[i] + dh_dxA[i] * der(xA[i])
           "Enthalpy Total Differential";
       end for;
-
     //Set up Algebraic Equations, der(V[i])=0
       for i in 2:41 loop
           der(V[i-1]) = (1/2.1221253477356540 * (hV[i+1] * V[i] + hL[i-1] * L[i-1] - hV[i] * V[i-1] -
@@ -2801,12 +2667,10 @@ Simulation time: 7200s
       end for;
       der(V[41])= 1/113* (hL[41]*L[41] - hL[42]*Bott - hV[42]*V[41] + Q_elec - Q_loss) - h_dot[42]
         "Reboiler";
-
     // Algebraic equations to determine the temperature at each stage; der(Temp[i])=0
     for i in 1:42 loop
        der(Temp[i]) = (Press[i] - Psat_A[i] * xA[i] - Psat_B[i] * (1 - xA[i])) / Press[i];
     end for;
-
     dh_dTemp[1]=0;
     dh_dxA[1]=0;
     dhL_A_dTemp[1]=0;
@@ -2816,7 +2680,6 @@ Simulation time: 7200s
     h_dot[1]=0;
     Temp_dot[1]=0;
     yA[1]=0;
-
     annotation (experiment(StopTime=6000, Algorithm="Dassl"),
           __Dymola_experimentSetupOutput,
         Diagram(graphics),
@@ -2834,7 +2697,6 @@ Simulation time: 7200s
 
     package Examples
       model Distillation4test
-
         JMExamples.Distillation.Distillation4Input
                            distillation4Input
           annotation (Placement(transformation(extent={{20,20},{40,40}})));
@@ -2845,7 +2707,6 @@ Simulation time: 7200s
             points={{-19,30},{4,30},{4,32.8},{27.8,32.8}},
             color={0,0,127},
             smooth=Smooth.None));
-
         annotation (
           Diagram(graphics),
           experiment(StopTime=6000),
@@ -2903,19 +2764,15 @@ Simulation time: 7200s
 
   package DoubleTank
     model DoubleTank
-
          import SI = Modelica.SIunits;
-
          //State start values
          parameter Real x1_0 = 0;
          parameter Real x2_0= 1;
-
          //States
          Real x1(start = x1_0, fixed=true);
          Real x2(start = x2_0, fixed=true);
          SI.DampingCoefficient gamma;
          SI.DampingCoefficient delta;
-
          //Parameter
          parameter SI.Area A = 4.9*10e-4 "Tank cross section";
          parameter SI.Area a = 3.1*10e-6 "Outlet cross section";
@@ -2924,7 +2781,6 @@ Simulation time: 7200s
          parameter SI.PhaseCoefficient beta = 6.25
         "Conversion factor from height to measurement";
          parameter SI.Acceleration g = 9.81 "Acceleration of gravity";
-
          //Control Signal
           Modelica.Blocks.Interfaces.RealInput u
         annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
@@ -2934,24 +2790,20 @@ Simulation time: 7200s
           delta = alpha*beta/A;
           der(x1) = -gamma*sqrt(x1)+delta*u;
           der(x2) = gamma*(sqrt(x1)-sqrt(x2));
-
       annotation (DymolaStoredErrors);
     end DoubleTank;
   end DoubleTank;
 
   package FlightPath
     model FlightPath
-
       //state start values
       parameter Real x1_0 = 153.73;
       parameter Real x2_0 = 0;
       parameter Real x3_0 = 0;
-
       //states
       Real x1(start = x1_0, fixed=true);
       Real x2(start = x2_0, fixed=true);
       Real x3(start = x3_0, fixed=true);
-
       //control
       Modelica.Blocks.Interfaces.RealInput u
         annotation (Placement(transformation(extent={{-120,20},{-80,60}}),
@@ -2959,19 +2811,16 @@ Simulation time: 7200s
       Modelica.Blocks.Interfaces.RealInput v
         annotation (Placement(transformation(extent={{-120,-40},{-80,0}}),
             iconTransformation(extent={{-120,-40},{-80,0}})));
-
       //parameter
       parameter Real L = 65.3;
       parameter Real D = 3.18;
       parameter Real m = 160e3;
       parameter Real g = 9.81;
       parameter Real c = 6;
-
     equation
       der(x1) = (-D/m*x1^2-g*sin(x2)+u/m);
       der(x2) = L/m*x1*(1-c*x2)-g*cos(x2)/x1+L*c/m*v;
       der(x3) = (x1*sin(x2));
-
       annotation (experiment(StopTime=100), __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
 <p>
@@ -3001,7 +2850,6 @@ Simulation time: 100s
 
     package Examples
       model FlightPathExp
-
         FlightPath flightPath
           annotation (Placement(transformation(extent={{20,20},{40,40}})));
         Modelica.Blocks.Sources.RealExpression realExpression(y=25)
@@ -3030,7 +2878,6 @@ Simulation time: 100s
       end FlightPathExp;
 
       model FlightPathSine
-
         FlightPath flightPath
           annotation (Placement(transformation(extent={{20,0},{40,20}})));
         Modelica.Blocks.Sources.Sine sine(amplitude=20, freqHz=10)
@@ -3064,9 +2911,7 @@ Simulation time: 100s
 
   package Greenhouse
     model Greenhouse
-
       import SI = Modelica.SIunits;
-
       //parameter
       parameter Real pW = 3e-6/40;
       parameter Real pT = 1;
@@ -3075,31 +2920,26 @@ Simulation time: 100s
       parameter Real pWc = 3e4/220;
       parameter Real pi = 3.14159;
       parameter Real tf = 48;
-
       //state start values
       parameter Real x1_0 = 0;
       parameter Real x2_0 = 10;
       parameter Real x3_0 = 0;
-
       //states
       SI.Mass x1(start=x1_0,fixed=true) "dry weight";
       SI.Temp_C x2(start=x2_0,fixed=true) "Greenhouse temperature";
       SI.Energy x3(start=x3_0,fixed=true);
       SI.Power sun "sunlight";
       SI.Temp_C temp "outside temperature";
-
       //control signal
       Modelica.Blocks.Interfaces.RealInput u
         annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
             iconTransformation(extent={{-120,-20},{-80,20}})));
-
     equation
       der(x1) = pW*sun*x2;
       der(x2) = pT*(temp-x2)+pH*u;
       der(x3) = pHc*u;
       sun = 800*sin(4*pi*time/tf-0.65*pi);
       temp = 15+10*sin(4*pi*time/tf-0.65*pi);
-
       annotation (experiment(StopTime=48), __Dymola_experimentSetupOutput,
         Icon(graphics={
             Ellipse(
@@ -3263,9 +3103,7 @@ OPTIMAL CONTROL OF A SOLAR GREENHOUSE, R.J.C. van Ooteghem, J.D. Stigter, L.G. v
 
   package Helicopter
     model Helicopter
-
          import SI = Modelica.SIunits;
-
          //State start values and parameters
          parameter SI.MomentOfInertia Je = 0.91
         "Moment of inertia about elevation axis";
@@ -3281,7 +3119,6 @@ OPTIMAL CONTROL OF A SOLAR GREENHOUSE, R.J.C. van Ooteghem, J.D. Stigter, L.G. v
         "Distance from pitch axis to either motor";
          parameter SI.MomentOfInertia Jt = 0.91
         "Moment of inertia about travel axis";
-
          //States
          Real te(fixed=true);
          Real tr(fixed=true);
@@ -3289,7 +3126,6 @@ OPTIMAL CONTROL OF A SOLAR GREENHOUSE, R.J.C. van Ooteghem, J.D. Stigter, L.G. v
          Real dte(fixed=true);
          Real dtr(fixed=true);
          Real dtp(fixed=true);
-
          //Control Signal
       Modelica.Blocks.Interfaces.RealInput Vf
         annotation (Placement(transformation(extent={{-120,20},{-80,60}}),
@@ -3388,9 +3224,7 @@ OPTIMAL CONTROL OF A SOLAR GREENHOUSE, R.J.C. van Ooteghem, J.D. Stigter, L.G. v
     end Helicopter;
 
     model HelicopterDer
-
       import SI = Modelica.SIunits;
-
          //State start values and parameters
          parameter SI.MomentOfInertia Je = 0.91
         "Moment of inertia about elevation axis";
@@ -3406,7 +3240,6 @@ OPTIMAL CONTROL OF A SOLAR GREENHOUSE, R.J.C. van Ooteghem, J.D. Stigter, L.G. v
         "Distance from pitch axis to either motor";
          parameter SI.MomentOfInertia Jt = 0.91
         "Moment of inertia about travel axis";
-
          //States
          Real te(start=0,fixed=true);
          Real tr(start=0,fixed=true);
@@ -3416,13 +3249,11 @@ OPTIMAL CONTROL OF A SOLAR GREENHOUSE, R.J.C. van Ooteghem, J.D. Stigter, L.G. v
          Real dtp(start=-2,fixed=true);
          Real Vf(start=0,fixed=true);
          Real Vb(start=0,fixed=true);
-
          //Control Signal
       Modelica.Blocks.Interfaces.RealInput dVf
         annotation (Placement(transformation(extent={{-52,10},{-12,50}})));
       Modelica.Blocks.Interfaces.RealInput dVb
         annotation (Placement(transformation(extent={{-50,-46},{-10,-6}})));
-
     equation
          der(te) = dte;
          der(tr) = dtr;
@@ -3511,7 +3342,6 @@ OPTIMAL CONTROL OF A SOLAR GREENHOUSE, R.J.C. van Ooteghem, J.D. Stigter, L.G. v
 
     package Examples
       model HelicopterInput
-
         HelicopterDer helicopterDer
           annotation (Placement(transformation(extent={{20,0},{40,20}})));
         Modelica.Blocks.Sources.TimeTable timeTable(table=[0,0.3; 7,0.3; 7,0; 15,
@@ -3543,17 +3373,13 @@ OPTIMAL CONTROL OF A SOLAR GREENHOUSE, R.J.C. van Ooteghem, J.D. Stigter, L.G. v
 
   package MarinePopulation
     model MarinePopulation
-
       //parameter
       parameter Real m[8]={0,0,0,0,0,0,0,0};
       parameter Real g[7]={0,0,0,0,0,0,0};
-
       //states
       Real y[8](start={ 20000, 17000, 10000, 15000, 12000, 9000, 7000, 3000}, each fixed=true);
-
     equation
       der(y) = cat(1,{0},g).*cat(1,{0},y[1:7]) - (m+cat(1,g,{0})).*y;
-
       annotation (experiment(StopTime=10), __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
 <p>
@@ -3606,31 +3432,25 @@ Simulation time: 10s
 
   package MoonLander
     model MoonLander
-
       import SI = Modelica.SIunits;
       //parameter
-
       //state start values
       parameter SI.Height   h_0 = 1;
       parameter SI.Velocity v_0 = -0.783;
       parameter SI.Mass     m_0 = 1;
-
       //states
       SI.Height   h(start=h_0, fixed=true);
       SI.Velocity v(start=v_0, fixed=true);
       SI.Mass     m(start=m_0, fixed=true);
-
       //control input
       Modelica.Blocks.Interfaces.RealInput u "thrust" annotation (Placement(transformation(
               extent={{-120,-20},{-80,20}}),
                                           iconTransformation(extent={{-120,-20},
                 {-80,20}})));
-
     equation
       der(h) = v;
       der(v) = -1+u/m;
       der(m) = -u/2.349;
-
       annotation (experiment(NumberOfIntervals=1),
           __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
@@ -3692,7 +3512,6 @@ Simulation time: 1s
 
     package Examples
       model MoonLanderInput
-
         MoonLander moonLander
           annotation (Placement(transformation(extent={{20,20},{40,40}})));
         Modelica.Blocks.Sources.TimeTable timeTable(table=[0,0; 0.2,0; 0.25,1.227;
@@ -3720,11 +3539,8 @@ Simulation time: 1s
   end MoonLander;
 
   package PenicillinPlant
-
     model PenicillinPlant1
-
       import SI = Modelica.SIunits;
-
       parameter Real miu_m = 0.02;
       parameter Real Km =   0.05;
       parameter Real Ki = 5;
@@ -3732,14 +3548,12 @@ Simulation time: 1s
       parameter Real Yp =   1.2;
       parameter Real v = 0.004;
       parameter Real Sin =   200;
-
       //state start values
       parameter Real X1_0=1;
       parameter Real S1_0=0.5;
       parameter Real P1_0=0;
       parameter Real V1_0=150;
       parameter Real u1_0=1;
-
       //state start values
       Real X1(start=X1_0,fixed=true) "Cell mass concentration";
       Real S1(start=S1_0,fixed=true) "Substrate concentration";
@@ -3747,12 +3561,10 @@ Simulation time: 1s
       Real V1(start=V1_0,fixed=true) "Volume of medium";
       Real u1(start=u1_0,fixed=true);
       Real miu1;
-
       //control signal
       Modelica.Blocks.Interfaces.RealInput du1 "Feed Flowrate derivative"
         annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
             iconTransformation(extent={{-120,-20},{-80,20}})));
-
     equation
       miu1 = (miu_m*S1)/(Km+S1+S1^2/Ki);
       der(X1) = miu1*X1-u1/V1*X1;
@@ -3760,7 +3572,6 @@ Simulation time: 1s
       der(P1) = v*X1 - u1/V1*P1;
       der(V1) = u1;
       der(u1) = du1;
-
       annotation (experiment(StopTime=150, NumberOfIntervals=100),
           __Dymola_experimentSetupOutput,
      Documentation(info="<HTML>
@@ -3827,7 +3638,6 @@ Simulation time: 150s
 
     model PenicillinPlant2
       import SI = Modelica.SIunits;
-
        //parameter
           parameter Real miu_m = 0.02;
           parameter Real Km =   0.05;
@@ -3836,7 +3646,6 @@ Simulation time: 150s
           parameter Real Yp = 1.2;
           parameter Real v = 0.004;
           parameter Real Sin = 200;
-
           //state start values, equal to final values of first phase
           parameter Real X2_0 = 3.7;
           parameter Real S2_0 = 0;
@@ -3844,7 +3653,6 @@ Simulation time: 150s
           parameter Real V2_0 = 150;
           parameter Real u2_0 = 0.03;
           parameter Real du2_0 = 0;
-
           //state start values
           Real X2(start=X2_0,fixed=true);
           Real S2(start=S2_0,fixed=true);
@@ -3852,13 +3660,11 @@ Simulation time: 150s
           Real V2(start=V2_0,fixed=true);
           Real u2(start=u2_0,fixed=true);
           Real miu2;
-
           //control signal
       Modelica.Blocks.Interfaces.RealInput du2 annotation (Placement(transformation(
               extent={{-120,-20},{-80,20}}),
                                          iconTransformation(extent={{-120,-20},
                 {-80,20}})));
-
     equation
           miu2 = (miu_m*S2)/(Km+S2+S2^2/Ki);
           der(X2) = miu2*X2-u2/V2*X2;
@@ -3866,7 +3672,6 @@ Simulation time: 150s
           der(P2) = v*X2 - u2/V2*P2;
           der(V2) = u2;
           der(u2) = du2;
-
       annotation (Documentation(info="<HTML>
 <p>
 The model is equivalent to PenicillinPlant1 except the input value. Furthermore the upper constraint for u is set to 0.03.
@@ -3904,9 +3709,7 @@ Simulation time: 150s
     end PenicillinPlant2;
 
     model PenicillinPlantTest
-
       import SI = Modelica.SIunits;
-
       parameter Real miu_m = 0.02;
       parameter Real Km =   0.05;
       parameter Real Ki = 5;
@@ -3914,25 +3717,21 @@ Simulation time: 150s
       parameter Real Yp =   1.2;
       parameter Real v = 0.004;
       parameter Real Sin =   200;
-
       //state start values
       parameter Real X1_0=1;
       parameter Real S1_0=0.5;
       parameter Real P1_0=0;
       parameter Real V1_0=150;
-
       //state start values
       Real X1(start=X1_0,fixed=true) "Cell mass concentration";
       Real S1(start=S1_0,fixed=true) "Substrate concentration";
       Real P1(start=P1_0,fixed=true) "Penicillin concentration";
       Real V1(start=V1_0,fixed=true) "Volume of medium";
       Real miu1;
-
       //control signal
       Modelica.Blocks.Interfaces.RealInput u1 "Feed Flowrate"
         annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
             iconTransformation(extent={{-120,-20},{-80,20}})));
-
     equation
       miu1 = (miu_m*S1)/(Km+S1+S1^2/Ki);
       der(X1) = miu1*X1-u1/V1*X1;
@@ -3980,7 +3779,6 @@ Simulation time: 150s
 
     package Examples
       model PenicillinPlantInput
-
         PenicillinPlantTest penicillinPlantTest
           annotation (Placement(transformation(extent={{0,0},{20,20}})));
         Modelica.Blocks.Sources.Trapezoid trapezoid(
@@ -4013,7 +3811,6 @@ Simulation time: 150s
       end PenicillinPlantInput;
 
       model PenicillinPlantInputConst
-
         PenicillinPlantTest penicillinPlantTest
           annotation (Placement(transformation(extent={{0,0},{20,20}})));
         Modelica.Blocks.Sources.Constant const(k=0.03)
@@ -4042,9 +3839,7 @@ Simulation time: 150s
 
   package Polyeth
     model Polyeth
-
       import SI = Modelica.SIunits;
-
         //define constants:
         parameter SI.Volume Vg = 500;
         parameter SI.Volume Vp = 0.5;
@@ -4069,19 +3864,16 @@ Simulation time: 150s
         parameter SI.Temperature Twi = 289.56;
         parameter Real RR = 8.20575e-5;
         parameter SI.MolarHeatCapacity R = 8.314;
-
         //define parameter theta
          parameter SI.IonicStrength ac = 0.548;
          parameter Real kp0 = 85e-3;
          parameter Real Ea = 9e3*4.1868 "J/mol";
          parameter Real kd = 1e-4 "s^-1";
-
         // Control Signal
         parameter SI.MassFlowRate Fc = 1.5/3600;
         parameter SI.Temperature Tfeed = 293 "scalar or vector??";
         //Fc (start = Fc_ss) could be defined as input for optimization problems
         //Tfeed (start = Tfeed_ss) step control signal value could be defined as input for optimization problems
-
          //States
          SI.Concentration In_con(start = 483.5818, fixed=true)
         "Molar concentration of inert in the gas phase";
@@ -4101,7 +3893,6 @@ Simulation time: 150s
          Real Hg0;
          Real Hr;
          Real Hpol;
-
     equation
          //Algebric equations:
          0 = Vp * Cv * sqrt((M1_con+In_con) * RR * T - Pv) -bt;
@@ -4112,7 +3903,6 @@ Simulation time: 150s
          0 = (Fg + bt) * (T - Tf) * Cpg-Hg0;
          0 = Hreac * Mw1 * RM1-Hr;
          0 = Cppol * (T - Tf) * RM1 * Mw1-Hpol;
-
          // Differential equations:
          der(In_con) = (FIn - In_con/(M1_con + In_con) * bt)/Vg;
          der(M1_con) = (FM1 - M1_con/(M1_con + In_con) * bt - RM1)/Vg;
@@ -4121,7 +3911,6 @@ Simulation time: 150s
          der(T)      = (Hf + Hg1 - Hg0 - Hr - Hpol)/(MrCpr + Bw * Cppol);
          der(Tw)     = Fw/Mw * (Twi - Tw) - UA/(Mw * Cpw) * (Tw - Tg);
          der(Tg)     = Fg/Mg * (T - Tg)   + UA/(Mg * Cpg) * (Tw - Tg);
-
       annotation (Icon(graphics),
         experiment(StopTime=36000),
         __Dymola_experimentSetupOutput,
@@ -4147,9 +3936,7 @@ Simulation time: 36000s
     end Polyeth;
 
     model PolyethTest
-
       import SI = Modelica.SIunits;
-
         //define constants:
         parameter SI.Volume Vg = 500;
         parameter SI.Volume Vp = 0.5;
@@ -4175,13 +3962,11 @@ Simulation time: 36000s
         parameter Real RR = 8.20575e-5;
         parameter SI.MolarHeatCapacity R = 8.314;
         parameter SI.Temperature Tfeed=293;
-
         //define parameter theta
          parameter SI.IonicStrength ac = 0.548;
          parameter Real kp0 = 85e-3;
          parameter Real Ea = 9e3*4.1868 "J/mol";
          parameter Real kd = 1e-4 "s^-1";
-
          //States
          SI.Concentration In_con(start = 483.5818, fixed=true)
         "Molar concentration of inert in the gas phase";
@@ -4201,7 +3986,6 @@ Simulation time: 36000s
          Real Hg0;
          Real Hr;
          Real Hpol;
-
          // Control Signal
       Modelica.Blocks.Interfaces.RealInput Fc annotation (Placement(transformation(
               extent={{-60,20},{-20,60}}), iconTransformation(extent={{-60,20},{-20,
@@ -4216,7 +4000,6 @@ Simulation time: 36000s
          0 = (Fg + bt) * (T - Tf) * Cpg-Hg0;
          0 = Hreac * Mw1 * RM1-Hr;
          0 = Cppol * (T - Tf) * RM1 * Mw1-Hpol;
-
          // Differential equations:
          der(In_con) = (FIn - In_con/(M1_con + In_con) * bt)/Vg;
          der(M1_con) = (FM1 - M1_con/(M1_con + In_con) * bt - RM1)/Vg;
@@ -4225,7 +4008,6 @@ Simulation time: 36000s
          der(T)      = (Hf + Hg1 - Hg0 - Hr - Hpol)/(MrCpr + Bw * Cppol);
          der(Tw)     = Fw/Mw * (Twi - Tw) - UA/(Mw * Cpw) * (Tw - Tg);
          der(Tg)     = Fg/Mg * (T - Tg) + UA/(Mg * Cpg) * (Tw - Tg);
-
       annotation (Icon(graphics),
         experiment(StopTime=36000),
         __Dymola_experimentSetupOutput,
@@ -4241,7 +4023,6 @@ Simulation time: 36000s
 
     package Examples
       model PolyethInput
-
         JMExamples.Polyeth.PolyethTest
                      polyethInput
           annotation (Placement(transformation(extent={{20,0},{40,20}})));
@@ -4270,9 +4051,7 @@ Simulation time: 36000s
 
   package QuadrupleTank
     model QuadrupleTank
-
         import SI = Modelica.SIunits;
-
          //State start values
          parameter Real x1_0 = 8.2444;
          parameter Real x2_0= 19.0163;
@@ -4280,13 +4059,11 @@ Simulation time: 36000s
          parameter Real x4_0= 8.8065;
          parameter Real u1_0 = 3;
          parameter Real u2_0= 3;
-
          //States
          Real x1(start = x1_0, fixed=true);
          Real x2(start = x2_0, fixed=true);
          Real x3(start = x3_0, fixed=true);
          Real x4(start = x4_0, fixed=true);
-
          //Parameter
          parameter SI.Area Al = 28*10e-4 "Tank cross section of lower tanks";
          parameter SI.Area Au = 32*10e-4 "Tank cross section of upper tanks";
@@ -4298,7 +4075,6 @@ Simulation time: 36000s
          parameter Real gamma1 = 0.25 "Position of the valves";
          parameter Real gamma2 = 0.35 "Position of the valves";
          parameter SI.Acceleration g = 9.81 "Acceleration of gravity";
-
          //Control Signal
           Modelica.Blocks.Interfaces.RealInput u2(start=u2_0, fixed=true)
         annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
@@ -4310,7 +4086,6 @@ Simulation time: 36000s
           der(x2) = -al/Al*sqrt(2*g*x2) + au/Al*sqrt(2*g*x4) + gamma2*k2/Al*u2;
           der(x3) = -au/Au*sqrt(2*g*x3) + (1-gamma1)*k2/Au*u2;
           der(x4) = -au/Au*sqrt(2*g*x4) + (1-gamma2)*k1/Au*u1;
-
       annotation (Diagram(graphics),
         experiment(StopTime=60),
         __Dymola_experimentSetupOutput);
@@ -4342,17 +4117,13 @@ Simulation time: 36000s
 
 package VDP
   model VDP "Van der Pol model"
-
      // State start values
      parameter Real x1_0 = 0;
      parameter Real x2_0 = 1;
-
      // The states
      Real x1(start = x1_0);
      Real x2(start = x2_0);
-
      // The control signal
-
     Modelica.Blocks.Interfaces.RealInput u
       annotation (Placement(transformation(extent={{-120,-20},{-80,20}})));
   equation
@@ -4390,7 +4161,6 @@ Simulation time: 10s
 
   package Examples
     model VDPexpsin
-
       VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
       Modelica.Blocks.Sources.ExpSine expSine(amplitude=10)
         annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
@@ -4413,7 +4183,6 @@ Simulation time: 10s
     end VDPexpsin;
 
     model VDPramp
-
       VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
       Modelica.Blocks.Sources.Ramp ramp
         annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
@@ -4422,7 +4191,6 @@ Simulation time: 10s
           points={{-19,10},{20,10}},
           color={0,0,127},
           smooth=Smooth.None));
-
       annotation (
         Diagram(graphics),
         experiment(StopTime=10, NumberOfIntervals=50),
@@ -4440,7 +4208,6 @@ Simulation time: 10s
     end VDPramp;
 
     model VDPexp
-
       VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
       Modelica.Blocks.Sources.Exponentials exponentials(riseTime=10)
         annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
@@ -4449,7 +4216,6 @@ Simulation time: 10s
           points={{-19,10},{20,10}},
           color={0,0,127},
           smooth=Smooth.None));
-
       annotation (Diagram(graphics),
         Documentation(info="<HTML>
 <p>
@@ -4464,7 +4230,6 @@ Simulation time: 10s
     end VDPexp;
 
     model VDPpulse
-
       VDP vDP annotation (Placement(transformation(extent={{0,0},{20,20}})));
       Modelica.Blocks.Sources.Pulse pulse(amplitude=10)
         annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
@@ -4473,7 +4238,6 @@ Simulation time: 10s
           points={{-39,10},{0,10}},
           color={0,0,127},
           smooth=Smooth.None));
-
       annotation (Diagram(graphics),
         Documentation(info="<HTML>
 <p>
@@ -4488,7 +4252,6 @@ Simulation time: 10s
     end VDPpulse;
 
     model VDPsine
-
       VDP vDP annotation (Placement(transformation(extent={{20,0},{40,20}})));
       Modelica.Blocks.Sources.Sine sine(amplitude=5, freqHz=1)
         annotation (Placement(transformation(extent={{-32,0},{-12,20}})));
@@ -4497,7 +4260,6 @@ Simulation time: 10s
           points={{-11,10},{20,10}},
           color={0,0,127},
           smooth=Smooth.None));
-
       annotation (Diagram(graphics),
         Documentation(info="<HTML>
 <p>
