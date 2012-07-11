@@ -927,29 +927,45 @@ aspect CADCodeGen {
 		}
 	}
 	
-
 	public void StructuredBLT.genOdeDerivativeBlocks_CAD(PrintStream str) {
 		int block_counter = 0;
+		int i = 0;
 		str.append("/*********** ODE section ***********/\n");	
 		// Loop over all derivatives
 		for (AbstractEquationBlock eb : getOdeBlocks()) {
 			eb.genBlock_CAD(block_counter,false,"  ",str);
-			block_counter += eb.isSolvable()? 0: 1; 			
+			block_counter += eb.isSolvable()? 0: 1; 		
+			for (FAbstractEquation e : eb.equations()){
+				e.genFuncCall_CAD(i, "", str);
+				i += e.numScalarEquations();
+			}
 		}
 		str.append("/*********** Real outputs **********/\n");	
 		for (AbstractEquationBlock eb : getRealOutputBlocks()) {
 			eb.genBlock_CAD(block_counter,false,"  ",str);
-			block_counter += eb.isSolvable()? 0: 1; 			
+			block_counter += eb.isSolvable()? 0: 1; 		
+			for (FAbstractEquation e : eb.equations()){
+				e.genFuncCall_CAD(i, "", str);
+				i += e.numScalarEquations();
+			}
 		}
 		str.append("/*** Integer and boolean outputs ***/\n");	
 		for (AbstractEquationBlock eb : getIntegerBooleanOutputBlocks()) {
 			eb.genBlock_CAD(block_counter,false,"  ",str);
-			block_counter += eb.isSolvable()? 0: 1; 			
+			block_counter += eb.isSolvable()? 0: 1; 	
+			for (FAbstractEquation e : eb.equations()){
+				e.genFuncCall_CAD(i, "", str);
+				i += e.numScalarEquations();
+			}
 		}
 		str.append("/********* Other variables *********/\n");	
 		for (AbstractEquationBlock eb : getOtherBlocks()) {
 			eb.genBlock_CAD(block_counter,false,"  ",str);
-			block_counter += eb.isSolvable()? 0: 1; 			
+			block_counter += eb.isSolvable()? 0: 1; 		
+			for (FAbstractEquation e : eb.equations()){
+				e.genFuncCall_CAD(i, "", str);
+				i += e.numScalarEquations();
+			}
 		}
 	}
 	
@@ -959,10 +975,16 @@ aspect CADCodeGen {
 	public void FFunctionCallEquation.genResidual_CAD(int i, String indent, PrintStream str) {
 		if (!getCall().isIgnored()) {
 			genTempVars_CAD(printer_C, str, indent);
+			getCall().prettyPrint_CAD(str, indent);
+			str.print(";\n");
 			for (FFunctionCallLeft l : getLefts()){
 				l.setBaseIndex(i);
 				l.genWriteBack_CAD(str, indent);
 			}
+// TODO: Should this be added? Updates the variables assigned in the function calls. 			
+//			for (FFunctionCallLeft l : getLefts()){
+//				l.genWriteBackInFunc_CAD(str, indent);
+//			}
 		}
 	}
 	
