@@ -719,7 +719,7 @@ aspect CADCodeGen {
 	}
 	
 	public void SolvedScalarEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {	
-		equations().get(0).genSolvedBlock_CAD(activeVariables().get(0),indent,str);
+		eqn.genSolvedBlock_CAD(fv,indent,str);
 	}
 	
 	public void FAbstractEquation.genSolvedBlock_CAD(FVariable v, String indent, PrintStream str) {}
@@ -775,13 +775,9 @@ aspect CADCodeGen {
 		str.print("  } else if (evaluation_mode==JMI_BLOCK_EVALUATE || evaluation_mode==JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode==JMI_BLOCK_EVALUATE_WITH_STATE) {\n");
 		
 		// Generate dy_i seeds from solved equations and variables
-		for (MatchingPair mp: getSolvedPairs()){
-			mp.getEquation().genSolvedTornBlock_CAD(mp.getFVariable(), indent, str);
-			/*str.print("    (*dv)[jmi_get_index_from_value_ref(" + mp.getFVariable().valueReference() + ")-jmi->offs_real_dx] = ");
-			str.print(mp.getEquation().solution(mp.getFVariable().name(),true).adDerName() + ";\n");
-			str.print(indent + mp.getFVariable().name_C() + " = ");
-			str.print(mp.getEquation().solution(mp.getFVariable().name(),true).adVarName() + ";\n");*/
-        }
+		for (AbstractEquationBlock aeb : solvedBlocks) {
+			aeb.genBlockResidualFunctionBeforeEqns_CAD(indent, str);
+		}
 		// AD-code for residual equations
 		int equation_counter = 0;
 		for (FAbstractEquation e : unsolvedEquations()) {
@@ -794,7 +790,7 @@ aspect CADCodeGen {
 		}
 		str.print("   }else if(evaluation_mode==JMI_BLOCK_WRITE_BACK){\n");
 		var_counter = 0;
-		for (FVariable fv : variables()) {
+		for (FVariable fv : activeVariables()) {
 			str.print("    (*dv)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];\n");
 			//str.print("    (*(jmi->dz))[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];\n");
 			var_counter++;
@@ -805,19 +801,13 @@ aspect CADCodeGen {
 		
 	}
 	
-
-	public void FAbstractEquation.genSolvedTornBlock_CAD(FVariable v, String indent, PrintStream str) {}
-	
-	public void FEquation.genSolvedTornBlock_CAD(FVariable v, String indent, PrintStream str) {
-		if(v.isReal()){
-			solution(v.name()).prettyPrint_CAD(str,indent);
-			str.print(indent + v.name_C() + " = " + solution(v.name()).adVarName() + ";\n");
-			str.print(indent + "(*dv)[jmi_get_index_from_value_ref(" + v.valueReference() + ")-jmi->offs_real_dx] =" +  solution(v.name()).adDerName() + ";\n");
-		}else{
-			this.genSolvedBlock_C(v, indent, str);
-		}
+	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str) {
 	}
 	
+	public void SolvedScalarEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str) {
+		genBlock_CAD(0, false, indent, str);
+	}
+
 	public ArrayList<ASTNode> AbstractEquationBlock.blockResidualNodes_CAD() {
 		ArrayList<ASTNode> res = new ArrayList<ASTNode>(activeVariables());
 		res.addAll(equations());
@@ -825,7 +815,7 @@ aspect CADCodeGen {
 	}
 	
 	public ArrayList<ASTNode> TornEquationBlock.blockResidualNodes_CAD() {
-		ArrayList<ASTNode> res = new ArrayList<ASTNode>(variables());
+		ArrayList<ASTNode> res = new ArrayList<ASTNode>(activeVariables());
 		res.addAll(equations());
 		return res;
 	}

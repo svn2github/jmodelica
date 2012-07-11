@@ -53,8 +53,8 @@ public class EquationBlockFactory {
 		return l;
 	}
 
-	static SimpleEquationBlock createSimpleEquationBlock(ArrayList<FAbstractEquation> eqns, 
-	                                                     ArrayList<FVariable> fvs, boolean solve) {
+	static SimpleEquationBlock createSimpleEquationBlock(java.util.List<FAbstractEquation> eqns, 
+														 java.util.List<FVariable> fvs, boolean solve) {
 				
 		if (eqns.size()==1 ) {
 			FAbstractEquation e = eqns.get(0);
@@ -779,10 +779,19 @@ public class BiPGraph {
     	int k = startIndex;
     	Eq eqn = null;
     	Var v = null;
+		Map<FVariable, Integer> emptyMap = Collections.emptyMap();
 		for (FAbstractEquation e : eqns) {
 
 			int n_eq = e.numScalarEquations();
 			LinkedHashSet<Eq> groupMembers = new LinkedHashSet<Eq>();
+			Map<FVariable, Integer> ffceLeftVarMap = emptyMap;
+			if (e instanceof FFunctionCallEquation) {
+				int i = 0;
+				ffceLeftVarMap = new HashMap<FVariable, Integer>();
+				for (FVariable fv : e.referencedFVariablesInLHS()) {
+					ffceLeftVarMap.put(fv,i++);
+				}
+			}
 			for (int i=0;i<n_eq;i++) {
 				eqn = addEquation(eqNamePrefix+k,e.prettyPrint(""),e);
 				groupMembers.add(eqn);
@@ -804,8 +813,11 @@ public class BiPGraph {
 
 				if ((variableMask & ALGEBRAIC_VARIABLES) != 0) {
 					for (FVariable y : e.algebraicVariables()) { 
-						v = getVariable(y.name()); 
-						addEdge(eqn,v); 
+						Integer pos = ffceLeftVarMap.get(y);
+						if (pos == null || pos == i) {
+							v = getVariable(y.name()); 
+							addEdge(eqn,v); 
+						}
 					} 
 				}
 				
@@ -1658,42 +1670,53 @@ public class BiPGraph {
      * it seems to work fine.
      */
 	public BLT computeBLT() {
-		
-		index = 0;
-        S = new Stack<Eq>();
-        components = new LinkedList<Stack<Eq>>();
-        tarjanReset();
-        
-        for (Eq e : getEquations()) {
-        	if (!e.isVisited()) {
-        		tarjan(e);
-        	}
-        }
-				
-        BLT blt = new BLT(getFClass());
-        
-        Var v = null;
+		computeRawBLT();
+		BLT blt = new BLT(getFClass());
 		for (Stack<Eq> bl : components) {
-			
 			blt.add(EquationBlockFactory.createEquationBlock(bl));
-					
 		}
 		return blt;
 	}
 	
 	public LinkedList<Stack<Eq>> computeRawBLT() {
 		index = 0;
-        S = new Stack<Eq>();
-        components = new LinkedList<Stack<Eq>>();
-        tarjanReset();
-        
-        for (Eq e : getEquations()) {
-        	if (!e.isVisited()) {
-        		tarjan(e);
-        	}
-        }
-        
-        return components;	
+		S = new Stack<Eq>();
+		components = new LinkedList<Stack<Eq>>();
+		tarjanReset();
+		for (Eq e : getEquations()) {
+			if (!e.isVisited()) {
+				tarjan(e);
+			}
+		}
+		
+		java.util.List<Stack<Eq>> oldComponents = components;
+		components = new LinkedList<Stack<Eq>>();
+		Stack<Eq> fCallStack = null;
+		FAbstractEquation lastFCall = null;
+		for (Stack<Eq> block : oldComponents) {
+			if (block.size() == 1
+					&& block.peek().getEquation() instanceof FFunctionCallEquation) {
+				Eq e = block.peek();
+				if (fCallStack != null && lastFCall != e.getEquation()) {
+					components.add(fCallStack);
+					fCallStack = null;
+				}
+				if (fCallStack == null) {
+					fCallStack = new Stack<Eq>();
+					lastFCall = e.getEquation();
+				}
+				fCallStack.add(e);
+			} else {
+				if (fCallStack != null) {
+					components.add(fCallStack);
+					fCallStack = null;
+				}
+				components.add(block);
+			}
+		}
+		if (fCallStack != null)
+			components.add(fCallStack);
+		return components;
 	}
 	
 	public void tarjan(Eq e) {
