@@ -2163,9 +2163,9 @@ class FMUModel2(FMUModel):
             for j in range(nx):
                 if N.abs((A[i,j]-Afd[i,j])/(N.abs(Afd[i,j]) + 1)) > tol:                    
                     print "V_err at: A[" + repr(i).rjust(3) + "," + repr(j).rjust(3) + \
-                    "], jac=" +"{0: e}".format(A[i,j]) + \
-                    ", fd=" + "{0: e}".format(Afd[i,j]) + \
-                    ", => err=" + "{0: e}".format(A[i,j]-Afd[i,j])
+                    "],jac=" +"{0: e}".format(A[i,j]) + \
+                    ",fd=" + "{0: e}".format(Afd[i,j]) + \
+                    "=> rel_err=" + "{0: e}".format(N.abs((A[i,j]-Afd[i,j])/(N.abs(Afd[i,j]) + 1)))
                     n_err = n_err + 1
                 if(N.abs(Afd[i,j]) > spar_tol):
                     if(not A_sp[i,j] == 1 ):
@@ -2184,9 +2184,9 @@ class FMUModel2(FMUModel):
             for j in range(ncu):
                 if N.abs((B[i,j]-Bfd[i,j])/(N.abs(Bfd[i,j]) + 1)) > tol:
                     print "V_err at: B[" + repr(i).rjust(3) + "," + repr(j).rjust(3) + \
-                    "], jac=" +"{0: e}".format(B[i,j]) + \
-                    ", fd=" + "{0: e}".format(Bfd[i,j]) + \
-                    ", => err=" + "{0: e}".format(B[i,j]-Bfd[i,j])
+                    "],jac=" +"{0: e}".format(B[i,j]) + \
+                    ",fd=" + "{0: e}".format(Bfd[i,j]) + \
+                    "=> rel_err=" + "{0: e}".format(N.abs((B[i,j]-Bfd[i,j])/(N.abs(Bfd[i,j]) + 1)))
                     n_err = n_err + 1
                 if(N.abs(Bfd[i,j]) > spar_tol):
                     if(not B_sp[i,j] == 1 ):
@@ -2204,9 +2204,9 @@ class FMUModel2(FMUModel):
             for j in range(nx):
                 if N.abs((C[i,j]-Cfd[i,j])/(N.abs(Cfd[i,j]) + 1)) > tol:
                     print "V_err at: C[" + repr(i).rjust(3) + "," + repr(j).rjust(3) + \
-                    "], jac=" +"{0: e}".format(C[i,j]) + \
-                    ", fd=" + "{0: e}".format(Cfd[i,j]) + \
-                    ", => err=" + "{0: e}".format(C[i,j]-Cfd[i,j])
+                    "],jac=" +"{0: e}".format(C[i,j]) + \
+                    ",fd=" + "{0: e}".format(Cfd[i,j]) + \
+                    "=> rel_err=" + "{0: e}".format(N.abs((C[i,j]-Cfd[i,j])/(N.abs(Cfd[i,j]) + 1)))
                     n_err = n_err + 1
                 if(N.abs(Cfd[i,j]) > spar_tol):
                     if(not C_sp[i,j] == 1 ):
@@ -2225,9 +2225,9 @@ class FMUModel2(FMUModel):
             for j in range(ncu):
                 if N.abs((D[i,j]-Dfd[i,j])/(N.abs(Dfd[i,j]) + 1)) > tol:
                     print "V_err at: D[" + repr(i).rjust(3) + "," + repr(j).rjust(3) + \
-                    "], jac=" +"{0: e}".format(D[i,j]) + \
-                    ", fd=" + "{0: e}".format(Dfd[i,j]) + \
-                    ", => err=" + "{0: e}".format(D[i,j]-Dfd[i,j])
+                    "],jac=" +"{0: e}".format(D[i,j]) + \
+                    ",fd=" + "{0: e}".format(Dfd[i,j]) + \
+                    "=> rel_err=" + "{0: e}".format(N.abs((D[i,j]-Dfd[i,j])/(N.abs(Dfd[i,j]) + 1)))
                     n_err = n_err + 1
                 if(N.abs(Dfd[i,j]) > spar_tol):
                     if(not D_sp[i,j] == 1 ):
