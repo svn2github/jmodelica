@@ -212,7 +212,6 @@ public class CADGenerator extends CGenerator {
 				genPrinter.print("\n/******** Declarations *******/\n");
 				fclass.getDAEStructuredBLT().genVarDecls_CAD(genPrinter, INDENT);
 				genPrinter.print("\njmi_real_t** dz = jmi->dv;\n");
-				genPrinter.print("jmi_real_t** dv = jmi->dv;\n");
 				fclass.getDAEStructuredBLT().genOdeDerivativeBlocks_CAD(genPrinter);
 			}
 		}
