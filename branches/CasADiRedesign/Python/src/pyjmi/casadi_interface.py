@@ -673,7 +673,6 @@ class CasadiModel(BaseModel):
         options["sort_equations"] = False
         options["eliminate_dependent"] = False
         self.ocp.parseFMI(xml, options)
-        self.ocp.sortType(True)
         casadi.updateDependent(self.ocp)
         
         # Store list of non-free parameters
@@ -694,11 +693,11 @@ class CasadiModel(BaseModel):
                  'w': self.xmldoc.get_w_variable_names,
                  'p_opt': self.xmldoc.get_p_opt_variable_names}
         variables = {}
-        variables['x'] = [v for v in self.ocp.x if v.isDifferential()]
+        variables['x'] = [v for v in self.ocp.xz if v.isDifferential()]
         variables['u'] = self.ocp.u
         variables['w'] = [v for v in
-                          self.ocp.x if not v.isDifferential()]
-        variables['p_opt'] = self.ocp.p_free
+                          self.ocp.xz if not v.isDifferential()]
+        variables['p_opt'] = self.ocp.pf
         
         # Make sure the variables appear in value reference order
         var_vectors = {}
@@ -811,7 +810,7 @@ class CasadiModel(BaseModel):
     def _convert_to_ode(self):
         self.ocp.makeExplicit()
         
-        if len(self.ocp.xa) > 0 or self.ocp.ode.empty():
+        if len(self.ocp.z) > 0 or self.ocp.ode.empty():
             raise RuntimeError("Unable to reformulate as ODE.")
         
         [self.ode] = casadi.substitute([self.ocp.ode],
@@ -856,7 +855,7 @@ class CasadiModel(BaseModel):
             self.ocp_ode_mterm_inputs = []
             self.ocp_ode_mterm_inputs += list(self.p)
             self.ocp_ode_mterm_inputs += [
-                    x.atTime(tf, True) for x in self.ocp.xd]
+                    x.atTime(tf, True) for x in self.ocp.x]
             self.ocp_ode_mterm_inputs += [self.t]
             self.opt_ode_J = casadi.SXFunction(
                     [self.ocp_ode_mterm_inputs], [[self.mterm[0]]])
@@ -892,9 +891,9 @@ class CasadiModel(BaseModel):
         self.ocp_ode_boundary_inputs = []
         self.ocp_ode_boundary_inputs += list(self.p)
         self.ocp_ode_boundary_inputs += [x.atTime(t0, True) for
-                                         x in self.ocp.xd]
+                                         x in self.ocp.x]
         self.ocp_ode_boundary_inputs += [x.atTime(tf, True) for
-                                         x in self.ocp.xd]
+                                         x in self.ocp.x]
         self.opt_ode_C = casadi.SXFunction(
                 [self.ocp_ode_boundary_inputs], [self.opt_ode_C])
         self.opt_ode_C.init()
@@ -935,7 +934,7 @@ class CasadiModel(BaseModel):
             self.ocp_ode_mterm_inputs_scaled += list(self.p)
             self.ocp_ode_mterm_inputs_scaled += [
                     self.x_sf[ind] * x.atTime(tf, True) for
-                    (ind, x) in enumerate(self.ocp.x)]
+                    (ind, x) in enumerate(self.ocp.xz)]
             self.ocp_ode_mterm_inputs_scaled += [self.t]
             
             # Substitute scaled variables
