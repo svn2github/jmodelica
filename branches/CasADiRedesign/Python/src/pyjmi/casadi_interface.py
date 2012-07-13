@@ -655,7 +655,7 @@ class CasadiModel(BaseModel):
         """
         Update OCP expressions using current parameter values.
         """
-        ocp_expressions = [self.ocp.initial, self.ocp.dae, self.ocp.path,
+        ocp_expressions = [self.ocp.initial, casadi.vertcat((self.ocp.ode,self.ocp.alg)), self.ocp.path,
                            self.ocp.point, self.ocp.mterm, self.ocp.lterm]
         parameters = [p.var() for p in self._parameters]
         parameter_values = [p.getStart() for p in self._parameters]
@@ -693,10 +693,9 @@ class CasadiModel(BaseModel):
                  'w': self.xmldoc.get_w_variable_names,
                  'p_opt': self.xmldoc.get_p_opt_variable_names}
         variables = {}
-        variables['x'] = [v for v in self.ocp.xz if v.isDifferential()]
+        variables['x'] = [v for v in self.ocp.x]
         variables['u'] = self.ocp.u
-        variables['w'] = [v for v in
-                          self.ocp.xz if not v.isDifferential()]
+        variables['w'] = [v for v in self.ocp.z]
         variables['p_opt'] = self.ocp.pf
         
         # Make sure the variables appear in value reference order
@@ -934,7 +933,7 @@ class CasadiModel(BaseModel):
             self.ocp_ode_mterm_inputs_scaled += list(self.p)
             self.ocp_ode_mterm_inputs_scaled += [
                     self.x_sf[ind] * x.atTime(tf, True) for
-                    (ind, x) in enumerate(self.ocp.xz)]
+                    (ind, x) in enumerate(tuple(self.ocp.x))+tuple(self.ocp.z)]
             self.ocp_ode_mterm_inputs_scaled += [self.t]
             
             # Substitute scaled variables
