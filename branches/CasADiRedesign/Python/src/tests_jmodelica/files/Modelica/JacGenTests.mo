@@ -599,7 +599,7 @@ package JacGenTests
 	end F;
 	Real x(start=5);
 	equation
-		der(x) = F(x);
+		der(x) = log(F(x));
   end JacTestFunction4; 
   
   
@@ -617,12 +617,16 @@ package JacGenTests
 	function F2
 		input Real x;
 		output Real a;
+		output Real b;
 	algorithm
-		a := F(x)*x;
+		(a,b) := F(x);
 	end F2;
 	Real x(start=5);
+	Real y(start=2);
+	output Real a(start=2);
 	equation
-		der(x) = F2(x);
+		(x,y)  = F2(a);
+		der(a) = x+y;
   end JacTestFunction5; 
   
   model JacTestFunction6
@@ -660,11 +664,124 @@ package JacGenTests
 	Real y(start=10);
 	Real a(start=15);
 	equation
+		a 	  = x+y;
 		(x,y) = F(a);
-		der(a)  = x+y;
   end JacTestFunction7; 
   
   
+   model Unsolved_blocks1
+	Real x(start=.5);
+	Real y(start=10);
+	Real a(start=15);
+	output Real b(start=2);
+	equation
+		x = sin(x);
+		0 = a+y;
+		der(y) = a+x;
+		der(b) = a+log(x*y);
+ end Unsolved_blocks1;
+ 
+ 
+  model Unsolved_blocks2
+	Real x(start=5);
+	Real y(start=10);
+	Real a(start=15);
+	equation
+		a = 2*a+y;
+		der(y) = a+x;
+		der(x) = a;
+ end Unsolved_blocks2;
+ 
+ 
+  model Unsolved_blocks3
+ 	function F
+		input Real x;
+		output Real a;
+	algorithm
+		a := x^2;
+	end F;
+	Real x(start=5);
+	Real y(start=10);
+	Real a(start=15);
+	equation
+		x = F(x);
+		der(y) = x*a;
+		der(a) = log(x*y);
+ end Unsolved_blocks3;
+  
+  
+ model Unsolved_blocks4
+ 	function F
+		input Real x;
+		input Real y;
+		output Real a;
+		output Real b;
+	algorithm
+		a := x*2*x;
+		b := y*4*x;
+	end F;
+	Real x(start=5);
+	Real y(start=10);
+	Real a(start=15);
+	equation
+		(x,y)  = F(x,y);
+		der(a) = x+y;
+ end Unsolved_blocks4;
+  
+  
+ model Unsolved_blocks5
+ 	function F
+		input Real x;
+		input Real y;
+		output Real a;
+		output Real b;
+		output Real c;
+	algorithm
+		a := x*2*x;
+		b := y*4*x;
+		c := y*4*x;
+	end F;
+	Real x(start=5);
+	Real y(start=10);
+	Real a(start=15);
+	equation
+		(x,y)  = F(x,y);
+		der(a) = x+y;
+ end Unsolved_blocks5;
+ 
+ model Unsolved_blocks6
+	function F
+			input Real x1;
+			input Real x2;
+			input Real x3;
+			input Real x4;
+			output Real a;
+			output Real b;
+			output Real c;
+			output Real d;
+		algorithm
+			a := sin(x1);
+			b := cos(x1);
+			c := tan(x2);
+			d := sin(x3);
+		end F;
+		Real x1(start=.1);
+		Real x2(start=.2);
+		Real x3(start=.3);
+		Real x4(start=.4);
+		Real e(start=1);
+		Real f(start=2);
+		Real g(start=3);
+		output Real Y;
+	equation
+		(x1,x2,x3,x4) = F(x1,x2,x3,x4);
+		der(e) = log(x1*x2)*e;
+		der(f) = sin(x2*x3)*f;
+		der(g) = log(x1*x2*x3*x4)*g+e+f;
+		der(Y) = x1+x2+x3+x4+e+f+g;
+ end Unsolved_blocks6;
+ 
+ 
   model JacTestInput
 	Real x(start=1);
 	input Real u;

@@ -1073,86 +1073,84 @@ aspect TransformCanonical {
 	 * TornEquationBlock represents an equation block resulting from tearing.
 	 */
 	public class TornEquationBlock extends AbstractEquationBlock {
-		private ArrayList<MatchingPair> unsolvedPairs = new ArrayList<MatchingPair>();
-		private ArrayList<MatchingPair> solvedPairs = new ArrayList<MatchingPair>();
+		private ArrayList<AbstractEquationBlock> solvedBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> unsolvedBlocks = new ArrayList<AbstractEquationBlock>();
 		
 		public TornEquationBlock() {
 		}
 		
-		public void addSolvedMatchingPair(MatchingPair m) {
-			solvedPairs.add(m);
-		}	
-
-		public void addUnsolvedMatchingPair(MatchingPair m) {
-			unsolvedPairs.add(m);
-		}	
+		public void addSolvedBlock(AbstractEquationBlock aeb) {
+			solvedBlocks.add(aeb);
+		}
+		
+		public java.util.List<AbstractEquationBlock> getSolvedBlocks() {
+			return solvedBlocks;
+		}
+		
+		public void addUnsolvedBlock(AbstractEquationBlock aeb) {
+			unsolvedBlocks.add(aeb);
+		}
+		
+		public java.util.List<AbstractEquationBlock> getUnsolvedBlocks() {
+			return unsolvedBlocks;
+		}
 
 		public ArrayList<FAbstractEquation> unsolvedEquations() {
-			return equationList(unsolvedPairs, ALL_MATCHING_PAIR_FILTER);
+			ArrayList<FAbstractEquation> eqs = new ArrayList<FAbstractEquation>();
+			for (AbstractEquationBlock block : unsolvedBlocks) {
+				eqs.addAll(block.equations());
+			}
+			return eqs;
 		}
 
 		public ArrayList<FAbstractEquation> solvedEquations() {
-			return equationList(solvedPairs, ALL_MATCHING_PAIR_FILTER);
+			ArrayList<FAbstractEquation> eqs = new ArrayList<FAbstractEquation>();
+			for (AbstractEquationBlock block : solvedBlocks) {
+				eqs.addAll(block.equations());
+			}
+			return eqs;
 		}
 
 		public ArrayList<FAbstractEquation> equations() {
+			// Sort out any duplicated equations that has been introduced from records...
+			// TODO: This should probably be handled in the compute_tearing() method..
 			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
-			s.addAll(solvedEquations());
-			s.addAll(unsolvedEquations());
+			FAbstractEquation prev = null;
+			for (FAbstractEquation e : solvedEquations()) {
+				if (e != prev)
+					s.add(e);
+				prev = e;
+			}
+			for (FAbstractEquation e : unsolvedEquations()) {
+				if (e != prev)
+					s.add(e);
+				prev = e;
+			}
 			return s;
 		}
 
-		public ArrayList<MatchingPair> getSolvedPairs() {
-			return solvedPairs;
-		}
-
-		public ArrayList<MatchingPair> getUnsolvedPairs() {
-			return unsolvedPairs;
-		}
-		
 		public ArrayList<FVariable> activeVariables() {
-			ArrayList<FVariable> s = new ArrayList<FVariable>();
-			for(MatchingPair mp: solvedPairs){
-				s.add(mp.getFVariable());
+			ArrayList<FVariable> vars = new ArrayList<FVariable>();
+			for(AbstractEquationBlock block : solvedBlocks){
+				vars.addAll(block.activeVariables());
 			}
-			for (MatchingPair mp : unsolvedPairs) {
-				s.add(mp.getFVariable());
+			for (AbstractEquationBlock block : unsolvedBlocks) {
+				vars.addAll(block.activeVariables());
 			}
-			return s;
+			return vars;
 		}	
 		
 		public ArrayList<FVariable> iterationVariables() {
-			ArrayList<FVariable> s = new ArrayList<FVariable>();
-			for (MatchingPair mp : unsolvedPairs) {
-				s.add(mp.getFVariable());
+			ArrayList<FVariable> vars = new ArrayList<FVariable>();
+			for (AbstractEquationBlock block : unsolvedBlocks) {
+				vars.addAll(block.activeVariables());
 			}
-			return s;
+			return vars;
 		}
 		
-		public ArrayList<FVariable> variables() {
-			ArrayList<FVariable> s = new ArrayList<FVariable>();
-			for (MatchingPair mp : unsolvedPairs) {
-				s.add(mp.getFVariable());
-			}
-			for (MatchingPair mp : solvedPairs) {
-				s.add(mp.getFVariable());
-			}
-			return s;
-		}
-						
 		public boolean isSolvable() {
 			return false;
 		}			
-		
-		public boolean containsDerivative() {
-			for (FVariable fv : activeVariables()) {
-				if (fv.isDerivativeVariable()) {
-					return true;
-				}
-			}
-
-			return false;
-		}	
 		
 		public String toString() {
 			StringBuffer str = new StringBuffer();
@@ -1163,9 +1161,8 @@ aspect TransformCanonical {
 				str.append("  " + fv.name() + "\n");
 			}
 			str.append("Solved equations:\n");
-			for(MatchingPair mp: getSolvedPairs()){
-				str.append("  " + mp.getFVariable().name() + " = ");
-				str.append(((FEquation)mp.getEquation()).solution(mp.getFVariable().name(),true) + "\n");
+			for(FAbstractEquation feq : solvedEquations()){
+				str.append("  " + feq.prettyPrint("") + "\n");			
 			}	
 			str.append("Residual equations:\n");
 			for (FAbstractEquation feq : unsolvedEquations()) {
@@ -1690,7 +1687,10 @@ aspect TransformCanonical {
 			LinkedList<Stack<Eq>> blt = graph.computeRawBLT();
 			BLT tearBLT = new BLT(this);
 			for(Stack<Eq> block : blt){ // Iterate over all (global) BLT-blocks
-				if (block.size()>1){
+				AbstractEquationBlock tearBlock = EquationBlockFactory.createEquationBlock(block);
+				if (tearBlock.isSolvable()) {
+					tearBLT.add(tearBlock);
+				} else {
 					TornEquationBlock eb = new TornEquationBlock();
 					BiPGraph g = new BiPGraph(this,"","");
 					ArrayList<Eq> SUME = new ArrayList<Eq>();
@@ -1779,9 +1779,9 @@ aspect TransformCanonical {
 							if(bInner.size()==1){
 										// If: the block is scalar, it will be a solvedMatchingPair
 								Eq e = bInner.get(0);
-								Var v = e.getSolvableMatching();
-								MatchingPair mp = new MatchingPair(e.getEquation(),v.getVariable());
-								eb.addSolvedMatchingPair(mp);
+								FAbstractEquation eqn = e.getEquation();
+								FVariable var = e.getSolvableMatching().getVariable();
+								eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(Arrays.asList(eqn), Arrays.asList(var), true));
 										// If the equation contains a Var in SUMV, that Var cannot be
 										// reinserted and must be used as a tearing variable.
 								for(Var vv : e.getVariables()){
@@ -1868,9 +1868,9 @@ aspect TransformCanonical {
 										for(Stack<Eq> bInnerInner : newBlocks){
 											if(bInnerInner.size()==1){
 												Eq e = bInnerInner.get(0);
-												Var v = e.getSolvableMatching();
-												MatchingPair mp = new MatchingPair(e.getEquation(),v.getVariable());
-												eb.addSolvedMatchingPair(mp);
+												FAbstractEquation eqn = e.getEquation();
+												FVariable var = e.getSolvableMatching().getVariable();
+												eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(Arrays.asList(eqn), Arrays.asList(var), true));
 											} else {
 												eb = Tear(bInnerInner,eb);
 											}
@@ -1891,14 +1891,11 @@ aspect TransformCanonical {
 							tearings.add(v.getVariable());
 						}
 						for(int i=0; i<tearings.size(); i++){
-							MatchingPair mp = new MatchingPair(residuals.get(i),tearings.get(i));
-							eb.addUnsolvedMatchingPair(mp);
+							eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(Arrays.asList(residuals.get(i)), Arrays.asList(tearings.get(i)), false));
 						}
 					}
 					
 					tearBLT.add(eb);
-				} else {
-					tearBLT.add(EquationBlockFactory.createSimpleEquationBlock(block,true));
 				}
 			}
 			return tearBLT;
@@ -1927,15 +1924,13 @@ aspect TransformCanonical {
 		res.isRes(true);
 		//v.isVisited(true);	
 		//g.collectResidual(res,e.getVariables().size()-1,e.getSolvableVariables().size());
-		MatchingPair tp = new MatchingPair(res.getEquation(),tear.getVariable());
-		eb.addUnsolvedMatchingPair(tp);
+		eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(Arrays.asList(res.getEquation()), Arrays.asList(tear.getVariable()), false));
 		LinkedList<Stack<Eq>> blt = g.computeTearBlocks();
 		for(Stack<Eq> block : blt){
 			if(block.size()==1){
 				Eq e = block.get(0);
 				Var v = e.getSolvableMatching();
-				MatchingPair mp = new MatchingPair(e.getEquation(),v.getVariable());
-				eb.addSolvedMatchingPair(mp);
+				eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(Arrays.asList(e.getEquation()), Arrays.asList(v.getVariable()), true));
 			} else {
 				eb = Tear(block,eb);
 			}

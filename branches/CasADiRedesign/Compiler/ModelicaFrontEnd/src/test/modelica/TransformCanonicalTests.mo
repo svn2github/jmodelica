@@ -5582,6 +5582,103 @@ equation
   i1 = i2 + i3;
   end TearingTest1;
 
+model RecordTearingTest1
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+    JModelica.UnitTesting.FClassMethodTestCase(
+      name="RecordTearingTest1",
+      methodName="printDAEBLT",
+	  equation_sorting = true,
+	  enable_tearing = true,         
+      description="Test of record tearing", methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  x
+Solution:
+  1
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  y
+Solution:
+  x + 2
+-------------------------------
+Solved block of 2 variables:
+Unknown variables:
+  r.x
+  r.y
+Equations:
+  (TransformCanonicalTests.RecordTearingTest1.R(r.x, r.y)) = TransformCanonicalTests.RecordTearingTest1.F(x, y)
+-------------------------------
+      ")})));
+  record R
+    Real x;
+    Real y;
+  end R;
+  function F
+    input Real a;
+    input Real b;
+    output R r;
+  algorithm
+    r := R(a + b, a - b);
+  end F;
+  Real x, y;
+  R r;
+equation
+  x = 1;
+  y = x + 2;
+  r = F(x, y);
+end RecordTearingTest1;
+
+model RecordTearingTest2
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+    JModelica.UnitTesting.FClassMethodTestCase(
+      name="RecordTearingTest2",
+      methodName="printDAEBLT",
+	  equation_sorting = true,
+	  enable_tearing = true,         
+      description="Test of record tearing", methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  y
+Solution:
+  sin(time)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  r.y
+Solution:
+  2
+-------------------------------
+Torn block of 1 tearing variables and 1 solved variables.
+Tearing variables:
+  x
+Solved equations:
+  (TransformCanonicalTests.RecordTearingTest2.R(r.x, r.y)) = TransformCanonicalTests.RecordTearingTest2.F(x, y)
+Residual equations:
+  (TransformCanonicalTests.RecordTearingTest2.R(r.x, r.y)) = TransformCanonicalTests.RecordTearingTest2.F(x, y)
+-------------------------------
+      ")})));
+  record R
+    Real x;
+    Real y;
+  end R;
+  function F
+    input Real a;
+    input Real b;
+    output R r;
+  algorithm
+    r := R(a + b, a - b);
+  end F;
+  Real x,y;
+  R r;
+equation
+  y = sin(time);
+  r.y = 2;
+  r = F(x,y);
+end RecordTearingTest2;
+
 model VarDependencyTest1
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FClassMethodTestCase(name="VarDependencyTest1",

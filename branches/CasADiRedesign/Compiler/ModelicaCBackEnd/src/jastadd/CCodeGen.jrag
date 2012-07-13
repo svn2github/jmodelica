@@ -1482,7 +1482,7 @@ aspect CCodeGen {
 			var_counter++;
 		}
 		
-		genBlockResidualFunctionBeforeEqns_C(indent, str);
+		genBlockResidualFunctionBeforeEqns_C(indent, str, new HashSet<FAbstractEquation>());
 		// Write the residual expressions
 		int equation_counter = 0;
 		for (FAbstractEquation e : blockResidualEquations_C()) {
@@ -1504,7 +1504,7 @@ aspect CCodeGen {
 	}
 	
 	protected void AbstractEquationBlock.genVarDecls_C(PrintStream str, String indent) {
-		for (ASTNode n : blockResidualNodes_C())
+		for (ASTNode n : new LinkedHashSet<ASTNode>(blockResidualNodes_C()))
 			n.genVarDecls_C(ASTNode.printer_C, str, indent);
 	}
 	
@@ -1525,7 +1525,7 @@ aspect CCodeGen {
 	}
 	
 	public ArrayList<ASTNode> TornEquationBlock.blockResidualNodes_C() {
-		ArrayList<ASTNode> res = new ArrayList<ASTNode>(variables());
+		ArrayList<ASTNode> res = new ArrayList<ASTNode>(activeVariables());
 		res.addAll(equations());
 		return res;
 	}
@@ -1567,14 +1567,30 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str) {
+	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
 	}
 	
-	public void TornEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str) {
-		// Loop over all solved equations and write the expressions  
-		for (MatchingPair mp: getSolvedPairs()){
-			mp.getEquation().genSolvedBlock_C(mp.getFVariable(), indent, str);	
-        }
+	public void TornEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
+		// Loop over all solved blocks and write the expressions  
+		for (AbstractEquationBlock aeb : solvedBlocks) {
+			aeb.genBlockResidualFunctionBeforeEqns_C(indent, str, visited);
+		}
+	}
+	
+	public void SolvedScalarEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
+		eqn.genSolvedBlock_C(fv, indent, str);
+	}
+	
+	public void SolvedFunctionCallEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
+	 	if (!functionCallEquation.getCall().isIgnored()) {
+	 		if (!visited.contains(functionCallEquation)) {
+	 			visited.add(functionCallEquation);
+	 			functionCallEquation.getCall().prettyPrint_C(str, indent);
+	 			str.print(";\n");
+	 		}
+			for (FFunctionCallLeft l : functionCallEquation.getLefts()) 
+				l.genWriteBackAssignment_C(str, indent, new HashSet<FVariable>(activeVars));
+		}
 	}
 	
 	public void AbstractEquationBlock.genBlockAddCall_C(int block_counter, boolean inInit, String indent, PrintStream str) {
@@ -1623,7 +1639,7 @@ aspect CCodeGen {
 			functionCallEquation.getCall().prettyPrint_C(str, indent);
 			str.print(";\n");
 			for (FFunctionCallLeft l : functionCallEquation.getLefts()) 
-				l.genWriteBackAssignment_C(str, indent);
+				l.genWriteBackAssignment_C(str, indent, null);
 		}
 	}
 
@@ -1736,7 +1752,7 @@ aspect CCodeGen {
 			getCall().prettyPrint_C(str, indent);
 			str.print(";\n");
 			for (FFunctionCallLeft l : getLefts())
-				l.genWriteBackAssignment_C(str, indent);
+				l.genWriteBackAssignment_C(str, indent, null);
 		}
 	}
 
@@ -1804,40 +1820,43 @@ aspect CCodeGen {
 		str.print(");\n");
 	}
 	
-	public void FFunctionCallLeft.genWriteBackAssignment_C(PrintStream str, String indent) {
+	public void FFunctionCallLeft.genWriteBackAssignment_C(PrintStream str, String indent, Set<FVariable> vars) {
 		if (hasFExp()) 
-			getFExp().type().genWriteBackAssignment_C(str, indent, name_C(), getFExp());
+			getFExp().type().genWriteBackAssignment_C(str, indent, name_C(), getFExp(), vars);
 	}
 	
-	public void FType.genWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp) {
+	public void FType.genWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp, Set<FVariable> vars) {
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
 			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
 			Array arr = exp.getArray();
 			for (Index i : arr.indices()) {
 				String cellName = pre + i.toUnclosedString() + ")";
-				genCellWriteBackAssignment_C(str, indent, cellName, arr.get(i));
+				genCellWriteBackAssignment_C(str, indent, cellName, arr.get(i), vars);
 			}
 		} else {
-			genCellWriteBackAssignment_C(str, indent, name, exp);
+			genCellWriteBackAssignment_C(str, indent, name, exp, vars);
 		}
 	}
 	
-	public void FType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp) {
-		exp.genWriteBackAssignment_C(str, indent, name);
+	public void FType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp, Set<FVariable> vars) {
+		exp.genWriteBackAssignment_C(str, indent, name, vars);
 	}
 	
-	public void FRecordType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp) {
+	public void FRecordType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp, Set<FVariable> vars) {
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
-			comp.getFType().genWriteBackAssignment_C(str, indent, compName, compExp);
+			comp.getFType().genWriteBackAssignment_C(str, indent, compName, compExp, vars);
 		}
 	}
 
-	public void FExp.genWriteBackAssignment_C(PrintStream str, String indent, String name) {
+	public void FExp.genWriteBackAssignment_C(PrintStream str, String indent, String name, Set<FVariable> vars) {
 		str.print(indent);
 		FIdUseExp e = (FIdUseExp)this;
+		if (vars != null && !vars.contains(e.myFV()))
+			return; // This variable is not in the set of variables to generate code for.
+		
 		e.getFIdUse().prettyPrint_C(str,"");
 //		prettyPrint_C(str, "");
 		str.print(" = (");

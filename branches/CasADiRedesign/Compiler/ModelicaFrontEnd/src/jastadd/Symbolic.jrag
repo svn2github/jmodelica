@@ -33,9 +33,6 @@ aspect EquationSolve {
 	}
 
 	eq FFunctionCallEquation.isSolved(String name, boolean duringTearing) {
-		if (duringTearing) {
-			return false;	
-		}
 		Set<FVariable> leftVars = referencedFVariablesInLHS();
 		
 		boolean inLeft = false;

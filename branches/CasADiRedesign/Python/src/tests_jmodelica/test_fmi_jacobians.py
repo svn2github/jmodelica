@@ -425,7 +425,7 @@ class Test_FMI_Jaobians_Ifcases:
 ##	def test_IfFunctionRecord(self):
 ##		cname = "JacGenTests.JacTestIfFunctionRecord"
 ##		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-##		'generate_dae_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+##		'eliminate_alias_variables':False,'fmi_version':2.0})
 ##		m = FMUModel2(fn)
 ##		m.set_debug_logging(True)
 ##		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
@@ -441,7 +441,7 @@ class Test_FMI_Jaobians_Functions:
 	def test_Function1(self):
 		cname = "JacGenTests.JacTestFunction1"
 		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-		 'generate_dae_jacobian':True, 'eliminate_alias_variables':False,'fmi_version':2.0})
+		  'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
@@ -452,7 +452,7 @@ class Test_FMI_Jaobians_Functions:
 	def test_Function2(self):
 		cname = "JacGenTests.JacTestFunction2"
 		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-		'generate_dae_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
@@ -463,7 +463,7 @@ class Test_FMI_Jaobians_Functions:
 	def test_Function3(self):
 		cname = "JacGenTests.JacTestFunction3"
 		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-		'generate_dae_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
@@ -473,7 +473,7 @@ class Test_FMI_Jaobians_Functions:
 	def test_Function4(self):
 		cname = "JacGenTests.JacTestFunction4"
 		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-		'generate_dae_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
@@ -483,68 +483,34 @@ class Test_FMI_Jaobians_Functions:
 	def test_Function5(self):
 		cname = "JacGenTests.JacTestFunction5"
 		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-		'generate_dae_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
 		assert n_errs ==0
 
-## shift+alt+3 in PythonWin to remove comments, alt+3 to add
 
-##Fails, with the following output:
-##======================================================================
-##FAIL: tests_jmodelica.test_fmi_jacobians.Test_FMI_Jaobians_Functions.test_Function6
-##----------------------------------------------------------------------
-##Traceback (most recent call last):
-##  File "c:\Python27\lib\site-packages\nose\case.py", line 197, in runTest
-##    self.test(*self.arg)
-##  File "c:\JModelica.org-SDK-1.6.1\install\Python\tests_jmodelica\test_fmi_jacobians.py", line 504, in test_Function6
-##    assert n_errs ==0
-##AssertionError: 
-##-------------------- >> begin captured stdout << ---------------------
-##Error summary:
-##V_err at: A[  0,  0], jac= 0.000000e+00, fd= 1.400000e+01, => err=-1.400000e+01
-##Found 1 errors and 0 warnings
-##  - Value errors: 1
-##
-##--------------------- >> end captured stdout << ----------------------
-##
-##	@testattr(stddist = True)
-##	def test_Function6(self):
-##		cname = "JacGenTests.JacTestFunction6"
-##		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-##		'generate_dae_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
-##		m = FMUModel2(fn)
-##		m.set_debug_logging(True)
-##		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
-##		assert n_errs ==0
+	@testattr(stddist = True)
+	def test_Function6(self):
+		cname = "JacGenTests.JacTestFunction6"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
+		'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+		assert n_errs ==0
 
 
-##Fails, with the following output:
-##FAIL: tests_jmodelica.test_fmi_jacobians.Test_FMI_Jaobians_Functions.test_Function7
-##----------------------------------------------------------------------
-##Traceback (most recent call last):
-##  File "c:\Python27\lib\site-packages\nose\case.py", line 197, in runTest
-##    self.test(*self.arg)
-##  File "c:\JModelica.org-SDK-1.6.1\install\Python\tests_jmodelica\test_fmi_jacobians.py", line 514, in test_Function7
-##    assert n_errs ==0
-##AssertionError: 
-##-------------------- >> begin captured stdout << ---------------------
-##Error summary:
-##V_err at: A[  0,  0], jac= 0.000000e+00, fd= 6.000000e+00, => err=-6.000000e+00
-##Found 1 errors and 0 warnings
-##  - Value errors: 1
-##
-##--------------------- >> end captured stdout << ----------------------
-##	@testattr(stddist = True)
-##	def test_Function7(self):
-##		cname = "JacGenTests.JacTestFunction7"
-##		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-##		'generate_dae_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
-##		m = FMUModel2(fn)
-##		m.set_debug_logging(True)
-##		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
-##		assert n_errs ==0
+
+	@testattr(stddist = True)
+	def test_Function7(self):
+		cname = "JacGenTests.JacTestFunction7"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
+		'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+		assert n_errs ==0
 
 class Test_FMI_Jacobians_Simulation:
 
@@ -555,7 +521,7 @@ class Test_FMI_Jacobians_Simulation:
 	def test_FunctionSim1(self):
 		cname = "JacGenTests.JacTestFunction1"
 		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-		 'generate_dae_jacobian':True, 'eliminate_alias_variables':False,'fmi_version':2.0})
+		  'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
@@ -569,13 +535,84 @@ class Test_FMI_Jacobians_Simulation:
 	def test_FunctionSim2(self):
 		cname = "JacGenTests.JacTestFunction3"
 		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-		 'generate_dae_jacobian':True, 'eliminate_alias_variables':False,'fmi_version':2.0})
+		  'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
 		m.simulate(final_time=5)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
 		assert n_errs ==0    		
 
+
+class Test_FMI_Jaobians_Unsolved_blocks:
+	def setUp(self):
+		self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
+
+	@testattr(stddist = True)
+	def test_Unsolved_blocks1(self):
+		cname = "JacGenTests.Unsolved_blocks1"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
+		  'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		m.initialize()
+		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+		assert n_errs ==0
+
+	@testattr(stddist = True)
+	def test_Unsolved_blocks2(self):
+		cname = "JacGenTests.Unsolved_blocks2"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
+		  'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		m.initialize()
+		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+		assert n_errs ==0
+
+	@testattr(stddist = True)
+	def test_Unsolved_blocks3(self):
+		cname = "JacGenTests.Unsolved_blocks3"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
+		  'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		m.initialize()
+		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+		assert n_errs ==0
+
+	@testattr(stddist = True)
+	def test_Unsolved_blocks4(self):
+		cname = "JacGenTests.Unsolved_blocks4"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
+		  'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		m.initialize()
+		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+		assert n_errs ==0
+
+	@testattr(stddist = True)
+	def test_Unsolved_blocks5(self):
+		cname = "JacGenTests.Unsolved_blocks5"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
+		  'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		m.initialize()
+		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+		assert n_errs ==0
+
+	@testattr(stddist = True)
+	def test_Unsolved_blocks6(self):
+		cname = "JacGenTests.Unsolved_blocks6"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,\
+		  'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		m.initialize()
+		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+		assert n_errs ==0		
+		
 class Test_FMI_Jaobians_Miscellaneous:
 
 	def setUp(self):
@@ -586,7 +623,7 @@ class Test_FMI_Jaobians_Miscellaneous:
 	def test_Input(self):
 		cname = "JacGenTests.JacTestInput"
 		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-		'generate_dae_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)

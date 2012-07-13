@@ -1465,9 +1465,6 @@ class LocalDAECollocationAlg(AlgorithmBase):
             
         # set solver options
         self._set_solver_options()
-
-        if self.init_traj is not None:
-            self.nlp.set_initial_from_file(self.init_traj)
         
     def _set_options(self):
         """ 
@@ -1515,20 +1512,10 @@ class LocalDAECollocationAlg(AlgorithmBase):
             print("Warning: Variable renaming is currently activated.")
         
         # Check validity of quadrature_constraint
-        if self.discr != "LG" and not self.quadrature_constraint:
-            raise ValueError("quadrature_constraint is only compatible " + \
-                             "with Gauss collocation.")
         if (self.discr == "LG" and self.eliminate_der_var and
             self.quadrature_constraint):
             raise NotImplementedError("quadrature_constraint is not " + \
                                       "compatible with eliminate_der_var.")
-        
-        # Check validity of result_mode and n_eval_points
-        if (self.result_mode != "element_interpolation" and
-            self.n_eval_points != defaults['n_eval_points']):
-            raise ValueError("n_eval_points is only used if algorithm " + \
-                             "option result_mode is set to " + \
-                             '"element_interpolation".')
         
         # Check validity of blocking_factors
         if (self.blocking_factors is not None and 
@@ -1536,7 +1523,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
             raise ValueError("The sum of all elements in blocking factors " +
                              "must be the same as the number of elements.")
         
-        # solver options
+        # Solver options
         self.solver_options = self.IPOPT_options
         
     def _set_solver_options(self):
@@ -1776,6 +1763,14 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: None or pyjmi.common.io.ResultDymolaTextual
             Default: None
         
+        init_traj_scale_time --
+            Whether to scale the time horizon of the provided initial
+            trajectories to fit the time horizon of the optimization problem.
+            This option is only applicable when init_traj is not None.
+            
+            Type: bool
+            Default: True
+        
         parameter_estimation_data --
             Parameter estimation data used for solving parameter estimation
             problems.
@@ -1842,6 +1837,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
                 'init_traj': None,
+                'init_traj_scale_time': True,
                 'parameter_estimation_data': None,
                 'casadi_options_f': {"name": "NLP objective function"},
                 'casadi_options_g': {"name": "NLP constraint function"},

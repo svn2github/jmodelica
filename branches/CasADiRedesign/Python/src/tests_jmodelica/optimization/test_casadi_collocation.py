@@ -26,14 +26,13 @@ import pylab as P
 from tests_jmodelica import testattr, get_files_path
 from pyjmi.common.io import ResultDymolaTextual
 from pyjmi.common.xmlparser import XMLException
-from pymodelica.compiler import compile_fmux
-from pyfmi.common.io import ResultDymolaTextual as fmiResultDymolaTextual
+from pymodelica.compiler import compile_fmux, compile_fmu
+from pyfmi import FMUModel
 try:
     from pyjmi.optimization.casadi_collocation import *
     from pyjmi.casadi_interface import CasadiModel
 except NameError, ImportError:
     pass
-    #logging.warning('Could not load casadi_collocation. Check pyjmi.check_packages()')
 
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
 
@@ -58,42 +57,45 @@ class TestLocalDAECollocator:
     @classmethod
     def setUpClass(cls):
         """Compile the test models."""
-        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        vdp_file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt_Bounds_Lagrange"
-        compile_fmux(class_path, file_path)
+        compile_fmux(class_path, vdp_file_path)
         
-        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt_Bounds_Lagrange_Renamed_Input"
-        compile_fmux(class_path, file_path)
+        compile_fmux(class_path, vdp_file_path)
         
-        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt_Bounds_Mayer"
-        compile_fmux(class_path, file_path)
+        compile_fmux(class_path, vdp_file_path)
         
-        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt_Constraints_Mayer"
-        compile_fmux(class_path, file_path)
+        compile_fmux(class_path, vdp_file_path)
         
-        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt_Initial_Equations"
-        compile_fmux(class_path, file_path)
+        compile_fmux(class_path, vdp_file_path)
         
-        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt_Scaled_Min_Time"
-        compile_fmux(class_path, file_path)
+        compile_fmux(class_path, vdp_file_path)
         
-        file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
+        cstr_file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
+        class_path = "CSTR.CSTR"
+        compile_fmu(class_path, cstr_file_path)
+        
         class_path = "CSTR.CSTR_Opt_Bounds_Lagrange"
-        compile_fmux(class_path, file_path)
+        compile_fmux(class_path, cstr_file_path)
         
-        file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR_Opt_Bounds_Mayer"
-        compile_fmux(class_path, file_path)
+        compile_fmux(class_path, cstr_file_path)
         
-        file_path = os.path.join(get_files_path(), 'Modelica',
+        class_path = "CSTR.CSTR_Opt_Dependent_Parameter"
+        compile_fmux(class_path, cstr_file_path)
+        
+        class_path = "CSTR.CSTR_Opt_Extends"
+        compile_fmux(class_path, cstr_file_path)
+        
+        pe_file_path = os.path.join(get_files_path(), 'Modelica',
                                  'ParameterEstimation_1.mop')
         class_path = "ParEst.ParEstCasADi"
-        compile_fmux(class_path, file_path)
+        compile_fmux(class_path, pe_file_path)
     
     def setUp(self):
         """Load the test models."""
@@ -122,6 +124,9 @@ class TestLocalDAECollocator:
         self.model_vdp_scaled_min_time = CasadiModel(
                 fmux_vdp_scaled_min_time, verbose=False)
         
+        fmu_cstr = 'CSTR_CSTR.fmu'
+        self.model_cstr = FMUModel(fmu_cstr)
+        
         fmux_cstr_lagrange = "CSTR_CSTR_Opt_Bounds_Lagrange.fmux"
         self.model_cstr_lagrange = CasadiModel(fmux_cstr_lagrange,
                                                verbose=False)
@@ -130,6 +135,14 @@ class TestLocalDAECollocator:
         
         fmux_cstr_mayer = "CSTR_CSTR_Opt_Bounds_Mayer.fmux"
         self.model_cstr_mayer = CasadiModel(fmux_cstr_mayer, verbose=False)
+        
+        fmux_cstr_dependent_parameter = \
+                "CSTR_CSTR_Opt_Dependent_Parameter.fmux"
+        self.model_cstr_dependent_parameter = CasadiModel(
+                fmux_cstr_mayer, verbose=False)
+        
+        fmux_cstr_extends = "CSTR_CSTR_Opt_Extends.fmux"
+        self.model_cstr_extends = CasadiModel(fmux_cstr_extends, verbose=False)
         
         fmux_second_order = "ParEst_ParEstCasADi.fmux"
         self.model_second_order = CasadiModel(fmux_second_order)
@@ -140,7 +153,40 @@ class TestLocalDAECollocator:
         self.algorithm = "LocalDAECollocationAlg"
     
     @testattr(casadi = True)
-    def test_init_traj(self):
+    def test_init_traj_sim(self):
+        """Test initial trajectories based on an existing simulation."""
+        model = self.model_cstr
+        model_opt = self.model_cstr_extends
+        model.set(['c_init', 'T_init'], model_opt.get(['c_init', 'T_init']))
+        
+        # Create input trajectory
+        t = [0, 200]
+        u = [342.85, 280]
+        u_traj = N.transpose(N.vstack((t, u)))
+        init_res = model.simulate(final_time=300, input=('Tc', u_traj))
+        
+        # Initialize without scaling init_traj time
+        opts = model_opt.optimize_options(self.algorithm)
+        opts['init_traj'] = init_res.result_data
+        opts['init_traj_scale_time'] = False
+        col = LocalDAECollocator(model_opt, opts)
+        xx_init = col.get_xx_init()
+        N.testing.assert_allclose(
+                xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
+                [390.56379356, 337.93876716])
+        
+        # Initialize with scaled init_traj time
+        opts = model_opt.optimize_options(self.algorithm)
+        opts['init_traj'] = init_res.result_data
+        opts['init_traj_scale_time'] = True
+        col = LocalDAECollocator(model_opt, opts)
+        xx_init = col.get_xx_init()
+        N.testing.assert_allclose(
+                xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
+                [357.07773821, 280.62047233])
+    
+    @testattr(casadi = True)
+    def test_init_traj_opt(self):
         """Test optimizing based on an existing optimization reult."""
         model = self.model_vdp_bounds_lagrange
         
@@ -148,12 +194,14 @@ class TestLocalDAECollocator:
         cost_ref = 3.19495079586595e0
         u_norm_ref = 2.80997269112246e-1
         
+        # Get initial guess
         opts = model.optimize_options(self.algorithm)
         opts['n_e'] = 40
         opts['n_cp'] = 2
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
+        # Optimize using initial guess
         opts['n_e'] = 75
         opts['n_cp'] = 4
         opts['eliminate_der_var'] = True
@@ -162,16 +210,7 @@ class TestLocalDAECollocator:
                 "VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt")
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
-        
-        #Test that no exception is raised when supplying a result from
-        #PyFMI
-        opts = model.optimize_options()
-        local_col = LocalDAECollocator(
-                            self.model_vdp_bounds_lagrange_renamed,opts)
-        
-        local_col.set_initial_from_file(fmiResultDymolaTextual(
-                         "VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt"))
-        
+    
     @testattr(casadi = True)
     def test_cstr(self):
         """
@@ -384,7 +423,7 @@ class TestLocalDAECollocator:
     @testattr(casadi = True)
     def test_scaling(self):
         """
-        Test optimizing the CSTR with and without scaling..
+        Test optimizing the CSTR with and without scaling.
 
         This test also tests writing both the unscaled and scaled result as
         well as eliminating derivative variables.
@@ -461,8 +500,9 @@ class TestLocalDAECollocator:
     def test_parameter_setting(self):
         """Test setting parameters post-compilation."""
         # Create new model
-        fmux_cstr_mayer= "CSTR_CSTR_Opt_Bounds_Mayer.fmux"
-        model = CasadiModel(fmux_cstr_mayer, verbose=False)
+        fmux_cstr_dependent_parameter = \
+                "CSTR_CSTR_Opt_Dependent_Parameter.fmux"
+        model = CasadiModel(fmux_cstr_dependent_parameter, verbose=False)
         N.testing.assert_raises(XMLException, model.set, 'cstr.F', 500)
         
         # Reference values
