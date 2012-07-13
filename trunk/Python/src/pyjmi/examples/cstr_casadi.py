@@ -191,10 +191,11 @@ def run_demo(with_plots=True):
     # Verify solution for testing purposes
     try:
         import casadi
-        cost = float(res.solver.solver.output(casadi.NLP_COST))
-        assert(N.abs(cost/1.e3 - 1.8585429) < 1e-3)
     except:
         pass
+    else:
+        cost = float(res.solver.solver.output(casadi.NLP_COST))
+        assert(N.abs(cost/1.e3 - 1.8585429) < 1e-3)
     
     # Plot the results
     if with_plots:
