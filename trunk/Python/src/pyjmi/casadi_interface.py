@@ -172,24 +172,24 @@ class CasadiModel(BaseModel):
     
     def get(self, names):
         """
-        Get the values of non-free parameters.
+        Get the values of non-free parameters and constants.
         
         Parameters::
             
             names -- 
-                The name of the parameters to get.
+                The name of the parameters or constants to get.
                 Type: string or list of strings
         
         Returns::
             
             values --
-                Parameter values.
+                Parameter or constant values.
                 Type: float or list of floats
         
         Raises::
             
             XMLException if name not present in model or if variable is not a
-            non-free parameter.
+            non-free parameter or a constant.
         
         Example::
             
@@ -203,24 +203,24 @@ class CasadiModel(BaseModel):
     
     def _get(self, name):
         """
-        Get the value of a non-free parameter.
+        Get the value of a non-free parameter or a constant.
         
         Parameters::
             
             name -- 
-                The name of the parameter to get.
+                The name of the parameter or constant to get.
                 Type: string
         
         Returns::
             
             value --
-                Parameter value.
+                Parameter or constant value.
                 Type: float
         
         Raises::
             
             XMLException if name not present in model or if variable is not a
-            non-free parameter.
+            non-free parameter or a constant.
         
         Example::
             
@@ -231,8 +231,10 @@ class CasadiModel(BaseModel):
             variable = self.ocp.variable(name)
         except RuntimeError:
             raise XMLException("Could not find variable: " + name)
-        if variable.getVariability() != casadi.PARAMETER:
-            raise XMLException(name + " is not a parameter.")
+        if (variable.getVariability() != casadi.PARAMETER and
+            variable.getVariability() != casadi.CONSTANT):
+            raise XMLException(name + " is neither a parameter nor a " +
+                               "constant.")
         if variable.getFree():
             raise XMLException(name + " is a free parameter.")
         return variable.getStart()

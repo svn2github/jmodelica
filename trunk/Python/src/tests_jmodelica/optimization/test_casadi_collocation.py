@@ -423,7 +423,7 @@ class TestLocalDAECollocator:
     @testattr(casadi = True)
     def test_scaling(self):
         """
-        Test optimizing the CSTR with and without scaling..
+        Test optimizing the CSTR with and without scaling.
 
         This test also tests writing both the unscaled and scaled result as
         well as eliminating derivative variables.
