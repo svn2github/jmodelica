@@ -49,7 +49,7 @@ public class CADGenerator extends CGenerator {
 					e.genVarDecls_CAD(ASTNode.printer_C, genPrinter, INDENT);
 				}
 				for (FAbstractEquation e : fclass.equations()) {
-					e.genTempForFunc_CAD(i,"",genPrinter);
+					e.genTempForFunc_CAD(i,"",genPrinter,null);
 					i += e.numScalarEquations();
 				}
 				i=0;
