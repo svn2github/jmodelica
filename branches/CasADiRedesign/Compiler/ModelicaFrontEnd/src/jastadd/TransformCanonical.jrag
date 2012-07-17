@@ -613,6 +613,10 @@ aspect TransformCanonical {
 		
 		
 		public abstract String toString();
+		
+		public boolean mergeBlock(AbstractEquationBlock block) {
+			return false;
+		}
 	
 	}
 
@@ -951,6 +955,14 @@ aspect TransformCanonical {
 			return str.toString();
 		}	
 		
+		public boolean mergeBlock(AbstractEquationBlock block) {
+			if (!(block instanceof FunctionCallEquationBlock))
+				return false;
+			
+			FunctionCallEquationBlock fceb = (FunctionCallEquationBlock) block;
+			activeVars.addAll(fceb.activeVars);
+			return true;
+		}
 	}	
 
 
@@ -1080,6 +1092,8 @@ aspect TransformCanonical {
 		}
 		
 		public void addSolvedBlock(AbstractEquationBlock aeb) {
+			if (!solvedBlocks.isEmpty() && solvedBlocks.get(solvedBlocks.size() - 1).mergeBlock(aeb))
+				return;
 			solvedBlocks.add(aeb);
 		}
 		
@@ -1088,6 +1102,8 @@ aspect TransformCanonical {
 		}
 		
 		public void addUnsolvedBlock(AbstractEquationBlock aeb) {
+			if (!unsolvedBlocks.isEmpty() && unsolvedBlocks.get(unsolvedBlocks.size() - 1).mergeBlock(aeb))
+				return;
 			unsolvedBlocks.add(aeb);
 		}
 		

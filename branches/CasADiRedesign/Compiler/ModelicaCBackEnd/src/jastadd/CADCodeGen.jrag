@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 aspect CADCodeGen {
 	
@@ -620,7 +621,7 @@ aspect CADCodeGen {
 		
 		str.print("(*dF)[");
 		str.print(i);
-		str.print("] = ");
+		str.print("]  = ");
 		str.print(getRight().adDerName());
 		str.print(" - ");
 		str.print(getLeft().adDerName());
@@ -636,7 +637,7 @@ aspect CADCodeGen {
 		str.print("static int dae_" + (inInit? "init_": "") + "block_dir_der_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {\n");
 		int i = 0;
 		for (FAbstractEquation e : equations()){
-			e.genTempForFunc_CAD(i, indent, str);
+			e.genTempForFunc_CAD(i, indent, str, null);
 			i += e.numScalarEquations();
 		}
 		genVarDecls_CAD(str, indent);
@@ -713,6 +714,24 @@ aspect CADCodeGen {
 		}	
 	}
 	
+	public void TornEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {	
+		if (inInitial) {
+			// Assuming that the model has been evaluated prior to Jacobian evaluation, no iteration is needed here
+			//str.print(indent + "jmi_kinsol_solve(jmi->dae_init_block_residuals[" + i +"]);\n");
+			str.print(indent + "jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_init_block_residuals[" + i +"]);\n");
+		} else {
+			// Assuming that the model has been evaluated prior to Jacobian evaluation, no iteration is needed here
+			//str.print(indent + "jmi_kinsol_solve(jmi->dae_block_residuals[" + i +"]);\n");
+			str.print(indent + "jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[" + i +"]);\n");
+		}	
+	}
+	
+	public void SolvedFunctionCallEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {
+		if (!functionCallEquation.getCall().isIgnored()) {
+			functionCallEquation.genFuncCall_CAD(i, "", str);
+		}
+	}
+	
 	public void SolvedScalarEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {	
 		eqn.genSolvedBlock_CAD(fv,indent,str);
 	}
@@ -729,14 +748,57 @@ aspect CADCodeGen {
 			this.genSolvedBlock_C(v, indent, str);
 		}
 	}
+	
+	public void FIdUseExp.genVarDeclsRedundantCheck_CAD(PrintStream str, Set<String> vars) {}
+	
+	public void FLitExp.genVarDeclsRedundantCheck_CAD(PrintStream str, Set<String> vars) {}
+	
+	public void ASTNode.genVarDeclsRedundantCheck_CAD(PrintStream str, Set<String> vars){
+		for(ASTNode n: this){
+			n.genVarDeclsRedundantCheck_CAD(str,vars);
+		}
+	}
+	
+	public void FExp.genVarDeclsRedundantCheck_CAD(PrintStream str, Set<String> vars){
+		if (vars.contains(this.adVarName())){
+			super.genVarDeclsRedundantCheck_CAD(str,vars);
+			return;
+		}
+		vars.add(this.adVarName());
+		if(this.adVarName().contains("v")){
+		str.print("\n");
+		str.print("jmi_ad_var_t ");
+		str.print(this.adVarName()+";\n");
+		str.print("jmi_ad_var_t ");
+		str.print(this.adDerName()+";\n");
+		}
+		super.genVarDeclsRedundantCheck_CAD(str,vars);
+	}
+	
 
 	//Tornblock, works in similar way as the above given EquationBlock.genBlockResidulFunction_CAD
 	public void TornEquationBlock.genBlockResidualFunction_CAD(int block_counter, boolean inInit, String indent, PrintStream str) {
 		str.print("static int dae_" + (inInit? "init_": "") + "block_dir_der_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {\n");
+		int i = 0;
+		HashSet<String> hs = new HashSet<String>();
+		for (FAbstractEquation e : equations()){
+			e.genTempForFunc_CAD(i, indent, str, hs);
+			i += e.numScalarEquations();
+		}
+		
+		for (AbstractEquationBlock aeb : solvedBlocks) {
+			aeb.genVarDecls_CAD(str, indent);
+		}
+		hs.clear();
+		for (AbstractEquationBlock aeb : unsolvedBlocks) {
+			for(FAbstractEquation e : aeb.equations()){
+				e.genVarDeclsRedundantCheck_CAD(str, hs);
+			}
+		}
+		
 		str.print("  jmi_real_t** res = &residual;\n");
 		str.print("  jmi_real_t** dF = &dRes;\n");
 		str.print("  jmi_real_t** dz;\n");
-		genVarDecls_CAD(str, indent); // TODO: wrong indent (but so has rest of func...)
 		str.print("  if (evaluation_mode == JMI_BLOCK_EVALUATE){\n");
 		str.print("      dz = jmi->dz_seed;\n");
 		// Loop over all active variables and write the values in x to the z vector
@@ -799,6 +861,10 @@ aspect CADCodeGen {
 	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str) {
 	}
 	
+	public void SolvedFunctionCallEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str) {
+		genBlock_CAD(0, false, indent, str);
+	}
+	
 	public void SolvedScalarEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str) {
 		genBlock_CAD(0, false, indent, str);
 	}
@@ -840,20 +906,30 @@ aspect CADCodeGen {
 	}
 	
 	
-	public void FFunctionCallEquation.genTempForFunc_CAD(int i, String indent, PrintStream str) {
+	public void FFunctionCallEquation.genTempForFunc_CAD(int i, String indent, PrintStream str,HashSet<String> hs) {
 		if (!getCall().isIgnored()) {
 			for (FFunctionCallLeft l : getLefts()) {
-				l.setBaseIndex(i);
-				l.genTempVar_var_CAD(indent, str);
-				l.genTempVar_der_CAD(indent,str);
+				if(hs!=null){
+					if(!hs.contains(l.name_var_CAD())){
+						l.setBaseIndex(i);
+						l.genTempVar_var_CAD(indent, str);
+						l.genTempVar_der_CAD(indent,str);
+						hs.add(l.name_var_CAD());
+					}
+				} else {
+					l.setBaseIndex(i);
+					l.genTempVar_var_CAD(indent, str);
+					l.genTempVar_der_CAD(indent,str);
+				}
+				
 			}
 		}
-		super.genTempForFunc_CAD(i,indent,str);
+		super.genTempForFunc_CAD(i,indent,str,hs);
 	}
 	
-	public void ASTNode.genTempForFunc_CAD(int i, String indent, PrintStream str) {
+	public void ASTNode.genTempForFunc_CAD(int i, String indent, PrintStream str,HashSet<String> hs) {
 		for(ASTNode n: this){
-			n.genTempForFunc_CAD(i,indent,str);
+			n.genTempForFunc_CAD(i,indent,str,hs);
 		}
 	}
 
@@ -898,6 +974,24 @@ aspect CADCodeGen {
 		}
 	}
 	
+	public void BLT.genSolvedVarDecls_CAD(PrintStream str, String indent) {
+		int i = 0;
+		for (AbstractEquationBlock eb : getAllBlocks()){
+			if(eb.isSolvable()){
+				eb.genVarDecls_CAD(str, indent);
+			}
+		}
+		for (AbstractEquationBlock eb : getAllBlocks()){
+			if(eb.isSolvable()){
+				for (FAbstractEquation e : eb.equations()){
+					e.genTempForFunc_CAD(i, "", str,null);
+					i += e.numScalarEquations();
+				}
+			}
+		}
+	}
+	
+	
 	public void BLT.genVarDecls_CAD(PrintStream str, String indent) {
 		int i = 0;
 		for (AbstractEquationBlock eb : getAllBlocks()){
@@ -905,7 +999,7 @@ aspect CADCodeGen {
 		}
 		for (AbstractEquationBlock eb : getAllBlocks()){
 			for (FAbstractEquation e : eb.equations()){
-				e.genTempForFunc_CAD(i, "", str);
+				e.genTempForFunc_CAD(i, "", str,null);
 				i += e.numScalarEquations();
 			}
 		}
@@ -924,43 +1018,26 @@ aspect CADCodeGen {
 	
 	public void StructuredBLT.genOdeDerivativeBlocks_CAD(PrintStream str) {
 		int block_counter = 0;
-		int i = 0;
 		str.append("/*********** ODE section ***********/\n");	
 		// Loop over all derivatives
 		for (AbstractEquationBlock eb : getOdeBlocks()) {
 			eb.genBlock_CAD(block_counter,false,"  ",str);
 			block_counter += eb.isSolvable()? 0: 1; 		
-			for (FAbstractEquation e : eb.equations()){
-				e.genFuncCall_CAD(i, "", str);
-				i += e.numScalarEquations();
-			}
 		}
 		str.append("/*********** Real outputs **********/\n");	
 		for (AbstractEquationBlock eb : getRealOutputBlocks()) {
 			eb.genBlock_CAD(block_counter,false,"  ",str);
 			block_counter += eb.isSolvable()? 0: 1; 		
-			for (FAbstractEquation e : eb.equations()){
-				e.genFuncCall_CAD(i, "", str);
-				i += e.numScalarEquations();
-			}
 		}
 		str.append("/*** Integer and boolean outputs ***/\n");	
 		for (AbstractEquationBlock eb : getIntegerBooleanOutputBlocks()) {
 			eb.genBlock_CAD(block_counter,false,"  ",str);
 			block_counter += eb.isSolvable()? 0: 1; 	
-			for (FAbstractEquation e : eb.equations()){
-				e.genFuncCall_CAD(i, "", str);
-				i += e.numScalarEquations();
-			}
 		}
 		str.append("/********* Other variables *********/\n");	
 		for (AbstractEquationBlock eb : getOtherBlocks()) {
 			eb.genBlock_CAD(block_counter,false,"  ",str);
 			block_counter += eb.isSolvable()? 0: 1; 		
-			for (FAbstractEquation e : eb.equations()){
-				e.genFuncCall_CAD(i, "", str);
-				i += e.numScalarEquations();
-			}
 		}
 	}
 	
@@ -970,10 +1047,12 @@ aspect CADCodeGen {
 	public void FFunctionCallEquation.genResidual_CAD(int i, String indent, PrintStream str) {
 		if (!getCall().isIgnored()) {
 			genTempVars_CAD(printer_C, str, indent);
+			for (FFunctionCallLeft l : getLefts()){
+				l.setBaseIndex(i);
+			}
 			getCall().prettyPrint_CAD(str, indent);
 			str.print(";\n");
 			for (FFunctionCallLeft l : getLefts()){
-				l.setBaseIndex(i);
 				l.genWriteBack_CAD(str, indent);
 			}
 // TODO: Should this be added? Updates the variables assigned in the function calls. 			
@@ -1070,11 +1149,11 @@ aspect CADCodeGen {
 	}
 	
 	syn lazy String FExp.tempName_var_CAD() {
-		return "tmp_var_a_" + nextTempNbr_var_CAD();
+		return "tmp_var_" + nextTempNbr_var_CAD();
 	}
 	
 	syn lazy String FExp.tempName_der_CAD() {
-		return "tmp_der_a_" + nextTempNbr_der_CAD();
+		return "tmp_der_" + nextTempNbr_der_CAD();
 	}
 	
 	private int FClass.tmpNbr_var = 0;
@@ -1149,10 +1228,7 @@ aspect CADCodeGen {
 	syn String FFunctionCallLeft.name_var_CAD() {
 		// TODO: use getFExp().tempName_C() instead of first case as well?
 		if (equationIndex >= 0 && !getFExp().isComposite()) {
-			StringBuilder b = new StringBuilder();
-			b.append("tmp_var_");
-			b.append(equationIndex);
-			return b.toString();
+			return getFExp().tempName_var_CAD();
 		} else if (equationIndex < 0 || getFExp().keepAsArray()) {
 			return ((FIdUseExp) getFExp()).getFIdUse().name_var_CAD();
 		} else {
@@ -1174,10 +1250,7 @@ aspect CADCodeGen {
 	syn String FFunctionCallLeft.name_der_CAD() {
 		// TODO: use getFExp().tempName_C() instead of first case as well?
 		if (equationIndex >= 0 && !getFExp().isComposite()) {
-			StringBuilder b = new StringBuilder();
-			b.append("tmp_der_");
-			b.append(equationIndex);
-			return b.toString();
+			return getFExp().tempName_der_CAD();
 		} else if (equationIndex < 0 || getFExp().keepAsArray()) {
 			return ((FIdUseExp) getFExp()).getFIdUse().name_der_CAD();
 		} else {

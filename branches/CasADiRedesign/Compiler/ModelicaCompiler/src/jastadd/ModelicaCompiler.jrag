@@ -2244,7 +2244,8 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 		vars.put("CPPAD_HOME", getEnv().get("CPPAD_HOME"));
 		vars.put("IPOPT_HOME", getEnv().get("IPOPT_HOME"));
 		vars.put("SUNDIALS_HOME", getEnv().get("SUNDIALS_HOME"));
-		vars.put("EXT_LIBS", varFromList(ext_libs));
+		vars.put("EXT_LIBS", varFromList(ext_libs)!=null? 
+                      (varFromList(ext_libs) + " " + varFromList(ext_libs)): null);
 		vars.put("EXT_INC_DIRS", varFromList(ext_incl_dirs, INC_OP));
 	}
 	
