@@ -974,6 +974,24 @@ aspect CADCodeGen {
 		}
 	}
 	
+	public void BLT.genSolvedVarDecls_CAD(PrintStream str, String indent) {
+		int i = 0;
+		for (AbstractEquationBlock eb : getAllBlocks()){
+			if(eb.isSolvable()){
+				eb.genVarDecls_CAD(str, indent);
+			}
+		}
+		for (AbstractEquationBlock eb : getAllBlocks()){
+			if(eb.isSolvable()){
+				for (FAbstractEquation e : eb.equations()){
+					e.genTempForFunc_CAD(i, "", str,null);
+					i += e.numScalarEquations();
+				}
+			}
+		}
+	}
+	
+	
 	public void BLT.genVarDecls_CAD(PrintStream str, String indent) {
 		int i = 0;
 		for (AbstractEquationBlock eb : getAllBlocks()){

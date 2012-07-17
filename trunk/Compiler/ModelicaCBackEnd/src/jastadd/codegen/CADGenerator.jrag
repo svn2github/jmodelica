@@ -210,7 +210,7 @@ public class CADGenerator extends CGenerator {
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode_jacobian") || fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
 				genPrinter.print("\n/******** Declarations *******/\n");
-				fclass.getDAEStructuredBLT().genVarDecls_CAD(genPrinter, INDENT);
+				fclass.getDAEStructuredBLT().genSolvedVarDecls_CAD(genPrinter, INDENT);
 				genPrinter.print("\njmi_real_t** dz = jmi->dv;\n");
 				fclass.getDAEStructuredBLT().genOdeDerivativeBlocks_CAD(genPrinter);
 			}
