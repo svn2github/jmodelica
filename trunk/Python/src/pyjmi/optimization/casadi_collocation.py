@@ -2532,15 +2532,15 @@ class PseudoSpectral(CasadiCollocator):
         
         _x_max = md.get_x_max(include_alias = False)
         _u_max = md.get_u_max(include_alias = False)
-        _p_max = [(p.getValueReference(), p.getMax()) for p in ocp.p_free]
+        _p_max = [(p.getValueReference(), p.getMax()) for p in ocp.pf]
         _x_min = md.get_x_min(include_alias = False)
         _u_min = md.get_u_min(include_alias = False)
-        _p_min = [(p.getValueReference(), p.getMin()) for p in ocp.p_free]
+        _p_min = [(p.getValueReference(), p.getMin()) for p in ocp.pf]
         _x_start = md.get_x_start(include_alias = False)
         #_u_start = md.get_u_start(include_alias = False)
         _u_start = md.get_u_initial_guess(include_alias = False)
         _p_start = []
-        for p in ocp.p_free: #NOTE SHOULD BE CHANGED
+        for p in ocp.pf: #NOTE SHOULD BE CHANGED
             for p_ori in md.get_p_opt_initial_guess():
                 if p.getValueReference() == p_ori[0]:
                     _p_start += [p_ori] 
@@ -2548,7 +2548,7 @@ class PseudoSpectral(CasadiCollocator):
         
         # Remove startTime and finalTime from parameters, should be changed
         i = 0
-        for p in ocp.p_free:
+        for p in ocp.pf:
             if p.getName() == 'startTime' or p.getName() == 'finalTime':
                 del _p_max[i]
                 del _p_min[i]
