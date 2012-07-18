@@ -5720,7 +5720,7 @@ model RecordTearingTest4
 	  enable_tearing = true,
       description="Test of record tearing", methodResult="
 -------------------------------
-Torn block of 1 tearing variables and 1 solved variables.
+Torn block of 1 tearing variables and 2 solved variables.
 Tearing variables:
   v
 Solved equations:
@@ -5744,6 +5744,49 @@ equation
    (x, y) = F(v, v);
    v = x + y;
 end RecordTearingTest4;
+
+model RecordTearingTest5
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+    JModelica.UnitTesting.FClassMethodTestCase(
+      name="RecordTearingTest5",
+      methodName="printDAEBLT",
+	  equation_sorting = true,
+	  enable_tearing = true,
+      description="Test of record tearing", methodResult="
+-------------------------------
+Torn block of 3 tearing variables and 3 solved variables.
+Tearing variables:
+  f
+  a
+  b
+Solved equations:
+  (c, d) = TransformCanonicalTests.RecordTearingTest5.F(a, b)
+  (e, f) = TransformCanonicalTests.RecordTearingTest5.F(c, d)
+Residual equations:
+  (e, f) = TransformCanonicalTests.RecordTearingTest5.F(c, d)
+  (a, b) = TransformCanonicalTests.RecordTearingTest5.F(e, f)
+-------------------------------
+      ")})));
+  function F
+    input Real a;
+    input Real b;
+    output Real x;
+    output Real y;
+  algorithm
+    x := a + b;
+    y := a - b;
+  end F;
+  Real a;
+  Real b;
+  Real c;
+  Real d;
+  Real e;
+  Real f;
+equation
+  (c,d) = F(a,b);
+  (e,f) = F(c,d);
+  (a,b) = F(e,f);
+end RecordTearingTest5;
 
 model VarDependencyTest1
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

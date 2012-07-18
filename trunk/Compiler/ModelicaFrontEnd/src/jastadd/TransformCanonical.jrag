@@ -912,7 +912,7 @@ aspect TransformCanonical {
 	 */
 	public abstract class FunctionCallEquationBlock extends SimpleEquationBlock {
 		protected FFunctionCallEquation functionCallEquation;
-		protected ArrayList<FVariable> activeVars = new ArrayList<FVariable>();	
+		protected Collection<FVariable> activeVars = new LinkedHashSet<FVariable>();
 		
 		public FunctionCallEquationBlock(FFunctionCallEquation eqn, ArrayList<FVariable> activeVars) {
 			this.functionCallEquation = eqn;
@@ -960,6 +960,10 @@ aspect TransformCanonical {
 				return false;
 			
 			FunctionCallEquationBlock fceb = (FunctionCallEquationBlock) block;
+			
+			if (functionCallEquation != fceb.functionCallEquation)
+				return false;
+			
 			activeVars.addAll(fceb.activeVars);
 			return true;
 		}
@@ -1170,8 +1174,12 @@ aspect TransformCanonical {
 		
 		public String toString() {
 			StringBuffer str = new StringBuffer();
-			str.append("Torn block of " + iterationVariables().size() + " tearing variables");
-			str.append(" and " + solvedEquations().size() + " solved variables.\n");
+			java.util.List<FVariable> iterationVars = iterationVariables();
+			java.util.List<FVariable> solvedVars = activeVariables();
+			solvedVars.removeAll(iterationVars);
+
+			str.append("Torn block of " + iterationVars.size() + " tearing variables");
+			str.append(" and " + solvedVars.size() + " solved variables.\n");
 			str.append("Tearing variables:\n");
 			for (FVariable fv : iterationVariables()) {
 				str.append("  " + fv.name() + "\n");
@@ -1185,7 +1193,6 @@ aspect TransformCanonical {
 				str.append("  " + feq.prettyPrint("") + "\n");			
 			}
 			return str.toString();
-	
 		}
 	
 	}
