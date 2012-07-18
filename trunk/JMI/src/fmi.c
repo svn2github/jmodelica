@@ -865,19 +865,6 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	/* Used for debbugging
 	jac2 = (fmiReal*)calloc(njac, sizeof(fmiReal));
 	*/
-	output_vrefs = (int*)calloc(n_outputs, sizeof(int));
-	output_vrefs_real = (int*)calloc(n_outputs, sizeof(int));
-	
-	jmi_get_output_vrefs(jmi, output_vrefs);
-	j = 0;
-	for(i = 0; i < n_outputs; i++){
-		if(get_type_from_value_ref(output_vrefs[i]) == 0){
-			output_vrefs_real[j] = output_vrefs[i];
-			j++;		
-		}else{
-			n_outputs_real--;
-		}
-	}
 	
 	offs = jmi->n_real_dx;
 	
@@ -921,62 +908,83 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 				(*dv)[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j] + jmi->n_real_dx] = 0.;
 			}
 		}
+		c1 = clock();
+
+		/*printf("Jac A eval call: %f\n", ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
+
 	} else {
 
+		output_vrefs = (int*)calloc(n_outputs, sizeof(int));
+		output_vrefs_real = (int*)calloc(n_outputs, sizeof(int));
 
-	/*nvvr: number of x and/or u variables used
-	  nzvr: number of dx and/or w variables used*/
-	
-	if(independents&FMI_STATES){
-		nvvr += jmi->n_real_x;
- 	}else{
- 		offs += jmi->n_real_x;
- 	}
-	if(independents&FMI_INPUTS){
-		nvvr += jmi->n_real_u;
- 	}
- 	if(dependents&FMI_DERIVATIVES){
-		nzvr += jmi->n_real_dx;
-		output_off = jmi->n_real_dx;
- 	}
-	if(dependents&FMI_OUTPUTS){
-		nzvr += n_outputs_real;
- 	}
-
-	/*For every x and/or u variable...*/
-	for(i = 0; i < nvvr; i++){
-		(*dv)[i+offs] = 1;
-		
-		/*Evaluate directional derivative*/
-		jmi->dae->ode_derivatives_dir_der(jmi);
-		
-		/*Jacobian elements ddx/dx and/or ddx/du*/
-		if(dependents&FMI_DERIVATIVES){
-			for(j = 0; j<jmi->n_real_dx;j++){
-				jac[i*nzvr+j] = (*dz)[j];
+		jmi_get_output_vrefs(jmi, output_vrefs);
+		j = 0;
+		for(i = 0; i < n_outputs; i++){
+			if(get_type_from_value_ref(output_vrefs[i]) == 0){
+				output_vrefs_real[j] = output_vrefs[i];
+				j++;
+			}else{
+				n_outputs_real--;
 			}
 		}
-		
-		/*Jacobian elements dy/dx and/or dy/du*/
+
+		/*nvvr: number of x and/or u variables used
+	  nzvr: number of dx and/or w variables used*/
+
+		if(independents&FMI_STATES){
+			nvvr += jmi->n_real_x;
+		}else{
+			offs += jmi->n_real_x;
+		}
+		if(independents&FMI_INPUTS){
+			nvvr += jmi->n_real_u;
+		}
+		if(dependents&FMI_DERIVATIVES){
+			nzvr += jmi->n_real_dx;
+			output_off = jmi->n_real_dx;
+		}
 		if(dependents&FMI_OUTPUTS){
-			for(j = 0; j<n_outputs_real;j++){
-				index = get_index_from_value_ref(output_vrefs_real[j]);
-				if(index < jmi->n_real_x + jmi->n_real_u){
-					  if(index == i + offs){
-					  	jac[i*nzvr+output_off+j] = 1;
-					  } else{
-					  	jac[i*nzvr+output_off+j] = 0;
-					  }
-				} else{
-					jac[i*nzvr+j+output_off] = (*dz)[index-jmi->offs_real_dx];	
+			nzvr += n_outputs_real;
+		}
+
+		/*For every x and/or u variable...*/
+		for(i = 0; i < nvvr; i++){
+			(*dv)[i+offs] = 1;
+
+			/*Evaluate directional derivative*/
+			jmi->dae->ode_derivatives_dir_der(jmi);
+
+			/*Jacobian elements ddx/dx and/or ddx/du*/
+			if(dependents&FMI_DERIVATIVES){
+				for(j = 0; j<jmi->n_real_dx;j++){
+					jac[i*nzvr+j] = (*dz)[j];
 				}
 			}
+
+			/*Jacobian elements dy/dx and/or dy/du*/
+			if(dependents&FMI_OUTPUTS){
+				for(j = 0; j<n_outputs_real;j++){
+					index = get_index_from_value_ref(output_vrefs_real[j]);
+					if(index < jmi->n_real_x + jmi->n_real_u){
+						if(index == i + offs){
+							jac[i*nzvr+output_off+j] = 1;
+						} else{
+							jac[i*nzvr+output_off+j] = 0;
+						}
+					} else{
+						jac[i*nzvr+j+output_off] = (*dz)[index-jmi->offs_real_dx];
+					}
+				}
+			}
+			/*reset dz vector*/
+			for(j = 0; j<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;j++){
+				(*dz)[j] = 0;
+			}
+
 		}
-		/*reset dz vector*/
-		for(j = 0; j<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;j++){
-			(*dz)[j] = 0;
-		}
-	}
+
+		free(output_vrefs);
+		free(output_vrefs_real);
 
 	}
 	/*
@@ -1009,8 +1017,6 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 
 	free(jac2);
 	*/
-	free(output_vrefs);
-	free(output_vrefs_real);
 	
 	c1 = clock();
 
