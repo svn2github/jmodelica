@@ -1688,6 +1688,79 @@ d_3 = d_4 * 1/(v_4);
 		der(a) = log(x*y);
   end CADFunction7;
 
+model CADDerAnno1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CADCodeGenTestCase(
+         name="CADDerAnno1",
+         description="",
+         generate_dae_jacobian=true,
+         generate_ode_jacobian=true,
+         template="$CAD_function_headers$,$CAD_functions$",
+         generatedCode="
+void func_CADCodeGenTests_CADDerAnno1_f_der_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t der_x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t der_x_der_v, jmi_ad_var_t* der_y_var_o, jmi_ad_var_t* der_y_der_o);
+void func_CADCodeGenTests_CADDerAnno1_f_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
+,void func_CADCodeGenTests_CADDerAnno1_f_der_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t der_x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t der_x_der_v, jmi_ad_var_t* der_y_var_o, jmi_ad_var_t* der_y_der_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t der_y_var_v;
+    jmi_ad_var_t der_y_der_v;
+
+jmi_ad_var_t v_0;
+jmi_ad_var_t d_0;
+
+jmi_ad_var_t v_1;
+jmi_ad_var_t d_1;
+v_1 = 2 * x_var_v;
+d_1 = (AD_WRAP_LITERAL(0) * x_var_v + 2 * x_der_v);
+v_0 = v_1 * der_x_var_v;
+d_0 = (d_1 * der_x_var_v + v_1 * der_x_der_v);
+der_y_var_v = v_0;
+der_y_der_v = d_0;
+
+if (der_y_var_o != NULL) *der_y_var_o = der_y_var_v;
+if (der_y_der_o != NULL) *der_y_der_o = der_y_der_v;
+JMI_DYNAMIC_FREE()
+return;
+}
+
+void func_CADCodeGenTests_CADDerAnno1_f_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_var_v;
+    jmi_ad_var_t y_der_v;
+
+jmi_ad_var_t v_2;
+jmi_ad_var_t d_2;
+/*Using specified derivative annotation instead of AD*/
+func_CADCodeGenTests_CADDerAnno1_f_def(x_var_v,  &y_var_v);
+func_CADCodeGenTests_CADDerAnno1_f_der_def(x_var_v, x_der_v,  &y_der_v);
+if (y_var_o != NULL) *y_var_o = y_var_v;
+if (y_der_o != NULL) *y_der_o = y_der_v;
+JMI_DYNAMIC_FREE()
+return;
+}
+
+")})));
+
+		function f
+			input Real x;
+			output Real y;
+		algorithm
+			y := x^2;
+			annotation(derivative=f_der);
+		end f;
+		
+		function f_der
+			input Real x;
+			input Real der_x;
+			output Real der_y;
+		algorithm
+			der_y := 2*x*der_x;
+		end f_der;
+
+		Real x1,x2;
+	equation
+		der(x1) + der(x2) = 1;
+		x1 + f(x2) = 0;
+end CADDerAnno1;
 
 model SparseJacTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

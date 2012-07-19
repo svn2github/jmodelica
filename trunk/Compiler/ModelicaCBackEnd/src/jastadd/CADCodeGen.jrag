@@ -1605,6 +1605,39 @@ aspect CADCodeGen {
 		str.print(";\n");
 	}
 	
+	public void FFunctionDecl.printFuncAnnotation_CAD(PrintStream str){
+		str.print("/*Using specified derivative annotation instead of AD*/\n");
+		str.print("func_"+name().replace('.','_')+"_def(");
+		for (FFunctionVariable ffv : myInputs()){
+			str.print(ffv.name_var_CAD()+", ");
+		}
+		int i = 0;
+		for (FFunctionVariable ffv : myOutputs()){
+			i++;
+			if(i==myOutputs().size()){
+				str.print(" &"+ffv.name_var_CAD()+");\n");
+			} else {
+				str.print(" &"+ffv.name_var_CAD()+", ");
+			}
+		}
+		str.print("func_"+getFDerivativeFunction().getName().name().replace('.','_')+"_def(");
+		for (FFunctionVariable ffv : myInputs()){
+			str.print(ffv.name_var_CAD()+", ");
+		}
+		for (FFunctionVariable ffv : myInputs()){
+			str.print(ffv.name_der_CAD()+", ");
+		}
+		i = 0;
+		for (FFunctionVariable ffv : myOutputs()){
+			i++;
+			if(i==myOutputs().size()){
+				str.print(" &"+ffv.name_der_CAD()+");\n");
+			} else {
+				str.print(" &"+ffv.name_der_CAD()+", ");
+			}
+		}
+	}
+	
 	public void FFunctionDecl.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 		String next = p.indent(indent);
 		// Print definition
@@ -1612,11 +1645,15 @@ aspect CADCodeGen {
 		str.print(" {\n");
 		str.print(next + "JMI_DYNAMIC_INIT()\n");
 		genVarDecls_CAD(p, str, p.indent(indent));
-		for (FFunctionVariable ffv : myNonInputs())
-			p.print(ffv, str, indent);
-		for (FFunctionVariable ffv : myOutputs())
-			ffv.printNullOutputReplacement_CAD(p, str, next);
-    	p.print(getFAlgorithmBlock(), str, next);
+		if(hasFDerivativeFunction()){
+			printFuncAnnotation_CAD(str);
+		} else {
+			for (FFunctionVariable ffv : myNonInputs())
+				p.print(ffv, str, indent);
+			for (FFunctionVariable ffv : myOutputs())
+				ffv.printNullOutputReplacement_CAD(p, str, next);
+			p.print(getFAlgorithmBlock(), str, next);
+		}
     	str.print(indent);
     	returnDefinition().printReturnWrite_CAD(str, indent);
 		// TODO: Check if there are any dynamic declarations first
