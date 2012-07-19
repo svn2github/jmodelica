@@ -3536,6 +3536,35 @@ equation
     end if;
 end IfEqu23;
 
+model IfEqu24  "Test delay equation"
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu24",
+         description="Check correct elimination of if equation branches.",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu24
+ parameter Boolean use_delay = false /* false */;
+ Real x1(start = 1);
+ Real x2(start = 1);
+initial equation 
+ x1 = 1;
+equation
+ der(x1) = sin(time);
+ 0 = x1 - ( x2 ) + 2;
+end TransformCanonicalTests.IfEqu24;
+")})));
+		
+  parameter Boolean use_delay=false;
+  Real x1(start = 1); 
+  Real x2(start = 1);
+equation
+  der(x1) = sin(time);
+  if use_delay then
+    der(x2) = (x1 - x2) /100;
+  else
+    0 = x1 - x2 + 2;
+  end if;
+end IfEqu24;
 
 model IfExpLeft1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

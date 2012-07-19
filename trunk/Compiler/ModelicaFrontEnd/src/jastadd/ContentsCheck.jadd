@@ -153,13 +153,16 @@ aspect ContentCheck {
 			boolean inWhen = inWhen();
 			boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
 			boolean functionCallEqu = hasFunctionCallEquations(); 
-			if (hasOnlyParamTests())
+			if (hasOnlyParamTests()) {
 				setEliminateOnParamTest();
-			else if (!balanced)
-				error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
-			if (functionCallEqu)
-				compliance("If equations that has non-parameter tests and contains " + 
+			} else {
+				if (!balanced) {
+					error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
+				} else if (functionCallEqu) {
+					compliance("If equations that has non-parameter tests and contains " + 
 						"function calls using multiple outputs are not supported");
+				}
+			}
 		}
 	}
 	
