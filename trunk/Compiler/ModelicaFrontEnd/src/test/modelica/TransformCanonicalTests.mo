@@ -219,6 +219,77 @@ end TransformCanonicalTests.TransformCanonicalTest7;
 	  Real y = x[p2]; 
   end TransformCanonicalTest7;
 
+model TransformCanonicalTest8
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="TransformCanonicalTest8",
+         generate_ode_jacobian=true,
+		 description="Test that derivative functions are included in the flattened model if Jacobians are to be generated.",
+         flatModel="
+		 fclass TransformCanonicalTests.TransformCanonicalTest8
+ Real x1;
+ Real x2;
+equation
+ x1 = TransformCanonicalTests.TransformCanonicalTest8.f(x2);
+ x2 = TransformCanonicalTests.TransformCanonicalTest8.f1(x1);
+
+public
+ function TransformCanonicalTests.TransformCanonicalTest8.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := ( TransformCanonicalTests.TransformCanonicalTest8.f1(x) ) * ( 2 );
+  return;
+ end TransformCanonicalTests.TransformCanonicalTest8.f;
+
+ function TransformCanonicalTests.TransformCanonicalTest8.f_der
+  input Real x;
+  input Real der_x;
+  output Real der_y;
+ algorithm
+  der_y := ( ( 2 ) * ( x ) ) * ( der_x );
+  return;
+ end TransformCanonicalTests.TransformCanonicalTest8.f_der;
+
+ function TransformCanonicalTests.TransformCanonicalTest8.f1
+  input Real x;
+  output Real y;
+ algorithm
+  y := x ^ 2;
+  return;
+ end TransformCanonicalTests.TransformCanonicalTest8.f1;
+
+end TransformCanonicalTests.TransformCanonicalTest8;
+")})));
+		
+  function f
+	input Real x;
+	output Real y;
+  algorithm
+	y := f1(x)*2;
+  end f;
+	
+  function f1
+	input Real x;
+	output Real y;
+  algorithm
+	y := x^2;
+	annotation(derivative=f_der);
+  end f1;
+		
+  function f_der
+	input Real x;
+	input Real der_x;
+	output Real der_y;
+  algorithm
+	der_y := 2*x*der_x;
+  end f_der;
+
+  Real x1,x2;
+equation
+  x1 = f(x2);
+  x2 = f1(x1);
+end TransformCanonicalTest8;
 
   model EvalTest1
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -5960,7 +6031,6 @@ equation
   (y1,y2) = f2(x + y1);
 
 end BlockTest2;
-
 
 model VarDependencyTest1
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
