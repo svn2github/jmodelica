@@ -5817,6 +5817,151 @@ equation
   (a,b) = F(e,f);
 end RecordTearingTest5;
 
+model BlockTest1
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+    JModelica.UnitTesting.FClassMethodTestCase(
+      name="BlockTest1",
+      methodName="printDAEBLT",
+	  equation_sorting = true,
+      description="Test of correct creation of blocks containing functions returning records", methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  x
+Solution:
+  sin(time)
+-------------------------------
+Non-solved block of 2 variables:
+Unknown variables:
+  r.x
+  r.y
+Equations:
+  (TransformCanonicalTests.BlockTest1.R(r.x, r.y)) = TransformCanonicalTests.BlockTest1.f1(x + r.x)
+-------------------------------
+Non-solved block of 2 variables:
+Unknown variables:
+  y1
+  y2
+Equations:
+  (y1, y2) = TransformCanonicalTests.BlockTest1.f2(x + y1)
+-------------------------------
+      ")})));
+record R
+  Real x,y;
+end R;
+
+function f1
+  input Real x;
+  output R r;
+algorithm 
+  r.x :=x;
+  r.y :=x*x;
+end f1;
+
+function f2
+  input Real x;
+  output Real y1;
+  output Real y2;
+algorithm
+  y1:=x*2;
+  y2:=x*4;
+end f2;
+
+  R r;
+  Real x;
+  Real y1,y2;
+equation
+  x = sin(time);
+  r = f1(x + r.x);
+  (y1,y2) = f2(x + y1);
+
+end BlockTest1;
+
+model BlockTest2
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+    JModelica.UnitTesting.FClassMethodTestCase(
+      name="BlockTest2",
+      methodName="printDAEBLT",
+	  equation_sorting = true,
+      description="Test of correct creation of blocks containing functions returning records", methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  x
+Solution:
+  sin(time)
+-------------------------------
+Non-solved block of 2 variables:
+Unknown variables:
+  r.x
+  r.y
+Equations:
+  (TransformCanonicalTests.BlockTest2.R(r.x, r.y)) = TransformCanonicalTests.BlockTest2.f1(x + r.x)
+-------------------------------
+Non-solved block of 3 variables:
+Unknown variables:
+  r2.x
+  r2.r.x
+  r2.r.y
+Equations:
+  (TransformCanonicalTests.BlockTest2.R2(r2.x, TransformCanonicalTests.BlockTest2.R(r2.r.x, r2.r.y))) = TransformCanonicalTests.BlockTest2.f3(x + r2.x)
+-------------------------------
+Non-solved block of 2 variables:
+Unknown variables:
+  y1
+  y2
+Equations:
+  (y1, y2) = TransformCanonicalTests.BlockTest2.f2(x + y1)
+-------------------------------
+      ")})));
+
+record R
+  Real x,y;
+end R;
+
+record R2
+  Real x;
+  R r;
+end R2;
+
+function f1
+  input Real x;
+  output R r;
+algorithm 
+  r.x :=x;
+  r.y :=x*x;
+end f1;
+
+function f2
+  input Real x;
+  output Real y1;
+  output Real y2;
+algorithm
+  y1:=x*2;
+  y2:=x*4;
+end f2;
+
+function f3
+  input Real x;
+  output R2 r;
+algorithm 
+  r.x :=x;
+  r.r :=R(x*x,x);
+end f3;
+
+  R r;
+  R2 r2;
+  Real x;
+  Real y1,y2;
+equation
+  x = sin(time);
+  r = f1(x + r.x);
+  r2 = f3(x + r2.x);
+  (y1,y2) = f2(x + y1);
+
+end BlockTest2;
+
+
 model VarDependencyTest1
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FClassMethodTestCase(name="VarDependencyTest1",

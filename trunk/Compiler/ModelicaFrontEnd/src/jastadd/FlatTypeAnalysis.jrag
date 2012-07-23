@@ -174,7 +174,7 @@ aspect FlatTypeAnalysis {
 	eq FFunctionCallEquation.isReal() {
 		for (FFunctionCallLeft l : getLefts()) {
 			if (l.hasFExp()) {
-				if (!l.getFExp().type().isReal()) {
+				if (!l.getFExp().type().onlyContainsReal()) {
 					return false;
 				}
 			}	
@@ -919,14 +919,14 @@ aspect BuiltInFlatTypes {
 			public boolean check(FType t) { return t.isReal(); }
 		};
 	}
-	
+		
 	protected boolean FType.recursiveTypeCheck(TypeChecker ch) {
 		return ch.check(this);
 	}
 	
 	protected boolean FRecordType.recursiveTypeCheck(TypeChecker ch) {
 		for (FRecordComponentType c : getComponents())
-			if (!ch.check(c.getFType()))
+			if (!c.getFType().recursiveTypeCheck(ch))
 				return false;
 		return true;
 	}
