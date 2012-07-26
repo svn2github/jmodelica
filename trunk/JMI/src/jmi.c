@@ -24,6 +24,7 @@
 
 
 #include "jmi.h"
+#include "jmi_block_residual.h"
 
 int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_real_pd, int n_integer_ci, int n_integer_cd,

@@ -40,8 +40,8 @@
  *
  */
 
-#include "jmi.h"
 #include <time.h>
+#include "jmi.h"
 
 int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_real_pd, int n_integer_ci, int n_integer_cd,
@@ -761,13 +761,17 @@ int jmi_delete(jmi_t* jmi){
 		jmi_func_delete(jmi->opt->Hineq);
 		free(jmi->opt);
 	}
+        
+#if 0
+        /* NO block_residual are possible */ 
 	for (i=0; i < jmi->n_dae_init_blocks;i=i+1){ /*Deallocate init BLT blocks.*/
 		jmi_delete_block_residual(jmi->dae_init_block_residuals[i]);
 	}
 	for (i=0; i < jmi->n_dae_blocks;i=i+1){ /*Deallocate BLT blocks.*/
 		jmi_delete_block_residual(jmi->dae_block_residuals[i]);
 	}
-
+#endif
+    
 	free(jmi->output_vrefs);
 	delete jmi->z;
 	free(*(jmi->z_val));

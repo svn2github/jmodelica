@@ -19,11 +19,13 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
+
 #include "fmi.h"
 #include "fmiModelFunctions.h"
 #include "fmiModelTypes.h"
 #include "jmi.h"
-#include <time.h>
+#include "jmi_block_residual.h"
 
 #ifdef USE_FMI_ALLOC
 #include "fmi_alloc.h"
@@ -278,19 +280,6 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     /* Evaluate parameters */
     jmi_init_eval_parameters(((fmi_t *)c)->jmi);
 
-    /* Sets the relative tolerance to a default value for use in Kinsol when tolerance controlled is false */
-    if (toleranceControlled == fmiFalse){
-        relativeTolerance = 1e-6;
-    }
-    /* Set tolerance in the BLT blocks */
-    for (i=0; i < ((fmi_t *)c)->jmi->n_dae_init_blocks; i=i+1){
-        ((fmi_t *)c)->jmi->dae_init_block_residuals[i]->kin_ftol = relativeTolerance*safety_factor_newton;
-        ((fmi_t *)c)->jmi->dae_init_block_residuals[i]->kin_stol = relativeTolerance*safety_factor_newton;
-    }
-    for (i=0; i < ((fmi_t *)c)->jmi->n_dae_blocks; i=i+1){
-        ((fmi_t *)c)->jmi->dae_block_residuals[i]->kin_ftol = relativeTolerance*safety_factor_newton;
-        ((fmi_t *)c)->jmi->dae_block_residuals[i]->kin_stol = relativeTolerance*safety_factor_newton;
-    }
     /* Get Sizes */
     retval = jmi_init_get_sizes(((fmi_t *)c)->jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
     if(retval != 0) {
@@ -305,6 +294,10 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     }
     /* ---- */
     
+    /* Sets the relative tolerance to a default value for use in Kinsol when tolerance controlled is false */
+    if (toleranceControlled == fmiFalse){
+        relativeTolerance = 1e-6;
+    }
     ((fmi_t *)c) -> fmi_epsilon=safety_factor_events*relativeTolerance; /* Used in the event detection */
     ((fmi_t *)c) -> fmi_newton_tolerance=safety_factor_newton*relativeTolerance; /* Used in the Newton iteration */
     
@@ -627,7 +620,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 			d0 = clock();
 			fmiFlag = setMatrixElement(A,row+1,col+1,jac[row + col*nx]);
 			d1 = clock();
-			setElementTime += ((realtype) ((long)(d1-d0))/(CLOCKS_PER_SEC));
+			setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix A");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -649,7 +642,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 			d0 = clock();
 			fmiFlag = setMatrixElement(B,row+1,col+1,jac[row + col*nx]);
 			d1 = clock();
-			setElementTime += ((realtype) ((long)(d1-d0))/(CLOCKS_PER_SEC));
+			setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix B");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -671,7 +664,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 			d0 = clock();
 			fmiFlag = setMatrixElement(C,row + 1, col + 1, jac[row+col*ny]);
 			d1 = clock();
-			setElementTime += ((realtype) ((long)(d1-d0))/(CLOCKS_PER_SEC));
+			setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix C");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -839,9 +832,6 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	jmi_real_t** dv;
 	jmi_real_t** dz;
 
-	clock_t c0, c1;
-
-	c0 = clock();
 
 	/*Used for debugging 
 	fmiReal tol = 0.001;	
@@ -855,6 +845,9 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	int n_outputs_real;
 	int* output_vrefs_real;
 	jmi_t* jmi = ((fmi_t *)c)->jmi;
+    clock_t c0, c1;
+
+	c0 = clock();
 	n_outputs = jmi->n_outputs;
 	n_outputs_real = n_outputs;
 	

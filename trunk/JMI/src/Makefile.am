@@ -49,7 +49,12 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_common.h \
                     jmi.c \
                     jmi_common.c \
-                    jmi_newton_solvers.c \
+                    jmi_simple_newton.h \
+                    jmi_simple_newton.c \
+                    jmi_block_residual.h \
+                    jmi_block_residual.c \
+                    jmi_kinsol_solver.h \
+                    jmi_kinsol_solver.c \
                     jmi_opt_coll.h \
                     jmi_array_common.h \
                     jmi_array_none.h \
@@ -134,8 +139,10 @@ libjmi_solver_la_LDFLAGS = -no-undefined -static-libtool-libs
 
 libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_common.c \
+                    jmi_common.h \
+                    jmi_block_residual.h \
+                    jmi_block_residual.c \
                     jmi_cppad.cpp\
-                    jmi_common.c \
                     jmi_array_common.h \
                     jmi_array_cppad.h \
                     jmi_util.h \
@@ -180,7 +187,9 @@ include_HEADERS = jmi.h \
                   fmi_cs.h\
                   ModelicaUtilities.h \
                   jmi_common.h \
-                  jmi_newton_solvers.h \
+                    jmi_simple_newton.h \
+                    jmi_block_residual.h \
+                    jmi_kinsol_solver.h \
                   jmi_init_opt.h \
                   jmi_opt_coll.h \
                   jmi_opt_coll_radau.h \

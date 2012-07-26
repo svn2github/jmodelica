@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <jmi.h>
-#include <jmi_newton_solvers.h>
+#include <jmi_block_residual.h>
 #include "fmi.h"
 
 $external_func_includes$

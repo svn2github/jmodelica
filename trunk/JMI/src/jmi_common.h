@@ -29,9 +29,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include <sundials/sundials_types.h>
+
 #include <fmiModelTypes.h>
 #include <fmiModelFunctions.h>
-#include <math.h>
 
 /**
  * \defgroup Jmi_internal Internal functions of the JMI Model \
@@ -137,8 +139,6 @@
  *  TODO: Error codes...
  *  Introduce #defines to denote different error codes
  */
-#include <nvector/nvector_serial.h>
-#include <kinsol/kinsol.h>
 
 #if JMI_AD == JMI_AD_CPPAD
 /* This must be done outside of 'extern "C"' */
@@ -255,11 +255,6 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 	type name##_rec;\
 	type* name = &name##_rec;
 
-/* Default Kinsol tolerance when solving BLT blocks */
-/* RCONST from SUNDIALS and defines a compatible type, usally double precision */
-#define JMI_DEFAULT_KINSOL_TOL RCONST(1.0e-8)
-
-
 #ifdef JMI_AD_NONE_AND_CPP
 extern "C" {
 #endif /* JMI_AD_NONE_AND_CPP */
@@ -368,51 +363,6 @@ typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
 typedef int (*jmi_directional_der_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res,
 		jmi_ad_var_vec_p dF, jmi_ad_var_vec_p dz);
 
-/**
- * \brief Function signature for evaluation of a equation block residual
- * function in the generated code.
- *
- * @param jmi A jmi_t struct.
- * @param x (Input/Output) The iteration variable vector. If the init argument is
- * set to JMI_BLOCK_INITIALIZE then x is an output argument that holds the
- * initial values. If init is set to JMI_BLOCK_EVALUATE, then x is an input
- * argument used in the evaluation of the residual.
- * @param residual (Output) The residual vector if init is set to
- * JMI_BLOCK_EVALUATE, otherwise this argument is not used.
- * @param init Set to either JMI_BLOCK_INITIALIZE or JMI_BLOCK_EVALUATE.
- * @return Error code.
- */
-typedef int (*jmi_block_residual_func_t)(jmi_t* jmi, jmi_real_t* x,
-		jmi_real_t* residual, int init);
-		
-/**
- * \brief Function signature for evaluation of a directional derivatives for a
- * block function in the generated code.
- *
- * @param jmi A jmi_t struct.
- * @param x (Input/Output) The iteration variable vector. If the init argument is
- * set to JMI_BLOCK_INITIALIZE then x is an output argument that holds the
- * initial values. If init is set to JMI_BLOCK_EVALUATE, then x is an input
- * argument used in the evaluation of the residual.
- * @param dx (input) The seed vector that is used if init is set to JMI_BLOCK_EVALUATE
- * @param dRes (output) the directional derivative if init is set to JMI_BLOCK_EVALUATE
- * @param residual (Output) The residual vector if init is set to
- * JMI_BLOCK_EVALUATE, otherwise this argument is not used.
- * @param init Set to either JMI_BLOCK_INITIALIZE or JMI_BLOCK_EVALUATE.
- * @return Error code.
- */
-typedef int (*jmi_block_dir_der_func_t)(jmi_t* jmi, jmi_real_t* x,
-		 jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int init);
-
-/**
- * \brief Function signature for evaluation of a directional derivatives for a
- * block function in the generated code.
- *
- * @param jmi A jmi_t struct.
- * *** DOCUMENT ***
- * @return Error code.
- */
-typedef int (*jmi_ode_derivatives_dir_der_func_t)(jmi_t* jmi);
 
 /**
  * \brief Evaluation of symbolic jacobian of a residual function in
@@ -815,34 +765,6 @@ struct jmi_func_ad_t{
 
 };
 
-struct jmi_block_residual_t {
-	jmi_t *jmi;                    /**< \brief A pointer to the corresponding jmi_t struct */
-	jmi_block_residual_func_t F;   /**< \brief A function pointer to the block residual function */
-	jmi_block_dir_der_func_t dF;   /**< \brief A function pointer to the block AD-function */
-	int n;                         /**< \brief The number of real unknowns in the equation system */
-	int n_nr;                         /**< \brief The number of non-real unknowns in the equation system */
-	jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */
-	jmi_real_t* x_nr;                 /**< \brief Work vector for the non-real iteration variables */
-	jmi_real_t* dx;				/**< \brief Work vector for the seed vector */
-	jmi_real_t* dv;					/**< \brief Work vector for (dF/dv)*dv */
-        int index ;
-    jmi_real_t* res;               /**< \brief Work vector for the block residual */
-    jmi_real_t* dres;			   /**< \brief Work vector for the directional derivative that corresponds to dx */
-    jmi_real_t* jac;               /**< \brief Work vector for the block Jacobian */
-    int* ipiv;                     /**< \brief Work vector needed for dgesv */
-    void* kin_mem;                 /**< \brief A pointer to the Kinsol solver */
-    int init;			   /**< \brief A flag for initialization */
-    N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
-    N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
-    N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
-    realtype kin_ftol;		   /**< \brief Tolerance for F */
-    realtype kin_stol;		   /**< \brief Tolerance for Step-size */
-  int nb_calls;                    /**< \brief Nb of times the block has been solved */
-  int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */
-  int nb_jevals ;
-  realtype time_spent;             /**< \brief Total time spent in non-linear solver */
-};
-
 
 /* @} */
 
@@ -973,61 +895,12 @@ int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
         jmi_residual_func_t R, int n_eq_R,
         jmi_jacobian_func_t dR, int dR_n_nz, int* dR_row, int* dR_col,
         jmi_generic_func_t ode_derivatives,
-        jmi_ode_derivatives_dir_der_func_t ode_derivatives_dir_der,
+        jmi_generic_func_t ode_derivatives_dir_der,
         jmi_generic_func_t ode_outputs,
         jmi_generic_func_t ode_initialize,
         jmi_generic_func_t ode_guards,
         jmi_generic_func_t ode_guards_init,
         jmi_next_time_event_func_t ode_next_time_event);
-
-/**
- * \brief Register a block residual function in a jmi_t struct.
- *
- * @param jmi A jmi_t struct.
- * @param F A jmi_block_residual_func_t function
- * @param dF A jmi_block_dir_der_func_t function
- * @param n Integer size of the block of real variables
- * @param n_nr Integer size of the block of non-real variables
- * @param index Integer ID nbr of the block
- * @return Error code.
- */
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index);
-
-/**
- * \brief Allocates a jmi_block_residual struct.
- * 
- * @param b A jmi_block_residual_t struct (Output)
- * @param jmi A jmi_t struct.
- * @param F A jmi_block_residual_func_t function
- * @param dF A jmi_block_dir_der_func_t function 
- * @param n Integer size of the block of real variables
- * @param n_nr Integer size of the block of non-real variables
- * @param index Integer ID nbr of the block
- * @return Error code.
- */
-int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index);
-
-
-/**
- * \brief Deletes a jmi_block_residual struct.
- * 
- * @param b A jmi_block_residual_t struct.
- * @return Error code.
- */
-int jmi_delete_block_residual(jmi_block_residual_t* b);
-
-/**
- * \brief Register an initialization block residual function in a jmi_t struct.
- *
- * @param jmi A jmi_t struct.
- * @param F A jmi_block_residual_func_t function
- * @param dF A jmi_block_dir_der_func_t function
- * @param n Integer size of the block of real variables
- * @param n_nr Integer size of the block of non-real variables
- * @param index Integer ID nbr of the block
- * @return Error code.
- */
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index);
 
 /**
  * \brief Allocates memory for the contents of a jmi_simple_color_info struct
@@ -1432,7 +1305,7 @@ struct jmi_dae_t{
 	jmi_func_t* F;                           /**< \brief  A jmi_func_t struct representing the DAE residual \f$F\f$. */
 	jmi_func_t* R;                           /**< \brief  A jmi_func_t struct representing the DAE event indicator function \f$R\f$. */
     jmi_generic_func_t ode_derivatives;      /**< \brief A function pointer to a function for evaluating the ODE derivatives. */
-    jmi_ode_derivatives_dir_der_func_t ode_derivatives_dir_der;      /**< \brief A function pointer to a function for evaluating the ODE directional derivative. */
+    jmi_generic_func_t ode_derivatives_dir_der;      /**< \brief A function pointer to a function for evaluating the ODE directional derivative. */
     jmi_generic_func_t ode_outputs;          /**< \brief A function pointer to a function for evaluating the ODE outputs. */
     jmi_generic_func_t ode_initialize;       /**< \brief A function pointer to a function for initializing the ODE. */
     jmi_generic_func_t ode_guards;           /**< A function pointer for evaluating the guard expressions. */

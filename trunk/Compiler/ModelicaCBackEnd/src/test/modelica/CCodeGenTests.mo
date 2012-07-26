@@ -1321,9 +1321,6 @@ void func_CCodeGenTests_CFunctionTest14_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v
     return;
 }
 
-    JMI_ARRAY_STATIC(tmp_1, 2, 1)
-    JMI_ARRAY_STATIC(tmp_2, 2, 1)
-    JMI_ARRAY_STATIC(tmp_3, 2, 1)
     model_ode_guards(jmi);
 /************* ODE section *********/
   _der_x_1_7 =  - ( _x_1_0 );
@@ -1332,7 +1329,7 @@ void func_CCodeGenTests_CFunctionTest14_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
   _u_4 = 3;
-  ef |= jmi_kinsol_solve(jmi->dae_block_residuals[0]);
+  ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
 
 ")})));
 		
@@ -4462,7 +4459,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
       model_ode_guards(jmi);
   _x_p_1 = 1;
   _u_c_4 = ( _c_p_7 ) * ( _x_p_1 );
-  ef |= jmi_kinsol_solve(jmi->dae_init_block_residuals[0]);
+  ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
   _u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
   _der_x_p_12 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
   _sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
@@ -4548,7 +4545,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     model_ode_guards(jmi);
-  ef |= jmi_kinsol_solve(jmi->dae_init_block_residuals[0]);
+  ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
   _u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
   _x_p_1 = 1;
   _der_x_p_13 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
@@ -4704,11 +4701,11 @@ model_ode_guards(jmi);
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-ef |= jmi_kinsol_solve(jmi->dae_block_residuals[0]);
+ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
 _z_2 = _x_0 + _y_1;
 
 model_ode_guards(jmi);
-ef |= jmi_kinsol_solve(jmi->dae_init_block_residuals[0]);
+ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
 _z_2 = _x_0 + _y_1;
 ")})));
   Real x, y, z;
@@ -4756,9 +4753,9 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init
 }
 model_ode_guards(jmi);
   /************* ODE section *********/
-  ef |= jmi_kinsol_solve(jmi->dae_block_residuals[0]);
+  ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
   _der_x2_5 =  - ( _x2_1 ) + _z2_1_3 + _z2_2_4;
-  ef |= jmi_kinsol_solve(jmi->dae_block_residuals[1]);
+  ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
   _der_x1_6 =  - ( _x1_0 ) + _z1_2;
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/

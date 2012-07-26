@@ -125,7 +125,7 @@ int jmi_func_delete(jmi_func_t *func) {
 	free(func->c_info);
 	free(func->coloring_done);
 	free(func);
-	return 0;
+	return flag;
 }
 
 /* Convenience function to evaluate the Jacobian of the function contained in a
@@ -232,7 +232,7 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	int j;
 	int k;
 	int l;
-	int flag;
+	int flag = 0;
 	int c_index;
 	
 	int dF_n_cols;
@@ -419,7 +419,7 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	free(dF_row);
 	free(dF_col);
 	free(dF_col_independent_ind);
-	return 0;
+	return flag;
 }
 
 
@@ -956,7 +956,7 @@ int jmi_dae_init(jmi_t* jmi,
 		jmi_residual_func_t R, int n_eq_R, jmi_jacobian_func_t dR,
 		int dR_n_nz, int* dR_row, int* dR_col,
         jmi_generic_func_t ode_derivatives,
-        jmi_ode_derivatives_dir_der_func_t ode_derivatives_dir_der,
+        jmi_generic_func_t ode_derivatives_dir_der,
         jmi_generic_func_t ode_outputs,
         jmi_generic_func_t ode_initialize,
         jmi_generic_func_t ode_guards,
@@ -1065,77 +1065,6 @@ int jmi_sim_init(jmi_t* jmi, fmiReal relative_tolerance){
 	jmi->sim->event_epsilon = jmi->sim->sfac_events*relative_tolerance;
 	jmi->sim->newton_tolerance = jmi->sim->sfac_newton*relative_tolerance;
 	
-	return 0;
-}
-
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index) {
-	jmi_block_residual_t* b;
-	int flag;
-	flag = jmi_new_block_residual(&b,jmi,F,dF,n,n_nr,index);
-	jmi->dae_block_residuals[index] = b;
-	return 0;
-}
-
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index) {
-	jmi_block_residual_t* b;
-	int flag;
-	flag = jmi_new_block_residual(&b,jmi,F,dF,n,n_nr,index);
-	jmi->dae_init_block_residuals[index] = b;
-	return 0;
-}
-
-int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index){
-	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
-	*block = b;
-	
-	b->jmi = jmi;
-	b->F = F;
-	b->dF = dF;
-	b->n = n;
-	b->n_nr = n_nr;
-	b->index = index ;
-	b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-	if (n_nr>0) {
-		b->x_nr = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-	}
-	b->dx = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-	b->dv = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-	b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-	b->dres = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-	b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
-	b->ipiv = (int*)calloc(n,sizeof(int));
-	b->init = 1;
-        /*Initialize Kinsol. -> moved to jmi_newton_solvers.c
-        b->kin_mem = KINCreate();  */
-        b->kin_mem = 0;
-	b->kin_y = N_VNew_Serial(n);
-	b->kin_y_scale = N_VNew_Serial(n);
-	b->kin_f_scale = N_VNew_Serial(n);
-	b->kin_ftol = JMI_DEFAULT_KINSOL_TOL;
-	b->kin_stol = JMI_DEFAULT_KINSOL_TOL;
-	return 0;
-}
-
-
-int jmi_delete_block_residual(jmi_block_residual_t* b){
-	free(b->x);
-	if (b->n_nr>0) {
-		free(b->x_nr);
-	}
-	free(b->dx);
-	free(b->dv);
-	free(b->res);
-	free(b->dres);
-	free(b->jac);
-	free(b->ipiv);
-	/*Deallocate Kinsol work vectors.*/
-	N_VDestroy_Serial(b->kin_y);
-	N_VDestroy_Serial(b->kin_y_scale);
-	N_VDestroy_Serial(b->kin_f_scale);
-	/*Deallocate Kinsol */
-        if(b->kin_mem) KINFree(&(b->kin_mem));
-	/*Deallocate struct */
-	free(b);
 	return 0;
 }
 
