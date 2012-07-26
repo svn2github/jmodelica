@@ -669,6 +669,52 @@ package JacGenTests
   end JacTestFunction7; 
   
   
+  model JacTestExpInFuncArg1
+  	function f
+		input Real x;
+		output Real y1;
+		output Real y2;
+	algorithm
+		(y1,y2) := f3(x+100,x^2);
+	end f;
+
+	function f1
+		input Real x;
+		output Real y;
+	algorithm
+		y := f2(sin(x))^(-2);
+	end f1;
+
+
+	function f2
+		input Real x;
+		output Real y;
+	algorithm
+		y := x^(-3);
+	end f2;
+	
+	function f3
+		input Real x1;
+		input Real x2;
+		output Real y1;
+		output Real y2;
+	algorithm
+		y1 := x1^(-3);
+		y2 := x2^(-5);
+	end f3;
+
+	Real x1(start=.1),x2(start=.2);
+	Real u1,u2;
+	Real v1,v2;
+equation
+	der(x1) = f(sin(x2));
+	der(x2) = f1(x1);
+	(u1,u2) = f(sin(x1));
+	der(v1) = u1;
+	der(v2) = u2;
+  end JacTestExpInFuncArg1;
+  
+  
    model Unsolved_blocks1
 	Real x(start=.5);
 	Real y(start=10);

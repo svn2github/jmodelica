@@ -1271,6 +1271,9 @@ aspect CADCodeGen {
 	
 	public void FFunctionCall.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 		boolean exp = functionCallIsExp();
+		for (FExp arg : getArgs()) {
+			arg.prettyPrint_CAD(p, str, indent);
+		}
 		
 		str.print(getName().funcNameUnderscore("der_AD"));
 		str.print("(");
@@ -1359,7 +1362,7 @@ aspect CADCodeGen {
 				FIdUseExp e = (FIdUseExp)this;
 				str.print(e.adVarName());
 			} catch (java.lang.ClassCastException e) {
-				this.prettyPrint_C(p, str, indent);
+				str.print(adVarName());
 			}
 		}
 	}
@@ -1372,7 +1375,7 @@ aspect CADCodeGen {
 				FIdUseExp e = (FIdUseExp)this;
 				str.print(e.adDerName());
 			} catch (java.lang.ClassCastException e) {
-				this.prettyPrint_C(p, str, indent);
+				str.print(adDerName());
 			}
 		}
 	}
