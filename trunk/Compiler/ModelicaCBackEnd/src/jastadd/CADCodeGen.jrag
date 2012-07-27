@@ -607,6 +607,9 @@ aspect CADCodeGen {
 	public void FAbstractEquation.genResidual_CAD(int i, String indent, PrintStream str) {}
 	
 	public void FEquation.genResidual_CAD(int i, String indent, PrintStream str) {
+		if(!type().isReal()){
+			return;
+		}
 		genTempVars_C(printer_C, str, indent);
 		getRight().prettyPrint_CAD(str,"    ");
 		getLeft().prettyPrint_CAD(str,"    ");
@@ -1619,9 +1622,15 @@ aspect CADCodeGen {
 	
 	public void FFunctionDecl.printFuncAnnotation_CAD(PrintStream str){
 		str.print("/*Using specified derivative annotation instead of AD*/\n");
+		
+		//  Print the normal function call, to set the variables
 		str.print("func_"+name().replace('.','_')+"_def(");
 		for (FFunctionVariable ffv : myInputs()){
-			str.print(ffv.name_var_CAD()+", ");
+			if(!ffv.getType().isReal()){
+				str.print(ffv.name_C()+", ");
+			} else {
+				str.print(ffv.name_var_CAD()+", ");
+			}
 		}
 		int i = 0;
 		for (FFunctionVariable ffv : myOutputs()){
@@ -1632,20 +1641,32 @@ aspect CADCodeGen {
 				str.print(" &"+ffv.name_var_CAD()+", ");
 			}
 		}
+		
+		// Print the call to the specified derivative function
 		str.print("func_"+getFDerivativeFunction().getName().name().replace('.','_')+"_def(");
 		for (FFunctionVariable ffv : myInputs()){
-			str.print(ffv.name_var_CAD()+", ");
+			if(!ffv.getType().isReal()){
+				str.print(ffv.name_C()+", ");
+			} else {
+				str.print(ffv.name_var_CAD()+", ");
+			}
 		}
 		for (FFunctionVariable ffv : myInputs()){
-			str.print(ffv.name_der_CAD()+", ");
+			if(ffv.getType().isReal()){
+				str.print(ffv.name_der_CAD()+", ");
+			}
 		}
 		i = 0;
 		for (FFunctionVariable ffv : myOutputs()){
 			i++;
-			if(i==myOutputs().size()){
-				str.print(" &"+ffv.name_der_CAD()+");\n");
+			if(ffv.getType().isReal()){
+				if(i==myOutputs().size()){
+					str.print(" &"+ffv.name_der_CAD()+");\n");
+				} else {
+					str.print(" &"+ffv.name_der_CAD()+", ");
+				}
 			} else {
-				str.print(" &"+ffv.name_der_CAD()+", ");
+				str.print(( (i==myOutputs().size())? ");\n":""));
 			}
 		}
 	}
