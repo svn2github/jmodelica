@@ -900,9 +900,11 @@ aspect CADCodeGen {
 	
 	
 	public void FExp.genWriteBackInFunc_der_CAD(PrintStream str, String indent, String name, int index) {
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(name+";\n");
+		if(type().isReal()){
+			str.print(adDerName());
+			str.print(" = ");
+			str.print(name+";\n");
+		}
 	}
 	
 	
@@ -1284,9 +1286,11 @@ aspect CADCodeGen {
 			sep = ", ";
 		}
 		for (FExp arg : getArgs()) {
-			str.print(sep);
-			arg.genArgument_der_CAD(p, str, indent);
-			sep = ", ";
+			if(arg.type().isReal()){
+				str.print(sep);
+				arg.genArgument_der_CAD(p, str, indent);
+				sep = ", ";
+			}
 		}
 		if (!exp){
 			int tot = myOutputs().size();
@@ -1301,10 +1305,15 @@ aspect CADCodeGen {
 			}
 			for (int i = 0; i < tot; i++) {
 				str.print(sep);
-				if (i < lefts)
-					myLefts().get(i).genArgument_der_CAD(str);
-				else
+				if (i < lefts){	
+					if(myLefts().get(i).type().isReal()){
+						myLefts().get(i).genArgument_der_CAD(str);
+					} else { 
+						str.print("NULL");
+					}
+				} else { 
 					str.print("NULL");
+				}
 				sep = ", ";
 			}
 			str.print(")");
@@ -1739,9 +1748,10 @@ aspect CADCodeGen {
 			sep = ", ";
 		}
 		for (FFunctionVariable v : myInputs()) {
-			str.print(sep);
-			v.printArgument_der_CAD(str);
-			sep = ", ";
+			if(v.getType().isReal()){
+				str.print(sep);
+				v.printArgument_der_CAD(str);
+			}
 		}
 		if (returnArgs) {
 			for (FFunctionVariable v : myOutputs()) {
@@ -1761,9 +1771,13 @@ aspect CADCodeGen {
 	}
 	
 	public void FFunctionVariable.printArgument_var_CAD(PrintStream str) {
-		str.print(type_C());
-		str.print(" ");
-		str.print(name_var_CAD());
+		if(getType().isReal()){
+			str.print(type_C());
+			str.print(" ");
+			str.print(name_var_CAD());
+		} else {
+			printArgument_C(str);
+		}
 	}
 	
 	public void FFunctionVariable.printArgument_der_CAD(PrintStream str) {

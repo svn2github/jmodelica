@@ -1963,7 +1963,83 @@ equation
 	der(v2) = u2;
 end CADExpInFuncArg1;
 
+model CADDiscreteFuncArg1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CADCodeGenTestCase(
+         name="CADDiscreteFuncArg1",
+         description="",
+         generate_ode_jacobian=true,
+         template="$CAD_function_headers$,$CAD_functions$",
+         generatedCode="
+void func_CADCodeGenTests_CADDiscreteFuncArg1_f1_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o);
+void func_CADCodeGenTests_CADDiscreteFuncArg1_f2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o);
+,void func_CADCodeGenTests_CADDiscreteFuncArg1_f1_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t i1_var_v;
+    jmi_ad_var_t i1_der_v;
+    jmi_ad_var_t b1_var_v;
+    jmi_ad_var_t b1_der_v;
 
+jmi_ad_var_t v_0;
+jmi_ad_var_t d_0;
+    func_CADCodeGenTests_CADDiscreteFuncArg1_f2_der_AD(x1_var_v, b1_var_v, x1_der_v, &i1_var_v, &b1_var_v, NULL, NULL);
+
+if (i1_var_o != NULL) *i1_var_o = i1_var_v;
+if (i1_der_o != NULL) *i1_der_o = i1_der_v;
+if (b1_var_o != NULL) *b1_var_o = b1_var_v;
+if (b1_der_o != NULL) *b1_der_o = b1_der_v;
+JMI_DYNAMIC_FREE()
+return;
+}
+
+void func_CADCodeGenTests_CADDiscreteFuncArg1_f2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t i1_var_v;
+    jmi_ad_var_t i1_der_v;
+    jmi_ad_var_t b1_var_v;
+    jmi_ad_var_t b1_der_v;
+i1_var_v = 1;
+i1_der_v = AD_WRAP_LITERAL(0);
+b1_var_v = JMI_TRUE;
+b1_der_v = AD_WRAP_LITERAL(0);
+
+if (i1_var_o != NULL) *i1_var_o = i1_var_v;
+if (i1_der_o != NULL) *i1_der_o = i1_der_v;
+if (b1_var_o != NULL) *b1_var_o = b1_var_v;
+if (b1_der_o != NULL) *b1_der_o = b1_der_v;
+JMI_DYNAMIC_FREE()
+return;
+}
+
+")})));
+
+		function f1
+			input Real x1;
+			output Integer i1;
+			output Boolean b1;
+		algorithm
+			(i1,b1):=f2(x1,b1);
+		end f1;
+	
+	
+		function f2
+			input Real x1;
+			input Boolean b;
+			output Integer i1;
+			output Boolean b1;
+		algorithm
+			i1 := 1;
+			b1 := true;
+		end f2;
+		
+		Real x1(start=2);
+		Integer i;
+		output Real a1(start=4);
+	equation
+		i = f1(x1);
+		der(a1) = if i == 1 then x1 else -x1;
+		der(x1) = a1;
+end CADDiscreteFuncArg1;
 
 model SparseJacTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
