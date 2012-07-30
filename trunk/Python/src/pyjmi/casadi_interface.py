@@ -657,7 +657,8 @@ class CasadiModel(BaseModel):
         """
         Update OCP expressions using current parameter values.
         """
-        ocp_expressions = [self.ocp.initial, casadi.vertcat((self.ocp.ode,self.ocp.alg)), self.ocp.path,
+        dae = casadi.vertcat([self.ocp.ode, self.ocp.alg])
+        ocp_expressions = [self.ocp.initial, dae, self.ocp.path,
                            self.ocp.point, self.ocp.mterm, self.ocp.lterm]
         parameters = [p.var() for p in self._parameters]
         parameter_values = [p.getStart() for p in self._parameters]
@@ -695,9 +696,9 @@ class CasadiModel(BaseModel):
                  'w': self.xmldoc.get_w_variable_names,
                  'p_opt': self.xmldoc.get_p_opt_variable_names}
         variables = {}
-        variables['x'] = [v for v in self.ocp.x]
+        variables['x'] = self.ocp.x
         variables['u'] = self.ocp.u
-        variables['w'] = [v for v in self.ocp.z]
+        variables['w'] = self.ocp.z
         variables['p_opt'] = self.ocp.pf
         
         # Make sure the variables appear in value reference order
