@@ -49,6 +49,17 @@ public class JunitGenerator {
 	    	System.out.println(msg);
 	    	System.exit(1);
 	    }
+	    
+	    public void assertEquals(String msg, String expected, String actual) {
+	    	if (!expected.equals(actual)) {
+		    	System.out.println(msg);
+		    	System.out.println("\nExpected:");
+		    	System.out.println(expected);
+		    	System.out.println("\nActual:");
+		    	System.out.println(actual);
+		    	System.exit(1);
+	    	}
+	    }
 	}
 	
 	public static void main(String args[]) {

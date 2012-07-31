@@ -72,7 +72,7 @@ public abstract class CodeGenTestCase extends TestCase {
 	    String test = os.toString();
 	    String correct = filter(getGenCode());
 	    if (!removeWhitespace(test).equals(removeWhitespace(correct)))
-	    	fail("Generated code does not match expected." + compareMsg(test, correct));
+	    	assertEquals("Generated code does not match expected.", correct, test);
 	    return true;
 	}
 	

@@ -52,7 +52,7 @@ public class ErrorTestCase extends TestCase {
 		String f_correct = filterErrorMessages(correct);
 		
 		if (!f_test.equals(f_correct))
-			fail("Wrong errors reported." + compareMsg(test, correct));
+			assertEquals("Wrong errors reported.", correct, test);
 			
 		return true;
 	}

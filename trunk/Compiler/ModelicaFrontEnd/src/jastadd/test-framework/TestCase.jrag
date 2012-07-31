@@ -233,14 +233,11 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Replace all sequences of whitespace with a single space each.
+	 * Remove all whitespace.
 	 */
 	public String removeWhitespace(String str) {
-	    /* TODO: Removing all whitespace can conceal errors. 
-	     * Perhaps all sequences of whitespace should be replaced with a single space instead? */ 
-		String str_res = str;
-    	str_res = str_res.replaceAll("\\s+", "");
-		return str_res;
+		// TODO: this can mask errors, we need a better filtering
+		return str.replaceAll("\\s+", "");
 	}
 	
 	/**
@@ -248,9 +245,25 @@ abstract public class TestCase {
 	 */
 	public static interface Assert {
 		public void fail(String msg);
+		
+		public void assertEquals(String msg, String expected, String actual);
 	}
 	
 	private Assert asserter;
+	
+	/**
+	 * Perform an assertion that two strings are equal.
+	 * 
+	 * @param msg       a message describing what went wrong
+	 * @param expected  the expected value
+	 * @param actual    the actual value
+	 */
+	protected void assertEquals(String msg, String expected, String actual) {
+		expected = expected.replaceFirst("^([ \\t]*[\\n\\r])+", "");
+		actual = actual.replaceFirst("^([ \\t]*[\\n\\r])+", "");
+		msg = getDescription() + "\n" + getClass().getSimpleName() + ": " + msg;
+		asserter.assertEquals(msg, expected, actual);
+	}
 	
 	/**
 	 * \brief Signal that the test failed.
@@ -404,11 +417,7 @@ abstract public class TestCase {
 		if (!tt.test(test, correct)) {
 			String diff = tt.firstDiff();
 			String err = "Flat class does not match expected.";
-			if (tt.test(sortLines(test), sortLines(correct)))
-				err += "\nOnly the order of the lines differ.";
-			else 
-				err += "\n--- First differing lines: ---\n" + diff;
-			fail(err + compareMsg(test, correct));
+			assertEquals(err, correct, test);
 		}
 	}
 	
@@ -424,14 +433,6 @@ abstract public class TestCase {
 			buf.append('\n');
 		}
 		return buf.toString();
-	}
-	
-	/**
-	 * \brief Generate the part of an error message that shows expected and actual result.
-	 */
-	protected String compareMsg(String actual, String expected) {
-		expected =  expected.trim();
-		return "\n\n--- Actual: ---\n" + actual + "\n--- Expected: ---\n" + expected;
 	}
 
 }

@@ -65,9 +65,7 @@ public class EvalTestCase extends TestCase {
 			} else {
 				String test = fv.ceval().toString();
 				String correct = vals[i].trim();
-				if (!test.equals(correct))
-					fail("Evaluation result does not match expected for variable " + name + 
-							".\nExpected: " + correct + "\nActual:   " + test);
+				assertEquals("Evaluation result for variable " + name + ": ", correct, test);
 			}
 		}		
 

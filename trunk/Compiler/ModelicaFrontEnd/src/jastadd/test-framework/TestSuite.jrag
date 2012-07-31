@@ -65,6 +65,9 @@ public class TestSuite {
 		str.append("  private static class Assert implements TestCase.Assert {\n");
 		str.append("    public void fail(String msg) {\n");
 		str.append("      org.junit.Assert.fail(msg);\n");
+		str.append("    }\n\n");
+		str.append("    public void assertEquals(String msg, String expected, String actual) {\n");
+		str.append("      org.junit.Assert.assertEquals(msg, expected, actual);\n");
 		str.append("    }\n");
 		str.append("  }\n");
 		str.append("  static Assert asserter = new Assert();\n\n");
