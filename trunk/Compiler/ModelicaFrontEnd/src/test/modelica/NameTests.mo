@@ -734,6 +734,26 @@ end NameTests.NameTest22;
 end NameTest22;
 
 
+model NameTest23
+	model A
+		Real x;
+	end A;
+	
+	model B
+		parameter Integer n;
+		A[n] a;
+		Real[n] y = a.x;
+	end B;
+	
+	model C
+		parameter Integer m;
+		B[m] b(n = 1:m);
+	end C;
+	
+	C c(m = 4);
+end NameTest23;
+
+
 
 /* Used for tests ConstantLookup1-3. */
 constant Real constant_1 = 1.0;
@@ -1618,7 +1638,7 @@ model ConstantLookup33
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
          name="ConstantLookup33",
-         description="",
+         description="Package constants in functions for complex accesses",
          flatModel="
 fclass NameTests.ConstantLookup33
  parameter Integer j = 1 /* 1 */;
@@ -1672,6 +1692,190 @@ end NameTests.ConstantLookup33;
     parameter Integer j = 1;
     Real y = f(j);
 end ConstantLookup33;
+
+
+model ConstantLookup34
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstantLookup34",
+         description="Constant in function being used in a manner that triggers the algorithm that includes packag constants in functions",
+         flatModel="
+fclass NameTests.ConstantLookup34
+ parameter Integer j = 1 /* 1 */;
+ Real z;
+equation
+ z = NameTests.ConstantLookup34.f(j);
+
+public
+ function NameTests.ConstantLookup34.f
+  NameTests.ConstantLookup34.A.B[2] temp_1;
+  input Integer i;
+  output Real x;
+ algorithm
+  temp_1[1].y[1] := 1;
+  temp_1[1].y[2] := 2;
+  temp_1[2].y[1] := 3;
+  temp_1[2].y[2] := 4;
+  x := temp_1[i].y[i];
+  return;
+ end NameTests.ConstantLookup34.f;
+
+ record NameTests.ConstantLookup34.A.B
+  Real y[2];
+ end NameTests.ConstantLookup34.A.B;
+
+end NameTests.ConstantLookup34;
+")})));
+
+    package A
+        constant B[2] x = { B({1,2}), B({3,4}) };
+        
+        record B
+            Real[2] y;
+        end B;
+    end A;
+    
+    function f
+        input Integer i;
+        output Real x;
+    algorithm
+        x := A.x[i].y[i];
+    end f;
+    
+    parameter Integer j = 1;
+    Real z = f(j);
+end ConstantLookup34;
+
+
+model ConstantLookup35
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstantLookup35",
+         description="Package constants in functions where getFQName() gives two-part name",
+         flatModel="
+fclass NameTests.ConstantLookup35
+ parameter Integer b.j = 1 /* 1 */;
+ Real b.z;
+equation
+ b.z = NameTests.ConstantLookup35.b.C.F.f1(b.j);
+
+public
+ function NameTests.ConstantLookup35.b.C.F.f1
+  Real[2] temp_1;
+  input Integer i;
+  output Real x;
+  Real y;
+ algorithm
+  temp_1[1] := 1;
+  temp_1[2] := 2;
+  y := temp_1[i];
+  x := y;
+  return;
+ end NameTests.ConstantLookup35.b.C.F.f1;
+
+end NameTests.ConstantLookup35;
+")})));
+
+	package A = B;
+	D b(redeclare package C = A);
+	
+	model D
+		replaceable package C = B constrainedby E;
+		parameter Integer j = 1;
+		Real z = C.F.f1(j);
+	end D;
+	
+	package G
+        replaceable package H = I;
+	
+		partial function f1
+			input Integer i;
+			output Real x;
+		end f1;
+	end G;
+	
+	package B
+		extends E(redeclare package F = J);
+	end B;
+	
+	package J
+		extends K(redeclare package H = L);
+	end J;
+	
+	package K
+		extends G;
+		
+		redeclare function extends f1
+		protected
+			Real y = H.a[i];
+		algorithm
+			x := y;
+		end f1;
+	end K;
+	
+	package L
+		extends I(a = {1,2});
+	end L;
+	
+	package I
+		constant Real[2] a = {3,4};
+	end I;
+	
+	package E
+		replaceable package F = G;
+	end E;
+end ConstantLookup35;
+
+
+model ConstantLookup36
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstantLookup36",
+         description="",
+         flatModel="
+fclass NameTests.ConstantLookup36
+ parameter Integer j = 1 /* 1 */;
+ Real z;
+equation
+ z = NameTests.ConstantLookup36.f(j);
+
+public
+ function NameTests.ConstantLookup36.f
+  NameTests.ConstantLookup36.B[2] a;
+  input Integer i;
+  output Real x;
+ algorithm
+  a[1].b[1] := 1;
+  a[1].b[2] := 2;
+  a[2].b[1] := 3;
+  a[2].b[2] := 4;
+  x := a[i].b[i];
+  return;
+ end NameTests.ConstantLookup36.f;
+
+ record NameTests.ConstantLookup36.B
+  Real b[2];
+ end NameTests.ConstantLookup36.B;
+
+end NameTests.ConstantLookup36;
+")})));
+
+    record B
+        Real[2] b;
+    end B;
+    
+    function f
+        input Integer i;
+        output Real x;
+	protected
+		constant B[2] a = { B({1,2}), B({3,4}) };
+    algorithm
+        x := a[i].b[i];
+    end f;
+    
+    parameter Integer j = 1;
+    Real z = f(j);
+end ConstantLookup36;
 
 
 

@@ -49,6 +49,12 @@ aspect InstLookupComponents {
 	eq InstComponentAccess.qualifiedLookupInstComponent(String name) = 
 		lookupArrayElement(myInstComponentDecl()).memberInstComponentConstrained(name);
 
+	inh HashSet InstAccess.localLookupInstComponent(String name);	
+	eq InstRoot.getChild().localLookupInstComponent(String name)          = emptyHashSet();
+	eq FlatRoot.getChild().localLookupInstComponent(String name)          = emptyHashSet();
+	eq InstClassDecl.getChild().localLookupInstComponent(String name)     = memberInstComponent(name);
+	eq InstComponentDecl.getChild().localLookupInstComponent(String name) = memberInstComponent(name);
+
 	/**
 	 * Lookup the specific array component corresponding to this access, using current ceval() 
 	 * value for indices. If no specific component can be found or this access is not to a specific 

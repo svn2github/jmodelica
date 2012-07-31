@@ -197,6 +197,7 @@ aspect Flattening {
 				if (!added.contains(cons)) {
 					cons.flattenInFunction(ffd, fc, true, this);
 					cons.myBindingInstExp().flattenUsedFuncsAndEnums(fc);
+					all.remove(cons);
 					added.add(cons);
 				}
 			}
@@ -358,7 +359,7 @@ aspect Flattening {
 			if (hasInstValueMod())
 				getBindingFExp().flattenUsedFuncsAndEnums(fc);
 			Opt eo = (e == null) ? new Opt() : new Opt(e);
-			FQName fqn = new FQName(getFQName());
+			FQName fqn = createFQNameForFuncVar(func);
 			fqn.setLastFArraySubscripts(null);
 			FFunctionVariable ffv = createFFunctionVariable(eo, fqn);
 			if (isInput())
@@ -370,6 +371,17 @@ aspect Flattening {
 			myInstClass().flattenRecord(fc);
 			temporarilyInFunction = old;
 		}
+	}
+	
+	public FQName InstComponentDecl.createFQNameForFuncVar(InstClassDecl func) {
+		FQName name = getFQName();
+		if (func != null) {
+			Set<InstComponentDecl> set = func.memberInstComponent(name.name());
+			InstComponentDecl found = set.isEmpty() ? null : set.iterator().next();
+			if (name.getNumFQNamePart() > 1 || (found != null && found != this))
+				return new FQName(func.localTempVarName(this));
+		}
+		return name.fullCopy();
 	}
 
 	public FFunctionVariable InstAssignable.createFFunctionVariable(Opt eo, FQName fqn) {
@@ -1232,16 +1244,20 @@ aspect FlatExpressions {
 						addConstToFunc = true;
 				}
 				if (addConstToFunc) {
+					// TODO: possible name conflict
 					// Add the constant array to the function and keep the access
-					ia = ia.assignablePartOfAccess();
-					if (ia.isAssignable())
-						functionConstantList().add((InstAssignable) ia.topInstComponentDecl());
-//					FQName fqn = new FQName(var.getFQName());
-//					FArraySubscripts fas = null;
-//					if (ia.hasFArraySubscripts()) 
-//						fas = ia.getFArraySubscripts().flatten(prefix);
-//					fqn.setLastFArraySubscripts(fas);
-//					return new FIdUseExp(fqn);
+					InstAccess aia = ia.assignablePartOfAccess();
+					if (aia.isAssignable()) {
+						var = (InstAssignable) aia.topInstComponentDecl();
+						functionConstantList().add(var);
+						FQName name = var.getFQName();
+						FQName use = aia.flatten(prefix);
+						Set<InstComponentDecl> set = ia.localLookupInstComponent(name.name());
+						InstComponentDecl found = set.isEmpty() ? null : set.iterator().next();
+						if (name.getNumFQNamePart() > 1 || (found != null && found != var))
+							use.getFQNamePart(0).setName(ia.findTempVarName(var));
+						return new FIdUseExp(use);
+					}
 				}
 			}
 		} 
@@ -1250,6 +1266,27 @@ aspect FlatExpressions {
 		} else {
 			return new FIdUseExp(ia.flatten(prefix));
 		}
+	}
+	
+	private Map<InstComponentDecl,String> InstClassDecl.tempVarNames;
+	private int InstClassDecl.nextTempVarIndex = 1;
+	
+	inh String InstAccess.findTempVarName(InstComponentDecl var);
+	eq InstClassDecl.getChild().findTempVarName(InstComponentDecl var) = localTempVarName(var);
+	eq InstRoot.getChild().findTempVarName(InstComponentDecl var)      = null;
+	eq FlatRoot.getChild().findTempVarName(InstComponentDecl var)      = null;
+	
+	syn String InstClassDecl.localTempVarName(InstComponentDecl var) {
+		if (tempVarNames == null)
+			tempVarNames = new HashMap<InstComponentDecl,String>();
+		if (tempVarNames.containsKey(var))
+			return tempVarNames.get(var);
+		String name;
+		do {
+			name = "temp_" + nextTempVarIndex++;
+		} while (!memberInstComponent(name).isEmpty());
+		tempVarNames.put(var, name);
+		return name;
 	}
 	
 	// TODO: This assumes that no InstDot has an InstDot as left child. 
