@@ -109,10 +109,17 @@ public class EquationBlockFactory {
 		}
 		return null;
 	}
-
+	
+	/**
+	 * This method takes an equation and a variable and constructs an equation block.
+	 * If <code>solve</code> is true the equation will be solved for the variable. 
+	 */
+	public static AbstractEquationBlock createSimpleEquationBlock(FAbstractEquation equation, FVariable variable, boolean solve) {
+		return createSimpleEquationBlock(Arrays.asList(equation), Arrays.asList(variable), solve);
+	}
 
 	/*
-	 * This method takes a list of Eq objects and reate an equation blocks
+	 * This method takes a list of Eq objects and create equation blocks
 	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
 	 */
 	static SimpleEquationBlock createSimpleEquationBlock(Stack<Eq> component, boolean solve) {
@@ -2562,6 +2569,14 @@ public class Eq {
 		return groupMembers;	
 	}
 	
+	public Var getVariable(String name) {
+		for (Var var : variables) {
+			if (var.getName().equals(name)) {
+				return var;
+			}
+		}
+		return null;
+	}
 }
 
 public class Var {

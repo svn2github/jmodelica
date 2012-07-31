@@ -1707,255 +1707,310 @@ aspect TransformCanonical {
 
 
 	public BLT FClass.computeTearings(BiPGraph graph) {
-			LinkedList<Stack<Eq>> blt = graph.computeRawBLT();
-			BLT tearBLT = new BLT(this);
-			for(Stack<Eq> block : blt){ // Iterate over all (global) BLT-blocks
+		LinkedList<Stack<Eq>> blt = graph.computeRawBLT();
+		BLT tearBLT = new BLT(this);
+		for (Stack<Eq> block : blt) { // Iterate over all (global) BLT-blocks
+			AbstractEquationBlock tearBlock = EquationBlockFactory.createEquationBlock(block);
+			if (block.size() == 1 || tearBlock.isSolvable()) {
+				tearBLT.add(tearBlock);
+			} else {
+				TornEquationBlock eb = new TornEquationBlock();
+				tear(block, eb);
+				tearBLT.add(eb);
+			}
+		}
+		return tearBLT;
+	}
+	
+	private void FClass.tear(Stack<Eq> block, TornEquationBlock eb) {
+		Iterator<Eq> it = block.iterator();
+		BiPGraph g = new BiPGraph(this, "", "");
+		ArrayList<Eq> SUME = new ArrayList<Eq>();
+
+		while (it.hasNext()) {
+			Eq e = it.next();
+			if (e.getEquation().hasResidues()) {
+				Var tearVar = null;
+				for (FExp exp : e.getEquation().getResidues().getResidues()) {
+					for (FVariable var : exp.referencedFVariablesInFExp()) {
+						tearVar = e.getVariable(var.name());
+						break;
+					}
+					if (tearVar != null)
+						break;
+				}
+				if (tearVar == null) {
+					tearVar = e.getMatching();
+				}
+				tearVar.isTear(true);
+				e.isRes(true);
+				it.remove();
 				AbstractEquationBlock tearBlock = EquationBlockFactory.createEquationBlock(block);
 				if (tearBlock.isSolvable()) {
-					tearBLT.add(tearBlock);
-				} else {
-					TornEquationBlock eb = new TornEquationBlock();
-					BiPGraph g = new BiPGraph(this,"","");
-					ArrayList<Eq> SUME = new ArrayList<Eq>();
+					eb.addSolvedBlock(tearBlock);
+					return;
+				}
+				
+				Var var = g.addVariable(e.getMatching().getName(), "", e.getMatching().getVariable());
+				Eq eqn = g.addEquation(e.getName(), "", e.getEquation());
+				SUME.add(eqn);
+				break;
+			}
+		}
 
-					// ---------------------- Graph Info -----------------------------------
-					for(Eq e : block){
-						Var gVar = g.addVariable(e.getMatching().getName(),"",e.getMatching().getVariable());
-						Eq gEq = g.addEquation(e.getName(),"",e.getEquation());
-						if(gEq.getEquation().isSolved(gVar.getName(),true)){ // Use old matching where possible
-							gEq.setSolvableMatching(gVar);
-							gVar.setSolvableMatching(gEq);
-						}else{
-							SUME.add(gEq);
-						}
+		// ---------------------- Graph Info -----------------------------------
+		for (Eq e : block) {
+			Var gVar = g.addVariable(e.getMatching().getName(), "", e.getMatching().getVariable());
+			Eq gEq = g.addEquation(e.getName(), "", e.getEquation());
+			if (gEq.getEquation().isSolved(gVar.getName(), true)) { // Use old matching where possible
+				gEq.setSolvableMatching(gVar);
+				gVar.setSolvableMatching(gEq);
+			} else {
+				SUME.add(gEq);
+			}
+		}
+		// Add edges between the active variables and equations
+		for (Eq e : block) {
+			Eq gEq = g.getEquation(e.getName());
+			for (Var v : e.getVariables()) {
+				Var gVar = g.getVariable(v.getName());
+				if (gVar != null) {
+					gEq.addVariable(gVar);
+					gVar.occurrence();
+					if (gEq.getEquation().isSolved(gVar.getName(), true)) {
+						gEq.addSolvableVariable(gVar);
+						gVar.solvableOccurrence();
 					}
-					// Add edges between the active variables and equations
-					for(Eq e : block){
-						Eq gEq = g.getEquation(e.getName());
-						for(Var v : e.getVariables()){
-							Var gVar = g.getVariable(v.getName());
-							if(gVar!=null){
-								gEq.addVariable(gVar);
-								gVar.occurrence();
-								if(gEq.getEquation().isSolved(gVar.getName(),true)){
-									gEq.addSolvableVariable(gVar);
-									gVar.solvableOccurrence();
-								}
-							}
-						}
-					}
-					// Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
-					SUME = g.greedySM(SUME);
-					Iterator<Eq> itr = SUME.iterator();
-					while (itr.hasNext()) {
-						Eq e = itr.next();
-						if(g.SAP(e)){
-							itr.remove();
-						}else{
-							e.isRes(true);
-						}
-						g.lightReset();
-					}
-
-					// Now we have a Maximum Solvable Matching
-					
-					if(SUME.size()==0){ // If: there exist a Pefect Solvable Matching
-										//     proceed with recursive tearing of block
-						eb = Tear(g,eb);
-					} else { 
-										// Else: Start out by trying to insert residuals that contain
-										// 		 few variables. 
-						ArrayList<FAbstractEquation> residuals = new ArrayList<FAbstractEquation>();
-						for(Eq e: SUME) {
-							int nVars = e.getVariables().size();
-							int nSVars = e.getSolvableVariables().size();
-							Eq newRes = null;
-							for(Var v: e.getSolvableVariables()){
-								Eq tmp = v.getSolvableMatching();
-								int tmpNVars = tmp.getVariables().size();
-								int tmpNSVars = tmp.getSolvableVariables().size();
-								if(tmpNVars > nVars	|| (tmpNVars == nVars && tmpNSVars > nSVars) ){
-									newRes = tmp;
-									nVars = tmpNVars;
-									nSVars = tmpNSVars;
-								}
-							}
-							if(newRes!=null){
-								Var tmpVar = newRes.getSolvableMatching();
-								newRes.setSolvableMatching(null);
-								newRes.isRes(true);
-								e.setSolvableMatching(tmpVar);
-								tmpVar.setSolvableMatching(e);
-								e.isRes(false);
-								residuals.add(newRes.getEquation());
-							}else{
-								residuals.add(e.getEquation());
-							}
-						}
-						
-										// Compute inner BLT and see if tearings can be changed 
-						ArrayList<Var> SUMV = g.getSUMV();			
-						LinkedList<Stack<Eq>> innerBlocks = g.computeTearBlocks(); 
-						ArrayList<FVariable> tearings = new ArrayList<FVariable>();
-						
-						for(Stack<Eq> bInner : innerBlocks){
-							if(bInner.size()==1){
-										// If: the block is scalar, it will be a solvedMatchingPair
-								Eq e = bInner.get(0);
-								FAbstractEquation eqn = e.getEquation();
-								FVariable var = e.getSolvableMatching().getVariable();
-								eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(Arrays.asList(eqn), Arrays.asList(var), true));
-										// If the equation contains a Var in SUMV, that Var cannot be
-										// reinserted and must be used as a tearing variable.
-								for(Var vv : e.getVariables()){
-									if(SUMV.contains(vv)){
-										SUMV.remove(vv);
-										tearings.add(vv.getVariable());
-									}
-								}
-							} else {
-										// Build Inner Graph and add info about tearing variables
-								BiPGraph gInner = new BiPGraph(this,"","");
-										// Obtain info about block-graph
-								for(Eq e : bInner){
-									Var gInnerVar = gInner.addVariable(e.getSolvableMatching().getName(),"",e.getSolvableMatching().getVariable());
-									Eq gInnerEq = gInner.addEquation(e.getName(),"",e.getEquation());
-									gInnerEq.setSolvableMatching(gInnerVar);
-									gInnerVar.setSolvableMatching(gInnerEq);
-								}
-										// Build block-graph and look for interchangeable variables in SUMV
-								ArrayList<Eq> eqs = new ArrayList<Eq>();
-								boolean graphHasTear = false;
-								for(Eq e : bInner){
-									Eq gInnerEq = gInner.getEquation(e.getName());
-									for(Var v : e.getVariables()){
-										Var gInnerVar = gInner.getVariable(v.getName());
-										if(gInnerVar!=null){
-											gInnerEq.addVariable(gInnerVar);
-											gInnerVar.occurrence();
-											if(gInnerEq.getEquation().isSolved(gInnerVar.getName(),true)){
-												gInnerEq.addSolvableVariable(gInnerVar);
-												gInnerVar.solvableOccurrence();
-												if(gInnerVar.isTear() && !eqs.contains(gInnerEq)){
-													eqs.add(gInnerEq);
-												}
-											}
-										}else if(SUMV.contains(v)){
-											Var newGInnerVar = gInner.addVariable(v.getName(),"",v.getVariable());
-											newGInnerVar.isTear(true);
-											newGInnerVar.occurrence();
-											gInnerEq.addVariable(newGInnerVar);
-											SUMV.remove(v);
-											tearings.add(v.getVariable());
-											graphHasTear = true;
-											if(e.getEquation().isSolved(v.getName(),true)){
-												gInnerEq.addSolvableVariable(newGInnerVar);
-												newGInnerVar.solvableOccurrence();
-												if(!eqs.contains(gInnerEq)){
-													eqs.add(gInnerEq);
-												}
-											}
-										}
-									}
-								}
-										// Go through equations that might get a new matching
-								boolean isChanged = false;
-								for(Eq e: eqs){
-									int occ = e.getSolvableMatching().getNbrV();
-									int solvOcc = e.getSolvableMatching().getNbrSV();
-									for(Var v: e.getSolvableVariables()){
-										if(v.isTear()){
-											int vOcc = v.getNbrV();
-											int vSolvOcc = v.getNbrSV();
-										// Reinsert tearing if it is "better" than the matching	
-											if(vOcc < occ || (vOcc == occ && vSolvOcc > solvOcc)){
-												Var tmp = e.getSolvableMatching();
-												tmp.isTear(true);
-												tmp.setSolvableMatching(null);
-												tearings.remove(v.getVariable());
-												tearings.add(tmp.getVariable());
-												v.isTear(false);
-												e.setSolvableMatching(v);
-												v.setSolvableMatching(e);
-												occ=vOcc;
-												solvOcc = vSolvOcc;
-												isChanged = true;
-											}
-										}
-									}
-								}
-								
-								if(graphHasTear){
-									if(isChanged){
-										LinkedList<Stack<Eq>> newBlocks = gInner.computeTearBlocks();
-										for(Stack<Eq> bInnerInner : newBlocks){
-											if(bInnerInner.size()==1){
-												Eq e = bInnerInner.get(0);
-												FAbstractEquation eqn = e.getEquation();
-												FVariable var = e.getSolvableMatching().getVariable();
-												eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(Arrays.asList(eqn), Arrays.asList(var), true));
-											} else {
-												eb = Tear(bInnerInner,eb);
-											}
-										}
-									} else {
-										eb = Tear(bInner,eb);
-									}
-							
-								} else {
-										// Reuse the already constructed graph
-									eb = Tear(gInner,eb);
-								}
-							}
-						}
-						for(Var v: SUMV){
-							//SUMV ought to be empty, but there might exist variables that hasn't 
-							// been altered before. 
-							tearings.add(v.getVariable());
-						}
-						for(int i=0; i<tearings.size(); i++){
-							eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(Arrays.asList(residuals.get(i)), Arrays.asList(tearings.get(i)), false));
-						}
-					}
-					
-					tearBLT.add(eb);
 				}
 			}
-			return tearBLT;
+		}
+		// Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
+		SUME = g.greedySM(SUME);
+		Iterator<Eq> itr = SUME.iterator();
+		while (itr.hasNext()) {
+			Eq e = itr.next();
+			if (g.SAP(e)) {
+				itr.remove();
+			} else {
+				e.isRes(true);
+			}
+			g.lightReset();
+		}
+
+		// Now we have a Maximum Solvable Matching
+
+		if (SUME.size() == 0) { // If: there exist a Pefect Solvable Matching
+								//     proceed with recursive tearing of block
+			eb = Tear(g, eb);
+		} else {
+			// Else: Start out by trying to insert residuals that contain
+			// 		 few variables. 
+			ArrayList<FAbstractEquation> residuals = new ArrayList<FAbstractEquation>();
+			for (Eq e : SUME) {
+				int nVars = e.getVariables().size();
+				int nSVars = e.getSolvableVariables().size();
+				Eq newRes = null;
+				for (Var v : e.getSolvableVariables()) {
+					Eq tmp = v.getSolvableMatching();
+					int tmpNVars = tmp.getVariables().size();
+					int tmpNSVars = tmp.getSolvableVariables().size();
+					if (tmpNVars > nVars || (tmpNVars == nVars && tmpNSVars > nSVars)) {
+						newRes = tmp;
+						nVars = tmpNVars;
+						nSVars = tmpNSVars;
+					}
+				}
+				if (newRes != null) {
+					Var tmpVar = newRes.getSolvableMatching();
+					newRes.setSolvableMatching(null);
+					newRes.isRes(true);
+					e.setSolvableMatching(tmpVar);
+					tmpVar.setSolvableMatching(e);
+					e.isRes(false);
+					residuals.add(newRes.getEquation());
+				} else {
+					residuals.add(e.getEquation());
+				}
+			}
+
+			// Compute inner BLT and see if tearings can be changed 
+			ArrayList<Var> SUMV = g.getSUMV();
+			LinkedList<Stack<Eq>> innerBlocks = g.computeTearBlocks();
+			ArrayList<FVariable> tearings = new ArrayList<FVariable>();
+
+			for (Stack<Eq> bInner : innerBlocks) {
+				if (bInner.size() == 1) {
+					// If: the block is scalar, it will be a solvedMatchingPair
+					Eq e = bInner.get(0);
+					FAbstractEquation eqn = e.getEquation();
+					FVariable var = e.getSolvableMatching().getVariable();
+					eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(eqn, var, true));
+					// If the equation contains a Var in SUMV, that Var cannot be
+					// reinserted and must be used as a tearing variable.
+					for (Var vv : e.getVariables()) {
+						if (SUMV.contains(vv)) {
+							SUMV.remove(vv);
+							tearings.add(vv.getVariable());
+						}
+					}
+				} else {
+					// Build Inner Graph and add info about tearing variables
+					BiPGraph gInner = new BiPGraph(this, "", "");
+					// Obtain info about block-graph
+					for (Eq e : bInner) {
+						Var gInnerVar = gInner.addVariable(e.getSolvableMatching().getName(), "", e.getSolvableMatching().getVariable());
+						Eq gInnerEq = gInner.addEquation(e.getName(), "", e.getEquation());
+						gInnerEq.setSolvableMatching(gInnerVar);
+						gInnerVar.setSolvableMatching(gInnerEq);
+					}
+					// Build block-graph and look for interchangeable variables in SUMV
+					ArrayList<Eq> eqs = new ArrayList<Eq>();
+					boolean graphHasTear = false;
+					for (Eq e : bInner) {
+						Eq gInnerEq = gInner.getEquation(e.getName());
+						for (Var v : e.getVariables()) {
+							Var gInnerVar = gInner.getVariable(v.getName());
+							if (gInnerVar != null) {
+								gInnerEq.addVariable(gInnerVar);
+								gInnerVar.occurrence();
+								if (gInnerEq.getEquation().isSolved(gInnerVar.getName(), true)) {
+									gInnerEq.addSolvableVariable(gInnerVar);
+									gInnerVar.solvableOccurrence();
+									if (gInnerVar.isTear() && !eqs.contains(gInnerEq)) {
+										eqs.add(gInnerEq);
+									}
+								}
+							} else if (SUMV.contains(v)) {
+								Var newGInnerVar = gInner.addVariable(v.getName(), "", v.getVariable());
+								newGInnerVar.isTear(true);
+								newGInnerVar.occurrence();
+								gInnerEq.addVariable(newGInnerVar);
+								SUMV.remove(v);
+								tearings.add(v.getVariable());
+								graphHasTear = true;
+								if (e.getEquation().isSolved(v.getName(), true)) {
+									gInnerEq.addSolvableVariable(newGInnerVar);
+									newGInnerVar.solvableOccurrence();
+									if (!eqs.contains(gInnerEq)) {
+										eqs.add(gInnerEq);
+									}
+								}
+							}
+						}
+					}
+					// Go through equations that might get a new matching
+					boolean isChanged = false;
+					for (Eq e : eqs) {
+						int occ = e.getSolvableMatching().getNbrV();
+						int solvOcc = e.getSolvableMatching().getNbrSV();
+						for (Var v : e.getSolvableVariables()) {
+							if (v.isTear()) {
+								int vOcc = v.getNbrV();
+								int vSolvOcc = v.getNbrSV();
+								// Reinsert tearing if it is "better" than the matching	
+								if (vOcc < occ || (vOcc == occ && vSolvOcc > solvOcc)) {
+									Var tmp = e.getSolvableMatching();
+									tmp.isTear(true);
+									tmp.setSolvableMatching(null);
+									tearings.remove(v.getVariable());
+									tearings.add(tmp.getVariable());
+									v.isTear(false);
+									e.setSolvableMatching(v);
+									v.setSolvableMatching(e);
+									occ = vOcc;
+									solvOcc = vSolvOcc;
+									isChanged = true;
+								}
+							}
+						}
+					}
+
+					if (graphHasTear) {
+						if (isChanged) {
+							LinkedList<Stack<Eq>> newBlocks = gInner.computeTearBlocks();
+							for (Stack<Eq> bInnerInner : newBlocks) {
+								if (bInnerInner.size() == 1) {
+									Eq e = bInnerInner.get(0);
+									FAbstractEquation eqn = e.getEquation();
+									FVariable var = e.getSolvableMatching().getVariable();
+									eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(eqn, var, true));
+								} else {
+									eb = Tear(bInnerInner, eb);
+								}
+							}
+						} else {
+							eb = Tear(bInner, eb);
+						}
+
+					} else {
+						// Reuse the already constructed graph
+						eb = Tear(gInner, eb);
+					}
+				}
+			}
+			for (Var v : SUMV) {
+				//SUMV ought to be empty, but there might exist variables that hasn't 
+				// been altered before. 
+				tearings.add(v.getVariable());
+			}
+			for (int i = 0; i < tearings.size(); i++) {
+				eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(residuals.get(i), tearings.get(i), false));
+			}
+		}
 	}	
 
 	
 	public TornEquationBlock FClass.Tear(BiPGraph g, TornEquationBlock eb){
+		Var tear = null;
+		Eq res = null;
 		int maxOcc = 0;
 		int minSolvOcc = 0;
-		Var tear = null;
-		for(Eq e: g.getEquations()){
-			Var tmp = e.getSolvableMatching();
-			int occ = tmp.getNbrV();
-			int sOcc = tmp.getNbrSV();
-			if(occ>maxOcc){
-				tear=tmp;
-				maxOcc=occ;
-				minSolvOcc = sOcc;
-			} else if (occ==maxOcc && sOcc < minSolvOcc){
-				tear=tmp;
-				minSolvOcc = sOcc;
+		for (Eq e : g.getEquations()) {
+			if (e.getEquation().hasResidues()) {
+				FResidues reidues = e.getEquation().getResidues();
+				res = e;
+				for (FExp exp : reidues.getResidues()) {
+					for (FVariable var : exp.referencedFVariablesInFExp()) {
+						tear = g.getVariable(var.name());
+						break;
+					}
+					if (tear != null)
+						break;
+				}
+				if (tear == null)
+					tear = res.getSolvableMatching();
+				break;
 			}
 		}
-		Eq res = tear.getSolvableMatching();
+		if (tear == null) {
+			for (Eq e : g.getEquations()) {
+				Var tmp = e.getSolvableMatching();
+				int occ = tmp.getNbrV();
+				int sOcc = tmp.getNbrSV();
+				if (occ > maxOcc) {
+					tear = tmp;
+					maxOcc = occ;
+					minSolvOcc = sOcc;
+				} else if (occ == maxOcc && sOcc < minSolvOcc) {
+					tear = tmp;
+					minSolvOcc = sOcc;
+				}
+			}
+			res = tear.getSolvableMatching();
+		}
 		tear.isTear(true);
 		res.isRes(true);
 		//v.isVisited(true);	
 		//g.collectResidual(res,e.getVariables().size()-1,e.getSolvableVariables().size());
-		eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(Arrays.asList(res.getEquation()), Arrays.asList(tear.getVariable()), false));
+		eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res.getEquation(), tear.getVariable(), false));
 		LinkedList<Stack<Eq>> blt = g.computeTearBlocks();
-		for(Stack<Eq> block : blt){
-			if(block.size()==1){
+		for (Stack<Eq> block : blt) {
+			if (block.size() == 1) {
 				Eq e = block.get(0);
 				Var v = e.getSolvableMatching();
-				eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(Arrays.asList(e.getEquation()), Arrays.asList(v.getVariable()), true));
+				eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e.getEquation(), v.getVariable(), true));
 			} else {
-				eb = Tear(block,eb);
+				eb = Tear(block, eb);
 			}
 		}
 		return eb;
@@ -1995,17 +2050,24 @@ aspect TransformCanonical {
 		AnnotationNode residues = annotation("__JModelica/residue");
 		if (!residues.exists())
 			return null;
-		
+
 		FResidues fResidues = new FResidues();
 		for (AnnotationNode residue : residues) {
 			String var = residue.string();
-			FExp e;
+			boolean isDer = false;
 			if (residue.string().startsWith("der(")) {
 				var = var.substring(4, var.length() - 1);
-				e = new InstDerExp(new FIdUseExp(new FIdUseInstAccess(new InstParseAccess(var))));
-			} else {
-				e = new FIdUseExp(new FIdUseInstAccess(new InstParseAccess(var)));
+				isDer = true;
 			}
+
+			String[] varSplit = var.split("\\.");
+			InstAccess access = new InstParseAccess(varSplit[varSplit.length - 1]);
+			for (int i = varSplit.length - 2; i >= 0; i--)
+				access = new InstDot(new InstParseAccess(varSplit[i]), access);
+
+			FExp e = new FInstAccessExp(access);
+			if (isDer)
+				e = new InstDerExp(e);
 			residue.ast().copyLocationTo(e);
 			fResidues.addResidue(e);
 		}
