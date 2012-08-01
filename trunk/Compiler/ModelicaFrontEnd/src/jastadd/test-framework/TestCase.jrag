@@ -260,6 +260,9 @@ abstract public class TestCase {
 	 */
 	protected void assertEquals(String msg, String expected, String actual) {
 		expected = expected.replaceFirst("^([ \\t]*[\\n\\r])+", "");
+		expected = expected.replaceAll("\\r\\n", "\n");
+		expected = expected.replaceAll("\\r", "\n");
+		expected = expected.replaceAll("[ \\t]*$", "");
 		actual = actual.replaceFirst("^([ \\t]*[\\n\\r])+", "");
 		msg = getDescription() + "\n" + getClass().getSimpleName() + ": " + msg;
 		asserter.assertEquals(msg, expected, actual);
