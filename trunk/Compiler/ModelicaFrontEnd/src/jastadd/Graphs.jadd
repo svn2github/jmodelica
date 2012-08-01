@@ -799,7 +799,8 @@ public class BiPGraph {
 					ffceLeftVarMap.put(fv,i++);
 				}
 			}
-			for (int i=0;i<n_eq;i++) {
+			for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
+												  // need to reverse here to preserve the initial order.
 				eqn = addEquation(eqNamePrefix+k,e.prettyPrint(""),e);
 				groupMembers.add(eqn);
 				k++;
@@ -1698,31 +1699,9 @@ public class BiPGraph {
 		
 		java.util.List<Stack<Eq>> oldComponents = components;
 		components = new LinkedList<Stack<Eq>>();
-		Stack<Eq> fCallStack = null;
-		FAbstractEquation lastFCall = null;
 		for (Stack<Eq> block : oldComponents) {
-			if (block.size() == 1
-					&& block.peek().getEquation() instanceof FFunctionCallEquation) {
-				Eq e = block.peek();
-				if (fCallStack != null && lastFCall != e.getEquation()) {
-					components.add(fCallStack);
-					fCallStack = null;
-				}
-				if (fCallStack == null) {
-					fCallStack = new Stack<Eq>();
-					lastFCall = e.getEquation();
-				}
-				fCallStack.add(e);
-			} else {
-				if (fCallStack != null) {
-					components.add(fCallStack);
-					fCallStack = null;
-				}
-				components.add(block);
-			}
+			components.add(block);
 		}
-		if (fCallStack != null)
-			components.add(fCallStack);
 		return components;
 	}
 	
@@ -1745,6 +1724,16 @@ public class BiPGraph {
 				}
 			}
  		}
+		for (Eq eqn : e.getGroupMembers()) {
+			if (!eqn.isVisited()) {
+				tarjan(eqn);
+				e.setTarjanLowLink(Math.min(
+						e.getTarjanLowLink(),eqn.getTarjanLowLink()));
+			} else {
+				e.setTarjanLowLink(Math.min(
+						e.getTarjanLowLink(),eqn.getTarjanNbr()));
+			}
+		}
 		if (e.getTarjanNbr()==e.getTarjanLowLink()) {
 			Stack<Eq> component = new Stack<Eq>();
 			boolean done = false;

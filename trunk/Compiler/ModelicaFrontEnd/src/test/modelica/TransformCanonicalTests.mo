@@ -5632,6 +5632,10 @@ Solution:
   sin(time)
 -------------------------------
 Torn block of 2 tearing variables and 3 solved variables.
+Solved variables:
+  u2
+  i1
+  u1
 Tearing variables:
   i3
   i2
@@ -5752,6 +5756,8 @@ Solution:
   2
 -------------------------------
 Torn block of 1 tearing variables and 1 solved variables.
+Solved variables:
+  r.x
 Tearing variables:
   x
 Solved equations:
@@ -5789,6 +5795,7 @@ model RecordTearingTest3
       description="Test of record tearing", methodResult="
 -------------------------------
 Torn block of 2 tearing variables and 0 solved variables.
+Solved variables:
 Tearing variables:
   x
   y
@@ -5821,6 +5828,9 @@ model RecordTearingTest4
       description="Test of record tearing", methodResult="
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
+Solved variables:
+  x
+  y
 Tearing variables:
   v
 Solved equations:
@@ -5855,6 +5865,10 @@ model RecordTearingTest5
       description="Test of record tearing", methodResult="
 -------------------------------
 Torn block of 3 tearing variables and 3 solved variables.
+Solved variables:
+  c
+  d
+  e
 Tearing variables:
   f
   a
@@ -5904,6 +5918,10 @@ Solution:
   sin(time)
 -------------------------------
 Torn block of 2 tearing variables and 3 solved variables.
+Solved variables:
+  i1
+  u2
+  u1
 Tearing variables:
   i2
   i3
@@ -6096,6 +6114,52 @@ equation
   (y1,y2) = f2(x + y1);
 
 end BlockTest2;
+
+model BlockTest3
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+    JModelica.UnitTesting.FClassMethodTestCase(
+      name="BlockTest3",
+      methodName="printDAEBLT",
+	  equation_sorting = true,
+      description="Test of correct creation of blocks containing functions returning records", methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  x
+Solution:
+  sin(time)
+-------------------------------
+Non-solved block of 4 variables:
+Unknown variables:
+  r2.y
+  r1.x
+  r2.x
+  r1.y
+Equations:
+  (TransformCanonicalTests.BlockTest3.R(r2.x, r2.y)) = TransformCanonicalTests.BlockTest3.F(x + r1.x)
+  (TransformCanonicalTests.BlockTest3.R(r1.x, r1.y)) = TransformCanonicalTests.BlockTest3.F(x + r2.x)
+  (TransformCanonicalTests.BlockTest3.R(r2.x, r2.y)) = TransformCanonicalTests.BlockTest3.F(x + r1.x)
+  (TransformCanonicalTests.BlockTest3.R(r1.x, r1.y)) = TransformCanonicalTests.BlockTest3.F(x + r2.x)
+-------------------------------
+      ")})));
+  record R
+    Real x;
+    Real y;
+  end R;
+  function F
+    input Real a;
+    output R r;
+  algorithm
+    r := R(a*2, a*3);
+  end F;
+  R r1, r2;
+  Real x;
+equation
+  x = sin(time);
+  r1 = F(x + r2.x);
+  r2 = F(x + r1.x);  
+end BlockTest3;
+
 
 model VarDependencyTest1
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

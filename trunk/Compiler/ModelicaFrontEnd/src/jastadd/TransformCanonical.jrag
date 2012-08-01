@@ -1180,8 +1180,12 @@ aspect TransformCanonical {
 
 			str.append("Torn block of " + iterationVars.size() + " tearing variables");
 			str.append(" and " + solvedVars.size() + " solved variables.\n");
+			str.append("Solved variables:\n");
+			for (FVariable fv : solvedVars) {
+				str.append("  " + fv.name() + "\n");
+			}
 			str.append("Tearing variables:\n");
-			for (FVariable fv : iterationVariables()) {
+			for (FVariable fv : iterationVars) {
 				str.append("  " + fv.name() + "\n");
 			}
 			str.append("Solved equations:\n");
