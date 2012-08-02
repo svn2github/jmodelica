@@ -215,7 +215,7 @@ aspect Arrays {
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	eq FNdimsExp.ndims() = 0;
 	
-	eq FInfArgsFunctionCall.ndims()   = getNumFExp();
+	eq FArrayDimAsArgsExp.ndims()     = getNumFExp();
 	eq FFillExp.ndims()               = getNumFExp() + getFillExp().ndims();
 	eq FFunctionCall.ndims()          = hasOutputs() ? expOutput().ndims() : -1;
 	eq FVectorFunctionCall.ndims()    = size().ndims();
@@ -774,7 +774,7 @@ aspect Arrays {
 	eq FUnaryBuiltIn.size()     = getFExp().size();
 	eq FVectUnaryBuiltIn.size() = getFExp().size().contractRight(ndims());
 	
-	eq FInfArgsFunctionCall.size() {
+	eq FArrayDimAsArgsExp.size() {
 		if (!isArray())
 			return Size.SCALAR;
 		MutableSize s = new MutableSize(ndims());
@@ -784,7 +784,7 @@ aspect Arrays {
 		return s;
 	}
 	
-	protected void FInfArgsFunctionCall.appendSpecificLengths(MutableSize s) {}
+	protected void FArrayDimAsArgsExp.appendSpecificLengths(MutableSize s) {}
 	protected void FFillExp.appendSpecificLengths(MutableSize s) {
 		s.append(getFillExp().size());
 	}
@@ -1756,9 +1756,18 @@ aspect Arrays {
 		return array;
 	}
 	
-	eq FZeros.getArray()   = new Array(indices()).fill(new FIntegerLitExp(0));
-	eq FOnes.getArray()    = new Array(indices()).fill(new FIntegerLitExp(1));
-	eq FFillExp.getArray() = new Array(indices()).fill(getFillExp());
+	eq FArrayDimAsArgsExp.getArray() = new Array(indices()).fill(fillExp());
+	
+	/**
+	 * Get the expression the array is filled with.
+	 * 
+	 * E.g. a literal 1 in the case of <code>ones()</code>.
+	 * Will only create new nodes if necessary.
+	 */
+	syn FExp FArrayDimAsArgsExp.fillExp();
+	eq FZeros.fillExp()   = new FIntegerLitExp(0);
+	eq FOnes.fillExp()    = new FIntegerLitExp(1);
+	eq FFillExp.fillExp() = getFillExp();
 	
 	/**
 	 * \brief Get the set of all array indices of an array access. 

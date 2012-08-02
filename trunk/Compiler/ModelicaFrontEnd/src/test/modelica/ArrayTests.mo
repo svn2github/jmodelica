@@ -6740,6 +6740,166 @@ Semantic error at line 6365, column 22:
 	parameter Real x[:, size(x,1)];
 end ArraySize2;
 
+
+model M_OLineExample
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Other_M_OLineExample",
+         description="Test example that caused infinite loop",
+         errorMessage="
+49 errors found:
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 253, column 3:
+  Cannot find class or component declaration for G_actual
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 253, column 14:
+  Cannot find class or component declaration for G
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 253, column 21:
+  Cannot find class or component declaration for alpha
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 253, column 28:
+  Cannot find class or component declaration for T_heatPort
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 253, column 41:
+  Cannot find class or component declaration for T_ref
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 254, column 3:
+  Cannot find class or component declaration for i
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 254, column 7:
+  Cannot find class or component declaration for G_actual
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 254, column 16:
+  Cannot find class or component declaration for v
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 255, column 3:
+  Cannot find class or component declaration for LossPower
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 255, column 15:
+  Cannot find class or component declaration for v
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 255, column 17:
+  Cannot find class or component declaration for i
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 323, column 5:
+  Cannot find class or component declaration for i
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 323, column 9:
+  Cannot find class or component declaration for C
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 323, column 15:
+  Cannot find class or component declaration for v
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 642, column 43:
+  Could not evaluate array size expression: dimL
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 143, column 20:
+  Could not evaluate array size expression: dim_vector_lgc
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 145, column 19:
+  Array size mismatch in declaration of l, size of declaration is [dim_vector_lgc] and size of binding expression is [10]
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 148, column 20:
+  Could not evaluate array size expression: dim_vector_lgc
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 150, column 19:
+  Array size mismatch in declaration of g, size of declaration is [dim_vector_lgc] and size of binding expression is [10]
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 153, column 20:
+  Could not evaluate array size expression: dim_vector_lgc
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 155, column 19:
+  Array size mismatch in declaration of c, size of declaration is [dim_vector_lgc] and size of binding expression is [10]
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 169, column 21:
+  Could not evaluate array size expression: dim_vector_lgc
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 171, column 21:
+  Could not evaluate array size expression: dim_vector_lgc
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 172, column 21:
+  Could not evaluate array size expression: dim_vector_lgc
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 186, column 31:
+  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) )
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 186, column 68:
+  Cannot find class or component declaration for p
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 187, column 15:
+  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) )
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 187, column 52:
+  Cannot find class or component declaration for n
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 188, column 31:
+  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) )
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 188, column 68:
+  Cannot find class or component declaration for p
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 189, column 15:
+  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) )
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 189, column 52:
+  Cannot find class or component declaration for n
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 192, column 33:
+  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) ) + 1 + i - ( j + 1 )
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 192, column 80:
+  Cannot find class or component declaration for p
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 193, column 17:
+  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) ) + 1 + i - ( j + 1 )
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 193, column 64:
+  Cannot find class or component declaration for n
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 194, column 33:
+  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) ) + 1 + i - ( j + 1 )
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 194, column 80:
+  Cannot find class or component declaration for p
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 195, column 17:
+  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) ) + 1 + i - ( j + 1 )
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 195, column 64:
+  Cannot find class or component declaration for n
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 201, column 35:
+  Could not evaluate array index expression: dim_vector_lgc
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 201, column 51:
+  Cannot find class or component declaration for p
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 202, column 15:
+  Could not evaluate array index expression: dim_vector_lgc
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 202, column 31:
+  Cannot find class or component declaration for n
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 203, column 35:
+  Could not evaluate array index expression: dim_vector_lgc
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 203, column 51:
+  Cannot find class or component declaration for p
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 204, column 15:
+  Could not evaluate array index expression: dim_vector_lgc
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 204, column 31:
+  Cannot find class or component declaration for n
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 224, column 21:
+  Could not evaluate array size expression: dim_vector_lgc
+")})));
+
+	extends Modelica.Electrical.Analog.Lines.M_OLine;
+end M_OLineExample;
+
 end Other;
 
 

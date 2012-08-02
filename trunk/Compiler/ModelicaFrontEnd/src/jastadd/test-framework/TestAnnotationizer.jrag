@@ -308,7 +308,7 @@ abstract public class TestAnnotationizerHelper {
 	 * \brief Escapes unallowed characters in the fields of the test annotation.
 	 */
 	protected String prepare(String str) {
-		return str.replaceAll("\\\\", "\\\\").replaceAll("\"", "\\\\\"");	
+		return str.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"");	
 	}
 
 	/**

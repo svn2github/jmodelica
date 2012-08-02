@@ -604,13 +604,21 @@ aspect InstanceTreeConstruction {
 	
 	
 	/**
-	 * \brief Dynamically places an FExp in the tree under this FExp.
+	 * Dynamically places an FExp in the tree under this FExp.
+	 * 
+	 * If <code>exp</code> is already in tree of if <code>exp == this</code>, 
+	 * then <code>exp</code> is returned.
 	 * 
 	 * @returns  the final version of the dynamically placed node.
 	 */
 	public FExp FExp.dynamicFExp(FExp exp) {
 		if (exp == this)
 			return exp;
+		if (exp.parent != null) {
+			int i = exp.parent.getIndexOfChild(exp);
+			if (i >= 0)
+				return (FExp) exp.parent.getChild(i);
+		}
 		// Fool JastAdd into keeping the list
 		boolean finalFlag = is$Final();
 		if (!finalFlag)

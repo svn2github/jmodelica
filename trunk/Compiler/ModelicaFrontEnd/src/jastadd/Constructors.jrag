@@ -657,11 +657,12 @@ aspect Constructors {
 	 * 
 	 * All FSubscripts except the first will be FColonSubscripts.
 	 * 
-	 * @param exp    the expression this FSubscriptedExp should wrap.
-	 * @param index  the index to use for the first FSubscript.
+	 * @param exp    the expression this FSubscriptedExp should wrap
+	 * @param index  the index to use for the first FSubscript
+	 * @param ndims  the number of dimensions of exp (calling ndims() might cause name lookup)
 	 */
-	public FSubscriptedExp.FSubscriptedExp(FExp exp, int index) {
-		this(exp, FArraySubscripts.createFColonSubscripts(exp.ndims()));
+	public FSubscriptedExp.FSubscriptedExp(FExp exp, int index, int ndims) {
+		this(exp, FArraySubscripts.createFColonSubscripts(ndims));
 		getFArraySubscripts().specifyNext(index);
 	}
 	

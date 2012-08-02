@@ -1237,19 +1237,24 @@ FLinspace : FBuiltInFunctionCall ::= StartExp:FExp StopExp:FExp N:FExp;
 abstract FInfArgsFunctionCall : FBuiltInFunctionCall ::= FExp*;
 
 /**
+ * Base class for operators that creates an array with dimensions given as arguments, e.g. ones().
+ */
+abstract FArrayDimAsArgsExp : FInfArgsFunctionCall;
+
+/**
  * \brief Ones built-in function.
  */
-FOnes : FInfArgsFunctionCall;
+FOnes : FArrayDimAsArgsExp;
 
 /**
  * \brief Zeros built-in function.
  */
-FZeros : FInfArgsFunctionCall;
+FZeros : FArrayDimAsArgsExp;
 
 /**
  * \brief Fill built-in function.
  */
-FFillExp : FInfArgsFunctionCall ::= FillExp:FExp;
+FFillExp : FArrayDimAsArgsExp ::= FillExp:FExp;
 
 /**
  * \brief Common base class for FMinExp & FMaxExp.

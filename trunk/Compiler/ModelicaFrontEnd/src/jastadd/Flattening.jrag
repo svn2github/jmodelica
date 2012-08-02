@@ -754,7 +754,7 @@ aspect Flattening {
 	eq InstRoot.getChild().splitBindingFExp(FExp fe, InstNode node)      = fe;
 	eq FlatRoot.getChild().splitBindingFExp(FExp fe, InstNode node)      = fe;
 	eq InstArrayComponentDecl.getChild().splitBindingFExp(FExp fe, InstNode node) =
-		splitBindingFExp(fe, node).splitArrayExp(getIndex());
+		fe.dynamicFExp(splitBindingFExp(fe, node)).splitArrayExp(getIndex());
 	eq InstComposite.getChild().splitBindingFExp(FExp fe, InstNode node) =
 		(node == this) ? fe : splitBindingFExp(fe, node);
 	eq InstRecord.getChild().splitBindingFExp(FExp fe, InstNode node) =
@@ -777,11 +777,25 @@ aspect Flattening {
 	 * 
 	 * Will not create new nodes unless necessary.
 	 */
-	syn FExp FExp.splitArrayExp(int index)     = new FSubscriptedExp(unboundCopy(), index);
+	syn FExp FExp.splitArrayExp(int index)     = new FSubscriptedExp(unboundCopy(), index, ndims());
 	eq FArray.splitArrayExp(int index)         = getFExp(index - 1);
 	eq FIdUseExp.splitArrayExp(int index)      = createNode(getFIdUse().splitArrayAccess(index));
 	eq FInstAccessExp.splitArrayExp(int index) = new FInstAccessExp(getInstAccess().splitArrayAccess(index));
 	eq InstDerExp.splitArrayExp(int index)     = new InstDerExp(getFExp().splitArrayExp(index));
+	eq FArrayDimAsArgsExp.splitArrayExp(int index) {
+		if (getNumFExp() == 1)
+			return fillExp();
+		List<FExp> args = new List<FExp>();
+		for (int i = 1, n = getNumFExp(); i < n; i++)
+			args.add(getFExp(i).fullCopy());
+		return createNode(args);
+	}
+	eq FFillExp.splitArrayExp(int index) {
+		FExp res = super.splitArrayExp(index);
+		if (getNumFExp() > 1)
+			((FFillExp) res).setFillExp(getFillExp().fullCopy());
+		return res;
+	}
 	eq FSubscriptedExp.splitArrayExp(int index) {
 		FSubscriptedExp exp = (FSubscriptedExp) unboundCopy();
 		exp.getFArraySubscripts().specifyNext(index);
