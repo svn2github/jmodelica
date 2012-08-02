@@ -158,8 +158,8 @@ def run_demo(with_plots=True):
     # Compile model
     fmux = compile_fmux("CSTR.CSTR_Opt2", file_path)
 
-    # Load model and enable scaling
-    cstr = CasadiModel(fmux, scale_variables=True)
+    # Load model
+    cstr = CasadiModel(fmux)
     
     # Set reference values
     cstr.set('Tc_ref', Tc_0_B)

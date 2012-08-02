@@ -103,9 +103,10 @@ class TestLocalDAECollocator:
         self.model_vdp_bounds_lagrange = CasadiModel(fmux_vdp_bounds_lagrange,
                                                      verbose=False)
         
-        fmux_vdp_bounds_lagrange_renamed = 'VDP_pack_VDP_Opt_Bounds_Lagrange_Renamed_Input.fmux'
-        self.model_vdp_bounds_lagrange_renamed = CasadiModel(fmux_vdp_bounds_lagrange_renamed,
-                                                     verbose=False)
+        fmux_vdp_bounds_lagrange_renamed = ('VDP_pack_VDP_Opt_Bounds_' +
+                                            'Lagrange_Renamed_Input.fmux')
+        self.model_vdp_bounds_lagrange_renamed = CasadiModel(
+                fmux_vdp_bounds_lagrange_renamed, verbose=False)
         
         
         fmux_vdp_bounds_mayer = 'VDP_pack_VDP_Opt_Bounds_Mayer.fmux'
@@ -130,8 +131,6 @@ class TestLocalDAECollocator:
         fmux_cstr_lagrange = "CSTR_CSTR_Opt_Bounds_Lagrange.fmux"
         self.model_cstr_lagrange = CasadiModel(fmux_cstr_lagrange,
                                                verbose=False)
-        self.model_cstr_scaled_lagrange = CasadiModel(
-                fmux_cstr_lagrange, scale_variables=True, verbose=False)
         
         fmux_cstr_mayer = "CSTR_CSTR_Opt_Bounds_Mayer.fmux"
         self.model_cstr_mayer = CasadiModel(fmux_cstr_mayer, verbose=False)
@@ -145,10 +144,7 @@ class TestLocalDAECollocator:
         self.model_cstr_extends = CasadiModel(fmux_cstr_extends, verbose=False)
         
         fmux_second_order = "ParEst_ParEstCasADi.fmux"
-        self.model_second_order = CasadiModel(fmux_second_order)
-        self.model_second_order_scaled = CasadiModel(fmux_second_order,
-                                                     scale_variables=True,
-                                                     verbose=False)
+        self.model_second_order = CasadiModel(fmux_second_order, verbose=False)
         
         self.algorithm = "LocalDAECollocationAlg"
     
@@ -167,6 +163,7 @@ class TestLocalDAECollocator:
         
         # Initialize without scaling init_traj time
         opts = model_opt.optimize_options(self.algorithm)
+        opts['variable_scaling'] = False
         opts['init_traj'] = init_res.result_data
         opts['init_traj_scale_time'] = False
         col = LocalDAECollocator(model_opt, opts)
@@ -176,8 +173,6 @@ class TestLocalDAECollocator:
                 [390.56379356, 337.93876716])
         
         # Initialize with scaled init_traj time
-        opts = model_opt.optimize_options(self.algorithm)
-        opts['init_traj'] = init_res.result_data
         opts['init_traj_scale_time'] = True
         col = LocalDAECollocator(model_opt, opts)
         xx_init = col.get_xx_init()
@@ -242,11 +237,10 @@ class TestLocalDAECollocator:
         """
         Test a parameter estimation example with and without scaling.
         
-        WARNING: This test is very slow when using the linear solver MUMPS for
-        Ipopt.
+        WARNING: This test is very slow when using IPOPT with the linear solver
+        MUMPS.
         """
-        model_unscaled = self.model_second_order
-        model_scaled = self.model_second_order_scaled
+        model = self.model_second_order
         
         # Reference values
         w_ref = 1.048589
@@ -266,9 +260,10 @@ class TestLocalDAECollocator:
         par_est_data = ParameterEstimationData(Q, measured_variables, data)
         
         # Optimize without scaling
-        opts = model_unscaled.optimize_options(self.algorithm)
+        opts = model.optimize_options(self.algorithm)
         opts['parameter_estimation_data'] = par_est_data
-        res = model_unscaled.optimize(self.algorithm, opts)
+        opts['variable_scaling'] = False
+        res = model.optimize(self.algorithm, opts)
         
         w_unscaled = res['sys.w']
         z_unscaled = res['sys.z']
@@ -276,7 +271,8 @@ class TestLocalDAECollocator:
         N.testing.assert_allclose(z_unscaled, z_ref, 1e-2)
         
         # Optimize with scaling
-        res = model_scaled.optimize(self.algorithm, opts)
+        opts['variable_scaling'] = True
+        res = model.optimize(self.algorithm, opts)
         w_scaled = res['sys.w']
         z_scaled = res['sys.z']
         N.testing.assert_allclose(w_scaled, w_ref, 1e-2)
@@ -428,33 +424,35 @@ class TestLocalDAECollocator:
         This test also tests writing both the unscaled and scaled result as
         well as eliminating derivative variables.
         """
-        unscaled_model = self.model_cstr_lagrange
-        scaled_model = self.model_cstr_scaled_lagrange
+        model = self.model_cstr_lagrange
         
         # References values
         cost_ref = 1.8576873858261e3
         u_norm_ref = 3.0556730059e2
         
-        # Unscaled model, with derivatives
-        opts = unscaled_model.optimize_options(self.algorithm)
+        # Unscaled variables, with derivatives
+        opts = model.optimize_options(self.algorithm)
+        opts['variable_scaling'] = False
         opts['write_scaled_result'] = False
         opts['eliminate_der_var'] = False
-        res = unscaled_model.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
 
-        # Scaled model, unscaled result
+        # Scaled variables, unscaled result
         # Eliminated derivatives
+        opts['variable_scaling'] = True
         opts['write_scaled_result'] = False
         opts['eliminate_der_var'] = True
-        res = scaled_model.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         c_unscaled = res['cstr.c']
 
-        # Scaled model, scaled result
+        # Scaled variables, scaled result
         # Eliminated derivatives
+        opts['variable_scaling'] = True
         opts['write_scaled_result'] = True
         opts['eliminate_der_var'] = True
-        res = scaled_model.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         c_scaled = res['cstr.c']
         N.testing.assert_allclose(c_unscaled, 1000. * c_scaled,

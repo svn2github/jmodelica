@@ -1657,6 +1657,43 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: bool
             Default: False
         
+        init_traj --
+            Variable trajectory data used for initialization of the NLP
+            variables.
+            
+            Type: None or pyjmi.common.io.ResultDymolaTextual
+            Default: None
+        
+        init_traj_scale_time --
+            Whether to scale the time horizon of the provided initial
+            trajectories to fit the time horizon of the optimization problem.
+            This option is only applicable when init_traj is not None.
+            
+            Type: bool
+            Default: True
+        
+        variable_scaling --
+            Whether to scale the variables according to their nominal values or
+            the trajectories provided with the nominal_traj option.
+            
+            Type: bool
+            Default: True
+        
+        nominal_traj --
+            Variable trajectory data used for scaling of the NLP variables.
+            This option is only applicable if variable scaling is enabled.
+            
+            Type: None or pyjmi.common.io.ResultDymolaTextual
+            Default: None
+        
+        nominal_traj_scale_time --
+            Whether to scale the time horizon of the provided nominal
+            trajectories to fit the time horizon of the optimization problem.
+            This option is only applicable when nominal_traj is not None.
+            
+            Type: bool
+            Default: True
+        
         write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
             return the unscaled optimization result. This option is 
@@ -1756,21 +1793,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: bool
             Default: False
         
-        init_traj --
-            Variable trajectory data used for initialization of the
-            optimization problem.
-            
-            Type: None or pyjmi.common.io.ResultDymolaTextual
-            Default: None
-        
-        init_traj_scale_time --
-            Whether to scale the time horizon of the provided initial
-            trajectories to fit the time horizon of the optimization problem.
-            This option is only applicable when init_traj is not None.
-            
-            Type: bool
-            Default: True
-        
         parameter_estimation_data --
             Parameter estimation data used for solving parameter estimation
             problems.
@@ -1829,6 +1851,11 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'discr': "LGR",
                 'graph': 'SX',
                 'rename_vars': False,
+                'init_traj': None,
+                'init_traj_scale_time': True,
+                'variable_scaling': True,
+                'nominal_traj': None,
+                'nominal_traj_scale_time': True,
                 'write_scaled_result': False,
                 'result_mode': "collocation_points",
                 'n_eval_points': 20,
@@ -1836,8 +1863,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'quadrature_constraint': True,
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
-                'init_traj': None,
-                'init_traj_scale_time': True,
                 'parameter_estimation_data': None,
                 'casadi_options_f': {"name": "NLP objective function"},
                 'casadi_options_g': {"name": "NLP constraint function"},
