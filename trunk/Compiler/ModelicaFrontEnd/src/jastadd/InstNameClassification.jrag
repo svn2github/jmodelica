@@ -78,22 +78,21 @@ aspect InstNameClassification {
 
 	eq InstDot.getLeft().kind() = getRightNoTransform().predKind();
 
-	eq InstExtends.getClassName().kind() = Kind.CLASS_ACCESS;
-	eq InstImport.getPackageName().kind() = Kind.LAST_AMBIGUOUS_ACCESS;
-//	eq InstShortClassDecl.getClassName().kind() = Kind.CLASS_ACCESS;
-	eq InstComponentDecl.getClassName().kind() = Kind.CLASS_ACCESS;	
-	eq InstComponentModification.getName().kind() = Kind.COMPONENT_ACCESS;
-	eq InstClassRedeclare.getName().kind() = Kind.CLASS_ACCESS;
-	eq InstComponentRedeclare.getName().kind() = Kind.COMPONENT_ACCESS;
-	eq InstFunctionCall.getName().kind() = Kind.CLASS_ACCESS;
+	eq InstExtends.getClassName().kind()          = Kind.CLASS_ACCESS;
+	eq InstImport.getPackageName().kind()         = Kind.LAST_AMBIGUOUS_ACCESS;
+	eq InstComponentDecl.getClassName().kind()    = Kind.CLASS_ACCESS;	
+	eq InstComponentModification.getName().kind() = hasValue() ? Kind.COMPONENT_ACCESS : Kind.AMBIGUOUS_ACCESS;
+	eq InstClassRedeclare.getName().kind()        = Kind.CLASS_ACCESS;
+	eq InstComponentRedeclare.getName().kind()    = Kind.COMPONENT_ACCESS;
+	eq InstFunctionCall.getName().kind()          = Kind.CLASS_ACCESS;
 	
-	eq InstConstraining.getClassName().kind() = Kind.CLASS_ACCESS;
-	eq InstNode.getDynamicComponentName().kind() = Kind.COMPONENT_ACCESS;
-	eq InstNode.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
-    eq InstComponentRedeclare.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
+	eq InstConstraining.getClassName().kind()                 = Kind.CLASS_ACCESS;
+	eq InstNode.getDynamicComponentName().kind()              = Kind.COMPONENT_ACCESS;
+	eq InstNode.getDynamicClassName().kind()                  = Kind.CLASS_ACCESS;
+    eq InstComponentRedeclare.getDynamicClassName().kind()    = Kind.CLASS_ACCESS;
 	eq InstConstrainingComponent.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
-	eq InstComponentDecl.getConditionalAttribute().kind() = Kind.AMBIGUOUS_ACCESS;
-	eq InstBaseClassDecl.getFAbstractEquation().kind() = Kind.AMBIGUOUS_ACCESS;	
+	eq InstComponentDecl.getConditionalAttribute().kind()     = Kind.AMBIGUOUS_ACCESS;
+	eq InstBaseClassDecl.getFAbstractEquation().kind()        = Kind.AMBIGUOUS_ACCESS;	
 
 	/**
 	 * The attribute predKind defines the kind for the previous part of a 
@@ -102,6 +101,17 @@ aspect InstNameClassification {
 	syn Kind InstAccess.predKind() = kind().predKind();
 	eq InstDot.predKind()          = getLeftNoTransform().predKind();
 
+	/**
+	 * Check if this modification has a value modification.
+	 */
+	syn boolean InstComponentModification.hasValue() = 
+		hasInstModification() && getInstModification().isValue();
+	
+	/**
+	 * Check if this is a value modification.
+	 */
+	syn boolean InstModification.isValue() = false;
+	eq InstValueModification.isValue()     = true;
 }
 aspect InstResolveAmbiguousNames {
 	/**

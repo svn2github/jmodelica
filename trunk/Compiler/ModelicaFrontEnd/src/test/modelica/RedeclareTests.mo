@@ -4219,4 +4219,55 @@ model CyclicRedeclare1
 end CyclicRedeclare1;
 
 
+model ModifyClass1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ModifyClass1",
+         description="Modification of constant in sub-package",
+         flatModel="
+fclass RedeclareTests.ModifyClass1
+ Real y = 2.0;
+ Real Z = 1.0;
+end RedeclareTests.ModifyClass1;
+")})));
+
+    package A
+        package B
+            constant Real x = 1;
+        end B;
+    end A;
+    
+    package C = A(B(x = 2));
+    
+    Real y = C.B.x;
+	Real Z = A.B.x;
+end ModifyClass1;
+
+
+model ModifyClass2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ModifyClass2",
+         description="Modification of attribute of type declared in package being modified",
+         flatModel="
+fclass RedeclareTests.ModifyClass2
+ RedeclareTests.ModifyClass2.C.B y(max = 2) = 0;
+ RedeclareTests.ModifyClass2.A.B z = 0;
+
+public
+ type RedeclareTests.ModifyClass2.C.B = Real(max = 2);
+ type RedeclareTests.ModifyClass2.A.B = Real(max = 1);
+end RedeclareTests.ModifyClass2;
+")})));
+
+    package A
+        type B = Real(max = 1);
+    end A;
+    
+    package C = A(B(max = 2));
+    
+    C.B y = 0;
+	A.B z = 0;
+end ModifyClass2;
+
 end RedeclareTests;

@@ -289,7 +289,7 @@ aspect LookupInstComponentsInModifications {
 	     
 	eq InstComponentDecl.getInstModification().lookupInstComponentInInstElement(String name) = myInstClass().memberInstComponentConstrained(name); 
 	
-	eq InstElementModification.getInstModification().lookupInstComponentInInstElement(String name) = getName().myInstComponentDecl().memberInstComponentConstrained(name);
+	eq InstElementModification.getInstModification().lookupInstComponentInInstElement(String name) = getName().qualifiedLookupInstComponent(name);
     
 	eq InstExtends.getInstClassModification().lookupInstComponentInInstElement(String name) = myInstClass().memberInstComponentConstrained(name);
 	
