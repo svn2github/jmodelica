@@ -33,6 +33,15 @@ public class CADGenerator extends CGenerator {
 			FClass fclass) {
 		super(expPrinter, escapeCharacter, fclass);
 	}
+	
+	/**
+	 * Helper method to check if any of the jacobian options are activated 
+	 * (generate_ode_jacobian or generate_dae_jacobian).
+	 */
+	static boolean shouldGenerateJacobians(FClass fclass) {
+		OptionRegistry opt = fclass.root().options;
+		return opt.getBooleanOption("generate_ode_jacobian") || opt.getBooleanOption("generate_dae_jacobian");
+	}
 
 	class DAETag_C_equationResidualDirectionalDerivative extends DAETag {
 		
@@ -44,7 +53,7 @@ public class CADGenerator extends CGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			int i = 0;
-			if (fclass.root().options.getBooleanOption("generate_ode_jacobian") || fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
+			if (shouldGenerateJacobians(fclass)) {
 				for (FAbstractEquation e : fclass.equations()) {
 					e.genVarDecls_CAD(ASTNode.printer_C, genPrinter, INDENT);
 				}
@@ -72,7 +81,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode_jacobian") || fclass.root().options.getBooleanOption("generate_dae_jacobian")){
+			if (shouldGenerateJacobians(fclass)){
 				for (FFunctionDecl func : fclass.getFFunctionDecls()){
 					func.genHeader_CAD(genPrinter, "");
 				}
@@ -91,7 +100,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode_jacobian") || fclass.root().options.getBooleanOption("generate_dae_jacobian")){
+			if (shouldGenerateJacobians(fclass)){
 				for (FFunctionDecl func : fclass.getFFunctionDecls()){
 					func.prettyPrint_CAD(genPrinter, "");
 				}
@@ -110,7 +119,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode_jacobian") || fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
+			if (shouldGenerateJacobians(fclass)) {
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
 				 	block.genBlockResidualFunction_CAD(block_counter,false,"  ",genPrinter); 
@@ -133,7 +142,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode_jacobian") || fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
+			if (shouldGenerateJacobians(fclass)) {
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
 					block.genBlockResidualFunction_CAD(block_counter,true,"  ",genPrinter); 
@@ -157,7 +166,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode_jacobian") || fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
+			if (shouldGenerateJacobians(fclass)) {
 			
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
@@ -183,7 +192,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode_jacobian") || fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
+			if (shouldGenerateJacobians(fclass)) {
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
 				    if (!block.isSolvable()) {
@@ -208,7 +217,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode_jacobian") || fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
+			if (shouldGenerateJacobians(fclass)) {
 				genPrinter.print("\n/******** Declarations *******/\n");
 				fclass.getDAEStructuredBLT().genSolvedVarDecls_CAD(genPrinter, INDENT);
 				genPrinter.print("\njmi_real_t** dz = jmi->dv;\n");
@@ -228,7 +237,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode_jacobian") || fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
+			if (shouldGenerateJacobians(fclass)) {
 				//genPrinter.print(INDENT + "model_ode_guards(jmi);\n");
 				genPrinter.print("\n/******** Start declarations *******/\n");
 				fclass.getDAEInitBLT().genVarDecls_CAD(genPrinter, INDENT);
@@ -258,7 +267,7 @@ public class CADGenerator extends CGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode_jacobian") || fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
+			if (shouldGenerateJacobians(fclass)) {
 			    
 			    int A_n_nz = 0;
 			    int B_n_nz = 0;
@@ -464,7 +473,7 @@ public class CADGenerator extends CGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode_jacobian") || fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
+			if (shouldGenerateJacobians(fclass)) {
 			    
 			    int dae_n_nz = fclass.freeParametersEquationSparsity_n_nz()+
 			        fclass.derivativeVariablesEquationSparsity_n_nz() + 

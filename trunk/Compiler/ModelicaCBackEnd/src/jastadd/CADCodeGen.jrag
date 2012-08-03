@@ -1326,20 +1326,13 @@ aspect CADCodeGen {
 			if(myOutputs().size() <= 1){
 				str.print(",&" + this.adVarName() + ", &" + this.adDerName() + ");\n");
 			} else {
-				Boolean var = true;
-				for(int i = 1; i <= 2; i++){
-					for(int j = 1; j <= myOutputs().size(); j++){
-						if(j==1){
-							if(var){
-								str.print(",&" + this.adVarName());	
-							} else {
-								str.print(",&" + this.adDerName());
-							}
-						} else {
-							str.print(", NULL");
-						}
-					}
-					var = false;
+				str.print(", &" + adVarName());
+				for (int j = 1; j < myOutputs().size(); j++) {
+					str.print(", NULL");
+				}
+				str.print(", &" + adDerName());
+				for (int j = 1; j < myOutputs().size(); j++) {
+					str.print(", NULL");
 				}
 				str.print(");\n");
 			}
