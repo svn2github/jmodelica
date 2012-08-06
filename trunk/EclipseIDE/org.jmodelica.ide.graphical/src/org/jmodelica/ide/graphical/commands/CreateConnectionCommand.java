@@ -1,65 +1,61 @@
 package org.jmodelica.ide.graphical.commands;
 
-import java.util.Arrays;
-
 import org.eclipse.gef.commands.Command;
-import org.jmodelica.icons.Connection;
-import org.jmodelica.icons.Connector;
-import org.jmodelica.icons.coord.Point;
+import org.jmodelica.ide.graphical.proxy.ConnectionProxy;
+import org.jmodelica.ide.graphical.proxy.ConnectorProxy;
 
 public abstract class CreateConnectionCommand extends Command {
-	
-	private Connector source;
-	private Connector target;
-	private Connection connection;
-	
-	public CreateConnectionCommand(Connector source) {
+
+	private ConnectorProxy source;
+	private ConnectorProxy target;
+	private ConnectionProxy connection;
+
+	public CreateConnectionCommand(ConnectorProxy source) {
 		this.source = source;
 		setLabel("add connection");
 	}
-	
+
+	public void setTarget(ConnectorProxy model) {
+		target = model;
+	}
+
 	@Override
 	public boolean canExecute() {
+		if (target == null)
+			return true;
 		if (source == target) {
 			return false;
 		}
-		for (Connection con : source.getTargetConnections()) {
-			if (con.getTargetConnector() == target) {
+		for (ConnectionProxy con : source.getTargetConnections()) {
+			if (con.getSourceID().equals(target.getQualifiedComponentName())) {
 				return false;
 			}
 		}
-		for (Connection con : source.getSourceConnections()) {
-			if (con.getSourceConnector() == target) {
+		for (ConnectionProxy con : source.getSourceConnections()) {
+			if (con.getTargetID().equals(target.getQualifiedComponentName())) {
 				return false;
 			}
 		}
 		return true;
 	}
-	
-	protected abstract void initConnection(Connection c);
-	
+
+	protected abstract void initConnection(ConnectionProxy connection);
+
 	@Override
 	public void execute() {
-		connection = new Connection();
+		connection = new ConnectionProxy(source.getQualifiedComponentName(), target.getQualifiedComponentName(), source.getDiagram(), false);
 		initConnection(connection);
-		connection.setSourceConnector(source);
-		connection.setTargetConnector(target);
-		connection.setPoints(Arrays.asList(new Point(), new Point()));
 		redo();
 	}
-	
-	@Override
-	public void undo() {
-		connection.disconnect();
-	}
-	
+
 	@Override
 	public void redo() {
 		connection.connect();
 	}
 
-	public void setTarget(Connector model) {
-		target = model;
+	@Override
+	public void undo() {
+		connection.disconnect();
 	}
 
 }

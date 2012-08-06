@@ -4,44 +4,41 @@ import org.eclipse.gef.commands.Command;
 import org.jmodelica.icons.coord.Point;
 import org.jmodelica.icons.primitives.Line;
 
-public abstract class MoveBendpointCommand extends Command {
+public abstract class AddBendpointCommand extends Command {
 
 	private Line line;
 	private Point newPoint;
-	private Point oldPoint;
+	private int index;
 
-	public MoveBendpointCommand(Line line) {
+	public AddBendpointCommand(Line line) {
 		this.line = line;
-		setLabel("move bendpoint");
+		setLabel("add bendpoint");
 	}
 
 	protected abstract Point calculateNewPoint();
 
-	protected abstract Point calculateOldPoint();
+	protected abstract int calculateIndex();
 
 	@Override
 	public void execute() {
-		oldPoint = calculateOldPoint();
+		index = calculateIndex();
 		newPoint = calculateNewPoint();
 		redo();
 	}
 
 	@Override
 	public void redo() {
-		int index = line.getPoints().indexOf(oldPoint);
-		if (index != -1) {
-			line.getPoints().set(index, newPoint);
-			line.pointsChanged();
-		} else {
-			System.err.println("Oldpoint is missing from pointlist, someone probably swapped it already!");
-		}
+		if (line.getPoints().size() <= index)
+			System.err.println("Index is out of bounds someone probably changed it already!");
+		line.getPoints().add(index, newPoint);
+		line.pointsChanged();
 	}
 
 	@Override
 	public void undo() {
 		int index = line.getPoints().indexOf(newPoint);
 		if (index != -1) {
-			line.getPoints().set(index, oldPoint);
+			line.getPoints().remove(index);
 			line.pointsChanged();
 		} else {
 			System.err.println("Newpoint is missing from pointlist, someone probably swapped it already!");

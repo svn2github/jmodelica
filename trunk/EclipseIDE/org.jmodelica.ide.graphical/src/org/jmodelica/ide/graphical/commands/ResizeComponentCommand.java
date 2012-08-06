@@ -1,18 +1,17 @@
 package org.jmodelica.ide.graphical.commands;
 
-import org.jmodelica.icons.Component;
+import org.eclipse.gef.commands.Command;
 import org.jmodelica.icons.coord.Extent;
-import org.jmodelica.ide.graphical.util.ASTResourceProvider;
+import org.jmodelica.ide.graphical.proxy.ComponentProxy;
 
-public abstract class ResizeComponentCommand extends AbstractCommand {
+public abstract class ResizeComponentCommand extends Command {
 
 	private Extent newExtent;
 	private Extent oldExtent;
-	private String componentName;
+	private ComponentProxy component;
 
-	public ResizeComponentCommand(String componentName, ASTResourceProvider provider) {
-		super(provider);
-		this.componentName = componentName;
+	public ResizeComponentCommand(ComponentProxy component) {
+		this.component = component;
 		setLabel("resize");
 	}
 
@@ -20,10 +19,6 @@ public abstract class ResizeComponentCommand extends AbstractCommand {
 
 	@Override
 	public void execute() {
-		Component component = getASTResourceProvider().getComponentByName(componentName);
-		if (component == null)
-			return;
-
 		oldExtent = component.getPlacement().getTransformation().getExtent();
 		newExtent = calculateNewExtent();
 		redo();
@@ -31,19 +26,11 @@ public abstract class ResizeComponentCommand extends AbstractCommand {
 
 	@Override
 	public void redo() {
-		Component component = getASTResourceProvider().getComponentByName(componentName);
-		if (component == null)
-			return;
-
 		component.getPlacement().getTransformation().setExtent(newExtent);
 	}
 
 	@Override
 	public void undo() {
-		Component component = getASTResourceProvider().getComponentByName(componentName);
-		if (component == null)
-			return;
-
 		component.getPlacement().getTransformation().setExtent(oldExtent);
 	}
 }

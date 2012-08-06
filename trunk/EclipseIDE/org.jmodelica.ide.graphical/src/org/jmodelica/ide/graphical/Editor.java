@@ -1,6 +1,5 @@
 package org.jmodelica.ide.graphical;
 
-import java.io.ByteArrayInputStream;
 import java.util.EventObject;
 import java.util.Iterator;
 import java.util.Stack;
@@ -35,25 +34,23 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.jastadd.plugin.Activator;
-import org.jmodelica.icons.Component;
 import org.jmodelica.ide.graphical.actions.OpenComponentAction;
 import org.jmodelica.ide.graphical.actions.RotateAction;
-import org.jmodelica.ide.graphical.editparts.EditPartFactory;
-import org.jmodelica.ide.graphical.util.ASTResourceProvider;
-import org.jmodelica.ide.graphical.util.ComponentASTResourceProvider;
+import org.jmodelica.ide.graphical.edit.EditPartFactory;
+import org.jmodelica.ide.graphical.proxy.AbstractDiagramProxy;
+import org.jmodelica.ide.graphical.proxy.AbstractNodeProxy;
+import org.jmodelica.ide.graphical.proxy.ComponentDiagramProxy;
+import org.jmodelica.ide.graphical.proxy.ComponentProxy;
+import org.jmodelica.ide.graphical.proxy.ClassDiagramProxy;
 import org.jmodelica.modelica.compiler.ClassDecl;
-import org.jmodelica.modelica.compiler.InstClassDecl;
-import org.jmodelica.modelica.compiler.InstComponentDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
-import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.SourceRoot;
-import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class Editor extends GraphicalEditor {
 
 	private GraphicalEditorInput input;
-	private InstClassDecl icd;
-	private Stack<InstComponentDecl> openComponentStack;
+	private AbstractDiagramProxy dp;
+	private Stack<ComponentProxy> openComponentStack;
 	private Composite breadcrumbsBar;
 
 	public Editor() {
@@ -100,7 +97,7 @@ public class Editor extends GraphicalEditor {
 			breadcrumbsBar.setVisible(true);
 
 			Link rootLabel = new Link(breadcrumbsBar, SWT.NONE);
-			rootLabel.setText("<a>" + icd.name() + "</a>");
+			rootLabel.setText("<a>" + dp.getClassName() + "</a>");
 			rootLabel.addListener(SWT.Selection, new Listener() {
 
 				@Override
@@ -109,23 +106,23 @@ public class Editor extends GraphicalEditor {
 				}
 			});
 
-			Iterator<InstComponentDecl> it = openComponentStack.iterator();
+			Iterator<ComponentProxy> it = openComponentStack.iterator();
 			while (it.hasNext()) {
-				final InstComponentDecl icd = it.next();
+				final ComponentProxy component = it.next();
 				Label arrow = new Label(breadcrumbsBar, SWT.NONE);
 				arrow.setText(".");
 				if (it.hasNext()) {
 					Link componentLabel = new Link(breadcrumbsBar, SWT.NONE);
-					componentLabel.setText("<a>" + icd.name() + "</a>");
+					componentLabel.setText("<a>" + component.getComponentName() + "</a>");
 					componentLabel.addListener(SWT.Selection, new Listener() {
 						@Override
 						public void handleEvent(Event event) {
-							openPrevComponent(icd.getComponent());
+							openPrevComponent(component);
 						}
 					});
 				} else {
 					Label componentLabel = new Label(breadcrumbsBar, SWT.NONE);
-					componentLabel.setText(icd.name());
+					componentLabel.setText(component.getComponentName());
 				}
 			}
 		} else {
@@ -140,7 +137,7 @@ public class Editor extends GraphicalEditor {
 	protected void configureGraphicalViewer() {
 		super.configureGraphicalViewer();
 		GraphicalViewer viewer = getGraphicalViewer();
-		viewer.setEditPartFactory(new EditPartFactory(new EditorASTResourceProvider(this)));
+		viewer.setEditPartFactory(new EditPartFactory());
 		viewer.setRootEditPart(new ScalableFreeformRootEditPart());
 		viewer.setKeyHandler(new GraphicalViewerKeyHandler(viewer));
 		viewer.addDropTargetListener(new TextTransferDropTargetListener(viewer, TextTransfer.getInstance()));
@@ -156,8 +153,8 @@ public class Editor extends GraphicalEditor {
 
 	@Override
 	protected void initializeGraphicalViewer() {
-		icd = getProgramRoot().simpleLookupInstClassDecl(input.getClassName());
-		openComponentStack = new Stack<InstComponentDecl>();
+		dp = new ClassDiagramProxy(getProgramRoot().simpleLookupInstClassDecl(input.getClassName()));
+		openComponentStack = new Stack<ComponentProxy>();
 		setContent();
 		getGraphicalViewer().getRootEditPart().refresh();
 	}
@@ -174,41 +171,28 @@ public class Editor extends GraphicalEditor {
 
 	private void setContent() {
 		if (input.editIcon()) {
-			getGraphicalViewer().setContents(icd.icon());
+			getGraphicalViewer().setContents(dp);
 		} else {
 			refreshBreadcrumbsBar();
-			ASTResourceProvider provider = new EditorASTResourceProvider(this);
-			for (InstComponentDecl icd : openComponentStack)
-				provider = new ComponentASTResourceProvider(provider, icd.name());
-
-			getEditPartFactory().setASTResourceProvider(provider);
 
 			if (openComponentStack.isEmpty())
-				getGraphicalViewer().setContents(icd.diagram());
+				getGraphicalViewer().setContents(dp);
 			else
-				getGraphicalViewer().setContents(openComponentStack.peek().myInstClass().diagram());
+				getGraphicalViewer().setContents(new ComponentDiagramProxy(openComponentStack.peek()));
 		}
-	}
-
-	/**
-	 * A convenient method for retrieving the EditPartFactory.
-	 * 
-	 * @return the EditPartFactory
-	 */
-	private EditPartFactory getEditPartFactory() {
-		return (EditPartFactory) getGraphicalViewer().getEditPartFactory();
 	}
 
 	@Override
 	public void doSave(final IProgressMonitor monitor) {
-		if (icd == null)
+		if (dp == null)
 			return;
 
 		SafeRunner.run(new SafeRunnable() {
 			@Override
 			public void run() throws Exception {
-				StoredDefinition definition = icd.getDefinition();
-				definition.getFile().setContents(new ByteArrayInputStream(definition.prettyPrintFormatted().getBytes()), false, true, monitor);
+//				TODO:refactor to proxy pattern.
+//				StoredDefinition definition = dp.getDefinition();
+//				definition.getFile().setContents(new ByteArrayInputStream(definition.prettyPrintFormatted().getBytes()), false, true, monitor);
 				getCommandStack().markSaveLocation();
 			}
 		});
@@ -260,23 +244,23 @@ public class Editor extends GraphicalEditor {
 	 * Shows the diagram of a sub component. If <code>component</code> is a sub
 	 * component to the currently shown component it will be shown.
 	 * 
-	 * @param component Component that we are trying to open
+	 * @param componentProxy Component that we are trying to open
 	 * @return If the component was found and displayed
 	 */
-	public boolean openSubComponent(Component component) {
-		List<InstComponentDecl> decls;
+	public boolean openSubComponent(ComponentProxy component) {
+		System.out.println(component.getComponentName());
+		AbstractNodeProxy node;
 		if (openComponentStack.isEmpty())
-			decls = icd.getInstComponentDecls();
+			node = dp;
 		else
-			decls = openComponentStack.peek().myInstClass().getInstComponentDecls();
+			node = openComponentStack.peek();
 
-		for (InstComponentDecl decl : decls) {
-			if (component == decl.getComponent()) {
-				openComponentStack.push(decl);
-				setContent();
-				return true;
-			}
+		if (component.isParent(node)) {
+			openComponentStack.push(component);
+			setContent();
+			return true;
 		}
+		System.out.println("No definition found!");
 		return false;
 	}
 
@@ -286,9 +270,9 @@ public class Editor extends GraphicalEditor {
 	 * @param component Component that we are trying to open
 	 * @return If the component was found and displayed
 	 */
-	public boolean openPrevComponent(Component component) {
+	public boolean openPrevComponent(ComponentProxy component) {
 		for (int i = 0; i < openComponentStack.size(); i++) {
-			if (component == openComponentStack.get(i).getComponent()) {
+			if (component == openComponentStack.get(i)) {
 				while (i + 1 < openComponentStack.size())
 					openComponentStack.pop();
 
@@ -311,49 +295,16 @@ public class Editor extends GraphicalEditor {
 	}
 
 	public void flushInst() {
-//		long start = System.currentTimeMillis();
-		String[] openComponents = new String[openComponentStack.size()];
-		int i = 0;
-		for (InstComponentDecl c : openComponentStack) {
-			openComponents[i] = c.name();
-			i++;
-		}
-//		System.out.println("old hash" + icd.hashCode());
-//		System.out.println("copy stack, t+" + (System.currentTimeMillis() - start));
-		openComponentStack.clear();
-//		System.out.println("clear stack, t+" + (System.currentTimeMillis() - start));
-		ClassDecl cd = icd.getClassDecl();
+		long start = System.currentTimeMillis();
+		ClassDecl cd = getProgramRoot().simpleLookupInstClassDecl(input.getClassName()).getClassDecl();
 		cd.flushCache();
-//		System.out.println("flush src classDecl, t+" + (System.currentTimeMillis() - start));
+		System.out.println("flush src classDecl, t+" + (System.currentTimeMillis() - start));
 		getProgramRoot().flushAll();
-//		System.out.println("flush program root, t+" + (System.currentTimeMillis() - start));
-		icd = getProgramRoot().simpleLookupInstClassDecl(input.getClassName());
-//		System.out.println("lookup input class, t+" + (System.currentTimeMillis() - start));
-//		System.out.println("new hash" + icd.hashCode());
-		if (openComponents.length > 0) {
-			List<InstComponentDecl> icds = icd.getInstComponentDecls();
-			for (String s : openComponents) {
-				for (InstComponentDecl icd : icds) {
-					if (icd.name().equals(s)) {
-						openComponentStack.push(icd);
-						icds = icd.getInstComponentDecls();
-						break;
-					}
-				}
-			}
-		}
-//		System.out.println("rebuild open component stack, t+" + (System.currentTimeMillis() - start));
+		System.out.println("flush program root, t+" + (System.currentTimeMillis() - start));
+		dp = new ClassDiagramProxy(getProgramRoot().simpleLookupInstClassDecl(input.getClassName()));
+		System.out.println("lookup input class, t+" + (System.currentTimeMillis() - start));
 		setContent();
-//		System.out.println("set content, t+" + (System.currentTimeMillis() - start));
+		System.out.println("set content, t+" + (System.currentTimeMillis() - start));
 	}
 
-	/**
-	 * Returns the current {@link InstClassDecl}. References should never be
-	 * saved or cached as it may change at any time.
-	 * 
-	 * @return current {@link InstClassDecl}
-	 */
-	public InstClassDecl getInstClassDecl() {
-		return icd;
-	}
 }

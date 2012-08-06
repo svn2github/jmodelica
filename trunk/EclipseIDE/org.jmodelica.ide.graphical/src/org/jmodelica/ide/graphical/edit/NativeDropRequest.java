@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.jmodelica.ide.graphical.editparts;
+package org.jmodelica.ide.graphical.edit;
 
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.Request;

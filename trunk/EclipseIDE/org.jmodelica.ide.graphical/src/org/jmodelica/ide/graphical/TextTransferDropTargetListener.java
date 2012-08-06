@@ -4,7 +4,7 @@ import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.dnd.AbstractTransferDropTargetListener;
 import org.eclipse.swt.dnd.Transfer;
-import org.jmodelica.ide.graphical.editparts.NativeDropRequest;
+import org.jmodelica.ide.graphical.edit.NativeDropRequest;
 
 
 public class TextTransferDropTargetListener extends AbstractTransferDropTargetListener {

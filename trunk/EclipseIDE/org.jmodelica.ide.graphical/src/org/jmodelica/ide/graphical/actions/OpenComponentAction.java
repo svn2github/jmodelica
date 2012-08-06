@@ -2,8 +2,7 @@ package org.jmodelica.ide.graphical.actions;
 
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.jmodelica.ide.graphical.Editor;
-import org.jmodelica.ide.graphical.editparts.ComponentEditPart;
-
+import org.jmodelica.ide.graphical.edit.parts.ComponentPart;
 
 public class OpenComponentAction extends SelectionAction {
 	
@@ -24,12 +23,11 @@ public class OpenComponentAction extends SelectionAction {
 	protected boolean calculateEnabled() {
 		if (getSelectedObjects().size() != 1)
 			return false;
-		return getSelectedObjects().get(0) instanceof ComponentEditPart;
+		return getSelectedObjects().get(0) instanceof ComponentPart;
 	}
 	
 	@Override
 	public void run() {
-		ComponentEditPart cep = (ComponentEditPart) getSelectedObjects().get(0);
-		getWorkbenchPart().openSubComponent(cep.getModel());
+		getWorkbenchPart().openSubComponent(((ComponentPart) getSelectedObjects().get(0)).getModel());
 	}
 }

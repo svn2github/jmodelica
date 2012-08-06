@@ -67,7 +67,7 @@ public class Transform implements Cloneable {
 	 * @param angle an angle, in radians.
 	 */
 	public void rotate(double angle) {
-		// TODO: Optimize, use tmp variables instead of allocating a new matrix.
+		// XXX: Optimize, use tmp variables instead of allocating a new matrix.
 		double cos = Math.cos(angle);
 		double sin = Math.sin(angle);
 		double[] newA = new double[aMatrix.length];

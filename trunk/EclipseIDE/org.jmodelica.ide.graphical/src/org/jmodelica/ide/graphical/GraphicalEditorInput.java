@@ -59,13 +59,11 @@ public class GraphicalEditorInput implements IEditorInput, IPersistableElement {
 	
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public boolean exists() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 

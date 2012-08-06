@@ -18,7 +18,7 @@ public class IconLayer extends Layer implements FigureListener, HandleBounds {
 		IFigure fig = super.findFigureAt(x, y, search);
 		if (fig == null)
 			return null;
-		else if (fig instanceof IconLayer)//FIXME: make sure this is a connector...
+		else if (fig instanceof IconLayer)//TODO: make sure this is a connector...
 			return fig;
 		else
 			return this;

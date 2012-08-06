@@ -5,9 +5,9 @@ import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.ui.IWorkbenchPart;
-import org.jmodelica.ide.graphical.editparts.ComponentEditPart;
-import org.jmodelica.ide.graphical.editparts.ConnectionEditPart;
-import org.jmodelica.ide.graphical.editparts.primitives.GraphicEditPart;
+import org.jmodelica.ide.graphical.edit.parts.ComponentPart;
+import org.jmodelica.ide.graphical.edit.parts.ConnectionPart;
+import org.jmodelica.ide.graphical.edit.parts.primitives.GraphicEditPart;
 
 
 public class RotateAction extends SelectionAction {
@@ -64,7 +64,7 @@ public class RotateAction extends SelectionAction {
 			
 			EditPart part = (EditPart) o;
 			
-			if (!(part instanceof ComponentEditPart || (part instanceof GraphicEditPart && !(part instanceof ConnectionEditPart))))
+			if (!(part instanceof ComponentPart || (part instanceof GraphicEditPart && !(part instanceof ConnectionPart))))
 				return false;
 		}
 		return true;

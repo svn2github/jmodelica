@@ -17,7 +17,6 @@ public class Converter {
 
 	public static Point convert(org.jmodelica.icons.coord.Point point) {
 		return new Point((int)Math.round(point.getX()), (int)Math.round(point.getY()));
-//		return new PrecisionPoint(point.getX(), point.getY());
 	}
 
 	public static org.jmodelica.icons.coord.Point convert(Point point) {
