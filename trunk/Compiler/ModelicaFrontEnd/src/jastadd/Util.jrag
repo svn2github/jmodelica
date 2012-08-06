@@ -752,14 +752,14 @@ aspect Names {
      * \brief Copy this access, append a name part to the copy and return the copy.
      */
     public InstDot InstAccess.copyAndAppend(String id) {
-    	InstAccess left = (InstAccess) fullCopy();
+    	InstAccess left = fullCopy();
     	InstAccess right = createPartToAppend(id);
         return new InstDot(left, right);
     }
     
     public InstDot InstDot.copyAndAppend(String id) {
-    	InstDot res = (InstDot) copy();
-    	res.setLeft((InstAccess) getLeft().fullCopy());
+    	InstDot res = copy();
+    	res.setLeft(getLeft().fullCopy());
     	res.setRight(getRight().copyAndAppend(id));
     	return res;
     }
@@ -851,33 +851,6 @@ aspect FlatNames {
         } else {
             return "unknown";
         }
-    }
-
-    /**
-     * Append a new name part.
-     */
-    public FQName FQName.append(String name) {
-        addFQNamePart(name);
-        return this;
-    }
-
-    /**
-     * Copy and append all name parts from <code>fqn</code>.
-     */
-    public FQName FQName.append(FQName fqn) {
-        for (FQNamePart part : fqn.getFQNameParts())
-            addFQNamePart((FQNamePart) part.fullCopy());
-        return this;
-    }
-
-    /**
-     * Copy and append the last <code>n</code> name parts from <code>fqn</code>.
-     */
-    public FQName FQName.appendSuffix(FQName fqn, int n) {
-    	int num = fqn.getNumFQNamePart();
-        for (int i = num - n; i < num; i++)
-            addFQNamePart((FQNamePart) fqn.getFQNamePart(i).fullCopy());
-        return this;
     }
     
     syn FQNamePart FQName.lastFQNamePart() = getFQNamePart(getNumFQNamePart()-1);
@@ -1191,47 +1164,79 @@ aspect FlatNames {
 
     inh int FRecordDecl.recordIndex();
     eq FClass.getFRecordDecl(int i).recordIndex() = i;
-    
+
     /**
-     * \brief Copy this FQName, append a String to the copy and return the copy.
+     * Append a new name part.
+     */
+    public FQName FQName.append(String name) {
+        addFQNamePart(name);
+        return this;
+    }
+
+    /**
+     * Copy and append all name parts from <code>fqn</code>.
+     */
+    public FQName FQName.append(FQName fqn) {
+        for (FQNamePart part : fqn.getFQNameParts())
+            addFQNamePart((FQNamePart) part.fullCopy());
+        return this;
+    }
+ 
+    /**
+     * Create a copy of the name, with a String appended.
      */
     public FQName FQName.copyAndAppend(String name) {
         return fullCopy().append(name);
     }
     
     /**
-     * \brief Copy this FQName, append another FQName to the copy and return the copy.
+     * Create a copy of the name, with another FQName appended.
      */
     public FQName FQName.copyAndAppend(FQName name) {
         return fullCopy().append(name);
     }
     
     /**
-     * \brief Create a copy of all parts but the first of this name.
+     * Create a copy of the name excluding the first part.
      */
     public FQName FQName.copySuffix() {
-        FQName res = new FQName();
-        for (int i = 1; i < getNumFQNamePart(); i++)
-            res.addFQNamePart(getFQNamePart(i).fullCopy());
-        return res;
+        return copySuffix(getNumFQNamePart() - 1);
     }
     
     /**
-     * \brief Create a copy of the first part of this name.
+     * Create a copy of the last part of this name.
+     */
+    public FQName FQName.copyLastSuffix() {
+        return copySuffix(1);
+    }
+    
+    /**
+     * Create a copy of the last <code>n</code> parts of this name.
+     */
+    public FQName FQName.copySuffix(int n) {
+        FQName res = new FQName();
+        int m = getNumFQNamePart();
+        for (int i = m - n; i < m; i++)
+            res.addFQNamePart(getFQNamePart(i).fullCopy());
+        return res;
+    }
+
+    /**
+     * Create a copy of the name excluding the last part.
      */
     public FQName FQName.copyPrefix() {
+    	return copyPrefix(getNumFQNamePart() - 1);
+    }
+    
+    /**
+     * Create a copy of the first part of this name.
+     */
+    public FQName FQName.copyFirstPrefix() {
     	return copyPrefix(1);
     }
 
     /**
-     * \brief Create a copy of the name excluding the last part.
-     */
-    public FQName FQName.copyFullPrefix() {
-    	return copyPrefix(getNumFQNamePart() - 1);
-    }
-
-    /**
-     * \brief Create a copy of the first <code>n</code> parts of this name.
+     * Create a copy of the first <code>n</code> parts of this name.
      */
     public FQName FQName.copyPrefix(int n) {
         FQName res = new FQName();
@@ -1252,8 +1257,12 @@ aspect FlatNames {
     }
     
     /**
-     * \brief Create a copy of this name with non-literal array subscripts replaced 
-     *        with indices from <code>i</code>.
+     * Create a copy of this name with non-literal array subscripts replaced 
+     * with indices from <code>i</code>.
+     * 
+     * The number of dimensions of <code>i</code> must be the same as the number 
+     * of non-literal subscripts. The subscripts to be replaced can be spread out 
+     * over several name parts.
      */
     public FQName FQName.copyReplacingSubscripts(Index i) {
         FQName res = new FQName();
@@ -2314,6 +2323,7 @@ aspect Sorting {
 aspect GeneralHelpers {
 	
 	abstract public FExp FExp.fullCopy();
+	abstract public InstAccess InstAccess.fullCopy();
 	abstract public FAbstractFunctionCall FAbstractFunctionCall.fullCopy();
 	abstract public FStatement FStatement.fullCopy();
 	abstract public FEquationType FEquationType.fullCopy();
@@ -2323,6 +2333,7 @@ aspect GeneralHelpers {
 	abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
 	
 	abstract public FExp FExp.copy();
+	abstract public InstAccess InstAccess.copy();
 	
 	public FExp FExp.unboundCopy() { return (FExp) super.unboundCopy(); }
 	

@@ -274,7 +274,7 @@ aspect FlatRecordBinding {
 	 * 
 	 * Access is assumed to be refering to a member of a record and be in a function.
 	 */
-	syn AbstractFVariable FIdUse.myRecordFV() = lookupFV(getFQName().copyPrefix());
+	syn AbstractFVariable FIdUse.myRecordFV() = lookupFV(getFQName().copyFirstPrefix());
 	
 	syn lazy FRecordDecl AbstractFVariable.myFRecordDecl() = null;
 	eq FRecordVariable.myFRecordDecl()   = lookupFRec(getRecord().name());

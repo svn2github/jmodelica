@@ -2471,7 +2471,7 @@ aspect TransformCanonical {
 			if (p.hasFArraySubscripts())
 				for (FSubscript s : p.getFArraySubscripts().getFSubscripts())
 					s.prefixInternalUses(prefix, decl);
-		if (decl == lookupFV(fqn.copyPrefix()).containingRecordDecl()) 
+		if (decl == lookupFV(fqn.copyFirstPrefix()).containingRecordDecl()) 
 			getFIdUse().setFQName(prefix.copyAndAppend(fqn));
 	}
 	

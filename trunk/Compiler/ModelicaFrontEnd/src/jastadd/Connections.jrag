@@ -146,7 +146,7 @@ aspect Connections {
 		when (rewriteStreams) to FExp {
 			// 1) Get the stream variable name prefix
 			FQName var_name = ((FIdUseExp)getFExp()).getFIdUse().getFQName();
-			FQName prefix = var_name.copyFullPrefix();
+			FQName prefix = var_name.copyPrefix();
 			ArrayList<ConnectionSetEntry> cses = myFClass().getConnectionSetManager().
 			  getFlowVariables(prefix.name());
 			if (cses.size()==1) { // This condition should be checked earlier

@@ -1294,7 +1294,7 @@ aspect ConstantEvaluation {
 	  if (name.getNumFQNamePart() <= 1)
 		  return CValue.UNKNOWN;
 	  String last = name.lastFQNamePart().getName();
-	  FQName prefix = name.copyFullPrefix();
+	  FQName prefix = name.copyPrefix();
 	  AbstractFVariable var = lookupFV(prefix.copyWithoutSubscripts());
 	  CValue res = var.inRecord() ? cevalRecordMember(prefix) : var.ceval();
 	  if (prefix.hasFArraySubscripts())
