@@ -1,0 +1,104 @@
+import org.jmodelica.icons.Observable;
+import org.jmodelica.icons.primitives.Line;
+import org.jmodelica.icons.Observer;
+
+aspect ModelicaIconsEditing {
+	
+	/*-------------------------------------------------------------------------
+	 *                          Connection related
+	 ------------------------------------------------------------------------*/
+	
+	public Line FConnectClause.getConnectionLine() {
+		return getConnectClause().getConnectionLine();
+	}
+	
+	syn lazy Line ConnectClause.getConnectionLine() {
+		Line line;
+		try {
+			line = annotation().createConnectionLine();
+		} catch (FailedConstructionException e) {
+			line = new Line();
+		}
+		line.addObserver(this);
+		return line;
+	}
+	
+	public class ConnectClause implements Observer{}
+	
+	@Override
+	public void ConnectClause.update(Observable o, Object flag, Object additionalInfo) {
+		if (o instanceof Line)
+			annotation().saveConnectionLine((Line) o);
+	}
+	
+	
+	/*-------------------------------------------------------------------------
+	 *                          Component related
+	 ------------------------------------------------------------------------*/
+	public Placement InstComponentDecl.getPlacement() {
+		return getComponentDecl().getPlacement();
+	}
+	
+	syn lazy Placement ComponentDecl.getPlacement() {
+		try {
+			return annotation().createPlacement(Context.DIAGRAM);
+		}
+		catch(FailedConstructionException fe) {
+			return new Placement(new Transformation(new Extent(new Point(-10, -10), new Point(10, 10))));
+		}
+	}
+	
+	public CoordinateSystem InstComponentDecl.getCoordinateSystem() {
+		return myInstClass().getCoordinateSystem();
+	}
+	
+	public CoordinateSystem InstClassDecl.getCoordinateSystem() {
+		return getClassDecl().getCoordinateSystem();
+	}
+	
+	syn lazy CoordinateSystem ClassDecl.getCoordinateSystem() {
+		return annotation().createCoordinateSystem();
+	}
+	
+	/*-------------------------------------------------------------------------
+	 *                          Class related
+	 ------------------------------------------------------------------------*/
+	public void InstClassDecl.addComponent(String className, String componentName, Placement placement) {
+		ComponentDecl componentDecl = new ComponentDecl();
+		componentDecl.setClassName(Access.fromClassName(className));
+		componentDecl.setVisibilityType(new PublicVisibilityType());
+		componentDecl.setName(new IdDecl(componentName));
+		componentDecl.setComment(new Comment());
+		componentDecl.setCCComment(new Comment());
+		componentDecl.annotation().savePlacement(placement);
+		
+		FullClassDecl classDecl = (FullClassDecl)getClassDecl();
+		classDecl.addNewComponentDecl(componentDecl);
+		classDecl.flushAllRecursive();
+		InstComponentDecl icd = (InstComponentDecl)createInstComponentDecl(componentDecl);
+		addInstComponentDecl(icd);
+		flushAllRecursive();
+	}
+	
+	public void InstClassDecl.removeComponent(InstComponentDecl icd) {
+		removeInstComponentDecl(icd);
+		((FullClassDecl)getClassDecl()).removeComponentDecl(icd.getComponentDecl());
+	}
+	
+	public FConnectClause InstClassDecl.addConnection(String sourceID, String targetID, Line connectionLine) {
+		ConnectClause cc = new ConnectClause();
+		cc.setComment(new Comment());
+		cc.annotation().saveConnectionLine(connectionLine);
+		cc.setConnector1(Access.fromClassName(sourceID));
+		cc.setConnector2(Access.fromClassName(targetID));
+		((FullClassDecl)getClassDecl()).addNewEquation(cc);
+		
+		FConnectClause fcc = (FConnectClause)cc.instantiate();
+//		fcc.setConnection(con);
+		addFAbstractEquation(fcc);
+//		con.addObserver(fcc);
+		return fcc;
+	}
+	
+
+}

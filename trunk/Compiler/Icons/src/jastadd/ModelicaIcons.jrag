@@ -28,15 +28,19 @@ aspect ModelicaIcons
 
 	protected boolean ClassDecl.visitingDuringIconRendering;
 	
-	eq ClassDecl.icon() { 
+	syn AnnotationNode BaseNode.iconAnnotation() = annotation();
+	eq InstComponentDecl.iconAnnotation() = myInstClass().annotation();
+	eq InstExtends.iconAnnotation() = myInstClass().annotation();
+	
+	
+	eq ClassDecl.icon() {
 		visitingDuringIconRendering = true;
-		Icon icon;
 		Layer layer = Layer.NO_LAYER;
-		AnnotationNode annotation = annotation();
+		AnnotationNode annotation = iconAnnotation();
 		if (annotation.exists()) {
 			layer = annotation.createIconLayer();
 		}
-		icon = new Icon(qualifiedName(), layer, Context.ICON); 
+		Icon icon = new Icon(qualifiedName(), layer, Context.ICON); 
 		icon = addSuperClasses(icon);
 		icon = addSubComponents(icon);
 		visitingDuringIconRendering = false;
@@ -45,13 +49,12 @@ aspect ModelicaIcons
 	
 	eq ShortClassDecl.icon() {
 		visitingDuringIconRendering = true;
-		Icon icon;
 		Layer layer = Layer.NO_LAYER;
-		AnnotationNode annotation = annotation();
+		AnnotationNode annotation = iconAnnotation();
 		if (annotation.exists()) {
 			layer = annotation.createIconLayer();
 		}
-		icon = new Icon(qualifiedName(), layer, Context.ICON);
+		Icon icon = new Icon(qualifiedName(), layer, Context.ICON);
 		Icon superIcon = getExtendsClauseShortClass().findClassDecl().icon();
 		if (superIcon != Icon.NULL_ICON) {
 			icon.addSuperclass(superIcon);
@@ -61,13 +64,12 @@ aspect ModelicaIcons
 	}
 
 	eq InstClassDecl.icon() {
-		Icon icon;
 		Layer layer = Layer.NO_LAYER;
-		AnnotationNode annotation = annotation();
+		AnnotationNode annotation = iconAnnotation();
 		if (annotation.exists()) {
 			layer = annotation.createIconLayer();
 		}
-		icon = new Icon(qualifiedName(), layer, Context.ICON);
+		Icon icon = new Icon(qualifiedName(), layer, Context.ICON);
 		addSuperClasses(icon);
 		addSubComponents(icon);
 		return icon;
@@ -75,7 +77,7 @@ aspect ModelicaIcons
 	
 	eq InstComponentDecl.icon() {
 		Layer layer = Layer.NO_LAYER;
-		AnnotationNode annotation = myInstClass().annotation();
+		AnnotationNode annotation = iconAnnotation();
 		if (annotation.exists()) {
 			layer = annotation.createIconLayer();
 		}
@@ -86,114 +88,90 @@ aspect ModelicaIcons
 	}
 	
 	eq InstExtends.icon() {
-		Icon icon;
 		Layer layer = Layer.NO_LAYER;
-		AnnotationNode annotation = myInstClass().annotation();
+		AnnotationNode annotation = iconAnnotation();
 		if (annotation.exists()) {
 			layer = annotation.createIconLayer();
 		}
-		icon = new Icon(myInstClass().qualifiedName(), layer, Context.ICON);
+		Icon icon = new Icon(myInstClass().qualifiedName(), layer, Context.ICON);
 		addSuperClasses(icon);
 		addSubComponents(icon);
 		return icon;
 	}
 	
-	eq InstClassDecl.diagram() {
-		Diagram diagram;
-		Layer layer = annotation().createDiagramLayer();
-		diagram = new Diagram(qualifiedName(), layer, Context.DIAGRAM, new DiagramFactory() {
-			public Component createComponent(String className, String componentName) {
-				ComponentDecl componentDecl = new ComponentDecl();
-				componentDecl.setClassName(Access.fromClassName(className));
-				componentDecl.setVisibilityType(new PublicVisibilityType());
-				componentDecl.setName(new IdDecl(componentName));
-				componentDecl.setComment(new Comment());
-				componentDecl.setCCComment(new Comment());
-				((FullClassDecl)getClassDecl()).addNewComponentDecl(componentDecl);
-				InstComponentDecl icd = (InstComponentDecl)createInstComponentDecl(componentDecl);
-				addInstComponentDecl(icd);
-				
-				icd.is$Final(true);
-				
-				Component c = icd.component(Context.DIAGRAM);
-				
-				removeInstComponentDecl(icd);
-				((FullClassDecl)getClassDecl()).removeComponentDecl(icd.getComponentDecl());
-				
-				if (c == null)
-					return null;
-				icd.setComponent(c);
-				childComponentMap.put(c, icd);
-				return c;
-			}
-		});
-		addSuperClasses(diagram);
-		addSubComponents(diagram);
-		for (FAbstractEquation fae : getFAbstractEquations()) {
-			if (fae instanceof FConnectClause) {
-				FConnectClause fcc = (FConnectClause) fae;
-				Connection con;
-				try {
-					con = fcc.getConnectClause().annotation().createConnection();
-				} catch (FailedConstructionException e) {
-					con = new Connection();
-				}
-				con.setSourceConnector((org.jmodelica.icons.Connector)fcc.getConnector1().getInstAccess().myInstComponentDecl().getComponent());
-				con.setTargetConnector((org.jmodelica.icons.Connector)fcc.getConnector2().getInstAccess().myInstComponentDecl().getComponent());
-				fcc.setConnection(con);
-				con.connect();
-				con.addObserver(fcc);
-			}
-		}
-		diagram.addObserver(this);
-		return diagram;
-	}
-	
-	eq InstNode.diagram() {
-		Layer layer = annotation().createDiagramLayer();
-		Diagram diagram = new Diagram(myInstClass().qualifiedName(), layer, Context.DIAGRAM, null);
-		addSuperClasses(diagram);
-		addSubComponents(diagram);
-		for (FAbstractEquation fae : getFAbstractEquations()) {
-			if (fae instanceof FConnectClause) {
-				FConnectClause fcc = (FConnectClause) fae;
-				Connection con;
-				try {
-					con = fcc.getConnectClause().annotation().createConnection();
-				} catch (FailedConstructionException e) {
-					con = new Connection();
-				}
-				con.setSourceConnector((org.jmodelica.icons.Connector)fcc.getConnector1().getInstAccess().myInstComponentDecl().getComponent());
-				con.setTargetConnector((org.jmodelica.icons.Connector)fcc.getConnector2().getInstAccess().myInstComponentDecl().getComponent());
-				fcc.setConnection(con);
-				con.connect();
-			}
-		}
-		return diagram;
-	}
-	
-	eq InstComponentDecl.diagram() {
-		Layer layer = myInstClass().annotation().createDiagramLayer();
-		Diagram diagram = new Diagram(myInstClass().qualifiedName(), layer, Context.DIAGRAM, null);
-		addSuperClasses(diagram);
-		addSubComponents(diagram);
-		for (FAbstractEquation fae : getFAbstractEquations()) {
-			if (fae instanceof FConnectClause) {
-				FConnectClause fcc = (FConnectClause) fae;
-				Connection con;
-				try {
-					con = fcc.getConnectClause().annotation().createConnection();
-				} catch (FailedConstructionException e) {
-					con = new Connection();
-				}
-				con.setSourceConnector((org.jmodelica.icons.Connector)fcc.getConnector1().getInstAccess().myInstComponentDecl().getComponent());
-				con.setTargetConnector((org.jmodelica.icons.Connector)fcc.getConnector2().getInstAccess().myInstComponentDecl().getComponent());
-				fcc.setConnection(con);
-				con.connect();
-			}
-		}
-		return diagram;
-	}
+//	eq InstClassDecl.diagram() {
+//		Diagram diagram;
+//		Layer layer = iconAnnotation().createDiagramLayer();
+//		diagram = new Diagram(qualifiedName(), layer, Context.DIAGRAM, new DiagramFactory() {
+//			public Component createComponent(String className, String componentName) {
+//				ComponentDecl componentDecl = new ComponentDecl();
+//				componentDecl.setClassName(Access.fromClassName(className));
+//				componentDecl.setVisibilityType(new PublicVisibilityType());
+//				componentDecl.setName(new IdDecl(componentName));
+//				componentDecl.setComment(new Comment());
+//				componentDecl.setCCComment(new Comment());
+//				((FullClassDecl)getClassDecl()).addNewComponentDecl(componentDecl);
+//				InstComponentDecl icd = (InstComponentDecl)createInstComponentDecl(componentDecl);
+//				addInstComponentDecl(icd);
+//				
+//				icd.is$Final(true);
+//				
+//				Component c = icd.component(Context.DIAGRAM);
+//				
+//				removeInstComponentDecl(icd);
+//				((FullClassDecl)getClassDecl()).removeComponentDecl(icd.getComponentDecl());
+//				
+//				if (c == null)
+//					return null;
+//				icd.setComponent(c);
+//				childComponentMap.put(c, icd);
+//				return c;
+//			}
+//		});
+//		addSuperClasses(diagram);
+//		addSubComponents(diagram);
+//		for (FAbstractEquation fae : getFAbstractEquations()) {
+//			if (fae instanceof FConnectClause) {
+//				FConnectClause fcc = (FConnectClause) fae;
+//				Connection con;
+//				try {
+//					con = fcc.getConnectClause().annotation().createConnection();
+//				} catch (FailedConstructionException e) {
+//					con = new Connection();
+//				}
+//				con.setSourceConnector((org.jmodelica.icons.Connector)fcc.getConnector1().getInstAccess().myInstComponentDecl().getComponent());
+//				con.setTargetConnector((org.jmodelica.icons.Connector)fcc.getConnector2().getInstAccess().myInstComponentDecl().getComponent());
+//				fcc.setConnection(con);
+//				con.connect();
+//				con.addObserver(fcc);
+//			}
+//		}
+//		diagram.addObserver(this);
+//		return diagram;
+//	}
+//	
+//	eq InstNode.diagram() {
+//		Layer layer = iconAnnotation().createDiagramLayer();
+//		Diagram diagram = new Diagram(myInstClass().qualifiedName(), layer, Context.DIAGRAM, null);
+//		addSuperClasses(diagram);
+//		addSubComponents(diagram);
+//		for (FAbstractEquation fae : getFAbstractEquations()) {
+//			if (fae instanceof FConnectClause) {
+//				FConnectClause fcc = (FConnectClause) fae;
+//				Connection con;
+//				try {
+//					con = fcc.getConnectClause().annotation().createConnection();
+//				} catch (FailedConstructionException e) {
+//					con = new Connection();
+//				}
+//				con.setSourceConnector((org.jmodelica.icons.Connector)fcc.getConnector1().getInstAccess().myInstComponentDecl().getComponent());
+//				con.setTargetConnector((org.jmodelica.icons.Connector)fcc.getConnector2().getInstAccess().myInstComponentDecl().getComponent());
+//				fcc.setConnection(con);
+//				con.connect();
+//			}
+//		}
+//		return diagram;
+//	}
 	
 	public BufferedImage BaseNode.render(Icon icon, int w, int h) {
 		return new AWTIconDrawer(icon, w, h).getImage();
@@ -289,14 +267,14 @@ aspect ModelicaIcons
 			Component c = componentDecl.component(icon.getContext());
 			if (c != null) {
 				icon.addSubcomponent(c);
-				componentDecl.setComponent(c);
+//				componentDecl.setComponent(c);
 			}
 		}
 	}
 	
 	public Component InstComponentDecl.component(Context context) {
-		if (getComponent() != null)
-			return getComponent();
+//		if (getComponent() != null)
+//			return getComponent();
 		InstClassDecl subDecl = myInstClass();
 		if(subDecl.isUnknown()) {
 			return null;
@@ -328,7 +306,7 @@ aspect ModelicaIcons
 				} else {
 					c = new Component(icon(), placement, qualifiedName());
 				}
-				c.addObserver(this);
+//				c.addObserver(this);
 				return c;
 			}
 		}
@@ -368,95 +346,95 @@ aspect ModelicaIcons
 	 * =========== Methods for Component->InstComponentDecl lookup ============
 	 */
 
-	private Component InstComponentDecl.component = null;
-	
-	public void InstComponentDecl.setComponent(Component c) {
-		if (component != null)
-			throw new ASTEditException("Changing of Component once it has been set is now allowed.");
-		component = c;
-	}
-	
-	public Component InstComponentDecl.getComponent() {
-		return component;
-	}
-	
-	protected InstComponentDecl InstNode.findOwnerOf(Component c) {
-		for(InstComponentDecl icd : getInstComponentDecls()) {
-			if (icd.getComponent() == c)
-				return icd;
-		}
-		for (InstExtends ie : instExtends()) {
-			InstComponentDecl result = ie.findOwnerOf(c);
-			if (result != null)
-				return result;
-		}
-		for(InstComponentDecl icd : getInstComponentDecls()) {
-			InstComponentDecl result = icd.findOwnerOf(c);
-			if (result != null)
-				return result;
-		}
-		return null;
-	}
+//	private Component InstComponentDecl.component = null;
+//	
+//	public void InstComponentDecl.setComponent(Component c) {
+//		if (component != null)
+//			throw new ASTEditException("Changing of Component once it has been set is now allowed.");
+//		component = c;
+//	}
+//	
+//	public Component InstComponentDecl.getComponent() {
+//		return component;
+//	}
+//	
+//	protected InstComponentDecl InstNode.findOwnerOf(Component c) {
+//		for(InstComponentDecl icd : getInstComponentDecls()) {
+//			if (icd.getComponent() == c)
+//				return icd;
+//		}
+//		for (InstExtends ie : instExtends()) {
+//			InstComponentDecl result = ie.findOwnerOf(c);
+//			if (result != null)
+//				return result;
+//		}
+//		for(InstComponentDecl icd : getInstComponentDecls()) {
+//			InstComponentDecl result = icd.findOwnerOf(c);
+//			if (result != null)
+//				return result;
+//		}
+//		return null;
+//	}
 	
 	/*
 	 * ======================= Observer Related Methods =======================
 	 */
 	
-	private Map<Component, InstComponentDecl> InstClassDecl.childComponentMap = new HashMap<Component, InstComponentDecl>();
-
-	public class InstClassDecl implements Observer{}
-	public void InstClassDecl.update(Observable o, Object flag, Object additionalInfo) {
-		if (o == diagram() && flag == Icon.SUBCOMPONENT_ADDED) {
-			InstComponentDecl icd = findOwnerOf((Component)additionalInfo);
-			if (icd != null) {
-				System.err.println("Child already added!");
-				return;
-			}
-			icd = childComponentMap.remove(additionalInfo);
-			if (icd == null)
-				throw new ASTEditException("This should not be null, the component has been created else where");
-			((FullClassDecl)getClassDecl()).addNewComponentDecl(icd.getComponentDecl());
-			addInstComponentDecl(icd);
-		} else if (o == diagram() && flag == Icon.SUBCOMPONENT_REMOVED) {
-			InstComponentDecl icd = findOwnerOf((Component)additionalInfo);
-			if (icd == null)
-				throw new ASTEditException("This should not be null, the component has been created else where");
-			removeInstComponentDecl(icd);
-			((FullClassDecl)getClassDecl()).removeComponentDecl(icd.getComponentDecl());
-			childComponentMap.put((Component)additionalInfo, icd);
-		} else if (o == diagram() && flag == Diagram.CONNECTION_ADDED) {
-			Connection con = (Connection)additionalInfo;
-			FConnectClause fcc = findOwnerOf(con);
-			if (fcc == null) {
-				ConnectClause cc = new ConnectClause();
-				cc.setComment(new Comment());
-				cc.annotation().saveConnection(con);
-				cc.setConnector1(Access.fromClassName(con.getSourceConnector().getComponentName()));
-				cc.setConnector2(Access.fromClassName(con.getTargetConnector().getComponentName()));
-				((FullClassDecl)getClassDecl()).addNewEquation(cc);
-				fcc = (FConnectClause)cc.instantiate();
-				fcc.setConnection(con);
-				addFAbstractEquation(fcc);
-				con.addObserver(fcc);
-			} else {
-				((FullClassDecl)getClassDecl()).addNewEquation(fcc.getConnectClause());
-				addFAbstractEquation(fcc);
-			}
-			if (findOwnerOf((Component)con.getSourceConnector()) != fcc.getConnector1().getInstAccess().myInstComponentDecl()) {
-				// Reconnect?
-			}
-			if (findOwnerOf((Component)con.getTargetConnector()) != fcc.getConnector2().getInstAccess().myInstComponentDecl()) {
-				// Reconnect?
-			}
-		} else if (o == diagram() && flag == Diagram.CONNECTION_REMOVED) {
-			FConnectClause fcc = findOwnerOf((Connection)additionalInfo);
-			if (fcc == null)
-				throw new ASTEditException("This should not be null, the connection has been created else where");
-			removeFAbstractEquation(fcc);
-			((FullClassDecl)getClassDecl()).removeEquation(fcc.getConnectClause());
-		}
-	}
-	  
+//	private Map<Component, InstComponentDecl> InstClassDecl.childComponentMap = new HashMap<Component, InstComponentDecl>();
+//
+//	public class InstClassDecl implements Observer{}
+//	public void InstClassDecl.update(Observable o, Object flag, Object additionalInfo) {
+//		if (o == diagram() && flag == Icon.SUBCOMPONENT_ADDED) {
+//			InstComponentDecl icd = findOwnerOf((Component)additionalInfo);
+//			if (icd != null) {
+//				System.err.println("Child already added!");
+//				return;
+//			}
+//			icd = childComponentMap.remove(additionalInfo);
+//			if (icd == null)
+//				throw new ASTEditException("This should not be null, the component has been created else where");
+//			((FullClassDecl)getClassDecl()).addNewComponentDecl(icd.getComponentDecl());
+//			addInstComponentDecl(icd);
+//		} else if (o == diagram() && flag == Icon.SUBCOMPONENT_REMOVED) {
+//			InstComponentDecl icd = findOwnerOf((Component)additionalInfo);
+//			if (icd == null)
+//				throw new ASTEditException("This should not be null, the component has been created else where");
+//			removeInstComponentDecl(icd);
+//			((FullClassDecl)getClassDecl()).removeComponentDecl(icd.getComponentDecl());
+//			childComponentMap.put((Component)additionalInfo, icd);
+//		} else if (o == diagram() && flag == Diagram.CONNECTION_ADDED) {
+//			Connection con = (Connection)additionalInfo;
+//			FConnectClause fcc = findOwnerOf(con);
+//			if (fcc == null) {
+//				ConnectClause cc = new ConnectClause();
+//				cc.setComment(new Comment());
+//				cc.annotation().saveConnectionLine(con);
+//				cc.setConnector1(Access.fromClassName(con.getSourceConnector().getComponentName()));
+//				cc.setConnector2(Access.fromClassName(con.getTargetConnector().getComponentName()));
+//				((FullClassDecl)getClassDecl()).addNewEquation(cc);
+//				fcc = (FConnectClause)cc.instantiate();
+//				fcc.setConnection(con);
+//				addFAbstractEquation(fcc);
+//				con.addObserver(fcc);
+//			} else {
+//				((FullClassDecl)getClassDecl()).addNewEquation(fcc.getConnectClause());
+//				addFAbstractEquation(fcc);
+//			}
+//			if (findOwnerOf((Component)con.getSourceConnector()) != fcc.getConnector1().getInstAccess().myInstComponentDecl()) {
+//				// Reconnect?
+//			}
+//			if (findOwnerOf((Component)con.getTargetConnector()) != fcc.getConnector2().getInstAccess().myInstComponentDecl()) {
+//				// Reconnect?
+//			}
+//		} else if (o == diagram() && flag == Diagram.CONNECTION_REMOVED) {
+//			FConnectClause fcc = findOwnerOf((Connection)additionalInfo);
+//			if (fcc == null)
+//				throw new ASTEditException("This should not be null, the connection has been created else where");
+//			removeFAbstractEquation(fcc);
+//			((FullClassDecl)getClassDecl()).removeEquation(fcc.getConnectClause());
+//		}
+//	}
+//	  
 	public boolean FullClassDecl.removeComponentDecl(ComponentDecl cd) {
 		int componentIndex = getComponentDecls().getIndexOfChild(cd);
 		if (componentIndex < 0) {
@@ -521,19 +499,13 @@ aspect ModelicaIcons
 
 		return true;
 	}
-	
-	public class InstComponentDecl implements Observer{}
-	public void InstComponentDecl.update(Observable o, Object flag, Object additionalInfo) {
-		if (o == getComponent() && flag == Component.PLACEMENT_UPDATED) {
-			getComponentDecl().annotation().savePlacement(((Component)o).getPlacement());
-		}
-	}
-	
-	public class FConnectClause implements Observer{}
-	public void FConnectClause.update(Observable o, Object flag, Object additionalInfo) {
-		if (o instanceof Connection)
-			getConnectClause().annotation().saveConnection((Connection)o);
-	}
+//	
+//	public class InstComponentDecl implements Observer{}
+//	public void InstComponentDecl.update(Observable o, Object flag, Object additionalInfo) {
+//		if (o == getComponent() && flag == Component.PLACEMENT_UPDATED) {
+//			getComponentDecl().annotation().savePlacement(((Component)o).getPlacement());
+//		}
+//	}
 	
 	/*
 	 * F�r tidtagning.

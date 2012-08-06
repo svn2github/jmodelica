@@ -111,6 +111,22 @@ aspect AnnotationParsing {
 			throw new FailedConstructionException("Connection");
 		}
 		
+		/**
+		 * Creates a connection Line represented by this AnnotationNode
+		 * @return the created connection
+		 * @throws FailedConstructionExceptionException if transformation annotatioNode does not exist. 
+		 */
+		public Line createConnectionLine() throws FailedConstructionException {
+			AnnotationNode lineAnnotation = forPath("Line");
+			if (lineAnnotation.exists()) {
+				//TODO: Once refactor of graphical editor done, remove createConnection() and inline initializeLine()
+				Line con = new Line();
+				lineAnnotation.initializeLine(con);
+				return con;
+			}
+			throw new FailedConstructionException("ConnectionLine");
+		}
+		
 		public boolean hasPlacement() {
 			return forPath("Placement").exists();
 		}
@@ -120,7 +136,7 @@ aspect AnnotationParsing {
 		* @throws NotEnoughParametersException if the extent parameter was not given.
 		* @throws FailedConstructionExceptionException if transformation annotatioNode does not exist. 
 		*/
-		private Transformation createTransformation() 
+		public Transformation createTransformation() 
 			throws FailedConstructionException, NotEnoughParametersException {
 			Transformation transformation = new Transformation();
 			boolean extentSet = false;
@@ -147,7 +163,7 @@ aspect AnnotationParsing {
 		* @return the created CoordinateSystem if the annotationNode exists else a 
 		* deafult Coordinatesystem according to MLS. 
 		*/
-		private CoordinateSystem createCoordinateSystem() {
+		public CoordinateSystem createCoordinateSystem() {
 			if (!exists()) {
 				return CoordinateSystem.DEFAULT_COORDINATE_SYSTEM;
 			}
@@ -174,7 +190,7 @@ aspect AnnotationParsing {
 		* @return a grid vector.
 		* @throws FailedConstructionException if grid vector was null.	
 		* */
-		private double[] createGrid() 
+		public double[] createGrid() 
 			throws FailedConstructionException, NotEnoughParametersException, IllegalArgumentException {
 			if(realVector() != null) {
 				double[] grid = realVector();
@@ -187,7 +203,7 @@ aspect AnnotationParsing {
 		* Creates a list with the graphics attribute represented by this AnnotationNode.
 		* @return the created list.		
 		* */
-		private ArrayList<GraphicItem> createGraphics() {
+		public ArrayList<GraphicItem> createGraphics() {
 			ArrayList<GraphicItem> items = new ArrayList<GraphicItem>();
 			for (AnnotationNode a : this) {
 				try {

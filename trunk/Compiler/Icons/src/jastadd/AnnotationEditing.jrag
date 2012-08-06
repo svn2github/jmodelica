@@ -11,13 +11,13 @@ aspect AnnotationEditing {
 	}
 	
 	/**
-	 * Saves the connection annotation from <code>connection</code> to this
+	 * Saves the line annotation from <code>connectionLine</code> to this
 	 * annotation node.
 	 * 
 	 * @param connection Connection to save annotation from
 	 */
-	public void AnnotationNode.saveConnection(Connection connection) {
-		forPath("Line").save((Line)connection);
+	public void AnnotationNode.saveConnectionLine(Line connectionLine) {
+		forPath("Line").save(connectionLine);
 	}
 	
 	/*
