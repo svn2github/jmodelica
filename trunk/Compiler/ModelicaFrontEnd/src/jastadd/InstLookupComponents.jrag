@@ -153,6 +153,7 @@ aspect InstLookupComponents {
 	
 	syn HashSet InstNode.genericLookupInstConstant(String name) = lookupInstConstant(name);
 	eq InstComponentDecl.genericLookupInstConstant(String name) = myInstClass().lookupInstConstant(name);
+	eq InstExtends.genericLookupInstConstant(String name)       = myInstClass().lookupInstConstant(name);
 	
 	/**
 	 * \brief Check if any constraining class/component has the given component.

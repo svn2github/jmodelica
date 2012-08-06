@@ -1878,6 +1878,62 @@ end NameTests.ConstantLookup36;
 end ConstantLookup36;
 
 
+model ConstantLookup37
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup37",
+         description="Package constant through hierarchical lookup from extended class",
+         flatModel="
+fclass NameTests.ConstantLookup37
+ Real z = 2.0;
+end NameTests.ConstantLookup37;
+")})));
+
+    package A
+        constant Real e = 2;
+                
+        package B
+            constant Real g = 1;
+            extends C(f = e);
+        end B;
+    end A;
+    
+    package C
+        constant Real f = 1;
+    end C;
+    
+    package D = A.B(g = 3);
+    
+    Real z = D.f;
+end ConstantLookup37;
+
+
+model ConstantLookup38
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup38",
+         description="Package constant through hierarchical lookup from extended class",
+         flatModel="
+fclass NameTests.ConstantLookup38
+ Real z = 2.0;
+end NameTests.ConstantLookup38;
+")})));
+
+    package A
+        constant Real e = 2;
+                
+        package B
+            constant Real g = 1;
+			constant Real f = e;
+        end B;
+    end A;
+    
+    package D = A.B(g = 3);
+    
+    Real z = D.f;
+end ConstantLookup38;
+
+
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
