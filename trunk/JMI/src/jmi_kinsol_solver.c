@@ -156,10 +156,11 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, void *user_data, N_Vector t
 	for(i = 0; i < N; i++){ 
  	    block->x[i] = Ith(u,i);
 	}
+
 	/*printf("x[0]: %f\n Jac: ", block->x[0]);*/
 	for(i = 0; i < N; i++){
 		block->dx[i] = 1;
-		block->dF(block->jmi,block->x,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE_WITH_STATE);
+		block->dF(block->jmi,block->x,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE);
 		for(j = 0; j < N; j++){
 			(J->data)[i*N+j] = block->dres[j];
 			/*printf(" %f, ", block->dres[j]);*/

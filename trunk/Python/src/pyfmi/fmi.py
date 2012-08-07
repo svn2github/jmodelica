@@ -2086,7 +2086,7 @@ class FMUModel2(FMUModel):
     
         yc_vrefs = self._md.get_continous_outputs_value_references()
         uc_vrefs = self._md.get_continous_inputs_value_references()
-        
+                
         # Compute finite diffrences (fd)
         for i in range(nx):
             if x[i] < 0:
@@ -2134,7 +2134,7 @@ class FMUModel2(FMUModel):
 
             u[i] = u[i] + delta
             self.set_real(uc_vrefs,u)
-            
+        
         # *** Error checking ***
         # Jacobian error (n_err): Compare to fd approx, if relative error > tol then count as error. 
         # Sparsity error (n_spar_err): Compare sparsity ((A/B/C/D)_st) to fd approx, if > spar_tol in fd in some pos. but

@@ -821,9 +821,9 @@ equation
 		output Real Y;
 	equation
 		(x1,x2,x3,x4) = F(x1,x2,x3,x4);
-		der(e) = log(x1*x2)*e;
+		der(e) = log(x1*x2 + 2)*e;
 		der(f) = sin(x2*x3)*f;
-		der(g) = log(x1*x2*x3*x4)*g+e+f;
+		der(g) = log(x1*x2*x3*x4 + 3)*g+e+f;
 		der(Y) = x1+x2+x3+x4+e+f+g;
  end Unsolved_blocks6;
  

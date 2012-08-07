@@ -852,8 +852,8 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	n_outputs_real = n_outputs;
 	
 	/*dv and the dz are stored in the same vector*/
-	dv = jmi->dv;
-	dz = jmi->dv;
+	dv = jmi->dz;
+	dz = jmi->dz;
 	
 	/* Used for debbugging
 	jac2 = (fmiReal*)calloc(njac, sizeof(fmiReal));
@@ -863,7 +863,6 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	
  	for(i = 0; i<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;i++){
  		(*dz)[i] = 0;
- 		(*dv)[i] = 0;
 	}
 
 	for(i = 0; i < jmi->n_real_u; i++){
@@ -881,9 +880,10 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 				(*dv)[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j] + jmi->n_real_dx] = 1.;
 			}
 			/*
-			for (j=0;j<jmi->n_z;j++) {
-				printf(" * %d %f\n",j,d_z[j]);
-			}*/
+			for (j=0;j<jmi->n_v;j++) {
+				printf(" * %d %f\n",j,(*(jmi->dz))[j]);
+			}
+			*/
 			/* Evaluate directional derivative */
 			jmi->dae->ode_derivatives_dir_der(jmi);
 			/* Extract Jacobian values */
@@ -1021,8 +1021,11 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 fmiStatus fmi_get_directional_derivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]) {
 	int i = 0;
 	jmi_t* jmi = ((fmi_t *)c)->jmi;
-	jmi_real_t** dv_ = jmi->dv;
-	jmi_real_t** dz_ = jmi->dv;
+	jmi_real_t** dv_ = jmi->dz;
+	jmi_real_t** dz_ = jmi->dz;
+	for (i=0;i<jmi->n_v;i++) {
+		(*dv_)[i] = 0.;
+	}
 	for (i=0;i<nvvr;i++) {
 		(*dv_)[get_index_from_value_ref(v_vref[i])] = dv[i];
 	}
