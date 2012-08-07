@@ -20,6 +20,16 @@ aspect AnnotationEditing {
 		forPath("Line").save(connectionLine);
 	}
 	
+	/**
+	 * Saves the coordinateSystem annotation from <code>system</code> to this
+	 * annotation node.
+	 * 
+	 * @param system CoordinateSystem to save annotation from
+	 */
+	public void AnnotationNode.saveCoordinateSystem(CoordinateSystem system) {
+		forPath("CoordinateSystem").save(system);
+	}
+	
 	/*
 	 * ====================== PRIVATE COORD SAVE METHODS =======================
 	 */

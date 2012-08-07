@@ -12,23 +12,26 @@ aspect ModelicaIconsEditing {
 		return getConnectClause().getConnectionLine();
 	}
 	
-	syn lazy Line ConnectClause.getConnectionLine() {
-		Line line;
+	private Line ConnectClause.connectionLine;
+	
+	public Line ConnectClause.getConnectionLine() {
+		if (connectionLine != null)
+			return connectionLine;
 		try {
-			line = annotation().createConnectionLine();
+			connectionLine = annotation().createConnectionLine();
 		} catch (FailedConstructionException e) {
-			line = new Line();
+			connectionLine = new Line();
 		}
-		line.addObserver(this);
-		return line;
+		connectionLine.addObserver(this);
+		return connectionLine;
 	}
 	
 	public class ConnectClause implements Observer{}
 	
 	@Override
 	public void ConnectClause.update(Observable o, Object flag, Object additionalInfo) {
-		if (o instanceof Line)
-			annotation().saveConnectionLine((Line) o);
+		if (o == getConnectionLine())
+			annotation().saveConnectionLine(getConnectionLine());
 	}
 	
 	
@@ -39,13 +42,28 @@ aspect ModelicaIconsEditing {
 		return getComponentDecl().getPlacement();
 	}
 	
-	syn lazy Placement ComponentDecl.getPlacement() {
+	private Placement ComponentDecl.placement;
+	
+	public Placement ComponentDecl.getPlacement() {
+		if (placement != null)
+			return placement;
+		
 		try {
-			return annotation().createPlacement(Context.DIAGRAM);
+			placement = annotation().createPlacement(Context.DIAGRAM);
 		}
 		catch(FailedConstructionException fe) {
-			return new Placement(new Transformation(new Extent(new Point(-10, -10), new Point(10, 10))));
+			placement = new Placement(new Transformation(new Extent(new Point(-10, -10), new Point(10, 10))));
 		}
+		placement.addObserver(this);
+		return placement;
+	}
+	
+	public class ComponentDecl implements Observer{}
+	
+	@Override
+	public void ComponentDecl.update(Observable o, Object flag, Object additionalInfo) {
+		if (o == getPlacement())
+			annotation().savePlacement(getPlacement());
 	}
 	
 	public CoordinateSystem InstComponentDecl.getCoordinateSystem() {
@@ -56,8 +74,22 @@ aspect ModelicaIconsEditing {
 		return getClassDecl().getCoordinateSystem();
 	}
 	
-	syn lazy CoordinateSystem ClassDecl.getCoordinateSystem() {
-		return annotation().createCoordinateSystem();
+	private CoordinateSystem ClassDecl.coordinateSystem;
+	
+	public CoordinateSystem ClassDecl.getCoordinateSystem() {
+		if (coordinateSystem != null)
+			return coordinateSystem;
+		coordinateSystem = annotation().forPath("Diagram/CoordinateSystem").createCoordinateSystem();
+		coordinateSystem.addObserver(this);
+		return coordinateSystem;
+	}
+	
+	public class ClassDecl implements Observer{}
+	
+	@Override
+	public void ClassDecl.update(Observable o, Object flag, Object additionalInfo) {
+		if (o == getCoordinateSystem())
+			annotation().forPath("Diagram").saveCoordinateSystem(getCoordinateSystem());
 	}
 	
 	/*-------------------------------------------------------------------------
