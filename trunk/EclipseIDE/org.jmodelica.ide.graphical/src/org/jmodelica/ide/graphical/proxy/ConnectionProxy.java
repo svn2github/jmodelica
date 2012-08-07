@@ -31,7 +31,11 @@ public class ConnectionProxy {
 	}
 
 	public Line getLine() {
-		return getFConnectClause().getConnectionLine();
+		if (connected)
+			return getFConnectClause().getConnectionLine();
+		if (lineCache == null)
+			lineCache = new Line(Arrays.asList(new Point(), new Point()));
+		return lineCache;
 	}
 
 	public void disconnect() {
@@ -45,9 +49,7 @@ public class ConnectionProxy {
 	public void connect() {
 		if (connected)
 			return;
-		if (lineCache == null)
-			lineCache = new Line(Arrays.asList(new Point(), new Point()));
-		diagram.addConnection(sourceID, targetID, lineCache);
+		diagram.addConnection(sourceID, targetID, getLine());
 		lineCache = null;
 		connected = true;
 	}
