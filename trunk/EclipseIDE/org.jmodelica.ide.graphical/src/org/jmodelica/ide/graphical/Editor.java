@@ -37,11 +37,10 @@ import org.jastadd.plugin.Activator;
 import org.jmodelica.ide.graphical.actions.OpenComponentAction;
 import org.jmodelica.ide.graphical.actions.RotateAction;
 import org.jmodelica.ide.graphical.edit.EditPartFactory;
-import org.jmodelica.ide.graphical.proxy.AbstractDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.AbstractNodeProxy;
+import org.jmodelica.ide.graphical.proxy.ClassDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentProxy;
-import org.jmodelica.ide.graphical.proxy.ClassDiagramProxy;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
 import org.jmodelica.modelica.compiler.SourceRoot;
@@ -49,7 +48,7 @@ import org.jmodelica.modelica.compiler.SourceRoot;
 public class Editor extends GraphicalEditor {
 
 	private GraphicalEditorInput input;
-	private AbstractDiagramProxy dp;
+	private ClassDiagramProxy dp;
 	private Stack<ComponentProxy> openComponentStack;
 	private Composite breadcrumbsBar;
 
@@ -190,9 +189,7 @@ public class Editor extends GraphicalEditor {
 		SafeRunner.run(new SafeRunnable() {
 			@Override
 			public void run() throws Exception {
-//				TODO:refactor to proxy pattern.
-//				StoredDefinition definition = dp.getDefinition();
-//				definition.getFile().setContents(new ByteArrayInputStream(definition.prettyPrintFormatted().getBytes()), false, true, monitor);
+				dp.saveModelicaFile(monitor);
 				getCommandStack().markSaveLocation();
 			}
 		});

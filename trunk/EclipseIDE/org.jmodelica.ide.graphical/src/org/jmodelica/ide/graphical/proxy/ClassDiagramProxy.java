@@ -1,11 +1,16 @@
 package org.jmodelica.ide.graphical.proxy;
 
+import java.io.ByteArrayInputStream;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.icons.primitives.Line;
 import org.jmodelica.modelica.compiler.FConnectClause;
 import org.jmodelica.modelica.compiler.FullClassDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
+import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class ClassDiagramProxy extends AbstractDiagramProxy {
 
@@ -61,6 +66,11 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 		((ConnectorProxy) getComponentMap().get(fcc.getConnector1().getInstAccess().myInstComponentDecl().qualifiedName())).sourceConnectionsHasChanged();
 		((ConnectorProxy) getComponentMap().get(fcc.getConnector2().getInstAccess().myInstComponentDecl().qualifiedName())).targetConnectionsHasChanged();
 		return true;
+	}
+
+	public void saveModelicaFile(IProgressMonitor monitor) throws CoreException {
+		StoredDefinition definition = instClassDecl.getDefinition();
+		definition.getFile().setContents(new ByteArrayInputStream(definition.prettyPrintFormatted().getBytes()), false, true, monitor);
 	}
 
 }
