@@ -635,10 +635,15 @@ aspect TransformCanonical {
 		protected ArrayList<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
 		
 		public EquationBlock(ArrayList<SimpleEquationBlock> blocks) {
-			this.blocks.addAll(blocks);	
+			for (SimpleEquationBlock block : blocks)
+				addBlock(block);
 		}
 				
 		public void addBlock(SimpleEquationBlock b) {
+			for (SimpleEquationBlock block : blocks) {
+				if (block.mergeBlock(b))
+					return;
+			}
 			blocks.add(b);
 		}	
 		
