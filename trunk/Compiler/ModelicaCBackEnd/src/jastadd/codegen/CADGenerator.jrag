@@ -35,12 +35,28 @@ public class CADGenerator extends CGenerator {
 	}
 	
 	/**
-	 * Helper method to check if any of the jacobian options are activated 
-	 * (generate_ode_jacobian or generate_dae_jacobian).
+	 * Helper method to check if DAE jacobians should be generated (generate_dae_jacobian)
 	 */
-	static boolean shouldGenerateJacobians(FClass fclass) {
+	static boolean shouldGenerateDAEJacobians(FClass fclass) {
 		OptionRegistry opt = fclass.root().options;
-		return opt.getBooleanOption("generate_ode_jacobian") || opt.getBooleanOption("generate_dae_jacobian");
+		return opt.getBooleanOption("generate_dae_jacobian");
+	}
+	
+	/**
+	 * Helper method to check if ODE jacobians should be generated (generated_ode_jacobian)
+	 */
+	static boolean shouldGenerateODEJacobians(FClass fclass) {
+		OptionRegistry opt = fclass.root().options;
+		return opt.getBooleanOption("generate_ode_jacobian");
+	}
+	
+	/**
+	 * Helper method to check if block jacobians should be generated 
+	 * (depends on both generate_ode_jacobian and generate_block_jacobian)
+	 */
+	static boolean shouldGenerateBlockJacobians(FClass fclass) {
+		OptionRegistry opt = fclass.root().options;
+		return opt.getBooleanOption("generate_ode_jacobian") || opt.getBooleanOption("generate_block_jacobian");
 	}
 
 	class DAETag_C_equationResidualDirectionalDerivative extends DAETag {
@@ -53,7 +69,7 @@ public class CADGenerator extends CGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			int i = 0;
-			if (shouldGenerateJacobians(fclass)) {
+			if (shouldGenerateDAEJacobians(fclass)) {
 				for (FAbstractEquation e : fclass.equations()) {
 					e.genVarDecls_CAD(ASTNode.printer_C, genPrinter, INDENT);
 				}
@@ -79,9 +95,10 @@ public class CADGenerator extends CGenerator {
 			super("CAD_function_headers","C: CAD function headers representing Modelica functions",
 			  myGenerator,fclass);
 		}
-
+		// Function calls might appear in dae_dir_df, in model_ode_derivatives or in blocks and should
+		// therefore be generated if one of them is true. 
 		public void generate(PrintStream genPrinter) {
-			if (shouldGenerateJacobians(fclass)){
+			if (shouldGenerateDAEJacobians(fclass) || shouldGenerateODEJacobians(fclass) || shouldGenerateBlockJacobians(fclass)){
 				for (FFunctionDecl func : fclass.getFFunctionDecls()){
 					func.genHeader_CAD(genPrinter, "");
 				}
@@ -98,9 +115,10 @@ public class CADGenerator extends CGenerator {
 			super("CAD_functions","C: CAD functions representing Modelica functions",
 			  myGenerator,fclass);
 		}
-
+		// Function calls might appear in dae_dir_df, in model_ode_derivatives or in blocks and should
+		// therefore be generated if one of them is true. 
 		public void generate(PrintStream genPrinter) {
-			if (shouldGenerateJacobians(fclass)){
+			if (shouldGenerateDAEJacobians(fclass) || shouldGenerateODEJacobians(fclass) || shouldGenerateBlockJacobians(fclass)){
 				for (FFunctionDecl func : fclass.getFFunctionDecls()){
 					func.prettyPrint_CAD(genPrinter, "");
 				}
@@ -119,7 +137,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (shouldGenerateJacobians(fclass)) {
+			if (shouldGenerateBlockJacobians(fclass)) {
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
 				 	block.genBlockResidualFunction_CAD(block_counter,false,"  ",genPrinter); 
@@ -142,7 +160,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (shouldGenerateJacobians(fclass)) {
+			if ( shouldGenerateBlockJacobians(fclass)) {
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
 					block.genBlockResidualFunction_CAD(block_counter,true,"  ",genPrinter); 
@@ -166,7 +184,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (shouldGenerateJacobians(fclass)) {
+			if (shouldGenerateBlockJacobians(fclass)) {
 			
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
@@ -192,7 +210,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (shouldGenerateJacobians(fclass)) {
+			if (shouldGenerateBlockJacobians(fclass)) {
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
 				    if (!block.isSolvable()) {
@@ -217,7 +235,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (shouldGenerateJacobians(fclass)) {
+			if (shouldGenerateODEJacobians(fclass)) {
 				genPrinter.print("\n/******** Declarations *******/\n");
 				fclass.getDAEStructuredBLT().genSolvedVarDecls_CAD(genPrinter, INDENT);
 				genPrinter.print("\njmi_real_t** dz = jmi->dz;\n");
@@ -228,6 +246,7 @@ public class CADGenerator extends CGenerator {
 
 	/**
 	 * Generates code for solving the BLT blocks in the initialization system using CAD
+	 * See fmi_me_modelica_template, not needed as of revision 3657
 	 */
 	class DAETag_CAD_ode_initialization extends DAETag {
 		
@@ -237,7 +256,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (shouldGenerateJacobians(fclass)) {
+			if (shouldGenerateODEJacobians(fclass)) {
 				//genPrinter.print(INDENT + "model_ode_guards(jmi);\n");
 				genPrinter.print("\n/******** Start declarations *******/\n");
 				fclass.getDAEInitBLT().genVarDecls_CAD(genPrinter, INDENT);
@@ -267,7 +286,7 @@ public class CADGenerator extends CGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			if (shouldGenerateJacobians(fclass)) {
+			if (shouldGenerateODEJacobians(fclass)) {
 			    
 			    int A_n_nz = 0;
 			    int B_n_nz = 0;
@@ -473,7 +492,7 @@ public class CADGenerator extends CGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			if (shouldGenerateJacobians(fclass)) {
+			if (shouldGenerateDAEJacobians(fclass)) {
 			    
 			    int dae_n_nz = fclass.freeParametersEquationSparsity_n_nz()+
 			        fclass.derivativeVariablesEquationSparsity_n_nz() + 
@@ -594,4 +613,3 @@ public class CADGenerator extends CGenerator {
 	}
 
 }
-

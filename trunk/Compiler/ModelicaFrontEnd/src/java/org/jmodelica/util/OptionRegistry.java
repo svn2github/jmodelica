@@ -56,6 +56,9 @@ public class OptionRegistry {
 					"If this option is set to true (default is false), code for computing DAE Jacobians are generated."),
 			GEN_ODE_JAC   ("generate_ode_jacobian",            false,		
 					"If this option is set to true (default is false), code for computing ODE Jacobians are generated."),
+			GEN_BLOCK_JAC   ("generate_block_jacobian",            false,		
+					"If this option is set to true (default is false), code for computing block Jacobians is generated. "+
+					"If blocks are needed to compute ODE jacobians they will be generated anyway"),
 			GEN_ODE   ("generate_ode",            false, 
 					"If this option is set to true (default is false), code for solving ODEs are generated. "),
 			EXTRA_LIB   ("extra_lib_dirs",            "", 
