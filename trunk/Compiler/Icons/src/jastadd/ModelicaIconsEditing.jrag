@@ -8,135 +8,378 @@ aspect ModelicaIconsEditing {
 	 *                          Connection related
 	 ------------------------------------------------------------------------*/
 	
-	public Line FConnectClause.getConnectionLine() {
-		return getConnectClause().getConnectionLine();
+	/**
+	 * Thread safe method that retreives the connection line for this connection.
+	 */
+	public Line FConnectClause.syncGetConnectionLine() {
+		synchronized (state()) {
+			return getConnectClause().syncGetConnectionLine();
+		}
 	}
 	
 	private Line ConnectClause.connectionLine;
 	
-	public Line ConnectClause.getConnectionLine() {
-		if (connectionLine != null)
+	/**
+	 * Thread safe method that retreives the connection line for this connection.
+	 */
+	public Line ConnectClause.syncGetConnectionLine() {
+		synchronized (state()) {
+			if (connectionLine != null)
+				return connectionLine;
+			try {
+				connectionLine = annotation().createConnectionLine();
+			} catch (FailedConstructionException e) {
+				connectionLine = new Line();
+			}
+			connectionLine.addObserver(this);
 			return connectionLine;
-		try {
-			connectionLine = annotation().createConnectionLine();
-		} catch (FailedConstructionException e) {
-			connectionLine = new Line();
 		}
-		connectionLine.addObserver(this);
-		return connectionLine;
 	}
 	
 	public class ConnectClause implements Observer{}
 	
 	@Override
 	public void ConnectClause.update(Observable o, Object flag, Object additionalInfo) {
-		if (o == getConnectionLine())
-			annotation().saveConnectionLine(getConnectionLine());
+		synchronized (state()) {
+			if (o == syncGetConnectionLine())
+				annotation().saveConnectionLine(syncGetConnectionLine());
+		}
 	}
 	
 	
 	/*-------------------------------------------------------------------------
 	 *                          Component related
 	 ------------------------------------------------------------------------*/
-	public Placement InstComponentDecl.getPlacement() {
-		return getComponentDecl().getPlacement();
+	/**
+	 * Thread safe method that retreives the placement for this component.
+	 */
+	public Placement InstComponentDecl.syncGetPlacement() {
+		synchronized (state()) {
+			return getComponentDecl().syncGetPlacement();
+		}
 	}
 	
 	private Placement ComponentDecl.placement;
 	
-	public Placement ComponentDecl.getPlacement() {
-		if (placement != null)
+	/**
+	 * Thread safe method that retreives the placement for this component.
+	 */
+	public Placement ComponentDecl.syncGetPlacement() {
+		synchronized (state()) {
+			if (placement != null)
+				return placement;
+			
+			try {
+				placement = annotation().createPlacement(Context.DIAGRAM);
+			}
+			catch(FailedConstructionException fe) {
+				placement = new Placement(new Transformation(new Extent(new Point(-10, -10), new Point(10, 10))));
+			}
+			placement.addObserver(this);
 			return placement;
-		
-		try {
-			placement = annotation().createPlacement(Context.DIAGRAM);
 		}
-		catch(FailedConstructionException fe) {
-			placement = new Placement(new Transformation(new Extent(new Point(-10, -10), new Point(10, 10))));
-		}
-		placement.addObserver(this);
-		return placement;
 	}
 	
 	public class ComponentDecl implements Observer{}
 	
 	@Override
 	public void ComponentDecl.update(Observable o, Object flag, Object additionalInfo) {
-		if (o == getPlacement())
-			annotation().savePlacement(getPlacement());
+		synchronized (state()) {
+			if (o == syncGetPlacement())
+				annotation().savePlacement(syncGetPlacement());
+		}
 	}
 	
-	public CoordinateSystem InstComponentDecl.getCoordinateSystem() {
-		return myInstClass().getCoordinateSystem();
+	/**
+	 * Thread safe method that retreives the coordiante system for this
+	 * component.
+	 */
+	public CoordinateSystem InstComponentDecl.syncGetCoordinateSystem() {
+		synchronized (state()) {
+			return myInstClass().syncGetCoordinateSystem();
+		}
 	}
 	
-	public CoordinateSystem InstClassDecl.getCoordinateSystem() {
-		return getClassDecl().getCoordinateSystem();
+	/**
+	 * Thread safe method that retreives the coordiante system for this class.
+	 */
+	public CoordinateSystem InstClassDecl.syncGetCoordinateSystem() {
+		synchronized (state()) {
+			return getClassDecl().syncGetCoordinateSystem();
+		}
 	}
 	
 	private CoordinateSystem ClassDecl.coordinateSystem;
 	
-	public CoordinateSystem ClassDecl.getCoordinateSystem() {
-		if (coordinateSystem != null)
+	/**
+	 * Thread safe method that retreives the coordiante system for this class.
+	 */
+	public CoordinateSystem ClassDecl.syncGetCoordinateSystem() {
+		synchronized (state()) {
+			if (coordinateSystem != null)
+				return coordinateSystem;
+			coordinateSystem = annotation().forPath("Diagram/CoordinateSystem").createCoordinateSystem();
+			coordinateSystem.addObserver(this);
 			return coordinateSystem;
-		coordinateSystem = annotation().forPath("Diagram/CoordinateSystem").createCoordinateSystem();
-		coordinateSystem.addObserver(this);
-		return coordinateSystem;
+		}
 	}
 	
 	public class ClassDecl implements Observer{}
 	
 	@Override
 	public void ClassDecl.update(Observable o, Object flag, Object additionalInfo) {
-		if (o == getCoordinateSystem())
-			annotation().forPath("Diagram").saveCoordinateSystem(getCoordinateSystem());
+		synchronized (state()) {
+			if (o == syncGetCoordinateSystem())
+				annotation().forPath("Diagram").saveCoordinateSystem(syncGetCoordinateSystem());
+		}
 	}
 	
 	/*-------------------------------------------------------------------------
 	 *                          Class related
 	 ------------------------------------------------------------------------*/
-	public InstComponentDecl InstClassDecl.addComponent(String className, String componentName, Placement placement) {
-		ComponentDecl componentDecl = new ComponentDecl();
-		componentDecl.setClassName(Access.fromClassName(className));
-		componentDecl.setVisibilityType(new PublicVisibilityType());
-		componentDecl.setName(new IdDecl(componentName));
-		componentDecl.setComment(new Comment());
-		componentDecl.setCCComment(new Comment());
-		componentDecl.annotation().savePlacement(placement);
-		
-		FullClassDecl classDecl = (FullClassDecl)getClassDecl();
-		classDecl.addNewComponentDecl(componentDecl);
-		InstComponentDecl icd = (InstComponentDecl)createInstComponentDecl(componentDecl);
-		addInstComponentDecl(icd);
-		return icd;
+	/**
+	 * Thread safe method that adds a new component to this class.
+	 */
+	public InstComponentDecl InstClassDecl.syncAddComponent(String className, String componentName, Placement placement) {
+		synchronized (state()) {
+			ComponentDecl componentDecl = new ComponentDecl();
+			componentDecl.setClassName(Access.fromClassName(className));
+			componentDecl.setVisibilityType(new PublicVisibilityType());
+			componentDecl.setName(new IdDecl(componentName));
+			componentDecl.setComment(new Comment());
+			componentDecl.setCCComment(new Comment());
+			componentDecl.annotation().savePlacement(placement);
+			
+			FullClassDecl classDecl = (FullClassDecl)getClassDecl();
+			classDecl.addNewComponentDecl(componentDecl);
+			InstComponentDecl icd = (InstComponentDecl)createInstComponentDecl(componentDecl);
+			addInstComponentDecl(icd);
+			return icd;
+		}
 	}
 	
-	public void InstClassDecl.removeComponent(InstComponentDecl icd) {
-		removeInstComponentDecl(icd);
-		((FullClassDecl)getClassDecl()).removeComponentDecl(icd.getComponentDecl());
+	/**
+	 * Thread safe method that removes a component from this class.
+	 */
+	public void InstClassDecl.syncRemoveComponent(InstComponentDecl icd) {
+		synchronized (state()) {
+			removeInstComponentDecl(icd);
+			((FullClassDecl)getClassDecl()).removeComponentDecl(icd.getComponentDecl());
+		}
 	}
 	
-	public ConnectClause InstClassDecl.addConnection(String sourceID, String targetID) {
-		ConnectClause connectClause = new ConnectClause();
-		connectClause.setComment(new Comment());
-		connectClause.setConnector1(Access.fromClassName(sourceID));
-		connectClause.setConnector2(Access.fromClassName(targetID));
-		addConnection(connectClause);
-		return connectClause;
+	/**
+	 * Thread safe method that adds a new connection to this class.
+	 */
+	public ConnectClause InstClassDecl.syncAddConnection(String sourceID, String targetID) {
+		synchronized (state()) {
+			ConnectClause connectClause = new ConnectClause();
+			connectClause.setComment(new Comment());
+			connectClause.setConnector1(Access.fromClassName(sourceID));
+			connectClause.setConnector2(Access.fromClassName(targetID));
+			syncAddConnection(connectClause);
+			return connectClause;
+		}
 	}
 	
-	public void InstClassDecl.addConnection(ConnectClause connectClause) {
-		((FullClassDecl)getClassDecl()).addNewEquation(connectClause);
-		FConnectClause fcc = (FConnectClause)connectClause.instantiate();
-		addFAbstractEquation(fcc);
+	/**
+	 * Thread safe method that adds an existing connection to this class.
+	 * TODO:Propper Javadoc
+	 */
+	public void InstClassDecl.syncAddConnection(ConnectClause connectClause) {
+		synchronized (state()) {
+			((FullClassDecl)getClassDecl()).addNewEquation(connectClause);
+			FConnectClause fcc = (FConnectClause)connectClause.instantiate();
+			addFAbstractEquation(fcc);
+		}
 	}
 	
-	public boolean InstClassDecl.removeConnection(FConnectClause fcc) {
-		if (!removeFAbstractEquation(fcc))
-			return false;
-		((FullClassDecl) getClassDecl()).removeEquation(fcc.getConnectClause());
-		return true;
+	/**
+	 * Thread safe method that removes a connection from this class.
+	 * TODO:Propper Javadoc
+	 */
+	public boolean InstClassDecl.syncRemoveConnection(FConnectClause fcc) {
+		synchronized (state()) {
+			if (!removeFAbstractEquation(fcc))
+				return false;
+			((FullClassDecl) getClassDecl()).removeEquation(fcc.getConnectClause());
+			return true;
+		}
 	}
 	
 
+	/*-------------------------------------------------------------------------
+	 *                          Misc Sync methods
+	 ------------------------------------------------------------------------*/
+	
+	/**
+	 * Thread safe wrapper method for InstComponentDecl.isConnector()
+	 */
+	public boolean InstComponentDecl.syncIsConnector() {
+		synchronized (state()) {
+			return isConnector();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for InstComponentDecl.qualifiedName()
+	 */
+	public String InstComponentDecl.syncQualifiedName() {
+		synchronized (state()) {
+			return qualifiedName();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for InstClassDecl.qualifiedName()
+	 */
+	public String InstClassDecl.syncQualifiedName() {
+		synchronized (state()) {
+			return qualifiedName();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for InstClassDecl.getClassIconName()
+	 */
+	public String InstClassDecl.syncGetClassIconName() {
+		synchronized (state()) {
+			return getClassIconName();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for InstNode.name()
+	 */
+	public String InstNode.syncName() {
+		synchronized (state()) {
+			return name();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for InstNode.getInstExtendss()
+	 */
+	public List<InstExtends> InstNode.syncGetInstExtendss() {
+		synchronized (state()) {
+			return getInstExtendss();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for InstNode.getInstComponentDecls()
+	 */
+	public List<InstComponentDecl> InstNode.syncGetInstComponentDecls() {
+		synchronized (state()) {
+			return getInstComponentDecls();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for BaseNode.iconAnnotation()
+	 */
+	public AnnotationNode BaseNode.syncIconAnnotation() {
+		synchronized (state()) {
+			return iconAnnotation();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for InstNode.myInstClass()
+	 */
+	public InstClassDecl InstNode.syncMyInstClass() {
+		synchronized (state()) {
+			return myInstClass();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for InstClassDecl.isUnknown()
+	 */
+	public boolean InstClassDecl.syncIsUnknown() {
+		synchronized (state()) {
+			return isUnknown();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for InstNode.getFAbstractEquations()
+	 */
+	public List<FAbstractEquation> InstNode.syncGetFAbstractEquations() {
+		synchronized (state()) {
+			return getFAbstractEquations();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for FConnectClause.getConnectClause()
+	 */
+	public ConnectClause FConnectClause.syncGetConnectClause() {
+		synchronized (state()) {
+			return getConnectClause();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for FConnectClause.getConnector1()
+	 */
+	public FIdUseInstAccess FConnectClause.syncGetConnector1() {
+		synchronized (state()) {
+			return getConnector1();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for FConnectClause.getConnector2()
+	 */
+	public FIdUseInstAccess FConnectClause.syncGetConnector2() {
+		synchronized (state()) {
+			return getConnector2();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for FIdUseInstAccess.getInstAccess()
+	 */
+	public InstAccess FIdUseInstAccess.syncGetInstAccess() {
+		synchronized (state()) {
+			return getInstAccess();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for InstAccess.myInstComponentDecl()
+	 */
+	public InstComponentDecl InstAccess.syncMyInstComponentDecl() {
+		synchronized (state()) {
+			return myInstComponentDecl();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for InstNode.simpleLookupInstComponentDecl
+	 */
+	public InstComponentDecl InstNode.syncSimpleLookupInstComponentDecl(String name) {
+		synchronized (state()) {
+			return simpleLookupInstComponentDecl(name);
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for InstComponentDecl.getComponentDecl()
+	 */
+	public ComponentDecl InstComponentDecl.syncGetComponentDecl() {
+		synchronized (state()) {
+			return getComponentDecl();
+		}
+	}
+	
+	/**
+	 * Thread safe wrapper method for ComponentDecl.isProtected()
+	 */
+	public boolean ComponentDecl.syncIsProtected() {
+		synchronized (state) {
+			return isProtected();
+		}
+	}
 }
