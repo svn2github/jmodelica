@@ -1,18 +1,16 @@
 package org.jmodelica.ide.graphical.edit.parts.primitives;
 
-import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.Observer;
 import org.jmodelica.icons.primitives.GraphicItem;
 import org.jmodelica.ide.graphical.edit.parts.AbstractInstNodePart;
+import org.jmodelica.ide.graphical.edit.parts.AbstractModelicaPart;
 import org.jmodelica.ide.graphical.util.Transform;
 
-public abstract class GraphicEditPart extends AbstractGraphicalEditPart implements Observer {
-
-	private Transform transform;
+public abstract class GraphicEditPart extends AbstractModelicaPart implements Observer {
 
 	public GraphicEditPart(GraphicItem model) {
-		setModel(model);
+		super(model);
 	}
 
 	@Override
@@ -25,40 +23,20 @@ public abstract class GraphicEditPart extends AbstractGraphicalEditPart implemen
 		return (AbstractInstNodePart) super.getParent();
 	}
 
-	public Transform getTransform() {
-		if (transform == null) {
-			transform = getParent().getTransform();
-			transform.translate(Transform.yInverter.transform(getModel().getOrigin()));
-			transform.rotate(-getModel().getRotation() * Math.PI / 180);
-		}
-		return transform.clone();
+	@Override
+	protected Transform calculateTransform() {
+		Transform transform = getParent().getTransform();
+		transform.translate(Transform.yInverter.transform(getModel().getOrigin()));
+		transform.rotate(-getModel().getRotation() * Math.PI / 180);
+		return transform;
 	}
-
-	public void invalidateTransform() {
-		transform = null;
-		transformInvalid();
-	}
-
-	protected abstract void transformInvalid();
-
+	
 	@Override
 	public void addNotify() {
 		updateOrigin();
 		updateRotation();
 		updateVisible();
 		super.addNotify();
-	}
-
-	@Override
-	public void activate() {
-		super.activate();
-		getModel().addObserver(this);
-	}
-
-	@Override
-	public void deactivate() {
-		super.deactivate();
-		getModel().removeObserver(this);
 	}
 
 	@Override
@@ -71,6 +49,7 @@ public abstract class GraphicEditPart extends AbstractGraphicalEditPart implemen
 			else if (flag == GraphicItem.ORIGIN_UPDATED)
 				updateOrigin();
 		}
+		super.update(o, flag, additionalInfo);
 	}
 
 	private void updateVisible() {

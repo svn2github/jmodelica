@@ -3,7 +3,6 @@ package org.jmodelica.ide.graphical.edit.parts.primitives;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Polyline;
-import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.swt.SWT;
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.primitives.Line;
@@ -44,10 +43,6 @@ public class LineEditPart extends GraphicEditPart {
 		updateSmooth();
 		updateThickness();
 		super.addNotify();
-	}
-	
-	protected void setFigurePoints(PointList points) {
-		getFigure().setPoints(points);
 	}
 	
 	@Override
@@ -93,7 +88,7 @@ public class LineEditPart extends GraphicEditPart {
 	}
 
 	private void updatePoints() {
-		setFigurePoints(Converter.convert(getTransform().transform(Transform.yInverter.transform(getModel().getPoints()))));
+		getFigure().setPoints(Converter.convert(getTransform().transform(Transform.yInverter.transform(getModel().getPoints()))));
 	}
 
 	private void updateSmooth() {

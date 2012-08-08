@@ -33,6 +33,15 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	protected AbstractNodeProxy getParent() {
 		return parent;
 	}
+	
+	@Override
+	protected String buildDiagramName() {
+		String parentName = parent.buildDiagramName();
+		if (parentName.length() == 0)
+			return componentName;
+		else
+			return parentName + "." + componentName;
+	}
 
 	@Override
 	protected InstComponentDecl getComponentDecl() {
@@ -68,10 +77,11 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 		for (InstComponentDecl icd : node.getInstComponentDecls()) {
 			InstClassDecl classDecl = icd.myInstClass();
 			if (classDecl.isKnown() && classDecl instanceof InstBaseClassDecl && !icd.getComponentDecl().isProtected() && icd.isConnector()) {
-				ComponentProxy cp = getComponentMap().get(icd.qualifiedName());
+				String mapName = buildMapName(icd.qualifiedName(), true, false);
+				ComponentProxy cp = getComponentMap().get(mapName);
 				if (cp == null) {
 					cp = new IconConnectorProxy(icd.name(), this);
-					getComponentMap().put(icd.qualifiedName(), cp);
+					getComponentMap().put(mapName, cp);
 				}
 				connectors.add((ConnectorProxy) cp);
 			}
@@ -142,10 +152,13 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	public Placement getPlacement() {
 		return getComponentDecl().getPlacement();
 	}
-
-	public void setPlacement(Placement placement) {
-		getComponentDecl().annotation().savePlacement(placement);
-		notifyObservers(PLACEMENT_CHANGED);
+	
+	public String getMapName() {
+		return buildMapName(getQualifiedComponentName(), isConnector(), isConnector());
+	}
+	
+	public boolean isConnector() {
+		return false;
 	}
 
 	@Override
@@ -165,6 +178,11 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 			return true;
 		else
 			return false;
+	}
+	
+	@Override
+	public String toString() {
+		return buildDiagramName();
 	}
 
 }

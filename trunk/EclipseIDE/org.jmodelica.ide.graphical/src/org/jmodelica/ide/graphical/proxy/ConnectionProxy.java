@@ -1,69 +1,84 @@
 package org.jmodelica.ide.graphical.proxy;
 
-import java.util.Arrays;
+import java.util.List;
 
-import org.jmodelica.icons.coord.Point;
+import org.jmodelica.icons.Observable;
+import org.jmodelica.icons.Observer;
 import org.jmodelica.icons.primitives.Color;
 import org.jmodelica.icons.primitives.Line;
-import org.jmodelica.modelica.compiler.FConnectClause;
+import org.jmodelica.modelica.compiler.ConnectClause;
 
-public class ConnectionProxy {
+public class ConnectionProxy extends Observable implements Observer {
 
 	private AbstractDiagramProxy diagram;
-	private String sourceID;
-	private String targetID;
+	private ConnectorProxy source;
+	private ConnectorProxy target;
+	private ConnectClause connectClause;
 	private boolean connected = true;
-	private Line lineCache;
 
-	public ConnectionProxy(String sourceID, String targetID, AbstractDiagramProxy diagram) {
-		this(sourceID, targetID, diagram, true);
-	}
-
-	public ConnectionProxy(String sourceID, String targetID, AbstractDiagramProxy diagram, boolean connected) {
-		this.sourceID = sourceID;
-		this.targetID = targetID;
+	public ConnectionProxy(ConnectorProxy source, ConnectorProxy target, ConnectClause connectClause, AbstractDiagramProxy diagram) {
+		this.source = source;
+		this.target = target;
+		this.connectClause = connectClause;
 		this.diagram = diagram;
-		this.connected = connected;
-	}
-
-	private FConnectClause getFConnectClause() {
-		return diagram.getConnection(sourceID, targetID);
+		source.addObserver(this);
+		target.addObserver(this);
+		source.sourceConnectionsHasChanged();
+		target.targetConnectionsHasChanged();
 	}
 
 	public Line getLine() {
-		if (connected)
-			return getFConnectClause().getConnectionLine();
-		if (lineCache == null)
-			lineCache = new Line(Arrays.asList(new Point(), new Point()));
-		return lineCache;
+		return connectClause.getConnectionLine();
 	}
 
 	public void disconnect() {
 		if (!connected)
 			return;
-		lineCache = getLine();
-		if (diagram.removeConnection(sourceID, targetID))
-			connected = false;
+		diagram.removeConnection(this);
+		connected = false;
+		source.sourceConnectionsHasChanged();
+		target.targetConnectionsHasChanged();
 	}
 
 	public void connect() {
 		if (connected)
 			return;
-		diagram.addConnection(sourceID, targetID, getLine());
-		lineCache = null;
+		diagram.addConnection(this);
 		connected = true;
+		source.sourceConnectionsHasChanged();
+		target.targetConnectionsHasChanged();
 	}
 
-	public String getSourceID() {
-		return sourceID;
+	public ConnectorProxy getSource() {
+		return source;
 	}
 
-	public String getTargetID() {
-		return targetID;
+	public ConnectorProxy getTarget() {
+		return target;
 	}
 
 	public void setColor(Color color) {
 		getLine().setColor(color);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void update(Observable o, Object flag, Object additionalInfo) {
+		if (o == source && flag == ConnectorProxy.COLLECTING_SOURCE && connected) {
+			((List<ConnectionProxy>) additionalInfo).add(this);
+		}
+		if (o == target && flag == ConnectorProxy.COLLECTING_TARGET && connected) {
+			((List<ConnectionProxy>) additionalInfo).add(this);
+		}
+	}
+
+	protected ConnectClause getConnectClause() {
+		return connectClause;
+	}
+	
+	@Override
+	public String toString() {
+		return source.buildDiagramName() + " -- " + target.buildDiagramName();
 	}
 
 }

@@ -5,9 +5,7 @@ import java.io.ByteArrayInputStream;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jmodelica.icons.coord.Placement;
-import org.jmodelica.icons.primitives.Line;
-import org.jmodelica.modelica.compiler.FConnectClause;
-import org.jmodelica.modelica.compiler.FullClassDecl;
+import org.jmodelica.modelica.compiler.ConnectClause;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
 import org.jmodelica.modelica.compiler.StoredDefinition;
@@ -39,9 +37,20 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	}
 
 	@Override
-	public void addComponent(String className, String componentName, Placement placement) {
-		getASTNode().addComponent(className, componentName, placement);
+	public ComponentProxy addComponent(String className, String componentName, Placement placement) {
+		InstComponentDecl icd = getASTNode().addComponent(className, componentName, placement);
+		String mapName = buildMapName(icd.qualifiedName(), icd.isConnector(), icd.isConnector());
+		ComponentProxy component = getComponentMap().get(mapName);
+		if (component == null) {
+			if (icd.isConnector()) {
+				component = new DiagramConnectorProxy(componentName, this);
+			} else {
+				component = new ComponentProxy(componentName, this);
+			}
+			getComponentMap().put(mapName, component);
+		}
 		notifyObservers(COMPONENT_ADDED);
+		return component;
 	}
 
 	@Override
@@ -49,22 +58,23 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 		getASTNode().removeComponent(component.getComponentDecl());
 		notifyObservers(COMPONENT_REMOVED);
 	}
-
+	
 	@Override
-	public void addConnection(String sourceID, String targetID, Line lineCache) {
-		FConnectClause fcc = getASTNode().addConnection(sourceID, targetID, lineCache);
-		((ConnectorProxy) getComponentMap().get(fcc.getConnector1().getInstAccess().myInstComponentDecl().qualifiedName())).sourceConnectionsHasChanged();
-		((ConnectorProxy) getComponentMap().get(fcc.getConnector2().getInstAccess().myInstComponentDecl().qualifiedName())).targetConnectionsHasChanged();
+	public ConnectionProxy addConnection(ConnectorProxy source, ConnectorProxy target) {
+		ConnectClause connectClause = getASTNode().addConnection(source.buildDiagramName(), target.buildDiagramName());
+		ConnectionProxy connection = new ConnectionProxy(source, target, connectClause, this);
+		getConnectionMap().put(connectClause, connection);
+		return connection;
+	}
+	
+	@Override
+	protected void addConnection(ConnectionProxy connection) {
+		getASTNode().addConnection(connection.getConnectClause());
 	}
 
 	@Override
-	public boolean removeConnection(String sourceID, String targetID) {
-		FConnectClause fcc = getConnection(sourceID, targetID);
-		if (!getASTNode().removeFAbstractEquation(fcc))
-			return false;
-		((FullClassDecl) getASTNode().getClassDecl()).removeEquation(fcc.getConnectClause());
-		((ConnectorProxy) getComponentMap().get(fcc.getConnector1().getInstAccess().myInstComponentDecl().qualifiedName())).sourceConnectionsHasChanged();
-		((ConnectorProxy) getComponentMap().get(fcc.getConnector2().getInstAccess().myInstComponentDecl().qualifiedName())).targetConnectionsHasChanged();
+	protected boolean removeConnection(ConnectionProxy connection) {
+		getASTNode().removeConnection(getConnection(connection.getConnectClause()));
 		return true;
 	}
 

@@ -27,12 +27,12 @@ public abstract class CreateConnectionCommand extends Command {
 			return false;
 		}
 		for (ConnectionProxy con : source.getTargetConnections()) {
-			if (con.getSourceID().equals(target.getQualifiedComponentName())) {
+			if (con.getSource().equals(target)) {
 				return false;
 			}
 		}
 		for (ConnectionProxy con : source.getSourceConnections()) {
-			if (con.getTargetID().equals(target.getQualifiedComponentName())) {
+			if (con.getTarget().equals(target)) {
 				return false;
 			}
 		}
@@ -43,9 +43,8 @@ public abstract class CreateConnectionCommand extends Command {
 
 	@Override
 	public void execute() {
-		connection = new ConnectionProxy(source.getQualifiedComponentName(), target.getQualifiedComponentName(), source.getDiagram(), false);
+		connection = source.getDiagram().addConnection(source, target);
 		initConnection(connection);
-		redo();
 	}
 
 	@Override

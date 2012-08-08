@@ -24,6 +24,8 @@ public abstract class AbstractNodeProxy extends Observable {
 
 	abstract protected Map<String, ComponentProxy> getComponentMap();
 
+	protected abstract  String buildDiagramName();
+	
 	public abstract AbstractDiagramProxy getDiagram();
 
 	public String getClassName() {
@@ -33,7 +35,7 @@ public abstract class AbstractNodeProxy extends Observable {
 	public String getQualifiedClassName() {
 		return getClassDecl().qualifiedName();
 	}
-
+	
 	public String getComponentName() {
 		InstComponentDecl componentDecl = getComponentDecl();
 		if (componentDecl != null)
@@ -82,5 +84,16 @@ public abstract class AbstractNodeProxy extends Observable {
 		}
 		return null;
 	}
-
+	
+	protected static String buildMapName(String qualifiedName, boolean isConnector, boolean inDiagram) {
+		String name = qualifiedName;
+		if (!isConnector)
+			return name;
+		name += ":connector";
+		if (inDiagram)
+			name += ":diagram";
+		else
+			name += ":icon";
+		return name;
+	}
 }

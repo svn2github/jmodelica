@@ -16,7 +16,7 @@ public class ConnectionPolicy extends ConnectionEditPolicy {
 
 	@Override
 	protected Command getDeleteCommand(GroupRequest request) {
-		return new DeleteConnectionCommand(connection.getConnection());
+		return new DeleteConnectionCommand(connection.getModel());
 	}
 
 }

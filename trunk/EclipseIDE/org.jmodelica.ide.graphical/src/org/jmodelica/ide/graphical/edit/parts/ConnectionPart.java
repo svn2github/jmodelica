@@ -2,17 +2,18 @@ package org.jmodelica.ide.graphical.edit.parts;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Map;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.XYAnchor;
 import org.eclipse.draw2d.geometry.Point;
-import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.gef.ConnectionEditPart;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.LayerConstants;
-import org.jmodelica.ide.graphical.edit.parts.primitives.LineEditPart;
+import org.eclipse.swt.SWT;
+import org.jmodelica.icons.Observable;
+import org.jmodelica.icons.primitives.Line;
+import org.jmodelica.icons.primitives.Types.LinePattern;
 import org.jmodelica.ide.graphical.edit.policies.ConnectionBendpointPolicy;
 import org.jmodelica.ide.graphical.edit.policies.ConnectionPolicy;
 import org.jmodelica.ide.graphical.graphics.ConnectionFigure;
@@ -20,16 +21,40 @@ import org.jmodelica.ide.graphical.proxy.ConnectionProxy;
 import org.jmodelica.ide.graphical.util.Converter;
 import org.jmodelica.ide.graphical.util.Transform;
 
-public class ConnectionPart extends LineEditPart implements ConnectionEditPart, PropertyChangeListener {
+public class ConnectionPart extends AbstractModelicaPart implements ConnectionEditPart, PropertyChangeListener {
 
 	private ConnectorPart sourcePart;
 	private ConnectorPart targetPart;
 	private boolean updatingFigurePoints = false;
-	private ConnectionProxy connection;
 
-	public ConnectionPart(ConnectionProxy connection) {
-		super(connection.getLine());
-		this.connection = connection;
+	public ConnectionPart(ConnectionProxy model) {
+		super(model);
+	}
+	
+	@Override
+	public void activate() {
+		super.activate();
+		getLine().addObserver(this);
+	}
+	
+	@Override
+	public void deactivate() {
+		getLine().removeObserver(this);
+		super.deactivate();
+	}
+
+	@Override
+	public ConnectionProxy getModel() {
+		return (ConnectionProxy) super.getModel();
+	}
+
+	@Override
+	public AbstractModelicaPart getParent() {
+		return (AbstractModelicaPart) super.getParent();
+	}
+
+	public Line getLine() {
+		return getModel().getLine();
 	}
 
 	@Override
@@ -38,38 +63,12 @@ public class ConnectionPart extends LineEditPart implements ConnectionEditPart, 
 		cf.addPropertyChangeListener(ConnectionFigure.REAL_POINTS_CHANGED, this);
 		return cf;
 	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	protected void registerModel() {
-		getViewer().getEditPartRegistry().put(connection, this);
-	}
-	
-	@SuppressWarnings("rawtypes")
-	@Override
-	protected void unregisterModel() {
-		Map registry = getViewer().getEditPartRegistry();
-		if (registry.get(connection) == this)
-			registry.remove(connection);
-	}
 
 	@Override
 	public ConnectionFigure getFigure() {
 		return (ConnectionFigure) super.getFigure();
 	}
-	
-	@Override
-	protected void setFigurePoints(PointList points) {
-		updatingFigurePoints  = true;
-		getFigure().setRealPoints(points);
-		refresh();
-		updatingFigurePoints = false;
-	}
-	
-	public ConnectionProxy getConnection() {
-		return connection;
-	}
-	
+
 	@Override
 	public void setParent(EditPart parent) {
 		while (parent != null && !(parent instanceof DiagramPart)) {
@@ -105,6 +104,12 @@ public class ConnectionPart extends LineEditPart implements ConnectionEditPart, 
 
 	@Override
 	public void addNotify() {
+		updateArrows();
+		updateColor();
+		updatePattern();
+		updatePoints();
+		updateSmooth();
+		updateThickness();
 		getLayer(LayerConstants.CONNECTION_LAYER).add(getFigure());
 		super.addNotify();
 	}
@@ -162,7 +167,7 @@ public class ConnectionPart extends LineEditPart implements ConnectionEditPart, 
 	@Override
 	public void propertyChange(PropertyChangeEvent arg) {
 		if (arg.getPropertyName() == ConnectionFigure.REAL_POINTS_CHANGED && !updatingFigurePoints) {
-			getModel().setPoints(Transform.yInverter.transform(getTransform().getInverseTransfrom().transform(Converter.convert(getFigure().getRealPoints()))));
+			getLine().setPoints(Transform.yInverter.transform(getTransform().getInverseTransfrom().transform(Converter.convert(getFigure().getRealPoints()))));
 		}
 	}
 
@@ -172,4 +177,67 @@ public class ConnectionPart extends LineEditPart implements ConnectionEditPart, 
 		installEditPolicy(EditPolicy.CONNECTION_ROLE, new ConnectionPolicy(this));
 	}
 
+	@Override
+	protected Transform calculateTransform() {
+		return getParent().getTransform();
+	}
+
+	@Override
+	protected void transformInvalid() {}
+
+	@Override
+	public void update(Observable o, Object flag, Object additionalInfo) {
+		if (o == getLine()) {
+			if (flag == Line.ARROW_SIZE_UPDATED || flag == Line.ARROW_UPDATED)
+				updateArrows();
+			else if (flag == Line.COLOR_UPDATE)
+				updateColor();
+			else if (flag == Line.LINE_PATTERN_UPDATED)
+				updatePattern();
+			else if (flag == Line.POINTS_UPDATED)
+				updatePoints();
+			else if (flag == Line.SMOOTH_UPDATED)
+				updateSmooth();
+			else if (flag == Line.THICKNESS_UPDATE)
+				updateThickness();
+		}
+		super.update(o, flag, additionalInfo);
+	}
+
+	private void updateArrows() {
+		// TODO Implement arrows
+	}
+
+	protected void updateColor() {
+		getFigure().setForegroundColor(Converter.convert(getLine().getColor()));
+	}
+
+	private void updatePattern() {
+		if (getLine().getLinePattern() == LinePattern.NONE) {
+			getFigure().setVisible(false);
+		} else {
+			getFigure().setVisible(true);
+			if (getLine().getLinePattern() == LinePattern.SOLID) {
+				getFigure().setLineStyle(SWT.LINE_SOLID);
+			} else {
+				getFigure().setLineStyle(SWT.LINE_CUSTOM);
+				getFigure().setLineDash(getLine().getLinePattern().getDash());
+			}
+		}
+	}
+
+	private void updatePoints() {
+		updatingFigurePoints = true;
+		getFigure().setRealPoints(Converter.convert(getTransform().transform(Transform.yInverter.transform(getLine().getPoints()))));
+		refresh();
+		updatingFigurePoints = false;
+	}
+
+	private void updateSmooth() {
+		// TODO Implement smoothnes
+	}
+
+	private void updateThickness() {
+		getFigure().setLineWidthFloat((float) (getTransform().getScale() * getLine().getThickness()));
+	}
 }

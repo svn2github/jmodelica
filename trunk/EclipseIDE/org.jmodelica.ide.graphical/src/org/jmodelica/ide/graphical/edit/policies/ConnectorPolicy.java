@@ -1,10 +1,13 @@
 package org.jmodelica.ide.graphical.edit.policies;
 
+import java.util.Arrays;
+
 import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 import org.eclipse.gef.requests.ReconnectRequest;
+import org.jmodelica.icons.coord.Point;
 import org.jmodelica.ide.graphical.commands.CreateConnectionCommand;
 import org.jmodelica.ide.graphical.edit.parts.ConnectorPart;
 import org.jmodelica.ide.graphical.graphics.TemporaryConnectionFigure;
@@ -34,7 +37,8 @@ public class ConnectorPolicy extends GraphicalNodeEditPolicy {
 
 			@Override
 			protected void initConnection(ConnectionProxy c) {
-				c.setColor(connector.calculateConnectionColor());
+				c.getLine().setColor(connector.calculateConnectionColor());
+				c.getLine().setPoints(Arrays.asList(new Point(), new Point()));
 			}
 
 		};

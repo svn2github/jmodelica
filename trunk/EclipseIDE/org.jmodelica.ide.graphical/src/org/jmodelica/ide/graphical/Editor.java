@@ -37,6 +37,7 @@ import org.jastadd.plugin.Activator;
 import org.jmodelica.ide.graphical.actions.OpenComponentAction;
 import org.jmodelica.ide.graphical.actions.RotateAction;
 import org.jmodelica.ide.graphical.edit.EditPartFactory;
+import org.jmodelica.ide.graphical.proxy.AbstractDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.AbstractNodeProxy;
 import org.jmodelica.ide.graphical.proxy.ClassDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentDiagramProxy;
@@ -173,11 +174,14 @@ public class Editor extends GraphicalEditor {
 			getGraphicalViewer().setContents(dp);
 		} else {
 			refreshBreadcrumbsBar();
-
+			
+			AbstractDiagramProxy adp;
 			if (openComponentStack.isEmpty())
-				getGraphicalViewer().setContents(dp);
+				adp = dp;
 			else
-				getGraphicalViewer().setContents(new ComponentDiagramProxy(openComponentStack.peek()));
+				adp = new ComponentDiagramProxy(openComponentStack.peek());
+			getGraphicalViewer().setContents(adp);
+			adp.constructConnections();
 		}
 	}
 

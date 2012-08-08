@@ -7,6 +7,7 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Polygon;
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.coord.Point;
+import org.jmodelica.icons.primitives.Color;
 import org.jmodelica.icons.primitives.FilledShape;
 import org.jmodelica.ide.graphical.util.Converter;
 import org.jmodelica.ide.graphical.util.Transform;
@@ -49,6 +50,11 @@ public abstract class AbstractPolygonEditPart extends GraphicEditPart {
 	@Override
 	protected void transformInvalid() {
 		updatePoints();
+	}
+	
+	@Override
+	public Color calculateConnectionColor() {
+		return getModel().getLineColor();
 	}
 	
 	@Override

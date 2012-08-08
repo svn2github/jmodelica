@@ -21,11 +21,11 @@ public class ConnectionBendpointPolicy extends BendpointEditPolicy {
 
 	@Override
 	protected Command getMoveBendpointCommand(final BendpointRequest request) {
-		return new MoveBendpointCommand(connection.getModel()) {
+		return new MoveBendpointCommand(connection.getLine()) {
 
 			@Override
 			protected org.jmodelica.icons.coord.Point calculateOldPoint() {
-				return connection.getModel().getPoints().get(request.getIndex() + 1);
+				return connection.getLine().getPoints().get(request.getIndex() + 1);
 			}
 
 			@Override
@@ -40,18 +40,18 @@ public class ConnectionBendpointPolicy extends BendpointEditPolicy {
 
 	@Override
 	protected Command getDeleteBendpointCommand(final BendpointRequest request) {
-		return new RemoveBendpointCommand(connection.getModel()) {
+		return new RemoveBendpointCommand(connection.getLine()) {
 
 			@Override
 			protected org.jmodelica.icons.coord.Point calculateOldPoint() {
-				return connection.getModel().getPoints().get(request.getIndex() + 1);
+				return connection.getLine().getPoints().get(request.getIndex() + 1);
 			}
 		};
 	}
 
 	@Override
 	protected Command getCreateBendpointCommand(final BendpointRequest request) {
-		return new AddBendpointCommand(connection.getModel()) {
+		return new AddBendpointCommand(connection.getLine()) {
 
 			@Override
 			protected int calculateIndex() {

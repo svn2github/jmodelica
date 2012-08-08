@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
 import org.jmodelica.icons.coord.Placement;
-import org.jmodelica.icons.primitives.Line;
+import org.jmodelica.modelica.compiler.ConnectClause;
 import org.jmodelica.modelica.compiler.FAbstractEquation;
 import org.jmodelica.modelica.compiler.FConnectClause;
-import org.jmodelica.modelica.compiler.FIdUseInstAccess;
 import org.jmodelica.modelica.compiler.InstBaseClassDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
@@ -20,11 +20,16 @@ import org.jmodelica.modelica.compiler.InstNode;
 
 public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 
-	private Map<FConnectClause, ConnectionProxy> connectionMap = new HashMap<FConnectClause, ConnectionProxy>();
+	private Map<ConnectClause, ConnectionProxy> connectionMap = new HashMap<ConnectClause, ConnectionProxy>();
 	private Map<String, ComponentProxy> componentMap = new HashMap<String, ComponentProxy>();
 
 	@Override
 	protected abstract InstNode getASTNode();
+	
+	@Override
+	protected String buildDiagramName() {
+		return "";
+	}
 
 	public List<ComponentProxy> getComponents() {
 		List<ComponentProxy> components = new ArrayList<ComponentProxy>();
@@ -36,6 +41,10 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 	protected Map<String, ComponentProxy> getComponentMap() {
 		return componentMap;
 	}
+	
+	protected Map<ConnectClause, ConnectionProxy> getConnectionMap() {
+		return connectionMap;
+	}
 
 	private void collectComponents(InstNode node, List<ComponentProxy> components) {
 		for (InstExtends ie : node.getInstExtendss()) {
@@ -44,17 +53,55 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 		for (InstComponentDecl icd : node.getInstComponentDecls()) {
 			InstClassDecl classDecl = icd.myInstClass();
 			if (classDecl.isKnown() && classDecl instanceof InstBaseClassDecl) {
-				ComponentProxy component = getComponentMap().get(icd.qualifiedName());
+				String mapName = buildMapName(icd.qualifiedName(), icd.isConnector(), icd.isConnector());
+				ComponentProxy component = getComponentMap().get(mapName);
 				if (component == null) {
 					if (icd.isConnector())
 						component = new DiagramConnectorProxy(icd.name(), this);
 					else
 						component = new ComponentProxy(icd.name(), this);
-					getComponentMap().put(icd.qualifiedName(), component);
+					getComponentMap().put(mapName, component);
 				}
 				components.add(component);
 			}
 		}
+	}
+	
+	
+	public void constructConnections() {
+		constructConnections(getASTNode());
+	}
+	
+	private void constructConnections(InstNode node) {
+		for (InstExtends ie : node.getInstExtendss()) {
+			constructConnections(ie);
+		}
+		for (FAbstractEquation fae : node.getFAbstractEquations()) {
+			if (fae instanceof FConnectClause) {
+				FConnectClause fcc = (FConnectClause) fae;
+				ConnectClause connectClause = fcc.getConnectClause();
+				if (connectionMap.containsKey(connectClause))
+					continue;
+				ConnectorProxy source = getConnectorFromDecl(fcc.getConnector1().getInstAccess().myInstComponentDecl());
+				Assert.isNotNull(source);
+				ConnectorProxy target = getConnectorFromDecl(fcc.getConnector2().getInstAccess().myInstComponentDecl());
+				Assert.isNotNull(target);
+				ConnectionProxy connection = new ConnectionProxy(source, target, connectClause, this);
+				connectionMap.put(connectClause, connection);
+			}
+		}
+	}
+	
+	private ConnectorProxy getConnectorFromDecl(InstComponentDecl icd) {
+		String mapName = buildMapName(icd.qualifiedName(), true, false);
+		ComponentProxy connector = getComponentMap().get(mapName);
+		if (connector != null)
+			return (ConnectorProxy) connector;
+		mapName = buildMapName(icd.qualifiedName(), true, true);
+		connector = getComponentMap().get(mapName);
+		if (connector != null)
+			return (ConnectorProxy) connector;
+		throw new IllegalArgumentException();
 	}
 
 	@Override
@@ -62,59 +109,24 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 		return true;
 	}
 
-	public List<ConnectionProxy> getSourceConnectionsFor(InstComponentDecl connector) {
-		List<ConnectionProxy> connections = new ArrayList<ConnectionProxy>();
-		collectConnectionsFor(connections, connector, getASTNode(), true);
-		return connections;
+	protected FConnectClause getConnection(ConnectClause connectClause) {
+		return searchForConnection(getASTNode(), connectClause);
 	}
 
-	public List<ConnectionProxy> getTargetConnectionsFor(InstComponentDecl connector) {
-		List<ConnectionProxy> connections = new ArrayList<ConnectionProxy>();
-		collectConnectionsFor(connections, connector, getASTNode(), false);
-		return connections;
-	}
-
-	private void collectConnectionsFor(List<ConnectionProxy> connections, InstComponentDecl connector, InstNode node, boolean isConnector1) {
+	private static FConnectClause searchForConnection(InstNode node, ConnectClause connectClause) {
 		for (FAbstractEquation fae : node.getFAbstractEquations()) {
 			if (fae instanceof FConnectClause) {
 				FConnectClause fcc = (FConnectClause) fae;
-				FIdUseInstAccess fiuia;
-				if (isConnector1)
-					fiuia = fcc.getConnector1();
-				else
-					fiuia = fcc.getConnector2();
-				if (fiuia.getInstAccess().myInstComponentDecl() == connector) {
-					ConnectionProxy connection = connectionMap.get(fcc);
-					if (connection == null) {
-						connection = new ConnectionProxy(fcc.getConnector1().name(), fcc.getConnector2().name(), this);
-						connectionMap.put(fcc, connection);
-					}
-					connections.add(connection);
-				}
-			}
-		}
-		for (InstExtends ie : node.getInstExtendss()) {
-			collectConnectionsFor(connections, connector, ie, isConnector1);
-		}
-	}
-
-	protected FConnectClause getConnection(String sourceID, String targetID) {
-		return searchForConnection(getASTNode(), sourceID, targetID);
-	}
-
-	private static FConnectClause searchForConnection(InstNode node, String sourceID, String targetID) {
-		for (FAbstractEquation fae : node.getFAbstractEquations()) {
-			if (fae instanceof FConnectClause) {
-				FConnectClause fcc = (FConnectClause) fae;
-				if (fcc.getConnector1().name().equals(sourceID) && fcc.getConnector2().name().equals(targetID))
+				if (fcc.getConnectClause() == connectClause)
 					return fcc;
 			}
 		}
 		for (InstExtends ie : node.getInstExtendss()) {
-			FConnectClause val = searchForConnection(ie, sourceID, targetID);
+			FConnectClause val = searchForConnection(ie, connectClause);
 			if (val != null)
 				return val;
 		}
+		System.err.println("Unable to find FConnectClause for ConnectClause: " + connectClause);
 		return null;
 	}
 
@@ -130,17 +142,18 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 
 	public ComponentProxy addComponent(String className, Placement placement) {
 		String componentName = generateUniqueName(className);
-		addComponent(className, componentName, placement);
-		return new ComponentProxy(componentName, this);
+		return addComponent(className, componentName, placement);
 	}
 
-	public abstract void addComponent(String className, String componentName, Placement placement);
+	public abstract ComponentProxy addComponent(String className, String componentName, Placement placement);
 
 	public abstract void removeComponent(ComponentProxy component);
 
-	public abstract void addConnection(String sourceID, String targetID, Line lineCache);
+	public abstract ConnectionProxy addConnection(ConnectorProxy source, ConnectorProxy target);
+	
+	protected abstract void addConnection(ConnectionProxy connection);
 
-	public abstract boolean removeConnection(String sourceID, String targetID);
+	protected abstract boolean removeConnection(ConnectionProxy connection);
 
 	private String generateUniqueName(String className) {
 		String baseAutoName = className;
