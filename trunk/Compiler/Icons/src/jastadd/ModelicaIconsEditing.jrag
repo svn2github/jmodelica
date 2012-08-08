@@ -95,7 +95,7 @@ aspect ModelicaIconsEditing {
 	/*-------------------------------------------------------------------------
 	 *                          Class related
 	 ------------------------------------------------------------------------*/
-	public void InstClassDecl.addComponent(String className, String componentName, Placement placement) {
+	public InstComponentDecl InstClassDecl.addComponent(String className, String componentName, Placement placement) {
 		ComponentDecl componentDecl = new ComponentDecl();
 		componentDecl.setClassName(Access.fromClassName(className));
 		componentDecl.setVisibilityType(new PublicVisibilityType());
@@ -106,10 +106,9 @@ aspect ModelicaIconsEditing {
 		
 		FullClassDecl classDecl = (FullClassDecl)getClassDecl();
 		classDecl.addNewComponentDecl(componentDecl);
-		classDecl.flushAllRecursive();
 		InstComponentDecl icd = (InstComponentDecl)createInstComponentDecl(componentDecl);
 		addInstComponentDecl(icd);
-		flushAllRecursive();
+		return icd;
 	}
 	
 	public void InstClassDecl.removeComponent(InstComponentDecl icd) {
@@ -117,19 +116,26 @@ aspect ModelicaIconsEditing {
 		((FullClassDecl)getClassDecl()).removeComponentDecl(icd.getComponentDecl());
 	}
 	
-	public FConnectClause InstClassDecl.addConnection(String sourceID, String targetID, Line connectionLine) {
-		ConnectClause cc = new ConnectClause();
-		cc.setComment(new Comment());
-		cc.annotation().saveConnectionLine(connectionLine);
-		cc.setConnector1(Access.fromClassName(sourceID));
-		cc.setConnector2(Access.fromClassName(targetID));
-		((FullClassDecl)getClassDecl()).addNewEquation(cc);
-		
-		FConnectClause fcc = (FConnectClause)cc.instantiate();
-//		fcc.setConnection(con);
+	public ConnectClause InstClassDecl.addConnection(String sourceID, String targetID) {
+		ConnectClause connectClause = new ConnectClause();
+		connectClause.setComment(new Comment());
+		connectClause.setConnector1(Access.fromClassName(sourceID));
+		connectClause.setConnector2(Access.fromClassName(targetID));
+		addConnection(connectClause);
+		return connectClause;
+	}
+	
+	public void InstClassDecl.addConnection(ConnectClause connectClause) {
+		((FullClassDecl)getClassDecl()).addNewEquation(connectClause);
+		FConnectClause fcc = (FConnectClause)connectClause.instantiate();
 		addFAbstractEquation(fcc);
-//		con.addObserver(fcc);
-		return fcc;
+	}
+	
+	public boolean InstClassDecl.removeConnection(FConnectClause fcc) {
+		if (!removeFAbstractEquation(fcc))
+			return false;
+		((FullClassDecl) getClassDecl()).removeEquation(fcc.getConnectClause());
+		return true;
 	}
 	
 
