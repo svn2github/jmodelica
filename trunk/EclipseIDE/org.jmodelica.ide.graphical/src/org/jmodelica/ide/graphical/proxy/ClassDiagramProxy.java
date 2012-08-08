@@ -26,6 +26,10 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 		return instClassDecl;
 	}
 
+	public void setInstClassDecl(InstClassDecl instClassDecl) {
+		this.instClassDecl = instClassDecl;
+	}
+	
 	@Override
 	protected InstComponentDecl getComponentDecl() {
 		return null;

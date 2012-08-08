@@ -302,7 +302,7 @@ public class Editor extends GraphicalEditor {
 		System.out.println("flush src classDecl, t+" + (System.currentTimeMillis() - start));
 		getProgramRoot().flushAll();
 		System.out.println("flush program root, t+" + (System.currentTimeMillis() - start));
-		dp = new ClassDiagramProxy(getProgramRoot().simpleLookupInstClassDecl(input.getClassName()));
+		dp.setInstClassDecl(getProgramRoot().simpleLookupInstClassDecl(input.getClassName()));
 		System.out.println("lookup input class, t+" + (System.currentTimeMillis() - start));
 		setContent();
 		System.out.println("set content, t+" + (System.currentTimeMillis() - start));
