@@ -28,7 +28,7 @@ public class ConnectionProxy extends Observable implements Observer {
 	}
 
 	public Line getLine() {
-		return connectClause.getConnectionLine();
+		return connectClause.syncGetConnectionLine();
 	}
 
 	public void disconnect() {

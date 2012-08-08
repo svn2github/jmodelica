@@ -50,7 +50,7 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 
 	@Override
 	protected InstClassDecl getClassDecl() {
-		return getComponentDecl().myInstClass();
+		return getComponentDecl().syncMyInstClass();
 	}
 
 	@Override
@@ -71,16 +71,16 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	}
 
 	private void collectConnectors(InstNode node, List<ConnectorProxy> connectors) {
-		for (InstExtends ie : node.getInstExtendss()) {
+		for (InstExtends ie : node.syncGetInstExtendss()) {
 			collectConnectors(ie, connectors);
 		}
-		for (InstComponentDecl icd : node.getInstComponentDecls()) {
-			InstClassDecl classDecl = icd.myInstClass();
-			if (classDecl.isKnown() && classDecl instanceof InstBaseClassDecl && !icd.getComponentDecl().isProtected() && icd.isConnector()) {
-				String mapName = buildMapName(icd.qualifiedName(), true, false);
+		for (InstComponentDecl icd : node.syncGetInstComponentDecls()) {
+			InstClassDecl classDecl = icd.syncMyInstClass();
+			if (!classDecl.syncIsUnknown() && classDecl instanceof InstBaseClassDecl && !icd.syncGetComponentDecl().syncIsProtected() && icd.syncIsConnector()) {
+				String mapName = buildMapName(icd.syncQualifiedName(), true, false);
 				ComponentProxy cp = getComponentMap().get(mapName);
 				if (cp == null) {
-					cp = new IconConnectorProxy(icd.name(), this);
+					cp = new IconConnectorProxy(icd.syncName(), this);
 					getComponentMap().put(mapName, cp);
 				}
 				connectors.add((ConnectorProxy) cp);
@@ -90,14 +90,14 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 
 	@Override
 	protected InstComponentDecl getInstComponentDecl(String componentName) {
-		return getComponentDecl().simpleLookupInstComponentDecl(componentName);
+		return getComponentDecl().syncSimpleLookupInstComponentDecl(componentName);
 	}
 
 	public Transform calculateTransform(Transform parent) { //TODO:refactor
 		// Based on org.jmodelica.icons.drawing.AWTIconDrawer.setTransformation()
 		Transformation compTransformation = getPlacement().getTransformation();
 		Extent transformationExtent = compTransformation.getExtent();
-		Extent componentExtent = getComponentDecl().getCoordinateSystem().getExtent();
+		Extent componentExtent = getComponentDecl().syncGetCoordinateSystem().getExtent();
 		Transform t = parent.clone();
 		t.translate(Transform.yInverter.transform(compTransformation.getOrigin()));
 //		componentTransform = transform.clone();
@@ -150,7 +150,7 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	}
 
 	public Placement getPlacement() {
-		return getComponentDecl().getPlacement();
+		return getComponentDecl().syncGetPlacement();
 	}
 	
 	public String getMapName() {

@@ -47,19 +47,19 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 	}
 
 	private void collectComponents(InstNode node, List<ComponentProxy> components) {
-		for (InstExtends ie : node.getInstExtendss()) {
+		for (InstExtends ie : node.syncGetInstExtendss()) {
 			collectComponents(ie, components);
 		}
-		for (InstComponentDecl icd : node.getInstComponentDecls()) {
-			InstClassDecl classDecl = icd.myInstClass();
-			if (classDecl.isKnown() && classDecl instanceof InstBaseClassDecl) {
-				String mapName = buildMapName(icd.qualifiedName(), icd.isConnector(), icd.isConnector());
+		for (InstComponentDecl icd : node.syncGetInstComponentDecls()) {
+			InstClassDecl classDecl = icd.syncMyInstClass();
+			if (!classDecl.syncIsUnknown() && classDecl instanceof InstBaseClassDecl) {
+				String mapName = buildMapName(icd.syncQualifiedName(), icd.syncIsConnector(), icd.syncIsConnector());
 				ComponentProxy component = getComponentMap().get(mapName);
 				if (component == null) {
-					if (icd.isConnector())
-						component = new DiagramConnectorProxy(icd.name(), this);
+					if (icd.syncIsConnector())
+						component = new DiagramConnectorProxy(icd.syncName(), this);
 					else
-						component = new ComponentProxy(icd.name(), this);
+						component = new ComponentProxy(icd.syncName(), this);
 					getComponentMap().put(mapName, component);
 				}
 				components.add(component);
@@ -73,18 +73,18 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 	}
 	
 	private void constructConnections(InstNode node) {
-		for (InstExtends ie : node.getInstExtendss()) {
+		for (InstExtends ie : node.syncGetInstExtendss()) {
 			constructConnections(ie);
 		}
-		for (FAbstractEquation fae : node.getFAbstractEquations()) {
+		for (FAbstractEquation fae : node.syncGetFAbstractEquations()) {
 			if (fae instanceof FConnectClause) {
 				FConnectClause fcc = (FConnectClause) fae;
-				ConnectClause connectClause = fcc.getConnectClause();
+				ConnectClause connectClause = fcc.syncGetConnectClause();
 				if (connectionMap.containsKey(connectClause))
 					continue;
-				ConnectorProxy source = getConnectorFromDecl(fcc.getConnector1().getInstAccess().myInstComponentDecl());
+				ConnectorProxy source = getConnectorFromDecl(fcc.syncGetConnector1().syncGetInstAccess().syncMyInstComponentDecl());
 				Assert.isNotNull(source);
-				ConnectorProxy target = getConnectorFromDecl(fcc.getConnector2().getInstAccess().myInstComponentDecl());
+				ConnectorProxy target = getConnectorFromDecl(fcc.syncGetConnector2().syncGetInstAccess().syncMyInstComponentDecl());
 				Assert.isNotNull(target);
 				ConnectionProxy connection = new ConnectionProxy(source, target, connectClause, this);
 				connectionMap.put(connectClause, connection);
@@ -93,11 +93,11 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 	}
 	
 	private ConnectorProxy getConnectorFromDecl(InstComponentDecl icd) {
-		String mapName = buildMapName(icd.qualifiedName(), true, false);
+		String mapName = buildMapName(icd.syncQualifiedName(), true, false);
 		ComponentProxy connector = getComponentMap().get(mapName);
 		if (connector != null)
 			return (ConnectorProxy) connector;
-		mapName = buildMapName(icd.qualifiedName(), true, true);
+		mapName = buildMapName(icd.syncQualifiedName(), true, true);
 		connector = getComponentMap().get(mapName);
 		if (connector != null)
 			return (ConnectorProxy) connector;
@@ -114,14 +114,14 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 	}
 
 	private static FConnectClause searchForConnection(InstNode node, ConnectClause connectClause) {
-		for (FAbstractEquation fae : node.getFAbstractEquations()) {
+		for (FAbstractEquation fae : node.syncGetFAbstractEquations()) {
 			if (fae instanceof FConnectClause) {
 				FConnectClause fcc = (FConnectClause) fae;
-				if (fcc.getConnectClause() == connectClause)
+				if (fcc.syncGetConnectClause() == connectClause)
 					return fcc;
 			}
 		}
-		for (InstExtends ie : node.getInstExtendss()) {
+		for (InstExtends ie : node.syncGetInstExtendss()) {
 			FConnectClause val = searchForConnection(ie, connectClause);
 			if (val != null)
 				return val;
@@ -132,7 +132,7 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 
 	@Override
 	protected InstComponentDecl getInstComponentDecl(String componentName) {
-		return getASTNode().simpleLookupInstComponentDecl(componentName);
+		return getASTNode().syncSimpleLookupInstComponentDecl(componentName);
 	}
 
 	@Override

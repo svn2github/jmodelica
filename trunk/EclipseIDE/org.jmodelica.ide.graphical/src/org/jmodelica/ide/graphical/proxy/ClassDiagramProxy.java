@@ -14,7 +14,7 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 
 	public static final Object COMPONENT_ADDED = new Object();
 	public static final Object COMPONENT_REMOVED = new Object();
-	
+
 	private InstClassDecl instClassDecl;
 
 	public ClassDiagramProxy(InstClassDecl instClassDecl) {
@@ -29,7 +29,7 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	public void setInstClassDecl(InstClassDecl instClassDecl) {
 		this.instClassDecl = instClassDecl;
 	}
-	
+
 	@Override
 	protected InstComponentDecl getComponentDecl() {
 		return null;
@@ -42,8 +42,9 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 
 	@Override
 	public ComponentProxy addComponent(String className, String componentName, Placement placement) {
-		InstComponentDecl icd = getASTNode().addComponent(className, componentName, placement);
-		String mapName = buildMapName(icd.qualifiedName(), icd.isConnector(), icd.isConnector());
+		String mapName;
+		InstComponentDecl icd = getASTNode().syncAddComponent(className, componentName, placement);
+		mapName = buildMapName(icd.syncQualifiedName(), icd.syncIsConnector(), icd.syncIsConnector());
 		ComponentProxy component = getComponentMap().get(mapName);
 		if (component == null) {
 			if (icd.isConnector()) {
@@ -59,26 +60,26 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 
 	@Override
 	public void removeComponent(ComponentProxy component) {
-		getASTNode().removeComponent(component.getComponentDecl());
+		getASTNode().syncRemoveComponent(component.getComponentDecl());
 		notifyObservers(COMPONENT_REMOVED);
 	}
-	
+
 	@Override
 	public ConnectionProxy addConnection(ConnectorProxy source, ConnectorProxy target) {
-		ConnectClause connectClause = getASTNode().addConnection(source.buildDiagramName(), target.buildDiagramName());
+		ConnectClause connectClause = getASTNode().syncAddConnection(source.buildDiagramName(), target.buildDiagramName());
 		ConnectionProxy connection = new ConnectionProxy(source, target, connectClause, this);
 		getConnectionMap().put(connectClause, connection);
 		return connection;
 	}
-	
+
 	@Override
 	protected void addConnection(ConnectionProxy connection) {
-		getASTNode().addConnection(connection.getConnectClause());
+		getASTNode().syncAddConnection(connection.getConnectClause());
 	}
 
 	@Override
 	protected boolean removeConnection(ConnectionProxy connection) {
-		getASTNode().removeConnection(getConnection(connection.getConnectClause()));
+		getASTNode().syncRemoveConnection(getConnection(connection.getConnectClause()));
 		return true;
 	}
 
