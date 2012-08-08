@@ -27,7 +27,7 @@ import os, os.path
 __all__ = ['general', 'initialization', 'optimization', 'simulation',
            'simulation_jmi', 'test_cad', 'test_compiler', 'test_examples',
            'test_fmi', 'test_init', 'test_io', 'test_jmi', 'test_linearization',
-           'test_xmlparser']
+           'test_xmlparser', 'test_core']
 
 #create working directory for tests
 if sys.platform == 'win32':
