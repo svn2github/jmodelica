@@ -3769,8 +3769,214 @@ end RedeclareTests.RedeclareElement17;
 end RedeclareElement17;
 
 
+model RedeclareElement18
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareElement18",
+         description="Chain of redeclare class extends - packages",
+         flatModel="
+fclass RedeclareTests.RedeclareElement18
+ Real f.w = 4;
+ Real f.z = 3;
+ Real f.y = 2;
+ Real f.x = 1;
+end RedeclareTests.RedeclareElement18;
+")})));
+
+    package A
+        replaceable model B
+            Real x = 1;
+        end B;
+    end A;
+    
+    package C
+        extends A;
+        redeclare replaceable model extends B
+            Real y = 2;
+        end B;
+    end C;
+    
+    package D
+        extends C;
+        redeclare replaceable model extends B
+            Real z = 3;
+        end B;
+    end D;
+    
+    package E
+        extends D;
+        redeclare model extends B
+            Real w = 4;
+        end B;
+    end E;
+    
+    E.B f;
+end RedeclareElement18;
+
+
+model RedeclareElement19
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareElement19",
+         description="Chain of redeclare class extends - packages, with extends in between",
+         flatModel="
+fclass RedeclareTests.RedeclareElement19
+ Real h.z = 3;
+ Real h.y = 2;
+ Real h.x = 1;
+end RedeclareTests.RedeclareElement19;
+")})));
+
+    package A
+        replaceable model B
+            Real x = 1;
+        end B;
+    end A;
+    
+    package C
+        extends A;
+    end C;
+    
+    package D
+        extends C;
+        redeclare replaceable model extends B
+            Real y = 2;
+        end B;
+    end D;
+    
+    package E
+        extends D;
+    end E;
+    
+    package F
+        extends E;
+        redeclare model extends B
+            Real z = 3;
+        end B;
+    end F;
+    
+    package G
+        extends F;
+    end G;
+    
+    G.B h;
+end RedeclareElement19;
+
+
+model RedeclareElement20
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareElement20",
+         description="Chain of redeclare class extends - models",
+         flatModel="
+fclass RedeclareTests.RedeclareElement20
+ Real f.g.w = 4;
+ Real f.g.z = 3;
+ Real f.g.y = 2;
+ Real f.g.x = 1;
+end RedeclareTests.RedeclareElement20;
+")})));
+
+    model A
+        replaceable model B
+            Real x = 1;
+        end B;
+		
+		B g;
+    end A;
+    
+    model C
+        extends A;
+        redeclare replaceable model extends B
+            Real y = 2;
+        end B;
+    end C;
+    
+    model D
+        extends C;
+        redeclare replaceable model extends B
+            Real z = 3;
+        end B;
+    end D;
+    
+    model E
+        extends D;
+        redeclare model extends B
+            Real w = 4;
+        end B;
+    end E;
+    
+    E f;
+end RedeclareElement20;
+
+
+model RedeclareElement21
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareElement21",
+         description="Chain of redeclare class extends - models, with extends in between",
+         flatModel="
+fclass RedeclareTests.RedeclareElement21
+ Real h.i.z = 3;
+ Real h.i.y = 2;
+ Real h.i.x = 1;
+end RedeclareTests.RedeclareElement21;
+")})));
+
+    model A
+        replaceable model B
+            Real x = 1;
+        end B;
+        
+        B i;
+    end A;
+    
+    model C
+        extends A;
+    end C;
+    
+    model D
+        extends C;
+        redeclare replaceable model extends B
+            Real y = 2;
+        end B;
+    end D;
+    
+    model E
+        extends D;
+    end E;
+    
+    model F
+        extends E;
+        redeclare model extends B
+            Real z = 3;
+        end B;
+    end F;
+    
+    model G
+        extends F;
+    end G;
+    
+    G h;
+end RedeclareElement21;
+
+
 
 model RedeclareSameLevel10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareSameLevel10",
+         description="Class used in base class redeclared as element",
+         flatModel="
+fclass RedeclareTests.RedeclareSameLevel10
+ Real d.y;
+ Real d.c.x;
+equation
+ d.c.x = 1;
+ d.y = 2;
+end RedeclareTests.RedeclareSameLevel10;
+")})));
+
 	package A
 		replaceable partial model C
 		end C;

@@ -535,6 +535,15 @@ aspect Environments {
 				return icd;
 		return retrieveReplacingClass(name);
 	}
+	eq InstExtends.getChild().lookupReplacingClass(String name) {
+		InstRedeclareClassNode res = lookupReplacingClass(name);
+		if (res != null)
+			return res;
+		for (InstClassDecl icd : getRedeclaredInstClassDecls())
+			if (icd.name().equals(name))
+				return icd;
+		return super.retrieveReplacingClass(name);
+	}
 
 	inh lazy InstNode InstModification.myInstNode();
 	inh lazy InstNode InstNode.myInstNode();
@@ -751,7 +760,7 @@ aspect InstanceTreeConstruction {
 		
 		for (ClassDecl cd : classes()) {
 			if (cd.hasRedeclare()) {
-			    InstNode icd = createInstClassDecl(cd);
+			    InstNode icd = cd.newInstClassDecl();
 			    if (icd != null)
 			    	l.add(icd);
 			}

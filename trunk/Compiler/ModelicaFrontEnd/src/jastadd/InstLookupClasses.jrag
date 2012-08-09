@@ -52,7 +52,7 @@ aspect InstLookupClasses {
 	eq InstExtends.getInstExtends().lookupInstClassFromMod(String name)       = genericLookupInstClassInExtends(name);
    
     eq InstInlineExtends.getClassName().lookupInstClass(String name) = 
-    	getClassName().name().equals(name) ? surroundingSuperLookupInstClass(name) : lookupInstClass(name);
+    	getClassName().name().equals(name) ? lookupRedeclareExtendsInstClass(name) : lookupInstClass(name);
 
 	// The lexical scope of modifiers in short classes is the "outer" scope, although
 	// the short class declaration is modeled as containing an extends clause
@@ -105,48 +105,93 @@ aspect InstLookupClasses {
 	eq FlatRoot.getChild().lookupInstClass(String name) = emptyHashSet();
 	
 	/**
-	 * \brief Does class lookup in the superclass(es) of the class surrounding the class containing an InstInlineExtends.
-	 * 
-	 * Used to look up the class being extended in a "redeclare class extends" declaration.
+	 * Look up the class being redeclared & extended in a "redeclare class extends" declaration.
 	 */
-	inh HashSet InstNode.surroundingSuperLookupInstClass(String name);
-	eq SourceRoot.getChild().surroundingSuperLookupInstClass(String name) = emptyHashSet();
-	eq FlatRoot.getChild().surroundingSuperLookupInstClass(String name)   = emptyHashSet();
-	eq InstClassDecl.getInstExtends().surroundingSuperLookupInstClass(String name) = 
-		doSurroundingSuperLookupInstClass(name);
-	eq InstClassDecl.getChild().surroundingSuperLookupInstClass(String name) = 
-		lookupInstClassInSuperClass(name);
-	eq InstComponentDecl.getChild().surroundingSuperLookupInstClass(String name) = 
-		myInstClass().doSurroundingSuperLookupInstClass(name);
-	eq InstReplacingShortClassDecl.getInstExtends().surroundingSuperLookupInstClass(String name) {
-		HashSet set = new HashSet(4);  // TODO: only valid for original purpose of attribute, needs rewite otherwise
-		set.add(getOriginalInstClass());
-		return set;
+	inh HashSet InstNode.lookupRedeclareExtendsInstClass(String name);
+	eq InstNode.getChild().lookupRedeclareExtendsInstClass(String name)                    = emptyHashSet();
+	eq InstExtendClassDecl.getChild().lookupRedeclareExtendsInstClass(String name)         = lookupRedeclareExtendsInstClass(name);
+	eq InstReplacingFullClassDecl.getChild().lookupRedeclareExtendsInstClass(String name)  = lookupRedeclareExtendsInstClass(name);
+	eq InstReplacingShortClassDecl.getChild().lookupRedeclareExtendsInstClass(String name) = lookupRedeclareExtendsInstClass(name);
+	eq InstExtends.getInstClassDecl().lookupRedeclareExtendsInstClass(String name)         = lookupTopRedeclareExtendsInstClass(name);
+	eq InstNode.getRedeclaredInstClassDecl().lookupRedeclareExtendsInstClass(String name)  = lookupNextRedeclareExtendsInstClass(name);
+	eq InstInlineExtends.getInstExtends().lookupRedeclareExtendsInstClass(String name)     = 
+		myInstClass().lookupRedeclareExtendsInstClass(name);
+	eq InstComponentDecl.getChild().lookupRedeclareExtendsInstClass(String name)           = 
+		myInstClass().lookupRedeclareExtendsInstClassFromComponent(name);
+	
+	syn HashSet InstClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)      = lookupLastRedeclareExtendsInstClass(name);
+	eq InstReplacingFullClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)  = lookupRedeclareExtendsInstClass(name);
+	eq InstReplacingShortClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name) = lookupRedeclareExtendsInstClass(name);
+	
+	/**
+	 * Look up the class being redeclared & extended in the last step of a chain 
+	 * of "redeclare class extends" declarations.
+	 */
+	inh HashSet InstExtends.lookupTopRedeclareExtendsInstClass(String name);
+	eq InstExtends.getChild().lookupTopRedeclareExtendsInstClass(String name)    = lookupTopRedeclareExtendsInstClass(name);
+	eq InstNode.getInstExtends().lookupTopRedeclareExtendsInstClass(String name) = lookupLastRedeclareExtendsInstClass(name);
+	
+	/**
+	 * Lookup the class being redeclared & extended in the last step of a chain 
+	 * of "redeclare class extends" declarations, where it is known that the last 
+	 * redeclaring class is below this node.
+	 */
+	syn HashSet InstNode.lookupLastRedeclareExtendsInstClass(String name) {
+		// TODO: find better way of detecting if there is only one "redeclare class extends" in chain
+		HashSet first = lookupCurRedeclareExtendsInstClass(name);
+		if (!first.isEmpty()) {
+			InstNode in = (InstNode) first.iterator().next();
+			HashSet second = in.lookupRedeclareExtendsInstClass(name);
+			if (!second.isEmpty())
+				first = second;
+		}
+		return first;
 	}
 	
 	/**
-	 * \brief Does lookup in all superclasses.
+	 * Look up the next class being redeclared & extended in a chain of 
+	 * "redeclare class extends" declarations.
 	 */
-	syn lazy HashSet InstNode.lookupInstClassInSuperClass(String name) {
-		HashSet set = new HashSet(4);
-		for (InstExtends ie : getInstExtendss()) 
-			set.addAll(ie.memberInstClass(name));
-		return set.isEmpty() ? emptyHashSet() : set;
+	syn HashSet InstNode.lookupNextRedeclareExtendsInstClass(String name) {
+		for (InstExtends ie : getInstExtendss()) {
+			HashSet res = ie.lookupCurRedeclareExtendsInstClass(name);
+			if (!res.isEmpty())
+				return res;
+		}
+		for (InstClassDecl icd : getInstClassDecls()) {
+			if (icd.matches(name)) {
+				InstClassDecl oicd = icd.originalInstClass();
+				if (icd != null) {
+					HashSet res = new HashSet(4);
+					res.add(oicd);
+					return res;
+				}
+			}
+		}
+		return emptyHashSet();
 	}
 	
 	/**
-	 * \brief Redirection method for surroundingSuperLookupInstClass().
-	 * 
-	 * Used to allow artificial calls to one of the cases.
+	 * Look up the next class being redeclared & extended in a chain of 
+	 * "redeclare class extends" declarations, including among direct children.
 	 */
-	syn HashSet InstClassDecl.doSurroundingSuperLookupInstClass(String name) =
-		surroundingSuperLookupInstClass(name);
-	
-	eq InstReplacingFullClassDecl.doSurroundingSuperLookupInstClass(String name) {
-		HashSet set = new HashSet(1);
-		set.add(getOriginalInstClass());
-		return set;
+	syn HashSet InstNode.lookupCurRedeclareExtendsInstClass(String name) {
+		for (InstClassDecl icd : getRedeclaredInstClassDecls()) {
+			if (icd.matches(name)) {
+				HashSet res = new HashSet(4);
+				res.add(icd);
+				return res;
+			}
+		}
+		return lookupNextRedeclareExtendsInstClass(name);
 	}
+	
+	/**
+	 * Return OriginalInstClass for nodes that have it, null otherwise.
+	 */
+	syn InstClassDecl InstClassDecl.originalInstClass() = null;
+	eq InstReplacingFullClassDecl.originalInstClass()   = getOriginalInstClass();
+	eq InstReplacingShortClassDecl.originalInstClass()  = getOriginalInstClass();
 	
 	syn lazy HashSet InstProgramRoot.lookupElementInstClass(String name) {
 		HashSet set = new HashSet(4);

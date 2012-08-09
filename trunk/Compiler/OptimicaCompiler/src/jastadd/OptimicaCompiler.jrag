@@ -203,8 +203,8 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		throws JModelicaHomeNotFoundException {
 		super.setArguments(compilerName, args, programarguments);
 		int arg = programarguments.size();
-		if (args.length >= arg+6) 
-			optimicaCTemplatefile = args[arg+5];
+		if (args.length >= arg+5) 
+			optimicaCTemplatefile = args[arg+4];
 	}
 	
 	public static void main(String args[]) {		
