@@ -50,7 +50,7 @@ public class Editor extends GraphicalEditor {
 
 	private GraphicalEditorInput input;
 	private ClassDiagramProxy dp;
-	private Stack<ComponentProxy> openComponentStack;
+	private Stack<ComponentDiagramProxy> openComponentStack;
 	private Composite breadcrumbsBar;
 
 	public Editor() {
@@ -106,9 +106,9 @@ public class Editor extends GraphicalEditor {
 				}
 			});
 
-			Iterator<ComponentProxy> it = openComponentStack.iterator();
+			Iterator<ComponentDiagramProxy> it = openComponentStack.iterator();
 			while (it.hasNext()) {
-				final ComponentProxy component = it.next();
+				final ComponentDiagramProxy component = it.next();
 				Label arrow = new Label(breadcrumbsBar, SWT.NONE);
 				arrow.setText(".");
 				if (it.hasNext()) {
@@ -154,7 +154,7 @@ public class Editor extends GraphicalEditor {
 	@Override
 	protected void initializeGraphicalViewer() {
 		dp = new ClassDiagramProxy(getProgramRoot().simpleLookupInstClassDecl(input.getClassName()));
-		openComponentStack = new Stack<ComponentProxy>();
+		openComponentStack = new Stack<ComponentDiagramProxy>();
 		setContent();
 		getGraphicalViewer().getRootEditPart().refresh();
 	}
@@ -179,7 +179,7 @@ public class Editor extends GraphicalEditor {
 			if (openComponentStack.isEmpty())
 				adp = dp;
 			else
-				adp = new ComponentDiagramProxy(openComponentStack.peek());
+				adp = openComponentStack.peek();
 			getGraphicalViewer().setContents(adp);
 			adp.constructConnections();
 		}
@@ -249,7 +249,6 @@ public class Editor extends GraphicalEditor {
 	 * @return If the component was found and displayed
 	 */
 	public boolean openSubComponent(ComponentProxy component) {
-		System.out.println(component.getComponentName());
 		AbstractNodeProxy node;
 		if (openComponentStack.isEmpty())
 			node = dp;
@@ -257,11 +256,11 @@ public class Editor extends GraphicalEditor {
 			node = openComponentStack.peek();
 
 		if (component.isParent(node)) {
-			openComponentStack.push(component);
+			openComponentStack.push(new ComponentDiagramProxy(component));
 			setContent();
 			return true;
 		}
-		System.out.println("No definition found!");
+		System.err.println("No definition found!");
 		return false;
 	}
 
@@ -271,7 +270,7 @@ public class Editor extends GraphicalEditor {
 	 * @param component Component that we are trying to open
 	 * @return If the component was found and displayed
 	 */
-	public boolean openPrevComponent(ComponentProxy component) {
+	public boolean openPrevComponent(ComponentDiagramProxy component) {
 		for (int i = 0; i < openComponentStack.size(); i++) {
 			if (component == openComponentStack.get(i)) {
 				while (i + 1 < openComponentStack.size())
