@@ -67,7 +67,7 @@ aspect AnnotationParsing {
 				throws FailedConstructionException, NotEnoughParametersException {
 			AnnotationNode placementAnnotation = forPath("Placement");
 			if(placementAnnotation.exists()) {
-				boolean visible = false;
+				boolean visible = Placement.DEFAULT_VISIBLE;
 				Transformation diagramTransformation = null;
 				Transformation iconTransformation = null;
 				for (AnnotationNode a : placementAnnotation) {

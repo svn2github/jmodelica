@@ -1,9 +1,7 @@
 package org.jmodelica.ide.graphical.edit.parts;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.GraphicalEditPart;
 import org.jmodelica.icons.Observable;
@@ -50,11 +48,19 @@ public class ComponentPart extends AbstractInstNodePart {
 	}
 	
 	@Override
+	public void addNotify() {
+		super.addNotify();
+		updateVisible();
+	}
+	
+	@Override
 	protected void refreshVisuals() {
-		getFigure().setDeclaredBounds(Converter.convert(getModel().calculateComponentTransform(getParent().getTransform()).transform(Transform.yInverter.transform(getModel().getPlacement().getTransformation().getExtent()))));
-		getFigure().figureMoved(null);
-		((GraphicalEditPart) getParent()).setLayoutConstraint(this, getFigure(), getFigure().getBounds());
-
+		if (getFigure().isVisible()) {
+			Rectangle declaredBounds = Converter.convert(getTransform().transform(Transform.yInverter.transform(getModel().getLayer().getCoordinateSystem().getExtent())));
+			getFigure().setDeclaredBounds(declaredBounds);
+			getFigure().figureMoved(null);
+			((GraphicalEditPart) getParent()).setLayoutConstraint(this, getFigure(), getFigure().getBounds());
+		}
 	}
 	
 	@Override
@@ -68,22 +74,26 @@ public class ComponentPart extends AbstractInstNodePart {
 	}
 
 	@Override
-	protected List<Object> getModelChildren() {
-		List<Object> children = new ArrayList<Object>();
-		children.addAll(getModel().getGraphics());
-		children.addAll(getModel().getConnectors());
-		return children;
-	}
-	
-	@Override
 	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (flag == Transformation.ORIGIN_UPDATED)
-			invalidateTransform();
-		if (flag == Transformation.EXTENT_UPDATED)
-			invalidateTransform();
-		if (flag == Transformation.ROTATION_CHANGED)
-			invalidateTransform();
+		
+		if (o == getModel().getPlacement()) {
+			if (flag == Placement.VISIBLE_UPDATED)
+				updateVisible();
+		}
+		if (o == getModel().getPlacement().getTransformation()) {
+			if (flag == Transformation.ORIGIN_UPDATED)
+				invalidateTransform();
+			if (flag == Transformation.EXTENT_UPDATED)
+				invalidateTransform();
+			if (flag == Transformation.ROTATION_CHANGED)
+				invalidateTransform();
+		}
+		
 		super.update(o, flag, additionalInfo);
+	}
+
+	private void updateVisible() {
+		getFigure().setVisible(getModel().getPlacement().isVisible());
 	}
 
 }

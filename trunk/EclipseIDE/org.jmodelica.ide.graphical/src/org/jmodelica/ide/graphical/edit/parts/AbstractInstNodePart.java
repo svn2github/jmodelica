@@ -1,25 +1,38 @@
 package org.jmodelica.ide.graphical.edit.parts;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.jmodelica.icons.Icon;
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.Observer;
+import org.jmodelica.icons.coord.CoordinateSystem;
 import org.jmodelica.ide.graphical.proxy.AbstractNodeProxy;
 import org.jmodelica.ide.graphical.util.ASTNodeResourceProvider;
-import org.jmodelica.modelica.compiler.InstExtends;
-import org.jmodelica.modelica.compiler.InstNode;
 
 public abstract class AbstractInstNodePart extends AbstractModelicaPart implements ASTNodeResourceProvider, Observer {
 
-	public AbstractInstNodePart(AbstractNodeProxy anp) {
-		super(anp);
+	public AbstractInstNodePart(AbstractNodeProxy model) {
+		super(model);
 	}
 
 	@Override
 	public AbstractNodeProxy getModel() {
 		return (AbstractNodeProxy) super.getModel();
+	}
+	
+	@Override
+	public void activate() {
+		super.activate();
+		getModel().getLayer().addObserver(this);
+		getModel().getLayer().getCoordinateSystem().addObserver(this);
+	}
+	
+	@Override
+	public void deactivate() {
+		getModel().getLayer().getCoordinateSystem().removeObserver(this);
+		getModel().getLayer().removeObserver(this);
+		super.deactivate();
 	}
 
 	@Override
@@ -27,15 +40,14 @@ public abstract class AbstractInstNodePart extends AbstractModelicaPart implemen
 		refreshVisuals();
 	}
 
-	protected static void collectGraphics(InstNode node, List<Object> graphics, boolean inDiagram) {
-		Icon icon = inDiagram ? node.diagram() : node.icon();
-		if (icon.getLayer() != Layer.NO_LAYER)
-			graphics.addAll(icon.getLayer().getGraphics());
-		for (InstExtends ie : node.getInstExtendss()) {
-			collectGraphics(ie, graphics, inDiagram);
-		}
+	@Override
+	protected List<Object> getModelChildren() {
+		List<Object> children = new ArrayList<Object>();
+		children.addAll(getModel().getGraphics());
+		children.addAll(getModel().getComponents());
+		return children;
 	}
-
+	
 	@Override
 	public String getComponentName() {
 		return getModel().getComponentName();
@@ -53,8 +65,34 @@ public abstract class AbstractInstNodePart extends AbstractModelicaPart implemen
 
 	@Override
 	public void update(Observable o, Object flag, Object additionalInfo) {
+		if (o == getModel().getLayer() && flag == Layer.GRAPHICS_SWAPPED)
+			refreshChildren();
+		if (o == getModel().getLayer().getCoordinateSystem()) {
+			if (flag == CoordinateSystem.EXTENT_UPDATED)
+				updateLayerExtent();
+			if (flag == CoordinateSystem.GRID_CHANGED)
+				updateGrid();
+			if (flag == CoordinateSystem.INITIAL_SCALE_CHANGED)
+				updateInitialScale();
+			if (flag == CoordinateSystem.PRESERVE_ASPECT_RATIO_CHANGED)
+				updatePreserveAspectRatio();
+		}
 		if (!isActive())
 			o.removeObserver(this);
 		super.update(o, flag, additionalInfo);
 	}
+
+	protected void updateLayerExtent() {
+		invalidateTransform();
+	}
+	
+	protected void updateGrid() {
+	}
+
+	protected void updateInitialScale() {
+	}
+
+	protected void updatePreserveAspectRatio() {
+	}
+
 }

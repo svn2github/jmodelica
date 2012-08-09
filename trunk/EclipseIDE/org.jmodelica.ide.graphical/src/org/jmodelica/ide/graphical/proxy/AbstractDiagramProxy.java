@@ -1,19 +1,16 @@
 package org.jmodelica.ide.graphical.proxy;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
+import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.modelica.compiler.ConnectClause;
 import org.jmodelica.modelica.compiler.FAbstractEquation;
 import org.jmodelica.modelica.compiler.FConnectClause;
-import org.jmodelica.modelica.compiler.InstBaseClassDecl;
-import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
 import org.jmodelica.modelica.compiler.InstExtends;
 import org.jmodelica.modelica.compiler.InstNode;
@@ -31,10 +28,9 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 		return "";
 	}
 
-	public List<ComponentProxy> getComponents() {
-		List<ComponentProxy> components = new ArrayList<ComponentProxy>();
-		collectComponents(getASTNode(), components);
-		return components;
+	@Override
+	public Layer getLayer() {
+		return getASTNode().syncGetDiagramLayer();
 	}
 
 	@Override
@@ -46,28 +42,6 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 		return connectionMap;
 	}
 
-	private void collectComponents(InstNode node, List<ComponentProxy> components) {
-		for (InstExtends ie : node.syncGetInstExtendss()) {
-			collectComponents(ie, components);
-		}
-		for (InstComponentDecl icd : node.syncGetInstComponentDecls()) {
-			InstClassDecl classDecl = icd.syncMyInstClass();
-			if (!classDecl.syncIsUnknown() && classDecl instanceof InstBaseClassDecl) {
-				String mapName = buildMapName(icd.syncQualifiedName(), icd.syncIsConnector(), icd.syncIsConnector());
-				ComponentProxy component = getComponentMap().get(mapName);
-				if (component == null) {
-					if (icd.syncIsConnector())
-						component = new DiagramConnectorProxy(icd.syncName(), this);
-					else
-						component = new ComponentProxy(icd.syncName(), this);
-					getComponentMap().put(mapName, component);
-				}
-				components.add(component);
-			}
-		}
-	}
-	
-	
 	public void constructConnections() {
 		constructConnections(getASTNode());
 	}

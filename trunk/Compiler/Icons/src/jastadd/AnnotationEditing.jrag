@@ -21,13 +21,23 @@ aspect AnnotationEditing {
 	}
 	
 	/**
-	 * Saves the coordinateSystem annotation from <code>system</code> to this
-	 * annotation node.
+	 * Saves the icon coordinateSystem annotation from <code>system</code>
+	 * to this annotation node.
 	 * 
 	 * @param system CoordinateSystem to save annotation from
 	 */
-	public void AnnotationNode.saveCoordinateSystem(CoordinateSystem system) {
-		forPath("CoordinateSystem").save(system);
+	public void AnnotationNode.saveIconCoordinateSystem(CoordinateSystem system) {
+		forPath("Icon/coordinateSystem").save(system);
+	}
+	
+	/**
+	 * Saves the diagram coordinateSystem annotation from <code>system</code>
+	 * to this annotation node.
+	 * 
+	 * @param system CoordinateSystem to save annotation from
+	 */
+	public void AnnotationNode.saveDiagramCoordinateSystem(CoordinateSystem system) {
+		forPath("Diagram/coordinateSystem").save(system);
 	}
 	
 	/*

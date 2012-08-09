@@ -91,46 +91,95 @@ aspect ModelicaIconsEditing {
 	}
 	
 	/**
-	 * Thread safe method that retreives the coordiante system for this
-	 * component.
+	 * Thread safe method that checks if a component should be rendered.
 	 */
-	public CoordinateSystem InstComponentDecl.syncGetCoordinateSystem() {
+	public boolean InstComponentDecl.syncIsIconRenderable() {
+		if (myInstClass().isUnknown())
+			return false;
+		if (!(myInstClass() instanceof InstBaseClassDecl))
+			return false;
+		if (hasConditionalAttribute()) {
+			CValue val = getConditionalAttribute().ceval();
+			if (val instanceof CValueBoolean && !val.booleanValue()) {
+				return false;
+			}
+		}
+		if (isConnector() && getComponentDecl().isProtected())
+			return false;
+		return true;
+	}
+	
+	
+	syn ClassDecl InstNode.iconClassDecl() = null;
+	eq InstClassDecl.iconClassDecl() = getClassDecl();
+	eq InstComponentDecl.iconClassDecl() = myInstClass().iconClassDecl();
+	eq InstExtends.iconClassDecl() = myInstClass().iconClassDecl();
+	
+	/**
+	 * Thread safe method that retreives the icon layer for this component.
+	 */
+	public Layer InstNode.syncGetIconLayer() {
 		synchronized (state()) {
-			return myInstClass().syncGetCoordinateSystem();
+			ClassDecl decl = iconClassDecl();
+			if (decl == null)
+				return Layer.NO_LAYER;
+			else
+				return decl.iconLayer();
 		}
 	}
 	
 	/**
-	 * Thread safe method that retreives the coordiante system for this class.
+	 * Thread safe method that retreives the diagram layer for this component.
 	 */
-	public CoordinateSystem InstClassDecl.syncGetCoordinateSystem() {
+	public Layer InstNode.syncGetDiagramLayer() {
 		synchronized (state()) {
-			return getClassDecl().syncGetCoordinateSystem();
+			ClassDecl decl = iconClassDecl();
+			if (decl == null)
+				return Layer.NO_LAYER;
+			else
+				return decl.diagramLayer();
 		}
 	}
 	
-	private CoordinateSystem ClassDecl.coordinateSystem;
 	
-	/**
-	 * Thread safe method that retreives the coordiante system for this class.
-	 */
-	public CoordinateSystem ClassDecl.syncGetCoordinateSystem() {
-		synchronized (state()) {
-			if (coordinateSystem != null)
-				return coordinateSystem;
-			coordinateSystem = annotation().forPath("Diagram/CoordinateSystem").createCoordinateSystem();
-			coordinateSystem.addObserver(this);
-			return coordinateSystem;
-		}
+	private Layer ClassDecl.iconLayer;
+	
+	public Layer ClassDecl.iconLayer() {
+		if (iconLayer != null)
+			return iconLayer;
+		iconLayer = annotation().createIconLayer();
+		iconLayer.addObserver(this);
+		return iconLayer;
 	}
+	
+	private Layer ClassDecl.diagramLayer;
+	
+	public Layer ClassDecl.diagramLayer() {
+		if (diagramLayer != null)
+			return diagramLayer;
+		diagramLayer = annotation().createDiagramLayer();
+		diagramLayer.addObserver(this);
+		return diagramLayer;
+	}
+	
 	
 	public class ClassDecl implements Observer{}
 	
 	@Override
 	public void ClassDecl.update(Observable o, Object flag, Object additionalInfo) {
 		synchronized (state()) {
-			if (o == syncGetCoordinateSystem())
-				annotation().forPath("Diagram").saveCoordinateSystem(syncGetCoordinateSystem());
+			if (o == iconLayer) {
+				if (flag == Layer.COORDINATE_SYSTEM_UPDATED)
+					annotation().saveIconCoordinateSystem(iconLayer.getCoordinateSystem());
+//				if (flag == Layer.GRAPHICS_SWAPPED) //TODO:add support for graphics change.
+//					annotation().save(iconLayer.getGraphics().toArray(new GraphicItem[iconLayer.getGraphics().size()]));
+			}
+			if (o == diagramLayer) {
+				if (flag == Layer.COORDINATE_SYSTEM_UPDATED)
+					annotation().saveDiagramCoordinateSystem(diagramLayer.getCoordinateSystem());
+//				if (flag == Layer.GRAPHICS_SWAPPED) //TODO:add support for graphics change.
+//					annotation().save(iconLayer.getGraphics().toArray(new GraphicItem[iconLayer.getGraphics().size()]));
+			}
 		}
 	}
 	
@@ -294,15 +343,6 @@ aspect ModelicaIconsEditing {
 	}
 	
 	/**
-	 * Thread safe wrapper method for InstClassDecl.isUnknown()
-	 */
-	public boolean InstClassDecl.syncIsUnknown() {
-		synchronized (state()) {
-			return isUnknown();
-		}
-	}
-	
-	/**
 	 * Thread safe wrapper method for InstNode.getFAbstractEquations()
 	 */
 	public List<FAbstractEquation> InstNode.syncGetFAbstractEquations() {
@@ -371,15 +411,6 @@ aspect ModelicaIconsEditing {
 	public ComponentDecl InstComponentDecl.syncGetComponentDecl() {
 		synchronized (state()) {
 			return getComponentDecl();
-		}
-	}
-	
-	/**
-	 * Thread safe wrapper method for ComponentDecl.isProtected()
-	 */
-	public boolean ComponentDecl.syncIsProtected() {
-		synchronized (state) {
-			return isProtected();
 		}
 	}
 }
