@@ -46,6 +46,25 @@ aspect ModelicaIconsEditing {
 		}
 	}
 	
+	/*-------------------------------------------------------------------------
+	 *                          InstNode related
+	 ------------------------------------------------------------------------*/
+	
+	/**
+	 * Thread safe method that lookup the parameter value for <code>paramter</code>
+	 */
+	public String InstNode.syncLookupParameterValue(String parameter) {
+		synchronized (state()) {
+			for (Object o : memberInstComponent(parameter)) {
+				if (o instanceof InstPrimitive) {
+					InstPrimitive ip = (InstPrimitive) o;
+					return ip.ceval().toString();
+				}
+			}
+			return null;
+		}
+	}
+
 	
 	/*-------------------------------------------------------------------------
 	 *                          Component related

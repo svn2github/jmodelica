@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.Assert;
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.modelica.compiler.ConnectClause;
@@ -57,9 +56,11 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 				if (connectionMap.containsKey(connectClause))
 					continue;
 				ConnectorProxy source = getConnectorFromDecl(fcc.syncGetConnector1().syncGetInstAccess().syncMyInstComponentDecl());
-				Assert.isNotNull(source);
+				if (source == null)
+					continue;
 				ConnectorProxy target = getConnectorFromDecl(fcc.syncGetConnector2().syncGetInstAccess().syncMyInstComponentDecl());
-				Assert.isNotNull(target);
+				if (target == null)
+					continue;
 				ConnectionProxy connection = new ConnectionProxy(source, target, connectClause, this);
 				connectionMap.put(connectClause, connection);
 			}
@@ -75,7 +76,7 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 		connector = getComponentMap().get(mapName);
 		if (connector != null)
 			return (ConnectorProxy) connector;
-		throw new IllegalArgumentException();
+		return null;
 	}
 
 	@Override

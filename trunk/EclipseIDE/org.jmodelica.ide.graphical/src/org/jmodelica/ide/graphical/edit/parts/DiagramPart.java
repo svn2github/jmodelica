@@ -60,7 +60,7 @@ public class DiagramPart extends AbstractInstNodePart {
 	protected Transform calculateTransform() {
 		Transform transform = new Transform();
 		transform.translate(300, 300);
-		transform.scale(3);
+		transform.scale(4);
 		return transform;
 	}
 

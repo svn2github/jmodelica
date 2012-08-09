@@ -94,7 +94,7 @@ public abstract class AbstractNodeProxy extends Observable {
 			if (component == null) {
 				if (isConnector && inDiagram)
 					component = new DiagramConnectorProxy(icd.syncName(), this);
-				if (isConnector && !inDiagram)
+				else if (isConnector && !inDiagram)
 					component = new IconConnectorProxy(icd.syncName(), this);
 				else
 					component = new ComponentProxy(icd.syncName(), this);
@@ -105,18 +105,7 @@ public abstract class AbstractNodeProxy extends Observable {
 	}
 
 	public String getParameterValue(String parameter) {
-//		InstNode in = getComponentDecl();
-//		if (in == null)
-//			in = getClassDecl();
-//		if (in == null)
-//			return null;
-//		for (Object o : in.memberInstComponent(parameter)) {
-//			if (o instanceof InstPrimitive) {
-//				InstPrimitive ip = (InstPrimitive) o;
-//				return ip.ceval().toString();
-//			}
-//		}
-		return null;
+		return getASTNode().syncLookupParameterValue(parameter);
 	}
 	
 	protected static String buildMapName(String qualifiedName, boolean isConnector, boolean inDiagram) {
