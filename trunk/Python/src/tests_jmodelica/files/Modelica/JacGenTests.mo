@@ -827,6 +827,51 @@ equation
 		der(Y) = x1+x2+x3+x4+e+f+g;
  end Unsolved_blocks6;
  
+ model Unsolved_blocks_torn_1
+  Real x_1(start=1.29533105933);
+  output Real w_ode_1_1;
+  Real w_ode_1_2;
+  input Real ur_1;
+  input Real ur_2;
+  input Real ur_3;
+equation
+	w_ode_1_1*20 + (1.30*w_ode_1_2 + sin(w_ode_1_2) ) + (-2.01*x_1 + sin(x_1) ) + (-1.18*x_1) + (1.45*x_1) + (1.09*ur_2 + sin(ur_2) ) + (-1.24*ur_2) + (2.16*ur_3 + sin(ur_3) ) = 0;
+	w_ode_1_2*20 + (-2.10*w_ode_1_1 + sin(w_ode_1_1) ) + (1.63*x_1 + sin(x_1) ) + (2.59*x_1 + sin(x_1) ) - (2.05*x_1) = 0;
+	der(x_1) = (1.58*w_ode_1_1 + sin(w_ode_1_1) ) + (-2.51*w_ode_1_2 + sin(w_ode_1_2) ) + (2.15*x_1 + sin(x_1) ) - (2.19*x_1 + sin(x_1) ) - (-2.89*x_1) + (2.99*ur_1 + sin(ur_1) ) + (-2.34*ur_3 + sin(ur_3) ) + (-1.23*ur_2);		 
+ end Unsolved_blocks_torn_1;
+ 
+ model Unsolved_blocks_torn_2
+	 function F
+			input Real x1;
+			input Real x2;
+			input Real x3;
+			input Real x4;
+			output Real a;
+			output Real b;
+			output Real c;
+			output Real d;
+		algorithm
+			a := sin(x1);
+			b := cos(x1);
+			c := tan(x2);
+			d := sin(x3);
+		end F;
+		Real x1(start=.1);
+		Real x2(start=.2);
+		Real x3(start=.3);
+		Real x4(start=.4);
+		Real e(start=1);
+		Real f(start=2);
+		Real g(start=3);
+		output Real Y;
+	equation
+		(x1,x2,x3,x4) = F(x1,x2,x3,x4);
+		der(e) = log(x1*x2 + 2)*e;
+		der(f) = sin(x2*x3)*f;
+		der(g) = log(x1*x2*x3*x4 + 3)*g+e+f;
+		der(Y) = x1+x2+x3+x4+e+f+g;
+ end Unsolved_blocks_torn_2;
+ 
  
   model JacTestInput
 	Real x(start=1);

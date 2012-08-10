@@ -1934,142 +1934,119 @@ model CADRes1
          fmi_version=2.0,
          generate_ode=true,
          equation_sorting=true,
-         template="$CAD_dae_blocks_residual_functions$,$CAD_dae_init_blocks_residual_functions$",
+         enable_tearing=false,
+         template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$",
          generatedCode="
-static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+
+/******** Declarations *******/
 
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 
+jmi_ad_var_t v_1;
+jmi_ad_var_t d_1;
+
+jmi_ad_var_t v_2;
+jmi_ad_var_t d_2;
+
+jmi_ad_var_t v_3;
+jmi_ad_var_t d_3;
+
+jmi_ad_var_t v_4;
+jmi_ad_var_t d_4;
+
+jmi_ad_var_t v_5;
+jmi_ad_var_t d_5;
+
+jmi_real_t** dz = jmi->dz;
+/*********** ODE section ***********/
+  jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+v_2 = _x_0 + AD_WRAP_LITERAL(1);
+d_2 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] + AD_WRAP_LITERAL(0);
+v_1 = log(v_2);
+d_1 = d_2 * 1/(v_2);
+v_0 = v_1 * _a_2;
+d_0 = (d_1 * _a_2 + v_1 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+  _der_a_4 = v_0;
+  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_0;
+  jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[1]);
+v_5 = _y_1 + AD_WRAP_LITERAL(2);
+d_5 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] + AD_WRAP_LITERAL(0);
+v_4 = log(v_5);
+d_4 = d_5 * 1/(v_5);
+v_3 = v_4 * _b_3;
+d_3 = (d_4 * _b_3 + v_4 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
+  _der_b_5 = v_3;
+  (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] =d_3;
+/*********** Real outputs **********/
+/*** Integer and boolean outputs ***/
+/********* Other variables *********/
+,static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+
+jmi_ad_var_t v_6;
+jmi_ad_var_t d_6;
+
 jmi_real_t** res = &residual;
 jmi_real_t** dF = &dRes;
 jmi_real_t** dz;
-  if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _x_0;
-  return 0;  } else if (evaluation_mode == JMI_BLOCK_EVALUATE){
-  dz = jmi->dz_active_variables;
 
+if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
+    x[0] = _x_0;
+    return 0;
+} else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+    dz = jmi->dz_active_variables;
     _x_0 = x[0];
     (*dz)[ jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = dx[0];
-  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK){
-      dz = jmi->dz;
-  } else{
-  return -1;
-}
- if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
-v_0 = sin(_x_0);
-d_0 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * cos(_x_0);
-(*res)[0] = v_0 - _x_0;
-(*dF)[0]  = d_0 - (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+} else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+    dz = jmi->dz;
+} else {
+    return -1;
+} if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
+v_6 = sin(_x_0);
+d_6 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * cos(_x_0);
+(*res)[0] = v_6 - _x_0;
+(*dF)[0]  = d_6 - (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
     (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = 0;
-   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = -(*dF)[0];
-  } else {
-return -1;
+} else {
+    return -1;
 }
-  return 0;
+    return 0;
 }
 
 static int dae_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
 
-jmi_ad_var_t v_1;
-jmi_ad_var_t d_1;
+jmi_ad_var_t v_7;
+jmi_ad_var_t d_7;
 
 jmi_real_t** res = &residual;
 jmi_real_t** dF = &dRes;
 jmi_real_t** dz;
-  if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _y_1;
-  return 0;  } else if (evaluation_mode == JMI_BLOCK_EVALUATE){
-  dz = jmi->dz_active_variables;
 
+if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
+    x[0] = _y_1;
+    return 0;
+} else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+    dz = jmi->dz_active_variables;
     _y_1 = x[0];
     (*dz)[ jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = dx[0];
-  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK){
-      dz = jmi->dz;
-  } else{
-  return -1;
-}
- if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
-v_1 = sin(_y_1);
-d_1 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] * cos(_y_1);
-(*res)[0] = v_1 - _y_1;
-(*dF)[0]  = d_1 - (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
+} else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+    dz = jmi->dz;
+} else {
+    return -1;
+} if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
+v_7 = sin(_y_1);
+d_7 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] * cos(_y_1);
+(*res)[0] = v_7 - _y_1;
+(*dF)[0]  = d_7 - (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
     (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = 0;
-   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = -(*dF)[0];
-  } else {
-return -1;
+} else {
+    return -1;
 }
-  return 0;
-}
-
-,static int dae_init_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
-
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-
-jmi_real_t** res = &residual;
-jmi_real_t** dF = &dRes;
-jmi_real_t** dz;
-  if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _x_0;
-  return 0;  } else if (evaluation_mode == JMI_BLOCK_EVALUATE){
-  dz = jmi->dz_active_variables;
-
-    _x_0 = x[0];
-    (*dz)[ jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = dx[0];
-  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK){
-      dz = jmi->dz;
-  } else{
-  return -1;
-}
- if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
-v_0 = sin(_x_0);
-d_0 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * cos(_x_0);
-(*res)[0] = v_0 - _x_0;
-(*dF)[0]  = d_0 - (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
-    (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = 0;
-   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = -(*dF)[0];
-  } else {
-return -1;
-}
-  return 0;
-}
-
-static int dae_init_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
-
-jmi_ad_var_t v_1;
-jmi_ad_var_t d_1;
-
-jmi_real_t** res = &residual;
-jmi_real_t** dF = &dRes;
-jmi_real_t** dz;
-  if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _y_1;
-  return 0;  } else if (evaluation_mode == JMI_BLOCK_EVALUATE){
-  dz = jmi->dz_active_variables;
-
-    _y_1 = x[0];
-    (*dz)[ jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = dx[0];
-  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK){
-      dz = jmi->dz;
-  } else{
-  return -1;
-}
- if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
-v_1 = sin(_y_1);
-d_1 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] * cos(_y_1);
-(*res)[0] = v_1 - _y_1;
-(*dF)[0]  = d_1 - (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
-    (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = 0;
-   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = -(*dF)[0];
-  } else {
-return -1;
-}
-  return 0;
+    return 0;
 }
 
 ")})));
@@ -2096,72 +2073,73 @@ model CADRes2
          fmi_version=2.0,
          generate_ode=true,
          equation_sorting=true,
-         template="$CAD_dae_blocks_residual_functions$,$CAD_dae_init_blocks_residual_functions$",
+         enable_tearing=false,
+         template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$",
          generatedCode="
-static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+
+/******** Declarations *******/
 
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 
+jmi_ad_var_t v_1;
+jmi_ad_var_t d_1;
+
+jmi_ad_var_t v_2;
+jmi_ad_var_t d_2;
+
+jmi_ad_var_t v_3;
+jmi_ad_var_t d_3;
+
+jmi_real_t** dz = jmi->dz;
+/*********** ODE section ***********/
+  jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+v_0 = _x_0 * _a_2;
+d_0 = ((*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * _a_2 + _x_0 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
+  _der_y_3 = v_0;
+  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_0;
+v_3 = _x_0 * _y_1;
+d_3 = ((*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * _y_1 + _x_0 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+v_2 = v_3 + AD_WRAP_LITERAL(1);
+d_2 = d_3 + AD_WRAP_LITERAL(0);
+v_1 = log(v_2);
+d_1 = d_2 * 1/(v_2);
+  _der_a_4 = v_1;
+  (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] =d_1;
+/*********** Real outputs **********/
+/*** Integer and boolean outputs ***/
+/********* Other variables *********/
+,static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+
+jmi_ad_var_t v_4;
+jmi_ad_var_t d_4;
+
 jmi_real_t** res = &residual;
 jmi_real_t** dF = &dRes;
 jmi_real_t** dz;
-  if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _x_0;
-  return 0;  } else if (evaluation_mode == JMI_BLOCK_EVALUATE){
-  dz = jmi->dz_active_variables;
 
+if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
+    x[0] = _x_0;
+    return 0;
+} else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+    dz = jmi->dz_active_variables;
     _x_0 = x[0];
     (*dz)[ jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = dx[0];
-  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK){
-      dz = jmi->dz;
-  } else{
-  return -1;
-}
- if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
-func_CADCodeGenTests_CADRes2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx],&v_0, &d_0);
-(*res)[0] = v_0 - _x_0;
-(*dF)[0]  = d_0 - (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+} else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+    dz = jmi->dz;
+} else {
+    return -1;
+} if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
+func_CADCodeGenTests_CADRes2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx],&v_4, &d_4);
+(*res)[0] = v_4 - _x_0;
+(*dF)[0]  = d_4 - (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
     (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = 0;
-   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = -(*dF)[0];
-  } else {
-return -1;
+} else {
+    return -1;
 }
-  return 0;
-}
-
-,static int dae_init_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
-
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-
-jmi_real_t** res = &residual;
-jmi_real_t** dF = &dRes;
-jmi_real_t** dz;
-  if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _x_0;
-  return 0;  } else if (evaluation_mode == JMI_BLOCK_EVALUATE){
-  dz = jmi->dz_active_variables;
-
-    _x_0 = x[0];
-    (*dz)[ jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = dx[0];
-  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK){
-      dz = jmi->dz;
-  } else{
-  return -1;
-}
- if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
-func_CADCodeGenTests_CADRes2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx],&v_0, &d_0);
-(*res)[0] = v_0 - _x_0;
-(*dF)[0]  = d_0 - (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
-    (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = 0;
-   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = -(*dF)[0];
-  } else {
-return -1;
-}
-  return 0;
+    return 0;
 }
 
 ")})));
@@ -2191,9 +2169,137 @@ model CADRes3
          fmi_version=2.0,
          generate_ode=true,
          equation_sorting=true,
-         template="$CAD_dae_blocks_residual_functions$,$CAD_dae_init_blocks_residual_functions$",
+         enable_tearing=false,
+         template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$",
          generatedCode="
-static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+
+/******** Declarations *******/
+
+jmi_ad_var_t v_0;
+jmi_ad_var_t d_0;
+
+jmi_ad_var_t v_1;
+jmi_ad_var_t d_1;
+
+jmi_ad_var_t v_2;
+jmi_ad_var_t d_2;
+
+jmi_ad_var_t v_3;
+jmi_ad_var_t d_3;
+
+jmi_ad_var_t v_4;
+jmi_ad_var_t d_4;
+
+jmi_ad_var_t v_5;
+jmi_ad_var_t d_5;
+
+jmi_ad_var_t v_6;
+jmi_ad_var_t d_6;
+
+jmi_ad_var_t v_7;
+jmi_ad_var_t d_7;
+
+jmi_ad_var_t v_8;
+jmi_ad_var_t d_8;
+
+jmi_ad_var_t v_9;
+jmi_ad_var_t d_9;
+
+jmi_ad_var_t v_10;
+jmi_ad_var_t d_10;
+
+jmi_ad_var_t v_11;
+jmi_ad_var_t d_11;
+
+jmi_ad_var_t v_12;
+jmi_ad_var_t d_12;
+
+jmi_ad_var_t v_13;
+jmi_ad_var_t d_13;
+
+jmi_ad_var_t v_14;
+jmi_ad_var_t d_14;
+
+jmi_ad_var_t v_15;
+jmi_ad_var_t d_15;
+
+jmi_ad_var_t v_16;
+jmi_ad_var_t d_16;
+
+jmi_ad_var_t v_17;
+jmi_ad_var_t d_17;
+
+jmi_ad_var_t v_18;
+jmi_ad_var_t d_18;
+
+jmi_ad_var_t v_19;
+jmi_ad_var_t d_19;
+
+jmi_ad_var_t v_20;
+jmi_ad_var_t d_20;
+
+jmi_ad_var_t v_21;
+jmi_ad_var_t d_21;
+
+jmi_real_t** dz = jmi->dz;
+/*********** ODE section ***********/
+  jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+v_3 = _x1_0 * _x2_1;
+d_3 = ((*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] * _x2_1 + _x1_0 * (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx]);
+v_2 = v_3 + AD_WRAP_LITERAL(1);
+d_2 = d_3 + AD_WRAP_LITERAL(0);
+v_1 = log(v_2);
+d_1 = d_2 * 1/(v_2);
+v_0 = v_1 * _e_4;
+d_0 = (d_1 * _e_4 + v_1 * (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx]);
+  _der_e_8 = v_0;
+  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_0;
+v_7 = _x2_1 * _x3_2;
+d_7 = ((*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] * _x3_2 + _x2_1 * (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx]);
+v_6 = v_7 + AD_WRAP_LITERAL(2);
+d_6 = d_7 + AD_WRAP_LITERAL(0);
+v_5 = sin(v_6);
+d_5 = d_6 * cos(v_6);
+v_4 = v_5 * _f_5;
+d_4 = (d_5 * _f_5 + v_5 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx]);
+  _der_f_9 = v_4;
+  (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] =d_4;
+v_15 = _x1_0 * _x2_1;
+d_15 = ((*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] * _x2_1 + _x1_0 * (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx]);
+v_14 = v_15 * _x3_2;
+d_14 = (d_15 * _x3_2 + v_15 * (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx]);
+v_13 = v_14 * _x4_3;
+d_13 = (d_14 * _x4_3 + v_14 * (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx]);
+v_12 = v_13 + AD_WRAP_LITERAL(3);
+d_12 = d_13 + AD_WRAP_LITERAL(0);
+v_11 = log(v_12);
+d_11 = d_12 * 1/(v_12);
+v_10 = v_11 * _g_6;
+d_10 = (d_11 * _g_6 + v_11 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx]);
+v_9 = v_10 + _e_4;
+d_9 = d_10 + (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+v_8 = v_9 + _f_5;
+d_8 = d_9 + (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
+  _der_g_10 = v_8;
+  (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] =d_8;
+v_21 = _x1_0 + _x2_1;
+d_21 = (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
+v_20 = v_21 + _x3_2;
+d_20 = d_21 + (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx];
+v_19 = v_20 + _x4_3;
+d_19 = d_20 + (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx];
+v_18 = v_19 + _e_4;
+d_18 = d_19 + (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+v_17 = v_18 + _f_5;
+d_17 = d_18 + (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
+v_16 = v_17 + _g_6;
+d_16 = d_17 + (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
+  _der_Y_11 = v_16;
+  (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] =d_16;
+/*********** Real outputs **********/
+/*** Integer and boolean outputs ***/
+/********* Other variables *********/
+,static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
   jmi_ad_var_t tmp_var_0;
   jmi_ad_var_t tmp_der_0;
   jmi_ad_var_t tmp_var_1;
@@ -2203,20 +2309,21 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
   jmi_ad_var_t tmp_var_3;
   jmi_ad_var_t tmp_der_3;
 
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
+jmi_ad_var_t v_22;
+jmi_ad_var_t d_22;
 
 jmi_real_t** res = &residual;
 jmi_real_t** dF = &dRes;
 jmi_real_t** dz;
-  if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
+
+if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _x1_0;
     x[1] = _x2_1;
     x[2] = _x3_2;
     x[3] = _x4_3;
-  return 0;  } else if (evaluation_mode == JMI_BLOCK_EVALUATE){
-  dz = jmi->dz_active_variables;
-
+    return 0;
+} else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+    dz = jmi->dz_active_variables;
     _x1_0 = x[0];
     (*dz)[ jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = dx[0];
     _x2_1 = x[1];
@@ -2225,12 +2332,11 @@ jmi_real_t** dz;
     (*dz)[ jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = dx[2];
     _x4_3 = x[3];
     (*dz)[ jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] = dx[3];
-  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK){
-      dz = jmi->dz;
-  } else{
-  return -1;
-}
- if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
+} else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+    dz = jmi->dz;
+} else {
+    return -1;
+} if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
 func_CADCodeGenTests_CADRes3_F_der_AD(_x1_0, _x2_1, _x3_2, _x4_3, (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx], &tmp_var_0, &tmp_var_1, &tmp_var_2, &tmp_var_3, &tmp_der_0, &tmp_der_1, &tmp_der_2, &tmp_der_3);
     (*res)[0] = tmp_var_0 - (_x1_0);
     (*dF)[0] = tmp_der_0 - ((*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx]);
@@ -2244,81 +2350,18 @@ func_CADCodeGenTests_CADRes3_F_der_AD(_x1_0, _x2_1, _x3_2, _x4_3, (*dz)[jmi_get_
     (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = 0;
     (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = 0;
     (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] = 0;
-   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = -(*dF)[0];
     (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = -(*dF)[1];
     (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = -(*dF)[2];
     (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] = -(*dF)[3];
-  } else {
-return -1;
+} else {
+    return -1;
 }
-  return 0;
-}
-
-,static int dae_init_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
-  jmi_ad_var_t tmp_var_0;
-  jmi_ad_var_t tmp_der_0;
-  jmi_ad_var_t tmp_var_1;
-  jmi_ad_var_t tmp_der_1;
-  jmi_ad_var_t tmp_var_2;
-  jmi_ad_var_t tmp_der_2;
-  jmi_ad_var_t tmp_var_3;
-  jmi_ad_var_t tmp_der_3;
-
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-
-jmi_real_t** res = &residual;
-jmi_real_t** dF = &dRes;
-jmi_real_t** dz;
-  if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _x1_0;
-    x[1] = _x2_1;
-    x[2] = _x3_2;
-    x[3] = _x4_3;
-  return 0;  } else if (evaluation_mode == JMI_BLOCK_EVALUATE){
-  dz = jmi->dz_active_variables;
-
-    _x1_0 = x[0];
-    (*dz)[ jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = dx[0];
-    _x2_1 = x[1];
-    (*dz)[ jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = dx[1];
-    _x3_2 = x[2];
-    (*dz)[ jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = dx[2];
-    _x4_3 = x[3];
-    (*dz)[ jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] = dx[3];
-  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK){
-      dz = jmi->dz;
-  } else{
-  return -1;
-}
- if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
-func_CADCodeGenTests_CADRes3_F_der_AD(_x1_0, _x2_1, _x3_2, _x4_3, (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx], &tmp_var_0, &tmp_var_1, &tmp_var_2, &tmp_var_3, &tmp_der_0, &tmp_der_1, &tmp_der_2, &tmp_der_3);
-    (*res)[0] = tmp_var_0 - (_x1_0);
-    (*dF)[0] = tmp_der_0 - ((*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx]);
-    (*res)[1] = tmp_var_1 - (_x2_1);
-    (*dF)[1] = tmp_der_1 - ((*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx]);
-    (*res)[2] = tmp_var_2 - (_x3_2);
-    (*dF)[2] = tmp_der_2 - ((*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx]);
-    (*res)[3] = tmp_var_3 - (_x4_3);
-    (*dF)[3] = tmp_der_3 - ((*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx]);
-    (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = 0;
-    (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = 0;
-    (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = 0;
-    (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] = 0;
-   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = -(*dF)[0];
-    (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = -(*dF)[1];
-    (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = -(*dF)[2];
-    (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] = -(*dF)[3];
-  } else {
-return -1;
-}
-  return 0;
+    return 0;
 }
 
 ")})));
-
 
 	function F
 			input Real x1;
@@ -2350,6 +2393,520 @@ return -1;
 		der(g) = log(x1*x2*x3*x4+3)*g+e+f;
 		der(Y) = x1+x2+x3+x4+e+f+g;
 end CADRes3;
+
+model CADTorn1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CADCodeGenTestCase(
+         name="CADTorn1",
+         description="",
+         generate_ode_jacobian=true,
+         eliminate_alias_variables=false,
+         fmi_version=2.0,
+         generate_ode=true,
+         equation_sorting=true,
+         enable_tearing=true,
+         template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$",
+         generatedCode="
+
+/******** Declarations *******/
+
+jmi_ad_var_t v_0;
+jmi_ad_var_t d_0;
+
+jmi_ad_var_t v_1;
+jmi_ad_var_t d_1;
+
+jmi_ad_var_t v_2;
+jmi_ad_var_t d_2;
+
+jmi_ad_var_t v_3;
+jmi_ad_var_t d_3;
+
+jmi_ad_var_t v_4;
+jmi_ad_var_t d_4;
+
+jmi_ad_var_t v_5;
+jmi_ad_var_t d_5;
+
+jmi_ad_var_t v_6;
+jmi_ad_var_t d_6;
+
+jmi_ad_var_t v_7;
+jmi_ad_var_t d_7;
+
+jmi_ad_var_t v_8;
+jmi_ad_var_t d_8;
+
+jmi_ad_var_t v_9;
+jmi_ad_var_t d_9;
+
+jmi_ad_var_t v_10;
+jmi_ad_var_t d_10;
+
+jmi_ad_var_t v_11;
+jmi_ad_var_t d_11;
+
+jmi_ad_var_t v_12;
+jmi_ad_var_t d_12;
+
+jmi_ad_var_t v_13;
+jmi_ad_var_t d_13;
+
+jmi_ad_var_t v_14;
+jmi_ad_var_t d_14;
+
+jmi_ad_var_t v_15;
+jmi_ad_var_t d_15;
+
+jmi_ad_var_t v_16;
+jmi_ad_var_t d_16;
+
+jmi_ad_var_t v_17;
+jmi_ad_var_t d_17;
+
+jmi_ad_var_t v_18;
+jmi_ad_var_t d_18;
+
+jmi_ad_var_t v_19;
+jmi_ad_var_t d_19;
+
+jmi_ad_var_t v_20;
+jmi_ad_var_t d_20;
+
+jmi_ad_var_t v_21;
+jmi_ad_var_t d_21;
+
+jmi_ad_var_t v_22;
+jmi_ad_var_t d_22;
+
+jmi_ad_var_t v_23;
+jmi_ad_var_t d_23;
+
+jmi_ad_var_t v_24;
+jmi_ad_var_t d_24;
+
+jmi_ad_var_t v_25;
+jmi_ad_var_t d_25;
+
+jmi_ad_var_t v_26;
+jmi_ad_var_t d_26;
+
+jmi_ad_var_t v_27;
+jmi_ad_var_t d_27;
+
+jmi_ad_var_t v_28;
+jmi_ad_var_t d_28;
+
+jmi_ad_var_t v_29;
+jmi_ad_var_t d_29;
+
+jmi_ad_var_t v_30;
+jmi_ad_var_t d_30;
+
+jmi_ad_var_t v_31;
+jmi_ad_var_t d_31;
+
+jmi_ad_var_t v_32;
+jmi_ad_var_t d_32;
+
+jmi_ad_var_t v_33;
+jmi_ad_var_t d_33;
+
+jmi_real_t** dz = jmi->dz;
+/*********** ODE section ***********/
+  jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+v_13 = 1.58 * _w_ode_1_1_1;
+d_13 = (AD_WRAP_LITERAL(0) * _w_ode_1_1_1 + 1.58 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx]);
+v_14 = sin(_w_ode_1_1_1);
+d_14 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] * cos(_w_ode_1_1_1);
+v_12 = v_13 + v_14;
+d_12 = d_13 + d_14;
+v_16 = -2.51;
+d_16 = -AD_WRAP_LITERAL(0);
+v_15 = v_16 * _w_ode_1_2_2;
+d_15 = (d_16 * _w_ode_1_2_2 + v_16 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx]);
+v_11 = v_12 + v_15;
+d_11 = d_12 + d_15;
+v_17 = sin(_w_ode_1_2_2);
+d_17 = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * cos(_w_ode_1_2_2);
+v_10 = v_11 + v_17;
+d_10 = d_11 + d_17;
+v_18 = 2.15 * _x_1_0;
+d_18 = (AD_WRAP_LITERAL(0) * _x_1_0 + 2.15 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+v_9 = v_10 + v_18;
+d_9 = d_10 + d_18;
+v_19 = sin(_x_1_0);
+d_19 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
+v_8 = v_9 + v_19;
+d_8 = d_9 + d_19;
+v_21 = 2.19 * _x_1_0;
+d_21 = (AD_WRAP_LITERAL(0) * _x_1_0 + 2.19 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+v_20 = -v_21;
+d_20 = -d_21;
+v_7 = v_8 + v_20;
+d_7 = d_8 + d_20;
+v_23 = sin(_x_1_0);
+d_23 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
+v_22 = -v_23;
+d_22 = -d_23;
+v_6 = v_7 + v_22;
+d_6 = d_7 + d_22;
+v_26 = -2.89;
+d_26 = -AD_WRAP_LITERAL(0);
+v_25 = v_26 * _x_1_0;
+d_25 = (d_26 * _x_1_0 + v_26 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+v_24 = -v_25;
+d_24 = -d_25;
+v_5 = v_6 + v_24;
+d_5 = d_6 + d_24;
+v_27 = 2.99 * _ur_1_3;
+d_27 = (AD_WRAP_LITERAL(0) * _ur_1_3 + 2.99 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+v_4 = v_5 + v_27;
+d_4 = d_5 + d_27;
+v_28 = sin(_ur_1_3);
+d_28 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * cos(_ur_1_3);
+v_3 = v_4 + v_28;
+d_3 = d_4 + d_28;
+v_30 = -2.34;
+d_30 = -AD_WRAP_LITERAL(0);
+v_29 = v_30 * _ur_3_5;
+d_29 = (d_30 * _ur_3_5 + v_30 * (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx]);
+v_2 = v_3 + v_29;
+d_2 = d_3 + d_29;
+v_31 = sin(_ur_3_5);
+d_31 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * cos(_ur_3_5);
+v_1 = v_2 + v_31;
+d_1 = d_2 + d_31;
+v_33 = -1.23;
+d_33 = -AD_WRAP_LITERAL(0);
+v_32 = v_33 * _ur_2_4;
+d_32 = (d_33 * _ur_2_4 + v_33 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
+v_0 = v_1 + v_32;
+d_0 = d_1 + d_32;
+  _der_x_1_6 = v_0;
+  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_0;
+/*********** Real outputs **********/
+/*** Integer and boolean outputs ***/
+/********* Other variables *********/
+,static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+
+jmi_ad_var_t v_34;
+jmi_ad_var_t d_34;
+
+jmi_ad_var_t v_35;
+jmi_ad_var_t d_35;
+
+jmi_ad_var_t v_36;
+jmi_ad_var_t d_36;
+
+jmi_ad_var_t v_37;
+jmi_ad_var_t d_37;
+
+jmi_ad_var_t v_38;
+jmi_ad_var_t d_38;
+
+jmi_ad_var_t v_39;
+jmi_ad_var_t d_39;
+
+jmi_ad_var_t v_40;
+jmi_ad_var_t d_40;
+
+jmi_ad_var_t v_41;
+jmi_ad_var_t d_41;
+
+jmi_ad_var_t v_42;
+jmi_ad_var_t d_42;
+
+jmi_ad_var_t v_43;
+jmi_ad_var_t d_43;
+
+jmi_ad_var_t v_44;
+jmi_ad_var_t d_44;
+
+jmi_ad_var_t v_45;
+jmi_ad_var_t d_45;
+
+jmi_ad_var_t v_46;
+jmi_ad_var_t d_46;
+
+jmi_ad_var_t v_47;
+jmi_ad_var_t d_47;
+
+jmi_ad_var_t v_48;
+jmi_ad_var_t d_48;
+
+jmi_ad_var_t v_49;
+jmi_ad_var_t d_49;
+
+jmi_ad_var_t v_50;
+jmi_ad_var_t d_50;
+
+jmi_ad_var_t v_51;
+jmi_ad_var_t d_51;
+
+jmi_ad_var_t v_52;
+jmi_ad_var_t d_52;
+
+jmi_ad_var_t v_53;
+jmi_ad_var_t d_53;
+
+jmi_ad_var_t v_54;
+jmi_ad_var_t d_54;
+
+jmi_ad_var_t v_55;
+jmi_ad_var_t d_55;
+
+jmi_ad_var_t v_56;
+jmi_ad_var_t d_56;
+
+jmi_ad_var_t v_57;
+jmi_ad_var_t d_57;
+
+jmi_ad_var_t v_58;
+jmi_ad_var_t d_58;
+
+jmi_ad_var_t v_59;
+jmi_ad_var_t d_59;
+
+jmi_ad_var_t v_60;
+jmi_ad_var_t d_60;
+
+jmi_ad_var_t v_61;
+jmi_ad_var_t d_61;
+
+jmi_ad_var_t v_62;
+jmi_ad_var_t d_62;
+
+jmi_ad_var_t v_63;
+jmi_ad_var_t d_63;
+
+jmi_ad_var_t v_64;
+jmi_ad_var_t d_64;
+
+jmi_ad_var_t v_65;
+jmi_ad_var_t d_65;
+
+jmi_ad_var_t v_66;
+jmi_ad_var_t d_66;
+
+jmi_ad_var_t v_67;
+jmi_ad_var_t d_67;
+
+jmi_ad_var_t v_68;
+jmi_ad_var_t d_68;
+
+jmi_ad_var_t v_69;
+jmi_ad_var_t d_69;
+
+jmi_ad_var_t v_70;
+jmi_ad_var_t d_70;
+
+jmi_ad_var_t v_71;
+jmi_ad_var_t d_71;
+
+jmi_ad_var_t v_72;
+jmi_ad_var_t d_72;
+
+jmi_ad_var_t v_73;
+jmi_ad_var_t d_73;
+
+jmi_ad_var_t v_74;
+jmi_ad_var_t d_74;
+
+jmi_ad_var_t v_75;
+jmi_ad_var_t d_75;
+
+jmi_ad_var_t v_76;
+jmi_ad_var_t d_76;
+
+jmi_ad_var_t v_77;
+jmi_ad_var_t d_77;
+
+jmi_ad_var_t v_78;
+jmi_ad_var_t d_78;
+
+jmi_ad_var_t v_79;
+jmi_ad_var_t d_79;
+
+jmi_ad_var_t v_80;
+jmi_ad_var_t d_80;
+
+jmi_ad_var_t v_81;
+jmi_ad_var_t d_81;
+
+jmi_ad_var_t v_82;
+jmi_ad_var_t d_82;
+
+jmi_ad_var_t v_83;
+jmi_ad_var_t d_83;
+
+jmi_ad_var_t v_84;
+jmi_ad_var_t d_84;
+
+jmi_ad_var_t v_85;
+jmi_ad_var_t d_85;
+
+jmi_ad_var_t v_86;
+jmi_ad_var_t d_86;
+
+jmi_real_t** res = &residual;
+jmi_real_t** dF = &dRes;
+jmi_real_t** dz;
+if (evaluation_mode==JMI_BLOCK_INITIALIZE){
+    x[0] = _w_ode_1_2_2;
+    return 0;
+} else if (evaluation_mode == JMI_BLOCK_EVALUATE){
+    dz = jmi->dz_active_variables;
+    (*dz)[ jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] = dx[0];
+    _w_ode_1_2_2 = x[0];
+} else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+      dz = jmi->dz;
+} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+    dz = jmi->dz;
+    (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] = -(*dF)[0];
+} else {
+  return -1; 
+}
+if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE|| evaluation_mode == JMI_BLOCK_WRITE_BACK ){
+v_47 = 1.3 * _w_ode_1_2_2;
+d_47 = (AD_WRAP_LITERAL(0) * _w_ode_1_2_2 + 1.3 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx]);
+v_46 = -v_47;
+d_46 = -d_47;
+v_49 = sin(_w_ode_1_2_2);
+d_49 = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * cos(_w_ode_1_2_2);
+v_48 = -v_49;
+d_48 = -d_49;
+v_45 = v_46 + v_48;
+d_45 = d_46 + d_48;
+v_52 = -2.01;
+d_52 = -AD_WRAP_LITERAL(0);
+v_51 = v_52 * _x_1_0;
+d_51 = (d_52 * _x_1_0 + v_52 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+v_50 = -v_51;
+d_50 = -d_51;
+v_44 = v_45 + v_50;
+d_44 = d_45 + d_50;
+v_54 = sin(_x_1_0);
+d_54 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
+v_53 = -v_54;
+d_53 = -d_54;
+v_43 = v_44 + v_53;
+d_43 = d_44 + d_53;
+v_57 = -1.18;
+d_57 = -AD_WRAP_LITERAL(0);
+v_56 = v_57 * _x_1_0;
+d_56 = (d_57 * _x_1_0 + v_57 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+v_55 = -v_56;
+d_55 = -d_56;
+v_42 = v_43 + v_55;
+d_42 = d_43 + d_55;
+v_59 = 1.45 * _x_1_0;
+d_59 = (AD_WRAP_LITERAL(0) * _x_1_0 + 1.45 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+v_58 = -v_59;
+d_58 = -d_59;
+v_41 = v_42 + v_58;
+d_41 = d_42 + d_58;
+v_61 = 1.09 * _ur_2_4;
+d_61 = (AD_WRAP_LITERAL(0) * _ur_2_4 + 1.09 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
+v_60 = -v_61;
+d_60 = -d_61;
+v_40 = v_41 + v_60;
+d_40 = d_41 + d_60;
+v_63 = sin(_ur_2_4);
+d_63 = (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] * cos(_ur_2_4);
+v_62 = -v_63;
+d_62 = -d_63;
+v_39 = v_40 + v_62;
+d_39 = d_40 + d_62;
+v_66 = -1.24;
+d_66 = -AD_WRAP_LITERAL(0);
+v_65 = v_66 * _ur_2_4;
+d_65 = (d_66 * _ur_2_4 + v_66 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
+v_64 = -v_65;
+d_64 = -d_65;
+v_38 = v_39 + v_64;
+d_38 = d_39 + d_64;
+v_68 = 2.16 * _ur_3_5;
+d_68 = (AD_WRAP_LITERAL(0) * _ur_3_5 + 2.16 * (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx]);
+v_67 = -v_68;
+d_67 = -d_68;
+v_37 = v_38 + v_67;
+d_37 = d_38 + d_67;
+v_70 = sin(_ur_3_5);
+d_70 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * cos(_ur_3_5);
+v_69 = -v_70;
+d_69 = -d_70;
+v_36 = v_37 + v_69;
+d_36 = d_37 + d_69;
+v_35 = v_36 + 0;
+d_35 = d_36 + AD_WRAP_LITERAL(0);
+v_34 = v_35 / 20;
+d_34 = (d_35 * 20 - v_35 * AD_WRAP_LITERAL(0) ) / ( 20 * 20);
+    _w_ode_1_1_1 = v_34;
+    (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] =d_34;
+}
+if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
+v_75 = _w_ode_1_2_2 * 20;
+d_75 = ((*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * 20 + _w_ode_1_2_2 * AD_WRAP_LITERAL(0));
+v_78 = -2.1;
+d_78 = -AD_WRAP_LITERAL(0);
+v_77 = v_78 * _w_ode_1_1_1;
+d_77 = (d_78 * _w_ode_1_1_1 + v_78 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx]);
+v_79 = sin(_w_ode_1_1_1);
+d_79 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] * cos(_w_ode_1_1_1);
+v_76 = v_77 + v_79;
+d_76 = d_77 + d_79;
+v_74 = v_75 + v_76;
+d_74 = d_75 + d_76;
+v_81 = 1.63 * _x_1_0;
+d_81 = (AD_WRAP_LITERAL(0) * _x_1_0 + 1.63 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+v_82 = sin(_x_1_0);
+d_82 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
+v_80 = v_81 + v_82;
+d_80 = d_81 + d_82;
+v_73 = v_74 + v_80;
+d_73 = d_74 + d_80;
+v_84 = 2.59 * _x_1_0;
+d_84 = (AD_WRAP_LITERAL(0) * _x_1_0 + 2.59 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+v_85 = sin(_x_1_0);
+d_85 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
+v_83 = v_84 + v_85;
+d_83 = d_84 + d_85;
+v_72 = v_73 + v_83;
+d_72 = d_73 + d_83;
+v_86 = 2.05 * _x_1_0;
+d_86 = (AD_WRAP_LITERAL(0) * _x_1_0 + 2.05 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+v_71 = v_72 - v_86;
+d_71 = d_72 - d_86;
+(*res)[0] = 0 - v_71;
+(*dF)[0]  = AD_WRAP_LITERAL(0) - d_71;
+    (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = 0;
+    (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] = 0;
+} else {
+  return -1;
+}
+  return 0;
+}
+
+")})));
+
+  Real x_1(start=1.29533105933);
+  output Real w_ode_1_1;
+  Real w_ode_1_2;
+
+  input Real ur_1;
+  input Real ur_2;
+  input Real ur_3;
+equation
+w_ode_1_1*20 + (1.30*w_ode_1_2 + sin(w_ode_1_2) ) + (-2.01*x_1 + sin(x_1) ) + (-1.18*x_1) + (1.45*x_1) + (1.09*ur_2 + sin(ur_2) ) + (-1.24*ur_2) + (2.16*ur_3 + sin(ur_3) ) = 0;
+
+w_ode_1_2*20 + (-2.10*w_ode_1_1 + sin(w_ode_1_1) ) + (1.63*x_1 + sin(x_1) ) + (2.59*x_1 + sin(x_1) ) - (2.05*x_1) = 0;
+
+der(x_1) = (1.58*w_ode_1_1 + sin(w_ode_1_1) ) + (-2.51*w_ode_1_2 + sin(w_ode_1_2) ) + (2.15*x_1 + sin(x_1) ) - (2.19*x_1 + sin(x_1) ) - (-2.89*x_1) + (2.99*ur_1 + sin(ur_1) ) + (-2.34*ur_3 + sin(ur_3) ) + (-1.23*ur_2);
+
+end CADTorn1;
+
+
 
 model CADOde1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

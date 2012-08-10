@@ -622,6 +622,31 @@ class Test_FMI_Jaobians_Unsolved_blocks:
 		m.initialize()
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
 		assert n_errs ==0		
+
+
+	@testattr(stddist = True)
+	def test_Unsolved_blocks_torn_1(self):
+		cname = "JacGenTests.Unsolved_blocks_torn_1"
+		fn = compile_fmu(cname,self.fname,compiler_options={'enable_tearing':True,
+			'equation_sorting':True,'eliminate_alias_variables':False,
+			'generate_ode_jacobian':True,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		m.initialize()
+		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+		assert n_errs ==0
+
+	@testattr(stddist = True)
+	def test_Unsolved_blocks_torn_2(self):
+		cname = "JacGenTests.Unsolved_blocks_torn_2"
+		fn = compile_fmu(cname,self.fname,compiler_options={'enable_tearing':True,
+			'equation_sorting':True,'eliminate_alias_variables':False,
+			'generate_ode_jacobian':True,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		m.initialize()
+		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+		assert n_errs ==0		
 		
 class Test_FMI_Jaobians_Miscellaneous:
 

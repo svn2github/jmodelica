@@ -805,8 +805,12 @@ aspect CADCodeGen {
 	} 
 	
 	
-	/* Generates AD code for equationBlock which require iteration to be solved. The subclass MixedEquationBlock is currently
-	 * not supported. 
+	/* Generates AD code for EquationBlock which require iteration to be solved. The subclass MixedEquationBlock is currently
+	 * not supported. The general flow is:  
+	 * 1: Initilize active variables
+	 * 2: Evaluate inactive varibles to compute the right hand side.
+	 * 3: Evaluate block jacobian for active variables. dz_active variables is used as seeds.
+	 * 4: The solver solves the resulting linear system. The solver calls write back with the solved variables as input.  
 	 * @param int block_counter, determines the index of this block in the c-code
 	 * @param boolean init, determines whether this block is written as an init block or not
 	 * @param String indent, used to get a consistently formated c-code
@@ -822,19 +826,19 @@ aspect CADCodeGen {
 		genVarDecls_CAD(str, indent);
 		str.print("\njmi_real_t** res = &residual;\n");
 		str.print("jmi_real_t** dF = &dRes;\n");
-		str.print("jmi_real_t** dz;\n");
+		str.print("jmi_real_t** dz;\n\n");
 		
-		str.print("  if (evaluation_mode==JMI_BLOCK_INITIALIZE) {\n");
+		str.print("if (evaluation_mode==JMI_BLOCK_INITIALIZE) {\n");
 		int var_counter = 0;
 		// Loop over all active variables and write their value to x	
 		for (FVariable fv : activeVariables()) {
 			str.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
 			var_counter++;
 		}
-		str.print(indent + "return 0;");
+		str.print("    return 0;");
 		// If we should evaluate the block Jacobian, then use dz_active_variables as seed
-		str.print("  } else if (evaluation_mode == JMI_BLOCK_EVALUATE){\n");
-		str.print(indent + "dz = jmi->dz_active_variables;\n\n");
+		str.print("\n} else if (evaluation_mode == JMI_BLOCK_EVALUATE) {\n");
+		str.print("    dz = jmi->dz_active_variables;\n");
 		// Loop over all active variables and write the values in x to the z vector
 		var_counter = 0;
 		for (FVariable fv : activeVariables()) {
@@ -842,11 +846,11 @@ aspect CADCodeGen {
 			str.print("    (*dz)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];\n");
 			var_counter++;
 		}
-		// If we should evalate the right hand side, or write back directional derivatives, then we use dz as seed
-		str.print("  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK){\n");
-		str.print("      dz = jmi->dz;\n");
-        str.print("  } else{\n");
-        str.print("  return -1;\n}\n");
+		// If we should evaluate the right hand side, or write back directional derivatives, then we use dz as seed
+		str.print("} else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
+		str.print("    dz = jmi->dz;\n");
+        str.print("} else {\n");
+        str.print("    return -1;\n}");
 				
 		str.print(" if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){\n");				
 		// Write AD-code
@@ -862,20 +866,29 @@ aspect CADCodeGen {
         }
 		
 		// Write back values	
-		str.print("   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
+		str.print("} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
 		var_counter = 0;
 		//Code that stores the evaluated dz
 		for (FVariable fv : activeVariables()) {
 			str.print("    (*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];\n");
 			var_counter++;
 		}
-		str.print("  } else {\nreturn -1;\n}\n");
+		str.print("} else {\n    return -1;\n}\n");
 		
-		str.print("  return 0;\n}\n\n");
+		str.print("    return 0;\n}\n\n");
 	}
 	
 	
-	/* Generates AD code for TornEquationBlock which require iteration to be solved. TODO: when this works, update javadoc
+	/* Generates AD code for TornEquationBlock which require iteration to be solved. 
+	 * The general flow of the Torn AD solver is:
+	 * 1: Initialize unsolved/iteration variables.
+	 * 2: Evaluate solved variables in to obtain dz_i seeds for the active (unsolved) variable.
+	 * Also evaluate inactive variables to evaluate the right hand side.
+	 * 3: Compute block jacobians by using dz_active variables which only contains
+	 * seeds set by the solver.
+	 * 4: The solver solves the resulting linear system. When performing a write back the 
+	 * solved variables are also computed again, now with the right seeds for the
+	 * unsolved/iteration variables, and stored in the global dz-vector.  
 	 * @param int block_counter, determines the index of this block in the c-code
 	 * @param boolean init, determines whether this block is written as an init block or not
 	 * @param String indent, used to get a consistently formated c-code
@@ -883,6 +896,16 @@ aspect CADCodeGen {
 	 */
 	public void TornEquationBlock.genBlockResidualFunction_CAD(int block_counter, boolean inInit, String indent, PrintStream str) {
 		str.print("static int dae_" + (inInit? "init_": "") + "block_dir_der_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {\n");
+		ArrayList<FVariable> unsolvedVars = new ArrayList<FVariable>();
+		for (AbstractEquationBlock block : unsolvedBlocks) {
+			unsolvedVars.addAll(block.activeVariables());
+		}
+		
+		ArrayList<FVariable> solvedVars = new ArrayList<FVariable>();
+		for (AbstractEquationBlock block : solvedBlocks) {
+			solvedVars.addAll(block.activeVariables());
+		}
+		
 		int i = 0;
 		HashSet<String> hs = new HashSet<String>();
 		for (FAbstractEquation e : equations()){
@@ -899,67 +922,78 @@ aspect CADCodeGen {
 				e.genVarDeclsRedundantCheck_CAD(str, hs);
 			}
 		}
+		str.print("\njmi_real_t** res = &residual;\n");
+		str.print("jmi_real_t** dF = &dRes;\n");
+		str.print("jmi_real_t** dz;\n");
 		
-		str.print("  jmi_real_t** res = &residual;\n");
-		str.print("  jmi_real_t** dF = &dRes;\n");
-		str.print("  jmi_real_t** dz;\n");
-		str.print("  if (evaluation_mode == JMI_BLOCK_EVALUATE){\n");
-		str.print("      dz = jmi->dz_seed;\n");
-		// Loop over all active variables and write the values in x to the z vector
+		str.print("if (evaluation_mode==JMI_BLOCK_INITIALIZE){\n");
 		int var_counter = 0;
-		for (FVariable fv : activeVariables()) {
-			//str.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
-			str.print("    (*dz)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];\n");
-			var_counter++;
-		}
-		str.print("  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_WITH_STATE){\n");
-		str.print("      dz = jmi->dz_seed;\n");
-		// Loop over all active variables and write the values in x to the z vector
-		var_counter = 0;
-		for (FVariable fv : activeVariables()) {
-			str.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
-			str.print("    (*dz)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];\n");
-			var_counter++;
-		}
-		
-		str.print("  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK){\n");
-		str.print("      dz = jmi->dv;\n");
-		str.print("  } else{\n");
-		str.print("  return -1;\n}\n");
-		str.print("  if (evaluation_mode==JMI_BLOCK_INITIALIZE) {\n");
-		var_counter = 0;
-		// Loop over all active variables and write their value to x	
-		for (FVariable fv : activeVariables()) {
+		// Loop over all unsolved variables and write their value to x	
+		for (FVariable fv : unsolvedVars) {
 			str.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
 			var_counter++;
 		}
-		str.print("  } else if (evaluation_mode==JMI_BLOCK_EVALUATE || evaluation_mode==JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode==JMI_BLOCK_EVALUATE_WITH_STATE) {\n");
+		str.print("    return 0;");
 		
-		// Generate dy_i seeds from solved equations and variables
-		for (AbstractEquationBlock aeb : solvedBlocks) {
-			aeb.genBlockResidualFunctionBeforeEqns_CAD(indent, str);
+		// If we should evaluate the block Jacobian, then use dz_active_variables as seed
+		str.print("\n} else if (evaluation_mode == JMI_BLOCK_EVALUATE){\n");
+		str.print("    dz = jmi->dz_active_variables;\n");
+		// Loop over all active variables and write the values in x to the z vector
+		var_counter = 0;
+		// Iteration is over the unsolved variables. 
+		for (FVariable fv : unsolvedVars) {
+			str.print("    (*dz)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];\n");
+			str.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
+			var_counter++;
 		}
+	
+		// If we should evaluate the right hand side use global dz as seed
+		str.print("} else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {\n");
+		str.print("      dz = jmi->dz;\n");
+		
+		// If we should write back directional derivatives then global use dz as seed
+		str.print("} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {");
+		str.print("\n    dz = jmi->dz;\n");
+		var_counter = 0;
+		// Code that stores the evaluated dz
+		// dz entries for the solved variables are updated below as well
+		for (FVariable fv : unsolvedVars) {
+			str.print("    (*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];\n");
+			var_counter++;
+		}
+		str.print("} else {\n  return -1; \n}\n");
+		
+		
+        
+        str.print("if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE "+
+        			"|| evaluation_mode == JMI_BLOCK_EVALUATE"+
+        		    "|| evaluation_mode == JMI_BLOCK_WRITE_BACK ){\n");				
+        
+        // Generate dz_i seeds from solved equations and variables
+		for (AbstractEquationBlock aeb : solvedBlocks) {
+			 var_counter=0;
+			aeb.genBlockResidualFunctionBeforeEqns_CAD("    ", str);
+		}
+		str.print("}\n");
+		
+        str.print("if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE "+
+    			    "|| evaluation_mode == JMI_BLOCK_EVALUATE){\n");	
+		
 		// AD-code for residual equations
 		int equation_counter = 0;
 		for (FAbstractEquation e : unsolvedEquations()) {
-			e.genResidual_CAD(equation_counter,indent,str);				
+			e.genResidual_CAD(equation_counter,"    ",str);				
 			equation_counter += e.numScalarEquations();
 		}
-		// Reset seed-vector
+		
+		// Reset all variables. global dz is updated elsewhere and dz_active should
+		// always be reset so as not to cause incorrect seeds
 		for (FVariable fv : activeVariables()) {
 			str.print("    (*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = 0;\n");
 		}
-		str.print("   }else if(evaluation_mode==JMI_BLOCK_WRITE_BACK){\n");
-		var_counter = 0;
-		for (FVariable fv : activeVariables()) {
-			str.print("    (*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];\n");
-			//str.print("    (*(jmi->dz))[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];\n");
-			var_counter++;
-		}
-		str.print("  } else{\nreturn -1;\n}\n");
 		
+		str.print("} else {\n  return -1;\n}\n");
 		str.print("  return 0;\n}\n\n");
-		
 	}
 	
 	/* Used to generate AD code for blocks, called mainly from model_ode_derivatives or model_ode_initialize_dir_der.
