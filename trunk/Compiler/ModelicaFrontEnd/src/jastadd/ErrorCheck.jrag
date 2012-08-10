@@ -557,15 +557,36 @@ aspect InstanceErrorCheck {
   }
   
     public void InstNode.collectErrorsInClassDecls() {
-    	for (InstNode n : getInstClassDecls()) 
-    		n.collectErrors();
+    	for (InstNode n : getInstClassDecls())
+    		n.collectErrorsInClassDecl();
     }
     
-    public void InstComponentDecl.collectErrorsInClassDecls() {}
+    protected boolean InstNode.errorCheckedAsClass = false;
     
-    public void InstExtends.collectErrorsInClassDecls() {
-    	if (!inInstComponent())
-    		super.collectErrorsInClassDecls();
+    public void InstNode.collectErrorsInClassDecl() {
+        if (!errorCheckedAsClass) {
+        	errorCheckedAsClass = true;
+	    	if (isRecursed()) {
+	    		error("Recursive class structure");
+	    	} else {
+	    		classChecks();
+	    		for(InstNode n : getInstExtendss()) 
+	    			n.collectErrorsInClassDecl();
+	    	}
+        }
+    }
+    
+    public void InstNode.classChecks() {}
+    
+    public void InstExtends.classChecks() {
+		if (hasInstClassModification())
+			getInstClassModification().collectErrors();
+		getClassName().collectErrors();
+    }
+    
+    public void InstBaseClassDecl.classChecks() {
+		if (hasInstConstraining())
+			getInstConstraining().getClassName().collectErrors();
     }
     
     /**
@@ -761,6 +782,14 @@ aspect InstanceErrorCheck {
 	}	
 	
 	public void InstExtendsShortClass.collectErrors() {
+		collectErrorsInstExtendsShortClass();
+    }
+	
+	public void InstReplacingExtendsShortClass.collectErrors() {
+		collectErrorsInstExtendsShortClass();
+    }
+	
+	public void InstExtends.collectErrorsInstExtendsShortClass() {
 	    if (!errorChecked) {
     		errorChecked = true;
 	    	if (isRecursed()) {
@@ -861,19 +890,9 @@ aspect InstanceErrorCheck {
 		    //super.collectErrors();
 		    errorChecked = true;
 		    nameCheck();
-			// If the class access is to be checked, then the corresponding
-			// InstClassDecl is checked as well, since it is being accessed at
-			// some point... ...But it is probably too drastic since it means
-			// that if Modelica.Electrical.Analog.Basic.Resistor is accessed,
-			// then first Modelica is completely checked, then Electrical etc.
-			// Probably, only the name should be checked here, and the 
-			// actually target class of an access should be checked. 
-		    //
-		    // One could do this check if (getLastAccess() == this) - 
-		    // then only target class would be checked.
-		    //
-			//if (!myInstClassDecl().isUnknown())
-			//	myInstClassDecl().collectErrors();
+		    // Do the short error check on the class (check that modifications are OK, etc)
+			if (getTopInstAccess().getLastInstAccess() == this && !myInstClassDecl().isUnknown())
+				myInstClassDecl().collectErrorsInClassDecl();
 		}
 	}
 
@@ -996,15 +1015,13 @@ aspect InstanceErrorCheck {
 	}
 	
 	/**
-	 * \brief Check if this component is in a recursive component structure.
+	 * \brief Check if this node is in a recursive structure.
 	 */
-	syn boolean InstComponentDecl.isRecursed() = isWithin(myInstClass());
+	syn boolean InstNode.isRecursed() = false;
+	eq InstComponentDecl.isRecursed() = isWithin(myInstClass());
+	eq InstExtends.isRecursed()       = isWithin(myInstClass());
 	
-	/**
-	 * \brief Check if this component is in a recursive class structure.
-	 */
-	syn boolean InstExtends.isRecursed()       = isWithin(myInstClass());
-	
+	// TODO: check if we realy need this in addition to isRecursed()
 	/**
 	 * \brief Check if extends tree is recursive.
 	 */

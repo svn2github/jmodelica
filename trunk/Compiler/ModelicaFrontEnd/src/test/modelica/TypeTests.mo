@@ -1073,10 +1073,7 @@ model RecursiveStructure1
          name="RecursiveStructure1",
          description="Detect recursive class structures",
          errorMessage="
-2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1017, column 5:
-  Recursive class structure
+1 error found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 1021, column 5:
   Recursive class structure
@@ -1127,12 +1124,9 @@ model RecursiveStructure3
          name="RecursiveStructure3",
          description="Detect recursive class structures",
          errorMessage="
-2 errors found:
+1 error found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 1071, column 3:
-  Recursive class structure
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1075, column 5:
   Recursive class structure
 ")})));
 

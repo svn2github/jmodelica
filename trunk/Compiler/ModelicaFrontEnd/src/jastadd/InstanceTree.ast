@@ -105,10 +105,11 @@ InstReplacingPrimitive   : InstPrimitive ::= <OriginalDecl:ComponentDecl>
                                              /OriginalInstComponent:InstComponentDecl/ 
                                              <InstComponentRedeclare:InstComponentRedeclare>;
 
-InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause> [InstClassModification];
-InstExtendsShortClass : InstExtends;
-InstInlineExtends     : InstExtends;
-//InstReplacingExtendsShortClass : InstReplacingExtendsShortClass ::= <InstExtendsShortClass:InstExtendsShortClass>
+InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause>;
+InstNormalExtends : InstExtends ::= [InstClassModification];
+InstExtendsShortClass : InstNormalExtends;
+InstInlineExtends     : InstNormalExtends;
+InstReplacingExtendsShortClass : InstExtends ::= <InstExtendsShortClass:InstExtendsShortClass>;
 
 // Accesses in the instance tree
 abstract InstAccess : BaseNode ::= <ID> /ExpandedSubscripts:FArraySubscripts/;

@@ -36,7 +36,7 @@ aspect InstLookupComponents {
 	
 	eq InstReplacingComposite.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstReplacingPrimitive.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
-	eq InstExtends.getInstClassModification().lookupInstComponent(String name)            = lookupInstComponent(name);
+	eq InstNormalExtends.getInstClassModification().lookupInstComponent(String name)            = lookupInstComponent(name);
 	eq InstShortClassDecl.getChild().lookupInstComponent(String name)                     = lookupInstComponent(name);
 	
 	eq InstDot.getRight().lookupInstComponent(String name)                    = getLeft().qualifiedLookupInstComponent(name);
@@ -292,7 +292,7 @@ aspect LookupInstComponentsInModifications {
 	
 	eq InstElementModification.getInstModification().lookupInstComponentInInstElement(String name) = getName().qualifiedLookupInstComponent(name);
     
-	eq InstExtends.getInstClassModification().lookupInstComponentInInstElement(String name) = myInstClass().memberInstComponentConstrained(name);
+	eq InstNormalExtends.getInstClassModification().lookupInstComponentInInstElement(String name) = myInstClass().memberInstComponentConstrained(name);
 	
 //	eq InstShortClassDecl.getInstClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
 	

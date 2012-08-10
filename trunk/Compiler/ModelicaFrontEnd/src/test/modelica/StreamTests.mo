@@ -405,7 +405,6 @@ package StreamExample
      end FlowSource;
 
      model Reservoir
-     replaceable package Fluid =StreamExample.Fluids.Gases.IdealGasXY;
          parameter SI.Pressure p0;
          parameter SI.Temperature T0;
          parameter SI.SpecificHeatCapacity cp;
