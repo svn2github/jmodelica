@@ -432,4 +432,23 @@ aspect ModelicaIconsEditing {
 			return getComponentDecl();
 		}
 	}
+
+	/**
+	 * Thread safe wrapper method for InstComponentDecl.isPrimitive()
+	 */
+	public boolean InstComponentDecl.syncIsPrimitive() {
+		synchronized (state()) {
+			return isPrimitive();
+		}
+	}
+
+	/**
+	 * Thread safe wrapper method for InstComponentDecl.isParameter()
+	 */
+	public boolean InstComponentDecl.syncIsParameter() {
+		synchronized (state()) {
+			return isParameter();
+		}
+	}
+
 }

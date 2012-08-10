@@ -1,6 +1,7 @@
 package org.jmodelica.ide.graphical.proxy;
 
 import java.io.ByteArrayInputStream;
+import java.util.Stack;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -14,6 +15,7 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 
 	public static final Object COMPONENT_ADDED = new Object();
 	public static final Object COMPONENT_REMOVED = new Object();
+	public static final Object FLUSH_CONTENTS = new String("Flush contents now");
 
 	private InstClassDecl instClassDecl;
 
@@ -86,6 +88,10 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	public void saveModelicaFile(IProgressMonitor monitor) throws CoreException {
 		StoredDefinition definition = instClassDecl.getDefinition();
 		definition.getFile().setContents(new ByteArrayInputStream(definition.prettyPrintFormatted().getBytes()), false, true, monitor);
+	}
+	
+	@Override
+	protected void setParameterValue(Stack<String> path, String value) {
 	}
 
 }

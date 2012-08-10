@@ -3,6 +3,7 @@ package org.jmodelica.ide.graphical.proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.Observable;
@@ -23,6 +24,8 @@ public abstract class AbstractNodeProxy extends Observable {
 	protected abstract InstNode getASTNode();
 
 	abstract protected Map<String, ComponentProxy> getComponentMap();
+	
+	abstract protected void setParameterValue(Stack<String> path, String value);
 
 	protected abstract  String buildDiagramName();
 	

@@ -1,7 +1,9 @@
 package org.jmodelica.ide.graphical;
 
+import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Stack;
 
 import org.eclipse.core.runtime.Assert;
@@ -9,6 +11,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.DefaultEditDomain;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.SnapToGrid;
 import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
@@ -294,9 +297,15 @@ public class Editor extends GraphicalEditor {
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void flushInst() {
 		long start = System.currentTimeMillis();
 		ClassDecl cd = getProgramRoot().simpleLookupInstClassDecl(input.getClassName()).getClassDecl();
+		System.out.println("copy selection, t+" + (System.currentTimeMillis() - start));
+		List<Object> selectedModels = new ArrayList<Object>();
+		for (EditPart o : (List<EditPart>) getGraphicalViewer().getSelectedEditParts()) {
+			selectedModels.add(o.getModel());
+		}
 		cd.flushCache();
 		System.out.println("flush src classDecl, t+" + (System.currentTimeMillis() - start));
 		getProgramRoot().flushAll();
@@ -305,6 +314,11 @@ public class Editor extends GraphicalEditor {
 		System.out.println("lookup input class, t+" + (System.currentTimeMillis() - start));
 		setContent();
 		System.out.println("set content, t+" + (System.currentTimeMillis() - start));
+		for (Object selectedModel : selectedModels) {
+			EditPart part = (EditPart) getGraphicalViewer().getEditPartRegistry().get(selectedModel);
+			if (part != null)
+				getGraphicalViewer().getSelectionManager().appendSelection(part);
+		}
 	}
 
 }

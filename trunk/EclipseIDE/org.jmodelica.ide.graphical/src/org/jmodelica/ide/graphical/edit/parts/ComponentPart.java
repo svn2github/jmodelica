@@ -1,19 +1,25 @@
 package org.jmodelica.ide.graphical.edit.parts;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.GraphicalEditPart;
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.ui.views.properties.IPropertySource2;
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.icons.coord.Transformation;
 import org.jmodelica.ide.graphical.edit.policies.ComponentPolicy;
 import org.jmodelica.ide.graphical.graphics.IconLayer;
 import org.jmodelica.ide.graphical.proxy.ComponentProxy;
+import org.jmodelica.ide.graphical.proxy.ParameterProxy;
 import org.jmodelica.ide.graphical.util.Converter;
 import org.jmodelica.ide.graphical.util.Transform;
 
-public class ComponentPart extends AbstractInstNodePart {
+public class ComponentPart extends AbstractInstNodePart implements IPropertySource2 {
 
 	public ComponentPart(ComponentProxy cp) {
 		super(cp);
@@ -94,6 +100,52 @@ public class ComponentPart extends AbstractInstNodePart {
 
 	private void updateVisible() {
 		getFigure().setVisible(getModel().getPlacement().isVisible());
+	}
+
+	@Override
+	public boolean isPropertyResettable(Object id) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isPropertySet(Object id) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Object getEditableValue() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IPropertyDescriptor[] getPropertyDescriptors() {
+		List<IPropertyDescriptor> properties = new ArrayList<IPropertyDescriptor>();
+		properties.addAll(getModel().getParameters());
+		return properties.toArray(new IPropertyDescriptor[properties.size()]);
+	}
+
+	@Override
+	public Object getPropertyValue(Object id) {
+		if (id instanceof ParameterProxy) {
+			return ((ParameterProxy) id).getValue();
+		}
+		return null;
+	}
+
+	@Override
+	public void resetPropertyValue(Object id) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setPropertyValue(Object id, Object value) {
+		if (id instanceof ParameterProxy) {
+			((ParameterProxy) id).setValue(value.toString());
+		}
 	}
 
 }

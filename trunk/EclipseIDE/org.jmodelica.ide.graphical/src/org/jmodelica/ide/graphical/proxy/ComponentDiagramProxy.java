@@ -1,5 +1,7 @@
 package org.jmodelica.ide.graphical.proxy;
 
+import java.util.Stack;
+
 import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
@@ -50,6 +52,11 @@ public class ComponentDiagramProxy extends AbstractDiagramProxy {
 	@Override
 	protected boolean removeConnection(ConnectionProxy connection) {
 		throw new UnsupportedOperationException("It is not possible to alter component definition!");
+	}
+	
+	@Override
+	protected void setParameterValue(Stack<String> path, String value) {
+		component.setParameterValue(path, value);
 	}
 
 }

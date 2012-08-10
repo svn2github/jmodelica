@@ -3,6 +3,7 @@ package org.jmodelica.ide.graphical.proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.Observable;
@@ -13,6 +14,7 @@ import org.jmodelica.icons.coord.Transformation;
 import org.jmodelica.ide.graphical.util.Transform;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
+import org.jmodelica.modelica.compiler.InstExtends;
 import org.jmodelica.modelica.compiler.InstNode;
 
 public class ComponentProxy extends AbstractNodeProxy implements Observer {
@@ -140,6 +142,30 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	@Override
 	public String toString() {
 		return buildDiagramName();
+	}
+
+	public List<ParameterProxy> getParameters() {
+		List<ParameterProxy> parameters = new ArrayList<ParameterProxy>();
+		collectParameters(getComponentDecl(), parameters);
+		return parameters;
+	}
+	
+	private void collectParameters(InstNode node, List<ParameterProxy> parameters) {
+		for (InstExtends ie : node.syncGetInstExtendss()) {
+			collectParameters(ie, parameters);
+		}
+		for (InstComponentDecl icd : node.syncGetInstComponentDecls()) {
+			if (icd.syncIsPrimitive() && icd.syncIsParameter()) {
+				parameters.add(new ParameterProxy(icd.syncName(), this));
+			}
+		}
+
+	}
+
+	@Override
+	protected void setParameterValue(Stack<String> path, String value) {
+		path.push(componentName);
+		getParent().setParameterValue(path, value);
 	}
 
 }
