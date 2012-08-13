@@ -1003,6 +1003,19 @@ aspect ConstantEvaluation {
 	    }
     }
     
+  /** 
+   * \brief Convenience function for savely checking if an expression as a particular value.
+   * 
+   */ 
+  syn boolean FExp.equalsRealValue(double val) {
+  	try {
+  		return variability().lessOrEqual(fConstant()) && ceval().realValue()==val;
+  	} catch(Exception e) {
+  		return false;
+  	}
+  }  
+    
+    
   /**
    * \brief Returns the constant value of a flat expression. 
    * 

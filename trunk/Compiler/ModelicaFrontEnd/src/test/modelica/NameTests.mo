@@ -3185,7 +3185,7 @@ fclass NameTests.ComplexExpInDer2
 Real x;
 Real y;
 equation
-der(x,2) + 0.0 - ( der(y) ) = 0;
+der(x,2) - ( der(y) ) = 0;
 end NameTests.ComplexExpInDer2;")})));
 
  Real x;

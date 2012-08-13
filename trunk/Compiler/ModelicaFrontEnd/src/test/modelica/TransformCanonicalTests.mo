@@ -3786,11 +3786,6 @@ fclass TransformCanonicalTests.IndexReduction2_Mechanical
  parameter Real sine.offset = 0 \"Offset of output signal\" /* 0 */;
  parameter Modelica.SIunits.Time sine.startTime = 0 \"Output = offset for time < startTime\" /* 0 */;
  constant Real sine.pi = 3.141592653589793;
- Real der_idealGear_phi_a;
- Real der_idealGear_phi_b;
- Real der_2_idealGear_phi_a;
- Real der_2_idealGear_phi_b;
- Real der_2_damper_phi_rel;
 initial equation 
  inertia2.phi = 0;
  inertia2.w = 0.0;
@@ -3824,15 +3819,10 @@ equation
  damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau - ( torque.flange.tau ) = 0;
  inertia3.flange_b.tau = 0;
  idealGear.support.tau =  - ( idealGear.flange_a.tau ) - ( idealGear.flange_b.tau );
- der_idealGear_phi_a = ( idealGear.ratio ) * ( der_idealGear_phi_b );
- der_idealGear_phi_a = inertia1.w - ( 0.0 );
- der_idealGear_phi_b = inertia2.w - ( 0.0 );
- der_2_idealGear_phi_a = ( idealGear.ratio ) * ( der_2_idealGear_phi_b );
- der_2_idealGear_phi_a = inertia1.a - ( 0.0 );
- der_2_idealGear_phi_b = inertia2.a - ( 0.0 );
- damper.der(phi_rel) = 0.0 - ( inertia2.w );
- der_2_damper_phi_rel = 0.0 - ( inertia2.a );
- damper.der(w_rel) = der_2_damper_phi_rel;
+ inertia1.w = ( idealGear.ratio ) * ( inertia2.w );
+ inertia1.a = ( idealGear.ratio ) * ( inertia2.a );
+ damper.der(phi_rel) =  - ( inertia2.w );
+ damper.der(w_rel) =  - ( inertia2.a );
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -5113,18 +5103,17 @@ end TransformCanonicalTests.IndexReduction32_PlanarPendulum_StatePreferAlways;
          description="Test of index reduction",
          flatModel="
 fclass TransformCanonicalTests.IndexReduction33_Div
-Real x1;
-Real x2;
-parameter Real p = 2 /* 2 */;
-Real der_x1;
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
 initial equation 
-x2 = 0.0;
+ x2 = 0.0;
 equation
-der_x1 + der(x2) = 1;
-( x1 + x2 ) / ( x1 + p ) = 0;
-( ( der_x1 + der(x2) ) * ( x1 + p ) - ( ( x1 + x2 ) * ( der_x1 + 0.0 ) ) ) / ( ( x1 + p ) ^ 2 ) = 0.0;
+ der_x1 + der(x2) = 1;
+ ( x1 + x2 ) / ( x1 + p ) = 0;
+ ( ( der_x1 + der(x2) ) * ( x1 + p ) - ( ( x1 + x2 ) * ( der_x1 ) ) ) / ( ( x1 + p ) ^ 2 ) = 0.0;
 end TransformCanonicalTests.IndexReduction33_Div;
-		 
 		 ")})));
   Real x1,x2;
   parameter Real p = 2;
@@ -5179,7 +5168,7 @@ equation
  x = (if b then 1 else 2 + y);
  der_x + der(y) = 0;
  b = false;
- der_x = (if b then 0.0 else 0.0 + der(y));
+ der_x = (if b then 0.0 else der(y));
 end TransformCanonicalTests.IndexReduction35_Boolean;
 		 ")})));	
     Real x,y;
@@ -5207,7 +5196,7 @@ equation
  x = (if b == 2 then 1 else 2 + y);
  der_x + der(y) = 0;
  b = 2;
- der_x = (if b == 2 then 0.0 else 0.0 + der(y));
+ der_x = (if b == 2 then 0.0 else der(y));
 end TransformCanonicalTests.IndexReduction36_Integer;
 		 ")})));		
     Real x,y;
@@ -6158,6 +6147,106 @@ equation
   r2 = F(x + r1.x);  
 end BlockTest3;
 
+model BlockTest4
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+    JModelica.UnitTesting.FClassMethodTestCase(
+      name="BlockTest4",
+      methodName="printDAEBLT",
+	  equation_sorting = true,
+      description="Test of linear systems of equations", methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  w
+Solution:
+  1
+-------------------------------
+Non-solved linear block of 3 variables:
+Coefficient variability: Continuous
+Unknown variables:
+  x1
+  z
+  x2
+Equations:
+  x1 + x2 = z + sin(w)
+  x1 - ( x2 ) = ( z ) * ( w )
+  x2 = ( w ) * ( z ) + 1 + w
+Jacobian:
+  | - ( 1.0 ), 1.0,  - ( 1.0 )|
+  | - ( 1.0 ), ( 1.0 ) * ( w ),  - (  - ( 1.0 ) )|
+  |0.0, ( w ) * ( 1.0 ),  - ( 1.0 )|
+-------------------------------
+")})));
+ Real x1,x2,z,w;
+equation
+w=1;
+x2 = w*z + 1 + w;
+x1 + x2 = z + sin(w);
+x1 - x2 = z*w;
+end BlockTest4;
+
+model BlockTest5
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+    JModelica.UnitTesting.FClassMethodTestCase(
+      name="BlockTest5",
+      methodName="printDAEBLT",
+	  equation_sorting = true,
+      description="Test of linear systems of equations", methodResult="
+-------------------------------
+Non-solved linear block of 3 variables:
+Coefficient variability: Constant
+Unknown variables:
+  x1
+  z
+  x2
+Equations:
+  x1 + x2 = z
+  x1 - ( x2 ) = z
+  x2 = z + 1
+Jacobian:
+  | - ( 1.0 ), 1.0,  - ( 1.0 )|
+  | - ( 1.0 ), 1.0,  - (  - ( 1.0 ) )|
+  |0.0, 1.0,  - ( 1.0 )|
+-------------------------------
+")})));
+ Real x1,x2,z;
+equation
+x2 = z + 1 ;
+x1 + x2 = z;
+x1 - x2 = z;
+end BlockTest5;
+
+model BlockTest6
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+    JModelica.UnitTesting.FClassMethodTestCase(
+      name="BlockTest6",
+      methodName="printDAEBLT",
+	  equation_sorting = true,
+      description="Test of linear systems of equations", methodResult="
+-------------------------------
+Non-solved linear block of 3 variables:
+Coefficient variability: Parameter
+Unknown variables:
+  x1
+  z
+  x2
+Equations:
+  x1 + x2 = z
+  x1 - ( x2 ) = ( z ) * ( p )
+  x2 = z + p
+Jacobian:
+  | - ( 1.0 ), 1.0,  - ( 1.0 )|
+  | - ( 1.0 ), ( 1.0 ) * ( p ),  - (  - ( 1.0 ) )|
+  |0.0, 1.0,  - ( 1.0 )|
+-------------------------------
+")})));
+ Real x1,x2,z;
+ parameter Real p;
+equation
+x2 = z + p;
+x1 + x2 = z;
+x1 - x2 = z*p;
+end BlockTest6;
 
 model VarDependencyTest1
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

@@ -1690,6 +1690,65 @@ aspect LinearFVariables {
 	// to include free parameters in the Optimica extension.
 	syn boolean FExp.isLinearParameterExp() = isParameterExp();
     
+    coll Set<FIdUseExp> FAbstractEquation.collectUses() 
+		[new LinkedHashSet<FIdUseExp>()] with add root FAbstractEquation;
+
+	FIdUseExp contributes this when !myFV().isUnknown() && 
+		!(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) to 
+		FAbstractEquation.collectUses() for myFEquation();
+    
+    syn Set<FIdUseExp> FAbstractEquation.collectUses(Set<FVariable> vars) {
+    	HashSet<FIdUseExp> set = new HashSet<FIdUseExp>();
+    	for (FIdUseExp e : collectUses()) {
+    		if (vars.contains(e.myFV())) {
+    			set.add(e);			
+    		}
+    	}
+    	return set;
+    }
+    
+    syn boolean FAbstractEquation.checkLinearity(Set<FVariable> vars) {
+    	HashSet<FIdUseExp> set = new HashSet<FIdUseExp>();
+    	for (FIdUseExp e : collectUses(vars)) {
+    		if (!e.isLinear(vars)) {
+    			return false;			
+    		}
+    	}
+    	return true;
+    }
+    
+    inh boolean FExp.isLinear(Set<FVariable> vars);
+	eq FlatRoot.getChild().isLinear(Set<FVariable> vars) = true;
+	eq SourceRoot.getChild().isLinear(Set<FVariable> vars) = true;
+	
+	eq FAbstractEquation.getChild().isLinear(Set<FVariable> vars) = true;
+	
+	eq FMulExp.getLeft().isLinear(Set<FVariable> vars) =
+		(getRight().isIndependent(vars))?
+				isLinear(vars) : false;
+	eq FMulExp.getRight().isLinear(Set<FVariable> vars) =
+		(getLeft().isIndependent(vars))?
+				isLinear(vars) : false;
+	eq FDivExp.getLeft().isLinear(Set<FVariable> vars) =
+		(getRight().isIndependent(vars))?
+				isLinear(vars) : false;			
+	eq FDivExp.getRight().isLinear(Set<FVariable> vars) = false;		
+    eq FPowExp.getChild().isLinear(Set<FVariable> vars) = false;
+    eq FFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
+    eq FMathematicalFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
+
+	syn boolean FExp.isIndependent(Set<FVariable> set) {
+		for (FExp e : childFExps()) {
+    		if (!e.isIndependent(set)) {
+    			return false;
+    		}
+    	}
+    	return true;
+	}
+
+	eq FIdUseExp.isIndependent(Set<FVariable> set) {
+		return !set.contains(myFV());	
+	}
 }
 
 aspect FlatDiagnostics {

@@ -88,7 +88,6 @@ public class EquationBlockFactory {
 				return new WhenEquationBlock(ee);
 		}
 
-		
 		// Check if the component contains a single function call equation		
 		if (e instanceof FFunctionCallEquation && one_equation) {		
 			FFunctionCallEquation fce = (FFunctionCallEquation)e;
@@ -159,7 +158,9 @@ public class EquationBlockFactory {
 		for (Stack<Eq> s : l) {
 			ls.add(createSimpleEquationBlock(s,false));	
 		}	
-			
+
+		// Check if an equation block is mixed, i.e., contains both continous
+		// and discrete variables			
 		EquationBlock b = null;
 		boolean isMixed = false;
 		for (SimpleEquationBlock seb : ls) {
@@ -170,8 +171,25 @@ public class EquationBlockFactory {
 			}
 		}
 		
+		// Check if an equation block is linear in the unknowns
+		boolean isLinear = true;
+		ArrayList<FVariable> activeVariables = new ArrayList<FVariable>();
+		for (SimpleEquationBlock sb : ls) {
+			activeVariables.addAll(sb.activeVariables());
+		}
+		
+		for (SimpleEquationBlock seb : ls) {
+			for (FAbstractEquation e : seb.equations()) {
+				if (!e.checkLinearity(new HashSet(activeVariables))) {
+					isLinear = false;
+				}
+			}
+		}
+		
 		if (isMixed) {
 			b = new MixedEquationBlock(ls);		
+		} else if (isLinear) {
+			b = new LinearEquationBlock(ls);
 		} else {
 			b = new EquationBlock(ls);	
 		}

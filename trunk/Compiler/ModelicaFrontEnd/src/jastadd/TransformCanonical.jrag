@@ -691,9 +691,10 @@ aspect TransformCanonical {
 			}*/
 			str.append("Equations:\n");
 			for (FAbstractEquation feq : equations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");			
+				str.append("  " + feq.prettyPrint("") + "\n");	
 			}
-			/*
+			
+			/*		
 			str.append("---- Block Jacobian:\n");
 			for (FAbstractEquation feq  : equations()) {
 				int j = 0;
@@ -714,6 +715,134 @@ aspect TransformCanonical {
 			return str.toString();
 		}
 	
+	}
+
+	/**
+	 * LinearEquationBlock is a system of equations that may contain one or more
+	 * non-solved equations, all of wich are linear in the active variables.
+	 */
+	public class LinearEquationBlock extends EquationBlock {
+
+		private FExp[][] jacobian;
+		private FTypePrefixVariability blockVariability;
+
+		public LinearEquationBlock(ArrayList<SimpleEquationBlock> blocks) {
+			super(blocks);
+			
+			// Compute Jacobian
+			jacobian = new FExp[equations().size()][equations().size()];
+			int row = 0;
+			int col = 0;
+			blockVariability = activeVariables().get(0).fConstant();
+			for (FAbstractEquation fe : equations()) {
+				col = 0;
+				for (FVariable fv : activeVariables()) {
+					FExp l = ((FEquation)fe).getLeft();
+					FExp r = ((FEquation)fe).getRight();
+					FExp dl = l.dynamicFExp(l.diff(fv.name()));
+					FExp dr = r.dynamicFExp(r.diff(fv.name()));
+					boolean lz = dl.equalsRealValue(0);
+					boolean rz = dr.equalsRealValue(0);
+					FExp je;
+					if (rz && lz) {
+						je = r.dynamicFExp(new FRealLitExp(0.0));
+					} else if (lz) {
+						je = dr;
+					} else if (rz) {
+						je = r.dynamicFExp(new FNegExp(dl));
+					} else {
+						je = r.dynamicFExp(new FSubExp(dr,dl));
+					}
+					if (!je.variability().lessOrEqual(blockVariability)) {
+						blockVariability = je.variability();
+					}
+					jacobian[row][col] = je;
+					col++;
+				}	
+				row++;
+			}
+		}
+
+		public FTypePrefixVariability variability() {
+			return blockVariability;	
+		}
+	
+		public boolean isConstant() {
+			return blockVariability.constantVariability();
+		}
+
+		public boolean isParameter() {
+			return blockVariability.parameterVariability();
+		}
+
+		public boolean isDiscrete() {
+			return blockVariability.discreteVariability();
+		}
+
+		public boolean isContinuous() {
+			return blockVariability.continuousVariability();
+		}
+	
+		public FExp[][] getJacobian() {
+			return jacobian;	
+		}
+	
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append("Non-solved linear block of " + activeVariables().size() + " variables:\n");
+			str.append("Coefficient variability: " + (isConstant()? "Constant":
+			                                          isParameter()? "Parameter":
+			                                          isDiscrete()? "Discrete":
+			                                          isContinuous()? "Continuous":
+			                                          "Unknown") + "\n");
+			str.append("Unknown variables:\n");
+			for (FVariable fv : activeVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}
+/*			str.append("Inactive variables:\n");
+			for (FVariable fv : inactiveVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}*/
+			str.append("Equations:\n");
+			for (FAbstractEquation feq : equations()) {
+				str.append("  " + feq.prettyPrint("") + "\n");	
+				//str.append("    Is linear: " + feq.checkLinearity(new HashSet<FVariable>(activeVariables())) + "\n");					
+			}
+					
+			str.append("Jacobian:\n");
+			for (int col=0;col<equations().size();col++) {
+				str.append("  |");
+				for (int row=0;row<equations().size();row++) {
+					str.append(jacobian[col][row].prettyPrint(""));
+					if (row<equations().size()-1) {
+						str.append(", ");	
+					}
+				}
+				str.append("|\n");
+			}
+			
+			/*
+			str.append("---- Block Jacobian:\n");
+			for (FAbstractEquation feq  : equations()) {
+				int j = 0;
+				str.append(feq.prettyPrint("") + "\n");
+				for (FVariable fv : activeVariables()) {
+					FExp dl = ((FEquation)feq).getLeft().dynamicFExp(((FEquation)feq).getLeft().diff(fv.name()));
+					FExp dr = ((FEquation)feq).getRight().dynamicFExp(((FEquation)feq).getRight().diff(fv.name()));
+					if (!(dl.variability().lessOrEqual(feq.fConstant()) && 
+					    dl.ceval().realValue()==0. &&
+					    dr.variability().lessOrEqual(feq.fConstant()) && 
+					    dr.ceval().realValue()==0.)) {
+						str.append("  " + fv.name() + " " + dl.prettyPrint("") + 
+						              " - " + dr.prettyPrint("") + "\n");
+					}
+				}
+			}
+			*/
+			return str.toString();
+		}
+
+
 	}
 
 	/**
@@ -1415,8 +1544,6 @@ aspect TransformCanonical {
 				log.info("DAE system real variables only");
 				log.info(g.printMatching());
 
-				//System.out.println(prettyPrint(""));
-				
 				IndexReductionResult result = null;
 				try {
 					result = g.reduceIndex(false);

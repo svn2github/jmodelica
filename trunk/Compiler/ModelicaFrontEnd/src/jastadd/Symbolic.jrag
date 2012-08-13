@@ -457,46 +457,53 @@ aspect Derivatives {
 	}
 	
 	public FExp FAddExp.diff(String name) {
-		/*FExp rd = dynamicFExp(getRight().diff(name));
+		FExp rd = dynamicFExp(getRight().diff(name));
 		FExp ld = dynamicFExp(getLeft().diff(name));
-		try {
-			if (ld.variability().lessOrEqual(fConstant()) && ld.ceval().realValue()==0. &&
-			rd.variability().lessOrEqual(fConstant()) && rd.ceval().realValue()==0.) {
-				return new FRealLitExp(0.0);
-			} if (ld.variability().lessOrEqual(fConstant()) && ld.ceval().realValue()==0.) {
-				return dynamicFExp(rd);
-			}
-			if (rd.variability().lessOrEqual(fConstant()) && rd.ceval().realValue()==0.) {
-				return dynamicFExp(ld);
-			}
-		} catch(Exception e) {}*/
-		return dynamicFExp(new FAddExp(getLeft().diff(name),
-			getRight().diff(name)));
+		boolean rz = rd.equalsRealValue(0);
+		boolean lz = ld.equalsRealValue(0);
+		if (rz && lz) {
+			return new FRealLitExp(0.0);
+		} else if (lz) {
+			return dynamicFExp(rd);
+		} else if (rz) {
+			return dynamicFExp(ld);
+		} else {
+			return dynamicFExp(new FAddExp(ld,rd));
+		}
 	}
 
 	public FExp FSubExp.diff(String name) {
-		return dynamicFExp(new FSubExp(getLeft().diff(name),
-			getRight().diff(name)));
+		FExp rd = dynamicFExp(getRight().diff(name));
+		FExp ld = dynamicFExp(getLeft().diff(name));
+		boolean rz = rd.equalsRealValue(0);
+		boolean lz = ld.equalsRealValue(0);
+		if (rz && lz) {
+			return new FRealLitExp(0.0);
+		} if (lz) {
+			return dynamicFExp(new FNegExp(rd));
+		} else if (rz) {
+			return dynamicFExp(ld);
+		} else {
+			return dynamicFExp(new FSubExp(ld,rd));
+		}
 	}
 
 	public FExp FMulExp.diff(String name) {
 		FExp rd = dynamicFExp((getRight().diff(name)));
 		FExp ld = dynamicFExp((getLeft().diff(name)));
-		try {
-			if (ld.variability().lessOrEqual(fConstant()) && ld.ceval().realValue()==0. &&
-			rd.variability().lessOrEqual(fConstant()) && rd.ceval().realValue()==0.) {
-				return new FRealLitExp(0.0);
-			} if (ld.variability().lessOrEqual(fConstant()) && ld.ceval().realValue()==0.) {
-				return dynamicFExp(new FMulExp(getLeft().fullCopy(), getRight().diff(name)));
-			}
-			if (rd.variability().lessOrEqual(fConstant()) && rd.ceval().realValue()==0.) {
-				return dynamicFExp(new	FMulExp(getLeft().diff(name), getRight().fullCopy()));
-			}
-			
-		} catch(Exception e) {}
-		return dynamicFExp(new FAddExp(
-		    new FMulExp(getLeft().fullCopy(), getRight().diff(name)),
-			new	FMulExp(getLeft().diff(name), getRight().fullCopy())));
+		boolean rz = rd.equalsRealValue(0);
+		boolean lz = ld.equalsRealValue(0);
+		if (rz && lz) {
+			return new FRealLitExp(0.0);
+		} else if (lz) {
+			return dynamicFExp(new FMulExp(getLeft().fullCopy(), rd));
+		} else if (rz) {
+			return dynamicFExp(new	FMulExp(ld, getRight().fullCopy()));
+		} else {
+			return dynamicFExp(new FAddExp(
+	    		new FMulExp(getLeft().fullCopy(), rd),
+				new	FMulExp(ld, getRight().fullCopy())));
+		}	
 	}
 
 	public FExp FDivExp.diff(String name) {
@@ -658,6 +665,14 @@ aspect Derivatives {
 		return dynamicFExp(diffUseOrDerExp(name, name()));		
 	}
 	
+	public FExp FPreExp.diff(String name) {
+		if (name.equals(name())) {
+			return new FRealLitExp(1);	
+		} else {
+			return new FRealLitExp(0);	
+		}	
+	}
+	
 	public FExp FDerExp.diff(String name) {	
 		return dynamicFExp(diffUseOrDerExp(name, name()));		
 	}
@@ -734,6 +749,27 @@ aspect Derivatives {
 	}
 	
 	public FExp FFunctionCall.diff(String name) {
+		// If the function does not have an argument that matches name,
+		// and the name is not 'time', then the derivative is zero.
+		if (!name.equals(TIME)) {
+			boolean isIndependent = true;
+			FQName fqn = new FQName(name);
+			FIdUseExp fid = (FIdUseExp)dynamicFExp(fqn.createFIdUseExp());
+			AbstractFVariable fv = fid.myFV();
+			if (fv!=null) {
+				HashSet<FVariable> s = new HashSet<FVariable>();
+				s.add((FVariable)fv);
+				for (FExp e : getArgs()) {
+					if (!e.isIndependent(s)) {
+						isIndependent = false;
+						break;			
+					}
+				}				
+				if (isIndependent) {
+					return new FRealLitExp(0);	
+				}
+			}
+		}
 		FFunctionDecl fd = myFFunctionDecl();
 		if (!fd.hasFDerivativeFunction()) 
 			throw new FunctionDifferentiationException(this);	
