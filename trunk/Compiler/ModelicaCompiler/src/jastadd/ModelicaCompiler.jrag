@@ -197,7 +197,6 @@ public class ModelicaCompiler {
 	
 	public void defaultOptionsFMUX() {
     	setBooleanOption("generate_xml_equations", true);
-    	setBooleanOption("normalize_minimum_time_problems", false);
 	}
 	
 	public void defaultTemplatePathsJMU() {

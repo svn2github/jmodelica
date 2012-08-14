@@ -76,6 +76,9 @@ class TestLocalDAECollocator:
         class_path = "VDP_pack.VDP_Opt_Scaled_Min_Time"
         compile_fmux(class_path, vdp_file_path)
         
+        class_path = "VDP_pack.VDP_Opt_Unscaled_Min_Time"
+        compile_fmux(class_path, vdp_file_path)
+        
         cstr_file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR"
         compile_fmu(class_path, cstr_file_path)
@@ -124,6 +127,10 @@ class TestLocalDAECollocator:
         fmux_vdp_scaled_min_time = 'VDP_pack_VDP_Opt_Scaled_Min_Time.fmux'
         self.model_vdp_scaled_min_time = CasadiModel(
                 fmux_vdp_scaled_min_time, verbose=False)
+        
+        fmux_vdp_unscaled_min_time = 'VDP_pack_VDP_Opt_Unscaled_Min_Time.fmux'
+        self.model_vdp_unscaled_min_time = CasadiModel(
+                fmux_vdp_unscaled_min_time, verbose=False)
         
         fmu_cstr = 'CSTR_CSTR.fmu'
         self.model_cstr = FMUModel(fmu_cstr)
@@ -279,22 +286,39 @@ class TestLocalDAECollocator:
         N.testing.assert_allclose(z_scaled, z_ref, 1e-2)
     
     @testattr(casadi = True)
-    def test_point_constraints(self):
-        """Test point constraints for a scaled minimum time problem."""
-        model = self.model_vdp_scaled_min_time
+    def test_minimum_time(self):
+        """
+        Test solving minimum time problems.
+        
+        Tests both a problem where the time is manually scaled, and one where
+        the time is automatically scaled by the compiler.
+        """
+        model_scaled = self.model_vdp_scaled_min_time
+        model_unscaled = self.model_vdp_unscaled_min_time
         
         # References values
         cost_ref = 2.2811590707107996e0
         u_norm_ref = 9.991517452037317e-1
         
-        # Radau
-        opts = model.optimize_options(self.algorithm)
-        res = model.optimize(self.algorithm, opts)
+        # Scaled, Radau
+        opts = model_scaled.optimize_options(self.algorithm)
+        opts['discr'] = "LGR"
+        res = model_scaled.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
-        # Gauss
+        # Scaled, Gauss
         opts['discr'] = "LG"
-        res = model.optimize(self.algorithm, opts)
+        res = model_scaled.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        
+        # Unscaled, Radau
+        opts['discr'] = "LGR"
+        res = model_unscaled.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        
+        # Unscaled, Gauss
+        opts['discr'] = "LG"
+        res = model_unscaled.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
     
     @testattr(casadi = True)

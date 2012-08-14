@@ -741,9 +741,11 @@ class CasadiModel(BaseModel):
                 var_vectors[var_type] = casadi.VariableVector(len(var_dict))
             i = 0
             for vr in sorted(name_dict):
-                if (name_dict[vr] == "finalTime" or
-                    name_dict[vr] == "startTime"):
-                    continue
+                if (self.xmldoc.get_opt_finaltime_free() or
+                    self.xmldoc.get_opt_starttime_free()):
+                    if (name_dict[vr] == "finalTime" or
+                        name_dict[vr] == "startTime"):
+                        continue
                 var_vectors[var_type][i] = var_dict[name_dict[vr]]
                 i = i + 1
         self._var_vectors = var_vectors

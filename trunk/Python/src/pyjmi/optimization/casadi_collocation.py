@@ -71,8 +71,16 @@ class CasadiCollocator(object):
         casadi.updateDependent(self.ocp)
         
         # Get start and final time
-        self.t0 = self.ocp.variable('startTime').getStart()
-        self.tf = self.ocp.variable('finalTime').getStart()
+        t0 = self.ocp.variable('startTime')
+        tf = self.ocp.variable('finalTime')
+        if (t0.getFree() and not self.ocp.t0_free):
+            self.t0 = self.ocp.t0
+        else:
+            self.t0 = t0.getStart()
+        if (tf.getFree() and not self.ocp.tf_free):
+            self.tf = self.ocp.tf
+        else:
+            self.tf = tf.getStart()
         
         # Update OCP expressions
         self.model.update_expressions()
@@ -630,6 +638,16 @@ class LocalDAECollocator(CasadiCollocator):
     
     def __init__(self, model, options):
         super(LocalDAECollocator, self).__init__(model)
+        
+        # Check normalization of minimum time problems
+        t0 = self.ocp.variable('startTime')
+        tf = self.ocp.variable('finalTime')
+        if (t0.getFree() and self.ocp.t0_free or
+            tf.getFree() and self.ocp.tf_free):
+            raise CasadiCollocatorException(
+                    "Problems with free start or final time must be " +
+                    'compiled with the compiler option "normalize_minimum_' +
+                    'time_problems" enabled.')
         
         # Get the options
         self.__dict__.update(options)
@@ -2101,6 +2119,16 @@ class PseudoSpectral(CasadiCollocator):
     
     def __init__(self, model, options):
         super(PseudoSpectral, self).__init__(model)
+        
+        # Check normalization of minimum time problems
+        t0 = self.ocp.variable('startTime')
+        tf = self.ocp.variable('finalTime')
+        if (t0.getFree() and not self.ocp.t0_free or
+            tf.getFree() and not self.ocp.tf_free):
+            raise CasadiCollocatorException(
+                    "Problems with free start or final time must be " +
+                    'compiled with the compiler option "normalize_minimum_' +
+                    'time_problems" disabled.')
         
         #Make problem explicit
         model._convert_to_ode()

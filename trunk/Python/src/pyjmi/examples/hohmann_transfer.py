@@ -31,7 +31,9 @@ def run_demo(with_plots=True):
     curr_dir = os.path.dirname(os.path.abspath(__file__));
         
     jmu_name  = compile_jmu("Orbital", curr_dir+"/files/Hohmann.mop")
-    fmux_name = compile_fmux("HohmannTransfer", curr_dir+"/files/Hohmann.mop")
+    comp_opts = {"normalize_minimum_time_problems": False} # Disable minimum time normalization
+    fmux_name = compile_fmux("HohmannTransfer", curr_dir+"/files/Hohmann.mop",
+                             compiler_options=comp_opts)
 
     #Optimization
     model = CasadiModel(fmux_name)

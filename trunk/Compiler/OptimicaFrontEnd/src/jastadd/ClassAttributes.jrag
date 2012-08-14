@@ -26,9 +26,9 @@ aspect ClassAttributes {
 		builtInDef += "Real objective = 1;\n"; 
 		builtInDef += "Real objectiveIntegrand = 1;\n"; 
 		builtInDef += "parameter Real startTime=0;\n";
-		builtInDef += "parameter Real finalTime=1;\n";
+		builtInDef += "parameter Real finalTime(initialGuess=1)=1;\n";
 		builtInDef += "parameter Boolean static=false;\n";
-    	builtInDef += "end ClassAttributes;\n";
+		builtInDef += "end ClassAttributes;\n";
    
    		//java.io.StringReader builtInDefReader = new java.io.StringReader(builtInDef);
  	  	//ModelicaParser parser = new ModelicaParser();
