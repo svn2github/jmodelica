@@ -5912,8 +5912,8 @@ Solved variables:
   u2
   u1
 Tearing variables:
-  i2
   i3
+  i2
 Solved equations:
   i1 = i2 + i3
   u2 = ( R3 ) * ( i3 )

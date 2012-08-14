@@ -1863,37 +1863,6 @@ aspect TransformCanonical {
 		BiPGraph g = new BiPGraph(this, "", "");
 		ArrayList<Eq> SUME = new ArrayList<Eq>();
 
-		while (it.hasNext()) {
-			Eq e = it.next();
-			if (e.getEquation().hasResidues()) {
-				Var tearVar = null;
-				for (FExp exp : e.getEquation().getResidues().getResidues()) {
-					for (FVariable var : exp.referencedFVariablesInFExp()) {
-						tearVar = e.getVariable(var.name());
-						break;
-					}
-					if (tearVar != null)
-						break;
-				}
-				if (tearVar == null) {
-					tearVar = e.getMatching();
-				}
-				tearVar.isTear(true);
-				e.isRes(true);
-				it.remove();
-				AbstractEquationBlock tearBlock = EquationBlockFactory.createEquationBlock(block);
-				if (tearBlock.isSolvable()) {
-					eb.addSolvedBlock(tearBlock);
-					return;
-				}
-				
-				Var var = g.addVariable(e.getMatching().getName(), "", e.getMatching().getVariable());
-				Eq eqn = g.addEquation(e.getName(), "", e.getEquation());
-				SUME.add(eqn);
-				break;
-			}
-		}
-
 		// ---------------------- Graph Info -----------------------------------
 		for (Eq e : block) {
 			Var gVar = g.addVariable(e.getMatching().getName(), "", e.getMatching().getVariable());
@@ -1939,6 +1908,32 @@ aspect TransformCanonical {
 								//     proceed with recursive tearing of block
 			eb = Tear(g, eb);
 		} else {
+			// Check for hand guided tearing
+			while (it.hasNext()) {
+				Eq e = it.next();
+				if (e.getEquation().hasResidues()) {
+					Var tearVar = null;
+					for (FExp exp : e.getEquation().getResidues().getResidues()) {
+						for (FVariable var : exp.referencedFVariablesInFExp()) {
+							tearVar = e.getVariable(var.name());
+							break;
+						}
+						if (tearVar != null)
+							break;
+					}
+					if (tearVar == null) {
+						tearVar = e.getMatching();
+					} else if (e.getMatching() != tearVar) {
+						tearVar.getMatching().setMatching(e.getMatching());
+						e.setMatching(tearVar);
+					}
+					Stack<Eq> innerBlock = block;
+					it.remove();
+					eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e.getEquation(), tearVar.getVariable(), false));
+					tear(block, eb);
+					return;
+				}
+			}
 			// Else: Start out by trying to insert residuals that contain
 			// 		 few variables. 
 			ArrayList<FAbstractEquation> residuals = new ArrayList<FAbstractEquation>();
