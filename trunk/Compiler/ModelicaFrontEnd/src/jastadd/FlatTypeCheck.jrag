@@ -181,14 +181,24 @@ aspect FlatTypeCheck {
   }
   
   public void FIdUseExp.typeCheck() {
-	  if (!getFIdUse().isUnknown() && type().isUnknown())
+	  if (!getFIdUse().isUnknown() && type().isUnknown() && !accessToModelOK())
 		  typeError();
   }
+  
   public void FInstAccessExp.typeCheck() {
-	  if (!getInstAccess().isUnknown() && type().isUnknown())
+	  if (!getInstAccess().isUnknown() && type().isUnknown() && !accessToModelOK())
 		  typeError();
   }
 
+  inh boolean FIdUseExp.accessToModelOK();
+  inh boolean FInstAccessExp.accessToModelOK();
+  inh boolean InstFunctionArgument.accessToModelOK();
+  eq BaseNode.getChild().accessToModelOK()             = false;
+  eq InstFunctionArgument.getChild().accessToModelOK() = accessToModelOK();
+  eq FSizeExp.getFExp().accessToModelOK()              = true;
+  eq FSizeExp.getOriginalArg(int i).accessToModelOK()  = i == 0;
+  
+  
   /**
    * \brief Check if the FExp of this FIterExp must be scalar.
    */
@@ -502,8 +512,11 @@ aspect FlatTypeCheck {
 		  }
 	  }
 	  if (!typeOk) {
-		  error(functionCallDecription() + ": types of " + argumentDesc() + 
-				  " and input " + getBoundInput().name() + " are not compatible");
+		  if (getBoundInput() == null)
+			  error(nonBoundArgumentTypeError());
+		  else
+			  error(functionCallDecription() + ": types of " + argumentDesc() + 
+					  " and input " + getBoundInput().name() + " are not compatible");
 	  }
   }
   
@@ -516,6 +529,11 @@ aspect FlatTypeCheck {
   }
   
   public void InstDefaultArgument.typeCheck() {}
+  
+  inh String InstFunctionArgument.nonBoundArgumentTypeError();
+  eq FExp.getChild().nonBoundArgumentTypeError()                          = null;
+  eq FArrayDimAsArgsExp.getOriginalArg(int i).nonBoundArgumentTypeError() = 
+	  functionCallDecription() + ": type of positional argument " + i + " is not compatible with Integer";
   
   protected String InstFunctionArgument.argumentDesc() { return null; }
   
@@ -606,7 +624,10 @@ aspect FlatTypeCheck {
   eq FSumExp.getChild().argumentTypeValid(FType type)               = type.ndims() > 0 && type.hasAdd();
   eq FEnumIntegerExp.getChild().argumentTypeValid(FType type)       = type.isEnumScalar();
   eq FNoEventExp.getChild().argumentTypeValid(FType type)           = true;
+  eq FSizeExp.getChild().argumentTypeValid(FType type)              = true;
   eq FAbsExp.getChild().argumentTypeValid(FType type)               = type.isNumeric();
+  eq FArrayDimAsArgsExp.getFExp().argumentTypeValid(FType type)     = type.isInteger();
+  eq FFillExp.getOriginalArg(int i).argumentTypeValid(FType type)   = true;
   eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type) = 
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();

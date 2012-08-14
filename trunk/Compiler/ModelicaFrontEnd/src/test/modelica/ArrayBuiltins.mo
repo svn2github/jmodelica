@@ -198,6 +198,53 @@ Semantic error at line 860, column 11:
  Real x = size(ones(2, 3), 3);
 end SizeExp10;
 
+
+model SizeExp11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="Size_SizeExp11",
+         description="",
+         flatModel="
+fclass ArrayBuiltins.Size.SizeExp11
+ Real y[1].x = 1;
+ Real y[2].x = 1;
+ parameter Integer z = size(zeros(2), 1) /* 2 */;
+end ArrayBuiltins.Size.SizeExp11;
+")})));
+
+    model A
+        Real x;
+    end A;
+    
+    A[2] y(x = ones(z));
+	parameter Integer z = size(y, 1);
+end SizeExp11;
+
+
+model SizeExp12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="Size_SizeExp12",
+         description="Size operator: array of records",
+         flatModel="
+fclass ArrayBuiltins.Size.SizeExp12
+ ArrayBuiltins.Size.SizeExp12.A y[2] = fill(ArrayBuiltins.Size.SizeExp12.A(1), size(y, 1));
+
+public
+ record ArrayBuiltins.Size.SizeExp12.A
+  Real x;
+ end ArrayBuiltins.Size.SizeExp12.A;
+
+end ArrayBuiltins.Size.SizeExp12;
+")})));
+
+    record A
+        Real x;
+    end A;
+    
+    A[2] y = fill(A(1), size(y, 1));
+end SizeExp12;
+
 end Size;
 
 

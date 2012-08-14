@@ -1509,8 +1509,10 @@ aspect FlatExpressions {
 	}
 	
 	public FSizeExp FSizeExp.flatten(FQName prefix) {
+		FExp exp = getFExp();
+		exp = (exp.type().isUnknown()) ? exp.size().createZeroFExp() : exp.flatten(prefix);
 		Opt<FExp> dim = hasDim() ? new Opt<FExp>(getDim().flatten(prefix)) : new Opt<FExp>();
-		return new FSizeExp(getFExp().flatten(prefix), dim); 
+		return new FSizeExp(exp, dim);
 	}
 	
 	public FUnknownSizeExp FUnknownSizeExp.flatten(FQName prefix) {

@@ -450,12 +450,14 @@ aspect InstFunctionBinding {
 	    		// Make sure we have any fixed arguments
 	    		for (int i = args.size(); i < inputs.size(); i++) {
 	    			InstMissingArgument arg = new InstMissingArgument();
-	    			arg.setBoundInput(inputs.get(i));
 	    			args.add(arg);
 	    			argsOK = false;
 	    		}
 	    		temp = args.toArray(new InstFunctionArgument[args.size()]);
-	    		
+
+	    		// Connect fixed arguments to inputs
+	    		for (int i = 0; i < inputs.size(); i++)
+	    			temp[i].setBoundInput(inputs.get(i));
 	    	} else {
 		    
 	    		// Bind arguments
