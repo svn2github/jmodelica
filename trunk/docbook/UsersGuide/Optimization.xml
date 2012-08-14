@@ -2489,7 +2489,11 @@ opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
       evaluation of residuals, leading to very fast function evaluations. The
       second is that second-order derivatives are computed using automatic
       differentation, whereas the JMI algorithm instead uses a quasi-Newton
-      method, which affects convergence speed and robustness.</para>
+      method, which affects convergence speed and robustness. This feature can
+      be disabled by setting the IPOPT option
+      <literal>generate_hessian</literal> to <literal>False</literal>, in
+      which case it will use the same quasi-Newton approach as the JMI
+      algorithm.</para>
 
       <para>The CasADi framework does not support simulation and
       initialization of models. It is recommended to instead use FMI for these
