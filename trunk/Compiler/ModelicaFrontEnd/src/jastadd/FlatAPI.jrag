@@ -1736,6 +1736,7 @@ aspect LinearFVariables {
     eq FPowExp.getChild().isLinear(Set<FVariable> vars) = false;
     eq FFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
     eq FMathematicalFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
+    eq FAbstractFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
 
 	syn boolean FExp.isIndependent(Set<FVariable> set) {
 		for (FExp e : childFExps()) {
