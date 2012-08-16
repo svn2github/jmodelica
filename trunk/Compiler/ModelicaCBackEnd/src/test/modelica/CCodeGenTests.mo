@@ -4405,20 +4405,30 @@ equation
 end WhenTest3; 
 
 model WhenEqu4
-
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
-         name="WhenTest4",
+         name="WhenEqu4",
          description="Test code generation of samplers",
          generate_ode=true,
          equation_sorting=true,
-         template="$C_dae_init_blocks_residual_functions$
-                   $C_ode_derivatives$ 
-                   $C_ode_initialization$", 
-         generatedCode=" 
+         template="
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+$C_ode_initialization$
+",
+         generatedCode="
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
-  if (init==JMI_BLOCK_INITIALIZE) {
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+    x[1] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = -1e20;
+    x[1] = -1e20;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+    x[1] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = pre_x_c_3;
     x[1] = _x_c_3;
   } else if (init==JMI_BLOCK_EVALUATE) {
@@ -4429,7 +4439,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   }
   return 0;
 }
-		 
+
+
     model_ode_guards(jmi);
 /************* ODE section *********/
   _sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
@@ -4454,19 +4465,17 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-		 
 
-      model_ode_guards(jmi);
+    model_ode_guards(jmi);
   _x_p_1 = 1;
   _u_c_4 = ( _c_p_7 ) * ( _x_p_1 );
-  ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+   ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
   _u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
   _der_x_p_12 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
   _sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
   pre_sampleTrigger_0 = JMI_FALSE;
   pre_u_c_4 = 0.0;
 ")})));
-
 
  discrete Boolean sampleTrigger;
  Real x_p(start=1, fixed=true);
@@ -4493,20 +4502,30 @@ equation
 end WhenEqu4;
 
 model WhenEqu5
-
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
-         name="WhenTest5",
+         name="WhenEqu5",
          description="Test code generation of samplers",
-         generate_ode=true,    
+         generate_ode=true,
          equation_sorting=true,
-                  template="$C_dae_init_blocks_residual_functions$
-                   $C_ode_derivatives$ 
-                   $C_ode_initialization$",               
-         generatedCode=" 
+         template="
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+$C_ode_initialization$
+",
+         generatedCode="
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
-  if (init==JMI_BLOCK_INITIALIZE) {
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+    x[1] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = -1e20;
+    x[1] = -1e20;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+    x[1] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = pre_x_c_3;
     x[1] = _x_c_3;
   } else if (init==JMI_BLOCK_EVALUATE) {
@@ -4517,9 +4536,9 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   }
   return 0;
 }
-		 
-		 
-  model_ode_guards(jmi);
+
+
+    model_ode_guards(jmi);
 /************* ODE section *********/
   _atInit_12 = LOG_EXP_AND(JMI_TRUE, _atInitial);
   _sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
@@ -4544,8 +4563,9 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
+
     model_ode_guards(jmi);
-  ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+   ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
   _u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
   _x_p_1 = 1;
   _der_x_p_13 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
@@ -4556,7 +4576,6 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   pre_sampleTrigger_0 = JMI_FALSE;
   pre_atInit_12 = JMI_FALSE;
 ")})));
-
 
  discrete Boolean sampleTrigger;
  Real x_p(start=1, fixed=true);
@@ -4659,55 +4678,77 @@ model BlockTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
          name="BlockTest1",
-         description="Test of code generation of when clauses.",
+         description="Test code generation of systems of equations.",
          generate_ode=true,
          equation_sorting=true,
-         template="$C_dae_blocks_residual_functions$
-                   $C_dae_init_blocks_residual_functions$
-                   $C_ode_derivatives$ 
-                   $C_ode_initialization$",
-         generatedCode=" 
+         template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+$C_ode_initialization$
+",
+         generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
-jmi_real_t** res = &residual;
-if (init==JMI_BLOCK_INITIALIZE) {
-x[0] = _y_1;
-x[1] = _x_0;
-} else if (init==JMI_BLOCK_EVALUATE) {
-_y_1 = x[0];
-_x_0 = x[1];
-(*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) - (5);
-(*res)[1] = _x_0 - ( _y_1 ) - (3);
-}
-return 0;
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+    x[1] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = -1e20;
+    x[1] = -1e20;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+    x[1] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _y_1;
+    x[1] = _x_0;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _y_1 = x[0];
+    _x_0 = x[1];
+  (*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) - (5);
+  (*res)[1] = _x_0 - ( _y_1 ) - (3);
+  }
+  return 0;
 }
 
 
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
-jmi_real_t** res = &residual;
-if (init==JMI_BLOCK_INITIALIZE) {
-x[0] = _y_1;
-x[1] = _x_0;
-} else if (init==JMI_BLOCK_EVALUATE) {
-_y_1 = x[0];
-_x_0 = x[1];
-(*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) - (5);
-(*res)[1] = _x_0 - ( _y_1 ) - (3);
-}
-return 0;
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+    x[1] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = -1e20;
+    x[1] = -1e20;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+    x[1] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _y_1;
+    x[1] = _x_0;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _y_1 = x[0];
+    _x_0 = x[1];
+  (*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) - (5);
+  (*res)[1] = _x_0 - ( _y_1 ) - (3);
+  }
+  return 0;
 }
 
-model_ode_guards(jmi);
+
+    model_ode_guards(jmi);
 /************* ODE section *********/
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
-_z_2 = _x_0 + _y_1;
+   ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+  _z_2 = _x_0 + _y_1;
 
-model_ode_guards(jmi);
-ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
-_z_2 = _x_0 + _y_1;
+    model_ode_guards(jmi);
+   ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+  _z_2 = _x_0 + _y_1;
 ")})));
+
   Real x, y, z;
 equation
   z = x + y;
@@ -4720,16 +4761,28 @@ model BlockTest2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
          name="BlockTest2",
-         description="Test of code generation of when clauses.",
+         description="Test generation of equation blocks",
          generate_ode=true,
          equation_sorting=true,
-         template="$C_dae_blocks_residual_functions$
-                   $C_ode_derivatives$ 
-                   $C_dae_add_blocks_residual_functions$",
-         generatedCode=" 
+         template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+$C_ode_initialization$
+",
+         generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
-  if (init==JMI_BLOCK_INITIALIZE) {
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+    x[1] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = -1e20;
+    x[1] = -1e20;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+    x[1] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _z2_2_4;
     x[1] = _z2_1_3;
   } else if (init==JMI_BLOCK_EVALUATE) {
@@ -4743,7 +4796,13 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init
 
 static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
-  if (init==JMI_BLOCK_INITIALIZE) {
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = -1e20;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _z1_2;
   } else if (init==JMI_BLOCK_EVALUATE) {
     _z1_2 = x[0];
@@ -4751,19 +4810,66 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init
   }
   return 0;
 }
-model_ode_guards(jmi);
-  /************* ODE section *********/
-  ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = -1e20;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _z1_2;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _z1_2 = x[0];
+  (*res)[0] = _z1_2 + 2 - (( sin(_z1_2) ) * ( 3 ));
+  }
+  return 0;
+}
+
+static int dae_init_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+    x[1] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = -1e20;
+    x[1] = -1e20;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+    x[1] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _z2_2_4;
+    x[1] = _z2_1_3;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _z2_2_4 = x[0];
+    _z2_1_3 = x[1];
+  (*res)[0] = 5 - (( 3 ) * ( _z2_1_3 ) + ( 4 ) * ( _z2_2_4 ));
+  (*res)[1] = 4 - (( 1 ) * ( _z2_1_3 ) + ( 2 ) * ( _z2_2_4 ));
+  }
+  return 0;
+}
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+   ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
   _der_x2_5 =  - ( _x2_1 ) + _z2_1_3 + _z2_2_4;
-  ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
+   ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
   _der_x1_6 =  - ( _x1_0 ) + _z1_2;
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
 
-jmi_dae_add_equation_block(*jmi,dae_block_0, NULL,2,0,0 );
-jmi_dae_add_equation_block(*jmi,dae_block_1, NULL,1,0,1 );
-
+    model_ode_guards(jmi);
+   ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+   ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[1]);
+  _x2_1 = 0.0;
+  _der_x2_5 =  - ( _x2_1 ) + _z2_1_3 + _z2_2_4;
+  _x1_0 = 0.0;
+  _der_x1_6 =  - ( _x1_0 ) + _z1_2;
 ")})));
 
 Real x1,x2,z1,z2[2];
@@ -4782,14 +4888,34 @@ model BlockTest3
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
          name="BlockTest3",
-         description="Test of code generation of mixed systems of equations.",
+         description="Test of code generation of blocks",
          generate_ode=true,
          equation_sorting=true,
-         template="$C_dae_blocks_residual_functions$",
-         generatedCode=" 
-		 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+         template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+$C_ode_initialization$
+",
+         generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
-  if (init==JMI_BLOCK_INITIALIZE) {
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+    x[1] = 1.;
+    x[2] = 1.;
+    x[3] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = -1e20;
+    x[1] = -1e20;
+    x[2] = -1e20;
+    x[3] = -1e20;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+    x[1] = 1e20;
+    x[2] = 1e20;
+    x[3] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _a_4;
     x[1] = _sa_7;
     x[2] = _f_5;
@@ -4800,8 +4926,8 @@ model BlockTest3
     _f_5 = x[2];
     _der_v_13 = x[3];
   (*res)[0] = _a_4 - (_der_v_13);
-  (*res)[1] = COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8),JMI_TRUE,_sa_7 - ( AD_WRAP_LITERAL(1) ),COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9),JMI_TRUE,_sa_7 + AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0))) - (_a_4);
-  (*res)[2] = COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8),JMI_TRUE,_f0_1 + ( _f1_2 ) * ( _v_3 ),COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9),JMI_TRUE, - ( _f0_1 ) + ( _f1_2 ) * ( _v_3 ),( _f0_1 ) * ( _sa_7 ))) - (_f_5);
+  (*res)[1] = COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), JMI_TRUE, _sa_7 - ( AD_WRAP_LITERAL(1) ), COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), JMI_TRUE, _sa_7 + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0))) - (_a_4);
+  (*res)[2] = COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), JMI_TRUE, _f0_1 + ( _f1_2 ) * ( _v_3 ), COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), JMI_TRUE,  - ( _f0_1 ) + ( _f1_2 ) * ( _v_3 ), ( _f0_1 ) * ( _sa_7 ))) - (_f_5);
   (*res)[3] = _u_6 - ( _f_5 ) - (( _m_0 ) * ( _der_v_13 ));
   } else if (init==JMI_BLOCK_EVALUATE_NON_REALS) {
  _startBack_9 = LOG_EXP_AND(COND_EXP_EQ(pre_mode_10, 2, JMI_TRUE, JMI_FALSE), _sw(1));
@@ -4809,6 +4935,67 @@ model BlockTest3
   }
   return 0;
 }
+
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+    x[1] = 1.;
+    x[2] = 1.;
+    x[3] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = -1e20;
+    x[1] = -1e20;
+    x[2] = -1e20;
+    x[3] = -1e20;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+    x[1] = 1e20;
+    x[2] = 1e20;
+    x[3] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _a_4;
+    x[1] = _sa_7;
+    x[2] = _f_5;
+    x[3] = _der_v_13;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _a_4 = x[0];
+    _sa_7 = x[1];
+    _f_5 = x[2];
+    _der_v_13 = x[3];
+  (*res)[0] = _a_4 - (_der_v_13);
+  (*res)[1] = COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), JMI_TRUE, _sa_7 - ( AD_WRAP_LITERAL(1) ), COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), JMI_TRUE, _sa_7 + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0))) - (_a_4);
+  (*res)[2] = COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), JMI_TRUE, _f0_1 + ( _f1_2 ) * ( _v_3 ), COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), JMI_TRUE,  - ( _f0_1 ) + ( _f1_2 ) * ( _v_3 ), ( _f0_1 ) * ( _sa_7 ))) - (_f_5);
+  (*res)[3] = _u_6 - ( _f_5 ) - (( _m_0 ) * ( _der_v_13 ));
+  } else if (init==JMI_BLOCK_EVALUATE_NON_REALS) {
+ _startBack_9 = LOG_EXP_AND(COND_EXP_EQ(pre_mode_10, 2, JMI_TRUE, JMI_FALSE), _sw(1));
+ _startFor_8 = LOG_EXP_AND(COND_EXP_EQ(pre_mode_10, 2, JMI_TRUE, JMI_FALSE), _sw(0));
+  }
+  return 0;
+}
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+  _der_dummy_12 = 1;
+  _u_6 = ( 2 ) * ( sin(_time) );
+   ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+  _mode_10 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), _sw(2)), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), _sw(3)), JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(2)));
+
+    model_ode_guards(jmi);
+  _der_dummy_12 = 1;
+  _u_6 = ( 2 ) * ( sin(_time) );
+  pre_mode_10 = 2;
+  _v_3 = 0.0;
+   ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+  _mode_10 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), _sw(2)), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), _sw(3)), JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(2)));
+  _dummy_11 = 0.0;
+  pre_startFor_8 = JMI_FALSE;
+  pre_startBack_9 = JMI_FALSE;
 ")})));
 
  parameter Real m = 1;
@@ -4844,9 +5031,166 @@ equation
 
 end BlockTest3;
 
+model BlockTest4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="BlockTest4",
+         description="Test that min, max, and nominal attributes are correctly generated",
+         generate_ode=true,
+         equation_sorting=true,
+         template="$C_dae_blocks_residual_functions$",
+         generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 5.0;
+    x[1] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = -1e20;
+    x[1] = 3.0;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = -2.0;
+    x[1] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _y_1;
+    x[1] = _x_0;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _y_1 = x[0];
+    _x_0 = x[1];
+  (*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) - (5);
+  (*res)[1] = _x_0 - ( _y_1 ) - (3);
+  }
+  return 0;
+}
+")})));
 
+  Real x(min=3); 
+  Real y(max=-2, nominal=5);
+  Real z(min=4,max=5,nominal=8);
+equation
+  z = x + y;
+  3 = x - y;
+  5 = x + 3*y;  
+end BlockTest4;
 
+model BlockTest5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="BlockTest5",
+         description="",
+         generate_ode=true,
+         equation_sorting=true,
+         template="$C_dae_blocks_residual_functions$",
+         generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+    x[1] = 5.0;
+    x[2] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = 16.0;
+    x[1] = -1e20;
+    x[2] = 1.0;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+    x[1] = -2.0;
+    x[2] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _x_2_2;
+    x[1] = _y_3;
+    x[2] = _x_1_1;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _x_2_2 = x[0];
+    _y_3 = x[1];
+    _x_1_1 = x[2];
+  (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
+  (*res)[1] = _x_1_1 + ( 3 ) * ( _y_3 ) - (5);
+  (*res)[2] = _x_1_1 - ( _y_3 ) + _x_2_2 - (3);
+  }
+  return 0;
+}
 
+")})));
+
+  parameter Real p1 = 4;
+  Real x[2](min={1, 4*p1}); 
+  Real y(max=-2, nominal=5);
+  equation
+  3 = x[1] - y + x[2];
+  5 = x[1] + 3*y;
+  3 = x[1] + y + x[2];  
+end BlockTest5;
+
+model BlockTest6
+ 
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="BlockTest6",
+         description=" Test of min, max and nominal attributes in blocks",
+         generate_ode=true,
+         equation_sorting=true,
+         template="$C_dae_blocks_residual_functions$",
+         generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+    x[1] = 5.0;
+    x[2] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = 12.0;
+    x[1] = -1e20;
+    x[2] = 6.0;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+    x[1] = -6.0;
+    x[2] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _x_2_2;
+    x[1] = _y_3;
+    x[2] = _x_1_1;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _x_2_2 = x[0];
+    _y_3 = x[1];
+    _x_1_1 = x[2];
+  (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
+  (*res)[1] = _x_1_1 + ( 3 ) * ( _y_3 ) - (5);
+  (*res)[2] = _x_1_1 - ( _y_3 ) + _x_2_2 - (3);
+  }
+  return 0;
+}
+
+")})));
+
+  function f1
+    input Real x;
+	output Real y=0;
+  algorithm
+	  for i in 1:3 loop
+		  y := y + x;
+	  end for;
+  end f1;
+
+  function f2
+	input Real x;
+	input Integer n;
+	output Real y[2]={0,0};
+  algorithm
+	  for i in 1:n loop
+		  y := {y[1] + x, y[2] + 2*x};
+	  end for;
+  end f2;
+  
+  parameter Real p1 = 4;
+  Real x[2](min=f2(3,2)); 
+  Real y(max=-f1(2), nominal=5);
+  equation
+  3 = x[1] - y + x[2];
+  5 = x[1] + 3*y;
+  3 = x[1] + y + x[2];  
+end BlockTest6;
 
 model OutputTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -6544,18 +6888,27 @@ model Smooth1
 end Smooth1;
 
 model TearingTest1
-	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
          name="TearingTest1",
          description="Test code generation of torn blocks",
          generate_ode=true,
          equation_sorting=true,
-		 enable_tearing=true,
-         template="$C_dae_blocks_residual_functions$", 
-         generatedCode=" 
+         enable_tearing=true,
+         template="$C_dae_blocks_residual_functions$",
+         generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
-  if (init==JMI_BLOCK_INITIALIZE) {
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+    x[1] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = -1e20;
+    x[1] = -1e20;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+    x[1] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _i3_7;
     x[1] = _i2_6;
   } else if (init==JMI_BLOCK_EVALUATE) {
@@ -6569,8 +6922,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init
   }
   return 0;
 }
-		 
+
 ")})));
+
+	
   Real u0,u1,u2,u3,uL;
   Real i0,i1,i2,i3,iL;
   parameter Real R1 = 1;

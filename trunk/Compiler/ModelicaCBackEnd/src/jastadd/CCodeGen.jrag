@@ -1467,8 +1467,50 @@ aspect CCodeGen {
 		str.print("static int dae_" + (inInit? "init_": "") + "block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {\n");
 		str.print("  jmi_real_t** res = &residual;\n");	
 		genVarDecls_C(str, indent); // TODO: wrong indent (but so has rest of func...)
-		str.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
 		int var_counter = 0;
+		// Nominal values
+		str.print("  if (init==JMI_BLOCK_NOMINAL) {\n");
+		for (FVariable fv : blockResidualVariables_C()) {
+			str.print("    x["+var_counter+"] = ");
+			if(((FRealVariable)fv).nominalAttributeSet()) {
+				str.print(((FRealVariable)fv).nominalAttribute());
+			} else {
+				str.print("1.");
+			}
+			str.append(";\n");
+			var_counter++;
+		}
+		
+		// Min values
+		var_counter = 0;
+		str.print("  } else  if (init==JMI_BLOCK_MIN) {\n");
+		for (FVariable fv : blockResidualVariables_C()) {
+			str.print("    x["+var_counter+"] = ");
+			if(((FRealVariable)fv).minAttributeSet()) {
+				str.print(((FRealVariable)fv).minAttribute());
+			} else {
+				str.print("-1e20");
+			}
+			str.append(";\n");
+			var_counter++;
+		}
+		
+		// Max values
+		var_counter = 0;
+		str.print("  } else if (init==JMI_BLOCK_MAX) {\n");
+		for (FVariable fv : blockResidualVariables_C()) {
+			str.print("    x["+var_counter+"] = ");
+			if(((FRealVariable)fv).maxAttributeSet()) {
+				str.print(((FRealVariable)fv).maxAttribute());
+			} else {
+				str.print("1e20");
+			}
+			str.append(";\n");
+			var_counter++;
+		}
+
+		str.print("  } else if (init==JMI_BLOCK_INITIALIZE) {\n");
+		var_counter = 0;
 		// Loop over all active variables and write their value to x	
 		for (FVariable fv : blockResidualVariables_C()) {
 			str.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");

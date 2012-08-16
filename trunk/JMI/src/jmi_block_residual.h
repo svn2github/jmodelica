@@ -110,6 +110,10 @@ struct jmi_block_residual_t {
     jmi_real_t* jac;               /**< \brief Work vector for the block Jacobian */
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
 
+    jmi_real_t* min;               /**< \brief Work vector needed for dgesv */
+    jmi_real_t* max;               /**< \brief Work vector needed for dgesv */
+    jmi_real_t* nominal;           /**< \brief Work vector needed for dgesv */
+
     void * solver;
     jmi_block_residual_solve_func_t solve;
     jmi_block_residual_delete_func_t delete_solver;

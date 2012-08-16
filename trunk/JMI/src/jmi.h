@@ -367,6 +367,9 @@ extern "C" {
 #define JMI_BLOCK_WRITE_BACK 2
 #define JMI_BLOCK_EVALUATE_INACTIVE 4
 #define JMI_BLOCK_EVALUATE_NON_REALS 8
+#define JMI_BLOCK_MIN 16
+#define JMI_BLOCK_MAX 32
+#define JMI_BLOCK_NOMINAL 64
 
 /* @} */
 

@@ -53,6 +53,8 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     if(!b) return -1;
 	*block = b;
 	
+	int i;
+
 	b->jmi = jmi;
 	b->F = F;
 	b->dF = dF;
@@ -71,6 +73,14 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 	b->ipiv = (int*)calloc(n,sizeof(int));
 	b->init = 1;
       
+	b->min = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->max = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->nominal = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+
+	b->F(jmi,b->min,b->res,JMI_BLOCK_MIN);
+	b->F(jmi,b->max,b->res,JMI_BLOCK_MAX);
+	b->F(jmi,b->nominal,b->res,JMI_BLOCK_NOMINAL);
+
     switch(solver) {
     case JMI_KINSOL: {
         jmi_kinsol_solver_t* solver;    
@@ -133,6 +143,9 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
 	free(b->dres);
 	free(b->jac);
 	free(b->ipiv);
+	free(b->min);
+	free(b->max);
+	free(b->nominal);
 	/* clean up the solver.*/
     b->delete_solver(b);
 
