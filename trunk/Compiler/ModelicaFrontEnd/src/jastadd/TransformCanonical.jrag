@@ -1223,29 +1223,29 @@ aspect TransformCanonical {
 	 * TornEquationBlock represents an equation block resulting from tearing.
 	 */
 	public class TornEquationBlock extends AbstractEquationBlock {
-		private ArrayList<AbstractEquationBlock> solvedBlocks = new ArrayList<AbstractEquationBlock>();
-		private ArrayList<AbstractEquationBlock> unsolvedBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
+		private ArrayList<SimpleEquationBlock> unsolvedBlocks = new ArrayList<SimpleEquationBlock>();
 		
 		public TornEquationBlock() {
 		}
 		
-		public void addSolvedBlock(AbstractEquationBlock aeb) {
+		public void addSolvedBlock(SimpleEquationBlock aeb) {
 			if (!solvedBlocks.isEmpty() && solvedBlocks.get(solvedBlocks.size() - 1).mergeBlock(aeb))
 				return;
 			solvedBlocks.add(aeb);
 		}
 		
-		public java.util.List<AbstractEquationBlock> getSolvedBlocks() {
+		public java.util.List<SimpleEquationBlock> getSolvedBlocks() {
 			return solvedBlocks;
 		}
 		
-		public void addUnsolvedBlock(AbstractEquationBlock aeb) {
+		public void addUnsolvedBlock(SimpleEquationBlock aeb) {
 			if (!unsolvedBlocks.isEmpty() && unsolvedBlocks.get(unsolvedBlocks.size() - 1).mergeBlock(aeb))
 				return;
 			unsolvedBlocks.add(aeb);
 		}
 		
-		public java.util.List<AbstractEquationBlock> getUnsolvedBlocks() {
+		public java.util.List<SimpleEquationBlock> getUnsolvedBlocks() {
 			return unsolvedBlocks;
 		}
 
