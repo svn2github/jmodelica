@@ -71,16 +71,21 @@ class CasadiCollocator(object):
         # Update dependent parameters
         casadi.updateDependent(self.ocp)
         
-        # Get start and final time
+        # Check if minimum time normalization has occured
         t0 = self.ocp.variable('startTime')
         tf = self.ocp.variable('finalTime')
-        if (t0.getFree() and not self.ocp.t0_free):
-            self.t0 = self.ocp.t0
+        if (t0.getFree() and not self.ocp.t0_free or
+            tf.getFree() and not self.ocp.tf_free):
+            self._normalize_min_time = True
         else:
-            self.t0 = t0.getStart()
-        if (tf.getFree() and not self.ocp.tf_free):
+            self._normalize_min_time = False
+        
+        # Get start and final time
+        if self._normalize_min_time:
+            self.t0 = self.ocp.t0
             self.tf = self.ocp.tf
         else:
+            self.t0 = t0.getStart()
             self.tf = tf.getStart()
         
         # Update OCP expressions
@@ -2213,6 +2218,24 @@ class LocalDAECollocator(CasadiCollocator):
                     t_index += 1
         else:
             raise ValueError("Unknown result mode %s." % self.result_mode)
+        
+        # Denormalize minimum time problem
+        if self._normalize_min_time:
+            vr_map = self.model.get_vr_map()
+            if self.ocp.variable('startTime').getFree():
+                vr = self.ocp.variable('startTime').getValueReference()
+                (ind, _) = vr_map[vr]
+                t0 = var_opt['p_opt'][ind]
+            else:
+                t0 = self.ocp.t0
+            if self.ocp.variable('finalTime').getFree():
+                vr = self.ocp.variable('finalTime').getValueReference()
+                (ind, _) = vr_map[vr]
+                tf = var_opt['p_opt'][ind]
+            else:
+                tf = self.ocp.tf
+            t_opt = t0 + (tf - t0) * t_opt
+            var_opt['dx'] /= (tf - t0)
         
         # Return results
         return (t_opt, var_opt['dx'], var_opt['x'], var_opt['u'], var_opt['w'],

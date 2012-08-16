@@ -178,7 +178,7 @@ package VDP_pack
   
   optimization VDP_Opt_Scaled_Min_Time(objective=tf) 
 
-    parameter Real tf(free=true, min=0.2, initialGuess=0.2);
+    parameter Real tf(free=true, min=0.2, initialGuess=2);
 
     Real x1(start=0, fixed=true);
     Real x2(start=1, fixed=true);
@@ -196,7 +196,7 @@ package VDP_pack
   end VDP_Opt_Scaled_Min_Time;
   
   optimization VDP_Opt_Unscaled_Min_Time(objective=finalTime, startTime=0,
-      finalTime(min=0.2, free=true, initialGuess=0.2))
+      finalTime(min=0.2, free=true, initialGuess=2))
                                                    
     
     Real x1(start=0, fixed=true) "First state";
