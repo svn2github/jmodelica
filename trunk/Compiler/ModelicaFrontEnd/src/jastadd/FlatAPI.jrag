@@ -1529,10 +1529,15 @@ aspect FVariableUses {
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
 	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
-		!(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) && 
-		myFV().isAlgebraicVariable() to 
+		isAlgebraicVariableAccess() && myFV().isAlgebraicVariable() to 
 		FAbstractEquation.retrieveAlgebraicVariables() for myFEquation();
 
+	inh boolean FIdUseExp.isAlgebraicVariableAccess();
+	eq BaseNode.getChild().isAlgebraicVariableAccess() = true;
+	eq FDerExp.getChild().isAlgebraicVariableAccess() = false;
+	eq FPreExp.getChild().isAlgebraicVariableAccess() = false;
+	eq FResidues.getResidue().isAlgebraicVariableAccess() = false;
+	
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() = 
 	    retrieveAlgebraicVariables();
 	
