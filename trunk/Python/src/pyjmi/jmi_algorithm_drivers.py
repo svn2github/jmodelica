@@ -1664,14 +1664,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: None or pyjmi.common.io.ResultDymolaTextual
             Default: None
         
-        init_traj_scale_time --
-            Whether to scale the time horizon of the provided initial
-            trajectories to fit the time horizon of the optimization problem.
-            This option is only applicable when init_traj is not None.
-            
-            Type: bool
-            Default: True
-        
         variable_scaling --
             Whether to scale the variables according to their nominal values or
             the trajectories provided with the nominal_traj option.
@@ -1685,14 +1677,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: None or pyjmi.common.io.ResultDymolaTextual
             Default: None
-        
-        nominal_traj_scale_time --
-            Whether to scale the time horizon of the provided nominal
-            trajectories to fit the time horizon of the optimization problem.
-            This option is only applicable when nominal_traj is not None.
-            
-            Type: bool
-            Default: True
         
         write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
@@ -1852,10 +1836,8 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'graph': 'SX',
                 'rename_vars': False,
                 'init_traj': None,
-                'init_traj_scale_time': True,
                 'variable_scaling': True,
                 'nominal_traj': None,
-                'nominal_traj_scale_time': True,
                 'write_scaled_result': False,
                 'result_mode': "collocation_points",
                 'n_eval_points': 20,

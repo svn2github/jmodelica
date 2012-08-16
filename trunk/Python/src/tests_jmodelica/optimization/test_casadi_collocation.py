@@ -166,26 +166,19 @@ class TestLocalDAECollocator:
         t = [0, 200]
         u = [342.85, 280]
         u_traj = N.transpose(N.vstack((t, u)))
+        
+        # Generate initial trajectories
         init_res = model.simulate(final_time=300, input=('Tc', u_traj))
         
-        # Initialize without scaling init_traj time
+        # Optimize
         opts = model_opt.optimize_options(self.algorithm)
         opts['variable_scaling'] = False
         opts['init_traj'] = init_res.result_data
-        opts['init_traj_scale_time'] = False
         col = LocalDAECollocator(model_opt, opts)
         xx_init = col.get_xx_init()
         N.testing.assert_allclose(
                 xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
                 [390.56379356, 337.93876716])
-        
-        # Initialize with scaled init_traj time
-        opts['init_traj_scale_time'] = True
-        col = LocalDAECollocator(model_opt, opts)
-        xx_init = col.get_xx_init()
-        N.testing.assert_allclose(
-                xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
-                [357.07773821, 280.62047233])
     
     @testattr(casadi = True)
     def test_init_traj_opt(self):
@@ -398,7 +391,7 @@ class TestLocalDAECollocator:
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         indices = range(1, 4) + range(opts['n_e'] - 3, opts['n_e'])
-        values = N.array([0.5, 0.5, 0.5, 2.0, 2.0, 2.0]).reshape([-1, 1])
+        values = N.array([0.5, 0.5, 0.5, 2.0, 2.0, 2.0])
         N.testing.assert_allclose(20. * res.h_opt[indices], values, 5e-3)
         
         # Element interpolation
@@ -428,7 +421,7 @@ class TestLocalDAECollocator:
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
 
-        # WIth renameing
+        # With renaming
         opts['rename_vars'] = True
         res_renaming = model.optimize(self.algorithm, opts)
         assert_results(res_renaming, cost_ref, u_norm_ref)
