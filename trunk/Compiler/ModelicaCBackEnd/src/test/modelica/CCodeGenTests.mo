@@ -6971,7 +6971,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init
   JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
   jmi_array_ref_1(tmp_1, 1) = _map_1_0;
   jmi_array_ref_1(tmp_1, 2) = _map_2_1;
-  _y_3 = func_MapTearingTest1_F_exp(_x_2, tmp_1);
+  _y_3 = func_CCodeGenTests_MapTearingTest1_F_exp(_x_2, tmp_1);
   (*res)[0] = _y_3 + 1 - (_x_2);
   }
   return 0;

@@ -2003,6 +2003,7 @@ aspect TransformCanonical {
 
 			// Compute inner BLT and see if tearings can be changed 
 			ArrayList<Var> SUMV = g.getSUMV();
+			g.maximumMatching(false);
 			LinkedList<Stack<Eq>> innerBlocks = g.computeTearBlocks();
 			ArrayList<FVariable> tearings = new ArrayList<FVariable>();
 
