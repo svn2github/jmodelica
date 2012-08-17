@@ -95,11 +95,11 @@ aspect CADCodeGen {
 		}
 	}
 	
-	public String AbstractFVariable.genUse_var_CAD(Printer p, FArraySubscripts fas, String type) {
+	public String FAbstractVariable.genUse_var_CAD(Printer p, FArraySubscripts fas, String type) {
 		return name_var_CAD();
 	}
 	
-	public String AbstractFVariable.genUse_der_CAD(Printer p, FArraySubscripts fas, String type) {
+	public String FAbstractVariable.genUse_der_CAD(Printer p, FArraySubscripts fas, String type) {
 		return name_der_CAD();
 		
 	}
@@ -2370,8 +2370,8 @@ aspect CADCodeGen {
 		str.print(nameReturn_der_CAD());
 	}
 	
-	syn lazy String AbstractFVariable.name_var_CAD() = name_C();
-	syn lazy String AbstractFVariable.name_der_CAD() = "0";
+	syn lazy String FAbstractVariable.name_var_CAD() = name_C();
+	syn lazy String FAbstractVariable.name_der_CAD() = "0";
 	
 	eq FFunctionVariable.name_var_CAD() = nameUnderscore() + "_var_" + C_SUFFIX_VARIABLE;
 	eq FFunctionArray.name_var_CAD()    = nameUnderscore() + "_var_" + C_SUFFIX_ARRAY;

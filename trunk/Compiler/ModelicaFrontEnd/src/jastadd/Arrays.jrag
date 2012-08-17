@@ -395,7 +395,7 @@ aspect Arrays {
 			int n = name.getNumFQNamePart();
 			FVariable record = null;
 			for (i = 1; record == null && i < n; i++) {
-				AbstractFVariable tmp = lookupFV(name.copyPrefix(i));
+				FAbstractVariable tmp = lookupFV(name.copyPrefix(i));
 				if (!tmp.isUnknown())
 					record = (FVariable) tmp;
 			}
@@ -469,7 +469,7 @@ aspect Arrays {
 	inh int InstArrayComponentDecl.retrieveArrayCompNdims();
 	eq InstNode.getChild().retrieveArrayCompNdims() = ndims() - 1;
 
-	syn int AbstractFVariable.ndims() = -1;
+	syn int FAbstractVariable.ndims() = -1;
 	
 	eq FVariable.ndims()         = isScalarized()? 0 : getFQName().ndims();
 	eq FFunctionArray.ndims()    = getType().ndims();
@@ -934,7 +934,7 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes. 
 	 */	
-	syn lazy Size AbstractFVariable.size() = Size.SCALAR;
+	syn lazy Size FAbstractVariable.size() = Size.SCALAR;
 	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().size();
 	eq FFunctionArray.size() = getType().size();
 		
@@ -997,7 +997,7 @@ aspect Arrays {
 		if (varMap.containsKey(this))
 			throw new ConstantEvaluationException();
 		varMap.put(this, null);
-		AbstractFVariable var = myFV();
+		FAbstractVariable var = myFV();
 		FExp exp = varMap.get(var);
 		return (exp != null) ? exp : var.size().createDummyFExp(varMap);
 	}
@@ -1066,7 +1066,7 @@ aspect Arrays {
 	 * 
 	 * @return True if array dimension > 0 else false
 	 */
-	syn boolean AbstractFVariable.isArray() = ndims()>0;
+	syn boolean FAbstractVariable.isArray() = ndims()>0;
 	
 	/**
 	 * \brief check if an instance node is an array expression.
@@ -1175,7 +1175,7 @@ aspect Arrays {
 	syn CommonForIndex FIdUse.myForIndex()            = myFV().myForIndex();
 	syn CommonForIndex FIdUseInstAccess.myForIndex()  = getInstAccess().myInstComponentDecl().myForIndex();
 	syn CommonForIndex FInstAccessExp.myForIndex()    = getInstAccess().myInstComponentDecl().myForIndex();
-	inh CommonForIndex AbstractFVariable.myForIndex();
+	inh CommonForIndex FAbstractVariable.myForIndex();
 	inh CommonForIndex InstComponentDecl.myForIndex();
 	eq FForIndex.getFVariable().myForIndex()        = this;
 	eq InstForIndex.getInstPrimitive().myForIndex() = this;
@@ -1852,7 +1852,7 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn lazy Indices AbstractFVariable.indices() = null;
+	syn lazy Indices FAbstractVariable.indices() = null;
 	eq FVariable.indices()      = isScalarized() ? null : Indices.create(size());
 	eq FFunctionArray.indices() = Indices.create(size());
 

@@ -787,7 +787,7 @@ aspect OptimicaFlatAPI {
 		return l;
 	}
 	
-	inh FOptClass AbstractFVariable.myFOptClass();
+	inh FOptClass FAbstractVariable.myFOptClass();
 	inh FOptClass FExp.myFOptClass();
 	inh FOptClass FIdUse.myFOptClass();
 	inh FOptClass InstComponentModification.myFOptClass();
@@ -993,7 +993,7 @@ aspect OptimicaFlatAPIDiagnostics {
 
 aspect OptimicaFreeParameters {
 	
-	syn boolean AbstractFVariable.isFreeParameter() = 
+	syn boolean FAbstractVariable.isFreeParameter() = 
 		myFClass().freeParameters().contains(this);
 	
 	refine FlatAPI eq FClass.numFreeParameters() = freeParameters().size();
@@ -1054,7 +1054,7 @@ aspect OptimicaFreeParameters {
 		return s;
 	}
 	
-	syn boolean AbstractFVariable.isFreeDependentParameter() {
+	syn boolean FAbstractVariable.isFreeDependentParameter() {
 		if (myFClass()!=null) {
 			return myFClass().freeDependentParameters().contains(this);
 		} else {

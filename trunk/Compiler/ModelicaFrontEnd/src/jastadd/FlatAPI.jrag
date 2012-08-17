@@ -165,7 +165,7 @@ aspect FlatAPI {
 	 * Bit 32 is left unused.
 	 *
 	 */
-	inh lazy int AbstractFVariable.valueReference();
+	inh lazy int FAbstractVariable.valueReference();
 	eq FClass.getFVariable(int i).valueReference()     = valueReferenceMap().get(getFVariable(i));
 	eq FClass.getAliasVariable(int i).valueReference() = getAliasVariable(i).aliasValueReference();
 	eq FClass.getFEquationBlock().valueReference()     = -1;
@@ -951,7 +951,7 @@ aspect FlatAPI {
 	eq FAbstractEquation.getChild().myFEquation() = this;
 	eq Root.getChild().myFEquation()=null;
 	
-	inh FClass AbstractFVariable.myFClass();
+	inh FClass FAbstractVariable.myFClass();
 	inh FClass FExp.myFClass();
 	inh FClass FIdUse.myFClass();
 	inh FClass FQName.myFClass();
@@ -1037,24 +1037,24 @@ aspect FlatAPI {
 	
 	syn boolean FVariable.isVariable() = !isParameter() && !isConstant();
 	
-	syn boolean AbstractFVariable.isDifferentiatedVariable() = false;
+	syn boolean FAbstractVariable.isDifferentiatedVariable() = false;
 	syn lazy boolean FVariable.isDifferentiatedVariable() = 
 	  myFClass().differentiatedRealVariables().contains(this);
 	  
-	syn boolean AbstractFVariable.isDerivativeVariable() = false;
+	syn boolean FAbstractVariable.isDerivativeVariable() = false;
 	eq FDerivativeVariable.isDerivativeVariable() = true;
 
-	syn boolean AbstractFVariable.isDummyDerivativeVariable() = false;
+	syn boolean FAbstractVariable.isDummyDerivativeVariable() = false;
 	eq FDummyDerivativeVariable.isDummyDerivativeVariable() = true;
 
-	syn boolean AbstractFVariable.isPreVariable() = false;
+	syn boolean FAbstractVariable.isPreVariable() = false;
 	eq FPreRealVariable.isPreVariable() = true;
 	eq FPreIntegerVariable.isPreVariable() = true;
 	eq FPreBooleanVariable.isPreVariable() = true;
 	eq FPreStringVariable.isPreVariable() = true;
 	eq FPreEnumVariable.isPreVariable() = true;
 	
-	syn boolean AbstractFVariable.isAlgebraicVariable() = false;
+	syn boolean FAbstractVariable.isAlgebraicVariable() = false;
 	syn lazy boolean FVariable.isAlgebraicVariable() = 
 		  myFClass().algebraicRealVariables().contains(this) ||
 		  myFClass().discreteRealVariables().contains(this) ||
@@ -1063,7 +1063,7 @@ aspect FlatAPI {
 		  myFClass().discreteBooleanVariables().contains(this) ||
 		  myFClass().discreteStringVariables().contains(this);
 
-	syn boolean AbstractFVariable.isDiscreteVariable() = false;
+	syn boolean FAbstractVariable.isDiscreteVariable() = false;
 	syn lazy boolean FVariable.isDiscreteVariable() = 
 		  myFClass().discreteVariables().contains(this);
 
@@ -1222,10 +1222,10 @@ aspect FlatCausality {
 	syn boolean FTypePrefixInputOutput.outputCausality() = false;
 	eq FOutput.outputCausality() = true;	
 	
-	syn boolean AbstractFVariable.isInput() = false;
+	syn boolean FAbstractVariable.isInput() = false;
     eq FVariable.isInput() = 
       hasFTypePrefixInputOutput()? getFTypePrefixInputOutput().inputCausality(): false;    
-    syn boolean AbstractFVariable.isOutput() = false;
+    syn boolean FAbstractVariable.isOutput() = false;
     eq FVariable.isOutput() = 
       hasFTypePrefixInputOutput()? getFTypePrefixInputOutput().outputCausality(): false;
       
@@ -1233,19 +1233,19 @@ aspect FlatCausality {
 
 aspect FlatTypes {
 
-	syn boolean AbstractFVariable.isReal()    = type().isReal();
-	syn boolean AbstractFVariable.isInteger() = type().isInteger();
-	syn boolean AbstractFVariable.isBoolean() = type().isBoolean();
-	syn boolean AbstractFVariable.isString()  = type().isString();
-	syn boolean AbstractFVariable.isRecord()  = type().isRecord();
-	syn boolean AbstractFVariable.isEnum()    = type().isEnum();
+	syn boolean FAbstractVariable.isReal()    = type().isReal();
+	syn boolean FAbstractVariable.isInteger() = type().isInteger();
+	syn boolean FAbstractVariable.isBoolean() = type().isBoolean();
+	syn boolean FAbstractVariable.isString()  = type().isString();
+	syn boolean FAbstractVariable.isRecord()  = type().isRecord();
+	syn boolean FAbstractVariable.isEnum()    = type().isEnum();
 	
 	syn boolean FExp.isComposite()              = isArray() || type().isRecord();
 	syn boolean FType.isComposite()             = isArray() || isRecord();
-	syn boolean AbstractFVariable.isComposite() = isArray() || isRecord();
+	syn boolean FAbstractVariable.isComposite() = isArray() || isRecord();
 	syn boolean InstComponentDecl.isComposite() = isArray() || isRecord();
 	
-	inh boolean AbstractFVariable.inRecord();
+	inh boolean FAbstractVariable.inRecord();
 	eq FRecordDecl.getChild().inRecord() = true;
 	eq FClass.getChild().inRecord()      = false;
 	eq FForIndex.getChild().inRecord()   = false;
@@ -1268,7 +1268,7 @@ aspect FlatTypes {
 		return -1;
 	}
 	
-	inh FRecordDecl AbstractFVariable.containingRecordDecl();
+	inh FRecordDecl FAbstractVariable.containingRecordDecl();
 	eq FRecordDecl.getChild().containingRecordDecl() = this;
 	eq FlatRoot.getChild().containingRecordDecl()    = null;
 
@@ -1470,17 +1470,17 @@ aspect FVariableUses {
 	/**
 	 * \brief Collection attribute returning all variable uses in expressions.
 	 */
-	coll HashSet<FIdUseExp> AbstractFVariable.uses() [new LinkedHashSet<FIdUseExp>()] 
+	coll HashSet<FIdUseExp> FAbstractVariable.uses() [new LinkedHashSet<FIdUseExp>()] 
 		with add root FlatRoot;
 	
 	FIdUseExp contributes this when !(getParent() instanceof FDerExp) to 
-		AbstractFVariable.uses() for myFV();
+		FAbstractVariable.uses() for myFV();
 	
 	/**
 	 * All uses of this variable that are not the left-hand side of an equation. 
 	 * (Unless the variable has a binding expression, then this is the same as uses().)
 	 */
-	syn lazy Set<FIdUseExp> AbstractFVariable.nonDefiningUses() {
+	syn lazy Set<FIdUseExp> FAbstractVariable.nonDefiningUses() {
 		Set<FIdUseExp> res = new HashSet<FIdUseExp>();
 		for (FIdUseExp use : uses())
 			if (hasBindingExp() || !use.isLeftHandSide())
@@ -1492,7 +1492,7 @@ aspect FVariableUses {
 	 * All uses of this variable that are the left-hand side of an equation. 
 	 * (Unless the variable has a binding expression, then this is empty.)
 	 */
-	syn lazy Set<FIdUseExp> AbstractFVariable.definingUses() {
+	syn lazy Set<FIdUseExp> FAbstractVariable.definingUses() {
 		if (hasBindingExp()) {
 			return Collections.emptySet();
 		} else {
@@ -1516,25 +1516,25 @@ aspect FVariableUses {
 	 * depends on the parameter.
 	 */
 	
-	coll HashSet<FVariable> AbstractFVariable.dependentParameters() 
+	coll HashSet<FVariable> FAbstractVariable.dependentParameters() 
 	  [new LinkedHashSet<FVariable>()] 
 		with addAll root FlatRoot;
 	
 	FIdUseExp contributes boundParameters() 
 		when !(getParent() instanceof FDerExp) && !myFV().isUnknown() && 
 		     myFV().isParameter()
-		to AbstractFVariable.dependentParameters() for myFV();
+		to FAbstractVariable.dependentParameters() for myFV();
 	
-	syn lazy ArrayList<FRealVariable> AbstractFVariable.dependentRealParameters() =
+	syn lazy ArrayList<FRealVariable> FAbstractVariable.dependentRealParameters() =
         FClass.intersectFVColl(myFClass().reals(), dependentParameters());
 
-	syn lazy ArrayList<FIntegerVariable> AbstractFVariable.dependentIntegerParameters() =
+	syn lazy ArrayList<FIntegerVariable> FAbstractVariable.dependentIntegerParameters() =
 	    FClass.intersectFVColl(myFClass().integers(), dependentParameters());
 
-	syn lazy ArrayList<FBooleanVariable> AbstractFVariable.dependentBooleanParameters() =
+	syn lazy ArrayList<FBooleanVariable> FAbstractVariable.dependentBooleanParameters() =
 	    FClass.intersectFVColl(myFClass().booleans(), dependentParameters());
 
-	syn lazy ArrayList<FStringVariable> AbstractFVariable.dependentStringParameters() =
+	syn lazy ArrayList<FStringVariable> FAbstractVariable.dependentStringParameters() =
 	    FClass.intersectFVColl(myFClass().strings(), dependentParameters());
 
 	/**

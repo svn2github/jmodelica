@@ -1245,7 +1245,7 @@ aspect ConstantEvaluation {
 	  FQName name = getFQName();
 	  if (func)
 		  name = name.resolveSubscripts();
-	  AbstractFVariable var = func ? lookupFV(name) : myFV();
+	  FAbstractVariable var = func ? lookupFV(name) : myFV();
 	  if (var != null && !var.isUnknown()) {
 		  CValue res = var.inRecord() ? cevalRecordMember(name) : var.ceval();
 		  if (hasFArraySubscripts() && !name.isScalarized())
@@ -1308,7 +1308,7 @@ aspect ConstantEvaluation {
 		  return CValue.UNKNOWN;
 	  String last = name.lastFQNamePart().getName();
 	  FQName prefix = name.copyPrefix();
-	  AbstractFVariable var = lookupFV(prefix.copyWithoutSubscripts());
+	  FAbstractVariable var = lookupFV(prefix.copyWithoutSubscripts());
 	  CValue res = var.inRecord() ? cevalRecordMember(prefix) : var.ceval();
 	  if (prefix.hasFArraySubscripts())
 		  res = res.array().getCell(prefix.getFArraySubscripts().createIndex());
@@ -1512,7 +1512,7 @@ aspect ConstantEvaluation {
    * 
    *  @return The constant value.
    */
-  syn CValue AbstractFVariable.ceval();
+  syn CValue FAbstractVariable.ceval();
   eq UnknownFVariable.ceval()    = CValue.UNKNOWN;
   eq FDerivativeVariable.ceval() = CValue.UNKNOWN;
   eq FEnumLiteral.ceval()        = CValue.UNKNOWN;
@@ -1637,7 +1637,7 @@ aspect ConstantEvaluation {
 	  public String name();
   }
   
-  public class AbstractFVariable implements CommonVariableDecl {}
+  public class FAbstractVariable implements CommonVariableDecl {}
   public class InstComponentDecl implements CommonVariableDecl {}
   
   syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncInputs() = 
@@ -1792,7 +1792,7 @@ aspect ConstantEvaluation {
   /**
    * \brief Save current function evaluation value to map.
    */
-  public void AbstractFVariable.saveEvaluationValue(Map<CommonVariableDecl, CValue> map) {
+  public void FAbstractVariable.saveEvaluationValue(Map<CommonVariableDecl, CValue> map) {
 	  map.put(this, evaluationValue);
   }
   
@@ -1808,7 +1808,7 @@ aspect ConstantEvaluation {
    * 
    * If this variable isn't in the map, set to value of binding expression.
    */
-  public void AbstractFVariable.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
+  public void FAbstractVariable.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
 	  evaluationValue = map.get(this);
   }
   
@@ -1848,7 +1848,7 @@ aspect ConstantEvaluation {
   /**
    * Set the current function evaluation value.
    */
-  public void AbstractFVariable.setEvaluationValue(CValue val) {
+  public void FAbstractVariable.setEvaluationValue(CValue val) {
 	  evaluationValue = val;
   }
   
@@ -1864,7 +1864,7 @@ aspect ConstantEvaluation {
    * 
    * Also updates value map.
    */
-  public void AbstractFVariable.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
+  public void FAbstractVariable.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
 	  evaluationValue = val;
 	  if (map != null)
 		  map.put(this, val);
@@ -1924,7 +1924,7 @@ aspect ConstantEvaluation {
   /**
    * Check if this variable has a current function evaluation value.
    */
-  public boolean AbstractFVariable.hasEvaluationValue() {
+  public boolean FAbstractVariable.hasEvaluationValue() {
 	  return evaluationValue != null;
   }
   
@@ -1938,7 +1938,7 @@ aspect ConstantEvaluation {
   /**
    * Get the current function evaluation value.
    */
-  public CValue AbstractFVariable.evaluationValue() {
+  public CValue FAbstractVariable.evaluationValue() {
 	  return evaluationValue == null ? CValue.UNKNOWN : evaluationValue;
   }
   
@@ -1949,7 +1949,7 @@ aspect ConstantEvaluation {
 	  return evaluationValue == null ? CValue.UNKNOWN : evaluationValue;
   }
   
-  protected CValue AbstractFVariable.evaluationValue = null;
+  protected CValue FAbstractVariable.evaluationValue = null;
   protected CValue InstComponentDecl.evaluationValue = null;
   
   // Return values for FStatement.evaluate()
@@ -2007,7 +2007,7 @@ aspect ConstantEvaluation {
    */
   public void FIdUse.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right) {
 	  FQName name = getFQName();
-	  AbstractFVariable tmp_var;
+	  FAbstractVariable tmp_var;
 	  int i = 0;
 	  int n = name.getNumFQNamePart();
 	  if (n == 1) {
@@ -2224,7 +2224,7 @@ aspect ConstantEvaluation {
   }
 
   public int FForStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
-	  AbstractFVariable ind = getIndex().getFVariable();
+	  FAbstractVariable ind = getIndex().getFVariable();
 	  CValue oldVal = ind.hasEvaluationValue() ? ind.evaluationValue() : null;
 	  
 	  CValueArray ivals = getIndex().getFExp().ceval().array();
@@ -2576,7 +2576,7 @@ aspect CircularExpressions {
 	syn boolean FExp.isUnknownSizeVarUse() = false;
 	eq FIdUseExp.isUnknownSizeVarUse()     = getFIdUse().myFV().isUnknownSizeVar();
 	
-	syn boolean AbstractFVariable.isUnknownSizeVar() = false;
+	syn boolean FAbstractVariable.isUnknownSizeVar() = false;
 	eq FFunctionArray.isUnknownSizeVar()             = getType().size().isUnknown();
 	
 	public boolean Size.isCircular() {
@@ -2620,7 +2620,7 @@ aspect CircularExpressions {
 	eq InstDefaultArgument.isCircular()    = getFExp().isCircular();
 	
 
-	syn lazy boolean AbstractFVariable.isCircular() circular [true] = false;
+	syn lazy boolean FAbstractVariable.isCircular() circular [true] = false;
 	eq FVariable.isCircular() = getFQName().isCircular() || (hasBindingExp() && getBindingExp().isCircular());
 	
 	syn boolean FQName.isCircular() = hasFArraySubscripts() && getLastFArraySubscripts().isCircular();

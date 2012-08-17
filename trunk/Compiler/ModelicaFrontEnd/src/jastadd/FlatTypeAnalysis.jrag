@@ -19,7 +19,7 @@ import java.util.TreeSet;
 
 aspect FlatTypeAnalysis {
 
-	syn lazy FType AbstractFVariable.type();
+	syn lazy FType FAbstractVariable.type();
 	eq FRealVariable.type()       = fRealType(size());
 	eq FIntegerVariable.type()    = fIntegerType(size());
 	eq FBooleanVariable.type()    = fBooleanType(size());

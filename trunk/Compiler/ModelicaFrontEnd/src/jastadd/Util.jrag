@@ -1037,7 +1037,7 @@ aspect FlatNames {
     eq FFunctionCall.name()        = getNameNoTransform().name();
     eq FBuiltInFunctionCall.name() = builtInName();
     
-    syn String AbstractFVariable.name() = null;
+    syn String FAbstractVariable.name() = null;
     eq FVariable.name()         = getFQNameNoTransform().name();
     eq FFunctionVariable.name() = getFQNameNoTransform().name();
     
@@ -1129,7 +1129,7 @@ aspect FlatNames {
     	return name.replace(".", "_");
     }
     
-    syn String AbstractFVariable.nameUnderscore() = null;
+    syn String FAbstractVariable.nameUnderscore() = null;
     eq FVariable.nameUnderscore()           = getFQName().nameUnderscore();
     eq FDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
     eq FDummyDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
@@ -1289,7 +1289,7 @@ aspect FlatNames {
     /**
      * Create an access to this variable.
      */
-	public FIdUse AbstractFVariable.createFIdUse() {
+	public FIdUse FAbstractVariable.createFIdUse() {
 		 return null;
 	}
 	// TODO: Add implementation for enum
@@ -2276,9 +2276,9 @@ aspect StringComments {
 
 aspect Sorting {
     
-	public static final Comparator<AbstractFVariable> AbstractFVariable.NAME_COMPARATOR = 
-		new Comparator<AbstractFVariable>() {
-			public int compare(AbstractFVariable fv1, AbstractFVariable fv2) {
+	public static final Comparator<FAbstractVariable> FAbstractVariable.NAME_COMPARATOR = 
+		new Comparator<FAbstractVariable>() {
+			public int compare(FAbstractVariable fv1, FAbstractVariable fv2) {
 				String n1 = (fv1 == null) ? null : fv1.name();
 				String n2 = (fv2 == null) ? null : fv2.name();
 				if (n1 != null)

@@ -70,7 +70,7 @@ FEnumDecl : BaseNode ::= Name:FIdDecl FEnumSpecification [FStringComment];
 abstract FEnumSpecification : BaseNode;
 FEnumLiteralList : FEnumSpecification ::= FEnumLiteral*;
 FEnumUnspecified : FEnumSpecification;
-FEnumLiteral : AbstractFVariable ::= Name:FIdUse [FStringComment];
+FEnumLiteral : FAbstractVariable ::= Name:FIdUse [FStringComment];
 
 FAbstractEquationBlock : BaseNode;
 
@@ -84,12 +84,12 @@ FEquationBlock : FAbstractEquationBlock ::= FAbstractEquation*;
 /**
  * \brief Abstract base class for flat variables.
  */
-abstract AbstractFVariable : BaseNode;
+abstract FAbstractVariable : BaseNode;
 
 /**
  * \brief A flat variable in a function.
  */
-FFunctionVariable : AbstractFVariable ::= [FTypePrefixInputOutput]
+FFunctionVariable : FAbstractVariable ::= [FTypePrefixInputOutput]
                                           Type:FType
                                           [BindingExp:FExp]
                                           FQName;
@@ -102,7 +102,7 @@ FFunctionArray : FFunctionVariable;
 /**
  * \brief A flat variable corresponding to an unknown declaration.
  */
-UnknownFVariable : AbstractFVariable;
+UnknownFVariable : FAbstractVariable;
 
 /**
  * \brief A class representing a flattened Modelica variable.
@@ -114,7 +114,7 @@ UnknownFVariable : AbstractFVariable;
  * variables and scalar variables: this information is embedded in the 
  * FQName class.
  */
-abstract FVariable : AbstractFVariable ::= FVisibilityType
+abstract FVariable : FAbstractVariable ::= FVisibilityType
                                            FTypePrefixVariability
                                            [FTypePrefixInputOutput]
                                            FAttribute*

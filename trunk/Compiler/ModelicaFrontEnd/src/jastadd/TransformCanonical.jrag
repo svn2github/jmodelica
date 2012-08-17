@@ -2715,7 +2715,7 @@ aspect TransformCanonical {
 			ArrayList<FVariable> inVars = new ArrayList<FVariable>();
 			ArrayList<FFunctionVariable> bothInVars = new ArrayList<FFunctionVariable>();
 			for (FIdUse use : alg.usedFIdUses()) {
-				AbstractFVariable fv = use.myFV();
+				FAbstractVariable fv = use.myFV();
 				if (!fv.isUnknown() && !inVars.contains(fv) && !fv.isForIndex()) {
 					inVars.add((FVariable) fv);
 					bothInVars.add(null);
@@ -3402,7 +3402,7 @@ aspect TransformCanonical {
 	}
 	
 	public void FIdUseExp.removeFromUses() {
-		AbstractFVariable var = getFIdUse().myFV();
+		FAbstractVariable var = getFIdUse().myFV();
 		var.uses().remove(this);
 		var.definingUses().remove(this);
 		var.nonDefiningUses().remove(this);
@@ -3696,25 +3696,25 @@ aspect MapWhenClauses{
 
 aspect TempVariables {
 	
-	protected ArrayList<AbstractFVariable> FAbstractEquation.ownedTempVars = null;
+	protected ArrayList<FAbstractVariable> FAbstractEquation.ownedTempVars = null;
 	
-	protected ArrayList<AbstractFVariable> FAbstractEquation.NULL_EQUATION_LIST = 
-		new ArrayList<AbstractFVariable>(0);
+	protected ArrayList<FAbstractVariable> FAbstractEquation.NULL_EQUATION_LIST = 
+		new ArrayList<FAbstractVariable>(0);
 	
 	
 	/**
 	 * Get the list of temporary variables that was created together with this equation.
 	 */
-	public ArrayList<AbstractFVariable> FAbstractEquation.ownedTempVariables() {
+	public ArrayList<FAbstractVariable> FAbstractEquation.ownedTempVariables() {
 		return (ownedTempVars == null) ? NULL_EQUATION_LIST : ownedTempVars;
 	}
 	
 	/**
 	 * Add variable to the list of temporary variables that was created together with this equation.
 	 */
-	public void FAbstractEquation.addOwnedTempVariable(AbstractFVariable var) {
+	public void FAbstractEquation.addOwnedTempVariable(FAbstractVariable var) {
 		if (ownedTempVars == null)
-			ownedTempVars = new ArrayList<AbstractFVariable>();
+			ownedTempVars = new ArrayList<FAbstractVariable>();
 		ownedTempVars.add(var);
 	}
 	
@@ -3722,7 +3722,7 @@ aspect TempVariables {
 	 * Mark all owned temp variables for removal.
 	 */
 	public void FAbstractEquation.markTempVarsForRemoval() {
-		for (AbstractFVariable var : ownedTempVariables())
+		for (FAbstractVariable var : ownedTempVariables())
 			var.markedForRemoval = true;
 	}
 	
@@ -3755,7 +3755,7 @@ aspect TempVariables {
 	/**
 	 * Flag for removing variable.
 	 */
-	public boolean AbstractFVariable.markedForRemoval = false;
+	public boolean FAbstractVariable.markedForRemoval = false;
 	
 	/**
 	 * Remove all variables with <code>markedForRemoval == true</code>.
@@ -3883,7 +3883,7 @@ aspect IfEquations {
 	
 	private boolean FIfEquation.rewriteIfEquation = false;
 	
-	syn Map<AbstractFVariable,FEquation> FIfWhenElseEquation.assignmentEquationMap() {
+	syn Map<FAbstractVariable,FEquation> FIfWhenElseEquation.assignmentEquationMap() {
 		calcAssignmentEquations();
 		return assignmentEquationMap;
 	}
@@ -3898,19 +3898,19 @@ aspect IfEquations {
 		return nonFEquationSet;
 	}
 	
-	private Map<AbstractFVariable,FEquation> FIfWhenElseEquation.assignmentEquationMap = null;
+	private Map<FAbstractVariable,FEquation> FIfWhenElseEquation.assignmentEquationMap = null;
 	private Set<FEquation> FIfWhenElseEquation.nonAssignmentEquationSet = null;
 	private Set<FAbstractEquation> FIfWhenElseEquation.nonFEquationSet = null;
 	
 	private void FIfWhenElseEquation.calcAssignmentEquations() {
 		if (assignmentEquationMap == null || nonAssignmentEquationSet == null || nonFEquationSet == null) {
-			assignmentEquationMap = new HashMap<AbstractFVariable,FEquation>();
+			assignmentEquationMap = new HashMap<FAbstractVariable,FEquation>();
 			nonAssignmentEquationSet = new HashSet<FEquation>();
 			nonFEquationSet = new HashSet<FAbstractEquation>();
 			for (FAbstractEquation eqn : getFAbstractEquations()) {
 				if (eqn instanceof FEquation) {
 					FEquation feqn = (FEquation) eqn;
-					AbstractFVariable var = feqn.assignedFV();
+					FAbstractVariable var = feqn.assignedFV();
 					if (var != null && !assignmentEquationMap.containsKey(var))
 						assignmentEquationMap.put(var, feqn);
 					else
@@ -3996,7 +3996,7 @@ aspect IfEquations {
 	}
 	
 	protected static ArrayList<FEquation> FIfEquation.unmatchedEquations(
-			FIfWhenElseEquation ifEqn, Set<AbstractFVariable> varsInBoth) {
+			FIfWhenElseEquation ifEqn, Set<FAbstractVariable> varsInBoth) {
 		Set<FEquation> unMatchedAssign = 
 			valuesOfUnNamedKeys(ifEqn.assignmentEquationMap(), varsInBoth);
 		unMatchedAssign.addAll(ifEqn.nonAssignmentEquationSet());
@@ -4006,9 +4006,9 @@ aspect IfEquations {
 	syn List FIfEquation.createIfExpEquationList() {
 		List<FAbstractEquation> l = new List<FAbstractEquation>();
 		
-		Set<AbstractFVariable> varsInBoth = 
+		Set<FAbstractVariable> varsInBoth = 
 			intersection(assignmentEquationMap().keySet(), getElse().assignmentEquationMap().keySet()); 
-		for (AbstractFVariable v : toSortedList(varsInBoth, AbstractFVariable.NAME_COMPARATOR)) {
+		for (FAbstractVariable v : toSortedList(varsInBoth, FAbstractVariable.NAME_COMPARATOR)) {
 			FExp left = assignmentEquationMap().get(v).assignmentExp();
 			FExp right = getElse().assignmentEquationMap().get(v).assignmentExp();
 			FExp ifExp = new FIfExp(getTest().fullCopy(), left, right);
@@ -4257,7 +4257,7 @@ aspect ParameterSorting {
 	/**
 	 * Remove binding expression of this variable.
 	 */
-	public void AbstractFVariable.removeBindingExp() {}
+	public void FAbstractVariable.removeBindingExp() {}
 	
 	public void FVariable.removeBindingExp() {
 		if (hasBindingExp())
@@ -4303,7 +4303,7 @@ aspect DummyDerivatives {
 		}
 	}
 	
-	syn boolean AbstractFVariable.isDummyDer() {
+	syn boolean FAbstractVariable.isDummyDer() {
 		return false;
 	}
 	
@@ -5255,7 +5255,7 @@ aspect FunctionInlining {
 	}
 
 	public void FInitArrayStmt.inline(FunctionInliner fi) {
-		AbstractFVariable fv = getFIdUseExp().myFV();
+		FAbstractVariable fv = getFIdUseExp().myFV();
 		fi.setSizeOf(fv.name(), fv.size().copyAndReplaceReferences(fi, getFIdUseExp()));
 		fv.flushCache();
 	}

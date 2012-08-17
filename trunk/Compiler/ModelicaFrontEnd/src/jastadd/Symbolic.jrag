@@ -755,7 +755,7 @@ aspect Derivatives {
 			boolean isIndependent = true;
 			FQName fqn = new FQName(name);
 			FIdUseExp fid = (FIdUseExp)dynamicFExp(fqn.createFIdUseExp());
-			AbstractFVariable fv = fid.myFV();
+			FAbstractVariable fv = fid.myFV();
 			if (fv!=null) {
 				HashSet<FVariable> s = new HashSet<FVariable>();
 				s.add((FVariable)fv);

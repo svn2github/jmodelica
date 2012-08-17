@@ -121,10 +121,10 @@ aspect FlatVariability {
 	eq FFunctionCallEquation.isDiscrete() = variability().discreteVariability();
 	eq FFunctionCallEquation.isContinuous() = variability().continuousVariability();
 	
-	syn boolean AbstractFVariable.isConstant()   = false;
-    syn boolean AbstractFVariable.isParameter()  = false;
-    syn boolean AbstractFVariable.isDiscrete()   = false;
-    syn boolean AbstractFVariable.isContinuous() = false;
+	syn boolean FAbstractVariable.isConstant()   = false;
+    syn boolean FAbstractVariable.isParameter()  = false;
+    syn boolean FAbstractVariable.isDiscrete()   = false;
+    syn boolean FAbstractVariable.isContinuous() = false;
 	
 	eq FVariable.isConstant()   = variability().constantVariability();
     eq FVariable.isParameter()  = variability().parameterVariability();
@@ -241,13 +241,13 @@ aspect FlatVariability {
 	 * 
 	 * Only works in flat tree.
 	 */
-	syn AbstractFVariable FAbstractEquation.assignedFV() = null;
+	syn FAbstractVariable FAbstractEquation.assignedFV() = null;
 	eq FEquation.assignedFV()                            = getLeft().assignedFV();
 	
 	/**
 	 * If this is an flat tree access, return set containing accessed var, otherwise empty set.
 	 */
-	syn AbstractFVariable FExp.assignedFV() = null;
+	syn FAbstractVariable FExp.assignedFV() = null;
 	eq FIdUseExp.assignedFV()               = myFV();
 	
 	
@@ -322,7 +322,7 @@ aspect FlatVariability {
 	eq FIdUseExp.expVariability() = getFIdUse().variability();
 	
 	syn FTypePrefixVariability FIdUse.variability() {
-		AbstractFVariable variable = myFV();
+		FAbstractVariable variable = myFV();
 		if (variable instanceof FVariable) {
 			FVariable fVariable = (FVariable) variable;
 			return(fVariable.variability());

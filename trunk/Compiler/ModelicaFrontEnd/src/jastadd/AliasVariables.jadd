@@ -28,7 +28,7 @@ aspect AliasVariables {
 	 * 
 	 * @return True if alias, else false.
 	 */
-	syn lazy boolean AbstractFVariable.isAlias() = false; 
+	syn lazy boolean FAbstractVariable.isAlias() = false; 
 	eq FVariable.isAlias() = aliasVariable() != null; 
 	
 	/**
@@ -57,7 +57,7 @@ aspect AliasVariables {
 	 * 
 	 * @return The corresponding iteration variable if alias, otherwise null.
 	 */
-	syn FVariable AbstractFVariable.alias() = null;
+	syn FVariable FAbstractVariable.alias() = null;
 	
 	eq FVariable.alias() {
 		if (aliasVariable() == null) {
@@ -72,7 +72,7 @@ aspect AliasVariables {
 	 * 
 	 * @return True if negated alias, otherwise false.
 	 */
-	syn boolean AbstractFVariable.isNegated() = false;
+	syn boolean FAbstractVariable.isNegated() = false;
 	
 	eq FVariable.isNegated(){
 		AliasManager aliasManager = myFClass().getAliasManager();

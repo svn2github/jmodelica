@@ -423,7 +423,7 @@ aspect Scalarization {
 	 * \brief A node that can look up variable names in the flat tree.
 	 */
 	public interface FlatLookupNode {
-		public AbstractFVariable lookupFV(FQName fqn);
+		public FAbstractVariable lookupFV(FQName fqn);
 	}
 	public class FFunctionVariable implements FlatLookupNode {}
 	public class FExp implements FlatLookupNode {}
@@ -614,7 +614,7 @@ aspect Scalarization {
 	 * \brief Scalarize an assignment to an array of unknown size and put the resulting statements in 
 	 *        the list of statements.
 	 */
-	public void AbstractFVariable.scalarizeUnknownArrayAssignment(List<FFunctionVariable> vars, 
+	public void FAbstractVariable.scalarizeUnknownArrayAssignment(List<FFunctionVariable> vars, 
 			List<FStatement> stmts, Map<String,FExp> indexMap, FExp exp) {}
 
 	public void FFunctionArray.scalarizeUnknownArrayAssignment(List<FFunctionVariable> vars, 
@@ -827,7 +827,7 @@ aspect Scalarization {
 	/**
 	 * \brief Create a new FIdUse of this variable with uses of <code>names</code> as array subscripts.
 	 */
-	public FIdUse AbstractFVariable.createUseWithNamedSubscripts(ForNames names) {
+	public FIdUse FAbstractVariable.createUseWithNamedSubscripts(ForNames names) {
 		FIdUse use = new FIdUse(name());
 		use.getFQName().setLastFArraySubscripts(names.createFArraySubscripts());
 		return use;
@@ -1533,7 +1533,7 @@ aspect Scalarization {
 		FQName fqn = name.fullCopy();
 		fqn.scalarized = true;
 		
-		AbstractFVariable var = createTempFVariable(fqn, param);
+		FAbstractVariable var = createTempFVariable(fqn, param);
 		vars.add(var);
 		if (eqn != null)
 			eqn.addOwnedTempVariable(var);

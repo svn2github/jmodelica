@@ -455,7 +455,7 @@ aspect Flattening {
 	 * 
 	 * @return the expression, possibly rewritten
 	 */
-	public FExp AbstractFVariable.affixExpression(FExp exp) {
+	public FExp FAbstractVariable.affixExpression(FExp exp) {
 		// TODO: need better way of including exp in tree
 		exp.parent = this;
 		exp.updateFUnknownSizeExps(this);
@@ -465,17 +465,17 @@ aspect Flattening {
 	/**
 	 * \brief Change the variable of any FUnknownSizeExp to the given variable.
 	 */
-	public void FExp.updateFUnknownSizeExps(AbstractFVariable var) {
+	public void FExp.updateFUnknownSizeExps(FAbstractVariable var) {
 	}
 	
-	public void FUnknownSizeExp.updateFUnknownSizeExps(AbstractFVariable var) {
+	public void FUnknownSizeExp.updateFUnknownSizeExps(FAbstractVariable var) {
 		setVariable(var);
 	}
 	
 	/**
 	 * \brief Change the variable of any FUnknownSizeExp in size to the given variable.
 	 */
-	public void FType.updateFUnknownSizeExps(AbstractFVariable var) {
+	public void FType.updateFUnknownSizeExps(FAbstractVariable var) {
 		if (getSize() != Size.SCALAR) {
 			Size s = getSize().clone();
 			s.updateFUnknownSizeExps(var);
@@ -486,9 +486,9 @@ aspect Flattening {
 	/**
 	 * \brief Change the variable of any FUnknownSizeExp dimension to the given variable.
 	 */
-	public void Size.updateFUnknownSizeExps(AbstractFVariable var) {}
+	public void Size.updateFUnknownSizeExps(FAbstractVariable var) {}
 	
-	public void MutableSize.updateFUnknownSizeExps(AbstractFVariable var) {
+	public void MutableSize.updateFUnknownSizeExps(FAbstractVariable var) {
 		for (int i = 0; i < exps.length; i++) 
 			if (exps[i] != null) 
 				exps[i] = var.affixExpression(exps[i].fullCopy());

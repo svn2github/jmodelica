@@ -322,7 +322,7 @@ aspect FlatTypeCheck {
   eq FIdUse.getChild().isInstComponentSize()                            = false;
   eq FExp.getChild().isInstComponentSize()                              = false;
   eq FInstAccessExp.getChild().isInstComponentSize()                    = isInstComponentSize();
-  eq AbstractFVariable.getChild().isInstComponentSize()                 = false;
+  eq FAbstractVariable.getChild().isInstComponentSize()                 = false;
   eq FAbstractEquation.getChild().isInstComponentSize()                 = false;
   eq InstNode.getChild().isInstComponentSize()                          = false;
   eq FlatRoot.getChild().isInstComponentSize()                          = false;

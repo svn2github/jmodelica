@@ -181,7 +181,7 @@ aspect CCodeGen {
 		str.print(toString_C(p));
 	}
 	
-	public String AbstractFVariable.genUse_C(Printer p, FArraySubscripts fas, String type) {
+	public String FAbstractVariable.genUse_C(Printer p, FArraySubscripts fas, String type) {
 		return name_C();
 	}
 	
@@ -207,7 +207,7 @@ aspect CCodeGen {
 		return os.toString();
 	}
 	
-	public String AbstractFVariable.genRecordUse_C(Printer p, FQName name, String type) {
+	public String FAbstractVariable.genRecordUse_C(Printer p, FQName name, String type) {
 		FQNamePart part = name.getFQNamePart(0);
 		FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
 		String res = genUse_C(p, fas, C_ARRAY_RECORD);
@@ -415,10 +415,10 @@ aspect CCodeGen {
 	public static final String ASTNode.C_ARRAY_REFERENCE = "ref";
 	public static final String ASTNode.C_ARRAY_VALUE     = "val";
 	
-	syn String AbstractFVariable.funcArrayType(boolean assign) = 
+	syn String FAbstractVariable.funcArrayType(boolean assign) = 
 		isRecord() ? C_ARRAY_RECORD : (assign ? C_ARRAY_REFERENCE : C_ARRAY_VALUE);
 
-	syn lazy String AbstractFVariable.name_C() = null;
+	syn lazy String FAbstractVariable.name_C() = null;
 	eq FVariable.name_C()           = isForIndex() ? 
 										name_C(null, variableIndex() + C_SUFFIX_INDEX) : 
 										name_C(""); 
@@ -435,7 +435,7 @@ aspect CCodeGen {
 		return name_C(prefix, Integer.toString(variableIndex()));
 	}
 	
-	protected String AbstractFVariable.name_C(String prefix, String suffix) {
+	protected String FAbstractVariable.name_C(String prefix, String suffix) {
 		StringBuilder buf = new StringBuilder();
 		if (prefix != null) {
 			buf.append(prefix);
@@ -451,7 +451,7 @@ aspect CCodeGen {
 		isRecord() ? name_C() : name_C(null, C_SUFFIX_RETURN);
 	syn String FFunctionArray.nameReturn_C()    = name_C();
 	
-	syn String AbstractFVariable.type_C() = type().type_C();
+	syn String FAbstractVariable.type_C() = type().type_C();
 	syn String FFunctionCallLeft.type_C() = type().type_C();
 	
 	syn String FType.type_C() = isArray() ? arrayType_C() : scalarType_C();
@@ -968,7 +968,7 @@ aspect CCodeGen {
 	
 	public void FUnknownSizeExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print("jmi_array_size(");
-		AbstractFVariable fv = (AbstractFVariable) getVariable();
+		FAbstractVariable fv = (FAbstractVariable) getVariable();
 		str.print(fv.name_C());
 		str.print(", ");
 		str.print(getDim());
@@ -1101,7 +1101,7 @@ aspect CCodeGen {
 	inh boolean FIntegerLitExp.inFunctionArg();
 	eq FAbstractFunctionCall.getChild().inFunctionArg() = true;
 	eq FArraySubscripts.getChild().inFunctionArg()      = false;
-	eq AbstractFVariable.getChild().inFunctionArg()     = false;
+	eq FAbstractVariable.getChild().inFunctionArg()     = false;
 	eq FAbstractEquation.getChild().inFunctionArg()     = false;
 	eq Root.getChild().inFunctionArg()                  = false;
 	

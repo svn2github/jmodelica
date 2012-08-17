@@ -19,14 +19,14 @@ import java.util.HashMap;
 
 aspect FlatNameBinding {
 	
-	inh AbstractFVariable FIdUse.lookupFV(FQName fqn);
-	inh AbstractFVariable FIdUse.lookupDerFV(FQName fqn);
-	inh AbstractFVariable FExp.lookupFV(FQName fqn);
-	inh AbstractFVariable AbstractFVariable.lookupFV(FQName fqn);
-	inh AbstractFVariable FRecordDecl.lookupFV(FQName fqn);
+	inh FAbstractVariable FIdUse.lookupFV(FQName fqn);
+	inh FAbstractVariable FIdUse.lookupDerFV(FQName fqn);
+	inh FAbstractVariable FExp.lookupFV(FQName fqn);
+	inh FAbstractVariable FAbstractVariable.lookupFV(FQName fqn);
+	inh FAbstractVariable FRecordDecl.lookupFV(FQName fqn);
 	
-	syn AbstractFVariable FIdUse.myFV() = lookupFV(getFQName());
-	syn lazy AbstractFVariable FIdUseExp.myFV() = getFIdUse().myFV();
+	syn FAbstractVariable FIdUse.myFV() = lookupFV(getFQName());
+	syn lazy FAbstractVariable FIdUseExp.myFV() = getFIdUse().myFV();
 	eq FDerExp.myFV() = getFIdUse().lookupDerFV(getFIdUse().getFQName());
 	eq FDummyDerExp.myFV() = getFIdUse().lookupDerFV(getFIdUse().getFQName());
     
@@ -36,10 +36,10 @@ aspect FlatNameBinding {
 	eq FClass.getChild(int index).lookupFV(FQName fqn)    = lookupFV(fqn, false);
 	eq FClass.getChild(int index).lookupDerFV(FQName fqn) = lookupFV(fqn, true);
 	
-	public AbstractFVariable FClass.lookupFV(FQName fqn, boolean der) {
+	public FAbstractVariable FClass.lookupFV(FQName fqn, boolean der) {
 		boolean scalar = fqn.scalarized;
 		fqn.scalarized = scalarized;
-		AbstractFVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, der, true);
+		FAbstractVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, der, true);
 		fqn.scalarized = scalar;
 		return (variable == null) ? unknownFVariable() : variable;
 	}
@@ -47,7 +47,7 @@ aspect FlatNameBinding {
 	private Map<String,FVariable> FFunctionDecl.tempLookupMap = null;
 	
 	eq FFunctionDecl.getChild(int index).lookupFV(FQName fqn) {
-		AbstractFVariable variable = null;
+		FAbstractVariable variable = null;
 		if (tempLookupMap != null)
 			variable = lookupFVFromMap(tempLookupMap, fqn, false, false);
 		if (variable == null)
@@ -56,20 +56,20 @@ aspect FlatNameBinding {
 	}
 
 	eq FRecordDecl.getChild(int index).lookupFV(FQName fqn) {
-		AbstractFVariable variable = lookupFVInRecord(fqn, 0);
+		FAbstractVariable variable = lookupFVInRecord(fqn, 0);
 		return (variable == null) ? lookupFV(fqn) : variable;
 	}
 	
-	public static AbstractFVariable ASTNode.lookupFVFromMap(
-			Map<String, ? extends AbstractFVariable> map, FQName fqn, boolean der, boolean resolve) {
+	public static FAbstractVariable ASTNode.lookupFVFromMap(
+			Map<String, ? extends FAbstractVariable> map, FQName fqn, boolean der, boolean resolve) {
 		String name = fqn.prefixName(0, der, resolve);
-		AbstractFVariable variable = map.get(name);
+		FAbstractVariable variable = map.get(name);
 		int i = fqn.getNumFQNamePart();
 		while (variable == null && i > 1) {
 			i--;
 			// Only last part should have "der()", and it isn't included here
 			String part = fqn.prefixName(i, false, resolve);
-			AbstractFVariable tmp = map.get(part);
+			FAbstractVariable tmp = map.get(part);
 			if (tmp != null) 
 				// TODO: shouldn't we support der here?
 				variable = tmp.lookupFVInRecord(fqn, i);
@@ -77,23 +77,23 @@ aspect FlatNameBinding {
 		return variable;
 	}
 	
-	public AbstractFVariable FRecordDecl.lookupFVInRecord(FQName fqn, int part) {
-		AbstractFVariable res = null;
+	public FAbstractVariable FRecordDecl.lookupFVInRecord(FQName fqn, int part) {
+		FAbstractVariable res = null;
 		for (FVariable fv : getFVariables())
 			if (fv.name().equals(fqn.getFQNamePart(part).getName()))
 				res = fv;
 		return res;
 	}
 	
-	public AbstractFVariable AbstractFVariable.lookupFVInRecord(FQName fqn, int part) {
+	public FAbstractVariable FAbstractVariable.lookupFVInRecord(FQName fqn, int part) {
 		FRecordDecl rec = myFRecordDecl();
-		AbstractFVariable res = (rec != null) ? rec.lookupFVInRecord(fqn, part) : null;
+		FAbstractVariable res = (rec != null) ? rec.lookupFVInRecord(fqn, part) : null;
 		if (part < fqn.getNumFQNamePart() - 1 && res != null)
 			res = res.lookupFVInRecord(fqn, part + 1);
 		return res;
 	}
 	
-	inh AbstractFVariable FForClauseE.lookupFV(FQName fqn);
+	inh FAbstractVariable FForClauseE.lookupFV(FQName fqn);
 	eq FForClauseE.getChild().lookupFV(FQName fqn) {
 		String name = fqn.name();
 		for (FForIndex fi : getFForIndexs()) {
@@ -104,7 +104,7 @@ aspect FlatNameBinding {
 		return lookupFV(fqn);
 	}
 	
-	inh AbstractFVariable FForStmt.lookupFV(FQName fqn);
+	inh FAbstractVariable FForStmt.lookupFV(FQName fqn);
 	eq FForStmt.getChild().lookupFV(FQName fqn) {
 		String name = fqn.name();
 		FVariable index = getIndex().getFVariable();
@@ -113,7 +113,7 @@ aspect FlatNameBinding {
 		return lookupFV(fqn);
 	}
 	
-	inh AbstractFVariable FIterExp.lookupFV(FQName fqn);
+	inh FAbstractVariable FIterExp.lookupFV(FQName fqn);
 	eq FIterExp.getChild().lookupFV(FQName fqn) {
 		String name = fqn.name();
 		for (CommonForIndex fi : getForIndexs()) {
@@ -127,7 +127,7 @@ aspect FlatNameBinding {
 	}
 	
 	/*
-	inh AbstractFVariable FDerExp.lookupFDV(String name);
+	inh FAbstractVariable FDerExp.lookupFDV(String name);
 	eq Root.getChild().lookupFDV(String name) = null;
 	eq FClass.getChild(int index).lookupFDV(String name) {
 		FVariable variable = (FDerivativeVariable) 
@@ -167,7 +167,7 @@ aspect FlatNameBinding {
 	syn boolean FIdUseInstAccess.isForIndex()  = getInstAccess().isForIndex();
 	syn boolean FInstAccessExp.isForIndex()    = getInstAccess().isForIndex();
 	syn boolean InstAccess.isForIndex()        = myInstComponentDecl().isForIndex();
-	syn boolean AbstractFVariable.isForIndex() = false;
+	syn boolean FAbstractVariable.isForIndex() = false;
 	inh boolean FVariable.isForIndex();
 	inh boolean InstComponentDecl.isForIndex();
 	eq FForIndex.getFVariable().isForIndex()        = true;
@@ -179,12 +179,12 @@ aspect FlatNameBinding {
 
 aspect ParameterEquations {
 
-	syn boolean AbstractFVariable.hasBindingExp() = false;
+	syn boolean FAbstractVariable.hasBindingExp() = false;
 	
-	syn boolean AbstractFVariable.hasParameterEquation() = 
+	syn boolean FAbstractVariable.hasParameterEquation() = 
 		!hasBindingExp() && parameterEquation() != null;
 	
-	inh lazy FAbstractEquation AbstractFVariable.parameterEquation();
+	inh lazy FAbstractEquation FAbstractVariable.parameterEquation();
 	eq FClass.getFVariable(int i).parameterEquation()     = 
 		parameterEquationsMap().get(getFVariable(i));
 	eq FClass.getAliasVariable(int i).parameterEquation() = 
@@ -193,37 +193,37 @@ aspect ParameterEquations {
 	eq FFunctionDecl.getChild().parameterEquation()       = null;
 	eq FRecordDecl.getChild().parameterEquation()         = null;
 	
-	syn lazy Map<AbstractFVariable,FAbstractEquation> FClass.parameterEquationsMap() {
-		Map<AbstractFVariable,FAbstractEquation> map = new HashMap<AbstractFVariable,FAbstractEquation>();
+	syn lazy Map<FAbstractVariable,FAbstractEquation> FClass.parameterEquationsMap() {
+		Map<FAbstractVariable,FAbstractEquation> map = new HashMap<FAbstractVariable,FAbstractEquation>();
 		for (FAbstractEquation equ : getFParameterEquations())
 			equ.addToParameterEquationsMap(map);
 		return map;
 	}
 	
 	public void FAbstractEquation.addToParameterEquationsMap(
-			Map<AbstractFVariable,FAbstractEquation> map) {}
+			Map<FAbstractVariable,FAbstractEquation> map) {}
 	
 	public void FEquation.addToParameterEquationsMap(
-			Map<AbstractFVariable,FAbstractEquation> map) {
+			Map<FAbstractVariable,FAbstractEquation> map) {
 		getLeft().addToParameterEquationsMap(map, this);
 	}
 	
 	public void FFunctionCallEquation.addToParameterEquationsMap(
-			Map<AbstractFVariable,FAbstractEquation> map) {
+			Map<FAbstractVariable,FAbstractEquation> map) {
 		for (FFunctionCallLeft left : getLefts())
 			if (left.hasFExp())
 				left.getFExp().addToParameterEquationsMap(map, this);
 	}
 	
 	public void FExp.addToParameterEquationsMap(
-			Map<AbstractFVariable,FAbstractEquation> map, FAbstractEquation equ) {
+			Map<FAbstractVariable,FAbstractEquation> map, FAbstractEquation equ) {
 		for (FExp e : childFExps())
 			e.addToParameterEquationsMap(map, equ);
 	}
 	
 	public void FIdUseExp.addToParameterEquationsMap(
-			Map<AbstractFVariable,FAbstractEquation> map, FAbstractEquation equ) {
-		AbstractFVariable fv = getFIdUse().myFV();
+			Map<FAbstractVariable,FAbstractEquation> map, FAbstractEquation equ) {
+		FAbstractVariable fv = getFIdUse().myFV();
 		if (!fv.isUnknown())
 			map.put(fv, equ);
 	}
@@ -274,9 +274,9 @@ aspect FlatRecordBinding {
 	 * 
 	 * Access is assumed to be refering to a member of a record and be in a function.
 	 */
-	syn AbstractFVariable FIdUse.myRecordFV() = lookupFV(getFQName().copyFirstPrefix());
+	syn FAbstractVariable FIdUse.myRecordFV() = lookupFV(getFQName().copyFirstPrefix());
 	
-	syn lazy FRecordDecl AbstractFVariable.myFRecordDecl() = null;
+	syn lazy FRecordDecl FAbstractVariable.myFRecordDecl() = null;
 	eq FRecordVariable.myFRecordDecl()   = lookupFRec(getRecord().name());
 	eq FFunctionVariable.myFRecordDecl() = type().myFRecordDecl();
 	
@@ -297,10 +297,10 @@ aspect FlatRecordBinding {
 		return null;
 	}
 	
-	syn AbstractFVariable FRecordDecl.findComponent(FQName name) {
+	syn FAbstractVariable FRecordDecl.findComponent(FQName name) {
 		UnknownFVariable unknown = unknownFVariable();
 		FRecordDecl rec = this;
-		AbstractFVariable res = unknown;
+		FAbstractVariable res = unknown;
 		for (FQNamePart p : name.getFQNameParts()) {
 			if (rec == null)
 				return unknown;
@@ -322,9 +322,9 @@ aspect FlatRecordBinding {
 
 aspect FlatEnumBinding {
 	
-	syn AbstractFVariable FIdUse.myEnumFV() = lookupFV(getFQName().copyPrefix());
+	syn FAbstractVariable FIdUse.myEnumFV() = lookupFV(getFQName().copyPrefix());
 	
-	syn lazy FEnumDecl AbstractFVariable.myFEnumDecl() = null;
+	syn lazy FEnumDecl FAbstractVariable.myFEnumDecl() = null;
 	eq FEnumVariable.myFEnumDecl()     = lookupFEnum(getEnum().name());
 	eq FFunctionVariable.myFEnumDecl() = type().myFEnumDecl();
 	eq FEnumLiteral.myFEnumDecl()      = retrieveFEnumDecl();
@@ -352,10 +352,10 @@ aspect FlatEnumBinding {
 		return null;
 	}
 	/*
-	syn AbstractFVariable FEnumDecl.findComponent(FQName name) {
+	syn FAbstractVariable FEnumDecl.findComponent(FQName name) {
 		UnknownFVariable unknown = unknownFVariable();
 		FEnumDecl rec = this;
-		AbstractFVariable res = unknown;
+		FAbstractVariable res = unknown;
 		for (FQNamePart p : name.getFQNameParts()) {
 			if (rec == null)
 				return unknown;
@@ -377,9 +377,9 @@ aspect FlatEnumBinding {
 
 aspect FlatPreBinding {
 
-	inh AbstractFVariable FIdUse.lookupPreFV(FQName fqn);	
-	inh AbstractFVariable FExp.lookupPreFV(FQName fqn);	
-	syn AbstractFVariable FPreExp.myFV() {
+	inh FAbstractVariable FIdUse.lookupPreFV(FQName fqn);	
+	inh FAbstractVariable FExp.lookupPreFV(FQName fqn);	
+	syn FAbstractVariable FPreExp.myFV() {
 		if (getFExp() instanceof FIdUseExp) {
 		    //System.out.println("FPreExp.myFV(): " + name());
 			return ((FIdUseExp)getFExp()).lookupPreFV(((FIdUseExp)getFExp()).getFIdUse().getFQName());
@@ -392,18 +392,18 @@ aspect FlatPreBinding {
 
 	eq FClass.getChild(int index).lookupPreFV(FQName fqn) = lookupPreFV(fqn);
 	
-	public AbstractFVariable FClass.lookupPreFV(FQName fqn) {
+	public FAbstractVariable FClass.lookupPreFV(FQName fqn) {
 		boolean scalar = fqn.scalarized;
 		fqn.scalarized = scalarized;
-		AbstractFVariable variable = lookupPreFVFromMap(fullyQualifiedVariablesMap(), fqn);
+		FAbstractVariable variable = lookupPreFVFromMap(fullyQualifiedVariablesMap(), fqn);
 		//System.out.println("FClass.lookupPreFV(): " + fqn.name());
 		fqn.scalarized = scalar;
 		return (variable == null) ? unknownFVariable() : variable;
 	}
 
-	public static AbstractFVariable ASTNode.lookupPreFVFromMap(
-		Map<String, ? extends AbstractFVariable> map, FQName fqn) {
-		AbstractFVariable variable = map.get(fqn.preName());
+	public static FAbstractVariable ASTNode.lookupPreFVFromMap(
+		Map<String, ? extends FAbstractVariable> map, FQName fqn) {
+		FAbstractVariable variable = map.get(fqn.preName());
 		//System.out.println(map.toString());
 		return variable;
 	}
@@ -412,13 +412,13 @@ aspect FlatPreBinding {
 
 aspect FlatHDerBinding {
 
-	inh AbstractFVariable FIdUse.lookupHDerFV(FQName fqn, int order);	
-	inh AbstractFVariable FExp.lookupHDerFV(FQName fqn, int order);	
-	syn AbstractFVariable FHDerExp.myFV() {
+	inh FAbstractVariable FIdUse.lookupHDerFV(FQName fqn, int order);	
+	inh FAbstractVariable FExp.lookupHDerFV(FQName fqn, int order);	
+	syn FAbstractVariable FHDerExp.myFV() {
 		return getFIdUse().lookupHDerFV(getFIdUse().getFQName(),getOrder());
     }
 
-	syn AbstractFVariable FHDummyDerExp.myFV() {
+	syn FAbstractVariable FHDummyDerExp.myFV() {
 		return getFIdUse().lookupHDerFV(getFIdUse().getFQName(),getOrder());
     }
     
@@ -426,19 +426,19 @@ aspect FlatHDerBinding {
 
 	eq FClass.getChild(int index).lookupHDerFV(FQName fqn, int order) = lookupHDerFV(fqn, order);
 	
-	public AbstractFVariable FClass.lookupHDerFV(FQName fqn, int order) {
+	public FAbstractVariable FClass.lookupHDerFV(FQName fqn, int order) {
 		boolean scalar = fqn.scalarized;
 		fqn.scalarized = scalarized;
-		AbstractFVariable variable = lookupHDerFVFromMap(fullyQualifiedVariablesMap(), fqn, order);
+		FAbstractVariable variable = lookupHDerFVFromMap(fullyQualifiedVariablesMap(), fqn, order);
 		//System.out.println("FClass.lookupPreFV(): " + fqn.name());
 		fqn.scalarized = scalar;
 		return (variable == null) ? unknownFVariable() : variable;
 	}
 
-	public static AbstractFVariable ASTNode.lookupHDerFVFromMap(
-		Map<String, ? extends AbstractFVariable> map, FQName fqn, int order) {
+	public static FAbstractVariable ASTNode.lookupHDerFVFromMap(
+		Map<String, ? extends FAbstractVariable> map, FQName fqn, int order) {
 		String[] str = fqn.derName().split("\\)");
-		AbstractFVariable variable = map.get(str[0] + "," + order + ")");
+		FAbstractVariable variable = map.get(str[0] + "," + order + ")");
 		//System.out.println(map.toString());
 		return variable;
 	}
@@ -452,7 +452,7 @@ aspect UnknownFVariables {
 	syn UnknownFVariable ASTNode.unknownFVariable() = root().unknownFVariable();
 	eq FlatRoot.unknownFVariable() = getFClass().getUnknownFVariable();
 
-	syn boolean AbstractFVariable.isUnknown() = false;
+	syn boolean FAbstractVariable.isUnknown() = false;
 	eq UnknownFVariable.isUnknown() = true;
 	   
 }
