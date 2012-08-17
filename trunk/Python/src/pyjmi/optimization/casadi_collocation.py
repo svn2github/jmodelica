@@ -730,11 +730,14 @@ class LocalDAECollocator(CasadiCollocator):
         or eliminating the derivative variables.
         """
         collocation = {}
+        dx_i_k = casadi.ssym("dx_i_k", self.model.get_n_x())
         x_i = casadi.ssym("x_i", self.model.get_n_x(), self.n_cp + 1)
         der_vals_k = casadi.ssym("der_vals[k]", self.model.get_n_x(),
                                  self.n_cp + 1)
         h_i = casadi.ssym("h_i")
         collocation['coll_der'] = casadi.sumCols(x_i * der_vals_k) / h_i
+        collocation['coll_eq'] = casadi.sumCols(x_i * der_vals_k) - h_i*dx_i_k
+        collocation['dx_i_k'] = dx_i_k
         collocation['x_i'] = x_i
         collocation['der_vals_k'] = der_vals_k
         collocation['h_i'] = h_i
@@ -1203,6 +1206,8 @@ class LocalDAECollocator(CasadiCollocator):
             n_var = copy.copy(self._n_var)
             is_variant = {}
             variant_var = casadi.SXMatrix(0, 1)
+            n_variant_x = 0
+            n_variant_dx = 0
             variant_sf = {}
             invariant_var = casadi.SXMatrix(0, 1)
             invariant_d = []
@@ -1232,16 +1237,15 @@ class LocalDAECollocator(CasadiCollocator):
                         values[i] = {}
                         for k in time_points[i]:
                             tp = time_points[i][k]
-                            val = nom_traj[vt][var_index].eval(tp)
+                            val = float(nom_traj[vt][var_index].eval(tp))
                             values[i][k] = val
                             if val < traj_min:
                                 traj_min = val
-                            elif val > traj_max:
+                            if val > traj_max:
                                 traj_max = val
                     variant = True
                     if (traj_min < 0 and traj_max > 0 or
-                        traj_min == 0 or traj_max == 0 or
-                        False): # Close to zero?!
+                        traj_min == 0 or traj_max == 0):
                         variant = False
                     if variant:
                         traj_abs = N.abs([traj_min, traj_max])
@@ -1257,6 +1261,8 @@ class LocalDAECollocator(CasadiCollocator):
                             is_variant[vr] = True
                             vr_sf_map[vr] = variant_var.numel()
                             variant_var.append(var.der())
+                            n_variant_x += 1
+                            n_variant_dx += 1
                         vr = var.getValueReference()
                         vr_sf_map[vr] = variant_var.numel()
                         variant_var.append(var.var())
@@ -1273,10 +1279,17 @@ class LocalDAECollocator(CasadiCollocator):
                             variant_timed_sf.append(N.abs(values[i][k]))
                     else:
                         is_variant[vr] = False
-                        d = traj_max - traj_min
-                        e = traj_min
+                        if N.allclose(traj_max, traj_min):
+                            if N.allclose(traj_max, 0.):
+                                d = 1.
+                            else:
+                                d = traj_max
+                            e = 0.
+                        else:
+                            d = traj_max - traj_min
+                            e = traj_min
                         if vt == "x": # Inappropriate treatment of derivatives!
-                            name = convert_casadi_der_name(str(var))
+                            name = convert_casadi_der_name(str(var.der()))
                             vr = self.model.xmldoc.get_value_reference(name)
                             is_variant[vr] = False
                             vr_sf_map[vr] = invariant_var.numel()
@@ -1296,9 +1309,12 @@ class LocalDAECollocator(CasadiCollocator):
         # Create collocation and DAE functions
         sym_input = self._sym_input
         sym_input_elim_der = self._sym_input_elim_der
+        dx_i_k = self._collocation['dx_i_k']
         x_i = self._collocation['x_i']
         der_vals_k = self._collocation['der_vals_k']
         h_i = self._collocation['h_i']
+        coll_eq = self._collocation['coll_eq']
+        coll_der = self._collocation['coll_der']
         if self.nominal_traj is None:
             self._eliminate_der_var()
             initial_fcn = casadi.SXFunction([sym_input], [self.initial])
@@ -1314,11 +1330,9 @@ class LocalDAECollocator(CasadiCollocator):
                 ode_fcn_t0.init()
                 alg_fcn_t0.init()
             else:
-                dx_i_k = casadi.ssym("dx_i_k", self.model.get_n_x())
-                coll_eq = casadi.SXFunction(
-                        [x_i, der_vals_k, h_i, dx_i_k],
-                        [casadi.sumCols(x_i * der_vals_k) - h_i * dx_i_k])
-                coll_eq.init()
+                coll_eq_fcn = casadi.SXFunction([x_i, der_vals_k, h_i, dx_i_k],
+                                                [coll_eq])
+                coll_eq_fcn.init()
                 ode_fcn = casadi.SXFunction([sym_input], [self.ode])
                 alg_fcn = casadi.SXFunction([sym_input], [self.alg])
         else:
@@ -1341,7 +1355,61 @@ class LocalDAECollocator(CasadiCollocator):
                                                    scaled_var)
             [self.initial, self.ode, self.alg, self.path, self.point,
              self.mterm, self.lterm] = scaled_expressions
-            self._eliminate_der_var()
+            
+            # Scale variables in collocation equations
+            if self.eliminate_der_var:
+                self._eliminate_der_var()
+            else:
+                x_i_sf = casadi.ssym("x_i_sf", (self.n_cp + 1) * n_variant_x)
+                dx_i_k_sf = casadi.ssym("dx_i_k_sf", n_variant_dx)
+                variant_x_i = casadi.SXMatrix(0, 1)
+                variant_dx_i_k = casadi.SXMatrix(0, 1)
+                invariant_x_i = casadi.SXMatrix(0, 1)
+                invariant_dx_i_k = casadi.SXMatrix(0, 1)
+                invariant_x_i_d = []
+                invariant_dx_i_k_d = []
+                invariant_x_i_e = []
+                invariant_dx_i_k_e = []
+                for var in var_vectors['x']:
+                    x_vr = var.getValueReference()
+                    
+                    # Inappropriate treatment of derivatives!
+                    dx_name = convert_casadi_der_name(str(var.der()))
+                    dx_vr = self.model.xmldoc.get_value_reference(name)
+                    
+                    (ind, _) = vr_map[x_vr]
+                    if is_variant[x_vr]:
+                        x_i_temp = x_i[ind, :].reshape([self.n_cp + 1, 1])
+                        variant_x_i.append(x_i_temp)
+                        variant_dx_i_k.append(dx_i_k[ind])
+                    else:
+                        x_i_temp = x_i[ind, :].reshape([self.n_cp + 1, 1])
+                        invariant_x_i.append(x_i_temp)
+                        invariant_dx_i_k.append(dx_i_k[ind])
+                        x_sf_index = vr_sf_map[x_vr]
+                        dx_sf_index = vr_sf_map[dx_vr]
+                        invariant_dx_i_k_d.append(invariant_d[dx_sf_index])
+                        invariant_dx_i_k_e.append(invariant_e[dx_sf_index])
+                        for k in xrange(self.n_cp + 1):
+                            invariant_x_i_d.append(invariant_d[x_sf_index])
+                            invariant_x_i_e.append(invariant_e[x_sf_index])
+                invariant_x_i_d = N.array(invariant_x_i_d)
+                invariant_dx_i_k_d = N.array(invariant_dx_i_k_d)
+                invariant_x_i_e = N.array(invariant_x_i_e)
+                invariant_dx_i_k_e = N.array(invariant_dx_i_k_e)
+                unscaled_var = casadi.SXMatrix(0, 1)
+                unscaled_var.append(invariant_x_i)
+                unscaled_var.append(invariant_dx_i_k)
+                unscaled_var.append(variant_x_i)
+                unscaled_var.append(variant_dx_i_k)
+                scaled_var = casadi.SXMatrix(0, 1)
+                scaled_var.append(invariant_x_i_d * invariant_x_i +
+                                  invariant_x_i_e)
+                scaled_var.append(invariant_dx_i_k_d * invariant_dx_i_k +
+                                  invariant_dx_i_k_e)
+                scaled_var.append(x_i_sf * variant_x_i)
+                scaled_var.append(dx_i_k_sf * variant_dx_i_k)
+                coll_eq = casadi.substitute(coll_eq, unscaled_var, scaled_var)
             
             # Create functions
             initial_fcn = casadi.SXFunction([sym_input, sym_sf],
@@ -1360,11 +1428,10 @@ class LocalDAECollocator(CasadiCollocator):
                 ode_fcn_t0.init()
                 alg_fcn_t0.init()
             else:
-                dx_i_k = casadi.ssym("dx_i_k", self.model.get_n_x())
-                coll_eq = casadi.SXFunction(
-                        [x_i, der_vals_k, h_i, dx_i_k],
-                        [casadi.sumCols(x_i * der_vals_k) - h_i * dx_i_k])
-                coll_eq.init()
+                coll_eq_fcn = casadi.SXFunction(
+                        [x_i, der_vals_k, h_i, dx_i_k, x_i_sf, dx_i_k_sf],
+                        [coll_eq])
+                coll_eq_fcn.init()
                 ode_fcn = casadi.SXFunction([sym_input, sym_sf], [self.ode])                
                 alg_fcn = casadi.SXFunction([sym_input, sym_sf], [self.alg])
         
@@ -1429,7 +1496,7 @@ class LocalDAECollocator(CasadiCollocator):
                 ode_fcn_t0_eval = ode_fcn_t0.call
                 alg_fcn_t0_eval = alg_fcn_t0.call
             else:
-                coll_eq_eval = coll_eq.call
+                coll_eq_fcn_eval = coll_eq_fcn.call
             g_e_eval = g_e_fcn.call
             g_i_eval = g_i_fcn.call
             G_e_eval = G_e_fcn.call
@@ -1444,7 +1511,7 @@ class LocalDAECollocator(CasadiCollocator):
                 ode_fcn_t0_eval = ode_fcn_t0.eval
                 alg_fcn_t0_eval = alg_fcn_t0.eval
             else:
-                coll_eq_eval = coll_eq.eval
+                coll_eq_fcn_eval = coll_eq_fcn.eval
             g_e_eval = g_e_fcn.eval
             g_i_eval = g_i_fcn.eval
             G_e_eval = G_e_fcn.eval
@@ -1461,6 +1528,45 @@ class LocalDAECollocator(CasadiCollocator):
             x_i = [var_map[i][k]['x'] for k in xrange(self.n_cp + 1)]
             x_i = casadi.horzcat(x_i)
             x_list.append(x_i)
+        
+        # Index collocation equation scale factors
+        if self.nominal_traj is not None:
+            coll_sf = {}
+            for i in xrange(1, self.n_e + 1):
+                coll_sf[i] = {}
+                coll_sf[i]['x'] = []
+                coll_sf[i]['dx'] = {}
+                for k in xrange(1, self.n_cp + 1):
+                    coll_sf[i]['dx'][k] = []
+            for var in var_vectors['x']:
+                x_vr = var.getValueReference()
+                
+                # Inappropriate treatment of derivatives!
+                dx_name = convert_casadi_der_name(str(var.der()))
+                dx_vr = self.model.xmldoc.get_value_reference(dx_name)
+                
+                x_sf_index = vr_sf_map[x_vr]
+                dx_sf_index = vr_sf_map[dx_vr]
+                
+                if is_variant[x_vr]:
+                    # First element
+                    i = 1
+                    coll_sf[i]['x'].append(variant_sf[i][0][x_sf_index])
+                    for k in xrange(1, self.n_cp + 1):
+                        coll_sf[i]['x'].append(
+                                variant_sf[i][k][x_sf_index])
+                        coll_sf[i]['dx'][k].append(
+                                variant_sf[i][k][dx_sf_index])
+                    
+                    # Suceeding elements
+                    for i in xrange(2, self.n_e + 1):
+                        k = self.n_cp + self.is_gauss
+                        coll_sf[i]['x'].append(variant_sf[i-1][k][x_sf_index])
+                        for k in xrange(1, self.n_cp + 1):
+                            coll_sf[i]['x'].append(
+                                    variant_sf[i][k][x_sf_index])
+                            coll_sf[i]['dx'][k].append(
+                                    variant_sf[i][k][dx_sf_index])
         
         # Initial conditions
         i = 1
@@ -1504,10 +1610,13 @@ class LocalDAECollocator(CasadiCollocator):
                                   var_map[i][k]['dx']]
                 if self.nominal_traj is not None:
                     fcn_input.append(variant_sf[i][k])
+                    if not self.eliminate_der_var:
+                        coll_input.append(coll_sf[i]['x'])
+                        coll_input.append(coll_sf[i]['dx'][k])
                 
                 # Evaluate collocation constraints
                 if not self.eliminate_der_var:
-                    [coll_constr] = coll_eq_eval(coll_input)
+                    [coll_constr] = coll_eq_fcn_eval(coll_input)
                     c_e.append(coll_constr)
                 
                 # Evaluate DAE constraints
