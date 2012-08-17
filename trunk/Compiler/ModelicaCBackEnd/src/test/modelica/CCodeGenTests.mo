@@ -6961,15 +6961,15 @@ equation
 end TearingTest1;
 
 model MapTearingTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CCodeGenTestCase(
-         name="MapTearingTest1",
-         description="Test code generation of torn blocks",
-         generate_ode=true,
-         equation_sorting=true,
-         enable_tearing=true,
-         template="$C_dae_blocks_residual_functions$",
-         generatedCode="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+	         name="MapTearingTest1",
+            description="Test code generation of torn blocks",
+            generate_ode=true,
+            equation_sorting=true,
+            enable_tearing=true,
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   JMI_ARRAY_STATIC(tmp_1, 2, 1)
