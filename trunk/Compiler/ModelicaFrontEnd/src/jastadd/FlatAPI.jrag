@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.HashSet;
 import java.util.Set;
@@ -373,11 +374,13 @@ aspect FlatAPI {
 
 	// TODO: Is there such a thing as a dependent constant??
     syn int FClass.numDependentConstants() = dependentConstants().size();
-	coll ArrayList<FVariable> FClass.dependentConstants() 
-	  [new ArrayList<FVariable>()] with add root FlatRoot;
-	FVariable contributes
- 		this when false
-	to FClass.dependentConstants() for myFClass();
+	syn ArrayList<FVariable> FClass.dependentConstants() = new ArrayList<FVariable>(0);
+// This collection would never contain anything, replacing with just an empty list.
+//	coll ArrayList<FVariable> FClass.dependentConstants() 
+//	  [new ArrayList<FVariable>()] with add root FlatRoot;
+//	FVariable contributes
+// 		this when false
+//	to FClass.dependentConstants() for myFClass();
 	
 	syn int FClass.numDependentRealConstants() = dependentRealConstants().size();
 	syn lazy ArrayList<FRealVariable> FClass.dependentRealConstants() =
@@ -550,6 +553,13 @@ aspect FlatAPI {
               }
 	      return set;
 	}
+	
+    syn int FClass.numTempVariables() = tempVariables().size();
+	coll ArrayList<FVariable> FClass.tempVariables() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when isTemporary() && shouldContribute()
+	to FClass.tempVariables() for myFClass();
 	
 	syn int FClass.numRealVariables() = realVariables().size();
 	syn lazy ArrayList<FRealVariable> FClass.realVariables() =
@@ -1465,6 +1475,41 @@ aspect FVariableUses {
 	
 	FIdUseExp contributes this when !(getParent() instanceof FDerExp) to 
 		AbstractFVariable.uses() for myFV();
+	
+	/**
+	 * All uses of this variable that are not the left-hand side of an equation. 
+	 * (Unless the variable has a binding expression, then this is the same as uses().)
+	 */
+	syn lazy Set<FIdUseExp> AbstractFVariable.nonDefiningUses() {
+		Set<FIdUseExp> res = new HashSet<FIdUseExp>();
+		for (FIdUseExp use : uses())
+			if (hasBindingExp() || !use.isLeftHandSide())
+				res.add(use);
+		return res;
+	}
+	
+	/**
+	 * All uses of this variable that are the left-hand side of an equation. 
+	 * (Unless the variable has a binding expression, then this is empty.)
+	 */
+	syn lazy Set<FIdUseExp> AbstractFVariable.definingUses() {
+		if (hasBindingExp()) {
+			return Collections.emptySet();
+		} else {
+			Set<FIdUseExp> res = new HashSet<FIdUseExp>();
+			for (FIdUseExp use : uses())
+				if (use.isLeftHandSide())
+					res.add(use);
+			return res;
+		}
+	}
+	
+	/**
+	 * Check if this is the left hand side of an equation.
+	 */
+	inh boolean FIdUseExp.isLeftHandSide();
+	eq BaseNode.getChild().isLeftHandSide() = false;
+	eq FEquation.getLeft().isLeftHandSide() = true;
 
 	/**
 	 * \brief Collection attribute returning all dependent parameters which

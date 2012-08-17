@@ -3324,19 +3324,126 @@ aspect TransformCanonical {
 	
 	
 	/**
-	 * Remove all unused temporary variables.
+	 * Remove all unused temporary variables, and inline temporaries only used once.
 	 */
 	public void FClass.removeUnusedTemporaries() {
-		// First version, only removing constants
+		ArrayList<FVariable> temps = tempVariables();
+		int oldSize = Integer.MAX_VALUE;
+		while (temps.size() < oldSize) {
+			ArrayList<FVariable> temps2 = new ArrayList<FVariable>(temps.size());
+			for (FVariable fv : temps) {
+				if (fv.shouldEliminateTemporary())
+					fv.inlineUses();
+				else
+					temps2.add(fv);
+			}
+			oldSize = temps.size();
+			temps = temps2;
+		}
+		
 		ArrayList<FVariable> vars = new ArrayList<FVariable>();
 		for (FVariable fv : getFVariables())
-			if (!fv.shouldEliminateTemporary())
+			if (!fv.isTemporary())
 				vars.add(fv);
+		for (FVariable fv : temps)
+			vars.add(fv);
+		
+		removeMarkedEqns();
 		setFVariableList(new List(vars));
 	}
 
+	/**
+	 * Check if this is a temporary variable that should be eliminated.
+	 */
 	syn boolean FVariable.shouldEliminateTemporary() = 
-		isConstant() && isTemporary() && uses().isEmpty();
+		isTemporary() && nonDefiningUses().size() <= 1 && definingUses().size() <= 1;
+	
+	/**
+	 * Inline all non-defining uses of variable, and remove equation defining it.
+	 * 
+	 * NB: This assumes that the variable and any equations marked for removal will be removed.
+	 */
+	public void FVariable.inlineUses() {
+		FExp value;
+		if (hasBindingExp()) {
+			value = getBindingExp();
+		} else {
+			if (definingUses().isEmpty())
+				return;
+			FAbstractEquation eqn = definingUses().iterator().next().myFEquation();
+			if (!(eqn instanceof FEquation)) 
+				return;
+			value = ((FEquation) eqn).getRight();
+			eqn.markedForRemoval = true;
+		}
+		
+		if (nonDefiningUses().isEmpty())
+			value.removeFromUses();
+		value.parent = null;
+		
+		for (FIdUseExp use : nonDefiningUses())
+			use.replaceMe(value.unboundCopy());
+	}
+	
+	/**
+	 * Flag for removing equation.
+	 */
+	public boolean FAbstractEquation.markedForRemoval = false;
+	
+	/**
+	 * Remove all uses in an expression from the uses lists of their respective variables.
+	 * 
+	 * Should only be used to allow iterative algorithms to use updated uses lists while 
+	 * removing expressions. Only valid in flat tree.
+	 */
+	public void FExp.removeFromUses() {
+		for (FExp e : childFExps())
+			e.removeFromUses();
+	}
+	
+	public void FIdUseExp.removeFromUses() {
+		AbstractFVariable var = getFIdUse().myFV();
+		var.uses().remove(this);
+		var.definingUses().remove(this);
+		var.nonDefiningUses().remove(this);
+		for (FQNamePart p : getFIdUse().getFQName().getFQNameParts())
+			if (p.hasFArraySubscripts())
+				for (FSubscript s : p.getFArraySubscripts().getFSubscripts())
+					s.removeFromUses();
+	}
+	
+	/**
+	 * Remove all uses in an expression from the uses lists of their respective variables.
+	 * 
+	 * Should only be used to allow iterative algorithms to use updated uses lists while 
+	 * removing expressions. Only valid in flat tree.
+	 */
+	public void FSubscript.removeFromUses() {}
+	
+	public void FExpSubscript.removeFromUses() {
+		getFExp().removeFromUses();
+	}
+	
+	/**
+	 * Remove all equations with <code>markedForRemoval == true</code>. 
+	 */
+	public void FClass.removeMarkedEqns() {
+		setFInitialEquationList(removeMarkedEqns(getFInitialEquations()));
+		setFParameterEquationList(removeMarkedEqns(getFParameterEquations()));
+		FEquationBlock eb = getFEquationBlock(0);
+		eb.setFAbstractEquationList(removeMarkedEqns(eb.getFAbstractEquations()));
+	}
+	
+	/**
+	 * Create a copy of the list with all equations with <code>markedForRemoval == true</code> removed. 
+	 */
+	private List<FAbstractEquation> FClass.removeMarkedEqns(List<FAbstractEquation> list) {
+		List<FAbstractEquation> res = new List<FAbstractEquation>();
+		for (FAbstractEquation eqn : list)
+			if (!eqn.markedForRemoval)
+				res.add(eqn);
+		return res;
+	}
 	
 	/**
 	 * Remove records that are equivalent, and update uses. 
@@ -4400,18 +4507,20 @@ aspect FunctionInlining {
 	 * Then remove functions that aren't needed anymore.
 	 */
 	public void FClass.functionInliningIfSet() {
-		OptionRegistry opt = root().options;
-		if (opt.getBooleanOption("inline_functions")) {
-			inlineFunctions();
+		String opt = root().options.getStringOption("inline_functions");
+		if (opt != OptionRegistry.Inlining.NONE) {
+			inlineFunctions(opt);
 		}
 	}
 	
 	/**
 	 * Inline all function calls that we can.
 	 */
-	public void FClass.inlineFunctions() {
+	public void FClass.inlineFunctions(String opt) {
 		beginStep("inlineFunctions()");
-		new FunctionInliner(this).inline();
+		new FunctionInliner(this, opt).inline();
+		flushAllRecursive();
+		removeUnusedTemporaries();
 		flushAllRecursive();
 		endStep("inlineFunctions()");
 	}
@@ -4422,6 +4531,8 @@ aspect FunctionInlining {
 	 * Keeps track of all required data and the current state of the inlining process.
 	 */
 	public class FunctionInliner {
+		
+		private String level;
 		
 		private FClass fc;
 		private FFunctionDecl func;
@@ -4434,10 +4545,15 @@ aspect FunctionInlining {
 		private Map<String,Size> sizeMap;
 		
 		/**
-		 * Create a ne FunctionInliner to use with <code>fc</code>.
+		 * Create a new FunctionInliner to use with <code>fc</code>.
+		 * 
+		 * @param fc     the FClass to inline in
+		 * @param level  decides how complex functions to inline, can take values 
+		 *               from OptionRegistry.Inlining
 		 */
-		public FunctionInliner(FClass fc) {
+		public FunctionInliner(FClass fc, String level) {
 			this.fc = fc;
+			this.level = level;
 			vars = fc.getFVariables();
 			normalEqns = fc.getFEquationBlock(0).getFAbstractEquations();
 			paramEqns = fc.getFParameterEquations();
@@ -4459,13 +4575,24 @@ aspect FunctionInlining {
 		 */
 		public void inline(List<FAbstractEquation> eqns) {
 			for (FAbstractEquation eqn : eqns) {
-				while (eqn.hasInlinableFunctions()) {
+				while (eqn.hasInlinableFunctions(this)) {
 					// Note that this will add new equations to eqns, so we depend on
 					// List.iterator() to handle that correctly.
 					eqn = eqn.inlineFunctions(this);
 //					fc.clearFlatNameBinding();
 				}
 			}
+		}
+		
+		/**
+		 * Check if a given function should be inlined under the current inlining level.
+		 */
+		public boolean isInlinable(FFunctionDecl func) {
+			if (level == OptionRegistry.Inlining.ALL)
+				return func.isInlinable();
+			if (level == OptionRegistry.Inlining.TRIVIAL)
+				return func.isTrivialInlinable();
+			return false;
 		}
 		
 		/**
@@ -4712,16 +4839,17 @@ aspect FunctionInlining {
 	/**
 	 * Check if an equation contains any calls to functions that we can inline.
 	 */
-	syn boolean FAbstractEquation.hasInlinableFunctions() = false;
-	eq FFunctionCallEquation.hasInlinableFunctions()      = getCall().hasInlinableFunctions();
-	eq FEquation.hasInlinableFunctions()                  =
-		getLeft().hasInlinableFunctions() || getRight().hasInlinableFunctions();
-	eq FIfEquation.hasInlinableFunctions()                = 
-		super.hasInlinableFunctions() || (hasElse() && getElse().hasInlinableFunctions());
-	eq FWhenEquation.hasInlinableFunctions()              = false;
-	eq FIfWhenElseEquation.hasInlinableFunctions() {
+	syn boolean FAbstractEquation.hasInlinableFunctions(FunctionInliner fi) = false;
+	eq FFunctionCallEquation.hasInlinableFunctions(FunctionInliner fi)      = 
+		getCall().hasInlinableFunctions(fi);
+	eq FEquation.hasInlinableFunctions(FunctionInliner fi)                  =
+		getLeft().hasInlinableFunctions(fi) || getRight().hasInlinableFunctions(fi);
+	eq FIfEquation.hasInlinableFunctions(FunctionInliner fi)                = 
+		super.hasInlinableFunctions(fi) || (hasElse() && getElse().hasInlinableFunctions(fi));
+	eq FWhenEquation.hasInlinableFunctions(FunctionInliner fi)              = false;
+	eq FIfWhenElseEquation.hasInlinableFunctions(FunctionInliner fi) {
 		for (FAbstractEquation eqn : getFAbstractEquations())
-			if (eqn.hasInlinableFunctions())
+			if (eqn.hasInlinableFunctions(fi))
 				return true;
 		return false;
 	}
@@ -4729,25 +4857,25 @@ aspect FunctionInlining {
 	/**
 	 * Check if an expression contains any calls to functions that we can inline.
 	 */
-	syn boolean FExp.hasInlinableFunctions() {
+	syn boolean FExp.hasInlinableFunctions(FunctionInliner fi) {
 		for (FExp exp : childFExps())
-			if (exp.hasInlinableFunctions())
+			if (exp.hasInlinableFunctions(fi))
 				return true;
 		return false;
 	}
-	eq FFunctionCall.hasInlinableFunctions() =
-		isInlinableFunctionCall() || super.hasInlinableFunctions();
-	eq FIdUseExp.hasInlinableFunctions()     = 
-		getFIdUse().getFQName().hasInlinableFunctions();
+	eq FFunctionCall.hasInlinableFunctions(FunctionInliner fi) =
+		isInlinableFunctionCall(fi) || super.hasInlinableFunctions(fi);
+	eq FIdUseExp.hasInlinableFunctions(FunctionInliner fi)     = 
+		getFIdUse().getFQName().hasInlinableFunctions(fi);
 	
 	/**
 	 * Check if any array subscripts contain any calls to functions that we can inline.
 	 */
-	syn boolean FQName.hasInlinableFunctions() {
+	syn boolean FQName.hasInlinableFunctions(FunctionInliner fi) {
 		for (FQNamePart part : getFQNameParts())
 			if (part.hasFArraySubscripts())
 				for (FSubscript sub : part.getFArraySubscripts().getFSubscripts())
-					if (sub.hasInlinableFunctions())
+					if (sub.hasInlinableFunctions(fi))
 						return true;
 		return false;
 	}
@@ -4755,14 +4883,15 @@ aspect FunctionInlining {
 	/**
 	 * Check if an array subscript contains any calls to functions that we can inline.
 	 */
-	syn boolean FSubscript.hasInlinableFunctions() = false;
-	eq FExpSubscript.hasInlinableFunctions()       = getFExp().hasInlinableFunctions();
+	syn boolean FSubscript.hasInlinableFunctions(FunctionInliner fi) = false;
+	eq FExpSubscript.hasInlinableFunctions(FunctionInliner fi)       = 
+		getFExp().hasInlinableFunctions(fi);
 	
 	/**
 	 * Check if an expression is a call to a function that we can inline.
 	 */
-	syn boolean FExp.isInlinableFunctionCall() = false;
-	eq FFunctionCall.isInlinableFunctionCall() = myFFunctionDecl().isInlinable();
+	syn boolean FExp.isInlinableFunctionCall(FunctionInliner fi) = false;
+	eq FFunctionCall.isInlinableFunctionCall(FunctionInliner fi) = myFFunctionDecl().isInlinable(fi);
 	
 
 	/**
@@ -4779,7 +4908,7 @@ aspect FunctionInlining {
 	}
 	
 	public FAbstractEquation FFunctionCallEquation.inlineFunctions(FunctionInliner fi) {
-		if (getCall().isInlinableFunctionCall()) {
+		if (getCall().isInlinableFunctionCall(fi)) {
 			getCall().inline(fi);
 			ArrayList<FFunctionVariable> outs = ((FFunctionCall) getCall()).myOutputs();
 			int n = getNumLeft();
@@ -4851,7 +4980,7 @@ aspect FunctionInlining {
 	}
 	
 	public void FFunctionCall.inlineFunctions(FunctionInliner fi) {
-		if (isInlinableFunctionCall()) {
+		if (isInlinableFunctionCall(fi)) {
 			inline(fi);
 			FVariable var = fi.getReplacementVar(myOutputs().get(0).name());
 			replaceMe(var.createInlineUseFExp());
@@ -4972,11 +5101,46 @@ aspect FunctionInlining {
 	
 	
 	/**
+	 * Check if we can inline this function, given the inlining level set in <code>fi</code>.
+	 */
+	syn boolean FFunctionDecl.isInlinable(FunctionInliner fi) =
+		fi.isInlinable(this);
+	
+	/**
 	 * Check if we can inline this function.
 	 */
-	syn lazy boolean FFunctionDecl.isInlinable() {
-		return isAllInlinable(getFAlgorithmBlock().getFStatements());
+	syn lazy boolean FFunctionDecl.isInlinable() =
+		isAllInlinable(getFAlgorithmBlock().getFStatements());
+	
+	/**
+	 * Check if this function falls under the "trivial" inlining category.
+	 */
+	syn lazy boolean FFunctionDecl.isTrivialInlinable() {
+		int assigned = 0;
+		for (FStatement stmt : getFAlgorithmBlock().getFStatements()) {
+			int a = stmt.numAssignedScalarVars();
+			if (a == 0 && !stmt.ignoreInIsTrivialInlinable())
+				return false;
+			assigned += a;
+		}
+		int outs = 0;
+		for (FFunctionVariable out : myOutputs())
+			outs += out.size().numElements();
+		return assigned == outs;
 	}
+	
+	// TODO: support function call statements
+	/**
+	 * Helper method to decide if each output in a function is assigned only once.
+	 */
+	syn int FStatement.numAssignedScalarVars() = 0;
+	eq FAssignStmt.numAssignedScalarVars()     = getLeft().size().numElements(); // TODO: this is a prototype
+	
+	/**
+	 * Helper method to filter return statements and similar in isTrivialInlinable().
+	 */
+	syn boolean FStatement.ignoreInIsTrivialInlinable() = false;
+	eq FReturnStmt.ignoreInIsTrivialInlinable()         = isLast();
 	
 	/**
 	 * Helper method to check if a list of statements are all inlinable.

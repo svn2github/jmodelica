@@ -140,10 +140,17 @@ aspect AnnotationAPI {
 		}
 		
 		/**
-		 * \brief Returns the value for a node that represents a string value.
+		 * Returns the value for a node that represents a string value.
 		 */
 		public String string() {
 			return null;
+		}
+		
+		/**
+		 * Check if this node represents a string value.
+		 */
+		public boolean isStringValue() {
+			return false;
 		}
 		
 		/**
@@ -157,15 +164,22 @@ aspect AnnotationAPI {
 		}
 		
 		/**
-		 * \brief Returns the value for a node that represents a list of strings.
+		 * Returns the value for a node that represents a list of strings.
 		 */
 		public ArrayList<String> stringList() {
 			return null;
 		}
 		
 		/**
-		 * \brief Returns the value for a node that represents a list of strings, 
-		 *        or a single string value.
+		 * Check if this node represents a list of strings.
+		 */
+		public boolean isStringListValue() {
+			return false;
+		}
+		
+		/**
+		 * Returns the value for a node that represents a list of strings, 
+		 * or a single string value.
 		 */
 		public ArrayList<String> asStringList() {
 			ArrayList<String> res = stringList();
@@ -180,24 +194,45 @@ aspect AnnotationAPI {
 		}
 		
 		/**
-		 * \brief Returns the value for a node that represents a real value.
+		 * Returns the value for a node that represents a real value.
 		 */
 		public double real() {
 			return 0.0;
 		}
 		
 		/**
-		 * \brief Returns the value for a node that represents a vector of real values.
+		 * Check if this node represents a real value.
+		 */
+		public boolean isRealValue() {
+			return false;
+		}
+		
+		/**
+		 * Returns the value for a node that represents a vector of real values.
 		 */
 		public double[] realVector() {
 			return null;
 		}
 		
 		/**
-		 * \brief Returns the value for a node that represents a matrix of real values.
+		 * Check if this node represents a vector of real values.
+		 */
+		public boolean isRealVectorValue() {
+			return false;
+		}
+		
+		/**
+		 * Returns the value for a node that represents a matrix of real values.
 		 */
 		public double[][] realMatrix() {
 			return null;
+		}
+		
+		/**
+		 * Check if this node represents a matrix of real values.
+		 */
+		public boolean isRealMatrixValue() {
+			return false;
 		}
 		
 		/**
@@ -208,9 +243,23 @@ aspect AnnotationAPI {
 		}
 		
 		/**
+		 * Check if this node represents a boolean value.
+		 */
+		public boolean isBoolValue() {
+			return false;
+		}
+		
+		/**
 		 * Returns the ast node that this annotation node is connected to.
 		 */
 		protected abstract ASTNode ast();
+		
+		/**
+		 * Return the string representation of the AST node that this annotation node is connected to.
+		 */
+		public String toString() {
+			return (ast() != null) ? ast().toString() : "(no annotation)"; 
+		}
 		
 		/**
 		 * Set the expression <code>exp</code> of the node if possible.
@@ -538,13 +587,6 @@ aspect AnnotationAPI {
 		
 		protected abstract Exp exp();
 		protected abstract void setExp(Exp exp);
-		
-		public String string() {
-			if (exp() == null)
-				return super.string();
-			else
-				return exp().avalueString();
-		}
 
 		public boolean isValue() {
 			if (exp() == null)
@@ -552,44 +594,9 @@ aspect AnnotationAPI {
 			else
 				return !exp().isAnnotationExp();
 		}
-		
-		public ArrayList<String> stringList() {
-			if (exp() == null)
-				return super.stringList();
-			else
-				return exp().avalueStringList();
-		}
 
 		public Iterator<AnnotationNode> iterator() {
 			return exp() == null || isValue() ? super.iterator() : new AnnotationIterator(exp().annotationList());
-		}
-		
-		public double real() {
-			if (exp() == null)
-				return super.real();
-			else
-				return exp().avalueReal();
-		}
-		
-		public double[] realVector() {
-			if (exp() == null)
-				return super.realVector();
-			else
-				return exp().avalueRealVector();
-		}
-		
-		public double[][] realMatrix() {
-			if (exp() == null)
-				return super.realMatrix();
-			else
-				return exp().avalueRealMatrix();
-		}
-
-		public boolean bool() {
-			if (exp() == null)
-				return super.bool();
-			else
-				return exp().avalueBool();
 		}
 		
 		protected ASTNode ast() {
@@ -600,6 +607,72 @@ aspect AnnotationAPI {
 			if (exp() != null && exp != null)
 				exp.copyFormattingFrom(exp());
 			setExp(exp);
+		}
+		
+		public String string() {
+			if (exp() == null)
+				return super.string();
+			else
+				return exp().avalueString();
+		}
+		
+		public boolean isStringValue() {
+			return exp() != null && exp().isAvalueString();
+		}
+		
+		public ArrayList<String> stringList() {
+			if (exp() == null)
+				return super.stringList();
+			else
+				return exp().avalueStringList();
+		}
+		
+		public boolean isStringListValue() {
+			return exp() != null && exp().isAvalueStringList();
+		}
+		
+		public double real() {
+			if (exp() == null)
+				return super.real();
+			else
+				return exp().avalueReal();
+		}
+		
+		public boolean isRealValue() {
+			return exp() != null && exp().isAvalueReal();
+		}
+		
+		public double[] realVector() {
+			if (exp() == null)
+				return super.realVector();
+			else
+				return exp().avalueRealVector();
+		}
+		
+		public boolean isRealVectorValue() {
+			return exp() != null && exp().isAvalueRealVector();
+		}
+		
+		public double[][] realMatrix() {
+			if (exp() == null)
+				return super.realMatrix();
+			else
+				return exp().avalueRealMatrix();
+		}
+		
+		public boolean isRealMatrixValue() {
+			return exp() != null && exp().isAvalueRealMatrix();
+		}
+
+		public boolean bool() {
+			if (exp() == null)
+				return super.bool();
+			else
+				return exp().avalueBool();
+		}
+		
+		public boolean isBoolValue() {
+			return exp() != null && exp().isAvalueBool();
 		}
 		
 	}
@@ -832,6 +905,10 @@ aspect AnnotationAPI {
 	eq StringLitExp.avalueString() = unEscape();
 	eq AccessExp.avalueString()    = getAccess().name();
 	
+	syn boolean Exp.isAvalueString() = false;
+	eq StringLitExp.isAvalueString() = true;
+	eq AccessExp.isAvalueString()    = true;
+	
 	syn ArrayList<String> Exp.avalueStringList() = null;
 	eq ArrayConstructor.avalueStringList() {
 		ArrayList<String> l = new ArrayList<String>(getFunctionArguments().getNumExp());
@@ -840,13 +917,29 @@ aspect AnnotationAPI {
 		return l.contains(null) ? null : l;
 	}
 	
+	syn boolean Exp.isAvalueStringList() = false;
+	eq ArrayConstructor.isAvalueStringList() {
+		for (Exp e : getFunctionArguments().getExps())
+			if (!e.isAvalueString())
+				return false;
+		return true;
+	}
+	
 	syn boolean Exp.avalueBool()      = false;
 	eq BooleanLitExpTrue.avalueBool() = true;
+	
+	syn boolean Exp.isAvalueBool()  = false;
+	eq BooleanLitExp.isAvalueBool() = true;
 	
 	syn double Exp.avalueReal()   = 0.0;
 	eq IntegerLitExp.avalueReal() = (double) Integer.parseInt(getUNSIGNED_INTEGER());
 	eq RealLitExp.avalueReal()    = Double.parseDouble(getUNSIGNED_NUMBER());
 	eq NegExp.avalueReal()        = -getExp().avalueReal();
+	
+	syn boolean Exp.isAvalueReal()  = false;
+	eq IntegerLitExp.isAvalueReal() = true;
+	eq RealLitExp.isAvalueReal()    = true;
+	eq NegExp.isAvalueReal()        = true;
 	
 	syn double[] Exp.avalueRealVector() = null;
 	eq ArrayConstructor.avalueRealVector() {
@@ -859,15 +952,29 @@ aspect AnnotationAPI {
 		return res;
 	}
 	
+	syn boolean Exp.isAvalueRealVector() = false;
+	eq ArrayConstructor.isAvalueRealVector() {
+		for (Exp e : getFunctionArguments().getExps())
+			if (!e.isAvalueReal())
+				return false;
+		return true;
+	}
+	
 	syn double[][] Exp.avalueRealMatrix() = null;
 	eq ArrayConstructor.avalueRealMatrix() {
-		if (adim() != 2)
-			return null;
 		double[][] res = new double[getFunctionArguments().getNumExp()][];
 		int i = 0;
 		for (Exp e : getFunctionArguments().getExps())
 			res[i++] = e.avalueRealVector();
 		return res;
+	}
+	
+	syn boolean Exp.isAvalueRealMatrix() = false;
+	eq ArrayConstructor.isAvalueRealMatrix() {
+		for (Exp e : getFunctionArguments().getExps())
+			if (!e.isAvalueRealVector())
+				return false;
+		return true;
 	}
 	
 	syn int Exp.adim()         = 0;
