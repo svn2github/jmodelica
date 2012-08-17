@@ -6945,6 +6945,54 @@ equation
   i1 = i2 + i3;
 end TearingTest1;
 
+model MapTearingTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="MapTearingTest1",
+         description="Test code generation of torn blocks",
+         generate_ode=true,
+         equation_sorting=true,
+         enable_tearing=true,
+         template="$C_dae_blocks_residual_functions$",
+         generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  JMI_ARRAY_STATIC(tmp_1, 2, 1)
+  if (init==JMI_BLOCK_NOMINAL) {
+    x[0] = 1.;
+  } else  if (init==JMI_BLOCK_MIN) {
+    x[0] = -1e20;
+  } else if (init==JMI_BLOCK_MAX) {
+    x[0] = 1e20;
+  } else if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _x_2;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _x_2 = x[0];
+  JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
+  jmi_array_ref_1(tmp_1, 1) = _map_1_0;
+  jmi_array_ref_1(tmp_1, 2) = _map_2_1;
+  _y_3 = func_MapTearingTest1_F_exp(_x_2, tmp_1);
+  (*res)[0] = _y_3 + 1 - (_x_2);
+  }
+  return 0;
+}
+
+")})));
+  function F
+    input Real x;
+    input Integer[2] map;
+    output Real y;
+  algorithm
+    y := x + 1;
+  end F;
+  Integer[2] map = {1,2};
+  Real x, y;
+equation
+  x = y + 1;
+  y = F(x, map);
+end MapTearingTest1;
+
+
 model MathSolve
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(

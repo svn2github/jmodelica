@@ -1554,6 +1554,14 @@ aspect CCodeGen {
 		solution().genVarDecls_C(ASTNode.printer_C, str, indent);
 	}
 	
+	@Override
+	protected void TornEquationBlock.genVarDecls_C(PrintStream str, String indent) {
+		for (AbstractEquationBlock aeb : getSolvedBlocks())
+			aeb.genVarDecls_C(str, indent);
+		for (AbstractEquationBlock aeb : getUnsolvedBlocks())
+			aeb.genVarDecls_C(str, indent);
+	}
+	
 	public ArrayList<ASTNode> AbstractEquationBlock.blockResidualNodes_C() {
 		ArrayList<ASTNode> res = new ArrayList<ASTNode>(blockResidualVariables_C());
 		res.addAll(blockResidualEquations_C());
