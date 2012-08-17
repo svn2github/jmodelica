@@ -157,7 +157,7 @@ def run_demo(with_plots=True):
     ### 3. Solve the optimal control problem
     # Compile model
     fmux = compile_fmux("CSTR.CSTR_Opt2", file_path)
-
+    
     # Load model
     cstr = CasadiModel(fmux)
     
@@ -165,7 +165,7 @@ def run_demo(with_plots=True):
     cstr.set('Tc_ref', Tc_0_B)
     cstr.set('c_ref', c_0_B)
     cstr.set('T_ref', T_0_B)
-
+    
     # Set initial values
     cstr.set('cstr.c_init', c_0_A)
     cstr.set('cstr.T_init', T_0_A)

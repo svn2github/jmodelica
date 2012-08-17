@@ -1889,11 +1889,7 @@ class LocalDAECollocator(CasadiCollocator):
                         ordinates = N.array([[var.getInitialGuess()]])
                     else:
                         abscissae = data.t
-                        if self.variable_scaling:
-                            ordinates = (data.x.reshape([-1, 1]) /
-                                         sfs[vt][var_index])
-                        else:
-                            ordinates = data.x.reshape([-1, 1])
+                        ordinates = data.x.reshape([-1, 1])
                     traj[vt][var_index] = \
                             TrajectoryLinearInterpolation(abscissae, ordinates)
         

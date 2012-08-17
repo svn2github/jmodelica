@@ -90,7 +90,6 @@ optimization CSTR_Opt2(objectiveIntegrand=1e-4*(q_c*(c_ref-cstr.c)^2 + q_T*(T_re
   Real q = 2*u;
 end CSTR_Opt2;
 
-
 optimization CSTR_Opt_MPC(objective=(cost(finalTime)),
                       startTime=0.0,
                       finalTime=50)
