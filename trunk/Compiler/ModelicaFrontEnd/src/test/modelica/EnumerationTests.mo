@@ -3,6 +3,9 @@ package EnumerationTests
 
 
   model EnumerationTest1
+    type Size = enumeration(small "1st", medium, large, xlarge); 
+	parameter Size t_shirt_size = Size.medium; 
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="EnumerationTest1",
@@ -16,13 +19,20 @@ public
 
 end EnumerationTests.EnumerationTest1;
 ")})));
-
-    type Size = enumeration(small "1st", medium, large, xlarge); 
-	parameter Size t_shirt_size = Size.medium; 
   end EnumerationTest1;
 
   
   model EnumerationTest2
+    type Size = enumeration(small "1st", medium, large, xlarge); 
+	  
+    model A
+      parameter Size t_shirt_size(start = Size.large) = Size.medium; 
+	end A;
+	
+    A a1;
+    A a2;
+	parameter Size s = Size.large;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="EnumerationTest2",
@@ -38,20 +48,14 @@ public
 
 end EnumerationTests.EnumerationTest2;
 ")})));
-
-    type Size = enumeration(small "1st", medium, large, xlarge); 
-	  
-    model A
-      parameter Size t_shirt_size(start = Size.large) = Size.medium; 
-	end A;
-	
-    A a1;
-    A a2;
-	parameter Size s = Size.large;
   end EnumerationTest2;
 
 
   model EnumerationTest3
+    type A = enumeration(a, b, c);
+    constant A x = A.b;
+	parameter A y = x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="EnumerationTest3",
@@ -66,14 +70,14 @@ public
 
 end EnumerationTests.EnumerationTest3;
 ")})));
-
-    type A = enumeration(a, b, c);
-    constant A x = A.b;
-	parameter A y = x;
   end EnumerationTest3;
   
   
   model EnumerationTest4
+    type A = enumeration(a, b, c);
+    type B = enumeration(a, c, b);
+	parameter A x = B.a;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="EnumerationTest4",
@@ -84,14 +88,16 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo'
 Semantic error at line 72, column 6:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
-
-    type A = enumeration(a, b, c);
-    type B = enumeration(a, c, b);
-	parameter A x = B.a;
   end EnumerationTest4;
   
   
   model EnumerationTest5
+    type A = enumeration(a, b, c);
+    type B = enumeration(a, c, b);
+	parameter A x;
+  equation
+    x = B.a;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="EnumerationTest5",
@@ -102,16 +108,14 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo'
 Semantic error at line 92, column 4:
   The right and left expression types of equation are not compatible
 ")})));
-
-    type A = enumeration(a, b, c);
-    type B = enumeration(a, c, b);
-	parameter A x;
-  equation
-    x = B.a;
   end EnumerationTest5;
   
   
   model EnumerationTest6
+    type A = enumeration(a, b, c);
+    type B = enumeration(a, b, c);
+	parameter A x = B.a;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="EnumerationTest6",
@@ -127,15 +131,14 @@ public
 
 end EnumerationTests.EnumerationTest6;
 ")})));
-
-    type A = enumeration(a, b, c);
-    type B = enumeration(a, b, c);
-	parameter A x = B.a;
   end EnumerationTest6;
   
   
   // Keeping this here for now, despite it being a compliance test
   model EnumerationTest7
+    type A = enumeration(a, b, c);
+    Real x[A];
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="EnumerationTest7",
@@ -146,13 +149,17 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo'
 Compliance error at line 117, column 12:
   Array sizes of Boolean or enumeration type are not supported: A
 ")})));
-
-    type A = enumeration(a, b, c);
-    Real x[A];
   end EnumerationTest7;
   
   
   model EnumerationTest8
+	  type A = enumeration(a, b, c, d, e);
+	
+	  constant Boolean a[2] = false:true;
+	  parameter Boolean b[2] = a;
+	  constant A c[3] = A.b:A.d;
+	  parameter A d[3] = c;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="EnumerationTest8",
@@ -169,17 +176,21 @@ public
 
 end EnumerationTests.EnumerationTest8;
 ")})));
-
-	  type A = enumeration(a, b, c, d, e);
-	
-	  constant Boolean a[2] = false:true;
-	  parameter Boolean b[2] = a;
-	  constant A c[3] = A.b:A.d;
-	  parameter A d[3] = c;
   end EnumerationTest8;
   
   
   model EnumerationTest9
+	  type A = enumeration(a, b, c, d, e);
+	  constant Boolean[:,:] x = {
+		  { A.c <  A.b, A.c <  A.c, A.c <  A.d }, 
+		  { A.c <= A.b, A.c <= A.c, A.c <= A.d }, 
+		  { A.c >  A.b, A.c >  A.c, A.c >  A.d }, 
+		  { A.c >= A.b, A.c >= A.c, A.c >= A.d }, 
+		  { A.c == A.b, A.c == A.c, A.c == A.d }, 
+		  { A.c <> A.b, A.c <> A.c, A.c <> A.d } 
+		  };
+	  parameter Boolean[:,:] y = x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="EnumerationTest9",
@@ -194,21 +205,14 @@ public
 
 end EnumerationTests.EnumerationTest9;
 ")})));
-
-	  type A = enumeration(a, b, c, d, e);
-	  constant Boolean[:,:] x = {
-		  { A.c <  A.b, A.c <  A.c, A.c <  A.d }, 
-		  { A.c <= A.b, A.c <= A.c, A.c <= A.d }, 
-		  { A.c >  A.b, A.c >  A.c, A.c >  A.d }, 
-		  { A.c >= A.b, A.c >= A.c, A.c >= A.d }, 
-		  { A.c == A.b, A.c == A.c, A.c == A.d }, 
-		  { A.c <> A.b, A.c <> A.c, A.c <> A.d } 
-		  };
-	  parameter Boolean[:,:] y = x;
   end EnumerationTest9;
   
   
   model EnumerationTest10
+	  type A = enumeration(a, b, c, d, e);
+	  constant Integer i[:] = { Integer(A.a), Integer(A.c), Integer(A.e) };
+	  parameter Integer j[:] = i;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="EnumerationTest10",
@@ -223,14 +227,14 @@ public
 
 end EnumerationTests.EnumerationTest10;
 ")})));
-
-	  type A = enumeration(a, b, c, d, e);
-	  constant Integer i[:] = { Integer(A.a), Integer(A.c), Integer(A.e) };
-	  parameter Integer j[:] = i;
   end EnumerationTest10;
   
   
   model EnumerationTest11
+	  parameter Integer is = Integer("1");
+	  parameter Integer ir = Integer(1.0);
+	  parameter Integer ii = Integer(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="EnumerationTest11",
@@ -247,14 +251,14 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo'
 Semantic error at line 221, column 35:
   Calling function Integer(): types of positional argument 1 and input x are not compatible
 ")})));
-
-	  parameter Integer is = Integer("1");
-	  parameter Integer ir = Integer(1.0);
-	  parameter Integer ii = Integer(1);
   end EnumerationTest11;
   
   
   model EnumerationTest12
+	  type DigitalCurrentChoices = enumeration(zero, one);
+	  type DigitalCurrent = DigitalCurrentChoices(quantity="Current", start = DigitalCurrentChoices.one, fixed = true);
+	  parameter DigitalCurrent c = DigitalCurrent.one;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="EnumerationTest12",
@@ -270,15 +274,25 @@ public
 
 end EnumerationTests.EnumerationTest12;
 ")})));
-
-	  type DigitalCurrentChoices = enumeration(zero, one);
-	  type DigitalCurrent = DigitalCurrentChoices(quantity="Current", start = DigitalCurrentChoices.one, fixed = true);
-	  parameter DigitalCurrent c = DigitalCurrent.one;
   end EnumerationTest12;
   
   
   
   model FlatAPIEnum1
+	  type A = enumeration(a, b, c);
+	  type B = enumeration(d, e, f);
+	  
+	  constant A aic = A.a;
+	  constant B bic = B.e;
+	  constant A adc = aic;
+	  constant B bdc = bic;
+	  parameter A aip = A.b;
+	  parameter B bip = B.f;
+	  parameter A adp = aip;
+	  parameter B bdp = bip;
+	  A av = A.c;
+	  B bv = B.d;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="FlatAPIEnum1",
@@ -380,20 +394,6 @@ Incidence:
 
 Connection sets: 0 sets
 ")})));
-
-	  type A = enumeration(a, b, c);
-	  type B = enumeration(d, e, f);
-	  
-	  constant A aic = A.a;
-	  constant B bic = B.e;
-	  constant A adc = aic;
-	  constant B bdc = bic;
-	  parameter A aip = A.b;
-	  parameter B bip = B.f;
-	  parameter A adp = aip;
-	  parameter B bdp = bip;
-	  A av = A.c;
-	  B bv = B.d;
   end FlatAPIEnum1;
 
 

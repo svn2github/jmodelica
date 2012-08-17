@@ -30,22 +30,6 @@ test"
 end RemoveCopyright;
 
 model XMLExtFuncAnnotations1
-	annotation(__JModelica(UnitTesting(tests={
-		XMLCodeGenTestCase(
-			name="XMLExtFuncAnnotations1",
-			description="Test that external function annotations are generated correctly with file://.",
-			template="$XML_vendorAnnotations$",
-			generatedCode="
-<VendorAnnotations>
-		<Tool name=\"JModelica\">
-			<Annotation name=\"Library\" value=\"external1\"/>
-			<Annotation name=\"Include\" value=\"#include &quot;external1.h&quot;\"/>
-			<Annotation name=\"LibraryDirectory\" value=\"/Library\"/>
-			<Annotation name= \"IncludeDirectory\" value=\"/Include\"/>
-		</Tool>
-	</VendorAnnotations>
-"
-   )})));
 	function extFunc
 		external "C" annotation(Library="external1", Include="#include \"external1.h\"",
 								LibraryDirectory="file:///Library", IncludeDirectory="file:///Include");
@@ -54,9 +38,31 @@ model XMLExtFuncAnnotations1
 algorithm
 	extFunc();
 	
+    annotation(__JModelica(UnitTesting(tests={
+        XMLCodeGenTestCase(
+            name="XMLExtFuncAnnotations1",
+            description="Test that external function annotations are generated correctly with file://.",
+            template="$XML_vendorAnnotations$",
+            generatedCode="
+<VendorAnnotations>
+        <Tool name=\"JModelica\">
+            <Annotation name=\"Library\" value=\"external1\"/>
+            <Annotation name=\"Include\" value=\"#include &quot;external1.h&quot;\"/>
+            <Annotation name=\"LibraryDirectory\" value=\"/Library\"/>
+            <Annotation name= \"IncludeDirectory\" value=\"/Include\"/>
+        </Tool>
+    </VendorAnnotations>
+")})));
 end XMLExtFuncAnnotations1;
 
 model XMLExtFuncAnnotations2
+	function extFunc
+		external "C" annotation(Library="external1", Include="#include \"external1.h\"");
+	end extFunc;
+	
+algorithm
+	extFunc();
+	
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="XMLExtFuncAnnotations2",
@@ -72,15 +78,7 @@ model XMLExtFuncAnnotations2
 			<Annotation name= \"IncludeDirectory\" value=\"%dir%/Resources/Include\"/>
 		</Tool>
 	</VendorAnnotations>
-"
-   )})));
-	function extFunc
-		external "C" annotation(Library="external1", Include="#include \"external1.h\"");
-	end extFunc;
-	
-algorithm
-	extFunc();
-	
+")})));
 end XMLExtFuncAnnotations2;
 
 
@@ -134,6 +132,14 @@ end XMLExtFuncAnnotations2;
   end XMLCodeGenTest1;
 
 model XMLCodeGenTest2
+	parameter Real p1 = 5;
+	parameter Real p2 = p1+4;
+	parameter Integer i1 = 1;
+	parameter Integer i2 = i1+1;
+	parameter Boolean b1 = true;
+	parameter Boolean b2 = false;
+    equation
+	
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="XMLCodeGenTest2",
@@ -171,14 +177,6 @@ model XMLCodeGenTest2
 <VariableCategory>dependentParameter</VariableCategory>
 </ScalarVariable>
 ")})));
-
-	parameter Real p1 = 5;
-	parameter Real p2 = p1+4;
-	parameter Integer i1 = 1;
-	parameter Integer i2 = i1+1;
-	parameter Boolean b1 = true;
-	parameter Boolean b2 = false;
-	equation		
 end XMLCodeGenTest2;
 
 	model XMLCodeGenTest3	
@@ -228,6 +226,12 @@ end XMLCodeGenTest2;
 
 	
 	model EnumerationTest1
+		type A = enumeration(a "This is a", b, c) "This is A";
+		type B = enumeration(a, c, b "This is b");
+		
+		parameter A x = A.a;
+		parameter B y = B.b;
+
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="EnumerationTest1",
@@ -250,16 +254,15 @@ end XMLCodeGenTest2;
 			</EnumerationType>
 		</Type>
 	</TypeDefinitions>")})));
-
+	end EnumerationTest1;
+	
+	model EnumerationTest2
 		type A = enumeration(a "This is a", b, c) "This is A";
 		type B = enumeration(a, c, b "This is b");
 		
 		parameter A x = A.a;
 		parameter B y = B.b;
 
-	end EnumerationTest1;
-	
-	model EnumerationTest2
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="EnumerationTest2",
@@ -277,16 +280,15 @@ end XMLCodeGenTest2;
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>")})));
-
-		type A = enumeration(a "This is a", b, c) "This is A";
-		type B = enumeration(a, c, b "This is b");
-		
-		parameter A x = A.a;
-		parameter B y = B.b;
-
 	end EnumerationTest2;
 	
 	model EnumerationTest3		
+		type A = enumeration(a "This is a", b, c) "This is A";
+		type B = enumeration(a, c, b "This is b");
+		
+		parameter A x(quantity="a", min=A.a, max=A.c);
+		parameter B y(fixed=true);
+		
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="EnumerationTest3",
@@ -304,16 +306,13 @@ end XMLCodeGenTest2;
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>")})));
-
-		type A = enumeration(a "This is a", b, c) "This is A";
-		type B = enumeration(a, c, b "This is b");
-		
-		parameter A x(quantity="a", min=A.a, max=A.c);
-		parameter B y(fixed=true);
-		
 	end EnumerationTest3;
 	
 	model EnumerationTest4
+		type DigitalCurrentChoices = enumeration(zero, one);
+
+		parameter DigitalCurrentChoices c(start = DigitalCurrentChoices.one, fixed = true);
+
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="EnumerationTest4",
@@ -326,11 +325,6 @@ end XMLCodeGenTest2;
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>")})));
-
-		type DigitalCurrentChoices = enumeration(zero, one);
-
-		parameter DigitalCurrentChoices c(start = DigitalCurrentChoices.one, fixed = true);
-
 	end EnumerationTest4;
 	
 	//model EnumerationTest5
@@ -342,6 +336,12 @@ end XMLCodeGenTest2;
 	//end EnumerationTest5;
 	
 	model VariableSortingTest1	
+		parameter Real d = 1;
+		parameter Real a = 5;
+		parameter Real c = 6;
+		parameter Real b = 4;
+   	 equation
+		
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="VariableSortingTest1",
@@ -369,16 +369,14 @@ end XMLCodeGenTest2;
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>")})));
-
-		parameter Real d = 1;
-		parameter Real a = 5;
-		parameter Real c = 6;
-		parameter Real b = 4;
-   	 equation
-		
 	end VariableSortingTest1;
 	
 	model VariableSortingTest2
+		parameter Real a3 = 3;
+		parameter Real a1 = 1;
+		parameter Real a2 = 2;
+		equation
+
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="VariableSortingTest2",
@@ -401,14 +399,15 @@ end XMLCodeGenTest2;
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>")})));
-
-		parameter Real a3 = 3;
-		parameter Real a1 = 1;
-		parameter Real a2 = 2;
-		equation
 	end VariableSortingTest2;
 	
 	model VariableSortingTest3
+		parameter Real a11 = 2;
+		parameter Real a111 = 3;
+		parameter Real a1 = 1;
+		parameter Real a1111 = 4;
+		equation 
+
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="VariableSortingTest3",
@@ -436,15 +435,24 @@ end XMLCodeGenTest2;
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>")})));
-
-		parameter Real a11 = 2;
-		parameter Real a111 = 3;
-		parameter Real a1 = 1;
-		parameter Real a1111 = 4;
-		equation 
 	end VariableSortingTest3;
 	
 	model VariableSortingTest4
+		model A
+			parameter Real b = 2;
+			parameter Real a = 1;
+			equation
+		end A;
+		
+		model B
+			parameter Real b = 2;
+			parameter Real a = 1;
+			equation
+		end B;
+		
+		A a;
+		B b;
+		
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="VariableSortingTest4",
@@ -472,25 +480,12 @@ end XMLCodeGenTest2;
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>")})));
-
-		model A
-			parameter Real b = 2;
-			parameter Real a = 1;
-			equation
-		end A;
-		
-		model B
-			parameter Real b = 2;
-			parameter Real a = 1;
-			equation
-		end B;
-		
-		A a;
-		B b;
-		
 	end VariableSortingTest4;
 	
 	model VariableSortingTest5
+    	Real x[11] = fill(1, 11);
+  		equation
+    		
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="VariableSortingTest5",
@@ -553,13 +548,20 @@ end XMLCodeGenTest2;
 <VariableCategory>algebraic</VariableCategory>
 </ScalarVariable>
 ")})));
-
-    	Real x[11] = fill(1, 11);
-  		equation
-    		
 	end VariableSortingTest5;
 	
 	model VariableSortingTest6
+		parameter Real a = 1;
+		parameter Real b = 2;
+		parameter Real z = 5;
+	    Real x[2];
+	    Real y[2];
+  		equation
+  			der(y[2]) = 2;
+    		der(x[1]) = 3;
+    		der(x[2]) = 4;
+    		der(y[1]) = 1;
+
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="VariableSortingTest6",
@@ -622,20 +624,33 @@ end XMLCodeGenTest2;
 <VariableCategory>independentParameter</VariableCategory>
 </ScalarVariable>
 ")})));
-
-		parameter Real a = 1;
-		parameter Real b = 2;
-		parameter Real z = 5;
-	    Real x[2];
-	    Real y[2];
-  		equation
-  			der(y[2]) = 2;
-    		der(x[1]) = 3;
-    		der(x[2]) = 4;
-    		der(y[1]) = 1;
 	end VariableSortingTest6;
 	
 	model VariableSortingTest7
+		class A
+			Real r[2];
+ 			class B 
+ 				Real x[2,2];
+				class C
+		  			Real y[2];
+		  			equation
+		  				y[1]=2;
+		  				y[2]=3;
+				end C;
+		  		C c;
+ 			end B;
+ 			B b;
+ 			equation
+ 				b.x[1,1] = b.c.y[1];
+    			b.x[1,2] = 2;
+    			b.x[2,1] = b.c.y[2];
+    			b.x[2,2] = 4;
+		end A;
+		A a;
+		equation
+			a.r[1] = a.b.x[1,1];
+			a.r[2] = a.b.x[2,1];
+
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="VariableSortingTest7",
@@ -683,33 +698,34 @@ end XMLCodeGenTest2;
 <VariableCategory>algebraic</VariableCategory>
 </ScalarVariable>
 ")})));
-
-		class A
-			Real r[2];
- 			class B 
- 				Real x[2,2];
-				class C
-		  			Real y[2];
-		  			equation
-		  				y[1]=2;
-		  				y[2]=3;
-				end C;
-		  		C c;
- 			end B;
- 			B b;
- 			equation
- 				b.x[1,1] = b.c.y[1];
-    			b.x[1,2] = 2;
-    			b.x[2,1] = b.c.y[2];
-    			b.x[2,2] = 4;
-		end A;
-		A a;
-		equation
-			a.r[1] = a.b.x[1,1];
-			a.r[2] = a.b.x[2,1];
 	end VariableSortingTest7;
 
 	model DirectDependencyTest1
+  Real x[15];
+  Real z[3];
+  input Real u[4];
+  output Real y1;
+  output Real y2;
+equation
+  der(z) = -z;
+  x[1] = u[1];
+  x[2] = u[2];
+  x[3] = u[3];
+  x[4] = u[4];
+  x[5] = x[1];
+  x[6] = x[1] + x[2];
+  x[7] = x[3];
+  x[8] = x[3];
+  x[9] = x[4];
+  x[10] = x[5];
+  x[11] = x[5];
+  x[12] = x[1] + x[6];
+  x[13] = x[7] + x[8];
+  x[14] = x[8] + x[9];
+  x[15] = x[12] + x[3];
+  y1 = x[15] + x[1] + z[1];
+  y2 = x[4] + sum(z);
+
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="DirectDependencyTest1",
@@ -862,35 +878,16 @@ end XMLCodeGenTest2;
 			<VariableCategory>derivative</VariableCategory>
 		</ScalarVariable>
 ")})));
-
-  Real x[15];
-  Real z[3];
-  input Real u[4];
-  output Real y1;
-  output Real y2;
-equation
-  der(z) = -z;
-  x[1] = u[1];
-  x[2] = u[2];
-  x[3] = u[3];
-  x[4] = u[4];
-  x[5] = x[1];
-  x[6] = x[1] + x[2];
-  x[7] = x[3];
-  x[8] = x[3];
-  x[9] = x[4];
-  x[10] = x[5];
-  x[11] = x[5];
-  x[12] = x[1] + x[6];
-  x[13] = x[7] + x[8];
-  x[14] = x[8] + x[9];
-  x[15] = x[12] + x[3];
-  y1 = x[15] + x[1] + z[1];
-  y2 = x[4] + sum(z);
-	end DirectDependencyTest1;
+end DirectDependencyTest1;
 
 
 model NonConstantStart1
+    Real x(start = 1 + a[b]);
+    parameter Real a[2] = { 1, 2 };
+    parameter Integer b = 1;
+equation
+    der(x) = x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
 			name="NonConstantStart1",
@@ -923,12 +920,6 @@ model NonConstantStart1
             <VariableCategory>derivative</VariableCategory>
         </ScalarVariable>
 ")})));
-
-    Real x(start = 1 + a[b]);
-    parameter Real a[2] = { 1, 2 };
-    parameter Integer b = 1;
-equation
-    der(x) = x;
 end NonConstantStart1;
 
 		

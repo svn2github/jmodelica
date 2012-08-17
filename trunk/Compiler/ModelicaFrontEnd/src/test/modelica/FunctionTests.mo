@@ -150,6 +150,10 @@ end Func22;
 /* ====================== Functions ====================== */
 
 model FunctionFlatten1
+ Real x;
+equation
+ x = TestFunction1(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionFlatten1",
@@ -170,14 +174,15 @@ public
 
 end FunctionTests.FunctionFlatten1;
 ")})));
-
- Real x;
-equation
- x = TestFunction1(1);
 end FunctionFlatten1;
 
 
 model FunctionFlatten2
+ Real x;
+ Real y = TestFunction2(2, 3);
+equation
+ x = TestFunction2(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionFlatten2",
@@ -202,15 +207,15 @@ public
 
 end FunctionTests.FunctionFlatten2;
 ")})));
-
- Real x;
- Real y = TestFunction2(2, 3);
-equation
- x = TestFunction2(1);
 end FunctionFlatten2;
 
 
 model FunctionFlatten3
+ Real x;
+ Real y = TestFunction2(2, 3);
+equation
+ x = TestFunction1(y * 2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionFlatten3",
@@ -242,15 +247,12 @@ public
 
 end FunctionTests.FunctionFlatten3;
 ")})));
-
- Real x;
- Real y = TestFunction2(2, 3);
-equation
- x = TestFunction1(y * 2);
 end FunctionFlatten3;
 
 
 model FunctionFlatten4
+ Real x = TestFunctionWithConst(2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionFlatten4",
@@ -269,12 +271,22 @@ public
 
 end FunctionTests.FunctionFlatten4;
 ")})));
-
- Real x = TestFunctionWithConst(2);
 end FunctionFlatten4;
 
 
 model FunctionFlatten5
+	model A
+		Real x;
+	equation
+		x = TestFunction1(1);
+	end A;
+	
+	model B
+		extends A;
+	end B;
+	
+	B y;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionFlatten5",
@@ -295,22 +307,18 @@ public
 
 end FunctionTests.FunctionFlatten5;
 ")})));
-
-	model A
-		Real x;
-	equation
-		x = TestFunction1(1);
-	end A;
-	
-	model B
-		extends A;
-	end B;
-	
-	B y;
 end FunctionFlatten5;
 
 
 model FunctionFlatten6
+	model A
+		Real x;
+	end A;
+	
+	model B = A(x = TestFunction1(1));
+	
+	B y;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionFlatten6",
@@ -329,18 +337,30 @@ public
 
 end FunctionTests.FunctionFlatten6;
 ")})));
-
-	model A
-		Real x;
-	end A;
-	
-	model B = A(x = TestFunction1(1));
-	
-	B y;
 end FunctionFlatten6;
 
 
 model FunctionFlatten7
+	package A
+		constant Real c = 1;
+		function f
+			output Real a = c;
+		algorithm
+		end f;
+	end A;
+	
+	package B
+		extends A(c = 2);
+	end B;
+	
+	package C
+		extends A(c = 3);
+	end C;
+	
+	Real x = A.f();
+	Real y = B.f();
+	Real z = C.f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionFlatten7",
@@ -372,30 +392,23 @@ public
 
 end FunctionTests.FunctionFlatten7;
 ")})));
-
-	package A
-		constant Real c = 1;
-		function f
-			output Real a = c;
-		algorithm
-		end f;
-	end A;
-	
-	package B
-		extends A(c = 2);
-	end B;
-	
-	package C
-		extends A(c = 3);
-	end C;
-	
-	Real x = A.f();
-	Real y = B.f();
-	Real z = C.f();
 end FunctionFlatten7;
 
 
 model FunctionFlatten8
+	function f
+		output Real x = 1;
+	algorithm
+	end f;
+	
+	model A
+		Real x;
+	equation
+		x = f();
+	end A;
+	
+	A y;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionFlatten8",
@@ -415,23 +428,21 @@ public
 
 end FunctionTests.FunctionFlatten8;
 ")})));
-
-	function f
-		output Real x = 1;
-	algorithm
-	end f;
-	
-	model A
-		Real x;
-	equation
-		x = f();
-	end A;
-	
-	A y;
 end FunctionFlatten8;
 
 
 model FunctionFlatten9
+    constant Real[3] a = {1,2,3};
+    
+    function f
+        input Real[2] x;
+        output Real[2] y;
+    algorithm
+        y := x + a[1:2] + a[1:2];
+    end f;
+    
+    Real[2] z = f({3,4});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="FunctionFlatten9",
@@ -462,21 +473,27 @@ public
 
 end FunctionTests.FunctionFlatten9;
 ")})));
-
-    constant Real[3] a = {1,2,3};
-    
-    function f
-        input Real[2] x;
-        output Real[2] y;
-    algorithm
-        y := x + a[1:2] + a[1:2];
-    end f;
-    
-    Real[2] z = f({3,4});
 end FunctionFlatten9;
 
 
 model FunctionFlatten10
+    function f1
+        input Real x;
+        output Real y;
+    end f1;
+    
+    function f2
+        extends f1;
+    end f2;
+    
+    function f3
+        extends f2;
+    algorithm
+        y := x;
+    end f3;
+    
+    Real z = f3(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionFlatten10",
@@ -496,23 +513,6 @@ public
 
 end FunctionTests.FunctionFlatten10;
 ")})));
-
-    function f1
-        input Real x;
-        output Real y;
-    end f1;
-    
-    function f2
-        extends f1;
-    end f2;
-    
-    function f3
-        extends f2;
-    algorithm
-        y := x;
-    end f3;
-    
-    Real z = f3(1);
 end FunctionFlatten10;
 
 
@@ -520,6 +520,8 @@ end FunctionFlatten10;
 /* ====================== Function calls ====================== */
 
 model FunctionBinding1
+ Real x = TestFunction1();
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionBinding1",
@@ -538,11 +540,11 @@ public
 
 end FunctionTests.FunctionBinding1;
 ")})));
-
- Real x = TestFunction1();
 end FunctionBinding1;
 
 model FunctionBinding2
+ Real x = TestFunction1(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionBinding2",
@@ -561,11 +563,11 @@ public
 
 end FunctionTests.FunctionBinding2;
 ")})));
-
- Real x = TestFunction1(1);
 end FunctionBinding2;
 
 model FunctionBinding3
+ Real x = TestFunction1(1, 2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionBinding3",
@@ -576,10 +578,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction1(): too many positional arguments
 ")})));
- Real x = TestFunction1(1, 2);
 end FunctionBinding3;
 
 model FunctionBinding4
+ Real x = TestFunction3();
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionBinding4",
@@ -593,11 +596,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction3(): missing argument for required input i2
 ")})));
-
- Real x = TestFunction3();
 end FunctionBinding4;
 
 model FunctionBinding5
+ Real x = TestFunction3(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionBinding5",
@@ -608,11 +611,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction3(): missing argument for required input i2
 ")})));
-
- Real x = TestFunction3(1);
 end FunctionBinding5;
 
 model FunctionBinding6
+ Real x = TestFunction3(1, 2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionBinding6",
@@ -635,11 +638,11 @@ public
 
 end FunctionTests.FunctionBinding6;
 ")})));
-
- Real x = TestFunction3(1, 2);
 end FunctionBinding6;
 
 model FunctionBinding7
+ Real x = TestFunction0();
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionBinding7",
@@ -657,11 +660,11 @@ public
 
 end FunctionTests.FunctionBinding7;
 ")})));
-
- Real x = TestFunction0();
 end FunctionBinding7;
 
 model FunctionBinding8
+ Real x = TestFunction1(i1=1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionBinding8",
@@ -680,11 +683,11 @@ public
 
 end FunctionTests.FunctionBinding8;
 ")})));
-
- Real x = TestFunction1(i1=1);
 end FunctionBinding8;
 
 model FunctionBinding9
+ Real x = TestFunction2(i2=2, i1=1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionBinding9",
@@ -706,11 +709,11 @@ public
 
 end FunctionTests.FunctionBinding9;
 ")})));
-
- Real x = TestFunction2(i2=2, i1=1);
 end FunctionBinding9;
 
 model FunctionBinding10
+ Real x = TestFunction3(1, i3=2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionBinding10",
@@ -721,11 +724,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction3(): missing argument for required input i2
 ")})));
-
- Real x = TestFunction3(1, i3=2);
 end FunctionBinding10;
 
 model FunctionBinding11
+ Real x = TestFunction2(i3=1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionBinding11",
@@ -736,11 +739,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): no input matching named argument i3 found
 ")})));
-
- Real x = TestFunction2(i3=1);
 end FunctionBinding11;
 
 model FunctionBinding12
+ Real x = TestFunction2(o1=1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionBinding12",
@@ -751,11 +754,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): no input matching named argument o1 found
 ")})));
-
- Real x = TestFunction2(o1=1);
 end FunctionBinding12;
 
 model FunctionBinding13
+ Real x = TestFunction2(1, 2, i1=3);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionBinding13",
@@ -766,11 +769,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): multiple arguments matches input i1
 ")})));
-
- Real x = TestFunction2(1, 2, i1=3);
 end FunctionBinding13;
 
 model FunctionBinding14
+ Real x = TestFunction2(1, 2, i1=3, i1=3, i1=3);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionBinding14",
@@ -781,11 +784,25 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): multiple arguments matches input i1
 ")})));
-
- Real x = TestFunction2(1, 2, i1=3, i1=3, i1=3);
 end FunctionBinding14;
 
 model FunctionBinding15
+    package A
+        constant Real a = 1;
+        
+        function f
+            input  Real b = a;
+            output Real c = b;
+        algorithm
+        end f;
+    end A;
+    
+    model B
+        Real c = A.f();
+    end B;
+    
+    B d;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionBinding15",
@@ -804,22 +821,6 @@ public
 
 end FunctionTests.FunctionBinding15;
 ")})));
-
-    package A
-        constant Real a = 1;
-        
-        function f
-            input  Real b = a;
-            output Real c = b;
-        algorithm
-        end f;
-    end A;
-    
-    model B
-        Real c = A.f();
-    end B;
-    
-    B d;
 end FunctionBinding15;
 
 
@@ -865,6 +866,9 @@ end FunctionBinding18;
 
 
 model BadFunctionCall1
+  Real x = NonExistingFunction(1, 2);
+  Real y = NonExistingFunction();
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="BadFunctionCall1",
@@ -878,12 +882,13 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   The function NonExistingFunction() is undeclared
 ")})));
-
-  Real x = NonExistingFunction(1, 2);
-  Real y = NonExistingFunction();
 end BadFunctionCall1;
 
 model BadFunctionCall2
+  Real notAFunction = 0;
+  Real x = notAFunction(1, 2);
+  Real y = notAFunction();
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="BadFunctionCall2",
@@ -897,10 +902,6 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   The function notAFunction() is undeclared
 ")})));
-
-  Real notAFunction = 0;
-  Real x = notAFunction(1, 2);
-  Real y = notAFunction();
 end BadFunctionCall2;
 
 class NotAFunctionClass
@@ -908,6 +909,9 @@ class NotAFunctionClass
 end NotAFunctionClass;
 
 model BadFunctionCall3
+  Real x = NotAFunctionClass(1, 2);
+  Real y = NotAFunctionClass();
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="BadFunctionCall3",
@@ -921,12 +925,14 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   The class NotAFunctionClass is not a function
 ")})));
-
-  Real x = NotAFunctionClass(1, 2);
-  Real y = NotAFunctionClass();
 end BadFunctionCall3;
 
 model MultipleOutput1
+  Real x;
+  Real y;
+equation
+  (x, y) = TestFunction2(1, 2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="MultipleOutput1",
@@ -951,14 +957,14 @@ public
 
 end FunctionTests.MultipleOutput1;
 ")})));
-
-  Real x;
-  Real y;
-equation
-  (x, y) = TestFunction2(1, 2);
 end MultipleOutput1;
 
 model MultipleOutput2
+  Real x;
+  Real y;
+equation
+  (x, y) = TestFunction3(1, 2, 3);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="MultipleOutput2",
@@ -984,14 +990,14 @@ public
 
 end FunctionTests.MultipleOutput2;
 ")})));
-
-  Real x;
-  Real y;
-equation
-  (x, y) = TestFunction3(1, 2, 3);
 end MultipleOutput2;
 
 model MultipleOutput3
+  Real x;
+  Real z;
+equation
+  (x, , z) = TestFunction3(1, 2, 3);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="MultipleOutput3",
@@ -1017,14 +1023,14 @@ public
 
 end FunctionTests.MultipleOutput3;
 ")})));
-
-  Real x;
-  Real z;
-equation
-  (x, , z) = TestFunction3(1, 2, 3);
 end MultipleOutput3;
 
 model MultipleOutput4
+  Real x;
+  Real y;
+equation
+  TestFunction2(1, 2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="MultipleOutput4",
@@ -1049,14 +1055,11 @@ public
 
 end FunctionTests.MultipleOutput4;
 ")})));
-
-  Real x;
-  Real y;
-equation
-  TestFunction2(1, 2);
 end MultipleOutput4;
 
 model RecursionTest1
+ Real x = TestFunctionCallingFunction(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecursionTest1",
@@ -1083,11 +1086,11 @@ public
 
 end FunctionTests.RecursionTest1;
 ")})));
-
- Real x = TestFunctionCallingFunction(1);
 end RecursionTest1;
 
 model RecursionTest2
+ Real x = TestFunctionRecursive(5);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecursionTest2",
@@ -1111,13 +1114,13 @@ public
 
 end FunctionTests.RecursionTest2;
 ")})));
-
- Real x = TestFunctionRecursive(5);
 end RecursionTest2;
 
 /* ====================== Function call type checks ====================== */
 
 model FunctionType0
+ Real x = TestFunction1(1.0);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionType0",
@@ -1136,11 +1139,11 @@ public
 
 end FunctionTests.FunctionType0;
 ")})));
-
- Real x = TestFunction1(1.0);
 end FunctionType0;
 
 model FunctionType1
+ Real x = TestFunction1(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionType1",
@@ -1159,11 +1162,11 @@ public
 
 end FunctionTests.FunctionType1;
 ")})));
-
- Real x = TestFunction1(1);
 end FunctionType1;
 
 model FunctionType2
+ Integer x = TestFunction1(1.0);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionType2",
@@ -1174,11 +1177,12 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
-
- Integer x = TestFunction1(1.0);
 end FunctionType2;
 
 model FunctionType3
+ parameter Real a = 1.0;
+ Real x = TestFunction1(a);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionType3",
@@ -1198,12 +1202,12 @@ public
 
 end FunctionTests.FunctionType3;
 ")})));
-
- parameter Real a = 1.0;
- Real x = TestFunction1(a);
 end FunctionType3;
 
 model FunctionType4
+ parameter Integer a = 1;
+ Real x = TestFunction1(a);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionType4",
@@ -1223,12 +1227,11 @@ public
 
 end FunctionTests.FunctionType4;
 ")})));
-
- parameter Integer a = 1;
- Real x = TestFunction1(a);
 end FunctionType4;
 
 model FunctionType5
+ Real x = TestFunction2(1, true);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionType5",
@@ -1239,11 +1242,12 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
 ")})));
-
- Real x = TestFunction2(1, true);
 end FunctionType5;
 
 model FunctionType6
+ parameter Boolean a = true;
+ Real x = TestFunction2(1, a);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionType6",
@@ -1254,12 +1258,12 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
 ")})));
-
- parameter Boolean a = true;
- Real x = TestFunction2(1, a);
 end FunctionType6;
 
 model FunctionType7
+ parameter Integer a = 1;
+ Real x = TestFunction2(TestFunction2(), TestFunction2(1));
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionType7",
@@ -1282,12 +1286,12 @@ public
 
 end FunctionTests.FunctionType7;
 ")})));
-
- parameter Integer a = 1;
- Real x = TestFunction2(TestFunction2(), TestFunction2(1));
 end FunctionType7;
 
 model FunctionType8
+ parameter Integer a = 1;
+ Real x = TestFunction2(TestFunction1(true), TestFunction2(1));
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionType8",
@@ -1298,12 +1302,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction1(): types of positional argument 1 and input i1 are not compatible
 ")})));
-
- parameter Integer a = 1;
- Real x = TestFunction2(TestFunction1(true), TestFunction2(1));
 end FunctionType8;
 
 model FunctionType9
+ String x = TestFunctionString("test");
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="FunctionType9",
@@ -1320,11 +1323,12 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Compliance error at line 1303, column 7:
   String variables are not supported
 ")})));
-
- String x = TestFunctionString("test");
 end FunctionType9;
 
 model FunctionType10
+ parameter String a = "test";
+ String x = TestFunctionString(a);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="FunctionType10",
@@ -1341,12 +1345,11 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Compliance error at line 1327, column 29:
   String variables are not supported
 ")})));
-
- parameter String a = "test";
- String x = TestFunctionString(a);
 end FunctionType10;
 
 model FunctionType11
+ String x = TestFunctionString(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="FunctionType11",
@@ -1366,11 +1369,14 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1340, column 32:
   Calling function TestFunctionString(): types of positional argument 1 and input i1 are not compatible
 ")})));
-
- String x = TestFunctionString(1);
 end FunctionType11;
 
 model FunctionType12
+ Real x;
+ Integer y;
+equation
+ (x, y) = TestFunction2(1, 2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionType12",
@@ -1381,14 +1387,15 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): types of component y and output o2 are not compatible
 ")})));
-
- Real x;
- Integer y;
-equation
- (x, y) = TestFunction2(1, 2);
 end FunctionType12;
 
 model FunctionType13
+ Integer x;
+ Real y;
+ Integer z;
+equation
+ (x, y, z) = TestFunction3(1, 2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionType13",
@@ -1402,15 +1409,15 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction3(): types of component z and output o3 are not compatible
 ")})));
-
- Integer x;
- Real y;
- Integer z;
-equation
- (x, y, z) = TestFunction3(1, 2);
 end FunctionType13;
 
 model FunctionType14
+ Real x;
+ Real y;
+ Real z;
+equation
+ (x, y, z) = TestFunction2(1, 2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionType14",
@@ -1421,15 +1428,14 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Too many components assigned from function call: TestFunction2() has 2 output(s)
 ")})));
-
- Real x;
- Real y;
- Real z;
-equation
- (x, y, z) = TestFunction2(1, 2);
 end FunctionType14;
 
 model FunctionType15
+ Real x;
+ Integer z;
+equation
+ (x, , z) = TestFunction3(1, 2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionType15",
@@ -1440,14 +1446,14 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction3(): types of component z and output o3 are not compatible
 ")})));
-
- Real x;
- Integer z;
-equation
- (x, , z) = TestFunction3(1, 2);
 end FunctionType15;
 
 model FunctionType16
+ Real x;
+ Real y;
+equation
+ (x, y) = sin(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionType16",
@@ -1458,14 +1464,19 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Too many components assigned from function call: sin() has 1 output(s)
 ")})));
-
- Real x;
- Real y;
-equation
- (x, y) = sin(1);
 end FunctionType16;
 
 model FunctionType17
+ function f
+  input Real x[:,:];
+  input Real y[2,:];
+  output Real z[size(x,1),size(x,2)];
+ algorithm
+  z := x + y;
+ end f;
+  
+ Real x[2,2] = f({{1,2},{3,4}}, {{5,6},{7,8}});
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="FunctionType17",
@@ -1476,20 +1487,12 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1094, column 8:
   Type error in expression: x + y
 ")})));
-
- function f
-  input Real x[:,:];
-  input Real y[2,:];
-  output Real z[size(x,1),size(x,2)];
- algorithm
-  z := x + y;
- end f;
-  
- Real x[2,2] = f({{1,2},{3,4}}, {{5,6},{7,8}});
 end FunctionType17;
 
 
 model BuiltInCallType1
+  Real x = sin(true);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="BuiltInCallType1",
@@ -1500,11 +1503,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function sin(): types of positional argument 1 and input u are not compatible
 ")})));
-
-  Real x = sin(true);
 end BuiltInCallType1;
 
 model BuiltInCallType2
+  Real x = sqrt("test");
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="BuiltInCallType2",
@@ -1515,11 +1518,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function sqrt(): types of positional argument 1 and input x are not compatible
 ")})));
-
-  Real x = sqrt("test");
 end BuiltInCallType2;
 
 model BuiltInCallType3
+  Real x = sqrt(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="BuiltInCallType3",
@@ -1530,11 +1533,11 @@ fclass FunctionTests.BuiltInCallType3
 
 end FunctionTests.BuiltInCallType3;
 ")})));
-
-  Real x = sqrt(1);
 end BuiltInCallType3;
 
 model BuiltInCallType4
+  Integer x = sqrt(9.0);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="BuiltInCallType4",
@@ -1545,11 +1548,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
-
-  Integer x = sqrt(9.0);
 end BuiltInCallType4;
 
 model BuiltInCallType5
+  Real x = sin();
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="BuiltInCallType5",
@@ -1560,11 +1563,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function sin(): missing argument for required input u
 ")})));
-
-  Real x = sin();
 end BuiltInCallType5;
 
 model BuiltInCallType6
+  Real x = atan2(9.0);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="BuiltInCallType6",
@@ -1575,11 +1578,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function atan2(): missing argument for required input u2
 ")})));
-
-  Real x = atan2(9.0);
 end BuiltInCallType6;
 
 model BuiltInCallType7
+  Real x = atan2(9.0, "test");
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="BuiltInCallType7",
@@ -1590,11 +1593,12 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function atan2(): types of positional argument 2 and input u2 are not compatible
 ")})));
-
-  Real x = atan2(9.0, "test");
 end BuiltInCallType7;
 
 model BuiltInCallType8
+  Real x[3] = zeros(3);
+  Real y[3,2] = ones(3,2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="BuiltInCallType8",
@@ -1606,12 +1610,11 @@ fclass FunctionTests.BuiltInCallType8
 
 end FunctionTests.BuiltInCallType8;
 ")})));
-
-  Real x[3] = zeros(3);
-  Real y[3,2] = ones(3,2);
 end BuiltInCallType8;
 
 model BuiltInCallType9
+   Real x[3] = zeros(3.0);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="BuiltInCallType9",
@@ -1622,11 +1625,11 @@ In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Argument of zeros() is not compatible with Integer: 3.0
 ")})));
-
-   Real x[3] = zeros(3.0);
 end BuiltInCallType9;
 
 model BuiltInCallType10
+   Real x[3] = ones(3, "test");
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="BuiltInCallType10",
@@ -1640,14 +1643,17 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1223, column 24:
   Argument of ones() is not compatible with Integer: \"test\"
 ")})));
-
-   Real x[3] = ones(3, "test");
 end BuiltInCallType10;
 
 
 /* ====================== Algorithm flattening ====================== */
 
 model AlgorithmFlatten1
+ Real x;
+algorithm
+ x := 5;
+ x := x + 2;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="AlgorithmFlatten1",
@@ -1661,14 +1667,13 @@ algorithm
 
 end FunctionTests.AlgorithmFlatten1;
 ")})));
-
- Real x;
-algorithm
- x := 5;
- x := x + 2;
 end AlgorithmFlatten1;
 
 model AlgorithmFlatten2
+ Real x;
+algorithm
+ break;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="AlgorithmFlatten2",
@@ -1681,13 +1686,25 @@ algorithm
 
 end FunctionTests.AlgorithmFlatten2;
 ")})));
-
- Real x;
-algorithm
- break;
 end AlgorithmFlatten2;
 
 model AlgorithmFlatten3
+ Integer x;
+ Integer y;
+algorithm
+ if x == 4 then
+  x := 1;
+  y := 2;
+ elseif x == 3 then
+  if y == 0 then
+   y := 1;
+  end if;
+  x := 2;
+  y := 3;
+ else
+  x := 3;
+ end if;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="AlgorithmFlatten3",
@@ -1712,25 +1729,23 @@ algorithm
 
 end FunctionTests.AlgorithmFlatten3;
 ")})));
-
- Integer x;
- Integer y;
-algorithm
- if x == 4 then
-  x := 1;
-  y := 2;
- elseif x == 3 then
-  if y == 0 then
-   y := 1;
-  end if;
-  x := 2;
-  y := 3;
- else
-  x := 3;
- end if;
 end AlgorithmFlatten3;
 
 model AlgorithmFlatten4
+ Integer x;
+ Integer y;
+algorithm
+ when x == 4 then
+  x := 1;
+  y := 2;
+ elsewhen x == 3 then
+  x := 2;
+  y := 3;
+  if x == 2 then
+   x := 3;
+  end if;
+ end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="AlgorithmFlatten4",
@@ -1753,23 +1768,19 @@ algorithm
 
 end FunctionTests.AlgorithmFlatten4;
 ")})));
-
- Integer x;
- Integer y;
-algorithm
- when x == 4 then
-  x := 1;
-  y := 2;
- elsewhen x == 3 then
-  x := 2;
-  y := 3;
-  if x == 2 then
-   x := 3;
-  end if;
- end when;
 end AlgorithmFlatten4;
 
 model AlgorithmFlatten5
+ Real x;
+algorithm
+ while x < 1 loop
+  while x < 2 loop
+   while x < 3 loop
+    x := x - 1;
+   end while;
+  end while;
+ end while;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="AlgorithmFlatten5",
@@ -1788,19 +1799,15 @@ algorithm
 
 end FunctionTests.AlgorithmFlatten5;
 ")})));
-
- Real x;
-algorithm
- while x < 1 loop
-  while x < 2 loop
-   while x < 3 loop
-    x := x - 1;
-   end while;
-  end while;
- end while;
 end AlgorithmFlatten5;
 
 model AlgorithmFlatten6
+ Real x;
+algorithm
+ for i in {1, 2, 4}, j in 1:3 loop
+  x := x + i * j;
+ end for;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="AlgorithmFlatten6",
@@ -1817,12 +1824,6 @@ algorithm
 
 end FunctionTests.AlgorithmFlatten6;
 ")})));
-
- Real x;
-algorithm
- for i in {1, 2, 4}, j in 1:3 loop
-  x := x + i * j;
- end for;
 end AlgorithmFlatten6;
 
 
@@ -1831,6 +1832,12 @@ end AlgorithmFlatten6;
 /* ----- if ----- */
 
 model AlgorithmTypeIf1
+ Real x;
+algorithm
+ if 1 then
+  x := 1.0;
+ end if;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeIf1",
@@ -1841,15 +1848,16 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1363, column 5:
   Type of test expression of if statement is not Boolean
 ")})));
-
- Real x;
-algorithm
- if 1 then
-  x := 1.0;
- end if;
 end AlgorithmTypeIf1;
 
 model AlgorithmTypeIf2
+ Integer a = 1;
+ Real x;
+algorithm
+ if a then
+  x := 1.0;
+ end if;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeIf2",
@@ -1860,16 +1868,16 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1382, column 5:
   Type of test expression of if statement is not Boolean
 ")})));
-
- Integer a = 1;
- Real x;
-algorithm
- if a then
-  x := 1.0;
- end if;
 end AlgorithmTypeIf2;
 
 model AlgorithmTypeIf3
+ Integer a = 1;
+ Real x;
+algorithm
+ if a + x then
+  x := 1.0;
+ end if;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeIf3",
@@ -1880,16 +1888,15 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1403, column 5:
   Type of test expression of if statement is not Boolean
 ")})));
-
- Integer a = 1;
- Real x;
-algorithm
- if a + x then
-  x := 1.0;
- end if;
 end AlgorithmTypeIf3;
 
 model AlgorithmTypeIf4
+ Real x;
+algorithm
+ if { true, false } then
+  x := 1.0;
+ end if;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeIf4",
@@ -1900,15 +1907,15 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1422, column 5:
   Type of test expression of if statement is not Boolean
 ")})));
-
- Real x;
-algorithm
- if { true, false } then
-  x := 1.0;
- end if;
 end AlgorithmTypeIf4;
 
 model AlgorithmTypeIf5
+ Real x;
+algorithm
+ if true then
+  x := 1.0;
+ end if;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="AlgorithmTypeIf5",
@@ -1923,17 +1930,17 @@ algorithm
 
 end FunctionTests.AlgorithmTypeIf5;
 ")})));
-
- Real x;
-algorithm
- if true then
-  x := 1.0;
- end if;
 end AlgorithmTypeIf5;
 
 /* ----- when ----- */
 
 model AlgorithmTypeWhen1
+ Real x;
+algorithm
+ when 1 then
+  x := 1.0;
+ end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeWhen1",
@@ -1944,15 +1951,16 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1469, column 7:
   Test expression of when statement isn't Boolean scalar or vector expression
 ")})));
-
- Real x;
-algorithm
- when 1 then
-  x := 1.0;
- end when;
 end AlgorithmTypeWhen1;
 
 model AlgorithmTypeWhen2
+ Integer a = 1;
+ Real x;
+algorithm
+ when a then
+  x := 1.0;
+ end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeWhen2",
@@ -1963,16 +1971,16 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1489, column 7:
   Test expression of when statement isn't Boolean scalar or vector expression
 ")})));
-
- Integer a = 1;
- Real x;
-algorithm
- when a then
-  x := 1.0;
- end when;
 end AlgorithmTypeWhen2;
 
 model AlgorithmTypeWhen3
+ Integer a = 1;
+ Real x;
+algorithm
+ when a + x then
+  x := 1.0;
+ end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeWhen3",
@@ -1983,16 +1991,15 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1509, column 7:
   Test expression of when statement isn't Boolean scalar or vector expression
 ")})));
-
- Integer a = 1;
- Real x;
-algorithm
- when a + x then
-  x := 1.0;
- end when;
 end AlgorithmTypeWhen3;
 
 model AlgorithmTypeWhen4
+ Real x;
+algorithm
+ when { true, false } then
+  x := 1.0;
+ end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="AlgorithmTypeWhen4",
@@ -2007,15 +2014,15 @@ algorithm
 
 end FunctionTests.AlgorithmTypeWhen4;
 ")})));
-
- Real x;
-algorithm
- when { true, false } then
-  x := 1.0;
- end when;
 end AlgorithmTypeWhen4;
 
 model AlgorithmTypeWhen5
+ Real x;
+algorithm
+ when true then
+  x := 1.0;
+ end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="AlgorithmTypeWhen5",
@@ -2030,17 +2037,17 @@ algorithm
 
 end FunctionTests.AlgorithmTypeWhen5;
 ")})));
-
- Real x;
-algorithm
- when true then
-  x := 1.0;
- end when;
 end AlgorithmTypeWhen5;
 
 /* ----- while ----- */
 
 model AlgorithmTypeWhile1
+ Real x;
+algorithm
+ while 1 loop
+  x := 1.0;
+ end while;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeWhile1",
@@ -2051,15 +2058,16 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1363, column 5:
   Type of test expression of while statement is not Boolean
 ")})));
-
- Real x;
-algorithm
- while 1 loop
-  x := 1.0;
- end while;
 end AlgorithmTypeWhile1;
 
 model AlgorithmTypeWhile2
+ Integer a = 1;
+ Real x;
+algorithm
+ while a loop
+  x := 1.0;
+ end while;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeWhile2",
@@ -2070,16 +2078,16 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1382, column 5:
   Type of test expression of while statement is not Boolean
 ")})));
-
- Integer a = 1;
- Real x;
-algorithm
- while a loop
-  x := 1.0;
- end while;
 end AlgorithmTypeWhile2;
 
 model AlgorithmTypeWhile3
+ Integer a = 1;
+ Real x;
+algorithm
+ while a + x loop
+  x := 1.0;
+ end while;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeWhile3",
@@ -2090,16 +2098,15 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1403, column 5:
   Type of test expression of while statement is not Boolean
 ")})));
-
- Integer a = 1;
- Real x;
-algorithm
- while a + x loop
-  x := 1.0;
- end while;
 end AlgorithmTypeWhile3;
 
 model AlgorithmTypeWhile4
+ Real x;
+algorithm
+ while { true, false } loop
+  x := 1.0;
+ end while;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeWhile4",
@@ -2110,15 +2117,15 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1422, column 5:
   Type of test expression of while statement is not Boolean
 ")})));
-
- Real x;
-algorithm
- while { true, false } loop
-  x := 1.0;
- end while;
 end AlgorithmTypeWhile4;
 
 model AlgorithmTypeWhile5
+ Real x;
+algorithm
+ while true loop
+  x := 1.0;
+ end while;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="AlgorithmTypeWhile5",
@@ -2133,15 +2140,13 @@ algorithm
 
 end FunctionTests.AlgorithmTypeWhile5;
 ")})));
-
- Real x;
-algorithm
- while true loop
-  x := 1.0;
- end while;
 end AlgorithmTypeWhile5;
 
 model AlgorithmTypeAssign1
+ Integer x;
+algorithm
+ x := 1.0;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeAssign1",
@@ -2152,13 +2157,13 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1674, column 2:
   Types of right and left side of assignment are not compatible
 ")})));
-
- Integer x;
-algorithm
- x := 1.0;
 end AlgorithmTypeAssign1;
 
 model AlgorithmTypeAssign2
+ Real x;
+algorithm
+ x := 1;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="AlgorithmTypeAssign2",
@@ -2171,13 +2176,13 @@ algorithm
 
 end FunctionTests.AlgorithmTypeAssign2;
 ")})));
-
- Real x;
-algorithm
- x := 1;
 end AlgorithmTypeAssign2;
 
 model AlgorithmTypeAssign3
+ Real x;
+algorithm
+ x := 1.0;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="AlgorithmTypeAssign3",
@@ -2190,13 +2195,13 @@ algorithm
 
 end FunctionTests.AlgorithmTypeAssign3;
 ")})));
-
- Real x;
-algorithm
- x := 1.0;
 end AlgorithmTypeAssign3;
 
 model AlgorithmTypeAssign4
+ Real x;
+algorithm
+ x := "foo";
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeAssign4",
@@ -2207,14 +2212,17 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1715, column 2:
   Types of right and left side of assignment are not compatible
 ")})));
-
- Real x;
-algorithm
- x := "foo";
 end AlgorithmTypeAssign4;
 
 
 model AlgorithmTypeForIndex1
+ Real x;
+algorithm
+ for i in 1:3 loop
+  i := 2;
+  x := i;
+ end for;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeForIndex1",
@@ -2225,17 +2233,16 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1794, column 3:
   Can not assign a value to a for loop index
 ")})));
-
- Real x;
-algorithm
- for i in 1:3 loop
-  i := 2;
-  x := i;
- end for;
 end AlgorithmTypeForIndex1;
 
 
 model AlgorithmTypeForIndex2
+ Real x;
+algorithm
+ for i in 1:3 loop
+  (i, x) := TestFunction2(1, 2);
+ end for;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmTypeForIndex2",
@@ -2246,18 +2253,20 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1815, column 3:
   Can not assign a value to a for loop index
 ")})));
-
- Real x;
-algorithm
- for i in 1:3 loop
-  (i, x) := TestFunction2(1, 2);
- end for;
 end AlgorithmTypeForIndex2;
 
 
 /* ====================== Algorithm transformations ===================== */
 
 model AlgorithmTransformation1
+ Real a = 1;
+ Real b = 2;
+ Real x;
+ Real y;
+algorithm
+ x := a;
+ y := b;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation1",
@@ -2287,18 +2296,19 @@ public
 
 end FunctionTests.AlgorithmTransformation1;
 ")})));
-
- Real a = 1;
- Real b = 2;
- Real x;
- Real y;
-algorithm
- x := a;
- y := b;
 end AlgorithmTransformation1;
 
 
 model AlgorithmTransformation2
+ Real a = 1;
+ Real x;
+ Real y;
+algorithm
+ x := a;
+ y := a;
+ x := a;
+ y := a;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation2",
@@ -2327,19 +2337,20 @@ public
 
 end FunctionTests.AlgorithmTransformation2;
 ")})));
-
- Real a = 1;
- Real x;
- Real y;
-algorithm
- x := a;
- y := a;
- x := a;
- y := a;
 end AlgorithmTransformation2;
 
 
 model AlgorithmTransformation3
+ Real a = 1;
+ Real b = 2;
+ Real x;
+ Real y;
+algorithm
+ x := a + 1;
+ if b > 1 then
+  y := a + 2;
+ end if;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation3",
@@ -2371,20 +2382,24 @@ public
 
 end FunctionTests.AlgorithmTransformation3;
 ")})));
+end AlgorithmTransformation3;
 
+
+model AlgorithmTransformation4
  Real a = 1;
  Real b = 2;
  Real x;
  Real y;
 algorithm
- x := a + 1;
- if b > 1 then
-  y := a + 2;
- end if;
-end AlgorithmTransformation3;
+ while b > 1 loop
+  x := a;
+  if a < 2 then
+   y := b;
+  else
+   y := a + 2;
+  end if;
+ end while;
 
-
-model AlgorithmTransformation4
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation4",
@@ -2420,24 +2435,16 @@ public
 
 end FunctionTests.AlgorithmTransformation4;
 ")})));
-
- Real a = 1;
- Real b = 2;
- Real x;
- Real y;
-algorithm
- while b > 1 loop
-  x := a;
-  if a < 2 then
-   y := b;
-  else
-   y := a + 2;
-  end if;
- end while;
 end AlgorithmTransformation4;
 
 
 model AlgorithmTransformation5
+ Real x;
+ Real y;
+algorithm
+ x := 1;
+ y := 2;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation5",
@@ -2461,16 +2468,17 @@ public
 
 end FunctionTests.AlgorithmTransformation5;
 ")})));
-
- Real x;
- Real y;
-algorithm
- x := 1;
- y := 2;
 end AlgorithmTransformation5;
 
 
 model AlgorithmTransformation6
+ Real x;
+ Real y;
+algorithm
+ x := 1;
+algorithm
+ y := 2;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation6",
@@ -2500,17 +2508,20 @@ public
 
 end FunctionTests.AlgorithmTransformation6;
 ")})));
-
- Real x;
- Real y;
-algorithm
- x := 1;
-algorithm
- y := 2;
 end AlgorithmTransformation6;
 
 
 model AlgorithmTransformation7
+ function algorithm_1
+  input Real i;
+  output Real o = i * 2;
+  algorithm
+ end algorithm_1;
+ 
+ Real x;
+algorithm
+ x := algorithm_1(2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation7",
@@ -2539,20 +2550,20 @@ public
 
 end FunctionTests.AlgorithmTransformation7;
 ")})));
-
- function algorithm_1
-  input Real i;
-  output Real o = i * 2;
-  algorithm
- end algorithm_1;
- 
- Real x;
-algorithm
- x := algorithm_1(2);
 end AlgorithmTransformation7;
 
 
 model AlgorithmTransformation8
+ model algorithm_1
+  Real a;
+  Real b;
+ end algorithm_1;
+ 
+ algorithm_1 x;
+algorithm
+ x.a := 2;
+ x.b := 3;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation8",
@@ -2576,20 +2587,17 @@ public
 
 end FunctionTests.AlgorithmTransformation8;
 ")})));
-
- model algorithm_1
-  Real a;
-  Real b;
- end algorithm_1;
- 
- algorithm_1 x;
-algorithm
- x.a := 2;
- x.b := 3;
 end AlgorithmTransformation8;
 
 
 model AlgorithmTransformation9
+ Real algorithm_1;
+ Real algorithm_3;
+algorithm
+ algorithm_1 := 1;
+algorithm
+ algorithm_3 := 3;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation9",
@@ -2619,17 +2627,19 @@ public
 
 end FunctionTests.AlgorithmTransformation9;
 ")})));
-
- Real algorithm_1;
- Real algorithm_3;
-algorithm
- algorithm_1 := 1;
-algorithm
- algorithm_3 := 3;
 end AlgorithmTransformation9;
 
 
 model AlgorithmTransformation10
+ Real x;
+ Real x_0;
+ Real x_1;
+algorithm
+ x := x_0;
+ x_1 := x;
+equation
+ x_0 = 0;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation10",
@@ -2658,19 +2668,16 @@ public
 
 end FunctionTests.AlgorithmTransformation10;
 ")})));
-
- Real x;
- Real x_0;
- Real x_1;
-algorithm
- x := x_0;
- x_1 := x;
-equation
- x_0 = 0;
 end AlgorithmTransformation10;
 
 
 model AlgorithmTransformation11
+ Real x;
+ Real y;
+algorithm
+ x := 1;
+ y := x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation11",
@@ -2696,16 +2703,20 @@ public
 
 end FunctionTests.AlgorithmTransformation11;
 ")})));
-
- Real x;
- Real y;
-algorithm
- x := 1;
- y := x;
 end AlgorithmTransformation11;
 
 
 model AlgorithmTransformation12
+ Real x0;
+ Real x1(start=1);
+ Real x2(start=2);
+ Real y;
+algorithm
+ x0 := 1;
+ x1 := x0;
+ x2 := x1;
+ y := x2;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation12",
@@ -2741,20 +2752,16 @@ public
 
 end FunctionTests.AlgorithmTransformation12;
 ")})));
-
- Real x0;
- Real x1(start=1);
- Real x2(start=2);
- Real y;
-algorithm
- x0 := 1;
- x1 := x0;
- x2 := x1;
- y := x2;
 end AlgorithmTransformation12;
 
 
 model AlgorithmTransformation13
+ Real x = 2;
+algorithm
+ if x < 3 then
+  TestFunction1(x);
+ end if;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation13",
@@ -2786,16 +2793,17 @@ public
 
 end FunctionTests.AlgorithmTransformation13;
 ")})));
-
- Real x = 2;
-algorithm
- if x < 3 then
-  TestFunction1(x);
- end if;
 end AlgorithmTransformation13;
 
 
 model AlgorithmTransformation14
+ Real x;
+algorithm
+ x := 0;
+ for i in 1:3 loop
+  x := x + i;
+ end for;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation14",
@@ -2821,17 +2829,26 @@ public
 
 end FunctionTests.AlgorithmTransformation14;
 ")})));
-
- Real x;
-algorithm
- x := 0;
- for i in 1:3 loop
-  x := x + i;
- end for;
 end AlgorithmTransformation14;
 
 
 model AlgorithmTransformation15
+	Real a_in = 1;
+	Real b_in = 2;
+	Real c_out;
+	Real d_out;
+
+	function f
+		input Real a;
+		input Real b;
+		output Real c = a;
+		output Real d = b;
+	algorithm
+	end f;
+
+algorithm
+	(c_out, d_out) := f(a_in, b_in);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation15",
@@ -2871,22 +2888,6 @@ public
 
 end FunctionTests.AlgorithmTransformation15;
 ")})));
-
-	Real a_in = 1;
-	Real b_in = 2;
-	Real c_out;
-	Real d_out;
-
-	function f
-		input Real a;
-		input Real b;
-		output Real c = a;
-		output Real d = b;
-	algorithm
-	end f;
-
-algorithm
-	(c_out, d_out) := f(a_in, b_in);
 end AlgorithmTransformation15;
 
 
@@ -2894,6 +2895,15 @@ end AlgorithmTransformation15;
 /* =========================== Arrays in functions =========================== */
 
 model ArrayExpInFunc1
+ function f
+  output Real o = 1.0;
+  protected Real x[3];
+ algorithm
+  x := { 1, 2, 3 };
+ end f;
+ 
+ Real x = f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc1",
@@ -2918,19 +2928,19 @@ public
 
 end FunctionTests.ArrayExpInFunc1;
 ")})));
-
- function f
-  output Real o = 1.0;
-  protected Real x[3];
- algorithm
-  x := { 1, 2, 3 };
- end f;
- 
- Real x = f();
 end ArrayExpInFunc1;
 
 
 model ArrayExpInFunc2
+ function f
+  output Real o = 1.0;
+  protected Real x[2,2];
+ algorithm
+  x := {{1,2},{3,4}} * {{1,2},{3,4}};
+ end f;
+ 
+ Real x = f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc2",
@@ -2956,19 +2966,20 @@ public
 
 end FunctionTests.ArrayExpInFunc2;
 ")})));
-
- function f
-  output Real o = 1.0;
-  protected Real x[2,2];
- algorithm
-  x := {{1,2},{3,4}} * {{1,2},{3,4}};
- end f;
- 
- Real x = f();
 end ArrayExpInFunc2;
 
 
 model ArrayExpInFunc3
+ function f
+  output Real o = 1.0;
+  protected Real x[2,2];
+ algorithm
+  x[1,:] := {1,2};
+  x[2,:] := {3,4};
+ end f;
+ 
+ Real x = f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc3",
@@ -2994,20 +3005,18 @@ public
 
 end FunctionTests.ArrayExpInFunc3;
 ")})));
-
- function f
-  output Real o = 1.0;
-  protected Real x[2,2];
- algorithm
-  x[1,:] := {1,2};
-  x[2,:] := {3,4};
- end f;
- 
- Real x = f();
 end ArrayExpInFunc3;
 
 
 model ArrayExpInFunc4
+ function f
+  output Real o = 1.0;
+  protected Real x[2,2] = {{1,2},{3,4}} * {{1,2},{3,4}};
+ algorithm
+ end f;
+ 
+ Real x = f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc4",
@@ -3033,18 +3042,29 @@ public
 
 end FunctionTests.ArrayExpInFunc4;
 ")})));
-
- function f
-  output Real o = 1.0;
-  protected Real x[2,2] = {{1,2},{3,4}} * {{1,2},{3,4}};
- algorithm
- end f;
- 
- Real x = f();
 end ArrayExpInFunc4;
 
 
 model ArrayExpInFunc5
+ function f
+  input Real a;
+  output Real o;
+  protected Real x;
+  protected Real y;
+ algorithm
+  (x, y) := f2({1,2,3} * {1,2,3});
+  o := a + x + y;
+ end f;
+ 
+ function f2
+  input Real a;
+  output Real b = a;
+  output Real c = a;
+ algorithm
+ end f2;
+ 
+ Real x = f({1,2,3} * {1,2,3});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc5",
@@ -3079,29 +3099,25 @@ public
 
 end FunctionTests.ArrayExpInFunc5;
 ")})));
-
- function f
-  input Real a;
-  output Real o;
-  protected Real x;
-  protected Real y;
- algorithm
-  (x, y) := f2({1,2,3} * {1,2,3});
-  o := a + x + y;
- end f;
- 
- function f2
-  input Real a;
-  output Real b = a;
-  output Real c = a;
- algorithm
- end f2;
- 
- Real x = f({1,2,3} * {1,2,3});
 end ArrayExpInFunc5;
 
 
 model ArrayExpInFunc6
+ function f
+  output Real o = 1.0;
+  protected Real x[3];
+ algorithm
+  if o < 2.0 then
+   x := { 1, 2, 3 };
+  elseif o < 1.5 then
+   x := { 4, 5, 6 };
+  else
+   x := { 7, 8, 9 };
+  end if;
+ end f;
+ 
+ Real x = f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc6",
@@ -3136,25 +3152,19 @@ public
 
 end FunctionTests.ArrayExpInFunc6;
 ")})));
-
- function f
-  output Real o = 1.0;
-  protected Real x[3];
- algorithm
-  if o < 2.0 then
-   x := { 1, 2, 3 };
-  elseif o < 1.5 then
-   x := { 4, 5, 6 };
-  else
-   x := { 7, 8, 9 };
-  end if;
- end f;
- 
- Real x = f();
 end ArrayExpInFunc6;
 
 
 model ArrayExpInFunc7
+ Real o = 1.0;
+ Real x[3];
+algorithm
+ when {o < 2.0, o > 3.0} then
+  x := { 1, 2, 3 };
+ elsewhen o < 1.5 then
+  x := { 4, 5, 6 };
+ end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc7",
@@ -3188,19 +3198,23 @@ public
 
 end FunctionTests.ArrayExpInFunc7;
 ")})));
-
- Real o = 1.0;
- Real x[3];
-algorithm
- when {o < 2.0, o > 3.0} then
-  x := { 1, 2, 3 };
- elsewhen o < 1.5 then
-  x := { 4, 5, 6 };
- end when;
 end ArrayExpInFunc7;
 
 
 model ArrayExpInFunc8
+ function f
+  output Real o = 1.0;
+  protected Real x[3];
+  protected Real y[3];
+ algorithm
+  for i in 1:3 loop
+   x[i] := i;
+   y := {i*i for i in 1:3};
+  end for;
+ end f;
+ 
+ Real x = f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc8",
@@ -3229,23 +3243,24 @@ public
 
 end FunctionTests.ArrayExpInFunc8;
 ")})));
-
- function f
-  output Real o = 1.0;
-  protected Real x[3];
-  protected Real y[3];
- algorithm
-  for i in 1:3 loop
-   x[i] := i;
-   y := {i*i for i in 1:3};
-  end for;
- end f;
- 
- Real x = f();
 end ArrayExpInFunc8;
 
 
 model ArrayExpInFunc9
+ function f
+  output Real o = 1.0;
+  protected Real x[3];
+  protected Integer y = 3;
+ algorithm
+  while y > 0 loop
+   x := 1:3;
+   x[y] := y;
+   y := y - 1;
+  end while;
+ end f;
+ 
+ Real x = f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc9",
@@ -3276,25 +3291,22 @@ public
 
 end FunctionTests.ArrayExpInFunc9;
 ")})));
-
- function f
-  output Real o = 1.0;
-  protected Real x[3];
-  protected Integer y = 3;
- algorithm
-  while y > 0 loop
-   x := 1:3;
-   x[y] := y;
-   y := y - 1;
-  end while;
- end f;
- 
- Real x = f();
 end ArrayExpInFunc9;
 
 
 
 model ArrayOutputScalarization1
+ function f
+  output Real x[2] = {1,2};
+  output Real y[2] = {1,2};
+ algorithm
+ end f;
+ 
+ Real x[2];
+ Real y[2];
+equation
+ (x,y) = f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization1",
@@ -3322,21 +3334,19 @@ public
 
 end FunctionTests.ArrayOutputScalarization1;
 ")})));
-
- function f
-  output Real x[2] = {1,2};
-  output Real y[2] = {1,2};
- algorithm
- end f;
- 
- Real x[2];
- Real y[2];
-equation
- (x,y) = f();
 end ArrayOutputScalarization1;
 
 
 model ArrayOutputScalarization2
+ function f
+  output Real x[2] = {1,2};
+ algorithm
+ end f;
+ 
+ Real x[2];
+equation
+ x = {3,4} + f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization2",
@@ -3363,19 +3373,22 @@ public
 
 end FunctionTests.ArrayOutputScalarization2;
 ")})));
-
- function f
-  output Real x[2] = {1,2};
- algorithm
- end f;
- 
- Real x[2];
-equation
- x = {3,4} + f();
 end ArrayOutputScalarization2;
 
 
 model ArrayOutputScalarization3
+ function f
+  output Real x[2] = {1, 2};
+ algorithm
+ end f;
+ 
+ Real x[2];
+ Real temp = 1;
+ Real temp_1 = 2;
+ Real temp_3 = 3;
+equation
+ x = {1,2} + f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization3",
@@ -3408,22 +3421,27 @@ public
 
 end FunctionTests.ArrayOutputScalarization3;
 ")})));
-
- function f
-  output Real x[2] = {1, 2};
- algorithm
- end f;
- 
- Real x[2];
- Real temp = 1;
- Real temp_1 = 2;
- Real temp_3 = 3;
-equation
- x = {1,2} + f();
 end ArrayOutputScalarization3;
 
 
 model ArrayOutputScalarization4
+ function f1
+  output Real x[2] = {1,2};
+  output Real y[2] = {1,2};
+ algorithm
+ end f1;
+ 
+ function f2
+  output Real x;
+  protected Real y[2];
+  protected Real z[2];
+ algorithm
+  (y,z) := f1();
+  x := y[1];
+ end f2;
+ 
+ Real x = f2();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization4",
@@ -3458,27 +3476,25 @@ public
 
 end FunctionTests.ArrayOutputScalarization4;
 ")})));
+end ArrayOutputScalarization4;
 
+
+model ArrayOutputScalarization5
  function f1
-  output Real x[2] = {1,2};
-  output Real y[2] = {1,2};
+  output Real x[2] = {1, 2};
  algorithm
  end f1;
  
  function f2
   output Real x;
   protected Real y[2];
-  protected Real z[2];
  algorithm
-  (y,z) := f1();
+  y := {1,2} + f1();
   x := y[1];
  end f2;
  
  Real x = f2();
-end ArrayOutputScalarization4;
 
-
-model ArrayOutputScalarization5
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization5",
@@ -3512,6 +3528,10 @@ public
 
 end FunctionTests.ArrayOutputScalarization5;
 ")})));
+end ArrayOutputScalarization5;
+
+
+model ArrayOutputScalarization6
 
  function f1
   output Real x[2] = {1, 2};
@@ -3521,16 +3541,14 @@ end FunctionTests.ArrayOutputScalarization5;
  function f2
   output Real x;
   protected Real y[2];
+  protected Real temp_1;
  algorithm
-  y := {1,2} + f1();
+  y := f1();
   x := y[1];
  end f2;
  
  Real x = f2();
-end ArrayOutputScalarization5;
 
-
-model ArrayOutputScalarization6
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization6",
@@ -3562,8 +3580,10 @@ public
 
 end FunctionTests.ArrayOutputScalarization6;
 ")})));
+end ArrayOutputScalarization6;
 
 
+model ArrayOutputScalarization7
  function f1
   output Real x[2] = {1, 2};
  algorithm
@@ -3572,17 +3592,21 @@ end FunctionTests.ArrayOutputScalarization6;
  function f2
   output Real x;
   protected Real y[2];
-  protected Real temp_1;
  algorithm
-  y := f1();
+  if sum(f1()) < 4 then
+   x := 1;
+   y := {1,2} + f1();
+  elseif sum(f1()) < 5 then
+   y := {3,4};
+  else
+   x := 1;
+   y := f1();
+  end if;
   x := y[1];
  end f2;
  
  Real x = f2();
-end ArrayOutputScalarization6;
 
-
-model ArrayOutputScalarization7
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization7",
@@ -3629,7 +3653,10 @@ public
 
 end FunctionTests.ArrayOutputScalarization7;
 ")})));
+end ArrayOutputScalarization7;
 
+
+model ArrayOutputScalarization8
  function f1
   output Real x[2] = {1, 2};
  algorithm
@@ -3639,23 +3666,15 @@ end FunctionTests.ArrayOutputScalarization7;
   output Real x;
   protected Real y[2];
  algorithm
-  if sum(f1()) < 4 then
-   x := 1;
-   y := {1,2} + f1();
-  elseif sum(f1()) < 5 then
-   y := {3,4};
-  else
-   x := 1;
+  for i in f1() loop
+   y[1] := i;
    y := f1();
-  end if;
+  end for;
   x := y[1];
  end f2;
  
  Real x = f2();
-end ArrayOutputScalarization7;
 
-
-model ArrayOutputScalarization8
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization8",
@@ -3691,28 +3710,19 @@ public
 
 end FunctionTests.ArrayOutputScalarization8;
 ")})));
-
- function f1
-  output Real x[2] = {1, 2};
- algorithm
- end f1;
- 
- function f2
-  output Real x;
-  protected Real y[2];
- algorithm
-  for i in f1() loop
-   y[1] := i;
-   y := f1();
-  end for;
-  x := y[1];
- end f2;
- 
- Real x = f2();
 end ArrayOutputScalarization8;
 
 
 model ArrayOutputScalarization9
+ function f
+  output Real x[2] = {1, 2};
+ algorithm
+ end f;
+ 
+ Real x[2];
+equation
+ x = f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization9",
@@ -3740,19 +3750,25 @@ public
 
 end FunctionTests.ArrayOutputScalarization9;
 ")})));
-
- function f
-  output Real x[2] = {1, 2};
- algorithm
- end f;
- 
- Real x[2];
-equation
- x = f();
 end ArrayOutputScalarization9;
 
 
 model ArrayOutputScalarization10
+ function f1
+  output Real x[2] = {1, 2};
+ algorithm
+ end f1;
+ 
+ function f2
+  output Real x = 0;
+ algorithm
+  while x < sum(f1()) loop
+   x := x + 1;
+  end while;
+ end f2;
+ 
+ Real x = f2();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization10",
@@ -3787,25 +3803,24 @@ public
 
 end FunctionTests.ArrayOutputScalarization10;
 ")})));
+end ArrayOutputScalarization10;
 
+
+model ArrayOutputScalarization11
  function f1
   output Real x[2] = {1, 2};
  algorithm
  end f1;
  
  function f2
-  output Real x = 0;
+  output Real x;
+  protected Real y[2] = f1();
  algorithm
-  while x < sum(f1()) loop
-   x := x + 1;
-  end while;
+  x := y[1];
  end f2;
  
  Real x = f2();
-end ArrayOutputScalarization10;
 
-
-model ArrayOutputScalarization11
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization11",
@@ -3836,7 +3851,10 @@ public
 
 end FunctionTests.ArrayOutputScalarization11;
 ")})));
+end ArrayOutputScalarization11;
 
+
+model ArrayOutputScalarization12
  function f1
   output Real x[2] = {1, 2};
  algorithm
@@ -3844,16 +3862,13 @@ end FunctionTests.ArrayOutputScalarization11;
  
  function f2
   output Real x;
-  protected Real y[2] = f1();
+  protected Real y[2] = f1() + {3, 4};
  algorithm
   x := y[1];
  end f2;
  
  Real x = f2();
-end ArrayOutputScalarization11;
 
-
-model ArrayOutputScalarization12
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization12",
@@ -3887,7 +3902,10 @@ public
 
 end FunctionTests.ArrayOutputScalarization12;
 ")})));
+end ArrayOutputScalarization12;
 
+
+model ArrayOutputScalarization13
  function f1
   output Real x[2] = {1, 2};
  algorithm
@@ -3895,16 +3913,13 @@ end FunctionTests.ArrayOutputScalarization12;
  
  function f2
   output Real x;
-  protected Real y[2] = f1() + {3, 4};
+  protected Real y = sum(f1());
  algorithm
-  x := y[1];
+  x := y;
  end f2;
  
  Real x = f2();
-end ArrayOutputScalarization12;
 
-
-model ArrayOutputScalarization13
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization13",
@@ -3937,24 +3952,17 @@ public
 
 end FunctionTests.ArrayOutputScalarization13;
 ")})));
-
- function f1
-  output Real x[2] = {1, 2};
- algorithm
- end f1;
- 
- function f2
-  output Real x;
-  protected Real y = sum(f1());
- algorithm
-  x := y;
- end f2;
- 
- Real x = f2();
 end ArrayOutputScalarization13;
 
 
 model ArrayOutputScalarization14
+ function f
+  output Real x[2] = {1, 2};
+ algorithm
+ end f;
+ 
+ Real x = f() * {3, 4};
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization14",
@@ -3979,25 +3987,10 @@ public
 
 end FunctionTests.ArrayOutputScalarization14;
 ")})));
-
- function f
-  output Real x[2] = {1, 2};
- algorithm
- end f;
- 
- Real x = f() * {3, 4};
 end ArrayOutputScalarization14;
 
 
 model ArrayOutputScalarization15
-	annotation(__JModelica(UnitTesting(tests={
-		GenericCodeGenTestCase(
-			name="ArrayOutputScalarization15",
-			description="Scalarization of array function outputs: number of equations",
-			template="$n_equations$",
-			generatedCode="3"
-)})));
-
  function f
   output Real x[2] = {1,2};
   output Real y = 2;
@@ -4008,10 +4001,34 @@ model ArrayOutputScalarization15
  Real y;
 equation
  (x, y) = f();
+
+	annotation(__JModelica(UnitTesting(tests={
+		GenericCodeGenTestCase(
+			name="ArrayOutputScalarization15",
+			description="Scalarization of array function outputs: number of equations",
+			template="$n_equations$",
+			generatedCode="3"
+)})));
 end ArrayOutputScalarization15;
 
 
 model ArrayOutputScalarization16
+ function f1
+  output Real o = 2;
+  protected Real x[2] = {1,2};
+  protected Real y[2];
+ algorithm
+  y := f2(x);
+ end f1;
+ 
+ function f2
+  input Real x[2];
+  output Real y[2] = x;
+ algorithm
+ end f2;
+ 
+ Real x = f1();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization16",
@@ -4046,13 +4063,15 @@ public
 
 end FunctionTests.ArrayOutputScalarization16;
 ")})));
+end ArrayOutputScalarization16;
 
+
+model ArrayOutputScalarization17
  function f1
   output Real o = 2;
-  protected Real x[2] = {1,2};
   protected Real y[2];
  algorithm
-  y := f2(x);
+  y := f2(f2({1,2}));
  end f1;
  
  function f2
@@ -4062,10 +4081,7 @@ end FunctionTests.ArrayOutputScalarization16;
  end f2;
  
  Real x = f1();
-end ArrayOutputScalarization16;
 
-
-model ArrayOutputScalarization17
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization17",
@@ -4099,25 +4115,27 @@ public
 
 end FunctionTests.ArrayOutputScalarization17;
 ")})));
-
- function f1
-  output Real o = 2;
-  protected Real y[2];
- algorithm
-  y := f2(f2({1,2}));
- end f1;
- 
- function f2
-  input Real x[2];
-  output Real y[2] = x;
- algorithm
- end f2;
- 
- Real x = f1();
 end ArrayOutputScalarization17;
 
 
 model ArrayOutputScalarization18
+    function f1
+        input Real[:] a1;
+        output Real x1;
+    protected
+        Real[:] b1 = f2(a1);
+    algorithm
+        x1 := a1 * b1;
+    end f1;
+    
+    function f2
+        input Real[:] a2;
+        output Real[size(a2, 1)] x2 = 2 * a2;
+    algorithm
+    end f2;
+    
+    Real x = f1({ 1, 2 });
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization18",
@@ -4157,14 +4175,17 @@ public
 
 end FunctionTests.ArrayOutputScalarization18;
 ")})));
+end ArrayOutputScalarization18;
 
+
+model ArrayOutputScalarization19
     function f1
         input Real[:] a1;
         output Real x1;
     protected
-        Real[:] b1 = f2(a1);
+        Real[2] b1 = f2(a1);
     algorithm
-        x1 := a1 * b1;
+        x1 := sum(b1);
     end f1;
     
     function f2
@@ -4174,10 +4195,7 @@ end FunctionTests.ArrayOutputScalarization18;
     end f2;
     
     Real x = f1({ 1, 2 });
-end ArrayOutputScalarization18;
 
-
-model ArrayOutputScalarization19
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization19",
@@ -4211,27 +4229,31 @@ public
 
 end FunctionTests.ArrayOutputScalarization19;
 ")})));
-
-    function f1
-        input Real[:] a1;
-        output Real x1;
-    protected
-        Real[2] b1 = f2(a1);
-    algorithm
-        x1 := sum(b1);
-    end f1;
-    
-    function f2
-        input Real[:] a2;
-        output Real[size(a2, 1)] x2 = 2 * a2;
-    algorithm
-    end f2;
-    
-    Real x = f1({ 1, 2 });
 end ArrayOutputScalarization19;
 
 
 model ArrayOutputScalarization20
+	record R
+		Real a;
+		Real b[2];		
+	end R;
+	
+    function f1
+        input Real c;
+        output R d;
+    algorithm
+        d := f2(c);
+    end f1;
+    
+    function f2
+        input Real e;
+        output R f;
+    algorithm
+        f := R(e, {1,2});
+    end f2;
+    
+    R x = f1(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization20",
@@ -4270,27 +4292,6 @@ public
 
 end FunctionTests.ArrayOutputScalarization20;
 ")})));
-
-	record R
-		Real a;
-		Real b[2];		
-	end R;
-	
-    function f1
-        input Real c;
-        output R d;
-    algorithm
-        d := f2(c);
-    end f1;
-    
-    function f2
-        input Real e;
-        output R f;
-    algorithm
-        f := R(e, {1,2});
-    end f2;
-    
-    R x = f1(1);
 end ArrayOutputScalarization20;
 
 
@@ -4298,6 +4299,16 @@ end ArrayOutputScalarization20;
 /* ======================= Unknown array sizes ======================*/
 
 model UnknownArray1
+ function f
+  input Real a[:];
+  output Real b[size(a,1)];
+ algorithm
+  b := a;
+ end f;
+ 
+ Real x[3] = f({1,2,3});
+ Real y[2] = f({4,5});
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="UnknownArray1",
@@ -4318,20 +4329,19 @@ public
 
 end FunctionTests.UnknownArray1;
 ")})));
-
- function f
-  input Real a[:];
-  output Real b[size(a,1)];
- algorithm
-  b := a;
- end f;
- 
- Real x[3] = f({1,2,3});
- Real y[2] = f({4,5});
 end UnknownArray1;
 
 
 model UnknownArray2
+ function f
+  input Real a[:];
+  output Real b[:] = a;
+ algorithm
+ end f;
+ 
+ Real x[3] = f({1,2,3});
+ Real y[2] = f({4,5});
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="UnknownArray2",
@@ -4351,19 +4361,21 @@ public
 
 end FunctionTests.UnknownArray2;
 ")})));
-
- function f
-  input Real a[:];
-  output Real b[:] = a;
- algorithm
- end f;
- 
- Real x[3] = f({1,2,3});
- Real y[2] = f({4,5});
 end UnknownArray2;
 
 
 model UnknownArray3
+ function f
+  input Real a[:];
+  output Real b[size(c,1)];
+  protected Real c[size(a,1)];
+ algorithm
+  b := a;
+ end f;
+ 
+ Real x[3] = f({1,2,3});
+ Real y[2] = f({4,5});
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="UnknownArray3",
@@ -4385,21 +4397,20 @@ public
 
 end FunctionTests.UnknownArray3;
 ")})));
-
- function f
-  input Real a[:];
-  output Real b[size(c,1)];
-  protected Real c[size(a,1)];
- algorithm
-  b := a;
- end f;
- 
- Real x[3] = f({1,2,3});
- Real y[2] = f({4,5});
 end UnknownArray3;
 
 
 model UnknownArray4
+ function f
+  input Real a[:];
+  output Real b[:] = c;
+  protected Real c[:] = a;
+ algorithm
+ end f;
+ 
+ Real x[3] = f({1,2,3});
+ Real y[2] = f({4,5});
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="UnknownArray4",
@@ -4420,20 +4431,22 @@ public
 
 end FunctionTests.UnknownArray4;
 ")})));
-
- function f
-  input Real a[:];
-  output Real b[:] = c;
-  protected Real c[:] = a;
- algorithm
- end f;
- 
- Real x[3] = f({1,2,3});
- Real y[2] = f({4,5});
 end UnknownArray4;
 
 
 model UnknownArray5
+ function f
+  input Real a[:];
+  output Real b[:] = c;
+  output Real c[:] = a;
+ algorithm
+ end f;
+ 
+ Real x[3];
+ Real y[3];
+equation
+ (x, y) = f({1,2,3});
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="UnknownArray5",
@@ -4456,7 +4469,10 @@ public
 
 end FunctionTests.UnknownArray5;
 ")})));
+end UnknownArray5;
 
+
+model UnknownArray6
  function f
   input Real a[:];
   output Real b[:] = c;
@@ -4464,14 +4480,8 @@ end FunctionTests.UnknownArray5;
  algorithm
  end f;
  
- Real x[3];
- Real y[3];
-equation
- (x, y) = f({1,2,3});
-end UnknownArray5;
+ Real x[2] = f({1,2,3});
 
-
-model UnknownArray6
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="UnknownArray6",
@@ -4482,30 +4492,10 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 3747, column 7:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
 ")})));
-
- function f
-  input Real a[:];
-  output Real b[:] = c;
-  output Real c[:] = a;
- algorithm
- end f;
- 
- Real x[2] = f({1,2,3});
 end UnknownArray6;
 
 
 model UnknownArray7
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="UnknownArray7",
-			description="Using functions with unknown array sizes: wrong size",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 3773, column 2:
-  Calling function f(): types of component y and output c are not compatible
-")})));
-
  function f
   input Real a[:];
   output Real b[:] = c;
@@ -4517,10 +4507,30 @@ Semantic error at line 3773, column 2:
  Real y[2];
 equation
  (x, y) = f({1,2,3});
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnknownArray7",
+			description="Using functions with unknown array sizes: wrong size",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 3773, column 2:
+  Calling function f(): types of component y and output c are not compatible
+")})));
 end UnknownArray7;
 
 
 model UnknownArray8
+ function f
+  input Real a[:];
+  output Real b[size(b,1)];
+ algorithm
+  b := {1,2};
+ end f;
+ 
+ Real x[2] = f({1,2,3});
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="UnknownArray8",
@@ -4534,19 +4544,21 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 3796, column 14:
   Could not evaluate array size of output b
 ")})));
-
- function f
-  input Real a[:];
-  output Real b[size(b,1)];
- algorithm
-  b := {1,2};
- end f;
- 
- Real x[2] = f({1,2,3});
 end UnknownArray8;
 
 
 model UnknownArray9
+ function f
+  input Real a[:,:];
+  input Real b[:,size(a,2)];
+  output Real c[size(d,1), size(d,2)];
+  protected Real d[:,:] = cat(1, a, b);
+ algorithm
+  c := d;
+ end f;
+ 
+ Real x[5,2] = f({{1,2},{3,4}}, {{5,6},{7,8},{9,0}});
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="UnknownArray9",
@@ -4568,21 +4580,19 @@ public
 
 end FunctionTests.UnknownArray9;
 ")})));
-
- function f
-  input Real a[:,:];
-  input Real b[:,size(a,2)];
-  output Real c[size(d,1), size(d,2)];
-  protected Real d[:,:] = cat(1, a, b);
- algorithm
-  c := d;
- end f;
- 
- Real x[5,2] = f({{1,2},{3,4}}, {{5,6},{7,8},{9,0}});
 end UnknownArray9;
 
 
 model UnknownArray10
+ function f
+  input Real a[:];
+  output Real b[size(a,1)];
+ algorithm
+  b := a;
+ end f;
+ 
+ Real x[2] = f({1,2});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray10",
@@ -4607,19 +4617,18 @@ public
 
 end FunctionTests.UnknownArray10;
 ")})));
-
- function f
-  input Real a[:];
-  output Real b[size(a,1)];
- algorithm
-  b := a;
- end f;
- 
- Real x[2] = f({1,2});
 end UnknownArray10;
 
 
 model UnknownArray11
+ function f
+  input Real a[:];
+  output Real b[size(a,1)] = a;
+ algorithm
+ end f;
+ 
+ Real x[2] = f({1,2});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray11",
@@ -4644,18 +4653,21 @@ public
 
 end FunctionTests.UnknownArray11;
 ")})));
-
- function f
-  input Real a[:];
-  output Real b[size(a,1)] = a;
- algorithm
- end f;
- 
- Real x[2] = f({1,2});
 end UnknownArray11;
 
 
 model UnknownArray12
+ function f
+  input Real a[:];
+  input Real b[:];
+  input Real c;
+  output Real o[size(a,1)];
+ algorithm
+  o := c * a + 2 * b;
+ end f;
+ 
+ Real x[2] = f({1,2}, {3,4}, 5);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray12",
@@ -4682,21 +4694,20 @@ public
 
 end FunctionTests.UnknownArray12;
 ")})));
-
- function f
-  input Real a[:];
-  input Real b[:];
-  input Real c;
-  output Real o[size(a,1)];
- algorithm
-  o := c * a + 2 * b;
- end f;
- 
- Real x[2] = f({1,2}, {3,4}, 5);
 end UnknownArray12;
 
 
 model UnknownArray13
+ function f
+  input Real a[:];
+  input Real b[:];
+  input Real c;
+  output Real o[size(a,1)] = c * a + 2 * b;
+ algorithm
+ end f;
+ 
+ Real x[2] = f({1,2}, {3,4}, 5);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray13",
@@ -4723,20 +4734,19 @@ public
 
 end FunctionTests.UnknownArray13;
 ")})));
-
- function f
-  input Real a[:];
-  input Real b[:];
-  input Real c;
-  output Real o[size(a,1)] = c * a + 2 * b;
- algorithm
- end f;
- 
- Real x[2] = f({1,2}, {3,4}, 5);
 end UnknownArray13;
 
 
 model UnknownArray14
+ function f
+  input Real a[:,:];
+  input Real b[size(a,2),:];
+  output Real o[size(a,1),size(b,2)] = a * b;
+ algorithm
+ end f;
+ 
+ Real x[2,2] = f({{1,2},{3,4}}, {{5,6},{7,8}});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray14",
@@ -4771,19 +4781,19 @@ public
 
 end FunctionTests.UnknownArray14;
 ")})));
-
- function f
-  input Real a[:,:];
-  input Real b[size(a,2),:];
-  output Real o[size(a,1),size(b,2)] = a * b;
- algorithm
- end f;
- 
- Real x[2,2] = f({{1,2},{3,4}}, {{5,6},{7,8}});
 end UnknownArray14;
 
 
 model UnknownArray15
+ function f
+  input Real a[:];
+  input Real b[size(a,1)];
+  output Real o = a * b;
+ algorithm
+ end f;
+ 
+ Real x = f({1,2}, {3,4});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray15",
@@ -4811,19 +4821,22 @@ public
 
 end FunctionTests.UnknownArray15;
 ")})));
-
- function f
-  input Real a[:];
-  input Real b[size(a,1)];
-  output Real o = a * b;
- algorithm
- end f;
- 
- Real x = f({1,2}, {3,4});
 end UnknownArray15;
 
 
 model UnknownArray16
+ function f
+  input Real a[:];
+  input Real b[size(a,1)];
+  output Real o = 1;
+ algorithm
+  if a * b < 4 then
+   o := 2;
+  end if;
+ end f;
+ 
+ Real x = f({1,2}, {3,4});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray16",
@@ -4854,22 +4867,21 @@ public
 
 end FunctionTests.UnknownArray16;
 ")})));
-
- function f
-  input Real a[:];
-  input Real b[size(a,1)];
-  output Real o = 1;
- algorithm
-  if a * b < 4 then
-   o := 2;
-  end if;
- end f;
- 
- Real x = f({1,2}, {3,4});
 end UnknownArray16;
 
 
 model UnknownArray17
+ function f
+  input Real a[:,:];
+  input Real b[size(a,2),:];
+  input Real c[size(b,2),:];
+  output Real[size(a, 1), size(c, 2)] o = a * b * c;
+ algorithm
+ end f;
+ 
+ Real y[2,2] = {{1,2}, {3,4}};
+ Real x[2,2] = f(y, y, y);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray17",
@@ -4918,21 +4930,21 @@ public
 
 end FunctionTests.UnknownArray17;
 ")})));
-
- function f
-  input Real a[:,:];
-  input Real b[size(a,2),:];
-  input Real c[size(b,2),:];
-  output Real[size(a, 1), size(c, 2)] o = a * b * c;
- algorithm
- end f;
- 
- Real y[2,2] = {{1,2}, {3,4}};
- Real x[2,2] = f(y, y, y);
 end UnknownArray17;
 
 
 model UnknownArray18
+ function f
+  input Real a[:];
+  output Real o[size(a,1)];
+ algorithm
+  for i in 1:size(a,1) loop
+   o[i] := a[i] + i;
+  end for;
+ end f;
+ 
+  Real x[2] = f({1,2});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray18",
@@ -4957,21 +4969,18 @@ public
 
 end FunctionTests.UnknownArray18;
 ")})));
-
- function f
-  input Real a[:];
-  output Real o[size(a,1)];
- algorithm
-  for i in 1:size(a,1) loop
-   o[i] := a[i] + i;
-  end for;
- end f;
- 
-  Real x[2] = f({1,2});
 end UnknownArray18;
 
 
 model UnknownArray19
+ function f
+  input Real a[:,:];
+  output Real[size(a, 1), size(b, 2)] c = a;
+ algorithm
+ end f;
+ 
+ Real x[2,2] = f({{1,2}, {3,4}});
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="UnknownArray19",
@@ -4988,18 +4997,20 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 4433, column 16:
   Could not evaluate array size of output c
 ")})));
-
- function f
-  input Real a[:,:];
-  output Real[size(a, 1), size(b, 2)] c = a;
- algorithm
- end f;
- 
- Real x[2,2] = f({{1,2}, {3,4}});
 end UnknownArray19;
 
 
 model UnknownArray20
+ function f
+  input Real a[:,:];
+  output Real[2] c;
+ algorithm
+  c[1] := a[1,1];
+  c[end] := a[end,end];
+ end f;
+ 
+ Real x[2] = f({{1,2}, {3,4}});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray20",
@@ -5023,20 +5034,19 @@ public
 
 end FunctionTests.UnknownArray20;
 ")})));
-
- function f
-  input Real a[:,:];
-  output Real[2] c;
- algorithm
-  c[1] := a[1,1];
-  c[end] := a[end,end];
- end f;
- 
- Real x[2] = f({{1,2}, {3,4}});
 end UnknownArray20;
 
 
 model UnknownArray21
+	function f
+		input Real a[:];
+		input Real b[:];
+		output Real c = a * b;
+	algorithm
+	end f;
+	
+	Real x = f({1,2}, {3,4});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray21",
@@ -5064,19 +5074,19 @@ public
 
 end FunctionTests.UnknownArray21;
 ")})));
+end UnknownArray21;
 
+
+model UnknownArray22
 	function f
-		input Real a[:];
-		input Real b[:];
+		input Real a[:] = {1, 2, 3};
+		input Real b[:] = {4, 5, 6};
 		output Real c = a * b;
 	algorithm
 	end f;
 	
 	Real x = f({1,2}, {3,4});
-end UnknownArray21;
 
-
-model UnknownArray22
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray22",
@@ -5104,20 +5114,19 @@ public
 
 end FunctionTests.UnknownArray22;
 ")})));
-
-	function f
-		input Real a[:] = {1, 2, 3};
-		input Real b[:] = {4, 5, 6};
-		output Real c = a * b;
-	algorithm
-	end f;
-	
-	Real x = f({1,2}, {3,4});
 end UnknownArray22;
 
 
 // TODO: assignment to temp array should be outside loop - see #699
 model UnknownArray23
+	function f
+		input Real a[:];
+		output Real c = a * {1, 2, 3};
+	algorithm
+	end f;
+
+	Real x = f({1,2,3});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray23",
@@ -5148,19 +5157,20 @@ public
 
 end FunctionTests.UnknownArray23;
 ")})));
-
-	function f
-		input Real a[:];
-		output Real c = a * {1, 2, 3};
-	algorithm
-	end f;
-
-	Real x = f({1,2,3});
 end UnknownArray23;
 
 
 // TODO: assignment to temp array should be outside loop - see #699
 model UnknownArray24
+	function f
+		input Real x[:,2];
+		output Real y[size(x, 1), 2];
+	algorithm
+		y := x * {{1, 2}, {3, 4}};
+	end f;
+
+	Real x[3,2] = f({{5,6},{7,8},{9,0}});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray24",
@@ -5201,19 +5211,19 @@ public
 
 end FunctionTests.UnknownArray24;
 ")})));
-
-	function f
-		input Real x[:,2];
-		output Real y[size(x, 1), 2];
-	algorithm
-		y := x * {{1, 2}, {3, 4}};
-	end f;
-
-	Real x[3,2] = f({{5,6},{7,8},{9,0}});
 end UnknownArray24;
 
 
 model UnknownArray25
+    function f
+        input Real[:] y;
+        output Real x;
+    algorithm
+        x := sum(y);
+    end f;
+    
+    Real x = f({1,2});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray25",
@@ -5240,19 +5250,19 @@ public
 
 end FunctionTests.UnknownArray25;
 ")})));
-
-    function f
-        input Real[:] y;
-        output Real x;
-    algorithm
-        x := sum(y);
-    end f;
-    
-    Real x = f({1,2});
 end UnknownArray25;
 
 
 model UnknownArray26
+    function f
+        input Real[:] y;
+        output Real x;
+    algorithm
+        x := sum(y[i]*y[i] for i in 1:size(y,1));
+    end f;
+    
+    Real x = f({1,2});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray26",
@@ -5279,19 +5289,20 @@ public
 
 end FunctionTests.UnknownArray26;
 ")})));
-
-    function f
-        input Real[:] y;
-        output Real x;
-    algorithm
-        x := sum(y[i]*y[i] for i in 1:size(y,1));
-    end f;
-    
-    Real x = f({1,2});
 end UnknownArray26;
 
 
 model UnknownArray27
+    function f
+        input Real[:] y;
+        input Real[size(y,1), size(y,1)] z;
+        output Real x;
+    algorithm
+        x := sum(y[i]*y[i]/(sum(y[j]*z[i,j] for j in 1:size(y,1))) for i in 1:size(y,1));
+    end f;
+    
+    Real x = f({1,2}, {{1,2},{3,4}});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray27",
@@ -5324,16 +5335,6 @@ public
 
 end FunctionTests.UnknownArray27;
 ")})));
-
-    function f
-        input Real[:] y;
-        input Real[size(y,1), size(y,1)] z;
-        output Real x;
-    algorithm
-        x := sum(y[i]*y[i]/(sum(y[j]*z[i,j] for j in 1:size(y,1))) for i in 1:size(y,1));
-    end f;
-    
-    Real x = f({1,2}, {{1,2},{3,4}});
 end UnknownArray27;
 
 
@@ -5351,6 +5352,23 @@ end UnknownArray28;
 
 
 model UnknownArray29
+    final constant Real a[:] = {1, 2, 3};
+    
+    function f1
+        output Real y1;
+    protected
+    algorithm
+      y1 := f2(a[1:2]);
+    end f1;
+    
+    function f2
+        input Real x2[:];
+        output Real y2 = sum(x2);
+    algorithm
+    end f2;
+    
+    Real x = f1();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray29",
@@ -5394,27 +5412,19 @@ public
 
 end FunctionTests.UnknownArray29;
 ")})));
-
-    final constant Real a[:] = {1, 2, 3};
-    
-    function f1
-        output Real y1;
-    protected
-    algorithm
-      y1 := f2(a[1:2]);
-    end f1;
-    
-    function f2
-        input Real x2[:];
-        output Real y2 = sum(x2);
-    algorithm
-    end f2;
-    
-    Real x = f1();
 end UnknownArray29;
 
 
 model UnknownArray30
+	function f
+		input Real[:] a;
+		output Real b;
+	algorithm
+		b := a * ones(size(a, 1)) + zeros(size(a, 1)) * fill(a[1], size(a, 1));
+	end f;
+	
+	Real x = f({1,2,3});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray30",
@@ -5446,18 +5456,25 @@ public
 
 end FunctionTests.UnknownArray30;
 ")})));
-
-	function f
-		input Real[:] a;
-		output Real b;
-	algorithm
-		b := a * ones(size(a, 1)) + zeros(size(a, 1)) * fill(a[1], size(a, 1));
-	end f;
-	
-	Real x = f({1,2,3});
 end UnknownArray30;
 
 model UnknownArray31
+	function f1
+		input Real[:] a;
+		output Real[size(a,1)] b;
+	algorithm
+		b := 2 * a;
+	end f1;
+	
+	function f2
+		input Real[:] c;
+		output Real[size(c,1)] d;
+	algorithm
+		d := f1(c);
+	end f2;
+	
+	Real[2] x = f2({1,2});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnknownArray31",
@@ -5490,26 +5507,17 @@ public
 
 end FunctionTests.UnknownArray31;
 ")})));
-
-	function f1
-		input Real[:] a;
-		output Real[size(a,1)] b;
-	algorithm
-		b := 2 * a;
-	end f1;
-	
-	function f2
-		input Real[:] c;
-		output Real[size(c,1)] d;
-	algorithm
-		d := f1(c);
-	end f2;
-	
-	Real[2] x = f2({1,2});
 end UnknownArray31;
 
 // TODO: need more complex cases
 model IncompleteFunc1
+ function f
+  input Real x;
+  output Real y = x;
+ end f;
+ 
+ Real x = f(2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="IncompleteFunc1",
@@ -5520,17 +5528,21 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 4251, column 11:
   Calling function f(): can only call functions that have one algorithm section or external function specification
 ")})));
-
- function f
-  input Real x;
-  output Real y = x;
- end f;
- 
- Real x = f(2);
 end IncompleteFunc1;
 
 
 model IncompleteFunc2
+ function f
+  input Real x;
+  output Real y = x;
+ algorithm
+  y := y + 1;
+ algorithm
+  y := y + 1;
+ end f;
+ 
+ Real x = f(2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="IncompleteFunc2",
@@ -5541,21 +5553,20 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 4276, column 11:
   Calling function f(): can only call functions that have one algorithm section or external function specification
 ")})));
+end IncompleteFunc2;
 
+
+model IncompleteFunc3
  function f
   input Real x;
   output Real y = x;
  algorithm
   y := y + 1;
- algorithm
-  y := y + 1;
+ external;
  end f;
  
  Real x = f(2);
-end IncompleteFunc2;
 
-
-model IncompleteFunc3
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="IncompleteFunc3",
@@ -5566,21 +5577,19 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 4300, column 11:
   Calling function f(): can only call functions that have one algorithm section or external function specification
 ")})));
-
- function f
-  input Real x;
-  output Real y = x;
- algorithm
-  y := y + 1;
- external;
- end f;
- 
- Real x = f(2);
 end IncompleteFunc3;
 
 
 
 model ExternalFunc1
+ function f
+  input Real x;
+  output Real y;
+ external;
+ end f;
+ 
+ Real x = f(2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ExternalFunc1",
@@ -5600,18 +5609,21 @@ public
 
 end FunctionTests.ExternalFunc1;
 ")})));
-
- function f
-  input Real x;
-  output Real y;
- external;
- end f;
- 
- Real x = f(2);
 end ExternalFunc1;
 
 
 model ExternalFunc2
+ function f
+  input Real x[:,2];
+  input Real y;
+  output Real z;
+  output Real q;
+  protected Real a = y + 2;
+ external;
+ end f;
+ 
+ Real x = f({{1,2},{3,4}}, 5);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ExternalFunc2",
@@ -5634,21 +5646,20 @@ public
 
 end FunctionTests.ExternalFunc2;
 ")})));
+end ExternalFunc2;
 
+
+model ExternalFunc3
  function f
   input Real x[:,2];
   input Real y;
   output Real z;
   output Real q;
-  protected Real a = y + 2;
- external;
+ external foo(size(x,1), 2, x, z, y, q);
  end f;
  
  Real x = f({{1,2},{3,4}}, 5);
-end ExternalFunc2;
 
-
-model ExternalFunc3
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ExternalFunc3",
@@ -5670,20 +5681,20 @@ public
 
 end FunctionTests.ExternalFunc3;
 ")})));
+end ExternalFunc3;
 
+
+model ExternalFunc4
  function f
   input Real x[:,2];
   input Real y;
   output Real z;
   output Real q;
- external foo(size(x,1), 2, x, z, y, q);
+ external q = foo(size(x,1), 2, x, z, y);
  end f;
  
  Real x = f({{1,2},{3,4}}, 5);
-end ExternalFunc3;
 
-
-model ExternalFunc4
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ExternalFunc4",
@@ -5705,20 +5716,18 @@ public
 
 end FunctionTests.ExternalFunc4;
 ")})));
-
- function f
-  input Real x[:,2];
-  input Real y;
-  output Real z;
-  output Real q;
- external q = foo(size(x,1), 2, x, z, y);
- end f;
- 
- Real x = f({{1,2},{3,4}}, 5);
 end ExternalFunc4;
 
 
 model ExternalFunc5
+ function f
+  input Real x;
+  output Real y;
+ external "C";
+ end f;
+ 
+ Real x = f(2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ExternalFunc5",
@@ -5738,18 +5747,18 @@ public
 
 end FunctionTests.ExternalFunc5;
 ")})));
-
- function f
-  input Real x;
-  output Real y;
- external "C";
- end f;
- 
- Real x = f(2);
 end ExternalFunc5;
 
 
 model ExternalFunc6
+ function f
+  input Real x;
+  output Real y;
+ external "FORTRAN 77";
+ end f;
+ 
+ Real x = f(2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ExternalFunc6",
@@ -5769,18 +5778,18 @@ public
 
 end FunctionTests.ExternalFunc6;
 ")})));
-
- function f
-  input Real x;
-  output Real y;
- external "FORTRAN 77";
- end f;
- 
- Real x = f(2);
 end ExternalFunc6;
 
 
 model ExternalFunc7
+ function f
+  input Real x;
+  output Real y;
+ external "C++";
+ end f;
+ 
+ Real x = f(2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="ExternalFunc7",
@@ -5791,27 +5800,11 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 4508, column 2:
   The external language specification \"C++\" is not supported
 ")})));
-
- function f
-  input Real x;
-  output Real y;
- external "C++";
- end f;
- 
- Real x = f(2);
 end ExternalFunc7;
 
 
 
 model ExternalFuncLibs1
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="ExternalFuncLibs1",
-			description="External function annotations, Library",
-			methodName="externalLibraries",
-			methodResult="[foo, m, bar]"
- )})));
-
  function f1
   input Real x;
   output Real y;
@@ -5840,18 +5833,18 @@ model ExternalFuncLibs1
  Real x2 = f2(2);
  Real x3 = f3(3);
  Real x4 = f4(4);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="ExternalFuncLibs1",
+			description="External function annotations, Library",
+			methodName="externalLibraries",
+			methodResult="[foo, m, bar]"
+ )})));
 end ExternalFuncLibs1;
 
 
 model ExternalFuncLibs2
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="ExternalFuncLibs2",
-			description="External function annotations, Include",
-			methodName="externalIncludes",
-			methodResult="[#include \"bar.h\", #include \"foo.h\"]"
- )})));
-
  function f1
   input Real x;
   output Real y;
@@ -5880,18 +5873,18 @@ model ExternalFuncLibs2
  Real x2 = f2(2);
  Real x3 = f3(3);
  Real x4 = f4(4);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="ExternalFuncLibs2",
+			description="External function annotations, Include",
+			methodName="externalIncludes",
+			methodResult="[#include \"bar.h\", #include \"foo.h\"]"
+ )})));
 end ExternalFuncLibs2;
 
 
 model ExternalFuncLibs3
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="ExternalFuncLibs3",
-			description="External function annotations, LibraryDirectory",
-			methodName="externalLibraryDirectories",
-			methodResult="[/c:/bar/lib, /c:/foo/lib]"
- )})));
-
  function f1
   input Real x;
   output Real y;
@@ -5914,19 +5907,18 @@ model ExternalFuncLibs3
  Real x1 = f1(1);
  Real x2 = f2(2);
  Real x3 = f3(3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="ExternalFuncLibs3",
+			description="External function annotations, LibraryDirectory",
+			methodName="externalLibraryDirectories",
+			methodResult="[/c:/bar/lib, /c:/foo/lib]"
+ )})));
 end ExternalFuncLibs3;
 
 
 model ExternalFuncLibs4
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="ExternalFuncLibs4",
-			description="External function annotations, LibraryDirectory",
-			methodName="externalLibraryDirectories",
-			filter=true,
-			methodResult="
-[%dir%/Resources/Library]"
- )})));
  function f1
   input Real x;
   output Real y;
@@ -5948,19 +5940,20 @@ model ExternalFuncLibs4
  Real x1 = f1(1);
  Real x2 = f2(2);
  Real x3 = f3(3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="ExternalFuncLibs4",
+			description="External function annotations, LibraryDirectory",
+			methodName="externalLibraryDirectories",
+			filter=true,
+			methodResult="
+[%dir%/Resources/Library]"
+ )})));
 end ExternalFuncLibs4;
 
 
 model ExternalFuncLibs5
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="ExternalFuncLibs5",
-			description="External function annotations, IncludeDirectory",
-			methodName="externalIncludeDirectories",
-			filter=true,
-			methodResult="[/c:/foo/inc, /c:/bar/inc]"
- )})));
-
  function f1
   input Real x;
   output Real y;
@@ -5983,20 +5976,19 @@ model ExternalFuncLibs5
  Real x1 = f1(1);
  Real x2 = f2(2);
  Real x3 = f3(3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="ExternalFuncLibs5",
+			description="External function annotations, IncludeDirectory",
+			methodName="externalIncludeDirectories",
+			filter=true,
+			methodResult="[/c:/foo/inc, /c:/bar/inc]"
+ )})));
 end ExternalFuncLibs5;
 
 
 model ExternalFuncLibs6
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="ExternalFuncLibs6",
-			description="External function annotations, IncludeDirectory",
-			methodName="externalIncludeDirectories",
-			filter=true,
-			methodResult="
-[%dir%/Resources/Include]"
- )})));
-
  function f1
   input Real x;
   output Real y;
@@ -6018,18 +6010,20 @@ model ExternalFuncLibs6
  Real x1 = f1(1);
  Real x2 = f2(2);
  Real x3 = f3(3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="ExternalFuncLibs6",
+			description="External function annotations, IncludeDirectory",
+			methodName="externalIncludeDirectories",
+			filter=true,
+			methodResult="
+[%dir%/Resources/Include]"
+ )})));
 end ExternalFuncLibs6;
 
 
 model ExternalFuncLibs7
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="ExternalFuncLibs7",
-			description="External function annotations, compiler args",
-			methodName="externalCompilerArgs",
-			methodResult=" -lfoo -lbar -L/c:/bar/lib -L/c:/std/lib -L/c:/foo/lib -I/c:/foo/inc -I/c:/std/inc -I/c:/bar/inc"
- )})));
-
  function f1
   input Real x;
   output Real y;
@@ -6065,19 +6059,18 @@ model ExternalFuncLibs7
  Real x2 = f2(2);
  Real x3 = f3(3);
  Real x4 = f4(4);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="ExternalFuncLibs7",
+			description="External function annotations, compiler args",
+			methodName="externalCompilerArgs",
+			methodResult=" -lfoo -lbar -L/c:/bar/lib -L/c:/std/lib -L/c:/foo/lib -I/c:/foo/inc -I/c:/std/inc -I/c:/bar/inc"
+ )})));
 end ExternalFuncLibs7;
 
 
 model ExternalFuncLibs8
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="ExternalFuncLibs8",
-			description="External function annotations, compiler args",
-			methodName="externalCompilerArgs",
-			filter=true,
-			methodResult=" -lfoo -L%dir%/Resources/Library -I%dir%/Resources/Include"
- )})));
- 
  function f
   input Real x;
   output Real y;
@@ -6086,11 +6079,33 @@ model ExternalFuncLibs8
  end f;
  
  Real x = f(1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="ExternalFuncLibs8",
+			description="External function annotations, compiler args",
+			methodName="externalCompilerArgs",
+			filter=true,
+			methodResult=" -lfoo -L%dir%/Resources/Library -I%dir%/Resources/Include"
+ )})));
 end ExternalFuncLibs8;
 
 
 
 model ExtendFunc1
+    function f1
+        input Real a;
+        output Real b;
+    end f1;
+    
+    function f2
+        extends f1;
+    algorithm
+        b := a;
+    end f2;
+    
+    Real x = f2(1.0);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ExtendFunc1",
@@ -6110,7 +6125,13 @@ public
 
 end FunctionTests.ExtendFunc1;
 ")})));
+end ExtendFunc1;
 
+
+
+model ExtendFunc2
+	constant Real[2] d = { 1, 2 };
+	
     function f1
         input Real a;
         output Real b;
@@ -6118,16 +6139,15 @@ end FunctionTests.ExtendFunc1;
     
     function f2
         extends f1;
+		input Integer c = 2;
+	protected
+		Real f = a + d[c];
     algorithm
-        b := a;
+        b := f;
     end f2;
-    
-    Real x = f2(1.0);
-end ExtendFunc1;
 
+    Real x = f2(1);
 
-
-model ExtendFunc2
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ExtendFunc2",
@@ -6151,29 +6171,18 @@ public
 
 end FunctionTests.ExtendFunc2;
 ")})));
-
-	constant Real[2] d = { 1, 2 };
-	
-    function f1
-        input Real a;
-        output Real b;
-    end f1;
-    
-    function f2
-        extends f1;
-		input Integer c = 2;
-	protected
-		Real f = a + d[c];
-    algorithm
-        b := f;
-    end f2;
-
-    Real x = f2(1);
 end ExtendFunc2;
 
 
 
 model AttributeTemp1
+	function f
+		output Real o[2] = {1, 2};
+	algorithm
+	end f;
+	
+	Real x[2](start = f()) = {3, 4};
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AttributeTemp1",
@@ -6201,18 +6210,20 @@ public
 
 end FunctionTests.AttributeTemp1;
 ")})));
-
-	function f
-		output Real o[2] = {1, 2};
-	algorithm
-	end f;
-	
-	Real x[2](start = f()) = {3, 4};
 end AttributeTemp1;
 
 
 
 model InputAsArraySize1
+	function f
+		input Integer n;
+		output Real x[n];
+	algorithm
+		x := 1:size(x,1);
+	end f;
+	
+	Real x[3] = f(3);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="InputAsArraySize1",
@@ -6238,7 +6249,10 @@ public
 
 end FunctionTests.InputAsArraySize1;
 ")})));
+end InputAsArraySize1;
 
+
+model InputAsArraySize2
 	function f
 		input Integer n;
 		output Real x[n];
@@ -6246,11 +6260,9 @@ end FunctionTests.InputAsArraySize1;
 		x := 1:size(x,1);
 	end f;
 	
-	Real x[3] = f(3);
-end InputAsArraySize1;
+	parameter Integer n = 3;
+	Real x[3] = f(n);
 
-
-model InputAsArraySize2
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="InputAsArraySize2",
@@ -6277,7 +6289,10 @@ public
 
 end FunctionTests.InputAsArraySize2;
 ")})));
+end InputAsArraySize2;
 
+
+model InputAsArraySize3
 	function f
 		input Integer n;
 		output Real x[n];
@@ -6286,11 +6301,8 @@ end FunctionTests.InputAsArraySize2;
 	end f;
 	
 	parameter Integer n = 3;
-	Real x[3] = f(n);
-end InputAsArraySize2;
+	Real x[n] = f(n);
 
-
-model InputAsArraySize3
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="InputAsArraySize3",
@@ -6317,7 +6329,10 @@ public
 
 end FunctionTests.InputAsArraySize3;
 ")})));
+end InputAsArraySize3;
 
+
+model InputAsArraySize4
 	function f
 		input Integer n;
 		output Real x[n];
@@ -6325,12 +6340,8 @@ end FunctionTests.InputAsArraySize3;
 		x := 1:size(x,1);
 	end f;
 	
-	parameter Integer n = 3;
-	Real x[n] = f(n);
-end InputAsArraySize3;
+	Real x[3] = f(size(x,1));
 
-
-model InputAsArraySize4
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="InputAsArraySize4",
@@ -6356,7 +6367,10 @@ public
 
 end FunctionTests.InputAsArraySize4;
 ")})));
+end InputAsArraySize4;
 
+
+model InputAsArraySize5
 	function f
 		input Integer n;
 		output Real x[n];
@@ -6364,11 +6378,9 @@ end FunctionTests.InputAsArraySize4;
 		x := 1:size(x,1);
 	end f;
 	
-	Real x[3] = f(size(x,1));
-end InputAsArraySize4;
+	Integer n = 3;
+	Real x[3] = f(n);
 
-
-model InputAsArraySize5
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="InputAsArraySize5",
@@ -6382,7 +6394,10 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 5605, column 14:
   Could not evaluate array size of output x
 ")})));
+end InputAsArraySize5;
 
+
+model InputAsArraySize6
 	function f
 		input Integer n;
 		output Real x[n];
@@ -6390,12 +6405,8 @@ Semantic error at line 5605, column 14:
 		x := 1:size(x,1);
 	end f;
 	
-	Integer n = 3;
-	Real x[3] = f(n);
-end InputAsArraySize5;
+	Real x[3] = f(4);
 
-
-model InputAsArraySize6
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="InputAsArraySize6",
@@ -6406,19 +6417,20 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 5631, column 7:
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [4]
 ")})));
-
-	function f
-		input Integer n;
-		output Real x[n];
-	algorithm
-		x := 1:size(x,1);
-	end f;
-	
-	Real x[3] = f(4);
 end InputAsArraySize6;
 
 
 model InputAsArraySize7
+	function f
+		input Integer n;
+		input Real y[n];
+		output Real x;
+	algorithm
+		x := sum(y[1:n]);
+	end f;
+	
+	Real x = f(3, {1, 2, 3});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="InputAsArraySize7",
@@ -6446,16 +6458,6 @@ public
 
 end FunctionTests.InputAsArraySize7;
 ")})));
-
-	function f
-		input Integer n;
-		input Real y[n];
-		output Real x;
-	algorithm
-		x := sum(y[1:n]);
-	end f;
-	
-	Real x = f(3, {1, 2, 3});
 end InputAsArraySize7;
 
 
@@ -6473,6 +6475,16 @@ end InputAsArraySize8;
 
 
 model InputAsArraySize9
+	function f
+		input Integer n;
+		input Real y[n];
+		output Real x;
+	algorithm
+		x := sum(y);
+	end f;
+	
+	Real x = f(3, {1, 2, 3});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="InputAsArraySize9",
@@ -6500,16 +6512,6 @@ public
 
 end FunctionTests.InputAsArraySize9;
 ")})));
-
-	function f
-		input Integer n;
-		input Real y[n];
-		output Real x;
-	algorithm
-		x := sum(y);
-	end f;
-	
-	Real x = f(3, {1, 2, 3});
 end InputAsArraySize9;
 
 
@@ -6529,6 +6531,15 @@ end InputAsArraySize10;
 
 
 model VectorizedCall1
+    function f
+        input Real x;
+        output Real y;
+    algorithm
+        y := 2 * x;
+    end f;
+    
+    Real z[2] = f({1,2});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="VectorizedCall1",
@@ -6552,19 +6563,21 @@ public
 
 end FunctionTests.VectorizedCall1;
 ")})));
-
-    function f
-        input Real x;
-        output Real y;
-    algorithm
-        y := 2 * x;
-    end f;
-    
-    Real z[2] = f({1,2});
 end VectorizedCall1;
 
 
 model VectorizedCall2
+    function f
+        input Real x1;
+		input Real x2;
+		input Real x3 = 2;
+        output Real y;
+    algorithm
+        y := 2 * x1 + x2 + x3;
+    end f;
+    
+    Real z[2,2] = f({{1,2},{3,4}}, 5);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="VectorizedCall2",
@@ -6594,21 +6607,22 @@ public
 
 end FunctionTests.VectorizedCall2;
 ")})));
-
-    function f
-        input Real x1;
-		input Real x2;
-		input Real x3 = 2;
-        output Real y;
-    algorithm
-        y := 2 * x1 + x2 + x3;
-    end f;
-    
-    Real z[2,2] = f({{1,2},{3,4}}, 5);
 end VectorizedCall2;
 
 
 model VectorizedCall3
+    function f
+        input Real[:,:] x1;
+        input Real[:,:] x2;
+        output Real y;
+    algorithm
+        y := sum(x1 * x2);
+    end f;
+    
+    constant Real v[3,3] = -1 * [1,2,3;4,5,6;7,8,9];
+    constant Real w[3,3] = [1,2,3;4,5,6;7,8,9];
+    Real z[2,2] = f({{w, 2*w},{3*w, 4*w}}, {{v, 2*v},{3*v, 4*v}});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="VectorizedCall3",
@@ -6667,7 +6681,10 @@ public
 
 end FunctionTests.VectorizedCall3;
 ")})));
+end VectorizedCall3;
 
+
+model VectorizedCall4
     function f
         input Real[:,:] x1;
         input Real[:,:] x2;
@@ -6676,13 +6693,12 @@ end FunctionTests.VectorizedCall3;
         y := sum(x1 * x2);
     end f;
     
-    constant Real v[3,3] = -1 * [1,2,3;4,5,6;7,8,9];
-    constant Real w[3,3] = [1,2,3;4,5,6;7,8,9];
-    Real z[2,2] = f({{w, 2*w},{3*w, 4*w}}, {{v, 2*v},{3*v, 4*v}});
-end VectorizedCall3;
+    Real v[3,3] = -1 * [1,2,3;4,5,6;7,8,9];
+    Real w[3,3] = [1,2,3;4,5,6;7,8,9];
+    Real v2[2,2,3,3] = {{v, 2*v},{3*v, 4*v}};
+    Real w2[2,2,3,3] = {{w, 2*w},{3*w, 4*w}};
+    Real z[2,2] = f(w2, v2);
 
-
-model VectorizedCall4
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="VectorizedCall4",
@@ -6867,24 +6883,25 @@ public
 
 end FunctionTests.VectorizedCall4;
 ")})));
-
-    function f
-        input Real[:,:] x1;
-        input Real[:,:] x2;
-        output Real y;
-    algorithm
-        y := sum(x1 * x2);
-    end f;
-    
-    Real v[3,3] = -1 * [1,2,3;4,5,6;7,8,9];
-    Real w[3,3] = [1,2,3;4,5,6;7,8,9];
-    Real v2[2,2,3,3] = {{v, 2*v},{3*v, 4*v}};
-    Real w2[2,2,3,3] = {{w, 2*w},{3*w, 4*w}};
-    Real z[2,2] = f(w2, v2);
 end VectorizedCall4;
 
 
 model VectorizedCall5
+	record R
+		Real a;
+		Real b;
+	end R;
+	
+    function f
+        input R x;
+        output Real y;
+    algorithm
+        y := 2 * x.a + x.b;
+    end f;
+    
+	R[2] w = {R(1,2), R(3,4)};
+    Real z[2] = f(w);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="VectorizedCall5",
@@ -6921,25 +6938,16 @@ public
 
 end FunctionTests.VectorizedCall5;
 ")})));
-
-	record R
-		Real a;
-		Real b;
-	end R;
-	
-    function f
-        input R x;
-        output Real y;
-    algorithm
-        y := 2 * x.a + x.b;
-    end f;
-    
-	R[2] w = {R(1,2), R(3,4)};
-    Real z[2] = f(w);
 end VectorizedCall5;
 
 
 model Lapack_dgeqpf
+  Real A[2,2] = {{1,2},{3,4}};
+  Real QR[2,2];
+  Real tau[2];
+equation 
+  (QR,tau,) = Modelica.Math.Matrices.LAPACK.dgeqpf(A);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="Lapack_dgeqpf",
@@ -6989,15 +6997,16 @@ public
 
 end FunctionTests.Lapack_dgeqpf;
 ")})));
-
-  Real A[2,2] = {{1,2},{3,4}};
-  Real QR[2,2];
-  Real tau[2];
-equation 
-  (QR,tau,) = Modelica.Math.Matrices.LAPACK.dgeqpf(A);
 end Lapack_dgeqpf;
 
 model Lapack_QR
+ Real A[2,2] = {{5,6},{7,8}};
+ Real Q[2,2];
+ Real R[2,2];
+ //Integer piv[2];
+equation 
+ (Q,R,) = Modelica.Math.Matrices.QR(A);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="Lapack_QR",
@@ -7096,16 +7105,25 @@ public
 
 end FunctionTests.Lapack_QR;
 ")})));
-
- Real A[2,2] = {{5,6},{7,8}};
- Real Q[2,2];
- Real R[2,2];
- //Integer piv[2];
-equation 
- (Q,R,) = Modelica.Math.Matrices.QR(A);
 end Lapack_QR;
 
 model BindingSort1
+	function f
+		input Real x;
+		output Real y = a + 1;
+	protected
+        Real a = b + e;
+	    Real b = c + d;
+	    Real c = x + d;
+	    Real d = e + 1;
+	    Real e = x + 1;
+	algorithm
+		y := y + x;
+	end f;
+	
+	Real x = f(y);
+	Real y = 1;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="BindingSort1",
@@ -7140,22 +7158,6 @@ public
 
 end FunctionTests.BindingSort1;
 ")})));
-
-	function f
-		input Real x;
-		output Real y = a + 1;
-	protected
-        Real a = b + e;
-	    Real b = c + d;
-	    Real c = x + d;
-	    Real d = e + 1;
-	    Real e = x + 1;
-	algorithm
-		y := y + x;
-	end f;
-	
-	Real x = f(y);
-	Real y = 1;
 end BindingSort1;
 
 end FunctionTests;

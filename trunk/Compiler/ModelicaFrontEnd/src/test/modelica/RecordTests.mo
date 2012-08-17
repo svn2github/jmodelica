@@ -19,6 +19,16 @@ package RecordTests
 
 
 model RecordFlat1
+ record A
+  Real a;
+  Real b;
+ end A;
+ 
+ A x;
+ A y;
+equation
+ y = x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordFlat1",
@@ -38,7 +48,10 @@ public
 
 end RecordTests.RecordFlat1;
 ")})));
+end RecordFlat1;
 
+
+model RecordFlat2
  record A
   Real a;
   Real b;
@@ -48,10 +61,9 @@ end RecordTests.RecordFlat1;
  A y;
 equation
  y = x;
-end RecordFlat1;
+ x.a = 1;
+ x.b = 2;
 
-
-model RecordFlat2
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordFlat2",
@@ -73,22 +85,20 @@ public
 
 end RecordTests.RecordFlat2;
 ")})));
+end RecordFlat2;
 
+
+model RecordFlat3
  record A
   Real a;
   Real b;
  end A;
  
- A x;
+ A x(a=1, b=2);
  A y;
 equation
  y = x;
- x.a = 1;
- x.b = 2;
-end RecordFlat2;
 
-
-model RecordFlat3
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordFlat3",
@@ -108,20 +118,23 @@ public
 
 end RecordTests.RecordFlat3;
 ")})));
-
- record A
-  Real a;
-  Real b;
- end A;
- 
- A x(a=1, b=2);
- A y;
-equation
- y = x;
 end RecordFlat3;
 
 
 model RecordFlat4
+ record A
+  Real a;
+  Real b;
+ end A;
+
+ record B
+  Real c;
+  Real d;
+ end B;
+ 
+ B y;
+ A x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordFlat4",
@@ -144,23 +157,22 @@ public
 
 end RecordTests.RecordFlat4;
 ")})));
+end RecordFlat4;
 
+
+model RecordFlat5
  record A
   Real a;
-  Real b;
+  B b;
  end A;
-
+ 
  record B
   Real c;
   Real d;
  end B;
  
- B y;
  A x;
-end RecordFlat4;
 
-
-model RecordFlat5
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordFlat5",
@@ -182,23 +194,26 @@ public
 
 end RecordTests.RecordFlat5;
 ")})));
-
- record A
-  Real a;
-  B b;
- end A;
- 
- record B
-  Real c;
-  Real d;
- end B;
- 
- A x;
 end RecordFlat5;
 
 
 
 model RecordType1
+ record A
+  Real a;
+  Real b;
+ end A;
+
+ record B
+  Real a;
+  Real b;
+ end B;
+ 
+ A x;
+ B y;
+equation
+ y = x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordType1",
@@ -223,36 +238,10 @@ public
 
 end RecordTests.RecordType1;
 ")})));
-
- record A
-  Real a;
-  Real b;
- end A;
-
- record B
-  Real a;
-  Real b;
- end B;
- 
- A x;
- B y;
-equation
- y = x;
 end RecordType1;
 
 
 model RecordType2
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordType2",
-			description="Records: non-equivalent types (component name)",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 246, column 2:
-  The right and left expression types of equation are not compatible
-")})));
-
  record A
   Real a;
   Real b;
@@ -267,21 +256,21 @@ Semantic error at line 246, column 2:
  B y;
 equation
  y = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RecordType2",
+			description="Records: non-equivalent types (component name)",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 246, column 2:
+  The right and left expression types of equation are not compatible
+")})));
 end RecordType2;
 
 
 model RecordType3
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordType3",
-			description="Records: non-equivalent types (component type)",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 275, column 2:
-  The right and left expression types of equation are not compatible
-")})));
-
  record A
   Real a;
   Real b;
@@ -296,10 +285,46 @@ Semantic error at line 275, column 2:
  B y;
 equation
  y = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RecordType3",
+			description="Records: non-equivalent types (component type)",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 275, column 2:
+  The right and left expression types of equation are not compatible
+")})));
 end RecordType3;
 
 
 model RecordType4
+ record A
+  Real a;
+  Real b;
+ end A;
+
+ record B
+  Real a;
+  Real b;
+ end B;
+ 
+ record C
+  A a;
+  Real e;
+ end C;
+
+ record D
+  B a;
+  Real e;
+ end D;
+ 
+ C x;
+ D y;
+equation
+ y = x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordType4",
@@ -334,46 +359,10 @@ public
 
 end RecordTests.RecordType4;
 ")})));
-
- record A
-  Real a;
-  Real b;
- end A;
-
- record B
-  Real a;
-  Real b;
- end B;
- 
- record C
-  A a;
-  Real e;
- end C;
-
- record D
-  B a;
-  Real e;
- end D;
- 
- C x;
- D y;
-equation
- y = x;
 end RecordType4;
 
 
 model RecordType5
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordType5",
-			description="Records: non-equivalent nested types",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 342, column 2:
-  The right and left expression types of equation are not compatible
-")})));
-
  record A
   Real a;
   Real b;
@@ -398,10 +387,44 @@ Semantic error at line 342, column 2:
  D y;
 equation
  y = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RecordType5",
+			description="Records: non-equivalent nested types",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 342, column 2:
+  The right and left expression types of equation are not compatible
+")})));
 end RecordType5;
 
 
 model RecordType6
+ record A
+  Real a;
+  Real b;
+ end A;
+
+ record B
+  extends C;
+ end B;
+
+ record C
+  extends D;
+  Real a;
+ end C;
+
+ record D
+  Real b;
+ end D;
+ 
+ A x(a=1, b=2);
+ B y;
+equation
+ y = x;		
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordType6",
@@ -426,34 +449,19 @@ public
 
 end RecordTests.RecordType6;
 ")})));
-
- record A
-  Real a;
-  Real b;
- end A;
-
- record B
-  extends C;
- end B;
-
- record C
-  extends D;
-  Real a;
- end C;
-
- record D
-  Real b;
- end D;
- 
- A x(a=1, b=2);
- B y;
-equation
- y = x;		
 end RecordType6;
 
 
 
 model RecordBinding1
+ record A
+  Real a;
+  Real b;
+ end A;
+ 
+ A x = y;
+ A y;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordBinding1",
@@ -471,18 +479,23 @@ public
 
 end RecordTests.RecordBinding1;
 ")})));
-
- record A
-  Real a;
-  Real b;
- end A;
- 
- A x = y;
- A y;
 end RecordBinding1;
 
 
 model RecordBinding2
+ record A
+  Real a;
+  Real b;
+ end A;
+
+ record B
+  Real a;
+  Real b;
+ end B;
+ 
+ A x = y;
+ B y;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordBinding2",
@@ -505,34 +518,10 @@ public
 
 end RecordTests.RecordBinding2;
 ")})));
-
- record A
-  Real a;
-  Real b;
- end A;
-
- record B
-  Real a;
-  Real b;
- end B;
- 
- A x = y;
- B y;
 end RecordBinding2;
 
 
 model RecordBinding3
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordBinding3",
-			description="Records: binding expression, wrong type (incompatible record)",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 466, column 4:
-  The binding expression of the variable x does not match the declared type of the variable
-")})));
-
  record A
   Real a;
   Real b;
@@ -545,10 +534,29 @@ Semantic error at line 466, column 4:
  
  A x = y;
  B y;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RecordBinding3",
+			description="Records: binding expression, wrong type (incompatible record)",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 466, column 4:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
 end RecordBinding3;
 
 
 model RecordBinding4
+ record A
+  Real a;
+  Real b;
+ end A;
+ 
+ A x = y;
+ A y[2];
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="RecordBinding4",
@@ -559,18 +567,17 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
 Semantic error at line 499, column 4:
   Array size mismatch in declaration of x, size of declaration is [] and size of binding expression is [2]
 ")})));
+end RecordBinding4;
 
+
+model RecordBinding5
  record A
   Real a;
   Real b;
  end A;
  
- A x = y;
- A y[2];
-end RecordBinding4;
+ A x(a = 1, b = "foo");
 
-
-model RecordBinding5
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="RecordBinding5",
@@ -581,18 +588,18 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
 Semantic error at line 507, column 8:
   The binding expression of the variable b does not match the declared type of the variable
 ")})));
-
- record A
-  Real a;
-  Real b;
- end A;
- 
- A x(a = 1, b = "foo");
 end RecordBinding5;
 
 
 
 model RecordArray1
+ record A
+  Real a[2];
+  Real b;
+ end A;
+ 
+ A x(a={1,2}, b=1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordArray1",
@@ -609,17 +616,21 @@ public
 
 end RecordTests.RecordArray1;
 ")})));
+end RecordArray1;
 
+
+model RecordArray2
  record A
   Real a[2];
   Real b;
  end A;
  
- A x(a={1,2}, b=1);
-end RecordArray1;
+ A x;
+equation
+ x.a[1] = 1;
+ x.a[2] = 2;
+ x.b = 1;
 
-
-model RecordArray2
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordArray2",
@@ -640,21 +651,20 @@ public
 
 end RecordTests.RecordArray2;
 ")})));
+end RecordArray2;
 
+
+model RecordArray3
  record A
   Real a[2];
   Real b;
  end A;
  
  A x;
+ A y;
 equation
- x.a[1] = 1;
- x.a[2] = 2;
- x.b = 1;
-end RecordArray2;
+ x = y;
 
-
-model RecordArray3
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordArray3",
@@ -674,20 +684,17 @@ public
 
 end RecordTests.RecordArray3;
 ")})));
-
- record A
-  Real a[2];
-  Real b;
- end A;
- 
- A x;
- A y;
-equation
- x = y;
 end RecordArray3;
 
 
 model RecordArray4
+ record A
+  Real a;
+  Real b;
+ end A;
+ 
+ A x[2](each a=1, b={1,2});
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordArray4",
@@ -704,17 +711,22 @@ public
 
 end RecordTests.RecordArray4;
 ")})));
+end RecordArray4;
 
+
+model RecordArray5
  record A
   Real a;
   Real b;
  end A;
  
- A x[2](each a=1, b={1,2});
-end RecordArray4;
+ A x[2];
+equation
+ x[1].a = 1;
+ x[1].b = 2;
+ x[2].a = 3;
+ x[2].b = 4;
 
-
-model RecordArray5
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordArray5",
@@ -736,23 +748,19 @@ public
 
 end RecordTests.RecordArray5;
 ")})));
-
- record A
-  Real a;
-  Real b;
- end A;
- 
- A x[2];
-equation
- x[1].a = 1;
- x[1].b = 2;
- x[2].a = 3;
- x[2].b = 4;
 end RecordArray5;
 
 
 
 model RecordConstructor1
+ record A
+  Real a;
+  Integer b;
+  parameter String c;
+ end A;
+ 
+ A x = A(1.0, 2, "foo");
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordConstructor1",
@@ -770,18 +778,18 @@ public
 
 end RecordTests.RecordConstructor1;
 ")})));
+end RecordConstructor1;
 
+
+model RecordConstructor2
  record A
   Real a;
   Integer b;
   parameter String c;
  end A;
  
- A x = A(1.0, 2, "foo");
-end RecordConstructor1;
+ A x = A(c="foo", a=1.0, b=2);
 
-
-model RecordConstructor2
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordConstructor2",
@@ -799,18 +807,18 @@ public
 
 end RecordTests.RecordConstructor2;
 ")})));
-
- record A
-  Real a;
-  Integer b;
-  parameter String c;
- end A;
- 
- A x = A(c="foo", a=1.0, b=2);
 end RecordConstructor2;
 
 
 model RecordConstructor3
+ record A
+  Real a;
+  Integer b = 0;
+  constant String c = "foo";
+ end A;
+ 
+ A x = A(1, 2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordConstructor3",
@@ -828,18 +836,18 @@ public
 
 end RecordTests.RecordConstructor3;
 ")})));
-
- record A
-  Real a;
-  Integer b = 0;
-  constant String c = "foo";
- end A;
- 
- A x = A(1, 2);
 end RecordConstructor3;
 
 
 model RecordConstructor4
+ record A
+  Real a;
+  Integer b;
+  parameter String c;
+ end A;
+ 
+ A x = A(1.0, 2, 3);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="RecordConstructor4",
@@ -850,18 +858,18 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
 Semantic error at line 775, column 18:
   Record constructor for A: types of positional argument 3 and input c are not compatible
 ")})));
+end RecordConstructor4;
 
+
+model RecordConstructor5
  record A
   Real a;
   Integer b;
   parameter String c;
  end A;
  
- A x = A(1.0, 2, 3);
-end RecordConstructor4;
+ A x = A(1.0, 2);
 
-
-model RecordConstructor5
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="RecordConstructor5",
@@ -872,18 +880,18 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
 Semantic error at line 786, column 8:
   Record constructor for A: missing argument for required input c
 ")})));
+end RecordConstructor5;
 
+
+model RecordConstructor6
  record A
   Real a;
   Integer b;
   parameter String c;
  end A;
  
- A x = A(1.0, 2);
-end RecordConstructor5;
+ A x = A(1.0, 2, "foo", 0);
 
-
-model RecordConstructor6
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="RecordConstructor6",
@@ -894,19 +902,21 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
 Semantic error at line 808, column 25:
   Record constructor for A: too many positional arguments
 ")})));
-
- record A
-  Real a;
-  Integer b;
-  parameter String c;
- end A;
- 
- A x = A(1.0, 2, "foo", 0);
 end RecordConstructor6;
 
 
 
 model RecordScalarize1
+ record A
+  Real a;
+  Real b;
+ end A;
+ 
+ A x(a=1, b=2);
+ A y;
+equation
+ y = x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize1",
@@ -932,20 +942,22 @@ public
 
 end RecordTests.RecordScalarize1;
 ")})));
+end RecordScalarize1;
 
+
+model RecordScalarize2
  record A
   Real a;
   Real b;
  end A;
  
- A x(a=1, b=2);
+ A x;
  A y;
 equation
  y = x;
-end RecordScalarize1;
+ x.a = 1;
+ x.b = 2;
 
-
-model RecordScalarize2
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize2",
@@ -971,22 +983,20 @@ public
 
 end RecordTests.RecordScalarize2;
 ")})));
-
- record A
-  Real a;
-  Real b;
- end A;
- 
- A x;
- A y;
-equation
- y = x;
- x.a = 1;
- x.b = 2;
 end RecordScalarize2;
 
 
 model RecordScalarize3
+ record A
+  Real b;
+  Real a;
+ end A;
+ 
+ A x = A(1, 2);
+ A y;
+equation
+ y = x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize3",
@@ -1012,20 +1022,23 @@ public
 
 end RecordTests.RecordScalarize3;
 ")})));
-
- record A
-  Real b;
-  Real a;
- end A;
- 
- A x = A(1, 2);
- A y;
-equation
- y = x;
 end RecordScalarize3;
 
 
 model RecordScalarize4
+ record A
+  Real a;
+  Real b;
+ end A;
+
+ record B
+  Real c;
+  Real d;
+ end B;
+ 
+ A x = A(1, 2);
+ B y = B(3, 4);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize4",
@@ -1056,23 +1069,24 @@ public
 
 end RecordTests.RecordScalarize4;
 ")})));
+end RecordScalarize4;
+
+
+model RecordScalarize5
 
  record A
   Real a;
-  Real b;
+  B b;
  end A;
-
+ 
  record B
   Real c;
   Real d;
  end B;
  
- A x = A(1, 2);
- B y = B(3, 4);
-end RecordScalarize4;
+ A x = A(1, y);
+ B y = B(2, 3);
 
-
-model RecordScalarize5
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize5",
@@ -1105,24 +1119,25 @@ public
 
 end RecordTests.RecordScalarize5;
 ")})));
-
-
- record A
-  Real a;
-  B b;
- end A;
- 
- record B
-  Real c;
-  Real d;
- end B;
- 
- A x = A(1, y);
- B y = B(2, 3);
 end RecordScalarize5;
 
 
 model RecordScalarize6
+ record A
+  Real a;
+  Real b;
+ end A;
+
+ record B
+  Real b;
+  Real a;
+ end B;
+ 
+ A x = B(2, 1);
+ B y;
+equation
+ y = x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize6",
@@ -1153,25 +1168,35 @@ public
 
 end RecordTests.RecordScalarize6;
 ")})));
-
- record A
-  Real a;
-  Real b;
- end A;
-
- record B
-  Real b;
-  Real a;
- end B;
- 
- A x = B(2, 1);
- B y;
-equation
- y = x;
 end RecordScalarize6;
 
 
 model RecordScalarize7
+ record A
+  Real b;
+  Real a;
+ end A;
+
+ record B
+  Real a;
+  Real b;
+ end B;
+ 
+ record C
+  Real c;
+  A x;
+ end C;
+
+ record D
+  B x;
+  Real c;
+ end D;
+ 
+ C x = D(B(3, 2), 1);
+ D y;
+equation
+ y = x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize7",
@@ -1216,35 +1241,17 @@ public
 
 end RecordTests.RecordScalarize7;
 ")})));
-
- record A
-  Real b;
-  Real a;
- end A;
-
- record B
-  Real a;
-  Real b;
- end B;
- 
- record C
-  Real c;
-  A x;
- end C;
-
- record D
-  B x;
-  Real c;
- end D;
- 
- C x = D(B(3, 2), 1);
- D y;
-equation
- y = x;
 end RecordScalarize7;
 
 
 model RecordScalarize8
+ record A
+  Real a[2];
+  Real b;
+ end A;
+ 
+ A x(a={1,2}, b=1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize8",
@@ -1267,17 +1274,21 @@ public
 
 end RecordTests.RecordScalarize8;
 ")})));
+end RecordScalarize8;
 
+
+model RecordScalarize9
  record A
   Real a[2];
   Real b;
  end A;
  
- A x(a={1,2}, b=1);
-end RecordScalarize8;
+ A x;
+equation
+ x.a[1] = 1;
+ x.a[2] = 2;
+ x.b = 1;
 
-
-model RecordScalarize9
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize9",
@@ -1300,21 +1311,20 @@ public
 
 end RecordTests.RecordScalarize9;
 ")})));
+end RecordScalarize9;
 
+
+model RecordScalarize10
  record A
   Real a[2];
   Real b;
  end A;
  
- A x;
+ A x = A({1,2}, 3);
+ A y;
 equation
- x.a[1] = 1;
- x.a[2] = 2;
- x.b = 1;
-end RecordScalarize9;
+ x = y;
 
-
-model RecordScalarize10
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize10",
@@ -1344,16 +1354,6 @@ public
 
 end RecordTests.RecordScalarize10;
 ")})));
-
- record A
-  Real a[2];
-  Real b;
- end A;
- 
- A x = A({1,2}, 3);
- A y;
-equation
- x = y;
 end RecordScalarize10;
 
 
@@ -1368,6 +1368,18 @@ end RecordScalarize11;
 
 
 model RecordScalarize12
+ record A
+  Real a;
+  Real b;
+ end A;
+ 
+ A x[2];
+equation
+ x[1].a = 1;
+ x[1].b = 2;
+ x[2].a = 3;
+ x[2].b = 4;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="RecordScalarize12",
@@ -1389,22 +1401,20 @@ public
 
 end RecordTests.RecordScalarize12;
 ")})));
+end RecordScalarize12;
 
+
+model RecordScalarize13
  record A
   Real a;
   Real b;
  end A;
  
- A x[2];
+ A x[2] = {A(1,2), A(3,4)};
+ A y[2];
 equation
- x[1].a = 1;
- x[1].b = 2;
- x[2].a = 3;
- x[2].b = 4;
-end RecordScalarize12;
+ x = y;
 
-
-model RecordScalarize13
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize13",
@@ -1438,20 +1448,23 @@ public
 
 end RecordTests.RecordScalarize13;
 ")})));
-
- record A
-  Real a;
-  Real b;
- end A;
- 
- A x[2] = {A(1,2), A(3,4)};
- A y[2];
-equation
- x = y;
 end RecordScalarize13;
 
 
 model RecordScalarize14
+ record A
+  B b[2];
+ end A;
+ 
+ record B
+  Real a[2];
+ end B;
+ 
+ A x[2] = { A({ B({1,2}), B({3,4}) }), A({ B({5,6}), B({7,8}) }) };
+ A y[2];
+equation
+ x = y;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize14",
@@ -1504,7 +1517,10 @@ public
 
 end RecordTests.RecordScalarize14;
 ")})));
+end RecordScalarize14;
 
+
+model RecordScalarize15
  record A
   B b[2];
  end A;
@@ -1514,13 +1530,8 @@ end RecordTests.RecordScalarize14;
  end B;
  
  A x[2] = { A({ B({1,2}), B({3,4}) }), A({ B({5,6}), B({7,8}) }) };
- A y[2];
-equation
- x = y;
-end RecordScalarize14;
+ Real y = x[1].b[1].a[2];
 
-
-model RecordScalarize15
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize15",
@@ -1559,7 +1570,10 @@ public
 
 end RecordTests.RecordScalarize15;
 ")})));
+end RecordScalarize15;
 
+
+model RecordScalarize16
  record A
   B b[2];
  end A;
@@ -1569,11 +1583,8 @@ end RecordTests.RecordScalarize15;
  end B;
  
  A x[2] = { A({ B({1,2}), B({3,4}) }), A({ B({5,6}), B({7,8}) }) };
- Real y = x[1].b[1].a[2];
-end RecordScalarize15;
+ B y = x[1].b[2];
 
-
-model RecordScalarize16
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize16",
@@ -1609,21 +1620,17 @@ public
 
 end RecordTests.RecordScalarize16;
 ")})));
-
- record A
-  B b[2];
- end A;
- 
- record B
-  Real a[2];
- end B;
- 
- A x[2] = { A({ B({1,2}), B({3,4}) }), A({ B({5,6}), B({7,8}) }) };
- B y = x[1].b[2];
 end RecordScalarize16;
 
 
 model RecordScalarize17
+ record A
+  Real a;
+  Real b;
+ end A;
+ 
+ A x(b(start=3)) = A(1,2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize17",
@@ -1644,17 +1651,21 @@ public
 
 end RecordTests.RecordScalarize17;
 ")})));
-
- record A
-  Real a;
-  Real b;
- end A;
- 
- A x(b(start=3)) = A(1,2);
 end RecordScalarize17;
 
 
 model RecordScalarize18
+ record A
+  Real a;
+ end A;
+ 
+ record B
+  A b1;
+  A b2;
+ end B;
+ 
+ B x(b1(a(start=3)), b2.a(start=4)) = B(A(1),A(2));
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize18",
@@ -1679,21 +1690,18 @@ public
 
 end RecordTests.RecordScalarize18;
 ")})));
-
- record A
-  Real a;
- end A;
- 
- record B
-  A b1;
-  A b2;
- end B;
- 
- B x(b1(a(start=3)), b2.a(start=4)) = B(A(1),A(2));
 end RecordScalarize18;
 
 
 model RecordScalarize19
+    record A
+        Real x[2];
+    end A;
+	
+    A a1(x(stateSelect={StateSelect.default,StateSelect.default},start={1,2}));
+equation
+    der(a1.x) = -a1.x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize19",
@@ -1718,18 +1726,18 @@ public
 
 end RecordTests.RecordScalarize19;
 ")})));
-
-    record A
-        Real x[2];
-    end A;
-	
-    A a1(x(stateSelect={StateSelect.default,StateSelect.default},start={1,2}));
-equation
-    der(a1.x) = -a1.x;
 end RecordScalarize19;
 
 
 model RecordScalarize20
+    record A
+        Real x[2](stateSelect={StateSelect.default,StateSelect.default},start={1,2});
+    end A;
+
+    A a1;
+equation
+    der(a1.x) = -a1.x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordScalarize20",
@@ -1754,14 +1762,6 @@ public
 
 end RecordTests.RecordScalarize20;
 ")})));
-
-    record A
-        Real x[2](stateSelect={StateSelect.default,StateSelect.default},start={1,2});
-    end A;
-
-    A a1;
-equation
-    der(a1.x) = -a1.x;
 end RecordScalarize20;
 
 // TODO: Add more complicated combinations of arrays, records and modifiers
@@ -1769,6 +1769,24 @@ end RecordScalarize20;
 
 
 model RecordFunc1
+ record A
+  Real x;
+  Real y;
+ end A;
+ 
+ function f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  protected A z;
+ algorithm
+  z.x := ix;
+  z.y := iy;
+  o := z.x * z.y;
+ end f;
+ 
+ Real q = f(1, 2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordFunc1",
@@ -1799,7 +1817,10 @@ public
 
 end RecordTests.RecordFunc1;
 ")})));
+end RecordFunc1;
 
+
+model RecordFunc2
  record A
   Real x;
   Real y;
@@ -1810,17 +1831,16 @@ end RecordTests.RecordFunc1;
   input Real iy;
   output Real o;
   protected A z;
+  protected A w;
  algorithm
   z.x := ix;
   z.y := iy;
-  o := z.x * z.y;
+  w := z;
+  o := w.x * w.y;
  end f;
  
  Real q = f(1, 2);
-end RecordFunc1;
 
-
-model RecordFunc2
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordFunc2",
@@ -1854,7 +1874,10 @@ public
 
 end RecordTests.RecordFunc2;
 ")})));
+end RecordFunc2;
 
+
+model RecordFunc3
  record A
   Real x;
   Real y;
@@ -1865,19 +1888,13 @@ end RecordTests.RecordFunc2;
   input Real iy;
   output Real o;
   protected A z;
-  protected A w;
  algorithm
-  z.x := ix;
-  z.y := iy;
-  w := z;
-  o := w.x * w.y;
+  z := A(ix, iy);
+  o := z.x * z.y;
  end f;
  
  Real q = f(1, 2);
-end RecordFunc2;
 
-
-model RecordFunc3
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordFunc3",
@@ -1908,11 +1925,19 @@ public
 
 end RecordTests.RecordFunc3;
 ")})));
+end RecordFunc3;
 
+
+model RecordFunc3b
  record A
   Real x;
   Real y;
  end A;
+ 
+ record B
+  Real x;
+  Real y;
+ end B;
  
  function f
   input Real ix;
@@ -1920,15 +1945,12 @@ end RecordTests.RecordFunc3;
   output Real o;
   protected A z;
  algorithm
-  z := A(ix, iy);
+  z := B(ix, iy);
   o := z.x * z.y;
  end f;
  
  Real q = f(1, 2);
-end RecordFunc3;
 
-
-model RecordFunc3b
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordFunc3b",
@@ -1959,16 +1981,13 @@ public
 
 end RecordTests.RecordFunc3b;
 ")})));
+end RecordFunc3b;
 
+
+model RecordFunc4
  record A
-  Real x;
-  Real y;
+  Real x[2];
  end A;
- 
- record B
-  Real x;
-  Real y;
- end B;
  
  function f
   input Real ix;
@@ -1976,15 +1995,13 @@ end RecordTests.RecordFunc3b;
   output Real o;
   protected A z;
  algorithm
-  z := B(ix, iy);
-  o := z.x * z.y;
+  z.x[1] := ix;
+  z.x[2] := iy;
+  o := z.x[1] * z.x[2];
  end f;
  
  Real q = f(1, 2);
-end RecordFunc3b;
 
-
-model RecordFunc4
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordFunc4",
@@ -2014,7 +2031,10 @@ public
 
 end RecordTests.RecordFunc4;
 ")})));
+end RecordFunc4;
 
+
+model RecordFunc5
  record A
   Real x[2];
  end A;
@@ -2024,17 +2044,16 @@ end RecordTests.RecordFunc4;
   input Real iy;
   output Real o;
   protected A z;
+  protected A w;
  algorithm
   z.x[1] := ix;
   z.x[2] := iy;
-  o := z.x[1] * z.x[2];
+  w := z;
+  o := w.x[1] * w.x[2];
  end f;
  
  Real q = f(1, 2);
-end RecordFunc4;
 
-
-model RecordFunc5
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordFunc5",
@@ -2067,7 +2086,10 @@ public
 
 end RecordTests.RecordFunc5;
 ")})));
+end RecordFunc5;
 
+
+model RecordFunc6
  record A
   Real x[2];
  end A;
@@ -2077,19 +2099,13 @@ end RecordTests.RecordFunc5;
   input Real iy;
   output Real o;
   protected A z;
-  protected A w;
  algorithm
-  z.x[1] := ix;
-  z.x[2] := iy;
-  w := z;
-  o := w.x[1] * w.x[2];
+  z := A({ix, iy});
+  o := z.x[1] * z.x[2];
  end f;
  
  Real q = f(1, 2);
-end RecordFunc5;
 
-
-model RecordFunc6
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordFunc6",
@@ -2119,26 +2135,27 @@ public
 
 end RecordTests.RecordFunc6;
 ")})));
+end RecordFunc6;
 
+
+model RecordFunc7
  record A
-  Real x[2];
+  Real x;
  end A;
  
  function f
   input Real ix;
   input Real iy;
   output Real o;
-  protected A z;
+  protected A z[2];
  algorithm
-  z := A({ix, iy});
-  o := z.x[1] * z.x[2];
+  z[1].x := ix;
+  z[2].x := iy;
+  o := z[1].x * z[2].x;
  end f;
  
  Real q = f(1, 2);
-end RecordFunc6;
 
-
-model RecordFunc7
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordFunc7",
@@ -2168,9 +2185,13 @@ public
 
 end RecordTests.RecordFunc7;
 ")})));
+end RecordFunc7;
 
+
+model RecordFunc8
  record A
   Real x;
+  Real y;
  end A;
  
  function f
@@ -2178,17 +2199,18 @@ end RecordTests.RecordFunc7;
   input Real iy;
   output Real o;
   protected A z[2];
+  protected A w[2];
  algorithm
   z[1].x := ix;
-  z[2].x := iy;
-  o := z[1].x * z[2].x;
+  z[1].y := iy;
+  z[2].x := ix;
+  z[2].y := iy;
+  w := z;
+  o := w[1].x * w[2].x;
  end f;
  
  Real q = f(1, 2);
-end RecordFunc7;
 
-
-model RecordFunc8
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordFunc8",
@@ -2226,7 +2248,10 @@ public
 
 end RecordTests.RecordFunc8;
 ")})));
+end RecordFunc8;
 
+
+model RecordFunc9
  record A
   Real x;
   Real y;
@@ -2237,21 +2262,13 @@ end RecordTests.RecordFunc8;
   input Real iy;
   output Real o;
   protected A z[2];
-  protected A w[2];
  algorithm
-  z[1].x := ix;
-  z[1].y := iy;
-  z[2].x := ix;
-  z[2].y := iy;
-  w := z;
-  o := w[1].x * w[2].x;
+  z := {A(ix, iy), A(ix+2, iy+2)};
+  o := z[1].x * z[2].x;
  end f;
  
  Real q = f(1, 2);
-end RecordFunc8;
 
-
-model RecordFunc9
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordFunc9",
@@ -2284,28 +2301,23 @@ public
 
 end RecordTests.RecordFunc9;
 ")})));
-
- record A
-  Real x;
-  Real y;
- end A;
- 
- function f
-  input Real ix;
-  input Real iy;
-  output Real o;
-  protected A z[2];
- algorithm
-  z := {A(ix, iy), A(ix+2, iy+2)};
-  o := z[1].x * z[2].x;
- end f;
- 
- Real q = f(1, 2);
 end RecordFunc9;
 
 
 
 model RecordOutput1
+ record A
+  Real y;
+  Real x;
+ end A;
+ 
+ function f
+  output A o = A(1, 2);
+ algorithm
+ end f;
+ 
+ A z = f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordOutput1",
@@ -2338,22 +2350,22 @@ public
 
 end RecordTests.RecordOutput1;
 ")})));
-
- record A
-  Real y;
-  Real x;
- end A;
- 
- function f
-  output A o = A(1, 2);
- algorithm
- end f;
- 
- A z = f();
 end RecordOutput1;
 
 
 model RecordOutput2
+ record A
+  Real x;
+  Real y;
+ end A;
+ 
+ function f
+  output A o[2] = {A(1, 2), A(3, 4)};
+ algorithm
+ end f;
+ 
+ A x[2] = f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordOutput2",
@@ -2385,22 +2397,22 @@ public
 
 end RecordTests.RecordOutput2;
 ")})));
-
- record A
-  Real x;
-  Real y;
- end A;
- 
- function f
-  output A o[2] = {A(1, 2), A(3, 4)};
- algorithm
- end f;
- 
- A x[2] = f();
 end RecordOutput2;
 
 
 model RecordOutput3
+ record A
+  Real x[2];
+  Real y[3];
+ end A;
+ 
+ function f
+  output A o = A({1,2}, {3,4,5});
+ algorithm
+ end f;
+ 
+ A x = f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordOutput3",
@@ -2434,22 +2446,27 @@ public
 
 end RecordTests.RecordOutput3;
 ")})));
-
- record A
-  Real x[2];
-  Real y[3];
- end A;
- 
- function f
-  output A o = A({1,2}, {3,4,5});
- algorithm
- end f;
- 
- A x = f();
 end RecordOutput3;
 
 
 model RecordOutput4
+ record A
+  Real x;
+  Real y;
+ end A;
+ 
+ record B
+  A x;
+  Real y;
+ end B;
+ 
+ function f
+  output B o = B(A(1, 2), 3);
+ algorithm
+ end f;
+ 
+ B x = f();
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordOutput4",
@@ -2484,27 +2501,29 @@ public
 
 end RecordTests.RecordOutput4;
 ")})));
-
- record A
-  Real x;
-  Real y;
- end A;
- 
- record B
-  A x;
-  Real y;
- end B;
- 
- function f
-  output B o = B(A(1, 2), 3);
- algorithm
- end f;
- 
- B x = f();
 end RecordOutput4;
 
 
 model RecordOutput5
+    record R
+        Real x;
+        Real y;
+    end R;
+
+    function f
+        input Real u;
+        output R ry;
+        output Real y;
+    algorithm
+        ry := R(1,2);
+        y := u;
+    end f;
+
+    R ry;
+    Real z;
+equation
+    (ry,z) = f(3);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordOutput5",
@@ -2536,29 +2555,28 @@ public
 
 end RecordTests.RecordOutput5;
 ")})));
+end RecordOutput5;
 
+
+model RecordOutput6
     record R
         Real x;
         Real y;
     end R;
 
     function f
-        input Real u;
+        input R rx;
         output R ry;
-        output Real y;
     algorithm
-        ry := R(1,2);
-        y := u;
+        ry := rx;
     end f;
 
-    R ry;
-    Real z;
+    R ry = f(R(5,6));
+    Real u;
+    Real y = 3;
 equation
-    (ry,z) = f(3);
-end RecordOutput5;
+    y = u;
 
-
-model RecordOutput6
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordOutput6",
@@ -2589,29 +2607,25 @@ public
 
 end RecordTests.RecordOutput6;
 ")})));
-
-    record R
-        Real x;
-        Real y;
-    end R;
-
-    function f
-        input R rx;
-        output R ry;
-    algorithm
-        ry := rx;
-    end f;
-
-    R ry = f(R(5,6));
-    Real u;
-    Real y = 3;
-equation
-    y = u;
 end RecordOutput6;
 
 
 
 model RecordInput1
+ record A
+  Real x;
+  Real y;
+ end A;
+ 
+ function f
+  input A i;
+  output Real o;
+ algorithm
+  o := i.x + i.y;
+ end f;
+ 
+ Real x = f(A(1,{2,3}*{4,5}));
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInput1",
@@ -2638,7 +2652,10 @@ public
 
 end RecordTests.RecordInput1;
 ")})));
+end RecordInput1;
 
+
+model RecordInput2
  record A
   Real x;
   Real y;
@@ -2651,11 +2668,9 @@ end RecordTests.RecordInput1;
   o := i.x + i.y;
  end f;
  
- Real x = f(A(1,{2,3}*{4,5}));
-end RecordInput1;
+ A a = A(1,2);
+ Real x = f(a);
 
-
-model RecordInput2
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInput2",
@@ -2686,26 +2701,31 @@ public
 
 end RecordTests.RecordInput2;
 ")})));
-
- record A
-  Real x;
-  Real y;
- end A;
- 
- function f
-  input A i;
-  output Real o;
- algorithm
-  o := i.x + i.y;
- end f;
- 
- A a = A(1,2);
- Real x = f(a);
 end RecordInput2;
 
 
 // TODO: Dont create temporary here, just send the returned array into the next function (cf. arrays)
 model RecordInput3
+ record A
+  Real x;
+  Real y;
+ end A;
+ 
+ function f1
+  output A o;
+ algorithm
+  o := A(1,2);
+ end f1;
+ 
+ function f2
+  input A i;
+  output Real o;
+ algorithm
+  o := i.x + i.y;
+ end f2;
+ 
+ Real x = f2(f1());
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInput3",
@@ -2743,30 +2763,25 @@ public
 
 end RecordTests.RecordInput3;
 ")})));
+end RecordInput3;
 
+
+model RecordInput4
  record A
   Real x;
   Real y;
  end A;
  
- function f1
-  output A o;
- algorithm
-  o := A(1,2);
- end f1;
- 
- function f2
-  input A i;
+ function f
+  input A i[2];
   output Real o;
  algorithm
-  o := i.x + i.y;
- end f2;
+  o := i[1].x + i[2].y;
+ end f;
  
- Real x = f2(f1());
-end RecordInput3;
+ A a[2] = {A(1,2),A(3,4)};
+ Real x = f(a);
 
-
-model RecordInput4
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInput4",
@@ -2801,25 +2816,25 @@ public
 
 end RecordTests.RecordInput4;
 ")})));
-
- record A
-  Real x;
-  Real y;
- end A;
- 
- function f
-  input A i[2];
-  output Real o;
- algorithm
-  o := i[1].x + i[2].y;
- end f;
- 
- A a[2] = {A(1,2),A(3,4)};
- Real x = f(a);
 end RecordInput4;
 
 
 model RecordInput5
+ record A
+  Real x[2];
+  Real y;
+ end A;
+ 
+ function f
+  input A i;
+  output Real o;
+ algorithm
+  o := i.x[1] + i.y;
+ end f;
+ 
+ A a = A({1,2}, 3);
+ Real x = f(a);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInput5",
@@ -2852,25 +2867,29 @@ public
 
 end RecordTests.RecordInput5;
 ")})));
+end RecordInput5;
 
+
+model RecordInput6
  record A
-  Real x[2];
-  Real y;
+  B z;
  end A;
+ 
+ record B
+  Real x;
+  Real y;
+ end B;
  
  function f
   input A i;
   output Real o;
  algorithm
-  o := i.x[1] + i.y;
+  o := i.z.x + i.z.y;
  end f;
  
- A a = A({1,2}, 3);
+ A a = A(B(1,2));
  Real x = f(a);
-end RecordInput5;
 
-
-model RecordInput6
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInput6",
@@ -2905,29 +2924,32 @@ public
 
 end RecordTests.RecordInput6;
 ")})));
-
- record A
-  B z;
- end A;
- 
- record B
-  Real x;
-  Real y;
- end B;
- 
- function f
-  input A i;
-  output Real o;
- algorithm
-  o := i.z.x + i.z.y;
- end f;
- 
- A a = A(B(1,2));
- Real x = f(a);
 end RecordInput6;
 
 
 model RecordInput7
+ record A
+  Real x;
+  Real y;
+ end A;
+ 
+ function f1
+  input A i;
+  output Real o;
+ algorithm
+  o := f2(i);
+ end f1;
+  
+ function f2
+  input A i;
+  output Real o;
+ algorithm
+  o := i.x + i.y;
+ end f2;
+ 
+ A a = A(1,2);
+ Real x = f1(a);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInput7",
@@ -2966,33 +2988,18 @@ public
 
 end RecordTests.RecordInput7;
 ")})));
-
- record A
-  Real x;
-  Real y;
- end A;
- 
- function f1
-  input A i;
-  output Real o;
- algorithm
-  o := f2(i);
- end f1;
-  
- function f2
-  input A i;
-  output Real o;
- algorithm
-  o := i.x + i.y;
- end f2;
- 
- A a = A(1,2);
- Real x = f1(a);
 end RecordInput7;
 
 
 
 model RecordParBexp1
+	record R
+		Real x = 1;
+		Real y = 1;
+	end R;
+	
+	parameter R[2] r = {R(3,3),R(4,6)};
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordParBexp1",
@@ -3013,18 +3020,18 @@ public
 
 end RecordTests.RecordParBexp1;
 ")})));
-
-	record R
-		Real x = 1;
-		Real y = 1;
-	end R;
-	
-	parameter R[2] r = {R(3,3),R(4,6)};
 end RecordParBexp1;
 
 
 
 model RecordWithParam1
+	record R
+		parameter Real a;
+		Real b;
+	end R;
+	
+	R c(a = 1, b = 2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordWithParam1",
@@ -3044,17 +3051,18 @@ public
 
 end RecordTests.RecordWithParam1;
 ")})));
+end RecordWithParam1;
 
+
+model RecordWithParam2
 	record R
 		parameter Real a;
 		Real b;
 	end R;
 	
-	R c(a = 1, b = 2);
-end RecordWithParam1;
+	R c(a = d, b = 2);
+	parameter Real d = 1;
 
-
-model RecordWithParam2
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordWithParam2",
@@ -3077,19 +3085,19 @@ public
 
 end RecordTests.RecordWithParam2;
 ")})));
-
-	record R
-		parameter Real a;
-		Real b;
-	end R;
-	
-	R c(a = d, b = 2);
-	parameter Real d = 1;
 end RecordWithParam2;
 
 
 
 model RecordWithColonArray1
+	record A
+		Real a[:];
+		Real b;
+	end A;
+
+	A c = A({1, 2, 3}, 4);
+	A d = A({5, 6}, 7);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordWithColonArray1",
@@ -3120,18 +3128,17 @@ public
 
 end RecordTests.RecordWithColonArray1;
 ")})));
+end RecordWithColonArray1;
 
+
+model RecordWithColonArray2
 	record A
 		Real a[:];
 		Real b;
 	end A;
 
-	A c = A({1, 2, 3}, 4);
-	A d = A({5, 6}, 7);
-end RecordWithColonArray1;
+	A c;
 
-
-model RecordWithColonArray2
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="RecordWithColonArray2",
@@ -3142,17 +3149,18 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
 Semantic error at line 2794, column 8:
   Can not infer array size of the variable a
 ")})));
+end RecordWithColonArray2;
 
+
+model RecordWithColonArray3
 	record A
 		Real a[:];
 		Real b;
 	end A;
 
-	A c;
-end RecordWithColonArray2;
+	A c(a = {1, 2, 3}, b = 4);
+	A d(a = {5, 6}, b = 7);
 
-
-model RecordWithColonArray3
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordWithColonArray3",
@@ -3183,14 +3191,6 @@ public
 
 end RecordTests.RecordWithColonArray3;
 ")})));
-
-	record A
-		Real a[:];
-		Real b;
-	end A;
-
-	A c(a = {1, 2, 3}, b = 4);
-	A d(a = {5, 6}, b = 7);
 end RecordWithColonArray3;
 
 
@@ -3213,6 +3213,18 @@ end RecordWithColonArray4;
 
 
 model RecordDer1
+	record A
+		Real x;
+		Real y;
+	end A;
+	
+	A a;
+initial equation
+	a = A(1, 0);
+equation
+	der(a.x) = -a.y;
+	der(a.y) = -a.x;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordDer1",
@@ -3237,23 +3249,18 @@ public
 
 end RecordTests.RecordDer1;
 ")})));
-
-	record A
-		Real x;
-		Real y;
-	end A;
-	
-	A a;
-initial equation
-	a = A(1, 0);
-equation
-	der(a.x) = -a.y;
-	der(a.y) = -a.x;
 end RecordDer1;
 
 
 
 model RecordParam1
+	record A
+		parameter Real x = 1;
+		Real y;
+	end A;
+	
+	A a1(y=2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordParam1",
@@ -3273,17 +3280,17 @@ public
 
 end RecordTests.RecordParam1;
 ")})));
+end RecordParam1;
 
+
+model RecordParam2
 	record A
 		parameter Real x = 1;
 		Real y;
 	end A;
 	
-	A a1(y=2);
-end RecordParam1;
+	A a1 = A(y=2);
 
-
-model RecordParam2
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordParam2",
@@ -3303,17 +3310,23 @@ public
 
 end RecordTests.RecordParam2;
 ")})));
-
-	record A
-		parameter Real x = 1;
-		Real y;
-	end A;
-	
-	A a1 = A(y=2);
 end RecordParam2;
 
 
 model RecordParam3
+	function f
+		input Real i;
+		output Real[2] o = { i, -i };
+	algorithm
+	end f;
+	
+	record A
+		parameter Real[2] x = f(1);
+		Real y;
+	end A;
+	
+	A a1(y=2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordParam3",
@@ -3349,23 +3362,18 @@ public
 
 end RecordTests.RecordParam3;
 ")})));
-
-	function f
-		input Real i;
-		output Real[2] o = { i, -i };
-	algorithm
-	end f;
-	
-	record A
-		parameter Real[2] x = f(1);
-		Real y;
-	end A;
-	
-	A a1(y=2);
 end RecordParam3;
 
 
 model RecordParam4
+	record A
+		parameter Real x = 1;
+		parameter Real z = x;
+		Real y;
+	end A;
+	
+	A a1(y=2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordParam4",
@@ -3389,18 +3397,18 @@ public
 
 end RecordTests.RecordParam4;
 ")})));
-
-	record A
-		parameter Real x = 1;
-		parameter Real z = x;
-		Real y;
-	end A;
-	
-	A a1(y=2);
 end RecordParam4;
 
 
 model RecordParam5
+	record A
+		parameter Real x = 2;
+		parameter Real z = 3;
+		Real y;
+	end A;
+	
+	A a1 = A(y = 2, x = 1, z = a1.x);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordParam5",
@@ -3424,18 +3432,23 @@ public
 
 end RecordTests.RecordParam5;
 ")})));
-
-	record A
-		parameter Real x = 2;
-		parameter Real z = 3;
-		Real y;
-	end A;
-	
-	A a1 = A(y = 2, x = 1, z = a1.x);
 end RecordParam5;
 
 
 model RecordParam6
+	function f
+		output Real[2] o = {1,2};
+	algorithm
+	end f;
+	
+	record A
+		parameter Real x[2] = f();
+		parameter Real y[2] = x;
+	end A;
+	
+	A a1;
+	A a2;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordParam6",
@@ -3482,23 +3495,29 @@ public
 
 end RecordTests.RecordParam6;
 ")})));
-
-	function f
-		output Real[2] o = {1,2};
-	algorithm
-	end f;
-	
-	record A
-		parameter Real x[2] = f();
-		parameter Real y[2] = x;
-	end A;
-	
-	A a1;
-	A a2;
 end RecordParam6;
 
 
 model RecordMerge1
+    record R1
+        Real x;
+        Real y;
+    end R1;
+ 
+    record R2
+        Real x;
+        Real y;
+    end R2;
+ 
+    function F
+        input R1 rin;
+        output R2 rout;
+    algorithm
+        rout := rin;
+    end F;
+ 
+    R2 r2 = F(R1(1,2));
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordMerge1",
@@ -3527,25 +3546,6 @@ public
 
 end RecordTests.RecordMerge1;
 ")})));
-
-    record R1
-        Real x;
-        Real y;
-    end R1;
- 
-    record R2
-        Real x;
-        Real y;
-    end R2;
- 
-    function F
-        input R1 rin;
-        output R2 rout;
-    algorithm
-        rout := rin;
-    end F;
- 
-    R2 r2 = F(R1(1,2));
 end RecordMerge1;
 
 

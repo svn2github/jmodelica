@@ -105,6 +105,7 @@ UnknownClassDecl : FullClassDecl;
 
 PN_FullClassDecl : BaseClassDecl ::= [StringComment] 
                                      Composition 
+                                     [Annotation]
                                      EndDecl;
 	                      
 FullClassDecl : BaseClassDecl ::= [StringComment]  

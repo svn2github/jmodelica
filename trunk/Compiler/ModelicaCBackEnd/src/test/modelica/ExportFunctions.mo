@@ -17,6 +17,17 @@
 package ExportFunctions
 
 model Scalar2To1
+  function f
+    input Real x;
+    input Integer y;
+    output Real z;
+  algorithm
+    z := x + y;
+  end f;
+  
+algorithm
+  f(1.0, 2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="Scalar2To1",
@@ -47,7 +58,9 @@ DllExport double __stdcall select_vba_1(char* name, double x_v, int y_v) {
 }
 
 ")})));
-
+end Scalar2To1;
+	
+model Options1
   function f
     input Real x;
     input Integer y;
@@ -58,9 +71,7 @@ DllExport double __stdcall select_vba_1(char* name, double x_v, int y_v) {
   
 algorithm
   f(1.0, 2);
-end Scalar2To1;
-	
-model Options1
+
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="Options1",
@@ -71,8 +82,11 @@ model Options1
 $C_export_functions$
 $C_export_wrappers$
 ",
-         generatedCode="")})));
-
+         generatedCode="
+")})));
+end Options1;
+	
+model Options2
   function f
     input Real x;
     input Integer y;
@@ -83,9 +97,7 @@ $C_export_wrappers$
   
 algorithm
   f(1.0, 2);
-end Options1;
-	
-model Options2
+
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="Options2",
@@ -103,21 +115,42 @@ DllExport double func_ExportFunctions_Options2_f_export(double x_v, int y_v) {
     return z_v;
 }
 ")})));
-
-  function f
-    input Real x;
-    input Integer y;
-    output Real z;
-  algorithm
-    z := x + y;
-  end f;
-  
-algorithm
-  f(1.0, 2);
 end Options2;
 	
 
 model ScalarGrouping1
+  function fa1
+    input Real x;
+    output Real z = x;
+  algorithm
+  end fa1;
+  
+  function fa2
+    input Real y;
+    output Real w = -y;
+  algorithm
+  end fa2;
+  
+  function fb2
+    input Real x;
+    input Real y;
+    output Real z = x + y;
+  algorithm
+  end fb2;
+  
+  function fb1
+    input Real x1;
+    input Real x2;
+    output Real y = x1 - x2;
+  algorithm
+  end fb1;
+  
+algorithm
+  fa2(0);
+  fa1(0);
+  fb1(0, 0);
+  fb2(0, 0);
+
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="ScalarGrouping1",
@@ -177,42 +210,26 @@ DllExport double __stdcall select_vba_2(char* name, double x1_v, double x2_v) {
 }
 
 ")})));
-
-  function fa1
-    input Real x;
-    output Real z = x;
-  algorithm
-  end fa1;
-  
-  function fa2
-    input Real y;
-    output Real w = -y;
-  algorithm
-  end fa2;
-  
-  function fb2
-    input Real x;
-    input Real y;
-    output Real z = x + y;
-  algorithm
-  end fb2;
-  
-  function fb1
-    input Real x1;
-    input Real x2;
-    output Real y = x1 - x2;
-  algorithm
-  end fb1;
-  
-algorithm
-  fa2(0);
-  fa1(0);
-  fb1(0, 0);
-  fb2(0, 0);
 end ScalarGrouping1;
 
 
 model ArrayInputs1
+  function f1
+    input Real x[:];
+    output Real z = 0;
+  algorithm
+  end f1;
+  
+  function f2
+    input Real y[:];
+    output Real w = 0;
+  algorithm
+  end f2;
+
+algorithm
+  f2({0});
+  f1({0});
+
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="ArrayInputs1",
@@ -265,26 +282,26 @@ DllExport double __stdcall select_vba_1(char* name, double* x_ap, int x_a0) {
 }
 
 ")})));
+end ArrayInputs1;
 
+
+model ArrayInputs2
   function f1
-    input Real x[:];
+    input Real x[:,:];
     output Real z = 0;
   algorithm
   end f1;
   
   function f2
-    input Real y[:];
+    input Real y[:,:];
     output Real w = 0;
   algorithm
   end f2;
 
 algorithm
-  f2({0});
-  f1({0});
-end ArrayInputs1;
+  f2({{0}});
+  f1({{0}});
 
-
-model ArrayInputs2
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="ArrayInputs2",
@@ -339,38 +356,10 @@ DllExport double __stdcall select_vba_1(char* name, double* x_ap, int x_a0, int 
 }
 
 ")})));
-
-  function f1
-    input Real x[:,:];
-    output Real z = 0;
-  algorithm
-  end f1;
-  
-  function f2
-    input Real y[:,:];
-    output Real w = 0;
-  algorithm
-  end f2;
-
-algorithm
-  f2({{0}});
-  f1({{0}});
 end ArrayInputs2;
 
 
 model OnlyUnsupported
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="OnlyUnsupported",
-			description="Test that unsupported functions aren't included when exporting functions",
-			export_functions=true,
-			export_functions_vba=true,
-			template="
-$C_export_functions$
-$C_export_wrappers$
-",
-         generatedCode="")})));
-
   function f1
     input Real x;
     output Real[2] y = { 1, 2 };
@@ -394,6 +383,19 @@ algorithm
   f1(1);
   f2(1);
   f3(1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="OnlyUnsupported",
+			description="Test that unsupported functions aren't included when exporting functions",
+			export_functions=true,
+			export_functions_vba=true,
+			template="
+$C_export_functions$
+$C_export_wrappers$
+",
+         generatedCode="
+")})));
 end OnlyUnsupported;
 
 end ExportFunctions;

@@ -60,17 +60,6 @@ end ConnectTests.ConnectTest1;
 
     class ConnectTest2_Err
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConnectTest2_Err",
-			description="Basic test of name lookup in connect clauses",
-			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/ConnectTests.mo':
-Semantic error at line 53, column 15:
-  Cannot find class or component declaration for cc
-")})));
-
 	connector Ca
 		flow Real x;
 		Real y;
@@ -90,31 +79,20 @@ Semantic error at line 53, column 15:
     
     C2 c2;  
       
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectTest2_Err",
+			description="Basic test of name lookup in connect clauses",
+			errorMessage="
+1 error(s) found...
+In file 'src/test/modelica/ConnectTests.mo':
+Semantic error at line 53, column 15:
+  Cannot find class or component declaration for cc
+")})));
    end ConnectTest2_Err;
    
 model ConnectTest3
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ConnectTest3",
-			description="Test of generation of connection equations",
-			flatModel="
-fclass ConnectTests.ConnectTest3
- parameter Real gain.k = 1 \"Gain value multiplied with input signal\" /* 1 */;
- ConnectTests.ConnectTest3.RealInput gain.u \"Input signal connector\";
- ConnectTests.ConnectTest3.RealOutput gain.y \"Output signal connector\";
- parameter Real const.k = 1 \"Constant output value\" /* 1 */;
- ConnectTests.ConnectTest3.RealOutput const.y \"Connector of Real output signal\";
-equation
- gain.y = ( gain.k ) * ( gain.u );
- const.y = const.k;
- const.y = gain.u;
-
-public
- type ConnectTests.ConnectTest3.RealInput = Real;
- type ConnectTests.ConnectTest3.RealOutput = Real;
-end ConnectTests.ConnectTest3;
-")})));
-
  block Gain 
   "Output the product of a gain value with the input signal" 
   
@@ -157,9 +135,53 @@ equation
   connect(const.y, gain.u);
 
 
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest3",
+			description="Test of generation of connection equations",
+			flatModel="
+fclass ConnectTests.ConnectTest3
+ parameter Real gain.k = 1 \"Gain value multiplied with input signal\" /* 1 */;
+ ConnectTests.ConnectTest3.RealInput gain.u \"Input signal connector\";
+ ConnectTests.ConnectTest3.RealOutput gain.y \"Output signal connector\";
+ parameter Real const.k = 1 \"Constant output value\" /* 1 */;
+ ConnectTests.ConnectTest3.RealOutput const.y \"Connector of Real output signal\";
+equation
+ gain.y = ( gain.k ) * ( gain.u );
+ const.y = const.k;
+ const.y = gain.u;
+
+public
+ type ConnectTests.ConnectTest3.RealInput = Real;
+ type ConnectTests.ConnectTest3.RealOutput = Real;
+end ConnectTests.ConnectTest3;
+")})));
 end ConnectTest3;
 
   class ConnectTest4
+
+	connector Ca
+		flow Real x;
+		Real y;
+	end Ca;
+	
+	connector Cb
+		flow Real x;
+		Real y;
+	end Cb;
+	
+	model C2
+		Ca ca;
+		Cb cb;
+                Ca ca2;
+	equation
+        ca2.x =3;
+      connect(ca,cb);
+    end C2;
+    
+    C2 c2;  
+      
 
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
@@ -183,31 +205,21 @@ equation
 
 end ConnectTests.ConnectTest4;
 ")})));
-
-	connector Ca
-		flow Real x;
-		Real y;
-	end Ca;
-	
-	connector Cb
-		flow Real x;
-		Real y;
-	end Cb;
-	
-	model C2
-		Ca ca;
-		Cb cb;
-                Ca ca2;
-	equation
-        ca2.x =3;
-      connect(ca,cb);
-    end C2;
-    
-    C2 c2;  
-      
    end ConnectTest4;
 
 model ConnectTest5
+  connector C
+    parameter Integer n = 2;
+    Real x[n];
+  end C;
+  C c1;
+  C c2;
+
+equation
+  connect(c1,c2);
+  c1.x = {1,2};
+
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest5",
@@ -223,22 +235,27 @@ equation
  c1.x[1:2] = c2.x[1:2];
 end ConnectTests.ConnectTest5;
 ")})));
-
-  connector C
-    parameter Integer n = 2;
-    Real x[n];
-  end C;
-  C c1;
-  C c2;
-
-equation
-  connect(c1,c2);
-  c1.x = {1,2};
-
 end ConnectTest5;
 
 
 model ConnectTest6
+	connector A
+		Real y[2];
+		flow Real x[2];
+	end A;
+	
+	model B
+		A a1;
+		A a2;
+          equation
+            connect(a1,a2);
+	end B;
+	
+	B b1;
+	B b2;
+equation
+	connect(b1.a1, b2.a2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest6",
@@ -265,27 +282,21 @@ equation
 
 end ConnectTests.ConnectTest6;
 ")})));
-
-	connector A
-		Real y[2];
-		flow Real x[2];
-	end A;
-	
-	model B
-		A a1;
-		A a2;
-          equation
-            connect(a1,a2);
-	end B;
-	
-	B b1;
-	B b2;
-equation
-	connect(b1.a1, b2.a2);
 end ConnectTest6;
 
 
 model ConnectTest7
+    connector A
+        Real x;
+        flow Real y;
+    end A;
+    
+    A a1[2];
+    A a2[2];
+equation
+    connect(a1, a2);
+    a1.x = ones(2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest7",
@@ -313,21 +324,21 @@ equation
 
 end ConnectTests.ConnectTest7;
 ")})));
+end ConnectTest7;
 
+
+model ConnectTest8
     connector A
         Real x;
         flow Real y;
     end A;
     
-    A a1[2];
-    A a2[2];
+    A a[4];
 equation
-    connect(a1, a2);
-    a1.x = ones(2);
-end ConnectTest7;
+    for i in 1:3 loop
+        connect(a[i], a[i+1]);
+    end for;
 
-
-model ConnectTest8
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest8",
@@ -356,21 +367,19 @@ equation
 
 end ConnectTests.ConnectTest8;
 ")})));
-
-    connector A
-        Real x;
-        flow Real y;
-    end A;
-    
-    A a[4];
-equation
-    for i in 1:3 loop
-        connect(a[i], a[i+1]);
-    end for;
 end ConnectTest8;
 
 
 model ConnectTest9
+	connector A
+		Real x;
+		flow Real y;
+	end A;
+	
+	A a[2];
+equation
+	connect(a[1], a[2]);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest9",
@@ -389,19 +398,25 @@ equation
 
 end ConnectTests.ConnectTest9;
 ")})));
-
-	connector A
-		Real x;
-		flow Real y;
-	end A;
-	
-	A a[2];
-equation
-	connect(a[1], a[2]);
 end ConnectTest9;
 
 
 model ConnectTest10
+	connector A
+		Real x;
+		Real y;
+	end A;
+	
+	connector B
+		Real y;
+		Real x;
+	end B;
+	
+	A a;
+	B b;
+equation
+	connect(a, b);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest10",
@@ -418,25 +433,25 @@ equation
 
 end ConnectTests.ConnectTest10;
 ")})));
-
-	connector A
-		Real x;
-		Real y;
-	end A;
-	
-	connector B
-		Real y;
-		Real x;
-	end B;
-	
-	A a;
-	B b;
-equation
-	connect(a, b);
 end ConnectTest10;
 
 
 model ConnectTest11
+	connector B
+	    Real x;
+	    flow Real y;
+	end B;
+  
+	connector C
+	    B b1;
+	    B b2;
+	end C;
+  
+	C c1;
+	C c2;
+equation
+	connect(c1, c2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest11",
@@ -463,25 +478,27 @@ equation
 
 end ConnectTests.ConnectTest11;
 ")})));
-
-	connector B
-	    Real x;
-	    flow Real y;
-	end B;
-  
-	connector C
-	    B b1;
-	    B b2;
-	end C;
-  
-	C c1;
-	C c2;
-equation
-	connect(c1, c2);
 end ConnectTest11;
 
 
 model ConnectTest12
+	connector A
+		Real x;
+		flow Real y;
+	end A;
+	
+	connector B
+		A a[2];
+	end B;
+	
+	B b[3,4];
+equation
+	for i in 1:2, j in 1:3 loop
+		connect(b[i,j].a[1], b[i,j+1].a[1]);
+		connect(b[i,j].a[2], b[i+1,j].a[2]);
+		connect(b[i,j].a[1], b[i,j].a[2]);
+	end for;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest12",
@@ -583,7 +600,10 @@ equation
 
 end ConnectTests.ConnectTest12;
 ")})));
+end ConnectTest12;
 
+
+model ConnectTest13
 	connector A
 		Real x;
 		flow Real y;
@@ -593,17 +613,12 @@ end ConnectTests.ConnectTest12;
 		A a[2];
 	end B;
 	
-	B b[3,4];
+	B b[3];
 equation
-	for i in 1:2, j in 1:3 loop
-		connect(b[i,j].a[1], b[i,j+1].a[1]);
-		connect(b[i,j].a[2], b[i+1,j].a[2]);
-		connect(b[i,j].a[1], b[i,j].a[2]);
+	for i in 1:2 loop
+		connect(b[i].a, b[i+1].a);
 	end for;
-end ConnectTest12;
 
-
-model ConnectTest13
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest13",
@@ -640,7 +655,10 @@ equation
 
 end ConnectTests.ConnectTest13;
 ")})));
+end ConnectTest13;
 
+
+model ConnectTest14
 	connector A
 		Real x;
 		flow Real y;
@@ -650,15 +668,11 @@ end ConnectTests.ConnectTest13;
 		A a[2];
 	end B;
 	
-	B b[3];
+	B b1[2,2];
+	B b2[2,2];
 equation
-	for i in 1:2 loop
-		connect(b[i].a, b[i+1].a);
-	end for;
-end ConnectTest13;
+	connect(b1.a, b2.a);
 
-
-model ConnectTest14
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest14",
@@ -733,7 +747,10 @@ equation
 
 end ConnectTests.ConnectTest14;
 ")})));
+end ConnectTest14;
 
+
+model ConnectTest15
 	connector A
 		Real x;
 		flow Real y;
@@ -743,14 +760,10 @@ end ConnectTests.ConnectTest14;
 		A a[2];
 	end B;
 	
-	B b1[2,2];
-	B b2[2,2];
+	B b[2,2,2];
 equation
-	connect(b1.a, b2.a);
-end ConnectTest14;
+	connect(b[1,:,:].a, b[2,:,:].a);
 
-
-model ConnectTest15
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest15",
@@ -825,23 +838,23 @@ equation
 
 end ConnectTests.ConnectTest15;
 ")})));
-
-	connector A
-		Real x;
-		flow Real y;
-	end A;
-	
-	connector B
-		A a[2];
-	end B;
-	
-	B b[2,2,2];
-equation
-	connect(b[1,:,:].a, b[2,:,:].a);
 end ConnectTest15;
 
 
 model ConnectTest16
+    connector A
+        Real x;
+    end A;
+    
+    model B
+        A a1[2];
+        A a2[2];
+    equation
+        connect(a1, a2);
+    end B;
+    
+    B b[2];
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest16",
@@ -864,23 +877,23 @@ equation
 
 end ConnectTests.ConnectTest16;
 ")})));
+end ConnectTest16;
 
+
+model ConnectTest17
     connector A
         Real x;
     end A;
     
     model B
-        A a1[2];
-        A a2[2];
+        A a1[3];
+        A a2[3];
     equation
-        connect(a1, a2);
+        connect(a1[1:2], a2[2:3]);
     end B;
     
     B b[2];
-end ConnectTest16;
 
-
-model ConnectTest17
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest17",
@@ -907,19 +920,6 @@ equation
 
 end ConnectTests.ConnectTest17;
 ")})));
-
-    connector A
-        Real x;
-    end A;
-    
-    model B
-        A a1[3];
-        A a2[3];
-    equation
-        connect(a1[1:2], a2[2:3]);
-    end B;
-    
-    B b[2];
 end ConnectTest17;
 
 
@@ -1000,6 +1000,17 @@ model Electrical
 end Electrical;
 
   model CircuitTest1
+    Electrical.ConstantVoltage cv;
+    Electrical.Ground g;
+    Electrical.Resistor r;
+    Electrical.Capacitor c;
+  equation
+    connect(cv.p,r.p);
+    connect(r.p,c.p);
+    connect(cv.n,g.p);
+    connect(cv.n,r.n);
+    connect(r.n,c.n);
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="CircuitTest1",
@@ -1053,20 +1064,42 @@ equation
 
 end ConnectTests.CircuitTest1;
 ")})));
+  end CircuitTest1;
+
+  model CircuitTest2
+    model F
+      extends Electrical.OnePort;
+      Electrical.Resistor r;
+      Electrical.Capacitor c;
+    equation
+      connect(p,r.p);
+      connect(p,c.p);
+      connect(n,r.n);
+      connect(n,c.n);
+    end F;
+
+    model F2
+      extends Electrical.TwoPin;
+      Electrical.Resistor r;
+      Electrical.Capacitor c;
+    equation
+      connect(p,r.p);
+      connect(p,c.p);
+      connect(n,r.n);
+      connect(n,c.n);
+    end F2;
   
     Electrical.ConstantVoltage cv;
     Electrical.Ground g;
     Electrical.Resistor r;
-    Electrical.Capacitor c;
+    F2 f;
   equation
     connect(cv.p,r.p);
-    connect(r.p,c.p);
+    connect(r.p,f.p);
     connect(cv.n,g.p);
     connect(cv.n,r.n);
-    connect(r.n,c.n);
-  end CircuitTest1;
+    connect(r.n,f.n);
 
-  model CircuitTest2
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="CircuitTest2",
@@ -1143,77 +1176,9 @@ equation
 
 end ConnectTests.CircuitTest2;
 ")})));
-  
-    model F
-      extends Electrical.OnePort;
-      Electrical.Resistor r;
-      Electrical.Capacitor c;
-    equation
-      connect(p,r.p);
-      connect(p,c.p);
-      connect(n,r.n);
-      connect(n,c.n);
-    end F;
-
-    model F2
-      extends Electrical.TwoPin;
-      Electrical.Resistor r;
-      Electrical.Capacitor c;
-    equation
-      connect(p,r.p);
-      connect(p,c.p);
-      connect(n,r.n);
-      connect(n,c.n);
-    end F2;
-  
-    Electrical.ConstantVoltage cv;
-    Electrical.Ground g;
-    Electrical.Resistor r;
-    F2 f;
-  equation
-    connect(cv.p,r.p);
-    connect(r.p,f.p);
-    connect(cv.n,g.p);
-    connect(cv.n,r.n);
-    connect(r.n,f.n);
   end CircuitTest2;
 
 model ConnectorTest
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ConnectorTest",
-			description="Test of generation of connection equations",
-			flatModel="
-fclass ConnectTests.ConnectorTest
- parameter Real c.b.firstOrder.k = 1 \"Gain\" /* 1 */;
- parameter Modelica.SIunits.Time c.b.firstOrder.T(start = 1) = 1 \"Time Constant\" /* 1 */;
- parameter Real c.b.firstOrder.y_start = 0 \"Initial or guess value of output (= state)\" /* 0 */;
- ConnectTests.ConnectorTest.RealInput c.b.firstOrder.u \"Connector of Real input signal\";
- ConnectTests.ConnectorTest.RealOutput c.b.firstOrder.y(start = c.b.firstOrder.y_start) \"Connector of Real output signal\";
- ConnectTests.ConnectorTest.RealInput c.b.feedback.u1;
- ConnectTests.ConnectorTest.RealInput c.b.feedback.u2;
- ConnectTests.ConnectorTest.RealOutput c.b.feedback.y;
- ConnectTests.ConnectorTest.RealInput c.b.u;
- parameter Real c.const.k(start = 1) = 1 \"Constant output value\" /* 1 */;
- ConnectTests.ConnectorTest.RealOutput c.const.y \"Connector of Real output signal\";
-initial equation 
- c.b.firstOrder.y = c.b.firstOrder.y_start;
-equation
- c.b.firstOrder.der(y) = ( ( c.b.firstOrder.k ) * ( c.b.firstOrder.u ) - ( c.b.firstOrder.y ) ) / ( c.b.firstOrder.T );
- c.b.feedback.y = c.b.feedback.u1 - ( c.b.feedback.u2 );
- c.const.y = c.const.k;
- c.b.u = c.const.y;
- c.b.feedback.y = c.b.firstOrder.u;
- c.b.feedback.u2 = c.b.firstOrder.y;
- c.b.feedback.u1 = c.b.u;
-
-public
- type Modelica.SIunits.Time = Real(final quantity = \"Time\",final unit = \"s\");
- type ConnectTests.ConnectorTest.RealInput = Real;
- type ConnectTests.ConnectorTest.RealOutput = Real;
-end ConnectTests.ConnectorTest;
-")})));
-
    model A
  
      RealInput u
@@ -1325,9 +1290,47 @@ end ConnectTests.ConnectorTest;
   end C;
   
   C c;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectorTest",
+			description="Test of generation of connection equations",
+			flatModel="
+fclass ConnectTests.ConnectorTest
+ parameter Real c.b.firstOrder.k = 1 \"Gain\" /* 1 */;
+ parameter Modelica.SIunits.Time c.b.firstOrder.T(start = 1) = 1 \"Time Constant\" /* 1 */;
+ parameter Real c.b.firstOrder.y_start = 0 \"Initial or guess value of output (= state)\" /* 0 */;
+ ConnectTests.ConnectorTest.RealInput c.b.firstOrder.u \"Connector of Real input signal\";
+ ConnectTests.ConnectorTest.RealOutput c.b.firstOrder.y(start = c.b.firstOrder.y_start) \"Connector of Real output signal\";
+ ConnectTests.ConnectorTest.RealInput c.b.feedback.u1;
+ ConnectTests.ConnectorTest.RealInput c.b.feedback.u2;
+ ConnectTests.ConnectorTest.RealOutput c.b.feedback.y;
+ ConnectTests.ConnectorTest.RealInput c.b.u;
+ parameter Real c.const.k(start = 1) = 1 \"Constant output value\" /* 1 */;
+ ConnectTests.ConnectorTest.RealOutput c.const.y \"Connector of Real output signal\";
+initial equation 
+ c.b.firstOrder.y = c.b.firstOrder.y_start;
+equation
+ c.b.firstOrder.der(y) = ( ( c.b.firstOrder.k ) * ( c.b.firstOrder.u ) - ( c.b.firstOrder.y ) ) / ( c.b.firstOrder.T );
+ c.b.feedback.y = c.b.feedback.u1 - ( c.b.feedback.u2 );
+ c.const.y = c.const.k;
+ c.b.u = c.const.y;
+ c.b.feedback.y = c.b.firstOrder.u;
+ c.b.feedback.u2 = c.b.firstOrder.y;
+ c.b.feedback.u1 = c.b.u;
+
+public
+ type Modelica.SIunits.Time = Real(final quantity = \"Time\",final unit = \"s\");
+ type ConnectTests.ConnectorTest.RealInput = Real;
+ type ConnectTests.ConnectorTest.RealOutput = Real;
+end ConnectTests.ConnectorTest;
+")})));
 end ConnectorTest;
 
 model CauerLowPassAnalog
+extends Modelica.Electrical.Analog.Examples.CauerLowPassAnalog(R1(R=1),R2(R=1),V(V=0));
+
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="CauerLowPassAnalog",
@@ -1521,13 +1524,26 @@ public
  type Modelica.Blocks.Interfaces.RealOutput = Real;
 end ConnectTests.CauerLowPassAnalog;
 ")})));
-
-extends Modelica.Electrical.Analog.Examples.CauerLowPassAnalog(R1(R=1),R2(R=1),V(V=0));
-
 end CauerLowPassAnalog; 
 
 
 model StreamTest1
+	connector A
+		Real a;
+		flow Real b;
+		stream Real c;
+		stream Real d;
+	end A;
+	
+	model B
+		A e;
+		A f;
+	equation
+		connect(e,f);
+	end B;
+	
+	B g;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="StreamTest1",
@@ -1550,7 +1566,10 @@ equation
 
 end ConnectTests.StreamTest1;
 ")})));
+end StreamTest1;
 
+
+model StreamTest2
 	connector A
 		Real a;
 		flow Real b;
@@ -1561,15 +1580,17 @@ end ConnectTests.StreamTest1;
 	model B
 		A e;
 		A f;
+		Real x;
+		Real y;
+
 	equation
+         	x = inStream(e.c);
+	        y = actualStream(e.c);
 		connect(e,f);
 	end B;
 	
 	B g;
-end StreamTest1;
 
-
-model StreamTest2
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="StreamTest2",
@@ -1596,31 +1617,23 @@ equation
 
 end ConnectTests.StreamTest2;
 ")})));
-
-	connector A
-		Real a;
-		flow Real b;
-		stream Real c;
-		stream Real d;
-	end A;
-	
-	model B
-		A e;
-		A f;
-		Real x;
-		Real y;
-
-	equation
-         	x = inStream(e.c);
-	        y = actualStream(e.c);
-		connect(e,f);
-	end B;
-	
-	B g;
 end StreamTest2;
 
 
 model StreamTest3
+	connector A
+		Real a;
+		flow Real b;
+		stream Real c;
+	end A;
+	
+	A d;
+	Real x;
+	Real y;
+equation
+	x = inStream(d.a);
+	y = actualStream(d.a);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="StreamTest3",
@@ -1634,7 +1647,10 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
 Semantic error at line 931, column 6:
   Argument of actualStream() must be a stream variable
 ")})));
+end StreamTest3;
 
+
+model StreamTest4
 	connector A
 		Real a;
 		flow Real b;
@@ -1645,12 +1661,9 @@ Semantic error at line 931, column 6:
 	Real x;
 	Real y;
 equation
-	x = inStream(d.a);
-	y = actualStream(d.a);
-end StreamTest3;
+	x = inStream(d.b);
+	y = actualStream(d.b);
 
-
-model StreamTest4
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="StreamTest4",
@@ -1664,23 +1677,17 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
 Semantic error at line 961, column 6:
   Argument of actualStream() must be a stream variable
 ")})));
-
-	connector A
-		Real a;
-		flow Real b;
-		stream Real c;
-	end A;
-	
-	A d;
-	Real x;
-	Real y;
-equation
-	x = inStream(d.b);
-	y = actualStream(d.b);
 end StreamTest4;
 
 
 model StreamTest5
+	Real a;
+	Real x;
+	Real y;
+equation
+	x = inStream(a);
+	y = actualStream(a);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="StreamTest5",
@@ -1694,13 +1701,6 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
 Semantic error at line 985, column 6:
   Argument of actualStream() must be a stream variable
 ")})));
-
-	Real a;
-	Real x;
-	Real y;
-equation
-	x = inStream(a);
-	y = actualStream(a);
 end StreamTest5;
 
 

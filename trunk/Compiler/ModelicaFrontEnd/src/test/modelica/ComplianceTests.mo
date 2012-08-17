@@ -3,6 +3,11 @@ package ComplianceTests
 
 /*
 model String_ComplErr
+
+ String str1="s1";
+ parameter String str2="s2";
+
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="String_ComplErr",
@@ -15,15 +20,14 @@ Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src
 Compliance error at line 74, column 19:
   String variables are not supported
 ")})));
-
-
- String str1="s1";
- parameter String str2="s2";
-
 end String_ComplErr;
 */
 
 model IntegerVariable_ComplErr
+
+Integer i=1;
+
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="IntegerVariable_ComplErr",
@@ -33,13 +37,12 @@ Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src
 Compliance error at line 87, column 9:
   Integer variables are not supported, only constants and parameters
 ")})));
-
-
-Integer i=1;
-
 end IntegerVariable_ComplErr;
 
 model BooleanVariable_ComplErr
+ Boolean b=true;
+
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="BooleanVariable_ComplErr",
@@ -49,12 +52,13 @@ Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src
 Compliance error at line 103, column 10:
   Boolean variables are not supported, only constants and parameters
 ")})));
-
- Boolean b=true;
-
 end BooleanVariable_ComplErr;
 
 model EnumVariable_ComplErr
+ type A = enumeration(a, b, c);
+ A x = A.b;
+
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="EnumVariable_ComplErr",
@@ -64,24 +68,9 @@ Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src
 Compliance error at line 103, column 10:
   Enumeration variables are not supported, only constants and parameters
 ")})));
-
- type A = enumeration(a, b, c);
- A x = A.b;
-
 end EnumVariable_ComplErr;
 
 model ArrayOfRecords_Warn
-	annotation(__JModelica(UnitTesting(tests={
-		WarningTestCase(
-			name="ArrayOfRecords_Warn",
-			description="Compliance warning for arrays of records with index variability > parameter",
-			errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-At line 79, column 3:
-  Using arrays of records with indices of higher than parameter variability is currently not supported when compiling with CppAD
-")})));
-
  function f
   input Real i;
   output R[2] a;
@@ -96,6 +85,17 @@ At line 79, column 3:
  end R;
  
  R x[2] = f(1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="ArrayOfRecords_Warn",
+			description="Compliance warning for arrays of records with index variability > parameter",
+			errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+At line 79, column 3:
+  Using arrays of records with indices of higher than parameter variability is currently not supported when compiling with CppAD
+")})));
 end ArrayOfRecords_Warn;
 
 
@@ -121,6 +121,12 @@ end ArrayOfRecords_Warn;
 
 
 model WhenStmt_ComplErr
+ Real x;
+algorithm
+ when (time < 2) then
+  x := 5;
+ end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="WhenStmt_ComplErr",
@@ -131,15 +137,17 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 126, column 2:
   When statements are not supported
 ")})));
-
- Real x;
-algorithm
- when (time < 2) then
-  x := 5;
- end when;
 end WhenStmt_ComplErr;
 
 model ElseWhenEq_ComplErr
+ Real x;
+equation
+ when (time < 2) then
+  x = 5;
+ elsewhen time >5 then
+  x = 6;
+ end when;	
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="ElseWhen_ComplErr",
@@ -150,17 +158,19 @@ Error: in file '/Users/jakesson/svn_projects/JModelica.org/Compiler/ModelicaFron
 Compliance error at line 176, column 2:
   Else clauses in when equations are currently not supported	 
 ")})));
-
- Real x;
-equation
- when (time < 2) then
-  x = 5;
- elsewhen time >5 then
-  x = 6;
- end when;	
 end ElseWhenEq_ComplErr;
 
 model UnsupportedBuiltins1_ComplErr
+ equation
+  scalar(1);
+  vector(1);
+  matrix(1);
+  diagonal(1 + "2");
+  product(1);
+  outerProduct(1);
+  symmetric(1);
+  skew(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="UnsupportedBuiltins1_ComplErr",
@@ -192,20 +202,21 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 172, column 3:
   The skew() function-like operator is not supported
 ")})));
-
- equation
-  scalar(1);
-  vector(1);
-  matrix(1);
-  diagonal(1 + "2");
-  product(1);
-  outerProduct(1);
-  symmetric(1);
-  skew(1);
 end UnsupportedBuiltins1_ComplErr;
 
 
 model UnsupportedBuiltins2_ComplErr
+ equation
+  sign(1);
+  String();
+  div(1);
+  mod();
+  rem(1);
+  ceil();
+  floor();
+  delay(1);
+  cardinality();
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="UnsupportedBuiltins2_ComplErr",
@@ -240,21 +251,22 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 219, column 3:
   The cardinality() function-like operator is not supported
 ")})));
-
- equation
-  sign(1);
-  String();
-  div(1);
-  mod();
-  rem(1);
-  ceil();
-  floor();
-  delay(1);
-  cardinality();
 end UnsupportedBuiltins2_ComplErr;
 
 
 model UnsupportedBuiltins3_ComplErr
+  discrete Real x;
+ equation
+  semiLinear();
+  initial();
+  terminal();
+  sample(1,1);
+  pre(x);
+  edge();
+  reinit(1);
+  terminate();
+  integer(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="UnsupportedBuiltins3_ComplErr",
@@ -289,22 +301,13 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 289, column 3:
   The integer() function-like operator is not supported
 ")})));
-
-  discrete Real x;
- equation
-  semiLinear();
-  initial();
-  terminal();
-  sample(1,1);
-  pre(x);
-  edge();
-  reinit(1);
-  terminate();
-  integer(1);
 end UnsupportedBuiltins3_ComplErr;
 
 
 model UnsupportedBuiltins4_Warn
+equation
+ assert(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		WarningTestCase(
 			name="UnsupportedBuiltins4_Warn",
@@ -315,13 +318,16 @@ Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo
 At line 294, column 2:
   The assert() function-like operator is not supported, and is currently ignored
 ")})));
-
-equation
- assert(1);
 end UnsupportedBuiltins4_Warn;
 
 
 model UnsupportedBuiltins5_Err
+  Real a;
+  Real b;
+ equation
+  (a, b) = assert(1);
+  a = assert(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="UnsupportedBuiltins5_Err",
@@ -335,16 +341,13 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Semantic error at line 314, column 3:
   Function assert() has no outputs, but is used in expression
 ")})));
-
-  Real a;
-  Real b;
- equation
-  (a, b) = assert(1);
-  a = assert(1);
 end UnsupportedBuiltins5_Err;
 
 
 model UnsupportedBuiltins6
+equation
+ assert(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UnsupportedBuiltins6",
@@ -354,13 +357,16 @@ fclass ComplianceTests.UnsupportedBuiltins6
 
 end ComplianceTests.UnsupportedBuiltins6;
 ")})));
-
-equation
- assert(1);
 end UnsupportedBuiltins6;
 
 
 model ArrayCellMod_ComplErr
+ model A
+  Real b[2];
+ end A;
+ 
+ A a(b[1] = 1, b[1](start=2));
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="ArrayCellMod_ComplErr",
@@ -377,15 +383,13 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 364, column 14:
   Modifiers of specific array elements are not supported
 ")})));
-
- model A
-  Real b[2];
- end A;
- 
- A a(b[1] = 1, b[1](start=2));
 end ArrayCellMod_ComplErr;
 
 model DuplicateVariables_ComplErr
+  Real x(start=1) = 1;
+  Real x = 1;
+
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="DuplicateVariables_ComplErr",
@@ -398,13 +402,31 @@ Error: in file 'ComplianceTests.DuplicateVariables_ComplErr.mof':
 Compliance error at line 0, column 0:
   The variable x is declared multiple times and is not identical to other declaration(s) with the same name.
 ")})));
-
-  Real x(start=1) = 1;
-  Real x = 1;
-
 end DuplicateVariables_ComplErr;
 
 model HybridNonFMU1
+Real xx(start=2);
+discrete Real x; 
+discrete Real y; 
+discrete Boolean w(start=true); 
+discrete Boolean v(start=true); 
+discrete Boolean z(start=true); 
+equation
+der(xx) = -x; 
+when y > 2 and pre(z) then 
+w = false; 
+end when; 
+when y > 2 and z then 
+v = false; 
+end when; 
+when x > 2 then 
+z = false; 
+end when; 
+when sample(0,1) then 
+x = pre(x) + 1.1; 
+y = pre(y) + 1.1; 
+end when; 
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="HybridNonFMU1",
@@ -445,7 +467,10 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 466, column 5:
   The pre() function-like operator is supported only when compiling FMUs
 ")})));
+end HybridNonFMU1;
 
+
+model HybridFMU1
 Real xx(start=2);
 discrete Real x; 
 discrete Real y; 
@@ -467,10 +492,7 @@ when sample(0,1) then
 x = pre(x) + 1.1; 
 y = pre(y) + 1.1; 
 end when; 
-end HybridNonFMU1;
 
-
-model HybridFMU1
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="HybridFMU1",
@@ -512,32 +534,21 @@ equation
 
 end ComplianceTests.HybridFMU1;
 ")})));
-
-Real xx(start=2);
-discrete Real x; 
-discrete Real y; 
-discrete Boolean w(start=true); 
-discrete Boolean v(start=true); 
-discrete Boolean z(start=true); 
-equation
-der(xx) = -x; 
-when y > 2 and pre(z) then 
-w = false; 
-end when; 
-when y > 2 and z then 
-v = false; 
-end when; 
-when x > 2 then 
-z = false; 
-end when; 
-when sample(0,1) then 
-x = pre(x) + 1.1; 
-y = pre(y) + 1.1; 
-end when; 
 end HybridFMU1;
 
 
 model HybridNonFMU2 
+ discrete Real x,y;
+ Real dummy;
+equation
+ der(dummy) = 0;
+ when sample(0,1/3) then
+   x = pre(x) + 1;
+ end when;
+ when initial() then
+   y = pre(y) + 1;
+ end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="HybridNonFMU2",
@@ -563,7 +574,10 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 587, column 8:
   The pre() function-like operator is supported only when compiling FMUs
 ")})));
+end HybridNonFMU2; 
 
+
+model HybridFMU2 
  discrete Real x,y;
  Real dummy;
 equation
@@ -574,10 +588,7 @@ equation
  when initial() then
    y = pre(y) + 1;
  end when;
-end HybridNonFMU2; 
 
-
-model HybridFMU2 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="HybridFMU2",
@@ -604,17 +615,6 @@ equation
 
 end ComplianceTests.HybridFMU2;
 ")})));
-
- discrete Real x,y;
- Real dummy;
-equation
- der(dummy) = 0;
- when sample(0,1/3) then
-   x = pre(x) + 1;
- end when;
- when initial() then
-   y = pre(y) + 1;
- end when;
 end HybridFMU2; 
 
 

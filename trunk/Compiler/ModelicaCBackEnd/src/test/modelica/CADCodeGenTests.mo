@@ -1,6 +1,12 @@
 package CADCodeGenTests
 
 model CADsin
+	Real y;
+	Real x1(start=1.5);
+equation
+	y = sin(x1);
+	x1 = 1;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADsin",
@@ -17,15 +23,15 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x1_1);
 (*res)[1] = 1 - _x1_1;
 (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
-
-	Real y;
-	Real x1(start=1.5);
-equation
-	y = sin(x1);
-	x1 = 1;
 end CADsin;
 
 model CADcos
+  Real y;
+  Real x1(start=1.5); 
+equation 
+  y = cos(x1);
+  x1 = 1;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADcos",
@@ -42,15 +48,15 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * -sin(_x1_1);
 (*res)[1] = 1 - _x1_1;
 (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
-
-  Real y;
-  Real x1(start=1.5); 
-equation 
-  y = cos(x1);
-  x1 = 1;
 end CADcos;
 
 model CADtan
+	Real y;
+	Real x1(start=1.5);
+equation
+	y = tan(x1);
+	x1 = 1;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADtan",
@@ -67,15 +73,16 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * 1/(cos(_x1_1)*c
 (*res)[1] = 1 - _x1_1;
 (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+end CADtan;
+
+model CADasin
 
 	Real y;
 	Real x1(start=1.5);
 equation
-	y = tan(x1);
+	y = asin(x1);
 	x1 = 1;
-end CADtan;
 
-model CADasin
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADasin",
@@ -92,16 +99,16 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * 1/(sqrt(1 -_x1_
 (*res)[1] = 1 - _x1_1;
 (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+end CADasin;
 
+model CADacos
 
 	Real y;
 	Real x1(start=1.5);
 equation
-	y = asin(x1);
+	y = acos(x1);
 	x1 = 1;
-end CADasin;
 
-model CADacos
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADacos",
@@ -118,16 +125,16 @@ d_0 = -(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * 1/(sqrt(1 -_x1
 (*res)[1] = 1 - _x1_1;
 (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+end CADacos;
 
+model CADatan
 
 	Real y;
 	Real x1(start=1.5);
 equation
-	y = acos(x1);
+	y = atan(x1);
 	x1 = 1;
-end CADacos;
 
-model CADatan
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADatan",
@@ -144,16 +151,18 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * 1/(1 +_x1_1*_x1
 (*res)[1] = 1 - _x1_1;
 (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
-
-
-	Real y;
-	Real x1(start=1.5);
-equation
-	y = atan(x1);
-	x1 = 1;
 end CADatan;
 
 model CADatan2
+
+	Real y;
+	Real x1(start=1.5);
+	Real x2(start=2.0);
+equation
+	y = atan2(x1,x2);
+	x1 = 1;
+	x2 = (-1.5);
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADatan2",
@@ -177,18 +186,16 @@ d_1 = -AD_WRAP_LITERAL(0);
 (*res)[2] = v_1 - _x2_2;
 (*dF)[2] = d_1 - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 ")})));
-
-
-	Real y;
-	Real x1(start=1.5);
-	Real x2(start=2.0);
-equation
-	y = atan2(x1,x2);
-	x1 = 1;
-	x2 = (-1.5);
 end CADatan2;
 
 model CADsinh
+
+	Real y;
+	Real x1(start=1.5);
+equation
+	y = sinh(x1);
+	x1 = 1;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADsinh",
@@ -205,16 +212,16 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cosh(_x1_1);
 (*res)[1] = 1 - _x1_1;
 (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+end CADsinh;
 
+model CADcosh
 
 	Real y;
 	Real x1(start=1.5);
 equation
-	y = sinh(x1);
+	y = cosh(x1);
 	x1 = 1;
-end CADsinh;
 
-model CADcosh
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADcosh",
@@ -231,16 +238,17 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * sinh(_x1_1);
 (*res)[1] = 1 - _x1_1;
 (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+end CADcosh;
+
+model CADtanh
 
 
 	Real y;
 	Real x1(start=1.5);
 equation
-	y = cosh(x1);
+	y = tanh(x1);
 	x1 = 1;
-end CADcosh;
 
-model CADtanh
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADtanh",
@@ -257,17 +265,17 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * (1 - tanh(_x1_1
 (*res)[1] = 1 - _x1_1;
 (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+end CADtanh;
 
+model CADexp
 
 
 	Real y;
 	Real x1(start=1.5);
 equation
-	y = tanh(x1);
+	y = exp(x1);
 	x1 = 1;
-end CADtanh;
 
-model CADexp
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADexp",
@@ -284,17 +292,17 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * exp(_x1_1);
 (*res)[1] = 1 - _x1_1;
 (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+end CADexp;
 
+model CADlog
 
 
 	Real y;
 	Real x1(start=1.5);
 equation
-	y = exp(x1);
-	x1 = 1;
-end CADexp;
+	y = log(x1);
+	x1 = 2;
 
-model CADlog
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADlog",
@@ -311,17 +319,17 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * 1/(_x1_1);
 (*res)[1] = 2 - _x1_1;
 (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+end CADlog;
 
+model CADlog10
 
 
 	Real y;
 	Real x1(start=1.5);
 equation
-	y = log(x1);
-	x1 = 2;
-end CADlog;
+	y = log10(x1);
+	x1 = 1;
 
-model CADlog10
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADlog10",
@@ -338,17 +346,17 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * log10(exp(1))*1
 (*res)[1] = 1 - _x1_1;
 (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
-
-
-
-	Real y;
-	Real x1(start=1.5);
-equation
-	y = log10(x1);
-	x1 = 1;
 end CADlog10;
 
 model CADsqrt
+
+
+ 	Real y;
+	Real x1(start=1.5);
+equation
+	y = sqrt(x1);
+	x1 = 2;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADsqrt",
@@ -365,17 +373,20 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * 1/(2*sqrt(_x1_1
 (*res)[1] = 2 - _x1_1;
 (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
-
-
-
- 	Real y;
-	Real x1(start=1.5);
-equation
-	y = sqrt(x1);
-	x1 = 2;
 end CADsqrt;
 
 model CADadd
+
+
+
+	Real y;
+	Real x1(start=1.5);
+	Real x2(start=2.0);
+equation
+	y = x1 + x2;
+	x1 = 1;
+	x2 = 3;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADadd",
@@ -394,7 +405,9 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] + (*dz)[jmi_get_i
 (*res)[2] = 3 - _x2_2;
 (*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 ")})));
+end CADadd;
 
+model CADsub
 
 
 
@@ -402,12 +415,10 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] + (*dz)[jmi_get_i
 	Real x1(start=1.5);
 	Real x2(start=2.0);
 equation
-	y = x1 + x2;
+	y = x1 - x2;
 	x1 = 1;
 	x2 = 3;
-end CADadd;
 
-model CADsub
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADsub",
@@ -426,7 +437,9 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] - (*dz)[jmi_get_i
 (*res)[2] = 3 - _x2_2;
 (*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 ")})));
+end CADsub;
 
+model CADmul
 
 
 
@@ -434,12 +447,10 @@ d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] - (*dz)[jmi_get_i
 	Real x1(start=1.5);
 	Real x2(start=2.0);
 equation
-	y = x1 - x2;
+	y = x1 * x2;
 	x1 = 1;
 	x2 = 3;
-end CADsub;
 
-model CADmul
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADmul",
@@ -458,7 +469,9 @@ d_0 = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 + _x1_1 
 (*res)[2] = 3 - _x2_2;
 (*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 ")})));
+end CADmul;
 
+model CADdiv
 
 
 
@@ -466,12 +479,10 @@ d_0 = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 + _x1_1 
 	Real x1(start=1.5);
 	Real x2(start=2.0);
 equation
-	y = x1 * x2;
+	y = x1 / x2;
 	x1 = 1;
 	x2 = 3;
-end CADmul;
 
-model CADdiv
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADdiv",
@@ -490,7 +501,9 @@ d_0 = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 - _x1_1 
 (*res)[2] = 3 - _x2_2;
 (*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 ")})));
+end CADdiv;
 
+model CADpow
 
 
 
@@ -498,12 +511,10 @@ d_0 = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 - _x1_1 
 	Real x1(start=1.5);
 	Real x2(start=2.0);
 equation
-	y = x1 / x2;
-	x1 = 1;
+	y = x1^x2;
+	x1 = 2;
 	x2 = 3;
-end CADdiv;
 
-model CADpow
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADpow",
@@ -526,20 +537,18 @@ d_0 = v_0 * ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * log(jmi_
 (*res)[2] = 3 - _x2_2;
 (*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 ")})));
+end CADpow;
 
+model CADabs
 
 
 
 	Real y;
 	Real x1(start=1.5);
-	Real x2(start=2.0);
 equation
-	y = x1^x2;
-	x1 = 2;
-	x2 = 3;
-end CADpow;
+	y = abs(x1);
+	x1 = -1;
 
-model CADabs
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADabs",
@@ -565,18 +574,15 @@ d_1 = -AD_WRAP_LITERAL(0);
 (*res)[1] = v_1 - _x1_1;
 (*dF)[1] = d_1 - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
-
-
-
-
-	Real y;
-	Real x1(start=1.5);
-equation
-	y = abs(x1);
-	x1 = -1;
 end CADabs;
 
 model IfExpExample1
+    Real x,u;
+equation
+    u = if(x > 3) then noEvent(if time<=Modelica.Constants.pi/2 then sin(time) elseif 
+              noEvent(time<=Modelica.Constants.pi) then 1 else sin(time-Modelica.Constants.pi/2)) else noEvent(sin(3*x));
+    der(x) = u;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="IfExpExample1",
@@ -674,15 +680,15 @@ d_17 = d_18;
 (*res)[1] = _u_1 - _der_x_2;
 (*dF)[1] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 ")})));
-   
-    Real x,u;
-equation
-    u = if(x > 3) then noEvent(if time<=Modelica.Constants.pi/2 then sin(time) elseif 
-              noEvent(time<=Modelica.Constants.pi) then 1 else sin(time-Modelica.Constants.pi/2)) else noEvent(sin(3*x));
-    der(x) = u;
 end IfExpExample1;
 
 model IfExpExample2
+Real x,u;
+equation
+    u = if time<=Modelica.Constants.pi/2 then sin(time) elseif 
+              time<=Modelica.Constants.pi then 1 else sin(time-Modelica.Constants.pi/2);
+    der(x) = u;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="IfExpExample2",
@@ -749,16 +755,21 @@ d_9 = d_10 * cos(v_10);
 (*res)[1] = _u_1 - _der_x_2;
 (*dF)[1] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 ")})));
-
-Real x,u;
-equation
-    u = if time<=Modelica.Constants.pi/2 then sin(time) elseif 
-              time<=Modelica.Constants.pi then 1 else sin(time-Modelica.Constants.pi/2);
-    der(x) = u;
 end IfExpExample2;
 
 
   model CADFunction1		  
+
+	function F
+		input Real x;
+		output Real y;
+	algorithm
+		y := x;
+	end F;
+	Real a(start=2);
+	equation
+		der(a) = F(a);
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADFunction1",
@@ -787,20 +798,24 @@ func_CADCodeGenTests_CADFunction1_F_der_AD(_a_0, (*dz)[jmi_get_index_from_value_
 (*res)[0] = v_0 - _der_a_1;
 (*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 ")})));
-
-
-	function F
-		input Real x;
-		output Real y;
-	algorithm
-		y := x;
-	end F;
-	Real a(start=2);
-	equation
-		der(a) = F(a);
   end CADFunction1;
 
   model CADFunction2	  
+
+	function F
+		input Real x;
+		output Real a;
+		output Real b;
+		output Real c;
+	algorithm
+		a := x*2;
+		b := x*4;
+		c := x*8;
+	end F;
+	Real x(start=5);
+	equation
+		der(x) = F(x);
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADFunction2",
@@ -856,25 +871,33 @@ func_CADCodeGenTests_CADFunction2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_
 (*res)[0] = v_3 - _der_x_1;
 (*dF)[0] = d_3 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 ")})));
-
-
-	function F
-		input Real x;
-		output Real a;
-		output Real b;
-		output Real c;
-	algorithm
-		a := x*2;
-		b := x*4;
-		c := x*8;
-	end F;
-	Real x(start=5);
-	equation
-		der(x) = F(x);
   end CADFunction2; 
   
 
   model CADFunction3	  
+
+	function F
+		input Real x;
+		output Real y;
+	algorithm
+		y := F2(x)^2;
+	end F;
+	function F2
+		input Real x;
+		output Real y;
+	algorithm
+		y := F3(x)^2;
+	end F2;
+	function F3
+		input Real x;
+		output Real y;
+	algorithm
+		y := x^2;
+	end F3;
+	Real a(start=5);
+	equation
+		der(a) = F(a)+F2(a);
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADFunction3",
@@ -973,33 +996,31 @@ d_5 = d_6 + d_7;
 (*res)[0] = v_5 - _der_a_1;
 (*dF)[0] = d_5 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 ")})));
-
-
-	function F
-		input Real x;
-		output Real y;
-	algorithm
-		y := F2(x)^2;
-	end F;
-	function F2
-		input Real x;
-		output Real y;
-	algorithm
-		y := F3(x)^2;
-	end F2;
-	function F3
-		input Real x;
-		output Real y;
-	algorithm
-		y := x^2;
-	end F3;
-	Real a(start=5);
-	equation
-		der(a) = F(a)+F2(a);
   end CADFunction3; 
   
   
     model CADFunction4	
+
+	function F
+		input Real x; 
+		output Real a;
+		output Real b;
+		output Real c;
+	algorithm
+		a := x*2;
+		b := x*4;
+		c := x*8;
+	end F;
+	function F2
+		input Real x;
+		output Real a;
+	algorithm
+		a := F(x)*x;
+	end F2;
+	Real x(start=5);
+	equation
+		der(x) = F2(x);
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADFunction4",
@@ -1077,30 +1098,55 @@ func_CADCodeGenTests_CADFunction4_F2_der_AD(_x_0, (*dz)[jmi_get_index_from_value
 (*res)[0] = v_5 - _der_x_1;
 (*dF)[0] = d_5 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 ")})));
-
-
-	function F
-		input Real x; 
-		output Real a;
-		output Real b;
-		output Real c;
-	algorithm
-		a := x*2;
-		b := x*4;
-		c := x*8;
-	end F;
-	function F2
-		input Real x;
-		output Real a;
-	algorithm
-		a := F(x)*x;
-	end F2;
-	Real x(start=5);
-	equation
-		der(x) = F2(x);
   end CADFunction4; 
 
 model CADFunction5
+
+			function F
+			input Real x;
+			input Real x1;
+			input Real x2;
+			input Real x3;
+			input Real x4;
+			output Real a;
+			output Real b;
+			output Real c;
+			output Real d;
+			output Real e;
+			output Real f;
+			output Real g;
+		algorithm
+			a := x*2;
+			b := x1*4;
+			c := x2*8;
+			d := x3*8;
+			e := x4*8;
+			f := x*x1*x2;
+			g := x3*x4+x1;
+		end F;
+		Real x(start=5);
+		Real x1(start=10);
+		Real x2(start=15);
+		Real x3(start=20);
+		Real x4(start=25);
+		 Real a;
+		 Real b;
+		 Real c;
+		 Real d;
+		 Real e;
+		 Real f;
+		 Real g;
+		 input Real U(start=10);
+		 output Real Y;
+		equation
+			der(x)   = x1*U;
+			(a,b,c,d,e,f,g) = F(x,x1,x2,x3,x4);
+			der(x1)  = b;
+			der(x2)  = c;
+			der(x3)  = d+a;
+			der(x4)  = e*f+g;
+			Y = x+x1+x2+x3+x4;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADFunction5",
@@ -1288,7 +1334,10 @@ d_14 = d_15 + (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
 (*res)[12] = v_14 - _Y_13;
 (*dF)[12] = d_14 - (*dz)[jmi_get_index_from_value_ref(18)-jmi->offs_real_dx];
 ")})));
+end CADFunction5;
 
+
+model CADFunction6
 
 			function F
 			input Real x;
@@ -1308,36 +1357,46 @@ d_14 = d_15 + (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
 			b := x1*4;
 			c := x2*8;
 			d := x3*8;
-			e := x4*8;
-			f := x*x1*x2;
-			g := x3*x4+x1;
+			(e,f,g) := F2(x4,x3,x2);
 		end F;
+		
+		function F2
+			input Real x1;
+			input Real x2;
+			input Real x3;
+			output Real a;
+			output Real b;
+			output Real c;
+		algorithm
+			a := x1*2;
+			b := x2*4;
+			c := x3*8;
+		end F2;
+		
 		Real x(start=5);
 		Real x1(start=10);
 		Real x2(start=15);
 		Real x3(start=20);
 		Real x4(start=25);
-		 Real a;
-		 Real b;
-		 Real c;
-		 Real d;
-		 Real e;
-		 Real f;
-		 Real g;
-		 input Real U(start=10);
-		 output Real Y;
-		equation
-			der(x)   = x1*U;
-			(a,b,c,d,e,f,g) = F(x,x1,x2,x3,x4);
-			der(x1)  = b;
-			der(x2)  = c;
-			der(x3)  = d+a;
-			der(x4)  = e*f+g;
-			Y = x+x1+x2+x3+x4;
-end CADFunction5;
+		Real a;
+		Real b;
+		Real c;
+		Real d;
+		Real e;
+		Real f;
+		Real g;
+		input Real U(start=10);
+		output Real Y;
+	equation
+		der(x)   = x1*U;
+		(a,b,c,d) = F(x,x1,x2,x3,x4);
+		der(x1)  = b;
+		der(x2)  = c;
+		der(x3)  = d+a;
+		der(x4)  = e*f+g+x1;
+		(e,f,g) = F(x,x1,x2,x3,x4);
+		Y = x+x1+x2+x3+x4;
 
-
-model CADFunction6
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADFunction6",
@@ -1547,68 +1606,24 @@ d_15 = d_16 + (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
 (*res)[12] = v_15 - _Y_13;
 (*dF)[12] = d_15 - (*dz)[jmi_get_index_from_value_ref(18)-jmi->offs_real_dx];
 ")})));
-
-
-			function F
-			input Real x;
-			input Real x1;
-			input Real x2;
-			input Real x3;
-			input Real x4;
-			output Real a;
-			output Real b;
-			output Real c;
-			output Real d;
-			output Real e;
-			output Real f;
-			output Real g;
-		algorithm
-			a := x*2;
-			b := x1*4;
-			c := x2*8;
-			d := x3*8;
-			(e,f,g) := F2(x4,x3,x2);
-		end F;
-		
-		function F2
-			input Real x1;
-			input Real x2;
-			input Real x3;
-			output Real a;
-			output Real b;
-			output Real c;
-		algorithm
-			a := x1*2;
-			b := x2*4;
-			c := x3*8;
-		end F2;
-		
-		Real x(start=5);
-		Real x1(start=10);
-		Real x2(start=15);
-		Real x3(start=20);
-		Real x4(start=25);
-		Real a;
-		Real b;
-		Real c;
-		Real d;
-		Real e;
-		Real f;
-		Real g;
-		input Real U(start=10);
-		output Real Y;
-	equation
-		der(x)   = x1*U;
-		(a,b,c,d) = F(x,x1,x2,x3,x4);
-		der(x1)  = b;
-		der(x2)  = c;
-		der(x3)  = d+a;
-		der(x4)  = e*f+g+x1;
-		(e,f,g) = F(x,x1,x2,x3,x4);
-		Y = x+x1+x2+x3+x4;
 end CADFunction6;
 
 model CADFunction7
+	function F
+		input Real x;
+		output Real y;
+		output Real z;
+	algorithm
+		y := x*x;
+		z := x*y;
+	end F;
+	Real x(start=5);
+	Real y(start=7);
+	Real a(start=2);
+	equation
+		(x,y) = F(a);
+		der(a) = log(x*y);
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADFunction7",
@@ -1671,24 +1686,30 @@ d_3 = d_4 * 1/(v_4);
 (*res)[2] = v_3 - _der_a_3;
 (*dF)[2] = d_3 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 ")})));
-
-	function F
-		input Real x;
-		output Real y;
-		output Real z;
-	algorithm
-		y := x*x;
-		z := x*y;
-	end F;
-	Real x(start=5);
-	Real y(start=7);
-	Real a(start=2);
-	equation
-		(x,y) = F(a);
-		der(a) = log(x*y);
   end CADFunction7;
 
 model CADDerAnno1
+		function f
+			input Real x;
+			output Real y;
+		algorithm
+			y := x^2;
+			annotation(derivative=f_der);
+		end f;
+		
+		function f_der
+			input Real x;
+			input Real der_x;
+			output Real der_y;
+		algorithm
+			der_y := 2*x*der_x;
+		end f_der;
+
+		Real x1,x2;
+	equation
+		der(x1) + der(x2) = 1;
+		x1 + f(x2) = 0;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADDerAnno1",
@@ -1739,31 +1760,46 @@ return;
 }
 
 ")})));
-
-		function f
-			input Real x;
-			output Real y;
-		algorithm
-			y := x^2;
-			annotation(derivative=f_der);
-		end f;
-		
-		function f_der
-			input Real x;
-			input Real der_x;
-			output Real der_y;
-		algorithm
-			der_y := 2*x*der_x;
-		end f_der;
-
-		Real x1,x2;
-	equation
-		der(x1) + der(x2) = 1;
-		x1 + f(x2) = 0;
 end CADDerAnno1;
 
 
 model CADDerAnno2
+		function f2
+			input Real x1;
+			input Integer i = 1;
+			input Boolean b = true;
+			output Integer i1;
+			output Boolean b1;
+			output Real y;
+			annotation(derivative = f_der);
+		algorithm
+			i1 := 1;
+			b1 := true;
+			y  := if(b) then x1^2 else x1^3;
+		end f2;
+		
+		function f_der
+			input Real x1;
+			input Integer i1;
+			input Boolean b1;
+			input Real der_x1;
+			output Real der_y1;
+		algorithm
+			der_y1 := if(b1) then 2*x1*der_x1 else 3*x1^2*der_x1;
+		end f_der;
+		
+		Real x1(start=2);
+		Real y(start=2);
+		Integer i (start = 1);
+		Boolean b (start = true);
+		output Real a1(start=4);
+	equation
+		y = f2(x1,i,b);
+		i = if b then 1 else 2;
+		b = x1 > 0;
+		der(a1) = if i == 1 then x1 else -x1;
+		der(x1) = a1;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADDerAnno2",
@@ -1887,44 +1923,20 @@ jmi_ad_var_t func_CADCodeGenTests_CADDerAnno2_f2_exp(jmi_ad_var_t x1_v, jmi_ad_v
 }
 
 ")})));
-		function f2
-			input Real x1;
-			input Integer i = 1;
-			input Boolean b = true;
-			output Integer i1;
-			output Boolean b1;
-			output Real y;
-			annotation(derivative = f_der);
-		algorithm
-			i1 := 1;
-			b1 := true;
-			y  := if(b) then x1^2 else x1^3;
-		end f2;
-		
-		function f_der
-			input Real x1;
-			input Integer i1;
-			input Boolean b1;
-			input Real der_x1;
-			output Real der_y1;
-		algorithm
-			der_y1 := if(b1) then 2*x1*der_x1 else 3*x1^2*der_x1;
-		end f_der;
-		
-		Real x1(start=2);
-		Real y(start=2);
-		Integer i (start = 1);
-		Boolean b (start = true);
-		output Real a1(start=4);
-	equation
-		y = f2(x1,i,b);
-		i = if b then 1 else 2;
-		b = x1 > 0;
-		der(a1) = if i == 1 then x1 else -x1;
-		der(x1) = a1;
 end CADDerAnno2;
 
 model CADRes1
+
+	Real x(start=0.5);
+	Real y(start=0.5);
+	Real a(start=15);
+	Real b(start=15);
+	equation
+		x = sin(x);
+		y = sin(y);
+		der(a) = log(x+1)*a;
+		der(b) = log(y+2)*b;	
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADRes1",
@@ -2050,20 +2062,23 @@ d_7 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] * cos(_y_1);
 }
 
 ")})));
-
-
-	Real x(start=0.5);
-	Real y(start=0.5);
-	Real a(start=15);
-	Real b(start=15);
-	equation
-		x = sin(x);
-		y = sin(y);
-		der(a) = log(x+1)*a;
-		der(b) = log(y+2)*b;	
 end CADRes1;
 
 model CADRes2
+	 function F
+		input Real x;
+		output Real a;
+	algorithm
+		a := sin(x);
+	end F;
+	Real x(start=0.5);
+	Real y(start=10);
+	Real a(start=15);
+	equation
+		x = F(x);
+		der(y) = x*a;
+		der(a) = log(x*y+1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADRes2",
@@ -2143,23 +2158,39 @@ func_CADCodeGenTests_CADRes2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(4
 }
 
 ")})));
-
-	 function F
-		input Real x;
-		output Real a;
-	algorithm
-		a := sin(x);
-	end F;
-	Real x(start=0.5);
-	Real y(start=10);
-	Real a(start=15);
-	equation
-		x = F(x);
-		der(y) = x*a;
-		der(a) = log(x*y+1);
 end CADRes2;
 
 model CADRes3
+	function F
+			input Real x1;
+			input Real x2;
+			input Real x3;
+			input Real x4;
+			output Real a;
+			output Real b;
+			output Real c;
+			output Real d;
+		algorithm
+			a := sin(x1);
+			b := cos(x1);
+			c := tan(x2);
+			d := sin(x3);
+		end F;
+		Real x1(start=.1);
+		Real x2(start=.2);
+		Real x3(start=.3);
+		Real x4(start=.4);
+		Real e(start=1);
+		Real f(start=2);
+		Real g(start=3);
+		output Real Y;
+	equation
+		(x1,x2,x3,x4) = F(x1,x2,x3,x4);
+		der(e) = log(x1*x2+1)*e;
+		der(f) = sin(x2*x3+2)*f;
+		der(g) = log(x1*x2*x3*x4+3)*g+e+f;
+		der(Y) = x1+x2+x3+x4+e+f+g;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADRes3",
@@ -2362,39 +2393,24 @@ func_CADCodeGenTests_CADRes3_F_der_AD(_x1_0, _x2_1, _x3_2, _x4_3, (*dz)[jmi_get_
 }
 
 ")})));
-
-	function F
-			input Real x1;
-			input Real x2;
-			input Real x3;
-			input Real x4;
-			output Real a;
-			output Real b;
-			output Real c;
-			output Real d;
-		algorithm
-			a := sin(x1);
-			b := cos(x1);
-			c := tan(x2);
-			d := sin(x3);
-		end F;
-		Real x1(start=.1);
-		Real x2(start=.2);
-		Real x3(start=.3);
-		Real x4(start=.4);
-		Real e(start=1);
-		Real f(start=2);
-		Real g(start=3);
-		output Real Y;
-	equation
-		(x1,x2,x3,x4) = F(x1,x2,x3,x4);
-		der(e) = log(x1*x2+1)*e;
-		der(f) = sin(x2*x3+2)*f;
-		der(g) = log(x1*x2*x3*x4+3)*g+e+f;
-		der(Y) = x1+x2+x3+x4+e+f+g;
 end CADRes3;
 
 model CADTorn1
+  Real x_1(start=1.29533105933);
+  output Real w_ode_1_1;
+  Real w_ode_1_2;
+
+  input Real ur_1;
+  input Real ur_2;
+  input Real ur_3;
+equation
+w_ode_1_1*20 + (1.30*w_ode_1_2 + sin(w_ode_1_2) ) + (-2.01*x_1 + sin(x_1) ) + (-1.18*x_1) + (1.45*x_1) + (1.09*ur_2 + sin(ur_2) ) + (-1.24*ur_2) + (2.16*ur_3 + sin(ur_3) ) = 0;
+
+w_ode_1_2*20 + (-2.10*w_ode_1_1 + sin(w_ode_1_1) ) + (1.63*x_1 + sin(x_1) ) + (2.59*x_1 + sin(x_1) ) - (2.05*x_1) = 0;
+
+der(x_1) = (1.58*w_ode_1_1 + sin(w_ode_1_1) ) + (-2.51*w_ode_1_2 + sin(w_ode_1_2) ) + (2.15*x_1 + sin(x_1) ) - (2.19*x_1 + sin(x_1) ) - (-2.89*x_1) + (2.99*ur_1 + sin(ur_1) ) + (-2.34*ur_3 + sin(ur_3) ) + (-1.23*ur_2);
+
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADTorn1",
@@ -2889,26 +2905,41 @@ d_71 = d_72 - d_86;
 }
 
 ")})));
-
-  Real x_1(start=1.29533105933);
-  output Real w_ode_1_1;
-  Real w_ode_1_2;
-
-  input Real ur_1;
-  input Real ur_2;
-  input Real ur_3;
-equation
-w_ode_1_1*20 + (1.30*w_ode_1_2 + sin(w_ode_1_2) ) + (-2.01*x_1 + sin(x_1) ) + (-1.18*x_1) + (1.45*x_1) + (1.09*ur_2 + sin(ur_2) ) + (-1.24*ur_2) + (2.16*ur_3 + sin(ur_3) ) = 0;
-
-w_ode_1_2*20 + (-2.10*w_ode_1_1 + sin(w_ode_1_1) ) + (1.63*x_1 + sin(x_1) ) + (2.59*x_1 + sin(x_1) ) - (2.05*x_1) = 0;
-
-der(x_1) = (1.58*w_ode_1_1 + sin(w_ode_1_1) ) + (-2.51*w_ode_1_2 + sin(w_ode_1_2) ) + (2.15*x_1 + sin(x_1) ) - (2.19*x_1 + sin(x_1) ) - (-2.89*x_1) + (2.99*ur_1 + sin(ur_1) ) + (-2.34*ur_3 + sin(ur_3) ) + (-1.23*ur_2);
-
 end CADTorn1;
 
 
 
 model CADOde1
+	function F
+			input Real x1;
+			input Real x2;
+			input Real x3;
+			input Real x4;
+			output Real a;
+			output Real b;
+			output Real c;
+			output Real d;
+		algorithm
+			a := sin(x1);
+			b := cos(x1);
+			c := tan(x2);
+			d := sin(x3);
+		end F;
+		Real x1(start=.1);
+		Real x2(start=.2);
+		Real x3(start=.3);
+		Real x4(start=.4);
+		Real e(start=1);
+		Real f(start=2);
+		Real g(start=3);
+		output Real Y;
+	equation
+		(e,f,g,Y) = F(x1,x2,x3,x4);
+		der(x1) = sin(2+1);
+		der(x2) = cos(x1*x3+2)*5;
+		der(x3) = tanh(x1*x2*5*x4+3);
+		der(x4) = 1;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADOde1",
@@ -3012,39 +3043,52 @@ _Y_7 = tmp_var_3;
 /*** Integer and boolean outputs ***/
 /********* Other variables *********/
 ")})));
-
-	function F
-			input Real x1;
-			input Real x2;
-			input Real x3;
-			input Real x4;
-			output Real a;
-			output Real b;
-			output Real c;
-			output Real d;
-		algorithm
-			a := sin(x1);
-			b := cos(x1);
-			c := tan(x2);
-			d := sin(x3);
-		end F;
-		Real x1(start=.1);
-		Real x2(start=.2);
-		Real x3(start=.3);
-		Real x4(start=.4);
-		Real e(start=1);
-		Real f(start=2);
-		Real g(start=3);
-		output Real Y;
-	equation
-		(e,f,g,Y) = F(x1,x2,x3,x4);
-		der(x1) = sin(2+1);
-		der(x2) = cos(x1*x3+2)*5;
-		der(x3) = tanh(x1*x2*5*x4+3);
-		der(x4) = 1;
 end CADOde1;
 
 model CADExpInFuncArg1
+	function f
+		input Real x;
+		output Real y1;
+		output Real y2;
+	algorithm
+		(y1,y2) := f3(x+100,x^2);
+	end f;
+
+	function f1
+		input Real x;
+		output Real y;
+	algorithm
+		y := f2(sin(x))^(-2);
+	end f1;
+
+
+	function f2
+		input Real x;
+		output Real y;
+	algorithm
+		y := x^(-3);
+	end f2;
+	
+	function f3
+		input Real x1;
+		input Real x2;
+		output Real y1;
+		output Real y2;
+	algorithm
+		y1 := x1^(-3);
+		y2 := x2^(-5);
+	end f3;
+
+	Real x1(start=.1),x2(start=.2);
+	Real u1,u2;
+	Real v1,v2;
+equation
+	der(x1) = f(sin(x2));
+	der(x2) = f1(x1);
+	(u1,u2) = f(sin(x1));
+	der(v1) = u1;
+	der(v2) = u2;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADExpInFuncArg1",
@@ -3200,52 +3244,36 @@ return;
 }
 
 ")})));
-
-	function f
-		input Real x;
-		output Real y1;
-		output Real y2;
-	algorithm
-		(y1,y2) := f3(x+100,x^2);
-	end f;
-
-	function f1
-		input Real x;
-		output Real y;
-	algorithm
-		y := f2(sin(x))^(-2);
-	end f1;
-
-
-	function f2
-		input Real x;
-		output Real y;
-	algorithm
-		y := x^(-3);
-	end f2;
-	
-	function f3
-		input Real x1;
-		input Real x2;
-		output Real y1;
-		output Real y2;
-	algorithm
-		y1 := x1^(-3);
-		y2 := x2^(-5);
-	end f3;
-
-	Real x1(start=.1),x2(start=.2);
-	Real u1,u2;
-	Real v1,v2;
-equation
-	der(x1) = f(sin(x2));
-	der(x2) = f1(x1);
-	(u1,u2) = f(sin(x1));
-	der(v1) = u1;
-	der(v2) = u2;
 end CADExpInFuncArg1;
 
 model CADDiscreteFuncArg1
+		function f1
+			input Real x1;
+			output Integer i1;
+			output Boolean b1;
+		algorithm
+			(i1,b1):=f2(x1,b1);
+		end f1;
+	
+	
+		function f2
+			input Real x1;
+			input Boolean b;
+			output Integer i1;
+			output Boolean b1;
+		algorithm
+			i1 := 1;
+			b1 := true;
+		end f2;
+		
+		Real x1(start=2);
+		Integer i;
+		output Real a1(start=4);
+	equation
+		i = f1(x1);
+		der(a1) = if i == 1 then x1 else -x1;
+		der(x1) = a1;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="CADDiscreteFuncArg1",
@@ -3294,36 +3322,24 @@ return;
 }
 
 ")})));
-
-		function f1
-			input Real x1;
-			output Integer i1;
-			output Boolean b1;
-		algorithm
-			(i1,b1):=f2(x1,b1);
-		end f1;
-	
-	
-		function f2
-			input Real x1;
-			input Boolean b;
-			output Integer i1;
-			output Boolean b1;
-		algorithm
-			i1 := 1;
-			b1 := true;
-		end f2;
-		
-		Real x1(start=2);
-		Integer i;
-		output Real a1(start=4);
-	equation
-		i = f1(x1);
-		der(a1) = if i == 1 then x1 else -x1;
-		der(x1) = a1;
 end CADDiscreteFuncArg1;
 
 model SparseJacTest1
+ parameter Real p1=2;
+ parameter Integer p2 = 1;
+ parameter Boolean p3 = false;
+ Real x[3]; 
+ Real x2[2];
+ Real y[3];
+ Real y2;
+ input Real u[3];
+ input Real u2[2];
+equation
+ der(x2) = -x2;
+ der(x) = x + y + u;
+ y = {1,2,3};
+ y2 = sum(u2);
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="SparseJacTest1",
@@ -3342,42 +3358,9 @@ static int CAD_dae_n_nz = 22;
 static const int CAD_dae_nz_rows[22] = {0,1,2,3,4,0,1,2,3,4,2,3,4,8,8,2,5,3,6,4,7,8};
 static const int CAD_dae_nz_cols[22] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,15,16,16,17,17,18};
 ")})));
-
- parameter Real p1=2;
- parameter Integer p2 = 1;
- parameter Boolean p3 = false;
- Real x[3]; 
- Real x2[2];
- Real y[3];
- Real y2;
- input Real u[3];
- input Real u2[2];
-equation
- der(x2) = -x2;
- der(x) = x + y + u;
- y = {1,2,3};
- y2 = sum(u2);
 end SparseJacTest1;
 
 model SparseJacTest2
-	annotation(__JModelica(UnitTesting(tests={
-		CADCodeGenTestCase(
-			name="SparseJacTest2",
-			description="Test that sparsity information is generated correctly",
-			generate_dae_jacobian=true,
-			template="
-$C_DAE_equation_sparsity$
-",
-         generatedCode="
-static const int CAD_dae_real_p_opt_n_nz = 0;
-static const int CAD_dae_real_dx_n_nz = 0;
-static const int CAD_dae_real_x_n_nz = 0;
-static const int CAD_dae_real_u_n_nz = 0;
-static const int CAD_dae_real_w_n_nz = 4;
-static int CAD_dae_n_nz = 4;
-static const int CAD_dae_nz_rows[4] = {1,2,3,0};
-static const int CAD_dae_nz_cols[4] = {0,1,2,3};
-")})));
     function F1
       input Real x1[3];
       input Real x2;
@@ -3396,12 +3379,10 @@ static const int CAD_dae_nz_cols[4] = {0,1,2,3};
 equation
     (a,y) = F1(x,z,w);
 
-end SparseJacTest2;
 
-model SparseJacTest3
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
-			name="SparseJacTest3",
+			name="SparseJacTest2",
 			description="Test that sparsity information is generated correctly",
 			generate_dae_jacobian=true,
 			template="
@@ -3412,11 +3393,14 @@ static const int CAD_dae_real_p_opt_n_nz = 0;
 static const int CAD_dae_real_dx_n_nz = 0;
 static const int CAD_dae_real_x_n_nz = 0;
 static const int CAD_dae_real_u_n_nz = 0;
-static const int CAD_dae_real_w_n_nz = 12;
-static int CAD_dae_n_nz = 12;
-static const int CAD_dae_nz_rows[12] = {1,2,3,0,1,2,3,0,1,2,3,4};
-static const int CAD_dae_nz_cols[12] = {0,1,2,3,3,3,3,4,4,4,4,4};
+static const int CAD_dae_real_w_n_nz = 4;
+static int CAD_dae_n_nz = 4;
+static const int CAD_dae_nz_rows[4] = {1,2,3,0};
+static const int CAD_dae_nz_cols[4] = {0,1,2,3};
 ")})));
+end SparseJacTest2;
+
+model SparseJacTest3
     function F1
       input Real x1[3];
       input Real x2;
@@ -3436,9 +3420,46 @@ static const int CAD_dae_nz_cols[12] = {0,1,2,3,3,3,3,4,4,4,4,4};
 equation
     (a,y) = F1(x,q,a);
 
+
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="SparseJacTest3",
+			description="Test that sparsity information is generated correctly",
+			generate_dae_jacobian=true,
+			template="
+$C_DAE_equation_sparsity$
+",
+         generatedCode="
+static const int CAD_dae_real_p_opt_n_nz = 0;
+static const int CAD_dae_real_dx_n_nz = 0;
+static const int CAD_dae_real_x_n_nz = 0;
+static const int CAD_dae_real_u_n_nz = 0;
+static const int CAD_dae_real_w_n_nz = 12;
+static int CAD_dae_n_nz = 12;
+static const int CAD_dae_nz_rows[12] = {1,2,3,0,1,2,3,0,1,2,3,4};
+static const int CAD_dae_nz_cols[12] = {0,1,2,3,3,3,3,4,4,4,4,4};
+")})));
 end SparseJacTest3;
 
 model SparseJacTest4
+    function F1
+      input Real x1[3];
+      input Real x2;
+      input Real x3;
+      output Real y1;
+      output Real y2[3];
+    algorithm
+      y1 := x1[1]+x2;
+      y2 := {x1[1],x2,x3} + x1;
+    end F1;
+    Real y[3](start={1,2,3});
+    Real a(start = 3);
+    Real q = 3;
+    input Real x[3](start={3,2,2});
+equation
+    (a,y) = F1(x,q,a);
+
+
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="SparseJacTest4",
@@ -3457,6 +3478,9 @@ static int CAD_dae_n_nz = 24;
 static const int CAD_dae_nz_rows[24] = {0,1,2,3,0,1,2,3,0,1,2,3,1,2,3,0,1,2,3,0,1,2,3,4};
 static const int CAD_dae_nz_cols[24] = {0,0,0,0,1,1,1,1,2,2,2,2,3,4,5,6,6,6,6,7,7,7,7,7};
 ")})));
+end SparseJacTest4;
+
+model SparseJacTest5
     function F1
       input Real x1[3];
       input Real x2;
@@ -3470,13 +3494,11 @@ static const int CAD_dae_nz_cols[24] = {0,0,0,0,1,1,1,1,2,2,2,2,3,4,5,6,6,6,6,7,
     Real y[3](start={1,2,3});
     Real a(start = 3);
     Real q = 3;
-    input Real x[3](start={3,2,2});
+    Real x[3](start={3,2,2});
 equation
-    (a,y) = F1(x,q,a);
+    (a,y) = F1(der(x)+x,q,a);
+    der(x) = -x;
 
-end SparseJacTest4;
-
-model SparseJacTest5
 	annotation(__JModelica(UnitTesting(tests={
 		CADCodeGenTestCase(
 			name="SparseJacTest5",
@@ -3496,23 +3518,6 @@ static const int CAD_dae_nz_rows[42] = {0,1,2,3,4,0,1,2,3,5,0,1,2,3,6,0,1,2,3,4,
 static const int CAD_dae_nz_cols[42] = {0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,7,8,9,9,9,9,10,10,10,10,10};
 
 ")})));
-    function F1
-      input Real x1[3];
-      input Real x2;
-      input Real x3;
-      output Real y1;
-      output Real y2[3];
-    algorithm
-      y1 := x1[1]+x2;
-      y2 := {x1[1],x2,x3} + x1;
-    end F1;
-    Real y[3](start={1,2,3});
-    Real a(start = 3);
-    Real q = 3;
-    Real x[3](start={3,2,2});
-equation
-    (a,y) = F1(der(x)+x,q,a);
-    der(x) = -x;
 end SparseJacTest5;
 
 

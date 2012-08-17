@@ -18,6 +18,15 @@
 package FunctionInlining
     
     model BasicInline1
+        function f
+            input Real a;
+            output Real b;
+        algorithm
+            b := a;
+	        end f;
+        
+        Real x = f(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="BasicInline1",
@@ -30,33 +39,10 @@ equation
  x = 1;
 end FunctionInlining.BasicInline1;
 ")})));
-
-        function f
-            input Real a;
-            output Real b;
-        algorithm
-            b := a;
-	        end f;
-        
-        Real x = f(1);
     end BasicInline1;
        
 	   
     model BasicInline2
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="BasicInline2",
-			description="More complicated inlining case with only assignments and constant argument",
-			inline_functions="all",
-			flatModel="
-fclass FunctionInlining.BasicInline2
- Real x;
- constant Real y = 2;
-equation
- x = 2.0;
-end FunctionInlining.BasicInline2;
-")})));
-
         function f
             input Real a;
             output Real b;
@@ -76,10 +62,44 @@ end FunctionInlining.BasicInline2;
         
         Real x = f(y - 1);
         constant Real y = 2;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline2",
+			description="More complicated inlining case with only assignments and constant argument",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.BasicInline2
+ Real x;
+ constant Real y = 2;
+equation
+ x = 2.0;
+end FunctionInlining.BasicInline2;
+")})));
     end BasicInline2;
        
 	   
     model BasicInline3
+        function f
+            input Real a;
+            output Real b;
+        protected
+            Real c;
+            Real d;
+            Real e;
+            Real f;
+        algorithm
+            c := a;
+            d := 2 * c + a;
+            c := d / 3 + 1;
+            e := c ^ d;
+            f := e - c - d - c;
+            b := f + 1;
+        end f;
+        
+        Real x = f(y + 1);
+        Real y = time;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="BasicInline3",
@@ -101,45 +121,10 @@ equation
  temp_4 = ( temp_3 ) / ( 3 ) + 1;
 end FunctionInlining.BasicInline3;
 ")})));
-
-        function f
-            input Real a;
-            output Real b;
-        protected
-            Real c;
-            Real d;
-            Real e;
-            Real f;
-        algorithm
-            c := a;
-            d := 2 * c + a;
-            c := d / 3 + 1;
-            e := c ^ d;
-            f := e - c - d - c;
-            b := f + 1;
-        end f;
-        
-        Real x = f(y + 1);
-        Real y = time;
     end BasicInline3;
        
 	   
     model BasicInline4
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="BasicInline4",
-			description="Test of alias elimination after inlining",
-			inline_functions="all",
-			flatModel="
-fclass FunctionInlining.BasicInline4
- Real x;
- Real y;
-equation
- x = y + y;
- y = time;
-end FunctionInlining.BasicInline4;
-")})));
-
         function f
             input Real a;
             output Real b;
@@ -159,10 +144,40 @@ end FunctionInlining.BasicInline4;
         
         Real x = f(y);
         Real y = time;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline4",
+			description="Test of alias elimination after inlining",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.BasicInline4
+ Real x;
+ Real y;
+equation
+ x = y + y;
+ y = time;
+end FunctionInlining.BasicInline4;
+")})));
     end BasicInline4;
     
 	
     model BasicInline6
+        function f
+            input Real[:] a;
+            output Real[size(a,1)] b;
+        protected
+            Real[size(a,1)] c;
+            Real d;
+        algorithm
+            c := a .+ 2;
+            d := a * c;
+            b := d * (a + c);
+        end f;
+        
+        Real x[:] = f(y);
+        Real y[3] = { 1, 2, 3 };
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="BasicInline6",
@@ -193,47 +208,10 @@ equation
  temp_18 = 0.0 + ( y[1] ) * ( temp_6 ) + ( y[2] ) * ( temp_8 ) + ( y[3] ) * ( temp_10 );
 end FunctionInlining.BasicInline6;
 ")})));
-
-        function f
-            input Real[:] a;
-            output Real[size(a,1)] b;
-        protected
-            Real[size(a,1)] c;
-            Real d;
-        algorithm
-            c := a .+ 2;
-            d := a * c;
-            b := d * (a + c);
-        end f;
-        
-        Real x[:] = f(y);
-        Real y[3] = { 1, 2, 3 };
     end BasicInline6;
     
 	
     model BasicInline7
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="BasicInline7",
-			description="",
-			inline_functions="all",
-			eliminate_alias_variables=false,
-			flatModel="
-fclass FunctionInlining.BasicInline7
- Real x;
- Real y;
- Real temp_1;
- Real temp_4;
- Real temp_7;
-equation
- x = temp_4 + ( temp_4 ) * ( 2 ) + temp_7 + ( temp_7 ) * ( 2 );
- y = 1;
- temp_1 = y;
- temp_4 = temp_1;
- temp_7 = ( temp_1 ) * ( 2 );
-end FunctionInlining.BasicInline7;
-")})));
-
         function f1
             input Real a;
             output Real b;
@@ -256,10 +234,57 @@ end FunctionInlining.BasicInline7;
         
 	    Real x = f2(y);
         Real y = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline7",
+			description="",
+			inline_functions="all",
+			eliminate_alias_variables=false,
+			flatModel="
+fclass FunctionInlining.BasicInline7
+ Real x;
+ Real y;
+ Real temp_1;
+ Real temp_4;
+ Real temp_7;
+equation
+ x = temp_4 + ( temp_4 ) * ( 2 ) + temp_7 + ( temp_7 ) * ( 2 );
+ y = 1;
+ temp_1 = y;
+ temp_4 = temp_1;
+ temp_7 = ( temp_1 ) * ( 2 );
+end FunctionInlining.BasicInline7;
+")})));
     end BasicInline7;
     
 
     model BasicInline8
+        function f1
+            input Real[:] a;
+            output Real[size(a,1)] b;
+        protected
+            Real[size(a,1)] c;
+            Real d;
+        algorithm
+            c := a .+ 1;
+            d := a * c;
+            b := d * (a + c);
+        end f1;
+        
+        function f2
+            input Real[:] a;
+            output Real[size(a,1)] b;
+        protected
+            Real[size(a,1)] c;
+        algorithm
+            c := a * 2;
+            b := f1(a) + f1(c);
+        end f2;
+        
+        Real x[:] = f2(y);
+        Real y[3] = { 1, 2, 3 };
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="BasicInline8",
@@ -300,35 +325,30 @@ equation
  temp_159 = temp_61 .+ 1;
 end FunctionInlining.BasicInline8;
 ")})));
-
-        function f1
-            input Real[:] a;
-            output Real[size(a,1)] b;
-        protected
-            Real[size(a,1)] c;
-            Real d;
-        algorithm
-            c := a .+ 1;
-            d := a * c;
-            b := d * (a + c);
-        end f1;
-        
-        function f2
-            input Real[:] a;
-            output Real[size(a,1)] b;
-        protected
-            Real[size(a,1)] c;
-        algorithm
-            c := a * 2;
-            b := f1(a) + f1(c);
-        end f2;
-        
-        Real x[:] = f2(y);
-        Real y[3] = { 1, 2, 3 };
     end BasicInline8;
     
     
     model BasicInline9
+        function f
+            input Real a;
+            output Real b;
+        protected
+            Real c;
+            Real d;
+            Real e;
+            Real f;
+        algorithm
+            c := a;
+            d := 2 * c + a;
+            c := d / 3 + 1;
+            e := c ^ d;
+            f := e - c - d - c;
+            b := f + 1;
+		end f;
+		
+        parameter Real x = f(y - 1);
+        parameter Real y = 2;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="BasicInline9",
@@ -349,30 +369,24 @@ parameter equation
  x = temp_4 ^ temp_3 - ( temp_4 ) - ( temp_3 ) - ( temp_4 ) + 1;
 end FunctionInlining.BasicInline9;
 ")})));
-
-        function f
-            input Real a;
-            output Real b;
-        protected
-            Real c;
-            Real d;
-            Real e;
-            Real f;
-        algorithm
-            c := a;
-            d := 2 * c + a;
-            c := d / 3 + 1;
-            e := c ^ d;
-            f := e - c - d - c;
-            b := f + 1;
-		end f;
-		
-        parameter Real x = f(y - 1);
-        parameter Real y = 2;
     end BasicInline9;
 
 
     model BasicInline10
+        function f
+            input Real a;
+            input Real[:] b;
+            input Integer c;
+            output Real d;
+        algorithm
+            d := a * b[c];
+            end f;
+        
+        parameter Integer e = 2;
+        Real x = f(y, z, e);
+        Real y = 2.2;
+        Real[:] z = { 1, 2, 3 };
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="BasicInline10",
@@ -394,24 +408,21 @@ equation
  z[3] = 3;
 end FunctionInlining.BasicInline10;
 ")})));
-
-        function f
-            input Real a;
-            input Real[:] b;
-            input Integer c;
-            output Real d;
-        algorithm
-            d := a * b[c];
-            end f;
-        
-        parameter Integer e = 2;
-        Real x = f(y, z, e);
-        Real y = 2.2;
-        Real[:] z = { 1, 2, 3 };
     end BasicInline10;
 
 
     model BasicInline11
+        function f
+            input Integer a;
+            output Integer b;
+        algorithm
+            b := 4 - a;
+            end f;
+        
+        parameter Integer e = 1;
+        Real x = y[f(e)];
+        Real[:] y = { 1, 2, 3 };
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="BasicInline11",
@@ -433,17 +444,6 @@ equation
 
 end FunctionInlining.BasicInline11;
 ")})));
-
-        function f
-            input Integer a;
-            output Integer b;
-        algorithm
-            b := 4 - a;
-            end f;
-        
-        parameter Integer e = 1;
-        Real x = y[f(e)];
-        Real[:] y = { 1, 2, 3 };
     end BasicInline11;
 
 
@@ -467,6 +467,18 @@ end FunctionInlining.BasicInline11;
 
 
     model BasicInline13
+		type E = enumeration(a, b, c);
+		
+        function next
+            input E x;
+            output E y;
+        algorithm
+            y := if x == E.a then E.b else E.c;
+        end next;
+        
+        E p1 = next(E.a);
+		E p2 = next(p1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="BasicInline13",
@@ -488,22 +500,24 @@ public
 
 end FunctionInlining.BasicInline13;
 ")})));
-
-		type E = enumeration(a, b, c);
-		
-        function next
-            input E x;
-            output E y;
-        algorithm
-            y := if x == E.a then E.b else E.c;
-        end next;
-        
-        E p1 = next(E.a);
-		E p2 = next(p1);
     end BasicInline13;
     
     
     model RecordInline1
+        record R
+            Real a[3];
+            Integer b;
+        end R;
+        
+        function f
+            input R c;
+            output Real d;
+        algorithm
+            d := c.b + sum(c.a);
+        end f;
+        
+        Real x = f(R({1,2,3}, 4));
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInline1",
@@ -523,24 +537,24 @@ public
 
 end FunctionInlining.RecordInline1;
 ")})));
-
+    end RecordInline1;
+    
+    
+    model RecordInline2
         record R
             Real a[3];
             Integer b;
         end R;
         
         function f
-            input R c;
-            output Real d;
+            input Real c;
+            output R d;
         algorithm
-            d := c.b + sum(c.a);
+            d := R({1,2,3} * c, 2);
         end f;
         
-        Real x = f(R({1,2,3}, 4));
-    end RecordInline1;
-    
-    
-    model RecordInline2
+        R x = f(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInline2",
@@ -568,7 +582,10 @@ public
 
 end FunctionInlining.RecordInline2;
 ")})));
-
+    end RecordInline2;
+    
+    
+    model RecordInline3
         record R
             Real a[3];
             Integer b;
@@ -576,16 +593,16 @@ end FunctionInlining.RecordInline2;
         
         function f
             input Real c;
-            output R d;
+            output Real d;
+        protected
+            R e;
         algorithm
-            d := R({1,2,3} * c, 2);
+            e := R({1,2,3} * c, 4);
+            d := sum(e.a) + c * e.b;
         end f;
         
-        R x = f(1);
-    end RecordInline2;
-    
-    
-    model RecordInline3
+        Real x = f(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInline3",
@@ -605,27 +622,25 @@ public
 
 end FunctionInlining.RecordInline3;
 ")})));
-
+    end RecordInline3;
+    
+    
+    model RecordInline4
         record R
             Real a[3];
             Integer b;
         end R;
         
         function f
-            input Real c;
+            input R c;
             output Real d;
-        protected
-            R e;
         algorithm
-            e := R({1,2,3} * c, 4);
-            d := sum(e.a) + c * e.b;
+            d := c.b + sum(c.a);
         end f;
         
-        Real x = f(1);
-    end RecordInline3;
-    
-    
-    model RecordInline4
+		Real y[4] = {1,2,3,4};
+        Real x = f(R(y[1:3], integer(y[4])));
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInline4",
@@ -653,25 +668,25 @@ public
 
 end FunctionInlining.RecordInline4;
 ")})));
-
+    end RecordInline4;
+    
+    
+    model RecordInline5
         record R
             Real a[3];
             Integer b;
         end R;
         
         function f
-            input R c;
-            output Real d;
+            input Real c;
+            output R d;
         algorithm
-            d := c.b + sum(c.a);
+            d := R({1,2,3} * c, 2);
         end f;
         
-		Real y[4] = {1,2,3,4};
-        Real x = f(R(y[1:3], integer(y[4])));
-    end RecordInline4;
-    
-    
-    model RecordInline5
+		Real y = 1;
+        R x = f(y);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInline5",
@@ -701,7 +716,10 @@ public
 
 end FunctionInlining.RecordInline5;
 ")})));
-
+    end RecordInline5;
+    
+    
+    model RecordInline6
         record R
             Real a[3];
             Integer b;
@@ -709,17 +727,17 @@ end FunctionInlining.RecordInline5;
         
         function f
             input Real c;
-            output R d;
+            output Real d;
+        protected
+            R e;
         algorithm
-            d := R({1,2,3} * c, 2);
+            e := R({1,2,3} * c, 4);
+            d := sum(e.a) + c * e.b;
         end f;
         
-		Real y = 1;
-        R x = f(y);
-    end RecordInline5;
-    
-    
-    model RecordInline6
+        Real y = 1;
+        Real x = f(y);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInline6",
@@ -741,28 +759,32 @@ public
 
 end FunctionInlining.RecordInline6;
 ")})));
-
+    end RecordInline6;
+    
+    
+    model RecordInline7
         record R
             Real a[3];
             Integer b;
         end R;
         
         function f
-            input Real c;
-            output Real d;
+            input R c;
+            output R d;
         protected
             R e;
+            R g;
+            R h;
         algorithm
-            e := R({1,2,3} * c, 4);
-            d := sum(e.a) + c * e.b;
+			e := c;
+			g := R(e.a + c.a, e.b - c.b);
+			h := R(c.a * e.a * g.a, 3);
+			d := R(h.a - c.a, h.b + g.b);
         end f;
         
-        Real y = 1;
-        Real x = f(y);
-    end RecordInline6;
-    
-    
-    model RecordInline7
+        Real y[4] = {1,2,3,4};
+        R x = f(R(y[1:3], integer(y[4])));
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInline7",
@@ -801,32 +823,28 @@ public
 
 end FunctionInlining.RecordInline7;
 ")})));
-
+    end RecordInline7;
+    
+    
+    model RecordInline8
         record R
             Real a[3];
             Integer b;
         end R;
         
         function f
-            input R c;
+            input Real c;
             output R d;
-        protected
-            R e;
-            R g;
-            R h;
         algorithm
-			e := c;
-			g := R(e.a + c.a, e.b - c.b);
-			h := R(c.a * e.a * g.a, 3);
-			d := R(h.a - c.a, h.b + g.b);
+            d.a[1] := 2 / c;
+            d.a[2] := 3 + c;
+            d.a[3] := 4 * c;
+            d.b := integer(5 - c);
         end f;
         
-        Real y[4] = {1,2,3,4};
-        R x = f(R(y[1:3], integer(y[4])));
-    end RecordInline7;
-    
-    
-    model RecordInline8
+        Real y = 1;
+        R x = f(y);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInline8",
@@ -856,7 +874,10 @@ public
 
 end FunctionInlining.RecordInline8;
 ")})));
-
+    end RecordInline8;
+    
+    
+    model RecordInline9
         record R
             Real a[3];
             Integer b;
@@ -872,12 +893,8 @@ end FunctionInlining.RecordInline8;
             d.b := integer(5 - c);
         end f;
         
-        Real y = 1;
-        R x = f(y);
-    end RecordInline8;
-    
-    
-    model RecordInline9
+        R x = f(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordInline9",
@@ -905,49 +922,10 @@ public
 
 end FunctionInlining.RecordInline9;
 ")})));
-
-        record R
-            Real a[3];
-            Integer b;
-        end R;
-        
-        function f
-            input Real c;
-            output R d;
-        algorithm
-            d.a[1] := 2 / c;
-            d.a[2] := 3 + c;
-            d.a[3] := 4 * c;
-            d.b := integer(5 - c);
-        end f;
-        
-        R x = f(1);
     end RecordInline9;
     
     
     model RecordInline10
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="RecordInline10",
-			description="",
-			inline_functions="all",
-			flatModel="
-fclass FunctionInlining.RecordInline10
- Real x;
- Real y;
-equation
- x = ( 1 ) * ( y ) + ( 2 ) * ( y ) + ( 3 ) * ( y ) + integer(5 - ( y ));
- y = 1;
-
-public
- record FunctionInlining.RecordInline10.R
-  Real a[3];
-  discrete Integer b;
- end FunctionInlining.RecordInline10.R;
-
-end FunctionInlining.RecordInline10;
-")})));
-
         record R
             Real a[3];
             Integer b;
@@ -973,17 +951,14 @@ end FunctionInlining.RecordInline10;
         
         Real x = f1(y);
         Real y = 1;
-    end RecordInline10;
-    
-    
-    model RecordInline11
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="RecordInline11",
+			name="RecordInline10",
 			description="",
 			inline_functions="all",
 			flatModel="
-fclass FunctionInlining.RecordInline11
+fclass FunctionInlining.RecordInline10
  Real x;
  Real y;
 equation
@@ -991,14 +966,17 @@ equation
  y = 1;
 
 public
- record FunctionInlining.RecordInline11.R
+ record FunctionInlining.RecordInline10.R
   Real a[3];
   discrete Integer b;
- end FunctionInlining.RecordInline11.R;
+ end FunctionInlining.RecordInline10.R;
 
-end FunctionInlining.RecordInline11;
+end FunctionInlining.RecordInline10;
 ")})));
-
+    end RecordInline10;
+    
+    
+    model RecordInline11
         record R
             Real a[3];
             Integer b;
@@ -1024,10 +1002,71 @@ end FunctionInlining.RecordInline11;
         
         Real x = f1(y);
         Real y = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordInline11",
+			description="",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.RecordInline11
+ Real x;
+ Real y;
+equation
+ x = ( 1 ) * ( y ) + ( 2 ) * ( y ) + ( 3 ) * ( y ) + integer(5 - ( y ));
+ y = 1;
+
+public
+ record FunctionInlining.RecordInline11.R
+  Real a[3];
+  discrete Integer b;
+ end FunctionInlining.RecordInline11.R;
+
+end FunctionInlining.RecordInline11;
+")})));
     end RecordInline11;
 	
 	
 	model UninlinableFunction1
+		function f1
+			input Real x1;
+			input Real x2;
+			output Real y = f4(x1);
+		algorithm
+            while y < x2 loop
+				y := y + f3(x1, x2);
+            end while;
+		end f1;
+		
+		function f2
+			input Real x;
+			output Real y = x;
+		algorithm
+		end f2;
+		
+        function f3
+            input Real x1;
+            input Real x2;
+            output Real y;
+        algorithm
+            y := 0;
+            while y < x2 loop
+                y := y + x1;
+            end while;
+        end f3;
+        
+        function f4
+            input Real x;
+            output Real y = x;
+        algorithm
+        end f4;
+        
+		Real z[3] = 1:size(z,1);
+		Real w[2];
+	equation
+		w[1] = f1(z[2], z[3]);
+		w[2] = f2(z[1]);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UninlinableFunction1",
@@ -1083,65 +1122,10 @@ public
 
 end FunctionInlining.UninlinableFunction1;
 ")})));
-
-		function f1
-			input Real x1;
-			input Real x2;
-			output Real y = f4(x1);
-		algorithm
-            while y < x2 loop
-				y := y + f3(x1, x2);
-            end while;
-		end f1;
-		
-		function f2
-			input Real x;
-			output Real y = x;
-		algorithm
-		end f2;
-		
-        function f3
-            input Real x1;
-            input Real x2;
-            output Real y;
-        algorithm
-            y := 0;
-            while y < x2 loop
-                y := y + x1;
-            end while;
-        end f3;
-        
-        function f4
-            input Real x;
-            output Real y = x;
-        algorithm
-        end f4;
-        
-		Real z[3] = 1:size(z,1);
-		Real w[2];
-	equation
-		w[1] = f1(z[2], z[3]);
-		w[2] = f2(z[1]);
 	end UninlinableFunction1;
     
     
     model IfStatementInline1
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfStatementInline1",
-			description="",
-			inline_functions="all",
-			flatModel="
-fclass FunctionInlining.IfStatementInline1
- Real z1;
- Real z2;
-equation
- z1 = 5;
- z2 = 3;
-
-end FunctionInlining.IfStatementInline1;
-")})));
-
         function f
             input Real x;
             output Real y;
@@ -1159,28 +1143,26 @@ end FunctionInlining.IfStatementInline1;
         
         Real z1 = f(3);
         Real z2 = f(1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfStatementInline1",
+			description="",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.IfStatementInline1
+ Real z1;
+ Real z2;
+equation
+ z1 = 5;
+ z2 = 3;
+
+end FunctionInlining.IfStatementInline1;
+")})));
     end IfStatementInline1;
     
     
     model IfStatementInline2
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfStatementInline2",
-			description="",
-			inline_functions="all",
-			eliminate_alias_variables=false,
-			flatModel="
-fclass FunctionInlining.IfStatementInline2
- Real v;
- Real z;
- Real temp_1;
-equation
- v = 2;
- z = noEvent((if temp_1 > 2 then temp_1 else 1)) + 2;
- temp_1 = v;
-end FunctionInlining.IfStatementInline2;
-")})));
-
         function f
             input Real x;
             output Real y;
@@ -1198,32 +1180,28 @@ end FunctionInlining.IfStatementInline2;
         
         Real v = 2;
         Real z = f(v);
-    end IfStatementInline2;
-    
-    
-    model IfStatementInline3
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="IfStatementInline3",
+			name="IfStatementInline2",
 			description="",
 			inline_functions="all",
 			eliminate_alias_variables=false,
 			flatModel="
-fclass FunctionInlining.IfStatementInline3
- Real v1;
- Real v2;
- Real v3;
+fclass FunctionInlining.IfStatementInline2
+ Real v;
  Real z;
  Real temp_1;
 equation
- v1 = 1;
- v2 = 2;
- v3 = 3;
- z = noEvent((if temp_1 > 2 then temp_1 else v2)) + noEvent((if temp_1 > 2 then v3 else temp_1));
- temp_1 = v1;
-end FunctionInlining.IfStatementInline3;
+ v = 2;
+ z = noEvent((if temp_1 > 2 then temp_1 else 1)) + 2;
+ temp_1 = v;
+end FunctionInlining.IfStatementInline2;
 ")})));
-
+    end IfStatementInline2;
+    
+    
+    model IfStatementInline3
         function f
             input Real x1;
             input Real x2;
@@ -1247,10 +1225,46 @@ end FunctionInlining.IfStatementInline3;
         Real v2 = 2;
         Real v3 = 3;
         Real z = f(v1, v2, v3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfStatementInline3",
+			description="",
+			inline_functions="all",
+			eliminate_alias_variables=false,
+			flatModel="
+fclass FunctionInlining.IfStatementInline3
+ Real v1;
+ Real v2;
+ Real v3;
+ Real z;
+ Real temp_1;
+equation
+ v1 = 1;
+ v2 = 2;
+ v3 = 3;
+ z = noEvent((if temp_1 > 2 then temp_1 else v2)) + noEvent((if temp_1 > 2 then v3 else temp_1));
+ temp_1 = v1;
+end FunctionInlining.IfStatementInline3;
+")})));
     end IfStatementInline3;
     
     
     model IfStatementInline4
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            if x > 2 then
+                y := x;
+            else
+                y := x + 1;
+            end if;
+        end f;
+        
+        Real v = 1;
+        Real z = f(v);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="IfStatementInline4",
@@ -1268,24 +1282,23 @@ equation
  temp_1 = v;
 end FunctionInlining.IfStatementInline4;
 ")})));
-
-        function f
-            input Real x;
-            output Real y;
-        algorithm
-            if x > 2 then
-                y := x;
-            else
-                y := x + 1;
-            end if;
-        end f;
-        
-        Real v = 1;
-        Real z = f(v);
     end IfStatementInline4;
     
     
     model ForStatementInline1
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := 0;
+            for w in linspace(1, x, 4) loop
+                y := y + w * w;
+            end for;
+        end f;
+        
+        Real v = 3;
+        Real z = f(v);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ForStatementInline1",
@@ -1311,7 +1324,10 @@ equation
  temp_9 = 1 + ( 3 ) * ( ( temp_1 - ( 1 ) ) / ( 3 ) );
 end FunctionInlining.ForStatementInline1;
 ")})));
-
+    end ForStatementInline1;
+    
+    
+    model ForStatementInline2
         function f
             input Real x;
             output Real y;
@@ -1322,12 +1338,8 @@ end FunctionInlining.ForStatementInline1;
             end for;
         end f;
         
-        Real v = 3;
-        Real z = f(v);
-    end ForStatementInline1;
-    
-    
-    model ForStatementInline2
+        Real z = f(3);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ForStatementInline2",
@@ -1341,22 +1353,23 @@ equation
 
 end FunctionInlining.ForStatementInline2;
 ")})));
-
-        function f
-            input Real x;
-            output Real y;
-        algorithm
-            y := 0;
-            for w in linspace(1, x, 4) loop
-                y := y + w * w;
-            end for;
-        end f;
-        
-        Real z = f(3);
     end ForStatementInline2;
     
     
     model ForStatementInline3
+        function f
+            input Real[:] x;
+            output Real y;
+        algorithm
+            y := 0;
+            for w in x loop
+                y := y + w * w;
+            end for;
+        end f;
+        
+        Real v[3] = {1,2,3};
+        Real z = f(v);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ForStatementInline3",
@@ -1375,7 +1388,10 @@ equation
  z = 0 + ( v[1] ) * ( v[1] ) + ( v[2] ) * ( v[2] ) + ( v[3] ) * ( v[3] );
 end FunctionInlining.ForStatementInline3;
 ")})));
-
+    end ForStatementInline3;
+    
+    
+    model ForStatementInline4
         function f
             input Real[:] x;
             output Real y;
@@ -1386,12 +1402,8 @@ end FunctionInlining.ForStatementInline3;
             end for;
         end f;
         
-        Real v[3] = {1,2,3};
-        Real z = f(v);
-    end ForStatementInline3;
-    
-    
-    model ForStatementInline4
+        Real z = f({1,2,3});
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ForStatementInline4",
@@ -1405,22 +1417,27 @@ equation
 
 end FunctionInlining.ForStatementInline4;
 ")})));
+    end ForStatementInline4;
 
+
+    model ForStatementInline5
         function f
             input Real[:] x;
             output Real y;
         algorithm
             y := 0;
             for w in x loop
-                y := y + w * w;
+                if w > 2 then
+                    y := y + w * w;
+                else
+                    y := y + w;
+                end if;
             end for;
         end f;
         
-        Real z = f({1,2,3});
-    end ForStatementInline4;
+        Real v[3] = {1,2,3};
+        Real z = f(v);
 
-
-    model ForStatementInline5
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ForStatementInline5",
@@ -1449,41 +1466,10 @@ equation
  temp_12 = noEvent((if v[3] > 2 then temp_10 + ( v[3] ) * ( v[3] ) else temp_10));
 end FunctionInlining.ForStatementInline5;
 ")})));
-
-        function f
-            input Real[:] x;
-            output Real y;
-        algorithm
-            y := 0;
-            for w in x loop
-                if w > 2 then
-                    y := y + w * w;
-                else
-                    y := y + w;
-                end if;
-            end for;
-        end f;
-        
-        Real v[3] = {1,2,3};
-        Real z = f(v);
     end ForStatementInline5;
 
 
     model ForStatementInline6
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ForStatementInline6",
-			description="",
-			inline_functions="all",
-			flatModel="
-fclass FunctionInlining.ForStatementInline6
- Real z;
-equation
- z = 12;
-
-end FunctionInlining.ForStatementInline6;
-")})));
-
         function f
             input Real[:] x;
             output Real y;
@@ -1499,10 +1485,44 @@ end FunctionInlining.ForStatementInline6;
         end f;
         
         Real z = f({1,2,3});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForStatementInline6",
+			description="",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.ForStatementInline6
+ Real z;
+equation
+ z = 12;
+
+end FunctionInlining.ForStatementInline6;
+")})));
     end ForStatementInline6;
 
 
     model ForStatementInline7
+        function f
+            input Real[:] x;
+            output Real y;
+		protected
+			Real t;
+        algorithm
+			t := x * x;
+            y := 0;
+            for w in 1:4 loop
+                if w > 2 then
+                    y := y + w * t;
+                else
+                    y := y + t;
+                end if;
+            end for;
+        end f;
+        
+        Real v[3] = {1,2,3};
+        Real z = f(v);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ForStatementInline7",
@@ -1523,30 +1543,25 @@ equation
  temp_12 = 0.0 + ( v[1] ) * ( v[1] ) + ( v[2] ) * ( v[2] ) + ( v[3] ) * ( v[3] );
 end FunctionInlining.ForStatementInline7;
 ")})));
+    end ForStatementInline7;
 
+
+    model ForStatementInline8
         function f
             input Real[:] x;
             output Real y;
-		protected
-			Real t;
         algorithm
-			t := x * x;
             y := 0;
-            for w in 1:4 loop
-                if w > 2 then
+            for w in x loop
+                for t in x loop
                     y := y + w * t;
-                else
-                    y := y + t;
-                end if;
+                end for;
             end for;
         end f;
         
         Real v[3] = {1,2,3};
         Real z = f(v);
-    end ForStatementInline7;
 
-
-    model ForStatementInline8
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ForStatementInline8",
@@ -1565,26 +1580,28 @@ equation
  z = 0 + ( v[1] ) * ( v[1] ) + ( v[1] ) * ( v[2] ) + ( v[1] ) * ( v[3] ) + ( v[2] ) * ( v[1] ) + ( v[2] ) * ( v[2] ) + ( v[2] ) * ( v[3] ) + ( v[3] ) * ( v[1] ) + ( v[3] ) * ( v[2] ) + ( v[3] ) * ( v[3] );
 end FunctionInlining.ForStatementInline8;
 ")})));
-
-        function f
-            input Real[:] x;
-            output Real y;
-        algorithm
-            y := 0;
-            for w in x loop
-                for t in x loop
-                    y := y + w * t;
-                end for;
-            end for;
-        end f;
-        
-        Real v[3] = {1,2,3};
-        Real z = f(v);
     end ForStatementInline8;
 	
     
     
     model MultipleOutputsInline1
+        function f
+            input Real a;
+            input Real b;
+            output Real c;
+            output Real d;
+        algorithm
+            c := a + 1;
+            d := c + b;
+        end f;
+        
+        Real x[8];
+    equation
+        (x[1], x[2]) = f(1, 2 * 2);
+        (x[3], x[4]) = f(2, x[2]);
+        (x[5], x[6]) = f(x[3], 3);
+        (x[7], x[8]) = f(x[5], x[6]);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="MultipleOutputsInline1",
@@ -1611,27 +1628,29 @@ equation
  x[7] = x[5] + 1;
 end FunctionInlining.MultipleOutputsInline1;
 ")})));
-
+    end MultipleOutputsInline1;
+    
+    
+    model MultipleOutputsInline2
         function f
             input Real a;
             input Real b;
             output Real c;
             output Real d;
+            output Real e;
         algorithm
-            c := a + 1;
-            d := c + b;
+            c := a + b;
+            d := a - b;
+            e := a * b;
         end f;
         
-        Real x[8];
+        Real x[6];
+		Real y[6] = ones(6);
     equation
-        (x[1], x[2]) = f(1, 2 * 2);
-        (x[3], x[4]) = f(2, x[2]);
-        (x[5], x[6]) = f(x[3], 3);
-        (x[7], x[8]) = f(x[5], x[6]);
-    end MultipleOutputsInline1;
-    
-    
-    model MultipleOutputsInline2
+        (x[1], , x[2]) = f(y[1], y[2]);
+        (x[3], x[4])   = f(y[3], y[4]);
+        (, x[5], x[6]) = f(y[5], y[6]);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="MultipleOutputsInline2",
@@ -1666,8 +1685,11 @@ equation
  y[6] = 1;
 end FunctionInlining.MultipleOutputsInline2;
 ")})));
+    end MultipleOutputsInline2;
 
-        function f
+
+    model MultipleOutputsInline3
+        function f1
             input Real a;
             input Real b;
             output Real c;
@@ -1677,18 +1699,25 @@ end FunctionInlining.MultipleOutputsInline2;
             c := a + b;
             d := a - b;
             e := a * b;
-        end f;
+        end f1;
+		
+		function f2
+            input Real y1;
+            input Real y2;
+            output Real x1;
+	        output Real x2;
+            output Real x3;
+	    algorithm
+	        (x1, x2, x3) := f1(y1, y2);
+		end f2;
         
         Real x[6];
-		Real y[6] = ones(6);
+        Real y[6] = ones(6);
     equation
-        (x[1], , x[2]) = f(y[1], y[2]);
-        (x[3], x[4])   = f(y[3], y[4]);
-        (, x[5], x[6]) = f(y[5], y[6]);
-    end MultipleOutputsInline2;
+        (x[1], , x[2]) = f2(y[1], y[2]);
+        (x[3], x[4])   = f2(y[3], y[4]);
+        (, x[5], x[6]) = f2(y[5], y[6]);
 
-
-    model MultipleOutputsInline3
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="MultipleOutputsInline3",
@@ -1723,55 +1752,10 @@ equation
  y[6] = 1;
 end FunctionInlining.MultipleOutputsInline3;
 ")})));
-
-        function f1
-            input Real a;
-            input Real b;
-            output Real c;
-            output Real d;
-            output Real e;
-        algorithm
-            c := a + b;
-            d := a - b;
-            e := a * b;
-        end f1;
-		
-		function f2
-            input Real y1;
-            input Real y2;
-            output Real x1;
-	        output Real x2;
-            output Real x3;
-	    algorithm
-	        (x1, x2, x3) := f1(y1, y2);
-		end f2;
-        
-        Real x[6];
-        Real y[6] = ones(6);
-    equation
-        (x[1], , x[2]) = f2(y[1], y[2]);
-        (x[3], x[4])   = f2(y[3], y[4]);
-        (, x[5], x[6]) = f2(y[5], y[6]);
     end MultipleOutputsInline3;
     
     
     model IfEquationInline1
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEquationInline1",
-			description="Test inlining of function calls in if equations",
-			inline_functions="all",
-			flatModel="
-fclass FunctionInlining.IfEquationInline1
- Real x;
- Real y;
-equation
- y = (if time > 1 then x else 0);
- x = 1;
-
-end FunctionInlining.IfEquationInline1;
-")})));
-
         function f
             input Real a;
             output Real b;
@@ -1787,25 +1771,26 @@ end FunctionInlining.IfEquationInline1;
         else
             y = 0;
         end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationInline1",
+			description="Test inlining of function calls in if equations",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.IfEquationInline1
+ Real x;
+ Real y;
+equation
+ y = (if time > 1 then x else 0);
+ x = 1;
+
+end FunctionInlining.IfEquationInline1;
+")})));
     end IfEquationInline1;
     
     
     model IfEquationInline2
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEquationInline2",
-			description="Test inlining of function calls in if equations",
-			inline_functions="all",
-			flatModel="
-fclass FunctionInlining.IfEquationInline2
- parameter Boolean b = true /* true */;
- Real y;
-equation
- y = 1;
-
-end FunctionInlining.IfEquationInline2;
-")})));
-
         function f
             input Real a;
             output Real b;
@@ -1820,27 +1805,25 @@ end FunctionInlining.IfEquationInline2;
         if (b) then
             y = f(x);
         end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationInline2",
+			description="Test inlining of function calls in if equations",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.IfEquationInline2
+ parameter Boolean b = true /* true */;
+ Real y;
+equation
+ y = 1;
+
+end FunctionInlining.IfEquationInline2;
+")})));
     end IfEquationInline2;
     
     
     model IfEquationInline3
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEquationInline3",
-			description="Test inlining of function calls in if equations",
-			inline_functions="all",
-			flatModel="
-fclass FunctionInlining.IfEquationInline3
- parameter Boolean b = false /* false */;
- Real x;
- Real y;
-equation
- y = 0;
- x = 1;
-
-end FunctionInlining.IfEquationInline3;
-")})));
-
         function f
             input Real a;
             output Real b;
@@ -1858,10 +1841,44 @@ end FunctionInlining.IfEquationInline3;
 		if (not b) then
 			y = 0;
 		end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationInline3",
+			description="Test inlining of function calls in if equations",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.IfEquationInline3
+ parameter Boolean b = false /* false */;
+ Real x;
+ Real y;
+equation
+ y = 0;
+ x = 1;
+
+end FunctionInlining.IfEquationInline3;
+")})));
     end IfEquationInline3;
     
     
     model IfEquationInline4
+        function f
+            input Real a;
+            output Real b;
+        algorithm
+            b := a;
+        end f;
+        
+        Real x1 = 1;
+        Real x2 = 2;
+        Real y;
+    equation
+        if (time > 1) then
+            y = f(x1);
+        else
+            y = f(x2);
+        end if;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="IfEquationInline4",
@@ -1879,44 +1896,10 @@ equation
 
 end FunctionInlining.IfEquationInline4;
 ")})));
-
-        function f
-            input Real a;
-            output Real b;
-        algorithm
-            b := a;
-        end f;
-        
-        Real x1 = 1;
-        Real x2 = 2;
-        Real y;
-    equation
-        if (time > 1) then
-            y = f(x1);
-        else
-            y = f(x2);
-        end if;
     end IfEquationInline4;
     
     
     model IfEquationInline5
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEquationInline5",
-			description="Test inlining of function calls in if equations",
-			inline_functions="all",
-			flatModel="
-fclass FunctionInlining.IfEquationInline5
- constant Boolean b = true;
- Real x2;
- Real y;
-equation
- y = 1;
- x2 = 2;
-
-end FunctionInlining.IfEquationInline5;
-")})));
-
         function f
             input Real a;
             output Real b;
@@ -1934,27 +1917,27 @@ end FunctionInlining.IfEquationInline5;
         else
             y = f(x2);
         end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationInline5",
+			description="Test inlining of function calls in if equations",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.IfEquationInline5
+ constant Boolean b = true;
+ Real x2;
+ Real y;
+equation
+ y = 1;
+ x2 = 2;
+
+end FunctionInlining.IfEquationInline5;
+")})));
     end IfEquationInline5;
     
     
     model IfEquationInline6
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEquationInline6",
-			description="Test inlining of function calls in if equations",
-			inline_functions="all",
-			flatModel="
-fclass FunctionInlining.IfEquationInline6
- constant Boolean b = false;
- Real x1;
- Real y;
-equation
- x1 = 1;
- y = 2;
-
-end FunctionInlining.IfEquationInline6;
-")})));
-
         function f
             input Real a;
             output Real b;
@@ -1972,28 +1955,28 @@ end FunctionInlining.IfEquationInline6;
         else
             y = f(x2);
         end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationInline6",
+			description="Test inlining of function calls in if equations",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.IfEquationInline6
+ constant Boolean b = false;
+ Real x1;
+ Real y;
+equation
+ x1 = 1;
+ y = 2;
+
+end FunctionInlining.IfEquationInline6;
+")})));
     end IfEquationInline6;
     
     
     
     model TrivialInline1
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="TrivialInline1",
-			description="",
-			inline_functions="trivial",
-			flatModel="
-fclass FunctionInlining.TrivialInline1
- Real x;
- Real y;
- Real z;
-equation
- x = (if z > 2 then 3 else z + 3);
- y = (if z > 2 then 4 else ( z ) * ( 3 ));
- z = 1;
-end FunctionInlining.TrivialInline1;
-")})));
-
         function f
             input Real a;
             input Real b;
@@ -2014,27 +1997,27 @@ end FunctionInlining.TrivialInline1;
         else
             (x, y) = f(z, 3);
         end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TrivialInline1",
+			description="",
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.TrivialInline1
+ Real x;
+ Real y;
+ Real z;
+equation
+ x = (if z > 2 then 3 else z + 3);
+ y = (if z > 2 then 4 else ( z ) * ( 3 ));
+ z = 1;
+end FunctionInlining.TrivialInline1;
+")})));
     end TrivialInline1;
     
     
     model TrivialInline2
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="TrivialInline2",
-			description="",
-			inline_functions="trivial",
-			flatModel="
-fclass FunctionInlining.TrivialInline2
- Real x[1];
- Real x[2];
- Real z;
-equation
- x[1] = (if z > 2 then 3 else z + 3);
- x[2] = (if z > 2 then 4 else z - ( 3 ));
- z = 1;
-end FunctionInlining.TrivialInline2;
-")})));
-
         function f
             input Real a;
             input Real b;
@@ -2054,6 +2037,23 @@ end FunctionInlining.TrivialInline2;
         else
             x = f(z, 3);
         end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TrivialInline2",
+			description="",
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.TrivialInline2
+ Real x[1];
+ Real x[2];
+ Real z;
+equation
+ x[1] = (if z > 2 then 3 else z + 3);
+ x[2] = (if z > 2 then 4 else z - ( 3 ));
+ z = 1;
+end FunctionInlining.TrivialInline2;
+")})));
     end TrivialInline2;
     
     
@@ -2129,21 +2129,6 @@ end FunctionInlining.TrivialInline2;
     
     
     model TrivialInline6
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="TrivialInline6",
-			description="",
-			inline_functions="trivial",
-			flatModel="
-fclass FunctionInlining.TrivialInline6
- Real x;
- Real z;
-equation
- x = (if z > 2 then 2 else ( ( z ) * ( 2 ) + 1 ) * ( 2 ));
- z = 1;
-end FunctionInlining.TrivialInline6;
-")})));
-
         function f1
             input Real a;
             output Real b;
@@ -2166,6 +2151,21 @@ end FunctionInlining.TrivialInline6;
         else
             x = f1(z);
         end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TrivialInline6",
+			description="",
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.TrivialInline6
+ Real x;
+ Real z;
+equation
+ x = (if z > 2 then 2 else ( ( z ) * ( 2 ) + 1 ) * ( 2 ));
+ z = 1;
+end FunctionInlining.TrivialInline6;
+")})));
     end TrivialInline6;
     
     

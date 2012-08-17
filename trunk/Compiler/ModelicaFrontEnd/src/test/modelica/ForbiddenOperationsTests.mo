@@ -30,6 +30,8 @@ algorithm
 end WhenInFunction_Func;
 
 model WhenInFunction
+ Real x = WhenInFunction_Func(1);
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="WhenInFunction",
@@ -40,11 +42,17 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsT
 Semantic error at line 60, column 2:
   When statements are not allowed in functions
 ")})));
-
- Real x = WhenInFunction_Func(1);
 end WhenInFunction;
 
 model WhenInBlocks1
+ Real x;
+algorithm
+ if x < 1 then
+  when x < 0.5 then
+   x := 0.8;
+  end when;
+ end if;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="WhenInBlocks1",
@@ -55,17 +63,17 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsT
 Semantic error at line 84, column 3:
   When statements are not allowed inside if, for, while and when clauses
 ")})));
-
- Real x;
-algorithm
- if x < 1 then
-  when x < 0.5 then
-   x := 0.8;
-  end when;
- end if;
 end WhenInBlocks1;
 
 model WhenInBlocks2
+ Real x;
+algorithm
+ when x < 1 then
+  when x < 0.5 then
+   x := 0.8;
+  end when;
+ end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="WhenInBlocks2",
@@ -76,17 +84,17 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsT
 Semantic error at line 84, column 3:
   When statements are not allowed inside if, for, while and when clauses
 ")})));
-
- Real x;
-algorithm
- when x < 1 then
-  when x < 0.5 then
-   x := 0.8;
-  end when;
- end when;
 end WhenInBlocks2;
 
 model WhenInBlocks3
+ Real x;
+algorithm
+ while x < 1 loop
+  when x < 0.5 then
+   x := 0.8;
+  end when;
+ end while;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="WhenInBlocks3",
@@ -97,17 +105,17 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsT
 Semantic error at line 84, column 3:
   When statements are not allowed inside if, for, while and when clauses
 ")})));
-
- Real x;
-algorithm
- while x < 1 loop
-  when x < 0.5 then
-   x := 0.8;
-  end when;
- end while;
 end WhenInBlocks3;
 
 model WhenInBlocks4
+ Real x;
+algorithm
+ for i in 1:3 loop
+  when x < 0.5 then
+   x := 0.8;
+  end when;
+ end for;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="WhenInBlocks4",
@@ -118,17 +126,12 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsT
 Semantic error at line 84, column 3:
   When statements are not allowed inside if, for, while and when clauses
 ")})));
-
- Real x;
-algorithm
- for i in 1:3 loop
-  when x < 0.5 then
-   x := 0.8;
-  end when;
- end for;
 end WhenInBlocks4;
 
 model ReturnOutsideFunction
+algorithm
+ return;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="ReturnOutsideFunction",
@@ -139,12 +142,19 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsT
 Semantic error at line 166, column 2:
   Return statements are only allowed in functions
 ")})));
-
-algorithm
- return;
 end ReturnOutsideFunction;
 
 model IfEquTest_ComplErr
+ Real x;
+ Boolean y = true;
+equation
+ if y then
+   x=3;
+ else
+   x=5;
+ end if;
+
+
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="IfEquTest_ComplErr",
@@ -158,21 +168,20 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsT
 Compliance error at line 196, column 2:
   If equations are currently only supported with constant or parameter test expressions
 ")})));
-
- Real x;
- Boolean y = true;
-equation
- if y then
-   x=3;
- else
-   x=5;
- end if;
-
 end IfEquTest_ComplErr;
 
 
 
 model WhenContents1
+	Real x;
+	Real y;
+equation
+	x = y + 1;
+	when time > 1 then
+		x + y = 3;
+		x = 2;
+	end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="WhenContents1",
@@ -183,19 +192,20 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsT
 Semantic error at line 215, column 3:
   Only assignment equations are allowed in when clauses
 ")})));
-
-	Real x;
-	Real y;
-equation
-	x = y + 1;
-	when time > 1 then
-		x + y = 3;
-		x = 2;
-	end when;
 end WhenContents1;
 
 
 model WhenContents2
+	Real x;
+	Real y;
+equation
+	when time > 1 then
+		x = 3;
+	elsewhen time > 2 then
+		x = 3;
+		y = 3;
+	end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="WhenContents2",
@@ -206,31 +216,10 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsT
 Semantic error at line 235, column 2:
   All branches in when equation must assign the same variables
 ")})));
-
-	Real x;
-	Real y;
-equation
-	when time > 1 then
-		x = 3;
-	elsewhen time > 2 then
-		x = 3;
-		y = 3;
-	end when;
 end WhenContents2;
 
 
 model WhenContents3
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="WhenContents3",
-			description="Check contents of when clauses",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Semantic error at line 262, column 3:
-  All branches in if equation with non-parameter tests within when equation must assign the same variables
-")})));
-
 	Real x;
 	Real y;
 equation
@@ -243,10 +232,23 @@ equation
 			y = 3;
 		end if;
 	end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="WhenContents3",
+			description="Check contents of when clauses",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
+Semantic error at line 262, column 3:
+  All branches in if equation with non-parameter tests within when equation must assign the same variables
+")})));
 end WhenContents3;
 
 
 model LongIntConst1
+    Real x = 1000000000000;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="LongIntConst1",
@@ -259,12 +261,12 @@ equation
 
 end ForbiddenOperationsTests.LongIntConst1;
 ")})));
-
-    Real x = 1000000000000;
 end LongIntConst1;
 
 
 model LongIntConst2
+    Real x = 1000000000000;
+
 	annotation(__JModelica(UnitTesting(tests={
 		WarningTestCase(
 			name="LongIntConst2",
@@ -275,8 +277,6 @@ Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperation
 At line 300, column 14:
   Integer literal \"1000000000000\" is too large to represent as 32-bit Integer, using Real instead.
 ")})));
-
-    Real x = 1000000000000;
 end LongIntConst2;
 
 

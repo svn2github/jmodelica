@@ -1,8 +1,32 @@
 package OptimicaTransformCanonicalTests
 
-  optimization LinearityTest1 (objective = cost(finalTime)^2,
-                               startTime=0,
-                               finalTime=1)
+  optimization LinearityTest1 (objective = cost(finalTime)^2, startTime=0, finalTime=1)
+
+        Real cost;
+  
+  	Real x1;
+  	Real x2;
+  	Real x3;
+  	Real x4;
+  	Real x5;
+  	Real x6;
+  	Real x7;
+	Real x8;
+  	
+  	parameter Real p1 = 1;
+        parameter Real p2(free=true,initialGuess=3);
+  	  
+  equation
+	der(cost) = 1;
+  	x1 = x1*p1 + x2;
+  	x2 = x3^2;
+  	x3 = x4/p1;
+  	x4 = p1/x5;
+  	x5 = x6-x6;
+  	x6 = sin(x7);
+	x7 = x8*p2;
+	x1 = 1;
+
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
@@ -41,39 +65,27 @@ Algebraic real variables:
 
 Input variables: 
 
-  ")})));
-
-        Real cost;
-  
-  	Real x1;
-  	Real x2;
-  	Real x3;
-  	Real x4;
-  	Real x5;
-  	Real x6;
-  	Real x7;
-	Real x8;
-  	
-  	parameter Real p1 = 1;
-        parameter Real p2(free=true,initialGuess=3);
-  	  
-  equation
-	der(cost) = 1;
-  	x1 = x1*p1 + x2;
-  	x2 = x3^2;
-  	x3 = x4/p1;
-  	x4 = p1/x5;
-  	x5 = x6-x6;
-  	x6 = sin(x7);
-	x7 = x8*p2;
-	x1 = 1;
-
+")})));
   end LinearityTest1;
 
 
-  optimization LinearityTest2 (objective = x(finalTime)^2,
-                               startTime=0,
-                               finalTime=5)
+  optimization LinearityTest2 (objective = x(finalTime)^2, startTime=0, finalTime=5)
+	parameter Real t0 = 0;
+	parameter Real t1 = 1;
+	parameter Real t2 = 2;
+	parameter Real t3 = 3;
+	parameter Real t4 = 4;
+	parameter Real t5 = 5;
+	
+	Real x;
+        Real y;
+
+     constraint
+        x = y(t0)+y(t1)^2 + sin(y(t2));
+        x = 3;
+        x(t3) >= 1;
+        x(t4)*x(t4) <= 1;
+
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
@@ -152,27 +164,28 @@ finalTime:
   3.0, isLinear: true
   4.0, isLinear: true
   5.0, isLinear: true
-  ")})));
-
-	parameter Real t0 = 0;
-	parameter Real t1 = 1;
-	parameter Real t2 = 2;
-	parameter Real t3 = 3;
-	parameter Real t4 = 4;
-	parameter Real t5 = 5;
-	
-	Real x;
-        Real y;
-
-     constraint
-        x = y(t0)+y(t1)^2 + sin(y(t2));
-        x = 3;
-        x(t3) >= 1;
-        x(t4)*x(t4) <= 1;
-
+")})));
   end LinearityTest2;	
 
   optimization ArrayTest1 (objective=cost(finalTime),startTime=0,finalTime=2)
+    Real cost(start=0,fixed=true);
+    Real x[2](start={1,1},each fixed=true);
+    Real y;
+    input Real u;
+    parameter Real A[2,2] = {{-1,0},{1,-1}};
+    parameter Real B[2] = {1,2};
+    parameter Real C[2] = {1,1};
+  equation 
+    der(x) = A*x+B*u;
+    y = C*x;
+    der(cost) = y^2 + u^2;
+  constraint
+    u >= -1;
+    u <= 1;
+    x(finalTime) = {0,0};
+    x <= {1,1}; // This constraint has no effect but is added for testing
+    x >= {-1,-1}; // This constraint has no effect but is added for testing
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayTest1",
@@ -217,6 +230,9 @@ constraint
  x[2] >= - ( 1 );
 end OptimicaTransformCanonicalTests.ArrayTest1;
 ")})));
+  end ArrayTest1;
+
+  optimization ArrayTest2 (objective=cost(finalTime)+x[1](finalTime)^2 + x[2](finalTime)^2,startTime=0,finalTime=2)
 
     Real cost(start=0,fixed=true);
     Real x[2](start={1,1},each fixed=true);
@@ -232,12 +248,6 @@ end OptimicaTransformCanonicalTests.ArrayTest1;
   constraint
     u >= -1;
     u <= 1;
-    x(finalTime) = {0,0};
-    x <= {1,1}; // This constraint has no effect but is added for testing
-    x >= {-1,-1}; // This constraint has no effect but is added for testing
-  end ArrayTest1;
-
-  optimization ArrayTest2 (objective=cost(finalTime)+x[1](finalTime)^2 + x[2](finalTime)^2,startTime=0,finalTime=2)
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -277,24 +287,13 @@ constraint
  u <= 1;
 end OptimicaTransformCanonicalTests.ArrayTest2;
 ")})));
-
-    Real cost(start=0,fixed=true);
-    Real x[2](start={1,1},each fixed=true);
-    Real y;
-    input Real u;
-    parameter Real A[2,2] = {{-1,0},{1,-1}};
-    parameter Real B[2] = {1,2};
-    parameter Real C[2] = {1,1};
-  equation 
-    der(x) = A*x+B*u;
-    y = C*x;
-    der(cost) = y^2 + u^2;
-  constraint
-    u >= -1;
-    u <= 1;
   end ArrayTest2;
 
   optimization ArrayTest3_Err (objective=x(finalTime),startTime=0,startTime=3)
+
+    Real x[2](each start=1,each fixed=true);
+  equation
+    der(x) = -x;
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
@@ -307,14 +306,15 @@ Semantic error at line 271, column 27:
   Array size mismatch for the attribute objective, size of declaration is [] and size of objective expression is [2]
   
 ")})));
-
-    Real x[2](each start=1,each fixed=true);
-  equation
-    der(x) = -x;
   end ArrayTest3_Err;
 
 
 optimization TimedArrayTest1 (objective=y(finalTime),startTime=0,finalTime=2)
+ Real x[2] = {1,2};
+ Real y = x[1];
+constraint
+ y <= x[2](0);
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="TimedArrayTest1",
@@ -332,15 +332,15 @@ constraint
  y <= x[2](0);
 end OptimicaTransformCanonicalTests.TimedArrayTest1;
 ")})));
-
- Real x[2] = {1,2};
- Real y = x[1];
-constraint
- y <= x[2](0);
 end TimedArrayTest1;
 
 
 optimization TimedArrayTest2 (objective=y(finalTime),startTime=0,finalTime=2)
+ Real x[2] = {1,2};
+ Real y = x[1] + 3;
+constraint
+ y <= x(0) * {2,3};
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="TimedArrayTest2",
@@ -360,15 +360,15 @@ constraint
  y <= ( x[1](0) ) * ( 2 ) + ( x[2](0) ) * ( 3 );
 end OptimicaTransformCanonicalTests.TimedArrayTest2;
 ")})));
-
- Real x[2] = {1,2};
- Real y = x[1] + 3;
-constraint
- y <= x(0) * {2,3};
 end TimedArrayTest2;
 
 
 optimization TimedArrayTest3 (objective=y(finalTime),startTime=0,finalTime=2)
+ Real x[2] = {1,2};
+ Real y = x[1] + 3;
+constraint
+ y <= x("0") * {2,3};
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="TimedArrayTest3",
@@ -379,15 +379,15 @@ Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCan
 Semantic error at line 347, column 7:
   Type error in expression: x(\"0\")
 ")})));
-
- Real x[2] = {1,2};
- Real y = x[1] + 3;
-constraint
- y <= x("0") * {2,3};
 end TimedArrayTest3;
 
 
 optimization TimedArrayTest4 (objective=y(finalTime),startTime=0,finalTime=2)
+ Real x[2] = {1,2};
+ Real y = x[1] + 3;
+constraint
+ y <= x(y) * {2,3};
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="TimedArrayTest4",
@@ -398,15 +398,17 @@ Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCan
 Semantic error at line 366, column 7:
   Type error in expression: x(y)
 ")})));
-
- Real x[2] = {1,2};
- Real y = x[1] + 3;
-constraint
- y <= x(y) * {2,3};
 end TimedArrayTest4;
 
 
 optimization ForConstraint1 (objective=sum(y(finalTime)),startTime=0,finalTime=2)
+ Real x[2] = {1,2};
+ Real y[2] = {3,4} + x;
+constraint
+ for i in 1:2, j in 1:2 loop
+  y[i] <= x[j];
+ end for;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ForConstraint1",
@@ -431,16 +433,20 @@ constraint
  y[2] <= x[2];
 end OptimicaTransformCanonicalTests.ForConstraint1;
 ")})));
-
- Real x[2] = {1,2};
- Real y[2] = {3,4} + x;
-constraint
- for i in 1:2, j in 1:2 loop
-  y[i] <= x[j];
- end for;
 end ForConstraint1;
 
 optimization MinTimeTest1 (objective=finalTime,finalTime(free=true,start=1,initialGuess=3)=4)
+  Real x(start=1,fixed=true);
+  Real dx(start=0,fixed=true);
+  input Real u;
+equation
+  der(x) = dx;
+  der(dx) = u;
+constraint
+  u<=1; u>=-1;
+  x(finalTime) = 0;
+  dx(finalTime) = 0;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="MinTimeTest1",
@@ -467,6 +473,9 @@ constraint
  dx(finalTime) = 0;
 end OptimicaTransformCanonicalTests.MinTimeTest1;
 ")})));
+end MinTimeTest1;
+
+optimization MinTimeTest2 (objective=-startTime, startTime(free=true,initialGuess=-1)=2)
 
   Real x(start=1,fixed=true);
   Real dx(start=0,fixed=true);
@@ -478,10 +487,7 @@ constraint
   u<=1; u>=-1;
   x(finalTime) = 0;
   dx(finalTime) = 0;
-end MinTimeTest1;
 
-optimization MinTimeTest2 (objective=-startTime,
-                          startTime(free=true,initialGuess=-1)=2)
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="MinTimeTest2",
@@ -508,8 +514,9 @@ constraint
  dx(finalTime) = 0;
 end OptimicaTransformCanonicalTests.MinTimeTest2;
 ")})));
+end MinTimeTest2;
 
-
+optimization MinTimeTest3 (objective=finalTime, startTime(free=true,initialGuess=-1), finalTime(free=true,initialGuess = 2))
   Real x(start=1,fixed=true);
   Real dx(start=0,fixed=true);
   input Real u;
@@ -517,13 +524,11 @@ equation
   der(x) = dx;
   der(dx) = u;
 constraint
+  startTime=-1;
   u<=1; u>=-1;
   x(finalTime) = 0;
   dx(finalTime) = 0;
-end MinTimeTest2;
 
-optimization MinTimeTest3 (objective=finalTime,
-                          startTime(free=true,initialGuess=-1), finalTime(free=true,initialGuess = 2))
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="MinTimeTest3",
@@ -551,22 +556,29 @@ constraint
  dx(finalTime) = 0;
 end OptimicaTransformCanonicalTests.MinTimeTest3;
 ")})));
-
-  Real x(start=1,fixed=true);
-  Real dx(start=0,fixed=true);
-  input Real u;
-equation
-  der(x) = dx;
-  der(dx) = u;
-constraint
-  startTime=-1;
-  u<=1; u>=-1;
-  x(finalTime) = 0;
-  dx(finalTime) = 0;
 end MinTimeTest3;
 
 
   model DAETest1
+	parameter Integer N = 5 "Number of linear ODEs/DAEs";
+	parameter Integer N_states = 3 "Number of states: < N";
+	Real x[N](each start=3,fixed=dynamic) "States/algebraics";
+	input Real u "Control input";
+	output Real y = x[1] "Output";
+	parameter Real a[N] = (0.5*(N+1):-0.5:1) "Time constants";
+	parameter Boolean dynamic[N] = array((if i<=N_states then true else false) for i in 1:N) "Switches for turning ODEs into DAEs";    
+  equation
+	// ODE equations
+	for i in 1:N_states loop
+		der(x[i]) = -a[i]*x[i] + a[i]*x[i+1];
+	end for;
+	// DAE equations
+	for i in N_states+1:N-1 loop
+		0 = -a[i]*x[i] + a[i]*x[i+1];
+	end for;
+	// The last equation is assumed to be algebraic
+	0 = -a[N]*x[N] + a[N]*u;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="DAETest1",
@@ -609,28 +621,15 @@ equation
  0 = (  - ( a[5] ) ) * ( x[5] ) + ( a[5] ) * ( u );
 end OptimicaTransformCanonicalTests.DAETest1;
 ")})));
-
-	parameter Integer N = 5 "Number of linear ODEs/DAEs";
-	parameter Integer N_states = 3 "Number of states: < N";
-	Real x[N](each start=3,fixed=dynamic) "States/algebraics";
-	input Real u "Control input";
-	output Real y = x[1] "Output";
-	parameter Real a[N] = (0.5*(N+1):-0.5:1) "Time constants";
-	parameter Boolean dynamic[N] = array((if i<=N_states then true else false) for i in 1:N) "Switches for turning ODEs into DAEs";    
-  equation
-	// ODE equations
-	for i in 1:N_states loop
-		der(x[i]) = -a[i]*x[i] + a[i]*x[i+1];
-	end for;
-	// DAE equations
-	for i in N_states+1:N-1 loop
-		0 = -a[i]*x[i] + a[i]*x[i+1];
-	end for;
-	// The last equation is assumed to be algebraic
-	0 = -a[N]*x[N] + a[N]*u;
   end DAETest1;
 
 optimization DepParTest1 (objective=1,startTime=0,finalTime=1) 
+
+  parameter Real p1(free=true) = 1;
+  parameter Real p2 = 5;
+  Real x;
+equation
+  x*p2 = p1;
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
@@ -641,16 +640,16 @@ optimization DepParTest1 (objective=1,startTime=0,finalTime=1)
 Free independent parameters:
 p1
 Free dependent parameters:
-  ")})));
-
-  parameter Real p1(free=true) = 1;
-  parameter Real p2 = 5;
-  Real x;
-equation
-  x*p2 = p1;
+")})));
 end DepParTest1;
 
 optimization DepParTest2 (objective=1,startTime=0,finalTime=1) 
+
+  parameter Real p1(free=true) = 1;
+  parameter Real p2 = p1*2;
+  Real x;
+equation
+  x*p2 = p1;
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
@@ -661,29 +660,10 @@ optimization DepParTest2 (objective=1,startTime=0,finalTime=1)
 Free independent parameters:
 p1
 Free dependent parameters:
-
-  ")})));
-
-  parameter Real p1(free=true) = 1;
-  parameter Real p2 = p1*2;
-  Real x;
-equation
-  x*p2 = p1;
+")})));
 end DepParTest2;
 
 optimization DepParTest3 (objective=1,startTime=0,finalTime=1) 
-
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="DepParTest3",
-			methodName="freeParametersDiagnostics",
-			description="Test that free dependent parameters are handled correctly.",
-			methodResult="
-Free independent parameters:
-p2
-Free dependent parameters:
-  
-  ")})));
 
   model M
     parameter Real p1 = 1;
@@ -695,9 +675,31 @@ Free dependent parameters:
   Real x;
 equation
   x*p2 = 4;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="DepParTest3",
+			methodName="freeParametersDiagnostics",
+			description="Test that free dependent parameters are handled correctly.",
+			methodResult="
+Free independent parameters:
+p2
+Free dependent parameters:
+")})));
 end DepParTest3;
 
 optimization DepParTest4 (objective=1,startTime=0,finalTime=1) 
+
+  model M
+    parameter Real p1 = 1;
+    Real x = 2*p1;
+  end M;
+  
+  M m(p1=p2*3);
+  parameter Real p2(free=true) = 3;
+  Real x;
+equation
+  x*p2 = 4;
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
@@ -710,19 +712,7 @@ Free independent parameters:
 p2
 Free dependent parameters:
 m.p1
-
-  ")})));
-
-  model M
-    parameter Real p1 = 1;
-    Real x = 2*p1;
-  end M;
-  
-  M m(p1=p2*3);
-  parameter Real p2(free=true) = 3;
-  Real x;
-equation
-  x*p2 = 4;
+")})));
 end DepParTest4;
 
 

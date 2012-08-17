@@ -1,5 +1,17 @@
 package InnerOuterTests
 model InnerOuterTest1
+model A 
+  outer Real T0;
+  Real z = sin(T0);
+end A;
+model B 
+  inner Real T0;
+  A a1, a2;	// B.T0, B.a1.T0 and B.a2.T0 is the same variable
+equation
+  T0 = time;
+end B;
+B b;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="InnerOuterTest1",
@@ -17,55 +29,9 @@ equation
 
 end InnerOuterTests.InnerOuterTest1;
 ")})));
-model A 
-  outer Real T0;
-  Real z = sin(T0);
-end A;
-model B 
-  inner Real T0;
-  A a1, a2;	// B.T0, B.a1.T0 and B.a2.T0 is the same variable
-equation
-  T0 = time;
-end B;
-B b;
 end InnerOuterTest1;
 
 model InnerOuterTest2
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="InnerOuterTest2",
-			description="Basic test of inner outer.",
-			equation_sorting=true,
-			flatModel="
-fclass InnerOuterTests.InnerOuterTest2
- Real i.TI;
- Real i.e.TI;
- Real i.e.f.TI;
- Real i.e.f.g.TI;
- Real i.e.f.g.h.a.x;
- Real i.e.f.g.h.a.b.TI;
- Real i.e.f.g.h.a.b.c.TI;
- Real i.e.f.g.h.a.b.c.d.x;
- Real i.a.x;
- Real i.a.b.TI;
- Real i.a.b.c.TI;
- Real i.a.b.c.d.x;
-equation
- i.TI = ( 2 ) * ( time );
- i.e.TI = ( 4 ) * ( time );
- i.e.f.TI = ( 5 ) * ( time );
- i.e.f.g.TI = 5;
- i.e.f.g.h.a.x = ( i.e.f.TI ) * ( 2 );
- i.e.f.g.h.a.b.TI = 1;
- i.e.f.g.h.a.b.c.TI = 2;
- i.e.f.g.h.a.b.c.d.x = ( 3 ) * ( i.e.f.TI );
- i.a.x = ( i.TI ) * ( 2 );
- i.a.b.TI = 1;
- i.a.b.c.TI = 2;
- i.a.b.c.d.x = ( 3 ) * ( i.TI );
-
-end InnerOuterTests.InnerOuterTest2;
-")})));
 	model A
 		outer Real TI = time;
 		Real x=TI*2;
@@ -104,6 +70,42 @@ end InnerOuterTests.InnerOuterTest2;
 		A a;
 	end I;
 	I i;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InnerOuterTest2",
+			description="Basic test of inner outer.",
+			equation_sorting=true,
+			flatModel="
+fclass InnerOuterTests.InnerOuterTest2
+ Real i.TI;
+ Real i.e.TI;
+ Real i.e.f.TI;
+ Real i.e.f.g.TI;
+ Real i.e.f.g.h.a.x;
+ Real i.e.f.g.h.a.b.TI;
+ Real i.e.f.g.h.a.b.c.TI;
+ Real i.e.f.g.h.a.b.c.d.x;
+ Real i.a.x;
+ Real i.a.b.TI;
+ Real i.a.b.c.TI;
+ Real i.a.b.c.d.x;
+equation
+ i.TI = ( 2 ) * ( time );
+ i.e.TI = ( 4 ) * ( time );
+ i.e.f.TI = ( 5 ) * ( time );
+ i.e.f.g.TI = 5;
+ i.e.f.g.h.a.x = ( i.e.f.TI ) * ( 2 );
+ i.e.f.g.h.a.b.TI = 1;
+ i.e.f.g.h.a.b.c.TI = 2;
+ i.e.f.g.h.a.b.c.d.x = ( 3 ) * ( i.e.f.TI );
+ i.a.x = ( i.TI ) * ( 2 );
+ i.a.b.TI = 1;
+ i.a.b.c.TI = 2;
+ i.a.b.c.d.x = ( 3 ) * ( i.TI );
+
+end InnerOuterTests.InnerOuterTest2;
+")})));
 end InnerOuterTest2;
 
 model InnerOuterTest3_Err
@@ -115,6 +117,19 @@ model InnerOuterTest3_Err
 end InnerOuterTest3_Err;
 
 model InnerOuterTest4
+	model A
+		Real x;
+	end A;
+	model B
+		outer A a;
+		Real x = 2*a.x;
+	end B;
+	model C
+		inner A a(x=sin(time));
+		B b;
+	end C;
+	C c;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="InnerOuterTest4",
@@ -130,21 +145,34 @@ equation
 
 end InnerOuterTests.InnerOuterTest4;
 ")})));
-	model A
-		Real x;
-	end A;
-	model B
-		outer A a;
-		Real x = 2*a.x;
-	end B;
-	model C
-		inner A a(x=sin(time));
-		B b;
-	end C;
-	C c;
 end InnerOuterTest4;
 
 model InnerOuterTest5
+model ConditionalIntegrator 
+    "Simple differential equation if isEnabled"
+outer Boolean isEnabled;
+Real x(start=1);
+equation 
+  der(x)= if isEnabled then -x else 0;
+end ConditionalIntegrator;
+
+model SubSystem 
+    "subsystem that 'enable' its conditional integrators"
+Boolean enableMe = time<=1; // Set inner isEnabled to outer isEnabled and enableMe 
+inner outer Boolean isEnabled = isEnabled and enableMe;
+ConditionalIntegrator conditionalIntegrator;
+ConditionalIntegrator conditionalIntegrator2;
+end SubSystem;
+
+model System
+             SubSystem subSystem;
+  inner Boolean isEnabled = time>=0.5; // subSystem.conditionalIntegrator.isEnabled will be
+                                       // 'isEnabled and subSystem.enableMe'
+end System;
+
+System sys;
+
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="InnerOuterTest5",
@@ -171,30 +199,6 @@ equation
  sys.isEnabled = time >= 0.5;
 end InnerOuterTests.InnerOuterTest5;	 
 ")})));
-model ConditionalIntegrator 
-    "Simple differential equation if isEnabled"
-outer Boolean isEnabled;
-Real x(start=1);
-equation 
-  der(x)= if isEnabled then -x else 0;
-end ConditionalIntegrator;
-
-model SubSystem 
-    "subsystem that 'enable' its conditional integrators"
-Boolean enableMe = time<=1; // Set inner isEnabled to outer isEnabled and enableMe 
-inner outer Boolean isEnabled = isEnabled and enableMe;
-ConditionalIntegrator conditionalIntegrator;
-ConditionalIntegrator conditionalIntegrator2;
-end SubSystem;
-
-model System
-             SubSystem subSystem;
-  inner Boolean isEnabled = time>=0.5; // subSystem.conditionalIntegrator.isEnabled will be
-                                       // 'isEnabled and subSystem.enableMe'
-end System;
-
-System sys;
-
 end InnerOuterTest5;
 
 model InnerOuterTest6
@@ -229,6 +233,25 @@ end C;
 end InnerOuterTest6;
 
 model InnerOuterTest7
+	model A
+		Real x = 4;
+	end A;
+	model B
+		Real x = 6;
+		Real y = 9;
+	end B;
+    model C
+		outer model Q = A;	
+		Q a;
+		Real z = a.x;
+	end C;
+	model D
+	 	inner model Q = B;
+		B a; 
+		C c;
+	end D;
+	D d;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="InnerOuterTest7",
@@ -250,44 +273,9 @@ equation
  d.c.z = d.c.a.x;
 end InnerOuterTests.InnerOuterTest7;
 	")})));
-	model A
-		Real x = 4;
-	end A;
-	model B
-		Real x = 6;
-		Real y = 9;
-	end B;
-    model C
-		outer model Q = A;	
-		Q a;
-		Real z = a.x;
-	end C;
-	model D
-	 	inner model Q = B;
-		B a; 
-		C c;
-	end D;
-	D d;
 end InnerOuterTest7;
 	
 model InnerOuterTest8
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="InnerOuterTest8",
-			description="Basic test of inner outer.",
-			equation_sorting=true,
-			eliminate_alias_variables=false,
-			flatModel="
-fclass InnerOuterTests.InnerOuterTest8
- Real d.c.a.x;
- Real d.c.a.y;
- Real d.c.z;
-equation
- d.c.a.x = 6;
- d.c.a.y = 9;
- d.c.z = d.c.a.x;
-end InnerOuterTests.InnerOuterTest8;	 
-	")})));
 	package P1
     	model A 
 	    	Real x = 4;
@@ -309,6 +297,24 @@ end InnerOuterTests.InnerOuterTest8;
 		C c;
 	end D;
 	D d;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InnerOuterTest8",
+			description="Basic test of inner outer.",
+			equation_sorting=true,
+			eliminate_alias_variables=false,
+			flatModel="
+fclass InnerOuterTests.InnerOuterTest8
+ Real d.c.a.x;
+ Real d.c.a.y;
+ Real d.c.z;
+equation
+ d.c.a.x = 6;
+ d.c.a.y = 9;
+ d.c.z = d.c.a.x;
+end InnerOuterTests.InnerOuterTest8;	 
+	")})));
 end InnerOuterTest8;
 
 end InnerOuterTests;

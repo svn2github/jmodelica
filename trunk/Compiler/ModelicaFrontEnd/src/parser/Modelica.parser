@@ -194,6 +194,7 @@ BaseClassDecl base_class_decl
     id_decl.start 
     string_comment? 
     composition 
+    annotation_sc?
     end_decl   {:   
         return new PN_FullClassDecl(
             new UnknownVisibilityType(),
@@ -204,6 +205,7 @@ BaseClassDecl base_class_decl
             new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
             string_comment,
             composition,
+            annotation_sc,
             end_decl); 
     :}
     |
@@ -242,6 +244,7 @@ BaseClassDecl base_class_decl
     class_modification?
     string_comment? 
     composition 
+    annotation_sc?
     end_decl {:
         return new PN_ExtendClassDecl(
             new UnknownVisibilityType(),
@@ -252,6 +255,7 @@ BaseClassDecl base_class_decl
             new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
             string_comment,
             composition,
+            annotation_sc,
             end_decl, 
             class_modification); 
   :}  

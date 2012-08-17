@@ -42,7 +42,7 @@ aspect TestFramework {
 			for (AnnotationNode a2 : a1) 
 				generateTestCase(ts, a2);
 		} else {
-			super.collectTestCases(ts);
+			getClassDeclList().collectTestCases(ts);
 		}
 	}
 	

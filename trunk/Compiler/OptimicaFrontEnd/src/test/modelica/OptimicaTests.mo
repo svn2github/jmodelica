@@ -32,6 +32,15 @@ model OptimicaTests
   end ConstraintTest1;
 
   optimization ClassAttrTest1 (objective=x(finalTime)^2,startTime=3,finalTime=4)
+    Real x;
+    Real y;
+  equation 
+    x=2;
+    y=4;
+  constraint
+    x<=3;
+    y>=3;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ClassAttrTest1",
@@ -48,19 +57,20 @@ constraint
  y >= 3;
 end OptimicaTests.ClassAttrTest1;
 ")})));
+  end ClassAttrTest1;
 
+
+  optimization ClassAttrTest2 (objective=O,startTime=3,finalTime=4)
     Real x;
     Real y;
+    parameter Real O = 1.0;
   equation 
     x=2;
     y=4;
   constraint
     x<=3;
     y>=3;
-  end ClassAttrTest1;
 
-
-  optimization ClassAttrTest2 (objective=O,startTime=3,finalTime=4)
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ClassAttrTest2",
@@ -78,20 +88,20 @@ constraint
  y >= 3;
 end OptimicaTests.ClassAttrTest2;
 ")})));
+  end ClassAttrTest2;
+ 
 
+  optimization ClassAttrTest3 (objective=O,startTime=3,finalTime=4)
     Real x;
     Real y;
-    parameter Real O = 1.0;
+    constant Real O = 1.0;
   equation 
     x=2;
     y=4;
   constraint
     x<=3;
     y>=3;
-  end ClassAttrTest2;
- 
 
-  optimization ClassAttrTest3 (objective=O,startTime=3,finalTime=4)
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ClassAttrTest3",
@@ -109,20 +119,19 @@ constraint
  y >= 3;
 end OptimicaTests.ClassAttrTest3;
 ")})));
+  end ClassAttrTest3;
+  
 
+  optimization ClassAttrTest4 (objective=1.0,startTime=3,finalTime=4)
     Real x;
     Real y;
-    constant Real O = 1.0;
   equation 
     x=2;
     y=4;
   constraint
     x<=3;
     y>=3;
-  end ClassAttrTest3;
-  
 
-  optimization ClassAttrTest4 (objective=1.0,startTime=3,finalTime=4)
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ClassAttrTest4",
@@ -139,7 +148,10 @@ constraint
  y >= 3;
 end OptimicaTests.ClassAttrTest4;
 ")})));
+  end ClassAttrTest4;
+  
 
+  optimization ClassAttrTest5 (objective=x,startTime=3,finalTime=4)
     Real x;
     Real y;
   equation 
@@ -148,10 +160,7 @@ end OptimicaTests.ClassAttrTest4;
   constraint
     x<=3;
     y>=3;
-  end ClassAttrTest4;
-  
 
-  optimization ClassAttrTest5 (objective=x,startTime=3,finalTime=4)
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="ClassAttrTest5",
@@ -162,15 +171,6 @@ Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
 Semantic error at line 108, column 31:
   The class attribute 'objective' must have parameter or timed variability.
 ")})));
-
-    Real x;
-    Real y;
-  equation 
-    x=2;
-    y=4;
-  constraint
-    x<=3;
-    y>=3;
   end ClassAttrTest5;
 
   
@@ -189,6 +189,15 @@ Semantic error at line 179, column 41:
   end ClassAttrTest6;
 
   optimization ClassAttrTest7 (objectiveIntegrand=x(finalTime),startTime=3,finalTime=4)
+    Real x;
+    Real y;
+  equation 
+    x=2;
+    y=4;
+  constraint
+    x<=3;
+    y>=3;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="ClassAttrTest7",
@@ -199,7 +208,9 @@ Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src
 Semantic error at line 193, column 31:
   The class attribute 'objectiveIntegrand' must not have timed variability.
 ")})));
+  end ClassAttrTest7;
 
+  optimization ClassAttrTest8 (objectiveIntegrand=x^2,startTime=3,finalTime=4)
     Real x;
     Real y;
   equation 
@@ -208,9 +219,7 @@ Semantic error at line 193, column 31:
   constraint
     x<=3;
     y>=3;
-  end ClassAttrTest7;
 
-  optimization ClassAttrTest8 (objectiveIntegrand=x^2,startTime=3,finalTime=4)
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ClassAttrTest8",
@@ -227,28 +236,22 @@ constraint
  y >= 3;
 end OptimicaTests.ClassAttrTest8;
 ")})));
-
-    Real x;
-    Real y;
-  equation 
-    x=2;
-    y=4;
-  constraint
-    x<=3;
-    y>=3;
   end ClassAttrTest8;
 
   optimization FreeDependentParametersTest1(objective=p1^2,startTime=0,finalTime=1) 
+     parameter Real p1(free=true) = 1;
+     parameter Real p2 = p1;
+     parameter Real p3 = p2;
+     parameter Real p4(free=true) = 1;
+     parameter Real p5 = p4;
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="FreeDependentParametersTest1",
 			methodName="freeParametersDiagnostics",
 			convert_free_dependent_parameters_to_algebraics=false,
-			description="
-Test that free dependent parameters are computed correctly.", 
-        methodResult=
-        "  
+			description="Test that free dependent parameters are computed correctly.", 
+            methodResult="
 Free independent parameters:
 p1
 p4
@@ -256,26 +259,26 @@ Free dependent parameters:
 p2
 p5
 p3
-  ")})));
+")})));
+  end FreeDependentParametersTest1;
 
+  optimization FreeDependentParametersTest2(objective=p1^2,startTime=0,finalTime=1) 
      parameter Real p1(free=true) = 1;
      parameter Real p2 = p1;
      parameter Real p3 = p2;
      parameter Real p4(free=true) = 1;
      parameter Real p5 = p4;
-  end FreeDependentParametersTest1;
-
-  optimization FreeDependentParametersTest2(objective=p1^2,startTime=0,finalTime=1) 
+     Real x1 = 1;
+     Real x2 = p1;
+     Real x3 = p2;
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="FreeDependentParametersTest2",
 			methodName="freeParametersDiagnostics",
 			convert_free_dependent_parameters_to_algebraics=false,
-			description="
-Test that free dependent parameters are computed correctly.", 
-        methodResult=
-        "  
+			description="Test that free dependent parameters are computed correctly.", 
+            methodResult="  
 Free independent parameters:
 p1
 p4
@@ -283,36 +286,35 @@ Free dependent parameters:
 p2
 p5
 p3
-  ")})));
-
-     parameter Real p1(free=true) = 1;
-     parameter Real p2 = p1;
-     parameter Real p3 = p2;
-     parameter Real p4(free=true) = 1;
-     parameter Real p5 = p4;
-     Real x1 = 1;
-     Real x2 = p1;
-     Real x3 = p2;
+")})));
   end FreeDependentParametersTest2;
 
   optimization FreeDependentParametersTest3(objective=p1^2,startTime=0,finalTime=1) 
+     parameter Real p1(free=true) = 1;
+     parameter Real p2 = p1;
+     parameter Real p3 = p2;
+     parameter Real p4 = 1;
+     parameter Real p5(free=true) = p4;
+     Real x1 = 1;
+     Real x2 = p1;
+     Real x3 = p2;
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="FreeDependentParametersTest3",
 			methodName="freeParametersDiagnostics",
 			convert_free_dependent_parameters_to_algebraics=false,
-			description="
-Test that free dependent parameters are computed correctly.", 
-        methodResult=
-        "  
+			description="Test that free dependent parameters are computed correctly.", 
+            methodResult="
 Free independent parameters:
 p1
 Free dependent parameters:
 p2
 p3
-  ")})));
+")})));
+  end FreeDependentParametersTest3;
 
+  optimization FreeDependentParametersTest4(objective=p1^2,startTime=0,finalTime=1) 
      parameter Real p1(free=true) = 1;
      parameter Real p2 = p1;
      parameter Real p3 = p2;
@@ -321,26 +323,23 @@ p3
      Real x1 = 1;
      Real x2 = p1;
      Real x3 = p2;
-  end FreeDependentParametersTest3;
-
-  optimization FreeDependentParametersTest4(objective=p1^2,startTime=0,finalTime=1) 
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="FreeDependentParametersTest4",
 			methodName="freeParametersDiagnostics",
 			convert_free_dependent_parameters_to_algebraics=false,
-			description="
-Test that free dependent parameters are computed correctly.", 
-        methodResult=
-        "  
+			description="Test that free dependent parameters are computed correctly.", 
+            methodResult="
 Free independent parameters:
 p1
 Free dependent parameters:
 p2
 p3
-  ")})));
+")})));
+  end FreeDependentParametersTest4;
 
+  optimization FreeDependentParametersTest5(objective=p1^2 + p2^2,startTime=0,finalTime=1) 
      parameter Real p1(free=true) = 1;
      parameter Real p2 = p1;
      parameter Real p3 = p2;
@@ -349,18 +348,14 @@ p3
      Real x1 = 1;
      Real x2 = p1;
      Real x3 = p2;
-  end FreeDependentParametersTest4;
-
-  optimization FreeDependentParametersTest5(objective=p1^2 + p2^2,startTime=0,finalTime=1) 
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="FreeDependentParametersTest5",
 			methodName="variableDiagnostics",
 			convert_free_dependent_parameters_to_algebraics=false,
-			description="
-Test linearity of free dependent parameters.", 
-		methodResult="  
+			description="Test linearity of free dependent parameters.", 
+            methodResult="
 Independent constants: 
 
 Dependent constants: 
@@ -386,17 +381,9 @@ Algebraic real variables:
  x1: number of uses: 1, isLinear: true, alias: no
 
 Input variables: 
-  ")})));
-
-     parameter Real p1(free=true) = 1;
-     parameter Real p2 = p1;
-     parameter Real p3 = p2;
-     parameter Real p4 = 1;
-     parameter Real p5(free=true) = p4;
-     Real x1 = 1;
-     Real x2 = p1;
-     Real x3 = p2;
+")})));
   end FreeDependentParametersTest5;
+
 
   optimization InstantValueTest1 
      (objective=x(finalTime)^2,startTime=0,finalTime(free=true,initialGuess=3))
@@ -426,6 +413,9 @@ Input variables:
   end InstantValueTest2;
   
   optimization InstantValueTest3_Err (objective=x(finalTime),startTime=0,finalTime=1)
+    Real x;
+  equation
+    x  + x(finalTime)=2;
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
@@ -436,13 +426,14 @@ Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src
 Semantic error at line 217, column 10:
   Timed variables are not allowed in equations.
 ")})));
-    
-    Real x;
-  equation
-    x  + x(finalTime)=2;
   end InstantValueTest3_Err;
 /*
   optimization InstantValueTest4_Err (objective=x(finalTime),startTime=0,finalTime=1)
+    Real y = 1;
+    Real x;
+  constraint
+    x  + x(y)=2;
+    x<=5;
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
@@ -453,12 +444,6 @@ Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src
 Semantic error at line 234, column 10:
   The argument of a timed variable must have variability less than or equal to parameter variability.
 ")})));
-    
-    Real y = 1;
-    Real x;
-  constraint
-    x  + x(y)=2;
-    x<=5;
   end InstantValueTest4_Err;
 
 */
@@ -858,6 +843,18 @@ end TestFunction1;
 
 
 model OptFunctionFlatten1
+	model A
+		Real x;
+	equation
+		x = TestFunction1(1);
+	end A;
+	
+	model B
+		extends A;
+	end B;
+	
+	B y;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="OptFunctionFlatten1",
@@ -879,18 +876,6 @@ public
 
 end OptimicaTests.OptFunctionFlatten1;
 ")})));
-
-	model A
-		Real x;
-	equation
-		x = TestFunction1(1);
-	end A;
-	
-	model B
-		extends A;
-	end B;
-	
-	B y;
 end OptFunctionFlatten1;
 
 
