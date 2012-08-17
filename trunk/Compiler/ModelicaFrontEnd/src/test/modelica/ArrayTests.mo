@@ -20,11 +20,11 @@ package ArrayTests
 package General
 		
   model ArrayTest1
-        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ArrayTest1",
-        description="Flattening of arrays.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ArrayTest1",
+			description="Flattening of arrays.",
+			flatModel="
 fclass ArrayTests.General.ArrayTest1
  Real x[2];
 equation 
@@ -42,11 +42,11 @@ end ArrayTests.General.ArrayTest1;
 
   model ArrayTest1b
   
-         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ArrayTest1b",
-        description="Flattening of arrays.",
-                                               flatModel=
-                                               " 
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ArrayTest1b",
+			description="Flattening of arrays.",
+			flatModel=" 
 fclass ArrayTests.General.ArrayTest1b
  parameter Integer n = 2 /* 2 */;
  Real x[2];
@@ -67,12 +67,12 @@ end ArrayTests.General.ArrayTest1b;
 
   model ArrayTest1c
 
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest1c",
-        description="Test scalarization of variables",
-         automatic_add_initial_equations = false,
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest1c",
+			description="Test scalarization of variables",
+			automatic_add_initial_equations=false,
+			flatModel="
 fclass ArrayTests.General.ArrayTest1c
  Real x[1];
  Real x[2];
@@ -92,11 +92,11 @@ end ArrayTests.General.ArrayTest1c;
 
   model ArrayTest2
 
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest2",
-        description="Test scalarization of variables",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest2",
+			description="Test scalarization of variables",
+			flatModel="
 fclass ArrayTests.General.ArrayTest2
  Real x[1,1];
  Real x[1,2];
@@ -131,11 +131,12 @@ end ArrayTests.General.ArrayTest2;
   model ArrayTest4
 
 
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest4",
-        description="Test scalarization of variables",
-                                               flatModel=
-"fclass ArrayTests.General.ArrayTest4
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest4",
+			description="Test scalarization of variables",
+			flatModel="
+fclass ArrayTests.General.ArrayTest4
  Real m[1].x[1];
  Real m[1].x[2];
  Real m[2].x[1];
@@ -161,11 +162,11 @@ end ArrayTests.General.ArrayTest4;
   end ArrayTest4;
 
   model ArrayTest5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayTest5",
-         description="Test scalarization of variables",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest5",
+			description="Test scalarization of variables",
+			flatModel="
 fclass ArrayTests.General.ArrayTest5
  Real m[1].x[1];
  Real m[1].x[2];
@@ -191,11 +192,11 @@ end ArrayTests.General.ArrayTest5;
   end ArrayTest5;
 
   model ArrayTest6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayTest6",
-         description="Test scalarization of variables",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest6",
+			description="Test scalarization of variables",
+			flatModel="
 fclass ArrayTests.General.ArrayTest6
  Real m[1].x[1];
  Real m[1].x[2];
@@ -223,11 +224,11 @@ end ArrayTests.General.ArrayTest6;
   end ArrayTest6;
 
   model ArrayTest7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayTest7",
-         description="Test scalarization of variables",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest7",
+			description="Test scalarization of variables",
+			flatModel="
 fclass ArrayTests.General.ArrayTest7
  Real x[1];
  Real x[2];
@@ -247,11 +248,11 @@ end ArrayTests.General.ArrayTest7;
   end ArrayTest7;
 
   model ArrayTest8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ArrayTest8",
-         description="Test flattening of variables with sizes given in modifications",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ArrayTest8",
+			description="Test flattening of variables with sizes given in modifications",
+			flatModel="
 fclass ArrayTests.General.ArrayTest8
  parameter Integer m[1].n = 1 /* 1 */;
  Real m[1].x[1] = ones(m[1].n);
@@ -269,11 +270,11 @@ end ArrayTests.General.ArrayTest8;
   end ArrayTest8;
 
       model ArrayTest9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayTest9",
-         description="Test scalarization of variables",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest9",
+			description="Test scalarization of variables",
+			flatModel="
 fclass ArrayTests.General.ArrayTest9
  parameter Integer nn.n2 = 2 /* 2 */;
  parameter Integer nn.m[1,1].n1 = 2 /* 2 */;
@@ -324,11 +325,11 @@ end ArrayTests.General.ArrayTest9;
       end ArrayTest9;
 
       model ArrayTest95
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayTest95",
-         description="Test scalarization of variables",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest95",
+			description="Test scalarization of variables",
+			flatModel="
 fclass ArrayTests.General.ArrayTest95
  parameter Integer n[1].n2 = 2 /* 2 */;
  parameter Integer n[1].m.n1 = 3 /* 3 */;
@@ -352,11 +353,11 @@ end ArrayTests.General.ArrayTest95;
 
 
    model ArrayTest10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayTest10",
-         description="Test scalarization of variables",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest10",
+			description="Test scalarization of variables",
+			flatModel="
 fclass ArrayTests.General.ArrayTest10
  parameter Integer n;
 
@@ -368,11 +369,11 @@ end ArrayTests.General.ArrayTest10;
    end ArrayTest10;
 
    model ArrayTest11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayTest11",
-         description="Test scalarization of variables",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest11",
+			description="Test scalarization of variables",
+			flatModel="
 fclass ArrayTests.General.ArrayTest11
  Real m1[1].x[1];
  Real m1[1].x[2];
@@ -411,11 +412,11 @@ end ArrayTests.General.ArrayTest11;
    end ArrayTest11;
 
       model ArrayTest12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayTest12",
-         description="Test scalarization of variables",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest12",
+			description="Test scalarization of variables",
+			flatModel="
 fclass ArrayTests.General.ArrayTest12
  Real n[1].m[1].x[1];
  Real n[1].m[1].x[2];
@@ -448,11 +449,11 @@ end ArrayTests.General.ArrayTest12;
       end ArrayTest12;
 
   model ArrayTest13
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayTest13",
-         description="Test scalarization of variables",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest13",
+			description="Test scalarization of variables",
+			flatModel="
 fclass ArrayTests.General.ArrayTest13
  parameter Integer c.n = 2 /* 2 */;
  parameter Integer cv[1].n = 2 /* 2 */;
@@ -469,11 +470,11 @@ end ArrayTests.General.ArrayTest13;
   end ArrayTest13;
 
       model ArrayTest14
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayTest14",
-         description="Test scalarization of variables",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest14",
+			description="Test scalarization of variables",
+			flatModel="
 fclass ArrayTests.General.ArrayTest14
  Real n.m[1,1].x[1];
  Real n.m[1,2].x[1];
@@ -505,11 +506,11 @@ end ArrayTests.General.ArrayTest14;
       end ArrayTest14;
 
 model ArrayTest15_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayTest15_Err",
-         description="Test type checking of arrays",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayTest15_Err",
+			description="Test type checking of arrays",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 251, column 9:
@@ -532,12 +533,12 @@ end ArrayTest15_Err;
   end ArrayTest16;
 
 model ArrayTest17
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayTest17",
-         description="Test scalarization of variables",
-         automatic_add_initial_equations = false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest17",
+			description="Test scalarization of variables",
+			automatic_add_initial_equations=false,
+			flatModel="
 fclass ArrayTests.General.ArrayTest17
  Real n[1].m[1,1].x[1];
  Real n[1].m[1,1].x[2];
@@ -576,11 +577,11 @@ end ArrayTests.General.ArrayTest17;
 end ArrayTest17;
 
 model ArrayTest21
-        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest21",
-        description="Flattening of arrays.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest21",
+			description="Flattening of arrays.",
+			flatModel="
 fclass ArrayTests.General.ArrayTest21
  Real x[1];
  Real x[2];
@@ -600,11 +601,11 @@ equation
 end ArrayTest21;
 
 model ArrayTest22
-        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest22",
-        description="Flattening of arrays.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest22",
+			description="Flattening of arrays.",
+			flatModel="
 fclass ArrayTests.General.ArrayTest22
  Real x[1];
  Real x[2];
@@ -624,11 +625,11 @@ equation
 end ArrayTest22;
 
 model ArrayTest23
-        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest23",
-        description="Flattening of arrays.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest23",
+			description="Flattening of arrays.",
+			flatModel="
 fclass ArrayTests.General.ArrayTest23
  Real x[1,1];
  Real x[1,2];
@@ -652,11 +653,11 @@ end ArrayTest23;
 
 model ArrayTest24
 
-        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest24",
-        description="Flattening of arrays.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest24",
+			description="Flattening of arrays.",
+			flatModel="
 fclass ArrayTests.General.ArrayTest24
  Real x[1,1];
  Real x[1,2];
@@ -690,11 +691,11 @@ end ArrayTest24;
 
 model ArrayTest25
 
-        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest25",
-        description="Flattening of arrays.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest25",
+			description="Flattening of arrays.",
+			flatModel="
 fclass ArrayTests.General.ArrayTest25
  Real x[1,1];
  Real x[1,2];
@@ -739,13 +740,13 @@ end ArrayTest25;
 
 model ArrayTest26
 
-        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest26",
-        description="Flattening of arrays.",
-         automatic_add_initial_equations = false,
-         enable_structural_diagnosis = false,
-                                               flatModel=
-"fclass ArrayTests.General.ArrayTest26
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest26",
+			description="Flattening of arrays.",
+			automatic_add_initial_equations=false,
+			enable_structural_diagnosis=false,
+			flatModel="fclass ArrayTests.General.ArrayTest26
  Real x[1,1];
  Real x[1,2];
  Real x[1,3];
@@ -846,11 +847,11 @@ end ArrayTest26;
 
 
 model ArrayTest27_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayTest27_Err",
-         description="Test type checking of arrays",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayTest27_Err",
+			description="Test type checking of arrays",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 592, column 13:
@@ -864,12 +865,13 @@ end ArrayTest27_Err;
 
 
 model ArrayTest29
-        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest29",
-        description="Flattening of arrays.",
-         automatic_add_initial_equations = false,
-                                               flatModel=
-"fclass ArrayTests.General.ArrayTest29
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest29",
+			description="Flattening of arrays.",
+			automatic_add_initial_equations=false,
+			flatModel="
+fclass ArrayTests.General.ArrayTest29
  Real x[1](start = 1);
  Real x[2](start = 2);
  Real x[3](start = 3);
@@ -888,12 +890,12 @@ end ArrayTest29;
 
 model ArrayTest30
 
-        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest30",
-        description="Flattening of arrays.",
-         automatic_add_initial_equations = false,
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest30",
+			description="Flattening of arrays.",
+			automatic_add_initial_equations=false,
+			flatModel="
 fclass ArrayTests.General.ArrayTest30
  Real x[1,1](start = 1);
  Real x[1,2](start = 2);
@@ -919,11 +921,12 @@ equation
 end ArrayTest30;
 
 model ArrayTest31
-        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest31",
-        description="Flattening of arrays.",
-                                               flatModel=
-"fclass ArrayTests.General.ArrayTest31
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest31",
+			description="Flattening of arrays.",
+			flatModel="
+fclass ArrayTests.General.ArrayTest31
  Real x[1];
  Real x[2];
 equation
@@ -938,11 +941,11 @@ equation
 end ArrayTest31;
 
 model ArrayTest32
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayTest32",
-         description="Scalarization of initial equation",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest32",
+			description="Scalarization of initial equation",
+			flatModel="
 fclass ArrayTests.General.ArrayTest32
  Real x[1];
  Real x[2];
@@ -965,11 +968,11 @@ end ArrayTest32;
 
 
 model ArrayTest33
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ArrayTest33",
-         description="Equations in array components",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ArrayTest33",
+			description="Equations in array components",
+			flatModel="
 fclass ArrayTests.General.ArrayTest33
  Real c[1].x;
  Real c[2].x;
@@ -993,11 +996,11 @@ end ArrayTest33;
 
 
 model ArrayTest34
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ArrayTest34",
-         description="Equations in array components",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ArrayTest34",
+			description="Equations in array components",
+			flatModel="
 fclass ArrayTests.General.ArrayTest34
  Real a[1].b[1].x;
  Real a[1].b[1].c[1].x;
@@ -1051,11 +1054,11 @@ end ArrayTest34;
 
 // TODO: the result is wrong, but tests a fixed crash bug - change when cat + unknown array sizes are supported
 model ArrayTest35
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayTest35",
-         description="Test adding array sizes that are present as expressions in tree",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest35",
+			description="Test adding array sizes that are present as expressions in tree",
+			flatModel="
 fclass ArrayTests.General.ArrayTest35
  Real z[1];
  Real z[2];
@@ -1094,11 +1097,11 @@ end General;
 package UnknownSize
 
 model UnknownSize1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="UnknownSize1",
-         description="Using unknown array sizes: deciding with binding exp",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="UnknownSize1",
+			description="Using unknown array sizes: deciding with binding exp",
+			flatModel="
 fclass ArrayTests.UnknownSize.UnknownSize1
  Real x[1,1];
  Real x[1,2];
@@ -1118,11 +1121,11 @@ end UnknownSize1;
 
 
 model UnknownSize2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="UnknownSize2",
-         description="Using unknown array sizes: binding exp through modification on array",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="UnknownSize2",
+			description="Using unknown array sizes: binding exp through modification on array",
+			flatModel="
 fclass ArrayTests.UnknownSize.UnknownSize2
  Real x[1].y[1].z[1];
  Real x[1].y[1].z[2];
@@ -1158,11 +1161,11 @@ end UnknownSize2;
 
 
 model UnknownSize3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="UnknownSize3",
-         description="Using unknown array sizes: one dim known, one unknown",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="UnknownSize3",
+			description="Using unknown array sizes: one dim known, one unknown",
+			flatModel="
 fclass ArrayTests.UnknownSize.UnknownSize3
  Real x[1,1];
  Real x[1,2];
@@ -1178,11 +1181,11 @@ end UnknownSize3;
 
 
 model UnknownSize4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="UnknownSize4",
-         description="Using unknown array sizes: too few dims",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnknownSize4",
+			description="Using unknown array sizes: too few dims",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 789, column 7:
@@ -1196,11 +1199,11 @@ end UnknownSize4;
 
 
 model UnknownSize5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="UnknownSize5",
-         description="Using unknown array sizes: one dim specified and does not match",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnknownSize5",
+			description="Using unknown array sizes: one dim specified and does not match",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 805, column 7:
@@ -1212,11 +1215,11 @@ end UnknownSize5;
 
 
 model UnknownSize6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="UnknownSize6",
-         description="Using unknown array sizes:",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnknownSize6",
+			description="Using unknown array sizes:",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 821, column 7:
@@ -1236,11 +1239,11 @@ end UnknownSize;
 package Subscripts
 	
 model SubscriptExpression1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="SubscriptExpression1",
-         description="Replacing expressions in array subscripts with literals: basic test",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="SubscriptExpression1",
+			description="Replacing expressions in array subscripts with literals: basic test",
+			flatModel="
 fclass ArrayTests.Subscripts.SubscriptExpression1
  Real x[1];
  Real x[2];
@@ -1265,11 +1268,11 @@ end SubscriptExpression1;
 
 
 model SubscriptExpression2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="SubscriptExpression2",
-         description="Type checking array subscripts: literal < 1",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="SubscriptExpression2",
+			description="Type checking array subscripts: literal < 1",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 737, column 4:
@@ -1283,11 +1286,11 @@ end SubscriptExpression2;
 
 
 model SubscriptExpression3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="SubscriptExpression3",
-         description="Type checking array subscripts: literal > end",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="SubscriptExpression3",
+			description="Type checking array subscripts: literal > end",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 754, column 4:
@@ -1301,11 +1304,11 @@ end SubscriptExpression3;
 
 
 model SubscriptExpression4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="SubscriptExpression4",
-         description="Type checking array subscripts: expression < 1",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="SubscriptExpression4",
+			description="Type checking array subscripts: expression < 1",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 750, column 12:
@@ -1321,11 +1324,11 @@ end SubscriptExpression4;
 
 
 model SubscriptExpression5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="SubscriptExpression5",
-         description="Type checking array subscripts: expression > end",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="SubscriptExpression5",
+			description="Type checking array subscripts: expression > end",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 769, column 12:
@@ -1341,11 +1344,11 @@ end SubscriptExpression5;
 
 
 model SubscriptExpression6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="SubscriptExpression6",
-         description="Type checking array subscripts: simulating [4,4] with [16]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="SubscriptExpression6",
+			description="Type checking array subscripts: simulating [4,4] with [16]",
+			flatModel="
 fclass ArrayTests.Subscripts.SubscriptExpression6
  Real x[1];
  Real x[2];
@@ -1393,13 +1396,13 @@ end SubscriptExpression6;
 
 
 model SubscriptExpression7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="SubscriptExpression7",
-         description="Type checking array subscripts: using min in subscripts",
-         automatic_add_initial_equations = false,
-         enable_structural_diagnosis = false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="SubscriptExpression7",
+			description="Type checking array subscripts: using min in subscripts",
+			automatic_add_initial_equations=false,
+			enable_structural_diagnosis=false,
+			flatModel="
 fclass ArrayTests.Subscripts.SubscriptExpression7
  Real x[1,1];
  Real x[1,2];
@@ -1447,11 +1450,11 @@ end SubscriptExpression7;
 
 
 model SubscriptExpression8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="SubscriptExpression8",
-         description="Type checking array subscripts: complex expression, several bad indices",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="SubscriptExpression8",
+			description="Type checking array subscripts: complex expression, several bad indices",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1499, column 5:
@@ -1468,11 +1471,11 @@ end SubscriptExpression8;
 
 
 model NumSubscripts1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="NumSubscripts1",
-         description="Check number of array subscripts:",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NumSubscripts1",
+			description="Check number of array subscripts:",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1928, column 12:
@@ -1485,11 +1488,11 @@ end NumSubscripts1;
 
 
 model NumSubscripts2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="NumSubscripts2",
-         description="Check number of array subscripts:",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NumSubscripts2",
+			description="Check number of array subscripts:",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1945, column 12:
@@ -1510,11 +1513,11 @@ package Algebra
 package Add
 	
 model ArrayAdd1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayAdd1",
-         description="Scalarization of addition: Real[2] + Integer[2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayAdd1",
+			description="Scalarization of addition: Real[2] + Integer[2]",
+			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayAdd1
  Real x[1];
  Real x[2];
@@ -1537,11 +1540,11 @@ end ArrayAdd1;
 
 
 model ArrayAdd2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayAdd2",
-         description="Scalarization of addition: Real[2,2] + Integer[2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayAdd2",
+			description="Scalarization of addition: Real[2,2] + Integer[2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayAdd2
  Real x[1,1];
  Real x[1,2];
@@ -1572,11 +1575,11 @@ end ArrayAdd2;
 
 
 model ArrayAdd3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayAdd3",
-         description="Scalarization of addition: Real[2,2,2] + Integer[2,2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayAdd3",
+			description="Scalarization of addition: Real[2,2,2] + Integer[2,2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayAdd3
  Real x[1,1,1];
  Real x[1,1,2];
@@ -1623,11 +1626,11 @@ end ArrayAdd3;
 
 
 model ArrayAdd4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAdd4",
-         description="Scalarization of addition: Real[2] + Integer",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAdd4",
+			description="Scalarization of addition: Real[2] + Integer",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 796, column 6:
@@ -1642,11 +1645,11 @@ end ArrayAdd4;
 
 
 model ArrayAdd5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAdd5",
-         description="Scalarization of addition: Real[2,2] + Integer",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAdd5",
+			description="Scalarization of addition: Real[2,2] + Integer",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 815, column 6:
@@ -1661,11 +1664,11 @@ end ArrayAdd5;
 
 
 model ArrayAdd6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAdd6",
-         description="Scalarization of addition: Real[2,2,2] + Integer",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAdd6",
+			description="Scalarization of addition: Real[2,2,2] + Integer",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 834, column 6:
@@ -1680,11 +1683,11 @@ end ArrayAdd6;
 
 
 model ArrayAdd7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAdd7",
-         description="Scalarization of addition: Real + Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAdd7",
+			description="Scalarization of addition: Real + Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 853, column 6:
@@ -1699,11 +1702,11 @@ end ArrayAdd7;
 
 
 model ArrayAdd8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAdd8",
-         description="Scalarization of addition: Real + Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAdd8",
+			description="Scalarization of addition: Real + Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 861, column 6:
@@ -1718,11 +1721,11 @@ end ArrayAdd8;
 
 
 model ArrayAdd9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAdd9",
-         description="Scalarization of addition: Real + Integer[2,2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAdd9",
+			description="Scalarization of addition: Real + Integer[2,2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 869, column 6:
@@ -1737,11 +1740,11 @@ end ArrayAdd9;
 
 
 model ArrayAdd10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAdd10",
-         description="Scalarization of addition: Real[2] + Integer[3]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAdd10",
+			description="Scalarization of addition: Real[2] + Integer[3]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 910, column 6:
@@ -1756,11 +1759,11 @@ end ArrayAdd10;
 
 
 model ArrayAdd11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAdd11",
-         description="Scalarization of addition: Real[2] + Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAdd11",
+			description="Scalarization of addition: Real[2] + Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 929, column 6:
@@ -1775,11 +1778,11 @@ end ArrayAdd11;
 
 
 model ArrayAdd12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAdd12",
-         description="Scalarization of addition: Real[2] + String[2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAdd12",
+			description="Scalarization of addition: Real[2] + String[2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 948, column 6:
@@ -1795,11 +1798,11 @@ end ArrayAdd12;
 
 
 model ArrayDotAdd1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotAdd1",
-         description="Scalarization of element-wise addition: Real[2] .+ Integer[2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotAdd1",
+			description="Scalarization of element-wise addition: Real[2] .+ Integer[2]",
+			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd1
  Real x[1];
  Real x[2];
@@ -1822,11 +1825,11 @@ end ArrayDotAdd1;
 
 
 model ArrayDotAdd2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotAdd2",
-         description="Scalarization of element-wise addition: Real[2,2] .+ Integer[2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotAdd2",
+			description="Scalarization of element-wise addition: Real[2,2] .+ Integer[2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd2
  Real x[1,1];
  Real x[1,2];
@@ -1857,11 +1860,11 @@ end ArrayDotAdd2;
 
 
 model ArrayDotAdd3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotAdd3",
-         description="Scalarization of element-wise addition: Real[2,2,2] .+ Integer[2,2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotAdd3",
+			description="Scalarization of element-wise addition: Real[2,2,2] .+ Integer[2,2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd3
  Real x[1,1,1];
  Real x[1,1,2];
@@ -1908,11 +1911,11 @@ end ArrayDotAdd3;
 
 
 model ArrayDotAdd4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotAdd4",
-         description="Scalarization of element-wise addition: Real[2] .+ Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotAdd4",
+			description="Scalarization of element-wise addition: Real[2] .+ Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd4
  Real x[1];
  Real x[2];
@@ -1935,11 +1938,11 @@ end ArrayDotAdd4;
 
 
 model ArrayDotAdd5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotAdd5",
-         description="Scalarization of element-wise addition: Real[2,2] .+ Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotAdd5",
+			description="Scalarization of element-wise addition: Real[2,2] .+ Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd5
  Real x[1,1];
  Real x[1,2];
@@ -1970,11 +1973,11 @@ end ArrayDotAdd5;
 
 
 model ArrayDotAdd6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotAdd6",
-         description="Scalarization of element-wise addition: Real[2,2,2] .+ Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotAdd6",
+			description="Scalarization of element-wise addition: Real[2,2,2] .+ Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd6
  Real x[1,1,1];
  Real x[1,1,2];
@@ -2021,11 +2024,11 @@ end ArrayDotAdd6;
 
 
 model ArrayDotAdd7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotAdd7",
-         description="Scalarization of element-wise addition: Real .+ Integer[2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotAdd7",
+			description="Scalarization of element-wise addition: Real .+ Integer[2]",
+			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd7
  Real x[1];
  Real x[2];
@@ -2046,11 +2049,11 @@ end ArrayDotAdd7;
 
 
 model ArrayDotAdd8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotAdd8",
-         description="Scalarization of element-wise addition: Real .+ Integer[2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotAdd8",
+			description="Scalarization of element-wise addition: Real .+ Integer[2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd8
  Real x[1,1];
  Real x[1,2];
@@ -2075,11 +2078,11 @@ end ArrayDotAdd8;
 
 
 model ArrayDotAdd9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotAdd9",
-         description="Scalarization of element-wise addition: Real .+ Integer[2,2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotAdd9",
+			description="Scalarization of element-wise addition: Real .+ Integer[2,2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd9
  Real x[1,1,1];
  Real x[1,1,2];
@@ -2112,11 +2115,11 @@ end ArrayDotAdd9;
 
 
 model ArrayDotAdd10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotAdd10",
-         description="Scalarization of element-wise addition: Real[2] .+ Integer[3]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotAdd10",
+			description="Scalarization of element-wise addition: Real[2] .+ Integer[3]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2508, column 6:
@@ -2131,11 +2134,11 @@ end ArrayDotAdd10;
 
 
 model ArrayDotAdd11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotAdd11",
-         description="Scalarization of element-wise addition: Real[2] .+ Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotAdd11",
+			description="Scalarization of element-wise addition: Real[2] .+ Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2527, column 6:
@@ -2150,11 +2153,11 @@ end ArrayDotAdd11;
 
 
 model ArrayDotAdd12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotAdd12",
-         description="Scalarization of element-wise addition: Real[2] .+ String[2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotAdd12",
+			description="Scalarization of element-wise addition: Real[2] .+ String[2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2546, column 6:
@@ -2173,11 +2176,11 @@ end Add;
 package Sub
 	
 model ArraySub1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArraySub1",
-         description="Scalarization of subtraction: Real[2] - Integer[2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArraySub1",
+			description="Scalarization of subtraction: Real[2] - Integer[2]",
+			flatModel="
 fclass ArrayTests.Algebra.Sub.ArraySub1
  Real x[1];
  Real x[2];
@@ -2200,11 +2203,11 @@ end ArraySub1;
 
 
 model ArraySub2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArraySub2",
-         description="Scalarization of subtraction: Real[2,2] - Integer[2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArraySub2",
+			description="Scalarization of subtraction: Real[2,2] - Integer[2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Sub.ArraySub2
  Real x[1,1];
  Real x[1,2];
@@ -2235,11 +2238,11 @@ end ArraySub2;
 
 
 model ArraySub3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArraySub3",
-         description="Scalarization of subtraction: Real[2,2,2] - Integer[2,2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArraySub3",
+			description="Scalarization of subtraction: Real[2,2,2] - Integer[2,2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Sub.ArraySub3
  Real x[1,1,1];
  Real x[1,1,2];
@@ -2286,11 +2289,11 @@ end ArraySub3;
 
 
 model ArraySub4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArraySub4",
-         description="Scalarization of subtraction: Real[2] - Integer",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArraySub4",
+			description="Scalarization of subtraction: Real[2] - Integer",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1078, column 6:
@@ -2305,11 +2308,11 @@ end ArraySub4;
 
 
 model ArraySub5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArraySub5",
-         description="Scalarization of subtraction: Real[2,2] - Integer",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArraySub5",
+			description="Scalarization of subtraction: Real[2,2] - Integer",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1097, column 6:
@@ -2324,11 +2327,11 @@ end ArraySub5;
 
 
 model ArraySub6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArraySub6",
-         description="Scalarization of subtraction: Real[2,2,2] - Integer",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArraySub6",
+			description="Scalarization of subtraction: Real[2,2,2] - Integer",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1116, column 6:
@@ -2343,11 +2346,11 @@ end ArraySub6;
 
 
 model ArraySub7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArraySub7",
-         description="Scalarization of subtraction: Real - Integer[2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArraySub7",
+			description="Scalarization of subtraction: Real - Integer[2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1135, column 6:
@@ -2362,11 +2365,11 @@ end ArraySub7;
 
 
 model ArraySub8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArraySub8",
-         description="Scalarization of subtraction: Real - Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArraySub8",
+			description="Scalarization of subtraction: Real - Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1154, column 6:
@@ -2381,11 +2384,11 @@ end ArraySub8;
 
 
 model ArraySub9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArraySub9",
-         description="Scalarization of subtraction: Real - Integer[2,2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArraySub9",
+			description="Scalarization of subtraction: Real - Integer[2,2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1173, column 6:
@@ -2400,11 +2403,11 @@ end ArraySub9;
 
 
 model ArraySub10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArraySub10",
-         description="Scalarization of subtraction: Real[2] - Integer[3]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArraySub10",
+			description="Scalarization of subtraction: Real[2] - Integer[3]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1192, column 6:
@@ -2419,11 +2422,11 @@ end ArraySub10;
 
 
 model ArraySub11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArraySub11",
-         description="Scalarization of subtraction: Real[2] - Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArraySub11",
+			description="Scalarization of subtraction: Real[2] - Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1211, column 6:
@@ -2438,11 +2441,11 @@ end ArraySub11;
 
 
 model ArraySub12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArraySub12",
-         description="Scalarization of subtraction: Real[2] - String[2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArraySub12",
+			description="Scalarization of subtraction: Real[2] - String[2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1230, column 6:
@@ -2458,11 +2461,11 @@ end ArraySub12;
 
 
 model ArrayDotSub1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotSub1",
-         description="Scalarization of element-wise subtraction: Real[2] .- Integer[2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotSub1",
+			description="Scalarization of element-wise subtraction: Real[2] .- Integer[2]",
+			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub1
  Real x[1];
  Real x[2];
@@ -2485,11 +2488,11 @@ end ArrayDotSub1;
 
 
 model ArrayDotSub2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotSub2",
-         description="Scalarization of element-wise subtraction: Real[2,2] .- Integer[2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotSub2",
+			description="Scalarization of element-wise subtraction: Real[2,2] .- Integer[2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub2
  Real x[1,1];
  Real x[1,2];
@@ -2520,11 +2523,11 @@ end ArrayDotSub2;
 
 
 model ArrayDotSub3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotSub3",
-         description="Scalarization of element-wise subtraction: Real[2,2,2] .- Integer[2,2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotSub3",
+			description="Scalarization of element-wise subtraction: Real[2,2,2] .- Integer[2,2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub3
  Real x[1,1,1];
  Real x[1,1,2];
@@ -2571,11 +2574,11 @@ end ArrayDotSub3;
 
 
 model ArrayDotSub4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotSub4",
-         description="Scalarization of element-wise subtraction: Real[2] .- Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotSub4",
+			description="Scalarization of element-wise subtraction: Real[2] .- Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub4
  Real x[1];
  Real x[2];
@@ -2598,11 +2601,11 @@ end ArrayDotSub4;
 
 
 model ArrayDotSub5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotSub5",
-         description="Scalarization of element-wise subtraction: Real[2,2] .- Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotSub5",
+			description="Scalarization of element-wise subtraction: Real[2,2] .- Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub5
  Real x[1,1];
  Real x[1,2];
@@ -2633,11 +2636,11 @@ end ArrayDotSub5;
 
 
 model ArrayDotSub6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotSub6",
-         description="Scalarization of element-wise subtraction: Real[2,2,2] .- Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotSub6",
+			description="Scalarization of element-wise subtraction: Real[2,2,2] .- Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub6
  Real x[1,1,1];
  Real x[1,1,2];
@@ -2684,11 +2687,11 @@ end ArrayDotSub6;
 
 
 model ArrayDotSub7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotSub7",
-         description="Scalarization of element-wise subtraction: Real .- Integer[2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotSub7",
+			description="Scalarization of element-wise subtraction: Real .- Integer[2]",
+			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub7
  Real x[1];
  Real x[2];
@@ -2709,11 +2712,11 @@ end ArrayDotSub7;
 
 
 model ArrayDotSub8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotSub8",
-         description="Scalarization of element-wise subtraction: Real .- Integer[2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotSub8",
+			description="Scalarization of element-wise subtraction: Real .- Integer[2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub8
  Real x[1,1];
  Real x[1,2];
@@ -2738,11 +2741,11 @@ end ArrayDotSub8;
 
 
 model ArrayDotSub9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotSub9",
-         description="Scalarization of element-wise subtraction: Real .- Integer[2,2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotSub9",
+			description="Scalarization of element-wise subtraction: Real .- Integer[2,2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub9
  Real x[1,1,1];
  Real x[1,1,2];
@@ -2775,11 +2778,11 @@ end ArrayDotSub9;
 
 
 model ArrayDotSub10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotSub10",
-         description="Scalarization of element-wise subtraction: Real[2] .- Integer[3]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotSub10",
+			description="Scalarization of element-wise subtraction: Real[2] .- Integer[3]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2638, column 6:
@@ -2794,11 +2797,11 @@ end ArrayDotSub10;
 
 
 model ArrayDotSub11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotSub11",
-         description="Scalarization of element-wise subtraction: Real[2] .- Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotSub11",
+			description="Scalarization of element-wise subtraction: Real[2] .- Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2657, column 6:
@@ -2813,11 +2816,11 @@ end ArrayDotSub11;
 
 
 model ArrayDotSub12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotSub12",
-         description="Scalarization of element-wise subtraction: Real[2] .- String[2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotSub12",
+			description="Scalarization of element-wise subtraction: Real[2] .- String[2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2676, column 6:
@@ -2836,11 +2839,11 @@ end Sub;
 package Mul
 	
 model ArrayMulOK1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayMulOK1",
-         description="Scalarization of multiplication: Real[3] * Integer[3]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayMulOK1",
+			description="Scalarization of multiplication: Real[3] * Integer[3]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK1
  Real x;
  Real y[1];
@@ -2863,11 +2866,11 @@ end ArrayMulOK1;
 
 
 model ArrayMulOK2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayMulOK2",
-         description="Scalarization of multiplication: Real[2,2] * Integer[2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayMulOK2",
+			description="Scalarization of multiplication: Real[2,2] * Integer[2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK2
  Real x[1,1];
  Real x[1,2];
@@ -2898,11 +2901,11 @@ end ArrayMulOK2;
 
 
 model ArrayMulOK3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayMulOK3",
-         description="Scalarization of multiplication: Integer[3,2] * Real[2,4]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayMulOK3",
+			description="Scalarization of multiplication: Integer[3,2] * Real[2,4]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK3
  Real x[1,1];
  Real x[1,2];
@@ -2957,11 +2960,11 @@ end ArrayMulOK3;
 
 
 model ArrayMulOK4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayMulOK4",
-         description="Scalarization of multiplication: Real[2] * Integer[2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayMulOK4",
+			description="Scalarization of multiplication: Real[2] * Integer[2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK4
  Real x[1];
  Real x[2];
@@ -2984,11 +2987,11 @@ end ArrayMulOK4;
 
 
 model ArrayMulOK5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayMulOK5",
-         description="Scalarization of multiplication: Real[2,2] * Integer[2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayMulOK5",
+			description="Scalarization of multiplication: Real[2,2] * Integer[2]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK5
  Real x[1];
  Real x[2];
@@ -3015,11 +3018,11 @@ end ArrayMulOK5;
 
 
 model ArrayMulOK6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayMulOK6",
-         description="Scalarization of multiplication: Real[2] * Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayMulOK6",
+			description="Scalarization of multiplication: Real[2] * Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK6
  Real x[1];
  Real x[2];
@@ -3042,11 +3045,11 @@ end ArrayMulOK6;
 
 
 model ArrayMulOK7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayMulOK7",
-         description="Scalarization of multiplication: Real[2,2] * Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayMulOK7",
+			description="Scalarization of multiplication: Real[2,2] * Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK7
  Real x[1,1];
  Real x[1,2];
@@ -3077,11 +3080,11 @@ end ArrayMulOK7;
 
 
 model ArrayMulOK8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayMulOK8",
-         description="Scalarization of multiplication: Real[2,2,2] * Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayMulOK8",
+			description="Scalarization of multiplication: Real[2,2,2] * Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK8
  Real x[1,1,1];
  Real x[1,1,2];
@@ -3128,11 +3131,11 @@ end ArrayMulOK8;
 
 
 model ArrayMulOK9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayMulOK9",
-         description="Scalarization of multiplication: Real * Integer[2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayMulOK9",
+			description="Scalarization of multiplication: Real * Integer[2]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK9
  Real x[1];
  Real x[2];
@@ -3153,11 +3156,11 @@ end ArrayMulOK9;
 
 
 model ArrayMulOK10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayMulOK10",
-         description="Scalarization of multiplication: Real * Integer[2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayMulOK10",
+			description="Scalarization of multiplication: Real * Integer[2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK10
  Real x[1,1];
  Real x[1,2];
@@ -3182,11 +3185,11 @@ end ArrayMulOK10;
 
 
 model ArrayMulOK11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayMulOK11",
-         description="Scalarization of multiplication: Real * Integer[2,2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayMulOK11",
+			description="Scalarization of multiplication: Real * Integer[2,2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK11
  Real x[1,1,1];
  Real x[1,1,2];
@@ -3219,11 +3222,11 @@ end ArrayMulOK11;
 
 
 model ArrayMulOK12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayMulOK12",
-         description="Scalarization of multiplication: Real[2,2] * Integer[2,1]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayMulOK12",
+			description="Scalarization of multiplication: Real[2,2] * Integer[2,1]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK12
  Real x[1,1];
  Real x[2,1];
@@ -3250,11 +3253,11 @@ end ArrayMulOK12;
 
 
 model ArrayMulOK13
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayMulOK13",
-         description="Scalarization of multiplication: check that type() of Real[3] * Real[3] is correct",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayMulOK13",
+			description="Scalarization of multiplication: check that type() of Real[3] * Real[3] is correct",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK13
  Real x[1];
  Real x[2];
@@ -3279,11 +3282,11 @@ end ArrayMulOK13;
 
 
 model ArrayMulErr1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayMulErr1",
-         description="Scalarization of multiplication: Real[2,2,2] * Integer[2,2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayMulErr1",
+			description="Scalarization of multiplication: Real[2,2,2] * Integer[2,2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1602, column 6:
@@ -3298,11 +3301,11 @@ end ArrayMulErr1;
 
 
 model ArrayMulErr2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayMulErr2",
-         description="Scalarization of multiplication: Real[2] * Integer[3]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayMulErr2",
+			description="Scalarization of multiplication: Real[2] * Integer[3]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1621, column 6:
@@ -3317,11 +3320,11 @@ end ArrayMulErr2;
 
 
 model ArrayMulErr3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayMulErr3",
-         description="Scalarization of multiplication: Real[2] * String[2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayMulErr3",
+			description="Scalarization of multiplication: Real[2] * String[2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1640, column 6:
@@ -3336,11 +3339,11 @@ end ArrayMulErr3;
 
 
 model ArrayMulErr4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayMulErr4",
-         description="Scalarization of multiplication: Real[2,2] * Integer[3,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayMulErr4",
+			description="Scalarization of multiplication: Real[2,2] * Integer[3,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1659, column 6:
@@ -3355,11 +3358,11 @@ end ArrayMulErr4;
 
 
 model ArrayMulErr5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayMulErr5",
-         description="Scalarization of multiplication: Real[2,3] * Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayMulErr5",
+			description="Scalarization of multiplication: Real[2,3] * Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1678, column 6:
@@ -3374,11 +3377,11 @@ end ArrayMulErr5;
 
 
 model ArrayMulErr6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayMulErr6",
-         description="Scalarization of multiplication: Real[2,3] * Integer[2,3]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayMulErr6",
+			description="Scalarization of multiplication: Real[2,3] * Integer[2,3]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1697, column 6:
@@ -3393,11 +3396,11 @@ end ArrayMulErr6;
 
 
 model ArrayMulErr7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayMulErr7",
-         description="Scalarization of multiplication: Real[2,2] * Integer[3]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayMulErr7",
+			description="Scalarization of multiplication: Real[2,2] * Integer[3]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1716, column 6:
@@ -3412,11 +3415,11 @@ end ArrayMulErr7;
 
 
 model ArrayMulErr8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayMulErr8",
-         description="Scalarization of multiplication: Real[3] * Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayMulErr8",
+			description="Scalarization of multiplication: Real[3] * Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1735, column 6:
@@ -3431,11 +3434,11 @@ end ArrayMulErr8;
 
 
 model ArrayMulErr9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayMulErr9",
-         description="Scalarization of multiplication: Real[2,2] * Integer[1,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayMulErr9",
+			description="Scalarization of multiplication: Real[2,2] * Integer[1,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1754, column 6:
@@ -3451,11 +3454,11 @@ end ArrayMulErr9;
 
 
 model ArrayDotMul1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotMul1",
-         description="Scalarization of element-wise multiplication: Real[2] .* Integer[2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotMul1",
+			description="Scalarization of element-wise multiplication: Real[2] .* Integer[2]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul1
  Real x[1];
  Real x[2];
@@ -3478,11 +3481,11 @@ end ArrayDotMul1;
 
 
 model ArrayDotMul2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotMul2",
-         description="Scalarization of element-wise multiplication: Real[2,2] .* Integer[2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotMul2",
+			description="Scalarization of element-wise multiplication: Real[2,2] .* Integer[2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul2
  Real x[1,1];
  Real x[1,2];
@@ -3513,11 +3516,11 @@ end ArrayDotMul2;
 
 
 model ArrayDotMul3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotMul3",
-         description="Scalarization of element-wise multiplication: Real[2,2,2] .* Integer[2,2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotMul3",
+			description="Scalarization of element-wise multiplication: Real[2,2,2] .* Integer[2,2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul3
  Real x[1,1,1];
  Real x[1,1,2];
@@ -3564,11 +3567,11 @@ end ArrayDotMul3;
 
 
 model ArrayDotMul4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotMul4",
-         description="Scalarization of element-wise multiplication: Real[2] .* Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotMul4",
+			description="Scalarization of element-wise multiplication: Real[2] .* Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul4
  Real x[1];
  Real x[2];
@@ -3591,11 +3594,11 @@ end ArrayDotMul4;
 
 
 model ArrayDotMul5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotMul5",
-         description="Scalarization of element-wise multiplication: Real[2,2] .* Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotMul5",
+			description="Scalarization of element-wise multiplication: Real[2,2] .* Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul5
  Real x[1,1];
  Real x[1,2];
@@ -3626,11 +3629,11 @@ end ArrayDotMul5;
 
 
 model ArrayDotMul6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotMul6",
-         description="Scalarization of element-wise multiplication: Real[2,2,2] .* Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotMul6",
+			description="Scalarization of element-wise multiplication: Real[2,2,2] .* Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul6
  Real x[1,1,1];
  Real x[1,1,2];
@@ -3677,11 +3680,11 @@ end ArrayDotMul6;
 
 
 model ArrayDotMul7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotMul7",
-         description="Scalarization of element-wise multiplication: Real .* Integer[2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotMul7",
+			description="Scalarization of element-wise multiplication: Real .* Integer[2]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul7
  Real x[1];
  Real x[2];
@@ -3702,11 +3705,11 @@ end ArrayDotMul7;
 
 
 model ArrayDotMul8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotMul8",
-         description="Scalarization of element-wise multiplication: Real .* Integer[2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotMul8",
+			description="Scalarization of element-wise multiplication: Real .* Integer[2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul8
  Real x[1,1];
  Real x[1,2];
@@ -3731,11 +3734,11 @@ end ArrayDotMul8;
 
 
 model ArrayDotMul9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotMul9",
-         description="Scalarization of element-wise multiplication: Real .* Integer[2,2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotMul9",
+			description="Scalarization of element-wise multiplication: Real .* Integer[2,2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul9
  Real x[1,1,1];
  Real x[1,1,2];
@@ -3768,11 +3771,11 @@ end ArrayDotMul9;
 
 
 model ArrayDotMul10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotMul10",
-         description="Scalarization of element-wise multiplication: Real[2] .* Integer[3]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotMul10",
+			description="Scalarization of element-wise multiplication: Real[2] .* Integer[3]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2638, column 6:
@@ -3787,11 +3790,11 @@ end ArrayDotMul10;
 
 
 model ArrayDotMul11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotMul11",
-         description="Scalarization of element-wise multiplication: Real[2] .* Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotMul11",
+			description="Scalarization of element-wise multiplication: Real[2] .* Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2657, column 6:
@@ -3806,11 +3809,11 @@ end ArrayDotMul11;
 
 
 model ArrayDotMul12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotMul12",
-         description="Scalarization of element-wise multiplication: Real[2] .* String[2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotMul12",
+			description="Scalarization of element-wise multiplication: Real[2] .* String[2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2676, column 6:
@@ -3829,11 +3832,11 @@ end Mul;
 package Div
 	
 model ArrayDiv1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDiv1",
-         description="Scalarization of division: Real[2] / Integer[2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDiv1",
+			description="Scalarization of division: Real[2] / Integer[2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1994, column 6:
@@ -3848,11 +3851,11 @@ end ArrayDiv1;
 
 
 model ArrayDiv2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDiv2",
-         description="Scalarization of division: Real[2,2] / Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDiv2",
+			description="Scalarization of division: Real[2,2] / Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2013, column 6:
@@ -3867,11 +3870,11 @@ end ArrayDiv2;
 
 
 model ArrayDiv3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDiv3",
-         description="Scalarization of division: Real[2] / Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDiv3",
+			description="Scalarization of division: Real[2] / Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDiv3
  Real x[1];
  Real x[2];
@@ -3894,11 +3897,11 @@ end ArrayDiv3;
 
 
 model ArrayDiv4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDiv4",
-         description="Scalarization of division: Real[2,2] / Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDiv4",
+			description="Scalarization of division: Real[2,2] / Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDiv4
  Real x[1,1];
  Real x[1,2];
@@ -3929,11 +3932,11 @@ end ArrayDiv4;
 
 
 model ArrayDiv5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDiv5",
-         description="Scalarization of division: Real[2,2,2] / Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDiv5",
+			description="Scalarization of division: Real[2,2,2] / Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDiv5
  Real x[1,1,1];
  Real x[1,1,2];
@@ -3980,11 +3983,11 @@ end ArrayDiv5;
 
 
 model ArrayDiv6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDiv6",
-         description="Scalarization of division: Real / Integer[2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDiv6",
+			description="Scalarization of division: Real / Integer[2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2056, column 6:
@@ -3999,11 +4002,11 @@ end ArrayDiv6;
 
 
 model ArrayDiv7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDiv7",
-         description="Scalarization of division: Real / Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDiv7",
+			description="Scalarization of division: Real / Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2075, column 6:
@@ -4018,11 +4021,11 @@ end ArrayDiv7;
 
 
 model ArrayDiv8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDiv8",
-         description="Scalarization of division: Real[2] / String",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDiv8",
+			description="Scalarization of division: Real[2] / String",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2094, column 6:
@@ -4038,11 +4041,11 @@ end ArrayDiv8;
 
 
 model ArrayDotDiv1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotDiv1",
-         description="Scalarization of element-wise division: Real[2] ./ Integer[2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotDiv1",
+			description="Scalarization of element-wise division: Real[2] ./ Integer[2]",
+			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv1
  Real x[1];
  Real x[2];
@@ -4065,11 +4068,11 @@ end ArrayDotDiv1;
 
 
 model ArrayDotDiv2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotDiv2",
-         description="Scalarization of element-wise division: Real[2,2] ./ Integer[2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotDiv2",
+			description="Scalarization of element-wise division: Real[2,2] ./ Integer[2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv2
  Real x[1,1];
  Real x[1,2];
@@ -4100,11 +4103,11 @@ end ArrayDotDiv2;
 
 
 model ArrayDotDiv3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotDiv3",
-         description="Scalarization of element-wise division: Real[2,2,2] ./ Integer[2,2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotDiv3",
+			description="Scalarization of element-wise division: Real[2,2,2] ./ Integer[2,2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv3
  Real x[1,1,1];
  Real x[1,1,2];
@@ -4151,11 +4154,11 @@ end ArrayDotDiv3;
 
 
 model ArrayDotDiv4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotDiv4",
-         description="Scalarization of element-wise division: Real[2] ./ Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotDiv4",
+			description="Scalarization of element-wise division: Real[2] ./ Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv4
  Real x[1];
  Real x[2];
@@ -4178,11 +4181,11 @@ end ArrayDotDiv4;
 
 
 model ArrayDotDiv5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotDiv5",
-         description="Scalarization of element-wise division: Real[2,2] ./ Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotDiv5",
+			description="Scalarization of element-wise division: Real[2,2] ./ Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv5
  Real x[1,1];
  Real x[1,2];
@@ -4213,11 +4216,11 @@ end ArrayDotDiv5;
 
 
 model ArrayDotDiv6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotDiv6",
-         description="Scalarization of element-wise division: Real[2,2,2] ./ Integer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotDiv6",
+			description="Scalarization of element-wise division: Real[2,2,2] ./ Integer",
+			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv6
  Real x[1,1,1];
  Real x[1,1,2];
@@ -4264,11 +4267,11 @@ end ArrayDotDiv6;
 
 
 model ArrayDotDiv7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotDiv7",
-         description="Scalarization of element-wise division: Real ./ Integer[2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotDiv7",
+			description="Scalarization of element-wise division: Real ./ Integer[2]",
+			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv7
  Real x[1];
  Real x[2];
@@ -4289,11 +4292,11 @@ end ArrayDotDiv7;
 
 
 model ArrayDotDiv8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotDiv8",
-         description="Scalarization of element-wise division: Real ./ Integer[2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotDiv8",
+			description="Scalarization of element-wise division: Real ./ Integer[2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv8
  Real x[1,1];
  Real x[1,2];
@@ -4318,11 +4321,11 @@ end ArrayDotDiv8;
 
 
 model ArrayDotDiv9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotDiv9",
-         description="Scalarization of element-wise division: Real ./ Integer[2,2,2]",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotDiv9",
+			description="Scalarization of element-wise division: Real ./ Integer[2,2,2]",
+			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv9
  Real x[1,1,1];
  Real x[1,1,2];
@@ -4355,11 +4358,11 @@ end ArrayDotDiv9;
 
 
 model ArrayDotDiv10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotDiv10",
-         description="Scalarization of element-wise division: Real[2] ./ Integer[3]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotDiv10",
+			description="Scalarization of element-wise division: Real[2] ./ Integer[3]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2638, column 6:
@@ -4374,11 +4377,11 @@ end ArrayDotDiv10;
 
 
 model ArrayDotDiv11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotDiv11",
-         description="Scalarization of element-wise division: Real[2] ./ Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotDiv11",
+			description="Scalarization of element-wise division: Real[2] ./ Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2657, column 6:
@@ -4393,11 +4396,11 @@ end ArrayDotDiv11;
 
 
 model ArrayDotDiv12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotDiv12",
-         description="Scalarization of element-wise division: Real[2] ./ String[2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotDiv12",
+			description="Scalarization of element-wise division: Real[2] ./ String[2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 2676, column 6:
@@ -4416,11 +4419,11 @@ end Div;
 package Pow
 	
 model ArrayDotPow1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotPow1",
-         description="Scalarization of element-wise exponentiation:",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotPow1",
+			description="Scalarization of element-wise exponentiation:",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow1
  Real x[1];
  Real x[2];
@@ -4443,11 +4446,11 @@ end ArrayDotPow1;
 
 
 model ArrayDotPow2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotPow2",
-         description="Scalarization of element-wise exponentiation:",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotPow2",
+			description="Scalarization of element-wise exponentiation:",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow2
  Real x[1,1];
  Real x[1,2];
@@ -4478,11 +4481,11 @@ end ArrayDotPow2;
 
 
 model ArrayDotPow3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotPow3",
-         description="Scalarization of element-wise exponentiation:",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotPow3",
+			description="Scalarization of element-wise exponentiation:",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow3
  Real x[1,1,1];
  Real x[1,1,2];
@@ -4529,11 +4532,11 @@ end ArrayDotPow3;
 
 
 model ArrayDotPow4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotPow4",
-         description="Scalarization of element-wise exponentiation:",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotPow4",
+			description="Scalarization of element-wise exponentiation:",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow4
  Real x[1];
  Real x[2];
@@ -4556,11 +4559,11 @@ end ArrayDotPow4;
 
 
 model ArrayDotPow5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotPow5",
-         description="Scalarization of element-wise exponentiation:",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotPow5",
+			description="Scalarization of element-wise exponentiation:",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow5
  Real x[1,1];
  Real x[1,2];
@@ -4591,11 +4594,11 @@ end ArrayDotPow5;
 
 
 model ArrayDotPow6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotPow6",
-         description="Scalarization of element-wise exponentiation:",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotPow6",
+			description="Scalarization of element-wise exponentiation:",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow6
  Real x[1,1,1];
  Real x[1,1,2];
@@ -4642,11 +4645,11 @@ end ArrayDotPow6;
 
 
 model ArrayDotPow7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotPow7",
-         description="Scalarization of element-wise exponentiation:",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotPow7",
+			description="Scalarization of element-wise exponentiation:",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow7
  Real x[1];
  Real x[2];
@@ -4667,11 +4670,11 @@ end ArrayDotPow7;
 
 
 model ArrayDotPow8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotPow8",
-         description="Scalarization of element-wise exponentiation:",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotPow8",
+			description="Scalarization of element-wise exponentiation:",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow8
  Real x[1,1];
  Real x[1,2];
@@ -4696,11 +4699,11 @@ end ArrayDotPow8;
 
 
 model ArrayDotPow9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayDotPow9",
-         description="Scalarization of element-wise exponentiation:",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayDotPow9",
+			description="Scalarization of element-wise exponentiation:",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow9
  Real x[1,1,1];
  Real x[1,1,2];
@@ -4733,11 +4736,11 @@ end ArrayDotPow9;
 
 
 model ArrayDotPow10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotPow10",
-         description="Scalarization of element-wise exponentiation:",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotPow10",
+			description="Scalarization of element-wise exponentiation:",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 3972, column 6:
@@ -4752,11 +4755,11 @@ end ArrayDotPow10;
 
 
 model ArrayDotPow11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotPow11",
-         description="Scalarization of element-wise exponentiation:",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotPow11",
+			description="Scalarization of element-wise exponentiation:",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 3991, column 6:
@@ -4771,11 +4774,11 @@ end ArrayDotPow11;
 
 
 model ArrayDotPow12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayDotPow12",
-         description="Scalarization of element-wise exponentiation:",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayDotPow12",
+			description="Scalarization of element-wise exponentiation:",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 4010, column 6:
@@ -4791,11 +4794,11 @@ end ArrayDotPow12;
 
 
 model ArrayPow1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayPow1",
-         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 0",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayPow1",
+			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 0",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow1
  Real x[1,1];
  Real x[1,2];
@@ -4815,11 +4818,11 @@ end ArrayPow1;
 
 
 model ArrayPow2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayPow2",
-         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 1",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayPow2",
+			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 1",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow2
  Real x[1,1];
  Real x[1,2];
@@ -4839,11 +4842,11 @@ end ArrayPow2;
 
 
 model ArrayPow3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayPow3",
-         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 2",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayPow3",
+			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 2",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow3
  Real x[1,1];
  Real x[1,2];
@@ -4863,11 +4866,11 @@ end ArrayPow3;
 
 
 model ArrayPow4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayPow4",
-         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 3",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayPow4",
+			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 3",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow4
  Real x[1,1];
  Real x[1,2];
@@ -4887,11 +4890,11 @@ end ArrayPow4;
 
 
 model ArrayPow5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayPow5",
-         description="Scalarization of element-wise exponentiation: Integer[3,3] ^ 2",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayPow5",
+			description="Scalarization of element-wise exponentiation: Integer[3,3] ^ 2",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow5
  Real x[1,1];
  Real x[1,2];
@@ -4921,11 +4924,11 @@ end ArrayPow5;
 
 
 model ArrayPow6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayPow6",
-         description="Scalarization of element-wise exponentiation: component Real[2,2] ^ 2",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayPow6",
+			description="Scalarization of element-wise exponentiation: component Real[2,2] ^ 2",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow6
  Real x[1,1];
  Real x[1,2];
@@ -4956,11 +4959,11 @@ end ArrayPow6;
 
 
 model ArrayPow7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayPow7",
-         description="Scalarization of element-wise exponentiation:component Real[2,2] ^ 0",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayPow7",
+			description="Scalarization of element-wise exponentiation:component Real[2,2] ^ 0",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow7
  Real x[1,1];
  Real x[1,2];
@@ -4991,11 +4994,11 @@ end ArrayPow7;
 
 
 model ArrayPow8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayPow8",
-         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ (negative Integer)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayPow8",
+			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ (negative Integer)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 4068, column 16:
@@ -5007,11 +5010,11 @@ end ArrayPow8;
 
 
 model ArrayPow9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayPow9",
-         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ Real",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayPow9",
+			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ Real",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 4084, column 16:
@@ -5023,11 +5026,11 @@ end ArrayPow9;
 
 
 model ArrayPow10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayPow10",
-         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ Integer[2,2]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayPow10",
+			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ Integer[2,2]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 4100, column 16:
@@ -5039,11 +5042,11 @@ end ArrayPow10;
 
 
 model ArrayPow11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayPow11",
-         description="Scalarization of element-wise exponentiation: Integer[2,3] ^ 2",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayPow11",
+			description="Scalarization of element-wise exponentiation: Integer[2,3] ^ 2",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 4116, column 16:
@@ -5055,11 +5058,11 @@ end ArrayPow11;
 
 
 model ArrayPow12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayPow12",
-         description="Scalarization of element-wise exponentiation: Real[2,2] ^ Integer component",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayPow12",
+			description="Scalarization of element-wise exponentiation: Real[2,2] ^ Integer component",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 4286, column 16:
@@ -5072,11 +5075,11 @@ end ArrayPow12;
 
 
 model ArrayPow13
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayPow13",
-         description="Scalarization of element-wise exponentiation: Real[2,2] ^ constant Integer component",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayPow13",
+			description="Scalarization of element-wise exponentiation: Real[2,2] ^ constant Integer component",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow13
  Real x[1,1];
  Real x[1,2];
@@ -5098,11 +5101,11 @@ end ArrayPow13;
 
 
 model ArrayPow14
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayPow14",
-         description="Scalarization of element-wise exponentiation: Real[2,2] ^ parameter Integer component",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayPow14",
+			description="Scalarization of element-wise exponentiation: Real[2,2] ^ parameter Integer component",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 4326, column 16:
@@ -5115,11 +5118,11 @@ end ArrayPow14;
 
 
 model ArrayPow15
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayPow15",
-         description="Scalarization of element-wise exponentiation: Integer[1,1] ^ 2",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayPow15",
+			description="Scalarization of element-wise exponentiation: Integer[1,1] ^ 2",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow15
  Real x[1,1];
 equation
@@ -5133,11 +5136,11 @@ end ArrayPow15;
 
 
 model ArrayPow16
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayPow16",
-         description="Scalarization of element-wise exponentiation: Integer[1] ^ 2",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayPow16",
+			description="Scalarization of element-wise exponentiation: Integer[1] ^ 2",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 4177, column 16:
@@ -5149,11 +5152,11 @@ end ArrayPow16;
 
 
 model ArrayPow17
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayPow17",
-         description="Scalarization of element-wise exponentiation: Integer ^ 2",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayPow17",
+			description="Scalarization of element-wise exponentiation: Integer ^ 2",
+			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow17
  Real x;
 equation
@@ -5171,11 +5174,11 @@ end Pow;
 package Neg
     
 model ArrayNeg1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayNeg1",
-         description="Scalarization of negation: array of Integer (literal)",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayNeg1",
+			description="Scalarization of negation: array of Integer (literal)",
+			flatModel="
 fclass ArrayTests.Algebra.Neg.ArrayNeg1
  discrete Integer x[1];
  discrete Integer x[2];
@@ -5197,12 +5200,12 @@ end ArrayNeg1;
 
 
 model ArrayNeg2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayNeg2",
-         description="Scalarization of negation: array of Integer (variable)",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayNeg2",
+			description="Scalarization of negation: array of Integer (variable)",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass ArrayTests.Algebra.Neg.ArrayNeg2
  discrete Integer x[1];
  discrete Integer x[2];
@@ -5234,11 +5237,11 @@ end ArrayNeg2;
 
 
 model ArrayNeg3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayNeg3",
-         description="Scalarization of negation: constant evaluation",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayNeg3",
+			description="Scalarization of negation: constant evaluation",
+			flatModel="
 fclass ArrayTests.Algebra.Neg.ArrayNeg3
  discrete Integer x[1];
  discrete Integer x[2];
@@ -5264,11 +5267,11 @@ end ArrayNeg3;
 
 
 model ArrayNeg4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayNeg4",
-         description="Scalarization of negation: -Boolean[2] (literal)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayNeg4",
+			description="Scalarization of negation: -Boolean[2] (literal)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6029, column 17:
@@ -5280,11 +5283,11 @@ end ArrayNeg4;
 
 
 model ArrayNeg5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayNeg5",
-         description="Scalarization of negation: -Boolean[2] (component)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayNeg5",
+			description="Scalarization of negation: -Boolean[2] (component)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6045, column 17:
@@ -5306,11 +5309,11 @@ package Logical
 package And
 
 model ArrayAnd1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayAnd1",
-         description="Scalarization of logical and: arrays of Booleans (literal)",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayAnd1",
+			description="Scalarization of logical and: arrays of Booleans (literal)",
+			flatModel="
 fclass ArrayTests.Logical.And.ArrayAnd1
  discrete Boolean x[1];
  discrete Boolean x[2];
@@ -5328,11 +5331,11 @@ end ArrayTests.Logical.And.ArrayAnd1;
 end ArrayAnd1;
 
 model ArrayAnd2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayAnd2",
-         description="Scalarization of logical and: arrays of Booleans (component)",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayAnd2",
+			description="Scalarization of logical and: arrays of Booleans (component)",
+			flatModel="
 fclass ArrayTests.Logical.And.ArrayAnd2
  discrete Boolean y[1];
  discrete Boolean y[2];
@@ -5358,11 +5361,11 @@ end ArrayAnd2;
 
 
 model ArrayAnd3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAnd3",
-         description="Scalarization of logical and: different array sizes (literal)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAnd3",
+			description="Scalarization of logical and: different array sizes (literal)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5569, column 17:
@@ -5374,11 +5377,11 @@ end ArrayAnd3;
 
 
 model ArrayAnd4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAnd4",
-         description="Scalarization of logical and: different array sizes (component)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAnd4",
+			description="Scalarization of logical and: different array sizes (component)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5586, column 17:
@@ -5391,11 +5394,11 @@ end ArrayAnd4;
 
 
 model ArrayAnd5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAnd5",
-         description="Scalarization of logical and: array and scalar (literal)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAnd5",
+			description="Scalarization of logical and: array and scalar (literal)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5602, column 17:
@@ -5407,11 +5410,11 @@ end ArrayAnd5;
 
 
 model ArrayAnd6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAnd6",
-         description="Scalarization of logical and: array and scalar (component)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAnd6",
+			description="Scalarization of logical and: array and scalar (component)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5619, column 17:
@@ -5424,11 +5427,11 @@ end ArrayAnd6;
 
 
 model ArrayAnd7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAnd7",
-         description="Scalarization of logical and: Integer[2] and Integer[2] (literal)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAnd7",
+			description="Scalarization of logical and: Integer[2] and Integer[2] (literal)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5635, column 17:
@@ -5440,11 +5443,11 @@ end ArrayAnd7;
 
 
 model ArrayAnd8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayAnd8",
-         description="Scalarization of logical and: Integer[2] and Integer[2] (component)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayAnd8",
+			description="Scalarization of logical and: Integer[2] and Integer[2] (component)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5652, column 17:
@@ -5457,11 +5460,11 @@ end ArrayAnd8;
 
 
 model ArrayAnd9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayAnd9",
-         description="Scalarization of logical and: constant evaluation",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayAnd9",
+			description="Scalarization of logical and: constant evaluation",
+			flatModel="
 fclass ArrayTests.Logical.And.ArrayAnd9
  constant Boolean y[1] = true and true;
  constant Boolean y[2] = false and true;
@@ -5491,11 +5494,11 @@ end And;
 package Or
 	
 model ArrayOr1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayOr1",
-         description="Scalarization of logical or: arrays of Booleans (literal)",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayOr1",
+			description="Scalarization of logical or: arrays of Booleans (literal)",
+			flatModel="
 fclass ArrayTests.Logical.Or.ArrayOr1
  discrete Boolean x[1];
  discrete Boolean x[2];
@@ -5514,11 +5517,11 @@ end ArrayOr1;
 
 
 model ArrayOr2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayOr2",
-         description="Scalarization of logical or: arrays of Booleans (component)",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayOr2",
+			description="Scalarization of logical or: arrays of Booleans (component)",
+			flatModel="
 fclass ArrayTests.Logical.Or.ArrayOr2
  discrete Boolean y[1];
  discrete Boolean y[2];
@@ -5544,11 +5547,11 @@ end ArrayOr2;
 
 
 model ArrayOr3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayOr3",
-         description="Scalarization of logical or: different array sizes (literal)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayOr3",
+			description="Scalarization of logical or: different array sizes (literal)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5723, column 17:
@@ -5560,11 +5563,11 @@ end ArrayOr3;
 
 
 model ArrayOr4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayOr4",
-         description="Scalarization of logical or: different array sizes (component)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayOr4",
+			description="Scalarization of logical or: different array sizes (component)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5740, column 17:
@@ -5577,11 +5580,11 @@ end ArrayOr4;
 
 
 model ArrayOr5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayOr5",
-         description="Scalarization of logical or: array and scalar (literal)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayOr5",
+			description="Scalarization of logical or: array and scalar (literal)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5759, column 17:
@@ -5593,11 +5596,11 @@ end ArrayOr5;
 
 
 model ArrayOr6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayOr6",
-         description="Scalarization of logical or: array and scalar (component)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayOr6",
+			description="Scalarization of logical or: array and scalar (component)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5776, column 17:
@@ -5610,11 +5613,11 @@ end ArrayOr6;
 
 
 model ArrayOr7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayOr7",
-         description="Scalarization of logical or: Integer[2] or Integer[2] (literal)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayOr7",
+			description="Scalarization of logical or: Integer[2] or Integer[2] (literal)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5803, column 17:
@@ -5626,11 +5629,11 @@ end ArrayOr7;
 
 
 model ArrayOr8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayOr8",
-         description="Scalarization of logical or: Integer[2] or Integer[2] (component)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayOr8",
+			description="Scalarization of logical or: Integer[2] or Integer[2] (component)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5820, column 17:
@@ -5643,11 +5646,11 @@ end ArrayOr8;
 
 
 model ArrayOr9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayOr9",
-         description="Scalarization of logical or: constant evaluation",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayOr9",
+			description="Scalarization of logical or: constant evaluation",
+			flatModel="
 fclass ArrayTests.Logical.Or.ArrayOr9
  constant Boolean y[1] = true or true;
  constant Boolean y[2] = true or false;
@@ -5678,11 +5681,11 @@ end Or;
 package Not
 	
 model ArrayNot1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayNot1",
-         description="Scalarization of logical not: array of Boolean (literal)",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayNot1",
+			description="Scalarization of logical not: array of Boolean (literal)",
+			flatModel="
 fclass ArrayTests.Logical.Not.ArrayNot1
  discrete Boolean x[1];
  discrete Boolean x[2];
@@ -5701,11 +5704,11 @@ end ArrayNot1;
 
 
 model ArrayNot2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayNot2",
-         description="Scalarization of logical not: array of Boolean (component)",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayNot2",
+			description="Scalarization of logical not: array of Boolean (component)",
+			flatModel="
 fclass ArrayTests.Logical.Not.ArrayNot2
  discrete Boolean x[1];
  discrete Boolean x[2];
@@ -5731,11 +5734,11 @@ end ArrayNot2;
 
 
 model ArrayNot3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayNot3",
-         description="Scalarization of logical not: constant evaluation",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayNot3",
+			description="Scalarization of logical not: constant evaluation",
+			flatModel="
 fclass ArrayTests.Logical.Not.ArrayNot3
  discrete Boolean x[1];
  discrete Boolean x[2];
@@ -5757,11 +5760,11 @@ end ArrayNot3;
 
 
 model ArrayNot4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayNot4",
-         description="Scalarization of logical not: not Integer[2] (literal)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayNot4",
+			description="Scalarization of logical not: not Integer[2] (literal)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5879, column 17:
@@ -5773,11 +5776,11 @@ end ArrayNot4;
 
 
 model ArrayNot5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayNot5",
-         description="Scalarization of logical or: not Integer[2] (component)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayNot5",
+			description="Scalarization of logical or: not Integer[2] (component)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5895, column 17:
@@ -5799,11 +5802,11 @@ package Constructors
 package LongForm
 	
 model LongArrayForm1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="LongArrayForm1",
-         description="Long form of array constructor",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="LongArrayForm1",
+			description="Long form of array constructor",
+			flatModel="
 fclass ArrayTests.Constructors.LongForm.LongArrayForm1
  Real x[3] = array(1,2,3);
 
@@ -5815,11 +5818,11 @@ end LongArrayForm1;
 
 
 model LongArrayForm2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="LongArrayForm2",
-         description="Long form of array constructor",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="LongArrayForm2",
+			description="Long form of array constructor",
+			flatModel="
 fclass ArrayTests.Constructors.LongForm.LongArrayForm2
  Real x[1];
  Real x[2];
@@ -5837,11 +5840,11 @@ end LongArrayForm2;
 
 
 model LongArrayForm3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="LongArrayForm3",
-         description="Long form of array constructor, array component parts",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="LongArrayForm3",
+			description="Long form of array constructor, array component parts",
+			flatModel="
 fclass ArrayTests.Constructors.LongForm.LongArrayForm3
  Real x1[3] = array(1,2,3);
  Real x2[3] = {4,5,6};
@@ -5857,11 +5860,11 @@ end LongArrayForm3;
 
 
 model LongArrayForm4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="LongArrayForm4",
-         description="Long form of array constructor, array component parts",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="LongArrayForm4",
+			description="Long form of array constructor, array component parts",
+			flatModel="
 fclass ArrayTests.Constructors.LongForm.LongArrayForm4
  Real x3[1,1];
  Real x3[1,2];
@@ -5897,11 +5900,11 @@ end LongForm;
 package EmptyArray
 	
 model EmptyArray1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="EmptyArray1",
-         description="Empty arrays, basic test",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EmptyArray1",
+			description="Empty arrays, basic test",
+			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray1
 
 end ArrayTests.Constructors.EmptyArray.EmptyArray1;
@@ -5912,11 +5915,11 @@ end EmptyArray1;
 
 
 model EmptyArray2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="EmptyArray2",
-         description="Empty arrays, addition",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EmptyArray2",
+			description="Empty arrays, addition",
+			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray2
 
 end ArrayTests.Constructors.EmptyArray.EmptyArray2;
@@ -5929,11 +5932,11 @@ end EmptyArray2;
 
 
 model EmptyArray3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="EmptyArray3",
-         description="Empty arrays, concatenation",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EmptyArray3",
+			description="Empty arrays, concatenation",
+			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray3
  Real xx[1,1];
  Real xx[1,2];
@@ -5957,11 +5960,11 @@ end EmptyArray3;
 
 
 model EmptyArray4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="EmptyArray4",
-         description="Empty arrays, multiplication",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EmptyArray4",
+			description="Empty arrays, multiplication",
+			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray4
  Real y[1,1];
  Real y[1,2];
@@ -5983,11 +5986,11 @@ end EmptyArray4;
 
 
 model EmptyArray5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="EmptyArray5",
-         description="Empty arrays, simple equation system",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EmptyArray5",
+			description="Empty arrays, simple equation system",
+			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
  parameter Integer n = 0 /* 0 */;
  parameter Integer p = 2 /* 2 */;
@@ -6028,11 +6031,11 @@ end EmptyArray;
 package Iterators
 
 model ArrayIterTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayIterTest1",
-         description="Array constructor with iterators: over scalar exp",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayIterTest1",
+			description="Array constructor with iterators: over scalar exp",
+			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest1
  Real x[1,1];
  Real x[1,2];
@@ -6062,11 +6065,11 @@ end ArrayIterTest1;
 
 
 model ArrayIterTest2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayIterTest2",
-         description="Array constructor with iterators: over array exp",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayIterTest2",
+			description="Array constructor with iterators: over array exp",
+			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest2
  Real x[1,1,1];
  Real x[1,1,2];
@@ -6094,11 +6097,11 @@ end ArrayIterTest2;
 
 
 model ArrayIterTest3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayIterTest3",
-         description="Array constructor with iterators: without in",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayIterTest3",
+			description="Array constructor with iterators: without in",
+			errorMessage="
 3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 5981, column 7:
@@ -6116,11 +6119,11 @@ end ArrayIterTest3;
 
 
 model ArrayIterTest4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayIterTest4",
-         description="Array constructor with iterators: nestled constructors, masking index",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayIterTest4",
+			description="Array constructor with iterators: nestled constructors, masking index",
+			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest4
  Real i;
  Real x[1,1,1,1];
@@ -6167,11 +6170,11 @@ end ArrayIterTest4;
 
 
 model ArrayIterTest5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayIterTest5",
-         description="Array constructor with iterators: vectors of length 1",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayIterTest5",
+			description="Array constructor with iterators: vectors of length 1",
+			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest5
  Real x[1,1,1];
 equation
@@ -6185,11 +6188,11 @@ end ArrayIterTest5;
                        
                        
 model ArrayIterTest6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayIterTest6",
-         description="Iterated expression with bad size",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayIterTest6",
+			description="Iterated expression with bad size",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1960, column 16:
@@ -6212,11 +6215,11 @@ end Constructors;
 package For
 	
 model ForEquation1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ForEquation1",
-         description="Flattening of for equations: for equ in a component",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ForEquation1",
+			description="Flattening of for equations: for equ in a component",
+			flatModel="
 fclass ArrayTests.For.ForEquation1
  Real y.x[3];
 equation
@@ -6240,11 +6243,11 @@ end ForEquation1;
 
 
 model ForEquation2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ForEquation2",
-         description="",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForEquation2",
+			description="",
+			flatModel="
 fclass ArrayTests.For.ForEquation2
  parameter Integer a.N = 3 /* 3 */;
  parameter Integer a.rev[1] = 3 /* 3 */;
@@ -6277,11 +6280,11 @@ end ForEquation2;
 
 
 model ForEquation3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="For_ForEquation3",
-         description="Array expressions depending on for loop index",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="For_ForEquation3",
+			description="Array expressions depending on for loop index",
+			flatModel="
 fclass ArrayTests.For.ForEquation3
  parameter Integer n = 3 /* 3 */;
  Real x[1];
@@ -6321,11 +6324,11 @@ end ForEquation3;
 
 
 model ForInitial1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ForInitial1",
-         description="For equation in initial equation block",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForInitial1",
+			description="For equation in initial equation block",
+			flatModel="
 fclass ArrayTests.For.ForInitial1
  parameter Integer N = 3 /* 3 */;
  Real x[1];
@@ -6360,11 +6363,11 @@ end For;
 package Slices
 	
 model SliceTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="SliceTest1",
-         description="Slice operations: basic test",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="SliceTest1",
+			description="Slice operations: basic test",
+			flatModel="
 fclass ArrayTests.Slices.SliceTest1
  Real x[1].a[2] = {1,2};
  Real x[2].a[2] = {3,4};
@@ -6383,11 +6386,11 @@ end SliceTest1;
 
 
 model SliceTest2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="SliceTest2",
-         description="Slice operations: basic test",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="SliceTest2",
+			description="Slice operations: basic test",
+			flatModel="
 fclass ArrayTests.Slices.SliceTest2
  Real x[1].a[1];
  Real x[1].a[2];
@@ -6420,11 +6423,11 @@ end SliceTest2;
 
 
 model SliceTest3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="SliceTest3",
-         description="Slice operations: test with vector indices",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="SliceTest3",
+			description="Slice operations: test with vector indices",
+			flatModel="
 fclass ArrayTests.Slices.SliceTest3
  Real x[1].a[1];
  Real x[1].a[2];
@@ -6482,12 +6485,12 @@ end SliceTest3;
 
 
 model MixedIndices1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="MixedIndices1",
-         description="Mixing for index subscripts with colon subscripts",
-         automatic_add_initial_equations = false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="MixedIndices1",
+			description="Mixing for index subscripts with colon subscripts",
+			automatic_add_initial_equations=false,
+			flatModel="
 fclass ArrayTests.Slices.MixedIndices1
  Real y[1,1,1];
  Real y[1,1,2];
@@ -6542,11 +6545,11 @@ end MixedIndices1;
 
 
 model MixedIndices2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="MixedIndices2",
-         description="Mixing expression subscripts containing for indices with colon subscripts",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="MixedIndices2",
+			description="Mixing expression subscripts containing for indices with colon subscripts",
+			flatModel="
 fclass ArrayTests.Slices.MixedIndices2
  Real y[1,1];
  Real y[1,2];
@@ -6592,11 +6595,11 @@ end Slices;
 package Other
 	
 model CircularFunctionArg1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	 JModelica.UnitTesting.ErrorTestCase(
-		 name="CircularFunctionArg1",
-		 description="Circular dependency when calculating size of function output",
-		 errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="CircularFunctionArg1",
+			description="Circular dependency when calculating size of function output",
+			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1528, column 14:
@@ -6622,11 +6625,11 @@ constant Real testConst[2] = { 1, 2 };
 
 
 model ArrayConst1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayConst1",
-         description="Array constants used with parameter index",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayConst1",
+			description="Array constants used with parameter index",
+			flatModel="
 fclass ArrayTests.Other.ArrayConst1
  Real x[1];
  Real x[2];
@@ -6642,11 +6645,11 @@ end ArrayConst1;
 								   
    
 model ArrayConst2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayConst2",
-         description="Array constants used with parameter index",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayConst2",
+			description="Array constants used with parameter index",
+			flatModel="
 fclass ArrayTests.Other.ArrayConst2
  Real x[1];
  Real x[2];
@@ -6666,11 +6669,11 @@ end ArrayConst2;
 
 
 model ArrayConst3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayConst3",
-         description="Array constants used with index of discrete variability",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayConst3",
+			description="Array constants used with index of discrete variability",
+			flatModel="
 fclass ArrayTests.Other.ArrayConst3
  Real x;
 equation
@@ -6703,11 +6706,11 @@ end ArrayConst3;
 
 
 model ArrayConst4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayConst4",
-         description="Array constants used with parameter index",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayConst4",
+			description="Array constants used with parameter index",
+			flatModel="
 fclass ArrayTests.Other.ArrayConst4
  parameter Integer i = 1 /* 1 */;
  Real x;
@@ -6723,11 +6726,11 @@ end ArrayConst4;
 
 
 model ArraySize2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArraySize2",
-         description="Size of variable: one dimension refering to another",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArraySize2",
+			description="Size of variable: one dimension refering to another",
+			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6365, column 17:
@@ -6742,11 +6745,11 @@ end ArraySize2;
 
 
 model M_OLineExample
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="Other_M_OLineExample",
-         description="Test example that caused infinite loop",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Other_M_OLineExample",
+			description="Test example that caused infinite loop",
+			errorMessage="
 23 errors found:
 Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
 Semantic error at line 642, column 43:

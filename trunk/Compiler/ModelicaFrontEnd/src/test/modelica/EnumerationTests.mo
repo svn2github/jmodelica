@@ -3,10 +3,11 @@ package EnumerationTests
 
 
   model EnumerationTest1
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="EnumerationTest1",
-          description="Test basic use of enumerations",
-          flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="EnumerationTest1",
+			description="Test basic use of enumerations",
+			flatModel="
 fclass EnumerationTests.EnumerationTest1
  parameter EnumerationTests.EnumerationTest1.Size t_shirt_size = EnumerationTests.EnumerationTest1.Size.medium;
 
@@ -22,11 +23,11 @@ end EnumerationTests.EnumerationTest1;
 
   
   model EnumerationTest2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="EnumerationTest2",
-         description="Test basic use of enumerations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="EnumerationTest2",
+			description="Test basic use of enumerations",
+			flatModel="
 fclass EnumerationTests.EnumerationTest2
  parameter EnumerationTests.EnumerationTest2.Size a1.t_shirt_size(start = EnumerationTests.EnumerationTest2.Size.large) = EnumerationTests.EnumerationTest2.Size.medium /* EnumerationTests.EnumerationTest2.Size.medium */;
  parameter EnumerationTests.EnumerationTest2.Size a2.t_shirt_size(start = EnumerationTests.EnumerationTest2.Size.large) = EnumerationTests.EnumerationTest2.Size.medium /* EnumerationTests.EnumerationTest2.Size.medium */;
@@ -51,11 +52,11 @@ end EnumerationTests.EnumerationTest2;
 
 
   model EnumerationTest3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="EnumerationTest3",
-         description="Test of constant evaluation for enumerations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="EnumerationTest3",
+			description="Test of constant evaluation for enumerations",
+			flatModel="
 fclass EnumerationTests.EnumerationTest3
  constant EnumerationTests.EnumerationTest3.A x = EnumerationTests.EnumerationTest3.A.b;
  parameter EnumerationTests.EnumerationTest3.A y = EnumerationTests.EnumerationTest3.A.b;
@@ -73,11 +74,11 @@ end EnumerationTests.EnumerationTest3;
   
   
   model EnumerationTest4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="EnumerationTest4",
-         description="Using incompatible enumerations: binding expression",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="EnumerationTest4",
+			description="Using incompatible enumerations: binding expression",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
 Semantic error at line 72, column 6:
@@ -91,11 +92,11 @@ Semantic error at line 72, column 6:
   
   
   model EnumerationTest5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="EnumerationTest5",
-         description="Using incompatible enumerations: equation",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="EnumerationTest5",
+			description="Using incompatible enumerations: equation",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
 Semantic error at line 92, column 4:
@@ -111,11 +112,11 @@ Semantic error at line 92, column 4:
   
   
   model EnumerationTest6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="EnumerationTest6",
-         description="Using equivalent enumerations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="EnumerationTest6",
+			description="Using equivalent enumerations",
+			flatModel="
 fclass EnumerationTests.EnumerationTest6
  parameter EnumerationTests.EnumerationTest6.A x = EnumerationTests.EnumerationTest6.B.a;
 
@@ -135,11 +136,11 @@ end EnumerationTests.EnumerationTest6;
   
   // Keeping this here for now, despite it being a compliance test
   model EnumerationTest7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="EnumerationTest7",
-         description="Compliance error for using enumeration as array size",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="EnumerationTest7",
+			description="Compliance error for using enumeration as array size",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
 Compliance error at line 117, column 12:
@@ -152,11 +153,11 @@ Compliance error at line 117, column 12:
   
   
   model EnumerationTest8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="EnumerationTest8",
-         description="Range expressions with Booleans and enumerations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="EnumerationTest8",
+			description="Range expressions with Booleans and enumerations",
+			flatModel="
 fclass EnumerationTests.EnumerationTest8
  constant Boolean a[2] = false:true;
  parameter Boolean b[2] = {false,true} /* { false, true } */;
@@ -179,11 +180,11 @@ end EnumerationTests.EnumerationTest8;
   
   
   model EnumerationTest9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="EnumerationTest9",
-         description="Relational operators with enumerations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="EnumerationTest9",
+			description="Relational operators with enumerations",
+			flatModel="
 fclass EnumerationTests.EnumerationTest9
  constant Boolean x[6,3] = {{EnumerationTests.EnumerationTest9.A.c < EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c < EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c < EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c <= EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c <= EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c <= EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c > EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c > EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c > EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c >= EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c >= EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c >= EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c == EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c == EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c == EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c <> EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c <> EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c <> EnumerationTests.EnumerationTest9.A.d}};
  parameter Boolean y[6,3] = {{false,false,true},{false,true,true},{true,false,false},{true,true,false},{false,true,false},{true,false,true}} /* { { false, false, true }, { false, true, true }, { true, false, false }, { true, true, false }, { false, true, false }, { true, false, true } } */;
@@ -208,11 +209,11 @@ end EnumerationTests.EnumerationTest9;
   
   
   model EnumerationTest10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="EnumerationTest10",
-         description="Using the Integer() operator: basic test",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="EnumerationTest10",
+			description="Using the Integer() operator: basic test",
+			flatModel="
 fclass EnumerationTests.EnumerationTest10
  constant Integer i[3] = {Integer(EnumerationTests.EnumerationTest10.A.a),Integer(EnumerationTests.EnumerationTest10.A.c),Integer(EnumerationTests.EnumerationTest10.A.e)};
  parameter Integer j[3] = {1,3,5} /* { 1, 3, 5 } */;
@@ -230,11 +231,11 @@ end EnumerationTests.EnumerationTest10;
   
   
   model EnumerationTest11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="EnumerationTest11",
-         description="Using the Integer() operator: wrong type of argument",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="EnumerationTest11",
+			description="Using the Integer() operator: wrong type of argument",
+			errorMessage="
 3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
 Semantic error at line 219, column 35:
@@ -254,11 +255,11 @@ Semantic error at line 221, column 35:
   
   
   model EnumerationTest12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="EnumerationTest12",
-         description="",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="EnumerationTest12",
+			description="",
+			flatModel="
 fclass EnumerationTests.EnumerationTest12
  parameter EnumerationTests.EnumerationTest12.DigitalCurrent c = EnumerationTests.EnumerationTest12.DigitalCurrentChoices.one /* EnumerationTests.EnumerationTest12.DigitalCurrentChoices.one */;
 
@@ -278,12 +279,12 @@ end EnumerationTests.EnumerationTest12;
   
   
   model FlatAPIEnum1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FClassMethodTestCase(
-         name="FlatAPIEnum1",
-         description="FlatAPI for enumerations: diagnostics",
-         methodName="diagnostics",
-         methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="FlatAPIEnum1",
+			description="FlatAPI for enumerations: diagnostics",
+			methodName="diagnostics",
+			methodResult="
 Diagnostics for flattened class EnumerationTests.FlatAPIEnum1
 Number of independent constants:              4
   Number of Real independent constants:       0

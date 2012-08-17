@@ -18,12 +18,12 @@
 package FunctionInlining
     
     model BasicInline1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="BasicInline1",
-         description="Most basic inlining case",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline1",
+			description="Most basic inlining case",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.BasicInline1
  Real x;
 equation
@@ -43,12 +43,12 @@ end FunctionInlining.BasicInline1;
        
 	   
     model BasicInline2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="BasicInline2",
-         description="More complicated inlining case with only assignments and constant argument",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline2",
+			description="More complicated inlining case with only assignments and constant argument",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.BasicInline2
  Real x;
  constant Real y = 2;
@@ -80,13 +80,13 @@ end FunctionInlining.BasicInline2;
        
 	   
     model BasicInline3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="BasicInline3",
-         description="More complicated inlining case with only assignments and continous argument",
-         inline_functions="all",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline3",
+			description="More complicated inlining case with only assignments and continous argument",
+			inline_functions="all",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass FunctionInlining.BasicInline3
  Real x;
  Real y;
@@ -125,12 +125,12 @@ end FunctionInlining.BasicInline3;
        
 	   
     model BasicInline4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="BasicInline4",
-         description="Test of alias elimination after inlining",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline4",
+			description="Test of alias elimination after inlining",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.BasicInline4
  Real x;
  Real y;
@@ -163,12 +163,12 @@ end FunctionInlining.BasicInline4;
     
 	
     model BasicInline6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="BasicInline6",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline6",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.BasicInline6
  Real x[1];
  Real x[2];
@@ -212,13 +212,13 @@ end FunctionInlining.BasicInline6;
     
 	
     model BasicInline7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="BasicInline7",
-         description="",
-         inline_functions="all",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline7",
+			description="",
+			inline_functions="all",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass FunctionInlining.BasicInline7
  Real x;
  Real y;
@@ -260,12 +260,12 @@ end FunctionInlining.BasicInline7;
     
 
     model BasicInline8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="BasicInline8",
-         description="Inlining function with both function calls and arrays",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline8",
+			description="Inlining function with both function calls and arrays",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.BasicInline8
  Real x[1];
  Real x[2];
@@ -329,13 +329,13 @@ end FunctionInlining.BasicInline8;
     
     
     model BasicInline9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="BasicInline9",
-         description="",
-         inline_functions="all",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline9",
+			description="",
+			inline_functions="all",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass FunctionInlining.BasicInline9
  parameter Real temp_1;
  parameter Real y = 2 /* 2 */;
@@ -373,12 +373,12 @@ end FunctionInlining.BasicInline9;
 
 
     model BasicInline10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="BasicInline10",
-         description="Using array indices",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline10",
+			description="Using array indices",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.BasicInline10
  parameter Integer e = 2 /* 2 */;
  Real x;
@@ -412,13 +412,13 @@ end FunctionInlining.BasicInline10;
 
 
     model BasicInline11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="BasicInline11",
-         description="Function call as array index",
-         inline_functions="all",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline11",
+			description="Function call as array index",
+			inline_functions="all",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass FunctionInlining.BasicInline11
  parameter Integer e = 1 /* 1 */;
  Real x;
@@ -467,12 +467,12 @@ end FunctionInlining.BasicInline11;
 
 
     model BasicInline13
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="BasicInline13",
-         description="Inlining of function using enumeration",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BasicInline13",
+			description="Inlining of function using enumeration",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.BasicInline13
  discrete FunctionInlining.BasicInline13.E p1;
  discrete FunctionInlining.BasicInline13.E p2;
@@ -504,12 +504,12 @@ end FunctionInlining.BasicInline13;
     
     
     model RecordInline1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RecordInline1",
-         description="Inlining function taking constant record arg",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordInline1",
+			description="Inlining function taking constant record arg",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.RecordInline1
  Real x;
 equation
@@ -541,12 +541,12 @@ end FunctionInlining.RecordInline1;
     
     
     model RecordInline2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RecordInline2",
-         description="Inlining function returning recor, constant args",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordInline2",
+			description="Inlining function returning recor, constant args",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.RecordInline2
  Real x.a[1];
  Real x.a[2];
@@ -586,12 +586,12 @@ end FunctionInlining.RecordInline2;
     
     
     model RecordInline3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RecordInline3",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordInline3",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.RecordInline3
  Real x;
 equation
@@ -626,12 +626,12 @@ end FunctionInlining.RecordInline3;
     
     
     model RecordInline4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RecordInline4",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordInline4",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.RecordInline4
  Real y[1];
  Real y[2];
@@ -672,12 +672,12 @@ end FunctionInlining.RecordInline4;
     
     
     model RecordInline5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RecordInline5",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordInline5",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.RecordInline5
  Real y;
  Real x.a[1];
@@ -720,12 +720,12 @@ end FunctionInlining.RecordInline5;
     
     
     model RecordInline6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RecordInline6",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordInline6",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.RecordInline6
  Real y;
  Real x;
@@ -763,12 +763,12 @@ end FunctionInlining.RecordInline6;
     
     
     model RecordInline7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RecordInline7",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordInline7",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.RecordInline7
  Real y[1];
  Real y[2];
@@ -827,12 +827,12 @@ end FunctionInlining.RecordInline7;
     
     
     model RecordInline8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RecordInline8",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordInline8",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.RecordInline8
  Real y;
  Real x.a[1];
@@ -878,12 +878,12 @@ end FunctionInlining.RecordInline8;
     
     
     model RecordInline9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RecordInline9",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordInline9",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.RecordInline9
  Real x.a[1];
  Real x.a[2];
@@ -926,12 +926,12 @@ end FunctionInlining.RecordInline9;
     
     
     model RecordInline10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RecordInline10",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordInline10",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.RecordInline10
  Real x;
  Real y;
@@ -977,12 +977,12 @@ end FunctionInlining.RecordInline10;
     
     
     model RecordInline11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RecordInline11",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordInline11",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.RecordInline11
  Real x;
  Real y;
@@ -1028,13 +1028,13 @@ end FunctionInlining.RecordInline11;
 	
 	
 	model UninlinableFunction1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="UninlinableFunction1",
-         description="Make sure that only unused functions are removed",
-         inline_functions="all",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="UninlinableFunction1",
+			description="Make sure that only unused functions are removed",
+			inline_functions="all",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass FunctionInlining.UninlinableFunction1
  Real z[1];
  Real z[2];
@@ -1126,12 +1126,12 @@ end FunctionInlining.UninlinableFunction1;
     
     
     model IfStatementInline1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfStatementInline1",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfStatementInline1",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.IfStatementInline1
  Real z1;
  Real z2;
@@ -1163,13 +1163,13 @@ end FunctionInlining.IfStatementInline1;
     
     
     model IfStatementInline2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfStatementInline2",
-         description="",
-         inline_functions="all",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfStatementInline2",
+			description="",
+			inline_functions="all",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass FunctionInlining.IfStatementInline2
  Real v;
  Real z;
@@ -1202,13 +1202,13 @@ end FunctionInlining.IfStatementInline2;
     
     
     model IfStatementInline3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfStatementInline3",
-         description="",
-         inline_functions="all",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfStatementInline3",
+			description="",
+			inline_functions="all",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass FunctionInlining.IfStatementInline3
  Real v1;
  Real v2;
@@ -1251,13 +1251,13 @@ end FunctionInlining.IfStatementInline3;
     
     
     model IfStatementInline4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfStatementInline4",
-         description="",
-         inline_functions="all",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfStatementInline4",
+			description="",
+			inline_functions="all",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass FunctionInlining.IfStatementInline4
  Real v;
  Real z;
@@ -1286,13 +1286,13 @@ end FunctionInlining.IfStatementInline4;
     
     
     model ForStatementInline1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ForStatementInline1",
-         description="",
-         inline_functions="all",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForStatementInline1",
+			description="",
+			inline_functions="all",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass FunctionInlining.ForStatementInline1
  Real v;
  Real z;
@@ -1328,12 +1328,12 @@ end FunctionInlining.ForStatementInline1;
     
     
     model ForStatementInline2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ForStatementInline2",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForStatementInline2",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.ForStatementInline2
  Real z;
 equation
@@ -1357,12 +1357,12 @@ end FunctionInlining.ForStatementInline2;
     
     
     model ForStatementInline3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ForStatementInline3",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForStatementInline3",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.ForStatementInline3
  Real v[1];
  Real v[2];
@@ -1392,12 +1392,12 @@ end FunctionInlining.ForStatementInline3;
     
     
     model ForStatementInline4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ForStatementInline4",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForStatementInline4",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.ForStatementInline4
  Real z;
 equation
@@ -1421,12 +1421,12 @@ end FunctionInlining.ForStatementInline4;
 
 
     model ForStatementInline5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ForStatementInline5",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForStatementInline5",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.ForStatementInline5
  Real v[1];
  Real v[2];
@@ -1470,12 +1470,12 @@ end FunctionInlining.ForStatementInline5;
 
 
     model ForStatementInline6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ForStatementInline6",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForStatementInline6",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.ForStatementInline6
  Real z;
 equation
@@ -1503,12 +1503,12 @@ end FunctionInlining.ForStatementInline6;
 
 
     model ForStatementInline7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ForStatementInline7",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForStatementInline7",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.ForStatementInline7
  Real v[1];
  Real v[2];
@@ -1547,12 +1547,12 @@ end FunctionInlining.ForStatementInline7;
 
 
     model ForStatementInline8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ForStatementInline8",
-         description="",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForStatementInline8",
+			description="",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.ForStatementInline8
  Real v[1];
  Real v[2];
@@ -1585,12 +1585,12 @@ end FunctionInlining.ForStatementInline8;
     
     
     model MultipleOutputsInline1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="MultipleOutputsInline1",
-         description="Inlining function call using multiple outputs",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="MultipleOutputsInline1",
+			description="Inlining function call using multiple outputs",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.MultipleOutputsInline1
  Real x[1];
  Real x[2];
@@ -1632,12 +1632,12 @@ end FunctionInlining.MultipleOutputsInline1;
     
     
     model MultipleOutputsInline2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="MultipleOutputsInline2",
-         description="Inlining function call using multiple (but not all) outputs",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="MultipleOutputsInline2",
+			description="Inlining function call using multiple (but not all) outputs",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.MultipleOutputsInline2
  Real x[1];
  Real x[2];
@@ -1689,12 +1689,12 @@ end FunctionInlining.MultipleOutputsInline2;
 
 
     model MultipleOutputsInline3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="MultipleOutputsInline3",
-         description="Inlining function call using multiple (but not all) outputs",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="MultipleOutputsInline3",
+			description="Inlining function call using multiple (but not all) outputs",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.MultipleOutputsInline3
  Real x[1];
  Real x[2];
@@ -1756,12 +1756,12 @@ end FunctionInlining.MultipleOutputsInline3;
     
     
     model IfEquationInline1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEquationInline1",
-         description="Test inlining of function calls in if equations",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationInline1",
+			description="Test inlining of function calls in if equations",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.IfEquationInline1
  Real x;
  Real y;
@@ -1791,12 +1791,12 @@ end FunctionInlining.IfEquationInline1;
     
     
     model IfEquationInline2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEquationInline2",
-         description="Test inlining of function calls in if equations",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationInline2",
+			description="Test inlining of function calls in if equations",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.IfEquationInline2
  parameter Boolean b = true /* true */;
  Real y;
@@ -1824,12 +1824,12 @@ end FunctionInlining.IfEquationInline2;
     
     
     model IfEquationInline3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEquationInline3",
-         description="Test inlining of function calls in if equations",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationInline3",
+			description="Test inlining of function calls in if equations",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.IfEquationInline3
  parameter Boolean b = false /* false */;
  Real x;
@@ -1862,12 +1862,12 @@ end FunctionInlining.IfEquationInline3;
     
     
     model IfEquationInline4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEquationInline4",
-         description="Test inlining of function calls in if equations",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationInline4",
+			description="Test inlining of function calls in if equations",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.IfEquationInline4
  Real x1;
  Real x2;
@@ -1900,12 +1900,12 @@ end FunctionInlining.IfEquationInline4;
     
     
     model IfEquationInline5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEquationInline5",
-         description="Test inlining of function calls in if equations",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationInline5",
+			description="Test inlining of function calls in if equations",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.IfEquationInline5
  constant Boolean b = true;
  Real x2;
@@ -1938,12 +1938,12 @@ end FunctionInlining.IfEquationInline5;
     
     
     model IfEquationInline6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEquationInline6",
-         description="Test inlining of function calls in if equations",
-         inline_functions="all",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationInline6",
+			description="Test inlining of function calls in if equations",
+			inline_functions="all",
+			flatModel="
 fclass FunctionInlining.IfEquationInline6
  constant Boolean b = false;
  Real x1;
@@ -1977,12 +1977,12 @@ end FunctionInlining.IfEquationInline6;
     
     
     model TrivialInline1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="TrivialInline1",
-         description="",
-         inline_functions="trivial",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TrivialInline1",
+			description="",
+			inline_functions="trivial",
+			flatModel="
 fclass FunctionInlining.TrivialInline1
  Real x;
  Real y;
@@ -2018,12 +2018,12 @@ end FunctionInlining.TrivialInline1;
     
     
     model TrivialInline2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="TrivialInline2",
-         description="",
-         inline_functions="trivial",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TrivialInline2",
+			description="",
+			inline_functions="trivial",
+			flatModel="
 fclass FunctionInlining.TrivialInline2
  Real x[1];
  Real x[2];
@@ -2129,12 +2129,12 @@ end FunctionInlining.TrivialInline2;
     
     
     model TrivialInline6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="TrivialInline6",
-         description="",
-         inline_functions="trivial",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TrivialInline6",
+			description="",
+			inline_functions="trivial",
+			flatModel="
 fclass FunctionInlining.TrivialInline6
  Real x;
  Real z;

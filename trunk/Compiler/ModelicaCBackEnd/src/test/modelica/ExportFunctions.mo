@@ -17,13 +17,13 @@
 package ExportFunctions
 
 model Scalar2To1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CCodeGenTestCase(
-         name="Scalar2To1",
-         description="",
-		 export_functions=true,
-		 export_functions_vba=true,
-         template="
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Scalar2To1",
+			description="",
+			export_functions=true,
+			export_functions_vba=true,
+			template="
 $C_export_functions$
 $C_export_wrappers$
 ",
@@ -61,13 +61,13 @@ algorithm
 end Scalar2To1;
 	
 model Options1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CCodeGenTestCase(
-         name="Options1",
-         description="Check that the options activate/deactivate the export functions properly.",
-		 export_functions=false,
-		 export_functions_vba=false,
-         template="
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Options1",
+			description="Check that the options activate/deactivate the export functions properly.",
+			export_functions=false,
+			export_functions_vba=false,
+			template="
 $C_export_functions$
 $C_export_wrappers$
 ",
@@ -86,13 +86,13 @@ algorithm
 end Options1;
 	
 model Options2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CCodeGenTestCase(
-         name="Options2",
-         description="Check that the options activate/deactivate the export functions properly.",
-		 export_functions=true,
-		 export_functions_vba=false,
-         template="
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Options2",
+			description="Check that the options activate/deactivate the export functions properly.",
+			export_functions=true,
+			export_functions_vba=false,
+			template="
 $C_export_functions$
 $C_export_wrappers$
 ",
@@ -118,13 +118,13 @@ end Options2;
 	
 
 model ScalarGrouping1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CCodeGenTestCase(
-         name="ScalarGrouping1",
-         description="",
-		 export_functions=true,
-		 export_functions_vba=true,
-		 template="
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="ScalarGrouping1",
+			description="",
+			export_functions=true,
+			export_functions_vba=true,
+			template="
 $C_export_functions$
 $C_export_wrappers$
 ",
@@ -213,13 +213,13 @@ end ScalarGrouping1;
 
 
 model ArrayInputs1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CCodeGenTestCase(
-         name="ArrayInputs1",
-         description="",
-		 export_functions=true,
-		 export_functions_vba=true,
-		 template="
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="ArrayInputs1",
+			description="",
+			export_functions=true,
+			export_functions_vba=true,
+			template="
 $C_export_functions$
 $C_export_wrappers$
 ",
@@ -285,13 +285,13 @@ end ArrayInputs1;
 
 
 model ArrayInputs2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CCodeGenTestCase(
-         name="ArrayInputs2",
-         description="",
-		 export_functions=true,
-		 export_functions_vba=true,
-		 template="
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="ArrayInputs2",
+			description="",
+			export_functions=true,
+			export_functions_vba=true,
+			template="
 $C_export_functions$
 $C_export_wrappers$
 ",
@@ -359,13 +359,13 @@ end ArrayInputs2;
 
 
 model OnlyUnsupported
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CCodeGenTestCase(
-         name="OnlyUnsupported",
-         description="Test that unsupported functions aren't included when exporting functions",
-		 export_functions=true,
-		 export_functions_vba=true,
-		 template="
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="OnlyUnsupported",
+			description="Test that unsupported functions aren't included when exporting functions",
+			export_functions=true,
+			export_functions_vba=true,
+			template="
 $C_export_functions$
 $C_export_wrappers$
 ",

@@ -19,11 +19,11 @@ package TmpTests
 
 
  model NameTest2
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="NameTest2",
-                                               description="Basic test of name lookup",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="NameTest2",
+			description="Basic test of name lookup",
+			flatModel="
 fclass NameTests.NameTest2
  Real a.b.x;
  Real a.b.c.y;

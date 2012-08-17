@@ -19,12 +19,13 @@ package EvaluationTests
 
 
 model VectorMul
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="VectorMul",
-         description="Constant evaluation of vector multiplication",
-         variables="x",
-         values="10.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="VectorMul",
+			description="Constant evaluation of vector multiplication",
+			variables="x",
+			values="
+10.0"
  )})));
 
 	parameter Integer n = 3;
@@ -36,12 +37,13 @@ end VectorMul;
 
 
 model FunctionEval1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval1",
-         description="Constant evaluation of functions: basic test",
-         variables="x",
-         values="3.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval1",
+			description="Constant evaluation of functions: basic test",
+			variables="x",
+			values="
+3.0"
  )})));
 
 	function f
@@ -55,11 +57,11 @@ end FunctionEval1;
 
 
 model FunctionEval2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval2",
-         description="Constant evaluation of functions: while and if",
-         variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval2",
+			description="Constant evaluation of functions: while and if",
+			variables="
 x[1]
 x[2]
 x[3]
@@ -103,12 +105,13 @@ end FunctionEval2;
 
 
 model FunctionEval3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval3",
-         description="Constant evaluation of functions: array inputs and for loops",
-         variables="x",
-         values="48.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval3",
+			description="Constant evaluation of functions: array inputs and for loops",
+			variables="x",
+			values="
+48.0"
  )})));
 
 	function f
@@ -128,12 +131,13 @@ end FunctionEval3;
 
 
 model FunctionEval4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval4",
-         description="Constant evaluation of functions: unknown array sizes",
-         variables="x",
-         values="48.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval4",
+			description="Constant evaluation of functions: unknown array sizes",
+			variables="x",
+			values="
+48.0"
  )})));
 
 	function f
@@ -153,12 +157,13 @@ end FunctionEval4;
 
 
 model FunctionEval5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval5",
-         description="Constant evaluation of functions: using input as for index expression",
-         variables="x",
-         values="6.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval5",
+			description="Constant evaluation of functions: using input as for index expression",
+			variables="x",
+			values="
+6.0"
  )})));
 
 	function f
@@ -176,11 +181,11 @@ end FunctionEval5;
 
 
 model FunctionEval6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval6",
-         description="Constant evaluation of functions: array output",
-         variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval6",
+			description="Constant evaluation of functions: array output",
+			variables="
 x[1]
 x[2]
 ",
@@ -202,11 +207,11 @@ end FunctionEval6;
 
 
 model FunctionEval7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval7",
-         description="Constant evaluation of functions: array output, unknown size",
-         variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval7",
+			description="Constant evaluation of functions: array output, unknown size",
+			variables="
 x[1]
 x[2]
 ",
@@ -228,11 +233,11 @@ end FunctionEval7;
 
 
 model FunctionEval8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval8",
-         description="Constant evaluation and variability of iter exp containing function call",
-         variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval8",
+			description="Constant evaluation and variability of iter exp containing function call",
+			variables="
 x[1]
 x[2]
 ",
@@ -252,12 +257,13 @@ end FunctionEval8;
 
 
 model FunctionEval9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval9",
-         description="Constant evaluation of functions: while loops (flat tree, independent param)",
-         variables="x",
-         values="120.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval9",
+			description="Constant evaluation of functions: while loops (flat tree, independent param)",
+			variables="x",
+			values="
+120.0"
  )})));
 
 	function f
@@ -279,11 +285,11 @@ end FunctionEval9;
 
 
 model FunctionEval10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="FunctionEval10",
-         description="Constant evaluation of functions: while loops (instance tree)",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionEval10",
+			description="Constant evaluation of functions: while loops (instance tree)",
+			flatModel="
 fclass EvaluationTests.FunctionEval10
  constant Real x = EvaluationTests.FunctionEval10.f(5);
  Real y = 120.0;
@@ -326,12 +332,13 @@ end FunctionEval10;
 
 
 model FunctionEval11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval11",
-         description="Constant evaluation of functions: while loops (flat tree, dependent param)",
-         variables="x",
-         values="120.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval11",
+			description="Constant evaluation of functions: while loops (flat tree, dependent param)",
+			variables="x",
+			values="
+120.0"
  )})));
 
 	function f
@@ -354,11 +361,11 @@ end FunctionEval11;
 
 
 model FunctionEval12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	 JModelica.UnitTesting.FlatteningTestCase(
-		 name="FunctionEval12",
-		 description="Constant evaluation of functions: records",
-		 flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionEval12",
+			description="Constant evaluation of functions: records",
+			flatModel="
 fclass EvaluationTests.FunctionEval12
  constant Real x = EvaluationTests.FunctionEval12.f2(EvaluationTests.FunctionEval12.f1(2));
  Real y = 6.0;
@@ -413,11 +420,11 @@ end FunctionEval12;
 
 
 model FunctionEval13
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	 JModelica.UnitTesting.FlatteningTestCase(
-		 name="FunctionEval13",
-		 description="Constant evaluation of functions: records",
-		 flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionEval13",
+			description="Constant evaluation of functions: records",
+			flatModel="
 fclass EvaluationTests.FunctionEval13
  constant EvaluationTests.FunctionEval13.R x = EvaluationTests.FunctionEval13.f(2);
  EvaluationTests.FunctionEval13.R y = EvaluationTests.FunctionEval13.R(2, 4.0);
@@ -457,11 +464,11 @@ end FunctionEval13;
 
 
 model FunctionEval14
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="FunctionEval14",
-         description="Constant evaluation of functions: records",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionEval14",
+			description="Constant evaluation of functions: records",
+			flatModel="
 fclass EvaluationTests.FunctionEval14
  constant Real x = EvaluationTests.FunctionEval14.f(EvaluationTests.FunctionEval14.R(1, 2));
  Real y = 3.0;
@@ -501,11 +508,11 @@ end FunctionEval14;
 
 
 model FunctionEval15
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="FunctionEval15",
-         description="",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionEval15",
+			description="",
+			flatModel="
 fclass EvaluationTests.FunctionEval15
  constant Real x = EvaluationTests.FunctionEval15.f1(EvaluationTests.FunctionEval15.f2());
  Real y = 50.0;
@@ -584,12 +591,13 @@ end FunctionEval15;
 
 
 model FunctionEval16
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval16",
-         description="Constant evaluation of functions: records",
-         variables="x",
-         values="6.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval16",
+			description="Constant evaluation of functions: records",
+			variables="x",
+			values="
+6.0"
  )})));
 
 	record R
@@ -616,11 +624,11 @@ end FunctionEval16;
 
 
 model FunctionEval17
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval17",
-         description="Constant evaluation of functions: records",
-         variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval17",
+			description="Constant evaluation of functions: records",
+			variables="
 x.a
 x.b
 ",
@@ -646,12 +654,13 @@ end FunctionEval17;
 
 
 model FunctionEval18
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval18",
-         description="Constant evaluation of functions: records",
-         variables="x",
-         values="3.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval18",
+			description="Constant evaluation of functions: records",
+			variables="x",
+			values="
+3.0"
  )})));
 
 	record R
@@ -671,12 +680,13 @@ end FunctionEval18;
 
 
 model FunctionEval19
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval19",
-         description="Constant evaluation of functions: arrays of records",
-         variables="x",
-         values="50.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval19",
+			description="Constant evaluation of functions: arrays of records",
+			variables="x",
+			values="
+50.0"
  )})));
 
 	record R1
@@ -714,11 +724,11 @@ end FunctionEval19;
 
 
 model FunctionEval20
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval20",
-         description="",
-         variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval20",
+			description="",
+			variables="
 a
 b
 ",
@@ -740,12 +750,13 @@ end FunctionEval20;
 
 
 model FunctionEval21
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval21",
-         description="Evaluation of function containing assert()",
-         variables="x",
-         values="1.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval21",
+			description="Evaluation of function containing assert()",
+			variables="x",
+			values="
+1.0"
  )})));
 
 	function f
@@ -761,12 +772,13 @@ end FunctionEval21;
 
     
 model FunctionEval22
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="FunctionEval22",
-         description="Test evaluation of function containing function call statement using more than one output",
-         variables="x",
-         values="5.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval22",
+			description="Test evaluation of function containing function call statement using more than one output",
+			variables="x",
+			values="
+5.0"
  )})));
 
 	function f1
@@ -795,11 +807,11 @@ model FunctionEval22
 end FunctionEval22;
 
 model FunctionEval23
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="FunctionEval23",
-         description="",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="FunctionEval23",
+			description="",
+			errorMessage="
 3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EvaluationTests.mo':
 Semantic error at line 792, column 9:
@@ -825,11 +837,11 @@ end FunctionEval23;
 
 
 model StringConcat
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.EvalTestCase(
-         name="StringConcat",
-         description="",
-         variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="StringConcat",
+			description="",
+			variables="
 b
 c[1]
 c[2]

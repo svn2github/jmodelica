@@ -26,12 +26,12 @@ equation
 end LinearResistance;
 
   model StreamTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StreamTest1",
-         description="Test of inside and outside stream connectors.",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StreamTest1",
+			description="Test of inside and outside stream connectors.",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass StreamTests.StreamTest1
  parameter Real r.p0 = 1 /* 1 */;
  parameter Real r.h0 = 1 /* 1 */;
@@ -54,12 +54,12 @@ end StreamTests.StreamTest1;
   end StreamTest1;
 
   model StreamTest2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StreamTest2",
-         description="Test of inside and outside stream connectors.",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StreamTest2",
+			description="Test of inside and outside stream connectors.",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass StreamTests.StreamTest2
  parameter Real r.p0 = 1 /* 1 */;
  parameter Real r.h0 = 1 /* 1 */;
@@ -82,12 +82,12 @@ end StreamTests.StreamTest2;
   end StreamTest2;
 
   model StreamTest3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StreamTest3",
-         description="Test of inside and outside stream connectors.",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StreamTest3",
+			description="Test of inside and outside stream connectors.",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass StreamTests.StreamTest3
  parameter Real r1.p0 = 1 /* 1 */;
  parameter Real r1.h0 = 1 /* 1 */;
@@ -133,12 +133,12 @@ end StreamTests.StreamTest3;
   end StreamTest3;
   
   model StreamTest4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StreamTest4",
-         description="Using inStream() on array.",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StreamTest4",
+			description="Using inStream() on array.",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass StreamTests.StreamTest4
  parameter Real r[1].p0 = 1 /* 1 */;
  parameter Real r[1].h0 = 1 /* 1 */;
@@ -170,12 +170,12 @@ end StreamTests.StreamTest4;
   end StreamTest4;
 	
   model StreamTest5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StreamTest5",
-         description="Using actualStream() on stream variables from array of connectors.",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StreamTest5",
+			description="Using actualStream() on stream variables from array of connectors.",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass StreamTests.StreamTest5
  parameter Real r[1].p0 = 1 /* 1 */;
  parameter Real r[1].h0 = 1 /* 1 */;
@@ -207,12 +207,12 @@ end StreamTests.StreamTest5;
   end StreamTest5;
   
   model StreamTest6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StreamTest6",
-         description="Using actualStream() on array of stream variables.",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StreamTest6",
+			description="Using actualStream() on array of stream variables.",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass StreamTests.StreamTest6
  Real d.a;
  Real d.b[1];
@@ -264,11 +264,11 @@ end StreamTests.StreamTest6;
 
 model StreamComplErr
  // This is actually a compliance error but is kept here in order to avoid copying dependent classes.
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ComplianceErrorTestCase(name="StreamComplErr",
-        description="Compliance error for stream connections with more than two connectors",
-        errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="StreamComplErr",
+			description="Compliance error for stream connections with more than two connectors",
+			errorMessage="
 Error: in file 'StreamTests.StreamComplErr.mof':
 Compliance error at line 0, column 0:
   Stream connections with more than two connectors are not supported: Connection set (stream): {res1.port_b.h_outflow (i), res2.port_a.h_outflow (i), res3.port_a.h_outflow (i)}
@@ -490,12 +490,12 @@ package StreamExample
 
    package Systems
      model HeatedGas
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StreamExample_Examples_Systems_HeatedGas",
-         description="Test of stream connectors",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StreamExample_Examples_Systems_HeatedGas",
+			description="Test of stream connectors",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass StreamTests.StreamExample.Examples.Systems.HeatedGas
  parameter Modelica.SIunits.SpecificHeatCapacity R_gas = ( 8.314472 ) / ( 0.0289651159 ) /* 287.0512249529787 */;
  parameter Modelica.SIunits.SpecificHeatCapacity cp = 1000 /* 1000 */;
@@ -730,12 +730,12 @@ end StreamTests.StreamExample.Examples.Systems.HeatedGas;
      end HeatedGas_Simple;
 
      model HeatedGas_SimpleWrap
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StreamExample_Examples_Systems_HeatedGas_SimpleWrap",
-         description="Test of inside and outside stream connectors",
-         eliminate_alias_variables=false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StreamExample_Examples_Systems_HeatedGas_SimpleWrap",
+			description="Test of inside and outside stream connectors",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass StreamTests.StreamExample.Examples.Systems.HeatedGas_SimpleWrap
  parameter Modelica.SIunits.SpecificHeatCapacity R_gas = ( 8.314472 ) / ( 0.0289651159 ) /* 287.0512249529787 */;
  parameter Modelica.SIunits.SpecificHeatCapacity cp = 1000 /* 1000 */;

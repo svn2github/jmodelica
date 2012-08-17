@@ -287,13 +287,13 @@ abstract public class TestAnnotationizerHelper {
 	 * \brief Generates the test annotation and ouputs it on the given stream.
 	 */
 	public void outputAnnotation(PrintStream out) throws Exception {
-		out.println(" annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={");
-		out.println("     JModelica.UnitTesting." + getClass().getSimpleName() + "(");
-		out.println("         name=\"" + testName + "\",");
-		out.println("         description=\"" + description + "\",");
+		out.println("\tannotation(__JModelica(UnitTesting(tests={ ");
+		out.println("\t\t" + getClass().getSimpleName() + "(");
+		out.println("\t\t\tname=\"" + testName + "\",");
+		out.println("\t\t\tdescription=\"" + description + "\",");
 		for (String opt : opts) 
-			out.println("         " + opt + ",");
-		printSpecific(out, "         ");
+			out.println("\t\t\t" + opt + ",");
+		printSpecific(out, "\t\t\t");
 		out.println(")})));\n");
 	}
 	

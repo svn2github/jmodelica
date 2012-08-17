@@ -18,11 +18,12 @@
 package ModificationTests 
 
 class ModTest1
-    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ModTest1",
-                                               description="Test of Real attribute \"unit\".",
-                                               flatModel=
-"fclass ModificationTests.ModTest1
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModTest1",
+			description="Test of Real attribute \"unit\".",
+			flatModel="
+fclass ModificationTests.ModTest1
  parameter Real y=4;
  Real z(unit=\"m\")=y;
  Real x;
@@ -38,11 +39,11 @@ equation
 end ModTest1;
 
 class ModTest2
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ModTest2",
-                                               description="Merging of modifications",
-                                               flatModel=
-"  fclass ModificationTests.ModTest2
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModTest2",
+			description="Merging of modifications",
+			flatModel="  fclass ModificationTests.ModTest2
  parameter Real c4.x1;
  parameter Real c4.x2=22;
  parameter Real c4.x3.a=33;
@@ -80,11 +81,12 @@ end ModificationTests.ModTest2;
 end ModTest2;
 
 class ModTest3
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ModTest3",
-                                               description="Simple modification test",
-                                               flatModel=
-"fclass ModificationTests.ModTest3
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModTest3",
+			description="Simple modification test",
+			flatModel="
+fclass ModificationTests.ModTest3
  Real c.x=5;
 end ModificationTests.ModTest3;
  ")})));
@@ -99,11 +101,11 @@ end ModificationTests.ModTest3;
 end ModTest3;
 
 class ModTest5
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ModTest5",
-                                               description="Test of start-attribute",
-                                               flatModel=
-" fclass ModificationTests.ModTest5
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModTest5",
+			description="Test of start-attribute",
+			flatModel=" fclass ModificationTests.ModTest5
  parameter Real p=3;
  Real y(start=p)=5;
 end ModificationTests.ModTest5;")})));
@@ -115,11 +117,11 @@ end ModificationTests.ModTest5;")})));
 end ModTest5;
 
 class ModTest6
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ModTest6",
-                                               description="Test merging of modifications",
-                                               flatModel=
-" fclass ModificationTests.ModTest6
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModTest6",
+			description="Test merging of modifications",
+			flatModel=" fclass ModificationTests.ModTest6
  parameter Real c2.p(nominal=4)=3;
  Real c2.c1.x(min=c2.p)=5;
 end ModificationTests.ModTest6;")})));
@@ -137,11 +139,12 @@ C2 c2;
 end ModTest6;
 
 class ModTest7 
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ModTest7",
-                                               description="Test merging of attributes",
-                                               flatModel=
-"fclass ModificationTests.ModTest7
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModTest7",
+			description="Test merging of attributes",
+			flatModel="
+fclass ModificationTests.ModTest7
  Real x=3;
  Real c2.y=3;
  Real c2.c3.z(max=4,nominal=2)=5;
@@ -160,11 +163,12 @@ end ModTest7;
 
 
 class ModTest8
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ModTest8",
-                                               description="Merging of modifications in extends clauses",
-                                               flatModel=
-"fclass ModificationTests.ModTest8
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModTest8",
+			description="Merging of modifications in extends clauses",
+			flatModel="
+fclass ModificationTests.ModTest8
  Real c3.c1.x=44;
  Real c3.x=c3.c1.x;
 end ModificationTests.ModTest8;
@@ -188,11 +192,12 @@ C3 c3;
 end ModTest8;
 
 class ModTest9
-       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ModTest9",
-                                               description="Test of attributes of Real",
-                                               flatModel=
-"fclass ModificationTests.ModTest9
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModTest9",
+			description="Test of attributes of Real",
+			flatModel="
+fclass ModificationTests.ModTest9
  Real c3.c1.x(start=2,quantity=\"qwe\")=44;
  Real c3.x(quantity=\"qqq\",unit=\"m2\",displayUnit=\"m22\",start=4.2,min=4.1,max=9.0,nominal=0.2)=55;
 end ModificationTests.ModTest9;
@@ -219,11 +224,12 @@ C3 c3;
 end ModTest9;
 
 class ModTest10
-    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ModTest10",
-                                               description="Test of parameter-prefix in modifications.",
-                                               flatModel=
-"fclass ModificationTests.ModTest10
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModTest10",
+			description="Test of parameter-prefix in modifications.",
+			flatModel="
+fclass ModificationTests.ModTest10
  parameter Real A=2;
  parameter Real c2a.B=1;
  Real c2a.x=c2a.B;
@@ -244,11 +250,11 @@ end ModificationTests.ModTest10;
 end ModTest10;
 
 class ModTest11
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ModTest11",
-                                               description="Additional merging tests",
-                                               flatModel=
-" fclass ModificationTests.ModTest11
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModTest11",
+			description="Additional merging tests",
+			flatModel=" fclass ModificationTests.ModTest11
  Real c2.c3.c4a.z=6;
  Real c2.c3.c4a.x=4;
  Real c2.c3.c4b.z=2;
@@ -283,11 +289,12 @@ end ModTest11;
  
  model ModTest_PM_12
   
-    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ModTest12",
-                                               description="Additional merging tests",
-                                               flatModel=
-"fclass ModificationTests.ModTest_PM_12
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModTest12",
+			description="Additional merging tests",
+			flatModel="
+fclass ModificationTests.ModTest_PM_12
  Real a;
  Real c0.c3.b=5;
  Real c0.c3.c4a.z=6;
@@ -344,11 +351,11 @@ end ModificationTests.ModTest_PM_12;")})));
 end ModTest_PM_12;
  
 model ModTest13_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ModTest13_Err",
-        description="Test of lookup errors in modifications",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ModTest13_Err",
+			description="Test of lookup errors in modifications",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 351, column 7:
@@ -365,11 +372,11 @@ Semantic error at line 351, column 7:
 end ModTest13_Err;
  
 model ModTest14_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ModTest14_Err",
-        description="Test of lookup errors in modifications",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ModTest14_Err",
+			description="Test of lookup errors in modifications",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 351, column 7:
@@ -386,11 +393,11 @@ Semantic error at line 351, column 7:
 end ModTest14_Err;
 
 model ModTest15_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ModTest15_Err",
-        description="Test of lookup errors in modifications",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ModTest15_Err",
+			description="Test of lookup errors in modifications",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 404, column 7:
@@ -418,11 +425,11 @@ end ModTest15_Err;
  
 
 model ShortClassDeclModTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclModTest1",
-        description="Test simple use of short class declaration and modification.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ShortClassDeclModTest1",
+			description="Test simple use of short class declaration and modification.",
+			flatModel="
 fclass ModificationTests.ShortClassDeclModTest1
  Real aa.x=3;
 
@@ -440,11 +447,11 @@ end ModificationTests.ShortClassDeclModTest1;
 end ShortClassDeclModTest1;
 
  model ShortClassDeclModTest2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclModTest2",
-        description="Test simple use of short class declaration and modification.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ShortClassDeclModTest2",
+			description="Test simple use of short class declaration and modification.",
+			flatModel="
 fclass ModificationTests.ShortClassDeclModTest2
  Real aa.x=2.5;
 
@@ -462,11 +469,11 @@ end ModificationTests.ShortClassDeclModTest2;
 end ShortClassDeclModTest2;
 
 model ShortClassDeclModTest3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclModTest3",
-        description="Test simple use of short class declaration and modification.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ShortClassDeclModTest3",
+			description="Test simple use of short class declaration and modification.",
+			flatModel="
 fclass ModificationTests.ShortClassDeclModTest3
  Real aa.x=3;
 
@@ -486,11 +493,11 @@ end ShortClassDeclModTest3;
 
 
 model ArrayModifications1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications1",
-         description="Modifications to arrays: array attributes",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications1",
+			description="Modifications to arrays: array attributes",
+			flatModel="
 fclass ModificationTests.ArrayModifications1
  Real a[1](start = 3);
  Real a[2](start = 3);
@@ -515,11 +522,11 @@ end ArrayModifications1;
 
 
 model ArrayModifications2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications2",
-         description="Modifications to arrays: [](start=[])",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications2",
+			description="Modifications to arrays: [](start=[])",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 712, column 9:
@@ -531,11 +538,11 @@ end ArrayModifications2;
 
 
 model ArrayModifications3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications3",
-         description="Modifications to arrays: [3](start=[4])",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications3",
+			description="Modifications to arrays: [3](start=[4])",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 728, column 11:
@@ -547,11 +554,11 @@ end ArrayModifications3;
 
 
 model ArrayModifications4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications4",
-         description="Modifications to arrays: [3](each start=[2])",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications4",
+			description="Modifications to arrays: [3](each start=[2])",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 744, column 12:
@@ -563,11 +570,11 @@ end ArrayModifications4;
 
 
 model ArrayModifications5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications5",
-         description="Modifications to arrays: members that are arrays",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications5",
+			description="Modifications to arrays: members that are arrays",
+			flatModel="
 fclass ModificationTests.ArrayModifications5
  Real b[1].x[1];
  Real b[1].x[2];
@@ -608,11 +615,11 @@ end ArrayModifications5;
 
 
 model ArrayModifications6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications6",
-         description="Modifications to arrays: [3] = [4]",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications6",
+			description="Modifications to arrays: [3] = [4]",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 792, column 8:
@@ -628,11 +635,11 @@ end ArrayModifications6;
 
 
 model ArrayModifications7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications7",
-         description="Modifications to arrays: each [] = []",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications7",
+			description="Modifications to arrays: each [] = []",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 813, column 8:
@@ -648,11 +655,11 @@ end ArrayModifications7;
 
 
 model ArrayModifications8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications8",
-         description="Modifications to arrays: arrays of composites: same name on different levels",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications8",
+			description="Modifications to arrays: arrays of composites: same name on different levels",
+			flatModel="
 fclass ModificationTests.ArrayModifications8
  Real x[1].y[1].x[1];
  Real x[1].y[1].x[2];
@@ -697,11 +704,11 @@ end ArrayModifications8;
 
 
 model ArrayModifications9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications9",
-         description="Modifications to arrays: arrays of composites: same name on different levels, attribute",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications9",
+			description="Modifications to arrays: arrays of composites: same name on different levels, attribute",
+			flatModel="
 fclass ModificationTests.ArrayModifications9
  Real x[1].y[1].x[1](start = 1);
  Real x[1].y[1].x[2](start = 1);
@@ -746,11 +753,11 @@ end ArrayModifications9;
 
 
 model ArrayModifications10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications10",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, literal modifier on outer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications10",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, literal modifier on outer",
+			flatModel="
 fclass ModificationTests.ArrayModifications10
  Real x[1].y[1].z[1];
  Real x[1].y[1].z[2];
@@ -794,11 +801,11 @@ end ArrayModifications10;
 
 
 model ArrayModifications11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications11",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, literal attribute on outer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications11",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, literal attribute on outer",
+			flatModel="
 fclass ModificationTests.ArrayModifications11
  Real x[1].y[1].z[1](start = 1);
  Real x[1].y[1].z[2](start = 2);
@@ -842,11 +849,11 @@ end ArrayModifications11;
 
 
 model ArrayModifications12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ArrayModifications12",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, component modifier on outer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ArrayModifications12",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, component modifier on outer",
+			flatModel="
 fclass ModificationTests.ArrayModifications12
  Real xa[1].yb[1].zc[3] = ya[1,1,1:3];
  Real xa[1].yb[2].zc[3] = ya[1,2,1:3];
@@ -871,11 +878,11 @@ end ArrayModifications12;
 
 
 model ArrayModifications13
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications13",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, attribute modifier on outer",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications13",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute modifier on outer",
+			flatModel="
 fclass ModificationTests.ArrayModifications13
  Real xa[1].yb[1].zc[1](start = 1.0);
  Real xa[1].yb[1].zc[2](start = 2.0);
@@ -932,11 +939,11 @@ end ArrayModifications13;
 
 
 model ArrayModifications14
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications14",
-         description="Modifications to arrays: arrays of composites: array expression modifier on outer level",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications14",
+			description="Modifications to arrays: arrays of composites: array expression modifier on outer level",
+			flatModel="
 fclass ModificationTests.ArrayModifications14
  Real x[1].yb[1];
  Real x[1].yb[2];
@@ -960,11 +967,11 @@ end ArrayModifications14;
 
 
 model ArrayModifications15
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications15",
-         description="Modifications to arrays: arrays of composites: array expression modifier on outer level",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications15",
+			description="Modifications to arrays: arrays of composites: array expression modifier on outer level",
+			flatModel="
 fclass ModificationTests.ArrayModifications15
  Real x[1].yb[1];
  Real x[1].yb[2];
@@ -1006,11 +1013,11 @@ end ArrayModifications15;
 
 
 model ArrayModifications16
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications16",
-         description="Modifications to arrays: arrays of composites: bad size for 'each'",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications16",
+			description="Modifications to arrays: arrays of composites: bad size for 'each'",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1176, column 8:
@@ -1030,11 +1037,11 @@ end ArrayModifications16;
 
 
 model ArrayModifications17
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications17",
-         description="Modifications to arrays: arrays of composites: bad size for 'each'",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications17",
+			description="Modifications to arrays: arrays of composites: bad size for 'each'",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1200, column 8:
@@ -1054,11 +1061,11 @@ end ArrayModifications17;
 
 
 model ArrayModifications18
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications18",
-         description="Modifications to arrays: arrays of composites: non-scalar attribute",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications18",
+			description="Modifications to arrays: arrays of composites: non-scalar attribute",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1231, column 13:
@@ -1078,11 +1085,11 @@ end ArrayModifications18;
 
 
 model ArrayModifications19
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications19",
-         description="Modifications to arrays: arrays of composites: example from MLS v3.1 section 7.2.5",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications19",
+			description="Modifications to arrays: arrays of composites: example from MLS v3.1 section 7.2.5",
+			flatModel="
 fclass ModificationTests.ArrayModifications19
  parameter Real c[1].a[1] = 1 /* 1.0 */;
  parameter Real c[1].a[2] = 2 /* 2.0 */;
@@ -1118,11 +1125,11 @@ end ArrayModifications19;
 
 
 model ArrayModifications20
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications20",
-         description="Modifications to arrays: arrays of composites: wrong size of binding exp",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications20",
+			description="Modifications to arrays: arrays of composites: wrong size of binding exp",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1248, column 8:
@@ -1142,11 +1149,11 @@ end ArrayModifications20;
 
 
 model ArrayModifications21
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications21",
-         description="Modifications to arrays: arrays of composites: wrong size of attribute",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications21",
+			description="Modifications to arrays: arrays of composites: wrong size of attribute",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1279, column 12:
@@ -1166,11 +1173,11 @@ end ArrayModifications21;
 
 
 model ArrayModifications22
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications22",
-         description="Modifications to arrays: arrays of composites: wrong size of binding exp (through access)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications22",
+			description="Modifications to arrays: arrays of composites: wrong size of binding exp (through access)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1296, column 8:
@@ -1191,11 +1198,11 @@ end ArrayModifications22;
 
 
 model ArrayModifications23
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications23",
-         description="Modifications to arrays: arrays of composites: wrong size of attribute (through access)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications23",
+			description="Modifications to arrays: arrays of composites: wrong size of attribute (through access)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1328, column 15:
@@ -1216,11 +1223,11 @@ end ArrayModifications23;
 
 
 model ArrayModifications24
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications24",
-         description="Modifications to arrays: arrays of composites: wrong size of binding exp (through expression)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications24",
+			description="Modifications to arrays: arrays of composites: wrong size of binding exp (through expression)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1346, column 8:
@@ -1236,11 +1243,11 @@ end ArrayModifications24;
 
 
 model ArrayModifications25
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications25",
-         description="Modifications to arrays: arrays of composites: wrong size of binding exp (through expression with accesses)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications25",
+			description="Modifications to arrays: arrays of composites: wrong size of binding exp (through expression with accesses)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1366, column 8:
@@ -1258,11 +1265,11 @@ end ArrayModifications25;
 
 
 model ArrayModifications26
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications26",
-         description="Modifications to arrays: scalarisation of accesses with colon subscrpt",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications26",
+			description="Modifications to arrays: scalarisation of accesses with colon subscrpt",
+			flatModel="
 fclass ModificationTests.ArrayModifications26
  Real x1[1,1];
  Real x1[1,2];
@@ -1324,11 +1331,11 @@ end ArrayModifications26;
 
 
 model ArrayModifications27
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications27",
-         description="Modifications to arrays: arrays of composites: array expression attribute on outer level",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications27",
+			description="Modifications to arrays: arrays of composites: array expression attribute on outer level",
+			flatModel="
 fclass ModificationTests.ArrayModifications27
  Real x[1].yb[1](start = ( 1 ) * ( 10 ) + ( 2 ) * ( 30 ));
  Real x[1].yb[2](start = ( 1 ) * ( 20 ) + ( 2 ) * ( 40 ));
@@ -1352,11 +1359,11 @@ end ArrayModifications27;
 
 
 model ArrayModifications28
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications28",
-         description="Modifications to arrays: arrays of composites: array expression (with constants) attribute on outer level",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications28",
+			description="Modifications to arrays: arrays of composites: array expression (with constants) attribute on outer level",
+			flatModel="
 fclass ModificationTests.ArrayModifications28
  Real x[1].yb[1](start = ( 1.0 ) * ( 10.0 ) + ( 2.0 ) * ( 30.0 ));
  Real x[1].yb[2](start = ( 1.0 ) * ( 20.0 ) + ( 2.0 ) * ( 40.0 ));
@@ -1390,11 +1397,11 @@ end ArrayModifications28;
 
 
 model ArrayModifications29
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications29",
-         description="Modifications to arrays: arrays of composites: wrong size of attribute (through expression)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications29",
+			description="Modifications to arrays: arrays of composites: wrong size of attribute (through expression)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1510, column 11:
@@ -1410,11 +1417,11 @@ end ArrayModifications29;
 
 
 model ArrayModifications30
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications30",
-         description="Modifications to arrays: arrays of composites: wrong size of attribute (through expression with accesses)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications30",
+			description="Modifications to arrays: arrays of composites: wrong size of attribute (through expression with accesses)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1530, column 11:
@@ -1432,11 +1439,11 @@ end ArrayModifications30;
 
 
 model ArrayModifications31
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications31",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on inner",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications31",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on inner",
+			flatModel="
 fclass ModificationTests.ArrayModifications31
  Real x[1].y[1].x[1];
  Real x[1].y[1].x[2];
@@ -1472,11 +1479,11 @@ end ArrayModifications31;
 
 
 model ArrayModifications32
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications32",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on inner",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications32",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on inner",
+			flatModel="
 fclass ModificationTests.ArrayModifications32
  Real x[1].y[1].x[1](start = 1);
  Real x[1].y[1].x[2](start = 2);
@@ -1512,11 +1519,11 @@ end ArrayModifications32;
 
 
 model ArrayModifications33
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications33",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on middle",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications33",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on middle",
+			flatModel="
 fclass ModificationTests.ArrayModifications33
  Real x[1].y[1].x[1];
  Real x[1].y[1].x[2];
@@ -1552,11 +1559,11 @@ end ArrayModifications33;
 
 
 model ArrayModifications34
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications34",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications34",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle",
+			flatModel="
 fclass ModificationTests.ArrayModifications34
  Real x[1].y[1].x[1](start = 1);
  Real x[1].y[1].x[2](start = 2);
@@ -1592,11 +1599,11 @@ end ArrayModifications34;
 
 
 model ArrayModifications35
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications35",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on inner, wrong size",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications35",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on inner, wrong size",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1687, column 8:
@@ -1616,11 +1623,11 @@ end ArrayModifications35;
 
 
 model ArrayModifications36
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications36",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on inner, wrong size",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications36",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on inner, wrong size",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1711, column 8:
@@ -1640,11 +1647,11 @@ end ArrayModifications36;
 
 
 model ArrayModifications37
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications37",
-         description="Modifications to arrays: inferring each: 3 levels deep, binding exp on middle",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications37",
+			description="Modifications to arrays: inferring each: 3 levels deep, binding exp on middle",
+			flatModel="
 fclass ModificationTests.ArrayModifications37
  Real x[1].y[1].x[1];
  Real x[1].y[1].x[2];
@@ -1680,11 +1687,11 @@ end ArrayModifications37;
 
 
 model ArrayModifications38
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications38",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on middle, wrong size",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications38",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on middle, wrong size",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1759, column 8:
@@ -1704,11 +1711,11 @@ end ArrayModifications38;
 
 
 model ArrayModifications39
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications39",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on middle, wrong size",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications39",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on middle, wrong size",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1783, column 8:
@@ -1728,11 +1735,11 @@ end ArrayModifications39;
 
 
 model ArrayModifications40
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications40",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on inner, wrong size",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications40",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on inner, wrong size",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1807, column 12:
@@ -1752,11 +1759,11 @@ end ArrayModifications40;
 
 
 model ArrayModifications41
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications41",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on inner, wrong size",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications41",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on inner, wrong size",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1831, column 12:
@@ -1776,11 +1783,11 @@ end ArrayModifications41;
 
 
 model ArrayModifications42
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications42",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications42",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1859, column 11:
@@ -1800,11 +1807,11 @@ end ArrayModifications42;
 
 
 model ArrayModifications43
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications43",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications43",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1883, column 11:
@@ -1824,11 +1831,11 @@ end ArrayModifications43;
 
 
 model ArrayModifications44
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayModifications44",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications44",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1907, column 11:
@@ -1848,11 +1855,11 @@ end ArrayModifications44;
 
 
 model ArrayModifications45
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications45",
-         description="Modifications to arrays: inferring each: attribute",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications45",
+			description="Modifications to arrays: inferring each: attribute",
+			flatModel="
 fclass ModificationTests.ArrayModifications45
  Real x[1](start = 0);
  Real x[2](start = 0);
@@ -1868,11 +1875,11 @@ end ArrayModifications45;
 
 
 model ArrayModifications46
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ArrayModifications46",
-         description="Modifications to arrays: inferring each: binding expression",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications46",
+			description="Modifications to arrays: inferring each: binding expression",
+			flatModel="
 fclass ModificationTests.ArrayModifications46
  Real y[1].x[1];
  Real y[1].x[2];
@@ -1902,11 +1909,11 @@ type TypeA = Real(final quantity="A", unit="1");
 
 
 model TypeModifications1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="TypeModifications1",
-         description="Type declarations with modifications: array of new type",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="TypeModifications1",
+			description="Type declarations with modifications: array of new type",
+			flatModel="
 fclass ModificationTests.TypeModifications1
  ModificationTests.TypeA x[3] = {1,2,3};
 
@@ -1920,11 +1927,11 @@ end TypeModifications1;
 
 
 model TypeModifications2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="TypeModifications2",
-         description="Type declarations with modifications: array of components containing array of new type",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="TypeModifications2",
+			description="Type declarations with modifications: array of components containing array of new type",
+			flatModel="
 fclass ModificationTests.TypeModifications2
  ModificationTests.TypeA y[1].x[3] = {1,2,3};
  ModificationTests.TypeA y[2].x[3] = {1,2,3};
@@ -1950,11 +1957,11 @@ end ModelB;
 
 
 model TypeModifications3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="TypeModifications3",
-         description="Type declarations with modifications: modifying type in component decl",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="TypeModifications3",
+			description="Type declarations with modifications: modifying type in component decl",
+			flatModel="
 fclass ModificationTests.TypeModifications3
  Real z[1].x(start = 1) = 1;
  ModificationTests.TypeA z[1].y(start = 2) = 1;

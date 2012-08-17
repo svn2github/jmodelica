@@ -19,14 +19,14 @@ package CodeGenTests
 
   model CodeGenTest1
   
-  	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.GenericCodeGenTestCase(name="CodeGenTest1",
-        description="Test of code generation",
-         automatic_add_initial_equations = false,
-         enable_structural_diagnosis = false,
-		 compliance_as_warning=true,
-        template = 
-        "n_ci: $n_ci$
+	annotation(__JModelica(UnitTesting(tests={
+		GenericCodeGenTestCase(
+			name="CodeGenTest1",
+			description="Test of code generation",
+			automatic_add_initial_equations=false,
+			enable_structural_diagnosis=false,
+			compliance_as_warning=true,
+			template="n_ci: $n_ci$
 n_real_ci: $n_real_ci$
 n_integer_ci: $n_integer_ci$
 n_boolean_ci: $n_boolean_ci$
@@ -147,10 +147,13 @@ n_initial_equations: 0")})));
 
 	model CodeGenTest2
 	
-	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.GenericCodeGenTestCase(name="CodeGenTest2",
-        description="Test of code generation",
-        template = "$n_real_x$",generatedCode="1")})));
+	annotation(__JModelica(UnitTesting(tests={
+		GenericCodeGenTestCase(
+			name="CodeGenTest2",
+			description="Test of code generation",
+			template="$n_real_x$",
+			generatedCode="
+1")})));
 		Real x;
     equation
         der(x)=1;
@@ -184,11 +187,11 @@ n_initial_equations: 0")})));
 	
 	
 	model CodeGenTest5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.GenericCodeGenTestCase(
-         name="CodeGenTest5",
-         description="Code generation for enumerations: number of enum vars of different types",
-         template="
+	annotation(__JModelica(UnitTesting(tests={
+		GenericCodeGenTestCase(
+			name="CodeGenTest5",
+			description="Code generation for enumerations: number of enum vars of different types",
+			template="
 n_enum_ci: $n_enum_ci$
 n_enum_cd: $n_enum_cd$
 n_enum_pi: $n_enum_pi$
@@ -217,12 +220,13 @@ n_enum_pd: 2
 	
 	
 	model HookCodeGenTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.GenericCodeGenTestCase(
-         name="HookCodeGenTest1",
-         description="Test that undefined hook tags don't generate errors",
-         template="$HOOK__not_defined$",
-         generatedCode="")})));
+	annotation(__JModelica(UnitTesting(tests={
+		GenericCodeGenTestCase(
+			name="HookCodeGenTest1",
+			description="Test that undefined hook tags don't generate errors",
+			template="$HOOK__not_defined$",
+			generatedCode="
+")})));
 
 		Real x = 1;
 	end HookCodeGenTest1;

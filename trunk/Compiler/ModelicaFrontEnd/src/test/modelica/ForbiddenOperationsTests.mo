@@ -30,11 +30,11 @@ algorithm
 end WhenInFunction_Func;
 
 model WhenInFunction
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="WhenInFunction",
-         description="Content checks in algorithms: when in function",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="WhenInFunction",
+			description="Content checks in algorithms: when in function",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 60, column 2:
@@ -45,11 +45,11 @@ Semantic error at line 60, column 2:
 end WhenInFunction;
 
 model WhenInBlocks1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="WhenInBlocks1",
-         description="Content checks in algorithms: when inside if clause",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="WhenInBlocks1",
+			description="Content checks in algorithms: when inside if clause",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 84, column 3:
@@ -66,11 +66,11 @@ algorithm
 end WhenInBlocks1;
 
 model WhenInBlocks2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="WhenInBlocks2",
-         description="Content checks in algorithms: when inside when clause",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="WhenInBlocks2",
+			description="Content checks in algorithms: when inside when clause",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 84, column 3:
@@ -87,11 +87,11 @@ algorithm
 end WhenInBlocks2;
 
 model WhenInBlocks3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="WhenInBlocks3",
-         description="Content checks in algorithms: when inside while clause",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="WhenInBlocks3",
+			description="Content checks in algorithms: when inside while clause",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 84, column 3:
@@ -108,11 +108,11 @@ algorithm
 end WhenInBlocks3;
 
 model WhenInBlocks4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="WhenInBlocks4",
-         description="Content checks in algorithms: when inside for clause",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="WhenInBlocks4",
+			description="Content checks in algorithms: when inside for clause",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 84, column 3:
@@ -129,11 +129,11 @@ algorithm
 end WhenInBlocks4;
 
 model ReturnOutsideFunction
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ReturnOutsideFunction",
-         description="Content checks in algorithms: return outside function",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ReturnOutsideFunction",
+			description="Content checks in algorithms: return outside function",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 166, column 2:
@@ -145,11 +145,11 @@ algorithm
 end ReturnOutsideFunction;
 
 model IfEquTest_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="IfEquTest_ComplErr",
-         description="",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="IfEquTest_ComplErr",
+			description="",
+			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Compliance error at line 194, column 10:
@@ -173,11 +173,11 @@ end IfEquTest_ComplErr;
 
 
 model WhenContents1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="WhenContents1",
-         description="Check contents of when clauses",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="WhenContents1",
+			description="Check contents of when clauses",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 215, column 3:
@@ -196,11 +196,11 @@ end WhenContents1;
 
 
 model WhenContents2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="WhenContents2",
-         description="Check contents of when clauses",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="WhenContents2",
+			description="Check contents of when clauses",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 235, column 2:
@@ -220,11 +220,11 @@ end WhenContents2;
 
 
 model WhenContents3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="WhenContents3",
-         description="Check contents of when clauses",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="WhenContents3",
+			description="Check contents of when clauses",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 262, column 3:
@@ -247,11 +247,11 @@ end WhenContents3;
 
 
 model LongIntConst1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="LongIntConst1",
-         description="",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="LongIntConst1",
+			description="",
+			flatModel="
 fclass ForbiddenOperationsTests.LongIntConst1
  Real x;
 equation
@@ -265,11 +265,11 @@ end LongIntConst1;
 
 
 model LongIntConst2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.WarningTestCase(
-         name="LongIntConst2",
-         description="",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="LongIntConst2",
+			description="",
+			errorMessage="
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 At line 300, column 14:

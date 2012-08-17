@@ -4,11 +4,12 @@ package OptimicaTransformCanonicalTests
                                startTime=0,
                                finalTime=1)
 
-  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="LinearityTest1",
-      methodName="variableDiagnostics",
-        description="Test linearity of variables.", methodResult=
-        "  
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="LinearityTest1",
+			methodName="variableDiagnostics",
+			description="Test linearity of variables.",
+			methodResult="  
 Independent constants: 
 
 Dependent constants: 
@@ -74,11 +75,12 @@ Input variables:
                                startTime=0,
                                finalTime=5)
 
-  	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="LinearityTest2",
-      methodName="timedVariablesLinearityDiagnostics",
-        description="Test linearity of variables.", methodResult=
-        "  
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="LinearityTest2",
+			methodName="timedVariablesLinearityDiagnostics",
+			description="Test linearity of variables.",
+			methodResult="  
 Linearity of time points:
 t0:
   0.0, isLinear: true
@@ -171,11 +173,12 @@ finalTime:
   end LinearityTest2;	
 
   optimization ArrayTest1 (objective=cost(finalTime),startTime=0,finalTime=2)
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest1",
-        description="Test arrays in Optimica",
-                                               flatModel=
-"optimization OptimicaTransformCanonicalTests.ArrayTest1(objective = cost(finalTime),startTime = 0,finalTime = 2)
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest1",
+			description="Test arrays in Optimica",
+			flatModel="optimization OptimicaTransformCanonicalTests.ArrayTest1(objective = cost(finalTime),startTime = 0,
+			finalTime=2)
  Real cost(start = 0,fixed = true);
  Real x[1](start = 1,fixed = true);
  Real x[2](start = 1,fixed = true);
@@ -236,11 +239,11 @@ end OptimicaTransformCanonicalTests.ArrayTest1;
 
   optimization ArrayTest2 (objective=cost(finalTime)+x[1](finalTime)^2 + x[2](finalTime)^2,startTime=0,finalTime=2)
 
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest2",
-        description="Test arrays in Optimica",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayTest2",
+			description="Test arrays in Optimica",
+			flatModel="
 optimization OptimicaTransformCanonicalTests.ArrayTest2(objective = cost(finalTime) + ( x[1](finalTime) ) ^ 2 + ( x[2](finalTime) ) ^ 2,startTime = 0,finalTime = 2)
  Real cost(start = 0,fixed = true);
  Real x[1](start = 1,fixed = true);
@@ -293,11 +296,11 @@ end OptimicaTransformCanonicalTests.ArrayTest2;
 
   optimization ArrayTest3_Err (objective=x(finalTime),startTime=0,startTime=3)
 
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ArrayTest3_Err",
-                                               description="Test type checking of class attributes in Optimica.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayTest3_Err",
+			description="Test type checking of class attributes in Optimica.",
+			errorMessage="
 1 Error(s) found
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
 Semantic error at line 271, column 27:
@@ -312,11 +315,11 @@ Semantic error at line 271, column 27:
 
 
 optimization TimedArrayTest1 (objective=y(finalTime),startTime=0,finalTime=2)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="TimedArrayTest1",
-         description="Timed array variables: basic test",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TimedArrayTest1",
+			description="Timed array variables: basic test",
+			flatModel="
 optimization OptimicaTransformCanonicalTests.TimedArrayTest1(objective = y(finalTime),startTime = 0,finalTime = 2)
  Real x[2];
  Real y;
@@ -338,11 +341,11 @@ end TimedArrayTest1;
 
 
 optimization TimedArrayTest2 (objective=y(finalTime),startTime=0,finalTime=2)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="TimedArrayTest2",
-         description="Timed array variables: scalarizing vector multiplication",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TimedArrayTest2",
+			description="Timed array variables: scalarizing vector multiplication",
+			flatModel="
 optimization OptimicaTransformCanonicalTests.TimedArrayTest2(objective = y(finalTime),startTime = 0,finalTime = 2)
  Real x[1];
  Real x[2];
@@ -366,11 +369,11 @@ end TimedArrayTest2;
 
 
 optimization TimedArrayTest3 (objective=y(finalTime),startTime=0,finalTime=2)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="TimedArrayTest3",
-         description="Type checking timed variables: string arg",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TimedArrayTest3",
+			description="Type checking timed variables: string arg",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
 Semantic error at line 347, column 7:
@@ -385,11 +388,11 @@ end TimedArrayTest3;
 
 
 optimization TimedArrayTest4 (objective=y(finalTime),startTime=0,finalTime=2)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="TimedArrayTest4",
-         description="Type checking timed variables: continuous arg",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TimedArrayTest4",
+			description="Type checking timed variables: continuous arg",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
 Semantic error at line 366, column 7:
@@ -404,11 +407,11 @@ end TimedArrayTest4;
 
 
 optimization ForConstraint1 (objective=sum(y(finalTime)),startTime=0,finalTime=2)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ForConstraint1",
-         description="Scalarization of for constraints",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForConstraint1",
+			description="Scalarization of for constraints",
+			flatModel="
 optimization OptimicaTransformCanonicalTests.ForConstraint1(objective = y[1](finalTime) + y[2](finalTime),startTime = 0,finalTime = 2)
  Real x[1];
  Real x[2];
@@ -438,11 +441,11 @@ constraint
 end ForConstraint1;
 
 optimization MinTimeTest1 (objective=finalTime,finalTime(free=true,start=1,initialGuess=3)=4)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="MinTimeTest1",
-         description="Test normalization of minimum time problems",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="MinTimeTest1",
+			description="Test normalization of minimum time problems",
+			flatModel="
 optimization OptimicaTransformCanonicalTests.MinTimeTest1(objective = finalTime,finalTime = 1.0)
  Real x(start = 1,fixed = true);
  Real dx(start = 0,fixed = true);
@@ -479,11 +482,11 @@ end MinTimeTest1;
 
 optimization MinTimeTest2 (objective=-startTime,
                           startTime(free=true,initialGuess=-1)=2)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="MinTimeTest2",
-         description="Test normalization of minimum time problems",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="MinTimeTest2",
+			description="Test normalization of minimum time problems",
+			flatModel="
 optimization OptimicaTransformCanonicalTests.MinTimeTest2(objective =  - ( startTime ),startTime = 0.0)
  Real x(start = 1,fixed = true);
  Real dx(start = 0,fixed = true);
@@ -521,11 +524,11 @@ end MinTimeTest2;
 
 optimization MinTimeTest3 (objective=finalTime,
                           startTime(free=true,initialGuess=-1), finalTime(free=true,initialGuess = 2))
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="MinTimeTest3",
-         description="Test normalization of minimum time problems",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="MinTimeTest3",
+			description="Test normalization of minimum time problems",
+			flatModel="
 optimization OptimicaTransformCanonicalTests.MinTimeTest3(objective = finalTime,startTime = 0.0,finalTime = 1.0)
  Real x(start = 1,fixed = true);
  Real dx(start = 0,fixed = true);
@@ -564,11 +567,11 @@ end MinTimeTest3;
 
 
   model DAETest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="DAETest1",
-         description="Fixed set from parameter with parameter equation",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="DAETest1",
+			description="Fixed set from parameter with parameter equation",
+			flatModel="
 fclass OptimicaTransformCanonicalTests.DAETest1
  parameter Integer N = 5 \"Number of linear ODEs/DAEs\" /* 5 */;
  parameter Integer N_states = 3 \"Number of states: < N\" /* 3 */;
@@ -629,11 +632,12 @@ end OptimicaTransformCanonicalTests.DAETest1;
 
 optimization DepParTest1 (objective=1,startTime=0,finalTime=1) 
 
-  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="DepParTest1",
-      methodName="freeParametersDiagnostics",
-        description="Test that free dependent parameters are handled correctly", methodResult=
-        "  
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="DepParTest1",
+			methodName="freeParametersDiagnostics",
+			description="Test that free dependent parameters are handled correctly",
+			methodResult="  
 Free independent parameters:
 p1
 Free dependent parameters:
@@ -648,11 +652,12 @@ end DepParTest1;
 
 optimization DepParTest2 (objective=1,startTime=0,finalTime=1) 
 
-  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="DepParTest2",
-      methodName="freeParametersDiagnostics",
-        description="Test that free dependent parameters are handled correctly.", methodResult=
-        "  
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="DepParTest2",
+			methodName="freeParametersDiagnostics",
+			description="Test that free dependent parameters are handled correctly.",
+			methodResult="  
 Free independent parameters:
 p1
 Free dependent parameters:
@@ -668,11 +673,12 @@ end DepParTest2;
 
 optimization DepParTest3 (objective=1,startTime=0,finalTime=1) 
 
-  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="DepParTest3",
-      methodName="freeParametersDiagnostics",
-        description="Test that free dependent parameters are handled correctly.", methodResult=
-        "
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="DepParTest3",
+			methodName="freeParametersDiagnostics",
+			description="Test that free dependent parameters are handled correctly.",
+			methodResult="
 Free independent parameters:
 p2
 Free dependent parameters:
@@ -693,13 +699,13 @@ end DepParTest3;
 
 optimization DepParTest4 (objective=1,startTime=0,finalTime=1) 
 
-  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="DepParTest4",
-        convert_free_dependent_parameters_to_algebraics = false,
-        methodName="freeParametersDiagnostics",
-        description="Test that free dependent parameters are handled correctly.", 
-        methodResult=
-        "
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="DepParTest4",
+			convert_free_dependent_parameters_to_algebraics=false,
+			methodName="freeParametersDiagnostics",
+			description="Test that free dependent parameters are handled correctly.",
+			methodResult="
 Free independent parameters:
 p2
 Free dependent parameters:

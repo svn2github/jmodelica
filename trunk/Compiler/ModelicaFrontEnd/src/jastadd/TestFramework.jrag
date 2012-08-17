@@ -37,15 +37,10 @@ aspect TestFramework {
 	}
 
 	public void FullClassDecl.collectTestCases(TestSuite ts) {
-		AnnotationNode a1 = annotation("JModelica/unitTesting");
+		AnnotationNode a1 = annotation("__JModelica/UnitTesting/tests");
 		if (a1.exists()) {
-			for (AnnotationNode a2 : a1) {
-				if (a2.name().equals("JModelica.UnitTesting")) {
-					AnnotationNode a3 = a2.forPath("testCase");
-					for (AnnotationNode a4 : a3) 
-						generateTestCase(ts, a4);
-				}
-			}
+			for (AnnotationNode a2 : a1) 
+				generateTestCase(ts, a2);
 		} else {
 			super.collectTestCases(ts);
 		}

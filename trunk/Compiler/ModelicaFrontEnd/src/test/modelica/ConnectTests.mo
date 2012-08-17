@@ -19,11 +19,12 @@ model ConnectTests
 
   class ConnectTest1
 
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ConnectTest1",
-        description="Test of generation of connection equations.",
-                                               flatModel=
-"fclass ConnectTests.ConnectTest1
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest1",
+			description="Test of generation of connection equations.",
+			flatModel="
+fclass ConnectTests.ConnectTest1
  Real c2.ca.x;
  Real c2.ca.y;
  Real c2.cb.x;
@@ -59,11 +60,11 @@ end ConnectTests.ConnectTest1;
 
     class ConnectTest2_Err
 
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ConnectTest2_Err",
-                                               description="Basic test of name lookup in connect clauses",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectTest2_Err",
+			description="Basic test of name lookup in connect clauses",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/ConnectTests.mo':
 Semantic error at line 53, column 15:
@@ -92,11 +93,11 @@ Semantic error at line 53, column 15:
    end ConnectTest2_Err;
    
 model ConnectTest3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectTest3",
-         description="Test of generation of connection equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest3",
+			description="Test of generation of connection equations",
+			flatModel="
 fclass ConnectTests.ConnectTest3
  parameter Real gain.k = 1 \"Gain value multiplied with input signal\" /* 1 */;
  ConnectTests.ConnectTest3.RealInput gain.u \"Input signal connector\";
@@ -160,11 +161,11 @@ end ConnectTest3;
 
   class ConnectTest4
 
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ConnectTest4",
-        description="Test of generation of connection equations.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest4",
+			description="Test of generation of connection equations.",
+			flatModel="
 fclass ConnectTests.ConnectTest4
  Real c2.ca.x;
  Real c2.ca.y;
@@ -207,11 +208,12 @@ end ConnectTests.ConnectTest4;
    end ConnectTest4;
 
 model ConnectTest5
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ConnectTest5",
-        description="Test of generation of connection equations.",
-                                               flatModel=
-"fclass ConnectTests.ConnectTest5
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest5",
+			description="Test of generation of connection equations.",
+			flatModel="
+fclass ConnectTests.ConnectTest5
  parameter Integer c1.n = 2 /* 2 */;
  Real c1.x[2];
  parameter Integer c2.n = 2 /* 2 */;
@@ -237,11 +239,11 @@ end ConnectTest5;
 
 
 model ConnectTest6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectTest6",
-         description="Connecting array flow variables",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest6",
+			description="Connecting array flow variables",
+			flatModel="
 fclass ConnectTests.ConnectTest6
  Real b1.a1.y[2];
  Real b1.a1.x[2];
@@ -284,11 +286,11 @@ end ConnectTest6;
 
 
 model ConnectTest7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectTest7",
-         description="Connecting arrays of connectors",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest7",
+			description="Connecting arrays of connectors",
+			flatModel="
 fclass ConnectTests.ConnectTest7
  Real a1[1].x;
  Real a1[1].y;
@@ -326,11 +328,11 @@ end ConnectTest7;
 
 
 model ConnectTest8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectTest8",
-         description="Connect in for loop",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest8",
+			description="Connect in for loop",
+			flatModel="
 fclass ConnectTests.ConnectTest8
  Real a[1].x;
  Real a[1].y;
@@ -369,11 +371,11 @@ end ConnectTest8;
 
 
 model ConnectTest9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectTest9",
-         description="Connecting array elements",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest9",
+			description="Connecting array elements",
+			flatModel="
 fclass ConnectTests.ConnectTest9
  Real a[1].x;
  Real a[1].y;
@@ -400,11 +402,11 @@ end ConnectTest9;
 
 
 model ConnectTest10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectTest10",
-         description="Check that order of variables within connector does not matter",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest10",
+			description="Check that order of variables within connector does not matter",
+			flatModel="
 fclass ConnectTests.ConnectTest10
  Real a.x;
  Real a.y;
@@ -435,11 +437,11 @@ end ConnectTest10;
 
 
 model ConnectTest11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectTest11",
-         description="Connecting nestled connectors",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest11",
+			description="Connecting nestled connectors",
+			flatModel="
 fclass ConnectTests.ConnectTest11
  Real c1.b1.x;
  Real c1.b1.y;
@@ -480,11 +482,11 @@ end ConnectTest11;
 
 
 model ConnectTest12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectTest12",
-         description="Connect in for loop on nestles arrays of connectors",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest12",
+			description="Connect in for loop on nestles arrays of connectors",
+			flatModel="
 fclass ConnectTests.ConnectTest12
  Real b[1,1].a[1].x;
  Real b[1,1].a[1].y;
@@ -602,11 +604,11 @@ end ConnectTest12;
 
 
 model ConnectTest13
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectTest13",
-         description="Connecting arrays of connectors in a for loop",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest13",
+			description="Connecting arrays of connectors in a for loop",
+			flatModel="
 fclass ConnectTests.ConnectTest13
  Real b[1].a[1].x;
  Real b[1].a[1].y;
@@ -657,11 +659,11 @@ end ConnectTest13;
 
 
 model ConnectTest14
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectTest14",
-         description="Connecting nestled arrays of connectors",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest14",
+			description="Connecting nestled arrays of connectors",
+			flatModel="
 fclass ConnectTests.ConnectTest14
  Real b1[1,1].a[1].x;
  Real b1[1,1].a[1].y;
@@ -749,11 +751,11 @@ end ConnectTest14;
 
 
 model ConnectTest15
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectTest15",
-         description="Connecting nestled arrays of connectors using simple slice operation",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest15",
+			description="Connecting nestled arrays of connectors using simple slice operation",
+			flatModel="
 fclass ConnectTests.ConnectTest15
  Real b[1,1,1].a[1].x;
  Real b[1,1,1].a[1].y;
@@ -840,11 +842,11 @@ end ConnectTest15;
 
 
 model ConnectTest16
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectTest16",
-         description="Connecting arrays of connectors within an array of component instances, no indices",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest16",
+			description="Connecting arrays of connectors within an array of component instances, no indices",
+			flatModel="
 fclass ConnectTests.ConnectTest16
  Real b[1].a1[1].x;
  Real b[1].a1[2].x;
@@ -879,11 +881,11 @@ end ConnectTest16;
 
 
 model ConnectTest17
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectTest17",
-         description="Connecting arrays of connectors within an array of component instances, slices",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest17",
+			description="Connecting arrays of connectors within an array of component instances, slices",
+			flatModel="
 fclass ConnectTests.ConnectTest17
  Real b[1].a1[1].x;
  Real b[1].a1[2].x;
@@ -998,11 +1000,11 @@ model Electrical
 end Electrical;
 
   model CircuitTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="CircuitTest1",
-         description="Test of generation of connection equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="CircuitTest1",
+			description="Test of generation of connection equations.",
+			flatModel="
 fclass ConnectTests.CircuitTest1
  parameter Real cv.V = 1 \"Value of constant voltage\" /* 1 */;
  Real cv.v \"Voltage drop between the two pins (= p.v - n.v)\";
@@ -1065,11 +1067,11 @@ end ConnectTests.CircuitTest1;
   end CircuitTest1;
 
   model CircuitTest2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="CircuitTest2",
-         description="Test of generation of connection equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="CircuitTest2",
+			description="Test of generation of connection equations",
+			flatModel="
 fclass ConnectTests.CircuitTest2
  parameter Real cv.V = 1 \"Value of constant voltage\" /* 1 */;
  Real cv.v \"Voltage drop between the two pins (= p.v - n.v)\";
@@ -1177,11 +1179,11 @@ end ConnectTests.CircuitTest2;
   end CircuitTest2;
 
 model ConnectorTest
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConnectorTest",
-         description="Test of generation of connection equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectorTest",
+			description="Test of generation of connection equations",
+			flatModel="
 fclass ConnectTests.ConnectorTest
  parameter Real c.b.firstOrder.k = 1 \"Gain\" /* 1 */;
  parameter Modelica.SIunits.Time c.b.firstOrder.T(start = 1) = 1 \"Time Constant\" /* 1 */;
@@ -1326,11 +1328,11 @@ end ConnectTests.ConnectorTest;
 end ConnectorTest;
 
 model CauerLowPassAnalog
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="CauerLowPassAnalog",
-         description="Test of generation of connection equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="CauerLowPassAnalog",
+			description="Test of generation of connection equations",
+			flatModel="
 fclass ConnectTests.CauerLowPassAnalog
  parameter Modelica.SIunits.Inductance l1 = 1.304 \"filter coefficient I1\" /* 1.304 */;
  parameter Modelica.SIunits.Inductance l2 = 0.8586 \"filter coefficient I2\" /* 0.8586 */;
@@ -1526,11 +1528,11 @@ end CauerLowPassAnalog;
 
 
 model StreamTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	 JModelica.UnitTesting.FlatteningTestCase(
-		 name="StreamTest1",
-		 description="Stream variables: basic test",
-		 flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="StreamTest1",
+			description="Stream variables: basic test",
+			flatModel="
 fclass ConnectTests.StreamTest1
  Real g.e.a;
  Real g.e.b;
@@ -1568,11 +1570,11 @@ end StreamTest1;
 
 
 model StreamTest2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="StreamTest2",
-         description="Basic test of inStream() and actualStream()",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="StreamTest2",
+			description="Basic test of inStream() and actualStream()",
+			flatModel="
 fclass ConnectTests.StreamTest2
  Real g.e.a;
  Real g.e.b;
@@ -1619,11 +1621,11 @@ end StreamTest2;
 
 
 model StreamTest3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="StreamTest3",
-         description="Using inStream() and actualStream() on normal var in connector",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="StreamTest3",
+			description="Using inStream() and actualStream() on normal var in connector",
+			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
 Semantic error at line 930, column 6:
@@ -1649,11 +1651,11 @@ end StreamTest3;
 
 
 model StreamTest4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="StreamTest4",
-         description="Using inStream() and actualStream() on flow var",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="StreamTest4",
+			description="Using inStream() and actualStream() on flow var",
+			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
 Semantic error at line 960, column 6:
@@ -1679,11 +1681,11 @@ end StreamTest4;
 
 
 model StreamTest5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="StreamTest5",
-         description="Using inStream() and actualStream() on normal var not in connector",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="StreamTest5",
+			description="Using inStream() and actualStream() on normal var not in connector",
+			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
 Semantic error at line 984, column 6:

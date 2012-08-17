@@ -19,12 +19,12 @@ package OptimicaCADCodeGenTests
 
 
 model SparseJacTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="SparseJacTest1",
-         description="Test that sparsity information is generated correctly",
-	 generate_dae_jacobian=true,  
-         template="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="SparseJacTest1",
+			description="Test that sparsity information is generated correctly",
+			generate_dae_jacobian=true,
+			template="
 $C_DAE_equation_sparsity$
 ",
          generatedCode="

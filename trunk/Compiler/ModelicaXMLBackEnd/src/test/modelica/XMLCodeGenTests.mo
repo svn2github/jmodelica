@@ -19,18 +19,19 @@ package XMLCodeGenTests
 
 
 model RemoveCopyright
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="RemoveCopyright",
-         description="Test that licence tag is filtered out",
-         template="<!-- test copyright blurb --> test",
-         generatedCode="test"
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="RemoveCopyright",
+			description="Test that licence tag is filtered out",
+			template="<!-- test copyright blurb --> test",
+			generatedCode="
+test"
 )})));
 end RemoveCopyright;
 
 model XMLExtFuncAnnotations1
-	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-		JModelica.UnitTesting.XMLCodeGenTestCase(
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
 			name="XMLExtFuncAnnotations1",
 			description="Test that external function annotations are generated correctly with file://.",
 			template="$XML_vendorAnnotations$",
@@ -56,8 +57,8 @@ algorithm
 end XMLExtFuncAnnotations1;
 
 model XMLExtFuncAnnotations2
-	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-		JModelica.UnitTesting.XMLCodeGenTestCase(
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
 			name="XMLExtFuncAnnotations2",
 			description="Test that external function annotations are generated correctly without explicit Include or Library directories.",
 			template="$XML_vendorAnnotations$",
@@ -133,12 +134,12 @@ end XMLExtFuncAnnotations2;
   end XMLCodeGenTest1;
 
 model XMLCodeGenTest2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="XMLCodeGenTest2",
-         description="Start attribute of independent parameters.",
-         template="$XML_variables$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="XMLCodeGenTest2",
+			description="Start attribute of independent parameters.",
+			template="$XML_variables$",
+			generatedCode="
 <ScalarVariable name=\"b1\" valueReference=\"536870916\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 <Boolean start=\"true\" />
 <isLinear>true</isLinear>
@@ -227,12 +228,12 @@ end XMLCodeGenTest2;
 
 	
 	model EnumerationTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="EnumerationTest1",
-         description="Test that TypeDefinitions section is generated correctly.",
-         template="$XML_typeDefinitions$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="EnumerationTest1",
+			description="Test that TypeDefinitions section is generated correctly.",
+			template="$XML_typeDefinitions$",
+			generatedCode="
 <TypeDefinitions>
 		<Type name=\"XMLCodeGenTests.EnumerationTest1.A\" description=\"This is A\">
 			<EnumerationType min=\"1\" max=\"3\">
@@ -259,12 +260,12 @@ end XMLCodeGenTest2;
 	end EnumerationTest1;
 	
 	model EnumerationTest2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="EnumerationTest2",
-         description="",
-         template="$XML_variables$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="EnumerationTest2",
+			description="",
+			template="$XML_variables$",
+			generatedCode="
 
 		<ScalarVariable name=\"x\" valueReference=\"268435456\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest2.A\" start=\"1\" />
@@ -286,12 +287,12 @@ end XMLCodeGenTest2;
 	end EnumerationTest2;
 	
 	model EnumerationTest3		
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="EnumerationTest3",
-         description="",
-         template="$XML_variables$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="EnumerationTest3",
+			description="",
+			template="$XML_variables$",
+			generatedCode="
 
 		<ScalarVariable name=\"x\" valueReference=\"268435456\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest3.A\" quantity=\"a\" min=\"1\" max=\"3\"/>
@@ -313,12 +314,12 @@ end XMLCodeGenTest2;
 	end EnumerationTest3;
 	
 	model EnumerationTest4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="EnumerationTest4",
-         description="",
-         template="$XML_variables$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="EnumerationTest4",
+			description="",
+			template="$XML_variables$",
+			generatedCode="
 
 		<ScalarVariable name=\"c\" valueReference=\"268435456\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest4.DigitalCurrentChoices\" start=\"2\" fixed=\"true\" />
@@ -341,12 +342,12 @@ end XMLCodeGenTest2;
 	//end EnumerationTest5;
 	
 	model VariableSortingTest1	
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="VariableSortingTest1",
-         description="",
-         template="$XML_variables$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="VariableSortingTest1",
+			description="",
+			template="$XML_variables$",
+			generatedCode="
 
 		<ScalarVariable name=\"a\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"5.0\" />
@@ -378,12 +379,12 @@ end XMLCodeGenTest2;
 	end VariableSortingTest1;
 	
 	model VariableSortingTest2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="VariableSortingTest2",
-         description="",
-         template="$XML_variables$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="VariableSortingTest2",
+			description="",
+			template="$XML_variables$",
+			generatedCode="
 
 		<ScalarVariable name=\"a1\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
@@ -408,12 +409,12 @@ end XMLCodeGenTest2;
 	end VariableSortingTest2;
 	
 	model VariableSortingTest3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="VariableSortingTest3",
-         description="",
-         template="$XML_variables$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="VariableSortingTest3",
+			description="",
+			template="$XML_variables$",
+			generatedCode="
 
 		<ScalarVariable name=\"a1\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
@@ -444,12 +445,12 @@ end XMLCodeGenTest2;
 	end VariableSortingTest3;
 	
 	model VariableSortingTest4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="VariableSortingTest4",
-         description="",
-         template="$XML_variables$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="VariableSortingTest4",
+			description="",
+			template="$XML_variables$",
+			generatedCode="
 
 		<ScalarVariable name=\"a.a\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
@@ -490,12 +491,12 @@ end XMLCodeGenTest2;
 	end VariableSortingTest4;
 	
 	model VariableSortingTest5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="VariableSortingTest5",
-         description="",
-         template="$XML_variables$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="VariableSortingTest5",
+			description="",
+			template="$XML_variables$",
+			generatedCode="
 <ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
 <Real relativeQuantity=\"false\" />
 <isLinear>true</isLinear>
@@ -559,12 +560,12 @@ end XMLCodeGenTest2;
 	end VariableSortingTest5;
 	
 	model VariableSortingTest6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="VariableSortingTest6",
-         description="",
-         template="$XML_variables$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="VariableSortingTest6",
+			description="",
+			template="$XML_variables$",
+			generatedCode="
 <ScalarVariable name=\"a\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 <Real relativeQuantity=\"false\" start=\"1.0\" />
 <isLinear>true</isLinear>
@@ -635,12 +636,12 @@ end XMLCodeGenTest2;
 	end VariableSortingTest6;
 	
 	model VariableSortingTest7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="VariableSortingTest7",
-         description="",
-         template="$XML_variables$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="VariableSortingTest7",
+			description="",
+			template="$XML_variables$",
+			generatedCode="
 <ScalarVariable name=\"a.b.c.y[1]\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"alias\" >
 <Real relativeQuantity=\"false\" />
 <isLinear>true</isLinear>
@@ -709,14 +710,14 @@ end XMLCodeGenTest2;
 	end VariableSortingTest7;
 
 	model DirectDependencyTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="DirectDependencyTest1",
-         description="",
-         equation_sorting=true,
-         eliminate_alias_variables=false,
-         template="$XML_variables$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="DirectDependencyTest1",
+			description="",
+			equation_sorting=true,
+			eliminate_alias_variables=false,
+			template="$XML_variables$",
+			generatedCode="
 		<ScalarVariable name=\"u[1]\" valueReference=\"6\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" />
 			<isLinear>true</isLinear>
@@ -890,12 +891,12 @@ equation
 
 
 model NonConstantStart1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.XMLCodeGenTestCase(
-         name="NonConstantStart1",
-         description="Check that only constant start valued are included in XML file",
-         template="$XML_variables$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="NonConstantStart1",
+			description="Check that only constant start valued are included in XML file",
+			template="$XML_variables$",
+			generatedCode="
         <ScalarVariable name=\"a[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
             <Real relativeQuantity=\"false\" start=\"1.0\" />
             <isLinear>true</isLinear>

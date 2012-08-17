@@ -3,11 +3,12 @@ package ComplianceTests
 
 /*
 model String_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ComplianceErrorTestCase(name="String_ComplErr",
-        description="Compliance error for String variables",
-                                               errorMessage=
-"Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="String_ComplErr",
+			description="Compliance error for String variables",
+			errorMessage="
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 73, column 9:
   String variables are not supported
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
@@ -23,11 +24,11 @@ end String_ComplErr;
 */
 
 model IntegerVariable_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ComplianceErrorTestCase(name="IntegerVariable_ComplErr",
-        description="Compliance error for integer variables",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="IntegerVariable_ComplErr",
+			description="Compliance error for integer variables",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 87, column 9:
   Integer variables are not supported, only constants and parameters
@@ -39,11 +40,11 @@ Integer i=1;
 end IntegerVariable_ComplErr;
 
 model BooleanVariable_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	  JModelica.UnitTesting.ComplianceErrorTestCase(name="BooleanVariable_ComplErr",
-		description="Compliance error for boolean variables",
-											   errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="BooleanVariable_ComplErr",
+			description="Compliance error for boolean variables",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 103, column 10:
   Boolean variables are not supported, only constants and parameters
@@ -54,11 +55,11 @@ Compliance error at line 103, column 10:
 end BooleanVariable_ComplErr;
 
 model EnumVariable_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	  JModelica.UnitTesting.ComplianceErrorTestCase(name="EnumVariable_ComplErr",
-		description="Compliance error for enumeration variables",
-											   errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="EnumVariable_ComplErr",
+			description="Compliance error for enumeration variables",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 103, column 10:
   Enumeration variables are not supported, only constants and parameters
@@ -70,11 +71,11 @@ Compliance error at line 103, column 10:
 end EnumVariable_ComplErr;
 
 model ArrayOfRecords_Warn
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.WarningTestCase(
-         name="ArrayOfRecords_Warn",
-         description="Compliance warning for arrays of records with index variability > parameter",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="ArrayOfRecords_Warn",
+			description="Compliance warning for arrays of records with index variability > parameter",
+			errorMessage="
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 At line 79, column 3:
@@ -120,11 +121,11 @@ end ArrayOfRecords_Warn;
 
 
 model WhenStmt_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="WhenStmt_ComplErr",
-         description="Compliance error for when statements",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="WhenStmt_ComplErr",
+			description="Compliance error for when statements",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 126, column 2:
@@ -139,11 +140,11 @@ algorithm
 end WhenStmt_ComplErr;
 
 model ElseWhenEq_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="ElseWhen_ComplErr",
-         description="Compliance error for else clauses in when equations",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="ElseWhen_ComplErr",
+			description="Compliance error for else clauses in when equations",
+			errorMessage="
 0 error(s), 1 compliance error(s) and 0 warning(s) found:
 Error: in file '/Users/jakesson/svn_projects/JModelica.org/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 176, column 2:
@@ -160,11 +161,11 @@ equation
 end ElseWhenEq_ComplErr;
 
 model UnsupportedBuiltins1_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="UnsupportedBuiltins1_ComplErr",
-         description="Compliance error for unsupported builtins",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="UnsupportedBuiltins1_ComplErr",
+			description="Compliance error for unsupported builtins",
+			errorMessage="
 8 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 165, column 3:
@@ -205,11 +206,11 @@ end UnsupportedBuiltins1_ComplErr;
 
 
 model UnsupportedBuiltins2_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="UnsupportedBuiltins2_ComplErr",
-         description="Compliance error for unsupported builtins",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="UnsupportedBuiltins2_ComplErr",
+			description="Compliance error for unsupported builtins",
+			errorMessage="
 10 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 210, column 3:
@@ -254,11 +255,11 @@ end UnsupportedBuiltins2_ComplErr;
 
 
 model UnsupportedBuiltins3_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="UnsupportedBuiltins3_ComplErr",
-         description="Compliance error for unsupported builtins",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="UnsupportedBuiltins3_ComplErr",
+			description="Compliance error for unsupported builtins",
+			errorMessage="
 9 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 280, column 3:
@@ -304,11 +305,11 @@ end UnsupportedBuiltins3_ComplErr;
 
 
 model UnsupportedBuiltins4_Warn
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.WarningTestCase(
-         name="UnsupportedBuiltins4_Warn",
-         description="Warnings for ignored builtins",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="UnsupportedBuiltins4_Warn",
+			description="Warnings for ignored builtins",
+			errorMessage="
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 At line 294, column 2:
@@ -321,11 +322,11 @@ end UnsupportedBuiltins4_Warn;
 
 
 model UnsupportedBuiltins5_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="UnsupportedBuiltins5_Err",
-         description="Ignored builtins can't have outputs",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnsupportedBuiltins5_Err",
+			description="Ignored builtins can't have outputs",
+			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Semantic error at line 313, column 12:
@@ -344,11 +345,11 @@ end UnsupportedBuiltins5_Err;
 
 
 model UnsupportedBuiltins6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="UnsupportedBuiltins6",
-         description="Check that ignored built-ins aren't printed and doesn't cause exceptions",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="UnsupportedBuiltins6",
+			description="Check that ignored built-ins aren't printed and doesn't cause exceptions",
+			flatModel="
 fclass ComplianceTests.UnsupportedBuiltins6
 
 end ComplianceTests.UnsupportedBuiltins6;
@@ -360,11 +361,11 @@ end UnsupportedBuiltins6;
 
 
 model ArrayCellMod_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="ArrayCellMod_ComplErr",
-         description="Compliance error for modifiers of specific array elements",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="ArrayCellMod_ComplErr",
+			description="Compliance error for modifiers of specific array elements",
+			errorMessage="
 3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Semantic error at line 361, column 8:
@@ -385,12 +386,12 @@ Compliance error at line 364, column 14:
 end ArrayCellMod_ComplErr;
 
 model DuplicateVariables_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="DuplicateVariables_ComplErr",
-         enable_structural_diagnosis=false,
-         description="Compliance error test checking for duplicate variables",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="DuplicateVariables_ComplErr",
+			enable_structural_diagnosis=false,
+			description="Compliance error test checking for duplicate variables",
+			errorMessage="
 0 error(s), 1 compliance error(s) and 0 warning(s) found:
 
 Error: in file 'ComplianceTests.DuplicateVariables_ComplErr.mof':
@@ -404,11 +405,11 @@ Compliance error at line 0, column 0:
 end DuplicateVariables_ComplErr;
 
 model HybridNonFMU1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="HybridNonFMU1",
-         description="Test that compliance warnings for hybrid elements are issued when not compiling FMU",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="HybridNonFMU1",
+			description="Test that compliance warnings for hybrid elements are issued when not compiling FMU",
+			errorMessage="
 11 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 450, column 18:
@@ -470,13 +471,13 @@ end HybridNonFMU1;
 
 
 model HybridFMU1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="HybridFMU1",
-         description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
-         generate_ode=true,
-		 checkAll=true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="HybridFMU1",
+			description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
+			generate_ode=true,
+			checkAll=true,
+			flatModel="
 fclass ComplianceTests.HybridFMU1
  Real xx(start = 2);
  discrete Real x;
@@ -537,11 +538,11 @@ end HybridFMU1;
 
 
 model HybridNonFMU2 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="HybridNonFMU2",
-         description="Test that compliance warnings for hybrid elements are issued when not compiling FMU",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="HybridNonFMU2",
+			description="Test that compliance warnings for hybrid elements are issued when not compiling FMU",
+			errorMessage="
 6 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 583, column 2:
@@ -577,13 +578,13 @@ end HybridNonFMU2;
 
 
 model HybridFMU2 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="HybridFMU2",
-         description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
-         generate_ode=true,
-		 checkAll=true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="HybridFMU2",
+			description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
+			generate_ode=true,
+			checkAll=true,
+			flatModel="
 fclass ComplianceTests.HybridFMU2
  discrete Real x;
  discrete Real y;

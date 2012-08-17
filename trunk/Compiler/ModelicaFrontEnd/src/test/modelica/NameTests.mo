@@ -16,35 +16,13 @@
 
 
 package NameTests 
-  
-model NameTest0
- 
-annotation(__JModelica(UnitTesting(tests={FlatteningTestCase(name="NameTest0_Flattening",
-                                               description="Basic test of name lookup",
-                                               flatModel=
-"fclass NameTests.NameTest0
-  Real x;
-equation
-  x=1;
-end NameTests.NameTest0;
-")})));
-
-    Real x;
-    parameter Real p1 = 2.5;
-    parameter Real p2 = 2*p1 annotation(__JModelica(UnitTesting(
-             tests = {EvaluationTestCase(name="NameTest0_Eval1",
-                                         description="Basic test of static evaluation",
-                                         result = 5)})));
-  equation
-    x=1;
-  end NameTest0;
 
   model NameTest2
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="NameTest2",
-                                               description="Basic test of name lookup",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="NameTest2",
+			description="Basic test of name lookup",
+			flatModel="
 fclass NameTests.NameTest2
  Real a.b.x;
  Real a.b.c.y;
@@ -102,11 +80,11 @@ end A;
   model NameTest3_Err
   
   
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest3_Err",
-                                               description="Basic test of name lookup",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest3_Err",
+			description="Basic test of name lookup",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 90, column 1:
@@ -123,11 +101,11 @@ A a;
 model NameTest4_Err
   
   
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest4_Err",
-                                               description="Basic test of name lookup",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest4_Err",
+			description="Basic test of name lookup",
+			errorMessage="
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 100, column 4:
@@ -150,11 +128,11 @@ Semantic error at line 100, column 4:
 
 model NameTest5_Err
   
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest5_Err",
-                                               description="Basic test of name lookup",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest5_Err",
+			description="Basic test of name lookup",
+			errorMessage="
 2 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 151, column 5:
@@ -176,11 +154,11 @@ end NameTest5_Err;
 model NameTest55_Err
   
   
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest55_Err",
-                                               description="Basic test of name lookup",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest55_Err",
+			description="Basic test of name lookup",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 181, column 11:
@@ -200,11 +178,11 @@ end NameTest55_Err;
 model NameTest6_Err
   
   
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest6_Err",
-                                               description="Basic test of name lookup",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest6_Err",
+			description="Basic test of name lookup",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 174, column 14:
@@ -221,11 +199,11 @@ end NameTest6_Err;
 model NameTest7_Err
   
   
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest7_Err",
-                                               description="Basic test of name lookup",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest7_Err",
+			description="Basic test of name lookup",
+			errorMessage="
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 196, column 4:
@@ -244,11 +222,11 @@ end NameTest7_Err;
 model NameTest8_Err
   
   
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest8_Err",
-                                               description="Basic test of name lookup",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest8_Err",
+			description="Basic test of name lookup",
+			errorMessage="
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 196, column 4:
@@ -263,11 +241,11 @@ end NameTest8_Err;
 
 model NameTest9_Err
   
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest9_Err",
-                                               description="Test that names are looked up in constraining clauses.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest9_Err",
+			description="Test that names are looked up in constraining clauses.",
+			errorMessage="
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 196, column 4:
@@ -294,11 +272,11 @@ Semantic error at line 196, column 4:
 
 model NameTest10_Err
   
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest10_Err",
-                                               description="Test that names are looked up in constraining clauses.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest10_Err",
+			description="Test that names are looked up in constraining clauses.",
+			errorMessage="
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 297, column 4:
@@ -333,11 +311,11 @@ Semantic error at line 297, column 4:
   
   model NameTest11_Err
   
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest11_Err",
-                                               description="Test that names are looked up correct.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest11_Err",
+			description="Test that names are looked up correct.",
+			errorMessage="
 1 errors found:
 Error: In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 320, column 9:
@@ -356,11 +334,11 @@ Semantic error at line 320, column 9:
   
 model NameTest12_Err
   
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest12_Err",
-                                              description="Test that names are looked up correct.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest12_Err",
+			description="Test that names are looked up correct.",
+			errorMessage="
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 346, column 15:
@@ -389,10 +367,11 @@ end NameTest12_Err;
   
   
  model NameTest13_Err
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest13_Err",
-          description="Test that names are looked up correct.",
-          errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest13_Err",
+			description="Test that names are looked up correct.",
+			errorMessage="
  2 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 37:
@@ -432,11 +411,11 @@ Semantic error at line 386, column 39:
 end NameTest13_Err;
   
  model NameTest14_Err
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest14_Err",
-                                              description="Test that names are looked up correct.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest14_Err",
+			description="Test that names are looked up correct.",
+			errorMessage="
  4 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 459, column 18:
@@ -485,11 +464,11 @@ Semantic error at line 461, column 20:
 end NameTest14_Err;
   
 class NameTest15
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="NameTest15",
-        description="Check correct flattening of protected variable",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="NameTest15",
+			description="Check correct flattening of protected variable",
+			flatModel="
 fclass NameTests.NameTest15
  Real x = 1;
 
@@ -501,11 +480,11 @@ end NameTest15;
 
 
 class NameTest16
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="NameTest16",
-        description="Check that constants are inlined.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="NameTest16",
+			description="Check that constants are inlined.",
+			flatModel="
 fclass NameTests.NameTest16
 constant Real c = 1.0;
 parameter Real p = 1.0;
@@ -519,11 +498,11 @@ parameter Real p = c;
 end NameTest16;
 
 model NameTest17
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="NameTest17",
-        description="Check that modifiers without binding expressions are accepted.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="NameTest17",
+			description="Check that modifiers without binding expressions are accepted.",
+			flatModel="
 fclass NameTests.NameTest17
  Real x;
 equation
@@ -539,11 +518,11 @@ end NameTest17;
 
 
 model NameTest18
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="NameTest18",
-         description="Constraining class extending local class",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="NameTest18",
+			description="Constraining class extending local class",
+			flatModel="
 fclass NameTests.NameTest18
  Real y.x;
 
@@ -577,11 +556,11 @@ end NameTest18;
 
 
 model NameTest19
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="NameTest19",
-         description="Lookup of classes from array subscripts of dotted access",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="NameTest19",
+			description="Lookup of classes from array subscripts of dotted access",
+			flatModel="
 fclass NameTests.NameTest19
  Real y.x[1];
 equation
@@ -605,11 +584,11 @@ end NameTest19;
 
 
 model NameTest20
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="NameTest20",
-         description="Extending class with call to function in surrounding class",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="NameTest20",
+			description="Extending class with call to function in surrounding class",
+			flatModel="
 fclass NameTests.NameTest20
  Real y.x;
 equation
@@ -649,11 +628,11 @@ end NameTest20;
 
 
 model NameTest21
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="NameTest21",
-         description="Chain of redeclared short class declarations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="NameTest21",
+			description="Chain of redeclared short class declarations",
+			flatModel="
 fclass NameTests.NameTest21
  Real d.b.c.x = 2.0;
 
@@ -693,11 +672,11 @@ end NameTest21;
 
 
 model NameTest22
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="NameTest22",
-         description="Chain of short class declarations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="NameTest22",
+			description="Chain of short class declarations",
+			flatModel="
 fclass NameTests.NameTest22
  Real d.x = 3.0;
 
@@ -750,11 +729,11 @@ end NameTest23;
 constant Real constant_1 = 1.0;
 
 class ConstantLookup1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup1",
-         description="Constant lookup: simple lookup in enclosing class",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup1",
+			description="Constant lookup: simple lookup in enclosing class",
+			flatModel="
 fclass NameTests.ConstantLookup1
  Real x = 1.0;
 
@@ -766,11 +745,11 @@ end ConstantLookup1;
 
 
 class ConstantLookup2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup2",
-         description="Constant lookup: lookup in second enclosing class",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup2",
+			description="Constant lookup: lookup in second enclosing class",
+			flatModel="
 fclass NameTests.ConstantLookup2
  Real i.x = 1.0;
 
@@ -786,11 +765,11 @@ end ConstantLookup2;
 
 
 class ConstantLookup3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup3",
-         description="Constant lookup: enclosing class overriding constant in second enclosing class",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup3",
+			description="Constant lookup: enclosing class overriding constant in second enclosing class",
+			flatModel="
 fclass NameTests.ConstantLookup3
  constant Real constant_1 = 2.0;
  Real i.x = 2.0;
@@ -809,11 +788,11 @@ end ConstantLookup3;
 
 
 class ConstantLookup4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup4",
-         description="Constant lookup: directly from package",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup4",
+			description="Constant lookup: directly from package",
+			flatModel="
 fclass NameTests.ConstantLookup4
  parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
 
@@ -825,11 +804,11 @@ end ConstantLookup4;
 
 
 class ConstantLookup5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup5",
-         description="Constant lookup: import all from enclosing class",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup5",
+			description="Constant lookup: import all from enclosing class",
+			flatModel="
 fclass NameTests.ConstantLookup5
  parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
 
@@ -842,11 +821,11 @@ end ConstantLookup5;
 
 
 class ConstantLookup6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup6",
-         description="Constant lookup: import enclosing package with rename",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup6",
+			description="Constant lookup: import enclosing package with rename",
+			flatModel="
 fclass NameTests.ConstantLookup6
  parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
 
@@ -859,11 +838,11 @@ end ConstantLookup6;
 
 
 class ConstantLookup7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup7",
-         description="Constant lookup: import all in top package, access via enclosing class",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup7",
+			description="Constant lookup: import all in top package, access via enclosing class",
+			flatModel="
 fclass NameTests.ConstantLookup7
  parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
 
@@ -876,11 +855,11 @@ end ConstantLookup7;
 
 
 class ConstantLookup8 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup8",
-         description="Constant lookup: named import of specific constant",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup8",
+			description="Constant lookup: named import of specific constant",
+			flatModel="
 fclass NameTests.ConstantLookup8
  parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
 
@@ -893,11 +872,11 @@ end ConstantLookup8;
 
 
 class ConstantLookup9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup9",
-         description="Constant lookup: import of specific constant",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup9",
+			description="Constant lookup: import of specific constant",
+			flatModel="
 fclass NameTests.ConstantLookup9
  parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
 
@@ -911,11 +890,11 @@ end ConstantLookup9;
 
 // TODO: Maybe the last error message each in ConstantLookup10-11 are redundant - let lookup succeed?
 class ConstantLookup10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ConstantLookup10",
-         description="Constant lookup: trying to import non-constant component",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConstantLookup10",
+			description="Constant lookup: trying to import non-constant component",
+			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 904, column 2:
@@ -935,11 +914,11 @@ end ConstantLookup10;
 
 
 class ConstantLookup11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ConstantLookup11",
-         description="Constant lookup: trying to import non-constant component (named import)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConstantLookup11",
+			description="Constant lookup: trying to import non-constant component (named import)",
+			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 931, column 2:
@@ -960,11 +939,11 @@ end ConstantLookup11;
 
 // TODO: Maybe a better error message is needed here
 class ConstantLookup12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ConstantLookup12",
-         description="Constant lookup: trying to import non-constant component (unqualified import)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConstantLookup12",
+			description="Constant lookup: trying to import non-constant component (unqualified import)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 740, column 21:
@@ -1016,11 +995,11 @@ end ConstantLookup15;
 
 
 model ConstantLookup16
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ConstantLookup16",
-         description="Using constant with bad value as array index",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConstantLookup16",
+			description="Using constant with bad value as array index",
+			errorMessage="
 4 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 797, column 16:
@@ -1043,11 +1022,11 @@ end ConstantLookup16;
 
 
 model ConstantLookup17
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ConstantLookup17",
-         description="Illegal accesses of components in local classes",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConstantLookup17",
+			description="Illegal accesses of components in local classes",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 1039, column 2:
@@ -1068,11 +1047,11 @@ end ConstantLookup17;
 
 
 model ConstantLookup18
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ConstantLookup18",
-         description="Member of constant record, using record constructor, through inheritance and short class decl",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantLookup18",
+			description="Member of constant record, using record constructor, through inheritance and short class decl",
+			flatModel="
 fclass NameTests.ConstantLookup18
  parameter Integer b.n = 3 /* 3 */;
  Real b.x[1];
@@ -1113,11 +1092,11 @@ end ConstantLookup18;
 
 
 model ConstantLookup19
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup19",
-         description="Using package constant set through redeclare and several levels of inheritance",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup19",
+			description="Using package constant set through redeclare and several levels of inheritance",
+			flatModel="
 fclass NameTests.ConstantLookup19
  Real y.x[3] = fill(1, 3);
 
@@ -1161,11 +1140,11 @@ end ConstantLookup19;
 
 
 model ConstantLookup20
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ConstantLookup20",
-         description="Member of constant record, using record constructor",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantLookup20",
+			description="Member of constant record, using record constructor",
+			flatModel="
 fclass NameTests.ConstantLookup20
  Real y;
 equation
@@ -1187,11 +1166,11 @@ end ConstantLookup20;
 
 
 model ConstantLookup21
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup21",
-         description="Lookup of package constant through short class decl with constrainedby",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup21",
+			description="Lookup of package constant through short class decl with constrainedby",
+			flatModel="
 fclass NameTests.ConstantLookup21
  Real a.x[2] = ones(2);
 
@@ -1216,11 +1195,11 @@ end ConstantLookup21;
 
 
 model ConstantLookup22
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup22",
-         description="Class lookup through redeclares with constrainedby, complex example",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup22",
+			description="Class lookup through redeclares with constrainedby, complex example",
+			flatModel="
 fclass NameTests.ConstantLookup22
  Real f.d.a[2] = f.e[1:2];
  Real f.e[2] = ones(2);
@@ -1291,11 +1270,11 @@ end ConstantLookup22;
 
 
 model ConstantLookup23
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ConstantLookup23",
-         description="Trying to use member that does not exist in constraining class (but does in actual)",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConstantLookup23",
+			description="Trying to use member that does not exist in constraining class (but does in actual)",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 1062, column 13:
@@ -1335,11 +1314,11 @@ end ConstantLookup24;
 
 
 model ConstantLookup25
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup25",
-         description="Slice over array of components, declared with : size",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup25",
+			description="Slice over array of components, declared with : size",
+			flatModel="
 fclass NameTests.ConstantLookup25
  constant NameTests.ConstantLookup25.A x[2] = {NameTests.ConstantLookup25.A(1),NameTests.ConstantLookup25.A(2)};
  constant Real y[2] = {1.0,2.0};
@@ -1399,11 +1378,11 @@ package ExtraForConstantLookup26
 end ExtraForConstantLookup26;
 
 model ConstantLookup26
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup26",
-         description="Constant lookup in complex data structure",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup26",
+			description="Constant lookup in complex data structure",
+			flatModel="
 fclass NameTests.ConstantLookup26
  constant Real x[2] = {1.0,2.0};
  Real y[2] = {1.0,2.0};
@@ -1417,11 +1396,11 @@ end ConstantLookup26;
 
 
 model ConstantLookup27
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup27",
-         description="Access to record as modification",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup27",
+			description="Access to record as modification",
+			flatModel="
 fclass NameTests.ConstantLookup27
  constant NameTests.ConstantLookup27.A c = NameTests.ConstantLookup27.A(1, 2);
  constant Real e[2] = {1.0,2.0};
@@ -1457,11 +1436,11 @@ end ConstantLookup27;
 
 
 model ConstantLookup28
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup28",
-         description="",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup28",
+			description="",
+			flatModel="
 fclass NameTests.ConstantLookup28
  Real y.x = 2.0;
 
@@ -1489,11 +1468,11 @@ end ConstantLookup28;
 
 
 model ConstantLookup29
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ConstantLookup29",
-         description="Extending class using imported constant",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantLookup29",
+			description="Extending class using imported constant",
+			flatModel="
 fclass NameTests.ConstantLookup29
  Real a.x(start = 1.0);
 equation
@@ -1520,11 +1499,11 @@ end ConstantLookup29;
 
 
 model ConstantLookup30
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ConstantLookup30",
-         description="",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantLookup30",
+			description="",
+			flatModel="
 fclass NameTests.ConstantLookup30
  parameter Real p = 3.1 /* 3.1 */;
  Modelica.SIunits.Force f;
@@ -1557,11 +1536,11 @@ package ConstantLookup31
 		package ConstantLookup31
 			constant Integer c = 2;
 			model ConstantLookup31_m
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup31_m",
-         description="Lookup of names starting with .",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup31_m",
+			description="Lookup of names starting with .",
+			flatModel="
 fclass NameTests.ConstantLookup31.NameTests.ConstantLookup31.ConstantLookup31_m
  constant Integer a = 1;
  constant Integer b = 2;
@@ -1579,11 +1558,11 @@ end ConstantLookup31;
 
 
 model ConstantLookup32
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup32",
-         description="Package constants in functions for complex accesses",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup32",
+			description="Package constants in functions for complex accesses",
+			flatModel="
 fclass NameTests.ConstantLookup32
  parameter Integer j = 1 /* 1 */;
  Real y = NameTests.ConstantLookup32.f(j);
@@ -1626,11 +1605,11 @@ end ConstantLookup32;
 
 
 model ConstantLookup33
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup33",
-         description="Package constants in functions for complex accesses",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup33",
+			description="Package constants in functions for complex accesses",
+			flatModel="
 fclass NameTests.ConstantLookup33
  parameter Integer j = 1 /* 1 */;
  Real y = NameTests.ConstantLookup33.f(j);
@@ -1686,11 +1665,11 @@ end ConstantLookup33;
 
 
 model ConstantLookup34
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ConstantLookup34",
-         description="Constant in function being used in a manner that triggers the algorithm that includes packag constants in functions",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantLookup34",
+			description="Constant in function being used in a manner that triggers the algorithm that includes packag constants in functions",
+			flatModel="
 fclass NameTests.ConstantLookup34
  parameter Integer j = 1 /* 1 */;
  Real z;
@@ -1739,11 +1718,11 @@ end ConstantLookup34;
 
 
 model ConstantLookup35
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ConstantLookup35",
-         description="Package constants in functions where getFQName() gives two-part name",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantLookup35",
+			description="Package constants in functions where getFQName() gives two-part name",
+			flatModel="
 fclass NameTests.ConstantLookup35
  parameter Integer b.j = 1 /* 1 */;
  Real b.z;
@@ -1819,11 +1798,11 @@ end ConstantLookup35;
 
 
 model ConstantLookup36
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ConstantLookup36",
-         description="",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantLookup36",
+			description="",
+			flatModel="
 fclass NameTests.ConstantLookup36
  parameter Integer j = 1 /* 1 */;
  Real z;
@@ -1870,11 +1849,11 @@ end ConstantLookup36;
 
 
 model ConstantLookup37
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup37",
-         description="Package constant through hierarchical lookup from extended class",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup37",
+			description="Package constant through hierarchical lookup from extended class",
+			flatModel="
 fclass NameTests.ConstantLookup37
  Real z = 2.0;
 end NameTests.ConstantLookup37;
@@ -1900,11 +1879,11 @@ end ConstantLookup37;
 
 
 model ConstantLookup38
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConstantLookup38",
-         description="Package constant through hierarchical lookup from extended class",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConstantLookup38",
+			description="Package constant through hierarchical lookup from extended class",
+			flatModel="
 fclass NameTests.ConstantLookup38
  Real z = 2.0;
 end NameTests.ConstantLookup38;
@@ -1936,11 +1915,11 @@ package ExtraForConstantLookup39
 end ExtraForConstantLookup39;
 
 model ConstantLookup39
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ConstantLookup39",
-         description="",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConstantLookup39",
+			description="",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 1930, column 23:
@@ -1954,11 +1933,11 @@ end ConstantLookup39;
 
 
 class ExtendsTest1
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ExtendsTest1",
-        description="Simple use of extends",
-        flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ExtendsTest1",
+			description="Simple use of extends",
+			flatModel="
  fclass NameTests.ExtendsTest1
  Real c2.c3.x;
  Real c2.x;
@@ -1993,12 +1972,11 @@ end NameTests.ExtendsTest1;
 end ExtendsTest1;
 
 class ExtendsTest2
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ExtendsTest2",
-        description="Test component declaration using a local class that becomes visible
-                     through inheritance",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ExtendsTest2",
+			description="Test component declaration using a local class that becomes visible through inheritance",
+			flatModel="
 fclass NameTests.ExtendsTest2
  Real d.x;
 equation 
@@ -2019,18 +1997,17 @@ end NameTests.ExtendsTest2;
 end ExtendsTest2;
 
 class ExtendsTest3
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ExtendsTest3",
-        description="Test that local classes that becomes visible
-                     through inheritance can not be used as super classes",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExtendsTest3",
+			description="Test that local classes that becomes visible through inheritance can not be used as super classes",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 164, column 11:
   The class D is undeclared
   
-"  )})));
+")})));
   
   class C
     class D
@@ -2042,11 +2019,11 @@ Semantic error at line 164, column 11:
 end ExtendsTest3;
 
 model ExtendsTest4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ExtendsTest4",
-         description="Array of components of a class extending class with components",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ExtendsTest4",
+			description="Array of components of a class extending class with components",
+			flatModel="
 fclass NameTests.ExtendsTest4
  Real e[1].d = 1;
  Real e[2].d = 1;
@@ -2074,11 +2051,11 @@ end ExtendsTest4;
 
 
 model ImportTest1
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ImportTest1",
-        description="Test circular dependency of unqualified import and extends.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ImportTest1",
+			description="Test circular dependency of unqualified import and extends.",
+			flatModel="
 fclass NameTests.ImportTest1
  Real a.x;
  Real b.y;
@@ -2109,11 +2086,11 @@ end NameTests.ImportTest1;
 end ImportTest1;
 
 model ImportTest2
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ImportTest2",
-        description="Test of qualified import.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ImportTest2",
+			description="Test of qualified import.",
+			flatModel="
 fclass NameTests.ImportTest2
  Real a.x;
  Real x;
@@ -2139,11 +2116,11 @@ end NameTests.ImportTest2;
 end ImportTest2;
 
 model ImportTest3
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ImportTest3",
-        description="Test that only a class imported with qualified import is visible.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ImportTest3",
+			description="Test that only a class imported with qualified import is visible.",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 253, column 3:
@@ -2168,11 +2145,11 @@ end ImportTest3;
 
 
 model ImportTest4
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ImportTest4",
-        description="Test alias import.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ImportTest4",
+			description="Test alias import.",
+			flatModel="
 fclass NameTests.ImportTest4
  Real a.x;
  Real x;
@@ -2193,11 +2170,11 @@ end NameTests.ImportTest4;
 end ImportTest4;
 
 model ImportTest5
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ImportTest5",
-        description="Test circular dependency between import and extends: import of class that becomes visible through inheritance",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ImportTest5",
+			description="Test circular dependency between import and extends: import of class that becomes visible through inheritance",
+			flatModel="
 fclass NameTests.ImportTest5
  Real d.z=3;
 
@@ -2227,11 +2204,11 @@ end ImportTest5;
 
 
 model ImportTest6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ImportTest6",
-         description="Test name lookup in a more complex case",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ImportTest6",
+			description="Test name lookup in a more complex case",
+			flatModel="
 fclass NameTests.ImportTest6
  NameTests.ImportTest6.P.SIunits.Resistance m.R(start = 1);
 
@@ -2257,11 +2234,11 @@ end NameTests.ImportTest6;
 end ImportTest6;
 
 model ImportTest7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ImportTest7",
-         description="Test name lookup in a more complex case",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ImportTest7",
+			description="Test name lookup in a more complex case",
+			flatModel="
 fclass NameTests.ImportTest7
  NameTests.ImportTest7.P.SIunits.Resistance m.R(start = 1);
 
@@ -2289,11 +2266,11 @@ end NameTests.ImportTest7;
 end ImportTest7;
 
 model ImportTest8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ImportTest8",
-         description="Test name lookup in a structured library",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ImportTest8",
+			description="Test name lookup in a structured library",
+			flatModel="
 fclass NameTests.ImportTest8
  parameter Modelica.SIunits.Resistance r.R(start = 1) \"Resistance at temperature T_ref\";
  parameter Modelica.SIunits.Temperature r.T_ref = 300.15 \"Reference temperature\" /* 300.15 */;
@@ -2337,11 +2314,11 @@ end NameTests.ImportTest8;
 end ImportTest8;
 
 model ImportTest9
-	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	   JModelica.UnitTesting.FlatteningTestCase(name="ImportTest9",
-		 description="Test of import of builtin mathematical functions.",
-												flatModel=
- "
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ImportTest9",
+			description="Test of import of builtin mathematical functions.",
+			flatModel="
  fclass NameTests.ImportTest9
   parameter Real p1 = cos(9) /* -0.9111302618846769 */;
   parameter Real p2 = sin(9) /* 0.4121184852417566 */;
@@ -2357,11 +2334,11 @@ end ImportTest9;
 
 
 model ImportTest10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ImportTest10",
-         description="Using constant from imported package.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ImportTest10",
+			description="Using constant from imported package.",
+			flatModel="
 fclass NameTests.ImportTest10
  Real y.x = 3.141592653589793;
 
@@ -2377,11 +2354,11 @@ end NameTests.ImportTest10;
 end ImportTest10;
 
 model ImportTest11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ImportTest11",
-         description="Using constant from imported package.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ImportTest11",
+			description="Using constant from imported package.",
+			flatModel="
 fclass NameTests.ImportTest11
  Modelica.SIunits.Voltage m.v = 0;
  Real m.x = 1.2566370614359173E-6;
@@ -2401,11 +2378,12 @@ end NameTests.ImportTest11;
 end ImportTest11;
 
 model ShortClassDeclTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest1",
-        description="Test simple use of short class declaration.",
-                                               flatModel=
-"fclass NameTests.ShortClassDeclTest1
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ShortClassDeclTest1",
+			description="Test simple use of short class declaration.",
+			flatModel="
+fclass NameTests.ShortClassDeclTest1
  Real aa.x=2;
 end NameTests.ShortClassDeclTest1;
 ")})));
@@ -2423,11 +2401,12 @@ end ShortClassDeclTest1;
 
 
 model ShortClassDeclTest2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest2",
-        description="Test simple use of multiple short class declaration.",
-                                               flatModel=
-"fclass NameTests.ShortClassDeclTest2
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ShortClassDeclTest2",
+			description="Test simple use of multiple short class declaration.",
+			flatModel="
+fclass NameTests.ShortClassDeclTest2
  Real aa.x=2;
 end NameTests.ShortClassDeclTest2;
 ")})));
@@ -2444,11 +2423,11 @@ end NameTests.ShortClassDeclTest2;
 end ShortClassDeclTest2;
 
 model ShortClassDeclTest3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ShortClassDeclTest3",
-         description="Short class declaration of Real",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ShortClassDeclTest3",
+			description="Short class declaration of Real",
+			flatModel="
 fclass NameTests.ShortClassDeclTest3
  NameTests.ShortClassDeclTest3.MyReal x(start = 3);
 
@@ -2463,11 +2442,11 @@ end NameTests.ShortClassDeclTest3;
 end ShortClassDeclTest3;
 
 model ShortClassDeclTest31
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ShortClassDeclTest31",
-         description="Short class declaration of Real",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ShortClassDeclTest31",
+			description="Short class declaration of Real",
+			flatModel="
 fclass NameTests.ShortClassDeclTest31
  Modelica.SIunits.Angle x(start = 3);
 
@@ -2482,11 +2461,11 @@ end ShortClassDeclTest31;
 
 
 model ShortClassDeclTest35_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ShortClassDeclTest35_Err",
-        description="Short class declaration of Real.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ShortClassDeclTest35_Err",
+			description="Short class declaration of Real.",
+			errorMessage="
   2 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 549, column 4:
@@ -2504,11 +2483,11 @@ end ShortClassDeclTest35_Err;
 
 
 model ShortClassDeclTest4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ShortClassDeclTest4",
-         description="Test short class declarations and inheritance from primitive types",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ShortClassDeclTest4",
+			description="Test short class declarations and inheritance from primitive types",
+			flatModel="
 fclass NameTests.ShortClassDeclTest4
  input NameTests.ShortClassDeclTest4.MyRealInput u(min = 3);
 
@@ -2532,11 +2511,11 @@ end MyRealSignal;
 end ShortClassDeclTest4;
 
 model ShortClassDeclTest5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ShortClassDeclTest5",
-         description="Test short class declarations and inheritance from primitive types",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ShortClassDeclTest5",
+			description="Test short class declarations and inheritance from primitive types",
+			flatModel="
 fclass NameTests.ShortClassDeclTest5
  input NameTests.ShortClassDeclTest5.MyRealInput u(nominal = 4);
 
@@ -2563,11 +2542,11 @@ end ShortClassDeclTest5;
 
 
 model ShortClassDeclTest6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest6",
-        description="Test short class declarations.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ShortClassDeclTest6",
+			description="Test short class declarations.",
+			flatModel="
 fclass NameTests.ShortClassDeclTest6
  parameter Real R = 1;
  parameter Real a.R = R /*(0.0)*/;
@@ -2596,11 +2575,11 @@ end ShortClassDeclTest6;
 
 
 model ShortClassDeclTest7_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ShortClassDeclTest7_Err",
-        description="Short class declaration of Real.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ShortClassDeclTest7_Err",
+			description="Short class declaration of Real.",
+			errorMessage="
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 834, column 14:
@@ -2618,11 +2597,11 @@ end ShortClassDeclTest7_Err;
 
 
 model ShortClassDeclTest75_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ShortClassDeclTest75_Err",
-         description="",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ShortClassDeclTest75_Err",
+			description="",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 2625, column 15:
@@ -2646,11 +2625,11 @@ end ShortClassDeclTest75_Err;
 
 
 model ShortClassDeclTest8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ShortClassDeclTest8",
-         description="Test short class declarations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ShortClassDeclTest8",
+			description="Test short class declarations",
+			flatModel="
 fclass NameTests.ShortClassDeclTest8
  input NameTests.ShortClassDeclTest8.RealInput u;
  input Modelica.Blocks.Interfaces.RealInput u2;
@@ -2701,11 +2680,11 @@ model InitialEquationTest1
 end InitialEquationTest1;
 
 model EndExpTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="EndExpTest1",
-        description="Test of end expression",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="EndExpTest1",
+			description="Test of end expression",
+			flatModel="
 fclass NameTests.EndExpTest1
  Real x[1];
 equation 
@@ -2721,11 +2700,11 @@ equation
 end EndExpTest1;
 
 model ForTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ForTest1",
-        description="Test for equations.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ForTest1",
+			description="Test for equations.",
+			flatModel="
 fclass NameTests.ForTest1
  Real x[3,3];
 equation 
@@ -2745,11 +2724,11 @@ end ForTest1;
 
 
 model ForTest2_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ForTest2_Err",
-        description="Test for equations.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ForTest2_Err",
+			description="Test for equations.",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 1201, column 18:
   Cannot find class or component declaration for k
@@ -2764,11 +2743,12 @@ equation
 end ForTest2_Err;
 
 model StateSelectTest 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="StateSelectTest",
-        description="Test for equations.",
-                                               flatModel=
-"fclass NameTests.StateSelectTest
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="StateSelectTest",
+			description="Test for equations.",
+			flatModel="
+fclass NameTests.StateSelectTest
  Real x(stateSelect = StateSelect.never);
  Real y(stateSelect = StateSelect.avoid);
  Real z(stateSelect = StateSelect.default);
@@ -2803,11 +2783,11 @@ end StateSelectTest;
 
 
 model IndexLookup1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="IndexLookup1",
-         description="Name lookup from within array subscript",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="IndexLookup1",
+			description="Name lookup from within array subscript",
+			flatModel="
 fclass NameTests.IndexLookup1
  parameter Integer i = 2 /* 2 */;
  Real y.z[2] = {1,2};
@@ -2827,11 +2807,11 @@ end IndexLookup1;
 
 
 model IndexLookup2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="IndexLookup2",
-         description="Name lookup from within array subscript",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="IndexLookup2",
+			description="Name lookup from within array subscript",
+			flatModel="
 fclass NameTests.IndexLookup2
  parameter Integer i = 2 /* 2 */;
  parameter Integer y.i = 1 /* 1 */;
@@ -2852,11 +2832,11 @@ end NameTests.IndexLookup2;
 end IndexLookup2;
 
 model ConditionalComponentTest1_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ConditionalComponentTest1_Err",
-        description="Test of type checking of conditional components.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConditionalComponentTest1_Err",
+			description="Test of type checking of conditional components.",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 1939, column 18:
   The guard expression of a conditional component should be a boolean expression
@@ -2866,11 +2846,11 @@ Semantic error at line 1939, column 18:
 end ConditionalComponentTest1_Err;
 
 model ConditionalComponentTest2_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ConditionalComponentTest2_Err",
-        description="Test of type checking of conditional components.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConditionalComponentTest2_Err",
+			description="Test of type checking of conditional components.",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 1954, column 18:
   The guard expression of a conditional component should be a scalar expression
@@ -2881,11 +2861,11 @@ Semantic error at line 1954, column 18:
 end ConditionalComponentTest2_Err;
 
 model ConditionalComponentTest3_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ConditionalComponentTest3_Err",
-        description="Test of type checking of conditional components.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConditionalComponentTest3_Err",
+			description="Test of type checking of conditional components.",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 1967, column 18:
   The guard expression of a conditional component should be a boolean expression
@@ -2900,11 +2880,11 @@ end ConditionalComponentTest3_Err;
 
 
 model ConditionalComponentTest4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConditionalComponentTest4",
-         description="Test flattening of conditional components.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalComponentTest4",
+			description="Test flattening of conditional components.",
+			flatModel="
 fclass NameTests.ConditionalComponentTest4
  parameter Boolean b = true /* true */;
  parameter Real x = 1 /* 1 */;
@@ -2918,11 +2898,11 @@ end ConditionalComponentTest4;
 
 
 model ConditionalComponentTest5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConditionalComponentTest5",
-         description="Test flattening of conditional components.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalComponentTest5",
+			description="Test flattening of conditional components.",
+			flatModel="
 fclass NameTests.ConditionalComponentTest5
  parameter Real x = 1 /* 1 */;
 
@@ -2936,11 +2916,11 @@ end NameTests.ConditionalComponentTest5;
 end ConditionalComponentTest5;
 
 model ConditionalComponentTest6_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ConditionalComponentTest6_Err",
-        description="Test of type checking of conditional components.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConditionalComponentTest6_Err",
+			description="Test of type checking of conditional components.",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 2021, column 12:
   The component x is conditional: Access of conditional components is only valid in connect statements
@@ -2951,11 +2931,11 @@ Semantic error at line 2021, column 12:
 end ConditionalComponentTest6_Err;
 
 model ConditionalComponentTest7_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ConditionalComponentTest7_Err",
-        description="Test of type checking of conditional components.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConditionalComponentTest7_Err",
+			description="Test of type checking of conditional components.",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 2036, column 12:
   The component m is conditional: Access of conditional components is only valid in connect statements
@@ -2969,11 +2949,11 @@ Semantic error at line 2036, column 12:
 end ConditionalComponentTest7_Err;
 
 model ConditionalComponentTest8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConditionalComponentTest8",
-         description="Test flattening of conditional components.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalComponentTest8",
+			description="Test flattening of conditional components.",
+			flatModel="
 fclass NameTests.ConditionalComponentTest8
  parameter Boolean b = false /* false */;
 
@@ -2985,11 +2965,11 @@ end NameTests.ConditionalComponentTest8;
 end ConditionalComponentTest8;
 
 model ConditionalComponentTest9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConditionalComponentTest9",
-         description="Test flattening of conditional components.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalComponentTest9",
+			description="Test flattening of conditional components.",
+			flatModel="
 fclass NameTests.ConditionalComponentTest9
  parameter Boolean b = false /* false */;
 
@@ -3016,11 +2996,11 @@ end NameTests.ConditionalComponentTest9;
 end ConditionalComponentTest9;
 
 model ConditionalComponentTest10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConditionalComponentTest10",
-         description="Test flattening of conditional components",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalComponentTest10",
+			description="Test flattening of conditional components",
+			flatModel="
 fclass NameTests.ConditionalComponentTest10
  parameter Boolean b = true /* true */;
  parameter Boolean m.b = b;
@@ -3075,11 +3055,11 @@ end NameTests.ConditionalComponentTest10;
 end ConditionalComponentTest10;
 
 model ConditionalComponentTest11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ConditionalComponentTest11",
-         description="Test flattening of conditional components",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalComponentTest11",
+			description="Test flattening of conditional components",
+			flatModel="
 fclass NameTests.ConditionalComponentTest11
  parameter Boolean b = false /* false */;
  parameter Boolean m.b = b;
@@ -3136,11 +3116,11 @@ end ConditionalComponentTest11;
 
 
 model AttributeDot1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="AttributeDot1",
-         description="Access to attribute with dot notation",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AttributeDot1",
+			description="Access to attribute with dot notation",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 2442, column 22:
@@ -3154,11 +3134,11 @@ end AttributeDot1;
 
 
 model ComplexExpInDer1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ComplexExpInDer1",
-         description="",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ComplexExpInDer1",
+			description="",
+			flatModel="
 fclass NameTests.ComplexExpInDer1
  Real x;
  Real y;
@@ -3176,11 +3156,11 @@ end ComplexExpInDer1;
 
 
 model ComplexExpInDer2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ComplexExpInDer2",
-         description="",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ComplexExpInDer2",
+			description="",
+			flatModel="
 fclass NameTests.ComplexExpInDer2
 Real x;
 Real y;
@@ -3196,11 +3176,11 @@ end ComplexExpInDer2;
 
 
 model ComplexExpInDer3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ComplexExpInDer3",
-         description="",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ComplexExpInDer3",
+			description="",
+			flatModel="
 fclass NameTests.ComplexExpInDer3
  Real x;
  Real y;

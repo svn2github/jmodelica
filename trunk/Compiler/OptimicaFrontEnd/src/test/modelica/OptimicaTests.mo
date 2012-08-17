@@ -32,11 +32,11 @@ model OptimicaTests
   end ConstraintTest1;
 
   optimization ClassAttrTest1 (objective=x(finalTime)^2,startTime=3,finalTime=4)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ClassAttrTest1",
-         description="Variability of objective class attribute: timed",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ClassAttrTest1",
+			description="Variability of objective class attribute: timed",
+			flatModel="
 optimization OptimicaTests.ClassAttrTest1(objective = ( x(finalTime) ) ^ 2,startTime = 3,finalTime = 4)
  Real x;
  Real y;
@@ -61,11 +61,11 @@ end OptimicaTests.ClassAttrTest1;
 
 
   optimization ClassAttrTest2 (objective=O,startTime=3,finalTime=4)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ClassAttrTest2",
-         description="Variability of objective class attribute: parameter",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ClassAttrTest2",
+			description="Variability of objective class attribute: parameter",
+			flatModel="
 optimization OptimicaTests.ClassAttrTest2(objective = O,startTime = 3,finalTime = 4)
  Real x;
  Real y;
@@ -92,11 +92,11 @@ end OptimicaTests.ClassAttrTest2;
  
 
   optimization ClassAttrTest3 (objective=O,startTime=3,finalTime=4)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ClassAttrTest3",
-         description="Variability of objective class attribute: constant",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ClassAttrTest3",
+			description="Variability of objective class attribute: constant",
+			flatModel="
 optimization OptimicaTests.ClassAttrTest3(objective = 1.0,startTime = 3,finalTime = 4)
  Real x;
  Real y;
@@ -123,11 +123,11 @@ end OptimicaTests.ClassAttrTest3;
   
 
   optimization ClassAttrTest4 (objective=1.0,startTime=3,finalTime=4)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ClassAttrTest4",
-         description="Variability of objective class attribute: constant",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ClassAttrTest4",
+			description="Variability of objective class attribute: constant",
+			flatModel="
 optimization OptimicaTests.ClassAttrTest4(objective = 1.0,startTime = 3,finalTime = 4)
  Real x;
  Real y;
@@ -152,11 +152,11 @@ end OptimicaTests.ClassAttrTest4;
   
 
   optimization ClassAttrTest5 (objective=x,startTime=3,finalTime=4)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ClassAttrTest5",
-         description="Variability of objective class attribute: continuous",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ClassAttrTest5",
+			description="Variability of objective class attribute: continuous",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
 Semantic error at line 108, column 31:
@@ -175,11 +175,11 @@ Semantic error at line 108, column 31:
 
   
   optimization ClassAttrTest6(objective=x,startTime=0,finalTime=1)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ClassAttrTest6",
-         description="Using missing variable in class attribute",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ClassAttrTest6",
+			description="Using missing variable in class attribute",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
 Semantic error at line 179, column 41:
@@ -189,11 +189,11 @@ Semantic error at line 179, column 41:
   end ClassAttrTest6;
 
   optimization ClassAttrTest7 (objectiveIntegrand=x(finalTime),startTime=3,finalTime=4)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ClassAttrTest7",
-         description="Variability of objective class attribute: continuous",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ClassAttrTest7",
+			description="Variability of objective class attribute: continuous",
+			errorMessage="
 1 errors found:
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
 Semantic error at line 193, column 31:
@@ -211,11 +211,11 @@ Semantic error at line 193, column 31:
   end ClassAttrTest7;
 
   optimization ClassAttrTest8 (objectiveIntegrand=x^2,startTime=3,finalTime=4)
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ClassAttrTest8",
-         description="Variability of objective class attribute: timed",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ClassAttrTest8",
+			description="Variability of objective class attribute: timed",
+			flatModel="
 optimization OptimicaTests.ClassAttrTest8(objectiveIntegrand = x ^ 2,startTime = 3,finalTime = 4)
  Real x;
  Real y;
@@ -240,11 +240,13 @@ end OptimicaTests.ClassAttrTest8;
 
   optimization FreeDependentParametersTest1(objective=p1^2,startTime=0,finalTime=1) 
 
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest1",
-        methodName="freeParametersDiagnostics",
-        convert_free_dependent_parameters_to_algebraics = false,
-        description="Test that free dependent parameters are computed correctly.", 
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="FreeDependentParametersTest1",
+			methodName="freeParametersDiagnostics",
+			convert_free_dependent_parameters_to_algebraics=false,
+			description="
+Test that free dependent parameters are computed correctly.", 
         methodResult=
         "  
 Free independent parameters:
@@ -265,11 +267,13 @@ p3
 
   optimization FreeDependentParametersTest2(objective=p1^2,startTime=0,finalTime=1) 
 
-  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest2",
-        methodName="freeParametersDiagnostics",
-        convert_free_dependent_parameters_to_algebraics = false,
-        description="Test that free dependent parameters are computed correctly.", 
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="FreeDependentParametersTest2",
+			methodName="freeParametersDiagnostics",
+			convert_free_dependent_parameters_to_algebraics=false,
+			description="
+Test that free dependent parameters are computed correctly.", 
         methodResult=
         "  
 Free independent parameters:
@@ -293,11 +297,13 @@ p3
 
   optimization FreeDependentParametersTest3(objective=p1^2,startTime=0,finalTime=1) 
 
-  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest3",
-        methodName="freeParametersDiagnostics",
-        convert_free_dependent_parameters_to_algebraics = false,
-        description="Test that free dependent parameters are computed correctly.", 
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="FreeDependentParametersTest3",
+			methodName="freeParametersDiagnostics",
+			convert_free_dependent_parameters_to_algebraics=false,
+			description="
+Test that free dependent parameters are computed correctly.", 
         methodResult=
         "  
 Free independent parameters:
@@ -319,11 +325,13 @@ p3
 
   optimization FreeDependentParametersTest4(objective=p1^2,startTime=0,finalTime=1) 
 
-  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest4",
-        methodName="freeParametersDiagnostics",
-        convert_free_dependent_parameters_to_algebraics = false,
-        description="Test that free dependent parameters are computed correctly.", 
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="FreeDependentParametersTest4",
+			methodName="freeParametersDiagnostics",
+			convert_free_dependent_parameters_to_algebraics=false,
+			description="
+Test that free dependent parameters are computed correctly.", 
         methodResult=
         "  
 Free independent parameters:
@@ -345,11 +353,13 @@ p3
 
   optimization FreeDependentParametersTest5(objective=p1^2 + p2^2,startTime=0,finalTime=1) 
 
-  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest5",
-        methodName="variableDiagnostics",
-        convert_free_dependent_parameters_to_algebraics = false,
-        description="Test linearity of free dependent parameters.", 
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="FreeDependentParametersTest5",
+			methodName="variableDiagnostics",
+			convert_free_dependent_parameters_to_algebraics=false,
+			description="
+Test linearity of free dependent parameters.", 
 		methodResult="  
 Independent constants: 
 
@@ -417,11 +427,11 @@ Input variables:
   
   optimization InstantValueTest3_Err (objective=x(finalTime),startTime=0,finalTime=1)
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="InstantValueTest3_Err",
-         description="Test that error messages are generated if timed variables are used in equations.",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InstantValueTest3_Err",
+			description="Test that error messages are generated if timed variables are used in equations.",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
 Semantic error at line 217, column 10:
   Timed variables are not allowed in equations.
@@ -434,11 +444,12 @@ Semantic error at line 217, column 10:
 /*
   optimization InstantValueTest4_Err (objective=x(finalTime),startTime=0,finalTime=1)
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="InstantValueTest4_Err",
-         description="Test that error messages are generated when the argument to a timed variable is larger than parameter",
-         errorMessage="Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InstantValueTest4_Err",
+			description="Test that error messages are generated when the argument to a timed variable is larger than parameter",
+			errorMessage="
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
 Semantic error at line 234, column 10:
   The argument of a timed variable must have variability less than or equal to parameter variability.
 ")})));
@@ -847,11 +858,11 @@ end TestFunction1;
 
 
 model OptFunctionFlatten1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="OptFunctionFlatten1",
-         description="Flattening functions: function called in extended class, optimica compiler",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="OptFunctionFlatten1",
+			description="Flattening functions: function called in extended class, optimica compiler",
+			flatModel="
 fclass OptimicaTests.OptFunctionFlatten1
  Real y.x;
 equation

@@ -1,13 +1,13 @@
 package CADCodeGenTests
 
 model CADsin
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADsin",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADsin",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = sin(_x1_1);
@@ -26,13 +26,13 @@ equation
 end CADsin;
 
 model CADcos
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADcos",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADcos",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = cos(_x1_1);
@@ -51,13 +51,13 @@ equation
 end CADcos;
 
 model CADtan
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADtan",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADtan",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = tan(_x1_1);
@@ -76,13 +76,13 @@ equation
 end CADtan;
 
 model CADasin
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADasin",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADasin",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = asin(_x1_1);
@@ -102,13 +102,13 @@ equation
 end CADasin;
 
 model CADacos
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADacos",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADacos",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = acos(_x1_1);
@@ -128,13 +128,13 @@ equation
 end CADacos;
 
 model CADatan
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADatan",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADatan",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = atan(_x1_1);
@@ -154,13 +154,13 @@ equation
 end CADatan;
 
 model CADatan2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADatan2",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADatan2",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 
@@ -189,13 +189,13 @@ equation
 end CADatan2;
 
 model CADsinh
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADsinh",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADsinh",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = sinh(_x1_1);
@@ -215,13 +215,13 @@ equation
 end CADsinh;
 
 model CADcosh
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADcosh",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADcosh",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = cosh(_x1_1);
@@ -241,13 +241,13 @@ equation
 end CADcosh;
 
 model CADtanh
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADtanh",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADtanh",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = tanh(_x1_1);
@@ -268,13 +268,13 @@ equation
 end CADtanh;
 
 model CADexp
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADexp",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADexp",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = exp(_x1_1);
@@ -295,13 +295,13 @@ equation
 end CADexp;
 
 model CADlog
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADlog",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADlog",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = log(_x1_1);
@@ -322,13 +322,13 @@ equation
 end CADlog;
 
 model CADlog10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADlog10",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADlog10",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = log10(_x1_1);
@@ -349,13 +349,13 @@ equation
 end CADlog10;
 
 model CADsqrt
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADsqrt",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADsqrt",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = sqrt(_x1_1);
@@ -376,13 +376,13 @@ equation
 end CADsqrt;
 
 model CADadd
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADadd",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADadd",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = _x1_1 + _x2_2;
@@ -408,13 +408,13 @@ equation
 end CADadd;
 
 model CADsub
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADsub",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADsub",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = _x1_1 - _x2_2;
@@ -440,13 +440,13 @@ equation
 end CADsub;
 
 model CADmul
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADmul",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADmul",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = _x1_1 * _x2_2;
@@ -472,13 +472,13 @@ equation
 end CADmul;
 
 model CADdiv
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADdiv",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADdiv",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = _x1_1 / _x2_2;
@@ -504,13 +504,13 @@ equation
 end CADdiv;
 
 model CADpow
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADpow",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADpow",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 v_0 = pow(_x1_1 , _x2_2);
@@ -540,13 +540,13 @@ equation
 end CADpow;
 
 model CADabs
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADabs",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADabs",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 
@@ -577,13 +577,13 @@ equation
 end CADabs;
 
 model IfExpExample1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="IfExpExample1",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="IfExpExample1",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 
@@ -683,13 +683,13 @@ equation
 end IfExpExample1;
 
 model IfExpExample2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="IfExpExample2",
-         description="",
-         generate_dae_jacobian=true,
-         template="$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="IfExpExample2",
+			description="",
+			generate_dae_jacobian=true,
+			template="$C_DAE_equation_directional_derivative$",
+			generatedCode="
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 
@@ -759,14 +759,14 @@ end IfExpExample2;
 
 
   model CADFunction1		  
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADFunction1",
-         description="",
-         generate_dae_jacobian=true,
-         generate_ode_jacobian=true,
-         template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADFunction1",
+			description="",
+			generate_dae_jacobian=true,
+			generate_ode_jacobian=true,
+			template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
+			generatedCode="
 void func_CADCodeGenTests_CADFunction1_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t y_var_v;
@@ -801,14 +801,14 @@ func_CADCodeGenTests_CADFunction1_F_der_AD(_a_0, (*dz)[jmi_get_index_from_value_
   end CADFunction1;
 
   model CADFunction2	  
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADFunction2",
-         description="",
-         generate_dae_jacobian=true,
-         generate_ode_jacobian=true,
-         template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADFunction2",
+			description="",
+			generate_dae_jacobian=true,
+			generate_ode_jacobian=true,
+			template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
+			generatedCode="
 void func_CADCodeGenTests_CADFunction2_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* a_var_o, jmi_ad_var_t* b_var_o, jmi_ad_var_t* c_var_o, jmi_ad_var_t* a_der_o, jmi_ad_var_t* b_der_o, jmi_ad_var_t* c_der_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t a_var_v;
@@ -875,14 +875,14 @@ func_CADCodeGenTests_CADFunction2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_
   
 
   model CADFunction3	  
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADFunction3",
-         description="",
-         generate_dae_jacobian=true,
-         generate_ode_jacobian=true,
-         template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADFunction3",
+			description="",
+			generate_dae_jacobian=true,
+			generate_ode_jacobian=true,
+			template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
+			generatedCode="
 void func_CADCodeGenTests_CADFunction3_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t y_var_v;
@@ -1000,14 +1000,14 @@ d_5 = d_6 + d_7;
   
   
     model CADFunction4	
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADFunction4",
-         description="",
-         generate_dae_jacobian=true,
-         generate_ode_jacobian=true,
-         template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADFunction4",
+			description="",
+			generate_dae_jacobian=true,
+			generate_ode_jacobian=true,
+			template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
+			generatedCode="
 void func_CADCodeGenTests_CADFunction4_F2_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* a_var_o, jmi_ad_var_t* a_der_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t a_var_v;
@@ -1101,14 +1101,14 @@ func_CADCodeGenTests_CADFunction4_F2_der_AD(_x_0, (*dz)[jmi_get_index_from_value
   end CADFunction4; 
 
 model CADFunction5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADFunction5",
-         description="",
-         generate_dae_jacobian=true,
-         generate_ode_jacobian=true,
-         template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADFunction5",
+			description="",
+			generate_dae_jacobian=true,
+			generate_ode_jacobian=true,
+			template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
+			generatedCode="
 void func_CADCodeGenTests_CADFunction5_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x1_var_v, jmi_ad_var_t x2_var_v, jmi_ad_var_t x3_var_v, jmi_ad_var_t x4_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t x2_der_v, jmi_ad_var_t x3_der_v, jmi_ad_var_t x4_der_v, jmi_ad_var_t* a_var_o, jmi_ad_var_t* b_var_o, jmi_ad_var_t* c_var_o, jmi_ad_var_t* d_var_o, jmi_ad_var_t* e_var_o, jmi_ad_var_t* f_var_o, jmi_ad_var_t* g_var_o, jmi_ad_var_t* a_der_o, jmi_ad_var_t* b_der_o, jmi_ad_var_t* c_der_o, jmi_ad_var_t* d_der_o, jmi_ad_var_t* e_der_o, jmi_ad_var_t* f_der_o, jmi_ad_var_t* g_der_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t a_var_v;
@@ -1338,14 +1338,14 @@ end CADFunction5;
 
 
 model CADFunction6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADFunction6",
-         description="",
-         generate_dae_jacobian=true,
-         generate_ode_jacobian=true,
-         template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADFunction6",
+			description="",
+			generate_dae_jacobian=true,
+			generate_ode_jacobian=true,
+			template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
+			generatedCode="
 void func_CADCodeGenTests_CADFunction6_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x1_var_v, jmi_ad_var_t x2_var_v, jmi_ad_var_t x3_var_v, jmi_ad_var_t x4_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t x2_der_v, jmi_ad_var_t x3_der_v, jmi_ad_var_t x4_der_v, jmi_ad_var_t* a_var_o, jmi_ad_var_t* b_var_o, jmi_ad_var_t* c_var_o, jmi_ad_var_t* d_var_o, jmi_ad_var_t* e_var_o, jmi_ad_var_t* f_var_o, jmi_ad_var_t* g_var_o, jmi_ad_var_t* a_der_o, jmi_ad_var_t* b_der_o, jmi_ad_var_t* c_der_o, jmi_ad_var_t* d_der_o, jmi_ad_var_t* e_der_o, jmi_ad_var_t* f_der_o, jmi_ad_var_t* g_der_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t a_var_v;
@@ -1609,14 +1609,14 @@ d_15 = d_16 + (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
 end CADFunction6;
 
 model CADFunction7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADFunction7",
-         description="",
-         generate_dae_jacobian=true,
-         generate_ode_jacobian=true,
-         template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADFunction7",
+			description="",
+			generate_dae_jacobian=true,
+			generate_ode_jacobian=true,
+			template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
+			generatedCode="
 void func_CADCodeGenTests_CADFunction7_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* z_var_o, jmi_ad_var_t* y_der_o, jmi_ad_var_t* z_der_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t y_var_v;
@@ -1689,14 +1689,14 @@ d_3 = d_4 * 1/(v_4);
   end CADFunction7;
 
 model CADDerAnno1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADDerAnno1",
-         description="",
-         generate_dae_jacobian=true,
-         generate_ode_jacobian=true,
-         template="$CAD_function_headers$,$CAD_functions$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADDerAnno1",
+			description="",
+			generate_dae_jacobian=true,
+			generate_ode_jacobian=true,
+			template="$CAD_function_headers$,$CAD_functions$",
+			generatedCode="
 void func_CADCodeGenTests_CADDerAnno1_f_der_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t der_x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t der_x_der_v, jmi_ad_var_t* der_y_var_o, jmi_ad_var_t* der_y_der_o);
 void func_CADCodeGenTests_CADDerAnno1_f_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
 ,void func_CADCodeGenTests_CADDerAnno1_f_der_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t der_x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t der_x_der_v, jmi_ad_var_t* der_y_var_o, jmi_ad_var_t* der_y_der_o) {
@@ -1764,13 +1764,13 @@ end CADDerAnno1;
 
 
 model CADDerAnno2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADDerAnno2",
-         description="",
-         generate_ode_jacobian=true,
-         template="$CAD_function_headers$,$CAD_functions$,$C_functions$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADDerAnno2",
+			description="",
+			generate_ode_jacobian=true,
+			template="$CAD_function_headers$,$CAD_functions$,$C_functions$",
+			generatedCode="
 void func_CADCodeGenTests_CADDerAnno2_f_der_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t i1_v, jmi_ad_var_t b1_v, jmi_ad_var_t der_x1_var_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t der_x1_der_v, jmi_ad_var_t* der_y1_var_o, jmi_ad_var_t* der_y1_der_o);
 void func_CADCodeGenTests_CADDerAnno2_f2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* y_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o, jmi_ad_var_t* y_der_o);
 ,void func_CADCodeGenTests_CADDerAnno2_f_der_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t i1_v, jmi_ad_var_t b1_v, jmi_ad_var_t der_x1_var_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t der_x1_der_v, jmi_ad_var_t* der_y1_var_o, jmi_ad_var_t* der_y1_der_o) {
@@ -1925,18 +1925,18 @@ jmi_ad_var_t func_CADCodeGenTests_CADDerAnno2_f2_exp(jmi_ad_var_t x1_v, jmi_ad_v
 end CADDerAnno2;
 
 model CADRes1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADRes1",
-         description="",
-         generate_ode_jacobian=true,
-         eliminate_alias_variables=false,
-         fmi_version=2.0,
-         generate_ode=true,
-         equation_sorting=true,
-         enable_tearing=false,
-         template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADRes1",
+			description="",
+			generate_ode_jacobian=true,
+			eliminate_alias_variables=false,
+			fmi_version=2.0,
+			generate_ode=true,
+			equation_sorting=true,
+			enable_tearing=false,
+			template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$",
+			generatedCode="
 
 /******** Declarations *******/
 
@@ -2064,18 +2064,18 @@ d_7 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] * cos(_y_1);
 end CADRes1;
 
 model CADRes2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADRes2",
-         description="",
-         generate_ode_jacobian=true,
-         eliminate_alias_variables=false,
-         fmi_version=2.0,
-         generate_ode=true,
-         equation_sorting=true,
-         enable_tearing=false,
-         template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADRes2",
+			description="",
+			generate_ode_jacobian=true,
+			eliminate_alias_variables=false,
+			fmi_version=2.0,
+			generate_ode=true,
+			equation_sorting=true,
+			enable_tearing=false,
+			template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$",
+			generatedCode="
 
 /******** Declarations *******/
 
@@ -2160,18 +2160,18 @@ func_CADCodeGenTests_CADRes2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(4
 end CADRes2;
 
 model CADRes3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADRes3",
-         description="",
-         generate_ode_jacobian=true,
-         eliminate_alias_variables=false,
-         fmi_version=2.0,
-         generate_ode=true,
-         equation_sorting=true,
-         enable_tearing=false,
-         template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADRes3",
+			description="",
+			generate_ode_jacobian=true,
+			eliminate_alias_variables=false,
+			fmi_version=2.0,
+			generate_ode=true,
+			equation_sorting=true,
+			enable_tearing=false,
+			template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$",
+			generatedCode="
 
 /******** Declarations *******/
 
@@ -2395,18 +2395,18 @@ func_CADCodeGenTests_CADRes3_F_der_AD(_x1_0, _x2_1, _x3_2, _x4_3, (*dz)[jmi_get_
 end CADRes3;
 
 model CADTorn1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADTorn1",
-         description="",
-         generate_ode_jacobian=true,
-         eliminate_alias_variables=false,
-         fmi_version=2.0,
-         generate_ode=true,
-         equation_sorting=true,
-         enable_tearing=true,
-         template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADTorn1",
+			description="",
+			generate_ode_jacobian=true,
+			eliminate_alias_variables=false,
+			fmi_version=2.0,
+			generate_ode=true,
+			equation_sorting=true,
+			enable_tearing=true,
+			template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$",
+			generatedCode="
 
 /******** Declarations *******/
 
@@ -2909,17 +2909,17 @@ end CADTorn1;
 
 
 model CADOde1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADOde1",
-         description="",
-         generate_ode_jacobian=true,
-         eliminate_alias_variables=false,
-         fmi_version=2.0,
-         generate_ode=true,
-         equation_sorting=true,
-         template="$CAD_ode_derivatives$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADOde1",
+			description="",
+			generate_ode_jacobian=true,
+			eliminate_alias_variables=false,
+			fmi_version=2.0,
+			generate_ode=true,
+			equation_sorting=true,
+			template="$CAD_ode_derivatives$",
+			generatedCode="
 
 /******** Declarations *******/
 
@@ -3045,13 +3045,13 @@ _Y_7 = tmp_var_3;
 end CADOde1;
 
 model CADExpInFuncArg1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADExpInFuncArg1",
-         description="",
-         generate_ode_jacobian=true,
-         template="$CAD_function_headers$,$CAD_functions$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADExpInFuncArg1",
+			description="",
+			generate_ode_jacobian=true,
+			template="$CAD_function_headers$,$CAD_functions$",
+			generatedCode="
 void func_CADCodeGenTests_CADExpInFuncArg1_f_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y1_var_o, jmi_ad_var_t* y2_var_o, jmi_ad_var_t* y1_der_o, jmi_ad_var_t* y2_der_o);
 void func_CADCodeGenTests_CADExpInFuncArg1_f3_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t x2_var_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t x2_der_v, jmi_ad_var_t* y1_var_o, jmi_ad_var_t* y2_var_o, jmi_ad_var_t* y1_der_o, jmi_ad_var_t* y2_der_o);
 void func_CADCodeGenTests_CADExpInFuncArg1_f1_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
@@ -3246,13 +3246,13 @@ equation
 end CADExpInFuncArg1;
 
 model CADDiscreteFuncArg1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="CADDiscreteFuncArg1",
-         description="",
-         generate_ode_jacobian=true,
-         template="$CAD_function_headers$,$CAD_functions$",
-         generatedCode="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADDiscreteFuncArg1",
+			description="",
+			generate_ode_jacobian=true,
+			template="$CAD_function_headers$,$CAD_functions$",
+			generatedCode="
 void func_CADCodeGenTests_CADDiscreteFuncArg1_f1_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o);
 void func_CADCodeGenTests_CADDiscreteFuncArg1_f2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o);
 ,void func_CADCodeGenTests_CADDiscreteFuncArg1_f1_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o) {
@@ -3324,12 +3324,12 @@ return;
 end CADDiscreteFuncArg1;
 
 model SparseJacTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="SparseJacTest1",
-         description="Test that sparsity information is generated correctly",
-	 generate_dae_jacobian=true,
-         template="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="SparseJacTest1",
+			description="Test that sparsity information is generated correctly",
+			generate_dae_jacobian=true,
+			template="
 $C_DAE_equation_sparsity$
 ",
          generatedCode="
@@ -3360,12 +3360,12 @@ equation
 end SparseJacTest1;
 
 model SparseJacTest2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="SparseJacTest2",
-         description="Test that sparsity information is generated correctly",
-	 generate_dae_jacobian=true,
-         template="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="SparseJacTest2",
+			description="Test that sparsity information is generated correctly",
+			generate_dae_jacobian=true,
+			template="
 $C_DAE_equation_sparsity$
 ",
          generatedCode="
@@ -3399,12 +3399,12 @@ equation
 end SparseJacTest2;
 
 model SparseJacTest3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="SparseJacTest3",
-         description="Test that sparsity information is generated correctly",
-	 generate_dae_jacobian=true,
-         template="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="SparseJacTest3",
+			description="Test that sparsity information is generated correctly",
+			generate_dae_jacobian=true,
+			template="
 $C_DAE_equation_sparsity$
 ",
          generatedCode="
@@ -3439,12 +3439,12 @@ equation
 end SparseJacTest3;
 
 model SparseJacTest4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="SparseJacTest4",
-         description="Test that sparsity information is generated correctly",
-	 generate_dae_jacobian=true,
-         template="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="SparseJacTest4",
+			description="Test that sparsity information is generated correctly",
+			generate_dae_jacobian=true,
+			template="
 $C_DAE_equation_sparsity$
 ",
          generatedCode="
@@ -3477,12 +3477,12 @@ equation
 end SparseJacTest4;
 
 model SparseJacTest5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CADCodeGenTestCase(
-         name="SparseJacTest5",
-         description="Test that sparsity information is generated correctly",
-	 generate_dae_jacobian=true,
-         template="
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="SparseJacTest5",
+			description="Test that sparsity information is generated correctly",
+			generate_dae_jacobian=true,
+			template="
 $C_DAE_equation_sparsity$
 ",
          generatedCode="

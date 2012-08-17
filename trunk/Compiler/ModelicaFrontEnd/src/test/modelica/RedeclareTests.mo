@@ -19,11 +19,12 @@ package RedeclareTests
 
 
 model RedeclareTestOx1 "Basic redeclare test"
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx1",
-                                               description="Basic redeclares.",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTestOx1
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTestOx1",
+			description="Basic redeclares.",
+			flatModel="
+fclass RedeclareTests.RedeclareTestOx1
  Real c.a.x = 2 /*(2)*/;
  Real c.a.y = 3 /*(3)*/;
 end RedeclareTests.RedeclareTestOx1;
@@ -50,11 +51,11 @@ end RedeclareTestOx1;
  
 model RedeclareTestOx2_Err "Basic redeclare test, erroneous"
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx2_Err",
-        description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTestOx2_Err",
+			description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 71, column 8:
@@ -93,11 +94,12 @@ end RedeclareTestOx2_Err;
  
 model RedeclareTestOx3 "Redeclare deeper into instance hierarchy."
 
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx3",
-        description="Basic test of redeclares.",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTestOx3
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTestOx3",
+			description="Basic test of redeclares.",
+			flatModel="
+fclass RedeclareTests.RedeclareTestOx3
  Real d.c.a.x = 2 /*(2)*/;
  Real d.c.a.y = 3 /*(3)*/;
 end RedeclareTests.RedeclareTestOx3;
@@ -132,11 +134,11 @@ model RedeclareTestOx4_Err
     "Redeclare deeper into instance hierarchy."
  
   
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx4_Err",
-        description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTestOx4_Err",
+			description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 159, column 10:
@@ -181,11 +183,12 @@ end RedeclareTestOx4_Err;
 model RedeclareTestOx5 
     "Redeclare deeper into instance hierarchy and redeclaration of a replacing component."
  
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx5",
-        description="Basic test of redeclares.",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTestOx5
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTestOx5",
+			description="Basic test of redeclares.",
+			flatModel="
+fclass RedeclareTests.RedeclareTestOx5
  Real e.d.a.x = 2 /*(2)*/;
  Real e.d.a.y = 3 /*(3)*/;
  Real e.d.a.z = 4 /*(4)*/;
@@ -262,11 +265,11 @@ end RedeclareTestOx6_Err;
     "Redeclare deeper into instance hierarchy and redeclaration of a replacing component, Errouneous?"
  
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx65_Err",
-        description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTestOx65_Err",
+			description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 276, column 10:
@@ -344,11 +347,12 @@ end RedeclareTestOx7_Err;
  
 model RedeclareTestOx8 "Constraining clause example"
  
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx8",
-        description="Basic test of redeclares.",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTestOx8
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTestOx8",
+			description="Basic test of redeclares.",
+			flatModel="
+fclass RedeclareTests.RedeclareTestOx8
  Real d.c.x = 2 /*(2)*/;
  Real d.c.y = 3 /*(3)*/;
 end RedeclareTests.RedeclareTestOx8;
@@ -381,11 +385,12 @@ end RedeclareTestOx8;
 model RedeclareTestOx9_Err "Constraining clause example, errouneous"
  
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx9_Err",
-        description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
-                                               errorMessage=
-"1 error(s) found...
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTestOx9_Err",
+			description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
+			errorMessage="
+1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 399, column 8:
   'redeclare A c' is not a subtype of 'replaceable C c constrainedby B '
@@ -432,11 +437,12 @@ end RedeclareTestOx9_Err;
 
 model RedeclareTestOx95_Err "Constraining clause example, errouneous"
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx95_Err",
-        description="Check that the declaration is a subtype of the constraining clause",
-                                               errorMessage=
-"1 error(s) found...
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTestOx95_Err",
+			description="Check that the declaration is a subtype of the constraining clause",
+			errorMessage="
+1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 450, column 10:
   In the declaration 'replaceable B b constrainedby C ', the declared class is not a subtype of the constraining class
@@ -471,11 +477,12 @@ end RedeclareTestOx95_Err;
  /*
 model RedeclareTestOx10 "Constraining clause example."
  
-    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx10",
-        description="Basic test of redeclares.",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTestOx10
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTestOx10",
+			description="Basic test of redeclares.",
+			flatModel="
+fclass RedeclareTests.RedeclareTestOx10
  Real e.d.c.x = 2;
  Real e.d.c.y = 3;
 end RedeclareTests.RedeclareTestOx10;
@@ -515,11 +522,11 @@ end RedeclareTestOx10;
  */
 /*
 model RedeclareTestOx11_Err "Constraining clause example."
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx11_Err",
-        description="Check that the declaration is a subtype of the constraining clause",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTestOx11_Err",
+			description="Check that the declaration is a subtype of the constraining clause",
+			errorMessage="
   2 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 549, column 32:
@@ -569,11 +576,12 @@ end RedeclareTestOx11_Err;
  */
 
  model RedeclareTestOx115_Err "Constraining clause example."
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx115_Err",
-        description="Check that the declaration is a subtype of the constraining clause",
-                                               errorMessage=
-"1 error(s) found...
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTestOx115_Err",
+			description="Check that the declaration is a subtype of the constraining clause",
+			errorMessage="
+1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 601, column 69:
   In the declaration 'redeclare replaceable B c constrainedby C ', the declared class is not a subtype of the constraining class
@@ -615,11 +623,12 @@ Semantic error at line 431, column 32:
 end RedeclareTestOx115_Err;
 
  model RedeclareTestOx116_Err "Constraining clause example."
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx116_Err",
-        description="Check that the declaration is a subtype of the constraining clause",
-                                               errorMessage=
-"1 error(s) found...
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTestOx116_Err",
+			description="Check that the declaration is a subtype of the constraining clause",
+			errorMessage="
+1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 651, column 32:
   'redeclare replaceable C c constrainedby A ' is not a subtype of 'replaceable B c'
@@ -666,11 +675,12 @@ end RedeclareTestOx116_Err;
  /*
 model RedeclareTestOx12 "Constraining clause example."
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx12",
-        description="Check that the declaration is a subtype of the constraining clause",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTestOx12
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTestOx12",
+			description="Check that the declaration is a subtype of the constraining clause",
+			flatModel="
+fclass RedeclareTests.RedeclareTestOx12
  Real d.c.x = 5;
 end RedeclareTests.RedeclareTestOx12;
 "
@@ -696,11 +706,12 @@ end RedeclareTestOx12;
 */ 
 model RedeclareTestOx13 "Constraining clause example."
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx13",
-        description="Check that the declaration is a subtype of the constraining clause",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTestOx13
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTestOx13",
+			description="Check that the declaration is a subtype of the constraining clause",
+			flatModel="
+fclass RedeclareTests.RedeclareTestOx13
  Real e.d.c.x = 4 /*(4)*/;
  Real e.d.c.y = 3 /*(3)*/;
  Real e.d.c.z = 5 /*(5)*/;
@@ -739,11 +750,12 @@ end RedeclareTestOx13;
 model RedeclareTest_Constr_14_Err "Constraining clause example."
  
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest_Constr_14_Err",
-        description="Check that the declaration is a subtype of the constraining clause",
-                                               errorMessage=
-"1 error(s) found...
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTest_Constr_14_Err",
+			description="Check that the declaration is a subtype of the constraining clause",
+			errorMessage="
+1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 752, column 10:
   In the declaration 'redeclare replaceable B c constrainedby C ', the declared class is not a subtype of the constraining class
@@ -781,11 +793,12 @@ end RedeclareTest_Constr_14_Err;
 
 model RedeclareTest_Constr_15_Err "Constraining clause example."
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest_Constr_15_Err",
-        description="Check that the declaration is a subtype of the constraining clause",
-                                               errorMessage=
-"1 error(s) found...
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTest_Constr_15_Err",
+			description="Check that the declaration is a subtype of the constraining clause",
+			errorMessage="
+1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 790, column 10:
   In the declaration 'redeclare replaceable B c constrainedby C ', the declared class is not a subtype of the constraining class
@@ -822,11 +835,12 @@ end RedeclareTest_Constr_15_Err;
 
 model RedeclareTest_Constr_16_Err "Constraining clause example."
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest_Constr_16_Err",
-        description="Check that the declaration is a subtype of the constraining clause",
-                                               errorMessage=
-"1 error(s) found...
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTest_Constr_16_Err",
+			description="Check that the declaration is a subtype of the constraining clause",
+			errorMessage="
+1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 837, column 10:
   'redeclare replaceable A c' is not a subtype of 'redeclare replaceable B c constrainedby B '
@@ -863,11 +877,12 @@ end RedeclareTest_Constr_16_Err;
 
 model RedeclareTest_Constr_17_Err "Constraining clause example."
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest_Constr_17_Err",
-        description="Check that the declaration is a subtype of the constraining clause",
-                                               errorMessage=
-"1 error(s) found...
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTest_Constr_17_Err",
+			description="Check that the declaration is a subtype of the constraining clause",
+			errorMessage="
+1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 884, column 34:
   'redeclare replaceable B c' is not a subtype of 'redeclare replaceable C c constrainedby C '
@@ -903,11 +918,11 @@ Semantic error at line 884, column 34:
 end RedeclareTest_Constr_17_Err;
 
 model RedeclareTest_Constr_18_Err "Constraining clause example."
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="RedeclareTest_Constr_18_Err",
-         description="Check that the declaration is a subtype of the constraining clause",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTest_Constr_18_Err",
+			description="Check that the declaration is a subtype of the constraining clause",
+			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
 Semantic error at line 940, column 20:
@@ -948,11 +963,12 @@ end RedeclareTest_Constr_18_Err;
 
 model RedeclareTest_Classes_1 "Redeclaration of classes example."
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest_Classes_1",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTest_Classes_1
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest_Classes_1",
+			description="Test of parametrized classes.",
+			flatModel="
+fclass RedeclareTests.RedeclareTest_Classes_1
  Real e.d.a.x = 4 /*(4)*/;
  Real e.d.a.y = 3 /*(3)*/;
  Real e.d.a.z = 4 /*(4)*/;
@@ -1059,11 +1075,11 @@ end RedeclareTest0;
 
 model RedeclareTest1
   
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest1",
-                                               description="Basic redeclares.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest1",
+			description="Basic redeclares.",
+			flatModel="
  fclass RedeclareTests.RedeclareTest1
  Real a.c2.x = 3 /*(3)*/;
  Real a.c2.y = 4 /*(4)*/;
@@ -1108,11 +1124,11 @@ end RedeclareTest1;
 
 model RedeclareTest2
   
-       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest2",
-                                               description="Basic redeclares.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest2",
+			description="Basic redeclares.",
+			flatModel="
 /*
 fclass RedeclareTests.RedeclareTest2;
   Real p.c1.r = 1;
@@ -1170,11 +1186,11 @@ end RedeclareTest2;
 
 model RedeclareTest3 
   
-        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest3",
-                                               description="Basic redeclares.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest3",
+			description="Basic redeclares.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest3
  Real r = 0.1 /*(0.1)*/;
  Real palette.q = 0.3 /*(0.3)*/;
@@ -1267,11 +1283,11 @@ end RedeclareTest3;
 
 model RedeclareTest4
    
-         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest4",
-                                               description="Basic redeclares.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest4",
+			description="Basic redeclares.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest4
  Real c0.q = 0.3 /*(0.3)*/;
  Real c0.p.c1.r = 1 /*(1)*/;
@@ -1341,11 +1357,11 @@ end RedeclareTest4;
 model RedeclareTest5
   
   
-    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest5",
-                                               description="Basic redeclares.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest5",
+			description="Basic redeclares.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest5
  Real u.c1.c2.x = 55 /*(55)*/;
  Real u.c1.c2.y = 4 /*(4)*/;
@@ -1387,11 +1403,11 @@ end C222;
 end RedeclareTest5;
 
 model RedeclareTest6
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest6",
-                                               description="Basic redeclares.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest6",
+			description="Basic redeclares.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest6
  Real b.a.c2.x = 6 /*(6)*/;
  Real b.a.c2.y = 4 /*(4)*/;
@@ -1429,11 +1445,11 @@ end RedeclareTests.RedeclareTest6;
 end RedeclareTest6;
 
 model RedeclareTest65_Err
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest65_Err",
-                                               description="Basic redeclare error.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTest65_Err",
+			description="Basic redeclare error.",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 404, column 7:
@@ -1470,11 +1486,11 @@ end RedeclareTest65_Err;
 
 
 model RedeclareTest7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest7",
-                                               description="Basic redeclares.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest7",
+			description="Basic redeclares.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest7
  Real p = 4 /*(4)*/;
  Real a.d.b.x = p;
@@ -1539,11 +1555,11 @@ end RedeclareTest8;
 
 model RedeclareTest9
   
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest9",
-                                               description="Basic redeclares.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest9",
+			description="Basic redeclares.",
+			flatModel="
  fclass RedeclareTests.RedeclareTest9
  Real a.c2.x = 3 /*(3)*/;
  Real a.c2.y = 4 /*(4)*/;
@@ -1587,11 +1603,11 @@ end RedeclareTest9;
 
 model RedeclareTest95_Err
   
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest95_Err",
-                                               description="Basic redeclares.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTest95_Err",
+			description="Basic redeclares.",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 1609, column 7:
@@ -1632,11 +1648,11 @@ end RedeclareTest95_Err;
 
 model RedeclareTest96_Err
   
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest96_Err",
-                                               description="Basic redeclares.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTest96_Err",
+			description="Basic redeclares.",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 1659, column 7:
@@ -1677,11 +1693,11 @@ end RedeclareTest96_Err;
 
 model RedeclareTest97_Err
   
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest97_Err",
-                                               description="Basic redeclares.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTest97_Err",
+			description="Basic redeclares.",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 1659, column 7:
@@ -1722,12 +1738,11 @@ end RedeclareTest97_Err;
 
 model RedeclareTest10 
   
-        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest10",
-                                               description="Basic redeclares.",
-                                               flatModel=
-
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest10",
+			description="Basic redeclares.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest10
  Real r = 0.1 /*(0.1)*/;
  Real palette.q = 0.3 /*(0.3)*/;
@@ -1817,11 +1832,11 @@ end RedeclareTest10;
 
 model RedeclareTest11
    
-         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest11",
-                                               description="Basic redeclares.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest11",
+			description="Basic redeclares.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest11
  Real c0.q = 0.3 /*(0.3)*/;
  Real c0.p.c1.r = 1 /*(1)*/;
@@ -1891,11 +1906,11 @@ end RedeclareTest11;
 model RedeclareTest12
   
   
-    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest12",
-                                               description="Basic redeclares.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest12",
+			description="Basic redeclares.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest12
  Real u.c1.c2.x = 55 /*(55)*/;
  Real u.c1.c2.y = 44 /*(44)*/;
@@ -1937,11 +1952,11 @@ end C222;
 end RedeclareTest12;
 
 model RedeclareTest13
-    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest13",
-                                               description="Basic redeclares.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest13",
+			description="Basic redeclares.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest13
  Real c.b1.z = 3 /*(3)*/;
  Real c.b1.x = 5 /*(5)*/;
@@ -1973,11 +1988,11 @@ end RedeclareTests.RedeclareTest13;
 end RedeclareTest13;
 
 model RedeclareTest14
-    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest14",
-                                               description="Basic redeclares.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest14",
+			description="Basic redeclares.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest14
  Real c.b1.z = 3 /*(3)*/;
  Real c.b1.x = 5 /*(5)*/;
@@ -2009,11 +2024,12 @@ end RedeclareTest14;
 
 class RedeclareTest15 "Test of merging of modifications in parametrized classes"
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest15",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTest15
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest15",
+			description="Test of parametrized classes.",
+			flatModel="
+fclass RedeclareTests.RedeclareTest15
  Real d.c.a.x = 4 /*(4)*/;
  Real d.c.a.y = 5 /*(5)*/;
 end RedeclareTests.RedeclareTest15;
@@ -2045,11 +2061,12 @@ end RedeclareTest15;
 
 class RedeclareTest16 "Test of merging of modifications in parametrized classes"
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest16",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTest16
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest16",
+			description="Test of parametrized classes.",
+			flatModel="
+fclass RedeclareTests.RedeclareTest16
  Real e.d.a.x = 5 /*(5)*/;
  Real e.d.a.y = 4 /*(4)*/;
  Real e.d.a.z = 6 /*(6)*/;
@@ -2089,11 +2106,12 @@ end RedeclareTest16;
 
 class RedeclareTest161 "Test of merging of modifications in parametrized classes"
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest161",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTest161
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest161",
+			description="Test of parametrized classes.",
+			flatModel="
+fclass RedeclareTests.RedeclareTest161
  Real e.x = 6 /*(6)*/;
  Real e.y = 4 /*(4)*/;
  Real e.z = 6 /*(6)*/;
@@ -2128,11 +2146,12 @@ end RedeclareTest161;
 
 class RedeclareTest165 
  
-       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest165",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTest165
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest165",
+			description="Test of parametrized classes.",
+			flatModel="
+fclass RedeclareTests.RedeclareTest165
  parameter Real e.pE = 5 /*(5)*/;
  Real e.d.a.x = 5 /*(5)*/;
  Real e.d.a.y = e.pE /*(5)*/;
@@ -2189,11 +2208,12 @@ end RedeclareTest165;
 model RedeclareTest17
   
    
-       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest17",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTest17
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest17",
+			description="Test of parametrized classes.",
+			flatModel="
+fclass RedeclareTests.RedeclareTest17
  Real bb.x = 3 /*(3)*/;
  Real bb.y = 3 /*(3)*/;
  Real bb.z = 4 /*(4)*/;
@@ -2231,11 +2251,12 @@ end RedeclareTest17;
 model RedeclareTest175
   
    
-       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest175",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTest175
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest175",
+			description="Test of parametrized classes.",
+			flatModel="
+fclass RedeclareTests.RedeclareTest175
  Real bb.x = 2 /*(2)*/;
  Real bb.y = 6 /*(6)*/;
  Real bb.z = 5 /*(5)*/;
@@ -2274,11 +2295,12 @@ end RedeclareTest175;
 model RedeclareTest176
   
    
-       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest176",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"fclass RedeclareTests.RedeclareTest176
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest176",
+			description="Test of parametrized classes.",
+			flatModel="
+fclass RedeclareTests.RedeclareTest176
  Real bb.x = 3 /*(3)*/;
  Real bb.y = 6 /*(6)*/;
  Real bb.z = 4 /*(4)*/;
@@ -2318,11 +2340,11 @@ end RedeclareTest176;
 
 class RedeclareTest18 "Test of merging of modifications in parametrized classes"
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest18",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest18",
+			description="Test of parametrized classes.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest18
  Real g.f.e.a.x = 5 /*(5)*/;
  Real g.f.e.a.y = 4 /*(4)*/;
@@ -2376,11 +2398,11 @@ end RedeclareTest18;
 
 class RedeclareTest19 "Test of merging of modifications in parametrized classes"
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest19",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest19",
+			description="Test of parametrized classes.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest19
  Real g.f.e.a.x = 5 /*(5)*/;
  Real g.f.e.a.y = 4 /*(4)*/;
@@ -2436,11 +2458,11 @@ end RedeclareTest19;
 
 class RedeclareTest20 "Test of merging of modifications in parametrized classes"
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest20",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest20",
+			description="Test of parametrized classes.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest20
  Real g.f.e.b.x = 5 /*(5)*/;
  Real g.f.e.b.y = 3 /*(3)*/;
@@ -2501,11 +2523,11 @@ end RedeclareTest20;
 
 class RedeclareTest21 "Test of merging of modifications in parametrized classes"
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest21",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest21",
+			description="Test of parametrized classes.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest21
  parameter Real p0 = 5 /*(5)*/;
  parameter Real g.pG = 6 /*(6)*/;
@@ -2572,11 +2594,11 @@ end RedeclareTest21;
 
 class RedeclareTest22 "Test of merging of modifications in parametrized classes"
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest22",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest22",
+			description="Test of parametrized classes.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest22
  parameter Real p0 = 5 /*(5)*/;
  parameter Real g.pG = 6 /*(6)*/;
@@ -2638,11 +2660,11 @@ end RedeclareTest22;
 
 class RedeclareTest225 "Test of merging of modifications in parametrized classes"
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest225",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest225",
+			description="Test of parametrized classes.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest225
  parameter Real p0 = 5 /*(5)*/;
  parameter Real f.e.pE = 3 /*(3)*/;
@@ -2695,11 +2717,11 @@ end RedeclareTest225;
 model RedeclareTest23
 
 
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest23",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest23",
+			description="Test of parametrized classes.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest23
  Real d1.b.x = 4 /*(4)*/;
  Real d1.b.y = 3 /*(3)*/;
@@ -2743,11 +2765,11 @@ end RedeclareTest23;
 
 class RedeclareTest24 "Test of merging of modifications in parametrized classes"
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest24",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest24",
+			description="Test of parametrized classes.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest24
  parameter Real p0 = 5 /*(5)*/;
  parameter Real g.pG = 6 /*(6)*/;
@@ -2809,11 +2831,11 @@ end RedeclareTest24;
 
 class RedeclareTest25 "Test of merging of modifications in parametrized classes"
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest25",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest25",
+			description="Test of parametrized classes.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest25
  parameter Real p0 = 5 /*(5)*/;
  parameter Real g.pG = 6 /*(6)*/;
@@ -2875,11 +2897,11 @@ end RedeclareTest25;
 
 model RedeclareTest26 
 
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest26",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest26",
+			description="Test of parametrized classes.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest26
  Real m.x;
  Real m.y;
@@ -2913,11 +2935,11 @@ end RedeclareTest26;
 
 model RedeclareTest27
  
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest27",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest27",
+			description="Test of parametrized classes.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest27
  Real b.y = 3;
 end RedeclareTests.RedeclareTest27;
@@ -2951,11 +2973,11 @@ end RedeclareTest27;
 
 model RedeclareTest28
 
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest28",
-        description="Test of parametrized classes.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest28",
+			description="Test of parametrized classes.",
+			flatModel="
 fclass RedeclareTests.RedeclareTest28
  parameter Real p2 = 3 /* 3.0 */;
  parameter Real p3 = 1 /* 1.0 */;
@@ -2988,11 +3010,11 @@ end RedeclareTest28;
 
 
 model RedeclareTest29
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareTest29",
-         description="Modifying parameter that is used as size of array",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest29",
+			description="Modifying parameter that is used as size of array",
+			flatModel="
 fclass RedeclareTests.RedeclareTest29
  Real y[2] = {1.0,2.0};
 end RedeclareTests.RedeclareTest29;
@@ -3016,11 +3038,11 @@ end RedeclareTest29;
 
 
 model RedeclareTest30
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareTest30",
-         description="Test that constrainedby does not prevent accesses within same class",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest30",
+			description="Test that constrainedby does not prevent accesses within same class",
+			flatModel="
 fclass RedeclareTests.RedeclareTest30
  parameter Real a.y = 2 /* 2 */;
  Real a.x;
@@ -3045,11 +3067,11 @@ end RedeclareTest30;
 
 
 model RedeclareTest31
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="RedeclareTest31",
-         description="Test that constrainedby prevents accesses to elements not in constraining class from outside component",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTest31",
+			description="Test that constrainedby prevents accesses to elements not in constraining class from outside component",
+			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
 Semantic error at line 3061, column 10:
@@ -3072,11 +3094,11 @@ end RedeclareTest31;
 
 
 model RedeclareElement1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareElement1",
-         description="Redeclare class as element, short replacing declaration, basic test",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareElement1",
+			description="Redeclare class as element, short replacing declaration, basic test",
+			flatModel="
 fclass RedeclareTests.RedeclareElement1
  Real c.b.y;
  Real c.b.z;
@@ -3111,11 +3133,11 @@ end RedeclareElement1;
 
 
 model RedeclareElement2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareElement2",
-         description="Redeclare class as element, long replacing declaration, basic test",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareElement2",
+			description="Redeclare class as element, long replacing declaration, basic test",
+			flatModel="
 fclass RedeclareTests.RedeclareElement2
  Real c.b.y;
  Real c.b.z;
@@ -3149,11 +3171,11 @@ end RedeclareElement2;
 
 
 model RedeclareElement3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareElement3",
-         description="Redeclare class as element, long extending declaration, basic test",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareElement3",
+			description="Redeclare class as element, long extending declaration, basic test",
+			flatModel="
 fclass RedeclareTests.RedeclareElement3
  Real c.b.z;
  Real c.b.y;
@@ -3186,11 +3208,11 @@ end RedeclareElement3;
 
 
 model RedeclareElement4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareElement4",
-         description="Redeclare class as element, long extending declaration, basic test",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareElement4",
+			description="Redeclare class as element, long extending declaration, basic test",
+			flatModel="
 fclass RedeclareTests.RedeclareElement4
  Real c.b.z;
  Real c.b.y;
@@ -3223,11 +3245,11 @@ end RedeclareElement4;
 
 
 model RedeclareElement5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RedeclareElement5",
-         description="Redeclare class as element, short replacing declaration, with equation and modifications",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RedeclareElement5",
+			description="Redeclare class as element, short replacing declaration, with equation and modifications",
+			flatModel="
 fclass RedeclareTests.RedeclareElement5
  Real c.b.y(start = 2);
  Real c.b.z(start = 1);
@@ -3266,11 +3288,11 @@ end RedeclareElement5;
 
 
 model RedeclareElement6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RedeclareElement6",
-         description="Redeclare class as element, long replacing declaration, with equation",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RedeclareElement6",
+			description="Redeclare class as element, long replacing declaration, with equation",
+			flatModel="
 fclass RedeclareTests.RedeclareElement6
  Real c.b.y;
  Real c.b.z;
@@ -3309,11 +3331,11 @@ end RedeclareElement6;
 
 
 model RedeclareElement7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RedeclareElement7",
-         description="Redeclare class as element, long extending declaration, with equation and modifications",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RedeclareElement7",
+			description="Redeclare class as element, long extending declaration, with equation and modifications",
+			flatModel="
 fclass RedeclareTests.RedeclareElement7
  Real c.b.z;
  Real c.b.y(start = 10);
@@ -3353,11 +3375,11 @@ end RedeclareElement7;
 
 
 model RedeclareElement8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RedeclareElement8",
-         description="Redeclare class as element, long extending declaration, with equation and modifications",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RedeclareElement8",
+			description="Redeclare class as element, long extending declaration, with equation and modifications",
+			flatModel="
 fclass RedeclareTests.RedeclareElement8
  Real c.b.z;
  Real c.b.y(start = 10);
@@ -3397,11 +3419,11 @@ end RedeclareElement8;
 
 
 model RedeclareElement9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareElement9",
-         description="Redeclare class as element, using modified constant",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareElement9",
+			description="Redeclare class as element, using modified constant",
+			flatModel="
 fclass RedeclareTests.RedeclareElement9
  constant Integer c.n = 3;
  Real c.b.y = 2;
@@ -3431,11 +3453,11 @@ end RedeclareElement9;
 
 
 model RedeclareElement10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareElement10",
-         description="Redeclaring a short class decl with redeclare class extends",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareElement10",
+			description="Redeclaring a short class decl with redeclare class extends",
+			flatModel="
 fclass RedeclareTests.RedeclareElement10
  parameter Real c.y = c.x;
  parameter Real c.x = 1 /* 1 */;
@@ -3463,11 +3485,11 @@ end RedeclareElement10;
 
 
 model RedeclareElement11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareElement11",
-         description="Redeclaring a short class decl with redeclare class extends",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareElement11",
+			description="Redeclaring a short class decl with redeclare class extends",
+			flatModel="
 fclass RedeclareTests.RedeclareElement11
  parameter Real b.c.y = b.c.x;
  parameter Real b.c.x = 1 /* 1 */;
@@ -3496,11 +3518,11 @@ end RedeclareElement11;
 
 
 model RedeclareElement12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	 JModelica.UnitTesting.FlatteningTestCase(
-		 name="RedeclareElement12",
-		 description="Class modification containing reference to element of the extends it is attached to",
-		 flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareElement12",
+			description="Class modification containing reference to element of the extends it is attached to",
+			flatModel="
 fclass RedeclareTests.RedeclareElement12
  constant Real a = 3.0;
  parameter Real b = 3.0 /* 3.0 */;
@@ -3539,11 +3561,11 @@ end RedeclareElement12;
 
 
 model RedeclareElement13
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareElement13",
-         description="Class modification containing reference to element of the extends it is attached to",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareElement13",
+			description="Class modification containing reference to element of the extends it is attached to",
+			flatModel="
 fclass RedeclareTests.RedeclareElement13
  constant Real a = 1.0;
  parameter Real c = 1.0 /* 1.0 */;
@@ -3576,11 +3598,11 @@ end RedeclareElement13;
 
 
 model RedeclareElement14
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RedeclareElement14",
-         description="Looking up replacing class through extends",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RedeclareElement14",
+			description="Looking up replacing class through extends",
+			flatModel="
 fclass RedeclareTests.RedeclareElement14
  Real d.y;
  Real d.x;
@@ -3613,11 +3635,11 @@ end RedeclareElement14;
 
 
 model RedeclareElement15
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	 JModelica.UnitTesting.TransformCanonicalTestCase(
-		 name="RedeclareElement15",
-		 description="Class declared in same scope as replacing class",
-		 flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RedeclareElement15",
+			description="Class declared in same scope as replacing class",
+			flatModel="
 fclass RedeclareTests.RedeclareElement15
  Real z.y;
  Real z.x;
@@ -3662,11 +3684,11 @@ end RedeclareElement15;
 
 
 model RedeclareElement16
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RedeclareElement16",
-         description="Class declared in same scope as replacing class",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RedeclareElement16",
+			description="Class declared in same scope as replacing class",
+			flatModel="
 fclass RedeclareTests.RedeclareElement16
  Real z.x;
  Real z.y;
@@ -3717,11 +3739,11 @@ end RedeclareElement16;
 
 
 model RedeclareElement17
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RedeclareElement17",
-         description="Class declared in same scope as replacing class",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RedeclareElement17",
+			description="Class declared in same scope as replacing class",
+			flatModel="
 fclass RedeclareTests.RedeclareElement17
  Real z.x;
  Real z.y;
@@ -3770,11 +3792,11 @@ end RedeclareElement17;
 
 
 model RedeclareElement18
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareElement18",
-         description="Chain of redeclare class extends - packages",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareElement18",
+			description="Chain of redeclare class extends - packages",
+			flatModel="
 fclass RedeclareTests.RedeclareElement18
  Real f.w = 4;
  Real f.z = 3;
@@ -3815,11 +3837,11 @@ end RedeclareElement18;
 
 
 model RedeclareElement19
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareElement19",
-         description="Chain of redeclare class extends - packages, with extends in between",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareElement19",
+			description="Chain of redeclare class extends - packages, with extends in between",
+			flatModel="
 fclass RedeclareTests.RedeclareElement19
  Real h.z = 3;
  Real h.y = 2;
@@ -3864,11 +3886,11 @@ end RedeclareElement19;
 
 
 model RedeclareElement20
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareElement20",
-         description="Chain of redeclare class extends - models",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareElement20",
+			description="Chain of redeclare class extends - models",
+			flatModel="
 fclass RedeclareTests.RedeclareElement20
  Real f.g.w = 4;
  Real f.g.z = 3;
@@ -3911,11 +3933,11 @@ end RedeclareElement20;
 
 
 model RedeclareElement21
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareElement21",
-         description="Chain of redeclare class extends - models, with extends in between",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareElement21",
+			description="Chain of redeclare class extends - models, with extends in between",
+			flatModel="
 fclass RedeclareTests.RedeclareElement21
  Real h.i.z = 3;
  Real h.i.y = 2;
@@ -3963,11 +3985,11 @@ end RedeclareElement21;
 
 
 model RedeclareSameLevel10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareSameLevel10",
-         description="Class used in base class redeclared as element",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareSameLevel10",
+			description="Class used in base class redeclared as element",
+			flatModel="
 fclass RedeclareTests.RedeclareSameLevel10
  Real d.y;
  Real d.c.x;
@@ -4006,11 +4028,11 @@ end RedeclareSameLevel10;
 
 
 model RedeclareSameLevel11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareSameLevel11",
-         description="Class used in base class redeclared as element",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareSameLevel11",
+			description="Class used in base class redeclared as element",
+			flatModel="
 fclass RedeclareTests.RedeclareSameLevel11
  Real d.c.y;
  Real d.c.x;
@@ -4046,11 +4068,11 @@ end RedeclareSameLevel11;
 
 
 model RedeclareSameLevel12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareSameLevel12",
-         description="Two interdependent classes redeclared as elements, with inner equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareSameLevel12",
+			description="Two interdependent classes redeclared as elements, with inner equations",
+			flatModel="
 fclass RedeclareTests.RedeclareSameLevel12
  Real d.y;
  Real d.c.x;
@@ -4090,11 +4112,11 @@ end RedeclareSameLevel12;
 	
 	
 model RedeclareFunction1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	 JModelica.UnitTesting.FlatteningTestCase(
-		 name="RedeclareFunction1",
-		 description="Lookup with modifications in extending function",
-		 flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareFunction1",
+			description="Lookup with modifications in extending function",
+			flatModel="
 fclass RedeclareTests.RedeclareFunction1
  Real x[2] = RedeclareTests.RedeclareFunction1.C.B({1,2});
 
@@ -4132,11 +4154,11 @@ end RedeclareFunction1;
 
 
 model RedeclareFunction2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareFunction2",
-         description="Lookup in extending function with redeclared record",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareFunction2",
+			description="Lookup in extending function with redeclared record",
+			flatModel="
 fclass RedeclareTests.RedeclareFunction2
  RedeclareTests.RedeclareFunction2.C.D x = RedeclareTests.RedeclareFunction2.C.B({1,2});
 
@@ -4186,11 +4208,11 @@ end RedeclareFunction2;
 
 
 model RedeclareFunction3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RedeclareFunction3",
-         description="Functions redeclared in replacing package",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RedeclareFunction3",
+			description="Functions redeclared in replacing package",
+			flatModel="
 fclass RedeclareTests.RedeclareFunction3
  Real z.x;
  Real z.y;
@@ -4246,11 +4268,11 @@ end RedeclareFunction3;
 
 
 model RedeclareFunction4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RedeclareFunction4",
-         description="Redeclared versions of same function",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RedeclareFunction4",
+			description="Redeclared versions of same function",
+			flatModel="
 fclass RedeclareTests.RedeclareFunction4
  Real b.x;
  Real b.y;
@@ -4302,11 +4324,11 @@ end RedeclareFunction4;
 
 
 model RedeclareEach1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	 JModelica.UnitTesting.TransformCanonicalTestCase(
-		 name="RedeclareEach1",
-		 description="Using redeclare on array",
-		 flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RedeclareEach1",
+			description="Using redeclare on array",
+			flatModel="
 fclass RedeclareTests.RedeclareEach1
  Real a[1].a[1];
  Real a[2].a[1];
@@ -4334,11 +4356,11 @@ end RedeclareEach1;
 
 
 model RedeclareEach2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="RedeclareEach2",
-         description="Using redeclare on array",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RedeclareEach2",
+			description="Using redeclare on array",
+			flatModel="
 fclass RedeclareTests.RedeclareEach2
  Real a[1].a[1];
  Real a[2].a[1];
@@ -4426,11 +4448,11 @@ end CyclicRedeclare1;
 
 
 model ModifyClass1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ModifyClass1",
-         description="Modification of constant in sub-package",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModifyClass1",
+			description="Modification of constant in sub-package",
+			flatModel="
 fclass RedeclareTests.ModifyClass1
  Real y = 2.0;
  Real Z = 1.0;
@@ -4451,11 +4473,11 @@ end ModifyClass1;
 
 
 model ModifyClass2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="ModifyClass2",
-         description="Modification of attribute of type declared in package being modified",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModifyClass2",
+			description="Modification of attribute of type declared in package being modified",
+			flatModel="
 fclass RedeclareTests.ModifyClass2
  RedeclareTests.ModifyClass2.C.B y(max = 2) = 0;
  RedeclareTests.ModifyClass2.A.B z = 0;

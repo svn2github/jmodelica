@@ -1,11 +1,11 @@
 package InnerOuterTests
 model InnerOuterTest1
-	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InnerOuterTest1",
-         description="Basic test of inner outer.",
-         equation_sorting = true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InnerOuterTest1",
+			description="Basic test of inner outer.",
+			equation_sorting=true,
+			flatModel="
 fclass InnerOuterTests.InnerOuterTest1
  Real b.T0;
  Real b.a1.z;
@@ -31,12 +31,12 @@ B b;
 end InnerOuterTest1;
 
 model InnerOuterTest2
-		annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InnerOuterTest2",
-         description="Basic test of inner outer.",
-         equation_sorting = true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InnerOuterTest2",
+			description="Basic test of inner outer.",
+			equation_sorting=true,
+			flatModel="
 fclass InnerOuterTests.InnerOuterTest2
  Real i.TI;
  Real i.e.TI;
@@ -115,12 +115,12 @@ model InnerOuterTest3_Err
 end InnerOuterTest3_Err;
 
 model InnerOuterTest4
-		annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InnerOuterTest4",
-         description="Basic test of inner outer.",
-         equation_sorting = true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InnerOuterTest4",
+			description="Basic test of inner outer.",
+			equation_sorting=true,
+			flatModel="
 fclass InnerOuterTests.InnerOuterTest4
  Real c.a.x;
  Real c.b.x;
@@ -145,12 +145,12 @@ end InnerOuterTests.InnerOuterTest4;
 end InnerOuterTest4;
 
 model InnerOuterTest5
-		annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InnerOuterTest5",
-         description="Basic test of inner outer.",
-         equation_sorting = true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InnerOuterTest5",
+			description="Basic test of inner outer.",
+			equation_sorting=true,
+			flatModel="
 fclass InnerOuterTests.InnerOuterTest5
  discrete Boolean sys.subSystem.enableMe;
  discrete Boolean sys.subSystem.isEnabled;
@@ -229,13 +229,13 @@ end C;
 end InnerOuterTest6;
 
 model InnerOuterTest7
-			annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InnerOuterTest7",
-         description="Basic test of inner outer.",
-         equation_sorting = true,
-		 eliminate_alias_variables = false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InnerOuterTest7",
+			description="Basic test of inner outer.",
+			equation_sorting=true,
+			eliminate_alias_variables=false,
+			flatModel="
 fclass InnerOuterTests.InnerOuterTest7
  Real d.a.x;
  Real d.a.y;
@@ -271,13 +271,13 @@ end InnerOuterTests.InnerOuterTest7;
 end InnerOuterTest7;
 	
 model InnerOuterTest8
-			annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InnerOuterTest8",
-         description="Basic test of inner outer.",
-         equation_sorting = true,
-		 eliminate_alias_variables = false,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InnerOuterTest8",
+			description="Basic test of inner outer.",
+			equation_sorting=true,
+			eliminate_alias_variables=false,
+			flatModel="
 fclass InnerOuterTests.InnerOuterTest8
  Real d.c.a.x;
  Real d.c.a.y;

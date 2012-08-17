@@ -2,11 +2,11 @@ package TransformCanonicalTests
 
 
 	model TransformCanonicalTest1
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="TransformCanonicalTest1",
-        description="Test basic canonical transformations",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TransformCanonicalTest1",
+			description="Test basic canonical transformations",
+			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest1
  Real x(start = 1,fixed = true);
  Real y(start = 3,fixed = true);
@@ -36,11 +36,11 @@ end TransformCanonicalTests.TransformCanonicalTest1;
 	end TransformCanonicalTest1;
 	
   model TransformCanonicalTest2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="TransformCanonicalTest2",
-         description="Test parameter sorting",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TransformCanonicalTest2",
+			description="Test parameter sorting",
+			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest2
  parameter Real p6;
  parameter Real p5 = 5 /* 5.0 */;
@@ -66,11 +66,12 @@ end TransformCanonicalTests.TransformCanonicalTest2;
   end TransformCanonicalTest2;
 
   model TransformCanonicalTest3_Err
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="TransformCanonical3_Err",
-                                               description="Test parameter sorting.",
-                                               errorMessage=
-"3 errors found...
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TransformCanonical3_Err",
+			description="Test parameter sorting.",
+			errorMessage="
+3 errors found...
 Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 86, column 24:
   Circularity in binding expression of parameter: p4 = ( p3 ) * ( p3 )
@@ -91,11 +92,11 @@ Semantic error at line 88, column 24:
   end TransformCanonicalTest3_Err;
 
   model TransformCanonicalTest4_Err
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="TransformCanonical4_Err",
-                                               description="Test parameter sorting.",
-                                               errorMessage=
-" 3 errors found...
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TransformCanonical4_Err",
+			description="Test parameter sorting.",
+			errorMessage=" 3 errors found...
 Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 112, column 24:
   Circularity in binding expression of parameter: p4 = ( p3 ) * ( p3 )
@@ -116,11 +117,11 @@ Semantic error at line 114, column 24:
   end TransformCanonicalTest4_Err;
 
   model TransformCanonicalTest5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="TransformCanonicalTest5",
-         description="Test parameter sorting",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TransformCanonicalTest5",
+			description="Test parameter sorting",
+			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest5
  parameter Real p11;
  parameter Real p8;
@@ -153,11 +154,11 @@ end TransformCanonicalTests.TransformCanonicalTest5;
 
 
   model TransformCanonicalTest6
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="TransformCanonicalTest6",
-        description="Built-in functions.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TransformCanonicalTest6",
+			description="Built-in functions.",
+			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest6
  parameter Real p1 = sin(1) /* 0.8414709848078965 */;
  parameter Real p2 = cos(1) /* 0.5403023058681398 */;
@@ -194,11 +195,11 @@ end TransformCanonicalTests.TransformCanonicalTest6;
   
   
   model TransformCanonicalTest7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="TransformCanonicalTest7",
-         description="Provokes a former bug that was due to tree traversals befor the flush after scalarization",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TransformCanonicalTest7",
+			description="Provokes a former bug that was due to tree traversals befor the flush after scalarization",
+			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest7
  parameter Integer p1 = 2 /* 2 */;
  parameter Integer p2;
@@ -220,12 +221,12 @@ end TransformCanonicalTests.TransformCanonicalTest7;
   end TransformCanonicalTest7;
 
 model TransformCanonicalTest8
-	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="TransformCanonicalTest8",
-         generate_ode_jacobian=true,
-		 description="Test that derivative functions are included in the flattened model if Jacobians are to be generated.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TransformCanonicalTest8",
+			generate_ode_jacobian=true,
+			description="Test that derivative functions are included in the flattened model if Jacobians are to be generated.",
+			flatModel="
 		 fclass TransformCanonicalTests.TransformCanonicalTest8
  Real x1;
  Real x2;
@@ -292,11 +293,13 @@ equation
 end TransformCanonicalTest8;
 
   model EvalTest1
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="EvalTest1",
-      methodName="variableDiagnostics",
-        description="Test evaluation of independent parameters", methodResult=
-        "Independent constants: 
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="EvalTest1",
+			methodName="variableDiagnostics",
+			description="Test evaluation of independent parameters",
+			methodResult="
+Independent constants: 
         
 Dependent constants: 
 
@@ -348,11 +351,13 @@ Input variables:
   end EvalTest1;
 
   model EvalTest2
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="EvalTest2",
-      methodName="variableDiagnostics",
-        description="Test evaluation of independent parameters", methodResult=
-        "Independent constants: 
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="EvalTest2",
+			methodName="variableDiagnostics",
+			description="Test evaluation of independent parameters",
+			methodResult="
+Independent constants: 
 
 Dependent constants: 
 
@@ -383,11 +388,12 @@ Input variables:
 
   model LinearityTest1
   
-  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="LinearityTest1",
-      methodName="variableDiagnostics",
-        description="Test linearity of variables.", methodResult=
-        "  
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="LinearityTest1",
+			methodName="variableDiagnostics",
+			description="Test linearity of variables.",
+			methodResult="  
 
 Independent constants: 
 
@@ -438,11 +444,13 @@ Input variables:
   end LinearityTest1;
 
   model AliasTest1
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest1",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest1",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,-x3,-x4}
 {x2,-x5,-x6}
 4 variables can be eliminated
@@ -460,11 +468,13 @@ Input variables:
   end AliasTest1;
 
   model AliasTest2
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest2",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest2",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,x2,x3,x4}
 3 variables can be eliminated
 ")})));
@@ -479,11 +489,13 @@ Input variables:
   end AliasTest2;
 
   model AliasTest3
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest3",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest3",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,x2,-x3,-x4}
 3 variables can be eliminated
 ")})));
@@ -498,11 +510,13 @@ Input variables:
   end AliasTest3;
 
   model AliasTest4
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest4",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest4",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,-x2,x3,x4}
 3 variables can be eliminated
 ")})));
@@ -517,11 +531,13 @@ Input variables:
   end AliasTest4;
 
   model AliasTest5
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest5",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest5",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,-x2,-x3,-x4}
 3 variables can be eliminated
 ")})));
@@ -536,11 +552,13 @@ Input variables:
   end AliasTest5;
 
   model AliasTest6
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest6",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest6",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,x2,x3,-x4}
 3 variables can be eliminated
 ")})));
@@ -555,11 +573,13 @@ Input variables:
   end AliasTest6;
 
   model AliasTest7
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest7",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest7",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,x2,-x3,x4}
 3 variables can be eliminated
 ")})));
@@ -574,11 +594,13 @@ Input variables:
   end AliasTest7;
 
   model AliasTest8
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest8",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest8",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,-x2,x3,-x4}
 3 variables can be eliminated
 ")})));
@@ -593,11 +615,13 @@ Input variables:
   end AliasTest8;
 
   model AliasTest9
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest9",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest9",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,-x2,-x3,x4}
 3 variables can be eliminated
 ")})));
@@ -612,11 +636,13 @@ Input variables:
   end AliasTest9;
 
   model AliasTest10
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest10",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest10",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,x2,x3}
 2 variables can be eliminated
 ")})));
@@ -630,11 +656,13 @@ Input variables:
   end AliasTest10;
 
   model AliasTest11
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest11",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest11",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,x2,-x3}
 2 variables can be eliminated
 ")})));
@@ -648,11 +676,13 @@ Input variables:
   end AliasTest11;
 
   model AliasTest12
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest12",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest12",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,-x2,x3}
 2 variables can be eliminated
 ")})));
@@ -666,11 +696,13 @@ Input variables:
   end AliasTest12;
 
   model AliasTest13
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest13",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest13",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,-x2,-x3}
 2 variables can be eliminated
 ")})));
@@ -684,11 +716,13 @@ Input variables:
   end AliasTest13;
 
   model AliasTest14
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest14",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest14",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,-x2,x3}
 2 variables can be eliminated
 ")})));
@@ -702,11 +736,13 @@ Input variables:
   end AliasTest14;
 
   model AliasTest15
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest15",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest15",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,-x2,-x3}
 2 variables can be eliminated
 ")})));
@@ -720,11 +756,11 @@ Input variables:
   end AliasTest15;
 
   model AliasTest16_Err
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="AliasTest16_Err",
-                                               description="Test alias error.",
-                                               errorMessage=
-" 1 error found...
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AliasTest16_Err",
+			description="Test alias error.",
+			errorMessage=" 1 error found...
 Semantic error at line 0, column 0:
   Alias error: trying to add the negated alias pair (x3,-x1) to the alias set {x1,x2,x3}
 
@@ -740,11 +776,11 @@ Semantic error at line 0, column 0:
   end AliasTest16_Err;
 
   model AliasTest17_Err
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="AliasTest17_Err",
-                                               description="Test alias error.",
-                                               errorMessage=
-" 
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AliasTest17_Err",
+			description="Test alias error.",
+			errorMessage=" 
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 0, column 0:
   Alias error: trying to add the alias pair (x3,x1) to the alias set {x1,x2,-x3}
@@ -761,11 +797,11 @@ Semantic error at line 0, column 0:
   end AliasTest17_Err;
 
   model AliasTest18_Err
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="AliasTest18_Err",
-                                               description="Test alias error.",
-                                               errorMessage=
-" 
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AliasTest18_Err",
+			description="Test alias error.",
+			errorMessage=" 
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 0, column 0:
   Alias error: trying to add the alias pair (x3,x1) to the alias set {x1,-x2,-x3}
@@ -782,11 +818,11 @@ Semantic error at line 0, column 0:
   end AliasTest18_Err;
 
   model AliasTest19_Err
-     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="AliasTest19_Err",
-                                               description="Test alias error.",
-                                               errorMessage=
-" 
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AliasTest19_Err",
+			description="Test alias error.",
+			errorMessage=" 
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 0, column 0:
   Alias error: trying to add the negated alias pair (x3,-x1) to the alias set {x1,-x2,x3}
@@ -803,11 +839,11 @@ Semantic error at line 0, column 0:
   end AliasTest19_Err;
 
   model AliasTest20
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest20",
-        description="Test elimination of alias variables",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasTest20",
+			description="Test elimination of alias variables",
+			flatModel="
 fclass TransformCanonicalTests.AliasTest20
  Real x1;
 equation 
@@ -825,11 +861,13 @@ end TransformCanonicalTests.AliasTest20;
   end AliasTest20;
 
   model AliasTest21
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest21",
-      methodName="aliasDiagnostics",
-        description="Test computation of alias sets.", methodResult=
-        "Alias sets:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest21",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
 {x1,-x2}
 1 variables can be eliminated
 ")})));
@@ -842,11 +880,11 @@ end TransformCanonicalTests.AliasTest20;
   end AliasTest21;
 
   model AliasTest22
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest22",
-        description="Test elimination of alias variables",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasTest22",
+			description="Test elimination of alias variables",
+			flatModel="
 fclass TransformCanonicalTests.AliasTest22
  Real x1;
  Real x3;
@@ -866,12 +904,12 @@ end TransformCanonicalTests.AliasTest22;
 
 
   model AliasTest23
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest23",
-        description="Test elimination of alias variables",
-        automatic_add_initial_equations = false,
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasTest23",
+			description="Test elimination of alias variables",
+			automatic_add_initial_equations=false,
+			flatModel="
 fclass TransformCanonicalTests.AliasTest23
  Real x1;
 equation 
@@ -887,12 +925,12 @@ end TransformCanonicalTests.AliasTest23;
   end AliasTest23;
 
   model AliasTest24
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest24",
-        description="Test elimination of alias variables",
-        automatic_add_initial_equations = false,
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasTest24",
+			description="Test elimination of alias variables",
+			automatic_add_initial_equations=false,
+			flatModel="
 fclass TransformCanonicalTests.AliasTest24
  Real x1;
  input Real u;
@@ -911,11 +949,11 @@ end AliasTest24;
 
 
   model AliasTest25
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest25",
-        description="Test elimination of alias variables",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasTest25",
+			description="Test elimination of alias variables",
+			flatModel="
 fclass TransformCanonicalTests.AliasTest25
  Real x2(fixed = true);
 initial equation 
@@ -936,11 +974,11 @@ end TransformCanonicalTests.AliasTest25;
 end AliasTest25;
 
 model AliasTest26
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest26",
-        description="Test elimination of alias variables",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasTest26",
+			description="Test elimination of alias variables",
+			flatModel="
 fclass TransformCanonicalTests.AliasTest26
  parameter Real p = 1 /* 1.0 */;
  Real y;
@@ -958,11 +996,11 @@ equation
 end AliasTest26;
 
 model AliasTest27
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest27",
-        description="Test elimination of alias variables.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasTest27",
+			description="Test elimination of alias variables.",
+			flatModel="
 fclass TransformCanonicalTests.AliasTest27
  Real x1;
 equation
@@ -986,11 +1024,11 @@ equation
 end AliasTest27;
 
 model AliasTest28
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest28",
-        description="Test elimination of alias variables.",
-                                               flatModel=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasTest28",
+			description="Test elimination of alias variables.",
+			flatModel="
 fclass TransformCanonicalTests.AliasTest28
  Real y;
  parameter Real p = 1 /* 1.0 */;
@@ -1008,11 +1046,11 @@ equation
 end AliasTest28;
 
 model AliasTest29
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="AliasTest29",
-         description="",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasTest29",
+			description="",
+			flatModel="
 fclass TransformCanonicalTests.AliasTest29
  Real pml1;
  Real pml3;
@@ -1088,11 +1126,11 @@ equation
 end AliasTest29;
 
 model AliasTest30
-	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="AliasTest30",
-         description="",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasTest30",
+			description="",
+			flatModel="
 fclass TransformCanonicalTests.AliasTest30
  parameter Boolean f = true;
  Real y;
@@ -1115,11 +1153,11 @@ end AliasTest30;
 
 model ParameterBindingExpTest3_Warn
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.WarningTestCase(name="ParameterBindingExpTest3_Warn",
-        description="Test errors in binding expressions.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="ParameterBindingExpTest3_Warn",
+			description="Test errors in binding expressions.",
+			errorMessage="
 Warning: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ConstantEvalTests.mo':
 At line 110, column 18:
   The parameter p does not have a binding expression.
@@ -1131,11 +1169,11 @@ end ParameterBindingExpTest3_Warn;
 
 model AttributeBindingExpTest1_Err
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="AttributeBindingExpTest1_Err",
-        description="Test errors in binding expressions.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AttributeBindingExpTest1_Err",
+			description="Test errors in binding expressions.",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 1057, column 16:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
@@ -1149,11 +1187,11 @@ end AttributeBindingExpTest1_Err;
 
 model AttributeBindingExpTest2_Err
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="AttributeBindingExpTest2_Err",
-        description="Test errors in binding expressions..",
-                                               errorMessage=
-											   "
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AttributeBindingExpTest2_Err",
+			description="Test errors in binding expressions..",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 1079, column 16:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1 + 2
@@ -1168,11 +1206,11 @@ end AttributeBindingExpTest2_Err;
 
 model AttributeBindingExpTest3_Err
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="AttributeBindingExpTest3_Err",
-        description="Test errors in binding expressions..",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AttributeBindingExpTest3_Err",
+			description="Test errors in binding expressions..",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 1099, column 16:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1 + 2 + p
@@ -1189,11 +1227,11 @@ end AttributeBindingExpTest3_Err;
 
 model AttributeBindingExpTest4_Err
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="AttributeBindingExpTest4_Err",
-        description="Test errors in binding expressions..",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AttributeBindingExpTest4_Err",
+			description="Test errors in binding expressions..",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 1122, column 23:
   Circularity in binding expression of parameter: p1 = p2
@@ -1215,11 +1253,11 @@ end AttributeBindingExpTest4_Err;
 
 model AttributeBindingExpTest5_Err
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="AttributeBindingExpTest5_Err",
-        description="Test errors in binding expressions..",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AttributeBindingExpTest5_Err",
+			description="Test errors in binding expressions..",
+			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 1147, column 18:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
@@ -1238,11 +1276,13 @@ Semantic error at line 1151, column 15:
 end AttributeBindingExpTest5_Err;
 
 model IncidenceTest1
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="IncidenceTest1",
-      methodName="incidence",
-        description="Test computation of incidence information", methodResult=
-        "Incidence:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="IncidenceTest1",
+			methodName="incidence",
+			description="Test computation of incidence information",
+			methodResult="
+Incidence:
  eq 0: der(x) 
  eq 1: y 
 ")})));
@@ -1258,11 +1298,13 @@ end IncidenceTest1;
 
 
 model IncidenceTest2
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="IncidenceTest2",
-      methodName="incidence",
-        description="Test computation of incidence information", methodResult=
-        "Incidence:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="IncidenceTest2",
+			methodName="incidence",
+			description="Test computation of incidence information",
+			methodResult="
+Incidence:
  eq 0: der(x) z 
  eq 1: y 
  eq 2: z 
@@ -1278,11 +1320,13 @@ equation
 end IncidenceTest2;
 
 model IncidenceTest3
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="IncidenceTest3",
-      methodName="incidence",
-        description="Test computation of incidence information", methodResult=
-        "Incidence:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="IncidenceTest3",
+			methodName="incidence",
+			description="Test computation of incidence information",
+			methodResult="
+Incidence:
  eq 0: der(x[1]) 
  eq 1: der(x[2]) 
  eq 2: y 
@@ -1303,11 +1347,13 @@ equation
 end IncidenceTest3;
 
 model DiffsAndDersTest1
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="DiffsAndDersTest1",
-      methodName="dersAndDiffs",
-        description="Test that derivatives and differentiated variables can be cross referenced", methodResult=
-        "Derivatives and differentiated variables:
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="DiffsAndDersTest1",
+			methodName="dersAndDiffs",
+			description="Test that derivatives and differentiated variables can be cross referenced",
+			methodResult="
+Derivatives and differentiated variables:
  der(x[1]), x[1]
  der(x[2]), x[2]
 Differentiated variables and derivatives:
@@ -1330,11 +1376,11 @@ equation
 end DiffsAndDersTest1;
 
   model InitialEqTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest1",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest1",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest1
  Real x1(start = 1);
  Real x2(start = 2);
@@ -1365,11 +1411,11 @@ end TransformCanonicalTests.InitialEqTest1;
 
   model InitialEqTest2
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest2",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest2",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest2
  Real v1;
  Real v2;
@@ -1421,11 +1467,11 @@ end TransformCanonicalTests.InitialEqTest2;
 
   model InitialEqTest3
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest3",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest3",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest3
  Real x1(start = 1,fixed = true);
  Real x2(start = 2);
@@ -1455,11 +1501,11 @@ end TransformCanonicalTests.InitialEqTest3;
   end InitialEqTest3;
 
   model InitialEqTest4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest4",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest4",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest4
  Real x1(start = 1,fixed = true);
  Real x2(start = 2,fixed = true);
@@ -1488,11 +1534,11 @@ end TransformCanonicalTests.InitialEqTest4;
   end InitialEqTest4;
 
   model InitialEqTest5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest5",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest5",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest5
  Real x1(start = 1);
  Real x2(start = 2);
@@ -1524,11 +1570,11 @@ end TransformCanonicalTests.InitialEqTest5;
   end InitialEqTest5;
 
   model InitialEqTest6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest6",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest6",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest6
  Real x1(start = 1);
  Real x2(start = 2);
@@ -1571,11 +1617,11 @@ end TransformCanonicalTests.InitialEqTest6;
   end f1;
 
   model InitialEqTest7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest7",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest7",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest7
  Real x;
  Real y;
@@ -1603,11 +1649,11 @@ end TransformCanonicalTests.InitialEqTest7;
   end InitialEqTest7;
 
   model InitialEqTest8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest8",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest8",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest8
  Real x;
  Real y;
@@ -1651,11 +1697,11 @@ end TransformCanonicalTests.InitialEqTest8;
   end f2;
 
   model InitialEqTest9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest9",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest9",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest9
  Real x[1];
  Real x[2];
@@ -1693,11 +1739,11 @@ end TransformCanonicalTests.InitialEqTest9;
   end InitialEqTest9;
 
   model InitialEqTest10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest10",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest10",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest10
  Real x[1];
  Real x[2];
@@ -1746,11 +1792,11 @@ end TransformCanonicalTests.InitialEqTest10;
   end InitialEqTest10;
 
   model InitialEqTest11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest11",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest11",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest11
  Real x[1];
  Real x[2];
@@ -1796,11 +1842,11 @@ end TransformCanonicalTests.InitialEqTest11;
   end InitialEqTest11;
 
   model InitialEqTest12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest12",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest12",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest12
  Real x[1](start = 3);
  Real x[2](start = 3);
@@ -1845,11 +1891,11 @@ end TransformCanonicalTests.InitialEqTest12;
   end InitialEqTest12;
 
   model InitialEqTest13
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest13",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest13",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest13
  Real x1(start = 1);
  Real x2(start = 2);
@@ -1870,11 +1916,11 @@ end TransformCanonicalTests.InitialEqTest13;
   end InitialEqTest13;
 
   model InitialEqTest14
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest14",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest14",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest14
  discrete input Boolean ub1;
  discrete input Integer ui1;
@@ -1930,11 +1976,11 @@ end TransformCanonicalTests.InitialEqTest14;
 
 /*
   model InitialEqTest15
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="InitialEqTest15",
-         description="Test algorithm for adding additional initial equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest15",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 ")})));
   function F
     input Integer x1;
@@ -1973,11 +2019,11 @@ end TransformCanonicalTests.InitialEqTest14;
 */
 
 model ParameterDerivativeTest
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
-    JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="ParameterDerivativeTest",
-         description="Test that derivatives of parameters are translated into zeros.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ParameterDerivativeTest",
+			description="Test that derivatives of parameters are translated into zeros.",
+			flatModel="
 fclass TransformCanonicalTests.ParameterDerivativeTest
  Real y;
  parameter Real p = 2 /* 2 */;
@@ -1996,11 +2042,11 @@ equation
 end ParameterDerivativeTest;
 
 model UnbalancedTest1_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="UnbalancedTest1_Err",
-        description="Test error messages for unbalanced systems.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnbalancedTest1_Err",
+			description="Test error messages for unbalanced systems.",
+			errorMessage="
 Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
 Semantic error at line 0, column 0:
   The DAE system has 1 equations and 3 free variables.
@@ -2018,11 +2064,11 @@ Semantic error at line 0, column 0:
 end UnbalancedTest1_Err;
 
 model UnbalancedTest2_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="UnbalancedTest2_Err",
-        description="Test error messages for unbalanced systems.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnbalancedTest2_Err",
+			description="Test error messages for unbalanced systems.",
+			errorMessage="
 Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
 Semantic error at line 0, column 0:
   The system is structurally singuar. The following varible(s) could not be matched to any equation:
@@ -2040,11 +2086,11 @@ equation
 end UnbalancedTest2_Err;
 
 model UnbalancedTest3_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="UnbalancedTest3_Err",
-        description="Test error messages for unbalanced systems.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnbalancedTest3_Err",
+			description="Test error messages for unbalanced systems.",
+			errorMessage="
 Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
 Semantic error at line 0, column 0:
   The DAE initialization system has 2 equations and 1 free variables.
@@ -2066,11 +2112,11 @@ equation
 end UnbalancedTest3_Err;
 
 model UnbalancedTest4_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="UnbalancedTest4_Err",
-        description="Test error messages for unbalanced systems.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnbalancedTest4_Err",
+			description="Test error messages for unbalanced systems.",
+			errorMessage="
 2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest4_Err.mof':
@@ -2088,11 +2134,11 @@ equation
 end UnbalancedTest4_Err;
 
 model UnbalancedTest5_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="UnbalancedTest5_Err",
-        description="Test error messages for unbalanced systems.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnbalancedTest5_Err",
+			description="Test error messages for unbalanced systems.",
+			errorMessage="
 2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc3729100224648595936out/sources/TransformCanonicalTests.UnbalancedTest5_Err.mof':
@@ -2112,12 +2158,12 @@ equation
 end UnbalancedTest5_Err;
 
 model WhenEqu15
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="WhenEqu15",
-         description="Basic test of when equations",
-         equation_sorting = true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="WhenEqu15",
+			description="Basic test of when equations",
+			equation_sorting=true,
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu15
  discrete Real x[3];
  Real z[3];
@@ -2148,12 +2194,12 @@ equation
 end WhenEqu15;
 
 model WhenEqu1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu1",
-         description="Basic test of when equations",
-         equation_sorting = true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu1",
+			description="Basic test of when equations",
+			equation_sorting=true,
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu1
  discrete Real x[1];
  discrete Real x[2];
@@ -2211,12 +2257,12 @@ equation
 end WhenEqu1;
 
 model WhenEqu2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu2",
-         description="Basic test of when equations",
-         equation_sorting = true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu2",
+			description="Basic test of when equations",
+			equation_sorting=true,
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu2
  Real xx(start = 2);
  discrete Real x;
@@ -2276,12 +2322,12 @@ end when;
 end WhenEqu2;
 
 model WhenEqu3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu3",
-         description="Basic test of when equations",
-         equation_sorting = true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu3",
+			description="Basic test of when equations",
+			equation_sorting=true,
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu3
  Real xx(start = 2);
  discrete Real x;
@@ -2346,12 +2392,12 @@ b1 = y>2;
 end WhenEqu3;
 
 model WhenEqu4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu4",
-         description="Basic test of when equations",
-         equation_sorting = true, 
-	 flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu4",
+			description="Basic test of when equations",
+			equation_sorting=true,
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu4
 discrete Real x;
 discrete Real y;
@@ -2408,12 +2454,12 @@ end WhenEqu4;
 
 
 model WhenEqu45
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu45",
-         description="Basic test of when equations",
-         equation_sorting = true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu45",
+			description="Basic test of when equations",
+			equation_sorting=true,
+			flatModel="
 		 
 fclass TransformCanonicalTests.WhenEqu45
  discrete TransformCanonicalTests.WhenEqu45.E e(start = TransformCanonicalTests.WhenEqu45.E.b);
@@ -2446,11 +2492,11 @@ end WhenEqu45;
 
 model WhenEqu5 
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu5",
-         description="Basic test of when equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu5",
+			description="Basic test of when equations",
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu5
 Real x(start = 1);
 discrete Real a(start = 1.0);
@@ -2504,11 +2550,11 @@ end WhenEqu5;
 
 model WhenEqu7 
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu7",
-         description="Basic test of when equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu7",
+			description="Basic test of when equations",
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu7
  discrete Real x(start = 0);
  Real dummy;
@@ -2536,11 +2582,11 @@ end WhenEqu7;
 
 model WhenEqu8 
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu8",
-         description="Basic test of when equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu8",
+			description="Basic test of when equations",
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu8
  discrete Real x;
  discrete Real y;
@@ -2576,11 +2622,11 @@ end WhenEqu8;
 
 model WhenEqu9 
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu9",
-         description="Basic test of when equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu9",
+			description="Basic test of when equations",
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu9
  Real x;
  Real ref;
@@ -2624,11 +2670,11 @@ end WhenEqu9;
 
 model WhenEqu10
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu10",
-         description="Basic test of when equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu10",
+			description="Basic test of when equations",
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu10
  discrete Boolean sampleTrigger;
  Real x_p(start = 1, fixed=true);
@@ -2687,11 +2733,11 @@ end WhenEqu10;
 
 model WhenEqu11	
 		
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu11",
-         description="Basic test of when equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu11",
+			description="Basic test of when equations",
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu11
  discrete Boolean sampleTrigger;
  Real x_p(start = 1);
@@ -2754,11 +2800,11 @@ end WhenEqu11;
 
 model WhenEqu12
 	
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu12",
-         description="Basic test of when equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu12",
+			description="Basic test of when equations",
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu12
  discrete Real x;
  discrete Real y;
@@ -2799,11 +2845,11 @@ public
 end WhenEqu12;
 
 model IfEqu1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="IfEqu1",
-         description="If equations: flattening",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="IfEqu1",
+			description="If equations: flattening",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu1
  Real x[3];
 equation
@@ -2830,11 +2876,11 @@ end IfEqu1;
 
 
 model IfEqu2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu2",
-         description="If equations: branch elimination",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu2",
+			description="If equations: branch elimination",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu2
  Real x[1];
  Real x[2];
@@ -2859,11 +2905,11 @@ end IfEqu2;
 
 
 model IfEqu3
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu3",
-         description="If equations: branch elimination",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu3",
+			description="If equations: branch elimination",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu3
  Real x[1];
  Real x[2];
@@ -2888,11 +2934,11 @@ end IfEqu3;
 
 
 model IfEqu4
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu4",
-         description="If equations: branch elimination",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu4",
+			description="If equations: branch elimination",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu4
  Real x[1];
  Real x[2];
@@ -2917,11 +2963,11 @@ end IfEqu4;
 
 
 model IfEqu5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu5",
-         description="If equations: branch elimination",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu5",
+			description="If equations: branch elimination",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu5
  Real x[1];
  Real x[2];
@@ -2944,11 +2990,11 @@ end IfEqu5;
 
 
 model IfEqu6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu6",
-         description="If equations: scalarization without elimination",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu6",
+			description="If equations: scalarization without elimination",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu6
  Real x[1];
  Real x[2];
@@ -2981,11 +3027,11 @@ end IfEqu6;
 
 
 model IfEqu7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu7",
-         description="If equations: scalarization without elimination",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu7",
+			description="If equations: scalarization without elimination",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu7
  Real x[1];
  Real x[2];
@@ -3018,11 +3064,11 @@ end IfEqu7;
 
 
 model IfEqu8
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu8",
-         description="If equations: branch elimination with parameter test expressions",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu8",
+			description="If equations: branch elimination with parameter test expressions",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu8
  Real x[1];
  Real x[2];
@@ -3051,11 +3097,11 @@ end IfEqu8;
 
 
 model IfEqu9
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu9",
-         description="If equations: branch elimination with one test non-parameter",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu9",
+			description="If equations: branch elimination with one test non-parameter",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu9
  Real x[1];
  Real x[2];
@@ -3085,11 +3131,11 @@ end IfEqu9;
 
 
 model IfEqu10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu10",
-         description="If equations: branch elimination with one test non-parameter",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu10",
+			description="If equations: branch elimination with one test non-parameter",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu10
  Real x[1];
  Real x[2];
@@ -3119,11 +3165,11 @@ end IfEqu10;
 
 
 model IfEqu11
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu11",
-         description="If equations: branch elimination with one test non-parameter",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu11",
+			description="If equations: branch elimination with one test non-parameter",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu11
  Real x[1];
  Real x[2];
@@ -3152,11 +3198,11 @@ equation
 end IfEqu11;
 
   model IfEqu12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu12",
-         description="Test of if equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu12",
+			description="Test of if equations.",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu12
  Real x(start = 1);
  Real u;
@@ -3180,11 +3226,11 @@ end TransformCanonicalTests.IfEqu12;
   end IfEqu12;
 
   model IfEqu13
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu13",
-         description="Test of if equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu13",
+			description="Test of if equations.",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu13
  Real x(start = 1);
  Real u;
@@ -3209,11 +3255,11 @@ end TransformCanonicalTests.IfEqu13;
   end IfEqu13;
 
   model IfEqu14
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu14",
-         description="Test of if equations.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu14",
+			description="Test of if equations.",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu14
  Real x(start = 1);
  Real u;
@@ -3244,11 +3290,11 @@ end TransformCanonicalTests.IfEqu14;
 
 
   model IfEqu15
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu15",
-         description="If equation with mixed assignment equations and non-assignment equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu15",
+			description="If equation with mixed assignment equations and non-assignment equations",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu15
  Real x;
  Real y;
@@ -3287,11 +3333,11 @@ end TransformCanonicalTests.IfEqu15;
 
 
   model IfEqu16
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu16",
-         description="Nestled if equations with mixed assignment equations and non-assignment equations",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu16",
+			description="Nestled if equations with mixed assignment equations and non-assignment equations",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu16
  Real x;
  Real y;
@@ -3330,11 +3376,11 @@ end TransformCanonicalTests.IfEqu16;
 
 
   model IfEqu17
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu17",
-         description="Check that if equations with function call equations are eliminated",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu17",
+			description="Check that if equations with function call equations are eliminated",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu17
  Real y1;
  Real y2;
@@ -3375,11 +3421,11 @@ end TransformCanonicalTests.IfEqu17;
 
 
   model IfEqu18
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="IfEqu18",
-         description="Check that if equations with function call equations and non-param tests are rejected",
-         errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="IfEqu18",
+			description="Check that if equations with function call equations and non-param tests are rejected",
+			errorMessage="
 3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Compliance error at line 3263, column 15:
@@ -3407,11 +3453,11 @@ Compliance error at line 3265, column 7:
   end IfEqu18;
 
   model IfEqu19
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu19",
-         description="Check that if equations inside when equations are treated correctly.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu19",
+			description="Check that if equations inside when equations are treated correctly.",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu19
  discrete Real x;
 initial equation 
@@ -3437,11 +3483,11 @@ end TransformCanonicalTests.IfEqu19;
   end IfEqu19;
 
 model IfEqu20
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu20",
-         description="Check that parameter if equations are rewritten in initial equation sections.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu20",
+			description="Check that parameter if equations are rewritten in initial equation sections.",
+			flatModel="
 		 fclass TransformCanonicalTests.IfEqu20
  Real x;
 initial equation 
@@ -3460,11 +3506,11 @@ equation
 end IfEqu20;
 
 model IfEqu21
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu21",
-         description="Check that variable if equations are rewritten in initial equation sections.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu21",
+			description="Check that variable if equations are rewritten in initial equation sections.",
+			flatModel="
 		 fclass TransformCanonicalTests.IfEqu21
  Real x;
 initial equation 
@@ -3486,11 +3532,11 @@ end IfEqu21;
 
 
 model IfEqu22
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu22",
-         description="Function call equation generated by scalarization inside if equation",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu22",
+			description="Function call equation generated by scalarization inside if equation",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu22
  discrete Boolean b;
  parameter Integer nX = 2 /* 2 */;
@@ -3541,11 +3587,11 @@ end IfEqu22;
 
 
 model IfEqu23
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu23",
-         description="Function call equation generated by scalarization inside else branch of if equation",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu23",
+			description="Function call equation generated by scalarization inside else branch of if equation",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu23
  Real x;
  Real y;
@@ -3608,11 +3654,11 @@ equation
 end IfEqu23;
 
 model IfEqu24  "Test delay equation"
-	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu24",
-         description="Check correct elimination of if equation branches.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu24",
+			description="Check correct elimination of if equation branches.",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu24
  parameter Boolean use_delay = false /* false */;
  Real x1(start = 1);
@@ -3638,11 +3684,11 @@ equation
 end IfEqu24;
 
 model IfExpLeft1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfExpLeft1",
-         description="If expression as left side of equation",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfExpLeft1",
+			description="If expression as left side of equation",
+			flatModel="
 fclass TransformCanonicalTests.IfExpLeft1
  Real x;
 equation
@@ -3658,11 +3704,11 @@ end IfExpLeft1;
 
 
 model WhenVariability1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenVariability1",
-         description="Variability of variable assigned in when clause",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenVariability1",
+			description="Variability of variable assigned in when clause",
+			flatModel="
 fclass TransformCanonicalTests.WhenVariability1
  discrete Real x(start = 1);
 initial equation 
@@ -3682,11 +3728,11 @@ equation
 end WhenVariability1;
 
   model IndexReduction1_PlanarPendulum
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction1_PlanarPendulum",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction1_PlanarPendulum",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction1_PlanarPendulum
 parameter Real L = 1 \"Pendulum length\" /* 1 */;
 parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
@@ -3729,11 +3775,11 @@ end TransformCanonicalTests.IndexReduction1_PlanarPendulum;
   end IndexReduction1_PlanarPendulum;
 
   model IndexReduction2_Mechanical
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction2_Mechanical",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction2_Mechanical",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Torque amplitude = 10 \"Amplitude of driving torque\" /* 10 */;
  parameter Modelica.SIunits.Frequency freqHz = 5 \"Frequency of driving torque\" /* 5 */;
@@ -3847,11 +3893,11 @@ end TransformCanonicalTests.IndexReduction2_Mechanical;
   end IndexReduction2_Mechanical;
 
   model IndexReduction3_Electrical
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction3_Electrical",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction3_Electrical",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction3_Electrical
  parameter Real omega = 100 /* 100 */;
  parameter Real R[1] = 10 /* 10 */;
@@ -3916,11 +3962,11 @@ equation
   end IndexReduction3_Electrical;
 
 model IndexReduction4_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="IndexReduction4_Err",
-        description="Test error messages for unbalanced systems.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="IndexReduction4_Err",
+			description="Test error messages for unbalanced systems.",
+			errorMessage="
 2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/TransformCanonicalTests.IndexReduction4_Err.mof':
@@ -3951,11 +3997,11 @@ equation
 end IndexReduction4_Err;
 
 model IndexReduction5_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="IndexReduction5_Err",
-        description="Test error messages for unbalanced systems.",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="IndexReduction5_Err",
+			description="Test error messages for unbalanced systems.",
+			errorMessage="
 3 error(s), 0 compliance error(s) and 0 warning(s) found:
 
 Error: in file 'TransformCanonicalTests.IndexReduction5_Err.mof':
@@ -3993,11 +4039,11 @@ equation
 end IndexReduction5_Err;
 
   model IndexReduction6_Cos
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction6_Cos",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction6_Cos",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction6_Cos
  Real x1;
  Real x2;
@@ -4017,11 +4063,11 @@ equation
   end IndexReduction6_Cos;
 
   model IndexReduction7_Sin
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction7_Sin",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction7_Sin",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction7_Sin
  Real x1;
  Real x2;
@@ -4041,11 +4087,11 @@ equation
   end IndexReduction7_Sin;
 
   model IndexReduction8_Neg
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction8_Neg",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction8_Neg",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction8_Neg		 
 Real x1;
 Real x2(stateSelect=StateSelect.prefer);
@@ -4069,11 +4115,11 @@ equation
   end IndexReduction8_Neg;
 
   model IndexReduction9_Exp
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction9_Exp",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction9_Exp",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction9_Exp
 Real x1;
 Real x2(stateSelect=StateSelect.prefer);
@@ -4099,11 +4145,11 @@ equation
   end IndexReduction9_Exp;
 
   model IndexReduction10_Tan
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction10_Tan",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction10_Tan",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction10_Tan
  Real x1;
  Real x2;
@@ -4125,11 +4171,11 @@ equation
   end IndexReduction10_Tan;
 
   model IndexReduction11_Asin
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction11_Asin",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction11_Asin",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction11_Asin
  Real x1;
  Real x2;
@@ -4151,11 +4197,11 @@ equation
   end IndexReduction11_Asin;
 
   model IndexReduction12_Acos
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction12_Acos",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction12_Acos",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction12_Acos
  Real x1;
  Real x2;
@@ -4177,11 +4223,11 @@ equation
   end IndexReduction12_Acos;
 
   model IndexReduction13_Atan
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction13_Atan",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction13_Atan",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction13_Atan
  Real x1;
  Real x2;
@@ -4203,11 +4249,11 @@ equation
   end IndexReduction13_Atan;
 /*
   model IndexReduction14_Atan2
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction14_Atan2",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction14_Atan2",
+			description="Test of index reduction",
+			flatModel="
 ")})));
   Real x1,x2,x3;
   parameter Real p = 2;
@@ -4218,11 +4264,11 @@ equation
   end IndexReduction14_Atan2;
 */
   model IndexReduction15_Sinh
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction15_Sinh",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction15_Sinh",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction15_Sinh
  Real x1;
  Real x2;
@@ -4244,11 +4290,11 @@ equation
   end IndexReduction15_Sinh;
 
   model IndexReduction16_Cosh
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction16_Cosh",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction16_Cosh",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction16_Cosh
  Real x1;
  Real x2;
@@ -4270,11 +4316,11 @@ equation
   end IndexReduction16_Cosh;
 
   model IndexReduction17_Tanh
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction17_Tanh",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction17_Tanh",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction17_Tanh
  Real x1;
  Real x2;
@@ -4296,11 +4342,11 @@ equation
   end IndexReduction17_Tanh;
 
   model IndexReduction18_Log
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction18_Log",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction18_Log",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction18_Log
  Real x1;
  Real x2;
@@ -4322,11 +4368,11 @@ equation
   end IndexReduction18_Log;
 
   model IndexReduction19_Log10
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction19_Log10",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction19_Log10",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction19_Log10
  Real x1;
  Real x2;
@@ -4348,11 +4394,11 @@ equation
   end IndexReduction19_Log10;
 
   model IndexReduction20_Sqrt
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction20_Sqrt",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction20_Sqrt",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction20_Sqrt
  Real x1;
  Real x2;
@@ -4374,11 +4420,11 @@ equation
   end IndexReduction20_Sqrt;
 
   model IndexReduction21_If
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction21_If",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction21_If",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction21_If
 Real x1;
 Real x2(stateSelect=StateSelect.prefer);
@@ -4404,11 +4450,11 @@ equation
   end IndexReduction21_If;
 
   model IndexReduction22_Pow
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction22_Pow",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction22_Pow",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction22_Pow
  Real x1;
  Real x2;
@@ -4430,11 +4476,11 @@ equation
   end IndexReduction22_Pow;
 
   model IndexReduction23_BasicVolume_Err
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="IndexReduction23_BasicVolume_Err",
-        description="Test error messages for unbalanced systems.",
-                                               errorMessage=
-"2 error(s), 0 compliance error(s) and 0 warning(s) found:
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="IndexReduction23_BasicVolume_Err",
+			description="Test error messages for unbalanced systems.",
+			errorMessage="2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc2815301804134878885out/resources/BasicVolume.mof':
 Semantic error at line 0, column 0:
@@ -4492,11 +4538,11 @@ P*V=m*R*T;
   end IndexReduction23_BasicVolume_Err;
 
 model IndexReduction24_DerFunc
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction24_DerFunc",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction24_DerFunc",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction24_DerFunc
  Real x1;
  Real x2;
@@ -4552,11 +4598,11 @@ equation
 end IndexReduction24_DerFunc;
 
 model IndexReduction25_DerFunc
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction25_DerFunc",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction25_DerFunc",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction25_DerFunc
  parameter Real A[1,1] = 1 /* 1 */;
  parameter Real A[1,2] = 2 /* 2 */;
@@ -4630,11 +4676,11 @@ equation
 end IndexReduction25_DerFunc;
 
 model IndexReduction26_DerFunc
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction26_DerFunc",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction26_DerFunc",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction26_DerFunc
  Real x1[1];
  Real x1[2];
@@ -4699,11 +4745,11 @@ end IndexReduction26_DerFunc;
 
 
 model IndexReduction27_DerFunc
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction27_DerFunc",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction27_DerFunc",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction27_DerFunc
  parameter Real A[1,1] = 1 /* 1 */;
  parameter Real A[1,2] = 2 /* 2 */;
@@ -4779,11 +4825,11 @@ end IndexReduction27_DerFunc;
 
 
 model IndexReduction28_Record
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction28_Record",
-         description="Index reduction: function with record input & output",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction28_Record",
+			description="Index reduction: function with record input & output",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction28_Record
 parameter Real A[1,1] = 1 /* 1 */;
 parameter Real A[1,2] = 2 /* 2 */;
@@ -4868,11 +4914,11 @@ equation
 end IndexReduction28_Record;
 
 model IndexReduction29_FunctionNoDerivative
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction29_FunctionNoDerivative",
-         description="Index reduction: function with record input & output",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction29_FunctionNoDerivative",
+			description="Index reduction: function with record input & output",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction29_FunctionNoDerivative
  Real x;
  Real y;
@@ -4949,11 +4995,11 @@ equation
 end IndexReduction29_FunctionNoDerivative;
 
   model IndexReduction30_PlanarPendulum_StatePrefer
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction30_PlanarPendulum_StatePrefer",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction30_PlanarPendulum_StatePrefer",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction30_PlanarPendulum_StatePrefer
 parameter Real L = 1 \"Pendulum length\" /* 1 */;
 parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
@@ -4998,11 +5044,11 @@ end TransformCanonicalTests.IndexReduction30_PlanarPendulum_StatePrefer;
   end IndexReduction30_PlanarPendulum_StatePrefer;
 
 model IndexReduction31_PlanarPendulum_StateAlways
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction31_PlanarPendulum_StateAlways",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction31_PlanarPendulum_StateAlways",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction31_PlanarPendulum_StateAlways
 parameter Real L = 1 \"Pendulum length\" /* 1 */;
 parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
@@ -5048,11 +5094,11 @@ end TransformCanonicalTests.IndexReduction31_PlanarPendulum_StateAlways;
   end IndexReduction31_PlanarPendulum_StateAlways;
 
   model IndexReduction32_PlanarPendulum_StatePreferAlways
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction32_PlanarPendulum_StatePreferAlways",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction32_PlanarPendulum_StatePreferAlways",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction32_PlanarPendulum_StatePreferAlways
 parameter Real L = 1 \"Pendulum length\" /* 1 */;
 parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
@@ -5097,11 +5143,11 @@ end TransformCanonicalTests.IndexReduction32_PlanarPendulum_StatePreferAlways;
   end IndexReduction32_PlanarPendulum_StatePreferAlways;
 
  model IndexReduction33_Div
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction33_Div",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction33_Div",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction33_Div
  Real x1;
  Real x2;
@@ -5123,11 +5169,11 @@ equation
   end IndexReduction33_Div;
 
  model IndexReduction34_Div
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction34_Div",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction34_Div",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction34_Div
  Real x1;
  Real x2;
@@ -5151,11 +5197,11 @@ equation
   end IndexReduction34_Div;
 
 model IndexReduction35_Boolean
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction35_Boolean",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction35_Boolean",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction35_Boolean
  Real x;
  Real y;
@@ -5179,11 +5225,11 @@ equation
 end IndexReduction35_Boolean;
 
 model IndexReduction36_Integer
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction36_Integer",
-         description="Test of index reduction",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction36_Integer",
+			description="Test of index reduction",
+			flatModel="
 fclass TransformCanonicalTests.IndexReduction36_Integer
  Real x;
  Real y;
@@ -5207,12 +5253,12 @@ equation
 end IndexReduction36_Integer;
 
 model StateInitialPars1
-	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StateInitialPars1",
-         description="Test the state initial equations option",
-		 state_initial_equations=true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StateInitialPars1",
+			description="Test the state initial equations option",
+			state_initial_equations=true,
+			flatModel="
 		 fclass TransformCanonicalTests.StateInitialPars1
  Real x(start = 3);
  parameter Real _start_x = 3 /* 3 */;
@@ -5228,12 +5274,12 @@ equation
 end StateInitialPars1;
 
 model StateInitialPars2
-	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StateInitialPars2",
-         description="Test the state initial equations option",
-		 state_initial_equations=true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StateInitialPars2",
+			description="Test the state initial equations option",
+			state_initial_equations=true,
+			flatModel="
 		 fclass TransformCanonicalTests.StateInitialPars2
  Real x(start = 3,fixed = true);
  parameter Real _start_x = 3 /* 3 */;
@@ -5249,12 +5295,12 @@ equation
 end StateInitialPars2;
 	
 model StateInitialPars3
-	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StateInitialPars3",
-         description="Test the state initial equations option",
-		 state_initial_equations=true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StateInitialPars3",
+			description="Test the state initial equations option",
+			state_initial_equations=true,
+			flatModel="
 fclass TransformCanonicalTests.StateInitialPars3
  Real x(start = 3,fixed = true);
  Real y(start = 4);
@@ -5280,12 +5326,12 @@ equation
 end StateInitialPars3;	
 	
 model StateInitialPars4
-	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StateInitialPars4",
-         description="Test the state initial equations option",
-		 state_initial_equations=true,
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StateInitialPars4",
+			description="Test the state initial equations option",
+			state_initial_equations=true,
+			flatModel="
 fclass TransformCanonicalTests.StateInitialPars4
  Real x(start = 3);
  Real y(start = 4);
@@ -5314,11 +5360,11 @@ equation
 end StateInitialPars4;		
 	
 model DuplicateVariables1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="DuplicateVariables1",
-         description="Test that identical variables in base classes are handled correctly.",
-         flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="DuplicateVariables1",
+			description="Test that identical variables in base classes are handled correctly.",
+			flatModel="
 fclass TransformCanonicalTests.DuplicateVariables1
  Real x(start = 1,min = 2);
 equation
@@ -5336,11 +5382,13 @@ end DuplicateVariables1;
 
 
   model SolveEqTest1
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest1",
-      methodName="printDAEBLT",
-	equation_sorting = true,         
-        description="Test solution of equations", methodResult=
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="SolveEqTest1",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test solution of equations", methodResult=
         "
 -------------------------------
 Solved block of 1 variables:
@@ -5371,11 +5419,13 @@ Solution:
   end SolveEqTest1;
 
   model SolveEqTest2
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest2",
-      methodName="printDAEBLT",
-	equation_sorting = true,         
-        description="Test solution of equations", methodResult=
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="SolveEqTest2",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test solution of equations", methodResult=
         "
 -------------------------------
 Solved block of 1 variables:
@@ -5406,11 +5456,13 @@ Solution:
   end SolveEqTest2;
 
   model SolveEqTest3
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest3",
-      methodName="printDAEBLT",
-	equation_sorting = true,         
-        description="Test solution of equations", methodResult=
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="SolveEqTest3",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test solution of equations", methodResult=
         "
         -------------------------------
 Solved block of 1 variables:
@@ -5441,11 +5493,13 @@ Solution:
   end SolveEqTest3;
 
   model SolveEqTest4
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest4",
-      methodName="printDAEBLT",
-	equation_sorting = true,         
-        description="Test solution of equations", methodResult=
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="SolveEqTest4",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test solution of equations", methodResult=
         "
 -------------------------------
 Solved block of 1 variables:
@@ -5476,11 +5530,13 @@ Solution:
   end SolveEqTest4;
 
   model SolveEqTest5
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest5",
-      methodName="printDAEBLT",
-	equation_sorting = true,         
-        description="Test solution of equations", methodResult=
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="SolveEqTest5",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test solution of equations", methodResult=
 "
 -------------------------------
 Solved block of 1 variables:
@@ -5511,11 +5567,13 @@ Solution:
   end SolveEqTest5;
 
   model SolveEqTest6
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest6",
-      methodName="printDAEBLT",
-	equation_sorting = true,         
-        description="Test solution of equations", methodResult=
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="SolveEqTest6",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test solution of equations", methodResult=
         "
         -------------------------------
 Solved block of 1 variables:
@@ -5548,11 +5606,13 @@ Equations:
   end SolveEqTest6;
 
    model SolveEqTest7
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest7",
-      methodName="printDAEBLT",
-	equation_sorting = true,         
-        description="Test solution of equations", methodResult=
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="SolveEqTest7",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test solution of equations", methodResult=
         "
         -------------------------------
 Solved block of 1 variables:
@@ -5585,11 +5645,13 @@ Solution:
   
 
   model SolveEqTest8
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest8",
-      methodName="printDAEBLT",
-	equation_sorting = true,         
-        description="Test solution of equations", methodResult=
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="SolveEqTest8",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test solution of equations", methodResult=
         "
 -------------------------------
 Solved block of 1 variables:
@@ -5606,13 +5668,14 @@ Solution:
  end SolveEqTest8;
   
  model TearingTest1
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="TearingTest1",
-      methodName="printDAEBLT",
-	equation_sorting = true,
-	enable_tearing = true,         
-        description="Test of tearing", methodResult=
-        "
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="TearingTest1",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			description="Test of tearing",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -5676,13 +5739,14 @@ equation
   end TearingTest1;
 
 model RecordTearingTest1
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="RecordTearingTest1",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-	  enable_tearing = true,
-      description="Test of record tearing", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="RecordTearingTest1",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			description="Test of record tearing",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -5724,13 +5788,14 @@ equation
 end RecordTearingTest1;
 
 model RecordTearingTest2
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="RecordTearingTest2",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-	  enable_tearing = true,
-      description="Test of record tearing", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="RecordTearingTest2",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			description="Test of record tearing",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -5775,13 +5840,14 @@ equation
 end RecordTearingTest2;
 
 model RecordTearingTest3
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="RecordTearingTest3",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-	  enable_tearing = true,
-      description="Test of record tearing", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="RecordTearingTest3",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			description="Test of record tearing",
+			methodResult="
 -------------------------------
 Torn block of 2 tearing variables and 0 solved variables.
 Solved variables:
@@ -5808,13 +5874,14 @@ equation
 end RecordTearingTest3;
 
 model RecordTearingTest4
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="RecordTearingTest4",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-	  enable_tearing = true,
-      description="Test of record tearing", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="RecordTearingTest4",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			description="Test of record tearing",
+			methodResult="
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -5845,13 +5912,14 @@ equation
 end RecordTearingTest4;
 
 model RecordTearingTest5
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="RecordTearingTest5",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-	  enable_tearing = true,
-      description="Test of record tearing", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="RecordTearingTest5",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			description="Test of record tearing",
+			methodResult="
 -------------------------------
 Torn block of 3 tearing variables and 3 solved variables.
 Solved variables:
@@ -5892,13 +5960,14 @@ equation
 end RecordTearingTest5;
 
 model HandGuidedTearing1
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="HandGuidedTearing1",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-	  enable_tearing = true,
-      description="Test of hand guided tearing", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="HandGuidedTearing1",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			description="Test of hand guided tearing",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -5961,13 +6030,14 @@ equation
 end HandGuidedTearing1;
 
 model HandGuidedTearing2
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="HandGuidedTearing2",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-	  enable_tearing = true,
-      description="Test of hand guided tearing", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="HandGuidedTearing2",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			description="Test of hand guided tearing",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6030,13 +6100,14 @@ equation
 end HandGuidedTearing2;
 
 model HandGuidedTearing3
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="HandGuidedTearing3",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-	  enable_tearing = true,
-      description="Test of hand guided tearing", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="HandGuidedTearing3",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			description="Test of hand guided tearing",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6099,12 +6170,13 @@ equation
 end HandGuidedTearing3;
 
 model BlockTest1
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="BlockTest1",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-      description="Test of correct creation of blocks containing functions returning records", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest1",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test of correct creation of blocks containing functions returning records", methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6159,12 +6231,13 @@ equation
 end BlockTest1;
 
 model BlockTest2
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="BlockTest2",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-      description="Test of correct creation of blocks containing functions returning records", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest2",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test of correct creation of blocks containing functions returning records", methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6243,12 +6316,13 @@ equation
 end BlockTest2;
 
 model BlockTest3
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="BlockTest3",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-      description="Test of correct creation of blocks containing functions returning records", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest3",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test of correct creation of blocks containing functions returning records", methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6286,12 +6360,13 @@ equation
 end BlockTest3;
 
 model BlockTest4
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="BlockTest4",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-      description="Test of linear systems of equations", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest4",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test of linear systems of equations", methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6324,12 +6399,13 @@ x1 - x2 = z*w;
 end BlockTest4;
 
 model BlockTest5
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="BlockTest5",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-      description="Test of linear systems of equations", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest5",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test of linear systems of equations", methodResult="
 -------------------------------
 Non-solved linear block of 3 variables:
 Coefficient variability: Constant
@@ -6355,12 +6431,13 @@ x1 - x2 = z;
 end BlockTest5;
 
 model BlockTest6
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-    JModelica.UnitTesting.FClassMethodTestCase(
-      name="BlockTest6",
-      methodName="printDAEBLT",
-	  equation_sorting = true,
-      description="Test of linear systems of equations", methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest6",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			description="
+Test of linear systems of equations", methodResult="
 -------------------------------
 Non-solved linear block of 3 variables:
 Coefficient variability: Parameter
@@ -6387,13 +6464,14 @@ x1 - x2 = z*p;
 end BlockTest6;
 
 model VarDependencyTest1
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="VarDependencyTest1",
-      methodName="dependencyDiagnostics",
-	equation_sorting = true,        
-        eliminate_alias_variables = false, 
-        description="Test computation of direct dependencies", methodResult=
-        "
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="VarDependencyTest1",
+			methodName="dependencyDiagnostics",
+			equation_sorting=true,
+			eliminate_alias_variables=false,
+			description="Test computation of direct dependencies",
+			methodResult="
 Variable dependencies:
 Derivative variables: 
 
@@ -6458,13 +6536,14 @@ equation
 end VarDependencyTest1;
 
 model VarDependencyTest2
-	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FClassMethodTestCase(name="VarDependencyTest2",
-      methodName="dependencyDiagnostics",
-	equation_sorting = true,         
-        eliminate_alias_variables = false, 
-        description="Test computation of direct dependencies", methodResult=
-        "
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="VarDependencyTest2",
+			methodName="dependencyDiagnostics",
+			equation_sorting=true,
+			eliminate_alias_variables=false,
+			description="Test computation of direct dependencies",
+			methodResult="
 Variable dependencies:
 Derivative variables: 
  der(x[1])
