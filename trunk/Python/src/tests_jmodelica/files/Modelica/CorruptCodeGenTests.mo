@@ -18,10 +18,13 @@ package CorruptCodeGenTests
 
 	model CorruptTest1
 	
-	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.GenericCodeGenTestCase(name="CorruptTest1",
-        description="Test of code generation",
-        template = "$n_real_x$",generatedCode="1")})));
+	annotation(__JModelica(UnitTesting(tests={
+		GenericCodeGenTestCase(
+			name="CorruptTest1",
+			description="Test of code generation",
+			template="$n_real_x$",
+			generatedCode="
+1")})));
 
     equation
        der(x) =1;

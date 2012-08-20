@@ -252,8 +252,10 @@ aspect NodeMethods {
         	fName = ((BaseNode) fNameNode).fName;
     }
     
-    public int ASTNode.beginLine() { return getLine(getStart()); }
+    public int ASTNode.beginLine()   { return getLine(getStart()); }
     public int ASTNode.beginColumn() { return getColumn(getStart()); }
+    public int ASTNode.endLine()     { return getLine(getEnd()); }
+    public int ASTNode.endColumn()   { return getColumn(getEnd()); }
 
     public String ASTNode.getNodeName() {
         return dump();

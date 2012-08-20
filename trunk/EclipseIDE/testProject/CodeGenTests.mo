@@ -22,11 +22,12 @@ package CodeGenTests
  
   model CodeGenTest1
   
-  	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.GenericCodeGenTestCase(name="CodeGenTest1",
-        description="Test of code generation",
-        template = 
-        "n_ci: $n_ci$
+	annotation(__JModelica(UnitTesting(tests={
+		GenericCodeGenTestCase(
+			name="CodeGenTest1",
+			description="Test of code generation",
+			template="
+n_ci: $n_ci$
 n_real_ci: $n_real_ci$
 n_integer_ci: $n_integer_ci$
 n_boolean_ci: $n_boolean_ci$
@@ -58,7 +59,8 @@ n_integer_u: $n_integer_u$
 n_boolean_u: $n_boolean_u$
 n_string_u: $n_string_u$
 n_equations: $n_equations$
-n_initial_equations: $n_initial_equations$",
+n_initial_equations: $n_initial_equations$
+",
         generatedCode="n_ci: 0
 n_real_ci: 0
 n_integer_ci: 0
@@ -145,10 +147,13 @@ n_initial_equations: 0")})));
 
 	model CodeGenTest2
 	
-	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.GenericCodeGenTestCase(name="CodeGenTest2",
-        description="Test of code generation",
-        template = "$n_real_x$",generatedCode="1")})));
+	annotation(__JModelica(UnitTesting(tests={
+		GenericCodeGenTestCase(
+			name="CodeGenTest2",
+			description="Test of code generation",
+			template="$n_real_x$",
+			generatedCode="
+1")})));
 		Real x;
     equation
         der(x)=1;

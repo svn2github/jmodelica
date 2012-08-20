@@ -43,11 +43,11 @@ model ConnectTests
 
     class ConnectTest2_Err
 
-   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ConnectTest2_Err",
-                                               description="Basic test of name lookup in connect clauses",
-                                               errorMessage=
-"
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectTest2_Err",
+			description="Basic test of name lookup in connect clauses",
+			errorMessage="
 1 error(s) found...
 In file 'src/test/modelica/ConnectTests.mo':
 Semantic error at line 53, column 15:
@@ -78,11 +78,12 @@ Semantic error at line 53, column 15:
 model ConnectTest3
 
 
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ConnectTest3",
-        description="Test of generation of connection equations.",
-                                               flatModel=
-"fclass ConnectTests.ConnectTest3
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest3",
+			description="Test of generation of connection equations.",
+			flatModel="
+fclass ConnectTests.ConnectTest3
  parameter Real gain.k = 1 \"Gain value multiplied with input signal\";
  Real gain.u \"Input signal connector\";
  Real gain.y \"Output signal connector\";
@@ -222,11 +223,12 @@ end Electrical;
 
   model CircuitTest1
   
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="CircuitTest1",
-        description="Test of generation of connection equations.",
-                                               flatModel=
-"fclass ConnectTests.CircuitTest1
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="CircuitTest1",
+			description="Test of generation of connection equations.",
+			flatModel="
+fclass ConnectTests.CircuitTest1
  parameter Real cv.V=1 \"Value of constant voltage\";
  Real cv.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Real cv.i \"Current flowing from pin p to pin n\";
@@ -287,11 +289,12 @@ end ConnectTests.CircuitTest1;
   end CircuitTest1;
 
   model CircuitTest2
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="CircuitTest2",
-        description="Test of generation of connection equations.",
-                                               flatModel=
-"fclass ConnectTests.CircuitTest2
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="CircuitTest2",
+			description="Test of generation of connection equations.",
+			flatModel="
+fclass ConnectTests.CircuitTest2
  parameter Real cv.V=1 \"Value of constant voltage\";
  Real cv.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Real cv.i \"Current flowing from pin p to pin n\";
