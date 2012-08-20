@@ -5101,6 +5101,7 @@ aspect FunctionInlining {
 	}
 	
 	
+	// TODO: check for recursive functions
 	/**
 	 * Check if we can inline this function, given the inlining level set in <code>fi</code>.
 	 */
@@ -5117,31 +5118,157 @@ aspect FunctionInlining {
 	 * Check if this function falls under the "trivial" inlining category.
 	 */
 	syn lazy boolean FFunctionDecl.isTrivialInlinable() {
-		int assigned = 0;
-		for (FStatement stmt : getFAlgorithmBlock().getFStatements()) {
-			int a = stmt.numAssignedScalarVars();
-			if (a == 0 && !stmt.ignoreInIsTrivialInlinable())
+		if (myProtected().size() > 0)
+			return false;
+		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
+			if (!stmt.isOkTrivialInline())
 				return false;
-			assigned += a;
+		for (FFunctionVariable out : myOutputs()) {
+			TrivialInlineCheck chk = out.createTrivialInlineCheck();
+			for (FIdUse use : out.assigningUses()) 
+				chk.check(use);
+			if (!chk.isOk())
+				return false;
 		}
-		int outs = 0;
-		for (FFunctionVariable out : myOutputs())
-			outs += out.size().numElements();
-		return assigned == outs;
+		return true;
+			
+//		int assigned = 0;
+//		for (FStatement stmt : getFAlgorithmBlock().getFStatements()) {
+//			int a = stmt.numAssignedScalarVars();
+//			if (a == 0 && !stmt.ignoreInIsTrivialInlinable())
+//				return false;
+//			assigned += a;
+//		}
+//		int outs = 0;
+//		for (FFunctionVariable out : myOutputs())
+//			outs += out.size().numElements();
+//		return assigned == outs;
 	}
 	
-	// TODO: support function call statements
-	/**
-	 * Helper method to decide if each output in a function is assigned only once.
-	 */
-	syn int FStatement.numAssignedScalarVars() = 0;
-	eq FAssignStmt.numAssignedScalarVars()     = getLeft().size().numElements(); // TODO: this is a prototype
+//	// TODO: support function call statements
+//	/**
+//	 * Helper method to decide if each output in a function is assigned only once.
+//	 */
+//	syn int FStatement.numAssignedScalarVars() = 0;
+//	eq FAssignStmt.numAssignedScalarVars()     = getLeft().size().numElements(); // TODO: this is a prototype
 	
 	/**
-	 * Helper method to filter return statements and similar in isTrivialInlinable().
+	 * Helper method to find unsupported statements in isTrivialInlinable().
 	 */
-	syn boolean FStatement.ignoreInIsTrivialInlinable() = false;
-	eq FReturnStmt.ignoreInIsTrivialInlinable()         = isLast();
+	syn boolean FStatement.isOkTrivialInline() = false;
+	eq FAssignStmt.isOkTrivialInline()         = true;
+	eq FFunctionCallStmt.isOkTrivialInline()   = getCall().isOkTrivialInline();
+	eq FReturnStmt.isOkTrivialInline()         = isLast();
+	eq FForStmt.isOkTrivialInline()            = isOkTrivialInlineInFor();
+	
+	/**
+	 * Helper method to find unsupported statements in isTrivialInlinable().
+	 */
+	syn boolean FAbstractFunctionCall.isOkTrivialInline() = isIgnored();
+	eq FFunctionCall.isOkTrivialInline()                  = myFFunctionDecl().isTrivialInlinable();
+	
+	/**
+	 * Helper method to unsupported statements in isTrivialInlinable().
+	 */
+	syn boolean FStatement.isOkTrivialInlineInFor() = false;
+	eq FAssignStmt.isOkTrivialInlineInFor()         = getLeft().myFV().size().isUnknown();
+	eq FForStmt.isOkTrivialInlineInFor() {
+		for (FStatement stmt : getForStmts())
+			if (!stmt.isOkTrivialInlineInFor())
+				return false;
+		return true;
+	}
+	
+	/**
+	 * Create a TrivialInlineCheck object for this variable.
+	 */
+	public TrivialInlineCheck FAbstractVariable.createTrivialInlineCheck() {
+		if (isArray()) {
+			if (isRecord())
+				return new TrivialInlineCheck.Unsupported();
+			if (size().isUnknown())
+				return new TrivialInlineCheck.UnknownArray();
+			else
+				return new TrivialInlineCheck.KnownArray(size().numElements());
+		} else {
+			if (isRecord())
+				return new TrivialInlineCheck.Record(myFRecordDecl());
+			else
+				return new TrivialInlineCheck.Scalar();
+		}
+	}
+	
+	/**
+	 * Recordkeeper object for checking that each output is assigned exactly once.
+	 * 
+	 * For arrays, a rough guess heuristic is used. Arrays of records and records 
+	 * containing arrays of unknown size are not supported.
+	 */
+	public abstract class TrivialInlineCheck {
+		protected abstract void check(FIdUse use, int i);
+		public abstract boolean isOk();
+		
+		public void check(FIdUse use) { check(use, 1); }
+		
+		public static class Scalar extends TrivialInlineCheck {
+			protected int n = 0;
+			protected void check(FIdUse use, int i) { n++; }
+			public boolean isOk()                   { return n == 1; }
+		}
+		
+		public static class KnownArray extends Scalar {
+			// TODO: check that each cell is assigned?
+			protected int size;
+			public KnownArray(int nElems) { size = nElems; };
+			public boolean isOk()         { return n == size; }
+		}
+		
+		public static class UnknownArray extends Scalar {
+			// TODO: check sizes, and how loop indices are used?
+			protected void check(FIdUse use, int i) { n += use.inForLoop() ? 1 : 2; }
+		}
+		
+		public static class Record extends TrivialInlineCheck {
+			protected Map<String,TrivialInlineCheck> parts;
+			protected boolean namesOk;
+			
+			public Record(FRecordDecl rec) {
+				namesOk = true;
+				parts = new HashMap<String,TrivialInlineCheck>();
+				for (FVariable v : rec.getFVariables())
+					parts.put(v.name(), v.createTrivialInlineCheck());
+			}
+			
+			protected void check(FIdUse use, int i) {
+				TrivialInlineCheck part = parts.get(use.getFQName().getFQNamePart(i).getName());
+				if (part != null)
+					part.check(use, i + 1);
+				else
+					namesOk = false;
+			}
+
+			public boolean isOk() {
+				for (TrivialInlineCheck part : parts.values())
+					if (!part.isOk())
+						return false;
+				return namesOk;
+			}
+		}
+		
+		public static class Unsupported extends TrivialInlineCheck {
+			protected void check(FIdUse use, int i) { }
+			public boolean isOk()                   { return false; }
+		}
+		
+		// TODO: records
+	}
+	
+	inh boolean FIdUse.inForLoop();
+	eq FForStmt.getForStmt().inForLoop()      = true;
+	eq FAlgorithmBlock.getChild().inForLoop() = false;
+	eq FlatRoot.getChild().inForLoop()        = false;
+	eq InstRoot.getChild().inForLoop()        = false;
+	
 	
 	/**
 	 * Helper method to check if a list of statements are all inlinable.

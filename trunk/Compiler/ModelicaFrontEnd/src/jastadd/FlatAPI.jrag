@@ -1505,11 +1505,39 @@ aspect FVariableUses {
 	}
 	
 	/**
+	 * All uses of this variable that are the left-hand side of an assignment or 
+	 * function call statement. 
+	 */
+	coll HashSet<FIdUse> FFunctionVariable.assigningUses() [new HashSet<FIdUse>()] 
+		with add root FFunctionDecl;
+	FIdUse contributes this when isAssignedTo() && myFuncVar() != null
+		to FFunctionVariable.assigningUses() for myFuncVar();
+//	syn lazy Set<FIdUse> FAbstractVariable.assigningUses() {
+//		Set<FIdUseExp> res = new HashSet<FIdUseExp>();
+//		for (FIdUseExp use : uses())
+//			if (use.isAssignedTo())
+//				res.add(use);
+//		return res;
+//	}
+	
+	/**
 	 * Check if this is the left hand side of an equation.
 	 */
 	inh boolean FIdUseExp.isLeftHandSide();
 	eq BaseNode.getChild().isLeftHandSide() = false;
 	eq FEquation.getLeft().isLeftHandSide() = true;
+	
+	/**
+	 * Check if this is the left hand side of an assignment or function call statement.
+	 */
+	inh boolean FIdUse.isAssignedTo();
+	inh boolean FIdUseExp.isAssignedTo();
+	inh boolean FFunctionCallLeft.isAssignedTo();
+	eq BaseNode.getChild().isAssignedTo()         = false;
+	eq FAssignStmt.getLeft().isAssignedTo()       = true;
+	eq FFunctionCallStmt.getLeft().isAssignedTo() = true;
+	eq FIdUseExp.getFIdUse().isAssignedTo()       = isAssignedTo();
+	eq FFunctionCallLeft.getFExp().isAssignedTo() = isAssignedTo();
 
 	/**
 	 * \brief Collection attribute returning all dependent parameters which

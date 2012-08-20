@@ -2001,7 +2001,7 @@ end FunctionInlining.IfEquationInline6;
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="TrivialInline1",
-			description="",
+			description="Test inlining of trivial functions - 2 outputs",
 			inline_functions="trivial",
 			flatModel="
 fclass FunctionInlining.TrivialInline1
@@ -2041,7 +2041,7 @@ end FunctionInlining.TrivialInline1;
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="TrivialInline2",
-			description="",
+			description="Test inlining of trivial functions - 2 outputs, one used",
 			inline_functions="trivial",
 			flatModel="
 fclass FunctionInlining.TrivialInline2
@@ -2079,6 +2079,30 @@ end FunctionInlining.TrivialInline2;
         else
             x = f(z, 3);
         end if;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="TrivialInline3",
+			description="Test inlining of trivial functions - record output, record constructor",
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.TrivialInline3
+ Real x.a;
+ Real x.b;
+ Real z;
+equation
+ x.a = (if z > 2 then 3 else z + 3);
+ x.b = (if z > 2 then 4 else ( z ) * ( 3 ));
+ z = 1;
+
+public
+ record FunctionInlining.TrivialInline3.R
+  Real a;
+  Real b;
+ end FunctionInlining.TrivialInline3.R;
+
+end FunctionInlining.TrivialInline3;
+")})));
     end TrivialInline3;
     
     
@@ -2105,6 +2129,30 @@ end FunctionInlining.TrivialInline2;
         else
             x = f(z, 3);
         end if;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="TrivialInline4",
+			description="Test inlining of trivial functions - record constructor, separate assignments",
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.TrivialInline4
+ Real x.a;
+ Real x.b;
+ Real z;
+equation
+ x.a = (if z > 2 then 3 else z + 3);
+ x.b = (if z > 2 then 4 else ( z ) * ( 3 ));
+ z = 1;
+
+public
+ record FunctionInlining.TrivialInline4.R
+  Real a;
+  Real b;
+ end FunctionInlining.TrivialInline4.R;
+
+end FunctionInlining.TrivialInline4;
+")})));
     end TrivialInline4;
     
     
@@ -2125,6 +2173,29 @@ end FunctionInlining.TrivialInline2;
         else
             x = f(z, 3);
         end if;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="TrivialInline5",
+			description="Test inlining of trivial functions - array, unknown size",
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.TrivialInline5
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real z[1];
+ Real z[2];
+ Real z[3];
+equation
+ x[1] = (if z[1] > 2 then z[3] else ( z[1] ) * ( 3 ));
+ x[2] = (if z[1] > 2 then z[2] else ( z[2] ) * ( 3 ));
+ x[3] = (if z[1] > 2 then z[1] else ( z[3] ) * ( 3 ));
+ z[1] = 1;
+ z[2] = 2;
+ z[3] = 3;
+end FunctionInlining.TrivialInline5;
+")})));
     end TrivialInline5;
     
     
@@ -2155,7 +2226,7 @@ end FunctionInlining.TrivialInline2;
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="TrivialInline6",
-			description="",
+			description="Test inlining of trivial functions - function calling function",
 			inline_functions="trivial",
 			flatModel="
 fclass FunctionInlining.TrivialInline6
@@ -2197,7 +2268,115 @@ end FunctionInlining.TrivialInline6;
         else
             (x, y) = f1(z);
         end if;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="TrivialInline7",
+			description="Test inlining of trivial functions - function calling function, 2 outputs",
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.TrivialInline7
+ Real x;
+ Real y;
+ Real z;
+equation
+ x = (if z > 2 then 2 else z + 1);
+ y = (if z > 2 then 3 else ( z ) * ( 2 ));
+ z = 1;
+end FunctionInlining.TrivialInline7;
+")})));
     end TrivialInline7;
+    
+    
+    model TrivialInline8
+        function f
+            input Real a[3];
+            input Real b;
+            output Real c[size(a,1)];
+        algorithm
+            c := a * b;
+        end f;
+        
+        Real x[3];
+        Real z[3] = {1, 2, 3};
+    equation
+        if z[1] > 2 then
+            x = z[end:-1:1];
+        else
+            x = f(z, 3);
+        end if;
+
+    annotation(__JModelica(UnitTesting(tests={ 
+        TransformCanonicalTestCase(
+            name="TrivialInline8",
+            description="Test inlining of trivial functions - array, known size",
+            inline_functions="trivial",
+            flatModel="
+fclass FunctionInlining.TrivialInline8
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real z[1];
+ Real z[2];
+ Real z[3];
+equation
+ x[1] = (if z[1] > 2 then z[3] else ( z[1] ) * ( 3 ));
+ x[2] = (if z[1] > 2 then z[2] else ( z[2] ) * ( 3 ));
+ x[3] = (if z[1] > 2 then z[1] else ( z[3] ) * ( 3 ));
+ z[1] = 1;
+ z[2] = 2;
+ z[3] = 3;
+end FunctionInlining.TrivialInline8;
+")})));
+    end TrivialInline8;
+    
+    
+    model TrivialInline9
+        function f
+            input Real a;
+            input Real b;
+            output Real c;
+        algorithm
+            c := a * b;
+			c := c + 2;
+        end f;
+        
+        Real x;
+        Real z = 1;
+    equation
+        if z > 2 then
+            x = z;
+        else
+            x = f(z, 3);
+        end if;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="TrivialInline9",
+			description="Test inlining of trivial functions - non-trivial function",
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.TrivialInline9
+ Real x;
+ Real z;
+equation
+ x = (if z > 2 then z else FunctionInlining.TrivialInline9.f(z, 3));
+ z = 1;
+
+public
+ function FunctionInlining.TrivialInline9.f
+  input Real a;
+  input Real b;
+  output Real c;
+ algorithm
+  c := ( a ) * ( b );
+  c := c + 2;
+  return;
+ end FunctionInlining.TrivialInline9.f;
+
+end FunctionInlining.TrivialInline9;
+")})));
+    end TrivialInline9;
 
 	
 end FunctionInlining;
