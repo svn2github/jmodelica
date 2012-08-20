@@ -1632,14 +1632,9 @@ aspect CCodeGen {
 	}
 	
 	public void SolvedFunctionCallEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
-	 	if (!functionCallEquation.getCall().isIgnored()) {
-	 		if (!visited.contains(functionCallEquation)) {
-	 			visited.add(functionCallEquation);
-	 			functionCallEquation.getCall().prettyPrint_C(str, indent);
-	 			str.print(";\n");
-	 		}
-			for (FFunctionCallLeft l : functionCallEquation.getLefts()) 
-				l.genWriteBackAssignment_C(str, indent, new HashSet<FVariable>(activeVars));
+		if (!visited.contains(functionCallEquation)) {
+			visited.add(functionCallEquation);
+			functionCallEquation.genAssignment_C(indent, str);
 		}
 	}
 	
