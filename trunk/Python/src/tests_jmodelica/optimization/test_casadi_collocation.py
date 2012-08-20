@@ -207,6 +207,100 @@ class TestLocalDAECollocator:
         assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
     
     @testattr(casadi = True)
+    def test_nominal_traj_vdp(self):
+        """Test optimizing a VDP using nominal and initial trajectories."""
+        model = self.model_vdp_bounds_lagrange
+        
+        # References values
+        cost_ref_traj = 3.19495079586595e0
+        u_norm_ref_traj = 2.80997269112246e-1
+        cost_ref = 3.1749908234182826e0
+        u_norm_ref = 2.848606420347583e-1
+        
+        # Get nominal and initial trajectories
+        opts = model.optimize_options(self.algorithm)
+        opts['n_e'] = 40
+        opts['n_cp'] = 2
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref_traj, u_norm_ref_traj)
+        os.rename("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt",
+                  "vdp_nom_traj_result.txt")
+        
+        # Optimize using only initial trajectories
+        opts['n_e'] = 75
+        opts['n_cp'] = 4
+        opts['init_traj'] = ResultDymolaTextual("vdp_nom_traj_result.txt")
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Optimize using nominal and initial trajectories
+        opts['nominal_traj'] = ResultDymolaTextual("vdp_nom_traj_result.txt")
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        col = res.solver
+        xx_init = col.get_xx_init()
+        N.testing.assert_allclose(
+                xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
+                [0.85693481, 0.12910473])
+        
+        # Test with eliminated continuity variables
+        opts['eliminate_cont_var'] = True
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Test with eliminated continuity and derivative variables
+        opts['eliminate_der_var'] = True
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+    
+    @testattr(casadi = True)
+    def test_nominal_traj_cstr(self):
+        """Test optimizing a CSTR using nominal and initial trajectories."""
+        model = self.model_cstr_lagrange
+        
+        # References values
+        cost_ref_traj = 1.8549259545339369e3
+        u_norm_ref_traj = 3.0455503580669716e2
+        cost_ref = 1.858428662785409e3
+        u_norm_ref = 3.0507636243132043e2
+        
+        # Get nominal and initial trajectories
+        opts = model.optimize_options(self.algorithm)
+        opts['n_e'] = 40
+        opts['n_cp'] = 2
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref_traj, u_norm_ref_traj)
+        os.rename("CSTR_CSTR_Opt_Bounds_Lagrange_result.txt",
+                  "cstr_nom_traj_result.txt")
+        
+        # Optimize using only initial trajectories
+        opts['n_e'] = 75
+        opts['n_cp'] = 4
+        opts['init_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Optimize using nominal and initial trajectories
+        opts['nominal_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        col = res.solver
+        xx_init = col.get_xx_init()
+        N.testing.assert_allclose(
+                xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
+                [1., 1.])
+        
+        # Test with eliminated continuity variables
+        opts['eliminate_cont_var'] = True
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Test with eliminated continuity and derivative variables
+        opts['eliminate_der_var'] = True
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+    
+    @testattr(casadi = True)
     def test_cstr(self):
         """
         Test optimizing the CSTR.
