@@ -5284,6 +5284,33 @@ end TransformCanonicalTests.IndexReduction36_Integer;
 		 ")})));		
 end IndexReduction36_Integer;
 
+model IndexReduction37_noEvent
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ noEvent(x1 + sin(x2)) = 0;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction37_noEvent",
+			description="Test of index reduction",
+			flatModel="
+fclass TransformCanonicalTests.IndexReduction37_noEvent
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ noEvent(x1 + sin(x2)) = 0;
+ noEvent(der_x1 + ( cos(x2) ) * ( der(x2) )) = 0.0;
+end TransformCanonicalTests.IndexReduction37_noEvent;
+")})));
+  end IndexReduction37_noEvent;
+
 model StateInitialPars1
 	Real x(start=3);
 equation

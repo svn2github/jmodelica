@@ -651,6 +651,10 @@ aspect Derivatives {
 			throw new ExpressionDifferentiationException(this);
 	}
 
+	public FExp FNoEventExp.diff(String name) {
+		return new FNoEventExp(getFExp().diff(name));
+	}
+	
 	public FExp FIfExp.diff(String name) {
 		FExp e = getIfExp().fullCopy();
 		e.traverseSymbolic(getIfExp());
