@@ -2495,7 +2495,7 @@ opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
       which case it will use the same quasi-Newton approach as the JMI
       algorithm.</para>
 
-      <para>The CasADi framework does not support simulation and
+      <para>JModelica.org's CasADi framework does not support simulation and
       initialization of models. It is recommended to instead use FMI for these
       purposes.</para>
 
