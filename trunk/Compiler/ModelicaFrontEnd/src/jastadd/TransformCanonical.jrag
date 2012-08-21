@@ -1865,8 +1865,10 @@ aspect TransformCanonical {
 
 		// ---------------------- Graph Info -----------------------------------
 		for (Eq e : block) {
-			Var gVar = g.addVariable(e.getMatching().getName(), "", e.getMatching().getVariable());
 			Eq gEq = g.addEquation(e.getName(), "", e.getEquation());
+			Var gVar = g.addVariable(e.getMatching().getName(), "", e.getMatching().getVariable());
+			gEq.setMatching(gVar);
+			gVar.setMatching(gEq);
 			if (gEq.getEquation().isSolved(gVar.getName(), true)) { // Use old matching where possible
 				gEq.setSolvableMatching(gVar);
 				gVar.setSolvableMatching(gEq);
@@ -1910,7 +1912,6 @@ aspect TransformCanonical {
 			if (tearBlock != null && tearBlock.isSolvable()) {
 				eb.addSolvedBlock(tearBlock);
 			} else {
-				g.maximumMatching(true);
 				tear(g, eb);
 			}
 		} else {
@@ -1992,6 +1993,8 @@ aspect TransformCanonical {
 					Var tmpVar = newRes.getSolvableMatching();
 					newRes.setSolvableMatching(null);
 					newRes.isRes(true);
+					e.setMatching(tmpVar);
+					tmpVar.setMatching(e);
 					e.setSolvableMatching(tmpVar);
 					tmpVar.setSolvableMatching(e);
 					e.isRes(false);
@@ -2003,7 +2006,6 @@ aspect TransformCanonical {
 
 			// Compute inner BLT and see if tearings can be changed 
 			ArrayList<Var> SUMV = g.getSUMV();
-			g.maximumMatching(false);
 			LinkedList<Stack<Eq>> innerBlocks = g.computeTearBlocks();
 			ArrayList<FVariable> tearings = new ArrayList<FVariable>();
 
@@ -2029,6 +2031,8 @@ aspect TransformCanonical {
 					for (Eq e : bInner) {
 						Var gInnerVar = gInner.addVariable(e.getSolvableMatching().getName(), "", e.getSolvableMatching().getVariable());
 						Eq gInnerEq = gInner.addEquation(e.getName(), "", e.getEquation());
+						gInnerEq.setMatching(gInnerVar);
+						gInnerVar.setMatching(gInnerEq);
 						gInnerEq.setSolvableMatching(gInnerVar);
 						gInnerVar.setSolvableMatching(gInnerEq);
 					}
