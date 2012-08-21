@@ -31,57 +31,14 @@ aspect Connections {
 	}
 
 	public void FClass.genConnectionEquations() {
-	
 		log.debug("<<<FClass.genConnectionEquations()");
 		ArrayList<ConnectionSet> l = connectionSetManager.getConnectionSetList();
 		log.debug("<<<FClass.genConnectionEquations(): "+ l.size() + " sets in manager");
 		//getConnectionSetManager().printConnectionSets();
 		//System.out.println(connectionSetManager.printConnectionSets());
-		for (ConnectionSet set : l) {
-			// TODO: use sorted data structure instead? would speed up use of ConnectionSetManager as well
-			ConnectionSetEntry csee[] = set.toArray(new ConnectionSetEntry[set.size()]);
-			java.util.Arrays.sort(csee);
-			
-			//log.debug("*** Array size: " + csee.length);
-			
-			if (csee[0].isFlow()) {
-				// Treat first element separately
-				FExp e = csee[0].getFQName().createFIdUseExp();
-				if (csee[0].isOutside()) 
-					e = new FNegExp(e);
-			
-				for (int j = 1; j < csee.length; j++) {
-					FExp e2 = csee[j].getFQName().createFIdUseExp();
-					e = csee[j].isOutside() ? new FSubExp(e, e2) : new FAddExp(e, e2);
-				}
-				FExp zero = csee[0].getVar().size().createZeroFExp();
-				getFEquationBlock(0).addFAbstractEquation(new FEquation(e, zero));	
-			} if (csee[0].isStream()) {
-				// If the connection set has two member one being inside
-				// and one being outside an additional equation should
-				// be generated.
-				if (csee.length==2) {
-					if ((csee[0].isInside()&&csee[1].isOutside()) ||
-							(csee[1].isInside()&&csee[0].isOutside())) {
-						FExp e1 = csee[0].getFQName().createFIdUseExp();
-						FExp e2 = csee[1].getFQName().createFIdUseExp();
-						getFEquationBlock(0).addFAbstractEquation(new FEquation(e1,e2));
-						FEquationBlock b = getFEquationBlock(0);
-						int i = b.getNumChild();
-					}
-				}
-			} else if (!csee[0].isStream() && !csee[0].isFlow()){
-				// Treat first element separately
-				FExp e1 = csee[0].getFQName().createFIdUseExp();
-				for (int j = 1; j < csee.length; j++) {
-					FExp e2 = csee[j].getFQName().createFIdUseExp();
-					getFEquationBlock(0).addFAbstractEquation(new FEquation(e1, e2));
-					e1 = e2;
-				}
-			}
-
-		}
-
+		
+		for (ConnectionSet set : l) 
+			set.generateEquations(getFEquationBlock(0));
 	}
 		
 	public void ASTNode.enableStreamsRewrite() {
@@ -114,10 +71,7 @@ aspect Connections {
 			FArraySubscripts fas = fqn.hasFArraySubscripts() ? fqn.getFArraySubscripts() : null;
 			ConnectionSet cs = myFClass().getConnectionSetManager().getConnectionSet(name, false);
 			if (cs != null) {
-				int N = 0; // # of inside
-				for (ConnectionSetEntry cse : cs)
-					if (cse.isInside())
-						N++;
+				int N = cs.getNumInside(); // # of inside
 				int M = cs.size() - N; // # of outside
 				
 				Iterator<ConnectionSetEntry> it = cs.iterator();
@@ -147,8 +101,8 @@ aspect Connections {
 			// 1) Get the stream variable name prefix
 			FQName var_name = ((FIdUseExp)getFExp()).getFIdUse().getFQName();
 			FQName prefix = var_name.copyPrefix();
-			ArrayList<ConnectionSetEntry> cses = myFClass().getConnectionSetManager().
-			  getFlowVariables(prefix.name());
+			ArrayList<ConnectionSetEntry> cses = 
+				myFClass().getConnectionSetManager().getFlowVariables(prefix.name());
 			if (cses.size()==1) { // This condition should be checked earlier
 				// 2) Get the name of the flow variable of the connector,
 				//    there should only be one.
@@ -167,7 +121,20 @@ aspect Connections {
 	}
 
 	
-	public class ConnectionSet extends LinkedHashSet<ConnectionSetEntry> {
+	public abstract class ConnectionSet extends TreeSet<ConnectionSetEntry> {
+		
+		protected ConnectionSet(ConnectionSetEntry e) {
+			add(e);
+		}
+		
+		public static ConnectionSet create(ConnectionSetEntry e) {
+			if (e.isFlow())
+				return new FlowConnectionSet(e);
+			else if (e.isStream())
+				return new StreamConnectionSet(e);
+			else 
+				return new PotentialConnectionSet(e);
+		}
 		
 		public int getNumInside() {
 			int nInside = 0;
@@ -199,17 +166,20 @@ aspect Connections {
 		}
 		
 		/**
+		 * Generate equations for this set.
+		 * 
+		 * @param eb  equation block to add equations to
+		 */
+		public abstract void generateEquations(FEquationBlock eb);
+		
+		/**
 		 * Return all ConnectionSetEntrys corresponding to flow variables based
 		 * on a name prefix. This method is useful when generating expressions
 		 * for actualStream operators when the name of the flow variable in a
 		 * stream connector is needed.
 		 */
 		public ArrayList<ConnectionSetEntry> getFlowVariables(String prefix) {
-			ArrayList<ConnectionSetEntry> cses = new ArrayList<ConnectionSetEntry>();
-			for (ConnectionSetEntry cse : this) 
-				if (cse.isFlow() && cse.prefix().equals(prefix)) 
-					cses.add(cse);
-			return cses;
+			return new ArrayList<ConnectionSetEntry>(0);
 		}
 		
 		public int numStreamVariables() {
@@ -226,13 +196,7 @@ aspect Connections {
 			StringBuffer str = new StringBuffer();
 			
 			str.append("Connection set (");
-			if (this.iterator().next().isFlow()) {
-				str.append("flow");
-			} else if (this.iterator().next().isStream()) {
-				str.append("stream");
-			} else {
-				str.append("potential");
-			}
+			str.append(typeString());
 			str.append("): {");
 			String set_str = super.toString();
 			str.append(set_str.substring(1, set_str.length() - 1));
@@ -240,9 +204,85 @@ aspect Connections {
 			return str.toString();
 		}
 		
+		protected abstract String typeString();
+		
 	}
+	
+	public class FlowConnectionSet extends ConnectionSet {
+		
+		public FlowConnectionSet(ConnectionSetEntry e) {
+			super(e);
+		}
+		
+		public String typeString() {
+			return "flow";
+		}
+		
+		public ArrayList<ConnectionSetEntry> getFlowVariables(String prefix) {
+			ArrayList<ConnectionSetEntry> cses = new ArrayList<ConnectionSetEntry>();
+			for (ConnectionSetEntry cse : this) 
+				if (cse.prefix().equals(prefix)) 
+					cses.add(cse);
+			return cses;
+		}
 
-	static public class ConnectionSetManager {
+		public void generateEquations(FEquationBlock eb) {
+			FExp e = null;
+			for (ConnectionSetEntry cse : this) 
+				e = cse.createFIdUseExp().appendSum(e, cse.isOutside());
+			FExp zero = first().getVar().size().createZeroFExp();
+			eb.addFAbstractEquation(new FEquation(e, zero));	
+		}
+
+	}
+	
+	public class StreamConnectionSet extends ConnectionSet {
+		
+		public StreamConnectionSet(ConnectionSetEntry e) {
+			super(e);
+		}
+		
+		public String typeString() {
+			return "stream";
+		}
+
+		public void generateEquations(FEquationBlock eb) {
+			// If the connection set has two member one being inside
+			// and one being outside an additional equation should
+			// be generated.
+			if (size() == 2 && first().isOutside() != last().isOutside()) {
+				FExp e1 = first().createFIdUseExp();
+				FExp e2 = last().createFIdUseExp();
+				eb.addFAbstractEquation(new FEquation(e1, e2));
+			}
+		}
+		
+	}
+	
+	public class PotentialConnectionSet extends ConnectionSet {
+		
+		public PotentialConnectionSet(ConnectionSetEntry e) {
+			super(e);
+		}
+		
+		public String typeString() {
+			return "potential";
+		}
+
+		public void generateEquations(FEquationBlock eb) {
+			FExp e1 = null;
+			for (ConnectionSetEntry cse : this) {
+				FExp e2 = cse.createFIdUseExp();
+				if (e1 != null)
+					eb.addFAbstractEquation(new FEquation(e1, e2));
+				e1 = e2;
+			}
+		}
+		
+	}
+	
+
+	public class ConnectionSetManager {
 	
 		private ArrayList<ConnectionSet> list = new ArrayList<ConnectionSet>();
 		
@@ -251,14 +291,10 @@ aspect Connections {
 		}
 			
 		public void addInsideFlowVar(InstComponentDecl var1, FQName namePrefix1) {
-			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1, false, namePrefix1);
+			ConnectionSetEntry cse = new ConnectionSetEntry(var1, false, namePrefix1);
 			
-			if (getConnectionSet(cse1) == null) {
-				ConnectionSet h = new ConnectionSet();
-				h.add(cse1);
-				list.add(h);
-			}
-
+			if (getConnectionSet(cse) == null) 
+				list.add(ConnectionSet.create(cse));
 		}
 		
 		public void addVars(InstComponentDecl var1, boolean outside1, FQName namePrefix1,
@@ -273,27 +309,26 @@ aspect Connections {
 			if (var1.variability().parameterOrLess() || var2.variability().parameterOrLess()) 
 				return;
 			
-			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,outside1,namePrefix1);
-			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2,outside2,namePrefix2);	
+			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1, outside1, namePrefix1);
+			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2, outside2, namePrefix2);	
 
-			ConnectionSet h1 = getConnectionSet(cse1);
-			ConnectionSet h2 = getConnectionSet(cse2);
-			
-			if (h1!=null && h2==null)
-				h1.add(cse2);
-			else if (h2!=null && h1==null)
-				h2.add(cse1);
-			else if (h1!=null && h2!=null) {
-				if (h1!=h2) {
-					h1.addAll(h2);
-					list.remove(h2);
-				}
+			ConnectionSet h1 = addEntry(cse1);
+			ConnectionSet h2 = addEntry(cse2);
+			if (h1 != h2) {
+				h1.addAll(h2);
+				list.remove(h2);
+			}
+		}
+		
+		public ConnectionSet addEntry(ConnectionSetEntry cse) {
+			ConnectionSet h = getConnectionSet(cse);
+			if (h != null) {
+				h.add(cse);
 			} else {
-				ConnectionSet h = new ConnectionSet();
-				h.add(cse1);
-				h.add(cse2);
+				h = ConnectionSet.create(cse);
 				list.add(h);
 			}
+			return h;
 		}
 	
 		public ConnectionSet getConnectionSet(ConnectionSetEntry cse) {
@@ -336,12 +371,13 @@ aspect Connections {
 	}
 
 	
-	static public class ConnectionSetEntry implements Comparable<ConnectionSetEntry> {
+	public class ConnectionSetEntry implements Comparable<ConnectionSetEntry> {
 	
 		private InstComponentDecl cd;
 		private boolean outside;
 		private FQName fqName;
 		private String prefix;
+		private String str;
 		//private boolean flow;
 		
 		public ConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
@@ -349,10 +385,7 @@ aspect Connections {
 			this.cd = cd;
 			this.outside = outside;
 			this.fqName = fqName;
-			boolean scalar = fqName.scalarized;
-			fqName.scalarized = true;
-			prefix = fqName.prefixName(-1);
-			fqName.scalarized = scalar;
+			prefix = null;
 		}
 	
 		public boolean isOutside() {
@@ -380,6 +413,12 @@ aspect Connections {
 		}
 		
 		public String prefix() {
+			if (prefix == null) {
+				boolean scalar = fqName.scalarized;
+				fqName.scalarized = true;
+				prefix = fqName.prefixName(-1);
+				fqName.scalarized = scalar;
+			}
 			return prefix;
 		}
 		
@@ -388,33 +427,33 @@ aspect Connections {
 		}
 		
 		public String toString() {
-			return fqName.name() + (outside ? " (o)" : " (i)");
+			if (str == null)
+				str = fqName + (outside ? " (o)" : " (i)");
+			return str;
 		}
 		
 		public FQName getFQName() {
 			return fqName;
 		}
-				
+
+		public FExp createFIdUseExp() {
+			return fqName.createFIdUseExp();
+		}
+
 		public int hashCode() {
-			// TODO: Wouldn't toString().hashCode() be better?
-			
-			//log.debug("ConnectionSetEntry.hashCode");
-			String tr = "true";
-			String fa = "false";
-			return name().intern().hashCode() + (outside? tr.intern().hashCode() : fa.intern().hashCode());
+			return toString().hashCode();
 		}
 		
 		
 		public boolean equals(Object o) {
 			if (o instanceof ConnectionSetEntry) {
-				ConnectionSetEntry cse = (ConnectionSetEntry) o;
-				return name().equals(cse.name()) && outside == cse.isOutside();
+				return toString().equals(o.toString());
 			}
 			return false;
 		}
 	
 		public int compareTo(ConnectionSetEntry cse) {
-			return name().compareTo(cse.name());
+			return toString().compareTo(cse.toString());
 		}
 	
 	}

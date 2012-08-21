@@ -422,6 +422,24 @@ aspect Constructors {
 	}
 	
 	/**
+	 * Add this expression to another.
+	 * 
+	 * Used to gradually builf up a sum, and handles special case for first term. 
+	 * The so far accumulated expession is then passed as exp, and this node will be 
+	 * the right child of the created expression. May return <code>this</code>, 
+	 * if exp is <code>null</code>.
+	 * 
+	 * @param exp  the first term, may be null
+	 * @param neg  if <code>true</code>, then this will be subtracted instead of added
+	 */
+	public FExp FExp.appendSum(FExp exp, boolean neg) {
+		if (exp == null)
+			return neg ? new FNegExp(this) : this;
+		else
+			return neg ? new FSubExp(exp, this) : new FAddExp(exp, this);	
+	}
+	
+	/**
 	 * \brief Constructs an FRecordConstructor for a record with the given name and no arguments.
 	 */
 	public FRecordConstructor.FRecordConstructor(String name) {

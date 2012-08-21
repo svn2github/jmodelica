@@ -275,10 +275,10 @@ equation
  b1.a1.y[1:2] = b2.a2.y[1:2];
   - ( b1.a1.x[1:2] ) - ( b1.a2.x[1:2] ) = zeros(2);
  b1.a1.y[1:2] = b1.a2.y[1:2];
- b1.a2.x = zeros(2);
+ b1.a2.x[1:2] = zeros(2);
   - ( b2.a1.x[1:2] ) - ( b2.a2.x[1:2] ) = zeros(2);
  b2.a1.y[1:2] = b2.a2.y[1:2];
- b2.a1.x = zeros(2);
+ b2.a1.x[1:2] = zeros(2);
 
 end ConnectTests.ConnectTest6;
 ")})));
@@ -894,11 +894,11 @@ model ConnectTest17
     
     B b[2];
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ConnectTest17",
-			description="Connecting arrays of connectors within an array of component instances, slices",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectTest17",
+            description="Connecting arrays of connectors within an array of component instances, slices",
+            flatModel="
 fclass ConnectTests.ConnectTest17
  Real b[1].a1[1].x;
  Real b[1].a1[2].x;
@@ -921,6 +921,138 @@ equation
 end ConnectTests.ConnectTest17;
 ")})));
 end ConnectTest17;
+
+
+model ConnectTest18
+    connector A
+        Real x;
+    end A;
+    
+    model B
+        A a1;
+        A a2;
+        A a3[2];
+    equation
+        connect(a1, a3[1]);
+        connect(a2, a3[2]);
+    end B;
+    
+    B b[2];
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		FlatteningTestCase(
+			name="ConnectTest18",
+			description="Connecting single element in array of connectors",
+			flatModel="
+fclass ConnectTests.ConnectTest18
+ Real b[1].a1.x;
+ Real b[1].a2.x;
+ Real b[1].a3[1].x;
+ Real b[1].a3[2].x;
+ Real b[2].a1.x;
+ Real b[2].a2.x;
+ Real b[2].a3[1].x;
+ Real b[2].a3[2].x;
+equation
+ b[1].a1.x = b[1].a3[1].x;
+ b[1].a2.x = b[1].a3[2].x;
+ b[2].a1.x = b[2].a3[1].x;
+ b[2].a2.x = b[2].a3[2].x;
+end ConnectTests.ConnectTest18;
+")})));
+end ConnectTest18;
+
+
+model ConnectTest19
+    model A
+        Real a1;
+        Real a2[1];
+    equation
+        connect(a1, a2[1]);
+    end B;
+    
+    A b[2];
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		FlatteningTestCase(
+			name="ConnectTest19",
+			description="Connecting single element in array of reals",
+			flatModel="
+fclass ConnectTests.ConnectTest19
+ Real b[1].a1;
+ Real b[1].a2[1];
+ Real b[2].a1;
+ Real b[2].a2[1];
+equation
+ b[1].a1 = b[1].a2[1];
+ b[2].a1 = b[2].a2[1];
+end ConnectTests.ConnectTest19;
+")})));
+end ConnectTest19;
+
+
+model ConnectTest20
+    model A
+        Real a1;
+        Real a2;
+        Real a3[2];
+    equation
+        connect(a1, a3[1]);
+        connect(a2, a3[2]);
+    end B;
+    
+    A b[2];
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		FlatteningTestCase(
+			name="ConnectTest20",
+			description="Connecting several elemens in array of reals, one at a time",
+			flatModel="
+fclass ConnectTests.ConnectTest20
+ Real b[1].a1;
+ Real b[1].a2;
+ Real b[1].a3[2];
+ Real b[2].a1;
+ Real b[2].a2;
+ Real b[2].a3[2];
+equation
+ b[1].a1 = b[1].a3[1];
+ b[1].a2 = b[1].a3[2];
+ b[2].a1 = b[2].a3[1];
+ b[2].a2 = b[2].a3[2];
+end ConnectTests.ConnectTest20;
+")})));
+end ConnectTest20;
+
+
+model ConnectTest21
+    model A
+        Real a1[3];
+        Real a2[3];
+    equation
+        connect(a1[1:2], a2[2:3]);
+    end A;
+    
+    A b[2];
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		FlatteningTestCase(
+			name="ConnectTest21",
+			description="Connecting arrays of reals within an array of component instances, slices",
+			flatModel="
+fclass ConnectTests.ConnectTest21
+ Real b[1].a1[3];
+ Real b[1].a2[3];
+ Real b[2].a1[3];
+ Real b[2].a2[3];
+equation
+ b[1].a1[1] = b[1].a2[2];
+ b[1].a1[2] = b[1].a2[3];
+ b[2].a1[1] = b[2].a2[2];
+ b[2].a1[2] = b[2].a2[3];
+end ConnectTests.ConnectTest21;
+")})));
+end ConnectTest21;
 
 
 model Electrical
@@ -1493,12 +1625,6 @@ equation
  C1.p.v = C2.p.v;
  C2.p.v = L1.p.v;
  L1.p.v = R1.n.v;
- C1.n.i + C3.n.i + C5.n.i + G.p.i + R2.n.i + V.n.i = 0;
- C1.n.v = C3.n.v;
- C3.n.v = C5.n.v;
- C5.n.v = G.p.v;
- G.p.v = R2.n.v;
- R2.n.v = V.n.v;
  C2.n.i + C3.p.i + C4.p.i + L1.n.i + L2.p.i = 0;
  C2.n.v = C3.p.v;
  C3.p.v = C4.p.v;
@@ -1510,6 +1636,12 @@ equation
  L2.n.v = R2.p.v;
  R1.p.i + V.p.i = 0;
  R1.p.v = V.p.v;
+ C1.n.i + C3.n.i + C5.n.i + G.p.i + R2.n.i + V.n.i = 0;
+ C1.n.v = C3.n.v;
+ C3.n.v = C5.n.v;
+ C5.n.v = G.p.v;
+ G.p.v = R2.n.v;
+ R2.n.v = V.n.v;
 
 public
  type Modelica.SIunits.Inductance = Real(final quantity = \"Inductance\",final unit = \"H\");

@@ -2281,7 +2281,7 @@ aspect TransformCanonical {
 	
 	public void FFunctionArray.genInitArrayStatements(List<FStatement> stmts) {
 		if (size().isUnknown() && !isInput() && !isOutput()) {
-			FInitArrayStmt stmt = new FInitArrayStmt(getFQName().createFIdUseExp());
+			FInitArrayStmt stmt = new FInitArrayStmt(createUseExp());
 			stmt.shouldBeSorted = true;
 			stmts.add(stmt);
 			hasInitArrayStmt = true;
@@ -2496,7 +2496,7 @@ aspect TransformCanonical {
 	
 	public void FFunctionVariable.genBindingAssignments(List<FStatement> stmts) {
 		if (!isInput() && hasBindingExp()) {
-			FAssignStmt stmt = new FAssignStmt(getFQName().createFIdUse(), getBindingExp());
+			FAssignStmt stmt = new FAssignStmt(createFIdUse(), getBindingExp());
 			stmt.shouldBeSorted = true;
 			stmts.add(stmt);
 			setBindingExpOpt(new Opt());
@@ -5135,26 +5135,7 @@ aspect FunctionInlining {
 				return false;
 		}
 		return true;
-			
-//		int assigned = 0;
-//		for (FStatement stmt : getFAlgorithmBlock().getFStatements()) {
-//			int a = stmt.numAssignedScalarVars();
-//			if (a == 0 && !stmt.ignoreInIsTrivialInlinable())
-//				return false;
-//			assigned += a;
-//		}
-//		int outs = 0;
-//		for (FFunctionVariable out : myOutputs())
-//			outs += out.size().numElements();
-//		return assigned == outs;
 	}
-	
-//	// TODO: support function call statements
-//	/**
-//	 * Helper method to decide if each output in a function is assigned only once.
-//	 */
-//	syn int FStatement.numAssignedScalarVars() = 0;
-//	eq FAssignStmt.numAssignedScalarVars()     = getLeft().size().numElements(); // TODO: this is a prototype
 	
 	/**
 	 * Helper method to find unsupported statements in isTrivialInlinable().

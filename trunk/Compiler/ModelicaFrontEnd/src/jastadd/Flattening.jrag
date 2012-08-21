@@ -499,8 +499,8 @@ aspect Flattening {
 	
 	// Generic method for flattening	
 	public void ASTNode.flatten(FClass fc) {
-		for (int i=0;i<getNumChild();i++) {
-			getChild(i).flatten(fc);
+		for (ASTNode n : this) {
+			n.flatten(fc);
 		}
 	}
 	
@@ -539,9 +539,7 @@ aspect Flattening {
 			fc.addUniqueFVariable(createFVariable());
 			myInstClass().addFDerivedType(fc);
 			if (isFlow()) {
-				// TODO: Add expanded array subscripts
-				// TODO: Can we use getFQName() here instead?
-				FQName name = getFQNamePrefix().copyAndAppend(name());
+				FQName name = flattenedAccess(getFQNamePrefix());
 				fc.getConnectionSetManager().addInsideFlowVar(this, name);
 			}
 		}

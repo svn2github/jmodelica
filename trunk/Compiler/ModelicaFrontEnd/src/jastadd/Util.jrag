@@ -1297,38 +1297,38 @@ aspect FlatNames {
 	// TODO: Add implementation for enum
    
 	public FIdUse FVariable.createFIdUse() {
-		 return getFQName().createFIdUse();
+		 return getFQName().createUseFQName().createFIdUse();
 	}  
    
 	public FIdUse FFunctionVariable.createFIdUse() {
-		 return getFQName().createFIdUse();
+		 return getFQName().createUseFQName().createFIdUse();
 	}  
    
     /**
      * Create an access expression to this variable.
      */
 	public FIdUseExp FVariable.createUseExp() {
-		 return getFQName().createFIdUseExp();
+		 return getFQName().createUseFQName().createFIdUseExp();
 	}
 
 	public FIdUseExp FDerivativeVariable.createUseExp() {
-		 return getFQName().createFDerExp();
+		 return getFQName().createUseFQName().createFDerExp();
 	}
 
 	public FIdUseExp FHDerivativeVariable.createUseExp() {
-		 return getFQName().createFHDerExp(getOrder());
+		 return getFQName().createUseFQName().createFHDerExp(getOrder());
 	}
 
 	public FIdUseExp FDummyDerivativeVariable.createUseExp() {
-		 return getFQName().createFDummyDerExp();
+		 return getFQName().createUseFQName().createFDummyDerExp();
 	}
 
 	public FIdUseExp FHDummyDerivativeVariable.createUseExp() {
-		 return getFQName().createFHDummyDerExp(getOrder());
+		 return getFQName().createUseFQName().createFHDummyDerExp(getOrder());
 	}
     
 	public FIdUseExp FFunctionVariable.createUseExp() {
-		 return getFQName().createFIdUseExp();
+		 return getFQName().createUseFQName().createFIdUseExp();
 	}
     
 	public FExp FEnumLiteral.createUseExp() {
@@ -1350,56 +1350,46 @@ aspect FlatNames {
 	 * Create a pre() expression for this variable.
 	 */
 	public FPreExp FVariable.createFPreExp() {
-		return new FPreExp(getFQName().createFIdUseExp());
+		return new FPreExp(getFQName().createUseFQName().createFIdUseExp());
 	}
 
     /**
-     * \brief Create an FDerExp using a copy of this name.
-     * 
-     * It is assumed that this name is from a variable declaration.
+     * Create an FDerExp for this name, using a copy if needed.
      */
     public FDerExp FQName.createFDerExp() {
         return new FDerExp(createFIdUse()); 
     }
 
     /**
-     * \brief Create an FHDerExp using a copy of this name.
-     * 
-     * It is assumed that this name is from a variable declaration.
+     * Create an FHDerExp for this name, using a copy if needed.
      */
     public FHDerExp FQName.createFHDerExp(int order) {
         return new FHDerExp(createFIdUse(), order); 
     }
 
     /**
-     * \brief Create an FDummyDerExp using a copy of this name.
-     * 
-     * It is assumed that this name is from a variable declaration.
+     * Create an FDummyDerExp for this name, using a copy if needed.
      */
     public FDummyDerExp FQName.createFDummyDerExp() {
         return new FDummyDerExp(createFIdUse()); 
     }
 
     /**
-     * \brief Create an FHDummyDerExp using a copy of this name.
-     * 
-     * It is assumed that this name is from a variable declaration.
+     * Create an FHDummyDerExp for this name, using a copy if needed.
      */
     public FHDummyDerExp FQName.createFHDummyDerExp(int order) {
         return new FHDummyDerExp(createFIdUse(), order); 
     }
     
     /**
-     * \brief Create an FIdUseExp using a copy of this name.
-     * 
-     * It is assumed that this name is from a variable declaration.
+     * Create an FIdUseExp for this name, using a copy if needed.
      */
     public FIdUseExp FQName.createFIdUseExp() {
         return new FIdUseExp(createFIdUse()); 
     }
     
     /**
-     * \brief Create a copy of this name that is suitable for an FIdUse.
+     * Create a copy of this name that is suitable for an FIdUse.
      * 
      * It is assumed that this name is from a variable declaration.
      */
@@ -1411,12 +1401,10 @@ aspect FlatNames {
     }
     
     /**
-     * \brief Create an FIdUse using a copy of this name.
-     * 
-     * It is assumed that this name is from a variable declaration.
+     * Create an FIdUse for this name, using a copy if needed.
      */
     public FIdUse FQName.createFIdUse() {
-        return new FIdUse(createUseFQName()); 
+        return new FIdUse((FQName) unboundCopy()); 
     }
     
     /**
