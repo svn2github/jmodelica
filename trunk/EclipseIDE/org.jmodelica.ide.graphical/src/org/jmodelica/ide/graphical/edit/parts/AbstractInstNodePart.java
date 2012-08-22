@@ -30,8 +30,6 @@ public abstract class AbstractInstNodePart extends AbstractModelicaPart implemen
 	
 	@Override
 	public void deactivate() {
-		getModel().getLayer().getCoordinateSystem().removeObserver(this);
-		getModel().getLayer().removeObserver(this);
 		super.deactivate();
 	}
 
