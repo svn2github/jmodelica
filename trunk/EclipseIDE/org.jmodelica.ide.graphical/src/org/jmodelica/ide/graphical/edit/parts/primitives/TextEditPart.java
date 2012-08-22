@@ -46,7 +46,7 @@ public class TextEditPart extends GraphicEditPart {
 
 	@Override
 	public void addNotify() {
-		updateFillColor();
+		updateLineColor();
 		refreshTextLabel();
 		super.addNotify();
 	}
@@ -66,16 +66,12 @@ public class TextEditPart extends GraphicEditPart {
 				updateStyle();
 			else if (flag == FilledRectShape.EXTENT_UPDATED)
 				updateExtent();
-			else if (flag == FilledShape.FILL_COLOR_UPDATED)
-				updateFillColor();
-			else if (flag == FilledShape.FILL_PATTERN_CHANGED)
-				updateFillPattern();
+			else if (flag == FilledShape.FILL_COLOR_UPDATED);// Deprecated as of MLS 3.3
+			else if (flag == FilledShape.FILL_PATTERN_CHANGED);// Deprecated as of MLS 3.3
 			else if (flag == FilledShape.LINE_COLOR_UPDATED)
 				updateLineColor();
-			else if (flag == FilledShape.LINE_PATTERN_CHANGED)
-				updateLinePattern();
-			else if (flag == FilledShape.LINE_THICKNESS_CHANGED)
-				updateLineThickness();
+			else if (flag == FilledShape.LINE_PATTERN_CHANGED);// Deprecated as of MLS 3.3
+			else if (flag == FilledShape.LINE_THICKNESS_CHANGED);// Deprecated as of MLS 3.3
 		}
 		super.update(o, flag, additionalInfo);
 	}
@@ -104,24 +100,8 @@ public class TextEditPart extends GraphicEditPart {
 		refreshTextLabel();
 	}
 
-	private void updateFillColor() {
-		//TODO: Implement fill color
-	}
-
-	private void updateFillPattern() {
-		//TODO: Implement fill pattern
-	}
-
 	private void updateLineColor() {
 		getFigure().setForegroundColor(Converter.convert(getModel().getLineColor()));
-	}
-
-	private void updateLinePattern() {
-		//TODO: Implement line pattern
-	}
-
-	private void updateLineThickness() {
-		//TODO: Implement line thickness
 	}
 
 	private void refreshTextLabel() {
