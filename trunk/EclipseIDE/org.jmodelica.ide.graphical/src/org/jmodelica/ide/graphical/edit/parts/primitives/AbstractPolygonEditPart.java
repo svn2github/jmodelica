@@ -9,6 +9,7 @@ import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.coord.Point;
 import org.jmodelica.icons.primitives.Color;
 import org.jmodelica.icons.primitives.FilledShape;
+import org.jmodelica.icons.primitives.Types.FillPattern;
 import org.jmodelica.ide.graphical.util.Converter;
 import org.jmodelica.ide.graphical.util.Transform;
 
@@ -26,7 +27,6 @@ public abstract class AbstractPolygonEditPart extends GraphicEditPart {
 	@Override
 	protected IFigure createFigure() {
 		Polygon p = new Polygon();
-		p.setFill(true);
 //		p.setAntialias(SWT.ON);
 		return p;
 	}
@@ -79,6 +79,10 @@ public abstract class AbstractPolygonEditPart extends GraphicEditPart {
 	}
 	
 	private void updateFillpattern() {
+		if (getModel().getFillPattern() == FillPattern.NONE)
+			getFigure().setFill(false);
+		else
+			getFigure().setFill(true);
 		// TODO: implement fill patterns.
 	}
 
