@@ -15,7 +15,6 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.SnapToGrid;
 import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
-import org.eclipse.gef.ui.actions.ToggleGridAction;
 import org.eclipse.gef.ui.actions.ToggleSnapToGeometryAction;
 import org.eclipse.gef.ui.parts.GraphicalEditor;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
@@ -39,6 +38,8 @@ import org.eclipse.ui.IEditorPart;
 import org.jastadd.plugin.Activator;
 import org.jmodelica.ide.graphical.actions.OpenComponentAction;
 import org.jmodelica.ide.graphical.actions.RotateAction;
+import org.jmodelica.ide.graphical.actions.ShowGridAction;
+import org.jmodelica.ide.graphical.actions.SnapToGridAction;
 import org.jmodelica.ide.graphical.edit.EditPartFactory;
 import org.jmodelica.ide.graphical.proxy.AbstractDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.AbstractNodeProxy;
@@ -50,6 +51,8 @@ import org.jmodelica.modelica.compiler.InstProgramRoot;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
 public class Editor extends GraphicalEditor {
+
+	public static final String DIAGRAM_READ_ONLY = "diagramIsReadOnly";
 
 	private GraphicalEditorInput input;
 	private ClassDiagramProxy dp;
@@ -145,11 +148,12 @@ public class Editor extends GraphicalEditor {
 		viewer.setKeyHandler(new GraphicalViewerKeyHandler(viewer));
 		viewer.addDropTargetListener(new TextTransferDropTargetListener(viewer, TextTransfer.getInstance()));
 
-		viewer.setProperty(SnapToGrid.PROPERTY_GRID_ENABLED, false);
-		viewer.setProperty(SnapToGrid.PROPERTY_GRID_VISIBLE, false);
+		viewer.setProperty(SnapToGrid.PROPERTY_GRID_VISIBLE, true);
+		viewer.setProperty(SnapToGrid.PROPERTY_GRID_ENABLED, true);
 
+		getActionRegistry().registerAction(new ShowGridAction(getGraphicalViewer()));
+		getActionRegistry().registerAction(new SnapToGridAction(getGraphicalViewer()));
 		getActionRegistry().registerAction(new ToggleSnapToGeometryAction(getGraphicalViewer()));
-		getActionRegistry().registerAction(new ToggleGridAction(getGraphicalViewer()));
 		ContextMenuProvider contextMenu = new EditorContexMenuProvider(viewer, getActionRegistry());
 		viewer.setContextMenu(contextMenu);
 	}
@@ -177,7 +181,7 @@ public class Editor extends GraphicalEditor {
 			getGraphicalViewer().setContents(dp);
 		} else {
 			refreshBreadcrumbsBar();
-			
+
 			AbstractDiagramProxy adp;
 			if (openComponentStack.isEmpty())
 				adp = dp;

@@ -11,6 +11,8 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.RetargetAction;
+import org.jmodelica.ide.graphical.actions.ShowGridAction;
+import org.jmodelica.ide.graphical.actions.SnapToGridAction;
 
 public class EditorActionBarContributor extends ActionBarContributor {
 
@@ -19,23 +21,24 @@ public class EditorActionBarContributor extends ActionBarContributor {
 		addRetargetAction(new DeleteRetargetAction());
 		addRetargetAction(new UndoRetargetAction());
 		addRetargetAction(new RedoRetargetAction());
-		addRetargetAction(new RetargetAction(GEFActionConstants.TOGGLE_GRID_VISIBILITY, "Grid", IAction.AS_CHECK_BOX));
+		addRetargetAction(new RetargetAction(ShowGridAction.ID, "Show Grid", IAction.AS_CHECK_BOX));
+		addRetargetAction(new RetargetAction(SnapToGridAction.ID, "Snap to Grid", IAction.AS_CHECK_BOX));
 		addRetargetAction(new RetargetAction(GEFActionConstants.TOGGLE_SNAP_TO_GEOMETRY, "Snap to Geometry", IAction.AS_CHECK_BOX));
-
 	}
 
 	@Override
 	public void contributeToToolBar(IToolBarManager toolBarManager) {
 		toolBarManager.add(getAction(ActionFactory.UNDO.getId()));
 		toolBarManager.add(getAction(ActionFactory.REDO.getId()));
-		toolBarManager.add(getAction(GEFActionConstants.TOGGLE_GRID_VISIBILITY));
-	    toolBarManager.add(getAction(GEFActionConstants.TOGGLE_SNAP_TO_GEOMETRY));
-	    toolBarManager.add(new Action("Rebuild") {
-	    	@Override
-	    	public void run() {
-	    		((Editor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor()).flushInst();
-	    	}
-	    });
+		toolBarManager.add(getAction(ShowGridAction.ID));
+		toolBarManager.add(getAction(SnapToGridAction.ID));
+		toolBarManager.add(getAction(GEFActionConstants.TOGGLE_SNAP_TO_GEOMETRY));
+		toolBarManager.add(new Action("Rebuild") {
+			@Override
+			public void run() {
+				((Editor) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor()).flushInst();
+			}
+		});
 	}
 
 	@Override
