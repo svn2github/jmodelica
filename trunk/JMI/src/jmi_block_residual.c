@@ -50,10 +50,9 @@ int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi
 int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solvers_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index){
 	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
     int flag = 0;
+	int i;
     if(!b) return -1;
 	*block = b;
-	
-	int i;
 
 	b->jmi = jmi;
 	b->F = F;

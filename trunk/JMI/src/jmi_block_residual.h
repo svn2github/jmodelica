@@ -154,6 +154,8 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
  */
 int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_solvers_t solver,
                            jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index);
+                           
+int jmi_solve_block_residual(jmi_block_residual_t * block);
 
 /**
  * \brief Deletes a jmi_block_residual struct.
