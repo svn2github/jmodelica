@@ -67,6 +67,9 @@ public abstract class AbstractModelicaPart extends AbstractGraphicalEditPart imp
 	}
 
 	@Override
-	public void update(Observable o, Object flag, Object additionalInfo) {}
+	public void update(Observable o, Object flag, Object additionalInfo) {
+		if (!isActive())
+			o.removeObserver(this);
+	}
 
 }

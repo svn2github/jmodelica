@@ -3,15 +3,16 @@ package org.jmodelica.ide.graphical.commands;
 import org.eclipse.gef.commands.Command;
 import org.jmodelica.icons.coord.Point;
 import org.jmodelica.icons.primitives.Line;
+import org.jmodelica.ide.graphical.proxy.ConnectionProxy;
 
 public abstract class RemoveBendpointCommand extends Command {
 
-	private Line line;
+	private ConnectionProxy connection;
 	private int index;
 	private Point oldPoint;
 
-	public RemoveBendpointCommand(Line line) {
-		this.line = line;
+	public RemoveBendpointCommand(ConnectionProxy connection) {
+		this.connection = connection;
 		setLabel("remove bendpoint");
 	}
 
@@ -25,22 +26,32 @@ public abstract class RemoveBendpointCommand extends Command {
 
 	@Override
 	public void redo() {
+		Line line = connection.getLine();
+		if (line == null) {
+			System.err.println("Unable to redo remove line point, connection not found!");
+			return;
+		}
 		index = line.getPoints().indexOf(oldPoint);
 		if (index != -1) {
 			line.getPoints().remove(index);
 			line.pointsChanged();
 		} else {
-			System.err.println("Oldpoint is missing from pointlist, someone probably swapped it already!");
+			System.err.println("Unable to redo remove line point, oldpoint is missing from pointlist, someone probably swapped it already!");
 		}
 	}
 
 	@Override
 	public void undo() {
+		Line line = connection.getLine();
+		if (line == null) {
+			System.err.println("Unable to undo remove line point, connection not found!");
+			return;
+		}
 		if (index != -1) {
 			line.getPoints().add(index, oldPoint);
 			line.pointsChanged();
 		} else {
-			System.err.println("Index is invalid, someone probably changed the list already!");
+			System.err.println("Unable to undo remove line point, index is invalid, someone probably changed the list already!");
 		}
 	}
 

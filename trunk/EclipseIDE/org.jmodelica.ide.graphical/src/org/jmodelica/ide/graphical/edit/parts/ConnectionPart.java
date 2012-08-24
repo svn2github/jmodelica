@@ -35,11 +35,20 @@ public class ConnectionPart extends AbstractModelicaPart implements ConnectionEd
 	public void activate() {
 		super.activate();
 		getLine().addObserver(this);
+		updateArrows();
+		updateColor();
+		updatePattern();
+		updatePoints();
+		updateSmooth();
+		updateThickness();
+		getLayer(LayerConstants.CONNECTION_LAYER).add(getFigure());
 	}
 	
 	@Override
 	public void deactivate() {
-		getLine().removeObserver(this);
+		getLayer(LayerConstants.CONNECTION_LAYER).remove(getFigure());
+		getFigure().setSourceAnchor(null);
+		getFigure().setTargetAnchor(null);
 		super.deactivate();
 	}
 
@@ -54,6 +63,8 @@ public class ConnectionPart extends AbstractModelicaPart implements ConnectionEd
 	}
 
 	public Line getLine() {
+		if (!isActive())
+			return null;
 		return getModel().getLine();
 	}
 
@@ -100,26 +111,6 @@ public class ConnectionPart extends AbstractModelicaPart implements ConnectionEd
 			getFigure().setTargetAnchor(new XYAnchor(new Point(100, 100)));
 		else
 			getFigure().setTargetAnchor(getTarget().getTargetConnectionAnchor(this));
-	}
-
-	@Override
-	public void addNotify() {
-		updateArrows();
-		updateColor();
-		updatePattern();
-		updatePoints();
-		updateSmooth();
-		updateThickness();
-		getLayer(LayerConstants.CONNECTION_LAYER).add(getFigure());
-		super.addNotify();
-	}
-
-	@Override
-	public void removeNotify() {
-		getLayer(LayerConstants.CONNECTION_LAYER).remove(getFigure());
-		getFigure().setSourceAnchor(null);
-		getFigure().setTargetAnchor(null);
-		super.removeNotify();
 	}
 
 	@Override

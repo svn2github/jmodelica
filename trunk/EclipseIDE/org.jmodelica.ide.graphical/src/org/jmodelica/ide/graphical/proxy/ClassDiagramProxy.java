@@ -86,12 +86,26 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	}
 
 	public void saveModelicaFile(IProgressMonitor monitor) throws CoreException {
-		StoredDefinition definition = instClassDecl.getDefinition();
-		definition.getFile().setContents(new ByteArrayInputStream(definition.prettyPrintFormatted().getBytes()), false, true, monitor);
+		synchronized (instClassDecl.state()) {
+			StoredDefinition definition = instClassDecl.getDefinition();
+			definition.getFile().setContents(new ByteArrayInputStream(definition.prettyPrintFormatted().getBytes()), false, true, monitor);
+		}
 	}
 	
 	@Override
 	protected void setParameterValue(Stack<String> path, String value) {
 	}
-
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof ClassDiagramProxy) {
+			ClassDiagramProxy other = (ClassDiagramProxy) obj;
+			return instClassDecl.equals(other);
+		}
+		if (obj instanceof InstClassDecl) {
+			InstClassDecl other = (InstClassDecl) obj;
+			return instClassDecl.equals(other);
+		}
+		return false;
+	}
 }

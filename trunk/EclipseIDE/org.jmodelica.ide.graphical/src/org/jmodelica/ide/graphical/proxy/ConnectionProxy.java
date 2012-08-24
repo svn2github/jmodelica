@@ -28,6 +28,13 @@ public class ConnectionProxy extends Observable implements Observer {
 	}
 
 	public Line getLine() {
+		if (connectClause == null) {
+			ConnectionProxy newConnection = diagram.getConnection(source, target);
+			if (newConnection == null)
+				return null;
+			else
+				return newConnection.getLine();
+		}
 		return connectClause.syncGetConnectionLine();
 	}
 
@@ -80,5 +87,11 @@ public class ConnectionProxy extends Observable implements Observer {
 	public String toString() {
 		return source.buildDiagramName() + " -- " + target.buildDiagramName();
 	}
-
+	
+	protected void dispose() {
+		source.removeObserver(this);
+		target.removeObserver(this);
+		connected = false;
+		connectClause = null;
+	}
 }

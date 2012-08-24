@@ -2,7 +2,9 @@ package org.jmodelica.ide.graphical.proxy;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jmodelica.icons.Layer;
@@ -42,6 +44,11 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 	}
 
 	public void constructConnections() {
+		Iterator<Entry<ConnectClause, ConnectionProxy>> it = connectionMap.entrySet().iterator();
+		while (it.hasNext()) {
+			it.next().getValue().dispose();
+			it.remove();
+		}
 		constructConnections(getASTNode());
 	}
 	
@@ -82,6 +89,16 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 	@Override
 	protected boolean inDiagram() {
 		return true;
+	}
+	
+	protected ConnectionProxy getConnection(ConnectorProxy source, ConnectorProxy target) {
+		for (Entry<ConnectClause, ConnectionProxy> entry : connectionMap.entrySet()) {
+			ConnectionProxy proxy = entry.getValue();
+			if (proxy.getSource() == source && proxy.getTarget() == target) {
+				return proxy;
+			}
+		}
+		return null;
 	}
 
 	protected FConnectClause getConnection(ConnectClause connectClause) {

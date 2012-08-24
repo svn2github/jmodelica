@@ -3,12 +3,19 @@ package org.jmodelica.ide.graphical;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.DefaultEditDomain;
 import org.eclipse.gef.EditPart;
@@ -19,6 +26,7 @@ import org.eclipse.gef.ui.actions.ToggleSnapToGeometryAction;
 import org.eclipse.gef.ui.parts.GraphicalEditor;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -35,7 +43,12 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.UIJob;
 import org.jastadd.plugin.Activator;
+import org.jastadd.plugin.registry.IASTRegistryListener;
 import org.jmodelica.ide.graphical.actions.OpenComponentAction;
 import org.jmodelica.ide.graphical.actions.RotateAction;
 import org.jmodelica.ide.graphical.actions.ShowGridAction;
@@ -47,10 +60,11 @@ import org.jmodelica.ide.graphical.proxy.ClassDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentProxy;
 import org.jmodelica.modelica.compiler.ClassDecl;
+import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
-public class Editor extends GraphicalEditor {
+public class Editor extends GraphicalEditor implements IASTRegistryListener, IPartListener2 {
 
 	public static final String DIAGRAM_READ_ONLY = "diagramIsReadOnly";
 
@@ -58,6 +72,7 @@ public class Editor extends GraphicalEditor {
 	private ClassDiagramProxy dp;
 	private Stack<ComponentDiagramProxy> openComponentStack;
 	private Composite breadcrumbsBar;
+	private boolean ASTDirty;
 
 	public Editor() {
 		setEditDomain(new DefaultEditDomain(this));
@@ -93,17 +108,23 @@ public class Editor extends GraphicalEditor {
 	}
 
 	private void refreshBreadcrumbsBar() {
+		String className = dp.getClassName();
+		Map<String, ComponentDiagramProxy> components = new LinkedHashMap<String, ComponentDiagramProxy>();
+		for (ComponentDiagramProxy component : openComponentStack) {
+			components.put(component.getComponentName(), component);
+		}
+
 		Control[] cs = breadcrumbsBar.getChildren();
 		for (Control c : cs) {
 			c.dispose();
 		}
-		if (!openComponentStack.isEmpty()) {
+		if (!components.isEmpty()) {
 			((RowLayout) breadcrumbsBar.getLayout()).marginBottom = 3;
 			((RowLayout) breadcrumbsBar.getLayout()).marginTop = 3;
 			breadcrumbsBar.setVisible(true);
 
 			Link rootLabel = new Link(breadcrumbsBar, SWT.NONE);
-			rootLabel.setText("<a>" + dp.getClassName() + "</a>");
+			rootLabel.setText("<a>" + className + "</a>");
 			rootLabel.addListener(SWT.Selection, new Listener() {
 
 				@Override
@@ -112,23 +133,23 @@ public class Editor extends GraphicalEditor {
 				}
 			});
 
-			Iterator<ComponentDiagramProxy> it = openComponentStack.iterator();
+			Iterator<Entry<String, ComponentDiagramProxy>> it = components.entrySet().iterator();
 			while (it.hasNext()) {
-				final ComponentDiagramProxy component = it.next();
+				final Entry<String, ComponentDiagramProxy> entry = it.next();
 				Label arrow = new Label(breadcrumbsBar, SWT.NONE);
 				arrow.setText(".");
 				if (it.hasNext()) {
 					Link componentLabel = new Link(breadcrumbsBar, SWT.NONE);
-					componentLabel.setText("<a>" + component.getComponentName() + "</a>");
+					componentLabel.setText("<a>" + entry.getKey() + "</a>");
 					componentLabel.addListener(SWT.Selection, new Listener() {
 						@Override
 						public void handleEvent(Event event) {
-							openPrevComponent(component);
+							openPrevComponent(entry.getValue());
 						}
 					});
 				} else {
 					Label componentLabel = new Label(breadcrumbsBar, SWT.NONE);
-					componentLabel.setText(component.getComponentName());
+					componentLabel.setText(entry.getKey());
 				}
 			}
 		} else {
@@ -156,11 +177,12 @@ public class Editor extends GraphicalEditor {
 		getActionRegistry().registerAction(new ToggleSnapToGeometryAction(getGraphicalViewer()));
 		ContextMenuProvider contextMenu = new EditorContexMenuProvider(viewer, getActionRegistry());
 		viewer.setContextMenu(contextMenu);
+		getSite().getWorkbenchWindow().getPartService().addPartListener(this);
 	}
 
 	@Override
 	protected void initializeGraphicalViewer() {
-		dp = new ClassDiagramProxy(getProgramRoot().simpleLookupInstClassDecl(input.getClassName()));
+		dp = new ClassDiagramProxy(getProgramRoot().syncSimpleLookupInstClassDecl(input.getClassName()));
 		openComponentStack = new Stack<ComponentDiagramProxy>();
 		setContent();
 		getGraphicalViewer().getRootEditPart().refresh();
@@ -210,8 +232,10 @@ public class Editor extends GraphicalEditor {
 	protected void setInput(IEditorInput input) {
 		super.setInput(input);
 		Assert.isLegal(input instanceof GraphicalEditorInput, "The editor only support opening Modelica classes.");
-
+		if (this.input != null)
+			Activator.getASTRegistry().removeListener(this);
 		this.input = (GraphicalEditorInput) input;
+		Activator.getASTRegistry().addListener(this, this.input.getProject(), null);
 		setPartName(input.getName());
 	}
 
@@ -288,6 +312,7 @@ public class Editor extends GraphicalEditor {
 			}
 		}
 		return false;
+
 	}
 
 	/**
@@ -304,7 +329,7 @@ public class Editor extends GraphicalEditor {
 	@SuppressWarnings("unchecked")
 	public void flushInst() {
 		long start = System.currentTimeMillis();
-		ClassDecl cd = getProgramRoot().simpleLookupInstClassDecl(input.getClassName()).getClassDecl();
+		ClassDecl cd = getProgramRoot().syncSimpleLookupInstClassDecl(input.getClassName()).getClassDecl();
 		System.out.println("copy selection, t+" + (System.currentTimeMillis() - start));
 		List<Object> selectedModels = new ArrayList<Object>();
 		for (EditPart o : (List<EditPart>) getGraphicalViewer().getSelectedEditParts()) {
@@ -314,7 +339,7 @@ public class Editor extends GraphicalEditor {
 		System.out.println("flush src classDecl, t+" + (System.currentTimeMillis() - start));
 		getProgramRoot().flushAll();
 		System.out.println("flush program root, t+" + (System.currentTimeMillis() - start));
-		dp.setInstClassDecl(getProgramRoot().simpleLookupInstClassDecl(input.getClassName()));
+		dp.setInstClassDecl(getProgramRoot().syncSimpleLookupInstClassDecl(input.getClassName()));
 		System.out.println("lookup input class, t+" + (System.currentTimeMillis() - start));
 		setContent();
 		System.out.println("set content, t+" + (System.currentTimeMillis() - start));
@@ -323,6 +348,94 @@ public class Editor extends GraphicalEditor {
 			if (part != null)
 				getGraphicalViewer().getSelectionManager().appendSelection(part);
 		}
+		System.out.println("restore selection, t+" + (System.currentTimeMillis() - start));
 	}
+
+	public void refreshInst() {
+		new Job("Refresh Diagram") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				InstClassDecl icd = getProgramRoot().syncSimpleLookupInstClassDecl(input.getClassName());
+				if (dp.equals(icd)) {
+					return Status.OK_STATUS;
+				}
+				if (getCommandStack().isDirty()) {
+					ASTDirty = true;
+					if (getSite().getWorkbenchWindow().getActivePage().getActiveEditor() == Editor.this)
+						showSourceChangeDialog();
+					return Status.OK_STATUS;
+				}
+				dp.setInstClassDecl(icd);
+				new UIJob("Refresh Diagram") {
+
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						synchronized (getProgramRoot().state()) {
+							getCommandStack().markSaveLocation();
+							ASTDirty = false;
+							setContent();
+							return Status.OK_STATUS;
+						}
+					}
+				}.schedule();
+				return Status.OK_STATUS;
+			}
+		}.schedule();
+	}
+
+	private void showSourceChangeDialog() {
+		new UIJob("Refresh Diagram") {
+
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				if (!ASTDirty)
+					return Status.OK_STATUS;
+				boolean choise = MessageDialog.openQuestion(PlatformUI.getWorkbench().getDisplay().getActiveShell(), "Source file has changed", "The source file has changed and you have unsaved changes!\nDo you want to reload and discard your changes?");
+				if (!choise)
+					return Status.OK_STATUS;
+				getCommandStack().flush();
+				refreshInst();
+				return Status.OK_STATUS;
+			}
+		}.schedule();
+	}
+
+	@Override
+	public void projectASTChanged(IProject project) {
+		if (dp != null)
+			refreshInst();
+	}
+
+	@Override
+	public void childASTChanged(IProject project, String key) {}
+
+	@Override
+	public void partActivated(IWorkbenchPartReference partRef) {
+		if (partRef.getPart(false) != this)
+			return;
+		showSourceChangeDialog();
+	}
+
+	@Override
+	public void partBroughtToTop(IWorkbenchPartReference partRef) {}
+
+	@Override
+	public void partClosed(IWorkbenchPartReference partRef) {}
+
+	@Override
+	public void partDeactivated(IWorkbenchPartReference partRef) {}
+
+	@Override
+	public void partOpened(IWorkbenchPartReference partRef) {}
+
+	@Override
+	public void partHidden(IWorkbenchPartReference partRef) {}
+
+	@Override
+	public void partVisible(IWorkbenchPartReference partRef) {}
+
+	@Override
+	public void partInputChanged(IWorkbenchPartReference partRef) {}
 
 }

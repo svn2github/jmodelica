@@ -425,6 +425,15 @@ aspect ModelicaIconsEditing {
 	}
 	
 	/**
+	 * Thread safe wrapper method for InstProgramRoot.simpleLookupInstClassDecl
+	 */
+	public InstClassDecl InstProgramRoot.syncSimpleLookupInstClassDecl(String name) {
+		synchronized (state()) {
+			return simpleLookupInstClassDecl(name);
+		}
+	}
+	
+	/**
 	 * Thread safe wrapper method for InstComponentDecl.getComponentDecl()
 	 */
 	public ComponentDecl InstComponentDecl.syncGetComponentDecl() {
