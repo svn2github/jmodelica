@@ -835,6 +835,31 @@ Semantic error at line 796, column 23:
 ")})));
 end FunctionEval23;
 
+model FunctionEval24
+	function f
+		input Real x;
+		output Real y;
+	algorithm
+		y := x;
+	end f;
+	
+	constant Real z = f();
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		ErrorTestCase(
+			name="FunctionEval24",
+			description="",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EvaluationTests.mo':
+Semantic error at line 846, column 20:
+  Calling function f(): missing argument for required input x
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EvaluationTests.mo':
+Semantic error at line 846, column 20:
+  Could not evaluate binding expression for constant 'z': 'f()'
+")})));
+end FunctionEval24;
+
 
 model StringConcat
  Real a = 1;

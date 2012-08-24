@@ -1681,7 +1681,11 @@ aspect ConstantEvaluation {
 	  int i = 0;
 	  for (CommonVariableDecl var : myFuncInputs()) {
 		  var.prepareForFunctionEval();
-		  values.put(var, argument(i++).ceval());
+		  FExp arg = argument(i++);
+		  if (arg != null)
+			  values.put(var, arg.ceval());
+		  else
+			  throw new ConstantEvaluationException();
 	  }
 	  
 	  evaluate(values);
