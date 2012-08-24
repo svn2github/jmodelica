@@ -40,7 +40,7 @@ try:
     #from pyjmi.simulation.assimulo_interface import write_data
     #from pyjmi.simulation.assimulo_interface import TrajectoryLinearInterpolation
     from assimulo.solvers import IDA
-except NameError, ImportError:
+except (NameError, ImportError):
     logging.warning('Could not load Assimulo module. Check pyjmi.check_packages()')
 
 int = N.int32

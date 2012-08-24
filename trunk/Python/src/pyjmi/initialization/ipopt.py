@@ -56,7 +56,7 @@ class InitializationOptimizer(object):
             assert self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_new(
                 byref(self._ipopt_init), self._nlp_init._jmi_init_opt) == 0, \
                    "jmi_init_opt_ipopt_new returned non-zero"
-        except AttributeError, e:
+        except AttributeError as e:
             raise JMIException(
                 "Can not create InitializationOptimizer object. \ "
                 "Please recompile model with target='ipopt")
@@ -90,7 +90,7 @@ class InitializationOptimizer(object):
                 ct.POINTER(c_jmi_real_t),
                 ct.POINTER(c_jmi_real_t)]
 
-        except AttributeError, e:
+        except AttributeError as e:
             pass
                
     def init_opt_ipopt_solve(self):
@@ -334,7 +334,7 @@ class NLPInitialization(object):
             _w_lin, 
             JMI_DER_CPPAD,stat) is 0, \
                 " jmi_opt_lp_new returned non-zero."
-        #        except AttributeError,e:
+        #        except AttributeError as e:
 #             raise JMIException("Can not create NLPInitialization object.")
         assert self._jmi_init_opt.value is not None, \
             "jmi_init_opt struct has not returned correctly."
@@ -425,7 +425,7 @@ class NLPInitialization(object):
                                     flags='C'),
                 ct.c_int,                             # der_eval_alg
                 ct.c_int]                             # stat            
-        except AttributeError, e:
+        except AttributeError as e:
             pass
             
     def _set_nlpInit_typedefs(self):
@@ -538,7 +538,7 @@ class NLPInitialization(object):
             #                                                     flags='C')]
             _returns_ndarray(self._jmi_model._dll.jmi_init_opt_get_x, 
                 c_jmi_real_t, n_real_x.value, order='C')
-        except AttributeError, e:
+        except AttributeError as e:
             pass
         
     def init_opt_get_dimensions(self):

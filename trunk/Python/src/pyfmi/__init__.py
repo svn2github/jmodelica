@@ -89,10 +89,10 @@ def check_packages():
                     vers = etree.__version__
                 else:
                     vers = mod.__version__
-            except AttributeError, e:
+            except AttributeError as e:
                 pass
             sys.stdout.write("%s %s %s" %(package.ljust(le,'.'), vers.ljust(le), "Ok".ljust(le)))
-        except ImportError, e:
+        except ImportError as e:
             if package == "assimulo" or package == "wxPython":
                 sys.stdout.write("%s %s %s" % (package.ljust(le,'.'), vers.ljust(le), "Package missing - Warning issued, see details below".ljust(le)))
                 warning_packages.append(package)

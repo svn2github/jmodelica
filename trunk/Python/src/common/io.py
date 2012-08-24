@@ -68,7 +68,7 @@ class ResultDymola:
         
         try:
             return self.name.index(name)
-        except ValueError, ex:
+        except ValueError as ex:
             #Variable was not found so check if it was a derivative variable
             #and check if there exists a variable with another naming
             #convention
@@ -76,7 +76,7 @@ class ResultDymola:
                 try:
                     #First do a simple search for the other naming convention
                     return self.name.index(self._convert_dx_name(name))
-                except ValueError, ex:
+                except ValueError as ex:
                     return self._exhaustive_search_for_derivatives(name)
             else:
                 raise VariableNotFoundError("Cannot find variable " +
@@ -115,10 +115,10 @@ class ResultDymola:
             
             try:
                 return self.name.index(der_trial_name)
-            except ValueError, ex:
+            except ValueError as ex:
                 try:
                     return self.name.index(self._convert_dx_name(der_trial_name))
-                except ValueError, ex:
+                except ValueError as ex:
                     pass
         else:
             raise VariableNotFoundError("Cannot find variable " +

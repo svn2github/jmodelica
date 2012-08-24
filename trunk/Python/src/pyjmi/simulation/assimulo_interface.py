@@ -461,7 +461,7 @@ class JMIDAE(Implicit_Problem):
                 solver.make_consistent('IDA_YA_YDP_INIT') #Calculate consistency
                 self._log.debug(
                     ' Calculation of consistent initial conditions: True')
-            except Sundials_Exception, data:
+            except Sundials_Exception as data:
                 print data
                 print 'Failed to calculate initial conditions. Trying to continue...'
                 self._log.debug(

@@ -199,14 +199,14 @@ def _parse_XML(filename, schemaname=''):
 
     try:
         element_tree = etree.ElementTree(file=filename)
-    except etree.XMLSyntaxError, detail:
+    except etree.XMLSyntaxError as detail:
         raise XMLException("The XML file: %s is not well-formed. %s" 
             %(filename, detail))
 
     if schemaname:
         try:
             schemadoc = etree.ElementTree(file=schemaname)
-        except etree.XMLSyntaxError, detail:
+        except etree.XMLSyntaxError as detail:
             raise XMLException("The XMLSchema: %s is not well-formed. %s" 
                 %(schemaname, detail))         
         

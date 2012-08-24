@@ -386,7 +386,7 @@ class ModelicaCompiler(object):
         """
         try:
             options = OptionRegistryInterface(self.options_file_path)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
             
         options.addStringOption('MODELICAPATH',pym.environ['MODELICAPATH'])
@@ -503,7 +503,7 @@ class ModelicaCompiler(object):
         """
         try:
             option = self._compiler.getBooleanOption(key)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
         return bool(option)
     
@@ -526,7 +526,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.setBooleanOption(key, value)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
         
     def get_integer_option(self, key):
@@ -544,7 +544,7 @@ class ModelicaCompiler(object):
         """
         try:
             option = self._compiler.getIntegerOption(key)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
         return option
     
@@ -567,7 +567,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.setIntegerOption(key, value)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
         
     def get_real_option(self, key):
@@ -585,7 +585,7 @@ class ModelicaCompiler(object):
         """
         try:
             option = self._compiler.getRealOption(key)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
         return option
     
@@ -608,7 +608,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.setRealOption(key, value)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
                     
     def get_string_option(self, key):
@@ -626,7 +626,7 @@ class ModelicaCompiler(object):
         """
         try:
             option = self._compiler.getStringOption(key)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
         return str(option)
         
@@ -649,7 +649,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.setStringOption(key, value)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
     
     def get_XML_tpl(self):
@@ -724,7 +724,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.compileJMU(class_name, file_name, target, compile_to)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
         
     def compile_FMU(self, class_name, file_name, target, compile_to):
@@ -757,7 +757,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.compileFMU(class_name, file_name, target, compile_to)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
 
     def compile_FMUX(self, class_name, file_name, compile_to):
@@ -780,7 +780,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.compileFMUX(class_name, file_name, compile_to)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
 
     def parse_model(self,model_file_name):   
@@ -818,7 +818,7 @@ class ModelicaCompiler(object):
         try:
             sr = self._compiler.parseModel(model_file_name)
             return sr        
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
 
     def instantiate_model(self, source_root, model_class_name):
@@ -853,7 +853,7 @@ class ModelicaCompiler(object):
         try:
             ipr = self._compiler.instantiateModel(source_root, model_class_name)
             return ipr    
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
 
     def flatten_model(self, inst_class_decl):
@@ -888,7 +888,7 @@ class ModelicaCompiler(object):
         try:
             fclass = self._compiler.flattenModel(inst_class_decl)
             return fclass    
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
 
     def generate_code(self,fclass):
@@ -915,7 +915,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.generateCode(fclass)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
             
     def _handle_exception(self, ex):
@@ -1015,7 +1015,7 @@ class OptimicaCompiler(ModelicaCompiler):
         """
         try:
             options = OptionRegistryInterface(self.options_file_path)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
             
         options.addStringOption('MODELICAPATH',pym.environ['MODELICAPATH'])
@@ -1069,7 +1069,7 @@ class OptimicaCompiler(ModelicaCompiler):
         """
         try:
             self._compiler.setBooleanOption(key, value)
-        except jpype.JavaException, ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
               
 

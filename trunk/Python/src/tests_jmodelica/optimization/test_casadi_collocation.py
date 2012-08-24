@@ -31,7 +31,7 @@ from pyfmi import FMUModel
 try:
     from pyjmi.optimization.casadi_collocation import *
     from pyjmi.casadi_interface import CasadiModel
-except NameError, ImportError:
+except (NameError, ImportError):
     pass
 
 path_to_mos = os.path.join(get_files_path(), 'Modelica')

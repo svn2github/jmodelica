@@ -34,7 +34,7 @@ try:
     from pyfmi.common.core import TrajectoryLinearInterpolation
     from assimulo.solvers import CVode
     from assimulo.solvers import IDA
-except NameError, ImportError:
+except (NameError, ImportError):
     logging.warning('Could not load Assimulo module. Check pyfmi.check_packages()')
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')

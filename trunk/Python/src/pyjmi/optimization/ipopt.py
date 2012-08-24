@@ -71,7 +71,7 @@ class CollocationOptimizer(object):
             assert self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_new(
                 byref(self._ipopt_opt), self._nlp_collocation._jmi_opt_coll) == 0, \
                    "jmi_opt_coll_ipopt_new returned non-zero"
-        except AttributeError, e:
+        except AttributeError as e:
             raise JMIException("Can not create JMISimultaneousOptIPOPT \
             object. Please recompile model with target='ipopt")
         
@@ -103,7 +103,7 @@ class CollocationOptimizer(object):
                 ct.POINTER(ct.c_int),
                 ct.POINTER(c_jmi_real_t),
                 ct.POINTER(c_jmi_real_t)]
-        except AttributeError, e:
+        except AttributeError as e:
             pass
                
     def opt_coll_ipopt_solve(self):
@@ -456,7 +456,7 @@ class NLPCollocation(object):
             # n_real_x from jmi_opt_coll_get_dimensions
             _returns_ndarray(self._model.jmimodel._dll.jmi_opt_coll_get_x, 
                 c_jmi_real_t, n_real_x.value, order='C')
-        except AttributeError, e:
+        except AttributeError as e:
             pass
        
     def get_result(self):
@@ -1612,7 +1612,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                 JMI_DER_CPPAD,N.size(self._blocking_factors),
                 self._blocking_factors) is 0, \
                 " jmi_opt_lp_new returned non-zero."
-        except AttributeError,e:
+        except AttributeError as e:
              raise JMIException("Can not create \
              NLPCollocationLagrangePolynomials object. Try recompiling \
              model with target='algorithms'")
@@ -1628,7 +1628,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
             assert self._model.jmimodel._dll.jmi_opt_coll_radau_delete(
                 self._jmi_opt_coll) == 0, \
                    "jmi_delete failed"
-        except AttributeError, e:
+        except AttributeError as e:
             pass
 
     def _set_nlpLagrangePols_typedefs(self):
@@ -1792,7 +1792,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                 Nct.ndpointer(dtype=c_jmi_real_t,
                               ndim=1,
                               flags='C')]
-        except AttributeError, e:
+        except AttributeError as e:
             pass
         
     def opt_coll_radau_eval_pol(self, tau, n, pol, k):

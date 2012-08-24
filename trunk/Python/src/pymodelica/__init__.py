@@ -30,9 +30,9 @@ try:
     _p = os.environ['JMODELICA_HOME']
     if not os.path.exists(_p):
         raise IOError
-except KeyError, IOError:
+except (KeyError, IOError):
     raise EnvironmentError('The environment variable JMODELICA_HOME is not set \
-        or points to a non-existing location.')
+or points to a non-existing location.')
     
 # set version
 f= None
@@ -133,10 +133,10 @@ def check_packages():
                     vers = etree.__version__
                 else:
                     vers = mod.__version__
-            except AttributeError, e:
+            except AttributeError as e:
                 pass
             sys.stdout.write("%s %s %s" %(package.ljust(le,'.'), vers.ljust(le), "Ok".ljust(le)))
-        except ImportError, e:
+        except ImportError as e:
             if package == "nose" or package == "wxPython":
                 sys.stdout.write("%s %s %s" % (package.ljust(le,'.'), vers.ljust(le), "Package missing - Warning issued, see details below".ljust(le)))
                 warning_packages.append(package)
