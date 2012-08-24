@@ -41,6 +41,7 @@
 	<property name="ast_package" value="org.jmodelica.optimica.compiler" />
 
 	<property name="base_output" value="src/java-generated" />
+    <property name="ast_output" value="${base_output}/org/jmodelica/modelica/compiler" />
 	<property name="parser_output" value="${base_output}/org/jmodelica/optimica/parser" />
 
 	<!-- "tools" is the directory where the needed tools (lexing, parsing, jastadd2, junit.jar) are located. -->
@@ -103,7 +104,7 @@
 		</jar>
 	</target>
 
-	<target name="compile-ast" depends="gen,gen-parser">
+	<target name="compile-ast" depends="patch,gen-parser">
 		<mkdir dir="bin" />
 		<javac classpath="${beaver_dir}/lib/beaver.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
 				compiler="${java_compiler}" source="${java_version}" target="${java_version}" debug="true" 
@@ -115,6 +116,21 @@
 			<exclude name="**/*.aj" />
 		</javac>
 	</target>
+
+    <target name="compile-patcher">
+        <mkdir dir="bin" />
+        <javac classpath="${beaver_dir}/lib/beaver.jar" compiler="${java_compiler}" source="${java_version}" 
+            target="${java_version}" debug="true" destdir="bin" includeantruntime="false">
+            <src path="${modelica_front_end_path}/src/java" />
+            <include name="**/GeneratedFilePatcher.java" />
+        </javac>
+    </target>
+
+    <target name="patch" depends="gen,compile-patcher">
+        <java classpath="bin:${beaver_dir}/lib/beaver-rt.jar" classname="org.jmodelica.util.GeneratedFilePatcher">
+            <arg line="${ast_output}" />
+        </java>
+    </target>
 
 	<!-- TARGET gen -->
 	<target name="gen">

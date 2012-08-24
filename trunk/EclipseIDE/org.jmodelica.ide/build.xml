@@ -51,6 +51,7 @@
 	<property name="ant_task_dir" value="ant" />
 	<property name="bin_dir" value="bin" />
 	<property name="output_dir" location="site" />
+    <property name="ast_dir" value="${java_dir}/org/jmodelica/modelica/compiler" />
 
 	<property name="compiler_dir" value="${jmodelica_root}/Compiler" />
 	<property name="modelica_frontend_dir" value="${compiler_dir}/ModelicaFrontEnd/src" />
@@ -216,7 +217,21 @@
 	<target name="genscanner" depends="copy,scanner" />
 
 	<!-- meta-target for generating all java files -->
-	<target name="gen" depends="copy,scanner,parser,ast" />
+	<target name="gen" depends="copy,scanner,parser,ast,patch" />
+
+    <target name="compile-patcher" depends="copy">
+        <mkdir dir="${bin_dir}/classes" />
+        <javac classpath="${beaver_dir}/lib/beaver.jar" compiler="javac1.5" debug="true" destdir="${bin_dir}/classes">
+            <src path="${java_dir}" />
+            <include name="**/GeneratedFilePatcher.java" />
+        </javac>
+    </target>
+
+    <target name="patch" depends="ast,compile-patcher">
+        <java classpath="${bin_dir}/classes:${beaver_dir}/lib/beaver-rt.jar" classname="org.jmodelica.util.GeneratedFilePatcher">
+            <arg line="${ast_dir}" />
+        </java>
+    </target>
 
 	<!-- generate compiler ast files -->
 	<!-- create AST node types and weave aspect modules -->
