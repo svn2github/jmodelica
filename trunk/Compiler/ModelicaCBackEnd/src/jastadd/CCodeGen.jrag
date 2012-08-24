@@ -655,7 +655,7 @@ aspect CCodeGen {
 		for (FRecordComponentType comp : getComponents()) {
 			if (comp.getFType().isComposite()) {
 				String compName = name + "->" + comp.getName();
-				String tempName = "tmp_" + nextTempNbr_C();
+				String tempName = "tmp_" + src.nextTempNbr_C();
 				src.recordChildTempNames().put(compName, tempName);
 				comp.getFType().printDecl_C(p, str, indent, tempName, src);
 			}
@@ -1393,7 +1393,6 @@ aspect CCodeGen {
 	private int FFunctionDecl.nextTempNbr_C = 1;
 	
 	inh int FExp.nextTempNbr_C();
-	inh int FType.nextTempNbr_C();
 	eq InstNode.getChild().nextTempNbr_C()      = 0;
 	eq FClass.getChild().nextTempNbr_C()        = nextTempNbr_C++;
 	eq FFunctionDecl.getChild().nextTempNbr_C() = nextTempNbr_C++;

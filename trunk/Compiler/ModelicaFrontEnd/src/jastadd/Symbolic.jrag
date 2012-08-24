@@ -92,9 +92,7 @@ aspect EquationSolve {
 		FExp sol = null;
 		// Build new AST for the inactive terms
 		for (FExp e : inactiveTerms) {
-			FExp ee = e.fullCopy();
-			// Set references from the new tree to the original one
-			ee.traverseSymbolic(e); 
+			FExp ee = e.copySymbolic();
 			if (!e.isNegativeTerm()) {
 			  	ee = new FNegExp(ee);
 			}
@@ -143,11 +141,9 @@ aspect EquationSolve {
 			FExp coeff = null;
 			for (FExp eee : inactiveFactors) {
 			    mulCoeffVar = mulCoeffVar.combine(eee.variability());			
-				FExp eeee = eee.fullCopy();
-				// Set references from the new tree to the original one
-				eeee.traverseSymbolic(eee); 
+				FExp eeee = eee.copySymbolic();
 				if (eee.isInvertedFactor()) {
-				  	eeee = new FDivExp(new FRealLitExp(1),eeee);
+				  	eeee = new FDivExp(new FRealLitExp(1), eeee);
 				}
 				if (coeff==null) {
 					coeff = eeee;
@@ -329,26 +325,29 @@ aspect EquationSolve {
 	
 	public FRelExp FRelExp.originalFRelExp = null;
 	public FSampleExp FSampleExp.originalFSampleExp = null;
-	public void ASTNode.traverseSymbolic(ASTNode e) {
-		for (int i=0;i<getNumChild();i++) {
-			getChild(i).traverseSymbolic(e.getChild(i));
+	
+	protected void ASTNode.traverseSymbolic(ASTNode e) {
+		for (int i = 0; i < getNumChildNoTransform(); i++) {
+			getChildNoTransform(i).traverseSymbolic(e.getChildNoTransform(i));
 		}
 	}
 
-	public void FRelExp.traverseSymbolic(ASTNode e) {
-		FRelExp re = (FRelExp)e;
-		originalFRelExp = re.originalFRelExp==null? re: re.originalFRelExp;
-		for (int i=0;i<getNumChild();i++) {
-			getChild(i).traverseSymbolic(e.getChild(i));
-		}
+	protected void FRelExp.traverseSymbolic(ASTNode e) {
+		FRelExp re = (FRelExp) e;
+		originalFRelExp = (re.originalFRelExp == null) ? re : re.originalFRelExp;
+		super.traverseSymbolic(e);
 	}
 
-	public void FSampleExp.traverseSymbolic(ASTNode e) {
-		FSampleExp se = (FSampleExp)e;
-		originalFSampleExp = se.originalFSampleExp==null? se: se.originalFSampleExp;
-		for (int i=0;i<getNumChild();i++) {
-			getChild(i).traverseSymbolic(e.getChild(i));
-		}
+	protected void FSampleExp.traverseSymbolic(ASTNode e) {
+		FSampleExp se = (FSampleExp) e;
+		originalFSampleExp = (se.originalFSampleExp == null) ? se : se.originalFSampleExp;
+		super.traverseSymbolic(e);
+	}
+	
+	public FExp FExp.copySymbolic() {
+		FExp res = fullCopy();
+		res.traverseSymbolic(this);
+		return res;
 	}
 	
 }
@@ -534,9 +533,9 @@ aspect Derivatives {
 			exponent = new FSubExp(getRight().fullCopy(),new FIntegerLitExp(1));
 			e = new FPowExp(getLeft().fullCopy(),exponent);
 		}
-			
-		return dynamicFExp(new FMulExp(new FMulExp(getRight().fullCopy(),
-		                        e),getLeft().diff(name)));	
+		
+		FExp e2 = new FMulExp(getRight().fullCopy(), e);
+		return dynamicFExp(new FMulExp(e2, getLeft().diff(name)));	
 	}
 
 	public FExp FNegExp.diff(String name) {
@@ -656,9 +655,8 @@ aspect Derivatives {
 	}
 	
 	public FExp FIfExp.diff(String name) {
-		FExp e = getIfExp().fullCopy();
-		e.traverseSymbolic(getIfExp());
-		return dynamicFExp(new FIfExp(e,getThenExp().diff(name),getElseExp().diff(name)));
+		FExp e = getIfExp().copySymbolic();
+		return dynamicFExp(new FIfExp(e, getThenExp().diff(name), getElseExp().diff(name)));
 	}
 	
 	public FExp FIdUseExp.diff(String name) {

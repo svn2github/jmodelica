@@ -288,7 +288,8 @@ aspect FlatRecordBinding {
 	syn lazy FRecordDecl FIdUse.myFRecordDecl() = lookupFRec(name());
 	
 	syn lazy FRecordDecl FType.myFRecordDecl() = null;
-	eq FRecordType.myFRecordDecl() = lookupFRec(getName());
+	eq FRecordType.myFRecordDecl()             = 
+		(getFClass() != null) ? getFClass().lookupFRec(getName()) : null;
 	
 	inh FRecordDecl FRecordVariable.lookupFRec(String name);
 	inh FRecordDecl FRecordType.lookupFRec(String name);

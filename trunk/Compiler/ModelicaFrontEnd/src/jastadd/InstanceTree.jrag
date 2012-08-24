@@ -576,9 +576,13 @@ aspect InstanceTreeConstruction {
 	syn lazy List InstComponentRedeclare.getDynamicClassNameList() = new List();
 	syn lazy List InstConstrainingComponent.getDynamicClassNameList() = new List();
 	syn lazy List InstForIndex.getDynamicClassNameList() = new List();
-	syn lazy List FExp.getDynamicFExpList() = new List();
+	syn nta List FExp.getDynamicFExpList() = new List();
 	syn lazy List FAbstractEquation.getDynamicFAbstractEquationList() = new List();	
 	syn lazy List InstValueModification.getDynamicInstModList() = new List();
+	
+	syn int        FExp.getNumDynamicFExp()   = getDynamicFExpList().getNumChild();
+	syn FExp       FExp.getDynamicFExp(int i) = (FExp) getDynamicFExpList().getChild(i);
+	syn List<FExp> FExp.getDynamicFExps()     = (List<FExp>) getDynamicFExpList();
 	
 	/**
 	 * \brief Dynamically places a class name in the tree under this InstNode.
@@ -630,13 +634,13 @@ aspect InstanceTreeConstruction {
 				return (FExp) exp.parent.getChild(i);
 		}
 		// Fool JastAdd into keeping the list
-		boolean finalFlag = is$Final();
-		if (!finalFlag)
-			log.debug("FExp.dynamicFExp(): adding '%s' to dynamic list of non-final exp '%s'.",	exp, this);
-		is$Final(true);
+//		boolean finalFlag = is$Final();
+//		if (!finalFlag)
+//			log.debug("FExp.dynamicFExp(): adding '%s' to dynamic list of non-final exp '%s'.",	exp, this);
+//		is$Final(true);
 		getDynamicFExpList().add(exp);
 		exp = getDynamicFExp(getNumDynamicFExp() - 1);
-		is$Final(finalFlag);
+//		is$Final(finalFlag);
 		return exp;
 	}
 
@@ -1224,9 +1228,17 @@ aspect InstanceTreeConstruction {
 	}
 
 	/**
-	 * \brief Returns the FExp associated with this argument, if any.
+	 * Returns the FExp associated with this argument, if any.
 	 */
 	public FExp InstFunctionArgument.getFExp() { return null; }
+
+	/**
+	 * Returns the FExp associated with this argument, if any, without triggering rewrites.
+	 */
+	public FExp InstFunctionArgument.getFExpNoTransform() { return null; }
+
+	public FExp InstDefaultArgument.getFExpNoTransform() { return getFExp(); }
+
 
 }
 

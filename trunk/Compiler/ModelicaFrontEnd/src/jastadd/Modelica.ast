@@ -23,7 +23,7 @@
  * part of the internal JastAdd run-time system - these methods are not intended
  * to be used by the user.
  * 
- * We are currently working togehter with the JastAdd team to develop a 
+ * We are currently working together with the JastAdd team to develop a 
  * documentation system where internal methods are hidden and where the user
  * API is exposed.
  *

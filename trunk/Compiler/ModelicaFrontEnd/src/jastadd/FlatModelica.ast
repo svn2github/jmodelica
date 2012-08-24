@@ -280,7 +280,7 @@ abstract FType : BaseNode ::= <Size:Size>;
  * In the instance tree, the components are stored alphabetically, 
  * but in the flat tree they are in the order declared. 
  */
-FRecordType : FType ::= <Name> Component:FRecordComponentType*;
+FRecordType : FType ::= <Name> Component:FRecordComponentType* <FClass:FClass>;
 
 /**
  * \brief The type description of a record component.
@@ -652,7 +652,7 @@ ScalarAsArray : Array;
 /**
  * \brief Abstract base class for all flattened expressions.
  */
-abstract FExp : BaseNode ::= /Array/ /DynamicFExp:FExp*/;
+abstract FExp : BaseNode ::= /Array/;
 
 /**
  * \brief Unsupported expression.

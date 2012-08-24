@@ -1719,9 +1719,15 @@ aspect ConstantEvaluation {
   
   public void FExp.prepareForFunctionEval() {
 	  super.prepareForFunctionEval();
-	  // Flush getArray() - NB: uses internal JastAdd implementation details
-	  if (size().isUnknown())
-		  getArray_computed = false;
+// Old version - does not work when JastAdd generates one _computes/_value pair for each eq of a lazy attr
+//	  // Flush getArray() - NB: uses internal JastAdd implementation details
+//	  if (size().isUnknown())
+//		  getArray_computed = false;
+	  // Flush so that getArray() is cleared for unknown sizes, and then recaclculate size
+	  if (size().isUnknown()) {
+		  flushCache();
+		  size();
+	  }
   }
   
   // TODO: reduce code duplication
@@ -1736,6 +1742,8 @@ aspect ConstantEvaluation {
  	  FAlgorithmBlock fab = getFAlgorithmBlock();
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
+	  for (FFunctionVariable var : getFFunctionVariables())
+		  var.setEvaluationValue(null);
 	  fab.prepareForFunctionEval();
 	  
 	  for (FFunctionVariable var : myInputs())

@@ -956,6 +956,7 @@ aspect FlatAPI {
 	inh FClass FIdUse.myFClass();
 	inh FClass FQName.myFClass();
 	inh FClass FFunctionDecl.myFClass();
+	inh FClass FRecordDecl.myFClass();
 	inh FClass FAlgorithmBlock.myFClass();
 	inh FClass FAbstractEquation.myFClass();	
 	inh lazy FClass FExternalStmt.myFClass();
@@ -1292,6 +1293,7 @@ aspect Attributes {
 	
 	syn lazy FDerivedType FVariable.myFDerivedType() = findFDerivedType(getDerivedType());
 	syn FDerivedType FEnumDecl.myFDerivedType()      = findFDerivedType(name());
+	eq FRecordVariable.myFDerivedType()              = null;
 	
 	inh FDerivedType FVariable.findFDerivedType(String name);
 	inh FDerivedType FEnumDecl.findFDerivedType(String name);

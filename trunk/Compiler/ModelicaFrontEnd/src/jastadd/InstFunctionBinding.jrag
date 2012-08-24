@@ -188,7 +188,7 @@ aspect InstFunctionBinding {
 	 * and the expression from the argument as a child.
 	 */
 	public void FRecordConstructor.addArgument(InstFunctionArgument arg) {
-		addArg(arg.getFExp().fullCopy());
+		addArg(arg.getFExpNoTransform().fullCopy());
 		addToOriginalArgs(arg);
 	}
 	
@@ -322,7 +322,7 @@ aspect InstFunctionBinding {
 				}
 				
 				protected static FExp extractFExp(InstFunctionArgument arg) {
-					return arg.getFExp().fullCopy();
+					return arg.getFExpNoTransform().fullCopy();
 				}
 				
 			}
