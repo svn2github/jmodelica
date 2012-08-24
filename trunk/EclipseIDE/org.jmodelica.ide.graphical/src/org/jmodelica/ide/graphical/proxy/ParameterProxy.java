@@ -11,7 +11,7 @@ import org.jmodelica.modelica.compiler.InstPrimitive;
 
 public class ParameterProxy implements IPropertyDescriptor {
 	
-	private static final String CATEGORY = "Paramters";
+	private static final String CATEGORY = "Parameters";
 	
 	private ComponentProxy owner;
 	private String name;
