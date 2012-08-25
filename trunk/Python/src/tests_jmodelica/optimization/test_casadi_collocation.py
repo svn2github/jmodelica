@@ -223,6 +223,10 @@ class TestLocalDAECollocator:
         opts['n_cp'] = 2
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref_traj, u_norm_ref_traj)
+        try:
+            os.remove("vdp_nom_traj_result.txt")
+        except OSError:
+            pass
         os.rename("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt",
                   "vdp_nom_traj_result.txt")
         
@@ -270,6 +274,10 @@ class TestLocalDAECollocator:
         opts['n_cp'] = 2
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref_traj, u_norm_ref_traj)
+        try:
+            os.remove("cstr_nom_traj_result.txt")
+        except OSError:
+            pass
         os.rename("CSTR_CSTR_Opt_Bounds_Lagrange_result.txt",
                   "cstr_nom_traj_result.txt")
         
