@@ -269,6 +269,13 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     jmi_real_t* switchesR0;  /* Initial Switches */
     jmi_real_t* b_mode;
 
+    /* For debugging Jacobians */
+/*
+    int n_states;
+    jmi_real_t* jac;
+    int j;
+*/
+
     /* Update eventInfo */
 
     eventInfo->upcomingTimeEvent = fmiFalse;            /* Next time event is computed after initialization */
@@ -485,7 +492,21 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
         ((fmi_t*)c) -> fmi_functions.freeMemory(a_mode); //Free memory
     }
     */
-    
+    /*
+    n_states = ((fmi_t *)c)->jmi->n_real_x;
+    jac = (jmi_real_t*)calloc(n_states*n_states,sizeof(jmi_real_t));
+    fmi_get_jacobian(c, FMI_STATES, FMI_DERIVATIVES, jac, n_states);
+
+    for (i=0;i<n_states;i++) {
+    	for (j=0;j<n_states;j++) {
+    		printf("%f, ",jac[i + j*n_states]);
+    	}
+    	printf("\n");
+    }
+
+    free(jac);
+*/
+
     return fmiOK;
 }
 

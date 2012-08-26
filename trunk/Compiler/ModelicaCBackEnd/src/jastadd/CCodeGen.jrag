@@ -1463,12 +1463,12 @@ aspect CCodeGen {
 
 	
 	public void AbstractEquationBlock.genBlockResidualFunction_C(int block_counter, boolean inInit, String indent, PrintStream str) {
-		str.print("static int dae_" + (inInit? "init_": "") + "block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {\n");
+		str.print("static int dae_" + (inInit? "init_": "") + "block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {\n");
 		str.print("  jmi_real_t** res = &residual;\n");	
 		genVarDecls_C(str, indent); // TODO: wrong indent (but so has rest of func...)
 		int var_counter = 0;
 		// Nominal values
-		str.print("  if (init==JMI_BLOCK_NOMINAL) {\n");
+		str.print("  if (evaluation_mode==JMI_BLOCK_NOMINAL) {\n");
 		for (FVariable fv : blockResidualVariables_C()) {
 			if(((FRealVariable)fv).nominalAttributeSet()) {
 				str.print("    x["+var_counter+"] = ");
@@ -1480,7 +1480,7 @@ aspect CCodeGen {
 		
 		// Min values
 		var_counter = 0;
-		str.print("  } else  if (init==JMI_BLOCK_MIN) {\n");
+		str.print("  } else  if (evaluation_mode==JMI_BLOCK_MIN) {\n");
 		for (FVariable fv : blockResidualVariables_C()) {
 			if(((FRealVariable)fv).minAttributeSet()) {
 				str.print("    x["+var_counter+"] = ");
@@ -1492,7 +1492,7 @@ aspect CCodeGen {
 		
 		// Max values
 		var_counter = 0;
-		str.print("  } else if (init==JMI_BLOCK_MAX) {\n");
+		str.print("  } else if (evaluation_mode==JMI_BLOCK_MAX) {\n");
 		for (FVariable fv : blockResidualVariables_C()) {
 			if(((FRealVariable)fv).maxAttributeSet()) {
 				str.print("    x["+var_counter+"] = ");
@@ -1502,11 +1502,11 @@ aspect CCodeGen {
 			var_counter++;
 		}
 
-		str.print("  } else if (init==JMI_BLOCK_INITIALIZE) {\n");
+		str.print("  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {\n");
 		var_counter = 0;
 		// Loop over all active variables and write their value to x	
 		for (FVariable fv : blockResidualVariables_C()) {
-			str.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
+			str.print(indent + indent + "x["+var_counter+"] = " + fv.name_C() + ";\n");
 			if(((FRealVariable)fv).maxAttributeSet() && ((FRealVariable)fv).minAttributeSet()) {
 				str.print(indent + indent + "init_with_bounds(");
 				str.print("x["+var_counter+"],");
@@ -1524,7 +1524,11 @@ aspect CCodeGen {
 
 			var_counter++;
 		}
-		str.print("  } else if (init==JMI_BLOCK_EVALUATE) {\n");
+		
+		// Generate code for Jacobian
+		genBlockResidualFunctionJacobian_C(indent, str);
+		
+		str.print(indent + "} else if (evaluation_mode==JMI_BLOCK_EVALUATE) {\n");
 		// Loop over all active variables and write the values in x to the z vector
 		var_counter = 0;
 		for (FVariable fv : blockResidualVariables_C()) {
@@ -1544,9 +1548,10 @@ aspect CCodeGen {
 			} 
 			var_counter++;
 		}
-		var_counter = 0;
+		var_counter = 0;		
+
 		for (FVariable fv : blockResidualVariables_C()) {
-			str.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
+			str.print(indent + indent + fv.name_C() + " = x["+var_counter+"];\n");
 			var_counter++;
 		}
 		
@@ -1558,8 +1563,17 @@ aspect CCodeGen {
 			equation_counter += e.numScalarEquations();
 		}
 		genBlockResidualFunctionAfterEqns_C(indent, str);
-		str.print("  }\n");
-		str.print("  return 0;\n}\n\n");
+		// Write back
+		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
+		var_counter = 0;
+		// Loop over all active variables and write their value to x	
+		for (FVariable fv : blockResidualVariables_C()) {
+			str.print(indent + indent + fv.name_C() + " = x[" + var_counter +"];\n");
+			var_counter++;
+		}
+
+		str.print(indent + "}\n");
+		str.print(indent + "return 0;\n}\n\n");
 	}
 	
 	public void SolvedScalarEquationBlock.genBlockResidualFunction_C(int block_counter, boolean inInit, String indent, PrintStream str) {
@@ -1630,7 +1644,7 @@ aspect CCodeGen {
 	}
 	
 	public void MixedEquationBlock.genBlockResidualFunctionAfterEqns_C(String indent, PrintStream str) {
-		str.print("  } else if (init==JMI_BLOCK_EVALUATE_NON_REALS) {\n");
+		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {\n");
 		// Loop over all active variables and write the values in x to the z vector
 		// Write the residual expressions
 		for (FAbstractEquation ae : discreteEquations()) {
@@ -1664,31 +1678,56 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void AbstractEquationBlock.genBlockAddCall_C(int block_counter, boolean inInit, String indent, PrintStream str) {
-	} 
+	public void AbstractEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {}
 
-	public void TornEquationBlock.genBlockAddCall_C(int block_counter, boolean inInit, String indent, PrintStream str) {
-		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
-		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
-		block_counter + ", NULL," + iterationVariables().size() + ",0," + 
-		block_counter + " );\n");
-	} 
-
-	public void EquationBlock.genBlockAddCall_C(int block_counter, boolean inInit, String indent, PrintStream str) {
-		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
-		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
-		block_counter + ", NULL," + iterationVariables().size() + ",0," + 
-		block_counter + " );\n");
-	} 
-
-	public void MixedEquationBlock.genBlockAddCall_C(int block_counter, boolean inInit, String indent, PrintStream str) {
-		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
-		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
-		block_counter + ", NULL," + activeContinuousVariables().size() + "," + 
-		activeDiscreteVariables().size() + "," + 
-		block_counter + " );\n");
-	} 
+	public void LinearEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
 		
+		str.print(indent + "} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n");
+		// Output Jacobian
+		int var_counter = 0;
+		for (int i=0;i<activeVariables().size();i++) {
+			for (int j=0;j<activeVariables().size();j++) {
+				str.print(indent + indent + "residual[" + var_counter + "] = " + jacobian[j][i].prettyPrint_C("") + ";\n");
+				var_counter++;
+			}
+		}
+						
+	}
+
+	public void AbstractEquationBlock.genBlockAddCall_C(int block_counter, boolean dirDer, boolean inInit, String indent, PrintStream str) {
+	} 
+
+	public void TornEquationBlock.genBlockAddCall_C(int block_counter, boolean dirDer, boolean inInit, String indent, PrintStream str) {
+		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
+		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
+		block_counter + "," + (dirDer? "dae_" + (inInit? "init_": "") + "block_dir_der_" + block_counter: "NULL") + "," + iterationVariables().size() + ",0,JMI_CONTINUOUS_VARIABILITY,JMI_KINSOL_SOLVER," + 
+		block_counter + " );\n");
+	} 
+
+	public void EquationBlock.genBlockAddCall_C(int block_counter, boolean dirDer, boolean inInit, String indent, PrintStream str) {
+		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
+		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
+		block_counter + "," + (dirDer? "dae_" + (inInit? "init_": "") + "block_dir_der_" + block_counter: "NULL") + "," + iterationVariables().size() + ",0,JMI_CONTINUOUS_VARIABILITY,JMI_KINSOL_SOLVER," + 
+		block_counter + " );\n");
+	} 
+
+	public void MixedEquationBlock.genBlockAddCall_C(int block_counter, boolean dirDer, boolean inInit, String indent, PrintStream str) {
+		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
+		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
+		block_counter + "," + (dirDer? "dae_" + (inInit? "init_": "") + "block_dir_der_" + block_counter: "NULL") + "," + activeContinuousVariables().size() + "," + activeDiscreteVariables().size() +",JMI_CONTINUOUS_VARIABILITY,JMI_KINSOL_SOLVER," +  
+		block_counter + " );\n");
+	} 
+
+	public void LinearEquationBlock.genBlockAddCall_C(int block_counter, boolean dirDer, boolean inInit, String indent, PrintStream str) {
+		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
+		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
+		block_counter + "," + (dirDer? "dae_" + (inInit? "init_": "") + "block_dir_der_" + block_counter: "NULL") + "," + iterationVariables().size() + ",0");
+		str.print(isConstant()? ",JMI_CONSTANT_VARIABILITY,": isParameter()? ",JMI_PARAMETER_VARIABILITY,": 
+			      isDiscrete()? ",JMI_DISCRETE_VARIABILITY,": ",JMI_CONTINUOUS_VARIABILITY,");
+		str.print("JMI_LINEAR_SOLVER,");
+		str.print(block_counter + " );\n");
+	} 
+	
 	public void AbstractEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {
 		String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
 		str.format("%s ef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, i);

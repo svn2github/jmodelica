@@ -88,11 +88,6 @@ typedef int (*jmi_block_residual_solve_func_t)(jmi_block_residual_t* block);
   */
 typedef void (*jmi_block_residual_delete_func_t)(jmi_block_residual_t* block);
 
-typedef enum {
-    JMI_SIMPLE_NEWTON,
-    JMI_KINSOL    
-} jmi_block_solvers_t;
-
 struct jmi_block_residual_t {
 	jmi_t *jmi;                    /**< \brief A pointer to the corresponding jmi_t struct */
 	jmi_block_residual_func_t F;   /**< \brief A function pointer to the block residual function */
@@ -110,9 +105,11 @@ struct jmi_block_residual_t {
     jmi_real_t* jac;               /**< \brief Work vector for the block Jacobian */
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
 
-    jmi_real_t* min;               /**< \brief Work vector needed for dgesv */
-    jmi_real_t* max;               /**< \brief Work vector needed for dgesv */
-    jmi_real_t* nominal;           /**< \brief Work vector needed for dgesv */
+    jmi_real_t* min;               /**< \brief Min values for iteration variables */
+    jmi_real_t* max;               /**< \brief Max values for iteration variables */
+    jmi_real_t* nominal;           /**< \brief Nominal values for iteration variables */
+    int jacobian_variability;      /**< \brief Variability of Jacobian coefficients: JMI_CONSTANT_VARIABILITY
+                                         JMI_PARAMETER_VARIABILITY, JMI_DISCRETE_VARIABILITY, JMI_CONTINUOUS_VARIABILITY */
 
     void * solver;
     jmi_block_residual_solve_func_t solve;
@@ -134,10 +131,28 @@ struct jmi_block_residual_t {
  * @param dF A jmi_block_dir_der_func_t function
  * @param n Integer size of the block of real variables
  * @param n_nr Integer size of the block of non-real variables
+ * @param jacobian_variability Variability of the Jacobian coefficients
+ * @param solver Solver to be used for the block
  * @param index Integer ID nbr of the block
  * @return Error code.
  */
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index);
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, jmi_block_solvers_t solver, int index);
+
+/**
+ * \brief Register an initialization block residual function in a jmi_t struct.
+ *
+ * @param jmi A jmi_t struct.
+ * @param F A jmi_block_residual_func_t function
+ * @param dF A jmi_block_dir_der_func_t function
+ * @param n Integer size of the block of real variables
+ * @param n_nr Integer size of the block of non-real variables
+ * @param jacobian_variability Variability of the Jacobian coefficients
+ * @param solver Solver to be used for the block
+ * @param index Integer ID nbr of the block
+ * @return Error code.
+ */
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, jmi_block_solvers_t solver, int index);
+
 
 /**
  * \brief Allocates a jmi_block_residual struct.
@@ -149,11 +164,12 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
  * @param dF A jmi_block_dir_der_func_t function 
  * @param n Integer size of the block of real variables
  * @param n_nr Integer size of the block of non-real variables
+ * @param jacobian_variability Variability of the Jacobian coefficients
  * @param index Integer ID nbr of the block
  * @return Error code.
  */
 int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_solvers_t solver,
-                           jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index);
+                           jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, int index);
                            
 int jmi_solve_block_residual(jmi_block_residual_t * block);
 
@@ -164,20 +180,6 @@ int jmi_solve_block_residual(jmi_block_residual_t * block);
  * @return Error code.
  */
 int jmi_delete_block_residual(jmi_block_residual_t* b);
-
-/**
- * \brief Register an initialization block residual function in a jmi_t struct.
- *
- * @param jmi A jmi_t struct.
- * @param F A jmi_block_residual_func_t function
- * @param dF A jmi_block_dir_der_func_t function
- * @param n Integer size of the block of real variables
- * @param n_nr Integer size of the block of non-real variables
- * @param index Integer ID nbr of the block
- * @return Error code.
- */
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index);
-
 
 /**
  * \brief Calculate directional derivatives for a equation block.

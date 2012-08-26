@@ -176,6 +176,7 @@ public class CADGenerator extends CGenerator {
 	/**
 	 * Generates code for adding BLT AD-blocks 
 	 */
+	
 	class DAETag_CAD_dae_add_blocks_residual_functions extends DAETag {
 		
 		public DAETag_CAD_dae_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
@@ -186,12 +187,12 @@ public class CADGenerator extends CGenerator {
 		public void generate(PrintStream genPrinter) {
 			if (shouldGenerateBlockJacobians(fclass)) {
 			
+				
 				int block_counter = 0;
+
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
-				    if (!block.isSolvable()) {
-						genPrinter.print(" jmi_dae_add_equation_block(*jmi,dae_block_" + 
-							block_counter + "," + "dae_block_dir_der_" + block_counter + ","+ block.iterationVariables().size() + ",0," + 
-							block_counter + " );\n");
+					if (!block.isSolvable()) {
+						block.genBlockAddCall_C(block_counter, true, false," ",genPrinter);
 						block_counter++;
 					}
 				}
@@ -211,18 +212,19 @@ public class CADGenerator extends CGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (shouldGenerateBlockJacobians(fclass)) {
+				
 				int block_counter = 0;
+
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
-				    if (!block.isSolvable()) {
-						genPrinter.print(" jmi_dae_init_add_equation_block(*jmi,dae_init_block_" + 
-							block_counter + "," + "dae_init_block_dir_der_" + block_counter + "," + block.iterationVariables().size() + ",0," + 
-							block_counter + ");\n");
+					if (!block.isSolvable()) {
+						block.genBlockAddCall_C(block_counter, true, true," ",genPrinter);
 						block_counter++;
 					}
-				}
+				}				
 			}
 		}
 	}
+
 	
 	/**
 	 * Generates code for solving the BLT blocks using CAD

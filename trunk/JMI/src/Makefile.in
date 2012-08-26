@@ -112,9 +112,9 @@ libfmi_cs_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 libjmi_la_LIBADD =
 am_libjmi_la_OBJECTS = libjmi_la-jmi.lo libjmi_la-jmi_common.lo \
 	libjmi_la-jmi_simple_newton.lo libjmi_la-jmi_block_residual.lo \
-	libjmi_la-jmi_kinsol_solver.lo libjmi_la-jmi_array_none.lo \
-	libjmi_la-jmi_util.lo libjmi_la-kinpinv.lo \
-	libjmi_la-kinsol_jmod.lo
+	libjmi_la-jmi_kinsol_solver.lo libjmi_la-jmi_linear_solver.lo \
+	libjmi_la-jmi_array_none.lo libjmi_la-jmi_util.lo \
+	libjmi_la-kinpinv.lo libjmi_la-kinsol_jmod.lo
 libjmi_la_OBJECTS = $(am_libjmi_la_OBJECTS)
 libjmi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libjmi_la_CFLAGS) \
@@ -224,10 +224,10 @@ DIST_SOURCES = $(libfmi_la_SOURCES) $(libfmi_cs_la_SOURCES) \
 am__include_HEADERS_DIST = jmi.h fmiModelFunctions.h fmiModelTypes.h \
 	fmiCSFunctions.h fmiCSPlatformTypes.h fmi.h fmi_cs.h \
 	ModelicaUtilities.h jmi_common.h jmi_simple_newton.h \
-	jmi_block_residual.h jmi_kinsol_solver.h jmi_init_opt.h \
-	jmi_opt_coll.h jmi_opt_coll_radau.h jmi_array_common.h \
-	jmi_array_none.h jmi_array_cppad.h jmi_util.h \
-	$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
+	jmi_block_residual.h jmi_kinsol_solver.h jmi_linear_solver.h \
+	jmi_init_opt.h jmi_opt_coll.h jmi_opt_coll_radau.h \
+	jmi_array_common.h jmi_array_none.h jmi_array_cppad.h \
+	jmi_util.h $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h \
 	jmi_opt_coll_ipopt.h jmi_init_opt_ipopt.h
@@ -407,6 +407,8 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_block_residual.c \
                     jmi_kinsol_solver.h \
                     jmi_kinsol_solver.c \
+                    jmi_linear_solver.h \
+                    jmi_linear_solver.c \
                     jmi_opt_coll.h \
                     jmi_array_common.h \
                     jmi_array_none.h \
@@ -522,10 +524,10 @@ libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g -I$(SUNDI
 include_HEADERS = jmi.h fmiModelFunctions.h fmiModelTypes.h \
 	fmiCSFunctions.h fmiCSPlatformTypes.h fmi.h fmi_cs.h \
 	ModelicaUtilities.h jmi_common.h jmi_simple_newton.h \
-	jmi_block_residual.h jmi_kinsol_solver.h jmi_init_opt.h \
-	jmi_opt_coll.h jmi_opt_coll_radau.h jmi_array_common.h \
-	jmi_array_none.h jmi_array_cppad.h jmi_util.h \
-	$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
+	jmi_block_residual.h jmi_kinsol_solver.h jmi_linear_solver.h \
+	jmi_init_opt.h jmi_opt_coll.h jmi_opt_coll_radau.h \
+	jmi_array_common.h jmi_array_none.h jmi_array_cppad.h \
+	jmi_util.h $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h \
 	$(am__append_4)
@@ -642,6 +644,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_block_residual.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_common.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_kinsol_solver.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_linear_solver.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_simple_newton.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-kinpinv.Plo@am__quote@
@@ -754,6 +757,13 @@ libjmi_la-jmi_kinsol_solver.lo: jmi_kinsol_solver.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jmi_kinsol_solver.c' object='libjmi_la-jmi_kinsol_solver.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-jmi_kinsol_solver.lo `test -f 'jmi_kinsol_solver.c' || echo '$(srcdir)/'`jmi_kinsol_solver.c
+
+libjmi_la-jmi_linear_solver.lo: jmi_linear_solver.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-jmi_linear_solver.lo -MD -MP -MF $(DEPDIR)/libjmi_la-jmi_linear_solver.Tpo -c -o libjmi_la-jmi_linear_solver.lo `test -f 'jmi_linear_solver.c' || echo '$(srcdir)/'`jmi_linear_solver.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjmi_la-jmi_linear_solver.Tpo $(DEPDIR)/libjmi_la-jmi_linear_solver.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jmi_linear_solver.c' object='libjmi_la-jmi_linear_solver.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-jmi_linear_solver.lo `test -f 'jmi_linear_solver.c' || echo '$(srcdir)/'`jmi_linear_solver.c
 
 libjmi_la-jmi_array_none.lo: jmi_array_none.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-jmi_array_none.lo -MD -MP -MF $(DEPDIR)/libjmi_la-jmi_array_none.Tpo -c -o libjmi_la-jmi_array_none.lo `test -f 'jmi_array_none.c' || echo '$(srcdir)/'`jmi_array_none.c

@@ -747,11 +747,11 @@ aspect TransformCanonical {
 					if (rz && lz) {
 						je = r.dynamicFExp(new FRealLitExp(0.0));
 					} else if (lz) {
-						je = dr;
+						je = r.dynamicFExp(new FNegExp(dr));
 					} else if (rz) {
-						je = r.dynamicFExp(new FNegExp(dl));
+						je = dl;
 					} else {
-						je = r.dynamicFExp(new FSubExp(dr,dl));
+						je = r.dynamicFExp(new FSubExp(dl,dr));
 					}
 					if (!je.variability().lessOrEqual(blockVariability)) {
 						blockVariability = je.variability();

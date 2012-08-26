@@ -191,7 +191,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, void *user_data, N_Vector t
 }
 
 
-int jmi_kinsol_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t* block) {
+int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t* block) {
     jmi_kinsol_solver_t* solver= (jmi_kinsol_solver_t*)calloc(1,sizeof(jmi_kinsol_solver_t));
     jmi_t* jmi = block->jmi;
     int flag, i, n = block->n;
@@ -307,7 +307,7 @@ int jmi_kinsol_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t* block
 }
 
 
-int jmi_kinsol_solve(jmi_block_residual_t * block){
+int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     int flag;
     int i;
     jmi_kinsol_solver_t* solver = block->solver;
@@ -389,7 +389,7 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
     return 0;
 }
 
-void jmi_kinsol_delete(jmi_block_residual_t* block) {
+void jmi_kinsol_solver_delete(jmi_block_residual_t* block) {
     jmi_kinsol_solver_t* solver = block->solver;
     /*Deallocate Kinsol work vectors.*/
 	N_VDestroy_Serial(solver->kin_y);

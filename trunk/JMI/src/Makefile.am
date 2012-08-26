@@ -55,6 +55,8 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_block_residual.c \
                     jmi_kinsol_solver.h \
                     jmi_kinsol_solver.c \
+                    jmi_linear_solver.h \
+                    jmi_linear_solver.c \
                     jmi_opt_coll.h \
                     jmi_array_common.h \
                     jmi_array_none.h \
@@ -187,9 +189,10 @@ include_HEADERS = jmi.h \
                   fmi_cs.h\
                   ModelicaUtilities.h \
                   jmi_common.h \
-                    jmi_simple_newton.h \
-                    jmi_block_residual.h \
-                    jmi_kinsol_solver.h \
+                  jmi_simple_newton.h \
+                  jmi_block_residual.h \
+                  jmi_kinsol_solver.h \
+                  jmi_linear_solver.h \
                   jmi_init_opt.h \
                   jmi_opt_coll.h \
                   jmi_opt_coll_radau.h \

@@ -339,7 +339,7 @@ public class CGenerator extends GenericGenerator {
 
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
 					if (!block.isSolvable()) {
-						block.genBlockAddCall_C(block_counter,false," ",genPrinter);
+						block.genBlockAddCall_C(block_counter,false, false," ",genPrinter);
 						block_counter++;
 					}
 				}
@@ -387,7 +387,7 @@ public class CGenerator extends GenericGenerator {
 			if (fclass.root().options.getBooleanOption("generate_ode")) {
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
-					block.genBlockResidualFunction_C(block_counter,true,"  ",genPrinter); 
+					block.genBlockResidualFunction_C(block_counter, true,"  ",genPrinter); 
 				  	if (!block.isSolvable()) {
 				  		block_counter++;
 				  	}
@@ -412,7 +412,7 @@ public class CGenerator extends GenericGenerator {
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
 				    if (!block.isSolvable()) {
-				    	block.genBlockAddCall_C(block_counter,true," ",genPrinter);
+				    	block.genBlockAddCall_C(block_counter,false, true," ",genPrinter);
 						block_counter++;
 					}
 				}

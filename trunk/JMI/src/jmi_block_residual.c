@@ -29,31 +29,33 @@
 #include "jmi_block_residual.h"
 #include "jmi_simple_newton.h"
 #include "jmi_kinsol_solver.h"
+#include "jmi_linear_solver.h"
 
 
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index) {
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, jmi_block_solvers_t solver, int index) {
 	jmi_block_residual_t* b;
 	int flag;
-	flag = jmi_new_block_residual(&b,jmi, JMI_KINSOL, F,dF,n,n_nr,index);
+	flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_nr, jacobian_variability, index);
 	jmi->dae_block_residuals[index] = b;
 	return flag;
 }
 
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index) {
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, jmi_block_solvers_t solver, int index) {
 	jmi_block_residual_t* b;
 	int flag;
-	flag = jmi_new_block_residual(&b,jmi, JMI_KINSOL, F,dF,n,n_nr,index);
+	flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_nr, jacobian_variability, index);
 	jmi->dae_init_block_residuals[index] = b;
 	return flag;
 }
 
-int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solvers_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index){
+int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solvers_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, int index){
 	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
-    int flag = 0;
 	int i;
+	int flag = 0;
     if(!b) return -1;
 	*block = b;
 
+	b->jacobian_variability = jacobian_variability;
 	b->jmi = jmi;
 	b->F = F;
 	b->dF = dF;
@@ -81,21 +83,31 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 	b->F(jmi,b->nominal,b->res,JMI_BLOCK_NOMINAL);
 
     switch(solver) {
-    case JMI_KINSOL: {
+    case JMI_KINSOL_SOLVER: {
         jmi_kinsol_solver_t* solver;    
-        flag = jmi_kinsol_new(&solver, b);
+        flag = jmi_kinsol_solver_new(&solver, b);
         b->solver = solver;
-        b->solve = jmi_kinsol_solve;
-        b->delete_solver = jmi_kinsol_delete;
+        b->solve = jmi_kinsol_solver_solve;
+        b->delete_solver = jmi_kinsol_solver_delete;
     }
         break;
         
-    case JMI_SIMPLE_NEWTON: {
+    case JMI_SIMPLE_NEWTON_SOLVER: {
         b->solver = 0;
         b->solve = jmi_simple_newton_solve;
         b->delete_solver = jmi_simple_newton_delete;
     }
         break;
+
+    case JMI_LINEAR_SOLVER: {
+        jmi_linear_solver_t* solver;
+    	flag = jmi_linear_solver_new(&solver, b);
+    	b->solver = solver;
+        b->solve = jmi_linear_solver_solve;
+        b->delete_solver = jmi_linear_solver_delete;
+    }
+        break;
+
     default:
         assert(0);
     }
