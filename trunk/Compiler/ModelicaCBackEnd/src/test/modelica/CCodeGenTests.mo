@@ -4443,7 +4443,8 @@ equation
    x_c = a_c*pre(x_c) + b_c*u_c;
  end when;
 
-	annotation(__JModelica(UnitTesting(tests={
+
+	annotation(__JModelica(UnitTesting(tests={ 
 		CCodeGenTestCase(
 			name="WhenEqu4",
 			description="Test code generation of samplers",
@@ -4454,18 +4455,12 @@ $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
 $C_ode_initialization$
 ",
-         generatedCode="
+			generatedCode="
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
-    x[1] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
-    x[0] = -1e20;
-    x[1] = -1e20;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
-    x[1] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = pre_x_c_3;
     x[1] = _x_c_3;
@@ -4541,7 +4536,7 @@ equation
    x_c = a_c*pre(x_c) + b_c*u_c;
  end when;
 
-	annotation(__JModelica(UnitTesting(tests={
+	annotation(__JModelica(UnitTesting(tests={ 
 		CCodeGenTestCase(
 			name="WhenEqu5",
 			description="Test code generation of samplers",
@@ -4552,18 +4547,12 @@ $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
 $C_ode_initialization$
 ",
-         generatedCode="
+			generatedCode="
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
-    x[1] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
-    x[0] = -1e20;
-    x[1] = -1e20;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
-    x[1] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = pre_x_c_3;
     x[1] = _x_c_3;
@@ -4700,30 +4689,25 @@ equation
   3 = x - y;
   5 = x + 3*y;  
 
-	annotation(__JModelica(UnitTesting(tests={
+	annotation(__JModelica(UnitTesting(tests={ 
 		CCodeGenTestCase(
 			name="BlockTest1",
 			description="Test code generation of systems of equations.",
 			generate_ode=true,
 			equation_sorting=true,
+			enable_tearing=false,
 			template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
 $C_ode_initialization$
 ",
-         generatedCode="
+			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
-    x[1] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
-    x[0] = -1e20;
-    x[1] = -1e20;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
-    x[1] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _y_1;
     x[1] = _x_0;
@@ -4740,14 +4724,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
-    x[1] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
-    x[0] = -1e20;
-    x[1] = -1e20;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
-    x[1] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _y_1;
     x[1] = _x_0;
@@ -4787,8 +4765,7 @@ sin(z1)*3 = z1 + 2;
 der(x2) = -x2 + z2[1] + z2[2];
 der(x1) = -x1 + z1;
 
-
-	annotation(__JModelica(UnitTesting(tests={
+	annotation(__JModelica(UnitTesting(tests={ 
 		CCodeGenTestCase(
 			name="BlockTest2",
 			description="Test generation of equation blocks",
@@ -4800,18 +4777,12 @@ $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
 $C_ode_initialization$
 ",
-         generatedCode="
+			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
-    x[1] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
-    x[0] = -1e20;
-    x[1] = -1e20;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
-    x[1] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _z2_2_4;
     x[1] = _z2_1_3;
@@ -4827,11 +4798,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init
 static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
-    x[0] = -1e20;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _z1_2;
   } else if (init==JMI_BLOCK_EVALUATE) {
@@ -4845,11 +4813,8 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
-    x[0] = -1e20;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _z1_2;
   } else if (init==JMI_BLOCK_EVALUATE) {
@@ -4862,14 +4827,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 static int dae_init_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
-    x[1] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
-    x[0] = -1e20;
-    x[1] = -1e20;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
-    x[1] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _z2_2_4;
     x[1] = _z2_1_3;
@@ -4936,7 +4895,7 @@ equation
           and v<0 then 3 else 2;
 
 
-	annotation(__JModelica(UnitTesting(tests={
+	annotation(__JModelica(UnitTesting(tests={ 
 		CCodeGenTestCase(
 			name="BlockTest3",
 			description="Test of code generation of blocks",
@@ -4948,24 +4907,12 @@ $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
 $C_ode_initialization$
 ",
-         generatedCode="
+			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
-    x[1] = 1.;
-    x[2] = 1.;
-    x[3] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
-    x[0] = -1e20;
-    x[1] = -1e20;
-    x[2] = -1e20;
-    x[3] = -1e20;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
-    x[1] = 1e20;
-    x[2] = 1e20;
-    x[3] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _a_4;
     x[1] = _sa_7;
@@ -4991,20 +4938,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
-    x[1] = 1.;
-    x[2] = 1.;
-    x[3] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
-    x[0] = -1e20;
-    x[1] = -1e20;
-    x[2] = -1e20;
-    x[3] = -1e20;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
-    x[1] = 1e20;
-    x[2] = 1e20;
-    x[3] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _a_4;
     x[1] = _sa_7;
@@ -5057,9 +4992,9 @@ model BlockTest4
 equation
   z = x + y;
   3 = x - y;
-  5 = x + 3*y;  
+  5 = x + 3*y + z;  
 
-	annotation(__JModelica(UnitTesting(tests={
+	annotation(__JModelica(UnitTesting(tests={ 
 		CCodeGenTestCase(
 			name="BlockTest4",
 			description="Test that min, max, and nominal attributes are correctly generated",
@@ -5071,21 +5006,30 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
     x[0] = 5.0;
-    x[1] = 1.;
+    x[2] = 8.0;
   } else  if (init==JMI_BLOCK_MIN) {
-    x[0] = -1e20;
     x[1] = 3.0;
+    x[2] = 4.0;
   } else if (init==JMI_BLOCK_MAX) {
     x[0] = -2.0;
-    x[1] = 1e20;
+    x[2] = 5.0;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _y_1;
+    init_with_ubound(x[0],-2.0, \"Resetting initial value for y\");
     x[1] = _x_0;
+    init_with_lbound(x[1],3.0, \"Resetting initial value for x\");
+    x[2] = _z_2;
+    init_with_bounds(x[2],4.0, 5.0, \"Resetting initial value for z\");
   } else if (init==JMI_BLOCK_EVALUATE) {
+    check_ubound(x[0],-2.0, \"Out of bounds for variable y\");
+    check_lbound(x[1],3.0, \"Out of bound for variable x\");
+    check_bounds(x[2],4.0, 5.0, \"Out of bounds for variable z\");
     _y_1 = x[0];
     _x_0 = x[1];
-  (*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) - (5);
+    _z_2 = x[2];
+  (*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) + _z_2 - (5);
   (*res)[1] = _x_0 - ( _y_1 ) - (3);
+  (*res)[2] = _x_0 + _y_1 - (_z_2);
   }
   return 0;
 }
@@ -5101,10 +5045,12 @@ model BlockTest5
   5 = x[1] + 3*y;
   3 = x[1] + y + x[2];  
 
-	annotation(__JModelica(UnitTesting(tests={
+
+
+	annotation(__JModelica(UnitTesting(tests={ 
 		CCodeGenTestCase(
 			name="BlockTest5",
-			description="",
+			description="Test of min and max for iteration varaibles.",
 			generate_ode=true,
 			equation_sorting=true,
 			template="$C_dae_blocks_residual_functions$",
@@ -5112,22 +5058,23 @@ model BlockTest5
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
     x[1] = 5.0;
-    x[2] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
     x[0] = 16.0;
-    x[1] = -1e20;
     x[2] = 1.0;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
     x[1] = -2.0;
-    x[2] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _x_2_2;
+    init_with_lbound(x[0],16.0, \"Resetting initial value for x[2]\");
     x[1] = _y_3;
+    init_with_ubound(x[1],-2.0, \"Resetting initial value for y\");
     x[2] = _x_1_1;
+    init_with_lbound(x[2],1.0, \"Resetting initial value for x[1]\");
   } else if (init==JMI_BLOCK_EVALUATE) {
+    check_lbound(x[0],16.0, \"Out of bound for variable x[2]\");
+    check_ubound(x[1],-2.0, \"Out of bounds for variable y\");
+    check_lbound(x[2],1.0, \"Out of bound for variable x[1]\");
     _x_2_2 = x[0];
     _y_3 = x[1];
     _x_1_1 = x[2];
@@ -5171,10 +5118,10 @@ model BlockTest6
   5 = x[1] + 3*y;
   3 = x[1] + y + x[2];  
 
-	annotation(__JModelica(UnitTesting(tests={
+	annotation(__JModelica(UnitTesting(tests={ 
 		CCodeGenTestCase(
 			name="BlockTest6",
-			description=" Test of min, max and nominal attributes in blocks",
+			description="Test of min, max and nominal attributes in blocks",
 			generate_ode=true,
 			equation_sorting=true,
 			template="$C_dae_blocks_residual_functions$",
@@ -5182,22 +5129,23 @@ model BlockTest6
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
     x[1] = 5.0;
-    x[2] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
     x[0] = 12.0;
-    x[1] = -1e20;
     x[2] = 6.0;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
     x[1] = -6.0;
-    x[2] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _x_2_2;
+    init_with_lbound(x[0],12.0, \"Resetting initial value for x[2]\");
     x[1] = _y_3;
+    init_with_ubound(x[1],-6.0, \"Resetting initial value for y\");
     x[2] = _x_1_1;
+    init_with_lbound(x[2],6.0, \"Resetting initial value for x[1]\");
   } else if (init==JMI_BLOCK_EVALUATE) {
+    check_lbound(x[0],12.0, \"Out of bound for variable x[2]\");
+    check_ubound(x[1],-6.0, \"Out of bounds for variable y\");
+    check_lbound(x[2],6.0, \"Out of bound for variable x[1]\");
     _x_2_2 = x[0];
     _y_3 = x[1];
     _x_1_1 = x[2];
@@ -6928,7 +6876,7 @@ equation
   i0 = i1 + iL;
   i1 = i2 + i3;
 
-	annotation(__JModelica(UnitTesting(tests={
+	annotation(__JModelica(UnitTesting(tests={ 
 		CCodeGenTestCase(
 			name="TearingTest1",
 			description="Test code generation of torn blocks",
@@ -6940,14 +6888,8 @@ equation
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
-    x[1] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
-    x[0] = -1e20;
-    x[1] = -1e20;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
-    x[1] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _i3_7;
     x[1] = _i2_6;
@@ -6967,6 +6909,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init
 end TearingTest1;
 
 model MapTearingTest1
+
   function F
     input Real x;
     input Integer[2] map;
@@ -6980,24 +6923,21 @@ equation
   x = y + 1;
   y = F(x, map);
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-	         name="MapTearingTest1",
-            description="Test code generation of torn blocks",
-            generate_ode=true,
-            equation_sorting=true,
-            enable_tearing=true,
-            template="$C_dae_blocks_residual_functions$",
-            generatedCode="
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="MapTearingTest1",
+			description="Test code generation of torn blocks",
+			generate_ode=true,
+			equation_sorting=true,
+			enable_tearing=true,
+			template="$C_dae_blocks_residual_functions$",
+			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
   JMI_ARRAY_STATIC(tmp_1, 2, 1)
   if (init==JMI_BLOCK_NOMINAL) {
-    x[0] = 1.;
   } else  if (init==JMI_BLOCK_MIN) {
-    x[0] = -1e20;
   } else if (init==JMI_BLOCK_MAX) {
-    x[0] = 1e20;
   } else if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = _x_2;
   } else if (init==JMI_BLOCK_EVALUATE) {

@@ -1470,13 +1470,11 @@ aspect CCodeGen {
 		// Nominal values
 		str.print("  if (init==JMI_BLOCK_NOMINAL) {\n");
 		for (FVariable fv : blockResidualVariables_C()) {
-			str.print("    x["+var_counter+"] = ");
 			if(((FRealVariable)fv).nominalAttributeSet()) {
+				str.print("    x["+var_counter+"] = ");
 				str.print(((FRealVariable)fv).nominalAttribute());
-			} else {
-				str.print("1.");
-			}
-			str.append(";\n");
+				str.append(";\n");
+			} 
 			var_counter++;
 		}
 		
@@ -1484,13 +1482,11 @@ aspect CCodeGen {
 		var_counter = 0;
 		str.print("  } else  if (init==JMI_BLOCK_MIN) {\n");
 		for (FVariable fv : blockResidualVariables_C()) {
-			str.print("    x["+var_counter+"] = ");
 			if(((FRealVariable)fv).minAttributeSet()) {
+				str.print("    x["+var_counter+"] = ");
 				str.print(((FRealVariable)fv).minAttribute());
-			} else {
-				str.print("-1e20");
+				str.append(";\n");
 			}
-			str.append(";\n");
 			var_counter++;
 		}
 		
@@ -1498,13 +1494,11 @@ aspect CCodeGen {
 		var_counter = 0;
 		str.print("  } else if (init==JMI_BLOCK_MAX) {\n");
 		for (FVariable fv : blockResidualVariables_C()) {
-			str.print("    x["+var_counter+"] = ");
 			if(((FRealVariable)fv).maxAttributeSet()) {
+				str.print("    x["+var_counter+"] = ");
 				str.print(((FRealVariable)fv).maxAttribute());
-			} else {
-				str.print("1e20");
-			}
-			str.append(";\n");
+				str.append(";\n");
+			} 
 			var_counter++;
 		}
 
@@ -1513,10 +1507,43 @@ aspect CCodeGen {
 		// Loop over all active variables and write their value to x	
 		for (FVariable fv : blockResidualVariables_C()) {
 			str.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
+			if(((FRealVariable)fv).maxAttributeSet() && ((FRealVariable)fv).minAttributeSet()) {
+				str.print(indent + indent + "init_with_bounds(");
+				str.print("x["+var_counter+"],");
+				str.print(((FRealVariable)fv).minAttribute() + ", "+ ((FRealVariable)fv).maxAttribute());
+				str.print(", \"Resetting initial value for " + ((FRealVariable)fv).name() + "\");\n");
+			} else if(((FRealVariable)fv).maxAttributeSet()) {
+				str.print(indent + indent + "init_with_ubound(");
+				str.print("x["+var_counter+"]," + ((FRealVariable)fv).maxAttribute());
+				str.print(", \"Resetting initial value for " + ((FRealVariable)fv).name() + "\");\n");
+			} else if(((FRealVariable)fv).minAttributeSet()) {
+				str.print(indent + indent + "init_with_lbound(");
+				str.print("x["+var_counter+"]," + ((FRealVariable)fv).minAttribute());
+				str.print(", \"Resetting initial value for " + ((FRealVariable)fv).name() + "\");\n");
+			} 
+
 			var_counter++;
 		}
 		str.print("  } else if (init==JMI_BLOCK_EVALUATE) {\n");
 		// Loop over all active variables and write the values in x to the z vector
+		var_counter = 0;
+		for (FVariable fv : blockResidualVariables_C()) {
+			if(((FRealVariable)fv).maxAttributeSet() && ((FRealVariable)fv).minAttributeSet()) {
+				str.print(indent + indent + "check_bounds(");
+				str.print("x["+var_counter+"],");
+				str.print(((FRealVariable)fv).minAttribute() + ", "+ ((FRealVariable)fv).maxAttribute());
+				str.print(", \"Out of bounds for variable " + ((FRealVariable)fv).name() + "\");\n");
+			} else if(((FRealVariable)fv).maxAttributeSet()) {
+				str.print(indent + indent + "check_ubound(");
+				str.print("x["+var_counter+"]," + ((FRealVariable)fv).maxAttribute());
+				str.print(", \"Out of bounds for variable " + ((FRealVariable)fv).name() + "\");\n");
+			} else if(((FRealVariable)fv).minAttributeSet()) {
+				str.print(indent + indent + "check_lbound(");
+				str.print("x["+var_counter+"]," + ((FRealVariable)fv).minAttribute());
+				str.print(", \"Out of bound for variable " + ((FRealVariable)fv).name() + "\");\n");
+			} 
+			var_counter++;
+		}
 		var_counter = 0;
 		for (FVariable fv : blockResidualVariables_C()) {
 			str.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
