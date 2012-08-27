@@ -31,7 +31,7 @@ public class ViewDocumentationAction extends Action{
 		Object elem = Util.getSelected(selectionProvider.getSelection());
 		if (elem instanceof FullClassDecl) {
 			try {
-				IDE.openEditor(page, new DocumentationEditorInput((FullClassDecl) elem), "org.jmodelica.ide.documentation.documentationEditor", true);
+				IDE.openEditor(page, new DocumentationEditorInput((FullClassDecl) elem, false), "org.jmodelica.ide.documentation.documentationEditor", true);
 			} catch (PartInitException e) {
 				System.err.println("Unable to open file: " + elem);
 			}

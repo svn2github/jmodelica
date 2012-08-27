@@ -21,8 +21,10 @@ public class DocumentationEditorInput implements IEditorInput, IPersistableEleme
 	private String className;
 	private IProject project;
 	private FullClassDecl fullClassDecl;
+	private boolean genDoc;
 
-	public DocumentationEditorInput(FullClassDecl fullClassDecl){
+	public DocumentationEditorInput(FullClassDecl fullClassDecl, boolean genDoc){
+		this.genDoc = genDoc;
 		ArrayList<String> path = new ArrayList<String>();
 		String name = fullClassDecl.name();
 		StringBuilder sb = new StringBuilder();
@@ -60,6 +62,10 @@ public class DocumentationEditorInput implements IEditorInput, IPersistableEleme
 
 	public FullClassDecl getFullClassDecl(){
 		return fullClassDecl;
+	}
+	
+	public boolean getGenDoc(){
+		return genDoc;
 	}
 
 	@Override

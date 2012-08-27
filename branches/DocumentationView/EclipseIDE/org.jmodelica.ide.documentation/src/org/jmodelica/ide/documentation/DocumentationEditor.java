@@ -11,8 +11,10 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.jastadd.plugin.Activator;
@@ -51,7 +53,8 @@ public class DocumentationEditor extends EditorPart {
 			//fullClassDecl = (FullClassDecl) program.simpleLookupClassDotted(input.getClassName());
 		}
 		browser = new Browser(parent, SWT.NONE);
-		browserContent = new BrowserContent(fullClassDecl, browser, icd, sourceRoot.getProgram(), navProv);
+		//getSite().getPage().close()
+		browserContent = new BrowserContent(fullClassDecl, browser, icd, sourceRoot.getProgram(), navProv, this.input.getGenDoc());
      }
 	
 	public boolean back(){
@@ -106,6 +109,15 @@ public class DocumentationEditor extends EditorPart {
 	public void setFocus() {
 		if (contents != null)
             contents.setFocus();
+	}
+	
+	public String getCurrenetClass(){
+		return browserContent.getCurrentClass();
+	}
+
+	public void generateDocumentation(FullClassDecl elem) {
+		browserContent.generateDocumentation(elem);
+		
 	}
 
 }

@@ -9,6 +9,7 @@ import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
 public class ExplorerActionProvider extends CommonActionProvider{
 	
 	private ViewDocumentationAction viewDocAction;
+	private GenerateDocumentationAction genDocAction;
 	
 	@Override
 	public void init(org.eclipse.ui.navigator.ICommonActionExtensionSite site) {
@@ -17,11 +18,13 @@ public class ExplorerActionProvider extends CommonActionProvider{
 		if (viewSite instanceof ICommonViewerWorkbenchSite) {
 			ICommonViewerWorkbenchSite wbs = (ICommonViewerWorkbenchSite) viewSite;
 			viewDocAction = new ViewDocumentationAction(wbs.getPage(), wbs.getSelectionProvider());
+			genDocAction = new GenerateDocumentationAction(wbs.getPage(), wbs.getSelectionProvider());
 		}
 	}
 	
 	@Override
 	public void fillContextMenu(IMenuManager menu){
 		menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN, viewDocAction);
+		menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN, genDocAction);
 	}
 }
