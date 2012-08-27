@@ -51,7 +51,6 @@
 	<property name="ant_task_dir" value="ant" />
 	<property name="bin_dir" value="bin" />
 	<property name="output_dir" location="site" />
-    <property name="ast_dir" value="${java_dir}/org/jmodelica/modelica/compiler" />
 
 	<property name="compiler_dir" value="${jmodelica_root}/Compiler" />
 	<property name="modelica_frontend_dir" value="${compiler_dir}/ModelicaFrontEnd/src" />
@@ -71,6 +70,7 @@
 	<property name="package" value="org.jmodelica" />
 	<property name="ast_package" value="${package}.modelica.compiler" />
 	<property name="package_dir" value="${java_dir}/org/jmodelica" />
+    <property name="ast_dir" value="${package_dir}/modelica/compiler" />
 	<!--	
 	<property name="jmodelica_test_framework" value="${modelica_frontend_dir}/test/test-framework"/>
 	<property name="jmodelica_java" value="${modelica_frontend_dir}/java"/>
@@ -228,7 +228,8 @@
     </target>
 
     <target name="patch" depends="ast,compile-patcher">
-        <java classpath="${bin_dir}/classes:${beaver_dir}/lib/beaver-rt.jar" classname="org.jmodelica.util.GeneratedFilePatcher">
+        <java classpath="${bin_dir}/classes:${beaver_dir}/lib/beaver-rt.jar" 
+        	    classname="org.jmodelica.util.GeneratedFilePatcher" failonerror="true">
             <arg line="${ast_dir}" />
         </java>
     </target>
@@ -236,7 +237,9 @@
 	<!-- generate compiler ast files -->
 	<!-- create AST node types and weave aspect modules -->
 	<target name="ast">
-		<jastadd package="${ast_package}" license="${ide_aspects}/licence.blurb" beaver="true" rewrite="true" outdir="${java_dir}" NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" Deterministic="true" NoStatic="false" Debug="false">
+		<jastadd package="${ast_package}" license="${ide_aspects}/licence.blurb" beaver="true" 
+			    rewrite="true" outdir="${java_dir}" NoCacheCycle="false" ComponentCheck="true" 
+			    visitcheck="false" LazyMaps="true" Deterministic="true" NoStatic="false" Debug="false">
 			<fileset dir="${modelica_frontend_aspects}">
 				<include name="**/*.ast" />
 				<include name="**/*.jrag" />

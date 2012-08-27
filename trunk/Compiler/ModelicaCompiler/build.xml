@@ -36,9 +36,10 @@
 	<!-- "package" is the directory where generated files will be stored -->
 	<property name="ast_package" value="org.jmodelica.modelica.compiler" />
 
-	<property name="base_output" value="src/java-generated" />
-    <property name="ast_output" value="${base_output}/org/jmodelica/modelica/compiler" />
-	<property name="parser_output" value="${base_output}/org/jmodelica/modelica/parser" />
+    <property name="base_output" value="src/java-generated" />
+    <property name="common_output" value="${base_output}/org/jmodelica/modelica" />
+    <property name="ast_output" value="${common_output}/compiler" />
+    <property name="parser_output" value="${common_output}/parser" />
 
 	<!-- "tools" is the directory where the needed tools (lexing, parsing, jastadd2, junit.jar) are located. -->
 	<property name="jar_output_dir" value="bin" />
@@ -119,7 +120,8 @@
 	</target>
 
     <target name="patch" depends="ast,compile-patcher">
-        <java classpath="bin:${beaver_dir}/lib/beaver-rt.jar" classname="org.jmodelica.util.GeneratedFilePatcher">
+        <java classpath="bin:${beaver_dir}/lib/beaver-rt.jar" 
+        	    classname="org.jmodelica.util.GeneratedFilePatcher" failonerror="true">
             <arg line="${ast_output}" />
         </java>
     </target>
