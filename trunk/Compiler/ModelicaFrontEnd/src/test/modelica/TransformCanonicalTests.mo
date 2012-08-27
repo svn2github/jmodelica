@@ -1151,6 +1151,59 @@ end TransformCanonicalTests.AliasTest30;
 end AliasTest30;
 
 
+model AliasFuncTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AliasFuncTest1",
+         description="",
+         flatModel="
+fclass TransformCanonicalTests.AliasFuncTest1
+ Real y[1].x;
+ Real y[2].x;
+ Real y[3].x;
+ Real z;
+ Real temp_1[2];
+ Real temp_1[3];
+ Real temp_2[1];
+ Real temp_2[3];
+ Real temp_3[1];
+ Real temp_3[2];
+equation
+ ({y[1].x,temp_1[2],temp_1[3]}) = TransformCanonicalTests.AliasFuncTest1.f(z);
+ ({temp_2[1],y[2].x,temp_2[3]}) = TransformCanonicalTests.AliasFuncTest1.f(z);
+ ({temp_3[1],temp_3[2],y[3].x}) = TransformCanonicalTests.AliasFuncTest1.f(z);
+ z = 1;
+
+public
+ function TransformCanonicalTests.AliasFuncTest1.f
+  input Real a;
+  output Real[3] b;
+ algorithm
+  b[1] := ( 1 ) * ( a );
+  b[2] := ( 2 ) * ( a );
+  b[3] := ( 3 ) * ( a );
+  return;
+ end TransformCanonicalTests.AliasFuncTest1.f;
+
+end TransformCanonicalTests.AliasFuncTest1;
+")})));
+
+	function f
+		input Real a;
+		output Real[3] b;
+	algorithm
+		b := {1, 2, 3} * a;
+	end f;
+	
+	model A
+		Real x;
+	end A;
+	
+	A[3] y(x=f(z));
+	Real z = 1;
+end AliasFuncTest1;
+
+
 model ParameterBindingExpTest3_Warn
 
   parameter Real p;

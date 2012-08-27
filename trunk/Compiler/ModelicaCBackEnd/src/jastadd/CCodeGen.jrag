@@ -1962,19 +1962,22 @@ aspect CCodeGen {
 	}
 
 	public void FExp.genWriteBackAssignment_C(PrintStream str, String indent, String name, Set<FVariable> vars) {
+		throw new UnsupportedOperationException();
+	}
+	
+	public void FIdUseExp.genWriteBackAssignment_C(PrintStream str, String indent, String name, Set<FVariable> vars) {
 		str.print(indent);
-		FIdUseExp e = (FIdUseExp)this;
-		if (vars != null && !vars.contains(e.myFV()))
+		if (vars != null && !vars.contains(myFV()))
 			return; // This variable is not in the set of variables to generate code for.
 		
-		e.getFIdUse().prettyPrint_C(str,"");
+		getFIdUse().prettyPrint_C(str,"");
 //		prettyPrint_C(str, "");
 		str.print(" = (");
 		str.print(name);
 		str.print(")");
-		if (e.myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
+		if (myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
 			str.print("/sf(");
-			str.print(e.myFV().valueReference());
+			str.print(myFV().valueReference());
 			str.print(")");
 		}
 		str.print(";\n");

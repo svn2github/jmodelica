@@ -1507,6 +1507,21 @@ aspect FVariableUses {
 	}
 	
 	/**
+	 * Check if this variable is used on the left hand side of a function call equation or statement.
+	 */
+	syn lazy boolean FAbstractVariable.usedAsFunctionCallLeft() {
+		for (FExp e : nonDefiningUses()) 
+			if (e.inFunctionCallLeft())
+				return true;
+		return false;
+	}
+	
+	inh boolean FExp.inFunctionCallLeft();
+	eq FFunctionCallLeft.getChild().inFunctionCallLeft() = true;
+	eq FClass.getChild().inFunctionCallLeft()            = false;
+	eq InstRoot.getChild().inFunctionCallLeft()          = false;
+	
+	/**
 	 * All uses of this variable that are the left-hand side of an assignment or 
 	 * function call statement. 
 	 */

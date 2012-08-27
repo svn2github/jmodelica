@@ -3361,7 +3361,7 @@ aspect TransformCanonical {
 	 * Check if this is a temporary variable that should be eliminated.
 	 */
 	syn boolean FVariable.shouldEliminateTemporary() = 
-		isTemporary() && nonDefiningUses().size() <= 1 && definingUses().size() <= 1;
+		isTemporary() && nonDefiningUses().size() <= 1 && definingUses().size() <= 1 && !usedAsFunctionCallLeft();
 	
 	/**
 	 * Inline all non-defining uses of variable, and remove equation defining it.
