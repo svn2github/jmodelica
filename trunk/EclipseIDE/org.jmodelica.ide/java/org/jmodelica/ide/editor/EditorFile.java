@@ -3,10 +3,7 @@ package org.jmodelica.ide.editor;
 import java.io.File;
 import java.util.ArrayList;
 
-import mock.MockFile;
-
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.Position;
@@ -63,17 +60,13 @@ public class EditorFile {
 		return file != null;
 	}
 
-	protected boolean nullFile(IFile f) {
-		return f == null || f instanceof MockFile;
-	}
-
 	/**
 	 * Returns true if file is located in the library
 	 * 
 	 * @return true if file is located in the library
 	 */
 	public boolean inLibrary() {
-		return path != null && (nullFile(file) || Util.isInLibrary(file));
+		return path != null && (file == null || Util.isInLibrary(file));
 	}
 	
 	/**
@@ -138,7 +131,7 @@ public class EditorFile {
 	 * @return key representation
 	 */
 	public String toRegistryKey() {
-		return inLibrary() ? (!nullFile(file) ? Util.getLibraryPath(file) : path) : file
+		return inLibrary() ? (file != null ? Util.getLibraryPath(file) : path) : file
 				.getRawLocation().toOSString();
 	}
 
@@ -148,7 +141,7 @@ public class EditorFile {
 	public String getDirName() {
 		if (file != null)
 			return file.getParent().getName();
-		String[] parts = path.split("[\\/]");
+		String[] parts = path.split("[\\\\/]");
 		return parts[parts.length - 2];
 	}
 

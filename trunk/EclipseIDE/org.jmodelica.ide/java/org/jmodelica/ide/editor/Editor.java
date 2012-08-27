@@ -20,8 +20,6 @@ package org.jmodelica.ide.editor;
 
 import java.io.File;
 
-import mock.MockFile;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -31,7 +29,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
@@ -42,9 +39,6 @@ import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -59,17 +53,13 @@ import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.actions.CollapseAllAction;
 import org.jmodelica.ide.actions.CompileFMUAction;
-import org.jmodelica.ide.actions.CurrentClassAction;
 import org.jmodelica.ide.actions.ErrorCheckAction;
 import org.jmodelica.ide.actions.ExpandAllAction;
 import org.jmodelica.ide.actions.FormatRegionAction;
 import org.jmodelica.ide.actions.GoToDeclaration;
 import org.jmodelica.ide.actions.ToggleAnnotationsAction;
 import org.jmodelica.ide.actions.ToggleComment;
-import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.ide.helpers.hooks.IASTEditor;
-import org.jmodelica.ide.namecomplete.CompletionProcessor;
-import org.jmodelica.ide.outline.ClassOutlinePage;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
@@ -333,8 +323,6 @@ protected void rulerContextMenuAboutToShow(IMenuManager menu) {
 public void recompileLocal(IDocument document) {
 
     IFile iFile = file.iFile();
-    if (iFile == null)
-    	iFile = new MockFile(null, file.path());
 	compResult.recompileLocal(document(), iFile);
 
     Display.getDefault().asyncExec(new Runnable() {

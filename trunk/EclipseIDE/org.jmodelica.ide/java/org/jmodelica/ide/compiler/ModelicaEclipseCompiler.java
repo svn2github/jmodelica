@@ -19,9 +19,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 
-import mock.MockFile;
-import mock.MockProject;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -42,7 +39,6 @@ import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.LibNode;
-import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class ModelicaEclipseCompiler extends AbstractCompiler {
@@ -88,26 +84,21 @@ public class ModelicaEclipseCompiler extends AbstractCompiler {
 		return compilationRoot;
 	}
 
-	protected IFile defaultToMock(IFile file) {
-		return new Maybe<IFile>(file).defaultTo(new MockFile(null, ""));
-	}
-
 	@Override
 	public IASTNode compileToAST(IDocument document, DirtyRegion dirtyRegion, IRegion region,
 			IFile file) {
-		file = defaultToMock(file);
+		if (file == null)
+			return null;
 		CompilationRoot compilationRoot = new CompilationRoot(file.getProject());
 		compilationRoot.parseFile(new DocumentReader(document), file, false);
 		return compilationRoot.getStoredDefinition();
 	}
 
 	public Maybe<ASTNode<?>> recompile(IDocument doc, IFile file) {
-		file = defaultToMock(file);
 		return new Maybe<ASTNode<?>>((ASTNode<?>) compileToAST(doc, null, null, file));
 	}
 
 	public StoredDefinition recompile(String doc, IFile file) {
-		file = defaultToMock(file);
 		CompilationRoot root = new CompilationRoot(file.getProject());
 
 		root.parseDoc(doc, file);
@@ -117,11 +108,12 @@ public class ModelicaEclipseCompiler extends AbstractCompiler {
 
 	@Override
 	protected IASTNode compileToAST(IFile file) {
-		return compileFile(defaultToMock(file));
+		return compileFile(file);
 	}
 
 	public StoredDefinition compileFile(IFile file) {
-		file = defaultToMock(file);
+		if (file == null)
+			return new CompilationRoot(null).getStoredDefinition();
 		CompilationRoot compilationRoot = new CompilationRoot(file.getProject());
 
 		compilationRoot.parseFile(file);
@@ -129,24 +121,8 @@ public class ModelicaEclipseCompiler extends AbstractCompiler {
 		return compilationRoot.getStoredDefinition();
 	}
 
-	public SourceRoot compileDirectory(File dir) {
-		CompilationRoot cRoot = new CompilationRoot(MockProject.PROJECT);
-		for (File f : dir.listFiles()) {
-			if (f.isDirectory())
-				compileDirectory(f);
-			else
-				cRoot.parseFile(new MockFile(f.getAbsolutePath()));
-		}
-
-		return cRoot.root();
-	}
-
-	public StoredDefinition compileString(String content) {
-		return new CompilationRoot(new MockProject()).parseDoc(content, new MockFile())
-				.getStoredDefinition();
-	}
-
 	// Overridden to add synchronization
+	@Override
 	public void compile(IDocument document, DirtyRegion dirtyRegion, IRegion region, IFile file) {
 		ASTNode node = (ASTNode) compileToAST(document, dirtyRegion, region, file);
 		ASTRegistry reg = Activator.getASTRegistry();
