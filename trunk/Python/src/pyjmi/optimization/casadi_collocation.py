@@ -1167,32 +1167,22 @@ class LocalDAECollocator(CasadiCollocator):
                     nlp_timed_variables.append(var_map[i][k][var_type])
         
         # Denormalize time for minimum time problems
-        if (self._normalize_min_time and
-            (self.init_traj is not None or self.nominal_traj is not None)):
-            if self.ocp.variable('startTime').getFree():
-                if self.init_traj is None:
-                    t0 = self.ocp.variable('startTime').getInitialGuess()
+        if self._normalize_min_time:
+            t0 = self.ocp.variable('startTime').getInitialGuess()
+            tf = self.ocp.variable('finalTime').getInitialGuess()
+            if self.init_traj is not None:
+                try:
+                    data = self.init_traj.get_variable_data("startTime")
+                except VariableNotFoundError:
+                    t0 = t0
                 else:
-                    try:
-                        data = self.init_traj.get_variable_data("startTime")
-                    except VariableNotFoundError:
-                        t0 = self.ocp.variable('startTime').getInitialGuess()
-                    else:
-                        t0 = data.x[0]
-            else:
-                t0 = self.ocp.t0
-            if self.ocp.variable('finalTime').getFree():
-                if self.init_traj is None:
+                    t0 = data.x[0]
+                try:
+                    data = self.init_traj.get_variable_data("finalTime")
+                except VariableNotFoundError:
                     tf = self.ocp.variable('finalTime').getInitialGuess()
                 else:
-                    try:
-                        data = self.init_traj.get_variable_data("finalTime")
-                    except VariableNotFoundError:
-                        tf = self.ocp.variable('finalTime').getInitialGuess()
-                    else:
-                        tf = data.x[0]
-            else:
-                tf = self.ocp.tf
+                    tf = data.x[0]
             self._denorm_t0 = t0
             self._denorm_tf = tf
         
@@ -2044,7 +2034,18 @@ class LocalDAECollocator(CasadiCollocator):
                 sf = 1
             p_min[var_index] = var.getMin() / sf
             p_max[var_index] = var.getMax() / sf
-            p_init[var_index] = var.getInitialGuess() / sf
+            
+            # Handle initial guess
+            var_init = var.getInitialGuess()
+            if self.init_traj is not None:
+                name = var.getName() 
+                try: 
+                    data = self.init_traj.get_variable_data(name) 
+                except VariableNotFoundError: 
+                    pass
+                else: 
+                    var_init = data.x[0] 
+            p_init[var_index] = var_init / sf
         xx_lb[var_indices['p_opt']] = p_min
         xx_ub[var_indices['p_opt']] = p_max
         xx_init[var_indices['p_opt']] = p_init
@@ -2074,8 +2075,7 @@ class LocalDAECollocator(CasadiCollocator):
                             TrajectoryLinearInterpolation(abscissae, ordinates)
         
         # Denormalize time for minimum time problems
-        if (self._normalize_min_time and
-            (self.init_traj is not None or self.nominal_traj is not None)):
+        if self._normalize_min_time:
             t0 = self._denorm_t0
             tf = self._denorm_tf
         
@@ -2083,9 +2083,7 @@ class LocalDAECollocator(CasadiCollocator):
         for i in xrange(1, self.n_e + 1):
             for k in self.time_points[i].keys():
                 time = time_points[i][k]
-                if (self._normalize_min_time and
-                    (self.init_traj is not None or
-                     self.nominal_traj is not None)):
+                if self._normalize_min_time:
                     time = t0 + (tf - t0) * time
                 for vt in ['x', 'u', 'w']:
                     var_min = N.empty(len(var_vectors[vt]))
