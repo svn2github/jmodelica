@@ -28,7 +28,7 @@ from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_jmu
 from pymodelica.common.io import ResultDymolaTextual, ResultWriterDymola
 from pyjmi.common.io import VariableNotTimeVarying
-from pyfmi.common.io import ResultWriterDymola as fmi_ResultWriterDymola
+from pyfmi.common.io import ResultWriterDymola_deprecated as fmi_ResultWriterDymola
 from pyjmi.jmi import JMUModel
 from pyjmi.optimization import ipopt
 from pyfmi.fmi import FMUModel
