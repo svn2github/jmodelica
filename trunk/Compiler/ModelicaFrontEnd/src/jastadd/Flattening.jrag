@@ -1205,7 +1205,7 @@ aspect FlatExpressions {
 	}
 	
 	public FExp FExp.flatten(FQName prefix) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 	
 	public FIgnoredBuiltIn FIgnoredBuiltIn.flatten(FQName prefix) {
@@ -1494,12 +1494,13 @@ aspect FlatExpressions {
 	// These used to delegate to standard implementation for FExp.flatten(FQName).
 	public FScalar FScalar.flatten(FQName prefix) { return null; }
 	
-	public FCross      FCross.flatten(FQName prefix)      { return new FCross(getX().flatten(prefix), getY().flatten(prefix)); }
-	public FSampleExp  FSampleExp.flatten(FQName prefix)  { return new FSampleExp(getOffset().flatten(prefix), getInterval().flatten(prefix)); }
-	public FInitialExp FInitialExp.flatten(FQName prefix) { return new FInitialExp(); }
-	public FSmoothExp  FSmoothExp.flatten(FQName prefix)  { return new FSmoothExp(getOrder().flatten(prefix), getFExp().flatten(prefix)); }
-	
-	public FStringExp  FStringExp.flatten(FQName prefix)  { return new FStringExp(new List(), getValue().flatten(prefix)); }
+	public FCross        FCross.flatten(FQName prefix)        { return new FCross(getX().flatten(prefix), getY().flatten(prefix)); }
+	public FOuterProduct FOuterProduct.flatten(FQName prefix) { return new FOuterProduct(getX().flatten(prefix), getY().flatten(prefix)); }
+	public FSampleExp    FSampleExp.flatten(FQName prefix)    { return new FSampleExp(getOffset().flatten(prefix), getInterval().flatten(prefix)); }
+	public FInitialExp   FInitialExp.flatten(FQName prefix)   { return new FInitialExp(); }
+	public FSmoothExp    FSmoothExp.flatten(FQName prefix)    { return new FSmoothExp(getOrder().flatten(prefix), getFExp().flatten(prefix)); }
+	                     
+	public FStringExp FStringExp.flatten(FQName prefix) { return new FStringExp(new List(), getValue().flatten(prefix)); }
 	
 	
 	public FMinMaxExp FMinMaxExp.flatten(FQName prefix) { 

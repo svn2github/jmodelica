@@ -297,7 +297,7 @@ aspect PredefinedTypes {
 +"function promote end promote;\n"
 +"function ndims\n"
 +"  input Real A;\n"      // Type not used
-+"  output Real n;\n"
++"  output Integer n;\n"
 +"end ndims;\n"
 +"function size\n"
 +"  input Real A;\n"      // Type not used
@@ -316,7 +316,11 @@ aspect PredefinedTypes {
 +"  input Real y[3];\n"
 +"  output Real z[3];\n"   // Type not used
 +"end cross;\n"
-+"function outerProduct end outerProduct;\n"
++"function outerProduct\n"
++"  input Real x[:];\n"
++"  input Real y[:];\n"
++"  output Real z[:,:];\n"   // Type not used
++"end outerProduct;\n"
 +"function diagonal end diagonal;\n"
 +"function identity\n"
 +"  input Integer n;\n"

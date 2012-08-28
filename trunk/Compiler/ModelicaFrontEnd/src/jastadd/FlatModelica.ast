@@ -1227,6 +1227,11 @@ FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
 FIdentity : FUnaryBuiltIn;
 
 /**
+ * Outer product built-in function.
+ */
+FOuterProduct : FBuiltInFunctionCall ::= X:FExp Y:FExp;
+
+/**
  * \brief Identity built-in function.
  */
 FLinspace : FBuiltInFunctionCall ::= StartExp:FExp StopExp:FExp N:FExp;

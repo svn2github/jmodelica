@@ -206,9 +206,10 @@ aspect Arrays {
 		return (exp >= 0) ? exp + getNumForIndex() : -1;
 	}
 	
-	eq FTranspose.ndims() = getFExp().ndims();
-	eq FCross.ndims() = 1;
-	eq FIdentity.ndims() = 2;
+	eq FTranspose.ndims()    = getFExp().ndims();
+	eq FCross.ndims()        = 1;
+	eq FOuterProduct.ndims() = 2;
+	eq FIdentity.ndims()     = 2;
 	
 	eq FUnaryBuiltIn.ndims() = getFExp().ndims();
 	
@@ -758,6 +759,13 @@ aspect Arrays {
 	}
 	
 	eq FCross.size() = new Size(3);
+	
+	eq FOuterProduct.size() {
+		MutableSize s = new MutableSize(2);
+		s.append(getX().size());
+		s.append(getY().size());
+		return s;
+	}
 	
 	eq FIdentity.size() {
 		MutableSize s = new MutableSize(2);
@@ -1349,15 +1357,22 @@ aspect Arrays {
 		Array res = new Array(indices());
 		Array x = getX().getArray();
 		Array y = getY().getArray();
-		Index j = new Index(new int[1]);
-		Index k = new Index(new int[1]);
 		for (Index i : res.indices()) {
-			j.set(0, i.first() % 3 + 1);
-			k.set(0, j.first() % 3 + 1);
+			int j = i.first() % 3 + 1;
+			int k = j % 3 + 1;
 			FExp m1 = new FMulExp(x.get(j).fullCopy(), y.get(k).fullCopy());
 			FExp m2 = new FMulExp(x.get(k).fullCopy(), y.get(j).fullCopy());
 			res.set(i, new FSubExp(m1, m2));
 		}
+		return res;
+	}
+	
+	eq FOuterProduct.getArray() {
+		Array res = new Array(indices());
+		Array x = getX().getArray();
+		Array y = getY().getArray();
+		for (Index i : res.indices()) 
+			res.set(i, new FMulExp(x.get(i.first()).fullCopy(), y.get(i.last()).fullCopy()));
 		return res;
 	}
 	
@@ -2583,7 +2598,8 @@ aspect ArrayHelpers {
 			} else if (size[d] != UNKNOWN) {
 				size[d] += s;
 			} else if (okExp(exps[d])) {
-				exps[d] = new FAddExp(exps[d].unboundCopy(), new FIntegerLitExp(s));
+				FExp e = new FAddExp(exps[d].unboundCopy(), new FIntegerLitExp(s));
+				exps[d] = exps[d].dynamicFExp(e);
 			}
 		}
 		
@@ -2594,8 +2610,8 @@ aspect ArrayHelpers {
 			try {
 				add(d, e.ceval().intValue());
 			} catch (ConstantEvaluationException uoe) {
-				exps[d] = new FAddExp(createFExp(d), e.unboundCopy());
-				size[d] = UNKNOWN;
+				FExp e2 = new FAddExp(createFExp(d), e.unboundCopy());
+				exps[d] = e.dynamicFExp(e2);
 			}
 		}
 		
@@ -2870,7 +2886,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Creates a right-hand iterator for multiplication. 
+		 * Creates a right-hand iterator for multiplication. 
 		 * 
 		 * Creates an iterator that iterates over all FExp nodes involved in 
 		 * calculating the cell i in a multiplication with this Array at the 
@@ -2890,28 +2906,37 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Returns the element referenced by <code>i</code> in this Array.
+		 * Returns the element referenced by <code>i</code> in this Array.
 		 */
 		public FExp get(Index i) {
 			return getFExp(i.internal(indices));
 		}
 		
 		/**
-		 * \brief Sets the element referenced by <code>i</code> in this Array to <code>exp</code>.
+		 * Returns element <code>i</code> in this Array.
+		 * 
+		 * For vectors, this is equivalent to <code>get(new Index(new int[]{i}))</code>.
+		 */
+		public FExp get(int i) {
+			return getFExp(i - 1);
+		}
+		
+		/**
+		 * Sets the element referenced by <code>i</code> in this Array to <code>exp</code>.
 		 */
 		public void set(Index i, FExp exp) {
 			setFExp(exp.unboundCopy(), i.internal(indices));
 		}
 		
 		/**
-		 * \brief Returns the Indices associated with this Array.
+		 * Returns the Indices associated with this Array.
 		 */
 		public Indices indices() {
 			return indices;
 		}
 		
 		/**
-		 * \brief Set all expressions in Array to copies of <code>exp</code>.
+		 * Set all expressions in Array to copies of <code>exp</code>.
 		 * 
 		 * If <code>exp</code> is an array, it is duplicated as many times as 
 		 * nessecary to fill this Array with scalar expressions.

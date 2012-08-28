@@ -167,7 +167,6 @@ model UnsupportedBuiltins1_ComplErr
   matrix(1);
   diagonal(1 + "2");
   product(1);
-  outerProduct(1);
   symmetric(1);
   skew(1);
 
@@ -176,7 +175,7 @@ model UnsupportedBuiltins1_ComplErr
 			name="UnsupportedBuiltins1_ComplErr",
 			description="Compliance error for unsupported builtins",
 			errorMessage="
-8 errors found:
+7 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 165, column 3:
   The scalar() function-like operator is not supported
@@ -192,9 +191,6 @@ Compliance error at line 168, column 3:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 169, column 3:
   The product() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 170, column 3:
-  The outerProduct() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 171, column 3:
   The symmetric() function-like operator is not supported

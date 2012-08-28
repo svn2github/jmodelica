@@ -1381,6 +1381,152 @@ end Cross7;
 end Cross;
 
 
+package OuterProduct
+	
+model OuterProduct1
+ Real x[3,2] = outerProduct({1.0,2,3}, {4,5});
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="OuterProduct_OuterProduct1",
+			description="outerProduct() operator: basic test",
+			flatModel="
+fclass ArrayBuiltins.OuterProduct.OuterProduct1
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[3,1];
+ Real x[3,2];
+equation
+ x[1,1] = ( 1.0 ) * ( 4 );
+ x[1,2] = ( 1.0 ) * ( 5 );
+ x[2,1] = ( 2 ) * ( 4 );
+ x[2,2] = ( 2 ) * ( 5 );
+ x[3,1] = ( 3 ) * ( 4 );
+ x[3,2] = ( 3 ) * ( 5 );
+end ArrayBuiltins.OuterProduct.OuterProduct1;
+")})));
+end OuterProduct1; 
+
+
+model OuterProduct2
+ Integer x[3,3] = outerProduct({1,2,3}, {4,5,6});
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="OuterProduct_OuterProduct2",
+			description="outerProduct() operator: basic test",
+			flatModel="
+fclass ArrayBuiltins.OuterProduct.OuterProduct2
+ discrete Integer x[1,1];
+ discrete Integer x[1,2];
+ discrete Integer x[1,3];
+ discrete Integer x[2,1];
+ discrete Integer x[2,2];
+ discrete Integer x[2,3];
+ discrete Integer x[3,1];
+ discrete Integer x[3,2];
+ discrete Integer x[3,3];
+initial equation 
+ pre(x[1,1]) = 0;
+ pre(x[1,2]) = 0;
+ pre(x[1,3]) = 0;
+ pre(x[2,1]) = 0;
+ pre(x[2,2]) = 0;
+ pre(x[2,3]) = 0;
+ pre(x[3,1]) = 0;
+ pre(x[3,2]) = 0;
+ pre(x[3,3]) = 0;
+equation
+ x[1,1] = ( 1 ) * ( 4 );
+ x[1,2] = ( 1 ) * ( 5 );
+ x[1,3] = ( 1 ) * ( 6 );
+ x[2,1] = ( 2 ) * ( 4 );
+ x[2,2] = ( 2 ) * ( 5 );
+ x[2,3] = ( 2 ) * ( 6 );
+ x[3,1] = ( 3 ) * ( 4 );
+ x[3,2] = ( 3 ) * ( 5 );
+ x[3,3] = ( 3 ) * ( 6 );
+end ArrayBuiltins.OuterProduct.OuterProduct2;
+")})));
+end OuterProduct2; 
+
+
+model OuterProduct3
+ Integer x[3,3] = outerProduct({1.0,2,3}, {4,5,6});
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		ErrorTestCase(
+			name="OuterProduct_OuterProduct3",
+			description="outerProduct() operator: wrong numeric type",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1463, column 19:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+end OuterProduct3; 
+
+
+model OuterProduct4
+ Integer x = outerProduct(1, 2);
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		ErrorTestCase(
+			name="OuterProduct_OuterProduct4",
+			description="outerProduct() operator: scalar arguments",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1479, column 27:
+  Calling function outerProduct(): types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1479, column 30:
+  Calling function outerProduct(): types of positional argument 2 and input y are not compatible
+")})));
+end OuterProduct4; 
+
+
+model OuterProduct5
+ String x[3,3] = outerProduct({"1","2","3"}, {"4","5","6"});
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		ErrorTestCase(
+			name="OuterProduct_OuterProduct5",
+			description="outerProduct() operator: wrong type",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1498, column 31:
+  Calling function outerProduct(): types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1498, column 46:
+  Calling function outerProduct(): types of positional argument 2 and input y are not compatible
+")})));
+end OuterProduct5; 
+
+
+model OuterProduct6
+ Integer x[3,3,3,3] = outerProduct({{1,2,3},{1,2,3},{1,2,3}}, {{4,5,6},{4,5,6},{4,5,6}});
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		ErrorTestCase(
+			name="OuterProduct_OuterProduct6",
+			description="outerProduct() operator: too many dims",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1517, column 36:
+  Calling function outerProduct(): types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1517, column 63:
+  Calling function outerProduct(): types of positional argument 2 and input y are not compatible
+")})));
+end OuterProduct6; 
+		
+end OuterProduct;
+
 
 package Cat
 	

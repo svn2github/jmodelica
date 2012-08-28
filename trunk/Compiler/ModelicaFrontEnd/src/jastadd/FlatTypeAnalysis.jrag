@@ -313,7 +313,14 @@ aspect FlatTypeAnalysis {
 			getFExp().type().arrayType(size());
 	
 	eq FCross.type() = getX().type().numericPromotion(getY().type());
-	
+
+	eq FOuterProduct.type() { 
+		if (getX().ndims() != 1 || getY().ndims() != 1)
+			return fUnknownType();
+		FType scalar = getX().type().scalarType().numericPromotion(getY().type().scalarType());
+		return scalar.sizedType(size());
+	}
+
 	eq FNdimsExp.type() = fIntegerScalarType();
 	
 	eq FSizeExp.type() {
