@@ -49,6 +49,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.UIJob;
 import org.jastadd.plugin.Activator;
 import org.jastadd.plugin.registry.IASTRegistryListener;
+import org.jmodelica.icons.Observable;
+import org.jmodelica.icons.Observer;
 import org.jmodelica.ide.graphical.actions.OpenComponentAction;
 import org.jmodelica.ide.graphical.actions.RotateAction;
 import org.jmodelica.ide.graphical.actions.ShowGridAction;
@@ -59,12 +61,11 @@ import org.jmodelica.ide.graphical.proxy.AbstractNodeProxy;
 import org.jmodelica.ide.graphical.proxy.ClassDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentProxy;
-import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
-public class Editor extends GraphicalEditor implements IASTRegistryListener, IPartListener2 {
+public class Editor extends GraphicalEditor implements IASTRegistryListener, IPartListener2, Observer {
 
 	public static final String DIAGRAM_READ_ONLY = "diagramIsReadOnly";
 
@@ -183,6 +184,7 @@ public class Editor extends GraphicalEditor implements IASTRegistryListener, IPa
 	@Override
 	protected void initializeGraphicalViewer() {
 		dp = new ClassDiagramProxy(getProgramRoot().syncSimpleLookupInstClassDecl(input.getClassName()));
+		dp.addObserver(this);
 		openComponentStack = new Stack<ComponentDiagramProxy>();
 		setContent();
 		getGraphicalViewer().getRootEditPart().refresh();
@@ -329,18 +331,16 @@ public class Editor extends GraphicalEditor implements IASTRegistryListener, IPa
 	@SuppressWarnings("unchecked")
 	public void flushInst() {
 		long start = System.currentTimeMillis();
-		ClassDecl cd = getProgramRoot().syncSimpleLookupInstClassDecl(input.getClassName()).getClassDecl();
-		System.out.println("copy selection, t+" + (System.currentTimeMillis() - start));
 		List<Object> selectedModels = new ArrayList<Object>();
 		for (EditPart o : (List<EditPart>) getGraphicalViewer().getSelectedEditParts()) {
 			selectedModels.add(o.getModel());
 		}
-		cd.flushCache();
-		System.out.println("flush src classDecl, t+" + (System.currentTimeMillis() - start));
-		getProgramRoot().flushAll();
-		System.out.println("flush program root, t+" + (System.currentTimeMillis() - start));
-		dp.setInstClassDecl(getProgramRoot().syncSimpleLookupInstClassDecl(input.getClassName()));
-		System.out.println("lookup input class, t+" + (System.currentTimeMillis() - start));
+		System.out.println("copy selection, t+" + (System.currentTimeMillis() - start));
+		synchronized (getProgramRoot().state()) {
+			getProgramRoot().flushAll();
+			dp.setInstClassDecl(getProgramRoot().simpleLookupInstClassDecl(input.getClassName()));
+		}
+		System.out.println("flush, t+" + (System.currentTimeMillis() - start));
 		setContent();
 		System.out.println("set content, t+" + (System.currentTimeMillis() - start));
 		for (Object selectedModel : selectedModels) {
@@ -371,12 +371,10 @@ public class Editor extends GraphicalEditor implements IASTRegistryListener, IPa
 
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
-						synchronized (getProgramRoot().state()) {
-							getCommandStack().markSaveLocation();
-							ASTDirty = false;
-							setContent();
-							return Status.OK_STATUS;
-						}
+						getCommandStack().markSaveLocation();
+						ASTDirty = false;
+						setContent();
+						return Status.OK_STATUS;
 					}
 				}.schedule();
 				return Status.OK_STATUS;
@@ -403,12 +401,20 @@ public class Editor extends GraphicalEditor implements IASTRegistryListener, IPa
 
 	@Override
 	public void projectASTChanged(IProject project) {
-		if (dp != null)
-			refreshInst();
 	}
 
 	@Override
-	public void childASTChanged(IProject project, String key) {}
+	public void childASTChanged(IProject project, final String key) {
+		new Job("Check for updates") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				if (dp != null && dp.getDefinitionKey().equals(key))
+					refreshInst();
+				return Status.OK_STATUS;
+			}
+		}.schedule();
+	}
 
 	@Override
 	public void partActivated(IWorkbenchPartReference partRef) {
@@ -437,5 +443,11 @@ public class Editor extends GraphicalEditor implements IASTRegistryListener, IPa
 
 	@Override
 	public void partInputChanged(IWorkbenchPartReference partRef) {}
+
+	@Override
+	public void update(Observable o, Object flag, Object additionalInfo) {
+		if (o == dp && flag == ClassDiagramProxy.FLUSH_CONTENTS)
+			flushInst();
+	}
 
 }

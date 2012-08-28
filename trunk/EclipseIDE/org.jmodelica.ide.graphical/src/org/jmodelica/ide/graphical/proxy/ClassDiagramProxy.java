@@ -41,6 +41,12 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	protected InstClassDecl getClassDecl() {
 		return getASTNode();
 	}
+	
+	public String getDefinitionKey() {
+		synchronized (instClassDecl.state()) {
+			return instClassDecl.getDefinition().lookupKey();
+		}
+	}
 
 	@Override
 	public ComponentProxy addComponent(String className, String componentName, Placement placement) {
@@ -94,6 +100,8 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	
 	@Override
 	protected void setParameterValue(Stack<String> path, String value) {
+		instClassDecl.syncSetParameterValue(path, value);
+		notifyObservers(FLUSH_CONTENTS);
 	}
 	
 	@Override

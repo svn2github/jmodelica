@@ -275,6 +275,66 @@ aspect ModelicaIconsEditing {
 		}
 	}
 	
+	
+	public void InstClassDecl.syncSetParameterValue(Stack<String> path, String value) {
+		synchronized (state()) {
+			setParameterValue(path, value);
+		}
+	}
+	
+	protected void InstClassDecl.setParameterValue(Stack<String> path, String value) {
+		String componentName = path.peek();
+		for (InstComponentDecl component : getInstComponentDecls()) {
+			if (componentName.equals(component.name())) {
+				path.pop();
+				component.getComponentDecl().setParameterValue(path, value);
+				return;
+			}
+		}
+		
+		for (InstExtends ie : getInstExtendss()) {
+			if (ie.containsComponent(componentName)) {
+				ie.getExtendsClause().setParameterValue(path, value);
+				return;
+			}
+		}
+	}
+	
+	protected boolean InstNode.containsComponent(String componentName) {
+		for (InstComponentDecl icd : getInstComponentDecls()) {
+			if (componentName.equals(icd.name()))
+				return true;
+		}
+		for (InstExtends ie : getInstExtendss()) {
+			boolean val = containsComponent(componentName);
+			if (val)
+				return true;
+		}
+		return false;
+	}
+	
+	
+	protected void Element.setParameterValue(Stack<String> path, String value) {
+		StringBuilder sb = new StringBuilder(path.pop());
+		for (String part : path) {
+			sb.append('/');
+			sb.append(part);
+		}
+		ParserHandler ph = new ParserHandler();
+		try {
+			AnnotationNode node = modificationAnnotation();
+			Exp e = ph.parseExpString(value);
+			node.forPath(sb.toString()).setValue(e);
+		} catch (ParserException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (beaver.Parser.Exception e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/*-------------------------------------------------------------------------
 	 *                          Misc Sync methods

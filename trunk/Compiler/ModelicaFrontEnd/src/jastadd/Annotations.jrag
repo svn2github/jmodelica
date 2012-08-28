@@ -48,6 +48,7 @@ aspect AnnotationAPI {
 	
 	eq Comment.annotation()         = getAnnotationOpt().annotation();
 	eq ParseAnnotation.annotation() = getClassModification().annotationNode();
+	eq Modification.annotation() = annotationNode();
 	
 	eq ExternalClause.annotation() = getAnnotation1Opt().annotation();
 	eq InstExternal.annotation()   = getExternalClause().annotation();
@@ -62,6 +63,14 @@ aspect AnnotationAPI {
 
 	eq ComponentDecl.annotation()     = getComment().annotation();
 	eq InstComponentDecl.annotation() = getComponentDecl().annotation();
+	
+	/**
+	 * Experimental! Retreives the annotation representing the modifications.
+	 */
+	
+	syn AnnotationNode Element.modificationAnnotation() = AnnotationNode.NO_ANNOTATION;
+	eq ComponentDecl.modificationAnnotation() = getModificationOpt().annotation();
+	eq ExtendsClause.modificationAnnotation() = getClassModificationOpt().annotation();
 	
 	
 	/**
@@ -290,6 +299,10 @@ aspect AnnotationAPI {
 		public static AnnotationNode createNullAnnotationNodeFor(ASTNode node) {
 			if (node.getParent() instanceof Comment)
 				return new NullCommentAnnotationNode((Comment)node.getParent());
+			if (node.getParent() instanceof ComponentDecl)
+				return new NullComponentAnnotationNode((ComponentDecl)node.getParent());
+			if (node.getParent() instanceof ExtendsClause)
+				return new NullExtendsAnnotationNode((ExtendsClause)node.getParent());
 			return NO_ANNOTATION;
 		}
 		
@@ -511,6 +524,65 @@ aspect AnnotationAPI {
 		
 		}
 		
+		
+		/**
+		 * A null annotation node for a component, it adds the possibility to add annotation.
+		 */
+		private static class NullComponentAnnotationNode extends AssignableNullAnnotationNode {
+			
+			private ComponentDecl component;
+			
+			/**
+			 * Constructs an instance with the component <code>component</code>.
+			 */
+			protected NullComponentAnnotationNode(ComponentDecl component) {
+				super(null, null);
+				this.component = component;
+			}
+			
+			@Override
+			public void setValue(Exp exp) {
+				throw new AnnotationEditException("Set value is not supported on this type of annotation node");
+			}
+		
+			@Override
+			protected void createRealNode() {
+				ClassModification classMod = new ClassModification();
+				CompleteModification cm = new CompleteModification(classMod);
+				component.setModification(cm);
+				realNode = classMod.annotationNode();
+			}
+		
+		}
+		
+		/**
+		 * A null annotation node for a extends clause, it adds the possibility to add annotation.
+		 */
+		private static class NullExtendsAnnotationNode extends AssignableNullAnnotationNode {
+			
+			private ExtendsClause ec;
+			
+			/**
+			 * Constructs an instance with the extends clause <code>ec</code>.
+			 */
+			protected NullExtendsAnnotationNode(ExtendsClause ec) {
+				super(null, null);
+				this.ec = ec;
+			}
+			
+			@Override
+			public void setValue(Exp exp) {
+				throw new AnnotationEditException("Set value is not supported on this type of annotation node");
+			}
+		
+			@Override
+			protected void createRealNode() {
+				ClassModification classMod = new ClassModification();
+				ec.setClassModification(classMod);
+				realNode = classMod.annotationNode();
+			}
+		
+		}
 	}
 	
 	/**
