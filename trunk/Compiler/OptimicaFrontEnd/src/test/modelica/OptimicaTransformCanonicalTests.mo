@@ -303,7 +303,7 @@ end OptimicaTransformCanonicalTests.ArrayTest2;
 1 Error(s) found
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
 Semantic error at line 271, column 27:
-  Array size mismatch for the attribute objective, size of declaration is [] and size of objective expression is [2]
+  Array size mismatch for the attribute objective, size of declaration is scalar and size of objective expression is [2]
   
 ")})));
   end ArrayTest3_Err;

@@ -1037,7 +1037,7 @@ model ArrayModifications16
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1176, column 8:
-  Array size mismatch in declaration of each x, size of declaration is [2] and size of binding expression is []
+  Array size mismatch in declaration of each x, size of declaration is [2] and size of binding expression is scalar
 ")})));
 end ArrayModifications16;
 

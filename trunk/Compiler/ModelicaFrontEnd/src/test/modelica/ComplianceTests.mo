@@ -371,7 +371,7 @@ model ArrayCellMod_ComplErr
 3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Semantic error at line 361, column 8:
-  Array size mismatch in declaration of b, size of declaration is [2] and size of binding expression is []
+  Array size mismatch in declaration of b, size of declaration is [2] and size of binding expression is scalar
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 364, column 5:
   Modifiers of specific array elements are not supported

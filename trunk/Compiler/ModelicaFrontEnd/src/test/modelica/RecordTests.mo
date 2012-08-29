@@ -565,7 +565,7 @@ model RecordBinding4
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
 Semantic error at line 499, column 4:
-  Array size mismatch in declaration of x, size of declaration is [] and size of binding expression is [2]
+  Array size mismatch in declaration of x, size of declaration is scalar and size of binding expression is [2]
 ")})));
 end RecordBinding4;
 

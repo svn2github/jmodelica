@@ -414,7 +414,7 @@ model FillExp7
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 1259, column 7:
-  Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is []
+  Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is scalar
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 1259, column 14:
   Calling function fill(): missing argument for required input s
@@ -2225,7 +2225,7 @@ model Identity2
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 7207, column 18:
-  Array size mismatch in declaration of A, size of declaration is [] and size of binding expression is [3, 3]
+  Array size mismatch in declaration of A, size of declaration is scalar and size of binding expression is [3, 3]
 ")})));
 end Identity2;
 
