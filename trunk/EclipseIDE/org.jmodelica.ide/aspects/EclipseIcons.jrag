@@ -70,10 +70,12 @@ aspect ModelicaEclipseIcons
 			public boolean iscurrent = false;
 			
 			public void update(Image i) {
-				if (prev != null)
-					prev.dispose();
-				prev = icon;
-				icon = i;
+				if (i != icon) {
+					if (prev != null)
+						prev.dispose();
+					prev = icon;
+					icon = i;
+				}
 			}
 			
 			public Image transfer() {
