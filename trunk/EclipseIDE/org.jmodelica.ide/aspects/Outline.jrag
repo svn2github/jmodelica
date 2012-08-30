@@ -279,7 +279,8 @@ aspect Outline {
 								}
 							}
 						}
-						sn.disposeCachedIcon();
+						if (!found || sn != dn)
+							sn.disposeCachedIcon();
 					}
 				}
 			}
