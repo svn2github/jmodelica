@@ -59,8 +59,12 @@ struct jmi_kinsol_solver_t {
     N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
     N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
     N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
+    N_Vector kin_f_new_scale;      /**< \brief Work vector for updating Kinsol scaling of f */
+    realtype kin_scale_update_time; /**< \brief The last time when Kinsol scale was updated */
+    realtype kin_ftol_update_time;  /**< \brief The last time when Kinsol ftol was updated */
     realtype kin_ftol;		       /**< \brief Tolerance for F */
     realtype kin_stol;		       /**< \brief Tolerance for Step-size */
+    
 };
 
 
