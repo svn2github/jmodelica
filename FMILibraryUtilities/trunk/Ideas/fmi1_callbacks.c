@@ -128,18 +128,27 @@ void  fmi1_default_callback_logger(fmi1_component_t c, fmi1_string_t instanceNam
 
 void fmi1_logger(jm_callbacks* cb, jm_string module, jm_log_level_enu_t log_level, jm_string message) {
 	fmi1_callbacks_t* c = (fmi1_callbacks_t*)cb->context;
+	fmi1_status_t status;
 	if(!c ||!c->fmiFunctions.logger) return;
-	switch(log_level) {
-	case jm_log_level_all:
-	case jm_log_level_info:
-		c->fmiFunctions.logger( c, module, fmi1_status_ok, "INFO", message);
-		break;
-	case jm_log_level_warning:
-		c->fmiFunctions.logger( c, module, fmi1_status_warning, "WARNING", message);
-		break;
-	default:
-		c->fmiFunctions.logger( c, module, fmi1_status_error, "ERROR", message);
+
+	if(log_level > jm_log_level_all) {
+		assert(0);
+		status = fmi1_status_error;
 	}
+	else if(log_level >= jm_log_level_info)
+		status = fmi1_status_ok;
+	else if(log_level >= jm_log_level_warning)
+		status = fmi1_status_warning;
+	else if(log_level >= jm_log_level_error)
+		status = fmi1_status_error;
+	else if(log_level >= jm_log_level_fatal)
+		status = fmi1_status_fatal;
+	else {
+		assert(0);
+		status = fmi1_status_error;
+	}
+
+	c->fmiFunctions.logger( c, module, status, jm_log_level_to_string(log_level), message);
 }
 
 void fmi1_import_init_logger(jm_callbacks* cb, fmi1_callbacks_t* context) {

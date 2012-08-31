@@ -24,14 +24,14 @@
 extern "C" {
 #endif
 /** \file fmi1_callbacks.h
-	Support for FMI callbacks.
+	\brief Support for FMI callbacks.
 */
 
 /**	\addtogroup fmi1_utils
 	@{
 */
 /** 
-\name Replacing system malloc/calloc/realloc/free
+\todo Replacing system malloc/calloc/realloc/free on export
 
 	NOTE: THIS IS NOT FULLY IMPLEMENTED
 	
@@ -46,7 +46,7 @@ extern "C" {
     Note that realloc and free get the correct context from heap memory directly if present.
 @{
 
-Mapping of FMI callbacks to ::jm_callbacks*/
+Mapping of FMI callbacks to ::jm_callbacks */
 typedef struct fmi1_callbacks_t {
     jm_callbacks jmFunctions;
     fmi1_callback_functions_t fmiFunctions;
@@ -60,7 +60,9 @@ typedef struct fmi_memory_header_t {
     size_t size;
 } fmi1_memory_header_t;
 
-/** Initialize ::fmi1_callback_functions_t structure to map jm library callback functions onto fmi callbacks */
+/** \brief Initialize ::fmi1_callback_functions_t structure to map jm library callback functions onto fmi callbacks 
+	\param callbacks the 
+*/
 void fmi1_export_init_callbacks(fmi1_callbacks_t* callbacks, fmi1_callback_functions_t* fmiFunctions);
 /** @}
 */
