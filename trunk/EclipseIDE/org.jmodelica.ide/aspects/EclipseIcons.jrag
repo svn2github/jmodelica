@@ -72,7 +72,7 @@ aspect ModelicaEclipseIcons
 			public void update(Image i) {
 				if (i != icon) {
 					if (prev != null)
-						prev.dispose();
+						prev = dispose(prev);
 					prev = icon;
 					icon = i;
 				}
@@ -85,10 +85,15 @@ aspect ModelicaEclipseIcons
 			}
 			
 			public void dispose() {
-				if (icon != null)
-					icon.dispose();
-				if (prev != null)
-					prev.dispose();
+				icon = dispose(icon);
+				prev = dispose(prev);
+				iscurrent = false;
+			}
+
+			private Image dispose(Image img) {
+				if (img != null) 
+					img.dispose();
+				return null;
 			}
 		}
 		
