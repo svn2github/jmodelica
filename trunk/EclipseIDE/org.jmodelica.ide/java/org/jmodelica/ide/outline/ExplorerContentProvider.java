@@ -110,7 +110,7 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		// TODO: Need to save in registry even if we have to build ourselves
 		if (ast == null) {
 			ast = localCompiles.get(file);
-			if (ast == null || outdatedLocalCompiles.contains(ast)) {
+			if (localCompiles.containsKey(file) || outdatedLocalCompiles.contains(ast)) {
 				outdatedLocalCompiles.remove(ast);
 				new CompileJob(file).schedule();
 			}
@@ -177,7 +177,9 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 			final IFile file = (IFile) source;
 			String ext = file.getFileExtension();
 			if (ext != null && ext.equals(IDEConstants.MODELICA_FILE_EXT)) {
-				outdatedLocalCompiles.add(localCompiles.get(file));
+				IASTNode ast = localCompiles.get(file);
+				if (ast != null)
+					outdatedLocalCompiles.add(ast);
 				new UpdateJob(file).schedule();
 			}
 			return false;
