@@ -2,8 +2,14 @@ package org.jmodelica.ide.documentation;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,11 +91,13 @@ public class Generator {
 				N3 + "a:active {text-decoration: none}" +
 				N2 + "</style>" + N2 + "<!-- END OF CSS -->";
 	}
-	
+
 	public static String genJavaScript(String scriptPath){
 		return  N2 + "<!-- JAVASCRIPT -->" +
 				N2 + "<script type=\"text/javascript\" src=\"" + scriptPath + "\">" + "</script>" + 
 				N2 + "<script type=\"text/javascript\">" + 
+				N3 + "window.onunload = null;" +
+				N3 + "Window.OnBeforeUnload = null;" +
 				Scripts.PRE_INFO_EDIT + Scripts.PRE_REV_EDIT + Scripts.POST_INFO_EDIT + Scripts.POST_REV_EDIT + Scripts.CANCEL_INFO + Scripts.CANCEL_REV +
 				N2 + "</script>" +
 				N2 + "<!-- END OF JAVASCRIPT -->";
@@ -140,28 +148,28 @@ public class Generator {
 		return content.toString();
 	}
 
-	public static String genTitle(FullClassDecl fcd, String folderPath){
+	public static String genTitle(FullClassDecl fcd, String folderPath, boolean offline){
 		StringBuilder content = new StringBuilder();
 		String name = fcd.getName().getID();
 		content.append(N4 + "<!-- CLASS ICON, RESTRICTION AND NAME -->");
 		content.append(N4 +"<h1>");
-		content.append(N5 + genIcon(fcd, folderPath + "icon.png"));
+		content.append(N5 + genIcon(fcd, folderPath + "icon.png", offline));
 		content.append(N5 + fcd.getRestriction() + " " + name + N4 + "</h1>" + N4 + "<!-- END OF CLASS ICON, RESTRICTION AND NAME -->");
 		return content.toString();
 	}
 
-	public static String genComment(FullClassDecl fcd, boolean isEditable){
+	public static String genComment(FullClassDecl fcd){
 		if(fcd.hasStringComment()){
 			return N4 + "<!-- COMMENT -->" + N4 + "<div class=\"text\">" + N5 + "<i>" + fcd.stringComment() + "</i>" + N4 + "</div> "+ N4 + "<!-- END OF COMMENT -->";
 		}
 		return "";
 	}
 
-	public static String genInfo (FullClassDecl fcd, boolean isEditable){
+	public static String genInfo (FullClassDecl fcd, boolean offline){
 		StringBuilder content = new StringBuilder();
 		String embeddedHTML = fcd.annotation().forPath("Documentation/info").string();
 		content.append(N4 + "<!-- INFO -->");
-		if (!isEditable){
+		if (offline){
 			content.append(N4 + "<h2 id=\"buttonInsertion\">" + N5 + "Information"  + N4 + "</h2>");
 		}else{
 			//figure out if we're in a library. This might give false positives
@@ -183,7 +191,7 @@ public class Generator {
 			content.append(N6 + "<i>No HTML info available</i>");
 		}
 		content.append(N4 + "" + INFO_ID_CLOSE_TAG + N4 + "<!-- END OF INFO -->");
-		
+
 		return content.toString();
 	}
 
@@ -307,11 +315,11 @@ public class Generator {
 		return content.toString();
 	}
 
-	public static String genRevisions(FullClassDecl fcd, boolean editable){
+	public static String genRevisions(FullClassDecl fcd, boolean offline){
 		StringBuilder content = new StringBuilder();
 		String revision = fcd.annotation().forPath("Documentation/revisions").string();
 		content.append(N4 + "<!-- REVISIONS -->");
-		if(!editable){
+		if(offline){
 			content.append(N4 + "<h2 id=\"buttonInsertion\">" + N5 + "Revisions&nbsp;" + N4 + "</h2>");
 		}else{
 			String disabled = "";
@@ -340,8 +348,9 @@ public class Generator {
 	public static String genFooter(String footer){
 		StringBuilder content = new StringBuilder();
 		content.append(N3 + "</div> <!-- END OF MAIN -->" + N2 + "</div> <!-- END OF WRAP -->"); //closing main and wrap
-		content.append(N2 + "<!-- FOOTER -->");
-		content.append(N2 + "<div id=\"footer\"> <hr>" + N3 + footer + N2 + "</div>" + N2 + "<!-- END OF FOOTER -->"+ N1 + "</body>\n</html>");
+		//content.append(N2 + "<!-- FOOTER -->");
+		//content.append(N2 + "<div id=\"footer\"> <hr>" + N3 + footer + N2 + "</div>" + N2 + "<!-- END OF FOOTER -->"+ N1 + "</body>\n</html>");
+		content.append(N2 + "<!-- END OF FOOTER -->"+ N1 + "</body>\n</html>");
 		return content.toString();
 	}
 
@@ -353,9 +362,7 @@ public class Generator {
 	}
 
 	public static String genUnknownClassDecl(UnknownClassDecl fcd, String className) {
-		return N5 + "<span>Error: The class <b>" + className + "</b> could not be found."+
-				" To get the latest version of the Modelica standard library, please visit " +
-				"<a href=\"https://www.modelica.org/libraries/Modelica\">https://www.modelica.org/libraries/Modelica</a></span>";
+		return N5 + "<span>Error: The class <b>" + className + "</b> could not be found.</span>";
 	}
 
 	/**
@@ -433,11 +440,16 @@ public class Generator {
 	 * @param fullPath The desired path and file name of the .png file.
 	 * @return
 	 */
-	public static String genIcon(ClassDecl cd, String fullPath){
+	public static String genIcon(ClassDecl cd, String fullPath, boolean offline){
 		if (!(cd instanceof FullClassDecl)) return "";
 		FullClassDecl fcd = (FullClassDecl) cd;
 		if (renderIcon(fcd,fullPath)){
-			return "<img src=\"file:/" + fullPath + "\">";
+//			if (!offline){
+				return "<img src=\"file:/" + fullPath + "\">";
+//			}else{
+//				return "<img src=\"" + fullPath + "\">"; 
+//			}
+
 		}
 		return "<!-- No icon available -->";	
 	}
@@ -519,7 +531,8 @@ public class Generator {
 	 */
 	public static String processEmbeddedHTML(String htmlCode, ClassDecl cd){
 		//process <a href="...">
-		htmlCode =  removeHTMLTag(htmlCode);
+		htmlCode =  removeHTMLTag(htmlCode); //don't want nested HTML tags
+		//just adds title
 		String urlPrefix = "a href=";
 		Pattern urlPattern = Pattern.compile(urlPrefix + "\"(.+?)\"", Pattern.CASE_INSENSITIVE | Pattern.CANON_EQ);
 		Matcher urlMatcher = urlPattern.matcher(htmlCode);
@@ -527,9 +540,7 @@ public class Generator {
 		while (urlMatcher.find()){
 			MatchResult mr = urlMatcher.toMatchResult();
 			String match = htmlCode.substring(mr.start() + urlPrefix.length(), mr.end()); //e.g "Modelica://Modelica.UsersGuide.Overview"
-			String matchWithoutParentesis = match.substring(1, match.length() -1);
-			if (matchWithoutParentesis.startsWith("Modelica://")){
-			}
+			//String matchWithoutParentesis = match.substring(1, match.length() -1);
 			urlMatcher.appendReplacement(urlSb, htmlCode.substring(mr.start(), mr.end()) + " title=" + match);
 		}
 		urlMatcher.appendTail(urlSb);
@@ -547,15 +558,45 @@ public class Generator {
 			}
 			String absPath = cd.uri2path(match);
 			if (absPath == null) absPath = match;
-			String imgTag = "img src=\"" + absPath + "\"" + " title=" + absPath;
+			String imgTag;
+
+			imgTag = "img src=\"" + absPath + "\"" + " title=" + absPath;
 			imgTag = imgTag.replace("\\", "\\\\");
+
 			imgMatcher.appendReplacement(imgSb,  imgTag);
 		}
 		imgMatcher.appendTail(imgSb);
 		return imgSb.toString();
 	}
 
-	public static String genDocumentation(ClassDecl cd, Program program, String path, String footer, String className, String rootPath, String libName) {
+	private static boolean copyFile(String srFile, String dtFile){
+		try{
+			if(srFile.startsWith("file://")) srFile = srFile.substring("file://".length());
+			if(srFile.startsWith("modelica://") || srFile.startsWith("Modelica://"))srFile = srFile.substring("modelica://".length());
+			File f1 = new File(srFile);
+			if(dtFile.startsWith("modelica://") || dtFile.startsWith("Modelica://"))dtFile = dtFile.substring("modelica://".length());
+			if(dtFile.startsWith("file://")) dtFile = dtFile.substring("file://".length());
+			File f2 = new File(dtFile);
+			InputStream in = new FileInputStream(f1);
+			OutputStream out = new FileOutputStream(f2);
+			byte[] buf = new byte[1024];
+			int len;
+			while ((len = in.read(buf)) > 0){
+				out.write(buf, 0, len);
+			}
+			in.close();
+			out.close();
+		}
+		catch(FileNotFoundException ex){
+			return false;
+		}
+		catch(IOException e){
+			return false;
+		}
+		return true;
+	}
+
+	public static String genDocumentation(ClassDecl cd, Program program, String path, String footer, String className, String rootPath, String libName, HashMap<String, Boolean> options) {
 		StringBuilder content = new StringBuilder();
 		content.append(Generator.genHead());
 		//don't generate JavaScript
@@ -564,29 +605,33 @@ public class Generator {
 		if (cd instanceof ShortClassDecl){
 			content.append(genShortClassDecl((ShortClassDecl)cd));
 			content.append(genFooter(footer));
-			return resolveLinksForGenDoc(content.toString(), rootPath, libName);
+			return resolveLinksForGenDoc(content.toString(), rootPath, libName, cd);
 		}
 		if (cd instanceof UnknownClassDecl){
 			content.append(genUnknownClassDecl((UnknownClassDecl)cd, className));
 			content.append(genFooter(footer));
-			return resolveLinksForGenDoc(content.toString(), rootPath, libName);
+			return resolveLinksForGenDoc(content.toString(), rootPath, libName, cd);
 		}
 		if (!(cd instanceof FullClassDecl)) return "";
 		FullClassDecl fcd = (FullClassDecl) cd;
-		content.append(genTitle(fcd, path));
-		content.append(genInfo(fcd, false));
-		content.append(genImports(fcd));
-		content.append(genExtensions(fcd));
+		content.append(genTitle(fcd, path, true));
+		if (options.get(DocGenDialog.COMMENT)) content.append(genComment(fcd));
+		if (options.get(DocGenDialog.INFORMATION)) content.append(genInfo(fcd, true));
+		if (options.get(DocGenDialog.IMPORTS))content.append(genImports(fcd));
+		if (options.get(DocGenDialog.EXTENSIONS))content.append(genExtensions(fcd));
 		content.append(genClasses(fcd));
-		content.append(genComponents(fcd));
-		content.append(genEquations(fcd));
-		content.append(genRevisions(fcd, false));
+		if (options.get(DocGenDialog.COMPONENTS))content.append(genComponents(fcd));
+		if (options.get(DocGenDialog.EQUATIONS))content.append(genEquations(fcd));
+		if (options.get(DocGenDialog.REVISIONS))content.append(genRevisions(fcd, true));
 		content.append(genFooter(footer));
-		return resolveLinksForGenDoc(content.toString(), rootPath, libName);
+		return resolveLinksForGenDoc(content.toString(), rootPath, libName, cd);
 	}
-	
-	private static String resolveLinksForGenDoc(String documentation, String rootPath, String libName){
-		rootPath = rootPath.replace("\\", "/");
+
+	private static String resolveLinksForGenDoc(String documentation, String rootPath, String libName, ClassDecl cd){
+		//make all links relative to "libName"
+		//start by figuring out the path from libName to cd
+		String path = getFullPath(cd);
+		//rootPath = rootPath.replace("\\", "/");
 		Pattern urlPattern = Pattern.compile("<a[^>]*>(.*?)</a>" , Pattern.CASE_INSENSITIVE | Pattern.CANON_EQ);
 		Matcher urlMatcher = urlPattern.matcher(documentation);
 		StringBuffer urlSb = new StringBuffer();
@@ -599,7 +644,10 @@ public class Generator {
 				MatchResult refMr = refM.toMatchResult();
 				String ref = match.substring(refMr.start() + "href=\"".length(), refMr.end()-1);
 				if (ref.toLowerCase().startsWith(libName.toLowerCase())){
-					match = match.replaceAll("href=\"(.+?)\"", "href=\"file://" + rootPath + ref.replace(".","/" ) + "/index.html\"");
+					String relativePath = findRelativePath(path, ref); //path is the modelica path of the cd, ref is the modelica path of the link
+					//match = match.replaceAll("href=\"(.+?)\"", "href=\"file://" + rootPath + ref.replace(".","/" ) + "/index.html\"");
+					match = match.replaceAll("href=\"(.+?)\"", "href=\"" + relativePath + "index.html\"");
+
 					urlMatcher.appendReplacement(urlSb, match);
 				}else{
 					if (ref.toLowerCase().startsWith("modelica://")){
@@ -611,6 +659,71 @@ public class Generator {
 			}
 		}
 		urlMatcher.appendTail(urlSb);
-		return urlSb.toString();
+		//img handling
+		String imgRegex = "<img[^>]+src\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>";
+		Pattern imgPattern = Pattern.compile(imgRegex);//, Pattern.CASE_INSENSITIVE | Pattern.CANON_EQ);
+		Matcher imgMatcher = imgPattern.matcher(urlSb.toString());
+		StringBuffer imgSb = new StringBuffer();
+		while (imgMatcher.find()){
+			MatchResult mr = imgMatcher.toMatchResult();
+			String match = urlSb.toString().substring(mr.start(), mr.end()); //e.g "Modelica://Modelica.UsersGuide.Overview"
+			Pattern refP = Pattern.compile("src=\"(.+?)\"" , Pattern.CASE_INSENSITIVE | Pattern.CANON_EQ);
+			Matcher refM = refP.matcher(match);
+			if (refM.find()){
+				MatchResult refMr = refM.toMatchResult();
+				String ref = match.substring(refMr.start() + "src=\"".length(), refMr.end()-1);
+				String fileName;
+				ref = ref.replace("\\", "/");
+				if(ref.lastIndexOf("/") != -1){
+					fileName = ref.substring(ref.lastIndexOf("/"));
+				}else{
+					fileName = ref;
+				}
+				String relativePath = path.replace(".","/") + fileName;
+				copyFile(ref, rootPath + relativePath);
+				//create relative path in the offline docs.
+				imgMatcher.appendReplacement(imgSb, "<img src=\"../" + relativePath +"\" \\>");
+			}
+		}
+		imgMatcher.appendTail(imgSb);
+
+		return imgSb.toString();
 	}
+
+	public static String findRelativePath(String from, String to){
+		//Eg: 	from 	= Modelica.Analog.Electrical.Resistor
+		//		to		= Modelica.Analog.Inductive.Capacitance
+		//		return	= ../../Inductive/Capacitance
+		String[] fromArray = from.split("\\.");
+		String[] toArray = to.split("\\.");
+		int fromDepth = fromArray.length;
+		int toDepth = toArray.length;
+		int commonDepth = 0;
+		for (int i = 0; i < Math.min(fromArray.length, toArray.length); i++){
+			if (fromArray[i].equals(toArray[i])){
+				commonDepth++;
+			}else{
+				break;
+			}
+		}
+		StringBuilder relPath = new StringBuilder();
+		int up = fromDepth - commonDepth;
+		for (int i = 0; i < up; i++){
+			relPath.append("../");
+		}
+		int down = toDepth - commonDepth;
+		for (int i = 0; i < down; i++){
+			relPath.append(toArray[i+commonDepth] + "/");
+		}
+
+		return relPath.toString();
+	}
+	//	public static void main(String[] args){
+	//		String test = findRelativePath("Modelica.Analog.Electrical.Resistor", "Modelica.Analog.Inductive.Capacitance");
+	//		String test2 = findRelativePath("Modelica", "Modelica.Analog.Inductive.Capacitance");
+	//		String test3 = findRelativePath("Modelica.Analog.Electrical.Resistor", "Modelica");
+	//		System.out.println(test);
+	//		System.out.println(test2);
+	//		System.out.println(test3);
+	//	}
 }

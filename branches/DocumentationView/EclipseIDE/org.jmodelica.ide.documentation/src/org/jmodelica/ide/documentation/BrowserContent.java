@@ -5,8 +5,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
@@ -62,60 +68,88 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 		}
 	}
 
+//	private class Dialog implements Runnable{
+//		private FullClassDecl fcd;
+//		private Program program;
+//		private String footer;
+//		public Dialog(FullClassDecl fcd, Program program, String footer){
+//			this.fcd = fcd;
+//			this.program = program;
+//			this.footer = footer;
+//		}
+//		@Override
+//		public void run() {
+//			new DocGenDialog(null, fcd, program, FOOTER);
+//			
+//		}
+//		
+//	}
 	public void generateDocumentation(FullClassDecl fcd) {
-		JFileChooser fc = new JFileChooser();
-		fc.setDialogTitle("Documentation generation - Specify directory");
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		if (fc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION) return;
-		String rootPath = fc.getCurrentDirectory().getAbsolutePath() + "\\" + fc.getSelectedFile().getName() + "\\";
-		String path = rootPath + fcd.getName().getID();
-		String libName = fcd.getName().getID();
+		//DocGenDialog dlg = new DocGenDialog(null);
+		new DocGenDialog(null, fcd, program, FOOTER);
 		
-		if ((new File(path)).exists()) {
-			if (JOptionPane.showConfirmDialog(null, "This folder already exist. Would you like to override existing files?") != JOptionPane.YES_OPTION) return;
-		}else{
-			boolean success = (new File(path)).mkdirs();
-			if (!success) {
-				JOptionPane.showMessageDialog(null, "Unable to create a new directory", "Error", JOptionPane.ERROR_MESSAGE, null);
-				return;
-			}
-		}
-		String code = Generator.genDocumentation(fcd, program, path + "\\", "footer", "Unknown Class Decl", rootPath, libName);
-		try{
-			FileWriter fstream = new FileWriter(path + "\\index.html");
-			BufferedWriter out = new BufferedWriter(fstream);
-			out.write(code);
-			out.close();
-		}catch (Exception e){
-			JOptionPane.showMessageDialog(null, "Unable to save to file", "Error", JOptionPane.ERROR_MESSAGE, null);
-		}
-		ArrayList<ClassDecl> children = new ArrayList<ClassDecl>();
-		collectChildren(fcd, children);
-		for (ClassDecl child : children){
-			String newPath = rootPath + "\\" + Generator.getFullPath(child).replace(".", "\\");
-			(new File(newPath)).mkdirs();
-			try{
-				FileWriter fstream = new FileWriter(newPath + "\\index.html");
-				BufferedWriter out = new BufferedWriter(fstream);
-				out.write(Generator.genDocumentation(child, program, newPath + "\\", "footer", "Unknown class decl", rootPath, libName));
-				out.close();
-			}catch (Exception e){
-				JOptionPane.showMessageDialog(null, "Unable to save to file", "Error", JOptionPane.ERROR_MESSAGE, null);
-			}
-		}
+		//new Dialog(fcd, program, FOOTER).run();
+		
+		
+		
+		//RETURN!!!!
+//		String rootPath = dlg.getRootPath();
+//		HashMap<String, Boolean> options = dlg.getOptions();
+//		if (!dlg.isDone()) return;
+//		String path = rootPath + fcd.getName().getID();
+//		String libName = fcd.getName().getID();
+//		
+//		if ((new File(path)).exists()) {
+//			if (JOptionPane.showConfirmDialog(null, "This folder already exist. Would you like to override existing files?") != JOptionPane.YES_OPTION) return;
+//		}else{
+//			boolean success = (new File(path)).mkdirs();
+//			if (!success) {
+//				JOptionPane.showMessageDialog(null, "Unable to create a new directory", "Error", JOptionPane.ERROR_MESSAGE, null);
+//				return;
+//			}
+//		}
+//		String code = Generator.genDocumentation(fcd, program, path + "\\", FOOTER, "Unknown Class Decl", rootPath, libName, options);
+//		try{
+//			FileWriter fstream = new FileWriter(path + "\\index.html");
+//			BufferedWriter out = new BufferedWriter(fstream);
+//			out.write(code);
+//			out.close();
+//		}catch (Exception e){
+//			JOptionPane.showMessageDialog(null, "Unable to save to file", "Error", JOptionPane.ERROR_MESSAGE, null);
+//		}
+//		ArrayList<ClassDecl> children = new ArrayList<ClassDecl>();
+//		collectChildren(fcd, children);
+//		for (ClassDecl child : children){
+//			String newPath = rootPath + "\\" + Generator.getFullPath(child).replace(".", "\\");
+//			(new File(newPath)).mkdirs();
+//			try{
+//				FileWriter fstream = new FileWriter(newPath + "\\index.html");
+//				BufferedWriter out = new BufferedWriter(fstream);
+//				out.write(Generator.genDocumentation(child, program, newPath + "\\", FOOTER, "Unknown class decl", rootPath, libName, options));
+//				out.close();
+//			}catch (Exception e){
+//				JOptionPane.showMessageDialog(null, "Unable to save to file", "Error", JOptionPane.ERROR_MESSAGE, null);
+//			}
+//		}
+//		StringBuilder generatedDocs = new StringBuilder("Documentation was successfully generated for the following classes:");
+//		generatedDocs.append("\n" + libName);
+//		for (ClassDecl cd : children){
+//			generatedDocs.append("\n" + cd.name());
+//		}
+//		JOptionPane.showMessageDialog(null, generatedDocs.toString(), "Generation Complete", JOptionPane.INFORMATION_MESSAGE, null);
 	}
 
-	private void collectChildren(FullClassDecl fcd, ArrayList<ClassDecl> children) {
-		if (fcd.classes() == null || fcd.classes().size() == 0) return;
-		for (ClassDecl child : fcd.classes()){
-			if (!children.contains(child)){
-				children.add(child);
-				if (child instanceof FullClassDecl){
-					collectChildren((FullClassDecl) child, children);
-				}
-			}
-		}
-	}
+//	private void collectChildren(FullClassDecl fcd, ArrayList<ClassDecl> children) {
+//		if (fcd.classes() == null || fcd.classes().size() == 0) return;
+//		for (ClassDecl child : fcd.classes()){
+//			if (!children.contains(child)){
+//				children.add(child);
+//				if (child instanceof FullClassDecl){
+//					collectChildren((FullClassDecl) child, children);
+//				}
+//			}
+//		}
+//	}
 
 	/**
 	 * Renders a class declaration. This includes a head, breadcrumbar, header, title, body content 
@@ -148,14 +182,15 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	 * @param fcd
 	 */
 	private void renderFullClassDecl(FullClassDecl fcd){
-		content.append(Generator.genTitle(fcd, this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()));
-		content.append(Generator.genInfo(fcd, true));
+		content.append(Generator.genTitle(fcd, this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath(), false));
+		content.append(Generator.genComment(fcd));
+		content.append(Generator.genInfo(fcd, false));
 		content.append(Generator.genImports(fcd));
 		content.append(Generator.genExtensions(fcd));
 		content.append(Generator.genClasses(fcd));
 		content.append(Generator.genComponents(fcd));
 		content.append(Generator.genEquations(fcd));
-		content.append(Generator.genRevisions(fcd, true));
+		content.append(Generator.genRevisions(fcd, false));
 	}
 
 	/**

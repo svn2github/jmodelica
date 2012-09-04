@@ -1,10 +1,8 @@
 package org.jmodelica.ide.documentation;
 
 public class Scripts {
-	private static final String N2 = "\n\t\t";
 	private static final String N3 = "\n\t\t\t";
-	private static final String N4 = "\n\t\t\t\t";
-	private static final String N5 = "\n\t\t\t\t\t";		
+	private static final String N4 = "\n\t\t\t\t";	
 	
 	public static final String PRE_INFO_EDIT =
 			N3 + "function preInfoEdit(){"+

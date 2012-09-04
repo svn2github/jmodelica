@@ -33,23 +33,6 @@ public class GenerateDocumentationAction extends Action{
 		Object elem = Util.getSelected(selectionProvider.getSelection());
 		return elem instanceof ASTNode<?>;
 	}
-
-
-	/**
-	 * <fcd.name()>.html [file]
-	 * 		<fcd.name()> files [folder]
-	 * 			images [folder]
-	 * 				<fcd1.name()>_icon.png [file]
-	 * 				<fcd2.name()>_icon.png [file]
-	 * 				...
-	 * 				<fcdn.name()>_icon.png [file]
-	 * 			src [folder]
-	 * 				<fcd1.name()>.html [file]
-	 * 				<fcd2.name()>.html [file]
-	 * 				...
-	 * 				<fcdn.name()>.html [file]
-	 * 			
-	 */
 	
 	@Override
 	public void run() {
