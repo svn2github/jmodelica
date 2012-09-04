@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
@@ -21,7 +22,9 @@ import org.eclipse.swt.browser.TitleEvent;
 import org.eclipse.swt.browser.TitleListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.ui.PlatformUI;
 import org.jmodelica.ide.documentation.commands.NavigationProvider;
+import org.jmodelica.ide.documentation.wizard.GenDocWizard;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.FullClassDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
@@ -86,7 +89,10 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 //	}
 	public void generateDocumentation(FullClassDecl fcd) {
 		//DocGenDialog dlg = new DocGenDialog(null);
-		new DocGenDialog(null, fcd, program, FOOTER);
+		//new DocGenDialog(null, fcd, program, FOOTER);
+        WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), new GenDocWizard(fcd, program, FOOTER));
+        dialog.create();
+        dialog.open();
 		
 		//new Dialog(fcd, program, FOOTER).run();
 		

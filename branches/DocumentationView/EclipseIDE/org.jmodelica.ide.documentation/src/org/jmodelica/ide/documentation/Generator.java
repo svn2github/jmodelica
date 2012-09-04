@@ -675,14 +675,14 @@ public class Generator {
 				String fileName;
 				ref = ref.replace("\\", "/");
 				if(ref.lastIndexOf("/") != -1){
-					fileName = ref.substring(ref.lastIndexOf("/"));
+					fileName = ref.substring(ref.lastIndexOf("/")+1);
 				}else{
 					fileName = ref;
 				}
-				String relativePath = path.replace(".","/") + fileName;
+				String relativePath = path.replace(".","/") + "/" + fileName;
 				copyFile(ref, rootPath + relativePath);
 				//create relative path in the offline docs.
-				imgMatcher.appendReplacement(imgSb, "<img src=\"../" + relativePath +"\" \\>");
+				imgMatcher.appendReplacement(imgSb, "<img src=\"" + fileName +"\" \\>");
 			}
 		}
 		imgMatcher.appendTail(imgSb);

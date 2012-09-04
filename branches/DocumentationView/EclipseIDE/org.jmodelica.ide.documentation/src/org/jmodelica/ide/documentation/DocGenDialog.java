@@ -30,6 +30,8 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import java.util.Random;
 
+import org.eclipse.jface.wizard.WizardDialog;
+import org.jmodelica.ide.documentation.wizard.GenDocWizard;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.FullClassDecl;
 import org.jmodelica.modelica.compiler.Program;
