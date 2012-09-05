@@ -669,7 +669,7 @@ int jmi_func_ad_delete(jmi_func_ad_t *jfa) {
 	free(jfa->dF_z_col);
 	free(jfa->dF_z_col_start_index);
 	free(jfa->dF_z_col_n_nz);
-	jmi_delete_simple_color_info(jfa->color_info);
+	jmi_delete_simple_color_info(&jfa->color_info);
 
 
 /*

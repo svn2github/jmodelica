@@ -944,10 +944,9 @@ int jmi_new_simple_color_info(jmi_simple_color_info_t** c_info, int n_cols, int 
 /**
  * \brief Deletes the contents of a jmi_simple_color_info struct
  *
- * @param c_info A jmi_color_info struct
- * @return Error code
+ * @param c_info_ptr A pointer to jmi_color_info struct
  */
-int jmi_delete_simple_color_info(jmi_simple_color_info_t *c_info);
+void jmi_delete_simple_color_info(jmi_simple_color_info_t **c_info_ptr);
 
 /**
  * \brief Allocates memory for the contents of a jmi_color_info struct

@@ -235,12 +235,16 @@ int jmi_delete(jmi_t* jmi){
 	int i;
 	if(jmi->dae != NULL) {
 		jmi_func_delete(jmi->dae->F);
-                jmi_func_delete(jmi->dae->R);
-                free(jmi->dae);
-                jmi->dae = 0;
+        jmi_func_delete(jmi->dae->R);
+        jmi_delete_simple_color_info(&jmi->color_info_A);
+        jmi_delete_simple_color_info(&jmi->color_info_B);
+        jmi_delete_simple_color_info(&jmi->color_info_C);
+        jmi_delete_simple_color_info(&jmi->color_info_D);
+        free(jmi->dae);
+        jmi->dae = 0;
 	}
 
-        jmi_delete_init(&(jmi->init));
+    jmi_delete_init(&(jmi->init));
 
 	if(jmi->opt != NULL) {
 		jmi_func_delete(jmi->opt->Ffdp);

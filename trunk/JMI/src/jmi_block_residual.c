@@ -63,10 +63,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 	b->n_nr = n_nr;
 	b->index = index ;
 	b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-    b->x_nom = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-    b->x_min = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-    b->x_max = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-    
+   
 	if (n_nr>0) {
 		b->x_nr = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	}
@@ -81,10 +78,6 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 	b->min = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->max = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->nominal = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-
-	b->F(jmi,b->min,b->res,JMI_BLOCK_MIN);
-	b->F(jmi,b->max,b->res,JMI_BLOCK_MAX);
-	b->F(jmi,b->nominal,b->res,JMI_BLOCK_NOMINAL);
 
     switch(solver) {
     case JMI_KINSOL_SOLVER: {
@@ -128,19 +121,19 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         int i;
         /* Initialize the work vectors */
         for(i=0; i < block->n; ++i) {
-            block->x_nom[i] = 1.0;
-            block->x_max[i] = BIG_REAL;
-            block->x_min[i] = -block->x_max[i];
+            block->nominal[i] = 1.0;
+            block->max[i] = BIG_REAL;
+            block->min[i] = -block->max[i];
         }
-        block->F(jmi,block->x_nom,block->res,JMI_BLOCK_NOMINAL);
-        block->F(jmi,block->x_min,block->res,JMI_BLOCK_MIN);
-        block->F(jmi,block->x_max,block->res,JMI_BLOCK_MAX);
+        block->F(jmi,block->nominal,block->res,JMI_BLOCK_NOMINAL);
+        block->F(jmi,block->min,block->res,JMI_BLOCK_MIN);
+        block->F(jmi,block->max,block->res,JMI_BLOCK_MAX);
         /* if the nominal is outside min-max -> fix it! */
         for(i=0; i < block->n; ++i) {
-            if(block->x_nom[i] > block->x_max[i])
-                block->x_nom[i] = block->x_max[i];
-            else if(block->x_nom[i] < block->x_min[i])
-                block->x_nom[i] = block->x_min[i];
+            if(block->nominal[i] > block->max[i])
+                block->nominal[i] = block->max[i];
+            else if(block->nominal[i] < block->min[i])
+                block->nominal[i] = block->min[i];
         }
         
 		block->F(jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
