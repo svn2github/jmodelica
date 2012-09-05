@@ -564,7 +564,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
 		  'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
-		m.initialize()
+		m.initialize(relativeTolerance=1e-11)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
 		assert n_errs ==0
 
@@ -575,7 +575,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
 		  'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
-		m.initialize()
+		m.initialize(relativeTolerance=1e-11)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
 		assert n_errs ==0
 
@@ -586,7 +586,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
 		  'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
-		m.initialize()
+		m.initialize(relativeTolerance=1e-11)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
 		assert n_errs ==0
 
@@ -597,7 +597,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
 		  'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
-		m.initialize()
+		m.initialize(relativeTolerance=1e-11)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
 		assert n_errs ==0
 
@@ -608,7 +608,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
 		  'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
-		m.initialize()
+		m.initialize(relativeTolerance=1e-11)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
 		assert n_errs ==0
 
@@ -619,7 +619,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
 		  'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
-		m.initialize()
+		m.initialize(relativeTolerance=1e-11)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
 		assert n_errs ==0		
 
@@ -632,7 +632,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
 			'generate_ode_jacobian':True,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
-		m.initialize()
+		m.initialize(relativeTolerance=1e-11)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
 		assert n_errs ==0
 
@@ -644,7 +644,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
 			'generate_ode_jacobian':True,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
-		m.initialize()
+		m.initialize(relativeTolerance=1e-11)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
 		assert n_errs ==0		
 		

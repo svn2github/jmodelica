@@ -721,7 +721,7 @@ equation
 	Real a(start=15);
 	output Real b(start=2);
 	equation
-		x = sin(x);
+		x-0.1 = sin(x);
 		0 = a+y;
 		der(y) = a+x;
 		der(b) = a+log(x*y);
@@ -828,8 +828,8 @@ equation
  end Unsolved_blocks6;
  
  model Unsolved_blocks_torn_1
-  Real x_1(start=1.29533105933);
-  output Real w_ode_1_1;
+  Real x_1(start=1.29533105933, nominal=1e-3);
+  output Real w_ode_1_1(nominal=1e-3);
   Real w_ode_1_2;
   input Real ur_1;
   input Real ur_2;
@@ -851,7 +851,7 @@ equation
 			output Real c;
 			output Real d;
 		algorithm
-			a := sin(x1);
+			a := sin(x1)+0.1;
 			b := cos(x1);
 			c := tan(x2);
 			d := sin(x3);
