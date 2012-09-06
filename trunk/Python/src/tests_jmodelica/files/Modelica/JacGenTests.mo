@@ -85,21 +85,9 @@ package JacGenTests
 	der(x3) = x3 ^ x1;
     y =   x3^x1;
   end JacTestPow;
+
   
   model JacTestAbs1
-    Real x1(start=0);
-    Real x2(start=5);
-	Real x3(start=-5);
-    input Real u;
-    output Real y;
-  equation
-    der(x1) = abs(x1);
-    der(x2) = abs(x2);
-	der(x3) = abs(x3);
-    y =   abs(x1);
-  end JacTestAbs1; 
-  
-  model JacTestAbs2
     Real x1(start=1);
     Real x2(start=5);
 	Real x3(start=-5);
@@ -107,27 +95,36 @@ package JacGenTests
     output Real y;
   equation
     der(x1) = abs(x1);
-    der(x2) = abs(x2);
-	der(x3) = abs(x3);
-    y =   abs(x1);
-  end JacTestAbs2;  
+    der(x2) = abs(-x2)*2;
+	der(x3) = -abs(x3);
+    y =   abs(x1*x2)+x3;
+  end JacTestAbs1;  
   
-  // TODO: incorporate these tests, the first one is fine, the other one fails.
-   model JacTestAbs2
-    Real x1(start=-2);
-    Real x2(start=3);
+  model JacTestMin
+    Real x1(start=1);
+    Real x2(start=5);
+	Real x3(start=-5);
+    input Real u;
+    output Real y;
   equation
-    0 = abs(x1) + x2;
-    der(x1) = abs(x2);
-  end JacTestAbs2;
+    der(x1) = min(x1,x2);
+    der(x2) = min(x1,x3);
+	der(x3) = min(x3,x2);
+    der(y) =   min(min(x1,x2),x3);
+  end JacTestMin;  
   
-    model JacTest2
-    Real x1(start=2);
-    Real x2(start=3);
+  model JacTestMax
+    Real x1(start=1);
+    Real x2(start=5);
+	Real x3(start=-5);
+    input Real u;
+    output Real y;
   equation
-    0 = x1 + abs(x2);
-    der(x1) = x2;
-  end JacTest2;
+    der(x1) = max(x1,x2);
+    der(x2) = max(x1,x3);
+	der(x3) = max(x3,x2);
+    y =   max(max(x1,x2),x3);
+  end JacTestMax;  
   
   model JacTestSqrt
     Real x1(start=0);

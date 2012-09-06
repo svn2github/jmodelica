@@ -19,7 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 /*
- * This class is used to generate AD code used when generating jacobians
+ * This aspect is used to generate AD code used when generating jacobians
  * for ODE and DAE systems and for blocks that require iteration. The functionality
  * in this class is called from CADGenerator that derives what is called from
  * the compiler options set by the user. 
@@ -152,6 +152,37 @@ aspect CADCodeGen {
 		return os.toString();
 	}
 	
+	/* Prints AD code for min and max expressions. Consistent with evaluation defined 
+	 * in jmi_common.c/h
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	public void FMinMaxExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		p.print(getX(),str,indent);
+		p.print(getY(),str,indent);
+		str.print(indent+adVarName());
+		str.print(" = jmi_" + builtInName() + "(");
+		str.print(getX().adVarName()); 
+		str.print(", ");
+		str.print(getY().adVarName());
+		str.print(");\n");
+		
+		if(builtInName()=="max"){
+			str.print(indent+"if(" + getX().adVarName() + " > " + getY().adVarName()+ ") {\n");
+			str.print(indent+indent+ adDerName()+" = " + getX().adDerName()+";\n");
+			str.print(indent+"} else {\n");
+			str.print(indent+indent+ adDerName()+" = " + getY().adDerName()+";\n");
+			str.print(indent+"}\n");
+		} else {
+			str.print(indent+"if(" + getX().adVarName() + " < " + getY().adVarName()+ ") {\n");
+			str.print(indent+indent+ adDerName()+" = " + getX().adDerName()+";\n");
+			str.print(indent+"} else {\n");
+			str.print(indent+indent+ adDerName()+" = " + getY().adDerName()+";\n");
+			str.print(indent+"}\n");
+		}
+	}
+
 	//Default implementation, use prettyPrint_C instead for literals instead. 
 	
 	public void FLitExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {}
@@ -644,15 +675,15 @@ aspect CADCodeGen {
 			
 			str.print("if(");
 			str.print(getFExp().adVarName());
-			str.print(" < 0){\n    ");
+			str.print(" >= 0){\n    ");
 			str.print(adDerName());
-			str.print(" = -");
+			str.print(" = ");
 			str.print(getFExp().adDerName());
 			str.print(";\n}");
 			
 			str.print("else {\n    ");
 			str.print(adDerName());
-			str.print(" = ");
+			str.print(" = -");
 			str.print(getFExp().adDerName());
 			str.print(";\n}\n");
 	}

@@ -103,11 +103,6 @@ class Test_FMI_Jaobians_functions:
 	def setUp(self):	
 		self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
 
-	"""
-	Fails in the check_jacobians test. This is not surprising however, since the abs function has en undefined derivative in the origin. 
-	The choice has been made to treat the derivative of abs as:
-	der(abs(x)) = -1 if x < 0 else 1, thus the finite difference will say that derivative is
-	zero at the origin and the AD-code that it's 1. 
 	@testattr(stddist = True)
 	def test_abs1(self):
 		cname = "JacGenTests.JacTestAbs1"
@@ -115,17 +110,26 @@ class Test_FMI_Jaobians_functions:
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
-		assert n_errs ==0 
-	"""
+		assert n_errs ==0
+
 	@testattr(stddist = True)
-	def test_abs2(self):
-		cname = "JacGenTests.JacTestAbs2"
+	def test_min(self):
+		cname = "JacGenTests.JacTestMin"
 		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
 		m = FMUModel2(fn)
 		m.set_debug_logging(True)
 		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
-		assert n_errs ==0 
+		assert n_errs ==0	
 
+	@testattr(stddist = True)
+	def test_max(self):
+		cname = "JacGenTests.JacTestMax"
+		fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+		m = FMUModel2(fn)
+		m.set_debug_logging(True)
+		Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+		assert n_errs ==0
+		
 	@testattr(stddist = True)
 	def test_sqrt(self):
 		cname = "JacGenTests.JacTestSqrt"

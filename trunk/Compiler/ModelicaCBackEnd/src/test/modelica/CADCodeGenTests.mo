@@ -539,6 +539,106 @@ d_0 = v_0 * ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * log(jmi_
 ")})));
 end CADpow;
 
+model CADmin
+	Real y;
+	Real x1(start=1.5);
+equation
+	y = min(x1,2);
+	x1 = -1;
+	
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CADCodeGenTestCase(
+			name="CADmin",
+			description="",
+			generate_ode_jacobian=true,
+			eliminate_alias_variables=false,
+			fmi_version=2.0,
+			generate_ode=true,
+			equation_sorting=true,
+			enable_tearing=false,
+			template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$,$CAD_functions$",
+			generatedCode="
+
+/******** Declarations *******/
+
+jmi_ad_var_t v_0;
+jmi_ad_var_t d_0;
+
+jmi_ad_var_t v_1;
+jmi_ad_var_t d_1;
+
+jmi_real_t** dz = jmi->dz;
+/*********** ODE section ***********/
+/*********** Real outputs **********/
+/*** Integer and boolean outputs ***/
+/********* Other variables *********/
+v_0 = -1;
+d_0 = -AD_WRAP_LITERAL(0);
+  _x1_1 = v_0;
+  (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] =d_0;
+  v_1 = jmi_min(_x1_1, AD_WRAP_LITERAL(2));
+  if(_x1_1 < AD_WRAP_LITERAL(2)) {
+    d_1 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+  } else {
+    d_1 = AD_WRAP_LITERAL(0);
+  }
+  _y_0 = v_1;
+  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_1;
+,,
+")})));
+end CADmin;
+
+model CADmax
+	Real y;
+	Real x1(start=1.5);
+equation
+	y = max(x1,2);
+	x1 = -1;
+
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CADCodeGenTestCase(
+			name="CADmax",
+			description="",
+			generate_ode_jacobian=true,
+			eliminate_alias_variables=false,
+			fmi_version=2.0,
+			generate_ode=true,
+			equation_sorting=true,
+			enable_tearing=false,
+			template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$,$CAD_functions$",
+			generatedCode="
+
+/******** Declarations *******/
+
+jmi_ad_var_t v_0;
+jmi_ad_var_t d_0;
+
+jmi_ad_var_t v_1;
+jmi_ad_var_t d_1;
+
+jmi_real_t** dz = jmi->dz;
+/*********** ODE section ***********/
+/*********** Real outputs **********/
+/*** Integer and boolean outputs ***/
+/********* Other variables *********/
+v_0 = -1;
+d_0 = -AD_WRAP_LITERAL(0);
+  _x1_1 = v_0;
+  (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] =d_0;
+  v_1 = jmi_max(_x1_1, AD_WRAP_LITERAL(2));
+  if(_x1_1 > AD_WRAP_LITERAL(2)) {
+    d_1 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+  } else {
+    d_1 = AD_WRAP_LITERAL(0);
+  }
+  _y_0 = v_1;
+  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_1;
+,,
+")})));
+end CADmax;
+
 model CADabs
 
 
@@ -549,30 +649,46 @@ equation
 	y = abs(x1);
 	x1 = -1;
 
-	annotation(__JModelica(UnitTesting(tests={
+
+	annotation(__JModelica(UnitTesting(tests={ 
 		CADCodeGenTestCase(
 			name="CADabs",
 			description="",
-			generate_dae_jacobian=true,
-			template="$C_DAE_equation_directional_derivative$",
+			generate_ode_jacobian=true,
+			eliminate_alias_variables=false,
+			fmi_version=2.0,
+			generate_ode=true,
+			equation_sorting=true,
+			enable_tearing=false,
+			template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$,$CAD_functions$",
 			generatedCode="
+
+/******** Declarations *******/
+
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 
 jmi_ad_var_t v_1;
 jmi_ad_var_t d_1;
-v_0 = jmi_abs(_x1_1);
-if(_x1_1 < 0){
-    d_0 = -(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+
+jmi_real_t** dz = jmi->dz;
+/*********** ODE section ***********/
+/*********** Real outputs **********/
+/*** Integer and boolean outputs ***/
+/********* Other variables *********/
+v_0 = -1;
+d_0 = -AD_WRAP_LITERAL(0);
+  _x1_1 = v_0;
+  (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] =d_0;
+v_1 = jmi_abs(_x1_1);
+if(_x1_1 >= 0){
+    d_1 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 }else {
-    d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+    d_1 = -(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 }
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-v_1 = -1;
-d_1 = -AD_WRAP_LITERAL(0);
-(*res)[1] = v_1 - _x1_1;
-(*dF)[1] = d_1 - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+  _y_0 = v_1;
+  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_1;
+,,
 ")})));
 end CADabs;
 
