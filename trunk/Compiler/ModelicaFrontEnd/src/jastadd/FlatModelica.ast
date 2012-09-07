@@ -121,7 +121,8 @@ abstract FVariable : FAbstractVariable ::= FVisibilityType
                                            <DerivedType>
                                            [BindingExp:FExp]
                                            [FStringComment]
-                                           FQName;
+                                           FQName
+                                           <ManualTearingVariable:boolean>;
 
 /**
  * Represents a set of attributes that can be used by several variables.

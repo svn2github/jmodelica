@@ -516,7 +516,7 @@ aspect Constructors {
 	 */
 	public FRealVariable.FRealVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
 	}
 	
 	/**
@@ -524,7 +524,7 @@ aspect Constructors {
 	 */
 	public FDerivativeVariable.FDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
 	}
 	
 	/**
@@ -532,7 +532,7 @@ aspect Constructors {
 	 */
 	public FDummyDerivativeVariable.FDummyDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
 	}
 	
 	/**
@@ -540,7 +540,7 @@ aspect Constructors {
 	 */
 	public FHDerivativeVariable.FHDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, int order) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, order);
 	}
 	
 	/**
@@ -548,7 +548,7 @@ aspect Constructors {
 	 */
 	public FHDummyDerivativeVariable.FHDummyDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, int order) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, order);
 	}
 	
 	/**
@@ -557,7 +557,7 @@ aspect Constructors {
 	public FPreRealVariable.FPreRealVariable(FRealVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualTearingVariable());
 	}
 	
 	/**
@@ -565,7 +565,7 @@ aspect Constructors {
 	 */
 	public FIntegerVariable.FIntegerVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
 	}
 	
 	/**
@@ -574,7 +574,7 @@ aspect Constructors {
 	public FPreIntegerVariable.FPreIntegerVariable(FIntegerVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualTearingVariable());
 	}
 	
 	/**
@@ -582,7 +582,7 @@ aspect Constructors {
 	 */
 	public FEnumVariable.FEnumVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, FQName enumName) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, enumName);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, enumName);
 	}
 	
 	/**
@@ -591,7 +591,7 @@ aspect Constructors {
 	public FPreEnumVariable.FPreEnumVariable(FEnumVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getEnum().fullCopy());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualTearingVariable(), fv.getEnum().fullCopy());
 	}
 	
 	/**
@@ -599,7 +599,7 @@ aspect Constructors {
 	 */
 	public FBooleanVariable.FBooleanVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
 	}
 	
 	/**
@@ -608,7 +608,7 @@ aspect Constructors {
 	public FPreBooleanVariable.FPreBooleanVariable(FBooleanVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualTearingVariable());
 	}
 	
 	/**
@@ -616,7 +616,7 @@ aspect Constructors {
 	 */
 	public FStringVariable.FStringVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
 	}
 	
 	/**
@@ -625,7 +625,7 @@ aspect Constructors {
 	public FPreStringVariable.FPreStringVariable(FStringVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualTearingVariable());
 	}
 	
 	/**
@@ -633,7 +633,7 @@ aspect Constructors {
 	 */
 	public FRecordVariable.FRecordVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, FQName record) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, record);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, record);
 	}
 
 	

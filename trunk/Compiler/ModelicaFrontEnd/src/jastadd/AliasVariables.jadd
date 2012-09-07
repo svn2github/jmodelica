@@ -255,6 +255,33 @@ aspect AliasVariables {
 			 *  set, then modified, then reinserted.
 			 */
 			
+			/*
+			 * The algorithm has two stages, a detection phase and a 
+			 * update phase.
+			 * In the detection phase the algorithm detects what should
+			 * be done, the possibillities are:
+			 *   - Merge two alias sets if both variables had previously
+			 *     known aliases.
+			 *   - Addition of one variable if the other variables had
+			 *     previously known aliases.
+			 *   - Creation of new alias set if none of the variables
+			 *     had previously known aliases.
+			 * The result of the detection phase is stored in the
+			 * temporary variables resultAS, mergeAS, mergeAlias and
+			 * negMergeAS.
+			 * 
+			 * In the update phase the correct action is taken depening
+			 * on what variables are set:
+			 *   - If resultAS and mergeAS is set, then all aliases in
+			 *     mergeAS is added into resultAS, if negMergeAS is set
+			 *     then the aliases are negated before they are added
+			 *     to resultAS.
+			 *   - If resultAS and mergeAlias is set, then mergeAlias
+			 *     is added to resultAS.
+			 *   - If only resultAS is set, the two variables are added
+			 *     to the new alias set.
+			 */
+			
 			// Create all combinations of alias variables, negated and 
 			// non-negated
 			LinkedHashSet<AliasVariable> as1 = getAliasSet(alias1);
@@ -262,158 +289,105 @@ aspect AliasVariables {
 			LinkedHashSet<AliasVariable> as1n = getAliasSet(alias1n);
 			LinkedHashSet<AliasVariable> as2n = getAliasSet(alias2n);
 			
+			LinkedHashSet<AliasVariable> resultAS;
+			LinkedHashSet<AliasVariable> mergeAS = null;
+			AliasVariable mergeAlias = null;
+			boolean negMergeAS = false;
+			
 			// Go through all the cases
 			if (as1!=null && as2!=null) { // -> as1n==null & as2n==null
-				if (as1==as2 && neg) {
-					aliasErrorFlag = true;
-					aliasErrorMessage = "Alias error: trying to add the " +
-							"negated alias pair (" + fv1.name() + ",-" + 
-							fv2.name() + ") to the alias set " + 
-							printAliasSet(as1);
-					return;
-				}
-				// Merge connection sets
-				if (neg) {
-					aliasSets.remove(as1);
-					for (AliasVariable a : as2) {
-						as1.add(new AliasVariable(a.getFVariable(),
-								!a.isNegated()));
-					}
-					aliasSets.add(as1);
-					aliasSets.remove(as2);
-				} else { 
-					aliasSets.remove(as1);
-					as1.addAll(as2);
-					aliasSets.add(as1);
-					aliasSets.remove(as2);
-				}				
+				resultAS = as1;
+				mergeAS = as2;
+				negMergeAS = neg;
 			} else if (as1!=null && as2n!=null) { // -> as1n==null & as2==null
-				if (as1==as2n && !neg) {
-					aliasErrorFlag = true;
-					aliasErrorMessage = "Alias error: trying to add the " +
-					"alias pair (" + fv1.name() + "," + 
-					fv2.name() + ") to the alias set " + 
-					printAliasSet(as1);
-					return;
-				}
-				// Merge connection sets
-				if (neg) {
-					aliasSets.remove(as1);
-					as1.addAll(as2n);
-					aliasSets.add(as1);
-					aliasSets.remove(as2n);					
-				} else { 
-					aliasSets.remove(as1);
-					for (AliasVariable a : as2n) {
-						as1.add(new AliasVariable(a.getFVariable(),
-								!a.isNegated()));
-					}
-					aliasSets.add(as1);
-					aliasSets.remove(as2n);
-				}				
+				resultAS = as1;
+				mergeAS = as2n;
+				negMergeAS = !neg;
 			} else if (as1n!=null && as2!=null) { // -> as1==null & as2n==null
-				if (as1n==as2 && !neg) {
-					aliasErrorFlag = true;
-					aliasErrorFlag = true;
-					aliasErrorMessage = "Alias error: trying to add the " +
-					"alias pair (" + fv1.name() + "," + 
-					fv2.name() + ") to the alias set " + 
-					printAliasSet(as1n);
-					return;
-				}					
-				if (neg) {
-					aliasSets.remove(as1n);
-					as1n.addAll(as2);
-					aliasSets.add(as1n);
-					aliasSets.remove(as2);					
-				} else { 
-					aliasSets.remove(as1n);
-					for (AliasVariable a : as2) {
-						as1n.add(new AliasVariable(a.getFVariable(),
-								!a.isNegated()));
-					}
-					aliasSets.add(as1n);
-					aliasSets.remove(as2);
-				}				
-
+				resultAS = as1n;
+				mergeAS = as2;
+				negMergeAS = !neg;
 			} else if (as1n!=null && as2n!=null) { // -> as1==null & as2==null
-				if (as1n==as2n && neg) {
+				resultAS = as1n;
+				mergeAS = as2n;
+				negMergeAS = neg;
+			} else if (as1==null && as1n==null && as2!=null) { // -> as2n==null
+				resultAS = as2;
+				mergeAlias = neg ? alias1n : alias1;
+			} else if (as1==null && as1n==null && as2n!=null) { // -> as2==null
+				resultAS = as2n;
+				mergeAlias = neg ? alias1 : alias1n;
+			} else if (as2==null && as2n==null && as1!=null) { // -> as1n==null
+				resultAS = as1;
+				mergeAlias = neg ? alias2n : alias2;
+			} else if (as2==null && as2n==null && as1n!=null) { // -> as1==null
+				resultAS = as1n;
+				mergeAlias = neg ? alias2 : alias2n;
+			} else {
+				resultAS = new LinkedHashSet<AliasVariable>();
+			}
+			
+			// Update part begins here
+			
+			if (mergeAS != null) { // Merge
+				if (resultAS == mergeAS && negMergeAS) {
 					aliasErrorFlag = true;
-					aliasErrorFlag = true;
-					aliasErrorMessage = "Alias error: trying to add the " +
-					"negated alias pair (" + fv1.name() + ",-" + 
-					fv2.name() + ") to the alias set " + 
-					printAliasSet(as1n);
+					if (neg)
+						aliasErrorMessage = "Alias error: trying to add the " +
+								"negated alias pair (" + fv1.name() + ",-" + 
+								fv2.name() + ") to the alias set " + 
+								printAliasSet(resultAS);
+					else
+						aliasErrorMessage = "Alias error: trying to add the " +
+								(neg ? "negated " : "") +
+								"alias pair (" + fv1.name() + "," + 
+								fv2.name() + ") to the alias set " + 
+								printAliasSet(resultAS);
 					return;
 				}
-				if (neg) {
-					aliasSets.remove(as1n);
-					for (AliasVariable a : as2n) {
-						as1n.add(new AliasVariable(a.getFVariable(),
+				aliasSets.remove(mergeAS);
+				aliasSets.remove(resultAS);
+				if (negMergeAS) {
+					for (AliasVariable a : mergeAS) {
+						resultAS.add(new AliasVariable(a.getFVariable(),
 								!a.isNegated()));
 					}
-					aliasSets.add(as1n);
-					aliasSets.remove(as2n);
 				} else { 
-					aliasSets.remove(as1n);
-					as1n.addAll(as2n);
-					aliasSets.add(as1n);
-					aliasSets.remove(as2n);					
+					resultAS.addAll(mergeAS);
 				}				
-
-			} else if (as1==null && as1n==null && as2!=null) { // -> as2n==null
+				aliasSets.add(resultAS);
+			} else if (mergeAlias != null) { // Add alias to set
+				aliasSets.remove(resultAS);
+				resultAS.add(mergeAlias);
+				aliasSets.add(resultAS);
+			} else { // New alias set
 				if (neg) {
-					aliasSets.remove(as2);
-					as2.add(alias1n);
-					aliasSets.add(as2);
+					resultAS.add(alias1);
+					resultAS.add(alias2n);
 				} else {
-					aliasSets.remove(as2);
-					as2.add(alias1);
-					aliasSets.add(as2);
+					resultAS.add(alias1);
+					resultAS.add(alias2);
 				}
-			} else if (as1==null && as1n==null && as2n!=null) { // -> as2==null
-				if (neg) {
-					aliasSets.remove(as2n);
-					as2n.add(alias1);
-					aliasSets.add(as2n);
-				} else {
-					aliasSets.remove(as2n);
-					as2n.add(alias1n);
-					aliasSets.add(as2n);
-				}				
-			} else if (as2==null && as2n==null && as1!=null) { // -> as1n==null
-				if (neg) {
-					aliasSets.remove(as1);
-					as1.add(alias2n);
-					aliasSets.add(as1);
-				} else {
-					aliasSets.remove(as1);
-					as1.add(alias2);
-					aliasSets.add(as1);
-				}
-			} else if (as2==null && as2n==null && as1n!=null) { // -> as1==null
-				if (neg) {
-					aliasSets.remove(as1n);
-					as1n.add(alias2);
-					aliasSets.add(as1n);
-				} else {
-					aliasSets.remove(as1n);
-					as1n.add(alias2n);
-					aliasSets.add(as1n);
-				}				
-			} else {
-				LinkedHashSet<AliasVariable> as = 
-					new LinkedHashSet<AliasVariable>();
-				if (neg) {
-					as.add(alias1);
-					as.add(alias2n);
-				} else {
-					as.add(alias1);
-					as.add(alias2);
-				}
-				aliasSets.add(as);
+				aliasSets.add(resultAS);
 			}
-			//log.debug(">>" + printAliasSets());
+			
+			checkManualTearing(resultAS);
+		}
+		
+		public void checkManualTearing(Set<AliasVariable> aliasSet) {
+			boolean allManual = true;
+			boolean anyManual = false;
+			for (AliasVariable var : aliasSet) {
+				if (var.getFVariable().getManualTearingVariable())
+					anyManual = true;
+				else
+					allManual = false;
+			}
+			if (anyManual && !allManual) {
+				for (AliasVariable var : aliasSet) {
+					var.getFVariable().setManualTearingVariable(true);
+				}
+			}
 		}
 		
 		public String printAliasSet(LinkedHashSet<AliasVariable> aliasSet) {

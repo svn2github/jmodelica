@@ -1936,6 +1936,18 @@ aspect TransformCanonical {
 						}
 					}
 					if (tearVar == null) {
+						for (Eq eqn : block) {
+							for (Var var : eqn.getVariables()) {
+								if (var.getVariable().getManualTearingVariable()) {
+									tearVar = var;
+									break;
+								}
+							}
+							if (tearVar != null)
+								break;
+						}
+					}
+					if (tearVar == null) {
 						tearVar = e.getMatching();
 					} else if (e.getMatching() != tearVar) {
 						BiPGraph newGraph = new BiPGraph(this, "", "");
@@ -3071,7 +3083,9 @@ aspect TransformCanonical {
 	 * as alias equations and an AliasPair object is returned.
 	 */
 	public AliasPair FEquation.aliasVariables() {
-		AliasPair res = aliasVariables(getLeft(), getRight(), 1);
+		AliasPair res = null;
+		if (!hasResidues()) // This equation should not be alias-removed if it is marked as residue!
+			res = aliasVariables(getLeft(), getRight(), 1);
 		aliasClassified = true;
 		classifiedAsAlias = res != null;
 		return res;

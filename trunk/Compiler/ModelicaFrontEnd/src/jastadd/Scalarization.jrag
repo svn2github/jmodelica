@@ -200,6 +200,8 @@ aspect Scalarization {
 		name.scalarized = true;
 		fv.setFQName(name);
 
+		fv.setManualTearingVariable(getManualTearingVariable());
+
 		return fv;
 	}
 	

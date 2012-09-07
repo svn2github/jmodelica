@@ -697,6 +697,9 @@ aspect Flattening {
 				
 		fv.setFQName(getFQName());
 		
+		if (annotation().forPath("__JModelica/tearVariable").exists())
+			fv.setManualTearingVariable(true);
+		
 		return fv;
 	}
 	
