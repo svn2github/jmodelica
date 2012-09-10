@@ -906,6 +906,11 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 			}
 			*/
 			/* Evaluate directional derivative */
+			if (i==0) {
+				jmi->cached_block_jacobians = 0;
+			} else {
+				jmi->cached_block_jacobians = 1;
+			}
 			jmi->dae->ode_derivatives_dir_der(jmi);
 			/* Extract Jacobian values */
 			for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {

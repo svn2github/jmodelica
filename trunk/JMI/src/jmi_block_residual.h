@@ -82,6 +82,24 @@ typedef int (*jmi_block_dir_der_func_t)(jmi_t* jmi, jmi_real_t* x,
 typedef int (*jmi_block_residual_solve_func_t)(jmi_block_residual_t* block);
 
 /**
+ * \brief Compute the block Jacobian for the solver
+ *
+ * @param block A jmi_block_residual_t struct.
+ * @param jacobian A vector that upon function exit contains the Jacobian in column major form.
+ * @return Error code.
+ */
+typedef int (*jmi_block_residual_jacobian_func_t)(jmi_block_residual_t* block, jmi_real_t* jacobian);
+
+/**
+ * \brief Compute the LU factorization of the block Jacobian for the solver
+ *
+ * @param block A jmi_block_residual_t struct.
+ * @param jacobian A vector that upon function exit contains the LU factorization of the Jacobian in column major form.
+ * @return Error code.
+ */
+typedef int (*jmi_block_residual_jacobian_factorization_func_t)(jmi_block_residual_t* block, jmi_real_t* factorization);
+
+/**
  * \brief A equation block solver destructor signature.
  *
  * @param block A jmi_block_residual_t struct.
@@ -115,6 +133,8 @@ struct jmi_block_residual_t {
     void * solver;
     jmi_block_residual_solve_func_t solve;
     jmi_block_residual_delete_func_t delete_solver;
+    jmi_block_residual_jacobian_func_t evaluate_jacobian;
+    jmi_block_residual_jacobian_factorization_func_t evaluate_jacobian_factorization;
     
     int init;			   /**< \brief A flag for initialization */
     

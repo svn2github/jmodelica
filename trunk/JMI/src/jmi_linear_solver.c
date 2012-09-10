@@ -35,6 +35,7 @@ int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_residual_t
     
     /* Initialize work vectors.*/
 	solver->factorization = (jmi_real_t*)calloc(n_x*n_x,sizeof(jmi_real_t));
+	solver->jacobian = (jmi_real_t*)calloc(n_x*n_x,sizeof(jmi_real_t));
 	solver->ipiv = (int*)calloc(n_x,sizeof(int));
 
     *solver_ptr = solver;
@@ -55,6 +56,7 @@ int jmi_linear_solver_solve(jmi_block_residual_t * block){
 
     	/*printf("** Computing factorization in jmi_linear_solver_solve for block %d\n",block->index);*/
     	block->F(jmi,NULL,solver->factorization,JMI_BLOCK_EVALUATE_JACOBIAN);
+
 /*    	printf("Jacobian: \n");
     	for (i=0;i<n_x;i++) {
     		for (j=0;j<n_x;j++) {
@@ -95,10 +97,44 @@ int jmi_linear_solver_solve(jmi_block_residual_t * block){
     return info==0? 0: -1;
 }
 
+int jmi_linear_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian) {
+    jmi_linear_solver_t* solver = block->solver;
+    jmi_t * jmi = block->jmi;
+	int i;
+    block->F(jmi,NULL,jacobian,JMI_BLOCK_EVALUATE_JACOBIAN);
+	for (i=0;i<block->n*block->n;i++) {
+		jacobian[i] = -jacobian[i];
+	}
+	return 0;
+}
+
+int jmi_linear_solver_evaluate_jacobian_factorization(jmi_block_residual_t* block, jmi_real_t* factorization) {
+    jmi_linear_solver_t* solver = block->solver;
+    jmi_t * jmi = block->jmi;
+	int i,j;
+	for (i=0;i<block->n*block->n;i++) {
+		factorization[i] = solver->factorization[i];
+	}
+
+	/*
+	for (i=0;i<block->n;i++) {
+		for (j=0;j<block->n;j++) {
+			if (i<j) {
+				factorization[i + block->n*j] = solver->factorization[i + block->n*j];
+			} else {
+				factorization[i + block->n*j] = solver->factorization[i + block->n*j];
+			}
+		}
+	}*/
+	return 0;
+}
+
+
 void jmi_linear_solver_delete(jmi_block_residual_t* block) {
     jmi_linear_solver_t* solver = block->solver;
     free(solver->ipiv);
     free(solver->factorization);
+    free(solver->jacobian);
     free(solver);
     block->solver = 0;
 }

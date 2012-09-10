@@ -85,6 +85,8 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
         flag = jmi_kinsol_solver_new(&solver, b);
         b->solver = solver;
         b->solve = jmi_kinsol_solver_solve;
+        b->evaluate_jacobian = jmi_kinsol_solver_evaluate_jacobian;
+        b->evaluate_jacobian_factorization = jmi_kinsol_solver_evaluate_jacobian_factorization;
         b->delete_solver = jmi_kinsol_solver_delete;
     }
         break;
@@ -101,6 +103,8 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     	flag = jmi_linear_solver_new(&solver, b);
     	b->solver = solver;
         b->solve = jmi_linear_solver_solve;
+        b->evaluate_jacobian = jmi_linear_solver_evaluate_jacobian;
+        b->evaluate_jacobian_factorization = jmi_linear_solver_evaluate_jacobian_factorization;
         b->delete_solver = jmi_linear_solver_delete;
     }
         break;
@@ -188,6 +192,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
 int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_block){
 	int i;
 	int j;
+    char trans;
 	int INFO;
 	int n_x;
 	int nrhs;
@@ -216,18 +221,20 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
   	ef |= current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);
 
     /* Now we evaluate the system matrix of the linear system. */
-    for(i = 0; i < n_x; i++){
-    	current_block->dx[i] = 1;
-    	ef |= current_block->dF(current_block->jmi,current_block->x,current_block->dx,current_block->res,current_block->dres,JMI_BLOCK_EVALUATE);
-    	for(j = 0; j < n_x; j++){
-  			current_block->jac[i*n_x+j] = current_block->dres[j];
-    	}
-    	current_block->dx[i] = 0;
+  	if (!current_block->jmi->cached_block_jacobians==1) {
+  		/* Evaluate Jacobian */
+  		current_block->evaluate_jacobian(current_block, current_block->jac);
+  		/* Factorize Jacobian */
+  		dgetrf_(&n_x, &n_x, current_block->jac, &n_x, current_block->ipiv, &INFO);
   	}
 
-    /* Solve linear equation system to get dz_i for the block */
- 	dgesv_( &n_x, &nrhs, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO );	
-    /* Write back results into the global dz vector. */
+	trans = 'N'; /* No transposition */
+	i = 1; /* One rhs to solve for */
+
+	/* Perform a back-solve */
+	dgetrs_(&trans, &n_x, &i, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO);
+
+	/* Write back results into the global dz vector. */
   	ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);
 
   	return ef;

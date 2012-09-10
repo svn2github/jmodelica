@@ -46,11 +46,16 @@ int jmi_linear_solver_new(jmi_linear_solver_t** solver, jmi_block_residual_t* bl
 
 int jmi_linear_solver_solve(jmi_block_residual_t* block);
 
+int jmi_linear_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian);
+
+int jmi_linear_solver_evaluate_jacobian_factorization(jmi_block_residual_t* block, jmi_real_t* factorization);
+
 void jmi_linear_solver_delete(jmi_block_residual_t* block);
 
 struct jmi_linear_solver_t {
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
     jmi_real_t* factorization;      /**< \brief Matrix for storing the Jacobian factorization */
+    jmi_real_t* jacobian;      /**< \brief Matrix for storing the Jacobian */
     int cached_jacobian;          /**< \brief This flag indicates weather the Jacobian needs to be refactorized */
 };
 

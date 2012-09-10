@@ -359,7 +359,6 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t
     return flag;
 }
 
-
 int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     int flag;
     int i;
@@ -483,6 +482,42 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     block->nb_iters += nniters;
     block->nb_jevals += njevals ;
     
+    return 0;
+}
+
+int jmi_kinsol_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian) {
+    int i,j;
+    int n_x;
+    int ef;
+    n_x = block->n;
+
+	for(i = 0; i < n_x; i++){
+		block->dx[i] = 1;
+		ef |= block->dF(block->jmi,block->x,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE);
+		for(j = 0; j < n_x; j++){
+			jacobian[i*n_x+j] = block->dres[j];
+		}
+		block->dx[i] = 0;
+	}
+
+    return 0;
+}
+
+int jmi_kinsol_solver_evaluate_jacobian_factorization(jmi_block_residual_t* block, jmi_real_t* factorization) {
+    int i,j;
+    int n_x;
+    int ef;
+    n_x = block->n;
+/*
+	for(i = 0; i < n_x; i++){
+		block->dx[i] = 1;
+		ef |= block->dF(block->jmi,block->x,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE);
+		for(j = 0; j < n_x; j++){
+			jacobian[i*n_x+j] = block->dres[j];
+		}
+		block->dx[i] = 0;
+	}
+*/
     return 0;
 }
 

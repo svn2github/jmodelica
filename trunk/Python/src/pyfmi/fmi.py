@@ -2017,7 +2017,7 @@ class FMUModel2(FMUModel):
         if status != 0:
             raise FMUException('Failed to evaluate the directional derivative.')
 
-    def check_jacobians(self, delta_abs=1e-2, delta_rel=1e-6, tol=1e-3, spar_tol=1e-14, 
+    def check_jacobians(self, delta_abs=1e-2, delta_rel=1e-6, tol=1e-3, spar_tol=1e-9, 
                         plot_sparsity_check=False,suppress_warnings=False):
         """
         Check if the Jacobians are correct by means of finite differences.

@@ -52,6 +52,10 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver, jmi_block_residual_t* bl
 
 int jmi_kinsol_solver_solve(jmi_block_residual_t* block);
 
+int jmi_kinsol_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian);
+
+int jmi_kinsol_solver_evaluate_jacobian_factorization(jmi_block_residual_t* block, jmi_real_t* factorization);
+
 void jmi_kinsol_solver_delete(jmi_block_residual_t* block);
 
 struct jmi_kinsol_solver_t {
