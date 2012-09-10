@@ -6860,4 +6860,37 @@ Algebraic real variables:
 ")})));
 end VarDependencyTest2;
 
+model StringFuncTest
+  function f
+    input String s;
+    output String t;
+  algorithm
+   t := s;
+  end f;
+
+  parameter String p1 = f("a");
+  parameter String p2 = "a";
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StringFuncTest",
+			description="Test that string parameters and string parameters goes through front-end.",
+			flatModel="
+fclass TransformCanonicalTests.StringFuncTest
+ parameter String p1 = TransformCanonicalTests.StringFuncTest.f(\"a\") /* \"a\" */;
+ parameter String p2 = \"a\" /* \"a\" */;
+public
+ function TransformCanonicalTests.StringFuncTest.f
+  input String s;
+  output String t;
+ algorithm
+  t := s;
+  return;
+ end TransformCanonicalTests.StringFuncTest.f;
+
+end TransformCanonicalTests.StringFuncTest;
+")})));
+
+end StringFuncTest;
+
 end TransformCanonicalTests;

@@ -2070,6 +2070,10 @@ aspect CCodeGen {
 		str.print(";\n");
 	}
 	
+	public void FStringVariable.genStartValue_C(String indent, PrintStream str) {
+		// Skip string variables
+	}
+	
 	public void BLT.genOdeDerivativeBlocks(PrintStream str) {
 		int block_counter = 0;
 		for (AbstractEquationBlock block : this) {
