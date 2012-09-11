@@ -3,6 +3,7 @@ import org.jmodelica.util.FormattingItem;
 import org.jmodelica.util.EmptyFormattingItem;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import beaver.Symbol;
 
 aspect FormattedPrint {
 	/**

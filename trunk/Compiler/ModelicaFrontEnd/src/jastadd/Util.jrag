@@ -2477,7 +2477,7 @@ aspect GeneralHelpers {
 	}
 
 	/**
-	 * \brief Creates a human-readable memory size string (e.g. 2.34 kB).
+	 * Create a human-readable memory size string (e.g. 2.34 kB).
 	 * 
 	 * @param mem  size to format, in bytes. May be negative.
 	 */
@@ -2487,17 +2487,42 @@ aspect GeneralHelpers {
 		for (; i < 4 && scaledMem >= 1000.0; i++)
 			scaledMem /= 1024.0;
 		StringBuilder buf = new StringBuilder();
-		if (mem < 0)
-			buf.append('-');
-		if (i == 0)
+		if (i == 0) {
 			buf.append(mem);
-		else
+		} else {
+			if (mem < 0)
+				buf.append('-');
 			buf.append(roundFriendly(scaledMem));
+		}
 		buf.append(memUnits[i]);
 		return buf.toString();
+	}
+
+	/**
+	 * Parse a human-readable memory size string (e.g. 2.34 kB).
+	 * 
+	 * @param str  string to parse
+	 * @return  the amount of memory described by the string
+	 */
+	public static long ASTNode.parseMem(String str) {
+		Matcher m = memPattern.matcher(str);
+		if (m.matches()) {
+			double val = Double.parseDouble(m.group(1));
+			String suff = m.group(4);
+			if (suff != null && !suff.isEmpty()) {
+				char sc = Character.toLowerCase(suff.charAt(0));
+				for (int i = 0; i < memUnits.length && Character.toLowerCase(memUnits[i].charAt(1)) != sc; i++)
+					val *= 1024.0;
+			}
+			if (val < Long.MAX_VALUE && val > Long.MIN_VALUE)
+				return (long) val;
+		}
+		throw new IllegalArgumentException(str);
 	}
 	
 	private static final String[] ASTNode.memUnits = { 
 		" B", " kB", " MB", " GB", " TB" , " PB" , " EB" };
+	private static final Pattern ASTNode.memPattern = 
+			Pattern.compile("([0-9]+(\\.[0-9]*)?)(([kKmMgGtTpPeE])?[bB]?)?");
 	
 }

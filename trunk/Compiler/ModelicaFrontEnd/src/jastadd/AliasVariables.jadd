@@ -509,11 +509,11 @@ aspect AliasVariables {
 		 * @return True if o is equal to the alias, otherwise false.
 		 */
 		public boolean equals(Object o) {
-			
+			if (!(o instanceof AliasVariable))
+				return false;
 			AliasVariable alias = (AliasVariable)o;
 			return (getFVariable().name().equals(alias.getFVariable().name())) &
 			       (isNegated()==alias.isNegated());
-		
 		}
 
 		/**

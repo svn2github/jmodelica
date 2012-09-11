@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
@@ -24,8 +25,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
-import beaver.Symbol;
 
 aspect LightProfiling {
 	
@@ -45,7 +46,7 @@ aspect LightProfiling {
 	
 	public class StepInfo {
 		
-		public static final boolean GC_BEFORE_MEM = false;
+		public static boolean GC_BEFORE_MEM = false;
 		
 		public static final Class<? extends InfoItem> TIME = TimeItem.class;
 		public static final Class<? extends InfoItem> MEMORY_CHANGE = MemoryChangeItem.class;
@@ -247,11 +248,11 @@ aspect LightProfiling {
 			}
 			
 			public String toString() {
-				return toString(endVal - beginVal);
+				return toString(endVal - beginVal, endVal);
 			}
 			
 			public abstract long state();
-			public abstract String toString(long diff);
+			public abstract String toString(long diff, long endVal);
 		}
 		
 		public static class TimeItem extends StateDifferenceInfoItem {
@@ -259,7 +260,7 @@ aspect LightProfiling {
 				return System.currentTimeMillis();
 			}
 			
-			public String toString(long diff) {
+			public String toString(long diff, long endVal) {
 				return (Math.round(diff / 10.0) / 100.0) + " s";
 			}
 		}
@@ -291,8 +292,8 @@ aspect LightProfiling {
 				} catch (Exception e) {}
 			}
 			
-			public String toString(long diff) {
-				return ASTNode.formatMem(diff);
+			public String toString(long diff, long endVal) {
+				return ASTNode.formatMem(diff) + " (" + ASTNode.formatMem(endVal) + " total)";
 			}
 		}
 		
@@ -301,6 +302,77 @@ aspect LightProfiling {
 }
 
 aspect MemoryUse {
+	
+	private static Map<Class,Counter> ASTNode.buildNodeCountMap = null;
+	
+	/**
+	 * Output a list of the number of instances of each node class.
+	 */
+	public static void ASTNode.dumpNodeCount(String file) 
+			throws FileNotFoundException {
+		ArrayList<Counter> list = new ArrayList<Counter>();
+		list.addAll(buildNodeCountMap.values());
+		Collections.sort(list);
+		PrintStream out = new PrintStream(file);
+		for (Counter c : list)
+			out.println(c);
+		out.close();
+	}
+	
+	public void ASTNode.buildNodeCount() {
+		if (buildNodeCountMap == null)
+			buildNodeCountMap = new HashMap<Class,Counter>();
+		buildNodeCount(buildNodeCountMap);
+	}
+	
+	private void ASTNode.buildNodeCount(Map<Class,Counter> map) {
+		addToNodeCount(map, getClass());
+		
+		if (children != null)
+			for (int i = children.length -1; i >= 0; i--) 
+				if (children[i] != null)
+					children[i].buildNodeCount(map);
+	}
+	
+	private void ASTNode.addToNodeCount(Map<Class,Counter> map, Class cls) {
+		if (map.containsKey(cls))
+			map.get(cls).inc();
+		else
+			map.put(cls, new Counter(cls.getSimpleName()));
+		if (cls != ASTNode.class)
+			addToNodeCount(map, cls.getSuperclass());
+	}
+	
+	public class ASTNode {
+		public static class Counter implements Comparable<Counter> {
+			private int n;
+			private String s;
+			
+			private static int l = 0;
+			private static String fmt = null;
+			
+			public Counter(String name) {
+				s = name;
+				n = 1;
+				if (s.length() > l)
+					l = s.length();
+			}
+			
+			public void inc() {
+				n++;
+			}
+			
+			public int compareTo(Counter c) {
+				return c.n - n;
+			}
+			
+			public String toString() {
+				if (fmt == null)
+					fmt = "%-" + l + "s : %d";
+				return String.format(fmt, s, n);
+			}
+		}
+	}
 	
 	/**
 	 * \brief Output a view of an AST, showing the classname and approximate memory footprint 
@@ -436,137 +508,6 @@ aspect MemoryUse {
 	eq InstExtends.extraMemoryUseInfo()       = " extending \"" + getClassName().name() + "\"";
 
 	/**
-	 * \brief Counts the number of ASTNodes of each type created.
-	 * 
-	 * Activated by changing the superclass of ASTNode to ProfilingNode.
-	 */
-	public class ProfilingNode extends Symbol {
-
-		private static int objects = 0;
-		private static HashMap<String, Counter> names = new HashMap<String, Counter>();
-
-		/**
-		 * \brief If set to <code>true</code>, each instance will be counted as an instance each of 
-		 *        every super class.
-		 */
-		public static boolean COUNT_SUPER = true;
-	    
-		public ProfilingNode() {
-			super();
-			objects++;
-			count(getClass());
-		}
-		
-		private static void count(Class type) {
-			String name = type.getSimpleName();
-			if (names.containsKey(name)) 
-				names.get(name).n++;
-			else
-				names.put(name, new Counter(type));
-			
-			if (COUNT_SUPER && !name.equals("ASTNode"))
-				count(type.getSuperclass());
-		}
-
-		private static class Counter {
-			
-			public static int total;
-			
-			public int n = 1;
-			public Class type;
-			
-			public Counter(Class t) {
-				type = t;
-			}
-			
-			public String toString() {
-				String size = ASTNode.formatMem(Profiler.getTotalShellSize(type) * n);
-				return n + " (" + ASTNode.roundFriendly(n * 100.0 / total) + "%, " + size + ")";
-			}
-			
-		}
-
-		/**
-		 * \brief Resets the counters to 0.
-		 */
-		public static void reset() {
-			objects = 0;
-			names.clear();
-		}
-		
-		/**
-		 * \brief Prints out the collected info.
-		 * 
-		 * @param out     stream to write output to
-		 * @param sorter  comparator for class count entries, use SORT_* constants
-		 */
-		public static void printInfo(PrintStream out, CountSorter sorter) {
-			Counter.total = objects;
-			out.println("Number of AST nodes: " + objects);
-			ArrayList<Map.Entry<String, Counter>> list = new ArrayList<Map.Entry<String, Counter>>();
-			list.addAll(names.entrySet());
-			Collections.sort(list, sorter);
-			for (Map.Entry<String, Counter> e : list) 
-				out.println("  " + e.getKey() + ": " + e.getValue());
-		}
-		
-		/**
-		 * \brief Type for the sorter argument for {@link printInfo(PrintStream, CountSorter)}.
-		 */
-		public static abstract class CountSorter implements Comparator<Entry<String, Counter>> {}
-		
-		/**
-		 * \brief Sort output by count, ascending.
-		 */
-		public static final CountSorter SORT_COUNT_DESC = new CmpCount(true);
-		
-		/**
-		 * \brief Sort output by count, descending.
-		 */
-		public static final CountSorter SORT_COUNT_ASC  = new CmpCount(false);
-		
-		/**
-		 * \brief Sort output by class name, ascending.
-		 */
-		public static final CountSorter SORT_CLASS_DESC = new CmpName(true);
-		
-		/**
-		 * \brief Sort output by class name, descending.
-		 */
-		public static final CountSorter SORT_CLASS_ASC = new CmpName(false);
-		
-		private static class CmpCount extends CountSorter {
-			
-			private int mul;
-			
-			public CmpCount(boolean reverse) {
-				mul = reverse ? -1 : 1;
-			}
-
-			public int compare(Entry<String, Counter> o1, Entry<String, Counter> o2) {
-				int res = mul * (o1.getValue().n - o2.getValue().n);
-				return res == 0 ? o1.getKey().compareTo(o2.getKey()) : res;
-			}
-
-		}
-		
-		private static class CmpName extends CountSorter {
-			
-			private int mul;
-			
-			public CmpName(boolean reverse) {
-				mul = reverse ? -1 : 1;
-			}
-
-			public int compare(Entry<String, Counter> o1, Entry<String, Counter> o2) {
-				return mul * o1.getKey().compareTo(o2.getKey());
-			}
-
-		}
-		
-	}
-
-	/**
 	 * \brief Contains methods for calculating the size of AST nodes.
 	 * 
 	 * Uses minimum sizes stipulated by language standard, and ignores padding for memory alignment 
@@ -593,6 +534,7 @@ aspect MemoryUse {
 			visited.clear();
 		}
 
+	    private static final int OBJECT_MIN_SIZE     = 16;
 	    private static final int OBJECT_SHELL_SIZE   = 8;
 	    private static final int OBJREF_SIZE         = 4;
 	    private static final int LONG_FIELD_SIZE     = 8;
@@ -654,6 +596,8 @@ aspect MemoryUse {
 				return getLinkedListSize((LinkedList) o, type);
 			
 			int mem = getTotalShellSize(type);
+			if (mem < OBJECT_MIN_SIZE)
+				mem = OBJECT_MIN_SIZE;
 			for (; type != null; type = type.getSuperclass())
 				for (Field f : getFields.perform(type)) 
 					if ((f.getModifiers() & Modifier.STATIC) == 0) 

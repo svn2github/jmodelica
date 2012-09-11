@@ -39,6 +39,7 @@ aspect Connections {
 		
 		for (ConnectionSet set : l) 
 			set.generateEquations(getFEquationBlock(0));
+		connectionSetManager.disconnectFromInstanceTree();
 	}
 		
 	public void ASTNode.enableStreamsRewrite() {
@@ -134,6 +135,11 @@ aspect Connections {
 				return new StreamConnectionSet(e);
 			else 
 				return new PotentialConnectionSet(e);
+		}
+		
+		public void disconnectFromInstanceTree() {
+			for (ConnectionSetEntry e : this)
+				e.disconnectFromInstanceTree();
 		}
 		
 		public int getNumInside() {
@@ -355,6 +361,11 @@ aspect Connections {
 			return cses;
 		}
 		
+		public void disconnectFromInstanceTree() {
+			for (ConnectionSet set : list)
+				set.disconnectFromInstanceTree();
+		}
+		
 		public String printConnectionSets() {
 		
 			StringBuffer str = new StringBuffer();
@@ -375,6 +386,8 @@ aspect Connections {
 	
 		private InstComponentDecl cd;
 		private boolean outside;
+		private boolean stream;
+		private boolean flow;
 		private FQName fqName;
 		private String prefix;
 		private String str;
@@ -386,6 +399,13 @@ aspect Connections {
 			this.outside = outside;
 			this.fqName = fqName;
 			prefix = null;
+			flow = cd.getComponentDecl().isFlow();
+			stream = cd.getComponentDecl().isStream();
+		}
+		
+		public void disconnectFromInstanceTree() {
+			toString();
+			cd = null;
 		}
 	
 		public boolean isOutside() {
@@ -401,11 +421,11 @@ aspect Connections {
 		}
 		
 		public boolean isFlow() {
-			return cd.getComponentDecl().isFlow();
+			return flow;
 		}
 
 		public boolean isStream() {
-			return cd.getComponentDecl().isStream();
+			return stream;
 		}
 		
 		public String name() {

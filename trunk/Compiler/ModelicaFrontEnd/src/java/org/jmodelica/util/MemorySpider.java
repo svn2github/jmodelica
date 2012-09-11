@@ -87,17 +87,17 @@ public class MemorySpider {
 		
 		Class type = o.getClass();
 		if (type.isArray()) {
-			for (; type != null; type = type.getSuperclass())
-				for (Field f : getFields.perform(type)) 
-					traverse(getValue.perform(f, o));
-		} else if (o instanceof LinkedList) { // Special case for linked lists for efficiency
-			for (Object o2 : (LinkedList) o)
-				traverse(o2);
-		} else {
 			int len = java.lang.reflect.Array.getLength(o);
 			if (!type.getComponentType().isPrimitive()) 
 				for (int i = 0; i < len; i++) 
 					traverse(java.lang.reflect.Array.get(o, i));
+		} else if (o instanceof LinkedList) { // Special case for linked lists for efficiency
+			for (Object o2 : (LinkedList) o)
+				traverse(o2);
+		} else {
+			for (; type != null; type = type.getSuperclass())
+				for (Field f : getFields.perform(type)) 
+					traverse(getValue.perform(f, o));
 		}
 	}
 }
