@@ -852,6 +852,7 @@ public class ModelicaCompiler {
 			deleteOutDir();
 			ASTNode.endStep("packUnit()");
 		} finally {
+			log.debug("Time useage and memory usage change during compilation steps:");
 			ASTNode.getStepInfo().logReport();
 		}
 	}
@@ -1059,7 +1060,6 @@ public class ModelicaCompiler {
 			generateCode(fc);
 			
 		} finally {
-			log.debug("Time useage and memory usage change during compilation steps:");
 //			logCompilationInfo();
 			// The node count requires changing ASTNode.java by hand - see dumpNodeCountFile()
 //			dumpNodeCountFile("node_count.txt");
@@ -1280,7 +1280,6 @@ public class ModelicaCompiler {
 	public FClass flattenModel(InstClassDecl icl) 
 			throws CompilerException, ModelicaClassNotFoundException, IOException {
 		hookCheckAbort();
-//		noteUsedMemory();
 		ASTNode.beginStep("flattenModel()");
 		
 		String instName = icl.qualifiedName();
@@ -1352,7 +1351,6 @@ public class ModelicaCompiler {
 			handleCompilerProblems(problems);
 
 		hookFlatModelChecked(fc);
-//		noteUsedMemory();
 		ASTNode.endStep("flattenModel()");
 
 		return fc;

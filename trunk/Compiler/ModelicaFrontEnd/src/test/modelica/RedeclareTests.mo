@@ -3942,6 +3942,51 @@ end RedeclareTests.RedeclareElement21;
 end RedeclareElement21;
 
 
+model RedeclareElement22
+  package A
+    replaceable model B
+      Real y = 1;
+    end B;
+    
+    B b;
+  end A;
+  
+  package C
+    extends A;
+    redeclare model extends B
+      Real z = 2;
+    end B;
+  end C;
+  
+  model D
+    replaceable model E
+    end E;
+
+    E e;
+  end D;
+
+  model F
+    extends D(redeclare final model E = C.B);
+  end F;
+  
+  F f;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="RedeclareElement22",
+			description="Redeclare class extends used directly in redeclare",
+			flatModel="
+fclass RedeclareTests.RedeclareElement22
+ Real f.e.z;
+ Real f.e.y;
+equation
+ f.e.z = 2;
+ f.e.y = 1;
+end RedeclareTests.RedeclareElement22;
+")})));
+end RedeclareElement22;
+
+
 
 model RedeclareSameLevel10
 	package A
