@@ -136,6 +136,16 @@ aspect TransformCanonical {
 			return blockSizes;
 		}
 
+		public ArrayList<Integer> unsolvedBlockIterationSizes() {
+			ArrayList<Integer> blockSizes = new ArrayList<Integer>();
+			for (AbstractEquationBlock b : this) {
+				if (!b.isSolvable()) {
+					blockSizes.add(new Integer(b.iterationVariables().size()));
+				}		
+			}
+			return blockSizes;
+		}
+
 		public void reset() {
 			for (AbstractEquationBlock eb : this) {
 				eb.reset();
@@ -1517,7 +1527,7 @@ aspect TransformCanonical {
 		g.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
 		
 		log.info(g.toString());
-		g.maximumMatching(true);	
+		g.maximumMatching(true);
 		log.info("DAE system");
 		log.info(g.printMatching());
 			
@@ -1846,9 +1856,22 @@ aspect TransformCanonical {
 		LinkedList<Stack<Eq>> blt = graph.computeRawBLT();
 		BLT tearBLT = new BLT(this);
 		for (Stack<Eq> block : blt) { // Iterate over all (global) BLT-blocks
-			AbstractEquationBlock tearBlock = EquationBlockFactory.createEquationBlock(block);
-			if (block.size() == 1 || tearBlock.isSolvable()) {
-				tearBLT.add(tearBlock);
+			boolean singleEquation = true;
+			Iterator<Eq> it = block.iterator();
+			Eq last = it.next();
+			while (it.hasNext()) {
+				Eq e = it.next();
+				if (last.getEquation() != e.getEquation()) {
+					singleEquation = false;
+					break;
+				}
+			}
+			AbstractEquationBlock tearBlock = null;
+			if (singleEquation) {
+				tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, true);
+			}
+			if (tearBlock != null && tearBlock.isSolvable()) {
+				tearBLT.add(EquationBlockFactory.createEquationBlock(block));
 			} else {
 				TornEquationBlock eb = new TornEquationBlock();
 				tear(block, eb);
