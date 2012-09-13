@@ -40,8 +40,10 @@
 	<!-- "package" is the directory where generated files will be stored -->
 	<property name="ast_package" value="org.jmodelica.optimica.compiler" />
 
-	<property name="base_output" value="src/java-generated" />
-	<property name="parser_output" value="${base_output}/org/jmodelica/optimica/parser" />
+    <property name="base_output" value="src/java-generated" />
+    <property name="common_output" value="${base_output}/org/jmodelica/optimica" />
+    <property name="ast_output" value="${common_output}/compiler" />
+    <property name="parser_output" value="${common_output}/parser" />
 
 	<!-- "tools" is the directory where the needed tools (lexing, parsing, jastadd2, junit.jar) are located. -->
 	<property name="jar_output_dir" value="bin" />
@@ -103,7 +105,7 @@
 		</jar>
 	</target>
 
-	<target name="compile-ast" depends="gen,gen-parser">
+	<target name="compile-ast" depends="gen">
 		<mkdir dir="bin" />
 		<javac classpath="${beaver_dir}/lib/beaver.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
 				compiler="${java_compiler}" source="${java_version}" target="${java_version}" debug="true" 
@@ -115,9 +117,28 @@
 			<exclude name="**/*.aj" />
 		</javac>
 	</target>
+	
+	<!-- Meta target for generating all java files -->
+	<target name="gen" depends="patch,gen-parser" />
+
+    <target name="compile-patcher">
+        <mkdir dir="bin" />
+        <javac classpath="${beaver_dir}/lib/beaver.jar" compiler="${java_compiler}" source="${java_version}" 
+            target="${java_version}" debug="true" destdir="bin" includeantruntime="false">
+            <src path="${modelica_front_end_path}/src/java" />
+            <include name="**/GeneratedFilePatcher.java" />
+        </javac>
+    </target>
+
+    <target name="patch" depends="ast,compile-patcher">
+        <java classpath="bin:${beaver_dir}/lib/beaver-rt.jar" 
+        	    classname="org.jmodelica.util.GeneratedFilePatcher" failonerror="true">
+            <arg line="${ast_output}" />
+        </java>
+    </target>
 
 	<!-- TARGET gen -->
-	<target name="gen">
+	<target name="ast">
 		<!-- create a directory for the generated files -->
 		<mkdir dir="${base_output}" />
 		<!-- run jastadd to generate AST files -->

@@ -70,6 +70,7 @@
 	<property name="package" value="org.jmodelica" />
 	<property name="ast_package" value="${package}.modelica.compiler" />
 	<property name="package_dir" value="${java_dir}/org/jmodelica" />
+    <property name="ast_dir" value="${package_dir}/modelica/compiler" />
 	<!--	
 	<property name="jmodelica_test_framework" value="${modelica_frontend_dir}/test/test-framework"/>
 	<property name="jmodelica_java" value="${modelica_frontend_dir}/java"/>
@@ -216,12 +217,29 @@
 	<target name="genscanner" depends="copy,scanner" />
 
 	<!-- meta-target for generating all java files -->
-	<target name="gen" depends="copy,scanner,parser,ast" />
+	<target name="gen" depends="copy,scanner,parser,ast,patch" />
+
+    <target name="compile-patcher" depends="copy">
+        <mkdir dir="${bin_dir}/classes" />
+        <javac classpath="${beaver_dir}/lib/beaver.jar" compiler="javac1.5" debug="true" destdir="${bin_dir}/classes">
+            <src path="${java_dir}" />
+            <include name="**/GeneratedFilePatcher.java" />
+        </javac>
+    </target>
+
+    <target name="patch" depends="ast,compile-patcher">
+        <java classpath="${bin_dir}/classes:${beaver_dir}/lib/beaver-rt.jar" 
+        	    classname="org.jmodelica.util.GeneratedFilePatcher" failonerror="true">
+            <arg line="${ast_dir}" />
+        </java>
+    </target>
 
 	<!-- generate compiler ast files -->
 	<!-- create AST node types and weave aspect modules -->
 	<target name="ast">
-		<jastadd package="${ast_package}" license="${ide_aspects}/licence.blurb" beaver="true" rewrite="true" outdir="${java_dir}" NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" Deterministic="true" NoStatic="false" Debug="false">
+		<jastadd package="${ast_package}" license="${ide_aspects}/licence.blurb" beaver="true" 
+			    rewrite="true" outdir="${java_dir}" NoCacheCycle="false" ComponentCheck="true" 
+			    visitcheck="false" LazyMaps="true" Deterministic="true" NoStatic="false" Debug="false">
 			<fileset dir="${modelica_frontend_aspects}">
 				<include name="**/*.ast" />
 				<include name="**/*.jrag" />

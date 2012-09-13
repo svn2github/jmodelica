@@ -242,6 +242,10 @@ aspect AnnotationAPI {
 		public static AnnotationNode createNullAnnotationNodeFor(ASTNode node) {
 			if (node.getParent() instanceof Comment)
 				return new NullCommentAnnotationNode((Comment)node.getParent());
+			
+			if (node.getParent() instanceof FullClassDecl)
+			return new NullFullClassDeclAnnotationNode((FullClassDecl)node.getParent());
+			
 			return NO_ANNOTATION;
 		}
 		
@@ -463,7 +467,34 @@ aspect AnnotationAPI {
 		
 		}
 		
-	}
+		/**
+	 	 * A null annotation node for a FullClassDecl, it adds the possibility to add annotation.
+	 	 */
+	 	private static class NullFullClassDeclAnnotationNode extends AssignableNullAnnotationNode {
+	 
+	 	private FullClassDecl fullClassDecl;
+	 	
+		/**
+		 * Constructs an instance with the FullClassDecl <code>fullClassDecl</code>.
+		 */	 
+		 protected NullFullClassDeclAnnotationNode(FullClassDecl fullClassDecl) {
+		 	super(null,null);
+		 	this.fullClassDecl = fullClassDecl;
+		 }
+		
+			@Override
+			public void setValue(Exp exp) {
+				throw new AnnotationEditException("Set value is not supported on this type of annotation node");
+			}
+		
+			@Override
+			protected void createRealNode() {
+				ClassModification cm = new ClassModification();
+				fullClassDecl.addAnnotation(new ParseAnnotation(cm));
+				realNode = new CMAnnotationNode(cm);
+			}
+		}
+	}	
 	
 	/**
 	 * \brief Represents an annotation that is represented in the source tree by a ClassModification.
