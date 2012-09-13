@@ -2033,6 +2033,25 @@ aspect FlatDiagnostics {
 		
 	}
 
+	public String FClass.aliasDiagnosticsShort() {
+		StringBuilder str = new StringBuilder();
+		if (getAliasManager()!=null) {
+			int n_elim = 0;
+			LinkedHashSet<LinkedHashSet<AliasVariable>> aliasSets = getAliasManager().getAliasSets();
+			for (LinkedHashSet<AliasVariable> aliasSet : aliasSets) {
+				n_elim += aliasSet.size() - 1;
+			}
+			str.append(aliasSets.size());
+			str.append(" sets, ");
+			str.append(n_elim);
+			str.append(" eliminated variables");
+		} else {
+			str.append("Alias sets not computed");
+		}
+		return str.toString();	
+		
+	}
+
 	public String FClass.variableDiagnostics() {
 		
 		StringBuilder str = new StringBuilder();

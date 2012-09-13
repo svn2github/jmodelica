@@ -1310,6 +1310,7 @@ public class ModelicaCompiler {
 		if (fc.root().options.getBooleanOption("generate_html_diagnostics") &&
 		    getDiagnosticsGenerator()!=null) {
 			getDiagnosticsGenerator().writeRawFlattenedModel(fc);
+			getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
 		}
 		ASTNode.endStep("prettyPrintFlat()");
 		
