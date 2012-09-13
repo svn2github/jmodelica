@@ -291,6 +291,7 @@ aspect Connections {
 	public class ConnectionSetManager {
 	
 		private ArrayList<ConnectionSet> list = new ArrayList<ConnectionSet>();
+		private Map<ConnectionSetEntry, ConnectionSet> entryMap = new HashMap<ConnectionSetEntry, ConnectionSet>();
 		
 		public ArrayList<ConnectionSet> getConnectionSetList() {
 			return list;
@@ -299,8 +300,11 @@ aspect Connections {
 		public void addInsideFlowVar(InstComponentDecl var1, FQName namePrefix1) {
 			ConnectionSetEntry cse = new ConnectionSetEntry(var1, false, namePrefix1);
 			
-			if (getConnectionSet(cse) == null) 
-				list.add(ConnectionSet.create(cse));
+			if (getConnectionSet(cse) == null) {
+				ConnectionSet set = ConnectionSet.create(cse);
+				list.add(set);
+				entryMap.put(cse, set);
+			}
 		}
 		
 		public void addVars(InstComponentDecl var1, boolean outside1, FQName namePrefix1,
@@ -321,6 +325,8 @@ aspect Connections {
 			ConnectionSet h1 = addEntry(cse1);
 			ConnectionSet h2 = addEntry(cse2);
 			if (h1 != h2) {
+				for (ConnectionSetEntry entry : h2)
+					entryMap.put(entry, h1);
 				h1.addAll(h2);
 				list.remove(h2);
 			}
@@ -334,14 +340,12 @@ aspect Connections {
 				h = ConnectionSet.create(cse);
 				list.add(h);
 			}
+			entryMap.put(cse, h);
 			return h;
 		}
 	
 		public ConnectionSet getConnectionSet(ConnectionSetEntry cse) {
-			for (ConnectionSet set : list)
-				if (set.contains(cse))
-					return set;
-			return null;
+			return entryMap.get(cse);
 		}
 
 		public ConnectionSet getConnectionSet(String name, boolean outside) {
