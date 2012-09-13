@@ -92,7 +92,10 @@ aspect PredefinedTypes {
         builtInDef += " (also variables can be selected, which do not appear"; 
         builtInDef += " differentiated). \","; 
         builtInDef += " always \"Do use it as a state.\""; 
-        builtInDef += ");\n"; 
+        builtInDef += ");\n";
+        
+        builtInDef += "partial model ExternalObject\n"; 
+        builtInDef += "end ExternalObject;\n"; 
 
         PrimitiveClassDecl pcd=null;
   
