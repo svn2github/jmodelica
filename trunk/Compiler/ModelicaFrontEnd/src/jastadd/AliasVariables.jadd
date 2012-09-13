@@ -115,8 +115,10 @@ aspect AliasVariables {
 		private boolean aliasErrorFlag = false;
 		
 		// A set of alias sets
-		private LinkedHashSet<LinkedHashSet<AliasVariable>> aliasSets = 
-			new LinkedHashSet<LinkedHashSet<AliasVariable>>();
+		private LinkedHashSet<LinkedHashSet<AliasVariable>> aliasSets = new LinkedHashSet<LinkedHashSet<AliasVariable>>();
+		
+		// A map that maps FVariable to its alias set.
+		private HashMap<FVariable, LinkedHashSet<AliasVariable>> variableMap = new HashMap<FVariable, LinkedHashSet<AliasVariable>>();
 		
 		/**
 		 * \brief Getter for alias error message.
@@ -194,11 +196,11 @@ aspect AliasVariables {
 		 * @return The alias set corresponding to the alias variable.
 		 */
 		public LinkedHashSet<AliasVariable> getAliasSet(AliasVariable alias) {
-			for (LinkedHashSet<AliasVariable> aliasSet : aliasSets) {
-				if (aliasSet.contains(alias)) {
-					return aliasSet;	
-				}
-			}
+			LinkedHashSet<AliasVariable> aliasSet = getAliasSet(alias.getFVariable());
+			if (aliasSet == null)
+				return null;
+			if (aliasSet.contains(alias))
+				return aliasSet;
 			return null;
 		}
 
@@ -211,16 +213,9 @@ aspect AliasVariables {
 		 * @return The alias set corresponding to the alias variable.
 		 */
 		public LinkedHashSet<AliasVariable> getAliasSet(FVariable alias) {
-			for (LinkedHashSet<AliasVariable> aliasSet : aliasSets) {
-				if (aliasSet.contains(new AliasVariable(alias,true))) {
-					return aliasSet;	
-				} else if (aliasSet.contains(new AliasVariable(alias,false))) {
-					return aliasSet;	
-				}
-			}
-			return null;
+			return variableMap.get(alias);
 		}
-				
+
 		/**
 		 * \brief Add a pair of alias variables to the alias manager.
 		 * 
@@ -229,9 +224,8 @@ aspect AliasVariables {
 		 * @param neg True if the alias pair is negated, otherwise false.
 		 * 
 		 */
-		public void addAliasVariables(FVariable fv1, FVariable fv2, 
-				boolean neg) {
-						
+		public void addAliasVariables(FVariable fv1, FVariable fv2, boolean neg) {
+			
 			// Create alias variables with negated  = false
 			AliasVariable alias1 = new AliasVariable(fv1,false);
 			AliasVariable alias2 = new AliasVariable(fv2,false);
@@ -239,7 +233,7 @@ aspect AliasVariables {
 			// Create alias variables with negated = true
 			AliasVariable alias1n = new AliasVariable(fv1,true);
 			AliasVariable alias2n = new AliasVariable(fv2,true);
-				
+			
 			/*
 			 * Rules for alias sets:
 			 * 
@@ -347,25 +341,26 @@ aspect AliasVariables {
 				}
 				aliasSets.remove(mergeAS);
 				aliasSets.remove(resultAS);
-				if (negMergeAS) {
-					for (AliasVariable a : mergeAS) {
-						resultAS.add(new AliasVariable(a.getFVariable(),
-								!a.isNegated()));
-					}
-				} else { 
-					resultAS.addAll(mergeAS);
-				}				
+				for (AliasVariable a : mergeAS) {
+					resultAS.add(new AliasVariable(a.getFVariable(), negMergeAS ? !a.isNegated() : a.isNegated()));
+					variableMap.put(a.getFVariable(), resultAS);
+				}
 				aliasSets.add(resultAS);
 			} else if (mergeAlias != null) { // Add alias to set
 				aliasSets.remove(resultAS);
 				resultAS.add(mergeAlias);
+				variableMap.put(mergeAlias.getFVariable(), resultAS);
 				aliasSets.add(resultAS);
 			} else { // New alias set
 				if (neg) {
 					resultAS.add(alias1);
+					variableMap.put(alias1.getFVariable(), resultAS);
 					resultAS.add(alias2n);
+					variableMap.put(alias2n.getFVariable(), resultAS);
 				} else {
 					resultAS.add(alias1);
+					variableMap.put(alias1.getFVariable(), resultAS);
+					variableMap.put(alias2.getFVariable(), resultAS);
 					resultAS.add(alias2);
 				}
 				aliasSets.add(resultAS);
@@ -389,7 +384,7 @@ aspect AliasVariables {
 				}
 			}
 		}
-		
+
 		public String printAliasSet(LinkedHashSet<AliasVariable> aliasSet) {
 			StringBuilder str = new StringBuilder();
 			//str.append(getIterationVariable(aliasSet).getFVariable().name());
