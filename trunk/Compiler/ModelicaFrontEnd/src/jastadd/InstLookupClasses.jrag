@@ -577,6 +577,7 @@ aspect InstLookupClasses {
 	
 	syn InstClassDecl InstNode.myInstClass()  = unknownInstClassDecl(); 
 	eq InstComponentDecl.myInstClass()        = getClassName().myInstClassDecl();
+	eq InstArrayComponentDecl.myInstClass()   = instComponentDecl().myInstClass();
 	//eq InstShortClassDecl.myInstClass()  = getClassName().myInstClassDecl();
 	eq InstClassDecl.myInstClass()            = this;
 	eq InstExtends.myInstClass()              = getClassName().myInstClassDecl();

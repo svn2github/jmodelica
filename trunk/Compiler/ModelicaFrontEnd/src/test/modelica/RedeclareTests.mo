@@ -3971,11 +3971,11 @@ model RedeclareElement22
   
   F f;
 
-	annotation(__JModelica(UnitTesting(tests={ 
-		TransformCanonicalTestCase(
-			name="RedeclareElement22",
-			description="Redeclare class extends used directly in redeclare",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={ 
+        TransformCanonicalTestCase(
+            name="RedeclareElement22",
+            description="Redeclare class extends used directly in redeclare",
+            flatModel="
 fclass RedeclareTests.RedeclareElement22
  Real f.e.z;
  Real f.e.y;
@@ -3985,6 +3985,45 @@ equation
 end RedeclareTests.RedeclareElement22;
 ")})));
 end RedeclareElement22;
+
+
+model RedeclareElement23
+  package A
+    replaceable model B
+      Real y = 1;
+    end B;
+    
+    B b;
+  end A;
+  
+  package C
+    extends A;
+    redeclare model extends B
+      Real z = 2;
+    end B;
+  end C;
+  
+  C.B[2] b;
+  Real x = b[1].y;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="RedeclareElement23",
+			description="Array of redeclare class extends",
+			flatModel="
+fclass RedeclareTests.RedeclareElement23
+ Real b[1].z;
+ Real b[2].z;
+ Real b[2].y;
+ Real x;
+equation
+ b[1].z = 2;
+ x = 1;
+ b[2].z = 2;
+ b[2].y = 1;
+end RedeclareTests.RedeclareElement23;
+")})));
+end RedeclareElement23;
 
 
 
