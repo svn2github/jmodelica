@@ -34,6 +34,10 @@ public class GenerateDocumentationAction extends Action{
 		return elem instanceof ASTNode<?>;
 	}
 	
+	/**
+	 * Go through the open editors to see if the selected class is already open. If so, it is brought 
+	 * to the front. If not, a new editor for the selected class is opened.
+	 */
 	@Override
 	public void run() {
 		boolean noWorkBench = false;
@@ -44,7 +48,7 @@ public class GenerateDocumentationAction extends Action{
 				IEditorReference[] editors = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
 				String name = Generator.getFullPath(((FullClassDecl) elem));
 				for (IEditorReference editor : editors){
-					if (editor.getEditor(false) instanceof DocumentationEditor && ((DocumentationEditor)editor.getEditor(false)).getCurrenetClass().equals(name)){
+					if (editor.getEditor(false) instanceof DocumentationEditor && ((DocumentationEditor)editor.getEditor(false)).getCurrentClass().equals(name)){
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(editor.getPart(true));
 						found = true;
 						((DocumentationEditor)editor.getEditor(false)).generateDocumentation((FullClassDecl)elem);

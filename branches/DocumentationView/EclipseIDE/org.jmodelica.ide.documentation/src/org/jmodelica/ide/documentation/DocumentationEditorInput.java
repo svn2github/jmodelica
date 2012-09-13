@@ -40,7 +40,7 @@ public class DocumentationEditorInput implements IEditorInput, IPersistableEleme
 				sb.append(".");
 			}
 		}
-		className = sb.toString();// fullClassDecl.name();
+		className = sb.toString();
 		project = lookupIProject(new File(fullClassDecl.containingFileName()));
 		this.fullClassDecl = fullClassDecl;
 	}

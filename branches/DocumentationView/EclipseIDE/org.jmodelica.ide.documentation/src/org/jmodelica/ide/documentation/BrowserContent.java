@@ -5,14 +5,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
-
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.browser.Browser;
@@ -30,6 +22,7 @@ import org.jmodelica.modelica.compiler.FullClassDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.Program;
 import org.jmodelica.modelica.compiler.ShortClassDecl;
+import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StringLitExp;
 import org.jmodelica.modelica.compiler.UnknownClassDecl;
 
@@ -42,6 +35,7 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	private int histSize;
 	private Program program;
 	private NavigationProvider navProv;
+	private SourceRoot sourceRoot;
 	private static final String N3 = "\n\t\t\t";
 	private static final String N4 = N3 + "\t";
 	private static final String FOOTER = "<i>footer</i>";
@@ -52,10 +46,12 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	private static final String CANCEL_INFO_BTN = "<input class='buttonIndent' type='button' onclick='cancelInfo()' id='cancelInfoButton' value='Cancel'/>";
 	private static final String CANCEL_REV_BTN = "<input class='buttonIndent' type='button' onclick='cancelRev()' id='cancelRevButton' value='Cancel'/>";
 	private boolean saving = false;
+	private String tinymcePath;
 
-	public BrowserContent(FullClassDecl fullClassDecl, Browser browser, InstClassDecl icd, Program program, NavigationProvider navProv, boolean genDoc){
+	public BrowserContent(FullClassDecl fullClassDecl, Browser browser, InstClassDecl icd, SourceRoot sourceRoot, NavigationProvider navProv, boolean genDoc){
+		this.sourceRoot = sourceRoot;
 		this.navProv = navProv;
-		this.program = program;
+		this.program = sourceRoot.getProgram();
 		history = new ArrayList<String>();
 		histIndex = 0;
 		histSize = 0;
@@ -82,22 +78,21 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 //		}
 //		@Override
 //		public void run() {
-//			new DocGenDialog(null, fcd, program, FOOTER);
-//			
+//			new DocGenDialog(null, fcd, program, FOOTER);		
 //		}
-//		
 //	}
+	
+	/**
+	 * Generates offline documentation for the FullClassDecl fcd by launching a wizard
+	 * @param fcd The FullClassDecl
+	 */
 	public void generateDocumentation(FullClassDecl fcd) {
 		//DocGenDialog dlg = new DocGenDialog(null);
 		//new DocGenDialog(null, fcd, program, FOOTER);
-        WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), new GenDocWizard(fcd, program, FOOTER));
+        WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), new GenDocWizard(fcd, program, sourceRoot, FOOTER));
         dialog.create();
-        dialog.open();
-		
+        dialog.open();		
 		//new Dialog(fcd, program, FOOTER).run();
-		
-		
-		
 		//RETURN!!!!
 //		String rootPath = dlg.getRootPath();
 //		HashMap<String, Boolean> options = dlg.getOptions();
@@ -164,10 +159,10 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	 * @param fcd The class declaration to be rendered
 	 */
 	private void renderClassDecl(ClassDecl fcd){
-		String tinymcePath = this.getClass().getProtectionDomain().getCodeSource().getLocation() + this.getClass().getResource("/resources/tinymce/jscripts/tiny_mce/tiny_mce.js").getPath();
+		tinymcePath = this.getClass().getProtectionDomain().getCodeSource().getLocation() + this.getClass().getResource("/resources/tinymce/jscripts/tiny_mce/tiny_mce.js").getPath();
 		content = new StringBuilder();
 		content.append(Generator.genHead());
-		content.append(Generator.genJavaScript(tinymcePath));
+		content.append(Generator.genJavaScript(tinymcePath, false));
 		content.append(Generator.genHeader());
 		content.append(Generator.genBreadCrumBar(fcd, program));
 		if (fcd instanceof UnknownClassDecl){
@@ -190,13 +185,13 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	private void renderFullClassDecl(FullClassDecl fcd){
 		content.append(Generator.genTitle(fcd, this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath(), false));
 		content.append(Generator.genComment(fcd));
-		content.append(Generator.genInfo(fcd, false));
+		content.append(Generator.genInfo(fcd, false, sourceRoot));
 		content.append(Generator.genImports(fcd));
 		content.append(Generator.genExtensions(fcd));
 		content.append(Generator.genClasses(fcd));
 		content.append(Generator.genComponents(fcd));
 		content.append(Generator.genEquations(fcd));
-		content.append(Generator.genRevisions(fcd, false));
+		content.append(Generator.genRevisions(fcd, false, sourceRoot));
 	}
 
 	/**
@@ -256,7 +251,7 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 
 	private void saveNewRevisionsAnnotation(String newVal){
 		ClassDecl fcd = program.simpleLookupClassDotted(history.get(histIndex));
-		StringLitExp exp = new StringLitExp(newVal);
+		StringLitExp exp = new StringLitExp(Generator.htmlToModelica(newVal));
 		fcd.annotation().forPath("Documentation/revisions").setValue(exp);
 		SaveSafeRunnable ssr = new SaveSafeRunnable(fcd);
 		SafeRunner.run(ssr);
@@ -275,12 +270,16 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 			if (event.location.endsWith("tmp.html") || event.location.startsWith("javascript")){
 				event.doit = true;
 			}else{
+				//browser.setText(content.toString());
 				//browser.evaluate(Scripts.ALERT_UNSAVED_CHANGES);
-				Boolean shouldMove = (Boolean) browser.evaluate(Scripts.CONFIRM_POPUP);
-				if (!shouldMove) event.doit = false;
-				saving = !shouldMove;
-				if (shouldMove)browser.setText(content.toString());
+//				Boolean shouldMove = (Boolean) browser.evaluate(Scripts.CONFIRM_POPUP);
+//				if (!shouldMove) event.doit = false;
+//				saving = !shouldMove;
+//				if (shouldMove)browser.setText(content.toString());
+//				event.doit = true;
+				saving = false;
 				event.doit = false;
+				browser.setText(content.toString());
 			}
 		}
 	}
@@ -334,7 +333,7 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 			//reset title, reset saving, use browser.setText()
 			saving = false;
 			content.replace(content.indexOf(Generator.INFO_ID_OPEN_TAG) + Generator.INFO_ID_OPEN_TAG.length(), content.indexOf("<!-- END OF INFO -->"), textAreaContent + N3 + Generator.INFO_ID_CLOSE_TAG);
-			saveNewDocumentationAnnotation(textAreaContent);
+			saveNewDocumentationAnnotation(textAreaContent);//(Generator.htmlToModelica(textAreaContent));
 			browser.setText(content.toString());
 		}else if(title.equals("preRevEdit")){
 			String revContent = (String)browser.evaluate(Scripts.FETCH_REV_DIV_CONTENT);
@@ -357,19 +356,41 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	 * @param isInfo True if the Information annotation is about to be edited, false if the Revisions annotation is about to be edited
 	 */
 	private void gotoWYSIWYG(String divContent, boolean isInfo){
-		StringBuilder sb = new StringBuilder(content.toString());
+		//StringBuilder sb = new StringBuilder(content.toString());
+		StringBuilder sb = new StringBuilder();
+		FullClassDecl fcd = (FullClassDecl)program.simpleLookupClassDotted(history.get(histIndex));
+		//remake all code, without edit button and with okay/cancel button
+		sb.append(Generator.genHead());
+		sb.append(Generator.genJavaScript(tinymcePath, true));
+		sb.append(Generator.genHeader());
+		sb.append(Generator.genTitle(fcd, this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath(), true));
+		sb.append(Generator.genComment(fcd));
+		sb.append(Generator.genInfo(fcd, true, sourceRoot));
+		sb.append(Generator.genImports(fcd));
+		sb.append(Generator.genExtensions(fcd));
+		sb.append(Generator.genClasses(fcd));
+		sb.append(Generator.genComponents(fcd));
+		sb.append(Generator.genEquations(fcd));
+		sb.append(Generator.genRevisions(fcd, true, sourceRoot));
+		sb.append(Generator.genFooter(""));
+		
+		
+		
 		//Insert the JavaScript initialization of TinyMCE
-		int insert = sb.indexOf("<script type=\"text/javascript\">") + "<script type=\"text/javascript\">".length();
-		sb.insert(insert, N4 + Scripts.SCRIPT_INIT_TINY_MCE);
+//		int insert = sb.indexOf("<script type=\"text/javascript\">") + "<script type=\"text/javascript\">".length();
+//		sb.insert(insert, N4 + Scripts.SCRIPT_INIT_TINY_MCE);
 		//Replace the div with a textArea, with the same content [startIndex,endIndex)
 		int startIndex = isInfo ? sb.indexOf(Generator.INFO_ID_OPEN_TAG) : sb.indexOf(Generator.REV_ID_OPEN_TAG);
 		int endIndex = isInfo ? sb.indexOf("<!-- END OF INFO -->") : sb.indexOf("<!-- END OF REVISIONS -->");
 		String textAreaID = isInfo ? "infoTextArea" : "revTextArea";
+		String submitFunction = isInfo ? "\"postInfoEdit();return false;\"" : "\"postRevEdit();return false;\"";
+		String cancelButton = isInfo ? CANCEL_INFO_BTN : CANCEL_REV_BTN;
 		String textArea =  
-				"<form>\n"+  
+				"<form onsubmit=" + submitFunction + ">\n"+
 						"<textarea name=\"content\" id=\""+ textAreaID + "\" cols=\"98\" rows=\"30\" >\n"+ 
 						divContent + "\n"+
 						"</textarea>\n"+
+						"<input type=\"submit\" value=\"Save\" />" + cancelButton +
 						"</form>\n";
 		sb.replace(startIndex, endIndex, textArea);
 		try
@@ -379,21 +400,8 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 			file.createNewFile();
 			FileWriter fstream = new FileWriter(fileName);
 			BufferedWriter out = new BufferedWriter(fstream);
-			if (isInfo){
-				//change from 'Edit..' to 'Save'
-				sb.replace(sb.indexOf(Generator.INFO_BTN_DATA_PRE), sb.indexOf(Generator.INFO_BTN_DATA_PRE)+ Generator.INFO_BTN_DATA_PRE.length(), INFO_BTN_DATA_POST);
-				//Disable 'Edit..' for 'Revisions'
-				sb.replace(sb.indexOf(Generator.REV_BTN_DATA_PRE), sb.indexOf(Generator.REV_BTN_DATA_PRE) + Generator.REV_BTN_DATA_PRE.length(), REV_BTN_DISABLE);
-				//add cancel button
-				sb.insert(sb.indexOf(INFO_BTN_DATA_POST) + INFO_BTN_DATA_POST.length() + "/>".length(), CANCEL_INFO_BTN);
-			}else{
-				//change from 'Edit..' to 'Save'
-				sb.replace(sb.indexOf(Generator.REV_BTN_DATA_PRE), sb.indexOf(Generator.REV_BTN_DATA_PRE)+ Generator.REV_BTN_DATA_PRE.length(), REV_BTN_DATA_POST);
-				//Disable 'Edit..' for 'Information'
-				sb.replace(sb.indexOf(Generator.INFO_BTN_DATA_PRE), sb.indexOf(Generator.INFO_BTN_DATA_PRE) + Generator.INFO_BTN_DATA_PRE.length(), INFO_BTN_DISABLE);
-				//add cancel button
-				sb.insert(sb.indexOf(REV_BTN_DATA_POST) + REV_BTN_DATA_POST.length() + "/>".length(), CANCEL_REV_BTN);
-			}
+			//sb.replace(sb.indexOf(Generator.INFO_BTN_DATA_PRE), sb.indexOf(Generator.INFO_BTN_DATA_PRE) + Generator.INFO_BTN_DATA_PRE.length(), INFO_BTN_DISABLE);
+			//sb.replace(sb.indexOf(Generator.REV_BTN_DATA_PRE), sb.indexOf(Generator.REV_BTN_DATA_PRE) + Generator.REV_BTN_DATA_PRE.length(), REV_BTN_DISABLE);
 			out.write(sb.toString());
 			out.close();
 			saving = true;

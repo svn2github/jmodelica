@@ -1,16 +1,12 @@
 package org.jmodelica.ide.documentation.wizard;
 
 import javax.swing.JFileChooser;
-
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
@@ -26,6 +22,10 @@ public class GenDocWizardPageTwo extends WizardPage {
 		setTitle("Target");
 		setDescription("Please specify where you want to save the documentation");
 	}
+	
+	/**
+	 * Sets up the GUI; links a JFileChooser to the 'Browse' button and adds a keyListener to the text field
+	 */
 	@Override
 	public void createControl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -69,8 +69,8 @@ public class GenDocWizardPageTwo extends WizardPage {
 				}
 			}
 		});
-
 	}
+	
 	String getPath(){
 		return path;
 	}

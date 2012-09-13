@@ -10,13 +10,6 @@ import org.eclipse.swt.widgets.Composite;
 public class GenDocWizardPageOne extends WizardPage {
 
 	private HashMap<String, Boolean> checkBoxes;
-	public static final String COMMENT = "comment";
-	public static final String INFORMATION = "information";
-	public static final String IMPORTS = "imports";
-	public static final String EXTENSIONS = "extensions";
-	public static final String COMPONENTS = "components";
-	public static final String EQUATIONS = "equations";
-	public static final String REVISIONS = "revisions";
 	private Button chkComment;
 	private Button chkInformation;
 	private Button chkImport;
@@ -31,6 +24,10 @@ public class GenDocWizardPageOne extends WizardPage {
 		setDescription("Please specify what you want to include in the documentation");
 		checkBoxes = new HashMap<String, Boolean>();
 	}
+	
+	/**
+	 * Sets up the GUI 
+	 */
 	@Override
 	public void createControl(Composite parent){ 
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -60,14 +57,19 @@ public class GenDocWizardPageOne extends WizardPage {
 		chkRevisions.setSelection(true);
 		setPageComplete(true);
 	}
+	
+	/**
+	 * 
+	 * @return a HashMap containing all the values from the check boxes.
+	 */
 	public HashMap<String, Boolean> getCheckBoxes() {
-		checkBoxes.put(COMMENT, chkComment.getSelection());
-		checkBoxes.put(INFORMATION, chkInformation.getSelection());
-		checkBoxes.put(IMPORTS, chkImport.getSelection());
-		checkBoxes.put(EXTENSIONS, chkExtension.getSelection());
-		checkBoxes.put(COMPONENTS, chkComponents.getSelection());
-		checkBoxes.put(EQUATIONS, chkEquations.getSelection());
-		checkBoxes.put(REVISIONS, chkRevisions.getSelection());
+		checkBoxes.put(GenDocWizard.COMMENT, chkComment.getSelection());
+		checkBoxes.put(GenDocWizard.INFORMATION, chkInformation.getSelection());
+		checkBoxes.put(GenDocWizard.IMPORTS, chkImport.getSelection());
+		checkBoxes.put(GenDocWizard.EXTENSIONS, chkExtension.getSelection());
+		checkBoxes.put(GenDocWizard.COMPONENTS, chkComponents.getSelection());
+		checkBoxes.put(GenDocWizard.EQUATIONS, chkEquations.getSelection());
+		checkBoxes.put(GenDocWizard.REVISIONS, chkRevisions.getSelection());
 		return checkBoxes;
 	}
 }

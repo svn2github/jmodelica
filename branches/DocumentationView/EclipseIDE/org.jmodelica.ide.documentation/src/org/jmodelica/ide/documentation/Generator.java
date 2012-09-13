@@ -13,11 +13,10 @@ import java.util.HashMap;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.imageio.ImageIO;
-
 import org.eclipse.core.resources.IFile;
 import org.jmodelica.icons.Icon;
+import org.jmodelica.ide.documentation.wizard.GenDocWizard;
 import org.jmodelica.ide.helpers.EclipseUtil;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.helpers.Util;
@@ -29,6 +28,7 @@ import org.jmodelica.modelica.compiler.FullClassDecl;
 import org.jmodelica.modelica.compiler.ImportClause;
 import org.jmodelica.modelica.compiler.Program;
 import org.jmodelica.modelica.compiler.ShortClassDecl;
+import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.UnknownClassDecl;
 
 public class Generator {
@@ -54,7 +54,7 @@ public class Generator {
 	 * Creates the HTML head, including css definitions and a JavaScript file path.
 	 * @param scriptPath The absolute path to a JavaScript file.
 	 */
-	public static String genHead(){
+	public static final String genHead(){
 		return "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">" +
 				N0 + "<html xmlns=\"http://www.w3.org/1999/xhtml\">" + 
 				N1 + "<head>" + 
@@ -92,16 +92,28 @@ public class Generator {
 				N2 + "</style>" + N2 + "<!-- END OF CSS -->";
 	}
 
-	public static String genJavaScript(String scriptPath){
-		return  N2 + "<!-- JAVASCRIPT -->" +
-				N2 + "<script type=\"text/javascript\" src=\"" + scriptPath + "\">" + "</script>" + 
-				N2 + "<script type=\"text/javascript\">" + 
+	/**
+	 * Generates the necessary HTML code to include JavaScript for the documentation view.
+	 * This includes initializing TinyMCE and adding the functions to handle button clicks. 
+	 * @param scriptPath absolute path to TinyMCE 
+	 * @return
+	 */
+	public static String genJavaScript(String scriptPath, boolean initTinyMCE){
+		StringBuilder sb = new StringBuilder();
+		sb.append(
+				N2 + "<!-- JAVASCRIPT -->" +
+						N2 + "<script type=\"text/javascript\" src=\"" + scriptPath + "\">" + "</script>" + 
+						N2 + "<script type=\"text/javascript\">");
+		if (initTinyMCE){
+			sb.append(N3 + Scripts.SCRIPT_INIT_TINY_MCE);
+		}
+		sb.append(
 				N3 + "window.onunload = null;" +
-				N3 + "Window.OnBeforeUnload = null;" +
-				Scripts.PRE_INFO_EDIT + Scripts.PRE_REV_EDIT + Scripts.POST_INFO_EDIT + Scripts.POST_REV_EDIT + Scripts.CANCEL_INFO + Scripts.CANCEL_REV +
-				N2 + "</script>" +
-				N2 + "<!-- END OF JAVASCRIPT -->";
-
+						N3 + "Window.OnBeforeUnload = null;" +
+						Scripts.PRE_INFO_EDIT + Scripts.PRE_REV_EDIT + Scripts.POST_INFO_EDIT + Scripts.POST_REV_EDIT + Scripts.CANCEL_INFO + Scripts.CANCEL_REV +
+						N2 + "</script>" +
+						N2 + "<!-- END OF JAVASCRIPT -->");
+		return sb.toString();
 	}
 
 	public static String genHeader(){
@@ -148,16 +160,29 @@ public class Generator {
 		return content.toString();
 	}
 
+	/**
+	 * Generates HTML code for showing the icon, restriction and name of the FullClassDecl
+	 * @param fcd the FullClassDecl
+	 * @param folderPath Path to the icon
+	 * @param offline Whether its used for documentation view or documentation generation. In 
+	 * the latter case the icon needs to be copied and the path has to be made relative
+	 * @return	The HTML string
+	 */
 	public static String genTitle(FullClassDecl fcd, String folderPath, boolean offline){
 		StringBuilder content = new StringBuilder();
 		String name = fcd.getName().getID();
 		content.append(N4 + "<!-- CLASS ICON, RESTRICTION AND NAME -->");
 		content.append(N4 +"<h1>");
-		content.append(N5 + genIcon(fcd, folderPath + "icon.png", offline));
+		content.append(N5 + genIcon(fcd, folderPath + "icon.png"));
 		content.append(N5 + fcd.getRestriction() + " " + name + N4 + "</h1>" + N4 + "<!-- END OF CLASS ICON, RESTRICTION AND NAME -->");
 		return content.toString();
 	}
 
+	/**
+	 * Generates the HTML code for showing the comment in the FullClassDecl, if any
+	 * @param fcd The FullClassDecl
+	 * @return The HTML string
+	 */
 	public static String genComment(FullClassDecl fcd){
 		if(fcd.hasStringComment()){
 			return N4 + "<!-- COMMENT -->" + N4 + "<div class=\"text\">" + N5 + "<i>" + fcd.stringComment() + "</i>" + N4 + "</div> "+ N4 + "<!-- END OF COMMENT -->";
@@ -165,9 +190,20 @@ public class Generator {
 		return "";
 	}
 
-	public static String genInfo (FullClassDecl fcd, boolean offline){
+	/**
+	 * Generates HTML code for showing the information of the FullClassDecl
+	 * @param fcd The FullClassDecl
+	 * @param offline Whether its used for documentation view or documentation generation. In 
+	 * the latter case the information will not be editable, and the 'Edit' button should not be included
+	 * @return The HTML String
+	 */
+	public static String genInfo (FullClassDecl fcd, boolean offline, SourceRoot sourceRoot){
+
 		StringBuilder content = new StringBuilder();
-		String embeddedHTML = fcd.annotation().forPath("Documentation/info").string();
+		String embeddedHTML;
+		synchronized (fcd.state()){
+			embeddedHTML = fcd.annotation().forPath("Documentation/info").string();
+		}
 		content.append(N4 + "<!-- INFO -->");
 		if (offline){
 			content.append(N4 + "<h2 id=\"buttonInsertion\">" + N5 + "Information"  + N4 + "</h2>");
@@ -175,8 +211,15 @@ public class Generator {
 			//figure out if we're in a library. This might give false positives
 			//since it treats not found files as library files
 			String disabled = "";
-			Maybe<IFile> iFile = EclipseUtil.getFileForPath(fcd.containingFileName());
-			boolean isLib = (iFile.isNothing() ? true : Util.isInLibrary(iFile.value()));
+
+			boolean isLib;
+			synchronized (fcd.state()){
+				IFile file = fcd.getDefinition().getFile();
+				isLib =  !(file != null && file.getProject() == sourceRoot.getProject());
+			}
+
+			//Maybe<IFile> iFile = EclipseUtil.getFileForPath(fcd.containingFileName());
+			//boolean isLib = (iFile.isNothing() ? true : Util.isInLibrary(iFile.value()));
 			if (isLib){
 				disabled="disabled='disabled'";
 			}
@@ -195,70 +238,105 @@ public class Generator {
 		return content.toString();
 	}
 
+	/**
+	 * Generates the HTML code for showing the classes contained in the FullClassDecl fcd
+	 * @param fcd The FullClassDecl
+	 * @return The HTML string
+	 */
 	public static String genClasses (FullClassDecl fcd){
 		if (fcd.classes() == null || fcd.classes().size() == 0) return "";
 		StringBuilder content = new StringBuilder();
 		content.append(N4 + "<!-- PACKAGE CONTENT -->");
 		content.append(N4 + "<h2>Classes</h2>");
-		ArrayList<ClassDecl> fcds = fcd.classes();
-		content.append(N5 + "<div>" + N6 + "<table BORDER=\"3\" CELLPADDING=\"3\" width=\"812\" CELLSPACING=\"0\" >" +
-				N7 + "<tr BGCOLOR=\"#CCCCFF\" align=\"left\">" + 
-				N8 + "<td><b><span class=\"text\">Class</span></b></td>" + 
-				N8 + "<td><b><span class=\"text\">Restriction</span></b></td>" +
-				N8 + "<td><b><span class=\"text\">Description</span></b></td></b>" + N7 + "</tr>");
-		for (ClassDecl cd : fcds){
-			content.append(N7 + "<tr>");
-			String classCategory;
-			if (cd instanceof FullClassDecl){
-				classCategory = ((FullClassDecl)cd).getRestriction().toString();
-			}else if (cd instanceof ShortClassDecl){
-				classCategory = PRIMITIVE_TYPE;
-			}else{
-				classCategory = "";
-			}
-			String comment = "";
-			if(cd.hasStringComment() && cd.stringComment() != null){
-				comment = modelicaToHTML(cd.stringComment());
-			}
+		synchronized (fcd.state()){
+			ArrayList<ClassDecl> fcds = fcd.classes();
+			content.append(N5 + "<div>" + N6 + "<table BORDER=\"3\" CELLPADDING=\"3\" width=\"812\" CELLSPACING=\"0\" >" +
+					N7 + "<tr BGCOLOR=\"#CCCCFF\" align=\"left\">" + 
+					N8 + "<td><b><span class=\"text\">Class</span></b></td>" + 
+					N8 + "<td><b><span class=\"text\">Restriction</span></b></td>" +
+					N8 + "<td><b><span class=\"text\">Description</span></b></td></b>" + N7 + "</tr>");
+			for (ClassDecl cd : fcds){
+				content.append(N7 + "<tr>");
+				String classCategory;
+				if (cd instanceof FullClassDecl){
+					classCategory = ((FullClassDecl)cd).getRestriction().toString();
+				}else if (cd instanceof ShortClassDecl){
+					classCategory = PRIMITIVE_TYPE;
+				}else{
+					classCategory = "";
+				}
+				String comment = "";
+				if(cd.hasStringComment() && cd.stringComment() != null){
+					comment = modelicaToHTML(cd.stringComment());
+				}
 
-			content.append(N8 + "<td>" + classDeclLink(cd, false) + "</td>" + 
-					N8 + "<td><span class=\"text\">" + classCategory + "</span></td>" + N8 + "<td><span class=\"text\">" + comment + "&nbsp;" + "</span></td>");
-			content.append(N7 + "</tr>");
+				content.append(N8 + "<td>" + classDeclLink(cd, false) + "</td>" + 
+						N8 + "<td><span class=\"text\">" + classCategory + "</span></td>" + N8 + "<td><span class=\"text\">" + comment + "&nbsp;" + "</span></td>");
+				content.append(N7 + "</tr>");
+			}
 		}
 		content.append(N6 + "</table>" + N5 + "</div>" + N4 + "<!-- END OF PACKAGE CONTENT -->");
 		return content.toString();
 	}
 
+	/**
+	 * Generates the HTML code for showing the imports in the FullClassDecl fcd
+	 * @param fcd The FullClassDecl
+	 * @return The HTML string
+	 */
 	public static String genImports(FullClassDecl fcd){
-		if (fcd.getNumImport() == 0) return "";
-		StringBuilder content = new StringBuilder();
-		content.append(N4 + "<!-- IMPORTS -->");
-		content.append(N4 + "<h2>Imports</h2>");
-		content.append(N4 + "<div id=\"imports\">");
-		for (int i = 0; i < fcd.getNumImport(); i++){
-			ImportClause ic = fcd.getImport(i);
-			ic.findClassDecl();
-			content.append(N5 + "<div class=\"text\">" + N6 + Generator.classDeclLink(ic.findClassDecl(), true) + N5 + "</div>");
+		StringBuilder content;
+		synchronized (fcd.state()){
+
+			if (fcd.getNumImport() == 0) return "";
+			content = new StringBuilder();
+			content.append(N4 + "<!-- IMPORTS -->");
+			content.append(N4 + "<h2>Imports</h2>");
+			content.append(N4 + "<div id=\"imports\">");
+			for (int i = 0; i < fcd.getNumImport(); i++){
+				ImportClause ic = fcd.getImport(i);
+				ic.findClassDecl();
+				content.append(N5 + "<div class=\"text\">" + N6 + Generator.classDeclLink(ic.findClassDecl(), true) + N5 + "</div>");
+			}
 		}
 		content.append(N4 + "</div>" + N4 + "<!-- END OF IMPORTS -->");
 		return content.toString();
 	}
 
+	/**
+	 * Generates the HTML code for showing the extensions in the FullClassDecl fcd
+	 * @param fcd The FullClassDecl
+	 * @return The HTML string
+	 */
 	public static String genExtensions(FullClassDecl fcd){
-		if (fcd.getNumSuper() == 0) return "";
-		StringBuilder content = new StringBuilder();
-		content.append(N4 + "<!-- EXTENSIONS -->");
-		content.append(N4 + "<h2>Extends</h2>");
-		content.append(N4 + "<div id=\"extensions\">");
-		for (int i=0; i < fcd.getNumSuper(); i++) {
-			content.append(N5 + "<div class=\"text\">" + N6 + Generator.classDeclLink(fcd.getSuper(i).findClassDecl(), true) + N5 + "</div>");
+		StringBuilder content;
+		synchronized (fcd.state()){
+			if (fcd.getNumSuper() == 0) return "";
+			content = new StringBuilder();
+			content.append(N4 + "<!-- EXTENSIONS -->");
+			content.append(N4 + "<h2>Extends</h2>");
+			content.append(N4 + "<div id=\"extensions\">");
+			for (int i=0; i < fcd.getNumSuper(); i++) {
+				if (fcd.getSuper(i).findClassDecl() instanceof UnknownClassDecl){
+					//content.append(N5 + "<div class=\"text\">" + N6 + "Unknown Class" + N5 + "</div>");
+				}else{
+					content.append(N5 + "<div class=\"text\">" + N6 + Generator.classDeclLink(fcd.getSuper(i).findClassDecl(), true) + N5 + "</div>");
+				}
+			}
 		}
 		content.append(N4 + "</div>" + N4 + "<!-- END OF EXTENSIONS -->");
 		return content.toString();
 	}
 
+	/**
+	 * Generates the HTML code for showing the components in the FullClassDecl fcd
+	 * @param fcd The FullClassDecl
+	 * @return The HTML string
+	 */
 	public static String genComponents(FullClassDecl fcd){
-		if (fcd.getNumComponentDecl() == 0) return "";
+		synchronized (fcd.state()){
+			if (fcd.getNumComponentDecl() == 0) return "";
+		}
 		StringBuilder content = new StringBuilder();
 		content.append(N4 + "<!-- COMPONENTS -->");
 		content.append(N4 + "<h2> Components</h2>" + 
@@ -269,35 +347,44 @@ public class Generator {
 				N8 + "<td><b><span class=\"text\">Name</span></b></td>" + 
 				N8 + "<td><b><span class=\"text\">Description</span></b></td></b>" + 
 				N7 + "</tr>");
-		for (int i=0;i<fcd.getNumComponentDecl();i++){
-			content.append(N7 + "<tr>");
-			ComponentDecl cd = fcd.getComponentDecl(i);
-			String stringComment = "&nbsp;"; //without the html whitespace the cell isn't drawn properly(?)
-			if (cd.getComment().hasStringComment()){
-				stringComment = Generator.modelicaToHTML(cd.getComment().getStringComment().getComment());
-			}
-			Access a = cd.getClassName();
-			String s = a.name(); //correct path
-			ClassDecl cdd = cd.findClassDecl();
-			if (cdd.isUnknown()){content.append(
-					N8 + "<td>" + "<span class=\"text\">" + s + "</span></td>" +
-							N8 + "<td><span class=\"text\">" + cd.getName().getID() + "</span></td>" +
-							N8 + "<td><span class=\"text\">" + stringComment + "</span></td>");
-			}else{
-				content.append(
-						N8 + "<td>" + Generator.classDeclLink(cdd, false) + "</td>" + 
+		synchronized (fcd.state()){
+			for (int i=0;i<fcd.getNumComponentDecl();i++){
+				content.append(N7 + "<tr>");
+				ComponentDecl cd = fcd.getComponentDecl(i);
+				String stringComment = "&nbsp;"; //without the html whitespace the cell isn't drawn properly(?)
+				if (cd.getComment().hasStringComment()){
+					stringComment = Generator.modelicaToHTML(cd.getComment().getStringComment().getComment());
+				}
+				Access a = cd.getClassName();
+				String s = a.name(); //correct path
+				ClassDecl cdd = cd.findClassDecl();
+				if (cdd.isUnknown()){content.append(
+						N8 + "<td>" + "<span class=\"text\">" + s + "</span></td>" +
 								N8 + "<td><span class=\"text\">" + cd.getName().getID() + "</span></td>" +
 								N8 + "<td><span class=\"text\">" + stringComment + "</span></td>");
+				}else{
+					content.append(
+							N8 + "<td>" + Generator.classDeclLink(cdd, false) + "</td>" + 
+									N8 + "<td><span class=\"text\">" + cd.getName().getID() + "</span></td>" +
+									N8 + "<td><span class=\"text\">" + stringComment + "</span></td>");
+				}
+				content.append(N7 + "</tr>");
 			}
-			content.append(N7 + "</tr>");
 		}
 		content.append(N6 + "</table>" + N5 + "</div>");
 		content.append(N4 + "<!-- END OF COMPONENTS -->");
 		return content.toString();
 	}
 
+	/**
+	 * Generates the HTML code for showing the equations in the FullClassDecl fcd
+	 * @param fcd The FullClassDecl
+	 * @return The HTML string
+	 */
 	public static String genEquations(FullClassDecl fcd){
-		if (fcd.getNumEquation() == 0) return "";
+		synchronized (fcd.state()){
+			if (fcd.getNumEquation() == 0) return "";
+		}
 		StringBuilder content = new StringBuilder();
 		String blue = "codeBlue";
 		String gray = "codeGray";
@@ -305,26 +392,42 @@ public class Generator {
 		content.append(N4 + "<!-- EQUATIONS -->");
 		content.append(N4 + "<h2> Equations</h2>");
 		content.append(N4 + "<div id=\"equations\">");
-		for (int i=0;i<fcd.getNumEquation();i++) {
-			AbstractEquation ae = fcd.getEquation(i);
-			String tmp = color%2 == 0 ? blue : gray;
-			content.append(N5 + "<div class=\"" + tmp + "\"> " + N6 + Generator.modelicaToHTML(ae.toString()) + N5 + "</div>");
-			color++;
+		synchronized (fcd.state()){
+			for (int i=0;i<fcd.getNumEquation();i++) {
+				AbstractEquation ae = fcd.getEquation(i);
+				String tmp = color%2 == 0 ? blue : gray;
+				content.append(N5 + "<div class=\"" + tmp + "\"> " + N6 + Generator.modelicaToHTML(ae.toString()) + N5 + "</div>");
+				color++;
+			}
 		}
 		content.append(N4 + "</div>" + N4 + "<!-- END OF EQUATIONS -->");
 		return content.toString();
 	}
 
-	public static String genRevisions(FullClassDecl fcd, boolean offline){
+	/**
+	 * Generates the HTML code for showing the revision information of the FullClassDecl fcd
+	 * @param fcd The FullClassDecl
+	 * @param offline Whether its used for documentation view or documentation generation. In 
+	 * the latter case the revision information will not be editable, and the 'Edit' button should not be included
+	 * @return The HTML string
+	 */
+	public static String genRevisions(FullClassDecl fcd, boolean offline, SourceRoot sourceRoot){
 		StringBuilder content = new StringBuilder();
-		String revision = fcd.annotation().forPath("Documentation/revisions").string();
+		String revision;
+		synchronized (fcd.state()){
+			revision = fcd.annotation().forPath("Documentation/revisions").string();
+		}
 		content.append(N4 + "<!-- REVISIONS -->");
 		if(offline){
 			content.append(N4 + "<h2 id=\"buttonInsertion\">" + N5 + "Revisions&nbsp;" + N4 + "</h2>");
 		}else{
 			String disabled = "";
-			Maybe<IFile> iFile = EclipseUtil.getFileForPath(fcd.containingFileName());
-			boolean isLib = (iFile.isNothing() ? true : Util.isInLibrary(iFile.value()));
+			IFile file;
+			synchronized (fcd.state()){
+				file = fcd.getDefinition().getFile();
+			}
+			boolean isLib =  !(file != null && file.getProject() == sourceRoot.getProject());
+
 			if (isLib){
 				disabled="disabled='disabled'";
 			}
@@ -343,7 +446,10 @@ public class Generator {
 	}
 
 	/**
-	 * Appends a footer to the end of the document. The content of the footer is determined by the constant FOOTER
+	 * NOTE: Currently does not add a footer.
+	 * Appends a footer to the end of the document.
+	 * @param footer
+	 * @return
 	 */
 	public static String genFooter(String footer){
 		StringBuilder content = new StringBuilder();
@@ -354,13 +460,26 @@ public class Generator {
 		return content.toString();
 	}
 
+	/**
+	 * Generates the HTML code for showing the ShortClassDecl scd
+	 * @param scd The ShortClassDecl
+	 * @return The HTML string
+	 */
 	public static String genShortClassDecl(ShortClassDecl scd){
 		StringBuilder content = new StringBuilder();
-		content.append(N4 + "<h1>" + scd.getRestriction() + " " + scd.name() + "</h1>");
-		content.append(N4 + "<div class=\"code\">" + N5 + scd.prettyPrint("") + N4 + "</div>");
+		synchronized (scd.state()){
+			content.append(N4 + "<h1>" + scd.getRestriction() + " " + scd.name() + "</h1>");
+			content.append(N4 + "<div class=\"code\">" + N5 + scd.prettyPrint("") + N4 + "</div>");
+		}
 		return content.toString();
 	}
 
+	/**
+	 * Generates the HTML code for showing the UnknownClassDecl fcd
+	 * @param fcd The UnknownClassDecl
+	 * @param className The name of the class not found, since this can not be extracted from fcd
+	 * @return The HTML string
+	 */
 	public static String genUnknownClassDecl(UnknownClassDecl fcd, String className) {
 		return N5 + "<span>Error: The class <b>" + className + "</b> could not be found.</span>";
 	}
@@ -375,7 +494,7 @@ public class Generator {
 		if (s.endsWith("/")){
 			s = s.substring(0, s.length()-1);
 		}
-		return s.startsWith("Modelica://") || s.startsWith("modelica://") ? s.substring("modelica://".length()) : s;
+		return s.toLowerCase().startsWith("modelica://") ? s.substring("modelica://".length()) : s;
 	}
 
 	/**
@@ -400,11 +519,13 @@ public class Generator {
 		ClassDecl tmp = cd;
 		ArrayList<String> path = new ArrayList<String>();
 		String name = cd.name();
-		do{
-			path.add(tmp.name());
-			tmp = tmp.enclosingClassDecl();
+		synchronized (cd.state()){
+			do{
+				path.add(tmp.name());
+				tmp = tmp.enclosingClassDecl();
 
-		}while(tmp != null && !name.equals(tmp.name()));
+			}while(tmp != null && !name.equals(tmp.name()));
+		}
 		for (int i = path.size() - 1; i >= 0; i--){
 			sb.append(path.get(i));
 			if (i != 0){
@@ -426,7 +547,6 @@ public class Generator {
 		StringBuffer urlSb = new StringBuffer();
 		while (urlMatcher.find()){
 			MatchResult mr = urlMatcher.toMatchResult();
-			String match = htmlCode.substring(mr.start(), mr.end()); //e.g "Modelica://Modelica.UsersGuide.Overview"
 			urlMatcher.appendReplacement(urlSb, "");
 		}
 		urlMatcher.appendTail(urlSb);
@@ -434,31 +554,51 @@ public class Generator {
 	}
 
 	/**
+	 * Creates an .png image of the icon (32 by 32 px) associated with the full class declaration fcd, and return a HTML string 
+	 * containing an IMG tag linking to the file.
+	 * @param cd The full class declaration associated with the icon.
+	 * @param fullPath The desired path and file name of the .png file.
+	 * @return The HTML string
+	 */
+	public static String genIcon(ClassDecl cd, String fullPath){
+		return genIcon(cd, fullPath, 32,32);	
+	}
+
+	/**
 	 * Creates an .png image of the icon associated with the full class declaration fcd, and return a HTML string 
 	 * containing an IMG tag linking to the file.
-	 * @param fcd The full class declaration associated with the icon.
+	 * @param cd The full class declaration associated with the icon.
 	 * @param fullPath The desired path and file name of the .png file.
-	 * @return
+	 * @param width The width of the icon in pixels
+	 * @param height The height of the icon in pixels
+	 * @return The HTML string
 	 */
-	public static String genIcon(ClassDecl cd, String fullPath, boolean offline){
+	public static String genIcon(ClassDecl cd, String fullPath,int width, int height){
 		if (!(cd instanceof FullClassDecl)) return "";
 		FullClassDecl fcd = (FullClassDecl) cd;
-		if (renderIcon(fcd,fullPath)){
-//			if (!offline){
-				return "<img src=\"file:/" + fullPath + "\">";
-//			}else{
-//				return "<img src=\"" + fullPath + "\">"; 
-//			}
+		if (renderIcon(fcd,fullPath, width, height)){
+			return "<img src=\"file:/" + fullPath + "\">";
 
 		}
 		return "<!-- No icon available -->";	
 	}
 
-	private static boolean renderIcon(FullClassDecl fcd, String folderPath){
+	/**
+	 * Renders the icon and saves it to file as a .png
+	 * @param fcd The FullClassDecl the icon belongs to
+	 * @param folderPath The location the icon should be saved it
+	 * @param width The width of the icon in pixels
+	 * @param height The height of the icon in pixels
+	 * @return
+	 */
+	private static boolean renderIcon(FullClassDecl fcd, String folderPath, int width, int height){
 		if (fcd.hasIcon()){
 			try {
-				Icon icon = fcd.icon();
-				BufferedImage bi =fcd.render(icon, 32,32);
+				Icon icon;
+				synchronized(fcd.state()){
+					icon = fcd.icon();
+				}
+				BufferedImage bi =fcd.render(icon, width,height);
 				String fileName = folderPath;
 				File outputfile = new File(fileName);
 				ImageIO.write(bi, "png",outputfile);
@@ -532,7 +672,7 @@ public class Generator {
 	public static String processEmbeddedHTML(String htmlCode, ClassDecl cd){
 		//process <a href="...">
 		htmlCode =  removeHTMLTag(htmlCode); //don't want nested HTML tags
-		//just adds title
+		//Add a title to every "a href="
 		String urlPrefix = "a href=";
 		Pattern urlPattern = Pattern.compile(urlPrefix + "\"(.+?)\"", Pattern.CASE_INSENSITIVE | Pattern.CANON_EQ);
 		Matcher urlMatcher = urlPattern.matcher(htmlCode);
@@ -540,7 +680,6 @@ public class Generator {
 		while (urlMatcher.find()){
 			MatchResult mr = urlMatcher.toMatchResult();
 			String match = htmlCode.substring(mr.start() + urlPrefix.length(), mr.end()); //e.g "Modelica://Modelica.UsersGuide.Overview"
-			//String matchWithoutParentesis = match.substring(1, match.length() -1);
 			urlMatcher.appendReplacement(urlSb, htmlCode.substring(mr.start(), mr.end()) + " title=" + match);
 		}
 		urlMatcher.appendTail(urlSb);
@@ -556,7 +695,10 @@ public class Generator {
 			if (match.startsWith("../")){
 				match = match.substring("../".length());
 			}
-			String absPath = cd.uri2path(match);
+			String absPath;
+			synchronized(cd.state()){
+				absPath = cd.uri2path(match);
+			}
 			if (absPath == null) absPath = match;
 			String imgTag;
 
@@ -569,6 +711,12 @@ public class Generator {
 		return imgSb.toString();
 	}
 
+	/**
+	 * Copies a file. If present, HTML (file://) and Modelica (Modelica://) prefixes are removed. 
+	 * @param srFile The source file
+	 * @param dtFile The destination file
+	 * @return
+	 */
 	private static boolean copyFile(String srFile, String dtFile){
 		try{
 			if(srFile.startsWith("file://")) srFile = srFile.substring("file://".length());
@@ -596,7 +744,19 @@ public class Generator {
 		return true;
 	}
 
-	public static String genDocumentation(ClassDecl cd, Program program, String path, String footer, String className, String rootPath, String libName, HashMap<String, Boolean> options) {
+	/**
+	 * Generates all the documentation for a given ClassDecl cd
+	 * @param cd The ClassDecl
+	 * @param program The org.jmodelica.modelica.compiler.Program, needed for class lookups
+	 * @param path The path to the icon
+	 * @param footer String appeneded to the end of the document
+	 * @param className The name of the class (in case cd is an instance of an UnknownClassDecl
+	 * @param rootPath The path to the destination of the generation, in case of offline generation
+	 * @param libName The name of the library containing cd 
+	 * @param options What part of the class should be generated (comment, info, imports etc.)
+	 * @return The HTML string describing the ClassDecl
+	 */
+	public static String genDocumentation(ClassDecl cd, SourceRoot sourceRoot, Program program, String path, String footer, String className, String rootPath, String libName, HashMap<String, Boolean> options) {
 		StringBuilder content = new StringBuilder();
 		content.append(Generator.genHead());
 		//don't generate JavaScript
@@ -615,18 +775,26 @@ public class Generator {
 		if (!(cd instanceof FullClassDecl)) return "";
 		FullClassDecl fcd = (FullClassDecl) cd;
 		content.append(genTitle(fcd, path, true));
-		if (options.get(DocGenDialog.COMMENT)) content.append(genComment(fcd));
-		if (options.get(DocGenDialog.INFORMATION)) content.append(genInfo(fcd, true));
-		if (options.get(DocGenDialog.IMPORTS))content.append(genImports(fcd));
-		if (options.get(DocGenDialog.EXTENSIONS))content.append(genExtensions(fcd));
+		if (options.get(GenDocWizard.COMMENT)) content.append(genComment(fcd));
+		if (options.get(GenDocWizard.INFORMATION)) content.append(genInfo(fcd, true, sourceRoot));
+		if (options.get(GenDocWizard.IMPORTS))content.append(genImports(fcd));
+		if (options.get(GenDocWizard.EXTENSIONS))content.append(genExtensions(fcd));
 		content.append(genClasses(fcd));
-		if (options.get(DocGenDialog.COMPONENTS))content.append(genComponents(fcd));
-		if (options.get(DocGenDialog.EQUATIONS))content.append(genEquations(fcd));
-		if (options.get(DocGenDialog.REVISIONS))content.append(genRevisions(fcd, true));
+		if (options.get(GenDocWizard.COMPONENTS))content.append(genComponents(fcd));
+		if (options.get(GenDocWizard.EQUATIONS))content.append(genEquations(fcd));
+		if (options.get(GenDocWizard.REVISIONS))content.append(genRevisions(fcd, true, sourceRoot));
 		content.append(genFooter(footer));
 		return resolveLinksForGenDoc(content.toString(), rootPath, libName, cd);
 	}
 
+	/**
+	 * Makes all links relative for offline documentation generation
+	 * @param documentation The HTML string of the class
+	 * @param rootPath The destination folder of the generation
+	 * @param libName The name of the library
+	 * @param cd The ClassDecl 
+	 * @return
+	 */
 	private static String resolveLinksForGenDoc(String documentation, String rootPath, String libName, ClassDecl cd){
 		//make all links relative to "libName"
 		//start by figuring out the path from libName to cd
@@ -690,10 +858,19 @@ public class Generator {
 		return imgSb.toString();
 	}
 
+	/**
+	 * Given two Modelica links, returns a string that describes the directory navigation required
+	 * to go from 'from' to 'to'
+	 * 
+	 * Exampel: from 	= Modelica.Analog.Electrical.Resistor
+	 * 			to		= Modelica.Analog.Inductive.Capacitance
+	 * 			return 	= ../../Inductive/Capacitance
+	 * 
+	 * @param from The source
+	 * @param to The destination
+	 * @return the relative path from source to destination
+	 */
 	public static String findRelativePath(String from, String to){
-		//Eg: 	from 	= Modelica.Analog.Electrical.Resistor
-		//		to		= Modelica.Analog.Inductive.Capacitance
-		//		return	= ../../Inductive/Capacitance
 		String[] fromArray = from.split("\\.");
 		String[] toArray = to.split("\\.");
 		int fromDepth = fromArray.length;
@@ -715,15 +892,6 @@ public class Generator {
 		for (int i = 0; i < down; i++){
 			relPath.append(toArray[i+commonDepth] + "/");
 		}
-
 		return relPath.toString();
 	}
-	//	public static void main(String[] args){
-	//		String test = findRelativePath("Modelica.Analog.Electrical.Resistor", "Modelica.Analog.Inductive.Capacitance");
-	//		String test2 = findRelativePath("Modelica", "Modelica.Analog.Inductive.Capacitance");
-	//		String test3 = findRelativePath("Modelica.Analog.Electrical.Resistor", "Modelica");
-	//		System.out.println(test);
-	//		System.out.println(test2);
-	//		System.out.println(test3);
-	//	}
 }

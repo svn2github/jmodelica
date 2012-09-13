@@ -32,32 +32,29 @@ public class DocumentationEditor extends EditorPart {
 	private FullClassDecl fullClassDecl;
 	private BrowserContent browserContent;
 	
-	public DocumentationEditor() {
-	}
-	
 	@Override
 	public void createPartControl(Composite parent) {
 		ISourceProviderService sourceProviderService = (ISourceProviderService)this.getSite().getWorkbenchWindow().getService(ISourceProviderService.class);
 		NavigationProvider navProv = (NavigationProvider) sourceProviderService.getSourceProvider(NavigationProvider.NAVIGATION_FORWARD);
-		//IHandlerService handlerService = (IHandlerService) getSite().getService(IHandlerService.class);
 		sourceRoot = (SourceRoot) Activator.getASTRegistry().lookupAST(null, this.input.getProject());
 		icd = sourceRoot.getProgram().getInstProgramRoot().simpleLookupInstClassDecl(this.input.getClassName());
-		//openComponentStack = new Stack<InstComponentDecl>();
-		//program = sourceRoot.getProgram();
-		//String s = input.getClassName();
-		
 		fullClassDecl = input.getFullClassDecl();
-		if (fullClassDecl == null){
-			//fullClassDecl = (FullClassDecl) program.simpleLookupClassDotted(input.getClassName());
-		}
 		browser = new Browser(parent, SWT.NONE);
-		//getSite().getPage().close()
-		browserContent = new BrowserContent(fullClassDecl, browser, icd, sourceRoot.getProgram(), navProv, this.input.getGenDoc());
+		browserContent = new BrowserContent(fullClassDecl, browser, icd, sourceRoot, navProv, this.input.getGenDoc());
      }
 	
+	/**
+	 * Navigate to the previous page in the browser history
+	 * @return whether the action was successful
+	 */
 	public boolean back(){
 		return browserContent.back();
 	}
+	
+	/**
+	 * Navigate to the next page in the browser history
+	 * @return whether the action was successful
+	 */
 	public boolean forward(){
 		return browserContent.forward();
 	}
@@ -109,10 +106,14 @@ public class DocumentationEditor extends EditorPart {
             contents.setFocus();
 	}
 	
-	public String getCurrenetClass(){
+	public String getCurrentClass(){
 		return browserContent.getCurrentClass();
 	}
 
+	/**
+	 * Generate documentation for the full class declaration elem
+	 * @param elem
+	 */
 	public void generateDocumentation(FullClassDecl elem) {
 		browserContent.generateDocumentation(elem);
 		

@@ -16,6 +16,7 @@ import org.jmodelica.ide.documentation.Generator;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.FullClassDecl;
 import org.jmodelica.modelica.compiler.Program;
+import org.jmodelica.modelica.compiler.SourceRoot;
 
 public class GenDocWizard extends Wizard {
 	private Program program;
@@ -29,15 +30,27 @@ public class GenDocWizard extends Wizard {
 	private String path;
 	private String rootPath;
 	private String libName;
+	private SourceRoot sourceRoot;
 	private HashMap<String, Boolean> checkBoxes;
+	public static final String COMMENT = "comment";
+	public static final String INFORMATION = "information";
+	public static final String IMPORTS = "imports";
+	public static final String EXTENSIONS = "extensions";
+	public static final String COMPONENTS = "components";
+	public static final String EQUATIONS = "equations";
+	public static final String REVISIONS = "revisions";
 
-	public GenDocWizard(FullClassDecl fcd, Program program, String footer){
+	public GenDocWizard(FullClassDecl fcd, Program program, SourceRoot sourceRoot, String footer){
 		super();
 		this.fcd = fcd;
 		this.program = program;
+		this.sourceRoot = sourceRoot;
 		this.footer = footer;
 
 	}
+	/**
+	 * Add an instance of GenDocWizardPageOne and GenDocWizardPageTwo to the wizard
+	 */
 	public void addPages() {
 		pageOne = new GenDocWizardPageOne(PAGE_ONE);
 		addPage(pageOne);
@@ -45,6 +58,14 @@ public class GenDocWizard extends Wizard {
 		addPage(pageTwo);
 
 	}
+	/**
+	 * Does the following:
+	 * Collect the wizard information (inclusions and path).
+	 * Start up a progress monitor.
+	 * Generates documentation for the full class declaration
+	 * Recursively generates documentation for all the classes in the full class declaration.
+	 * 
+	 */
 	public boolean performFinish() {
 		rootPath = ((GenDocWizardPageTwo)getPage(GenDocWizard.PAGE_TWO)).getPath();
 		checkBoxes = ((GenDocWizardPageOne)getPage(GenDocWizard.PAGE_ONE)).getCheckBoxes();
@@ -67,7 +88,7 @@ public class GenDocWizard extends Wizard {
 					monitor.beginTask("Generating documentation...", children.size() + 1); 
 					monitor.subTask(libName);
 					monitor.worked(1);
-					String code = Generator.genDocumentation(fcd, program, path + "\\", footer, "Unknown Class Decl", rootPath, libName, checkBoxes);
+					String code = Generator.genDocumentation(fcd, sourceRoot, program, path + "\\", footer, "Unknown Class Decl", rootPath, libName, checkBoxes);
 					try{
 						FileWriter fstream = new FileWriter(path + "\\index.html");
 						BufferedWriter out = new BufferedWriter(fstream);
@@ -78,14 +99,12 @@ public class GenDocWizard extends Wizard {
 					}
 					monitor.worked(1);
 					for (ClassDecl cd : children){
-						
-						/////////////////////////////// REMOVE
+
 						try {
-							Thread.sleep(300);
+							Thread.sleep(500);
 						} catch (InterruptedException e) {
 						}
-						/////////////////////////////// REMOVE
-						
+
 						if (monitor.isCanceled()){
 							monitor.done();
 							return;
@@ -96,15 +115,13 @@ public class GenDocWizard extends Wizard {
 						try{
 							FileWriter fstream = new FileWriter(newPath + "\\index.html");
 							BufferedWriter out = new BufferedWriter(fstream);
-							out.write(Generator.genDocumentation(cd, program, newPath + "/", footer, "Unknown class decl", rootPath, libName, checkBoxes));
+							out.write(Generator.genDocumentation(cd, sourceRoot, program, newPath + "/", footer, "Unknown class decl", rootPath, libName, checkBoxes));
 							out.close();
 						}catch (Exception ex){
 							JOptionPane.showMessageDialog(null, "Unable to save to file", "Error", JOptionPane.ERROR_MESSAGE, null);
 						}
 						monitor.worked(1);
-						
 					}
-					
 					monitor.done(); 
 				} 
 			});
@@ -115,6 +132,11 @@ public class GenDocWizard extends Wizard {
 		return true;
 	}
 
+	/**
+	 * Saves all the classes found in the full class declaration fcd into children
+	 * @param fcd
+	 * @param children
+	 */
 	private void collectChildren(FullClassDecl fcd, ArrayList<ClassDecl> children) {
 		if (fcd.classes() == null || fcd.classes().size() == 0) return;
 		for (ClassDecl child : fcd.classes()){
