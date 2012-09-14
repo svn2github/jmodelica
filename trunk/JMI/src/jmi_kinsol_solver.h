@@ -33,6 +33,9 @@
  *  Introduce #defines to denote different error codes
  */
 #include <nvector/nvector_serial.h>
+
+#include <sundials/sundials_dense.h>
+
 #include <kinsol/kinsol.h>
 
 #if JMI_AD == JMI_AD_CPPAD
@@ -63,12 +66,23 @@ struct jmi_kinsol_solver_t {
     N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
     N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
     N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
-    N_Vector kin_f_new_scale;      /**< \brief Work vector for updating Kinsol scaling of f */
     realtype kin_scale_update_time; /**< \brief The last time when Kinsol scale was updated */
-    realtype kin_ftol_update_time;  /**< \brief The last time when Kinsol ftol was updated */
+    realtype kin_jac_update_time; /**< \brief The last time when Jacobian was updated */
     realtype kin_ftol;		       /**< \brief Tolerance for F */
     realtype kin_stol;		       /**< \brief Tolerance for Step-size */
+    DlsMat J;                       /**< \brief A copy of the Jacobian matrix */
     
+    realtype* lapack_work;         /**< \brief work vector for lapack */
+    int * lapack_iwork;            /**< \brief work vector for lapack */
+
+    int (*kin_lsolve)(void *kin_mem, N_Vector xx, N_Vector bb, 
+              realtype *res_norm );
+    
+    int num_bounds;
+    int* bound_vindex;             /**< \brief variable index for a bound */
+    int* bound_kind;               /**< \brief +1 for max, -1 for min */    
+    realtype* bounds;              /**< \brief bound vals */
+    realtype* active_bounds;
 };
 
 

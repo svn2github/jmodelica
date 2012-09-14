@@ -78,6 +78,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 	b->min = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->max = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->nominal = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+    b->initial = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 
     switch(solver) {
     case JMI_KINSOL_SOLVER: {
@@ -132,15 +133,50 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         block->F(jmi,block->nominal,block->res,JMI_BLOCK_NOMINAL);
         block->F(jmi,block->min,block->res,JMI_BLOCK_MIN);
         block->F(jmi,block->max,block->res,JMI_BLOCK_MAX);
+        block->F(jmi,block->initial,block->res,JMI_BLOCK_INITIALIZE);
         /* if the nominal is outside min-max -> fix it! */
         for(i=0; i < block->n; ++i) {
-            if(block->nominal[i] > block->max[i])
-                block->nominal[i] = block->max[i];
-            else if(block->nominal[i] < block->min[i])
-                block->nominal[i] = block->min[i];
+            realtype maxi = block->max[i];
+            realtype mini = block->min[i];
+            realtype nomi = block->nominal[i];
+            realtype initi = block->initial[i];
+            booleantype hasSpecificMax = (maxi != BIG_REAL);
+            booleantype hasSpecificMin = (mini != -BIG_REAL);
+            booleantype nominalOk = TRUE;
+            if((nomi > maxi) || (nomi < mini))
+                nominalOk = FALSE;
+
+            if(!nominalOk) {
+                /* fix the nominal value to be inside the allowed range */
+                if((initi > mini) && (initi < maxi) && (initi != 0.0)) {
+                    block->nominal[i] = initi;
+                }
+                else if(hasSpecificMax && hasSpecificMin) {
+                    block->nominal[i] = (maxi + mini) / 2;
+                    if(    (maxi * mini < 0) 
+                        && (fabs(block->nominal[i]) < 1e-2*maxi ))
+                        /* in case of the almost symmetric range take 1% of max */
+                        block->nominal[i] = 1e-2*maxi;
+                }
+                else if(hasSpecificMin)
+                    block->nominal[i] = 
+                            (mini == 0.0) ? 
+                                1.0: 
+                                (mini > 0)?
+                                    mini * (1+UNIT_ROUNDOFF):
+                                    mini * (1-UNIT_ROUNDOFF);
+                else {
+                    block->nominal[i] = 
+                            (maxi == 0.0) ? 
+                                -1.0: 
+                                (maxi > 0)? 
+                                    maxi * (1-UNIT_ROUNDOFF):
+                                    maxi * (1+UNIT_ROUNDOFF);
+                }
+            }
+            block->x[i] = initi;
         }
         
-		block->F(jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
     }
     /*
      * A proper local even iteration should problably be done here.
