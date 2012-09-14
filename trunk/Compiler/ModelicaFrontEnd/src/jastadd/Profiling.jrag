@@ -134,6 +134,18 @@ aspect LightProfiling {
 				ASTNode.log.debug(String.format(fmt, (Object[]) line));
 		}
 		
+		public String[][] rawLog() {
+			while (top.depth > 0) 
+				end(top.name);
+			top.end();
+			
+			java.util.List<String[]> lines = new ArrayList<String[]>();
+			lines.add(top.toStringsRaw());
+			for (InfoNode n : top)
+				lines.add(n.toStringsRaw());
+			
+			return lines.toArray(new String[lines.size()][]);
+		}
 		
 		private InfoItem[] createItems() {
 			InfoItem[] res = new InfoItem[itemClasses.size()];
@@ -180,16 +192,29 @@ aspect LightProfiling {
 				children.add(n);
 			}
 			
-			public String[] toStrings() {
-				String[] res = new String[items.length + 1];
+			private String produceNameHead() {
 				StringBuilder buf = new StringBuilder();
 				for (int j = 0; j < depth; j++)
 					buf.append(INDENT);
 				buf.append(name);
-				res[0] = buf.toString();
+				return buf.toString();
+			}
+			
+			public String[] toStrings() {
+				String[] res = new String[items.length + 1];
+				res[0] = produceNameHead();
 				int i = 1;
 				for (InfoItem it : items)
 					res[i++] = it.toString();
+				return res;
+			}
+			
+			public String[] toStringsRaw() {
+				String[] res = new String[items.length + 1];
+				res[0] = produceNameHead();
+				int i = 1;
+				for (InfoItem it : items)
+					res[i++] = it.toStringRaw();
 				return res;
 			}
 			
@@ -233,6 +258,7 @@ aspect LightProfiling {
 			public void begin();
 			public void end();
 			public String toString();
+			public String toStringRaw();
 		}
 		
 		public static abstract class StateDifferenceInfoItem implements InfoItem {
@@ -251,8 +277,13 @@ aspect LightProfiling {
 				return toString(endVal - beginVal, endVal);
 			}
 			
+			public String toStringRaw() {
+				return toStringRaw(endVal - beginVal, endVal);
+			}
+			
 			public abstract long state();
 			public abstract String toString(long diff, long endVal);
+			public abstract String toStringRaw(long diff, long endVal);
 		}
 		
 		public static class TimeItem extends StateDifferenceInfoItem {
@@ -262,6 +293,10 @@ aspect LightProfiling {
 			
 			public String toString(long diff, long endVal) {
 				return (Math.round(diff / 10.0) / 100.0) + " s";
+			}
+			
+			public String toStringRaw(long diff, long endVal) {
+				return new Long(diff).toString();
 			}
 		}
 		
@@ -294,6 +329,10 @@ aspect LightProfiling {
 			
 			public String toString(long diff, long endVal) {
 				return ASTNode.formatMem(diff) + " (" + ASTNode.formatMem(endVal) + " total)";
+			}
+			
+			public String toStringRaw(long diff, long endVal) {
+				return diff + "," + endVal;
 			}
 		}
 		
