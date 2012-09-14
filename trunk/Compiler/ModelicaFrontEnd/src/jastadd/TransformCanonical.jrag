@@ -1526,10 +1526,10 @@ aspect TransformCanonical {
 		g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
 		g.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
 		
-		log.info(g.toString());
+		log.info(g);
 		g.maximumMatching(true);
 		log.info("DAE system");
-		log.info(g.printMatching());
+		log.info(g.printMatchingObj());
 			
 		daeMatching = g.getMatching();
 			
@@ -1549,10 +1549,10 @@ aspect TransformCanonical {
 				g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.CONTINUOUS_ALGEBRAIC_VARIABLES);
 				g.addEquations(continuousEquations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.CONTINUOUS_ALGEBRAIC_VARIABLES,"eq_",1);
 				log.info("Index reduction starts");
-				log.info(g.toString());
+				log.info(g);
 				g.maximumMatching(true);	
 				log.info("DAE system real variables only");
-				log.info(g.printMatching());
+				log.info(g.printMatchingObj());
 
 				IndexReductionResult result = null;
 				try {
@@ -1563,84 +1563,84 @@ aspect TransformCanonical {
 				}
 				
 				if (result != null) {
-				// Add the new equations
-				// Replace selected dummy derivatives with algebraics
-				// Enable rewrite of identifiers? (not necessary?)
-				for (FAbstractEquation fe : result.getEquations()) {
-					addFEquation((FAbstractEquation)fe.fullCopy());
-				}
-				
-				List<FVariable> l = new List<FVariable>();
-				
-				for (FVariable fv : getFVariables()) {
-					if (result.getDummyDerivatives().contains(fv)) {
-						if (fv instanceof FHDerivativeVariable) {
-							FHDummyDerivativeVariable fdv = new FHDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
-								fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy(),
-								((FHDerivativeVariable)fv).getOrder());
-							l.add(fdv);
-						} else if (fv instanceof FDerivativeVariable) {
-							FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
-								fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
-							l.add(fdv);					
+					// Add the new equations
+					// Replace selected dummy derivatives with algebraics
+					// Enable rewrite of identifiers? (not necessary?)
+					for (FAbstractEquation fe : result.getEquations()) {
+						addFEquation((FAbstractEquation)fe.fullCopy());
+					}
+					
+					List<FVariable> l = new List<FVariable>();
+					
+					for (FVariable fv : getFVariables()) {
+						if (result.getDummyDerivatives().contains(fv)) {
+							if (fv instanceof FHDerivativeVariable) {
+								FHDummyDerivativeVariable fdv = new FHDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+									fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy(),
+									((FHDerivativeVariable)fv).getOrder());
+								l.add(fdv);
+							} else if (fv instanceof FDerivativeVariable) {
+								FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+									fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
+								l.add(fdv);					
+							} else {
+								l.add(fv);
+							}
+						} else if (fv instanceof FHDerivativeVariable) {
+						    // Convert higher order derivative variables into
+						    // first order derivatives
+						    FHDerivativeVariable fhdv = (FHDerivativeVariable)fv;
+							for (int i=0;i<fhdv.getOrder()-1;i++) {
+								StringBuffer str = new StringBuffer();
+								StringBuffer str2 = new StringBuffer();
+								for (int j=0;j<i+1;j++) {
+									str.append("_der");
+									if (j<i) {
+										str2.append("_der");
+									}
+								}
+								str.append("_");
+								if (i>0) {
+									str2.append("_");
+								}
+								FQName fqn = fhdv.getFQName();
+								FQName fqn2 = (FQName)fv.getFQName().fullCopy();
+								str.append(fqn.getFQNamePart(fqn.getNumFQNamePart()-1).name());
+								fqn.setFQNamePart(new FQNamePart(str.toString(),fqn.getFQNamePart(fqn.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn.getNumFQNamePart()-1);
+								l.add(new FRealVariable(fv.getFVisibilityType().fullCopy(),
+									fv.getFTypePrefixVariability().fullCopy(), fqn));
+								l.add(new FDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+									fv.getFTypePrefixVariability().fullCopy(), (FQName)fqn.fullCopy()));
+								str2.append(fqn2.getFQNamePart(fqn2.getNumFQNamePart()-1).name());
+								fqn2.setFQNamePart(new FQNamePart(str2.toString(),fqn2.getFQNamePart(fqn2.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn2.getNumFQNamePart()-1);
+								// Add equations for the new variables
+								addFEquation(new FEquation(new FIdUseExp(new FIdUse((FQName)fqn.fullCopy())),new FDerExp(new FIdUse(fqn2))));
+							}		
 						} else {
 							l.add(fv);
 						}
-					} else if (fv instanceof FHDerivativeVariable) {
-					    // Convert higher order derivative variables into
-					    // first order derivatives
-					    FHDerivativeVariable fhdv = (FHDerivativeVariable)fv;
-						for (int i=0;i<fhdv.getOrder()-1;i++) {
-							StringBuffer str = new StringBuffer();
-							StringBuffer str2 = new StringBuffer();
-							for (int j=0;j<i+1;j++) {
-								str.append("_der");
-								if (j<i) {
-									str2.append("_der");
-								}
-							}
-							str.append("_");
-							if (i>0) {
-								str2.append("_");
-							}
-							FQName fqn = fhdv.getFQName();
-							FQName fqn2 = (FQName)fv.getFQName().fullCopy();
-							str.append(fqn.getFQNamePart(fqn.getNumFQNamePart()-1).name());
-							fqn.setFQNamePart(new FQNamePart(str.toString(),fqn.getFQNamePart(fqn.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn.getNumFQNamePart()-1);
-							l.add(new FRealVariable(fv.getFVisibilityType().fullCopy(),
-								fv.getFTypePrefixVariability().fullCopy(), fqn));
-							l.add(new FDerivativeVariable(fv.getFVisibilityType().fullCopy(),
-								fv.getFTypePrefixVariability().fullCopy(), (FQName)fqn.fullCopy()));
-							str2.append(fqn2.getFQNamePart(fqn2.getNumFQNamePart()-1).name());
-							fqn2.setFQNamePart(new FQNamePart(str2.toString(),fqn2.getFQNamePart(fqn2.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn2.getNumFQNamePart()-1);
-							// Add equations for the new variables
-							addFEquation(new FEquation(new FIdUseExp(new FIdUse((FQName)fqn.fullCopy())),new FDerExp(new FIdUse(fqn2))));
-						}		
-					} else {
-						l.add(fv);
+					}	
+	
+					setFVariableList(l);		
+	
+					enableFHDerRewrite();
+	
+					// flushAllRecursiveClearFinal must be used here in order to
+					// trigger rewrites of FDerExp -> FDummyDerExp
+					root().flushAllRecursiveClearFinal();
+	
+					aliasEliminationIfSet();
+	
+	 				root().flushAllRecursive();
+	
+					//System.out.println(prettyPrint(""));
+	
+					//dumpTree("");
+	
+					log.info("States:");
+					for (FVariable fv : differentiatedRealVariables()) {
+						log.info(fv.prettyPrint("  ")); //TODO: fix so no call is made if log level < info
 					}
-				}	
-
-				setFVariableList(l);		
-
-				enableFHDerRewrite();
-
-				// flushAllRecursiveClearFinal must be used here in order to
-				// trigger rewrites of FDerExp -> FDummyDerExp
-				root().flushAllRecursiveClearFinal();
-
-				aliasEliminationIfSet();
-
- 				root().flushAllRecursive();
-
-				//System.out.println(prettyPrint(""));
-
-				//dumpTree("");
-
-				log.info("States:");
-				for (FVariable fv : differentiatedRealVariables()) {
-					log.info(fv.prettyPrint("  "));
-				}
 				} else {
 					return;
 				}
@@ -1651,10 +1651,10 @@ aspect TransformCanonical {
 				g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
 				g.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
 
-				log.info(g.toString());
+				log.info(g);
 				g.maximumMatching(true);	
 				log.info("DAE system ");
-				log.info(g.printMatching());
+				log.info(g.printMatchingObj());
 		
 				daeMatching = g.getMatching();
 		
@@ -1692,9 +1692,9 @@ aspect TransformCanonical {
 				}
 			}	
 			daeStructuredBLT = new StructuredBLT(this,daeBLT);
-			log.info(daeStructuredBLT.toString());
+			log.info(daeStructuredBLT);
 			
-			log.info(daeBLT.toString());
+			log.info(daeBLT);
 		
 		}
 						
@@ -1741,7 +1741,7 @@ aspect TransformCanonical {
 		                                   1);
 		}		
 	
-		log.info(g.toString());
+		log.info(g);
 		
 
 		g.addEquations(initialEquations(), BiPGraph.DERIVATIVE_VARIABLES | 
@@ -1750,10 +1750,10 @@ aspect TransformCanonical {
 		                                   BiPGraph.DISCRETE_PRE_VARIABLES, "eq_",
 		                                   g.getEquations().size() + 1);
 
-		log.info(g.toString());
+		log.info(g);
 		g.maximumMatching(false);	
 		log.info("DAE initial ");
-		log.info(g.printMatching());
+		log.info(g.printMatchingObj());
 
 		if (g.getUnmatchedEquations().size()>0) {
 		   	return;
@@ -1811,8 +1811,8 @@ aspect TransformCanonical {
 
 			g.maximumMatching(false);	
 			log.info("DAE initial after addition of initial equations");
-			log.info(g.toString());
-			log.info(g.printMatching());
+			log.info(g);
+			log.info(g.printMatchingObj());
 
 		}
 
@@ -1846,13 +1846,14 @@ aspect TransformCanonical {
 					daeInitFVariableEquationBlockMap.put(fv,eb);
 				}
 			}	
-			log.info(daeInitBLT.toString());
+			log.info(daeInitBLT);
 		}
 	}	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 	public BLT FClass.computeTearings(BiPGraph graph) {
+		beginStep("computeTearings()");
 		LinkedList<Stack<Eq>> blt = graph.computeRawBLT();
 		BLT tearBLT = new BLT(this);
 		for (Stack<Eq> block : blt) { // Iterate over all (global) BLT-blocks
@@ -1878,6 +1879,7 @@ aspect TransformCanonical {
 				tearBLT.add(eb);
 			}
 		}
+		endStep("computeTearings()");
 		return tearBLT;
 	}
 	

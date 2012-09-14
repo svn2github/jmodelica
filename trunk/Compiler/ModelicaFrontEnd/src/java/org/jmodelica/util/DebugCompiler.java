@@ -130,6 +130,11 @@ public class DebugCompiler extends JFrame {
 			target.append(message + "\n");
 		}
 		
+		@Override
+		public void log(Level level, String format, Object... args) {
+			target.append(String.format(format, args));
+		}
+		
 	}
 
 }

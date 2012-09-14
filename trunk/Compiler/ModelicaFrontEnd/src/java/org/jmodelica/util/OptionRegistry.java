@@ -68,6 +68,9 @@ public class OptionRegistry {
 				"If blocks are needed to compute ODE jacobians they will be generated anyway"),
 		GEN_ODE   ("generate_ode",            false, 
 				"If this option is set to true (default is false), code for solving ODEs are generated. "),
+		GEN_MOF_FILES   ("generate_mof_files", true,
+				"If this option is set to true (default is true), flat model before and after" +
+				" transformations will be generated."),
 		EXTRA_LIB   ("extra_lib_dirs",            "", 
 				"The value of this option is appended to the value of the MODELICAPATH environment " +
 				"variable for determining in what directories to search for libraries."),

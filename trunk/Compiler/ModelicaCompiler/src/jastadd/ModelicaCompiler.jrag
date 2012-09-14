@@ -1284,7 +1284,7 @@ public class ModelicaCompiler {
 		
 		String instName = icl.qualifiedName();
 		File flatFile = new File(sourceDir, instName + ".mof");
-		FClass fc = createFlatTree(icl, flatFile.getPath());
+		final FClass fc = createFlatTree(icl, flatFile.getPath());
 		
 		ASTNode.beginStep("flatten()");
 		log.info("Flattening model...");
@@ -1297,57 +1297,62 @@ public class ModelicaCompiler {
 		
 		//fc.dumpTree("");
 		// Output the untransformed flattened model
-		ASTNode.beginStep("prettyPrintFlat()");
-		log.debug("Creating raw .mof file...");
-		PrintStream out = new PrintStream(flatFile);
-		fc.prettyPrint_MC(out, "");
-	   	out.close();
-	   	log.debug("... raw .mof file created.");
+		ASTNode.beginStep("prettyPrintRawFlat()");
+		if (fc.root().options.getBooleanOption("generate_mof_files")) {
+			log.debug("Creating raw .mof file...");
+			PrintStream out = new PrintStream(flatFile);
+			fc.prettyPrint_MC(out, "");
+			out.close();
+			log.debug("... raw .mof file created.");
+		}
 
 		log.info("Raw flattened model:");
-		log.info(fc.prettyPrint(""));
+		log.info(fc);
+		ASTNode.endStep("prettyPrintRawFlat()");
 
-		if (fc.root().options.getBooleanOption("generate_html_diagnostics") &&
-		    getDiagnosticsGenerator()!=null) {
+		if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+			ASTNode.beginStep("htmlDiagnostics()");
 			getDiagnosticsGenerator().writeRawFlattenedModel(fc);
 			getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
+			ASTNode.endStep("htmlDiagnostics()");
 		}
-		ASTNode.endStep("prettyPrintFlat()");
 		
 		fc.transformCanonical();
 		
 		hookModelTransformed(fc);
 		hookCheckAbort();
-				
-		log.debug("Creating transformed .mof file...");
-		out = new PrintStream(new File(sourceDir, instName + "_transformed.mof"));
-	   	fc.prettyPrint_MC(out, "");
-	   	out.close();
-	   	log.debug("... transformed .mof file created.");
-	    
+		
+		ASTNode.beginStep("prettyPrintFlat()");
+		if (fc.root().options.getBooleanOption("generate_mof_files")) {
+			log.debug("Creating transformed .mof file...");
+			PrintStream out = new PrintStream(new File(sourceDir, instName + "_transformed.mof"));
+			fc.prettyPrint_MC(out, "");
+			out.close();
+			log.debug("... transformed .mof file created.");
+		}
+		
 		log.info("Diagnostics for transformed flattened model:");		
-		log.info(fc.diagnostics());
+		log.info(new Object() {
+			public String toString() {
+				return fc.diagnostics();
+			};
+		});
 		
 		log.info("Transformed flattened model:");		
-		log.info(fc.prettyPrint(""));
-
-		if (fc.root().options.getBooleanOption("generate_html_diagnostics") &&
-		    getDiagnosticsGenerator()!=null) {
-			getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
-		}
-
+		log.info(fc);
+		
+		ASTNode.endStep("prettyPrintFlat()");
+		
 		Collection<Problem> problems = fc.errorCheck();
-
-		if (fc.root().options.getBooleanOption("generate_html_diagnostics") &&
-		    getDiagnosticsGenerator()!=null) {
+		
+		if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+			ASTNode.beginStep("htmlDiagnostics()");
+			getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
 			getDiagnosticsGenerator().writeProblems(problems);
-		}
-
-		if (fc.root().options.getBooleanOption("generate_html_diagnostics") &&
-		    getDiagnosticsGenerator()!=null) {
 			getDiagnosticsGenerator().writeDiagnostics(fc);
+			ASTNode.endStep("htmlDiagnostics()");
 		}
-
+		
 		if (problems.size() > 0) 
 			handleCompilerProblems(problems);
 
@@ -1933,6 +1938,17 @@ public class ModelicaCompiler {
 		     */
 		    public void log(Level level, String message) {
 		    	logger.log(level, message);
+		    }
+		    
+		    /**
+		     * \brief Log <code>format</code> on log level <code>level</code>
+		     * with parameters <code>args</code>.
+		     * 
+		     * This implementation delegates to the selected Logger.
+		     */
+		    @Override
+		    public void log(Level level, String format, Object... args) {
+		    	logger.log(level, format, args);
 		    }
 		    
 		    /**

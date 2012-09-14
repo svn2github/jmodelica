@@ -1,14 +1,10 @@
 package org.jmodelica.util;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.logging.Level;
-
-import javax.naming.OperationNotSupportedException;
 
 /**
  * \brief Base class for logging messages from the tree.
@@ -32,7 +28,6 @@ public class ModelicaLogger {
      * Uses {@link #log(Level, String)} to log message.
      */
     public void log(Level level, String format, Object... args) {
-    	log(level, String.format(format, args));
     }
     
     /**
@@ -62,6 +57,11 @@ public class ModelicaLogger {
     public void info(String format, Object... args)    { log(Level.INFO,    format, args); }
     public void warning(String format, Object... args) { log(Level.WARNING, format, args); }
     public void error(String format, Object... args)   { log(Level.SEVERE,  format, args); }
+    
+    public void debug(Object obj)   { log(Level.FINE,    "%s", obj); }
+    public void info(Object obj)    { log(Level.INFO,    "%s", obj); }
+    public void warning(Object obj) { log(Level.WARNING, "%s", obj); }
+    public void error(Object obj)   { log(Level.SEVERE,  "%s", obj); }
     
     /**
      * Log stack trace of exception on debug log level.

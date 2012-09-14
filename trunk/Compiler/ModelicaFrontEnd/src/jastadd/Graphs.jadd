@@ -1945,6 +1945,15 @@ public class BiPGraph {
 		return str.toString();
 	}
 	
+	public Object printMatchingObj() {
+		return new Object() {
+			@Override
+			public String toString() {
+				return printMatching();
+			}
+		};
+	}
+	
 	public String printSolvableMatching() {
 		StringBuffer str = new StringBuffer();
 		str.append("----------------------------------------\n");
