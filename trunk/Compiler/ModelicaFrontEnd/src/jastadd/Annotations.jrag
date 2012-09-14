@@ -610,7 +610,7 @@ aspect AnnotationAPI {
 			protected void createRealNode() {
 				ClassModification cm = new ClassModification();
 				fullClassDecl.addAnnotation(new ParseAnnotation(cm));
-				realNode = new CMAnnotationNode(cm);
+				realNode = new ClassModAnnotationNode(cm);
 			}
 		}
 	}	
