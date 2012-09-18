@@ -4,6 +4,12 @@ public class Scripts {
 	private static final String N3 = "\n\t\t\t";
 	private static final String N4 = "\n\t\t\t\t";
 
+	public static final String SUBMIT_INFO =
+			"code";
+	
+	public static final String SUBMIT_REV = 
+			"code";
+	
 	public static final String SUPPRESS_NAVIGATION_WARNING =
 			N3 + "window.onunload = function() {"+
 					N3 + "var x = confirm('Are you sure you want to navigate away from this page?');"+
@@ -15,7 +21,8 @@ public class Scripts {
 			N3 + "(function(b){" +
 					N3 + "var f = function() { return confirm('Are you sure you wish to leave?'); };" +
 					N3 + "if(b.attachEvent) {"+
-					N3 + "b.attachEvent('onunload', f);"+
+					N3 + "b.attachEvent('window.onunload', f);" +
+					N3 + "b.attachEvent('window.onbeforeunload', f);" +
 					N3 + "}"+
 					N3 + "else {"+
 					N3 + "b.addEventListener('unload', f, false);"+

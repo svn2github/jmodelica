@@ -37,8 +37,8 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	private NavigationProvider navProv;
 	private SourceRoot sourceRoot;
 	private static final String FOOTER = "<i>footer</i>";
-	private static final String CANCEL_INFO_BTN = "<input class='buttonIndent' type='button' onclick='cancelInfo()' id='cancelInfoButton' value='Cancel'/>";
-	private static final String CANCEL_REV_BTN = "<input class='buttonIndent' type='button' onclick='cancelRev()' id='cancelRevButton' value='Cancel'/>";
+	private static final String CANCEL_INFO_BTN = "<input type='reset' class='buttonIndent' type='button' onclick='cancelInfo()' id='cancelInfoButton' value='Cancel'/>";
+	private static final String CANCEL_REV_BTN = "<input type='reset' class='buttonIndent' type='button' onclick='cancelRev()' id='cancelRevButton' value='Cancel'/>";
 	private boolean saving = false;
 	private String tinymcePath;
 
@@ -340,6 +340,7 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 			saveNewRevisionsAnnotation(textAreaContent);
 			browser.setText(content.toString());
 		}else if (title.equals("cancelInfo") || title.equals("cancelRev")){
+			//only if the user hasn't canelled the canellation!
 			saving = false;
 			browser.setText(content.toString());
 		}

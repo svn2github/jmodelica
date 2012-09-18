@@ -104,7 +104,7 @@ public class Generator {
 			sb.append(N3 + Scripts.SCRIPT_INIT_TINY_MCE);
 		}
 		sb.append(
-				N2 + Scripts.SUPPRESS_NAVIGATION_WARNING4 + Scripts.PRE_INFO_EDIT + Scripts.PRE_REV_EDIT + Scripts.POST_INFO_EDIT + Scripts.POST_REV_EDIT + Scripts.CANCEL_INFO + Scripts.CANCEL_REV +
+				N2 + Scripts.SUPPRESS_NAVIGATION_WARNING2 + Scripts.PRE_INFO_EDIT + Scripts.PRE_REV_EDIT + Scripts.POST_INFO_EDIT + Scripts.POST_REV_EDIT + Scripts.CANCEL_INFO + Scripts.CANCEL_REV +
 				N2 + "</script>" +
 				N2 + "<!-- END OF JAVASCRIPT -->");
 		return sb.toString();
