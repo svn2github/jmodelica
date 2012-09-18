@@ -288,7 +288,7 @@ aspect LightProfiling {
 		
 		public static class TimeItem extends StateDifferenceInfoItem {
 			public long state() {
-				return System.currentTimeMillis();
+				return System.currentTimeMillis() - MemoryChangeItem.timeSpentInGC;
 			}
 			
 			public String toString(long diff, long endVal) {
@@ -302,6 +302,11 @@ aspect LightProfiling {
 		
 		public static class MemoryChangeItem extends StateDifferenceInfoItem {
 			private static final Runtime RUNTIME = Runtime.getRuntime();
+			private static long timeSpentInGC = 0;
+			
+			public static long getTimeSpentInGC() {
+				return timeSpentInGC;
+			}
 
 			public long state() {
 				if (StepInfo.GC_BEFORE_MEM)
@@ -314,6 +319,7 @@ aspect LightProfiling {
 			}
 			
 			private static void runGC() {
+				long start = System.currentTimeMillis();
 				try {
 					long usedMem1 = usedMemory(), usedMem2 = Long.MAX_VALUE;
 					for (int i = 0; (usedMem1 < usedMem2) && (i < 500); ++i) {
@@ -325,6 +331,7 @@ aspect LightProfiling {
 						usedMem1 = usedMemory();
 					}
 				} catch (Exception e) {}
+				timeSpentInGC += System.currentTimeMillis() - start;
 			}
 			
 			public String toString(long diff, long endVal) {
