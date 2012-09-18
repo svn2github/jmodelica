@@ -17,9 +17,6 @@ import javax.imageio.ImageIO;
 import org.eclipse.core.resources.IFile;
 import org.jmodelica.icons.Icon;
 import org.jmodelica.ide.documentation.wizard.GenDocWizard;
-import org.jmodelica.ide.helpers.EclipseUtil;
-import org.jmodelica.ide.helpers.Maybe;
-import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.AbstractEquation;
 import org.jmodelica.modelica.compiler.Access;
 import org.jmodelica.modelica.compiler.ClassDecl;
@@ -51,8 +48,7 @@ public class Generator {
 	public static final String REV_BTN_DATA_PRE = "onclick='preRevEdit()' id='editRevisionButton' value='Edit..'";
 
 	/**
-	 * Creates the HTML head, including css definitions and a JavaScript file path.
-	 * @param scriptPath The absolute path to a JavaScript file.
+	 * Creates the HTML head, including CSS definitions.
 	 */
 	public static final String genHead(){
 		return "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">" +
@@ -96,7 +92,7 @@ public class Generator {
 	 * Generates the necessary HTML code to include JavaScript for the documentation view.
 	 * This includes initializing TinyMCE and adding the functions to handle button clicks. 
 	 * @param scriptPath absolute path to TinyMCE 
-	 * @return
+	 * @return HTML code for the JavaScript
 	 */
 	public static String genJavaScript(String scriptPath, boolean initTinyMCE){
 		StringBuilder sb = new StringBuilder();
@@ -108,11 +104,9 @@ public class Generator {
 			sb.append(N3 + Scripts.SCRIPT_INIT_TINY_MCE);
 		}
 		sb.append(
-				N3 + "window.onunload = null;" +
-						N3 + "Window.OnBeforeUnload = null;" +
-						Scripts.PRE_INFO_EDIT + Scripts.PRE_REV_EDIT + Scripts.POST_INFO_EDIT + Scripts.POST_REV_EDIT + Scripts.CANCEL_INFO + Scripts.CANCEL_REV +
-						N2 + "</script>" +
-						N2 + "<!-- END OF JAVASCRIPT -->");
+				N2 + Scripts.SUPPRESS_NAVIGATION_WARNING4 + Scripts.PRE_INFO_EDIT + Scripts.PRE_REV_EDIT + Scripts.POST_INFO_EDIT + Scripts.POST_REV_EDIT + Scripts.CANCEL_INFO + Scripts.CANCEL_REV +
+				N2 + "</script>" +
+				N2 + "<!-- END OF JAVASCRIPT -->");
 		return sb.toString();
 	}
 
@@ -208,18 +202,17 @@ public class Generator {
 		if (offline){
 			content.append(N4 + "<h2 id=\"buttonInsertion\">" + N5 + "Information"  + N4 + "</h2>");
 		}else{
-			//figure out if we're in a library. This might give false positives
-			//since it treats not found files as library files
 			String disabled = "";
 
 			boolean isLib;
 			synchronized (fcd.state()){
-				IFile file = fcd.getDefinition().getFile();
-				isLib =  !(file != null && file.getProject() == sourceRoot.getProject());
+				try{
+					IFile file = fcd.getDefinition().getFile();
+					isLib =  !(file != null && file.getProject() == sourceRoot.getProject());
+				}catch(NullPointerException e){
+					isLib = true;
+				}
 			}
-
-			//Maybe<IFile> iFile = EclipseUtil.getFileForPath(fcd.containingFileName());
-			//boolean isLib = (iFile.isNothing() ? true : Util.isInLibrary(iFile.value()));
 			if (isLib){
 				disabled="disabled='disabled'";
 			}
@@ -351,7 +344,7 @@ public class Generator {
 			for (int i=0;i<fcd.getNumComponentDecl();i++){
 				content.append(N7 + "<tr>");
 				ComponentDecl cd = fcd.getComponentDecl(i);
-				String stringComment = "&nbsp;"; //without the html whitespace the cell isn't drawn properly(?)
+				String stringComment = "&nbsp;"; //without the html whitespace the empty cell isn't drawn properly(?)
 				if (cd.getComment().hasStringComment()){
 					stringComment = Generator.modelicaToHTML(cd.getComment().getStringComment().getComment());
 				}
@@ -422,11 +415,15 @@ public class Generator {
 			content.append(N4 + "<h2 id=\"buttonInsertion\">" + N5 + "Revisions&nbsp;" + N4 + "</h2>");
 		}else{
 			String disabled = "";
-			IFile file;
+			boolean isLib;
 			synchronized (fcd.state()){
-				file = fcd.getDefinition().getFile();
-			}
-			boolean isLib =  !(file != null && file.getProject() == sourceRoot.getProject());
+				try{
+					IFile file = fcd.getDefinition().getFile();
+					isLib =  !(file != null && file.getProject() == sourceRoot.getProject());
+				}catch (NullPointerException e){
+					isLib = true;
+				}
+			}	
 
 			if (isLib){
 				disabled="disabled='disabled'";
@@ -565,7 +562,7 @@ public class Generator {
 	}
 
 	/**
-	 * Creates an .png image of the icon associated with the full class declaration fcd, and return a HTML string 
+	 * Creates an .PNG image of the icon associated with the full class declaration fcd, and return a HTML string 
 	 * containing an IMG tag linking to the file.
 	 * @param cd The full class declaration associated with the icon.
 	 * @param fullPath The desired path and file name of the .png file.
@@ -625,7 +622,7 @@ public class Generator {
 
 	/**
 	 * Processes user input before it is saved to a .mo file by prepending
-	 * the modelica escape character \ to the symbols " and \
+	 * the Modelica escape character \ to the symbols " and \
 	 */
 	public static String htmlToModelica(String s){
 		s = s.replace("\\", "\\\\");
@@ -634,9 +631,9 @@ public class Generator {
 	}
 
 	/**
-	 * Removes the html tag
+	 * Removes the <HTML> tag that might be enclosing existing documentation to prevent nesting of <HTML> tags in the document
 	 * @param s The String from which the tag should be removed.
-	 * @return The same String stripped from the html tag.
+	 * @return The same String stripped from the HTML tag.
 	 */
 	public static String removeHTMLTag(String s){
 		String open = "<html>";
@@ -745,23 +742,23 @@ public class Generator {
 	}
 
 	/**
-	 * Generates all the documentation for a given ClassDecl cd
+	 * Generates all the documentation for a given ClassDecl cd, and classes below it, to file
 	 * @param cd The ClassDecl
-	 * @param program The org.jmodelica.modelica.compiler.Program, needed for class lookups
+	 * @param sourceRoot the current source root, needed for class lookups
 	 * @param path The path to the icon
-	 * @param footer String appeneded to the end of the document
-	 * @param className The name of the class (in case cd is an instance of an UnknownClassDecl
-	 * @param rootPath The path to the destination of the generation, in case of offline generation
+	 * @param footer String appended to the end of the document
+	 * @param className The name of the class (in case cd is an instance of an UnknownClassDecl)
+	 * @param rootPath The path to the destination of the generation
 	 * @param libName The name of the library containing cd 
 	 * @param options What part of the class should be generated (comment, info, imports etc.)
 	 * @return The HTML string describing the ClassDecl
 	 */
-	public static String genDocumentation(ClassDecl cd, SourceRoot sourceRoot, Program program, String path, String footer, String className, String rootPath, String libName, HashMap<String, Boolean> options) {
+	public static String genDocumentation(ClassDecl cd, SourceRoot sourceRoot, String path, String footer, String className, String rootPath, String libName, HashMap<String, Boolean> options) {
 		StringBuilder content = new StringBuilder();
 		content.append(Generator.genHead());
 		//don't generate JavaScript
 		content.append(genHeader());
-		content.append(genBreadCrumBar(cd, program));
+		content.append(genBreadCrumBar(cd, sourceRoot.getProgram()));
 		if (cd instanceof ShortClassDecl){
 			content.append(genShortClassDecl((ShortClassDecl)cd));
 			content.append(genFooter(footer));
@@ -811,6 +808,10 @@ public class Generator {
 			if (refM.find()){
 				MatchResult refMr = refM.toMatchResult();
 				String ref = match.substring(refMr.start() + "href=\"".length(), refMr.end()-1);
+				//remove modelica://, if present
+				if (ref.toLowerCase().startsWith("modelica://")){
+					ref = ref.substring("modelica://".length());
+				}
 				if (ref.toLowerCase().startsWith(libName.toLowerCase())){
 					String relativePath = findRelativePath(path, ref); //path is the modelica path of the cd, ref is the modelica path of the link
 					//match = match.replaceAll("href=\"(.+?)\"", "href=\"file://" + rootPath + ref.replace(".","/" ) + "/index.html\"");
@@ -840,6 +841,10 @@ public class Generator {
 			if (refM.find()){
 				MatchResult refMr = refM.toMatchResult();
 				String ref = match.substring(refMr.start() + "src=\"".length(), refMr.end()-1);
+				//remove modelica://, if present
+				if (ref.toLowerCase().startsWith("modelica://")){
+					ref = ref.substring("modelica://".length());
+				}
 				String fileName;
 				ref = ref.replace("\\", "/");
 				if(ref.lastIndexOf("/") != -1){

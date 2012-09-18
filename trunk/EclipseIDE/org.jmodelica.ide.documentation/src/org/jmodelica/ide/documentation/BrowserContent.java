@@ -36,13 +36,7 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	private Program program;
 	private NavigationProvider navProv;
 	private SourceRoot sourceRoot;
-	private static final String N3 = "\n\t\t\t";
-	private static final String N4 = N3 + "\t";
 	private static final String FOOTER = "<i>footer</i>";
-	private static final String INFO_BTN_DATA_POST = "onclick='postInfoEdit()' id='editInfoButton' value='Save'";
-	private static final String REV_BTN_DATA_POST = "onclick='postRevEdit()' id='editRevisionButton' value='Save'";
-	private static final String INFO_BTN_DISABLE = "onclick='preInfoEdit()' id='editInfoButton' disabled='disabled' value='Edit..'";
-	private static final String REV_BTN_DISABLE = "onclick='preRevEdit()' id='editRevisionButton' disabled='disabled' value='Edit..'";
 	private static final String CANCEL_INFO_BTN = "<input class='buttonIndent' type='button' onclick='cancelInfo()' id='cancelInfoButton' value='Cancel'/>";
 	private static final String CANCEL_REV_BTN = "<input class='buttonIndent' type='button' onclick='cancelRev()' id='cancelRevButton' value='Cancel'/>";
 	private boolean saving = false;
@@ -89,7 +83,7 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	public void generateDocumentation(FullClassDecl fcd) {
 		//DocGenDialog dlg = new DocGenDialog(null);
 		//new DocGenDialog(null, fcd, program, FOOTER);
-        WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), new GenDocWizard(fcd, program, sourceRoot, FOOTER));
+        WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), new GenDocWizard(fcd, sourceRoot, FOOTER));
         dialog.create();
         dialog.open();		
 		//new Dialog(fcd, program, FOOTER).run();
@@ -329,10 +323,11 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 			String docContent = (String)browser.evaluate(Scripts.FETCH_INFO_DIV_CONTENT);
 			gotoWYSIWYG(docContent, true);
 		}else if(title.equals("postInfoEdit")){
+			//browser.evaluate("tinyMCE.get('infoTextArea').setContent('" + docContent + "');");
 			String textAreaContent = (String)browser.evaluate(Scripts.FETCH_INFO_TEXTAREA_CONTENT);
 			//reset title, reset saving, use browser.setText()
 			saving = false;
-			content.replace(content.indexOf(Generator.INFO_ID_OPEN_TAG) + Generator.INFO_ID_OPEN_TAG.length(), content.indexOf("<!-- END OF INFO -->"), textAreaContent + N3 + Generator.INFO_ID_CLOSE_TAG);
+			content.replace(content.indexOf(Generator.INFO_ID_OPEN_TAG) + Generator.INFO_ID_OPEN_TAG.length(), content.indexOf("<!-- END OF INFO -->"), textAreaContent + "\n\t\t\t" + Generator.INFO_ID_CLOSE_TAG);
 			saveNewDocumentationAnnotation(textAreaContent);//(Generator.htmlToModelica(textAreaContent));
 			browser.setText(content.toString());
 		}else if(title.equals("preRevEdit")){
@@ -341,7 +336,7 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 		}else if (title.equals("postRevEdit")){
 			String textAreaContent = (String)browser.evaluate(Scripts.FETCH_REV_TEXTAREA_CONTENT);
 			saving = false;
-			content.replace(content.indexOf(Generator.REV_ID_OPEN_TAG) + Generator.REV_ID_OPEN_TAG.length(), content.indexOf("<!-- END OF REVISIONS -->"), textAreaContent + N3 + Generator.REV_ID_CLOSE_TAG);
+			content.replace(content.indexOf(Generator.REV_ID_OPEN_TAG) + Generator.REV_ID_OPEN_TAG.length(), content.indexOf("<!-- END OF REVISIONS -->"), textAreaContent + "\n\t\t\t" + Generator.REV_ID_CLOSE_TAG);
 			saveNewRevisionsAnnotation(textAreaContent);
 			browser.setText(content.toString());
 		}else if (title.equals("cancelInfo") || title.equals("cancelRev")){

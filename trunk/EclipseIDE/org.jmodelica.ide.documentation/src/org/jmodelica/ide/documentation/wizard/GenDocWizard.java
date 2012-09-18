@@ -15,17 +15,13 @@ import org.eclipse.ui.PlatformUI;
 import org.jmodelica.ide.documentation.Generator;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.FullClassDecl;
-import org.jmodelica.modelica.compiler.Program;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
 public class GenDocWizard extends Wizard {
-	private Program program;
 	private String footer;
 	private FullClassDecl fcd;
-	private GenDocWizardPageOne pageOne;
-	private GenDocWizardPageTwo pageTwo;
+	private GenDocWizardPage pageOne;
 	public static final String PAGE_ONE = "PAGE_ONE";
-	public static final String PAGE_TWO = "PAGE_TWO";
 	private ArrayList<ClassDecl> children;
 	private String path;
 	private String rootPath;
@@ -40,22 +36,26 @@ public class GenDocWizard extends Wizard {
 	public static final String EQUATIONS = "equations";
 	public static final String REVISIONS = "revisions";
 
-	public GenDocWizard(FullClassDecl fcd, Program program, SourceRoot sourceRoot, String footer){
+	/**
+	 * 
+	 * @param fcd The full class declaration that is at the root of what is to be generated
+	 * @param sourceRoot The source root associated with the full class declaration. Needed to determine restrictions for fcds and for class lookups
+	 * @param footer Optional footer at the end of the HTML document
+	 */
+	public GenDocWizard(FullClassDecl fcd, SourceRoot sourceRoot, String footer){
 		super();
+		this.setWindowTitle("Documentation Generation");
 		this.fcd = fcd;
-		this.program = program;
 		this.sourceRoot = sourceRoot;
 		this.footer = footer;
 
 	}
 	/**
-	 * Add an instance of GenDocWizardPageOne and GenDocWizardPageTwo to the wizard
+	 * Add an instance of GenDocWizardPageOne to the wizard
 	 */
 	public void addPages() {
-		pageOne = new GenDocWizardPageOne(PAGE_ONE);
+		pageOne = new GenDocWizardPage(PAGE_ONE);
 		addPage(pageOne);
-		pageTwo = new GenDocWizardPageTwo(PAGE_TWO);
-		addPage(pageTwo);
 
 	}
 	/**
@@ -64,11 +64,11 @@ public class GenDocWizard extends Wizard {
 	 * Start up a progress monitor.
 	 * Generates documentation for the full class declaration
 	 * Recursively generates documentation for all the classes in the full class declaration.
-	 * 
+	 * Called when the user presses 'finish' in the wizard.
 	 */
 	public boolean performFinish() {
-		rootPath = ((GenDocWizardPageTwo)getPage(GenDocWizard.PAGE_TWO)).getPath();
-		checkBoxes = ((GenDocWizardPageOne)getPage(GenDocWizard.PAGE_ONE)).getCheckBoxes();
+		rootPath = ((GenDocWizardPage)getPage(GenDocWizard.PAGE_ONE)).getPath();
+		checkBoxes = ((GenDocWizardPage)getPage(GenDocWizard.PAGE_ONE)).getCheckBoxes();
 		path = rootPath + fcd.getName().getID();
 		libName = fcd.getName().getID();
 		if (!(new File(path)).exists()) {
@@ -88,7 +88,7 @@ public class GenDocWizard extends Wizard {
 					monitor.beginTask("Generating documentation...", children.size() + 1); 
 					monitor.subTask(libName);
 					monitor.worked(1);
-					String code = Generator.genDocumentation(fcd, sourceRoot, program, path + "\\", footer, "Unknown Class Decl", rootPath, libName, checkBoxes);
+					String code = Generator.genDocumentation(fcd, sourceRoot, path + "\\", footer, "Unknown Class Decl", rootPath, libName, checkBoxes);
 					try{
 						FileWriter fstream = new FileWriter(path + "\\index.html");
 						BufferedWriter out = new BufferedWriter(fstream);
@@ -99,12 +99,6 @@ public class GenDocWizard extends Wizard {
 					}
 					monitor.worked(1);
 					for (ClassDecl cd : children){
-
-						try {
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
-						}
-
 						if (monitor.isCanceled()){
 							monitor.done();
 							return;
@@ -115,7 +109,7 @@ public class GenDocWizard extends Wizard {
 						try{
 							FileWriter fstream = new FileWriter(newPath + "\\index.html");
 							BufferedWriter out = new BufferedWriter(fstream);
-							out.write(Generator.genDocumentation(cd, sourceRoot, program, newPath + "/", footer, "Unknown class decl", rootPath, libName, checkBoxes));
+							out.write(Generator.genDocumentation(cd, sourceRoot, newPath + "/", footer, "Unknown class decl", rootPath, libName, checkBoxes));
 							out.close();
 						}catch (Exception ex){
 							JOptionPane.showMessageDialog(null, "Unable to save to file", "Error", JOptionPane.ERROR_MESSAGE, null);
@@ -149,9 +143,11 @@ public class GenDocWizard extends Wizard {
 		}
 	}
 
+	/**
+	 * Returns whether the wizard can be finished, used to enable/disable the finish button
+	 */
 	@Override
 	public boolean canFinish(){
-		return getPage(PAGE_TWO).isPageComplete();// && getPage(PAGE_THREE).isPageComplete();
-
+		return getPage(PAGE_ONE).isPageComplete();
 	}
 }
