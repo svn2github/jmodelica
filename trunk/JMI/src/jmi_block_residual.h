@@ -113,7 +113,6 @@ struct jmi_block_residual_t {
 	int n;                         /**< \brief The number of real unknowns in the equation system */
 	int n_nr;                         /**< \brief The number of non-real unknowns in the equation system */
 	jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */
-    
 	jmi_real_t* x_nr;                 /**< \brief Work vector for the non-real iteration variables */
 	jmi_real_t* dx;				   /**< \brief Work vector for the seed vector */
 	jmi_real_t* dv;					/**< \brief Work vector for (dF/dv)*dv */
@@ -138,9 +137,9 @@ struct jmi_block_residual_t {
     
     int init;			   /**< \brief A flag for initialization */
     
-    long int nb_calls;                    /**< \brief Nb of times the block has been solved */
-    long int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */
-    long int nb_jevals ;
+    int nb_calls;                    /**< \brief Nb of times the block has been solved */
+    int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */
+    int nb_jevals ;
     double time_spent;             /**< \brief Total time spent in non-linear solver */
 };
 

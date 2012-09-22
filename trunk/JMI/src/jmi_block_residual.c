@@ -50,7 +50,7 @@ int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi
 
 int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solvers_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, int index){
 	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
-	/* int i; */
+	int i;
 	int flag = 0;
     if(!b) return -1;
 	*block = b;
@@ -63,7 +63,6 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 	b->n_nr = n_nr;
 	b->index = index ;
 	b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-   
 	if (n_nr>0) {
 		b->x_nr = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	}
@@ -78,6 +77,10 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 	b->min = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->max = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->nominal = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+
+	b->F(jmi,b->min,b->res,JMI_BLOCK_MIN);
+	b->F(jmi,b->max,b->res,JMI_BLOCK_MAX);
+	b->F(jmi,b->nominal,b->res,JMI_BLOCK_NOMINAL);
 
     switch(solver) {
     case JMI_KINSOL_SOLVER: {
@@ -122,25 +125,9 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
     jmi_t* jmi = block->jmi;
     c0 = clock();
     if(block->init) {
-        int i;
-        /* Initialize the work vectors */
-        for(i=0; i < block->n; ++i) {
-            block->nominal[i] = 1.0;
-            block->max[i] = BIG_REAL;
-            block->min[i] = -block->max[i];
-        }
-        block->F(jmi,block->nominal,block->res,JMI_BLOCK_NOMINAL);
-        block->F(jmi,block->min,block->res,JMI_BLOCK_MIN);
-        block->F(jmi,block->max,block->res,JMI_BLOCK_MAX);
-        /* if the nominal is outside min-max -> fix it! */
-        for(i=0; i < block->n; ++i) {
-            if(block->nominal[i] > block->max[i])
-                block->nominal[i] = block->max[i];
-            else if(block->nominal[i] < block->min[i])
-                block->nominal[i] = block->min[i];
-        }
-        
+        /* Initialize the work vector */
 		block->F(jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
+        block->init = 0;
     }
     /*
      * A proper local even iteration should problably be done here.
@@ -153,13 +140,6 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
     
     ef = block->solve(block);
 
-    if(block->init) {
-        /* 
-            This needs to be done after "solve" so that block 
-            can finalize initialization at the first step.
-        */
-        block->init = 0;
-    }
     c1 = clock();
     /* Make information available for logger */
     block->nb_calls++;

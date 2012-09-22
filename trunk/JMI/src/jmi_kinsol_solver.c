@@ -17,8 +17,6 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-/* #define SET_TIGHT_TOLERANCE */
-
 #include <sundials/sundials_math.h>
 /* #include <kinsol/kinsol_impl.h> */
 #include <kinsol/kinsol_direct.h>
@@ -46,7 +44,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 	
 	realtype *y, *f;
 	jmi_block_residual_t *block = problem_data;
-	int i,n, ret;
+	int i,n;
 
 	y = NV_DATA_S(yy); /*y is now a vector of realtype*/
 	f = NV_DATA_S(ff); /*f is now a vector of realtype*/
@@ -63,8 +61,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 	}
 
 	/*Evaluate the residual*/
-	ret = block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE);
-    if(ret) return ret;
+	block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE);
 
 	/* Test if output is OK (no -1.#IND) */
 	n = NV_LENGTH_S(ff);
@@ -86,13 +83,12 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
         char buffer[4000];
         jmi_block_residual_t *block = eh_data;
         jmi_t *jmi = block->jmi;
-        jmi_kinsol_solver_t* solver = block->solver;
-#ifdef SET_TIGHT_TOLERANCE        
+        jmi_kinsol_solver_t* solver = block->solver;        
+        
         if(solver->kin_ftol < jmi->fmi->fmi_newton_tolerance) {
             /* don't care in this case - solver will be rerun */
             return;
         }
-#endif	
         if (err_code > 0){ /*Warning*/
             category = logWarning;
         }else if (err_code < 0){ /*Error*/
@@ -153,60 +149,10 @@ void jmi_kinsol_error_handling(jmi_t* jmi, int flag){
     }
 }
 
-static void jmi_update_f_scale(jmi_block_residual_t *block, DlsMat J) {
-    jmi_kinsol_solver_t* solver = block->solver;        
-    size_t i, N = block->n;
-    realtype tol = block->jmi->fmi->fmi_newton_tolerance;
-   /* realtype tol_sq = tol*tol; */
-    
-    realtype curtime = *(jmi_get_t(block->jmi));
-    
-    /* update only one per time step */
-    if(curtime == solver->kin_scale_update_time) 
-        return;
-    
-    solver->kin_scale_update_time = curtime;  
-    
-    N_VConst_Serial(0,solver->kin_f_new_scale);
-    for(i = 0; i < N; i++){
-        int j;
-        realtype xscale = RAbs(block->nominal[i]);
-        realtype x = RAbs(block->x[i]);
-        if(x < xscale) x = xscale;
-        if(x < solver->kin_stol) x = solver->kin_stol;
-
-        for(j = 0; j < N; j++){
-            realtype dres = RAbs((J->data)[i*N+j]);
-            realtype fscale;
-            fscale = dres * x;
-            Ith(solver->kin_f_new_scale,j) = MAX(Ith(solver->kin_f_new_scale,j), fscale);
-		}
-	}
-    for(i = 0; i < N; i++) {
-        if(Ith(solver->kin_f_new_scale,i) < tol)
-            Ith(solver->kin_f_new_scale,i) = 1/tol;
-        else
-            Ith(solver->kin_f_new_scale,i) = 1/Ith(solver->kin_f_new_scale,i);
-    }
-}
-
-/* Use internal function for finite difference to avoid reimplementation */
-int kinPinvDQJac(int N,	 N_Vector u, N_Vector fu, DlsMat Jac, void *data, N_Vector tmp1, N_Vector tmp2);
-
 int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2){
 	jmi_block_residual_t *block = user_data;
-    jmi_kinsol_solver_t* solver = block->solver;        
 	int i;
 	int j;
-    int ret = 0;
-    
-    if(!block->dF) {
-        /* Use standard KINSOL finite differences */
-        ret = kinPinvDQJac(N, u, fu, J, solver->kin_mem, tmp1, tmp2);
-        jmi_update_f_scale(block, J);
-        return ret;         
-    }
-    
 	for(i = 0; i < N; i++){ 
  	    block->x[i] = Ith(u,i);
 	}
@@ -214,18 +160,15 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, void *user_data, N_Vector t
 	/*printf("x[0]: %f\n Jac: ", block->x[0]);*/
 	for(i = 0; i < N; i++){
 		block->dx[i] = 1;
-		ret |= block->dF(block->jmi,block->x,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE);
+		block->dF(block->jmi,block->x,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE);
 		for(j = 0; j < N; j++){
-            realtype dres = block->dres[j];
-			(J->data)[i*N+j] = dres;
+			(J->data)[i*N+j] = block->dres[j];
 			/*printf(" %f, ", block->dres[j]);*/
 		}
 		J->cols[i] = &(J->data)[i*N];
-	    block->dx[i] = 0;
+		block->dx[i] = 0;
 	}
-    jmi_update_f_scale(block, J);
- 
-    /*
+	/*
 	printf("Q=N.array([");
 	for(i = 0; i < N; i++){
 		printf("[");
@@ -244,14 +187,14 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, void *user_data, N_Vector t
 	printf("print N.linalg.cond(Q)\n");
 */
 	/*printf("\n");*/
-	return ret;
+	return 0;
 }
 
 
 int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t* block) {
     jmi_kinsol_solver_t* solver= (jmi_kinsol_solver_t*)calloc(1,sizeof(jmi_kinsol_solver_t));
     jmi_t* jmi = block->jmi;
-    int flag, n = block->n;
+    int flag, i, n = block->n;
     int verbosity = 0;
     
     if(!solver ) return -1;
@@ -260,12 +203,9 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t
 
     /*Sets the scaling vectors to ones.*/
     /*To be changed. */
-    solver->kin_y = N_VMake_Serial(n, block->x);
+    solver->kin_y = N_VNew_Serial(n);
 	solver->kin_y_scale = N_VNew_Serial(n);
 	solver->kin_f_scale = N_VNew_Serial(n);
-    solver->kin_f_new_scale  = N_VNew_Serial(n);
-    solver->kin_scale_update_time = -1.0;
-    solver->kin_ftol_update_time = -1.0;
     
     /*NOTE: it'd be nice to use "jmi->fmi->fmi_newton_tolerance" here
       However, fmi pointer is not set yet at this point.
@@ -273,13 +213,17 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t
 	solver->kin_ftol = JMI_DEFAULT_KINSOL_TOL;
 	solver->kin_stol = JMI_DEFAULT_KINSOL_TOL;
 
-    /* Initialize scaling to 1.0 - defaults */
-    N_VConst_Serial(1.0,solver->kin_y_scale);
+    N_VConst_Serial(ONE,solver->kin_y_scale);
+    N_VConst_Serial(ONE,solver->kin_f_scale);
+    
+    /* Initialize the work vector */
+    block->F(jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
+    /*N_VSetArrayPointer(block->x,solver->kin_y);*/
+    
+    for(i=0;i< n;++i){
+        Ith(solver->kin_y,i)=block->x[i];
+    }
 
-    /* Initial equation scaling is 1.0 */
-    N_VConst_Serial(1.0,solver->kin_f_scale);
-    N_VConst_Serial(1.0,solver->kin_f_new_scale);
-                
     solver->kin_mem = KINCreate();
     flag = KINInit(solver->kin_mem, kin_f, solver->kin_y); /*Initialize Kinsol*/
     jmi_kinsol_error_handling(jmi, flag);
@@ -299,13 +243,15 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t
     flag = KINSetUserData(solver->kin_mem, block);
     jmi_kinsol_error_handling(jmi, flag);
     
-    flag = KINDlsSetDenseJacFn(solver->kin_mem, kin_dF);
-    if (flag<0) {
-        jmi_kinsol_error_handling(jmi, flag);
-        return flag;
+    if(block->dF != NULL){
+        flag = KINDlsSetDenseJacFn(solver->kin_mem, kin_dF);
+        if (flag<0) {
+            jmi_kinsol_error_handling(jmi, flag);
+            return flag;
+        }
     }
     
-    /*Stopping tolerance of F -> just the default */
+    /*Stopping tolerance of F*/
     flag = KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol); 
     if (flag<0) {
         jmi_kinsol_error_handling(jmi, flag);
@@ -313,11 +259,13 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t
     }
     
     /*Stepsize tolerance*/
-    flag = KINSetScaledStepTol(solver->kin_mem, 1e-3 * solver->kin_stol); 
+    /*
+    flag = KINSetScaledStepTol(solver->kin_mem, 0.001*(solver->kin_stol)); 
     if (flag<0) {
         jmi_kinsol_error_handling(jmi, flag);
         return flag;
     }
+    */
     
     /* Allow long steps */
     flag = KINSetMaxNewtonStep(solver->kin_mem, 1e30);
@@ -326,8 +274,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t
         return flag;
     }
     
-    /* Disable residual monitoring (since inexact solution is given sometimes by 
-    the linear solver) */
+    /* Disable residual monitoring */
     flag = KINSetNoResMon(solver->kin_mem,1);
     if (flag<0) {
         jmi_kinsol_error_handling(jmi, flag);
@@ -365,119 +312,75 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     jmi_kinsol_solver_t* solver = block->solver;
     jmi_t * jmi = block->jmi;
     
-    long int nniters = 0, njevals = 0, njevalscur=0;
+    long int nniters = 0, njevals = 0;
     
-    if(block->init) {
-        /* set tolerances */
-#ifdef SET_TIGHT_TOLERANCE
-        solver->kin_stol = 1e-20;
-        solver->kin_ftol = 1e-20;
-#else        
-        solver->kin_stol = jmi->fmi->fmi_newton_tolerance;
-        solver->kin_ftol = jmi->fmi->fmi_newton_tolerance;
-#endif        
+    for(i=0;i<block->n;i=i+1){
+        Ith(solver->kin_y,i)=block->x[i];
+    }
+    
+    flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
+    
+    if (flag == 0) {
+        realtype norm;
+        /* As soon as the first solution was obtained (and it was not the intial guess -> Jacobian can be reused */
+        KINSetNoInitSetup(solver->kin_mem, 1);
 
-        KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
-        KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
-        /* 
-            Set variable scaling based on nominal values.          
+        /* Set the function tolerance for the next step to be the current norm + eps.
+          This is to prevent drift off when ODE solver is taking small steps.
         */
-        for(i=0;i< block->n;++i){
-            double nominal = RAbs(block->nominal[i]);
-            if(nominal != 1.0) {
-                if(nominal == 0.0)
-                    nominal = 1/solver->kin_stol;
-                else
-                    nominal = 1/nominal;
-                Ith(solver->kin_y_scale,i)=nominal;
+        KINGetFuncNorm(solver->kin_mem, &norm);
+        if(norm < JMI_DEFAULT_KINSOL_TOL) {
+            norm = JMI_DEFAULT_KINSOL_TOL;
+        }
+        solver->kin_ftol = norm * (1.0 + UNIT_ROUNDOFF);
+        KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
+    }
+
+    if (flag<0) {
+        realtype ftol = jmi->fmi->fmi_newton_tolerance;
+        /* check that the solution was done with specified tolerance and not a finer one */
+        if(solver->kin_ftol < ftol) {
+            realtype norm;
+            KINGetFuncNorm(solver->kin_mem, &norm);            
+            /* Check if the solution was OK */
+            if(norm <= ftol ) {
+                /* the tolerance was too tight, reset it*/
+                solver->kin_ftol = norm * (1.0 + UNIT_ROUNDOFF);
+                solver->kin_stol = jmi->fmi->fmi_newton_tolerance;
+                KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol); 
+                /* KINSetScaledStepTol(solver->kin_mem, solver->kin_stol); */
+                flag = 0;
             }
+            else {
+                /* try again. mostly to print error */
+                solver->kin_ftol = ftol;
+                solver->kin_stol = jmi->fmi->fmi_newton_tolerance;
+                KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol); 
+                /* KINSetScaledStepTol(solver->kin_mem, solver->kin_stol); */
+                flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);                
+            }            
         }
     }
-    else if(solver->kin_ftol_update_time != solver->kin_scale_update_time) {
-        /* Equation scaling was updated last time. */
-        realtype curtime = *(jmi_get_t(block->jmi));
-    
-        /* update only once per time step */
-        if(curtime != solver->kin_ftol_update_time) {
-            solver->kin_ftol_update_time = solver->kin_scale_update_time;
-            N_VScale_Serial(ONE, solver->kin_f_new_scale, solver->kin_f_scale);
-        }
+    if (flag<0) {
+        jmi_kinsol_error_handling(jmi, flag);
+        return flag;    
     }
-    
-    flag = KINPinvGetNumJacEvals(solver->kin_mem, &njevalscur);
+  
+    /* Get debug information */
+    nniters = 0;
+    flag = KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);
     if (flag<0) {
         jmi_kinsol_error_handling(jmi, flag);
         return flag;
     }
-  
-    flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
     
-    KINPinvGetNumJacEvals(solver->kin_mem, &njevals);
-    if(njevals > njevalscur) {
-        /*  Jacobian can be reused */
-        KINSetNoInitSetup(solver->kin_mem, 1);
- 
-        if(block->init) {
-            int flagNonscaled = flag;
-            /* If this is the first call then solve again to make sure 
-            the scaled solution is fine.  */
-            solver->kin_ftol_update_time = solver->kin_scale_update_time;
-            N_VScale_Serial(ONE, solver->kin_f_new_scale, solver->kin_f_scale);
-            
-            /* Get & store debug information */
-            KINGetNumNonlinSolvIters(solver->kin_mem, &block->nb_iters);
-            block->nb_jevals = njevals ;
-
-            flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
-            if(flag == KIN_INITIAL_GUESS_OK) flag = KIN_SUCCESS;
-            if(flag < 0) {
-                if(flagNonscaled == 0)
-                    jmi_log(block->jmi, logError, "The non-scaled problem solved fine, scaled problem failed");
-                else
-                    jmi_log(block->jmi, logError, "Both non-scaled and scaled problem failed");
-            }
-            else if(flagNonscaled < 0) {
-                jmi_log(block->jmi, logWarning, "The non-scaled problem failed, scaled solved fine");
-            }
-        }
+    njevals = 0;
+    flag = KINPinvGetNumJacEvals(solver->kin_mem, &njevals);
+    if (flag<0) {
+        jmi_kinsol_error_handling(jmi, flag);
+        return flag;
     }
- 
-#ifdef SET_TIGHT_TOLERANCE
-    if(flag == 0) {
-        /* prevent solution drift off by requiring function norm
-          to be about constant between the calls.
-        */
-        realtype norm;
-        KINGetFuncNorm(solver->kin_mem, &norm);           
-        solver->kin_ftol = norm * (1.0 + UNIT_ROUNDOFF);
-        KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);        
-    }
-    else if (flag<0) {
-         realtype ftol = jmi->fmi->fmi_newton_tolerance;
-         /* check that the solution was done with specified tolerance and not a finer one */
-         if(solver->kin_ftol < ftol) {
-             realtype norm;
-             KINGetFuncNorm(solver->kin_mem, &norm);           
-             /* Check if the solution was OK */
-             if(norm <= ftol ) {
-             /* the tolerance was too tight, reset it*/
- 	                solver->kin_ftol = norm * (1.0 + UNIT_ROUNDOFF);
- 	                KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
- 	                flag = 0;
-             }
-             else {
-                 /* try again. mostly to print error */
-                 solver->kin_ftol = ftol;
-                 KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol); 
-                 flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);               
-             }           
-         }
-     }
-#endif  
-    /* Get debug information */
-    KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);    
-    KINPinvGetNumJacEvals(solver->kin_mem, &njevals);
-     
+    
     /* Store debug information */
     block->nb_iters += nniters;
     block->nb_jevals += njevals ;
@@ -527,7 +430,6 @@ void jmi_kinsol_solver_delete(jmi_block_residual_t* block) {
 	N_VDestroy_Serial(solver->kin_y);
 	N_VDestroy_Serial(solver->kin_y_scale);
 	N_VDestroy_Serial(solver->kin_f_scale);
-    N_VDestroy_Serial(solver->kin_f_new_scale);
 	/*Deallocate Kinsol */
     KINFree(&(solver->kin_mem));
 	/*Deallocate struct */

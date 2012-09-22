@@ -250,27 +250,42 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define SURELY_LT_ZERO(op) (op<=-1e-6? JMI_TRUE: JMI_FALSE)
 #define SURELY_GT_ZERO(op) (op>=1e-6? JMI_TRUE: JMI_FALSE)
 
+/*
 #define check_lbound(x, xmin, message) \
     if(x < xmin) { jmi_log(jmi, logInfo, message); return 1; }
 
 #define check_ubound(x, xmax, message) \
     if(x > xmax) { jmi_log(jmi, logInfo, message); return 1; }
+*/
+
+#define check_lbound(x, xmin, message) \
+    if(0) { jmi_log(jmi, logInfo, message); return 1; }
+
+#define check_ubound(x, xmax, message) \
+    if(0) { jmi_log(jmi, logInfo, message); return 1; }
 
 #define check_bounds(x, xmin, xmax, message) \
     check_lbound(x, xmin, message)\
     else check_ubound(x, xmax, message)
 
+/*
 #define init_with_lbound(x, xmin, message) \
     if(x < xmin) { jmi_log(jmi, logInfo, message); x = xmin; }
 
 #define init_with_ubound(x, xmax, message) \
     if(x > xmax) { jmi_log(jmi, logInfo, message); x = xmax; }
+*/
+
+#define init_with_lbound(x, xmin, message) \
+    if(0) { jmi_log(jmi, logInfo, message); x = xmin; }
+
+#define init_with_ubound(x, xmax, message) \
+    if(0) { jmi_log(jmi, logInfo, message); x = xmax; }
+
 
 #define init_with_bounds(x, xmin, xmax, message) \
     init_with_lbound(x, xmin, message) \
     else init_with_ubound(x, xmax, message)
-
-
 
 /* Record creation macro */
 #define JMI_RECORD_STATIC(type, name) \
@@ -944,9 +959,10 @@ int jmi_new_simple_color_info(jmi_simple_color_info_t** c_info, int n_cols, int 
 /**
  * \brief Deletes the contents of a jmi_simple_color_info struct
  *
- * @param c_info_ptr A pointer to jmi_color_info struct
+ * @param c_info A jmi_color_info struct
+ * @return Error code
  */
-void jmi_delete_simple_color_info(jmi_simple_color_info_t **c_info_ptr);
+int jmi_delete_simple_color_info(jmi_simple_color_info_t *c_info);
 
 /**
  * \brief Allocates memory for the contents of a jmi_color_info struct

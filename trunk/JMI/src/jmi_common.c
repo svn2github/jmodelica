@@ -1132,10 +1132,7 @@ int jmi_new_simple_color_info(jmi_simple_color_info_t** c_info, int n_cols, int 
 	return 0;
 }
 
-void jmi_delete_simple_color_info(jmi_simple_color_info_t **c_info_ptr) {
-    jmi_simple_color_info_t *c_info = *c_info_ptr;
-    if(!c_info) return;
-    
+int jmi_delete_simple_color_info(jmi_simple_color_info_t *c_info) {
 	free(c_info->cols);
 	free(c_info->rows);
 	free(c_info->col_n_nz);
@@ -1144,7 +1141,7 @@ void jmi_delete_simple_color_info(jmi_simple_color_info_t **c_info_ptr) {
 	free(c_info->n_cols_in_group);
 	free(c_info->group_start_index);
 	free(c_info);
-    *c_info_ptr = 0;
+	return 0;
 }
 
 /*Initiate struct containing graph coloring results*/
