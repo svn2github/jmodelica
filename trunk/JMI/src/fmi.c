@@ -263,7 +263,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     fmiInteger initComplete = 0;    /* If the initialization are complete */
     jmi_real_t nextTimeEvent;       /* Next time event instant */
     fmiReal safety_factor_events = 0.0001;
-    fmiReal safety_factor_newton = 0.001;
+    fmiReal safety_factor_newton = 0.0001;
     
     jmi_real_t* switchesR;   /* Switches */
     jmi_real_t* switchesR0;  /* Initial Switches */
