@@ -1948,7 +1948,8 @@ public class ModelicaCompiler {
 		     */
 		    @Override
 		    public void log(Level level, String format, Object... args) {
-		    	logger.log(level, format, args);
+		    	if (getLevel().intValue() <= level.intValue())
+		    		log(level, String.format(format, args));
 		    }
 		    
 		    /**
