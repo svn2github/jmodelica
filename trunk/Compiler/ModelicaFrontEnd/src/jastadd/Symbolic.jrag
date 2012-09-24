@@ -683,6 +683,10 @@ aspect Derivatives {
 		return dynamicFExp(diffUseOrDerExp(name, null));		
 	}
 	
+	public FExp FAbsExp.diff(String name) {
+		return dynamicFExp(new FIfExp(new FGeqExp(getFExp().fullCopy(), new FRealLitExp(0)), getFExp().diff(name), new FNegExp(getFExp().diff(name))));
+	}
+	
 	public FExp FExp.diffUseOrDerExp(String name, String myName) {
 		int val;
 		if (variability().parameterOrLess()) {
