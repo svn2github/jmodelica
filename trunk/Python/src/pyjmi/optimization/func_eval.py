@@ -28,7 +28,10 @@ func_file_name = sys.argv[-2]
 execfile(func_file_name)
 
 # Get the actual function
-func_name = func_file_name.strip('.py').split('/')[-1].split('\\')[-1]
+if func_file_name.endswith(".py"):
+    func_name = func_file_name[:-3].split('/')[-1].split('\\')[-1]
+else:
+    func_name = func_file_name.split('/')[-1].split('\\')[-1]
 f = eval(func_name)
 
 # Get the name of the sub-directory
