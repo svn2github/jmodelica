@@ -1867,12 +1867,14 @@ aspect TransformCanonical {
 					break;
 				}
 			}
-			AbstractEquationBlock tearBlock = null;
+			AbstractEquationBlock simpleBlock = null;
 			if (singleEquation) {
-				tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, true);
+				simpleBlock = EquationBlockFactory.createSimpleEquationBlock(block, true);
+				if (!simpleBlock.isSolvable())
+					simpleBlock = null;
 			}
-			if (tearBlock != null && tearBlock.isSolvable()) {
-				tearBLT.add(EquationBlockFactory.createEquationBlock(block));
+			if (simpleBlock != null) {
+				tearBLT.add(simpleBlock);
 			} else {
 				TornEquationBlock eb = new TornEquationBlock();
 				tear(block, eb);
