@@ -205,6 +205,11 @@ FStringVariable : FVariable;
 FEnumVariable : FVariable ::= Enum:FQName /Type:FType/;
 
 /**
+ * \brief An external object variable.
+ */
+FExternalObjectVariable : FVariable;
+
+/**
  * \brief Pre FVariable of type Real.
  */
 FPreRealVariable : FRealVariable;
@@ -335,6 +340,11 @@ FEnumLiteralType : FPrimitiveType ::= <Name>;
  * Used to represent type errors. 
  */
 FUnknownType : FType;
+
+/**
+ * \brief Class representing the external object type.
+ */
+FExternalObjectType : FPrimitiveType;
 
 /**
  * \brief A qualified name supporting array subscripts.

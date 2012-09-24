@@ -594,6 +594,8 @@ aspect Flattening {
 			return new FBooleanVariable();
 		if (isString()) 
 			return new FStringVariable();
+		if (isExternalObject())
+			return new FExternalObjectVariable();
 		return null;
 	}	
 

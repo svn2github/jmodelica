@@ -1015,12 +1015,13 @@ aspect InheritedFactoryMethods {
 	public FWhenStmt FWhenStmt.createEmptyNode() { return new FWhenStmt(); }
 	
 	public abstract FVariable FVariable.createEmptyNode();
-	public FRealVariable    FRealVariable.createEmptyNode()    { return new FRealVariable(); }
-	public FIntegerVariable FIntegerVariable.createEmptyNode() { return new FIntegerVariable(); }
-	public FBooleanVariable FBooleanVariable.createEmptyNode() { return new FBooleanVariable(); }
-	public FStringVariable  FStringVariable.createEmptyNode()  { return new FStringVariable(); }
-	public FEnumVariable    FEnumVariable.createEmptyNode()    { return new FEnumVariable(); }
-	public FRecordVariable  FRecordVariable.createEmptyNode()  { return new FRecordVariable(); }
+	public FRealVariable    FRealVariable.createEmptyNode()    					{ return new FRealVariable(); }
+	public FIntegerVariable FIntegerVariable.createEmptyNode() 					{ return new FIntegerVariable(); }
+	public FBooleanVariable FBooleanVariable.createEmptyNode() 					{ return new FBooleanVariable(); }
+	public FStringVariable  FStringVariable.createEmptyNode()  					{ return new FStringVariable(); }
+	public FEnumVariable    FEnumVariable.createEmptyNode()    					{ return new FEnumVariable(); }
+	public FRecordVariable  FRecordVariable.createEmptyNode()  					{ return new FRecordVariable(); }
+	public FExternalObjectVariable FExternalObjectVariable.createEmptyNode()	{ return new FExternalObjectVariable(); }
 
 	public FAttribute         FAttribute.createEmptyNode()         { return new FAttribute(); }
 	public FInternalAttribute FInternalAttribute.createEmptyNode() { return new FInternalAttribute(); }

@@ -2981,6 +2981,10 @@ aspect TransformCanonical {
 	public FVariable FRecordVariable.createPreVariable() {
 		throw new UnsupportedOperationException();
 	}
+	
+	public FVariable FExternalObjectVariable.createPreVariable() {
+		throw new UnsupportedOperationException();
+	}
 
 
 	/**

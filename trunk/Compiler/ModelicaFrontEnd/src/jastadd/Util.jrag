@@ -1452,14 +1452,15 @@ aspect FlatNames {
    	}
     
     syn String FType.name();
-    eq FRealType.name()        = "Real";
-    eq FIntegerType.name()     = "Integer";
-    eq FBooleanType.name()     = "Boolean";
-    eq FStringType.name()      = "String";
-    eq FEnumType.name()        = getName();
-    eq FEnumLiteralType.name() = getName();
-    eq FRecordType.name()      = getName();
-    eq FUnknownType.name()     = "(unknown type)";
+    eq FRealType.name()        		= "Real";
+    eq FIntegerType.name()     		= "Integer";
+    eq FBooleanType.name()     		= "Boolean";
+    eq FStringType.name()      		= "String";
+    eq FEnumType.name()        		= getName();
+    eq FEnumLiteralType.name() 		= getName();
+    eq FRecordType.name()      		= getName();
+    eq FUnknownType.name()     		= "(unknown type)";
+    eq FExternalObjectType.name()	= "External Object"; 
     
     syn boolean FAbstractFunctionCall.isIgnored() = false;
     eq FIgnoredBuiltIn.isIgnored() = true;

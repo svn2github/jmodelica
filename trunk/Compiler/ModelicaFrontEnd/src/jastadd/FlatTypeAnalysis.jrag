@@ -20,15 +20,16 @@ import java.util.TreeSet;
 aspect FlatTypeAnalysis {
 
 	syn lazy FType FAbstractVariable.type();
-	eq FRealVariable.type()       = fRealType(size());
-	eq FIntegerVariable.type()    = fIntegerType(size());
-	eq FBooleanVariable.type()    = fBooleanType(size());
-	eq FStringVariable.type()     = fStringType(size());
-	eq FEnumVariable.type()       = getType();
-	eq FRecordVariable.type()     = getType();
-	eq FDerivativeVariable.type() = fRealScalarType();
-	eq FFunctionVariable.type()   = getType();
-	eq UnknownFVariable.type()    = fUnknownType();
+	eq FRealVariable.type()       		= fRealType(size());
+	eq FIntegerVariable.type()    		= fIntegerType(size());
+	eq FBooleanVariable.type()    		= fBooleanType(size());
+	eq FStringVariable.type()     		= fStringType(size());
+	eq FEnumVariable.type()       		= getType();
+	eq FRecordVariable.type()     		= getType();
+	eq FDerivativeVariable.type() 		= fRealScalarType();
+	eq FFunctionVariable.type()   		= getType();
+	eq UnknownFVariable.type()    		= fUnknownType();
+	eq FExternalObjectVariable.type()	= fExternalObjectType(size());
 	
 	syn FType FRealVariable.stateSelectType() = myFClass().stateSelectType();
 	syn lazy FType FClass.stateSelectType() {
@@ -84,6 +85,8 @@ aspect FlatTypeAnalysis {
 			return fBooleanScalarType();
 		else if (isString()) 
 			return fStringScalarType();
+		else if (isExternalObject())
+			return fExternalObjectScalarType();
 		return fUnknownType();
 	}
 	eq InstEnum.primitiveScalarType()      = myInstClass().enumType();
@@ -778,6 +781,8 @@ aspect FTypeCompatibility {
 		typeMatches(type, true, allowUnknown);
 	eq FEnumType.typeCompatible(FType type, boolean allowUnknown) = 
 		typeMatches(type, true, allowUnknown);
+	eq FExternalObjectType.typeCompatible(FType type, boolean allowUnknown) = 
+			type.isExternalObject() && dimensionCompatible(type, allowUnknown);
 	
 	syn boolean FType.typeMatches(FType type, boolean compatible, boolean allowUnknown) =
 		compatible ? typeCompatible(type, allowUnknown) : equivalentTo(type, allowUnknown);
@@ -844,17 +849,19 @@ aspect FTypeEquivalent {
 
 aspect BuiltInFlatTypes {
  	
- 	syn boolean InstNode.isReal()    = false;
- 	syn boolean InstNode.isInteger() = false;
- 	syn boolean InstNode.isBoolean() = false;
- 	syn boolean InstNode.isString()  = false;
- 	syn boolean InstNode.isEnum()    = false;
+ 	syn boolean InstNode.isReal()    		= false;
+ 	syn boolean InstNode.isInteger()		= false;
+ 	syn boolean InstNode.isBoolean() 		= false;
+ 	syn boolean InstNode.isString()  		= false;
+ 	syn boolean InstNode.isEnum()    		= false;
+ 	syn boolean InstNode.isExternalObject() = false;
  	
- 	eq InstPrimitive.isReal()    = myInstClass().isReal();
- 	eq InstPrimitive.isInteger() = myInstClass().isInteger();
- 	eq InstPrimitive.isBoolean() = myInstClass().isBoolean();
- 	eq InstPrimitive.isString()  = myInstClass().isString();
- 	eq InstEnum.isEnum()         = true;
+ 	eq InstPrimitive.isReal()    		= myInstClass().isReal();
+ 	eq InstPrimitive.isInteger() 		= myInstClass().isInteger();
+ 	eq InstPrimitive.isBoolean() 		= myInstClass().isBoolean();
+ 	eq InstPrimitive.isString()  		= myInstClass().isString();
+ 	eq InstEnum.isEnum()         		= true;
+ 	eq InstPrimitive.isExternalObject() = myInstClass().isExternalObject();
  	
  	eq InstClassDecl.isReal()    = finalClass().primitiveName().equals("Real");
  	eq InstClassDecl.isInteger() = finalClass().primitiveName().equals("Integer");
@@ -872,24 +879,27 @@ aspect BuiltInFlatTypes {
  		myInstClass().finalClass().primitiveName().equals("StringType");
 
 	 
-	public static final FRealType    FRealType.SCALAR    = new FRealType(Size.SCALAR);
-	public static final FIntegerType FIntegerType.SCALAR = new FIntegerType(Size.SCALAR);
-	public static final FBooleanType FBooleanType.SCALAR = new FBooleanType(Size.SCALAR);
-	public static final FStringType  FStringType.SCALAR  = new FStringType(Size.SCALAR);
-	public static final FUnknownType FUnknownType.SCALAR = new FUnknownType(Size.SCALAR);
+	public static final FRealType    FRealType.SCALAR    				= new FRealType(Size.SCALAR);
+	public static final FIntegerType FIntegerType.SCALAR 				= new FIntegerType(Size.SCALAR);
+	public static final FBooleanType FBooleanType.SCALAR 				= new FBooleanType(Size.SCALAR);
+	public static final FStringType  FStringType.SCALAR  				= new FStringType(Size.SCALAR);
+	public static final FUnknownType FUnknownType.SCALAR 				= new FUnknownType(Size.SCALAR);
+	public static final FExternalObjectType FExternalObjectType.SCALAR 	= new FExternalObjectType(Size.SCALAR);
 
-	syn boolean FType.isReal()    = false;
-	eq FRealType.isReal()         = true;
-	syn boolean FType.isInteger() = false;
-	eq FIntegerType.isInteger()   = true;
-	syn boolean FType.isBoolean() = false;
-	eq FBooleanType.isBoolean()   = true;
-	syn boolean FType.isString()  = false;
-	eq FStringType.isString()     = true;
-	syn boolean FType.isRecord()  = false;
-	eq FRecordType.isRecord()     = true;
-	syn boolean FType.isEnum()    = false;
-	eq FEnumType.isEnum()         = true;
+	syn boolean FType.isReal()    				= false;
+	eq FRealType.isReal()						= true;
+	syn boolean FType.isInteger() 				= false;
+	eq FIntegerType.isInteger()   				= true;
+	syn boolean FType.isBoolean() 				= false;
+	eq FBooleanType.isBoolean()   				= true;
+	syn boolean FType.isString()  				= false;
+	eq FStringType.isString()     				= true;
+	syn boolean FType.isRecord()  				= false;
+	eq FRecordType.isRecord()     				= true;
+	syn boolean FType.isEnum()    				= false;
+	eq FEnumType.isEnum()         				= true;
+	syn boolean FType.isExternalObject()    	= false;
+	eq FExternalObjectType.isExternalObject()	= true;
 	
 	syn boolean FType.isArray()  = getSize() != Size.SCALAR;
 	syn boolean FType.isScalar() = getSize() == Size.SCALAR;
@@ -964,26 +974,29 @@ aspect BuiltInFlatTypes {
   		copy.setSize(Size.SCALAR);
   		return copy;
 	}
-	eq FUnknownType.scalarType() = FUnknownType.SCALAR;
-	eq FRealType.scalarType()    = FRealType.SCALAR;
-	eq FIntegerType.scalarType() = FIntegerType.SCALAR;
-	eq FBooleanType.scalarType() = FBooleanType.SCALAR;
-	eq FStringType.scalarType()  = FStringType.SCALAR;
+	eq FUnknownType.scalarType() 		= FUnknownType.SCALAR;
+	eq FRealType.scalarType()    		= FRealType.SCALAR;
+	eq FIntegerType.scalarType() 		= FIntegerType.SCALAR;
+	eq FBooleanType.scalarType()		= FBooleanType.SCALAR;
+	eq FStringType.scalarType()  		= FStringType.SCALAR;
+	eq FExternalObjectType.scalarType()	= FExternalObjectType.SCALAR;
   	
 	syn boolean FType.isUnknown() = false;
  	eq FUnknownType.isUnknown() = true;
  	
 	syn FType ASTNode.fUnknownType() = FUnknownType.SCALAR;
 	
-	syn FPrimitiveType ASTNode.fRealScalarType()    = FRealType.SCALAR;
-	syn FPrimitiveType ASTNode.fIntegerScalarType() = FIntegerType.SCALAR;
-	syn FPrimitiveType ASTNode.fBooleanScalarType() = FBooleanType.SCALAR;
-	syn FPrimitiveType ASTNode.fStringScalarType()  = FStringType.SCALAR;
+	syn FPrimitiveType ASTNode.fRealScalarType()    		= FRealType.SCALAR;
+	syn FPrimitiveType ASTNode.fIntegerScalarType() 		= FIntegerType.SCALAR;
+	syn FPrimitiveType ASTNode.fBooleanScalarType() 		= FBooleanType.SCALAR;
+	syn FPrimitiveType ASTNode.fStringScalarType()  		= FStringType.SCALAR;
+	syn FPrimitiveType ASTNode.fExternalObjectScalarType()	= FExternalObjectType.SCALAR;
  	
-	syn FPrimitiveType ASTNode.fRealArrayType(Size size)    = new FRealType(size);
-	syn FPrimitiveType ASTNode.fIntegerArrayType(Size size) = new FIntegerType(size);
-	syn FPrimitiveType ASTNode.fBooleanArrayType(Size size) = new FBooleanType(size);
-	syn FPrimitiveType ASTNode.fStringArrayType(Size size)  = new FStringType(size);
+	syn FPrimitiveType ASTNode.fRealArrayType(Size size)    		= new FRealType(size);
+	syn FPrimitiveType ASTNode.fIntegerArrayType(Size size) 		= new FIntegerType(size);
+	syn FPrimitiveType ASTNode.fBooleanArrayType(Size size) 		= new FBooleanType(size);
+	syn FPrimitiveType ASTNode.fStringArrayType(Size size)  		= new FStringType(size);
+	syn FPrimitiveType ASTNode.fExternalObjectArrayType(Size size)  = new FExternalObjectType(size);
  	
 	syn FPrimitiveType ASTNode.fRealType(Size size) = 
  		(size == Size.SCALAR) ? fRealScalarType() : fRealArrayType(size);
@@ -993,17 +1006,20 @@ aspect BuiltInFlatTypes {
  		(size == Size.SCALAR) ? fBooleanScalarType() : fBooleanArrayType(size);
 	syn FPrimitiveType ASTNode.fStringType(Size size) = 
  		(size == Size.SCALAR) ? fStringScalarType() : fStringArrayType(size);
+ 	syn FPrimitiveType ASTNode.fExternalObjectType(Size size) = 
+ 		(size == Size.SCALAR) ? fExternalObjectScalarType() : fExternalObjectArrayType(size);
  		
  	syn FType FType.arrayType(Size size) {
   		FType copy = (FType) fullCopy();
   		copy.setSize(size);
   		return copy;
  	}
- 	eq FUnknownType.arrayType(Size size)  = this;
-	eq FRealType.arrayType(Size size)     = fRealArrayType(size);
- 	eq FIntegerType.arrayType(Size size)  = fIntegerArrayType(size);
- 	eq FStringType.arrayType(Size size)   = fStringArrayType(size);
-	eq FBooleanType.arrayType(Size size)  = fBooleanArrayType(size);
+ 	eq FUnknownType.arrayType(Size size)  		= this;
+	eq FRealType.arrayType(Size size)     		= fRealArrayType(size);
+ 	eq FIntegerType.arrayType(Size size)  		= fIntegerArrayType(size);
+ 	eq FStringType.arrayType(Size size)   		= fStringArrayType(size);
+	eq FBooleanType.arrayType(Size size)  		= fBooleanArrayType(size);
+	eq FExternalObjectType.arrayType(Size size)	= fExternalObjectArrayType(size);
 	
  	/**
  	 * \brief Create a literal with the zero value for this type, if applicable.
@@ -1097,5 +1113,16 @@ aspect InstClassRestriction {
 	syn boolean InstRestriction.isPackage() = false;
 	eq InstMPackage.isPackage()             = true;
 
+	/**
+	 * \brief Is this class an external object?
+	 */
+	syn boolean InstClassDecl.isExternalObject() {
+		for (InstExtends ie : getInstExtendss()) {
+			String name = ie.getClassName().name();
+			if (name.equals("ExternalObject"))
+				return true;
+		}
+		return false;	
+	}
 	
 }

@@ -1535,6 +1535,7 @@ aspect ConstantEvaluation {
 		  return val;
 	  }
   }
+  eq FExternalObjectVariable.ceval()    = CValue.UNKNOWN;
   
   /**
    * \brief Constant evaluation of binding equation for dependent parameter.
