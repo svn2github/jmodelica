@@ -46,6 +46,8 @@ public class Generator {
 	public static final String REV_ID_CLOSE_TAG = "</div>";
 	public static final String INFO_BTN_DATA_PRE = "onclick='preInfoEdit()' id='editInfoButton' value='Edit..'";
 	public static final String REV_BTN_DATA_PRE = "onclick='preRevEdit()' id='editRevisionButton' value='Edit..'";
+	public static final String NO_INFO_AVAILABLE = "No information available";
+	public static final String NO_REV_AVAILABLE = "No revisions available";
 
 	/**
 	 * Creates the HTML head, including CSS definitions.
@@ -101,10 +103,10 @@ public class Generator {
 						N2 + "<script type=\"text/javascript\" src=\"" + scriptPath + "\">" + "</script>" + 
 						N2 + "<script type=\"text/javascript\">");
 		if (initTinyMCE){
-			sb.append(N3 + Scripts.SCRIPT_INIT_TINY_MCE);
+			sb.append(N3 + Scripts.SCRIPT_INIT_TINY_MCE + Scripts.CANCEL_INFO + Scripts.CANCEL_REV);
 		}
 		sb.append(
-				N2 + Scripts.SUPPRESS_NAVIGATION_WARNING2 + Scripts.PRE_INFO_EDIT + Scripts.PRE_REV_EDIT + Scripts.POST_INFO_EDIT + Scripts.POST_REV_EDIT + Scripts.CANCEL_INFO + Scripts.CANCEL_REV +
+				N2 + Scripts.SUPPRESS_NAVIGATION_WARNING6 + Scripts.PRE_INFO_EDIT + Scripts.PRE_REV_EDIT + Scripts.POST_INFO_EDIT + Scripts.POST_REV_EDIT  +
 				N2 + "</script>" +
 				N2 + "<!-- END OF JAVASCRIPT -->");
 		return sb.toString();
@@ -191,12 +193,26 @@ public class Generator {
 	 * the latter case the information will not be editable, and the 'Edit' button should not be included
 	 * @return The HTML String
 	 */
-	public static String genInfo (FullClassDecl fcd, boolean offline, SourceRoot sourceRoot){
+	public static String genInfo (FullClassDecl fcd, boolean offline, SourceRoot sourceRoot, boolean forceDisabled){
 
 		StringBuilder content = new StringBuilder();
-		String embeddedHTML;
+		String info;
+		boolean isLib;
 		synchronized (fcd.state()){
-			embeddedHTML = fcd.annotation().forPath("Documentation/info").string();
+			try{
+				IFile file = fcd.getDefinition().getFile();
+				isLib =  !(file != null && file.getProject() == sourceRoot.getProject());
+			}catch(NullPointerException e){
+				isLib = true;
+			}
+		}
+		synchronized (fcd.state()){
+			info = fcd.annotation().forPath("Documentation/info").string();
+			//cases in switch an empty string should be returned:
+			//(1) is in a library AND there is no info
+			if (isLib && (info == null || info.equals(""))) return "";
+			//(2) is offline AND there is no info
+			if (offline && (info == null || info.equals(""))) return "";
 		}
 		content.append(N4 + "<!-- INFO -->");
 		if (offline){
@@ -204,16 +220,7 @@ public class Generator {
 		}else{
 			String disabled = "";
 
-			boolean isLib;
-			synchronized (fcd.state()){
-				try{
-					IFile file = fcd.getDefinition().getFile();
-					isLib =  !(file != null && file.getProject() == sourceRoot.getProject());
-				}catch(NullPointerException e){
-					isLib = true;
-				}
-			}
-			if (isLib){
+			if (isLib || forceDisabled){
 				disabled="disabled='disabled'";
 			}
 			String editInfoButton = "<input class='buttonIndent' type='button' " + disabled + INFO_BTN_DATA_PRE + "/>";
@@ -221,10 +228,10 @@ public class Generator {
 		}
 		content.append(N4 + "<!-- The embedded HTML code in the following DIV tag may not be indented in accordance with the rest of the document due to the frequent use of the PRE tag that displays all white spaces -->");
 		content.append(N4 + INFO_ID_OPEN_TAG + "\n");
-		if (embeddedHTML != null && !embeddedHTML.equals("")){
-			content.append(processEmbeddedHTML(embeddedHTML, fcd));
+		if (info != null && !info.equals("")){
+			content.append(processEmbeddedHTML(info, fcd));
 		}else{
-			content.append(N6 + "<i>No HTML info available</i>");
+			content.append(N6 + NO_INFO_AVAILABLE);
 		}
 		content.append(N4 + "" + INFO_ID_CLOSE_TAG + N4 + "<!-- END OF INFO -->");
 
@@ -288,8 +295,13 @@ public class Generator {
 			content.append(N4 + "<div id=\"imports\">");
 			for (int i = 0; i < fcd.getNumImport(); i++){
 				ImportClause ic = fcd.getImport(i);
-				ic.findClassDecl();
-				content.append(N5 + "<div class=\"text\">" + N6 + Generator.classDeclLink(ic.findClassDecl(), true) + N5 + "</div>");
+				ic.getPackageName().name();
+				boolean unknown = ic.findClassDecl().isUnknown();
+				if (!unknown){
+					content.append(N5 + "<div class=\"text\">" + N6 + Generator.classDeclLink(ic.findClassDecl(), true) + N5 + "</div>");
+				}else{
+					content.append(N5 + "<div class=\"text\">" + N6 + ic.getPackageName().name() + N5 + "</div>");
+				}
 			}
 		}
 		content.append(N4 + "</div>" + N4 + "<!-- END OF IMPORTS -->");
@@ -404,28 +416,33 @@ public class Generator {
 	 * the latter case the revision information will not be editable, and the 'Edit' button should not be included
 	 * @return The HTML string
 	 */
-	public static String genRevisions(FullClassDecl fcd, boolean offline, SourceRoot sourceRoot){
+	public static String genRevisions(FullClassDecl fcd, boolean offline, SourceRoot sourceRoot, boolean forceDisabled){
 		StringBuilder content = new StringBuilder();
 		String revision;
+		boolean isLib;
+		synchronized (fcd.state()){
+			try{
+				IFile file = fcd.getDefinition().getFile();
+				isLib =  !(file != null && file.getProject() == sourceRoot.getProject());
+			}catch (NullPointerException e){
+				isLib = true;
+			}
+		}	
 		synchronized (fcd.state()){
 			revision = fcd.annotation().forPath("Documentation/revisions").string();
+			//cases in switch an empty string should be returned:
+			//(1) is in a library AND there is no info
+			if (isLib && (revision == null || revision.equals(""))) return "";
+			//(2) is offline AND there is no rev
+			if (offline && (revision == null || revision.equals(""))) return "";
 		}
 		content.append(N4 + "<!-- REVISIONS -->");
 		if(offline){
 			content.append(N4 + "<h2 id=\"buttonInsertion\">" + N5 + "Revisions&nbsp;" + N4 + "</h2>");
 		}else{
 			String disabled = "";
-			boolean isLib;
-			synchronized (fcd.state()){
-				try{
-					IFile file = fcd.getDefinition().getFile();
-					isLib =  !(file != null && file.getProject() == sourceRoot.getProject());
-				}catch (NullPointerException e){
-					isLib = true;
-				}
-			}	
 
-			if (isLib){
+			if (isLib || forceDisabled){
 				disabled="disabled='disabled'";
 			}
 			String editRevisionsButton = "<input class='buttonIndent' type='button' " + disabled + " onclick='preRevEdit()' id='editRevisionButton' value='Edit..'/>";
@@ -436,7 +453,7 @@ public class Generator {
 		if (revision != null && !revision.equals("")){
 			content.append(Generator.processEmbeddedHTML(revision, fcd));
 		}else{
-			content.append(N6 + "<i>No revision information available</i>");
+			content.append(N6 + NO_REV_AVAILABLE);
 		}
 		content.append(N4 + "" + Generator.REV_ID_CLOSE_TAG + N4 + "<!-- END OF REVISIONS -->");
 		return content.toString();
@@ -478,6 +495,7 @@ public class Generator {
 	 * @return The HTML string
 	 */
 	public static String genUnknownClassDecl(UnknownClassDecl fcd, String className) {
+		//TODO remove second parameter
 		return N5 + "<span>Error: The class <b>" + className + "</b> could not be found.</span>";
 	}
 
@@ -699,7 +717,7 @@ public class Generator {
 			if (absPath == null) absPath = match;
 			String imgTag;
 
-			imgTag = "img src=\"" + absPath + "\"" + " title=" + absPath;
+			imgTag = "img src=\"" + absPath + "\"" + " title=\"" + absPath + "\"";
 			imgTag = imgTag.replace("\\", "\\\\");
 
 			imgMatcher.appendReplacement(imgSb,  imgTag);
@@ -773,13 +791,13 @@ public class Generator {
 		FullClassDecl fcd = (FullClassDecl) cd;
 		content.append(genTitle(fcd, path, true));
 		if (options.get(GenDocWizard.COMMENT)) content.append(genComment(fcd));
-		if (options.get(GenDocWizard.INFORMATION)) content.append(genInfo(fcd, true, sourceRoot));
+		if (options.get(GenDocWizard.INFORMATION)) content.append(genInfo(fcd, true, sourceRoot, false));
 		if (options.get(GenDocWizard.IMPORTS))content.append(genImports(fcd));
 		if (options.get(GenDocWizard.EXTENSIONS))content.append(genExtensions(fcd));
 		content.append(genClasses(fcd));
 		if (options.get(GenDocWizard.COMPONENTS))content.append(genComponents(fcd));
 		if (options.get(GenDocWizard.EQUATIONS))content.append(genEquations(fcd));
-		if (options.get(GenDocWizard.REVISIONS))content.append(genRevisions(fcd, true, sourceRoot));
+		if (options.get(GenDocWizard.REVISIONS))content.append(genRevisions(fcd, true, sourceRoot, false));
 		content.append(genFooter(footer));
 		return resolveLinksForGenDoc(content.toString(), rootPath, libName, cd);
 	}

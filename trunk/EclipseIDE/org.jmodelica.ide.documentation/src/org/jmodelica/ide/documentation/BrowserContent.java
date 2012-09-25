@@ -6,7 +6,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
@@ -19,7 +22,6 @@ import org.jmodelica.ide.documentation.commands.NavigationProvider;
 import org.jmodelica.ide.documentation.wizard.GenDocWizard;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.FullClassDecl;
-import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.Program;
 import org.jmodelica.modelica.compiler.ShortClassDecl;
 import org.jmodelica.modelica.compiler.SourceRoot;
@@ -37,12 +39,23 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	private NavigationProvider navProv;
 	private SourceRoot sourceRoot;
 	private static final String FOOTER = "<i>footer</i>";
-	private static final String CANCEL_INFO_BTN = "<input type='reset' class='buttonIndent' type='button' onclick='cancelInfo()' id='cancelInfoButton' value='Cancel'/>";
-	private static final String CANCEL_REV_BTN = "<input type='reset' class='buttonIndent' type='button' onclick='cancelRev()' id='cancelRevButton' value='Cancel'/>";
-	private boolean saving = false;
+	private static final String CANCEL_INFO_BTN = "<input class='buttonIndent' type='button' onclick='cancelInfo()' id='cancelInfoButton' value='Cancel'/>";
+	private static final String CANCEL_REV_BTN = "<input class='buttonIndent' type='button' onclick='cancelRev()' id='cancelRevButton' value='Cancel'/>";
+	private boolean editing = false;
 	private String tinymcePath;
+	private DocumentationEditor editor;
 
-	public BrowserContent(FullClassDecl fullClassDecl, Browser browser, InstClassDecl icd, SourceRoot sourceRoot, NavigationProvider navProv, boolean genDoc){
+	/**
+	 * Sets up the content of the browser, based of the FullClassDecl fcd, and renders it. If genDoc is true it also launches a wizard for documentation generation
+	 * @param editor The editor in which to render the content
+	 * @param fullClassDecl The FullClassDecl to be rendered
+	 * @param browser The browser that handles the rendering
+	 * @param sourceRoot The root node of the source AST
+	 * @param navProv A navigation provider that that facilitates 'back' and 'forward' in the browsing history.
+	 * @param genDoc Whether or not the documentation should we saved to file or just directly presented in the browser.
+	 */
+	public BrowserContent(DocumentationEditor editor, FullClassDecl fullClassDecl, Browser browser, SourceRoot sourceRoot, NavigationProvider navProv, boolean genDoc){
+		this.editor = editor;
 		this.sourceRoot = sourceRoot;
 		this.navProv = navProv;
 		this.program = sourceRoot.getProgram();
@@ -61,21 +74,21 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 		}
 	}
 
-//	private class Dialog implements Runnable{
-//		private FullClassDecl fcd;
-//		private Program program;
-//		private String footer;
-//		public Dialog(FullClassDecl fcd, Program program, String footer){
-//			this.fcd = fcd;
-//			this.program = program;
-//			this.footer = footer;
-//		}
-//		@Override
-//		public void run() {
-//			new DocGenDialog(null, fcd, program, FOOTER);		
-//		}
-//	}
-	
+	//	private class Dialog implements Runnable{
+	//		private FullClassDecl fcd;
+	//		private Program program;
+	//		private String footer;
+	//		public Dialog(FullClassDecl fcd, Program program, String footer){
+	//			this.fcd = fcd;
+	//			this.program = program;
+	//			this.footer = footer;
+	//		}
+	//		@Override
+	//		public void run() {
+	//			new DocGenDialog(null, fcd, program, FOOTER);		
+	//		}
+	//	}
+
 	/**
 	 * Generates offline documentation for the FullClassDecl fcd by launching a wizard
 	 * @param fcd The FullClassDecl
@@ -83,73 +96,75 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	public void generateDocumentation(FullClassDecl fcd) {
 		//DocGenDialog dlg = new DocGenDialog(null);
 		//new DocGenDialog(null, fcd, program, FOOTER);
-        WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), new GenDocWizard(fcd, sourceRoot, FOOTER));
-        dialog.create();
-        dialog.open();		
+		WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), new GenDocWizard(fcd, sourceRoot, FOOTER));
+		dialog.create();
+		dialog.open();		
 		//new Dialog(fcd, program, FOOTER).run();
 		//RETURN!!!!
-//		String rootPath = dlg.getRootPath();
-//		HashMap<String, Boolean> options = dlg.getOptions();
-//		if (!dlg.isDone()) return;
-//		String path = rootPath + fcd.getName().getID();
-//		String libName = fcd.getName().getID();
-//		
-//		if ((new File(path)).exists()) {
-//			if (JOptionPane.showConfirmDialog(null, "This folder already exist. Would you like to override existing files?") != JOptionPane.YES_OPTION) return;
-//		}else{
-//			boolean success = (new File(path)).mkdirs();
-//			if (!success) {
-//				JOptionPane.showMessageDialog(null, "Unable to create a new directory", "Error", JOptionPane.ERROR_MESSAGE, null);
-//				return;
-//			}
-//		}
-//		String code = Generator.genDocumentation(fcd, program, path + "\\", FOOTER, "Unknown Class Decl", rootPath, libName, options);
-//		try{
-//			FileWriter fstream = new FileWriter(path + "\\index.html");
-//			BufferedWriter out = new BufferedWriter(fstream);
-//			out.write(code);
-//			out.close();
-//		}catch (Exception e){
-//			JOptionPane.showMessageDialog(null, "Unable to save to file", "Error", JOptionPane.ERROR_MESSAGE, null);
-//		}
-//		ArrayList<ClassDecl> children = new ArrayList<ClassDecl>();
-//		collectChildren(fcd, children);
-//		for (ClassDecl child : children){
-//			String newPath = rootPath + "\\" + Generator.getFullPath(child).replace(".", "\\");
-//			(new File(newPath)).mkdirs();
-//			try{
-//				FileWriter fstream = new FileWriter(newPath + "\\index.html");
-//				BufferedWriter out = new BufferedWriter(fstream);
-//				out.write(Generator.genDocumentation(child, program, newPath + "\\", FOOTER, "Unknown class decl", rootPath, libName, options));
-//				out.close();
-//			}catch (Exception e){
-//				JOptionPane.showMessageDialog(null, "Unable to save to file", "Error", JOptionPane.ERROR_MESSAGE, null);
-//			}
-//		}
-//		StringBuilder generatedDocs = new StringBuilder("Documentation was successfully generated for the following classes:");
-//		generatedDocs.append("\n" + libName);
-//		for (ClassDecl cd : children){
-//			generatedDocs.append("\n" + cd.name());
-//		}
-//		JOptionPane.showMessageDialog(null, generatedDocs.toString(), "Generation Complete", JOptionPane.INFORMATION_MESSAGE, null);
+		//		String rootPath = dlg.getRootPath();
+		//		HashMap<String, Boolean> options = dlg.getOptions();
+		//		if (!dlg.isDone()) return;
+		//		String path = rootPath + fcd.getName().getID();
+		//		String libName = fcd.getName().getID();
+		//		
+		//		if ((new File(path)).exists()) {
+		//			if (JOptionPane.showConfirmDialog(null, "This folder already exist. Would you like to override existing files?") != JOptionPane.YES_OPTION) return;
+		//		}else{
+		//			boolean success = (new File(path)).mkdirs();
+		//			if (!success) {
+		//				JOptionPane.showMessageDialog(null, "Unable to create a new directory", "Error", JOptionPane.ERROR_MESSAGE, null);
+		//				return;
+		//			}
+		//		}
+		//		String code = Generator.genDocumentation(fcd, program, path + "\\", FOOTER, "Unknown Class Decl", rootPath, libName, options);
+		//		try{
+		//			FileWriter fstream = new FileWriter(path + "\\index.html");
+		//			BufferedWriter out = new BufferedWriter(fstream);
+		//			out.write(code);
+		//			out.close();
+		//		}catch (Exception e){
+		//			JOptionPane.showMessageDialog(null, "Unable to save to file", "Error", JOptionPane.ERROR_MESSAGE, null);
+		//		}
+		//		ArrayList<ClassDecl> children = new ArrayList<ClassDecl>();
+		//		collectChildren(fcd, children);
+		//		for (ClassDecl child : children){
+		//			String newPath = rootPath + "\\" + Generator.getFullPath(child).replace(".", "\\");
+		//			(new File(newPath)).mkdirs();
+		//			try{
+		//				FileWriter fstream = new FileWriter(newPath + "\\index.html");
+		//				BufferedWriter out = new BufferedWriter(fstream);
+		//				out.write(Generator.genDocumentation(child, program, newPath + "\\", FOOTER, "Unknown class decl", rootPath, libName, options));
+		//				out.close();
+		//			}catch (Exception e){
+		//				JOptionPane.showMessageDialog(null, "Unable to save to file", "Error", JOptionPane.ERROR_MESSAGE, null);
+		//			}
+		//		}
+		//		StringBuilder generatedDocs = new StringBuilder("Documentation was successfully generated for the following classes:");
+		//		generatedDocs.append("\n" + libName);
+		//		for (ClassDecl cd : children){
+		//			generatedDocs.append("\n" + cd.name());
+		//		}
+		//		JOptionPane.showMessageDialog(null, generatedDocs.toString(), "Generation Complete", JOptionPane.INFORMATION_MESSAGE, null);
 	}
 
-//	private void collectChildren(FullClassDecl fcd, ArrayList<ClassDecl> children) {
-//		if (fcd.classes() == null || fcd.classes().size() == 0) return;
-//		for (ClassDecl child : fcd.classes()){
-//			if (!children.contains(child)){
-//				children.add(child);
-//				if (child instanceof FullClassDecl){
-//					collectChildren((FullClassDecl) child, children);
-//				}
-//			}
-//		}
-//	}
+	//	private void collectChildren(FullClassDecl fcd, ArrayList<ClassDecl> children) {
+	//		if (fcd.classes() == null || fcd.classes().size() == 0) return;
+	//		for (ClassDecl child : fcd.classes()){
+	//			if (!children.contains(child)){
+	//				children.add(child);
+	//				if (child instanceof FullClassDecl){
+	//					collectChildren((FullClassDecl) child, children);
+	//				}
+	//			}
+	//		}
+	//	}
 
 	/**
-	 * Renders a class declaration. This includes a head, breadcrumbar, header, title, body content 
+	 * Renders a class declaration. This includes appending a head, breadcrumbar, header, title, body content 
 	 * and footer. The body may, depending on what type of class it is, contain properties such as
 	 * classes contained in a package, equations, components, extensions revision information etc.
+	 * Called when the users ask for a new class declaration to be rendered by pressing a link or
+	 * navigating in the browser history.
 	 * @param fcd The class declaration to be rendered
 	 */
 	private void renderClassDecl(ClassDecl fcd){
@@ -168,30 +183,40 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 		}
 		content.append(Generator.genFooter(FOOTER));
 		browser.setText(content.toString());
+		//		String rev = (String) browser.evaluate(Scripts.FETCH_REV_DIV_CONTENT);
+		//		if (rev == null || rev.equals("")){
+		//			browser.evaluate(Scripts.HIDE_REV_DIV);
+		//		}
+		//		String info = (String) browser.evaluate(Scripts.FETCH_INFO_DIV_CONTENT);
+		//		if (info == null || info.equals("")){
+		//			browser.evaluate(Scripts.HIDE_INFO_DIV);
+		//		}
 	}
 
 	/**
-	 * Renders the components specific to a full class declaration. 
+	 * Appends HTML code that's specific to the ClassDecl subclass FullClassDecl. 
 	 * This includes: title, info, imports, extensions, classes, components, equations, revision
 	 * This does NOT include: head (initialization, css and javascript), header (document header), breadcrum bar
+	 * which are found in all ClassDecl.
 	 * @param fcd
 	 */
 	private void renderFullClassDecl(FullClassDecl fcd){
 		content.append(Generator.genTitle(fcd, this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath(), false));
 		content.append(Generator.genComment(fcd));
-		content.append(Generator.genInfo(fcd, false, sourceRoot));
+		content.append(Generator.genInfo(fcd, false, sourceRoot, false));
 		content.append(Generator.genImports(fcd));
 		content.append(Generator.genExtensions(fcd));
 		content.append(Generator.genClasses(fcd));
 		content.append(Generator.genComponents(fcd));
 		content.append(Generator.genEquations(fcd));
-		content.append(Generator.genRevisions(fcd, false, sourceRoot));
+		content.append(Generator.genRevisions(fcd, false, sourceRoot, false));
 	}
 
 	/**
 	 * Renders a hyperlink clicked by the user. This can refer to a external site or a class declaration.
-	 * @param link The unique identifier for the link. A URL for a HTTP request or a Modelica path
-	 * for a class declaration
+	 * If it's not a http(s) link, it's assumed to be a link to a ClassDecl. Does not accept links to files
+	 * on the file system.
+	 * @param link The unique identifier for the link. A URL for a HTTP request or a Modelica path (with or without the 'modelica://' prefix
 	 */
 	private void renderLink(String link){
 		navProv.setBackEnabled(histIndex > 0 ? true : false);
@@ -207,11 +232,12 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	}
 
 	/**
-	 * Attempts to update the navigation history and render the next page
+	 * Attempts to update the navigation history and render the 'next' page
 	 * @return Whether the action was successfully carried out
 	 */
 	public boolean forward(){
 		if (histSize <= histIndex) return false;
+		if (editing) return true;
 		histIndex++;
 		String location = history.get(histIndex);
 		renderLink(location);
@@ -219,11 +245,12 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	}
 
 	/**
-	 * Attempts to update the navigation history and render the previous page
+	 * Attempts to update the navigation history and render the 'previous' page
 	 * @return Whether the action was successfully carried out
 	 */
 	public boolean back(){
 		if (histIndex <= 0) return false;
+		if (editing) return true;
 		histIndex--;
 		String location = history.get(histIndex);
 		renderLink(location);
@@ -231,58 +258,79 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	}
 
 	/**
-	 * Adds a new String value to documentation annotation node of the current class declaration and
-	 * saves it to file.
-	 * @param newVal The new documentation string associated with the current class declaration.
+	 * Adds a new String value to information annotation node of the current class declaration and
+	 * saves it to file. Overwrites any existing value.
+	 * @param newVal The new information string associated with the current class declaration.
 	 */
-	private void saveNewDocumentationAnnotation(String newVal){
+	private void saveNewInformationAnnotation(String newVal){
 		ClassDecl fcd = program.simpleLookupClassDotted(history.get(histIndex));
 		StringLitExp exp = new StringLitExp(Generator.htmlToModelica(newVal));
-		fcd.annotation().forPath("Documentation/info").setValue(exp);
-		SaveSafeRunnable ssr = new SaveSafeRunnable(fcd);
-		SafeRunner.run(ssr);
+		synchronized (fcd.state()){
+			fcd.annotation().forPath("Documentation/info").setValue(exp);
+			SaveSafeRunnable ssr = new SaveSafeRunnable(fcd);
+			SafeRunner.run(ssr);
+		}
+
 	}
 
+	/**
+	 * Adds a new String value to revisions annotation node of the current class declaration and
+	 * saves it to file. Overwrites any existing value.
+	 * @param newVal The new revisions string associated with the current class declaration.
+	 */
 	private void saveNewRevisionsAnnotation(String newVal){
 		ClassDecl fcd = program.simpleLookupClassDotted(history.get(histIndex));
 		StringLitExp exp = new StringLitExp(Generator.htmlToModelica(newVal));
-		fcd.annotation().forPath("Documentation/revisions").setValue(exp);
-		SaveSafeRunnable ssr = new SaveSafeRunnable(fcd);
-		SafeRunner.run(ssr);
+		synchronized (fcd.state()){
+			fcd.annotation().forPath("Documentation/revisions").setValue(exp);
+			SaveSafeRunnable ssr = new SaveSafeRunnable(fcd);
+			SafeRunner.run(ssr);
+		}
 	}
 
 	/**
 	 * Invoked before the browser has 'changed'. This includes change of dynamic content
-	 * through JavaScript, invoking Browser.setText(), and the browsers own handling of
+	 * through JavaScript, invoking browser.setText() or browser.setURL(), and the browsers own handling of
 	 * hyperlink redirects. This invokation takes place both at the first request to change
 	 * as well as when the change is completed, i.e when the page is fully loaded.
+	 * Determines whether the change should be allowed to take place
 	 */
 	@Override
 	public void changing(LocationEvent event) {
 		event.doit = true;
-		if (saving){
+		if (editing){
 			if (event.location.endsWith("tmp.html") || event.location.startsWith("javascript")){
 				event.doit = true;
 			}else{
 				//browser.setText(content.toString());
 				//browser.evaluate(Scripts.ALERT_UNSAVED_CHANGES);
-//				Boolean shouldMove = (Boolean) browser.evaluate(Scripts.CONFIRM_POPUP);
-//				if (!shouldMove) event.doit = false;
-//				saving = !shouldMove;
-//				if (shouldMove)browser.setText(content.toString());
-//				event.doit = true;
-				saving = false;
+				//				Boolean shouldMove = (Boolean) browser.evaluate(Scripts.CONFIRM_POPUP);
+				//				if (!shouldMove) event.doit = false;
+				//				saving = !shouldMove;
+				//				if (shouldMove)browser.setText(content.toString());
+				//				event.doit = true;
+
 				event.doit = false;
-				browser.setText(content.toString());
+
+//				if (yesNoBox("Would you like to leave edit mode? All unsaved changes will be lost!", "Confirm")){
+//					editing = false;
+//					browser.setText(content.toString());
+//					browser.evaluate(Scripts.UNDO_ALL);
+//					histIndex++;
+//					String link = event.location.substring(Math.max(event.location.lastIndexOf("/"), event.location.lastIndexOf("\\")) + 1);
+//					history.add(link);
+//					renderLink(link);
+				//}
 			}
 		}
 	}
 
 	/**
-	 * Invoked after the browser has 'changed'. This includes change of dynamic content
-	 * through JavaScript, invoking Browser.setText(), and the browsers own handling of
-	 * hyperlink redirects.
 	 * Updates the browser history and calls renderLink() for the new location 
+	 * This method is invoked after the browser has 'changed'. This includes change of dynamic content
+	 * through JavaScript, invoking browser.setText() or browser.setURL(), and the browsers own handling of
+	 * hyperlink redirects.
+
 	 */
 	@Override
 	public void changed(LocationEvent event) {
@@ -321,27 +369,45 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 		String title = (String) browser.evaluate("return document.title");
 		if (title.equals("preInfoEdit")){
 			String docContent = (String)browser.evaluate(Scripts.FETCH_INFO_DIV_CONTENT);
+			if (docContent.trim().equals(Generator.NO_INFO_AVAILABLE)){
+				docContent = "";
+			}
+			editor.setDirty(true);
 			gotoWYSIWYG(docContent, true);
 		}else if(title.equals("postInfoEdit")){
-			//browser.evaluate("tinyMCE.get('infoTextArea').setContent('" + docContent + "');");
 			String textAreaContent = (String)browser.evaluate(Scripts.FETCH_INFO_TEXTAREA_CONTENT);
+			saveNewInformationAnnotation(textAreaContent);
+			if (textAreaContent.trim().equals("")){
+				textAreaContent = Generator.NO_INFO_AVAILABLE;	
+			}
 			//reset title, reset saving, use browser.setText()
-			saving = false;
+			editing = false;
 			content.replace(content.indexOf(Generator.INFO_ID_OPEN_TAG) + Generator.INFO_ID_OPEN_TAG.length(), content.indexOf("<!-- END OF INFO -->"), textAreaContent + "\n\t\t\t" + Generator.INFO_ID_CLOSE_TAG);
-			saveNewDocumentationAnnotation(textAreaContent);//(Generator.htmlToModelica(textAreaContent));
+			editor.setDirty(false);
 			browser.setText(content.toString());
 		}else if(title.equals("preRevEdit")){
 			String revContent = (String)browser.evaluate(Scripts.FETCH_REV_DIV_CONTENT);
+			if (revContent.trim().equals(Generator.NO_REV_AVAILABLE)){
+				revContent = "";
+			}
+			editor.setDirty(true);
 			gotoWYSIWYG(revContent, false);
 		}else if (title.equals("postRevEdit")){
 			String textAreaContent = (String)browser.evaluate(Scripts.FETCH_REV_TEXTAREA_CONTENT);
-			saving = false;
-			content.replace(content.indexOf(Generator.REV_ID_OPEN_TAG) + Generator.REV_ID_OPEN_TAG.length(), content.indexOf("<!-- END OF REVISIONS -->"), textAreaContent + "\n\t\t\t" + Generator.REV_ID_CLOSE_TAG);
 			saveNewRevisionsAnnotation(textAreaContent);
+			if (textAreaContent.trim().equals("")){
+				textAreaContent = Generator.NO_REV_AVAILABLE;	
+			}
+			editing = false;
+			content.replace(content.indexOf(Generator.REV_ID_OPEN_TAG) + Generator.REV_ID_OPEN_TAG.length(), content.indexOf("<!-- END OF REVISIONS -->"), textAreaContent + "\n\t\t\t" + Generator.REV_ID_CLOSE_TAG);
+			editor.setDirty(false);
+			if (textAreaContent.trim().equals("")){
+				browser.evaluate(Scripts.setRevDivContent(Generator.NO_REV_AVAILABLE));
+			}
 			browser.setText(content.toString());
 		}else if (title.equals("cancelInfo") || title.equals("cancelRev")){
-			//only if the user hasn't canelled the canellation!
-			saving = false;
+			editing = false;
+			editor.setDirty(false);
 			browser.setText(content.toString());
 		}
 	}
@@ -361,20 +427,20 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 		sb.append(Generator.genHeader());
 		sb.append(Generator.genTitle(fcd, this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath(), true));
 		sb.append(Generator.genComment(fcd));
-		sb.append(Generator.genInfo(fcd, true, sourceRoot));
+		sb.append(Generator.genInfo(fcd, false, sourceRoot, true));
 		sb.append(Generator.genImports(fcd));
 		sb.append(Generator.genExtensions(fcd));
 		sb.append(Generator.genClasses(fcd));
 		sb.append(Generator.genComponents(fcd));
 		sb.append(Generator.genEquations(fcd));
-		sb.append(Generator.genRevisions(fcd, true, sourceRoot));
+		sb.append(Generator.genRevisions(fcd, false, sourceRoot, true));
 		sb.append(Generator.genFooter(""));
-		
-		
-		
+
+
+
 		//Insert the JavaScript initialization of TinyMCE
-//		int insert = sb.indexOf("<script type=\"text/javascript\">") + "<script type=\"text/javascript\">".length();
-//		sb.insert(insert, N4 + Scripts.SCRIPT_INIT_TINY_MCE);
+		//		int insert = sb.indexOf("<script type=\"text/javascript\">") + "<script type=\"text/javascript\">".length();
+		//		sb.insert(insert, N4 + Scripts.SCRIPT_INIT_TINY_MCE);
 		//Replace the div with a textArea, with the same content [startIndex,endIndex)
 		int startIndex = isInfo ? sb.indexOf(Generator.INFO_ID_OPEN_TAG) : sb.indexOf(Generator.REV_ID_OPEN_TAG);
 		int endIndex = isInfo ? sb.indexOf("<!-- END OF INFO -->") : sb.indexOf("<!-- END OF REVISIONS -->");
@@ -396,11 +462,9 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 			file.createNewFile();
 			FileWriter fstream = new FileWriter(fileName);
 			BufferedWriter out = new BufferedWriter(fstream);
-			//sb.replace(sb.indexOf(Generator.INFO_BTN_DATA_PRE), sb.indexOf(Generator.INFO_BTN_DATA_PRE) + Generator.INFO_BTN_DATA_PRE.length(), INFO_BTN_DISABLE);
-			//sb.replace(sb.indexOf(Generator.REV_BTN_DATA_PRE), sb.indexOf(Generator.REV_BTN_DATA_PRE) + Generator.REV_BTN_DATA_PRE.length(), REV_BTN_DISABLE);
 			out.write(sb.toString());
 			out.close();
-			saving = true;
+			editing = true;
 			browser.setUrl(file.toURI().toURL().toString());
 		}
 		catch (IOException e)
@@ -419,5 +483,47 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 
 	public String getCurrentClass() {
 		return history.get(histIndex);
+	}
+
+	/**
+	 * Saves the content of the current WYSIWYG. Only called when the user attempts to close an editor window while a 
+	 * WYSIWYG for information of revision is currently open.
+	 * @return true if anything was saved.
+	 */
+	public boolean save() {
+		if (!editing) return false;
+		try{
+			String textAreaContent = (String)browser.evaluate(Scripts.FETCH_INFO_TEXTAREA_CONTENT);
+			editing = false;
+			saveNewInformationAnnotation(textAreaContent);
+			editor.setDirty(false);
+		}catch(SWTException e){
+			String textAreaContent2 = (String)browser.evaluate(Scripts.FETCH_REV_TEXTAREA_CONTENT);
+			editing = false;
+			saveNewRevisionsAnnotation(textAreaContent2);
+			editor.setDirty(false);
+		}
+		return true;
+	}
+
+	public boolean isDirty() {
+		if (!editing) return false; //evaluate will throw an exception of editing == false
+		return (Boolean) browser.evaluate("return tinyMCE.activeEditor.isDirty()");
+	}
+	
+	public boolean yesNoBox(String message, String title){
+		MessageDialog dialog = new MessageDialog(editor.getEditorSite().getShell(),
+				title,
+				null,
+				message,
+				MessageDialog.QUESTION, new String[]{
+			IDialogConstants.YES_LABEL,
+			IDialogConstants.NO_LABEL},
+			0);
+		int dialogResults = dialog.open();
+		if (dialogResults == 0){ //yes
+			return true;
+		}
+		return false;
 	}
 }
