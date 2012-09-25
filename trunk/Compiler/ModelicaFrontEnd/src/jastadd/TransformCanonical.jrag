@@ -1939,7 +1939,7 @@ aspect TransformCanonical {
 			if (tearBlock != null && tearBlock.isSolvable()) {
 				eb.addSolvedBlock(tearBlock);
 			} else {
-				tear(g, eb);
+				tearInner(g, eb);
 			}
 		} else {
 			// Check for hand guided tearing
@@ -2147,16 +2147,16 @@ aspect TransformCanonical {
 									FVariable var = e.getSolvableMatching().getVariable();
 									eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(eqn, var, true));
 								} else {
-									tear(bInnerInner, eb);
+									tearInner(bInnerInner, eb);
 								}
 							}
 						} else {
-							tear(bInner, eb);
+							tearInner(bInner, eb);
 						}
 
 					} else {
 						// Reuse the already constructed graph
-						tear(gInner, eb);
+						tearInner(gInner, eb);
 					}
 				}
 			}
@@ -2172,7 +2172,7 @@ aspect TransformCanonical {
 	}	
 
 	
-	public TornEquationBlock FClass.tear(BiPGraph g, TornEquationBlock eb){
+	private TornEquationBlock FClass.tearInner(BiPGraph g, TornEquationBlock eb){
 		Var tear = null;
 		Eq res = null;
 		int maxOcc = 0;
@@ -2220,10 +2220,38 @@ aspect TransformCanonical {
 				Var v = e.getSolvableMatching();
 				eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e.getEquation(), v.getVariable(), true));
 			} else {
-				tear(block, eb);
+				tearInner(block, eb);
 			}
 		}
 		return eb;
+	}
+	
+	private TornEquationBlock FClass.tearInner(Stack<Eq> Block, TornEquationBlock eb) {
+		BiPGraph g = new BiPGraph(this, "", "");
+		for (Eq e : Block) {
+			Var gVar = g.addVariable(e.getSolvableMatching().getName(), "", e
+					.getSolvableMatching().getVariable());
+			Eq gEq = g.addEquation(e.getName(), "", e.getEquation());
+			// At this stage the pair is a SolvableMatchingPair
+			gEq.setSolvableMatching(gVar);
+			gVar.setSolvableMatching(gEq);
+		}
+		// Add edges between the active variables and equations
+		for (Eq e : Block) {
+			Eq gEq = g.getEquation(e.getName());
+			for (Var v : e.getVariables()) {
+				Var gVar = g.getVariable(v.getName());
+				if (gVar != null) {
+					gEq.addVariable(gVar);
+					gVar.occurrence();
+					if (gEq.getEquation().isSolved(gVar.getName(), true)) {
+						gEq.addSolvableVariable(gVar);
+						gVar.solvableOccurrence();
+					}
+				}
+			}
+		}
+		return tearInner(g, eb);
 	}
 	
 	/**
