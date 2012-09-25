@@ -6893,4 +6893,37 @@ end TransformCanonicalTests.StringFuncTest;
 
 end StringFuncTest;
 
+class MyExternalObject
+ extends ExternalObject;
+ function constructor
+  output MyExternalObject eo;
+  external "C" init_myEO();
+ end constructor;
+end MyExternalObject;
+
+model TestExternalObj1
+ MyExternalObject myEO = MyExternalObject();
+
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		FlatteningTestCase(
+			name="TestExternalObj1",
+			description="",
+			flatModel="
+fclass TransformCanonicalTests.TestExternalObj1
+ parameter TransformCanonicalTests.MyExternalObject myEO = TransformCanonicalTests.MyExternalObject.constructor() /* (unknown value) */;
+
+public
+ function TransformCanonicalTests.MyExternalObject.constructor
+  output ExternalObject eo;
+ algorithm
+  external \"C\" init_myEO();
+  return;
+ end TransformCanonicalTests.MyExternalObject.constructor;
+
+ type TransformCanonicalTests.MyExternalObject = ExternalObject;
+end TransformCanonicalTests.TestExternalObj1;
+")})));
+end TestExternalObj1;
+
 end TransformCanonicalTests;

@@ -1460,7 +1460,7 @@ aspect FlatNames {
     eq FEnumLiteralType.name() 		= getName();
     eq FRecordType.name()      		= getName();
     eq FUnknownType.name()     		= "(unknown type)";
-    eq FExternalObjectType.name()	= "External Object"; 
+    eq FExternalObjectType.name()	= "ExternalObject"; 
     
     syn boolean FAbstractFunctionCall.isIgnored() = false;
     eq FIgnoredBuiltIn.isIgnored() = true;

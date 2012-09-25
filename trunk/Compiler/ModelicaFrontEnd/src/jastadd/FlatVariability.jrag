@@ -164,7 +164,14 @@ aspect FlatVariability {
 	eq InstEnumLiteral.variability() = fConstant();
 	
 	syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fConstant();
-	eq InstPrimitive.defaultVariability() = isReal() ? fContinuous() : fDiscrete();
+	eq InstPrimitive.defaultVariability() {
+		if (isReal())
+			return fContinuous();
+		else if (isExternalObject())
+			return fParameter();
+		else
+			return fDiscrete();
+	}
 	eq InstRecord.defaultVariability() {
 		InstComponentDecl rec = isArray() ? getInstComponentDecl(0) : this;
 		FTypePrefixVariability var = fConstant();

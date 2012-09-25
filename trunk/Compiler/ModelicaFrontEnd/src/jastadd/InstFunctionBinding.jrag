@@ -16,6 +16,7 @@
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 
 aspect InstFunctionBinding {
@@ -419,6 +420,7 @@ aspect InstFunctionBinding {
     		bound = true;
 
 		    // Get info
+    		boolean externalObject = false;
 		    InstClassDecl target = getName().myInstClassDecl();
 	    	String name = target.qualifiedName();
 		    if (target.isPrimitive()) {
@@ -426,6 +428,9 @@ aspect InstFunctionBinding {
 				HashSet set = getName().lookupInstClass("!" + target.name());
 				if (set.size() > 0)
 					target = (InstClassDecl) set.iterator().next();
+		    } if (target.isExternalObject()) {
+		    	target = target.myConstructor();
+		    	externalObject = true;
 		    }
     		ArrayList<InstComponentDecl> inputs = myInputs(target);
 		    
@@ -487,7 +492,10 @@ aspect InstFunctionBinding {
 					FIdUse rec = new FIdUseInstAccess(getName());
 					n = new FRecordConstructor(rec, new List());
 				} else {
-			    	InstFunctionCall ifc = new InstFunctionCall(getName(), new List());
+					InstAccess accessName = getName();
+					if (externalObject)
+						accessName = accessName.copyAndAppend("constructor");
+					InstFunctionCall ifc = new InstFunctionCall(accessName, new List());
 					ifc.unbindableArgs = unbindableArgs;
 					ifc.bound = true;
 					n = ifc;
@@ -595,4 +603,13 @@ aspect InstFunctionBinding {
     	}
 	}
 	
+	/**
+	 * \brief Extract constructor function for external object class.
+	 */
+	syn InstClassDecl InstClassDecl.myConstructor() {
+		HashSet<InstClassDecl> hs = memberInstClass("constructor");
+		if (hs.size() > 0)
+			return hs.iterator().next();
+		return null;
+	}
 }
