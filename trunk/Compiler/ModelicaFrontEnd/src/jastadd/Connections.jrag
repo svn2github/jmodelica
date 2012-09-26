@@ -237,7 +237,7 @@ aspect Connections {
 			for (ConnectionSetEntry cse : this) 
 				e = cse.createFIdUseExp().appendSum(e, cse.isOutside());
 			FExp zero = first().getVar().size().createZeroFExp();
-			eb.addFAbstractEquation(new FEquation(e, zero));	
+			eb.addFAbstractEquationNoTransform(new FEquation(e, zero));	
 		}
 
 	}
@@ -259,7 +259,7 @@ aspect Connections {
 			if (size() == 2 && first().isOutside() != last().isOutside()) {
 				FExp e1 = first().createFIdUseExp();
 				FExp e2 = last().createFIdUseExp();
-				eb.addFAbstractEquation(new FEquation(e1, e2));
+				eb.addFAbstractEquationNoTransform(new FEquation(e1, e2));
 			}
 		}
 		
@@ -280,7 +280,7 @@ aspect Connections {
 			for (ConnectionSetEntry cse : this) {
 				FExp e2 = cse.createFIdUseExp();
 				if (e1 != null)
-					eb.addFAbstractEquation(new FEquation(e1, e2));
+					eb.addFAbstractEquationNoTransform(new FEquation(e1, e2));
 				e1 = e2;
 			}
 		}
