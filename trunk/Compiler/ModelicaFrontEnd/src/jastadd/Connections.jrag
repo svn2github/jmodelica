@@ -322,28 +322,46 @@ aspect Connections {
 			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1, outside1, namePrefix1);
 			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2, outside2, namePrefix2);	
 
-			ConnectionSet h1 = addEntry(cse1);
-			ConnectionSet h2 = addEntry(cse2);
-			if (h1 != h2) {
-				for (ConnectionSetEntry entry : h2)
-					entryMap.put(entry, h1);
-				h1.addAll(h2);
-				list.remove(h2);
+			ConnectionSet setA = getConnectionSet(cse1);
+			ConnectionSet setB = getConnectionSet(cse2);
+			
+			if (setA != null && setB != null) {
+				if (setA != setB)
+					merge(setA, setB);
+			} else if (setA != null && setB == null) {
+				add(setA, cse2);
+			} else if (setA == null && setB != null) {
+				add(setB, cse1);
+			} else if (setA == null && setB == null) {
+				join(cse1, cse2);
 			}
 		}
 		
-		public ConnectionSet addEntry(ConnectionSetEntry cse) {
-			ConnectionSet h = getConnectionSet(cse);
-			if (h != null) {
-				h.add(cse);
-			} else {
-				h = ConnectionSet.create(cse);
-				list.add(h);
-			}
-			entryMap.put(cse, h);
-			return h;
+		private void join(ConnectionSetEntry entryA, ConnectionSetEntry entryB) {
+			ConnectionSet set = ConnectionSet.create(entryA);
+			set.add(entryB);
+			list.add(set);
+			entryMap.put(entryA, set);
+			entryMap.put(entryB, set);
 		}
-	
+		
+		private void add(ConnectionSet set, ConnectionSetEntry entry) {
+			set.add(entry);
+			entryMap.put(entry, set);
+		}
+		
+		private void merge(ConnectionSet setA, ConnectionSet setB) {
+			if (setA.size() < setB.size()) {
+				ConnectionSet tmp = setA;
+				setA = setB;
+				setB = tmp;
+			}
+			for (ConnectionSetEntry entry : setB)
+				entryMap.put(entry, setA);
+			setA.addAll(setB);
+			list.remove(setB);
+		}
+		
 		public ConnectionSet getConnectionSet(ConnectionSetEntry cse) {
 			return entryMap.get(cse);
 		}

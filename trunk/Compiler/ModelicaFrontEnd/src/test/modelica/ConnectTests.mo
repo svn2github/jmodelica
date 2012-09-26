@@ -1625,6 +1625,12 @@ equation
  C1.p.v = C2.p.v;
  C2.p.v = L1.p.v;
  L1.p.v = R1.n.v;
+ C1.n.i + C3.n.i + C5.n.i + G.p.i + R2.n.i + V.n.i = 0;
+ C1.n.v = C3.n.v;
+ C3.n.v = C5.n.v;
+ C5.n.v = G.p.v;
+ G.p.v = R2.n.v;
+ R2.n.v = V.n.v;
  C2.n.i + C3.p.i + C4.p.i + L1.n.i + L2.p.i = 0;
  C2.n.v = C3.p.v;
  C3.p.v = C4.p.v;
@@ -1636,12 +1642,6 @@ equation
  L2.n.v = R2.p.v;
  R1.p.i + V.p.i = 0;
  R1.p.v = V.p.v;
- C1.n.i + C3.n.i + C5.n.i + G.p.i + R2.n.i + V.n.i = 0;
- C1.n.v = C3.n.v;
- C3.n.v = C5.n.v;
- C5.n.v = G.p.v;
- G.p.v = R2.n.v;
- R2.n.v = V.n.v;
 
 public
  type Modelica.SIunits.Inductance = Real(final quantity = \"Inductance\",final unit = \"H\");
