@@ -1018,7 +1018,7 @@ aspect UniqueVariables {
 	public void FClass.addUniqueFVariable(FVariable fv) {
 		if (!uniqueVars.containsKey(fv.name())) {
 			uniqueVars.put(fv.name(),fv);
-			addFVariable(fv);
+			addFVariableNoTransform(fv);
 		} else if (!uniqueVars.get(fv.name()).prettyPrint("").equals(fv.prettyPrint(""))) {
 			nonUniqueVars.put(fv.name(),fv);
 		}
