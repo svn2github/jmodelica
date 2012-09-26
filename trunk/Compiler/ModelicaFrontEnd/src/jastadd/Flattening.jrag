@@ -1040,11 +1040,11 @@ aspect FlatExpressions {
 	abstract public void FEquationType.addEquationTo(FClass fc, FAbstractEquation f);
 	
 	public void FNormalEquation.addEquationTo(FClass fc, FAbstractEquation f) {
-		fc.getFEquationBlock(0).addFAbstractEquation(f);
+		fc.getFEquationBlock(0).addFAbstractEquationNoTransform(f);
 	}
 	
 	public void FInitialEquation.addEquationTo(FClass fc, FAbstractEquation f) {
-		fc.addFInitialEquation(f);
+		fc.addFInitialEquationNoTransform(f);
 	}
 
 	public FAbstractEquation FAbstractEquation.flattenEqn(FQName prefix, FClass fc) {
