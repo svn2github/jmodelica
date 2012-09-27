@@ -56,7 +56,7 @@ public class Generator {
 		return "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">" +
 				N0 + "<html xmlns=\"http://www.w3.org/1999/xhtml\">" + 
 				N1 + "<head>" + 
-				N2 + "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />" +
+				N2 + "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge; charset=utf-8\" />" +
 				N2 + "<!--[if IE]><style type=\"text/css\">#wrap {height:100%;display:table}</style><![endif]-->" +
 				N2 +"<!-- CSS -->" + N2 + "<style type=\"text/css\">" +
 				N3 + "html, body {height: 100%;}" +
@@ -207,12 +207,12 @@ public class Generator {
 			}
 		}
 		synchronized (fcd.state()){
-			info = fcd.annotation().forPath("Documentation/info").string();
+			info = processEmbeddedHTML(fcd.annotation().forPath("Documentation/info").string(), fcd).trim();
 			//cases in switch an empty string should be returned:
 			//(1) is in a library AND there is no info
-			if (isLib && (info == null || info.equals(""))) return "";
+			if (isLib && (info == null || info.trim().equals(""))) return "";
 			//(2) is offline AND there is no info
-			if (offline && (info == null || info.equals(""))) return "";
+			if (offline && (info == null || info.trim().equals(""))) return "";
 		}
 		content.append(N4 + "<!-- INFO -->");
 		if (offline){
@@ -229,7 +229,7 @@ public class Generator {
 		content.append(N4 + "<!-- The embedded HTML code in the following DIV tag may not be indented in accordance with the rest of the document due to the frequent use of the PRE tag that displays all white spaces -->");
 		content.append(N4 + INFO_ID_OPEN_TAG + "\n");
 		if (info != null && !info.equals("")){
-			content.append(processEmbeddedHTML(info, fcd));
+			content.append(info);
 		}else{
 			content.append(N6 + NO_INFO_AVAILABLE);
 		}
@@ -429,12 +429,12 @@ public class Generator {
 			}
 		}	
 		synchronized (fcd.state()){
-			revision = fcd.annotation().forPath("Documentation/revisions").string();
+			revision = processEmbeddedHTML(fcd.annotation().forPath("Documentation/revisions").string(),fcd).trim();
 			//cases in switch an empty string should be returned:
 			//(1) is in a library AND there is no info
-			if (isLib && (revision == null || revision.equals(""))) return "";
+			if (isLib && (revision == null || revision.trim().equals(""))) return "";
 			//(2) is offline AND there is no rev
-			if (offline && (revision == null || revision.equals(""))) return "";
+			if (offline && (revision == null || revision.trim().equals(""))) return "";
 		}
 		content.append(N4 + "<!-- REVISIONS -->");
 		if(offline){
@@ -451,7 +451,7 @@ public class Generator {
 		content.append(N4 + "<!-- The embedded HTML code in the following DIV tag may not be indented in accordance with the rest of the document due to the frequent use of the PRE tag that displays all white spaces -->");
 		content.append(N4 + Generator.REV_ID_OPEN_TAG + "\n");
 		if (revision != null && !revision.equals("")){
-			content.append(Generator.processEmbeddedHTML(revision, fcd));
+			content.append(revision);
 		}else{
 			content.append(N6 + NO_REV_AVAILABLE);
 		}
@@ -685,6 +685,7 @@ public class Generator {
 	 * @return
 	 */
 	public static String processEmbeddedHTML(String htmlCode, ClassDecl cd){
+		if (htmlCode == null || htmlCode.trim().equals("")) return "";
 		//process <a href="...">
 		htmlCode =  removeHTMLTag(htmlCode); //don't want nested HTML tags
 		//Add a title to every "a href="

@@ -94,6 +94,7 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	 * @param fcd The FullClassDecl
 	 */
 	public void generateDocumentation(FullClassDecl fcd) {
+		//fcd = (FullClassDecl)program.simpleLookupClassDotted("Modelica.Thermal.HeatTransfer.Examples");
 		//DocGenDialog dlg = new DocGenDialog(null);
 		//new DocGenDialog(null, fcd, program, FOOTER);
 		WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), new GenDocWizard(fcd, sourceRoot, FOOTER));
