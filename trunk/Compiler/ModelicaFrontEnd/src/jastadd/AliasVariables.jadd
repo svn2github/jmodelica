@@ -15,6 +15,7 @@
 */
 
 import java.util.LinkedHashSet;
+//import org.jmodelica.modelica.compiler.AliasManager.AliasVariable;
 
 /**
  * Computation of alias sets.
@@ -39,13 +40,13 @@ aspect AliasVariables {
 	 * @return An AliasVariable object if the variable is an alias, otherwise
 	 * null.
 	 */
-	syn lazy AliasVariable FVariable.aliasVariable() {
+	syn lazy AliasManager.AliasVariable FVariable.aliasVariable() {
 		AliasManager aliasManager = myFClass().getAliasManager();
-		LinkedHashSet<AliasVariable> aliasSet = aliasManager.getAliasSet(this);
+		AliasManager.AliasSet aliasSet = aliasManager.getAliasSet(this);
 		if (aliasSet == null || inRecord()) {
 			return null;
 		}
-		AliasVariable av = aliasManager.getIterationVariable(aliasSet);
+		AliasManager.AliasVariable av = aliasSet.getIterationVariable();
 		return av.getFVariable()==this? null : av;
 	}
 	
@@ -76,13 +77,13 @@ aspect AliasVariables {
 	
 	eq FVariable.isNegated(){
 		AliasManager aliasManager = myFClass().getAliasManager();
-		AliasVariable av = aliasManager.getAliasVariable(this);
-		LinkedHashSet<AliasVariable> aliasSet = aliasManager.getAliasSet(av);
-		if (av == null) {
+		AliasManager.AliasVariable alias = aliasManager.getAliasVariable(this);
+		AliasManager.AliasSet aliasSet = alias.getSet();
+		if (alias == null) {
 			return false;
 		} else {
-			AliasVariable iav = aliasManager.getIterationVariable(aliasSet);
-			return (av.isNegated() != iav.isNegated());
+			AliasManager.AliasVariable iav = aliasSet.getIterationVariable();
+			return (alias.isNegated() != iav.isNegated());
 		}
 	}
 		
@@ -115,10 +116,10 @@ aspect AliasVariables {
 		private boolean aliasErrorFlag = false;
 		
 		// A set of alias sets
-		private LinkedHashSet<LinkedHashSet<AliasVariable>> aliasSets = new LinkedHashSet<LinkedHashSet<AliasVariable>>();
+		private Set<AliasSet> aliasSets = new LinkedHashSet<AliasSet>();
 		
 		// A map that maps FVariable to its alias set.
-		private HashMap<FVariable, LinkedHashSet<AliasVariable>> variableMap = new HashMap<FVariable, LinkedHashSet<AliasVariable>>();
+		private Map<FVariable, AliasVariable> variableMap = new HashMap<FVariable, AliasVariable>();
 		
 		/**
 		 * \brief Getter for alias error message.
@@ -132,7 +133,7 @@ aspect AliasVariables {
 		/**
 		 * \brief Check if there was an alias error.
 		 * 
-		 * The error message can be retreived by calling the method
+		 * The error message can be retrieved by calling the method
 		 * getAliasManagerError.
 		 * 
 		 * @return True if there was an alias error, otherwise false.
@@ -146,63 +147,20 @@ aspect AliasVariables {
 		 * 
 		 * @return A set containing the alias sets.
 		 */
-		public LinkedHashSet<LinkedHashSet<AliasVariable>> getAliasSets() {
+		public Set<AliasSet> getAliasSets() {
 			return aliasSets;
 		}
 		
 		/**
-		 * \brief Get the iteration variable of an alias set.
-		 * 
-		 * @param aliasSet An alias set.
-		 * @return The iteration variable of the alias set.
-		 */
-		public AliasVariable getIterationVariable(LinkedHashSet<AliasVariable> aliasSet) {
-			// Find the variable with highest heuristic score
-			AliasVariable best = null;
-			int max = 0;
-			for (AliasVariable av : aliasSet) {
-				int score = av.getFVariable().aliasHeuristicScore();
-				if (score > max) {
-					max = score;
-					best = av;
-				}
-			}
-			return best;
-		}
-
-		/**
 		 * \brief Get the AliasVariable object corresponding to an FVariable
 		 * 
 		 * @param fv An FVariable object
-		 * @return An AliasVariable object if the FVariable is in an alias
-		 * set, otherwise null.
+		 * @return The alias variable that corresponds to an FVariable
 		 */
 		public AliasVariable getAliasVariable(FVariable fv) {
-			LinkedHashSet<AliasVariable> aliasSet = getAliasSet(fv);
-			for (AliasVariable av : aliasSet) {
-				if (av.getFVariable().equals(fv)) {
-					return av;
-				}
-			}
-			return null;
+			return variableMap.get(fv);
 		}
 		
-		/**
-		 * \brief Retrieve the alias set corresponding to an alias variable.
-		 * 
-		 * Returns null if alias variable not present in an alias set.
-		 * 
-		 * @param alias An alias variable.
-		 * @return The alias set corresponding to the alias variable.
-		 */
-		public LinkedHashSet<AliasVariable> getAliasSet(AliasVariable alias) {
-			LinkedHashSet<AliasVariable> aliasSet = getAliasSet(alias.getFVariable());
-			if (aliasSet == null)
-				return null;
-			if (aliasSet.contains(alias))
-				return aliasSet;
-			return null;
-		}
 
 		/**
 		 * \brief Retrieve the alias set corresponding to an FVariable.
@@ -212,28 +170,22 @@ aspect AliasVariables {
 		 * @param alias An FVariable.
 		 * @return The alias set corresponding to the alias variable.
 		 */
-		public LinkedHashSet<AliasVariable> getAliasSet(FVariable alias) {
-			return variableMap.get(alias);
+		public AliasSet getAliasSet(FVariable fv) {
+			AliasVariable alias = variableMap.get(fv);
+			if (alias == null)
+				return null;
+			return alias.getSet();
 		}
 
 		/**
 		 * \brief Add a pair of alias variables to the alias manager.
 		 * 
-		 * @param fv1 An FVariable.
-		 * @param fv2 Another FVariable.
+		 * @param fvA An FVariable.
+		 * @param fvB Another FVariable.
 		 * @param neg True if the alias pair is negated, otherwise false.
 		 * 
 		 */
-		public void addAliasVariables(FVariable fv1, FVariable fv2, boolean neg) {
-			
-			// Create alias variables with negated  = false
-			AliasVariable alias1 = new AliasVariable(fv1,false);
-			AliasVariable alias2 = new AliasVariable(fv2,false);
-
-			// Create alias variables with negated = true
-			AliasVariable alias1n = new AliasVariable(fv1,true);
-			AliasVariable alias2n = new AliasVariable(fv2,true);
-			
+		public void addAliasVariables(FVariable fvA, FVariable fvB, boolean neg) {
 			/*
 			 * Rules for alias sets:
 			 * 
@@ -249,179 +201,77 @@ aspect AliasVariables {
 			 *  set, then modified, then reinserted.
 			 */
 			
-			/*
-			 * The algorithm has two stages, a detection phase and a 
-			 * update phase.
-			 * In the detection phase the algorithm detects what should
-			 * be done, the possibillities are:
-			 *   - Merge two alias sets if both variables had previously
-			 *     known aliases.
-			 *   - Addition of one variable if the other variables had
-			 *     previously known aliases.
-			 *   - Creation of new alias set if none of the variables
-			 *     had previously known aliases.
-			 * The result of the detection phase is stored in the
-			 * temporary variables resultAS, mergeAS, mergeAlias and
-			 * negMergeAS.
-			 * 
-			 * In the update phase the correct action is taken depening
-			 * on what variables are set:
-			 *   - If resultAS and mergeAS is set, then all aliases in
-			 *     mergeAS is added into resultAS, if negMergeAS is set
-			 *     then the aliases are negated before they are added
-			 *     to resultAS.
-			 *   - If resultAS and mergeAlias is set, then mergeAlias
-			 *     is added to resultAS.
-			 *   - If only resultAS is set, the two variables are added
-			 *     to the new alias set.
-			 */
+			AliasVariable aliasA = getAliasVariable(fvA);
+			AliasVariable aliasB = getAliasVariable(fvB);
 			
-			// Create all combinations of alias variables, negated and 
-			// non-negated
-			LinkedHashSet<AliasVariable> as1 = getAliasSet(alias1);
-			LinkedHashSet<AliasVariable> as2 = getAliasSet(alias2);
-			LinkedHashSet<AliasVariable> as1n = getAliasSet(alias1n);
-			LinkedHashSet<AliasVariable> as2n = getAliasSet(alias2n);
-			
-			LinkedHashSet<AliasVariable> resultAS;
-			LinkedHashSet<AliasVariable> mergeAS = null;
-			AliasVariable mergeAlias = null;
-			boolean negMergeAS = false;
-			
-			// Go through all the cases
-			if (as1!=null && as2!=null) { // -> as1n==null & as2n==null
-				resultAS = as1;
-				mergeAS = as2;
-				negMergeAS = neg;
-			} else if (as1!=null && as2n!=null) { // -> as1n==null & as2==null
-				resultAS = as1;
-				mergeAS = as2n;
-				negMergeAS = !neg;
-			} else if (as1n!=null && as2!=null) { // -> as1==null & as2n==null
-				resultAS = as1n;
-				mergeAS = as2;
-				negMergeAS = !neg;
-			} else if (as1n!=null && as2n!=null) { // -> as1==null & as2==null
-				resultAS = as1n;
-				mergeAS = as2n;
-				negMergeAS = neg;
-			} else if (as1==null && as1n==null && as2!=null) { // -> as2n==null
-				resultAS = as2;
-				mergeAlias = neg ? alias1n : alias1;
-			} else if (as1==null && as1n==null && as2n!=null) { // -> as2==null
-				resultAS = as2n;
-				mergeAlias = neg ? alias1 : alias1n;
-			} else if (as2==null && as2n==null && as1!=null) { // -> as1n==null
-				resultAS = as1;
-				mergeAlias = neg ? alias2n : alias2;
-			} else if (as2==null && as2n==null && as1n!=null) { // -> as1==null
-				resultAS = as1n;
-				mergeAlias = neg ? alias2 : alias2n;
+			if (aliasA != null && aliasB != null) {
+				merge(aliasA, aliasB, neg);
+			} else if (aliasA != null) {
+				add(aliasA.getSet(), fvB, aliasA.isNegated() ? !neg : neg);
+			} else if (aliasB != null) {
+				add(aliasB.getSet(), fvA, aliasB.isNegated() ? !neg : neg);
 			} else {
-				resultAS = new LinkedHashSet<AliasVariable>();
+				join(fvA, fvB, neg);
 			}
-			
-			// Update part begins here
-			
-			if (mergeAS != null) { // Merge
-				if (resultAS == mergeAS && negMergeAS) {
+		}
+		
+		/**
+		 * Merges two alias variables <code>aliasA</code> and <code>aliasB</code>.
+		 * The implementation also check the rules for a alias set is maintained.
+		 * 
+		 * @param aliasA First alias variable
+		 * @param aliasB Second alias variable
+		 * @param neg True if the alias pair is negated, otherwise false.
+		 */
+		private void merge(AliasVariable aliasA, AliasVariable aliasB, boolean neg) {
+			AliasSet mergeSet = aliasB.getSet();
+			AliasSet resultSet = aliasA.getSet();
+			if (resultSet == mergeSet) {
+				if (aliasA.isNegated() == aliasB.isNegated() && neg) {
 					aliasErrorFlag = true;
-					if (neg)
-						aliasErrorMessage = "Alias error: trying to add the " +
-								"negated alias pair (" + fv1.name() + ",-" + 
-								fv2.name() + ") to the alias set " + 
-								printAliasSet(resultAS);
-					else
-						aliasErrorMessage = "Alias error: trying to add the " +
-								(neg ? "negated " : "") +
-								"alias pair (" + fv1.name() + "," + 
-								fv2.name() + ") to the alias set " + 
-								printAliasSet(resultAS);
-					return;
+					aliasErrorMessage = "Alias error: trying to add the " +
+					"negated alias pair (" + aliasA.getFVariable().name() + ",-" + 
+					aliasB.getFVariable().name() + ") to the alias set " + resultSet;
+				} else if (aliasA.isNegated() != aliasB.isNegated() && !neg) {
+					aliasErrorFlag = true;
+					aliasErrorMessage = "Alias error: trying to add the " +
+					"alias pair (" + aliasA.getFVariable().name() + "," + 
+					aliasB.getFVariable().name() + ") to the alias set " + resultSet;
 				}
-				aliasSets.remove(mergeAS);
-				aliasSets.remove(resultAS);
-				for (AliasVariable a : mergeAS) {
-					resultAS.add(new AliasVariable(a.getFVariable(), negMergeAS ? !a.isNegated() : a.isNegated()));
-					variableMap.put(a.getFVariable(), resultAS);
-				}
-				aliasSets.add(resultAS);
-			} else if (mergeAlias != null) { // Add alias to set
-				aliasSets.remove(resultAS);
-				resultAS.add(mergeAlias);
-				variableMap.put(mergeAlias.getFVariable(), resultAS);
-				aliasSets.add(resultAS);
-			} else { // New alias set
-				if (neg) {
-					resultAS.add(alias1);
-					variableMap.put(alias1.getFVariable(), resultAS);
-					resultAS.add(alias2n);
-					variableMap.put(alias2n.getFVariable(), resultAS);
-				} else {
-					resultAS.add(alias1);
-					variableMap.put(alias1.getFVariable(), resultAS);
-					variableMap.put(alias2.getFVariable(), resultAS);
-					resultAS.add(alias2);
-				}
-				aliasSets.add(resultAS);
+				return;
 			}
-			
-			checkManualTearing(resultAS);
+			boolean shouldNegate = aliasA.isNegated() ? !neg : neg;
+			for (AliasVariable a : mergeSet) {
+				if (shouldNegate)
+					a.negated = !a.negated;
+				resultSet.add(a);
+			}
+			aliasSets.remove(mergeSet);
 		}
 		
-		public void checkManualTearing(Set<AliasVariable> aliasSet) {
-			boolean allManual = true;
-			boolean anyManual = false;
-			for (AliasVariable var : aliasSet) {
-				if (var.getFVariable().getManualTearingVariable())
-					anyManual = true;
-				else
-					allManual = false;
-			}
-			if (anyManual && !allManual) {
-				for (AliasVariable var : aliasSet) {
-					var.getFVariable().setManualTearingVariable(true);
-				}
-			}
-		}
-
-		public String printAliasSet(LinkedHashSet<AliasVariable> aliasSet) {
-			StringBuilder str = new StringBuilder();
-			//str.append(getIterationVariable(aliasSet).getFVariable().name());
-			//str.append("(" + getIterationVariable(aliasSet).getFVariable().varKind() + ")");
-			//str.append(":");
-			str.append("{");
-			int i=0;
-			for (AliasVariable alias : aliasSet) {
-				if (alias.isNegated()) {
-					str.append("-");
-				}
-				str.append(alias.getFVariable().name());
-				//str.append("(" + alias.getFVariable().varKind() + ")");
-				if ((i<(aliasSet.size())-1)) {
-					str.append(",");
-				}
-				i++;
-			}
-			str.append("}");
-			return str.toString();
+		/**
+		 * Add a new variable to an exisiting alias set.
+		 * 
+		 * @param set The existing alias set
+		 * @param fv The new alias variable
+		 * @param neg True if the alias variable is negated, otherwise false.
+		 */
+		private void add(AliasSet set, FVariable fv, boolean neg) {
+			set.add(new AliasVariable(fv, neg));
 		}
 		
-		public String printAliasSetVerbose(LinkedHashSet<AliasVariable> aliasSet) {
-			StringBuilder str = new StringBuilder();
-			//str.append(getIterationVariable(aliasSet).getFVariable().name());
-			//str.append("(" + getIterationVariable(aliasSet).getFVariable().varKind() + ")");
-			//str.append(":");
-			str.append("Alias set: (" + getIterationVariable(aliasSet).getFVariable().name() + ")\n");
-			for (AliasVariable alias : aliasSet) {
-				if (alias.isNegated()) {
-					str.append("-");
-				}
-				str.append(alias.getFVariable().name());
-				str.append(" " + alias.getFVariable().aliasHeuristicScore() + " ");
-				str.append(" " + alias.getFVariable().varKind() + "\n");
-			}
-			return str.toString();
+		/**
+		 * Creates a new alias set based on the two variables.
+		 * 
+		 * @param fvA First variable
+		 * @param fvB First variable
+		 * @param neg True if the alias pair is negated, otherwise false.
+		 */
+		private void join(FVariable fvA, FVariable fvB, boolean negate) {
+			AliasSet set = new AliasSet();
+			aliasSets.add(set);
+			set.add(new AliasVariable(fvA, false));
+			set.add(new AliasVariable(fvB, negate));
 		}
 		
 		/**
@@ -431,98 +281,194 @@ aspect AliasVariables {
 		 */
 		public String printAliasSets() {
 			StringBuilder str = new StringBuilder();
-			for (LinkedHashSet<AliasVariable> aliasSet : aliasSets) {
-				str.append(printAliasSet(aliasSet)+"\n");
+			for (AliasSet aliasSet : aliasSets) {
+				str.append(aliasSet +"\n");
 			}
 			return str.toString();		
 		}
-	}	
-	
-	/**
-	 * \brief AliasVariable is used to encapsulate an FVariable and whether
-	 * the alias is negated. 
-	 * 
-	 * AliasVariable implements the Comparable interface and objects of the 
-	 * class are used in the alias sets.
-	 */
-	public class AliasVariable implements Comparable{
-		
-		// The FVariable
-		private FVariable fv;
-		// Negated attribute
-		private boolean negated = false;
 		
 		/**
-		 * \brief Constructor.
-		 * 
-		 * @param fv An FVariable.
-		 * @param negated True if the alias is negated, otherwise false.
+		 * A class representing a set of alias variables.
 		 */
-		public AliasVariable(FVariable fv,boolean negated) {
-			this.fv = fv;
-			this.negated = negated;
+		public class AliasSet implements Iterable<AliasVariable> {
+			
+			// List of aliases
+			private java.util.List<AliasVariable> aliases = new ArrayList<AliasVariable>();
+			
+			// If this set is marked as manual tearing
+			private boolean isManualTearing = false;
+			
+			/**
+			 * Private constructor
+			 */
+			private AliasSet() {
+			}
+			
+			/**
+			 * An iterator over all the alias variables in this set.
+			 * 
+			 * @return An iterator for this set
+			 */
+			@Override
+			public Iterator<AliasVariable> iterator() {
+				return aliases.iterator();
+			}
+			
+			/**
+			 * Adds a new alias variable to this set.
+			 * Manual tearing is also propagated if necessary.
+			 * 
+			 * @param newAlias Alias variable to add
+			 */
+			private void add(AliasVariable newAlias) {
+				boolean newAliasIsManualTearing = newAlias.getFVariable().getManualTearingVariable();
+				if (isManualTearing && !newAliasIsManualTearing) {
+					newAlias.getFVariable().setManualTearingVariable(true);
+				} else if (!isManualTearing && newAliasIsManualTearing) {
+					isManualTearing = true;
+					for (AliasVariable alias : aliases)
+						alias.getFVariable().setManualTearingVariable(true);
+				}
+				newAlias.setSet(this);
+				aliases.add(newAlias);
+			}
+			
+			/**
+			 * Get the iteration variable of this alias set.
+			 * 
+			 * @return The iteration variable of this alias set.
+			 */
+			public AliasVariable getIterationVariable() {
+				// Find the variable with highest heuristic score
+				AliasVariable best = null;
+				int max = 0;
+				for (AliasVariable av : aliases) {
+					int score = av.getFVariable().aliasHeuristicScore();
+					if (score > max) {
+						max = score;
+						best = av;
+					}
+				}
+				return best;
+			}
+			
+			/**
+			 * Method for retreiving the number of aliases in this set.
+			 * 
+			 * @return The number of aliases in this set
+			 */
+			public int numAliases() {
+				return aliases.size();
+			}
+			
+			@Override
+			public String toString() {
+				StringBuilder str = new StringBuilder();
+				str.append("{");
+				int i=0;
+				for (AliasVariable alias : aliases) {
+					if (alias.isNegated()) {
+						str.append("-");
+					}
+					str.append(alias.getFVariable().name());
+					//str.append("(" + alias.getFVariable().varKind() + ")");
+					if ((i<(aliases.size())-1)) {
+						str.append(",");
+					}
+					i++;
+				}
+				str.append("}");
+				return str.toString();
+			}
+			
+			/**
+			 * A more verbose version of toString().
+			 * 
+			 * @return More info about this set
+			 */
+			public String toStringVerbose() {
+				StringBuilder str = new StringBuilder();
+				str.append("Alias set: (" + getIterationVariable().getFVariable().name() + ")\n");
+				for (AliasVariable alias : aliases) {
+					if (alias.isNegated()) {
+						str.append("-");
+					}
+					str.append(alias.getFVariable().name());
+					str.append(" " + alias.getFVariable().aliasHeuristicScore() + " ");
+					str.append(" " + alias.getFVariable().varKind() + "\n");
+				}
+				return str.toString();
+			}
+			
 		}
-	
-		/**
-		 * \brief Returns true if the alias is negated.
-		 * 
-		 * @return True if the alias is negated, otherwise false.
-		 */
-		public boolean isNegated() {
-			return negated;
-		}
-	
-		/**
-		 * \brief Getter for the FVariable.
-		 * 
-		 * @return The FVariable.
-		 */
-		public FVariable getFVariable() {
-			return fv;
-		}	
 		
 		/**
-		 * \brief Compute the hash code of the alias variable. 
+		 * \brief AliasVariable is used to encapsulate an FVariable and whether
+		 * the alias is negated. 
 		 * 
-		 * Both the name of the variable and the negated attribute is used
-		 * to compute the hash code.
-		 * 
-		 * @return The hash code.
+		 * AliasVariable implements the Comparable interface and objects of the 
+		 * class are used in the alias sets.
 		 */
-		public int hashCode() {
-			String tr = "true";
-			String fa = "false";
-			return fv.name().intern().hashCode() + 
-				(negated? tr.intern().hashCode() : fa.intern().hashCode());
-		}
+		public class AliasVariable {
+			
+			// The FVariable
+			private FVariable fv;
+			// Negated attribute
+			private boolean negated = false;
+			
+			// The set that this alias variable belong to
+			private AliasSet set;
+			
+			/**
+			 * \brief Constructor.
+			 * 
+			 * @param fv An FVariable.
+			 * @param negated True if the alias is negated, otherwise false.
+			 */
+			private AliasVariable(FVariable fv,boolean negated) {
+				this.fv = fv;
+				this.negated = negated;
+				variableMap.put(fv, this);
+			}
 		
-		/**
-		 * \brief Implementation of the equals method in the Comparable 
-		 * interface.
-		 * 
-		 * @param o An object to compare.
-		 * @return True if o is equal to the alias, otherwise false.
-		 */
-		public boolean equals(Object o) {
-			if (!(o instanceof AliasVariable))
-				return false;
-			AliasVariable alias = (AliasVariable)o;
-			return (getFVariable().name().equals(alias.getFVariable().name())) &
-			       (isNegated()==alias.isNegated());
-		}
-
-		/**
-		 * \brief Implementation of the compareTo method in the Comparable
-		 * interface.
-		 * 
-		 * @param o An object to compare with.
-		 * @return Result of comparison.
-		 */
-		public int compareTo(Object o) {
+			/**
+			 * \brief Returns true if the alias is negated.
+			 * 
+			 * @return True if the alias is negated, otherwise false.
+			 */
+			public boolean isNegated() {
+				return negated;
+			}
 		
-			AliasVariable alias = (AliasVariable)o;
-			return getFVariable().name().compareTo(alias.getFVariable().name());
-		
+			/**
+			 * \brief Getter for the FVariable.
+			 * 
+			 * @return The FVariable.
+			 */
+			public FVariable getFVariable() {
+				return fv;
+			}	
+			
+			/**
+			 * Returns the alias set that this alias variable belong to.
+			 * 
+			 * @return Alias set that this alias belong to
+			 */
+			public AliasSet getSet() {
+				return set;
+			}
+			
+			/**
+			 * Private method for changing the set that this alias belong to.
+			 * This method should only be used when the alias initially is added
+			 * of when two alias sets are merged.
+			 * 
+			 * @param set The new set that this alias should belong to
+			 */
+			private void setSet(AliasSet set) {
+				this.set = set;
+			}
+			
 		}
 	
 	}

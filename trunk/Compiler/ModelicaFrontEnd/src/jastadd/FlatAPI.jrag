@@ -2020,9 +2020,8 @@ aspect FlatDiagnostics {
 		if (getAliasManager()!=null) {
 			str.append(getAliasManager().printAliasSets());
 			int n_elim = 0;
-			for (LinkedHashSet<AliasVariable> aliasSet : 
-				getAliasManager().getAliasSets()) {
-				n_elim += aliasSet.size() - 1;
+			for (AliasManager.AliasSet aliasSet : getAliasManager().getAliasSets()) {
+				n_elim += aliasSet.numAliases() - 1;
 			}
 			str.append(n_elim + " variables can be eliminated\n");
 				
@@ -2037,9 +2036,9 @@ aspect FlatDiagnostics {
 		StringBuilder str = new StringBuilder();
 		if (getAliasManager()!=null) {
 			int n_elim = 0;
-			LinkedHashSet<LinkedHashSet<AliasVariable>> aliasSets = getAliasManager().getAliasSets();
-			for (LinkedHashSet<AliasVariable> aliasSet : aliasSets) {
-				n_elim += aliasSet.size() - 1;
+			Set<AliasManager.AliasSet> aliasSets = getAliasManager().getAliasSets();
+			for (AliasManager.AliasSet aliasSet : aliasSets) {
+				n_elim += aliasSet.numAliases() - 1;
 			}
 			str.append(aliasSets.size());
 			str.append(" sets, ");
