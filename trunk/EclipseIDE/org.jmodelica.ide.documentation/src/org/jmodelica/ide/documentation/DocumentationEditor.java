@@ -93,7 +93,7 @@ public class DocumentationEditor extends EditorPart implements ISaveablePart2 {
 		setSite(site);
 		setInput(input);
 	}
-
+	
 	@Override
 	public boolean isDirty() {
 		return isDirty;
@@ -101,6 +101,7 @@ public class DocumentationEditor extends EditorPart implements ISaveablePart2 {
 
 	public void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
+		this.firePropertyChange(ISaveablePart2.PROP_DIRTY);
 	}
 
 	@Override
@@ -120,14 +121,15 @@ public class DocumentationEditor extends EditorPart implements ISaveablePart2 {
 
 	/**
 	 * Generate documentation for the full class declaration elem
-	 * @param elem
+	 * @param fcd
 	 */
-	public void generateDocumentation(FullClassDecl elem) {
-		browserContent.generateDocumentation(elem);
+	public void generateDocumentation(FullClassDecl fcd) {
+		browserContent.generateDocumentation(fcd);
 	}
 
 	@Override
 	public int promptToSaveOnClose() {
+		System.out.println("prompting");
 		if (!browserContent.isDirty()) return ISaveablePart2.YES;
 		MessageDialog dialog = new MessageDialog(getEditorSite().getShell(),
 				"Save Resources",
@@ -141,11 +143,13 @@ public class DocumentationEditor extends EditorPart implements ISaveablePart2 {
 		int dialogResults = dialog.open();
 		if (dialogResults == 0){
 			if(browserContent.save()){
+				browserContent.undoChanges();
 				return ISaveablePart2.YES;
 			}else{
 				return ISaveablePart2.CANCEL;
 			}
 		}else if (dialogResults == 1){
+			browserContent.undoChanges();
 			return ISaveablePart2.NO;
 		}else{
 			return ISaveablePart2.CANCEL;

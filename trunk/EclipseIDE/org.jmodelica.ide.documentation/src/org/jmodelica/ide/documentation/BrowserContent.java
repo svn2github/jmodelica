@@ -367,6 +367,7 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 	@Override
 	public void changed(TitleEvent event) {
 		String title = (String) browser.evaluate("return document.title");
+		if (title == null) return;
 		if (title.equals("preInfoEdit")){
 			String docContent = (String)browser.evaluate(Scripts.FETCH_INFO_DIV_CONTENT);
 			if (docContent.trim().equals(Generator.NO_INFO_AVAILABLE)){
@@ -525,5 +526,10 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 			return true;
 		}
 		return false;
+	}
+
+	public void undoChanges() {
+		browser.evaluate(Scripts.UNDO_ALL);
+		
 	}
 }

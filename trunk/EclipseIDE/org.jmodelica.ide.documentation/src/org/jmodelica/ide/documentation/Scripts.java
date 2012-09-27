@@ -71,10 +71,10 @@ public class Scripts {
 					N3 + "function _addHook(hooks,handler){" + 
 					N4 + "(window[hooks]?window[hooks]:(window[hooks]=[])).push(handler);" +
 					N3 + "}";
-	
+
 	public static String UNDO_ALL =
 			"while (tinyMCE.activeEditor.undoManager.hasUndo()){" +
-			"tinyMCE.activeEditor.undoManager.undo();}";
+					"tinyMCE.activeEditor.undoManager.undo();}";
 
 	public static final String confirm(String message){
 		return "return confirm(" + "\"" + message + "\");";
@@ -125,7 +125,7 @@ public class Scripts {
 					N4 + "tinyMCE.activeEditor.focus();" +
 					N4 + "}" +
 					N3 + "}";
-
+	
 	public static final String CANCEL_REV =
 			N3 + "function cancelRev() {" +
 					N4 + "if (tinyMCE.activeEditor.undoManager.hasUndo()){" +
