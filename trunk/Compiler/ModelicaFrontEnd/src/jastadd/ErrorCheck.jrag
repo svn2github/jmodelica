@@ -1073,13 +1073,11 @@ aspect InstanceErrorCheck {
 	 * \brief Check if <code>icd</code> is an ancestor of this node or any ancestor is an 
 	 *        instance of <code>icd</code>.
 	 */
-	inh boolean InstNode.isWithin(InstClassDecl icd);
-	eq InstNode.getChild().isWithin(InstClassDecl icd) = isDirectlyWithin(icd);
-	eq InstRoot.getChild().isWithin(InstClassDecl icd) = false;
-	
-	syn boolean InstNode.isDirectlyWithin(InstClassDecl icd) 	= isOfInstClassDecl(icd);
-	eq InstComponentDecl.isDirectlyWithin(InstClassDecl icd)	= isOfInstClassDecl(icd) || isWithin(icd);
-	eq InstExtends.isDirectlyWithin(InstClassDecl icd)			= isOfInstClassDecl(icd) || isWithin(icd);
+	inh boolean InstComponentDecl.isWithin(InstClassDecl icd);
+	inh boolean InstExtends.isWithin(InstClassDecl icd);
+	eq InstNode.getChild().isWithin(InstClassDecl icd)          = isOfInstClassDecl(icd);
+	eq InstComponentDecl.getChild().isWithin(InstClassDecl icd) = isOfInstClassDecl(icd) || isWithin(icd);
+	eq InstExtends.getChild().isWithin(InstClassDecl icd)       = isOfInstClassDecl(icd) || isWithin(icd);
 	
 	/**
 	 * \brief Check if this node is equal to or an instance of <code>icd</code>.
