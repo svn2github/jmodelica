@@ -1234,12 +1234,13 @@ aspect FlatCausality {
 
 aspect FlatTypes {
 
-	syn boolean FAbstractVariable.isReal()    = type().isReal();
-	syn boolean FAbstractVariable.isInteger() = type().isInteger();
-	syn boolean FAbstractVariable.isBoolean() = type().isBoolean();
-	syn boolean FAbstractVariable.isString()  = type().isString();
-	syn boolean FAbstractVariable.isRecord()  = type().isRecord();
-	syn boolean FAbstractVariable.isEnum()    = type().isEnum();
+	syn boolean FAbstractVariable.isReal()    			= type().isReal();
+	syn boolean FAbstractVariable.isInteger() 			= type().isInteger();
+	syn boolean FAbstractVariable.isBoolean() 			= type().isBoolean();
+	syn boolean FAbstractVariable.isString()  			= type().isString();
+	syn boolean FAbstractVariable.isRecord()  			= type().isRecord();
+	syn boolean FAbstractVariable.isEnum()    			= type().isEnum();
+	syn boolean FAbstractVariable.isExternalObject()	= type().isExternalObject();
 	
 	syn boolean FExp.isComposite()              = isArray() || type().isRecord();
 	syn boolean FType.isComposite()             = isArray() || isRecord();

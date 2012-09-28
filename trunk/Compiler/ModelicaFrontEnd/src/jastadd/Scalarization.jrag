@@ -205,6 +205,15 @@ aspect Scalarization {
 		return fv;
 	}
 	
+	protected FVariable FExternalObjectVariable.createScalarFVariable(Index i) {
+		FExternalObjectVariable fex = (FExternalObjectVariable) super.createScalarFVariable(i);
+		FFunctionCallStmt stmt = (FFunctionCallStmt) getDestructorCall();
+		FFunctionCall call = (FFunctionCall) stmt.getCall().scalarize(Collections.<String, FExp>emptyMap());
+		stmt.setCall(call);
+		fex.setDestructorCall(stmt);
+		return fex;
+	}
+	
 	protected FEnumVariable FEnumVariable.createScalarFVariable(Index i) {
 		FEnumVariable fv = (FEnumVariable) super.createScalarFVariable(i);
 		fv.setEnum(getEnum().fullCopy());

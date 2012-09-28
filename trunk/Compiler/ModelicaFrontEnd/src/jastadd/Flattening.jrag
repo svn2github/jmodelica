@@ -92,6 +92,11 @@ aspect Flattening {
 		getArgs().flattenUsedFuncsAndEnums(fc);
 	}
 	
+	public void InstExternalObject.flattenUsedFuncsAndEnums(FClass fc) {
+		myDestructor().flattenFunction(fc);
+		super.flattenUsedFuncsAndEnums(fc);
+	}
+	
 	public void FRecordConstructor.flattenUsedFuncsAndEnums(FClass fc) {
 		getRecord().flattenMyRecord(fc);
 		getArgs().flattenUsedFuncsAndEnums(fc);
@@ -594,8 +599,6 @@ aspect Flattening {
 			return new FBooleanVariable();
 		if (isString()) 
 			return new FStringVariable();
-		if (isExternalObject())
-			return new FExternalObjectVariable();
 		return null;
 	}	
 
@@ -609,6 +612,12 @@ aspect Flattening {
 		FRecordVariable rec = new FRecordVariable();
 		rec.setRecord(new FQName(myInstClass().qualifiedName()));
 		return rec;
+	}
+		
+	public FVariable InstExternalObject.createEmptyFVariable() {
+		FExternalObjectVariable exo = new FExternalObjectVariable();
+		exo.setDestructorCall(getDestructorCall().flatten(getFQNamePrefix()));
+		return exo;
 	}
 	
 	public void InstAssignable.addAttributesToFV(List<FAttribute> attr) {

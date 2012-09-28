@@ -604,7 +604,7 @@ aspect InstFunctionBinding {
 	}
 	
 	/**
-	 * \brief Extract constructor function for external object class.
+	 * \brief Extract constructor/destructor function for external object class.
 	 */
 	syn InstClassDecl InstClassDecl.myConstructor() {
 		HashSet<InstClassDecl> hs = memberInstClass("constructor");
@@ -612,4 +612,15 @@ aspect InstFunctionBinding {
 			return hs.iterator().next();
 		return null;
 	}
+	
+	syn InstClassDecl InstExternalObject.myConstructor() = myInstClass().myConstructor();
+	
+	syn InstClassDecl InstClassDecl.myDestructor() {
+		HashSet<InstClassDecl> hs = memberInstClass("destructor");
+		if (hs.size() > 0)
+			return hs.iterator().next();
+		return null;
+	}
+	
+	syn InstClassDecl InstExternalObject.myDestructor() = myInstClass().myDestructor();
 }

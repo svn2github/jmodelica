@@ -948,6 +948,8 @@ aspect InstanceTreeConstruction {
 			return new InstRecord(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 		else if (extendsEnum()) 
 			return new InstEnum(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
+		else if (isExternalObject())
+			return new InstExternalObject(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 		else if (extendsPrimitive()) 
 			return new InstPrimitive(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 		else
@@ -1238,6 +1240,14 @@ aspect InstanceTreeConstruction {
 	public FExp InstFunctionArgument.getFExpNoTransform() { return null; }
 
 	public FExp InstDefaultArgument.getFExpNoTransform() { return getFExp(); }
+	
+	syn lazy FFunctionCallStmt InstExternalObject.getDestructorCall() {
+		InstAccess name = getClassName().copyAndAppend("destructor");
+		List<InstFunctionArgument> args = new List<InstFunctionArgument>();
+		args.add(new InstPositionalArgument(0, createUseExp()));
+		FFunctionCallStmt stmt = new FFunctionCallStmt(new List(), new InstFunctionCall(name, args));
+		return stmt;
+	}
 
 
 }

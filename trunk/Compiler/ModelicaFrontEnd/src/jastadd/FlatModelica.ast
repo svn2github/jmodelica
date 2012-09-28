@@ -207,7 +207,7 @@ FEnumVariable : FVariable ::= Enum:FQName /Type:FType/;
 /**
  * \brief An external object variable.
  */
-FExternalObjectVariable : FVariable;
+FExternalObjectVariable : FVariable ::= DestructorCall:FFunctionCallStmt;
 
 /**
  * \brief Pre FVariable of type Real.
