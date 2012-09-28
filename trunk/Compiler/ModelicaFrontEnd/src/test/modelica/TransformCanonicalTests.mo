@@ -6895,10 +6895,16 @@ end StringFuncTest;
 
 class MyExternalObject
  extends ExternalObject;
+ 
  function constructor
-  output MyExternalObject eo;
-  external "C" init_myEO();
+	 output MyExternalObject eo;
+	 external "C" init_myEO();
  end constructor;
+ 
+ function destructor
+	 input MyExternalObject eo;
+	 external "C" destroy_myEO(eo);
+ end destructor;
 end MyExternalObject;
 
 model TestExternalObj1
@@ -6906,7 +6912,7 @@ model TestExternalObj1
 
 
 	annotation(__JModelica(UnitTesting(tests={ 
-		FlatteningTestCase(
+		TransformCanonicalTestCase(
 			name="TestExternalObj1",
 			description="",
 			flatModel="
@@ -6914,6 +6920,13 @@ fclass TransformCanonicalTests.TestExternalObj1
  parameter TransformCanonicalTests.MyExternalObject myEO = TransformCanonicalTests.MyExternalObject.constructor() /* (unknown value) */;
 
 public
+ function TransformCanonicalTests.MyExternalObject.destructor
+  input ExternalObject eo;
+ algorithm
+  external \"C\" destroy_myEO(eo);
+  return;
+ end TransformCanonicalTests.MyExternalObject.destructor;
+
  function TransformCanonicalTests.MyExternalObject.constructor
   output ExternalObject eo;
  algorithm
