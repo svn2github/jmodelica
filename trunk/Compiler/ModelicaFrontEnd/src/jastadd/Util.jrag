@@ -43,7 +43,7 @@ aspect RootAccess {
     eq SourceRoot.getChild().retrieveRoot() = this;
     eq FlatRoot.getChild().retrieveRoot()   = this;
     syn Root ASTNode.root() = retrieveRoot();
-    syn lazy Root BaseNode.root() = retrieveRoot();
+    syn Root BaseNode.root() = retrieveRoot();
     eq Root.root() = this;
     
     // TODO: When uses of HashSet has been generalised to Set, replace with Collections.emptySet()
