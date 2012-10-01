@@ -7482,4 +7482,85 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def(jmi_array_t* A_a, jmi_array_t*
 ")})));
 end MathSolve2;
 
+class ExtObject1
+	extends ExternalObject;
+	
+	function constructor
+		output ExtObject1 eo;
+		external "C" eo = init_myEO();
+	end constructor;
+	
+	function destructor
+		input ExtObject1 eo;
+		external "C" close_myEO(eo);
+	end destructor;
+end ExtObject1;
+
+function useMyEO
+	input ExtObject1 eo;
+	output Real r;
+	external "C" r = useMyEO(eo);
+end useMyEO;
+
+model TestExtObject1
+	ExtObject1 myEO = ExtObject1();
+	Real y;
+equation
+	y = useMyEO(myEO);
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="TestExtObject1",
+			description="",
+			template="
+$C_function_headers$
+$C_functions$
+",
+			generatedCode="
+void func_CCodeGenTests_ExtObject1_destructor_def(void* eo_v);
+void func_CCodeGenTests_ExtObject1_constructor_def(void** eo_o);
+void* func_CCodeGenTests_ExtObject1_constructor_exp();
+void func_CCodeGenTests_useMyEO_def(void* eo_v, jmi_ad_var_t* r_o);
+jmi_ad_var_t func_CCodeGenTests_useMyEO_exp(void* eo_v);
+
+void func_CCodeGenTests_ExtObject1_destructor_def(void* eo_v) {
+    JMI_DYNAMIC_INIT()
+    close_myEO(eo_v);
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CCodeGenTests_ExtObject1_constructor_def(void** eo_o) {
+    JMI_DYNAMIC_INIT()
+    void* eo_v;
+    eo_v = init_myEO();
+    if (eo_o != NULL) *eo_o = eo_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void* func_CCodeGenTests_ExtObject1_constructor_exp() {
+    void* eo_v;
+    func_CCodeGenTests_ExtObject1_constructor_def(&eo_v);
+    return eo_v;
+}
+
+void func_CCodeGenTests_useMyEO_def(void* eo_v, jmi_ad_var_t* r_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t r_v;
+    r_v = useMyEO(eo_v);
+    if (r_o != NULL) *r_o = r_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_useMyEO_exp(void* eo_v) {
+    jmi_ad_var_t r_v;
+    func_CCodeGenTests_useMyEO_def(eo_v, &r_v);
+    return r_v;
+}
+
+")})));
+end TestExtObject1;
+
 end CCodeGenTests;

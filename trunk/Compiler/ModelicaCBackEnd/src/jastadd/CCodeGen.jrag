@@ -401,6 +401,14 @@ aspect CCodeGen {
 		str.print(";\n");
 	}
 	
+	public void FExternalObjectVariable.printObjectDecl(PrintStream str, String indent) {
+		str.print(indent);
+		str.print(type_C());
+		str.print(" ");
+		str.print(name_C());
+		str.print(";\n");
+	}
+	
 	// Suffixes that are used with variables in JMI: size, var, arr, rec
 	public static final String ASTNode.C_SUFFIX_DEF      = "def";
 	public static final String ASTNode.C_SUFFIX_EXP      = "exp";
@@ -456,13 +464,15 @@ aspect CCodeGen {
 	
 	syn String FType.type_C() = isArray() ? arrayType_C() : scalarType_C();
 	
-	syn String FType.argType_C()  = type_C();
-	eq FPrimitiveType.argType_C() = "jmi_ad_var_t";
-	eq FIntegerType.argType_C()   = "jmi_int_t";
+	syn String FType.argType_C()  		= type_C();
+	eq FPrimitiveType.argType_C() 		= "jmi_ad_var_t";
+	eq FIntegerType.argType_C()   		= "jmi_int_t";
+	eq FExternalObjectType.argType_C()	= "void*";
 	
-	syn String FType.scalarType_C() = "jmi_ad_var_t";
-	eq FRecordType.scalarType_C()   = name_C() + "*";
-	eq FStringType.scalarType_C()   = "char*"; // Tentative support.
+	syn String FType.scalarType_C() 		= "jmi_ad_var_t";
+	eq FRecordType.scalarType_C()   		= name_C() + "*";
+	eq FStringType.scalarType_C()   		= "char*"; // Tentative support.
+	eq FExternalObjectType.scalarType_C()	= "void*";
 	
 	syn String FType.arrayType_C() = "jmi_array_t*";
 	eq FRecordType.arrayType_C()   = nameArray_C() + "*";
