@@ -832,18 +832,21 @@ aspect Flattening {
 		}
 		return use;
 	}
+	
 	syn InstAccess InstAccess.splitArrayAccess(int index) = this;
+	
 	eq InstDot.splitArrayAccess(int index) {
-		InstAccess left, right;
-		if (getLeft().isArray()) {
-			left = getLeft().splitArrayAccess(index);
-			right = (InstAccess) getRight().fullCopy();
-		} else {
-			left = (InstAccess) getLeft().fullCopy();
-			right = getRight().splitArrayAccess(index);
+		InstDot res = fullCopy();
+		for (int i = 0, n = res.getNumInstAccess(); i < n; i++) {
+			InstAccess ia = res.getInstAccess(i);
+			if (ia.isArray()) {
+				res.setInstAccess(ia.splitArrayAccess(index), i);
+				i = n;
+			}
 		}
-		return new InstDot(getID(), left, right);
+		return res;
 	}
+	
 	eq InstArrayAccess.splitArrayAccess(int index) {
 		InstArrayAccess access = (InstArrayAccess) fullCopy();
 		if (hasFArraySubscripts()) {
@@ -855,6 +858,7 @@ aspect Flattening {
 		}
 		return access;
 	}
+	
 	eq InstGlobalAccess.splitArrayAccess(int index) = 
 		new InstGlobalAccess(getInstAccess().splitArrayAccess(index));
 	
@@ -968,7 +972,7 @@ aspect Flattening {
             // If attribute is not set, add to list
 			if (!attr_set && (cls || !im.isOnPrimitiveTypeDecl())) {
 				FIdUse typeName = new FIdUse(getName().myInstComponentDecl().myInstClass().name());
-				FIdDecl name = new FIdDecl(new FQName(getName().getID()));
+				FIdDecl name = new FIdDecl(new FQName(getName().name()));
 				FAttribute a = new FAttribute(typeName, name, true);
 				boolean isEach = getComponentModification().hasEach();
 				boolean isFinal = getComponentModification().hasFinal();
@@ -1272,12 +1276,11 @@ aspect FlatExpressions {
 				if (addConstToFunc) {
 					// TODO: possible name conflict
 					// Add the constant array to the function and keep the access
-					InstAccess aia = ia.assignablePartOfAccess();
-					if (aia.isAssignable()) {
-						var = (InstAssignable) aia.topInstComponentDecl();
+					if (ia.isAssignable()) {
+						var = ia.topInstAssignable();
 						functionConstantList().add(var);
 						FQName name = var.getFQName();
-						FQName use = aia.flatten(prefix);
+						FQName use = ia.flattenAssignablePart(prefix);
 						Set<InstComponentDecl> set = ia.localLookupInstComponent(name.name());
 						InstComponentDecl found = set.isEmpty() ? null : set.iterator().next();
 						if (name.getNumFQNamePart() > 1 || (found != null && found != var))
@@ -1288,7 +1291,7 @@ aspect FlatExpressions {
 			}
 		} 
 		if (ia.myInstComponentDecl().inOrIsOuter()) {
-			return new FIdUseExp(ia.myInstComponentDecl().myInnerInstComponentDecl().createNameInstAccess().flatten(new FQName()));
+			return new FIdUseExp(ia.myInstComponentDecl().myInnerInstComponentDecl().getFQName().fullCopy());
 		} else {
 			return new FIdUseExp(ia.flatten(prefix));
 		}
@@ -1315,10 +1318,24 @@ aspect FlatExpressions {
 		return name;
 	}
 	
-	// TODO: This assumes that no InstDot has an InstDot as left child. 
-	syn InstAccess InstAccess.assignablePartOfAccess() = this;
-	eq InstDot.assignablePartOfAccess()                = 
-		getLeft().isAssignable() ? this : getRight().assignablePartOfAccess();
+	syn int InstDot.firstAssignableIndex() {
+		for (int i = 0, n = getNumInstAccess(); i < n; i++)
+			if (getInstAccess(i).isAssignable())
+				return i;
+		return -1;
+	}
+	
+	syn InstAssignable InstAccess.topInstAssignable() = (InstAssignable) myInstComponentDecl();
+	eq InstDot.topInstAssignable()                    = 
+			getInstAccess(firstAssignableIndex()).topInstAssignable();
+	
+	public FQName InstAccess.flattenAssignablePart(FQName prefix) {
+		return flatten(prefix);
+	}
+	
+	public FQName InstDot.flattenAssignablePart(FQName prefix) {
+		return flattenName(prefix, new FQName(prefix), firstAssignableIndex(), getNumInstAccess() - 1);
+	}
 	
 	/**
 	 * \brief Get the list of constants that need to be added to the surrounding function.
@@ -1342,8 +1359,12 @@ aspect FlatExpressions {
 	
 	syn boolean InstAccess.hasUnknownIndices() = 
 		hasFArraySubscripts() && getFArraySubscripts().hasUnknownIndices();
-	eq InstDot.hasUnknownIndices()             =
-		getLeft().hasUnknownIndices() || getRight().hasUnknownIndices();
+	eq InstDot.hasUnknownIndices() {
+		for (InstAccess ia : getInstAccesss())
+			if (ia.hasUnknownIndices())
+				return true;
+		return false;
+	}
 	
 	syn lazy boolean FArraySubscripts.hasUnknownIndices() {
 		for (FSubscript fs : getFSubscripts())
@@ -1367,15 +1388,20 @@ aspect FlatExpressions {
 			return new FQName(myInstComponentDecl().getFQName());
 		
 		FQName myName = isForIndex() ? new FQName() : new FQName(prefix);
+		int last = allFArraySubscripts().size() - 1;
+		return flattenName(prefix, myName, 0, last);
+	}
+	
+	public FQName InstAccess.flattenName(FQName prefix, FQName myName, int first, int last) { 
 		ArrayList<FArraySubscripts> fasl = allFArraySubscripts();
 		InstAccess cur = getFirstInstAccess();
-		int last = fasl.size() - 1;
 		boolean func = inFunction();
 		boolean size = inSizeExp();
-		for (int i = 0; i <= last; i++, cur = cur.getNextInstAccess()) {
-			FArraySubscripts fas = fasl.get(i);
-			boolean empty = fas.getNumFSubscript() == 0;
-			if (!empty && !cur.hasFArraySubscripts()) {
+		for (int i = 0; i < first; i++)
+			cur = cur.getNextInstAccess();
+		for (int i = first; i <= last; i++, cur = cur.getNextInstAccess()) {
+			boolean empty = false;
+			if (!cur.hasFArraySubscripts()) {
 				/* TODO: This is a temporary fix to make the slices code play nice 
 				 *        with functions - it will probably need to be replaced with 
 				 *        a more permanent fix later. See #741. */
@@ -1385,10 +1411,15 @@ aspect FlatExpressions {
 				if (size)
 					empty = true;
 			}
-			Opt as = empty ? new Opt() : new Opt(fas.flatten(prefix));
-			myName.addFQNamePart(new FQNamePart(cur.name(), as));
+			myName.addFQNamePart(cur.flattenPart(prefix, empty ? null : fasl.get(i)));
 		}
 		return myName;
+	}
+
+	public FQNamePart InstAccess.flattenPart(FQName prefix, FArraySubscripts fas) {
+		boolean empty = fas == null || fas.getNumFSubscript() == 0;
+		Opt as = empty ? new Opt() : new Opt(fas.flatten(prefix));
+		return new FQNamePart(name(), as);
 	}
 	
 	/**

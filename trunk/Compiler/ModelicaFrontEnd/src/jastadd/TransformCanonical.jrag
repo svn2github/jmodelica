@@ -2270,12 +2270,7 @@ aspect TransformCanonical {
 				var = var.substring(4, var.length() - 1);
 				isDer = true;
 			}
-
-			String[] varSplit = var.split("\\.");
-			InstAccess access = new InstParseAccess(varSplit[varSplit.length - 1]);
-			for (int i = varSplit.length - 2; i >= 0; i--)
-				access = new InstDot(new InstParseAccess(varSplit[i]), access);
-
+			InstAccess access = InstAccess.fromName(var);
 			FExp e = new FInstAccessExp(access);
 			if (isDer)
 				e = new InstDerExp(e);

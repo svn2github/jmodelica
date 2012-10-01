@@ -145,7 +145,7 @@ aspect FlatTypeCheck {
   protected void InstAccess.typeError(InstAccess top) {}
   
   protected void InstDot.typeError(InstAccess top) {
-	  getRight().typeError(top);
+	  getInstAccess(getNumInstAccess() - 1).typeError(top);
   }
   
   protected void InstGlobalAccess.typeError(InstAccess top) {
@@ -553,15 +553,13 @@ aspect FlatTypeCheck {
   
   public void InstDot.typeCheck() {
 	  // Check for accesses to non-constant component in class
-	  getLeft().checkAccessCompInClassLeft(getRight());
+	  int n = getNumInstAccess();
+	  for (int i = 0; i < n - 1; i++)
+		  getInstAccess(i).checkAccessCompInClassLeft(getInstAccess(i + 1));
 	  super.typeCheck();
   }
   
   public void InstAccess.checkAccessCompInClassLeft(InstAccess right) {}
-  
-  public void InstDot.checkAccessCompInClassLeft(InstAccess right) {
-	  getRight().checkAccessCompInClassLeft(right);
-  }
   
   public void InstClassAccess.checkAccessCompInClassLeft(InstAccess right) {
 	  right.checkAccessCompInClassRight(myInstClassDecl());
@@ -575,10 +573,6 @@ aspect FlatTypeCheck {
   }
   
   public void InstAccess.checkAccessCompInClassRight(InstClassDecl icd) {}
-  
-  public void InstDot.checkAccessCompInClassRight(InstClassDecl icd) {
-	  getLeft().checkAccessCompInClassRight(icd);
-  }
   
   public void InstComponentAccess.checkAccessCompInClassRight(InstClassDecl icd) {
 	  String type = null;

@@ -265,7 +265,7 @@ aspect NodeMethods {
         return dump() + ": '" + getID() + "'";
     }
 
-    public String Access.getNodeName() {
+    public String NamedAccess.getNodeName() {
         return dump() + ": '" + getID() + "'";
     }
     
@@ -445,36 +445,62 @@ aspect FileNames {
     
 aspect Names {
   // simple names
-  syn String IdDecl.name()  = getID();
-  syn String Access.name()  = getID();
-  eq ParseAccess.name()     = getID();
-  eq ClassAccess.name()     = getID();
-  eq AmbiguousAccess.name() = getID();
-  eq ComponentAccess.name() = getID();
-  syn lazy String GlobalAccess.name() = "." + getAccessNoTransform().name();
-  syn lazy String Dot.name()          = 
+  syn String IdDecl.name()            = getID();
+  syn String Access.name();
+  eq NamedAccess.name()               = getID();
+  eq PN_Dot.name()                    = 
   	getLeftNoTransform().name() + "." + getRightNoTransform().name();
+  syn lazy String GlobalAccess.name() = "." + getAccessNoTransform().name();
+  syn lazy String Dot.name() {
+	  StringBuilder buf = new StringBuilder();
+	  List<Access> l = getAccessListNoTransform();
+	  for (int i = 0; i < l.getNumChildNoTransform(); i++) {
+		  buf.append(l.getChildNoTransform(i).name());
+		  buf.append('.');
+	  }
+	  return buf.substring(0, buf.length() - 1);
+  }
   
    // simple names of InstAccess:es
-  syn String InstAccess.name()  = getID();
-  eq InstParseAccess.name()     = getID();
-  eq InstClassAccess.name()     = getID();
-  eq InstAmbiguousAccess.name() = getID();
-  eq InstComponentAccess.name() = getID();
+  syn String InstAccess.name();
+  eq InstNamedAccess.name()               = getID();
   syn lazy String InstGlobalAccess.name() = "." + getInstAccessNoTransform().name();
-  syn lazy String InstDot.name()          = 
-  	getLeftNoTransform().name() + "." + getRightNoTransform().name();
+  syn lazy String InstDot.name() {
+	  StringBuilder buf = new StringBuilder();
+	  List<InstAccess> l = getInstAccessListNoTransform();
+	  for (int i = 0; i < l.getNumChildNoTransform(); i++) {
+		  buf.append(l.getChildNoTransform(i).name());
+		  buf.append('.');
+	  }
+	  return buf.substring(0, buf.length() - 1);
+  }
   
   syn String InstNamedModification.name() = getNameNoTransform().name();
   
-  syn String Access.qualifiedName()            = getID();
-  syn lazy String Dot.qualifiedName()          = 
+  syn String Access.qualifiedName();
+  eq NamedAccess.qualifiedName()               = getID();
+  eq PN_Dot.qualifiedName()                    = 
   	getLeft().qualifiedName() + "." + getRight().qualifiedName();
   syn lazy String GlobalAccess.qualifiedName() = "." + getAccess().qualifiedName();
+  syn lazy String Dot.qualifiedName() {
+	  StringBuilder buf = new StringBuilder();
+	  for (Access a : getAccesss()) {
+		  buf.append(a.qualifiedName());
+		  buf.append('.');
+	  }
+	  return buf.substring(0, buf.length() - 1);
+  }
   
-  syn String InstAccess.qualifiedName()            = getID();
-  syn lazy String InstDot.qualifiedName()          = 
-  	getLeft().qualifiedName() + "." + getRight().qualifiedName();
+  syn String InstAccess.qualifiedName();
+  eq InstNamedAccess.qualifiedName()           = getID();
+  syn lazy String InstDot.qualifiedName() {
+	  StringBuilder buf = new StringBuilder();
+	  for (InstAccess ia : getInstAccesss()) {
+		  buf.append(ia.qualifiedName());
+		  buf.append('.');
+	  }
+	  return buf.substring(0, buf.length() - 1);
+  }
   syn lazy String InstGlobalAccess.qualifiedName() = 
   	"." + getInstAccess().qualifiedName();
   
@@ -494,12 +520,16 @@ aspect Names {
   eq InstImportUnqualified.name() = "*";    // To avoid returning null
   
   syn String Access.lastName() = name();
-  eq Dot.lastName()            = getRightNoTransform().lastName();
+  eq Dot.lastName()            = getAccessListNoTransform().lastChildNoTransform().lastName();
   eq GlobalAccess.lastName()   = getAccessNoTransform().lastName();
   
   syn String InstAccess.lastName() = name();
-  eq InstDot.lastName()            = getRightNoTransform().lastName();
+  eq InstDot.lastName()            = getInstAccessListNoTransform().lastChildNoTransform().lastName();
   eq InstGlobalAccess.lastName()   = getInstAccessNoTransform().lastName();
+  
+  public T List.lastChildNoTransform() {
+	  return getChildNoTransform(getNumChildNoTransform() - 1);
+  }
   
   syn String ClassDecl.qualifiedName();
   eq BaseClassDecl.qualifiedName() = combineName(classNamePrefix(), name());
@@ -649,11 +679,11 @@ aspect Names {
      * unqualified name.
      */ 
     syn Access Access.getLastAccess() = this;
-    eq Dot.getLastAccess()            = getRight().getLastAccess();
+    eq Dot.getLastAccess()            = getAccess(getNumAccess() - 1);
     eq GlobalAccess.getLastAccess()   = getAccess().getLastAccess();
     
     syn InstAccess InstAccess.getLastInstAccess() = this;
-    eq InstDot.getLastInstAccess()                = getRight().getLastInstAccess();
+    eq InstDot.getLastInstAccess()                = getInstAccess(getNumInstAccess() - 1);
     eq InstGlobalAccess.getLastInstAccess()       = getInstAccess().getLastInstAccess();
     
     /**
@@ -661,7 +691,7 @@ aspect Names {
      * unqualified name.
      */
     syn Access Access.getFirstAccess() = this;
-    eq Dot.getFirstAccess()            = getLeft().getFirstAccess();
+    eq Dot.getFirstAccess()            = getAccess(0);
     eq GlobalAccess.getFirstAccess()   = getAccess().getFirstAccess();
 
     // For proxy
@@ -670,22 +700,22 @@ aspect Names {
     }
     
     inh Access Access.getNextAccess();
-    eq Dot.getLeft().getNextAccess() = getRight().getFirstAccess();
+    eq Dot.getAccess(int i).getNextAccess()    = (i >= getNumAccess() - 1) ? null : getAccess(i + 1);
     eq SourceRoot.getProgram().getNextAccess() = computeNextAccess();
-    eq Root.getChild().getNextAccess() = null;
+    eq Root.getChild().getNextAccess()         = null;
 
     /**
      * Access method for the first Access of a qualified or
      * unqualified name.
      */
     syn InstAccess InstAccess.getFirstInstAccess() = this;
-    eq InstDot.getFirstInstAccess()                = getLeft().getFirstInstAccess();
+    eq InstDot.getFirstInstAccess()                = getInstAccess(0);
     eq InstGlobalAccess.getFirstInstAccess()       = getInstAccess().getFirstInstAccess();
    
     inh InstAccess InstAccess.getNextInstAccess();
-    eq InstDot.getLeft().getNextInstAccess()  = getRight().getFirstInstAccess();
-    eq InstDot.getRight().getNextInstAccess() = getNextInstAccess();
-    eq ASTNode.getChild().getNextInstAccess() = null;
+    eq InstDot.getInstAccess(int i).getNextInstAccess() = 
+    		(i >= getNumInstAccess() - 1) ? null : getInstAccess(i + 1);
+    eq BaseNode.getChild().getNextInstAccess()          = null;
 
     
     /**
@@ -697,9 +727,13 @@ aspect Names {
     }
     
     public Access Dot.stripFirstAccess() {
-        Access right = (Access) getRight().fullCopy();
-        Access left = getLeft().stripFirstAccess();
-        return (left == null) ? right : new Dot(left, right);
+    	int n = getNumAccess();
+    	if (n <= 2)
+    		return getAccess(n - 1);
+    	List<Access> l = new List<Access>();
+    	for (int i = 1; i < n; i++)
+    		l.add(getAccess(i));
+        return new Dot(l);
     }
     
     public Access GlobalAccess.stripFirstAccess() {
@@ -726,9 +760,9 @@ aspect Names {
     syn InstAccess InstAccess.getTopInstAccess() = retrieveTopInstAccess(this);
     
     inh InstAccess InstAccess.retrieveTopInstAccess(InstAccess pre);
-    eq ASTNode.getChild().retrieveTopInstAccess(InstAccess pre)          = pre;
+    eq BaseNode.getChild().retrieveTopInstAccess(InstAccess pre)         = pre;
     eq InstDot.getChild().retrieveTopInstAccess(InstAccess pre)          = retrieveTopInstAccess(this);
-    eq InstGlobalAccess.getChild().retrieveTopInstAccess(InstAccess pre) = retrieveTopInstAccess(this);
+    eq InstGlobalAccess.getChild().retrieveTopInstAccess(InstAccess pre) = this;
     
     /**
      * \brief Get the array subscripts of the last name part.
@@ -737,10 +771,10 @@ aspect Names {
         getLastInstAccess().getFArraySubscripts();
     
     syn FArraySubscripts InstAccess.getFArraySubscripts() = null;
-    eq InstDot.getFArraySubscripts() = getRight().getFArraySubscripts();
+    eq InstDot.getFArraySubscripts() = getLastInstAccess().getFArraySubscripts();
 
     syn boolean InstAccess.hasFArraySubscripts() = false;
-    eq InstDot.hasFArraySubscripts() = getRight().hasFArraySubscripts();
+    eq InstDot.hasFArraySubscripts() = getLastInstAccess().hasFArraySubscripts();
     
     /**
      * \brief Set the array subscripts of the last name part.
@@ -756,13 +790,12 @@ aspect Names {
     public InstDot InstAccess.copyAndAppend(String id) {
     	InstAccess left = fullCopy();
     	InstAccess right = createPartToAppend(id);
-        return new InstDot(left, right);
+        return new InstDot(new List<InstAccess>().add(left).add(right));
     }
     
     public InstDot InstDot.copyAndAppend(String id) {
-    	InstDot res = copy();
-    	res.setLeft(getLeft().fullCopy());
-    	res.setRight(getRight().copyAndAppend(id));
+    	InstDot res = fullCopy();
+    	res.addInstAccess(createPartToAppend(id));
     	return res;
     }
     
@@ -785,7 +818,13 @@ aspect Slices {
      * \brief Check if this is a slice operation.
      */
     syn boolean InstAccess.isSlice() = hasFArraySubscripts() && isArray();
-    eq InstDot.isSlice() = getLeft().isArray() || getRight().isSlice();
+    eq InstDot.isSlice() {
+    	int last = getNumInstAccess() - 1;
+    	for (int i = 0; i < last; i++)
+    		if (getInstAccess(i).isArray())
+    			return true;
+    	return getInstAccess(last).isSlice();
+    }
     
     /**
      * \brief Check if this is a slice operation.
@@ -1427,29 +1466,6 @@ aspect FlatNames {
     		fqn.lastFQNamePart().setFArraySubscripts(fas);
         return new FIdUse(fqn); 
     }
-
-    /**
-     * \brief Create an InstAccess based on an FQName.
-     * 
-     */    
-    public InstAccess FQName.createInstComponentAccess() {
-    	InstAccess ia;
-    	Iterator<FQNamePart> it = getFQNameParts().iterator();
-    	FQNamePart fqnp = it.next();
-    	ia = new InstComponentAccess(fqnp.getName(),(Opt)fqnp.getFArraySubscriptsOpt().fullCopy());
-    	while (it.hasNext()) {
-    		fqnp = it.next();
-    		ia = new InstDot(ia,new InstComponentAccess(fqnp.getName(),(Opt)fqnp.getFArraySubscriptsOpt().fullCopy()));
-    	}	
-    	ia.setParent(this);
-    	return ia;
-    }
-    
-    syn nta InstAccess InstComponentDecl.createNameInstAccess() {
-   		InstAccess ia = getFQName().createInstComponentAccess();
-   		ia = dynamicComponentName(ia);
-   		return ia;
-   	}
     
     syn String FType.name();
     eq FRealType.name()        		= "Real";
@@ -2031,7 +2047,12 @@ aspect ComponentDeclMethods {
     syn boolean FIdUseInstAccess.isDisabled() = getInstAccess().isDisabled();
     syn boolean InstAccess.isDisabled() = false;
     eq InstComponentAccess.isDisabled() = myInstComponentDecl().isDisabled();
-    eq InstDot.isDisabled() = getRight().isDisabled() || getLeft().isDisabled();
+    eq InstDot.isDisabled() {
+    	for (InstAccess ia : getInstAccesss())
+    		if (ia.isDisabled())
+    			return true;
+    	return false;
+    }
     
 }
 
@@ -2193,6 +2214,9 @@ aspect NodeSearch {
      *             <code>false</code> otherwise
      */
     syn boolean ASTNode.matches(String str) = false;
+    eq Access.matches(String str)           = name().equals(str);
+    eq InstAccess.matches(String str)       = name().equals(str);
+    
     
     public class ASTNode {
         
@@ -2526,4 +2550,18 @@ aspect GeneralHelpers {
 	private static final Pattern ASTNode.memPattern = 
 			Pattern.compile("([0-9]+(\\.[0-9]*)?)(([kKmMgGtTpPeE])?[bB]?)?");
 	
+}
+
+aspect DebugHelpers {
+
+	/**
+	 * Check if the list contains an instance of the specified class.
+	 */
+	public boolean List.containsInstance(Class c) {
+		 for (ASTNode n : children)
+			 if (c.isInstance(n))
+				 return true;
+		 return false;
+	}
+
 }

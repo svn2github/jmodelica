@@ -66,8 +66,9 @@ aspect DumpTree {
  
   public void Dot.dumpTree(String indent) {
   	super.dumpTree(indent);
-  	getLeft().dumpTree(indent+" ");
-  	getRight().dumpTree(indent+" ");
+  	indent += ' ';
+  	for (Access ia : getAccesss())
+  		ia.dumpTree(indent);
   }
  
   public void GlobalAccess.dumpTree(String indent) {
@@ -174,9 +175,9 @@ aspect InstDumpTree {
  
   public void InstDot.dumpTree(String indent) {
   	super.dumpTree(indent);
-  	getLeft().dumpTree(indent+" ");
-  	getRight().dumpTree(indent+" ");
-  }
+	for (InstAccess ia : getInstAccesss())
+		ia.dumpTree(indent+" ");
+   }
  
   public void InstGlobalAccess.dumpTree(String indent) {
   	super.dumpTree(indent);
@@ -201,7 +202,7 @@ aspect DumpTreeBasic {
   	System.out.println(indent + dumpBasic() + " at line: " + getLine(getStart()) + " decl name: " + getID());
   }
   
-  public void Access.dumpTreeBasic(String indent) {
+  public void NamedAccess.dumpTreeBasic(String indent) {
   	System.out.println(indent + dumpBasic() + " at line: " + getLine(getStart()) + " access name: " + getID());
   }
   

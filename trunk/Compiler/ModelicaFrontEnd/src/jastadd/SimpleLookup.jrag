@@ -32,7 +32,8 @@ aspect SimpleClassLookup {
 	protected int ClassDecl.duringFindClassDeclRevisits = 0;
 	protected static final int ClassDecl.MAX_FIND_CLASS_DECL_REVISITS = 20;
 		
-	syn lazy ClassDecl Access.findClassDecl() {
+	syn ClassDecl Access.findClassDecl();
+	syn lazy ClassDecl NamedAccess.findClassDecl() {
 		if (duringFindClassDecl)
 			return unknownClassDecl();
 		duringFindClassDecl = true;
@@ -42,14 +43,15 @@ aspect SimpleClassLookup {
 			duringFindClassDecl = false;
 		}
 	}
-	eq Dot.findClassDecl()          = getRight().findClassDecl();
+	eq Dot.findClassDecl()          = getLastAccess().findClassDecl();
+	eq PN_Dot.findClassDecl()       = unknownClassDecl();
 	eq GlobalAccess.findClassDecl() = getAccess().findClassDecl();
 	
 	
 	inh ClassDecl Access.simpleLookupClass(String name);
 	inh ClassDecl ClassDecl.simpleLookupClass(String name);
-	eq Dot.getRight().simpleLookupClass(String name)           = 
-		getLeft().findClassDecl().simpleLookupClassMemberScope(name);
+	eq Dot.getAccess(int i).simpleLookupClass(String name)          = 
+		(i == 0) ? simpleLookupClass(name) : getAccess(i - 1).findClassDecl().simpleLookupClassMemberScope(name);
 	eq GlobalAccess.getAccess().simpleLookupClass(String name)      = simpleLookupClassGlobalScope(name);
 	eq ImportClause.getPackageName().simpleLookupClass(String name) = simpleLookupClassGlobalScope(name);
 	eq FullClassDecl.getSuper().simpleLookupClass(String name)      = simpleLookupClassLocalScope(name);
@@ -227,6 +229,6 @@ aspect SimpleClassLookup {
 	eq BaseClassDecl.matches(String str)         = getName().matches(str);
 	eq ImportClauseRename.matches(String str)    = getIdDecl().matches(str);
 	eq ImportClauseQualified.matches(String str) = 
-		getPackageName().getLastAccess().getID().equals(str);
+		getPackageName().getLastAccess().matches(str);
 
 }

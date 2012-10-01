@@ -405,7 +405,7 @@ aspect Environments {
 	}
 	
 	eq InstComponentModification.matchInstModification(String name) {
-		if (name.equals(getName().getID()))
+		if (getName().matches(name))
 			return hasInstModification()? getInstModification() : null;
 		return null;
 	}
@@ -419,7 +419,7 @@ aspect Environments {
 	
 	// Only add modifiers in constraining clauses
 	eq InstComponentRedeclare.matchInstModification(String name) {
-		if (name.equals(getName().getID()) && getInstComponentDecl().hasInstConstraining() &&
+		if (getName().matches(name) && getInstComponentDecl().hasInstConstraining() &&
 		    getInstComponentDecl().getInstConstraining().hasInstClassModification())
 			return getInstComponentDecl().getInstConstraining().getInstClassModification();
 		return null;
@@ -427,7 +427,7 @@ aspect Environments {
 	
 	// Only add modifiers in constraining clauses
 	eq InstClassRedeclare.matchInstModification(String name) {
-		if (name.equals(getName().name()) && getInstClassDecl().hasInstConstraining() &&
+		if (getName().matches(name) && getInstClassDecl().hasInstConstraining() &&
 		    getInstClassDecl().getInstConstraining().hasInstClassModification())
 			return getInstClassDecl().getInstConstraining().getInstClassModification();
 		return null;
@@ -1154,6 +1154,8 @@ aspect InstanceTreeConstruction {
 		return getClassName().newInstAccess();
 	}
 	
+	public abstract InstAccess Access.newInstAccess();
+	
 	public InstAccess ArrayAccess.newInstAccess() {
 		Opt as = null;
 		if (hasArraySubscripts() && getArraySubscripts().getNumSubscript()>0) {
@@ -1166,17 +1168,24 @@ aspect InstanceTreeConstruction {
 		return ia;
 	}
 
-	public InstAccess Access.newInstAccess() {
+	public InstAccess NamedAccess.newInstAccess() {
 		InstAccess ia =  new InstParseAccess(getID(),new Opt());
 		ia.setLocation(this);
 		return ia;
 	}
 
 	public InstAccess Dot.newInstAccess() {
-		InstAccess ia = new InstDot(getLeft().newInstAccess(), getRight().newInstAccess());
+		List<InstAccess> l = new List<InstAccess>();
+		for (Access a : getAccesss())
+			l.add(a.newInstAccess());
+		InstDot ia = new InstDot(l);
 		ia.setLocation(this);
 		return ia;
-	}	
+	}
+
+	public InstAccess PN_Dot.newInstAccess() {
+		throw new UnsupportedOperationException();
+	}
 
 	public InstAccess GlobalAccess.newInstAccess() {
 		InstAccess ia = new InstGlobalAccess(getAccess().newInstAccess());

@@ -309,8 +309,13 @@ aspect Arrays {
 		res.add(getExpandedSubscripts());
 		return res;
 	}
-	eq InstDot.allFArraySubscripts() = 
-		concatenation(getLeft().allFArraySubscripts(), getRight().allFArraySubscripts());
+	eq InstDot.allFArraySubscripts() {
+		int n = getNumInstAccess();
+		ArrayList<FArraySubscripts>[] lists = new ArrayList[n];
+		for (int i = 0; i < n; i++)
+			lists[i] = getInstAccess(i).allFArraySubscripts();
+		return concatenation(lists);
+	}
 	eq InstGlobalAccess.allFArraySubscripts() = getInstAccess().allFArraySubscripts();
 	
 	/**
@@ -379,6 +384,8 @@ aspect Arrays {
 				getFArraySubscripts().expandedSubscripts() :
 				myInstComponentDecl().expandedSubscripts();
 	}
+	
+//	private static final FArraySubscripts InstAccess.EMPTY_FAS = new FArraySubscripts();
 	
 	/**
 	 * \brief Get the expanded array subscripts of this access.
@@ -605,14 +612,14 @@ aspect Arrays {
 	inh Size FEndExp.mySize();
 	inh Size FSubscript.mySize();
 	inh Size FArraySubscripts.mySize();
-	eq FIdUse.getChild().mySize()                     = myFV().size();
-	eq FIdUseInstAccess.getChild().mySize()           = getInstAccess().size();
-	eq InstArrayAccess.getFArraySubscripts().mySize() = myInstComponentDecl().size();
-	eq InstAccess.getExpandedSubscripts().mySize()    = myInstComponentDecl().size();
-	eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size();
-	eq FExpSubscript.getFExp().mySize()               = mySize();
-	eq FlatRoot.getChild().mySize()                   = Size.SCALAR;
-	eq InstRoot.getChild().mySize()                   = Size.SCALAR;
+	eq FIdUse.getChild().mySize()                       = myFV().size();
+	eq FIdUseInstAccess.getChild().mySize()             = getInstAccess().size();
+	eq InstArrayAccess.getFArraySubscripts().mySize()   = myInstComponentDecl().size();
+	eq InstNamedAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
+	eq FSubscriptedExp.getFArraySubscripts().mySize()   = getFExp().size();
+	eq FExpSubscript.getFExp().mySize()                 = mySize();
+	eq FlatRoot.getChild().mySize()                     = Size.SCALAR;
+	eq InstRoot.getChild().mySize()                     = Size.SCALAR;
 	
 	eq FArraySubscripts.getFSubscript(int i).mySize() {
 		MutableSize s = new MutableSize(1);
@@ -923,15 +930,22 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Get the array sizes as declared. May be unknown. 
+	 * Get the array sizes as declared. May be unknown. 
 	 */
 	syn Size InstComponentDecl.declaredSize() = 
 		hasFArraySubscripts() ? getFArraySubscripts().declarationSize() : Size.SCALAR;
 	
 	/**
-	 * \brief Get the array sizes. 
+	 * Get the array sizes. 
 	 */
-	eq InstDot.size()          = getRight().size().expand(getLeft().size());
+	eq InstDot.size() {
+		if (!isArray())
+			return Size.SCALAR;
+		MutableSize s = new MutableSize(ndims());
+		for (InstAccess ia : getInstAccesss())
+			s.append(ia.size());
+		return s;
+	}
 	eq InstGlobalAccess.size() = getInstAccess().size();
 	
 	/**
@@ -1711,7 +1725,10 @@ aspect Arrays {
 	}
 
 	protected InstDot InstDot.specifyEach(Index i, int[] dim) {
-		return new InstDot(getLeft().specifyEach(i, dim), getRight().specifyEach(i, dim));
+		List<InstAccess> l = new List<InstAccess>();
+		for (InstAccess ia : getInstAccesss())
+			l.add(ia.specifyEach(i, dim));
+		return new InstDot(l);
 	}
 
 	protected InstGlobalAccess InstGlobalAccess.specifyEach(Index i, int[] dim) {

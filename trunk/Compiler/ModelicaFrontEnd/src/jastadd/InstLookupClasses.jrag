@@ -19,7 +19,7 @@ import java.util.HashSet;
 aspect InstLookupClasses {
 
 	syn lazy HashSet InstAccess.lookupInstClass() circular [emptyHashSet()] = lookupInstClass(name());
-	eq InstDot.lookupInstClass()           = getRight().lookupInstClass();
+	eq InstDot.lookupInstClass()          = getLastInstAccess().lookupInstClass();
 	eq InstGlobalAccess.lookupInstClass() = getInstAccess().lookupInstClass();
 
 	inh HashSet InstAccess.lookupInstClass(String name) circular [emptyHashSet()];
@@ -342,10 +342,11 @@ aspect InstLookupClasses {
 			return emptyHashSet();
 	}
 	
-	eq InstDot.getRight().lookupInstClass(String name)                    = getLeft().qualifiedLookupInstClass(name);
-	eq InstGlobalAccess.getInstAccess().lookupInstClass(String name)      = lookupInstClassFromTop(name);
-	eq InstArrayAccess.getFArraySubscripts().lookupInstClass(String name) = getTopInstAccess().lookupInstClass(name);
-	eq InstAccess.getExpandedSubscripts().lookupInstClass(String name)    = getTopInstAccess().lookupInstClass(name);
+	eq InstDot.getInstAccess(int i).lookupInstClass(String name)            = 
+			(i == 0) ? lookupInstClass(name) : getInstAccessNoListTrans(i - 1).qualifiedLookupInstClass(name);
+	eq InstGlobalAccess.getInstAccess().lookupInstClass(String name)        = lookupInstClassFromTop(name);
+	eq InstArrayAccess.getFArraySubscripts().lookupInstClass(String name)   = getTopInstAccess().lookupInstClass(name);
+	eq InstNamedAccess.getExpandedSubscripts().lookupInstClass(String name) = getTopInstAccess().lookupInstClass(name);
 	
 	syn HashSet InstAccess.qualifiedLookupInstClass(String name) circular [emptyHashSet()] = emptyHashSet();	
 	eq InstClassAccess.qualifiedLookupInstClass(String name) = myInstClassDecl().memberInstClass(name);
@@ -572,7 +573,7 @@ aspect InstLookupClasses {
 			return unknownInstClassDecl();
 		}
 	}
-	eq InstDot.myInstClassDecl()          = getRight().myInstClassDecl();
+	eq InstDot.myInstClassDecl()          = getLastInstAccess().myInstClassDecl();
 	eq InstGlobalAccess.myInstClassDecl() = getInstAccess().myInstClassDecl();
 	
 	syn InstClassDecl InstNode.myInstClass()  = unknownInstClassDecl(); 

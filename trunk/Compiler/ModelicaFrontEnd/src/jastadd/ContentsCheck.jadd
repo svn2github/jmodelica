@@ -279,8 +279,8 @@ aspect StructuralParams {
 	public void InstAccess.markUsesInSubscriptsAsStructuralParameter() {}
 	
 	public void InstDot.markUsesInSubscriptsAsStructuralParameter() {
-		getLeft().markUsesInSubscriptsAsStructuralParameter();
-		getRight().markUsesInSubscriptsAsStructuralParameter();
+		for (InstAccess ia : getInstAccesss())
+			ia.markUsesInSubscriptsAsStructuralParameter();
 	}
 	
 	public void InstArrayAccess.markUsesInSubscriptsAsStructuralParameter() {

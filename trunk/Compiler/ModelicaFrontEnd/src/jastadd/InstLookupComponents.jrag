@@ -36,13 +36,14 @@ aspect InstLookupComponents {
 	
 	eq InstReplacingComposite.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstReplacingPrimitive.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
-	eq InstNormalExtends.getInstClassModification().lookupInstComponent(String name)            = lookupInstComponent(name);
+	eq InstNormalExtends.getInstClassModification().lookupInstComponent(String name)      = lookupInstComponent(name);
 	eq InstShortClassDecl.getChild().lookupInstComponent(String name)                     = lookupInstComponent(name);
 	
-	eq InstDot.getRight().lookupInstComponent(String name)                    = getLeft().qualifiedLookupInstComponent(name);
-	eq InstArrayAccess.getFArraySubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
-	eq InstAccess.getExpandedSubscripts().lookupInstComponent(String name)    = getTopInstAccess().lookupInstComponent(name);
-	eq InstGlobalAccess.getInstAccess().lookupInstComponent(String name)      = emptyHashSet();
+	eq InstDot.getInstAccess(int i).lookupInstComponent(String name)            = 
+			(i == 0) ? lookupInstComponent(name) : getInstAccessNoListTrans(i - 1).qualifiedLookupInstComponent(name);
+	eq InstArrayAccess.getFArraySubscripts().lookupInstComponent(String name)   = getTopInstAccess().lookupInstComponent(name);
+	eq InstNamedAccess.getExpandedSubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
+	eq InstGlobalAccess.getInstAccess().lookupInstComponent(String name)        = emptyHashSet();
 	
 	syn HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
 	eq InstClassAccess.qualifiedLookupInstComponent(String name)     = myInstClassDecl().memberInstComponentConstrained(name);
@@ -54,6 +55,8 @@ aspect InstLookupComponents {
 	eq FlatRoot.getChild().localLookupInstComponent(String name)          = emptyHashSet();
 	eq InstClassDecl.getChild().localLookupInstComponent(String name)     = memberInstComponent(name);
 	eq InstComponentDecl.getChild().localLookupInstComponent(String name) = memberInstComponent(name);
+	
+	syn InstAccess InstDot.getInstAccessNoListTrans(int i) = (InstAccess) getInstAccessListNoTransform().getChild(i);
 
 	/**
 	 * Lookup the specific array component corresponding to this access, using current ceval() 
@@ -267,11 +270,8 @@ aspect InstLookupComponents {
 	
 	syn lazy InstComponentDecl InstAccess.myInstComponentDecl() = unknownInstComponentDecl();
 	eq InstComponentAccess.myInstComponentDecl()                = componentFromSet(lookupInstComponent(name()));
-	eq InstDot.myInstComponentDecl()                            = getRight().myInstComponentDecl();
+	eq InstDot.myInstComponentDecl()                            = getLastInstAccess().myInstComponentDecl();
 	eq InstGlobalAccess.myInstComponentDecl()                   = getInstAccess().myInstComponentDecl();
-	
-	syn InstComponentDecl InstAccess.topInstComponentDecl() = myInstComponentDecl();
-	eq InstDot.topInstComponentDecl()                       = getLeft().myInstComponentDecl();
 	
 }
 

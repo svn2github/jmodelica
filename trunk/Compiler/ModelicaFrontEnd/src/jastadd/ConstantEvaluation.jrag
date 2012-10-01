@@ -1319,7 +1319,7 @@ aspect ConstantEvaluation {
   eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
   
   syn CValue InstAccess.ceval() = CValue.UNKNOWN;
-  eq InstDot.ceval()            = getRight().ceval();
+  eq InstDot.ceval()            = getInstAccess(getNumInstAccess() - 1).ceval();
   eq InstGlobalAccess.ceval()   = getInstAccess().ceval();
   eq InstComponentAccess.ceval() {
 	  CValue res = CValue.UNKNOWN;
@@ -1359,9 +1359,9 @@ aspect ConstantEvaluation {
    * \brief Perform constant evaluation of an access to a record member.
    */
   inh CValue InstAccess.cevalRecordMember(String id);
-  eq BaseNode.getChild().cevalRecordMember(String id) = CValue.UNKNOWN;
-  eq InstDot.getLeft().cevalRecordMember(String id)   = cevalRecordMember(id);
-  eq InstDot.getRight().cevalRecordMember(String id)  = getLeft().ceval().record().getMember(id);
+  eq BaseNode.getChild().cevalRecordMember(String id)          = CValue.UNKNOWN;
+  eq InstDot.getInstAccess(int i).cevalRecordMember(String id) = 
+		  (i == 0) ? cevalRecordMember(id) : getInstAccess(i - 1).ceval().record().getMember(id);
   
   // TODO: if caching, use cevalFunction() instead
   eq FFunctionCall.cevalCalc()    = evaluate()[0];

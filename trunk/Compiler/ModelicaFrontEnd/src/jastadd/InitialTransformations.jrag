@@ -474,5 +474,21 @@
            return scd;
         }
     }
+    
+    rewrite PN_Dot {
+    	to Dot buildDot(new Dot());
+    }
+
+    public Dot Access.buildDot(Dot dot) {
+    	dot.addAccessNoTransform(this);
+    	return dot;
+    }
+    
+
+    public Dot PN_Dot.buildDot(Dot dot) {
+    	getLeftNoTransform().buildDot(dot);
+    	getRightNoTransform().buildDot(dot);
+    	return dot;
+    }
 
 }

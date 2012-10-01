@@ -385,12 +385,14 @@ DerExp : Exp ::= Exp;
 
 AccessExp : Exp ::= Access;
 
-abstract Access : SourceBaseNode ::= <ID>;
-Dot             : Access ::= Left:Access Right:Access;
-ArrayAccess     : Access ::= [ArraySubscripts];
+abstract Access : SourceBaseNode;
+abstract NamedAccess : Access ::= <ID>;
+Dot             : Access      ::= Access*;
+PN_Dot          : Access      ::= Left:Access Right:Access;
+GlobalAccess    : Access      ::= Access;
+ArrayAccess     : NamedAccess ::= [ArraySubscripts];
 ParseAccess     : ArrayAccess;
-ClassAccess     : Access;
-GlobalAccess    : Access ::= Access;
+ClassAccess     : NamedAccess;
 AmbiguousAccess : ArrayAccess;
 ComponentAccess : ArrayAccess;
 

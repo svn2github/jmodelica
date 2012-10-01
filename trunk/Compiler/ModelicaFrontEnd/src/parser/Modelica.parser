@@ -1152,13 +1152,13 @@ StringComment string_comment =
  Access parse_access_loc = 
    parse_access_single   {: return parse_access_single; :}
  | parse_access_single DOT parse_access_loc 
-   			             {: return new Dot(parse_access_single, parse_access_loc); :}
+   			             {: return new PN_Dot(parse_access_single, parse_access_loc); :}
  ;
  
  Access first_class_access =
    class_access_single  {: return class_access_single; :}
  | class_access_single DOT parse_access_loc  
- 						{: return new Dot(class_access_single, parse_access_loc); :}
+ 						{: return new PN_Dot(class_access_single, parse_access_loc); :}
  ;
  
  ParseAccess parse_access_single = 
@@ -1184,9 +1184,9 @@ StringComment string_comment =
  
  Access qualified_import_access_rec = 
    class_access_single DOT parse_access_single_simple  
-   			{: return new Dot(class_access_single, parse_access_single_simple); :}
+   			{: return new PN_Dot(class_access_single, parse_access_single_simple); :}
  | class_access_single DOT qualified_import_access_rec 
-   			{: return new Dot(class_access_single, qualified_import_access_rec); :}
+   			{: return new PN_Dot(class_access_single, qualified_import_access_rec); :}
  ;
 
  
@@ -1202,7 +1202,7 @@ StringComment string_comment =
  
  Access class_access_loc = 
    class_access_single                      {: return class_access_single; :}
- | class_access_single DOT class_access_loc {: return new Dot(class_access_single, class_access_loc); :}
+ | class_access_single DOT class_access_loc {: return new PN_Dot(class_access_single, class_access_loc); :}
  ;    
   
  ClassAccess class_access_single = 

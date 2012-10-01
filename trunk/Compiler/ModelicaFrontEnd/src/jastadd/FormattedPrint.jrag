@@ -1159,9 +1159,7 @@ aspect FormattedPrint {
     }
     
     void Dot.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	getLeft().doPrettyPrintFormatted(printer, printStream);
-    	printStream.print(".");
-    	getRight().doPrettyPrintFormatted(printer, printStream);
+    	getAccesss().prettyPrintWithSep(printer, printStream, null, ".");
     }
     
     void ArraySubscripts.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {

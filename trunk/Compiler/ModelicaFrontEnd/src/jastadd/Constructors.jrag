@@ -322,42 +322,33 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs an InstDot with an empty ID.
+	 * Create an access from a class name.
 	 */
-	public InstDot.InstDot(InstAccess left, InstAccess right) {
-		this("", left, right);
-	}
-	
-	/**
-	 * \brief Constructs a Dot with an empty ID.
-	 */
-	public Dot.Dot(Access left, Access right) {
-		this("", left, right);
-	}
-	
-	/**
-	 * \brief Constructs an InstGlobalAccess with an empty ID.
-	 */
-	public InstGlobalAccess.InstGlobalAccess(InstAccess access) {
-		this("", access);
-	}
-	
-	/**
-	 * \brief Constructs a GlobalAccess with an empty ID.
-	 */
-	public GlobalAccess.GlobalAccess(Access access) {
-		this("", access);
+	public static Access Access.fromClassName(String name) {
+		String[] parts = name.split("\\.");
+		if (parts.length == 1) {
+			return new ClassAccess(parts[0]);
+		} else {
+			List<Access> l = new List<Access>();
+			for (String part : parts)
+				l.add(new ClassAccess(part));
+			return new Dot(l);
+		}
 	}
 	
 	/**
 	 * Create an access from a class name.
 	 */
-	public static Access Access.fromClassName(String name) {
-		String[] parts = name.split("\\.", 2);
-		if (parts.length == 1)
-			return new ClassAccess(parts[0]);
-		else
-			return new Dot(new ClassAccess(parts[0]), fromClassName(parts[1]));
+	public static InstAccess InstAccess.fromName(String name) {
+		String[] parts = name.split("\\.");
+		if (parts.length == 1) {
+			return new InstParseAccess(parts[0]);
+		} else {
+			List<InstAccess> l = new List<InstAccess>();
+			for (String part : parts)
+				l.add(new InstParseAccess(part));
+			return new InstDot(l);
+		}
 	}
 	
 	/**

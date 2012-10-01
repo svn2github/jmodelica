@@ -76,7 +76,13 @@ aspect InstNameClassification {
 	eq InstRoot.getChild().kind() = Kind.AMBIGUOUS_ACCESS;
 	eq FlatRoot.getChild().kind() = Kind.AMBIGUOUS_ACCESS;
 
-	eq InstDot.getLeft().kind() = getRightNoTransform().predKind();
+	eq InstDot.getInstAccess(int i).kind() {
+		List<InstAccess> accesses = getInstAccesssNoTransform();
+		if (i >= accesses.getNumChildNoTransform() - 1)
+			return kind();
+		else
+			return accesses.getChildNoTransform(i + 1).predKind();
+	}
 
 	eq InstExtends.getClassName().kind()          = Kind.CLASS_ACCESS;
 	eq InstImport.getPackageName().kind()         = Kind.LAST_AMBIGUOUS_ACCESS;
@@ -99,7 +105,7 @@ aspect InstNameClassification {
 	 * qualified name.
 	 */
 	syn Kind InstAccess.predKind() = kind().predKind();
-	eq InstDot.predKind()          = getLeftNoTransform().predKind();
+	eq InstDot.predKind()          = getInstAccessListNoTransform().getChild(0).predKind();
 
 	/**
 	 * Check if this modification has a value modification.
