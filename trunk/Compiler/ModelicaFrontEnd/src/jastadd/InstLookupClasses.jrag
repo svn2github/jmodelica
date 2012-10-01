@@ -34,6 +34,7 @@ aspect InstLookupClasses {
     eq InstNode.getDynamicClassName().lookupInstClass(String name)               = genericLookupInstClass(name);
 
 	eq InstComponentDecl.getInstExtends().lookupInstClass(String name)           = superLookupInstClassInComponent(name);
+    eq InstArrayComponentDecl.getInstExtends().lookupInstClass(String name)      = instComponentDecl().superLookupInstClassInComponent(name);
 
     eq InstAssignable.getBindingFExp().lookupInstClass(String name)              = myInstValueMod().lookupInstClass(name);
 
@@ -647,24 +648,23 @@ aspect InstLocalClasses {
 
 aspect InstLookupClassesInModifications {
 
-	inh HashSet InstElementModification.lookupInstClassInInstClass(String name);	
-
 	eq InstElementModification.getName().lookupInstClass(String name) = lookupInstClassInInstClass(name);
-
-	eq InstComponentDecl.getInstModification().lookupInstClassInInstClass(String name) = /*myInstClass().*/memberInstClass(name);		
-	eq InstElementModification.getInstModification().lookupInstClassInInstClass(String name) = getName().myInstComponentDecl().memberInstClass(name);
-	eq InstNormalExtends.getInstClassModification().lookupInstClassInInstClass(String name) = /*myInstClass().*/memberInstClass(name);
-	
-//	eq InstShortClassDecl.getInstClassModification().lookupInstClassInInstClass(String name) = getClassName().myInstClassDecl().memberInstClass(name);
-	
-	inh HashSet InstClassRedeclare.lookupInstClassInInstClass(String name);
 	eq InstClassRedeclare.getName().lookupInstClass(String name) = lookupInstClassInInstClass(name);
+
+	inh HashSet InstElementModification.lookupInstClassInInstClass(String name);	
+	inh HashSet InstClassRedeclare.lookupInstClassInInstClass(String name);
+
+	eq InstArrayComponentDecl.getInstModification().lookupInstClassInInstClass(String name)  = instComponentDecl().memberInstClass(name);		
+	eq InstComponentDecl.getInstModification().lookupInstClassInInstClass(String name)       = memberInstClass(name);		
+	eq InstElementModification.getInstModification().lookupInstClassInInstClass(String name) = getName().myInstComponentDecl().memberInstClass(name);
+	eq InstNormalExtends.getInstClassModification().lookupInstClassInInstClass(String name)  = memberInstClass(name);
+	
 	
 	/**
 	 * Terminating equation for attribute lookupInstClassInInstClass.
 	 */
-	eq InstRoot.getChild().lookupInstClassInInstClass(String name) {return emptyHashSet();}
-	eq FlatRoot.getChild().lookupInstClassInInstClass(String name) {return emptyHashSet();}
+	eq InstRoot.getChild().lookupInstClassInInstClass(String name) = emptyHashSet();
+	eq FlatRoot.getChild().lookupInstClassInInstClass(String name) = emptyHashSet();
 	  
 }
 

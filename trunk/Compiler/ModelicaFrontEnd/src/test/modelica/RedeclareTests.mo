@@ -3052,6 +3052,46 @@ Semantic error at line 3061, column 10:
 end RedeclareTest31;
 
 
+model RedeclareTest32
+	package A
+		constant Real x = 1;
+	end A;
+	
+	model B
+		replaceable package C
+			constant Real x = 2;
+		end C;
+		
+		Real y = C.x;
+	end B;
+	
+	model D
+		extends B(redeclare package C = E);
+	end D;
+	
+	package E
+		constant Real x = 3;
+	end E;
+	
+	D[2] d;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="RedeclareTest32",
+			description="Lookup of extends with redeclare modification in array",
+			flatModel="
+fclass RedeclareTests.RedeclareTest32
+ Real d[1].y;
+ Real d[2].y;
+equation
+ d[1].y = 3.0;
+ d[2].y = 3.0;
+end RedeclareTests.RedeclareTest32;
+")})));
+end RedeclareTest32;
+
+
+
 model RedeclareElement1
   model A
     replaceable model B
