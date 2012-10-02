@@ -352,6 +352,11 @@ aspect FlatAPI {
 	  when isIndependentConstant() && shouldContribute() 
 	  to FClass.independentConstants() for myFClass();
 
+    syn int FClass.numExternalObjectVariables() = externalObjectVariables().size();
+	coll ArrayList<FExternalObjectVariable> FClass.externalObjectVariables()
+      [new ArrayList<FExternalObjectVariable>()] with add root FlatRoot;
+	FExternalObjectVariable contributes this when shouldContribute() to FClass.externalObjectVariables() for myFClass();
+
 	syn int FClass.numIndependentRealConstants() = independentRealConstants().size();
 	syn lazy ArrayList<FRealVariable> FClass.independentRealConstants() = 
 		intersectFVColl(reals(), independentConstants());

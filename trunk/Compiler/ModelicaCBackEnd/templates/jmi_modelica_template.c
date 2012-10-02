@@ -284,7 +284,7 @@ int jmi_new(jmi_t** jmi) {
 	   N_string_d,N_string_u,N_outputs,(int (*))Output_vrefs,
 	   N_sw,N_sw_init,N_guards,N_guards_init,
 	   N_dae_blocks,N_dae_init_blocks,
-	   Scaling_method);
+	   Scaling_method, -1);
 
   $C_dae_add_blocks_residual_functions$
 

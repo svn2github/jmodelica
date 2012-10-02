@@ -877,7 +877,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_sw, int n_sw_init,
 		int n_guards, int n_guards_init,
 		int n_dae_blocks, int n_dae_init_blocks,
-		int scaling_method);
+		int scaling_method, int n_ext_objs);
 
 /**
  * \brief Allocates a jmi_dae_t struct.
@@ -1290,6 +1290,7 @@ struct jmi_t{
 	jmi_real_t** z_val;                  /**< \brief  This vector contains the actual values. */
 	jmi_real_t **dz;					 /**< \brief  This vector is used to store calculated directional derivatives */
 	jmi_real_t **dz_active_variables;	 /**< \brief  This vector is used to store seed-values for active variables in block Jacobians */
+	void** ext_objs;                    /**< \brief This vector contains the external object pointers. */
 	
 	jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
 	int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */

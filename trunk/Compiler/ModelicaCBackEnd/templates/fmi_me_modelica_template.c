@@ -62,6 +62,8 @@ static const int N_boolean_u = $n_boolean_u$;
 static const int N_string_d = $n_string_d$;
 static const int N_string_u = $n_string_u$;
 
+static const int N_ext_objs = $n_ext_objs$;
+
 static const int N_sw = $n_switches$;
 static const int N_eq_F = $n_equations$;
 static const int N_eq_R = $n_event_indicators$;
@@ -303,7 +305,7 @@ int jmi_new(jmi_t** jmi) {
 	   N_string_d,N_string_u, N_outputs,(int (*))Output_vrefs,
            N_sw,N_sw_init,N_guards,N_guards_init,
 	   N_dae_blocks,N_dae_init_blocks,
-	   Scaling_method);
+	   Scaling_method, N_ext_objs);
 
   $C_dae_add_blocks_residual_functions$
 

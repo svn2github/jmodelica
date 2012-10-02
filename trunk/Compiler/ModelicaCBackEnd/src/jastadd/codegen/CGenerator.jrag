@@ -250,6 +250,20 @@ public class CGenerator extends GenericGenerator {
 			for (FVariable fv : list)
 				generatePreVar(genPrinter, fv, offset, index++);
 		}
+		
+        private void generateExtObject(PrintStream genPrinter, FVariable fv, int index) {
+            genPrinter.print("#define ");
+            genPrinter.print(fv.name_C());
+            genPrinter.print(" ((jmi->ext_objs)[");
+            genPrinter.print(index);
+            genPrinter.print("])\n");
+        }
+        
+        private void generateExtObjectList(PrintStream genPrinter, Iterable<? extends FExternalObjectVariable> list) {
+            int index = 0;
+            for (FExternalObjectVariable fv : list)
+                generateExtObject(genPrinter, fv, index++);
+        }
 	
 		public void generate(PrintStream genPrinter) {
 			generateVarList(genPrinter, fclass.independentRealConstants(),     "real_ci");
@@ -294,6 +308,7 @@ public class CGenerator extends GenericGenerator {
 				generatePreVarList(genPrinter, fclass.discreteBooleanVariables(),     "boolean_d");
 				generatePreVarList(genPrinter, fclass.booleanInputs(),                "boolean_u");
 			}
+			generateExtObjectList(genPrinter, fclass.externalObjectVariables());
 
 		}
 	}

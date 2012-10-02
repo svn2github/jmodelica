@@ -617,6 +617,20 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 	}
+	
+    class DAETag_numExternalObjects extends DAETag {
+        
+        public DAETag_numExternalObjects(AbstractGenerator myGenerator, 
+          FClass fclass) {
+            super("n_ext_objs","Number of external objects",
+              myGenerator,fclass);
+        }
+    
+        public void generate(PrintStream genPrinter) {
+            genPrinter.print(fclass.numExternalObjectVariables());
+        }
+    
+    }
 
 	class DAETag_numEquations extends DAETag {
 		

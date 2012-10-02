@@ -57,7 +57,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_sw, int n_sw_init,
 		int n_guards, int n_guards_init,
 		int n_dae_blocks, int n_dae_init_blocks,
-		int scaling_method) {
+		int scaling_method, int n_ext_objs) {
 
 	// Create jmi struct
 	*jmi = (jmi_t*)calloc(1,sizeof(jmi_t));
