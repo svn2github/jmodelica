@@ -146,16 +146,10 @@ aspect FlatTypeAnalysis {
 	
 	syn FType InstClassDecl.enumType() {
 		FEnumType type = new FEnumType(Size.SCALAR, qualifiedName(), new List());
-		type.originatingInstClassDecl = this;
 		for (InstEnumLiteral el : enumLiterals()) 
 			type.addFEnumLiteralType(new FEnumLiteralType(Size.SCALAR, el.name()));
 		return type;
 	}
-	
-	/**
-	 * \brief If this type is created from a class in the instance tree, a reference to that class.
-	 */
-	public InstClassDecl FEnumType.originatingInstClassDecl = null;
 	
 	public FType FExp.promoteTypeForFExpList(Iterable<FExp> exps) {
 		Iterator<FExp> it = exps.iterator();

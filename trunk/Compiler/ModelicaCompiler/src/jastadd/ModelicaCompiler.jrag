@@ -150,6 +150,7 @@ public class ModelicaCompiler {
 	
 	protected boolean dumpMemoryUse = false;
 	protected int dumpMemoryUseMinSize = 2 * 1024;
+	protected boolean findFlatToInstanceLinks = false;
 	
 	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
 	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
@@ -470,6 +471,14 @@ public class ModelicaCompiler {
 		else
 			setDumpMemoryUse(dump, (int) ASTNode.parseMem(minSize));
 	}
+	
+	public boolean willFindFlatToInstanceLinks() {
+		return findFlatToInstanceLinks;
+	}
+
+	public void setFindFlatToInstanceLinks(boolean find) {
+		findFlatToInstanceLinks = find;
+	}
 
 	/**
 	 * Returns the modelicapath attribute set for this compiler instance.
@@ -626,7 +635,7 @@ public class ModelicaCompiler {
 			String file = "size_" + name + ".txt";
 			log.debug("Dumping " + type + " tree to '" + file + "'...");
 			long time = System.currentTimeMillis();
-			root.dumpMemoryUse(file, true, 25, dumpMemoryUseMinSize);
+			root.dumpMemoryUse(file, true, -1, dumpMemoryUseMinSize);
 			time = Math.round((System.currentTimeMillis() - time) / 1000.0);
 			if (count)
 				root.buildNodeCount();
@@ -647,6 +656,43 @@ public class ModelicaCompiler {
 			String file = "node_count.txt";
 			log.debug("Dumping node counts to '" + file + "'...");
 			ASTNode.dumpNodeCount(file);
+		}
+	}
+	
+	/**
+	 * Find any links from the flat tree to the instance tree.
+	 */
+	protected void findFlatToInstanceLinks(FClass fc) {
+		if (findFlatToInstanceLinks) {
+			log.warning("Searching memory graph for flat tree for links to instance tree...");
+			new MemorySpider(new MemorySpider.ClassFilteredVisitor<InstRoot>(InstRoot.class) {
+				protected void visitFiltered(InstRoot ir, Stack<MemorySpider.Frame> path) {
+					Root root = null;
+					int first = -1;
+					int last = -1;
+					for (int i = 0; last < 0 && i < path.size(); i++) {
+						Object obj = path.get(i).getObject();
+						if (obj instanceof BaseNode) {
+							BaseNode n = (BaseNode) obj;
+							try {
+								if (first < 0) {
+									root = n.root();
+									first = i;
+								} else if (root != n.root()) {
+									last = i;
+								} else {
+									first = i;
+								}
+							} catch (Exception e) {}
+						}
+					}
+					log.error("Found link to instance tree, starting at: " + path.get(first).name());
+					for (int i = first + 1; i <= last; i++)
+						log.error("  " + path.get(i));
+					throw new IllegalArgumentException();
+				}
+			}).traverse(fc);
+			log.warning("Done.");
 		}
 	}
 	
@@ -1043,13 +1089,11 @@ public class ModelicaCompiler {
 
 			// compute instance tree
 			InstClassDecl icl = instantiateModel(sr, cl);
-			//icl.dumpTree("");
-			dumpMemoryUseFile(icl, "instance", false);
 			
 			// flattening
 			// Throw away source and instance trees when they are not needed any more
 			PassAndForget<InstClassDecl> buf = new PassAndForget<InstClassDecl>(icl);
-			dumpMemoryUseFile(sr, "total source", "source2", true);
+			dumpMemoryUseFile(sr, "source and instance", "instance", true);
 			sr = null;
 			icl = null;
 			fc = flattenModel(buf.pass());
@@ -1058,6 +1102,7 @@ public class ModelicaCompiler {
 
 			// Generate code 
 			generateCode(fc);
+			dumpMemoryUseFile(fc, "generated", false);
 			
 		} finally {
 //			logCompilationInfo();
@@ -1292,6 +1337,7 @@ public class ModelicaCompiler {
 		icl = null;
 		ASTNode.endStep("flatten()");
 		
+		findFlatToInstanceLinks(fc);
 		hookModelFlattened(fc);
 		hookCheckAbort();
 		
@@ -1654,7 +1700,7 @@ public class ModelicaCompiler {
 					"  -log=<i or w or e> \n" +
 					"  -modelicapath=<path to modelica libraries> \n" +
 					"  -optfile=<path to XML options file> \n" + 
-					"  -dumpmemuse[=<resolution>] -invokegc \n" + 
+					"  -dumpmemuse[=<resolution>] -invokegc -findflatinst \n" + 
 					" and templates, if given, should be (in order): \n" + 
 					"  xml model description template \n" +
 					"  c template \n" +
@@ -1670,6 +1716,7 @@ public class ModelicaCompiler {
 		setLogLevel(log, (level != null) ? level : ModelicaCompiler.ERROR);
 		
 		setDumpMemoryUse(programarguments.containsKey("dumpmemuse"), programarguments.get("dumpmemuse"));
+		setFindFlatToInstanceLinks(programarguments.containsKey("findflatinst"));
 		StepInfo.GC_BEFORE_MEM = programarguments.containsKey("invokegc");
 		
 		arg = programarguments.size();
