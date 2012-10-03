@@ -408,6 +408,15 @@ def create_temp_dir():
     tmpdir = tempfile.mkdtemp(prefix='jm_tmp', dir=tmp_location)
     
     return tmpdir
+    
+def delete_temp_dir(tmp_dir):
+    """
+    This method deletes a temporary directory that has been created by
+    for instance create_temp_dir.
+    """
+    #Check if the directory exists
+    if os.path.exists(tmp_dir):
+        shutil.rmtree(tmp_dir)
 
         
 def get_unit_name(class_name, unit_type='JMU'):
