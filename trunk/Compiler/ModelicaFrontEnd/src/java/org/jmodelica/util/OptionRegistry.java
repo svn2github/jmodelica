@@ -370,13 +370,16 @@ public class OptionRegistry {
 		return findIntegerOption(key, false).getValue();
 	}
 	
+	public boolean isIntegerOption(String key) {
+		return optionsMap.get(key) instanceof IntegerOption;
+	}
+	
 	protected IntegerOption findIntegerOption(String key, boolean allowMissing) {
 		Option o = optionsMap.get(key);
 		if (o instanceof IntegerOption)
 			return (IntegerOption) o;
 		if (o != null)
-			throw new UnknownOptionException("Option: " + key + " is not of " +
-					"integer type");
+			throw new UnknownOptionException("Option: " + key + " is not of integer type");
 		if (allowMissing)
 			return null;
 		throw new UnknownOptionException("Unknown option: " + key);
@@ -410,13 +413,16 @@ public class OptionRegistry {
 		return findStringOption(key, false).getValue();
 	}
 	
+	public boolean isStringOption(String key) {
+		return optionsMap.get(key) instanceof StringOption;
+	}
+	
 	protected StringOption findStringOption(String key, boolean allowMissing) {
 		Option o = optionsMap.get(key);
 		if (o instanceof StringOption)
 			return (StringOption) o;
 		if (o != null)
-			throw new UnknownOptionException("Option: " + key + " is not of " +
-					"string type");
+			throw new UnknownOptionException("Option: " + key + " is not of string type");
 		if (allowMissing)
 			return null;
 		throw new UnknownOptionException("Unknown option: " + key);
@@ -454,13 +460,16 @@ public class OptionRegistry {
 		return findRealOption(key, false).getValue();
 	}
 	
+	public boolean isRealOption(String key) {
+		return optionsMap.get(key) instanceof RealOption;
+	}
+	
 	protected RealOption findRealOption(String key, boolean allowMissing) {
 		Option o = optionsMap.get(key);
 		if (o instanceof RealOption)
 			return (RealOption) o;
 		if (o != null)
-			throw new UnknownOptionException("Option: " + key + " is not of " +
-					"real type");
+			throw new UnknownOptionException("Option: " + key + " is not of real type");
 		if (allowMissing)
 			return null;
 		throw new UnknownOptionException("Unknown option: " + key);
@@ -494,13 +503,16 @@ public class OptionRegistry {
 		return findBooleanOption(key, false).getValue();
 	}
 	
+	public boolean isBooleanOption(String key) {
+		return optionsMap.get(key) instanceof BooleanOption;
+	}
+	
 	protected BooleanOption findBooleanOption(String key, boolean allowMissing) {
 		Option o = optionsMap.get(key);
 		if (o instanceof BooleanOption)
 			return (BooleanOption) o;
 		if (o != null)
-			throw new UnknownOptionException("Option: " + key + " is not of " +
-					"boolean type");
+			throw new UnknownOptionException("Option: " + key + " is not of boolean type");
 		if (allowMissing)
 			return null;
 		throw new UnknownOptionException("Unknown option: " + key);
