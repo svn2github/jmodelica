@@ -1585,12 +1585,12 @@ aspect CADCodeGen {
 	
 	// Used to assign a unique temporary variable for this expression.	
 	syn lazy String FExp.tempName_var_CAD() {
-		return "tmp_var_" + nextTempNbr_var_CAD();
+		return "tmp_var_" + myFClass().nextTempNbr_var_CAD();
 	}
 	
 	// Used to assign a unique temporary derivative variable for this expression.
 	syn lazy String FExp.tempName_der_CAD() {
-		return "tmp_der_" + nextTempNbr_der_CAD();
+		return "tmp_der_" + myFClass().nextTempNbr_der_CAD();
 	}
 	
 	private int FClass.tmpNbr_var = 0;
@@ -1600,18 +1600,12 @@ aspect CADCodeGen {
 		return tmpNbr_var++;
 	}
 	
-	// Used when assigning unique temporary variables. 
-	syn lazy int FExp.nextTempNbr_var_CAD() = myFClass().nextTempNbr_var_CAD();
-	
 	private int FClass.tmpNbr_der = 0;
 	
 	// Is called when assigning unique temporary derivative variables. Increment index by one for each expression. 
 	public int FClass.nextTempNbr_der_CAD() {
 		return tmpNbr_der++;
 	}
-	
-	// Used when assigning unique temporary derivative variables. 
-	syn lazy int FExp.nextTempNbr_der_CAD() = myFClass().nextTempNbr_der_CAD();
 	
 	public void FExp.genTempInputs_CAD(Printer p, PrintStream str, String indent) {
 		if (isComposite() && !keepAsArray()) {
