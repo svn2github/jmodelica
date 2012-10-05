@@ -525,7 +525,7 @@ aspect FlatTypeAnalysis {
 	syn lazy FType FIdUse.type() = myFV().type().sizedType(size());
 	eq FIdUseInstAccess.type() = getInstAccess().type();
 
-	syn lazy FType InstAccess.type() {
+	syn FType InstAccess.type() {
 		if (myInstComponentDecl().isAssignable()) {
 			InstAssignable ip = (InstAssignable) myInstComponentDecl();
 			FType t = ip.type().scalarType();
