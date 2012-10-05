@@ -356,8 +356,8 @@ aspect InstLookupClasses {
 	eq InstArrayAccess.getFArraySubscripts().lookupInstClass(String name)   = getTopInstAccess().lookupInstClass(name);
 	eq InstNamedAccess.getExpandedSubscripts().lookupInstClass(String name) = getTopInstAccess().lookupInstClass(name);
 	
-	syn HashSet InstAccess.qualifiedLookupInstClass(String name) circular [emptyHashSet()] = emptyHashSet();	
-	eq InstClassAccess.qualifiedLookupInstClass(String name) = myInstClassDecl().memberInstClass(name);
+	syn HashSet InstAccess.qualifiedLookupInstClass(String name) = emptyHashSet();	
+	syn lazy HashSet InstClassAccess.qualifiedLookupInstClass(String name) circular [emptyHashSet()] = myInstClassDecl().memberInstClass(name);
 	
 	syn HashSet InstNode.lookupInstClassInSurrounding(String name) = lookupInstClass(name);
 	eq InstReplacingFullClassDecl.lookupInstClassInSurrounding(String name) = 
@@ -570,10 +570,10 @@ aspect InstLookupClasses {
 	// there are import statements, evaluation might get back to the 
 	// ClassAccess A when when looking up the ClassAccess to import.
 	// See NameTests.ImportTest1 for an example. 
-	syn lazy InstClassDecl InstAccess.myInstClassDecl() circular [unknownInstClassDecl()] {
+	syn InstClassDecl InstAccess.myInstClassDecl() {
 		 return unknownInstClassDecl();
 	}
-	eq InstClassAccess.myInstClassDecl()  {
+	syn lazy InstClassDecl InstClassAccess.myInstClassDecl() circular [unknownInstClassDecl()] {
 		HashSet set = lookupInstClass(name());
 		if (set.size() > 0) {
 			return (InstClassDecl) set.iterator().next();
