@@ -570,12 +570,8 @@ aspect Environments {
 
 aspect InstanceTreeConstruction {
 	
-	syn lazy List InstNode.getDynamicClassNameList() = new List();
 	syn lazy List InstNode.getDynamicComponentNameList() = new List();
 	syn lazy List InstNode.getDynamicFExpList() = new List();
-	syn lazy List InstComponentRedeclare.getDynamicClassNameList() = new List();
-	syn lazy List InstConstrainingComponent.getDynamicClassNameList() = new List();
-	syn lazy List InstForIndex.getDynamicClassNameList() = new List();
 	syn nta List FExp.getDynamicFExpList() = new List();
 	syn lazy List FAbstractEquation.getDynamicFAbstractEquationList() = new List();	
 	syn lazy List InstValueModification.getDynamicInstModList() = new List();
@@ -584,17 +580,7 @@ aspect InstanceTreeConstruction {
 	syn FExp       FExp.getDynamicFExp(int i) = (FExp) getDynamicFExpList().getChild(i);
 	syn List<FExp> FExp.getDynamicFExps()     = (List<FExp>) getDynamicFExpList();
 	
-	/**
-	 * \brief Dynamically places a class name in the tree under this InstNode.
-	 * 
-	 * @returns  the final version of the dynamically placed node.
-	 */
-	public InstAccess InstNode.dynamicClassName(InstAccess name) {
-		getDynamicClassNameList().add(name);
-		return getDynamicClassName(getNumDynamicClassName() - 1);
-	}
-	
-	
+
 	/**
 	 * \brief Dynamically places a component name in the tree under this InstNode.
 	 * 
@@ -667,37 +653,12 @@ aspect InstanceTreeConstruction {
 	}
 	
 	
-	/**
-	 * \brief Dynamically places a component name in the tree under this InstComponentRedeclare.
-	 * 
-	 * @returns  the final version of the dynamically placed node.
-	 */
-	public InstAccess InstComponentRedeclare.dynamicClassName(InstAccess name) {
-		addDynamicClassName(name);
-		return getDynamicClassName(getNumDynamicClassName() - 1);
+	public interface InstLookupRedirectNode {
+		HashSet lookupInstClassRedirect(String name);
 	}
 	
-	
-	/**
-	 * \brief Dynamically places a component name in the tree under this InstConstrainingComponent.
-	 * 
-	 * @returns  the final version of the dynamically placed node.
-	 */
-	public InstAccess InstConstrainingComponent.dynamicClassName(InstAccess name) {
-		addDynamicClassName(name);
-		return getDynamicClassName(getNumDynamicClassName() - 1);
-	}
-	
-	
-	/**
-	 * \brief Dynamically places a component name in the tree under this InstForIndex.
-	 * 
-	 * @returns  the final version of the dynamically placed node.
-	 */
-	public InstAccess InstForIndex.dynamicClassName(InstAccess name) {
-		addDynamicClassName(name);
-		return getDynamicClassName(getNumDynamicClassName() - 1);
-	}
+	public class InstNode implements InstLookupRedirectNode {}
+	public class InstModification implements InstLookupRedirectNode {}
 	
 	syn lazy List InstNode.getInstComponentDeclList() {
 		
@@ -816,11 +777,23 @@ aspect InstanceTreeConstruction {
     	InstComponentRedeclare irc = retrieveReplacingComponent(cd.name());
     	if (irc!=null) {
     		ComponentDecl replacingComp = irc.getComponentRedeclare().getComponentDecl();
-    		// Add the new access to the InstComponentRedeclare node in order to get lookup in the right scope
-    		return irc.dynamicClassName(replacingComp.getClassName().newInstAccess()).myInstClassDecl().newInstReplacingComponent(replacingComp,cd,irc);    	    		
+    		return new InstCreateReplacingComponentDecl(replacingComp, irc, cd, irc);    	    		
     	} else { 
-    		return dynamicClassName(cd.getClassName().newInstAccess()).myInstClassDecl().newInstComponentDecl(cd);    	
+    		return new InstCreateComponentDecl(cd, this);    	
     	}
+     }
+     
+     rewrite InstCreateReplacingComponentDecl {
+     	to InstComponentDecl getClassName().myInstClassDecl().newInstReplacingComponent(
+     			getComponentDecl(), getOriginalDecl(), getInstComponentRedeclare());
+     }
+     
+     rewrite InstCreateComponentDecl {
+     	to InstComponentDecl getClassName().myInstClassDecl().newInstComponentDecl(getComponentDecl());
+     }
+     
+     rewrite InstCreateForIndexPrimitive {
+     	to InstPrimitive (InstPrimitive) getClassName().myInstClassDecl().newInstComponentDecl(getComponentDecl());
      }
         
 	public InstNode InstNode.createInstClassDecl(ClassDecl bcd) {
@@ -1014,11 +987,11 @@ aspect InstanceTreeConstruction {
 	public InstComponentDecl InstBuiltInClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
 	                                                                        ComponentDecl originalDecl, 
 	                                                                        InstComponentRedeclare icr) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
     public InstClassDecl ClassDecl.newInstClassDecl() {
-    	return null;
+    	throw new UnsupportedOperationException();
     }
     
     public Opt<InstExternal> FullClassDecl.newInstExternalOpt() {
@@ -1211,16 +1184,14 @@ aspect InstanceTreeConstruction {
 	    // TODO: Check if the component is redeclared. Really...?
     	// -> Yes: Create an InstReplacingComponent component
     	// -> No: Create an InstComponent 
-		InstAccess name = dynamicClassName(getComponentRedeclare().getComponentDecl().getClassName().newInstAccess());
-    	return name.myInstClassDecl().newInstComponentDecl(getComponentRedeclare().getComponentDecl());
+		return new InstCreateComponentDecl(getComponentRedeclare().getComponentDecl(), this);
 	}
 
 	syn lazy InstComponentDecl InstReplacingComposite.getOriginalInstComponent()  {
 		// TODO: Check if the component is redeclared. Really...?
     	// -> Yes: Create an InstReplacingComponent component
     	// -> No: Create an InstComponent 
-		InstAccess name = dynamicClassName(getOriginalDecl().getClassName().newInstAccess());
-    	return name.myInstClassDecl().newInstComponentDecl(getOriginalDecl());
+    	return new InstCreateComponentDecl(getOriginalDecl(), this);
 	}
 
 

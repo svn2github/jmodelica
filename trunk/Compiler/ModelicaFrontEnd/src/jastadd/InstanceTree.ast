@@ -21,7 +21,6 @@ abstract InstNode : BaseNode ::= /InstComponentDecl*/
                                  /RedeclaredInstClassDecl:InstClassDecl*/
                                  /FAbstractEquation*/ 
                                  /FQName/ 
-                                 /DynamicClassName:InstAccess*/ 
                                  /DynamicComponentName:InstAccess*/ 
                                  /DynamicFExp:FExp*/;
 abstract InstRoot : InstNode;
@@ -76,7 +75,7 @@ InstImportRename      : InstImport;
 
 abstract InstConstraining : BaseNode         ::=  ClassName:InstAccess [InstClassModification] /InstNode/;
 InstConstrainingClass     : InstConstraining ::= <BaseClassDecl:BaseClassDecl>;
-InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> /DynamicClassName:InstAccess*/;
+InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl>;
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
@@ -106,6 +105,11 @@ InstReplacingPrimitive   : InstPrimitive ::= <OriginalDecl:ComponentDecl>
                                              /OriginalInstComponent:InstComponentDecl/ 
                                              <InstComponentRedeclare:InstComponentRedeclare>;
 
+InstCreateComponentDecl : InstComponentDecl ::= <LookupNode:InstLookupRedirectNode>;
+InstCreateForIndexPrimitive : InstPrimitive ::= <LookupNode:InstLookupRedirectNode>;
+InstCreateReplacingComponentDecl : InstCreateComponentDecl ::= <OriginalDecl:ComponentDecl> 
+                                                               <InstComponentRedeclare:InstComponentRedeclare>;
+
 InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause>;
 InstNormalExtends : InstExtends ::= [InstClassModification];
 InstExtendsShortClass : InstNormalExtends;
@@ -124,7 +128,7 @@ InstGlobalAccess    : InstAccess ::= InstAccess;
 InstAmbiguousAccess : InstArrayAccess;
 InstComponentAccess : InstArrayAccess;
 
-InstForIndex : CommonForIndex ::= InstPrimitive /DynamicClassName:InstAccess*/;
+InstForIndex : CommonForIndex ::= InstPrimitive;
 
 InstForClauseE : FAbstractEquation ::= InstForIndex* FAbstractEquation*;
 InstForStmt    : FStatement        ::= InstForIndex* ForStmt:FStatement*;
@@ -148,4 +152,4 @@ abstract InstElementModification : InstNamedModification ::= [InstModification];
 abstract InstElementRedeclare    : InstNamedModification;
 InstComponentModification : InstElementModification; 
 InstClassRedeclare        : InstElementRedeclare ::= /InstClassDecl/;
-InstComponentRedeclare    : InstElementRedeclare ::= /InstComponentDecl/ /DynamicClassName:InstAccess*/;
+InstComponentRedeclare    : InstElementRedeclare ::= /InstComponentDecl/;

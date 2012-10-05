@@ -25,13 +25,19 @@ aspect InstLookupClasses {
 	inh HashSet InstAccess.lookupInstClass(String name);
 	inh HashSet InstNode.lookupInstClass(String name);
     inh HashSet InstModification.lookupInstClass(String name);
+    
+    syn HashSet InstNode.lookupInstClassRedirect(String name)         = genericLookupInstClass(name);
+    eq InstEnumClassDecl.lookupInstClassRedirect(String name)         = lookupInstBuiltInClass(name);
+    eq InstReplacingComposite.lookupInstClassRedirect(String name)    = lookupInstClass(name);
+    eq InstReplacingPrimitive.lookupInstClassRedirect(String name)    = lookupInstClass(name);
+    eq InstExtends.lookupInstClassRedirect(String name)               = genericLookupInstClassInExtends(name);
+    syn HashSet InstModification.lookupInstClassRedirect(String name) = lookupInstClass(name);
 
 	eq InstNode.getInstClassDecl().lookupInstClass(String name)                  = genericLookupInstClass(name); 
 	eq InstNode.getRedeclaredInstClassDecl().lookupInstClass(String name)        = genericLookupInstClass(name); 
 	eq InstNode.getInstComponentDecl().lookupInstClass(String name)              = genericLookupInstClass(name); 
 	eq InstNode.getFAbstractEquation().lookupInstClass(String name)              = genericLookupInstClass(name); 
 	eq InstNode.getInstExtends().lookupInstClass(String name)                    = superLookupInstClass(name);
-    eq InstNode.getDynamicClassName().lookupInstClass(String name)               = genericLookupInstClass(name);
 
 	eq InstComponentDecl.getInstExtends().lookupInstClass(String name)           = superLookupInstClassInComponent(name);
     eq InstArrayComponentDecl.getInstExtends().lookupInstClass(String name)      = instComponentDecl().superLookupInstClassInComponent(name);
@@ -43,7 +49,6 @@ aspect InstLookupClasses {
 	eq InstExtends.getInstClassDecl().lookupInstClass(String name)               = genericLookupInstClassInExtends(name);	
 	eq InstExtends.getInstComponentDecl().lookupInstClass(String name)           = genericLookupInstClassInExtends(name);	
 	eq InstExtends.getInstExtends().lookupInstClass(String name)                 = superLookupInstClassInExtends(name);	
-    eq InstExtends.getDynamicClassName().lookupInstClass(String name)            = genericLookupInstClassInExtends(name);
 	eq InstExtends.getFAbstractEquation().lookupInstClass(String name)           = genericLookupInstClassInExtends(name); 
 	eq InstNormalExtends.getInstClassModification().lookupInstClass(String name) = lookupInstClassFromMod(name);
 
@@ -71,12 +76,14 @@ aspect InstLookupClasses {
 	
 	eq InstReplacingComposite.getOriginalInstComponent().lookupInstClass(String name) = lookupInstClass(name);
 	eq InstReplacingPrimitive.getOriginalInstComponent().lookupInstClass(String name) = lookupInstClass(name);
- 	eq InstReplacingComposite.getDynamicClassName().lookupInstClass(String name) = lookupInstClass(name);
- 	eq InstReplacingPrimitive.getDynamicClassName().lookupInstClass(String name) = lookupInstClass(name);
   
 	eq InstReplacingComposite.getClassName().lookupInstClass(String name) = getInstComponentRedeclare().lookupInstClass(name);
 	eq InstReplacingPrimitive.getClassName().lookupInstClass(String name) = getInstComponentRedeclare().lookupInstClass(name);
 	
+	eq InstCreateComponentDecl.getChild().lookupInstClass(String name)     = getLookupNode().lookupInstClassRedirect(name);
+	eq InstCreateForIndexPrimitive.getChild().lookupInstClass(String name) = getLookupNode().lookupInstClassRedirect(name);
+	
+
 	eq InstConstrainingClass.getInstNode().lookupInstClass(String name) = getClassName().myInstClassDecl().lookupInstClass(name);
 
 	syn HashSet InstClassDecl.lookupInstClassInInstClassRedeclare(String name) = emptyHashSet();
@@ -702,6 +709,26 @@ aspect SimpleInstClassLookup {
 	    	return unknownInstClassDecl();
 	}
 
+	/**
+	 * Look up qualified class names in the instance class structure.
+	 * 
+	 * @param name A string containing a qualified name, for example 'A.B.C'.
+	 */
+	public InstClassDecl InstNode.lookupInstClassQualified(String name) {
+		return lookupInstClassQualified(name, true);
+	}
+
+	private InstClassDecl InstNode.lookupInstClassQualified(String name, boolean first) {
+		String[] parts = name.split("\\.", 2);
+		HashSet set = first ? lookupInstClass(parts[0]) : memberInstClass(parts[0]);
+		if (set.isEmpty())
+			return unknownInstClassDecl();
+		InstClassDecl icd = (InstClassDecl) set.iterator().next();
+		if (parts.length > 1)
+			return icd.lookupInstClassQualified(name);
+		else
+			return icd;
+	}
 	
 }
 

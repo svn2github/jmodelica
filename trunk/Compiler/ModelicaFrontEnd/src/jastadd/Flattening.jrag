@@ -157,36 +157,41 @@ aspect Flattening {
 			fab.ensureReturn();
 			ffd.setFAlgorithmBlock(fab);
 			
-			AnnotationNode functionDer = annotation("derivative");
-			
-			if (!functionDer.exists() && ie != null) {
-				functionDer = ie.annotation("derivative");	
-			}
-			
-			if (functionDer.exists()) {
-				String functionDerName = functionDer.string();
-				List<FIdUse> noDerivatives = new List<FIdUse>();
-				for (AnnotationNode nd : functionDer) {
-					if (nd!=null && "noDerivative".equals(nd.name())) {
-						if (nd.string() != null) {
-							noDerivatives.add(new FIdUse(nd.string()));
-						}
-					}	
-				}				
-
-				InstAccess func_der = dynamicClassName(new InstClassAccess(functionDerName));
-				InstBaseClassDecl fd_decl = (InstBaseClassDecl)func_der.myInstClassDecl();
-				if (!fd_decl.isUnknown()) {
-					fd_decl.flattenThisFunction(fc);
-					ffd.setFDerivativeFunction(new FDerivativeFunction(new FIdUse(new FQName(fd_decl.qualifiedName())),1,noDerivatives));
-				}
-			}
+			FDerivativeFunction der = createFDerivativeFunction(fc, ie);
+			if (der != null)
+				ffd.setFDerivativeFunction(der);
 			
 			addLocalFunctionConstants(ffd, fc);
 			fc.addFFunctionDecl(ffd);
 			flattenUsedFuncsAndEnums(fc);
 			ffd.updateRecordArraySizes();
 		}
+	}
+	
+	private FDerivativeFunction InstBaseClassDecl.createFDerivativeFunction(FClass fc, InstExternal ie) {
+		AnnotationNode functionDer = annotation("derivative");
+		if (!functionDer.exists() && ie != null) 
+			functionDer = ie.annotation("derivative");
+		
+		if (functionDer.exists()) {
+			String functionDerName = functionDer.string();
+			List<FIdUse> noDerivatives = new List<FIdUse>();
+			for (AnnotationNode nd : functionDer) {
+				if (nd != null && "noDerivative".equals(nd.name())) {
+					if (nd.string() != null) {
+						noDerivatives.add(new FIdUse(nd.string()));
+					}
+				}	
+			}				
+			
+			InstClassDecl fd_decl = lookupInstClassQualified(functionDer.string());
+			if (!fd_decl.isUnknown()) {
+				fd_decl.flattenFunction(fc);
+				FIdUse use = new FIdUse(new FQName(fd_decl.qualifiedName()));
+				return new FDerivativeFunction(use, 1, noDerivatives);
+			}
+		}
+		return null;
 	}
 	
 	private void InstBaseClassDecl.addLocalFunctionConstants(FFunctionDecl ffd, FClass fc) {
@@ -2112,12 +2117,7 @@ aspect InstantiatedExpressions {
 	}
   
 	public InstForIndex ForIndex.instantiate() {
-		SourceRoot sr = (SourceRoot)root(); // We know we are in the source tree
-		// This maneuver is pretty ugly, but we need to find an InstClassDecl
-		// in the instance tree from the source tree...
-		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-		InstAccess name = ipr.dynamicClassName(getForIndexDecl().getClassName().newInstAccess());
-		InstPrimitive ip = (InstPrimitive) name.myInstClassDecl().newInstComponentDecl(getForIndexDecl());
+		InstPrimitive ip = new InstCreateForIndexPrimitive(getForIndexDecl());
 		Opt o = hasExp()? new Opt(getExp().instantiate()): new Opt();
 		return copyLocationTo(new InstForIndex(o, ip));
 	}

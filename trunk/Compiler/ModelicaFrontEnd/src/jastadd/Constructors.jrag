@@ -174,6 +174,31 @@ aspect Constructors {
 	}
 	
 	/**
+	 * Constructor with only nessecary args. 
+	 */
+	public InstCreateComponentDecl.InstCreateComponentDecl(ComponentDecl cd, InstLookupRedirectNode ln) {
+		this(cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt(), ln);
+	}
+	
+	/**
+	 * Constructor with only nessecary args. 
+	 */
+	public InstCreateForIndexPrimitive.InstCreateForIndexPrimitive(ComponentDecl cd) {
+		// This maneuver is pretty ugly, but we need to find an InstClassDecl
+		// in the instance tree from the source tree...
+		this(cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt(), 
+				((SourceRoot) cd.root()).getProgram().getInstProgramRoot());
+	}
+	
+	/**
+	 * Constructor with only nessecary args. 
+	 */
+	public InstCreateReplacingComponentDecl.InstCreateReplacingComponentDecl(
+			ComponentDecl cd, InstLookupRedirectNode ln, ComponentDecl ocd, InstComponentRedeclare icr) {
+		this(cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt(), ln, ocd, icr);
+	}
+	
+	/**
 	 * \brief Constructs an algorithm block that is not initial.
 	 */
 	public FAlgorithmBlock.FAlgorithmBlock(List<FStatement> stmts) {

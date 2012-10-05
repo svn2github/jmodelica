@@ -694,7 +694,9 @@ aspect MemoryUse {
 		private static boolean shouldCount(Object o) {
 			if (o instanceof ASTNode) {
 				ASTNode n = (ASTNode) o;
-				for (; n.parent != null; n = n.parent);
+				for (; n.parent != null; n = n.parent)
+					if (!n.recognizedByParent())
+						return true;
 				return !(n instanceof Root);
 			} else {
 				return true;
@@ -772,6 +774,13 @@ aspect MemoryUse {
 			return res;
 		}
 
+	}
+	
+	public boolean ASTNode.recognizedByParent() {
+		return parent != null && 
+				parent.children != null && 
+				childIndex >= 0 && childIndex < parent.children.length &&
+				parent.children[childIndex] == this;
 	}
 
 }
