@@ -321,7 +321,7 @@ aspect Arrays {
 	/**
 	 * Get the expanded FArraySubscripts of each part of the fully qualified version of this access.
 	 */
-	syn lazy ArrayList<FArraySubscripts> InstAccess.qualifiedAllFArraySubscripts() = 
+	syn ArrayList<FArraySubscripts> InstAccess.qualifiedAllFArraySubscripts() = 
 		concatenation(surroundingFArraySubscripts(), allFArraySubscripts());
 	eq InstGlobalAccess.qualifiedAllFArraySubscripts() = allFArraySubscripts();
 	
