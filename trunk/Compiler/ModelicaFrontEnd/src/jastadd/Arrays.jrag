@@ -914,7 +914,7 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes. 
 	 */
-	syn lazy Size InstAccess.size() = Size.SCALAR;
+	syn Size InstAccess.size() = Size.SCALAR;
 	eq InstArrayAccess.size() = hasFArraySubscripts()? 
 			getFArraySubscripts().accessSize(): 
 				myInstComponentDecl().size();
