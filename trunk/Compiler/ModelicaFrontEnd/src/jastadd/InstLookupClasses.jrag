@@ -18,11 +18,11 @@ import java.util.HashSet;
 
 aspect InstLookupClasses {
 
-	syn lazy HashSet InstAccess.lookupInstClass() circular [emptyHashSet()] = lookupInstClass(name());
-	eq InstDot.lookupInstClass()          = getLastInstAccess().lookupInstClass();
-	eq InstGlobalAccess.lookupInstClass() = getInstAccess().lookupInstClass();
+//	syn lazy HashSet InstAccess.lookupInstClass() circular [emptyHashSet()] = lookupInstClass(name());
+//	eq InstDot.lookupInstClass()          = getLastInstAccess().lookupInstClass();
+//	eq InstGlobalAccess.lookupInstClass() = getInstAccess().lookupInstClass();
 
-	inh HashSet InstAccess.lookupInstClass(String name) circular [emptyHashSet()];
+	inh HashSet InstAccess.lookupInstClass(String name);
 	inh HashSet InstNode.lookupInstClass(String name);
     inh HashSet InstModification.lookupInstClass(String name);
 
