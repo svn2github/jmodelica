@@ -2103,14 +2103,14 @@ aspect ShortClassUtil {
 
 aspect FlatExpressions {
     
-    inh lazy boolean FExp.inEquationSection();
+    inh boolean FExp.inEquationSection();
     eq FClass.getFEquationBlock().inEquationSection() = true;
     eq Root.getChild().inEquationSection() = false;
-    inh lazy boolean FExp.inInitialEquationSection();
+    inh boolean FExp.inInitialEquationSection();
     eq FClass.getFInitialEquation().inInitialEquationSection() = true;
     eq Root.getChild().inInitialEquationSection() = false;
 
-    inh lazy boolean FExp.inEquation();
+    inh boolean FExp.inEquation();
     eq FAbstractEquation.getChild().inEquation() = true;
     eq Root.getChild().inEquation() = false;
     
