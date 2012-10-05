@@ -1098,11 +1098,13 @@ aspect FlatAPI {
 	syn Set<FVariable> FExp.referencedParametersInFExp() =
 		parametersInSet(referencedFVariablesInFExp());
 	
-	syn lazy Set<FVariable> FExp.referencedFVariablesInFExp() {
+	syn Set<FVariable> FExp.referencedFVariablesInFExp() {
 		Set<FVariable> res = new LinkedHashSet<FVariable>();
 		findReferencedFVariablesInTree(res);
 		return res;
 	}
+	
+	syn lazy Set<FVariable> FFunctionCall.referencedFVariablesInFExp() = super.referencedFVariablesInFExp();
 	
 	public void ASTNode.findReferencedFVariablesInTree(Set<FVariable> set) {
 		for (ASTNode n : this)
