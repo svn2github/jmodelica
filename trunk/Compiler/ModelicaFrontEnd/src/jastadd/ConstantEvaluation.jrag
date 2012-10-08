@@ -2550,7 +2550,8 @@ aspect CircularExpressions {
 	 * Default implementation returns <code>true</code> if any direct FExp child 
 	 * is circular.
 	 */
-	syn lazy boolean FExp.isCircular() circular [true] {
+	syn boolean FExp.isCircular() = false;
+	syn lazy boolean FAbstractExp.isCircular() circular [true] {
 		for (FExp e : childFExps())
 			if (e.isCircular())
 				return true;
