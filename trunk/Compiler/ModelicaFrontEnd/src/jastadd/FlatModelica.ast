@@ -666,6 +666,21 @@ ScalarAsArray : Array;
 abstract FExp : BaseNode ::= /Array/;
 
 /**
+ * \brief Abstract base class for all flattened expressions.
+ */
+
+abstract FAbstractExp : FExp;
+/**
+ * \brief Abstract base class for all flattened scalar expressions.
+ */
+abstract FAbstractScalarExp : FAbstractExp;
+
+/**
+ * \brief Abstract base class for all flattened expressions that can be scalar and array.
+ */
+abstract FAbstractArrayExp : FAbstractExp;
+
+/**
  * \brief Unsupported expression.
  *
  * Used for reporting errors.
@@ -675,12 +690,12 @@ FUnsupportedExp : FExp;
 /**
  * \brief Base class for binary expressions.
  */
-abstract FBinExp : FExp ::= Left:FExp Right:FExp;
+abstract FBinExp : FAbstractArrayExp ::= Left:FExp Right:FExp;
 
 /**
  * \brief Base class for unary expressions.
  */
-abstract FUnaryExp : FExp ::= FExp;
+abstract FUnaryExp : FAbstractArrayExp ::= FExp;
 
 /**
  * \brief Base class for arithmetic binary expressions.
@@ -859,7 +874,7 @@ FEnumLitExp : FLitExp ::= <Enum> <Value> <Type:FEnumType>;
 /**
  * Expressions of the form "(exp) for i in (exp)" in instance and flat tree.
  */
-FIterExp : FExp ::= FExp ForIndex:CommonForIndex*;
+FIterExp : FAbstractScalarExp ::= FExp ForIndex:CommonForIndex*;
 
 /**
  * \brief Common subclass for for indices in instance and flat trees.
@@ -874,7 +889,7 @@ FForIndex : CommonForIndex ::= FVariable;
 /**
  * \brief If expression.
  */
-FIfExp : FExp ::= IfExp:FExp ThenExp:FExp ElseExp:FExp;
+FIfExp : FAbstractArrayExp ::= IfExp:FExp ThenExp:FExp ElseExp:FExp;
 
 /**
  * \brief Declaration of a qualified name. 
@@ -889,7 +904,7 @@ FIdUse : BaseNode ::= FQName /ExpandedSubscripts:FArraySubscripts/;
 /**
  * \brief A qualifed identifier in an expression.
  */
-FIdUseExp : FExp ::= FIdUse;
+FIdUseExp : FAbstractArrayExp ::= FIdUse;
 
 /**
  * \brief The built-in function der in the instance tree.
@@ -932,7 +947,7 @@ FIdUseInstAccess : FIdUse ::= InstAccess;
  *
  * Instantiated expressions occurs in the instance tree.
  */
-FInstAccessExp : FExp ::= InstAccess;
+FInstAccessExp : FAbstractArrayExp ::= InstAccess;
 
 /**
  * \brief Record constructor.
@@ -942,7 +957,7 @@ FRecordConstructor : FBuiltInFunctionCall ::= Record:FIdUse Arg:FExp* /Type:FTyp
 /**
  * \brief Array constructor expression.
  */
-FArray : FExp ::= FExp*;
+FArray : FAbstractArrayExp ::= FExp*;
 
 /**
  * \brief Long form of array constructor expression.
@@ -979,41 +994,41 @@ FMatrixRow : FAbstractCat;
 /**
  * \brief Generated expression that applies array subscripts to any expression.
  */
-FSubscriptedExp : FExp ::= FExp FArraySubscripts;
+FSubscriptedExp : FAbstractArrayExp ::= FExp FArraySubscripts;
 
 /**
  * \brief Internal expression that describes an unknown size (for a single dimension).
  * 
  * Only used in Size objects.
  */
-FUnknownSizeExp : FExp ::= <Variable:CommonVariableDecl> <Dim:int>;
+FUnknownSizeExp : FAbstractArrayExp ::= <Variable:CommonVariableDecl> <Dim:int>;
 
 /**
  * \brief Dummy node.
  */
-FNoExp : FExp;
+FNoExp : FAbstractScalarExp;
 
 /**
  * \brief Range expression.
  */
-FRangeExp : FExp ::= FExp*;
+FRangeExp : FAbstractArrayExp ::= FExp*;
 
 /**
  * \brief Built-in variable time.
  */
-FTimeExp : FExp;
+FTimeExp : FAbstractScalarExp;
 
 /**
  * \brief Built-in expression 'end', used in arrays.
  */
-FEndExp : FExp;
+FEndExp : FAbstractScalarExp;
 
 
 // Functions and function-like operators
 /**
  * \brief Base class for all function calls and function call-like operators.
  */
-abstract FAbstractFunctionCall : FExp;
+abstract FAbstractFunctionCall : FAbstractArrayExp;
  
 /**
  * \brief Generic function call expression.

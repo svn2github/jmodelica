@@ -276,7 +276,8 @@ aspect FlatVariability {
 	eq FClass.getChild().inDiscreteLocation()                    = false;
 	eq InstNode.getChild().inDiscreteLocation()                  = false;
 	
-	syn lazy FTypePrefixVariability FExp.variability() = 
+	syn FTypePrefixVariability FExp.variability() = expVariability();
+	syn lazy FTypePrefixVariability FAbstractExp.variability() = 
 		inDiscreteLocation() ? expVariability().combineDown(fDiscrete()) : expVariability();
 	
 	syn FTypePrefixVariability FExp.expVariability() = combineFExpListVariability(childFExps());
