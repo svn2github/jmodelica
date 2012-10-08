@@ -93,7 +93,6 @@ aspect InstNameClassification {
 	eq InstFunctionCall.getName().kind()          = Kind.CLASS_ACCESS;
 	
 	eq InstConstraining.getClassName().kind()                 = Kind.CLASS_ACCESS;
-	eq InstNode.getDynamicComponentName().kind()              = Kind.COMPONENT_ACCESS;
 	eq InstComponentDecl.getConditionalAttribute().kind()     = Kind.AMBIGUOUS_ACCESS;
 	eq InstBaseClassDecl.getFAbstractEquation().kind()        = Kind.AMBIGUOUS_ACCESS;	
 
@@ -116,6 +115,7 @@ aspect InstNameClassification {
 	syn boolean InstModification.isValue() = false;
 	eq InstValueModification.isValue()     = true;
 }
+
 aspect InstResolveAmbiguousNames {
 	/**
 	 * This rewrite determines whether an InstAmbiguousAccess is a InstTypeAcces or a

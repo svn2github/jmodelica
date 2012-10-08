@@ -20,9 +20,10 @@ abstract InstNode : BaseNode ::= /InstComponentDecl*/
                                  /InstImport*/ 
                                  /RedeclaredInstClassDecl:InstClassDecl*/
                                  /FAbstractEquation*/ 
-                                 /FQName/ 
-                                 /DynamicComponentName:InstAccess*/ 
-                                 /DynamicFExp:FExp*/;
+                                 /FQName/;
+
+DynamicOpt : Opt;
+
 abstract InstRoot : InstNode;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
 //InstFullClassDeclRoot :InstRoot ::= InstFullClassDecl;

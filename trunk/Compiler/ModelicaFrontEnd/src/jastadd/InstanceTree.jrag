@@ -443,8 +443,7 @@ aspect Environments {
 		Modification mod = org.getModification();
 		for (int i = 0; i < inputs.size(); i++) {
 			String name = inputs.get(i).name();
-			InstModification im = new InstRecordModification(mod, name, getArg(i));
-			list.add((InstRecordModification) org.dynamicInstMod(im));
+			list.add(new InstRecordModification(mod, name, getArg(i)));
 		}
 	}
 	
@@ -474,8 +473,7 @@ aspect Environments {
 			for (FRecordComponentType comp : ((FRecordType) var.type()).getComponents()) {
 				String name = comp.getName();
 				FExp val = exp.dynamicFExp(new FInstAccessExp(copyAndAppend(name)));
-				InstModification im = new InstRecordModification(mod, name, val);
-				list.add((InstRecordModification) org.dynamicInstMod(im));
+				list.add(new InstRecordModification(mod, name, val));
 			}
 		}
 	}
@@ -570,26 +568,10 @@ aspect Environments {
 
 aspect InstanceTreeConstruction {
 	
-	syn lazy List InstNode.getDynamicComponentNameList() = new List();
-	syn lazy List InstNode.getDynamicFExpList() = new List();
-	syn nta List FExp.getDynamicFExpList() = new List();
-	syn lazy List FAbstractEquation.getDynamicFAbstractEquationList() = new List();	
+	syn nta Opt InstNode.getDynamicFExpOpt() = new DynamicOpt();
+	syn nta Opt FExp.getDynamicFExpOpt()     = new DynamicOpt();
+	syn lazy Opt FAbstractEquation.getDynamicFAbstractEquationOpt() = new DynamicOpt();	
 	syn lazy List InstValueModification.getDynamicInstModList() = new List();
-	
-	syn int        FExp.getNumDynamicFExp()   = getDynamicFExpList().getNumChild();
-	syn FExp       FExp.getDynamicFExp(int i) = (FExp) getDynamicFExpList().getChild(i);
-	syn List<FExp> FExp.getDynamicFExps()     = (List<FExp>) getDynamicFExpList();
-	
-
-	/**
-	 * \brief Dynamically places a component name in the tree under this InstNode.
-	 * 
-	 * @returns  the final version of the dynamically placed node.
-	 */
-	public InstAccess InstNode.dynamicComponentName(InstAccess name) {
-		getDynamicComponentNameList().add(name);
-		return getDynamicComponentName(getNumDynamicComponentName() - 1);
-	}
 	
 	
 	/**
@@ -598,8 +580,8 @@ aspect InstanceTreeConstruction {
 	 * @returns  the final version of the dynamically placed node.
 	 */
 	public FExp InstNode.dynamicFExp(FExp exp) {
-		getDynamicFExpList().add(exp);
-		return getDynamicFExp(getNumDynamicFExp() - 1);
+		getDynamicFExpOpt().setChild(exp, 0);
+		return (FExp) getDynamicFExpOpt().getChild(0);
 	}
 	
 	
@@ -619,15 +601,8 @@ aspect InstanceTreeConstruction {
 			if (i >= 0)
 				return (FExp) exp.parent.getChild(i);
 		}
-		// Fool JastAdd into keeping the list
-//		boolean finalFlag = is$Final();
-//		if (!finalFlag)
-//			log.debug("FExp.dynamicFExp(): adding '%s' to dynamic list of non-final exp '%s'.",	exp, this);
-//		is$Final(true);
-		getDynamicFExpList().add(exp);
-		exp = getDynamicFExp(getNumDynamicFExp() - 1);
-//		is$Final(finalFlag);
-		return exp;
+		getDynamicFExpOpt().setChild(exp, 0);
+		return (FExp) getDynamicFExpOpt().getChild(0);
 	}
 
 	/**
@@ -638,8 +613,8 @@ aspect InstanceTreeConstruction {
 	public FAbstractEquation FAbstractEquation.dynamicFAbstractEquation(FAbstractEquation eqn) {
 		if (eqn == this)
 			return eqn;
-		getDynamicFAbstractEquationList().add(eqn);
-		return getDynamicFAbstractEquation(getNumDynamicFAbstractEquation() - 1);
+		getDynamicFAbstractEquationOpt().setChild(eqn, 0);
+		return (FAbstractEquation) getDynamicFAbstractEquationOpt().getChild(0);
 	}
 		
 	/**
@@ -648,6 +623,7 @@ aspect InstanceTreeConstruction {
 	 * @returns  the final version of the dynamically placed node.
 	 */
 	public InstModification InstValueModification.dynamicInstMod(InstModification im) {
+		// TODO: only used for modifications on array components, should probably use an NTA specifically for that instead
 		getDynamicInstModList().add(im);
 		return getDynamicInstMod(getNumDynamicInstMod() - 1);
 	}

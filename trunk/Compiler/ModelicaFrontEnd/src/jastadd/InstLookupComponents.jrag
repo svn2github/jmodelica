@@ -32,7 +32,6 @@ aspect InstLookupComponents {
 	eq InstComponentDecl.getLocalFArraySubscripts().lookupInstComponent(String name) = lookupInstComponent(name);
 
 	eq InstAssignable.getBindingFExp().lookupInstComponent(String name) = myInstValueMod().lookupInstComponent(name);
-	eq InstAssignable.getDynamicFExp().lookupInstComponent(String name) = lookupInstComponent(name);
 	
 	eq InstReplacingComposite.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstReplacingPrimitive.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);

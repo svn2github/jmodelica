@@ -5157,8 +5157,12 @@ aspect FunctionInlining {
 	 */
 	protected void ASTNode.replaceMe(ASTNode repl) {
 		ASTNode p = getParent();
-		if (p != null)
-			p.replaceChild(this, repl);
+		if (p != null) { 
+			if (p instanceof DynamicOpt)
+				p.setChild(repl, 0);
+			else
+				p.replaceChild(this, repl);
+		}
 	}
 	
 	/**

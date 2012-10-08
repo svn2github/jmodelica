@@ -445,7 +445,7 @@ FInitialEquation : FEquationType;
  */
 abstract FAbstractEquation : BaseNode ::= Type:FEquationType
                                           /InitialEquation:FEquation*/ 
-                                          /DynamicFAbstractEquation:FAbstractEquation*/
+                                          /[DynamicFAbstractEquation:FAbstractEquation]/
                                           [Residues:FResidues]; 
 
 /**
