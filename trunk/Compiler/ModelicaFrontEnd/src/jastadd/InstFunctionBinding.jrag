@@ -425,11 +425,13 @@ aspect InstFunctionBinding {
 	    	String name = target.qualifiedName();
 		    if (target.isPrimitive()) {
 		    	// Look for conversion operator with same name as primitive class (if one exists)
-				HashSet set = getName().lookupInstClass("!" + target.name());
-				if (set.size() > 0)
-					target = (InstClassDecl) set.iterator().next();
+				InstClassDecl icd = getName().lookupInstClass("!" + target.name());
+				if (icd != null)
+					target = icd;
 		    } if (target.isExternalObject()) {
-		    	target = target.myConstructor();
+		    	InstClassDecl icd = target.myConstructor();
+				if (icd != null)
+					target = icd;
 		    	externalObject = true;
 		    }
     		ArrayList<InstComponentDecl> inputs = myInputs(target);
@@ -604,23 +606,22 @@ aspect InstFunctionBinding {
 	}
 	
 	/**
-	 * \brief Extract constructor/destructor function for external object class.
+	 * Extract constructor function for external object class.
 	 */
-	syn InstClassDecl InstClassDecl.myConstructor() {
-		HashSet<InstClassDecl> hs = memberInstClass("constructor");
-		if (hs.size() > 0)
-			return hs.iterator().next();
-		return null;
-	}
+	syn InstClassDecl InstClassDecl.myConstructor() = memberInstClass("constructor");
 	
+	/**
+	 * Extract constructor function for external object class.
+	 */
 	syn InstClassDecl InstExternalObject.myConstructor() = myInstClass().myConstructor();
 	
-	syn InstClassDecl InstClassDecl.myDestructor() {
-		HashSet<InstClassDecl> hs = memberInstClass("destructor");
-		if (hs.size() > 0)
-			return hs.iterator().next();
-		return null;
-	}
-	
+	/**
+	 * Extract destructor function for external object class.
+	 */
+	syn InstClassDecl InstClassDecl.myDestructor() = memberInstClass("destructor");
+		
+	/**
+	 * Extract destructor function for external object class.
+	 */
 	syn InstClassDecl InstExternalObject.myDestructor() = myInstClass().myDestructor();
 }

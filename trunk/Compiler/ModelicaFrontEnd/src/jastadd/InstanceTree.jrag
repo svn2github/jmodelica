@@ -630,7 +630,7 @@ aspect InstanceTreeConstruction {
 	
 	
 	public interface InstLookupRedirectNode {
-		HashSet lookupInstClassRedirect(String name);
+		InstClassDecl lookupInstClassRedirect(String name);
 	}
 	
 	public class InstNode implements InstLookupRedirectNode {}
@@ -786,7 +786,7 @@ aspect InstanceTreeConstruction {
 	}    
     
     public interface InstRedeclareClassNode {
-    	public HashSet lookupInstClass(String name);
+    	public InstClassDecl lookupInstClass(String name);
     	public ClassDecl redeclaringClassDecl();
     }
     public class InstClassDecl implements InstRedeclareClassNode {}

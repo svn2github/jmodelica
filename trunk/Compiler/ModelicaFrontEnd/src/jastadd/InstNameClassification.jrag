@@ -125,20 +125,16 @@ aspect InstResolveAmbiguousNames {
 	rewrite InstAmbiguousAccess {
 	    when (!rewritten) 
 	    to InstAccess {
-	    	//log.debug("rewrite InstAmbiguousAccess begin " + name());
 	  		if (!lookupInstComponent(name()).isEmpty()) {
-		    	//log.debug("rewrite InstAmbiguousAccess " + name() + " component");
      		    InstComponentAccess c = new InstComponentAccess(name(), getFArraySubscriptsOpt());
   	 			c.setLocation(this);
   	 			return c;
-  		    } else if (!lookupInstClass(name()).isEmpty()) {		
-    	    	//log.debug("rewrite InstAmbiguousAccess " + name() + " class");
+  		    } else if (lookupInstClass(name()) != null) {		
             	InstClassAccess t = new InstClassAccess(name()); 
     			t.setLocation(this);
   	 			return t;
   			}
   			rewritten = true;
-	    	//log.debug("rewrite InstAmbiguousAccess end " + name());
   			return this;
   		}
   	}

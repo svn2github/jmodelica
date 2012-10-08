@@ -14,24 +14,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import java.util.HashSet;
-
 aspect InstLookupClasses {
 
-//	syn lazy HashSet InstAccess.lookupInstClass() circular [emptyHashSet()] = lookupInstClass(name());
-//	eq InstDot.lookupInstClass()          = getLastInstAccess().lookupInstClass();
-//	eq InstGlobalAccess.lookupInstClass() = getInstAccess().lookupInstClass();
-
-	inh HashSet InstAccess.lookupInstClass(String name);
-	inh HashSet InstNode.lookupInstClass(String name);
-    inh HashSet InstModification.lookupInstClass(String name);
+	inh InstClassDecl InstAccess.lookupInstClass(String name);
+	inh InstClassDecl InstNode.lookupInstClass(String name);
+    inh InstClassDecl InstModification.lookupInstClass(String name);
     
-    syn HashSet InstNode.lookupInstClassRedirect(String name)         = genericLookupInstClass(name);
-    eq InstEnumClassDecl.lookupInstClassRedirect(String name)         = lookupInstBuiltInClass(name);
-    eq InstReplacingComposite.lookupInstClassRedirect(String name)    = lookupInstClass(name);
-    eq InstReplacingPrimitive.lookupInstClassRedirect(String name)    = lookupInstClass(name);
-    eq InstExtends.lookupInstClassRedirect(String name)               = genericLookupInstClassInExtends(name);
-    syn HashSet InstModification.lookupInstClassRedirect(String name) = lookupInstClass(name);
+    syn InstClassDecl InstNode.lookupInstClassRedirect(String name)         = genericLookupInstClass(name);
+    eq InstEnumClassDecl.lookupInstClassRedirect(String name)               = lookupInstBuiltInClass(name);
+    eq InstReplacingComposite.lookupInstClassRedirect(String name)          = lookupInstClass(name);
+    eq InstReplacingPrimitive.lookupInstClassRedirect(String name)          = lookupInstClass(name);
+    eq InstExtends.lookupInstClassRedirect(String name)                     = genericLookupInstClassInExtends(name);
+    syn InstClassDecl InstModification.lookupInstClassRedirect(String name) = lookupInstClass(name);
 
 	eq InstNode.getInstClassDecl().lookupInstClass(String name)                  = genericLookupInstClass(name); 
 	eq InstNode.getRedeclaredInstClassDecl().lookupInstClass(String name)        = genericLookupInstClass(name); 
@@ -52,7 +46,7 @@ aspect InstLookupClasses {
 	eq InstExtends.getFAbstractEquation().lookupInstClass(String name)           = genericLookupInstClassInExtends(name); 
 	eq InstNormalExtends.getInstClassModification().lookupInstClass(String name) = lookupInstClassFromMod(name);
 
-	inh HashSet InstExtends.lookupInstClassFromMod(String name);
+	inh InstClassDecl InstExtends.lookupInstClassFromMod(String name);
 	eq InstNode.getInstExtends().lookupInstClassFromMod(String name)          = genericLookupInstClass(name);
 	eq InstComponentDecl.getInstExtends().lookupInstClassFromMod(String name) = genericLookupInstClass(name);
 	eq InstExtends.getInstExtends().lookupInstClassFromMod(String name)       = genericLookupInstClassInExtends(name);
@@ -66,7 +60,7 @@ aspect InstLookupClasses {
 	eq InstExtendsShortClass.getClassName().lookupInstClass(String name)             = lookupInstClassInChain(name);
 	eq InstReplacingExtendsShortClass.getClassName().lookupInstClass(String name)    = lookupInstClassInChain(name);
 	eq InstShortClassDecl.getChild().lookupInstClass(String name)                    = lookupInstClass(name);
-	eq InstReplacingShortClassDecl.getChild().lookupInstClass(String name) = getInstClassRedeclare().lookupInstClass(name);
+	eq InstReplacingShortClassDecl.getChild().lookupInstClass(String name)           = getInstClassRedeclare().lookupInstClass(name);
 /* TODO: This makes RedeclareTests.RedeclareFunction3 fail. Shouldn't names be looked up *in* 
  *       redeclare, not *from* it? This should apply to the 3 other similar ones, but removing 
  *       them makes other tests fail. */
@@ -83,67 +77,67 @@ aspect InstLookupClasses {
 	eq InstCreateComponentDecl.getChild().lookupInstClass(String name)     = getLookupNode().lookupInstClassRedirect(name);
 	eq InstCreateForIndexPrimitive.getChild().lookupInstClass(String name) = getLookupNode().lookupInstClassRedirect(name);
 	
-
 	eq InstConstrainingClass.getInstNode().lookupInstClass(String name) = getClassName().myInstClassDecl().lookupInstClass(name);
 
-	syn HashSet InstClassDecl.lookupInstClassInInstClassRedeclare(String name) = emptyHashSet();
-	eq InstReplacingShortClassDecl.lookupInstClassInInstClassRedeclare(String name) = getInstClassRedeclare().lookupInstClass(name);
-	eq InstReplacingFullClassDecl.lookupInstClassInInstClassRedeclare(String name) = getInstClassRedeclare().lookupInstClass(name);
 
-	inh HashSet InstExtendsShortClass.lookupInstClassInChain(String name);
-	inh HashSet InstReplacingExtendsShortClass.lookupInstClassInChain(String name);
+	syn InstClassDecl InstClassDecl.lookupInstClassInInstClassRedeclare(String name) = null;
+	eq InstReplacingShortClassDecl.lookupInstClassInInstClassRedeclare(String name)  = getInstClassRedeclare().lookupInstClass(name);
+	eq InstReplacingFullClassDecl.lookupInstClassInInstClassRedeclare(String name)   = getInstClassRedeclare().lookupInstClass(name);
+
+	inh InstClassDecl InstExtendsShortClass.lookupInstClassInChain(String name);
+	inh InstClassDecl InstReplacingExtendsShortClass.lookupInstClassInChain(String name);
 	// Default to using normal lookup
 	// TODO: don't use JastAdd internal stuff (child)
 	eq InstNode.getChild().lookupInstClassInChain(String name) = ((InstNode) child).lookupInstClass(name);
-	eq InstExtendsShortClass.getInstExtends().lookupInstClassInChain(String name) = 
+	eq InstExtendsShortClass.getInstExtends().lookupInstClassInChain(String name)          = 
 		myInstClass().superLookupInstClassFromChain(name);
 	eq InstReplacingExtendsShortClass.getInstExtends().lookupInstClassInChain(String name) = 
 		myInstClass().superLookupInstClassFromChain(name);
 	
-	syn HashSet InstClassDecl.superLookupInstClassFromChain(String name)      = superLookupInstClass(name);
-	eq InstReplacingShortClassDecl.superLookupInstClassFromChain(String name) = getInstExtends(0).lookupInstClass(name);
+	syn InstClassDecl InstClassDecl.superLookupInstClassFromChain(String name) = superLookupInstClass(name);
+	eq InstReplacingShortClassDecl.superLookupInstClassFromChain(String name)  = getInstExtends(0).lookupInstClass(name);
 	
-	inh HashSet InstAccess.lookupInstClassFromTop(String name);
+	inh InstClassDecl InstAccess.lookupInstClassFromTop(String name);
 	eq InstRoot.getChild().lookupInstClassFromTop(String name) = genericLookupInstClass(name);
-	eq Root.getChild().lookupInstClassFromTop(String name)     = emptyHashSet();
+	eq Root.getChild().lookupInstClassFromTop(String name)     = null;
 
 	syn boolean InstClassDecl.isRedeclared() = false;
 	eq InstReplacingShortClassDecl.isRedeclared() = true;
 	eq InstReplacingFullClassDecl.isRedeclared() = true;
 
-	eq SourceRoot.getChild().lookupInstClass(String name) = emptyHashSet();
+	eq SourceRoot.getChild().lookupInstClass(String name) = null;
 	
 	// This equation is necessary since InstAccesses may be present in FExps.
-	eq FlatRoot.getChild().lookupInstClass(String name) = emptyHashSet();
+	eq FlatRoot.getChild().lookupInstClass(String name) = null;
 	
 	/**
 	 * Look up the class being redeclared & extended in a "redeclare class extends" declaration.
 	 */
-	inh HashSet InstNode.lookupRedeclareExtendsInstClass(String name);
-	eq InstNode.getChild().lookupRedeclareExtendsInstClass(String name)                    = emptyHashSet();
+	inh InstClassDecl InstNode.lookupRedeclareExtendsInstClass(String name);
+	eq InstNode.getChild().lookupRedeclareExtendsInstClass(String name)                    = null;
 	eq InstExtendClassDecl.getChild().lookupRedeclareExtendsInstClass(String name)         = lookupRedeclareExtendsInstClass(name);
 	eq InstReplacingFullClassDecl.getChild().lookupRedeclareExtendsInstClass(String name)  = lookupRedeclareExtendsInstClass(name);
 	eq InstReplacingShortClassDecl.getChild().lookupRedeclareExtendsInstClass(String name) = lookupRedeclareExtendsInstClass(name);
 	eq InstExtends.getInstClassDecl().lookupRedeclareExtendsInstClass(String name)         = lookupTopRedeclareExtendsInstClass(name);
 	eq InstNode.getRedeclaredInstClassDecl().lookupRedeclareExtendsInstClass(String name)  = lookupNextRedeclareExtendsInstClass(name);
 	eq InstInlineExtends.getInstExtends().lookupRedeclareExtendsInstClass(String name)     = 
-			myInstClass().lookupRedeclareExtendsInstClass(name);
+		myInstClass().lookupRedeclareExtendsInstClass(name);
 	eq InstExtendsShortClass.getInstExtends().lookupRedeclareExtendsInstClass(String name) = 
-			myInstClass().lookupRedeclareExtendsInstClass(name);
+		myInstClass().lookupRedeclareExtendsInstClass(name);
 	eq InstReplacingExtendsShortClass.getInstExtends().lookupRedeclareExtendsInstClass(String name) = 
-			myInstClass().lookupRedeclareExtendsInstClass(name);
+		myInstClass().lookupRedeclareExtendsInstClass(name);
 	eq InstComponentDecl.getChild().lookupRedeclareExtendsInstClass(String name)           = 
 		myInstClass().lookupRedeclareExtendsInstClassFromComponent(name);
 	
-	syn HashSet InstClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)      = lookupLastRedeclareExtendsInstClass(name);
-	eq InstReplacingFullClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)  = lookupRedeclareExtendsInstClass(name);
-	eq InstReplacingShortClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name) = lookupRedeclareExtendsInstClass(name);
+	syn InstClassDecl InstClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name) = lookupLastRedeclareExtendsInstClass(name);
+	eq InstReplacingFullClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)   = lookupRedeclareExtendsInstClass(name);
+	eq InstReplacingShortClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)  = lookupRedeclareExtendsInstClass(name);
 	
 	/**
 	 * Look up the class being redeclared & extended in the last step of a chain 
 	 * of "redeclare class extends" declarations.
 	 */
-	inh HashSet InstExtends.lookupTopRedeclareExtendsInstClass(String name);
+	inh InstClassDecl InstExtends.lookupTopRedeclareExtendsInstClass(String name);
 	eq InstExtends.getChild().lookupTopRedeclareExtendsInstClass(String name)    = lookupTopRedeclareExtendsInstClass(name);
 	eq InstNode.getInstExtends().lookupTopRedeclareExtendsInstClass(String name) = lookupLastRedeclareExtendsInstClass(name);
 	
@@ -152,13 +146,12 @@ aspect InstLookupClasses {
 	 * of "redeclare class extends" declarations, where it is known that the last 
 	 * redeclaring class is below this node.
 	 */
-	syn HashSet InstNode.lookupLastRedeclareExtendsInstClass(String name) {
+	syn InstClassDecl InstNode.lookupLastRedeclareExtendsInstClass(String name) {
 		// TODO: find better way of detecting if there is only one "redeclare class extends" in chain
-		HashSet first = lookupCurRedeclareExtendsInstClass(name);
-		if (!first.isEmpty()) {
-			InstNode in = (InstNode) first.iterator().next();
-			HashSet second = in.lookupRedeclareExtendsInstClass(name);
-			if (!second.isEmpty())
+		InstClassDecl first = lookupCurRedeclareExtendsInstClass(name);
+		if (first != null) {
+			InstClassDecl second = first.lookupRedeclareExtendsInstClass(name);
+			if (second != null)
 				first = second;
 		}
 		return first;
@@ -168,37 +161,26 @@ aspect InstLookupClasses {
 	 * Look up the next class being redeclared & extended in a chain of 
 	 * "redeclare class extends" declarations.
 	 */
-	syn HashSet InstNode.lookupNextRedeclareExtendsInstClass(String name) {
+	syn InstClassDecl InstNode.lookupNextRedeclareExtendsInstClass(String name) {
 		for (InstExtends ie : getInstExtendss()) {
-			HashSet res = ie.lookupCurRedeclareExtendsInstClass(name);
-			if (!res.isEmpty())
+			InstClassDecl res = ie.lookupCurRedeclareExtendsInstClass(name);
+			if (res != null)
 				return res;
 		}
-		for (InstClassDecl icd : getInstClassDecls()) {
-			if (icd.matches(name)) {
-				InstClassDecl oicd = icd.originalInstClass();
-				if (icd != null) {
-					HashSet res = new HashSet(4);
-					res.add(oicd);
-					return res;
-				}
-			}
-		}
-		return emptyHashSet();
+		for (InstClassDecl icd : getInstClassDecls()) 
+			if (icd.matches(name)) 
+				return icd.originalInstClass();
+		return null;
 	}
 	
 	/**
 	 * Look up the next class being redeclared & extended in a chain of 
 	 * "redeclare class extends" declarations, including among direct children.
 	 */
-	syn HashSet InstNode.lookupCurRedeclareExtendsInstClass(String name) {
-		for (InstClassDecl icd : getRedeclaredInstClassDecls()) {
-			if (icd.matches(name)) {
-				HashSet res = new HashSet(4);
-				res.add(icd);
-				return res;
-			}
-		}
+	syn InstClassDecl InstNode.lookupCurRedeclareExtendsInstClass(String name) {
+		for (InstClassDecl icd : getRedeclaredInstClassDecls()) 
+			if (icd.matches(name)) 
+				return icd;
 		return lookupNextRedeclareExtendsInstClass(name);
 	}
 	
@@ -208,54 +190,13 @@ aspect InstLookupClasses {
 	syn InstClassDecl InstClassDecl.originalInstClass() = null;
 	eq InstReplacingFullClassDecl.originalInstClass()   = getOriginalInstClass();
 	eq InstReplacingShortClassDecl.originalInstClass()  = getOriginalInstClass();
-	
-	syn lazy HashSet InstProgramRoot.lookupElementInstClass(String name) {
-		HashSet set = new HashSet(4);
-		for (InstClassDecl bcd : instClassDecls()) {
-			if (bcd.matchInstClassDecl(name))
-				set.add(bcd);	
-		}
-		
-		if (set.size()>0)
-			return set;
-		else
-			return emptyHashSet();
-	}
-	
-	syn lazy HashSet InstProgramRoot.lookupInstPredefinedType(String name) {
-		HashSet set = new HashSet(4);
-		for (InstClassDecl bcd : getInstPredefinedTypes()) {
-			if (bcd.matchInstClassDecl(name))
-				set.add(bcd);	
-		}
-
-		if (set.size()>0)
-			return set;
-		else
-			return emptyHashSet();
-	}
 
 
-	syn lazy HashSet InstProgramRoot.lookupInstBuiltInFunction(String name) {
-		HashSet set = new HashSet(4);
-		for (InstClassDecl bcd : getInstBuiltInFunctions()) {
-			if (bcd.matchInstClassDecl(name))
-				set.add(bcd);	
-		}		
-		
-		
-		if (set.size()>0)
-			return set;
-		else
-			return emptyHashSet();
-	}
-	
 	InstFullClassDecl LibNode.instFullClassDecl = null;
 	HashMap<String,LibNode> InstProgramRoot.libraryMap = 
 		new HashMap<String,LibNode>();
 	
-	syn lazy HashSet<InstFullClassDecl> InstProgramRoot.lookupLibrary(String name) {
-		HashSet<InstFullClassDecl> set = new HashSet<InstFullClassDecl>(4);
+	syn InstFullClassDecl InstProgramRoot.lookupLibrary(String name) {
 		Program prog = ((SourceRoot)root()).getProgram();
 		
 		LibNode ln = null;
@@ -277,7 +218,7 @@ aspect InstLookupClasses {
 		}
 
 		if (ln != null && ln.instFullClassDecl != null) { // Lib found and loaded
-			set.add(ln.instFullClassDecl);
+			return ln.instFullClassDecl;
 		} else if (ln != null) { // Lib found but not loaded
 			// Only need to consider one class according to spec.
 			if (ln.getStoredDefinition().getNumElement() > 0) {
@@ -291,183 +232,156 @@ aspect InstLookupClasses {
    			    		// Make sure is$Final is true;
    			    		getInstLibClassDecl(getNumInstLibClassDecl()-1);
    			    		ln.instFullClassDecl = (InstFullClassDecl)icd;
-   			    		set.add((InstFullClassDecl)icd);
+   			    		return (InstFullClassDecl) icd;
    			    	}
     	    	}
     	    }
 		}
-		if (set.size()>0)
-			return set;
-		else
-			return emptyHashSet();
+		return null;
 	}
 	
 	eq InstProgramRoot.getChild().lookupInstClass(String name) = genericLookupInstClass(name);
-	//eq SourceRoot.getLibNode().lookupInstClass(String name) = genericLookupClass(name);
 	
 
 	eq InstProgramRoot.getInstPredefinedType().lookupInstClass(String name) {
-		HashSet set = new HashSet(4);
-		for (InstClassDecl bcd : getInstPredefinedTypes()) {
+		for (InstClassDecl bcd : getInstPredefinedTypes()) 
 			if (bcd.matchInstClassDecl(name))
-				set.add(bcd);	
-		}		
+				return bcd;	
 
-		for (InstClassDecl bcd : getInstBuiltInTypes()) {
+		for (InstClassDecl bcd : getInstBuiltInTypes()) 
 			if (bcd.matchInstClassDecl(name))
-				set.add(bcd);	
-		}		
+				return bcd;	
 
-		if (set.size()>0)
-			return set;
-		else
-			return emptyHashSet();
+		return null;
 	}
 
 
-	syn lazy  HashSet InstProgramRoot.genericLookupInstClass(String name) {
-		HashSet set = new HashSet(4);
+	syn lazy InstClassDecl InstProgramRoot.genericLookupInstClass(String name) {
+		for (InstClassDecl bcd : instClassDecls()) 
+			if (bcd.matchInstClassDecl(name))
+				return bcd;	
 		
-		if (lookupElementInstClass(name).size()>0)
-			set.addAll(lookupElementInstClass(name));
-		
-		if (lookupInstPredefinedType(name).size()>0)
-			set.addAll(lookupInstPredefinedType(name));
-		
-		if (lookupInstBuiltInFunction(name).size()>0)
-			set.addAll(lookupInstBuiltInFunction(name));
+		for (InstClassDecl bcd : getInstPredefinedTypes()) 
+			if (bcd.matchInstClassDecl(name))
+				return bcd;	
+
+		for (InstClassDecl bcd : getInstBuiltInFunctions()) 
+			if (bcd.matchInstClassDecl(name))
+				return bcd;	
 
 		// TODO: propagate information about the class from where
 		// the lookup is requested, so that version information
-		// stored in annotations can be retreived. 
-		if (set.size()==0 /* Enable shadowing of libraries */&& 
-				lookupLibrary(name).size()>0)
-			set.addAll(lookupLibrary(name));
-
-		if (set.size()>0)
-			return set;
-		else
-			return emptyHashSet();
+		// stored in annotations can be retreived.
+		return lookupLibrary(name);
 	}
 	
 	eq InstDot.getInstAccess(int i).lookupInstClass(String name)            = 
-			(i == 0) ? lookupInstClass(name) : getInstAccessNoListTrans(i - 1).qualifiedLookupInstClass(name);
+		(i == 0) ? lookupInstClass(name) : getInstAccessNoListTrans(i - 1).qualifiedLookupInstClass(name);
 	eq InstGlobalAccess.getInstAccess().lookupInstClass(String name)        = lookupInstClassFromTop(name);
 	eq InstArrayAccess.getFArraySubscripts().lookupInstClass(String name)   = getTopInstAccess().lookupInstClass(name);
 	eq InstNamedAccess.getExpandedSubscripts().lookupInstClass(String name) = getTopInstAccess().lookupInstClass(name);
 	
-	syn HashSet InstAccess.qualifiedLookupInstClass(String name) = emptyHashSet();	
-	syn lazy HashSet InstClassAccess.qualifiedLookupInstClass(String name) circular [emptyHashSet()] = myInstClassDecl().memberInstClass(name);
+	syn InstClassDecl InstAccess.qualifiedLookupInstClass(String name) = null;	
+	syn lazy InstClassDecl InstClassAccess.qualifiedLookupInstClass(String name) circular [null] = myInstClassDecl().memberInstClass(name);
 	
-	syn HashSet InstNode.lookupInstClassInSurrounding(String name) = lookupInstClass(name);
-	eq InstReplacingFullClassDecl.lookupInstClassInSurrounding(String name) = 
+	syn InstClassDecl InstNode.lookupInstClassInSurrounding(String name)     = lookupInstClass(name);
+	eq InstReplacingFullClassDecl.lookupInstClassInSurrounding(String name)  = 
 		getInstClassRedeclare().lookupInstClass(name);
 	eq InstReplacingShortClassDecl.lookupInstClassInSurrounding(String name) = 
 		getInstClassRedeclare().lookupInstClass(name);
 
-	syn lazy HashSet InstNode.genericLookupInstClass(String name) circular [emptyHashSet()] {
-		HashSet set = new HashSet(4);
-		
-		for (InstClassDecl icd : instClassDecls()) {
-			if (icd.matchInstClassDecl(name)) {
-				set.add(icd);
-			}
-		}
+	syn lazy InstClassDecl InstNode.genericLookupInstClass(String name) circular [null] {
+		for (InstClassDecl icd : instClassDecls()) 
+			if (icd.matchInstClassDecl(name)) 
+				return icd;
 		
 		for (InstExtends ie : instExtends()) {
-			set.addAll(ie.memberInstClass(name));
+			InstClassDecl icd = ie.memberInstClass(name);
+			if (icd != null)
+				return icd;
 		}
 
 		for (InstImport ii : instImports()) {
-			set.addAll(ii.lookupInstClassInImport(name));		
+			InstClassDecl icd = ii.lookupInstClassInImport(name);
+			if (icd != null)
+				return icd;
 		}
 
-		if (set.size()>0)
-			return set;
-		else
-			return lookupInstClassInSurrounding(name);
+		return lookupInstClassInSurrounding(name);
 	}
 	
-	syn HashSet InstNode.superLookupInstClass(String name) circular [emptyHashSet()] {
+	syn InstClassDecl InstNode.superLookupInstClass(String name) circular [null] {
 		HashSet set = new HashSet();
 
 		for (InstImport ii : instImports()) {
-			set.addAll(ii.lookupInstClassInImport(name));		
+			InstClassDecl icd = ii.lookupInstClassInImport(name);
+			if (icd != null)
+				return icd;
 		}
 						
 		for (InstClassDecl icd : instClassDecls()) {
 			if (icd.matchInstClassDecl(name)) {
-				set.add(icd);
+				return icd;
 			}
 		}		
 	
-		if (set.size()>0)
-			return set;
-		else
-			return lookupInstClass(name);
+		return lookupInstClass(name);
 	}
 
-	syn lazy HashSet InstComponentDecl.genericLookupInstClass(String name) circular [emptyHashSet()] {
-		HashSet set = new HashSet(4);
-		set.addAll(memberInstClass(name));
+	syn lazy InstClassDecl InstComponentDecl.genericLookupInstClass(String name) circular [null] {
+		InstClassDecl icd = memberInstClass(name);
+		if (icd != null)
+			return icd;
 
-		for (InstImport ii : instImports()) 
-			set.addAll(ii.lookupInstClassInImport(name));		
+		for (InstImport ii : instImports()) {
+			icd = ii.lookupInstClassInImport(name);
+			if (icd != null)
+				return icd;
+		}
 
-		if (set.size()>0)
-			return set;
-		else
-			return myInstClass().genericLookupInstClass(name);
+		return myInstClass().genericLookupInstClass(name);
 	}
 	
-	syn HashSet InstComponentDecl.superLookupInstClassInComponent(String name) circular [emptyHashSet()] {
+	syn InstClassDecl InstComponentDecl.superLookupInstClassInComponent(String name) circular [null] {
 		// TODO: Why do we do this? Seems to be needed, as tests fail without it
 		if (myInstClass().isRedeclared())
 			return myInstClass().lookupInstClassInInstClassRedeclare(name);
 		
-		HashSet set = new HashSet();
-
-		for (InstImport ii : instImports()) 
-			set.addAll(ii.lookupInstClassInImport(name));		
+		for (InstImport ii : instImports()) {
+			InstClassDecl icd = ii.lookupInstClassInImport(name);
+			if (icd != null)
+				return icd;
+		}
 							
 		for (InstClassDecl icd : instClassDecls()) 
 			if (icd.matchInstClassDecl(name)) 
-					set.add(icd);
+				return icd;
 	
-		if (set.size()>0) //Found local class
-			return set;
-		else // else search for non-local class
-			return myInstClass().superLookupInstClass(name);
+		return myInstClass().superLookupInstClass(name);
 	}
 
 	
 	// TODO: rewrite so that classes are only looked up in constraining types.	
-	syn lazy HashSet InstExtends.genericLookupInstClassInExtends(String name) circular [emptyHashSet()] {
-		HashSet set = new HashSet(4);
-		
+	syn lazy InstClassDecl InstExtends.genericLookupInstClassInExtends(String name) circular [null] {
 		for (InstClassDecl icd : instClassDecls()) 
 			if (icd.matchInstClassDecl(name)) 
-				set.add(icd);
+				return icd;
 		
-		for (InstExtends ie : instExtends()) 
-			set.addAll(ie.memberInstClass(name));
+		for (InstExtends ie : instExtends()) {
+			InstClassDecl icd = ie.memberInstClass(name);
+			if (icd != null)
+				return icd;
+		}
 	
-		if (set.size()>0) // Did not find any local class
-			return set;
-		else // continue search at myInstClass()
-			return myInstClass().genericLookupInstClass(name);
+		return myInstClass().genericLookupInstClass(name);
 	}
 	
-	syn HashSet InstExtends.superLookupInstClassInExtends(String name) circular [emptyHashSet()] {
-		HashSet set = new HashSet();
+	syn InstClassDecl InstExtends.superLookupInstClassInExtends(String name) circular [null] {
 		for (InstClassDecl icd : instClassDecls()) 
 			if (icd.matchInstClassDecl(name)) 
-					set.add(icd);
+				return icd;
 
-		if (set.size()>0) //Found local class
-			return set;
-		else // else search for non-local class
-			return myInstClass().superLookupInstClass(name);
+		return myInstClass().superLookupInstClass(name);
 	}
 
 	/**
@@ -476,52 +390,49 @@ aspect InstLookupClasses {
 	syn boolean InstNode.constrainMemberInstClass(String name) {
 		if (!hasInstConstraining())
 			return true;
-		return getInstConstraining().getInstNode().memberInstClass(name).size() > 0;
+		return getInstConstraining().getInstNode().memberInstClass(name) != null;
 	}
 	
-	syn HashSet InstNode.memberInstClass(String name) circular [emptyHashSet()] = emptyHashSet();
+	syn InstClassDecl InstNode.memberInstClass(String name) circular [null] = null;
 	
 	eq InstFullClassDecl.memberInstClass(String name) {
-		HashSet set = new HashSet();
-		
-		for (InstClassDecl icd : instClassDecls()) { 
-			if (icd.matchInstClassDecl(name)) {
-				if (icd.inOrIsOuter()) {
-					set.add(icd.myInnerInstClassDecl());
-				} else {
-					set.add(icd);
-				}
-			}
-		}
-		
-		for (InstExtends ie : instExtends()) 
-			set.addAll(ie.memberInstClass(name));
-		
-		if (set.size() > 0 && constrainMemberInstClass(name)) 
-			return set;
-		return emptyHashSet();
-	}
-	
-	eq InstShortClassDecl.memberInstClass(String name){
-		HashSet set = getInstExtends(0).memberInstClass(name);		
-		if (set.size() > 0 && constrainMemberInstClass(name)) 
-			return set;
-		return emptyHashSet();
-	}
-	
-	eq InstExtends.memberInstClass(String name) {
-		HashSet set = new HashSet();
+		if (!constrainMemberInstClass(name))
+			return null;
 		
 		for (InstClassDecl icd : instClassDecls()) 
 			if (icd.matchInstClassDecl(name)) 
-				set.add(icd);
+				return icd.inOrIsOuter() ? icd.myInnerInstClassDecl() : icd;
 		
-		for (InstExtends ie : instExtends()) 
-			set.addAll(ie.memberInstClass(name));
+		for (InstExtends ie : instExtends()) {
+			InstClassDecl icd = ie.memberInstClass(name);
+			if (icd != null)
+				return icd;
+		}
 		
-		if (set.size() > 0 && constrainMemberInstClass(name)) 
-			return set;
-		return emptyHashSet();
+		return null;
+	}
+	
+	eq InstShortClassDecl.memberInstClass(String name){
+		if (!constrainMemberInstClass(name))
+			return null;
+		return getInstExtends(0).memberInstClass(name);		
+	}
+	
+	eq InstExtends.memberInstClass(String name) {
+		if (!constrainMemberInstClass(name))
+			return null;
+		
+		for (InstClassDecl icd : instClassDecls()) 
+			if (icd.matchInstClassDecl(name)) 
+				return icd;
+		
+		for (InstExtends ie : instExtends()) {
+			InstClassDecl icd = ie.memberInstClass(name);
+			if (icd != null)
+				return icd;
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -541,23 +452,20 @@ aspect InstLookupClasses {
 		if (isArray()) {
 			return arrayCellInstComponent(ndims()).memberInstClass(name);
 		} else {
-			HashSet set = new HashSet();
+			if (!constrainMemberInstClass(name))
+				return null;
 			
-			for (InstClassDecl icd : instClassDecls()) {
-				if (icd.matchInstClassDecl(name)) {
-					if (icd.inOrIsOuter()) {
-						set.add(icd.myInnerInstClassDecl());
-					} else {
-						set.add(icd);
-					}
-				}
+			for (InstClassDecl icd : instClassDecls()) 
+				if (icd.matchInstClassDecl(name)) 
+					return icd.inOrIsOuter() ? icd.myInnerInstClassDecl() : icd;
+
+			for (InstExtends ie : instExtends()) {
+				InstClassDecl icd = ie.memberInstClass(name);
+				if (icd != null)
+					return icd;
 			}
-			for (InstExtends ie : instExtends()) 
-				set.addAll(ie.memberInstClass(name));
 			
-			if (set.size() > 0 && constrainMemberInstClass(name)) 
-				return set;
-			return emptyHashSet();
+			return null;
 		}
 	}
 	
@@ -574,12 +482,8 @@ aspect InstLookupClasses {
 		 return unknownInstClassDecl();
 	}
 	syn lazy InstClassDecl InstClassAccess.myInstClassDecl() circular [unknownInstClassDecl()] {
-		HashSet set = lookupInstClass(name());
-		if (set.size() > 0) {
-			return (InstClassDecl) set.iterator().next();
-		} else {
-			return unknownInstClassDecl();
-		}
+		InstClassDecl icd = lookupInstClass(name());
+		return (icd == null) ? unknownInstClassDecl() : icd;
 	}
 	eq InstDot.myInstClassDecl()          = getLastInstAccess().myInstClassDecl();
 	eq InstGlobalAccess.myInstClassDecl() = getInstAccess().myInstClassDecl();
@@ -597,21 +501,12 @@ aspect InstLookupClasses {
 		InstNode icd = this;
 		boolean first = true;
 		for (String part : parts) {
-			HashSet set = first ? icd.lookupInstClass(part) : icd.memberInstClass(part);
-			if (set.size() > 0)
-				icd = (InstNode) set.iterator().next();
-			else
+			icd = first ? icd.lookupInstClass(part) : icd.memberInstClass(part);
+			if (icd == null)
 				return unknownInstClassDecl();
 			first = false;
 		}
 		return (InstClassDecl) icd;
-	}
-	
-	public InstClassDecl BaseNode.classFromSet(HashSet set) {
-		if (set.size() > 0) {
-			return (InstClassDecl)set.iterator().next();
-		} else
-			return unknownInstClassDecl();
 	}
 
 }
@@ -625,16 +520,13 @@ aspect InstLookupImport {
     		simpleLookupInstClassDecl(getPackageNameNoTransform().name());
 	}
 
-	syn HashSet InstImport.lookupInstClassInImport(String name) circular [emptyHashSet()] {
+	syn InstClassDecl InstImport.lookupInstClassInImport(String name) circular [null] {
 	    if (name.equals(name())) {	
 	    	InstClassDecl icd = getImportedClass();
-	    	if (!icd.isUnknown()) {
-	    		HashSet set = new HashSet(4);
-	    		set.add(icd);
-	    		return set;
-	    	} 
+	    	if (!icd.isUnknown()) 
+	    		return icd;
 		}
-		return emptyHashSet();
+		return null;
 	}
 	
 	eq InstImportUnqualified.lookupInstClassInImport(String name)  {
@@ -658,8 +550,8 @@ aspect InstLookupClassesInModifications {
 	eq InstElementModification.getName().lookupInstClass(String name) = lookupInstClassInInstClass(name);
 	eq InstClassRedeclare.getName().lookupInstClass(String name) = lookupInstClassInInstClass(name);
 
-	inh HashSet InstElementModification.lookupInstClassInInstClass(String name);	
-	inh HashSet InstClassRedeclare.lookupInstClassInInstClass(String name);
+	inh InstClassDecl InstElementModification.lookupInstClassInInstClass(String name);	
+	inh InstClassDecl InstClassRedeclare.lookupInstClassInInstClass(String name);
 
 	eq InstArrayComponentDecl.getInstModification().lookupInstClassInInstClass(String name)  = instComponentDecl().memberInstClass(name);		
 	eq InstComponentDecl.getInstModification().lookupInstClassInInstClass(String name)       = memberInstClass(name);		
@@ -670,8 +562,8 @@ aspect InstLookupClassesInModifications {
 	/**
 	 * Terminating equation for attribute lookupInstClassInInstClass.
 	 */
-	eq InstRoot.getChild().lookupInstClassInInstClass(String name) = emptyHashSet();
-	eq FlatRoot.getChild().lookupInstClassInInstClass(String name) = emptyHashSet();
+	eq InstRoot.getChild().lookupInstClassInInstClass(String name) = null;
+	eq FlatRoot.getChild().lookupInstClassInInstClass(String name) = null;
 	  
 }
 
@@ -702,7 +594,7 @@ aspect SimpleInstClassLookup {
 		String[] parts = name.split("\\.", 2);
 	    InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);
 	    if (icd == null) 
-	        icd = findMatching(lookupLibrary(parts[0]), parts[0]);
+	        icd = lookupLibrary(parts[0]);
 	    if (icd != null)
 	    	return icd = (parts.length == 1) ? icd : icd.simpleLookupInstClassDeclRecursive(parts[1]);
 	    else
@@ -720,10 +612,9 @@ aspect SimpleInstClassLookup {
 
 	private InstClassDecl InstNode.lookupInstClassQualified(String name, boolean first) {
 		String[] parts = name.split("\\.", 2);
-		HashSet set = first ? lookupInstClass(parts[0]) : memberInstClass(parts[0]);
-		if (set.isEmpty())
+		InstClassDecl icd = first ? lookupInstClass(parts[0]) : memberInstClass(parts[0]);
+		if (icd == null)
 			return unknownInstClassDecl();
-		InstClassDecl icd = (InstClassDecl) set.iterator().next();
 		if (parts.length > 1)
 			return icd.lookupInstClassQualified(name);
 		else
@@ -735,30 +626,26 @@ aspect SimpleInstClassLookup {
 
 aspect EnumLookup {
 	
-	inh HashSet InstEnumClassDecl.lookupInstBuiltInClass(String name);
+	inh InstClassDecl InstEnumClassDecl.lookupInstBuiltInClass(String name);
 	
 	eq InstEnumClassDecl.getChild().lookupInstClass(String name) = lookupInstBuiltInClass(name);
 
-	eq InstRoot.getChild().lookupInstBuiltInClass(String name) {return emptyHashSet();}
-	eq FlatRoot.getChild().lookupInstBuiltInClass(String name) {return emptyHashSet();}
+	eq InstRoot.getChild().lookupInstBuiltInClass(String name) = null;
+	eq FlatRoot.getChild().lookupInstBuiltInClass(String name) = null;
 	
 	eq InstProgramRoot.getChild().lookupInstBuiltInClass(String name) {
-		HashSet set = new HashSet(4);
 /*
 		for (InstClassDecl bcd : getInstPredefinedTypes()) {
 			if (bcd.matchInstClassDecl(name))
-				set.add(bcd);	
+				return bcd;	
 		}		
 */
 		for (InstClassDecl bcd : getInstBuiltInTypes()) {
 			if (bcd.matchInstClassDecl(name))
-				set.add(bcd);	
+				return bcd;	
 		}		
 
-		if (set.size()>0)
-			return set;
-		else
-			return emptyHashSet();
+		return null;
 	}
 
 	
