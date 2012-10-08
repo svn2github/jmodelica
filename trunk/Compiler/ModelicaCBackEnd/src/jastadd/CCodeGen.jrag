@@ -613,7 +613,11 @@ aspect CCodeGen {
 	}
 	
 	public void FType.printExternInit_C(Printer p, PrintStream str, String indent, String name, FExp src) {
-		printInit_C(p, str, indent, name, src, arrayExternMacroType_C());
+	    if (isArray() && size().isUnknown())
+	        printInit_C(p, str, indent, name, src, arrayExternMacroType_C());
+	    else
+	        printInit_C(p, str, indent, name, src);
+	    
 	}
 	
 	public void FType.printInit_C(Printer p, PrintStream str, String indent, String name, FExp src, String macroType_C) {

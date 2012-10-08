@@ -5975,7 +5975,7 @@ void func_CCodeGenTests_IntegerExternalArray1_f_def(jmi_array_t* a_a, jmi_ad_var
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t b_v;
     JMI_INT_ARRAY_STATIC(tmp_1, 2, 1)
-    JMI_INT_ARRAY_STATIC_INIT_1(tmp_1, 2)
+    JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
     b_v = f(tmp_1->var, jmi_array_size(a_a, 0));
     if (b_o != NULL) *b_o = b_v;
@@ -6019,7 +6019,7 @@ void func_CCodeGenTests_IntegerExternalArray2_f_def(jmi_array_t* a_a, jmi_ad_var
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t b_v;
     JMI_INT_ARRAY_STATIC(tmp_1, 4, 2)
-    JMI_INT_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
+    JMI_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
     b_v = f(tmp_1->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
     if (b_o != NULL) *b_o = b_v;
@@ -6066,7 +6066,7 @@ void func_CCodeGenTests_IntegerExternalArray3_f_def(jmi_ad_var_t a_v, jmi_array_
         JMI_ARRAY_STATIC_INIT_1(b_an, 2)
         b_a = b_an;
     }
-    JMI_INT_ARRAY_STATIC_INIT_1(tmp_1, 2)
+    JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
     jmi_copy_matrix_to_int(b_a, b_a->var, tmp_1->var);
     f(a_v, tmp_1->var, jmi_array_size(b_a, 0));
     jmi_copy_matrix_from_int(b_a, tmp_1->var, b_a->var);
@@ -6109,9 +6109,9 @@ void func_CCodeGenTests_IntegerExternalArray4_f_def(jmi_array_t* a_a, jmi_array_
         JMI_ARRAY_STATIC_INIT_2(b_an, 2, 2)
         b_a = b_an;
     }
-    JMI_INT_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
+    JMI_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
-    JMI_INT_ARRAY_STATIC_INIT_2(tmp_2, 2, 2)
+    JMI_ARRAY_STATIC_INIT_2(tmp_2, 2, 2)
     jmi_copy_matrix_to_int(b_a, b_a->var, tmp_2->var);
     f(tmp_1->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1), tmp_2->var, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1));
     jmi_copy_matrix_from_int(b_a, tmp_2->var, b_a->var);
@@ -7040,7 +7040,7 @@ void func_CCodeGenTests_IntegerExternalArrayFortran1_f_def(jmi_array_t* a_a, jmi
     jmi_ad_var_t b_v;
     JMI_INT_ARRAY_STATIC(tmp_1, 2, 1)
     extern jmi_ad_var_t f_(jmi_int_t*, jmi_int_t*);
-    JMI_INT_ARRAY_STATIC_INIT_1(tmp_1, 2)
+    JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
     jmi_matrix_to_fortran_int(a_a, a_a->var, tmp_1->var);
     b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0));
     if (b_o != NULL) *b_o = b_v;
@@ -7085,7 +7085,7 @@ void func_CCodeGenTests_IntegerExternalArrayFortran2_f_def(jmi_array_t* a_a, jmi
     jmi_ad_var_t b_v;
     JMI_INT_ARRAY_STATIC(tmp_1, 4, 2)
     extern jmi_ad_var_t f_(jmi_int_t*, jmi_int_t*, jmi_int_t*);
-    JMI_INT_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
+    JMI_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
     jmi_matrix_to_fortran_int(a_a, a_a->var, tmp_1->var);
     b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1));
     if (b_o != NULL) *b_o = b_v;
@@ -7133,7 +7133,7 @@ void func_CCodeGenTests_IntegerExternalArrayFortran3_f_def(jmi_ad_var_t a_v, jmi
         JMI_ARRAY_STATIC_INIT_1(b_an, 2)
         b_a = b_an;
     }
-    JMI_INT_ARRAY_STATIC_INIT_1(tmp_1, 2)
+    JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
     jmi_matrix_to_fortran_int(b_a, b_a->var, tmp_1->var);
     f_(&a_v, tmp_1->var, &jmi_array_size(b_a, 0));
     jmi_matrix_from_fortran_int(b_a, tmp_1->var, b_a->var);
@@ -7177,9 +7177,9 @@ void func_CCodeGenTests_IntegerExternalArrayFortran4_f_def(jmi_array_t* a_a, jmi
         JMI_ARRAY_STATIC_INIT_2(b_an, 2, 2)
         b_a = b_an;
     }
-    JMI_INT_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
+    JMI_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
     jmi_matrix_to_fortran_int(a_a, a_a->var, tmp_1->var);
-    JMI_INT_ARRAY_STATIC_INIT_2(tmp_2, 2, 2)
+    JMI_ARRAY_STATIC_INIT_2(tmp_2, 2, 2)
     jmi_matrix_to_fortran_int(b_a, b_a->var, tmp_2->var);
     f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
     jmi_matrix_from_fortran_int(b_a, tmp_2->var, b_a->var);
