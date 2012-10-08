@@ -3973,6 +3973,131 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternal4_f_exp(jmi_ad_var_t a_v, jmi_ad_
 ")})));
 end IntegerExternal4;
 
+model ExternalLiteral1
+	Real a_in = 1;
+    Real b_in = 2;
+    Real c_out;
+    function f
+        input Real a;
+        input Real b;
+        output Real c;
+        external my_f(a,b,10);
+    end f;
+    equation
+        c_out = f(a_in, b_in);
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="ExternalLiteral1",
+			description="",
+			template="
+$C_function_headers$
+$C_functions$
+",
+			generatedCode="
+void func_CCodeGenTests_ExternalLiteral1_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o);
+jmi_ad_var_t func_CCodeGenTests_ExternalLiteral1_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v);
+
+void func_CCodeGenTests_ExternalLiteral1_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t c_v;
+    my_f(a_v, b_v, 10);
+    if (c_o != NULL) *c_o = c_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_ExternalLiteral1_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
+    jmi_ad_var_t c_v;
+    func_CCodeGenTests_ExternalLiteral1_f_def(a_v, b_v, &c_v);
+    return c_v;
+}
+
+")})));
+end ExternalLiteral1;
+
+model ExternalLiteral2
+    Real a_in = 1;
+    Real b_in = 2;
+    Real c_out;
+    function f
+        input Real a;
+        input Real b;
+        output Real c;
+        external my_f(a,20,b,10);
+    end f;
+    equation
+        c_out = f(a_in, b_in);
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="ExternalLiteral2",
+			description="",
+			template="
+$C_function_headers$
+$C_functions$
+",
+			generatedCode="
+void func_CCodeGenTests_ExternalLiteral2_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o);
+jmi_ad_var_t func_CCodeGenTests_ExternalLiteral2_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v);
+
+void func_CCodeGenTests_ExternalLiteral2_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t c_v;
+    my_f(a_v, 20, b_v, 10);
+    if (c_o != NULL) *c_o = c_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_ExternalLiteral2_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
+    jmi_ad_var_t c_v;
+    func_CCodeGenTests_ExternalLiteral2_f_def(a_v, b_v, &c_v);
+    return c_v;
+}
+
+")})));
+end ExternalLiteral2;
+
+model ExternalLiteral3
+    Real c_out;
+    function f
+        output Real c;
+        external my_f(10,20,30);
+    end f;
+    equation
+        c_out = f();
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="ExternalLiteral3",
+			description="",
+			template="
+$C_function_headers$
+$C_functions$
+",
+			generatedCode="
+void func_CCodeGenTests_ExternalLiteral3_f_def(jmi_ad_var_t* c_o);
+jmi_ad_var_t func_CCodeGenTests_ExternalLiteral3_f_exp();
+
+void func_CCodeGenTests_ExternalLiteral3_f_def(jmi_ad_var_t* c_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t c_v;
+    my_f(10, 20, 30);
+    if (c_o != NULL) *c_o = c_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_ExternalLiteral3_f_exp() {
+    jmi_ad_var_t c_v;
+    func_CCodeGenTests_ExternalLiteral3_f_def(&c_v);
+    return c_v;
+}
+
+")})));
+end ExternalLiteral3;
+
 model IntegerInFunc1
 	function f
 		input Integer i;

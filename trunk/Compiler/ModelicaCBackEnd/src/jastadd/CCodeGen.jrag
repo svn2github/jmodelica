@@ -1298,7 +1298,7 @@ aspect CCodeGen {
 		String prefix = "";
 		for (FExp arg : stmt.getArgs()) {
 			str.print(prefix);
-			arg.genExternalCFuncCall(p, str, indent);
+			arg.genExternalCFuncArgs(p, str, indent);
 			prefix = ", ";
 		}
 		str.print(");\n");
@@ -1309,13 +1309,13 @@ aspect CCodeGen {
 		String prefix = "";
 		for (FExp arg : stmt.getArgs()) {
 			str.print(prefix);
-			arg.genExternalFortranFuncCall(p, str, indent);
+			arg.genExternalFortranFuncArgs(p, str, indent);
 			prefix = ", ";
 		}
 		str.print(");\n");		
 	}
 	
-	public void FExp.genExternalFortranFuncCall(Printer p, PrintStream str, String indent) {
+	public void FExp.genExternalFortranFuncArgs(Printer p, PrintStream str, String indent) {
 		if (!isArray()) {
 			str.print("&");
 		}
@@ -1328,13 +1328,11 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void FExp.genExternalCFuncCall(Printer p, PrintStream str, String indent) {}
-	
-	public void FSizeExp.genExternalCFuncCall(Printer p, PrintStream str, String indent) {
-		p.print(this, str, indent);
+	public void FExp.genExternalCFuncArgs(Printer p, PrintStream str, String indent) {
+        p.print(this, str, indent);
 	}
 	
-	public void FIdUseExp.genExternalCFuncCall(Printer p, PrintStream str, String indent) {
+	public void FIdUseExp.genExternalCFuncArgs(Printer p, PrintStream str, String indent) {
 		if (myFV() instanceof FFunctionVariable) {
 			FFunctionVariable ffv = (FFunctionVariable)myFV();
 			if (ffv.isOutput() && !isArray()) {
