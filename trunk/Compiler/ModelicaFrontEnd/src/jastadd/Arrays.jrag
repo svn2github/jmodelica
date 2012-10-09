@@ -634,7 +634,8 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes. 
 	 */
-	syn lazy Size FExp.size() = Size.SCALAR;
+	syn Size FExp.size() = Size.SCALAR;
+	syn lazy Size FAbstractArrayExp.size() = super.size();
 	eq FInstAccessExp.size() = getInstAccess().size();
 	
 	eq FBinExp.size() = getLeft().size();
