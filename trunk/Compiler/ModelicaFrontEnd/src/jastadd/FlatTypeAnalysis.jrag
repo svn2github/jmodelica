@@ -218,7 +218,9 @@ aspect FlatTypeAnalysis {
 	syn boolean FRelExp.isBooleanComparison() = getRight().type().numericPromotion(getLeft().type()).isBoolean();
 	syn boolean FRelExp.isStringComparison() = getRight().type().numericPromotion(getLeft().type()).isString();
 		
-	syn lazy FType FExp.type() = fUnknownType();
+	syn FType FExp.type() = fUnknownType();
+	
+	syn lazy FType FAbstractArrayExp.type() = super.type();
 	
 	eq FUnaryExp.type()   = getFExp().type();
 	eq FArtmBinExp.type() = getLeft().type().looseNumericPromotion(getRight().type());

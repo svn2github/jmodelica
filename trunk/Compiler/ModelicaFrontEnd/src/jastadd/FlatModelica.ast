@@ -874,7 +874,7 @@ FEnumLitExp : FLitExp ::= <Enum> <Value> <Type:FEnumType>;
 /**
  * Expressions of the form "(exp) for i in (exp)" in instance and flat tree.
  */
-FIterExp : FAbstractScalarExp ::= FExp ForIndex:CommonForIndex*;
+FIterExp : FAbstractArrayExp ::= FExp ForIndex:CommonForIndex*;
 
 /**
  * \brief Common subclass for for indices in instance and flat trees.
