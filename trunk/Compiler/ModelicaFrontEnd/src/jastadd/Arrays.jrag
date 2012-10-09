@@ -178,7 +178,8 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn lazy int FExp.ndims() = 0;
+	syn int FExp.ndims() = 0;
+	syn lazy int FAbstractArrayExp.ndims() = super.ndims();
 	eq FInstAccessExp.ndims() = getInstAccess().ndims();
 	eq FRangeExp.ndims() = 1;
 	eq FLinspace.ndims() = 1;
