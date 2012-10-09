@@ -1806,7 +1806,14 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn lazy Indices FExp.indices() = Indices.create(size());
+	syn Indices FExp.indices() = Indices.create(size());
+	
+	/**
+	 * \brief Get the set of all array indices of an array access. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */
+	syn lazy Indices FAbstractArrayExp.indices() = super.indices();
 	
 	/**
 	 * \brief Get the set of all array indices of an array access. 
@@ -3390,6 +3397,11 @@ aspect ArrayHelpers {
 		protected Size size;
 		
 		/**
+		 *  Used to represent the Indices of scalar expressions.
+		 */
+		public static final Indices SCALAR = new Indices(Size.SCALAR);
+		
+		/**
 		 * \brief A perfect hash for all Indices that have consecutive indicies, 
 		 *        ndims <= 3 and size[i] <= 1023 for 0 <= i < ndims. -1 for other 
 		 *        Indices.
@@ -3400,7 +3412,10 @@ aspect ArrayHelpers {
 		 * \brief Create an Indices object based on array sizes. 
 		 */
 		public static Indices create(Size size) {
-			return new Indices(size);
+			if (size == Size.SCALAR)
+				return SCALAR;
+			else
+				return new Indices(size);
 		}
 		
 		/**
