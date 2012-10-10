@@ -282,7 +282,7 @@ aspect InstLookupClasses {
 	eq InstNamedAccess.getExpandedSubscripts().lookupInstClass(String name) = getTopInstAccess().lookupInstClass(name);
 	
 	syn InstClassDecl InstAccess.qualifiedLookupInstClass(String name) = null;	
-	syn lazy InstClassDecl InstClassAccess.qualifiedLookupInstClass(String name) circular [null] = myInstClassDecl().memberInstClass(name);
+	eq InstClassAccess.qualifiedLookupInstClass(String name)           = myInstClassDecl().memberInstClass(name);
 	
 	syn InstClassDecl InstNode.lookupInstClassInSurrounding(String name)     = lookupInstClass(name);
 	eq InstReplacingFullClassDecl.lookupInstClassInSurrounding(String name)  = 
