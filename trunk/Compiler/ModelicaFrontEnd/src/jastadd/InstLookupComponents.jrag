@@ -267,10 +267,10 @@ aspect InstLookupComponents {
 	 */
 	syn boolean InstComponentDecl.matchInstComponentDecl(String name) = name().equals(name);
 	
-	syn lazy InstComponentDecl InstAccess.myInstComponentDecl() = unknownInstComponentDecl();
-	eq InstComponentAccess.myInstComponentDecl()                = componentFromSet(lookupInstComponent(name()));
-	eq InstDot.myInstComponentDecl()                            = getLastInstAccess().myInstComponentDecl();
-	eq InstGlobalAccess.myInstComponentDecl()                   = getInstAccess().myInstComponentDecl();
+	syn InstComponentDecl InstAccess.myInstComponentDecl()               = unknownInstComponentDecl();
+	eq InstDot.myInstComponentDecl()                                     = getLastInstAccess().myInstComponentDecl();
+	eq InstGlobalAccess.myInstComponentDecl()                            = getInstAccess().myInstComponentDecl();
+	syn lazy InstComponentDecl InstComponentAccess.myInstComponentDecl() = componentFromSet(lookupInstComponent(name()));
 	
 }
 
