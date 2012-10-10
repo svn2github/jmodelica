@@ -481,8 +481,8 @@ aspect Names {
   eq NamedAccess.qualifiedName()               = getID();
   eq PN_Dot.qualifiedName()                    = 
   	getLeft().qualifiedName() + "." + getRight().qualifiedName();
-  syn lazy String GlobalAccess.qualifiedName() = "." + getAccess().qualifiedName();
-  syn lazy String Dot.qualifiedName() {
+  eq GlobalAccess.qualifiedName() = "." + getAccess().qualifiedName();
+  eq Dot.qualifiedName() {
 	  StringBuilder buf = new StringBuilder();
 	  for (Access a : getAccesss()) {
 		  buf.append(a.qualifiedName());
@@ -493,7 +493,7 @@ aspect Names {
   
   syn String InstAccess.qualifiedName();
   eq InstNamedAccess.qualifiedName()           = getID();
-  syn lazy String InstDot.qualifiedName() {
+  eq InstDot.qualifiedName() {
 	  StringBuilder buf = new StringBuilder();
 	  for (InstAccess ia : getInstAccesss()) {
 		  buf.append(ia.qualifiedName());
@@ -501,8 +501,7 @@ aspect Names {
 	  }
 	  return buf.substring(0, buf.length() - 1);
   }
-  syn lazy String InstGlobalAccess.qualifiedName() = 
-  	"." + getInstAccess().qualifiedName();
+  eq InstGlobalAccess.qualifiedName()         = "." + getInstAccess().qualifiedName();
   
   syn String ClassDecl.name();
   eq BaseClassDecl.name()    = getNameNoTransform().getID();
