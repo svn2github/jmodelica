@@ -90,36 +90,6 @@ def unzip_fmu(archive, path='.'):
     
     return fmu_files
 
-def unzip_fmux(archive, path='.'):
-    """
-    Unzip an FMUX.
-    
-    Looks for a model description XML file and returns the result in a dict with 
-    the key words: 'model_desc'. If the file is not found an exception will be 
-    raised.
-    
-    Parameters::
-        
-        archive --
-            The archive file name.
-            
-        path --
-            The path to the archive file.
-            Default: Current directory.
-            
-    Raises::
-    
-        IOError the model description XML file is missing in the FMU.
-    """
-    tmpdir = unzip_unit(archive, path)
-    fmux_files = get_files_in_archive(tmpdir)
-    
-    # check if all files have been found during unzip
-    if fmux_files['model_desc'] == None:
-        raise IOError('ModelDescription.xml not found in FMUX archive: '+str(archive))
-    
-    return fmux_files
-
 class FMUException(Exception):
     """
     An FMU exception.

@@ -27,10 +27,10 @@ try:
 except:
     pass
 
-from pyfmi.fmi import unzip_fmux
 from pyjmi.common.core import BaseModel, get_temp_location
 from pyjmi.common import xmlparser
 from pyjmi.common.xmlparser import XMLException
+from pyfmi.common.core import unzip_unit, get_platform_suffix, get_files_in_archive, rename_to_tmp, load_DLL
 
 def convert_casadi_der_name(name):
     n = name.split('der_')[1]
@@ -39,6 +39,36 @@ def convert_casadi_der_name(name):
     for i in range(len(qnames)-1):
         n = n + qnames[i] + '.'
     return n + 'der(' + qnames[len(qnames)-1] + ')' 
+
+def unzip_fmux(archive, path='.'):
+    """
+    Unzip an FMUX.
+    
+    Looks for a model description XML file and returns the result in a dict with 
+    the key words: 'model_desc'. If the file is not found an exception will be 
+    raised.
+    
+    Parameters::
+        
+        archive --
+            The archive file name.
+            
+        path --
+            The path to the archive file.
+            Default: Current directory.
+            
+    Raises::
+    
+        IOError the model description XML file is missing in the FMU.
+    """
+    tmpdir = unzip_unit(archive, path)
+    fmux_files = get_files_in_archive(tmpdir)
+    
+    # check if all files have been found during unzip
+    if fmux_files['model_desc'] == None:
+        raise IOError('ModelDescription.xml not found in FMUX archive: '+str(archive))
+    
+    return fmux_files
 
 class CasadiModel(BaseModel):
     
