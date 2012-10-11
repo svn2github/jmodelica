@@ -882,4 +882,28 @@ equation
   end JacTestInput;
   
   
+  model JacTestRecord1
+	record Complex 
+		Real re;
+		Real im;
+	end Complex;
+	
+	function add
+		input Complex u, v;
+		output Complex w;
+	algorithm
+		w := Complex(u.re - v.re,u.im - v.re);
+	end add;
+		Complex c1, c2;
+		Real x(start=10);
+		Real y(start=2);
+	equation
+		c1 = Complex(re = cos(y+time),im = 2.0);
+		c2 = add(c1,Complex(4, time)); 
+		y  = c1.re+0.1;
+		der(x) = x*y;
+
+  end JacTestRecord1;
+  
+  
 end JacGenTests;

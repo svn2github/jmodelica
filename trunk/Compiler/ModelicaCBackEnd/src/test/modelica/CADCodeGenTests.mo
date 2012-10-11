@@ -3440,6 +3440,188 @@ return;
 ")})));
 end CADDiscreteFuncArg1;
 
+model CADRecord1
+	record Complex 
+		Real re;
+		Real im;
+	end Complex;
+	
+	function add
+		input Complex u, v;
+		output Complex w;
+	algorithm
+		w := Complex(u.re - v.re,u.im - v.re);
+	end add;
+		Complex c1, c2;
+		Real x(start=10);
+		Real y(start=2);
+	equation
+		c1 = Complex(re = cos(y+time),im = 2.0);
+		c2 = add(c1,Complex(4, time)); 
+		y  = c1.re+0.1;
+		der(x) = x*y;
+
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CADCodeGenTestCase(
+			name="CADRecord1",
+			description="",
+			generate_ode_jacobian=true,
+			eliminate_alias_variables=false,
+			fmi_version=2.0,
+			generate_ode=true,
+			equation_sorting=true,
+			enable_tearing=false,
+			template="$CAD_ode_derivatives$,$CAD_dae_blocks_residual_functions$,$CAD_functions$",
+			generatedCode="
+
+/******** Declarations *******/
+
+jmi_ad_var_t v_0;
+jmi_ad_var_t d_0;
+
+jmi_ad_var_t v_1;
+jmi_ad_var_t d_1;
+    JMI_RECORD_STATIC(Complex_0_r, tmp_var_0)
+    JMI_RECORD_STATIC(Complex_0_r, tmp_der_0)
+
+jmi_ad_var_t v_2;
+jmi_ad_var_t d_2;
+
+jmi_ad_var_t v_3;
+jmi_ad_var_t d_3;
+
+jmi_ad_var_t v_4;
+jmi_ad_var_t d_4;
+
+jmi_ad_var_t v_5;
+jmi_ad_var_t d_5;
+    JMI_RECORD_STATIC(Complex_0_r, tmp_var_1)
+    JMI_RECORD_STATIC(Complex_0_r, tmp_der_1)
+    JMI_RECORD_STATIC(Complex_0_r, tmp_var_2)
+    JMI_RECORD_STATIC(Complex_0_r, tmp_der_2)
+
+jmi_real_t** dz = jmi->dz;
+/*********** ODE section ***********/
+  jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+v_0 = _x_4 * _y_5;
+d_0 = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _y_5 + _x_4 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx]);
+  _der_x_8 = v_0;
+  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_0;
+/*********** Real outputs **********/
+/*** Integer and boolean outputs ***/
+/********* Other variables *********/
+  _c1_im_1 = 2.0;
+  (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] =AD_WRAP_LITERAL(0);
+tmp_var_1->re = _c1_re_0;
+tmp_var_1->im = _c1_im_1;
+tmp_der_1->re = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+tmp_der_1->im = (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
+tmp_var_2->re = AD_WRAP_LITERAL(4);
+v_5 = _time;
+d_5 = (*dz)[jmi->offs_t];
+tmp_var_2->im = v_5;
+tmp_der_2->re = AD_WRAP_LITERAL(0);
+tmp_der_2->im = d_5;
+func_CADCodeGenTests_CADRecord1_add_der_AD(tmp_var_1, tmp_var_2, tmp_der_1, tmp_der_2, tmp_var_0, tmp_der_0);
+_temp_1_re_6 = tmp_var_0->re;
+_temp_1_im_7 = tmp_var_0->im;
+(*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx] = tmp_der_0->re;
+(*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = tmp_der_0->im;
+  _c2_re_2 = _temp_1_re_6;
+  (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] =(*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx];
+  _c2_im_3 = _temp_1_im_7;
+  (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] =(*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx];
+,static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+
+jmi_ad_var_t v_6;
+jmi_ad_var_t d_6;
+
+jmi_ad_var_t v_7;
+jmi_ad_var_t d_7;
+
+jmi_ad_var_t v_8;
+jmi_ad_var_t d_8;
+
+jmi_ad_var_t v_9;
+jmi_ad_var_t d_9;
+
+jmi_real_t** res = &residual;
+jmi_real_t** dF = &dRes;
+jmi_real_t** dz;
+
+if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
+    x[0] = _y_5;
+    x[1] = _c1_re_0;
+    return 0;
+} else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+    dz = jmi->dz_active_variables;
+    _y_5 = x[0];
+    (*dz)[ jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] = dx[0];
+    _c1_re_0 = x[1];
+    (*dz)[ jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = dx[1];
+} else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+    dz = jmi->dz;
+} else {
+    return -1;
+} if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE){
+v_6 = _c1_re_0 + 0.1;
+d_6 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] + AD_WRAP_LITERAL(0);
+(*res)[0] = v_6 - _y_5;
+(*dF)[0]  = d_6 - (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
+v_9 = _time;
+d_9 = (*dz)[jmi->offs_t];
+v_8 = _y_5 + v_9;
+d_8 = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] + d_9;
+v_7 = cos(v_8);
+d_7 = d_8 * -sin(v_8);
+(*res)[1] = v_7 - _c1_re_0;
+(*dF)[1]  = d_7 - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+    (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] = 0;
+    (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = 0;
+} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+    (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] = -(*dF)[0];
+    (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = -(*dF)[1];
+} else {
+    return -1;
+}
+    return 0;
+}
+
+,void func_CADCodeGenTests_CADRecord1_add_der_AD(Complex_0_r* u_var_v, Complex_0_r* v_var_v, Complex_0_r* u_der_v, Complex_0_r* v_der_v, Complex_0_r* w_var_v, Complex_0_r* w_der_v) {
+    JMI_DYNAMIC_INIT()
+    JMI_RECORD_STATIC(Complex_0_r, w_var_vn)
+    JMI_RECORD_STATIC(Complex_0_r, w_der_vn)
+
+jmi_ad_var_t v_10;
+jmi_ad_var_t d_10;
+
+jmi_ad_var_t v_11;
+jmi_ad_var_t d_11;
+    if (w_var_v == NULL) {
+        w_var_v = w_var_vn;
+    }
+    if (w_der_v == NULL) {
+        w_der_v = w_der_vn;
+    }
+v_10 = u_var_v->re - v_var_v->re;
+d_10 = u_der_v->re - v_der_v->re;
+w_var_v->re = v_10;
+w_der_v->re = d_10;
+v_11 = u_var_v->im - v_var_v->re;
+d_11 = u_der_v->im - v_der_v->re;
+w_var_v->im = v_11;
+w_der_v->im = d_11;
+
+JMI_DYNAMIC_FREE()
+return;
+}
+
+")})));
+end CADRecord1;
+
+
+
 model SparseJacTest1
  parameter Real p1=2;
  parameter Integer p2 = 1;
