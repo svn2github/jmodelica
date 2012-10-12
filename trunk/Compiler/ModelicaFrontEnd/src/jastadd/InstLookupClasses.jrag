@@ -616,7 +616,7 @@ aspect SimpleInstClassLookup {
 		if (icd == null)
 			return unknownInstClassDecl();
 		if (parts.length > 1)
-			return icd.lookupInstClassQualified(name);
+			return icd.lookupInstClassQualified(parts[1]);
 		else
 			return icd;
 	}

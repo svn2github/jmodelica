@@ -7160,4 +7160,54 @@ end FunctionTests.BindingSort1;
 ")})));
 end BindingSort1;
 
+model Interpolate
+    function interp
+        input Real u;
+        output Real value;
+    algorithm
+	   value := u*2;
+	   annotation(derivative=Interpolate.interpDer);
+	end interp;
+
+    function interpDer
+        input Real u;
+        output Real value;
+	algorithm
+        value := u*3;
+    end interpDer;
+end Interpolate;
+
+model UseInterpolate	
+ Real result;
+ Real i = 1.0;
+ 
+equation
+	 result = Interpolate.interp(i);
+
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="UseInterpolate",
+			description="",
+			flatModel="
+fclass FunctionTests.UseInterpolate
+ Real result;
+ Real i;
+equation
+ result = FunctionTests.Interpolate.interp(i);
+ i = 1.0;
+
+public
+ function FunctionTests.Interpolate.interp
+  input Real u;
+  output Real value;
+ algorithm
+  value := ( u ) * ( 2 );
+  return;
+ end FunctionTests.Interpolate.interp;
+
+end FunctionTests.UseInterpolate;
+")})));
+end UseInterpolate;
+
 end FunctionTests;
