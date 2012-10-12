@@ -1930,7 +1930,9 @@ aspect CCodeGen {
 		if (noExp)
 			setBindingExp(exp = type().zeroLiteral());
 		OptionRegistry opt = root().options;
+		str.print("(");
 		exp.prettyPrint_C(str,"");
+		str.print(")");
 		if (isReal() && opt.getBooleanOption("enable_variable_scaling"))
 			str.format("/sf(%d)", valueReference());
 		if (noExp)

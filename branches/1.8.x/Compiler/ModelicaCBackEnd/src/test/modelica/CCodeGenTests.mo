@@ -504,8 +504,8 @@ $C_set_start_values$
          generatedCode="
     _y_1 = ((_x_0*sf(0)))/sf(2);
 
-    _x_0 = 1/sf(0);
-    _z_2 = func_CCodeGenTests_CCodeGenParameters1_f_exp(AD_WRAP_LITERAL(1))/sf(1);
+    _x_0 = (1)/sf(0);
+    _z_2 = (func_CCodeGenTests_CCodeGenParameters1_f_exp(AD_WRAP_LITERAL(1)))/sf(1);
    model_init_eval_parameters(jmi);
 ")})));
 
@@ -4996,12 +4996,12 @@ model StartValues1
          description="",
          template="$C_set_start_values$",
          generatedCode="
-_y_1 = 2;
-_z_2 = 3;
+_y_1 = (2);
+_z_2 = (3);
 model_init_eval_parameters(jmi);
-_x_0 = 1;
-_q_3 = 0.0;
-_der_x_4 = 0.0;		 
+_x_0 = (1);
+_q_3 = (0.0);
+_der_x_4 = (0.0);		 
 ")})));
 
   Real x(start=1);
@@ -5022,16 +5022,16 @@ model StartValues2
          description="",
          template="$C_set_start_values$",
          generatedCode="
-    _pr_0 = 1.5;
-    _pi_1 = 2;
-    _pb_2 = JMI_TRUE;
+    _pr_0 = (1.5);
+    _pi_1 = (2);
+    _pb_2 = (JMI_TRUE);
 	model_init_eval_parameters(jmi);
-    _r_3 = 5.5;
-    _i_4 = 10;
-    _b_5 = JMI_FALSE;
-    _der_r_6 = 0.0;
-    pre_i_4 = 10;
-    pre_b_5 = JMI_FALSE;
+    _r_3 = (5.5);
+    _i_4 = (10);
+    _b_5 = (JMI_FALSE);
+    _der_r_6 = (0.0);
+    pre_i_4 = (10);
+    pre_b_5 = (JMI_FALSE);
 ")})));
 
   parameter Real pr = 1.5;
