@@ -799,8 +799,8 @@ build-python-packages:
 	python setup_pymodelica.py install --prefix=$(pymodelica_install_dir); \
 	rm -rf build
 
-	cd $(abs_top_srcdir)/Python/src; \
-	python setup_pyfmi.py install --prefix=$(pyfmi_install_dir); \
+	cd $(abs_top_srcdir)/external/PyFMI; \
+	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install/ --prefix=$(pyfmi_install_dir); \
 	rm -rf build
 
 	cd $(abs_top_srcdir)/Python/src; \
