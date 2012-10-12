@@ -27,7 +27,7 @@ from tests_jmodelica import testattr, get_files_path
 from pyjmi.common.io import ResultDymolaTextual
 from pyjmi.common.xmlparser import XMLException
 from pymodelica.compiler import compile_fmux, compile_fmu
-from pyfmi import FMUModel
+from pyfmi import FMUModel,load_fmu
 try:
     from pyjmi.optimization.casadi_collocation import *
     from pyjmi.casadi_interface import CasadiModel
@@ -133,7 +133,7 @@ class TestLocalDAECollocator:
                 fmux_vdp_unscaled_min_time, verbose=False)
         
         fmu_cstr = 'CSTR_CSTR.fmu'
-        self.model_cstr = FMUModel(fmu_cstr)
+        self.model_cstr = load_fmu(fmu_cstr)
         
         fmux_cstr_lagrange = "CSTR_CSTR_Opt_Bounds_Lagrange.fmux"
         self.model_cstr_lagrange = CasadiModel(fmux_cstr_lagrange,
@@ -167,8 +167,14 @@ class TestLocalDAECollocator:
         u = [342.85, 280]
         u_traj = N.transpose(N.vstack((t, u)))
         
+        rtol, atol = model.get_tolerances()
+        
+        opts = model.simulate_options()
+        opts["CVode_options"]["rtol"]=1e-4
+        opts["CVode_options"]["atol"]=1e2*atol
+        
         # Generate initial trajectories
-        init_res = model.simulate(final_time=300, input=('Tc', u_traj))
+        init_res = model.simulate(final_time=300, input=('Tc', u_traj),options=opts)
         
         # Optimize
         opts = model_opt.optimize_options(self.algorithm)

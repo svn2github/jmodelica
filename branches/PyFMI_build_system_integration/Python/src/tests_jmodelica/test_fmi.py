@@ -26,36 +26,71 @@ import sys as S
 
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_fmu
-from pyfmi.fmi import unzip_fmu, FMUModel, FMUException
+from pyfmi.fmi import FMUModel, FMUException, FMUModelME1, FMUModelCS1, load_fmu
 import pyfmi.fmi_algorithm_drivers as ad
 from pyfmi.common.core import get_platform_dir
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_mofiles = os.path.join(get_files_path(), 'Modelica')
 
-@testattr(fmi = True)
-def test_unzip():
-    """
-    This tests the functionality of the method unzip_FMU.
-    """
-    #FMU
-    fmu = 'bouncingBall.fmu'
-    
-    #Unzip FMU
-    tempnames = unzip_fmu(archive=fmu, path=path_to_fmus)
-    binarydir = tempnames['binaries_dir']
-    xmlfile = tempnames['model_desc']
-    
-    platform = get_platform_dir()
-    assert binarydir.endswith(platform)
-    assert xmlfile.endswith('.xml')
-    
-    nose.tools.assert_raises(IOError,unzip_fmu,'Coupled')
+#THIS IS NOW DONE BY FMIL
+#@testattr(fmi = True)
+#def test_unzip():
+#    """
+#    This tests the functionality of the method unzip_FMU.
+#    """
+#    #FMU
+#    fmu = 'bouncingBall.fmu'
+#   
+#    #Unzip FMU
+#    tempnames = unzip_fmu(archive=fmu, path=path_to_fmus)
+#    binarydir = tempnames['binaries_dir']
+#    xmlfile = tempnames['model_desc']
+#    
+#    platform = get_platform_dir()
+#    assert binarydir.endswith(platform)
+#    assert xmlfile.endswith('.xml')
+#    
+#    nose.tools.assert_raises(IOError,unzip_fmu,'Coupled')
     
 
-class Test_FMI:
+class Test_load_fmu:
     """
-    This class tests pyfmi.fmi.FMIMODEL simulation functionality.
+    This test the functionality of load_fmu method.
+    """
+    
+    @testattr(fmi = True)
+    def test_raise_exception(self):
+        
+        nose.tools.assert_raises(FMUException, load_fmu, "test.fmu")
+        nose.tools.assert_raises(FMUException, FMUModelCS1, "Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus)
+        nose.tools.assert_raises(FMUException, FMUModelME1, "Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
+    
+    @testattr(windows = True)
+    def test_correct_loading(self):
+        
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus)
+        assert isinstance(model, FMUModelME1)
+        
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
+        assert isinstance(model, FMUModelCS1)
+        
+
+class Test_FMUModelCS1:
+    """
+    This class tests pyfmi.fmi.FMUModelCS1
+    """
+    
+    @testattr(windows = True)
+    def test_simulation_cs(self):
+        
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
+        res = model.simulate(final_time=1.5)
+        assert (res["J1.w"][-1] - 3.245091100366517) < 1e-4
+    
+class Test_FMUModelME1:
+    """
+    This class tests pyfmi.fmi.FMUModelME1
     """
     
     @classmethod
@@ -69,11 +104,11 @@ class Test_FMI:
         """
         Sets up the test case.
         """
-        self._bounce  = FMUModel('bouncingBall.fmu',path_to_fmus)
-        self._dq = FMUModel('dq.fmu',path_to_fmus)
+        self._bounce  = load_fmu('bouncingBall.fmu',path_to_fmus)
+        self._dq = load_fmu('dq.fmu',path_to_fmus)
         self._bounce.initialize()
         self._dq.initialize()
-        self.dep = FMUModel("DepParTests_DepPar1.fmu")
+        self.dep = load_fmu("DepParTests_DepPar1.fmu")
         self.dep.initialize()
     
     @testattr(fmi = True)
@@ -167,7 +202,7 @@ class Test_FMI:
         
         assert self._bounce.time == 1.0
         
-        nose.tools.assert_raises(FMUException, self._bounce._set_time, N.array([1.0,1.0]))
+        nose.tools.assert_raises(TypeError, self._bounce._set_time, N.array([1.0,1.0]))
         
         
     @testattr(fmi = True)
@@ -244,14 +279,14 @@ class Test_FMI:
         """
         [rtol,atol] = self._bounce.get_tolerances()
         
-        assert rtol == 0.0001
-        nose.tools.assert_almost_equal(atol[0],0.0000010)
-        nose.tools.assert_almost_equal(atol[1],0.0000010)
+        assert rtol == 0.000001
+        nose.tools.assert_almost_equal(atol[0],0.000000010)
+        nose.tools.assert_almost_equal(atol[1],0.000000010)
         
         [rtol,atol] = self._dq.get_tolerances()
         
-        assert rtol == 0.0001
-        nose.tools.assert_almost_equal(atol[0],0.0000010)
+        assert rtol == 0.000001
+        nose.tools.assert_almost_equal(atol[0],0.000000010)
         
     @testattr(fmi = True)
     def test_event_indicators(self):
@@ -331,12 +366,28 @@ class Test_FMI:
         """
         This test the attribute debugging.
         """
-        model = FMUModel('bouncingBall.fmu',path_to_fmus)
+        model = FMUModelME1('bouncingBall.fmu',path_to_fmus,enable_logging=False)
+        model.initialize()
+        try:
+            model.initialize()
+        except FMUException:
+            pass
+        assert len(model.get_log()) == 0 #Get the current log (empty)
+        model = FMUModelME1('bouncingBall.fmu',path_to_fmus,enable_logging=False)
         model.initialize()
         model.set_debug_logging(True) #Activates the logging
-        assert len(model.get_log()) == 4 #Get the current log (empty)
-        model.set_real([0],[1.0]) #Set value which generates log message
-        assert len(model.get_log()) > 5 
+        try:
+            model.initialize()
+        except FMUException:
+            pass
+        assert len(model.get_log()) > 0 #Get the current log (empty)
+        model = FMUModelME1('bouncingBall.fmu',path_to_fmus,enable_logging=True)
+        model.initialize()
+        try:
+            model.initialize()
+        except FMUException:
+            pass
+        assert len(model.get_log()) > 0 #Get the current log (empty)
         
     @testattr(fmi = True)
     def test_get_fmi_options(self):
@@ -351,7 +402,7 @@ class Test_FMI:
         """ 
         Test that FMUModel can not be instantiated with a JMU file.
         """
-        nose.tools.assert_raises(FMUException,FMUModel,'model.jmu')
+        nose.tools.assert_raises(FMUException,FMUModelME1,'model.jmu')
         
         
 class Test_FMI_Compile:
@@ -373,7 +424,7 @@ class Test_FMI_Compile:
         fpath = os.path.join(path_to_mofiles,'RLC_Circuit.mo')
         fmuname = compile_fmu('RLC_Circuit',fpath)
         
-        self._model  = FMUModel(fmuname)
+        self._model  = FMUModelME1(fmuname)
 
     @testattr(fmi = True)
     def test_get_version(self):
@@ -409,15 +460,15 @@ class TestDiscreteVariableRefs(object):
         Sets up the test class.
         """
         self.fmu_name = compile_fmu(self._cpath, self._fpath,compiler_options={'compliance_as_warning':True})
-        self.model = FMUModel(self.fmu_name)
+        self.model = FMUModelME1(self.fmu_name)
         
     @testattr(stddist = True)
     def test_vars_model(self):
        """
        Test that the value references are correct
        """
-       nose.tools.assert_equal(self.model._XMLStartRealKeys[0],0)
-       nose.tools.assert_equal(self.model._XMLStartRealKeys[1],2)
+       nose.tools.assert_equal(self.model._save_real_variables_val[0],0)
+       nose.tools.assert_equal(self.model._save_real_variables_val[1],2)
 
 class TestDependentParameters(object):
     """
@@ -433,7 +484,7 @@ class TestDependentParameters(object):
         Sets up the test class.
         """
         self.fmu_name = compile_fmu(self._cpath, self._fpath)
-        self.model = FMUModel(self.fmu_name)
+        self.model = FMUModelME1(self.fmu_name)
         
     @testattr(stddist = True)
     def test_parameter_eval(self):

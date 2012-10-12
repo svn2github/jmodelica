@@ -28,10 +28,10 @@ from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_jmu
 from pymodelica.common.io import ResultDymolaTextual, ResultWriterDymola
 from pyjmi.common.io import VariableNotTimeVarying
-from pyfmi.common.io import ResultWriterDymola_deprecated as fmi_ResultWriterDymola
+from pyfmi.common.io import ResultWriterDymola as fmi_ResultWriterDymola
 from pyjmi.jmi import JMUModel
 from pyjmi.optimization import ipopt
-from pyfmi.fmi import FMUModel
+from pyfmi.fmi import FMUModel, load_fmu
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_results = os.path.join(get_files_path(), 'Results')
@@ -227,7 +227,7 @@ class test_ResultWriterDymola:
         Tests the variable with parameter alias is presented as variable in the 
         result.
         """
-        simple_alias = FMUModel('SimpleAlias.fmu',path_to_fmus)
+        simple_alias = load_fmu('SimpleAlias.fmu',path_to_fmus)
         res = simple_alias.simulate()
         
         # test that res['y'] returns a vector of the same length as the time
