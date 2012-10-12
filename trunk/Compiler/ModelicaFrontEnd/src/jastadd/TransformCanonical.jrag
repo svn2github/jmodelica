@@ -2534,7 +2534,7 @@ aspect TransformCanonical {
 		for (FFunctionDecl ffd : getFFunctionDecls())
 			ffd.genBindingAssignments();
 //		flush();
-		flushAllRecursive();
+		root().flushAllRecursive();
 
 		endStep("genBindingEquations()");
 	}
@@ -3840,7 +3840,7 @@ aspect TempVariables {
 			if (!var.markedForRemoval)
 				vars.add(var);
 		setFVariableList(vars);
-		flushAllRecursive();
+		root().flushAllRecursive();
 	}
 	
 }
@@ -4592,9 +4592,9 @@ aspect FunctionInlining {
 	public void FClass.inlineFunctions(String opt) {
 		beginStep("inlineFunctions()");
 		new FunctionInliner(this, opt).inline();
-		flushAllRecursive();
+		root().flushAllRecursive();
 		removeUnusedTemporaries();
-		flushAllRecursive();
+		root().flushAllRecursive();
 		endStep("inlineFunctions()");
 	}
 	
@@ -5374,7 +5374,7 @@ aspect FunctionInlining {
 	public void FFunctionDecl.inline(FunctionInliner fi, List<FExp> args) {
 		duringInlining = true;
 		tempLookupMap = fi.startFunction(this);
-		flushAllRecursive();
+		root().flushAllRecursive();
 		
 		for (FFunctionVariable var : getFFunctionVariables())
 			var.functionInliner = fi;
@@ -5829,7 +5829,7 @@ aspect StateInitialEquations {
 				FEquation eqnToAdd = new FEquation(new FIdUseExp(fv.getFQName().fullCopy()),
 				                                   new FIdUseExp(nameToAdd.fullCopy()));
 				addFInitialEquation(eqnToAdd);    
-				flushAllRecursive();               
+				root().flushAllRecursive();               
 			}
 		
 			endStep("addStateInitialEquationsIfSet()");
