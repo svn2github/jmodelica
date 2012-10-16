@@ -18,8 +18,9 @@
 Module for testing external function support.
 """
 import os, subprocess, shutil
-
 from os.path import join as path
+
+import nose
 
 from pymodelica import compile_jmu, compile_fmu
 from pymodelica.common.core import get_platform_dir, create_temp_dir
@@ -27,40 +28,110 @@ from pyjmi import JMUModel
 from pyfmi import FMUModel
 from tests_jmodelica import testattr, get_files_path
 
-@testattr(stddist = True)
-def test_ModelicaUtilities():
-    """ 
-    Test compiling a model with external functions using the functions in ModelicaUtilities.
-    """
-    fpath = path(get_files_path(), 'Modelica', "ExtFunctionTests.mo")
-    cpath = "ExtFunctionTests.ExtFunctionTest3"
-    jmu_name = compile_jmu(cpath, fpath, target='model_noad')
-    model = JMUModel(jmu_name)
-    #model.simulate()
+class TestExternalStatic:
 
-@testattr(stddist = True)
-def test_ExtFuncStatic():
-    """ 
-    Test compiling a model with external functions in a static library.
-    """
-    dir = build_ext('add_static')
-    fpath = path(dir, "ExtFunctionTests.mo")
-    cpath = "ExtFunctionTests.ExtFunctionTest1"
-    fmu_name = compile_fmu(cpath, fpath)
-    shutil.rmtree(dir, True)
-    model = FMUModel(fmu_name)
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        cls.dir = build_ext('add_static')
+        cls.fpath = path(cls.dir, "ExtFunctionTests.mo")
+        
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        pass
+    
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(TestExternalStatic.dir, True)
+    
+    @testattr(stddist = True)
+    def test_ExtFuncStatic(self):
+        """ 
+        Test compiling a model with external functions in a static library.
+        """
+        cpath = "ExtFunctionTests.ExtFunctionTest1"
+        fmu_name = compile_fmu(cpath, TestExternalStatic.fpath)
+        model = FMUModel(fmu_name)
+    
+    @testattr(stddist = True)
+    def test_IntegerArrays(self):
+        """
+        Test a model with external functions containing integer array and literal inputs.
+        """
+        cpath = "ExtFunctionTests.ExtFunctionTest4"
+        fmu_name = compile_fmu(cpath, TestExternalStatic.fpath)
+        model = FMUModel(fmu_name)
+        res = model.simulate()
+        
+        nose.tools.assert_equals(res['myResult[1]'][-1], 2) 
+        nose.tools.assert_equals(res['myResult[2]'][-1], 4)
+        nose.tools.assert_equals(res['myResult[3]'][-1], 6)
+        
+class TestUtilities:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        pass
+        
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        pass
+    
+    @testattr(stddist = True)
+    def test_ModelicaUtilities(self):
+        """ 
+        Test compiling a model with external functions using the functions in ModelicaUtilities.
+        """
+        fpath = path(get_files_path(), 'Modelica', "ExtFunctionTests.mo")
+        cpath = "ExtFunctionTests.ExtFunctionTest3"
+        jmu_name = compile_jmu(cpath, fpath, target='model_noad')
+        model = JMUModel(jmu_name)
+        #model.simulate()
 
-@testattr(stddist = True)
-def test_ExtFuncShared():
-    """ 
-    Test compiling a model with external functions in a shared library.
-    """
-    dir = build_ext('add_shared')
-    fpath = path(dir, "ExtFunctionTests.mo")
-    cpath = "ExtFunctionTests.ExtFunctionTest1"
-    fmu_name = compile_fmu(cpath, fpath)
-    shutil.rmtree(dir, True)
-    model = FMUModel(fmu_name)
+class TestExternalShared:
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        cls.dir = build_ext('add_shared')
+        cls.fpath = path(cls.dir, "ExtFunctionTests.mo")
+        
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        pass
+    
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(TestExternalShared.dir, True)
+        
+    @testattr(stddist = True)
+    def test_ExtFuncShared(self):
+        """ 
+        Test compiling a model with external functions in a shared library.
+        """
+        cpath = "ExtFunctionTests.ExtFunctionTest1"
+        fmu_name = compile_fmu(cpath, TestExternalShared.fpath)
+        shutil.rmtree(TestExternalShared.dir, True)
+        model = FMUModel(fmu_name)
+        
 
 def build_ext(target):
     """

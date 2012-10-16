@@ -63,4 +63,17 @@ function testModelicaAllocateStrings
     external "C" annotation(Include="#include \"testModelicaUtilities.c\"");
 end testModelicaAllocateStrings;
 
+model ExtFunctionTest4
+	Integer[3] myArray = {1,2,3};
+	Integer[3] myResult = doubleArray(myArray);
+	
+end ExtFunctionTest4;
+
+function doubleArray
+	input Integer[3] arr;
+	output Integer[3] res;
+
+    external "C" multiplyAnArray(arr, res, 3, 2) annotation(Include="#include \"addNumbers.h\"", Library="addNumbers");
+end doubleArray;
+
 end ExtFunctionTests;
