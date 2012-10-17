@@ -386,14 +386,14 @@ class TestIndexReduction3FMU(SimulationTest):
         SimulationTest.setup_class_base(
             'IndexReductionTests.mo', 'IndexReductionTests.Electrical1',format='fmu')
 
-    @testattr(assimulo = True)
+    #@testattr(assimulo = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=3, time_step=0.01)
         self.run()
         self.load_expected_data(
             'IndexReductionTests_Electrical1_result.txt')
 
-    @testattr(assimulo = True)
+    #@testattr(assimulo = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['capacitor.i'], same_span=True, rel_tol=1e-4, abs_tol=1e-4)
 
