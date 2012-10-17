@@ -1,0 +1,59 @@
+import org.jastadd.plugin.compiler.ast.IOutlineNode;
+import org.eclipse.swt.graphics.Image;
+import java.util.ArrayList;
+
+aspect ContentOutline {
+
+	/*
+	 * The IOutlineNode interface must be implemented by ASTNode
+	 * for the AST to provide outline content
+	 */
+	ASTNode implements IOutlineNode;
+
+	/*
+	 * Default is not to show nodes in the outline
+	 */
+   	syn boolean ASTNode.showInContentOutline() = false;
+   	
+   	/*
+   	 * Default outline label is the name of the node class
+   	 */
+   	syn String ASTNode.contentOutlineLabel() = this.getClass().getName();
+   	
+   	/*
+   	 * The default outline image is null
+   	 */
+   	syn Image ASTNode.contentOutlineImage() = null;
+   
+   	/*
+     * The default behavior for hasVisibleChildren() is to ask showInContentOutline()
+     * if this node is visible. If not, move on to child nodes.
+   	 */
+   	syn boolean ASTNode.hasVisibleChildren() {
+    	if(showInContentOutline()) {
+       		return true;
+       	}
+     	for(int i = 0; i < getNumChild(); i++) {
+       		if(getChild(i).hasVisibleChildren()) {
+         		return true;
+         	}
+        }
+     	return false;
+   	}
+   
+   	/*
+     * Default behavior for outlineChildren() is to collect all visible
+     * children in a list which is returned 
+   	 */
+   	syn ArrayList ASTNode.outlineChildren() {
+    	ArrayList list = new ArrayList();
+     	for(int i = 0; i < getNumChild(); i++) {
+       		if(getChild(i).showInContentOutline()) {
+         		list.add(getChild(i));
+         	} else if(getChild(i).hasVisibleChildren()) {
+         		list.addAll(getChild(i).outlineChildren());
+         	}
+     	}
+     	return list;
+   	}
+}
