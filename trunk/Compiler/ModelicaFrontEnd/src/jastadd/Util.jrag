@@ -46,10 +46,6 @@ aspect RootAccess {
     syn Root BaseNode.root() = retrieveRoot();
     eq Root.root() = this;
     
-    // TODO: When uses of HashSet has been generalised to Set, replace with Collections.emptySet()
-    public static final HashSet ASTNode.EMPTY_HASH_SET = new HashSet(2);
-    syn HashSet ASTNode.emptyHashSet() = EMPTY_HASH_SET;
-    
     // TODO: When uses of ArrayList has been generalised to List, replace with Collections.emptyList()
     public static final ArrayList ASTNode.EMPTY_ARRAY_LIST = new ArrayList(0);
     syn ArrayList ASTNode.emptyArrayList() = EMPTY_ARRAY_LIST;

@@ -125,7 +125,7 @@ aspect InstResolveAmbiguousNames {
 	rewrite InstAmbiguousAccess {
 	    when (!rewritten) 
 	    to InstAccess {
-	  		if (!lookupInstComponent(name()).isEmpty()) {
+	  		if (lookupInstComponent(name()) != null) {
      		    InstComponentAccess c = new InstComponentAccess(name(), getFArraySubscriptsOpt());
   	 			c.setLocation(this);
   	 			return c;

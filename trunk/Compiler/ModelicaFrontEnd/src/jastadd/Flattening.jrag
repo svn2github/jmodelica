@@ -386,8 +386,7 @@ aspect Flattening {
 	public FQName InstComponentDecl.createFQNameForFuncVar(InstClassDecl func) {
 		FQName name = getFQName();
 		if (func != null) {
-			Set<InstComponentDecl> set = func.memberInstComponent(name.name());
-			InstComponentDecl found = set.isEmpty() ? null : set.iterator().next();
+			InstComponentDecl found = func.memberInstComponent(name.name());
 			if (name.getNumFQNamePart() > 1 || (found != null && found != this))
 				return new FQName(func.localTempVarName(this));
 		}
@@ -1286,8 +1285,7 @@ aspect FlatExpressions {
 						functionConstantList().add(var);
 						FQName name = var.getFQName();
 						FQName use = ia.flattenAssignablePart(prefix);
-						Set<InstComponentDecl> set = ia.localLookupInstComponent(name.name());
-						InstComponentDecl found = set.isEmpty() ? null : set.iterator().next();
+						InstComponentDecl found = ia.localLookupInstComponent(name.name());
 						if (name.getNumFQNamePart() > 1 || (found != null && found != var))
 							use.getFQNamePart(0).setName(ia.findTempVarName(var));
 						return new FIdUseExp(use);
@@ -1318,7 +1316,7 @@ aspect FlatExpressions {
 		String name;
 		do {
 			name = "temp_" + nextTempVarIndex++;
-		} while (!memberInstComponent(name).isEmpty());
+		} while (memberInstComponent(name) != null);
 		tempVarNames.put(var, name);
 		return name;
 	}

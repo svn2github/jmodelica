@@ -15,15 +15,13 @@
 */
 
 
-import java.util.HashSet;
-
 aspect InstLookupComponents {
 
-	inh HashSet InstAccess.lookupInstComponent(String name);	
-	inh lazy HashSet InstNode.lookupInstComponent(String name);	
-	inh lazy HashSet InstModification.lookupInstComponent(String name);	
+	inh InstComponentDecl InstAccess.lookupInstComponent(String name);	
+	inh lazy InstComponentDecl InstNode.lookupInstComponent(String name);	
+	inh lazy InstComponentDecl InstModification.lookupInstComponent(String name);	
 	eq InstNode.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 
-	eq InstRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
+	eq InstRoot.getChild().lookupInstComponent(String name) = null;
 	
 	eq InstComponentDecl.getInstModification().lookupInstComponent(String name)      = lookupInstComponent(name);
 	eq InstComponentDecl.getInstConstraining().lookupInstComponent(String name)      = lookupInstComponent(name);
@@ -42,16 +40,16 @@ aspect InstLookupComponents {
 			(i == 0) ? lookupInstComponent(name) : getInstAccessNoListTrans(i - 1).qualifiedLookupInstComponent(name);
 	eq InstArrayAccess.getFArraySubscripts().lookupInstComponent(String name)   = getTopInstAccess().lookupInstComponent(name);
 	eq InstNamedAccess.getExpandedSubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
-	eq InstGlobalAccess.getInstAccess().lookupInstComponent(String name)        = emptyHashSet();
+	eq InstGlobalAccess.getInstAccess().lookupInstComponent(String name)        = null;
 	
-	syn HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
-	eq InstClassAccess.qualifiedLookupInstComponent(String name)     = myInstClassDecl().memberInstComponentConstrained(name);
-	eq InstComponentAccess.qualifiedLookupInstComponent(String name) = 
+	syn InstComponentDecl InstAccess.qualifiedLookupInstComponent(String name) = null;
+	eq InstClassAccess.qualifiedLookupInstComponent(String name)               = myInstClassDecl().memberInstComponentConstrained(name);
+	eq InstComponentAccess.qualifiedLookupInstComponent(String name)           = 
 		lookupArrayElement(myInstComponentDecl()).memberInstComponentConstrained(name);
 
-	inh HashSet InstAccess.localLookupInstComponent(String name);	
-	eq InstRoot.getChild().localLookupInstComponent(String name)          = emptyHashSet();
-	eq FlatRoot.getChild().localLookupInstComponent(String name)          = emptyHashSet();
+	inh InstComponentDecl InstAccess.localLookupInstComponent(String name);	
+	eq InstRoot.getChild().localLookupInstComponent(String name)          = null;
+	eq FlatRoot.getChild().localLookupInstComponent(String name)          = null;
 	eq InstClassDecl.getChild().localLookupInstComponent(String name)     = memberInstComponent(name);
 	eq InstComponentDecl.getChild().localLookupInstComponent(String name) = memberInstComponent(name);
 	
@@ -101,7 +99,7 @@ aspect InstLookupComponents {
 		InstAccess next = cur.getNextInstAccess();
 		while (next != null) {
 			icd = cur.lookupArrayElement(icd);
-			icd = componentFromSet(icd.memberInstComponent(next.name()));
+			icd = icd.memberInstComponent(next.name());
 			cur = next;
 			next = next.getNextInstAccess();
 		}
@@ -109,53 +107,49 @@ aspect InstLookupComponents {
 		return icd;
 	}
 	
-	eq SourceRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
+	eq SourceRoot.getChild().lookupInstComponent(String name) = null;
 	// This equation is necessary since InstAccesses may be present in FExps.	
-	eq FlatRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
+	eq FlatRoot.getChild().lookupInstComponent(String name) = null;
 
-	inh lazy HashSet InstForClauseE.lookupInstComponent(String name);
+	inh lazy InstComponentDecl InstForClauseE.lookupInstComponent(String name);
 	eq InstForClauseE.getChild().lookupInstComponent(String name) {
-		HashSet set = new HashSet(4);
 		for (InstForIndex ifi : getInstForIndexs()) 
-			ifi.matchInstComponent(name, set);
-		return (set.size() > 0) ? set : lookupInstComponent(name);
+			if (ifi.matches(name))
+				return ifi.getInstPrimitive();
+		return lookupInstComponent(name);
 	}
 	
-	inh lazy HashSet InstForStmt.lookupInstComponent(String name);
+	inh lazy InstComponentDecl InstForStmt.lookupInstComponent(String name);
 	eq InstForStmt.getChild().lookupInstComponent(String name) {
-		HashSet set = new HashSet(4);
 		for (InstForIndex ifi : getInstForIndexs()) 
-			ifi.matchInstComponent(name, set);
-		return (set.size() > 0) ? set : lookupInstComponent(name);
+			if (ifi.matches(name))
+				return ifi.getInstPrimitive();
+		return lookupInstComponent(name);
 	}
 	
-	inh lazy HashSet FIterExp.lookupInstComponent(String name);
+	inh lazy InstComponentDecl FIterExp.lookupInstComponent(String name);
 	eq FIterExp.getChild().lookupInstComponent(String name) {
-		HashSet set = new HashSet(4);
 		for (CommonForIndex fi : getForIndexs()) 
-			fi.matchInstComponent(name, set);
-		return (set.size() > 0) ? set : lookupInstComponent(name);
-	}
-
-	public void CommonForIndex.matchInstComponent(String name, HashSet set) {}
-	public void InstForIndex.matchInstComponent(String name, HashSet set) {
-		if (getInstPrimitive().name().equals(name)) 
-			set.add(getInstPrimitive());
+			if (fi.matches(name) && fi instanceof InstForIndex)
+				return ((InstForIndex) fi).getInstPrimitive();
+		return lookupInstComponent(name);
 	}
 	
-	syn lazy HashSet InstNode.genericLookupInstComponent(String name) {
-		HashSet set = new HashSet(4);
-		set.addAll(memberInstComponent(name));
-		for (InstImport ii : instImports()) 
-			set.addAll(ii.lookupInstConstantInImport(name));		
-		if (set.isEmpty()) 
-			set.addAll(genericLookupInstConstant(name));
-		return set.isEmpty() ? emptyHashSet() : set;
+	syn lazy InstComponentDecl InstNode.genericLookupInstComponent(String name) {
+		InstComponentDecl icd = memberInstComponent(name);
+		if (icd != null)
+			return icd;
+		for (InstImport ii : instImports()) {
+			icd = ii.lookupInstConstantInImport(name);
+			if (icd != null)
+				return icd;
+		}
+		return genericLookupInstConstant(name);
 	 }
 	
-	syn HashSet InstNode.genericLookupInstConstant(String name) = lookupInstConstant(name);
-	eq InstComponentDecl.genericLookupInstConstant(String name) = myInstClass().lookupInstConstant(name);
-	eq InstExtends.genericLookupInstConstant(String name)       = myInstClass().lookupInstConstant(name);
+	syn InstComponentDecl InstNode.genericLookupInstConstant(String name) = lookupInstConstant(name);
+	eq InstComponentDecl.genericLookupInstConstant(String name)           = myInstClass().lookupInstConstant(name);
+	eq InstExtends.genericLookupInstConstant(String name)                 = myInstClass().lookupInstConstant(name);
 	
 	/**
 	 * \brief Check if any constraining class/component has the given component.
@@ -163,10 +157,10 @@ aspect InstLookupComponents {
 	syn boolean InstNode.constrainMemberInstComponent(String name) {
 		if (!hasInstConstraining())
 			return true;
-		return getInstConstraining().getInstNode().memberInstComponent(name).size() > 0;
+		return getInstConstraining().getInstNode().memberInstComponent(name) != null;
 	}
 	
-	syn HashSet InstNode.arrayMemberInstComponent(String name, int ndims) {
+	syn InstComponentDecl InstNode.arrayMemberInstComponent(String name, int ndims) {
 		if (ndims == 0) 
 			return memberInstComponent(name);
 		if (getNumInstComponentDecl() == 0)
@@ -174,66 +168,78 @@ aspect InstLookupComponents {
 		return getInstComponentDecl(0).arrayMemberInstComponent(name, ndims - 1);
 	}
 	
-	syn HashSet InstNode.emptyArrayMemberInstComponent(String name) = emptyHashSet();
-	eq InstComponentDecl.emptyArrayMemberInstComponent(String name) = 
-		size().isUnknown() ? myInstClass().memberInstComponent(name) : emptyHashSet();
+	syn InstComponentDecl InstNode.emptyArrayMemberInstComponent(String name) = null;
+	eq InstComponentDecl.emptyArrayMemberInstComponent(String name)           = 
+		size().isUnknown() ? myInstClass().memberInstComponent(name) : null;
 	
-	syn lazy HashSet InstNode.memberInstComponent(String name)  {
+	syn lazy InstComponentDecl InstNode.memberInstComponent(String name)  {
 		if (isArray()) {
 			return arrayMemberInstComponent(name, ndims());
 		} else {	
-			HashSet set = new HashSet(4);
-		 	
 			for (InstComponentDecl ic : instComponentDecls()) 
-				if (ic.matchInstComponentDecl(name))
-					set.add(ic);
+				if (ic.matches(name))
+					return ic;
 
-			for (InstExtends ie : instExtends()) 
-				set.addAll(ie.memberInstComponent(name));
-		
-			return set;
+			for (InstExtends ie : instExtends()) {
+				InstComponentDecl icd = ie.memberInstComponent(name);
+				if (icd != null)
+					return icd;
+			}
+			
+			return null;
 		}
 	}
 	
-	syn HashSet InstNode.memberInstComponentConstrained(String name)  {
-		HashSet set = memberInstComponent(name);
-		if (!isArray() && set.size() > 0 && !constrainMemberInstComponent(name)) 
-			set = emptyHashSet();
-		return set;
+	syn InstComponentDecl InstNode.memberInstComponentConstrained(String name)  {
+		if (isArray() || constrainMemberInstComponent(name)) 
+			return memberInstComponent(name);
+		else
+			return null;
 	}
 	
-	inh lazy HashSet InstNode.lookupInstConstant(String name);
-	eq Root.getChild().lookupInstConstant(String name) = emptyHashSet();
+	inh lazy InstComponentDecl InstNode.lookupInstConstant(String name);
+	eq Root.getChild().lookupInstConstant(String name) = null;
 	eq InstNode.getChild().lookupInstConstant(String name) {
-		HashSet set = new HashSet(4);
-		set.addAll(memberInstConstantWithExtends(name));
-		for (InstImport ii : instImports()) 
-			set.addAll(ii.lookupInstConstantInImport(name));		
-		if (set.isEmpty())
-			set.addAll(lookupInstConstant(name));
-		return set.isEmpty() ? emptyHashSet() : set;
+		InstComponentDecl icd = memberInstConstantWithExtends(name);
+		if (icd != null)
+			return icd;
+		
+		for (InstImport ii : instImports()) {
+			icd = ii.lookupInstConstantInImport(name);
+			if (icd != null)
+				return icd;
+
+		}
+
+		return lookupInstConstant(name);
 	}
 	
-	syn lazy HashSet InstNode.memberInstConstantWithExtends(String name) {
-		HashSet set = new HashSet(4);
-		set.addAll(memberInstConstant(name));
-		for (InstExtends ie : instExtends()) 
-			set.addAll(ie.memberInstConstantWithExtends(name));
-		return set.isEmpty() ? emptyHashSet() : set;
+	syn lazy InstComponentDecl InstNode.memberInstConstantWithExtends(String name) {
+		InstComponentDecl icd = memberInstConstant(name);
+		if (icd != null)
+			return icd;
+		
+		for (InstExtends ie : instExtends()) {
+			icd = ie.memberInstConstantWithExtends(name);
+			if (icd != null)
+				return icd;
+		}
+
+		return null;
 	}
 	
-	syn lazy HashSet InstNode.memberInstConstant(String name) {
-		HashSet set = new HashSet(4);
+	syn lazy InstComponentDecl InstNode.memberInstConstant(String name) {
+		if (!constrainMemberInstComponent(name)) 
+			return null;
+		
 		for (InstComponentDecl ic : instComponentDecls()) 
-			if (ic.getComponentDecl().isConstant() && ic.matchInstComponentDecl(name))
-				set.add(ic);
+			if (ic.getComponentDecl().isConstant() && ic.matches(name))
+				return ic;
 
-		if (set.size() > 0 && constrainMemberInstComponent(name)) 
-			return set;
-		return emptyHashSet();
+		return null;
 	}
 
-	syn HashSet InstImport.lookupInstConstantInImport(String name) {
+	syn InstComponentDecl InstImport.lookupInstConstantInImport(String name) {
 		// Assume import points to a single (constant) component
 	    if (name.equals(name())) {
 	    	String className = getPackageName().enclosingName();
@@ -243,7 +249,7 @@ aspect InstLookupComponents {
 		    	return icd.memberInstConstant(getPackageName().getLastInstAccess().name());
 	    	}
 		}
-		return emptyHashSet();
+		return null;
 	}
 	
 	eq InstImportUnqualified.lookupInstConstantInImport(String name)  {
@@ -253,24 +259,19 @@ aspect InstLookupComponents {
 	// This is needed since the member components of InstPrimitive:s (which are attributes)
 	// are not instantiated
 	eq InstPrimitive.memberInstComponent(String name) = myInstClass().memberInstComponent(name);
-	eq InstExtends.memberInstComponent(String name) = extendsPrimitive()? myInstClass().memberInstComponent(name) : super.memberInstComponent(name);
+	eq InstExtends.memberInstComponent(String name)   = 
+			extendsPrimitive() ? myInstClass().memberInstComponent(name) : super.memberInstComponent(name);
 
-	public InstComponentDecl BaseNode.componentFromSet(HashSet set) {
-		if (set.size() > 0) {
-			return (InstComponentDecl)set.iterator().next();
-		} else
-			return unknownInstComponentDecl();
-	}
-
-	/**
-	 * Simple matching of component names.
-	 */
-	syn boolean InstComponentDecl.matchInstComponentDecl(String name) = name().equals(name);
+	eq InstComponentDecl.matches(String str) = name().equals(str);
+	eq InstForIndex.matches(String str)      = getInstPrimitive().matches(str);
 	
-	syn InstComponentDecl InstAccess.myInstComponentDecl()               = unknownInstComponentDecl();
-	eq InstDot.myInstComponentDecl()                                     = getLastInstAccess().myInstComponentDecl();
-	eq InstGlobalAccess.myInstComponentDecl()                            = getInstAccess().myInstComponentDecl();
-	syn lazy InstComponentDecl InstComponentAccess.myInstComponentDecl() = componentFromSet(lookupInstComponent(name()));
+	syn InstComponentDecl InstAccess.myInstComponentDecl() = unknownInstComponentDecl();
+	eq InstDot.myInstComponentDecl()                       = getLastInstAccess().myInstComponentDecl();
+	eq InstGlobalAccess.myInstComponentDecl()              = getInstAccess().myInstComponentDecl();
+	syn lazy InstComponentDecl InstComponentAccess.myInstComponentDecl() {
+		InstComponentDecl icd = lookupInstComponent(name());
+		return (icd != null) ? icd : unknownInstComponentDecl();
+	}
 	
 }
 
@@ -283,8 +284,8 @@ aspect LookupInstComponentsInModifications {
      * sometimes. TODO: this should probably be fixed.
      * 
      */
-	inh HashSet InstElementModification.lookupInstComponentInInstElement(String name);
-	inh HashSet InstNamedModification.lookupInstComponentInInstElement(String name);
+	inh InstComponentDecl InstElementModification.lookupInstComponentInInstElement(String name);
+	inh InstComponentDecl InstNamedModification.lookupInstComponentInInstElement(String name);
 	
 	eq InstNamedModification.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
 	
@@ -299,11 +300,11 @@ aspect LookupInstComponentsInModifications {
 	
 //	eq InstShortClassDecl.getInstClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
 	
-	inh HashSet InstComponentRedeclare.lookupInstComponentInInstElement(String name);
+	inh InstComponentDecl InstComponentRedeclare.lookupInstComponentInInstElement(String name);
 	eq InstComponentRedeclare.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
 	
-	eq InstRoot.getChild().lookupInstComponentInInstElement(String name) {return emptyHashSet();}
-	eq FlatRoot.getChild().lookupInstComponentInInstElement(String name) {return emptyHashSet();}
+	eq InstRoot.getChild().lookupInstComponentInInstElement(String name) = null;
+	eq FlatRoot.getChild().lookupInstComponentInInstElement(String name) = null;
 	  
 }
 

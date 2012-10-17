@@ -1,62 +1,42 @@
 aspect InnerOuterComponents {
 	
 	inh boolean InstNode.inOuter();
-
-	eq InstRoot.getChild().inOuter() = false;
-	eq SourceRoot.getChild().inOuter() = false;
-	eq InstComponentDecl.getChild().inOuter() = isOuter()? true: inOuter();
+	eq InstRoot.getChild().inOuter()          = false;
+	eq SourceRoot.getChild().inOuter()        = false;
+	eq InstComponentDecl.getChild().inOuter() = inOrIsOuter();
 			
 	syn boolean InstComponentDecl.inOrIsOuter() = isOuter() || inOuter();	
 			
 	syn lazy InstComponentDecl InstComponentDecl.myInnerInstComponentDecl() {
 		if (isOuter()) {
-			return componentFromSet(lookupInnerInstComponent(name(),true));
+			return lookupInnerInstComponent(name(), true);
 		} else if (inOuter()) {
-			return componentFromSet(lookupInInnerInstComponent(name()));
+			return lookupInInnerInstComponent(name());
 		} else {	
 			return null;
 		}
 	}
 	
-	inh HashSet InstNode.lookupInnerInstComponent(String name, boolean firstScope);
+	inh InstComponentDecl InstNode.lookupInnerInstComponent(String name, boolean firstScope);
 	
-	eq InstRoot.getChild().lookupInnerInstComponent(String name, boolean firstScope) = emptyHashSet();
-	eq SourceRoot.getChild().lookupInnerInstComponent(String name, boolean firstScope) = emptyHashSet();
+	eq InstRoot.getChild().lookupInnerInstComponent(String name, boolean firstScope)   = null;
+	eq SourceRoot.getChild().lookupInnerInstComponent(String name, boolean firstScope) = null;
 	
 	eq InstNode.getChild().lookupInnerInstComponent(String name, boolean firstScope) {
-		if (firstScope) {
+		if (firstScope) 
 			return lookupInnerInstComponent(name, false);
-		}
-		HashSet set = new HashSet(4);
-		Iterator it = genericLookupInstComponent(name).iterator();
-		while (it.hasNext()) {
-			InstComponentDecl icd = (InstComponentDecl)it.next();
-			if (icd.isInner()) {
-				set.add(icd);
-			}
-		}
-		if (!set.isEmpty()) {
-			return set;
-		} else {
-			return lookupInnerInstComponent(name,false);
-		}
+		InstComponentDecl icd = genericLookupInstComponent(name);
+		if (icd != null && icd.isInner())
+			return icd;
+		return lookupInnerInstComponent(name,false);
 	}
 	
-	inh HashSet InstNode.lookupInInnerInstComponent(String name);
+	inh InstComponentDecl InstNode.lookupInInnerInstComponent(String name);
 	
-	eq InstRoot.getChild().lookupInInnerInstComponent(String name) = emptyHashSet();
-	eq SourceRoot.getChild().lookupInInnerInstComponent(String name) = emptyHashSet();
+	eq InstRoot.getChild().lookupInInnerInstComponent(String name) = null;
+	eq SourceRoot.getChild().lookupInInnerInstComponent(String name) = null;
 	
-	eq InstComponentDecl.getChild().lookupInInnerInstComponent(String name) {
-		HashSet set = new HashSet(4);
-		InstComponentDecl icd = myInnerInstComponentDecl();
-		set.addAll(icd.memberInstComponent(name));
-		if (!set.isEmpty()) {
-			return set;
-		} else {
-			return emptyHashSet();
-		}
-	}
+	eq InstComponentDecl.getChild().lookupInInnerInstComponent(String name) = myInnerInstComponentDecl().memberInstComponent(name);
 	
 }
 

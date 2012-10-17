@@ -73,17 +73,11 @@ aspect ClassAttributes {
 	}
 	
 	eq InstOptClassDecl.getInstClassModification().lookupInstComponentInInstElement(String name) {
-		
-		HashSet set = new HashSet();
-		//log.debug("InstOptClassDecl.getInstClassModification().lookupInstComponentInInstElement: " + name);
-		for (int i=0;i<getNumInstClassAttribute();i++) {
-			if (getInstClassAttribute(i).matchInstComponentDecl(name))
-				set.add(getInstClassAttribute(i));
+		for (InstComponentDecl ica : getInstClassAttributes()) {
+			if (ica.matches(name))
+				return ica;
 		}
-		if (set.size()>0)
-			return set;
-		else
-			return emptyHashSet();
+		return null;
 	}
 
 	// This equation is needed in order to ensure correct lookup of accesses
@@ -95,24 +89,16 @@ aspect ClassAttributes {
 		memberInstComponent(name);
 	
 	eq InstOptClassDecl.memberInstComponent(String name) {
-		log.debug("InstOptClassDecl.memberInstComponent: " + name);
-		HashSet set = new HashSet(4);
-		set.addAll(super.memberInstComponent(name));
-		if (set.size()>0) {
-			log.debug("Found component amongst the declared ones!");
-			return set;
+		InstComponentDecl icd = super.memberInstComponent(name);
+		if (icd != null)
+			return icd;
+		
+		for (InstComponentDecl ica : getInstClassAttributes()) {
+			if (ica.matches(name))
+				return ica;
 		}
-		for (int i=0;i<getNumInstClassAttribute();i++) {
-			if (getInstClassAttribute(i).matchInstComponentDecl(name))
-				set.add(getInstClassAttribute(i));
-		}
-		if (set.size()>0) {
-			//log.debug("InstOptClassDecl.memberInstComponent: " + name + " found");
-			return set;
-		} else {
-			//log.debug("InstOptClassDecl.memberInstComponent: " + name + " not found");
-			return emptyHashSet();	
-		}
+		
+		return null;
 	}
 
 	
