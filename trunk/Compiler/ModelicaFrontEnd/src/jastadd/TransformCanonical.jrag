@@ -5374,7 +5374,7 @@ aspect FunctionInlining {
 	public void FFunctionDecl.inline(FunctionInliner fi, List<FExp> args) {
 		duringInlining = true;
 		tempLookupMap = fi.startFunction(this);
-		root().flushAllRecursive();
+		flushAllRecursive();
 		
 		for (FFunctionVariable var : getFFunctionVariables())
 			var.functionInliner = fi;
@@ -5829,7 +5829,7 @@ aspect StateInitialEquations {
 				FEquation eqnToAdd = new FEquation(new FIdUseExp(fv.getFQName().fullCopy()),
 				                                   new FIdUseExp(nameToAdd.fullCopy()));
 				addFInitialEquation(eqnToAdd);    
-				root().flushAllRecursive();               
+				flushAllRecursive();               
 			}
 		
 			endStep("addStateInitialEquationsIfSet()");
