@@ -904,6 +904,22 @@ equation
 		der(x) = x*y;
 
   end JacTestRecord1;
+ 
+ model JacTestArray1
+	Real A[2,2] (start={{1,2},{4,5}});
+	Real X[2,2] = {{0.1,0.5},{0.3,0.2}};
+	Real dx[1,2] (start={{4,5}});
+	function f
+		input  Real A[2,2];
+		input  Real X[2,2];
+		output Real B[2,2];
+	algorithm
+		B := A*X;
+	end f;
+equation
+	der(A)  = -f(A,X);
+	der(dx) = -dx*A;
+  end  JacTestArray1;
   
   
 end JacGenTests;

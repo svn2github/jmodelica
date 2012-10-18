@@ -170,7 +170,7 @@ aspect CADCodeGen {
 		str.print("(");
 		str.print(name);
 		str.print(", ");
-		getFSubscripts().prettyPrint_CAD(p, str, "");
+		getFSubscripts().prettyPrintWithSep(p, str, "", ", ");
 		str.print(")");
 		return os.toString();
 	}
@@ -189,7 +189,7 @@ aspect CADCodeGen {
 		str.print("(");
 		str.print(name);
 		str.print(", ");
-		getFSubscripts().prettyPrint_CAD(p, str, "");
+		getFSubscripts().prettyPrintWithSep(p, str, "", ", ");
 		str.print(")");
 		return os.toString();
 	}
@@ -1522,6 +1522,9 @@ aspect CADCodeGen {
 	public void FFunctionCall.genTempVars_CAD(Printer p, PrintStream str, String indent) {
 		for (FExp arg : getArgs()) {
 			arg.genTempInputs_CAD(p, str, indent);
+		}
+		for(FFunctionCallLeft l : myLefts()){
+			l.genTempVars_CAD(p,str,indent);
 		}
 	}
 	
