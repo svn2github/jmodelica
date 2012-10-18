@@ -516,6 +516,78 @@ end FunctionTests.FunctionFlatten10;
 end FunctionFlatten10;
 
 
+model FunctionFlatten11
+    function f0
+        input Real x;
+        output Real y;
+    end f0;
+    
+    function f1
+        extends f0;
+    algorithm
+        y := x;
+    end f1;
+    
+    function f2
+        extends f0;
+    algorithm
+        y := x + 1;
+    end f2;
+    
+	model A
+		replaceable function f3 = f1 constrainedby f0;
+		Real x = 1;
+		Real y = f3(x);
+	end A;
+	
+	model B = A(redeclare function f3 = f2);
+	
+	model C
+		extends A;
+		redeclare function f3 = f2;
+	end C;
+	
+	B b;
+	C c;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="FunctionFlatten11",
+			description="Using redeclared function in model",
+			flatModel="
+fclass FunctionTests.FunctionFlatten11
+ Real b.x;
+ Real b.y;
+ Real c.x;
+ Real c.y;
+equation
+ b.x = 1;
+ b.y = FunctionTests.FunctionFlatten11.b.f3(b.x);
+ c.x = 1;
+ c.y = FunctionTests.FunctionFlatten11.c.f3(c.x);
+
+public
+ function FunctionTests.FunctionFlatten11.b.f3
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ end FunctionTests.FunctionFlatten11.b.f3;
+
+ function FunctionTests.FunctionFlatten11.c.f3
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ end FunctionTests.FunctionFlatten11.c.f3;
+
+end FunctionTests.FunctionFlatten11;
+")})));
+end FunctionFlatten11;
+
+
 
 /* ====================== Function calls ====================== */
 
