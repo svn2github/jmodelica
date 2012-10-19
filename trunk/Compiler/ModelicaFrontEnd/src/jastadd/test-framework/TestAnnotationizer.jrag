@@ -738,6 +738,37 @@ abstract public class TestAnnotationizerHelper {
 
 	}
 
+	/**
+	 * \brief A constant evaluation test case.
+	 */
+	public static class TimeTestCase extends TestAnnotationizerHelper {
+		
+		private String time;
+
+		public TimeTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+			super(filePath, className, description, opts, data);
+			time = data;
+			Double.parseDouble(data);
+		}
+		
+		/**
+		 * \brief Generate and print the part of the annotation that is specific to 
+	     *        this test case type.
+		 */
+		@Override
+		protected void printSpecific(PrintStream out, String indent) throws Exception {
+			printSpecificLine(out, indent, "maxTime", time, true);
+		}
+		
+		/**
+		 * \brief Prints a usage message for this test case type.
+		 */
+		public static void usage(String cl, String extra) {
+			TestAnnotationizerHelper.usage(cl, "maximum execution time");
+		}
+		
+	}
+
 }
 
 }
