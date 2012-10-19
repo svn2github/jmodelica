@@ -87,6 +87,11 @@ class Test_FMUModelCS1:
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
         res = model.simulate(final_time=1.5)
         assert (res["J1.w"][-1] - 3.245091100366517) < 1e-4
+        
+    @testattr(windows = True)
+    def test_types_platform(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
+        assert model.types_platform == "standard32"
     
 class Test_FMUModelME1:
     """
@@ -118,6 +123,10 @@ class Test_FMUModelME1:
         """
         pass
         
+    @testattr(fmi = True)
+    def test_model_types_platfrom(self):
+        assert self.dep.model_types_platform == "standard32"
+    
     @testattr(fmi = True)
     def test_boolean(self):
         """
