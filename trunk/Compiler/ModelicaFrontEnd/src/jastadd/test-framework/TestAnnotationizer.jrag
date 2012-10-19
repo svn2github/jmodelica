@@ -233,6 +233,26 @@ abstract public class TestAnnotationizerHelper {
 	
 	protected void printSpecificLine(
 			PrintStream out, String indent, String name, String value, boolean last) {
+		doPrintSpecificLine(out, indent, name, '"' + value + '"', last);
+	}
+	
+	protected void printSpecificLine(
+			PrintStream out, String indent, String name, double value, boolean last) {
+		doPrintSpecificLine(out, indent, name, Double.toString(value), last);
+	}
+	
+	protected void printSpecificLine(
+			PrintStream out, String indent, String name, int value, boolean last) {
+		doPrintSpecificLine(out, indent, name, Integer.toString(value), last);
+	}
+	
+	protected void printSpecificLine(
+			PrintStream out, String indent, String name, boolean value, boolean last) {
+		doPrintSpecificLine(out, indent, name, Boolean.toString(value), last);
+	}
+	
+	protected void doPrintSpecificLine(
+			PrintStream out, String indent, String name, String value, boolean last) {
 		int nl = Math.max(value.lastIndexOf('\n'), value.lastIndexOf('\r'));
 		boolean multi = nl >= 0;
 		if (multi) 
@@ -743,12 +763,11 @@ abstract public class TestAnnotationizerHelper {
 	 */
 	public static class TimeTestCase extends TestAnnotationizerHelper {
 		
-		private String time;
+		private double time;
 
 		public TimeTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
 			super(filePath, className, description, opts, data);
-			time = data;
-			Double.parseDouble(data);
+			time = Double.parseDouble(data);
 		}
 		
 		/**

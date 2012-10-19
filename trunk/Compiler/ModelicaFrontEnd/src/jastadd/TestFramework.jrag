@@ -93,8 +93,8 @@ aspect TestFramework {
 							m.invoke(tc, val);
 						}
 					} else {
-						log.error("Creating test case '" + className + "' - attribute '" + 
-								attrName + "' is assigned from an unsupported expression type");
+						testCaseError(className, "attribute '" + attrName + 
+								"' is assigned from an unsupported expression type");
 					}
 				}
 				
@@ -107,15 +107,19 @@ aspect TestFramework {
 		} catch (ClassNotFoundException e) {
 			// TODO: Maybe we should throw exceptions instead of log?
 			// No such class was found - log that
-			log.error("Creating test case '" + className + "' - class not found");
+			testCaseError(className, "class not found");
 		} catch (NoSuchMethodException e) {
 			// No such method was found - log that
-			log.error("Creating test case '" + className + "' - attribute '" + attrName + 
-					"' not found or used with wrong type of expression");
+			testCaseError(className, "attribute '" + attrName + "' not found or used with wrong type of expression");
 		} catch (Exception e) {
 			// The test case class did not behave as expected - log that
-			log.error("Creating test case '" + className + "' - malformed test case class");
+			testCaseError(className, "malformed test case class");
 		}
+	}
+	
+	public void FullClassDecl.testCaseError(String className, String msg) {
+		String[] fn = fileName().split("[/\\\\]Compiler[/\\\\]");
+		log.error("%s:%d: Creating test case '%s' - %s", fn[fn.length - 1], beginLine(), className, msg);
 	}
 
 }
