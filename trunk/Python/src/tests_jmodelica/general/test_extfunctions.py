@@ -141,9 +141,10 @@ def build_ext(target):
     if platform[:-2] == 'win':
         bin = path(os.environ['MINGW_HOME'],'bin')
         make = '%s CC=%s AR=%s' % (path(bin,'mingw32-make'), path(bin,'gcc'), path(bin,'ar'))
+        cmd = "gnumake Makefile "+target
     else:
         make = 'make'
-    cmd = '%s PLATFORM=%s clean %s' % (make, platform, target)
+        cmd = '%s PLATFORM=%s clean %s' % (make, platform, target)
     
     src = path(get_files_path(), 'Modelica')
     dst = create_temp_dir()
