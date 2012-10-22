@@ -5854,6 +5854,75 @@ Solution:
         ")})));
   end TearingTest1;
 
+model TearingWarningTest1
+	Real u0,u1,u2,u3,uL;
+	Real i0,i1,i2,i3,iL;
+	parameter Real R1 = 1;
+	parameter Real R2 = 1;
+	parameter Real R3 = 1;
+	parameter Real L = 1;
+equation
+	u0 = sin(time);
+	u1 = R1*i1;
+	u2 = R2*i2;
+	u3 = R3*i3;
+	uL = L*der(iL);
+	u0 = u1 + u3;
+	uL = u1 + u2;
+	u2 = u3;
+	i0 = i1 + iL;
+	i1 = i2 + i3;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		WarningTestCase(
+			name="TearingWarningTest1",
+			description="",
+			equation_sorting=true,
+			enable_tearing=true,
+			errorMessage="
+2 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+At line 0, column 0:
+  Tearing variable \"i2\" is missing start value!
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+At line 0, column 0:
+  Tearing variable \"i3\" is missing start value!
+")})));
+end TearingWarningTest1;
+
+model TearingWarningTest2
+	Real u0,u1,u2,u3,uL;
+	Real i0,i1,i2(start=1),i3,iL;
+	parameter Real R1 = 1;
+	parameter Real R2 = 1;
+	parameter Real R3 = 1;
+	parameter Real L = 1;
+equation
+	u0 = sin(time);
+	u1 = R1*i1;
+	u2 = R2*i2;
+	u3 = R3*i3;
+	uL = L*der(iL);
+	u0 = u1 + u3;
+	uL = u1 + u2;
+	u2 = u3;
+	i0 = i1 + iL;
+	i1 = i2 + i3;
+	
+	annotation(__JModelica(UnitTesting(tests={ 
+		WarningTestCase(
+			name="TearingWarningTest2",
+			description="",
+			equation_sorting=true,
+			enable_tearing=true,
+			errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+At line 0, column 0:
+  Tearing variable \"i3\" is missing start value!
+")})));
+end TearingWarningTest2;
+
 model RecordTearingTest1
   record R
     Real x;

@@ -1250,6 +1250,10 @@ aspect TransformCanonical {
 		}
 		
 		public void addUnsolvedBlock(SimpleEquationBlock aeb) {
+			for (FVariable var : aeb.activeVariables()) {
+				if (!var.startAttributeSet())
+					var.warning("Tearing variable \"" + var.name() + "\" is missing start value!");
+			}
 			if (!unsolvedBlocks.isEmpty() && unsolvedBlocks.get(unsolvedBlocks.size() - 1).mergeBlock(aeb))
 				return;
 			unsolvedBlocks.add(aeb);
