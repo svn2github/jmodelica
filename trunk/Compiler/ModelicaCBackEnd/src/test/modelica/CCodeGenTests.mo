@@ -522,7 +522,6 @@ $C_set_start_values$
     _x_0 = (1)/sf(0);
     _z_2 = (func_CCodeGenTests_CCodeGenParameters1_f_exp(AD_WRAP_LITERAL(1)))/sf(1);
    model_init_eval_parameters(jmi);
-   jmi->indep_extobjs_initialized = 1;
 ")})));
 end CCodeGenParameters1;
 
@@ -5797,7 +5796,6 @@ model_init_eval_parameters(jmi);
 _x_0 = (1);
 _q_3 = (0.0);
 _der_x_4 = (0.0);
-jmi->indep_extobjs_initialized = 1;
 ")})));
 end StartValues1;
 
@@ -5832,7 +5830,6 @@ equation
     _der_r_6 = (0.0);
     pre_i_4 = (10);
     pre_b_5 = (JMI_FALSE);
-	jmi->indep_extobjs_initialized = 1;
 ")})));
 end StartValues2;
 
