@@ -193,6 +193,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 	*(jmi_->dz) = (jmi_real_vec_t)calloc(jmi_->n_v, sizeof(jmi_real_t));/*Need number of equations*/
 	
         jmi_->ext_objs = (void**)calloc(n_ext_objs, sizeof(void*));
+        jmi_->indep_extobjs_initialized = 0;
+        jmi_->dep_extobjs_initialized = 0;
 
 	jmi_->dz_active_variables = (jmi_real_vec_p)calloc(1, sizeof(jmi_real_t *));
 	*(jmi_->dz_active_variables) = (jmi_real_vec_t)calloc(jmi_->n_v, sizeof(jmi_real_t));

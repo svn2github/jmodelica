@@ -522,6 +522,7 @@ $C_set_start_values$
     _x_0 = (1)/sf(0);
     _z_2 = (func_CCodeGenTests_CCodeGenParameters1_f_exp(AD_WRAP_LITERAL(1)))/sf(1);
    model_init_eval_parameters(jmi);
+   jmi->indep_extobjs_initialized = 1;
 ")})));
 end CCodeGenParameters1;
 
@@ -5795,7 +5796,8 @@ _z_2 = (3);
 model_init_eval_parameters(jmi);
 _x_0 = (1);
 _q_3 = (0.0);
-_der_x_4 = (0.0);		 
+_der_x_4 = (0.0);
+jmi->indep_extobjs_initialized = 1;
 ")})));
 end StartValues1;
 
@@ -5830,6 +5832,7 @@ equation
     _der_r_6 = (0.0);
     pre_i_4 = (10);
     pre_b_5 = (JMI_FALSE);
+	jmi->indep_extobjs_initialized = 1;
 ")})));
 end StartValues2;
 
@@ -7621,6 +7624,21 @@ class ExtObject
 	end destructor;
 end ExtObject;
 
+class ExtObjectwInput
+    extends ExternalObject;
+    
+    function constructor
+		input Real i;
+        output ExtObject eo;
+        external "C" eo = init_myEO(i);
+    end constructor;
+    
+    function destructor
+        input ExtObject eo;
+        external "C" close_myEO(eo);
+    end destructor;
+end ExtObjectwInput;
+
 function useMyEO
 	input ExtObject eo;
 	output Real r;
@@ -7761,5 +7779,54 @@ jmi_ad_var_t func_CCodeGenTests_useMyEO_exp(void* eo_v) {
 
 ")})));
 end TestExtObject2;
+
+model TestExtObject3
+    ExtObject myEO1 = ExtObject();
+	ExtObject myEO2 = ExtObject();
+	ExtObjectwInput myEO3 = ExtObjectwInput(z1);
+	ExtObjectwInput myEO4 = ExtObjectwInput(z1);
+    Real y1;
+	Real y2;
+	Real y3;
+	Real y4;
+	Real z1 = 5;
+equation
+    y1 = useMyEO(myEO1);
+	y2 = useMyEO(myEO2);
+    y3 = useMyEO(myEO3);
+    y4 = useMyEO(myEO4);
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="TestExtObject3",
+			description="",
+			template="
+$C_set_start_values$
+$C_DAE_initial_dependent_parameter_assignments$
+",
+			generatedCode="
+    if (!jmi->indep_extobjs_initialized) { 
+        _myEO1_0 = (func_CCodeGenTests_ExtObject_constructor_exp());
+    }
+    if (!jmi->indep_extobjs_initialized) { 
+        _myEO2_1 = (func_CCodeGenTests_ExtObject_constructor_exp());
+    }
+    model_init_eval_parameters(jmi);
+    _y1_4 = (0.0);
+    _y2_5 = (0.0);
+    _y3_6 = (0.0);
+    _y4_7 = (0.0);
+    _z1_8 = (0.0);
+    jmi->indep_extobjs_initialized = 1;
+
+    if (!jmi->dep_extobjs_initialized) { 
+        _myEO3_2 = (func_CCodeGenTests_ExtObjectwInput_constructor_exp(_z1_8));
+    }
+    if (!jmi->dep_extobjs_initialized) { 
+        _myEO4_3 = (func_CCodeGenTests_ExtObjectwInput_constructor_exp(_z1_8));
+    }
+    jmi->dep_extobjs_initialized = 1;
+")})));
+end TestExtObject3;
 
 end CCodeGenTests;

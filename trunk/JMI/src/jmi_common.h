@@ -1291,6 +1291,8 @@ struct jmi_t{
 	jmi_real_t **dz;					 /**< \brief  This vector is used to store calculated directional derivatives */
 	jmi_real_t **dz_active_variables;	 /**< \brief  This vector is used to store seed-values for active variables in block Jacobians */
 	void** ext_objs;                    /**< \brief This vector contains the external object pointers. */
+	int indep_extobjs_initialized;      /** <\brief Flag indicating if initialization of independent external objects have been done. */
+        int dep_extobjs_initialized;        /** <\brief Flag indicating if initialization of dependent external objects have been done. */
 	
 	jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
 	int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */
