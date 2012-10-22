@@ -3192,7 +3192,6 @@ aspect ArrayHelpers {
 	public class Index implements Cloneable {
 		
 		public static final Index NULL = new Index(0);
-		public static Index expanded = NULL;
 		
 		protected int[] index;
 		
@@ -3329,8 +3328,7 @@ aspect ArrayHelpers {
 		 * @param i  the Index to append.
 		 */
 		public Index expand(Index i) {
-			if (index.length + i.index.length != expanded.index.length) 
-				expanded = new Index(index.length + i.index.length);
+			Index expanded = new Index(index.length + i.index.length);
 			System.arraycopy(index, 0, expanded.index, 0, index.length);
 			System.arraycopy(i.index, 0, expanded.index, index.length, i.index.length);
 			return expanded;

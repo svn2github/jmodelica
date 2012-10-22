@@ -1100,7 +1100,7 @@ aspect ConstantEvaluation {
   // Bypass for nodes with inherent support for constant evaluation of arrays.
   eq FFunctionCall.cevalArray(Index i)    = cevalCalc();
   eq InstFunctionCall.cevalArray(Index i) = cevalCalc();
-  eq FInstAccessExp.cevalArray(Index i)   = isSlice() ? super.cevalArray(i) : cevalCalc();
+  eq FInstAccessExp.cevalArray(Index i)   = isSlice() ? super.cevalArray(i) : getInstAccess().ceval(i);
   eq FIdUseExp.cevalArray(Index i)        = isSlice() ? super.cevalArray(i) : cevalCalc();
   eq FIfExp.cevalArray(Index i)           = cevalSelectExp().cevalArray(i);
   
@@ -1240,23 +1240,30 @@ aspect ConstantEvaluation {
   eq FStringLitExp.cevalCalc()       = new CValueString(getString());
   eq FEnumLitExp.cevalCalc()         = new CValueEnum(type(), getValue());
   
-  syn CValue FIdUse.ceval() {
-	  boolean func = inFunction();
-	  FQName name = getFQName();
-	  if (func)
-		  name = name.resolveSubscripts();
-	  FAbstractVariable var = func ? lookupFV(name) : myFV();
-	  if (var != null && !var.isUnknown()) {
-		  CValue res = var.inRecord() ? cevalRecordMember(name) : var.ceval();
-		  if (hasFArraySubscripts() && !name.isScalarized())
-			  res = res.array().getCell(getFArraySubscripts().createIndex());
-		  return res;
-	  } else {
-		  return CValue.UNKNOWN;
-	  }
-  }
-  eq FIdUseInstAccess.ceval() = getInstAccess().ceval();
-  
+ 	syn CValue FIdUse.ceval() {
+		boolean func = inFunction();
+		FQName name = getFQName();
+		if (func)
+			name = name.resolveSubscripts();
+		FAbstractVariable var = func ? lookupFV(name) : myFV();
+		if (var != null && !var.isUnknown()) {
+			Index i = Index.NULL;
+			if (hasFArraySubscripts() && !name.isScalarized()) {
+				i = name.getFArraySubscripts().createIndex();
+			} else if (var instanceof FVariable && name.isScalarized() && !((FVariable) var).isScalarized()) {
+				i = ((FVariable) var).getFQName().getFArraySubscripts().createIndex();
+			}
+			if (i != Index.NULL) {
+				return var.inRecord() ? cevalRecordMember(name).array().getCell(i) : var.ceval(i);
+			} else {
+				return var.inRecord() ? cevalRecordMember(name) : var.ceval();
+			}
+		} else {
+			return CValue.UNKNOWN;
+		}
+	}
+ 	eq FIdUseInstAccess.ceval() = getInstAccess().ceval();
+
   /**
    * \brief Create a copy with all array subscripts replaced by literals.
    */
@@ -1318,18 +1325,20 @@ aspect ConstantEvaluation {
   eq FIdUseExp.cevalCalc()      = getFIdUse().ceval();
   eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
   
-  syn CValue InstAccess.ceval() = CValue.UNKNOWN;
-  eq InstDot.ceval()            = getInstAccess(getNumInstAccess() - 1).ceval();
-  eq InstGlobalAccess.ceval()   = getInstAccess().ceval();
-  eq InstComponentAccess.ceval() {
+  syn CValue InstAccess.ceval() = ceval(Index.NULL);
+  syn CValue InstAccess.ceval(Index i) = CValue.UNKNOWN;
+  eq InstDot.ceval(Index i)            = getInstAccess(getNumInstAccess() - 1).ceval(i);
+  eq InstGlobalAccess.ceval(Index i)   = getInstAccess().ceval(i);
+  eq InstComponentAccess.ceval(Index i) {
 	  CValue res = CValue.UNKNOWN;
 	  if (myInstComponentDecl().isAssignable()) {
+		  Index iHere = Index.NULL;
 		  InstAssignable var = (InstAssignable) myInstComponentDecl();
 		  
-		  Index i = Index.NULL;
 		  if (hasFArraySubscripts()) {
 			  FArraySubscripts fas = getFArraySubscripts();
-			  i = duringFunctionEval() ? fas.createIndex() : fas.asIndex();
+			  iHere = duringFunctionEval() ? fas.createIndex() : fas.asIndex();
+			  i = iHere.expand(i);
 		  }
 		  
 		  if (shouldCevalThroughParent(var)) {
@@ -1340,6 +1349,8 @@ aspect ConstantEvaluation {
 		  } else {
 			  res = var.ceval(i);
 		  }
+		  if (iHere != Index.NULL)
+			  res = res.array().getCell(iHere);
 	  }
 	  return res;
   }
@@ -1439,8 +1450,6 @@ aspect ConstantEvaluation {
 	    		val = startAttributeCValue();
 	    	}
 		}
-		if (i != Index.NULL && val != CValue.UNKNOWN)
-			val = val.array().getCell(i);
 		return val;
 	}
 	
@@ -1512,10 +1521,7 @@ aspect ConstantEvaluation {
    * 
    *  @return The constant value.
    */
-  syn CValue FAbstractVariable.ceval();
-  eq UnknownFVariable.ceval()    = CValue.UNKNOWN;
-  eq FDerivativeVariable.ceval() = CValue.UNKNOWN;
-  eq FEnumLiteral.ceval()        = CValue.UNKNOWN;
+  syn CValue FAbstractVariable.ceval() = CValue.UNKNOWN;
   eq FFunctionVariable.ceval()   = evaluationValue();
   eq FVariable.ceval() {
 	  if (!isConstant() && !isParameter()) {
@@ -1535,8 +1541,39 @@ aspect ConstantEvaluation {
 		  return val;
 	  }
   }
-  eq FExternalObjectVariable.ceval()    = CValue.UNKNOWN;
-  
+
+	/**
+	 * \brief Constant evaluation of FVariable binding expressions.
+	 * 
+	 * If an expression is evaluated in an FClass, then identifiers are 
+	 * referencing FVariables. The constant value of an FVariable is computed
+	 * by evaluating the binding expression of the variable, if any. If the
+	 * FVariable is not a constant or a parameter, or if it has no binding
+	 * expressions, then a CValueUnknown object is returned.
+	 * 
+	 *  @return The constant value.
+	 */
+	syn CValue FAbstractVariable.ceval(Index i) = CValue.UNKNOWN;
+	eq FFunctionVariable.ceval(Index i)   = evaluationValue().array().getCell(i);
+	eq FVariable.ceval(Index i) {
+		if (!isConstant() && !isParameter()) {
+			return CValue.UNKNOWN;
+		} else {
+			CValue val;
+			if (isForIndex())
+				val = evaluationValue().array().getCell(i);
+			else if (hasParameterEquation())
+				val = parameterEquation().cevalParameter(this, i);
+			else if (hasBindingExp())
+				val = getBindingExp().ceval(i);
+			else
+				val = startAttributeCValue().array().getCell(i);
+			if (isReal())
+				val = val.convertReal();
+			return val;
+		}
+	}
+
   /**
    * \brief Constant evaluation of binding equation for dependent parameter.
    */
@@ -1551,6 +1588,12 @@ aspect ConstantEvaluation {
 	  }
 	  return CValue.UNKNOWN;
   }
+  
+  /**
+   * \brief Constant evaluation of binding equation for dependent parameter.
+   */
+  syn CValue FAbstractEquation.cevalParameter(FVariable fv, Index i) = CValue.UNKNOWN;
+  eq FEquation.cevalParameter(FVariable fv, Index i)                 = getRight().ceval(i);
   
   /**
    * \brief Given that <code>val</code> is the value of this use expression, 

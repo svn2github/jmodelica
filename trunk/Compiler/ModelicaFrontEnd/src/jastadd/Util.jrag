@@ -891,10 +891,8 @@ aspect FlatNames {
     
     syn FQNamePart FQName.lastFQNamePart() = getFQNamePart(getNumFQNamePart()-1);
 
-    syn boolean FQName.hasFArraySubscripts() = isScalarized()? false:
-        lastFQNamePart().hasFArraySubscripts();
-    syn FArraySubscripts FQName.getFArraySubscripts() = isScalarized()? null:
-        lastFQNamePart().getFArraySubscripts();
+    syn boolean FQName.hasFArraySubscripts() = lastFQNamePart().hasFArraySubscripts();
+    syn FArraySubscripts FQName.getFArraySubscripts() = lastFQNamePart().getFArraySubscripts();
 
     syn boolean FIdUse.hasFArraySubscripts() = 
         getFQName().hasFArraySubscripts();
