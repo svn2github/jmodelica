@@ -17,8 +17,7 @@ AUTOMAKE_OPTIONS = foreign
 
 # EXTRA_DIST =
 
-# SUBDIRS = ThirdParty/Sundials ThirdParty/Zlib ThirdParty/Minizip ThirdParty/Expat JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary
-SUBDIRS = ThirdParty/Sundials JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary
+SUBDIRS = ThirdParty/Sundials ThirdParty/Zlib ThirdParty/Minizip ThirdParty/Expat JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 pymodelica_install_dir=$(abs_builddir)/pymodelica_install
@@ -147,6 +146,12 @@ endif
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials	
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Expat	
+	cp -r $(EXPAT_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Expat
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Minizip	
+	cp -r $(MINIZIP_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minizip
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Zlib	
+	cp -r $(ZLIB_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Zlib
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	cp $(CPPAD_HOME)/COPYING $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad	
@@ -216,17 +221,17 @@ clean-python-packages:
 if WITH_SUNDIALS
 	cd $(abs_top_srcdir)/Assimulo; \
 	python setup.py clean --all --sundials-home=$(SUNDIALS_HOME) 
-	rm -rf $(assimulo_install_dir) || echo  Could not remove $(assimulo_install_dir)
+	rm -rf $(assimulo_install_dir)
 endif
-	-cd $(abs_top_srcdir)/Python/src; \
+	cd $(abs_top_srcdir)/Python/src; \
 	python setup_pymodelica.py clean --all 
-	-rm -rf $(pymodelica_install_dir) || echo  Could not remove $(pymodelica_install_dir)
-	-cd $(abs_top_srcdir)/external/PyFMI; \
-	python setup.py  clean --all 
-	-rm -rf $(pyfmi_install_dir) || echo  Could not remove $(pyfmi_install_dir)
-	-cd $(abs_top_srcdir)/Python/src; \
+	rm -rf $(pymodelica_install_dir)
+	cd $(abs_top_srcdir)/Python/src; \
+	python setup_pyfmi.py clean --all 
+	rm -rf $(pyfmi_install_dir)
+	cd $(abs_top_srcdir)/Python/src; \
 	python setup_pyjmi.py clean --all 
-	-rm -rf $(pyjmi_install_dir)|| echo  Could not remove $(pyjmi_install_dir)
+	rm -rf $(pyjmi_install_dir)
 
 clean-frontends:
 if HAVE_ANT
