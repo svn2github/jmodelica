@@ -3187,7 +3187,7 @@ opts? #View the help text</programlisting>
               normalized in the sense that the sum of all lengths must be
               equal to 1. "free": The element lengths become optimization
               variables and are optimized according to the algorithm option
-              free_element_lengths_data. WARNING: This option is very
+              free_element_lengths_data. WARNING: The "free" option is very
               experimental and will not always give desirable results.</entry>
             </row>
 
@@ -3360,6 +3360,33 @@ opts? #View the help text</programlisting>
 
               <entry>Parameter estimation data used for solving parameter
               estimation problems.</entry>
+            </row>
+
+            <row>
+              <entry><literal>casadi_options_f</literal></entry>
+
+              <entry>CasADi defaults</entry>
+
+              <entry>CasADi options for evaluation of objective function. See
+              CasADi documentation for available options.</entry>
+            </row>
+
+            <row>
+              <entry><literal>casadi_options_g</literal></entry>
+
+              <entry>CasADi defaults</entry>
+
+              <entry>CasADi options for evaluation of constraint function. See
+              CasADi documentation for available options.</entry>
+            </row>
+
+            <row>
+              <entry><literal>IPOPT_options</literal></entry>
+
+              <entry>IPOPT defaults</entry>
+
+              <entry>IPOPT options for solution of NLP. See documentation of
+              CasADi's IPOPT interface for available options.</entry>
             </row>
           </tbody>
         </tgroup>
