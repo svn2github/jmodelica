@@ -166,10 +166,9 @@ plt.show()
         collocation with JMUs</emphasis>. This algorithm is the default
         algorithm for solving optimal control and parameter estimation
         problems. It is implemented in C, uses CppAD for computing function
-        derivatives and IPOPT for solving the resulting nonlinear program
-        (NLP). Functions and records in models are supported by this
-        algorithm. Use this method if your model is a DAE and does not contain
-        discontinuities.</para>
+        derivatives and IPOPT for solving the resulting NLP. Functions and
+        records in models are supported by this algorithm. Use this method if
+        your model is a DAE and does not contain discontinuities.</para>
       </listitem>
 
       <listitem>
@@ -2161,351 +2160,282 @@ print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
     <title>Dynamic optimization of DAEs using direct collocation with
     CasADi</title>
 
-    <section>
-      <title>Algorithm overview</title>
+    <para>The default algorithm described in <xref linkend="opt-sec-dae-jmu"/>
+    is well tested, robust and has been used in several large-scale industrial
+    projects. Due to its implementation in C, however, its flexibility is
+    limited and extension requires significant efforts. Therefore, a new
+    algorithm for optimal control and parameter estimation of DAEs based on
+    the same collocation scheme that has proven successful in the default
+    algorithm has been initiated. The new algorithm is based on the CasADi
+    package for evaluation of first and second order derivatives and for
+    integration with the IPOPT algorithm. The two main benefits of using
+    CasADi, through its Python interface, is significantly increased
+    flexibility and extensibility of the implementation on one hand and
+    significantly improved performance on the other. The goal is for the
+    CasADi-based algorithm to replace the C-based algorithm.</para>
 
-      <para>The default algorithm described in <xref
-      linkend="opt-sec-dae-jmu"/> is well tested, robust and has been used in
-      several large-scale industrial projects. Due to its implementation in C,
-      however, its flexibility is limited and extension requires significant
-      efforts. Therefore, a new algorithm for optimal control and parameter
-      estimation of DAEs based on the same collocation scheme that has proven
-      successful in the default algorithm has been initiated. The new
-      algorithm is based on the CasADi package for evaluation of first and
-      second order derivatives, instead of CppAD, and for integration with the
-      IPOPT algorithm. The two main benefits of using CasADi, through its
-      Python interface, is significantly increased flexibility and
-      extensibility of the implementation on one hand and significantly
-      improved performance on the other. The goal is for the CasADi-based
-      algorithm to replace the C-based algorithm.</para>
+    <para>The implementation relies on the class
+    <literal>CasadiModel</literal>. A compiler method for creating compiled
+    models compatible with CasADi resides in <literal>pymodelica</literal>,
+    <literal>compile_fmux</literal>. This function is similar to the
+    compilation functions for JMUs and FMUs, but rather than producing a model
+    representation that is based on compiled C code,
+    <literal>compile_fmux</literal> generates an XML model representation,
+    which in turn is imported into CasADi through creation of a
+    <literal>CasadiModel</literal> object. The commands for invoking the
+    compilation and optimization commands are shown below.</para>
 
-      <para>The implementation relies on the class
-      <literal>CasadiModel</literal>. A compiler method for creating compiled
-      models compatible with CasADi resides in <literal>pymodelica</literal>,
-      <literal>compile_fmux</literal>. This function is similar to the
-      compilation functions for JMUs and FMUs, but rather than producing a
-      model representation that is based on compiled C code,
-      <literal>compile_fmux</literal> generates an XML model representation,
-      which in turn is imported into CasADi through creation of a
-      <literal>CasadiModel</literal> object. The commands for invoking the
-      compilation and optimization commands are shown below.</para>
-
-      <programlisting language="python">from pymodelica import compile_fmux
+    <programlisting language="python">from pymodelica import compile_fmux
 from pyjmi import CasadiModel
 
 fmux_name = compile_fmux("MyModel", "MyModels.mop")
 model = CasadiModel(fmux_name)
 
-res = model.optimize()
+res = model.optimize(algorithm="LocalDAECollocationAlg")
 
 #Plot...
 </programlisting>
 
-      <para>As can be seen, the code for compiling and loading models, and for
-      invoking the optimization algorithm is similar to the default
-      optimization algorithm.</para>
+    <para>As can be seen, the code for compiling and loading models, and for
+    invoking the optimization algorithm is similar to the default optimization
+    algorithm.</para>
 
-      <para>An object containing all the options for the optimization
-      algorithm can be retrieved from the model object. The object
-      <literal>model</literal> in the code below is a
-      <literal>CasadiModel</literal> instance.</para>
+    <para>An object containing all the options for the optimization algorithm
+    can be retrieved from the model object. The object
+    <literal>model</literal> in the code below is a
+    <literal>CasadiModel</literal> instance.</para>
 
-      <programlisting language="python">opts = model.optimize_options()
+    <programlisting language="python">opts = model.optimize_options(algorithm="LocalDAECollocationAlg")
 
 opts? #View the help text</programlisting>
 
-      <para>Options are set in the same way as for the other simulation and
-      optimization algorithms, and the options object can then be propagated
-      to the <literal>optimize</literal> method:</para>
+    <para>Options are set in the same way as for the other simulation and
+    optimization algorithms, and the options object can then be propagated to
+    to the <literal>optimize</literal> method:</para>
 
-      <programlisting language="python">res = model.optimize(options=opts)</programlisting>
+    <programlisting language="python">res = model.optimize(algorithm="LocalDAECollocationAlg", options=opts)</programlisting>
 
-      <para>In <xref linkend="opt-tab-casadi-dae-opts"/> the options for the
-      algorithm are shown. Additional documentation is available in the Python
-      class documentation.</para>
+    <para>In <xref linkend="opt-tab-casadi-dae-opts"/> the options for the
+    algorithm are shown. Additional documentation is available in the Python
+    class documentation.</para>
 
-      <table xml:id="opt-tab-casadi-dae-opts">
-        <title>Options for the CasADi and collocation-based optimization
-        algorithm</title>
+    <table xml:id="opt-tab-casadi-dae-opts">
+      <title>Options for the CasADi and collocation-based optimization
+      algorithm</title>
 
-        <tgroup cols="3">
-          <colspec align="left" colname="col–opt" colwidth="1*"/>
+      <tgroup cols="3">
+        <colspec align="left" colname="col–opt" colwidth="1*"/>
 
-          <colspec align="left" colname="col–desc" colwidth="1*"/>
+        <colspec align="left" colname="col–desc" colwidth="1*"/>
 
-          <colspec align="left" colname="col–def" colwidth="2*"/>
+        <colspec align="left" colname="col–def" colwidth="2*"/>
 
-          <thead>
-            <row>
-              <entry align="center">Option</entry>
+        <thead>
+          <row>
+            <entry align="center">Option</entry>
 
-              <entry align="center">Default</entry>
+            <entry align="center">Default</entry>
 
-              <entry align="center">Description</entry>
-            </row>
-          </thead>
+            <entry align="center">Description</entry>
+          </row>
+        </thead>
 
-          <tbody>
-            <row>
-              <entry><literal>n_e</literal></entry>
+        <tbody>
+          <row>
+            <entry><literal>n_e</literal></entry>
 
-              <entry>50</entry>
+            <entry>50</entry>
 
-              <entry>Number of finite elements.</entry>
-            </row>
+            <entry>Number of finite elements.</entry>
+          </row>
 
-            <row>
-              <entry><literal>hs</literal></entry>
+          <row>
+            <entry><literal>hs</literal></entry>
 
-              <entry>None</entry>
+            <entry>None</entry>
 
-              <entry>Element lengths. Possible values: None, iterable of
-              floats and "free" None: The element lengths are uniformly
-              distributed. iterable of floats: Component i of the iterable
-              specifies the length of element i. The lengths must be
-              normalized in the sense that the sum of all lengths must be
-              equal to 1. "free": The element lengths become optimization
-              variables and are optimized according to the algorithm option
-              free_element_lengths_data. WARNING: The "free" option is very
-              experimental and will not always give desirable results.</entry>
-            </row>
+            <entry>Element lengths. Possible values: None, iterable of floats
+            and "free" None: The element lengths are uniformly distributed.
+            iterable of floats: Component i of the iterable specifies the
+            length of element i. The lengths must be normalized in the sense
+            that the sum of all lengths must be equal to 1. "free": The
+            element lengths become optimization variables and are optimized
+            according to the algorithm option free_element_lengths_data.
+            WARNING: This option is very experimental and will not always give
+            desirable results.</entry>
+          </row>
 
-            <row>
-              <entry><literal>free_element_lengths_data</literal></entry>
+          <row>
+            <entry><literal>free_element_lengths_data</literal></entry>
 
-              <entry>None</entry>
+            <entry>None</entry>
 
-              <entry>Data used for optimizing the element lengths if they are
-              free. Should be None when hs != "free".</entry>
-            </row>
+            <entry>Data used for optimizing the element lengths if they are
+            free. Should be None when hs != "free".</entry>
+          </row>
 
-            <row>
-              <entry><literal>n_cp</literal></entry>
+          <row>
+            <entry><literal>n_cp</literal></entry>
 
-              <entry>3</entry>
+            <entry>3</entry>
 
-              <entry>Number of collocation points in each element.</entry>
-            </row>
+            <entry>Number of collocation points in each element.</entry>
+          </row>
 
-            <row>
-              <entry><literal>discr</literal></entry>
+          <row>
+            <entry><literal>discr</literal></entry>
 
-              <entry>'LGR'</entry>
+            <entry>'LGR'</entry>
 
-              <entry>Determines the collocation scheme used to discretize the
-              problem. Possible values: "LG" and "LGR". "LG": Gauss
-              collocation (Legendre-Gauss) "LGR": Radau collocation
-              (Legendre-Gauss-Radau).</entry>
-            </row>
+            <entry>Determines the collocation scheme used to discretize the
+            problem. Possible values: "LG" and "LGR". "LG": Gauss collocation
+            (Legendre-Gauss) "LGR": Radau collocation
+            (Legendre-Gauss-Radau).</entry>
+          </row>
 
-            <row>
-              <entry><literal>graph</literal></entry>
+          <row>
+            <entry><literal>graph</literal></entry>
 
-              <entry>'SX'</entry>
+            <entry>'SX'</entry>
 
-              <entry>CasADi graph type. Possible values are "SX" and
-              "MX".</entry>
-            </row>
+            <entry>CasADi graph type. Possible values are "SX" and
+            "MX".</entry>
+          </row>
 
-            <row>
-              <entry><literal>rename_vars</literal></entry>
+          <row>
+            <entry><literal>rename_vars</literal></entry>
 
-              <entry>False</entry>
+            <entry>False</entry>
 
-              <entry>Rename NLP variables according to their corresponding
-              Modelica/Optimica names. This only works if graph == "SX". This
-              is done in an inefficient manner and should only be used for
-              investigative purposes.</entry>
-            </row>
-
-            <row>
-              <entry><literal>write_scaled_result</literal></entry>
-
-              <entry>False</entry>
-
-              <entry>Return the scaled optimization result if set to True,
-              otherwise return the unscaled optimization result. This option
-              is only applicable when the CasadiModel has been instantiated
-              with scale_variables=True. This option is only intended for
-              debugging.</entry>
-            </row>
-
-            <row>
-              <entry><literal>result_mode</literal></entry>
-
-              <entry>'collocation_points'</entry>
-
-              <entry>Specifies the output format of the optimization result.
-              Possible values: "collocation_points", "element_interpolation"
-              and "mesh_points" "collocation_points": The optimization result
-              is given at the collocation points as well as the start and
-              final time point. "element_interpolation": The values of the
-              variable trajectories are calculated by evaluating the
-              collocation polynomials. The algorithm option n_eval_points is
-              used to specify the evaluation points within each finite
-              element. "mesh_points": The optimization result is given at the
-              mesh points.</entry>
-            </row>
-
-            <row>
-              <entry><literal>n_eval_points</literal></entry>
-
-              <entry>20</entry>
-
-              <entry>The number of evaluation points used in each element when
-              the algorithm option result_mode is set to
-              "element_interpolation". One evaluation point is placed at each
-              element end-point (hence the option value must be at least 2)
-              and the rest are distributed uniformly.</entry>
-            </row>
-
-            <row>
-              <entry><literal>blocking_factors</literal></entry>
-
-              <entry>None (not used)</entry>
-
-              <entry>The iterable of blocking factors, where each element
-              corresponds to the number of elements for which all the control
-              profiles should be constant. For example, if blocking_factors ==
-              [2, 1, 5], then u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The
-              sum of all elements in the iterable must be the same as the
-              number of elements. If blocking_factors is None, then the usual
-              collocation polynomials are instead used to represent the
-              controls.</entry>
-            </row>
-
-            <row>
-              <entry><literal>quadrature_constraint</literal></entry>
-
-              <entry>True</entry>
-
-              <entry>Whether to use quadrature continuity constraints. This
-              option is only applicable when using Gauss collocation. It is
-              incompatible with eliminate_der_var set to True. True:
-              Quadrature is used to get the values of the states at the mesh
-              points. False: The Lagrange basis polynomials for the state
-              collocation polynomials are evaluated to get the values of the
-              states at the mesh points.</entry>
-            </row>
-
-            <row>
-              <entry><literal>eliminate_der_var</literal></entry>
-
-              <entry>False</entry>
-
-              <entry>True: The variables representing the derivatives are
-              eliminated via the collocation equations and are thus not a part
-              of the NLP, with the exception of \dot{x}_{1, 0}, which is not
-              eliminated since the collocation equations are not enforced at
-              t_0. False: The variables representing the derivatives are kept
-              as NLP variables and the collocation equations enter as
-              constraints.</entry>
-            </row>
-
-            <row>
-              <entry><literal>eliminate_cont_var</literal></entry>
-
-              <entry>False</entry>
-
-              <entry>True: Let the same variables represent both the values of
-              the states at the start of each element and the end of the
-              previous element. False: For Radau collocation, the extra
-              variables x_{i, 0}, representing the states at the start of each
-              element, are created and then constrained to be equal to the
-              corresponding variable at the end of the previous element for
-              continuity. For Gauss collocation, the extra variables x_{i,
-              n_cp + 1}, representing the states at the end of each element,
-              are created and then constrained to be equal to the
-              corresponding variable at the start of the succeeding element
-              for continuity.</entry>
-            </row>
-
-            <row>
-              <entry><literal>init_traj</literal></entry>
-
-              <entry>None (i.e. not used, set this argument to activate
-              initialization)</entry>
-
-              <entry>Variable trajectory data used for initialization of the
-              optimization problem. The data is represented by an object of
-              the type
-              <literal>pyjmi.common.io.ResultDymolaTextual.</literal></entry>
-            </row>
-
-            <row>
-              <entry><literal>parameter_estimation_data</literal></entry>
-
-              <entry>None</entry>
-
-              <entry>Parameter estimation data used for solving parameter
-              estimation problems.</entry>
-            </row>
-
-            <row>
-              <entry><literal>casadi_options_f</literal></entry>
-
-              <entry>CasADi defaults</entry>
-
-              <entry>CasADi options for evaluation of objective function. See
-              CasADi documentation for available options.</entry>
-            </row>
-
-            <row>
-              <entry><literal>casadi_options_g</literal></entry>
-
-              <entry>CasADi defaults</entry>
-
-              <entry>CasADi options for evaluation of constraint function. See
-              CasADi documentation for available options.</entry>
-            </row>
-
-            <row>
-              <entry><literal>IPOPT_options</literal></entry>
-
-              <entry>IPOPT defaults</entry>
-
-              <entry>IPOPT options for solution of NLP. See documentation of
-              CasADi's IPOPT interface for available options.</entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </table>
-
-      <para>A few of the options are experimental, so changing default values
-      should be done with some care. The three last options,
-      <literal>casadi_options_f</literal>, <literal>casadi_options_g</literal>
-      and IPOPT_options, serve as interfaces for setting options in CasADi and
-      IPOPT. For example, to set the maximum number of iterations in IPOPT,
-      the following syntax can be used.</para>
-
-      <programlisting language="python">opts = model.optimize_options()
-opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
-
-      <para>The algorithm is in many ways similar to the JMI algorithm, but
-      there are a few key differences. As mentioned before, it offers
-      increased performance, which is mainly due to two things. The first is
-      that this algorithm constructs automatic differentiation graphs for the
-      entire NLP, whereas the JMI algorithm only constructs graphs for
-      evaluation of residuals, leading to very fast function evaluations. The
-      second is that second-order derivatives are computed using automatic
-      differentation, whereas the JMI algorithm instead uses a quasi-Newton
-      method, which affects convergence speed and robustness. This feature can
-      be disabled by setting the IPOPT option
-      <literal>generate_hessian</literal> to <literal>False</literal>, in
-      which case it will use the same quasi-Newton approach as the JMI
-      algorithm.</para>
-
-      <para>JModelica.org's CasADi framework does not support simulation and
-      initialization of models. It is recommended to instead use FMI for these
-      purposes.</para>
-
-      <para>A limitation of the algorithm is that it currently does not
-      support record and function constructs in the Modelica code. Otherwise
-      the algorithm supports solution of the same problems as the JMI
-      algorithm. The solution of parameter estimation problems is done in a
-      slightly different way, which is still undocumented in this
-      document.</para>
-    </section>
+            <entry>Rename NLP variables according to their corresponding
+            Modelica/Optimica names. This only works if graph == "SX". This is
+            done in an inefficient manner and should only be used for
+            investigative purposes.</entry>
+          </row>
+
+          <row>
+            <entry><literal>write_scaled_result</literal></entry>
+
+            <entry>False</entry>
+
+            <entry>Return the scaled optimization result if set to True,
+            otherwise return the unscaled optimization result. This option is
+            only applicable when the CasadiModel has been instantiated with
+            scale_variables=True. This option is only intended for
+            debugging.</entry>
+          </row>
+
+          <row>
+            <entry><literal>result_mode</literal></entry>
+
+            <entry>'collocation_points'</entry>
+
+            <entry>Specifies the output format of the optimization result.
+            Possible values: "collocation_points", "element_interpolation" and
+            "mesh_points" "collocation_points": The optimization result is
+            given at the collocation points as well as the start and final
+            time point. "element_interpolation": The values of the variable
+            trajectories are calculated by evaluating the collocation
+            polynomials. The algorithm option n_eval_points is used to specify
+            the evaluation points within each finite element. "mesh_points":
+            The optimization result is given at the mesh points.</entry>
+          </row>
+
+          <row>
+            <entry><literal>n_eval_points</literal></entry>
+
+            <entry>20</entry>
+
+            <entry>The number of evaluation points used in each element when
+            the algorithm option result_mode is set to
+            "element_interpolation". One evaluation point is placed at each
+            element end-point (hence the option value must be at least 2) and
+            the rest are distributed uniformly.</entry>
+          </row>
+
+          <row>
+            <entry><literal>blocking_factors</literal></entry>
+
+            <entry>None (not used)</entry>
+
+            <entry>The iterable of blocking factors, where each element
+            corresponds to the number of elements for which all the control
+            profiles should be constant. For example, if blocking_factors ==
+            [2, 1, 5], then u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum
+            of all elements in the iterable must be the same as the number of
+            elements. If blocking_factors is None, then the usual collocation
+            polynomials are instead used to represent the controls.</entry>
+          </row>
+
+          <row>
+            <entry><literal>quadrature_constraint</literal></entry>
+
+            <entry>True</entry>
+
+            <entry>Whether to use quadrature continuity constraints. This
+            option is only applicable when using Gauss collocation. It is
+            incompatible with eliminate_der_var set to True. True: Quadrature
+            is used to get the values of the states at the mesh points. False:
+            The Lagrange basis polynomials for the state collocation
+            polynomials are evaluated to get the values of the states at the
+            mesh points.</entry>
+          </row>
+
+          <row>
+            <entry><literal>eliminate_der_var</literal></entry>
+
+            <entry>False</entry>
+
+            <entry>True: The variables representing the derivatives are
+            eliminated via the collocation equations and are thus not a part
+            of the NLP, with the exception of \dot{x}_{1, 0}, which is not
+            eliminated since the collocation equations are not enforced at
+            t_0. False: The variables representing the derivatives are kept as
+            NLP variables and the collocation equations enter as
+            constraints.</entry>
+          </row>
+
+          <row>
+            <entry><literal>eliminate_cont_var</literal></entry>
+
+            <entry>False</entry>
+
+            <entry>True: Let the same variables represent both the values of
+            the states at the start of each element and the end of the
+            previous element. False: For Radau collocation, the extra
+            variables x_{i, 0}, representing the states at the start of each
+            element, are created and then constrained to be equal to the
+            corresponding variable at the end of the previous element for
+            continuity. For Gauss collocation, the extra variables x_{i, n_cp
+            + 1}, representing the states at the end of each element, are
+            created and then constrained to be equal to the corresponding
+            variable at the start of the succeeding element for
+            continuity.</entry>
+          </row>
+
+          <row>
+            <entry><literal>init_traj</literal></entry>
+
+            <entry>None (i.e. not used, set this argument to activate
+            initialization)</entry>
+
+            <entry>Variable trajectory data used for initialization of the
+            optimization problem. The data is represented by an object of the
+            type
+            <literal>pyjmi.common.io.ResultDymolaTextual.</literal></entry>
+          </row>
+
+          <row>
+            <entry><literal>parameter_estimation_data</literal></entry>
+
+            <entry>None</entry>
+
+            <entry>Parameter estimation data used for solving parameter
+            estimation problems.</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
 
     <section>
       <title>Examples</title>
@@ -2519,14 +2449,16 @@ opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
         algorithm. It is thus recommended that the user is familiar with the
         steps performed in the previous example. A complete script for this
         example can be found in
-        <literal>${JMODELICA_HOME}/Python/pyjmi/examples/cstr_casadi.py</literal>.</para>
+        $JMODELICA_HOME/Python/pyjmi/examples/cstr_casadi.py.</para>
 
         <section xml:id="opt-sec-dae-casadi-cstr-init">
           <title>Solve the initialization problem</title>
 
           <para>The first step is to find the two stationary points via
-          initialization. We start by importing all the needed Python
-          packages.</para>
+          initialization. Since <literal>CasadiModel</literal>, unlike
+          <literal>JMUModel</literal>, does not support initialization and
+          simulation, we instead use FMI for these purposes. We start by
+          importing all the needed Python packages.</para>
 
           <para><programlisting language="python"># Import matplotlib and NumPy
 import matplotlib.pyplot as plt
@@ -2818,6 +2750,23 @@ plt.show()
 </programlisting>
         </section>
       </section>
+    </section>
+
+    <section>
+      <title>Limitations</title>
+
+      <para>Current significant limitations of the algorithm as compared to
+      the default JMI algorithm are:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>The time interval must be fixed.</para>
+        </listitem>
+
+        <listitem>
+          <para>The Modelica code can not contain functions or records.</para>
+        </listitem>
+      </itemizedlist>
     </section>
   </section>
 
