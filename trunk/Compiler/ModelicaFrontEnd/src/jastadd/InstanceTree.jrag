@@ -396,7 +396,7 @@ aspect Environments {
 		return res;
 	}
 	
-	syn lazy InstModification InstModification.matchInstModification(String name) = null;
+	syn InstModification InstModification.matchInstModification(String name) = null;
 	eq InstCompleteModification.matchInstModification(String name) {
 		for (InstModification im : getInstClassModification().getInstArguments())
 			if (im.matchInstModification(name)!=null)
@@ -544,8 +544,8 @@ aspect Environments {
 		return super.retrieveReplacingClass(name);
 	}
 
-	inh lazy InstNode InstModification.myInstNode();
-	inh lazy InstNode InstNode.myInstNode();
+	inh InstNode InstModification.myInstNode();
+	inh InstNode InstNode.myInstNode();
 	eq InstNode.getChild().myInstNode() = this;
 	//The lexical scope of modifiers for short classes are "outside" of the short declaration
     eq InstExtendsShortClass.getChild().myInstNode() = myInstNode();
