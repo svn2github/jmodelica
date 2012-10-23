@@ -324,8 +324,8 @@ aspect Environments {
 	 * as an inherited attribute and is computed from the outer environment located at
 	 * ancestor InstNodes.
 	 */	
-	inh lazy Environment InstNode.myEnvironment();
-	inh lazy Environment InstNode.myEnvironment(String name); // TODO: Make sure this is lazy - removed for debugging
+	inh Environment InstNode.myEnvironment();
+	inh Environment InstNode.myEnvironment(String name);
 	
 	/**
 	 * When no arguments are supplied to myEnvironment, the MergedEnvironment of the ancestor

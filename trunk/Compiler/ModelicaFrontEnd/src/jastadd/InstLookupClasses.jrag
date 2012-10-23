@@ -290,7 +290,7 @@ aspect InstLookupClasses {
 	eq InstReplacingShortClassDecl.lookupInstClassInSurrounding(String name) = 
 		getInstClassRedeclare().lookupInstClass(name);
 
-	syn lazy InstClassDecl InstNode.genericLookupInstClass(String name) circular [null] {
+	syn lazy InstClassDecl InstNode.genericLookupInstClass(String name) {
 		for (InstClassDecl icd : instClassDecls()) 
 			if (icd.matchInstClassDecl(name)) 
 				return icd;
@@ -310,7 +310,7 @@ aspect InstLookupClasses {
 		return lookupInstClassInSurrounding(name);
 	}
 	
-	syn InstClassDecl InstNode.superLookupInstClass(String name) circular [null] {
+	syn InstClassDecl InstNode.superLookupInstClass(String name) {
 		HashSet set = new HashSet();
 
 		for (InstImport ii : instImports()) {
@@ -328,7 +328,7 @@ aspect InstLookupClasses {
 		return lookupInstClass(name);
 	}
 
-	syn lazy InstClassDecl InstComponentDecl.genericLookupInstClass(String name) circular [null] {
+	syn InstClassDecl InstComponentDecl.genericLookupInstClass(String name) {
 		InstClassDecl icd = memberInstClass(name);
 		if (icd != null)
 			return icd;
@@ -342,7 +342,7 @@ aspect InstLookupClasses {
 		return myInstClass().genericLookupInstClass(name);
 	}
 	
-	syn InstClassDecl InstComponentDecl.superLookupInstClassInComponent(String name) circular [null] {
+	syn InstClassDecl InstComponentDecl.superLookupInstClassInComponent(String name) {
 		// TODO: Why do we do this? Seems to be needed, as tests fail without it
 		if (myInstClass().isRedeclared())
 			return myInstClass().lookupInstClassInInstClassRedeclare(name);
@@ -362,7 +362,7 @@ aspect InstLookupClasses {
 
 	
 	// TODO: rewrite so that classes are only looked up in constraining types.	
-	syn lazy InstClassDecl InstExtends.genericLookupInstClassInExtends(String name) circular [null] {
+	syn lazy InstClassDecl InstExtends.genericLookupInstClassInExtends(String name) {
 		for (InstClassDecl icd : instClassDecls()) 
 			if (icd.matchInstClassDecl(name)) 
 				return icd;
@@ -376,7 +376,7 @@ aspect InstLookupClasses {
 		return myInstClass().genericLookupInstClass(name);
 	}
 	
-	syn InstClassDecl InstExtends.superLookupInstClassInExtends(String name) circular [null] {
+	syn InstClassDecl InstExtends.superLookupInstClassInExtends(String name) {
 		for (InstClassDecl icd : instClassDecls()) 
 			if (icd.matchInstClassDecl(name)) 
 				return icd;
@@ -393,7 +393,7 @@ aspect InstLookupClasses {
 		return getInstConstraining().getInstNode().memberInstClass(name) != null;
 	}
 	
-	syn InstClassDecl InstNode.memberInstClass(String name) circular [null] = null;
+	syn InstClassDecl InstNode.memberInstClass(String name) = null;
 	
 	eq InstFullClassDecl.memberInstClass(String name) {
 		if (!constrainMemberInstClass(name))
@@ -520,7 +520,7 @@ aspect InstLookupImport {
     		simpleLookupInstClassDecl(getPackageNameNoTransform().name());
 	}
 
-	syn InstClassDecl InstImport.lookupInstClassInImport(String name) circular [null] {
+	syn InstClassDecl InstImport.lookupInstClassInImport(String name) {
 	    if (name.equals(name())) {	
 	    	InstClassDecl icd = getImportedClass();
 	    	if (!icd.isUnknown()) 
