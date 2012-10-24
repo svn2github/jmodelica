@@ -1112,9 +1112,6 @@ model RecursiveStructure2
 			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1058, column 3:
-  Recursive class structure
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 1062, column 3:
   Recursive class structure
 ")})));

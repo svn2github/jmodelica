@@ -28,8 +28,11 @@ aspect OptimicaErrorCheck {
   	
   	public void InstModification.checkOptimicaAttribute(InstOptClassDecl iocd) {
      	// TODO: Need to examine if typeCheckAttribute really fits here
+  		// TODO: Might want to handle this in InstClassAttribute.collectErrors() instead
  		typeCheckAttribute(iocd);
   	}
+  	
+  	public void InstClassAttribute.collectErrors() {}
   	
   	syn lazy boolean InstOptClassDecl.isStatic() {
     	boolean stat = false;

@@ -445,13 +445,7 @@ end NameTest13_Err;
 			name="NameTest14_Err",
 			description="Test that names are looked up correct.",
 			errorMessage="
- 4 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
-Semantic error at line 459, column 18:
-  The component z is undeclared
-In file 'src/test/modelica/NameTests.mo':
-Semantic error at line 459, column 20:
-  Cannot find class or component declaration for p
+ 2 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 461, column 18:
   The component z is undeclared
@@ -1922,13 +1916,16 @@ model ConstantLookup39
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="ConstantLookup39",
-			description="",
+			description="Error in constant used from other package",
 			errorMessage="
-1 errors found:
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 1930, column 23:
   Cannot find class or component declaration for e
-")})));
+Error: in file Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 1899, column 23:
+  Could not evaluate binding expression for constant 'f': 'e'
+  ")})));
 end ConstantLookup39;
 
 
@@ -2577,54 +2574,56 @@ end NameTests.ShortClassDeclTest6;
 end ShortClassDeclTest6;
 
 
-model ShortClassDeclTest7_Err
-  model A
-    Real x = 2;
-  end A;
-  
-  model B = A(y = 2.5);
-  
-  B b(x = 3);
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ShortClassDeclTest7_Err",
-			description="Short class declaration of Real.",
-			errorMessage="
-  1 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
-Semantic error at line 834, column 14:
-  The component y is undeclared
-")})));
-end ShortClassDeclTest7_Err;
-
-
-model ShortClassDeclTest75_Err
-  model A
-    Real x = 2;
-  end A;
-  
-  model B = A(y = 2.5);
-  
-  model C = B;
-  
-  model D
-	  extends B;
-  end D;
-  
-  B b(x = 3);
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ShortClassDeclTest75_Err",
-			description="",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 2625, column 15:
-  The component y is undeclared
-")})));
-end ShortClassDeclTest75_Err;
+// TODO: These errors should be covered by a "Check for errors" that should 
+//       be separate from the error check done when instantiating
+//model ShortClassDeclTest7_Err
+//  model A
+//    Real x = 2;
+//  end A;
+//  
+//  model B = A(y = 2.5);
+//  
+//  B b(x = 3);
+//
+//	annotation(__JModelica(UnitTesting(tests={
+//		ErrorTestCase(
+//			name="ShortClassDeclTest7_Err",
+//			description="Short class declaration of Real.",
+//			errorMessage="
+//  1 error(s) found...
+//In file 'src/test/modelica/NameTests.mo':
+//Semantic error at line 834, column 14:
+//  The component y is undeclared
+//")})));
+//end ShortClassDeclTest7_Err;
+//
+//
+//model ShortClassDeclTest75_Err
+//  model A
+//    Real x = 2;
+//  end A;
+//  
+//  model B = A(y = 2.5);
+//  
+//  model C = B;
+//  
+//  model D
+//	  extends B;
+//  end D;
+//  
+//  B b(x = 3);
+//
+//	annotation(__JModelica(UnitTesting(tests={
+//		ErrorTestCase(
+//			name="ShortClassDeclTest75_Err",
+//			description="",
+//			errorMessage="
+//1 errors found:
+//Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+//Semantic error at line 2625, column 15:
+//  The component y is undeclared
+//")})));
+//end ShortClassDeclTest75_Err;
 
 
 model ShortClassDeclTest8

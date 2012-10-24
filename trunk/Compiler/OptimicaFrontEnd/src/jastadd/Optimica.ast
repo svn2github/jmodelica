@@ -38,3 +38,5 @@ FinalTimeExp : Exp;
 InstOptClassDecl : InstFullClassDecl ::= [InstClassModification] /InstClassAttribute:InstComponentDecl*/;
 
 InstOptimizationClass : InstRestriction;
+
+InstClassAttribute : InstPrimitive;

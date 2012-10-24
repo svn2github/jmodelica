@@ -4066,6 +4066,83 @@ end RedeclareTests.RedeclareElement23;
 end RedeclareElement23;
 
 
+model RedeclareElement24
+	partial function A
+        input Real x;
+        output Real y;
+	end A;
+	
+	function B
+        extends A;
+    algorithm
+        y := x;
+    end B;
+	
+	partial record C
+        replaceable function D = A;
+    end C;
+	
+	record E
+        extends C(redeclare function D = B);
+    end E;
+	
+	model F
+		replaceable function G = A;
+		Real x = 1;
+	end F;
+	
+	model H
+		replaceable record I = C;
+        function J = I.D;
+		replaceable function K = J;
+		F b(redeclare function G = K);
+	end H;
+	
+	H a(redeclare record I = E);
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		FlatteningTestCase(
+			name="RedeclareElement24",
+			description="Complex system of redeclares that caused erroneous error message",
+			flatModel="
+fclass RedeclareTests.RedeclareElement24
+ Real a.b.x = 1;
+end RedeclareTests.RedeclareElement24;
+")})));
+end RedeclareElement24;
+
+
+model RedeclareElement25
+    package A
+        extends F(redeclare model C = D);
+    end A;
+    
+    package F
+        replaceable model C = E;
+    end F;
+    
+    model E
+        replaceable package B = F;
+        Real x = 1;
+    end E;
+    
+    model D
+        extends E(redeclare replaceable package B = A);
+    end D;
+    
+    A.C a;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		FlatteningTestCase(
+			name="RedeclareElement25",
+			description="Causes recursive class structure that expands infinitely if classes are expanded",
+			flatModel="
+fclass RedeclareTests.RedeclareElement25
+ Real a.x = 1;
+end RedeclareTests.RedeclareElement25;
+")})));
+end RedeclareElement25;
+
 
 model RedeclareSameLevel10
 	package A

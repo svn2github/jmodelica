@@ -569,46 +569,12 @@ aspect InstanceErrorCheck {
 	  allChecks();
 	  for (InstNode n : getInstComponentDecls()) 
 		  n.collectErrors();
-	  collectErrorsInClassDecls();
 	  for (InstNode n : getInstExtendss()) 
 		  n.collectErrors();
 	  for (FAbstractEquation e : getFAbstractEquations()) 
 		  e.collectErrors();
 	}
   }
-  
-    public void InstNode.collectErrorsInClassDecls() {
-    	for (InstNode n : getInstClassDecls())
-    		n.collectErrorsInClassDecl();
-    }
-    
-    protected boolean InstNode.errorCheckedAsClass = false;
-    
-    public void InstNode.collectErrorsInClassDecl() {
-        if (!errorCheckedAsClass) {
-        	errorCheckedAsClass = true;
-	    	if (isRecursed()) {
-	    		error("Recursive class structure");
-	    	} else {
-	    		classChecks();
-	    		for(InstNode n : getInstExtendss()) 
-	    			n.collectErrorsInClassDecl();
-	    	}
-        }
-    }
-    
-    public void InstNode.classChecks() {}
-    
-    public void InstExtends.classChecks() {
-		if (hasInstClassModification())
-			getInstClassModification().collectErrors();
-		getClassName().collectErrors();
-    }
-    
-    public void InstBaseClassDecl.classChecks() {
-		if (hasInstConstraining())
-			getInstConstraining().getClassName().collectErrors();
-    }
     
     /**
      * \brief Check if this node is in an InstComponentDecl.
@@ -734,7 +700,7 @@ aspect InstanceErrorCheck {
 			error("Could not evaluate binding expression for %s '%s': %s", varKind, varName, exp);
 	}
 	
-	public void InstPrimitive.collectErrors() {
+	public void InstAssignable.collectErrors() {
 		//log.debug(toString());
         if (!errorChecked) {
         	super.collectErrors();
@@ -751,6 +717,7 @@ aspect InstanceErrorCheck {
 				else if (isParameter() && bexp.isCircular())
 					bexp.error("Circularity in binding expression of parameter: %s = %s", 
 							qualifiedName(), bexp);
+				bexp.collectErrors();
     		} else {
 				// Warn if constant or parameter does not have a binding expression (start is used)
 				if ((isConstant() || isParameter()) && !isForIndex()) {
@@ -828,7 +795,6 @@ aspect InstanceErrorCheck {
 	    		getClassName().collectErrors();
 	    		for(InstNode n : getInstComponentDecls()) 
 	    			n.collectErrors();
-	    		collectErrorsInClassDecls();
 	    		for(InstNode n : getInstExtendss()) 
 	    			n.collectErrors();
 	    	}
@@ -913,9 +879,15 @@ aspect InstanceErrorCheck {
 		    //super.collectErrors();
 		    errorChecked = true;
 		    nameCheck();
-		    // Do the short error check on the class (check that modifications are OK, etc)
-			if (getTopInstAccess().getLastInstAccess() == this && !myInstClassDecl().isUnknown())
-				myInstClassDecl().collectErrorsInClassDecl();
+		}
+	}
+
+	public void InstComponentAccess.collectErrors() {
+	    if (!errorChecked) {
+		    errorChecked = true;
+		    super.collectErrors();
+		    if (!myInstComponentDecl().isUnknown())
+		    	myInstComponentDecl().collectErrors();
 		}
 	}
 

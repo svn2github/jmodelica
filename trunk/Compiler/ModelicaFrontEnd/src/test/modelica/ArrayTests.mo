@@ -6752,10 +6752,13 @@ model M_OLineExample
 			name="Other_M_OLineExample",
 			description="Test example that caused infinite loop",
 			errorMessage="
-23 errors found:
+24 errors found:
 Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
 Semantic error at line 642, column 43:
   Could not evaluate array size expression: dimL
+Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 642, column 49:
+  Array size mismatch in declaration of L, size of declaration is [dimL] and size of binding expression is [6]
 Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
 Semantic error at line 143, column 20:
   Could not evaluate array size expression: dim_vector_lgc

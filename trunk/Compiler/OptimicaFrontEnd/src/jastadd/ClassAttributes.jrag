@@ -79,6 +79,17 @@ aspect ClassAttributes {
 		}
 		return null;
 	}
+    
+    rewrite InstPrimitive {
+    	when (!(this instanceof InstClassAttribute) && isClassAttribute()) to InstClassAttribute 
+    	copyLocationTo(new InstClassAttribute(
+    			getClassName(), getLocalFArraySubscriptsOpt(), getComponentDecl(), 
+    			getInstModificationOpt(), getInstConstrainingOpt(), getConditionalAttributeOpt()));    	
+    }
+    
+    inh boolean InstPrimitive.isClassAttribute();
+    eq BaseNode.getChild().isClassAttribute()                      = false;
+    eq InstOptClassDecl.getInstClassAttribute().isClassAttribute() = true;
 
 	// This equation is needed in order to ensure correct lookup of accesses
 	// in the class attribute construct.
