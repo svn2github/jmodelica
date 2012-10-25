@@ -534,6 +534,20 @@ aspect MemoryUse {
 	}
 	
 	/**
+	 * Calclulate memory weight of all nodes fulfilling a specific criteria.
+	 */
+	public long ASTNode.filteredNodeSize(Criteria<ASTNode> filter, boolean deep) {
+		long res = 0;
+		if (filter.test(this))
+			res = Profiler.getNodeSize(this, deep);
+		if (children != null)
+			for (ASTNode ch : children) 
+				if (ch != null)
+					res += ch.filteredNodeSize(filter, deep);
+		return res;
+	}
+	
+	/**
 	 * \brief Traversal method for {@link #dumpMemoryUse(PrintStream, boolean, int, int)}.
 	 * 
 	 * @return approximation of the memory footprint for the subtree

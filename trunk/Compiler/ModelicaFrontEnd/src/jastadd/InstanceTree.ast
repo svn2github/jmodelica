@@ -25,8 +25,6 @@ abstract InstNode : BaseNode ::= /InstComponentDecl*/
 DynamicOpt : Opt;
 
 abstract InstRoot : InstNode;
-InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
-//InstFullClassDeclRoot :InstRoot ::= InstFullClassDecl;
 InstProgramRoot : InstRoot ::= <Program:Program>
 					           /UnknownInstClassDecl/
                                /UnknownInstComponentDecl/
@@ -37,13 +35,15 @@ InstProgramRoot : InstRoot ::= <Program:Program>
 
 abstract InstClassDecl: InstNode ::= <ClassDecl:ClassDecl>;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstraining] InstRestriction;
-InstFullClassDecl      : InstBaseClassDecl ::= [InstExternal];
-InstExtendClassDecl    : InstFullClassDecl ::= ;
-InstShortClassDecl     : InstBaseClassDecl ::= [FArraySubscripts];
-InstPrimitiveClassDecl : InstFullClassDecl;
-InstEnumClassDecl      : InstPrimitiveClassDecl;
-InstBuiltInClassDecl   : InstClassDecl;
-UnknownInstClassDecl   : InstFullClassDecl;
+InstFullClassDecl        : InstBaseClassDecl ::= [InstExternal];
+InstExtendClassDecl      : InstFullClassDecl;
+abstract InstAbstractShortClassDecl : InstBaseClassDecl;
+InstSimpleShortClassDecl : InstAbstractShortClassDecl ::= Target:InstAccess;
+InstShortClassDecl       : InstAbstractShortClassDecl ::= [FArraySubscripts];
+InstPrimitiveClassDecl   : InstFullClassDecl;
+InstEnumClassDecl        : InstPrimitiveClassDecl;
+InstBuiltInClassDecl     : InstClassDecl;
+UnknownInstClassDecl     : InstFullClassDecl;
 
 InstReplacingFullClassDecl      : InstFullClassDecl  ::= 
 	                                 <OriginalClassDecl:ClassDecl> 

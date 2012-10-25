@@ -78,6 +78,10 @@ aspect Flattening {
 		getInstExtendsList().flattenUsedFuncsAndEnums(fc);
 		super.flattenUsedFuncsAndEnums(fc);
     }
+    
+    public void InstSimpleShortClassDecl.flattenUsedFuncsAndEnums(FClass fc) {
+		actualInstClass().flattenUsedFuncsAndEnums(fc);
+    }
 
 	public void InstValueModification.flattenUsedFuncsAndEnums(FClass fc) {
 		getFExp().flattenUsedFuncsAndEnums(fc);
@@ -194,7 +198,9 @@ aspect Flattening {
 		return null;
 	}
 	
-	private void InstBaseClassDecl.addLocalFunctionConstants(FFunctionDecl ffd, FClass fc) {
+	protected void InstClassDecl.addLocalFunctionConstants(FFunctionDecl ffd, FClass fc) {}
+	
+	protected void InstBaseClassDecl.addLocalFunctionConstants(FFunctionDecl ffd, FClass fc) {
 		Set<InstAssignable> added = new HashSet<InstAssignable>();
 		Set<InstAssignable> all = localFunctionConstantList();
 		List<FFunctionVariable> ffvs = ffd.getFFunctionVariableListNoTransform();
@@ -215,7 +221,11 @@ aspect Flattening {
 		for (FFunctionVariable ffv : ffvs.noTransform())
 			ffd.addFFunctionVariable(ffv);
 	}
-	
+
+	protected void InstSimpleShortClassDecl.addLocalFunctionConstants(FFunctionDecl ffd, FClass fc) {
+		actualInstClass().addLocalFunctionConstants(ffd, fc);
+	}
+
 	public void FFunctionDecl.updateRecordArraySizes() {
 		for (FFunctionVariable ffv : getFFunctionVariables())
 			ffv.updateRecordArraySizes();
@@ -246,6 +256,10 @@ aspect Flattening {
 			icd.flattenInFunction(ffd, fc, false, null);
 	}
 	
+	public void InstSimpleShortClassDecl.flattenComponentsInFunction(FFunctionDecl ffd, FClass fc) {
+		actualInstClass().flattenComponentsInFunction(ffd, fc);
+	}
+	
 	syn FAlgorithmBlock InstNode.findFunctionAlgorithm() {
 		if (getNumFAbstractEquation() > 0) {
 			FAbstractEquation equ = getFAbstractEquation(0);
@@ -260,6 +274,7 @@ aspect Flattening {
 		}
 		return null;
 	}
+	eq InstSimpleShortClassDecl.findFunctionAlgorithm() = actualInstClass().findFunctionAlgorithm();
 	
 	syn InstExternal InstClassDecl.findFunctionExternal() {
 		for (InstExtends ie : getInstExtendss()) {
@@ -271,6 +286,7 @@ aspect Flattening {
 	}
 	eq InstFullClassDecl.findFunctionExternal() = 
 		hasInstExternal() ? getInstExternal() : super.findFunctionExternal();
+	eq InstSimpleShortClassDecl.findFunctionExternal() = actualInstClass().findFunctionExternal();
 	
 	// Flatten record if not already done
 	public void InstClassDecl.flattenRecord(FClass fc) {}
@@ -603,7 +619,7 @@ aspect Flattening {
 			return new FBooleanVariable();
 		if (isString()) 
 			return new FStringVariable();
-		return null;
+		throw new UnsupportedOperationException("InstPrimitive without type");
 	}	
 
 	public FEnumVariable InstEnum.createEmptyFVariable() {

@@ -1637,17 +1637,13 @@ fclass NameTests.ConstantLookup33
 
 public
  function NameTests.ConstantLookup33.f
-  NameTests.ConstantLookup33.D.A[2] d := {NameTests.ConstantLookup33.C.E.A(3),NameTests.ConstantLookup33.C.E.A(4)};
+  NameTests.ConstantLookup33.D.A[2] d := {NameTests.ConstantLookup33.D.A(3),NameTests.ConstantLookup33.D.A(4)};
   input Integer i;
   output Real x;
  algorithm
   x := d[i].b;
   return;
  end NameTests.ConstantLookup33.f;
-
- record NameTests.ConstantLookup33.C.E.A
-  Real b;
- end NameTests.ConstantLookup33.C.E.A;
 
  record NameTests.ConstantLookup33.D.A
   Real b;

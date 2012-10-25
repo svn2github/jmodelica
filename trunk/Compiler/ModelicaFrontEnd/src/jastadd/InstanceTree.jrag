@@ -563,6 +563,7 @@ aspect Environments {
 		else
 			return getInstExtends(0).totalMergedEnvironment();
 	}
+	eq InstSimpleShortClassDecl.totalMergedEnvironment() = actualInstClass().getMergedEnvironment();
 
 }
 
@@ -834,7 +835,7 @@ aspect InstanceTreeConstruction {
 	}
 	
 	public InstExtends InstClassRedeclare.createInstReplacingExtends(ExtendsClause ec) {
-		for (InstExtends ie : getInstClassDecl().getInstExtendss())
+		for (InstExtends ie : getInstClassDecl().actualInstClass().getInstExtendss())
 			return ie.createInstReplacingExtends(ec);
 		return ec.newInstExtends();
 	}
@@ -843,6 +844,10 @@ aspect InstanceTreeConstruction {
 		for (InstExtends ie : getInstExtendss())
 			return ie.createInstReplacingExtends(ec);
 		return ec.newInstExtends();
+	}
+	
+	public InstExtends InstSimpleShortClassDecl.createInstReplacingExtends(ExtendsClause ec) {
+		return actualInstClass().createInstReplacingExtends(ec);
 	}
 	
 	public InstExtends InstNode.createInstReplacingExtends(ExtendsClause ec) {
@@ -890,6 +895,10 @@ aspect InstanceTreeConstruction {
 		icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
 		icd.setLocation(cd);
 		return icd;
+	}
+
+	public InstComponentDecl InstSimpleShortClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
+		return actualInstClass().newInstComponentDecl(cd, className);
 	}
 	
 	public InstComponentDecl InstBaseClassDecl.emptyInstComponentDecl(ComponentDecl cd, InstAccess name) {
@@ -1204,6 +1213,54 @@ aspect InstanceTreeConstruction {
 		return stmt;
 	}
 
+	
+	private boolean InstShortClassDecl.simpleRewriteDone = false;
+	
+	rewrite InstShortClassDecl {
+		when (!simpleRewriteDone) to InstAbstractShortClassDecl {
+			simpleRewriteDone = true;
+			if (hasFArraySubscripts() || hasInstClassModification() || getClassDecl().hasTypePrefix())
+				return this;
+			if (hasInstConstraining() && getInstConstraining().hasInstClassModification())
+				return this;
+			Environment env = nameScope() ? myEnvironment(name()) : myEnvironment();
+			if (!env.isEmpty())
+				return this;
+			if (this instanceof InstReplacingShortClassDecl) 
+				return this;
+			
+			InstSimpleShortClassDecl res = new InstSimpleShortClassDecl(
+					getClassDecl(), getInstConstrainingOpt(), getInstRestriction(), getInstExtends(0).getClassName());
+			res.setLocation(this);
+			return res;
+		}	
+	}
+	
+	syn boolean ClassDecl.hasTypePrefix() = false;
+	eq ShortClassDecl.hasTypePrefix()     = getExtendsClauseShortClass().hasTypePrefix();
+	
+	syn boolean ExtendsClauseShortClass.hasTypePrefix() = 
+		hasTypePrefixFlow() || hasTypePrefixVariability() || hasTypePrefixInputOutput();
+	
+	public List<InstComponentDecl> InstSimpleShortClassDecl.getInstComponentDeclList() {
+		throw new UnsupportedOperationException();
+	}
+	
+	public List<InstClassDecl> InstSimpleShortClassDecl.getInstClassDeclList() {
+		throw new UnsupportedOperationException();
+	}
+	
+	public List<InstExtends> InstSimpleShortClassDecl.getInstExtendsList() {
+		throw new UnsupportedOperationException();
+	}
+	
+	public List<InstImport> InstSimpleShortClassDecl.getInstImportList() {
+		throw new UnsupportedOperationException();
+	}
+	
+	public List<InstClassDecl> InstSimpleShortClassDecl.getRedeclaredInstClassDeclList() {
+		throw new UnsupportedOperationException();
+	}
 
 }
 
@@ -1333,19 +1390,16 @@ aspect InstanceAST_API {
     eq InstRoot.getChild().instClassNamePrefix() = "";
 	
 	syn ArrayList<AbstractEquation> InstNode.equations() = new ArrayList<AbstractEquation>();
-	eq InstClassRoot.equations() = getClassDecl().equations();
 	eq InstComponentDecl.equations() = myInstClass().equations();
 	eq InstExtends.equations() = myInstClass().equations();
 	eq InstFullClassDecl.equations() = getBaseClassDecl().equations();	
 	
 	syn ArrayList<Algorithm> InstNode.algorithms() = new ArrayList<Algorithm>();
-	eq InstClassRoot.algorithms() = getClassDecl().algorithms();
 	eq InstComponentDecl.algorithms() = myInstClass().algorithms();
 	eq InstExtends.algorithms() = myInstClass().algorithms();
 	eq InstFullClassDecl.algorithms() = getBaseClassDecl().algorithms();	
 	
 	syn lazy ArrayList<ComponentDecl> InstNode.components() = new ArrayList<ComponentDecl>();
-	eq InstClassRoot.components() = getClassDecl().components();
 	eq InstComponentDecl.components() = myInstClass().components();
 	eq InstArrayComponentDecl.components() = instComponentDecl().isPrimitive()? 
 			new ArrayList<ComponentDecl>() : instComponentDecl().components();
@@ -1354,7 +1408,6 @@ aspect InstanceAST_API {
 //    eq InstPrimitiveClassDecl.components() = new ArrayList<ComponentDecl>();
 	
 	syn lazy ArrayList<ExtendsClause> InstNode.superClasses() = new ArrayList<ExtendsClause>();
-	eq InstClassRoot.superClasses() = getClassDecl().superClasses();
 	eq InstComponentDecl.superClasses() = myInstClass().superClasses();
 	eq InstArrayComponentDecl.superClasses() = instComponentDecl().isPrimitive()? 
 			new ArrayList<ExtendsClause>() : instComponentDecl().superClasses();
@@ -1362,7 +1415,6 @@ aspect InstanceAST_API {
     eq InstBaseClassDecl.superClasses() = getBaseClassDecl().superClasses();
 
 	syn lazy ArrayList<ClassDecl> InstNode.classes() = new ArrayList<ClassDecl>();
-	eq InstClassRoot.classes()          = getClassDecl().classes();
 	eq InstProgramRoot.classes()        = getProgram().classes();
 	eq InstComponentDecl.classes()      = myInstClass().classes();
 	eq InstArrayComponentDecl.classes() = instComponentDecl().isPrimitive()? 
@@ -1373,7 +1425,6 @@ aspect InstanceAST_API {
 //    eq InstShortClassDecl.classes() = getClassName().myInstClass().classes();
 
 	syn lazy ArrayList<ImportClause> InstNode.imports() = new ArrayList<ImportClause>();
-	eq InstClassRoot.imports()     = getClassDecl().imports();
 	eq InstComponentDecl.imports() = myInstClass().imports();
 	eq InstBaseClassDecl.imports() = getBaseClassDecl().imports();
 	eq InstExtends.imports()       = myInstClass().imports();
@@ -1441,11 +1492,15 @@ aspect InstanceAST_API {
 	syn boolean InstNode.hasInstConstraining() = false;
 	syn InstConstraining InstNode.getInstConstraining() = null;
 
-	syn boolean InstNode.extendsPrimitive()  = false;
-	eq InstShortClassDecl.extendsPrimitive() = 
+	syn boolean InstNode.extendsPrimitive()        = false;
+	eq InstShortClassDecl.extendsPrimitive()       = 
 		getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
-	eq InstFullClassDecl.extendsPrimitive()  = 
+	eq InstFullClassDecl.extendsPrimitive()        = 
 		getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
+	eq InstSimpleShortClassDecl.extendsPrimitive() {
+		InstClassDecl icd = actualInstClass();
+		return icd.isPrimitive() || icd.extendsPrimitive();
+	}
 	eq InstExtends.extendsPrimitive() {
 		InstClassDecl icd = myInstClass();
 		return !isRecursive() && (icd.isPrimitive() || icd.extendsPrimitive());
@@ -1454,10 +1509,11 @@ aspect InstanceAST_API {
 	/**
 	 * Check if this class is or extends an enumeration.
 	 */
-	syn boolean InstNode.extendsEnum() = false;
-	eq InstClassDecl.extendsEnum()     = getNumInstExtends() == 1 && getInstExtends(0).extendsEnum();
-	eq InstEnumClassDecl.extendsEnum() = true;
-	eq InstExtends.extendsEnum()       = !isRecursive() && myInstClass().extendsEnum();
+	syn boolean InstNode.extendsEnum()        = false;
+	eq InstClassDecl.extendsEnum()            = getNumInstExtends() == 1 && getInstExtends(0).extendsEnum();
+	eq InstSimpleShortClassDecl.extendsEnum() = actualInstClass().extendsEnum();
+	eq InstEnumClassDecl.extendsEnum()        = true;
+	eq InstExtends.extendsEnum()              = !isRecursive() && myInstClass().extendsEnum();
 	
 	syn InstClassDecl InstClassDecl.getBaseInstClass() = 
 		(getNumInstExtends() > 0) ? getInstExtends(0).getBaseInstClass() : this;
@@ -1831,28 +1887,31 @@ aspect InstanceDumpTree {
 			n.dumpTree(indent + " ");
 		for (InstNode n : getInstExtendss())
 			n.dumpTree(indent + " ");
-
-
-	}
-	
-	public String InstNamedAccess.toString() {
-		String s = dump() +": "+name() + " at line: " + beginLine();
-        s+="\n";
-		return s;
 	}
 
 	
  	public String InstNode.toString() {
 		return toString("");
     }
+ 	
 	public String InstNode.toString(String indent) {
 	   StringBuilder str = new StringBuilder();
-	   str.append(indent+"InstNode:\n");
+	   str.append(indent + getClass().getSimpleName() + ":\n");
+	   str.append(prettyPrint(indent + " ") + "\n");
+	   specificToString(str, indent + " ");
 	   appendEnvironment(str, indent);
 
-	   return str.toString();	
+	   return str.toString();
 	}
-	
+
+	public String InstProgramRoot.toString(String indent) {
+	   StringBuilder str = new StringBuilder();
+	   str.append(indent + "InstProgramRoot:\n");
+	   appendEnvironment(str, indent);
+
+	   return str.toString();
+	}
+
 	protected void InstNode.appendEnvironment(StringBuilder str, String indent) {
 		String next = indent + " ";
 		str.append(indent);
@@ -1867,180 +1926,66 @@ aspect InstanceDumpTree {
 		str.append(" mergedEnvironment():\n");
 		str.append(getMergedEnvironment().toString(next));
 	}
+	
+	public void InstNode.specificToString(StringBuilder str, String indent) {}
     
-	public String InstComponentDecl.toString(String indent) {
-	   StringBuilder str = new StringBuilder();
-	   str.append(indent+"InstComponent:\n");
-	   str.append(indent+" Original decl:  " + getComponentDecl().prettyPrint("") + "\n");
-       str.append(indent+ " "+ getClassName().toString());
-	   appendEnvironment(str, indent);
-	   //str.append(" Declared type:\n");
-	   //str.append(declaredType().toString());
-	   //str.append(" Constraining type:\n");
-	   //str.append(constrainingType().toString());
-	   return str.toString();	
+	public void InstComponentDecl.specificToString(StringBuilder str, String indent) {
+       str.append(indent + getClassName().toString() + "\n");
 	}
     
-	public String InstArrayComponentDecl.toString(String indent) {
-	   StringBuilder str = new StringBuilder();
-	   str.append(indent+" InstArrayComponent ("+ getIndex() + "):\n");
-	   str.append(indent+" Original decl:  " + getComponentDecl().prettyPrint("") + "\n");
-       str.append(indent+ " "+ getClassName().toString());
-	   appendEnvironment(str, indent);
-	   //str.append(" Declared type:\n");
-	   //str.append(declaredType().toString());
-	   //str.append(" Constraining type:\n");
-	   //str.append(constrainingType().toString());
-	   return str.toString();	
+	public void InstArrayComponentDecl.specificToString(StringBuilder str, String indent) {
+       str.append(indent+ "index: "+ getIndex() + "\n");
+	   super.specificToString(str, indent);
 	}
 	
-	public String InstReplacingComposite.toString(String indent) {
-	   StringBuilder str = new StringBuilder();
-	   str.append(indent+"InstReplacingComponent:\n");
-	   str.append(indent+" Replacing decl: " + getComponentDecl().prettyPrint("") + "\n");
-	   str.append(indent+" Original decl:  " + getOriginalDecl().prettyPrint("") + "\n");
-       str.append(indent+ " "+getClassName().toString());
-	   appendEnvironment(str, indent);
-	   //str.append(" Declared type:\n");
-	   //str.append(declaredType().toString());
-	   //str.append(" Constraining type:\n");
-	   //str.append(constrainingType().toString());
-	   return str.toString();	
+	public void InstReplacingPrimitive.specificToString(StringBuilder str, String indent) {
+	   str.append(indent + "Original decl:  " + getOriginalDecl().prettyPrint("") + "\n");
+       str.append(indent + getClassName().toString() + "\n");
+	}
+	
+	public void InstReplacingComposite.specificToString(StringBuilder str, String indent) {
+	   str.append(indent + "Original decl:  " + getOriginalDecl().prettyPrint("") + "\n");
+       str.append(indent + getClassName().toString() + "\n");
+	}
+	
+	public void InstReplacingFullClassDecl.specificToString(StringBuilder str, String indent) {
+	   str.append(indent + "Original decl:  " + getOriginalClassDecl().prettyPrint("") + "\n");
+	}
+	
+	public void InstReplacingShortClassDecl.specificToString(StringBuilder str, String indent) {
+	   str.append(indent + "Original decl:  " + getOriginalClassDecl().prettyPrint("") + "\n");
 	}
 
-	public String InstRecord.toString(String indent) {
-	   StringBuilder str = new StringBuilder();
-	   str.append(indent+"InstRecord:\n");
-	   str.append(indent+" Component decl: " + getComponentDecl().prettyPrint("") + "\n");
-       str.append(indent+ " " +getClassName().toString());	   
-	   appendEnvironment(str, indent);
-	   return str.toString();	
+	public void InstRecord.specificToString(StringBuilder str, String indent) {
+       str.append(indent + getClassName().toString() + "\n");	   
 	}
 
-	public String InstPrimitive.toString(String indent) {
-	   StringBuilder str = new StringBuilder();
-	   str.append(indent+"InstPrimitive:\n");
-	   str.append(indent+" Component decl: " + getComponentDecl().prettyPrint("") + "\n");
-       str.append(indent+ " " +getClassName().toString());	   
-	   appendEnvironment(str, indent);
-	   return str.toString();	
+	public void InstPrimitive.specificToString(StringBuilder str, String indent) {
+       str.append(indent + getClassName().toString() + "\n");	   
 	}
 
-	public String InstExtends.toString(String indent) {
-	   StringBuilder str = new StringBuilder();
-	   str.append(indent+"InstExtendsDecl:\n");
-	   str.append(indent+" Extends clause: " + getExtendsClause().getSuper().name() + "\n");
-       str.append(indent+ " "+ getClassName().toString());
-	   appendEnvironment(str, indent);
-	   //str.append(indent+" Declared type:\n");
-	   //str.append(indent+declaredType().toString());
-	   //str.append(indent+" Constraining type:\n");
-	   //str.append(indent+constrainingType().toString());
-	   
-	   return str.toString();	
+	public void InstExtends.specificToString(StringBuilder str, String indent) {
+       str.append(indent + getClassName().toString() + "\n");
 	}
 
-	public String InstFullClassDecl.toString(String indent) {
-	   StringBuilder str = new StringBuilder();
-	   str.append(indent+"InstFullClassDecl:\n");
-	   str.append(indent+" Class decl: " + getBaseClassDecl().name() + "\n");
-	   appendEnvironment(str, indent);
-	   //str.append(indent+" Declared type:\n");
-	   //str.append(indent+declaredType().toString());
-	   //str.append(indent+" Constraining type:\n");
-	   //str.append(indent+constrainingType().toString());
-	   
-	   return str.toString();	
-	}
-
-	public String InstFullClassDecl.toString() {
-		return toString("");
-    }
-
-
-
-	public String InstModification.toString() {
-		return toString("");
-    }
     public String InstModification.toString(String indent) {
     	return getModification().prettyPrint(indent);
-    
     }
 	
 }
 
-/* TODO: If we are doing this, we should do it properly
 aspect InstancePrettyPrint {
 
-	public String InstNode.prettyPrint(String indent) {
-		String str = getClass().getName();
-		str = indent + str.substring(str.lastIndexOf('.')+1);
-		return str;
-
-	}
-
-	public String InstBaseClassDecl.prettyPrint(String indent) {
-		String str = getClass().getName();
-		str = indent+str.substring(str.lastIndexOf('.')+1);
-		str+= ": " + name();
-		return str;
-
-	}
-
-	public String InstShortClassDecl.prettyPrint(String indent) {
-		String str = getClass().getName();
-		str = indent+str.substring(str.lastIndexOf('.')+1);
-		str+= ": " + getInstExtends(0).getClassName().name() + " "+ name();
-		return str;
-	}
-
-	public String InstExtendsShortClass.prettyPrint(String indent) {
-		String str = getClass().getName();
-		str = indent+str.substring(str.lastIndexOf('.')+1);
-		str+= ": " + getClassName().name();
-		return str;
-		
-	}
-
-	public String InstExtends.prettyPrint(String indent) {
-		String str = getClass().getName();
-		str = indent+str.substring(str.lastIndexOf('.')+1);
-		str+= ": " + getClassName().name();
-		return str;
-		
-	}
-
-	public String InstComponentDecl.prettyPrint(String indent) {
-		String str = getClass().getName();
-		str = indent+str.substring(str.lastIndexOf('.')+1);
-		str+= ": " + getClassName().name() + " "+
-		                      getComponentDecl().name();
-		return str;
-
-	}
-
-	public String InstArrayComponentDecl.prettyPrint(String indent) {
-		String str = getClass().getName();
-		str = indent+str.substring(str.lastIndexOf('.')+1);
-		str+= ": " + getIndex();
-		return str;
-
+	public void InstNode.prettyPrint(Printer p, PrintStream str, String indent) {
+		if (mySourceNode() != null)
+			p.print(mySourceNode(), str, indent);
+		else
+			super.prettyPrint(p, str, indent);
 	}
 	
-	public String InstImport.prettyPrint(String indent) {
-		String str = getClass().getName();
-		str = indent+str.substring(str.lastIndexOf('.')+1);
-		str += ": " + getPackageName().name();
-		return str;
-	}
-
-	public String InstAccess.prettyPrint(String indent) {
-		String str = getClass().getName();
-		str = indent+str.substring(str.lastIndexOf('.')+1);
-		str += ": " + name();
-		return str;
-	}
-
+	syn BaseNode InstNode.mySourceNode() = null;
+	eq InstClassDecl.mySourceNode()      = getClassDecl();
+	eq InstComponentDecl.mySourceNode()  = getComponentDecl();
+	eq InstExtends.mySourceNode()        = getExtendsClause();
 	
 }
-*/
