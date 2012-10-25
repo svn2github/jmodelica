@@ -19,7 +19,8 @@ aspect OptimicaExpressions {
 	rewrite InstFunctionCall {
 		when (//((getName() instanceof InstDot)? 
 				//	((InstDot)getName()).getLeft()!=null: true) && 
-				getName().getLastInstAccess() instanceof InstComponentAccess &&
+				(getName().getLastInstAccess() instanceof InstComponentAccess ||
+				getName().getLastInstAccess() instanceof InstComponentArrayAccess) &&
 				getNumArg()==1)
 		 to InstTimedVariable {
 //			System.out.println("rewrite InstFunctionCall: " + getName().name());

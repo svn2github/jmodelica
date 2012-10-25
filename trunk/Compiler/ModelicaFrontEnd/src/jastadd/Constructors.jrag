@@ -167,13 +167,6 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Construcs a inst parse access.
-	 */
-	public InstParseAccess.InstParseAccess(String id) {
-		this(id, new Opt<FArraySubscripts>());
-	}
-	
-	/**
 	 * Constructor with only nessecary args. 
 	 */
 	public InstCreateComponentDecl.InstCreateComponentDecl(ComponentDecl cd, InstLookupRedirectNode ln) {

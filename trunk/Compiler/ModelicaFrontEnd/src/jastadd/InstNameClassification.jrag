@@ -57,11 +57,25 @@ aspect InstNameClassification {
 		to InstAccess {
 			InstAccess a;
 			if (kind().isComponentAccess()) 
-			    a = new InstComponentAccess(getID(), getFArraySubscriptsOpt());
+			    a = new InstComponentAccess(getID());
 			else if (kind().isClassAccess()) 
 				a = new InstClassAccess(getID());
 			else 
-				a = new InstAmbiguousAccess(getID(), getFArraySubscriptsOpt());
+				a = new InstAmbiguousAccess(getID());
+			a.setLocation(this);
+			return a;
+  		}
+	}
+
+	rewrite InstParseArrayAccess {
+		to InstAccess {
+			InstAccess a;
+			if (kind().isComponentAccess()) 
+			    a = new InstComponentArrayAccess(getID(), getFArraySubscripts());
+			else if (kind().isClassAccess()) 
+				a = new InstClassAccess(getID());
+			else 
+				a = new InstAmbiguousArrayAccess(getID(), getFArraySubscripts());
 			a.setLocation(this);
 			return a;
   		}
@@ -126,7 +140,24 @@ aspect InstResolveAmbiguousNames {
 	    when (!rewritten) 
 	    to InstAccess {
 	  		if (lookupInstComponent(name()) != null) {
-     		    InstComponentAccess c = new InstComponentAccess(name(), getFArraySubscriptsOpt());
+     		    InstComponentAccess c = new InstComponentAccess(name());
+  	 			c.setLocation(this);
+  	 			return c;
+  		    } else if (lookupInstClass(name()) != null) {		
+            	InstClassAccess t = new InstClassAccess(name()); 
+    			t.setLocation(this);
+  	 			return t;
+  			}
+  			rewritten = true;
+  			return this;
+  		}
+  	}
+	boolean InstAmbiguousArrayAccess.rewritten = false;
+	rewrite InstAmbiguousArrayAccess {
+	    when (!rewritten) 
+	    to InstAccess {
+	  		if (lookupInstComponent(name()) != null) {
+     		    InstComponentArrayAccess c = new InstComponentArrayAccess(name(), getFArraySubscripts());
   	 			c.setLocation(this);
   	 			return c;
   		    } else if (lookupInstClass(name()) != null) {		

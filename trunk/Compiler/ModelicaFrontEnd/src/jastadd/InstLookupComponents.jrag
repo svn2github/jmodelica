@@ -46,6 +46,8 @@ aspect InstLookupComponents {
 	eq InstClassAccess.qualifiedLookupInstComponent(String name)               = myInstClassDecl().memberInstComponentConstrained(name);
 	eq InstComponentAccess.qualifiedLookupInstComponent(String name)           = 
 		lookupArrayElement(myInstComponentDecl()).memberInstComponentConstrained(name);
+	eq InstComponentArrayAccess.qualifiedLookupInstComponent(String name)           = 
+			lookupArrayElement(myInstComponentDecl()).memberInstComponentConstrained(name);
 
 	inh InstComponentDecl InstAccess.localLookupInstComponent(String name);	
 	eq InstRoot.getChild().localLookupInstComponent(String name)          = null;
@@ -67,7 +69,7 @@ aspect InstLookupComponents {
 	}
 	
 	public InstComponentDecl InstArrayAccess.lookupArrayElement(InstComponentDecl array) {
-		if (hasFArraySubscripts() && !isArray()) {
+		if (!isArray()) {
 			// If we can, try to get the correct InstArrayComponentDecl to do lookup from
 			try {
 				Index i = getFArraySubscripts().createIndex();
@@ -269,6 +271,11 @@ aspect InstLookupComponents {
 	eq InstDot.myInstComponentDecl()                       = getLastInstAccess().myInstComponentDecl();
 	eq InstGlobalAccess.myInstComponentDecl()              = getInstAccess().myInstComponentDecl();
 	syn lazy InstComponentDecl InstComponentAccess.myInstComponentDecl() {
+		InstComponentDecl icd = lookupInstComponent(name());
+		return (icd != null) ? icd : unknownInstComponentDecl();
+	}
+	
+	syn lazy InstComponentDecl InstComponentArrayAccess.myInstComponentDecl() {
 		InstComponentDecl icd = lookupInstComponent(name());
 		return (icd != null) ? icd : unknownInstComponentDecl();
 	}

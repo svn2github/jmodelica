@@ -122,12 +122,16 @@ abstract InstAccess : BaseNode        ::= /ExpandedSubscripts:FArraySubscripts/;
 abstract InstNamedAccess : InstAccess ::= <ID>;
 InstDot : InstAccess ::= InstAccess*;
 
-InstArrayAccess     : InstNamedAccess ::= [FArraySubscripts];
-InstParseAccess     : InstArrayAccess;
-InstClassAccess     : InstNamedAccess;
-InstGlobalAccess    : InstAccess ::= InstAccess;
-InstAmbiguousAccess : InstArrayAccess;
-InstComponentAccess : InstArrayAccess;
+InstClassAccess           : InstNamedAccess;
+abstract InstScalarAccess : InstNamedAccess;
+InstParseAccess           : InstScalarAccess;
+InstAmbiguousAccess       : InstScalarAccess;
+InstComponentAccess       : InstScalarAccess;
+abstract InstArrayAccess  : InstNamedAccess ::= FArraySubscripts;
+InstParseArrayAccess      : InstArrayAccess;
+InstAmbiguousArrayAccess  : InstArrayAccess;
+InstComponentArrayAccess  : InstArrayAccess;
+InstGlobalAccess          : InstAccess ::= InstAccess;
 
 InstForIndex : CommonForIndex ::= InstPrimitive;
 

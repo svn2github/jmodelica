@@ -284,8 +284,7 @@ aspect StructuralParams {
 	}
 	
 	public void InstArrayAccess.markUsesInSubscriptsAsStructuralParameter() {
-		if (hasFArraySubscripts())
-			getFArraySubscripts().markUsesAsStructuralParameter();
+		getFArraySubscripts().markUsesAsStructuralParameter();
 	}
 	
 	

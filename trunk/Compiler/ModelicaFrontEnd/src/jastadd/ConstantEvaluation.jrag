@@ -1329,7 +1329,7 @@ aspect ConstantEvaluation {
   syn CValue InstAccess.ceval(Index i) = CValue.UNKNOWN;
   eq InstDot.ceval(Index i)            = getInstAccess(getNumInstAccess() - 1).ceval(i);
   eq InstGlobalAccess.ceval(Index i)   = getInstAccess().ceval(i);
-  eq InstComponentAccess.ceval(Index i) {
+  eq InstNamedAccess.ceval(Index i) {
 	  CValue res = CValue.UNKNOWN;
 	  if (myInstComponentDecl().isAssignable()) {
 		  Index iHere = Index.NULL;
@@ -1358,7 +1358,7 @@ aspect ConstantEvaluation {
   /**
    * \brief Check if constant evaluation should go through surrounding record.
    */
-  protected boolean InstComponentAccess.shouldCevalThroughParent(InstAssignable var) {
+  protected boolean InstNamedAccess.shouldCevalThroughParent(InstAssignable var) {
 	  if (!var.inRecord() || !var.inFunction() || 
 			  containingInstComponent() == var.containingInstComponent())
 		  return false;
@@ -1651,7 +1651,7 @@ aspect ConstantEvaluation {
    * \brief Check if this node is in a function that is being evaluated.
    */
   inh boolean FExp.duringFunctionEval();
-  inh boolean InstComponentAccess.duringFunctionEval();
+  inh boolean InstNamedAccess.duringFunctionEval();
   eq FFunctionDecl.getChild().duringFunctionEval()     = currentEvaluationValues != null;
   eq InstFullClassDecl.getChild().duringFunctionEval() = currentEvaluationValues != null;
   eq InstNode.getChild().duringFunctionEval() = false;

@@ -851,15 +851,15 @@ aspect Flattening {
 		return res;
 	}
 	
+	eq InstScalarAccess.splitArrayAccess(int index) {
+		FArraySubscripts fas = FArraySubscripts.createFColonSubscripts(localNdims());
+		fas.specifyNext(index);
+		return getArrayCopy(fas);
+	}
+	
 	eq InstArrayAccess.splitArrayAccess(int index) {
-		InstArrayAccess access = (InstArrayAccess) fullCopy();
-		if (hasFArraySubscripts()) {
-			access.getFArraySubscripts().specifyNext(index);
-		} else {
-			FArraySubscripts fas = FArraySubscripts.createFColonSubscripts(localNdims());
-			access.setFArraySubscripts(fas);
-			fas.specifyNext(index);
-		}
+		InstArrayAccess access = fullCopy();
+		access.getFArraySubscripts().specifyNext(index);
 		return access;
 	}
 	

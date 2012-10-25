@@ -1106,19 +1106,18 @@ aspect InstanceTreeConstruction {
 	public abstract InstAccess Access.newInstAccess();
 	
 	public InstAccess ArrayAccess.newInstAccess() {
-		Opt as = null;
+		InstAccess ia;
 		if (hasArraySubscripts() && getArraySubscripts().getNumSubscript()>0) {
-			as = new Opt(getArraySubscripts().instantiate());
+			ia = new InstParseArrayAccess(getID(), getArraySubscripts().instantiate());
 		} else {
-			as = new Opt();
+			ia = new InstParseAccess(getID());
 		}
-		InstAccess ia =  new InstParseAccess(getID(),as);
 		ia.setLocation(this);
 		return ia;
 	}
 
 	public InstAccess NamedAccess.newInstAccess() {
-		InstAccess ia =  new InstParseAccess(getID(),new Opt());
+		InstAccess ia =  new InstParseAccess(getID());
 		ia.setLocation(this);
 		return ia;
 	}
@@ -1836,24 +1835,8 @@ aspect InstanceDumpTree {
 
 	}
 	
-	public String InstClassAccess.toString() {
-		String s = dump() +": "+name() + " at line: " + beginLine();/* + ", ClassDecl at: ";
-    	if (myInstClassDecl().isUnknown())
-    		s+="Unknown";
-    	else {
-    		s += myInstClassDecl().beginLine();
-        }*/
-        s+="\n";
-		return s;
-	}
-
-	public String InstComponentAccess.toString() {
-		String s = dump() +": "+name() + " at line: " + beginLine();/*+ ", ComponentDecl at: ";
-    	if (myInstComponentDecl().isUnknown())
-    		s+="Unknown";
-    	else {
-    		s += myInstComponentDecl().beginLine();
-		}*/
+	public String InstNamedAccess.toString() {
+		String s = dump() +": "+name() + " at line: " + beginLine();
         s+="\n";
 		return s;
 	}

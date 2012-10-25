@@ -891,6 +891,15 @@ aspect InstanceErrorCheck {
 		}
 	}
 	
+	public void InstComponentArrayAccess.collectErrors() {
+	    if (!errorChecked) {
+		    errorChecked = true;
+		    super.collectErrors();
+		    if (!myInstComponentDecl().isUnknown() && !isModificationName())
+		    	myInstComponentDecl().collectErrors();
+		}
+	}
+	
 	inh boolean InstAccess.isModificationName();
 	eq InstNamedModification.getName().isModificationName() = true;
 	eq BaseNode.getChild().isModificationName()             = false;

@@ -91,7 +91,7 @@ aspect UnknownDeclarations {
 	syn lazy UnknownInstClassDecl InstProgramRoot.getUnknownInstClassDecl() = 
 		new UnknownInstClassDecl(getProgram().getUnknownClassDecl(), new Opt(), new InstMClass(), new Opt());
 	syn lazy UnknownInstComponentDecl InstProgramRoot.getUnknownInstComponentDecl() = 
-	    new UnknownInstComponentDecl(new InstParseAccess("Unknown",new Opt()),new Opt(),getProgram().getUnknownComponentDecl(), new Opt(),new Opt(),new Opt());
+	    new UnknownInstComponentDecl(new InstParseAccess("Unknown"),new Opt(),getProgram().getUnknownComponentDecl(), new Opt(),new Opt(),new Opt());
 		
 	syn UnknownInstClassDecl ASTNode.unknownInstClassDecl() = root().unknownInstClassDecl();
 	eq SourceRoot.unknownInstClassDecl() = getUnknownInstClassDecl();
@@ -123,6 +123,7 @@ aspect UnknownDeclarations {
 	
 	syn boolean InstAccess.isUnknown() = true;
 	eq InstComponentAccess.isUnknown() = myInstComponentDecl().isUnknown();
+	eq InstComponentArrayAccess.isUnknown() = myInstComponentDecl().isUnknown();
 	eq InstClassAccess.isUnknown() = myInstClassDecl().isUnknown();                  
 		                    
 	syn boolean FIdUse.isUnknown()  = myFV().isUnknown();

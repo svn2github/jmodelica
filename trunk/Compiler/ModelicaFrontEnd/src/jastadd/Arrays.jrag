@@ -57,23 +57,6 @@ aspect Arrays {
 	eq ArrayAccess.arraySubscripts() = hasArraySubscripts()? getArraySubscripts(): null;
 
 	/**
-	 * \brief Check if an instance access has array subscripts.
-	 * 
-	 * @return True if the access has array subscripts, otherwise false.
-	 */
-	syn boolean InstAccess.isInstArrayAccess() = false;
-	eq InstArrayAccess.isInstArrayAccess() = hasFArraySubscripts();
-	
-	
-	/**
-	 * \brief Get the FArraySubscripts of an InstAccess, if any.
-	 * 
-	 * @return A reference to a FArraySubscripts object, or null.
-	 */
-	syn FArraySubscripts InstAccess.fArraySubscripts() = null;
-	eq InstArrayAccess.fArraySubscripts() = hasFArraySubscripts()? getFArraySubscripts(): null;
-	
-	/**
 	 * \brief Return an Index with these array subscripts.
 	 * 
 	 * This version is cached, to avoid repeating constant evaluation.
@@ -380,11 +363,8 @@ aspect Arrays {
 	 * Any colon subscripts are expanded into constant vector expressions.
 	 */
 	syn FArraySubscripts InstAccess.getExpandedSubscripts() = new FArraySubscripts();
-	eq InstArrayAccess.getExpandedSubscripts() {
-		return hasFArraySubscripts() ? 
-				getFArraySubscripts().expandedSubscripts() :
-				myInstComponentDecl().expandedSubscripts();
-	}
+	eq InstScalarAccess.getExpandedSubscripts() = myInstComponentDecl().expandedSubscripts();
+	eq InstArrayAccess.getExpandedSubscripts() = getFArraySubscripts().expandedSubscripts();
 	
 //	private static final FArraySubscripts InstAccess.EMPTY_FAS = new FArraySubscripts();
 	
@@ -917,9 +897,8 @@ aspect Arrays {
 	 * \brief Get the array sizes. 
 	 */
 	syn Size InstAccess.size() = Size.SCALAR;
-	eq InstArrayAccess.size() = hasFArraySubscripts()? 
-			getFArraySubscripts().accessSize(): 
-				myInstComponentDecl().size();
+	eq InstScalarAccess.size() = myInstComponentDecl().size();
+	eq InstArrayAccess.size() = getFArraySubscripts().accessSize();
 			
 	/**
 	 * \brief Get the array sizes. 
@@ -1736,8 +1715,28 @@ aspect Arrays {
 	protected InstGlobalAccess InstGlobalAccess.specifyEach(Index i, int[] dim) {
 		return new InstGlobalAccess(getInstAccess().specifyEach(i, dim));
 	}
+	
+	protected InstNamedAccess InstScalarAccess.specifyEach(Index i, int[] dim) { //TODO:Necessary?
+		FArraySubscripts oldfas = allFArraySubscripts().get(0);
+		int n = oldfas.getNumFSubscript();
+		if (n > 0) {
+			FArraySubscripts newfas = new FArraySubscripts();
+			for (int k = 0; k < n; k++) {
+				FSubscript fs = oldfas.getFSubscript(k).createSpecified(i, dim);
+				newfas.addFSubscript(fs);
+			}
+			return getArrayCopy(newfas);
+		} else {
+			return fullCopy();
+		}
+	}
+	
+	syn InstArrayAccess InstScalarAccess.getArrayCopy(FArraySubscripts fas);
+	eq InstParseAccess.getArrayCopy(FArraySubscripts fas) = new InstParseArrayAccess(getID(), fas);
+	eq InstAmbiguousAccess.getArrayCopy(FArraySubscripts fas) = new InstAmbiguousArrayAccess(getID(), fas);
+	eq InstComponentAccess.getArrayCopy(FArraySubscripts fas) = new InstComponentArrayAccess(getID(), fas);
 
-	protected InstArrayAccess InstArrayAccess.specifyEach(Index i, int[] dim) {
+	protected InstNamedAccess InstArrayAccess.specifyEach(Index i, int[] dim) {
 		InstArrayAccess res = fullCopy();
 		FArraySubscripts oldfas = allFArraySubscripts().get(0);
 		int n = oldfas.getNumFSubscript();

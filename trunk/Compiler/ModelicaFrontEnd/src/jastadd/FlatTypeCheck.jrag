@@ -157,6 +157,11 @@ aspect FlatTypeCheck {
 		  top.error("Accesses to composite components other than records are not allowed: " + top.name());
   }
   
+  protected void InstComponentArrayAccess.typeError(InstAccess top) {
+	  if (!myInstComponentDecl().isUnknown())
+		  top.error("Accesses to composite components other than records are not allowed: " + top.name());
+  }
+  
   protected void InstClassAccess.typeError(InstAccess top) {
 	  if (!isComponentSizeClass() || !isInstComponentSize())
 		  top.error("Illegal access to class in expression: " + top.name());
@@ -572,9 +577,32 @@ aspect FlatTypeCheck {
 	  }
   }
   
+  public void InstComponentArrayAccess.checkAccessCompInClassLeft(InstAccess right) {
+	  if (myInstComponentDecl().isPrimitive()) {
+		  InstAccess top = getTopInstAccess();
+		  top.error("Can not access attribute of primitive with dot notation: " + top.name());
+	  }
+  }
+  
   public void InstAccess.checkAccessCompInClassRight(InstClassDecl icd) {}
   
   public void InstComponentAccess.checkAccessCompInClassRight(InstClassDecl icd) {
+	  String type = null;
+	  if (icd.extendsEnum()) {
+		  if (!myInstComponentDecl().isEnumLiteral())
+			  type = "attribute of primitive with dot notation";
+	  } else if (icd.isPackage()) {
+		  icd.checkRestriction();
+	  } else if (!icd.isOkPackage()) {
+		  type = "component in non-package class";
+	  }
+	  if (type != null) {
+		  InstAccess top = getTopInstAccess();
+		  top.error("Can not access " + type + ": " + top.name());
+	  }
+  }
+  
+  public void InstComponentArrayAccess.checkAccessCompInClassRight(InstClassDecl icd) {
 	  String type = null;
 	  if (icd.extendsEnum()) {
 		  if (!myInstComponentDecl().isEnumLiteral())
