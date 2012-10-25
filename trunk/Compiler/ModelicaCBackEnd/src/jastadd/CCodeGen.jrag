@@ -379,6 +379,9 @@ aspect CCodeGen {
 		String next = p.indent(indent);
 		for (FVariable fv : getFVariables())
 			fv.printInRecord_C(p, str, next);
+        if (getNumFVariable() == 0)
+            // always generate default field so that C struct is not empty
+            str.print(next + "char dummy;\n");
 		str.print(indent);
 		str.print("} ");
 		str.print(name_C());

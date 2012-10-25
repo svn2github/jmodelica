@@ -3325,6 +3325,27 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl16_f_exp(A_1_ra* x_a) {
 ")})));
 end CRecordDecl16;
 
+model CRecordDecl17
+ record A
+ end A;
+ 
+ A x;
+
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="CRecordDecl17",
+			description="Test that a default field is created for an empty record.",
+			template="$C_records$",
+			generatedCode=
+"typedef struct _A_0_r {
+    char dummy;
+} A_0_r;
+JMI_RECORD_ARRAY_TYPE(A_0_r, A_0_ra)
+
+"
+)})));
+end CRecordDecl17;
 
 
 model RemoveCopyright
