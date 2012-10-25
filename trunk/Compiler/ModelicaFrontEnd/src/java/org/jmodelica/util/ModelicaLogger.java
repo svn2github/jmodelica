@@ -27,7 +27,8 @@ public class ModelicaLogger {
      * 
      * Uses {@link #log(Level, String)} to log message.
      */
-    public void log(Level level, String format, Object... args) {}
+    public void log(Level level, String format, Object... args) {
+    }
     
     /**
      * \brief Get the current log level.

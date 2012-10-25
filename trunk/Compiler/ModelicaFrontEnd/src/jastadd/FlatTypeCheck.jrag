@@ -145,7 +145,7 @@ aspect FlatTypeCheck {
   protected void InstAccess.typeError(InstAccess top) {}
   
   protected void InstDot.typeError(InstAccess top) {
-	  getLastInstAccess().typeError(top);
+	  getInstAccess(getNumInstAccess() - 1).typeError(top);
   }
   
   protected void InstGlobalAccess.typeError(InstAccess top) {
@@ -153,7 +153,7 @@ aspect FlatTypeCheck {
   }
   
   protected void InstComponentAccess.typeError(InstAccess top) {
-	  if (!myInstComponentDecl().isUnknown() && !myInstComponentDecl().myInstClass().isUnknown())
+	  if (!myInstComponentDecl().isUnknown())
 		  top.error("Accesses to composite components other than records are not allowed: " + top.name());
   }
   

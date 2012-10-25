@@ -678,7 +678,7 @@ aspect Names {
     eq GlobalAccess.getLastAccess()   = getAccess().getLastAccess();
     
     syn InstAccess InstAccess.getLastInstAccess() = this;
-    eq InstDot.getLastInstAccess()                = getInstAccess(getNumInstAccessNoTransform() - 1);
+    eq InstDot.getLastInstAccess()                = getInstAccess(getNumInstAccess() - 1);
     eq InstGlobalAccess.getLastInstAccess()       = getInstAccess().getLastInstAccess();
     
     /**
@@ -709,14 +709,9 @@ aspect Names {
    
     inh InstAccess InstAccess.getNextInstAccess();
     eq InstDot.getInstAccess(int i).getNextInstAccess() = 
-    		(i >= getNumInstAccessNoTransform() - 1) ? null : getInstAccess(i + 1);
+    		(i >= getNumInstAccess() - 1) ? null : getInstAccess(i + 1);
     eq BaseNode.getChild().getNextInstAccess()          = null;
 
-    
-    /**
-     * Get number of InstAccesses without triggering rewrites.
-     */
-    syn int InstDot.getNumInstAccessNoTransform() = getInstAccessListNoTransform().getNumChildNoTransform();
     
     /**
      * stripFirstAccess removes the first access in a qualified
@@ -1514,7 +1509,6 @@ aspect FlatFunctionUtils {
                  l.add(icd);
          return l;
      }
-     eq InstSimpleShortClassDecl.myInputs() = actualInstClass().myInputs();
      
      /**
       * \brief Returns a list of all InstComponentDecls not declared as "input".
@@ -1528,7 +1522,6 @@ aspect FlatFunctionUtils {
                  l.add(icd);
          return l;
      }
-     eq InstSimpleShortClassDecl.myNonInputs() = actualInstClass().myNonInputs();
      
      /**
       * \brief Returns a list of all InstComponentDecls declared as "output".
@@ -1542,7 +1535,6 @@ aspect FlatFunctionUtils {
                  l.add(icd);
          return l;
      }
-     eq InstSimpleShortClassDecl.myOutputs() = actualInstClass().myOutputs();
      
      /**
       * \brief Returns a list of all contained InstComponentDecls that may be altered by a modification.
@@ -1557,7 +1549,6 @@ aspect FlatFunctionUtils {
         	 l.addAll(ie.myModifiableComponents());
          return l;
      }
-     eq InstSimpleShortClassDecl.myModifiableComponents() = actualInstClass().myModifiableComponents();
      
      /**
       * \brief Returns a list of all FFunctionVariables declared as "input".
@@ -2055,8 +2046,7 @@ aspect ComponentDeclMethods {
 aspect ShortClassUtil {
 
     syn InstClassDecl InstClassDecl.finalClass() = this;
-    eq InstShortClassDecl.finalClass()           = getInstExtends(0).myInstClass().finalClass();
-    eq InstSimpleShortClassDecl.finalClass()     = actualInstClass().finalClass();
+    eq InstShortClassDecl.finalClass() = getInstExtends(0).myInstClass().finalClass();
 
 
     syn boolean ClassDecl.isInput() = false;
@@ -2075,15 +2065,21 @@ aspect ShortClassUtil {
         return false;
     }
 
-    syn boolean InstClassDecl.isInput()   = false;
-    eq InstShortClassDecl.isInput()       = 
-    	getClassDecl().isInput() || getInstExtends(0).myInstClass().isInput();
-    eq InstSimpleShortClassDecl.isInput() = actualInstClass().isInput();
+    syn boolean InstClassDecl.isInput() = false;
+    eq InstShortClassDecl.isInput() {
+        if (getClassDecl().isInput()) {
+            return true;
+        }
+        return getInstExtends(0).myInstClass().isInput();
+    }
 
-    syn boolean InstClassDecl.isOutput()   = false;
-    eq InstShortClassDecl.isOutput()       =
-        getClassDecl().isOutput() || getInstExtends(0).myInstClass().isOutput();
-    eq InstSimpleShortClassDecl.isOutput() = actualInstClass().isOutput();
+    syn boolean InstClassDecl.isOutput() = false;
+    eq InstShortClassDecl.isOutput() {
+        if (getClassDecl().isOutput()) {
+            return true;
+        }
+        return getInstExtends(0).myInstClass().isOutput();
+    }
     
     syn boolean BaseComponentDecl.isEnumLiteral() = false;
     eq EnumLiteralDecl.isEnumLiteral() = true;

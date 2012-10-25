@@ -53,12 +53,11 @@ aspect AnnotationAPI {
 	eq ExternalClause.annotation() = getAnnotation1Opt().annotation();
 	eq InstExternal.annotation()   = getExternalClause().annotation();
 	
-	eq FullClassDecl.annotation()            = getAnnotations().annotation();
-	eq InstClassDecl.annotation()            = getClassDecl().annotation();
-	eq ShortClassDecl.annotation()           = getExtendsClauseShortClass().annotation();
-	eq ExtendsClauseShortClass.annotation()  = getComment().annotation();
-	eq InstShortClassDecl.annotation()       = getClassDecl().annotation();
-	eq InstSimpleShortClassDecl.annotation() = getClassDecl().annotation();
+	eq FullClassDecl.annotation()           = getAnnotations().annotation();
+	eq InstClassDecl.annotation()           = getClassDecl().annotation();
+	eq ShortClassDecl.annotation()          = getExtendsClauseShortClass().annotation();
+	eq ExtendsClauseShortClass.annotation() = getComment().annotation();
+	eq InstShortClassDecl.annotation()      = getClassDecl().annotation();
 
 	eq AbstractEquation.annotation() = getComment().annotation();
 

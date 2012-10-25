@@ -23,12 +23,12 @@ aspect InnerOuterComponents {
 	eq SourceRoot.getChild().lookupInnerInstComponent(String name, boolean firstScope) = null;
 	
 	eq InstNode.getChild().lookupInnerInstComponent(String name, boolean firstScope) {
-		if (!firstScope) {
-			InstComponentDecl icd = genericLookupInstComponent(name);
-			if (icd != null && icd.isInner())
-				return icd;
-		}
-		return lookupInnerInstComponent(name, false);
+		if (firstScope) 
+			return lookupInnerInstComponent(name, false);
+		InstComponentDecl icd = genericLookupInstComponent(name);
+		if (icd != null && icd.isInner())
+			return icd;
+		return lookupInnerInstComponent(name,false);
 	}
 	
 	inh InstComponentDecl InstNode.lookupInInnerInstComponent(String name);
@@ -56,11 +56,10 @@ aspect InnerOuterClasses {
 	eq SourceRoot.getChild().lookupInnerInstClass(String name, boolean firstScope) = null;
 	
 	eq InstNode.getChild().lookupInnerInstClass(String name, boolean firstScope) {
-		if (!firstScope) {
-			InstClassDecl icd = genericLookupInstClass(name);
-			if (icd != null && icd.isInner())
-				return icd;
-		}
-		return lookupInnerInstClass(name, false);
+		if (firstScope) 
+			return lookupInnerInstClass(name, false);
+
+		InstClassDecl icd = genericLookupInstClass(name);
+		return icd.isInner() ? icd : lookupInnerInstClass(name,false);
 	}
 }

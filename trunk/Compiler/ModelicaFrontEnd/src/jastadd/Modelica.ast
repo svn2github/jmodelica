@@ -124,6 +124,7 @@ FullClassDecl : BaseClassDecl ::= [StringComment]
 LibClassDecl : FullClassDecl ::= LibNode*;
 LibNode : SourceBaseNode ::= <FileName:String> <Name:String> <Structured:boolean> <Version:String> /StoredDefinition/;
 
+// TODO: Why does ShortClassDecl have type_prefix:es?
 PN_ShortClassDecl : BaseClassDecl ::= [TypePrefixFlow] 
                                       [TypePrefixVariability]
                                       [TypePrefixInputOutput] 

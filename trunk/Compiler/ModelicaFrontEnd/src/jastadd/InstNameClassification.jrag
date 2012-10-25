@@ -106,10 +106,9 @@ aspect InstNameClassification {
 	eq InstComponentRedeclare.getName().kind()    = Kind.COMPONENT_ACCESS;
 	eq InstFunctionCall.getName().kind()          = Kind.CLASS_ACCESS;
 	
-	eq InstConstraining.getClassName().kind()             = Kind.CLASS_ACCESS;
-	eq InstComponentDecl.getConditionalAttribute().kind() = Kind.AMBIGUOUS_ACCESS;
-	eq InstBaseClassDecl.getFAbstractEquation().kind()    = Kind.AMBIGUOUS_ACCESS;	
-	eq InstSimpleShortClassDecl.getTarget().kind()        = Kind.CLASS_ACCESS;	
+	eq InstConstraining.getClassName().kind()                 = Kind.CLASS_ACCESS;
+	eq InstComponentDecl.getConditionalAttribute().kind()     = Kind.AMBIGUOUS_ACCESS;
+	eq InstBaseClassDecl.getFAbstractEquation().kind()        = Kind.AMBIGUOUS_ACCESS;	
 
 	/**
 	 * The attribute predKind defines the kind for the previous part of a 

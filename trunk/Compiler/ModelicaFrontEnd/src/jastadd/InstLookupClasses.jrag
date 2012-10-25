@@ -21,7 +21,6 @@ aspect InstLookupClasses {
     inh InstClassDecl InstModification.lookupInstClass(String name);
     
     syn InstClassDecl InstNode.lookupInstClassRedirect(String name)         = genericLookupInstClass(name);
-    eq InstClassDecl.lookupInstClassRedirect(String name)                   = actualInstClass().genericLookupInstClass(name);
     eq InstEnumClassDecl.lookupInstClassRedirect(String name)               = lookupInstBuiltInClass(name);
     eq InstReplacingComposite.lookupInstClassRedirect(String name)          = lookupInstClass(name);
     eq InstReplacingPrimitive.lookupInstClassRedirect(String name)          = lookupInstClass(name);
@@ -61,7 +60,6 @@ aspect InstLookupClasses {
 	eq InstExtendsShortClass.getClassName().lookupInstClass(String name)             = lookupInstClassInChain(name);
 	eq InstReplacingExtendsShortClass.getClassName().lookupInstClass(String name)    = lookupInstClassInChain(name);
 	eq InstShortClassDecl.getChild().lookupInstClass(String name)                    = lookupInstClass(name);
-	eq InstSimpleShortClassDecl.getChild().lookupInstClass(String name)              = lookupInstClass(name);
 	eq InstReplacingShortClassDecl.getChild().lookupInstClass(String name)           = getInstClassRedeclare().lookupInstClass(name);
 /* TODO: This makes RedeclareTests.RedeclareFunction3 fail. Shouldn't names be looked up *in* 
  *       redeclare, not *from* it? This should apply to the 3 other similar ones, but removing 
@@ -142,12 +140,6 @@ aspect InstLookupClasses {
 	inh InstClassDecl InstExtends.lookupTopRedeclareExtendsInstClass(String name);
 	eq InstExtends.getChild().lookupTopRedeclareExtendsInstClass(String name)    = lookupTopRedeclareExtendsInstClass(name);
 	eq InstNode.getInstExtends().lookupTopRedeclareExtendsInstClass(String name) = lookupLastRedeclareExtendsInstClass(name);
-	
-	/**
-	 * Resolve classes that are just references to other classes.
-	 */
-	syn InstClassDecl InstClassDecl.actualInstClass() = this;
-	eq InstSimpleShortClassDecl.actualInstClass()     = getTarget().myInstClassDecl().actualInstClass();
 	
 	/**
 	 * Lookup the class being redeclared & extended in the last step of a chain 
@@ -253,11 +245,11 @@ aspect InstLookupClasses {
 
 	eq InstProgramRoot.getInstPredefinedType().lookupInstClass(String name) {
 		for (InstClassDecl bcd : getInstPredefinedTypes()) 
-			if (bcd.matches(name))
+			if (bcd.matchInstClassDecl(name))
 				return bcd;	
 
 		for (InstClassDecl bcd : getInstBuiltInTypes()) 
-			if (bcd.matches(name))
+			if (bcd.matchInstClassDecl(name))
 				return bcd;	
 
 		return null;
@@ -266,15 +258,15 @@ aspect InstLookupClasses {
 
 	syn lazy InstClassDecl InstProgramRoot.genericLookupInstClass(String name) {
 		for (InstClassDecl bcd : instClassDecls()) 
-			if (bcd.matches(name))
+			if (bcd.matchInstClassDecl(name))
 				return bcd;	
 		
 		for (InstClassDecl bcd : getInstPredefinedTypes()) 
-			if (bcd.matches(name))
+			if (bcd.matchInstClassDecl(name))
 				return bcd;	
 
 		for (InstClassDecl bcd : getInstBuiltInFunctions()) 
-			if (bcd.matches(name))
+			if (bcd.matchInstClassDecl(name))
 				return bcd;	
 
 		// TODO: propagate information about the class from where
@@ -300,7 +292,7 @@ aspect InstLookupClasses {
 
 	syn lazy InstClassDecl InstNode.genericLookupInstClass(String name) {
 		for (InstClassDecl icd : instClassDecls()) 
-			if (icd.matches(name)) 
+			if (icd.matchInstClassDecl(name)) 
 				return icd;
 		
 		for (InstExtends ie : instExtends()) {
@@ -317,7 +309,6 @@ aspect InstLookupClasses {
 
 		return lookupInstClassInSurrounding(name);
 	}
-	eq InstSimpleShortClassDecl.genericLookupInstClass(String name) = actualInstClass().genericLookupInstClass(name);
 	
 	syn InstClassDecl InstNode.superLookupInstClass(String name) {
 		HashSet set = new HashSet();
@@ -329,14 +320,13 @@ aspect InstLookupClasses {
 		}
 						
 		for (InstClassDecl icd : instClassDecls()) {
-			if (icd.matches(name)) {
+			if (icd.matchInstClassDecl(name)) {
 				return icd;
 			}
 		}		
 	
 		return lookupInstClass(name);
 	}
-	eq InstSimpleShortClassDecl.superLookupInstClass(String name) = actualInstClass().superLookupInstClass(name);
 
 	syn InstClassDecl InstComponentDecl.genericLookupInstClass(String name) {
 		InstClassDecl icd = memberInstClass(name);
@@ -349,7 +339,7 @@ aspect InstLookupClasses {
 				return icd;
 		}
 
-		return myInstClass().lookupInstClassInSurrounding(name);
+		return myInstClass().genericLookupInstClass(name);
 	}
 	
 	syn InstClassDecl InstComponentDecl.superLookupInstClassInComponent(String name) {
@@ -364,7 +354,7 @@ aspect InstLookupClasses {
 		}
 							
 		for (InstClassDecl icd : instClassDecls()) 
-			if (icd.matches(name)) 
+			if (icd.matchInstClassDecl(name)) 
 				return icd;
 	
 		return myInstClass().superLookupInstClass(name);
@@ -374,7 +364,7 @@ aspect InstLookupClasses {
 	// TODO: rewrite so that classes are only looked up in constraining types.	
 	syn lazy InstClassDecl InstExtends.genericLookupInstClassInExtends(String name) {
 		for (InstClassDecl icd : instClassDecls()) 
-			if (icd.matches(name)) 
+			if (icd.matchInstClassDecl(name)) 
 				return icd;
 		
 		for (InstExtends ie : instExtends()) {
@@ -388,7 +378,7 @@ aspect InstLookupClasses {
 	
 	syn InstClassDecl InstExtends.superLookupInstClassInExtends(String name) {
 		for (InstClassDecl icd : instClassDecls()) 
-			if (icd.matches(name)) 
+			if (icd.matchInstClassDecl(name)) 
 				return icd;
 
 		return myInstClass().superLookupInstClass(name);
@@ -410,7 +400,7 @@ aspect InstLookupClasses {
 			return null;
 		
 		for (InstClassDecl icd : instClassDecls()) 
-			if (icd.matches(name)) 
+			if (icd.matchInstClassDecl(name)) 
 				return icd.inOrIsOuter() ? icd.myInnerInstClassDecl() : icd;
 		
 		for (InstExtends ie : instExtends()) {
@@ -422,17 +412,18 @@ aspect InstLookupClasses {
 		return null;
 	}
 	
-	eq InstShortClassDecl.memberInstClass(String name)       = 
-		constrainMemberInstClass(name) ? getInstExtends(0).memberInstClass(name) : null;		
-	eq InstSimpleShortClassDecl.memberInstClass(String name) = 
-		constrainMemberInstClass(name) ? actualInstClass().memberInstClass(name) : null;
+	eq InstShortClassDecl.memberInstClass(String name){
+		if (!constrainMemberInstClass(name))
+			return null;
+		return getInstExtends(0).memberInstClass(name);		
+	}
 	
 	eq InstExtends.memberInstClass(String name) {
 		if (!constrainMemberInstClass(name))
 			return null;
 		
 		for (InstClassDecl icd : instClassDecls()) 
-			if (icd.matches(name)) 
+			if (icd.matchInstClassDecl(name)) 
 				return icd;
 		
 		for (InstExtends ie : instExtends()) {
@@ -465,7 +456,7 @@ aspect InstLookupClasses {
 				return null;
 			
 			for (InstClassDecl icd : instClassDecls()) 
-				if (icd.matches(name)) 
+				if (icd.matchInstClassDecl(name)) 
 					return icd.inOrIsOuter() ? icd.myInnerInstClassDecl() : icd;
 
 			for (InstExtends ie : instExtends()) {
@@ -478,8 +469,9 @@ aspect InstLookupClasses {
 		}
 	}
 	
-	eq InstBuiltInClassDecl.matches(String str) = name().equals(str); 
-	eq InstBaseClassDecl.matches(String str)    = name().equals(str);
+	syn boolean InstClassDecl.matchInstClassDecl(String name) = false;
+	eq InstBuiltInClassDecl.matchInstClassDecl(String name) = name().equals(name); 
+	eq InstBaseClassDecl.matchInstClassDecl(String name) = name().equals(name);
 	
 	// This attribute should to be circular due to lookup in import-statements
 	// If the lookup is triggered by lookup of A in 'extends A', and
@@ -644,12 +636,12 @@ aspect EnumLookup {
 	eq InstProgramRoot.getChild().lookupInstBuiltInClass(String name) {
 /*
 		for (InstClassDecl bcd : getInstPredefinedTypes()) {
-			if (bcd.matches(name))
+			if (bcd.matchInstClassDecl(name))
 				return bcd;	
 		}		
 */
 		for (InstClassDecl bcd : getInstBuiltInTypes()) {
-			if (bcd.matches(name))
+			if (bcd.matchInstClassDecl(name))
 				return bcd;	
 		}		
 

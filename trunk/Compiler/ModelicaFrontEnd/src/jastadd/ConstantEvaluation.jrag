@@ -1325,9 +1325,9 @@ aspect ConstantEvaluation {
   eq FIdUseExp.cevalCalc()      = getFIdUse().ceval();
   eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
   
-  syn CValue InstAccess.ceval()        = ceval(Index.NULL);
+  syn CValue InstAccess.ceval() = ceval(Index.NULL);
   syn CValue InstAccess.ceval(Index i) = CValue.UNKNOWN;
-  eq InstDot.ceval(Index i)            = getLastInstAccess().ceval(i);
+  eq InstDot.ceval(Index i)            = getInstAccess(getNumInstAccess() - 1).ceval(i);
   eq InstGlobalAccess.ceval(Index i)   = getInstAccess().ceval(i);
   eq InstNamedAccess.ceval(Index i) {
 	  CValue res = CValue.UNKNOWN;

@@ -4103,7 +4103,7 @@ model RedeclareElement24
 	annotation(__JModelica(UnitTesting(tests={ 
 		FlatteningTestCase(
 			name="RedeclareElement24",
-			description="Complex system of redeclares that caused erroneous error messages",
+			description="Complex system of redeclares that caused erroneous error message",
 			flatModel="
 fclass RedeclareTests.RedeclareElement24
  Real a.b.x = 1;
@@ -4457,17 +4457,17 @@ fclass RedeclareTests.RedeclareFunction4
  Real b.x;
  Real b.y;
 equation
- b.x = RedeclareTests.RedeclareFunction4.A.f({1,2});
+ b.x = RedeclareTests.RedeclareFunction4.b.A2.f({1,2});
  b.y = RedeclareTests.RedeclareFunction4.b.A3.f({1,2,3});
 
 public
- function RedeclareTests.RedeclareFunction4.A.f
+ function RedeclareTests.RedeclareFunction4.b.A2.f
   input Real[2] a;
   output Real b;
  algorithm
   b := ( a[1] ) * ( 1 ) + ( a[2] ) * ( 2 );
   return;
- end RedeclareTests.RedeclareFunction4.A.f;
+ end RedeclareTests.RedeclareFunction4.b.A2.f;
 
  function RedeclareTests.RedeclareFunction4.b.A3.f
   input Real[3] a;
