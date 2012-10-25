@@ -257,7 +257,7 @@ abstract public class TestAnnotationizerHelper {
 		boolean multi = nl >= 0;
 		if (multi) 
 			value = "\n" + value + (nl < value.length() - 1 ? "\n" : "");
-		out.print(indent + name +"=\"" + value + "\"");
+		out.print(indent + name + "=" + value);
 		if (!last)
 			out.print(",\n");
 		else if (!multi) 
