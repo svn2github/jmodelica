@@ -139,9 +139,9 @@
 		return report;
 	}
 	
-	private Map<Integer, Integer> lineBreakMap;
+	private int[] lineBreakMap;
 	
-	public void setLineBreakMap(Map<Integer, Integer> map) {
+	public void setLineBreakMap(int[] map) {
 	    lineBreakMap = map;
 	}
 

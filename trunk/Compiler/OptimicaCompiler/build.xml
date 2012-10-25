@@ -119,7 +119,7 @@
 	</target>
 	
 	<!-- Meta target for generating all java files -->
-	<target name="gen" depends="patch,gen-parser" />
+	<target name="gen" depends="patch,parser,scanner" />
 
     <target name="compile-patcher">
         <mkdir dir="bin" />
@@ -215,67 +215,127 @@
 
 	</target>
 
-	<target name="gen-parser">
+    <uptodate property="uptodate_modelica_parser" targetfile="${parser_output}/ModelicaParser.java">
+        <srcfiles dir="${parser}">
+            <include name="Modelica_header.parser"/>
+        </srcfiles>
+        <srcfiles dir="${jmodelica_parser}">
+            <include name="Modelica.parser"/>
+            <include name="beaver.input"/>
+        </srcfiles>
+    </uptodate>
 
-		<!-- generate the scanner -->
-		<concat destfile="${parser_output}/Modelica_all.flex" force="no">
-			<filelist dir="." files="${parser}/Modelica_header.flex" />
-			<filelist dir="${jmodelica_parser}" files="Modelica.flex" />
-		</concat>
-		<jflex file="${parser_output}/Modelica_all.flex" outdir="${parser_output}" nobak="yes" />
+    <uptodate property="uptodate_optimica_parser" targetfile="${parser_output}/OptimicaParser.java">
+        <srcfiles dir="${parser}">
+            <include name="Optimica_header.parser"/>
+            <include name="Optimica.parser"/>
+        </srcfiles>
+        <srcfiles dir="${jmodelica_parser}">
+            <include name="Modelica.parser"/>
+            <include name="beaver.input"/>
+        </srcfiles>
+    </uptodate>
+    
+	<target name="parser" depends="parser-modelica,parser-optimica"/>
+	
+    <target name="parser-modelica" unless="uptodate_modelica_parser">
+        <!-- generate the parser phase 1, translating .lalr to .beaver -->
+        <concat destfile="${parser_output}/Modelica_cat.parser" force="no">
+            <filelist dir="${parser}" files="Modelica_header.parser" />
+            <filelist dir="${jmodelica_parser}" files="Modelica.parser" />
+        </concat>
+        <java classpath="${jastadd_dir}/JastAddParser.jar:${beaver_dir}/lib/beaver-rt.jar" classname="Main">
+            <arg line="${parser_output}/Modelica_cat.parser ${parser_output}/ModelicaParser_raw.beaver" />
+        </java>
+        <concat destfile="${parser_output}/ModelicaParser.beaver" force="no">
+            <filelist dir="${jmodelica_parser}" files="beaver.input" />
+            <filelist dir="${parser_output}" files="ModelicaParser_raw.beaver" />
+        </concat>
+        <!-- generate the parser phase 2, translating .beaver to .java -->
+        <beaver file="${parser_output}/ModelicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes" />
 
-		<!-- generate the parser phase 1, translating .lalr to .beaver -->
-		<concat destfile="${parser_output}/Modelica_all.parser" force="no">
-			<filelist dir="." files="${parser}/Modelica_header.parser" />
-			<filelist dir="${jmodelica_parser}" files="Modelica.parser" />
-		</concat>
-		<java classpath="${jastadd_dir}/JastAddParser.jar:${beaver_dir}/lib/beaver-rt.jar" classname="Main">
-			<arg line="${parser_output}/Modelica_all.parser ${parser_output}/ModelicaParser_raw.beaver" />
-		</java>
-		<concat destfile="${parser_output}/ModelicaParser.beaver" force="no">
-			<filelist dir="." files="${jmodelica_parser}/beaver.input" />
-			<filelist dir="${parser_output}" files="ModelicaParser_raw.beaver" />
-		</concat>
-		<!-- generate the parser phase 2, translating .beaver to .java -->
-		<beaver file="${parser_output}/ModelicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes" />
+        <!-- clean up intermediate files -->
+        <delete deleteonexit="true">
+            <fileset dir="${parser_output}">
+                <include name="*.parser" />
+                <include name="*.beaver" />
+            </fileset>
+        </delete>
+    </target>
+    
+    <target name="parser-optimica" unless="uptodate_optimica_parser">
+        <!-- generate the parser phase 1, translating .lalr to .beaver -->
+        <concat destfile="${parser_output}/Optimica_cat.parser" force="no">
+            <filelist dir="${parser}" files="Optimica_header.parser" />
+            <filelist dir="${jmodelica_parser}" files="Modelica.parser" />
+            <filelist dir="${parser}" files="Optimica.parser" />
+        </concat>
+        <java classpath="${jastadd_dir}/JastAddParser.jar:${beaver_dir}/lib/beaver-rt.jar" classname="Main">
+            <arg line="${parser_output}/Optimica_cat.parser ${parser_output}/OptimicaParser_raw.beaver" />
+        </java>
+        <concat destfile="${parser_output}/OptimicaParser.beaver" force="no">
+            <filelist dir="." files="${jmodelica_parser}/beaver.input" />
+            <filelist dir="${parser_output}" files="OptimicaParser_raw.beaver" />
+        </concat>
+        <!-- generate the parser phase 2, translating .beaver to .java -->
+        <beaver file="${parser_output}/OptimicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes" />
 
+        <!-- clean up intermediate files -->
+        <delete deleteonexit="true">
+            <fileset dir="${parser_output}">
+                <include name="*.parser" />
+                <include name="*.beaver" />
+            </fileset>
+        </delete>
+    </target>
 
-		<concat destfile="${parser_output}/FlatModelica_all.flex" force="no">
-			<filelist dir="." files="${parser}/FlatModelica_header.flex" />
-			<filelist dir="${jmodelica_parser}" files="FlatModelica.flex" />
-		</concat>
-		<jflex file="${parser_output}/FlatModelica_all.flex" outdir="${parser_output}" nobak="yes" />
+    <uptodate property="uptodate_modelica_scanner" targetfile="${parser_output}/ModelicaScanner.java">
+        <srcfiles dir="${jmodelica_parser}" includes="Modelica.flex"/>
+        <srcfiles dir="${parser}" includes="Modelica_header.flex"/>
+    </uptodate>
 
-		<!-- generate the scanner -->
-		<jflex file="${parser}/Optimica.flex" outdir="${parser_output}" nobak="yes" />
-		<!-- generate the parser phase 1, translating .lalr to .beaver -->
-		<concat destfile="${parser_output}/Modelica_all.parser" force="no">
-			<filelist dir="." files="${parser}/Optimica_header.parser" />
-			<filelist dir="${jmodelica_parser}" files="Modelica.parser" />
-		</concat>
-		<concat destfile="${parser_output}/Optimica_cat.parser" force="no">
-			<filelist dir="${parser_output}" files="Modelica_all.parser" />
-			<filelist dir="${parser}" files="Optimica.parser" />
-		</concat>
-		<java classpath="${jastadd_dir}/JastAddParser.jar:${beaver_dir}/lib/beaver-rt.jar" classname="Main">
-			<arg line="${parser_output}/Optimica_cat.parser ${parser_output}/OptimicaParser_raw.beaver" />
-		</java>
-		<concat destfile="${parser_output}/OptimicaParser.beaver" force="no">
-			<filelist dir="." files="${jmodelica_parser}/beaver.input" />
-			<filelist dir="${parser_output}" files="OptimicaParser_raw.beaver" />
-		</concat>
-		<!-- generate the parser phase 2, translating .beaver to .java -->
-		<beaver file="${parser_output}/OptimicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes" />
+    <uptodate property="uptodate_flatmodelica_scanner" targetfile="${parser_output}/FlatModelicaScanner.java">
+        <srcfiles dir="${jmodelica_parser}" includes="FlatModelica.flex"/>
+        <srcfiles dir="${parser}" includes="FlatModelica_header.flex"/>
+    </uptodate>
 
-		<!-- clean up intermediate files -->
-		<delete deleteonexit="true">
-			<fileset dir="${parser_output}">
-				<include name="*.parser" />
-				<include name="*.beaver" />
-				<include name="*.flex" />
-			</fileset>
-		</delete>
-	</target>
+    <uptodate property="uptodate_optimica_scanner" targetfile="${parser_output}/OptimicaScanner.java">
+        <srcfiles dir="${parser}" includes="Optimica.flex"/>
+    </uptodate>
+
+    <condition property="uptodate_scanner">
+        <and>
+            <istrue value="${uptodate_modelica_scanner}"/>
+            <istrue value="${uptodate_flatmodelica_scanner}"/>
+            <istrue value="${uptodate_optimica_scanner}"/>
+        </and>
+    </condition>
+
+    <target name="scanner" unless="uptodate_scanner">
+        <!-- Modelica -->
+        <concat destfile="${parser_output}/Modelica_all.flex" force="no">
+            <filelist dir="${parser}" files="Modelica_header.flex" />
+            <filelist dir="${jmodelica_parser}" files="Modelica.flex" />
+        </concat>
+        <jflex file="${parser_output}/Modelica_all.flex" outdir="${parser_output}" nobak="yes" />
+
+        <!-- FlatModelica -->
+        <concat destfile="${parser_output}/FlatModelica_all.flex" force="no">
+            <filelist dir="${parser}" files="FlatModelica_header.flex" />
+            <filelist dir="${jmodelica_parser}" files="FlatModelica.flex" />
+        </concat>
+        <jflex file="${parser_output}/FlatModelica_all.flex" outdir="${parser_output}" nobak="yes" />
+
+        <!-- Optimica -->
+        <jflex file="${parser}/Optimica.flex" outdir="${parser_output}" nobak="yes" />
+
+        <!-- clean up intermediate files -->
+        <delete deleteonexit="true">
+            <fileset dir="${parser_output}">
+                 <include name="*.flex" />
+            </fileset>
+        </delete>
+    </target>
 
 	<!-- TARGET clean -->
 	<target name="clean" depends="cleanGen">

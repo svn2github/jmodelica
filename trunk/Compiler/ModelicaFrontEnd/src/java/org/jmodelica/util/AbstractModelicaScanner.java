@@ -1,27 +1,34 @@
 package org.jmodelica.util;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AbstractModelicaScanner extends beaver.Scanner {
 
-	private HashMap<Integer, Integer> lineBreakMap;
+	private static final int INITIAL_LINEBREAK_MAP_SIZE = 64;
+	private int[] lineBreakMap;
 	private FormattingInfo formattingInfo;
+	private int maxLineBreakLine;
 
 	public AbstractModelicaScanner() {
-		lineBreakMap = new HashMap<Integer, Integer>();
-		lineBreakMap.put(0, 0);
-		formattingInfo = new FormattingInfo();
+		reset();
 	}
 
-	public Map<Integer, Integer> getLineBreakMap() {
+	public int[] getLineBreakMap() {
+		if (lineBreakMap.length > maxLineBreakLine + 1)
+			lineBreakMap = Arrays.copyOf(lineBreakMap, maxLineBreakLine + 1);
 		return lineBreakMap;
 	}
 
-	public void reset(java.io.Reader reader) {
-		lineBreakMap = new HashMap<Integer, Integer>();
-		lineBreakMap.put(0, 0);
+	private void reset() {
+		lineBreakMap = new int[INITIAL_LINEBREAK_MAP_SIZE];
+		maxLineBreakLine = 0;
 		resetFormatting();
+	}
+
+	public void reset(java.io.Reader reader) {
+		reset();
 	}
 	
 	public void resetFormatting() {
@@ -37,7 +44,7 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 				if (i < text.length() - 1 && text.charAt(i + 1) == '\n')
 					++i;
 			case '\n':
-				lineBreakMap.put(++line, matchOffset() + i + 1);
+				addLineBreak(++line, matchOffset() + i + 1);
 				++numberOfLineBreaksAdded;
 			}
 		}
@@ -45,8 +52,16 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 		return numberOfLineBreaksAdded;
 	}
 
+	private void addLineBreak(int line, int offset) {
+		if (lineBreakMap.length <= line) 
+			lineBreakMap = Arrays.copyOf(lineBreakMap, 4 * lineBreakMap.length);
+		lineBreakMap[line] = offset;
+		if (line > maxLineBreakLine)
+			maxLineBreakLine = line;
+	}
+
 	protected void addLineBreak() {
-		lineBreakMap.put(matchLine() + 1, matchOffset() + matchLength());
+		addLineBreak(matchLine() + 1, matchOffset() + matchLength());
 	}
 	
 	protected void addWhiteSpaces(String data) {

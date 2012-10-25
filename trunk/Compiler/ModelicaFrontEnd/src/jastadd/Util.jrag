@@ -2150,9 +2150,9 @@ aspect FlatExpressions {
 }
 
 aspect LineOffsets {
-    private Map<Integer, Integer> StoredDefinition.lineBreakMap;
+    private int[] StoredDefinition.lineBreakMap;
     
-    public void StoredDefinition.setLineBreakMap(Map<Integer, Integer> map) {
+    public void StoredDefinition.setLineBreakMap(int[] map) {
         lineBreakMap = map;
     }
 }
