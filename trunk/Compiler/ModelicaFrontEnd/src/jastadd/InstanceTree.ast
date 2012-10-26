@@ -118,16 +118,16 @@ InstInlineExtends     : InstNormalExtends;
 InstReplacingExtendsShortClass : InstExtends ::= <InstExtendsShortClass:InstExtendsShortClass>;
 
 // Accesses in the instance tree
-abstract InstAccess : BaseNode        ::= /ExpandedSubscripts:FArraySubscripts/;
+abstract InstAccess : BaseNode;
 abstract InstNamedAccess : InstAccess ::= <ID>;
 InstDot : InstAccess ::= InstAccess*;
 
 InstClassAccess           : InstNamedAccess;
-abstract InstScalarAccess : InstNamedAccess;
+abstract InstScalarAccess : InstNamedAccess ::= /ExpandedSubscripts:FArraySubscripts/;
 InstParseAccess           : InstScalarAccess;
 InstAmbiguousAccess       : InstScalarAccess;
 InstComponentAccess       : InstScalarAccess;
-abstract InstArrayAccess  : InstNamedAccess ::= FArraySubscripts;
+abstract InstArrayAccess  : InstNamedAccess ::= FArraySubscripts /ExpandedSubscripts:FArraySubscripts/;
 InstParseArrayAccess      : InstArrayAccess;
 InstAmbiguousArrayAccess  : InstArrayAccess;
 InstComponentArrayAccess  : InstArrayAccess;

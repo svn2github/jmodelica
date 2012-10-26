@@ -288,14 +288,12 @@ aspect Arrays {
 	/**
 	 * \brief Get the expanded FArraySubscripts of each part of this access.
 	 */
-	syn lazy ArrayList<FArraySubscripts> InstAccess.allFArraySubscripts() {
-		ArrayList<FArraySubscripts> res = new ArrayList<FArraySubscripts>(1);
-		res.add(getExpandedSubscripts());
-		return res;
-	}
+	syn java.util.List<FArraySubscripts> InstAccess.allFArraySubscripts() = Arrays.asList(new FArraySubscripts());
+	eq InstArrayAccess.allFArraySubscripts() = Arrays.asList(getExpandedSubscripts());
+	eq InstScalarAccess.allFArraySubscripts() = Arrays.asList(getExpandedSubscripts());
 	eq InstDot.allFArraySubscripts() {
 		int n = getNumInstAccess();
-		ArrayList<FArraySubscripts>[] lists = new ArrayList[n];
+		java.util.List<FArraySubscripts>[] lists = new java.util.List[n];
 		for (int i = 0; i < n; i++)
 			lists[i] = getInstAccess(i).allFArraySubscripts();
 		return concatenation(lists);
@@ -305,7 +303,7 @@ aspect Arrays {
 	/**
 	 * Get the expanded FArraySubscripts of each part of the fully qualified version of this access.
 	 */
-	syn ArrayList<FArraySubscripts> InstAccess.qualifiedAllFArraySubscripts() = 
+	syn java.util.List<FArraySubscripts> InstAccess.qualifiedAllFArraySubscripts() = 
 		concatenation(surroundingFArraySubscripts(), allFArraySubscripts());
 	eq InstGlobalAccess.qualifiedAllFArraySubscripts() = allFArraySubscripts();
 	
@@ -362,9 +360,8 @@ aspect Arrays {
 	 * An access without subscripts returns subscripts that span the entire component.
 	 * Any colon subscripts are expanded into constant vector expressions.
 	 */
-	syn FArraySubscripts InstAccess.getExpandedSubscripts() = new FArraySubscripts();
-	eq InstScalarAccess.getExpandedSubscripts() = myInstComponentDecl().expandedSubscripts();
-	eq InstArrayAccess.getExpandedSubscripts() = getFArraySubscripts().expandedSubscripts();
+	syn FArraySubscripts InstScalarAccess.getExpandedSubscripts() = myInstComponentDecl().expandedSubscripts();
+	syn FArraySubscripts InstArrayAccess.getExpandedSubscripts() = getFArraySubscripts().expandedSubscripts();
 	
 //	private static final FArraySubscripts InstAccess.EMPTY_FAS = new FArraySubscripts();
 	
@@ -595,8 +592,9 @@ aspect Arrays {
 	inh Size FArraySubscripts.mySize();
 	eq FIdUse.getChild().mySize()                       = myFV().size();
 	eq FIdUseInstAccess.getChild().mySize()             = getInstAccess().size();
+	eq InstScalarAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
 	eq InstArrayAccess.getFArraySubscripts().mySize()   = myInstComponentDecl().size();
-	eq InstNamedAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
+	eq InstArrayAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
 	eq FSubscriptedExp.getFArraySubscripts().mySize()   = getFExp().size();
 	eq FExpSubscript.getFExp().mySize()                 = mySize();
 	eq FlatRoot.getChild().mySize()                     = Size.SCALAR;
@@ -3427,7 +3425,7 @@ aspect ArrayHelpers {
 		/**
 		 * \brief Create an Indices object based on a list of FArraySubcripts.
 		 */
-		public static Indices createFromFas(ArrayList<FArraySubscripts> fasl) {
+		public static Indices createFromFas(java.util.List<FArraySubscripts> fasl) {
 			return NonConsecutiveIndices.createFromFas(fasl);
 		}
 		
@@ -3640,7 +3638,7 @@ aspect ArrayHelpers {
 		 * \brief Create a NonConsecutiveIndices object based on a list of FArraySubcripts.
 		 *        Use Indices.create(ArrayList<FArraySubscripts> fasl).
 		 */
-		public static NonConsecutiveIndices createFromFas(ArrayList<FArraySubscripts> fasl) {
+		public static NonConsecutiveIndices createFromFas(java.util.List<FArraySubscripts> fasl) {
 			int n = 0;
 			for (FArraySubscripts fas : fasl)
 				n += fas.getNumFSubscript();

@@ -278,8 +278,9 @@ aspect InstLookupClasses {
 	eq InstDot.getInstAccess(int i).lookupInstClass(String name)            = 
 		(i == 0) ? lookupInstClass(name) : getInstAccessNoListTrans(i - 1).qualifiedLookupInstClass(name);
 	eq InstGlobalAccess.getInstAccess().lookupInstClass(String name)        = lookupInstClassFromTop(name);
+	eq InstScalarAccess.getExpandedSubscripts().lookupInstClass(String name) = getTopInstAccess().lookupInstClass(name);
 	eq InstArrayAccess.getFArraySubscripts().lookupInstClass(String name)   = getTopInstAccess().lookupInstClass(name);
-	eq InstNamedAccess.getExpandedSubscripts().lookupInstClass(String name) = getTopInstAccess().lookupInstClass(name);
+	eq InstArrayAccess.getExpandedSubscripts().lookupInstClass(String name) = getTopInstAccess().lookupInstClass(name);
 	
 	syn InstClassDecl InstAccess.qualifiedLookupInstClass(String name) = null;	
 	eq InstClassAccess.qualifiedLookupInstClass(String name)           = myInstClassDecl().memberInstClass(name);

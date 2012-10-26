@@ -38,8 +38,9 @@ aspect InstLookupComponents {
 	
 	eq InstDot.getInstAccess(int i).lookupInstComponent(String name)            = 
 			(i == 0) ? lookupInstComponent(name) : getInstAccessNoListTrans(i - 1).qualifiedLookupInstComponent(name);
+	eq InstScalarAccess.getExpandedSubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
 	eq InstArrayAccess.getFArraySubscripts().lookupInstComponent(String name)   = getTopInstAccess().lookupInstComponent(name);
-	eq InstNamedAccess.getExpandedSubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
+	eq InstArrayAccess.getExpandedSubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
 	eq InstGlobalAccess.getInstAccess().lookupInstComponent(String name)        = null;
 	
 	syn InstComponentDecl InstAccess.qualifiedLookupInstComponent(String name) = null;
