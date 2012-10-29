@@ -2914,7 +2914,7 @@ class PseudoSpectral(CasadiCollocator):
                     z += self.vars[i][j]['x']
                     z += self.vars[i][j]['u']
                     z += [t]
-                    self.cost_lagrange += (self.vars[i]['t']-self.vars[i-1]['t'])/2.0*self.model.get_opt_ode_L().eval([z])[0][0]*WEIGH[ind]
+                    self.cost_lagrange += (self.vars[i]['t']-self.vars[i-1]['t'])/2.0*self.model.get_opt_ode_L().eval([casadi.vertcat(z)])[0][0]*WEIGH[ind]
           
         self.cost = self.cost_mayer + self.cost_lagrange
 
