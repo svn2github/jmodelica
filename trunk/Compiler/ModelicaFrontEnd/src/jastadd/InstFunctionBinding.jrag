@@ -249,6 +249,7 @@ aspect InstFunctionBinding {
 				map.put("pre",          new BuiltInCreator(false, new FPreExp(),         1));
 				map.put("sample",       new BuiltInCreator(false, new FSampleExp(),      2));
 				map.put("initial",      new BuiltInCreator(false, new FInitialExp(),     0));
+				map.put("terminal",     new BuiltInCreator(false, new FTerminalExp(),    0));
 				map.put("identity",     new BuiltInCreator(false, new FIdentity(),       1));
 				map.put("sqrt",         new BuiltInCreator(false, new FSqrtExp(),        1));
 				map.put("transpose",    new BuiltInCreator(false, new FTranspose(),      1));

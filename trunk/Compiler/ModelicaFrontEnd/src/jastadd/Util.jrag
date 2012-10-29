@@ -2387,62 +2387,6 @@ aspect GeneralHelpers {
 		
 	}
 	
-	/**
-	 * \brief Generic iterator over constant array.
-	 */
-	public class ConstArrayIterator<T> implements Iterator<T> {
-		
-		protected T[] elems;
-		protected int i;
-		
-		public ConstArrayIterator(T[] arr) {
-			elems = arr;
-			i = 0;
-		}
-		
-		public boolean hasNext() {
-			return i < elems.length;
-		}
-		
-		public T next() {
-			return elems[i++];
-		}
-		
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-		
-	}
-	
-	/**
-	 * \brief Generic iterator over a single value.
-	 */
-	public class SingleIterator<T> implements Iterator<T> {
-		
-		protected T elem;
-		protected boolean ok;
-		
-		public SingleIterator(T e) {
-			elem = e;
-			ok = true;
-		}
-		
-		public boolean hasNext() {
-			return ok;
-		}
-		
-		public T next() {
-			if (!ok)
-				throw new NoSuchElementException();
-			ok = false;
-			return elem;
-		}
-		
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-	}
-
 	syn boolean Restriction.isModel() = false;
 	eq Model.isModel() = true;
 	syn boolean ClassDecl.isModel() = false;

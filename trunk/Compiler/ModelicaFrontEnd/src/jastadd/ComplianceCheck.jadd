@@ -100,6 +100,10 @@ aspect ComplianceCheck {
 				"() function-like operator is not supported, and is currently ignored");
 	}
 	
+	public void FTerminalExp.complianceCheck() {
+		warning("The terminal() function-like operator is not supported, and is currently evaluated to false");
+	}
+	
 	public void FSmoothExp.complianceCheck() {
 		warning("The smooth() function-like operator is not fully supported, unnecessary events may be generated");
 	}

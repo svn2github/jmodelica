@@ -1106,6 +1106,11 @@ abstract FUnaryBuiltIn : FBuiltInFunctionCall ::= FExp;
 abstract FVectUnaryBuiltIn : FUnaryBuiltIn;
 
 /**
+ * \brief Base class for calls to built-in functions with no arguments.
+ */
+abstract FNoArgBuiltIn : FBuiltInFunctionCall;
+
+/**
  * \brief noEvent built-in function.
  */
 FNoEventExp : FVectUnaryBuiltIn;
@@ -1128,9 +1133,19 @@ FPreExp : FUnaryBuiltIn;
 FSampleExp : FBuiltInFunctionCall ::= Offset:FExp Interval:FExp;
 
 /**
+ * Built-in functions that return flas describing the simulation state.
+ */
+abstract FSimulationStateBuiltIn : FNoArgBuiltIn;
+
+/**
  * Initial built-in function.
  */
-FInitialExp : FBuiltInFunctionCall;
+FInitialExp : FSimulationStateBuiltIn;
+
+/**
+ * Initial built-in function.
+ */
+FTerminalExp : FSimulationStateBuiltIn;
 
 /**
  * \brief Abs built-in function.

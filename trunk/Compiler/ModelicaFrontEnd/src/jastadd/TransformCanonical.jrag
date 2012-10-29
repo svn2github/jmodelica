@@ -4101,41 +4101,24 @@ aspect IfEquations {
 			l.add(new FEquation(getType().fullCopy(), eqs[0].type().zeroLiteral(), ifExp));
 		}
 		
+		// TODO: handle this better once we have support for if equation that can't be rewritten in later steps
 		for (FAbstractEquation eqn : nonFEquationSet())
-			l.add(eqn);
+			if (eqn.allowGlobalOnIfRewrite())
+				l.add(eqn);
 		for (FAbstractEquation eqn : getElse().nonFEquationSet())
-			l.add(eqn);
+			if (eqn.allowGlobalOnIfRewrite())
+				l.add(eqn);
 		
 		return l;
 	}
+	
+	syn boolean FAbstractEquation.allowGlobalOnIfRewrite() = false;
+	eq FFunctionCallEquation.allowGlobalOnIfRewrite()      = getNumLeft() > 0;
 	
 	rewrite FIfEquation {
 		when (rewriteIfEquation)
 		to FElseEquation new FElseEquation(getType(), createIfExpEquationList());
 	}
-
-/*
-	public boolean IfEquation.isSimpleIfEquation() {
-		
-	}
-
-
-	syn boolean FIfWhenElseEquation.isSimpleIfWhenEquation(ArrayList<FVariable> vars) = false;
-	
-	eq FIfEquation.isSimpleIfWhenEquation(ArrayList<FVariable> vars) {
-		// If list is empty, populate list
-		for (FAbstractEquation eqn : getFAbstractEquations()) {
-			if (!(eqn instanceof FEquation)) {
-				return false;
-			} 
-			
-			else if (((FEquation).getLeft()) instanceof {
-				
-			}	
-		}
-		
-	}
-	*/
 
 }
 

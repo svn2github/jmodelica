@@ -354,15 +354,15 @@ aspect FlatVariability {
 	
 	eq FLinspace.expVariability() = getStartExp().variability().combine(getStopExp().variability());
 	
-	eq FIdentity.expVariability()   = fConstant();
-	eq FOnes.expVariability()       = fConstant();
-	eq FZeros.expVariability()      = fConstant();
-	eq FFillExp.expVariability()    = getFillExp().variability();
+	eq FIdentity.expVariability()  = fConstant();
+	eq FOnes.expVariability()      = fConstant();
+	eq FZeros.expVariability()     = fConstant();
+	eq FFillExp.expVariability()   = getFillExp().variability();
 	
-	eq FPreExp.expVariability()     = fDiscrete();
-	eq FSampleExp.expVariability()  = fDiscrete();
+	eq FPreExp.expVariability()    = fDiscrete();
+	eq FSampleExp.expVariability() = fDiscrete();
 	
-	eq FInitialExp.expVariability() = fParameter();
+	eq FSimulationStateBuiltIn.expVariability() = fParameter();
 	
 	syn int FTypePrefixVariability.combineLevel() = variabilityLevel() * 10;
 	

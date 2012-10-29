@@ -1227,7 +1227,8 @@ aspect ConstantEvaluation {
   	  FInitialExp.setIsInitial(initial);
   }
   
-  eq FInitialExp.cevalCalc() = evaluationValue;
+  eq FInitialExp.cevalCalc()  = evaluationValue;
+  eq FTerminalExp.cevalCalc() = CValueBoolean.FALSE;
   
   syn boolean FMinMaxExp.selectLesser();
   eq FMinExp.selectLesser() = true;
