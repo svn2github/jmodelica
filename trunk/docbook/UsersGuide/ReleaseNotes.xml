@@ -11,6 +11,14 @@
   <title>Release notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 1.8.1</title>
+
+    <para>This release is identical to JModelica.org version 1.8 apart from
+    one important bug fix. The issue that has been fixed concerns the scaling
+    of start attributes in JMUs.</para>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 1.8</title>
 
     <section>
