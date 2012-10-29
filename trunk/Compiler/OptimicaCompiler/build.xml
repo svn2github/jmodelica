@@ -215,30 +215,54 @@
 
 	</target>
 
-    <uptodate property="uptodate_modelica_parser" targetfile="${parser_output}/ModelicaParser.java">
-        <srcfiles dir="${parser}">
-            <include name="Modelica_header.parser"/>
-        </srcfiles>
-        <srcfiles dir="${jmodelica_parser}">
-            <include name="Modelica.parser"/>
-            <include name="beaver.input"/>
-        </srcfiles>
-    </uptodate>
+	<target name="check_uptodate">
+        <uptodate property="uptodate_modelica_parser" targetfile="${parser_output}/ModelicaParser.java">
+            <srcfiles dir="${parser}">
+                <include name="Modelica_header.parser"/>
+            </srcfiles>
+            <srcfiles dir="${jmodelica_parser}">
+                <include name="Modelica.parser"/>
+                <include name="beaver.input"/>
+            </srcfiles>
+        </uptodate>
 
-    <uptodate property="uptodate_optimica_parser" targetfile="${parser_output}/OptimicaParser.java">
-        <srcfiles dir="${parser}">
-            <include name="Optimica_header.parser"/>
-            <include name="Optimica.parser"/>
-        </srcfiles>
-        <srcfiles dir="${jmodelica_parser}">
-            <include name="Modelica.parser"/>
-            <include name="beaver.input"/>
-        </srcfiles>
-    </uptodate>
+        <uptodate property="uptodate_optimica_parser" targetfile="${parser_output}/OptimicaParser.java">
+            <srcfiles dir="${parser}">
+                <include name="Optimica_header.parser"/>
+                <include name="Optimica.parser"/>
+            </srcfiles>
+            <srcfiles dir="${jmodelica_parser}">
+                <include name="Modelica.parser"/>
+                <include name="beaver.input"/>
+            </srcfiles>
+        </uptodate>
+
+        <uptodate property="uptodate_modelica_scanner" targetfile="${parser_output}/ModelicaScanner.java">
+            <srcfiles dir="${jmodelica_parser}" includes="Modelica.flex"/>
+            <srcfiles dir="${parser}" includes="Modelica_header.flex"/>
+        </uptodate>
+
+        <uptodate property="uptodate_flatmodelica_scanner" targetfile="${parser_output}/FlatModelicaScanner.java">
+            <srcfiles dir="${jmodelica_parser}" includes="FlatModelica.flex"/>
+            <srcfiles dir="${parser}" includes="FlatModelica_header.flex"/>
+        </uptodate>
+
+        <uptodate property="uptodate_optimica_scanner" targetfile="${parser_output}/OptimicaScanner.java">
+            <srcfiles dir="${parser}" includes="Optimica.flex"/>
+        </uptodate>
+
+        <condition property="uptodate_scanner">
+            <and>
+                <istrue value="${uptodate_modelica_scanner}"/>
+                <istrue value="${uptodate_flatmodelica_scanner}"/>
+                <istrue value="${uptodate_optimica_scanner}"/>
+            </and>
+        </condition>
+    </target>
     
 	<target name="parser" depends="parser-modelica,parser-optimica"/>
 	
-    <target name="parser-modelica" unless="uptodate_modelica_parser">
+    <target name="parser-modelica" depends="check_uptodate" unless="uptodate_modelica_parser">
         <!-- generate the parser phase 1, translating .lalr to .beaver -->
         <concat destfile="${parser_output}/Modelica_cat.parser" force="no">
             <filelist dir="${parser}" files="Modelica_header.parser" />
@@ -263,7 +287,7 @@
         </delete>
     </target>
     
-    <target name="parser-optimica" unless="uptodate_optimica_parser">
+    <target name="parser-optimica" depends="check_uptodate" unless="uptodate_optimica_parser">
         <!-- generate the parser phase 1, translating .lalr to .beaver -->
         <concat destfile="${parser_output}/Optimica_cat.parser" force="no">
             <filelist dir="${parser}" files="Optimica_header.parser" />
@@ -289,29 +313,7 @@
         </delete>
     </target>
 
-    <uptodate property="uptodate_modelica_scanner" targetfile="${parser_output}/ModelicaScanner.java">
-        <srcfiles dir="${jmodelica_parser}" includes="Modelica.flex"/>
-        <srcfiles dir="${parser}" includes="Modelica_header.flex"/>
-    </uptodate>
-
-    <uptodate property="uptodate_flatmodelica_scanner" targetfile="${parser_output}/FlatModelicaScanner.java">
-        <srcfiles dir="${jmodelica_parser}" includes="FlatModelica.flex"/>
-        <srcfiles dir="${parser}" includes="FlatModelica_header.flex"/>
-    </uptodate>
-
-    <uptodate property="uptodate_optimica_scanner" targetfile="${parser_output}/OptimicaScanner.java">
-        <srcfiles dir="${parser}" includes="Optimica.flex"/>
-    </uptodate>
-
-    <condition property="uptodate_scanner">
-        <and>
-            <istrue value="${uptodate_modelica_scanner}"/>
-            <istrue value="${uptodate_flatmodelica_scanner}"/>
-            <istrue value="${uptodate_optimica_scanner}"/>
-        </and>
-    </condition>
-
-    <target name="scanner" unless="uptodate_scanner">
+    <target name="scanner" depends="check_uptodate" unless="uptodate_scanner">
         <!-- Modelica -->
         <concat destfile="${parser_output}/Modelica_all.flex" force="no">
             <filelist dir="${parser}" files="Modelica_header.flex" />

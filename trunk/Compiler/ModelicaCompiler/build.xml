@@ -199,16 +199,32 @@
 
 	</target>
 
+    <target name="check_uptodate">
+        <uptodate property="uptodate_parser" targetfile="${parser_output}/ModelicaParser.java">
+            <srcfiles dir="${jmodelica_parser}">
+                <include name="Modelica_header.parser"/>
+                <include name="Modelica.parser"/>
+                <include name="beaver.input"/>
+            </srcfiles>
+        </uptodate>
+    	
+        <uptodate property="uptodate_modelica_scanner" targetfile="${parser_output}/ModelicaScanner.java">
+            <srcfiles dir="${jmodelica_parser}" includes="Modelica*.flex"/>
+        </uptodate>
 
-    <uptodate property="uptodate_parser" targetfile="${parser_output}/ModelicaParser.java">
-        <srcfiles dir="${jmodelica_parser}">
-            <include name="Modelica_header.parser"/>
-            <include name="Modelica.parser"/>
-            <include name="beaver.input"/>
-        </srcfiles>
-    </uptodate>
+        <uptodate property="uptodate_flatmodelica_scanner" targetfile="${parser_output}/FlatModelicaScanner.java">
+            <srcfiles dir="${jmodelica_parser}" includes="FlatModelica*.flex"/>
+        </uptodate>
 
-    <target name="parser" unless="uptodate_parser">
+        <condition property="uptodate_scanner">
+            <and>
+                <istrue value="${uptodate_modelica_scanner}"/>
+                <istrue value="${uptodate_flatmodelica_scanner}"/>
+            </and>
+        </condition>
+    </target>
+
+    <target name="parser" depends="check_uptodate" unless="uptodate_parser">
         <!-- generate the parser phase 1, translating .lalr to .beaver -->
         <concat destfile="${parser_output}/Modelica_cat.parser" force="no">
             <filelist dir="${jmodelica_parser}" files="Modelica_header.parser" />
@@ -233,22 +249,7 @@
         </delete>
     </target>
 
-    <uptodate property="uptodate_modelica_scanner" targetfile="${parser_output}/ModelicaScanner.java">
-        <srcfiles dir="${jmodelica_parser}" includes="Modelica*.flex"/>
-    </uptodate>
-
-    <uptodate property="uptodate_flatmodelica_scanner" targetfile="${parser_output}/FlatModelicaScanner.java">
-        <srcfiles dir="${jmodelica_parser}" includes="FlatModelica*.flex"/>
-    </uptodate>
-
-	<condition property="uptodate_scanner">
-		<and>
-            <istrue value="${uptodate_modelica_scanner}"/>
-		    <istrue value="${uptodate_flatmodelica_scanner}"/>
-		</and>
-	</condition>
-	
-    <target name="scanner" unless="uptodate_scanner">
+    <target name="scanner" depends="check_uptodate" unless="uptodate_scanner">
         <!-- Modelica -->
         <concat destfile="${parser_output}/Modelica_cat.flex" force="no">
             <filelist dir="${jmodelica_parser}" files="Modelica_header.flex" />
