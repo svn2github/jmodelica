@@ -16,54 +16,6 @@
     <para>This release is identical to JModelica.org version 1.8 apart from
     one important bug fix. The issue that has been fixed concerns the scaling
     of start attributes in JMUs.</para>
-
-    <section>
-      <title>Contributors</title>
-
-      <para>Bengt-Arne Andersson</para>
-
-      <para>Christian Andersson</para>
-
-      <para>Tove Bergdahl</para>
-
-      <para>Magnus Gäfvert</para>
-
-      <para>Fredrik Magnusson</para>
-
-      <para>Jesper Mattsson</para>
-
-      <para>Tobias Mattsson</para>
-
-      <para>Iakov Nakhimovski</para>
-
-      <para>Jon Sten</para>
-
-      <para>Johan Ylikiiskilä</para>
-
-      <para>Johan Åkesson</para>
-
-      <section>
-        <title>Previous contributors</title>
-
-        <para>Sofia Gedda</para>
-
-        <para>Petter Lindgren</para>
-
-        <para>Lennart Moraeus</para>
-
-        <para>Philip Nilsson</para>
-
-        <para>Patrik Meijer</para>
-
-        <para>Kristina Olsson</para>
-
-        <para>Roberto Parrotto</para>
-
-        <para>Jens Rantil</para>
-
-        <para>Philip Reuterswärd</para>
-      </section>
-    </section>
   </section>
 
   <section>
