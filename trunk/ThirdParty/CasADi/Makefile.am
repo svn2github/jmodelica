@@ -13,16 +13,14 @@ $(CASADI_BUILD_DIR):
 	cd $(CASADI_BUILD_DIR) && \
 	case $(build) in \
 	*-cygwin*) \
-	IPOPT=$(IPOPT_HOME) SUNDIALS=$(SUNDIALS_HOME) cmake -G "MSYS Makefiles" $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles" $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
   	*-mingw*) \
-	IPOPT=$(IPOPT_HOME) SUNDIALS=$(SUNDIALS_HOME) cmake -G "MSYS Makefiles" $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles" $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
   	*-apple*) \
-	IPOPT=$(IPOPT_HOME) SUNDIALS=$(SUNDIALS_HOME) cmake $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
   	*) \
-	IPOPT=$(IPOPT_HOME) SUNDIALS=$(SUNDIALS_HOME) cmake $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
 	esac
-
-
 
 
 all-local: $(CASADI_BUILD_DIR)

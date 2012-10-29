@@ -710,7 +710,7 @@ class CasadiModel(BaseModel):
         ocp_expressions = [self.ocp.initial, self.ocp.ode, self.ocp.alg,
                            self.ocp.path, self.ocp.point, self.ocp.mterm,
                            self.ocp.lterm]
-        parameters = [p.var() for p in self._parameters]
+        parameters = casadi.vertcat([p.var() for p in self._parameters])
         parameter_values = [p.getStart() for p in self._parameters]
         [self.initial,
          self.ode,
@@ -781,12 +781,12 @@ class CasadiModel(BaseModel):
         self._var_vectors = var_vectors
         
         # Create symbolic variables
-        self.dx = casadi.der(var_vectors['x'])
-        self.x = casadi.var(var_vectors['x'])
-        self.u = casadi.var(var_vectors['u'])
-        self.w = casadi.var(var_vectors['w'])
+        self.dx = casadi.vertcat(casadi.der(var_vectors['x']))
+        self.x = casadi.vertcat(casadi.var(var_vectors['x']))
+        self.u = casadi.vertcat(casadi.var(var_vectors['u']))
+        self.w = casadi.vertcat(casadi.var(var_vectors['w']))
         self.t = self.ocp.t
-        self.p = casadi.var(var_vectors['p_opt'])
+        self.p = casadi.vertcat(casadi.var(var_vectors['p_opt']))
         sym_vars = {'dx': self.dx,
                     'x': self.x,
                     'u': self.u,
@@ -807,10 +807,10 @@ class CasadiModel(BaseModel):
         self.vr_map = vr_map
         
         # Count variables
-        self.n_x = len(self.x)
-        self.n_u = len(self.u)
-        self.n_w = len(self.w)
-        self.n_p = len(self.p)
+        self.n_x = self.x.numel()
+        self.n_u = self.u.numel()
+        self.n_w = self.w.numel()
+        self.n_p = self.p.numel()
         
         # Create scaling factors
         sf = {}
@@ -859,19 +859,20 @@ class CasadiModel(BaseModel):
             self.ocp_ode_init_inputs += [self.t]
             
             
-            self.ode_F = casadi.SXFunction([self.ocp_ode_inputs],
-                                           [self.ode])
+            self.ode_F = casadi.SXFunction(
+                    [casadi.vertcat(self.ocp_ode_inputs)], [self.ode])
             self.ode_F.init()
             
             # The initial equations
-            self.ode_F0 = casadi.SXFunction([self.ocp_ode_init_inputs],
-                                            [self.initial])
+            self.ode_F0 = casadi.SXFunction(
+                    [casadi.vertcat(self.ocp_ode_init_inputs)], [self.initial])
             self.ode_F0.init()
             
             # The Lagrange cost function
             if self.lterm.numel() > 0:
-                self.opt_ode_L = casadi.SXFunction([self.ocp_ode_inputs],
-                                                   [[self.lterm[0]]])
+                self.opt_ode_L = casadi.SXFunction(
+                        [casadi.vertcat(self.ocp_ode_inputs)],
+                        [self.lterm[0]])
                 self.opt_ode_L.init()
             else:
                 self.opt_ode_L = None
@@ -884,7 +885,8 @@ class CasadiModel(BaseModel):
                         x.atTime(tf, True) for x in self.ocp.x]
                 self.ocp_ode_mterm_inputs += [self.t]
                 self.opt_ode_J = casadi.SXFunction(
-                        [self.ocp_ode_mterm_inputs], [[self.mterm[0]]])
+                        [casadi.vertcat(self.ocp_ode_mterm_inputs)],
+                        [self.mterm[0]])
                 self.opt_ode_J.init()
             else:
                 self.opt_ode_J = None
@@ -921,10 +923,12 @@ class CasadiModel(BaseModel):
             self.ocp_ode_boundary_inputs += [x.atTime(tf, True) for
                                              x in self.ocp.x]
             self.opt_ode_C = casadi.SXFunction(
-                    [self.ocp_ode_boundary_inputs], [self.opt_ode_C])
+                    [casadi.SXMatrix(self.ocp_ode_boundary_inputs)],
+                    [casadi.vertcat(self.opt_ode_C)])
             self.opt_ode_C.init()
             self.opt_ode_Cineq = casadi.SXFunction(
-                    [self.ocp_ode_boundary_inputs], [self.opt_ode_Cineq])
+                    [casadi.SXMatrix(self.ocp_ode_boundary_inputs)],
+                    [casadi.vertcat(self.opt_ode_Cineq)])
             self.opt_ode_Cineq.init()
             
             ##############################

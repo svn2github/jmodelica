@@ -778,7 +778,7 @@ class LocalDAECollocator(CasadiCollocator):
         
         # Create NLP variables
         if self.graph == "MX":
-            xx = casadi.MX("xx", n_xx)
+            xx = casadi.msym("xx", n_xx)
         elif self.graph == "SX":
             xx = casadi.ssym("xx", n_xx)
         else:
@@ -934,54 +934,59 @@ class LocalDAECollocator(CasadiCollocator):
             if self.graph != "SX":
                 raise NotImplementedError("Variable renaming only works " + \
                                           "for SX graphs.")
-            xx = casadi.SXMatrix(self.n_xx, 1, 0)
+            xx = casadi.SXMatrix(self.n_xx, 1)
             var_indices = self.var_indices
             
-            for i in range(1, self.n_e+1):
+            for i in xrange(1, self.n_e+1):
                 if self.hs == "free":
                     xx[var_indices['h'][i]] = casadi.ssym("h_" + str(i))
                 for k in var_indices[i].keys():
                     if (not self.eliminate_der_var and
                         'dx' in var_indices[i][k].keys()):
-                        dx = []
-                        for j in range(self.model.get_n_x()):
-                            dx.append(casadi.ssym(str(self.model.get_dx()[j]) +
-                                                '_' + str(i) + '_' + str(k)))
-                        xx[var_indices[i][k]['dx']] = dx
+                        dx = casadi.SXMatrix(self.model.get_n_x(), 1)
+                        for j in xrange(self.model.get_n_x()):
+                            dx[j, 0] = (
+                                    casadi.ssym(str(self.model.get_dx()[j]) +
+                                    '_' + str(i) + '_' + str(k)))
+                        xx[var_indices[i][k]['dx'], 0] = dx
                     
                     if 'x' in var_indices[i][k].keys():
-                        x = []
-                        for j in range(self.model.get_n_x()):
-                            x.append(casadi.ssym(str(self.model.get_x()[j]) +
-                                               '_' +  str(i) + '_' + str(k)))
-                        xx[var_indices[i][k]['x']] = x
+                        x = casadi.SXMatrix(self.model.get_n_x(), 1)
+                        for j in xrange(self.model.get_n_x()):
+                            x[j, 0] = (
+                                    casadi.ssym(str(self.model.get_x()[j]) +
+                                    '_' +  str(i) + '_' + str(k)))
+                        xx[var_indices[i][k]['x'], 0] = x
                     
                     if 'u' in var_indices[i][k].keys():
-                        u = []
-                        for j in range(self.model.get_n_u()):
-                            u.append(casadi.ssym(str(self.model.get_u()[j]) +
-                                               '_' +  str(i) + '_' + str(k)))
-                        xx[var_indices[i][k]['u']] = u
+                        u = casadi.SXMatrix(self.model.get_n_u(), 1)
+                        for j in xrange(self.model.get_n_u()):
+                            u[j, 0] = (
+                                    casadi.ssym(str(self.model.get_u()[j]) +
+                                    '_' +  str(i) + '_' + str(k)))
+                        xx[var_indices[i][k]['u'], 0] = u
                     
                     if 'w' in var_indices[i][k].keys():
-                        w = []
-                        for j in range(self.model.get_n_w()):
-                            w.append(casadi.ssym(str(self.model.get_w()[j]) +
-                                               '_' +  str(i) + '_' + str(k)))
-                        xx[var_indices[i][k]['w']] = w
+                        w = casadi.SXMatrix(self.model.get_n_w(), 1)
+                        for j in xrange(self.model.get_n_w()):
+                            w[j, 0] = (
+                                    casadi.ssym(str(self.model.get_w()[j]) +
+                                    '_' +  str(i) + '_' + str(k)))
+                        xx[var_indices[i][k]['w'], 0] = w
             
             if 'p_opt' in var_indices.keys():
-                p_opt = []
-                for j in range(self.model.get_n_p()):
-                    p_opt.append(casadi.ssym(str(self.model.get_p()[j])))
-                xx[var_indices['p_opt']] = p_opt
+                p_opt = casadi.SXMatrix(self.model.get_n_p(), 1)
+                for j in xrange(self.model.get_n_p()):
+                    p_opt[j, 0] = casadi.ssym(str(self.model.get_p()[j]))
+                xx[var_indices['p_opt'], 0] = p_opt
             
             # Derivative initial values
             if self.eliminate_der_var:
-                dx = []
-                for j in range(self.model.get_n_x()):
-                    dx.append(casadi.ssym(str(self.model.get_dx()[j]) + '_1_0'))
-                xx[var_indices[1][0]['dx']] = dx
+                dx = casadi.SXMatrix(self.model.get_n_x(), 1)
+                for j in xrange(self.model.get_n_x()):
+                    dx[j, 0] = casadi.ssym(
+                            str(self.model.get_dx()[j]) + '_1_0')
+                xx[var_indices[1][0]['dx'], 0] = dx
             
             self.xx = xx
             self._create_nlp_variables(True)
@@ -1126,7 +1131,7 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             nlp_timed_variables = casadi.MX()
         if self.hs == "free":
-            timed_variables = []
+            timed_variables = casadi.SXMatrix()
         else:
             collocation_constraint_points = []
             for constraint_point in self.ocp.tp:
@@ -1158,10 +1163,11 @@ class LocalDAECollocator(CasadiCollocator):
             var_vector_list = [var_vectors['x'],
                                var_vectors['u'],
                                var_vectors['w']]
-            timed_variables = [vari.atTime(tp, True) for
-                               tp in self.ocp.tp for
-                               var_vector in var_vector_list for
-                               vari in var_vector]
+            timed_variables = casadi.SXMatrix(
+                    [vari.atTime(tp, True) for
+                     tp in self.ocp.tp for
+                     var_vector in var_vector_list for
+                     vari in var_vector])
             for (i, k) in collocation_constraint_points:
                 for var_type in ['x', 'u', 'w']:
                     nlp_timed_variables.append(var_map[i][k][var_type])
@@ -1518,8 +1524,10 @@ class LocalDAECollocator(CasadiCollocator):
         path_constraint_input.append(timed_variables)
         if self.nominal_traj is not None:
             path_constraint_input.append(sym_sf)
-        g_e_fcn = casadi.SXFunction(path_constraint_input, [g_e])
-        g_i_fcn = casadi.SXFunction(path_constraint_input, [g_i])
+        g_e_fcn = casadi.SXFunction(path_constraint_input,
+                                    [casadi.vertcat(g_e)])
+        g_i_fcn = casadi.SXFunction(path_constraint_input,
+                                    [casadi.vertcat(g_i)])
         g_e_fcn.init()
         g_i_fcn.init()
         
@@ -1536,8 +1544,12 @@ class LocalDAECollocator(CasadiCollocator):
                     G_i.append(-self.point[i] + lb[i])
                 if ub[i] != N.inf:
                     G_i.append(self.point[i] - ub[i])
-        G_e_fcn = casadi.SXFunction([self.model.p, timed_variables], [G_e])
-        G_i_fcn = casadi.SXFunction([self.model.p, timed_variables], [G_i])
+        G_e_fcn = casadi.SXFunction(
+                [casadi.vertcat([self.model.p, timed_variables])],
+                [casadi.vertcat(G_e)])
+        G_i_fcn = casadi.SXFunction([casadi.vertcat(
+                [self.model.p, timed_variables])],
+                [casadi.vertcat(G_i)])
         G_e_fcn.init()
         G_i_fcn.init()
         
@@ -1743,13 +1755,14 @@ class LocalDAECollocator(CasadiCollocator):
         # Path constraints
         for i in xrange(1, self.n_e + 1):
             for k in self.time_points[i].keys():
+                fcn_input = []
                 if self.eliminate_der_var:
                     z = self._get_z_elim_der(i, k)
-                    fcn_input = [z, x_list[i], der_vals[k],
-                                 self.horizon * self.h[i]]
+                    fcn_input += [z, x_list[i], der_vals[k],
+                                  self.horizon * self.h[i]]
                 else:
                     z = self._get_z(i, k)
-                    fcn_input = [z]
+                    fcn_input.append(z)
                 fcn_input.append(nlp_timed_variables)
                 if self.nominal_traj is not None:
                     fcn_input.append(variant_sf[i][k])
@@ -1759,8 +1772,10 @@ class LocalDAECollocator(CasadiCollocator):
                 c_i.append(g_i_constr)
         
         # Point constraints
-        [G_e_constr] = G_e_eval([var_map['p_opt'], nlp_timed_variables])
-        [G_i_constr] = G_i_eval([var_map['p_opt'], nlp_timed_variables])
+        [G_e_constr] = G_e_eval([casadi.vertcat(
+                [var_map['p_opt'], nlp_timed_variables])])
+        [G_i_constr] = G_i_eval([casadi.vertcat(
+                [var_map['p_opt'], nlp_timed_variables])])
         c_e.append(G_e_constr)
         c_i.append(G_i_constr)
         
@@ -1835,15 +1850,17 @@ class LocalDAECollocator(CasadiCollocator):
                 
                 # Create function for evaluation of Mayer term
                 tf = self.ocp.variable('finalTime').getStart()
-                mterm_inputs = casadi.vertcat([
-                        self.model.t,
+                mterm_inputs = casadi.SXMatrix(self.model.t)
+                mterm_inputs.append(casadi.SXMatrix(
                         [x.atTime(tf, True) for
-                         x in self.model._var_vectors['x']],
+                         x in self.model._var_vectors['x']]))
+                mterm_inputs.append(casadi.SXMatrix(
                         [u.atTime(tf, True) for
-                         u in self.model._var_vectors['u']],
+                         u in self.model._var_vectors['u']]))
+                mterm_inputs.append(casadi.SXMatrix(
                         [w.atTime(tf, True) for
-                         w in self.model._var_vectors['w']],
-                        self.model.p])
+                         w in self.model._var_vectors['w']]))
+                mterm_inputs.append(self.model.p)
                 mterm_fcn = casadi.SXFunction([mterm_inputs], [self.mterm])
                 mterm_fcn.init()
                 
@@ -2656,7 +2673,7 @@ class PseudoSpectral(CasadiCollocator):
         c = casadi.vertcat([c_e, c_i])
         
         # Create constraint function
-        self.c_fcn = casadi.SXFunction([self.get_xx()], [c])
+        self.c_fcn = casadi.SXFunction([casadi.vertcat(self.get_xx())], [c])
         self.c_fcn.setOption("name", "NLP constraint function")
         self.c_fcn.init()
         
@@ -2745,7 +2762,7 @@ class PseudoSpectral(CasadiCollocator):
         z += self.vars[0]['p']
         z += self.vars[PHASE[0]][DISCR[0]]['x']
         z += [t]
-        [init_constr] = self.model.get_ode_F0().eval([z])
+        [init_constr] = self.model.get_ode_F0().eval([casadi.vertcat(z)])
         init_constr = list(init_constr.data())
         self.h += init_constr
         
@@ -2764,7 +2781,7 @@ class PseudoSpectral(CasadiCollocator):
                 z += self.vars[i][j]['x']
                 z += self.vars[i][j]['u']
                 z += [t]
-                [Fz] = self.model.get_ode_F().eval([z])
+                [Fz] = self.model.get_ode_F().eval([casadi.vertcat(z)])
                 dynamic_constr = (self.vars[i]['t']-self.vars[i-1]['t'])*0.5*Fz
                 dynamic_constr = list(dynamic_constr.data())
                 for k in range(self.model.get_n_x()):
@@ -2841,7 +2858,7 @@ class PseudoSpectral(CasadiCollocator):
         z += self.vars[0]['p']
         z += self.vars[PHASE[0]][DISCR[0]]['x']
         z += self.vars[PHASE[-1]][DISCR[-1]]['x']
-        [boundary_constr] = self.model.opt_ode_C.eval([z])
+        [boundary_constr] = self.model.opt_ode_C.eval([casadi.vertcat(z)])
         boundary_constr = list(boundary_constr.data())
         self.h += boundary_constr
         
@@ -2851,7 +2868,8 @@ class PseudoSpectral(CasadiCollocator):
         z += self.vars[0]['p']
         z += self.vars[PHASE[0]][DISCR[0]]['x']
         z += self.vars[PHASE[-1]][DISCR[-1]]['x']
-        [boundary_constr_ineq] = self.model.opt_ode_Cineq.eval([z])
+        [boundary_constr_ineq] = self.model.opt_ode_Cineq.eval(
+                [casadi.vertcat(z)])
         boundary_constr_ineq = list(boundary_constr_ineq.data())
         self.g += boundary_constr_ineq
         
@@ -2881,7 +2899,8 @@ class PseudoSpectral(CasadiCollocator):
             z += self.vars[0]['p']
             z += self.vars[PHASE[-1]][DISCR[-1]]['x']
             z += [t]
-            [self.cost_mayer] = self.model.get_opt_ode_J().eval([z])
+            [self.cost_mayer] = self.model.get_opt_ode_J().eval(
+                    [casadi.vertcat(z)])
             #self.cost_mayer = list(self.cost_mayer.data())
         #NOTE TEMPORARY!!!!
         #self.cost_mayer=self.vars[PHASE[-1]]['t']
@@ -2895,12 +2914,12 @@ class PseudoSpectral(CasadiCollocator):
                     z += self.vars[i][j]['x']
                     z += self.vars[i][j]['u']
                     z += [t]
-                    self.cost_lagrange += (self.vars[i]['t']-self.vars[i-1]['t'])/2.0*self.model.get_opt_ode_L().eval([z])[0][0]*WEIGH[ind]
+                    self.cost_lagrange += (self.vars[i]['t']-self.vars[i-1]['t'])/2.0*self.model.get_opt_ode_L().eval([casadi.vertcat(z)])[0][0]*WEIGH[ind]
           
         self.cost = self.cost_mayer + self.cost_lagrange
 
         # Objective function
-        self.cost_fcn = casadi.SXFunction([self.xx], [[self.cost]])  
+        self.cost_fcn = casadi.SXFunction([casadi.vertcat(self.xx)], [self.cost])  
         
         # Hessian
         self.sigma = casadi.ssym('sigma')
@@ -2914,7 +2933,9 @@ class PseudoSpectral(CasadiCollocator):
             self.lam.append(casadi.ssym('lambda_' + str(i+len(self.h))))
             self.Lag = self.Lag + self.g[i]*self.lam[i+len(self.h)]
             
-        self.Lag_fcn = casadi.SXFunction([self.xx, self.lam, [self.sigma]],[[self.Lag]])
+        self.Lag_fcn = casadi.SXFunction(
+                [casadi.vertcat(self.xx), casadi.vertcat(self.lam),
+                 self.sigma], [self.Lag])
         self.Lag_fcn.init()
         #self.H_fcn = None
         self.H_fcn = self.Lag_fcn.hessian(0,0)
@@ -3055,10 +3076,10 @@ class PseudoSpectral(CasadiCollocator):
         self.n_xx = len(self.xx)
     
     def get_equality_constraint(self):
-        return casadi.SXMatrix(self.h)
+        return casadi.vertcat(self.h)
     
     def get_inequality_constraint(self):
-        return casadi.SXMatrix(self.g)
+        return casadi.vertcat(self.g)
 
     def get_cost(self):
         return self.cost_fcn
@@ -3225,13 +3246,13 @@ class PseudoSpectral(CasadiCollocator):
 
         if (self.options['free_phases'] and len(PHASE) > 1) and self.md.get_opt_finaltime_free():
             input_t = [self.vars[i]['t'] for i in PHASE]
-            tfcn = casadi.SXFunction([input_t],[ts])
+            tfcn = casadi.SXFunction([casadi.vertcat(input_t)],[casadi.vertcat(ts)])
             tfcn.init()
             input_res = [self.nlp_opt[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE]
             tfcn.setInput(N.array(input_res).flatten())
         elif (self.options['free_phases'] and len(PHASE) > 1):
             input_t = [self.vars[i]['t'] for i in PHASE[:-1]]
-            tfcn = casadi.SXFunction([input_t],[ts])
+            tfcn = casadi.SXFunction([casadi.vertcat(input_t)],[casadi.vertcat(ts)])
             tfcn.init()
             input_res = [self.nlp_opt[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE[:-1]]
             tfcn.setInput(N.array(input_res).flatten())

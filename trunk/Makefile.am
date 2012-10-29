@@ -32,7 +32,7 @@ casadi:
 	make -f Makefile
 
 install_casadi: casadi
-	cd $(abs_builddir)/casadi_build/swig/python/; \
+	cd $(abs_builddir)/casadi_build/python/; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/
 
 
