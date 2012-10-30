@@ -1150,6 +1150,29 @@ end TransformCanonicalTests.AliasTest30;
 ")})));
 end AliasTest30;
 
+model AliasTest31
+ Real x1;
+ Real x2;
+ Real x3;
+ Real x4;
+equation
+ x1 = -x2;
+ x3 = -x4;
+ x2 = -x4;
+ x3 =1;
+
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest31",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
+Alias sets:
+{x1,-x2,-x3,x4}
+3 variables can be eliminated
+")})));
+end AliasTest31;
 
 model AliasFuncTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

@@ -240,7 +240,7 @@ aspect AliasVariables {
 				}
 				return;
 			}
-			boolean shouldNegate = aliasA.isNegated() ? !neg : neg;
+			boolean shouldNegate = aliasA.isNegated() == aliasB.isNegated() ? neg : !neg;
 			for (AliasVariable a : mergeSet) {
 				if (shouldNegate)
 					a.negated = !a.negated;
