@@ -950,13 +950,14 @@ class LocalDAECollocator(CasadiCollocator):
                                     '_' + str(i) + '_' + str(k)))
                         xx[var_indices[i][k]['dx'], 0] = dx
                     
-                    if 'x' in var_indices[i][k].keys():
-                        x = casadi.SXMatrix(self.model.get_n_x(), 1)
-                        for j in xrange(self.model.get_n_x()):
-                            x[j, 0] = (
-                                    casadi.ssym(str(self.model.get_x()[j]) +
-                                    '_' +  str(i) + '_' + str(k)))
-                        xx[var_indices[i][k]['x'], 0] = x
+                    if not self.eliminate_cont_var or k > 0 or i == 1:
+                        if 'x' in var_indices[i][k].keys():
+                            x = casadi.SXMatrix(self.model.get_n_x(), 1)
+                            for j in xrange(self.model.get_n_x()):
+                                x[j, 0] = (
+                                        casadi.ssym(str(self.model.get_x()[j]) +
+                                        '_' +  str(i) + '_' + str(k)))
+                            xx[var_indices[i][k]['x'], 0] = x
                     
                     if 'u' in var_indices[i][k].keys():
                         u = casadi.SXMatrix(self.model.get_n_u(), 1)
@@ -2133,7 +2134,17 @@ class LocalDAECollocator(CasadiCollocator):
                     xx_init[var_indices[i][k][vt]] = var_init
                     # Inappropriate treatment of derivatives!
                     if (not self.eliminate_der_var and vt == "x"):
-                        xx_init[var_indices[i][k]["dx"]] = var_init
+                        xx_init[var_indices[i][k]["dx"]] = 0 * var_init
+        
+        # Set bounds and initial guesses for continuity variables
+        if not self.eliminate_cont_var:
+            vt = 'x'
+            k = self.n_cp + self.is_gauss
+            for i in xrange(2, self.n_e + 1):
+                xx_lb[var_indices[i][0][vt]] = xx_lb[var_indices[i - 1][k][vt]]
+                xx_ub[var_indices[i][0][vt]] = xx_ub[var_indices[i - 1][k][vt]]
+                xx_init[var_indices[i][0][vt]] = \
+                        xx_init[var_indices[i - 1][k][vt]]
         
         # Compute bounds and initial guesses for element lengths
         if self.hs == "free":
