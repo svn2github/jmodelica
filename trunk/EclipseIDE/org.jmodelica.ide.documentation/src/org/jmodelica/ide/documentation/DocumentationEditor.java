@@ -129,7 +129,6 @@ public class DocumentationEditor extends EditorPart implements ISaveablePart2 {
 
 	@Override
 	public int promptToSaveOnClose() {
-		System.out.println("prompting");
 		if (!browserContent.isDirty()) return ISaveablePart2.YES;
 		MessageDialog dialog = new MessageDialog(getEditorSite().getShell(),
 				"Save Resources",

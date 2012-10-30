@@ -115,5 +115,4 @@ public class DocumentationEditorInput implements IEditorInput, IPersistableEleme
 	public String getFactoryId() {
 		return DocumentationEditorInputFactory.ID_FACTORY;
 	}
-
 }

@@ -74,91 +74,15 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 		}
 	}
 
-	//	private class Dialog implements Runnable{
-	//		private FullClassDecl fcd;
-	//		private Program program;
-	//		private String footer;
-	//		public Dialog(FullClassDecl fcd, Program program, String footer){
-	//			this.fcd = fcd;
-	//			this.program = program;
-	//			this.footer = footer;
-	//		}
-	//		@Override
-	//		public void run() {
-	//			new DocGenDialog(null, fcd, program, FOOTER);		
-	//		}
-	//	}
-
 	/**
 	 * Generates offline documentation for the FullClassDecl fcd by launching a wizard
 	 * @param fcd The FullClassDecl
 	 */
 	public void generateDocumentation(FullClassDecl fcd) {
-		//fcd = (FullClassDecl)program.simpleLookupClassDotted("Modelica.Thermal.HeatTransfer.Examples");
-		//DocGenDialog dlg = new DocGenDialog(null);
-		//new DocGenDialog(null, fcd, program, FOOTER);
 		WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), new GenDocWizard(fcd, sourceRoot, FOOTER));
 		dialog.create();
 		dialog.open();		
-		//new Dialog(fcd, program, FOOTER).run();
-		//RETURN!!!!
-		//		String rootPath = dlg.getRootPath();
-		//		HashMap<String, Boolean> options = dlg.getOptions();
-		//		if (!dlg.isDone()) return;
-		//		String path = rootPath + fcd.getName().getID();
-		//		String libName = fcd.getName().getID();
-		//		
-		//		if ((new File(path)).exists()) {
-		//			if (JOptionPane.showConfirmDialog(null, "This folder already exist. Would you like to override existing files?") != JOptionPane.YES_OPTION) return;
-		//		}else{
-		//			boolean success = (new File(path)).mkdirs();
-		//			if (!success) {
-		//				JOptionPane.showMessageDialog(null, "Unable to create a new directory", "Error", JOptionPane.ERROR_MESSAGE, null);
-		//				return;
-		//			}
-		//		}
-		//		String code = Generator.genDocumentation(fcd, program, path + "\\", FOOTER, "Unknown Class Decl", rootPath, libName, options);
-		//		try{
-		//			FileWriter fstream = new FileWriter(path + "\\index.html");
-		//			BufferedWriter out = new BufferedWriter(fstream);
-		//			out.write(code);
-		//			out.close();
-		//		}catch (Exception e){
-		//			JOptionPane.showMessageDialog(null, "Unable to save to file", "Error", JOptionPane.ERROR_MESSAGE, null);
-		//		}
-		//		ArrayList<ClassDecl> children = new ArrayList<ClassDecl>();
-		//		collectChildren(fcd, children);
-		//		for (ClassDecl child : children){
-		//			String newPath = rootPath + "\\" + Generator.getFullPath(child).replace(".", "\\");
-		//			(new File(newPath)).mkdirs();
-		//			try{
-		//				FileWriter fstream = new FileWriter(newPath + "\\index.html");
-		//				BufferedWriter out = new BufferedWriter(fstream);
-		//				out.write(Generator.genDocumentation(child, program, newPath + "\\", FOOTER, "Unknown class decl", rootPath, libName, options));
-		//				out.close();
-		//			}catch (Exception e){
-		//				JOptionPane.showMessageDialog(null, "Unable to save to file", "Error", JOptionPane.ERROR_MESSAGE, null);
-		//			}
-		//		}
-		//		StringBuilder generatedDocs = new StringBuilder("Documentation was successfully generated for the following classes:");
-		//		generatedDocs.append("\n" + libName);
-		//		for (ClassDecl cd : children){
-		//			generatedDocs.append("\n" + cd.name());
-		//		}
-		//		JOptionPane.showMessageDialog(null, generatedDocs.toString(), "Generation Complete", JOptionPane.INFORMATION_MESSAGE, null);
 	}
-
-	//	private void collectChildren(FullClassDecl fcd, ArrayList<ClassDecl> children) {
-	//		if (fcd.classes() == null || fcd.classes().size() == 0) return;
-	//		for (ClassDecl child : fcd.classes()){
-	//			if (!children.contains(child)){
-	//				children.add(child);
-	//				if (child instanceof FullClassDecl){
-	//					collectChildren((FullClassDecl) child, children);
-	//				}
-	//			}
-	//		}
-	//	}
 
 	/**
 	 * Renders a class declaration. This includes appending a head, breadcrumbar, header, title, body content 
@@ -184,14 +108,6 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 		}
 		content.append(Generator.genFooter(FOOTER));
 		browser.setText(content.toString());
-		//		String rev = (String) browser.evaluate(Scripts.FETCH_REV_DIV_CONTENT);
-		//		if (rev == null || rev.equals("")){
-		//			browser.evaluate(Scripts.HIDE_REV_DIV);
-		//		}
-		//		String info = (String) browser.evaluate(Scripts.FETCH_INFO_DIV_CONTENT);
-		//		if (info == null || info.equals("")){
-		//			browser.evaluate(Scripts.HIDE_INFO_DIV);
-		//		}
 	}
 
 	/**
@@ -303,25 +219,14 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 			if (event.location.endsWith("tmp.html") || event.location.startsWith("javascript")){
 				event.doit = true;
 			}else{
-				//browser.setText(content.toString());
-				//browser.evaluate(Scripts.ALERT_UNSAVED_CHANGES);
-				//				Boolean shouldMove = (Boolean) browser.evaluate(Scripts.CONFIRM_POPUP);
-				//				if (!shouldMove) event.doit = false;
-				//				saving = !shouldMove;
-				//				if (shouldMove)browser.setText(content.toString());
-				//				event.doit = true;
-
-				event.doit = false;
-
-//				if (yesNoBox("Would you like to leave edit mode? All unsaved changes will be lost!", "Confirm")){
-//					editing = false;
-//					browser.setText(content.toString());
-//					browser.evaluate(Scripts.UNDO_ALL);
-//					histIndex++;
-//					String link = event.location.substring(Math.max(event.location.lastIndexOf("/"), event.location.lastIndexOf("\\")) + 1);
-//					history.add(link);
-//					renderLink(link);
-				//}
+				boolean confirmed = yesNoBox("Would you like to leave edit mode? All unsaved changed will be lost!", "Confirm navigation");//(Boolean) browser.evaluate(Scripts.CONFIRM_POPUP);
+				event.doit = confirmed;
+				editing = !confirmed;
+				if (confirmed){
+					browser.evaluate(Scripts.UNDO_ALL);
+					editor.setDirty(false);
+					browser.setText(content.toString());
+				}
 			}
 		}
 	}
@@ -438,12 +343,6 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 		sb.append(Generator.genRevisions(fcd, false, sourceRoot, true));
 		sb.append(Generator.genFooter(""));
 
-
-
-		//Insert the JavaScript initialization of TinyMCE
-		//		int insert = sb.indexOf("<script type=\"text/javascript\">") + "<script type=\"text/javascript\">".length();
-		//		sb.insert(insert, N4 + Scripts.SCRIPT_INIT_TINY_MCE);
-		//Replace the div with a textArea, with the same content [startIndex,endIndex)
 		int startIndex = isInfo ? sb.indexOf(Generator.INFO_ID_OPEN_TAG) : sb.indexOf(Generator.REV_ID_OPEN_TAG);
 		int endIndex = isInfo ? sb.indexOf("<!-- END OF INFO -->") : sb.indexOf("<!-- END OF REVISIONS -->");
 		String textAreaID = isInfo ? "infoTextArea" : "revTextArea";
@@ -512,7 +411,7 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 		if (!editing) return false; //evaluate will throw an exception of editing == false
 		return (Boolean) browser.evaluate("return tinyMCE.activeEditor.isDirty()");
 	}
-	
+
 	public boolean yesNoBox(String message, String title){
 		MessageDialog dialog = new MessageDialog(editor.getEditorSite().getShell(),
 				title,
@@ -531,6 +430,6 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 
 	public void undoChanges() {
 		browser.evaluate(Scripts.UNDO_ALL);
-		
+
 	}
 }

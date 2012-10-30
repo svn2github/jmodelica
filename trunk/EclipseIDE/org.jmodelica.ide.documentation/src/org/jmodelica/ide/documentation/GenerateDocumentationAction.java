@@ -1,15 +1,9 @@
 package org.jmodelica.ide.documentation;
 
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
