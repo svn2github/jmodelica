@@ -178,11 +178,10 @@ public class OptimicaCGenerator extends CADGenerator {
 		public void generate(PrintStream genPrinter) {
 			for (FAbstractEquation e : foptclass.freeDependentParameterEquations()) 
 				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-			int i=0;
+			Enumerator enumerator = new Enumerator();
 			for (FAbstractEquation e : foptclass.freeDependentParameterEquations()) {
-				e.genResidual_C(i, INDENT, genPrinter);				
-				i += e.numScalarEquations();
-			}			
+				e.genResidual_C(enumerator, INDENT, genPrinter, null, null);
+			}
 		}
 	}
 	

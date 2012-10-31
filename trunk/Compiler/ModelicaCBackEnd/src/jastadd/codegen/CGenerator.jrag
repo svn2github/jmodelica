@@ -69,11 +69,9 @@ public class CGenerator extends GenericGenerator {
 			if (fclass.root().options.getBooleanOption("generate_dae")) {
 				for (FAbstractEquation e : fclass.equations()) 
 					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-				int i=0;
-				for (FAbstractEquation e : fclass.equations()) {
-					e.genResidual_C(i, INDENT, genPrinter);				
-					i += e.numScalarEquations();
-				}
+				Enumerator enumerator = new Enumerator();
+				for (FAbstractEquation e : fclass.equations())
+					e.genResidual_C(enumerator, INDENT, genPrinter, null, null);
 			}
 		}
 	
@@ -90,11 +88,9 @@ public class CGenerator extends GenericGenerator {
 		public void generate(PrintStream genPrinter) {
 			for (FRelExp e : fclass.relExpInEquations()) 
 				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-			int i=0;
-			for (FRelExp e : fclass.relExpInEquations()) {
-				e.genResidual_C(i,INDENT,genPrinter);				
-				i++;
-			}
+			Enumerator enumerator = new Enumerator();
+			for (FRelExp e : fclass.relExpInEquations())
+				e.genResidual_C(enumerator,INDENT,genPrinter);
 		}
 	
 	}
@@ -113,15 +109,11 @@ public class CGenerator extends GenericGenerator {
 					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				for (FAbstractEquation e : fclass.initialEquations()) 
 					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-				int i=0;
-				for (FAbstractEquation e : fclass.equations()) {
-					e.genResidual_C(i,INDENT,genPrinter);				
-					i += e.numScalarEquations();
-				}
-				for (FAbstractEquation e : fclass.initialEquations()) {
-					e.genResidual_C(i,INDENT,genPrinter);				
-					i += e.numScalarEquations();
-				}
+				Enumerator enumerator = new Enumerator();
+				for (FAbstractEquation e : fclass.equations())
+					e.genResidual_C(enumerator,INDENT,genPrinter, null, null);
+				for (FAbstractEquation e : fclass.initialEquations())
+					e.genResidual_C(enumerator,INDENT,genPrinter, null, null);
 			}
 		}	
 	}
@@ -139,15 +131,11 @@ public class CGenerator extends GenericGenerator {
 				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			for (FRelExp e : fclass.relExpInInitialEquations()) 
 				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-			int i=0;
-			for (FRelExp e : fclass.relExpInEquations()) {
-				e.genResidual_C(i,INDENT,genPrinter);				
-				i++;
-			}
-			for (FRelExp e : fclass.relExpInInitialEquations()) {
-				e.genResidual_C(i,INDENT,genPrinter);				
-				i++;
-			}			
+			Enumerator enumerator = new Enumerator();
+			for (FRelExp e : fclass.relExpInEquations())
+				e.genResidual_C(enumerator,INDENT,genPrinter);
+			for (FRelExp e : fclass.relExpInInitialEquations())
+				e.genResidual_C(enumerator,INDENT,genPrinter);
 		}
 	}
 	
@@ -160,13 +148,10 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			int i=0;
-			for (FRealVariable fv : fclass.realVariables()) {
-				if (!(fv.fixedAttribute() )) {
-					fv.genStartAttributeResidual_C(i,"   ",genPrinter);
-					i++;
-				}
-			}
+			Enumerator enumerator = new Enumerator();
+			for (FRealVariable fv : fclass.realVariables())
+				if (!(fv.fixedAttribute() ))
+					fv.genStartAttributeResidual_C(enumerator, "   ", genPrinter);
 		}
 	
 	}
@@ -180,12 +165,10 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_dae")) {			
-				int i=0;
-				for (FAbstractEquation e : fclass.getFParameterEquations()) {
-					e.genResidual_C(i, INDENT, genPrinter);				
-					i += e.numScalarEquations();
-				}
+			if (fclass.root().options.getBooleanOption("generate_dae")) {
+				Enumerator enumerator = new Enumerator();
+				for (FAbstractEquation e : fclass.getFParameterEquations())
+					e.genResidual_C(enumerator, INDENT, genPrinter, null, null);
 			}
 		}
 	
@@ -203,7 +186,7 @@ public class CGenerator extends GenericGenerator {
 			for (FAbstractEquation e : fclass.getFParameterEquations()) 
 				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			for (FAbstractEquation e : fclass.getFParameterEquations()) 
-				e.genAssignment_C(INDENT, genPrinter);
+				e.genAssignment_C(INDENT, genPrinter, null, null);
             if (!fclass.externalObjectVariables().isEmpty()) {
                 genPrinter.print(INDENT + "jmi->dep_extobjs_initialized = 1;\n");
             }
@@ -662,12 +645,9 @@ public class CGenerator extends GenericGenerator {
 			if (fclass.root().options.getBooleanOption("generate_ode")) {
 				fclass.getDAEInitBLT().genVarDecls_C(genPrinter, INDENT);
 				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");						
-				int block_counter = 0;
+				Enumerator enumerator = new Enumerator();
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
-					block.genBlock_C(block_counter,true,"  ",genPrinter);                                        
-                    if (!block.isSolvable()) {
-						block_counter++;
-                    }
+					block.genBlock_C(enumerator,true,"  ",genPrinter);                                        
 				}
 			}
 		}

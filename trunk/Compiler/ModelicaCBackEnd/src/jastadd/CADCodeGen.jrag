@@ -820,7 +820,7 @@ aspect CADCodeGen {
 	 */
 	public void FEquation.genResidual_CAD(int i, String indent, PrintStream str) {
 		if(!type().isReal()){
-			genResidual_C(i, indent, str);
+			genResidual_C(new Enumerator(i), indent, str, null, null);
 			return;
 		}
 		genTempVars_C(printer_C, str, indent);

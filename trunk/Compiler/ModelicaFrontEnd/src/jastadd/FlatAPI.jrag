@@ -1128,6 +1128,12 @@ aspect FlatAPI {
 		getLefts().findReferencedFVariablesInTree(res);
 		return res;
 	}
+	
+	syn Set<FVariable> FFunctionCallLeft.referencedFVariables() {
+		Set<FVariable> res = new LinkedHashSet<FVariable>();
+		findReferencedFVariablesInTree(res);
+		return res;
+	}
 		
 	syn lazy String FClass.guid() {
 		try {

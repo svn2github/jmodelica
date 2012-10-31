@@ -3079,12 +3079,12 @@ void func_CCodeGenTests_CRecordDecl12_f_def(A_1_ra* x_a) {
     (*res)[0] = jmi_array_rec_1(tmp_1, 1)->a - (_x_1_a_0);
     (*res)[1] = jmi_array_rec_1(jmi_array_rec_1(tmp_1, 1)->b, 1)->c - (_x_1_b_1_c_1);
     (*res)[2] = jmi_array_rec_1(jmi_array_rec_1(tmp_1, 1)->b, 2)->c - (_x_1_b_2_c_2);
-    (*res)[1] = jmi_array_rec_1(tmp_1, 2)->a - (_x_2_a_3);
-    (*res)[2] = jmi_array_rec_1(jmi_array_rec_1(tmp_1, 2)->b, 1)->c - (_x_2_b_1_c_4);
-    (*res)[3] = jmi_array_rec_1(jmi_array_rec_1(tmp_1, 2)->b, 2)->c - (_x_2_b_2_c_5);
-    (*res)[2] = jmi_array_rec_1(tmp_1, 3)->a - (_x_3_a_6);
-    (*res)[3] = jmi_array_rec_1(jmi_array_rec_1(tmp_1, 3)->b, 1)->c - (_x_3_b_1_c_7);
-    (*res)[4] = jmi_array_rec_1(jmi_array_rec_1(tmp_1, 3)->b, 2)->c - (_x_3_b_2_c_8);
+    (*res)[3] = jmi_array_rec_1(tmp_1, 2)->a - (_x_2_a_3);
+    (*res)[4] = jmi_array_rec_1(jmi_array_rec_1(tmp_1, 2)->b, 1)->c - (_x_2_b_1_c_4);
+    (*res)[5] = jmi_array_rec_1(jmi_array_rec_1(tmp_1, 2)->b, 2)->c - (_x_2_b_2_c_5);
+    (*res)[6] = jmi_array_rec_1(tmp_1, 3)->a - (_x_3_a_6);
+    (*res)[7] = jmi_array_rec_1(jmi_array_rec_1(tmp_1, 3)->b, 1)->c - (_x_3_b_1_c_7);
+    (*res)[8] = jmi_array_rec_1(jmi_array_rec_1(tmp_1, 3)->b, 2)->c - (_x_3_b_2_c_8);
 ")})));
 end CRecordDecl12;
 
@@ -7454,6 +7454,73 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end MapTearingTest1;
 
+model RecordTearingTest1
+  function F
+    input Real a;
+    input Real b;
+    output Real x;
+    output Real y;
+  algorithm
+    x := a + b;
+    y := a - b;
+  end F;
+  Real a;
+  Real b;
+  Real c;
+  Real d;
+  Real e;
+  Real f;
+equation
+  (c,d) = F(a,b);
+  (e,f) = F(c,d);
+  (a,b) = F(e,f);
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="RecordTearingTest1",
+			description="",
+			generate_ode=true,
+			equation_sorting=true,
+			enable_tearing=true,
+			template="$C_dae_blocks_residual_functions$",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+  jmi_real_t** res = &residual;
+  jmi_ad_var_t tmp_1;
+  jmi_ad_var_t tmp_2;
+  jmi_ad_var_t tmp_3;
+  jmi_ad_var_t tmp_4;
+  jmi_ad_var_t tmp_5;
+  jmi_ad_var_t tmp_6;
+  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
+  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
+  } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
+    x[0] = _f_5;
+    x[1] = _a_0;
+    x[2] = _b_1;
+  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
+    _f_5 = x[0];
+    _a_0 = x[1];
+    _b_1 = x[2];
+  func_CCodeGenTests_RecordTearingTest1_F_def(_a_0, _b_1, &tmp_1, &tmp_2);
+  _c_2 = (tmp_1);
+  _d_3 = (tmp_2);
+  func_CCodeGenTests_RecordTearingTest1_F_def(_c_2, _d_3, &tmp_3, &tmp_4);
+  _e_4 = (tmp_3);
+  (*res)[0] = tmp_4 - (_f_5);
+  func_CCodeGenTests_RecordTearingTest1_F_def(_e_4, _f_5, &tmp_5, &tmp_6);
+  (*res)[1] = tmp_5 - (_a_0);
+  (*res)[2] = tmp_6 - (_b_1);
+  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+    _f_5 = x[0];
+    _a_0 = x[1];
+    _b_1 = x[2];
+  }
+  return 0;
+}
+")})));
+end RecordTearingTest1;
 
 model MathSolve
 	Real a[2,2] = [1,2;3,4];
