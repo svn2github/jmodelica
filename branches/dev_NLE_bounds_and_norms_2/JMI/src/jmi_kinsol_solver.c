@@ -31,6 +31,7 @@
 
 #include <kinsol/kinsol_impl.h>
 
+#define JM_KINSOL_VERBOSITY 3
 
 /* RCONST from SUNDIALS and defines a compatible type, usually double precision */
 
@@ -313,9 +314,7 @@ static int kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realty
     jmi_kinsol_solver_t* solver = block->solver;
     int ret = solver->kin_lsolve(kin_mem, x, b, res_norm);    
     if(ret) return ret;
-	if(solver->num_bounds > 0) {
-		jmi_kinsol_limit_step(kin_mem, x, b);
-	}
+	jmi_kinsol_limit_step(kin_mem, x, b);
     return ret;
         
 }
@@ -468,7 +467,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t
     jmi_kinsol_solver_t* solver= (jmi_kinsol_solver_t*)calloc(1,sizeof(jmi_kinsol_solver_t));
     jmi_t* jmi = block->jmi;
     int flag, n = block->n;
-    int verbosity = 0;
+    int verbosity = JM_KINSOL_VERBOSITY;
     
     if(!solver ) return -1;
     
