@@ -322,8 +322,8 @@ aspect Scalarization {
 			// TODO: don't these need scalarizing as well?
 			FQNamePart attrPart = a.getName().getFQName().getFQNamePart(0);
 			String attrName = attrPart.getName();
-			FAttribute na = a.copyForCell(myCell);
 			if (myName.equals(attrName)) {
+				FAttribute na = a.copyForCell(myCell);
 				if (a.getName().getFQName().getNumFQNamePart() > 1) {
 					na.getName().setFQName(a.getName().getFQName().copySuffix());
 					addFAttribute(na);

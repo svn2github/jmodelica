@@ -1764,6 +1764,44 @@ end RecordTests.RecordScalarize20;
 ")})));
 end RecordScalarize20;
 
+
+model RecordScalarize21
+	record A
+		Real x[2];
+		Real y;
+	end A;
+	
+	parameter Real y_start = 3;
+	
+	A a(y(start=y_start));
+equation
+	a = A({1,2}, 4);
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="RecordScalarize21",
+			description="Modifiers on record members using parameters",
+			flatModel="
+fclass RecordTests.RecordScalarize21
+ parameter Real y_start = 3 /* 3 */;
+ Real a.x[1];
+ Real a.x[2];
+ Real a.y(start = y_start);
+equation
+ a.x[1] = 1;
+ a.x[2] = 2;
+ a.y = 4;
+
+public
+ record RecordTests.RecordScalarize21.A
+  Real x[2];
+  Real y;
+ end RecordTests.RecordScalarize21.A;
+
+end RecordTests.RecordScalarize21;
+")})));
+end RecordScalarize21;
+
 // TODO: Add more complicated combinations of arrays, records and modifiers
 
 
