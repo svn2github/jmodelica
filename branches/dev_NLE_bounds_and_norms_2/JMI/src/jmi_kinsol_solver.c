@@ -32,6 +32,8 @@
 #include <kinsol/kinsol_impl.h>
 
 #define JM_KINSOL_VERBOSITY 3
+#define JM_KINSOL_USE_SCALING 
+/**/
 
 /* RCONST from SUNDIALS and defines a compatible type, usually double precision */
 
@@ -92,22 +94,24 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
         jmi_block_residual_t *block = eh_data;
         jmi_t *jmi = block->jmi;
         jmi_kinsol_solver_t* solver = block->solver;
+        realtype fnorm, snorm;
+        KINGetFuncNorm(solver->kin_mem, &fnorm);
+        KINGetStepLength(solver->kin_mem, &snorm);
+
         if (err_code > 0){ /*Warning*/
             category = logWarning;
         }else if (err_code < 0){ /*Error*/
             category = logError;
         }
 
+        if(fnorm < solver->kin_stol) {
+            return;
+        }
         sprintf(buffer, "[KINSOL] Error occured in %s at time %3.2fs when solving block %d: ", function, *(jmi_get_t(jmi)), block->index);
         jmi_log(block->jmi, category, buffer);
         jmi_log(block->jmi, category, msg);
-        {
-            realtype fnorm, snorm;
-            KINGetFuncNorm(solver->kin_mem, &fnorm);
-            KINGetStepLength(solver->kin_mem, &snorm);
-            sprintf(buffer, "Current function norm: %g, scaled step length: %g", fnorm, snorm);
-            jmi_log(block->jmi, category, buffer);
-        }
+        sprintf(buffer, "Current function norm: %g, scaled step length: %g, tolerance: %g", fnorm, snorm, solver->kin_stol);
+        jmi_log(block->jmi, category, buffer);
 /*      jmi_simple_newton_jac(block);
 
         jmi_log(block->jmi, category, buffer);
@@ -163,7 +167,7 @@ static int jmi_kinsol_init(jmi_block_residual_t * block) {
     struct KINMemRec * kin_mem = solver->kin_mem; 
     /* set tolerances */
     solver->kin_ftol = jmi->fmi->fmi_newton_tolerance;
-    solver->kin_stol = solver->kin_ftol * solver->kin_ftol;
+    solver->kin_stol = solver->kin_ftol;
 
     KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
     KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
@@ -342,7 +346,10 @@ static int jmi_update_f_scale(jmi_block_residual_t *block, DlsMat J) {
         /* need a fresh jac for proper update */
         return 0;
     }
+#ifndef JM_KINSOL_USE_SCALING
     
+    return 0;
+#endif
     /* Scale equations by Jacobian rows. */
     N_VConst_Serial(0,solver->kin_f_scale);
     for(i = 0; i < N; i++){
@@ -374,9 +381,11 @@ static int jmi_update_f_scale(jmi_block_residual_t *block, DlsMat J) {
             col_ptr[j] *= scale_ptr[j];
 		}
 	}
+    solver->kin_stol = tol;
     /* estimate condition number of the scaled jacobian 
         and scale function tolerance with it. */
-    {
+
+    if(N > 1){
         char norm = 'I';
         double Jnorm = 1.0, Jcond = 1.0;
         int info;
@@ -396,7 +405,6 @@ static int jmi_update_f_scale(jmi_block_residual_t *block, DlsMat J) {
         }
     }
     solver->kin_ftol = tol;
-    solver->kin_stol = tol * tol;
     KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
     KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
     
@@ -564,7 +572,13 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     KINPinvGetNumJacEvals(solver->kin_mem, &njevalscur);
   
     flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
-    
+    if(flag != KIN_SUCCESS) {
+        realtype fnorm;
+        KINGetFuncNorm(solver->kin_mem, &fnorm);
+        if(fnorm < solver->kin_stol) {
+            flag = KIN_SUCCESS;
+        }
+    }
     KINPinvGetNumJacEvals(solver->kin_mem, &njevals);
     if(njevals > njevalscur) { 
  
@@ -581,12 +595,15 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
             jmi_update_f_scale(block, solver->J);
             
             flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
-
             if(flag == KIN_INITIAL_GUESS_OK) flag = KIN_SUCCESS;
-			if(flag == KIN_STEP_LT_STPTOL) {
-				flag = KIN_LINESEARCH_NONCONV;
+            else if(flag != KIN_SUCCESS) {
+                realtype fnorm;
+                KINGetFuncNorm(solver->kin_mem, &fnorm);
+                if(fnorm < solver->kin_stol) {
+                    flag = KIN_SUCCESS;
+                }
 			}
-            if(flag < 0) {
+            if(flag != KIN_SUCCESS) {
                 if(flagNonscaled == 0)
                     jmi_log(block->jmi, logError, "The non-scaled problem solved fine, scaled problem failed");
                 else
