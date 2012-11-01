@@ -126,6 +126,8 @@ struct jmi_block_residual_t {
     jmi_real_t* min;               /**< \brief Min values for iteration variables */
     jmi_real_t* max;               /**< \brief Max values for iteration variables */
     jmi_real_t* nominal;           /**< \brief Nominal values for iteration variables */
+    jmi_real_t* initial;           /**< \brief Nominal values for iteration variables */
+    
     int jacobian_variability;      /**< \brief Variability of Jacobian coefficients: JMI_CONSTANT_VARIABILITY
                                          JMI_PARAMETER_VARIABILITY, JMI_DISCRETE_VARIABILITY, JMI_CONTINUOUS_VARIABILITY */
 
@@ -137,9 +139,10 @@ struct jmi_block_residual_t {
     
     int init;			   /**< \brief A flag for initialization */
     
-    int nb_calls;                    /**< \brief Nb of times the block has been solved */
-    int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */
-    int nb_jevals ;
+    long int nb_calls;                    /**< \brief Nb of times the block has been solved */
+    long int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */
+    long int nb_jevals ;
+    long int nb_fevals;
     double time_spent;             /**< \brief Total time spent in non-linear solver */
 };
 

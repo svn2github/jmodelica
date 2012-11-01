@@ -1136,6 +1136,9 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
 
 fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
     /* Strings not yet supported. */
+    int i;
+    for(i = 0; i < nvr; i++) value[i] = 0;
+    
     (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiWarning, "INFO", "Strings are not yet supported.");
     return fmiWarning;
 }
@@ -1365,8 +1368,8 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
         /* Test if block is solved by KINSOL */
         if (nniters > 0) {
             /* Output to logger */
-            sprintf(buf, "INIT Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d", 
-                    block->index, block->n, nniters, block->nb_calls, block->nb_jevals);
+            sprintf(buf, "INIT Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d nfevals: %d", 
+                    block->index, block->n, nniters, block->nb_calls, block->nb_jevals, block->nb_fevals);
             logger(c, instance_name, fmiOK, "DEBUG", buf);
 
             sprintf(buf, "INIT Block %d ; time: %f", block->index, block->time_spent);
@@ -1383,7 +1386,7 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
         if (nniters > 0) {
             /* Output to logger */
             sprintf(buf, "SIM Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d", 
-                    block->index, block->n, nniters, block->nb_calls, block->nb_jevals);
+                    block->index, block->n, nniters, block->nb_calls, block->nb_jevals, block->nb_fevals);
             logger(c, instance_name, fmiOK, "DEBUG", buf);
 
             sprintf(buf,"INIT Block %d ; time: %f", block->index, block->time_spent);

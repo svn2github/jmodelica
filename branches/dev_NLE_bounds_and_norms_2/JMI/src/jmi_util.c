@@ -49,7 +49,7 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
 	jmi_real_t* res1;
 	jmi_real_t* res2;
 
-	if(jmi->opt->n_p_opt != NULL){
+	if(jmi->opt->n_p_opt != 0){
 		jmi_opt_get_n_p_opt(jmi, &n_p_opt);
 	} else{
 		n_p_opt = 0;

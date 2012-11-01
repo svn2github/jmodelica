@@ -50,7 +50,7 @@ int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi
 
 int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solvers_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, int index){
 	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
-	int i;
+	/* int i;*/
 	int flag = 0;
     if(!b) return -1;
 	*block = b;
@@ -77,10 +77,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 	b->min = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->max = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->nominal = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-
-	b->F(jmi,b->min,b->res,JMI_BLOCK_MIN);
-	b->F(jmi,b->max,b->res,JMI_BLOCK_MAX);
-	b->F(jmi,b->nominal,b->res,JMI_BLOCK_NOMINAL);
+    b->initial = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 
     switch(solver) {
     case JMI_KINSOL_SOLVER: {
@@ -125,9 +122,67 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
     jmi_t* jmi = block->jmi;
     c0 = clock();
     if(block->init) {
-        /* Initialize the work vector */
-		block->F(jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
-        block->init = 0;
+        int i;
+        /* Initialize the work vectors */
+        for(i=0; i < block->n; ++i) {
+            block->nominal[i] = BIG_REAL;
+            block->max[i] = BIG_REAL;
+            block->min[i] = -block->max[i];
+        }
+        block->F(jmi,block->nominal,block->res,JMI_BLOCK_NOMINAL);
+        block->F(jmi,block->min,block->res,JMI_BLOCK_MIN);
+        block->F(jmi,block->max,block->res,JMI_BLOCK_MAX);
+        block->F(jmi,block->initial,block->res,JMI_BLOCK_INITIALIZE);
+        /* if the nominal is outside min-max -> fix it! */
+        for(i=0; i < block->n; ++i) {
+            realtype maxi = block->max[i];
+            realtype mini = block->min[i];
+            realtype nomi = block->nominal[i];
+            realtype initi = block->initial[i];
+            booleantype hasSpecificMax = (maxi != BIG_REAL);
+            booleantype hasSpecificMin = (mini != -BIG_REAL);
+            booleantype nominalOk = TRUE;
+            if((nomi > maxi) || (nomi < mini) || (nomi == BIG_REAL))
+                nominalOk = FALSE;
+
+            if(!nominalOk) {
+                /* fix the nominal value to be inside the allowed range */
+                if((initi > mini) && (initi < maxi) && (initi != 0.0)) {
+                    block->nominal[i] = initi;
+                }
+                else if(hasSpecificMax && hasSpecificMin) {
+                    nomi = (maxi + mini) / 2;
+                    if( /* min&max have different sign */
+                            (maxi * mini < 0) && 
+                            /* almost symmetric range */
+                            (fabs(nomi) < 1e-2*maxi ))
+                        /* take 1% of max  */                        
+                        nomi = 1e-2*maxi;
+                        
+                     block->nominal[i] = nomi;
+                }
+                else if(hasSpecificMin)
+                    block->nominal[i] = 
+                            (mini == 0.0) ? 
+                                1.0: 
+                                (mini > 0)?
+                                    mini * (1+UNIT_ROUNDOFF):
+                                    mini * (1-UNIT_ROUNDOFF);
+                else if (hasSpecificMax){
+                    block->nominal[i] = 
+                            (maxi == 0.0) ? 
+                                -1.0: 
+                                (maxi > 0)? 
+                                    maxi * (1-UNIT_ROUNDOFF):
+                                    maxi * (1+UNIT_ROUNDOFF);
+                }
+                else
+                    /* take 1.0 as default*/
+                    block->nominal[i] = 1.0;
+            }
+            block->x[i] = initi;
+        }
+        
     }
     /*
      * A proper local even iteration should problably be done here.
@@ -140,6 +195,13 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
     
     ef = block->solve(block);
 
+    if(block->init) {
+        /* 
+            This needs to be done after "solve" so that block 
+            can finalize initialization at the first step.
+        */
+        block->init = 0;
+    }
     c1 = clock();
     /* Make information available for logger */
     block->nb_calls++;

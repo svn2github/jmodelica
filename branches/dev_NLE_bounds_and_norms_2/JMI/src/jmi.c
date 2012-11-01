@@ -240,6 +240,10 @@ int jmi_delete(jmi_t* jmi){
 	if(jmi->dae != NULL) {
 		jmi_func_delete(jmi->dae->F);
                 jmi_func_delete(jmi->dae->R);
+        jmi_delete_simple_color_info(&jmi->color_info_A);
+        jmi_delete_simple_color_info(&jmi->color_info_B);
+        jmi_delete_simple_color_info(&jmi->color_info_C);
+        jmi_delete_simple_color_info(&jmi->color_info_D);
                 free(jmi->dae);
                 jmi->dae = 0;
 	}
