@@ -2262,6 +2262,8 @@ aspect TransformCanonical {
 	 * Builds a FResidual instance for "this" equation.  
 	 */
 	protected FResidual AbstractEquation.buildResidual() {
+		if (!root().options.getBooleanOption("enable_hand_guided_tearing"))
+			return null;
 		AnnotationNode residualNode = annotation().vendorNode().forPath("ResidualEquation");
 		if (!residualNode.exists())
 			return null;

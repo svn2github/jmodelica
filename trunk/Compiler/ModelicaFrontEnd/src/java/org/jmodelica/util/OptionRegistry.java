@@ -54,6 +54,9 @@ public class OptionRegistry {
 				"such divisions are made during tearing."),
 		ENABLE_TEARING   ("enable_tearing", false, 
 				"If this option is set to true (default is false), tearing of equation systems is enabled."),
+		ENABLE_HAND_GUIDED_TEARING   ("enable_hand_guided_tearing", false, 
+				"If this option is set to true (default is false), hand guided tearing annotations are parsed " +
+				"and will have precedence during tearing."),
 		CONV_FREE_DEP_PAR_TO_ALGS   ("convert_free_dependent_parameters_to_algebraics", true, 
 				"If this option is set to true (default is true), free dependent parameters are" +
 				"converted to algebraic variables."),

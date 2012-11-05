@@ -60,7 +60,7 @@ aspect FlatTypeCheck {
     	}
 	
 		AnnotationNode enabledNode = annotation().vendorNode().forPath("IterationVariable/enabled");
-		if (enabledNode.exists()) {
+		if (root().options.getBooleanOption("enable_hand_guided_tearing") && enabledNode.exists()) {
 			FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
 			try {
 				enabledExp.ceval().booleanValue();

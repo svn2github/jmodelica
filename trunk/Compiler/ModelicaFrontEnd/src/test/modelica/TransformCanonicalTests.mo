@@ -6197,6 +6197,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing",
 			methodResult="
 -------------------------------
@@ -6268,6 +6269,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing",
 			methodResult="
 -------------------------------
@@ -6339,6 +6341,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing",
 			methodResult="
 -------------------------------
@@ -6411,6 +6414,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing",
 			methodResult="
 -------------------------------
@@ -6484,6 +6488,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing",
 			methodResult="
 -------------------------------
@@ -6555,6 +6560,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing with enable set to true",
 			methodResult="
 -------------------------------
@@ -6626,6 +6632,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing with enable set to false",
 			methodResult="
 -------------------------------
@@ -6698,6 +6705,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing with enable set to true through a parameter",
 			methodResult="
 -------------------------------
@@ -6770,6 +6778,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing with enable set to false through a parameter",
 			methodResult="
 -------------------------------
@@ -6843,6 +6852,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing with annotation on two iteration variables",
 			methodResult="
 -------------------------------
@@ -6916,6 +6926,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing with annotation on two iteration variables",
 			methodResult="
 -------------------------------
@@ -6989,6 +7000,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing with annotation on two iteration variables",
 			methodResult="
 -------------------------------
@@ -7063,6 +7075,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing with annotation on two iteration variables, set through parameter",
 			methodResult="
 -------------------------------
@@ -7137,6 +7150,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing with annotation on two iteration variables, set through parameter",
 			methodResult="
 -------------------------------

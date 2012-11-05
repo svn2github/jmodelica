@@ -713,7 +713,7 @@ aspect Flattening {
 		fv.setFQName(getFQName());
 		
 		AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
-		if (iterationNode.exists()) {
+		if (root().options.getBooleanOption("enable_hand_guided_tearing") && iterationNode.exists()) {
 			AnnotationNode enabledNode = iterationNode.forPath("enabled");
 			if (enabledNode.exists()) {
 				fv.setManualIterationVariable(containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).ceval().booleanValue());
