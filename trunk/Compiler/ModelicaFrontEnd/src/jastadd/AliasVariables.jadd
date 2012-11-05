@@ -296,7 +296,7 @@ aspect AliasVariables {
 			private java.util.List<AliasVariable> aliases = new ArrayList<AliasVariable>();
 			
 			// If this set is marked as manual tearing
-			private boolean isManualTearing = false;
+			private boolean isManualIteration = false;
 			
 			/**
 			 * Private constructor
@@ -321,13 +321,13 @@ aspect AliasVariables {
 			 * @param newAlias Alias variable to add
 			 */
 			private void add(AliasVariable newAlias) {
-				boolean newAliasIsManualTearing = newAlias.getFVariable().getManualTearingVariable();
-				if (isManualTearing && !newAliasIsManualTearing) {
-					newAlias.getFVariable().setManualTearingVariable(true);
-				} else if (!isManualTearing && newAliasIsManualTearing) {
-					isManualTearing = true;
+				boolean newAliasIsManualIteration = newAlias.getFVariable().getManualIterationVariable();
+				if (isManualIteration && !newAliasIsManualIteration) {
+					newAlias.getFVariable().setManualIterationVariable(true);
+				} else if (!isManualIteration && newAliasIsManualIteration) {
+					isManualIteration = true;
 					for (AliasVariable alias : aliases)
-						alias.getFVariable().setManualTearingVariable(true);
+						alias.getFVariable().setManualIterationVariable(true);
 				}
 				newAlias.setSet(this);
 				aliases.add(newAlias);

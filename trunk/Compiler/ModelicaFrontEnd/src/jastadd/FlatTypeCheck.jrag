@@ -58,7 +58,17 @@ aspect FlatTypeCheck {
 	    			error("The guard expression of a conditional component should have parameter or constant variability");
     		}
     	}
-	  
+	
+		AnnotationNode enabledNode = annotation().vendorNode().forPath("IterationVariable/enabled");
+		if (enabledNode.exists()) {
+			FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
+			try {
+				enabledExp.ceval().booleanValue();
+			} catch (ConstantEvaluationException e) {
+				error("Could not evaluate enabled expression: " + enabledExp);
+			}
+		}
+		
     	typeCheckAttributes();
     }
     
@@ -653,5 +663,15 @@ aspect FlatTypeCheck {
   eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type) = 
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();
-  
+	
+	public void FInstResidual.typeCheck() {
+		if (hasEnabled()) {
+			FExp enabledExp = getEnabled();
+			try {
+				enabledExp.ceval().booleanValue();
+			} catch (ConstantEvaluationException e) {
+				error("Could not evaluate enabled expression: " + enabledExp);
+			}
+		}
+	}
 }

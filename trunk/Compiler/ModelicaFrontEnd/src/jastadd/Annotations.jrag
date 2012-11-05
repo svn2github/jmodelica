@@ -264,6 +264,20 @@ aspect AnnotationAPI {
 		protected abstract ASTNode ast();
 		
 		/**
+		 * Returns the exp node that this annotation node is connected to (if possible).
+		 */
+		public Exp exp() {
+			return null;
+		}
+		
+		/**
+		 * Returns the vendor specific node for jmodelica. forPath("__Modelon") is done.
+		 */
+		public AnnotationNode vendorNode() {
+			return forPath("__Modelon");
+		}
+		
+		/**
 		 * Return the string representation of the AST node that this annotation node is connected to.
 		 */
 		public String toString() {
@@ -687,7 +701,7 @@ aspect AnnotationAPI {
 	
 	abstract class ExpAnnotationNode extends AnnotationNode {
 		
-		protected abstract Exp exp();
+		public abstract Exp exp();
 		protected abstract void setExp(Exp exp);
 
 		public boolean isValue() {
@@ -704,7 +718,7 @@ aspect AnnotationAPI {
 		protected ASTNode ast() {
 			return exp();
 		}
-
+		
 		public void setValue(Exp exp) {
 			if (exp() != null && exp != null)
 				exp.copyFormattingFrom(exp());
@@ -790,7 +804,7 @@ aspect AnnotationAPI {
 			mod = vm;
 		}
 		
-		protected Exp exp() {
+		public Exp exp() {
 			return mod.getExp();
 		}
 		
@@ -816,7 +830,7 @@ aspect AnnotationAPI {
 		}
 		
 		@Override
-		protected Exp exp() {
+		public Exp exp() {
 			if (mod.hasModification() && mod.getModification().annotationNode() instanceof ExpAnnotationNode)
 				return ((ExpAnnotationNode) mod.getModification().annotationNode()).exp();
 			else
@@ -876,7 +890,7 @@ aspect AnnotationAPI {
 		}
 		
 		@Override
-		protected Exp exp() {
+		public Exp exp() {
 			if (mod.hasValueModification())
 				return mod.getValueModification().getExp();
 			else
@@ -931,7 +945,7 @@ aspect AnnotationAPI {
 			arg = na;
 		}
 		
-		protected Exp exp() {
+		public Exp exp() {
 			return arg.getExp();
 		}
 		
@@ -956,7 +970,7 @@ aspect AnnotationAPI {
 			e = exp;
 		}
 		
-		protected Exp exp() {
+		public Exp exp() {
 			return e;
 		}
 		

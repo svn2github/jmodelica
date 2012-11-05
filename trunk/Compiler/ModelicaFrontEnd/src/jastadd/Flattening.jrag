@@ -712,8 +712,15 @@ aspect Flattening {
 				
 		fv.setFQName(getFQName());
 		
-		if (annotation().forPath("__JModelica/tearVariable").exists())
-			fv.setManualTearingVariable(true);
+		AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
+		if (iterationNode.exists()) {
+			AnnotationNode enabledNode = iterationNode.forPath("enabled");
+			if (enabledNode.exists()) {
+				fv.setManualIterationVariable(containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).ceval().booleanValue());
+			} else {
+				fv.setManualIterationVariable(true);
+			}
+		}
 		
 		return fv;
 	}
@@ -999,10 +1006,17 @@ aspect Flattening {
 	eq InstNode.getChild().isOnPrimitiveTypeDecl()    = false;
 	
 	
-	public FResidues FResidues.flatten(FQName prefix) {
-		FResidues flattened = new FResidues();
-		for (FExp e : getResidues()) {
-			flattened.addResidue(e.flatten(prefix));
+	syn FResidual FResidual.flatten(FQName prefix) {
+		throw new UnsupportedOperationException();
+	}
+	eq FInstResidual.flatten(FQName prefix) {
+		if (hasEnabled()) {
+			if (!getEnabled().ceval().booleanValue())
+				return null;
+		}
+		FResidual flattened = new FResidual();
+		for (FExp e : getIterationVariables()) {
+			flattened.addIterationVariable(e.flatten(prefix));
 		}
 		return flattened;
 	}
@@ -1069,7 +1083,7 @@ aspect FlatExpressions {
 	}
 
 	public FEquation FEquation.flattenEqn(FQName prefix, FClass fc) {
-		return new FEquation(getType().flatten(prefix), hasResidues() ? getResidues().flatten(prefix) : null, getLeft().flatten(prefix), getRight().flatten(prefix));
+		return new FEquation(getType().flatten(prefix), hasResidual() ? getResidual().flatten(prefix) : null, getLeft().flatten(prefix), getRight().flatten(prefix));
 	}
 
 	public FForClauseE InstForClauseE.flattenEqn(FQName prefix, FClass fc) {
@@ -1710,7 +1724,7 @@ aspect InstantiatedExpressions {
 	}
 
 	public FAbstractEquation Equation.instantiate() {
-		return copyLocationTo(new FEquation(equationType(), buildResidues(), 
+		return copyLocationTo(new FEquation(equationType(), buildResidual(), 
 				getLeft().instantiate(), getRight().instantiate()));
 	}
 
