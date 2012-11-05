@@ -133,7 +133,10 @@ public class OptionRegistry {
 				"Default is false."),
 		INLINE_FUNCS ("inline_functions", Inlining.NONE, 
 				"Perform function inlining on model after flattening (default is false)", 
-				Inlining.NONE, Inlining.TRIVIAL, Inlining.ALL);
+				Inlining.NONE, Inlining.TRIVIAL, Inlining.ALL),
+		DEBUG_CSV_STEP_INFO ("debug_csv_step_info", false,
+				"Debug option, outputs a csv file containing profiling recorded during compilation. Default is false.");
+		
 					
 		public String key;
 		public String desc;
