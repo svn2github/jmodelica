@@ -209,6 +209,45 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
     return ef;
 }
 
+int jmi_block_jacobian_fd(jmi_block_residual_t* b, jmi_real_t* x, jmi_real_t delta_rel, jmi_real_t delta_abs) {
+	int i,j;
+	jmi_real_t delta = 0.;
+	int n = b->n;
+	jmi_real_t* fp;
+	jmi_real_t* fn;
+
+	fp = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	fn = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+
+	for (i=0;i<n;i++) {
+		if (x[i]<0) {
+			delta = (x[i] - delta_abs)*delta_rel;
+		} else {
+			delta = (x[i] + delta_abs)*delta_rel;
+		}
+		x[i] = x[i] + delta;
+
+		/* evaluate the residual to get positive side */
+		b->F(b->jmi,x,fp,JMI_BLOCK_EVALUATE);
+
+		x[i] = x[i] - 2.*delta;
+
+		/* evaluate the residual to get negative side */
+		b->F(b->jmi,x,fn,JMI_BLOCK_EVALUATE);
+
+		x[i] = x[i] - delta;
+
+		for (j=0;j<n;j++) {
+			b->jac[i*n + j] = (fp[j] - fn[j])/2./delta;
+			printf("%12.12e\n",b->jac[i*n + j]);
+		}
+	}
+
+    free(fp);
+    free(fn);
+}
+
+
 int jmi_delete_block_residual(jmi_block_residual_t* b){
 	free(b->x);
 	if (b->n_nr>0) {

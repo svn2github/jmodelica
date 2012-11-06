@@ -48,6 +48,47 @@
 extern "C" {
 #endif /* JMI_AD_NONE_AND_CPP */
 
+/* JM_KINSOL_ENFORCE_BOUNDS (see jmi_common.h for JM_ENFORCE_BOUNDS) controls is bounds are enforced inside the solver */
+#define JM_KINSOL_ENFORCE_BOUNDS JM_ENFORCE_BOUNDS
+
+/* Verbosity level for KINSOL. Default is "0" - no info 
+*                        |  0  no statistical information is
+*                        |     displayed (default level)
+*                        |
+*                        |  1  for each nonlinear iteration display
+*                        |     the following information: the scaled
+*                        |     norm (L2) of the system function
+*                        |     evaluated at the current iterate, the
+*                        |     scaled norm of the Newton step (only if
+*                        |     using KIN_NONE), and the
+*                        |     number of function evaluations performed
+*                        |     thus far
+*                        |
+*                        |  2  display level 1 output and the
+*                        |     following values for each iteration:
+*                        |
+*                        |       fnorm (L2) = ||fscale*func(u)||_L2
+*                        |       (only for KIN_NONE)
+*                        |
+*                        |       scaled fnorm (for stopping) =
+*                        |       ||fscale*ABS(func(u))||_L-infinity
+*                        |       (for KIN_NONE and
+*                        |       KIN_LINESEARCH)
+*                        |
+*                        |  3  display level 2 output plus additional
+*                        |     values used by the global strategy
+*                        |     (only if using KIN_LINESEARCH), and
+*                        |     statistical information for the linear
+*                        |     solver */
+#define JM_KINSOL_VERBOSITY 0
+/* If scaling is active than nominal values are used to set scaling of x and f */
+#define JM_KINSOL_USE_SCALING
+/* Update the scaling if the jac was singular at some point */
+/* #define JM_KINSOL_RESCALE_AFTER_SINGULAR_JAC */
+/* JM_KINSOL_CHECK_JAC_COND controls extra checking and warning on Jacobian condition number estimate */
+#define JM_KINSOL_CHECK_JAC_COND
+/* JM_KINSOL_USE_JAC_SCALING  controls if jacobian is scaled to get better accuracy */
+#define JM_KINSOL_USE_JAC_SCALING
 
 typedef struct jmi_kinsol_solver_t jmi_kinsol_solver_t;
 
@@ -70,13 +111,21 @@ struct jmi_kinsol_solver_t {
     realtype kin_jac_update_time; /**< \brief The last time when Jacobian was updated */
     realtype kin_ftol;		       /**< \brief Tolerance for F */
     realtype kin_stol;		       /**< \brief Tolerance for Step-size */
-    DlsMat J;                       /**< \brief A copy of the Jacobian matrix */
+    
+    DlsMat J;                       /**< \brief The Jacobian matrix  */    
+    DlsMat JTJ;                     /**< \brief The Transpose(J).J used if J is singular */
+    int J_is_singular_flag;         /**< \brief A flag indicating that J is singular. Regularized JTJ is setup */
+    int force_new_J_flag;           /**< \brief A flag indicating that J needs to be recalculated */
+    DlsMat J_LU;                    /**< \brief Jacobian matrix/it's LU decomposition */
+    DlsMat J_scale;                 /**< \brief Jacobian matrix scaled with xnorm for used for fnorm calculation */
+
+	char equed;						/**< \brief Type of Jac scaling used */
+	realtype* rScale;				/**< \brief Row scale factors */
+	realtype* cScale;				/**< \brief Column scale factors */
     
     realtype* lapack_work;         /**< \brief work vector for lapack */
     int * lapack_iwork;            /**< \brief work vector for lapack */
-
-    int (*kin_lsolve)(void *kin_mem, N_Vector xx, N_Vector bb, 
-              realtype *res_norm );
+    int * lapack_ipiv;            /**< \brief work vector for lapack */
     
     int num_bounds;
     int* bound_vindex;             /**< \brief variable index for a bound */
@@ -84,6 +133,21 @@ struct jmi_kinsol_solver_t {
     realtype* bounds;              /**< \brief bound vals */
     realtype* active_bounds;
 };
+
+
+/* Utilized Lapack routines */
+extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );
+extern void dgetrs_(char* TRANS, int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
+extern void dgecon_(char *norm, int *n, double *a, int *lda, double *anorm, double *rcond, 
+             double *work, int *iwork, int *info);
+
+extern int dgeequ_(int *m, int *n, double *a, int *
+	lda, double *r__, double *c__, double *rowcnd, double 
+	*colcnd, double *amax, int *info);
+
+extern int dlaqge_(int *m, int *n, double *a, int *
+	lda, double *r__, double *c__, double *rowcnd, double 
+	*colcnd, double *amax, char *equed);
 
 
 #ifdef JMI_AD_NONE_AND_CPP

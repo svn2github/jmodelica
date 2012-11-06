@@ -196,6 +196,9 @@ int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_solver
                            
 int jmi_solve_block_residual(jmi_block_residual_t * block);
 
+
+int jmi_block_jacobian_fd(jmi_block_residual_t* b, jmi_real_t* x, jmi_real_t delta_rel, jmi_real_t delta_abs);
+
 /**
  * \brief Deletes a jmi_block_residual struct.
  * 

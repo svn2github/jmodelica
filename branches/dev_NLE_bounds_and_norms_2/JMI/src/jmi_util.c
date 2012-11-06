@@ -17,6 +17,7 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
+#include <stdarg.h>
 #include "fmi.h"
 #include "jmi.h"
 
@@ -743,6 +744,63 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
 		i++;
 	}
 	return 0;
+}
+
+void jmi_log_error(jmi_t *jmi, char* fmt,...) {
+    va_list ap;
+    va_start (ap, fmt);
+    
+    if(jmi->fmi) {
+        fmi_t* fmi = jmi->fmi;
+        char buf[1000];
+        if(!fmi->fmi_logging_on) return;
+        vsprintf(buf, fmt, ap);
+        fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
+                                  fmiError, "ERROR", buf);
+    }
+    else {
+        fprintf(stderr, "ERROR:");
+        fprintf(stderr, fmt,ap);
+        fprintf(stderr, "\n");
+    }
+}
+
+void jmi_log_warning(jmi_t *jmi, char* fmt,...) {
+    va_list ap;
+    va_start (ap, fmt);
+    
+    if(jmi->fmi) {
+        fmi_t* fmi = jmi->fmi;
+        char buf[1000];
+        if(!fmi->fmi_logging_on) return;
+        vsprintf(buf, fmt, ap);
+        fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
+                                  fmiWarning, "WARNING", buf);
+    }
+    else {
+        fprintf(stderr, "WARNING:");
+        fprintf(stderr, fmt,ap);
+        fprintf(stderr, "\n");
+    }
+}
+
+void jmi_log_info(jmi_t *jmi, char* fmt,...) {
+    va_list ap;
+    va_start (ap, fmt);
+    
+    if(jmi->fmi) {
+        fmi_t* fmi = jmi->fmi;
+        char buf[1000];
+        if(!fmi->fmi_logging_on) return;
+        vsprintf(buf, fmt, ap);
+        fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
+                                  fmiOK, "INFO", buf);
+    }
+    else {
+        fprintf(stdout, "WARNING:");
+        fprintf(stdout, fmt,ap);
+        fprintf(stdout, "\n");
+    }
 }
 
 void jmi_log(jmi_t *jmi, jmi_log_category_t category, char* message) {

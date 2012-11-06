@@ -250,31 +250,31 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define SURELY_LT_ZERO(op) (op<=-1e-6? JMI_TRUE: JMI_FALSE)
 #define SURELY_GT_ZERO(op) (op>=1e-6? JMI_TRUE: JMI_FALSE)
 
-/*
+/* JM_ENFORCE_BOUNDS controls is bounds are enforced inside the equation block functions */
+#if JMI_AD != JMI_AD_CPPAD
+#define JM_ENFORCE_BOUNDS
+#endif
+
+#ifdef JM_ENFORCE_BOUNDS
+
 #define check_lbound(x, xmin, message) \
     if(x < xmin) { jmi_log(jmi, logInfo, message); return 1; }
 
 #define check_ubound(x, xmax, message) \
     if(x > xmax) { jmi_log(jmi, logInfo, message); return 1; }
-*/
+#define init_with_lbound(x, xmin, message) \
+    if(x < xmin) { jmi_log(jmi, logInfo, message); x = xmin; }
+
+#define init_with_ubound(x, xmax, message) \
+    if(x > xmax) { jmi_log(jmi, logInfo, message); x = xmax; }
+
+#else
 
 #define check_lbound(x, xmin, message) \
     if(0) { jmi_log(jmi, logInfo, message); return 1; }
 
 #define check_ubound(x, xmax, message) \
     if(0) { jmi_log(jmi, logInfo, message); return 1; }
-
-#define check_bounds(x, xmin, xmax, message) \
-    check_lbound(x, xmin, message)\
-    else check_ubound(x, xmax, message)
-
-/*
-#define init_with_lbound(x, xmin, message) \
-    if(x < xmin) { jmi_log(jmi, logInfo, message); x = xmin; }
-
-#define init_with_ubound(x, xmax, message) \
-    if(x > xmax) { jmi_log(jmi, logInfo, message); x = xmax; }
-*/
 
 #define init_with_lbound(x, xmin, message) \
     if(0) { jmi_log(jmi, logInfo, message); x = xmin; }
@@ -282,6 +282,12 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define init_with_ubound(x, xmax, message) \
     if(0) { jmi_log(jmi, logInfo, message); x = xmax; }
 
+#endif
+
+
+#define check_bounds(x, xmin, xmax, message) \
+    check_lbound(x, xmin, message)\
+    else check_ubound(x, xmax, message)
 
 #define init_with_bounds(x, xmin, xmax, message) \
     init_with_lbound(x, xmin, message) \
