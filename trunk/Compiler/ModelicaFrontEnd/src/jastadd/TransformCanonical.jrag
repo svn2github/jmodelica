@@ -1951,7 +1951,7 @@ aspect TransformCanonical {
 				Eq e = it.next();
 				if (e.getEquation().hasResidual()) {
 					Var tearVar = null;
-					FExp tearExp = null;
+					ASTNode tearVarNode = null;
 					for (FExp exp : e.getEquation().getResidual().getIterationVariables()) {
 						for (FVariable var : exp.referencedFVariablesInFExp()) {
 							for (Eq eqn : block) {
@@ -1962,7 +1962,7 @@ aspect TransformCanonical {
 							break;
 						}
 						if (tearVar != null) {
-							tearExp = exp;
+							tearVarNode = exp;
 							break;
 						}
 					}
@@ -1971,6 +1971,7 @@ aspect TransformCanonical {
 							for (Var var : eqn.getVariables()) {
 								if (var.getVariable().getManualIterationVariable()) {
 									tearVar = var;
+									tearVarNode = var.getVariable();
 									break;
 								}
 							}
@@ -2001,8 +2002,8 @@ aspect TransformCanonical {
 							}
 						}
 						newGraph.maximumMatching(true);
-						if (newGraph.getUnmatchedEquations().size() > 0) {
-								tearExp.warning("Unable to use hand guided tearing variable " + tearVar.getName() + " in equation " + e.getEquation().toString());
+						if (newGraph.getUnmatchedEquations().size() > 0 && tearVarNode != null) {
+							tearVarNode.warning("Unable to use hand guided tearing variable " + tearVar.getName() + " in equation " + e.getEquation().toString());
 							continue;
 						}
 						Stack<Eq> newBlock = new Stack<Eq>();

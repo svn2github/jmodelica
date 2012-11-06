@@ -57,6 +57,9 @@ public class OptionRegistry {
 		ENABLE_HAND_GUIDED_TEARING   ("enable_hand_guided_tearing", false, 
 				"If this option is set to true (default is false), hand guided tearing annotations are parsed " +
 				"and will have precedence during tearing."),
+		MERGE_BLT_BLOCKS   ("merge_blt_blocks", false, 
+				"If this option is set to true (default is false), BLT blocks will be merged so that all hand " +
+				"guided tearing equations and variables reside inside the same BLT block."),
 		CONV_FREE_DEP_PAR_TO_ALGS   ("convert_free_dependent_parameters_to_algebraics", true, 
 				"If this option is set to true (default is true), free dependent parameters are" +
 				"converted to algebraic variables."),
