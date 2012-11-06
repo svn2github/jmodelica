@@ -1949,10 +1949,10 @@ aspect TransformCanonical {
 			// Check for hand guided tearing
 			while (it.hasNext()) {
 				Eq e = it.next();
-				if (e.getEquation().hasResidues()) {
+				if (e.getEquation().hasResidual()) {
 					Var tearVar = null;
-					FExp tearExp = null;
-					for (FExp exp : e.getEquation().getResidues().getResidues()) {
+					ASTNode tearVarNode = null;
+					for (FExp exp : e.getEquation().getResidual().getIterationVariables()) {
 						for (FVariable var : exp.referencedFVariablesInFExp()) {
 							for (Eq eqn : block) {
 								tearVar = eqn.getVariable(var.name());
@@ -1962,15 +1962,16 @@ aspect TransformCanonical {
 							break;
 						}
 						if (tearVar != null) {
-							tearExp = exp;
+							tearVarNode = exp;
 							break;
 						}
 					}
 					if (tearVar == null) {
 						for (Eq eqn : block) {
 							for (Var var : eqn.getVariables()) {
-								if (var.getVariable().getManualTearingVariable()) {
+								if (var.getVariable().getManualIterationVariable()) {
 									tearVar = var;
+									tearVarNode = var.getVariable();
 									break;
 								}
 							}
@@ -2001,8 +2002,8 @@ aspect TransformCanonical {
 							}
 						}
 						newGraph.maximumMatching(true);
-						if (newGraph.getUnmatchedEquations().size() > 0) {
-								tearExp.warning("Unable to use hand guided tearing variable " + tearVar.getName() + " in equation " + e.getEquation().toString());
+						if (newGraph.getUnmatchedEquations().size() > 0 && tearVarNode != null) {
+							tearVarNode.warning("Unable to use hand guided tearing variable " + tearVar.getName() + " in equation " + e.getEquation().toString());
 							continue;
 						}
 						Stack<Eq> newBlock = new Stack<Eq>();
@@ -2182,10 +2183,10 @@ aspect TransformCanonical {
 		int maxOcc = 0;
 		int minSolvOcc = 0;
 		for (Eq e : g.getEquations()) {
-			if (e.getEquation().hasResidues()) {
-				FResidues reidues = e.getEquation().getResidues();
+			if (e.getEquation().hasResidual()) {
+				FResidual residual = e.getEquation().getResidual();
 				res = e;
-				for (FExp exp : reidues.getResidues()) {
+				for (FExp exp : residual.getIterationVariables()) {
 					for (FVariable var : exp.referencedFVariablesInFExp()) {
 						tear = g.getVariable(var.name());
 						break;
@@ -2259,29 +2260,21 @@ aspect TransformCanonical {
 	}
 	
 	/**
-	 * Builds a FResidues instance for "this" equation.  
+	 * Builds a FResidual instance for "this" equation.  
 	 */
-	protected FResidues AbstractEquation.buildResidues() {
-		AnnotationNode residues = annotation("__JModelica/residue");
-		if (!residues.exists())
+	protected FResidual AbstractEquation.buildResidual() {
+		if (!root().options.getBooleanOption("enable_hand_guided_tearing"))
 			return null;
-
-		FResidues fResidues = new FResidues();
-		for (AnnotationNode residue : residues) {
-			String var = residue.string();
-			boolean isDer = false;
-			if (residue.string().startsWith("der(")) {
-				var = var.substring(4, var.length() - 1);
-				isDer = true;
-			}
-			InstAccess access = InstAccess.fromName(var);
-			FExp e = new FInstAccessExp(access);
-			if (isDer)
-				e = new InstDerExp(e);
-			residue.ast().copyLocationTo(e);
-			fResidues.addResidue(e);
-		}
-		return fResidues;
+		AnnotationNode residualNode = annotation().vendorNode().forPath("ResidualEquation");
+		if (!residualNode.exists())
+			return null;
+		Exp enabledExp = residualNode.forPath("enabled").exp();
+		FInstResidual residual = new FInstResidual();
+		if (enabledExp != null)
+			residual.setEnabled(enabledExp.instantiate());
+		for (AnnotationNode iterationVariableNode : residualNode.forPath("iterationVariables"))
+			residual.addIterationVariable(iterationVariableNode.exp().instantiate());
+		return residual;
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			
@@ -3142,7 +3135,7 @@ aspect TransformCanonical {
 	 */
 	public AliasPair FEquation.aliasVariables() {
 		AliasPair res = null;
-		if (!hasResidues()) // This equation should not be alias-removed if it is marked as residue!
+		if (!hasResidual()) // This equation should not be alias-removed if it is marked as residual!
 			res = aliasVariables(getLeft(), getRight(), 1);
 		aliasClassified = true;
 		classifiedAsAlias = res != null;

@@ -1704,11 +1704,22 @@ public class BiPGraph {
 		return blt;
 	}
 	
+	private java.util.List<Eq> handGuidedEquations;
+	
 	public LinkedList<Stack<Eq>> computeRawBLT() {
 		index = 0;
 		S = new Stack<Eq>();
 		components = new LinkedList<Stack<Eq>>();
 		tarjanReset();
+		
+		handGuidedEquations = new ArrayList<Eq>();
+		if (fclass.root().options.getBooleanOption("merge_blt_blocks")) {
+			for (Eq e : getEquations()) {
+				if (e.isHandGuided())
+					handGuidedEquations.add(e);
+			}
+		}
+		
 		for (Eq e : getEquations()) {
 			if (!e.isVisited()) {
 				tarjan(e);
@@ -1729,6 +1740,18 @@ public class BiPGraph {
 		e.setTarjanLowLink(index);
 		e.setVisited(true);
 		index++;
+		if (e.isHandGuided()) {
+			for (Eq ee : handGuidedEquations) {
+				if (ee != e) {
+					if (!ee.isVisited()) {
+						tarjan(ee);
+						e.setTarjanLowLink(Math.min(e.getTarjanLowLink(),ee.getTarjanLowLink()));
+					} else if (S.contains(ee)) {
+						e.setTarjanLowLink(Math.min(e.getTarjanLowLink(),ee.getTarjanNbr()));
+					}
+				}
+			}
+		}
 		for (Var v : e.getVariables()) {
 			Eq ee = v.getMatching();
 			if (ee != null && e != ee) {
@@ -2593,6 +2616,15 @@ public class Eq {
 		}
 		return null;
 	}
+	
+	public boolean isHandGuided() {
+		if (getEquation().hasResidual())
+			return true;
+		else if (getMatching() != null && getMatching().getVariable().getManualIterationVariable())
+			return true;
+		return false;
+	}
+
 }
 
 public class Var {

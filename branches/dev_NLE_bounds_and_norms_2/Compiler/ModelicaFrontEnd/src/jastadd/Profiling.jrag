@@ -147,6 +147,36 @@ aspect LightProfiling {
 			
 			return lines.toArray(new String[lines.size()][]);
 		}
+		private static final String[][] measurmentNames = new String[][] {new String[]{"type"}, new String[]{"time"}, new String[]{"memoryDiff", "memoryTotal"}};
+		
+		public void writeCSVFile(File file) throws FileNotFoundException {
+			String[][] rawMemLog = rawLog();
+			String[][][] memLog = new String[rawMemLog.length][][];
+			for (int i = 0; i < rawMemLog.length; i++) {
+				memLog[i] = new String[rawMemLog[i].length][];
+				for (int j = 0; j < rawMemLog[i].length; j++) {
+					if (j == 0)
+						memLog[i][j] = new String[] {rawMemLog[i][j]};
+					else
+						memLog[i][j] = rawMemLog[i][j].split(",");
+				}
+			}
+			PrintStream memOutFile = new PrintStream(file);
+			for (int j = 0; j < memLog[0].length; j++) {
+				for (int k = 0; k < memLog[0][j].length; k++) {
+					memOutFile.print("\"");
+					memOutFile.print(measurmentNames[j][k]);
+					memOutFile.print("\"");
+					for (int i = 0; i < memLog.length; i++) {
+						memOutFile.print(",\"");
+						memOutFile.print(memLog[i][j][k]);
+						memOutFile.print('"');
+					}
+					memOutFile.println();
+				}
+			}
+			memOutFile.close();
+		}
 		
 		private InfoItem[] createItems() {
 			InfoItem[] res = new InfoItem[itemClasses.size()];

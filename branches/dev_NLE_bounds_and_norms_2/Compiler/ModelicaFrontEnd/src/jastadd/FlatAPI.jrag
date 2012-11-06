@@ -1640,7 +1640,7 @@ aspect FVariableUses {
 	eq BaseNode.getChild().isAlgebraicVariableAccess() = true;
 	eq FDerExp.getChild().isAlgebraicVariableAccess() = false;
 	eq FPreExp.getChild().isAlgebraicVariableAccess() = false;
-	eq FResidues.getResidue().isAlgebraicVariableAccess() = false;
+	eq FResidual.getIterationVariable().isAlgebraicVariableAccess() = false;
 	
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() = 
 	    retrieveAlgebraicVariables();
