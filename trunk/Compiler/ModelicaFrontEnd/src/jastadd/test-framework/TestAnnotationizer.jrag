@@ -233,30 +233,30 @@ abstract public class TestAnnotationizerHelper {
 	
 	protected void printSpecificLine(
 			PrintStream out, String indent, String name, String value, boolean last) {
-		doPrintSpecificLine(out, indent, name, '"' + value + '"', last);
+        int nl = Math.max(value.lastIndexOf('\n'), value.lastIndexOf('\r'));
+        boolean multi = nl >= 0;
+        if (multi) 
+            value = "\n" + value + (nl < value.length() - 1 ? "\n" : "");
+		doPrintSpecificLine(out, indent, name, '"' + value + '"', last, multi);
 	}
 	
 	protected void printSpecificLine(
 			PrintStream out, String indent, String name, double value, boolean last) {
-		doPrintSpecificLine(out, indent, name, Double.toString(value), last);
+		doPrintSpecificLine(out, indent, name, Double.toString(value), last, false);
 	}
 	
 	protected void printSpecificLine(
 			PrintStream out, String indent, String name, int value, boolean last) {
-		doPrintSpecificLine(out, indent, name, Integer.toString(value), last);
+		doPrintSpecificLine(out, indent, name, Integer.toString(value), last, false);
 	}
 	
 	protected void printSpecificLine(
 			PrintStream out, String indent, String name, boolean value, boolean last) {
-		doPrintSpecificLine(out, indent, name, Boolean.toString(value), last);
+		doPrintSpecificLine(out, indent, name, Boolean.toString(value), last, false);
 	}
 	
 	protected void doPrintSpecificLine(
-			PrintStream out, String indent, String name, String value, boolean last) {
-		int nl = Math.max(value.lastIndexOf('\n'), value.lastIndexOf('\r'));
-		boolean multi = nl >= 0;
-		if (multi) 
-			value = "\n" + value + (nl < value.length() - 1 ? "\n" : "");
+			PrintStream out, String indent, String name, String value, boolean last, boolean multi) {
 		out.print(indent + name + "=" + value);
 		if (!last)
 			out.print(",\n");
