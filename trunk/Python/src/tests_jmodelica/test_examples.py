@@ -183,6 +183,11 @@ def test_marine_population():
 def test_mechanics_rotational_examples_first():
     """ Run mechanics high index example from MSL """
     mechanical_rotational_examples_first.run_demo(False)
+
+@testattr(assimulo = True)
+def test_mechanics_rotational_examples_coupled_clutches():
+    """ Run mechanics high index example from MSL """
+    mechanical_rotational_examples_coupled_clutches.run_demo(False)
 	
 @testattr(ipopt = True)
 def test_moon_lander():

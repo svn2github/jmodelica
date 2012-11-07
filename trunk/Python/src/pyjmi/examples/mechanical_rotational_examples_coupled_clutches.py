@@ -54,7 +54,7 @@ def run_demo(with_plots=True):
     tau_c3 = res['clutch3.tau']
     t = res['time']
 
-    assert N.abs(w3[-1] - (2.4648259915308199)) < 1e-3
+    assert N.abs(w3[-1] - (2.46382546506)) < 1e-3
 
     if with_plots:
         plt.figure(1)

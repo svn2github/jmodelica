@@ -1728,6 +1728,20 @@ aspect CCodeGen {
 						
 	}
 
+	public void MixedLinearEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
+		
+		str.print(indent + "} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n");
+		// Output Jacobian
+		int var_counter = 0;
+		for (int i=0;i<activeContinuousVariables().size();i++) {
+			for (int j=0;j<activeContinuousVariables().size();j++) {
+				str.print(indent + indent + "residual[" + var_counter + "] = " + jacobian[j][i].prettyPrint_C("") + ";\n");
+				var_counter++;
+			}
+		}
+						
+	}
+	
 	public void AbstractEquationBlock.genBlockAddCall_C(int block_counter, boolean dirDer, boolean inInit, String indent, PrintStream str) {
 	} 
 
@@ -1756,6 +1770,16 @@ aspect CCodeGen {
 		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
 		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
 		block_counter + "," + (dirDer? "dae_" + (inInit? "init_": "") + "block_dir_der_" + block_counter: "NULL") + "," + iterationVariables().size() + ",0");
+		str.print(isConstant()? ",JMI_CONSTANT_VARIABILITY,": isParameter()? ",JMI_PARAMETER_VARIABILITY,": 
+			      isDiscrete()? ",JMI_DISCRETE_VARIABILITY,": ",JMI_CONTINUOUS_VARIABILITY,");
+		str.print("JMI_LINEAR_SOLVER,");
+		str.print(block_counter + " );\n");
+	} 
+
+	public void MixedLinearEquationBlock.genBlockAddCall_C(int block_counter, boolean dirDer, boolean inInit, String indent, PrintStream str) {
+		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
+		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
+		block_counter + "," + (dirDer? "dae_" + (inInit? "init_": "") + "block_dir_der_" + block_counter: "NULL") + "," + activeContinuousVariables().size() + "," + activeDiscreteVariables().size());
 		str.print(isConstant()? ",JMI_CONSTANT_VARIABILITY,": isParameter()? ",JMI_PARAMETER_VARIABILITY,": 
 			      isDiscrete()? ",JMI_DISCRETE_VARIABILITY,": ",JMI_CONTINUOUS_VARIABILITY,");
 		str.print("JMI_LINEAR_SOLVER,");
