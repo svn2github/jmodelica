@@ -3200,6 +3200,20 @@ end NameTests.ComplexExpInDer3;
 ")})));
 end ComplexExpInDer3;
 
-
+model EmptyAnnotationTest
+  
+  model M
+  annotation();
+  end M;
+  M m;
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="EmptyAnnotation",
+			description="",
+			flatModel="
+fclass NameTests.EmptyAnnotationTest
+end NameTests.EmptyAnnotationTest;
+")})));
+end EmptyAnnotationTest;
 
 end NameTests;

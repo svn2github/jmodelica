@@ -633,9 +633,9 @@ ClassModification class_modification =
   LPAREN argument_list RPAREN {: return new ClassModification(argument_list); :}
   ;
 
-  
 List argument_list =
-  argument                          {: return new List().add(argument); :}
+                                      {: return new List(); :}
+  | argument                          {: return new List().add(argument); :}
   | argument_list COMMA argument    {: argument_list.add(argument); 
                                        return argument_list; :}
   ;
