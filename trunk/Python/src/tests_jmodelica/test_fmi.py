@@ -92,6 +92,17 @@ class Test_FMUModelCS1:
     def test_types_platform(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
         assert model.types_platform == "standard32"
+        
+    @testattr(windows = True)
+    def test_exception_input_derivatives(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
+        nose.tools.assert_raises(FMUException, model.set_input_derivatives, "u",1.0,1)
+        
+    @testattr(windows = True)
+    def test_exception_output_derivatives(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
+        nose.tools.assert_raises(FMUException, model.get_output_derivatives, "u",1)
+        
     
 class Test_FMUModelME1:
     """
