@@ -81,16 +81,19 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 	/* Test if output is OK (no -1.#IND) */
 	n = NV_LENGTH_S(ff);
 	for (i=0;i<n;i++) {
-          double v = Ith(ff,i);
+        double v = Ith(ff,i);
 	  /* Recoverable error*/
-          if (v- v != 0) {
-           jmi_log_warning(block->jmi, "Not a number in output from equation block %d", block->index);
-           return 1;
+        if (v- v != 0) {
+           jmi_log_warning(block->jmi, "Not a number in output [%d] from equation block %d", i, block->index);           
+#if 0           
+           block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE);
+#endif
           }
 	}
 
 	/*
-	printf("f = N.array([\n");
+    realtype* y = NV_DATA_S(yy); */ /*y is now a vector of realtype*/
+	/* printf("f = N.array([\n");
 	for (i=0;i<n;i++) {
 		printf("%12.12f\n",y[i]);
 	}
@@ -318,8 +321,11 @@ static int jmi_kinsol_init(jmi_block_residual_t * block) {
     int ef;
     struct KINMemRec * kin_mem = solver->kin_mem; 
     /* set tolerances */
+    solver->kin_stol = jmi->fmi->fmi_newton_tolerance;
+    if(solver->kin_stol < JMI_DEFAULT_KINSOL_TOL) {
+        solver->kin_stol = JMI_DEFAULT_KINSOL_TOL;
+    }
     solver->kin_ftol = jmi->fmi->fmi_newton_tolerance;
-    solver->kin_stol = solver->kin_ftol;
 
     KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
     KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
@@ -381,7 +387,11 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
 #endif
     {
 	    /* make sure full newton step can be taken */
-		kin_mem->kin_mxnewtstep = MAX_NETON_STEP_RATIO * xnorm;
+        realtype maxstep = MAX_NETON_STEP_RATIO * xnorm;
+#if 0
+        if(maxstep > kin_mem->kin_mxnewtstep)
+#endif
+            kin_mem->kin_mxnewtstep = maxstep;
 		return;
 	}
 
@@ -613,7 +623,7 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
     jmi_kinsol_solver_t* solver = block->solver; 
     jmi_t* jmi = block->jmi;
     int i, N = block->n;
-    realtype tol = jmi->fmi->fmi_newton_tolerance;
+    realtype tol = solver->kin_stol;
     realtype curtime = *(jmi_get_t(block->jmi));
     realtype* scale_ptr = N_VGetArrayPointer(solver->kin_f_scale);
     realtype* col_ptr;
@@ -648,7 +658,6 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
         else
             scale_ptr[i] = 1/scale_ptr[i];
     }
-    solver->kin_stol = tol;
     solver->kin_ftol = tol;
     
     KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
@@ -767,7 +776,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t
     KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
     
     /* Allow long steps */
-    KINSetMaxNewtonStep(solver->kin_mem, 1e9);
+    KINSetMaxNewtonStep(solver->kin_mem, 1);
     
     /* Disable residual monitoring (since inexact solution is given sometimes by 
     the linear solver) */
@@ -869,7 +878,22 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
                 jmi_log_error(block->jmi, "The equations with initial scaling solved fine, re-scaled equations failed in block %d", block->index);
             else
                 jmi_log_error(block->jmi, "Could not converge after re-scaling equations in block %d", block->index);
-        }            
+            {
+                realtype* x = block->x;
+                realtype* res = block->res;
+                int i;
+                printf("Could not converge in block %d:\nx = N.array([\n",block->index);
+                for (i=0;i<block->n;i++) {
+                    printf("%12E\n",x[i]);
+                }
+                printf("]);\n");
+                printf("f = N.array([\n");
+                for (i=0;i<block->n;i++) {
+                    printf("%12E\n",res[i]);
+                }
+                printf("]);\n");
+            }            
+        }        
     }
     
     /* Get debug information */
