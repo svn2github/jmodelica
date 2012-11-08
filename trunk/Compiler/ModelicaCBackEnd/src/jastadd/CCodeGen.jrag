@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.Collections;
 
 import org.jmodelica.util.Enumerator;
 
@@ -1603,41 +1605,47 @@ aspect CCodeGen {
 	}
 	
 	protected void AbstractEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
-		for (ASTNode n : new LinkedHashSet<ASTNode>(blockResidualNodes_C()))
+		for (ASTNode n : blockResidualNodes_C())
 			if (visited == null || visited.add(n))
 				n.genVarDecls_C(ASTNode.printer_C, str, indent);
 	}
 	
 	@Override
-	protected void SolvedScalarEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
-		if (visited == null || visited.add(solution()))
-			solution().genVarDecls_C(ASTNode.printer_C, str, indent);
-	}
-	
-	@Override
-	protected void TornEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
-		if (visited == null)
-			visited = new HashSet<ASTNode>();
-		for (AbstractEquationBlock aeb : getSolvedBlocks())
-			aeb.genVarDecls_C(str, indent, visited);
-		for (AbstractEquationBlock aeb : getUnsolvedBlocks())
-			aeb.genVarDecls_C(str, indent, visited);
-	}
-	
-	public ArrayList<ASTNode> AbstractEquationBlock.blockResidualNodes_C() {
-		ArrayList<ASTNode> res = new ArrayList<ASTNode>(blockResidualVariables_C());
+    protected void TornEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
+        if (visited == null)
+            visited = new HashSet<ASTNode>();
+        for (AbstractEquationBlock aeb : getSolvedBlocks())
+            aeb.genVarDecls_C(str, indent, visited);
+        for (AbstractEquationBlock aeb : getUnsolvedBlocks())
+            aeb.genVarDecls_C(str, indent, visited);
+    }
+    
+    protected void WhenEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
+        if (visited == null)
+            visited = new HashSet<ASTNode>();
+        for (Iterable<? extends AbstractEquationBlock> aebl : blocks)
+            for (AbstractEquationBlock aeb : aebl)
+                aeb.genVarDecls_C(str, indent, visited);
+    }
+    
+	public Set<ASTNode> AbstractEquationBlock.blockResidualNodes_C() {
+	    Set<ASTNode> res = new LinkedHashSet<ASTNode>(blockResidualVariables_C());
 		res.addAll(blockResidualEquations_C());
 		return res;
 	}
+    
+    public Set<ASTNode> MixedEquationBlock.blockResidualNodes_C() {
+        Set<ASTNode> res = super.blockResidualNodes_C();
+        res.addAll(discreteEquations());
+        return res;
+    }
+    
+    public Set<ASTNode> SolvedScalarEquationBlock.blockResidualNodes_C() {
+        return Collections.<ASTNode>singleton(solution());
+    }
 	
-	public ArrayList<ASTNode> MixedEquationBlock.blockResidualNodes_C() {
-		ArrayList<ASTNode> res = super.blockResidualNodes_C();
-		res.addAll(discreteEquations());
-		return res;
-	}
-	
-	public ArrayList<ASTNode> TornEquationBlock.blockResidualNodes_C() {
-		ArrayList<ASTNode> res = new ArrayList<ASTNode>(activeVariables());
+	public Set<ASTNode> TornEquationBlock.blockResidualNodes_C() {
+	    Set<ASTNode> res = new LinkedHashSet<ASTNode>(activeVariables());
 		res.addAll(equations());
 		return res;
 	}

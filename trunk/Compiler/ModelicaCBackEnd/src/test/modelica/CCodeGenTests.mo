@@ -373,6 +373,50 @@ model CCodeGenTest13
 end CCodeGenTest13;
 
 
+model CCodeGenTest14
+	function f
+		input Real[2] a;
+		output Real b;
+	algorithm
+		b := sum(a);
+	end f;
+	
+    parameter Real[2] c = {1,2};
+	Real x;
+	
+equation
+	when initial() then
+		x = f(c);
+	end when;
+	
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="CCodeGenTest14",
+			description="",
+			generate_ode=true,
+			generate_dae=false,
+			equation_sorting=true,
+			template="$C_ode_derivatives$",
+			generatedCode="
+    JMI_ARRAY_STATIC(tmp_1, 2, 1)
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+  _guards(0) = _atInitial;
+  if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+   JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
+   jmi_array_ref_1(tmp_1, 1) = _c_1_0;
+   jmi_array_ref_1(tmp_1, 2) = _c_2_1;
+   _x_2 = func_CCodeGenTests_CCodeGenTest14_f_exp(tmp_1);
+  } else {
+  _x_2 = pre_x_2;
+  }
+")})));
+end CCodeGenTest14;
+
 
 model CLogExp1
  Boolean x = true;
