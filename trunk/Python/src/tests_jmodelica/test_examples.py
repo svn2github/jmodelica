@@ -305,3 +305,8 @@ def test_vdp_casadi_ps():
 def test_VDP_sim():
     """ Test the VDP_sim example. """    
     VDP_sim.run_demo(False)
+    
+@testattr(assimulo = True)
+def test_bouncingball_cs_sim():
+    """ Test the VDP_sim example. """    
+    fmi_bouncing_ball_cs.run_demo(False)
