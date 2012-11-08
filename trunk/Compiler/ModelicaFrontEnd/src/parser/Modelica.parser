@@ -1093,10 +1093,15 @@ List named_arguments =
   | named_arguments COMMA named_argument {: return named_arguments.add(named_argument); :}
   ;
   
-NamedArgument named_argument =
-  ID.id EQUALS exp {: return new NamedArgument(new ParseAccess(id,new Opt()),exp); :}
-  ;
+Exp function_argument_exp =
+ exp                               {: return exp; :}
+ | FUNCTION function_call          {: return function_call; :}  
+ ;
   
+NamedArgument named_argument =
+  ID.id EQUALS function_argument_exp {: return new NamedArgument(new ParseAccess(id,new Opt()),function_argument_exp); :}
+  ;
+
 Matrix matrix = 
     matrix_row                   {: return new Matrix(new List().add(matrix_row)); :}
   | matrix SEMICOLON matrix_row  {: matrix.addRow(matrix_row); 
@@ -1117,8 +1122,8 @@ List arg_list =
   ;
   
 List arg_list_p = 
-    exp                   {: return new List().add(exp); :}
-  | arg_list_p COMMA exp  {: return arg_list_p.add(exp); :}
+  function_argument_exp                   {: return new List().add(function_argument_exp); :}
+  | arg_list_p COMMA function_argument_exp  {: return arg_list_p.add(function_argument_exp); :}
   ;
   
 Comment comment = 
