@@ -411,6 +411,31 @@ class CasadiCollocator(object):
                 cnt += 1
         return (t_opt, dx_opt, x_opt, u_opt, w_opt, p_opt)
     
+    def get_ipopt_statistics(self):
+        """ 
+        Get statistics from the last optimization.
+
+        Returns::
+        
+            return_status -- 
+                Return status from IPOPT.
+                
+            nbr_iter -- 
+                Number of iterations.
+                
+            objective -- 
+                Final value of objective function.
+                
+            total_exec_time -- 
+                IPOPT execution time.
+        """
+        stats = self.solver.getStats()
+        return_status = stats['return_status']
+        nbr_iter = stats['iter_count']
+        objective = float(self.solver.output(casadi.NLP_COST))
+        total_exec_time = stats['t_mainloop']
+        return (return_status, nbr_iter, objective, total_exec_time)
+    
     def ipopt_solve(self):
         """
         Solves the NLP using IPOPT.

@@ -896,6 +896,24 @@ class TestLocalDAECollocator:
         opts['casadi_options_g']['numeric_jacobian'] = False
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
+    
+    @testattr(casadi = True)
+    def test_ipopt_statistics(self):
+        """
+        Test getting IPOPT statistics
+        """
+        model = self.model_vdp_bounds_mayer
+        
+        cost_ref = 3.17619580332244e0
+        
+        res = model.optimize()
+        (return_status, nbr_iter, objective, total_exec_time) = \
+                res.solver.get_ipopt_statistics()
+        N.testing.assert_string_equal(return_status, "Solve_Succeeded")
+        N.testing.assert_array_less([nbr_iter, -nbr_iter], [100, -5])
+        N.testing.assert_allclose(objective, cost_ref, 1e-3, 1e-4)
+        N.testing.assert_array_less([total_exec_time, -total_exec_time],
+                                    [1., 0.])
 
 class TestPseudoSpectral:
     
