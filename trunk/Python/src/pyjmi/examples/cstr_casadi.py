@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
 from pymodelica import compile_fmu, compile_fmux
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 from pyjmi import CasadiModel, get_files_path
 
 def run_demo(with_plots=True):
@@ -75,7 +75,7 @@ def run_demo(with_plots=True):
     init_fmu = compile_fmu("CSTR.CSTR_Init", file_path)
     
     # Load the FMU
-    init_model = FMUModel(init_fmu)
+    init_model = load_fmu(init_fmu)
     
     # Set input for Stationary point A
     Tc_0_A = 250
@@ -114,7 +114,7 @@ def run_demo(with_plots=True):
     init_sim_fmu = compile_fmu("CSTR.CSTR_Init_Optimization", file_path)
 
     # Load the model
-    init_sim_model = FMUModel(init_sim_fmu)
+    init_sim_model = load_fmu(init_sim_fmu)
     
     # Set initial and reference values
     init_sim_model.set('cstr.c_init', c_0_A)
@@ -232,7 +232,7 @@ def run_demo(with_plots=True):
     sim_fmu = compile_fmu("CSTR.CSTR", file_path)
 
     # Load model
-    sim_model = FMUModel(sim_fmu)
+    sim_model = load_fmu(sim_fmu)
     
     # Set initial values
     sim_model.set('c_init',c_0_A)

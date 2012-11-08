@@ -22,7 +22,7 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 from pymodelica import compile_fmu
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """ 
@@ -36,7 +36,7 @@ def run_demo(with_plots=True):
         curr_dir+"/files/Pendulum_pack.mop",compiler='optimica')
 
     # Load model
-    model = FMUModel(fmu_name)
+    model = load_fmu(fmu_name)
 
     # Load result file
     res = model.simulate(final_time=10.)

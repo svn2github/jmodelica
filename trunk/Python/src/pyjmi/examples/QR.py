@@ -20,7 +20,7 @@ import numpy as N
 import pylab as p
 
 from pymodelica import compile_fmu
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """
@@ -33,7 +33,7 @@ def run_demo(with_plots=True):
     mofile = curr_dir+'/files/QR_pack.mo'
     
     fmu_name = compile_fmu(class_name, mofile)
-    qr = FMUModel(fmu_name)
+    qr = load_fmu(fmu_name)
     
     res = qr.simulate(final_time=10)
     
@@ -48,19 +48,12 @@ def run_demo(with_plots=True):
     t = res['time']
 
     assert N.abs(qr_1_1[-1] + 4.47214) < 1e-3
-    
     assert N.abs(qr_1_2[-1] + 3.13049) < 1e-3
-    
     assert N.abs(qr_2_1[-1] - 0.618034) < 1e-3
-    
     assert N.abs(qr_2_2[-1] - 0.447214) < 1e-3
-    
     assert N.abs(tau_1[-1] - 1.44721) < 1e-3
-    
     assert N.abs(tau_2[-1] - 0) < 1e-3
-    
     assert N.abs(p_1[-1] - 2) < 1e-3
-    
     assert N.abs(p_2[-1] - 1) < 1e-3  
     
     if with_plots:

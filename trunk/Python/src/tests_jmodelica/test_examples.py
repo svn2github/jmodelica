@@ -308,5 +308,5 @@ def test_VDP_sim():
     
 @testattr(assimulo = True)
 def test_bouncingball_cs_sim():
-    """ Test the VDP_sim example. """    
+    """ Test the FMI Bouncing Ball CS 1.0 example. """    
     fmi_bouncing_ball_cs.run_demo(False)

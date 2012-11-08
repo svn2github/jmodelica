@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 import numpy as N
 from matplotlib.font_manager import fontManager, FontProperties
 
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 from pyjmi.optimization import dfo
 
 def run_demo(with_plots=True):
@@ -72,7 +72,7 @@ def run_demo(with_plots=True):
 		plt.show()
 	
 	# Load model
-	model = FMUModel(curr_dir+'/files/FMUs/Furuta.fmu')
+	model = load_fmu(curr_dir+'/files/FMUs/Furuta.fmu')
 	
 	# Create options object and set verbosity to zero to disable printouts
 	opts = model.simulate_options()

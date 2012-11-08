@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
 from pymodelica import compile_fmu
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """
@@ -35,7 +35,7 @@ def run_demo(with_plots=True):
 
     fmu_name = compile_fmu("JMExamples.Distillation.Distillation4Reference", 
     curr_dir+"/files/JMExamples.mo")
-    dist4 = FMUModel(fmu_name)
+    dist4 = load_fmu(fmu_name)
     
     res = dist4.simulate(final_time=6000)
 

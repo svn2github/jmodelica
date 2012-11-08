@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
 from pymodelica import compile_fmu
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 
 import pyfmi.examples.log_analysis as la
 
@@ -35,8 +35,8 @@ def run_demo(with_plots=True,with_loganalysis=True,nb_blocks=10):
 	# Compile the stationary initialization model into a DLL
 	fmu_name = compile_fmu("NonLinear.MultiSystems", curr_dir+"/files/NonLinear.mo")
 
-	# Load a JMU model instance
-	init_model = FMUModel(fmu_name)
+	# Load a FMU model instance
+	init_model = load_fmu(fmu_name)
 	init_model.set_debug_logging(True)
 	init_model.set('n',nb_blocks)
 	# Initialize

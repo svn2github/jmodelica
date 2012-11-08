@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
 from pymodelica import compile_fmu
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True,with_blocking_factors = False):
     """ 
@@ -50,7 +50,7 @@ def run_demo(with_plots=True,with_blocking_factors = False):
         curr_dir+"/files/DISTLib.mo")
 
     # Load a model instance into Python
-    model = FMUModel(fmu_name)
+    model = load_fmu(fmu_name)
     
     res = model.simulate(final_time=200)
 
