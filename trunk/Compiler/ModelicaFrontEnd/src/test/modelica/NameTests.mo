@@ -3228,9 +3228,7 @@ model EmptyModificationTest
 			description="Test that it is ok to have an empty modification.",
 			flatModel="
 fclass NameTests.EmptyModificationTest
- Real m.x;
-equation
- m.x = 1;
+ Real m.x = 1;
 end NameTests.EmptyModificationTest;
 ")})));
 end EmptyModificationTest;
