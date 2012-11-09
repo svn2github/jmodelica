@@ -3208,12 +3208,31 @@ model EmptyAnnotationTest
   M m;
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
-			name="EmptyAnnotation",
-			description="",
+			name="EmptyAnnotationTest",
+			description="Test that it is ok to have an empty annotation.",
 			flatModel="
 fclass NameTests.EmptyAnnotationTest
 end NameTests.EmptyAnnotationTest;
 ")})));
 end EmptyAnnotationTest;
+
+model EmptyModificationTest
+  
+  model M
+  Real x()=1;
+  end M;
+  M m;
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="EmptyModificationTest",
+			description="Test that it is ok to have an empty modification.",
+			flatModel="
+fclass NameTests.EmptyModificationTest
+ Real m.x;
+equation
+ m.x = 1;
+end NameTests.EmptyModificationTest;
+")})));
+end EmptyModificationTest;
 
 end NameTests;

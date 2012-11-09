@@ -628,14 +628,13 @@ AssignModification assign_modification =
   ;  
   */
   
-  
 ClassModification class_modification = 
-  LPAREN argument_list RPAREN {: return new ClassModification(argument_list); :}
+    LPAREN RPAREN {: return new ClassModification(); :}
+  | LPAREN argument_list RPAREN {: return new ClassModification(argument_list); :}
   ;
 
 List argument_list =
-                                      {: return new List(); :}
-  | argument                          {: return new List().add(argument); :}
+    argument                          {: return new List().add(argument); :}
   | argument_list COMMA argument    {: argument_list.add(argument); 
                                        return argument_list; :}
   ;
@@ -784,9 +783,6 @@ Argument argument =
                                                                :}
    | error				{: return new BadArgument(); :}                                              
    ;
-
-
-
 
 Annotation annotation = 
   ANNOTATION class_modification    {: return new ParseAnnotation(class_modification); :}
