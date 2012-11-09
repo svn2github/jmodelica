@@ -3233,4 +3233,40 @@ end NameTests.EmptyModificationTest;
 ")})));
 end EmptyModificationTest;
 
+model FunctionCallLeftTest
+  function f
+   input Real x1;
+   output Real y1;
+  algorithm
+   y1:=2*x1;
+  end f;
+  
+   Real x;
+  algorithm
+   (x) := f(1);
+	
+annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionCallLeftTest",
+			description="Test so that it is ok to have only one output argument in a function call left statement.",
+			flatModel="
+fclass NameTests.FunctionCallLeftTest
+ Real x;
+algorithm
+ (x) := NameTests.FunctionCallLeftTest.f(1);
+
+public
+ function NameTests.FunctionCallLeftTest.f
+  input Real x1;
+  output Real y1;
+ algorithm
+  y1 := ( 2 ) * ( x1 );
+  return;
+ end NameTests.FunctionCallLeftTest.f;
+
+end NameTests.FunctionCallLeftTest;
+")})));
+end FunctionCallLeftTest;
+
+
 end NameTests;

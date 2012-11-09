@@ -803,6 +803,16 @@ AbstractEquation abstract_equation =
   | annotation SEMICOLON              {: return new EquationAnnotation(new Opt(),new Comment(new Opt(), new Opt()), annotation); :}
   ;
 
+List function_call_left_list =
+    function_call_left.a COMMA function_call_left.b   {: return new List().add(a).add(b); :}
+  | function_call_left_list COMMA function_call_left  {: return function_call_left_list.add(function_call_left); :}
+  ;
+
+FunctionCallLeft function_call_left =
+                   {: return new FunctionCallLeft(new Opt()); :}
+  | parse_access   {: return new FunctionCallLeft(new Opt(parse_access)); :}
+  ;
+
 ForClauseE for_clause_e =
   FOR for_indices LOOP
   abstract_equation*
@@ -911,17 +921,17 @@ Statement statement =
   ;
   
 FunctionCallStmt function_call_stmt =
-    LPAREN function_call_left_list RPAREN ASSIGN function_call comment  
-                           {: return new FunctionCallStmt(comment, function_call_left_list, function_call); :}
+    LPAREN function_call_stmt_left_list RPAREN ASSIGN function_call comment  
+                           {: return new FunctionCallStmt(comment, function_call_stmt_left_list, function_call); :}
   | function_call comment  {: return new FunctionCallStmt(comment, new List(), function_call); :}
   ;
 
-List function_call_left_list =
-    function_call_left.a COMMA function_call_left.b   {: return new List().add(a).add(b); :}
-  | function_call_left_list COMMA function_call_left  {: return function_call_left_list.add(function_call_left); :}
+List function_call_stmt_left_list =
+    function_call_stmt_left   {: return new List().add(function_call_stmt_left); :}
+  | function_call_stmt_left_list COMMA function_call_stmt_left  {: return function_call_stmt_left_list.add(function_call_stmt_left); :}
   ;
 
-FunctionCallLeft function_call_left =
+FunctionCallLeft function_call_stmt_left =
                    {: return new FunctionCallLeft(new Opt()); :}
   | parse_access   {: return new FunctionCallLeft(new Opt(parse_access)); :}
   ;
