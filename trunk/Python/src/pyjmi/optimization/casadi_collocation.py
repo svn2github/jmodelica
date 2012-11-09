@@ -699,6 +699,9 @@ class LocalDAECollocator(CasadiCollocator):
     def _get_ocp_expressions(self):
         """
         Get OCP expressions from model and scale them if necessary.
+        
+        Timed variables are not scaled until _create_constraints, at
+        which point the constraint points are known.
         """
         # Get OCP expressions
         self.initial = casadi.SXMatrix(self.model.get_initial(False))
@@ -1197,6 +1200,25 @@ class LocalDAECollocator(CasadiCollocator):
             for (i, k) in collocation_constraint_points:
                 for var_type in ['x', 'u', 'w']:
                     nlp_timed_variables.append(var_map[i][k][var_type])
+        
+        # Scale timed variables
+        if (self.variable_scaling and self.nominal_traj is None and
+            self.hs != "free"):
+            # Get scale factors
+            sf = self.model.get_sf()
+            nbr_constraint_points = len(collocation_constraint_points)
+            if nbr_constraint_points > 0:
+                timed_variables_sfs = N.concatenate(
+                        nbr_constraint_points * [sf['x'], sf['u'], sf['w']])
+                
+                # Insert scale factors
+                ocp_expressions = [self.path, self.point, self.mterm]
+                [self.path,
+                 self.point,
+                 self.mterm] = casadi.substitute(ocp_expressions,
+                                                 timed_variables,
+                                                 timed_variables_sfs *
+                                                 timed_variables)
         
         # Denormalize time for minimum time problems
         if self._normalize_min_time:

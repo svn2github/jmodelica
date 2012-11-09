@@ -152,6 +152,57 @@ optimization CSTR_Opt_Extends(
   parameter Real q_Tc = 1;
 end CSTR_Opt_Extends;
 
+optimization CSTR_Opt_Scaled_Min_Time(objective=tf) 
+
+  parameter Real tf(free=true, min=0.2, initialGuess=100);
+
+  parameter Modelica.SIunits.VolumeFlowRate F0=100/1000/60 "Inflow";
+  parameter Modelica.SIunits.Concentration c0=1000 "Concentration of inflow"; 
+  Modelica.Blocks.Interfaces.RealInput Tc(initialGuess=350, min=230, max=370) "Cooling temperature"; 
+  parameter Modelica.SIunits.VolumeFlowRate F=100/1000/60 "Outflow"; 
+  parameter Modelica.SIunits.Temp_K T0 = 350;
+  parameter Modelica.SIunits.Length r = 0.219;
+  parameter Real k0 = 7.2e10/60;
+  parameter Real EdivR = 8750;
+  parameter Real U = 915.6;
+  parameter Real rho = 1000;
+  parameter Real Cp = 0.239*1000;
+  parameter Real dH = -5e4;
+  parameter Modelica.SIunits.Volume V = 100 "Reactor Volume";
+  parameter Modelica.SIunits.Concentration c_init = 956.271065;
+  parameter Modelica.SIunits.Temp_K T_init = 250.051971;
+  Real c(start=c_init,fixed=true,nominal=c0,initialGuess=300);
+  Real T(start=T_init,fixed=true,nominal=T0,initialGuess=300, max=350);
+  
+  parameter Real c_ref = 338.775766;
+  parameter Real T_ref = 280.099198;
+  
+equation 
+  der(c) = tf * (F0*(c0-c)/V-k0*c*exp(-EdivR/T));
+  der(T) = tf * (F0*(T0-T)/V-dH/(rho*Cp)*k0*c*exp(-EdivR/T)+2*U/(r*rho*Cp)*(Tc-T));
+
+constraint
+  c(finalTime) = c_ref;
+  T(finalTime) = T_ref;
+
+end CSTR_Opt_Scaled_Min_Time;
+
+optimization CSTR_Opt_Unscaled_Min_Time(objective=finalTime, startTime=0,
+    finalTime(min=0.2, free=true, initialGuess=100))
+                                                 
+  extends CSTR(c(initialGuess=300), T(initialGuess=300, max=350),
+               Tc(initialGuess=350, min=230, max=370), c_init=956.271065,
+               T_init=250.051971);
+
+  parameter Real c_ref = 338.775766;
+  parameter Real T_ref = 280.099198;
+
+constraint
+  c(1) = c_ref;
+  T(1) = T_ref;
+
+end CSTR_Opt_Unscaled_Min_Time;
+
 optimization CSTR_Opt_MPC(objective=(cost(finalTime)),
                       startTime=0.0,
                       finalTime=50)
