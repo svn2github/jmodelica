@@ -86,6 +86,7 @@ aspect TransformCanonical {
 		root().flushAllRecursive();
 		genInitialEquations();
 		sortDependentParameters();
+		addRuntimeOptionParameters();
 	}
 	
 	public void FClass.transformCanonicalCleanup() {
@@ -5943,6 +5944,76 @@ aspect StateInitialEquations {
 		
 			endStep("addStateInitialEquationsIfSet()");
 		}
+	}
+	
+}
+
+aspect RuntimeOptions {
+	
+	/**
+	 * Add parameters for all defined runtime options.
+	 */
+	public void FClass.addRuntimeOptionParameters() {
+		OptionRegistry opt = root().options;
+		if (opt.getBooleanOption("generate_runtime_option_parameters") && opt.getBooleanOption("generate_ode")) {
+			for (String key : opt.getRuntimeOptionKeys()) {
+				FVariable v = null;
+				String name = "_" + key;
+				if (opt.isBooleanOption(key))
+					v = createBooleanRuntimeOptionParameter(name, opt.getBooleanOption(key));
+				else if (opt.isStringOption(key))
+					v = createStringRuntimeOptionParameter(name, opt.getStringOption(key));
+				else if (opt.isIntegerOption(key))
+					v = createIntegerRuntimeOptionParameter(name, opt.getIntegerOption(key));
+				else if (opt.isRealOption(key))
+					v = createRealRuntimeOptionParameter(name, opt.getRealOption(key));
+				addFVariable(v);
+			}
+		}
+	}
+	
+	/**
+	 * Create a parameter for a boolean runtime option. 
+	 */
+	public FVariable FClass.createBooleanRuntimeOptionParameter(String name, boolean val) {
+		return commonCreateRuntimeOptionParameter(new FBooleanVariable(), name, FBooleanLitExp.create(val));
+	}
+	
+	/**
+	 * Create a parameter for a string runtime option. 
+	 */
+	public FVariable FClass.createStringRuntimeOptionParameter(String name, String val) {
+		return commonCreateRuntimeOptionParameter(new FStringVariable(), name, new FStringLitExp(val));
+	}
+	
+	/**
+	 * Create a parameter for a integer runtime option. 
+	 */
+	public FVariable FClass.createIntegerRuntimeOptionParameter(String name, int val) {
+		return commonCreateRuntimeOptionParameter(new FIntegerVariable(), name, new FIntegerLitExp(val));
+	}
+	
+	/**
+	 * Create a parameter for a real runtime option. 
+	 */
+	public FVariable FClass.createRealRuntimeOptionParameter(String name, double val) {
+		return commonCreateRuntimeOptionParameter(new FRealVariable(), name, new FRealLitExp(val));
+	}
+	
+	/**
+	 * Set the children of a runtime option parameter.
+	 * 
+	 * @param v     the variable to set fields on
+	 * @param name  the name of the variable
+	 * @param bExp  the burrent value of the option
+	 * @return  <code>v</code>, for convenience
+	 */
+	public FVariable FClass.commonCreateRuntimeOptionParameter(FVariable v, String name, FExp bExp) {
+		v.setFVisibilityType(new FPublicVisibilityType());
+		v.setFTypePrefixVariability(new FParameter());
+		v.setBindingExp(bExp);
+		v.setFQName(new FQName(name));
+		return v;
 	}
 	
 }

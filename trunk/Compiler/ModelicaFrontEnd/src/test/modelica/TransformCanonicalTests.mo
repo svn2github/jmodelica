@@ -7698,4 +7698,26 @@ end TransformCanonicalTests.TestExternalObj1;
 ")})));
 end TestExternalObj1;
 
+
+model TestRuntimeOptions1
+	Real x = 1;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="TestRuntimeOptions1",
+			description="",
+			genetate_runtime_option_parameters=true,
+			test_runtime_options=true,
+			flatModel="
+fclass TransformCanonicalTests.TestRuntimeOptions1
+ Real x;
+ parameter Boolean _test_runtime_options = true /* true */;
+ parameter Boolean _test_runtime_options_2 = false /* false */;
+equation
+ x = 1;
+end TransformCanonicalTests.TestRuntimeOptions1;
+")})));
+end TestRuntimeOptions1;
+
+
 end TransformCanonicalTests;

@@ -248,6 +248,11 @@ public class OptionRegistry {
 			 compiler, 
 			 false,
 			 "Debug option, outputs a csv file containing profiling recorded during compilation. Default is false."),
+		RUNTIME_PARAM
+		    ("generate_runtime_option_parameters",
+		     compiler,
+		     true,
+		     "Generate parameters for runtime options. For internal use, should always be true for normal compilation."),
 			 
 		// Runtime options
 		TEST 
