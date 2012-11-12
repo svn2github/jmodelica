@@ -413,8 +413,6 @@
 				<include name="org/jmodelica/**/*" />
 				<exclude name="org/jmodelica/folding/**/*" />
 				<exclude name="org/jmodelica/ant/**/*" />
-				<include name="mock/**/*" /> <!-- remove once #774 is done -->
-				<include name="testcases/**/*" /> <!-- remove once #774 is done -->
 			</fileset>
 		</copy>
 

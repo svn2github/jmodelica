@@ -2,7 +2,7 @@
 <feature
       id="org.jmodelica.ide.documentation.feature"
       label="JModelica Documentation"
-      version="1.0.0.qualifier">
+      version="1.0.0">
 
    <description>
       This is a preview of the Documentation view plugin to JModelica
