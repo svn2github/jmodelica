@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.IErrorHandler;
+import org.jmodelica.modelica.compiler.Root;
 
 public class InstanceErrorHandler implements IErrorHandler {
 	
@@ -135,5 +136,10 @@ public class InstanceErrorHandler implements IErrorHandler {
 			}
 		}
 		return buf.toString();
+	}
+
+	@Override
+	public IErrorHandler connectTo(Root root) {
+		return new InstanceErrorHandler();
 	}
 }

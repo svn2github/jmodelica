@@ -250,25 +250,21 @@ public class Util {
     }
     
     /**
-     * Create a right-recursive dot access from a list of identifiers,
+     * Create a dot access from a list of identifiers,
      * or a simple access if parts.length == 1.
      *  
      * @param parts parts of the qualified name
      * @return access created from parts 
      */
     public static Access createDotAccess(String id) {
-        return createDotAccess(id.split("\\."), 0); 
-    }
-
-    private static Access createDotAccess(String[] parts, int i) {
-
-        Access res = new ParseAccess();
-        res.setID(parts[i]);
-
-        return i == parts.length - 1 
-            ? res  
-            : new Dot("", res, createDotAccess(parts, i + 1));
-        
+        String[] parts = id.split("\\.");
+        Access[] accessParts = new Access[parts.length];
+        for (int i = 0; i < parts.length; i++)
+        	accessParts[i] = new ParseAccess(parts[i]);
+        if (accessParts.length == 1)
+        	return accessParts[0];
+        else
+        	return new Dot(new org.jmodelica.modelica.compiler.List<Access>(accessParts));
     }
 
 	/**

@@ -21,7 +21,7 @@ aspect Offset {
 	public int StoredDefinition.calcOffset(int location) {
 		int line = ASTNode.getLine(location);
 		int col = ASTNode.getColumn(location);
-		return lineBreakMap.get(line - 1) + col - 1;
+		return lineBreakMap[line - 1] + col - 1;
 	}
 	
   	protected int ASTNode.createOffset(int location) {
