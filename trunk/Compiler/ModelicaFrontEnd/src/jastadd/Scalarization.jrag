@@ -1150,9 +1150,17 @@ aspect Scalarization {
 		if (left.inferType().isRecord()) 
 			left.inferType().scalarRecordFEquations(eqns, new FQName(), indexMap, left, right);
 		else
-			eqns.add(new FEquation(residual, left.scalarize(indexMap), right.scalarize(indexMap)));
+			eqns.add(new FEquation(residual != null ? residual.scalarize(indexMap) : null, left.scalarize(indexMap), right.scalarize(indexMap)));
 	}
-
+	
+	public FResidual FResidual.scalarize(Map<String,FExp> indexMap) {
+		FResidual scalarized = new FResidual();
+		for (FExp exp : getIterationVariables()) {
+			scalarized.addIterationVariable(exp.scalarize(indexMap));
+		}
+		return scalarized;
+	}
+	
 	// TODO: Introduce parameter object?
 	/**
 	 * \brief Generate scalar FEquations for this record or record component.
