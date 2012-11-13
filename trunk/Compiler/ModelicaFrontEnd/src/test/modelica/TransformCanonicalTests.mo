@@ -7940,8 +7940,8 @@ model TestRuntimeOptions1
 	annotation(__JModelica(UnitTesting(tests={ 
 		TransformCanonicalTestCase(
 			name="TestRuntimeOptions1",
-			description="",
-			genetate_runtime_option_parameters=true,
+			description="Test that parameters for runtime options are generated properly",
+			generate_runtime_option_parameters=true,
 			test_runtime_options=true,
 			flatModel="
 fclass TransformCanonicalTests.TestRuntimeOptions1
