@@ -356,14 +356,10 @@ class ModelicaCompiler(object):
         self._compiler.setCTemplate(template)
         
         
-    def compile_JMU(self, class_name, file_name, target, compile_to):
+    def compile_JMU(self, class_name, file_name, compile_to):
         """
         Compiles a model (parsing, instantiating, flattening, code generation 
-        and binary file generation) and creates a JMU on the file system. Set 
-        target to specify the contents of the object file used to build the 
-        binary. The different targets are "model", "model_noad", "algorithms" 
-        and "ipopt". See makefile in install folder for details on the different 
-        targets.
+        and binary file generation) and creates a JMU on the file system.
         
         Parameters::
         
@@ -374,16 +370,12 @@ class ModelicaCompiler(object):
                 Path to file or list of paths to files in which the model is 
                 contained.
                 
-            target --
-                The build target. Valid options are 'model', 'model_noad', 
-                'algorithms' and 'ipopt'.
-                
             compile_to --
                 Specify location of the compiled JMU. Directory will be created 
                 if it does not exist.
         """
         try:
-            self._compiler.compileJMU(class_name, file_name, target, compile_to)
+            self._compiler.compileJMU(class_name, file_name, compile_to)
         except jpype.JavaException as ex:
             self._handle_exception(ex)
         
@@ -391,9 +383,8 @@ class ModelicaCompiler(object):
         """
         Compiles a model (parsing, instantiating, flattening, code generation 
         and binary file generation) and creates an FMU on the file system. Set 
-        target to specify the contents of the object file used to build the 
-        binary. The different targets are "model_fmume" and "model_fmucs". 
-        See makefile in install folder for details on the different targets.
+        target to specify which type of FMU should be created. The different 
+        targets are "fmume" and "fmucs". 
         
         Note: target must currently be set to 'model_fmume'.
         
@@ -407,9 +398,8 @@ class ModelicaCompiler(object):
                 in which the model is contained.
                 
             target --
-                The build target. Valid options are 'model_fmume' and 
-                'model_fmucs'.
-                Note: Must currently be set to 'model_fmume'.
+                The build target. Valid options are 'fmume' and 'fmucs'.
+                Note: Must currently be set to 'fmume'.
                 
             compile_to --
                 Specify location of the compiled FMU. Directory will be created 

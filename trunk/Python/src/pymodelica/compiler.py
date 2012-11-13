@@ -29,9 +29,8 @@ from pymodelica.common import xmlparser
 from pymodelica.common.core import get_unit_name
 
 
-def compile_fmu(class_name, file_name=[], compiler='auto', 
-    target='model_fmume', compiler_options={}, compile_to='.', 
-    compiler_log_level='warning'):
+def compile_fmu(class_name, file_name=[], compiler='auto', target='fmume', 
+                compiler_options={}, compile_to='.', compiler_log_level='warning'):
     """ 
     Compile a Modelica model to an FMU.
     
@@ -82,7 +81,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto',
             
         target --
             Compiler target.
-            Default: 'model_fmume'
+            Default: 'fmume'
             
         compiler_options --
             Options for the compiler.
@@ -120,9 +119,8 @@ def compile_fmu(class_name, file_name=[], compiler='auto',
     return os.path.join(compile_to, get_fmu_name(class_name))       
 
 
-def compile_fmux(class_name, file_name=[], compiler='auto', 
-                 compiler_options={}, compile_to='.', 
-                 compiler_log_level='warning'):
+def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={}, 
+                 compile_to='.', compiler_log_level='warning'):
     """ 
     Compile a Modelica model to an FMUX.
     
@@ -195,8 +193,8 @@ def compile_fmux(class_name, file_name=[], compiler='auto',
     
     return os.path.join(compile_to, get_fmux_name(class_name))
 
-def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt', 
-    compiler_options={}, compile_to='.', compiler_log_level='warning'):
+def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={}, 
+                compile_to='.', compiler_log_level='warning'):
     """ 
     Compile a Modelica or Optimica model to a JMU.
     
@@ -224,18 +222,6 @@ def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt',
     Other options for the compiler should also be listed in the compiler_options 
     dict.
     
-    The compiler target is 'ipopt' by default which means that libraries for AD 
-    and optimization/initialization algortihms will be available as well as the 
-    JMI. The other targets are:
-    
-        'model' -- 
-            AD and JMI is included.
-        'algorithm' -- 
-            AD and algorithm but no Ipopt linking.
-        'model_noad' -- 
-            Only JMI, that is no AD interface. (Must currently be used when 
-            model includes external functions.)
-    
     Parameters::
     
         class_name -- 
@@ -251,10 +237,6 @@ def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt',
             file ending, 'modelica' if a ModelicaCompiler should be used or 
             'optimica' if a OptimicaCompiler should be used.
             Default: 'auto' (i.e. depends on argument file_name)
-            
-        target --
-            Compiler target. 'model', 'algorithm', 'ipopt' or 'model_noad'.
-            Default: 'ipopt'
             
         compiler_options --
             Options for the compiler.
@@ -288,7 +270,7 @@ def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt',
     comp.set_compiler_log_level(compiler_log_level)
             
     # compile jmu in Java
-    comp.compile_JMU(class_name, file_name, target, compile_to)
+    comp.compile_JMU(class_name, file_name, compile_to)
     
     return os.path.join(compile_to, get_jmu_name(class_name))
 

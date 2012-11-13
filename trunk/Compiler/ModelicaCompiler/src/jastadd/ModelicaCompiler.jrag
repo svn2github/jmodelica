@@ -123,14 +123,7 @@ public class ModelicaCompiler {
 	public static final String ERROR = "e";
 	public static final String INHERITED = "inh";
 	protected static final HashMap<String, Level> levels = new HashMap<String, Level>();
-	
-	protected static final String WIN_32 = "win32";
-	protected static final String WIN_64 = "win64";
-	protected static final String DAR_32 = "darwin32";
-	protected static final String DAR_64 = "darwin64";
-	protected static final String LIN_32 = "linux32";
-	protected static final String LIN_64 = "linux64";
-	
+		
 	// This should be two static blocks, but jastadd ignores those, so this is a workaround
 	private static void staticBlocks() {
 		if (levels.isEmpty()) { // Using this as check if this is run already
@@ -703,14 +696,14 @@ public class ModelicaCompiler {
 	 * Compiles a model (parsing, instantiating, flattening, code generation and 
 	 * binary file compilation) and packs the result in a JMU.
 	 * 
-	 * Convenience metod, equivalent to compileJMU(className, fileName, "model", ".").
+	 * Convenience metod, equivalent to compileJMU(className, fileName, ".").
 	 * 
 	 * @param className Name of model class in the model file to compile.
 	 * @param fileName Array of model file or library paths.
 	 */
 	public void compileJMU(String className, String fileName[]) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		compileJMU(className, fileName, "model", ".");
+		compileJMU(className, fileName, ".");
 	}
 	
 	/**
@@ -718,8 +711,6 @@ public class ModelicaCompiler {
 	 * 
 	 * Compiles a model (parsing, instantiating, flattening, code generation and 
 	 * binary file compilation) and packs the result in a JMU.
-	 * 
-	 * Convenience metod, equivalent to compileJMU(className, fileName, "model", compileTo).
 	 * 
 	 * @param className Name of model class in the model file to compile.
 	 * @param fileName Array of model file or library paths.
@@ -727,24 +718,8 @@ public class ModelicaCompiler {
 	 */
 	public void compileJMU(String className, String fileName[], String compileTo) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		compileJMU(className, fileName, "model", compileTo);
-	}
-	
-	/**
-	 * \brief Compiles a model and creates a JMU.
-	 * 
-	 * Compiles a model (parsing, instantiating, flattening, code generation and 
-	 * binary file compilation) and packs the result in a JMU.
-	 * 
-	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file or library paths.
-	 * @param target The build target. Valid options are 'model', 'model_noad', 'algorithms' and 'ipopt'.
-	 * @param compileTo Specify location of the compiled JMU. Directory will be created if it does not exist.
-	 */
-	public void compileJMU(String className, String fileName[], String target, String compileTo) 
-		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		defaultTemplatePathsJMU();
-		compileUnit(className, fileName, target, compileTo, "JMU");
+		compileUnit(className, fileName, "jmu", compileTo, "JMU");
 	}
 
 	/**
@@ -760,7 +735,7 @@ public class ModelicaCompiler {
 	 */
 	public void compileFMUME(String className, String fileName[]) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		compileFMU(className, fileName, "model_fmume", ".");
+		compileFMU(className, fileName, "fmume", ".");
 	}
 
 	/**
@@ -776,7 +751,7 @@ public class ModelicaCompiler {
 	 */
 	public void compileFMUCS(String className, String fileName[]) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		compileFMU(className, fileName, "model_fmucs", ".");
+		compileFMU(className, fileName, "fmucs", ".");
 	}
 
 	/**
@@ -791,7 +766,7 @@ public class ModelicaCompiler {
 	 */
 	public void compileFMUME(String className, String fileName[], String compileTo) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		compileFMU(className, fileName, "model_fmume", compileTo);
+		compileFMU(className, fileName, "fmume", compileTo);
 	}
 
 	/**
@@ -806,7 +781,7 @@ public class ModelicaCompiler {
 	 */
 	public void compileFMUCS(String className, String fileName[], String compileTo) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		compileFMU(className, fileName, "model_fmucs", compileTo);
+		compileFMU(className, fileName, "fmucs", compileTo);
 	}
 
 	/**
@@ -817,7 +792,7 @@ public class ModelicaCompiler {
 	 * 
 	 * @param className Name of model class in the model file to compile.
 	 * @param fileName Array of model file or library paths.
-	 * @param target The build target. Valid options are 'model_noad', 'model_fmume' and 'model_fmucs'.
+	 * @param target The compiler target. Valid options are 'fmume' or 'fmucs'.
 	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
 	 */
 	public void compileFMU(String className, String fileName[], String target, String compileTo) 
@@ -827,14 +802,14 @@ public class ModelicaCompiler {
 		OptionRegistry tempOptions = new OptionRegistry(options);
 		
 		// use fmi file templates and set the correct options so that XML file will be FMI compliant
-		if (target.equals("model_noad") || target.equals("model_fmume")) {
+		if (target.equals("fmume")) {
 			defaultOptionsFMUME();
 			defaultTemplatePathsFMUME();	
-			compileUnit(className, fileName, target, compileTo, "FMUME");
-		} else 	if (target.equals("model_fmucs")) {
+			compileUnit(className, fileName, "fmume", compileTo, "FMUME");
+		} else 	if (target.equals("fmucs")) {
 			defaultOptionsFMUCS();
 			defaultTemplatePathsFMUCS();	
-			compileUnit(className, fileName, target, compileTo, "FMUCS");
+			compileUnit(className, fileName, "fmucs", compileTo, "FMUCS");
 		}		
 		
 		// set back all options
@@ -860,7 +835,7 @@ public class ModelicaCompiler {
 		// use fmi XML file template and set the correct options so that XML file will be FMI compliant
 		defaultOptionsFMUX();
 		defaultTemplatePathsFMUX();	
-		compileUnit(className, fileName, null, compileTo, "FMUX");		
+		compileUnit(className, fileName, null, compileTo, "FMUX");
 		
 		// set back all options
 		options.copyAllOptions(tempOptions);
@@ -871,7 +846,7 @@ public class ModelicaCompiler {
 	 * 
 	 * @param unitType "JMU", "FMUME", "FMUCS" or "FMUX".
 	 */
-	private void compileUnit(String className, String fileName[], String target, String compileTo, String unitType) 
+	private void compileUnit(String className, String fileName[], String makeTarget, String compileTo, String unitType) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		try {
 			// Set output dir
@@ -883,11 +858,11 @@ public class ModelicaCompiler {
 			
 			// compile c code if target is not null
 			hookCheckAbort();
-			if (target != null) {
+			if (makeTarget != null) {
 				ASTNode.beginStep("compileCCode()");
 				String cFileName = FClass.convertClassNameToUnderscore(className);
 				CCompilerDelegator ccompiler = getCCompiler();
-				ccompiler.compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
+				ccompiler.compileCCode(cFileName, makeTarget, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
 				ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());
 				ASTNode.endStep("compileCCode()");
 			}

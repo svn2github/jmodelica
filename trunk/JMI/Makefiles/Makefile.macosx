@@ -39,18 +39,11 @@
 #   EXT_INC_DIRS          List of external include directories.
 #            
 # The following targets are supported:
-#    model        Build a shared object file containing the generated code
-#                 and the low level JMI interface (contained in jmi.a)
-#    algorithms   Build a shared object file including the content resulting 
-#                 in the target 'basic' and in addition JMI algorithms.
-#    ipopt        Build a shared object file including the content resulting 
-#                 in the target 'algorithms' and in addition the Ipopt algorithm
-#                 interface.
-#    model_noad   Build a shared object file containing the generated code,
-#                 external libraries and the low level JMI interface (not CppAD).
-#    model_fmume  Build a shared object file containing the generated code and the
+#    jmu          Build a shared object file including the low level JMI interface 
+#                 (contained in jmi.a), JMI algorithms and the Ipopt algorithm.
+#    fmume        Build a shared object file containing the generated code and the
 #                 FMI for Model Exchange API.
-#    model_fmucs  Build a shared object file containing the generated code and the
+#    fmucs        Build a shared object file containing the generated code and the
 #                 FMI for co-simulation API.
 #
 # Example:
@@ -149,51 +142,23 @@ INCL_NOCPPAD = -I$(JMI_INC_DIR) $(EXT_INC_DIRS) -I$(SUNDIALS_INC_DIR)
 # set variable to correct makefile (for recursive call in model_noad)
 MAKEFILE = $(lastword $(MAKEFILE_LIST))
 
-ifeq ($(JMI_AD),JMI_AD_CPPAD)
-model: $(OBJS)
-	mkdir -p $(BINARY_DIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) $(LIBS_CPPAD)
-	$(RM) $(OBJS)
-else
-model: $(OBJS)
-	mkdir -p $(BINARY_DIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_NOCPPAD) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)
-	$(RM) $(OBJS)
-endif
+fmume:
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE fmume_
 
-model_noad: 
-	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE model
-
-model_fmume:
-	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE model_fmume_
-
-model_fmume_: $(OBJS)
+fmume_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
 	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMUME) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)
 	$(RM) $(OBJS)
 
-model_fmucs:
-	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE model_fmucs_
+fmucs:
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE fmucs_
 
-model_fmucs_: $(OBJS)
+fmucs_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
 	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMICS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)
 	$(RM) $(OBJS)
 
-algorithms: $(OBJS)
-# This is to ensure that the contents of libjmi_algorithm_cppad and
-# is included in the resulting shared object file.
-ifeq "$(wildcard .jmi_objs )" ""
-	mkdir .jmi_objs
-endif
-	mkdir -p $(BINARY_DIR)
-	cd .jmi_objs && $(AR) -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a   
-	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS_CPPAD)
-	$(RM) .jmi_objs/*
-	rmdir .jmi_objs
-	$(RM) $(OBJS)
-
-ipopt: $(OBJS)
+jmu: $(OBJS)
 # This is to ensure that the contents of libjmi_algorithm_cppad and
 # libjmi_solver_cppade is included in the resulting shared object file.
 ifeq "$(wildcard .jmi_objs )" ""
