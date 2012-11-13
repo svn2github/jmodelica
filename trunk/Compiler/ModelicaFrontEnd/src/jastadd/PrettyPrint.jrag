@@ -796,6 +796,22 @@ aspect FlatPrettyPrint {
 	    	str.print(" */");
 	    }
 	}
+	
+	public String FVariable.printFAttributes(String ... attributes) {
+		StringBuilder sb = new StringBuilder();
+		boolean first = true;
+		for (String attribute : attributes) {
+			if (attributeSet(attribute)) {
+				if (!first)
+					sb.append(',');
+				first = false;
+				sb.append(attribute);
+				sb.append('=');
+				sb.append(attributeExp(attribute));
+			}
+		}
+		return sb.toString();
+	}
 
 	
 	public void FDerivativeVariable.prettyPrint(Printer p, PrintStream str, String indent) {

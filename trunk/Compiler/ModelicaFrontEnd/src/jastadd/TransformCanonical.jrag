@@ -1464,7 +1464,7 @@ aspect TransformCanonical {
 			}
 			str.append("Tearing variables:\n");
 			for (FVariable fv : iterationVars) {
-				str.append("  " + fv.name() + "\n");
+				str.append("  " + fv.name() + "(" + fv.printFAttributes(FAttribute.MIN, FAttribute.MAX, FAttribute.START, FAttribute.NOMINAL) + ")\n");
 			}
 			str.append("Solved equations:\n");
 			for(FAbstractEquation feq : solvedEquations()){

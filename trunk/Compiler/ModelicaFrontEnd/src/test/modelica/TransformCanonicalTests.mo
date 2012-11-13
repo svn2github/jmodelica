@@ -5846,8 +5846,8 @@ Solved variables:
   i1
   u1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   i1 = i2 + i3
@@ -6040,7 +6040,7 @@ Torn block of 1 tearing variables and 1 solved variables.
 Solved variables:
   r.x
 Tearing variables:
-  x
+  x()
 Solved equations:
   (TransformCanonicalTests.RecordTearingTest2.R(r.x, r.y)) = TransformCanonicalTests.RecordTearingTest2.F(x, y)
 Residual equations:
@@ -6075,8 +6075,8 @@ equation
 Torn block of 2 tearing variables and 0 solved variables.
 Solved variables:
 Tearing variables:
-  x
-  y
+  x()
+  y()
 Solved equations:
 Residual equations:
   (x, y) = TransformCanonicalTests.RecordTearingTest3.F(y, x)
@@ -6114,7 +6114,7 @@ Solved variables:
   x
   y
 Tearing variables:
-  v
+  v()
 Solved equations:
   (x, y) = TransformCanonicalTests.RecordTearingTest4.F(v, v)
 Residual equations:
@@ -6159,9 +6159,9 @@ Solved variables:
   d
   e
 Tearing variables:
-  f
-  a
-  b
+  f()
+  a()
+  b()
 Solved equations:
   (c, d) = TransformCanonicalTests.RecordTearingTest5.F(a, b)
   (e, f) = TransformCanonicalTests.RecordTearingTest5.F(c, d)
@@ -6213,8 +6213,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   u0 = u1 + u2
@@ -6284,9 +6284,9 @@ Solved variables:
   u2
   u1
 Tearing variables:
-  i2
-  i1
-  i3
+  i2()
+  i1()
+  i3()
 Solved equations:
   u2 = ( R2 ) * ( i2 )
   u1 = ( R1 ) * ( i1 )
@@ -6357,8 +6357,8 @@ Solved variables:
   i1
   u1
 Tearing variables:
-  i2
-  i3
+  i2()
+  i3()
 Solved equations:
   u2 = ( R2 ) * ( i2 )
   i1 = i2 + i3
@@ -6430,8 +6430,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   u0 = u1 + u2
@@ -6504,8 +6504,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   u0 = u1 + u2
@@ -6575,9 +6575,9 @@ Solved variables:
   u2
   i1
 Tearing variables:
-  u1
-  i2
-  i3
+  u1()
+  i2()
+  i3()
 Solved equations:
   u0 = u1 + u2
   i1 = i2 + i3
@@ -6648,8 +6648,8 @@ Solved variables:
   i1
   u1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   i1 = i2 + i3
@@ -6720,9 +6720,9 @@ Solved variables:
   u2
   i1
 Tearing variables:
-  u1
-  i2
-  i3
+  u1()
+  i2()
+  i3()
 Solved equations:
   u0 = u1 + u2
   i1 = i2 + i3
@@ -6794,8 +6794,8 @@ Solved variables:
   i1
   u1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   i1 = i2 + i3
@@ -6868,8 +6868,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   u0 = u1 + u2
@@ -6942,8 +6942,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i2
-  i3
+  i2()
+  i3()
 Solved equations:
   u2 = ( R2 ) * ( i2 )
   u0 = u1 + u2
@@ -7016,8 +7016,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   u0 = u1 + u2
@@ -7091,8 +7091,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i2
-  i3
+  i2()
+  i3()
 Solved equations:
   u2 = ( R2 ) * ( i2 )
   u0 = u1 + u2
@@ -7166,8 +7166,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   u0 = u1 + u2
@@ -7225,7 +7225,7 @@ Solved variables:
   c[1]
   a[1]
 Tearing variables:
-  b[1]
+  b[1]()
 Solved equations:
   c[1] = b[1] - ( 3 )
   a[1] = c[1] + 1
@@ -7237,7 +7237,7 @@ Solved variables:
   c[2]
   a[2]
 Tearing variables:
-  b[2]
+  b[2]()
 Solved equations:
   c[2] = b[2] - ( 3 )
   a[2] = c[2] + 1
@@ -7249,7 +7249,7 @@ Solved variables:
   c[3]
   a[3]
 Tearing variables:
-  b[3]
+  b[3]()
 Solved equations:
   c[3] = b[3] - ( 3 )
   a[3] = c[3] + 1
@@ -7261,7 +7261,7 @@ Solved variables:
   c[4]
   a[4]
 Tearing variables:
-  b[4]
+  b[4]()
 Solved equations:
   c[4] = b[4] - ( 3 )
   a[4] = c[4] + 1
@@ -7273,7 +7273,7 @@ Solved variables:
   c[5]
   a[5]
 Tearing variables:
-  b[5]
+  b[5]()
 Solved equations:
   c[5] = b[5] - ( 3 )
   a[5] = c[5] + 1
@@ -7311,7 +7311,7 @@ Solved variables:
   a[1]
   b[1]
 Tearing variables:
-  c[1]
+  c[1]()
 Solved equations:
   a[1] = c[1] + 1
   a[1] = b[1] + 2
@@ -7323,7 +7323,7 @@ Solved variables:
   a[2]
   b[2]
 Tearing variables:
-  c[2]
+  c[2]()
 Solved equations:
   a[2] = c[2] + 1
   a[2] = b[2] + 2
@@ -7335,7 +7335,7 @@ Solved variables:
   a[3]
   b[3]
 Tearing variables:
-  c[3]
+  c[3]()
 Solved equations:
   a[3] = c[3] + 1
   a[3] = b[3] + 2
@@ -7347,7 +7347,7 @@ Solved variables:
   a[4]
   b[4]
 Tearing variables:
-  c[4]
+  c[4]()
 Solved equations:
   a[4] = c[4] + 1
   a[4] = b[4] + 2
@@ -7359,7 +7359,7 @@ Solved variables:
   a[5]
   b[5]
 Tearing variables:
-  c[5]
+  c[5]()
 Solved equations:
   a[5] = c[5] + 1
   a[5] = b[5] + 2
@@ -7406,11 +7406,11 @@ Solved variables:
   a[5]
   b[5]
 Tearing variables:
-  c[5]
-  c[1]
-  c[2]
-  c[3]
-  c[4]
+  c[5]()
+  c[1]()
+  c[2]()
+  c[3]()
+  c[4]()
 Solved equations:
   a[1] = c[1] + 1
   a[1] = b[1] + 2
