@@ -1,3 +1,19 @@
+#!/usr/bin/env python 
+# -*- coding: utf-8 -*-
+
+#    Copyright (C) 2012 Modelon AB
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 """ Test module for testing the examples.
  
 """
@@ -47,56 +63,16 @@ def test_cont_state():
     cont_state.run_demo(False)
 
 @testattr(assimulo = True)
-def test_crane():
-    """ Run the PyMBS example """
-    crane.run_demo(False)
-
-@testattr(assimulo = True)
 def test_cstr():
     """
     Test the cstr example
     """
     cstr.run_demo(False)
-	
-@testattr(slow = True)
-def test_cstr_mpc():
-    """ Test the cstr_mpc example. """    
-    cstr_mpc.run_demo(False)
 
 @testattr(ipopt = True)
 def test_cstr2():
     """ Test the cstr2 example. """   
     cstr2.run_demo(False)
-	
-@testattr(casadi = True)
-def test_cstr_casadi():
-    """Run the CSTR CasADi example."""
-    cstr_casadi.run_demo(False)
-	
-@testattr(slow = True)
-def test_distillation():
-    """ Test the distillation example. """  
-    distillation.run_demo(False)
-	
-@testattr(assimulo = True)
-def test_distillation_fmu():
-    """ Test of simulation of the distillation column using the FMU export. """
-    distillation_fmu.run_demo(False)
-	
-@testattr(assimulo = True)
-def test_distillation1_fmu():
-    """ Test the distillation1_fmu example. """    
-    distillation1_fmu.run_demo(False)
-    
-@testattr(assimulo = True)
-def test_distillation2_fmu():
-    """ Test the distillation2_fmu example. """    
-    distillation2_fmu.run_demo(False)
-    
-@testattr(assimulo = True)
-def test_distillation4_fmu():
-    """ Test the distillation4_fmu example. """    
-    distillation4_fmu.run_demo(False)
 	
 @testattr(ipopt = True)
 def test_dist1_init_sim():
@@ -123,21 +99,6 @@ def test_extfunctions_matrix():
 #    """ Test the flight_path example. """    
 #    flight_path.run_demo(False)
 	
-@testattr(fmi = True)
-def test_fmi_bouncing_ball_raw():
-    """ Test that the FMI bouncing ball example works """    
-    fmi_bouncing_ball_native.run_demo(False)
-	
-@testattr(windows = True)
-def test_fmu_with_input():
-    """ Run FMU with input example. """
-    fmu_with_input.run_demo(False)
-
-@testattr(assimulo = True)
-def test_fmi_bouncing_ball():
-    """ Test that the FMI bouncing ball using the high-level simulate works. """
-    fmi_bouncing_ball.run_demo(False) 
-	
 #@testattr(ipopt = True)
 #def test_greenhouse():
 #    """ Test the greenhouse example. """    
@@ -148,11 +109,6 @@ def test_fmi_bouncing_ball():
 #def test_helicopter_der():
 #    """ Test the helicopter_der example. """    
 #    helicopter_der.run_demo(False)	
-	
-@testattr(casadi = True)
-def test_hohmann_transfer():
-    """Run the Hohmann Transfer example using CsadiPseudoSpectral."""
-    hohmann_transfer.run_demo(False)
 	
 @testattr(assimulo = True)
 def test_if_example_1():
@@ -179,16 +135,6 @@ def test_marine_population():
     """ Test the marine_population example. """    
     marine_population.run_demo(False)
 	
-@testattr(assimulo = True)
-def test_mechanics_rotational_examples_first():
-    """ Run mechanics high index example from MSL """
-    mechanical_rotational_examples_first.run_demo(False)
-
-@testattr(assimulo = True)
-def test_mechanics_rotational_examples_coupled_clutches():
-    """ Run mechanics high index example from MSL """
-    mechanical_rotational_examples_coupled_clutches.run_demo(False)
-	
 @testattr(ipopt = True)
 def test_moon_lander():
     """ Test the moon_lander example. """    
@@ -200,11 +146,6 @@ def test_parameter_estimation_1():
     Test the parameter_estimation_1 example
     """
     parameter_estimation_1.run_demo(False) 
-	
-@testattr(casadi = True)
-def test_parameter_estimation_1_casadi():
-    """Run the Parameter Estimation CasADi example."""
-    parameter_estimation_1_casadi.run_demo(False)
 	
 @testattr(ipopt = True)
 def test_pendulum():
@@ -223,25 +164,10 @@ def test_penicillin_plant_time():
     """ Test the penicillin_plant_time example. """    
     penicillin_plant_time.run_demo(False)
 	
-@testattr(assimulo = True)
-def test_planar_pendulum():
-    """ Run planar pendulum example """
-    planar_pendulum.run_demo(False)
-	
-@testattr(assimulo = True)
-def test_QR():
-    """ Test the QR example. """    
-    QR.run_demo(False)
-	
 @testattr(ipopt = True)
 def test_qt_par_est():
     """ Run parameter estimation example """
     qt_par_est.run_demo(False)
-	
-@testattr(casadi = True)
-def test_qt_par_est_casadi():
-    """ Run quad tank parameter estimation CasADi example """
-    qt_par_est_casadi.run_demo(False)
 
 @testattr(ipopt = True)
 def test_quadtank():
@@ -290,23 +216,8 @@ def test_vdp_minimum_time():
     Test the vdp_minimum_time example
     """
     vdp_minimum_time.run_demo(False)
-   
-@testattr(casadi = True)
-def test_vdp_casadi():
-    """Run the VDP CasADi example."""
-    vdp_casadi.run_demo(False)
-
-@testattr(casadi = True)
-def test_vdp_casadi_ps():
-    """Run the VDP CasADi example using CasadiPseudoSpectral."""
-    vdp_casadi_ps.run_demo(False)
 
 @testattr(assimulo = True)
 def test_VDP_sim():
     """ Test the VDP_sim example. """    
     VDP_sim.run_demo(False)
-    
-@testattr(assimulo = True)
-def test_bouncingball_cs_sim():
-    """ Test the FMI Bouncing Ball CS 1.0 example. """    
-    fmi_bouncing_ball_cs.run_demo(False)
