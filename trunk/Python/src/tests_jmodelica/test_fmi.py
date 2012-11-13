@@ -479,7 +479,7 @@ class TestDiscreteVariableRefs(object):
         """
         Sets up the test class.
         """
-        self.fmu_name = compile_fmu(self._cpath, self._fpath,compiler_options={'compliance_as_warning':True})
+        self.fmu_name = compile_fmu(self._cpath, self._fpath,compiler_options={'compliance_as_warning':True, 'generate_runtime_option_parameters':False})
         self.model = FMUModelME1(self.fmu_name)
         
     @testattr(stddist = True)
