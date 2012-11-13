@@ -7942,6 +7942,7 @@ model TestRuntimeOptions1
 			name="TestRuntimeOptions1",
 			description="Test that parameters for runtime options are generated properly",
 			generate_runtime_option_parameters=true,
+			generate_ode=true,
 			test_runtime_options=true,
 			flatModel="
 fclass TransformCanonicalTests.TestRuntimeOptions1
