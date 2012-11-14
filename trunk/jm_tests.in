@@ -323,8 +323,7 @@ function read_args() {
             KEEP_PYTHON=1
             ;;
           l)
-            LOG=1
-            LOGFILE="$(pwd)/tests.log"
+            LOG=$((1-LOG))
             ;;
           f)
             ARG_TYPE=file
@@ -354,7 +353,8 @@ function read_args() {
             echo "  -C  Do a clean before each test suite"
             echo "  -i  Do not re-build before python tests"
             echo "  -k  Keep generated files from python tests"
-            echo "  -l  Create log file with the equivalent of the output with -v"
+            echo "  -l  Toggle creating log file with the equivalent of the output with -v" 
+            echo "      (on by default)"
             echo "  -t  When running python tests, only run tests marked with one of the "
             echo "      listed tags. If given without tags, all tests are run. If -t is "
             echo "      given several times, only the last one will be used"
@@ -377,6 +377,8 @@ function read_args() {
 
 # === Main ===
 OUTPUT=n
+LOGFILE="$(pwd)/tests.log"
+LOG=1
 i=0
 for a in ${tests}; do
     test[${i}]=0
