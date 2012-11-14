@@ -262,12 +262,11 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     fmiInteger nR0, nR;             /* Number of R-equations */
     fmiInteger initComplete = 0;    /* If the initialization are complete */
     jmi_real_t nextTimeEvent;       /* Next time event instant */
-    fmiReal safety_factor_events = 0.0001;
-    fmiReal safety_factor_newton = 0.0001;
     
     jmi_real_t* switchesR;   /* Switches */
     jmi_real_t* switchesR0;  /* Initial Switches */
     jmi_real_t* b_mode;
+    jmi_t* jmi =((fmi_t *)c)->jmi;
 
     /* For debugging Jacobians */
 /*
@@ -303,10 +302,14 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     
     /* Sets the relative tolerance to a default value for use in Kinsol when tolerance controlled is false */
     if (toleranceControlled == fmiFalse){
-        relativeTolerance = 1e-6;
+        relativeTolerance = jmi->options.nle_solver_default_tol;
+        ((fmi_t *)c) -> fmi_epsilon= jmi->options.events_default_tol; /* Used in the event detection */
+        ((fmi_t *)c) -> fmi_newton_tolerance=jmi->options.nle_solver_default_tol; /* Used in the Newton iteration */
     }
-    ((fmi_t *)c) -> fmi_epsilon=safety_factor_events*relativeTolerance; /* Used in the event detection */
-    ((fmi_t *)c) -> fmi_newton_tolerance=safety_factor_newton*relativeTolerance; /* Used in the Newton iteration */
+    else {
+        ((fmi_t *)c) -> fmi_epsilon= jmi->options.events_tol_factor*relativeTolerance; /* Used in the event detection */
+        ((fmi_t *)c) -> fmi_newton_tolerance=jmi->options.nle_solver_tol_factor*relativeTolerance; /* Used in the Newton iteration */
+    }
     
     /* We are at the initial event TODO: is this really necessary? */
     ((fmi_t *)c)->jmi->atEvent = JMI_TRUE;
@@ -1369,7 +1372,7 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
         if (nniters > 0) {
             /* Output to logger */
             sprintf(buf, "INIT Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d nfevals: %d", 
-                    block->index, block->n, nniters, block->nb_calls, block->nb_jevals, block->nb_fevals);
+                    block->index, block->n, nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
             logger(c, instance_name, fmiOK, "DEBUG", buf);
 
             sprintf(buf, "INIT Block %d ; time: %f", block->index, block->time_spent);
@@ -1385,8 +1388,8 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
         /* Test if block is solved by KINSOL */
         if (nniters > 0) {
             /* Output to logger */
-            sprintf(buf, "SIM Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d", 
-                    block->index, block->n, nniters, block->nb_calls, block->nb_jevals, block->nb_fevals);
+            sprintf(buf, "SIM Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d nfevals: %d", 
+                    block->index, block->n, (int)nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
             logger(c, instance_name, fmiOK, "DEBUG", buf);
 
             sprintf(buf,"INIT Block %d ; time: %f", block->index, block->time_spent);

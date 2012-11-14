@@ -160,6 +160,7 @@ typedef struct jmi_sim_t jmi_sim_t;                       /**< \brief Forward de
 typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward declaration of struct. */
 typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief Forward declaration of struct. */
 
+
 /* Typedef for the doubles used in the interface. */
 typedef double jmi_real_t; /*< Typedef for the real number
 			   < representation used in the Runtime
@@ -250,48 +251,6 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define SURELY_LT_ZERO(op) (op<=-1e-6? JMI_TRUE: JMI_FALSE)
 #define SURELY_GT_ZERO(op) (op>=1e-6? JMI_TRUE: JMI_FALSE)
 
-/* JM_ENFORCE_BOUNDS controls is bounds are enforced inside the equation block functions */
-#if JMI_AD != JMI_AD_CPPAD
-#define JM_ENFORCE_BOUNDS
-#endif
-
-#ifdef JM_ENFORCE_BOUNDS
-
-#define check_lbound(x, xmin, message) \
-    if(x < xmin) { jmi_log(jmi, logInfo, message); return 1; }
-
-#define check_ubound(x, xmax, message) \
-    if(x > xmax) { jmi_log(jmi, logInfo, message); return 1; }
-#define init_with_lbound(x, xmin, message) \
-    if(x < xmin) { jmi_log(jmi, logInfo, message); x = xmin; }
-
-#define init_with_ubound(x, xmax, message) \
-    if(x > xmax) { jmi_log(jmi, logInfo, message); x = xmax; }
-
-#else
-
-#define check_lbound(x, xmin, message) \
-    if(0) { jmi_log(jmi, logInfo, message); return 1; }
-
-#define check_ubound(x, xmax, message) \
-    if(0) { jmi_log(jmi, logInfo, message); return 1; }
-
-#define init_with_lbound(x, xmin, message) \
-    if(0) { jmi_log(jmi, logInfo, message); x = xmin; }
-
-#define init_with_ubound(x, xmax, message) \
-    if(0) { jmi_log(jmi, logInfo, message); x = xmax; }
-
-#endif
-
-
-#define check_bounds(x, xmin, xmax, message) \
-    check_lbound(x, xmin, message)\
-    else check_ubound(x, xmax, message)
-
-#define init_with_bounds(x, xmin, xmax, message) \
-    init_with_lbound(x, xmin, message) \
-    else init_with_ubound(x, xmax, message)
 
 /* Record creation macro */
 #define JMI_RECORD_STATIC(type, name) \
@@ -722,6 +681,48 @@ int jmi_func_fd_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
                     int independent_vars, int *mask,
 		    int *dF_n_cols, int *dF_n_nz);
 
+/**< \brief Run-time options. */
+typedef struct jmi_options_t {
+    int log_level; /**< \brief Log level for jmi_log 0 - none, 1 - fatal error, 2 - error, 3 - warning, 4 - info, 5 -verbose, 6 - debug */
+    int enforce_bounds_flag; /**< \brief Enforce min-max bounds on variables in the equation blocks*/
+    int nle_solver_log_level; /**< \brief Log level for non-linear equation solver: 0 - no progress messages, 1,2,3 - different levels of verbosity*/
+    int use_jacobian_scaling_flag;  /**< \brief If jacobian rows/columns should be automatically scaled in equation block solvers */
+    int use_automatic_scaling_flag;  /**< \brief If equations and variables should be automatically scaled in equation block solvers */
+    int use_Brent_in_1d_flag;  /**< \brief If Brent search should be used to improve accuracy in solution of 1D non-linear equations */
+    double nle_solver_default_tol;  /**< \brief Default tolerance for the equation block solver */
+    int nle_solver_check_jac_cond_flag; /**< \brief Flag if NLE solver should check Jacobian condition number and log it. */
+    double nle_solver_min_tol;  /**< \brief Minimum tolerance for the equation block solver */
+    double nle_solver_tol_factor;   /**< \brief Tolerance safety factor for the non-linear equation block solver. */
+    double events_default_tol;  /**< \brief Default tolerance for the event iterations. */        
+    double events_tol_factor;   /**< \brief Tolerance safety factor for the event iterations. */        
+} jmi_options_t;
+
+/**< \brief Initialize run-time options. */
+void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op);
+
+#define check_lbound(x, xmin, message) \
+    if(jmi->options.enforce_bounds_flag && (x < xmin)) \
+        { jmi_log(jmi, logInfo, message); return 1; }
+
+#define check_ubound(x, xmax, message) \
+    if(jmi->options.enforce_bounds_flag && (x > xmax)) \
+        { jmi_log(jmi, logInfo, message); return 1; }
+
+#define init_with_lbound(x, xmin, message) \
+    if(jmi->options.enforce_bounds_flag && (x < xmin)) \
+        { jmi_log(jmi, logInfo, message); x = xmin; }
+
+#define init_with_ubound(x, xmax, message) \
+    if(jmi->options.enforce_bounds_flag && (x > xmax)) \
+         { jmi_log(jmi, logInfo, message); x = xmax; }
+
+#define check_bounds(x, xmin, xmax, message) \
+    check_lbound(x, xmin, message)\
+    else check_ubound(x, xmax, message)
+
+#define init_with_bounds(x, xmin, xmax, message) \
+    init_with_lbound(x, xmin, message) \
+    else init_with_ubound(x, xmax, message)
 
 
 /**
@@ -1314,6 +1315,7 @@ struct jmi_t{
 	jmi_simple_color_info_t* color_info_C; /** \brief CPR coloring info for the ODE Jacobian C */
 	jmi_simple_color_info_t* color_info_D; /** \brief CPR coloring info for the ODE Jacobian D */
 
+    jmi_options_t options; /** \brief Runtime options */
 };
 
 /**

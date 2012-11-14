@@ -121,6 +121,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
     clock_t c0,c1; /*timers*/
     jmi_t* jmi = block->jmi;
     c0 = clock();
+     
     if(block->init) {
         int i;
         /* Initialize the work vectors */
@@ -182,8 +183,8 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             }
             block->x[i] = initi;
         }
-        
     }
+    
     /*
      * A proper local even iteration should problably be done here.
      * Right now event handling at top level will iterate.
@@ -215,7 +216,8 @@ int jmi_block_jacobian_fd(jmi_block_residual_t* b, jmi_real_t* x, jmi_real_t del
 	int n = b->n;
 	jmi_real_t* fp;
 	jmi_real_t* fn;
-
+    int flag = 0;
+    
 	fp = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	fn = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 
@@ -228,12 +230,12 @@ int jmi_block_jacobian_fd(jmi_block_residual_t* b, jmi_real_t* x, jmi_real_t del
 		x[i] = x[i] + delta;
 
 		/* evaluate the residual to get positive side */
-		b->F(b->jmi,x,fp,JMI_BLOCK_EVALUATE);
+		flag |= b->F(b->jmi,x,fp,JMI_BLOCK_EVALUATE);
 
 		x[i] = x[i] - 2.*delta;
 
 		/* evaluate the residual to get negative side */
-		b->F(b->jmi,x,fn,JMI_BLOCK_EVALUATE);
+		flag |= b->F(b->jmi,x,fn,JMI_BLOCK_EVALUATE);
 
 		x[i] = x[i] - delta;
 
@@ -245,6 +247,7 @@ int jmi_block_jacobian_fd(jmi_block_residual_t* b, jmi_real_t* x, jmi_real_t del
 
     free(fp);
     free(fn);
+    return flag;
 }
 
 
@@ -272,13 +275,11 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
 
 int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_block){
 	int i;
-	int j;
     char trans;
 	int INFO;
 	int n_x;
-	int nrhs;
+	/* int nrhs = 1; */
     int ef;
-	nrhs = 1;
 	INFO = 0;
   	n_x = current_block->n;
   	

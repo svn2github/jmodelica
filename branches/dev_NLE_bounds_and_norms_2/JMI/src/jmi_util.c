@@ -689,7 +689,6 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
 	int aim = 0;
 	int i = 0;
 	int j = 0;
-	int k = 0;
 
 	if(JMI_DER_T & independent_vars){
 		n_t = 1;
@@ -748,6 +747,7 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
 
 void jmi_log_error(jmi_t *jmi, char* fmt,...) {
     va_list ap;
+    if(jmi->options.log_level < 1) return;
     va_start (ap, fmt);
     
     if(jmi->fmi) {
@@ -767,6 +767,7 @@ void jmi_log_error(jmi_t *jmi, char* fmt,...) {
 
 void jmi_log_warning(jmi_t *jmi, char* fmt,...) {
     va_list ap;
+    if(jmi->options.log_level < 3) return;
     va_start (ap, fmt);
     
     if(jmi->fmi) {
@@ -786,6 +787,8 @@ void jmi_log_warning(jmi_t *jmi, char* fmt,...) {
 
 void jmi_log_info(jmi_t *jmi, char* fmt,...) {
     va_list ap;
+
+    if(jmi->options.log_level < 4) return;
     va_start (ap, fmt);
     
     if(jmi->fmi) {
@@ -815,10 +818,12 @@ void jmi_log(jmi_t *jmi, jmi_log_category_t category, char* message) {
             fmiCategory = "ERROR";
             break;
         case logWarning:
+            if(jmi->options.log_level < 3) return;
             status = fmiWarning;
             fmiCategory = "WARNING";
             break;
         case logInfo:
+            if(jmi->options.log_level < 4) return;
             status = fmiOK;
             fmiCategory = "INFO";
             break;
@@ -832,9 +837,11 @@ void jmi_log(jmi_t *jmi, jmi_log_category_t category, char* message) {
             fprintf(stderr, "ERROR: %s\n", message);
             break;
         case logWarning:
+            if(jmi->options.log_level < 3) return;
             fprintf(stderr, "WARNING: %s\n", message);
             break;
         case logInfo:
+            if(jmi->options.log_level < 4) return;
             fprintf(stdout, "%s\n", message);
             break;
         }
