@@ -286,7 +286,7 @@ function read_args() {
         ;;
       file)
         if [[ -f "${a}" ]]; then
-          FILE="${a}"
+          FILE="$(readlink -f ${a})"
         else
           FILE="${TESTS_DIR}/${a}"
         fi
