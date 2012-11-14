@@ -688,6 +688,8 @@ typedef struct jmi_options_t {
     int nle_solver_log_level; /**< \brief Log level for non-linear equation solver: 0 - no progress messages, 1,2,3 - different levels of verbosity*/
     int use_jacobian_scaling_flag;  /**< \brief If jacobian rows/columns should be automatically scaled in equation block solvers */
     int use_automatic_scaling_flag;  /**< \brief If equations and variables should be automatically scaled in equation block solvers */
+    int rescale_each_step_flag;  /**< \brief If scaling should be updated at every step (only active if use_automatic_scaling_flag is set) */
+    int rescale_after_singular_jac_flag;  /**< \brief If scaling should be updated after singular jac was detected (only active if use_automatic_scaling_flag is set) */
     int use_Brent_in_1d_flag;  /**< \brief If Brent search should be used to improve accuracy in solution of 1D non-linear equations */
     double nle_solver_default_tol;  /**< \brief Default tolerance for the equation block solver */
     int nle_solver_check_jac_cond_flag; /**< \brief Flag if NLE solver should check Jacobian condition number and log it. */

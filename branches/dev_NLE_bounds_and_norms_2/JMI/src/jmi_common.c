@@ -1706,6 +1706,8 @@ void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op) {
     op->nle_solver_log_level = 0; /**< \brief Log level for non-linear equation solver: 0 - no progress messages, 1,2,3 - different levels of verbosity*/
     op->use_jacobian_scaling_flag = 1;  /**< \brief If jacobian rows/columns should be automatically scaled in equation block solvers */
     op->use_automatic_scaling_flag = 1;  /**< \brief If equations and variables should be automatically scaled in equation block solvers */
+	op->rescale_each_step_flag = 0;
+	op->rescale_after_singular_jac_flag = 1;
     op->use_Brent_in_1d_flag = 0;  /**< \brief If Brent search should be used to improve accuracy in solution of 1D non-linear equations */
     op->nle_solver_default_tol = 1e-10;  /**< \brief Default tolerance for the equation block solver */
     op->nle_solver_check_jac_cond_flag = 0;  /**< \brief NLE solver should check Jacobian condition number and log it. */

@@ -582,9 +582,8 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     
     if(solver->force_new_J_flag ) {
         solver->force_new_J_flag = 0;
-#ifdef JM_KINSOL_RESCALE_AFTER_SINGULAR_JAC
-        jmi_update_f_scale(block);
-#endif        
+		if(jmi->options.rescale_after_singular_jac_flag)
+			jmi_update_f_scale(block);
     }    
         
     return 0;
@@ -889,7 +888,7 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     }
     
     /* update the scaling only once per time step */
-    if(block->init || (curtime > solver->kin_scale_update_time)) {
+    if(block->init || (block->jmi->options.rescale_each_step_flag && (curtime > solver->kin_scale_update_time))) {
         jmi_update_f_scale(block);
     }
      
