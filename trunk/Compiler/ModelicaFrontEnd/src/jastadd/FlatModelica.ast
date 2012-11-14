@@ -271,9 +271,14 @@ FProtectedVisibilityType : FVisibilityType;
 /**
  * \brief Visibility for temporary variable. 
  *
- * Used to mark temporary variables added to handle function calls returning array.
+ * Used to mark temporary variables added during elaboration, e.g. to handle function calls returning array.
  */
 FTemporaryVisibilityType : FPublicVisibilityType;
+
+/**
+ * Visibility for runtime option parameters. 
+ */
+FRuntimeOptionVisibilityType : FPublicVisibilityType;
 
 /**
  * \brief Base class for all type nodes.

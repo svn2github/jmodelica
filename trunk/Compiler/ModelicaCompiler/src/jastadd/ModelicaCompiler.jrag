@@ -91,8 +91,8 @@ aspect ModelicaCompilerMain {
  * <p>
  *  - -d : log debug, info, warning and error messages
  * 	- -i : log info, warning and error messages
- * 	- -w : log warning and error messages (default if the log option is not used)
- * 	- -e : log error messages only
+ * 	- -w : log warning and error messages
+ * 	- -e : log error messages only (default if the log option is not used)
  * <p>
  * Example with log level set to INFO: <br>
  * <code>org.jmodelica.applications.ModelicaCompiler -i myModels/models.mo 

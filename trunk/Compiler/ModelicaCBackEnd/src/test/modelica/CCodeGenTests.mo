@@ -7995,4 +7995,31 @@ $C_DAE_initial_dependent_parameter_assignments$
 ")})));
 end TestExtObject3;
 
+
+model TestRuntimeOptions1
+    Real x = 1;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="TestRuntimeOptions1",
+			description="Testing generation of runtime options map",
+			generate_ode=true,
+			generate_runtime_option_parameters=true,
+			template="$C_runtime_option_map$",
+			generatedCode="
+const char *fmi_runtime_options_map_names[] = {
+    \"_test_runtime_options\",
+    \"_test_runtime_options_2\",
+    NULL
+};
+
+const int fmi_runtime_options_map_vrefs[] = {
+    536870912, 536870913, 0
+};
+
+const int fmi_runtime_options_map_length = 2;
+")})));
+end TestRuntimeOptions1;
+
+
 end CCodeGenTests;

@@ -101,6 +101,8 @@ $C_DAE_ODE_jacobian_sparsity$
 
 $C_variable_aliases$
 
+$C_runtime_option_map$
+
 #define _real_ci(i) ((*(jmi->z))[jmi->offs_real_ci+i])
 #define _real_cd(i) ((*(jmi->z))[jmi->offs_real_cd+i])
 #define _real_pi(i) ((*(jmi->z))[jmi->offs_real_pi+i])

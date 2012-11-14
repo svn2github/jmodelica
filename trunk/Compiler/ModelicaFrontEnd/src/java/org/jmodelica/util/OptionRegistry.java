@@ -179,7 +179,8 @@ public class OptionRegistry {
 			 "validate with FMI schema the option generate_xml_equations must also be false."),
 		FMI_VER 
 			("fmi_version", 
-			 compiler, 1.0, 
+			 compiler, 
+			 1.0, 
 			 "If this option is true the model description part of the XML variables file " + 
 			 "will be FMI for co simulation compliant. Default is false. To generate an XML which will " + 
 			 "validate with FMI schema the option generate_xml_equations must also be false."),
@@ -265,6 +266,11 @@ public class OptionRegistry {
 			 runtime, 
 			 false, 
 			 "For testing the runtime options framework - has no effect and will be removed later");
+		/*
+		 * Note: Two JUnit tests are affected by changes to runtime options:
+		 * ModelicaCompiler : TeansformCanonicalTests.mo : TestRuntimeOptions1
+		 * ModelicaCBackEnd : CCodeGenTests.mo : TestRuntimeOptions1
+		 */
 		
 					
 		public String key;

@@ -6009,11 +6009,25 @@ aspect RuntimeOptions {
 	 * @return  <code>v</code>, for convenience
 	 */
 	public FVariable FClass.commonCreateRuntimeOptionParameter(FVariable v, String name, FExp bExp) {
-		v.setFVisibilityType(new FPublicVisibilityType());
+		v.setFVisibilityType(new FRuntimeOptionVisibilityType());
 		v.setFTypePrefixVariability(new FParameter());
 		v.setBindingExp(bExp);
 		v.setFQName(new FQName(name));
 		return v;
 	}
+	
+	syn int FClass.numRuntimeOptionParameters() = runtimeOptionParameters().size();
+	syn lazy ArrayList<FVariable> FClass.runtimeOptionParameters() {
+		ArrayList<FVariable> res = new ArrayList<FVariable>();
+		for (FVariable fv : independentParameters())  // They are always independent
+			if (fv.isRuntimeOption())
+				res.add(fv);
+		return res;
+	}
+	
+	syn boolean FVariable.isRuntimeOption() = getFVisibilityType().isRuntimeOptionVisibility();
+	
+	syn boolean FVisibilityType.isRuntimeOptionVisibility()     = false;
+	eq FRuntimeOptionVisibilityType.isRuntimeOptionVisibility() = true;
 	
 }
