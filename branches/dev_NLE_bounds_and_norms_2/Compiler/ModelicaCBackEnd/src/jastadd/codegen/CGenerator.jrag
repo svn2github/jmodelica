@@ -893,6 +893,34 @@ public class CGenerator extends GenericGenerator {
 	}
 	
 	/**
+	 * Generates mapping between runtime option names and value references for the 
+	 * associated parameters.
+	 */
+	class DAETag_C_runtime_option_map extends DAETag {
+		
+		public DAETag_C_runtime_option_map(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_runtime_option_map","C: runtime option name map",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print("const char *fmi_runtime_options_map_names[] = {\n");
+			for (FVariable fv : fclass.runtimeOptionParameters())
+				genPrinter.println("    \"" + fv.name() + "\",");
+			genPrinter.print("    NULL\n};\n\n");
+
+			genPrinter.print("const int fmi_runtime_options_map_vrefs[] = {\n    ");
+			int i = 0;
+			for (FVariable fv : fclass.runtimeOptionParameters()) 
+				genPrinter.print(fv.valueReference() + ((++i % 10) == 0 ? ",\n    " : ", "));
+			genPrinter.print("0\n};\n\n");
+
+			genPrinter.print("const int fmi_runtime_options_map_length = " + fclass.numRuntimeOptionParameters() + ";");
+	}
+		
+	}
+	
+	/**
 	 * \brief Returns the string denoting the beginning of the copyright blurb.
 	 */
 	protected String startOfBlurb() { return "/*"; }

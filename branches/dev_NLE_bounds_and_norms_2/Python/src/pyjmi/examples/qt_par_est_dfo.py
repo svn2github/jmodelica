@@ -23,7 +23,7 @@ import numpy as N
 from matplotlib.font_manager import fontManager, FontProperties
 
 from pymodelica import compile_fmu
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 from pyjmi.optimization import dfo
 
 def run_demo(with_plots=True):
@@ -97,7 +97,7 @@ def run_demo(with_plots=True):
         curr_dir+'/files/QuadTankPack.mo')
 
 	# Load model
-	model = FMUModel(fmu_name)
+	model = load_fmu(fmu_name)
 	
 	# Create options object and set verbosity to zero to disable printouts
 	opts = model.simulate_options()

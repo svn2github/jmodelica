@@ -20,7 +20,7 @@ import os
 from scipy.io.matlab.mio import loadmat
 import numpy as N
 
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 from pyjmi.optimization import dfo
 
 curr_dir = os.path.dirname(os.path.abspath(__file__));
@@ -41,7 +41,7 @@ def furuta_dfo_cost(x):
 	armFrictionCoefficient = x[0]/1e3
 	pendulumFrictionCoefficient = x[1]/1e3
 	
-	model = FMUModel(curr_dir + '/../examples/files/FMUs/Furuta.fmu')
+	model = load_fmu(curr_dir + '/../examples/files/FMUs/Furuta.fmu')
 
 	# Set new parameter values into the model 
 	model.set('armFriction',armFrictionCoefficient)

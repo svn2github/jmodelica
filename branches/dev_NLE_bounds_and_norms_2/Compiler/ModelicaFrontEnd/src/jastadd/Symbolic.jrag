@@ -655,8 +655,15 @@ aspect Derivatives {
 	}
 	
 	public FExp FIfExp.diff(String name) {
+		FExp td = dynamicFExp((getThenExp().diff(name)));
+		FExp ed = dynamicFExp((getElseExp().diff(name)));
+		boolean tz = td.equalsRealValue(0);
+		boolean ez = ed.equalsRealValue(0);
+		if (ez && tz) {
+			return new FRealLitExp(0.0);
+		} 
 		FExp e = getIfExp().copySymbolic();
-		return dynamicFExp(new FIfExp(e, getThenExp().diff(name), getElseExp().diff(name)));
+		return dynamicFExp(new FIfExp(e, td, ed));
 	}
 	
 	public FExp FIdUseExp.diff(String name) {

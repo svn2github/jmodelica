@@ -27,15 +27,16 @@
 
       <para>There are three different kinds of model objects that can be
       created with JModelica.org: <literal>JMUModel</literal>,
-      <literal>FMUModel</literal> and <literal>CasadiModel</literal>. The
-      <literal>JMUModel</literal> is created by loading a
+      <literal>FMUModel(ME/CS)1</literal> and <literal>CasadiModel</literal>.
+      The <literal>JMUModel</literal> is created by loading a
       <emphasis>JMU</emphasis>, which is a compressed file with a
-      JModelica.org specific structure. The <literal>FMUModel</literal> is
-      created by loading an <emphasis>FMU</emphasis> (Functional Mock-up
-      Unit), which is a compressed file compliant with the FMI (Functional
-      Mock-up Interface) standard. The <literal>CasadiModel</literal> is
-      created by loading an <emphasis>FMUX</emphasis> which is a compressed
-      file containing the XML file needed to work with <link
+      JModelica.org specific structure. The
+      <literal>FMUModel(ME/CS)1</literal> is created by loading an
+      <emphasis>FMU</emphasis> (Functional Mock-up Unit), which is a
+      compressed file compliant with the FMI (Functional Mock-up Interface)
+      standard. The <literal>CasadiModel</literal> is created by loading an
+      <emphasis>FMUX</emphasis> which is a compressed file containing the XML
+      file needed to work with <link
       xlink:href="http://sourceforge.net/apps/trac/casadi/">CasADI</link>.</para>
 
       <para>JMUs are created by compiling Modelica or Optimica models with
@@ -46,7 +47,7 @@
       <para>FMUs are created by compiling Modelica models with JModelica.org
       (or any other tool supporting FMU export). Optimica models can not be
       compiled into FMUs. The FMU can then be loaded in an
-      <literal>FMUModel</literal> object and used for simulation
+      <literal>FMUModel(ME/CS)1</literal> object and used for simulation
       purposes.</para>
 
       <para>FMUXes are created by compiling Modelica or Optimica models with
@@ -970,11 +971,11 @@ mc.generate_code(flat_rep)
 
     <para>Compiled models, JMUs, FMUs and FMUXes, are loaded in the
     JModelica.org Python interface with the <literal>JMUModel</literal> class
-    from the <literal>pyjmi</literal> module, the <literal>FMUModel</literal>
-    class from the <literal>pyfmi</literal> module and the
-    <literal>CasadiModel</literal> class from the <literal>pyjmi</literal>
-    module respectively. This will be demonstrated in <xref
-    linkend="models_sec_loading_a_jmu"/>, <xref
+    from the <literal>pyjmi</literal> module, the
+    <literal>FMUModel(ME/CS)1</literal> class from the
+    <literal>pyfmi</literal> module and the <literal>CasadiModel</literal>
+    class from the <literal>pyjmi</literal> module respectively. This will be
+    demonstrated in <xref linkend="models_sec_loading_a_jmu"/>, <xref
     linkend="models_sec_loading_an_fmu"/> and <xref
     linkend="models_sec_loading_an_fmux"/>.</para>
 
@@ -1058,16 +1059,17 @@ myModel = JMUModel(jmu_name)
     <section xml:id="models_sec_loading_an_fmu">
       <title>Loading an FMU</title>
 
-      <para>The FMU file can be loaded in JModelica.org with the class
-      <literal>FMUModel</literal> in the <literal>pyfmi</literal> module. The
+      <para>The FMU file can be loaded in JModelica.org with the method
+      <literal>load_fmu</literal> in the <literal>pyfmi</literal> module. The
       following short example demonstrates how to do this in a Python shell or
-      script.<programlisting language="python"># Import FMUModel from pyfmi
-from pyfmi import FMUModel
-myModel = FMUModel('myFMU.fmu')
+      script.<programlisting language="python"># Import load_fmu from pyfmi
+from pyfmi import load_fmu
+myModel = load_fmu('myFMU.fmu')
 </programlisting></para>
 
-      <para>The <literal>FMUModel</literal> instance can then be used to set
-      parameters and used for simulations.</para>
+      <para><literal>load_fmu</literal> returns a class instance of the
+      appropriate FMU type which then can be used to set parameters and used
+      for simulations.</para>
     </section>
 
     <section xml:id="models_sec_loading_an_fmux">
@@ -1088,8 +1090,8 @@ myModel = CasadiModel('myFMUX.fmux')
 
     <para>Model parameters can be altered with methods in the model classes
     once the model has been loaded. Some short examples in <xref
-    linkend="models_sec_setting_and_getting_params"/> will demonstrate this.
-    </para>
+    linkend="models_sec_setting_and_getting_params"/> will demonstrate
+    this.</para>
 
     <section xml:id="models_sec_setting_and_getting_params">
       <title>Setting and getting parameters</title>

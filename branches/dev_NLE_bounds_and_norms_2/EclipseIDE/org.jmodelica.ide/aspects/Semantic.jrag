@@ -77,7 +77,7 @@ aspect DocumentLookup {
     eq Dot.getAccessAt(IDocument d, int offset) {
         if (!containsPoint(d, offset))
             return Maybe.<Access>Nothing();
-        return getLeft().getAccessAt(d, offset).orElse(Maybe.Just(this));
+        return getAccess(0).getAccessAt(d, offset).orElse(Maybe.Just(this));
     }
     
     eq Access.getAccessAt(IDocument d, int offset) {
@@ -280,22 +280,14 @@ aspect Completion {
      * myInstClassDecl to lookup access in instance tree.
      */
     public InstAccess InstClassDecl.addClassDynamic(InstAccess access) {
-        addDynamicClassName(access);
-        // return value is equal to access, but this method needs to be called
-        // for proper evaluation of attributes
-        return 
-            (InstAccess) getDynamicClassNameList().getLast();
+		return addClassDynamic(access);
     }
      
     /**
      * See above.
      */
     public InstAccess InstClassDecl.addComponentDynamic(InstAccess access) {
-        addDynamicComponentName(access);
-        // return value is equal to access, but this method needs to be called
-        // for proper evaluation of attributes
-        return 
-            (InstAccess) getDynamicComponentNameList().getLast();
+		return addComponentDynamic(access);
     }
 }
 

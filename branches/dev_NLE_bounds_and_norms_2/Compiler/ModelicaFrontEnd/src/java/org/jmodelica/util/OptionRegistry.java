@@ -21,8 +21,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
@@ -30,8 +34,9 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
-import org.xml.sax.SAXException;
 
+import org.jmodelica.util.OptionRegistry.OptionType;
+import org.xml.sax.SAXException;
 
 /**
  * OptionRegistry contains all options for the compiler. Options
@@ -47,129 +52,255 @@ public class OptionRegistry {
 		public static final String ALL     = "all";
 	}
 	
-	private enum DefOpt {
-		DIVIDE_BY_VARS_IN_TEARING  ("divide_by_vars_in_tearing", false, 
-				"If this option is set to true (default is false), a less restrictive strategy is used for solving equations " +
-				"in the tearing algorithm. Specifically, division by parameters and variables is permitted, by default no " +
-				"such divisions are made during tearing."),
-		ENABLE_TEARING   ("enable_tearing", false, 
-				"If this option is set to true (default is false), tearing of equation systems is enabled."),
-		ENABLE_HAND_GUIDED_TEARING   ("enable_hand_guided_tearing", false, 
-				"If this option is set to true (default is false), hand guided tearing annotations are parsed " +
-				"and will have precedence during tearing."),
-		MERGE_BLT_BLOCKS   ("merge_blt_blocks", false, 
-				"If this option is set to true (default is false), BLT blocks will be merged so that all hand " +
-				"guided tearing equations and variables reside inside the same BLT block."),
-		CONV_FREE_DEP_PAR_TO_ALGS   ("convert_free_dependent_parameters_to_algebraics", true, 
-				"If this option is set to true (default is true), free dependent parameters are" +
-				"converted to algebraic variables."),
-		GEN_DAE   ("generate_dae",            true, 
-				"If this option is set to true (default is true), code for solving DAEs are generated."),
-		GEN_DAE_JAC   ("generate_dae_jacobian",            false, 
-				"If this option is set to true (default is false), code for computing DAE Jacobians are generated."),
-		GEN_ODE_JAC   ("generate_ode_jacobian",            false,		
-				"If this option is set to true (default is false), code for computing ODE Jacobians are generated."),
-		GEN_BLOCK_JAC   ("generate_block_jacobian",        false,		
-				"If this option is set to true (default is false), code for computing block Jacobians is generated. "+
-				"If blocks are needed to compute ODE jacobians they will be generated anyway"),
-		GEN_ODE   ("generate_ode",            false, 
-				"If this option is set to true (default is false), code for solving ODEs are generated. "),
-		GEN_MOF_FILES   ("generate_mof_files", false,
-				"If this option is set to true (default is false), flat model before and after" +
-				" transformations will be generated."),
-		EXTRA_LIB   ("extra_lib_dirs",            "", 
-				"The value of this option is appended to the value of the MODELICAPATH environment " +
-				"variable for determining in what directories to search for libraries."),
-		START_FIX   ("state_start_values_fixed",  false, 
-				"This option enables the user to specify if initial equations should be " + 
-				"generated automatically for differentiated variables even though the fixed " +
-				"attribute is equal to fixed. Setting this option to true is, however, often " +
-				"practical in optimization problems."),
-		ELIM_ALIAS  ("eliminate_alias_variables", true, 
-				"If this option is set to true (default), then alias variables are " +
-                "eliminated from the model."),
-		HALT_WARN   ("halt_on_warning",           false, 
-				"If this option is set to false (default) one or more compiler " +
-                "warnings will not stop compilation of the model."),
-		XML_EQU     ("generate_xml_equations",    false, 
-				"If this option is true, then model equations are generated in XML format. " + 
-				"Default is false."),
-		INDEX_RED   ("index_reduction",           true, // NB: this description used in a Python test 
-				"If this option is true (default is true), index reduction is performed."),
-		EQU_SORT    ("equation_sorting",          false, 
-				"If this option is true (default is false), equations are sorted using the BLT algorithm."),
-		XML_FMI_ME ("generate_fmi_me_xml",          false, 
-				"If this option is true the model description part of the XML variables file " + 
-				"will be FMI for model exchange compliant. Default is false. To generate an XML which will " + 
-				"validate with FMI schema the option generate_xml_equations must also be false."),
-		XML_FMI_CS ("generate_fmi_cs_xml",          false, 
-				"If this option is true the model description part of the XML variables file " + 
-				"will be FMI for co simulation compliant. Default is false. To generate an XML which will " + 
-				"validate with FMI schema the option generate_xml_equations must also be false."),
-		FMI_VER ("fmi_version",          1.0, 
-				"If this option is true the model description part of the XML variables file " + 
-				"will be FMI for co simulation compliant. Default is false. To generate an XML which will " + 
-				"validate with FMI schema the option generate_xml_equations must also be false."),
-		VAR_SCALE   ("enable_variable_scaling",   false, 
-				"If this option is true (default is false), then the \"nominal\" attribute will " + 
-				"be used to scale variables in the model."),
-		MIN_T_TRANS ("normalize_minimum_time_problems", true, 
-				"When this option is set to true (default is true) then minimum time " +
-				"optimal control problems encoded in Optimica are converted to fixed " + 
-				"interval problems by scaling of the derivative variables."),
-		STRUCTURAL_DIAGNOSIS ("enable_structural_diagnosis", true, 
-				"Enable this option to invoke the structural error diagnosis based on the matching algorithm."),
-		ADD_INIT_EQ ("automatic_add_initial_equations", true, 
-				"When this option is set to true (default is true), then additional initial " +
-				"equations are added to the model based on a the result of a matching algorithm. " +
-				"Initial equations are added for states that are not matched to an equation."), 
-		COMPL_WARN ("compliance_as_warning", false, 
-				"When this option is set to true (default is false), then compliance errors are treated " + 
-				"as warnings instead. This can lead to the compiler or solver crashing. Use with caution!"),
-		GEN_HTML_DIAG ("generate_html_diagnostics", false, 
-				"When this option is set to true (default is false) model diagnostics is generated in HTML format. " +
-		        "This includes the flattened model, connection sets, alias sets and BLT form."), 
-		EXPORT_FUNCS ("export_functions", false, 
-				"Export used Modelica functions to generated C code in a manner that is compatible with the " +
-				"external C interface in the Modelica Language Specification (default is false)"),
-		EXPORT_FUNCS_VBA ("export_functions_vba", false, 
-				"Create VBA-compatible wrappers for exported functions (default is false). Requires export_functions"), 
-		STATE_INIT_EQ ("state_initial_equations", false, 
-				"Neglect initial equations in the model and add initial equations, and parameters, for the states." +
-				"Default is false."),
-		INLINE_FUNCS ("inline_functions", Inlining.NONE, 
-				"Perform function inlining on model after flattening (default is false)", 
-				Inlining.NONE, Inlining.TRIVIAL, Inlining.ALL),
-		DEBUG_CSV_STEP_INFO ("debug_csv_step_info", false,
-				"Debug option, outputs a csv file containing profiling recorded during compilation. Default is false.");
+	public enum OptionType { compiler, runtime }
+	public static final OptionType compiler = OptionType.compiler;
+	public static final OptionType runtime  = OptionType.runtime;
+	
+	private enum Default {
+		// Compiler options
+		DIVIDE_BY_VARS_IN_TEARING 
+			("divide_by_vars_in_tearing", 
+			 compiler, 
+			 false, 
+			 "If this option is set to true (default is false), a less restrictive strategy is used for solving equations " +
+			 "in the tearing algorithm. Specifically, division by parameters and variables is permitted, by default no " +
+			 "such divisions are made during tearing."),
+		ENABLE_TEARING
+			("enable_tearing", 
+			 compiler, 
+			 false, 
+			 "If this option is set to true (default is false), tearing of equation systems is enabled."),
+		ENABLE_HAND_GUIDED_TEARING 
+			("enable_hand_guided_tearing", 
+			 compiler, 
+			 false, 
+			 "If this option is set to true (default is false), hand guided tearing annotations are parsed " +
+			 "and will have precedence during tearing."),
+		MERGE_BLT_BLOCKS
+			("merge_blt_blocks", 
+			 compiler, 
+			 false, 
+			 "If this option is set to true (default is false), BLT blocks will be merged so that all hand " +
+			 "guided tearing equations and variables reside inside the same BLT block."),
+		CONV_FREE_DEP_PAR_TO_ALGS
+			("convert_free_dependent_parameters_to_algebraics", 
+			 compiler, 
+			 true, 
+			 "If this option is set to true (default is true), free dependent parameters are" +
+			 "converted to algebraic variables."),
+		GEN_DAE
+			("generate_dae", 
+			 compiler, 
+			 true, 
+			 "If this option is set to true (default is true), code for solving DAEs are generated."),
+		GEN_DAE_JAC
+			("generate_dae_jacobian", 
+			 compiler, 
+			 false, 
+			 "If this option is set to true (default is false), code for computing DAE Jacobians are generated."),
+		GEN_ODE_JAC
+			("generate_ode_jacobian", 
+			 compiler, 
+			 false,		
+			 "If this option is set to true (default is false), code for computing ODE Jacobians are generated."),
+		GEN_BLOCK_JAC
+			("generate_block_jacobian", 
+			 compiler, 
+			 false,		
+			 "If this option is set to true (default is false), code for computing block Jacobians is generated. "+
+			 "If blocks are needed to compute ODE jacobians they will be generated anyway"),
+		GEN_ODE
+			("generate_ode", 
+			 compiler, 
+			 false, 
+			 "If this option is set to true (default is false), code for solving ODEs are generated. "),
+		GEN_MOF_FILES
+			("generate_mof_files", 
+			 compiler, 
+			 false,
+			 "If this option is set to true (default is false), flat model before and after" +
+			 " transformations will be generated."),
+		EXTRA_LIB
+			("extra_lib_dirs", 
+			 compiler, 
+			 "", 
+			 "The value of this option is appended to the value of the MODELICAPATH environment " +
+			 "variable for determining in what directories to search for libraries."),
+		START_FIX
+			("state_start_values_fixed", 
+			 compiler, 
+			 false, 
+			 "This option enables the user to specify if initial equations should be " + 
+			 "generated automatically for differentiated variables even though the fixed " +
+			 "attribute is equal to fixed. Setting this option to true is, however, often " +
+			 "practical in optimization problems."),
+		ELIM_ALIAS
+			("eliminate_alias_variables", 
+			 compiler, 
+			 true, 
+			 "If this option is set to true (default), then alias variables are " +
+             "eliminated from the model."),
+		HALT_WARN
+			("halt_on_warning", 
+			 compiler, 
+			 false, 
+			 "If this option is set to false (default) one or more compiler " +
+             "warnings will not stop compilation of the model."),
+		XML_EQU
+			("generate_xml_equations", 
+			 compiler, 
+			 false, 
+			 "If this option is true, then model equations are generated in XML format. " + 
+			 "Default is false."),
+		INDEX_RED
+			("index_reduction", 
+			 compiler, 
+			 true, 
+			 // NB: this description used in a Python test 
+			 "If this option is true (default is true), index reduction is performed."),
+		EQU_SORT
+			("equation_sorting", 
+			 compiler, 
+			 false, 
+			 "If this option is true (default is false), equations are sorted using the BLT algorithm."),
+		XML_FMI_ME
+			("generate_fmi_me_xml", 
+			 compiler, 
+			 false, 
+			 "If this option is true the model description part of the XML variables file " + 
+			 "will be FMI for model exchange compliant. Default is false. To generate an XML which will " + 
+			 "validate with FMI schema the option generate_xml_equations must also be false."),
+		XML_FMI_CS 
+			("generate_fmi_cs_xml", 
+			 compiler, 
+			 false, 
+			 "If this option is true the model description part of the XML variables file " + 
+			 "will be FMI for co simulation compliant. Default is false. To generate an XML which will " + 
+			 "validate with FMI schema the option generate_xml_equations must also be false."),
+		FMI_VER 
+			("fmi_version", 
+			 compiler, 
+			 1.0, 
+			 "If this option is true the model description part of the XML variables file " + 
+			 "will be FMI for co simulation compliant. Default is false. To generate an XML which will " + 
+			 "validate with FMI schema the option generate_xml_equations must also be false."),
+		VAR_SCALE 
+			("enable_variable_scaling", 
+			 compiler, 
+			 false, 
+			 "If this option is true (default is false), then the \"nominal\" attribute will " + 
+			 "be used to scale variables in the model."),
+		MIN_T_TRANS 
+			("normalize_minimum_time_problems", 
+			 compiler, 
+			 true, 
+			 "When this option is set to true (default is true) then minimum time " +
+			 "optimal control problems encoded in Optimica are converted to fixed " + 
+			 "interval problems by scaling of the derivative variables."),
+		STRUCTURAL_DIAGNOSIS 
+			("enable_structural_diagnosis", 
+			 compiler, 
+			 true, 
+			 "Enable this option to invoke the structural error diagnosis based on the matching algorithm."),
+		ADD_INIT_EQ 
+			("automatic_add_initial_equations", 
+			 compiler, 
+			 true, 
+			 "When this option is set to true (default is true), then additional initial " +
+			 "equations are added to the model based on a the result of a matching algorithm. " +
+			 "Initial equations are added for states that are not matched to an equation."), 
+		COMPL_WARN 
+			("compliance_as_warning", 
+			 compiler, 
+			 false, 
+			 "When this option is set to true (default is false), then compliance errors are treated " + 
+			 "as warnings instead. This can lead to the compiler or solver crashing. Use with caution!"),
+		GEN_HTML_DIAG 
+			("generate_html_diagnostics", 
+			 compiler, 
+			 false, 
+			 "When this option is set to true (default is false) model diagnostics is generated in HTML format. " +
+		     "This includes the flattened model, connection sets, alias sets and BLT form."), 
+		EXPORT_FUNCS 
+			("export_functions", 
+			 compiler, 
+			 false, 
+			 "Export used Modelica functions to generated C code in a manner that is compatible with the " +
+			 "external C interface in the Modelica Language Specification (default is false)"),
+		EXPORT_FUNCS_VBA 
+			("export_functions_vba", 
+			 compiler, 
+			 false, 
+			 "Create VBA-compatible wrappers for exported functions (default is false). Requires export_functions"), 
+		STATE_INIT_EQ 
+			("state_initial_equations", 
+			 compiler, 
+			 false, 
+			 "Neglect initial equations in the model and add initial equations, and parameters, for the states." +
+			 "Default is false."),
+		INLINE_FUNCS 
+			("inline_functions", 
+			 compiler, 
+			 Inlining.NONE, 
+			 "Perform function inlining on model after flattening (default is false)", 
+			 Inlining.NONE, Inlining.TRIVIAL, Inlining.ALL),
+		DEBUG_CSV_STEP_INFO 
+			("debug_csv_step_info", 
+			 compiler, 
+			 false,
+			 "Debug option, outputs a csv file containing profiling recorded during compilation. Default is false."),
+		RUNTIME_PARAM
+		    ("generate_runtime_option_parameters",
+		     compiler,
+		     true,
+		     "Generate parameters for runtime options. For internal use, should always be true for normal compilation."),
+			 
+		// Runtime options
+		TEST 
+			("test_runtime_options", 
+			 runtime, 
+			 false, 
+			 "For testing the runtime options framework - has no effect and will be removed later"),
+		TEST2 
+			("test_runtime_options_2", 
+			 runtime, 
+			 false, 
+			 "For testing the runtime options framework - has no effect and will be removed later");
+		/*
+		 * Note: Two JUnit tests are affected by changes to runtime options:
+		 * ModelicaCompiler : TeansformCanonicalTests.mo : TestRuntimeOptions1
+		 * ModelicaCBackEnd : CCodeGenTests.mo : TestRuntimeOptions1
+		 */
 		
 					
 		public String key;
+		public OptionType type;
 		public String desc;
 		public Object val;
 		public Object[] lim;
 		
-		private DefOpt(String k, Object v, String d, Object... l) {
+		private Default(String k, OptionType t, Object v, String d, Object... l) {
 			key = k;
+			type = t;
 			desc = d;
 			val = v;
 			lim = (l != null && l.length > 0) ? l : null;
 		}
 		
-		private DefOpt(String k, Object v, String d) {
-			this(k, v, d, (Object[]) null);
+		private Default(String k, OptionType t, Object v, String d) {
+			this(k, t, v, d, (Object[]) null);
 		}
 		
-		private DefOpt(String k, boolean v, String d) {
-			this(k, new Boolean(v), d);
+		private Default(String k, OptionType t, boolean v, String d) {
+			this(k, t, new Boolean(v), d);
 		}
 		
-		private DefOpt(String k, double v, String d, double min, double max) {
-			this(k, new Double(v), d, new Object[] {min, max});
+		private Default(String k, OptionType t, double v, String d, double min, double max) {
+			this(k, t, new Double(v), d, new Object[] {min, max});
 		}
 		
-		private DefOpt(String k, int v, String d, int min, int max) {
-			this(k, new Integer(v), d, new Object[] {min, max});
+		private Default(String k, OptionType t, int v, String d, int min, int max) {
+			this(k, t, new Integer(v), d, new Object[] {min, max});
 		}
 		
 		public String toString() {
@@ -181,7 +312,7 @@ public class OptionRegistry {
 	
 	public OptionRegistry() {
 		optionsMap = new HashMap<String,Option>();
-		for (DefOpt o : DefOpt.values())
+		for (Default o : Default.values())
 			defaultOption(o);
 	}
 
@@ -315,22 +446,22 @@ public class OptionRegistry {
 		}
 	}
 	
-	protected void defaultOption(DefOpt o) {
+	protected void defaultOption(Default o) {
 		if (o.val instanceof Integer) {
 			if (o.lim != null)
-				createIntegerOption(o.key, o.desc, iv(o.val), iv(o.lim[0]), iv(o.lim[1]));
+				createIntegerOption(o.key, o.type, o.desc, iv(o.val), iv(o.lim[0]), iv(o.lim[1]));
 			else
-				createIntegerOption(o.key, o.desc, iv(o.val));
+				createIntegerOption(o.key, o.type, o.desc, iv(o.val));
 		} else if (o.val instanceof String) {
 			String[] lim = (o.lim == null) ? null : Arrays.copyOf(o.lim, o.lim.length, String[].class);
-			createStringOption(o.key, o.desc, (String) o.val, lim);
+			createStringOption(o.key, o.type, o.desc, (String) o.val, lim);
 		} else if (o.val instanceof Double) {
 			if (o.lim != null)
-				createRealOption(o.key, o.desc, dv(o.val), dv(o.lim[0]), dv(o.lim[1]));
+				createRealOption(o.key, o.type, o.desc, dv(o.val), dv(o.lim[0]), dv(o.lim[1]));
 			else
-				createRealOption(o.key, o.desc, dv(o.val));
+				createRealOption(o.key, o.type, o.desc, dv(o.val));
 		} else if (o.val instanceof Boolean) {
-			createBooleanOption(o.key, o.desc, bv(o.val));
+			createBooleanOption(o.key, o.type, o.desc, bv(o.val));
 		}
 	}
 	
@@ -348,11 +479,19 @@ public class OptionRegistry {
 	
 	
 	protected void createIntegerOption(String key, String description, int defaultValue) {
-		optionsMap.put(key, new IntegerOption(key, description, defaultValue));			
+		createIntegerOption(key, compiler, description, defaultValue);			
+	}
+	
+	protected void createIntegerOption(String key, OptionType type, String description, int defaultValue) {
+		optionsMap.put(key, new IntegerOption(key, type, description, defaultValue));			
 	}
 	
 	protected void createIntegerOption(String key, String description, int defaultValue, int min, int max) {
-		optionsMap.put(key, new IntegerOption(key, description, defaultValue, min, max));			
+		createIntegerOption(key, compiler, description, defaultValue, min, max);			
+	}
+	
+	protected void createIntegerOption(String key, OptionType type, String description, int defaultValue, int min, int max) {
+		optionsMap.put(key, new IntegerOption(key, type, description, defaultValue, min, max));			
 	}
 	
 	public void addIntegerOption(String key, int value, String description) {
@@ -395,7 +534,11 @@ public class OptionRegistry {
 	}
 	
 	protected void createStringOption(String key, String description, String defaultValue, String[] vals) {
-		optionsMap.put(key, new StringOption(key, description, defaultValue, vals));			
+		createStringOption(key, compiler, description, defaultValue, vals);			
+	}
+	
+	protected void createStringOption(String key, OptionType type, String description, String defaultValue, String[] vals) {
+		optionsMap.put(key, new StringOption(key, type, description, defaultValue, vals));			
 	}
 	
 	public void addStringOption(String key, String value, String description) {
@@ -438,11 +581,19 @@ public class OptionRegistry {
 	}
 	
 	protected void createRealOption(String key, String description, double defaultValue) {
-		optionsMap.put(key, new RealOption(key, description, defaultValue));			
+		createRealOption(key, compiler, description, defaultValue);			
+	}
+	
+	protected void createRealOption(String key, OptionType type, String description, double defaultValue) {
+		optionsMap.put(key, new RealOption(key, type, description, defaultValue));			
 	}
 	
 	protected void createRealOption(String key, String description, double defaultValue, double min, double max) {
-		optionsMap.put(key, new RealOption(key, description, defaultValue, min, max));			
+		createRealOption(key, compiler, description, defaultValue, min, max);			
+	}
+	
+	protected void createRealOption(String key, OptionType type, String description, double defaultValue, double min, double max) {
+		optionsMap.put(key, new RealOption(key, type, description, defaultValue, min, max));			
 	}
 	
 	public void addRealOption(String key, double value, String description) {
@@ -485,7 +636,11 @@ public class OptionRegistry {
 	}
 	
 	protected void createBooleanOption(String key, String description, boolean defaultValue) {
-		optionsMap.put(key, new BooleanOption(key, description, defaultValue));			
+		createBooleanOption(key, compiler, description, defaultValue);			
+	}
+	
+	protected void createBooleanOption(String key, OptionType type, String description, boolean defaultValue) {
+		optionsMap.put(key, new BooleanOption(key, type, description, defaultValue));			
 	}
 	
 	public void addBooleanOption(String key, boolean value, String description) {
@@ -537,6 +692,31 @@ public class OptionRegistry {
 	
 	public Set<Map.Entry<String, Option>> getAllOptions() {
 		return optionsMap.entrySet();
+	}
+	
+	public Collection<String> getOptionKeys() {
+		return getFilteredOptionName(NULL_OPTION_FILTER);
+	}
+	
+	public Collection<String> getCompilerOptionKeys() {
+		return getTypeOptionKeys(compiler);
+	}
+	
+	public Collection<String> getRuntimeOptionKeys() {
+		return getTypeOptionKeys(runtime);
+	}
+	
+	public Collection<String> getTypeOptionKeys(OptionType type) {
+		return getFilteredOptionName(new TypeOptionFilter(type));
+	}
+	
+	public Collection<String> getFilteredOptionName(OptionFilter filter) {
+		List<String> res = new ArrayList<String>();
+		for (Option o : optionsMap.values())
+			if (filter.filter(o))
+				res.add(o.key);
+		Collections.sort(res);
+		return res;
 	}
 	
 	public void copyAllOptions(OptionRegistry registry) throws UnknownOptionException{
@@ -602,10 +782,12 @@ public class OptionRegistry {
 	abstract static class Option {
 		protected String key;
 		protected String description;
+		protected OptionType type;
 			
-		public Option(String key, String description) {
+		public Option(String key, String description, OptionType type) {
 			this.key = key;
 			this.description = description;
+			this.type = type;
 		}
 	
 		public void exportXML(PrintStream out) {
@@ -654,12 +836,12 @@ public class OptionRegistry {
 		protected int min;
 		protected int max;
 		
-		public IntegerOption(String key, String description, int value) {
-			this(key, description, value, Integer.MIN_VALUE, Integer.MAX_VALUE);
+		public IntegerOption(String key, OptionType type, String description, int value) {
+			this(key, type, description, value, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		}
 		
-		public IntegerOption(String key, String description, int value, int min, int max) {
-			super(key, description);
+		public IntegerOption(String key, OptionType type, String description, int value, int min, int max) {
+			super(key, description, type);
 			this.value = value;
 			this.min = min;
 			this.max = max;
@@ -690,12 +872,12 @@ public class OptionRegistry {
 		protected String value;
 		protected String[] vals;
 		
-		public StringOption(String key, String description, String value) {
-			this(key, description, value, null);
+		public StringOption(String key, OptionType type, String description, String value) {
+			this(key, type, description, value, null);
 		}
 		
-		public StringOption(String key, String description, String value, String[] vals) {
-			super(key,description);
+		public StringOption(String key, OptionType type, String description, String value, String[] vals) {
+			super(key, description, type);
 			this.value = value;
 			this.vals = vals;
 		}
@@ -734,12 +916,12 @@ public class OptionRegistry {
 		protected double min;
 		protected double max;
 		
-		public RealOption(String key, String description, double value) {
-			this(key, description, value, Double.MIN_VALUE, Double.MAX_VALUE);
+		public RealOption(String key, OptionType type, String description, double value) {
+			this(key, type, description, value, Double.MIN_VALUE, Double.MAX_VALUE);
 		}
 		
-		public RealOption(String key, String description, double value, double min, double max) {
-			super(key, description);
+		public RealOption(String key, OptionType type, String description, double value, double min, double max) {
+			super(key, description, type);
 			this.value = value;
 			this.min = min;
 			this.max = max;
@@ -769,8 +951,8 @@ public class OptionRegistry {
 	static class BooleanOption extends Option {
 		protected boolean value;
 		
-		public BooleanOption(String key, String description, boolean value) {
-			super(key, description);
+		public BooleanOption(String key, OptionType type, String description, boolean value) {
+			super(key, description, type);
 			this.value = value;
 		}
 		
@@ -793,6 +975,28 @@ public class OptionRegistry {
 		}
 	}
 	
+	public interface OptionFilter {
+		public boolean filter(Option o);
+	}
+	
+	public class TypeOptionFilter implements OptionFilter {
+		private OptionType type;
+		
+		public TypeOptionFilter(OptionType t) {
+			type = t;
+		}
+		
+		public boolean filter(Option o) {
+			return o.type == type;
+		}
+	}
+	
+	public static final OptionFilter NULL_OPTION_FILTER = new OptionFilter() {
+		public boolean filter(Option o) {
+			return true;
+		}
+	};
+	
 	public static class UnknownOptionException extends RuntimeException { 
 		
 		private static final long serialVersionUID = 3884972549318063140L;
@@ -804,7 +1008,7 @@ public class OptionRegistry {
 	
 	public static class InvalidOptionValueException extends RuntimeException { 
 		
-		private static final long serialVersionUID = 3884972549318063140L;
+		private static final long serialVersionUID = 3884972549318063141L;
 
 		public InvalidOptionValueException(String message) {
 			super(message);

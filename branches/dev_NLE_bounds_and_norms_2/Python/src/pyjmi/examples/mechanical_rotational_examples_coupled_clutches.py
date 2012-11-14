@@ -22,7 +22,7 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 from pymodelica import compile_fmu
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """ 
@@ -34,7 +34,7 @@ def run_demo(with_plots=True):
     fmu_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches",())
 
     # Load model
-    model = FMUModel(fmu_name)
+    model = load_fmu(fmu_name)
 
     # Get options
     opts = model.simulate_options()
@@ -54,7 +54,7 @@ def run_demo(with_plots=True):
     tau_c3 = res['clutch3.tau']
     t = res['time']
 
-    assert N.abs(w3[-1] - (2.4648259915308199)) < 1e-3
+    assert N.abs(w3[-1] - (2.46382546506)) < 1e-3
 
     if with_plots:
         plt.figure(1)

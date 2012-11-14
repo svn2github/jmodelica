@@ -180,13 +180,15 @@ public class EquationBlockFactory {
 		
 		for (SimpleEquationBlock seb : ls) {
 			for (FAbstractEquation e : seb.equations()) {
-				if (!e.checkLinearity(new HashSet(activeVariables))) {
+				if (e.isReal() && !e.checkLinearity(new HashSet(activeVariables))) {
 					isLinear = false;
 				}
 			}
 		}
 		
-		if (isMixed) {
+		if (isMixed && isLinear) {
+			b = new MixedLinearEquationBlock(ls);		
+		} else if (isMixed) {
 			b = new MixedEquationBlock(ls);		
 		} else if (isLinear) {
 			b = new LinearEquationBlock(ls);

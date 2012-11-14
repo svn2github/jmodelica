@@ -411,6 +411,31 @@ class CasadiCollocator(object):
                 cnt += 1
         return (t_opt, dx_opt, x_opt, u_opt, w_opt, p_opt)
     
+    def get_ipopt_statistics(self):
+        """ 
+        Get statistics from the last optimization.
+
+        Returns::
+        
+            return_status -- 
+                Return status from IPOPT.
+                
+            nbr_iter -- 
+                Number of iterations.
+                
+            objective -- 
+                Final value of objective function.
+                
+            total_exec_time -- 
+                IPOPT execution time.
+        """
+        stats = self.solver.getStats()
+        return_status = stats['return_status']
+        nbr_iter = stats['iter_count']
+        objective = float(self.solver.output(casadi.NLP_COST))
+        total_exec_time = stats['t_mainloop']
+        return (return_status, nbr_iter, objective, total_exec_time)
+    
     def ipopt_solve(self):
         """
         Solves the NLP using IPOPT.
@@ -674,6 +699,9 @@ class LocalDAECollocator(CasadiCollocator):
     def _get_ocp_expressions(self):
         """
         Get OCP expressions from model and scale them if necessary.
+        
+        Timed variables are not scaled until _create_constraints, at
+        which point the constraint points are known.
         """
         # Get OCP expressions
         self.initial = casadi.SXMatrix(self.model.get_initial(False))
@@ -1172,6 +1200,25 @@ class LocalDAECollocator(CasadiCollocator):
             for (i, k) in collocation_constraint_points:
                 for var_type in ['x', 'u', 'w']:
                     nlp_timed_variables.append(var_map[i][k][var_type])
+        
+        # Scale timed variables
+        if (self.variable_scaling and self.nominal_traj is None and
+            self.hs != "free"):
+            # Get scale factors
+            sf = self.model.get_sf()
+            nbr_constraint_points = len(collocation_constraint_points)
+            if nbr_constraint_points > 0:
+                timed_variables_sfs = N.concatenate(
+                        nbr_constraint_points * [sf['x'], sf['u'], sf['w']])
+                
+                # Insert scale factors
+                ocp_expressions = [self.path, self.point, self.mterm]
+                [self.path,
+                 self.point,
+                 self.mterm] = casadi.substitute(ocp_expressions,
+                                                 timed_variables,
+                                                 timed_variables_sfs *
+                                                 timed_variables)
         
         # Denormalize time for minimum time problems
         if self._normalize_min_time:

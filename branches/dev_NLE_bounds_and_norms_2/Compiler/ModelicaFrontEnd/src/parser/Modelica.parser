@@ -628,14 +628,13 @@ AssignModification assign_modification =
   ;  
   */
   
-  
 ClassModification class_modification = 
-  LPAREN argument_list RPAREN {: return new ClassModification(argument_list); :}
+    LPAREN RPAREN {: return new ClassModification(); :}
+  | LPAREN argument_list RPAREN {: return new ClassModification(argument_list); :}
   ;
 
-  
 List argument_list =
-  argument                          {: return new List().add(argument); :}
+    argument                          {: return new List().add(argument); :}
   | argument_list COMMA argument    {: argument_list.add(argument); 
                                        return argument_list; :}
   ;
@@ -785,9 +784,6 @@ Argument argument =
    | error				{: return new BadArgument(); :}                                              
    ;
 
-
-
-
 Annotation annotation = 
   ANNOTATION class_modification    {: return new ParseAnnotation(class_modification); :}
   ;  
@@ -805,6 +801,16 @@ AbstractEquation abstract_equation =
                                       {: return new FunctionCallEquation(new Opt(),comment,function_call_left_list,function_call); :}
   | function_call comment SEMICOLON   {: return new FunctionCallEquation(new Opt(),comment,new List(),function_call); :}
   | annotation SEMICOLON              {: return new EquationAnnotation(new Opt(),new Comment(new Opt(), new Opt()), annotation); :}
+  ;
+
+List function_call_left_list =
+    function_call_left.a COMMA function_call_left.b   {: return new List().add(a).add(b); :}
+  | function_call_left_list COMMA function_call_left  {: return function_call_left_list.add(function_call_left); :}
+  ;
+
+FunctionCallLeft function_call_left =
+                   {: return new FunctionCallLeft(new Opt()); :}
+  | parse_access   {: return new FunctionCallLeft(new Opt(parse_access)); :}
   ;
 
 ForClauseE for_clause_e =
@@ -915,17 +921,17 @@ Statement statement =
   ;
   
 FunctionCallStmt function_call_stmt =
-    LPAREN function_call_left_list RPAREN ASSIGN function_call comment  
-                           {: return new FunctionCallStmt(comment, function_call_left_list, function_call); :}
+    LPAREN function_call_stmt_left_list RPAREN ASSIGN function_call comment  
+                           {: return new FunctionCallStmt(comment, function_call_stmt_left_list, function_call); :}
   | function_call comment  {: return new FunctionCallStmt(comment, new List(), function_call); :}
   ;
 
-List function_call_left_list =
-    function_call_left.a COMMA function_call_left.b   {: return new List().add(a).add(b); :}
-  | function_call_left_list COMMA function_call_left  {: return function_call_left_list.add(function_call_left); :}
+List function_call_stmt_left_list =
+    function_call_stmt_left   {: return new List().add(function_call_stmt_left); :}
+  | function_call_stmt_left_list COMMA function_call_stmt_left  {: return function_call_stmt_left_list.add(function_call_stmt_left); :}
   ;
 
-FunctionCallLeft function_call_left =
+FunctionCallLeft function_call_stmt_left =
                    {: return new FunctionCallLeft(new Opt()); :}
   | parse_access   {: return new FunctionCallLeft(new Opt(parse_access)); :}
   ;
@@ -1093,10 +1099,15 @@ List named_arguments =
   | named_arguments COMMA named_argument {: return named_arguments.add(named_argument); :}
   ;
   
-NamedArgument named_argument =
-  ID.id EQUALS exp {: return new NamedArgument(new ParseAccess(id,new Opt()),exp); :}
-  ;
+Exp function_argument_exp =
+ exp                               {: return exp; :}
+ | FUNCTION function_call          {: return function_call; :}  
+ ;
   
+NamedArgument named_argument =
+  ID.id EQUALS function_argument_exp {: return new NamedArgument(new ParseAccess(id,new Opt()),function_argument_exp); :}
+  ;
+
 Matrix matrix = 
     matrix_row                   {: return new Matrix(new List().add(matrix_row)); :}
   | matrix SEMICOLON matrix_row  {: matrix.addRow(matrix_row); 
@@ -1117,8 +1128,8 @@ List arg_list =
   ;
   
 List arg_list_p = 
-    exp                   {: return new List().add(exp); :}
-  | arg_list_p COMMA exp  {: return arg_list_p.add(exp); :}
+  function_argument_exp                   {: return new List().add(function_argument_exp); :}
+  | arg_list_p COMMA function_argument_exp  {: return arg_list_p.add(function_argument_exp); :}
   ;
   
 Comment comment = 

@@ -37,10 +37,10 @@ except (NameError, ImportError):
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
 
 def assert_results(res, cost_ref, u_norm_ref,
-                   cost_rtol=1e-3, u_norm_rtol=1e-4):
+                   cost_rtol=1e-3, u_norm_rtol=1e-4, input_name="u"):
     """Helper function for asserting optimization results."""
     cost = float(res.solver.solver.output(casadi.NLP_COST))
-    u = res["u"]
+    u = res[input_name]
     u_norm = N.linalg.norm(u) / N.sqrt(len(u))
     N.testing.assert_allclose(cost, cost_ref, cost_rtol)
     N.testing.assert_allclose(u_norm, u_norm_ref, u_norm_rtol)
@@ -93,6 +93,12 @@ class TestLocalDAECollocator:
         compile_fmux(class_path, cstr_file_path)
         
         class_path = "CSTR.CSTR_Opt_Extends"
+        compile_fmux(class_path, cstr_file_path)
+        
+        class_path = "CSTR.CSTR_Opt_Scaled_Min_Time"
+        compile_fmux(class_path, cstr_file_path)
+        
+        class_path = "CSTR.CSTR_Opt_Unscaled_Min_Time"
         compile_fmux(class_path, cstr_file_path)
         
         pe_file_path = os.path.join(get_files_path(), 'Modelica',
@@ -149,6 +155,14 @@ class TestLocalDAECollocator:
         
         fmux_cstr_extends = "CSTR_CSTR_Opt_Extends.fmux"
         self.model_cstr_extends = CasadiModel(fmux_cstr_extends, verbose=False)
+        
+        fmux_cstr_scaled_min_time = 'CSTR_CSTR_Opt_Scaled_Min_Time.fmux'
+        self.model_cstr_scaled_min_time = CasadiModel(
+                fmux_cstr_scaled_min_time, verbose=False)
+        
+        fmux_cstr_unscaled_min_time = 'CSTR_CSTR_Opt_Unscaled_Min_Time.fmux'
+        self.model_cstr_unscaled_min_time = CasadiModel(
+                fmux_cstr_unscaled_min_time, verbose=False)
         
         fmux_second_order = "ParEst_ParEstCasADi.fmux"
         self.model_second_order = CasadiModel(fmux_second_order, verbose=False)
@@ -387,9 +401,9 @@ class TestLocalDAECollocator:
         N.testing.assert_allclose(z_scaled, z_ref, 1e-2)
     
     @testattr(casadi = True)
-    def test_minimum_time(self):
+    def test_vdp_minimum_time(self):
         """
-        Test solving minimum time problems.
+        Test solving minimum time problems based on the VDP oscillator.
         
         Tests both a problem where the time is manually scaled, and one where
         the time is automatically scaled by the compiler.
@@ -421,6 +435,45 @@ class TestLocalDAECollocator:
         opts['discr'] = "LG"
         res = model_unscaled.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+    
+    @testattr(casadi = True)
+    def test_cstr_minimum_time(self):
+        """
+        Test solving minimum time problems based on the CSTR.
+        
+        Tests both a problem where the time is manually scaled, and one where
+        the time is automatically scaled by the compiler.
+        """
+        model_scaled = self.model_cstr_scaled_min_time
+        model_unscaled = self.model_cstr_unscaled_min_time
+        
+        # References values
+        cost_ref = 1.1637020114180874e2
+        u_norm_ref = 3.0668821961641106e2
+        
+        # Scaled, Radau
+        opts = model_scaled.optimize_options(self.algorithm)
+        opts['discr'] = "LGR"
+        res = model_scaled.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, input_name="Tc")
+        
+        # Scaled, Gauss
+        opts['discr'] = "LG"
+        res = model_scaled.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2,
+                       input_name="Tc")
+        
+        # Unscaled, Radau
+        opts['discr'] = "LGR"
+        res = model_unscaled.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2,
+                       input_name="Tc")
+        
+        # Unscaled, Gauss
+        opts['discr'] = "LG"
+        res = model_unscaled.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2,
+                       input_name="Tc")
     
     @testattr(casadi = True)
     def test_path_constraints(self):
@@ -896,6 +949,24 @@ class TestLocalDAECollocator:
         opts['casadi_options_g']['numeric_jacobian'] = False
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
+    
+    @testattr(casadi = True)
+    def test_ipopt_statistics(self):
+        """
+        Test getting IPOPT statistics
+        """
+        model = self.model_vdp_bounds_mayer
+        
+        cost_ref = 3.17619580332244e0
+        
+        res = model.optimize()
+        (return_status, nbr_iter, objective, total_exec_time) = \
+                res.solver.get_ipopt_statistics()
+        N.testing.assert_string_equal(return_status, "Solve_Succeeded")
+        N.testing.assert_array_less([nbr_iter, -nbr_iter], [100, -5])
+        N.testing.assert_allclose(objective, cost_ref, 1e-3, 1e-4)
+        N.testing.assert_array_less([total_exec_time, -total_exec_time],
+                                    [1., 0.])
 
 class TestPseudoSpectral:
     

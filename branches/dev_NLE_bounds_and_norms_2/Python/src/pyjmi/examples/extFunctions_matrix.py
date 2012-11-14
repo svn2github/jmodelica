@@ -19,8 +19,8 @@ import os
 import pylab as p
 import numpy as N
 
-from pymodelica import compile_jmu
-from pyjmi import JMUModel
+from pymodelica import compile_fmu
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     
@@ -28,8 +28,8 @@ def run_demo(with_plots=True):
     class_name = 'ExtFunctions.transposeSquareMatrix'
     mofile = curr_dir+'/files/ExtFunctions.mo'
     
-    jmu_name = compile_jmu(class_name, mofile, target='model_noad')
-    model = JMUModel(jmu_name)
+    fmu_name = compile_fmu(class_name, mofile)
+    model = load_fmu(fmu_name)
 
     #simulate
     res = model.simulate()

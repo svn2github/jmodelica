@@ -5846,8 +5846,8 @@ Solved variables:
   i1
   u1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   i1 = i2 + i3
@@ -6040,7 +6040,7 @@ Torn block of 1 tearing variables and 1 solved variables.
 Solved variables:
   r.x
 Tearing variables:
-  x
+  x()
 Solved equations:
   (TransformCanonicalTests.RecordTearingTest2.R(r.x, r.y)) = TransformCanonicalTests.RecordTearingTest2.F(x, y)
 Residual equations:
@@ -6075,8 +6075,8 @@ equation
 Torn block of 2 tearing variables and 0 solved variables.
 Solved variables:
 Tearing variables:
-  x
-  y
+  x()
+  y()
 Solved equations:
 Residual equations:
   (x, y) = TransformCanonicalTests.RecordTearingTest3.F(y, x)
@@ -6114,7 +6114,7 @@ Solved variables:
   x
   y
 Tearing variables:
-  v
+  v()
 Solved equations:
   (x, y) = TransformCanonicalTests.RecordTearingTest4.F(v, v)
 Residual equations:
@@ -6159,9 +6159,9 @@ Solved variables:
   d
   e
 Tearing variables:
-  f
-  a
-  b
+  f()
+  a()
+  b()
 Solved equations:
   (c, d) = TransformCanonicalTests.RecordTearingTest5.F(a, b)
   (e, f) = TransformCanonicalTests.RecordTearingTest5.F(c, d)
@@ -6213,8 +6213,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   u0 = u1 + u2
@@ -6284,9 +6284,9 @@ Solved variables:
   u2
   u1
 Tearing variables:
-  i2
-  i1
-  i3
+  i2()
+  i1()
+  i3()
 Solved equations:
   u2 = ( R2 ) * ( i2 )
   u1 = ( R1 ) * ( i1 )
@@ -6357,8 +6357,8 @@ Solved variables:
   i1
   u1
 Tearing variables:
-  i2
-  i3
+  i2()
+  i3()
 Solved equations:
   u2 = ( R2 ) * ( i2 )
   i1 = i2 + i3
@@ -6430,8 +6430,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   u0 = u1 + u2
@@ -6504,8 +6504,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   u0 = u1 + u2
@@ -6575,9 +6575,9 @@ Solved variables:
   u2
   i1
 Tearing variables:
-  u1
-  i2
-  i3
+  u1()
+  i2()
+  i3()
 Solved equations:
   u0 = u1 + u2
   i1 = i2 + i3
@@ -6648,8 +6648,8 @@ Solved variables:
   i1
   u1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   i1 = i2 + i3
@@ -6720,9 +6720,9 @@ Solved variables:
   u2
   i1
 Tearing variables:
-  u1
-  i2
-  i3
+  u1()
+  i2()
+  i3()
 Solved equations:
   u0 = u1 + u2
   i1 = i2 + i3
@@ -6794,8 +6794,8 @@ Solved variables:
   i1
   u1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   i1 = i2 + i3
@@ -6868,8 +6868,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   u0 = u1 + u2
@@ -6942,8 +6942,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i2
-  i3
+  i2()
+  i3()
 Solved equations:
   u2 = ( R2 ) * ( i2 )
   u0 = u1 + u2
@@ -7016,8 +7016,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   u0 = u1 + u2
@@ -7091,8 +7091,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i2
-  i3
+  i2()
+  i3()
 Solved equations:
   u2 = ( R2 ) * ( i2 )
   u0 = u1 + u2
@@ -7166,8 +7166,8 @@ Solved variables:
   u1
   i1
 Tearing variables:
-  i3
-  i2
+  i3()
+  i2()
 Solved equations:
   u2 = ( R3 ) * ( i3 )
   u0 = u1 + u2
@@ -7196,6 +7196,241 @@ Solution:
 -------------------------------
       ")})));
 end HandGuidedTearing14;
+
+model HandGuidedTearing15
+
+	parameter Integer n = 5;
+	Real a[n];
+	Real b[n];
+	Real c[n];
+
+equation
+	for i in 1:n loop
+		a[i]=c[i] + 1;
+		a[i]=b[i] + 2;
+		c[i]=b[i] - 3;
+	end for;
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="HandGuidedTearing15",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			description="Test of hand guided tearing of vectors and indices whit no annotation, base case.",
+			methodResult="
+-------------------------------
+Torn block of 1 tearing variables and 2 solved variables.
+Solved variables:
+  c[1]
+  a[1]
+Tearing variables:
+  b[1]()
+Solved equations:
+  c[1] = b[1] - ( 3 )
+  a[1] = c[1] + 1
+Residual equations:
+  a[1] = b[1] + 2
+-------------------------------
+Torn block of 1 tearing variables and 2 solved variables.
+Solved variables:
+  c[2]
+  a[2]
+Tearing variables:
+  b[2]()
+Solved equations:
+  c[2] = b[2] - ( 3 )
+  a[2] = c[2] + 1
+Residual equations:
+  a[2] = b[2] + 2
+-------------------------------
+Torn block of 1 tearing variables and 2 solved variables.
+Solved variables:
+  c[3]
+  a[3]
+Tearing variables:
+  b[3]()
+Solved equations:
+  c[3] = b[3] - ( 3 )
+  a[3] = c[3] + 1
+Residual equations:
+  a[3] = b[3] + 2
+-------------------------------
+Torn block of 1 tearing variables and 2 solved variables.
+Solved variables:
+  c[4]
+  a[4]
+Tearing variables:
+  b[4]()
+Solved equations:
+  c[4] = b[4] - ( 3 )
+  a[4] = c[4] + 1
+Residual equations:
+  a[4] = b[4] + 2
+-------------------------------
+Torn block of 1 tearing variables and 2 solved variables.
+Solved variables:
+  c[5]
+  a[5]
+Tearing variables:
+  b[5]()
+Solved equations:
+  c[5] = b[5] - ( 3 )
+  a[5] = c[5] + 1
+Residual equations:
+  a[5] = b[5] + 2
+-------------------------------
+      ")})));
+end HandGuidedTearing15;
+
+model HandGuidedTearing16
+
+	parameter Integer n = 5;
+	Real a[n];
+	Real b[n];
+	Real c[n];
+
+equation
+	for i in 1:n loop
+		a[i]=c[i] + 1;
+		a[i]=b[i] + 2;
+		c[i]=b[i] - 3 annotation(__Modelon(ResidualEquation(enabled=true,iterationVariables={c[i]})));
+	end for;
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="HandGuidedTearing16",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			methodResult="
+-------------------------------
+Torn block of 1 tearing variables and 2 solved variables.
+Solved variables:
+  a[1]
+  b[1]
+Tearing variables:
+  c[1]()
+Solved equations:
+  a[1] = c[1] + 1
+  a[1] = b[1] + 2
+Residual equations:
+  c[1] = b[1] - ( 3 )
+-------------------------------
+Torn block of 1 tearing variables and 2 solved variables.
+Solved variables:
+  a[2]
+  b[2]
+Tearing variables:
+  c[2]()
+Solved equations:
+  a[2] = c[2] + 1
+  a[2] = b[2] + 2
+Residual equations:
+  c[2] = b[2] - ( 3 )
+-------------------------------
+Torn block of 1 tearing variables and 2 solved variables.
+Solved variables:
+  a[3]
+  b[3]
+Tearing variables:
+  c[3]()
+Solved equations:
+  a[3] = c[3] + 1
+  a[3] = b[3] + 2
+Residual equations:
+  c[3] = b[3] - ( 3 )
+-------------------------------
+Torn block of 1 tearing variables and 2 solved variables.
+Solved variables:
+  a[4]
+  b[4]
+Tearing variables:
+  c[4]()
+Solved equations:
+  a[4] = c[4] + 1
+  a[4] = b[4] + 2
+Residual equations:
+  c[4] = b[4] - ( 3 )
+-------------------------------
+Torn block of 1 tearing variables and 2 solved variables.
+Solved variables:
+  a[5]
+  b[5]
+Tearing variables:
+  c[5]()
+Solved equations:
+  a[5] = c[5] + 1
+  a[5] = b[5] + 2
+Residual equations:
+  c[5] = b[5] - ( 3 )
+-------------------------------
+      ")})));
+end HandGuidedTearing16;
+
+model HandGuidedTearing17
+
+	parameter Integer n = 5;
+	Real a[n];
+	Real b[n];
+	Real c[n];
+
+equation
+	for i in 1:n loop
+		a[i]=c[i] + 1;
+		a[i]=b[i] + 2;
+		c[i]=b[i] - 3 annotation(__Modelon(ResidualEquation(enabled=true,iterationVariables={c[i]})));
+	end for;
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="HandGuidedTearing17",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			merge_blt_blocks=true,
+			description="Test of hand guided tearing of vectors and indices with handguided annotation and blt merge.",
+			methodResult="
+-------------------------------
+Torn block of 5 tearing variables and 10 solved variables.
+Solved variables:
+  a[1]
+  b[1]
+  a[2]
+  b[2]
+  a[3]
+  b[3]
+  a[4]
+  b[4]
+  a[5]
+  b[5]
+Tearing variables:
+  c[5]()
+  c[1]()
+  c[2]()
+  c[3]()
+  c[4]()
+Solved equations:
+  a[1] = c[1] + 1
+  a[1] = b[1] + 2
+  a[2] = c[2] + 1
+  a[2] = b[2] + 2
+  a[3] = c[3] + 1
+  a[3] = b[3] + 2
+  a[4] = c[4] + 1
+  a[4] = b[4] + 2
+  a[5] = c[5] + 1
+  a[5] = b[5] + 2
+Residual equations:
+  c[5] = b[5] - ( 3 )
+  c[1] = b[1] - ( 3 )
+  c[2] = b[2] - ( 3 )
+  c[3] = b[3] - ( 3 )
+  c[4] = b[4] - ( 3 )
+-------------------------------
+      ")})));
+end HandGuidedTearing17;
 
 model BlockTest1
 record R
@@ -7697,5 +7932,28 @@ public
 end TransformCanonicalTests.TestExternalObj1;
 ")})));
 end TestExternalObj1;
+
+
+model TestRuntimeOptions1
+	Real x = 1;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="TestRuntimeOptions1",
+			description="Test that parameters for runtime options are generated properly",
+			generate_runtime_option_parameters=true,
+			generate_ode=true,
+			test_runtime_options=true,
+			flatModel="
+fclass TransformCanonicalTests.TestRuntimeOptions1
+ Real x;
+ parameter Boolean _test_runtime_options = true /* true */;
+ parameter Boolean _test_runtime_options_2 = false /* false */;
+equation
+ x = 1;
+end TransformCanonicalTests.TestRuntimeOptions1;
+")})));
+end TestRuntimeOptions1;
+
 
 end TransformCanonicalTests;

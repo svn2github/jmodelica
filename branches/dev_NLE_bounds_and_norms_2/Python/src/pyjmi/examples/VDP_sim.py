@@ -20,7 +20,7 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 from pymodelica import compile_fmu
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """
@@ -32,7 +32,7 @@ def run_demo(with_plots=True):
     fmu_name = compile_fmu("JMExamples.VDP.VDP", 
     curr_dir+"/files/JMExamples.mo")
 
-    model = FMUModel(fmu_name)
+    model = load_fmu(fmu_name)
     
     res = model.simulate(final_time=10, options={'solver':'CVode'})
 

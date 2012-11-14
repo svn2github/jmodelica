@@ -53,6 +53,25 @@ struct fmi_t {
 };
 
 /**
+ * Map between runtime option names and value references for the associated parameters - name table.
+ *
+ * Table is null-terminated.
+ */
+extern const char *fmi_runtime_options_map_names[];
+
+/**
+ * Map between runtime option names and value references for the associated parameters - value referece table.
+ *
+ * Table is zero-terminated, but may contain a value reference that is zero as well - use fmi_runtime_options_map_length.
+ */
+extern const int fmi_runtime_options_map_vrefs[];
+
+/**
+ * Map between runtime option names and value references for the associated parameters - table length.
+ */
+extern const int fmi_runtime_options_map_length;
+
+/**
  * \defgroup fmi_init Creation, initialization and destruction.
  * 
  * \brief Definitions of how an FMU are created, initialized and terminated.

@@ -22,10 +22,9 @@ from os.path import join as path
 
 import nose
 
-from pymodelica import compile_jmu, compile_fmu
+from pymodelica import compile_fmu
 from pymodelica.common.core import get_platform_dir, create_temp_dir
-from pyjmi import JMUModel
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 from tests_jmodelica import testattr, get_files_path
 
 class TestExternalStatic:
@@ -58,7 +57,7 @@ class TestExternalStatic:
         """
         cpath = "ExtFunctionTests.ExtFunctionTest1"
         fmu_name = compile_fmu(cpath, TestExternalStatic.fpath)
-        model = FMUModel(fmu_name)
+        model = load_fmu(fmu_name)
     
     @testattr(stddist = True)
     def test_IntegerArrays(self):
@@ -67,7 +66,7 @@ class TestExternalStatic:
         """
         cpath = "ExtFunctionTests.ExtFunctionTest4"
         fmu_name = compile_fmu(cpath, TestExternalStatic.fpath)
-        model = FMUModel(fmu_name)
+        model = load_fmu(fmu_name)
         res = model.simulate()
         
         nose.tools.assert_equals(res['myResult[1]'][-1], 2) 
@@ -95,8 +94,8 @@ class TestUtilities:
         """
         fpath = path(get_files_path(), 'Modelica', "ExtFunctionTests.mo")
         cpath = "ExtFunctionTests.ExtFunctionTest3"
-        jmu_name = compile_jmu(cpath, fpath, target='model_noad')
-        model = JMUModel(jmu_name)
+        jmu_name = compile_fmu(cpath, fpath)
+        model = load_fmu(jmu_name)
         #model.simulate()
 
 class TestExternalShared:
@@ -130,7 +129,7 @@ class TestExternalShared:
         cpath = "ExtFunctionTests.ExtFunctionTest1"
         fmu_name = compile_fmu(cpath, TestExternalShared.fpath)
         shutil.rmtree(TestExternalShared.dir, True)
-        model = FMUModel(fmu_name)
+        model = load_fmu(fmu_name)
         
 
 def build_ext(target):

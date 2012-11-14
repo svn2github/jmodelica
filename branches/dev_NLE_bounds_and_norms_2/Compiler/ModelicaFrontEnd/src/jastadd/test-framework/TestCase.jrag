@@ -77,6 +77,7 @@ abstract public class TestCase {
 		String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
 				"ThirdParty" + File.separator + "MSL";
 		or.addStringOption("MODELICAPATH", modelica_path);
+		or.setBooleanOption("generate_runtime_option_parameters", false);
 		return or;
 	}
 	
@@ -259,9 +260,8 @@ abstract public class TestCase {
 	 * @param actual    the actual value
 	 */
 	protected void assertEquals(String msg, String expected, String actual) {
-		expected = expected.replaceFirst("^([ \\t]*[\\n\\r])+", "");
-		expected = expected.replaceAll("\\r\\n", "\n");
-		expected = expected.replaceAll("\\r", "\n");
+		expected = expected.replaceAll("\\r\\n|\\r", "\n");
+		expected = expected.replaceFirst("^([ \\t]*[\\n])+", "");
 		expected = expected.replaceAll("[ \\t]*$", "");
 		actual = actual.replaceFirst("^([ \\t]*[\\n\\r])+", "");
 		msg = getDescription() + "\n" + getClass().getSimpleName() + ": " + msg;

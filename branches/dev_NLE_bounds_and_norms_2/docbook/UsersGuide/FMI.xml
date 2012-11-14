@@ -214,17 +214,17 @@
     also is the recommended way.</para>
 
     <para>For more examples on how to simulate an FMU using JModelica.org's
-    high-level features, see <xref linkend="ch_simulation" />.</para>
+    high-level features, see <xref linkend="ch_simulation"/>.</para>
 
     <section>
       <title>Simulation using the native FMI interface</title>
 
       <para>This example shows how to use the native JModelica.org FMI
-      interface for simulation of an FMU. The FMU that is to be simulated is
-      the bouncing ball example from Qtronics FMU SDK
-      (http://www.qtronic.de/en/fmusdk.html). This example is written similar
-      to the example in the documentation of the 'Functional Mock-up Interface
-      for Model Exchange' version 1.0
+      interface for simulation of an FMU (FMI 1.0 for Model Exchange). The FMU
+      that is to be simulated is the bouncing ball example from Qtronics FMU
+      SDK (http://www.qtronic.de/en/fmusdk.html). This example is written
+      similar to the example in the documentation of the 'Functional Mock-up
+      Interface for Model Exchange' version 1.0
       (http://www.functional-mockup-interface.org/). The bouncing ball model
       is to be simulated using the explicit Euler method with event
       detection.</para>
@@ -236,7 +236,7 @@
 
       <para><inlinemediaobject>
           <imageobject>
-            <imagedata fileref="images/bounc_eq.png" scale="100"></imagedata>
+            <imagedata fileref="images/bounc_eq.png" scale="100"/>
           </imageobject>
         </inlinemediaobject></para>
 
@@ -245,7 +245,7 @@
 
       <para><inlinemediaobject>
           <imageobject>
-            <imagedata fileref="images/event_eq.png"></imagedata>
+            <imagedata fileref="images/event_eq.png"/>
           </imageobject>
         </inlinemediaobject></para>
 
@@ -254,7 +254,7 @@
 
       <para><inlinemediaobject>
           <imageobject>
-            <imagedata fileref="images/event_handle.png"></imagedata>
+            <imagedata fileref="images/event_handle.png"/>
           </imageobject>
         </inlinemediaobject></para>
 
@@ -269,13 +269,13 @@
 
         <programlisting language="python">        import numpy as N 
         import pylab as P #Used for plotting
-        from pyfmi import FMUModel #The FMI Interface
+        from pyfmi import FMUModelME1 #The FMI Interface for Model Exchange
 </programlisting>
 
         <para>Next, the FMU is to be loaded and initialized,</para>
 
         <programlisting language="python">        #Load the FMU by specifying the fmu together with the path.
-        bouncing_fmu = FMUModel('/path/to/FMU/bouncingBall.fmu')
+        bouncing_fmu = FMUModelME1('/path/to/FMU/bouncingBall.fmu')
 
         Tstart = 0.5 #The start time.
         Tend   = 3.0 #The final simulation time.
@@ -472,7 +472,7 @@
           <mediaobject>
             <imageobject>
               <imagedata fileref="images/bouncing_nativ.svg" scalefit="1"
-                         width="60%"></imagedata>
+                         width="60%"/>
             </imageobject>
           </mediaobject>
         </figure>

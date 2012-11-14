@@ -591,7 +591,7 @@ class Test_ODE_JACOBIANS5:
         cname='BlockOdeJacTest'
         fname = os.path.join(get_files_path(), 'Modelica', 'BlockOdeJacTest.mo')
         
-        _fn_block = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'fmi_version':2.0})
+        _fn_block = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'generate_runtime_option_parameters':False,'fmi_version':2.0})
         
     def setUp(self):
         pass

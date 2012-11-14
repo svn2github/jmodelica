@@ -45,14 +45,12 @@ aspect Outline {
 	 * Set labels of interesting nodes
 	 */
 	eq BaseClassDecl.contentOutlineLabel() = getName().getID();
-	eq ComponentDecl.contentOutlineLabel() = getName().getID() + " : " + getClassName().typeString() + typePrefixes();
+	eq ComponentDecl.contentOutlineLabel() = getName().getID() + " : " + getClassName().name() + typePrefixes();
 	eq BadDefinition.contentOutlineLabel() = "";
 	eq LibNode.contentOutlineLabel() = getName();
 	eq InstClassDecl.contentOutlineLabel() = getClassDecl().contentOutlineLabel();
 	eq InstComponentDecl.contentOutlineLabel() = getComponentDecl().contentOutlineLabel();
 	
-	syn String Access.typeString() = getID();
-	eq Dot.typeString() = getLeft().typeString() + "." + getRight().typeString();
 	syn String ComponentDecl.typePrefixes() {
 		StringBuilder buf = new StringBuilder();
 		if (hasTypePrefixFlow()) {
