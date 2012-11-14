@@ -136,7 +136,7 @@ function python_tests() {
           echo ${TEST} | sed -e 's!^.*jmodelica.!Running !' | log > /dev/null
           nosetests ${TAGS} -v ${TEST} 2>&1 \
           | log \
-	      | sed -n -e 's!^OK$!PASSED!ip' -e 's!^FAILED !TEST FAILED!p'
+	      | sed -n -e 's!^OK$!PASSED!ip' -e 's!^FAILED !TEST FAILED!p' || echo NOSETESTS_NOT_OK
         done | filter_python_separate
       else
         echo BUILD FAILED
@@ -157,7 +157,7 @@ function python_tests() {
           | log \
           | egrep -v '^Exception .* ignored$' \
           | egrep -A500 "${PATTERN}" \
-          | sed -e 's!^OK$!PASSED!' -e 's!^FAILED !TEST FAILED!'
+          | sed -e 's!^OK$!PASSED!' -e 's!^FAILED !TEST FAILED!' || echo NOSETESTS_NOT_OK
         done | filter_python_separate
       fi
       ;;
@@ -186,20 +186,23 @@ function log() {
 }
 
 function filter_python_separate() {
-  TMP=$(mktemp -q /tmp/jm_tests.XXXXXX) 
-  tee ${TMP} | egrep -v "(PASSED|TEST FAILED)"
+  TMP=$(mktemp -q /tmp/jm_tests.XXXXXX 2>/dev/null) 
+  tee ${TMP} | egrep -v "(PASSED|TEST FAILED|NOSETESTS_NOT_OK)"
   cat ${TMP} \
   | sed -n \
         -e '1 i\
-            0 0' \
+            0 0 0' \
         -e 's!^TEST FAILED(errors=\([0-9]*\))!\1+!p' \
         -e 's!^TEST FAILED(failures=\([0-9]*\))!r\1+r!p' \
         -e 's!^TEST FAILED(errors=\([0-9]*\), failures=\([0-9]*\))!\1+r\2+r!p' \
+        -e 's!^NOSETESTS_NOT_OK!sar1+rla!p' \
         -e '$ a\
-            [errors=]nn[, failures=]np' \
+            n[ ]nn[ ]np' \
   | dc \
-  | sed -e 's!errors=0, failures=0!PASSED!' \
-	-e 's!\(errors=.*, failures=.*\)!TEST FAILED (\1)!'
+  | sed \
+    -e 's!0 0 [1-9].*!CRASHED!' \
+    -e 's!0 0 0!PASSED!' \
+	-e 's!\([0-9]\+\) \([0-9]\+\) .*!TEST FAILED (errors=\1, failures=\2)!'
   rm -f ${TMP}
 }
   
