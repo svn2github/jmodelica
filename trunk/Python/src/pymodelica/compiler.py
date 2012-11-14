@@ -377,9 +377,9 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
         
     # create cmd
     if compiler_options:
-        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, COMPILER, JVM_ARGS, LOG, OPTIONS, TARGET, MODEL_FILES, MODELICA_CLASS]
+        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, OPTIONS, TARGET, MODEL_FILES, MODELICA_CLASS]
     else:
-        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, COMPILER, JVM_ARGS, LOG, TARGET, MODEL_FILES, MODELICA_CLASS]
+        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, TARGET, MODEL_FILES, MODELICA_CLASS]
         
     check_call(cmd, stderr=STDOUT)
 
