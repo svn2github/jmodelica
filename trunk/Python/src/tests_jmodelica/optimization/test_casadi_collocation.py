@@ -181,14 +181,8 @@ class TestLocalDAECollocator:
         u = [342.85, 280]
         u_traj = N.transpose(N.vstack((t, u)))
         
-        rtol, atol = model.get_tolerances()
-        
-        opts = model.simulate_options()
-        opts["CVode_options"]["rtol"]=1e-4
-        opts["CVode_options"]["atol"]=1e2*atol
-        
         # Generate initial trajectories
-        init_res = model.simulate(final_time=300, input=('Tc', u_traj),options=opts)
+        init_res = model.simulate(final_time=300, input=('Tc', u_traj))
         
         # Optimize
         opts = model_opt.optimize_options(self.algorithm)
@@ -198,7 +192,7 @@ class TestLocalDAECollocator:
         xx_init = col.get_xx_init()
         N.testing.assert_allclose(
                 xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
-                [390.56379356, 337.93876716])
+                [435.4425832, 333.42862629])
     
     @testattr(casadi = True)
     def test_init_traj_opt(self):
@@ -967,6 +961,28 @@ class TestLocalDAECollocator:
         N.testing.assert_allclose(objective, cost_ref, 1e-3, 1e-4)
         N.testing.assert_array_less([total_exec_time, -total_exec_time],
                                     [1., 0.])
+    
+    @testattr(casadi = True)
+    def test_input_interpolator(self):
+        """
+        Test the input interpolator for simulation purposes
+        """
+        model = self.model_cstr
+        model_opt = self.model_cstr_extends
+        model.set(['c_init', 'T_init'], model_opt.get(['c_init', 'T_init']))
+        
+        # Optimize
+        opts = model_opt.optimize_options(self.algorithm)
+        opts['n_e'] = 100        
+        opt_res = model_opt.optimize(options=opts)
+        
+        # Simulate
+        interpolator = opt_res.solver.get_input_interpolator()
+        res = model.simulate(start_time=0., final_time=150.,
+                             input=('Tc', interpolator))
+        N.testing.assert_allclose([res["T"][-1], res["c"][-1]],
+                                  [284.62140206, 345.22510435])
+        
 
 class TestPseudoSpectral:
     

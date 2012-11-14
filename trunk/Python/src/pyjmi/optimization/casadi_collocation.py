@@ -411,6 +411,28 @@ class CasadiCollocator(object):
                 cnt += 1
         return (t_opt, dx_opt, x_opt, u_opt, w_opt, p_opt)
     
+    def get_input_interpolator(self):
+        """
+        Creates an interpolator for the inputs from the last optimization.
+        """
+        if self.hs == "free":
+            self._hi = map(lambda h: self.horizon * h, self.h_opt)
+        else:
+            self._hi = map(lambda h: self.horizon * h, self.h)
+        self._xi = self._u_opt[1:].reshape(self.n_e, self.model.n_u, self.n_cp)
+        self._xi = N.transpose(self._xi, [0, 2, 1])
+        self._ti = N.cumsum([self.t0] + self._hi[1:])
+        return self._input_interpolator
+    
+    def _input_interpolator(self, t):
+        i = N.clip(N.searchsorted(self._ti, t), 1, self.n_e)
+        tau = (t - self._ti[i - 1]) / self._hi[i]
+        
+        x = 0
+        for k in xrange(self.n_cp):
+            x += self._xi[i - 1, k, :] * self.pol.eval_basis(k + 1, tau, False)
+        return x
+    
     def get_ipopt_statistics(self):
         """ 
         Get statistics from the last optimization.
@@ -2486,6 +2508,20 @@ class LocalDAECollocator(CasadiCollocator):
                     t_index += 1
         else:
             raise ValueError("Unknown result mode %s." % self.result_mode)
+        
+        # Store optimal inputs for interpolator purposes
+        if self.result_mode == "collocation_points":
+            u_opt = var_opt['u']
+        else:
+            t_index = 0
+            var_type = 'u'
+            u_opt = N.empty([self.n_e * self.n_cp + 1, n_var[var_type]])
+            for i in xrange(1, self.n_e + 1):
+                for k in time_points[i]:
+                    u_i_k = self.nlp_opt[var_indices[i][k][var_type]]
+                    u_opt[t_index, :] = u_i_k.reshape(-1)
+                    t_index += 1
+        self._u_opt = u_opt
         
         # Denormalize minimum time problem
         if self._normalize_min_time:

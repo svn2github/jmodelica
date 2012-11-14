@@ -223,26 +223,22 @@ def run_demo(with_plots=True):
         plt.show()
 
     ### 4. Simulate to verify the optimal solution
-    # Set up the input trajectory
-    t = time_res 
-    u = Tc_res
-    u_traj = N.transpose(N.vstack((t, u)))
-    
     # Compile model
     sim_fmu = compile_fmu("CSTR.CSTR", file_path)
 
     # Load model
     sim_model = load_fmu(sim_fmu)
     
+    # Get solution interpolator
+    interpolator = res.solver.get_input_interpolator()
+    
     # Set initial values
     sim_model.set('c_init',c_0_A)
     sim_model.set('T_init',T_0_A)
-    sim_model.set('Tc',u[0])
 
     # Simulate using optimized input
     res = sim_model.simulate(start_time=0., final_time=150.,
-                             input=('Tc', u_traj),
-                             options={'solver': 'Radau5ODE'})
+                             input=('Tc', interpolator))
     
     # Extract variable profiles
     c_sim=res['c']

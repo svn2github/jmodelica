@@ -3667,16 +3667,7 @@ plt.show()
           is important, because the optimization algorithm does not make any
           guarantees with regards to solution accuracy. An insufficient number
           of elements and collocation points may result in poor solution
-          accuracy. We start by transforming the optimal control profile into
-          a trajectory compliant with the simulation method.</para>
-
-          <programlisting># Set up the input trajectory
-t = time_res 
-u = Tc_res
-u_traj = N.transpose(N.vstack((t, u)))
-</programlisting>
-
-          <para>Next, we compile and load the model used for
+          accuracy. We start by compiling and loading the model used for
           simulation.</para>
 
           <programlisting># Compile model
@@ -3686,22 +3677,33 @@ sim_fmu = compile_fmu("CSTR.CSTR", "CSTR.mop")
 sim_model = FMUModel(sim_fmu)
 </programlisting>
 
+          <para>The solution obtained from the optimization are values at a
+          finite number of time points, in this case the collocation points.
+          With the JMI framework, these values are normally interpolated
+          linearly when used for simulation purposes. The CasADi framework
+          also supports obtaining all the collocation polynomials for all the
+          input variables in the form of a function instead, which can be used
+          during simulation for greater accuracy. We obtain it from the result
+          object in the following manner.</para>
+
+          <programlisting># Get solution interpolator
+interpolator = res.solver.get_input_interpolator()
+</programlisting>
+
           <para>We specify the initial values and simulate using the optimal
-          trajectory with the Radau5 solver.</para>
+          trajectory.</para>
 
           <programlisting># Set initial values
 sim_model.set('c_init',c_0_A)
 sim_model.set('T_init',T_0_A)
-sim_model.set('Tc',u[0])
 
 # Simulate using optimized input
 res = sim_model.simulate(start_time=0., final_time=150.,
-                         input=('Tc', u_traj),
-                         options={'solver': 'Radau5ODE'})
+                         input=('Tc', interpolator))
 </programlisting>
 
           <para>Finally, we extract the simulation results and plot them. They
-          should be very similar to those shown in <xref
+          should be similar to those shown in <xref
           linkend="opt-fig-cstr-opt2" />.</para>
 
           <programlisting># Extract variable profiles
