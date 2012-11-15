@@ -57,44 +57,52 @@ import org.jmodelica.modelica.compiler.*;
  *   the test annotation.
  */
 public class TestAnnotationizer {
+	
+	private enum Lang { none, modelica, optimica };
 
 	public static void main(String[] args) throws Exception {
 		if (args.length == 0)
 			usageError(1);
 		
-		String filePath = args[0];
+		String filePath = null;
 		String testType = null;
-		String modelName = getPackageName(filePath);
+		String modelName = null;
 		String description = "";
 		String data = null;
 		boolean write = false;
-		boolean optimica = filePath.contains("Optimica");
+		Lang lang = Lang.none;
 		String opts = null;
 		
-		for (int i = 1; i < args.length; i++) {
-			String arg = (args[i].length() > 3) ? args[i].substring(3) : "";
-			if (args[i].startsWith("-t=")) 
-				testType = arg;
-			else if (args[i].startsWith("-c=")) 
-				modelName = composeModelName(modelName, arg);
-			else if (args[i].startsWith("-d=")) 
-				data = arg;
-			else if (args[i].startsWith("-p=")) 
-				opts = arg;
-			else if (args[i].equals("-w")) 
+		for (String arg : args) {
+			String value = (arg.length() > 3) ? arg.substring(3) : "";
+			if (arg.startsWith("-t=")) 
+				testType = value;
+			else if (arg.startsWith("-c=")) 
+				modelName = value;
+			else if (arg.startsWith("-d=")) 
+				data = value;
+			else if (arg.startsWith("-p=")) 
+				opts = value;
+			else if (arg.equals("-w")) 
 				write = true;
-			else if (args[i].equals("-h")) 
+			else if (arg.equals("-h")) 
 				usageError(0);
-			else if (args[i].equals("-o")) 
-				optimica = true;
-			else if (args[i].equals("-m")) 
-				optimica = false;
-			else if (args[i].startsWith("-")) 
-				System.err.println("Unrecognized option: " + args[i] + "\nUse -h for help.");
+			else if (arg.equals("-o")) 
+				lang = Lang.optimica;
+			else if (arg.equals("-m")) 
+				lang = Lang.modelica;
+			else if (arg.startsWith("-")) 
+				System.err.println("Unrecognized option: " + arg + "\nUse -h for help.");
+			else if (filePath == null)
+				filePath = arg;
 			else
-				description += " " + args[i];
+				description += " " + arg;
 		}
+		
 		description = description.trim();
+		modelName = composeModelName(getPackageName(filePath), modelName);
+		if (lang == Lang.none)
+			lang = filePath.contains("Optimica") ? Lang.optimica : Lang.modelica;
 		
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		if (!modelName.contains(".")) {
@@ -108,6 +116,7 @@ public class TestAnnotationizer {
 			testType = in.readLine().trim();			
 		}
 		
+		boolean optimica = lang == Lang.optimica;
 		doAnnotation(optimica, filePath, testType, modelName, description, opts, data, write);
 	}
 
