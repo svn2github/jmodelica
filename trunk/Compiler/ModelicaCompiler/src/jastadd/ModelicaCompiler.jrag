@@ -158,6 +158,8 @@ public class ModelicaCompiler {
 	protected File sourceDir = null;
 	protected File resourceDir = null;
 	
+	protected String[] targetPlatforms = null;
+	
 	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String cTemplatefile) {
 		this(options);
 		this.xmlTpl = xmlTpl;
@@ -840,6 +842,22 @@ public class ModelicaCompiler {
 		// set back all options
 		options.copyAllOptions(tempOptions);
 	}
+	
+    /**
+     * \brief Compiles a model and creates an FMUX.
+     * 
+     * Compiles a model (parsing, instantiating, flattening, code generation and 
+     * binary file compilation) and packs the result in a FMUX.
+     * 
+     * Convenience metod, equivalent to compileFMUX(className, fileName, ".").
+     * 
+     * @param className Name of model class in the model file to compile.
+     * @param fileName Array of model file or library paths.
+     */
+    public void compileFMUX(String className, String fileName[]) 
+        throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        compileFMUX(className, fileName, ".");
+    }
 
 	/**
 	 * \brief Compiles a JMU, FMU or FMUX (helper function for compileJMU, compileFMU and compileFMUX).
@@ -862,6 +880,7 @@ public class ModelicaCompiler {
 				ASTNode.beginStep("compileCCode()");
 				String cFileName = FClass.convertClassNameToUnderscore(className);
 				CCompilerDelegator ccompiler = getCCompiler();
+				ccompiler.setTargetPlatforms(targetPlatforms);
 				ccompiler.compileCCode(cFileName, makeTarget, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
 				ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());
 				ASTNode.endStep("compileCCode()");
@@ -1698,6 +1717,7 @@ public class ModelicaCompiler {
 					"  -modelicapath=<path to modelica libraries> \n" +
 					"  -optfile=<path to XML options file> -opt=opt1:val1,opt2:val2\n" + 
 					"  -dumpmemuse[=<resolution>] -invokegc -findflatinst \n" + 
+					"  -platform=<win32 or win64 or linux32 or linux64 or darwin32 or darwin64>" +
 					" and templates, if given, should be (in order): \n" + 
 					"  xml model description template \n" +
 					"  c template \n" +
@@ -1725,6 +1745,12 @@ public class ModelicaCompiler {
 			log.error(compilerName + " -parse expects a list of filenames.");
 			System.exit(1);
 		}
+		
+		// platform argument
+		String platforms = programarguments.get("platform");
+        if (platforms != null) {
+            targetPlatforms =  platforms.split(",");
+        }
 		
 		// set templates and options		
 		if (args.length >= arg+4) {
@@ -1769,6 +1795,8 @@ public class ModelicaCompiler {
 				compileFMUME(cl, name);
 			else if (programarguments.containsKey("fmucs"))
 				compileFMUCS(cl, name);
+			else if (programarguments.containsKey("fmux"))
+			    compileFMUX(cl, name);
 			else
 				compileJMU(cl, name);
 		} catch  (ModelicaClassNotFoundException e){
@@ -2120,11 +2148,23 @@ public class CompilationAbortedException extends RuntimeException {
 public abstract class CCompilerDelegator {
 	
 	private Map<String, String> env = System.getenv();
+	private String[] targetPlatforms = null;
 	
 	abstract public void compileCCode(String fileName, String target, File workDir, 
 			Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs);
+    
+    abstract protected String[] getDefaultTargetPlatforms();
+    
+    protected String[] getTargetPlatforms() {
+        if (targetPlatforms != null)
+            return targetPlatforms;
+        else
+            return getDefaultTargetPlatforms();
+    }
 	
-	abstract protected String[] getTargetPlatforms();
+	public void setTargetPlatforms(String[] platforms) {
+	    targetPlatforms = platforms;
+	}
 	
 	/**
 	 * Copy shared libs to binaries[\<platform>] folder.
@@ -2305,7 +2345,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 	/**
 	 * Get the target platforms to compile for.
 	 */
-	protected String[] getTargetPlatforms() {
+	protected String[] getDefaultTargetPlatforms() {
 		return new String[] { ModelicaCompiler.getPlatform() };
 	}
 	

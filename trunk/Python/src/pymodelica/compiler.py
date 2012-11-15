@@ -371,15 +371,17 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     
     TARGET = "-" + target
     
+    PLATFORM = "-platform=" + _get_platform()
+    
     MODEL_FILES = ",".join(file_name)
     
     MODELICA_CLASS = class_name
         
     # create cmd
     if compiler_options:
-        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, OPTIONS, TARGET, MODEL_FILES, MODELICA_CLASS]
+        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, OPTIONS, TARGET, PLATFORM, MODEL_FILES, MODELICA_CLASS]
     else:
-        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, TARGET, MODEL_FILES, MODELICA_CLASS]
+        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, TARGET, PLATFORM, MODEL_FILES, MODELICA_CLASS]
         
     check_call(cmd, stderr=STDOUT)
 
