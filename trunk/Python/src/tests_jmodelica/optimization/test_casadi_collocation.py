@@ -977,9 +977,8 @@ class TestLocalDAECollocator:
         opt_res = model_opt.optimize(options=opts)
         
         # Simulate
-        interpolator = opt_res.solver.get_input_interpolator()
-        res = model.simulate(start_time=0., final_time=150.,
-                             input=('Tc', interpolator))
+        opt_input = opt_res.solver.get_opt_input()
+        res = model.simulate(start_time=0., final_time=150., input=opt_input)
         N.testing.assert_allclose([res["T"][-1], res["c"][-1]],
                                   [284.62140206, 345.22510435])
         

@@ -411,9 +411,21 @@ class CasadiCollocator(object):
                 cnt += 1
         return (t_opt, dx_opt, x_opt, u_opt, w_opt, p_opt)
     
-    def get_input_interpolator(self):
+    def get_opt_input(self):
         """
-        Creates an interpolator for the inputs from the last optimization.
+        Get the optimized input variables as a function of time.
+        
+        The purpose of this method is to conveniently provide the optimized
+        input variables to a simulator.
+        
+        Returns::
+        
+            input_names --
+                Tuple consisting of the names of the input variables.
+            
+            input_interpolator --
+                Collocation polynomials for input variables as a function of
+                time.
         """
         if self.hs == "free":
             self._hi = map(lambda h: self.horizon * h, self.h_opt)
@@ -422,7 +434,8 @@ class CasadiCollocator(object):
         self._xi = self._u_opt[1:].reshape(self.n_e, self.model.n_u, self.n_cp)
         self._xi = N.transpose(self._xi, [0, 2, 1])
         self._ti = N.cumsum([self.t0] + self._hi[1:])
-        return self._input_interpolator
+        input_names = tuple([repr(u) for u in self.model.u])
+        return (input_names, self._input_interpolator)
     
     def _input_interpolator(self, t):
         i = N.clip(N.searchsorted(self._ti, t), 1, self.n_e)

@@ -3686,8 +3686,8 @@ sim_model = FMUModel(sim_fmu)
           during simulation for greater accuracy. We obtain it from the result
           object in the following manner.</para>
 
-          <programlisting># Get solution interpolator
-interpolator = res.solver.get_input_interpolator()
+          <programlisting># Get optimized input
+(_, opt_input) = res.solver.get_opt_input()
 </programlisting>
 
           <para>We specify the initial values and simulate using the optimal
@@ -3699,7 +3699,7 @@ sim_model.set('T_init',T_0_A)
 
 # Simulate using optimized input
 res = sim_model.simulate(start_time=0., final_time=150.,
-                         input=('Tc', interpolator))
+                         input=('Tc', opt_input))
 </programlisting>
 
           <para>Finally, we extract the simulation results and plot them. They

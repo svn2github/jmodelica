@@ -229,8 +229,8 @@ def run_demo(with_plots=True):
     # Load model
     sim_model = load_fmu(sim_fmu)
     
-    # Get solution interpolator
-    interpolator = res.solver.get_input_interpolator()
+    # Get optimized input
+    (_, opt_input) = res.solver.get_opt_input()
     
     # Set initial values
     sim_model.set('c_init',c_0_A)
@@ -238,7 +238,7 @@ def run_demo(with_plots=True):
 
     # Simulate using optimized input
     res = sim_model.simulate(start_time=0., final_time=150.,
-                             input=('Tc', interpolator))
+                             input=('Tc', opt_input))
     
     # Extract variable profiles
     c_sim=res['c']
