@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Random;
+import java.util.Set;
 import java.util.Stack;
 
 aspect Graphs {
@@ -1706,7 +1707,7 @@ public class BiPGraph {
 		return blt;
 	}
 	
-	private java.util.List<Eq> handGuidedEquations;
+	private Set<Eq> handGuidedEquations;
 	
 	public LinkedList<Stack<Eq>> computeRawBLT() {
 		index = 0;
@@ -1714,11 +1715,19 @@ public class BiPGraph {
 		components = new LinkedList<Stack<Eq>>();
 		tarjanReset();
 		
-		handGuidedEquations = new ArrayList<Eq>();
+		handGuidedEquations = new LinkedHashSet<Eq>();
 		if (fclass.root().options.getBooleanOption("merge_blt_blocks")) {
 			for (Eq e : getEquations()) {
-				if (e.isHandGuided())
+				if (e.isHandGuided()) {
 					handGuidedEquations.add(e);
+				}
+				if (e.getEquation().hasResidual()) {
+					for (FExp exp : e.getEquation().getResidual().getIterationVariables()) {
+						for (FVariable var : exp.referencedFVariablesInFExp()) {
+							handGuidedEquations.add(getVariable(var.name()).getMatching());
+						}
+					}
+				}
 			}
 		}
 		
@@ -1742,7 +1751,7 @@ public class BiPGraph {
 		e.setTarjanLowLink(index);
 		e.setVisited(true);
 		index++;
-		if (e.isHandGuided()) {
+		if (handGuidedEquations.contains(e)) {
 			for (Eq ee : handGuidedEquations) {
 				if (ee != e) {
 					if (!ee.isVisited()) {
