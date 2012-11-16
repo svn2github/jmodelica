@@ -22,7 +22,7 @@ import os.path
 import numpy as N
 import matplotlib.pyplot as plt
 
-# Import the JModelica.org Python packages
+# Import the needed JModelica.org Python methods
 from pymodelica import compile_fmu, compile_fmux
 from pyfmi import load_fmu
 from pyjmi import CasadiModel, get_files_path
@@ -135,12 +135,14 @@ def run_demo(with_plots=True):
     # Plot the initial guess trajectories
     if with_plots:
         plt.figure(1)
-        plt.clf()
+        plt.close()
+        plt.figure(1)
         plt.hold(True)
         plt.subplot(3, 1, 1)
         plt.plot(t_init_sim, c_init_sim)
         plt.grid()
         plt.ylabel('Concentration')
+        plt.title('Initial guess obtained by simulation')
 
         plt.subplot(3, 1, 2)
         plt.plot(t_init_sim, T_init_sim)
@@ -200,13 +202,15 @@ def run_demo(with_plots=True):
     # Plot the results
     if with_plots:
         plt.figure(2)
-        plt.clf()
+        plt.close()
+        plt.figure(2)
         plt.hold(True)
         plt.subplot(3, 1, 1)
         plt.plot(time_res, c_res)
         plt.plot([time_res[0], time_res[-1]], [c_ref, c_ref], '--')
         plt.grid()
         plt.ylabel('Concentration')
+        plt.title('Optimized trajectories')
 
         plt.subplot(312)
         plt.plot(time_res,T_res)
@@ -249,25 +253,27 @@ def run_demo(with_plots=True):
     # Plot the results
     if with_plots:
         plt.figure(3)
-        plt.clf()
+        plt.close()
+        plt.figure(3)
         plt.hold(True)
         plt.subplot(3, 1, 1)
-        plt.plot(time_res, c_res, '--')
-        plt.plot(time_sim, c_sim)
+        plt.plot(time_res, c_res, '--', lw=5)
+        plt.plot(time_sim, c_sim, lw=2)
         plt.legend(('optimized', 'simulated'))
         plt.grid()
         plt.ylabel('Concentration')
-
+        plt.title('Verification')
+        
         plt.subplot(3, 1, 2)
-        plt.plot(time_res, T_res, '--')
-        plt.plot(time_sim, T_sim)
+        plt.plot(time_res, T_res, '--', lw=5)
+        plt.plot(time_sim, T_sim, lw=2)
         plt.legend(('optimized', 'simulated'))
         plt.grid()
         plt.ylabel('Temperature')
-
+        
         plt.subplot(3, 1, 3)
-        plt.plot(time_res, Tc_res, '--')
-        plt.plot(time_sim, Tc_sim)
+        plt.plot(time_res, Tc_res, '--', lw=5)
+        plt.plot(time_sim, Tc_sim, lw=2)
         plt.legend(('optimized', 'simulated'))
         plt.grid()
         plt.ylabel('Cooling temperature')
