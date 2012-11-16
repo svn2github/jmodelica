@@ -59,13 +59,25 @@ aspect FlatTypeCheck {
     		}
     	}
 	
-		AnnotationNode enabledNode = annotation().vendorNode().forPath("IterationVariable/enabled");
-		if (root().options.getBooleanOption("enable_hand_guided_tearing") && enabledNode.exists()) {
-			FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
-			try {
-				enabledExp.ceval().booleanValue();
-			} catch (ConstantEvaluationException e) {
-				error("Could not evaluate enabled expression: " + enabledExp);
+		if (root().options.getBooleanOption("enable_hand_guided_tearing")) {
+			AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
+			AnnotationNode enabledNode = iterationNode.forPath("enabled");
+			if (enabledNode.exists()) {
+				FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
+				try {
+					enabledExp.ceval().booleanValue();
+				} catch (ConstantEvaluationException e) {
+					error("Could not evaluate enabled expression: " + enabledExp);
+				}
+			}
+			AnnotationNode handleNode = iterationNode.forPath("handle");
+			if (handleNode.exists()) {
+				FExp handleExp = containingInstNode().dynamicFExp(handleNode.exp().instantiate());
+				try {
+					handleExp.ceval().intValue();
+				} catch (ConstantEvaluationException e) {
+					error("Could not evaluate handle expression: " + handleExp);
+				}
 			}
 		}
 		
@@ -671,6 +683,14 @@ aspect FlatTypeCheck {
 				enabledExp.ceval().booleanValue();
 			} catch (ConstantEvaluationException e) {
 				error("Could not evaluate enabled expression: " + enabledExp);
+			}
+		}
+		if (hasHandleExp()) {
+			FExp handleExp = getHandleExp();
+			try {
+				handleExp.ceval().intValue();
+			} catch (ConstantEvaluationException e) {
+				error("Could not evaluate handle expression: " + handleExp);
 			}
 		}
 	}

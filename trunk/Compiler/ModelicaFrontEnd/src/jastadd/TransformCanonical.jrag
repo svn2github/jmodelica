@@ -2096,16 +2096,29 @@ aspect TransformCanonical {
 							break;
 						}
 					}
+					int equationHandle = e.getEquation().getResidual().getHandle();
 					if (tearVar == null) {
+						boolean handleMatch = false;
 						for (Eq eqn : block) {
 							for (Var var : eqn.getVariables()) {
 								if (var.getVariable().getManualIterationVariable()) {
-									tearVar = var;
-									tearVarNode = var.getVariable();
+									Var tmpTearVar = var;
+									int varHandle = var.getVariable().getTearingHandle();
+									if (tmpTearVar != null) {
+										if (equationHandle == varHandle) {
+											tearVar = tmpTearVar;
+											tearVarNode = var.getVariable();
+											handleMatch = true;
+											break;
+										} else if (tearVar == null && varHandle == 0) {
+											tearVar = tmpTearVar;
+											tearVarNode = var.getVariable();
+										}
+									}
 									break;
 								}
 							}
-							if (tearVar != null)
+							if (tearVar != null && handleMatch)
 								break;
 						}
 					}
@@ -2140,6 +2153,8 @@ aspect TransformCanonical {
 						newBlock.addAll(newGraph.getEquations());
 						block = newBlock;
 					}
+					if (tearVar.getVariable().getTearingHandle() != equationHandle)
+						e.getEquation().warning("Tearing handle missmatch, equation handle = " + equationHandle + ", variable handle = " + tearVar.getVariable().getTearingHandle());
 					it.remove();
 					eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e.getEquation(), tearVar.getVariable(), false));
 					tear(block, eb);
@@ -2387,24 +2402,6 @@ aspect TransformCanonical {
 			}
 		}
 		return tearInner(g, eb);
-	}
-	
-	/**
-	 * Builds a FResidual instance for "this" equation.  
-	 */
-	protected FResidual AbstractEquation.buildResidual() {
-		if (!root().options.getBooleanOption("enable_hand_guided_tearing"))
-			return null;
-		AnnotationNode residualNode = annotation().vendorNode().forPath("ResidualEquation");
-		if (!residualNode.exists())
-			return null;
-		Exp enabledExp = residualNode.forPath("enabled").exp();
-		FInstResidual residual = new FInstResidual();
-		if (enabledExp != null)
-			residual.setEnabled(enabledExp.instantiate());
-		for (AnnotationNode iterationVariableNode : residualNode.forPath("iterationVariables"))
-			residual.addIterationVariable(iterationVariableNode.exp().instantiate());
-		return residual;
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			

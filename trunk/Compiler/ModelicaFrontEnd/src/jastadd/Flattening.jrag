@@ -720,6 +720,9 @@ aspect Flattening {
 			} else {
 				fv.setManualIterationVariable(true);
 			}
+			AnnotationNode handleNode = iterationNode.forPath("handle");
+			if (handleNode.exists())
+				fv.setTearingHandle(containingInstNode().dynamicFExp(handleNode.exp().instantiate()).ceval().intValue());
 		}
 		
 		return fv;
@@ -1017,6 +1020,9 @@ aspect Flattening {
 		FResidual flattened = new FResidual();
 		for (FExp e : getIterationVariables()) {
 			flattened.addIterationVariable(e.flatten(prefix));
+		}
+		if (hasHandleExp()) {
+			flattened.setHandle(getHandleExp().ceval().intValue());
 		}
 		return flattened;
 	}
@@ -1728,6 +1734,27 @@ aspect InstantiatedExpressions {
 				getLeft().instantiate(), getRight().instantiate()));
 	}
 
+	/**
+	 * Builds a FResidual instance for "this" equation.  
+	 */
+	protected FResidual AbstractEquation.buildResidual() {
+		if (!root().options.getBooleanOption("enable_hand_guided_tearing"))
+			return null;
+		AnnotationNode residualNode = annotation().vendorNode().forPath("ResidualEquation");
+		if (!residualNode.exists())
+			return null;
+		FInstResidual residual = new FInstResidual();
+		Exp enabledExp = residualNode.forPath("enabled").exp();
+		if (enabledExp != null)
+			residual.setEnabled(enabledExp.instantiate());
+		Exp handleExp = residualNode.forPath("handle").exp();
+		if (handleExp != null)
+			residual.setHandleExp(handleExp.instantiate());
+		for (AnnotationNode iterationVariableNode : residualNode.forPath("iterationVariables"))
+			residual.addIterationVariable(iterationVariableNode.exp().instantiate());
+		return residual;
+	}
+	
 	public FAbstractEquation ConnectClause.instantiate() {
 	    Opt o = null;
 	    if (getComment().hasStringComment())
