@@ -365,17 +365,15 @@ aspect AliasVariables {
 			public String toString() {
 				StringBuilder str = new StringBuilder();
 				str.append("{");
-				int i=0;
+				
+				AliasVariable iterationAlias = getIterationVariable();
+				str.append(iterationAlias);
+				
 				for (AliasVariable alias : aliases) {
-					if (alias.isNegated()) {
-						str.append("-");
-					}
-					str.append(alias.getFVariable().name());
-					//str.append("(" + alias.getFVariable().varKind() + ")");
-					if ((i<(aliases.size())-1)) {
-						str.append(",");
-					}
-					i++;
+					if (alias == iterationAlias)
+						continue;
+					str.append(',');
+					str.append(alias);
 				}
 				str.append("}");
 				return str.toString();
@@ -467,6 +465,14 @@ aspect AliasVariables {
 			 */
 			private void setSet(AliasSet set) {
 				this.set = set;
+			}
+			
+			@Override
+			public String toString() {
+				if (isNegated())
+					return '-' + getFVariable().name();
+				else
+					return getFVariable().name();
 			}
 			
 		}
