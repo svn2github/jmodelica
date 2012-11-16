@@ -51,6 +51,15 @@ public class OptionRegistry {
 		public static final String TRIVIAL = "trivial";
 		public static final String ALL     = "all";
 	}
+	public interface RuntimeLogLevel {
+		public static final int NONE = 0;
+		public static final int FATAL = 1;
+		public static final int ERROR = 2;
+		public static final int WARNING = 3; /* default */
+		public static final int INFO = 4;
+		public static final int VERBOSE = 5;
+		public static final int DEBUG = 6;
+	}
 	
 	public enum OptionType { compiler, runtime }
 	public static final OptionType compiler = OptionType.compiler;
@@ -256,22 +265,90 @@ public class OptionRegistry {
 		     "Generate parameters for runtime options. For internal use, should always be true for normal compilation."),
 			 
 		// Runtime options
-		TEST 
-			("test_runtime_options", 
-			 runtime, 
-			 false, 
-			 "For testing the runtime options framework - has no effect and will be removed later"),
-		TEST2 
-			("test_runtime_options_2", 
-			 runtime, 
-			 false, 
-			 "For testing the runtime options framework - has no effect and will be removed later");
-		/*
+        /*
 		 * Note: Two JUnit tests are affected by changes to runtime options:
 		 * ModelicaCompiler : TeansformCanonicalTests.mo : TestRuntimeOptions1
 		 * ModelicaCBackEnd : CCodeGenTests.mo : TestRuntimeOptions1
 		 */
-		
+        RUNTIME_LOG_LEVEL
+            ("log_level",
+              runtime, 
+              RuntimeLogLevel.WARNING,
+              "Log level for the runtime: 0 - none, 1 - fatal error, 2 - error, 3 - warning, 4 - info, 5 -verbose, 6 - debug.",
+                RuntimeLogLevel.NONE, RuntimeLogLevel.DEBUG),
+        ENFROCE_BOUNDS
+            ("enforce_bounds",
+            runtime,
+            false,
+            "Enforce min-max bounds on variables in the equation blocks."),
+        NLE_SOLVER_LOG_LEVEL
+            ("nle_solver_log_level",
+              runtime, 
+              0,
+              "Log level for non-linear equation solver: 0 - no progress messages, 1,2,3 - different levels of verbosity.",
+              0,3),
+        USE_JACOBIAN_SCALING
+            ("use_jacobian_scaling",
+            runtime,
+            false,
+            "If jacobian rows/columns should be automatically scaled in equation block solvers."),
+        USE_AUTOMATIC_SCALING
+            ("use_automatic_scaling",
+            runtime,
+            true,
+            "Enable equations and variables automatic scaling in equation block solvers."),
+        RESCALE_EACH_STEP
+            ("rescale_each_step",
+               runtime,
+               false,
+               "Scaling should be updated at every step (only active if use_automatic_scaling is on)."),
+        RESCALE_AFTER_SINGULAR_JAC
+            ("rescale_after_singular_jac",
+                runtime,
+                true,
+                 "If scaling should be updated after singular jac was detected (only active if use_automatic_scaling is set)."),
+        USE_BRENT_IN_1D
+            ("use_Brent_in_1d",
+                runtime,
+                false,
+                "Use Brent search to improve accuracy in solution of 1D non-linear equations."),
+        NLE_SOLVER_DEFAULT_TOL
+            ("nle_solver_default_tol",
+                runtime,
+                1e-10,
+             "Default tolerance for the equation block solver.",
+             1e-14, 1e-2),
+        NLE_SOLVER_CHECK_JAC_COND
+            ("nle_solver_check_jac_cond",
+            runtime, 
+            false,
+            "NLE solver should check Jacobian condition number and log it."),
+        NLE_SOLVER_MIN_TOL
+            ("nle_solver_min_tol",
+                runtime,
+                1e-12,
+                "Minimum tolerance for the equation block solver. Note that, for instance, default Kinsol tolerance is machine precision pwr 1/3, i.e., 1e-6."+
+                    "Tighter tolerance is default in JModelica.", 1e-14, 1e-6),
+        NLE_SOLVER_TOL_FACTOR
+            ("nle_solver_tol_factor",
+                runtime,
+                0.0001,
+                "Tolerance safety factor for the non-linear equation block solver. Used when external solver specifies relative tolerance.",
+                1e-6,1.0),
+        EVENTS_DEFAULT_TOL
+            ("events_default_tol",
+              runtime,
+             1e-10,
+             "Default tolerance for the event iterations.",
+              1e-14, 1e-2),
+        EVENTS_TOL_FACTOR
+            ("events_tol_factor",
+                runtime,
+              0.0001,
+              "Tolerance safety factor for the event iterations. Used when external solver specifies relative tolerance.",
+              1e-6,1.0);
+    
+    		
 					
 		public String key;
 		public OptionType type;

@@ -7940,15 +7940,27 @@ model TestRuntimeOptions1
 	annotation(__JModelica(UnitTesting(tests={ 
 		TransformCanonicalTestCase(
 			name="TestRuntimeOptions1",
-			description="Test that parameters for runtime options are generated properly",
+			description="",
 			generate_runtime_option_parameters=true,
+			log_level=1,
 			generate_ode=true,
-			test_runtime_options=true,
 			flatModel="
 fclass TransformCanonicalTests.TestRuntimeOptions1
  Real x;
- parameter Boolean _test_runtime_options = true /* true */;
- parameter Boolean _test_runtime_options_2 = false /* false */;
+ parameter Boolean _enforce_bounds = false /* false */;
+ parameter Real _events_default_tol = 1.0E-10 /* 1.0E-10 */;
+ parameter Real _events_tol_factor = 1.0E-4 /* 1.0E-4 */;
+ parameter Integer _log_level = 1 /* 1 */;
+ parameter Boolean _nle_solver_check_jac_cond = false /* false */;
+ parameter Real _nle_solver_default_tol = 1.0E-10 /* 1.0E-10 */;
+ parameter Integer _nle_solver_log_level = 0 /* 0 */;
+ parameter Real _nle_solver_min_tol = 1.0E-12 /* 1.0E-12 */;
+ parameter Real _nle_solver_tol_factor = 1.0E-4 /* 1.0E-4 */;
+ parameter Boolean _rescale_after_singular_jac = true /* true */;
+ parameter Boolean _rescale_each_step = false /* false */;
+ parameter Boolean _use_Brent_in_1d = false /* false */;
+ parameter Boolean _use_automatic_scaling = true /* true */;
+ parameter Boolean _use_jacobian_scaling = false /* false */;
 equation
  x = 1;
 end TransformCanonicalTests.TestRuntimeOptions1;
