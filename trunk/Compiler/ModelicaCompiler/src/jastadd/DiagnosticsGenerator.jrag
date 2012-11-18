@@ -677,6 +677,10 @@ public class DiagnosticsGenerator {
 		return "#CCF0CC";
 	}
 
+	protected String AlgorithmBlock.diagnostics_generateBLTTable_color() {
+		return "#CCF0CC";
+	}
+	
 	protected String EquationBlock.diagnostics_generateBLTTable_color() {
 		return "#CCCCF0";
 	}

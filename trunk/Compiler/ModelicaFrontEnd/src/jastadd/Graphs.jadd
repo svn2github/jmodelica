@@ -73,7 +73,7 @@ public class EquationBlockFactory {
 		}
 		
 		// Check if if the component corresponds to one single function 
-		// call equation or when equation
+		// call equation or when equation or algorithm block
 		FAbstractEquation e = eqns.get(0);
 		boolean one_equation = true;
 		for (FAbstractEquation eqn : eqns) {
@@ -89,6 +89,12 @@ public class EquationBlockFactory {
 				return new WhenEquationBlock(ee);
 		}
 
+		// Algorithm
+		if (e instanceof FAlgorithmBlock && one_equation) {
+			FAlgorithmBlock ee = (FAlgorithmBlock)e;
+				return new AlgorithmBlock(ee);
+		}
+		
 		// Check if the component contains a single function call equation		
 		if (e instanceof FFunctionCallEquation && one_equation) {		
 			FFunctionCallEquation fce = (FFunctionCallEquation)e;
@@ -809,7 +815,6 @@ public class BiPGraph {
     	Var v = null;
 		Map<FVariable, Integer> emptyMap = Collections.emptyMap();
 		for (FAbstractEquation e : eqns) {
-
 			int n_eq = e.numScalarEquations();
 			LinkedHashSet<Eq> groupMembers = new LinkedHashSet<Eq>();
 			Map<FVariable, Integer> ffceLeftVarMap = emptyMap;

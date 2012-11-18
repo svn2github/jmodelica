@@ -633,7 +633,7 @@ aspect TransformCanonical {
 
    /**
     * SimpleEquationBlock is the base class of ScalarEquationBlock, FunctionCallEquationBlock
-    * and WhenEquationBlock.
+    * AlgorithmBLock and WhenEquationBlock.
     */
    public abstract class SimpleEquationBlock extends AbstractEquationBlock {}
 
@@ -1479,6 +1479,87 @@ aspect TransformCanonical {
 	
 	}
 
+	public class AlgorithmBlock extends SimpleEquationBlock {
+		
+		protected FAlgorithmBlock alg;
+		
+		public AlgorithmBlock(FAlgorithmBlock alg) {
+			this.alg = alg;
+		}
+	
+		
+		public ArrayList<FAbstractEquation> equations() {
+			ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+			l.add(alg);
+			return l;
+		}
+		
+		/*
+		 * The active variables are assigned their values when the block is solved.
+		 */
+		public ArrayList<FVariable> activeVariables() {
+			// - Find assigned variables
+			ArrayList<FVariable> assignedVars = new ArrayList<FVariable>();
+			for (FIdUse use : alg.assignedFIdUses()) {
+				if (!use.myFV().isUnknown() && !assignedVars.contains(use.myFV())) {
+					FVariable fv = (FVariable) use.myFV();
+					assignedVars.add(fv);
+				}
+			}
+			return assignedVars;
+		}	
+		
+		public boolean isSolvable() {
+			return true;
+		}
+				
+		public boolean isMixed() {
+			return false;
+		}
+		
+		public ArrayList<FAbstractEquation> differentiatedEquations() {
+			ArrayList<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
+			return diffedEq;
+		}
+
+		
+		public String toStringVerbose() {	
+			StringBuffer str = new StringBuffer();
+			str.append("**** Block ****\n");
+			str.append(toString());
+			str.append("**** Depends on ****\n");
+			for (FVariable fv : dependsOn()) {
+				str.append(fv.prettyPrint("") + "\n");
+			} 
+			str.append("**** Inactive variables ****\n");
+			for (FVariable fv : inactiveVariables()) {
+				str.append(fv.prettyPrint("") + "\n");
+			} 
+		    str.append("**** Block ends ****\n");				
+			return str.toString();
+		}
+		
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append("Algorithm block of " + activeVariables().size() + " variables:\n");
+			str.append("Unknown variables:\n");
+			for (FVariable fv : activeVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}
+/*			str.append("Inactive variables:\n");
+			for (FVariable fv : inactiveVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}*/
+			str.append("Algorithm:\n");
+			for (FAbstractEquation feq : equations()) {
+				str.append("  " + feq.prettyPrint("") + "\n");	
+			}
+			
+			return str.toString();
+		}
+				
+	}
+	
     public class MatchingPair {
     	private FAbstractEquation eqn;
     	private FVariable fv;

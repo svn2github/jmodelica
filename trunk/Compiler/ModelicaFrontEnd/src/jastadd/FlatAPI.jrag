@@ -761,7 +761,17 @@ aspect FlatAPI {
 	syn int FAbstractEquation.numScalarEquations() = 1;
 	eq FEquation.numScalarEquations()           = getLeft().size().numElements();
 	eq FConnectClause.numScalarEquations()      = getConnector1().size().numElements();
-	eq FAlgorithmBlock.numScalarEquations()     = -1;  // TODO: Support FAlgorithmBlock
+	eq FAlgorithmBlock.numScalarEquations() {
+		ArrayList<FVariable> assignedVars = new ArrayList<FVariable>();
+		for (FIdUse use : assignedFIdUses()) {
+			if (!use.myFV().isUnknown() && !assignedVars.contains(use.myFV())) {
+				FVariable fv = (FVariable) use.myFV();
+				assignedVars.add(fv);
+			}
+		}
+		return assignedVars.size();
+
+	}
 	eq FIfWhenElseEquation.numScalarEquations() = numScalarEqnsInList(getFAbstractEquations());
 	eq FForClauseE.numScalarEquations()         = 
 		numScalarEqnsInList(getFAbstractEquations()) * numForElems(getFForIndexs());

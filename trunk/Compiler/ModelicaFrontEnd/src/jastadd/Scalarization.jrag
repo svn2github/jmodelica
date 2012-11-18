@@ -1144,6 +1144,17 @@ aspect Scalarization {
 		}
 	}
 	
+	public void FAlgorithmBlock.scalarize(List<FAbstractEquation> eqns,
+			List<FVariable> vars, Map<String,FExp> indexMap) {		
+		/*
+		List<FStatement> stmts = new List<FStatement>();
+		for (FStatement stmt : getFStatements())
+			stmt.scalarizeStmt(vars, stmts, indexMap);	
+	    eqns.add(new FAlgorithmBlock(stmts));	
+	    */
+		eqns.add(this);
+	}
+	
 	/**
 	 * \brief Scalarize left and right expressions and create new scalar equations.
 	 */
