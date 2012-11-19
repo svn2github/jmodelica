@@ -237,7 +237,7 @@ public class CADGenerator extends CGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (shouldGenerateODEJacobians(fclass)) {
+			if (!fclass.root().options.getBooleanOption("generate_only_initial_system") && shouldGenerateODEJacobians(fclass)) {
 				genPrinter.print("\n/******** Declarations *******/\n");
 				fclass.getDAEStructuredBLT().genSolvedVarDecls_CAD(genPrinter, INDENT);
 				genPrinter.print("\njmi_real_t** dz = jmi->dz;\n");

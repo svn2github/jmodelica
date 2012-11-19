@@ -417,6 +417,45 @@ equation
 ")})));
 end CCodeGenTest14;
 
+model CCodeGenTest15
+  Real x1(start=0); 
+  Real x2(start=1); 
+  input Real u; 
+  parameter Real p = 1;
+  Real w = x1+x2;
+equation 
+  der(x1) = (1-x2^2)*x1 - x2 + p*u; 
+  der(x2) = x1;
+
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="CCodeGenTest15",
+			description="Test the compiler option generate_only_initial_system",
+			generate_ode=true,
+			generate_dae=false,
+			equation_sorting=true,
+			generate_only_initial_system=true,
+			template="
+$C_ode_derivatives$
+$C_ode_guards$
+$C_ode_time_events$
+$C_DAE_event_indicator_residuals$
+$C_ode_initialization$
+",
+			generatedCode="
+
+
+
+
+    model_ode_guards(jmi);
+  _x2_1 = 1;
+  _x1_0 = 0;
+  _der_x1_5 = ( 1 - ( (1.0 * (_x2_1) * (_x2_1)) ) ) * ( _x1_0 ) - ( _x2_1 ) + ( _p_3 ) * ( _u_2 );
+  _der_x2_6 = _x1_0;
+  _w_4 = _x1_0 + _x2_1;
+")})));
+end CCodeGenTest15;
 
 model CLogExp1
  Boolean x = true;

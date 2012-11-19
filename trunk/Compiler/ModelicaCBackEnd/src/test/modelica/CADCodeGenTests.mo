@@ -3161,6 +3161,53 @@ _Y_7 = tmp_var_3;
 ")})));
 end CADOde1;
 
+model CADOde2
+    function F
+            input Real x1;
+            input Real x2;
+            input Real x3;
+            input Real x4;
+            output Real a;
+            output Real b;
+            output Real c;
+            output Real d;
+        algorithm
+            a := sin(x1);
+            b := cos(x1);
+            c := tan(x2);
+            d := sin(x3);
+        end F;
+        Real x1(start=.1);
+        Real x2(start=.2);
+        Real x3(start=.3);
+        Real x4(start=.4);
+        Real e(start=1);
+        Real f(start=2);
+        Real g(start=3);
+        output Real Y;
+    equation
+        (e,f,g,Y) = F(x1,x2,x3,x4);
+        der(x1) = sin(2+1);
+        der(x2) = cos(x1*x3+2)*5;
+        der(x3) = tanh(x1*x2*5*x4+3);
+        der(x4) = 1;
+
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CADCodeGenTestCase(
+			name="CADOde2",
+			description="",
+			generate_ode_jacobian=true,
+			eliminate_alias_variables=false,
+			fmi_version=2.0,
+			generate_ode=true,
+			equation_sorting=true,
+			generate_only_initial_system=true,
+			template="$CAD_ode_derivatives$",
+			generatedCode=""
+ )})));
+end CADOde2;
+
 model CADExpInFuncArg1
 	function f
 		input Real x;

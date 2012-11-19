@@ -86,11 +86,13 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			for (FRelExp e : fclass.relExpInEquations()) 
-				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-			Enumerator enumerator = new Enumerator();
-			for (FRelExp e : fclass.relExpInEquations())
-				e.genResidual_C(enumerator,INDENT,genPrinter);
+		    if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
+		        for (FRelExp e : fclass.relExpInEquations()) 
+		            e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+		        Enumerator enumerator = new Enumerator();
+		        for (FRelExp e : fclass.relExpInEquations())
+		            e.genResidual_C(enumerator,INDENT,genPrinter);
+		    }
 		}
 	
 	}
@@ -457,7 +459,7 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode")) {
+			if (!fclass.root().options.getBooleanOption("generate_only_initial_system") && fclass.root().options.getBooleanOption("generate_ode")) {
 				for (FExp e : fclass.guardExpInEquations()) 
 					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				int i=0;
@@ -507,7 +509,7 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode")) {
+			if (!fclass.root().options.getBooleanOption("generate_only_initial_system") && fclass.root().options.getBooleanOption("generate_ode")) {
 				for (FSampleExp e : fclass.samplers()) 
 					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				genPrinter.print("  jmi_real_t nextTimeEvent;\n");
@@ -623,7 +625,7 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode")) {
+			if (!fclass.root().options.getBooleanOption("generate_only_initial_system") && fclass.root().options.getBooleanOption("generate_ode")) {
 				fclass.getDAEStructuredBLT().genVarDecls_C(genPrinter, INDENT);
 				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");						
 				fclass.getDAEStructuredBLT().genOdeDerivativeBlocks(genPrinter);

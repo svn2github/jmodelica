@@ -58,6 +58,11 @@ public class OptionRegistry {
 	
 	private enum Default {
 		// Compiler options
+        GENERATE_ONLY_INITIAL_SYSTEM 
+            ("generate_only_initial_system", 
+             compiler, 
+             false, 
+             "If this option is set to true (default is false), only the initial equation system will be generated."),
 		DIVIDE_BY_VARS_IN_TEARING 
 			("divide_by_vars_in_tearing", 
 			 compiler, 
