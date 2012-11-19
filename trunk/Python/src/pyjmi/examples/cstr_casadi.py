@@ -134,8 +134,7 @@ def run_demo(with_plots=True):
     
     # Plot the initial guess trajectories
     if with_plots:
-        plt.figure(1)
-        plt.close()
+        plt.close(1)
         plt.figure(1)
         plt.hold(True)
         plt.subplot(3, 1, 1)
@@ -201,8 +200,7 @@ def run_demo(with_plots=True):
     
     # Plot the results
     if with_plots:
-        plt.figure(2)
-        plt.close()
+        plt.close(2)
         plt.figure(2)
         plt.hold(True)
         plt.subplot(3, 1, 1)
@@ -252,8 +250,7 @@ def run_demo(with_plots=True):
     
     # Plot the results
     if with_plots:
-        plt.figure(3)
-        plt.close()
+        plt.close(3)
         plt.figure(3)
         plt.hold(True)
         plt.subplot(3, 1, 1)
