@@ -1090,13 +1090,17 @@ aspect TransformCanonical {
 	 * ScalarEquationBlock represents a scalar equation. Base class for
 	 * SolvedScalarEquationBlock and UnsolvedScalarEquationBlock.
 	 */
-	public abstract class ScalarEquationBlock extends SimpleEquationBlock {
+	public class ScalarEquationBlock extends SimpleEquationBlock {
 		protected FEquation eqn;
 		protected FVariable fv;
 		
 		public ScalarEquationBlock(FEquation eqn, FVariable fv) {
 			this.eqn = eqn;
 			this.fv = fv;
+		}
+		
+		public boolean isSolvable() {
+			return eqn.isSolved(fv.name());
 		}
 		
 		public ArrayList<FAbstractEquation> equations() {
@@ -1142,11 +1146,6 @@ aspect TransformCanonical {
 			super(eqn, fv);
 		}
 
-		public boolean isSolvable() {
-			return true;
-		}
-		
-		
 		public FExp solution() {
 			return eqn.solution(fv.name());
 		}
@@ -1178,10 +1177,6 @@ aspect TransformCanonical {
 		public UnsolvedScalarEquationBlock(FEquation eqn, FVariable fv) {
 			super(eqn, fv);
 		}	
-		
-		public boolean isSolvable() {
-			return false;
-		}
 		
 	}
 
@@ -1901,11 +1896,8 @@ aspect TransformCanonical {
 		if (root().options.getBooleanOption("equation_sorting") && g.getUnmatchedVariables().size()==0 && g.getUnmatchedEquations().size()==0) {	
 			
 			if (root().options.getBooleanOption("enable_tearing")){
-				try {
-					daeBLT = computeTearings(g);
-				} catch (TearingException e) {
-					return;
-				}
+				daeBLT = computeTearings(g);
+				
 			}else{
 				daeBLT = g.computeBLT();
 			}
@@ -2060,11 +2052,7 @@ aspect TransformCanonical {
 		
 			g.tarjanReset();
 			if (root().options.getBooleanOption("enable_tearing")){
-				try {
-					daeInitBLT = computeTearings(g);
-				} catch (TearingException e) {
-					return;
-				}
+				daeInitBLT = computeTearings(g);
 			}else{
 				daeInitBLT = g.computeBLT();
 			}
@@ -2079,108 +2067,37 @@ aspect TransformCanonical {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-	public BLT FClass.computeTearings(BiPGraph graph) throws TearingException {
+	public BLT FClass.computeTearings(BiPGraph graph) {
 		beginStep("computeTearings()");
-		try {
-			LinkedList<Stack<Eq>> blt = graph.computeRawBLT();
-			BLT tearBLT = new BLT(this);
-			for (Stack<Eq> block : blt) { // Iterate over all (global) BLT-blocks
-				boolean singleEquation = true;
-				Iterator<Eq> it = block.iterator();
-				Eq last = it.next();
-				while (it.hasNext()) {
-					Eq e = it.next();
-					if (last.getEquation() != e.getEquation()) {
-						singleEquation = false;
-						break;
-					}
-				}
-				AbstractEquationBlock simpleBlock = null;
-				if (singleEquation) {
-					simpleBlock = EquationBlockFactory.createSimpleEquationBlock(block, true);
-					if (!simpleBlock.isSolvable())
-						simpleBlock = null;
-				}
-				if (simpleBlock != null) {
-					tearBLT.add(simpleBlock);
-				} else {
-					TornEquationBlock eb = new TornEquationBlock();
-					tearHandGuided(block, eb);
-					tearBLT.add(eb);
-				}
-			}
-			return tearBLT;
-		} finally {
-			endStep("computeTearings()");
-		}
-	}
-	
-	private void FClass.tearHandGuided(Stack<Eq> block, TornEquationBlock eb) throws TearingException {
-		boolean recalculateMatchings = false;
-		Map<FVariable, Var> varsInBlock = new LinkedHashMap<FVariable, Var>();
-		for (Eq e : block) {
-			varsInBlock.put(e.getMatching().getVariable(), e.getMatching());
-		}
-		Iterator<Eq> it = block.iterator();
-		while (it.hasNext()) {
-			Eq e = it.next();
-			if (e.getEquation().hasResidual() && e.getEquation().getResidual().hasIterationVariable()) {
-				FVariable fIterVar = e.getEquation().getResidual().iterationVariable();
-				Var iterVar = varsInBlock.get(fIterVar);
-				if (iterVar == null) {
-					e.getEquation().getResidual().warning("Can not use hand guided tearing pair, equation and variable resides in different blocks. Variable: " + fIterVar.name() + ". Equation: " + e.getEquation());
-					continue;
-				}
-				it.remove();
-				varsInBlock.remove(fIterVar);
-				recalculateMatchings = true;
-				eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e.getEquation(), fIterVar, false));
-			}
-		}
-		if (recalculateMatchings) {
-			BiPGraph newGraph = new BiPGraph(this, "", "");
-			for (Eq e : block) {
-				newGraph.addEquation(e.getName(), "", e.getEquation());
-			}
-			for (Map.Entry<FVariable, Var> v : varsInBlock.entrySet()) {
-				newGraph.addVariable(v.getValue().getName(), "", v.getKey());
-			}
-			for (Eq e : block) {
-				Eq newE = newGraph.getEquation(e.getName());
-				for (Var v : e.getVariables()) {
-					Var newV = newGraph.getVariable(v.getName());
-					if (newV != null) {
-						newE.addVariable(newV);
-						newV.occurrence();
-					}
-				}
-			}
-			newGraph.maximumMatching(true);
-			if (newGraph.getUnmatchedEquations().size() > 0 || newGraph.getUnmatchedVariables().size() > 0) {
-				error("Unable to perform hand guided tearing since the resulting system is unsolvable.");
-				throw new TearingException();
-			}
-			LinkedList<Stack<Eq>> innerBLT = newGraph.computeRawBLT();
-			boolean allInnerAreSolved = true;
-			java.util.List<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
-			for (Stack<Eq> innerBlock : innerBLT) {
-				SimpleEquationBlock seb = EquationBlockFactory.createSimpleEquationBlock(innerBlock, true, true);
-				if (seb != null && seb.isSolvable()) {
-					solvedBlocks.add(seb);
-				} else {
-					allInnerAreSolved = false;
+		LinkedList<Stack<Eq>> blt = graph.computeRawBLT();
+		BLT tearBLT = new BLT(this);
+		for (Stack<Eq> block : blt) { // Iterate over all (global) BLT-blocks
+			boolean singleEquation = true;
+			Iterator<Eq> it = block.iterator();
+			Eq last = it.next();
+			while (it.hasNext()) {
+				Eq e = it.next();
+				if (last.getEquation() != e.getEquation()) {
+					singleEquation = false;
 					break;
 				}
 			}
-			if (allInnerAreSolved) {
-				for (SimpleEquationBlock seb : solvedBlocks)
-					eb.addSolvedBlock(seb);
-				return;
+			AbstractEquationBlock simpleBlock = null;
+			if (singleEquation) {
+				simpleBlock = EquationBlockFactory.createSimpleEquationBlock(block, true);
+				if (!simpleBlock.isSolvable())
+					simpleBlock = null;
 			}
-			block = new Stack<Eq>();
-			block.addAll(newGraph.getEquations());
+			if (simpleBlock != null) {
+				tearBLT.add(simpleBlock);
+			} else {
+				TornEquationBlock eb = new TornEquationBlock();
+				tear(block, eb);
+				tearBLT.add(eb);
+			}
 		}
-		tear(block, eb);
+		endStep("computeTearings()");
+		return tearBLT;
 	}
 	
 	private void FClass.tear(Stack<Eq> block, TornEquationBlock eb) {
@@ -2241,74 +2158,90 @@ aspect TransformCanonical {
 			}
 		} else {
 			// Check for hand guided tearing
-//			while (it.hasNext()) {
-//				Eq e = it.next();
-//				if (e.getEquation().hasResidual()) {
-//					Var tearVar = null;
-//					ASTNode tearVarNode = null;
-//					if (e.getEquation().getResidual().hasIterationVariable()) {
-//						FExp exp = e.getEquation().getResidual().getIterationVariable();
-//						for (FVariable var : exp.referencedFVariablesInFExp()) {
-//							for (Eq eqn : block) {
-//								tearVar = eqn.getVariable(var.name());
-//								if (tearVar != null)
-//									break;
-//							}
-//							break;
-//						}
-//						if (tearVar != null)
-//							tearVarNode = exp;
-//					}
-//					if (tearVar == null) {
-//						for (Eq eqn : block) {
-//							for (Var var : eqn.getVariables()) {
-//								if (var.getVariable().getManualIterationVariable()) {
-//									tearVar = var;
-//									tearVarNode = var.getVariable();
-//									break;
-//								}
-//							}
-//							if (tearVar != null)
-//								break;
-//						}
-//					}
-//					if (tearVar == null) {
-//						tearVar = e.getMatching();
-//					} else if (e.getMatching() != tearVar) {
-//						BiPGraph newGraph = new BiPGraph(this, "", "");
-//						for (Eq eqn : block) {
-//							if (eqn != e)
-//								newGraph.addEquation(eqn.getName(), "", eqn.getEquation());
-//							if (eqn.getMatching() != tearVar)
-//								newGraph.addVariable(eqn.getMatching().getName(), "", eqn.getMatching().getVariable());
-//						}
-//						for (Eq eqn : block) {
-//							if (eqn == e)
-//								continue;
-//							Eq gEq = newGraph.getEquation(eqn.getName());
-//							for (Var v : eqn.getVariables()) {
-//								Var gVar = newGraph.getVariable(v.getName());
-//								if (gVar != null) {
-//									gEq.addVariable(gVar);
-//									gVar.occurrence();
-//								}
-//							}
-//						}
-//						newGraph.maximumMatching(true);
-//						if (newGraph.getUnmatchedEquations().size() > 0 && tearVarNode != null) {
-//							tearVarNode.warning("Unable to use hand guided tearing variable " + tearVar.getName() + " in equation " + e.getEquation().toString());
-//							continue;
-//						}
-//						Stack<Eq> newBlock = new Stack<Eq>();
-//						newBlock.addAll(newGraph.getEquations());
-//						block = newBlock;
-//					}
-//					it.remove();
-//					eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e.getEquation(), tearVar.getVariable(), false));
-//					tear(block, eb);
-//					return;
-//				}
-//			}
+			while (it.hasNext()) {
+				Eq e = it.next();
+				if (e.getEquation().hasResidual()) {
+					Var tearVar = null;
+					ASTNode tearVarNode = null;
+					for (FExp exp : e.getEquation().getResidual().getIterationVariables()) {
+						for (FVariable var : exp.referencedFVariablesInFExp()) {
+							for (Eq eqn : block) {
+								tearVar = eqn.getVariable(var.name());
+								if (tearVar != null)
+									break;
+							}
+							break;
+						}
+						if (tearVar != null) {
+							tearVarNode = exp;
+							break;
+						}
+					}
+					int equationHandle = e.getEquation().getResidual().getHandle();
+					if (tearVar == null) {
+						boolean handleMatch = false;
+						for (Eq eqn : block) {
+							for (Var var : eqn.getVariables()) {
+								if (var.getVariable().getManualIterationVariable()) {
+									Var tmpTearVar = var;
+									int varHandle = var.getVariable().getTearingHandle();
+									if (tmpTearVar != null) {
+										if (equationHandle == varHandle) {
+											tearVar = tmpTearVar;
+											tearVarNode = var.getVariable();
+											handleMatch = true;
+											break;
+										} else if (tearVar == null && varHandle == 0) {
+											tearVar = tmpTearVar;
+											tearVarNode = var.getVariable();
+										}
+									}
+									break;
+								}
+							}
+							if (tearVar != null && handleMatch)
+								break;
+						}
+					}
+					if (tearVar == null) {
+						tearVar = e.getMatching();
+					} else if (e.getMatching() != tearVar) {
+						BiPGraph newGraph = new BiPGraph(this, "", "");
+						for (Eq eqn : block) {
+							if (eqn != e)
+								newGraph.addEquation(eqn.getName(), "", eqn.getEquation());
+							if (eqn.getMatching() != tearVar)
+								newGraph.addVariable(eqn.getMatching().getName(), "", eqn.getMatching().getVariable());
+						}
+						for (Eq eqn : block) {
+							if (eqn == e)
+								continue;
+							Eq gEq = newGraph.getEquation(eqn.getName());
+							for (Var v : eqn.getVariables()) {
+								Var gVar = newGraph.getVariable(v.getName());
+								if (gVar != null) {
+									gEq.addVariable(gVar);
+									gVar.occurrence();
+								}
+							}
+						}
+						newGraph.maximumMatching(true);
+						if (newGraph.getUnmatchedEquations().size() > 0 && tearVarNode != null) {
+							tearVarNode.warning("Unable to use hand guided tearing variable " + tearVar.getName() + " in equation " + e.getEquation().toString());
+							continue;
+						}
+						Stack<Eq> newBlock = new Stack<Eq>();
+						newBlock.addAll(newGraph.getEquations());
+						block = newBlock;
+					}
+					if (tearVar.getVariable().getTearingHandle() != equationHandle)
+						e.getEquation().warning("Tearing handle missmatch, equation handle = " + equationHandle + ", variable handle = " + tearVar.getVariable().getTearingHandle());
+					it.remove();
+					eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e.getEquation(), tearVar.getVariable(), false));
+					tear(block, eb);
+					return;
+				}
+			}
 			// Else: Start out by trying to insert residuals that contain
 			// 		 few variables. 
 			ArrayList<FAbstractEquation> residuals = new ArrayList<FAbstractEquation>();
@@ -2475,23 +2408,24 @@ aspect TransformCanonical {
 		Eq res = null;
 		int maxOcc = 0;
 		int minSolvOcc = 0;
-//		for (Eq e : g.getEquations()) {
-//			if (e.getEquation().hasResidual()) {
-//				FResidual residual = e.getEquation().getResidual();
-//				res = e;
-//				if (residual.hasIterationVariable()) {
-//					FExp exp = residual.getIterationVariable();
-//					for (FVariable var : exp.referencedFVariablesInFExp()) {
-//						tear = g.getVariable(var.name());
-//						break;
-//					}
-//				}
-//				if (tear == null)
-//					tear = res.getSolvableMatching();
-//				break;
-//			}
-//		}
-//		if (tear == null) {
+		for (Eq e : g.getEquations()) {
+			if (e.getEquation().hasResidual()) {
+				FResidual residual = e.getEquation().getResidual();
+				res = e;
+				for (FExp exp : residual.getIterationVariables()) {
+					for (FVariable var : exp.referencedFVariablesInFExp()) {
+						tear = g.getVariable(var.name());
+						break;
+					}
+					if (tear != null)
+						break;
+				}
+				if (tear == null)
+					tear = res.getSolvableMatching();
+				break;
+			}
+		}
+		if (tear == null) {
 			for (Eq e : g.getEquations()) {
 				Var tmp = e.getSolvableMatching();
 				int occ = tmp.getNbrV();
@@ -2506,13 +2440,13 @@ aspect TransformCanonical {
 				}
 			}
 			res = tear.getSolvableMatching();
-//		}
+		}
 		tear.isTear(true);
 		res.isRes(true);
 		eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res.getEquation(), tear.getVariable(), false));
 		LinkedList<Stack<Eq>> blt = g.computeTearBlocks();
 		for (Stack<Eq> block : blt) {
-			if (block.size() == 1) { //TODO: Consider records...
+			if (block.size() == 1) {
 				Eq e = block.get(0);
 				Var v = e.getSolvableMatching();
 				eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e.getEquation(), v.getVariable(), true));
@@ -2549,9 +2483,6 @@ aspect TransformCanonical {
 			}
 		}
 		return tearInner(g, eb);
-	}
-	
-	public class TearingException extends ModelicaException {
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			

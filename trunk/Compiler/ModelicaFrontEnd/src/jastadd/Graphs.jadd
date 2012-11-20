@@ -55,19 +55,14 @@ public class EquationBlockFactory {
 	}
 
 	static SimpleEquationBlock createSimpleEquationBlock(java.util.List<FAbstractEquation> eqns, 
-			 java.util.List<FVariable> fvs, boolean solve) {
-		return createSimpleEquationBlock(eqns, fvs, solve, false);
-	}
-
-	static SimpleEquationBlock createSimpleEquationBlock(java.util.List<FAbstractEquation> eqns, 
-			 java.util.List<FVariable> fvs, boolean solve, boolean duringTearing) {
+														 java.util.List<FVariable> fvs, boolean solve) {
 				
 		if (eqns.size()==1 ) {
 			FAbstractEquation e = eqns.get(0);
 			FVariable fv = fvs.get(0);
 			if (e instanceof FEquation) {
 				FEquation ee = (FEquation)e;
-				if (solve && ee.isSolved(fv.name(), duringTearing)) { // Solved scalar equation
+				if (solve && ee.isSolved(fv.name())) { // Solved scalar equation
 					return new SolvedScalarEquationBlock(ee,fv);
 				} else { // Unsolved scalar equation
 					return new UnsolvedScalarEquationBlock(ee,fv);				
@@ -108,7 +103,7 @@ public class EquationBlockFactory {
 			ArrayList<FVariable> l = new ArrayList<FVariable>();
 			for (int i=0;i<eqns.size();i++) {
 				l.add(fvs.get(i));
-				if (!eqns.get(i).isSolved(fvs.get(i).name(), duringTearing)) {
+				if (!eqns.get(i).isSolved(fvs.get(i).name())) {
 					isSolvable = false;
 				}
 			} // Solved FunctionCallEquation				
@@ -134,14 +129,6 @@ public class EquationBlockFactory {
 	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
 	 */
 	static SimpleEquationBlock createSimpleEquationBlock(Stack<Eq> component, boolean solve) {
-		return createSimpleEquationBlock(component, solve, false);
-	}
-	
-	/*
-	 * This method takes a list of Eq objects and create equation blocks
-	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
-	 */
-	static SimpleEquationBlock createSimpleEquationBlock(Stack<Eq> component, boolean solve, boolean duringTearing) {
 		ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
 		ArrayList<FVariable> fvs = new ArrayList<FVariable>();
 		
@@ -150,7 +137,7 @@ public class EquationBlockFactory {
 			eqns.add(eqn.getEquation());
 		} 
 
-		return createSimpleEquationBlock(eqns,fvs,solve, duringTearing);
+		return createSimpleEquationBlock(eqns,fvs,solve);
 		
 	}
 
@@ -1739,10 +1726,11 @@ public class BiPGraph {
 				if (e.isHandGuided()) {
 					handGuidedEquations.add(e);
 				}
-				if (e.getEquation().hasResidual() && e.getEquation().getResidual().hasIterationVariable()) {
-					FExp exp = e.getEquation().getResidual().getIterationVariable();
-					for (FVariable var : exp.referencedFVariablesInFExp()) {
-						handGuidedEquations.add(getVariable(var.name()).getMatching());
+				if (e.getEquation().hasResidual()) {
+					for (FExp exp : e.getEquation().getResidual().getIterationVariables()) {
+						for (FVariable var : exp.referencedFVariablesInFExp()) {
+							handGuidedEquations.add(getVariable(var.name()).getMatching());
+						}
 					}
 				}
 			}

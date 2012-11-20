@@ -676,13 +676,21 @@ aspect FlatTypeCheck {
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();
 	
-	public void InstResidual.typeCheck() {
+	public void FInstResidual.typeCheck() {
 		if (hasEnabled()) {
 			FExp enabledExp = getEnabled();
 			try {
 				enabledExp.ceval().booleanValue();
 			} catch (ConstantEvaluationException e) {
 				error("Could not evaluate enabled expression: " + enabledExp);
+			}
+		}
+		if (hasHandleExp()) {
+			FExp handleExp = getHandleExp();
+			try {
+				handleExp.ceval().intValue();
+			} catch (ConstantEvaluationException e) {
+				error("Could not evaluate handle expression: " + handleExp);
 			}
 		}
 	}

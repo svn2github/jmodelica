@@ -202,6 +202,8 @@ aspect Scalarization {
 
 		fv.setManualIterationVariable(getManualIterationVariable());
 		
+		fv.setTearingHandle(getTearingHandle());
+
 		return fv;
 	}
 	
@@ -1166,8 +1168,10 @@ aspect Scalarization {
 	
 	public FResidual FResidual.scalarize(Map<String,FExp> indexMap) {
 		FResidual scalarized = new FResidual();
-		if (hasIterationVariable())
-			scalarized.setIterationVariable(getIterationVariable().scalarize(indexMap));
+		scalarized.setHandle(getHandle());
+		for (FExp exp : getIterationVariables()) {
+			scalarized.addIterationVariable(exp.scalarize(indexMap));
+		}
 		return scalarized;
 	}
 	
@@ -1284,8 +1288,9 @@ aspect Scalarization {
 	 */
 	protected FResidual FResidual.createScalarFResidual(Index i) {
 		FResidual scalarized = new FResidual();
-		if (hasIterationVariable())
-			scalarized.setIterationVariable(getIterationVariable().getArray().get(i));
+		for (FExp exp : getIterationVariables()) {
+			scalarized.addIterationVariable(exp.getArray().get(i));
+		}
 		return scalarized;
 	}
 	
