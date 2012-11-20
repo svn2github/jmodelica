@@ -122,8 +122,7 @@ abstract FVariable : FAbstractVariable ::= FVisibilityType
                                            [BindingExp:FExp]
                                            [FStringComment]
                                            FQName
-                                           <ManualIterationVariable:boolean>
-                                           <TearingHandle:int>;
+                                           <ManualIterationVariable:boolean>;
 
 /**
  * Represents a set of attributes that can be used by several variables.
@@ -452,7 +451,8 @@ FInitialEquation : FEquationType;
 abstract FAbstractEquation : BaseNode ::= Type:FEquationType
                                           /InitialEquation:FEquation*/ 
                                           /[DynamicFAbstractEquation:FAbstractEquation]/
-                                          [Residual:FResidual]; 
+                                          <Name:String>
+                                          [Residual:FResidual];
 
 /**
  * \brief Unsupported equation.
@@ -475,8 +475,8 @@ FFunctionCallEquation : FAbstractEquation ::= Left:FFunctionCallLeft* Call:FAbst
 /**
  * \brief A class for storing hand guided tearing variables.
  */
-FResidual : BaseNode ::= IterationVariable:FExp* <Handle:int>;
-FInstResidual : FResidual ::= [Enabled:FExp] [HandleExp:FExp];
+FResidual : BaseNode ::= [IterationVariable:FExp];
+InstResidual : FResidual ::= <Scope:InstNode> [Enabled:FExp];
 
 /**
  * \brief One of the left hand side variables in a function call equation. 
