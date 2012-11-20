@@ -1,0 +1,28 @@
+aspect InstLookupEquations{
+	
+	inh InstNode InstAccess.equationLookupScope();
+	eq InstDot.getInstAccess(int i).equationLookupScope() = 
+		(i == 0) ? equationLookupScope() : getInstAccessNoListTrans(i - 1).myInstComponentDecl();
+	eq InstNode.getChild().equationLookupScope() = this;
+	eq InstRoot.getChild().equationLookupScope() = null;
+	eq FlatRoot.getChild().equationLookupScope() = null;
+	
+	syn FAbstractEquation InstAccess.myEquation();
+	eq InstDot.myEquation() = getLastInstAccess().myEquation();
+	
+	eq InstNamedAccess.myEquation() = equationLookupScope().memberEquation(getID());
+	
+	eq InstGlobalAccess.myEquation() = getInstAccess().myEquation();
+	
+	syn FAbstractEquation InstNode.memberEquation(String name) {
+		for (FAbstractEquation eqn : getFAbstractEquations()) {
+			if (eqn.getName().equals(name))
+				return eqn;
+		}
+		return null;
+	}
+	
+	syn FAbstractEquation FExp.referencedEquation() = null;
+	eq FInstAccessExp.referencedEquation() = getInstAccess().myEquation();
+	
+}

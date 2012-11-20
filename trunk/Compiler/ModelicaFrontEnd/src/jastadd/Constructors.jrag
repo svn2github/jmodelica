@@ -82,14 +82,14 @@ aspect Constructors {
 	 * \brief Construcs a connect clause without any residual.
 	 */
 	public FConnectClause.FConnectClause(FEquationType type, Opt<FStringComment> comment, ConnectClause connectClause, FIdUseInstAccess left, FIdUseInstAccess right) {
-		this(type, new Opt<FResidual>(), comment, connectClause, left, right);
+		this(type, (String)null, new Opt<FResidual>(), comment, connectClause, left, right);
 	}
 	
 	/**
 	 * \brief Construcs a else equation without any residual.
 	 */
 	public FElseEquation.FElseEquation(FEquationType type, List<FAbstractEquation> eqns) {
-		this(type, new Opt<FResidual>(), eqns);
+		this(type, (String)null, new Opt<FResidual>(), eqns);
 	}
 	
 	/**
@@ -97,28 +97,28 @@ aspect Constructors {
 	 * residual.
 	 */
 	public FEquation.FEquation(FExp left, FExp right) {
-		this(new FNormalEquation(), new Opt<FResidual>(), left, right);
+		this(new FNormalEquation(), (String)null, new Opt<FResidual>(), left, right);
 	}
 	
 	/**
 	 * \brief Constructs an equation that is not marked as residual.
 	 */
 	public FEquation.FEquation(FEquationType type, FExp left, FExp right) {
-		this(type, new Opt<FResidual>(), left, right);
+		this(type, (String)null, new Opt<FResidual>(), left, right);
 	}
 	
 	/**
 	 * \brief Constructs an equation that is not initial
 	 */
 	public FEquation.FEquation(FResidual residual, FExp left, FExp right) {
-		this(new FNormalEquation(), residual, left, right);
+		this(new FNormalEquation(), null, residual, left, right);
 	}
 	
 	/**
 	 * \brief Constructs an equation
 	 */
-	public FEquation.FEquation(FEquationType type, FResidual residual, FExp left, FExp right) {
-		this(type, new Opt<FResidual>(), left, right);
+	public FEquation.FEquation(FEquationType type, String name, FResidual residual, FExp left, FExp right) {
+		this(type, name, new Opt<FResidual>(), left, right);
 		if (residual != null)
 			setResidual(residual);
 	}
@@ -127,14 +127,14 @@ aspect Constructors {
 	 * \brief Constructs a function call equation that is not initial.
 	 */
 	public FFunctionCallEquation.FFunctionCallEquation(List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
-		this(new FNormalEquation(), new Opt<FResidual>(), left, call);
+		this(new FNormalEquation(), (String)null, new Opt<FResidual>(), left, call);
 	}
 	
 	/**
 	 * \brief Constructs a function call equation.
 	 */
 	public FFunctionCallEquation.FFunctionCallEquation(FEquationType type, List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
-		this(type, new Opt<FResidual>(), left, call);
+		this(type, (String)null, new Opt<FResidual>(), left, call);
 	}
 	
 	/**
@@ -148,21 +148,21 @@ aspect Constructors {
 	 * \brief Constructs a for clause equation that is not initial.
 	 */
 	public FForClauseE.FForClauseE(List<FForIndex> indices, List<FAbstractEquation> eqns) {
-		this(new FNormalEquation(), new Opt<FResidual>(), indices, eqns);
+		this(new FNormalEquation(), (String)null, new Opt<FResidual>(), indices, eqns);
 	}
 	
 	/**
 	 * \brief Constructs a for clause equation that is not initial.
 	 */
 	public InstForClauseE.InstForClauseE(List<InstForIndex> indices, List<FAbstractEquation> eqns) {
-		this(new FNormalEquation(), new Opt<FResidual>(), indices, eqns);
+		this(new FNormalEquation(), (String)null, new Opt<FResidual>(), indices, eqns);
 	}
 	
 	/**
 	 * \brief Constructs a for clause equation.
 	 */
 	public InstForClauseE.InstForClauseE(FEquationType type, List<InstForIndex> indices, List<FAbstractEquation> eqns) {
-		this(type, new Opt<FResidual>(), indices, eqns);
+		this(type, (String)null, new Opt<FResidual>(), indices, eqns);
 	}
 	
 	/**
@@ -194,14 +194,14 @@ aspect Constructors {
 	 * \brief Constructs an algorithm block that is not initial.
 	 */
 	public FAlgorithmBlock.FAlgorithmBlock(List<FStatement> stmts) {
-		this(new FNormalEquation(), new Opt<FResidual>(), stmts);
+		this(new FNormalEquation(), (String)null, new Opt<FResidual>(), stmts);
 	}
 	
 	/**
 	 * \brief Constructs an algorithm block.
 	 */
 	public FAlgorithmBlock.FAlgorithmBlock(FEquationType type, List<FStatement> stmts) {
-		this(type, new Opt<FResidual>(), stmts);
+		this(type, (String)null, new Opt<FResidual>(), stmts);
 	}
 	
 	/**
@@ -252,7 +252,7 @@ aspect Constructors {
 	 * \brief Constructs an if equation.
 	 */
 	public FIfEquation.FIfEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
-		this(type, new Opt<FResidual>(), eqns, guard, elseClause);
+		this(type, (String)null, new Opt<FResidual>(), eqns, guard, elseClause);
 	}
     
 	/**
@@ -328,14 +328,14 @@ aspect Constructors {
 	 * \brief Constructs an unsuported equation.
 	 */
 	public FUnsupportedEquation.FUnsupportedEquation(FEquationType type) {
-		this(type, new Opt<FResidual>());
+		this(type, (String)null, new Opt<FResidual>());
 	}
 	
 	/**
 	 * \brief Constructs a when equation.
 	 */
 	public FWhenEquation.FWhenEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
-		this(type, new Opt<FResidual>(), eqns, guard, elseClause);
+		this(type, (String)null, new Opt<FResidual>(), eqns, guard, elseClause);
 	}
 	
 	/**
@@ -524,7 +524,7 @@ aspect Constructors {
 	 */
 	public FRealVariable.FRealVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, 0);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
 	}
 	
 	/**
@@ -532,7 +532,7 @@ aspect Constructors {
 	 */
 	public FDerivativeVariable.FDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, 0);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
 	}
 	
 	/**
@@ -540,7 +540,7 @@ aspect Constructors {
 	 */
 	public FDummyDerivativeVariable.FDummyDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, 0);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
 	}
 	
 	/**
@@ -548,7 +548,7 @@ aspect Constructors {
 	 */
 	public FHDerivativeVariable.FHDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, int order) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, 0, order);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, order);
 	}
 	
 	/**
@@ -556,7 +556,7 @@ aspect Constructors {
 	 */
 	public FHDummyDerivativeVariable.FHDummyDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, int order) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, 0, order);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, order);
 	}
 	
 	/**
@@ -565,7 +565,7 @@ aspect Constructors {
 	public FPreRealVariable.FPreRealVariable(FRealVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable(), fv.getTearingHandle());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable());
 	}
 	
 	/**
@@ -573,7 +573,7 @@ aspect Constructors {
 	 */
 	public FIntegerVariable.FIntegerVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, 0);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
 	}
 	
 	/**
@@ -582,7 +582,7 @@ aspect Constructors {
 	public FPreIntegerVariable.FPreIntegerVariable(FIntegerVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable(), fv.getTearingHandle());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable());
 	}
 	
 	/**
@@ -590,7 +590,7 @@ aspect Constructors {
 	 */
 	public FEnumVariable.FEnumVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, FQName enumName) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, 0, enumName);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, enumName);
 	}
 	
 	/**
@@ -599,7 +599,7 @@ aspect Constructors {
 	public FPreEnumVariable.FPreEnumVariable(FEnumVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable(), fv.getTearingHandle(), fv.getEnum().fullCopy());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable(), fv.getEnum().fullCopy());
 	}
 	
 	/**
@@ -607,7 +607,7 @@ aspect Constructors {
 	 */
 	public FBooleanVariable.FBooleanVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, 0);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
 	}
 	
 	/**
@@ -616,7 +616,7 @@ aspect Constructors {
 	public FPreBooleanVariable.FPreBooleanVariable(FBooleanVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable(), fv.getTearingHandle());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable());
 	}
 	
 	/**
@@ -624,7 +624,7 @@ aspect Constructors {
 	 */
 	public FStringVariable.FStringVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, 0);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
 	}
 	
 	/**
@@ -633,7 +633,7 @@ aspect Constructors {
 	public FPreStringVariable.FPreStringVariable(FStringVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable(), fv.getTearingHandle());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable());
 	}
 	
 	/**
@@ -641,7 +641,7 @@ aspect Constructors {
 	 */
 	public FRecordVariable.FRecordVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, FQName record) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, 0, record);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, record);
 	}
 
 	

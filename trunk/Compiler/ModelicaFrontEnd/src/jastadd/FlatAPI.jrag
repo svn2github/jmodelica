@@ -1237,6 +1237,10 @@ aspect FlatEnumerations {
 	syn int FEnumSpecification.numEnumLiterals() = 0;
 	eq FEnumLiteralList.numEnumLiterals() = getNumFEnumLiteral();
 	
+	syn boolean InstResidual.hasScope() = getScope() != null;
+	
+	syn FVariable FResidual.iterationVariable() = getIterationVariable().referencedFVariablesInFExp().iterator().next();
+	
 }
 
 aspect FlatCausality {
