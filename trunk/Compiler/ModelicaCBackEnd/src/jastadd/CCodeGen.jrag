@@ -15,7 +15,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.Collections;
 
@@ -1650,23 +1649,23 @@ aspect CCodeGen {
 		return res;
 	}
 	
-	public ArrayList<FVariable> AbstractEquationBlock.blockResidualVariables_C() {
+	public java.util.List<FVariable> AbstractEquationBlock.blockResidualVariables_C() {
 		return iterationVariables();
 	}
 	
-	public ArrayList<FVariable> MixedEquationBlock.blockResidualVariables_C() {
+	public java.util.List<FVariable> MixedEquationBlock.blockResidualVariables_C() {
 		return activeContinuousVariables();
 	}
 	
-	public ArrayList<FAbstractEquation> AbstractEquationBlock.blockResidualEquations_C() {
+	public java.util.List<FAbstractEquation> AbstractEquationBlock.blockResidualEquations_C() {
 		return equations();
 	}
 	
-	public ArrayList<FAbstractEquation> MixedEquationBlock.blockResidualEquations_C() {
+	public java.util.List<FAbstractEquation> MixedEquationBlock.blockResidualEquations_C() {
 		return continuousEquations();
 	}
 	
-	public ArrayList<FAbstractEquation> TornEquationBlock.blockResidualEquations_C() {
+	public java.util.List<FAbstractEquation> TornEquationBlock.blockResidualEquations_C() {
 		return unsolvedEquations();
 	}
 	
@@ -2196,7 +2195,7 @@ aspect CCodeGen {
 		}
 	}
 	
-	public ArrayList<AbstractEquationBlock> BLT.getAllBlocks() {
+	public java.util.List<AbstractEquationBlock> BLT.getAllBlocks() {
 		return this;
 	}
 	

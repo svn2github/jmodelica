@@ -16,6 +16,7 @@
 
 //import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Queue;
 import java.util.Stack;
@@ -418,19 +419,19 @@ aspect TransformCanonical {
 	 */
 	public abstract class AbstractEquationBlock {
 	
-		private LinkedHashSet<AbstractEquationBlock> predecessors = new LinkedHashSet<AbstractEquationBlock>();
-		private LinkedHashSet<AbstractEquationBlock> successors = new LinkedHashSet<AbstractEquationBlock>();
-		private LinkedHashSet<FVariable> dependsOnVariables = null; 
+		private Set<AbstractEquationBlock> predecessors = new LinkedHashSet<AbstractEquationBlock>();
+		private Set<AbstractEquationBlock> successors = new LinkedHashSet<AbstractEquationBlock>();
+		private Set<FVariable> dependsOnVariables = null; 
 	    private boolean visited = false;
 	    
 		private boolean predecessorsSet = false;
 	
-		public abstract ArrayList<FAbstractEquation> equations();
+		public abstract java.util.List<FAbstractEquation> equations();
 		
 		/*
 		 * The active variables are assigned their values when the block is solved.
 		 */
-		public abstract ArrayList<FVariable> activeVariables();
+		public abstract java.util.List<FVariable> activeVariables();
 
 		/* 
 		 * These are the variables that are solved for if an iterative
@@ -438,12 +439,12 @@ aspect TransformCanonical {
 		 * to the set of active variables, e.g., in the case of torn
 		 * or mixed blocks.
 		 */ 
-		public ArrayList<FVariable> iterationVariables() {
+		public java.util.List<FVariable> iterationVariables() {
 			return activeVariables();
 		}
 		
-		public ArrayList<FVariable> inactiveVariables() {
-			ArrayList<FVariable> s = new ArrayList<FVariable>();
+		public java.util.List<FVariable> inactiveVariables() {
+			java.util.List<FVariable> s = new ArrayList<FVariable>();
 			for (FAbstractEquation e : equations()) {
 				s.addAll(e.algebraicVariables());
 				s.addAll(e.derivativeVariables());	
@@ -452,8 +453,8 @@ aspect TransformCanonical {
 			return s;	
 		}		
 
-		public ArrayList<FVariable> independentVariables() {
-			ArrayList<FVariable> s = new ArrayList<FVariable>();
+		public java.util.List<FVariable> independentVariables() {
+			java.util.List<FVariable> s = new ArrayList<FVariable>();
 			for (FAbstractEquation e : equations()) {
 				s.addAll(e.inputs());
 				s.addAll(e.differentiatedVariables());	
@@ -479,7 +480,7 @@ aspect TransformCanonical {
 			}		
 		}
 		
-		public LinkedHashSet<FVariable> dependsOn() {
+		public Set<FVariable> dependsOn() {
 			if (this.dependsOnVariables==null) {
 				dependsOnVariables = new LinkedHashSet<FVariable>();
 				dependsOnVariables.addAll(independentVariables());
@@ -499,8 +500,8 @@ aspect TransformCanonical {
 			return false;
 		}
 		
-		public ArrayList<FAbstractEquation> differentiatedEquations() {
-			ArrayList<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
+		public java.util.List<FAbstractEquation> differentiatedEquations() {
+			java.util.List<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
 			for (FAbstractEquation e : equations()) {
 				if (e.getMeIntegrated()!=null) {
 					diffedEq.add(e);
@@ -509,8 +510,8 @@ aspect TransformCanonical {
 			return diffedEq;
 		}
 
-		public ArrayList<AbstractEquationBlock> getAllPredecessors() {
-			ArrayList<AbstractEquationBlock> allPredecessors = new ArrayList<AbstractEquationBlock>(); 
+		public java.util.List<AbstractEquationBlock> getAllPredecessors() {
+			java.util.List<AbstractEquationBlock> allPredecessors = new ArrayList<AbstractEquationBlock>(); 
 			for (AbstractEquationBlock eb : getPredecessors()) {
 				for (AbstractEquationBlock ebb : eb.getAllPredecessors()) {
 					if (!allPredecessors.contains(ebb)) {
@@ -524,11 +525,11 @@ aspect TransformCanonical {
 			return allPredecessors;
 		}	
 		
-		public LinkedHashSet<AbstractEquationBlock> getPredecessors() {
+		public Set<AbstractEquationBlock> getPredecessors() {
 			return predecessors;
 		}	
 
-		public LinkedHashSet<AbstractEquationBlock> getSuccessors() {
+		public Set<AbstractEquationBlock> getSuccessors() {
 			return successors;
 		}	
 		
@@ -571,58 +572,10 @@ aspect TransformCanonical {
 			for (FVariable fv : inactiveVariables()) {
 				str.append(fv.prettyPrint("") + "\n");
 			} 
-/*			str.append("**** Predecessors ****\n");
-			for (AbstractEquationBlock eb : getPredecessors()) {
-				str.append(eb.toString());
-				str.append("---------\n");
-			}
-			str.append("**** All Predecessors ****\n");
-			for (AbstractEquationBlock eb : getAllPredecessors()) {
-				str.append(eb.toString());
-				str.append("---------\n");
-			}
-			str.append("**** Successors ****\n");
-			for (AbstractEquationBlock eb : getSuccessors()) {
-				str.append(eb.toString());
-				str.append("---------\n");
-			}*/
-		    str.append("**** Block ends ****\n");				
+			str.append("**** Block ends ****\n");
 			return str.toString();
 		}
 	
-		protected ArrayList<FAbstractEquation> equationList(
-				ArrayList<MatchingPair> mps, MatchingPairFilter mpf) {
-			Set<FAbstractEquation> s = new LinkedHashSet<FAbstractEquation>();
-			for (MatchingPair mp : mps) {
-				if (mpf.filter(mp))
-					s.add(mp.getEquation());
-			}
-			ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>(s.size());
-			l.addAll(s);
-			return l;
-		}
-		
-		protected ArrayList<FVariable> variableList(
-			ArrayList<MatchingPair> mps, MatchingPairFilter mpf) {
-			ArrayList<FVariable> l = new ArrayList<FVariable>();
-			for (MatchingPair mp : mps) {
-				if (mpf.filter(mp))
-					l.add(mp.getFVariable());
-			}
-			return l;
-		}
-		
-		protected interface MatchingPairFilter {
-			public boolean filter(MatchingPair mp);
-		}
-		
-		protected MatchingPairFilter ALL_MATCHING_PAIR_FILTER = new MatchingPairFilter() {
-			public boolean filter(MatchingPair mp) {
-				return true;
-			}
-		};
-		
-		
 		public abstract String toString();
 		
 		public boolean mergeBlock(AbstractEquationBlock block) {
@@ -643,9 +596,9 @@ aspect TransformCanonical {
 	 */
 	public class EquationBlock extends AbstractEquationBlock {
 		
-		protected ArrayList<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
+		protected java.util.List<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
 		
-		public EquationBlock(ArrayList<SimpleEquationBlock> blocks) {
+		public EquationBlock(java.util.List<SimpleEquationBlock> blocks) {
 			for (SimpleEquationBlock block : blocks)
 				addBlock(block);
 		}
@@ -658,22 +611,20 @@ aspect TransformCanonical {
 			blocks.add(b);
 		}	
 		
-		public ArrayList<FVariable> activeVariables() {
-			ArrayList<FVariable> l = new ArrayList<FVariable>();
+		public java.util.List<FVariable> activeVariables() {
+			java.util.List<FVariable> l = new ArrayList<FVariable>();
 			for (SimpleEquationBlock sb : blocks) {
 				l.addAll(sb.activeVariables());
 			}
 			return l;
-			//return variableList(matchingPairs, ALL_MATCHING_PAIR_FILTER);
 		}		
 
-		public ArrayList<FAbstractEquation> equations() {
-			ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+		public java.util.List<FAbstractEquation> equations() {
+			java.util.List<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
 			for (SimpleEquationBlock sb : blocks) {
 				l.addAll(sb.equations());
 			}
 			return l;
-			//return equationList(matchingPairs, ALL_MATCHING_PAIR_FILTER);
 		}
 		
 		public boolean isSolvable() {
@@ -696,33 +647,11 @@ aspect TransformCanonical {
 			for (FVariable fv : activeVariables()) {
 				str.append("  " + fv.name() + "\n");
 			}
-/*			str.append("Inactive variables:\n");
-			for (FVariable fv : inactiveVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}*/
 			str.append("Equations:\n");
 			for (FAbstractEquation feq : equations()) {
 				str.append("  " + feq.prettyPrint("") + "\n");	
 			}
 			
-			/*		
-			str.append("---- Block Jacobian:\n");
-			for (FAbstractEquation feq  : equations()) {
-				int j = 0;
-				str.append(feq.prettyPrint("") + "\n");
-				for (FVariable fv : activeVariables()) {
-					FExp dl = ((FEquation)feq).getLeft().dynamicFExp(((FEquation)feq).getLeft().diff(fv.name()));
-					FExp dr = ((FEquation)feq).getRight().dynamicFExp(((FEquation)feq).getRight().diff(fv.name()));
-					if (!(dl.variability().lessOrEqual(feq.fConstant()) && 
-					    dl.ceval().realValue()==0. &&
-					    dr.variability().lessOrEqual(feq.fConstant()) && 
-					    dr.ceval().realValue()==0.)) {
-						str.append("  " + fv.name() + " " + dl.prettyPrint("") + 
-						              " - " + dr.prettyPrint("") + "\n");
-					}
-				}
-			}
-			*/
 			return str.toString();
 		}
 	
@@ -737,7 +666,7 @@ aspect TransformCanonical {
 		private FExp[][] jacobian;
 		private FTypePrefixVariability blockVariability;
 
-		public LinearEquationBlock(ArrayList<SimpleEquationBlock> blocks) {
+		public LinearEquationBlock(java.util.List<SimpleEquationBlock> blocks) {
 			super(blocks);
 			
 			// Compute Jacobian
@@ -832,24 +761,6 @@ aspect TransformCanonical {
 				str.append("|\n");
 			}
 			
-			/*
-			str.append("---- Block Jacobian:\n");
-			for (FAbstractEquation feq  : equations()) {
-				int j = 0;
-				str.append(feq.prettyPrint("") + "\n");
-				for (FVariable fv : activeVariables()) {
-					FExp dl = ((FEquation)feq).getLeft().dynamicFExp(((FEquation)feq).getLeft().diff(fv.name()));
-					FExp dr = ((FEquation)feq).getRight().dynamicFExp(((FEquation)feq).getRight().diff(fv.name()));
-					if (!(dl.variability().lessOrEqual(feq.fConstant()) && 
-					    dl.ceval().realValue()==0. &&
-					    dr.variability().lessOrEqual(feq.fConstant()) && 
-					    dr.ceval().realValue()==0.)) {
-						str.append("  " + fv.name() + " " + dl.prettyPrint("") + 
-						              " - " + dr.prettyPrint("") + "\n");
-					}
-				}
-			}
-			*/
 			return str.toString();
 		}
 
@@ -863,25 +774,11 @@ aspect TransformCanonical {
 	 */
 	public class MixedEquationBlock extends EquationBlock {
 		
-		public MixedEquationBlock(ArrayList<SimpleEquationBlock> blocks) {
+		public MixedEquationBlock(java.util.List<SimpleEquationBlock> blocks) {
 			super(blocks);	
 		}
 		
-		/*
-		protected MatchingPairFilter REAL_MATCHING_PAIR_FILTER = new MatchingPairFilter() {
-			public boolean filter(MatchingPair mp) {
-				return mp.getFVariable().isReal();
-			}
-		};
-		
-		protected MatchingPairFilter NON_REAL_MATCHING_PAIR_FILTER = new MatchingPairFilter() {
-			public boolean filter(MatchingPair mp) {
-				return !mp.getFVariable().isReal();
-			}
-		};
-		*/
-		
-		public ArrayList<FVariable> activeContinuousVariables() {
+		public java.util.List<FVariable> activeContinuousVariables() {
 			ArrayList<FVariable> l = new ArrayList<FVariable>();
 			for (FVariable fv : activeVariables()) {
 				if (fv.isReal()) {
@@ -892,7 +789,7 @@ aspect TransformCanonical {
 			//return variableList(matchingPairs, REAL_MATCHING_PAIR_FILTER);
 		}		
 
-		public ArrayList<FVariable> activeDiscreteVariables() {
+		public java.util.List<FVariable> activeDiscreteVariables() {
 			ArrayList<FVariable> l = new ArrayList<FVariable>();
 			for (FVariable fv : activeVariables()) {
 				if (!fv.isReal()) {
@@ -903,8 +800,8 @@ aspect TransformCanonical {
 			//return variableList(matchingPairs, NON_REAL_MATCHING_PAIR_FILTER);
 		}		
 
-		public ArrayList<FAbstractEquation> continuousEquations() {
-			ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+		public java.util.List<FAbstractEquation> continuousEquations() {
+			java.util.List<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
 			for (SimpleEquationBlock sb : blocks) {
 				for (FAbstractEquation e : sb.equations()) {
 					if (!e.isDiscrete()) {
@@ -916,8 +813,8 @@ aspect TransformCanonical {
 			//return equationList(matchingPairs, REAL_MATCHING_PAIR_FILTER);
 		}
 
-		public ArrayList<FAbstractEquation> discreteEquations() {
-			ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+		public java.util.List<FAbstractEquation> discreteEquations() {
+			java.util.List<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
 			for (SimpleEquationBlock sb : blocks) {
 				for (FAbstractEquation e : sb.equations()) {
 					if (e.isDiscrete()) {
@@ -961,7 +858,7 @@ aspect TransformCanonical {
 		private FExp[][] jacobian;
 		private FTypePrefixVariability blockVariability;
 
-		public MixedLinearEquationBlock(ArrayList<SimpleEquationBlock> blocks) {
+		public MixedLinearEquationBlock(java.util.List<SimpleEquationBlock> blocks) {
 			super(blocks);
 			
 			// Compute Jacobian
@@ -1061,24 +958,6 @@ aspect TransformCanonical {
 				str.append("|\n");
 			}
 			
-			/*
-			str.append("---- Block Jacobian:\n");
-			for (FAbstractEquation feq  : equations()) {
-				int j = 0;
-				str.append(feq.prettyPrint("") + "\n");
-				for (FVariable fv : activeVariables()) {
-					FExp dl = ((FEquation)feq).getLeft().dynamicFExp(((FEquation)feq).getLeft().diff(fv.name()));
-					FExp dr = ((FEquation)feq).getRight().dynamicFExp(((FEquation)feq).getRight().diff(fv.name()));
-					if (!(dl.variability().lessOrEqual(feq.fConstant()) && 
-					    dl.ceval().realValue()==0. &&
-					    dr.variability().lessOrEqual(feq.fConstant()) && 
-					    dr.ceval().realValue()==0.)) {
-						str.append("  " + fv.name() + " " + dl.prettyPrint("") + 
-						              " - " + dr.prettyPrint("") + "\n");
-					}
-				}
-			}
-			*/
 			return str.toString();
 		}
 
@@ -1193,7 +1072,7 @@ aspect TransformCanonical {
 		protected FFunctionCallEquation functionCallEquation;
 		protected Collection<FVariable> activeVars = new LinkedHashSet<FVariable>();
 		
-		public FunctionCallEquationBlock(FFunctionCallEquation eqn, ArrayList<FVariable> activeVars) {
+		public FunctionCallEquationBlock(FFunctionCallEquation eqn, java.util.List<FVariable> activeVars) {
 			this.functionCallEquation = eqn;
 			this.activeVars.addAll(activeVars);
 		}
@@ -1202,14 +1081,12 @@ aspect TransformCanonical {
 			return false;
 		}
 				
-		public ArrayList<FAbstractEquation> equations() {
-			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
-			s.add(functionCallEquation);
-			return s;
+		public java.util.List<FAbstractEquation> equations() {
+			return Arrays.asList((FAbstractEquation)functionCallEquation);
 		}
 		
-		public ArrayList<FVariable> activeVariables() {
-			ArrayList<FVariable> s = new ArrayList<FVariable>();
+		public java.util.List<FVariable> activeVariables() {
+			java.util.List<FVariable> s = new ArrayList<FVariable>();
 			s.addAll(activeVars);
 			return s;
 		}
@@ -1254,7 +1131,7 @@ aspect TransformCanonical {
 	 */
 	public class SolvedFunctionCallEquationBlock extends FunctionCallEquationBlock {
 		
-		public SolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, ArrayList<FVariable> activeVariables) {
+		public SolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, java.util.List<FVariable> activeVariables) {
 			super(eqn, activeVariables);
 		}
 		
@@ -1287,7 +1164,7 @@ aspect TransformCanonical {
 	 */
 	public class UnsolvedFunctionCallEquationBlock extends FunctionCallEquationBlock {
 		
-		public UnsolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, ArrayList<FVariable> activeVariables) {
+		public UnsolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, java.util.List<FVariable> activeVariables) {
 			super(eqn, activeVariables);
 		}
 			
@@ -1299,16 +1176,16 @@ aspect TransformCanonical {
 	public class WhenEquationBlock extends SimpleEquationBlock {
 		protected FWhenEquation whenEquation;
 		// One list of blocks for each when branch
-		protected ArrayList<ArrayList<SimpleEquationBlock>> blocks = new ArrayList<ArrayList<SimpleEquationBlock>>(); 
-		protected ArrayList<FVariable> fvars = new ArrayList<FVariable>();
+		protected java.util.List<java.util.List<SimpleEquationBlock>> blocks = new ArrayList<java.util.List<SimpleEquationBlock>>(); 
+		protected java.util.List<FVariable> fvars = new ArrayList<FVariable>();
 				
 		public WhenEquationBlock(FWhenEquation whenEquation) {
 			this.whenEquation = whenEquation;
 		
 			blocks.add(new ArrayList<SimpleEquationBlock>());		
 			for (FAbstractEquation eqn : whenEquation.getFAbstractEquations()) {
-				ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
-				ArrayList<FVariable> fvs = new ArrayList<FVariable>();
+				java.util.List<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+				java.util.List<FVariable> fvs = new ArrayList<FVariable>();
 				eqns.add(eqn);
 				for (FIdUseExp e : eqn.simpleLefts()) {
 					fvs.add((FVariable)e.myFV());
@@ -1324,13 +1201,11 @@ aspect TransformCanonical {
         	return true;
 		}
 		
-		public ArrayList<FAbstractEquation> equations() {
-			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
-			s.add(whenEquation);
-			return s;
+		public java.util.List<FAbstractEquation> equations() {
+			return Arrays.asList((FAbstractEquation)whenEquation);
 		}
 		
-		public ArrayList<FVariable> activeVariables() {
+		public java.util.List<FVariable> activeVariables() {
 			ArrayList<FVariable> s = new ArrayList<FVariable>();
 			for (FVariable fv : fvars) {
 				s.add(fv);
@@ -1358,7 +1233,7 @@ aspect TransformCanonical {
 			return str.toString();
 		}	
 			
-		ArrayList<SimpleEquationBlock> blocks(int i) {
+		java.util.List<SimpleEquationBlock> blocks(int i) {
 			return blocks.get(i);	
 		}
 				
@@ -1368,8 +1243,8 @@ aspect TransformCanonical {
 	 * TornEquationBlock represents an equation block resulting from tearing.
 	 */
 	public class TornEquationBlock extends AbstractEquationBlock {
-		private ArrayList<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
-		private ArrayList<SimpleEquationBlock> unsolvedBlocks = new ArrayList<SimpleEquationBlock>();
+		private java.util.List<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
+		private java.util.List<SimpleEquationBlock> unsolvedBlocks = new ArrayList<SimpleEquationBlock>();
 		
 		public TornEquationBlock() {
 		}
@@ -1398,26 +1273,26 @@ aspect TransformCanonical {
 			return unsolvedBlocks;
 		}
 
-		public ArrayList<FAbstractEquation> unsolvedEquations() {
-			ArrayList<FAbstractEquation> eqs = new ArrayList<FAbstractEquation>();
+		public java.util.List<FAbstractEquation> unsolvedEquations() {
+			java.util.List<FAbstractEquation> eqs = new ArrayList<FAbstractEquation>();
 			for (AbstractEquationBlock block : unsolvedBlocks) {
 				eqs.addAll(block.equations());
 			}
 			return eqs;
 		}
 
-		public ArrayList<FAbstractEquation> solvedEquations() {
-			ArrayList<FAbstractEquation> eqs = new ArrayList<FAbstractEquation>();
+		public java.util.List<FAbstractEquation> solvedEquations() {
+			java.util.List<FAbstractEquation> eqs = new ArrayList<FAbstractEquation>();
 			for (AbstractEquationBlock block : solvedBlocks) {
 				eqs.addAll(block.equations());
 			}
 			return eqs;
 		}
 
-		public ArrayList<FAbstractEquation> equations() {
+		public java.util.List<FAbstractEquation> equations() {
 			// Sort out any duplicated equations that has been introduced from records...
 			// TODO: This should probably be handled in the compute_tearing() method..
-			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			java.util.List<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
 			FAbstractEquation prev = null;
 			for (FAbstractEquation e : solvedEquations()) {
 				if (e != prev)
@@ -1432,8 +1307,8 @@ aspect TransformCanonical {
 			return s;
 		}
 
-		public ArrayList<FVariable> activeVariables() {
-			ArrayList<FVariable> vars = new ArrayList<FVariable>();
+		public java.util.List<FVariable> activeVariables() {
+			java.util.List<FVariable> vars = new ArrayList<FVariable>();
 			for(AbstractEquationBlock block : solvedBlocks){
 				vars.addAll(block.activeVariables());
 			}
@@ -1443,8 +1318,8 @@ aspect TransformCanonical {
 			return vars;
 		}	
 		
-		public ArrayList<FVariable> iterationVariables() {
-			ArrayList<FVariable> vars = new ArrayList<FVariable>();
+		public java.util.List<FVariable> iterationVariables() {
+			java.util.List<FVariable> vars = new ArrayList<FVariable>();
 			for (AbstractEquationBlock block : unsolvedBlocks) {
 				vars.addAll(block.activeVariables());
 			}
@@ -1493,16 +1368,14 @@ aspect TransformCanonical {
 		}
 	
 		
-		public ArrayList<FAbstractEquation> equations() {
-			ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
-			l.add(alg);
-			return l;
+		public java.util.List<FAbstractEquation> equations() {
+			return Arrays.asList((FAbstractEquation)alg);
 		}
 		
 		/*
 		 * The active variables are assigned their values when the block is solved.
 		 */
-		public ArrayList<FVariable> activeVariables() {
+		public java.util.List<FVariable> activeVariables() {
 			// - Find assigned variables
 			ArrayList<FVariable> assignedVars = new ArrayList<FVariable>();
 			for (FIdUse use : alg.assignedFIdUses()) {
@@ -1522,8 +1395,8 @@ aspect TransformCanonical {
 			return false;
 		}
 		
-		public ArrayList<FAbstractEquation> differentiatedEquations() {
-			ArrayList<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
+		public java.util.List<FAbstractEquation> differentiatedEquations() {
+			java.util.List<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
 			return diffedEq;
 		}
 
@@ -1565,24 +1438,7 @@ aspect TransformCanonical {
 				
 	}
 	
-    public class MatchingPair {
-    	private FAbstractEquation eqn;
-    	private FVariable fv;
-    	public MatchingPair(FAbstractEquation eqn, FVariable fv) {
-    		this.eqn = eqn;
-    		this.fv = fv;
-    	}
-    
-    	public FAbstractEquation getEquation() {
-			return eqn;    	
-    	}
-    	
-    	public FVariable getFVariable() {
-    		return fv;
-    	}
-    }
-
-	syn lazy LinkedHashSet<FVariable> FVariable.dependsOn() {
+	syn lazy Set<FVariable> FVariable.dependsOn() {
 		if (myDAEEquationBlock() != null) {
 			return myDAEEquationBlock().dependsOn();
 		} else {
@@ -1609,20 +1465,6 @@ aspect TransformCanonical {
 			computeMatchingsAndBLT();
 		return daeInitFVariableEquationBlockMap;
 	}
-
-	private ArrayList<MatchingPair> FClass.daeMatching = null;
-	syn ArrayList<MatchingPair> FClass.getDAEMatching() {
-		if (daeMatching == null) 
-			computeMatchingsAndBLT();
-		return daeMatching;
-	}
-	
-	private ArrayList<MatchingPair> FClass.daeInitMatching = null;
-	syn ArrayList<MatchingPair> FClass.getDAEInitMatching() { 
-		if (daeInitMatching == null) 
-			computeMatchingsAndBLT();
-		return daeInitMatching;
-	}	
 
 	private ArrayList<FAbstractEquation> FClass.daeUnmatchedEquations = null;
 	syn ArrayList<FAbstractEquation> FClass.getDAEUnmatchedEquations() { 
@@ -1723,17 +1565,15 @@ aspect TransformCanonical {
 	}
 	
 	private void FClass.computeMatchingsAndBLTWrapped() {
-		daeMatching = new ArrayList<MatchingPair>();
-		daeInitMatching = new ArrayList<MatchingPair>();		
-	    daeBLT = new BLT(this);
-	    daeStructuredBLT = new StructuredBLT(this);
-	   	daeInitBLT = new BLT(this);		
-		daeUnmatchedEquations = new ArrayList<FAbstractEquation>();		
-		daeUnmatchedVariables = new ArrayList<FVariable>();			
-		daeInitUnmatchedEquations = new ArrayList<FAbstractEquation>();		
-		daeInitUnmatchedVariables = new ArrayList<FVariable>();			
-		daeFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();	
-		daeInitFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();	
+		daeBLT = new BLT(this);
+		daeStructuredBLT = new StructuredBLT(this);
+		daeInitBLT = new BLT(this);		
+		daeUnmatchedEquations = new ArrayList<FAbstractEquation>();
+		daeUnmatchedVariables = new ArrayList<FVariable>();
+		daeInitUnmatchedEquations = new ArrayList<FAbstractEquation>();
+		daeInitUnmatchedVariables = new ArrayList<FVariable>();
+		daeFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();
+		daeInitFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();
 			
 		BiPGraph g = new BiPGraph(this,name(),"");
 		
@@ -1750,8 +1590,6 @@ aspect TransformCanonical {
 		g.maximumMatching(true);
 		log.info("DAE system");
 		log.info(g.printMatchingObj());
-			
-		daeMatching = g.getMatching();
 			
 		for (Var var : g.getUnmatchedVariables()) {
 			daeUnmatchedVariables.add(var.getVariable());
@@ -1876,8 +1714,6 @@ aspect TransformCanonical {
 				log.info("DAE system ");
 				log.info(g.printMatchingObj());
 		
-				daeMatching = g.getMatching();
-		
 				daeUnmatchedVariables.clear();
 				for (Var var : g.getUnmatchedVariables()) {
 					daeUnmatchedVariables.add(var.getVariable());
@@ -1926,8 +1762,7 @@ aspect TransformCanonical {
 		g.addEquations(equations(), BiPGraph.DIFFERENTIATED_VARIABLES | BiPGraph.DISCRETE_PRE_VARIABLES, "eq_",1);
 
 	    // Replace when equations	
-		ArrayList<FAbstractEquation> equationsToReplace = 
-			new ArrayList<FAbstractEquation>();
+		java.util.List<FAbstractEquation> equationsToReplace = new ArrayList<FAbstractEquation>();
 		for (FAbstractEquation e : equations()) {
 			if (e.replacedAtInitialization()) {
 				equationsToReplace.add(e);
@@ -1942,7 +1777,7 @@ aspect TransformCanonical {
 		
 		    // Put the Equations in an ArrayList rather than a List
 		    // TODO: There are probably more elegant ways to do this...
-			ArrayList<FAbstractEquation> newEquations_ = new ArrayList<FAbstractEquation>();
+			java.util.List<FAbstractEquation> newEquations_ = new ArrayList<FAbstractEquation>();
 			for (FAbstractEquation e : newEquations) {
 				newEquations_.add(e);	
 			}
@@ -1951,7 +1786,7 @@ aspect TransformCanonical {
 			 // - newEquations contains the new equations that replaces the equationToReplace
 			 // - Note that newEquations may contain several equations  
 			 
-			ArrayList<Eq> eq_list = g.getEquations(equationToReplace);
+			java.util.List<Eq> eq_list = new ArrayList<Eq>(g.getEquations(equationToReplace));
 			
 			for (Eq eqq : eq_list) {
 				g.removeEquation(eqq);	
@@ -2030,7 +1865,7 @@ aspect TransformCanonical {
 			}
 	
 			setFInitialEquationList(l);	
-	        root().flushAllRecursive();
+			root().flushAllRecursive();
 
 			g.maximumMatching(false);	
 			log.info("DAE initial after addition of initial equations");
@@ -2046,8 +1881,6 @@ aspect TransformCanonical {
 		for (Eq ee : g.getUnmatchedEquations()) {
 			daeInitUnmatchedEquations.add(ee.getEquation());
 		}
-
-		daeInitMatching = g.getMatching();
 
 		// TODO: If no complete matching found, then try index reduction
 		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
@@ -2082,27 +1915,12 @@ aspect TransformCanonical {
 	public BLT FClass.computeTearings(BiPGraph graph) throws TearingException {
 		beginStep("computeTearings()");
 		try {
-			LinkedList<Stack<Eq>> blt = graph.computeRawBLT();
+			java.util.List<java.util.List<Eq>> blt = graph.computeRawBLT();
 			BLT tearBLT = new BLT(this);
-			for (Stack<Eq> block : blt) { // Iterate over all (global) BLT-blocks
-				boolean singleEquation = true;
-				Iterator<Eq> it = block.iterator();
-				Eq last = it.next();
-				while (it.hasNext()) {
-					Eq e = it.next();
-					if (last.getEquation() != e.getEquation()) {
-						singleEquation = false;
-						break;
-					}
-				}
-				AbstractEquationBlock simpleBlock = null;
-				if (singleEquation) {
-					simpleBlock = EquationBlockFactory.createSimpleEquationBlock(block, true);
-					if (!simpleBlock.isSolvable())
-						simpleBlock = null;
-				}
-				if (simpleBlock != null) {
-					tearBLT.add(simpleBlock);
+			for (java.util.List<Eq> block : blt) { // Iterate over all (global) BLT-blocks
+				SimpleEquationBlock seb = EquationBlockFactory.createSimpleEquationBlock(block, true);
+				if (seb != null && seb.isSolvable()) {
+					tearBLT.add(seb);
 				} else {
 					TornEquationBlock eb = new TornEquationBlock();
 					tearHandGuided(block, eb);
@@ -2115,7 +1933,7 @@ aspect TransformCanonical {
 		}
 	}
 	
-	private void FClass.tearHandGuided(Stack<Eq> block, TornEquationBlock eb) throws TearingException {
+	private void FClass.tearHandGuided(java.util.List<Eq> block, TornEquationBlock eb) throws TearingException {
 		boolean recalculateMatchings = false;
 		Map<FVariable, Var> varsInBlock = new LinkedHashMap<FVariable, Var>();
 		for (Eq e : block) {
@@ -2160,10 +1978,10 @@ aspect TransformCanonical {
 				error("Unable to perform hand guided tearing since the resulting system is unsolvable.");
 				throw new TearingException();
 			}
-			LinkedList<Stack<Eq>> innerBLT = newGraph.computeRawBLT();
+			java.util.List<java.util.List<Eq>> innerBLT = newGraph.computeRawBLT();
 			boolean allInnerAreSolved = true;
 			java.util.List<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
-			for (Stack<Eq> innerBlock : innerBLT) {
+			for (java.util.List<Eq> innerBlock : innerBLT) {
 				SimpleEquationBlock seb = EquationBlockFactory.createSimpleEquationBlock(innerBlock, true, true);
 				if (seb != null && seb.isSolvable()) {
 					solvedBlocks.add(seb);
@@ -2177,13 +1995,13 @@ aspect TransformCanonical {
 					eb.addSolvedBlock(seb);
 				return;
 			}
-			block = new Stack<Eq>();
+			block = new ArrayList<Eq>();
 			block.addAll(newGraph.getEquations());
 		}
 		tear(block, eb);
 	}
 	
-	private void FClass.tear(Stack<Eq> block, TornEquationBlock eb) {
+	private void FClass.tear(java.util.List<Eq> block, TornEquationBlock eb) {
 		Iterator<Eq> it = block.iterator();
 		BiPGraph g = new BiPGraph(this, "", "");
 		ArrayList<Eq> SUME = new ArrayList<Eq>();
@@ -2217,7 +2035,7 @@ aspect TransformCanonical {
 			}
 		}
 		// Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
-		SUME = g.greedySM(SUME);
+		g.greedySM(SUME);
 		Iterator<Eq> itr = SUME.iterator();
 		while (itr.hasNext()) {
 			Eq e = itr.next();
@@ -2240,78 +2058,9 @@ aspect TransformCanonical {
 				tearInner(g, eb);
 			}
 		} else {
-			// Check for hand guided tearing
-//			while (it.hasNext()) {
-//				Eq e = it.next();
-//				if (e.getEquation().hasResidual()) {
-//					Var tearVar = null;
-//					ASTNode tearVarNode = null;
-//					if (e.getEquation().getResidual().hasIterationVariable()) {
-//						FExp exp = e.getEquation().getResidual().getIterationVariable();
-//						for (FVariable var : exp.referencedFVariablesInFExp()) {
-//							for (Eq eqn : block) {
-//								tearVar = eqn.getVariable(var.name());
-//								if (tearVar != null)
-//									break;
-//							}
-//							break;
-//						}
-//						if (tearVar != null)
-//							tearVarNode = exp;
-//					}
-//					if (tearVar == null) {
-//						for (Eq eqn : block) {
-//							for (Var var : eqn.getVariables()) {
-//								if (var.getVariable().getManualIterationVariable()) {
-//									tearVar = var;
-//									tearVarNode = var.getVariable();
-//									break;
-//								}
-//							}
-//							if (tearVar != null)
-//								break;
-//						}
-//					}
-//					if (tearVar == null) {
-//						tearVar = e.getMatching();
-//					} else if (e.getMatching() != tearVar) {
-//						BiPGraph newGraph = new BiPGraph(this, "", "");
-//						for (Eq eqn : block) {
-//							if (eqn != e)
-//								newGraph.addEquation(eqn.getName(), "", eqn.getEquation());
-//							if (eqn.getMatching() != tearVar)
-//								newGraph.addVariable(eqn.getMatching().getName(), "", eqn.getMatching().getVariable());
-//						}
-//						for (Eq eqn : block) {
-//							if (eqn == e)
-//								continue;
-//							Eq gEq = newGraph.getEquation(eqn.getName());
-//							for (Var v : eqn.getVariables()) {
-//								Var gVar = newGraph.getVariable(v.getName());
-//								if (gVar != null) {
-//									gEq.addVariable(gVar);
-//									gVar.occurrence();
-//								}
-//							}
-//						}
-//						newGraph.maximumMatching(true);
-//						if (newGraph.getUnmatchedEquations().size() > 0 && tearVarNode != null) {
-//							tearVarNode.warning("Unable to use hand guided tearing variable " + tearVar.getName() + " in equation " + e.getEquation().toString());
-//							continue;
-//						}
-//						Stack<Eq> newBlock = new Stack<Eq>();
-//						newBlock.addAll(newGraph.getEquations());
-//						block = newBlock;
-//					}
-//					it.remove();
-//					eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e.getEquation(), tearVar.getVariable(), false));
-//					tear(block, eb);
-//					return;
-//				}
-//			}
 			// Else: Start out by trying to insert residuals that contain
 			// 		 few variables. 
-			ArrayList<FAbstractEquation> residuals = new ArrayList<FAbstractEquation>();
+			java.util.List<FAbstractEquation> residuals = new ArrayList<FAbstractEquation>();
 			for (Eq e : SUME) {
 				int nVars = e.getVariables().size();
 				int nSVars = e.getSolvableVariables().size();
@@ -2342,11 +2091,11 @@ aspect TransformCanonical {
 			}
 
 			// Compute inner BLT and see if tearings can be changed 
-			ArrayList<Var> SUMV = g.getSUMV();
-			LinkedList<Stack<Eq>> innerBlocks = g.computeTearBlocks();
-			ArrayList<FVariable> tearings = new ArrayList<FVariable>();
+			java.util.List<Var> SUMV = g.getSUMV();
+			java.util.List<java.util.List<Eq>> innerBlocks = g.computeTearBlocks();
+			java.util.List<FVariable> tearings = new ArrayList<FVariable>();
 
-			for (Stack<Eq> bInner : innerBlocks) {
+			for (java.util.List<Eq> bInner : innerBlocks) {
 				if (bInner.size() == 1) {
 					// If: the block is scalar, it will be a solvedMatchingPair
 					Eq e = bInner.get(0);
@@ -2374,7 +2123,7 @@ aspect TransformCanonical {
 						gInnerVar.setSolvableMatching(gInnerEq);
 					}
 					// Build block-graph and look for interchangeable variables in SUMV
-					ArrayList<Eq> eqs = new ArrayList<Eq>();
+					java.util.List<Eq> eqs = new ArrayList<Eq>();
 					boolean graphHasTear = false;
 					for (Eq e : bInner) {
 						Eq gInnerEq = gInner.getEquation(e.getName());
@@ -2437,8 +2186,8 @@ aspect TransformCanonical {
 
 					if (graphHasTear) {
 						if (isChanged) {
-							LinkedList<Stack<Eq>> newBlocks = gInner.computeTearBlocks();
-							for (Stack<Eq> bInnerInner : newBlocks) {
+							java.util.List<java.util.List<Eq>> newBlocks = gInner.computeTearBlocks();
+							for (java.util.List<Eq> bInnerInner : newBlocks) {
 								if (bInnerInner.size() == 1) {
 									Eq e = bInnerInner.get(0);
 									FAbstractEquation eqn = e.getEquation();
@@ -2475,43 +2224,25 @@ aspect TransformCanonical {
 		Eq res = null;
 		int maxOcc = 0;
 		int minSolvOcc = 0;
-//		for (Eq e : g.getEquations()) {
-//			if (e.getEquation().hasResidual()) {
-//				FResidual residual = e.getEquation().getResidual();
-//				res = e;
-//				if (residual.hasIterationVariable()) {
-//					FExp exp = residual.getIterationVariable();
-//					for (FVariable var : exp.referencedFVariablesInFExp()) {
-//						tear = g.getVariable(var.name());
-//						break;
-//					}
-//				}
-//				if (tear == null)
-//					tear = res.getSolvableMatching();
-//				break;
-//			}
-//		}
-//		if (tear == null) {
-			for (Eq e : g.getEquations()) {
-				Var tmp = e.getSolvableMatching();
-				int occ = tmp.getNbrV();
-				int sOcc = tmp.getNbrSV();
-				if (occ > maxOcc) {
-					tear = tmp;
-					maxOcc = occ;
-					minSolvOcc = sOcc;
-				} else if (occ == maxOcc && sOcc < minSolvOcc) {
-					tear = tmp;
-					minSolvOcc = sOcc;
-				}
+		for (Eq e : g.getEquations()) {
+			Var tmp = e.getSolvableMatching();
+			int occ = tmp.getNbrV();
+			int sOcc = tmp.getNbrSV();
+			if (occ > maxOcc) {
+				tear = tmp;
+				maxOcc = occ;
+				minSolvOcc = sOcc;
+			} else if (occ == maxOcc && sOcc < minSolvOcc) {
+				tear = tmp;
+				minSolvOcc = sOcc;
 			}
-			res = tear.getSolvableMatching();
-//		}
+		}
+		res = tear.getSolvableMatching();
 		tear.isTear(true);
 		res.isRes(true);
 		eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res.getEquation(), tear.getVariable(), false));
-		LinkedList<Stack<Eq>> blt = g.computeTearBlocks();
-		for (Stack<Eq> block : blt) {
+		java.util.List<java.util.List<Eq>> blt = g.computeTearBlocks();
+		for (java.util.List<Eq> block : blt) {
 			if (block.size() == 1) { //TODO: Consider records...
 				Eq e = block.get(0);
 				Var v = e.getSolvableMatching();
@@ -2523,7 +2254,7 @@ aspect TransformCanonical {
 		return eb;
 	}
 	
-	private TornEquationBlock FClass.tearInner(Stack<Eq> Block, TornEquationBlock eb) {
+	private TornEquationBlock FClass.tearInner(java.util.List<Eq> Block, TornEquationBlock eb) {
 		BiPGraph g = new BiPGraph(this, "", "");
 		for (Eq e : Block) {
 			Var gVar = g.addVariable(e.getSolvableMatching().getName(), "", e

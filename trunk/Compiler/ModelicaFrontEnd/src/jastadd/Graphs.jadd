@@ -33,18 +33,18 @@ public class EquationBlockFactory {
 	 * This method groups the Eq objects in a BLT block so that Eqs that
 	 * originates from the same FAbstractEquation are grouped together.
 	 */
-	static ArrayList<Stack<Eq>> groupComponent(Stack<Eq> component) {
+	static java.util.List<java.util.List<Eq>> groupComponent(java.util.List<Eq> component) {
 	
 		Eq eqn1 = null;
 		Eq eqn2 = null;
-		Stack<Eq> newStack = null;
-		ArrayList<Stack<Eq>> l = new ArrayList<Stack<Eq>>();
+		java.util.List<Eq> newStack = null;
+		java.util.List<java.util.List<Eq>> l = new ArrayList<java.util.List<Eq>>();
 
 		for (Eq eqn : component) {
 			eqn1 = eqn2;
 			eqn2 = eqn;
 			if (eqn1==null || (eqn1.getEquation() != eqn2.getEquation())) {
-				newStack = new Stack<Eq>();
+				newStack = new ArrayList<Eq>();
 				l.add(newStack);
 				newStack.add(eqn2);	
 			} else {
@@ -105,7 +105,7 @@ public class EquationBlockFactory {
 			FFunctionCallEquation fce = (FFunctionCallEquation)e;
 			// Loop over all unknowns in the component
 			boolean isSolvable = true;
-			ArrayList<FVariable> l = new ArrayList<FVariable>();
+			java.util.List<FVariable> l = new ArrayList<FVariable>();
 			for (int i=0;i<eqns.size();i++) {
 				l.add(fvs.get(i));
 				if (!eqns.get(i).isSolved(fvs.get(i).name(), duringTearing)) {
@@ -133,7 +133,7 @@ public class EquationBlockFactory {
 	 * This method takes a list of Eq objects and create equation blocks
 	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
 	 */
-	static SimpleEquationBlock createSimpleEquationBlock(Stack<Eq> component, boolean solve) {
+	static SimpleEquationBlock createSimpleEquationBlock(java.util.List<Eq> component, boolean solve) {
 		return createSimpleEquationBlock(component, solve, false);
 	}
 	
@@ -141,9 +141,9 @@ public class EquationBlockFactory {
 	 * This method takes a list of Eq objects and create equation blocks
 	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
 	 */
-	static SimpleEquationBlock createSimpleEquationBlock(Stack<Eq> component, boolean solve, boolean duringTearing) {
-		ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
-		ArrayList<FVariable> fvs = new ArrayList<FVariable>();
+	static SimpleEquationBlock createSimpleEquationBlock(java.util.List<Eq> component, boolean solve, boolean duringTearing) {
+		java.util.List<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+		java.util.List<FVariable> fvs = new ArrayList<FVariable>();
 		
 		for (Eq eqn : component) {
 			fvs.add(eqn.getMatching().getVariable());
@@ -161,10 +161,10 @@ public class EquationBlockFactory {
 	 * only one Eq, a SimpleEquationBlock is created, if possible. Otherwise
 	 * a real or mixed equation block is created.
 	 */
-	static AbstractEquationBlock createEquationBlock(Stack<Eq> component) {
+	static AbstractEquationBlock createEquationBlock(java.util.List<Eq> component) {
 		
 		// System of equations
-		ArrayList<Stack<Eq>> l = EquationBlockFactory.groupComponent(component);
+		java.util.List<java.util.List<Eq>> l = EquationBlockFactory.groupComponent(component);
 
 		if (l.size()==1) {
 			SimpleEquationBlock seb = createSimpleEquationBlock(l.get(0),true);
@@ -173,9 +173,9 @@ public class EquationBlockFactory {
 			}	
 		}
 
-		ArrayList<SimpleEquationBlock> ls = new ArrayList<SimpleEquationBlock>();	
+		java.util.List<SimpleEquationBlock> ls = new ArrayList<SimpleEquationBlock>();	
 			
-		for (Stack<Eq> s : l) {
+		for (java.util.List<Eq> s : l) {
 			ls.add(createSimpleEquationBlock(s,false));	
 		}	
 
@@ -193,7 +193,7 @@ public class EquationBlockFactory {
 		
 		// Check if an equation block is linear in the unknowns
 		boolean isLinear = true;
-		ArrayList<FVariable> activeVariables = new ArrayList<FVariable>();
+		java.util.List<FVariable> activeVariables = new ArrayList<FVariable>();
 		for (SimpleEquationBlock sb : ls) {
 			activeVariables.addAll(sb.activeVariables());
 		}
@@ -239,8 +239,8 @@ public class MunkresProblem {
 	int rp;
 	int cp;
 	
-	ArrayList<Integer> pathRow;
-	ArrayList<Integer> pathColumn;
+	java.util.List<Integer> pathRow;
+	java.util.List<Integer> pathColumn;
 	
 	private int nextStep = COVER_MATCHED_COLUMNS;
 
@@ -618,10 +618,10 @@ public class BiPGraph {
 	
 	private FClass fclass;
 	
-	protected ArrayList<Eq> equations = new ArrayList<Eq>();
-	protected LinkedHashMap<String,Var> variableMap = new LinkedHashMap<String,Var>();
-	protected LinkedHashMap<String,Eq> equationMap = new LinkedHashMap<String,Eq>();
-	protected LinkedHashMap<FAbstractEquation,ArrayList<Eq>> equationIndexMap = new LinkedHashMap<FAbstractEquation,ArrayList<Eq>>();
+	protected java.util.List<Eq> equations = new ArrayList<Eq>();
+	protected Map<String,Var> variableMap = new LinkedHashMap<String,Var>();
+	protected Map<String,Eq> equationMap = new LinkedHashMap<String,Eq>();
+	protected Map<FAbstractEquation,java.util.List<Eq>> equationIndexMap = new LinkedHashMap<FAbstractEquation,java.util.List<Eq>>();
 	
 	public BiPGraph(FClass fclass, String name, String description) {
 		this.fclass = fclass;
@@ -638,10 +638,8 @@ public class BiPGraph {
 	}
 	
 
-	public ArrayList<Eq> getEquations(FAbstractEquation eqn) {
-		ArrayList<Eq> l = new ArrayList<Eq>();
-		l.addAll(equationIndexMap.get(eqn));
-		return l;
+	public java.util.List<Eq> getEquations(FAbstractEquation eqn) {
+		return equationIndexMap.get(eqn);
 	}
 
 	public Eq addEquation(String name, String description,
@@ -665,35 +663,6 @@ public class BiPGraph {
 		return v;
 	}
 	
-	public Eq replaceEquation(String name, String description, FAbstractEquation eqn) {
-		Eq e = equationMap.get(name);
-		
-		if (e==null) {
-			e = new Eq(name,description,eqn);
-			equations.add(e);
-			equationMap.put(name,e);
-			insertIntoEquationIndexMap(eqn,e);
-		} else {
-			// Remove the old equation
-			for (Var v : e.getVariables()) {
-				if (v.getMatching() == e) {
-					v.setMatching(null);
-				}
-			}
-			e.setMatching(null);
-			e.getVariables().clear();
-			// Insert the new equation
-			Eq ee = new Eq(name,description,eqn);
-			equations.set(equations.indexOf(e),ee);
-			equationMap.put(e.getName(),ee);
-			ArrayList<Eq> l = equationIndexMap.get(e.getEquation());
-			removeFromEquationIndexMap(e.getEquation(),e);
-			insertIntoEquationIndexMap(e.getEquation(),ee);
-			e = ee;
-		}
-		return e;
-	}
-
 	public void removeEquation(Eq e) {
 		for (Var v : e.getVariables()) {
 			if (v.getMatching() == e) {
@@ -707,17 +676,6 @@ public class BiPGraph {
 		removeFromEquationIndexMap(e.getEquation(),e);
 	}
 	
-	
-	
-	public Var addVariable(String name, String description) {
-		Var v = variableMap.get(name);
-		if (v==null) {
-			v = new Var(name,description);
-			variableMap.put(name,v);
-		}	
-		return v;
-	}
-
 	public void removeVariable(Var v) {
 		for (Eq e : getEquations()) {
 			if (e.getMatching() == v) {
@@ -822,7 +780,7 @@ public class BiPGraph {
 	
 	}	
 		
-	public void addEquations(ArrayList<FAbstractEquation> eqns, int variableMask, String eqNamePrefix, int startIndex) {	
+	public void addEquations(java.util.List<FAbstractEquation> eqns, int variableMask, String eqNamePrefix, int startIndex) {	
     	int k = startIndex;
     	Eq eqn = null;
     	Var v = null;
@@ -929,7 +887,7 @@ public class BiPGraph {
 		}
 	}
 	
-	public ArrayList<Eq> greedySM(ArrayList<Eq> SUME) {
+	public void greedySM(java.util.List<Eq> SUME) {
 		Iterator<Eq> itr = SUME.iterator();
 		while (itr.hasNext()) {
 			Eq e = itr.next();
@@ -942,13 +900,12 @@ public class BiPGraph {
 				}
 			}
 		}
-		return SUME;
 	}
 	
-	public ArrayList<LinkedHashMap<Var,LinkedHashSet<Eq>>> bfs(LinkedHashSet<Eq> startingNodes) {
-		ArrayList<LinkedHashMap<Var,LinkedHashSet<Eq>>> Lv = new ArrayList<LinkedHashMap<Var,LinkedHashSet<Eq>>>();
-		LinkedHashSet<Eq> Le_current = new LinkedHashSet<Eq>();
-		LinkedHashSet<Eq> Le_next = new LinkedHashSet<Eq>();
+	public java.util.List<Map<Var,Set<Eq>>> bfs(Set<Eq> startingNodes) {
+		java.util.List<Map<Var,Set<Eq>>> Lv = new ArrayList<Map<Var,Set<Eq>>>();
+		Set<Eq> Le_current = new LinkedHashSet<Eq>();
+		Set<Eq> Le_next = new LinkedHashSet<Eq>();
 		
 		Le_current.addAll(startingNodes);
 		// Reset nodes
@@ -962,7 +919,7 @@ public class BiPGraph {
 			//System.out.println("*** layer: " + layer);
 			//System.out.println(Lv);
 			//System.out.println(Le_current);
-			Lv.add(new LinkedHashMap<Var,LinkedHashSet<Eq>>());
+			Lv.add(new LinkedHashMap<Var,Set<Eq>>());
 			
 			for (Eq s : Le_current) {
 				//System.out.println(" eq: " + s.getName());
@@ -971,7 +928,7 @@ public class BiPGraph {
 					if (t.getLayer() >= layer) {
 						//System.out.println("    adding " + t.getName());
 						t.setLayer(layer);
-						LinkedHashSet<Eq> h = Lv.get(layer).get(t);
+						Set<Eq> h = Lv.get(layer).get(t);
 						if (h==null) {
 							h = new LinkedHashSet<Eq>();
 							Lv.get(layer).put(t,h);
@@ -995,7 +952,7 @@ public class BiPGraph {
 			Le_next = new LinkedHashSet<Eq>();
 		}
 		
-		ArrayList<Var> delQueue = new ArrayList<Var>();
+		java.util.List<Var> delQueue = new ArrayList<Var>();
 		for (Var v : Lv.get(Lv.size()-1).keySet()) {
 			if (v.getMatching()!=null) {
 				delQueue.add(v);
@@ -1009,18 +966,17 @@ public class BiPGraph {
 		return Lv;
 	}
 
-	public ArrayList<ArrayList<Edge>> dfs(ArrayList<LinkedHashMap<Var,LinkedHashSet<Eq>>> Lv) {
+	public java.util.List<java.util.List<Edge>> dfs(java.util.List<Map<Var,Set<Eq>>> Lv) {
 		lightReset();
-		ArrayList<ArrayList<Edge>> P = new ArrayList<ArrayList<Edge>>();
+		java.util.List<java.util.List<Edge>> P = new ArrayList<java.util.List<Edge>>();
 	
 		boolean found_path = true;
 		for (Var v : Lv.get(Lv.size()-1).keySet()) {
 			ArrayList<Edge> P_tmp = new ArrayList<Edge>();
 			
-			ListIterator<LinkedHashMap<Var,LinkedHashSet<Eq>>> iter = 
-				Lv.listIterator(Lv.size());
+			ListIterator<Map<Var,Set<Eq>>> iter = Lv.listIterator(Lv.size());
 			while (iter.hasPrevious()) {
-				LinkedHashMap<Var,LinkedHashSet<Eq>> l = iter.previous();
+				Map<Var,Set<Eq>> l = iter.previous();
 				v.setVisited(true);
 				if (!found_path) {
 					break;
@@ -1044,8 +1000,8 @@ public class BiPGraph {
 		return P;
 	}
 		
-	public void reassign(ArrayList<ArrayList<Edge>> P) {
-		for (ArrayList<Edge> l : P) {
+	public void reassign(java.util.List<java.util.List<Edge>> P) {
+		for (java.util.List<Edge> l : P) {
 			for (Edge ed : l) {
 				ed.getEquation().setMatching(ed.getVariable());
 				ed.getVariable().setMatching(ed.getEquation());
@@ -1061,22 +1017,22 @@ public class BiPGraph {
 		//System.out.println(printMatching());
 		
 		// Initialize set of free equations
-		LinkedHashSet<Eq> startingNodes = new LinkedHashSet<Eq>();
+		Set<Eq> startingNodes = new LinkedHashSet<Eq>();
 		for (Eq e : getEquations()) {
 			if (e.getMatching()==null) {
 				startingNodes.add(e);
 			}
 		}
 	
-		LinkedHashSet<Eq> unmatchedEquations = new LinkedHashSet<Eq>();
+		Set<Eq> unmatchedEquations = new LinkedHashSet<Eq>();
 		for (Eq e : equations) {
 			if (e.getMatching()==null) {
 				unmatchedEquations.add(e);
 			}
 		}
 		
-		ArrayList<LinkedHashMap<Var,LinkedHashSet<Eq>>> Lv = null;
-		ArrayList<ArrayList<Edge>> P = null;
+		java.util.List<Map<Var,Set<Eq>>> Lv = null;
+		java.util.List<java.util.List<Edge>> P = null;
 		
 		while (unmatchedEquations.size()>0) {
 		
@@ -1089,25 +1045,13 @@ public class BiPGraph {
 			
 			reassign(P);
 		
-			//System.out.println(printMatching());
-
-			for (ArrayList<Edge> l : P) {
+			for (java.util.List<Edge> l : P) {
 				unmatchedEquations.remove(l.get(l.size()-1).getEquation());
 			}
-			
-			/*
-			unmatchedEquations = new LinkedHashSet<Eq>();
-			for (Eq e : equations) {
-				if (e.getMatching()==null) {
-					unmatchedEquations.add(e);
-				}
-			}
-*/
-			
 		}
 	}
 	
-	public void matchMunkres(HashMap<String,Integer> weights) {
+	public void matchMunkres(Map<String,Integer> weights) {
 
 		if (equationMap.size()==0 || variableMap.size()==0) {
 			return;	
@@ -1154,69 +1098,25 @@ public class BiPGraph {
 		ASTNode.log.info("Optimal cost: " + opt_cost);
 	}
 	
-	public ArrayList<MatchingPair> getMatching() {
-			
-		ArrayList<MatchingPair> l = new ArrayList<MatchingPair>();
-		Var v = null;
-		
-		for (Eq e : getEquations()) {				
-			int n_eq = e.getEquation().numScalarEquations();
-			
-			for (int i=0;i<n_eq;i++) {
-				v = e.getMatching();
-				if (v!=null) {
-					l.add(new MatchingPair(e.getEquation(),v.getVariable()));
-				}
-			}
-		}		
-		return l;
-	}	
-	
-	/*
-	public String buildIndent(int n) {
-		String s = "";
-		for (int i=0;i<n;i++){
-			s += " ";
-		}
-		return s;
-	}	
-	
-	public int n_ind = 0;
-	*/
-	
-	public boolean augmentPath(Eq e, ArrayList<Eq> visitedEquations,
-	                                 ArrayList<Var> visitedVariables) {
+	public boolean augmentPath(Eq e, java.util.List<Eq> visitedEquations, java.util.List<Var> visitedVariables) {
 		e.setVisited(true);
 		visitedEquations.add(e);
-		//System.out.println(n_ind + buildIndent(n_ind) + " augmentPath start: " + e.getEquation().prettyPrint(""));	
-		//for (Var v : e.getVariables()) {
-		//	System.out.println(n_ind + buildIndent(n_ind) + " ** " + v.getVariable().name());	
-		//}
 		for (Var v : e.getVariables()) {
-			//System.out.println(n_ind + buildIndent(n_ind) + " augmentPath: " + e.getEquation().prettyPrint("") + " about to visit: " + v.getVariable().name());		
 			if (v.getMatching()==null) {
-				//System.out.println(n_ind + buildIndent(n_ind) + " augmentPath: " + e.getEquation().prettyPrint("") + " unmatched: " + v.getVariable().name());		
 				v.setMatching(e);
 				e.setMatching(v);
 				return true;
 			} else if (!v.isVisited()) {
-				//System.out.println(n_ind + buildIndent(n_ind) + " augmentPath: " + e.getEquation().prettyPrint("") + " matched and unvisited: " + v.getVariable().name());		
 				v.setVisited(true);
 				visitedVariables.add(v);
-				//n_ind++;
 				if (augmentPath(v.getMatching(),visitedEquations,visitedVariables)) {
-					//n_ind--;
-					//System.out.println(n_ind + buildIndent(n_ind) + " augmentPath: " + e.getEquation().prettyPrint("") + " matched and unvisited path found!: " + v.getVariable().name());		
 					v.setMatching(e);
 					e.setMatching(v);
 					return true;	
 				} else {
-					//n_ind--;
-					//System.out.println(n_ind + buildIndent(n_ind) + " augmentPath: " + e.getEquation().prettyPrint("") + " matched and unvisited path not found!: " + v.getVariable().name());				
 				}
 			}
 		}
-		//System.out.println(n_ind + buildIndent(n_ind) + "augmentPath end: " + e.getEquation().prettyPrint(""));	
 		return false;
 	}
 
@@ -1254,7 +1154,6 @@ public class BiPGraph {
 					int sVars = ee.getSolvableVariables().size();
 					if(vars>maxVars || (vars==maxVars && sVars < minSVars)){
 						maxVars = vars;
-						minSVars = minSVars;
 						ee.isRes(true);
 						
 					}
@@ -1268,16 +1167,14 @@ public class BiPGraph {
 	public IndexReductionResult reduceIndex(boolean resetMatching) {
 		if (resetMatching) {
 			reset();
-			//greedyMatching();
 		}
 						
-		//_maximumMatching(resetMatching);	
 		IndexReductionResult result = new IndexReductionResult();		
 				
-		ArrayList<Eq> visitedEquations;
-		ArrayList<Var> visitedVariables;		
+		java.util.List<Eq> visitedEquations;
+		java.util.List<Var> visitedVariables;		
 				
-		LinkedHashSet<Eq> es = new LinkedHashSet<Eq>();
+		Set<Eq> es = new LinkedHashSet<Eq>();
 		for (Eq e : getEquations()) {
 			if (e.getEquation().isContinuous()) {
 				es.add(e);
@@ -1289,12 +1186,10 @@ public class BiPGraph {
 			return null;
 		}
 		
-		FClass fc = es.iterator().next().getEquation().myFClass();	
-		
 		Eq eqToMatch;
 		
 		boolean pathFound = false;		
-		ArrayList<FVariable> newDiffedVars = new ArrayList<FVariable>();	
+		java.util.List<FVariable> newDiffedVars = new ArrayList<FVariable>();	
 		Stack<Eq> eqToMatchStack = new Stack<Eq>();
 		// Algoritm step numbering from the original Pantelides paper		
 		// Loop over all equations (step 3)
@@ -1415,7 +1310,7 @@ public class BiPGraph {
 		}
 
 		// Remove equations that are not connected
-		ArrayList<Eq> eqToRemove = new ArrayList<Eq>();
+		java.util.List<Eq> eqToRemove = new ArrayList<Eq>();
 		for (Eq e : getEquations()) {
 			if (e.getVariables().size()==0) {
 				eqToRemove.add(e);
@@ -1453,21 +1348,17 @@ public class BiPGraph {
 
 		// Lists of equations and variables, notation is the same as in the 
 		// paper
-		ArrayList<FAbstractEquation> g = 
-		   new ArrayList<FAbstractEquation>();
+		java.util.List<FAbstractEquation> g = new ArrayList<FAbstractEquation>();
 		
-		ArrayList<FAbstractEquation> h = 
-		   new ArrayList<FAbstractEquation>();
+		java.util.List<FAbstractEquation> h = new ArrayList<FAbstractEquation>();
 
-		ArrayList<FVariable> z = 
-		   new ArrayList<FVariable>();
+		java.util.List<FVariable> z = new ArrayList<FVariable>();
 
-		ArrayList<FVariable> zHat = 
-		   new ArrayList<FVariable>();
+		java.util.List<FVariable> zHat = new ArrayList<FVariable>();
 
 		// Collect all blocks that contain differentiated equations
 		for (AbstractEquationBlock eb : blt) {
-			ArrayList<FAbstractEquation> diffedEqns = eb.differentiatedEquations();
+			java.util.List<FAbstractEquation> diffedEqns = eb.differentiatedEquations();
 			if (diffedEqns.size()>0) {
 				ASTNode.log.info(" ********* Found block containing diffed equations ***********");
 				ASTNode.log.info(eb.toString());
@@ -1551,16 +1442,16 @@ public class BiPGraph {
 			
 			// Run matching
 			// Compute weights for variables based on linearity
-			HashMap<String,Integer> linearityWeights = new HashMap<String,Integer>();
+			Map<String,Integer> linearityWeights = new HashMap<String,Integer>();
 			for (FVariable fv : z) {
 		 		int w = 0;
  				for (FAbstractEquation feq : g) {
  					try {
 						FAbstractEquation feqd = feq.diff(fv.name());
 						//System.out.println(feqd.prettyPrint(""));
-						if (!feqd.variability().lessOrEqual(feqd.fParameter())) {
+						if (!feqd.variability().lessOrEqual(ASTNode.fParameter())) {
 							w += 2;
-						} else if (!feqd.variability().lessOrEqual(feqd.fConstant())) {
+						} else if (!feqd.variability().lessOrEqual(ASTNode.fConstant())) {
 							w += 1; 
 						}
 					} catch(Exception e) {}
@@ -1571,9 +1462,9 @@ public class BiPGraph {
 						try {
 							FAbstractEquation feqd = feq.diff(frv.name());
 							//System.out.println(feqd.prettyPrint(""));
-							if (!feqd.variability().lessOrEqual(feqd.fParameter())) {
+							if (!feqd.variability().lessOrEqual(ASTNode.fParameter())) {
 								w += 2;
-							} else if (!feqd.variability().lessOrEqual(feqd.fConstant())) {
+							} else if (!feqd.variability().lessOrEqual(ASTNode.fConstant())) {
 								w += 1; 
 							}
 						} catch(Exception e) {}							
@@ -1647,8 +1538,8 @@ public class BiPGraph {
 		return result;
 	}
 	
-	public ArrayList<Eq> getUnmatchedEquations() {
-		ArrayList<Eq> l = new ArrayList<Eq>();
+	public java.util.List<Eq> getUnmatchedEquations() {
+		java.util.List<Eq> l = new ArrayList<Eq>();
 		for (Eq e : equations) {
 			if (e.getMatching()==null) {
 				l.add(e);
@@ -1657,8 +1548,8 @@ public class BiPGraph {
 		return l;
 	}
 
-	public ArrayList<Var> getUnmatchedVariables() {
-		ArrayList<Var> l = new ArrayList<Var>();
+	public java.util.List<Var> getUnmatchedVariables() {
+		java.util.List<Var> l = new ArrayList<Var>();
 		for (Var v : variableMap.values()) {
 			if (v.getMatching()==null) {
 				l.add(v);
@@ -1667,8 +1558,8 @@ public class BiPGraph {
 		return l;
 	}
 	
-	public ArrayList<Eq> getSUME() {
-		ArrayList<Eq> l = new ArrayList<Eq>();
+	public java.util.List<Eq> getSUME() {
+		java.util.List<Eq> l = new ArrayList<Eq>();
 		for (Eq e : equations) {
 			if (e.getSolvableMatching()==null) {
 				l.add(e);
@@ -1677,8 +1568,8 @@ public class BiPGraph {
 		return l;
 	}
 
-	public ArrayList<Var> getSUMV() {
-		ArrayList<Var> l = new ArrayList<Var>();
+	public java.util.List<Var> getSUMV() {
+		java.util.List<Var> l = new ArrayList<Var>();
 		for (Var v : variableMap.values()) {
 			if (v.getSolvableMatching()==null) {
 				v.isTear(true);
@@ -1688,8 +1579,8 @@ public class BiPGraph {
 		return l;
 	}
 
-	public ArrayList<Eq> getMatchedEquations() {
-		ArrayList<Eq> l = new ArrayList<Eq>();
+	public java.util.List<Eq> getMatchedEquations() {
+		java.util.List<Eq> l = new ArrayList<Eq>();
 		for (Eq e : equations) {
 			if (e.getMatching()!=null) {
 				l.add(e);
@@ -1698,8 +1589,8 @@ public class BiPGraph {
 		return l;
 	}
 
-	public ArrayList<Var> getMatchedVariables() {
-		ArrayList<Var> l = new ArrayList<Var>();
+	public java.util.List<Var> getMatchedVariables() {
+		java.util.List<Var> l = new ArrayList<Var>();
 		for (Var v : variableMap.values()) {
 			if (v.getMatching()!=null) {
 				l.add(v);
@@ -1710,7 +1601,7 @@ public class BiPGraph {
 	
 	private int index = 0;
     private Stack<Eq> S;
-    private LinkedList<Stack<Eq>> components;
+    private java.util.List<java.util.List<Eq>> components;
 		
     /* This is an implementation of the recursive Tarjan's algorithm.
      * Possibly it is less efficient than the non-recursive version, but
@@ -1719,7 +1610,7 @@ public class BiPGraph {
 	public BLT computeBLT() {
 		computeRawBLT();
 		BLT blt = new BLT(getFClass());
-		for (Stack<Eq> bl : components) {
+		for (java.util.List<Eq> bl : components) {
 			blt.add(EquationBlockFactory.createEquationBlock(bl));
 		}
 		return blt;
@@ -1727,10 +1618,10 @@ public class BiPGraph {
 	
 	private Set<Eq> handGuidedEquations;
 	
-	public LinkedList<Stack<Eq>> computeRawBLT() {
+	public java.util.List<java.util.List<Eq>> computeRawBLT() {
 		index = 0;
 		S = new Stack<Eq>();
-		components = new LinkedList<Stack<Eq>>();
+		components = new LinkedList<java.util.List<Eq>>();
 		tarjanReset();
 		
 		handGuidedEquations = new LinkedHashSet<Eq>();
@@ -1741,8 +1632,11 @@ public class BiPGraph {
 				}
 				if (e.getEquation().hasResidual() && e.getEquation().getResidual().hasIterationVariable()) {
 					FExp exp = e.getEquation().getResidual().getIterationVariable();
-					for (FVariable var : exp.referencedFVariablesInFExp()) {
-						handGuidedEquations.add(getVariable(var.name()).getMatching());
+					for (FVariable fVar : exp.referencedFVariablesInFExp()) {
+						Var var = getVariable(fVar.name());
+						if (var != null) {
+							handGuidedEquations.add(var.getMatching());
+						}
 					}
 				}
 			}
@@ -1754,9 +1648,9 @@ public class BiPGraph {
 			}
 		}
 		
-		java.util.List<Stack<Eq>> oldComponents = components;
-		components = new LinkedList<Stack<Eq>>();
-		for (Stack<Eq> block : oldComponents) {
+		java.util.List<java.util.List<Eq>> oldComponents = components;
+		components = new LinkedList<java.util.List<Eq>>();
+		for (java.util.List<Eq> block : oldComponents) {
 			components.add(block);
 		}
 		return components;
@@ -1804,7 +1698,7 @@ public class BiPGraph {
 			}
 		}
 		if (e.getTarjanNbr()==e.getTarjanLowLink()) {
-			Stack<Eq> component = new Stack<Eq>();
+			java.util.List<Eq> component = new Stack<Eq>();
 			boolean done = false;
 			while (!done) {
 				Eq ee = S.pop();
@@ -1817,10 +1711,10 @@ public class BiPGraph {
 		}
 	}
 	
-	public LinkedList<Stack<Eq>> computeTearBlocks() {
+	public java.util.List<java.util.List<Eq>> computeTearBlocks() {
 		index = 0;
         S = new Stack<Eq>();
-        components = new LinkedList<Stack<Eq>>();
+        components = new LinkedList<java.util.List<Eq>>();
         tarjanReset();
         
         for (Eq e : getEquations()) {
@@ -1853,7 +1747,7 @@ public class BiPGraph {
 			}
  		}
 		if (e.getTarjanNbr()==e.getTarjanLowLink()) {
-			Stack<Eq> component = new Stack<Eq>();
+			java.util.List<Eq> component = new ArrayList<Eq>();
 			boolean done = false;
 			while (!done) {
 				Eq ee = S.pop();
@@ -1865,42 +1759,6 @@ public class BiPGraph {
 			components.add(component);
 		}
 	}
-	
-	/*
-	public void randomTest(int n_eq, int n_var, int n_ed) {
-		
-		BiPGraph g = new BiPGraph("Random Graph","");
-		
-		for (int i=0;i<n_eq;i++) {
-			g.addEquation("e_"+(i+1), "");
-		}
-
-		for (int i=0;i<n_var;i++) {
-			g.addVariable("v_"+(i+1), "");
-		}
-
-		Random r = new Random();
-		for (int i=0;i<n_ed;i++) {
-			boolean added=false;
-			while (!added) {
-				int e_ind = r.nextInt(n_eq) + 1;
-				int v_ind = r.nextInt(n_var) + 1;
-				if (g.addEdge("e_"+e_ind,"v_"+v_ind)) {
-					added = true;
-				}
-			}
-		}
-		
-		//System.out.println(g);
-		long before = System.currentTimeMillis();
-		g.maximumMatching(true);
-		long after = System.currentTimeMillis();
-		System.out.println("Matching n_equations="+n_eq+" n_variables="+n_var+" n_edges="+n_ed+" --- " + (((double)(after-before))/1000.));
-		
-		//System.out.println(g.printMatching());
-		
-	}
-	*/
 	
 	public void reset() {
 		for (Eq e : getEquations()) {
@@ -1942,12 +1800,12 @@ public class BiPGraph {
 		this.description = description;
 	}
 
-	public ArrayList<Eq> getEquations() {
+	public java.util.List<Eq> getEquations() {
 		return equations;
 	}
 
 	public void insertIntoEquationIndexMap(FAbstractEquation eqn, Eq e) {
-		ArrayList<Eq> l = equationIndexMap.get(eqn);
+		java.util.List<Eq> l = equationIndexMap.get(eqn);
 		if (l==null) {
 			l = new ArrayList<Eq>();
 			equationIndexMap.put(eqn, l);
@@ -1956,7 +1814,7 @@ public class BiPGraph {
 	}
 
 	public void removeFromEquationIndexMap(FAbstractEquation eqn, Eq e) {
-		ArrayList<Eq> l = equationIndexMap.get(eqn);
+		java.util.List<Eq> l = equationIndexMap.get(eqn);
 		if (l!=null) {
 			for (Eq ee : l) {
 				if (e==ee) {
@@ -2115,280 +1973,6 @@ public class BiPGraph {
 		return str.toString();
 	}
 	
-	/*
-	public boolean hasAP(Eq e, ArrayList<Eq> visitedEquations, ArrayList<Var> visitedVariables) {
-		e.setVisited(true);
-		visitedEquations.add(e);
-		for (Var v : e.getVariables()) {
-			if (v.getMatching()==null) {
-				return true;
-			} else if (!v.isVisited()) {
-				v.setVisited(true);
-				visitedVariables.add(v);
-				if (hasAP(v.getSolvableMatching(),visitedEquations,visitedVariables)) {
-					return true;	
-				} 
-			}
-		}
-		return false;
-	}	
-	
-	public boolean SAP(Eq e, ArrayList<Eq> visitedEquations, ArrayList<Var> visitedVariables) {
-		e.setVisited(true);
-		visitedEquations.add(e);
-		for (Var v : e.getSolvableVariables()) {
-			if (v.getSolvableMatching()==null) {
-				v.setSolvableMatching(e);
-				e.setSolvableMatching(v);
-				v.setMatching(e);
-				e.setMatching(v);
-				return true;
-			} else if (!v.isVisited()) {
-				v.setVisited(true);
-				visitedVariables.add(v);
-				if (SAP(v.getSolvableMatching(),visitedEquations,visitedVariables)) {
-					v.setSolvableMatching(e);
-					e.setSolvableMatching(v);
-					v.setMatching(e);
-					e.setMatching(v);
-					return true;	
-				} 
-			}
-		}
-		return false;
-	}
-
-	public void resetAP(){
-		for (Eq e : getEquations()) {
-			e.setVisited(false);
-			e.setDepth(0);
-		}		
-	}
-	
-	public boolean initAP(Eq e){
-		Var match = e.getMatching();
-		e.setMatching(null);
-		match.setMatching(null);
-		e.isUsed(true);
-		resetAP();
-		for(Var v: e.getSolvableVariables()){
-			if(v.getSolvableMatching()==null){
-				System.out.println("START FROM DEPTH 2");
-				if(AP(v.getSolvableMatching(),2)){
-					v.setSolvableMatching(e);
-					e.setSolvableMatching(v);
-					v.setMatching(e);
-					e.setMatching(v);
-					return true;
-				}
-			}else{
-				System.out.println("START FROM DEPTH 1");
-				if(AP(v.getSolvableMatching(),1)){
-					v.setSolvableMatching(e);
-					e.setSolvableMatching(v);
-					v.setMatching(e);
-					e.setMatching(v);
-					return true;
-				}
-			}
-		}
-		match.setMatching(e);
-		e.setMatching(match);
-		return false;	
-	}
-	
-	public boolean AP(Eq e, int d){
-		if(e.isVisited()){
-			System.out.println("This should not be possible anymore....");
-			return false;
-		}
-		if(e.getDepth()>=d){
-			//System.out.println("This equation has been visited in a deeper depth.");
-			return false;
-		}
-		e.setVisited(true);
-		if(d>e.getDepth()){
-			e.setDepth(d);
-			//System.out.println("Equation " + e.getName()+ " now has depth: " +d);
-		}
-		for(Var v: e.getVariables()){
-			if(e.getEquation().isSolved(v.getName(),true)){
-				if(v.getMatching()== null){
-					//System.out.println("Found unmatched and Solvable matched it!");
-					v.setSolvableMatching(e);
-					e.setSolvableMatching(v);
-					v.setMatching(e);
-					e.setMatching(v);
-					return true;
-				}else if(v.getSolvableMatching()==null && !v.getMatching().isVisited()){
-					int newD=d+1;
-					//System.out.println("Looking for path at depth S->US: " + newD);
-					//System.out.print(e.getName()+ " -> " + v.getMatching().getName());
-					//System.out.println(" via " + v.getName());
-					if(AP(v.getMatching(),newD)){
-						v.setSolvableMatching(e);
-						e.setSolvableMatching(v);
-						v.setMatching(e);
-						e.setMatching(v);
-						return true;
-					}
-				}else if(!v.getMatching().isVisited()){
-					//System.out.println("Looking for path at depth S->S: " +d);
-					//System.out.println(e.getName()+ " -> " + v.getSolvableMatching().getName());
-					if(AP(v.getSolvableMatching(),d)){
-						v.setSolvableMatching(e);
-						e.setSolvableMatching(v);
-						v.setMatching(e);
-						e.setMatching(v);
-						return true;
-					}
-				}
-			}else if(d>1){ // (if not solvable)
-				if(v.getMatching()== null){
-					//System.out.println("Found unmatched and matched it");
-					v.setMatching(e);
-					e.setMatching(v);
-					v.setSolvableMatching(null);
-					e.setSolvableMatching(null);
-					e.isUsed(false);
-					return true;
-				}else if(v.getSolvableMatching()==null && !v.getMatching().isVisited()){
-					//System.out.println("Looking for path at depth US->US: " + d);
-					//System.out.println(e.getName()+ " -> " + v.getMatching().getName());
-					if(AP(v.getMatching(),d)){
-						v.setMatching(e);
-						e.setMatching(v);
-						v.setSolvableMatching(null);
-						e.setSolvableMatching(null);
-						e.isUsed(false);
-						return true;
-					}
-				}else if(!v.getMatching().isVisited()){
-					int newD = d-1;
-					//System.out.println("Looking for path at depth US->S: " + newD);
-					//System.out.println(e.getName()+ " -> " + v.getSolvableMatching().getName());
-					if(AP(v.getSolvableMatching(),newD)){
-						v.setMatching(e);
-						e.setMatching(v);
-						v.setSolvableMatching(null);
-						e.setSolvableMatching(null);
-						e.isUsed(false);
-						return true;
-					}
-				}
-			}
-		}
-		e.setVisited(false);
-		return false;
-	}
-
-	public boolean SAPBuild(Eq e, ArrayList<Eq> visitedEquations, ArrayList<Var> visitedVariables) {
-		e.setVisited(true);
-		visitedEquations.add(e);
-		for (Var v : e.getSolvableVariables()) {
-			if (v.getSolvableMatching()==null) {
-				if(v.getMatching()==null){
-					v.setSolvableMatching(e);
-					e.setSolvableMatching(v);
-					v.setMatching(e);
-					e.setMatching(v);
-				}
-			} else if (!v.isVisited()) {
-				v.setVisited(true);
-				visitedVariables.add(v);
-				if (SAPBuild(v.getSolvableMatching(),visitedEquations,visitedVariables)) {
-					v.setSolvableMatching(e);
-					e.setSolvableMatching(v);
-					v.setMatching(e);
-					e.setMatching(v);
-					return true;	
-				} 
-			}
-		}
-		return false;
-	}
-	
-	public boolean hasSAP(Eq e, ArrayList<Eq> visitedEquations, ArrayList<Var> visitedVariables) {
-		e.setVisited(true);
-		visitedEquations.add(e);
-		for (Var v : e.getSolvableVariables()) {
-			if (v.getSolvableMatching()==null) {
-				return true;
-			} else if (!v.isVisited()) {
-				v.setVisited(true);
-				visitedVariables.add(v);
-				if (hasAP(v.getSolvableMatching(),visitedEquations,visitedVariables)) {
-					return true;	
-				} 
-			}
-		}
-		return false;
-	}	
-
-	public ArrayList<Eq> removeTearingPair(Eq res, Var tear, boolean unmatch){
-		ArrayList<Eq> alteredEquations = new ArrayList<Eq>();
-		equations.remove(res);
-		equationMap.remove(res.getName());
-		removeFromEquationIndexMap(res.getEquation(),res);
-		variableMap.remove(tear.getName());	
-		if(unmatch){
-			// Set the matching to null for the newly unmatched equation and variable
-			// (these were matched with tear and res before)
-			res.getMatching().setMatching(null);
-			if(res.getSolvableMatching()!=null){
-				res.getSolvableMatching().setSolvableMatching(null);
-			}
-			tear.getMatching().setMatching(null);
-			if(tear.getSolvableMatching()!=null){
-				tear.getSolvableMatching().setSolvableMatching(null);
-			}
-		}
-		// Remove tear from the remaining equations
-		for (Eq e : getEquations()) {
-			if(e.getVariables().remove(tear)){
-				alteredEquations.add(e);
-				e.getSolvableVariables().remove(tear);
-			}
-		}
-		return alteredEquations;
-	}
-	
-	public void reinsertTearingPair(Eq res, Var tear, ArrayList<Eq> alteredEquations, boolean match){
-		variableMap.put(tear.getName(),tear);
-		equations.add(res);
-		equationMap.put(res.getName(),res);
-		insertIntoEquationIndexMap(res.getEquation(),res);
-		for(Eq e: alteredEquations){
-			e.addVariable(tear);
-			if(e.getEquation().isSolved(tear.getName())){
-				e.addSolvableVariable(tear);
-			}
-		}
-		if(match){
-			// If an augmentPath was found, the matchings has been altered and a new one must be found.
-			tear.setMatching(null);
-			tear.setSolvableMatching(null);
-			res.setMatching(null);
-			res.setSolvableMatching(null);
-			lightReset();
-			SAP(res, new ArrayList<Eq>(), new ArrayList<Var>());
-		} else {
-			// Set matching as it was before the removal of the tearing pair. 
-			res.getMatching().setMatching(res);
-			if(res.getSolvableMatching()!=null){
-				res.getSolvableMatching().setSolvableMatching(res);
-			}
-			tear.getMatching().setMatching(tear);
-			if(tear.getSolvableMatching()!=null){
-				tear.getSolvableMatching().setSolvableMatching(tear);
-			}
-		}
-	}
-	*/
-	
-	
-	
-	
     class Edge {
     	private Var variable;
     	private Eq equation;
@@ -2424,8 +2008,8 @@ public class BiPGraph {
 public class Eq {
 
 	private String name;
-	private ArrayList<Var> variables = new ArrayList<Var>();
-	private ArrayList<Var> solvableVariables = new ArrayList<Var>();
+	private java.util.List<Var> variables = new ArrayList<Var>();
+	private java.util.List<Var> solvableVariables = new ArrayList<Var>();
 	private Iterator<Var> varIterator;
 	private Var matching = null;
 	private Var solvableMatching;
@@ -2449,7 +2033,7 @@ public class Eq {
        groups more consistent, e.g., when a function call equation
        needs to be differentiated. 
     */
-    private LinkedHashSet<Eq> groupMembers = new LinkedHashSet<Eq>();
+    private Set<Eq> groupMembers = new LinkedHashSet<Eq>();
 
 	public Eq(String name,String description) {
 		this.name = name;
@@ -2494,7 +2078,7 @@ public class Eq {
 		this.name = name;
 	}
 
-	public ArrayList<Var> getVariables() {
+	public java.util.List<Var> getVariables() {
 		return variables;
 	}
 
@@ -2600,7 +2184,7 @@ public class Eq {
 		solvableVariables.add(v);
 	}
 	
-	public ArrayList<Var> getSolvableVariables() {
+	public java.util.List<Var> getSolvableVariables() {
 		return solvableVariables;
 	}
 	
@@ -2632,7 +2216,7 @@ public class Eq {
 		groupMembers.add(eqn);
 	}
 	
-	public LinkedHashSet<Eq> getGroupMembers() {
+	public Set<Eq> getGroupMembers() {
 		return groupMembers;	
 	}
 	
@@ -2801,8 +2385,8 @@ public class Var {
 
 public class IndexReductionResult {
 
-	private ArrayList<FAbstractEquation> addedEquations;
-	private ArrayList<FVariable> dummyDerivatives;
+	private java.util.List<FAbstractEquation> addedEquations;
+	private java.util.List<FVariable> dummyDerivatives;
 
 	public IndexReductionResult() {
 		addedEquations = new ArrayList<FAbstractEquation>();
@@ -2817,11 +2401,11 @@ public class IndexReductionResult {
 		dummyDerivatives.add(fv);	
 	}
 
-	public ArrayList<FAbstractEquation> getEquations() {
+	public java.util.List<FAbstractEquation> getEquations() {
 		return addedEquations;
 	}
 
-	public ArrayList<FVariable> getDummyDerivatives() {
+	public java.util.List<FVariable> getDummyDerivatives() {
 		return dummyDerivatives;
 	}
 
