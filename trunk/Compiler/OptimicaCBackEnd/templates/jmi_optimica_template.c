@@ -98,6 +98,10 @@ $C_variable_aliases$
 
 $C_point_variable_aliases$
 
+const char *fmi_runtime_options_map_names[] = { NULL };
+const int fmi_runtime_options_map_vrefs[] = { -1 };
+const int fmi_runtime_options_map_length = 1;
+
 #define _real_ci(i) ((*(jmi->z))[jmi->offs_real_ci+i])
 #define _real_cd(i) ((*(jmi->z))[jmi->offs_real_cd+i])
 #define _real_pi(i) ((*(jmi->z))[jmi->offs_real_pi+i])

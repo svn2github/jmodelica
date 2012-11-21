@@ -42,22 +42,32 @@ def run_demo(with_plots=True):
     res = model.simulate(final_time=10.)
 
     x = res['x']
+    st = res['st']
+    ct = res['ct']
+    err = res['err']
     y = res['y']
     vx = res['vx']
     vy = res['vy']
     t = res['time']
+    maxerr = N.max(err)    
 
-    assert N.abs(x[-1] - 3.87669270e-01) < 1e-3
+    if maxerr > 1e-6:
+        print "Maximum error: ", maxerr 
+        assert maxerr < 1e-4
 
     if with_plots:
         plt.figure(1)
-        plt.subplot(2,1,1)
+        plt.subplot(3,1,1)
         plt.plot(t,x,t,y)
         plt.grid(True)
         plt.legend(['x','y'])
-        plt.subplot(2,1,2)
+        plt.subplot(3,1,2)
         plt.plot(t,vx,t,vy)
         plt.grid(True)
         plt.legend(['vx','vy'])
+        plt.subplot(3,1,3)
+        plt.plot(t,err)
+        plt.grid(True)
+        plt.legend(['err'])
         plt.xlabel('time [s]')
         plt.show()

@@ -187,4 +187,26 @@ typedef enum {
  * @param message   The message. Note that a trailing '\n' is always added to the message when printing.
  */
 void jmi_log(jmi_t *jmi, jmi_log_category_t category, char* message);
+
+/**
+ * \brief Log error. Forwards the call to FMI logger in case of FMU.
+ *
+ * @param jmi       A jmi_t struct.
+ * @param fmt       Format string used for printf. Note that a trailing '\n' is always added to the message when printing.
+ */
+void jmi_log_error(jmi_t *jmi, char* fmt,...);
+/**
+ * \brief Log warning. Forwards the call to FMI logger in case of FMU.
+ *
+ * @param jmi       A jmi_t struct.
+ * @param fmt       Format string used for printf. Note that a trailing '\n' is always added to the message when printing.
+ */
+void jmi_log_warning(jmi_t *jmi, char* fmt,...);
+/**
+ * \brief Log info. Forwards the call to FMI logger in case of FMU.
+ *
+ * @param jmi       A jmi_t struct.
+ * @param fmt       Format string used for printf. Note that a trailing '\n' is always added to the message when printing.
+ */
+void jmi_log_info(jmi_t *jmi, char* fmt,...);
 #endif

@@ -39,6 +39,11 @@ extern "C" {
 /* Lapack function */
 extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );
 extern void dgetrs_(char* TRANS, int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
+extern int dgeequ_(int *m, int *n, double *a, int *	lda, double *r__, double *c__, double *rowcnd, double 
+	*colcnd, double *amax, int *info);
+
+extern int dlaqge_(int *m, int *n, double *a, int *	lda, double *r__, double *c__, double *rowcnd, double 
+	*colcnd, double *amax, char *equed);
 
 typedef struct jmi_linear_solver_t jmi_linear_solver_t;
 
@@ -55,7 +60,10 @@ void jmi_linear_solver_delete(jmi_block_residual_t* block);
 struct jmi_linear_solver_t {
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
     jmi_real_t* factorization;      /**< \brief Matrix for storing the Jacobian factorization */
-    jmi_real_t* jacobian;      /**< \brief Matrix for storing the Jacobian */
+    jmi_real_t* jacobian;         /**< \brief Matrix for storing the Jacobian */
+    double* rScale;               /**< \brief Row scaling of the Jacobian matrix */
+    double* cScale;               /**< \brief Column scaling of the Jacobian matrix */
+    char equed;                    /**< \brief If scaling of the Jacobian matrix used ('N' - no scaling, 'R' - rows, 'C' - cols, 'B' - both */
     int cached_jacobian;          /**< \brief This flag indicates weather the Jacobian needs to be refactorized */
 };
 

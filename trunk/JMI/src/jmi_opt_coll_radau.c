@@ -2870,7 +2870,6 @@ int jmi_opt_coll_radau_new(jmi_opt_coll_t **jmi_opt_coll, jmi_t *jmi, int n_e,
 					for (k=0;k<n_cp;k++) {
 						for (j=0;j<jmi->n_real_u;j++) {
 							(*jmi_opt_coll)->dh_row[rc_ind] = j + 1 + row_index + jmi->n_real_dx + jmi->n_real_x;
-							(*jmi_opt_coll)->dh_col[rc_ind] =
 							(*jmi_opt_coll)->dh_col[rc_ind] = offs_u_coll((*jmi_opt_coll),
 									(*jmi_opt_coll)->tp_e[i],k+1,j) + 1;
 							rc_ind++;

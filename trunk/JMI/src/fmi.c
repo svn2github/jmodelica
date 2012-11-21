@@ -262,12 +262,12 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     fmiInteger nR0, nR;             /* Number of R-equations */
     fmiInteger initComplete = 0;    /* If the initialization are complete */
     jmi_real_t nextTimeEvent;       /* Next time event instant */
-    fmiReal safety_factor_events = 0.0001;
-    fmiReal safety_factor_newton = 0.0001;
     
     jmi_real_t* switchesR;   /* Switches */
     jmi_real_t* switchesR0;  /* Initial Switches */
     jmi_real_t* b_mode;
+	fmi_t* fmi = (fmi_t *)c;
+    jmi_t* jmi =fmi->jmi;
 
     /* For debugging Jacobians */
 /*
@@ -285,28 +285,32 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     eventInfo->iterationConverged = fmiTrue;            /* The iteration has converged */
     
     /* Evaluate parameters */
-    jmi_init_eval_parameters(((fmi_t *)c)->jmi);
+    jmi_init_eval_parameters(jmi);
 
     /* Get Sizes */
-    retval = jmi_init_get_sizes(((fmi_t *)c)->jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
+    retval = jmi_init_get_sizes(jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
     if(retval != 0) {
-        (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed when trying to retrieve the initial sizes.");
+        (fmi -> fmi_functions).logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Initialization failed when trying to retrieve the initial sizes.");
         return fmiError;
     }
 
-    retval = jmi_dae_get_sizes(((fmi_t *)c)->jmi,&nF,&nR);
+    retval = jmi_dae_get_sizes(jmi,&nF,&nR);
     if(retval != 0) {
-        (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed when trying to retrieve the actual sizes.");
+        (fmi -> fmi_functions).logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Initialization failed when trying to retrieve the actual sizes.");
         return fmiError;
     }
     /* ---- */
-    
+    fmi_update_runtime_options(fmi);
     /* Sets the relative tolerance to a default value for use in Kinsol when tolerance controlled is false */
     if (toleranceControlled == fmiFalse){
-        relativeTolerance = 1e-6;
+        relativeTolerance = jmi->options.nle_solver_default_tol;
+        ((fmi_t *)c) -> fmi_epsilon= jmi->options.events_default_tol; /* Used in the event detection */
+        ((fmi_t *)c) -> fmi_newton_tolerance=jmi->options.nle_solver_default_tol; /* Used in the Newton iteration */
     }
-    ((fmi_t *)c) -> fmi_epsilon=safety_factor_events*relativeTolerance; /* Used in the event detection */
-    ((fmi_t *)c) -> fmi_newton_tolerance=safety_factor_newton*relativeTolerance; /* Used in the Newton iteration */
+    else {
+        ((fmi_t *)c) -> fmi_epsilon= jmi->options.events_tol_factor*relativeTolerance; /* Used in the event detection */
+        ((fmi_t *)c) -> fmi_newton_tolerance=jmi->options.nle_solver_tol_factor*relativeTolerance; /* Used in the Newton iteration */
+    }
     
     /* We are at the initial event TODO: is this really necessary? */
     ((fmi_t *)c)->jmi->atEvent = JMI_TRUE;
@@ -1136,6 +1140,9 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
 
 fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
     /* Strings not yet supported. */
+    int i;
+    for(i = 0; i < nvr; i++) value[i] = 0;
+    
     (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiWarning, "INFO", "Strings are not yet supported.");
     return fmiWarning;
 }
@@ -1365,8 +1372,8 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
         /* Test if block is solved by KINSOL */
         if (nniters > 0) {
             /* Output to logger */
-            sprintf(buf, "INIT Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d", 
-                    block->index, block->n, nniters, block->nb_calls, block->nb_jevals);
+            sprintf(buf, "INIT Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d nfevals: %d", 
+                    block->index, block->n, nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
             logger(c, instance_name, fmiOK, "DEBUG", buf);
 
             sprintf(buf, "INIT Block %d ; time: %f", block->index, block->time_spent);
@@ -1382,8 +1389,8 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
         /* Test if block is solved by KINSOL */
         if (nniters > 0) {
             /* Output to logger */
-            sprintf(buf, "SIM Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d", 
-                    block->index, block->n, nniters, block->nb_calls, block->nb_jevals);
+            sprintf(buf, "SIM Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d nfevals: %d", 
+                    block->index, block->n, (int)nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
             logger(c, instance_name, fmiOK, "DEBUG", buf);
 
             sprintf(buf,"INIT Block %d ; time: %f", block->index, block->time_spent);
@@ -1397,4 +1404,77 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
             jmi_delete_block_residual(jmi->dae_block_residuals[i]);
     }*/
     return fmiOK;
+}
+
+
+extern const char *fmi_runtime_options_map_names[];
+extern const int fmi_runtime_options_map_vrefs[];
+extern const int fmi_runtime_options_map_length;
+
+int compare_option_names(const void* a, const void* b) {
+	const char** sa = a;
+	const char** sb = b;
+	return strcmp(*sa, *sb);
+}
+
+static int get_option_index(char* option) {
+	const char** found=(const char**)bsearch(&option,fmi_runtime_options_map_names,fmi_runtime_options_map_length,sizeof(char*),compare_option_names);
+	int vr, index;
+	if(!found) return 0;
+    index = (int)(found - &fmi_runtime_options_map_names[0]);
+    if(index >= fmi_runtime_options_map_length ) return 0;
+	vr = fmi_runtime_options_map_vrefs[index];
+	return get_index_from_value_ref(vr);
+}
+
+/**
+ * Update run-time options specified by the user.
+ */
+void fmi_update_runtime_options(fmi_t* fmi) {
+	jmi_t* jmi = fmi->jmi;
+	jmi_real_t* z = jmi_get_z(jmi);
+	int index;
+	jmi_options_t* op = &fmi->jmi->options;
+	index = get_option_index("_log_level");
+	if(index)
+		op->log_level = (int)z[index]; 
+	index = get_option_index("_enforce_bounds");
+	if(index)
+		op->enforce_bounds_flag = (int)z[index]; 
+	index = get_option_index("_nle_solver_log_level");
+	if(index)
+		op->nle_solver_log_level = (int)z[index]; 
+	index = get_option_index("_use_jacobian_scaling");
+	if(index)
+		op->use_jacobian_scaling_flag = (int)z[index]; 
+	index = get_option_index("_use_automatic_scaling");
+	if(index)
+		op->use_automatic_scaling_flag = (int)z[index]; 
+	index = get_option_index("_rescale_each_step");
+	if(index)
+		op->rescale_each_step_flag = (int)z[index]; 
+	index = get_option_index("_rescale_after_singular_jac");
+	if(index)
+		op->rescale_after_singular_jac_flag = (int)z[index]; 
+	index = get_option_index("_use_Brent_in_1d");
+	if(index)
+		op->use_Brent_in_1d_flag = (int)z[index]; 
+	index = get_option_index("_nle_solver_default_tol");
+	if(index)
+		op->nle_solver_default_tol = z[index]; 
+	index = get_option_index("_nle_solver_check_jac_cond");
+	if(index)
+		op->nle_solver_check_jac_cond_flag = (int)z[index]; 
+	index = get_option_index("_nle_solver_min_tol");
+	if(index)
+		op->nle_solver_min_tol = z[index]; 
+	index = get_option_index("_nle_solver_tol_factor");
+	if(index)
+		op->nle_solver_tol_factor = z[index]; 
+	index = get_option_index("_events_default_tol");
+	if(index)
+		op->events_default_tol = z[index]; 
+	index = get_option_index("_events_tol_factor");
+	if(index)
+		op->events_tol_factor = z[index]; 
 }

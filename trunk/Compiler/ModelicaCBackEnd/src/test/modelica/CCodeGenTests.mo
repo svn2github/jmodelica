@@ -8047,16 +8047,29 @@ model TestRuntimeOptions1
 			template="$C_runtime_option_map$",
 			generatedCode="
 const char *fmi_runtime_options_map_names[] = {
-    \"_test_runtime_options\",
-    \"_test_runtime_options_2\",
+    \"_enforce_bounds\",
+    \"_events_default_tol\",
+    \"_events_tol_factor\",
+    \"_log_level\",
+    \"_nle_solver_check_jac_cond\",
+    \"_nle_solver_default_tol\",
+    \"_nle_solver_log_level\",
+    \"_nle_solver_min_tol\",
+    \"_nle_solver_tol_factor\",
+    \"_rescale_after_singular_jac\",
+    \"_rescale_each_step\",
+    \"_use_Brent_in_1d\",
+    \"_use_automatic_scaling\",
+    \"_use_jacobian_scaling\",
     NULL
 };
 
 const int fmi_runtime_options_map_vrefs[] = {
-    536870912, 536870913, 0
+    536870919, 0, 1, 268435461, 536870920, 2, 268435462, 3, 4, 536870921,
+    536870922, 536870923, 536870924, 536870925, 0
 };
 
-const int fmi_runtime_options_map_length = 2;
+const int fmi_runtime_options_map_length = 14;
 ")})));
 end TestRuntimeOptions1;
 

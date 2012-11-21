@@ -896,7 +896,7 @@ equation
 	end add;
 		Complex c1, c2;
 		Real x(start=10);
-		Real y(start=2);
+		Real y(start=0.78);
 	equation
 		c1 = Complex(re = cos(y+time),im = 2.0);
 		c2 = add(c1,Complex(4, time)); 

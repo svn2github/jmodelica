@@ -17,6 +17,7 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
+#include <stdarg.h>
 #include "fmi.h"
 #include "jmi.h"
 
@@ -49,7 +50,7 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
 	jmi_real_t* res1;
 	jmi_real_t* res2;
 
-	if(jmi->opt->n_p_opt != NULL){
+	if(jmi->opt->n_p_opt != 0){
 		jmi_opt_get_n_p_opt(jmi, &n_p_opt);
 	} else{
 		n_p_opt = 0;
@@ -688,7 +689,6 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
 	int aim = 0;
 	int i = 0;
 	int j = 0;
-	int k = 0;
 
 	if(JMI_DER_T & independent_vars){
 		n_t = 1;
@@ -745,6 +745,67 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
 	return 0;
 }
 
+void jmi_log_error(jmi_t *jmi, char* fmt,...) {
+    va_list ap;
+    if(jmi->options.log_level < 1) return;
+    va_start (ap, fmt);
+    
+    if(jmi->fmi) {
+        fmi_t* fmi = jmi->fmi;
+        char buf[1000];
+        if(!fmi->fmi_logging_on) return;
+        vsprintf(buf, fmt, ap);
+        fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
+                                  fmiError, "ERROR", buf);
+    }
+    else {
+        fprintf(stderr, "ERROR:");
+        fprintf(stderr, fmt,ap);
+        fprintf(stderr, "\n");
+    }
+}
+
+void jmi_log_warning(jmi_t *jmi, char* fmt,...) {
+    va_list ap;
+    if(jmi->options.log_level < 3) return;
+    va_start (ap, fmt);
+    
+    if(jmi->fmi) {
+        fmi_t* fmi = jmi->fmi;
+        char buf[1000];
+        if(!fmi->fmi_logging_on) return;
+        vsprintf(buf, fmt, ap);
+        fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
+                                  fmiWarning, "WARNING", buf);
+    }
+    else {
+        fprintf(stderr, "WARNING:");
+        fprintf(stderr, fmt,ap);
+        fprintf(stderr, "\n");
+    }
+}
+
+void jmi_log_info(jmi_t *jmi, char* fmt,...) {
+    va_list ap;
+
+    if(jmi->options.log_level < 4) return;
+    va_start (ap, fmt);
+    
+    if(jmi->fmi) {
+        fmi_t* fmi = jmi->fmi;
+        char buf[1000];
+        if(!fmi->fmi_logging_on) return;
+        vsprintf(buf, fmt, ap);
+        fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
+                                  fmiOK, "INFO", buf);
+    }
+    else {
+        fprintf(stdout, "WARNING:");
+        fprintf(stdout, fmt,ap);
+        fprintf(stdout, "\n");
+    }
+}
+
 void jmi_log(jmi_t *jmi, jmi_log_category_t category, char* message) {
     if(jmi->fmi) {
         fmiStatus status;
@@ -757,10 +818,12 @@ void jmi_log(jmi_t *jmi, jmi_log_category_t category, char* message) {
             fmiCategory = "ERROR";
             break;
         case logWarning:
+            if(jmi->options.log_level < 3) return;
             status = fmiWarning;
             fmiCategory = "WARNING";
             break;
         case logInfo:
+            if(jmi->options.log_level < 4) return;
             status = fmiOK;
             fmiCategory = "INFO";
             break;
@@ -774,9 +837,11 @@ void jmi_log(jmi_t *jmi, jmi_log_category_t category, char* message) {
             fprintf(stderr, "ERROR: %s\n", message);
             break;
         case logWarning:
+            if(jmi->options.log_level < 3) return;
             fprintf(stderr, "WARNING: %s\n", message);
             break;
         case logInfo:
+            if(jmi->options.log_level < 4) return;
             fprintf(stdout, "%s\n", message);
             break;
         }

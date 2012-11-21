@@ -72,6 +72,11 @@ extern const int fmi_runtime_options_map_vrefs[];
 extern const int fmi_runtime_options_map_length;
 
 /**
+ * Update run-time options specified by the user.
+ */
+void fmi_update_runtime_options(fmi_t* fmi);
+
+/**
  * \defgroup fmi_init Creation, initialization and destruction.
  * 
  * \brief Definitions of how an FMU are created, initialized and terminated.

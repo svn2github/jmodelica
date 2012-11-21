@@ -511,10 +511,10 @@ class TestDependentParameters(object):
        """
        Test that the parameters are evaluated correctly.
        """
-       self.model.set_real([0],2.0)
+       self.model.set('p1',2.0)
 
-       p2 = self.model.get_real([1])
-       p3 = self.model.get_real([2])
+       p2 = self.model.get('p2')
+       p3 = self.model.get('p3')
 
        nose.tools.assert_almost_equal(p2,4)
        nose.tools.assert_almost_equal(p3,12)

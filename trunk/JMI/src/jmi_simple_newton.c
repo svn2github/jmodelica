@@ -29,7 +29,7 @@ void jmi_simple_newton_delete(jmi_block_residual_t *block) {}
 
 int jmi_simple_newton_solve(jmi_block_residual_t *block) {
 
-	int i, j, INCX, nbr_iter;
+	int i, INCX, nbr_iter;
 	double err_norm;
 
 	int N = block->n;

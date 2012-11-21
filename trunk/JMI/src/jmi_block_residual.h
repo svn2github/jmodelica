@@ -126,6 +126,8 @@ struct jmi_block_residual_t {
     jmi_real_t* min;               /**< \brief Min values for iteration variables */
     jmi_real_t* max;               /**< \brief Max values for iteration variables */
     jmi_real_t* nominal;           /**< \brief Nominal values for iteration variables */
+    jmi_real_t* initial;           /**< \brief Nominal values for iteration variables */
+    
     int jacobian_variability;      /**< \brief Variability of Jacobian coefficients: JMI_CONSTANT_VARIABILITY
                                          JMI_PARAMETER_VARIABILITY, JMI_DISCRETE_VARIABILITY, JMI_CONTINUOUS_VARIABILITY */
 
@@ -137,9 +139,10 @@ struct jmi_block_residual_t {
     
     int init;			   /**< \brief A flag for initialization */
     
-    int nb_calls;                    /**< \brief Nb of times the block has been solved */
-    int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */
-    int nb_jevals ;
+    long int nb_calls;                    /**< \brief Nb of times the block has been solved */
+    long int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */
+    long int nb_jevals ;
+    long int nb_fevals;
     double time_spent;             /**< \brief Total time spent in non-linear solver */
 };
 
@@ -192,6 +195,9 @@ int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_solver
                            jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, int index);
                            
 int jmi_solve_block_residual(jmi_block_residual_t * block);
+
+
+int jmi_block_jacobian_fd(jmi_block_residual_t* b, jmi_real_t* x, jmi_real_t delta_rel, jmi_real_t delta_abs);
 
 /**
  * \brief Deletes a jmi_block_residual struct.

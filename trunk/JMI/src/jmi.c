@@ -225,6 +225,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
 	jmi_->atEvent = JMI_FALSE;
 	jmi_->atInitial = JMI_FALSE;
+    
+    jmi_init_runtime_options(jmi_, &jmi_->options);
 
 	return 0;
 
@@ -240,6 +242,10 @@ int jmi_delete(jmi_t* jmi){
 	if(jmi->dae != NULL) {
 		jmi_func_delete(jmi->dae->F);
                 jmi_func_delete(jmi->dae->R);
+        jmi_delete_simple_color_info(&jmi->color_info_A);
+        jmi_delete_simple_color_info(&jmi->color_info_B);
+        jmi_delete_simple_color_info(&jmi->color_info_C);
+        jmi_delete_simple_color_info(&jmi->color_info_D);
                 free(jmi->dae);
                 jmi->dae = 0;
 	}
@@ -257,8 +263,8 @@ int jmi_delete(jmi_t* jmi){
 		free(jmi->opt);
 	}
 	if(jmi->info != NULL) {
-		free(jmi->info->guid);
-		free(jmi->info->instance_name);
+		free((void*)jmi->info->guid);
+		free((void*)jmi->info->instance_name);
 		free(jmi->info);
 	}
 	if(jmi->sim != NULL) {

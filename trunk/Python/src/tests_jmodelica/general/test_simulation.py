@@ -352,7 +352,8 @@ class TestIndexReduction1FMU(SimulationTest):
 
     @testattr(assimulo = True)
     def setUp(self):
-        self.setup_base(start_time=0.0, final_time=10)
+        self.setup_base(start_time=0.0, final_time=10,rel_tol = 1.0e-6, abs_tol = 1.0e-6)
+	self.ncp=50
         self.run()
         self.load_expected_data(
             'Pendulum_pack_PlanarPendulum_result.txt')
