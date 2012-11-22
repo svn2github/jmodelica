@@ -920,6 +920,8 @@ public class BiPGraph {
 			Eq e = itr.next();
 			for (Var v : e.getSolvableVariables()) {
 				if (v.getSolvableMatching()==null) {
+					v.setMatching(e);
+					e.setMatching(v);
 					v.setSolvableMatching(e);
 					e.setSolvableMatching(v);
 					itr.remove();
@@ -1151,12 +1153,16 @@ public class BiPGraph {
 		e.setVisited(true);
 		for (Var v : e.getSolvableVariables()) {
 			if (v.getSolvableMatching()==null) {
+				v.setMatching(e);
+				e.setMatching(v);
 				v.setSolvableMatching(e);
 				e.setSolvableMatching(v);
 				return true;
 			} else if (!v.isVisited()) {
 				v.setVisited(true);
 				if (SAP(v.getSolvableMatching())) {
+					v.setMatching(e);
+					e.setMatching(v);
 					v.setSolvableMatching(e);
 					e.setSolvableMatching(v);
 					return true;	
