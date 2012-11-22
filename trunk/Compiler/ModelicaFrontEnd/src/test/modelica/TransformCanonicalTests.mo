@@ -6336,26 +6336,55 @@ equation
   i1 = i2 + i3 annotation(__Modelon(ResidualEquation(iterationVariable=i3)));
 
 	annotation(__JModelica(UnitTesting(tests={ 
-		WarningTestCase(
+		FClassMethodTestCase(
 			name="HandGuidedTearing3",
+			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
 			description="Test of hand guided tearing",
-			errorMessage="
-1 errors and 2 warnings found:
-
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 0, column 0:
-  Unable to perform hand guided tearing since the resulting system is unsolvable.
-
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-At line 0, column 0:
-  Tearing variable \"i2\" is missing start value!
-
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-At line 0, column 0:
-  Tearing variable \"i3\" is missing start value!
+			methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  u0
+Solution:
+  sin(time)
+-------------------------------
+Torn block of 3 tearing variables and 2 solved variables.
+Solved variables:
+  u2
+  u1
+Tearing variables:
+  i2()
+  i3()
+  i1()
+Solved equations:
+  u2 = ( R3 ) * ( i3 )
+  u1 = ( R1 ) * ( i1 )
+Residual equations:
+  u0 = u1 + u2
+  i1 = i2 + i3
+  u2 = ( R2 ) * ( i2 )
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  uL
+Solution:
+  u1 + u2
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  der(iL)
+Solution:
+  (  - ( uL ) ) / (  - ( L ) )
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  i0
+Solution:
+  i1 + iL
+-------------------------------
 ")})));
 end HandGuidedTearing3;
 

@@ -1773,7 +1773,7 @@ aspect InstantiatedExpressions {
 			}
 			FAbstractEquation equation = dynamicFExp(equationExp.instantiate()).referencedEquation();
 			if (equation == null) {
-				equationExp.warning("Unable to find equation definition " + equationExp.toString());
+				equationExp.error("Unable to find equation definition " + equationExp.toString());
 				return;
 			}
 			Exp enabledExp = pair.forPath("enabled").exp();

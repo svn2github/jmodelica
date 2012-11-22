@@ -604,14 +604,14 @@ public class MunkresProblem {
 
 public class BiPGraph {
 
-	public static int DERIVATIVE_VARIABLES = 1;
-	public static int DIFFERENTIATED_VARIABLES = 2;
-	public static int ALGEBRAIC_VARIABLES = 4;
-	public static int CONTINUOUS_ALGEBRAIC_VARIABLES = 8;
-	public static int DISCRETE_ALGEBRAIC_VARIABLES = 16;
-	public static int DISCRETE_PRE_VARIABLES = 32;
+	public static final int DERIVATIVE_VARIABLES = 1;
+	public static final int DIFFERENTIATED_VARIABLES = 2;
+	public static final int ALGEBRAIC_VARIABLES = 4;
+	public static final int CONTINUOUS_ALGEBRAIC_VARIABLES = 8;
+	public static final int DISCRETE_ALGEBRAIC_VARIABLES = 16;
+	public static final int DISCRETE_PRE_VARIABLES = 32;
 
-	public static int MAX_N_EQ_DIFFS = 5;
+	public static final int MAX_N_EQ_DIFFS = 5;
 
 	private String name;
 	private String description;
@@ -623,6 +623,34 @@ public class BiPGraph {
 	protected Map<String,Eq> equationMap = new LinkedHashMap<String,Eq>();
 	protected Map<FAbstractEquation,java.util.List<Eq>> equationIndexMap = new LinkedHashMap<FAbstractEquation,java.util.List<Eq>>();
 	
+	public BiPGraph(FClass fclass, String name, String description, Collection<Eq> block) {
+		this(fclass, name, description);
+		for (Eq e : block) {
+			Var gVar = addVariable(e.getMatching().getName(), "", e.getMatching().getVariable());
+			Eq gEq = addEquation(e.getName(), "", e.getEquation());
+			gEq.setMatching(gVar);
+			gVar.setMatching(gEq);
+			if (gEq.getEquation().isSolved(gVar.getName(), true)) {
+				gEq.setSolvableMatching(gVar);
+				gVar.setSolvableMatching(gEq);
+			}
+		}
+		for (Eq e : block) {
+			Eq gEq = getEquation(e.getName());
+			for (Var v : e.getVariables()) {
+				Var gVar = getVariable(v.getName());
+				if (gVar != null) {
+					gEq.addVariable(gVar);
+					gVar.occurrence();
+					if (gEq.getEquation().isSolved(gVar.getName(), true)) {
+						gEq.addSolvableVariable(gVar);
+						gVar.solvableOccurrence();
+					}
+				}
+			}
+		}
+	}
+
 	public BiPGraph(FClass fclass, String name, String description) {
 		this.fclass = fclass;
 		this.name = name;
@@ -642,8 +670,7 @@ public class BiPGraph {
 		return equationIndexMap.get(eqn);
 	}
 
-	public Eq addEquation(String name, String description,
-		                      FAbstractEquation eqn) {
+	public Eq addEquation(String name, String description, FAbstractEquation eqn) {
 		Eq e = equationMap.get(name);
 		if (e==null) {
 			e = new Eq(name,description,eqn);
@@ -1861,35 +1888,6 @@ public class BiPGraph {
 				return printMatching();
 			}
 		};
-	}
-	
-	public String printSolvableMatching() {
-		StringBuffer str = new StringBuffer();
-		str.append("----------------------------------------\n");
-		str.append("BiPGraph " + getName() + " SolvableMatching:\n");
-		for (Eq e : getEquations()) {
-			if (e.getSolvableMatching()!=null) {
-				str.append(e.getName());
-//				str.append(e.getName() + "(" + e.getDescription() + ")");
-				str.append(" : ");
-				str.append(e.getSolvableMatching().getName());
-				str.append("\n");
-			}
-		}		
-		str.append("solvableUnmatched equations: {");
-		for (Eq e : getSUME()) {
-			str.append(e.getName() + " ");
-		}
-		str.append("}\n");
-
-		str.append("solvableUnmatched variables: {");
-		for (Var v : getSUMV()) {
-			str.append(v.getName() + " ");
-		}
-		str.append("}\n");
-
-		str.append("----------------------------------------\n");
-		return str.toString();
 	}
 	
 	public String toString() {
