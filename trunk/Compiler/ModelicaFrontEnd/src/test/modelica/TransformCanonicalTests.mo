@@ -3813,7 +3813,7 @@ end TransformCanonicalTests.WhenVariability1;
 ")})));
 end WhenVariability1;
 
-  model IndexReduction1_PlanarPendulum
+  model IndexReduction1a_PlanarPendulum
     parameter Real L = 1 "Pendulum length";
     parameter Real g =9.81 "Acceleration due to gravity";
     Real x "Cartesian x coordinate";
@@ -3830,10 +3830,10 @@ end WhenVariability1;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="IndexReduction1_PlanarPendulum",
+			name="IndexReduction1a_PlanarPendulum",
 			description="Test of index reduction",
 			flatModel="
-fclass TransformCanonicalTests.IndexReduction1_PlanarPendulum
+fclass TransformCanonicalTests.IndexReduction1a_PlanarPendulum
 parameter Real L = 1 \"Pendulum length\" /* 1 */;
 parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
 Real x \"Cartesian x coordinate\";
@@ -3856,9 +3856,57 @@ x ^ 2 + y ^ 2 = L;
 ( ( 2 ) * ( x ) ) * ( der(_der_x) ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
 der(_der_x) = der_vx;
 _der_x = der(x);
-end TransformCanonicalTests.IndexReduction1_PlanarPendulum;
+end TransformCanonicalTests.IndexReduction1a_PlanarPendulum;
 ")})));
-  end IndexReduction1_PlanarPendulum;
+  end IndexReduction1a_PlanarPendulum;
+
+  model IndexReduction1b_PlanarPendulum
+    parameter Real L = 1 "Pendulum length";
+    parameter Real g =9.81 "Acceleration due to gravity";
+    Real x "Cartesian x coordinate";
+    Real y "Cartesian x coordinate";
+    Real vx "Velocity in x coordinate";
+    Real vy "Velocity in y coordinate";
+    Real lambda "Lagrange multiplier";
+  equation
+    der(x) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) + 0 = lambda*y - g;
+    x^2 + y^2 = L;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction1b_PlanarPendulum",
+			description="Test of index reduction. This test exposes a nasty bug caused by rewrites of FDerExp:s in different order.",
+			flatModel="
+fclass TransformCanonicalTests.IndexReduction1b_PlanarPendulum
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x \"Cartesian x coordinate\";
+ Real y \"Cartesian x coordinate\";
+ Real vx \"Velocity in x coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ Real der_y;
+ Real der_vx;
+ Real _der_x;
+ Real der_2_y;
+initial equation 
+ x = 0.0;
+ _der_x = 0.0;
+equation
+ der(x) = vx;
+ der_vx = ( lambda ) * ( x );
+ der_2_y + 0 = ( lambda ) * ( y ) - ( g );
+ x ^ 2 + y ^ 2 = L;
+ ( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
+ ( ( 2 ) * ( x ) ) * ( der(_der_x) ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
+ der(_der_x) = der_vx;
+ _der_x = der(x);
+end TransformCanonicalTests.IndexReduction1b_PlanarPendulum;
+")})));
+  end IndexReduction1b_PlanarPendulum;
+
 
   model IndexReduction2_Mechanical
     extends Modelica.Mechanics.Rotational.Examples.First(freqHz=5,amplitude=10,

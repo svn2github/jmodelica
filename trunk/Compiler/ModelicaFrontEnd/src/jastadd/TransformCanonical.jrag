@@ -3294,12 +3294,21 @@ aspect TransformCanonical {
 	 * method ASTNode.flushAllRecursiveClearFinal. 
 	 */
 	rewrite FDerExp {
-		when (rewriteAlias && !getFIdUse().myFV().isUnknown() && getFIdUse().myFV().isAlias()) to FExp {
-			FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
-			FExp new_exp = new FDerExp(new FIdUse(new_name));
-			if (getFIdUse().myFV().isNegated()) 
-				new_exp = new FNegExp(new_exp);
-			return new_exp;
+		when (rewriteAlias && !getFIdUse().myFV().isUnknown() && 
+				(myFV().isAlias() || getFIdUse().myFV().isAlias())) to FExp {
+			if (myFV().isAlias()) {
+				FVariable fv = (FVariable) myFV();
+				FExp new_exp = fv.alias().createUseExp();
+				if (myFV().isNegated()) 
+					new_exp = new FNegExp(new_exp);
+				return new_exp;				
+			} else {			
+				FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
+				FExp new_exp = new FDerExp(new FIdUse(new_name));
+				if (getFIdUse().myFV().isNegated()) 
+					new_exp = new FNegExp(new_exp);
+				return new_exp;
+			}
 		}
 	}
 
