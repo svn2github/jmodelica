@@ -64,6 +64,8 @@ aspect AnnotationAPI {
 	eq ComponentDecl.annotation()     = getComment().annotation();
 	eq InstComponentDecl.annotation() = getComponentDecl().annotation();
 	
+	syn AnnotationNode InstNode.classAnnotation() = myInstClass().annotation();
+	
 	/**
 	 * Experimental! Retreives the annotation representing the modifications.
 	 */

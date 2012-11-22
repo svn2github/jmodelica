@@ -7494,6 +7494,60 @@ Residual equations:
 ")})));
 end HandGuidedTearing18;
 
+model HandGuidedTearing19
+	model C
+		model A
+			Real x;
+			Real y;
+		equation
+			x = y + 1 annotation(__Modelon(name=eq));
+		end A;
+		
+		model B
+			Real x;
+			Real y;
+		equation
+			x = y + 2;
+		end B;
+		
+		A a;
+		B b;
+	equation
+		a.x = b.y + 2;
+		a.y = b.x - 3;
+		annotation(__Modelon(TearingPairs={
+			Pair(residualEquation=a.eq, iterationVariable=b.x)
+		}));
+	end C;
+	C c;
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="HandGuidedTearing19",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			merge_blt_blocks=true,
+			description="Test of hand guided tearing with pairs defiend on system level, but in sub class.",
+			methodResult="
+-------------------------------
+Torn block of 1 tearing variables and 3 solved variables.
+Solved variables:
+  c.a.y
+  c.b.y
+  c.a.x
+Tearing variables:
+  c.b.x()
+Solved equations:
+  c.a.y = c.b.x - ( 3 )
+  c.b.x = c.b.y + 2
+  c.a.x = c.b.y + 2
+Residual equations:
+  c.a.x = c.a.y + 1
+-------------------------------
+")})));
+end HandGuidedTearing19;
+
 model BlockTest1
 record R
   Real x,y;
