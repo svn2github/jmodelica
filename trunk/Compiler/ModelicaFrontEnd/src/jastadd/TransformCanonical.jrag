@@ -1568,12 +1568,10 @@ aspect TransformCanonical {
 		daeFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();
 		daeInitFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();
 			
-		BiPGraph g = new BiPGraph(this,name(),"");
+		BiPGraph g = new BiPGraph(this);
 		
 		Eq eqn = null;
 		Var v = null;		
-		
-		int k = 1;
 		
 		// First try a global matching with all variables
 		g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
@@ -1596,7 +1594,7 @@ aspect TransformCanonical {
 		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
 			if (root().options.getBooleanOption("index_reduction")) {
 				// Only do index reduction based on real variables and equations
-				g = new BiPGraph(this,name(),"");
+				g = new BiPGraph(this);
 				g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.CONTINUOUS_ALGEBRAIC_VARIABLES);
 				g.addEquations(continuousEquations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.CONTINUOUS_ALGEBRAIC_VARIABLES,"eq_",1);
 				log.info("Index reduction starts");
@@ -1696,7 +1694,7 @@ aspect TransformCanonical {
 					return;
 				}
 				
-				g = new BiPGraph(this,name(),"");
+				g = new BiPGraph(this);
 				g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
 				g.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
 
@@ -1764,12 +1762,12 @@ aspect TransformCanonical {
 		for (FAbstractEquation equationToReplace : equationsToReplace) {
 						
 			// How many equations are there in this when clause?
-			List<FAbstractEquation> newEquations = equationToReplace.getInitialEquationList();
+			List<FEquation> newEquations = equationToReplace.getInitialEquations();
 		
 		    // Put the Equations in an ArrayList rather than a List
 		    // TODO: There are probably more elegant ways to do this...
 			java.util.List<FAbstractEquation> newEquations_ = new ArrayList<FAbstractEquation>();
-			for (FAbstractEquation e : newEquations) {
+			for (FEquation e : newEquations) {
 				newEquations_.add(e);	
 			}
 
@@ -1848,11 +1846,9 @@ aspect TransformCanonical {
 				}
 				l.add(fe);
 				
-				eqn = g.addEquation("eq_"+(g.getEquations().size() + 1),fe.prettyPrint(""),fe);
+				eqn = g.addEquation("eq_"+(g.getEquations().size() + 1),fe);
 				v = g.getVariable(var.getName());     
 				g.addEdge(eqn,v); 
-				k++;
-				//j++;
 			}
 	
 			setFInitialEquationList(l);	
@@ -1952,12 +1948,12 @@ aspect TransformCanonical {
 			}
 		}
 		if (recalculateMatchings) {
-			BiPGraph newGraph = new BiPGraph(this, "", "");
+			BiPGraph newGraph = new BiPGraph(this);
 			for (Eq e : block) {
-				newGraph.addEquation(e.getName(), "", e.getEquation());
+				newGraph.addEquation(e.getName(), e.getEquation());
 			}
 			for (Map.Entry<FVariable, Var> v : varsInBlock.entrySet()) {
-				newGraph.addVariable(v.getValue().getName(), "", v.getKey());
+				newGraph.addVariable(v.getValue().getName(), v.getKey());
 			}
 			for (Eq e : block) {
 				Eq newE = newGraph.getEquation(e.getName());
@@ -2019,8 +2015,7 @@ aspect TransformCanonical {
 	}
 	
 	private void FClass.tear(java.util.List<Eq> block, TornEquationBlock eb) {
-		Iterator<Eq> it = block.iterator();
-		BiPGraph g = new BiPGraph(this, "", "", block);
+		BiPGraph g = new BiPGraph(this, block);
 		
 		ArrayList<Eq> SUME = new ArrayList<Eq>();
 		for (Eq e : g.getEquations()) {
@@ -2106,7 +2101,7 @@ aspect TransformCanonical {
 					}
 				} else {
 					// Build Inner Graph and add info about tearing variables
-					BiPGraph gInner = new BiPGraph(this, "", "", bInner);
+					BiPGraph gInner = new BiPGraph(this, bInner);
 					// Build block-graph and look for interchangeable variables in SUMV
 					java.util.List<Eq> eqs = new ArrayList<Eq>();
 					boolean graphHasTear = false;
@@ -2119,7 +2114,7 @@ aspect TransformCanonical {
 									eqs.add(gInnerEq);
 								}
 							} else if (SUMV.contains(v)) {
-								gInnerVar = gInner.addVariable(v.getName(), "", v.getVariable());
+								gInnerVar = gInner.addVariable(v.getName(), v.getVariable());
 								gInnerVar.isTear(true);
 								gInnerVar.occurrence();
 								gInnerEq.addVariable(gInnerVar);
@@ -2176,11 +2171,11 @@ aspect TransformCanonical {
 									FVariable var = e.getSolvableMatching().getVariable();
 									eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(eqn, var, true));
 								} else {
-									tearInner(new BiPGraph(this, "", "", bInnerInner), eb);
+									tearInner(new BiPGraph(this, bInnerInner), eb);
 								}
 							}
 						} else {
-							tearInner(new BiPGraph(this, "", "", bInner), eb);
+							tearInner(new BiPGraph(this, bInner), eb);
 						}
 
 					} else {
@@ -2232,7 +2227,7 @@ aspect TransformCanonical {
 				Var v = e.getSolvableMatching();
 				eb.addSolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e.getEquation(), v.getVariable(), true));
 			} else {
-				tearInner(new BiPGraph(this, "", "", block), eb);
+				tearInner(new BiPGraph(this, block), eb);
 			}
 		}
 		return eb;
