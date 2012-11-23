@@ -1764,27 +1764,27 @@ aspect InstantiatedExpressions {
 			if (enabledExp != null)
 				try {
 					if (!dynamicFExp(enabledExp.instantiate()).ceval().booleanValue()) {
-						return;
+						continue;
 					}
 				} catch (ConstantEvaluationException e) {
 					enabledExp.error("Could not evaluate enabled expression: " + enabledExp);
-					return;
+					continue;
 				}
 			Exp variableExp = pair.forPath("iterationVariable").exp();
 			if (variableExp == null) {
 				pair.ast().warning("Iteration variable definition is missing from tearing pair.");
-				return;
+				continue;
 			}
 			Opt<FExp> variableOpt = new Opt<FExp>(variableExp.instantiate());
 			Exp equationExp = pair.forPath("residualEquation").exp();
 			if (equationExp == null) {
 				pair.ast().warning("Residual equation definition is missing from tearing pair.");
-				return;
+				continue;
 			}
 			FAbstractEquation equation = dynamicFExp(equationExp.instantiate()).referencedEquation();
 			if (equation == null) {
 				equationExp.error("Unable to find equation definition " + equationExp.toString());
-				return;
+				continue;
 			}
 			if (!equation.hasResidual() || (equation.hasResidual() && !equation.getResidual().hasScope()))
 				// If residual set and scope is set then the residual has been set on a higher level.

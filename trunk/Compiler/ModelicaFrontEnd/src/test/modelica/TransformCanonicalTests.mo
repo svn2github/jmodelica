@@ -7630,7 +7630,7 @@ model HandGuidedTearing20
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
 			merge_blt_blocks=true,
-			description="Test of hand guided tearing with pairs defiend on system level, but in sub class.",
+			description="Test of hand guided tearing with pairs defiend on system level and in sub class.",
 			methodResult="
 -------------------------------
 Torn block of 1 tearing variables and 3 solved variables.
@@ -7687,7 +7687,7 @@ model HandGuidedTearing21
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
 			merge_blt_blocks=true,
-			description="Test of hand guided tearing with pairs defiend on system level, but in sub class.",
+			description="Test of hand guided tearing with pairs defiend on system level and sub class.",
 			methodResult="
 -------------------------------
 Torn block of 1 tearing variables and 3 solved variables.
@@ -7706,6 +7706,120 @@ Residual equations:
 -------------------------------
 ")})));
 end HandGuidedTearing21;
+
+model HandGuidedTearing22
+	model C
+		model A
+			Real x;
+			Real y;
+		equation
+			x = y + 1 annotation(__Modelon(name=eq));
+		end A;
+		
+		model B
+			Real x;
+			Real y;
+		equation
+			x = y + 2;
+		end B;
+		
+		parameter Boolean useFirst = true;
+		
+		A a;
+		B b;
+	equation
+		a.x = b.y + 2;
+		a.y = b.x - 3;
+		annotation(__Modelon(TearingPairs={
+			Pair(enabled=useFirst, residualEquation=a.eq, iterationVariable=b.x),
+			Pair(enabled=not useFirst, residualEquation=a.eq, iterationVariable=b.y)
+		}));
+	end C;
+	C c;
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="HandGuidedTearing22",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			merge_blt_blocks=true,
+			description="Test of hand guided tearing with pairs defiend on system level.",
+			methodResult="
+-------------------------------
+Torn block of 1 tearing variables and 3 solved variables.
+Solved variables:
+  c.a.y
+  c.b.y
+  c.a.x
+Tearing variables:
+  c.b.x()
+Solved equations:
+  c.a.y = c.b.x - ( 3 )
+  c.b.x = c.b.y + 2
+  c.a.x = c.b.y + 2
+Residual equations:
+  c.a.x = c.a.y + 1
+-------------------------------
+")})));
+end HandGuidedTearing22;
+
+model HandGuidedTearing23
+	model C
+		model A
+			Real x;
+			Real y;
+		equation
+			x = y + 1 annotation(__Modelon(name=eq));
+		end A;
+		
+		model B
+			Real x;
+			Real y;
+		equation
+			x = y + 2;
+		end B;
+		
+		parameter Boolean useFirst = false;
+		
+		A a;
+		B b;
+	equation
+		a.x = b.y + 2;
+		a.y = b.x - 3;
+		annotation(__Modelon(TearingPairs={
+			Pair(enabled=useFirst, residualEquation=a.eq, iterationVariable=b.x),
+			Pair(enabled=not useFirst, residualEquation=a.eq, iterationVariable=b.y)
+		}));
+	end C;
+	C c;
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="HandGuidedTearing23",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			merge_blt_blocks=true,
+			description="Test of hand guided tearing with pairs defiend on system level.",
+			methodResult="
+-------------------------------
+Torn block of 1 tearing variables and 3 solved variables.
+Solved variables:
+  c.b.x
+  c.a.y
+  c.a.x
+Tearing variables:
+  c.b.y()
+Solved equations:
+  c.b.x = c.b.y + 2
+  c.a.y = c.b.x - ( 3 )
+  c.a.x = c.b.y + 2
+Residual equations:
+  c.a.x = c.a.y + 1
+-------------------------------
+")})));
+end HandGuidedTearing23;
 
 model BlockTest1
 record R
