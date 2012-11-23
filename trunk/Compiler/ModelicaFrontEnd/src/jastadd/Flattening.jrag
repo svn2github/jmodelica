@@ -1760,6 +1760,16 @@ aspect InstantiatedExpressions {
 		for (AnnotationNode pair : classAnnotation().vendorNode().forPath("TearingPairs")) {
 			if (!pair.name().equals("Pair"))
 				continue;
+			Exp enabledExp = pair.forPath("enabled").exp();
+			if (enabledExp != null)
+				try {
+					if (!dynamicFExp(enabledExp.instantiate()).ceval().booleanValue()) {
+						return;
+					}
+				} catch (ConstantEvaluationException e) {
+					enabledExp.error("Could not evaluate enabled expression: " + enabledExp);
+					return;
+				}
 			Exp variableExp = pair.forPath("iterationVariable").exp();
 			if (variableExp == null) {
 				pair.ast().warning("Iteration variable definition is missing from tearing pair.");
@@ -1776,13 +1786,9 @@ aspect InstantiatedExpressions {
 				equationExp.error("Unable to find equation definition " + equationExp.toString());
 				return;
 			}
-			Exp enabledExp = pair.forPath("enabled").exp();
-			Opt<FExp> enabledOpt;
-			if (enabledExp != null)
-				enabledOpt = new Opt<FExp>(enabledExp.instantiate());
-			else
-				enabledOpt = new Opt<FExp>();
-			equation.setResidual(new InstResidual(variableOpt, this, enabledOpt));
+			if (!equation.hasResidual() || (equation.hasResidual() && !equation.getResidual().hasScope()))
+				// If residual set and scope is set then the residual has been set on a higher level.
+				equation.setResidual(new InstResidual(variableOpt, this, new Opt<FExp>()));
 		}
 	}
 	
