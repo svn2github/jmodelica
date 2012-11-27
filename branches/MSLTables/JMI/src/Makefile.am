@@ -27,7 +27,7 @@ lib_LTLIBRARIES = libjmi.la \
                   libjmi_algorithm.la \
                   libfmi.la \
                   libfmi_cs.la \
-                  libmodelica_utilities.la
+                  libModelicaExternalC.la
 
 if COMPILE_WITH_CPPAD
 lib_LTLIBRARIES += libjmi_cppad.la \
@@ -116,15 +116,30 @@ libfmi_la_LDFLAGS = -no-undefined -static-libtool-libs
 libfmi_cs_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
 libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
 
+#libModelicaExternalC_la_SOURCES =  $(abs_top_srcdir)/ThirdParty/MSL/Modelica/C-Sources/ModelicaInternal.c \
+#	                           $(abs_top_srcdir)/ThirdParty/MSL/Modelica/C-Sources/ModelicaStrings.c \
+#                                   $(abs_top_srcdir)/ThirdParty/MSL/Modelica/C-Sources/ModelicaTables.h \
+#                                   ModelicaTables_JM.c \
+#                                   jmtables.h \
+#                                   jmtables.c \
+#                                   ModelicaUtilities.h \
+#                                   ModelicaUtilities.c
 
-libmodelica_utilities_la_SOURCES = ModelicaUtilities.h \
+libModelicaExternalC_la_SOURCES =  ModelicaUtilities.h \
                                    ModelicaUtilities.c
 
-libmodelica_utilities_la_CFLAGS = -Wall -g -std=c89 -pedantic
+libModelicaExternalC_la_CFLAGS = -Wall -g -std=c89 -pedantic -I$(abs_top_srcdir)/ThirdParty/MSL/Modelica/C-Sources/
+if WITH_TABLES
+libModelicaExternalC_la_SOURCES +=  ModelicaTables_JM.c \
+                                    jmtables.h \
+                                    jmtables.c
+libModelicaExternalC_la_CFLAGS += -I$(TABLES_HOME)/include
+endif
+
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
-libmodelica_utilities_la_LDFLAGS = -no-undefined -static-libtool-libs
+libModelicaExternalC_la_LDFLAGS = -no-undefined -static-libtool-libs
 
 libjmi_solver_la_SOURCES = jmi_opt_coll_radau.c \
                            jmi_opt_coll_ipopt.cpp \
