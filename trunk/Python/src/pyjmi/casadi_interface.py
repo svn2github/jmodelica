@@ -373,7 +373,7 @@ class CasadiModel(BaseModel):
     
     def set_min(self, names, values):
         """
-        Set the minimum value of variables.
+        Set the minimum values of variables.
         
         Parameters::
             
@@ -402,7 +402,7 @@ class CasadiModel(BaseModel):
         Parameters::
             
             name -- 
-                The names of the variable to set new minimum value for.
+                The names of the variable to set a new minimum value for.
                 Type: string
                 
             value -- 
@@ -421,7 +421,7 @@ class CasadiModel(BaseModel):
     
     def set_max(self, names, values):
         """
-        Set the maximum value of variables.
+        Set the maximum values of variables.
         
         Parameters::
             
@@ -450,7 +450,7 @@ class CasadiModel(BaseModel):
         Parameters::
             
             name -- 
-                The names of the variable to set new maximum value for.
+                The names of the variable to set a new maximum value for.
                 Type: string
                 
             value -- 
@@ -466,6 +466,54 @@ class CasadiModel(BaseModel):
         except RuntimeError:
             raise XMLException("Could not find variable: " + name)
         variable.setMax(value)
+    
+    def set_nominal(self, names, values):
+        """
+        Set the nominal values of variables.
+        
+        Parameters::
+            
+            names -- 
+                The names of the variables to set new nominal values for.
+                Type: string or list of strings
+                
+            values -- 
+                The new nominal values.
+                Type: float or list of floats
+        
+        Raises::
+            
+            XMLException if name not present in model.
+        """
+        if isinstance(names, basestring):
+            self._set_nominal(names, values)
+        else:
+            for (name, value) in zip(names, values):
+                self._set_nominal(name, value)
+    
+    def _set_nominal(self, name, value):
+        """ 
+        Set the nominal value of a variable.
+        
+        Parameters::
+            
+            name -- 
+                The names of the variable to set a new nominal value for.
+                Type: string
+                
+            value -- 
+                The new nominal value.
+                Type: float
+        
+        Raises::
+            
+            XMLException if name not present in model.
+        """
+        try:
+            variable = self.ocp.variable(name)
+        except RuntimeError:
+            raise XMLException("Could not find variable: " + name)
+        variable.setNominal(value)
     
     def get_dx(self):
         return self.dx
@@ -531,15 +579,36 @@ class CasadiModel(BaseModel):
                 pd += [(name, p.getValueReference(), pd_vals[i])]
         return pd
     
-    def get_sf(self):
+    def get_sf(self, update_sf=True):
         """
         Returns a nested dictionary of scaling factors.
         
         The dictionary has the following nested structure:
         
             sf[var_type][var_index] = var_sf
+        
+        Parameters::
+            
+            update_sf --
+                Whether to update the scaling factors using the current nominal
+                values.
         """
+        if update_sf:
+            self._update_sf()
         return self.sf
+    
+    def _update_sf(self):
+        """
+        Set scaling factors using current nominal values.
+        """
+        for (var_type, var_vector) in self._var_vectors.iteritems():
+            self.sf[var_type] = N.array([N.abs(v.getNominal()) for
+                                         v in var_vector])
+            
+            # Inappropriate treatment of derivatives!
+            if var_type == "x":
+                self.sf["dx"] = N.array([N.abs(v.getNominal()) for
+                                         v in var_vector])
     
     def get_vr_map(self):
         """
@@ -819,21 +888,8 @@ class CasadiModel(BaseModel):
         sf['u'] = N.ones(self.n_u)
         sf['w'] = N.ones(self.n_w)
         sf['p_opt'] = N.ones(self.n_p)
-        
-        # Get nominal values for scaling
-        nominal = {}
-        nominal['dx'] = self.xmldoc.get_x_nominal(include_alias=False)
-        nominal['x'] = self.xmldoc.get_x_nominal(include_alias=False)
-        nominal['u'] = self.xmldoc.get_u_nominal(include_alias=False)
-        nominal['w'] = self.xmldoc.get_w_nominal(include_alias=False)
-        nominal['p_opt'] = self.xmldoc.get_p_opt_nominal(include_alias=False)
-        
-        # Set nominal values as scaling factors
-        for var_type in nominal.keys():
-            for (vr, val) in nominal[var_type]:
-                if val is not None:
-                    sf[var_type][vr_map[vr][0]] = N.abs(val)
         self.sf = sf
+        self._update_sf()
     
     def _convert_to_ode(self):
         if not self._ode_conversion:

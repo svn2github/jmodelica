@@ -714,9 +714,12 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             raise ValueError("Unknown discretization scheme %s." % self.discr)
         
+        # Update scaling factors
+        self.model._update_sf()
+        
         # Get to work
         self._create_nlp()
-        
+    
     def _create_nlp(self):
         """
         Wrapper for creating the NLP.
@@ -765,7 +768,7 @@ class LocalDAECollocator(CasadiCollocator):
         # Scale variables
         if self.variable_scaling and self.nominal_traj is None:
             # Get scale factors
-            sf = self.model.get_sf()
+            sf = self.model.get_sf(False)
             variables = sym_input[1:]
             sfs = N.concatenate([sf['dx'],
                                  sf['x'],
@@ -1240,7 +1243,7 @@ class LocalDAECollocator(CasadiCollocator):
         if (self.variable_scaling and self.nominal_traj is None and
             self.hs != "free"):
             # Get scale factors
-            sf = self.model.get_sf()
+            sf = self.model.get_sf(False)
             nbr_constraint_points = len(collocation_constraint_points)
             if nbr_constraint_points > 0:
                 timed_variables_sfs = N.concatenate(
@@ -1280,7 +1283,7 @@ class LocalDAECollocator(CasadiCollocator):
             # Create nominal trajectories
             # State derivatives are treated inappropriately, see #2157!
             nom_traj = {}
-            sf = self.model.get_sf()
+            sf = self.model.get_sf(False)
             vr_map = self.model.get_vr_map()
             n = len(self.nominal_traj.get_data_matrix()[:, 0])
             for vt in ['x', 'u', 'w']:
@@ -2026,7 +2029,7 @@ class LocalDAECollocator(CasadiCollocator):
                 
                 # Calculate errors
                 vr_map = self.model.get_vr_map()
-                sfs = self.model.get_sf()
+                sfs = self.model.get_sf(False)
                 measured_variables = \
                         self.parameter_estimation_data.measured_variables
                 for j in xrange(len(measured_variables)):
@@ -2107,7 +2110,7 @@ class LocalDAECollocator(CasadiCollocator):
         ocp = self.ocp
         var_types = ['x', 'u', 'w', 'p_opt']
         vr_map = self.model.get_vr_map()
-        sfs = self.model.get_sf()
+        sfs = self.model.get_sf(False)
         var_vectors = self.model._var_vectors
         time_points = self.get_time_points()
         if self.variable_scaling and self.nominal_traj is not None:
@@ -2266,7 +2269,7 @@ class LocalDAECollocator(CasadiCollocator):
         vr_map = self.model.get_vr_map()
         var_opt = {}
         var_indices = self.get_var_indices()
-        sf = self.model.get_sf()
+        sf = self.model.get_sf(False)
         if self.nominal_traj is not None:
             vr_sf_map = self._vr_sf_map
             is_variant = self._is_variant

@@ -593,8 +593,9 @@ class TestLocalDAECollocator:
         """
         Test optimizing the CSTR with and without scaling.
 
-        This test also tests writing both the unscaled and scaled result as
-        well as eliminating derivative variables.
+        This test also tests writing both the unscaled and scaled result,
+        eliminating derivative variables and setting nominal values
+        post-compilation.
         """
         model = self.model_cstr_lagrange
         
@@ -628,6 +629,15 @@ class TestLocalDAECollocator:
         assert_results(res, cost_ref, u_norm_ref)
         c_scaled = res['cstr.c']
         N.testing.assert_allclose(c_unscaled, 1000. * c_scaled,
+                                  rtol=0, atol=1e-5)
+        
+        # Scaled variables, scaled result, with updated nominal value
+        # Eliminated derivatives
+        model.set_nominal('cstr.c', 500.)
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        c_scaled = res['cstr.c']
+        N.testing.assert_allclose(c_unscaled, 500. * c_scaled,
                                   rtol=0, atol=1e-5)
     
     @testattr(casadi = True)
