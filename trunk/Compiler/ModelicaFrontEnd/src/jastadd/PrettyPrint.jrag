@@ -968,9 +968,16 @@ aspect FlatPrettyPrint {
     }
     
     public void FQName.prettyPrint(Printer p, PrintStream str, String indent) {
-		for (int i = 0; i < getNumFQNamePart(); i++) {
-			p.print(getFQNamePart(i),str,indent);
-			if (i<getNumFQNamePart()-1)
+    }
+    
+    public void FQNameString.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(getName());
+    }
+    
+    public void FQNameFull.prettyPrint(Printer p, PrintStream str, String indent) {
+		for (int i = 0, n = getNumFQNamePart(); i < n; i++) {
+			p.print(getFQNamePart(i), str, indent);
+			if (i < n - 1)
 				str.print(".");
 		}    	
     }
@@ -989,6 +996,10 @@ aspect FlatPrettyPrint {
 
 	public void FColonSubscript.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(":");
+	}
+
+	public void FIntegerSubscript.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(getValue());
 	}
 	
 	public void FExpSubscript.prettyPrint(Printer p, PrintStream str, String indent) {

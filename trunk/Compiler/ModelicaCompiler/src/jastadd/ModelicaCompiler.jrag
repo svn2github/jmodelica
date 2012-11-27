@@ -1297,6 +1297,7 @@ public class ModelicaCompiler {
 		flatRoot.setFileName(flatFile);
 		FClass fc = createFClass(icl);
 		flatRoot.setFClass(fc);
+		fc = flatRoot.getFClass(); // make FClass final
 		flatRoot.options = new OptionRegistry(icl.root().options);
 		// TODO: We should change how the checkErrors() method works, 
 		//       since it relies on the behaviour of DefaultErrorHandler

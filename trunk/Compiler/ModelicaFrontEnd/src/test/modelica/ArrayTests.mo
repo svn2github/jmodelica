@@ -6295,7 +6295,7 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="For_ForEquation3",
+			name="ForEquation3",
 			description="Array expressions depending on for loop index",
 			flatModel="
 fclass ArrayTests.For.ForEquation3

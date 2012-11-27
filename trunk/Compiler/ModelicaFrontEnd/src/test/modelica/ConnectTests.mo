@@ -1035,11 +1035,11 @@ model ConnectTest21
     
     A b[2];
 
-	annotation(__JModelica(UnitTesting(tests={ 
-		FlatteningTestCase(
-			name="ConnectTest21",
-			description="Connecting arrays of reals within an array of component instances, slices",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={ 
+        FlatteningTestCase(
+            name="ConnectTest21",
+            description="Connecting arrays of reals within an array of component instances, slices",
+            flatModel="
 fclass ConnectTests.ConnectTest21
  Real b[1].a1[3];
  Real b[1].a2[3];
@@ -1053,6 +1053,51 @@ equation
 end ConnectTests.ConnectTest21;
 ")})));
 end ConnectTest21;
+
+model ConnectTest22
+    model A
+        B a1[3];
+        B a2[3];
+    equation
+        connect(a1[1:2].b1[1,:], a2[2:3].b1[2,:]);
+    end A;
+	
+	model B
+		Real b1[2,2];
+	end B;
+    
+    A b[2];
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		FlatteningTestCase(
+			name="ConnectTest22",
+			description="Connecting arrays of reals within an array of component instances, complex slices",
+			flatModel="
+fclass ConnectTests.ConnectTest22
+ Real b[1].a1[1].b1[2,2];
+ Real b[1].a1[2].b1[2,2];
+ Real b[1].a1[3].b1[2,2];
+ Real b[1].a2[1].b1[2,2];
+ Real b[1].a2[2].b1[2,2];
+ Real b[1].a2[3].b1[2,2];
+ Real b[2].a1[1].b1[2,2];
+ Real b[2].a1[2].b1[2,2];
+ Real b[2].a1[3].b1[2,2];
+ Real b[2].a2[1].b1[2,2];
+ Real b[2].a2[2].b1[2,2];
+ Real b[2].a2[3].b1[2,2];
+equation
+ b[1].a1[1].b1[1,1] = b[1].a2[2].b1[2,1];
+ b[1].a1[1].b1[1,2] = b[1].a2[2].b1[2,2];
+ b[1].a1[2].b1[1,1] = b[1].a2[3].b1[2,1];
+ b[1].a1[2].b1[1,2] = b[1].a2[3].b1[2,2];
+ b[2].a1[1].b1[1,1] = b[2].a2[2].b1[2,1];
+ b[2].a1[1].b1[1,2] = b[2].a2[2].b1[2,2];
+ b[2].a1[2].b1[1,1] = b[2].a2[3].b1[2,1];
+ b[2].a1[2].b1[1,2] = b[2].a2[3].b1[2,2];
+end ConnectTests.ConnectTest22;
+")})));
+end ConnectTest22;
 
 
 model Electrical

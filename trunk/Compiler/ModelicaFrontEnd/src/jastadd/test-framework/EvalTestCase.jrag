@@ -59,7 +59,7 @@ public class EvalTestCase extends TestCase {
 
 		for (int i = 0; i < vals.length; i++) {
 			String name = names[i];
-			FAbstractVariable fv = fc.lookupFV(new FQName(name), false);
+			FAbstractVariable fv = fc.lookupFV(name);
 			if (fv.isUnknown()) {
 				fail("Could not find variable " + name + "."); 
 			} else {

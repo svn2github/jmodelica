@@ -74,7 +74,7 @@ aspect OptimicaTransformCanonical {
 					// should be set to the value of the initialGuess attribute.
 					if (!fv_startTime.startAttributeSet()) {
 						fv_startTime.addFAttribute(new FAttribute(new FIdUse("Real"),
-	                            new FIdDecl(new FQName("start")),
+	                            new FIdDecl(new FQNameString("start")),
 	                            new Opt(initialGuess_exp!=null? initialGuess_exp: new FRealLitExp(0.0)),
 	                            true,
 	                            new Opt(),
@@ -106,7 +106,7 @@ aspect OptimicaTransformCanonical {
 					}	
 					if (!fv_finalTime.startAttributeSet()) {
 						fv_finalTime.addFAttribute(new FAttribute(new FIdUse("Real"),
-	                            new FIdDecl(new FQName("start")),
+	                            new FIdDecl(new FQNameString("start")),
 	                            new Opt(initialGuess_exp!=null? initialGuess_exp: new FRealLitExp(1.0)),
 	                            true,
 	                            new Opt(),
@@ -127,7 +127,7 @@ aspect OptimicaTransformCanonical {
 	
 	private FRealVariable FOptClass.addExperimentTimeParameter(
 			String name, FAttribute attr, double defaultValue) {
-		FRealVariable fv = new FRealVariable(new FPublicVisibilityType(), fParameter(), new FQName(name));
+		FRealVariable fv = new FRealVariable(new FPublicVisibilityType(), fParameter(), new FQNameString(name));
 		if (attr != null) 
 			fv.setFAttributeList(attr.getFAttributeList().fullCopy());
 		if (attr != null && attr.hasValue())

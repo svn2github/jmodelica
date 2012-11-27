@@ -1637,33 +1637,17 @@ aspect TransformCanonical {
 							}
 						} else if (fv instanceof FHDerivativeVariable) {
 						    // Convert higher order derivative variables into
-						    // first order derivatives
-						    FHDerivativeVariable fhdv = (FHDerivativeVariable)fv;
-							for (int i=0;i<fhdv.getOrder()-1;i++) {
-								StringBuffer str = new StringBuffer();
-								StringBuffer str2 = new StringBuffer();
-								for (int j=0;j<i+1;j++) {
-									str.append("_der");
-									if (j<i) {
-										str2.append("_der");
-									}
-								}
-								str.append("_");
-								if (i>0) {
-									str2.append("_");
-								}
-								FQName fqn = fhdv.getFQName();
-								FQName fqn2 = (FQName)fv.getFQName().fullCopy();
-								str.append(fqn.getFQNamePart(fqn.getNumFQNamePart()-1).name());
-								fqn.setFQNamePart(new FQNamePart(str.toString(),fqn.getFQNamePart(fqn.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn.getNumFQNamePart()-1);
+						    // first order derivatives, generating variables for each step
+						    FHDerivativeVariable fhdv = (FHDerivativeVariable) fv;
+						    FQName fqnPrev = fv.getFQName().fullCopy();
+							for (int i = 1; i < fhdv.getOrder(); i++) {
+								FQName fqn = fv.getFQName().createDerPrefixedName(i);
 								l.add(new FRealVariable(fv.getFVisibilityType().fullCopy(),
-									fv.getFTypePrefixVariability().fullCopy(), fqn));
+									fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
 								l.add(new FDerivativeVariable(fv.getFVisibilityType().fullCopy(),
-									fv.getFTypePrefixVariability().fullCopy(), (FQName)fqn.fullCopy()));
-								str2.append(fqn2.getFQNamePart(fqn2.getNumFQNamePart()-1).name());
-								fqn2.setFQNamePart(new FQNamePart(str2.toString(),fqn2.getFQNamePart(fqn2.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn2.getNumFQNamePart()-1);
-								// Add equations for the new variables
-								addFEquation(new FEquation(new FIdUseExp(new FIdUse((FQName)fqn.fullCopy())),new FDerExp(new FIdUse(fqn2))));
+									fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
+								addFEquation(new FEquation(new FIdUseExp(fqn), new FDerExp(fqnPrev.fullCopy())));
+								fqnPrev = fqn;
 							}		
 						} else {
 							l.add(fv);
@@ -1897,6 +1881,22 @@ aspect TransformCanonical {
 		}
 	}	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	private static String FQName.derPrefixString = "_der_der_der_der";
+	
+	/**
+	 * Create a new FQName that is a copy of this one, prefixed with "_der" <code>order</code> times in the last name part.
+	 */
+	public FQName FQName.createDerPrefixedName(int order) {
+		FQName pref = copyPrefix();
+		while (4 * order >= derPrefixString.length())
+			derPrefixString = derPrefixString + derPrefixString;
+		String name = derPrefixString.substring(0, 4 * order + 1) + lastPartName();
+		if (hasFArraySubscripts())
+			return pref.copyAndAppend(name, getFArraySubscripts().fullCopy());
+		else
+			return pref.copyAndAppend(name);
+	}
 
 
 	public BLT FClass.computeTearings(BiPGraph graph) throws TearingException {
@@ -2483,7 +2483,7 @@ aspect TransformCanonical {
 	public void FClass.genBindingEquations() {
 		beginStep("genBindingEquations()");
 		
-		FQName empty = new FQName();
+		FQName empty = new FQNameEmpty();
 		for (FVariable fv : getFVariables()) 
 			if (!fv.isConstant()) 
 				fv.genBindingEquations(this, empty);
@@ -2532,7 +2532,6 @@ aspect TransformCanonical {
 	}
 	
 	public FQName FVariable.createNameForBindingEquation(FQName prefix, FAttribute attr) {
-		FQName name = prefix.copyAndAppend(getFQName());
 		FArraySubscripts fas = null;
 		if (isArray()) {
 			if (attr != null)
@@ -2540,8 +2539,7 @@ aspect TransformCanonical {
 			Size size = (attr != null && attr.hasValue()) ? new MutableSize(attr.getValue()) : size();
 			fas = size.rangeFArraySubscripts();
 		}
-		name.setLastFArraySubscripts(fas);
-		return name;
+		return prefix.copyAndAppend(name(), fas);
 	}
 	
 	public void FVariable.genBindingEquations(FClass fc, FQName prefix) {
@@ -2625,12 +2623,18 @@ aspect TransformCanonical {
 	
 	public void FIdUseExp.prefixInternalUses(FQName prefix, FRecordDecl decl) {
 		FQName fqn = getFIdUse().getFQName();
-		for (FQNamePart p : fqn.getFQNameParts())
+		fqn.prefixInternalUses(prefix, decl);
+		if (decl == lookupFV(fqn.copyFirstPrefix()).containingRecordDecl()) 
+			getFIdUse().setFQName(prefix.copyAndAppend(fqn));
+	}
+	
+	public void FQName.prefixInternalUses(FQName prefix, FRecordDecl decl) {}
+	
+	public void FQNameFull.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+		for (FQNamePart p : getFQNameParts())
 			if (p.hasFArraySubscripts())
 				for (FSubscript s : p.getFArraySubscripts().getFSubscripts())
 					s.prefixInternalUses(prefix, decl);
-		if (decl == lookupFV(fqn.copyFirstPrefix()).containingRecordDecl()) 
-			getFIdUse().setFQName(prefix.copyAndAppend(fqn));
 	}
 	
 	public void FSubscript.prefixInternalUses(FQName prefix, FRecordDecl decl) {}
@@ -2662,7 +2666,7 @@ aspect TransformCanonical {
 	}
 	
 	public FExp FIdUseExp.extractRecordFExp(String suffix) {
-		FQName name = getFIdUse().getFQName().copyAndAppend(suffix);
+		FQName name = getFIdUse().getFQName().copyAsFQNameFull().append(suffix);
 		return new FIdUseExp(name);
 	}
 	
@@ -2698,7 +2702,7 @@ aspect TransformCanonical {
 	 * \brief Generate equations from an attribute of a record variable.
 	 */
 	public void FAttribute.genBindingEquations(FClass fc, FRecordDecl rec, FQName prefix, boolean depPar) {
-		FVariable comp = (FVariable) rec.findComponent(getName().getFQName());
+		FVariable comp = (FVariable) rec.lookupHierarchical(getName().getFQName(), 0);
 		if (!comp.isUnknown() && !comp.isConstant()) {
 			FQName fqn = prefix.copyAndAppend(getName().getFQName());
 			
@@ -2732,7 +2736,7 @@ aspect TransformCanonical {
 		for (FAlgorithmBlock alg : myAlgorithms()) {
 			// Create function declaration
 			List<FFunctionVariable> vars = new List<FFunctionVariable>();
-			FQName funcName = new FQName(alg.generateFunctionName());
+			FQName funcName = new FQNameString(alg.generateFunctionName());
 			
 			// - Find inputs
 			ArrayList<FVariable> inVars = new ArrayList<FVariable>();
@@ -2782,7 +2786,7 @@ aspect TransformCanonical {
 					}
 					
 					// Rename input
-					FQName fqn = new FQName(name);
+					FQName fqn = new FQNameString(name);
 					ffv.setFQName(fqn);
 					
 					// Create and add binding expression for output
@@ -2825,7 +2829,7 @@ aspect TransformCanonical {
 	 */
 	public FFunctionCallLeft FQName.createFFunctionCallLeft() {
 		FQName fqn = fullCopy();
-		fqn.setLastFArraySubscripts(null);
+		fqn.removeFArraySubscripts();
 		return new FFunctionCallLeft(new Opt(new FIdUseExp(fqn)));
 	}
 
@@ -3444,7 +3448,19 @@ aspect TransformCanonical {
 		var.uses().remove(this);
 		var.definingUses().remove(this);
 		var.nonDefiningUses().remove(this);
-		for (FQNamePart p : getFIdUse().getFQName().getFQNameParts())
+		getFIdUse().getFQName().removeFromUses();
+	}
+	
+	/**
+	 * Remove all uses in expressions in array subscripts from the uses lists of their respective variables.
+	 * 
+	 * Should only be used to allow iterative algorithms to use updated uses lists while 
+	 * removing expressions. Only valid in flat tree.
+	 */
+	public void FQName.removeFromUses() {}
+	
+	public void FQNameFull.removeFromUses() {
+		for (FQNamePart p : getFQNameParts())
 			if (p.hasFArraySubscripts())
 				for (FSubscript s : p.getFArraySubscripts().getFSubscripts())
 					s.removeFromUses();
@@ -4356,17 +4372,8 @@ aspect DummyDerivatives {
 	boolean FHDerivativeVariable.rewriteFHDer = false;
 
 	rewrite FHDerExp {
-		when (rewriteFHDer) to FDerExp {
-			StringBuffer str = new StringBuffer();
-			for (int i=0;i<getOrder()-1;i++) {
-				str.append("_der");
-			}
-			str.append("_");
-			FQName fqn = getFIdUse().getFQName();
-			str.append(fqn.getFQNamePart(fqn.getNumFQNamePart()-1).name());
-			fqn.setFQNamePart(new FQNamePart(str.toString(),fqn.getFQNamePart(fqn.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn.getNumFQNamePart()-1);
-			return new FDerExp(new FIdUse(fqn));
-		} 
+		when (rewriteFHDer) to FDerExp 
+		new FDerExp(getFIdUse().getFQName().createDerPrefixedName(getOrder() - 1));
 	}
 
 }
@@ -4562,7 +4569,7 @@ aspect FunctionInlining {
 		private List<FAbstractEquation> paramEqns;
 		
 		private Map<String,FVariable> replMap;
-		private Map<String,FVariable> lookupMap;
+		private FlatVariableMap lookupMap;
 		private Map<String,Size> sizeMap;
 		
 		/**
@@ -4580,7 +4587,7 @@ aspect FunctionInlining {
 			paramEqns = fc.getFParameterEquations();
 			// Make sure maps are calculated
 			fc.parameterEquationsMap();
-			fc.fullyQualifiedVariablesMap();
+			fc.variablesMap();
 		}
 		
 		/**
@@ -4621,9 +4628,9 @@ aspect FunctionInlining {
 		 * 
 		 * @return  the map to use for lookups in the function during inlining.
 		 */
-		public Map<String,FVariable> startFunction(FFunctionDecl f) {
+		public FlatVariableMap startFunction(FFunctionDecl f) {
 			replMap = new HashMap<String,FVariable>();
-			lookupMap = new HashMap<String,FVariable>();
+			lookupMap = new FlatVariableMap();
 			sizeMap = new HashMap<String,Size>();
 			func = f;
 			return lookupMap;
@@ -4649,7 +4656,7 @@ aspect FunctionInlining {
 		 * @param name  the name of the temporary variable
 		 */
 		public boolean isReplacementVar(String name) {
-			return lookupMap.get(name) != null;
+			return lookupMap.lookup(name) != null;
 		}
 
 		/**
@@ -4732,17 +4739,18 @@ aspect FunctionInlining {
 		}
 		
 		public FVariable addVar(String oldName, FTypePrefixVariability variability, FType type) {
-			FQName name = new FQName(fc.nextTempVarName(func));
-			if (type.isArray())
-				name.setLastFArraySubscripts(type.size().flattenFArraySubscripts(new FQName()));
+			String n = fc.nextTempVarName(func);
+			FQName name = type.isArray() ? 
+					new FQNameFull(n, type.size().flattenFArraySubscripts(new FQNameEmpty())) : 
+					new FQNameString(n);
 			
 			FVariable var = type.createTempFVariable(name, variability);
 			vars.add(var);
 			vars.getChild(vars.getNumChild() - 1);
 			
 			replMap.put(oldName, var);
-			lookupMap.put(var.name(), var);
-			fc.fullyQualifiedVariablesMap().put(var.name(), var);
+			lookupMap.addVariable(var);
+			fc.variablesMap().addVariable(var);
 			return var;
 		}
 		
@@ -4893,6 +4901,10 @@ aspect FunctionInlining {
 	 * Check if any array subscripts contain any calls to functions that we can inline.
 	 */
 	syn boolean FQName.hasInlinableFunctions(FunctionInliner fi) {
+		return false;
+	}
+	
+	syn boolean FQNameFull.hasInlinableFunctions(FunctionInliner fi) {
 		for (FQNamePart part : getFQNameParts())
 			if (part.hasFArraySubscripts())
 				for (FSubscript sub : part.getFArraySubscripts().getFSubscripts())
@@ -4937,7 +4949,7 @@ aspect FunctionInlining {
 			for (int i = 0; i < n; i++) {
 				if (getLeft(i).hasFExp()) {
 					FQName name = outs.get(i).getFQName().fullCopy();
-					name.setLastFArraySubscripts(null);
+					name.removeFArraySubscripts();
 					name.scalarized = true;
 					getLeft(i).getFExp().createInliningOutputEquations(list, fi, name, getType());
 				}
@@ -4964,19 +4976,16 @@ aspect FunctionInlining {
 	
 	public void FExp.createInliningOutputEquations(
 			ArrayList<FEquation> list, FunctionInliner fi, FQName name, FEquationType type) {
-		FVariable var = fi.getReplacementVar(name.name());
+		FVariable var = fi.getReplacementVar(name.scalarName());
 		FExp right = (var != null) ? var.createInlineUseFExp() : type().zeroLiteral();
 		list.add(new FEquation(type.fullCopy(), this, right));
 	}
 	
 	public void FArray.createInliningOutputEquations(
 			ArrayList<FEquation> list, FunctionInliner fi, FQName name, FEquationType type) {
-		if (!name.hasFArraySubscripts())
-			name.setLastFArraySubscripts(new FArraySubscripts());
 		int i = 1;
 		for (FExp exp : getFExps()) {
-			FQName cellName = name.fullCopy();
-			cellName.lastFQNamePart().getFArraySubscripts().addFSubscript(new FExpSubscript(i));
+			FQName cellName = name.copyAndAddSubscript(new FIntegerSubscript(i));
 			exp.createInliningOutputEquations(list, fi, cellName, type);
 			i++;
 		}
@@ -4986,8 +4995,7 @@ aspect FunctionInlining {
 			ArrayList<FEquation> list, FunctionInliner fi, FQName name, FEquationType type) {
 		Iterator<FExp> args = getArgs().iterator();
 		for (FRecordComponentType part : ((FRecordType) type()).getComponents()) {
-			FQName partName = name.fullCopy();
-			partName.addFQNamePart(part.getName());
+			FQName partName = name.copyAndAppend(part.getName());
 			args.next().createInliningOutputEquations(list, fi, partName, type);
 		}
 	}
@@ -5017,7 +5025,9 @@ aspect FunctionInlining {
 	/**
 	 * Inline all calls to functions that we can inline.
 	 */
-	public void FQName.inlineFunctions(FunctionInliner fi) {
+	public void FQName.inlineFunctions(FunctionInliner fi) {}
+
+	public void FQNameFull.inlineFunctions(FunctionInliner fi) {
 		for (FQNamePart part : getFQNameParts())
 			if (part.hasFArraySubscripts())
 				for (FSubscript sub : part.getFArraySubscripts().getFSubscripts())
@@ -5204,7 +5214,7 @@ aspect FunctionInlining {
 	}
 	
 	/**
-	 * Recordkeeper object for checking that each output is assigned exactly once.
+	 * Record keeper object for checking that each output is assigned exactly once.
 	 * 
 	 * For arrays, a rough guess heuristic is used. Arrays of records and records 
 	 * containing arrays of unknown size are not supported.
@@ -5245,7 +5255,7 @@ aspect FunctionInlining {
 			}
 			
 			protected void check(FIdUse use, int i) {
-				TrivialInlineCheck part = parts.get(use.getFQName().getFQNamePart(i).getName());
+				TrivialInlineCheck part = parts.get(use.getFQName().partName(i));
 				if (part != null)
 					part.check(use, i + 1);
 				else
@@ -5768,14 +5778,11 @@ aspect StateInitialEquations {
 			
 			for (FRealVariable fv : differentiatedRealVariables()) {
 	            
-				FQName nameToAdd = fv.getFQName().fullCopy();
-				nameToAdd.getFQNamePart(0).setName("_start_" + nameToAdd.getFQNamePart(0).getName());
-				FRealVariable fvToAdd = new FRealVariable(
-						new FPublicVisibilityType(), new FParameter(), nameToAdd);
+				FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
+				FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), new FParameter(), nameToAdd);
 				fvToAdd.setBindingExp(fv.startAttributeExp().fullCopy());
 				addFVariable(fvToAdd);                
-				FEquation eqnToAdd = new FEquation(new FIdUseExp(fv.getFQName().fullCopy()),
-				                                   new FIdUseExp(nameToAdd.fullCopy()));
+				FEquation eqnToAdd = new FEquation(fv.createUseExp(), fvToAdd.createUseExp());
 				addFInitialEquation(eqnToAdd);    
 				flushAllRecursive();               
 			}
@@ -5850,7 +5857,7 @@ aspect RuntimeOptions {
 		v.setFVisibilityType(new FRuntimeOptionVisibilityType());
 		v.setFTypePrefixVariability(new FParameter());
 		v.setBindingExp(bExp);
-		v.setFQName(new FQName(name));
+		v.setFQName(new FQNameString(name));
 		return v;
 	}
 	

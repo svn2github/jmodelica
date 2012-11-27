@@ -331,6 +331,7 @@ abstract public class TestCase {
 	    FClass fc = createFClass(ipr.simpleLookupInstClassDecl(getClassName()));
 	    
 	    flatRoot.setFClass(fc);
+		fc = flatRoot.getFClass(); // make FClass final
 	    flatRoot.options = new OptionRegistry(options);
     	ipr.findFlattenInst(getClassName(), fc);
 		if (testFlattened(fc)) return;

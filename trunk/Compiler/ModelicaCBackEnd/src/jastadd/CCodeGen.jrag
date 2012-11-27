@@ -175,9 +175,9 @@ aspect CCodeGen {
 	syn String FIdUse.toString_C(Printer p) {
 		String type = myFV().funcArrayType(isAssignUse());
 		if (myFV().inRecord() && inFunction()) 
-			return myRecordFV().genRecordUse_C(p, getFQName(), type);
+			return getFQName().genRecordUse_C(p, myRecordFV(), type);
 		else
-			return myFV().genUse_C(p, getFQName().getLastFArraySubscripts(), type);
+			return myFV().genUse_C(p, getFQName().getFArraySubscripts(), type);
 	}
 	
 	public void FIdUse.prettyPrint_C(Printer p, PrintStream str, String indent) {
@@ -210,12 +210,16 @@ aspect CCodeGen {
 		return os.toString();
 	}
 	
-	public String FAbstractVariable.genRecordUse_C(Printer p, FQName name, String type) {
-		FQNamePart part = name.getFQNamePart(0);
+	public String FQName.genRecordUse_C(Printer p, FAbstractVariable fv, String type) {
+		throw new UnsupportedOperationException();
+	}	
+	
+	public String FQNameFull.genRecordUse_C(Printer p, FAbstractVariable fv, String type) {
+		FQNamePart part = getFQNamePart(0);
 		FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
-		String res = genUse_C(p, fas, C_ARRAY_RECORD);
-		for (int i = 1, n = name.getNumFQNamePart(); i < n; i++) {
-			part = name.getFQNamePart(i);
+		String res = fv.genUse_C(p, fas, C_ARRAY_RECORD);
+		for (int i = 1, n = getNumFQNamePart(); i < n; i++) {
+			part = getFQNamePart(i);
 			res = res + "->" + part.getName();
 			if (part.hasFArraySubscripts()) {
 				String curType = (n - i > 1 ? C_ARRAY_RECORD : type);
@@ -366,7 +370,7 @@ aspect CCodeGen {
 	 */
 	syn boolean FFunctionDecl.generateExpFunction() = hasOutputs() && !isComposite();
 	
-	syn String FRecordDecl.name_C()      = getFQName().lastFQNamePart().getName() + "_" + 
+	syn String FRecordDecl.name_C()      = getFQName().lastActualPartName() + "_" + 
 										       recordIndex() + "_" + C_SUFFIX_RECORD;
 	syn String FRecordDecl.nameArray_C() = name_C() + C_SUFFIX_ARRAY;
 	syn String FRecordType.name_C()      = myFRecordDecl().name_C();
@@ -1464,9 +1468,8 @@ aspect CCodeGen {
 	}
 	
 	public FExp FIdUseExp.extractRecordComponentExp(String name) {
-		FIdUseExp res = fullCopy();
-		res.getFIdUse().getFQName().addFQNamePart(name);
-		return dynamicFExp(res);
+		FQName fqn = getFIdUse().getFQName().copyAndAppend(name);
+		return dynamicFExp(new FIdUseExp(fqn));
 	}
 	
 	public FExp FRecordConstructor.extractRecordComponentExp(String name) {

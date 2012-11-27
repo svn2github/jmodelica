@@ -542,23 +542,40 @@ aspect MemoryUse {
 	 */
 	public long ASTNode.subTreeSize() {
 		Profiler.clear();   // Remove any stale data from profiler
-		long res = gatherMemoryUse(NullStream.PRINT, "", true, 0, 0, 1);
+		long res = subTreeSizeNoClear();
 		Profiler.clear();   // Free any memory used by the profiler's cache
 		return res;
+	}
+	
+	/**
+	 * Calculate the memory weight of a subtree, without clearing cache.
+	 */
+	private long ASTNode.subTreeSizeNoClear() {
+		return gatherMemoryUse(NullStream.PRINT, "", true, 0, 0, 1);
 	}
 	
 	/**
 	 * Calclulate memory weight of all subtrees fulfilling a specific criteria.
 	 */
 	public long ASTNode.filteredTreeSize(Criteria<ASTNode> filter) {
+		Profiler.clear();   // Remove any stale data from profiler
+		long res = filteredTreeSizeNoClear(filter);
+		Profiler.clear();   // Free any memory used by the profiler's cache
+		return res;
+	}
+	
+	/**
+	 * Calclulate memory weight of all subtrees fulfilling a specific criteria, without clearing cache.
+	 */
+	private long ASTNode.filteredTreeSizeNoClear(Criteria<ASTNode> filter) {
 		if (filter.test(this)) {
-			return subTreeSize();
+			return subTreeSizeNoClear();
 		} else {
 			long res = 0;
 			if (children != null)
 				for (ASTNode ch : children) 
 					if (ch != null)
-						res += ch.filteredTreeSize(filter);
+						res += ch.filteredTreeSizeNoClear(filter);
 			return res;
 		}
 	}

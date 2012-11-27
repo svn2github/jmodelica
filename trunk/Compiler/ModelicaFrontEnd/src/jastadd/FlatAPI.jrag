@@ -535,7 +535,7 @@ aspect FlatAPI {
 	syn lazy ArrayList<FVariable> FClass.discretePreVariables() {
 		ArrayList<FVariable> l = new ArrayList<FVariable>();
 		for (FVariable fv : discreteVariables()) {
-			l.add((FVariable)lookupPreFV(fv.getFQName()));
+			l.add((FVariable) lookupFV(fv.getFQName().preName()));
 		}
 		return l;
 	}
@@ -1346,6 +1346,22 @@ aspect Attributes {
 	syn FExp    FVariable.attributeExp(String name)    = attributeExp(findAttribute(name));
 	syn String  FVariable.attributeString(String name) = attributeCValueString(name).stringValue();
 	
+	syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQName name) = null;
+	eq FVariable.findHierarchicalAttribute(FQName name) = name.findHierarchicalAttribute(getFQName(), this);
+	
+	syn FAttribute FQName.findHierarchicalAttribute(FQName prefix, FVariable var) = null;
+	eq FQNameString.findHierarchicalAttribute(FQName prefix, FVariable var)       = var.findAttribute(getName());
+	eq FQNameFull.findHierarchicalAttribute(FQName prefix, FVariable var) {
+		int i = prefix.numMatchingParts(this);
+		int n = getNumFQNamePart();
+		if (i >= n)
+			return null;
+		FAttribute attr = var.findAttribute(getFQNamePart(i).getName());
+		for (i++; i < n && attr != null; i++)
+			attr = attr.findAttribute(getFQNamePart(i).getName());
+		return attr;
+	}
+	
 	syn CValue FVariable.attributeCValueString(String name) {
 		FAttribute a = findAttribute(name);
 		return attributeSet(a) ? attributeExp(a).ceval() : new CValueString("");
@@ -1748,14 +1764,30 @@ aspect FVariableUses {
 	 * a derivative variable (FDerivativeVariable)
 	 */
 	syn FRealVariable FDerivativeVariable.myDifferentiatedVariable() =
-		(FRealVariable)myFClass().fullyQualifiedVariablesMap().get(getFQName().name());
+		(FRealVariable) lookupFV(getFQName());
 
 	/**
 	 * \brief Get the derivative variabel (FDerivativeVariable) corresponding to 
 	 * a differentiated variable (FVariable)
 	 */
 	syn FDerivativeVariable FVariable.myDerivativeVariable() =
-		(FDerivativeVariable)myFClass().fullyQualifiedVariablesMap().get("der("+name()+")");
+		(FDerivativeVariable) lookupDerFV(getFQName());
+	
+	/**
+	 * Get the pre variable connected to a normal variable, if any.
+	 */
+	syn FAbstractVariable FAbstractVariable.myPreVariable() = lookupPreFV(getFQName());
+	
+	/**
+	 * Get the normal variable connected to a pre variable.
+	 * 
+	 * Will be unknown for non-pre variables.
+	 */
+	syn FAbstractVariable FAbstractVariable.myNonPreVariable() = unknownFVariable();
+	eq FPreBooleanVariable.myNonPreVariable() = lookupFV(getFQName());
+	eq FPreIntegerVariable.myNonPreVariable() = lookupFV(getFQName());
+	eq FPreRealVariable.myNonPreVariable()    = lookupFV(getFQName());
+	eq FPreStringVariable.myNonPreVariable()  = lookupFV(getFQName());
 	
 }
 
@@ -2340,7 +2372,7 @@ aspect FlatAlgorithmAPI {
 			part = "algorithm_" + generatedFunctionNumber;
 			name = name() + "." + part;
 			generatedFunctionNumber++;
-		} while (lookupFunc(name) != null || fullyQualifiedVariablesMap().get(part) != null);
+		} while (lookupFunc(name) != null || variablesMap().lookup(part) != null);
 		return name;
 	}
 	

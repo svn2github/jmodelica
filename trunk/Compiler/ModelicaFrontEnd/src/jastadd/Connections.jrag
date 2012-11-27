@@ -66,34 +66,15 @@ aspect Connections {
 			// rewrite to an access. If it occurs in an inside-outside connection
 			// rewrite to a new inStream operator operating on the outside
 			// stream variable in the same connection set.
-			FQName fqn = ((FIdUseExp) getFExp()).getFIdUse().getFQName().fullCopy();
-			fqn.scalarized = false;
-			String name = fqn.name();
-			FArraySubscripts fas = fqn.hasFArraySubscripts() ? fqn.getFArraySubscripts() : null;
+			String name = ((FIdUseExp) getFExp()).getFIdUse().getFQName().fullCopy().name();
 			ConnectionSet cs = myFClass().getConnectionSetManager().getConnectionSet(name, false);
-			if (cs != null) {
-				int N = cs.getNumInside(); // # of inside
-				int M = cs.size() - N; // # of outside
-				
-				Iterator<ConnectionSetEntry> it = cs.iterator();
-				ConnectionSetEntry cse = it.next();
-				if (N == 1 && M == 0) {
-					return cse.getFQName().createFIdUseExp(fas);
-				} else if (N == 1 && M == 1) {
-					if (cse.isInside())
-						cse = it.next();
-					FInStream fis = new FInStream(cse.getFQName().createFIdUseExp(fas));
-					fis.rewriteStreams = true;
-					return fis;
-				} else if (N == 2 && M == 0) {
-					if (cse.name().equals(name))
-						cse = it.next();
-					return cse.getFQName().createFIdUseExp(fas);
-				}
+			if (cs != null && cs.canCreateInStreamExp()) {
+				return cs.createInStreamExp(name);
+			} else {
+				// TODO: should throw an exception here, but this situation is detected *after* this rewrite
+				this.rewriteStreams = false;
+				return this;
 			}
-			// TODO: should throw an exception here, but this situation is detected *after* this rewrite
-			this.rewriteStreams = false;
-			return this;
 		}
 	}
 
@@ -169,6 +150,26 @@ aspect Connections {
 				}
 			}
 			return null;
+		}
+		
+		/**
+		 * Check if a rewrite expression can be generated for an inStream() on a variable in this set.
+		 * 
+		 * Default implementation returns false, since inStream() only applies to stream connecton sets.
+		 */
+		public boolean canCreateInStreamExp() {
+			return false;
+		}
+		
+		/**
+		 * Create rewrite expression for an inStream() on a variable in this set.
+		 * 
+		 * Only valid for stream connecton sets.
+		 * 
+		 * @param name  the name of the variable to generate name for
+		 */
+		public FExp createInStreamExp(String name) {
+			throw new UnsupportedOperationException();
 		}
 		
 		/**
@@ -261,6 +262,39 @@ aspect Connections {
 				FExp e2 = last().createFIdUseExp();
 				eb.addFAbstractEquationNoTransform(new FEquation(e1, e2));
 			}
+		}
+		
+		/**
+		 * Check if a rewrite expression can be generated for an inStream() on a variable in this set.
+		 */
+		public boolean canCreateInStreamExp() {
+			return size() <= 2 && getNumInside() >= 1;
+		}
+		
+		/**
+		 * Create rewrite expression for an inStream() on a variable in this set.
+		 * 
+		 * @param name  the name of the variable to generate name for
+		 */
+		public FExp createInStreamExp(String name) {
+			int N = getNumInside(); // # of inside
+			if (size() == 1)
+				return new FIdUseExp(name);
+			boolean inFirst = first().equals(name, false);
+			ConnectionSetEntry containing = inFirst ? first() : last();
+			ConnectionSetEntry select;
+			int nOutside = getNumOutside();
+			if (nOutside == 1)
+				select = first().isOutside() ? first() : last();
+			else
+				select = inFirst ? last() : first();
+			FExp res = select.createFIdUseExp(name, containing);
+			if (nOutside == 1) {
+				FInStream fis = new FInStream(res);
+				fis.rewriteStreams = true;
+				res = fis;
+			}
+			return res;
 		}
 		
 	}
@@ -413,6 +447,7 @@ aspect Connections {
 		private FQName fqName;
 		private String prefix;
 		private String str;
+		private String[] scalarNames;
 		//private boolean flow;
 		
 		public ConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
@@ -426,7 +461,6 @@ aspect Connections {
 		}
 		
 		public void disconnectFromInstanceTree() {
-			toString();
 			cd = null;
 		}
 	
@@ -455,17 +489,22 @@ aspect Connections {
 		}
 		
 		public String prefix() {
-			if (prefix == null) {
-				boolean scalar = fqName.scalarized;
-				fqName.scalarized = true;
-				prefix = fqName.prefixName(-1);
-				fqName.scalarized = scalar;
-			}
+			if (prefix == null) 
+				prefix = fqName.copyPrefix().name();
 			return prefix;
 		}
 		
 		public boolean equals(String name, boolean outside) {
-			return name.equals(this.name()) & (outside==this.outside);
+			if (outside != this.outside)
+				return false;
+			if (scalarNames != null) {
+				for (String scalarName : scalarNames)
+					if (name.equals(scalarName))
+						return true;
+				return false;
+			} else {
+				return name.equals(name());
+			}
 		}
 		
 		public String toString() {
@@ -480,6 +519,20 @@ aspect Connections {
 
 		public FExp createFIdUseExp() {
 			return fqName.createFIdUseExp();
+		}
+
+		/**
+		 * Create an FIdUseExp that is an acces to a variable in this entry, that is connected to 
+		 * the variable named <code>name</code> in <code>other</code>.
+		 */
+		public FExp createFIdUseExp(String name, ConnectionSetEntry other) {
+			if (other == this)
+				return new FIdUseExp(name); 
+			if (scalarNames == null || other.scalarNames == null)
+				return createFIdUseExp();
+			int i;
+			for (i = 0; i < other.scalarNames.length && !other.scalarNames[i].equals(name); i++);
+			return (i < scalarNames.length) ? new FIdUseExp(scalarNames[i]) : createFIdUseExp();
 		}
 
 		public int hashCode() {
@@ -513,20 +566,20 @@ aspect Connections {
 			Indices rightInd = right.indices();
 			Iterator<Index> leftIter = leftInd.iterator();
 			Iterator<Index> rightIter = rightInd.iterator();
+			InstComponentDecl leftComp  = lookupEvaluatingIndices();
+			InstComponentDecl rightComp = right.lookupEvaluatingIndices();
 			while (leftIter.hasNext()) {
 				Index leftI = leftInd.translate(leftIter.next());
 				Index rightI = rightInd.translate(rightIter.next());
 				FQName leftCellName = leftName.copyReplacingSubscripts(leftI);
 				FQName rightCellName = rightName.copyReplacingSubscripts(rightI);
-				InstComponentDecl leftComp  = lookupEvaluatingIndices();
-				InstComponentDecl rightComp = right.lookupEvaluatingIndices();
-				leftComp = leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
-				rightComp = rightComp.findCell(rightI, rightI.ndims() - rightComp.ndims());
-				leftComp.connectTo(leftOutside, leftCellName, rightComp, rightOutside, rightCellName, csm);
+				InstComponentDecl leftCompCell = leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
+				InstComponentDecl rightCompCell = rightComp.findCell(rightI, rightI.ndims() - rightComp.ndims());
+				leftCompCell.connectTo(leftOutside, leftCellName, rightCompCell, rightOutside, rightCellName, csm);
 			}
 		} else {
-			InstComponentDecl leftComp  = lookupEvaluatingIndices().findCell(leftName);
-			InstComponentDecl rightComp = right.lookupEvaluatingIndices().findCell(rightName);
+			InstComponentDecl leftComp  = lookupEvaluatingIndices();
+			InstComponentDecl rightComp = right.lookupEvaluatingIndices();
 			leftComp.connectTo(leftOutside, leftName, rightComp, rightOutside, rightName, csm);
 		}
 	}
@@ -550,9 +603,6 @@ aspect Connections {
 	syn InstComponentDecl InstComponentDecl.findCell(Index i, int j) = 
 		(j < i.ndims()) ? getInstComponentDecl(i.get(j) - 1).findCell(i, j + 1) : this;
 	eq InstPrimitive.findCell(Index i, int j) = this;
-
-	syn InstComponentDecl InstComponentDecl.findCell(FQName name) = 
-		name.hasFArraySubscripts() ? findCell(name.getFArraySubscripts().asIndex(), 0) : this;
 
 	syn boolean InstAccess.isOutsideConnector() = getFirstInstAccess().myInstComponentDecl().isConnector();
 	

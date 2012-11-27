@@ -1237,13 +1237,13 @@ void func_CCodeGenTests_TestFunctionNoOut_def(jmi_ad_var_t i1_v) {
 end CFunctionTest11;
 
 model CFunctionTest12
-
 function f
   input Real x[2];
   output Real y[2];
 algorithm
   y:=x;
 end f;
+
 Real z[2](each nominal=3)={1,1};
 Real w[2];
 equation

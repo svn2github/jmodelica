@@ -361,14 +361,41 @@ FExternalObjectType : FPrimitiveType;
  * needs to be printed in a number of different way (dot notation, underscore
  * notation etc).
  */
-FQName : BaseNode ::= FQNamePart*;
+abstract FQName : BaseNode;
 
 /**
- * \brief A name and, optionally, its associated array subscripts.
+ * An empty FQName, used as the start of prefixes.
+ */
+FQNameEmpty : FQName;
+
+/**
+ * An FQName that is a simple string, used for scalarized names and simple names. 
+ */
+FQNameString : FQName ::= <Name:String>;
+
+/**
+ * A full FQName, with a list of FQNameParts.
+ */
+FQNameFull : FQName ::= FQNamePart*;
+
+/**
+ * A temporary FQNameFull, rewritten to an FQNameFull if in a function, and FQNameString otherwise.
+ */
+FQNameFullScalarize : FQNameFull;
+
+/**
+ * A name part without array subscripts.
  * 
  * To be used in FQName:s.
  */
-FQNamePart : BaseNode ::= <Name:String> [FArraySubscripts];
+FQNamePart : BaseNode ::= <Name:String>;
+
+/**
+ * A name part with array subscripts.
+ * 
+ * To be used in FQName:s.
+ */
+FQNamePartArray : FQNamePart ::= FArraySubscripts;
 
 /**
  * \brief Representation of an attribute for a built-in types.
@@ -418,14 +445,19 @@ FArraySubscripts : BaseNode ::= FSubscript*;
 abstract FSubscript : BaseNode;
 
 /**
- * \brief The colon subscript used to denote that the array size is inferred.
+ * The colon subscript used to denote that the array size is inferred.
  */
 FColonSubscript : FSubscript ::= /SizeExp:FExp/;
 
 /**
- * \brief Expression subscript.
+ * Expression subscript.
  */
 FExpSubscript : FSubscript ::= FExp /Expanded:Array/;
+
+/**
+ * A literal integer subscript.
+ */
+FIntegerSubscript : FSubscript ::= <Value:int>;
 
 /**
  * \brief Classifies a flattened equation as initial or normal.
@@ -1140,7 +1172,7 @@ FPreExp : FUnaryBuiltIn;
 FSampleExp : FBuiltInFunctionCall ::= Offset:FExp Interval:FExp;
 
 /**
- * Built-in functions that return flas describing the simulation state.
+ * Built-in functions that return flags describing the simulation state.
  */
 abstract FSimulationStateBuiltIn : FNoArgBuiltIn;
 

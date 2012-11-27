@@ -108,6 +108,7 @@ aspect InstLookupComponents {
 			cur = next;
 			next = next.getNextInstAccess();
 		}
+		icd = cur.lookupArrayElement(icd);
 		
 		return icd;
 	}

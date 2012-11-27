@@ -207,7 +207,7 @@ aspect XMLCodeGen {
 
 	public void FEnumLitExp.prettyPrint_XML(Printer p, PrintStream str, String indent) {
 		open_XML(str, indent);
-		p.print(new FQName(getEnum() + "." + getValue()), str, p.indent(indent));
+		p.print(new FQNameFull(getEnum(), getValue()), str, p.indent(indent));
 		close_XML(str, indent);
 	}
 	
@@ -452,14 +452,22 @@ aspect XMLCodeGen {
 	
 	//-------------------- Qualified Names ---------------------------
 	
-	public void FQName.prettyPrint_XML(Printer p, PrintStream str, String indent){
-		
-		for (FQNamePart np : this.getFQNamePartList())
-			np.prettyPrint_XML(str,p.indent(indent));
-		
+	public void FQName.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+		throw new UnsupportedOperationException();
 	}
 	
-	public void FQNamePart.prettyPrint_XML(Printer p, PrintStream str, String indent){
+	public void FQNameString.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+		// TODO: Should probably be changed in schema, a simple string should be enough here
+		for (String part : getName().split("\\."))
+			str.println("<exp:QualifiedNamePart name=\"" + part + "\"/>");
+	}
+	
+	public void FQNameFull.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+		for (FQNamePart np : getFQNameParts())
+			np.prettyPrint_XML(str,p.indent(indent));
+	}
+	
+	public void FQNamePart.prettyPrint_XML(Printer p, PrintStream str, String indent) {
 		String namespace = "exp";
 		String tag = this.xmlTag();
 		String nameAttr = " name=\"" + this.getName() + "\"";

@@ -1269,7 +1269,11 @@ aspect ConstantEvaluation {
    * \brief Create a copy with all array subscripts replaced by literals.
    */
   public FQName FQName.resolveSubscripts() {
-	  FQName res = new FQName();
+	  return fullCopy();
+  }
+  
+  public FQNameFull FQNameFull.resolveSubscripts() {
+	  FQNameFull res = new FQNameFull();
 	  for (FQNamePart part : getFQNameParts())
 		  res.addFQNamePart(part.resolveSubscripts());
 	  return res;
@@ -1279,9 +1283,11 @@ aspect ConstantEvaluation {
    * \brief Create a copy with all array subscripts replaced by literals.
    */
   public FQNamePart FQNamePart.resolveSubscripts() {
-	  Opt fas = hasFArraySubscripts() ? 
-			  new Opt(getFArraySubscripts().resolveSubscripts()) : new Opt();
-	  return new FQNamePart(getName(), fas);
+	  return fullCopy();
+  }
+  
+  public FQNamePartArray FQNamePartArray.resolveSubscripts() {
+	  return new FQNamePartArray(getName(), getFArraySubscripts().resolveSubscripts());
   }
   
   /**
@@ -1312,9 +1318,9 @@ aspect ConstantEvaluation {
    * \brief Perform constant evaluation of an access to a record member.
    */
   syn CValue FIdUse.cevalRecordMember(FQName name) {
-	  if (name.getNumFQNamePart() <= 1)
+	  if (name.numParts() <= 1)
 		  return CValue.UNKNOWN;
-	  String last = name.lastFQNamePart().getName();
+	  String last = name.lastPartName();
 	  FQName prefix = name.copyPrefix();
 	  FAbstractVariable var = lookupFV(prefix.copyWithoutSubscripts());
 	  CValue res = var.inRecord() ? cevalRecordMember(prefix) : var.ceval();
@@ -1398,7 +1404,11 @@ aspect ConstantEvaluation {
   eq FAbsExp.cevalCalc() = type().abs(getFExp().ceval());
 
 	syn CValue FSubscript.ceval() = CValue.UNSUPPORTED;
-	eq FExpSubscript.ceval() = getFExp().ceval();
+	eq FExpSubscript.ceval()      = getFExp().ceval();
+	eq FIntegerSubscript.ceval()  = new CValueInteger(getValue());
+	
+	syn int FSubscript.value()   = ceval().intValue();
+	eq FIntegerSubscript.value() = getValue();
 	
 	syn CValue InstComponentDecl.ceval() = 
 		(evaluationValue == null) ? CValue.UNKNOWN : evaluationValue;
@@ -2060,26 +2070,32 @@ aspect ConstantEvaluation {
   /**
    * \brief Evaluate an assignment with this as the left side during function evaluation.
    * 
-   * @param values  constant values for the variables. 
+   * @param values  constant values for the variables
+   * @param right   the right hand side
    */
   public void FIdUse.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right) {
-	  FQName name = getFQName();
-	  FAbstractVariable tmp_var;
-	  int i = 0;
-	  int n = name.getNumFQNamePart();
-	  if (n == 1) {
-		  tmp_var = (FFunctionVariable) myFV();
-	  } else {
-		  // Depends on lookupFV() not being lazy
-		  FQName tmp_name = new FQName();
-		  --i;
-		  do {
-			  tmp_name.addFQNamePart(name.getFQNamePart(++i).fullCopy());
-			  tmp_var = lookupFV(tmp_name);
-		  } while (tmp_var.isUnknown() && i < n);
-	  }
-	  FFunctionVariable var = (FFunctionVariable) tmp_var;
-	  FQNamePart firstPart = name.getFQNamePart(i);
+	  getFQName().assignToInFuncEval(values, right, this);
+  }
+
+  /**
+   * \brief Evaluate an assignment with this as the left side during function evaluation.
+   * 
+   * @param values   constant values for the variables
+   * @param right    the right hand side
+   * @param context  the use to look up names from
+   */
+  public void FQName.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right, FIdUse context) {
+	  throw new UnsupportedOperationException();
+  }
+
+  public void FQNameString.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right, FIdUse context) {
+	  FFunctionVariable var = (FFunctionVariable) context.lookupFV(this);
+	  var.setEvaluationValue(right, values);
+  }
+
+  public void FQNameFull.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right, FIdUse context) {
+	  FFunctionVariable var = (FFunctionVariable) context.lookupOutermostFV(this);
+	  FQNamePart firstPart = getFQNamePart(0);
 	  CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(), right);
 	  var.setEvaluationValue(val, values);
   }
@@ -2087,7 +2103,7 @@ aspect ConstantEvaluation {
   /**
    * \brief Evaluate an assignment with this as the left side during function evaluation.
    * 
-   * @param values  constant values for the variables. 
+   * @param values  constant values for the variables
    */
   public void InstAccess.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right) {
 	  InstAccess firstPart = getFirstInstAccess();
@@ -2137,7 +2153,7 @@ aspect ConstantEvaluation {
    */
   syn CommonNamePart InstAccess.nextNamePart() = getNextInstAccess();
   inh CommonNamePart FQNamePart.nextNamePart();
-  eq FQName.getFQNamePart(int i).nextNamePart() = 
+  eq FQNameFull.getFQNamePart(int i).nextNamePart() = 
 	  getNumFQNamePart() > i + 1 ? getFQNamePart(i + 1) : null;
 	  
   /**
@@ -2681,7 +2697,16 @@ aspect CircularExpressions {
 	syn lazy boolean FAbstractVariable.isCircular() circular [true] = false;
 	eq FVariable.isCircular() = getFQName().isCircular() || (hasBindingExp() && getBindingExp().isCircular());
 	
-	syn boolean FQName.isCircular() = hasFArraySubscripts() && getLastFArraySubscripts().isCircular();
+	syn boolean FQName.isCircular() = false;
+	eq FQNameFull.isCircular() {
+		for (FQNamePart part : getFQNameParts())
+			if (part.isCircular())
+				return true;
+		return false;
+	}
+	
+	syn boolean FQNamePart.isCircular() = false;
+	eq FQNamePartArray.isCircular()     = getFArraySubscripts().isCircular();
 	
 	syn lazy boolean InstComponentDecl.isCircular() circular [true] = false;
 	eq InstPrimitive.isCircular() {

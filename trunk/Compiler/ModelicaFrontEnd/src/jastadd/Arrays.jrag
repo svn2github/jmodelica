@@ -79,7 +79,7 @@ aspect Arrays {
 		int[] i = new int[getNumFSubscript()];
 		int j = 0;
 		for (FSubscript s : getFSubscripts()) 
-			i[j++] = s.ceval().intValue();
+			i[j++] = s.value();
 		return new Index(i);
 	}
 
@@ -150,8 +150,9 @@ aspect Arrays {
 	 * @return Array dimension.
 	 */	
 	syn int FSubscript.ndims();
-	eq FExpSubscript.ndims() = getFExp().ndims();
-	eq FColonSubscript.ndims() = 1;
+	eq FExpSubscript.ndims()     = getFExp().ndims();
+	eq FColonSubscript.ndims()   = 1;
+	eq FIntegerSubscript.ndims() = 0;
 	
 	/**
 	 * \brief Get array dimensions.
@@ -346,12 +347,32 @@ aspect Arrays {
 	 * \brief Get the expanded FArraySubscripts of each part of this access.
 	 */
 	syn lazy ArrayList<FArraySubscripts> FIdUse.allFArraySubscripts() {
-		ArrayList<FArraySubscripts> res = new ArrayList<FArraySubscripts>(getFQName().getNumFQNamePart());
-		for (FQNamePart part : getFQName().getFQNameParts())
-			res.add(part.hasFArraySubscripts() ? part.getFArraySubscripts() : new FArraySubscripts());
+		ArrayList<FArraySubscripts> res = getFQName().createFArraySubscriptsList();
 		if (!hasFArraySubscripts() && myFV().isArray()) 
 			res.set(res.size() - 1, getExpandedSubscripts());
 		return res;
+	}
+	
+	/**
+	 * Create a list with an FArraySubscripts for each part of this access, empty for parts that has none.
+	 */
+	public ArrayList<FArraySubscripts> FQName.createFArraySubscriptsList() {
+		ArrayList<FArraySubscripts> res = new ArrayList<FArraySubscripts>(numParts());
+		for (int i = 0, n = numParts(); i < n; i++)
+			res.add(createFArraySubscriptsForPart(i));
+		return res;
+	}
+	
+	/**
+	 * Get an FArraySubscripts for part <code>i</code> of this access, creating an empty one if it has none.
+	 */
+	public FArraySubscripts FQName.createFArraySubscriptsForPart(int i) {
+		return new FArraySubscripts();
+	}
+	
+	public FArraySubscripts FQNameFull.createFArraySubscriptsForPart(int i) {
+		FQNamePart part = getFQNamePart(i);
+		return part.hasFArraySubscripts() ? part.getFArraySubscripts() : new FArraySubscripts();
 	}
 	
 	/**
@@ -373,24 +394,10 @@ aspect Arrays {
 	syn FArraySubscripts FIdUse.getExpandedSubscripts() {
 		Size s = myFV().size();
 		if (s.isUnknown() && myFV().inRecord()) {
-			// Find enclosing record
-			// TODO: extract method? problem: need i after
-			// TODO: this is O(n^2) for n+1 parts in name of record (lookupFV() is O(n) if name isn't found)
 			FQName name = getFQName();
-			int i;
-			int n = name.getNumFQNamePart();
-			FVariable record = null;
-			for (i = 1; record == null && i < n; i++) {
-				FAbstractVariable tmp = lookupFV(name.copyPrefix(i));
-				if (!tmp.isUnknown())
-					record = (FVariable) tmp;
-			}
-			
-			// Find size attribute for this member
-			if (record != null) {
-				FAttribute attr = record.findAttribute(name.getFQNamePart(i-1).getName());
-				for (; attr != null && i < n; i++)
-					attr = attr.findAttribute(name.getFQNamePart(i).getName());
+			FAbstractVariable record = lookupOutermostFV(name);
+			if (!record.isUnknown()) {
+				FAttribute attr = record.findHierarchicalAttribute(name);
 				if (attr != null)
 					attr = attr.findAttribute(FAttribute.SIZE);
 				if (attr != null && attr.hasValue())
@@ -471,10 +478,11 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn lazy int FQName.ndims() {
+	syn int FQName.ndims() = 0;
+	eq FQNameFull.ndims() {
 		// Only look at the array subscripts for the last FQNamePart,
 		// all other array subscripts has been expanded in the instantiation.
-		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
+		FQNamePart last = getFQNamePart(getNumFQNamePart() - 1);
 		if (last.hasFArraySubscripts()) {
 			return last.getFArraySubscripts().ndims(); 
 		} else {
@@ -493,7 +501,8 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */		
-	syn int FQName.accessNdims() {
+	syn int FQName.accessNdims() = 0;
+	eq FQNameFull.accessNdims() {
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
 		if (last.hasFArraySubscripts()) {
 			return last.getFArraySubscripts().accessNdims(); 
@@ -545,6 +554,10 @@ aspect Arrays {
 		s.append(new FUnknownSizeExp(surroundingVariableDecl(), myDim()));
 	}
 	
+	public void FIntegerSubscript.addDeclarationSize(MutableSize s) {
+		s.append(getValue());
+	}
+	
 	/**
 	 * \brief The variable declaration that this subscript is a part of the size of, if any.
 	 */
@@ -579,10 +592,9 @@ aspect Arrays {
 	 * \brief Get the array sizes. 
 	 */
 	syn Size FSubscript.size();
-
-	eq FExpSubscript.size() = getFExp().size();
-	
-	eq FColonSubscript.size() = mySize();
+	eq FExpSubscript.size()     = getFExp().size();
+	eq FColonSubscript.size()   = mySize();
+	eq FIntegerSubscript.size() = Size.SCALAR;
 	
 	/**
 	 * \brief Get the size this subscript(s) would have if all subscripts were colons.
@@ -948,7 +960,8 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes. 
 	 */
-	syn lazy Size FQName.size() {
+	syn Size FQName.size() = Size.SCALAR;
+	syn lazy Size FQNameFull.size() {
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
 		if (last.hasFArraySubscripts()) {
 			return last.getFArraySubscripts().declarationSize(); 
@@ -1515,11 +1528,8 @@ aspect Arrays {
 			return super.getArray();
 		
 		Array arr = new Array(indices());
-		for (Index i : arr.indices()) {
-			FQName n = new FQName(tempVarName());
-			n.setLastFArraySubscripts(i.createFArraySubscripts());
-			arr.set(i, new FIdUseExp(n));
-		}
+		for (Index i : arr.indices()) 
+			arr.set(i, new FIdUseExp(tempVarName(), i.createFArraySubscripts()));
 		return arr;
 	}
 	
@@ -1547,10 +1557,9 @@ aspect Arrays {
 			 * Based on an array access, say x, corresponding to the declaration
 			 * Real x[2], the array {x[1],x[2]} is generated. 
 			 */
-			boolean scalarize = !inFunction();
 			Array array = new Array(indices());
 			for (Index i : array.indices()) 
-				array.set(i, createNode(getFIdUse().specify(i, scalarize)));
+				array.set(i, createNode(getFIdUse().specify(i, false)));
 			return array;
 		} else {
 			return new ScalarAsArray(this);
@@ -1625,7 +1634,11 @@ aspect Arrays {
 	 * @param scalarize  <code>true</code> if the FQName should be marked as scalarized 
 	 */
 	public FQName FQName.specify(Index i, boolean scalarize) {
-		FQName res = new FQName();
+		return copyAndAddFas(i.createFArraySubscripts());
+	}
+	
+	public FQName FQNameFull.specify(Index i, boolean scalarize) {
+		FQNameFull res = new FQNameFull();
 		int[] dim = new int[1];
 		int np = getNumFQNamePart();
 		for (int j = 0; j < np; j++) {
@@ -1641,12 +1654,14 @@ aspect Arrays {
 				for (int k = 0; k < n; k++) {
 					FSubscript fs = hasfas ?
 							oldfas.getFSubscript(k).createSpecified(i, dim) :
-							new FExpSubscript(i.get(dim[0]++));
+							new FIntegerSubscript(i.get(dim[0]++));
 					newfas.addFSubscript(fs);
 				}
 			}
-			Opt fasopt = newfas == null ? new Opt() : new Opt(newfas);
-			res.addFQNamePart(new FQNamePart(getFQNamePart(j).getName(), fasopt));
+			FQNamePart newpart = (newfas == null) ? 
+					new FQNamePart(part.getName()) : 
+					new FQNamePartArray(part.getName(), newfas);
+			res.addFQNamePart(newpart);
 		}
 		res.scalarized = scalarize;
 		return res;
@@ -1666,7 +1681,11 @@ aspect Arrays {
 	 *             wrapped in an array so that it can be changed by the method
 	 */
 	public FSubscript FSubscript.createSpecified(Index i, int[] dim) {
-		return new FExpSubscript(i.get(dim[0]++));
+		return fullCopy();
+	}
+	
+	public FSubscript FColonSubscript.createSpecified(Index i, int[] dim) {
+		return new FIntegerSubscript(i.get(dim[0]++));
 	}
 	
 	public FSubscript FExpSubscript.createSpecified(Index i, int[] dim) {
@@ -1925,7 +1944,8 @@ aspect Arrays {
 		return ind;
 	}
 	
-	eq FExpSubscript.myIndices() = getFExp().myIndices();
+	eq FExpSubscript.myIndices()     = getFExp().myIndices();
+	eq FIntegerSubscript.myIndices() = new int[] { getValue() };
 	
 	syn int[] FExp.myIndices() {
 		try {
@@ -2106,7 +2126,7 @@ aspect ArrayHelpers {
 		 * \brief Create a new flattened FSubscript for dimension <code>i</code>.
 		 */
 		protected FSubscript flattenFSubscript(int i, FQName prefix) {
-			return size[i] == UNKNOWN ? new FColonSubscript() : new FExpSubscript(size[i]);
+			return size[i] == UNKNOWN ? new FColonSubscript() : new FIntegerSubscript(size[i]);
 		}
 		
 		/**

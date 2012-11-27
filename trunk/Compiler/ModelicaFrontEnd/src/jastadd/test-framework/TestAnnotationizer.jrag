@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.regex.Pattern;
 
 aspect TestAnnotationizer {
@@ -708,19 +709,26 @@ abstract public class TestAnnotationizerHelper {
 		 */
 		public String makeVariableList(String vars) {
 			String[] list = vars.replace(',', '\n').split("[\\n\\r]+");
-			StringBuilder res = new StringBuilder();
-			Map<String,FVariable> map = fc.fullyQualifiedVariablesMap();
+			Set<String> available = fc.variablesMap().flatNameSet();
+			ArrayList<String> names = new ArrayList<String>();
 			for (String name : list) {
 				name = name.trim();
-				if (map.containsKey(name)) {
-					res.append(name + "\n");
+				int l = names.size();
+				if (available.contains(name)) {
+					names.add(name + "\n");
 				} else {
 					Pattern p = Pattern.compile(name + "[\\[.].*");
-					for (String var : map.keySet()) 
+					for (String var : available) 
 						if (p.matcher(var).matches()) 
-							res.append(var + "\n");
+							names.add(var + "\n");
 				}
+				if (names.size() == l)
+					throw new IllegalArgumentException("Could not find variable " + name);
 			}
+			Collections.sort(names);
+			StringBuilder res = new StringBuilder();
+			for (String name : names)
+				res.append(name);
 			return res.toString().trim();
 		}
 		
@@ -734,7 +742,7 @@ abstract public class TestAnnotationizerHelper {
 			for (int i = 0; i < variables.length; i++) {
 				if (i != 0)
 					res.append('\n');
-				res.append(fc.lookupFV(new FQName(variables[i]), false).ceval().toString());
+				res.append(fc.lookupFV(variables[i]).ceval().toString());
 			}
 			return res.toString();
 		}
@@ -788,6 +796,13 @@ abstract public class TestAnnotationizerHelper {
 		
 	}
 
+}
+
+/**
+ * Returns the set of flat names in the map.
+ */
+public Set<String> FlatVariableMap.flatNameSet() {
+	return flatMap.keySet();
 }
 
 }

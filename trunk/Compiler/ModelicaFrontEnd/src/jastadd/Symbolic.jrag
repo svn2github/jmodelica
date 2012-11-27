@@ -766,7 +766,7 @@ aspect Derivatives {
 		// and the name is not 'time', then the derivative is zero.
 		if (!name.equals(TIME)) {
 			boolean isIndependent = true;
-			FQName fqn = new FQName(name);
+			FQName fqn = new FQNameString(name);
 			FIdUseExp fid = (FIdUseExp)dynamicFExp(fqn.createFIdUseExp());
 			FAbstractVariable fv = fid.myFV();
 			if (fv!=null) {

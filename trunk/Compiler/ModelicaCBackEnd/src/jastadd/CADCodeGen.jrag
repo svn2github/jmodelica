@@ -77,18 +77,19 @@ aspect CADCodeGen {
 	
 	syn String FIdUse.name_der_CAD() = toString_der_CAD(printer_C);
 	
-	/* Use to print record uses in statements in functions. 
-	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
-	 * @param FQname name, used to retrieve the name for the record and the current
-	 * element in it. 
-	 * @param String type,
+	/**
+	 *Print CAD code for value for record use in statement in function. 
 	 */
-	public String FAbstractVariable.genRecordUse_var_CAD(Printer p, FQName name, String type) {
-		FQNamePart part = name.getFQNamePart(0);
+	public String FQName.genRecordUse_var_CAD(Printer p, FAbstractVariable fv, String type) {
+		throw new UnsupportedOperationException();
+	}	
+	
+	public String FQNameFull.genRecordUse_var_CAD(Printer p, FAbstractVariable fv, String type) {
+		FQNamePart part = getFQNamePart(0);
 		FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
-		String res = genUse_var_CAD(p, fas, C_ARRAY_RECORD);
-		for (int i = 1, n = name.getNumFQNamePart(); i < n; i++) {
-			part = name.getFQNamePart(i);
+		String res = fv.genUse_var_CAD(p, fas, C_ARRAY_RECORD);
+		for (int i = 1, n = getNumFQNamePart(); i < n; i++) {
+			part = getFQNamePart(i);
 			res = res + "->" + part.getName();
 			if (part.hasFArraySubscripts()) {
 				String curType = (n - i > 1 ? C_ARRAY_RECORD : type);
@@ -98,18 +99,19 @@ aspect CADCodeGen {
 		return res;
 	}
 	
-	/* Use to print records uses in statements in functions. 
-	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
-	 * @param FQname name, used to retrieve the name for the record and the current
-	 * element in it. 
-	 * @param String type,
+	/**
+	 *Print CAD code for for derivative record use in statement in function. 
 	 */
-	public String FAbstractVariable.genRecordUse_der_CAD(Printer p, FQName name, String type) {
-		FQNamePart part = name.getFQNamePart(0);
+	public String FQName.genRecordUse_der_CAD(Printer p, FAbstractVariable fv, String type) {
+		throw new UnsupportedOperationException();
+	}	
+	
+	public String FQNameFull.genRecordUse_der_CAD(Printer p, FAbstractVariable fv, String type) {
+		FQNamePart part = getFQNamePart(0);
 		FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
-		String res = genUse_der_CAD(p, fas, C_ARRAY_RECORD);
-		for (int i = 1, n = name.getNumFQNamePart(); i < n; i++) {
-			part = name.getFQNamePart(i);
+		String res = fv.genUse_der_CAD(p, fas, C_ARRAY_RECORD);
+		for (int i = 1, n = getNumFQNamePart(); i < n; i++) {
+			part = getFQNamePart(i);
 			res = res + "->" + part.getName();
 			if (part.hasFArraySubscripts()) {
 				String curType = (n - i > 1 ? C_ARRAY_RECORD : type);
@@ -122,18 +124,18 @@ aspect CADCodeGen {
 	syn String FIdUse.toString_var_CAD(Printer p) {
 		String type = myFV().funcArrayType(isAssignUse());
 		if (myFV().inRecord() && inFunction()) {
-			return myRecordFV().genRecordUse_var_CAD(p, getFQName(), type);
+			return getFQName().genRecordUse_var_CAD(p, myRecordFV(), type);
 		} else {
-			return myFV().genUse_var_CAD(p, getFQName().getLastFArraySubscripts(), type);
+			return myFV().genUse_var_CAD(p, getFQName().getFArraySubscripts(), type);
 		}
 	}
 	
 	syn String FIdUse.toString_der_CAD(Printer p) {
 		String type = myFV().funcArrayType(isAssignUse());
 		if (myFV().inRecord() && inFunction()) {
-			return myRecordFV().genRecordUse_der_CAD(p, getFQName(), type);
+			return getFQName().genRecordUse_der_CAD(p, myRecordFV(), type);
 		} else {
-			return myFV().genUse_der_CAD(p, getFQName().getLastFArraySubscripts(), type);
+			return myFV().genUse_der_CAD(p, getFQName().getFArraySubscripts(), type);
 		}
 	}
 	
@@ -175,8 +177,16 @@ aspect CADCodeGen {
 		return os.toString();
 	}
 	
-	public void FSubscript.prettyPrint_CAD(Printer p, PrintStream str, String indent){
-		this.getChild(0).prettyPrint_C(p,str,indent);
+	public void FSubscript.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		throw new UnsupportedOperationException();
+	}
+	
+	public void FExpSubscript.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		getFExp().prettyPrint_C(p,str,indent);
+	}
+	
+	public void FIntegerSubscript.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		str.print(getValue());
 	}
 	
 	public String FArraySubscripts.genFunctionArrayUse_der_CAD(Printer p, String name, String type) {

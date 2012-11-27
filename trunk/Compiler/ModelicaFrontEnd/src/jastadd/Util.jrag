@@ -817,7 +817,8 @@ aspect Slices {
     /**
      * \brief Check if this is a slice operation.
      */
-    syn boolean FQName.isSlice() {
+    syn boolean FQName.isSlice() = false;
+    eq FQNameFull.isSlice() {
     	int n = getNumFQNamePart() - 1;
     	for (int i = 0; i < n; i++) {
     		FQNamePart part = getFQNamePart(i);
@@ -854,7 +855,8 @@ aspect Slices {
     /**
      * \brief Check if this is a slice operation.
      */
-    syn boolean FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
+    // TODO: change order
+    syn boolean FIdUseExp.isSlice() = getFIdUse().isSlice() && isArray();
     
 }
 
@@ -882,10 +884,17 @@ aspect FlatNames {
         }
     }
     
-    syn FQNamePart FQName.lastFQNamePart() = getFQNamePart(getNumFQNamePart()-1);
+    syn FQNamePart FQNameFull.lastFQNamePart() = getFQNamePart(getNumFQNamePart()-1);
+    
+    syn boolean FQNamePart.hasFArraySubscripts()          = false;
+    eq FQNamePartArray.hasFArraySubscripts()              = true;
+    syn FArraySubscripts FQNamePart.getFArraySubscripts() = null;
+    // FQNamePartArray.getFArraySubscripts() declared from .ast file
 
-    syn boolean FQName.hasFArraySubscripts() = lastFQNamePart().hasFArraySubscripts();
-    syn FArraySubscripts FQName.getFArraySubscripts() = lastFQNamePart().getFArraySubscripts();
+    syn boolean FQName.hasFArraySubscripts()          = false;
+    syn FArraySubscripts FQName.getFArraySubscripts() = null;
+    eq FQNameFull.hasFArraySubscripts()               = lastFQNamePart().hasFArraySubscripts();
+    eq FQNameFull.getFArraySubscripts()               = lastFQNamePart().getFArraySubscripts();
 
     syn boolean FIdUse.hasFArraySubscripts() = 
         getFQName().hasFArraySubscripts();
@@ -901,92 +910,55 @@ aspect FlatNames {
         getFIdUse().hasFArraySubscripts();
     syn FArraySubscripts FIdUseExp.getFArraySubscripts() = 
         getFIdUse().getFArraySubscripts();
-
-    /**
-     * \brief Get the array subscripts of the last name part.
-     */
-    syn FArraySubscripts FQName.getLastFArraySubscripts() =
-        hasFArraySubscripts() ? lastFQNamePart().getFArraySubscripts() : null;
     
-    /**
-     * \brief Set the array subscripts of the last name part.
-     */
-    public void FQName.setLastFArraySubscripts(FArraySubscripts fas) {
-        Opt o = (fas == null) ? new Opt() : new Opt(fas);
-        lastFQNamePart().setFArraySubscriptsOpt(o);
-    }
-    
-    syn lazy FQName InstNode.getFQNamePrefix() = new FQName(retrieveFQName());
+    syn lazy FQName InstNode.getFQNamePrefix() = retrieveFQName();
     
     syn lazy FQName InstNode.getFQName() = getFQNamePrefix();
-    eq InstClassDecl.getFQName()         = new FQName();
+    eq InstClassDecl.getFQName()         = new FQNameEmpty();
+    eq InstComponentDecl.getFQName()     = appendMyName(retrieveFQName());
     
-    eq InstComponentDecl.getFQName() {
-        FQName myName = new FQName(retrieveFQName());
-        Opt array_subscr = new Opt();
-        if (isAssignable() && isArrayDecl()) 
-            array_subscr.setChild(size().flattenFArraySubscripts(myName), 0);
-        myName.addFQNamePart(new FQNamePart(name(), array_subscr));
-        return myName;
-    }
-    
-    eq InstArrayComponentDecl.getFQName() {
-        FQName myName = new FQName(retrieveFQName());
-        if (!myName.hasFArraySubscripts())
-        	myName.setLastFArraySubscripts(new FArraySubscripts());
-        myName.getFArraySubscripts().addFSubscript(new FExpSubscript(getIndex()));
-        return myName;
-    }
-    
-    eq InstEnumLiteral.getFQName() {
-    	FQName name = new FQName(retrieveFQName());
-    	name.addFQNamePart(name());
-    	return name;
-    }
+    syn FQName InstComponentDecl.appendMyName(FQName prefix) = 
+    	(isAssignable() && isArrayDecl()) ? 
+    			prefix.copyAndAppend(name(), size().flattenFArraySubscripts(prefix)) :
+    			prefix.copyAndAppend(name());
+    eq InstArrayComponentDecl.appendMyName(FQName prefix)    = 
+    	prefix.copyAndAddSubscript(new FIntegerSubscript(getIndex()));
+    eq InstEnumLiteral.appendMyName(FQName prefix)           = prefix.copyAndAppend(name());
     
     inh lazy FQName InstNode.retrieveFQName();
     eq InstComponentDecl.getChild().retrieveFQName()                      = getFQName();
     eq InstComponentDecl.getInstModification().retrieveFQName()           = retrieveFQName();
     eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
     eq InstReplacingPrimitive.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
-    eq InstReplacingShortClassDecl.getChild().retrieveFQName()            = isFunction() ? new FQName() : retrieveFQName();
-    eq InstClassDecl.getChild().retrieveFQName()                          = new FQName();
-    eq InstForIndex.getChild().retrieveFQName()                           = new FQName();
-    eq InstEnumClassDecl.getChild().retrieveFQName()                      = new FQName(qualifiedName());
-    
-    eq InstRoot.getChild().retrieveFQName() = new FQName();
-    eq SourceRoot.getProgram().retrieveFQName() = new FQName();
-
-    /**
-     * \brief Get a string representation of a prefix of this name.
-     * 
-     * @param n  the number of parts to include. If <code>n <= 0</code>, then 
-     *           all but the last <code>-n</code> parts are included.
-     */
-    public String FQName.prefixName(int n) {
-    	return prefixName(n, false, false);
-    }
+    eq InstReplacingShortClassDecl.getChild().retrieveFQName()            = isFunction() ? new FQNameEmpty() : retrieveFQName();
+    eq InstClassDecl.getChild().retrieveFQName()                          = new FQNameEmpty();
+    eq InstForIndex.getChild().retrieveFQName()                           = new FQNameEmpty();
+    eq InstEnumClassDecl.getChild().retrieveFQName()                      = new FQNameString(qualifiedName());
+    eq InstRoot.getChild().retrieveFQName()                               = new FQNameEmpty();
+    eq SourceRoot.getProgram().retrieveFQName()                           = new FQNameEmpty();
 
     /**
      * \brief Get a string representation of a prefix of this name.
      * 
      * @param n     the number of parts to include. If <code>n <= 0</code>, then 
      *              all but the last <code>-n</code> parts are included.
-     * @param der   if <code>true</code>, generate a derivative name (e.g. "a.der(b)")
+     * @param op    if not <code>null</code>, generate a name with an operator applied (e.g. "a.der(b)")
      * @param eval  if <code>true</code>, then evaluate all expressions first
      */
-    public String FQName.prefixName(int n, boolean der, boolean eval) {
+    private String FQNameFull.prefixName(int n, String op, boolean eval) {
     	int tot = getNumFQNamePart();
     	if (n <= 0)
     		n = tot + n;
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < n; i++) {
             FQNamePart part = getFQNamePart(i);
-            boolean last = i == n - 1; 
-            if (last && der)
-            	str.append("der(");
+            boolean last = i == n - 1;
+            if (last && op != null) {
+            	str.append(op);
+            	str.append("(");
+            }
             str.append(part.getName());
-            if ((!last || der || isScalarized()) && part.hasFArraySubscripts()) {
+            if ((!last || op != null || isScalarized()) && part.hasFArraySubscripts()) {
             	FArraySubscripts fas = part.getFArraySubscripts();
             	if (eval)
             		fas = fas.createEvaluated();
@@ -995,9 +967,59 @@ aspect FlatNames {
             if (!last) 
                 str.append(".");
         }
-        if (der)
+        if (op != null)
         	str.append(")");
         return str.toString();
+    }
+    
+    /**
+     * Gets a specific name part. Consides FQNameString as always having a single part.
+     */
+    syn String FQName.partName(int i) {
+    	throw new UnsupportedOperationException();
+    }
+    eq FQNameString.partName(int i) = (i == 0) ? getName() : super.partName(i);
+    eq FQNameFull.partName(int i)   = getFQNamePart(i).getName();
+    
+    /**
+     * Gets the last name part. Consides FQNameString as always having a single part.
+     */
+    syn String FQName.lastPartName() = partName(numParts() - 1);
+
+    /**
+     * Gets the last name part. Considers FQNameString as having one part for each '.'-separated substring.
+     */
+    syn String FQName.lastActualPartName() = lastPartName();
+    eq FQNameString.lastActualPartName()   = getName().substring(getName().lastIndexOf('.') + 1);
+
+    /**
+     * The number of name parts. Will always report 1 for FQNameString.
+     */
+    syn int FQName.numParts()  = 0;
+    eq FQNameString.numParts() = 1;
+    eq FQNameFull.numParts()   = getNumFQNamePart();
+    
+    /**
+     * The number of dots in the name.
+     */
+    syn int FQName.numDots() = 0;
+    eq FQNameFull.numDots()  = getNumFQNamePart() - 1;
+    eq FQNameString.numDots() {
+    	String name = getName();
+    	int n = 0;
+    	for (int i = name.indexOf('.'); i >= 0; n++, i = name.indexOf('.', i + 1));
+    	return n;
+    }
+    
+    syn int FQName.numMatchingParts(FQNameFull fqn)  = 0;
+    eq FQNameString.numMatchingParts(FQNameFull fqn) = 
+    	fqn.getFQNamePart(0).getName().equals(getName()) ? 1 : 0;
+    eq FQNameFull.numMatchingParts(FQNameFull fqn) {
+    	int n = getNumFQNamePart();
+    	for (int i = 0; i < n; i++)
+    		if (!getFQNamePart(i).getName().equals(fqn.getFQNamePart(i).getName()))
+    			return i;
+    	return n;
     }
     
     public FArraySubscripts FArraySubscripts.createEvaluated() {
@@ -1013,21 +1035,42 @@ aspect FlatNames {
     
     public FSubscript FExpSubscript.createEvaluated() {
     	try {
-    		return new FExpSubscript(getFExp().ceval().buildLiteral());
+    		return getFExp().ceval().createFSubscript();
     	} catch (ConstantEvaluationException e) {
     		return fullCopy();
     	}
     }
+    
+    syn FQName FAbstractVariable.getFQName() = null;
 
-    syn lazy String FQName.name()            = prefixName(0);
-    syn lazy String FQName.resolvedName()    = prefixName(0, false, true);
-    syn lazy String FQName.derName()         = prefixName(0, true, false);
-    syn lazy String FQName.resolvedDerName() = prefixName(0, true, true);
+    syn String FQName.name()         = "";
+    syn String FQName.resolvedName() = "";
+    syn String FQName.derName()      = "";
+    syn String FQName.preName()      = "";
+    
+    eq FQNameString.name()                 = getName();
+    eq FQNameString.resolvedName()         = getName();
+    syn lazy String FQNameString.derName() = applyOpToName(getName(), DER);
+    syn lazy String FQNameString.preName() = applyOpToName(getName(), PRE);
+    
+    syn lazy String FQNameFull.name()         = prefixName(0, null, false);
+    syn lazy String FQNameFull.resolvedName() = prefixName(0, null, true);
+    syn lazy String FQNameFull.derName()      = prefixName(0, DER, false);
+    syn lazy String FQNameFull.preName()      = prefixName(0, PRE, false);
+    
+    protected static final String FQName.DER = "der";
+    protected static final String FQName.PRE = "pre";
+    
+    private String FQNameString.applyOpToName(String name, String op) {
+    	int p = name.lastIndexOf('.') + 1;
+    	return name.substring(0, p) + op + '(' + name.substring(p) + ')';
+    }
 
-    syn String FQName.scalarName() {
+    syn String FQName.scalarName() = name();
+    eq FQNameFull.scalarName() {
     	boolean scalar = scalarized;
     	scalarized = true;
-    	String res = prefixName(0, false, true);
+    	String res = prefixName(0, null, true);
     	scalarized = scalar;
     	return res;
     }
@@ -1082,43 +1125,25 @@ aspect FlatNames {
     syn String FIdUse.hDerName(int derOrder)    = getFQNameNoTransform().hDerName(derOrder);
     syn String FIdUseExp.hDerName(int derOrder) = getFIdUseNoTransform().hDerName(derOrder);
 
-    eq FPreRealVariable.name()  = getFQNameNoTransform().preName();
+    eq FPreRealVariable.name()     = getFQNameNoTransform().preName();
     eq FPreIntegerVariable.name()  = getFQNameNoTransform().preName();	
     eq FPreBooleanVariable.name()  = getFQNameNoTransform().preName();
-    eq FPreStringVariable.name()  = getFQNameNoTransform().preName();
-    eq FPreEnumVariable.name()  = getFQNameNoTransform().preName();
+    eq FPreStringVariable.name()   = getFQNameNoTransform().preName();
+    eq FPreEnumVariable.name()     = getFQNameNoTransform().preName();
     syn String FIdUse.preName()    = getFQNameNoTransform().preName();
     syn String FPreExp.preName() {
      	return ((FIdUseExp)getFExpNoTransform()).getFIdUse().preName();
 	}
     syn String FIdUse.scalarName()    = getFQName().scalarName();
     syn String FIdUseExp.scalarName() = getFIdUse().scalarName();
-	
-    syn lazy String FQName.preName() {
-        StringBuilder str = new StringBuilder();
-        for (int i=0;i<getNumFQNamePart();i++) {
-            if (i==getNumFQNamePart()-1) {
-                str.append("pre(");
-            }
-            str.append(getFQNamePart(i).getName());
-            //if (i<getNumFQNamePart()-1 || isScalarized()) {
-                if (getFQNamePart(i).hasFArraySubscripts()) {
-                    str.append(getFQNamePart(i).getFArraySubscripts().prettyPrint(""));
-                }
-                if (i<getNumFQNamePart()-1) {
-                    str.append(".");
-                }
-            //}
-        }
-        str.append(")");
-        return str.toString();
-    }
 
     
     //syn String FIdUse.derName2() = getFQName().derName2();
     //syn String FIdUseExp.derName2() = getFIdUse().derName2();
     
-    syn lazy String FQName.nameUnderscore() {
+    syn String FQName.nameUnderscore()            = "";
+    syn lazy String FQNameString.nameUnderscore() = getName().replaceAll("]", "").replaceAll("[\\[,.]", "_");
+    syn lazy String FQNameFull.nameUnderscore() {
         StringBuilder str = new StringBuilder();
         int i = 0;
         int last = getNumFQNamePart() - 1;
@@ -1129,7 +1154,7 @@ aspect FlatNames {
         	str.append(part.getName());
         	if ((i < last || isScalarized()) && part.hasFArraySubscripts()) {
         		for (FSubscript fs : part.getFArraySubscripts().getFSubscripts()) {
-                    str.append("_");
+                    str.append(sep);
                     str.append(fs.prettyPrint(""));
         		}
         	}
@@ -1166,22 +1191,18 @@ aspect FlatNames {
     syn String FQName.funcNameUnderscore(String suffix) = "func_" + nameUnderscore() + "_" + suffix;
     syn String FIdUse.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
 
-    inh int FVariable.variableIndex();
-//    eq FClass.getFVariable(int i).variableIndex()     = i;
-    eq FClass.getFVariable(int i).variableIndex() {
-    	FVariable fv = getFVariable(i);
-    	if (!fv.isPreVariable()) {
-    		return i;
-    	} else {
-    		// Pre variables should have the same variable index as
-    		// their non-pre counterparts.
-    		return ((FVariable)lookupFV(fv.getFQName(),false)).variableIndex();
-    	}
-    }
-    eq FClass.getAliasVariable(int i).variableIndex() = getNumFVariable() + i;
-    eq FForIndex.getFVariable().variableIndex()       = forIndexIndex();
-    eq FRecordDecl.getFVariable().variableIndex()     = -1;
-    eq FEnumDecl.getChild().variableIndex()     = -1;
+    syn int FAbstractVariable.variableIndex() = findVariableIndex();
+    eq FPreBooleanVariable.variableIndex()    = myNonPreVariable().variableIndex();
+    eq FPreIntegerVariable.variableIndex()    = myNonPreVariable().variableIndex();
+    eq FPreRealVariable.variableIndex()       = myNonPreVariable().variableIndex();
+    eq FPreStringVariable.variableIndex()     = myNonPreVariable().variableIndex();
+    
+    inh int FAbstractVariable.findVariableIndex();
+    eq FClass.getFVariable(int i).findVariableIndex()     = i;
+    eq FClass.getAliasVariable(int i).findVariableIndex() = getNumFVariable() + i;
+    eq FForIndex.getFVariable().findVariableIndex()       = forIndexIndex();
+    eq FRecordDecl.getFVariable().findVariableIndex()     = -1;
+    eq FEnumDecl.getChild().findVariableIndex()           = -1;
     
     inh lazy int FForIndex.forIndexIndex();
     eq FClass.getChild().forIndexIndex() = nextForIndexIndex++;
@@ -1191,119 +1212,470 @@ aspect FlatNames {
 
     inh int FRecordDecl.recordIndex();
     eq FClass.getFRecordDecl(int i).recordIndex() = i;
+    
+    /**
+     * Check if this is a simple name, i.e. just a string or empty name.
+     */
+    syn boolean FQName.isSimple() = true;
+    eq FQNameFull.isSimple()      = false;
 
+    /**
+     * Check if this name has any expression or colon array subscripts. 
+     */
+    syn boolean FQName.hasNonLiteralSubscripts() = false;
+    eq FQNameFull.hasNonLiteralSubscripts() {
+    	for (FQNamePart part : getFQNameParts())
+    		if (part.hasNonLiteralSubscripts())
+    			return true;
+    	return false;
+    }
+
+    /**
+     * Check if this name part has any expression or colon array subscripts.
+     */
+    syn boolean FQNamePart.hasNonLiteralSubscripts() = false;
+    eq FQNamePartArray.hasNonLiteralSubscripts()     = getFArraySubscripts().hasNonLiteralSubscripts();
+    
+    /**
+     * Check if this array subscript list has any expression or colon subscripts.
+     */
+    syn boolean FArraySubscripts.hasNonLiteralSubscripts() {
+    	for (FSubscript s : getFSubscripts())
+    		if (s.hasNonLiteralSubscripts())
+    			return true;
+    	return false;
+    }
+
+    /**
+     * Check if this array subscript is an expression or colon. 
+     */
+    syn boolean FSubscript.hasNonLiteralSubscripts() = false;
+    eq FExpSubscript.hasNonLiteralSubscripts()       = true;
+    eq FColonSubscript.hasNonLiteralSubscripts()     = true;
+   
     /**
      * Append a new name part.
      */
     public FQName FQName.append(String name) {
+    	throw new UnsupportedOperationException();
+    }
+    
+    public FQNameString FQNameString.append(String name) {
+        setName(getName() + '.' + name);
+        return this;
+    }
+    
+    public FQNameFull FQNameFull.append(String name) {
         addFQNamePart(name);
         return this;
     }
 
     /**
      * Copy and append all name parts from <code>fqn</code>.
+     * 
+     * @return  <code>this</code>, for convenience
      */
-    public FQName FQName.append(FQName fqn) {
-        for (FQNamePart part : fqn.getFQNameParts())
-            addFQNamePart((FQNamePart) part.fullCopy());
-        return this;
+    public FQNameFull FQNameFull.append(FQName fqn) {
+        return fqn.appendTo(this);
     }
  
+    protected abstract FQNameFull FQName.appendTo(FQNameFull fqn);
+    
+    protected FQNameFull FQNameEmpty.appendTo(FQNameFull fqn) {
+        return fqn;
+    }
+    
+    protected FQNameFull FQNameString.appendTo(FQNameFull fqn) {
+        return fqn.append(getName());
+    }
+    
+    protected FQNameFull FQNameFull.appendTo(FQNameFull fqn) {
+        return fqn.appendFull(this);
+    }
+    
+    protected FQNameFull FQNameFull.appendFull(FQNameFull fqn) {
+        for (FQNamePart part : fqn.getFQNameParts())
+            addFQNamePart(part.fullCopy());
+        return this;
+    }
+    
     /**
-     * Create a copy of the name, with a String appended.
+     * Create a copy of the name, with a new name part appended.
      */
-    public FQName FQName.copyAndAppend(String name) {
+    public abstract FQName FQName.copyAndAppend(String name);
+    
+    public FQNameString FQNameEmpty.copyAndAppend(String name) {
+        return new FQNameString(name);
+    }
+    
+    public FQNameString FQNameString.copyAndAppend(String name) {
+        return new FQNameString(getName() + '.' + name);
+    }
+    
+    public FQNameFull FQNameFull.copyAndAppend(String name) {
         return fullCopy().append(name);
+    }
+    
+    /**
+     * Create a copy of the name, with a new name part appended.
+     * 
+     * Passing <code>null</code> as <code>fas</code> is supported, and equivalent 
+     * to using {@link #copyAndAppend(String)}.
+     */
+	public FQName FQName.copyAndAppend(String name, FArraySubscripts fas) {
+    	if (fas == null)
+    		return copyAndAppend(name);
+    	FQNameFull res = copyAsFQNameFull();
+    	res.addFQNamePart(new FQNamePartArray(name, fas));
+    	return res;
+    }
+    
+    /**
+     * Create a copy of the name as an FQNameFull.
+     */
+    public abstract FQNameFull FQName.copyAsFQNameFull();
+    
+    public FQNameFull FQNameEmpty.copyAsFQNameFull() {
+        return new FQNameFull();
+    }
+    
+    public FQNameFull FQNameString.copyAsFQNameFull() {
+        return new FQNameFull(getName());
+    }
+    
+    public FQNameFull FQNameFull.copyAsFQNameFull() {
+        return fullCopy();
+    }
+    
+    /**
+     * Return this name as an FQNameFull. 
+     * 
+     * Creates a copy only if needed.
+     */
+    public FQNameFull FQName.asFQNameFull() {
+    	return copyAsFQNameFull();
+    }
+    
+    public FQNameFull FQNameFull.asFQNameFull() {
+        return this;
+    }
+    
+    /**
+     * Create a copy of the name, with a new name part prepended.
+     */
+    public abstract FQName FQName.copyAndPrepend(String name);
+    
+    public FQNameString FQNameEmpty.copyAndPrepend(String name) {
+        return new FQNameString(name);
+    }
+    
+    public FQNameString FQNameString.copyAndPrepend(String name) {
+        return new FQNameString(name + '.' + getName());
+    }
+    
+    public FQNameFull FQNameFull.copyAndPrepend(String name) {
+    	FQNameFull res = new FQNameFull(name);
+    	int n = res.getNumFQNamePart();
+    	for (int i = getNumFQNamePart() - 1; i >= 0; i--)
+    		res.setFQNamePart(getFQNamePart(i), i + n);
+        return res;
+    }
+    
+    public FQNameFullScalarize FQNameFullScalarize.copyAndPrepend(String name) {
+    	return new FQNameFullScalarize(super.copyAndPrepend(name).getFQNamePartList());
+     }
+   
+    /**
+     * Create a copy of the name, with a prefix added to the first name part.
+     */
+    public abstract FQName FQName.copyAndAddPrefix(String prefix);
+    
+    public FQNameString FQNameEmpty.copyAndAddPrefix(String prefix) {
+        throw new UnsupportedOperationException();
+    }
+    
+    public FQNameString FQNameString.copyAndAddPrefix(String prefix) {
+        return new FQNameString(prefix + getName());
+    }
+    
+    public FQNameFull FQNameFull.copyAndAddPrefix(String prefix) {
+    	FQNameFull res = fullCopy();
+    	res.getFQNamePart(0).setName(prefix + res.getFQNamePart(0).getName());
+        return res;
     }
     
     /**
      * Create a copy of the name, with another FQName appended.
      */
-    public FQName FQName.copyAndAppend(FQName name) {
+    public abstract FQName FQName.copyAndAppend(FQName name);
+    
+    public FQName FQNameEmpty.copyAndAppend(FQName name) {
+        return name.fullCopy();
+    }
+    
+    public FQName FQNameString.copyAndAppend(FQName name) {
+        return name.copyAndPrepend(getName());
+    }
+    
+    public FQName FQNameFull.copyAndAppend(FQName name) {
         return fullCopy().append(name);
     }
     
     /**
+     * Create a copy of the name, with an FSubscript added to the last part.
+     */
+    public abstract FQName FQName.copyAndAddSubscript(FSubscript s);
+    
+    public FQName FQNameEmpty.copyAndAddSubscript(FSubscript s) {
+    	throw new UnsupportedOperationException();
+    }
+    
+    public FQName FQNameString.copyAndAddSubscript(FSubscript s) {
+        return new FQNameFull(getName()).addSubscript(s);
+    }
+    
+    public FQName FQNameFull.copyAndAddSubscript(FSubscript s) {
+        return fullCopy().addSubscript(s);
+    }
+
+    /**
+     * Add new FSubscript to the last name part.
+     */
+    public FQName FQNameFull.addSubscript(FSubscript s) {
+    	int i = getNumFQNamePart() - 1;
+    	setFQNamePart(getFQNamePart(i).addSubscript(s), i);
+    	return this;
+    }
+    
+    /**
+     * Add an array subscript to this name part, if necessary creating a new name part.
+     * 
+     * This name part might or might not be altered - replace it with the return value.
+     */
+    public FQNamePartArray FQNamePart.addSubscript(FSubscript s) {
+    	return new FQNamePartArray(getName(), new FArraySubscripts(new List(s)));
+    }
+   
+    public FQNamePartArray FQNamePartArray.addSubscript(FSubscript s) {
+    	getFArraySubscripts().addFSubscript(s);
+    	return this;
+    }
+    
+    /**
+     * Create a copy of the name, with an FArraySubscripts added to the last part.
+     * 
+     * Any previous FArraySubscripts is removed. Passing null as fas is equivalent 
+     * to calling {@link #removeFArraySubscripts()}.
+     */
+    public abstract FQName FQName.copyAndAddFas(FArraySubscripts fas);
+    
+    public FQName FQNameEmpty.copyAndAddFas(FArraySubscripts fas) {
+    	if (fas == null)
+    		return fullCopy();
+    	throw new UnsupportedOperationException();
+    }
+    
+    public FQName FQNameString.copyAndAddFas(FArraySubscripts fas) {
+    	if (fas == null)
+    		return fullCopy();
+        return new FQNameFull(getName()).addFArraySubscripts(fas);
+    }
+    
+    public FQName FQNameFull.copyAndAddFas(FArraySubscripts fas) {
+        return fullCopy().addFArraySubscripts(fas);
+    }
+    
+    /**
+     * Set the FArraySubscripts of the last FQNamePart.
+     * 
+     * Passing null as fas is equivalent to calling {@link #removeFArraySubscripts()}.
+     * 
+     * @return  <code>this</code>, for convenience
+     */
+    public FQNameFull FQNameFull.addFArraySubscripts(FArraySubscripts fas) {
+    	if (fas == null)
+    		return removeFArraySubscripts();
+    	int i = getNumFQNamePart() - 1;
+    	setFQNamePart(new FQNamePartArray(getFQNamePart(i).getName(), fas), i);
+        return this;
+    }
+    
+    /**
+     * Remove the FArraySubscripts of the last FQNamePart, if any.
+     * 
+     * @return  <code>this</code>, for convenience
+     */
+    public FQName FQName.removeFArraySubscripts() {
+        return this;
+    }
+   
+    public FQNameFull FQNameFull.removeFArraySubscripts() {
+    	int i = getNumFQNamePart() - 1;
+    	if (getFQNamePart(i).hasFArraySubscripts())
+    		setFQNamePart(new FQNamePart(getFQNamePart(i).getName()), i);
+        return this;
+    }
+   
+    /**
      * Create a copy of the name excluding the first part.
      */
     public FQName FQName.copySuffix() {
-        return copySuffix(getNumFQNamePart() - 1);
+        return copyPart(1, numDots());
     }
     
     /**
      * Create a copy of the last part of this name.
      */
     public FQName FQName.copyLastSuffix() {
-        return copySuffix(1);
+    	int i = numDots();
+        return copyPart(i, i);
     }
     
     /**
      * Create a copy of the last <code>n</code> parts of this name.
      */
     public FQName FQName.copySuffix(int n) {
-        FQName res = new FQName();
-        int m = getNumFQNamePart();
-        for (int i = m - n; i < m; i++)
-            res.addFQNamePart(getFQNamePart(i).fullCopy());
-        return res;
+    	int m = numDots();
+        return copyPart(m - n + 1, m);
     }
 
     /**
      * Create a copy of the name excluding the last part.
      */
     public FQName FQName.copyPrefix() {
-    	return copyPrefix(getNumFQNamePart() - 1);
+    	return copyPart(0, numDots() - 1);
     }
     
     /**
      * Create a copy of the first part of this name.
      */
     public FQName FQName.copyFirstPrefix() {
-    	return copyPrefix(1);
+    	return copyPart(0, 0);
     }
 
     /**
      * Create a copy of the first <code>n</code> parts of this name.
      */
     public FQName FQName.copyPrefix(int n) {
-        FQName res = new FQName();
-        for (int i = 0; i < n; i++)
+    	return copyPart(0, n - 1);
+    }
+    
+    /**
+     * Create a copy of parts <code>first</code> to <code>last</code> of this name (zero-based).
+     */
+    public abstract FQName FQName.copyPart(int first, int last);
+    
+    public FQName FQNameEmpty.copyPart(int first, int last) {
+    	throw new UnsupportedOperationException();
+    }
+    
+    public FQName FQNameString.copyPart(int first, int last) {
+    	if (last < first)
+    		return new FQNameEmpty();
+    	int fp = -1;
+    	String name = getName();
+    	for (int i = 0; i < first && fp >= 0; i++)
+    		fp = name.indexOf('.', fp + 1);
+    	if (fp < 0 && first > 0)
+    		throw new ArrayIndexOutOfBoundsException(first);
+    	int lp = (fp < 0) ? 0 : fp;
+    	for (int i = first; i < last && lp >= 0; i++)
+    		lp = name.indexOf('.', lp + 1);
+    	if (lp < 0 && last > 0)
+    		throw new ArrayIndexOutOfBoundsException(first);
+    	lp = name.indexOf('.', lp + 1);
+    	return new FQNameString((lp < 0) ? name.substring(fp + 1) : name.substring(fp + 1, lp));
+    }
+    
+    public FQName FQNameFull.copyPart(int first, int last) {
+    	if (last < first)
+    		return new FQNameEmpty();
+    	if (last == first)
+    		return getFQNamePart(first).createFQName();
+    	FQNameFull res = new FQNameFull();
+        for (int i = first; i <= last; i++)
             res.addFQNamePart(getFQNamePart(i).fullCopy());
-        res.scalarized = scalarized;
         return res;
+    }
+
+    public FQName FQNameFullScalarize.copyPart(int first, int last) {
+    	FQName res = super.copyPart(first, last);
+    	if (res instanceof FQNameFull)
+    		return new FQNameFullScalarize(((FQNameFull) res).getFQNamePartList());
+    	else 
+    		return res;
+    }
+
+    /**
+     * Create an FQName containing only a copy of this part.
+     */
+    public FQName FQNamePart.createFQName() {
+    	return new FQNameString(getName());
+    }
+    
+    public FQName FQNamePartArray.createFQName() {
+    	return new FQNameFull(new List(fullCopy()));
     }
     
     /**
      * \brief Create a copy of this name without array subscripts.
      */
     public FQName FQName.copyWithoutSubscripts() {
-        FQName res = new FQName();
+        return fullCopy();
+    }
+    
+    public FQName FQNameFull.copyWithoutSubscripts() {
+        FQNameFull res = new FQNameFull();
         for (FQNamePart part : getFQNameParts())
         	res.addFQNamePart(part.getName());
         return res;
     }
     
     /**
-     * Create a copy of this name with non-literal array subscripts replaced 
-     * with indices from <code>i</code>.
+     * Create a copy of this name with all array subscripts replaced with indices 
+     * from <code>i</code>.
      * 
      * The number of dimensions of <code>i</code> must be the same as the number 
      * of non-literal subscripts. The subscripts to be replaced can be spread out 
      * over several name parts.
      */
     public FQName FQName.copyReplacingSubscripts(Index i) {
-        FQName res = new FQName();
+        return fullCopy();
+    }
+    
+    public FQName FQNameFull.copyReplacingSubscripts(Index i) {
+        StringBuilder buf = new StringBuilder();
         int j = 0;
         for (FQNamePart part : getFQNameParts()) {
-        	FQNamePart newPart = new FQNamePart(part.getName(), new Opt());
-        	if (part.hasFArraySubscripts()) {
-        		int n = part.getFArraySubscripts().getNumFSubscript();
-        		newPart.setFArraySubscripts(new FArraySubscripts(i, j, n));
-        		j += n;
-        	}
-        	res.addFQNamePart(newPart);
+        	j = part.appendWithReplacedSubscripts(buf, i, j);
+        	buf.append('.');
         }
-        return res;
+        buf.deleteCharAt(buf.length() - 1);
+        return new FQNameString(buf.toString());
+    }
+    
+    /**
+     * Append a string representation of this name part to <code>buf</code>, but with 
+     * all array subscripts replaced with indices from <code>i</code>.
+     * 
+     * The first index in <code>i</code> to use should be given in <code>j</code>, and 
+     * the new value for <code>j</code> is returned.
+     */
+    public int FQNamePart.appendWithReplacedSubscripts(StringBuilder buf, Index i, int j) {
+    	buf.append(getName());
+    	return j;
+    }
+    
+    public int FQNamePartArray.appendWithReplacedSubscripts(StringBuilder buf, Index i, int j) {
+    	buf.append(getName());
+    	buf.append('[');
+    	int n = j + getFArraySubscripts().getNumFSubscript();
+    	for (int k = j; k < n; k++) {
+    		buf.append(i.get(k));
+    		buf.append(',');
+    	}
+    	buf.setCharAt(buf.length() - 1, ']');
+    	return n;
     }
     
     /**
@@ -1419,10 +1791,10 @@ aspect FlatNames {
      * It is assumed that this name is from a variable declaration.
      */
     public FQName FQName.createUseFQName() {
-    	FQName name = fullCopy();
     	if (!isScalarized() && ndims() > 0)
-    		name.setLastFArraySubscripts(size().createExpandedFArraySubscripts());
-        return name; 
+    		return copyAndAddFas(size().createExpandedFArraySubscripts());
+    	else
+    		return fullCopy();
     }
     
     /**
@@ -1447,10 +1819,7 @@ aspect FlatNames {
      * @param fas  array subscripts to use for the last name part.
      */
     public FIdUse FQName.createFIdUse(FArraySubscripts fas) {
-    	FQName fqn = fullCopy();
-    	if (fas != null)
-    		fqn.lastFQNamePart().setFArraySubscripts(fas);
-        return new FIdUse(fqn); 
+        return new FIdUse(copyAndAddFas(fas)); 
     }
     
     syn String FType.name();
@@ -1798,28 +2167,28 @@ aspect FlatFunctionUtils {
      eq FFunctionDecl.getChild().tempVarName() = nextTempVarName();
      
      public String FClass.nextTempVarName() {
-         Map<String,FVariable> vars = fullyQualifiedVariablesMap();
+    	 FlatVariableMap vars = variablesMap();
          String name;
          do {
              name = "temp_" + nextTempVarIndex++;
-         } while (vars.get(name) != null);
+         } while (vars.lookup(name) != null);
          return name;
      }
      public String FFunctionDecl.nextTempVarName() {
-         Map<String,FFunctionVariable> vars = fullyQualifiedVariablesMap();
+    	 FlatVariableMap vars = variablesMap();
          String name;
          do {
              name = "temp_" + nextTempVarIndex++;
-         } while (vars.get(name) != null);
+         } while (vars.lookup(name) != null);
          return name;
      }
      public String FClass.nextTempVarName(FFunctionDecl func) {
-         Map<String,FVariable> vars1 = fullyQualifiedVariablesMap();
-         Map<String,FFunctionVariable> vars2 = func.fullyQualifiedVariablesMap();
+    	 FlatVariableMap vars1 = variablesMap();
+    	 FlatVariableMap vars2 = func.variablesMap();
          String name;
          do {
              name = "temp_" + nextTempVarIndex++;
-         } while (vars1.get(name) != null || vars2.get(name) != null);
+         } while (vars1.lookup(name) != null || vars2.lookup(name) != null);
          return name;
      }
      
@@ -2325,6 +2694,7 @@ aspect Sorting {
 aspect GeneralHelpers {
 	
 	abstract public FExp FExp.fullCopy();
+	abstract public FQName FQName.fullCopy();
 	abstract public InstAccess InstAccess.fullCopy();
 	abstract public InstNamedAccess InstNamedAccess.fullCopy();
 	abstract public InstScalarAccess InstScalarAccess.fullCopy();
@@ -2336,6 +2706,7 @@ aspect GeneralHelpers {
 	abstract public FVisibilityType FVisibilityType.fullCopy();
 	abstract public FTypePrefixInputOutput FTypePrefixInputOutput.fullCopy();
 	abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
+	abstract public FSubscript FSubscript.fullCopy();
 	
 	abstract public FExp FExp.copy();
 	abstract public InstAccess InstAccess.copy();

@@ -148,7 +148,9 @@ public class TestAnnotationizer {
 	}
 
 	private static String composeModelName(String extracted, String entered) {
-		if (entered.contains("."))
+		if (entered == null)
+			return extracted;
+		else if (entered.contains("."))
 			return entered;
 		else
 			return extracted + "." + entered;

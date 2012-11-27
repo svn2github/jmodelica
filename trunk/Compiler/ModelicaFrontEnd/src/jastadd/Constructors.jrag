@@ -29,7 +29,7 @@ aspect Constructors {
 	*/
 	
 	/**
-	 * \brief Construct a List containing the same nodes as the given Collection.
+	 * Construct a List containing the same nodes as the given Collection.
 	 */
 	public List.List(Collection<T> nodes) {
 		if (!nodes.isEmpty())
@@ -37,6 +37,14 @@ aspect Constructors {
 		int i = 0;
 		for (T n : nodes)
 			setChild(n, i++);
+	}
+	
+	/**
+	 * Construct a List containing the given nodes.
+	 */
+	public List.List(T... nodes) {
+		for (int i = nodes.length - 1; i >= 0; i--)
+			setChild(nodes[i], i);
 	}
 	
 	/**
@@ -236,7 +244,7 @@ aspect Constructors {
 	 * \brief Constructs an FIdUse that refers to the variable with the given name.
 	 */
 	public FIdUse.FIdUse(String name) {
-		this(new FQName(name));
+		this(new FQNameString(name));
 	}
 	
 	/**
@@ -245,7 +253,7 @@ aspect Constructors {
 	 * @param fas  the array subscripts to set for the last name part
 	 */
 	public FIdUse.FIdUse(String name, FArraySubscripts fas) {
-		this(new FQName(name, fas));
+		this(new FQNameFull(name, fas));
 	}
 	
 	/**
@@ -260,17 +268,26 @@ aspect Constructors {
 	 * 
 	 * Does <em>not</em> parse array subscripts.
 	 */
-    public FQName.FQName(String name) {
+    public FQNameFull.FQNameFull(String name) {
+        this(name.split("\\."));
+    }
+    
+	/**
+	 * Constructs an FQName with the given name parts (without any subscripts).
+	 * 
+	 * Does <em>not</em> parse array subscripts.
+	 */
+    public FQNameFull.FQNameFull(String... name) {
         this(new List());
-        for (String part : name.split("\\."))
+        for (String part : name)
             addFQNamePart(part);
     }
     
     /**
      * \brief Creates and adds a new FQNamePart without array subscripts.
      */
-    public void FQName.addFQNamePart(String name) {
-    	addFQNamePart(new FQNamePart(name, new Opt()));
+    public void FQNameFull.addFQNamePart(String name) {
+    	addFQNamePart(new FQNamePart(name));
     }
 	
 	/**
@@ -280,17 +297,10 @@ aspect Constructors {
 	 *
 	 * @param fas  the array subscripts to set for the last name part
 	 */
-	public FQName.FQName(String name, FArraySubscripts fas) {
+	public FQNameFull.FQNameFull(String name, FArraySubscripts fas) {
 		this(name);
-		setLastFArraySubscripts(fas);
+		addFArraySubscripts(fas);
 	}
-    
-	/**
-	 * \brief Constructs an FQName that is a copy of another FQName.
-	 */
-    public FQName.FQName(FQName fqname) {
-        this((List)fqname.getFQNamePartList().fullCopy());
-    }
 	
 	/**
 	 * \brief Constructs a flat FIdUseExp that refers to the variable with the given name.
@@ -316,12 +326,19 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Constructs an FDerExp that refers to the variable with the given name.
+	 */
+	public FDerExp.FDerExp(FQName name) {
+		this(new FIdUse(name));
+	}
+	
+	/**
 	 * Constructs an FIdUseInstAccess with an empty FQName.
 	 * 
 	 * Note: the FQName of an FIdUseInstAccess should always be empty.
 	 */
 	public FIdUseInstAccess.FIdUseInstAccess(InstAccess ia) {
-		this(new FQName(), ia);
+		this(new FQNameEmpty(), ia);
 	}
 	
 	/**
@@ -379,7 +396,7 @@ aspect Constructors {
 		this();
 		setFExp(new FRangeExp(new FIntegerLitExp(1), end));
 		setFVariable(new FIntegerVariable(new FTemporaryVisibilityType(), 
-				fParameter(), new FQName(name)));
+				fParameter(), new FQNameString(name)));
 	}
 	
 	/**
@@ -650,7 +667,7 @@ aspect Constructors {
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name, FExp value) {
-		this(new FIdUse(new FQName()), new FIdDecl(new FQName(name)), new Opt(value), 
+		this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt(value), 
 				true, new Opt(), new Opt(), new List());
 	}
 	
@@ -666,15 +683,15 @@ aspect Constructors {
 	 *        Extracts array subscripts from type.
 	 */
 	public FFunctionArray.FFunctionArray(FType type, String name) {
-		this(new Opt(), type, new Opt(), new FQName(name));
-		getFQName().setLastFArraySubscripts(type.size().flattenFArraySubscripts(new FQName()));
+		this(new Opt(), type, new Opt(), 
+				new FQNameFull(name, type.size().flattenFArraySubscripts(new FQNameEmpty())));
 	}
 	
 	/**
 	 * \brief Create an FFunctionVariable with the given name and type. 
 	 */
 	public FFunctionVariable.FFunctionVariable(FType type, String name) {
-		this(new Opt(), type, new Opt(), new FQName(name));
+		this(new Opt(), type, new Opt(), new FQNameString(name));
 	}
 	
 	/**
@@ -693,13 +710,6 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Create a new FExpSubscript with an integer literal as expression.
-	 */
-	public FExpSubscript.FExpSubscript(int i) {
-		this(new FIntegerLitExp(i));
-	}
-	
-	/**
 	 * \brief Create a new FArraySubscripts <code>n</code> literal subscripts from 
 	 *        <code>i</code>, starting at <code>j</code>.
 	 */
@@ -713,7 +723,7 @@ aspect Constructors {
 	 * Add a new FExpSubscript with an integer literal as expression to the list of FSubscripts.
 	 */
 	public void FArraySubscripts.addFSubscript(int i) {
-		addFSubscript(new FExpSubscript(i));
+		addFSubscript(new FIntegerSubscript(i));
 	}
 	
 	/**
@@ -731,7 +741,7 @@ aspect Constructors {
 	 */
 	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int i) {
 		List<FSubscript> l = new List<FSubscript>();
-		l.add(new FExpSubscript(i));
+		l.add(new FIntegerSubscript(i));
 		return new FArraySubscripts(l);
 	}
 	
@@ -741,7 +751,7 @@ aspect Constructors {
 	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int[] index) {
 		List<FSubscript> l = new List<FSubscript>();
 		for (int i : index)
-			l.add(new FExpSubscript(i));
+			l.add(new FIntegerSubscript(i));
 		return new FArraySubscripts(l);
 	}
 	

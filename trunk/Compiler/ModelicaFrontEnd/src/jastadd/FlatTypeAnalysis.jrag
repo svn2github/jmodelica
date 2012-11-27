@@ -555,8 +555,9 @@ aspect FlatTypeAnalysis {
 	
 	// TODO: expand to handle boolean end enum index
 	syn lazy FType FSubscript.type();
-	eq FColonSubscript.type() = fIntegerArrayType(size());
-	eq FExpSubscript.type()   = getFExp().type();
+	eq FColonSubscript.type()   = fIntegerArrayType(size());
+	eq FIntegerSubscript.type() = fIntegerScalarType();
+	eq FExpSubscript.type()     = getFExp().type();
 }
 
 aspect InstBindingType {
