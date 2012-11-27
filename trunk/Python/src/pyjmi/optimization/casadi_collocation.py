@@ -2317,9 +2317,9 @@ class LocalDAECollocator(CasadiCollocator):
             var_opt['dx'] = N.empty([len(t_opt), n_var['x']])
         var_opt['p_opt'] = N.empty(self.model.get_n_p())
         
-        # Get optimal parameter values
+        # Get optimal parameter values and rescale
         p_opt = self.nlp_opt[self.get_var_indices()['p_opt']].reshape(-1)
-        if self.variable_scaling:
+        if self.variable_scaling and not self.write_scaled_result:
             if self.nominal_traj is None:
                 p_opt *= sf['p_opt']
             else:
