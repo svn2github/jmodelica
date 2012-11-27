@@ -22,6 +22,10 @@ from tests_jmodelica import testattr
 from pyfmi.examples import *
 from pyjmi.examples import *
 
+@testattr(casadi = True)
+def test_ccpp():
+    """Run the Combined Cycle Power Plant example."""
+    ccpp.run_demo(False)
 
 @testattr(casadi = True)
 def test_cstr_casadi():

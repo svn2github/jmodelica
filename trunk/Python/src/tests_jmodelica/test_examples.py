@@ -51,11 +51,6 @@ def test_catalytic_cracking():
 def test_catalyst_mixing():
     """ Test the catalyst_mixing example. """    
     catalyst_mixing.run_demo(False)
-
-@testattr(casadi = True)
-def test_ccpp():
-    """Run the Combined Cycle Power Plant example."""
-    ccpp.run_demo(False)
     
 @testattr(ipopt = True)
 def test_coloumb_friction():
