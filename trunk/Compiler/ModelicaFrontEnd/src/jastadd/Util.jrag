@@ -1331,6 +1331,17 @@ aspect FlatNames {
     }
     
     /**
+     * Create a copy of the name, with another name appended, and <code>fas</code> applied to the last part.
+     * 
+     * Passing <code>null</code> as <code>fas</code> is supported, and equivalent 
+     * to using {@link #copyAndAppend(FQName)}.
+     */
+	public FQName FQName.copyAndAppend(FQName name, FArraySubscripts fas) {
+		FQName res = copyAndAppend(name);
+		return (fas == null) ? res : res.asFQNameFull().addFArraySubscripts(fas);
+    }
+    
+    /**
      * Create a copy of the name as an FQNameFull.
      */
     public abstract FQNameFull FQName.copyAsFQNameFull();

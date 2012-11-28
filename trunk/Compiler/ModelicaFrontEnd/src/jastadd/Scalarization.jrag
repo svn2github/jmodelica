@@ -235,11 +235,11 @@ aspect Scalarization {
 			for (Index i : scalarizationIndices(last)) {
 				if (bexp != null)
 					nbexp = bexp.getArray().get(i);
-				FQName name = prefix.copyAndAppend(name(), i.createFArraySubscripts());
+				FQName name = prefix.copyAndAppend(getFQName(), i.createFArraySubscripts());
 				scalarRecordCellFVariables(vars, name, last, nbexp);
 			}
 		} else {
-			FQName name = prefix.copyAndAppend(name());
+			FQName name = prefix.copyAndAppend(getFQName());
 			scalarRecordCellFVariables(vars, name, last, bexp);
 		}
 	}

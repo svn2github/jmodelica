@@ -2539,7 +2539,7 @@ aspect TransformCanonical {
 			Size size = (attr != null && attr.hasValue()) ? new MutableSize(attr.getValue()) : size();
 			fas = size.rangeFArraySubscripts();
 		}
-		return prefix.copyAndAppend(name(), fas);
+		return prefix.copyAndAppend(getFQName(), fas);
 	}
 	
 	public void FVariable.genBindingEquations(FClass fc, FQName prefix) {

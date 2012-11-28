@@ -3431,6 +3431,34 @@ JMI_RECORD_ARRAY_TYPE(A_0_r, A_0_ra)
 end CRecordDecl17;
 
 
+model CRecordDecl18
+	record A
+		Real r;
+	end A;
+	
+	model B
+		C c;
+	end B;
+	
+	model C
+		A[2] a;
+	end C;
+	
+	B b(c(a = {A(1), A(2)}));
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="CRecordDecl18",
+			description="Array of records in subcomponent",
+			template="$C_variable_aliases$",
+			generatedCode="
+#define _b_c_a_1_r_0 ((*(jmi->z))[jmi->offs_real_w+0])
+#define _b_c_a_2_r_1 ((*(jmi->z))[jmi->offs_real_w+1])
+#define _time ((*(jmi->z))[jmi->offs_t])
+")})));
+end CRecordDecl18;
+
+
 model RemoveCopyright
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
