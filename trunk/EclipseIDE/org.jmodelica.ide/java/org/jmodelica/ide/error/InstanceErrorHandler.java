@@ -138,8 +138,8 @@ public class InstanceErrorHandler implements IErrorHandler {
 		return buf.toString();
 	}
 
-	@Override
 	public IErrorHandler connectTo(Root root) {
-		return new InstanceErrorHandler();
+		root.setErrorHandler(this);
+		return this;
 	}
 }

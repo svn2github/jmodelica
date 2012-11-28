@@ -58,11 +58,4 @@ aspect IDEUtil {
 	    return !isUnknown();
 	}
 	
-	public List.List(T... ts) {
-	    super();
-	    for (T t : ts) {
-	        add(t);
-	    }
-	}
-	
 }
