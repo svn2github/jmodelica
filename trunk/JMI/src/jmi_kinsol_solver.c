@@ -702,8 +702,10 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
 		}
 	}
     for(i = 0; i < N; i++) {
-        if(scale_ptr[i] < tol)
-            scale_ptr[i] = 1.0; /* Singular Jacobian? */
+        if(scale_ptr[i] < tol) {
+            scale_ptr[i] = 1/tol; /* Singular Jacobian? */
+			jmi_log_warning(block->jmi, "Using maximum scaling factor in block %d, equation %d. Consider rescaling in the model or tighter tolerance.", block->index, i);
+		}
         else
             scale_ptr[i] = 1/scale_ptr[i];
     }
