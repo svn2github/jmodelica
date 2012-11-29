@@ -1914,7 +1914,7 @@ aspect InstantiatedExpressions {
 	public void InstNode.propagateResiduals() {
 		if (!root().options.getBooleanOption("enable_hand_guided_tearing"))
 			return;
-		for (AnnotationNode pair : classAnnotation().vendorNode().forPath("TearingPairs")) {
+		for (AnnotationNode pair : classAnnotation().vendorNode().forPath("tearingPairs")) {
 			if (!pair.name().equals("Pair"))
 				continue;
 			Exp enabledExp = pair.forPath("enabled").exp();

@@ -1652,23 +1652,23 @@ aspect CCodeGen {
 		return res;
 	}
 	
-	public java.util.List<FVariable> AbstractEquationBlock.blockResidualVariables_C() {
+	public Collection<FVariable> AbstractEquationBlock.blockResidualVariables_C() {
 		return iterationVariables();
 	}
 	
-	public java.util.List<FVariable> MixedEquationBlock.blockResidualVariables_C() {
+	public Collection<FVariable> MixedEquationBlock.blockResidualVariables_C() {
 		return activeContinuousVariables();
 	}
 	
-	public java.util.List<FAbstractEquation> AbstractEquationBlock.blockResidualEquations_C() {
+	public Collection<FAbstractEquation> AbstractEquationBlock.blockResidualEquations_C() {
 		return equations();
 	}
 	
-	public java.util.List<FAbstractEquation> MixedEquationBlock.blockResidualEquations_C() {
+	public Collection<FAbstractEquation> MixedEquationBlock.blockResidualEquations_C() {
 		return continuousEquations();
 	}
 	
-	public java.util.List<FAbstractEquation> TornEquationBlock.blockResidualEquations_C() {
+	public Collection<FAbstractEquation> TornEquationBlock.blockResidualEquations_C() {
 		return unsolvedEquations();
 	}
 	
@@ -1851,7 +1851,7 @@ aspect CCodeGen {
 			str.print(")");
 		}
 		str.print(") {\n");
-		for (SimpleEquationBlock b : blocks(0)) {
+		for (SimpleEquationBlock b : blocks.iterator().next()) {
 			b.genBlock_C(enumerator,inInitial,indent + " ",str);
 		}
 		str.print("  } else {\n");

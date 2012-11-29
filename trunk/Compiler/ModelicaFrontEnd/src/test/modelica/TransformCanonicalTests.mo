@@ -3853,8 +3853,8 @@ der_vx = ( lambda ) * ( x );
 der_2_y = ( lambda ) * ( y ) - ( g );
 x ^ 2 + y ^ 2 = L;
 ( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
-( ( 2 ) * ( x ) ) * ( der(_der_x) ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
 der(_der_x) = der_vx;
+( ( 2 ) * ( x ) ) * ( der(_der_x) ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
 _der_x = der(x);
 end TransformCanonicalTests.IndexReduction1a_PlanarPendulum;
 ")})));
@@ -3900,8 +3900,8 @@ equation
  der_2_y + 0 = ( lambda ) * ( y ) - ( g );
  x ^ 2 + y ^ 2 = L;
  ( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
- ( ( 2 ) * ( x ) ) * ( der(_der_x) ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
  der(_der_x) = der_vx;
+ ( ( 2 ) * ( x ) ) * ( der(_der_x) ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
  _der_x = der(x);
 end TransformCanonicalTests.IndexReduction1b_PlanarPendulum;
 ")})));
@@ -4068,11 +4068,11 @@ fclass TransformCanonicalTests.IndexReduction3_Electrical
  Real i2;
  Real iC;
  Real der_uC;
+ Real der_u0;
  Real der_u1;
+ Real der_uL;
  Real der_i1;
  Real der_i2;
- Real der_uL;
- Real der_u0;
 initial equation 
  iL = 1;
 equation
@@ -4085,12 +4085,12 @@ equation
  uC = u1 + uL;
  i0 = i1 + iC;
  i1 = i2 + iL;
- der_uC = der_u1 + der_uL;
+ der_u0 = ( 220 ) * ( ( cos(( time ) * ( omega )) ) * ( ( 1.0 ) * ( omega ) ) );
  der_u1 = ( R[1] ) * ( der_i1 );
- der_i1 = der_i2 + der(iL);
  der_uL = ( R[2] ) * ( der_i2 );
  der_u0 = der_u1 + der_uL;
- der_u0 = ( 220 ) * ( ( cos(( time ) * ( omega )) ) * ( ( 1.0 ) * ( omega ) ) );
+ der_uC = der_u1 + der_uL;
+ der_i1 = der_i2 + der(iL);
 end TransformCanonicalTests.IndexReduction3_Electrical;
 		  
 ")})));
@@ -5185,8 +5185,8 @@ der(vx) = ( lambda ) * ( x );
 der_2_y = ( lambda ) * ( y ) - ( g );
 x ^ 2 + y ^ 2 = L;
 ( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
-( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
 der_2_x = der(vx);
+( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
 
 public
 type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -5235,8 +5235,8 @@ der(vx) = ( lambda ) * ( x );
 der_2_y = ( lambda ) * ( y ) - ( g );
 x ^ 2 + y ^ 2 = L;
 ( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
-( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
 der_2_x = der(vx);
+( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
 
 public
 type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -5284,8 +5284,8 @@ der_2_x = ( lambda ) * ( x );
 der(vy) = ( lambda ) * ( y ) - ( g );
 x ^ 2 + y ^ 2 = L;
 ( ( 2 ) * ( x ) ) * ( vx ) + ( ( 2 ) * ( y ) ) * ( der(y) ) = 0.0;
-( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( vx ) ) * ( vx ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der(y) ) ) * ( der(y) ) = 0.0;
 der_2_y = der(vy);
+( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( vx ) ) * ( vx ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der(y) ) ) * ( der(y) ) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -5890,18 +5890,18 @@ Solution:
 -------------------------------
 Torn block of 2 tearing variables and 3 solved variables.
 Solved variables:
-  u2
   i1
   u1
+  u2
 Tearing variables:
-  i3()
   i2()
+  i3()
 Solved equations:
-  u2 = ( R3 ) * ( i3 )
   i1 = i2 + i3
   u1 = ( R1 ) * ( i1 )
-Residual equations:
   u0 = u1 + u2
+Residual equations:
+  u2 = ( R3 ) * ( i3 )
   u2 = ( R2 ) * ( i2 )
 -------------------------------
 Solved block of 1 variables:
@@ -7511,7 +7511,7 @@ model HandGuidedTearing18
 equation
 	a.x = b.y + 2;
 	a.y = b.x - 3;
-	annotation(__Modelon(TearingPairs={
+	annotation(__Modelon(tearingPairs={
 		Pair(residualEquation=a.eq, iterationVariable=b.x)
 	}),
 	__JModelica(UnitTesting(tests={
@@ -7563,7 +7563,7 @@ model HandGuidedTearing19
 	equation
 		a.x = b.y + 2;
 		a.y = b.x - 3;
-		annotation(__Modelon(TearingPairs={
+		annotation(__Modelon(tearingPairs={
 			Pair(residualEquation=a.eq, iterationVariable=b.x)
 		}));
 	end C;
@@ -7617,7 +7617,7 @@ model HandGuidedTearing20
 	equation
 		a.x = b.y + 2;
 		a.y = b.x - 3;
-		annotation(__Modelon(TearingPairs={
+		annotation(__Modelon(tearingPairs={
 			Pair(residualEquation=a.eq, iterationVariable=b.x)
 		}));
 	end C;
@@ -7657,7 +7657,7 @@ model HandGuidedTearing21
 			Real y;
 		equation
 			x = y + 1 annotation(__Modelon(name=eq));
-			annotation(__Modelon(TearingPairs={
+			annotation(__Modelon(tearingPairs={
 				Pair(residualEquation=eq, iterationVariable=x)
 			}));
 		end A;
@@ -7674,7 +7674,7 @@ model HandGuidedTearing21
 	equation
 		a.x = b.y + 2;
 		a.y = b.x - 3;
-		annotation(__Modelon(TearingPairs={
+		annotation(__Modelon(tearingPairs={
 			Pair(residualEquation=a.eq, iterationVariable=b.x)
 		}));
 	end C;
@@ -7730,7 +7730,7 @@ model HandGuidedTearing22
 	equation
 		a.x = b.y + 2;
 		a.y = b.x - 3;
-		annotation(__Modelon(TearingPairs={
+		annotation(__Modelon(tearingPairs={
 			Pair(enabled=useFirst, residualEquation=a.eq, iterationVariable=b.x),
 			Pair(enabled=not useFirst, residualEquation=a.eq, iterationVariable=b.y)
 		}));
@@ -7787,7 +7787,7 @@ model HandGuidedTearing23
 	equation
 		a.x = b.y + 2;
 		a.y = b.x - 3;
-		annotation(__Modelon(TearingPairs={
+		annotation(__Modelon(tearingPairs={
 			Pair(enabled=useFirst, residualEquation=a.eq, iterationVariable=b.x),
 			Pair(enabled=not useFirst, residualEquation=a.eq, iterationVariable=b.y)
 		}));

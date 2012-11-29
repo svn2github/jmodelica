@@ -495,7 +495,7 @@ class TestTearing2(SimulationTest):
 
     @testattr(assimulo = True)
     def setUp(self):
-        self.setup_base(start_time=0.0, final_time=1,time_step=0.002,rel_tol=1e-6)
+        self.setup_base(start_time=0.0, final_time=0.996,time_step=0.002,rel_tol=1e-6)
         self.run()
         self.load_expected_data(
             'TearingTests_Electro_result.txt')
