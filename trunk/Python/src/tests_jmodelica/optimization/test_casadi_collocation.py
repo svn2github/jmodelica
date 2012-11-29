@@ -103,6 +103,9 @@ class TestLocalDAECollocator:
         
         pe_file_path = os.path.join(get_files_path(), 'Modelica',
                                  'ParameterEstimation_1.mop')
+        class_path = "ParEst.SecondOrder"
+        compile_fmu(class_path, pe_file_path)
+        
         class_path = "ParEst.ParEstCasADi"
         compile_fmux(class_path, pe_file_path)
     
@@ -164,8 +167,12 @@ class TestLocalDAECollocator:
         self.model_cstr_unscaled_min_time = CasadiModel(
                 fmux_cstr_unscaled_min_time, verbose=False)
         
-        fmux_second_order = "ParEst_ParEstCasADi.fmux"
-        self.model_second_order = CasadiModel(fmux_second_order, verbose=False)
+        fmux_second_order = "ParEst_SecondOrder.fmu"
+        self.model_second_order = load_fmu(fmux_second_order)
+        
+        fmux_second_order_par_est = "ParEst_ParEstCasADi.fmux"
+        self.model_second_order_par_est = CasadiModel(
+            fmux_second_order_par_est, verbose=False)
         
         self.algorithm = "LocalDAECollocationAlg"
     
@@ -356,7 +363,7 @@ class TestLocalDAECollocator:
         WARNING: This test is very slow when using IPOPT with the linear solver
         MUMPS.
         """
-        model = self.model_second_order
+        model = self.model_second_order_par_est
         
         # Reference values
         w_ref = 1.048589
@@ -370,7 +377,7 @@ class TestLocalDAECollocator:
         
         # Parameter estimation data
         Q = N.array([[1.]])
-        measured_variables=['sys.y']
+        measured_variables=['y']
         data = N.hstack([N.transpose(N.array([t_meas])),
                          N.transpose(N.array([y_meas]))])
         par_est_data = ParameterEstimationData(Q, measured_variables, data)
@@ -381,18 +388,73 @@ class TestLocalDAECollocator:
         opts['variable_scaling'] = False
         res = model.optimize(self.algorithm, opts)
         
-        w_unscaled = res['sys.w']
-        z_unscaled = res['sys.z']
+        w_unscaled = res['w']
+        z_unscaled = res['z']
         N.testing.assert_allclose(w_unscaled, w_ref, 1e-2)
         N.testing.assert_allclose(z_unscaled, z_ref, 1e-2)
         
         # Optimize with scaling
         opts['variable_scaling'] = True
         res = model.optimize(self.algorithm, opts)
-        w_scaled = res['sys.w']
-        z_scaled = res['sys.z']
+        w_scaled = res['w']
+        z_scaled = res['z']
         N.testing.assert_allclose(w_scaled, w_ref, 1e-2)
         N.testing.assert_allclose(z_scaled, z_ref, 1e-2)
+    
+    @testattr(casadi = True)
+    def test_parameter_estimation_traj(self):
+        """
+        Test parameter estimation with and without given trajectories.
+        
+        Currently doesn't work due to bug described in #2433.
+        """
+        pass
+        """
+        sim_model = self.model_second_order
+        opt_model = self.model_second_order_par_est
+        
+        # Simulate with initial guesses
+        sim_model.set('w', 2.)
+        sim_model.set('z', 1.)
+        sim_res = sim_model.simulate(final_time=15.)
+        
+        # Reference values
+        w_ref = 1.048589
+        z_ref = 0.470934
+        
+        # Measurements
+        y_meas = N.array([0.01463904, 0.35424225, 0.94776816, 1.20116167,
+                          1.17283905, 1.03631145, 1.0549561, 0.94827652,
+                          1.0317119, 1.04010453, 1.08012155])
+        t_meas = N.linspace(0., 10., num=len(y_meas))
+        
+        # Parameter estimation data
+        Q = N.array([[1.]])
+        measured_variables=['y']
+        data = N.hstack([N.transpose(N.array([t_meas])),
+                         N.transpose(N.array([y_meas]))])
+        par_est_data = ParameterEstimationData(Q, measured_variables, data)
+        
+        # Optimize without trajectories
+        opts = opt_model.optimize_options(self.algorithm)
+        opts['parameter_estimation_data'] = par_est_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        
+        # Assert results
+        w = opt_res['w']
+        z = opt_res['z']
+        N.testing.assert_allclose(w, w_ref, 1e-2)
+        N.testing.assert_allclose(z, z_ref, 1e-2)
+        
+        # Optimize with trajectories
+        opts['init_traj'] = sim_res.result_data
+        opts['nominal_traj'] = sim_res.result_data
+        traj_res = opt_model.optimize(self.algorithm, opts)
+        w_traj = traj_res['w']
+        z_traj = traj_res['z']
+        N.testing.assert_allclose(w_traj, w_ref, 1e-2)
+        N.testing.assert_allclose(z_traj, z_ref, 1e-2)
+        """
     
     @testattr(casadi = True)
     def test_vdp_minimum_time(self):
