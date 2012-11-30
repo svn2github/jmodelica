@@ -291,6 +291,7 @@ aspect FlatTypeAnalysis {
 	
 	eq FIntegerExp.type()     = getFExp().type().isNumericScalar() ? fIntegerScalarType() : fUnknownType();
 	eq FEnumIntegerExp.type() = getFExp().type().isEnumScalar() ? fIntegerScalarType() : fUnknownType();
+	eq FFloorExp.type()       = getFExp().type().isNumericScalar() ? fRealScalarType() : fUnknownType();
 	
 	syn FType FRecordConstructor.type() = getType();
 	syn FType FRecordConstructor.getType() {

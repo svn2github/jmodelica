@@ -261,6 +261,7 @@ aspect InstFunctionBinding {
 				map.put("linspace",     new BuiltInCreator(false, new FLinspace(),       3));
 				map.put("integer",      new BuiltInCreator(false, new FIntegerExp(),     1));
 				map.put("Integer",      new BuiltInCreator(false, new FEnumIntegerExp(), 1));
+				map.put("floor",        new BuiltInCreator(false, new FFloorExp(),       1));
 				map.put("inStream",     new BuiltInCreator(false, new FInStream(),       1));
 				map.put("actualStream", new BuiltInCreator(false, new FActualStream(),   1));
 				//       name                                         node           # fixed args
@@ -279,7 +280,7 @@ aspect InstFunctionBinding {
 						// Ticket 678: Support for array related functions
 						"scalar", "vector", "matrix", "diagonal", "product", "symmetric", "skew", 
 						// Ticket 664: Support all function-like operators
-						"sign", "String", "div", "mod", "rem", "ceil", "floor", "delay", "cardinality", 
+						"sign", "String", "div", "mod", "rem", "ceil", "delay", "cardinality", 
 						"semiLinear", "terminal", "smooth", "edge", "reinit", "terminate"
 					};
 				for (String name : unsupported)

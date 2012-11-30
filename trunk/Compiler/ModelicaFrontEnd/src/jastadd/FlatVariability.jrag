@@ -311,6 +311,7 @@ aspect FlatVariability {
 	eq FSizeExp.expVariability() = hasDim() ? getDim().variability() : fParameter();
 	
 	eq FIntegerExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
+	eq FFloorExp.expVariability()   = getFExp().variability().combineDown(fDiscrete());
 	
 	eq FIterExp.expVariability() {
 		FTypePrefixVariability total = getArray().iteratorFExp().next().variability();

@@ -778,6 +778,21 @@ aspect CADCodeGen {
 		str.print(getFExp().adDerName());
 		str.print(";\n");
 	}
+	 
+	/* Prints AD code for floor expression.
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	public void FFloorExp.prettyPrint_CAD(Printer p, PrintStream str, String indent){
+		p.print(getFExp(), str, indent);
+		str.print(adVarName());
+		str.print(" = floor(");
+		str.print(getFExp().adVarName());
+		str.print(");\n");
+		str.print(adDerName());
+		str.print(" = 0.0;\n");
+	}
 	
 	/* Prints AD code for if expression.
 	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD

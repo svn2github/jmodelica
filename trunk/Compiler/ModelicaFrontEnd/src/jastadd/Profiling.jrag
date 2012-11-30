@@ -581,6 +581,23 @@ aspect MemoryUse {
 	}
 	
 	/**
+	 * Calculate total memory weight of all nodes (including subtrees) of a specific class.
+	 */
+	public long ASTNode.specificNodeClassTreeSize(String name) {
+		try {
+			final Class cls = Class.forName(ASTNode.class.getName().replace("ASTNode", name));
+			Criteria<ASTNode> crit = new Criteria<ASTNode>() {
+				public boolean test(ASTNode o) {
+					return cls.isInstance(o);
+				}
+			};
+			return filteredTreeSize(crit);
+		} catch (ClassNotFoundException e) {
+			return -1;
+		}
+	}
+	
+	/**
 	 * \brief Traversal method for {@link #dumpMemoryUse(PrintStream, boolean, int, int)}.
 	 * 
 	 * @return approximation of the memory footprint for the subtree

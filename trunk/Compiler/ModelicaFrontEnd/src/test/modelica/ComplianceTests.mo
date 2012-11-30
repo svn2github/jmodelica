@@ -209,7 +209,6 @@ model UnsupportedBuiltins2_ComplErr
   mod();
   rem(1);
   ceil();
-  floor();
   delay(1);
   cardinality();
 
@@ -218,7 +217,7 @@ model UnsupportedBuiltins2_ComplErr
 			name="UnsupportedBuiltins2_ComplErr",
 			description="Compliance error for unsupported builtins",
 			errorMessage="
-10 errors found:
+8 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 210, column 3:
   The sign() function-like operator is not supported
@@ -234,9 +233,6 @@ Compliance error at line 214, column 3:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 215, column 3:
   The rem() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 216, column 3:
-  The ceil() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 217, column 3:
   The floor() function-like operator is not supported
@@ -472,7 +468,9 @@ discrete Real x;
 discrete Real y; 
 discrete Boolean w(start=true); 
 discrete Boolean v(start=true); 
-discrete Boolean z(start=true); 
+discrete Boolean z(start=true);
+parameter Real p1 = 1.2; 
+parameter Real p2 = floor(p1);
 equation
 der(xx) = -x; 
 when y > 2 and pre(z) then 
@@ -503,6 +501,8 @@ fclass ComplianceTests.HybridFMU1
  discrete Boolean w(start = true);
  discrete Boolean v(start = true);
  discrete Boolean z(start = true);
+ parameter Real p1 = 1.2 /* 1.2 */;
+ parameter Real p2;
 initial equation 
  xx = 2;
  pre(x) = 0.0;
@@ -510,6 +510,8 @@ initial equation
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
+parameter equation
+ p2 = floor(p1);
 equation
  der(xx) =  - ( x );
  when y > 2 and pre(z) then
@@ -527,14 +529,13 @@ equation
  when sample(0, 1) then
   y = pre(y) + 1.1;
  end when;
-
 end ComplianceTests.HybridFMU1;
 ")})));
 end HybridFMU1;
 
 
 model HybridNonFMU2 
- discrete Real x,y;
+ discrete Real x, y, z;
  Real dummy;
 equation
  der(dummy) = 0;
@@ -544,31 +545,35 @@ equation
  when initial() then
    y = pre(y) + 1;
  end when;
+ z = floor(dummy);
 
-	annotation(__JModelica(UnitTesting(tests={
+	annotation(__JModelica(UnitTesting(tests={ 
 		ComplianceErrorTestCase(
 			name="HybridNonFMU2",
-			description="Test that compliance warnings for hybrid elements are issued when not compiling FMU",
+			description="",
 			errorMessage="
-6 errors found:
+7 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 583, column 2:
+Compliance error at line 537, column 2:
   When equations are currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 583, column 7:
-  The sample() function-like operator is supported only when compiling FMUs
+Compliance error at line 537, column 7:
+  The sample() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 584, column 8:
-  The pre() function-like operator is supported only when compiling FMUs
+Compliance error at line 538, column 8:
+  The pre() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 586, column 2:
+Compliance error at line 540, column 2:
   When equations are currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 586, column 7:
-  The initial() function-like operator supported only when compiling FMUs
+Compliance error at line 540, column 7:
+  The initial() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 587, column 8:
-  The pre() function-like operator is supported only when compiling FMUs
+Compliance error at line 541, column 8:
+  The pre() function-like operator is currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 543, column 6:
+  The floor() function-like operator is currently only supported for parameter expressions, and only when compiling FMUs
 ")})));
 end HybridNonFMU2; 
 

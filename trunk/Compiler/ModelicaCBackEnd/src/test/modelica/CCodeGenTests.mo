@@ -7499,6 +7499,22 @@ model Smooth1
 ")})));
 end Smooth1;
 
+
+model CFloor1
+	parameter Real x = 2.4;
+	Real y = floor(x);
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="CFloor1",
+			description="C code generation for floor() operator",
+			template="$C_DAE_equation_residuals$",
+			generatedCode="
+    (*res)[0] = floor(_x_0) - (_y_1);
+")})));
+end CFloor1;
+
+
 model TearingTest1
 	
   Real u0,u1,u2,u3,uL;

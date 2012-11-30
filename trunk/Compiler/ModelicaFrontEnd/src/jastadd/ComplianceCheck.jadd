@@ -26,34 +26,34 @@ aspect ComplianceCheck {
 	
 	public void FIfWhenClause.complianceCheck() {
 		super.complianceCheck();
-		if (!getTest().variability().lessOrEqual(fParameter()) && 
-				!root().options.getBooleanOption("generate_ode"))
-			compliance("Using if statements is currently only supported when compiling FMUs");
+		if (!getTest().variability().lessOrEqual(fParameter()))
+			complianceOnlyFMU("Using if statements is");
 	}
 	
 	public void FWhileStmt.complianceCheck() {
 		super.complianceCheck();
-		if (!getTest().variability().lessOrEqual(fParameter()) && 
-				!root().options.getBooleanOption("generate_ode"))
-			compliance("Using while statements is currently only supported when compiling FMUs");
+		if (!getTest().variability().lessOrEqual(fParameter()))
+			complianceOnlyFMU("Using while statements is");
 	}
 	
 	public void InstAccess.complianceCheck() {
 		super.complianceCheck();
 		if (myInstComponentDecl().isRecord() && hasFArraySubscripts() && inFunction() && 
-				!getFArraySubscripts().variability().lessOrEqual(fParameter()) && 
-				!root().options.getBooleanOption("generate_ode")) {
-			compliance("Using arrays of records with indices of higher than parameter variability is currently only supported when compiling FMUs");
+				!getFArraySubscripts().variability().lessOrEqual(fParameter())) {
+			complianceOnlyFMU("Using arrays of records with indices of higher than parameter variability is");
 		}
 	}
 
 	public void FWhenEquation.complianceCheck() {
-		if (!root().options.getBooleanOption("generate_ode")) {
-			compliance("When equations are currently only supported when compiling FMUs");
-		}
+		complianceOnlyFMU("When equations are");
 		if (hasElse()) {
 			compliance("Else clauses in when equations are currently not supported");
 		}
+	}
+	
+	public void ASTNode.complianceOnlyFMU(String message) {
+		if (!root().options.getBooleanOption("generate_ode"))
+			compliance(message + " currently only supported when compiling FMUs");
 	}
 
 	public void FUnsupportedEquation.collectErrors() {
@@ -74,21 +74,20 @@ aspect ComplianceCheck {
 	}
 	
 	public void FSampleExp.complianceCheck() {
-	    if (!root().options.getBooleanOption("generate_ode")) {
-			compliance("The sample() function-like operator is supported only when compiling FMUs");
-		}
+	    complianceOnlyFMU("The sample() function-like operator is");
 	}
 
 	public void FPreExp.complianceCheck() {
-	    if (!root().options.getBooleanOption("generate_ode")) {
-			compliance("The pre() function-like operator is supported only when compiling FMUs");
-		}
+	    complianceOnlyFMU("The pre() function-like operator is");
 	}
 	
 	public void FInitialExp.complianceCheck() {
-		if (!root().options.getBooleanOption("generate_ode")) {	
-			compliance("The initial() function-like operator supported only when compiling FMUs");
-		}
+		complianceOnlyFMU("The initial() function-like operator is");
+	}
+	
+	public void FFloorExp.complianceCheck() {
+		if (!root().options.getBooleanOption("generate_ode") || !getFExp().variability().parameterOrLess())
+			compliance("The floor() function-like operator is currently only supported for parameter expressions, and only when compiling FMUs");
 	}
 	
 	public void FIntegerExp.complianceCheck() {

@@ -1062,6 +1062,13 @@ aspect CCodeGen {
 		str.print(")");
 	}
 	
+	public void FFloorExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		// Does not work for JMU - we generate an error in the JMU case
+		str.print("floor(");
+		p.print(getFExp(), str, indent);
+		str.print(")");
+	}
+	
 	syn String FBoolBinExp.macro_C();
 	eq FEqExp.macro_C()  = "COND_EXP_EQ";
 	eq FNeqExp.macro_C() = "COND_EXP_EQ";

@@ -1287,6 +1287,11 @@ FIntegerExp : FUnaryBuiltIn;
 FEnumIntegerExp : FUnaryBuiltIn;
 
 /**
+ * The floor() built-in function.
+ */
+FFloorExp : FUnaryBuiltIn;
+
+/**
  * \brief Scalar built-in function.
  */
 FScalar : FUnaryBuiltIn;

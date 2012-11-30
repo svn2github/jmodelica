@@ -281,7 +281,7 @@ public class OptionRegistry {
               RuntimeLogLevel.WARNING,
               "Log level for the runtime: 0 - none, 1 - fatal error, 2 - error, 3 - warning, 4 - info, 5 -verbose, 6 - debug.",
                 RuntimeLogLevel.NONE, RuntimeLogLevel.DEBUG),
-        ENFROCE_BOUNDS
+        ENFORCE_BOUNDS
             ("enforce_bounds",
             runtime,
             false,
