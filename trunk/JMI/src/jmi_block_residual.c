@@ -78,6 +78,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 	b->max = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->nominal = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     b->initial = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->message_buffer = (char*)calloc(n*20+200,sizeof(char));
 
     switch(solver) {
     case JMI_KINSOL_SOLVER: {
@@ -265,6 +266,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
 	free(b->min);
 	free(b->max);
 	free(b->nominal);
+	free(b->message_buffer);
 	/* clean up the solver.*/
     b->delete_solver(b);
 

@@ -144,6 +144,7 @@ struct jmi_block_residual_t {
     long int nb_jevals ;
     long int nb_fevals;
     double time_spent;             /**< \brief Total time spent in non-linear solver */
+	char* message_buffer ; /**< \brief Message buffer used for debugging purposes */
 };
 
 /**

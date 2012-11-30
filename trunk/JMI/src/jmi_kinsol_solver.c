@@ -157,6 +157,43 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
     
+	if((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log)) {
+		char* buf = block->message_buffer ;
+
+		sprintf(buf,"Block:;%d;Iteration:;%d;IVs:;",block->index,block->nb_jevals);
+		j = strlen(buf);
+		for (i=0;i<N;i++){
+			realtype* res = N_VGetArrayPointer(u);
+			int len;
+			char cur[20];
+			sprintf(cur, "%8.2E;",res[i]);
+			len = strlen(cur);
+			memcpy(buf + j, cur, len);
+			j += len;
+		}
+		buf[j]=0;
+		/* jmi_log(block->jmi, logInfo, buf); */
+		fprintf(block->jmi->options.debug_log, "%s\n",buf); 
+		/* printf( "%s\n",buf); */
+
+		buf = block->message_buffer ;
+		sprintf(buf,"Block:;%d;Norm:;%g;Residuals:;",block->index, kin_mem->kin_fnorm);
+		j = strlen(buf);
+		for (i=0;i<N;i++){
+			realtype* res = N_VGetArrayPointer(fu);
+			int len;
+			char cur[20];
+			sprintf(cur, "%8.2E;",res[i]);
+			len = strlen(cur);
+			memcpy(buf + j, cur, len);
+			j += len;
+		}
+		buf[j]=0;
+		/* jmi_log(block->jmi, logInfo, buf); */
+		fprintf(block->jmi->options.debug_log, "%s\n",buf); 
+		/* printf( "%s\n",buf); */
+	}
+
     if(!block->dF) {
         /* Use (almost) standard finite differences */
         realtype inc, inc_inv, ujsaved, ujscale, sign;
