@@ -2079,11 +2079,7 @@ aspect ArrayHelpers {
 		 * \brief Get length in the <code>i</code>th dimension.
 		 */
 		public int get(int i) {
-			try {
-				return size[i];
-			} catch (ArrayIndexOutOfBoundsException e) {
-				return UNKNOWN;
-			}
+			return (i >= 0 && i < size.length) ? size[i] : UNKNOWN;
 		}
 		
 		/**

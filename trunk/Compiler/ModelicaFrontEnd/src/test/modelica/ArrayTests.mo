@@ -6744,6 +6744,44 @@ Semantic error at line 6365, column 22:
 end ArraySize2;
 
 
+model ArraySize3
+	model A
+		Real x[2] = {1,2};
+	end A;
+	
+	parameter Integer n = 2;
+	A[n] b;
+	Real[n] c;
+equation
+	for i in 1:n loop
+		c[i] = b[i].x[1] + b[i].x[end];
+	end for;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		TransformCanonicalTestCase(
+			name="Other_ArraySize3",
+			description="Handle end in for loop",
+			flatModel="
+fclass ArrayTests.Other.ArraySize3
+ parameter Integer n = 2 /* 2 */;
+ Real b[1].x[1];
+ Real b[1].x[2];
+ Real b[2].x[1];
+ Real b[2].x[2];
+ Real c[1];
+ Real c[2];
+equation
+ c[1] = b[1].x[1] + b[1].x[2];
+ c[2] = b[2].x[1] + b[2].x[2];
+ b[1].x[1] = 1;
+ b[1].x[2] = 2;
+ b[2].x[1] = 1;
+ b[2].x[2] = 2;
+end ArrayTests.Other.ArraySize3;
+")})));
+end ArraySize3;
+
+
 model M_OLineExample
 	extends Modelica.Electrical.Analog.Lines.M_OLine;
 

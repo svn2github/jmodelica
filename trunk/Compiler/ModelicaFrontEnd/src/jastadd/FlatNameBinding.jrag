@@ -259,7 +259,7 @@ aspect FlatNameBinding {
 		public FAbstractVariable lookup(FQName name) {
 			FAbstractVariable res = null;
 			if (flatMap != null) 
-				res = flatMap.get(name.name());
+				res = flatMap.get(name.resolvedName());
 			if (res == null && hierMap != null) {
 				name = name.asFQNameFull();
 				HierarchicalMapNode n = hierMap.get(name.partName(0));
