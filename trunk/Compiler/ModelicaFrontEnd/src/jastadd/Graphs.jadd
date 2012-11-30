@@ -2184,7 +2184,10 @@ public class Var implements Comparable<Var> {
 	 */
 	@Override
 	public int compareTo(Var other) {
-		int diff = (markedAsIterationVariable() ? 1 : 0) - (other.markedAsIterationVariable() ? 1 : 0);
+		int diff = (other.getVariable().isTemporary() ? 1 : 0) - (getVariable().isTemporary() ? 1 : 0);
+		if (diff != 0)
+			return diff;
+		diff = (markedAsIterationVariable() ? 1 : 0) - (other.markedAsIterationVariable() ? 1 : 0);
 		if (diff != 0)
 			return diff;
 		diff = getNbrV() - other.getNbrV();

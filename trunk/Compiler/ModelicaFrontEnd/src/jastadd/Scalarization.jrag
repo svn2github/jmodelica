@@ -1109,7 +1109,7 @@ aspect Scalarization {
 			 * the equations is "scalarized" into a simple equation where
 			 * e.g. built in functions are replaced by elementary operations.
 			 */
-			createScalarFEquations(eqns, indexMap, hasResidual() ? getResidual() : null, getLeft(), getRight());
+			createScalarFEquations(eqns, indexMap, hasResidual() ? getResidual().scalarize(indexMap, null) : null, getLeft(), getRight());
 		} else if (ndims() > 0) {
 			/*
 			 * If the expression is an array expression, then the FExp.getArray()
@@ -1117,7 +1117,7 @@ aspect Scalarization {
 			 */
 			// Iterate over array elements and create scalarized equation for each
 			for (Index i : indices()) 
-				createScalarFEquations(eqns, indexMap, hasResidual() ? getResidual().createScalarFResidual(i) : null,
+				createScalarFEquations(eqns, indexMap, hasResidual() ? getResidual().scalarize(indexMap, i) : null,
 						getLeft().getArray().get(i), getRight().getArray().get(i));
 		} else {
 			throw new UnsupportedOperationException("Bad equation: ndims() for equation '" + 
@@ -1144,13 +1144,17 @@ aspect Scalarization {
 		if (left.inferType().isRecord()) 
 			left.inferType().scalarRecordFEquations(eqns, new FQNameEmpty(), indexMap, left, right);
 		else
-			eqns.add(new FEquation(residual != null ? residual.scalarize(indexMap) : null, left.scalarize(indexMap), right.scalarize(indexMap)));
+			eqns.add(new FEquation(residual, left.scalarize(indexMap), right.scalarize(indexMap)));
 	}
 	
-	public FResidual FResidual.scalarize(Map<String,FExp> indexMap) {
+	public FResidual FResidual.scalarize(Map<String,FExp> indexMap, Index i) {
 		FResidual scalarized = new FResidual();
-		if (hasIterationVariable())
-			scalarized.setIterationVariable(getIterationVariable().scalarize(indexMap));
+		if (hasIterationVariable()) {
+			FExp iterationVariable = getIterationVariable();
+			if (i != null)
+				iterationVariable = iterationVariable.getArray().get(i);
+			scalarized.setIterationVariable(iterationVariable.scalarize(indexMap));
+		}
 		return scalarized;
 	}
 	
@@ -1282,16 +1286,6 @@ aspect Scalarization {
 		FQName name = getFIdUse().getFQName().copyAndAppend(suffix);
 		name.scalarized = true;
 		return new FIdUseExp(name);
-	}
-	
-	/**
-	 * Generates a scalarized FResidue for index <code>i</code>
-	 */
-	protected FResidual FResidual.createScalarFResidual(Index i) {
-		FResidual scalarized = new FResidual();
-		if (hasIterationVariable())
-			scalarized.setIterationVariable(getIterationVariable().getArray().get(i));
-		return scalarized;
 	}
 	
 	/**
