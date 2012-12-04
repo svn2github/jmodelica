@@ -145,6 +145,24 @@ aspect RootAccess {
     
 }
 
+aspect SourceUtil {
+	syn boolean Exp.isAccess() = false;
+	eq AccessExp.isAccess() = true;
+	
+	syn Access Exp.asAccess() {
+		throw new UnsupportedOperationException();
+	}
+	eq AccessExp.asAccess() = getAccess();
+	
+	syn boolean Access.isNamed() = false;
+	eq NamedAccess.isNamed() = true;
+	
+	syn String Access.asID() {
+		throw new UnsupportedOperationException();
+	}
+	eq NamedAccess.asID() = getID();
+}
+
 aspect Logging {
 
     public static ModelicaLogger ASTNode.log = new ModelicaLogger();

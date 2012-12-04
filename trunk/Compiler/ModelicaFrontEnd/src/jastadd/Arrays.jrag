@@ -382,6 +382,7 @@ aspect Arrays {
 	 * Any colon subscripts are expanded into constant vector expressions.
 	 */
 	syn FArraySubscripts InstScalarAccess.getExpandedSubscripts() = myInstComponentDecl().expandedSubscripts();
+	eq InstEquationAccess.getExpandedSubscripts() = myEquation().size().createExpandedFArraySubscripts();
 	syn FArraySubscripts InstArrayAccess.getExpandedSubscripts() = getFArraySubscripts().expandedSubscripts();
 	
 //	private static final FArraySubscripts InstAccess.EMPTY_FAS = new FArraySubscripts();
@@ -1752,6 +1753,7 @@ aspect Arrays {
 	eq InstParseAccess.getArrayCopy(FArraySubscripts fas) = new InstParseArrayAccess(getID(), fas);
 	eq InstAmbiguousAccess.getArrayCopy(FArraySubscripts fas) = new InstAmbiguousArrayAccess(getID(), fas);
 	eq InstComponentAccess.getArrayCopy(FArraySubscripts fas) = new InstComponentArrayAccess(getID(), fas);
+	eq InstEquationAccess.getArrayCopy(FArraySubscripts fas) = new InstEquationArrayAccess(getID(), fas);
 
 	protected InstNamedAccess InstArrayAccess.specifyEach(Index i, int[] dim) {
 		InstArrayAccess res = fullCopy();

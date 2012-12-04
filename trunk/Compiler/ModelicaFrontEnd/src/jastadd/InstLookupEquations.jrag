@@ -1,5 +1,21 @@
 aspect InstLookupEquations{
 	
+	syn InstAccess InstAccess.convertToEquationAccess();
+	eq InstGlobalAccess.convertToEquationAccess() = new InstGlobalAccess(getInstAccess().convertToEquationAccess());
+	eq InstDot.convertToEquationAccess() {
+		List<InstAccess> l = new List<InstAccess>();
+		List<InstAccess> instAccessList = getInstAccessListNoTransform();
+		int numInstAccess = instAccessList.getNumChildNoTransform();
+		for (int i = 0; i < numInstAccess - 1; i++)
+			l.add(instAccessList.getChildNoTransform(i).fullCopy());
+		l.add(instAccessList.getChildNoTransform(numInstAccess - 1).convertToEquationAccess());
+		return new InstDot(l);
+	}
+	eq InstArrayAccess.convertToEquationAccess() = new InstEquationArrayAccess(getID(), getFArraySubscripts());
+	eq InstScalarAccess.convertToEquationAccess() = new InstEquationAccess(getID());
+	eq InstClassAccess.convertToEquationAccess() = new InstEquationAccess(getID());
+	
+	
 	inh InstNode InstAccess.equationLookupScope();
 	eq InstDot.getInstAccess(int i).equationLookupScope() = 
 		(i == 0) ? equationLookupScope() : getInstAccessNoListTrans(i - 1).myInstComponentDecl();
@@ -7,17 +23,32 @@ aspect InstLookupEquations{
 	eq InstRoot.getChild().equationLookupScope() = null;
 	eq FlatRoot.getChild().equationLookupScope() = null;
 	
-	syn FAbstractEquation InstAccess.myEquation();
+	syn FAbstractEquation InstAccess.myEquation() {
+		throw new UnsupportedOperationException();
+	}
 	eq InstDot.myEquation() = getLastInstAccess().myEquation();
-	
-	eq InstNamedAccess.myEquation() = equationLookupScope().memberEquation(getID());
-	
+	eq InstEquationAccess.myEquation() = equationLookupScope().memberEquation(getID());
+	eq InstEquationArrayAccess.myEquation() = equationLookupScope().memberEquation(getID());
 	eq InstGlobalAccess.myEquation() = getInstAccess().myEquation();
 	
 	syn FAbstractEquation InstNode.memberEquation(String name) {
 		for (FAbstractEquation eqn : getFAbstractEquations()) {
-			if (eqn.getName().equals(name))
-				return eqn;
+			FAbstractEquation match = eqn.memberEquation(name);
+			if (match != null)
+				return match;
+		}
+		return null;
+	}
+	
+	syn FAbstractEquation FAbstractEquation.memberEquation(String name) = hasName() && getName().name().equals(name) ? this : null;
+	eq InstForClauseE.memberEquation(String name) {
+		FAbstractEquation match = super.memberEquation(name);
+		if (match != null)
+			return match;
+		for (FAbstractEquation eqn : getFAbstractEquations()) {
+			match = eqn.memberEquation(name);
+			if (match != null)
+				return match;
 		}
 		return null;
 	}

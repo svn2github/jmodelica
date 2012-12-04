@@ -75,6 +75,7 @@ aspect TransformCanonical {
 		genAlgorithmFunctions();
 		genBindingEquations();
 		scalarize();
+		propagateResidualPairs();
 		genInitArrayStatements();
         enableIfEquationElimination();
 		functionInliningIfSet();
@@ -5786,4 +5787,29 @@ aspect RuntimeOptions {
 	syn boolean FVisibilityType.isRuntimeOptionVisibility()     = false;
 	eq FRuntimeOptionVisibilityType.isRuntimeOptionVisibility() = true;
 	
+}
+
+aspect ResidualPairPropagation{
+	
+	private void FClass.propagateResidualPairs() {
+		for (FResidualPair pair : getFResidualPairs()) {
+			pair.propagate();
+		}
+	}
+	
+	protected void FResidualPair.propagate() {
+		FAbstractEquation fae = getResidualEquation().myFEquation();
+		if (fae == null) {
+			error("Unable to find fae");
+			return;
+		}
+		FAbstractVariable fv = getIterationVariable().myFV();
+		int otherLevel = fae.hasResidual() ? fae.getResidual().getLevel() : Integer.MAX_VALUE;
+		if (otherLevel == getLevel()) {
+			error("Same level, decalred twise?");
+			return;
+		}
+		if (otherLevel > getLevel())
+			fae.setResidual(new FResidual(new Opt<FIdUse>(getIterationVariable().fullCopy()), getLevel()));
+	}
 }

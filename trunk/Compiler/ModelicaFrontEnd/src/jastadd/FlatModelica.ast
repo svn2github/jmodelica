@@ -37,7 +37,8 @@ FClass : BaseNode ::= FQName
                       FRecordDecl*
                       FEnumDecl*
                       FDerivedType*
-                      /UnknownFVariable/; 
+                      /UnknownFVariable/
+                      FResidualPair*;
 
 /**
  * \brief A flattened user-defined function.
@@ -483,7 +484,7 @@ FInitialEquation : FEquationType;
 abstract FAbstractEquation : BaseNode ::= Type:FEquationType
                                           /InitialEquation:FEquation*/ 
                                           /[DynamicFAbstractEquation:FAbstractEquation]/
-                                          <Name:String>
+                                          [Name:FQName]
                                           [Residual:FResidual];
 
 /**
@@ -505,10 +506,15 @@ FEquation : FAbstractEquation ::= Left:FExp Right:FExp;
 FFunctionCallEquation : FAbstractEquation ::= Left:FFunctionCallLeft* Call:FAbstractFunctionCall;
 
 /**
- * \brief A class for storing hand guided tearing variables.
+ * A class for storing hand guided tearing on component level.
  */
-FResidual : BaseNode ::= [IterationVariable:FExp];
-InstResidual : FResidual ::= <Scope:InstNode> [Enabled:FExp];
+FResidual : BaseNode ::= [IterationVariable:FIdUse] <Level:int>;
+InstResidual : FResidual ::= [Enabled:FExp];
+
+/**
+ * A class for storing hand guided tearing on system level.
+ */
+FResidualPair : BaseNode ::= ResidualEquation:FIdUse IterationVariable:FIdUse <Level:int>;
 
 /**
  * \brief One of the left hand side variables in a function call equation. 

@@ -65,6 +65,34 @@ aspect Scalarization {
 	
 	protected void FClass.scalarizeAllVarDependent(List<FVariable> vars) {
 		scalarizeEquations(vars);
+		scalarizeResidualPairs();
+	}
+	
+	protected void FClass.scalarizeResidualPairs() {
+		List<FResidualPair> newPairs = new List<FResidualPair>();
+		for (FResidualPair pair : getFResidualPairs()) {
+			pair.scalarize(newPairs);
+		}
+		setFResidualPairList(newPairs);
+	}
+	
+	protected void FResidualPair.scalarize(List<FResidualPair> pairs) {
+		if (!getResidualEquation().size().equals(getIterationVariable().size())) {
+			error("Residual equation and iteration variable have different sizes.");
+			return;
+		}
+		if (getResidualEquation().ndims() > 0) {
+			Iterator<Index> resIt = getResidualEquation().indices().iterator();
+			Iterator<Index> iterIt = getIterationVariable().indices().iterator();
+			while (resIt.hasNext() && iterIt.hasNext()) {
+				pairs.addChild(new FResidualPair(getResidualEquation().specify(resIt.next(), true), getIterationVariable().specify(iterIt.next(), true), getLevel()));
+			}
+			if (resIt.hasNext() || iterIt.hasNext())
+				error("Residual equation and iteration variable have different sizes.");
+		} else {
+			Map<String,FExp> emptyMap = Collections.emptyMap();
+			pairs.addChild(new FResidualPair(getResidualEquation().scalarize(emptyMap), getIterationVariable().scalarize(emptyMap), getLevel()));
+		}
 	}
 	
 	protected void FClass.scalarizeEquations(List<FVariable> vars) {
@@ -1109,21 +1137,51 @@ aspect Scalarization {
 			 * the equations is "scalarized" into a simple equation where
 			 * e.g. built in functions are replaced by elementary operations.
 			 */
-			createScalarFEquations(eqns, indexMap, hasResidual() ? getResidual().scalarize(indexMap, null) : null, getLeft(), getRight());
+			
+			FQName name = null;
+			if (hasName()) {
+				name = getName();
+				if (!name.hasFArraySubscripts()) {
+					List<FSubscript> list = extendedNameSubscript();
+					name = name.copyAndAddFas(new FArraySubscripts(list));
+					setName(name);
+				}
+				name = name.scalarize(indexMap);
+			}
+			FResidual residual = null;
+			if (hasResidual())
+				residual = getResidual().scalarize(indexMap, null);
+			createScalarFEquations(eqns, indexMap, name, residual, getLeft(), getRight());
 		} else if (ndims() > 0) {
 			/*
 			 * If the expression is an array expression, then the FExp.getArray()
 			 * element is used to generate scalar equations.
 			 */
 			// Iterate over array elements and create scalarized equation for each
-			for (Index i : indices()) 
-				createScalarFEquations(eqns, indexMap, hasResidual() ? getResidual().scalarize(indexMap, i) : null,
-						getLeft().getArray().get(i), getRight().getArray().get(i));
+			for (Index i : indices()) {
+				FQName name = null;
+				if (hasName())
+					name = getName().specify(i, true);
+				FResidual residual = null;
+				if (hasResidual())
+					residual = getResidual().scalarize(indexMap, i);
+				createScalarFEquations(eqns, indexMap, name, residual, getLeft().getArray().get(i), getRight().getArray().get(i));
+			}
 		} else {
 			throw new UnsupportedOperationException("Bad equation: ndims() for equation '" + 
 					this + "' returned " + ndims()); 
 		}
 	}
+	
+	inh List<FSubscript> FAbstractEquation.extendedNameSubscript();
+	eq FForClauseE.getChild().extendedNameSubscript() {
+		List<FSubscript> list = extendedNameSubscript();
+		for (FForIndex fi : getFForIndexs()) 
+			list.addChild(new FExpSubscript(new FIdUseExp(fi.getFVariable().name())));
+		return list;
+	}
+	eq FlatRoot.getChild().extendedNameSubscript() = new List<FSubscript>();
+	eq InstRoot.getChild().extendedNameSubscript() = new List<FSubscript>();
 	
 	public void FAlgorithmBlock.scalarize(List<FAbstractEquation> eqns,
 			List<FVariable> vars, Map<String,FExp> indexMap) {		
@@ -1140,19 +1198,20 @@ aspect Scalarization {
 	 * \brief Scalarize left and right expressions and create new scalar equations.
 	 */
 	public void FEquation.createScalarFEquations(
-			List<FAbstractEquation> eqns, Map<String,FExp> indexMap, FResidual residual, FExp left, FExp right) {
+			List<FAbstractEquation> eqns, Map<String,FExp> indexMap, FQName name, FResidual residual, FExp left, FExp right) {
 		if (left.inferType().isRecord()) 
 			left.inferType().scalarRecordFEquations(eqns, new FQNameEmpty(), indexMap, left, right);
 		else
-			eqns.add(new FEquation(residual, left.scalarize(indexMap), right.scalarize(indexMap)));
+			eqns.add(new FEquation(name, residual, left.scalarize(indexMap), right.scalarize(indexMap)));
 	}
 	
 	public FResidual FResidual.scalarize(Map<String,FExp> indexMap, Index i) {
 		FResidual scalarized = new FResidual();
+		scalarized.setLevel(getLevel());
 		if (hasIterationVariable()) {
-			FExp iterationVariable = getIterationVariable();
+			FIdUse iterationVariable = getIterationVariable();
 			if (i != null)
-				iterationVariable = iterationVariable.getArray().get(i);
+				iterationVariable = iterationVariable.specify(i, false);
 			scalarized.setIterationVariable(iterationVariable.scalarize(indexMap));
 		}
 		return scalarized;

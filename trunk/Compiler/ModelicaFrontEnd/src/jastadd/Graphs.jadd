@@ -1625,12 +1625,10 @@ public class BiPGraph {
 					keepTogether.add(e);
 				}
 				if (e.getEquation().hasResidual() && e.getEquation().getResidual().hasIterationVariable()) {
-					FExp exp = e.getEquation().getResidual().getIterationVariable();
-					for (FVariable fVar : exp.referencedFVariablesInFExp()) {
-						Var var = getVariable(fVar.name());
-						if (var != null) {
-							keepTogether.add(var.getMatching());
-						}
+					FVariable fVar = e.getEquation().getResidual().iterationVariable();
+					Var var = getVariable(fVar.name());
+					if (var != null) {
+						keepTogether.add(var.getMatching());
 					}
 				}
 			}

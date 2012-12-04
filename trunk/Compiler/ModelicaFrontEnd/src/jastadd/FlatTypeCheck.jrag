@@ -252,6 +252,13 @@ aspect FlatTypeCheck {
   eq FIdUseExp.isAccess()      = true;
   eq FInstAccessExp.isAccess() = true;
   
+	syn boolean FExp.isInstAccess()  = false;
+	eq FInstAccessExp.isInstAccess() = true;
+	syn InstAccess FExp.asInstAccess() {
+		throw new UnsupportedOperationException();
+	}
+	eq FInstAccessExp.asInstAccess() = getInstAccess();
+	
   syn boolean FExp.isAccessToStream()  = false;
   eq FIdUseExp.isAccessToStream()      = getFIdUse().isAccessToStream();
   eq FInstAccessExp.isAccessToStream() = getInstAccess().isAccessToStream();

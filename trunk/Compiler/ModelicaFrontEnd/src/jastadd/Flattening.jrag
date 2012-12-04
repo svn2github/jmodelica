@@ -50,6 +50,7 @@ aspect Flattening {
 		}
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
+		createAndFlattenResidualPairs(fc);
 		flattenUsedFuncsAndEnums(fc);
 		flattenInstClassDeclExtra(fc);
 		fc.genConnectionEquations();
@@ -1046,17 +1047,70 @@ aspect Flattening {
 	syn FResidual FResidual.flatten(FQName prefix) {
 		throw new UnsupportedOperationException();
 	}
-	eq InstResidual.flatten(FQName prefix) {
+	eq InstResidual.flatten(FQName prefix) {  
 		if (hasEnabled()) {
 			if (!getEnabled().ceval().booleanValue())
 				return null;
 		}
 		FResidual flattened = new FResidual();
+		flattened.setLevel(getLevel());
 		if (hasIterationVariable())
-			flattened.setIterationVariable(getIterationVariable().flatten(hasScope() ? getScope().getFQName() : prefix));
+			flattened.setIterationVariable(getIterationVariable().flatten(prefix));
 		return flattened;
 	}
-
+	
+    /**
+     * \brief Find functions, record and enumeration declarations that need to be flattened.
+     */
+	protected void ASTNode.createAndFlattenResidualPairs(FClass fc) {
+		for (ASTNode n : this)
+			n.createAndFlattenResidualPairs(fc);
+	}
+	
+	protected void InstNode.createAndFlattenResidualPairs(FClass fc) {
+		if (!root().options.getBooleanOption("enable_hand_guided_tearing"))
+			return;
+		getInstComponentDecls().createAndFlattenResidualPairs(fc);
+		FQName prefix = getFQName();
+		for (AnnotationNode pair : classAnnotation().vendorNode().forPath("tearingPairs")) {
+			if (!pair.name().equals("Pair"))
+				continue;
+			Exp enabledExp = pair.forPath("enabled").exp();
+			if (enabledExp != null) {
+				try {
+					if (!dynamicFExp(enabledExp.instantiate()).ceval().booleanValue()) {
+						continue;
+					}
+				} catch (ConstantEvaluationException e) {
+					enabledExp.error("Could not evaluate enabled expression: " + enabledExp);
+					continue;
+				}
+			}
+			Exp iterationVariableExp = pair.forPath("iterationVariable").exp();
+			FQName iterationVariableName = null;
+			if (iterationVariableExp == null) {
+				pair.ast().error("Iteration variable definition is missing from tearing pair.");
+			} else if (!iterationVariableExp.isAccess()) {
+				iterationVariableExp.error("Illegal variable reference");
+			} else {
+				InstAccess ia = iterationVariableExp.asAccess().instantiate();
+				iterationVariableName = dynamicFExp(new FInstAccessExp(ia)).asInstAccess().flatten(prefix);
+			}
+			Exp residualEquationExp = pair.forPath("residualEquation").exp();
+			FQName residualEquationName = null;
+			if (residualEquationExp == null) {
+				pair.ast().error("Residual equation definition is missing from tearing pair.");
+			} else if (!residualEquationExp.isAccess()) {
+				iterationVariableExp.error("Illegal equation reference");
+			} else {
+				InstAccess ia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
+				residualEquationName = dynamicFExp(new FInstAccessExp(ia)).asInstAccess().flatten(prefix);
+			}
+			if (iterationVariableName != null && residualEquationName != null)
+				fc.addFResidualPair(new FResidualPair(new FIdUse(residualEquationName), new FIdUse(iterationVariableName), prefix.numDots() + prefix.numParts()));
+		}
+	}
+	
 }
 
 aspect FlatteningDebug {
@@ -1119,7 +1173,16 @@ aspect FlatExpressions {
 	}
 
 	public FEquation FEquation.flattenEqn(FQName prefix, FClass fc) {
-		return new FEquation(getType().flatten(prefix), getName(), hasResidual() ? getResidual().flatten(prefix) : null, getLeft().flatten(prefix), getRight().flatten(prefix));
+		FEquation flattened = new FEquation(getType().flatten(prefix), getLeft().flatten(prefix), getRight().flatten(prefix));
+		if (hasName()) {
+			if (ndims() > 0)
+				flattened.setName(prefix.copyAndAppend(getName(), getLeft().size().createExpandedFArraySubscripts()));
+			else
+				flattened.setName(prefix.copyAndAppend(getName()));
+		}
+		if (hasResidual())
+			flattened.setResidual(getResidual().flatten(prefix));
+		return flattened;
 	}
 
 	public FForClauseE InstForClauseE.flattenEqn(FQName prefix, FClass fc) {
@@ -1880,73 +1943,46 @@ aspect InstantiatedExpressions {
 	}
 
 	public FAbstractEquation Equation.instantiate() {
-		return copyLocationTo(new FEquation(equationType(), computeName(), buildResidual(), 
+		return copyLocationTo(new FEquation(equationType(), buildNameOpt(), buildResidualOpt(), 
 				getLeft().instantiate(), getRight().instantiate()));
 	}
 	
-	protected String Equation.computeName() {
+	private Opt<FQName> Equation.buildNameOpt() {
 		AnnotationNode nameNode = annotation().vendorNode().forPath("name");
 		if (!nameNode.exists())
-			return null;
+			return new Opt<FQName>();
+		Exp nameExp = nameNode.exp();
+		if (nameExp == null)
+			nameNode.ast().error("Name annotation is incorrect");
+		else if (!nameExp.isAccess() || !nameExp.asAccess().isNamed() || nameExp.asAccess().isArrayAccess())
+			nameExp.error("Illegal equation name \"%s\"", nameExp);
 		else
-			return nameNode.string();
+			return new Opt<FQName>(new FQNameString(nameExp.asAccess().asID()));
+		return new Opt<FQName>();
 	}
 	
 	/**
 	 * Builds a FResidual instance for "this" equation.  
 	 */
-	protected FResidual Equation.buildResidual() {
+	private Opt<FResidual> Equation.buildResidualOpt() {
 		if (!root().options.getBooleanOption("enable_hand_guided_tearing"))
-			return null;
+			return new Opt<FResidual>();
 		AnnotationNode residualNode = annotation().vendorNode().forPath("ResidualEquation");
 		if (!residualNode.exists())
-			return null;
+			return new Opt<FResidual>();
 		InstResidual residual = new InstResidual();
+		residual.setLevel(Integer.MAX_VALUE);
 		Exp enabledExp = residualNode.forPath("enabled").exp();
 		if (enabledExp != null)
 			residual.setEnabled(enabledExp.instantiate());
 		Exp iterationVariableExp = residualNode.forPath("iterationVariable").exp();
-		if (iterationVariableExp != null)
-			residual.setIterationVariable(iterationVariableExp.instantiate());
-		return residual;
-	}
-	
-	public void InstNode.propagateResiduals() {
-		if (!root().options.getBooleanOption("enable_hand_guided_tearing"))
-			return;
-		for (AnnotationNode pair : classAnnotation().vendorNode().forPath("tearingPairs")) {
-			if (!pair.name().equals("Pair"))
-				continue;
-			Exp enabledExp = pair.forPath("enabled").exp();
-			if (enabledExp != null)
-				try {
-					if (!dynamicFExp(enabledExp.instantiate()).ceval().booleanValue()) {
-						continue;
-					}
-				} catch (ConstantEvaluationException e) {
-					enabledExp.error("Could not evaluate enabled expression: " + enabledExp);
-					continue;
-				}
-			Exp variableExp = pair.forPath("iterationVariable").exp();
-			if (variableExp == null) {
-				pair.ast().warning("Iteration variable definition is missing from tearing pair.");
-				continue;
-			}
-			Opt<FExp> variableOpt = new Opt<FExp>(variableExp.instantiate());
-			Exp equationExp = pair.forPath("residualEquation").exp();
-			if (equationExp == null) {
-				pair.ast().warning("Residual equation definition is missing from tearing pair.");
-				continue;
-			}
-			FAbstractEquation equation = dynamicFExp(equationExp.instantiate()).referencedEquation();
-			if (equation == null) {
-				equationExp.error("Unable to find equation definition " + equationExp.toString());
-				continue;
-			}
-			if (!equation.hasResidual() || (equation.hasResidual() && !equation.getResidual().hasScope()))
-				// If residual set and scope is set then the residual has been set on a higher level.
-				equation.setResidual(new InstResidual(variableOpt, this, new Opt<FExp>()));
-		}
+		if (iterationVariableExp == null)
+			residualNode.ast().error("Iteration variable annotation is incorrect");
+		else if (!iterationVariableExp.isAccess())
+			iterationVariableExp.error("Illegal variable reference");
+		else
+			residual.setIterationVariable(new FIdUseInstAccess(iterationVariableExp.asAccess().instantiate()));
+		return new Opt<FResidual>(residual);
 	}
 	
 	public FAbstractEquation ConnectClause.instantiate() {

@@ -566,7 +566,6 @@ aspect InstanceErrorCheck {
   public void InstNode.collectErrors() {
     if (!errorChecked) {
       errorChecked = true;
-      propagateResiduals();
 	  allChecks();
 	  for (InstNode n : getInstComponentDecls()) 
 		  n.collectErrors();
