@@ -234,7 +234,7 @@ public class OptionRegistry {
 			 compiler, 
 			 false, 
 			 "When this option is set to true (default is false) model diagnostics is generated in HTML format. " +
-		     "This includes the flattened model, connection sets, alias sets and BLT form."), 
+			 "This includes the flattened model, connection sets, alias sets and BLT form."), 
 		EXPORT_FUNCS 
 			("export_functions", 
 			 compiler, 
@@ -264,11 +264,19 @@ public class OptionRegistry {
 			 false,
 			 "Debug option, outputs a csv file containing profiling recorded during compilation. Default is false."),
 		RUNTIME_PARAM
-		    ("generate_runtime_option_parameters",
-		     compiler,
-		     true,
-		     "Generate parameters for runtime options. For internal use, should always be true for normal compilation."),
-			 
+			("generate_runtime_option_parameters",
+			 compiler,
+			 true,
+			 "Generate parameters for runtime options. For internal use, should always be true for normal compilation."),
+		WRITE_ITERATION_VARIABLES
+			("write_iteration_variables_to_file",
+			 compiler,
+			 false,
+			 "If the option is set to true (default is false), two text files named " +
+			 "<Model name>_iteration_variables.txt and <Model name>_initial_system_iteration_variables.txt " +
+			 "containing one iteration variable name per row is written to disk. The files contains " +
+			 "the iteration variables for the DAE and the DAE initialization system respectively"),
+		
 		// Runtime options
         /*
 		 * Note: Two JUnit tests are affected by changes to runtime options:

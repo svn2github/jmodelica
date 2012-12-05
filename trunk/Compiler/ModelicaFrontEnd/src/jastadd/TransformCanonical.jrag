@@ -15,6 +15,7 @@
 */
 
 //import java.util.ArrayDeque;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -146,6 +147,13 @@ aspect TransformCanonical {
 				str.append("-------------------------------\n");
 			}
 			return str.toString();
+		}
+		
+		public void writeIterationVariablesToFile(File file) throws FileNotFoundException {
+			PrintStream out = new PrintStream(file);
+			for (AbstractEquationBlock block : this)
+				block.printIterationVariables(out);
+			out.close();
 		}
 		
 	}
@@ -572,6 +580,8 @@ aspect TransformCanonical {
 		public boolean mergeBlock(AbstractEquationBlock block) {
 			return false;
 		}
+		
+		protected void printIterationVariables(PrintStream str) {}
 	
 	}
 
@@ -1325,15 +1335,20 @@ aspect TransformCanonical {
 			}
 			str.append("Solved equations:\n");
 			for(FAbstractEquation feq : solvedEquations()){
-				str.append("  " + feq.prettyPrint("") + "\n");			
+				str.append("  " + feq.prettyPrint("") + "\n");
 			}	
 			str.append("Residual equations:\n");
 			for (FAbstractEquation feq : unsolvedEquations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");			
+				str.append("  " + feq.prettyPrint("") + "\n");
 			}
 			return str.toString();
 		}
 	
+		protected void printIterationVariables(PrintStream str) {
+			for (AbstractEquationBlock block : unsolvedBlocks)
+				for (FVariable var : block.activeVariables())
+					str.println(var.name());
+		}
 	}
 
 	public class AlgorithmBlock extends SimpleEquationBlock {

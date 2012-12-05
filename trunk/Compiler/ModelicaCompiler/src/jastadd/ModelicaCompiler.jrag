@@ -1375,19 +1375,26 @@ public class ModelicaCompiler {
 			log.debug("... transformed .mof file created.");
 		}
 		
-		log.info("Diagnostics for transformed flattened model:");		
+		log.info("Diagnostics for transformed flattened model:");
 		log.info(new Object() {
 			public String toString() {
 				return fc.diagnostics();
 			};
 		});
 		
-		log.info("Transformed flattened model:");		
+		log.info("Transformed flattened model:");
 		log.info(fc);
 		
 		ASTNode.endStep("prettyPrintFlat()");
 		
 		Collection<Problem> problems = fc.errorCheck();
+		
+		if (fc.root().options.getBooleanOption("write_iteration_variables_to_file")) {
+			ASTNode.beginStep("writeIterationVariables()");
+			fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
+			fc.getDAEInitBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_initial_system_iteration_variables.txt"));
+			ASTNode.endStep("writeIterationVariables()");
+		}
 		
 		if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
 			ASTNode.beginStep("htmlDiagnostics()");
