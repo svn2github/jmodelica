@@ -72,6 +72,9 @@ IPOPT_HOME =
 # SUNDIALS home
 SUNDIALS_HOME =
 
+# TABLES home
+JMTABLES_HOME =
+
 # Additional library directories
 EXT_LIB_DIRS =
 
@@ -116,10 +119,12 @@ SHARED_LDFLAGS = -shared -Wl,-rpath,'$$ORIGIN',--no-undefined
 JMI_INC_DIR = ${JMODELICA_HOME}/include
 CPPAD_INC_DIR = $(CPPAD_HOME)
 SUNDIALS_INC_DIR = $(SUNDIALS_HOME)/include
+JMTABLES_INC_DIR = ${JMTABLES_HOME}/include
 
 # Directories with libraries
 JMI_LIB_DIR = ${JMODELICA_HOME}/lib
 SUNDIALS_LIB_DIR = $(SUNDIALS_HOME)/lib
+TABLES_LIB_DIR = $(JMTABLES_HOME)/lib
 
 # Libraries necessary to link with jmi
 # Reused parts
@@ -131,15 +136,13 @@ LIB_JMIAD    = -L$(JMI_LIB_DIR) -ljmi_cppad
 LIB_EXTRA_AD = -ljmi_algorithm_cppad -ljmi_solver_cppad
 LIB_IPOPT    = `PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig pkg-config --libs ipopt`
 # For different targets
-LIBS_CPPAD   = $(LIB_JMIAD) -lfmi    $(LIB_SUNDIALS)
-LIBS_NOCPPAD = $(LIB_JMIC)  -lfmi    $(LIB_COMMON)
-LIBS_FMUME   = $(LIB_JMIC)  -lfmi    $(LIB_COMMON)
+LIBS_FMUME   = $(LIB_JMIC)  -lfmi  -ltblAccess  $(LIB_COMMON) -L$(TABLES_LIB_DIR)
 LIBS_FMUCS   = $(LIB_JMIC)  -lfmi_cs $(LIB_COMMON)
 LIBS_IPOPT   = $(LIB_JMIAD) -lfmi    $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)
-INCL_NOCPPAD = -I$(JMI_INC_DIR) $(EXT_INC_DIRS) -I$(SUNDIALS_INC_DIR)
+INCL_NOCPPAD = -I$(JMI_INC_DIR) $(EXT_INC_DIRS) -I$(SUNDIALS_INC_DIR) -I$(JMTABLES_INC_DIR)
 
 # set variable to correct makefile (for recursive call in fmume/fmucs)
 MAKEFILE = $(lastword $(MAKEFILE_LIST))
@@ -149,7 +152,7 @@ fmume:
 
 fmume_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)  $(LIBS_FMUME)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)  $(LIBS_FMUME)
 	$(RM) $(OBJS)
 
 fmucs:

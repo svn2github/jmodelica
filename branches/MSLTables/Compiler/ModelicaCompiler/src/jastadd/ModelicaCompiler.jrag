@@ -2381,6 +2381,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 		vars.put("EXT_LIBS", varFromList(ext_libs)!=null? 
                       (varFromList(ext_libs) + " " + varFromList(ext_libs)): null);
 		vars.put("EXT_INC_DIRS", varFromList(ext_incl_dirs, INC_OP));
+		vars.put("JMTABLES_HOME", getEnv().get("JMTABLES_HOME"));
 	}
 	
 	/**
