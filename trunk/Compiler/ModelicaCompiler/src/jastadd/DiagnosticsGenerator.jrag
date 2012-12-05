@@ -182,48 +182,48 @@ public class DiagnosticsGenerator {
 				for (AbstractEquationBlock eb : fc.getDAEInitBLT()) {
 					out.print("<pre>\n");
 					out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + ind + "\">Block " + ind + (eb.isSolvable() ? "" : (" (Unsolvable block " + unSInd++ +")")) + "</a> ---\n");
-					out.print(eb.toString()+"\n");
+					eb.prettyPrint(out);
 					out.print("</pre>\n");
 					ind++;
 				}
 				ind = 0;
 				unSInd = 0;
-				out.print("<h2>BLT for DAE system </h2>\n");	
+				out.print("<h2>BLT for DAE system </h2>\n");
 				out.print("<h3> ODE blocks </h3>\n");	
 				// Loop over all derivatives
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOdeBlocks()) {
 					out.print("<pre>\n");
 					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolvable block " + unSInd++ +")")) + " ---\n");
-					out.print(eb.toString()+"\n");
-					out.print("</pre>\n");					
+					eb.prettyPrint(out);
+					out.print("</pre>\n");
 				}
-				out.print("<h3> Real output blocks </h3>\n");	
+				out.print("<h3> Real output blocks </h3>\n");
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getRealOutputBlocks()) {
 					out.print("<pre>\n");
 					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolvable block " + unSInd++ +")")) + " ---\n");
-					out.print(eb.toString()+"\n");
-					out.print("</pre>\n");					
+					eb.prettyPrint(out);
+					out.print("</pre>\n");
 				}
 				out.print("<h3> Integer and boolean output blocks </h3>\n");	
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getIntegerBooleanOutputBlocks()) {
 					out.print("<pre>\n");
 					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolvable block " + unSInd++ +")")) + " ---\n");
-					out.print(eb.toString()+"\n");
-					out.print("</pre>\n");	
+					eb.prettyPrint(out);
+					out.print("</pre>\n");
 				}
-				out.print("<h3> Other output blocks </h3>\n");					
+				out.print("<h3> Other output blocks </h3>\n");
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOtherBlocks()) {
 					out.print("<pre>\n");
 					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolvable block " + unSInd++ +")")) + " ---\n");
-					out.print(eb.toString()+"\n");
-					out.print("</pre>\n");					
+					eb.prettyPrint(out);
+					out.print("</pre>\n");
 				}		
 			}
 			out.print("</pre>\n");	
 			out.print(html_tail);
 		   	out.close();
 		} catch(FileNotFoundException e) {
-		} catch(UnsupportedEncodingException e) {		
+		} catch(UnsupportedEncodingException e) {
 		} 
 	}
 
@@ -763,7 +763,7 @@ public class DiagnosticsGenerator {
 	public void FunctionCallEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, PrintStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
 		varFilter = new HashMap<FVariable, Integer>();
 		int index = 0;
-		for (FVariable var : functionCallEquation.referencedFVariablesInLHS()) {
+		for (FVariable var : equation().referencedFVariablesInLHS()) {
 			varFilter.put(var, -1);
 		}
 		

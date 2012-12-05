@@ -1708,7 +1708,7 @@ aspect CCodeGen {
 	}
 	
 	public void UnsolvedFunctionCallEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		functionCallEquation.genResidual_C(enumerator,indent,str, visited, new HashSet<FVariable>(activeVars));
+		equation().genResidual_C(enumerator,indent,str, visited, new HashSet<FVariable>(activeVars));
 	}
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
@@ -1722,11 +1722,11 @@ aspect CCodeGen {
 	}
 	
 	public void SolvedScalarEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		eqn.genSolvedBlock_C(fv, indent, str);
+		equation().genSolvedBlock_C(fv, indent, str);
 	}
 	
 	public void SolvedFunctionCallEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		functionCallEquation.genAssignment_C(indent, str, visited, new HashSet<FVariable>(activeVars));
+		equation().genAssignment_C(indent, str, visited, new HashSet<FVariable>(activeVars));
 	}
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {}
@@ -1809,7 +1809,7 @@ aspect CCodeGen {
 	}
 
 	public void SolvedScalarEquationBlock.genBlock_C(Enumerator enumerator, boolean inInitial, String indent, PrintStream str) {
-	    FExp sol = eqn.solution(fv.name());
+	    FExp sol = equation().solution(fv.name());
 		sol.genTempVars_C(ASTNode.printer_C, str, indent);
 		str.format("%s%s = ", indent, fv.name_C());
 		sol.prettyPrint_C(str, indent);
@@ -1817,11 +1817,11 @@ aspect CCodeGen {
 	}
 
 	public void SolvedFunctionCallEquationBlock.genBlock_C(Enumerator enumerator, boolean inInitial, String indent, PrintStream str) {
-	 	if (!functionCallEquation.getCall().isIgnored()) {
-			functionCallEquation.genTempVars_C(ASTNode.printer_C, str, indent);
-			functionCallEquation.getCall().prettyPrint_C(str, indent);
+	 	if (!equation().getCall().isIgnored()) {
+			equation().genTempVars_C(ASTNode.printer_C, str, indent);
+			equation().getCall().prettyPrint_C(str, indent);
 			str.print(";\n");
-			for (FFunctionCallLeft l : functionCallEquation.getLefts()) 
+			for (FFunctionCallLeft l : equation().getLefts()) 
 				l.genWriteBackAssignment_C(str, indent, null);
 		}
 	}
@@ -1832,15 +1832,15 @@ aspect CCodeGen {
 		 // }
 		
 		// TODO: Add support for else when clauses
-		for (FExp g : whenEquation.guards()) {		
+		for (FExp g : equation().guards()) {		
 			g.genTempVars_C(ASTNode.printer_C, str, indent);
 			str.format("%s_guards(%d) = ", indent, g.guardExpInEquationsIndex());
 			g.prettyPrint_C(str,"");
 			str.print(";\n");
 		}
-		int j = whenEquation.guards().size();
+		int j = equation().guards().size();
 		str.print("  if(");
-		for (FExp g : whenEquation.guards()) {
+		for (FExp g : equation().guards()) {
 			if (j>1) {
 				str.print("LOG_EXP_OR(");
 			}		
@@ -1854,7 +1854,7 @@ aspect CCodeGen {
 			}		
 			j--;
 		}		
-		for (int k = 0;k<whenEquation.guards().size()-1;k++) {
+		for (int k = 0;k<equation().guards().size()-1;k++) {
 			str.print(")");
 		}
 		str.print(") {\n");

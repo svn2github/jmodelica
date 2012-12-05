@@ -1120,8 +1120,8 @@ aspect CADCodeGen {
 	 * @param PrintStream str, the c-code is written to this stream
 	 */
 	public void SolvedFunctionCallEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {
-		if (!functionCallEquation.getCall().isIgnored()) {
-			functionCallEquation.genFuncCall_CAD("", str);
+		if (!equation().getCall().isIgnored()) {
+			equation().genFuncCall_CAD("", str);
 		}
 	}
 	
@@ -1134,7 +1134,7 @@ aspect CADCodeGen {
 	 * @param PrintStream str, the c-code is written to this stream
 	 */
 	public void SolvedScalarEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {	
-		eqn.genSolvedBlock_CAD(fv,indent,str);
+		equation().genSolvedBlock_CAD(fv,indent,str);
 	}
 	
 	

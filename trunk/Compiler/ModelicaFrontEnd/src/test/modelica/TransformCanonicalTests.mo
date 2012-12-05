@@ -5902,7 +5902,9 @@ Solved equations:
   u0 = u1 + u2
 Residual equations:
   u2 = ( R3 ) * ( i3 )
+    Iteration variables: i2
   u2 = ( R2 ) * ( i2 )
+    Iteration variables: i3
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6093,6 +6095,7 @@ Solved equations:
   (TransformCanonicalTests.RecordTearingTest2.R(r.x, r.y)) = TransformCanonicalTests.RecordTearingTest2.F(x, y)
 Residual equations:
   (TransformCanonicalTests.RecordTearingTest2.R(r.x, r.y)) = TransformCanonicalTests.RecordTearingTest2.F(x, y)
+    Iteration variables: x
 -------------------------------
       ")})));
 end RecordTearingTest2;
@@ -6128,6 +6131,7 @@ Tearing variables:
 Solved equations:
 Residual equations:
   (x, y) = TransformCanonicalTests.RecordTearingTest3.F(y, x)
+    Iteration variables: x, y
 -------------------------------
       ")})));
 end RecordTearingTest3;
@@ -6167,6 +6171,7 @@ Solved equations:
   (x, y) = TransformCanonicalTests.RecordTearingTest4.F(v, v)
 Residual equations:
   v = x + y
+    Iteration variables: v
 -------------------------------
       ")})));
 end RecordTearingTest4;
@@ -6215,7 +6220,9 @@ Solved equations:
   (e, f) = TransformCanonicalTests.RecordTearingTest5.F(c, d)
 Residual equations:
   (e, f) = TransformCanonicalTests.RecordTearingTest5.F(c, d)
+    Iteration variables: f
   (a, b) = TransformCanonicalTests.RecordTearingTest5.F(e, f)
+    Iteration variables: a, b
 -------------------------------
       ")})));
 end RecordTearingTest5;
@@ -6269,7 +6276,9 @@ Solved equations:
   i1 = i2 + i3
 Residual equations:
   u1 = ( R1 ) * ( i1 )
+    Iteration variables: i3
   u2 = ( R2 ) * ( i2 )
+    Iteration variables: i2
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6340,8 +6349,11 @@ Solved equations:
   u1 = ( R1 ) * ( i1 )
 Residual equations:
   u0 = u1 + u2
+    Iteration variables: i2
   i1 = i2 + i3
+    Iteration variables: i1
   u2 = ( R3 ) * ( i3 )
+    Iteration variables: i3
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6412,8 +6424,11 @@ Solved equations:
   u1 = ( R1 ) * ( i1 )
 Residual equations:
   u0 = u1 + u2
+    Iteration variables: i2
   i1 = i2 + i3
+    Iteration variables: i3
   u2 = ( R2 ) * ( i2 )
+    Iteration variables: i1
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -7290,6 +7305,7 @@ Solved equations:
   a[1] = c[1] + 1
 Residual equations:
   a[1] = b[1] + 2
+    Iteration variables: b[1]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7302,6 +7318,7 @@ Solved equations:
   a[2] = c[2] + 1
 Residual equations:
   a[2] = b[2] + 2
+    Iteration variables: b[2]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7314,6 +7331,7 @@ Solved equations:
   a[3] = c[3] + 1
 Residual equations:
   a[3] = b[3] + 2
+    Iteration variables: b[3]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7326,6 +7344,7 @@ Solved equations:
   a[4] = c[4] + 1
 Residual equations:
   a[4] = b[4] + 2
+    Iteration variables: b[4]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7338,6 +7357,7 @@ Solved equations:
   a[5] = c[5] + 1
 Residual equations:
   a[5] = b[5] + 2
+    Iteration variables: b[5]
 -------------------------------
       ")})));
 end HandGuidedTearing15;
@@ -7376,6 +7396,7 @@ Solved equations:
   a[1] = b[1] + 2
 Residual equations:
   c[1] = b[1] - ( 3 )
+    Iteration variables: c[1]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7388,6 +7409,7 @@ Solved equations:
   a[2] = b[2] + 2
 Residual equations:
   c[2] = b[2] - ( 3 )
+    Iteration variables: c[2]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7400,6 +7422,7 @@ Solved equations:
   a[3] = b[3] + 2
 Residual equations:
   c[3] = b[3] - ( 3 )
+    Iteration variables: c[3]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7412,6 +7435,7 @@ Solved equations:
   a[4] = b[4] + 2
 Residual equations:
   c[4] = b[4] - ( 3 )
+    Iteration variables: c[4]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7424,6 +7448,7 @@ Solved equations:
   a[5] = b[5] + 2
 Residual equations:
   c[5] = b[5] - ( 3 )
+    Iteration variables: c[5]
 -------------------------------
       ")})));
 end HandGuidedTearing16;
@@ -7483,10 +7508,15 @@ Solved equations:
   a[5] = b[5] + 2
 Residual equations:
   c[5] = b[5] - ( 3 )
+    Iteration variables: c[5]
   c[4] = b[4] - ( 3 )
+    Iteration variables: c[4]
   c[3] = b[3] - ( 3 )
+    Iteration variables: c[3]
   c[2] = b[2] - ( 3 )
+    Iteration variables: c[2]
   c[1] = b[1] - ( 3 )
+    Iteration variables: c[1]
 -------------------------------
       ")})));
 end HandGuidedTearing17;
@@ -7538,6 +7568,7 @@ Solved equations:
   a.x = b.y + 2
 Residual equations:
   a.x = a.y + 1
+    Iteration variables: b.x
 -------------------------------
 ")})));
 end HandGuidedTearing18;
@@ -7592,6 +7623,7 @@ Solved equations:
   c.a.x = c.b.y + 2
 Residual equations:
   c.a.x = c.a.y + 1
+    Iteration variables: c.b.x
 -------------------------------
 ")})));
 end HandGuidedTearing19;
@@ -7646,6 +7678,7 @@ Solved equations:
   c.a.x = c.b.y + 2
 Residual equations:
   c.a.x = c.a.y + 1
+    Iteration variables: c.b.x
 -------------------------------
 ")})));
 end HandGuidedTearing20;
@@ -7703,6 +7736,7 @@ Solved equations:
   c.a.x = c.b.y + 2
 Residual equations:
   c.a.x = c.a.y + 1
+    Iteration variables: c.b.x
 -------------------------------
 ")})));
 end HandGuidedTearing21;
@@ -7760,6 +7794,7 @@ Solved equations:
   c.a.x = c.b.y + 2
 Residual equations:
   c.a.x = c.a.y + 1
+    Iteration variables: c.b.x
 -------------------------------
 ")})));
 end HandGuidedTearing22;
@@ -7817,6 +7852,7 @@ Solved equations:
   c.a.x = c.b.y + 2
 Residual equations:
   c.a.x = c.a.y + 1
+    Iteration variables: c.b.y
 -------------------------------
 ")})));
 end HandGuidedTearing23;
@@ -7853,6 +7889,7 @@ Solved equations:
   a[1] = b[1] .+ 2
 Residual equations:
   c[1] = b[1] .- ( 3 )
+    Iteration variables: c[1]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7865,6 +7902,7 @@ Solved equations:
   a[2] = b[2] .+ 2
 Residual equations:
   c[2] = b[2] .- ( 3 )
+    Iteration variables: c[2]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7877,6 +7915,7 @@ Solved equations:
   a[3] = b[3] .+ 2
 Residual equations:
   c[3] = b[3] .- ( 3 )
+    Iteration variables: c[3]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7889,6 +7928,7 @@ Solved equations:
   a[4] = b[4] .+ 2
 Residual equations:
   c[4] = b[4] .- ( 3 )
+    Iteration variables: c[4]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7901,6 +7941,7 @@ Solved equations:
   a[5] = b[5] .+ 2
 Residual equations:
   c[5] = b[5] .- ( 3 )
+    Iteration variables: c[5]
 -------------------------------
       ")})));
 end HandGuidedTearing24;
@@ -7939,6 +7980,7 @@ Solved equations:
   a[1] = b[1] .+ 2
 Residual equations:
   c[1] = b[1] .- ( 3 )
+    Iteration variables: c[1]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7951,6 +7993,7 @@ Solved equations:
   a[2] = b[2] .+ 2
 Residual equations:
   c[2] = b[2] .- ( 3 )
+    Iteration variables: c[2]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7963,6 +8006,7 @@ Solved equations:
   a[3] = b[3] .+ 2
 Residual equations:
   c[3] = b[3] .- ( 3 )
+    Iteration variables: c[3]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7975,6 +8019,7 @@ Solved equations:
   a[4] = b[4] .+ 2
 Residual equations:
   c[4] = b[4] .- ( 3 )
+    Iteration variables: c[4]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -7987,6 +8032,7 @@ Solved equations:
   a[5] = b[5] .+ 2
 Residual equations:
   c[5] = b[5] .- ( 3 )
+    Iteration variables: c[5]
 -------------------------------
       ")})));
 end HandGuidedTearing25;
@@ -8027,6 +8073,7 @@ Solved equations:
   a[1] = b[1] .+ 2
 Residual equations:
   c[1] = b[1] .- ( 3 )
+    Iteration variables: c[1]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -8039,6 +8086,7 @@ Solved equations:
   a[2] = c[2] .+ 1
 Residual equations:
   c[2] = b[2] .- ( 3 )
+    Iteration variables: b[2]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -8051,6 +8099,7 @@ Solved equations:
   a[3] = c[3] .+ 1
 Residual equations:
   c[3] = b[3] .- ( 3 )
+    Iteration variables: b[3]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -8063,6 +8112,7 @@ Solved equations:
   a[4] = c[4] .+ 1
 Residual equations:
   c[4] = b[4] .- ( 3 )
+    Iteration variables: a[4]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -8075,6 +8125,7 @@ Solved equations:
   a[5] = c[5] .+ 1
 Residual equations:
   c[5] = b[5] .- ( 3 )
+    Iteration variables: a[5]
 -------------------------------
       ")})));
 end HandGuidedTearing26;
@@ -8120,6 +8171,7 @@ Solved equations:
   a[1] = b[1] + 2
 Residual equations:
   c[1] = b[1] - ( 3 )
+    Iteration variables: c[1]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -8132,6 +8184,7 @@ Solved equations:
   a[2] = c[2] + 1
 Residual equations:
   c[2] = b[2] - ( 3 )
+    Iteration variables: b[2]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -8144,6 +8197,7 @@ Solved equations:
   a[3] = c[3] + 1
 Residual equations:
   c[3] = b[3] - ( 3 )
+    Iteration variables: b[3]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -8156,6 +8210,7 @@ Solved equations:
   a[4] = c[4] + 1
 Residual equations:
   c[4] = b[4] - ( 3 )
+    Iteration variables: a[4]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -8168,6 +8223,7 @@ Solved equations:
   a[5] = c[5] + 1
 Residual equations:
   c[5] = b[5] - ( 3 )
+    Iteration variables: a[5]
 -------------------------------
       ")})));
 end HandGuidedTearing27;
@@ -8313,6 +8369,7 @@ Solved equations:
   a.b.x[1] = a.b.z[1] .+ 1
 Residual equations:
   a.b.z[1] = a.b.y[1] .- ( 3 )
+    Iteration variables: a.b.y[1]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -8325,6 +8382,7 @@ Solved equations:
   a.b.x[2] = a.b.y[2] .+ 2
 Residual equations:
   a.b.z[2] = a.b.y[2] .- ( 3 )
+    Iteration variables: a.b.z[2]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -8337,6 +8395,7 @@ Solved equations:
   a.b.x[3] = a.b.z[3] .+ 1
 Residual equations:
   a.b.z[3] = a.b.y[3] .- ( 3 )
+    Iteration variables: a.b.y[3]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -8349,6 +8408,7 @@ Solved equations:
   a.b.x[4] = a.b.z[4] .+ 1
 Residual equations:
   a.b.z[4] = a.b.y[4] .- ( 3 )
+    Iteration variables: a.b.x[4]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
@@ -8361,6 +8421,7 @@ Solved equations:
   a.b.x[5] = a.b.z[5] .+ 1
 Residual equations:
   a.b.z[5] = a.b.y[5] .- ( 3 )
+    Iteration variables: a.b.x[5]
 -------------------------------
       ")})));
 end HandGuidedTearing29;

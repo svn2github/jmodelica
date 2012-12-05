@@ -797,20 +797,18 @@ aspect FlatPrettyPrint {
 	    }
 	}
 	
-	public String FVariable.printFAttributes(String ... attributes) {
-		StringBuilder sb = new StringBuilder();
+	public void FVariable.printFAttributes(PrintStream str, String ... attributes) {
 		boolean first = true;
 		for (String attribute : attributes) {
 			if (attributeSet(attribute)) {
 				if (!first)
-					sb.append(',');
+					str.print(',');
 				first = false;
-				sb.append(attribute);
-				sb.append('=');
-				sb.append(attributeExp(attribute));
+				str.print(attribute);
+				str.print('=');
+				str.print(attributeExp(attribute));
 			}
 		}
-		return sb.toString();
 	}
 
 	

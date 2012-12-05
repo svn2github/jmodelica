@@ -18,6 +18,7 @@
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Queue;
 import java.util.Set;
@@ -421,8 +422,7 @@ aspect TransformCanonical {
 		private Set<AbstractEquationBlock> predecessors = new LinkedHashSet<AbstractEquationBlock>();
 		private Set<AbstractEquationBlock> successors = new LinkedHashSet<AbstractEquationBlock>();
 		private Set<FVariable> dependsOnVariables = null; 
-	    private boolean visited = false;
-	    
+		private boolean visited = false;
 		private boolean predecessorsSet = false;
 	
 		public abstract Collection<FAbstractEquation> equations();
@@ -559,23 +559,13 @@ aspect TransformCanonical {
 			visited  = false;	
 		}
 		
-		public String toStringVerbose() {	
-			StringBuffer str = new StringBuffer();
-			str.append("**** Block ****\n");
-			str.append(toString());
-			str.append("**** Depends on ****\n");
-			for (FVariable fv : dependsOn()) {
-				str.append(fv.prettyPrint("") + "\n");
-			} 
-			str.append("**** Inactive variables ****\n");
-			for (FVariable fv : inactiveVariables()) {
-				str.append(fv.prettyPrint("") + "\n");
-			} 
-			str.append("**** Block ends ****\n");
-			return str.toString();
+		public final String toString() {
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			prettyPrint(new NotNullPrintStream(os));
+			return os.toString();
 		}
-	
-		public abstract String toString();
+		
+		public abstract void prettyPrint(PrintStream str);
 		
 		public boolean mergeBlock(AbstractEquationBlock block) {
 			return false;
@@ -584,12 +574,6 @@ aspect TransformCanonical {
 		protected void printIterationVariables(PrintStream str) {}
 	
 	}
-
-   /**
-    * SimpleEquationBlock is the base class of ScalarEquationBlock, FunctionCallEquationBlock
-    * AlgorithmBLock and WhenEquationBlock.
-    */
-   public abstract class SimpleEquationBlock extends AbstractEquationBlock {}
 
 	/**
 	 * EquationBlock is a general block that may contain one or more
@@ -605,55 +589,45 @@ aspect TransformCanonical {
 		}
 				
 		public void addBlock(SimpleEquationBlock b) {
-			for (SimpleEquationBlock block : blocks) {
+			for (SimpleEquationBlock block : blocks)
 				if (block.mergeBlock(b))
 					return;
-			}
 			blocks.add(b);
 		}	
 		
 		public Collection<FVariable> activeVariables() {
 			Collection<FVariable> l = new ArrayList<FVariable>();
-			for (SimpleEquationBlock sb : blocks) {
+			for (SimpleEquationBlock sb : blocks)
 				l.addAll(sb.activeVariables());
-			}
 			return l;
 		}		
 
 		public Collection<FAbstractEquation> equations() {
 			Collection<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
-			for (SimpleEquationBlock sb : blocks) {
-				l.addAll(sb.equations());
-			}
+			for (SimpleEquationBlock sb : blocks)
+				l.add(sb.equation());
 			return l;
 		}
 		
 		public boolean isSolvable() {
 			return false;	
 		}
-				
+
 		public boolean containsDerivative() {
-			for (FVariable fv : activeVariables()) {
-				if (fv.isDerivativeVariable()) {
+			for (FVariable fv : activeVariables())
+				if (fv.isDerivativeVariable())
 					return true;
-				}
-			}
 			return false;
-		}				
-					  						
-		public String toString() {
-			StringBuffer str = new StringBuffer();
-			str.append("Non-solved block of " + activeVariables().size() + " variables:\n");
-			str.append("Unknown variables:\n");
-			for (FVariable fv : activeVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}
-			str.append("Equations:\n");
-			for (FAbstractEquation feq : equations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");	
-			}
-			
-			return str.toString();
+		}
+
+		public void prettyPrint(PrintStream str) {
+			str.println("Non-solved block of " + activeVariables().size() + " variables:");
+			str.println("Unknown variables:");
+			for (SimpleEquationBlock seb : blocks)
+				seb.prettyPrintActiveVariables(str);
+			str.println("Equations:");
+			for (SimpleEquationBlock seb : blocks)
+				seb.prettyPrintEquation(str);
 		}
 	
 	}
@@ -727,42 +701,31 @@ aspect TransformCanonical {
 		public FExp[][] getJacobian() {
 			return jacobian;	
 		}
-	
-		public String toString() {
-			StringBuffer str = new StringBuffer();
-			str.append("Non-solved linear block of " + activeVariables().size() + " variables:\n");
-			str.append("Coefficient variability: " + (isConstant()? "Constant":
+
+		public void prettyPrint(PrintStream str) {
+			str.println("Non-solved linear block of " + activeVariables().size() + " variables:");
+			str.println("Coefficient variability: " + (isConstant()? "Constant":
 			                                          isParameter()? "Parameter":
 			                                          isDiscrete()? "Discrete":
 			                                          isContinuous()? "Continuous":
-			                                          "Unknown") + "\n");
-			str.append("Unknown variables:\n");
-			for (FVariable fv : activeVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}
-/*			str.append("Inactive variables:\n");
-			for (FVariable fv : inactiveVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}*/
-			str.append("Equations:\n");
-			for (FAbstractEquation feq : equations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");	
-				//str.append("    Is linear: " + feq.checkLinearity(new HashSet<FVariable>(activeVariables())) + "\n");					
-			}
-					
-			str.append("Jacobian:\n");
+			                                          "Unknown"));
+			str.println("Unknown variables:");
+			for (SimpleEquationBlock seb : blocks)
+				seb.prettyPrintActiveVariables(str);
+			str.println("Equations:");
+			for (SimpleEquationBlock seb : blocks)
+				seb.prettyPrintEquation(str);
+			str.println("Jacobian:");
 			for (int col=0;col<equations().size();col++) {
-				str.append("  |");
+				str.print("  |");
 				for (int row=0;row<equations().size();row++) {
-					str.append(jacobian[col][row].prettyPrint(""));
+					str.print(jacobian[col][row].prettyPrint(""));
 					if (row<equations().size()-1) {
-						str.append(", ");	
+						str.print(", ");	
 					}
 				}
-				str.append("|\n");
+				str.println("|");
 			}
-			
-			return str.toString();
 		}
 
 
@@ -781,72 +744,65 @@ aspect TransformCanonical {
 		
 		public Collection<FVariable> activeContinuousVariables() {
 			Collection<FVariable> l = new ArrayList<FVariable>();
-			for (FVariable fv : activeVariables()) {
+			for (FVariable fv : activeVariables())
 				if (fv.isReal())
 					l.add(fv);
-			}
 			return l;
-			//return variableList(matchingPairs, REAL_MATCHING_PAIR_FILTER);
 		}
 
 		public Collection<FVariable> activeDiscreteVariables() {
 			Collection<FVariable> l = new ArrayList<FVariable>();
-			for (FVariable fv : activeVariables()) {
+			for (FVariable fv : activeVariables())
 				if (!fv.isReal())
 					l.add(fv);
-			}
 			return l;
-			//return variableList(matchingPairs, NON_REAL_MATCHING_PAIR_FILTER);
 		}
 
 		public Collection<FAbstractEquation> continuousEquations() {
 			Collection<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
-			for (SimpleEquationBlock sb : blocks) {
-				for (FAbstractEquation e : sb.equations()) {
-					if (!e.isDiscrete())
-						l.add(e);
-				}
-			}
+			for (SimpleEquationBlock seb : continuousEquationBlocks())
+				l.add(seb.equation());
 			return l;
-			//return equationList(matchingPairs, REAL_MATCHING_PAIR_FILTER);
 		}
 
 		public Collection<FAbstractEquation> discreteEquations() {
 			Collection<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
-			for (SimpleEquationBlock sb : blocks) {
-				for (FAbstractEquation e : sb.equations()) {
-					if (e.isDiscrete())
-						l.add(e);
-				}
-			}
+			for (SimpleEquationBlock seb : discreteEquationBlocks())
+				l.add(seb.equation());
 			return l;
-			//return equationList(matchingPairs, NON_REAL_MATCHING_PAIR_FILTER);
 		}
 		
-		public String toString() {
-			StringBuffer str = new StringBuffer();
-			str.append("Mixed non-solved block of " + activeVariables().size() + " variables:\n");
-			str.append("Unknown continuous variables:\n");
-			for (FVariable fv : activeContinuousVariables()) {
-				str.append("  " + fv.name() + "\n");
+		public Collection<SimpleEquationBlock> continuousEquationBlocks() {
+			Collection<SimpleEquationBlock> l = new ArrayList<SimpleEquationBlock>();
+			for (SimpleEquationBlock seb : blocks) {
+				if (!seb.equation().isDiscrete())
+					l.add(seb);
 			}
-			str.append("Unknown discrete variables:\n");
-			for (FVariable fv : activeDiscreteVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}
-/*			str.append("Inactive variables:\n");
-			for (FVariable fv : inactiveVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}*/
-			str.append("Continuous equations:\n");
-			for (FAbstractEquation feq : continuousEquations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");			
-			}
-			str.append("Discrete equations:\n");
-			for (FAbstractEquation feq : discreteEquations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");			
-			}
-			return str.toString();
+			return l;
+		}
+
+		public Collection<SimpleEquationBlock> discreteEquationBlocks() {
+			Collection<SimpleEquationBlock> l = new ArrayList<SimpleEquationBlock>();
+			for (SimpleEquationBlock seb : blocks)
+				if (seb.equation().isDiscrete())
+					l.add(seb);
+			return l;
+		}
+		
+		public void prettyPrint(PrintStream str) {
+			str.println("Mixed non-solved block of " + activeVariables().size() + " variables:");
+			str.println("Unknown continuous variables:");
+			for (SimpleEquationBlock seb : continuousEquationBlocks())
+				seb.prettyPrintActiveVariables(str);
+			str.println("Unknown discrete variables:");
+			for (SimpleEquationBlock seb : discreteEquationBlocks())
+				seb.prettyPrintActiveVariables(str);
+			str.println("Continuous equations:");
+			for (SimpleEquationBlock seb : continuousEquationBlocks())
+				seb.prettyPrintEquation(str);
+			str.println("Discrete equations:");
+			for (SimpleEquationBlock seb : discreteEquationBlocks())
+				seb.prettyPrintEquation(str);
 		}
 	}
 
@@ -915,47 +871,39 @@ aspect TransformCanonical {
 		public FExp[][] getJacobian() {
 			return jacobian;	
 		}
-	
-		
-		public String toString() {
-			StringBuffer str = new StringBuffer();
-			str.append("Non-solved mixed linear block of " + activeVariables().size() + " variables:\n");
-			str.append("Coefficient variability: " + (isConstant()? "Constant":
+
+		public void prettyPrint(PrintStream str) {
+			str.println("Non-solved mixed linear block of " + activeVariables().size() + " variables:\n");
+			str.println("Coefficient variability: " + (isConstant()? "Constant":
 			                                          isParameter()? "Parameter":
 			                                          isDiscrete()? "Discrete":
 			                                          isContinuous()? "Continuous":
-			                                          "Unknown") + "\n");
+			                                          "Unknown"));
 		
-			str.append("Unknown continuous variables:\n");
-			for (FVariable fv : activeContinuousVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}
-			str.append("Unknown discrete variables:\n");
-			for (FVariable fv : activeDiscreteVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}
-			str.append("Continuous equations:\n");
-			for (FAbstractEquation feq : continuousEquations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");			
-			}
-			str.append("Discrete equations:\n");
-			for (FAbstractEquation feq : discreteEquations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");			
-			}
-					
-			str.append("Jacobian:\n");
-			for (int col=0;col<continuousEquations().size();col++) {
-				str.append("  |");
-				for (int row=0;row<continuousEquations().size();row++) {
-					str.append(jacobian[col][row].prettyPrint(""));
-					if (row<continuousEquations().size()-1) {
-						str.append(", ");	
+			Collection<SimpleEquationBlock> continuousEquationBlocks = continuousEquationBlocks();
+			str.println("Unknown continuous variables:");
+			for (SimpleEquationBlock seb : continuousEquationBlocks)
+				seb.prettyPrintActiveVariables(str);
+			str.println("Unknown discrete variables:");
+			for (SimpleEquationBlock seb : discreteEquationBlocks())
+				seb.prettyPrintActiveVariables(str);
+			str.println("Continuous equations:");
+			for (SimpleEquationBlock seb : continuousEquationBlocks)
+				seb.prettyPrintEquation(str);
+			str.println("Discrete equations:");
+			for (SimpleEquationBlock seb : discreteEquationBlocks())
+				seb.prettyPrintEquation(str);
+			str.println("Jacobian:");
+			for (int col=0;col<continuousEquationBlocks.size();col++) {
+				str.print("  |");
+				for (int row=0;row<continuousEquationBlocks.size();row++) {
+					str.print(jacobian[col][row].prettyPrint(""));
+					if (row<continuousEquationBlocks.size()-1) {
+						str.print(", ");
 					}
 				}
-				str.append("|\n");
+				str.println("|");
 			}
-			
-			return str.toString();
 		}
 
 		
@@ -963,50 +911,79 @@ aspect TransformCanonical {
 	}
 	
 	/**
+	 * SimpleEquationBlock is the base class of ScalarEquationBlock, FunctionCallEquationBlock
+	 * AlgorithmBLock and WhenEquationBlock.
+	 */
+	public abstract class SimpleEquationBlock extends AbstractEquationBlock {
+		private FAbstractEquation equation;
+		
+		public SimpleEquationBlock(FAbstractEquation equation) {
+			this.equation = equation;
+		}
+		
+		public FAbstractEquation equation() {
+			return equation;
+		}
+		
+		public Collection<FAbstractEquation> equations() {
+			return Arrays.asList(equation());
+		}
+		
+		public void prettyPrintActiveVariables(PrintStream str) {
+			prettyPrintActiveVariables(str, false);
+		}
+
+		public void prettyPrintActiveVariables(PrintStream str, boolean printAttributes) {
+			for (FVariable fv : activeVariables()) {
+				str.print("  " + fv.name());
+				if (printAttributes) {
+					str.print("(");
+					fv.printFAttributes(str, FAttribute.MIN, FAttribute.MAX, FAttribute.START, FAttribute.NOMINAL);
+					str.print(")");
+				}
+				str.println();
+			}
+		}
+		
+		public void prettyPrintEquation(PrintStream str) {
+			str.println("  " + equation());
+		}
+		
+		
+		public void prettyPrintIterationVariables(PrintStream str) {
+			str.print("    Iteration variables: ");
+			boolean first = true;
+			for (FVariable var : activeVariables()) {
+				if (!first)
+					str.print(", ");
+				first = false;
+				str.print(var.name());
+			}
+			str.println();
+		}
+
+	}
+
+	/**
 	 * ScalarEquationBlock represents a scalar equation. Base class for
 	 * SolvedScalarEquationBlock and UnsolvedScalarEquationBlock.
 	 */
 	public abstract class ScalarEquationBlock extends SimpleEquationBlock {
-		protected FEquation eqn;
 		protected FVariable fv;
 		
 		public ScalarEquationBlock(FEquation eqn, FVariable fv) {
-			this.eqn = eqn;
+			super(eqn);
 			this.fv = fv;
 		}
 		
-		public Collection<FAbstractEquation> equations() {
-			Collection<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
-			s.add(eqn);
-			return s;
+		public FEquation equation() {
+			return (FEquation) super.equation();
 		}
 		
 		public Collection<FVariable> activeVariables() {
-			Collection<FVariable> s = new ArrayList<FVariable>();
-			s.add(fv);
-			return s;
+			return Arrays.asList(fv);
 		}
 		
-		public boolean printStarted = false;
-
-		public String toString() {
-			StringBuffer str = new StringBuffer();
-			str.append("Non-solved block of " + activeVariables().size() + " variables:\n");
-			str.append("Unknown variables:\n");
-			for (FVariable fv : activeVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}
-/*			str.append("Inactive variables:\n");
-			for (FVariable fv : inactiveVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}*/
-			str.append("Equations:\n");
-			for (FAbstractEquation feq : equations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");			
-			}
-			return str.toString();
-		}	
-				
 	}
 	
 	/**
@@ -1022,26 +999,16 @@ aspect TransformCanonical {
 			return true;
 		}
 		
-		
 		public FExp solution() {
-			return eqn.solution(fv.name());
+			return equation().solution(fv.name());
 		}
 		
-		public String toString() {
-			
-			StringBuffer str = new StringBuffer();
-			str.append("Solved block of " + activeVariables().size() + " variables:\n"); 
-			str.append("Computed variable:\n");
-			for (FVariable fv : activeVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}
-/*			str.append("Inactive variables:\n");
-			for (FVariable fv : inactiveVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}*/
-			str.append("Solution:\n");
-			str.append("  " + solution().prettyPrint("") + "\n");
-			return str.toString();
+		public void prettyPrint(PrintStream str) {
+			str.println("Solved block of 1 variables:");
+			str.println("Computed variable:");
+			prettyPrintActiveVariables(str);
+			str.println("Solution:");
+			str.println("  " + solution());
 		}
 		
 	}
@@ -1059,6 +1026,14 @@ aspect TransformCanonical {
 			return false;
 		}
 		
+		public void prettyPrint(PrintStream str) {
+			str.println("Non-solved block of 1 variables:");
+			str.println("Unknown variables:");
+			prettyPrintActiveVariables(str);
+			str.println("Equations:");
+			prettyPrintEquation(str);
+		}
+
 	}
 
 	/**
@@ -1066,45 +1041,21 @@ aspect TransformCanonical {
 	 * and UnsolvedFunctionCallEquationBlock.
 	 */
 	public abstract class FunctionCallEquationBlock extends SimpleEquationBlock {
-		protected FFunctionCallEquation functionCallEquation;
+		
 		protected Collection<FVariable> activeVars = new LinkedHashSet<FVariable>();
 		
 		public FunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVars) {
-			this.functionCallEquation = eqn;
+			super(eqn);
 			this.activeVars.addAll(activeVars);
 		}
 		
-		public boolean isSolvable() {
-			return false;
-		}
-				
-		public Collection<FAbstractEquation> equations() {
-			return Arrays.asList((FAbstractEquation)functionCallEquation);
+		public FFunctionCallEquation equation() {
+			return (FFunctionCallEquation) super.equation();
 		}
 		
 		public Collection<FVariable> activeVariables() {
 			return new ArrayList<FVariable>(activeVars);
 		}
-		
-		public boolean printStarted = false;
-
-		public String toString() {
-			StringBuffer str = new StringBuffer();
-			str.append("Non-solved block of " + activeVariables().size() + " variables:\n");
-			str.append("Unknown variables:\n");
-			for (FVariable fv : activeVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}
-/*			str.append("Inactive variables:\n");
-			for (FVariable fv : inactiveVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}*/
-			str.append("Equations:\n");
-			for (FAbstractEquation feq : equations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");
-			}			
-			return str.toString();
-		}	
 		
 		public boolean mergeBlock(AbstractEquationBlock block) {
 			if (!(block instanceof FunctionCallEquationBlock))
@@ -1112,13 +1063,22 @@ aspect TransformCanonical {
 			
 			FunctionCallEquationBlock fceb = (FunctionCallEquationBlock) block;
 			
-			if (functionCallEquation != fceb.functionCallEquation)
+			if (equation() != fceb.equation())
 				return false;
 			
 			activeVars.addAll(fceb.activeVars);
 			return true;
 		}
-	}	
+		
+		public void prettyPrint(PrintStream str) {
+			str.print(isSolvable() ? "Solved" : "Non-solved");
+			str.println(" block of " + activeVariables().size() + " variables:");
+			str.println("Unknown variables:");
+			prettyPrintActiveVariables(str);
+			str.println("Equations:");
+			prettyPrintEquation(str);
+		}
+	}
 
 
 	/*
@@ -1134,24 +1094,6 @@ aspect TransformCanonical {
 			return true;
 		}
 		
-		public String toString() {
-			StringBuffer str = new StringBuffer();
-			str.append("Solved block of " + activeVariables().size() + " variables:\n");
-			str.append("Unknown variables:\n");
-			for (FVariable fv : activeVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}
-/*			str.append("Inactive variables:\n");
-			for (FVariable fv : inactiveVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}*/
-			str.append("Equations:\n");
-			for (FAbstractEquation feq : equations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");			
-			}
-			return str.toString();
-		}	
-		
 	}
 
 	/** 
@@ -1162,23 +1104,26 @@ aspect TransformCanonical {
 		public UnsolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVariables) {
 			super(eqn, activeVariables);
 		}
-			
+
+		public boolean isSolvable() {
+			return false;
+		}
+
 	}
 
 	/**
 	 * A when equation block.
 	 */
 	public class WhenEquationBlock extends SimpleEquationBlock {
-		protected FWhenEquation whenEquation;
 		// One list of blocks for each when branch
 		protected Collection<Collection<SimpleEquationBlock>> blocks = new ArrayList<Collection<SimpleEquationBlock>>(); 
 		protected Collection<FVariable> fvars = new ArrayList<FVariable>();
 				
 		public WhenEquationBlock(FWhenEquation whenEquation) {
-			this.whenEquation = whenEquation;
+			super(whenEquation);
 		
-			blocks.add(new ArrayList<SimpleEquationBlock>());		
-			for (FAbstractEquation eqn : whenEquation.getFAbstractEquations()) {
+			blocks.add(new ArrayList<SimpleEquationBlock>());
+			for (FAbstractEquation eqn : equation().getFAbstractEquations()) {
 				Collection<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
 				Collection<FVariable> fvs = new ArrayList<FVariable>();
 				eqns.add(eqn);
@@ -1193,39 +1138,71 @@ aspect TransformCanonical {
 		}
 		
 		public boolean isSolvable() {
-        	return true;
+			return true;
 		}
 		
-		public Collection<FAbstractEquation> equations() {
-			return Arrays.asList((FAbstractEquation)whenEquation);
+		public FWhenEquation equation() {
+			return (FWhenEquation) super.equation();
 		}
 		
 		public Collection<FVariable> activeVariables() {
 			return new ArrayList<FVariable>(fvars);
 		}
 		
-		public boolean printStarted = false;
-
-		public String toString() {
-			StringBuffer str = new StringBuffer();
-			str.append("When equation block of " + activeVariables().size() + " variables:\n");
-			str.append("Unknown variables:\n");
-			for (FVariable fv : activeVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}
-/*			str.append("Inactive variables:\n");
-			for (FVariable fv : inactiveVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}*/
-			str.append("Equations:\n");
-			for (FAbstractEquation feq : equations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");
-			}
-			return str.toString();
+		public void prettyPrint(PrintStream str) {
+			str.println("When equation block of " + activeVariables().size() + " variables:");
+			str.println("Unknown variables:");
+			prettyPrintActiveVariables(str);
+			str.println("Equations:");
+			prettyPrintEquation(str);
 		}
 		
 	}
 
+	public class AlgorithmBlock extends SimpleEquationBlock {
+		
+		public AlgorithmBlock(FAlgorithmBlock alg) {
+			super(alg);
+		}
+	
+		public FAlgorithmBlock equation() {
+			return (FAlgorithmBlock) super.equation();
+		}
+		
+		/*
+		 * The active variables are assigned their values when the block is solved.
+		 */
+		public Collection<FVariable> activeVariables() {
+			// - Find assigned variables
+			Collection<FVariable> assignedVars = new ArrayList<FVariable>();
+			for (FIdUse use : equation().assignedFIdUses()) {
+				if (!use.myFV().isUnknown() && !assignedVars.contains(use.myFV()))
+					assignedVars.add((FVariable) use.myFV());
+			}
+			return assignedVars;
+		}	
+		
+		public boolean isSolvable() {
+			return true;
+		}
+				
+		public boolean isMixed() {
+			return false;
+		}
+		
+		public Collection<FAbstractEquation> differentiatedEquations() {
+			return new ArrayList<FAbstractEquation>();
+		}
+		
+		public void prettyPrint(PrintStream str) {
+			str.println("Algorithm block of " + activeVariables().size() + " variables:");
+			str.println("Unknown variables:");
+			prettyPrintActiveVariables(str);
+			str.println("Algorithm:");
+			prettyPrintEquation(str);
+		}
+	}
+	
 	/**
 	 * TornEquationBlock represents an equation block resulting from tearing.
 	 */
@@ -1317,31 +1294,26 @@ aspect TransformCanonical {
 			return false;
 		}			
 		
-		public String toString() {
-			StringBuffer str = new StringBuffer();
+		public void prettyPrint(PrintStream str) {
 			Collection<FVariable> iterationVars = iterationVariables();
 			Collection<FVariable> solvedVars = activeVariables();
 			solvedVars.removeAll(iterationVars);
-
-			str.append("Torn block of " + iterationVars.size() + " tearing variables");
-			str.append(" and " + solvedVars.size() + " solved variables.\n");
-			str.append("Solved variables:\n");
-			for (FVariable fv : solvedVars) {
-				str.append("  " + fv.name() + "\n");
+			str.println("Torn block of " + iterationVars.size() + " tearing variables" +
+					" and " + solvedVars.size() + " solved variables.");
+			str.println("Solved variables:");
+			for (SimpleEquationBlock seb : solvedBlocks)
+				seb.prettyPrintActiveVariables(str);
+			str.println("Tearing variables:");
+			for (SimpleEquationBlock seb : unsolvedBlocks)
+				seb.prettyPrintActiveVariables(str, true);
+			str.println("Solved equations:");
+			for (SimpleEquationBlock seb : solvedBlocks)
+				seb.prettyPrintEquation(str);
+			str.println("Residual equations:");
+			for (SimpleEquationBlock seb : unsolvedBlocks) {
+				seb.prettyPrintEquation(str);
+				seb.prettyPrintIterationVariables(str);
 			}
-			str.append("Tearing variables:\n");
-			for (FVariable fv : iterationVars) {
-				str.append("  " + fv.name() + "(" + fv.printFAttributes(FAttribute.MIN, FAttribute.MAX, FAttribute.START, FAttribute.NOMINAL) + ")\n");
-			}
-			str.append("Solved equations:\n");
-			for(FAbstractEquation feq : solvedEquations()){
-				str.append("  " + feq.prettyPrint("") + "\n");
-			}	
-			str.append("Residual equations:\n");
-			for (FAbstractEquation feq : unsolvedEquations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");
-			}
-			return str.toString();
 		}
 	
 		protected void printIterationVariables(PrintStream str) {
@@ -1351,82 +1323,6 @@ aspect TransformCanonical {
 		}
 	}
 
-	public class AlgorithmBlock extends SimpleEquationBlock {
-		
-		protected FAlgorithmBlock alg;
-		
-		public AlgorithmBlock(FAlgorithmBlock alg) {
-			this.alg = alg;
-		}
-	
-		
-		public Collection<FAbstractEquation> equations() {
-			return Arrays.asList((FAbstractEquation)alg);
-		}
-		
-		/*
-		 * The active variables are assigned their values when the block is solved.
-		 */
-		public Collection<FVariable> activeVariables() {
-			// - Find assigned variables
-			Collection<FVariable> assignedVars = new ArrayList<FVariable>();
-			for (FIdUse use : alg.assignedFIdUses()) {
-				if (!use.myFV().isUnknown() && !assignedVars.contains(use.myFV()))
-					assignedVars.add((FVariable) use.myFV());
-			}
-			return assignedVars;
-		}	
-		
-		public boolean isSolvable() {
-			return true;
-		}
-				
-		public boolean isMixed() {
-			return false;
-		}
-		
-		public Collection<FAbstractEquation> differentiatedEquations() {
-			return new ArrayList<FAbstractEquation>();
-		}
-
-		
-		public String toStringVerbose() {	
-			StringBuffer str = new StringBuffer();
-			str.append("**** Block ****\n");
-			str.append(toString());
-			str.append("**** Depends on ****\n");
-			for (FVariable fv : dependsOn()) {
-				str.append(fv.prettyPrint("") + "\n");
-			} 
-			str.append("**** Inactive variables ****\n");
-			for (FVariable fv : inactiveVariables()) {
-				str.append(fv.prettyPrint("") + "\n");
-			} 
-		    str.append("**** Block ends ****\n");				
-			return str.toString();
-		}
-		
-		public String toString() {
-			StringBuffer str = new StringBuffer();
-			str.append("Algorithm block of " + activeVariables().size() + " variables:\n");
-			str.append("Unknown variables:\n");
-			for (FVariable fv : activeVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}
-/*			str.append("Inactive variables:\n");
-			for (FVariable fv : inactiveVariables()) {
-				str.append("  " + fv.name() + "\n");
-			}*/
-			str.append("Algorithm:\n");
-			for (FAbstractEquation feq : equations()) {
-				str.append("  " + feq.prettyPrint("") + "\n");	
-			}
-			
-			return str.toString();
-		}
-				
-	}
-	
 	syn lazy Set<FVariable> FVariable.dependsOn() {
 		if (myDAEEquationBlock() != null)
 			return myDAEEquationBlock().dependsOn();
