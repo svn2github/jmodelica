@@ -20,8 +20,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ModelicaUtilities.h"
-#include jmtables.h
-#include tblAccess.h
+#include "jmtables.h"
+#include "tblAccess.h"
 
 /* Table list constants*/
 #define INITIAL_SIZE 10
@@ -92,29 +92,32 @@ static int add_table(void* tbl) {
   return id;
 }
 
-static int table_init(const  char*  tableName, const  char*  fileName,
+static int table_init(const char* tableName, const char* fileName,
                       double const* table, int nRow, int nColumn,
                       const int interpolation,
                       const int dim) {
-  const int type;
-  const int* tblsize[2] = {nRow, nColumn};
-  const int extrapLow = EXTRAPOLATE_LINEAR;
-  const int extrapUp = EXTRAPOLATE_LINEAR;
+  int type, extrapLow, extrapUp;
+  void* tbl;
+  int tblsize[2];
+  tblsize[0] = nRow;
+  tblsize[1] = nColumn;
+  extrapLow = EXTRAPOLATE_LINEAR;
+  extrapUp = EXTRAPOLATE_LINEAR;
 
   if (strcmp(fileName, "NoName") == 0 || strcmp(fileName, "") == 0)
     type = TYPE_FROM_ARRAY;
   else
     type = TYPE_FROM_FILE;
 
-  void* tbl = ModelonTableCreate(dim,
-                                 interpolation,
-                                 extrapLow,
-                                 extrapUp,
-                                 type,
-                                 tblName,
-                                 flName,
-                                 tblData,
-                                 tblsize);
+  tbl = ModelonTableCreate(dim,
+                           interpolation,
+                           extrapLow,
+                           extrapUp,
+                           type,
+                           tableName,
+                           fileName,
+                           table,
+                           tblsize);
   return add_table(tbl);
 }
 
