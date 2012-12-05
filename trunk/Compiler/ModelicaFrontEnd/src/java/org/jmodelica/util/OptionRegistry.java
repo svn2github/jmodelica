@@ -272,10 +272,9 @@ public class OptionRegistry {
 			("write_iteration_variables_to_file",
 			 compiler,
 			 false,
-			 "If the option is set to true (default is false), two text files named " +
-			 "<Model name>_iteration_variables.txt and <Model name>_initial_system_iteration_variables.txt " +
-			 "containing one iteration variable name per row is written to disk. The files contains " +
-			 "the iteration variables for the DAE and the DAE initialization system respectively"),
+			 "If the option is set to true (default is false), two text files containing one iteration variable" +
+			 "name per row is written to disk. The files contains the iteration variables for the DAE and the" +
+			 "DAE initialization system respectively. The files are outputed to the resource directory"),
 		
 		// Runtime options
         /*
