@@ -26,6 +26,10 @@ $external_func_includes$
 #define C_GUID $C_guid$
 #include "fmiModelFunctions.h"
 
+static int model_ode_guards_init(jmi_t* jmi);
+static int model_init_R0(jmi_t* jmi, jmi_ad_var_vec_p res);
+static int model_ode_initialize(jmi_t* jmi);
+
 static const int N_real_ci = $n_real_ci$;
 static const int N_real_cd = $n_real_cd$;
 static const int N_real_pi = $n_real_pi$;

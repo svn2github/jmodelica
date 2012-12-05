@@ -124,9 +124,9 @@ public class XMLGenerator extends GenericGenerator {
 			genPrinter.print("variableNamingConvention=\"structured\" ");
 			genPrinter.print("numberOfContinuousStates=\""+fclass.numDifferentiatedRealVariables()+"\" ");
 			if (!fclass.root().options.getBooleanOption("generate_only_initial_system"))
-			    genPrinter.print("numberOfEventIndicators=\""+fclass.numEventIndicators()+"\"");
+			    genPrinter.print("numberOfEventIndicators=\"" + fclass.numEventIndicators() + "\"");
 			else
-			    genPrinter.print("numberOfEventIndicators=\"0\"");
+			    genPrinter.print("numberOfEventIndicators=\"" + (fclass.numEventIndicators() + fclass.numInitialEventIndicators()) + "\"");
 		}
 	}
 	

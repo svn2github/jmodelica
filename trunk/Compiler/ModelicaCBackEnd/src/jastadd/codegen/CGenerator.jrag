@@ -92,6 +92,8 @@ public class CGenerator extends GenericGenerator {
 		        Enumerator enumerator = new Enumerator();
 		        for (FRelExp e : fclass.relExpInEquations())
 		            e.genResidual_C(enumerator,INDENT,genPrinter);
+		    } else {
+		    	genPrinter.print("  model_init_R0(jmi, res);\n");
 		    }
 		}
 	
@@ -469,6 +471,8 @@ public class CGenerator extends GenericGenerator {
 					genPrinter.print(";\n");		
 					i++;
 				}
+			} else if (fclass.root().options.getBooleanOption("generate_only_initial_system") && fclass.root().options.getBooleanOption("generate_ode")) {
+				genPrinter.print("  model_ode_guards_init(jmi);\n");
 			}
 		}
 	}
@@ -629,6 +633,8 @@ public class CGenerator extends GenericGenerator {
 				fclass.getDAEStructuredBLT().genVarDecls_C(genPrinter, INDENT);
 				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");						
 				fclass.getDAEStructuredBLT().genOdeDerivativeBlocks(genPrinter);
+			} else if (fclass.root().options.getBooleanOption("generate_only_initial_system") && fclass.root().options.getBooleanOption("generate_ode")) {
+				genPrinter.print("  model_ode_initialize(jmi);\n");
 			}
 		}
 	}

@@ -655,11 +655,13 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			genPrinter.print(fclass.numEventIndicators());
+			if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
+				genPrinter.print(fclass.numEventIndicators());
+			} else {
+				genPrinter.print(fclass.numEventIndicators() + fclass.numInitialEventIndicators());
+			}
 		}
-	
 	}
-
 	
 	class DAETag_numInitialEquations extends DAETag {
 		
@@ -684,12 +686,14 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			genPrinter.print(fclass.numInitialEventIndicators());
+			if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
+				genPrinter.print(fclass.numInitialEventIndicators());
+			} else {
+				genPrinter.print(0);
+			}			
 		}
-	
 	}
 
-	
 	class DAETag_numInitialGuessEquations extends DAETag {
 		
 		public DAETag_numInitialGuessEquations(AbstractGenerator myGenerator, 

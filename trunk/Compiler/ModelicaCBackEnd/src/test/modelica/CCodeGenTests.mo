@@ -445,8 +445,11 @@ $C_ode_initialization$
 ",
 			generatedCode="
 
+model_ode_initialize(jmi);
 
+model_ode_guards_init(jmi);
 
+model_init_R0(jmi, res);
 
     model_ode_guards(jmi);
   _x2_1 = 1;
@@ -456,6 +459,44 @@ $C_ode_initialization$
   _w_4 = _x1_0 + _x2_1;
 ")})));
 end CCodeGenTest15;
+
+model CCodeGenTest16
+  Real x,y,z;
+initial equation
+ der(x) = if time>=1 then 1 elseif time>=2 then 3 else 5;
+equation
+ y - (if time>=5 then -z else z) + x = 3;
+ y + sin(z) + x = 5;
+ der(x) = -x + z;
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="CCodeGenTest16",
+			description="Test the compiler option generate_only_initial_system",
+			generate_ode=true,
+			generate_dae=false,
+			equation_sorting=true,
+			generate_only_initial_system=true,
+			template="
+$n_event_indicators$
+$n_initial_event_indicators$
+$C_DAE_initial_event_indicator_residuals$
+$C_ode_initialization$
+",
+			generatedCode="
+3
+0
+    (*res)[0] = _time - (AD_WRAP_LITERAL(5));
+    (*res)[1] = _time - (AD_WRAP_LITERAL(1));
+    (*res)[2] = _time - (AD_WRAP_LITERAL(2));
+
+     model_ode_guards(jmi);
+  _der_x_3 = COND_EXP_EQ(_sw_init(0), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(_sw_init(1), JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(5)));
+   ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+
+")})));
+end CCodeGenTest16;
+
 
 model CLogExp1
  Boolean x = true;
