@@ -174,11 +174,13 @@ fmiStatus fmi_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
 
 fmiStatus fmi_set_time(fmiComponent c, fmiReal time) {
     *(jmi_get_t(((fmi_t *)c)->jmi)) = time;
+    ((fmi_t *)c)->jmi->recomputeVariables = 1;
     return fmiOK;
 }
 
 fmiStatus fmi_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx) {
 	memcpy (jmi_get_real_x(((fmi_t *)c)->jmi), x, nx*sizeof(fmiReal));
+    ((fmi_t *)c)->jmi->recomputeVariables = 1;
     return fmiOK;
 }
 
@@ -189,6 +191,7 @@ fmiStatus fmi_completed_integrator_step(fmiComponent c, fmiBoolean* callEventUpd
 
 fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]) {
     /* Get the z vector*/
+    ((fmi_t *)c)->jmi->recomputeVariables = 1;
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
     fmiValueReference i;
@@ -211,6 +214,7 @@ fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
 
 fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]) {
     /* Get the z vector*/
+    ((fmi_t *)c)->jmi->recomputeVariables = 1;
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
     fmiValueReference i;
@@ -233,6 +237,7 @@ fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t 
 
 fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]) {
     /* Get the z vector*/
+    ((fmi_t *)c)->jmi->recomputeVariables = 1;
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
     fmiValueReference i;
@@ -255,6 +260,7 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
 
 fmiStatus fmi_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]) {
     /* Strings not yet supported. */
+    ((fmi_t *)c)->jmi->recomputeVariables = 1;
     (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiWarning, "INFO", "Strings are not yet supported.");
     return fmiWarning;
 }
@@ -521,10 +527,13 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
 }
 
 fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
-	fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
-	if(retval != 0) {
-		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
-		return fmiError;
+	if (((fmi_t *)c)->jmi->recomputeVariables==1) {
+		fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+		if(retval != 0) {
+			(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+			return fmiError;
+		}
+		((fmi_t *)c)->jmi->recomputeVariables = 0;
 	}
 	memcpy (derivatives, jmi_get_real_dx(((fmi_t *)c)->jmi), nx*sizeof(fmiReal));
 	return fmiOK;
@@ -533,10 +542,14 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
 fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
 	jmi_real_t *switches;
 	fmiValueReference i;
-	fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
-	if(retval != 0) {
-		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
-		return fmiError;
+	fmiInteger retval;
+	if (((fmi_t *)c)->jmi->recomputeVariables==1) {
+		retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+		if(retval != 0) {
+			(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+			return fmiError;
+		}
+		((fmi_t *)c)->jmi->recomputeVariables = 0;
 	}
 	retval = jmi_dae_R(((fmi_t *)c)->jmi,eventIndicators);
 	switches = jmi_get_sw(((fmi_t *)c)->jmi);
@@ -1072,46 +1085,47 @@ fmiStatus fmi_get_directional_derivative(fmiComponent c, const fmiValueReference
 	return fmiOK;
 }
 
-
 fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]) {
-    /* Get the z vector*/
+
+	fmiInteger retval;
+	if (((fmi_t *)c)->jmi->recomputeVariables==1) {
+		retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+		if(retval != 0) {
+			(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+			return fmiError;
+		}
+		((fmi_t *)c)->jmi->recomputeVariables = 0;
+	}
+
+	/* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
-    
+
     fmiValueReference i;
     fmiValueReference index;
-	
-	/* Make the derivative consistent if a derivative is output */
-	fmiValueReference derIndexMin;
-	fmiValueReference derIndexMax;
-	fmiBoolean updateDerivatives=fmiTrue;
-	fmiInteger retval;
-	derIndexMin=((fmi_t *)c)->jmi->offs_real_dx;
-	derIndexMax=((fmi_t *)c)->jmi->offs_real_dx+((fmi_t *)c)->jmi->n_real_dx-1;
 
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
         index = get_index_from_value_ref(vr[i]);
-
-		/* Update the derivatives if an index is a derivative */		
-		if (derIndexMax<=index && derIndexMin>=index) {
-			if (updateDerivatives) {
-				updateDerivatives=fmiFalse;
-				retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
-				if(retval != 0) {
-					(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed in fmiGetReal.");
-					return fmiError;
-				}				
-			}
-		}		
         
         /* Set value from z vector to return value array*/
-        value[i] = z[index];
+        value[i] = (fmiReal)z[index];
     }
+
     return fmiOK;
 }
 
 fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]) {
-    /* Get the z vector*/
+	fmiInteger retval;
+	if (((fmi_t *)c)->jmi->recomputeVariables==1) {
+		retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+		if(retval != 0) {
+			(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+			return fmiError;
+		}
+		((fmi_t *)c)->jmi->recomputeVariables = 0;
+	}
+
+	/* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
     fmiValueReference i;
@@ -1128,7 +1142,17 @@ fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t n
 }
 
 fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]) {
-    /* Get the z vector*/
+	fmiInteger retval;
+	if (((fmi_t *)c)->jmi->recomputeVariables==1) {
+		retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+		if(retval != 0) {
+			(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+			return fmiError;
+		}
+		((fmi_t *)c)->jmi->recomputeVariables = 0;
+	}
+
+	/* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
     fmiValueReference i;
@@ -1145,7 +1169,17 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
 }
 
 fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
-    /* Strings not yet supported. */
+	fmiInteger retval;
+	if (((fmi_t *)c)->jmi->recomputeVariables==1) {
+		retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+		if(retval != 0) {
+			(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+			return fmiError;
+		}
+		((fmi_t *)c)->jmi->recomputeVariables = 0;
+	}
+
+	/* Strings not yet supported. */
     int i;
     for(i = 0; i < nvr; i++) value[i] = 0;
     

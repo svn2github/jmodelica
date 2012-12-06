@@ -918,6 +918,8 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     realtype curtime = *(jmi_get_t(block->jmi));
     long int nniters = 0;
     
+    /*printf("jmi_kinsol_solver_solve called!\n");*/
+
     if(block->n == 1) {
         solver->f_pos_min_1d = BIG_REAL;
         solver->f_neg_max_1d = -BIG_REAL;
