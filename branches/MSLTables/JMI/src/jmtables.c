@@ -41,7 +41,7 @@
 static jmtables_t tables = {NULL, 0, 0};
 
 static int init_table_array() {
-  tables.next_id = 0;
+  tables.next_id = 1;
   tables.size = INITIAL_SIZE;
   tables.tblarray = (void**)calloc(INITIAL_SIZE, sizeof(void*));
 
@@ -63,13 +63,14 @@ static int double_array() {
   for (i = 0; i < pre_size; i++) {
       tables.tblarray[i] = old_array[i];
   }
+  free(old_array);
   return 0;
 }
 
 static int add_table(void* tbl) {
   /* Add the table tbl to array in tables struct and return table ID*/
   int retval;
-  int id = tables.next_id;
+  int id;
 
   if (tables.tblarray == NULL) {
       /* Initialize array*/
@@ -79,16 +80,17 @@ static int add_table(void* tbl) {
       }
   }
 
-  if (tables.size == tables.next_id) {
+  if (tables.size == tables.next_id-1) {
       /* Double array*/
       retval = double_array();
       if (retval != 0) {
-          ModelicaError("Failed to add new table. Could not double array.");
+          ModelicaError("Failed to add new table. Could not increase array.");
       }
   }
 
-  tables.tblarray[id] = tbl;
-  tables.next_id = id+1;
+  id = tables.next_id;
+  tables.tblarray[id-1] = tbl;
+  tables.next_id++;
   return id;
 }
 
@@ -129,11 +131,11 @@ int jmtables_1D_init(const  char*  tableName,
 }
 
 void jmtables_1D_close(int tableID) {
-  ModelonTableClose(tables.tblarray[tableID]);
+  ModelonTableClose(tables.tblarray[tableID-1]);
 }
 
 double jmtables_1D_interpolate(int tableID, int icol, double u) {
-  return ModelonTableInterp1(tables.tblarray[tableID], icol, u);
+  return ModelonTableInterp1(tables.tblarray[tableID-1], icol, u);
 }
 
 int jmtables_2D_init(const char*   tableName,
@@ -144,11 +146,11 @@ int jmtables_2D_init(const char*   tableName,
 }
 
 void jmtables_2D_close(int tableID) {
-  ModelonTableClose(tables.tblarray[tableID]);
+  ModelonTableClose(tables.tblarray[tableID-1]);
 }
 
 double jmtables_2D_interpolate(int tableID, double u1, double u2) {
-  return ModelonTableInterp2(tables.tblarray[tableID], u1, u2);
+  return ModelonTableInterp2(tables.tblarray[tableID-1], u1, u2);
 }
 
 int jmtables_timetable_init(const char*   tableName,
