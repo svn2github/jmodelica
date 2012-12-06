@@ -236,7 +236,9 @@ am__include_HEADERS_DIST = jmi.h fmiModelFunctions.h fmiModelTypes.h \
 	jmi_block_residual.h jmi_kinsol_solver.h jmi_linear_solver.h \
 	jmi_init_opt.h jmi_opt_coll.h jmi_opt_coll_radau.h \
 	jmi_array_common.h jmi_array_none.h jmi_array_cppad.h \
-	jmi_util.h $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
+	jmi_util.h \
+	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/C-Sources/ModelicaTables.h \
+	$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h \
 	jmi_opt_coll_ipopt.h jmi_init_opt_ipopt.h
@@ -542,7 +544,9 @@ include_HEADERS = jmi.h fmiModelFunctions.h fmiModelTypes.h \
 	jmi_block_residual.h jmi_kinsol_solver.h jmi_linear_solver.h \
 	jmi_init_opt.h jmi_opt_coll.h jmi_opt_coll_radau.h \
 	jmi_array_common.h jmi_array_none.h jmi_array_cppad.h \
-	jmi_util.h $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
+	jmi_util.h \
+	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/C-Sources/ModelicaTables.h \
+	$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h \
 	$(am__append_6)

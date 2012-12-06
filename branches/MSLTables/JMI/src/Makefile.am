@@ -215,6 +215,7 @@ include_HEADERS = jmi.h \
                   jmi_array_none.h \
                   jmi_array_cppad.h \
                   jmi_util.h \
+                  $(abs_top_srcdir)/ThirdParty/MSL/Modelica/C-Sources/ModelicaTables.h \
                   $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
                   $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
                   $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
