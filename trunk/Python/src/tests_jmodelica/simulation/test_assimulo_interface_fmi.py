@@ -25,7 +25,7 @@ from scipy.io.matlab.mio import loadmat
 
 from pymodelica.compiler import compile_jmu, compile_fmu
 from pyfmi.fmi_deprecated import FMUModel2
-from pyfmi.fmi import FMUModel, load_fmu
+from pyfmi.fmi import FMUModel, load_fmu, FMUException
 from pyfmi.common.io import ResultDymolaTextual
 from tests_jmodelica import testattr, get_files_path
 
@@ -294,6 +294,20 @@ class Test_FMI_ODE:
         solver = res.solver
         
         nose.tools.assert_almost_equal(solver.t, 1.856045, places=3)        
+
+    @testattr(assimulo = True)
+    def test_assert_raises_sensitivity_parameters(self):
+        """
+        This tests that an exception is raised if a sensitivity calculation
+        is to be perfomed and the parameters are not contained in the model.
+        """
+        fmu_name = compile_fmu('EventIter.EventMiddleIter', os.path.join(path_to_mos,'EventIter.mo'))
+
+        model = load_fmu(fmu_name)
+        opts = model.simulate_options()
+        opts["sensitivities"] = ["hej", "hopp"]
+        
+        nose.tools.assert_raises(FMUException,model.simulate,0,1,(),'AssimuloFMIAlg',opts)
 
     @testattr(assimulo = True)
     def test_event_iteration(self):

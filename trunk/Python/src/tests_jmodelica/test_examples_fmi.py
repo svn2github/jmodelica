@@ -88,3 +88,8 @@ def test_QR():
 def test_bouncingball_cs_sim():
     """ Test the FMI Bouncing Ball CS 1.0 example. """    
     fmi_bouncing_ball_cs.run_demo(False)
+
+@testattr(assimulo = True)
+def test_robertson_sensitivity_fmu():
+    """ Test the sensitivty example Robertson as an FMU. """
+    robertson_fmu.run_demo(False)
