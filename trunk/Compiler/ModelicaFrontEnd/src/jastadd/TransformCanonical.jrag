@@ -951,15 +951,15 @@ aspect TransformCanonical {
 		
 		
 		public void prettyPrintIterationVariables(PrintStream str) {
-			str.print("    Iteration variables: ");
 			boolean first = true;
 			for (FVariable var : activeVariables()) {
-				if (!first)
-					str.print(", ");
+				if (first)
+					str.print(" Iteration variables: ");
+				else
+					str.print("                      ");
 				first = false;
-				str.print(var.name());
+				str.println(var.name());
 			}
-			str.println();
 		}
 
 	}
@@ -1226,7 +1226,7 @@ aspect TransformCanonical {
 		public void addUnsolvedBlock(SimpleEquationBlock aeb) {
 			for (FVariable var : aeb.activeVariables()) {
 				if (!var.startAttributeSet())
-					var.warning("Tearing variable \"" + var.name() + "\" is missing start value!");
+					var.warning("Iteration variable \"" + var.name() + "\" is missing start value!");
 			}
 			if (!unsolvedBlocks.isEmpty() && unsolvedBlocks.get(unsolvedBlocks.size() - 1).mergeBlock(aeb))
 				return;
@@ -1298,12 +1298,12 @@ aspect TransformCanonical {
 			Collection<FVariable> iterationVars = iterationVariables();
 			Collection<FVariable> solvedVars = activeVariables();
 			solvedVars.removeAll(iterationVars);
-			str.println("Torn block of " + iterationVars.size() + " tearing variables" +
+			str.println("Torn block of " + iterationVars.size() + " iteration variables" +
 					" and " + solvedVars.size() + " solved variables.");
 			str.println("Solved variables:");
 			for (SimpleEquationBlock seb : solvedBlocks)
 				seb.prettyPrintActiveVariables(str);
-			str.println("Tearing variables:");
+			str.println("Iteration variables:");
 			for (SimpleEquationBlock seb : unsolvedBlocks)
 				seb.prettyPrintActiveVariables(str, true);
 			str.println("Solved equations:");
@@ -1311,8 +1311,8 @@ aspect TransformCanonical {
 				seb.prettyPrintEquation(str);
 			str.println("Residual equations:");
 			for (SimpleEquationBlock seb : unsolvedBlocks) {
-				seb.prettyPrintEquation(str);
 				seb.prettyPrintIterationVariables(str);
+				seb.prettyPrintEquation(str);
 			}
 		}
 	
@@ -1946,7 +1946,7 @@ aspect TransformCanonical {
 				if (tearBlock != null && tearBlock.isSolvable()) {
 					eb.addSolvedBlock(tearBlock);
 					// If the equation contains a Var in SUMV, that Var cannot be
-					// reinserted and must be used as a tearing variable.
+					// reinserted and must be used as a iteration variable.
 					for (Eq e : bInner) {
 						for (Var vv : e.getVariables()) {
 							if (SUMV.remove(vv))
@@ -1954,7 +1954,7 @@ aspect TransformCanonical {
 						}
 					}
 				} else {
-					// Build Inner Graph and add info about tearing variables
+					// Build Inner Graph and add info about iteration variables
 					SolvingBiPGraph gInner = new SolvingBiPGraph(bInner);
 					// Build block-graph and look for interchangeable variables in SUMV
 					java.util.List<Eq> eqs = new ArrayList<Eq>();
