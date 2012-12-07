@@ -1,7 +1,7 @@
 aspect InstLookupEquations{
 	
 	syn InstAccess InstAccess.convertToEquationAccess();
-	eq InstGlobalAccess.convertToEquationAccess() = new InstGlobalAccess(getInstAccess().convertToEquationAccess());
+	eq InstGlobalAccess.convertToEquationAccess() = copyLocationTo(new InstGlobalAccess(getInstAccess().convertToEquationAccess()));
 	eq InstDot.convertToEquationAccess() {
 		List<InstAccess> l = new List<InstAccess>();
 		List<InstAccess> instAccessList = getInstAccessListNoTransform();
@@ -9,11 +9,11 @@ aspect InstLookupEquations{
 		for (int i = 0; i < numInstAccess - 1; i++)
 			l.add(instAccessList.getChildNoTransform(i).fullCopy());
 		l.add(instAccessList.getChildNoTransform(numInstAccess - 1).convertToEquationAccess());
-		return new InstDot(l);
+		return copyLocationTo(new InstDot(l));
 	}
-	eq InstArrayAccess.convertToEquationAccess() = new InstEquationArrayAccess(getID(), getFArraySubscripts());
-	eq InstScalarAccess.convertToEquationAccess() = new InstEquationAccess(getID());
-	eq InstClassAccess.convertToEquationAccess() = new InstEquationAccess(getID());
+	eq InstArrayAccess.convertToEquationAccess() = copyLocationTo(new InstEquationArrayAccess(getID(), getFArraySubscripts()));
+	eq InstScalarAccess.convertToEquationAccess() = copyLocationTo(new InstEquationAccess(getID()));
+	eq InstClassAccess.convertToEquationAccess() = copyLocationTo(new InstEquationAccess(getID()));
 	
 	
 	inh InstNode InstAccess.equationLookupScope();

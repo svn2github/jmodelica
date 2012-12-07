@@ -1076,38 +1076,18 @@ aspect Flattening {
 			if (!pair.name().equals("Pair"))
 				continue;
 			Exp enabledExp = pair.forPath("enabled").exp();
-			if (enabledExp != null) {
-				try {
-					if (!dynamicFExp(enabledExp.instantiate()).ceval().booleanValue()) {
-						continue;
-					}
-				} catch (ConstantEvaluationException e) {
-					enabledExp.error("Could not evaluate enabled expression: " + enabledExp);
-					continue;
-				}
-			}
+			if (enabledExp != null && !dynamicFExp(enabledExp.instantiate()).ceval().booleanValue())
+				continue;
+			
 			Exp iterationVariableExp = pair.forPath("iterationVariable").exp();
-			FQName iterationVariableName = null;
-			if (iterationVariableExp == null) {
-				pair.ast().error("Iteration variable definition is missing from tearing pair.");
-			} else if (!iterationVariableExp.isAccess()) {
-				iterationVariableExp.error("Illegal variable reference");
-			} else {
-				InstAccess ia = iterationVariableExp.asAccess().instantiate();
-				iterationVariableName = dynamicFExp(new FInstAccessExp(ia)).asInstAccess().flatten(prefix);
-			}
+			InstAccess via = iterationVariableExp.asAccess().instantiate();
+			FQName iterationVariableName = dynamicFExp(new FInstAccessExp(via)).asInstAccess().flatten(prefix);
+			
 			Exp residualEquationExp = pair.forPath("residualEquation").exp();
-			FQName residualEquationName = null;
-			if (residualEquationExp == null) {
-				pair.ast().error("Residual equation definition is missing from tearing pair.");
-			} else if (!residualEquationExp.isAccess()) {
-				iterationVariableExp.error("Illegal equation reference");
-			} else {
-				InstAccess ia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
-				residualEquationName = dynamicFExp(new FInstAccessExp(ia)).asInstAccess().flatten(prefix);
-			}
-			if (iterationVariableName != null && residualEquationName != null)
-				fc.addFResidualPair(new FResidualPair(new FIdUse(residualEquationName), new FIdUse(iterationVariableName), prefix.numDots() + prefix.numParts()));
+			InstAccess eia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
+			FQName residualEquationName = dynamicFExp(new FInstAccessExp(eia)).asInstAccess().flatten(prefix);
+			
+			fc.addFResidualPair(new FResidualPair(new FIdUse(residualEquationName), new FIdUse(iterationVariableName), prefix.numDots() + prefix.numParts()));
 		}
 	}
 	
@@ -1976,12 +1956,12 @@ aspect InstantiatedExpressions {
 		if (enabledExp != null)
 			residual.setEnabled(enabledExp.instantiate());
 		Exp iterationVariableExp = residualNode.forPath("iterationVariable").exp();
-		if (iterationVariableExp == null)
-			residualNode.ast().error("Iteration variable annotation is incorrect");
-		else if (!iterationVariableExp.isAccess())
-			iterationVariableExp.error("Illegal variable reference");
-		else
-			residual.setIterationVariable(new FIdUseInstAccess(iterationVariableExp.asAccess().instantiate()));
+		if (iterationVariableExp != null) {
+			if (!iterationVariableExp.isAccess())
+				iterationVariableExp.error("Expression \"%s\" is not a legal iteration variable reference", iterationVariableExp);
+			else
+				residual.setIterationVariable(new FIdUseInstAccess(iterationVariableExp.asAccess().instantiate()));
+		}
 		return new Opt<FResidual>(residual);
 	}
 	

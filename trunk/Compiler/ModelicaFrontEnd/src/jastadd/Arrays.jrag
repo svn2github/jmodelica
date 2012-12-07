@@ -382,7 +382,7 @@ aspect Arrays {
 	 * Any colon subscripts are expanded into constant vector expressions.
 	 */
 	syn FArraySubscripts InstScalarAccess.getExpandedSubscripts() = myInstComponentDecl().expandedSubscripts();
-	eq InstEquationAccess.getExpandedSubscripts() = myEquation().size().createExpandedFArraySubscripts();
+	eq InstEquationAccess.getExpandedSubscripts() = myEquation().expandedSubscripts();
 	syn FArraySubscripts InstArrayAccess.getExpandedSubscripts() = getFArraySubscripts().expandedSubscripts();
 	
 //	private static final FArraySubscripts InstAccess.EMPTY_FAS = new FArraySubscripts();
@@ -524,7 +524,49 @@ aspect Arrays {
 		Size right = getRight().size();
 		return left.equals(right) ? left : Size.SCALAR;
 	}
-
+	
+	inh Size InstResidual.size();
+	eq FAbstractEquation.getResidual().size() = size();
+	
+	syn Size FAbstractEquation.totalSize() = size().expand(parentTotalSize());
+	
+	inh Size FAbstractEquation.parentTotalSize();
+	eq InstForClauseE.getChild().parentTotalSize() {
+		Size s = parentTotalSize();
+		for (InstForIndex i : getInstForIndexs()) {
+			if (i.hasFExp())
+				s = i.getFExp().size().expand(s);
+			else
+				s = new Size(0).expand(s);
+		}
+		return s;
+	}
+	eq InstRoot.getChild().parentTotalSize() = Size.SCALAR;
+	eq FlatRoot.getChild().parentTotalSize() = Size.SCALAR;
+	
+	syn FArraySubscripts FAbstractEquation.expandedSubscripts() {
+		FArraySubscripts fas = parentExpandedSubscripts();
+		Size size = size();
+		for (int i = 0; i < size.ndims(); i++) {
+			fas.addFSubscript(size.createExpandedFSubscript(i));
+		}
+		return fas;
+	}
+	
+	inh FArraySubscripts FAbstractEquation.parentExpandedSubscripts();
+	eq InstForClauseE.getChild().parentExpandedSubscripts() {
+		FArraySubscripts fas = parentExpandedSubscripts();
+		for (InstForIndex i : getInstForIndexs()) {
+			if (i.hasFExp())
+				fas.addFSubscript(new FExpSubscript(i.getFExp().flatten(myInstNode().getFQName())));
+			else
+				fas.addFSubscript(new FColonSubscript());
+		}
+		return fas;
+	}
+	eq InstRoot.getChild().parentExpandedSubscripts() = new FArraySubscripts();
+	eq FlatRoot.getChild().parentExpandedSubscripts() = new FArraySubscripts();
+	
 	/**
 	 * \brief Get the array sizes. 
 	 */
@@ -606,8 +648,11 @@ aspect Arrays {
 	eq FIdUse.getChild().mySize()                       = myFV().size();
 	eq FIdUseInstAccess.getChild().mySize()             = getInstAccess().size();
 	eq InstScalarAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
+	eq InstEquationAccess.getExpandedSubscripts().mySize() = myEquation().totalSize();
 	eq InstArrayAccess.getFArraySubscripts().mySize()   = myInstComponentDecl().size();
 	eq InstArrayAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
+	eq InstEquationArrayAccess.getFArraySubscripts().mySize()   = myEquation().totalSize();
+	eq InstEquationArrayAccess.getExpandedSubscripts().mySize() = myEquation().totalSize();
 	eq FSubscriptedExp.getFArraySubscripts().mySize()   = getFExp().size();
 	eq FExpSubscript.getFExp().mySize()                 = mySize();
 	eq FlatRoot.getChild().mySize()                     = Size.SCALAR;

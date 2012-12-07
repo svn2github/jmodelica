@@ -64,19 +64,11 @@ aspect FlatTypeCheck {
 			AnnotationNode enabledNode = iterationNode.forPath("enabled");
 			if (enabledNode.exists()) {
 				FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
+				enabledExp.collectErrors();
 				try {
 					enabledExp.ceval().booleanValue();
 				} catch (ConstantEvaluationException e) {
-					error("Could not evaluate enabled expression: " + enabledExp);
-				}
-			}
-			AnnotationNode handleNode = iterationNode.forPath("handle");
-			if (handleNode.exists()) {
-				FExp handleExp = containingInstNode().dynamicFExp(handleNode.exp().instantiate());
-				try {
-					handleExp.ceval().intValue();
-				} catch (ConstantEvaluationException e) {
-					error("Could not evaluate handle expression: " + handleExp);
+					enabledExp.error("Cannot evaluate boolean enabled expression: " + enabledExp);
 				}
 			}
 		}
@@ -689,8 +681,18 @@ aspect FlatTypeCheck {
 			try {
 				enabledExp.ceval().booleanValue();
 			} catch (ConstantEvaluationException e) {
-				enabledExp.error("Could not evaluate enabled expression: " + enabledExp);
+				enabledExp.error("Cannot evaluate boolean enabled expression: " + enabledExp);
 			}
+		}
+		if (hasIterationVariable() && !getIterationVariable().isUnknown()) {
+			FIdUse var = getIterationVariable();
+			FTypePrefixVariability variability = var.variability();
+			if (!variability.continuousVariability())
+				var.error("Iteration variable needs to have continuous variability, %s has %svariability", var, variability);
+			Size size = size();
+			Size varSize = var.size();
+			if (!size.equals(varSize))
+				var.error("Size of iteration variable %s is not the same size as the surrounding equation, size of variable %s, size of equation %s", var, varSize, size);
 		}
 	}
 }

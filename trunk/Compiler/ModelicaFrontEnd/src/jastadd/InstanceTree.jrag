@@ -546,7 +546,12 @@ aspect Environments {
 
 	inh InstNode InstModification.myInstNode();
 	inh InstNode InstNode.myInstNode();
+	inh InstNode FAbstractEquation.myInstNode();
 	eq InstNode.getChild().myInstNode() = this;
+	eq FlatRoot.getChild().myInstNode() {
+		throw new UnsupportedOperationException();
+	}
+	
 	//The lexical scope of modifiers for short classes are "outside" of the short declaration
     eq InstExtendsShortClass.getChild().myInstNode() = myInstNode();
 	

@@ -8228,22 +8228,26 @@ Residual equations:
       ")})));
 end HandGuidedTearing27;
 
-/*model HandGuidedTearing28
-
-	parameter Integer n = 5;
-	Real a[n];
-	Real b[n];
-	Real c[n];
-
-equation
-	for i in 1:n loop
-		a[i]=c[i] + 1;
-		a[i]=b[i] + 2;
-		c[i]=b[i] - 3 annotation(__Modelon(name=res));
-	end for;
+model HandGuidedTearing28
+	model A
+		parameter Integer n = 5;
+		Real a[n];
+		Real b[n];
+		Real c[n];
+	
+	equation
+		for i in 1:n loop
+			a[i]=c[i] + 1;
+			a[i]=b[i] + 2;
+			c[i]=b[i] - 3 annotation(__Modelon(name=res));
+		end for;
+	end A;
+	
+	A a;
+	
 	annotation(
 	__Modelon(tearingPairs={
-		Pair(residualEquation=res,iterationVariable=c)
+		Pair(residualEquation=a.res,iterationVariable=a.c)
 	}),
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
@@ -8257,66 +8261,71 @@ equation
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
-  a[1]
-  b[1]
+  a.a[1]
+  a.b[1]
 Tearing variables:
-  c[1]()
+  a.c[1]()
 Solved equations:
-  a[1] = c[1] .+ 1
-  a[1] = b[1] .+ 2
+  a.a[1] = a.c[1] + 1
+  a.a[1] = a.b[1] + 2
 Residual equations:
-  c[1] = b[1] .- ( 3 )
+  a.c[1] = a.b[1] - ( 3 )
+    Iteration variables: a.c[1]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
-  a[2]
-  b[2]
+  a.a[2]
+  a.b[2]
 Tearing variables:
-  c[2]()
+  a.c[2]()
 Solved equations:
-  a[2] = c[2] .+ 1
-  a[2] = b[2] .+ 2
+  a.a[2] = a.c[2] + 1
+  a.a[2] = a.b[2] + 2
 Residual equations:
-  c[2] = b[2] .- ( 3 )
+  a.c[2] = a.b[2] - ( 3 )
+    Iteration variables: a.c[2]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
-  a[3]
-  b[3]
+  a.a[3]
+  a.b[3]
 Tearing variables:
-  c[3]()
+  a.c[3]()
 Solved equations:
-  a[3] = c[3] .+ 1
-  a[3] = b[3] .+ 2
+  a.a[3] = a.c[3] + 1
+  a.a[3] = a.b[3] + 2
 Residual equations:
-  c[3] = b[3] .- ( 3 )
+  a.c[3] = a.b[3] - ( 3 )
+    Iteration variables: a.c[3]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
-  a[4]
-  b[4]
+  a.a[4]
+  a.b[4]
 Tearing variables:
-  c[4]()
+  a.c[4]()
 Solved equations:
-  a[4] = c[4] .+ 1
-  a[4] = b[4] .+ 2
+  a.a[4] = a.c[4] + 1
+  a.a[4] = a.b[4] + 2
 Residual equations:
-  c[4] = b[4] .- ( 3 )
+  a.c[4] = a.b[4] - ( 3 )
+    Iteration variables: a.c[4]
 -------------------------------
 Torn block of 1 tearing variables and 2 solved variables.
 Solved variables:
-  a[5]
-  b[5]
+  a.a[5]
+  a.b[5]
 Tearing variables:
-  c[5]()
+  a.c[5]()
 Solved equations:
-  a[5] = c[5] .+ 1
-  a[5] = b[5] .+ 2
+  a.a[5] = a.c[5] + 1
+  a.a[5] = a.b[5] + 2
 Residual equations:
-  c[5] = b[5] .- ( 3 )
+  a.c[5] = a.b[5] - ( 3 )
+    Iteration variables: a.c[5]
 -------------------------------
       ")})));
-end HandGuidedTearing28;*/
+end HandGuidedTearing28;
 
 model HandGuidedTearing29
 	model A
@@ -8425,6 +8434,302 @@ Residual equations:
 -------------------------------
       ")})));
 end HandGuidedTearing29;
+
+model HandGuidedTearingError1
+	Real x;
+	Real y;
+	Real z annotation(__Modelon(IterationVariable(enabled=1)));
+equation
+	x=y + 1;
+	y=z + 2 annotation(__Modelon(name=res));
+	z=x - 3 annotation(__Modelon(ResidualEquation(enabled=1)));
+	annotation(
+	__Modelon(tearingPairs(
+		Pair(iterationVariable=x, residualEquation=res, enabled=1)
+	)),
+	__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			name="HandGuidedTearingError1",
+			description="Test hand guided tearing errors",
+			errorMessage="
+3 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8432, column 56:
+  Cannot evaluate boolean enabled expression: 1
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8436, column 56:
+  Cannot evaluate boolean enabled expression: 1
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8439, column 59:
+  Cannot evaluate boolean enabled expression: 1
+")})));
+end HandGuidedTearingError1;
+
+model HandGuidedTearingError2
+	Real x;
+	Real y;
+	Real z annotation(__Modelon(IterationVariable(enabled=unknownParameter1)));
+equation
+	x=y + 1;
+	y=z + 2 annotation(__Modelon(name=res));
+	z=x - 3 annotation(__Modelon(ResidualEquation(enabled=unknownParameter2)));
+	annotation(
+	__Modelon(tearingPairs(
+		Pair(iterationVariable=x, residualEquation=res, enabled=unknownParameter3)
+	)),
+	__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			name="HandGuidedTearingError2",
+			description="Test hand guided tearing errors",
+			errorMessage="
+6 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8464, column 56:
+  Cannot evaluate boolean enabled expression: unknownParameter1
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8464, column 56:
+  Cannot find class or component declaration for unknownParameter1
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8468, column 56:
+  Cannot evaluate boolean enabled expression: unknownParameter2
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8468, column 56:
+  Cannot find class or component declaration for unknownParameter2
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8471, column 59:
+  Cannot evaluate boolean enabled expression: unknownParameter3
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8471, column 59:
+  Cannot find class or component declaration for unknownParameter3
+")})));
+end HandGuidedTearingError2;
+
+model HandGuidedTearingError3
+	Real x;
+	Real y;
+	Real z;
+equation
+	x=y + 1;
+	y=z + 2 annotation(__Modelon(name=res));
+	z=x - 3 annotation(__Modelon(ResidualEquation(iterationVariable=1)));
+	annotation(
+	__Modelon(tearingPairs(
+		Pair(iterationVariable=2, residualEquation=3)
+	)),
+	__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			name="HandGuidedTearingError3",
+			description="Test hand guided tearing errors",
+			errorMessage="
+3 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8504, column 66:
+  Expression \"1\" is not a legal iteration variable reference
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8507, column 26:
+  Expression \"2\" is not a legal iteration variable reference
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8507, column 46:
+  Expression \"3\" is not a legal residual equation reference
+")})));
+end HandGuidedTearingError3;
+
+model HandGuidedTearingError4
+	Real x;
+	Real y;
+	Real z;
+equation
+	x=y + 1;
+	y=z + 2 annotation(__Modelon(name=res));
+	z=x - 3 annotation(__Modelon(ResidualEquation(iterationVariable=unknownVariable1)));
+	annotation(
+	__Modelon(tearingPairs(
+		Pair(iterationVariable=unknownVariable2, residualEquation=unknownEquation)
+	)),
+	__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			name="HandGuidedTearingError4",
+			description="Test hand guided tearing errors",
+			errorMessage="
+3 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8532, column 66:
+  Cannot find class or component declaration for unknownVariable1
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8535, column 26:
+  Cannot find class or component declaration for unknownVariable2
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8535, column 61:
+  Cannot find equation declaration for unknownEquation
+")})));
+end HandGuidedTearingError4;
+
+model HandGuidedTearingError5
+	parameter Real p1 = 1;
+	parameter Real p2 = 2;
+	Real x;
+	Real y;
+	Real z;
+equation
+	x=y + 1;
+	y=z + 2 annotation(__Modelon(name=res));
+	z=x - 3 annotation(__Modelon(ResidualEquation(iterationVariable=p1)));
+	annotation(
+	__Modelon(tearingPairs(
+		Pair(iterationVariable=p2, residualEquation=res)
+	)),
+	__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			name="HandGuidedTearingError5",
+			description="Test hand guided tearing errors",
+			errorMessage="
+2 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8566, column 2:
+  Iteration variable needs to have continuous variability, p1 has parameter variability
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8569, column 26:
+  Iteration variable needs to have continuous variability, p2 has parameter variability
+")})));
+end HandGuidedTearingError5;
+
+model HandGuidedTearingError6
+	Real x;
+	Real y;
+	Real z;
+	Real v[2];
+equation
+	v[1] = v[2] + 1;
+	x=3 + v[2];
+	x=y + 1;
+	y=z + 2 annotation(__Modelon(name=res));
+	z=x - 3 annotation(__Modelon(ResidualEquation(iterationVariable=v)));
+	annotation(
+	__Modelon(tearingPairs(
+		Pair(iterationVariable=v, residualEquation=res)
+	)),
+	__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			name="HandGuidedTearingError6",
+			description="Test hand guided tearing errors",
+			errorMessage="
+2 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8597, column 2:
+  Size of iteration variable v is not the same size as the surrounding equation, size of variable [2], size of equation scalar
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8599, column 24:
+  Size of the iteration variable is not the same size as the size of the residual equation, size of variable [2], size of equation scalar
+")})));
+end HandGuidedTearingError6;
+
+model HandGuidedTearingError7
+	Real x[2];
+	Real y[2];
+	Real z[2];
+	Real v;
+equation
+	v = 1;
+	x=y .+ 1;
+	y=z .+ 2 annotation(__Modelon(name=res));
+	z=x .- 3 annotation(__Modelon(ResidualEquation(iterationVariable=v)));
+	annotation(
+	__Modelon(tearingPairs(
+		Pair(iterationVariable=v, residualEquation=res)
+	)),
+	__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			name="HandGuidedTearingError7",
+			description="Test hand guided tearing errors",
+			errorMessage="
+2 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8627, column 2:
+  Size of iteration variable v is not the same size as the surrounding equation, size of variable scalar, size of equation [2]
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8629, column 24:
+  Size of the iteration variable is not the same size as the size of the residual equation, size of variable scalar, size of equation [2]
+")})));
+end HandGuidedTearingError7;
+
+model HandGuidedTearingError8
+	Real x[2];
+	Real y[2];
+	Real z[2];
+	Real v[2,2] = {{1,2},{3,4}};
+equation
+	x=y .+ 1;
+	y=z .+ 2 annotation(__Modelon(name=res));
+	z=x .- 3 annotation(__Modelon(ResidualEquation(iterationVariable=v[3,:])));
+	annotation(
+	__Modelon(tearingPairs(
+		Pair(iterationVariable=x[3], residualEquation=res[3])
+	)),
+	__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			name="HandGuidedTearingError8",
+			description="Test hand guided tearing errors",
+			errorMessage="
+3 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8705, column 69:
+  Array index out of bounds: 3, index expression: 3
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8708, column 28:
+  Array index out of bounds: 3, index expression: 3
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 8708, column 53:
+  Array index out of bounds: 3, index expression: 3
+")})));
+end HandGuidedTearingError8;
 
 model BlockTest1
 record R

@@ -78,8 +78,7 @@ aspect Scalarization {
 	
 	protected void FResidualPair.scalarize(List<FResidualPair> pairs) {
 		if (!getResidualEquation().size().equals(getIterationVariable().size())) {
-			error("Residual equation and iteration variable have different sizes.");
-			return;
+			throw new UnsupportedOperationException("Residual equation and iteration variable have different sizes.");
 		}
 		if (getResidualEquation().ndims() > 0) {
 			Iterator<Index> resIt = getResidualEquation().indices().iterator();
@@ -88,7 +87,7 @@ aspect Scalarization {
 				pairs.addChild(new FResidualPair(getResidualEquation().specify(resIt.next(), true), getIterationVariable().specify(iterIt.next(), true), getLevel()));
 			}
 			if (resIt.hasNext() || iterIt.hasNext())
-				error("Residual equation and iteration variable have different sizes.");
+				throw new UnsupportedOperationException("Residual equation and iteration variable have different sizes.");
 		} else {
 			Map<String,FExp> emptyMap = Collections.emptyMap();
 			pairs.addChild(new FResidualPair(getResidualEquation().scalarize(emptyMap), getIterationVariable().scalarize(emptyMap), getLevel()));
