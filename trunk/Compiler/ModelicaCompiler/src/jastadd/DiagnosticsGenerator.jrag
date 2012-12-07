@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayDeque;
@@ -52,6 +53,8 @@ public class DiagnosticsGenerator {
 	private int numErrors = -1;
 	private int numComplianceErrors = -1;
 	private int numWarnings = -1;
+	
+	private Collection<Problem> problems = new TreeSet<Problem>();
 
 	/**
 	 * Default constructor for the Diagnostics generator.
@@ -62,12 +65,14 @@ public class DiagnosticsGenerator {
 	private String html_header ="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n" +   
 								"<html>\n" + 
 								"<head>\n" + 
-  								"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n" +
-    							"<title>Model diagnosis</title>\n" + 
-    							"</head>\n" + 
-							    "<body style=\"background-color: rgb(255, 255, 255);\">\n";
-    
-    private String html_tail = "</body>\n </html>\n";
+								"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n" +
+								"<title>Model diagnosis</title>\n" + 
+								"</head>\n" + 
+								"<body style=\"background-color: rgb(255, 255, 255);\">\n";
+	
+	private String html_tail = "</body>\n </html>\n";
+	
+	private String indexDiagnostics;
 	
 	public DiagnosticsGenerator(String modelName) {
 		this.modelName = modelName;
@@ -78,13 +83,7 @@ public class DiagnosticsGenerator {
 		File diagnosticsDir = new File(currDirString,this.modelNameUnderscore + "_html_diagnostics");
 		boolean success = diagnosticsDir.mkdir();
 		diagnosticsDirString = diagnosticsDir.getAbsolutePath();
-		/*
-		if (success) {
-			System.out.println("dir created");
-		} else {
-			System.out.println("dir not created");
-		}
-*/
+		
 		this.rawFlattenedModelFileName = this.modelNameUnderscore + "_raw.html";
 		this.transformedModelFileName = this.modelNameUnderscore + "_transformed.html";
 		this.errorsFileName = this.modelNameUnderscore + "_errors.html";
@@ -93,7 +92,9 @@ public class DiagnosticsGenerator {
 		this.aliasFileName = this.modelNameUnderscore + "_alias.html";
 		this.connectionsFileName = this.modelNameUnderscore + "_connections.html";
 		this.indexFileName = "index.html";
-				
+		
+		indexDiagnostics = "<h2>" + modelName + "</h2>\n{problemsString}\n";
+		
 		this.rawFlattenedModelAbsFileName = (new File(diagnosticsDirString,this.rawFlattenedModelFileName)).getAbsolutePath();
 		this.transformedModelAbsFileName = (new File(diagnosticsDirString,this.transformedModelFileName)).getAbsolutePath();
 		this.errorsAbsFileName = (new File(diagnosticsDirString,this.errorsFileName)).getAbsolutePath();
@@ -269,7 +270,9 @@ public class DiagnosticsGenerator {
 	/**
      *  Write a file containing the problems in the model.
      */
-	public void writeProblems(Collection<Problem> problems) {
+	public void writeProblems(Collection<Problem> newProblems) {
+		// Add the problems to our set of problems
+		problems.addAll(newProblems);
 		// Print problems
 		try {
 			PrintStream out;
@@ -302,20 +305,12 @@ public class DiagnosticsGenerator {
 			out.print(warns.toString());
 			out.print("</pre>\n");	
 			out.print(html_tail);
-		   	out.close();
-		   	
-		   	// Write a simple version of index.html in case there are errors
-			out = new PrintStream(indexAbsFileName,"UTF-8");
-			out.print(html_header);
-			out.print("<h2>" + modelName + "</h2>\n"); 
-			out.print("<a href=\"" + errorsFileName + "\"> Problems:</a><br>\n");
-			out.print("  " + numErrors + " errors, " + numComplianceErrors + 
-			          " compliance errors, " + numWarnings + " warnings<br><br>"); 
-			out.print(html_tail);
-		   	out.close();
-			          
+			out.close();
+			
+			// Update the index file.
+			writeIndexFile();
 		} catch(FileNotFoundException e) {
-		} catch(UnsupportedEncodingException e) {		
+		} catch(UnsupportedEncodingException e) {
 		} 
 	}
 	
@@ -330,96 +325,9 @@ public class DiagnosticsGenerator {
      *  Write index.html.
      */
 	public void writeDiagnostics(FClass fc) {
-		// Create index.html containing:
 		
-	    try {
-		    PrintStream out;
-			out = new PrintStream(indexAbsFileName,"UTF-8");
-			out.print(html_header);
-			out.println("<h2>" + modelName + "</h2>");
-			out.println("<p><a href=\"" + errorsFileName + "\"> Problems:</a><br />");
-			out.println("  " + numErrors + " errors, " + numComplianceErrors + 
-			          " compliance errors, " + numWarnings + " warnings</p>"); 
-			
-			out.println("<h3>Model before transformation</h3>");
-			out.println("<p><pre>");
-			// Diagnostics about model sizes
-			out.print(modelDiagnosticsBeforeTransform);
-			out.println("</pre></p>");	
-			out.println("<p><a href=\"" + rawFlattenedModelAbsFileName + "\">Flattened model</a></p>"); 
-			out.println("<p><a href=\"" + connectionsFileName + "\">Connection sets</a></p>"); 
-			
-			
-			out.println("<h3>Model after transformation</h3>");
-			out.println("<p><pre>");
-			// Diagnostics about model sizes
-			out.print(fc.modelDiagnostics());
-			out.println("</pre></p>");	
-			// Model name and links to the flattened models
-			out.println("<p><a href=\"" + transformedModelAbsFileName + "\">Transformed model</a></p>"); 
-			out.println("<p><a href=\"" + aliasFileName + "\"> Alias sets</a> (" + fc.aliasDiagnosticsShort()  + ")</p>"); 
-			out.println("<p><a href=\"" + bltFileName + "\">BLT diagnostics</a><br />"); 
-			out.println("<a href=\"" + bltTableFileName + "\">BLT diagnostics table</a></p>"); 
-			
-			if (fc.root().options.getBooleanOption("equation_sorting")) {
-				ArrayList<Integer> unsolvedDAEInitBlockSizes =
-				    fc.getDAEInitBLT().unsolvedBlockSizes(); 
-				ArrayList<Integer> unsolvedDAEBlockSizes =
-				    fc.getDAEBLT().unsolvedBlockSizes(); 
-				out.print("<p>Number of unsolved equation blocks in DAE initialization system: " + 
-			              unsolvedDAEInitBlockSizes.size() + ": {");   
-				int ind = 0;
-				for (Integer bs : unsolvedDAEInitBlockSizes) {
-					out.print(bs.toString());
-					if (ind<unsolvedDAEInitBlockSizes.size()-1) {
-						out.print(",");
-					}	
-					ind++;
-				}
-				out.println("}<br />");
-				out.print("Number of unsolved equation blocks in DAE system: " + 
-			              unsolvedDAEBlockSizes.size() + ": {");   
-				ind = 0;
-				for (Integer bs : unsolvedDAEBlockSizes) {
-					out.print(bs.toString());
-					if (ind<unsolvedDAEBlockSizes.size()-1) {
-						out.print(",");
-					}	
-					ind++;
-				}
-				out.println("}</p>");
-				if (fc.root().options.getBooleanOption("enable_tearing")) {
-					unsolvedDAEInitBlockSizes = fc.getDAEInitBLT().unsolvedBlockIterationSizes();
-					unsolvedDAEBlockSizes = fc.getDAEBLT().unsolvedBlockIterationSizes();
-					out.print("<p>Number of unsolved equation blocks in DAE initialization system after tearing: " + 
-				              unsolvedDAEInitBlockSizes.size() + ": {");   
-					ind = 0;
-					for (Integer bs : unsolvedDAEInitBlockSizes) {
-						out.print(bs.toString());
-						if (ind<unsolvedDAEInitBlockSizes.size()-1) {
-							out.print(",");
-						}	
-						ind++;
-					}
-					out.println("}<br />");
-					out.print("Number of unsolved equation blocks in DAE system after tearing: " + 
-				              unsolvedDAEBlockSizes.size() + ": {");   
-					ind = 0;
-					for (Integer bs : unsolvedDAEBlockSizes) {
-						out.print(bs.toString());
-						if (ind<unsolvedDAEBlockSizes.size()-1) {
-							out.print(",");
-						}	
-						ind++;
-					}
-					out.println("}</p>\n");
-				}
-			}      
-			out.print(html_tail);
-		   	out.close();
-		} catch(FileNotFoundException e) {
-		} catch(UnsupportedEncodingException e) {		
-		} 
+		produceIndexDiagnostics(fc);
+		writeIndexFile();
 		
 		// Create BLT diagnostics file (if equation_sorting is true)
 		writeBLTFile(fc);
@@ -432,6 +340,106 @@ public class DiagnosticsGenerator {
 				
 		// Create a file for alias information
 		writeAliasFile(fc);
+	}
+	
+	private void produceIndexDiagnostics(FClass fc) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		PrintStream out = new PrintStream(os);
+		out.println("<h2>" + modelName + "</h2>");
+		out.println("{problemsString}"); 
+		
+		out.println("<h3>Model before transformation</h3>");
+		out.println("<p><pre>");
+		// Diagnostics about model sizes
+		out.print(modelDiagnosticsBeforeTransform);
+		out.println("</pre></p>");	
+		out.println("<p><a href=\"" + rawFlattenedModelAbsFileName + "\">Flattened model</a></p>"); 
+		out.println("<p><a href=\"" + connectionsFileName + "\">Connection sets</a></p>"); 
+		
+		
+		out.println("<h3>Model after transformation</h3>");
+		out.println("<p><pre>");
+		// Diagnostics about model sizes
+		out.print(fc.modelDiagnostics());
+		out.println("</pre></p>");	
+		// Model name and links to the flattened models
+		out.println("<p><a href=\"" + transformedModelAbsFileName + "\">Transformed model</a></p>"); 
+		out.println("<p><a href=\"" + aliasFileName + "\"> Alias sets</a> (" + fc.aliasDiagnosticsShort()  + ")</p>"); 
+		out.println("<p><a href=\"" + bltFileName + "\">BLT diagnostics</a><br />"); 
+		out.println("<a href=\"" + bltTableFileName + "\">BLT diagnostics table</a></p>"); 
+		
+		if (fc.root().options.getBooleanOption("equation_sorting")) {
+			ArrayList<Integer> unsolvedDAEInitBlockSizes =
+			    fc.getDAEInitBLT().unsolvedBlockSizes(); 
+			ArrayList<Integer> unsolvedDAEBlockSizes =
+			    fc.getDAEBLT().unsolvedBlockSizes(); 
+			out.print("<p>Number of unsolved equation blocks in DAE initialization system: " + 
+		              unsolvedDAEInitBlockSizes.size() + ": {");   
+			int ind = 0;
+			for (Integer bs : unsolvedDAEInitBlockSizes) {
+				out.print(bs.toString());
+				if (ind<unsolvedDAEInitBlockSizes.size()-1) {
+					out.print(",");
+				}	
+				ind++;
+			}
+			out.println("}<br />");
+			out.print("Number of unsolved equation blocks in DAE system: " + 
+		              unsolvedDAEBlockSizes.size() + ": {");   
+			ind = 0;
+			for (Integer bs : unsolvedDAEBlockSizes) {
+				out.print(bs.toString());
+				if (ind<unsolvedDAEBlockSizes.size()-1) {
+					out.print(",");
+				}	
+				ind++;
+			}
+			out.println("}</p>");
+			if (fc.root().options.getBooleanOption("enable_tearing")) {
+				unsolvedDAEInitBlockSizes = fc.getDAEInitBLT().unsolvedBlockIterationSizes();
+				unsolvedDAEBlockSizes = fc.getDAEBLT().unsolvedBlockIterationSizes();
+				out.print("<p>Number of unsolved equation blocks in DAE initialization system after tearing: " + 
+			              unsolvedDAEInitBlockSizes.size() + ": {");   
+				ind = 0;
+				for (Integer bs : unsolvedDAEInitBlockSizes) {
+					out.print(bs.toString());
+					if (ind<unsolvedDAEInitBlockSizes.size()-1) {
+						out.print(",");
+					}	
+					ind++;
+				}
+				out.println("}<br />");
+				out.print("Number of unsolved equation blocks in DAE system after tearing: " + 
+			              unsolvedDAEBlockSizes.size() + ": {");
+				ind = 0;
+				for (Integer bs : unsolvedDAEBlockSizes) {
+					out.print(bs.toString());
+					if (ind<unsolvedDAEBlockSizes.size()-1) {
+						out.print(",");
+					}	
+					ind++;
+				}
+				out.println("}</p>\n");
+			}
+		}
+		indexDiagnostics = os.toString();
+	}
+	
+	public void writeIndexFile() {
+		// Create index.html containing:
+		
+		try {
+			PrintStream out;
+			out = new PrintStream(indexAbsFileName,"UTF-8");
+			out.print(html_header);
+			out.print(indexDiagnostics.replaceFirst("\\{problemsString\\}", "<p><a href=\"" + errorsFileName + "\"> Problems:</a><br />\n" +
+					"  " + numErrors + " errors, " + numComplianceErrors + " compliance errors, " + numWarnings + " warnings</p>"));
+			out.print(html_tail);
+		   	out.close();
+		} catch(FileNotFoundException e) {
+		} catch(UnsupportedEncodingException e) {		
+		} 
+		
 	}
 
 	/**
