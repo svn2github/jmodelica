@@ -219,6 +219,10 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 			if (event.location.endsWith("tmp.html") || event.location.startsWith("javascript")){
 				event.doit = true;
 			}else{
+				if (event.location.equals("about:blank")){
+					event.doit = false;
+					return;
+				}
 				boolean confirmed = yesNoBox("Would you like to leave edit mode? All unsaved changed will be lost!", "Confirm navigation");//(Boolean) browser.evaluate(Scripts.CONFIRM_POPUP);
 				event.doit = confirmed;
 				editing = !confirmed;
@@ -243,7 +247,7 @@ public class BrowserContent implements LocationListener, MouseListener, TitleLis
 		if (event.location.endsWith("tmp.html")) return;
 		String location = Generator.processLinkString(event.location);
 		//return if we're going to a blank page or current page
-		if (location.equals("blank") || history.get(histIndex).equals(location)) return;
+		if (location.equals("blank") || history.get(histIndex).equals(location) || location.startsWith("javascript")) return;
 		histIndex++;
 		if (histIndex >= history.size()){
 			history.add(location);
