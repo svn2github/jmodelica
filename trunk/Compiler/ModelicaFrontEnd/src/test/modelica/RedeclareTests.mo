@@ -4143,6 +4143,41 @@ end RedeclareTests.RedeclareElement25;
 ")})));
 end RedeclareElement25;
 
+model RedeclareElement26
+	record RA
+		Real a = 2;
+	end RB;
+	record RB
+		extends RA(a = 1);
+	end RB;
+	
+	model B
+		replaceable record R = RA;
+		R r;
+		Real x;
+	equation
+		x = r.a;
+	end B;
+	B b(redeclare record R = RB);
+	annotation(__JModelica(UnitTesting(tests={ 
+		FlatteningTestCase(
+			name="RedeclareElement26",
+			description="Redeclare of records",
+			flatModel="
+fclass RedeclareTests.RedeclareElement26
+ RedeclareTests.RedeclareElement26.b.R b.r(a = 1);
+ Real b.x;
+equation
+ b.x = b.r.a;
+
+public
+ record RedeclareTests.RedeclareElement26.b.R
+  Real a = 1;
+ end RedeclareTests.RedeclareElement26.b.R;
+
+end RedeclareTests.RedeclareElement26;
+")})));
+end RedeclareElement26;
 
 model RedeclareSameLevel10
 	package A
