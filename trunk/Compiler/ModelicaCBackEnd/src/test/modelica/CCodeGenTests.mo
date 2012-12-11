@@ -497,6 +497,27 @@ $C_ode_initialization$
 ")})));
 end CCodeGenTest16;
 
+model CCodeGenTest17
+	function f
+		input Integer [1] x;
+		output Integer y;
+	algorithm
+		y := x[1] + 1;
+	end f;
+	parameter Real x = f({5});
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="CCodeGenTest17",
+			description="Test the compiler code generation for functions with parameter input",
+			template="$C_set_start_values$",
+			generatedCode="
+    JMI_ARRAY_STATIC(tmp_1, 1, 1)
+    JMI_ARRAY_STATIC_INIT_1(tmp_1, 1)
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(5);
+    _x_0 = (func_CCodeGenTests_CCodeGenTest17_f_exp(tmp_1));
+    model_init_eval_parameters(jmi);
+")})));
+end CCodeGenTest17;
 
 model CLogExp1
  Boolean x = true;

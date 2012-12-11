@@ -2172,6 +2172,8 @@ aspect CCodeGen {
 	}
 	
 	public void FVariable.genStartValue_C(String indent, PrintStream str) {
+		genVarDecls_C(printer_C, str, printer_C.indent(indent));
+		genTempVars_C(printer_C, str, printer_C.indent(indent));
 		str.print(indent + name_C() + " = ");
 		FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
 		boolean noExp = exp == null;
@@ -2193,9 +2195,11 @@ aspect CCodeGen {
 	}
 	
 	public void FExternalObjectVariable.genStartValue_C(String indent, PrintStream str) {
-	    str.print(indent + "if (!jmi->indep_extobjs_initialized) { \n");
-	    super.genStartValue_C(printer_C.indent(indent), str);
-	    str.print(indent + "}\n");
+		str.print(indent + "if (!jmi->indep_extobjs_initialized) { \n");
+		genVarDecls_C(printer_C, str, printer_C.indent(indent));
+		genTempVars_C(printer_C, str, printer_C.indent(indent));
+		super.genStartValue_C(printer_C.indent(indent), str);
+		str.print(indent + "}\n");
 	}
 	
 	public void BLT.genOdeDerivativeBlocks(PrintStream str) {
