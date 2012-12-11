@@ -918,7 +918,7 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     realtype curtime = *(jmi_get_t(block->jmi));
     long int nniters = 0;
     
-    /*printf("jmi_kinsol_solver_solve called!\n");*/
+    /*jmi_log_info(block->jmi,"KINSOL solver invoked for block %d\n",block->index);*/
 
     if(block->n == 1) {
         solver->f_pos_min_1d = BIG_REAL;
@@ -929,6 +929,16 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
         jmi_kinsol_init(block);
     }
     
+    /* Read initial values for iteration variables from variable vector.
+     * This is needed if the user has changed initial guesses in between calls to
+     * Kinsol.
+     */
+    flag = block->F(block->jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
+    if(flag) {
+        jmi_log_warning(block->jmi, "Error code returned from equation block %d when reading in initial guesses.", block->index);
+        return flag;
+    }
+
     /* update the scaling only once per time step */
     if(block->init || (block->jmi->options.rescale_each_step_flag && (curtime > solver->kin_scale_update_time))) {
         jmi_update_f_scale(block);
