@@ -102,10 +102,16 @@ TraditionalComment = "/*" ~"*/"
 EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 
 
+%states NORMAL
 
 %%
 
 <YYINITIAL> {
+  "\uFEFF"        { yybegin(NORMAL); }
+  .|\n            { yypushback(1); yybegin(NORMAL); }
+}
+
+<NORMAL> {
   "within"        { return newSymbol(Terminals.WITHIN); }  
   "class"         { return newSymbol(Terminals.CLASS); }  
   "model"         { return newSymbol(Terminals.MODEL); }
@@ -242,11 +248,9 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   {Comment}                { addLineBreaks(yytext()); }
   {NonBreakingWhiteSpace}  { }
   {LineTerminator} 		   { addLineBreak(); }
-
+  .|\n                { throw new Exception("Illegal character \""+yytext()+ "\""); }
 }
 
-//.|\n                { throw new RuntimeException("Illegal character \""+yytext()+ "\" at line "+yyline+", column "+yycolumn); }
-.|\n                { throw new Scanner.Exception(yyline,yycolumn,"Illegal character \""+yytext()+ "\" at line "+yyline+", column "+yycolumn); }
 <<EOF>>             { return newSymbol(Terminals.EOF); }
 
 
