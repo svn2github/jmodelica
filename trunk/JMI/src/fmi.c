@@ -526,6 +526,8 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     free(jac);
 */
 
+    ((fmi_t*)c)->jmi->is_initialized = 1;
+
     return fmiOK;
 }
 
@@ -1094,7 +1096,7 @@ fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     fmiValueReference index;
     jmi_real_t* z;
 
-    if (((fmi_t *)c)->jmi->recomputeVariables==1) {
+    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
@@ -1123,7 +1125,7 @@ fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t n
     fmiValueReference i;
     fmiValueReference index;
 
-    if (((fmi_t *)c)->jmi->recomputeVariables==1) {
+    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
@@ -1151,7 +1153,7 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
     fmiValueReference i;
     fmiValueReference index;
 
-    if (((fmi_t *)c)->jmi->recomputeVariables==1) {
+    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
@@ -1177,7 +1179,7 @@ fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nv
     fmiInteger retval;
     int i;
 
-    if (((fmi_t *)c)->jmi->recomputeVariables==1) {
+    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
