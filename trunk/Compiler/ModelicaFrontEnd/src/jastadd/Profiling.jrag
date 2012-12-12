@@ -586,12 +586,7 @@ aspect MemoryUse {
 	public long ASTNode.specificNodeClassTreeSize(String name) {
 		try {
 			final Class cls = Class.forName(ASTNode.class.getName().replace("ASTNode", name));
-			Criteria<ASTNode> crit = new Criteria<ASTNode>() {
-				public boolean test(ASTNode o) {
-					return cls.isInstance(o);
-				}
-			};
-			return filteredTreeSize(crit);
+			return filteredTreeSize(new ClassCriteria<ASTNode>(cls));
 		} catch (ClassNotFoundException e) {
 			return -1;
 		}
@@ -643,6 +638,57 @@ aspect MemoryUse {
 	eq ClassDecl.extraMemoryUseInfo()         = " \"" + name() + "\"";
 	eq ComponentDecl.extraMemoryUseInfo()     = " \"" + name() + "\"";
 	eq InstExtends.extraMemoryUseInfo()       = " extending \"" + getClassName().name() + "\"";
+	
+	/**
+	 * Visit each node in tree (depth-first).
+	 */
+	public void ASTNode.visitAll(ASTVisitor v) {
+		if (children != null)
+			for (ASTNode ch : children) 
+				if (ch != null)
+					ch.visitAll(v);
+		v.visit(this);
+	}
+	
+	/**
+	 * Template for vistor object for tree.
+	 */
+	public interface ASTVisitor {
+		public void visit(ASTNode n);
+	}
+	
+	/**
+	 * Base class for ASTVisitor filtered by a criteria.
+	 */
+	public abstract class FilteredASTVisitor implements ASTVisitor {
+		private Criteria<ASTNode> crit;
+		
+		public FilteredASTVisitor(Criteria<ASTNode> crit) {
+			this.crit = crit;
+		}
+		
+		public void visit(ASTNode n) {
+			if (crit.test(n))
+				filteredVisit(n);
+		}
+		
+		public abstract void filteredVisit(ASTNode n);
+	}
+	
+	/**
+	 * A criteria that checks that the object is an instance of a specific class.
+	 */
+	public class ClassCriteria<T> implements Criteria<T> {
+		private Class cls;
+		
+		public ClassCriteria(Class cls) {
+			this.cls = cls;
+		}
+		
+		public boolean test(T elem) {
+			return cls.isInstance(elem);
+		}
+	}
 
 	/**
 	 * \brief Contains methods for calculating the size of AST nodes.
