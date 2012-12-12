@@ -2004,7 +2004,7 @@ class LocalDAECollocator(CasadiCollocator):
                 invariant_d = self._invariant_d
                 invariant_e = self._invariant_e
                 is_variant = self._is_variant
-                vr_sf_map = self._sf_vr_map
+                vr_sf_map = self._vr_sf_map
             
             # Interpolate the parameter estimation data
             data = self.parameter_estimation_data.data

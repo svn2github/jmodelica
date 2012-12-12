@@ -405,10 +405,6 @@ class TestLocalDAECollocator:
     def test_parameter_estimation_traj(self):
         """
         Test parameter estimation with and without given trajectories.
-        
-        Currently doesn't work due to bug described in #2433.
-        """
-        pass
         """
         sim_model = self.model_second_order
         opt_model = self.model_second_order_par_est
@@ -454,7 +450,6 @@ class TestLocalDAECollocator:
         z_traj = traj_res['z']
         N.testing.assert_allclose(w_traj, w_ref, 1e-2)
         N.testing.assert_allclose(z_traj, z_ref, 1e-2)
-        """
     
     @testattr(casadi = True)
     def test_vdp_minimum_time(self):
