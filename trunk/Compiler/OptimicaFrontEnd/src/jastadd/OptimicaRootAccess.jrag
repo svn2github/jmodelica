@@ -73,11 +73,12 @@ aspect OptimicaRootAccess {
 
 	public SourceRoot ParserHandler.parseOptimicaFile(String fileName) 
 	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(fileName));
-		AbstractModelicaScanner scanner = createOptimicaScanner(reader);
+		Reader reader = fileReader(fileName);
+		AbstractModelicaScanner scanner = createOptimicaScanner(new BufferedReader(reader));
 		beaver.Parser parser = createOptimicaParser(scanner);
 		SourceRoot sr = (SourceRoot) parser.parse(scanner);
 		sr.setFileName(fileName);
+		reader.close();
 		return sr;
 	}
 
