@@ -2067,6 +2067,7 @@ class JMUModel(BaseModel):
             
             A result object, subclass of algorithm_drivers.ResultBase.
         """
+        print "WARNING: Support for simulation of JMUs is to be discontinued. The recommended simulation framework is now the FMI, see the users-guide."
         return self._exec_simulate_algorithm(start_time, 
                                              final_time, 
                                              input,
