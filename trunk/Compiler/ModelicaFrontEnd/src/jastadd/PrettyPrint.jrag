@@ -324,9 +324,140 @@ aspect PrettyPrint {
 			}
 		}
 		
+		for (Algorithm a : getAlgorithms()) {
+			p.print(a, str, indent);
+		}
+		
 		str.print(indent + "end " + getName().getID());
 	} 
-
+	
+	public void Algorithm.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(indent);
+		if (hasInitial())
+			str.print("initial ");
+		str.println("algorithm");
+		
+		for (Statement s : getStatements()) {
+			p.print(s, str, indent + "  ");
+		}
+	}
+	
+	public void AssignStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(indent);
+		p.print(getLeft(), str, indent);
+		str.print(":=");
+		p.print(getRight(), str, indent);
+		str.println(';');
+	}
+	
+	public void FunctionCallStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(indent);
+		str.print('(');
+		boolean first = true;
+		for (FunctionCallLeft fcl : getLefts()) {
+			if (!first)
+				str.print(',');
+			first = false;
+			p.print(fcl, str, indent);
+		}
+		str.print("):=");
+		p.print(getFunctionCall(), str, indent);
+		str.println(';');
+	}
+	
+	public void BreakStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(indent);
+		str.println("break;");
+	}
+	
+	public void ReturnStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(indent);
+		str.println("return;");
+	}
+	
+	public void IfStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(indent);
+		str.print("if ");
+		boolean first = true;
+		for (IfWhenClause iwc : getIfWhenClauses()) {
+			if (!first) {
+				str.print(indent);
+				str.print("elseif ");
+			}
+			first = false;
+			p.print(iwc, str, indent);
+		}
+		if (getNumElseStmt() > 0) {
+			str.print(indent);
+			str.println("else");
+			for (Statement s : getElseStmts()) {
+				p.print(s, str, indent + "  ");
+			}
+		}
+		str.print(indent);
+		str.println("end if;");
+	}
+	
+	public void WhenStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(indent);
+		str.print("when ");
+		boolean first = true;
+		for (IfWhenClause iwc : getIfWhenClauses()) {
+			if (!first) {
+				str.print(indent);
+				str.print("elsewhen ");
+			}
+			first = false;
+			p.print(iwc, str, indent + "  ");
+		}
+		str.print(indent);
+		str.println("end when;");
+	}
+	
+	public void IfWhenClause.prettyPrint(Printer p, PrintStream str, String indent) {
+		p.print(getTest(), str, indent);
+		str.println(" then");
+		for (Statement s : getStatements()) {
+			p.print(s, str, indent + "  ");
+		}
+	}
+	
+	public void ForStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(indent);
+		str.print("for ");
+		boolean first = true;
+		for (ForIndex fi : getForIndexs()) {
+			if (!first)
+				str.print(',');
+			first = false;
+			p.print(fi, str, indent);
+		}
+		str.println(" loop");
+		for (Statement s : getForStmts())
+			p.print(s, str, indent + "  ");
+		str.print(indent);
+		str.println("end for;");
+	}
+	
+	public void WhileStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(indent);
+		str.print("while ");
+		p.print(getTest(), str, indent);
+		str.println(" loop");
+		for (Statement s : getWhileStmts())
+			p.print(s, str, indent + "  ");
+		str.print(indent);
+		str.println("end while;");
+	}
+	
+	public void ForIndex.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(getForIndexDecl().name());
+		if (hasExp()) {
+			str.print(" in ");
+			p.print(getExp(), str, indent);
+		}
+	}
+	
 	// For debugging
 	public void LibNode.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.format("%s%structured library '%s' at '%s'\n", indent, 
