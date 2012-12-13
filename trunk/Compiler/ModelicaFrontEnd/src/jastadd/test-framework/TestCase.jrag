@@ -313,8 +313,7 @@ abstract public class TestCase {
 		
 		// Parse
 		ParserHandler ph = new ParserHandler();
-		SourceRoot sr = null;
-		sr = ph.parseFile(getSourceFileName());
+		SourceRoot sr = ph.parseFile(getSourceFileName());
 		sr.options = options;
 		sr.setFileName(getSourceFileName());
 		
@@ -326,14 +325,9 @@ abstract public class TestCase {
 		
 		
 		// Flatten class and test it
-	    FlatRoot flatRoot = new FlatRoot();
-	    flatRoot.setFileName(getSourceFileName());
-	    FClass fc = createFClass(ipr.simpleLookupInstClassDecl(getClassName()));
-	    
-	    flatRoot.setFClass(fc);
-		fc = flatRoot.getFClass(); // make FClass final
-	    flatRoot.options = new OptionRegistry(options);
-    	ipr.findFlattenInst(getClassName(), fc);
+	    InstClassDecl icd = ipr.simpleLookupInstClassDecl(getClassName());
+		FClass fc = FClass.create(icd, getSourceFileName());
+		icd.flattenInstClassDecl(fc);
 		if (testFlattened(fc)) return;
 		
 		
@@ -440,12 +434,5 @@ abstract public class TestCase {
 	}
 
 }
-	
-	/**
-	 * \brief Create a new instance of the proper FClass (sub)class.
-	 */
-	public static FClass TestCase.createFClass(InstClassDecl icd) {
-		return new FClass();
-	}
 
 }

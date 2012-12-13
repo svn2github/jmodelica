@@ -63,36 +63,78 @@ abstract public class TestAnnotationizerHelper {
 	 * @param write        if <code>true</code>, write the annotation directly in the Modelica file
 	 */
 	public static void doAnnotation(String filePath, String testType, String modelName, 
-			String description, String opts, String data, boolean write) throws Exception {
+			String description, String[] opts, String data, boolean write) throws Exception {
 		try {
-			String ttl = testType.toLowerCase();
-			for (Class cl : TestAnnotationizerHelper.class.getClasses()) {
-				if (cl.getSimpleName().toLowerCase().startsWith(ttl) && !Modifier.isAbstract(cl.getModifiers())) {
-					System.out.println("Creating " + cl.getSimpleName() + "...");
-					Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String.class, String.class);
-					TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, opts, data);
-					if (write)
-						ta.writeAnnotation();
-					else
-						ta.printAnnotation();
-					System.exit(0);
-				}
-			}
+			Class cl = getTestCase(testType);
+			Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String[].class, String.class);
+			TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, opts, data);
+			ta.createAnnotation(write);
 		} catch (InvocationTargetException e) {
-			System.out.println("Creating annotation failed:");
-			Throwable cause = e.getCause();
-			String message = cause.getMessage();
-			if (message == null || !(cause instanceof ModelicaException))
-				cause.printStackTrace(System.out);
-			else
-				System.out.println(message);
-			System.exit(1);
+			handleException(e);
+		}
+	}
+
+	/**
+	 * This is the main method for regenerating an existing annotation.
+	 * 
+	 * @param filePath     the path to the Modelica file containing the test model
+	 * @param modelName    the name of the test model
+	 * @param write        if <code>true</code>, write the annotation directly in the Modelica file
+	 */
+	public static void doRegenerate(String filePath, String modelName, boolean write) throws Exception {
+		try {
+			SourceRoot root = parse(filePath, modelName, new OptionRegistry());
+			ClassDecl cd = root.getProgram().simpleLookupClassDotted(modelName);
+			if (cd.isUnknown()) {
+				System.err.println("Class " + modelName + "not found");
+				System.exit(1);
+			}
+			AnnotationNode a = cd.annotation("__JModelica/UnitTesting/tests");
+			a = a.iterator().hasNext() ? a.iterator().next() : AnnotationNode.NO_ANNOTATION;
+			if (!a.exists()) {
+				System.err.println("No test annotation found in class " + modelName);
+				System.exit(1);
+			}
+			Class cl = getTestCase(a.name());
+			Constructor constructor = cl.getConstructor(ClassDecl.class, String.class, String.class);
+			TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(cd, filePath, modelName);
+			ta.createAnnotation(write);
+		} catch (Exception e) {
+			handleException(e);
+		}
+	}
+	
+	/**
+	 * Get the test case generator class for the specified test case name (or prefix thereof).
+	 */
+	private static Class getTestCase(String testType) {
+		String ttl = testType.toLowerCase();
+		for (Class cl : TestAnnotationizerHelper.class.getClasses()) {
+			if (cl.getSimpleName().toLowerCase().startsWith(ttl) && !Modifier.isAbstract(cl.getModifiers())) {
+				System.out.println("Creating " + cl.getSimpleName() + "...");
+				return cl;
+			}
 		}
 		
 		System.out.println("Test type " + testType + " not found.");
 		System.exit(1);
+		return null;
 	}
-
+	
+	/**
+	 * Print error message for exception and exit.
+	 */
+	private static void handleException(Exception e) {
+		System.out.println("Creating annotation failed:");
+		Throwable cause = (e instanceof InvocationTargetException) ? e.getCause() : e;
+		String message = cause.getMessage();
+		if (message == null || !(cause instanceof ModelicaException))
+			cause.printStackTrace(System.out);
+		else
+			System.out.println(message);
+		System.exit(1);
+	}
+	
 	/**
 	 * \brief Prints a help message and exits.
 	 * 
@@ -105,6 +147,7 @@ abstract public class TestAnnotationizerHelper {
 		System.out.println("  Options:");
 		System.out.println("    -w           write result to file instead of stdout");
 		System.out.println("    -m/-o        create annotation for Modelica/Optimica (default is infer from file path)");
+		System.out.println("    -r           regenerate an already present annotation");
 		System.out.println("    -t=<type>    set type of test, a unique prefix is enough, e.g. Err for ErrorTestCase");
 		System.out.println("    -c=<class>   set name of class to generate annotation for, if name ");
 		System.out.println("                 does not contain a dot, base name of .mo file is prepended");
@@ -141,6 +184,7 @@ abstract public class TestAnnotationizerHelper {
 	protected String className;
 	protected String testName;
 	protected String description;
+	protected String data;
 	protected SourceRoot root;
 	protected String[] opts;
 	
@@ -157,21 +201,79 @@ abstract public class TestAnnotationizerHelper {
 	 * @param opts         comma-separated list of compiler options to override defaults for
 	 * @param data         any extra data to send to the delegate object
 	 */
-	public TestAnnotationizerHelper(String filePath, String className, String description, String opts, String data) throws Exception {
+	public TestAnnotationizerHelper(String filePath, String className, String description, String[] opts, String data) throws Exception {
 		this.filePath = filePath;
 		this.className = className;
 		this.description = prepare(description);
-		this.opts = (opts == null) ? new String[0] : opts.split(",");
+		this.opts = opts;
+		this.data = data;
+		process();
+	}
+	
+	/**
+	 * Test regeneration constructor for test case creators.
+	 * 
+	 * Parses the Modelica file containing the test model and saves the source root.
+	 * 
+	 * All subclasses should have a constructor with the same arguments that calls this constructor.
+	 * 
+	 * @param filePath     the path to the Modelica file containing the test model
+	 * @param className    the name of the test model
+	 */
+	public TestAnnotationizerHelper(ClassDecl cd, String filePath, String className) throws Exception {
+		this.filePath = filePath;
+		this.className = className;
+		AnnotationNode a = cd.annotation("__JModelica/UnitTesting/tests").iterator().next();
+		this.description = annotationString(a.forPath("description"));
+		this.data = annotationString(a.forPath(dataName()));
+		ArrayList<String> optStrings = new ArrayList<String>();
+		for (AnnotationNode a2 : a) 
+			if (a2.name().indexOf('_') >= 0) 
+				optStrings.add(a2.name() + '=' + annotationString(a2));
+		opts = optStrings.toArray(new String[optStrings.size()]);
+		process();
+	}
+	
+	protected static String annotationString(AnnotationNode a) {
+		String res = a.string();
+		if (res == null) {
+			Exp exp = a.exp();
+			if (exp != null)
+				res = exp.toString();
+		}
+		return (res == null) ? null : res.trim();
+	}
+	
+	/**
+	 * Get the name of the extra data parameter in the annotation, if any.
+	 */
+	protected String dataName() {
+		return "";
+	}
+	
+	/**
+	 * Process input and prepare all data needed for creating annotation.
+	 * 
+	 * Base implementation calculates test name and parses file.
+	 */
+	protected void process() throws Exception {
 		testName = className.substring(className.indexOf('.') + 1).replace('.', '_');
-		
+		root = parse(filePath, className, createOptionRegistry(opts));
+	}
+	
+	/**
+	 * Parse the file.
+	 */
+	private static SourceRoot parse(String filePath, String className, OptionRegistry opts) throws Exception {
 		String filesep = File.separator;
 		String modelicapath = System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";
+		opts.addStringOption("MODELICAPATH", modelicapath);
+		SourceRoot root;
 		
 		ParserHandler ph = new ParserHandler();
 		try {
 			root = ph.parseFile(filePath);
-			root.options = createOptionRegistry();
-			root.options.addStringOption("MODELICAPATH", modelicapath);
+			root.options = opts;
 		} catch (ParserException e) {
 			e.getProblem().setFileName(filePath);
 			CompilerException ce = new CompilerException();
@@ -180,12 +282,25 @@ abstract public class TestAnnotationizerHelper {
 		}
 		for (StoredDefinition sd : root.getProgram().getUnstructuredEntitys()) 
 			sd.setFileName(filePath);
+		return root;
+	}
+	
+	/**
+	 * Create an annotation from this helper object.
+	 * 
+	 * @param write  if <code>true</code>, write the annotation directly in the Modelica file
+	 */
+	protected void createAnnotation(boolean write) throws Exception {
+		if (write)
+			writeAnnotation();
+		else
+			printAnnotation();
 	}
 	
 	/**
 	 * \brief Creates the options registry to use.
 	 */
-	protected OptionRegistry createOptionRegistry() throws Exception {
+	protected OptionRegistry createOptionRegistry(String[] opts) throws Exception {
 		OptionRegistry or = new OptionRegistry();
 		for (String opt : opts) {
 			String parts[] = opt.split("=");
@@ -278,12 +393,29 @@ abstract public class TestAnnotationizerHelper {
 	 * \brief Writes the resulting test annotation directly in the Modelica file.
 	 */
 	public void writeAnnotation() throws Exception {
+		InstClassDecl icd = root.getProgram().getInstProgramRoot().simpleLookupInstClassDecl(className);
+		int start = icd.beginLine();
+		int end = icd.endLine();
 		File old = new File(filePath);
-		BufferedReader in = new BufferedReader(new FileReader(old));
+		BufferedReader in = new BufferedReader(ParserHandler.fileReader(old));
         File altered = File.createTempFile(className, ".mo");
-        PrintStream out = new PrintStream(altered);
-        for (int i = 0, n = getLine() - 1; i < n; i++)
-        	out.println(in.readLine());
+        PrintStream out = new PrintStream(altered, "UTF-8");
+        boolean foundOld = false;
+        boolean lastBlank = false;
+        for (int i = 0; i < end - 1; i++) {
+        	String line = in.readLine();
+        	String trimmed = line.trim();
+        	if (!foundOld) {
+        		if (i > start && trimmed.equals(HEADER)) {
+        			foundOld = true;
+        		} else {
+        			out.println(line);
+        			lastBlank = trimmed.isEmpty();
+        		}
+        	}
+        }
+        if (!lastBlank)
+        	out.println();
         try {
         	outputAnnotation(out);
         } catch (Exception e) {
@@ -295,20 +427,22 @@ abstract public class TestAnnotationizerHelper {
 			out.println(line);
 		out.close();
 		if (!altered.renameTo(old)) {
-			in = new BufferedReader(new FileReader(altered));
-	        out = new PrintStream(old);
+			in = new BufferedReader(ParserHandler.fileReader(altered));
+	        out = new PrintStream(old, "UTF-8");
 			for (String line = in.readLine(); line != null; line = in.readLine())
 				out.println(line);
 			altered.delete();
 		}
 		System.out.println("File " + old.getName() + " updated.");
 	}
+	
+	private final static String HEADER = "annotation(__JModelica(UnitTesting(tests={";
 
 	/**
 	 * \brief Generates the test annotation and ouputs it on the given stream.
 	 */
 	public void outputAnnotation(PrintStream out) throws Exception {
-		out.println("\n\tannotation(__JModelica(UnitTesting(tests={ ");
+		out.println("\t" + HEADER);
 		out.println("\t\t" + getClass().getSimpleName() + "(");
 		out.println("\t\t\tname=\"" + testName + "\",");
 		out.println("\t\t\tdescription=\"" + description + "\",");
@@ -316,13 +450,6 @@ abstract public class TestAnnotationizerHelper {
 			out.println("\t\t\t" + opt + ",");
 		printSpecific(out, "\t\t\t");
 		out.println(")})));");
-	}
-	
-	/**
-	 * \brief Gets the line number of the the start of the test model.
-	 */
-	protected int getLine() throws Exception {
-		return root.getProgram().getInstProgramRoot().simpleLookupInstClassDecl(className).endLine();
 	}
 	
 	/**
@@ -347,7 +474,6 @@ abstract public class TestAnnotationizerHelper {
 	 */
 	protected InstClassDecl instantiate() throws Exception {
 		InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
-		ipr.options = new OptionRegistry(root.options);
 		handleCompilerProblems(ipr.checkErrorsInInstClass(className));
 		return ipr.simpleLookupInstClassDecl(className);
 	}
@@ -355,13 +481,9 @@ abstract public class TestAnnotationizerHelper {
 	/**
 	 * \brief Performs the flattening step of the compilation.
 	 */
-	protected FClass flatten(InstClassDecl icl) {
-		FlatRoot flatRoot = new FlatRoot();
-	    flatRoot.setFileName(filePath);
-	    FClass fc = TestCase.createFClass(icl);
-	    flatRoot.setFClass(fc);
-		flatRoot.options = new OptionRegistry(icl.root().options);
-		icl.flattenInstClassDecl(fc);
+	protected FClass flatten(InstClassDecl icd) {
+		FClass fc = FClass.create(icd, filePath);
+		icd.flattenInstClassDecl(fc);
 		return fc;
 	}
 
@@ -427,8 +549,28 @@ abstract public class TestAnnotationizerHelper {
 		 * Compiles the model and generates code using the code template passed in 
 		 * <code>data</code> and a code generator created by subclass.
 		 */
-		public CodeGenTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+		public CodeGenTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
 			super(filePath, className, description, opts, data);
+		}
+		
+		/**
+		 * Test regeneration constructor for base code generation test.
+		 * 
+		 * Delegates to superclass implementation.
+		 * 
+		 * @param filePath     the path to the Modelica file containing the test model
+		 * @param className    the name of the test model
+		 */
+		public CodeGenTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+			super(cd, filePath, className);
+		}
+		
+		protected String dataName() {
+			return "template";
+		}
+		
+		protected void process() throws Exception {
+			super.process();
 			checkData(data);
 			template = prepare(data.replaceAll("\\\\n", "\n"));
 			FClass fc = compile();
@@ -465,8 +607,20 @@ abstract public class TestAnnotationizerHelper {
 		 * 
 		 * Delegates to super class.
 		 */
-		public GenericCodeGenTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+		public GenericCodeGenTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
 			super(filePath, className, description, opts, data);
+		}
+		
+		/**
+		 * Test regeneration constructor for generic code generation test.
+		 * 
+		 * Delegates to superclass implementation.
+		 * 
+		 * @param filePath     the path to the Modelica file containing the test model
+		 * @param className    the name of the test model
+		 */
+		public GenericCodeGenTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+			super(cd, filePath, className);
 		}
 		
 		/**
@@ -500,8 +654,24 @@ abstract public class TestAnnotationizerHelper {
 		 * 
 		 * Performs the flattening and instantiation steps of compilation.
 		 */
-		public FlatteningTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+		public FlatteningTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
 			super(filePath, className, description, opts, data);
+		}
+		
+		/**
+		 * Test regeneration constructor for flattening test.
+		 * 
+		 * Delegates to superclass implementation.
+		 * 
+		 * @param filePath     the path to the Modelica file containing the test model
+		 * @param className    the name of the test model
+		 */
+		public FlatteningTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+			super(cd, filePath, className);
+		}
+		
+		protected void process() throws Exception {
+			super.process();
 			fc = flatten(instantiate());
 		}
 
@@ -529,8 +699,24 @@ abstract public class TestAnnotationizerHelper {
 		 * Performs the transform canonical step of compilation.
 		 * (Superclass performs the flattening and instantiation steps.)
 		 */
-		public TransformCanonicalTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+		public TransformCanonicalTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
 			super(filePath, className, description, opts, data);
+		}
+		
+		/**
+		 * Test regeneration constructor for transform canonical test.
+		 * 
+		 * Delegates to superclass implementation.
+		 * 
+		 * @param filePath     the path to the Modelica file containing the test model
+		 * @param className    the name of the test model
+		 */
+		public TransformCanonicalTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+			super(cd, filePath, className);
+		}
+		
+		protected void process() throws Exception {
+			super.process();
 			transformCanonical(fc);
 		}
 		
@@ -550,8 +736,24 @@ abstract public class TestAnnotationizerHelper {
 		 * exception is caught, an error message is composed, to be included in 
 		 * the annotation.
 		 */
-		public ErrorTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+		public ErrorTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
 			super(filePath, className, description, opts, data);
+		}
+		
+		/**
+		 * Test regeneration constructor for error test.
+		 * 
+		 * Delegates to superclass implementation.
+		 * 
+		 * @param filePath     the path to the Modelica file containing the test model
+		 * @param className    the name of the test model
+		 */
+		public ErrorTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+			super(cd, filePath, className);
+		}
+		
+		protected void process() throws Exception {
+			super.process();
 			try {
 				compile();
 				throw new ModelicaException(noExceptionMessage());
@@ -592,8 +794,20 @@ abstract public class TestAnnotationizerHelper {
 		 * 
 		 * Delegates to super class.
 		 */
-		public WarningTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+		public WarningTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
 			super(filePath, className, description, opts, data);
+		}
+		
+		/**
+		 * Test regeneration constructor for warning test.
+		 * 
+		 * Delegates to superclass implementation.
+		 * 
+		 * @param filePath     the path to the Modelica file containing the test model
+		 * @param className    the name of the test model
+		 */
+		public WarningTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+			super(cd, filePath, className);
 		}
 		
 		/**
@@ -624,8 +838,20 @@ abstract public class TestAnnotationizerHelper {
 		 * 
 		 * Delegates to super class.
 		 */
-		public ComplianceErrorTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+		public ComplianceErrorTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
 			super(filePath, className, description, opts, data);
+		}
+		
+		/**
+		 * Test regeneration constructor for compliance test.
+		 * 
+		 * Delegates to superclass implementation.
+		 * 
+		 * @param filePath     the path to the Modelica file containing the test model
+		 * @param className    the name of the test model
+		 */
+		public ComplianceErrorTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+			super(cd, filePath, className);
 		}
 		
 		/**
@@ -653,8 +879,28 @@ abstract public class TestAnnotationizerHelper {
 		 * 
 		 * Compiles the model.
 		 */
-		public FClassMethodTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+		public FClassMethodTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
 			super(filePath, className, description, opts, data);
+		}
+		
+		/**
+		 * Test regeneration constructor for FClass method test case.
+		 * 
+		 * Delegates to superclass implementation.
+		 * 
+		 * @param filePath     the path to the Modelica file containing the test model
+		 * @param className    the name of the test model
+		 */
+		public FClassMethodTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+			super(cd, filePath, className);
+		}
+		
+		protected String dataName() {
+			return "methodName";
+		}
+		
+		protected void process() throws Exception {
+			super.process();
 			fc = compile();
 			checkData(data);
 			methodName = data;
@@ -691,12 +937,32 @@ abstract public class TestAnnotationizerHelper {
 		protected FClass fc;
 		
 		/**
-		 * \brief Constructor for FClass method test case.
+		 * \brief Constructor for parameter value evaluation test case.
 		 * 
 		 * Compiles the model.
 		 */
-		public EvalTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+		public EvalTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
 			super(filePath, className, description, opts, data);
+		}
+		
+		/**
+		 * Test regeneration constructor for parameter value evaluation test case.
+		 * 
+		 * Delegates to superclass implementation.
+		 * 
+		 * @param filePath     the path to the Modelica file containing the test model
+		 * @param className    the name of the test model
+		 */
+		public EvalTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+			super(cd, filePath, className);
+		}
+		
+		protected String dataName() {
+			return "variables";
+		}
+		
+		protected void process() throws Exception {
+			super.process();
 			fc = compile();
 			checkData(data);
 			variables = makeVariableList(data);
@@ -773,8 +1039,28 @@ abstract public class TestAnnotationizerHelper {
 		
 		private double time;
 
-		public TimeTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+		public TimeTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
 			super(filePath, className, description, opts, data);
+		}
+		
+		/**
+		 * Test regeneration constructor for compilation time test case.
+		 * 
+		 * Delegates to superclass implementation.
+		 * 
+		 * @param filePath     the path to the Modelica file containing the test model
+		 * @param className    the name of the test model
+		 */
+		public TimeTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+			super(cd, filePath, className);
+		}
+		
+		protected String dataName() {
+			return "maxTime";
+		}
+		
+		protected void process() throws Exception {
+			super.process();
 			time = Double.parseDouble(data);
 		}
 		

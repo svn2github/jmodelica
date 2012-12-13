@@ -44,6 +44,7 @@ import org.jmodelica.modelica.compiler.*;
  *   Options:
  *     -w           write result to file instead of stdout
  *     -m/-o        create annotation for Modelica/Optimica (default is infer from file path)
+ *     -r           regenerate an already present annotation
  *     -t=<type>    set type of test, e.g. ErrorTestCase
  *     -c=<class>   set name of class to generate annotation for, if name 
  *                  does not contain a dot, base name of .mo file is prepended
@@ -70,6 +71,7 @@ public class TestAnnotationizer {
 		String description = "";
 		String data = null;
 		boolean write = false;
+		boolean regenerate = false;
 		Lang lang = Lang.none;
 		String opts = null;
 		
@@ -85,6 +87,8 @@ public class TestAnnotationizer {
 				opts = value;
 			else if (arg.equals("-w")) 
 				write = true;
+			else if (arg.equals("-r")) 
+				regenerate = true;
 			else if (arg.equals("-h")) 
 				usageError(0);
 			else if (arg.equals("-o")) 
@@ -103,28 +107,39 @@ public class TestAnnotationizer {
 		modelName = composeModelName(getPackageName(filePath), modelName);
 		if (lang == Lang.none)
 			lang = filePath.contains("Optimica") ? Lang.optimica : Lang.modelica;
-		
+		boolean optimica = lang == Lang.optimica;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		if (!modelName.contains(".")) {
 			System.out.print("Enter class name: ");
 			System.out.flush();
 			modelName = composeModelName(modelName, in.readLine().trim());
 		}
-		if (testType == null) {
-			System.out.print("Enter type of test: ");
-			System.out.flush();
-			testType = in.readLine().trim();			
-		}
 		
-		boolean optimica = lang == Lang.optimica;
-		doAnnotation(optimica, filePath, testType, modelName, description, opts, data, write);
+		if (regenerate) {
+			doRegenerate(optimica, filePath, modelName, write);
+		} else {
+			if (testType == null) {
+				System.out.print("Enter type of test: ");
+				System.out.flush();
+				testType = in.readLine().trim();			
+			}
+			
+			doAnnotation(optimica, filePath, testType, modelName, description, opts, data, write);
+		}
+	}
+
+	private static void doRegenerate(boolean optimica, String filePath, String modelName, boolean write) throws Exception {
+		Method m = getHelperClass(optimica ? OPTIMICA : MODELICA).getMethod("doRegenerate", 
+				String.class, String.class, boolean.class);
+		m.invoke(null, filePath, modelName, write);
 	}
 
 	private static void doAnnotation(boolean optimica, String filePath,
-			String testType, String modelName, String description, String opts, 
+			String testType, String modelName, String description, String optStr, 
 			String data, boolean write) throws Exception {
+		String[] opts = (optStr == null) ? new String[0] : optStr.split(",");
 		Method m = getHelperClass(optimica ? OPTIMICA : MODELICA).getMethod("doAnnotation", 
-				String.class, String.class, String.class, String.class, String.class, String.class, boolean.class);
+				String.class, String.class, String.class, String.class, String[].class, String.class, boolean.class);
 		m.invoke(null, filePath, testType, modelName, description, opts, data, write);
 	}
 

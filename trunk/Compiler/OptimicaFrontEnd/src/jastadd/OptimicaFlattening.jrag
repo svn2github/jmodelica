@@ -14,6 +14,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+aspect OptimicaFlatTree {
+	
+	refine FlatTree public FClass InstClassDecl.createFClass() {
+		if (isOptimizationClass()) {
+			return new FOptClass();
+		} else {
+			return new FClass();
+		}
+	}
+
+}
+
 aspect OptimicaFlattening {
 
     public InstFullClassDecl OptClassDecl.newInstClassDecl() {

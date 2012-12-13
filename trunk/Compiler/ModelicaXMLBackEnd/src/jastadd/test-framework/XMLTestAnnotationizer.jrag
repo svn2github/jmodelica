@@ -28,8 +28,20 @@ abstract public class TestAnnotationizerHelper {
 		 * 
 		 * Delegates to super class.
 		 */
-		public XMLCodeGenTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+		public XMLCodeGenTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
 			super(filePath, className, description, opts, data);
+		}
+		
+		/**
+		 * Test regeneration constructor for XML code generation test.
+		 * 
+		 * Delegates to superclass implementation.
+		 * 
+		 * @param filePath     the path to the Modelica file containing the test model
+		 * @param className    the name of the test model
+		 */
+		public XMLCodeGenTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+			super(cd, filePath, className);
 		}
 		
 		/**

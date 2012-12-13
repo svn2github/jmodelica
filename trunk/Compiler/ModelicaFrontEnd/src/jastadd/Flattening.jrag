@@ -19,6 +19,38 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.HashSet;
 
+aspect FlatTree {
+	
+	/**
+	 * Create a correctly set up FClass.
+	 * 
+	 * Also creates a FlatRoot and sets its fields.
+	 * 
+	 * @param icd   the class being flattened
+	 * @param file  the path to the file to report errors on
+	 */
+	public static FClass FClass.create(InstClassDecl icl, String file) {
+		FlatRoot flatRoot = new FlatRoot(icl.createFClass());
+		flatRoot.setFileName(file);
+		FClass fc = flatRoot.getFClass(); // make FClass final
+		flatRoot.options = new OptionRegistry(icl.root().options);
+		// TODO: We should change how the checkErrors() method works, 
+		//       since it relies on the behaviour of DefaultErrorHandler
+		icl.root().getErrorHandler().connectTo(flatRoot);
+		return fc;
+	}
+	
+	/**
+	 * Create a new FClass object.
+	 * 
+	 * Override for subclasses needing a subclass of FClass.
+	 */
+	public FClass InstClassDecl.createFClass() {
+		return new FClass();
+	}
+	
+}
+
 aspect Flattening {
     
 	/**

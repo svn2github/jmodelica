@@ -17,10 +17,6 @@
 aspect OptimicaRootAccess {
 	
 	refine RootAccess eq SourceRoot.language() = "Optimica";
-	
-	refine RootAccess public FClass ParserHandler.newFClass() {
-		return new FOptClass();
-	}
     
 	refine RootAccess public static beaver.Parser ParserHandler.createModelicaParser(AbstractModelicaScanner scanner) {
     	org.jmodelica.optimica.parser.ModelicaParser parser = 

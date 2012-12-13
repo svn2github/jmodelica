@@ -1094,8 +1094,6 @@ public class ModelicaCompiler {
 			sr = null;
 			icl = null;
 			fc = flattenModel(buf.pass());
-			dumpMemoryUseFile(fc, "flat", true);
-			dumpNodeCountFile();
 
 			// Generate code 
 			generateCode(fc);
@@ -1276,36 +1274,6 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * \brief Create a new FClass object.
-	 * 
-	 * Override for subclasses needing a subclass of FClass.
-	 * 
-	 * @param icd  the instance class to be flattened, for use by subclasses
-	 */
-	protected FClass createFClass(InstClassDecl icd) {
-		return new FClass();
-	}
-	
-	/**
-	 * Create a flat tree with an empty FClass and return the FClass.
-	 * 
-	 * @param icl       the instance class to be flattened
-	 * @param flatFile  path to the file to report any errors on
-	 */
-	public FClass createFlatTree(InstClassDecl icl, String flatFile) {
-		FlatRoot flatRoot = new FlatRoot();
-		flatRoot.setFileName(flatFile);
-		FClass fc = createFClass(icl);
-		flatRoot.setFClass(fc);
-		fc = flatRoot.getFClass(); // make FClass final
-		flatRoot.options = new OptionRegistry(icl.root().options);
-		// TODO: We should change how the checkErrors() method works, 
-		//       since it relies on the behaviour of DefaultErrorHandler
-		icl.root().getErrorHandler().connectTo(flatRoot);
-		return fc;
-	}
-	
-	/**
 	 * Computes the flattened model representation from a model instance.
 	 * 
 	 * @param icd
@@ -1327,11 +1295,13 @@ public class ModelicaCompiler {
 		
 		String instName = icl.qualifiedName();
 		File flatFile = new File(sourceDir, instName + ".mof");
-		final FClass fc = createFlatTree(icl, flatFile.getPath());
+		final FClass fc = FClass.create(icl, flatFile.getPath());
 		
 		ASTNode.beginStep("flatten()");
 		log.info("Flattening model...");
 		icl.flattenInstClassDecl(fc);
+		dumpMemoryUseFile(fc, "flat", true);
+		dumpNodeCountFile();
 		icl = null;
 		ASTNode.endStep("flatten()");
 		
@@ -1387,6 +1357,7 @@ public class ModelicaCompiler {
 		
 		ASTNode.endStep("prettyPrintFlat()");
 		
+		dumpMemoryUseFile(fc, "transformed", false);
 		Collection<Problem> problems = fc.errorCheck();
 		
 		if (fc.root().options.getBooleanOption("write_iteration_variables_to_file")) {

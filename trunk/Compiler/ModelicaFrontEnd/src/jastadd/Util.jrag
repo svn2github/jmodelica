@@ -53,10 +53,6 @@ aspect RootAccess {
     public boolean ASTNode.hasRoot() { return (getParent() == null) ? false : getParent().hasRoot(); }
     public boolean Root.hasRoot()    { return true; }
     
-    public FClass ParserHandler.newFClass() {
-        return new FClass();
-    }
-    
     /*
      * These four methods are the only with references to the package containing 
      * the parser. Refine when needed.
