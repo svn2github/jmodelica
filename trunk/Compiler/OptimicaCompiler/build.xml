@@ -194,9 +194,6 @@
 			<fileset dir="${optimica_front_end_ast}">
 				<patternset refid="jastadd.files"/>
 			</fileset>
-			<fileset dir="${optimica_front_end_ast}/test-framework">
-				<patternset refid="jastadd.files"/>
-			</fileset>
 			<fileset dir="${optimica_xml_back_end_ast}">
 				<patternset refid="jastadd.files.notestframework"/>
 			</fileset>
