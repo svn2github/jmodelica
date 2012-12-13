@@ -1237,7 +1237,13 @@ aspect FlatEnumerations {
 	syn int FEnumSpecification.numEnumLiterals() = 0;
 	eq FEnumLiteralList.numEnumLiterals() = getNumFEnumLiteral();
 	
-	syn FVariable FResidual.iterationVariable() = (FVariable) getIterationVariable().myFV();
+	syn FVariable FResidual.iterationVariable() {
+		FVariable variable = (FVariable) getIterationVariable().myFV();
+		if (variable.isAlias())
+			return variable.alias();
+		else
+			return variable;
+	}
 	
 }
 
