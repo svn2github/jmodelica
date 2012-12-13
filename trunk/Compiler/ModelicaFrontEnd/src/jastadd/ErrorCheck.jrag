@@ -763,46 +763,21 @@ aspect InstanceErrorCheck {
 				super.collectErrors();
     			errorChecked = true;
 				getClassName().collectErrors();
-				if (hasInstClassModification())
+				if (hasInstClassModification() && shouldCheckModification())
 					getInstClassModification().collectErrors();
 			}
 	    }
-	}	
+	}
 	
-	public void InstExtendsShortClass.collectErrors() {
-		collectErrorsInstExtendsShortClass();
-    }
+	// Normally the class modifications in an InstExtendsShortClass
+	// does not need to be checked, since they are checked in InstShortClassDecl.
+	// This is not the case if the short class decl references
+	// an primitive variable, however, and in this case the
+	// class modification needs to be checked for errors.
+	syn boolean InstExtends.shouldCheckModification()           = true;
+	eq InstExtendsShortClass.shouldCheckModification()          = extendsPrimitive();
+	eq InstReplacingExtendsShortClass.shouldCheckModification() = extendsPrimitive();
 	
-	public void InstReplacingExtendsShortClass.collectErrors() {
-		collectErrorsInstExtendsShortClass();
-    }
-	
-	public void InstExtends.collectErrorsInstExtendsShortClass() {
-	    if (!errorChecked) {
-    		errorChecked = true;
-	    	if (isRecursed()) {
-	    		error("Recursive class structure");
-	    	} else {
-	    		allChecks();
-	    		// Normally the class modifications in an InstExtendsShortClass
-	    		// does not need to be checked, since they are checked in InstShortClassDecl.
-	    		// This is not the case if the short class decl references
-	    		// an primitive variable, however, and in this case the
-	    		// class modification needs to be checked for errors.
-	    		if (extendsPrimitive() && hasInstClassModification())
-	    			getInstClassModification().collectErrors();
-
-	    		getClassName().collectErrors();
-	    		for(InstNode n : getInstComponentDecls()) 
-	    			n.collectErrors();
-	    		for(InstNode n : getInstExtendss()) 
-	    			n.collectErrors();
-	    	}
-		}
-    }
-	
-	//public void InstPrimitiveClassDecl.collectErrors() {}
-
 	public void InstShortClassDecl.collectErrors() {
 	    if (!errorChecked) {
 	      if (!hasFArraySubscripts() && !hasInstClassModification()) {

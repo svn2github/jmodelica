@@ -4693,4 +4693,29 @@ end RedeclareTests.ModifyClass2;
 ")})));
 end ModifyClass2;
 
+
+model ShortClassDeclEqu1
+    model A
+        Real x;
+    equation
+        x = y;
+    end A;
+    
+    model B = A;
+    
+    B a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ShortClassDeclEqu1",
+			description="Make sure equations in instances of short class decls are checked",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
+Semantic error at line 4701, column 13:
+  Cannot find class or component declaration for y
+")})));
+end ShortClassDeclEqu1;
+
+
 end RedeclareTests;
