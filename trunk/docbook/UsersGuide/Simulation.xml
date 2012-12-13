@@ -806,7 +806,7 @@ opts['ncp'] = 1000 #Changing the number of communication points.
 
                 <entry>500</entry>
 
-                <entry>Number of communication points. </entry>
+                <entry>Number of communication points.</entry>
               </row>
 
               <row>
@@ -1778,6 +1778,73 @@ plt.show()
           </mediaobject>
         </figure>
       </section>
+    </section>
+
+    <section>
+      <title>Simulation of Co-Simulation FMUs</title>
+
+      <para>Simulation of an Co-Simulation FMU follow the same workflow as
+      simulation of an Model Exchange FMU. The model we would like to simulate
+      is a model of a bouncing ball, the file
+      <literal>bouncingBall.fmu</literal> is located in the examples folder in
+      the JModelica.org installation,
+      <literal>pyfmi/examples/files/CS1.0/</literal>. The FMU is a
+      Co-simulation FMU and in order to simulate it, we start by importing the
+      necessary methods and packages into Python: </para>
+
+      <programlisting>import pylab as P #For plotting
+from pyfmi import load_fmu #For loading the FMU </programlisting>
+
+      <para>Here, we have imported packages for plotting and the method
+      <literal>load_fmu</literal> which takes as input an FMU and then
+      determines the type and returns the appropriate class. Now, we need to
+      load the FMU.</para>
+
+      <programlisting>model = load_fmu('bouncingBall.fmu')</programlisting>
+
+      <para>The <literal>model</literal> object can now be used to interact
+      with the FMU, setting and getting values for instance. A simulation is
+      performed by invoking the <literal>simulate</literal> method:</para>
+
+      <programlisting>res = model.simulate(final_time=2.)</programlisting>
+
+      <para>As a Co-Simulation FMU contains it's own integrator, the method
+      simulate calls this integrator. Finally, plotting the result is done as
+      before:</para>
+
+      <programlisting>#Retrieve the result for the variables
+h_res = res['h']
+v_res = res['v']
+t     = res['time']
+    
+#Plot the solution
+#Plot the height
+fig = P.figure()
+P.clf()
+P.subplot(2,1,1)
+P.plot(t, h_res)
+P.ylabel('Height (m)')
+P.xlabel('Time (s)')
+#Plot the velocity
+P.subplot(2,1,2)
+P.plot(t, v_res)
+P.ylabel('Velocity (m/s)')
+P.xlabel('Time (s)')
+P.suptitle('FMI Bouncing Ball')
+P.show()</programlisting>
+
+      <para>and the figure below shows the results.</para>
+
+      <figure>
+        <title>Simulation result</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/bouncing_ball_cs.svg" scalefit="1"
+                       width="60%"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
     </section>
   </section>
 </chapter>
