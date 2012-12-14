@@ -2138,7 +2138,7 @@ Semantic error at line 0, column 0:
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
 Semantic error at line 0, column 0:
-  The system is structurally singuar. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
    y
    z
 ")})));
@@ -2158,7 +2158,7 @@ equation
 			errorMessage="
 Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
 Semantic error at line 0, column 0:
-  The system is structurally singuar. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
    y
 
   The follwowing equation(s) could not be matched to any variable:
@@ -2187,7 +2187,7 @@ Semantic error at line 0, column 0:
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
 Semantic error at line 0, column 0:
-  The system is structurally singuar. The following equation(s) could not be matched to any variable:
+  The system is structurally singular. The following equation(s) could not be matched to any variable:
    x = 5
 ")})));
 end UnbalancedTest3_Err;
@@ -2209,7 +2209,7 @@ Semantic error at line 0, column 0:
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest4_Err.mof':
 Semantic error at line 0, column 0:
-  The system is structurally singuar. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
    x
 ")})));
 end UnbalancedTest4_Err;
@@ -2233,7 +2233,7 @@ Semantic error at line 0, column 0:
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc3729100224648595936out/sources/TransformCanonicalTests.UnbalancedTest5_Err.mof':
 Semantic error at line 0, column 0:
-  The system is structurally singuar. The following equation(s) could not be matched to any variable:
+  The system is structurally singular. The following equation(s) could not be matched to any variable:
    x = 0
 ")})));
 end UnbalancedTest5_Err;
@@ -3945,7 +3945,7 @@ fclass TransformCanonicalTests.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Inertia inertia2.J(min = 0,start = 1) = 2 \"Moment of inertia\" /* 2 */;
  parameter StateSelect inertia2.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia2.phi(fixed = true,start = 0,stateSelect = inertia2.stateSelect) \"Absolute rotation angle of component\";
- Modelica.SIunits.AngularVelocity inertia2.w(fixed = true,stateSelect = inertia2.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
+ Modelica.SIunits.AngularVelocity inertia2.w(fixed = true,start = 0,stateSelect = inertia2.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
  Modelica.SIunits.AngularAcceleration inertia2.a \"Absolute angular acceleration of component (= der(w))\";
  parameter Modelica.SIunits.RotationalSpringConstant spring.c(final min = 0,start = 100000.0) = 10000.0 \"Spring constant\" /* 10000.0 */;
  parameter Modelica.SIunits.Angle spring.phi_rel0 = 0 \"Unstretched spring angle\" /* 0 */;
@@ -3955,15 +3955,17 @@ fclass TransformCanonicalTests.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Inertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
  parameter StateSelect inertia3.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia3.phi(stateSelect = inertia3.stateSelect) \"Absolute rotation angle of component\";
- Modelica.SIunits.AngularVelocity inertia3.w(fixed = true,stateSelect = inertia3.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
+ Modelica.SIunits.AngularVelocity inertia3.w(fixed = true,start = 0,stateSelect = inertia3.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
  Modelica.SIunits.AngularAcceleration inertia3.a \"Absolute angular acceleration of component (= der(w))\";
  parameter Modelica.SIunits.RotationalDampingConstant damper.d(final min = 0,start = 0) \"Damping constant\";
- Modelica.SIunits.Angle damper.phi_rel(stateSelect = StateSelect.always,start = 0,nominal = damper.phi_nominal) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
+ Modelica.SIunits.Angle damper.phi_rel(stateSelect = StateSelect.always,start = 0,nominal = (if damper.phi_nominal >= 1.0E-15 then damper.phi_nominal else 1)) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
  Modelica.SIunits.AngularVelocity damper.w_rel(stateSelect = StateSelect.always,start = 0) \"Relative angular velocity (= der(phi_rel))\";
  Modelica.SIunits.AngularAcceleration damper.a_rel(start = 0) \"Relative angular acceleration (= der(w_rel))\";
  Modelica.SIunits.Torque damper.flange_b.tau \"Cut torque in the flange\";
- parameter Modelica.SIunits.Angle damper.phi_nominal(displayUnit = \"rad\") = 1.0E-4 \"Nominal value of phi_rel (used for scaling)\" /* 1.0E-4 */;
+ parameter Modelica.SIunits.Angle damper.phi_nominal(displayUnit = \"rad\",min = 0.0) = 1.0E-4 \"Nominal value of phi_rel (used for scaling)\" /* 1.0E-4 */;
  parameter StateSelect damper.stateSelect = StateSelect.prefer \"Priority to use phi_rel and w_rel as states\" /* StateSelect.prefer */;
+ parameter Boolean damper.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
+ Modelica.SIunits.Power damper.lossPower \"Loss power leaving component via heatPort (> 0, if heat is flowing out of component)\";
  parameter Real sine.amplitude \"Amplitude of sine wave\";
  parameter Modelica.SIunits.Frequency sine.freqHz(start = 1) \"Frequency of sine wave\";
  parameter Modelica.SIunits.Angle sine.phase = 0 \"Phase of sine wave\" /* 0 */;
@@ -3972,8 +3974,8 @@ fclass TransformCanonicalTests.IndexReduction2_Mechanical
  constant Real sine.pi = 3.141592653589793;
 initial equation 
  inertia2.phi = 0;
- inertia2.w = 0.0;
- inertia3.w = 0.0;
+ inertia2.w = 0;
+ inertia3.w = 0;
  spring.phi_rel = 0;
 parameter equation
  inertia1.J = Jmotor;
@@ -3995,6 +3997,7 @@ equation
  inertia3.a = inertia3.der(w);
  ( inertia3.J ) * ( inertia3.a ) =  - ( spring.flange_b.tau ) + inertia3.flange_b.tau;
  damper.flange_b.tau = ( damper.d ) * ( damper.w_rel );
+ damper.lossPower = ( damper.flange_b.tau ) * ( damper.w_rel );
  damper.phi_rel = fixed.phi0 - ( inertia2.phi );
  damper.w_rel = damper.der(phi_rel);
  damper.a_rel = damper.der(w_rel);
@@ -4020,6 +4023,7 @@ public
  type Modelica.SIunits.AngularAcceleration = Real(final quantity = \"AngularAcceleration\",final unit = \"rad/s2\");
  type Modelica.SIunits.RotationalSpringConstant = Real(final quantity = \"RotationalSpringConstant\",final unit = \"N.m/rad\");
  type Modelica.SIunits.RotationalDampingConstant = Real(final quantity = \"RotationalDampingConstant\",final unit = \"N.m.s/rad\");
+ type Modelica.SIunits.Power = Real(final quantity = \"Power\",final unit = \"W\");
  type Modelica.SIunits.Time = Real(final quantity = \"Time\",final unit = \"s\");
  type Modelica.Blocks.Interfaces.RealOutput = Real;
 end TransformCanonicalTests.IndexReduction2_Mechanical;
@@ -4123,7 +4127,7 @@ Semantic error at line 0, column 0:
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/TransformCanonicalTests.IndexReduction4_Err.mof':
 Semantic error at line 0, column 0:
-  The system is structurally singuar. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
    der(x2)
 
   The follwowing equation(s) could not be matched to any variable:
@@ -4164,7 +4168,7 @@ Semantic error at line 0, column 0:
 
 Error: in file 'TransformCanonicalTests.IndexReduction5_Err.mof':
 Semantic error at line 0, column 0:
-  The system is structurally singuar. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
    der(x2)
 
   The follwowing equation(s) could not be matched to any variable:
@@ -4684,7 +4688,7 @@ Semantic error at line 0, column 0:
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc2815301804134878885out/resources/BasicVolume.mof':
 Semantic error at line 0, column 0:
-  The system is structurally singuar. The following equation(s) could not be matched to any variable:
+  The system is structurally singular. The following equation(s) could not be matched to any variable:
    u = u_0 + ( c_v ) * ( T - ( T_0 ) )
 ")})));
   end IndexReduction23_BasicVolume_Err;

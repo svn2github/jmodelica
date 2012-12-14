@@ -6790,75 +6790,54 @@ model M_OLineExample
 			name="Other_M_OLineExample",
 			description="Test example that caused infinite loop",
 			errorMessage="
-23 errors found:
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
-Semantic error at line 642, column 43:
+16 errors found:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
+Semantic error at line 610, column 43:
   Could not evaluate array size expression: dimL
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 143, column 20:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 161, column 22:
   Could not evaluate array size expression: dim_vector_lgc
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 145, column 19:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 163, column 26:
   Array size mismatch in declaration of l, size of declaration is [dim_vector_lgc] and size of binding expression is [10]
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 148, column 20:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 166, column 22:
   Could not evaluate array size expression: dim_vector_lgc
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 150, column 19:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 168, column 26:
   Array size mismatch in declaration of g, size of declaration is [dim_vector_lgc] and size of binding expression is [10]
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 153, column 20:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 171, column 22:
   Could not evaluate array size expression: dim_vector_lgc
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 155, column 19:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 173, column 26:
   Array size mismatch in declaration of c, size of declaration is [dim_vector_lgc] and size of binding expression is [10]
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 169, column 21:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 203, column 25:
   Could not evaluate array size expression: dim_vector_lgc
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 171, column 21:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 206, column 25:
   Could not evaluate array size expression: dim_vector_lgc
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 172, column 21:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 208, column 25:
   Could not evaluate array size expression: dim_vector_lgc
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 186, column 31:
-  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) )
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 187, column 15:
-  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) )
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 188, column 31:
-  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) )
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 189, column 15:
-  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) )
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 192, column 33:
-  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) ) + 1 + i - ( j + 1 )
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 193, column 17:
-  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) ) + 1 + i - ( j + 1 )
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 194, column 33:
-  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) ) + 1 + i - ( j + 1 )
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 195, column 17:
-  Array index must be Integer expression: 1 + ( j - ( 1 ) ) * ( lines ) - ( ( ( j - ( 2 ) ) * ( j - ( 1 ) ) ) * ( 0.5 ) ) + 1 + i - ( j + 1 )
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 201, column 35:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 272, column 38:
   Could not evaluate array index expression: dim_vector_lgc
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 202, column 15:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 273, column 17:
   Could not evaluate array index expression: dim_vector_lgc
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 203, column 35:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 274, column 38:
   Could not evaluate array index expression: dim_vector_lgc
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 204, column 15:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 275, column 17:
   Could not evaluate array index expression: dim_vector_lgc
-Error: in file '.\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 224, column 21:
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 288, column 29:
+  Could not evaluate array index expression: dim_vector_lgc
+Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
+Semantic error at line 310, column 25:
   Could not evaluate array size expression: dim_vector_lgc
 ")})));
 end M_OLineExample;

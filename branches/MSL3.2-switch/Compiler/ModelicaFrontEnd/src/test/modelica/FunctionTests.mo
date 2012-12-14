@@ -7044,12 +7044,12 @@ public
   output Real[size(A, 1), size(A, 2)] QR;
   output Real[min(size(A, 1), size(A, 2))] tau;
   output Integer[size(A, 2)] p;
-  Integer info;
+  output Integer info;
+  Integer lda;
   Integer ncol;
   Real[:] work;
  algorithm
-  ncol := size(A, 2);
-  size(work) := {( 3 ) * ( ncol )};
+  size(work) := {( 3 ) * ( size(A, 2) )};
   for i1 in 1:size(QR, 1) loop
    for i2 in 1:size(QR, 2) loop
     QR[i1,i2] := A[i1,i2];
@@ -7058,7 +7058,9 @@ public
   for i1 in 1:size(p, 1) loop
    p[i1] := 0;
   end for;
-  external \"FORTRAN 77\" dgeqpf(size(A, 1), ncol, QR, size(A, 1), p, tau, work, info);
+  lda := max(1, size(A, 1));
+  ncol := size(A, 2);
+  external \"FORTRAN 77\" dgeqpf(size(A, 1), ncol, QR, lda, p, tau, work, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgeqpf;
 
@@ -7093,7 +7095,7 @@ fclass FunctionTests.Lapack_QR
  Real R[2,1];
  Real R[2,2];
 equation
- ({{Q[1,1],Q[1,2]},{Q[2,1],Q[2,2]}}, {{R[1,1],R[1,2]},{R[2,1],R[2,2]}}, ) = Modelica.Math.Matrices.QR({{A[1,1],A[1,2]},{A[2,1],A[2,2]}});
+ ({{Q[1,1],Q[1,2]},{Q[2,1],Q[2,2]}}, {{R[1,1],R[1,2]},{R[2,1],R[2,2]}}, ) = Modelica.Math.Matrices.QR({{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, true);
  A[1,1] = 5;
  A[1,2] = 6;
  A[2,1] = 7;
@@ -7102,6 +7104,7 @@ equation
 public
  function Modelica.Math.Matrices.QR
   input Real[:, :] A;
+  input Boolean pivoting;
   output Real[size(A, 1), size(A, 2)] Q;
   output Real[size(A, 2), size(A, 2)] R;
   output Integer[size(A, 2)] p;
@@ -7109,11 +7112,18 @@ public
   Integer ncol;
   Real[:] tau;
  algorithm
-  ncol := size(A, 2);
-  size(tau) := {ncol};
+  size(tau) := {size(A, 2)};
   nrow := size(A, 1);
+  ncol := size(A, 2);
   ();
-  (Q, tau, p) := Modelica.Math.Matrices.LAPACK.dgeqpf(A);
+  if pivoting then
+   (Q, tau, p) := Modelica.Math.Matrices.LAPACK.dgeqpf(A);
+  else
+   (Q, tau) := Modelica.Math.Matrices.LAPACK.dgeqrf(A);
+   for i1 in 1:size(p, 1) loop
+    p[i1] := i1;
+   end for;
+  end if;
   for i1 in 1:size(R, 1) loop
    for i2 in 1:size(R, 2) loop
     R[i1,i2] := 0;
@@ -7133,12 +7143,12 @@ public
   output Real[size(A, 1), size(A, 2)] QR;
   output Real[min(size(A, 1), size(A, 2))] tau;
   output Integer[size(A, 2)] p;
-  Integer info;
+  output Integer info;
+  Integer lda;
   Integer ncol;
   Real[:] work;
  algorithm
-  ncol := size(A, 2);
-  size(work) := {( 3 ) * ( ncol )};
+  size(work) := {( 3 ) * ( size(A, 2) )};
   for i1 in 1:size(QR, 1) loop
    for i2 in 1:size(QR, 2) loop
     QR[i1,i2] := A[i1,i2];
@@ -7147,26 +7157,54 @@ public
   for i1 in 1:size(p, 1) loop
    p[i1] := 0;
   end for;
-  external \"FORTRAN 77\" dgeqpf(size(A, 1), ncol, QR, size(A, 1), p, tau, work, info);
+  lda := max(1, size(A, 1));
+  ncol := size(A, 2);
+  external \"FORTRAN 77\" dgeqpf(size(A, 1), ncol, QR, lda, p, tau, work, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgeqpf;
+
+ function Modelica.Math.Matrices.LAPACK.dgeqrf
+  input Real[:, :] A;
+  output Real[size(A, 1), size(A, 2)] Aout;
+  output Real[min(size(A, 1), size(A, 2))] tau;
+  output Integer info;
+  output Real[( 3 ) * ( max(1, size(A, 2)) )] work;
+  Integer m;
+  Integer n;
+  Integer lda;
+  Integer lwork;
+ algorithm
+  for i1 in 1:size(Aout, 1) loop
+   for i2 in 1:size(Aout, 2) loop
+    Aout[i1,i2] := A[i1,i2];
+   end for;
+  end for;
+  m := size(A, 1);
+  n := size(A, 2);
+  lda := max(1, m);
+  lwork := ( 3 ) * ( max(1, n) );
+  external \"FORTRAN 77\" dgeqrf(m, n, Aout, lda, tau, work, lwork, info);
+  return;
+ end Modelica.Math.Matrices.LAPACK.dgeqrf;
 
  function Modelica.Math.Matrices.LAPACK.dorgqr
   input Real[:, :] QR;
   input Real[min(size(QR, 1), size(QR, 2))] tau;
   output Real[size(QR, 1), size(QR, 2)] Q;
-  Integer info;
+  output Integer info;
+  Integer lda;
   Integer lwork;
   Real[:] work;
  algorithm
-  lwork := ( min(10, size(QR, 2)) ) * ( size(QR, 2) );
-  size(work) := {lwork};
+  size(work) := {max(1, ( min(10, size(QR, 2)) ) * ( size(QR, 2) ))};
   for i1 in 1:size(Q, 1) loop
    for i2 in 1:size(Q, 2) loop
     Q[i1,i2] := QR[i1,i2];
    end for;
   end for;
-  external \"FORTRAN 77\" dorgqr(size(QR, 1), size(QR, 2), size(tau, 1), Q, size(Q, 1), tau, work, lwork, info);
+  lda := max(1, size(Q, 1));
+  lwork := max(1, ( min(10, size(QR, 2)) ) * ( size(QR, 2) ));
+  external \"FORTRAN 77\" dorgqr(size(QR, 1), size(QR, 2), size(tau, 1), Q, lda, tau, work, lwork, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dorgqr;
 

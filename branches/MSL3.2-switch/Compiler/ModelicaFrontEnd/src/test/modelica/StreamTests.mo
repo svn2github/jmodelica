@@ -547,9 +547,8 @@ package StreamExample
            points={{-4,36},{6,36},{6,44},{15,44}},
            color={0,0,127},
            smooth=Smooth.None));
-       annotation (Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,
-                  -100},{100,100}}), graphics),
-				  __JModelica(UnitTesting(tests={
+
+    annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="StreamExample_Examples_Systems_HeatedGas",
             description="Test of stream connectors",
@@ -666,16 +665,16 @@ equation
 public
  type Modelica.SIunits.SpecificHeatCapacity = Real(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
  type Modelica.SIunits.MassFlowRate = Real(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\");
- type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
+ type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 1,max = 6000,start = 288.15,nominal = 300,displayUnit = \"degC\");
+ type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\",nominal = 1000000.0);
+ type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",min =  - ( 1.0E9 ),max = 1.0E9,nominal = 100000.0,start = 100000.0,displayUnit = \"bar\");
  type Modelica.SIunits.Volume = Real(final quantity = \"Volume\",final unit = \"m3\");
  type Modelica.SIunits.HeatFlowRate = Real(final quantity = \"Power\",final unit = \"W\");
  type Modelica.SIunits.EnthalpyFlowRate = Real(final quantity = \"EnthalpyFlowRate\",final unit = \"W\");
  type Modelica.SIunits.EnergyFlowRate = Real(final quantity = \"Power\",final unit = \"W\");
  type Modelica.SIunits.Mass = Real(quantity = \"Mass\",final unit = \"kg\",min = 0);
- type Modelica.SIunits.SpecificInternalEnergy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- type Modelica.SIunits.Density = Real(final quantity = \"Density\",final unit = \"kg/m3\",displayUnit = \"g/cm3\",min = 0);
+ type Modelica.SIunits.SpecificInternalEnergy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\",nominal = 1000000.0);
+ type Modelica.SIunits.Density = Real(final quantity = \"Density\",final unit = \"kg/m3\",displayUnit = \"g/cm3\",min = 1.0E-6,max = 30000.0);
  type Modelica.SIunits.InternalEnergy = Real(final quantity = \"Energy\",final unit = \"J\");
  type Modelica.SIunits.LinearTemperatureCoefficient = Real(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\");
  type Modelica.Blocks.Interfaces.RealInput = Real;
@@ -768,14 +767,12 @@ end StreamTests.StreamExample.Examples.Systems.HeatedGas;
             color={0,0,255},
             smooth=Smooth.None));
 
-       annotation (Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,
-                  -100},{100,100}}), graphics),
-				  __JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="StreamExample_Examples_Systems_HeatedGas_SimpleWrap",
-            description="Test of inside and outside stream connectors",
-            eliminate_alias_variables=false,
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StreamExample_Examples_Systems_HeatedGas_SimpleWrap",
+			description="Test of inside and outside stream connectors",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass StreamTests.StreamExample.Examples.Systems.HeatedGas_SimpleWrap
  parameter Modelica.SIunits.SpecificHeatCapacity R_gas = ( 8.314472 ) / ( 0.0289651159 ) /* 287.0512249529787 */;
  parameter Modelica.SIunits.SpecificHeatCapacity cp = 1000 /* 1000 */;
@@ -843,9 +840,9 @@ equation
 public
  type Modelica.SIunits.SpecificHeatCapacity = Real(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
  type Modelica.SIunits.MassFlowRate = Real(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\");
- type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
+ type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 1,max = 6000,start = 288.15,nominal = 300,displayUnit = \"degC\");
+ type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\",nominal = 1000000.0);
+ type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",min =  - ( 1.0E9 ),max = 1.0E9,nominal = 100000.0,start = 100000.0,displayUnit = \"bar\");
  type Modelica.SIunits.Time = Real(final quantity = \"Time\",final unit = \"s\");
  type Modelica.Blocks.Interfaces.RealOutput = Real;
  type Modelica.Blocks.Interfaces.RealInput = Real;

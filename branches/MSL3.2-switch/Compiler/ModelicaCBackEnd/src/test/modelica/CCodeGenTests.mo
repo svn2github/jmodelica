@@ -7758,12 +7758,12 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="MathSolve",
-			description="",
+			description="Using MSL function Modelica.Math.Matrices.solve",
 			template="
 $C_function_headers$
 $C_functions$
 ",
-         generatedCode="
+			generatedCode="
 void func_Modelica_Math_Matrices_solve_def(jmi_array_t* A_a, jmi_array_t* b_a, jmi_array_t* x_a);
 void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(jmi_array_t* A_a, jmi_array_t* b_a, jmi_array_t* x_a, jmi_ad_var_t* info_o);
 
@@ -7785,6 +7785,8 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(jmi_array_t* A_a, jmi_arra
     JMI_ARRAY_DYNAMIC(x_an, 1)
     jmi_ad_var_t info_v;
     JMI_ARRAY_DYNAMIC(Awork_a, 2)
+    jmi_ad_var_t lda_v;
+    jmi_ad_var_t ldb_v;
     JMI_ARRAY_DYNAMIC(ipiv_a, 1)
     jmi_ad_var_t i1_0i;
     jmi_ad_var_t i1_0ie;
@@ -7794,8 +7796,10 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(jmi_array_t* A_a, jmi_arra
     jmi_ad_var_t i2_2ie;
     jmi_int_t tmp_1;
     JMI_ARRAY_DYNAMIC(tmp_2, 2)
-    JMI_INT_ARRAY_DYNAMIC(tmp_3, 1)
-    jmi_int_t tmp_4;
+    jmi_int_t tmp_3;
+    JMI_INT_ARRAY_DYNAMIC(tmp_4, 1)
+    jmi_int_t tmp_5;
+    jmi_int_t tmp_6;
     extern void dgesv_(jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
     if (x_a == NULL) {
         JMI_ARRAY_DYNAMIC_INIT_1(x_an, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
@@ -7814,18 +7818,23 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(jmi_array_t* A_a, jmi_arra
             jmi_array_ref_2(Awork_a, i1_1i, i2_2i) = jmi_array_val_2(A_a, i1_1i, i2_2i);
         }
     }
+    lda_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(A_a, 0));
+    ldb_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(b_a, 0));
     tmp_1 = 1;
     JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(A_a, 0) ), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_2->var);
-    JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_3, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
-    jmi_matrix_to_fortran_int(ipiv_a, ipiv_a->var, tmp_3->var);
-    tmp_4 = (int)info_v;
-    dgesv_(&jmi_array_size(A_a, 0), &tmp_1, tmp_2->var, &jmi_array_size(A_a, 0), tmp_3->var, x_a->var, &jmi_array_size(A_a, 0), &tmp_4);
-    info_v = tmp_4;
+    tmp_3 = (int)lda_v;
+    JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_4, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+    jmi_matrix_to_fortran_int(ipiv_a, ipiv_a->var, tmp_4->var);
+    tmp_5 = (int)ldb_v;
+    tmp_6 = (int)info_v;
+    dgesv_(&jmi_array_size(A_a, 0), &tmp_1, tmp_2->var, &tmp_3, tmp_4->var, x_a->var, &tmp_5, &tmp_6);
+    info_v = tmp_6;
     if (info_o != NULL) *info_o = info_v;
     JMI_DYNAMIC_FREE()
     return;
 }
+
 
 ")})));
 end MathSolve;
@@ -7842,12 +7851,12 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="MathSolve2",
-			description="",
+			description="Using MSL function Modelica.Math.Matrices.solve",
 			template="
 $C_function_headers$
 $C_functions$
 ",
-         generatedCode="
+			generatedCode="
 void func_Modelica_Math_Matrices_solve2_def(jmi_array_t* A_a, jmi_array_t* B_a, jmi_array_t* X_a);
 void func_Modelica_Math_Matrices_LAPACK_dgesv_def(jmi_array_t* A_a, jmi_array_t* B_a, jmi_array_t* X_a, jmi_ad_var_t* info_o);
 
@@ -7869,6 +7878,8 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def(jmi_array_t* A_a, jmi_array_t*
     JMI_ARRAY_DYNAMIC(X_an, 2)
     jmi_ad_var_t info_v;
     JMI_ARRAY_DYNAMIC(Awork_a, 2)
+    jmi_ad_var_t lda_v;
+    jmi_ad_var_t ldb_v;
     JMI_ARRAY_DYNAMIC(ipiv_a, 1)
     jmi_ad_var_t i1_0i;
     jmi_ad_var_t i1_0ie;
@@ -7879,9 +7890,11 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def(jmi_array_t* A_a, jmi_array_t*
     jmi_ad_var_t i2_3i;
     jmi_ad_var_t i2_3ie;
     JMI_ARRAY_DYNAMIC(tmp_1, 2)
-    JMI_INT_ARRAY_DYNAMIC(tmp_2, 1)
-    JMI_ARRAY_DYNAMIC(tmp_3, 2)
-    jmi_int_t tmp_4;
+    jmi_int_t tmp_2;
+    JMI_INT_ARRAY_DYNAMIC(tmp_3, 1)
+    JMI_ARRAY_DYNAMIC(tmp_4, 2)
+    jmi_int_t tmp_5;
+    jmi_int_t tmp_6;
     extern void dgesv_(jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
     if (X_a == NULL) {
         JMI_ARRAY_DYNAMIC_INIT_2(X_an, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(B_a, 1) ), jmi_array_size(A_a, 0), jmi_array_size(B_a, 1))
@@ -7903,16 +7916,20 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def(jmi_array_t* A_a, jmi_array_t*
             jmi_array_ref_2(Awork_a, i1_2i, i2_3i) = jmi_array_val_2(A_a, i1_2i, i2_3i);
         }
     }
+    lda_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(A_a, 0));
+    ldb_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(B_a, 0));
     JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(A_a, 0) ), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_1->var);
-    JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
-    jmi_matrix_to_fortran_int(ipiv_a, ipiv_a->var, tmp_2->var);
-    JMI_ARRAY_DYNAMIC_INIT_2(tmp_3, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(B_a, 1) ), jmi_array_size(A_a, 0), jmi_array_size(B_a, 1))
-    jmi_matrix_to_fortran_real(X_a, X_a->var, tmp_3->var);
-    tmp_4 = (int)info_v;
-    dgesv_(&jmi_array_size(A_a, 0), &jmi_array_size(B_a, 1), tmp_1->var, &jmi_array_size(A_a, 0), tmp_2->var, tmp_3->var, &jmi_array_size(A_a, 0), &tmp_4);
-    jmi_matrix_from_fortran_real(X_a, tmp_3->var, X_a->var);
-    info_v = tmp_4;
+    tmp_2 = (int)lda_v;
+    JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_3, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+    jmi_matrix_to_fortran_int(ipiv_a, ipiv_a->var, tmp_3->var);
+    JMI_ARRAY_DYNAMIC_INIT_2(tmp_4, ( jmi_array_size(A_a, 0) ) * ( jmi_array_size(B_a, 1) ), jmi_array_size(A_a, 0), jmi_array_size(B_a, 1))
+    jmi_matrix_to_fortran_real(X_a, X_a->var, tmp_4->var);
+    tmp_5 = (int)ldb_v;
+    tmp_6 = (int)info_v;
+    dgesv_(&jmi_array_size(A_a, 0), &jmi_array_size(B_a, 1), tmp_1->var, &tmp_2, tmp_3->var, tmp_4->var, &tmp_5, &tmp_6);
+    jmi_matrix_from_fortran_real(X_a, tmp_4->var, X_a->var);
+    info_v = tmp_6;
     if (info_o != NULL) *info_o = info_v;
     JMI_DYNAMIC_FREE()
     return;

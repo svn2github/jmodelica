@@ -2067,7 +2067,7 @@ aspect TransformCanonical {
 		boolean unbalanced = false;
 		StringBuffer err_str = new StringBuffer();
 		if (getDAEUnmatchedVariables().size() > 0 ) {
-			err_str.append("The system is structurally singuar. The following varible(s) could not be matched to any equation:\n");
+			err_str.append("The system is structurally singular. The following varible(s) could not be matched to any equation:\n");
 			for (FVariable fv : getDAEUnmatchedVariables()) {
 				err_str.append("   " + fv.name());
 				err_str.append("\n");
@@ -2076,7 +2076,7 @@ aspect TransformCanonical {
 		}
 		if (getDAEUnmatchedEquations().size() > 0 ) {
 			if (!unbalanced) {
-				err_str.append("The system is structurally singuar. The following equation(s) could not be matched to any variable:\n");
+				err_str.append("The system is structurally singular. The following equation(s) could not be matched to any variable:\n");
 			} else {
 				err_str.append("\n  The follwowing equation(s) could not be matched to any variable:\n");
 			}
