@@ -19,7 +19,7 @@ Required keys:
   'COMPILER_JARS' : Paths to compiler jar files (path-separated depending on operating system)
   'BEAVER_LIB' : Path to Beaver lib directory
   'CLASSPATH' : Java CLASSPATH
-  'JVM_PATH' : Path to JVM dll file
+  'JYPE_JVM' : Path to JVM dll file
   'JVM_ARGS' : JVM arguments
 
 
@@ -60,7 +60,7 @@ _defaults = [('IPOPT_HOME','',True),
              ('COMPILER_JARS',COMPILER_JARS,True),
              ('BEAVER_PATH',os.path.join(_jm_home,'ThirdParty','Beaver','lib'),True),
              ('MODELICAPATH',os.path.join(_jm_home,'ThirdParty','MSL'),True),
-             ('JVM_PATH',jpype.getDefaultJVMPath(),True),
+             ('JPYPE_JVM',jpype.getDefaultJVMPath(),True),
              ('JVM_ARGS','-Xmx512m',False)]
 
 if sys.platform == 'win32':
