@@ -787,8 +787,8 @@ class CasadiModel(BaseModel):
          self.path,
          self.point,
          self.mterm,
-         self.lterm] = casadi.substitute(ocp_expressions, parameters,
-                                         parameter_values)
+         self.lterm] = casadi.substitute(ocp_expressions, [parameters],
+                                         [parameter_values])
     
     def _load_xml_to_casadi(self, xml, verbose):
         # Create a symbolic OCP

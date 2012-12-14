@@ -785,8 +785,8 @@ class LocalDAECollocator(CasadiCollocator):
              self.path,
              self.point,
              self.mterm,
-             self.lterm] = casadi.substitute(ocp_expressions, variables,
-                                             sfs * variables)
+             self.lterm] = casadi.substitute(ocp_expressions, [variables],
+                                             [sfs * variables])
     
     def _define_collocation(self):
         """
@@ -1137,8 +1137,8 @@ class LocalDAECollocator(CasadiCollocator):
              self.path,
              self.point,
              self.mterm,
-             self.lterm] = casadi.substitute(ocp_expressions, self.model.dx,
-                                             coll_der)
+             self.lterm] = casadi.substitute(ocp_expressions, [self.model.dx],
+                                             [coll_der])
     
     def _create_constraints(self):
         """
@@ -1254,9 +1254,9 @@ class LocalDAECollocator(CasadiCollocator):
                 [self.path,
                  self.point,
                  self.mterm] = casadi.substitute(ocp_expressions,
-                                                 timed_variables,
-                                                 timed_variables_sfs *
-                                                 timed_variables)
+                                                 [timed_variables],
+                                                 [timed_variables_sfs *
+                                                  timed_variables])
         
         # Denormalize time for minimum time problems
         if self._normalize_min_time:
@@ -1552,8 +1552,8 @@ class LocalDAECollocator(CasadiCollocator):
             scaled_var.append(sym_sf * variant_var)
             scaled_var.append(N.array(variant_timed_sf) * variant_timed_var)
             scaled_expressions = casadi.substitute(ocp_expressions,
-                                                   unscaled_var,
-                                                   scaled_var)
+                                                   [unscaled_var],
+                                                   [scaled_var])
             [self.initial, self.ode, self.alg, self.path, self.point,
              self.mterm, self.lterm] = scaled_expressions
             
