@@ -58,8 +58,8 @@
       and thereby use the automatic differentiation tool CasADi for
       optimization purposes. Read more about CasADi and how a
       <literal>CasadiModel</literal> object can be used for optimization in
-      <xref linkend="opt_sec_pseudo-spectral" /> in <xref
-      linkend="ch_optimization" />.</para>
+      <xref linkend="opt_sec_pseudo-spectral"/> in <xref
+      linkend="ch_optimization"/>.</para>
     </section>
   </section>
 
@@ -70,15 +70,15 @@
     compiler function from the JModelica.org Python package
     <literal>pymodelica</literal>, specifying a model class and file location
     and performing the actual compilation. This will be demonstrated in <xref
-    linkend="models_sec_simple_jmu_compilation" /> for the JMU, in <xref
-    linkend="models_sec_simple_fmu_compilation" /> for the FMU and in <xref
-    linkend="models_sec_simple_fmux_compilation" /> for the FMUX.</para>
+    linkend="models_sec_simple_jmu_compilation"/> for the JMU, in <xref
+    linkend="models_sec_simple_fmu_compilation"/> for the FMU and in <xref
+    linkend="models_sec_simple_fmux_compilation"/> for the FMUX.</para>
 
     <para>For more advanced usage of the compiler functions, there are
     compiler options and parameters which can be modified. These will be
-    explained in <xref linkend="models_sec_compiler_settings" />.</para>
+    explained in <xref linkend="models_sec_compiler_settings"/>.</para>
 
-    <para><xref linkend="models_sec_compilation_in_more_detail" />, will go
+    <para><xref linkend="models_sec_compilation_in_more_detail"/>, will go
     through some parts of the compilation process and how to perform these
     steps one by one.</para>
 
@@ -121,14 +121,14 @@ jmu_file = compile_jmu(model_name, mo_file)
       <literal>compile_jmu</literal> is the full file path of the JMU that has
       just been created, this will be useful later when we want to create
       model objects. More about the JMU file and loading models can be found
-      in <xref linkend="models_sec_loading_models" />.</para>
+      in <xref linkend="models_sec_loading_models"/>.</para>
 
       <para>In the above example, compilation has been performed using default
       parameters and options. The only parameters set are the model class and
       file name, which always have to be set. <literal>compile_jmu</literal>
       has several other parameters which can be modified. The different
       parameters, their default values and interpretation will be explained in
-      <xref linkend="models_sec_compiler_settings" />.</para>
+      <xref linkend="models_sec_compiler_settings"/>.</para>
     </section>
 
     <section xml:id="models_sec_simple_fmu_compilation">
@@ -169,7 +169,7 @@ fmu_file = compile_fmu(model_name, mo_file)
       return argument is also the full file path of the FMU that has just been
       created, which will be useful later when we want to create model
       objects. More about the FMU file and loading models can be found in
-      <xref linkend="models_sec_loading_models" />.</para>
+      <xref linkend="models_sec_loading_models"/>.</para>
     </section>
 
     <section xml:id="models_sec_simple_fmux_compilation">
@@ -278,9 +278,9 @@ fmu3 = compile_fmu('MyLibrary.MyModel', 'C:\MyLibs\MyLibrary')
       below.</para>
 
       <para>The parameter <literal>target</literal>, is further explained in
-      <xref linkend="models_sec_compiler_targets_jmu" />, <xref
-      linkend="models_sec_compiler_targets_fmu" /> and <xref
-      linkend="models_sec_compiler_targets_fmux" />.</para>
+      <xref linkend="models_sec_compiler_targets_jmu"/>, <xref
+      linkend="models_sec_compiler_targets_fmu"/> and <xref
+      linkend="models_sec_compiler_targets_fmux"/>.</para>
 
       <section xml:id="models_sec_compile_jmu_parameters">
         <title>compile_jmu parameters</title>
@@ -546,16 +546,16 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
         <literal>real</literal>, <literal>integer</literal> and
         <literal>boolean</literal>. The available options, default values and
         description are listed in <xref
-        linkend="models_tab_compiler_options" />.<table
+        linkend="models_tab_compiler_options"/>.<table
             xml:id="models_tab_compiler_options">
             <title>Compiler options</title>
 
             <tgroup cols="3">
-              <colspec align="left" colname="col–para" colwidth="2.75*" />
+              <colspec align="left" colname="col–para" colwidth="2.75*"/>
 
-              <colspec align="left" colname="col–def" colwidth="1*" />
+              <colspec align="left" colname="col–def" colwidth="1*"/>
 
-              <colspec align="left" colname="col–descr" colwidth="3.25*" />
+              <colspec align="left" colname="col–descr" colwidth="3.25*"/>
 
               <thead>
                 <row>
@@ -918,8 +918,7 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
       bundles quite a few steps required for the compilation from model file
       to JMU, FMU or FMUX. Some of these steps will be described briefly here,
       for a more detailed review on the compilation steps see <xref
-      linkend="intro_sec_architecture" /> in <xref
-      linkend="ch_intro" />.</para>
+      linkend="intro_sec_architecture"/> in <xref linkend="ch_intro"/>.</para>
 
       <section>
         <title>Create a compiler</title>
@@ -976,22 +975,22 @@ mc.generate_code(flat_rep)
     <literal>FMUModel(ME/CS)1</literal> class from the
     <literal>pyfmi</literal> module and the <literal>CasadiModel</literal>
     class from the <literal>pyjmi</literal> module respectively. This will be
-    demonstrated in <xref linkend="models_sec_loading_a_jmu" />, <xref
-    linkend="models_sec_loading_an_fmu" /> and <xref
-    linkend="models_sec_loading_an_fmux" />.</para>
+    demonstrated in <xref linkend="models_sec_loading_a_jmu"/>, <xref
+    linkend="models_sec_loading_an_fmu"/> and <xref
+    linkend="models_sec_loading_an_fmux"/>.</para>
 
     <para>The model classes contain many methods with which models can be
     manipulated after instantiation. Amongst the most important methods are
     <literal>initialize</literal>, <literal>simulate</literal> and
     <literal>optimize</literal>. (<literal>optimize</literal> is only relevant
     for JMU model instances) which are used when simulating and optimizing.
-    These are explained in <xref linkend="ch_simulation" /> and <xref
-    linkend="ch_optimization" />. For more information on how to use the
+    These are explained in <xref linkend="ch_simulation"/> and <xref
+    linkend="ch_optimization"/>. For more information on how to use the
     CasadiModel for optimization purposes, see <xref
-    linkend="opt_sec_pseudo-spectral" /> in <xref
-    linkend="ch_optimization" />. The more basic methods for variable and
-    parameter manipulation are explained in <xref
-    linkend="models_sec_variable_and_parameter_manipulation" />.</para>
+    linkend="opt_sec_pseudo-spectral"/> in <xref linkend="ch_optimization"/>.
+    The more basic methods for variable and parameter manipulation are
+    explained in <xref
+    linkend="models_sec_variable_and_parameter_manipulation"/>.</para>
 
     <section xml:id="models_sec_the_jmu_file">
       <title>The JMU</title>
@@ -1004,7 +1003,7 @@ mc.generate_code(flat_rep)
       file format from the FMI standard as much as possible. A JMU is created
       when compiling a Modelica or Optimica model with
       <literal>pymodelica.compile_jmu</literal>, see <xref
-      linkend="models_sec_compilation" />.</para>
+      linkend="models_sec_compilation"/>.</para>
     </section>
 
     <section>
@@ -1016,7 +1015,7 @@ mc.generate_code(flat_rep)
       <literal>pymodelica.compile_fmu</literal>.</para>
 
       <para>Read more about the FMI/FMU standard in <xref
-      linkend="ch_fmi" />.</para>
+      linkend="ch_fmi"/>.</para>
     </section>
 
     <section>
@@ -1091,7 +1090,7 @@ myModel = CasadiModel('myFMUX.fmux')
 
     <para>Model parameters can be altered with methods in the model classes
     once the model has been loaded. Some short examples in <xref
-    linkend="models_sec_setting_and_getting_params" /> will demonstrate
+    linkend="models_sec_setting_and_getting_params"/> will demonstrate
     this.</para>
 
     <section xml:id="models_sec_setting_and_getting_params">
@@ -1168,6 +1167,11 @@ rlc_circuit.set(vars, values)
 
       <programlisting>Modelica.Mechanics.Rotational.Examples.First
 
+Problems:
+0 errors, 0 compliance errors, 1 warnings
+
+Model before transformation
+
 Number of independent constants:              1
   Number of Real independent constants:       1
   Number of Integer independent constants:    0
@@ -1192,15 +1196,15 @@ Number of dependent parameters:               6
   Number of Enum dependent parameters:        0
   Number of Boolean dependent parameters:     0
   Number of String dependent parameters:      0
-Number of variables :                         33
-  Number of Real variables:                   33
+Number of variables :                         53
+  Number of Real variables:                   53
   Number of Integer variables:                0
   Number of Enum variables:                   0
   Number of Boolean variables:                0
   Number of String variables:                 0
-Number of Real differentiated variables:      4
-Number of Real derivative variables:          4
-Number of Real algebraic variables:           25
+Number of Real differentiated variables:      8
+Number of Real derivative variables:          0
+Number of Real algebraic variables:           45
 Number of inputs:                             0
   Number of Real inputs:                      0
   Number of Integer inputs:                   0
@@ -1213,74 +1217,133 @@ Number of discrete variables :                0
   Number of Enum discrete variables:          0
   Number of Boolean discrete variables:       0
   Number of String discrete variables:        0
-Number of equations:                          29
+Number of equations:                          51
+Number of variables with binding expression:  4
+  Number of Real variables with binding exp:  4
+  Number of Integer variables binding exp:    0
+  Number of Enum variables binding exp:       0
+  Number of Boolean variables binding exp:    0
+  Number of String variables binding exp:     0
+Total number of equations:                    55
+Number of initial equations:                  0
+Number of relational exps in equations:       1
+Number of relational exps in init equations:  0
+Flattened model
+
+Connection sets
+
+Model after transformation
+
+Number of independent constants:              1
+  Number of Real independent constants:       1
+  Number of Integer independent constants:    0
+  Number of Enum independent constants:       0
+  Number of Boolean independent constants:    0
+  Number of String independent constants:     0
+Number of dependent constants:                0
+  Number of Real dependent constants:         0
+  Number of Integer dependent constants:      0
+  Number of Enum dependent constants:         0
+  Number of Boolean dependent constants:      0
+  Number of String dependent constants:       0
+Number of independent parameters:             34
+  Number of Real independent parameters:      19
+  Number of Integer independent parameters:   2
+  Number of Enum independent parameters:      4
+  Number of Boolean independent parameters:   9
+  Number of String independent parameters:    0
+Number of dependent parameters:               6
+  Number of Real dependent parameters:        6
+  Number of Integer dependent parameters:     0
+  Number of Enum dependent parameters:        0
+  Number of Boolean dependent parameters:     0
+  Number of String dependent parameters:      0
+Number of variables :                         28
+  Number of Real variables:                   28
+  Number of Integer variables:                0
+  Number of Enum variables:                   0
+  Number of Boolean variables:                0
+  Number of String variables:                 0
+Number of Real differentiated variables:      4
+Number of Real derivative variables:          4
+Number of Real algebraic variables:           20
+Number of inputs:                             0
+  Number of Real inputs:                      0
+  Number of Integer inputs:                   0
+  Number of Enum inputs:                      0
+  Number of Boolean inputs:                   0
+  Number of String inputs:                    0
+Number of discrete variables :                0
+  Number of Real discrete variables:          0
+  Number of Integer discrete variables:       0
+  Number of Enum discrete variables:          0
+  Number of Boolean discrete variables:       0
+  Number of String discrete variables:        0
+Number of equations:                          24
 Number of variables with binding expression:  0
   Number of Real variables with binding exp:  0
   Number of Integer variables binding exp:    0
   Number of Enum variables binding exp:       0
   Number of Boolean variables binding exp:    0
   Number of String variables binding exp:     0
-Total number of equations:                    29
+Total number of equations:                    24
 Number of initial equations:                  4
 Number of relational exps in equations:       1
 Number of relational exps in init equations:  0
-Flattened model
-
 Transformed model
 
-Problems:
-0 errors, 0 compliance errors, 0 warnings
-
-Alias sets
-
-Connection sets
+Alias sets (13 sets, 40 eliminated variables)
 
 BLT diagnostics
-Number of unsolved equation blocks in DAE initialization system: 1: {7}
-Number of unsolved equation blocks in DAE system: 1: {7}
+BLT diagnostics table
+
+Number of unsolved equation blocks in DAE initialization system: 1: {4}
+Number of unsolved equation blocks in DAE system: 1: {4}
+
+Number of unsolved equation blocks in DAE initialization system after tearing: 1: {1}
+Number of unsolved equation blocks in DAE system after tearing: 1: {1}
 </programlisting>
 
-      <para>Note that some of the entries, including <literal>Flattened
-      model</literal>, <literal>Transformed model</literal>,
-      <literal>Connection sets</literal>, <literal>Alias sets</literal> and
-      <literal>BLT diagnostics</literal> are links to sub pages containing
-      additional information. For example, the BLT diagnostics page contains
-      information about individual systems of equations:</para>
+      <para>Note that some of the entries, including
+      <literal>Problems</literal>, <literal>Flattened model</literal>,
+      <literal>Connection sets</literal>, <literal>Transformed
+      model</literal>, <literal>Alias sets</literal>, <literal>BLT diagnostics
+      table</literal> and <literal>BLT diagnostics</literal> are links to sub
+      pages containing additional information. For example, the BLT
+      diagnostics page contains information about individual systems of
+      equations:</para>
 
       <programlisting>...
 
---- Block 12---
+--- Block 7 ---
 Solved block of 1 variables:
 Computed variable:
-  torque.flange.tau
+  inertia2.flange_b.tau
 Solution:
-  ( sine.offset + (if time &lt; sine.startTime then 0 else ( sine.amplitude ) * 
-  ( sin(( ( ( 2 ) * ( 3.141592653589793 ) ) * ( sine.freqHz ) ) * 
-  ( time - ( sine.startTime ) ) + sine.phase) )) ) / (  - ( 1 ) )
+   - (  - ( damper.flange_b.tau ) ) - (  - ( spring.flange_b.tau ) ) + 0
 
---- Block 13---
-Non-solved block of 7 variables:
+--- Block 8 (Unsolvable block 0) ---
+Non-solved linear block of 4 variables:
+Coefficient variability: Parameter
 Unknown variables:
-  idealGear.der(phi_a,2)
-  idealGear.der(phi_b,2)
-  inertia2.der(_der_phi)
   inertia2.a
   idealGear.flange_b.tau
   idealGear.flange_a.tau
   inertia1.a
 Equations:
-  der_2_idealGear_phi_a = inertia1.a - ( 0 )
-  der_2_idealGear_phi_a = ( idealGear.ratio ) * ( der_2_idealGear_phi_b ) + ( 0 ) * 
-                          ( der_idealGear_phi_b ) + ( 0 ) * ( der_idealGear_phi_b ) + 
-                          ( 0 ) * ( idealGear.phi_b )
-  der_2_idealGear_phi_b = inertia2.der(_der_phi) - ( 0 )
-  inertia2.a = inertia2.der(_der_phi)
+  inertia1.a = ( idealGear.ratio ) * ( inertia2.a )
   ( inertia2.J ) * ( inertia2.a ) =  - ( idealGear.flange_b.tau ) + inertia2.flange_b.tau
   0 = ( idealGear.ratio ) * ( idealGear.flange_a.tau ) + idealGear.flange_b.tau
   ( inertia1.J ) * ( inertia1.a ) =  - ( torque.flange.tau ) - ( idealGear.flange_a.tau )
 
 ...
 </programlisting>
+
+      <para>Additionally there is a table view of the <literal>BLT</literal>.
+      It can be found on the <literal>BLT diagnostics table</literal> page. It
+      provides a graphical representation of the <literal>BLT</literal>. The
+      view is limited to 300 equations due to the complexity of the
+      graph.</para>
     </section>
 
     <section>
