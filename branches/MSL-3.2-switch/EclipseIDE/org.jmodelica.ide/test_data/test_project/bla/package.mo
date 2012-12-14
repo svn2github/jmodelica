@@ -1,3 +1,0 @@
-package bla
-
-end bla;
