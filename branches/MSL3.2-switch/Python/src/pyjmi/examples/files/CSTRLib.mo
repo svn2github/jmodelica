@@ -39,10 +39,10 @@ package CSTRLib
    //used as initial conditions
    Real V1(start=V1_0,nominal=V1_0) "Volume in Reactor 1 (L)";
    Real CA1(start=CA1_0,nominal=CA1_0) "Concentration of Reactor 1 (mol/L)";
-   SI.Temperature T1(start=T1_0,nominal=T1_0) "Temperature in Reactor 1 (K)";
+   SI.Temperature T1(start=T1_0,nominal=T1_0,min=0) "Temperature in Reactor 1 (K)";
    Real V2(start=V2_0,nominal=V2_0) "Volume in Reactor 2 (L)";
    Real CA2(start=CA2_0,nominal=CA2_0) "Concentration of Reactor 2 (mol/L)";
-   SI.Temperature T2(start=T2_0,nominal=T2_0) "Temperature in Reactor 2 (K)";
+   SI.Temperature T2(start=T2_0,nominal=T2_0,min=0) "Temperature in Reactor 2 (K)";
 
    // Model inputs
    Modelica.Blocks.Interfaces.RealInput u1(start=1) annotation (Placement(
