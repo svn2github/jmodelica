@@ -81,13 +81,7 @@
             	fc.addAnnotation(getAnnotation());
             getComposition().extractElementsTo(fc);
             
-            ASTNode startNode = getRestriction();
-            if (hasEncapsulated()) {
-            	startNode = getEncapsulated();
-            } else if (hasPartial()) {
-            	startNode = getPartial();
-            }
-            fc.setLocationNoTree(startNode, this);
+            fc.setLocationNoTree(this);
             return fc;
         }
     }
@@ -128,12 +122,12 @@
             	ec.addAnnotation(getAnnotation());
             getComposition().extractElementsTo(ec);
             if (!hasRedeclare())
-            	ec.setRedeclare(new Redeclare());
+            	ec.setRedeclare(copyLocationTo(new Redeclare()));
 
             ca.setLocationNoTree(getName());
             // TODO: iec should probably include "extends" token as well, but that needs parser change
             iec.setLocationNoTree(getName());
-            ec.setLocationNoTree(getRestriction(), this);
+            ec.setLocationNoTree(this);
             return ec;
         }
     }

@@ -1145,6 +1145,7 @@ aspect FormattedPrint {
 	    if (hasClassModification()) {
 	    	getClassModification().doPrettyPrintFormatted(printer, printStream);
 	    }
+	    getComment().prettyPrintFormattedHelper(printer, printStream);
     }
 
     void Access.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1229,8 +1230,8 @@ aspect FormattedPrint {
     }
 
     void FullClassDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-	    if (hasEncapsulated()) {
-	    	getEncapsulated().doPrettyPrintFormatted(printer, printStream);
+    	if (hasEncapsulated()) {
+    		getEncapsulated().doPrettyPrintFormatted(printer, printStream);
 	    }
 	    if (hasPartial()) {
 	    	getPartial().doPrettyPrintFormatted(printer, printStream);
@@ -1251,6 +1252,8 @@ aspect FormattedPrint {
 	    	getReplaceable().doPrettyPrintFormatted(printer, printStream);
 	    }
 	    getRestriction().doPrettyPrintFormatted(printer, printStream);
+	    if (prettyPrintFormatedShouldHaveExtends())
+	    	printStream.print("extends");
 	    getName().doPrettyPrintFormatted(printer, printStream);
 	    if (hasStringComment()) {
 	    	getStringComment().doPrettyPrintFormatted(printer, printStream);
@@ -1262,6 +1265,9 @@ aspect FormattedPrint {
 
 	    getEndDecl().doPrettyPrintFormatted(printer, printStream);
 	}
+    
+    syn boolean FullClassDecl.prettyPrintFormatedShouldHaveExtends() = false;
+    syn boolean ExtendClassDecl.prettyPrintFormatedShouldHaveExtends() = true;
     
     public void FullClassDecl.addNewComponentDecl(ComponentDecl componentDecl) {
     	Stack<Clause> clauseStack = new Stack<Clause>();
@@ -1325,12 +1331,22 @@ aspect FormattedPrint {
 		if (hasClassModification()) {
 			getClassModification().doPrettyPrintFormatted(printer, printStream);
 		}
+		if (hasAnnotation())
+			getAnnotation().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(";");
 	}
 	
 	void ImportClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("import");
 		getPackageName().doPrettyPrintFormatted(printer, printStream);
+		getComment().doPrettyPrintFormatted(printer, printStream);
+		printStream.print(";");
+	}
+	
+	void ImportClauseUnqualified.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("import");
+		getPackageName().doPrettyPrintFormatted(printer, printStream);
+		printStream.print(".*");
 		getComment().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(";");
 	}
@@ -1631,6 +1647,10 @@ aspect FormattedPrint {
 		getExp().doPrettyPrintFormatted(printer, printStream);
 	}
 	
+	public void ColonSubscript.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(':');
+	}
+	
 	void RealLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(getUNSIGNED_NUMBER());
 	}
@@ -1641,6 +1661,10 @@ aspect FormattedPrint {
 	
 	public void TimeExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("time");
+	}
+	
+	public void EndExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("end");
 	}
 	
 	void StringLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
