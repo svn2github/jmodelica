@@ -173,7 +173,8 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
 		}
 		buf[j]=0;
 		/* jmi_log(block->jmi, logInfo, buf); */
-		fprintf(block->jmi->options.debug_log, "%s\n",buf); 
+		fprintf(block->jmi->options.debug_log, "%s\n",buf);
+		fflush(block->jmi->options.debug_log);
 		/* printf( "%s\n",buf); */
 
 		buf = block->message_buffer ;
@@ -190,7 +191,8 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
 		}
 		buf[j]=0;
 		/* jmi_log(block->jmi, logInfo, buf); */
-		fprintf(block->jmi->options.debug_log, "%s\n",buf); 
+		fprintf(block->jmi->options.debug_log, "%s\n",buf);
+		fflush(block->jmi->options.debug_log);
 		/* printf( "%s\n",buf); */
 	}
 
