@@ -185,10 +185,11 @@ $C_DAE_initial_event_indicator_residuals$
 end CCodeGenTest6;
 
 model CCodeGenTest7
+  parameter Integer z = 2;
   Real x(start=0);
-  Real y = noEvent(if 1 <= 2 then 0 else if 3 >= 4 then 1 
-   else if 1 < 2 then 2 else if 3 > 4 then 4 
-   else if 4 == 3 then 4 else 7);
+  Real y = noEvent(if time <= 2 then 0 else if time >= 4 then 1 
+   else if x < 2 then 2 else if x > 4 then 4 
+   else if z == 3 then 4 else 7);
 equation
  der(x) = y; 
 
@@ -200,13 +201,10 @@ equation
 $C_DAE_equation_residuals$
 $C_DAE_event_indicator_residuals$
 ",
-         generatedCode="
-    (*res)[0] = _y_1 - (_der_x_2);
-    (*res)[1] = COND_EXP_EQ(COND_EXP_LE(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),JMI_TRUE,JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(0),CO
-ND_EXP_EQ(COND_EXP_GE(AD_WRAP_LITERAL(3),AD_WRAP_LITERAL(4),JMI_TRUE,JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(1),COND_EXP_EQ(COND_EXP_
-LT(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),JMI_TRUE,JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(2),COND_EXP_EQ(COND_EXP_GT(AD_WRAP_LITERAL(
-3),AD_WRAP_LITERAL(4),JMI_TRUE,JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(4),COND_EXP_EQ(COND_EXP_EQ(AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(
-3),JMI_TRUE,JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(7)))))) - (_y_1);
+			generatedCode="
+    (*res)[0] = _y_2 - (_der_x_3);
+    (*res)[1] = COND_EXP_EQ(COND_EXP_LE(_time, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(0), COND_EXP_EQ(COND_EXP_GE(_time, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(COND_EXP_LT(_x_1, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(2), COND_EXP_EQ(COND_EXP_GT(_x_1, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(4), COND_EXP_EQ(COND_EXP_EQ(_z_0, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(7)))))) - (_y_2);
+
 ")})));
 end CCodeGenTest7;
 

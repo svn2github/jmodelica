@@ -47,6 +47,7 @@ aspect FlatVariability {
 	syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
 		variabilityLevel() <= other.variabilityLevel();
 	
+	syn boolean FTypePrefixVariability.structuralOrLess() = lessOrEqual(fStructParameter());
 	syn boolean FTypePrefixVariability.parameterOrLess()  = lessOrEqual(fParameter());
 	syn boolean FTypePrefixVariability.discreteOrLess()   = lessOrEqual(fDiscrete());
 	syn boolean FTypePrefixVariability.continuousOrLess() = lessOrEqual(fContinuous());
@@ -61,14 +62,16 @@ aspect FlatVariability {
 	 * Also used to determine the behaviour of {@link #combine(FTypePrefixVariability)}.
 	 */
 	abstract protected int FTypePrefixVariability.variabilityLevel();
-	protected int FConstant.variabilityLevel()   { return VARIABILITY_LEVEL; }
-	protected int FParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
-	protected int FDiscrete.variabilityLevel()   { return VARIABILITY_LEVEL; }
-	protected int FContinuous.variabilityLevel() { return VARIABILITY_LEVEL; }
-	protected static final int FConstant.VARIABILITY_LEVEL   = 0;
-	protected static final int FParameter.VARIABILITY_LEVEL  = 10;
-	protected static final int FDiscrete.VARIABILITY_LEVEL   = 20;
-	protected static final int FContinuous.VARIABILITY_LEVEL = 30;
+	protected int FConstant.variabilityLevel()        { return VARIABILITY_LEVEL; }
+	protected int FStructParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
+	protected int FParameter.variabilityLevel()       { return VARIABILITY_LEVEL; }
+	protected int FDiscrete.variabilityLevel()        { return VARIABILITY_LEVEL; }
+	protected int FContinuous.variabilityLevel()      { return VARIABILITY_LEVEL; }
+	protected static final int FConstant.VARIABILITY_LEVEL        = 0;
+	protected static final int FStructParameter.VARIABILITY_LEVEL = 4;
+	protected static final int FParameter.VARIABILITY_LEVEL       = 10;
+	protected static final int FDiscrete.VARIABILITY_LEVEL        = 20;
+	protected static final int FContinuous.VARIABILITY_LEVEL      = 30;
 	
 	/**
 	 * \brief An ordering of the variability types.
@@ -154,6 +157,8 @@ aspect FlatVariability {
 	
 	syn FTypePrefixVariability InstComponentDecl.combinedVariability() = 
 		definedVariability().flatten().combineDown(defaultVariability());
+	eq InstAssignable.combinedVariability() = 
+		isStructuralParam ? fStructParameter() : super.combinedVariability();
 	
 	syn lazy FTypePrefixVariability InstComponentDecl.variability() {
 		FTypePrefixVariability var = combinedVariability();
@@ -394,10 +399,11 @@ aspect VariabilitySingletons {
 	public static final Parameter  Parameter.instance  = new Parameter();
 	public static final Constant   Constant.instance   = new Constant();	
 	
-	public static final FContinuous FContinuous.instance = new FContinuous();	
-	public static final FDiscrete   FDiscrete.instance   = new FDiscrete();	
-	public static final FParameter  FParameter.instance  = new FParameter();
-	public static final FConstant   FConstant.instance   = new FConstant();	
+	public static final FContinuous      FContinuous.instance      = new FContinuous();	
+	public static final FDiscrete        FDiscrete.instance        = new FDiscrete();	
+	public static final FParameter       FParameter.instance       = new FParameter();
+	public static final FStructParameter FStructParameter.instance = new FStructParameter();
+	public static final FConstant        FConstant.instance        = new FConstant();	
 	
 	public static Continuous ASTNode.continuous() {
 		return Continuous.instance;
@@ -425,6 +431,10 @@ aspect VariabilitySingletons {
 
 	public static FParameter ASTNode.fParameter() {
 		return FParameter.instance;
+	}
+
+	public static FStructParameter ASTNode.fStructParameter() {
+		return FStructParameter.instance;
 	}
 	
 	public static FConstant ASTNode.fConstant() {

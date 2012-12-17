@@ -2179,14 +2179,39 @@ model ArrayIfExp2
 			description="Constant evaluation of if expression",
 			flatModel="
 fclass ArrayBuiltins.ArrayIfExp2
- constant Real a = (if 1 > 2 then 5 elseif 1 < 2 then 6 else 7);
+ constant Real a = 6;
  Real b;
 equation
  b = 6.0;
-
 end ArrayBuiltins.ArrayIfExp2;
 ")})));
 end ArrayIfExp2;
+
+
+model ArrayIfExp3
+    parameter Real tableA[:, :] = fill(0.0, 0, 2);
+    parameter Real tableB[:, :] = fill(1.0, 1, 2);
+    parameter Boolean useTableA = false;
+    Real y;
+equation
+    y = if useTableA then tableA[1, 1] else tableB[1, 1];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayIfExp3",
+            description="Eliminate branches causing index out of bounds",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass ArrayBuiltins.ArrayIfExp3
+ parameter Real tableB[1,1] = 1.0 /* 1.0 */;
+ parameter Real tableB[1,2] = 1.0 /* 1.0 */;
+ parameter Boolean useTableA = false /* false */;
+ Real y;
+equation
+ y = tableB[1,1];
+end ArrayBuiltins.ArrayIfExp3;
+")})));
+end ArrayIfExp3;
 
 
 

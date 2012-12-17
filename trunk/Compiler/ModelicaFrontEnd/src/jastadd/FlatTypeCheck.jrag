@@ -307,7 +307,8 @@ aspect FlatTypeCheck {
 				  for (FExp e : getExpanded().iterable()) {
 					  int i = e.ceval().intValue();
 					  if (i < 1 || i > max) {
-						  error("Array index out of bounds: " + i + ", index expression: " + getFExp());
+						  if (!lockBranch())
+							  error("Array index out of bounds: " + i + ", index expression: " + getFExp());
 						  return;
 					  }
 				  }

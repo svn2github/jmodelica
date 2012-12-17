@@ -447,6 +447,59 @@ aspect ErrorCheck {
   void ASTNode.warning(String format, Object... args) {
 	  warning(String.format(format, args));
   }
+  
+  /**
+   * Lock the closest surrounding if-equation or if-expression that have only 
+   * parameter-expression tests and evaluates to another branch. Returns true 
+   * if any such if exists. 
+   * 
+   * Any parameters used in the test will be marked as structural.
+   */
+  inh boolean FExp.lockBranch();
+  inh boolean FExpSubscript.lockBranch();
+  inh boolean FIfEquation.lockBranch();
+  eq InstNode.getChild().lockBranch()                = false;
+  eq FClass.getChild().lockBranch()                  = false;
+  eq FIfExp.getThenExp().lockBranch()                = lockMyBranch(true);
+  eq FIfExp.getElseExp().lockBranch()                = lockMyBranch(false);
+  eq FIfEquation.getFAbstractEquation().lockBranch() = lockMyBranch(true);
+  eq FIfEquation.getElse().lockBranch()              = lockMyBranch(false);
+  
+  /**
+   * Lock this if-expression and return true if it only has only parameter-expression 
+   * tests and evaluates to the branch not indicated by <code>then</code>. Otherwise 
+   * delegates to {@link #lockBranch()}.
+   * 
+   * Any parameters used in the test will be marked as structural.
+   * 
+   * @param this  if true, we are trying to remove the then-branch, otherwise the else-branch
+   */
+  public boolean FIfExp.lockMyBranch(boolean then) {
+	  if (getIfExp().variability().parameterOrLess() && getIfExp().ceval().booleanValue() != then) {
+		  getIfExp().markAsStructuralParameter();
+		  return true;
+	  } else {
+		  return lockBranch();
+	  }
+  }
+  
+  /**
+   * Lock this if-expression and return true if it only has only parameter-expression 
+   * tests and evaluates to the branch not indicated by <code>then</code>. Otherwise 
+   * delegates to {@link #lockBranch()}.
+   * 
+   * Any parameters used in the test will be marked as structural.
+   * 
+   * @param this  if true, we are trying to remove the then-branch, otherwise the else-branch
+   */
+  public boolean FIfEquation.lockMyBranch(boolean then) {
+	  if (getTest().variability().parameterOrLess() && getTest().ceval().booleanValue() != then) {
+		  getTest().markAsStructuralParameter();
+		  return true;
+	  } else {
+		  return lockBranch();
+	  }
+  }
 
   /**
    * \brief Call all *Check() methods for this node.

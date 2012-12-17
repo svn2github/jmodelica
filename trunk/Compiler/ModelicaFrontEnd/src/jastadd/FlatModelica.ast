@@ -161,6 +161,11 @@ FDiscrete : FTypePrefixVariability;
 FParameter : FTypePrefixVariability;
 
 /**
+ * Structural parameter variability.
+ */
+FStructParameter : FParameter;
+
+/**
  * \brief Constant variability.
  */
 FConstant : FTypePrefixVariability;

@@ -86,7 +86,7 @@ abstract public class TestAnnotationizerHelper {
 			SourceRoot root = parse(filePath, modelName, new OptionRegistry());
 			ClassDecl cd = root.getProgram().simpleLookupClassDotted(modelName);
 			if (cd.isUnknown()) {
-				System.err.println("Class " + modelName + "not found");
+				System.err.println("Class " + modelName + " not found");
 				System.exit(1);
 			}
 			AnnotationNode a = cd.annotation("__JModelica/UnitTesting/tests");

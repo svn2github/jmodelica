@@ -1505,8 +1505,7 @@ end ConnectTests.ConnectorTest;
 end ConnectorTest;
 
 model CauerLowPassAnalog
-extends Modelica.Electrical.Analog.Examples.CauerLowPassAnalog(R1(R=1),R2(R=1),V(V=0));
-
+    extends Modelica.Electrical.Analog.Examples.CauerLowPassAnalog(R1(R=1),R2(R=1),V(V=0));
 
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
@@ -1649,7 +1648,7 @@ equation
  R1.v = R1.p.v - ( R1.n.v );
  0 = R1.p.i + R1.n.i;
  R1.i = R1.p.i;
- if not R1.useHeatPort then
+ if not false then
   R1.T_heatPort = R1.T;
  end if;
  R2.R_actual = ( R2.R ) * ( 1 + ( R2.alpha ) * ( R2.T_heatPort - ( R2.T_ref ) ) );
@@ -1658,7 +1657,7 @@ equation
  R2.v = R2.p.v - ( R2.n.v );
  0 = R2.p.i + R2.n.i;
  R2.i = R2.p.i;
- if not R2.useHeatPort then
+ if not false then
   R2.T_heatPort = R2.T;
  end if;
  V.v = V.signalSource.y;

@@ -3682,7 +3682,14 @@ aspect IfEquations {
 		is$Final = false;
 	}
 	
+	public void FIfExp.enableIfEquationElimination() {
+		super.enableIfEquationElimination();
+		eliminateIfEquation = true;
+		is$Final = false;
+	}
+	
 	private boolean FIfEquation.eliminateIfEquation = false;
+	private boolean FIfExp.eliminateIfEquation = false;
 	
 	protected boolean FIfWhenElseEquation.hasEliminatedIfBranches = false;
 
@@ -3717,7 +3724,17 @@ aspect IfEquations {
 				return new FElseEquation(getType(), new List());
 			}
 		}	
-	}	
+	}
+	
+	rewrite FIfExp {
+		when (eliminateIfEquation) to FExp {
+			eliminateIfEquation = false;
+			if (getIfExp().isConstantExp()) 
+				return getIfExp().ceval().booleanValue() ? getThenExp() : getElseExp();
+			else
+				return this;
+		}
+	}
 
 	rewrite FElseEquation in FClass.getFInitialEquation() {
 		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();

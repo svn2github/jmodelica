@@ -2266,7 +2266,6 @@ end ImportTest7;
 
 model ImportTest8
   Modelica.Electrical.Analog.Basic.Resistor r;
-	
 
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
@@ -2295,7 +2294,7 @@ equation
  r.v = r.p.v - ( r.n.v );
  0 = r.p.i + r.n.i;
  r.i = r.p.i;
- if not r.useHeatPort then
+ if not false then
   r.T_heatPort = r.T;
  end if;
  r.p.i = 0;

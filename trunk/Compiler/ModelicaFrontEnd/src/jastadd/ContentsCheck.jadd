@@ -270,11 +270,10 @@ aspect ContentCheck {
 
 aspect StructuralParams {
 	
-	private boolean FExp.isStructuralParamExp = false;
 	private boolean InstAssignable.isStructuralParam = false;
 	
 	public void FExp.markAsStructuralParameter() {
-		if (isStructuralParamExp || inFunction())
+		if (inFunction())
 			return;
 		if (!canCeval())
 			compliance("Could not evaluate expression used as structural parameter: " + this);
@@ -285,11 +284,6 @@ aspect StructuralParams {
 	public void ASTNode.markUsesAsStructuralParameter() {
 		for (ASTNode n : this)
 			n.markUsesAsStructuralParameter();
-	}
-	
-	public void FExp.markUsesAsStructuralParameter() {
-		isStructuralParamExp = true;
-		super.markUsesAsStructuralParameter();
 	}
 	
 	public void InstAccess.markUsesAsStructuralParameter() {
@@ -317,6 +311,8 @@ aspect StructuralParams {
 		if (isStructuralParam || !isParameter() || inFunction())
 			return;
 		isStructuralParam = true;
+		// Flush cache for variability()
+		variability_computed = false;
 		if (hasBindingFExp()) {
 			FExp e = getBindingFExp();
 			if (!e.canCeval())

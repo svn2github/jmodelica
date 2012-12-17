@@ -1381,7 +1381,7 @@ aspect FlatExpressions {
 		if (ia.isAssignable()) {
 			InstAssignable var = (InstAssignable) ia.myInstComponentDecl();
 			boolean addConstToFunc = false;
-			if (var.isConstant() || (var.isParameter() && var.isString())) {
+			if (var.variability().structuralOrLess() || (var.isParameter() && var.isString())) {
 				try {
 					// Check if we have non-constant array subscripts
 					if (ia.hasUnknownIndices()) {
