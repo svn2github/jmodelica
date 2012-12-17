@@ -521,6 +521,22 @@ aspect FormattedPrint {
 		return (formattingItem.getEndLine() == line && formattingItem.getEndColumn() == column - 5);
 	}
 
+	@Override
+	public boolean FunctionCallEquation.matchInsideFormatting(ScannedFormattingItem formattingItem) {
+		if (getNumLeft() == 0)
+			return false;
+		int start = getLeft(getNumLeft() - 1).getEnd();
+		return (formattingItem.getStartLine() == getLine(start) && formattingItem.getStartColumn() == getColumn(start) + 2);
+	}
+	
+	@Override
+	public boolean FunctionCallStmt.matchInsideFormatting(ScannedFormattingItem formattingItem) {
+		if (getNumLeft() == 0)
+			return false;
+		int start = getLeft(getNumLeft() - 1).getEnd();
+		return (formattingItem.getStartLine() == getLine(start) && formattingItem.getStartColumn() == getColumn(start) + 2);
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// DEFAULT FORMATTING:
 	//
@@ -1041,6 +1057,13 @@ aspect FormattedPrint {
 		printStream.print(postFormatting);
 	}
 
+	void AlgorithmAnnotation.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+		printStream.print(getAnnotation().preFormatting);
+		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(";");
+		printStream.print(getAnnotation().postFormatting);
+	}
+	
 	void SourceBaseNode.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		for (ASTNode childNode: this) {
 			childNode.doPrettyPrintFormatted(printer, printStream);
@@ -1509,6 +1532,23 @@ aspect FormattedPrint {
 		getRight().doPrettyPrintFormatted(printer, printStream);
 	}
 
+	void FunctionCallStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		if (getNumLeft() > 0) {
+			printStream.print('(');
+			boolean first = true;
+			for (FunctionCallLeft left : getLefts()) {
+				if (!first)
+					printStream.print(',');
+				first = false;
+				left.prettyPrintFormatted(printer, printStream);
+			}
+			printStream.print(')');
+			printStream.print(insideFormatting);
+			printStream.print(":=");
+		}
+		getFunctionCall().prettyPrintFormatted(printer, printStream);
+	}
+
 	void Equation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getLeft().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("=");
@@ -1534,7 +1574,9 @@ aspect FormattedPrint {
 					printStream.print(",");
 				}
 			}
-			printStream.print(") = ");
+			printStream.print(')');
+			printStream.print(insideFormatting);
+			printStream.print('=');
 		}
 		getCall().doPrettyPrintFormatted(printer, printStream);
 	}
@@ -1602,13 +1644,6 @@ aspect FormattedPrint {
 	}
 
 	void ElementAnnotation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-		printStream.print(getAnnotation().preFormatting);
-		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
-		printStream.print(";");
-		printStream.print(getAnnotation().postFormatting);
-	}
-
-	void AlgorithmAnnotation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(getAnnotation().preFormatting);
 		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(";");
