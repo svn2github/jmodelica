@@ -2068,10 +2068,10 @@ aspect InstantiatedExpressions {
 	
 	public static final String FCExternalLanguage.LANGUAGE_STRING         = "C";
 	public static final String FFortran77ExternalLanguage.LANGUAGE_STRING = "FORTRAN 77";
-	public static final String FBuiltinExternalLanguage.LANGUAGE_STRING   = "builtin";
+	public static final String FBuiltinExternalLanguage.LANGUAGE_STRING   = "BUILTIN";
 	
 	public FExternalLanguage ExternalLanguage.instantiate() {
-		String lang = getLanguage();
+		String lang = getLanguage().toUpperCase();
 		if (lang.equals(FCExternalLanguage.LANGUAGE_STRING))
 			return new FCExternalLanguage();
 		else if (lang.equals(FFortran77ExternalLanguage.LANGUAGE_STRING))

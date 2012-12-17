@@ -140,8 +140,8 @@ model Electro
   Modelica.Blocks.Sources.RealExpression realExpression3(y=25 + 5*resistor9.v^2*
         sqrt(resistor9.i^2 + 2) + 10*cos(resistor8.v^3) + 10*sin(resistor8.v^3))
     annotation (Placement(transformation(extent={{-46,78},{-26,98}})));
-  Modelica.Electrical.Analog.Sources.SawToothCurrent signalCurrent(I=0.05,
-      period=0.01)
+  Modelica.Electrical.Analog.Sources.SineCurrent signalCurrent(I=0.05,
+      freqHz=100)
     annotation (Placement(transformation(extent={{10,28},{22,40}})));
 equation
   connect(sineVoltage.p, resistor.p) annotation (Line(

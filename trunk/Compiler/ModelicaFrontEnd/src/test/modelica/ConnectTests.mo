@@ -1523,6 +1523,8 @@ fclass ConnectTests.CauerLowPassAnalog
  Modelica.SIunits.Voltage G.p.v \"Potential at the pin\";
  Modelica.SIunits.Current G.p.i \"Current flowing into the pin\";
  parameter Modelica.SIunits.Capacitance C1.C(start = 1) = c1 \"Capacitance\";
+ parameter Modelica.SIunits.Voltage C1.IC = 0 \"Initial Value\" /* 0 */;
+ parameter Boolean C1.UIC = true /* true */;
  Modelica.SIunits.Voltage C1.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Modelica.SIunits.Current C1.i \"Current flowing from pin p to pin n\";
  Modelica.SIunits.Voltage C1.p.v \"Potential at the pin\";
@@ -1530,6 +1532,8 @@ fclass ConnectTests.CauerLowPassAnalog
  Modelica.SIunits.Voltage C1.n.v \"Potential at the pin\";
  Modelica.SIunits.Current C1.n.i \"Current flowing into the pin\";
  parameter Modelica.SIunits.Capacitance C2.C(start = 1) = c2 \"Capacitance\";
+ parameter Modelica.SIunits.Voltage C2.IC = 0 \"Initial Value\" /* 0 */;
+ parameter Boolean C2.UIC = false /* false */;
  Modelica.SIunits.Voltage C2.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Modelica.SIunits.Current C2.i \"Current flowing from pin p to pin n\";
  Modelica.SIunits.Voltage C2.p.v \"Potential at the pin\";
@@ -1537,6 +1541,8 @@ fclass ConnectTests.CauerLowPassAnalog
  Modelica.SIunits.Voltage C2.n.v \"Potential at the pin\";
  Modelica.SIunits.Current C2.n.i \"Current flowing into the pin\";
  parameter Modelica.SIunits.Capacitance C3.C(start = 1) = c3 \"Capacitance\";
+ parameter Modelica.SIunits.Voltage C3.IC = 0 \"Initial Value\" /* 0 */;
+ parameter Boolean C3.UIC = true /* true */;
  Modelica.SIunits.Voltage C3.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Modelica.SIunits.Current C3.i \"Current flowing from pin p to pin n\";
  Modelica.SIunits.Voltage C3.p.v \"Potential at the pin\";
@@ -1544,6 +1550,8 @@ fclass ConnectTests.CauerLowPassAnalog
  Modelica.SIunits.Voltage C3.n.v \"Potential at the pin\";
  Modelica.SIunits.Current C3.n.i \"Current flowing into the pin\";
  parameter Modelica.SIunits.Capacitance C4.C(start = 1) = c4 \"Capacitance\";
+ parameter Modelica.SIunits.Voltage C4.IC = 0 \"Initial Value\" /* 0 */;
+ parameter Boolean C4.UIC = false /* false */;
  Modelica.SIunits.Voltage C4.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Modelica.SIunits.Current C4.i \"Current flowing from pin p to pin n\";
  Modelica.SIunits.Voltage C4.p.v \"Potential at the pin\";
@@ -1551,6 +1559,8 @@ fclass ConnectTests.CauerLowPassAnalog
  Modelica.SIunits.Voltage C4.n.v \"Potential at the pin\";
  Modelica.SIunits.Current C4.n.i \"Current flowing into the pin\";
  parameter Modelica.SIunits.Capacitance C5.C(start = 1) = c5 \"Capacitance\";
+ parameter Modelica.SIunits.Voltage C5.IC = 0 \"Initial Value\" /* 0 */;
+ parameter Boolean C5.UIC = true /* true */;
  Modelica.SIunits.Voltage C5.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Modelica.SIunits.Current C5.i \"Current flowing from pin p to pin n\";
  Modelica.SIunits.Voltage C5.p.v \"Potential at the pin\";
@@ -1558,6 +1568,8 @@ fclass ConnectTests.CauerLowPassAnalog
  Modelica.SIunits.Voltage C5.n.v \"Potential at the pin\";
  Modelica.SIunits.Current C5.n.i \"Current flowing into the pin\";
  parameter Modelica.SIunits.Inductance L1.L(start = 1) = l1 \"Inductance\";
+ parameter Modelica.SIunits.Current L1.IC = 0 \"Initial Value\" /* 0 */;
+ parameter Boolean L1.UIC = true /* true */;
  Modelica.SIunits.Voltage L1.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Modelica.SIunits.Current L1.i \"Current flowing from pin p to pin n\";
  Modelica.SIunits.Voltage L1.p.v \"Potential at the pin\";
@@ -1565,6 +1577,8 @@ fclass ConnectTests.CauerLowPassAnalog
  Modelica.SIunits.Voltage L1.n.v \"Potential at the pin\";
  Modelica.SIunits.Current L1.n.i \"Current flowing into the pin\";
  parameter Modelica.SIunits.Inductance L2.L(start = 1) = l2 \"Inductance\";
+ parameter Modelica.SIunits.Current L2.IC = 0 \"Initial Value\" /* 0 */;
+ parameter Boolean L2.UIC = true /* true */;
  Modelica.SIunits.Voltage L2.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Modelica.SIunits.Current L2.i \"Current flowing from pin p to pin n\";
  Modelica.SIunits.Voltage L2.p.v \"Potential at the pin\";
@@ -1612,6 +1626,28 @@ fclass ConnectTests.CauerLowPassAnalog
  Modelica.SIunits.Current V.p.i \"Current flowing into the pin\";
  Modelica.SIunits.Voltage V.n.v \"Potential at the pin\";
  Modelica.SIunits.Current V.n.i \"Current flowing into the pin\";
+initial equation 
+ if C1.UIC then
+  C1.v = C1.IC;
+ end if;
+ if C2.UIC then
+  C2.v = C2.IC;
+ end if;
+ if C3.UIC then
+  C3.v = C3.IC;
+ end if;
+ if C4.UIC then
+  C4.v = C4.IC;
+ end if;
+ if C5.UIC then
+  C5.v = C5.IC;
+ end if;
+ if L1.UIC then
+  L1.i = L1.IC;
+ end if;
+ if L2.UIC then
+  L2.i = L2.IC;
+ end if;
 equation
  G.p.v = 0;
  C1.i = ( C1.C ) * ( C1.der(v) );
@@ -1693,7 +1729,7 @@ public
  type Modelica.SIunits.Voltage = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
  type Modelica.SIunits.Current = Real(final quantity = \"ElectricCurrent\",final unit = \"A\");
  type Modelica.SIunits.Resistance = Real(final quantity = \"Resistance\",final unit = \"Ohm\");
- type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\");
+ type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 1,max = 6000,start = 288.15,nominal = 300,displayUnit = \"degC\");
  type Modelica.SIunits.LinearTemperatureCoefficient = Real(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\");
  type Modelica.SIunits.Power = Real(final quantity = \"Power\",final unit = \"W\");
  type Modelica.SIunits.Time = Real(final quantity = \"Time\",final unit = \"s\");
