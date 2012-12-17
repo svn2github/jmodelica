@@ -129,7 +129,7 @@ public class ErrorCheckAction extends CurrentClassAction implements IJobChangeLi
 				icd.collectErrors();
 				if (!errorHandler.hasErrors()) {
 					ModelicaCompiler mc = new ModelicaCompiler(icd.root().options);
-					FClass fc = mc.createFlatTree(icd, icd.fileName());
+					FClass fc = FClass.create(icd, icd.fileName());
 					icd.flattenInstClassDecl(fc);
 					fc.setLocation(icd.getSelectionNode());
 					fc.setDefinition(icd.getDefinition());
