@@ -16,7 +16,7 @@ aspect FormattedPrint {
 		public FormattedPrettyPrinter() {
 			super("");
 		}
-		
+
 		/**
 		 * Takes an AST node and prints it using a <code>PrintStream</code>. The formatting that the code that
 		 * generated this node is preserved.
@@ -29,20 +29,20 @@ aspect FormattedPrint {
 		public void print(ASTNode node, PrintStream printStream, String ident) {
 			node.doPrettyPrintFormatted(this, printStream);
 		}
-		
+
 		public String op(FBinExp exp) {
 			return operatorFormatted(exp);
 		}
-		
+
 		public String operatorFormatted(FBinExp exp) {
 			return exp.operatorFormatted();
 		}
 	}
-	
+
 	class DefaultFormattingIndentation {
 		private String indentation;
 		private String currentIndentation;
-		
+
 		public DefaultFormattingIndentation(String indentation) {
 			this.indentation = indentation;
 			this.currentIndentation = "";
@@ -51,13 +51,13 @@ aspect FormattedPrint {
 		public void stepIn() {
 			currentIndentation += indentation;
 		}
-		
+
 		public void stepOut() {
 			if (currentIndentation.length() >= indentation.length()) {
 				currentIndentation = currentIndentation.substring(0, currentIndentation.length() - indentation.length());
 			}
 		}
-		
+
 		public String toString() {
 			return currentIndentation;
 		}
@@ -71,39 +71,39 @@ aspect FormattedPrint {
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	static FormattedPrettyPrinter ASTNode.formattedPrettyPrinter = new FormattedPrettyPrinter();
-	
+
 	public static final FormattingItem SourceBaseNode.NO_FORMATTING = new EmptyFormattingItem();
 	protected FormattingInfo SourceBaseNode.formatting = new FormattingInfo();
 	protected FormattingItem SourceBaseNode.preFormatting = SourceBaseNode.NO_FORMATTING;
 	protected FormattingItem SourceBaseNode.insideFormatting = SourceBaseNode.NO_FORMATTING;
 	protected FormattingItem SourceBaseNode.postFormatting = SourceBaseNode.NO_FORMATTING;
-	
+
 	public boolean SourceBaseNode.hasCachedFormatting() {
 		return (formatting == null);
 	}
-	
+
 	public boolean SourceBaseNode.hasScannedNonCachedFormatting() {
 		return (!hasCachedFormatting() && !formatting.isEmpty());
 	}
-	
+
 	public void ASTNode.setFormatting(FormattingInfo formattingInfo) {
 		for (ASTNode childNode : this) {
 			childNode.setFormatting(formattingInfo);
 		}
 	}
-	
+
 	public void SourceBaseNode.setFormatting(FormattingInfo formattingInfo) {
 		formatting = formattingInfo;
 		super.setFormatting(formattingInfo);
 	}
-	
+
 	/**
 	 * Propagates the formatting information downwards in the AST if this has not already been done.
 	 */
 	public void ASTNode.propagateFormatting() {
 		getParent().propagateFormatting();
 	}
-	
+
 	protected void ASTNode.propagateFormatting(FormattingInfo formattingInfo) {
 		if (formattingInfo == null) {
 			addFormattingInformation(formattingInfo);
@@ -120,19 +120,19 @@ aspect FormattedPrint {
 		addFormattingInformation(formattingInfo);
 		addFormattingRest(formattingInfo);
 	}
-	
+
 	@Override
 	public void SourceBaseNode.propagateFormatting() {
 		propagateFormatting(formatting);
 		setDefaultFormatting(new DefaultFormattingIndentation("    "));
 	}
-	
+
 	protected void ASTNode.collectParenthesis(LinkedList<ScannedFormattingItem> parenthesisList) {
 		for (ASTNode node : this) {
 			node.collectParenthesis(parenthesisList);
 		}
 	}
-	
+
 	protected void Exp.collectParenthesis(LinkedList<ScannedFormattingItem> parenthesisList) {
 		for (ASTNode node : this) {
 			node.collectParenthesis(parenthesisList);
@@ -151,7 +151,7 @@ aspect FormattedPrint {
 			childNode.addFormattingInformation(formattingInfo);
 		}
 	}
-	
+
 	protected void SourceBaseNode.addFormattingInformation(FormattingInfo formattingInfo) {
 		if (hasCachedFormatting()) {
 			return;
@@ -167,7 +167,7 @@ aspect FormattedPrint {
 
 		super.addFormattingInformation(formattingInfo);
 	}
-	
+
 	protected void FullClassDecl.addFormattingInformation(FormattingInfo formattingInfo) {
 		super.addFormattingInformation(formattingInfo);
 
@@ -185,7 +185,7 @@ aspect FormattedPrint {
 			}
 		}
 	}
-	
+
 	public FormattingItem SourceBaseNode.addPreFormatting(Iterator<ScannedFormattingItem> formattingIterator) {
 		FormattingItem formattingItem = SourceBaseNode.NO_FORMATTING;
 		FormattingItem.RelativePosition relativePosition = FormattingItem.RelativePosition.BEFORE;
@@ -194,7 +194,7 @@ aspect FormattedPrint {
 			formattingItem = formattingIterator.next();
 			relativePosition = formattingItem.getFrontRelativePosition(this);
 		}
-		
+
 		if (formattingItem.getFrontRelativePosition(this) == FormattingItem.RelativePosition.FRONT_ADJACENT) {
 			preFormatting = formattingItem;
 			formattingIterator.remove();
@@ -204,10 +204,10 @@ aspect FormattedPrint {
 				formattingItem = SourceBaseNode.NO_FORMATTING;
 			}
 		}
-		
+
 		return formattingItem;
 	}
-	
+
 	public void SourceBaseNode.addPostFormatting(Iterator<ScannedFormattingItem> formattingIterator, FormattingItem startingFormattingItem) {
 		FormattingItem formattingItem = startingFormattingItem;
 		FormattingItem.RelativePosition relativePosition = formattingItem.getBackRelativePosition(this);
@@ -217,26 +217,26 @@ aspect FormattedPrint {
 			formattingItem = formattingIterator.next();
 			relativePosition = formattingItem.getBackRelativePosition(this);
 		}
-		
+
 		if (formattingItem.getBackRelativePosition(this) == FormattingItem.RelativePosition.BACK_ADJACENT) {
 			postFormatting = formattingItem;
 			formattingIterator.remove();
 		}
 	}
-	
+
 	public FormattingItem Comment.addPreFormatting(Iterator<ScannedFormattingItem> formattingIterator) {
 		return SourceBaseNode.NO_FORMATTING;
 	}
-	
+
 	public void Comment.addPostFormatting(Iterator<ScannedFormattingItem> formattingIterator, FormattingItem startingFormattingItem) {
 	}
-	
+
 	public void ASTNode.addFormattingRest(FormattingInfo formattingInfo) {
 		for (ASTNode childNode : this) {
 			childNode.addFormattingRest(formattingInfo);
 		}
 	}
-	
+
 	public void SourceBaseNode.addFormattingRest(FormattingInfo formattingInfo) {
 		Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.iterator();
 		while (formattingIterator.hasNext()) {
@@ -259,9 +259,8 @@ aspect FormattedPrint {
 			formatting = null;
 		}
 	}
-	
+
 	public void SourceBaseNode.addInsideFormatting(FormattingInfo formattingInfo) {
-		insideFormatting = SourceBaseNode.NO_FORMATTING;
 		Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.iterator();
 		while (formattingIterator.hasNext()) {
 			ScannedFormattingItem formattingItem = formattingIterator.next();
@@ -275,11 +274,11 @@ aspect FormattedPrint {
 			}
 		}
 	}
-	
+
 	public boolean SourceBaseNode.matchInsideFormatting(ScannedFormattingItem formattingItem) {
 		return false;
 	}
-	
+
 	@Override
 	public boolean IfExp.matchInsideFormatting(ScannedFormattingItem formattingItem) {
 		return (formattingItem.getStartLine() == getLine(getElseExp().getStart()) && formattingItem.getStartColumn() == getColumn(getElseExp().getStart()) + 4);
@@ -553,11 +552,11 @@ aspect FormattedPrint {
 		}
 		formatting = null;
 	}
-	
+
 	protected boolean SourceBaseNode.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		return false;
 	}
-	
+
 	@Override
 	protected boolean Within.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		if (hasPackageName()) {
@@ -566,55 +565,55 @@ aspect FormattedPrint {
 		postFormatting = new DefaultFormattingItem("\n");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean Encapsulated.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean Partial.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean Redeclare.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean Final.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean Inner.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean Outer.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean Replaceable.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean Restriction.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		postFormatting = new DefaultFormattingItem(" ");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean FullClassDecl.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		indentation.stepIn();
@@ -632,7 +631,7 @@ aspect FormattedPrint {
 				clause.setDefaultFormattingHelper(indentation);
 			}
 		}
-		
+
 		for (Annotation annotation : getAnnotations()) {
 			if (!annotation.hasCachedFormatting()) {
 				annotation.preFormatting = new DefaultFormattingItem(indentation.toString());
@@ -640,7 +639,7 @@ aspect FormattedPrint {
 		}
 		return true;
 	}
-	
+
 	@Override
 	protected boolean EquationClause.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		indentation.stepOut();
@@ -649,7 +648,7 @@ aspect FormattedPrint {
 		insideFormatting = new DefaultFormattingItem(" ");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean Algorithm.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		indentation.stepOut();
@@ -661,14 +660,14 @@ aspect FormattedPrint {
 		}
 		return false;
 	}
-	
+
 	@Override
 	protected boolean Statement.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		preFormatting = preFormatting.mergeItems(FormattingItem.Adjacency.BACK, new DefaultFormattingItem(indentation.toString()));
 		postFormatting = postFormatting.mergeItems(FormattingItem.Adjacency.FRONT, new DefaultFormattingItem("\n"));
 		return false;
 	}
-	
+
 	@Override
 	protected boolean ForStmt.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
@@ -680,7 +679,7 @@ aspect FormattedPrint {
 		indentation.stepIn();
 		return true;
 	}
-	
+
 	@Override
 	protected boolean ForIndex.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		getForIndexDecl().getName().preFormatting = new DefaultFormattingItem(" ");
@@ -690,7 +689,7 @@ aspect FormattedPrint {
 		}
 		return false;
 	}
-	
+
 	@Override
 	protected boolean WhileStmt.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
@@ -704,7 +703,7 @@ aspect FormattedPrint {
 		indentation.stepIn();
 		return true;
 	}
-	
+
 	@Override
 	protected boolean IfStmt.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
@@ -716,7 +715,7 @@ aspect FormattedPrint {
 		indentation.stepIn();
 		return true;
 	}
-	
+
 	@Override
 	protected boolean WhenStmt.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
@@ -724,7 +723,7 @@ aspect FormattedPrint {
 		indentation.stepIn();
 		return true;
 	}
-	
+
 	@Override
 	protected boolean IfWhenClause.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		getTest().preFormatting = new DefaultFormattingItem(" ");
@@ -737,7 +736,7 @@ aspect FormattedPrint {
 		}
 		return super.setDefaultFormattingHelper(indentation);
 	}
-	
+
 	@Override
 	protected boolean AbstractEquation.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		preFormatting = inheritFormatting(indentation);
@@ -749,7 +748,7 @@ aspect FormattedPrint {
 		postFormatting = postFormatting.mergeItems(FormattingItem.Adjacency.FRONT, new DefaultFormattingItem("\n"));
 		return false;
 	}
-	
+
 	private FormattingItem AbstractEquation.inheritFormatting(DefaultFormattingIndentation indentation) {
 		if (getParent() instanceof List && getParent().getParent() instanceof FullClassDecl) {
 			List<Clause> clauseList = (List<Clause>) ((FullClassDecl) getParent().getParent()).originalComposition.getClauses();
@@ -768,7 +767,7 @@ aspect FormattedPrint {
 
 		return preFormatting.mergeItems(FormattingItem.Adjacency.BACK, new DefaultFormattingItem(indentation.toString()));
 	}
-	
+
 	@Override
 	protected boolean ForClauseE.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
@@ -780,7 +779,7 @@ aspect FormattedPrint {
 		indentation.stepIn();
 		return true;
 	}
-	
+
 	@Override
 	protected boolean IfWhenEquation.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
@@ -811,30 +810,30 @@ aspect FormattedPrint {
 		indentation.stepIn();
 		return true;
 	}
-	
+
 	@Override
 	protected boolean ElseEquation.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		indentation.stepOut();
 		boolean addedIndentation = super.setDefaultFormattingHelper(indentation);
 		indentation.stepIn();
 		postFormatting = SourceBaseNode.NO_FORMATTING;
-		
+
 		if (getNumAbstractEquation() > 0) {
 			getAbstractEquation(0).preFormatting = new DefaultFormattingItem("\n");
 			indentation.stepOut();
 			getAbstractEquation(getNumAbstractEquation() - 1).postFormatting = new DefaultFormattingItem(indentation.toString());
 			indentation.stepIn();
 		}
-		
+
 		return addedIndentation;
 	}
-	
+
 	@Override
 	protected boolean ExpandableConnector.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean IfExp.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		if (getElseExp() instanceof IfExp) {
@@ -855,7 +854,7 @@ aspect FormattedPrint {
 		postFormatting = new DefaultFormattingItem(" ");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean ExtendsClause.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		preFormatting = new DefaultFormattingItem(" ");
@@ -863,7 +862,7 @@ aspect FormattedPrint {
 		postFormatting = new DefaultFormattingItem("\n");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean ImportClause.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		preFormatting = new DefaultFormattingItem(" ");
@@ -874,7 +873,7 @@ aspect FormattedPrint {
 		postFormatting = new DefaultFormattingItem("\n");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean ComponentDecl.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		FormattingItem inheritedPreFormatting = inheritFormatting(indentation);
@@ -917,14 +916,14 @@ aspect FormattedPrint {
 		postFormatting = new DefaultFormattingItem("\n");
 		return false;
 	}
-	
+
 	private FormattingItem ComponentDecl.inheritFormatting(DefaultFormattingIndentation indentation) {
 		if (getParent() instanceof List && getParent().getParent() instanceof FullClassDecl) {
 			List<Clause> clauseList = (List<Clause>) ((FullClassDecl) getParent().getParent()).originalComposition.getClauses();
 			int thisIndex = clauseList.getIndexOfChild(this);
 			if (thisIndex > 0 && clauseList.getChild(thisIndex - 1) instanceof ComponentDecl) {
 				ComponentDecl componentToInheritFrom = (ComponentDecl) clauseList.getChild(thisIndex - 1);
-				
+
 				if (componentToInheritFrom.hasRedeclare()) {
 					return componentToInheritFrom.getRedeclare().preFormatting.copyWhitepacesFromFormatting();
 				} else if (componentToInheritFrom.hasFinal()) {
@@ -948,7 +947,7 @@ aspect FormattedPrint {
 		}
 		return new DefaultFormattingItem(indentation.toString());
 	}
-	
+
 	@Override
 	protected boolean Comment.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		if (hasStringComment() && hasAnnotation()) {
@@ -956,19 +955,19 @@ aspect FormattedPrint {
 		}
 		return false;
 	}
-	
+
 	@Override
 	protected boolean ParseAnnotation.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		getClassModification().preFormatting = new DefaultFormattingItem(" ");
 		return false;
 	}
-	
+
 	@Override
 	protected boolean EndDecl.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
 		return false;
 	}
-	
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// PRETTY PRINT AST WITH PRESERVED FORMATTING:
 	//
@@ -985,10 +984,10 @@ aspect FormattedPrint {
 		OutputStream outputStream = new ByteArrayOutputStream();
 		PrintStream printStream = new PrintStream(outputStream);
 		prettyPrintFormatted(formattedPrettyPrinter, printStream);
-		
+
 		return outputStream.toString();
 	}
-	
+
 	/**
 	 * Pretty prints this AST node and all its childred, with preserved formatting.
 	 * @param printer the printer to use when pretty printing.
@@ -998,43 +997,43 @@ aspect FormattedPrint {
 		propagateFormatting();
 		doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	void ASTNode.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
 		for (ASTNode childNode: this) {
 			childNode.doPrettyPrintFormatted(printer, printStream);
 		}
 	}
-	
+
 	void SourceBaseNode.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(postFormatting);
 	}
-	
+
 	LinkedList<ScannedFormattingItem> Exp.parenthesisList = new LinkedList<ScannedFormattingItem>();
 	public void Exp.addParenthesis(Symbol left, Symbol right) {
 		parenthesisList.add(new ScannedFormattingItem(FormattingItem.Type.PARENTHESIS, "(",
-			Symbol.getLine(left.getStart()), Symbol.getColumn(left.getStart()), Symbol.getLine(left.getEnd()),
-			Symbol.getColumn(left.getEnd())));
+				Symbol.getLine(left.getStart()), Symbol.getColumn(left.getStart()), Symbol.getLine(left.getEnd()),
+				Symbol.getColumn(left.getEnd())));
 		parenthesisList.add(new ScannedFormattingItem(FormattingItem.Type.PARENTHESIS, ")",
-			Symbol.getLine(right.getStart()), Symbol.getColumn(right.getStart()), Symbol.getLine(right.getEnd()),
-			Symbol.getColumn(right.getEnd())));
+				Symbol.getLine(right.getStart()), Symbol.getColumn(right.getStart()), Symbol.getLine(right.getEnd()),
+				Symbol.getColumn(right.getEnd())));
 	}
-	
+
 	void AbstractEquation.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(";");
 		printStream.print(postFormatting);
 	}
-	
+
 	void EquationAnnotation.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
 		printStream.print(getAnnotation().preFormatting);
 		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(";");
 		printStream.print(getAnnotation().postFormatting);
 	}
-	
+
 	void Statement.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		prettyPrintFormattedHelper(printer, printStream);
@@ -1047,13 +1046,13 @@ aspect FormattedPrint {
 			childNode.doPrettyPrintFormatted(printer, printStream);
 		}
 	}
-	
+
 	void StoredDefinition.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
- 		if (hasWithin()) {
- 			getWithin().doPrettyPrintFormatted(printer, printStream);
- 		}
- 		for (Element element : getElements()) {
-	 		printer.print(element, printStream, "");
+		if (hasWithin()) {
+			getWithin().doPrettyPrintFormatted(printer, printStream);
+		}
+		for (Element element : getElements()) {
+			printer.print(element, printStream, "");
 		}
 	}
 
@@ -1066,265 +1065,268 @@ aspect FormattedPrint {
 	}
 
 	void ShortClassDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-	    if (hasEncapsulated()) {
-	    	getEncapsulated().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasPartial()) {
-	    	getPartial().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasRedeclare()) {
-	    	getRedeclare().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasFinal()) {
-	    	getFinal().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasInner()) {
-	    	getInner().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasOuter()) {
-	    	getOuter().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasReplaceable()) {
-	    	getReplaceable().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    
-	    getRestriction().doPrettyPrintFormatted(printer, printStream);
-	    getName().doPrettyPrintFormatted(printer, printStream);
-	    printStream.print("=");
-	    getExtendsClauseShortClass().doPrettyPrintFormatted(printer, printStream);
-	    if (hasConstrainingClause()) {
-	    	getConstrainingClause().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasConstrainingClauseComment()) {
-	    	getConstrainingClauseComment().doPrettyPrintFormatted(printer, printStream);
-	    }
+		if (hasEncapsulated()) {
+			getEncapsulated().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasPartial()) {
+			getPartial().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasRedeclare()) {
+			getRedeclare().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasFinal()) {
+			getFinal().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasInner()) {
+			getInner().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasOuter()) {
+			getOuter().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasReplaceable()) {
+			getReplaceable().doPrettyPrintFormatted(printer, printStream);
+		}
+
+		getRestriction().doPrettyPrintFormatted(printer, printStream);
+		getName().doPrettyPrintFormatted(printer, printStream);
+		printStream.print("=");
+		getExtendsClauseShortClass().doPrettyPrintFormatted(printer, printStream);
+		if (hasConstrainingClause()) {
+			getConstrainingClause().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasConstrainingClauseComment()) {
+			getConstrainingClauseComment().doPrettyPrintFormatted(printer, printStream);
+		}
+		printStream.print(';');
 	}
-    
-    void Encapsulated.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print("encapsulated");
-    }
 
-    void Partial.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print("partial");
-    }
-    
-    void Redeclare.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print("redeclare");
-    }
-    
-    void Final.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print("final");
-    }
-    
-    void Inner.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print("inner");
-    }
-    
-    void Outer.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print("outer");
-    }
-    
-    void Replaceable.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print("replaceable");
-    }
-    
-    void Restriction.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print(this);
-    }
-    
-    void IdDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print(getID());
-    }
-    
-    void ExtendsClauseShortClass.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	getSuper().doPrettyPrintFormatted(printer, printStream);
-    	
-    	if (hasArraySubscripts()) {
-	    	getArraySubscripts().doPrettyPrintFormatted(printer, printStream);
-    	}
-	    if (hasClassModification()) {
-	    	getClassModification().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    getComment().prettyPrintFormattedHelper(printer, printStream);
-    }
-
-    void Access.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print(name());
-    }
-    
-    void ArrayAccess.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print(name());
-    	if (hasArraySubscripts()) {
-    		getArraySubscripts().doPrettyPrintFormatted(printer, printStream);
-    	}
-    }
-    
-    void Dot.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	getAccesss().prettyPrintWithSep(printer, printStream, null, ".");
-    }
-    
-    void ArraySubscripts.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	if (getNumSubscript() == 0) {
-    		return;
-    	}
-
-    	printStream.print("[");
-    	for (int i = 0; i < getNumSubscript(); i++) {
-    		getSubscript(i).doPrettyPrintFormatted(printer, printStream);
-    		if (i + 1 < getNumSubscript()) {
-    			printStream.print(",");
-    		}
-    	}
-    	printStream.print("]");
-    }
-    
-    void ArrayConstructor.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print("{");
-    	getFunctionArguments().doPrettyPrintFormatted(printer, printStream);
-    	printStream.print("}");
-    }
-    
-    void Matrix.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print("[");
-    	for (int i = 0; i < getNumRow(); i++) {
-    		getRow(i).doPrettyPrintFormatted(printer, printStream);
-
-    		if (i + 1 < getNumRow()) {
-    			printStream.print(";");
-    		}
-    	}
-    	printStream.print("]");
-    }
-    
-    void MatrixRow.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	for (int i = 0; i < getNumExp(); i++) {
-    		getExp(i).doPrettyPrintFormatted(printer, printStream);
-
-    		if (i + 1 < getNumExp()) {
-    			printStream.print(",");
-    		}
-    	}
-    }    
-
-    void ClassModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print("(");
-    	if (getNumArgument() > 0) {
-    		getArgument(0).doPrettyPrintFormatted(printer, printStream);
-    	}
-    	for (int i = 1; i < getNumArgument(); i++) {
-    		printStream.print(",");
-    		getArgument(i).doPrettyPrintFormatted(printer, printStream);
-    	}
-    	printStream.print(")");
-    }
-    
-    void Each.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	printStream.print("each");
-    }
-    
-    void ConstrainingClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	getAccess().doPrettyPrintFormatted(printer, printStream);
-    	if (hasClassModification()) {
-    		getClassModification().doPrettyPrintFormatted(printer, printStream);
-    	}
-    }
-
-    void FullClassDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	if (hasEncapsulated()) {
-    		getEncapsulated().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasPartial()) {
-	    	getPartial().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasRedeclare()) {
-	    	getRedeclare().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasFinal()) {
-	    	getFinal().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasInner()) {
-	    	getInner().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasOuter()) {
-	    	getOuter().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasReplaceable()) {
-	    	getReplaceable().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    getRestriction().doPrettyPrintFormatted(printer, printStream);
-	    if (prettyPrintFormatedShouldHaveExtends())
-	    	printStream.print("extends");
-	    getName().doPrettyPrintFormatted(printer, printStream);
-	    if (hasStringComment()) {
-	    	getStringComment().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    
-	    for (Clause clause : originalComposition.getClauses()) {
-    		clause.prettyPrintFormatted(printer, printStream);
-    	}
-
-	    getEndDecl().doPrettyPrintFormatted(printer, printStream);
+	void Encapsulated.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("encapsulated");
 	}
-    
-    syn boolean FullClassDecl.prettyPrintFormatedShouldHaveExtends() = false;
-    syn boolean ExtendClassDecl.prettyPrintFormatedShouldHaveExtends() = true;
-    
-    public void FullClassDecl.addNewComponentDecl(ComponentDecl componentDecl) {
-    	Stack<Clause> clauseStack = new Stack<Clause>();
 
-    	for (int i = originalComposition.getNumClause() - 1; i >= 0; i--) {
-    		Clause clause = originalComposition.getClause(i);
-    		if (clause instanceof ComponentDecl && ((ComponentDecl) clause).isPublic() == componentDecl.isPublic()) {
-    			break;
-    		}
-    		clauseStack.push(clause);
-    		originalComposition.getClauses().removeChild(i);
-    	}
-    	
-    	originalComposition.addClause(componentDecl);
-    	
-    	while (!clauseStack.isEmpty()) {
-    		originalComposition.addClause(clauseStack.pop());
-    	}
-    	
-    	addComponentDecl(componentDecl);
-    }
-    
-    public void FullClassDecl.addNewEquation(AbstractEquation equation) {
-    	for (int i = originalComposition.getNumClause() - 1; i >= 0; i--) {
-    		Clause clause = originalComposition.getClause(i);
-    		if (clause instanceof EquationClause && ((EquationClause) clause).getAbstractEquation(0).isInitial() == equation.isInitial()) {
-    			EquationClause equationClause = (EquationClause) clause;
-    			Stack<AbstractEquation> equationStack = new Stack<AbstractEquation>();
-    			boolean foundGoodPosition = false;
-    			for (int j = equationClause.getNumAbstractEquation() - 1; j >= 0; j--) {
-    				AbstractEquation currentEquation = equationClause.getAbstractEquation(j);
-    				if (currentEquation.getClass() == equation.getClass()) {
-    					equationStack.push(equation);
-    					foundGoodPosition = true;
-    					break;
-    				}
-    				equationStack.push(currentEquation);
-    				equationClause.getAbstractEquations().removeChild(j);
-    			}
-    			
-    			while (!equationStack.isEmpty()) {
-        			equationClause.addAbstractEquation(equationStack.pop());
-        		}
-    			if (!foundGoodPosition) {
-    				equationClause.addAbstractEquation(equation);
-    			}
-    			addEquation(equation);
-    			return;
-    		}
-    	}
+	void Partial.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("partial");
+	}
 
-    	List<AbstractEquation> abstractEquationList = new List<AbstractEquation>();
-    	abstractEquationList.add(equation);
-    	originalComposition.addClause(new EquationClause(abstractEquationList));
-    	addEquation(equation);
-    }
-	
+	void Redeclare.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("redeclare");
+	}
+
+	void Final.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("final");
+	}
+
+	void Inner.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("inner");
+	}
+
+	void Outer.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("outer");
+	}
+
+	void Replaceable.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("replaceable");
+	}
+
+	void Restriction.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(this);
+	}
+
+	void IdDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(getID());
+	}
+
+	void ExtendsClauseShortClass.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		if (hasTypePrefixInputOutput())
+			getTypePrefixInputOutput().doPrettyPrintFormatted(printer, printStream);
+		getSuper().doPrettyPrintFormatted(printer, printStream);
+
+		if (hasArraySubscripts()) {
+			getArraySubscripts().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasClassModification()) {
+			getClassModification().doPrettyPrintFormatted(printer, printStream);
+		}
+		getComment().prettyPrintFormattedHelper(printer, printStream);
+	}
+
+	void Access.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(name());
+	}
+
+	void ArrayAccess.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print(name());
+		if (hasArraySubscripts()) {
+			getArraySubscripts().doPrettyPrintFormatted(printer, printStream);
+		}
+	}
+
+	void Dot.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		getAccesss().prettyPrintWithSep(printer, printStream, null, ".");
+	}
+
+	void ArraySubscripts.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		if (getNumSubscript() == 0) {
+			return;
+		}
+
+		printStream.print("[");
+		for (int i = 0; i < getNumSubscript(); i++) {
+			getSubscript(i).doPrettyPrintFormatted(printer, printStream);
+			if (i + 1 < getNumSubscript()) {
+				printStream.print(",");
+			}
+		}
+		printStream.print("]");
+	}
+
+	void ArrayConstructor.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("{");
+		getFunctionArguments().doPrettyPrintFormatted(printer, printStream);
+		printStream.print("}");
+	}
+
+	void Matrix.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("[");
+		for (int i = 0; i < getNumRow(); i++) {
+			getRow(i).doPrettyPrintFormatted(printer, printStream);
+
+			if (i + 1 < getNumRow()) {
+				printStream.print(";");
+			}
+		}
+		printStream.print("]");
+	}
+
+	void MatrixRow.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		for (int i = 0; i < getNumExp(); i++) {
+			getExp(i).doPrettyPrintFormatted(printer, printStream);
+
+			if (i + 1 < getNumExp()) {
+				printStream.print(",");
+			}
+		}
+	}    
+
+	void ClassModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("(");
+		if (getNumArgument() > 0) {
+			getArgument(0).doPrettyPrintFormatted(printer, printStream);
+		}
+		for (int i = 1; i < getNumArgument(); i++) {
+			printStream.print(",");
+			getArgument(i).doPrettyPrintFormatted(printer, printStream);
+		}
+		printStream.print(")");
+	}
+
+	void Each.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("each");
+	}
+
+	void ConstrainingClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		getAccess().doPrettyPrintFormatted(printer, printStream);
+		if (hasClassModification()) {
+			getClassModification().doPrettyPrintFormatted(printer, printStream);
+		}
+	}
+
+	void FullClassDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		if (hasEncapsulated()) {
+			getEncapsulated().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasPartial()) {
+			getPartial().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasRedeclare()) {
+			getRedeclare().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasFinal()) {
+			getFinal().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasInner()) {
+			getInner().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasOuter()) {
+			getOuter().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasReplaceable()) {
+			getReplaceable().doPrettyPrintFormatted(printer, printStream);
+		}
+		getRestriction().doPrettyPrintFormatted(printer, printStream);
+		if (prettyPrintFormatedShouldHaveExtends())
+			printStream.print("extends");
+		getName().doPrettyPrintFormatted(printer, printStream);
+		if (hasStringComment()) {
+			getStringComment().doPrettyPrintFormatted(printer, printStream);
+		}
+
+		for (Clause clause : originalComposition.getClauses()) {
+			clause.prettyPrintFormatted(printer, printStream);
+		}
+
+		getEndDecl().doPrettyPrintFormatted(printer, printStream);
+	}
+
+	syn boolean FullClassDecl.prettyPrintFormatedShouldHaveExtends() = false;
+	syn boolean ExtendClassDecl.prettyPrintFormatedShouldHaveExtends() = true;
+
+	public void FullClassDecl.addNewComponentDecl(ComponentDecl componentDecl) {
+		Stack<Clause> clauseStack = new Stack<Clause>();
+
+		for (int i = originalComposition.getNumClause() - 1; i >= 0; i--) {
+			Clause clause = originalComposition.getClause(i);
+			if (clause instanceof ComponentDecl && ((ComponentDecl) clause).isPublic() == componentDecl.isPublic()) {
+				break;
+			}
+			clauseStack.push(clause);
+			originalComposition.getClauses().removeChild(i);
+		}
+
+		originalComposition.addClause(componentDecl);
+
+		while (!clauseStack.isEmpty()) {
+			originalComposition.addClause(clauseStack.pop());
+		}
+
+		addComponentDecl(componentDecl);
+	}
+
+	public void FullClassDecl.addNewEquation(AbstractEquation equation) {
+		for (int i = originalComposition.getNumClause() - 1; i >= 0; i--) {
+			Clause clause = originalComposition.getClause(i);
+			if (clause instanceof EquationClause && ((EquationClause) clause).getAbstractEquation(0).isInitial() == equation.isInitial()) {
+				EquationClause equationClause = (EquationClause) clause;
+				Stack<AbstractEquation> equationStack = new Stack<AbstractEquation>();
+				boolean foundGoodPosition = false;
+				for (int j = equationClause.getNumAbstractEquation() - 1; j >= 0; j--) {
+					AbstractEquation currentEquation = equationClause.getAbstractEquation(j);
+					if (currentEquation.getClass() == equation.getClass()) {
+						equationStack.push(equation);
+						foundGoodPosition = true;
+						break;
+					}
+					equationStack.push(currentEquation);
+					equationClause.getAbstractEquations().removeChild(j);
+				}
+
+				while (!equationStack.isEmpty()) {
+					equationClause.addAbstractEquation(equationStack.pop());
+				}
+				if (!foundGoodPosition) {
+					equationClause.addAbstractEquation(equation);
+				}
+				addEquation(equation);
+				return;
+			}
+		}
+
+		List<AbstractEquation> abstractEquationList = new List<AbstractEquation>();
+		abstractEquationList.add(equation);
+		originalComposition.addClause(new EquationClause(abstractEquationList));
+		addEquation(equation);
+	}
+
 	void ExtendsClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("extends");
 		getSuper().doPrettyPrintFormatted(printer, printStream);
@@ -1335,14 +1337,14 @@ aspect FormattedPrint {
 			getAnnotation().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(";");
 	}
-	
+
 	void ImportClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("import");
 		getPackageName().doPrettyPrintFormatted(printer, printStream);
 		getComment().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(";");
 	}
-	
+
 	void ImportClauseUnqualified.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("import");
 		getPackageName().doPrettyPrintFormatted(printer, printStream);
@@ -1350,7 +1352,7 @@ aspect FormattedPrint {
 		getComment().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(";");
 	}
-	
+
 	void ImportClauseRename.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("import");
 		getIdDecl().doPrettyPrintFormatted(printer, printStream);
@@ -1359,19 +1361,19 @@ aspect FormattedPrint {
 		getComment().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(";");
 	}
-	
+
 	void CompleteModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getClassModification().doPrettyPrintFormatted(printer, printStream);
 		if (hasValueModification()) {
 			getValueModification().doPrettyPrintFormatted(printer, printStream);
 		}
 	}
-	
+
 	void ValueModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("=");
 		getExp().doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	void ElementModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		if (hasEach()) {
 			getEach().doPrettyPrintFormatted(printer, printStream);
@@ -1387,7 +1389,7 @@ aspect FormattedPrint {
 			getStringComment().doPrettyPrintFormatted(printer, printStream);
 		}
 	}
-	
+
 	void ClassRedeclare.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		if (hasEach()) {
 			getEach().doPrettyPrintFormatted(printer, printStream);
@@ -1397,7 +1399,7 @@ aspect FormattedPrint {
 		}
 		getBaseClassDecl().doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	void ComponentRedeclare.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		if (hasEach()) {
 			getEach().doPrettyPrintFormatted(printer, printStream);
@@ -1407,7 +1409,7 @@ aspect FormattedPrint {
 		}
 		getComponentDecl().doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	void EquationClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		if (getNumAbstractEquation() > 0 && getAbstractEquation(0).isInitial()) {
 			printStream.print("initial");
@@ -1419,27 +1421,27 @@ aspect FormattedPrint {
 			abstractEquation.doPrettyPrintFormatted(printer, printStream);
 		}
 	}
-	
+
 	void Algorithm.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		if (hasInitial()) {
 			printStream.print("initial");
 			printStream.print(insideFormatting);
 		}
 		printStream.print("algorithm");
-		
+
 		for (Statement statement : getStatements()) {
 			statement.doPrettyPrintFormatted(printer, printStream);
 		}
 	}
-	
+
 	void BreakStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("break");
 	}
-	
+
 	void ReturnStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("return");
 	}
-	
+
 	void WhileStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("while");
 		getTest().doPrettyPrintFormatted(printer, printStream);
@@ -1449,7 +1451,7 @@ aspect FormattedPrint {
 		}
 		printStream.print("end" + insideFormatting + "while");
 	}
-	
+
 	void ForStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("for");
 		for (int i = 0; i < getNumForIndex(); i++) {
@@ -1464,7 +1466,7 @@ aspect FormattedPrint {
 		}
 		printStream.print("end" + insideFormatting + "for");
 	}
-	
+
 	void WhenStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("when");
 		for (int i = 0; i < getNumIfWhenClause(); i++) {
@@ -1475,7 +1477,7 @@ aspect FormattedPrint {
 		}
 		printStream.print("end" + insideFormatting + "when");
 	}
-	
+
 	void IfStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("if");
 		for (int i = 0; i < getNumIfWhenClause(); i++) {
@@ -1492,7 +1494,7 @@ aspect FormattedPrint {
 		}
 		printStream.print("end" + insideFormatting + "if");
 	}
-	
+
 	void IfWhenClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getTest().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("then");
@@ -1500,19 +1502,19 @@ aspect FormattedPrint {
 			statement.doPrettyPrintFormatted(printer, printStream);
 		}
 	}
-	
+
 	void AssignStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getLeft().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(":=");
 		getRight().doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	void Equation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getLeft().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("=");
 		getRight().doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	void ConnectClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("connect");
 		printStream.print("(");
@@ -1522,7 +1524,7 @@ aspect FormattedPrint {
 		printStream.print(")");
 		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	void FunctionCallEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		if (getNumLeft() > 0) {
 			printStream.print("(");
@@ -1536,7 +1538,7 @@ aspect FormattedPrint {
 		}
 		getCall().doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	void ForClauseE.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("for");
 		for (int i = 0; i < getNumForIndex(); i++) {
@@ -1551,7 +1553,7 @@ aspect FormattedPrint {
 		}
 		printStream.print("end" + insideFormatting + "for");
 	}
-	
+
 	void ForIndex.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getForIndexDecl().getName().doPrettyPrintFormatted(printer, printStream);
 		if (hasExp()) {
@@ -1564,11 +1566,11 @@ aspect FormattedPrint {
 	syn String IfWhenEquation.keyword();
 	eq IfEquation.keyword() = "if";
 	eq WhenEquation.keyword() = "when";
-	
+
 	void IfWhenEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		prettyPrintFormattedHelper(printer, printStream, false);
 	}
-	
+
 	void IfWhenEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, boolean elseIfWhen) {
 		if (elseIfWhen) {
 			printStream.print(preFormatting);
@@ -1598,23 +1600,23 @@ aspect FormattedPrint {
 		}
 		printStream.print(postFormatting);
 	}
-	
+
 	void ElementAnnotation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(getAnnotation().preFormatting);
 		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(";");
 		printStream.print(getAnnotation().postFormatting);
 	}
-	
+
 	void AlgorithmAnnotation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(getAnnotation().preFormatting);
 		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(";");
 		printStream.print(getAnnotation().postFormatting);
 	}
-	
+
 	eq ExpandableConnector.toString() = "expandable" + insideFormatting + "connector";
-	
+
 	void FunctionCall.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("(");
@@ -1623,7 +1625,7 @@ aspect FormattedPrint {
 		}
 		printStream.print(")");
 	}
-	
+
 	void FunctionArguments.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		int totalNumberOfArguments = getNumExp() + getNumNamedArgument();
 
@@ -1640,17 +1642,17 @@ aspect FormattedPrint {
 			}
 		}
 	}
-	
+
 	void NamedArgument.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("=");
 		getExp().doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	public void ColonSubscript.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(':');
 	}
-	
+
 	void RealLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(getUNSIGNED_NUMBER());
 	}
@@ -1658,43 +1660,43 @@ aspect FormattedPrint {
 	void IntegerLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(getUNSIGNED_INTEGER());
 	}
-	
+
 	public void TimeExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("time");
 	}
-	
+
 	public void EndExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("end");
 	}
-	
+
 	void StringLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("\"" + getSTRING() + "\"");
 	}
-	
+
 	void BooleanLitExpTrue.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("true");
 	}
-	
+
 	void BooleanLitExpFalse.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("false");
 	}
-	
+
 	void NegExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("-");
 		getExp().doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	void NotExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("not");
 		getExp().doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	void DerExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("der(");
 		getExp().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(")");
 	}
-	
+
 	void RangeExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		for (int i = 0; i < getNumExp(); i++) {
 			getExp(i).doPrettyPrintFormatted(printer, printStream);
@@ -1703,7 +1705,7 @@ aspect FormattedPrint {
 			}
 		}
 	}
-	
+
 	void IfExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("if");
 		getIfExp().doPrettyPrintFormatted(printer, printStream);
@@ -1715,13 +1717,13 @@ aspect FormattedPrint {
 		getElseExp().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(getElseExp().postFormatting);
 	}
-	
+
 	void BinExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getLeft().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(operatorFormatted());
 		getRight().doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	syn String BinExp.operatorFormatted();
 	eq LtExp.operatorFormatted()     = "<";
 	eq LeqExp.operatorFormatted()    = "<=";
@@ -1767,30 +1769,30 @@ aspect FormattedPrint {
 		if (hasTypePrefixInputOutput()) {
 			getTypePrefixInputOutput().doPrettyPrintFormatted(printer, printStream);
 		}
-		
+
 		printer.print(getClassName(), printStream, "");
 		if (hasTypeArraySubscripts()) {
 			getTypeArraySubscripts().doPrettyPrintFormatted(printer, printStream);
 		}
 		getName().doPrettyPrintFormatted(printer, printStream); 
-	    if (hasVarArraySubscripts()) {
-	    	getVarArraySubscripts().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasModification()) {
-	    	getModification().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    if (hasConditionalAttribute()) {
-	    	getConditionalAttribute().doPrettyPrintFormatted(printer, printStream);
-	    }
-	    
-	    getComment().doPrettyPrintFormatted(printer, printStream);
-				 
+		if (hasVarArraySubscripts()) {
+			getVarArraySubscripts().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasModification()) {
+			getModification().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasConditionalAttribute()) {
+			getConditionalAttribute().doPrettyPrintFormatted(printer, printStream);
+		}
+
+		getComment().doPrettyPrintFormatted(printer, printStream);
+
 		if (hasConstrainingClause()) {
 			printer.print(getConstrainingClause(), printStream, "");
 		}
 		printStream.print(";");
 	}
-	
+
 	syn String TypePrefix.formattedToString();
 	eq Flow.formattedToString()			= "flow";
 	eq Stream.formattedToString()		= "stream";
@@ -1800,16 +1802,16 @@ aspect FormattedPrint {
 	eq Constant.formattedToString()		= "constant";
 	eq Input.formattedToString()		= "input";
 	eq Output.formattedToString()		= "output";
-	
+
 	void TypePrefix.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print(formattedToString());
 	}
-	
+
 	void ConditionalAttribute.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("if");
 		getExp().doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	void Comment.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		if (hasStringComment()) {
 			getStringComment().doPrettyPrintFormatted(printer, printStream);
@@ -1818,7 +1820,7 @@ aspect FormattedPrint {
 			getAnnotation().doPrettyPrintFormatted(printer, printStream);
 		}
 	}
-	
+
 	void StringComment.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("\"");
 		printStream.print(getComment());
@@ -1829,11 +1831,11 @@ aspect FormattedPrint {
 		printStream.print("annotation");
 		getClassModification().doPrettyPrintFormatted(printer, printStream);
 	}
-	
+
 	void EndDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("end" + insideFormatting + getEndID() + ";");
 	}
-	
+
 	syn String FBinExp.operatorFormatted();
 	eq FLtExp.operatorFormatted()     = "<";
 	eq FLeqExp.operatorFormatted()    = "<=";
@@ -1853,7 +1855,7 @@ aspect FormattedPrint {
 	eq FDotMulExp.operatorFormatted() = ".*";
 	eq FDotDivExp.operatorFormatted() = "./";
 	eq FDotPowExp.operatorFormatted() = ".^";
-	
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MISCELLANEOUS:
 	//
@@ -1861,7 +1863,7 @@ aspect FormattedPrint {
 	// to pretty printing with preserved formatting.
 	//
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	void ASTNode.copyFormattingFrom(ASTNode node) {
 		if (this.getClass() != node.getClass())
 			return;
@@ -1871,12 +1873,12 @@ aspect FormattedPrint {
 			getChild(i).copyFormattingFrom(node.getChild(i));
 		}
 	}
-	
+
 	void List.copyFormattingFrom(ASTNode node) {
 		if (this.getClass() != node.getClass())
 			return;
 	}
-	
+
 	void SourceBaseNode.copyFormattingFrom(ASTNode node) {
 		if (this.getClass() != node.getClass())
 			return;
@@ -1901,7 +1903,7 @@ aspect FormattedPrint {
 		}
 		return result;
 	}
-	
+
 	eq SourceBaseNode.numberOfDefaultFormattingItems() {
 		int result = 0;
 		if (!preFormatting.isScanned() && !preFormatting.isEmptyDefault()) {
@@ -1918,7 +1920,7 @@ aspect FormattedPrint {
 		}
 		return result;
 	}
-	
+
 	syn ArrayList<SourceBaseNode> ASTNode.nonScannedNodes() {
 		ArrayList<SourceBaseNode> result = new ArrayList<SourceBaseNode>();
 		for (ASTNode node : this) {
@@ -1926,7 +1928,7 @@ aspect FormattedPrint {
 		}
 		return result;
 	}
-	
+
 	eq SourceBaseNode.nonScannedNodes() {
 		ArrayList<SourceBaseNode> result = new ArrayList<SourceBaseNode>();
 		if (!preFormatting.isScanned() && !preFormatting.isEmptyDefault()) {
@@ -1941,7 +1943,7 @@ aspect FormattedPrint {
 		}
 		return result;
 	}
-	
+
 	syn SourceBaseNode ASTNode.ownsFormattingItem(int startLine, int startColumn) {
 		SourceBaseNode owner = null;
 		for (ASTNode node : this) {
@@ -1950,10 +1952,10 @@ aspect FormattedPrint {
 				return owner;
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	eq SourceBaseNode.ownsFormattingItem(int startLine, int startColumn) {
 		if (preFormatting.isScanned() && ((ScannedFormattingItem) preFormatting).getStartLine() == startLine && ((ScannedFormattingItem) preFormatting).getStartColumn() == startColumn) {
 			return this;
@@ -1972,7 +1974,7 @@ aspect FormattedPrint {
 				return owner;
 			}
 		}
-		
+
 		return null;
 	}
 }
