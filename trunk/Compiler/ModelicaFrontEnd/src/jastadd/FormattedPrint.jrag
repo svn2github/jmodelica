@@ -1763,6 +1763,17 @@ aspect FormattedPrint {
 		printStream.print(getElseExp().postFormatting);
 	}
 
+	void IterExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		getExp().doPrettyPrintFormatted(printer, printStream);
+		boolean first = true;
+		printStream.print("for");
+		for (ForIndex index : getForIndexs()) {
+			if (!first)
+				printStream.print(',');
+			first = false;
+			index.doPrettyPrintFormatted(printer, printStream);
+		}
+	}
 	void BinExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getLeft().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(operatorFormatted());
@@ -1778,7 +1789,7 @@ aspect FormattedPrint {
 	eq NeqExp.operatorFormatted()    = "<>";
 	eq OrExp.operatorFormatted()     = "or";
 	eq AndExp.operatorFormatted()    = "and";
-	eq AddExp.operatorFormatted()    = "+";
+	eq AddExp.operatorFormatted()    = "";
 	eq SubExp.operatorFormatted()    = "-";
 	eq MulExp.operatorFormatted()    = "*";
 	eq DivExp.operatorFormatted()    = "/";
@@ -1890,7 +1901,7 @@ aspect FormattedPrint {
 	eq FNeqExp.operatorFormatted()    = "<>";
 	eq FOrExp.operatorFormatted()     = "or";
 	eq FAndExp.operatorFormatted()    = "and";
-	eq FAddExp.operatorFormatted()    = "+";
+	eq FAddExp.operatorFormatted()    = "";
 	eq FSubExp.operatorFormatted()    = "-";
 	eq FMulExp.operatorFormatted()    = "*";
 	eq FDivExp.operatorFormatted()    = "/";
@@ -1904,27 +1915,27 @@ aspect FormattedPrint {
 	void ExternalClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("external");
 		if (hasExternalLanguage())
-			getExternalLanguage().prettyPrintFormatted(printer, printStream);
+			getExternalLanguage().doPrettyPrintFormatted(printer, printStream);
 		if (hasExternalFunctionCall())
-			getExternalFunctionCall().prettyPrintFormatted(printer, printStream);
+			getExternalFunctionCall().doPrettyPrintFormatted(printer, printStream);
 		if (hasAnnotation1())
-			getAnnotation1().prettyPrintFormatted(printer, printStream);
+			getAnnotation1().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(';');
 	}
 	
 	void ExternalFunctionCall.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		if (hasReturnVar()) {
-			getReturnVar().prettyPrintFormatted(printer, printStream);
+			getReturnVar().doPrettyPrintFormatted(printer, printStream);
 			printStream.print('=');
 		}
-		getFunctionName().prettyPrintFormatted(printer, printStream);
+		getFunctionName().doPrettyPrintFormatted(printer, printStream);
 		printStream.print('(');
 		boolean first = true;
 		for (Exp arg : getArgs()) {
 			if (!first)
 				printStream.print(',');
 			first = false;
-			arg.prettyPrintFormatted(printer, printStream);
+			arg.doPrettyPrintFormatted(printer, printStream);
 		}
 		printStream.print(')');
 	}

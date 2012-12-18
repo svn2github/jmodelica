@@ -265,7 +265,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   ","             { return newSymbol(Terminals.COMMA); }
 
 
-  "+"             { return newSymbol(Terminals.PLUS); }  
+  "+"             { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext());return newSymbol(Terminals.PLUS); }  
   "-"             { return newSymbol(Terminals.MINUS); }
   "*"             { return newSymbol(Terminals.MULT); }
   "/"             { return newSymbol(Terminals.DIV); }
