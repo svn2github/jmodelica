@@ -1627,25 +1627,25 @@ fclass ConnectTests.CauerLowPassAnalog
  Modelica.SIunits.Voltage V.n.v \"Potential at the pin\";
  Modelica.SIunits.Current V.n.i \"Current flowing into the pin\";
 initial equation 
- if C1.UIC then
+ if true then
   C1.v = C1.IC;
  end if;
- if C2.UIC then
+ if false then
   C2.v = C2.IC;
  end if;
- if C3.UIC then
+ if true then
   C3.v = C3.IC;
  end if;
- if C4.UIC then
+ if false then
   C4.v = C4.IC;
  end if;
- if C5.UIC then
+ if true then
   C5.v = C5.IC;
  end if;
- if L1.UIC then
+ if true then
   L1.i = L1.IC;
  end if;
- if L2.UIC then
+ if true then
   L2.i = L2.IC;
  end if;
 equation
