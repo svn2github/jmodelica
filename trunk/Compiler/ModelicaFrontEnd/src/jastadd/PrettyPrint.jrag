@@ -1785,13 +1785,13 @@ aspect FlatPrettyPrint {
 	
 	public void FArray.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print("{");
-		getFExps().prettyPrintWithSep(p, str, indent, ",");
+		getFExps().prettyPrintWithSep(p, str, indent, ", ");
 		str.print("}");
 	}
 	
 	public void FLongArray.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print("array(");
-		getFExps().prettyPrintWithSep(p, str, indent, ",");
+		getFExps().prettyPrintWithSep(p, str, indent, ", ");
 		str.print(")");
 	}
 	

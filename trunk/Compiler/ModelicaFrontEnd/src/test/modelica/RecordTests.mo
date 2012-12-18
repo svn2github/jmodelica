@@ -1802,6 +1802,98 @@ end RecordTests.RecordScalarize21;
 ")})));
 end RecordScalarize21;
 
+
+model RecordScalarize22
+    function f1
+        output Real o;
+        input A x[3];
+    algorithm
+        o := x[1].b[2].c;
+    end f1;
+
+    function f2
+        input Real o;
+        output A x;
+    algorithm
+        x := A(o, {B(o + 1), B(o + 2)});
+    end f2;
+
+    function f3
+        input Real o;
+        output B x;
+    algorithm
+        x := B(o);
+    end f3;
+ 
+    record A
+        Real a;
+        B b[2];
+    end A;
+ 
+    record B
+        Real c;
+    end B;
+ 
+    Real x = f1({A(1,{B(2),B(3)}),f2(4),A(7,{f3(8),f3(9)})});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordScalarize22",
+			description="Array of records as argument to function",
+			flatModel="
+fclass RecordTests.RecordScalarize22
+ Real x;
+ Real temp_1.a;
+ Real temp_1.b[1].c;
+ Real temp_1.b[2].c;
+ Real temp_2.c;
+ Real temp_3.c;
+equation
+ (RecordTests.RecordScalarize22.A(temp_1.a, {RecordTests.RecordScalarize22.B(temp_1.b[1].c), RecordTests.RecordScalarize22.B(temp_1.b[2].c)})) = RecordTests.RecordScalarize22.f2(4);
+ (RecordTests.RecordScalarize22.B(temp_2.c)) = RecordTests.RecordScalarize22.f3(8);
+ (RecordTests.RecordScalarize22.B(temp_3.c)) = RecordTests.RecordScalarize22.f3(9);
+ x = RecordTests.RecordScalarize22.f1({RecordTests.RecordScalarize22.A(1, {RecordTests.RecordScalarize22.B(2), RecordTests.RecordScalarize22.B(3)}), RecordTests.RecordScalarize22.A(temp_1.a, {RecordTests.RecordScalarize22.B(temp_1.b[1].c), RecordTests.RecordScalarize22.B(temp_1.b[2].c)}), RecordTests.RecordScalarize22.A(7, {temp_2, temp_3})});
+
+public
+ function RecordTests.RecordScalarize22.f1
+  output Real o;
+  input RecordTests.RecordScalarize22.A[3] x;
+ algorithm
+  o := x[1].b[2].c;
+  return;
+ end RecordTests.RecordScalarize22.f1;
+
+ function RecordTests.RecordScalarize22.f2
+  input Real o;
+  output RecordTests.RecordScalarize22.A x;
+ algorithm
+  x.a := o;
+  x.b[1].c := o + 1;
+  x.b[2].c := o + 2;
+  return;
+ end RecordTests.RecordScalarize22.f2;
+
+ function RecordTests.RecordScalarize22.f3
+  input Real o;
+  output RecordTests.RecordScalarize22.B x;
+ algorithm
+  x.c := o;
+  return;
+ end RecordTests.RecordScalarize22.f3;
+
+ record RecordTests.RecordScalarize22.B
+  Real c;
+ end RecordTests.RecordScalarize22.B;
+
+ record RecordTests.RecordScalarize22.A
+  Real a;
+  RecordTests.RecordScalarize22.B b[2];
+ end RecordTests.RecordScalarize22.A;
+
+end RecordTests.RecordScalarize22;
+")})));
+end RecordScalarize22;
+
 // TODO: Add more complicated combinations of arrays, records and modifiers
 
 

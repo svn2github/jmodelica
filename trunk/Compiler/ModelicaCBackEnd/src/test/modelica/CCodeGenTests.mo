@@ -3424,7 +3424,7 @@ $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
 ",
-         generatedCode="
+			generatedCode="
 void func_CCodeGenTests_CRecordDecl16_f_def(A_1_ra* x_a, jmi_ad_var_t* o_o);
 jmi_ad_var_t func_CCodeGenTests_CRecordDecl16_f_exp(A_1_ra* x_a);
 
@@ -3455,15 +3455,15 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl16_f_exp(A_1_ra* x_a) {
     jmi_array_rec_1(tmp_1, 2)->b = tmp_3;
     JMI_RECORD_ARRAY_STATIC_INIT_1(B_0_r, tmp_4, 2)
     jmi_array_rec_1(tmp_1, 3)->b = tmp_4;
-    jmi_array_rec_1(tmp_1, 1)->a = null;
-    jmi_array_rec_1(jmi_array_rec_1(tmp_1, 1)->b, 1)->c = null;
-    jmi_array_rec_1(jmi_array_rec_1(tmp_1, 1)->b, 2)->c = null;
-    jmi_array_rec_1(tmp_1, 2)->a = null;
-    jmi_array_rec_1(jmi_array_rec_1(tmp_1, 2)->b, 1)->c = null;
-    jmi_array_rec_1(jmi_array_rec_1(tmp_1, 2)->b, 2)->c = null;
-    jmi_array_rec_1(tmp_1, 3)->a = null;
-    jmi_array_rec_1(jmi_array_rec_1(tmp_1, 3)->b, 1)->c = null;
-    jmi_array_rec_1(jmi_array_rec_1(tmp_1, 3)->b, 2)->c = null;
+    jmi_array_rec_1(tmp_1, 1)->a = AD_WRAP_LITERAL(1);
+    jmi_array_rec_1(jmi_array_rec_1(tmp_1, 1)->b, 1)->c = AD_WRAP_LITERAL(2);
+    jmi_array_rec_1(jmi_array_rec_1(tmp_1, 1)->b, 2)->c = AD_WRAP_LITERAL(3);
+    jmi_array_rec_1(tmp_1, 2)->a = AD_WRAP_LITERAL(4);
+    jmi_array_rec_1(jmi_array_rec_1(tmp_1, 2)->b, 1)->c = AD_WRAP_LITERAL(5);
+    jmi_array_rec_1(jmi_array_rec_1(tmp_1, 2)->b, 2)->c = AD_WRAP_LITERAL(6);
+    jmi_array_rec_1(tmp_1, 3)->a = AD_WRAP_LITERAL(7);
+    jmi_array_rec_1(jmi_array_rec_1(tmp_1, 3)->b, 1)->c = AD_WRAP_LITERAL(8);
+    jmi_array_rec_1(jmi_array_rec_1(tmp_1, 3)->b, 2)->c = AD_WRAP_LITERAL(9);
     (*res)[0] = func_CCodeGenTests_CRecordDecl16_f_exp(tmp_1) - (_x_0);
 ")})));
 end CRecordDecl16;

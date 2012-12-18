@@ -143,7 +143,7 @@ model SizeExp7
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 145, column 11:
-  Type error in expression: size(ones(2, 3), {1,2})
+  Type error in expression: size(ones(2, 3), {1, 2})
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 145, column 28:
   Calling function size(): types of positional argument 2 and input d are not compatible
@@ -634,7 +634,7 @@ model MinExp10
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 589, column 25:
-  The expression of for index i must be a vector expression: {{1,2},{3,4}} has 2 dimension(s)
+  The expression of for index i must be a vector expression: {{1, 2}, {3, 4}} has 2 dimension(s)
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 589, column 45:
   The expression of for index j must be a vector expression: 2 has 0 dimension(s)
@@ -653,7 +653,7 @@ model MinExp11
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 1188, column 11:
-  The expression of a reduction-expression must be scalar, except for sum(): {( i ) * ( j ),2} has 1 dimension(s)
+  The expression of a reduction-expression must be scalar, except for sum(): {( i ) * ( j ), 2} has 1 dimension(s)
 ")})));
 end MinExp11;
 
@@ -858,7 +858,7 @@ model MaxExp10
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 812, column 25:
-  The expression of for index i must be a vector expression: {{1,2},{3,4}} has 2 dimension(s)
+  The expression of for index i must be a vector expression: {{1, 2}, {3, 4}} has 2 dimension(s)
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 812, column 45:
   The expression of for index j must be a vector expression: 2 has 0 dimension(s)

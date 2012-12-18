@@ -741,6 +741,8 @@ aspect Scalarization {
 			Map<String,FExp> indexMap, boolean addVar) {
 		if (useTempVar) 
 			defaultFunctionArrayTemporaries(clauses, vars, indexMap, addVar);
+		else
+			super.createArrayTemporaries(clauses, vars, indexMap, addVar);
 	}
 	
 	public void FExp.defaultFunctionArrayTemporaries(List clauses, List vars, 
@@ -1764,7 +1766,7 @@ aspect Scalarization {
 					new FIdUseExp(tempVarName());
 		else if (type().isRecord() && wantsRecordCon())
 			res = buildRecordConstructor(indexMap);
- 		else if (isArray() && !keepAsArray()) 
+ 		else if (buildScalarArray()) 
  			res = getArray().buildScalarized(indexMap, this);
 		else
 			res = scalarizeExp(indexMap);
@@ -1787,6 +1789,18 @@ aspect Scalarization {
 		return scalarizeExp(indexMap);
 	}
 	
+	public FExp FArray.buildRecordConstructor(Map<String,FExp> indexMap) {
+		if (isIterArray())
+			return getFExp(0).buildRecordConstructor(indexMap);
+		FArray res = new FArray();
+		for (FExp e : getFExps())
+			res.addFExpNoTransform(e.buildRecordConstructor(indexMap));
+		return res;
+	}
+	
+	syn boolean FExp.buildScalarArray() = isArray() && !keepAsArray();
+	eq FArray.buildScalarArray() = false;
+	
 	syn boolean FExp.keepAsArray() = canKeepAsArray() && canAcceptArray() || size().isUnknown();
 
 	syn boolean FExp.canKeepAsArray() = false;
@@ -1804,6 +1818,15 @@ aspect Scalarization {
 	 */
 	public FExp FExp.scalarizeExp(Map<String,FExp> indexMap) {
 		return fullCopy();
+	}
+
+	public FExp FArray.scalarizeExp(Map<String,FExp> indexMap) {
+		if (isIterArray())
+			return getFExp(0).scalarize(indexMap);
+		FArray res = new FArray();
+		for (FExp e : getFExps())
+			res.addFExpNoTransform(e.scalarize(indexMap));
+		return res;
 	}
 
 	public FSubscript FSubscript.scalarize(Map<String,FExp> indexMap) {
