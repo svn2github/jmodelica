@@ -151,7 +151,10 @@
         	ecd.setOuterOpt(getOuterOpt());
         	ecd.setReplaceableOpt(getReplaceableOpt());
         	ecd.setStringCommentOpt(getComment().getStringCommentOpt());
+        	if (getComment().hasAnnotation())
+        		ecd.addAnnotation(getComment().getAnnotation());
         	ecd.setEndDecl(new EndDecl(getName().getID()));
+        	ecd.setSymbol(getSymbol());
         	
         	// TODO: Copy min, max and start
         	
@@ -160,7 +163,7 @@
         		ecd.addComponentDecl(d);
         	}
         	
-            ecd.setLocationNoTree(getName());
+            ecd.setLocationNoTree(this);
             return ecd;
         }
     }
@@ -172,7 +175,7 @@
     public ArrayList<ComponentDecl> EnumLiteralList.enumComponents() {
     	ArrayList<ComponentDecl> l = new ArrayList<ComponentDecl>();
     	for (EnumLiteral el : getEnumLiterals()) {
-    		l.add(new EnumLiteralDecl(el.getIdDecl(),el.getComment()));
+    		l.add(el.copyLocationTo(new EnumLiteralDecl(el.getIdDecl(),el.getComment())));
     	}
     	return l;
     }

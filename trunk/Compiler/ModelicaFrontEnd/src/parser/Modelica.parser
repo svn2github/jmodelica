@@ -273,6 +273,7 @@ BaseClassDecl base_class_decl
             restriction,
             enum_name,
             new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
+            ENUMERATION,
             enum_specification,
             comment); 
     

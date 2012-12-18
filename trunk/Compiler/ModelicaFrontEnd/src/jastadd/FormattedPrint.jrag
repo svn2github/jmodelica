@@ -305,6 +305,11 @@ aspect FormattedPrint {
 	}
 
 	@Override
+	public boolean EnumClassDecl.matchInsideFormatting(ScannedFormattingItem formattingItem) {
+		return (formattingItem.getEndLine() == getLine(getSymbol().getStart()) && formattingItem.getEndColumn() == getColumn(getSymbol().getStart() - 1));
+	}
+
+	@Override
 	public boolean ForStmt.matchInsideFormatting(ScannedFormattingItem formattingItem) {
 		int line = -1;
 		int column = -1;
@@ -1302,8 +1307,53 @@ aspect FormattedPrint {
 	}
 
 	syn boolean FullClassDecl.prettyPrintFormatedShouldHaveExtends() = false;
-	syn boolean ExtendClassDecl.prettyPrintFormatedShouldHaveExtends() = true;
+	eq ExtendClassDecl.prettyPrintFormatedShouldHaveExtends() = true;
 
+	void EnumClassDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		if (hasEncapsulated()) {
+			getEncapsulated().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasPartial()) {
+			getPartial().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasRedeclare()) {
+			getRedeclare().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasFinal()) {
+			getFinal().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasInner()) {
+			getInner().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasOuter()) {
+			getOuter().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasReplaceable()) {
+			getReplaceable().doPrettyPrintFormatted(printer, printStream);
+		}
+		getRestriction().doPrettyPrintFormatted(printer, printStream);
+		getName().doPrettyPrintFormatted(printer, printStream);
+		printStream.print('=');
+		printStream.print(insideFormatting);
+		printStream.print("enumeration");
+		printStream.print('(');
+		boolean first = true;
+		for (ComponentDecl item : getComponentDecls()) {
+			if (!item.isEnumLiteral())
+				continue;
+			if (!first)
+				printStream.print(',');
+			first = false;
+			item.doPrettyPrintFormatted(printer, printStream);
+		}
+		printStream.print(')');
+		if (hasStringComment())
+			getStringComment().doPrettyPrintFormatted(printer, printStream);
+		if (getNumAnnotation() == 1)
+			getAnnotation(0).doPrettyPrintFormatted(printer, printStream);
+		printStream.print(';');
+	}
+	
 	public void FullClassDecl.addNewComponentDecl(ComponentDecl componentDecl) {
 		Stack<Clause> clauseStack = new Stack<Clause>();
 
@@ -1849,6 +1899,11 @@ aspect FormattedPrint {
 		printStream.print(";");
 	}
 
+	void EnumLiteralDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		getName().doPrettyPrintFormatted(printer, printStream);
+		getComment().doPrettyPrintFormatted(printer, printStream);
+	}
+	
 	syn String TypePrefix.formattedToString();
 	eq Flow.formattedToString()			= "flow";
 	eq Stream.formattedToString()		= "stream";

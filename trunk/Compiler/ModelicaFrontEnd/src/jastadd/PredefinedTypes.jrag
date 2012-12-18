@@ -155,7 +155,8 @@ aspect PredefinedTypes {
                         cd.getComponentDeclList(),
                         cd.getAnnotationList(),
                         new Opt(),
-                        cd.getEndDecl());
+                        cd.getEndDecl(),
+                        new Symbol("enumeration"));
             	pcd.originalComposition = cd.originalComposition;
             	l.add(pcd); 	
             }
@@ -217,7 +218,8 @@ aspect PredefinedTypes {
                                    cd.getComponentDeclList(),
                                    cd.getAnnotationList(),
                                    new Opt(),
-                                   cd.getEndDecl());
+                                   cd.getEndDecl(),
+                                   new Symbol("enumeration"));
             ecd.originalComposition = cd.originalComposition;
         
         } catch(Exception e){e.printStackTrace();}

@@ -150,9 +150,9 @@ RealClassDecl      : PrimitiveClassDecl;
 IntegerClassDecl   : PrimitiveClassDecl;
 BooleanClassDecl   : PrimitiveClassDecl;
 StringClassDecl    : PrimitiveClassDecl;
-EnumClassDecl      : PrimitiveClassDecl;
+EnumClassDecl      : PrimitiveClassDecl ::= <Symbol:Symbol>; // <Sumbol> is necessary to achieve formatted pretty print.
 
-PN_EnumDecl : BaseClassDecl ::= EnumSpecification Comment;
+PN_EnumDecl : BaseClassDecl ::= <Symbol:Symbol> EnumSpecification Comment;  // <Sumbol> is necessary to achieve formatted pretty print.
 abstract EnumSpecification : SourceBaseNode;
 EnumLiteralList : EnumSpecification ::= EnumLiteral*;
 EnumUnspecified : EnumSpecification;
