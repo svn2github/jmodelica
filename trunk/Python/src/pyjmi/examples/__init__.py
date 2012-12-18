@@ -37,4 +37,4 @@ __all__ = ['ast_example', 'bang_control', 'blood_glucose', 'blood_glucose_opt',
            'RLC_linearization', 'robertson', 'simulation_with_input',
            'simulation_with_input_function', 'SolAng', 'vdp', 'vdp_casadi',
            'vdp_casadi_ps', 'vdp_minimum_time', 'vdp_pp', 'VDP_sim',
-           'vdp_minimum_time_interpolation','robertson_fmu']
+           'vdp_minimum_time_interpolation','robertson_fmu','SEIRS']

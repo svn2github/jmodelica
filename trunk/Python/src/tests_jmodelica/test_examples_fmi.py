@@ -93,3 +93,8 @@ def test_bouncingball_cs_sim():
 def test_robertson_sensitivity_fmu():
     """ Test the sensitivty example Robertson as an FMU. """
     robertson_fmu.run_demo(False)
+    
+@testattr(assimulo = True)
+def test_SEIRS():
+    """ Test the sensitivity example by Niklas, SEIRS. """
+    SEIRS.run_demo(False)
