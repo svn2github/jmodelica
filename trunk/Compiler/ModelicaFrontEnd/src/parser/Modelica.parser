@@ -408,16 +408,12 @@ Annotation annotation_sc =
    	;
 
 ExternalFunctionCall external_function_call =
-	parse_access_eq ID.id LPAREN arg_list RPAREN  
-	            {: return new ExternalFunctionCall(new Opt(parse_access_eq), new IdDecl(id), arg_list); :}
-  | ID.id LPAREN arg_list RPAREN  
-                {: return new ExternalFunctionCall(new Opt(), new IdDecl(id), arg_list); :}
+	parse_access EQUALS id_decl LPAREN arg_list RPAREN  
+	            {: return new ExternalFunctionCall(new Opt(parse_access), id_decl, arg_list); :}
+  | id_decl LPAREN arg_list RPAREN  
+                {: return new ExternalFunctionCall(new Opt(), id_decl, arg_list); :}
   ;   	 	
    	  	
-ParseAccess parse_access_eq =
-	parse_access
-	EQUALS {: return parse_access; :}
-   	;
 
 	
 Element element 

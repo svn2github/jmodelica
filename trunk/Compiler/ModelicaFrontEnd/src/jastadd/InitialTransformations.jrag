@@ -193,11 +193,15 @@
         	ExternalClause ext = getExternalClause();
         	fcd.setExternalClause(ext);
         	if (ext.hasAnnotation2()) {
+        		ext.originalAnnotation2 = ext.getAnnotation2();
         		fcd.addAnnotation(ext.getAnnotation2());
         		ext.setAnnotation2Opt(new Opt());
         	}
         }
     }
+    
+    // For preserved formatting.
+    protected Annotation ExternalClause.originalAnnotation2 = null;
     
     public void Clause.addToFullClassDecl(FullClassDecl fcd) {}
     
