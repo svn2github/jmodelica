@@ -107,21 +107,24 @@ aspect ComplianceCheck {
 		warning("The smooth() function-like operator is not fully supported, unnecessary events may be generated");
 	}
 	
-//	public void FDotAddExp.complianceCheck() {
-//		super.complianceCheck();
-//		if (type().isString())
-//			compliance("String concatenation is not supported");
-//	}
+	public void FDotAddExp.complianceCheck() {
+		super.complianceCheck();
+		if (type().isString() && !variability().parameterOrLess())
+			compliance("String concatenation is only supported for parameter expressions");
+	}
 		
 	public void InstPrimitive.complianceCheck() {
 		super.complianceCheck();
 		if (isString()) {
-			if (inFunction())
+			if (inFunction()) {
 				warning("String arguments in functions are only partially supported");
-			else if (variability().lessOrEqual(fParameter()))
+			} else if (variability().lessOrEqual(fParameter())) {
 				warning("String parameters are only partially supported");
-			else
+				if (isParameter())
+					markAsStructuralParameter();
+			} else {
 				compliance("String variables are not supported");
+			}
 		}
 		if (!root().options.getBooleanOption("generate_ode")) {
 			if (isInteger() && !variability().lessOrEqual(fParameter()) && !inFunction())
