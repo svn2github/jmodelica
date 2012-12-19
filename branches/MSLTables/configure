@@ -18913,11 +18913,11 @@ fi
 
 
 if test "x$with_tables" = xno; then :
-  sundials="$srcdir/ThirdParty/Tables/"
+  tables="$srcdir/ThirdParty/Tables/"
 fi
 
 if test "x$with_tables" = xno; then :
-  with_sundials=automatic
+  with_tables=automatic
 fi
 
 if test "x$with_tables" = xno; then :

@@ -196,10 +196,10 @@ AC_ARG_WITH([tables],
   [with_tables=no])
 
 AS_IF([test "x$with_tables" = xno],
-      [sundials="$srcdir/ThirdParty/Tables/"])
+      [tables="$srcdir/ThirdParty/Tables/"])
 
 AS_IF([test "x$with_tables" = xno],
-      [with_sundials=automatic])
+      [with_tables=automatic])
 
 AS_IF([test "x$with_tables" = xno],
      [AC_MSG_RESULT([Tables installation not specified.])],
