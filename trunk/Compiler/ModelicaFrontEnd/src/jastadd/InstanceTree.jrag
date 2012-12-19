@@ -1711,8 +1711,9 @@ aspect InstArrays {
 	eq FlatRoot.getChild().dimensionLength(int i)                           = Size.UNKNOWN;
 
 	inh InstComponentDecl InstArrayComponentDecl.instComponentDecl();
-	eq InstComponentDecl.getChild().instComponentDecl() = this;
-	eq InstRoot.getChild().instComponentDecl() = null;
+	eq InstArrayComponentDecl.getChild().instComponentDecl() = instComponentDecl();
+	eq InstComponentDecl.getChild().instComponentDecl()      = this;
+	eq InstRoot.getChild().instComponentDecl()               = null;
 	
 	syn boolean InstComponentDecl.isArrayDecl() = hasFArraySubscripts() && 
 		getFArraySubscripts().getNumFSubscript()>0;
