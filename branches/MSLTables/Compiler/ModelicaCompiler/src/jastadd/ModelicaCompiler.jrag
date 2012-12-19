@@ -2373,6 +2373,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 	 */
 	protected void addFixedMakeVars(Map<String,String> vars, String fileName, String jmodelicaHome, 
 			Set<String> ext_libs, Set<String> ext_incl_dirs) {
+	    String filesep = File.separator;
 		vars.put("FILE_NAME", fileName);
 		vars.put("JMODELICA_HOME", jmodelicaHome);
 		vars.put("CPPAD_HOME", getEnv().get("CPPAD_HOME"));
@@ -2381,7 +2382,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 		vars.put("EXT_LIBS", varFromList(ext_libs)!=null? 
                       (varFromList(ext_libs) + " " + varFromList(ext_libs)): null);
 		vars.put("EXT_INC_DIRS", varFromList(ext_incl_dirs, INC_OP));
-		vars.put("JMTABLES_HOME", getEnv().get("JMTABLES_HOME"));
+		vars.put("JMTABLES_HOME", jmodelicaHome + filesep + "ThirdParty" + filesep + "Tables");
 	}
 	
 	/**
