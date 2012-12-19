@@ -1285,6 +1285,9 @@ aspect FormattedPrint {
 		if (prettyPrintFormatedShouldHaveExtends())
 			printStream.print("extends");
 		getName().doPrettyPrintFormatted(printer, printStream);
+		if (prettyPrintFormatedShouldHaveExtends() && getNumSuper() == 1 && getSuper(0).hasClassModification()) {
+			getSuper(0).getClassModification().doPrettyPrintFormatted(printer, printStream);
+		}
 		if (hasStringComment()) {
 			getStringComment().doPrettyPrintFormatted(printer, printStream);
 		}
@@ -1507,10 +1510,12 @@ aspect FormattedPrint {
 
 	void BreakStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("break");
+		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
 	void ReturnStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		printStream.print("return");
+		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
 	void WhileStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1521,6 +1526,7 @@ aspect FormattedPrint {
 			statement.doPrettyPrintFormatted(printer, printStream);
 		}
 		printStream.print("end" + insideFormatting + "while");
+		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
 	void ForStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1536,6 +1542,7 @@ aspect FormattedPrint {
 			statement.doPrettyPrintFormatted(printer, printStream);
 		}
 		printStream.print("end" + insideFormatting + "for");
+		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
 	void WhenStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1547,6 +1554,7 @@ aspect FormattedPrint {
 			}
 		}
 		printStream.print("end" + insideFormatting + "when");
+		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
 	void IfStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1564,6 +1572,7 @@ aspect FormattedPrint {
 			}
 		}
 		printStream.print("end" + insideFormatting + "if");
+		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
 	void IfWhenClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1578,6 +1587,7 @@ aspect FormattedPrint {
 		getLeft().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(":=");
 		getRight().doPrettyPrintFormatted(printer, printStream);
+		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
 	void FunctionCallStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1595,6 +1605,7 @@ aspect FormattedPrint {
 			printStream.print(":=");
 		}
 		getFunctionCall().prettyPrintFormatted(printer, printStream);
+		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
 	void Equation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1914,6 +1925,7 @@ aspect FormattedPrint {
 		}
 
 		getComment().doPrettyPrintFormatted(printer, printStream);
+		getCCComment().doPrettyPrintFormatted(printer, printStream);
 		
 	}
 	
