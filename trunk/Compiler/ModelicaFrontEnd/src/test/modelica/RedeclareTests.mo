@@ -4705,11 +4705,11 @@ model ShortClassDeclEqu1
     
     B a;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ShortClassDeclEqu1",
-			description="Make sure equations in instances of short class decls are checked",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ShortClassDeclEqu1",
+            description="Make sure equations in instances of short class decls are checked",
+            errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
 Semantic error at line 4701, column 13:
@@ -4717,5 +4717,23 @@ Semantic error at line 4701, column 13:
 ")})));
 end ShortClassDeclEqu1;
 
+
+model ShortClassDeclEqu2Extra
+    Real x;
+equation
+    x = y;
+end ShortClassDeclEqu2Extra;
+
+model ShortClassDeclEqu2 = ShortClassDeclEqu2Extra
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ShortClassDeclEqu2",
+			description="Make sure equations in short class decls being instantiated are checked",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
+Semantic error at line 4724, column 9:
+  Cannot find class or component declaration for y
+")})));
 
 end RedeclareTests;

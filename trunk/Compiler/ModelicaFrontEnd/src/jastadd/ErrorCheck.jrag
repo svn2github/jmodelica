@@ -833,11 +833,6 @@ aspect InstanceErrorCheck {
 	
 	public void InstShortClassDecl.collectErrors() {
 	    if (!errorChecked) {
-	      if (!hasFArraySubscripts() && !hasInstClassModification()) {
-	    	  errorChecked = true;
-	    	  return;
-	      }
-	      
 		  super.collectErrors();
     	  errorChecked = true;
 		  // The localInstModifications should only be checked if

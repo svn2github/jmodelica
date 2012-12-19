@@ -18,22 +18,36 @@ aspect TestFramework {
 	
 	public boolean ASTNode.collectTestCases(TestSuite ts, String className) {
 		for (int i=0;i<getNumChild();i++)
-			if (getChild(i).collectTestCases(ts,className))
+			if (getChild(i).collectTestCases(ts, className))
 				return true;
 		return false;
 	}
 
-	public boolean FullClassDecl.collectTestCases(TestSuite ts, String className) {
+	public boolean ClassDecl.collectTestCases(TestSuite ts, String className) {
 		if (qualifiedName().equals(className)) {
 			collectTestCases(ts);
 			return true;
 		}
-		return getClassDeclList().collectTestCases(ts,className);
+		return false;
+	}
+
+	public boolean FullClassDecl.collectTestCases(TestSuite ts, String className) {
+		if (super.collectTestCases(ts, className)) 
+			return true;
+		return getClassDeclList().collectTestCases(ts, className);
 	}
 
 	public void ASTNode.collectTestCases(TestSuite ts) {
 		for (ASTNode n : this)
 			n.collectTestCases(ts);
+	}
+
+	public void ClassDecl.collectTestCases(TestSuite ts) {
+		AnnotationNode a1 = annotation("__JModelica/UnitTesting/tests");
+		if (a1.exists()) {
+			for (AnnotationNode a2 : a1) 
+				generateTestCase(ts, a2);
+		} 
 	}
 
 	public void FullClassDecl.collectTestCases(TestSuite ts) {
@@ -46,7 +60,7 @@ aspect TestFramework {
 		}
 	}
 	
-	public void FullClassDecl.generateTestCase(TestSuite ts, AnnotationNode a) {
+	public void ClassDecl.generateTestCase(TestSuite ts, AnnotationNode a) {
 		String name = a.name();
 		String className = name.substring(name.lastIndexOf('.') + 1);
 		String fullName = TestCase.class.getName().replace("TestCase", className);
@@ -117,7 +131,7 @@ aspect TestFramework {
 		}
 	}
 	
-	public void FullClassDecl.testCaseError(String className, String msg) {
+	public void ClassDecl.testCaseError(String className, String msg) {
 		String[] fn = fileName().split("[/\\\\]Compiler[/\\\\]");
 		log.error("%s:%d: Creating test case '%s' - %s", fn[fn.length - 1], beginLine(), className, msg);
 	}
