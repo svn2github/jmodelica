@@ -152,8 +152,12 @@ aspect FormattedPrint {
 		}
 	}
 
+	inh boolean SourceBaseNode.shouldBeFormatted();
+	eq ComponentRedeclare.getName().shouldBeFormatted() = false;
+	eq SourceRoot.getChild().shouldBeFormatted() = true;
+	
 	protected void SourceBaseNode.addFormattingInformation(FormattingInfo formattingInfo) {
-		if (hasCachedFormatting()) {
+		if (!shouldBeFormatted() || hasCachedFormatting()) {
 			return;
 		}
 
@@ -238,6 +242,8 @@ aspect FormattedPrint {
 	}
 
 	public void SourceBaseNode.addFormattingRest(FormattingInfo formattingInfo) {
+		if (!shouldBeFormatted())
+			return;
 		Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.iterator();
 		while (formattingIterator.hasNext()) {
 			ScannedFormattingItem formattingItem = formattingIterator.next();
@@ -1484,13 +1490,7 @@ aspect FormattedPrint {
 	}
 
 	void ComponentRedeclare.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-		if (hasEach()) {
-			getEach().doPrettyPrintFormatted(printer, printStream);
-		}
-		if (hasFinal()) {
-			getFinal().doPrettyPrintFormatted(printer, printStream);
-		}
-		getComponentDecl().doPrettyPrintFormatted(printer, printStream);
+		getComponentDecl().prettyPrintFormattedHelper(printer, printStream, getEachOpt(), getFinalOpt());
 	}
 
 	void EquationClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1851,11 +1851,19 @@ aspect FormattedPrint {
 	eq DotPowExp.operatorFormatted() = ".^";
 
 	void ComponentDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		prettyPrintFormattedHelper(printer, printStream, new Opt<Each>(), getFinalOpt());
+		printStream.print(";");
+	}
+
+	void ComponentDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, Opt<Each> each_, Opt<Final> final_) {
 		if (hasRedeclare()) {
 			getRedeclare().doPrettyPrintFormatted(printer, printStream);
 		}
-		if (hasFinal()) {
-			getFinal().doPrettyPrintFormatted(printer, printStream);
+		if (each_.getNumChild() == 1) {
+			each_.getChild(0).doPrettyPrintFormatted(printer, printStream);
+		}
+		if (final_.getNumChild() == 1) {
+			final_.getChild(0).doPrettyPrintFormatted(printer, printStream);
 		}
 		if (hasInner()) {
 			getInner().doPrettyPrintFormatted(printer, printStream);
@@ -1880,6 +1888,20 @@ aspect FormattedPrint {
 		if (hasTypeArraySubscripts()) {
 			getTypeArraySubscripts().doPrettyPrintFormatted(printer, printStream);
 		}
+		
+		prettyPrintFormattedDecl(printer, printStream);
+		
+		if (hasConstrainingClause()) {
+			printer.print(getConstrainingClause(), printStream, "");
+		}
+	}
+
+	void SiblingComponentDecl.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+		if (getSiblings().get(0) == this)
+			super.doPrettyPrintFormatted(printer, printStream);
+	}
+	
+	void ComponentDecl.prettyPrintFormattedDecl(Printer printer, PrintStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream); 
 		if (hasVarArraySubscripts()) {
 			getVarArraySubscripts().doPrettyPrintFormatted(printer, printStream);
@@ -1892,13 +1914,27 @@ aspect FormattedPrint {
 		}
 
 		getComment().doPrettyPrintFormatted(printer, printStream);
-
-		if (hasConstrainingClause()) {
-			printer.print(getConstrainingClause(), printStream, "");
-		}
-		printStream.print(";");
+		
 	}
-
+	
+	void SiblingComponentDecl.prettyPrintFormattedDecl(Printer printer, PrintStream printStream) {
+		boolean first = true;
+		for (SiblingComponentDecl sibling : getSiblings()) {
+			if (!first)
+				printStream.print(',');
+			sibling.prettyPrintFormattedSiblingDecl(printer, printStream, first);
+			first = false;
+		}
+	}
+	
+	void SiblingComponentDecl.prettyPrintFormattedSiblingDecl(Printer printer, PrintStream printStream, boolean first) {
+		if (!first)
+			printStream.print(preFormatting);
+		super.prettyPrintFormattedDecl(printer, printStream);
+		if (!first)
+			printStream.print(postFormatting);
+	}
+	
 	void EnumLiteralDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream);
 		getComment().doPrettyPrintFormatted(printer, printStream);
@@ -2019,7 +2055,7 @@ aspect FormattedPrint {
 		}
 	}
 
-	void List.copyFormattingFrom(ASTNode node) {
+	void List.copyFormattingFrom(ASTNode node) { // This code is strange...
 		if (this.getClass() != node.getClass())
 			return;
 	}

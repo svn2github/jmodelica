@@ -673,6 +673,8 @@ Argument argument =
    constraining_clause? 
    {: 			ParseAccess pa = new ParseAccess(comp_name.getID(),array_subscripts);
    				pa.setLocationNoTree(comp_name);
+       			PN_ComponentDecl cd = new PN_ComponentDecl(comp_name,array_subscripts,modification,new Opt(),comment);
+       			cd.setLocationNoTree(comp_name, comment);
    				PN_ComponentRedeclare cdr = new PN_ComponentRedeclare(each,
                                         final_,
                                         pa,
@@ -686,7 +688,7 @@ Argument argument =
                                                                type_prefix_input_output,
                                                                class_access,
                                                                new Opt(),
-                                                               new List().add(new PN_ComponentDecl(comp_name,array_subscripts,modification,new Opt(),comment)),
+                                                               new List().add(cd),
                                                                constraining_clause,
                                                                new Comment(new Opt(),new Opt()))); 
                                          return cdr; :}
@@ -714,6 +716,8 @@ Argument argument =
    comment
    {: ParseAccess pa = new ParseAccess(comp_name.getID(),array_subscripts);
    				pa.setLocationNoTree(comp_name, array_subscripts);
+           		PN_ComponentDecl cd = new PN_ComponentDecl(comp_name,array_subscripts,modification,new Opt(),comment);
+       			cd.setLocationNoTree(comp_name, comment);
    				PN_ComponentRedeclare cdr = new PN_ComponentRedeclare(each,
                                         final_,
                                         pa,
@@ -727,7 +731,7 @@ Argument argument =
                                                                type_prefix_input_output,
                                                                class_access,
                                                                new Opt(),
-                                                               new List().add(new PN_ComponentDecl(comp_name,array_subscripts,modification,new Opt(),comment)),
+                                                               new List().add(cd),
                                                                new Opt(),
                                                                new Comment(new Opt(),new Opt()))); 
                  return cdr; :}
@@ -760,6 +764,8 @@ Argument argument =
    constraining_clause? 
    {:  ParseAccess pa = new ParseAccess(comp_name.getID(),array_subscripts);
        pa.setLocationNoTree(comp_name);
+       PN_ComponentDecl cd = new PN_ComponentDecl(comp_name,array_subscripts,modification,new Opt(),comment);
+       cd.setLocationNoTree(comp_name, comment);
        PN_ComponentRedeclare cr = new PN_ComponentRedeclare(each,
                                         final_,
                                         pa,
@@ -773,7 +779,7 @@ Argument argument =
                                                                type_prefix_input_output,
                                                                class_access,
                                                                new Opt(),
-                                                               new List().add(new PN_ComponentDecl(comp_name,array_subscripts,modification,new Opt(),comment)),
+                                                               new List().add(cd),
                                                                constraining_clause,
                                                                new Comment(new Opt(),new Opt()))); 
         return cr;                                                       

@@ -343,76 +343,77 @@
         }
     }
   
-    /** 
-     * Transform ComponentClauses to individual ones 
-     */
-    rewrite ComponentClause in Composition.getClause() {
-        when (getNumName()>1)
-            to List {
-                List l = new List();
-                    for (int i=0;i<getNumName();i++) {
-                        ComponentClause c = new ComponentClause((Opt)getRedeclareOpt().fullCopy(),
-                                                                (Opt)getFinalOpt().fullCopy(),
-                                                                (Opt)getInnerOpt().fullCopy(),
-                                                                (Opt)getOuterOpt().fullCopy(),
-                                                                (Opt)getReplaceableOpt().fullCopy(),
-                                                                (Opt)getTypePrefixFlowOpt().fullCopy(),
-                                                                (Opt)getTypePrefixVariabilityOpt().fullCopy(),
-                                                                (Opt)getTypePrefixInputOutputOpt().fullCopy(),
-                                                                (Access)getClassName().fullCopy(),
-                                                                (Opt)getTypeArraySubscriptsOpt().fullCopy(),
-                                                                (VisibilityType)getVisibilityType().fullCopy(),
-                                                                new List().add(getName(i)),
-                                                                (Opt)getConstrainingClauseOpt().fullCopy(),
-                                                                (Comment)getComment().fullCopy());
-                        c.setLocationNoTree(this);
-                        //log.debug("ComponentClause->ComponentClause.getStart() = "+c.getStart());
-                        l.add(c);
-                    }
-                return l;
-            }
-    }
-  
-    /**
-     * Transform ComponentClauses to ComponentDecls 
-     */
-    rewrite ComponentClause {
-        when (getNumName()==1) 
-            to ComponentDecl {
-                // Move all ArraySubscripts to the declaration
-                List l;
-                if (getName(0).hasVarArraySubscripts())
-                    l = getName(0).getVarArraySubscripts().getSubscriptList();
-                else
-                    l = new List();
-                    
-                if (hasTypeArraySubscripts())
-                    for (int i=0;i<getTypeArraySubscripts().getNumSubscript();i++)
-                        l.add(getTypeArraySubscripts().getSubscript(i));
-            
-                ComponentDecl c = new ComponentDecl(getRedeclareOpt(),
-                                                    getFinalOpt(),
-                                                    getInnerOpt(),
-                                                    getOuterOpt(),
-                                                    getReplaceableOpt(),
-                                                    getTypePrefixFlowOpt(),
-                                                    getTypePrefixVariabilityOpt(),
-                                                    getTypePrefixInputOutputOpt(),
-                                                    getClassName(),
-                                                    new Opt(),
-                                                    getVisibilityType(),
-                                                    getName(0).getName(),
-                                                    new Opt(new ArraySubscripts(l)),
-                                                    getName(0).getModificationOpt(),
-                                                    getName(0).getConditionalAttributeOpt(),
-                                                    getName(0).getComment(),
-                                                    getConstrainingClauseOpt(),
-                                                    getComment());
-                c.setLocationNoTree(this, this, getName(0));
-                //log.debug("ComponentClause->ComponentDecl.getStart() = "+c.getStart());
-                return c;
-            }
-    }
+	/**
+	 * Transform ComponentClauses to ComponentDecls 
+	 */
+	rewrite ComponentClause in Composition.getClause() {
+		to List {
+			List l = new List();
+			java.util.List<SiblingComponentDecl> siblings = null;
+			if (getNumName() > 1)
+				siblings = new ArrayList();
+			for (PN_ComponentDecl name : getNames()) {
+				ComponentDecl c = asComponentDecl(name, siblings);
+				if (l.getNumChild() == 0)
+					c.setLocationNoTree(this);
+				else
+					c.setLocationNoTree(name);
+				l.add(c);
+			}
+			return l;
+		}
+	}
+	
+	rewrite ComponentClause {
+		when (getNumName()==1) 
+		to ComponentDecl {
+			ComponentDecl cd = asComponentDecl(getName(0), null);
+			cd.setLocationNoTree(this);
+			return cd;
+		}
+	}
+	
+	private ComponentDecl ComponentClause.asComponentDecl(PN_ComponentDecl name, java.util.List<SiblingComponentDecl> siblings) {
+		// Move all ArraySubscripts to the declaration
+		List as;
+		if (name.hasVarArraySubscripts())
+			as = name.getVarArraySubscripts().getSubscriptList();
+		else
+			as = new List();
+
+		if (hasTypeArraySubscripts())
+			for (int i=0;i<getTypeArraySubscripts().getNumSubscript();i++)
+				as.add(getTypeArraySubscripts().getSubscript(i));
+		ComponentDecl c;
+		if (siblings == null) {
+			c = new ComponentDecl();
+		} else {
+			SiblingComponentDecl sc = new SiblingComponentDecl();
+			sc.setSiblings(siblings);
+			siblings.add(sc);
+			c = sc;
+		}
+		c.setRedeclareOpt((Opt) getRedeclareOpt().fullCopy());
+		c.setFinalOpt((Opt) getFinalOpt().fullCopy());
+		c.setInnerOpt((Opt) getInnerOpt().fullCopy());
+		c.setOuterOpt((Opt) getOuterOpt().fullCopy());
+		c.setReplaceableOpt((Opt) getReplaceableOpt().fullCopy());
+		c.setTypePrefixFlowOpt((Opt) getTypePrefixFlowOpt().fullCopy());
+		c.setTypePrefixVariabilityOpt((Opt) getTypePrefixVariabilityOpt().fullCopy());
+		c.setTypePrefixInputOutputOpt((Opt) getTypePrefixInputOutputOpt().fullCopy());
+		c.setClassName((Access) getClassName().fullCopy());
+		c.setTypeArraySubscriptsOpt(new Opt());
+		c.setVisibilityType((VisibilityType) getVisibilityType().fullCopy());
+		c.setName(name.getName());
+		c.setVarArraySubscripts(new ArraySubscripts(as));
+		c.setModificationOpt(name.getModificationOpt());
+		c.setConditionalAttributeOpt(name.getConditionalAttributeOpt());
+		c.setComment(name.getComment());
+		c.setConstrainingClauseOpt((Opt) getConstrainingClauseOpt().fullCopy());
+		c.setCCComment(getComment());
+		c.setLocationNoTree(this, this, name);
+		return c;
+	}
 
 
     rewrite ComponentModification {

@@ -245,6 +245,8 @@ ComponentDecl : BaseComponentDecl ::= VisibilityType
                                       [ConstrainingClause] 
                                       CCComment:Comment;
 
+SiblingComponentDecl : ComponentDecl ::= <Siblings:java.util.List<SiblingComponentDecl>>;
+
 PN_ComponentClause : BaseComponentDecl ::=  Name:PN_ComponentDecl* 
                                             [ConstrainingClause] 
                                             Comment;
