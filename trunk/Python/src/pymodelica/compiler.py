@@ -411,7 +411,7 @@ def _gen_log_level(log_level):
     
 def _get_separate_JVM():
     """
-    Helper function to get the path of the JVM to use for compiling in a separate 
+    Helper function for getting the path to Java to use when compiling in a separate 
     process.
     """
     # Check if SEPARATE_PROCESS_JVM is set, otherwise return with an error
@@ -423,25 +423,27 @@ def _get_separate_JVM():
             logging.warning("The environment variable SEPARATE_PROCESS_JVM is not set. Trying JAVA_HOME instead.")
             separate_jvm = os.environ['JAVA_HOME']
         except KeyError:
-            raise Exception("Neither SEPARATE_PROCESS_JVM nor JAVA_HOME is not set. Can not start the JVM.")
-    # Check that SEPARATE_PROCESS_JVM points at a jvm.dll/JRE/JDK
+            raise Exception("Neither SEPARATE_PROCESS_JVM nor JAVA_HOME is not set.")
+    # Check that SEPARATE_PROCESS_JVM points at a Java
     # Accepted paths:
-    # Full path to java.exe
+    # Full path to java executable
     # <JDK home>
     # <JRE home>
-    separate_jvm = _ensure_path(separate_jvm, os.path.join('bin', 'java.exe'))
+    separate_jvm = _ensure_path(separate_jvm, os.path.join('bin', 'java'))
     
     # Check that path exist
     # First make sure that all path separators are correct
-    if not os.path.isfile(separate_jvm):
-        raise Exception("The jvm.dll path %s does not exist." %(separate_jvm))
+    if _get_platform().startswith('win'):
+        separate_jvm+= '.exe' 
+    if not os.path.exists(separate_jvm):
+        raise Exception("The path to Java %s does not exist." %(separate_jvm))
  
     return separate_jvm
 
 def _ensure_path(start, end):
     """
-    Helper function for building the correct path to a JVM. Handled cases:
-    - Full path to Java.exe
+    Helper function for building the correct path to Java. Handled cases:
+    - Full path to Java executable
     - Path to JDK home
     - Path to JVM home
     """
