@@ -162,7 +162,8 @@ aspect Library {
 	}
 	
 	public LibClassDecl.LibClassDecl(FullClassDecl fcd) {
-		assignFields(fcd);            
+		assignFields(fcd);
+		originalComposition = fcd.originalComposition;
 	}
 	
 	public void LibClassDecl.assignFields(FullClassDecl fcd) {
