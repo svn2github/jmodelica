@@ -1393,6 +1393,7 @@ fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[]
 
 fmiStatus fmi_terminate(fmiComponent c) {
     /* Release all resources that have been allocated since fmi_initialize has been called. */
+	jmi_terminate(((fmi_t *)c)->jmi);
     return fmiOK;
 }
 

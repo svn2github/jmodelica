@@ -76,4 +76,33 @@ function doubleArray
     external "C" multiplyAnArray(arr, res, 3, 2) annotation(Include="#include \"addNumbers.h\"", Library="addNumbers");
 end doubleArray;
 
+class FileOnDelete
+	extends ExternalObject;
+    
+    function constructor
+        input String name;
+        output FileOnDelete out;
+        external "C" out = constructor_string(name) 
+            annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+    end constructor;
+    
+    function destructor
+        input FileOnDelete obj;
+        external "C" destructor_string_create_file(obj) 
+            annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+    end destructor;	
+end FileOnDelete;
+
+function use_FOD
+	input FileOnDelete obj;
+	output Real x;
+    external "C" x = constant_extobj_func(obj) 
+        annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+end use_FOD;
+
+model ExternalObjectTests1
+	FileOnDelete obj = FileOnDelete("test_ext_object.marker");
+	Real x = use_FOD(obj);
+end ExternalObjectTests1;
+
 end ExtFunctionTests;

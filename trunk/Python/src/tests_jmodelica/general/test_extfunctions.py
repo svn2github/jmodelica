@@ -128,8 +128,39 @@ class TestExternalShared:
         """
         cpath = "ExtFunctionTests.ExtFunctionTest1"
         fmu_name = compile_fmu(cpath, TestExternalShared.fpath)
-        shutil.rmtree(TestExternalShared.dir, True)
         model = load_fmu(fmu_name)
+
+class TestExternalObject:
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        cls.dir = build_ext('ext_objects')
+        cls.fpath = path(cls.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(TestExternalObject.dir, True)
+        
+    @testattr(stddist = True)
+    def test_ExtObjectDestructor(self):
+        """ 
+        Test compiling a model with external object functions in a static library.
+        """
+        cpath = 'ExtFunctionTests.ExternalObjectTests1'
+        fmu_name = compile_fmu(cpath, TestExternalObject.fpath)
+        model = load_fmu(fmu_name)
+        model.simulate()
+        model.terminate()
+        if (os.path.exists('test_ext_object.marker')):
+             os.remove('test_ext_object.marker')
+        else:
+            assert False, 'External object destructor not called.'
         
 
 def build_ext(target):

@@ -43,6 +43,10 @@ array_static: libarrayFunctions.a lib_dir
 	mv $< $(DIR)
 
 
+ext_objects: libextObjects.a lib_dir
+	mv $< $(DIR)
+
+
 lib_dir:
 	mkdir -p $(DIR)
 

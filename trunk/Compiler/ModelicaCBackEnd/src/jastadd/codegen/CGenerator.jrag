@@ -924,8 +924,26 @@ public class CGenerator extends GenericGenerator {
 			genPrinter.print("0\n};\n\n");
 
 			genPrinter.print("const int fmi_runtime_options_map_length = " + fclass.numRuntimeOptionParameters() + ";");
+		}
 	}
+	
+	/**
+	 * Generates calls to the destructors of all external objects.
+	 */
+	class DAETag_C_destruct_external_object extends DAETag {
 		
+		public DAETag_C_destruct_external_object(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_destruct_external_object","C: external object destructor calls",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			for (FExternalObjectVariable eo : fclass.externalObjectVariables()) {
+				genPrinter.printf("    if (%s != NULL) {\n", eo.name_C());
+				eo.getDestructorCall().prettyPrint_C(genPrinter, "        ");
+				genPrinter.printf("        %s = NULL;\n    }\n", eo.name_C());
+			}
+		}
 	}
 	
 	/**

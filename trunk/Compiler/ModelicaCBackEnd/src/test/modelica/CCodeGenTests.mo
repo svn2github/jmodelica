@@ -7966,10 +7966,16 @@ class ExtObjectwInput
 end ExtObjectwInput;
 
 function useMyEO
-	input ExtObject eo;
-	output Real r;
-	external "C" r = useMyEO(eo);
+    input ExtObject eo;
+    output Real r;
+    external "C" r = useMyEO(eo);
 end useMyEO;
+
+function useMyEOI
+    input ExtObjectwInput eo;
+    output Real r;
+    external "C" r = useMyEO(eo);
+end useMyEOI;
 
 model TestExtObject1
 	ExtObject myEO = ExtObject();
@@ -7977,8 +7983,7 @@ model TestExtObject1
 equation
 	y = useMyEO(myEO);
 
-
-	annotation(__JModelica(UnitTesting(tests={ 
+	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestExtObject1",
 			description="",
@@ -7986,6 +7991,7 @@ equation
 $C_variable_aliases$
 $C_function_headers$
 $C_functions$
+$C_destruct_external_object$
 ",
 			generatedCode="
 #define _y_1 ((*(jmi->z))[jmi->offs_real_w+0])
@@ -8035,6 +8041,11 @@ jmi_ad_var_t func_CCodeGenTests_useMyEO_exp(void* eo_v) {
     return r_v;
 }
 
+
+    if (_myEO_0 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_myEO_0);
+        _myEO_0 = NULL;
+    }
 ")})));
 end TestExtObject1;
 
@@ -8045,7 +8056,7 @@ model TestExtObject2
 equation
     y = useMyEO(myEO) + useMyEO(myEO2);	
 
-	annotation(__JModelica(UnitTesting(tests={ 
+	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestExtObject2",
 			description="",
@@ -8053,6 +8064,7 @@ equation
 $C_variable_aliases$
 $C_function_headers$
 $C_functions$
+$C_destruct_external_object$
 ",
 			generatedCode="
 #define _y_2 ((*(jmi->z))[jmi->offs_real_w+0])
@@ -8103,6 +8115,15 @@ jmi_ad_var_t func_CCodeGenTests_useMyEO_exp(void* eo_v) {
     return r_v;
 }
 
+
+    if (_myEO_0 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_myEO_0);
+        _myEO_0 = NULL;
+    }
+    if (_myEO2_1 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_myEO2_1);
+        _myEO2_1 = NULL;
+    }
 ")})));
 end TestExtObject2;
 
@@ -8115,20 +8136,21 @@ model TestExtObject3
 	Real y2;
 	Real y3;
 	Real y4;
-	Real z1 = 5;
+	parameter Real z1 = 5;
 equation
     y1 = useMyEO(myEO1);
 	y2 = useMyEO(myEO2);
-    y3 = useMyEO(myEO3);
-    y4 = useMyEO(myEO4);
+    y3 = useMyEOI(myEO3);
+    y4 = useMyEOI(myEO4);
 
-	annotation(__JModelica(UnitTesting(tests={ 
+	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestExtObject3",
 			description="",
 			template="
 $C_set_start_values$
 $C_DAE_initial_dependent_parameter_assignments$
+$C_destruct_external_object$
 ",
 			generatedCode="
     if (!jmi->indep_extobjs_initialized) { 
@@ -8137,12 +8159,12 @@ $C_DAE_initial_dependent_parameter_assignments$
     if (!jmi->indep_extobjs_initialized) { 
         _myEO2_1 = (func_CCodeGenTests_ExtObject_constructor_exp());
     }
+    _z1_8 = (5);
     model_init_eval_parameters(jmi);
     _y1_4 = (0.0);
     _y2_5 = (0.0);
     _y3_6 = (0.0);
     _y4_7 = (0.0);
-    _z1_8 = (0.0);
     jmi->indep_extobjs_initialized = 1;
 
     if (!jmi->dep_extobjs_initialized) { 
@@ -8152,6 +8174,23 @@ $C_DAE_initial_dependent_parameter_assignments$
         _myEO4_3 = (func_CCodeGenTests_ExtObjectwInput_constructor_exp(_z1_8));
     }
     jmi->dep_extobjs_initialized = 1;
+
+    if (_myEO1_0 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_myEO1_0);
+        _myEO1_0 = NULL;
+    }
+    if (_myEO2_1 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_myEO2_1);
+        _myEO2_1 = NULL;
+    }
+    if (_myEO3_2 != NULL) {
+        func_CCodeGenTests_ExtObjectwInput_destructor_def(_myEO3_2);
+        _myEO3_2 = NULL;
+    }
+    if (_myEO4_3 != NULL) {
+        func_CCodeGenTests_ExtObjectwInput_destructor_def(_myEO4_3);
+        _myEO4_3 = NULL;
+    }
 ")})));
 end TestExtObject3;
 
