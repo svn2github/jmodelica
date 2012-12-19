@@ -1240,12 +1240,6 @@ aspect FormattedPrint {
 	}
 	
 	void BaseClassDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, Opt<Each> each_, Opt<Final> final_) {
-		if (hasEncapsulated()) {
-			getEncapsulated().doPrettyPrintFormatted(printer, printStream);
-		}
-		if (hasPartial()) {
-			getPartial().doPrettyPrintFormatted(printer, printStream);
-		}
 		if (hasRedeclare()) {
 			getRedeclare().doPrettyPrintFormatted(printer, printStream);
 		}
@@ -1264,7 +1258,12 @@ aspect FormattedPrint {
 		if (hasReplaceable()) {
 			getReplaceable().doPrettyPrintFormatted(printer, printStream);
 		}
-
+		if (hasEncapsulated()) {
+			getEncapsulated().doPrettyPrintFormatted(printer, printStream);
+		}
+		if (hasPartial()) {
+			getPartial().doPrettyPrintFormatted(printer, printStream);
+		}
 		getRestriction().doPrettyPrintFormatted(printer, printStream);
 		prettyPrintFormattedDecl(printer, printStream);
 	}
@@ -1874,8 +1873,14 @@ aspect FormattedPrint {
 		}
 
 		printer.print(getClassName(), printStream, "");
-		if (hasTypeArraySubscripts()) {
-			getTypeArraySubscripts().doPrettyPrintFormatted(printer, printStream);
+		if (hasVarArraySubscripts()) {// TODO: Try to keep type array subscripts in typeArraySubscripts()
+			ArraySubscripts as = new ArraySubscripts();
+			for (Subscript s : getVarArraySubscripts().getSubscripts()) {
+				if (s.getStart() < getName().getStart())
+					as.addSubscript((Subscript)s.fullCopy());
+			}
+			if (as.getNumSubscript() > 0)
+				as.doPrettyPrintFormatted(printer, printStream);
 		}
 		
 		prettyPrintFormattedDecl(printer, printStream);
@@ -1892,8 +1897,14 @@ aspect FormattedPrint {
 	
 	void ComponentDecl.prettyPrintFormattedDecl(Printer printer, PrintStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream); 
-		if (hasVarArraySubscripts()) {
-			getVarArraySubscripts().doPrettyPrintFormatted(printer, printStream);
+		if (hasVarArraySubscripts()) {// TODO: Try to keep type array subscripts in typeArraySubscripts()
+			ArraySubscripts as = new ArraySubscripts();
+			for (Subscript s : getVarArraySubscripts().getSubscripts()) {
+				if (s.getStart() > getName().getStart())
+					as.addSubscript((Subscript)s.fullCopy());
+			}
+			if (as.getNumSubscript() > 0)
+				as.doPrettyPrintFormatted(printer, printStream);
 		}
 		if (hasModification()) {
 			getModification().doPrettyPrintFormatted(printer, printStream);
