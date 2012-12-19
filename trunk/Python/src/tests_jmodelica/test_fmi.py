@@ -103,6 +103,16 @@ class Test_FMUModelCS1:
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
         nose.tools.assert_raises(FMUException, model.get_output_derivatives, "u",1)
         
+    @testattr(assimulo = True)
+    def test_multiple_loadings_and_simulations(self):
+        model = load_fmu("bouncingBall.fmu",os.path.join(path_to_fmus,"CS1.0"),enable_logging=False)
+        res = model.simulate(final_time=1.0)
+        h_res = res['h']
+        
+        for i in range(40):
+            model = load_fmu("bouncingBall.fmu",os.path.join(path_to_fmus,"CS1.0"),enable_logging=False)
+            res = model.simulate(final_time=1.0)
+        assert N.abs(h_res[-1] - res['h'][-1]) < 1e-4
     
 class Test_FMUModelME1:
     """
@@ -126,6 +136,17 @@ class Test_FMUModelME1:
         self._dq.initialize()
         self.dep = load_fmu("DepParTests_DepPar1.fmu")
         self.dep.initialize()
+    
+    @testattr(assimulo = True)
+    def test_multiple_loadings_and_simulations(self):
+        model = load_fmu("bouncingBall.fmu",path_to_fmus,enable_logging=False)
+        res = model.simulate(final_time=1.0)
+        h_res = res['h']
+        
+        for i in range(40):
+            model = load_fmu("bouncingBall.fmu",path_to_fmus,enable_logging=False)
+            res = model.simulate(final_time=1.0)
+        assert N.abs(h_res[-1] - res['h'][-1]) < 1e-4
     
     @testattr(fmi = True)
     def test_init(self):
