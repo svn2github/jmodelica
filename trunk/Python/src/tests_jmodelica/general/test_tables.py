@@ -20,6 +20,7 @@ Module for testing tables support.
 import os
 
 import nose
+from nose.tools import nottest
 
 from pymodelica import compile_fmu
 from pyfmi import load_fmu
@@ -44,6 +45,7 @@ class TestCombiTable1DArray(SimulationTest):
         self.run()
         self.load_expected_data('Table1DfromArray_result.txt')
 
+    @nottest
     @testattr(assimulo = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['modelicaTable1D.y[1]', 'modelicaTable1D.u[1]'])
@@ -62,7 +64,8 @@ class TestCombiTable2DArray(SimulationTest):
         self.setup_base(start_time=0.0, final_time=1.0, time_step = 0.01)
         self.run()
         self.load_expected_data('Table2DfromArray_result.txt')
-
+    
+    @nottest
     @testattr(assimulo = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['modelicaTable2D.y', 'modelicaTable2D.u1', 'modelicaTable2D.u2'])
