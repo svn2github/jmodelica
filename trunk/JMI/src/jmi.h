@@ -419,6 +419,14 @@ extern "C" {
 int jmi_new(jmi_t** jmi);
 
 /**
+ * Clean up after a completed simulation.
+ *
+ * @param jmi A pointer to the jmi_t struct to clean up.
+ * @return Error code.
+ */
+int jmi_terminate(jmi_t* jmi);
+
+/**
  * Initializes the AD variables and tapes.
  *
  * Prior to this call, the variables in z should
@@ -579,7 +587,7 @@ int jmi_copy_pre_values(jmi_t *jmi);
  * @param jmi The jmi_t struct.
  * @param n_tp (Output) number of time points in the model.
  * @return Error code.
- *Ê
+ *ï¿½
  */
 int jmi_get_n_tp(jmi_t *jmi, int *n_tp);
 

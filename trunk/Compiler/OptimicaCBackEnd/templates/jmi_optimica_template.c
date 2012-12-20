@@ -323,6 +323,10 @@ int jmi_new(jmi_t** jmi) {
 	return 0;
 }
 
+int jmi_terminate(jmi_t* jmi) {
+	return 0;
+}
+
 int jmi_set_start_values(jmi_t* jmi) {
 $C_set_start_values$
     jmi_copy_z_to_zval(jmi);
