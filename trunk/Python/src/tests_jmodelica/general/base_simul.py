@@ -24,7 +24,7 @@ import os
 
 from pymodelica.compiler import compile_jmu, compile_fmu
 from pyjmi.jmi import JMUModel
-from pyfmi.fmi import FMUModel
+from pyfmi.fmi import load_fmu
 from pyjmi.common.io import ResultDymolaTextual
 from tests_jmodelica import get_files_path
 
@@ -76,7 +76,7 @@ class _BaseSimOptTest:
         if self.format=='jmu':
             self.model = JMUModel(self.model_name)
         else:
-            self.model = FMUModel(self.model_name)
+            self.model = load_fmu(self.model_name)
 
     def run(self):
         """

@@ -19,6 +19,7 @@
 #include <jmi.h>
 #include <jmi_block_residual.h>
 #include "fmi.h"
+#include "ModelicaUtilities.h"
 
 $external_func_includes$
 
