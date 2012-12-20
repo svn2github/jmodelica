@@ -237,7 +237,7 @@ am__include_HEADERS_DIST = jmi.h fmiModelFunctions.h fmiModelTypes.h \
 	jmi_init_opt.h jmi_opt_coll.h jmi_opt_coll_radau.h \
 	jmi_array_common.h jmi_array_none.h jmi_array_cppad.h \
 	jmi_util.h \
-	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resouces/C-Sources/ModelicaTables.h \
+	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaTables.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h \
@@ -471,9 +471,9 @@ libfmi_la_LDFLAGS = -no-undefined -static-libtool-libs
 libfmi_cs_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
 libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
 
-#libModelicaExternalC_la_SOURCES =  $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resouces/C-Sources/ModelicaInternal.c \
-#	                           $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resouces/C-Sources/ModelicaStrings.c \
-#                                   $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resouces/C-Sources/ModelicaTables.h \
+#libModelicaExternalC_la_SOURCES =  $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c \
+#	                           $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c \
+#                                   $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaTables.h \
 #                                   ModelicaTables_JM.c \
 #                                   jmtables.h \
 #                                   jmtables.c \
@@ -482,7 +482,7 @@ libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
 libModelicaExternalC_la_SOURCES = ModelicaUtilities.h \
 	ModelicaUtilities.c $(am__append_4)
 libModelicaExternalC_la_CFLAGS = -Wall -g -std=c89 -pedantic \
-	-I$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resouces/C-Sources/ \
+	-I$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ \
 	$(am__append_5)
 
 # Don't build shared libraries of libjmi and libjmicppad. This is not
@@ -546,7 +546,7 @@ include_HEADERS = jmi.h fmiModelFunctions.h fmiModelTypes.h \
 	jmi_init_opt.h jmi_opt_coll.h jmi_opt_coll_radau.h \
 	jmi_array_common.h jmi_array_none.h jmi_array_cppad.h \
 	jmi_util.h \
-	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resouces/C-Sources/ModelicaTables.h \
+	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaTables.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
 	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h \
