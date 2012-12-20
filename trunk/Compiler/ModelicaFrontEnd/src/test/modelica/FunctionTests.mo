@@ -5576,6 +5576,56 @@ end FunctionTests.UnknownArray31;
 ")})));
 end UnknownArray31;
 
+model UnknownArray32
+    function f
+        input Real[:] a;
+        output Real b;
+	protected
+        Real[1,size(a,1)] c;
+    algorithm
+        c[1,:] := 2 * a;
+		b := sum(c);
+    end f;
+    
+    Real x = f({1,2});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="UnknownArray32",
+			description="Check that size assignment for protected array with some dimensions known works",
+			flatModel="
+fclass FunctionTests.UnknownArray32
+ Real x;
+equation
+ x = FunctionTests.UnknownArray32.f({1, 2});
+
+public
+ function FunctionTests.UnknownArray32.f
+  input Real[:] a;
+  output Real b;
+  Real[:,:] c;
+  Real temp_1;
+ algorithm
+  size(c) := {1, size(a, 1)};
+  for i1 in 1:size(c, 1) loop
+   for i2 in 1:size(c, 2) loop
+    c[i1,i2] := ( 2 ) * ( a[i1,i2] );
+   end for;
+  end for;
+  temp_1 := 0.0;
+  for i1 in 1:1 loop
+   for i2 in 1:size(a, 1) loop
+    temp_1 := temp_1 + c[i1,i2];
+   end for;
+  end for;
+  b := temp_1;
+  return;
+ end FunctionTests.UnknownArray32.f;
+
+end FunctionTests.UnknownArray32;
+")})));
+end UnknownArray32;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f

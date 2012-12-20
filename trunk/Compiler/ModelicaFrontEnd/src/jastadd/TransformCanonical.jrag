@@ -2294,7 +2294,8 @@ aspect TransformCanonical {
 	
 	public Set<String> MutableSize.sortingAddNamesUsed(Set<String> set) {
 		for (FExp exp : exps)
-			exp.sortingAddNamesUsed(set);
+			if (exp != null)
+				exp.sortingAddNamesUsed(set);
 		return set;
 	}
 	
