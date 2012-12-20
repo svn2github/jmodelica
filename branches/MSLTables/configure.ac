@@ -196,7 +196,7 @@ AC_ARG_WITH([tables],
   [with_tables=no])
 
 AS_IF([test "x$with_tables" = xno],
-      [tables="$srcdir/ThirdParty/Tables/"])
+      [tables="ThirdParty/Tables/"])
 
 AS_IF([test "x$with_tables" = xno],
       [with_tables=automatic])
@@ -208,7 +208,15 @@ AS_IF([test "x$with_tables" = xno],
 AM_CONDITIONAL([WITH_TABLES],[test "x$with_tables" != xno])
 
 AC_SUBST(TABLES_HOME)
-TABLES_HOME=$tables
+AC_SUBST(WITH_TABLES)
+
+AS_IF([test "x$with_tables" = xautomatic],
+      [TABLES_HOME=`cd $srcdir; pwd`/$tables],
+      [TABLES_HOME=$tables])
+
+AS_IF([test "x$with_tables" != xno],
+      [WITH_TABLES="true"],
+      [WITH_TABLES="false"]) 
 
 AC_ARG_WITH([eclipse],
    [AS_HELP_STRING([--with-eclipse],

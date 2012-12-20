@@ -637,6 +637,7 @@ WITH_MINGW_TRUE
 ECLIPSE_HOME
 WITH_ECLIPSE_FALSE
 WITH_ECLIPSE_TRUE
+WITH_TABLES
 TABLES_HOME
 WITH_TABLES_FALSE
 WITH_TABLES_TRUE
@@ -18913,7 +18914,7 @@ fi
 
 
 if test "x$with_tables" = xno; then :
-  tables="$srcdir/ThirdParty/Tables/"
+  tables="ThirdParty/Tables/"
 fi
 
 if test "x$with_tables" = xno; then :
@@ -18938,7 +18939,19 @@ fi
 
 
 
-TABLES_HOME=$tables
+
+
+if test "x$with_tables" = xautomatic; then :
+  TABLES_HOME=`cd $srcdir; pwd`/$tables
+else
+  TABLES_HOME=$tables
+fi
+
+if test "x$with_tables" != xno; then :
+  WITH_TABLES="true"
+else
+  WITH_TABLES="false"
+fi
 
 
 # Check whether --with-eclipse was given.
