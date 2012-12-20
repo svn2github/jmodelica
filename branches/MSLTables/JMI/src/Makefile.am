@@ -116,9 +116,9 @@ libfmi_la_LDFLAGS = -no-undefined -static-libtool-libs
 libfmi_cs_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
 libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
 
-#libModelicaExternalC_la_SOURCES =  $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resouces/C-Sources/ModelicaInternal.c \
-#	                           $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resouces/C-Sources/ModelicaStrings.c \
-#                                   $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resouces/C-Sources/ModelicaTables.h \
+#libModelicaExternalC_la_SOURCES =  $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c \
+#	                           $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c \
+#                                   $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaTables.h \
 #                                   ModelicaTables_JM.c \
 #                                   jmtables.h \
 #                                   jmtables.c \
@@ -128,7 +128,7 @@ libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
 libModelicaExternalC_la_SOURCES =  ModelicaUtilities.h \
                                    ModelicaUtilities.c
 
-libModelicaExternalC_la_CFLAGS = -Wall -g -std=c89 -pedantic -I$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resouces/C-Sources/
+libModelicaExternalC_la_CFLAGS = -Wall -g -std=c89 -pedantic -I$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/
 if WITH_TABLES
 libModelicaExternalC_la_SOURCES +=  ModelicaTables_JM.c \
                                     jmtables.h \
@@ -215,7 +215,7 @@ include_HEADERS = jmi.h \
                   jmi_array_none.h \
                   jmi_array_cppad.h \
                   jmi_util.h \
-                  $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resouces/C-Sources/ModelicaTables.h \
+                  $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaTables.h \
                   $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
                   $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
                   $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
