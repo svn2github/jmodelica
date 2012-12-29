@@ -448,13 +448,13 @@ static int jmi_kinsol_init(jmi_block_residual_t * block) {
     /* evaluate the function at initial */
     ef =  kin_f(solver->kin_y, kin_mem->kin_fval, block);
     if(ef) {
-        jmi_log_error(jmi, "Residual evaluation function failed at initial codition for eq block %d", block->index);
+        jmi_log_error(jmi, "Residual function evaluation failed at initial point for non-linear block %d", block->index);
     }
 	kin_mem->kin_uscale = solver->kin_y_scale;
     
     if(jmi_kin_lsetup(kin_mem)) {
         ef = 1;
-        jmi_log_error(jmi, "Jacobian evaluation failed at initial codition for eq block %d", block->index);
+        jmi_log_error(jmi, "Jacobian evaluation failed at initial point for non-linear block %d", block->index);
     }
     return ef;
 }
@@ -914,13 +914,46 @@ void jmi_kinsol_solver_delete(jmi_block_residual_t* block) {
     block->solver = 0;
 }
 
+void jmi_kinsol_solver_print_solve_start(jmi_block_residual_t * block) {
+    int j;
+	jmi_log_info(block->jmi,"Non-linear solver invoked for block %d",block->index);
+	if((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log)) {
+		char* buf = block->message_buffer ;
+		sprintf(buf,"Block:;%d;Solve invoked;",block->index);
+		j = strlen(buf);
+		buf[j]=0;
+		fprintf(block->jmi->options.debug_log, "%s\n",buf);
+		fflush(block->jmi->options.debug_log);
+	}
+}
+
+void jmi_kinsol_solver_print_solve_end(jmi_block_residual_t * block, int flag) {
+	long int nniters;
+	int j;
+	jmi_kinsol_solver_t* solver = block->solver;
+	KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);
+
+    jmi_log_info(block->jmi,"Non-linear solver returned for block %d - return flag: %d, number of iterations: %d", block->index, flag, nniters);
+
+	if((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log)) {
+		char* buf = block->message_buffer ;
+		sprintf(buf,"Block:;%d;Solve finished;",block->index);
+		j = strlen(buf);
+		buf[j]=0;
+		fprintf(block->jmi->options.debug_log, "%s\n",buf);
+		fflush(block->jmi->options.debug_log);
+	}
+}
+
+
 int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     int flag;
     jmi_kinsol_solver_t* solver = block->solver;
     realtype curtime = *(jmi_get_t(block->jmi));
     long int nniters = 0;
-    
-    /*jmi_log_info(block->jmi,"KINSOL solver invoked for block %d\n",block->index);*/
+    int j;
+    int flagNonscaled;
+    realtype fnorm;
 
     if(block->n == 1) {
         solver->f_pos_min_1d = BIG_REAL;
@@ -937,7 +970,7 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
      */
     flag = block->F(block->jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
     if(flag) {
-        jmi_log_warning(block->jmi, "Error code returned from equation block %d when reading in initial guesses.", block->index);
+        jmi_log_warning(block->jmi, "Error code returned from equation block %d when reading initial guess.", block->index);
         return flag;
     }
 
@@ -946,12 +979,13 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
         jmi_update_f_scale(block);
     }
      
+    jmi_kinsol_solver_print_solve_start(block);
     flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
+    jmi_kinsol_solver_print_solve_end(block,flag);
     if(flag != KIN_SUCCESS) {
-        if(flag == KIN_INITIAL_GUESS_OK) {
+    	if(flag == KIN_INITIAL_GUESS_OK) {
             flag = KIN_SUCCESS;
-        }
-        else {
+        } else {
             realtype fnorm;
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm < solver->kin_stol) {
@@ -959,7 +993,9 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
             }
         }
     }
-    if((block->n == 1) && block->jmi->options.use_Brent_in_1d_flag){
+    /* TODO: Is Brent called even if Kinsol succeeded? Shouldn't this be in an else if?*/
+    if((block->n == 1) && block->jmi->options.use_Brent_in_1d_flag) {
+    	jmi_log_info(block->jmi,"Trying Brent's method non-linear block %d",block->index);
         if(( solver->f_pos_min_1d != BIG_REAL) &&
                 ( solver->f_neg_max_1d != -BIG_REAL)) {
             
@@ -971,24 +1007,27 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
             }                
         }
         if(flag != KIN_SUCCESS) {
-            jmi_log_error(block->jmi, "Could neither iterate to required accuracy nor bracket the root of 1D equation in block %d", block->index);
+            jmi_log_error(block->jmi, "Could neither iterate to required accuracy nor bracket the root of 1D equation in non-linear block %d", block->index);
         }
-    }
+    } /* TODO: This means that the first time scaling is always recomputed - and the solver is called a second time, why? */
     else if(block->init || (flag != KIN_SUCCESS)) {
+    	jmi_log_info(block->jmi,"Attempting rescaling in non-linear block %d",block->index);
         /* This is the first call or we're failing: make sure scaling was appropriate*/
-        int flagNonscaled = flag;
-        realtype fnorm;
+    	flagNonscaled = flag;
         /* Get & store debug information */
         KINGetNumNonlinSolvIters(solver->kin_mem, &block->nb_iters);
         if(flagNonscaled < 0) {
-            jmi_log_warning(block->jmi, "The equations with initial scaling didn't converge to a solution in block %d", block->index);
+            jmi_log_warning(block->jmi, "The equations with initial scaling didn't converge to a solution in non-linear block %d", block->index);
         }
         /* Update the scaling  */
         jmi_update_f_scale(block);
         
+        jmi_kinsol_solver_print_solve_start(block);
         flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
-        if(flag == KIN_INITIAL_GUESS_OK) flag = KIN_SUCCESS;
-        else if(flag != KIN_SUCCESS) {
+        jmi_kinsol_solver_print_solve_end(block,flag);
+        if(flag == KIN_INITIAL_GUESS_OK) {
+        	flag = KIN_SUCCESS;
+        } else if(flag != KIN_SUCCESS) {
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm <= solver->kin_stol) {
                 flag = KIN_SUCCESS;
