@@ -238,9 +238,9 @@ am__include_HEADERS_DIST = jmi.h fmiModelFunctions.h fmiModelTypes.h \
 	jmi_array_common.h jmi_array_none.h jmi_array_cppad.h \
 	jmi_util.h \
 	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaTables.h \
-	$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
-	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
-	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h \
+	$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.h \
+	$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.h \
+	$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod_impl.h \
 	jmi_opt_coll_ipopt.h jmi_init_opt_ipopt.h
 HEADERS = $(include_HEADERS)
 ETAGS = etags
@@ -422,13 +422,13 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_array_none.c \
                     jmi_util.h \
                     jmi_util.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.h \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.h \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod_impl.h 
 
-libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -I$(abs_top_srcdir)/Assimulo/src/lib -std=c89 -pedantic
+libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -I$(abs_top_srcdir)/External/Assimulo/src/lib -std=c89 -pedantic
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -449,22 +449,22 @@ libfmi_la_SOURCES = fmi.h \
                     fmiModelTypes.h \
                     jmi.h \
                     fmi.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.h \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.h \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod_impl.h 
 
 libfmi_cs_la_SOURCES = fmi_cs.h \
                     fmiCSModelFunctions.h \
                     fmiCSPlatformTypes.h \
                     jmi.h \
                     fmi_cs.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.h \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.h \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod_impl.h 
 
 libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
 libfmi_la_LDFLAGS = -no-undefined -static-libtool-libs
@@ -511,11 +511,11 @@ libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_array_cppad.h \
                     jmi_util.h \
                     jmi_util.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.h \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.h \
+                    $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod_impl.h 
 
 libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g -I$(SUNDIALS_HOME)/include
 libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g -I$(SUNDIALS_HOME)/include
@@ -547,9 +547,9 @@ include_HEADERS = jmi.h fmiModelFunctions.h fmiModelTypes.h \
 	jmi_array_common.h jmi_array_none.h jmi_array_cppad.h \
 	jmi_util.h \
 	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaTables.h \
-	$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
-	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
-	$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h \
+	$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.h \
+	$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.h \
+	$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod_impl.h \
 	$(am__append_6)
 all: all-am
 
@@ -731,19 +731,19 @@ libfmi_la-fmi.lo: fmi.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_la_CFLAGS) $(CFLAGS) -c -o libfmi_la-fmi.lo `test -f 'fmi.c' || echo '$(srcdir)/'`fmi.c
 
-libfmi_la-kinpinv.lo: $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_la_CFLAGS) $(CFLAGS) -MT libfmi_la-kinpinv.lo -MD -MP -MF $(DEPDIR)/libfmi_la-kinpinv.Tpo -c -o libfmi_la-kinpinv.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
+libfmi_la-kinpinv.lo: $(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_la_CFLAGS) $(CFLAGS) -MT libfmi_la-kinpinv.lo -MD -MP -MF $(DEPDIR)/libfmi_la-kinpinv.Tpo -c -o libfmi_la-kinpinv.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfmi_la-kinpinv.Tpo $(DEPDIR)/libfmi_la-kinpinv.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' object='libfmi_la-kinpinv.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c' object='libfmi_la-kinpinv.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_la_CFLAGS) $(CFLAGS) -c -o libfmi_la-kinpinv.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_la_CFLAGS) $(CFLAGS) -c -o libfmi_la-kinpinv.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c
 
-libfmi_la-kinsol_jmod.lo: $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_la_CFLAGS) $(CFLAGS) -MT libfmi_la-kinsol_jmod.lo -MD -MP -MF $(DEPDIR)/libfmi_la-kinsol_jmod.Tpo -c -o libfmi_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
+libfmi_la-kinsol_jmod.lo: $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_la_CFLAGS) $(CFLAGS) -MT libfmi_la-kinsol_jmod.lo -MD -MP -MF $(DEPDIR)/libfmi_la-kinsol_jmod.Tpo -c -o libfmi_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfmi_la-kinsol_jmod.Tpo $(DEPDIR)/libfmi_la-kinsol_jmod.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' object='libfmi_la-kinsol_jmod.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c' object='libfmi_la-kinsol_jmod.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_la_CFLAGS) $(CFLAGS) -c -o libfmi_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_la_CFLAGS) $(CFLAGS) -c -o libfmi_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c
 
 libfmi_cs_la-fmi_cs.lo: fmi_cs.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -MT libfmi_cs_la-fmi_cs.lo -MD -MP -MF $(DEPDIR)/libfmi_cs_la-fmi_cs.Tpo -c -o libfmi_cs_la-fmi_cs.lo `test -f 'fmi_cs.c' || echo '$(srcdir)/'`fmi_cs.c
@@ -752,19 +752,19 @@ libfmi_cs_la-fmi_cs.lo: fmi_cs.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -c -o libfmi_cs_la-fmi_cs.lo `test -f 'fmi_cs.c' || echo '$(srcdir)/'`fmi_cs.c
 
-libfmi_cs_la-kinpinv.lo: $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -MT libfmi_cs_la-kinpinv.lo -MD -MP -MF $(DEPDIR)/libfmi_cs_la-kinpinv.Tpo -c -o libfmi_cs_la-kinpinv.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
+libfmi_cs_la-kinpinv.lo: $(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -MT libfmi_cs_la-kinpinv.lo -MD -MP -MF $(DEPDIR)/libfmi_cs_la-kinpinv.Tpo -c -o libfmi_cs_la-kinpinv.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfmi_cs_la-kinpinv.Tpo $(DEPDIR)/libfmi_cs_la-kinpinv.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' object='libfmi_cs_la-kinpinv.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c' object='libfmi_cs_la-kinpinv.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -c -o libfmi_cs_la-kinpinv.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -c -o libfmi_cs_la-kinpinv.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c
 
-libfmi_cs_la-kinsol_jmod.lo: $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -MT libfmi_cs_la-kinsol_jmod.lo -MD -MP -MF $(DEPDIR)/libfmi_cs_la-kinsol_jmod.Tpo -c -o libfmi_cs_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
+libfmi_cs_la-kinsol_jmod.lo: $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -MT libfmi_cs_la-kinsol_jmod.lo -MD -MP -MF $(DEPDIR)/libfmi_cs_la-kinsol_jmod.Tpo -c -o libfmi_cs_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfmi_cs_la-kinsol_jmod.Tpo $(DEPDIR)/libfmi_cs_la-kinsol_jmod.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' object='libfmi_cs_la-kinsol_jmod.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c' object='libfmi_cs_la-kinsol_jmod.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -c -o libfmi_cs_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -c -o libfmi_cs_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c
 
 libjmi_la-jmi.lo: jmi.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-jmi.lo -MD -MP -MF $(DEPDIR)/libjmi_la-jmi.Tpo -c -o libjmi_la-jmi.lo `test -f 'jmi.c' || echo '$(srcdir)/'`jmi.c
@@ -822,19 +822,19 @@ libjmi_la-jmi_util.lo: jmi_util.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-jmi_util.lo `test -f 'jmi_util.c' || echo '$(srcdir)/'`jmi_util.c
 
-libjmi_la-kinpinv.lo: $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-kinpinv.lo -MD -MP -MF $(DEPDIR)/libjmi_la-kinpinv.Tpo -c -o libjmi_la-kinpinv.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
+libjmi_la-kinpinv.lo: $(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-kinpinv.lo -MD -MP -MF $(DEPDIR)/libjmi_la-kinpinv.Tpo -c -o libjmi_la-kinpinv.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjmi_la-kinpinv.Tpo $(DEPDIR)/libjmi_la-kinpinv.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' object='libjmi_la-kinpinv.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c' object='libjmi_la-kinpinv.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-kinpinv.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-kinpinv.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c
 
-libjmi_la-kinsol_jmod.lo: $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-kinsol_jmod.lo -MD -MP -MF $(DEPDIR)/libjmi_la-kinsol_jmod.Tpo -c -o libjmi_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
+libjmi_la-kinsol_jmod.lo: $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-kinsol_jmod.lo -MD -MP -MF $(DEPDIR)/libjmi_la-kinsol_jmod.Tpo -c -o libjmi_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjmi_la-kinsol_jmod.Tpo $(DEPDIR)/libjmi_la-kinsol_jmod.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' object='libjmi_la-kinsol_jmod.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c' object='libjmi_la-kinsol_jmod.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c
 
 libjmi_algorithm_la-jmi_init_opt.lo: jmi_init_opt.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_algorithm_la_CFLAGS) $(CFLAGS) -MT libjmi_algorithm_la-jmi_init_opt.lo -MD -MP -MF $(DEPDIR)/libjmi_algorithm_la-jmi_init_opt.Tpo -c -o libjmi_algorithm_la-jmi_init_opt.lo `test -f 'jmi_init_opt.c' || echo '$(srcdir)/'`jmi_init_opt.c
@@ -899,19 +899,19 @@ libjmi_cppad_la-jmi_util.lo: jmi_util.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -c -o libjmi_cppad_la-jmi_util.lo `test -f 'jmi_util.c' || echo '$(srcdir)/'`jmi_util.c
 
-libjmi_cppad_la-kinpinv.lo: $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -MT libjmi_cppad_la-kinpinv.lo -MD -MP -MF $(DEPDIR)/libjmi_cppad_la-kinpinv.Tpo -c -o libjmi_cppad_la-kinpinv.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
+libjmi_cppad_la-kinpinv.lo: $(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -MT libjmi_cppad_la-kinpinv.lo -MD -MP -MF $(DEPDIR)/libjmi_cppad_la-kinpinv.Tpo -c -o libjmi_cppad_la-kinpinv.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjmi_cppad_la-kinpinv.Tpo $(DEPDIR)/libjmi_cppad_la-kinpinv.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' object='libjmi_cppad_la-kinpinv.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c' object='libjmi_cppad_la-kinpinv.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -c -o libjmi_cppad_la-kinpinv.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -c -o libjmi_cppad_la-kinpinv.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinpinv.c
 
-libjmi_cppad_la-kinsol_jmod.lo: $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -MT libjmi_cppad_la-kinsol_jmod.lo -MD -MP -MF $(DEPDIR)/libjmi_cppad_la-kinsol_jmod.Tpo -c -o libjmi_cppad_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
+libjmi_cppad_la-kinsol_jmod.lo: $(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -MT libjmi_cppad_la-kinsol_jmod.lo -MD -MP -MF $(DEPDIR)/libjmi_cppad_la-kinsol_jmod.Tpo -c -o libjmi_cppad_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjmi_cppad_la-kinsol_jmod.Tpo $(DEPDIR)/libjmi_cppad_la-kinsol_jmod.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' object='libjmi_cppad_la-kinsol_jmod.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c' object='libjmi_cppad_la-kinsol_jmod.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -c -o libjmi_cppad_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -c -o libjmi_cppad_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/External/Assimulo/src/lib/kinsol_jmod.c
 
 libjmi_solver_la-jmi_opt_coll_radau.lo: jmi_opt_coll_radau.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_solver_la_CFLAGS) $(CFLAGS) -MT libjmi_solver_la-jmi_opt_coll_radau.lo -MD -MP -MF $(DEPDIR)/libjmi_solver_la-jmi_opt_coll_radau.Tpo -c -o libjmi_solver_la-jmi_opt_coll_radau.lo `test -f 'jmi_opt_coll_radau.c' || echo '$(srcdir)/'`jmi_opt_coll_radau.c
