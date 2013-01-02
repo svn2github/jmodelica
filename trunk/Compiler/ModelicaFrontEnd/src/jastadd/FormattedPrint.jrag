@@ -1224,6 +1224,7 @@ aspect FormattedPrint {
 	}
 
 	void ConstrainingClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("constrainedby");
 		getAccess().doPrettyPrintFormatted(printer, printStream);
 		if (hasClassModification()) {
 			getClassModification().doPrettyPrintFormatted(printer, printStream);
