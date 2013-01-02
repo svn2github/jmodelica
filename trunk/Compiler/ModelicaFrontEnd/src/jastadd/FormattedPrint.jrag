@@ -1612,6 +1612,7 @@ aspect FormattedPrint {
 		getLeft().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("=");
 		getRight().doPrettyPrintFormatted(printer, printStream);
+		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
 	void ConnectClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1721,19 +1722,12 @@ aspect FormattedPrint {
 	}
 
 	void FunctionArguments.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-		int totalNumberOfArguments = getNumExp() + getNumNamedArgument();
-
-		for (int i = 0; i < getNumExp(); i++) {
-			getExp(i).doPrettyPrintFormatted(printer, printStream);
-			if (i + 1 < totalNumberOfArguments) {
-				printStream.print(",");
-			}
-		}
-		for (int i = 0; i < getNumNamedArgument(); i++) {
-			getNamedArgument(i).doPrettyPrintFormatted(printer, printStream);
-			if (i + 1 < totalNumberOfArguments) {
-				printStream.print(",");
-			}
+		Iterator<ASTNode> it = new ChainedIterator<ASTNode>(getExps().iterator(), getNamedArguments().iterator());
+		while (it.hasNext()) {
+			ASTNode node = it.next();
+			node.doPrettyPrintFormatted(printer, printStream);
+			if (it.hasNext())
+				printStream.print(',');
 		}
 	}
 
