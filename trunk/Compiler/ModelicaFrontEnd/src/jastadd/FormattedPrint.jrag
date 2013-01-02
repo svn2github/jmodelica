@@ -200,7 +200,7 @@ aspect FormattedPrint {
 			relativePosition = formattingItem.getFrontRelativePosition(this);
 		}
 
-		if (formattingItem.getFrontRelativePosition(this) == FormattingItem.RelativePosition.FRONT_ADJACENT) {
+		if (relativePosition == FormattingItem.RelativePosition.FRONT_ADJACENT || relativePosition == FormattingItem.RelativePosition.INSIDE) {
 			preFormatting = formattingItem;
 			formattingIterator.remove();
 			if (formattingIterator.hasNext()) {
@@ -223,7 +223,7 @@ aspect FormattedPrint {
 			relativePosition = formattingItem.getBackRelativePosition(this);
 		}
 
-		if (formattingItem.getBackRelativePosition(this) == FormattingItem.RelativePosition.BACK_ADJACENT) {
+		if (relativePosition == FormattingItem.RelativePosition.BACK_ADJACENT || relativePosition == FormattingItem.RelativePosition.INSIDE) {
 			postFormatting = formattingItem;
 			formattingIterator.remove();
 		}
