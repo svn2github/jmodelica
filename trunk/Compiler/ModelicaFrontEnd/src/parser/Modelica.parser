@@ -1108,7 +1108,11 @@ Exp function_argument_exp =
  ;
   
 NamedArgument named_argument =
-  ID.id EQUALS function_argument_exp {: return new NamedArgument(new ParseAccess(id,new Opt()),function_argument_exp); :}
+  named_argument_id EQUALS function_argument_exp {: return new NamedArgument(named_argument_id,function_argument_exp); :}
+  ;
+
+Access named_argument_id = 
+  ID.id {: return new ParseAccess(id, new Opt()); :}
   ;
 
 Matrix matrix = 
