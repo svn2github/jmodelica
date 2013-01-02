@@ -222,7 +222,8 @@ class Test_FMI_ODE:
         solver.y = y
         solver.y_sol = [y]
         solver.continuous_output = False
-
+        
+        self._bounceSim.initialize(solver)
         self._bounceSim.handle_event(solver, None)
 
         nose.tools.assert_almost_equal(solver.y[0],1.00000000)
