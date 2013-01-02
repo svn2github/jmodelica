@@ -1729,7 +1729,7 @@ public
  type Modelica.SIunits.Voltage = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
  type Modelica.SIunits.Current = Real(final quantity = \"ElectricCurrent\",final unit = \"A\");
  type Modelica.SIunits.Resistance = Real(final quantity = \"Resistance\",final unit = \"Ohm\");
- type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 1,max = 6000,start = 288.15,nominal = 300,displayUnit = \"degC\");
+ type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0.0,start = 288.15,nominal = 300,displayUnit = \"degC\");
  type Modelica.SIunits.LinearTemperatureCoefficient = Real(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\");
  type Modelica.SIunits.Power = Real(final quantity = \"Power\",final unit = \"W\");
  type Modelica.SIunits.Time = Real(final quantity = \"Time\",final unit = \"s\");

@@ -610,7 +610,7 @@ fclass StreamTests.StreamExample.Examples.Systems.HeatedGas
  Modelica.SIunits.Pressure reservoir.flowPort.p(nominal = 100000,start = 100000);
  Modelica.SIunits.SpecificEnthalpy reservoir.flowPort.h_outflow(nominal = 400000,start = 400000);
  parameter Real ramp.height = 10000.0 \"Height of ramps\" /* 10000.0 */;
- parameter Modelica.SIunits.Time ramp.duration(min = 1.0E-60,start = 2) = 1 \"Durations of ramp\" /* 1 */;
+ parameter Modelica.SIunits.Time ramp.duration(min = 0.0,start = 2) = 1 \"Duration of ramp (= 0.0 gives a Step)\" /* 1 */;
  parameter Real ramp.offset = 10000.0 \"Offset of output signal\" /* 10000.0 */;
  parameter Modelica.SIunits.Time ramp.startTime = 5 \"Output = offset for time < startTime\" /* 5 */;
  Modelica.Blocks.Interfaces.RealOutput ramp.y \"Connector of Real output signal\";
@@ -665,16 +665,16 @@ equation
 public
  type Modelica.SIunits.SpecificHeatCapacity = Real(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
  type Modelica.SIunits.MassFlowRate = Real(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 1,max = 6000,start = 288.15,nominal = 300,displayUnit = \"degC\");
- type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\",nominal = 1000000.0);
- type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",min =  - ( 1.0E9 ),max = 1.0E9,nominal = 100000.0,start = 100000.0,displayUnit = \"bar\");
+ type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0.0,start = 288.15,nominal = 300,displayUnit = \"degC\");
+ type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
+ type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
  type Modelica.SIunits.Volume = Real(final quantity = \"Volume\",final unit = \"m3\");
  type Modelica.SIunits.HeatFlowRate = Real(final quantity = \"Power\",final unit = \"W\");
  type Modelica.SIunits.EnthalpyFlowRate = Real(final quantity = \"EnthalpyFlowRate\",final unit = \"W\");
  type Modelica.SIunits.EnergyFlowRate = Real(final quantity = \"Power\",final unit = \"W\");
  type Modelica.SIunits.Mass = Real(quantity = \"Mass\",final unit = \"kg\",min = 0);
- type Modelica.SIunits.SpecificInternalEnergy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\",nominal = 1000000.0);
- type Modelica.SIunits.Density = Real(final quantity = \"Density\",final unit = \"kg/m3\",displayUnit = \"g/cm3\",min = 1.0E-6,max = 30000.0);
+ type Modelica.SIunits.SpecificInternalEnergy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
+ type Modelica.SIunits.Density = Real(final quantity = \"Density\",final unit = \"kg/m3\",displayUnit = \"g/cm3\",min = 0.0);
  type Modelica.SIunits.InternalEnergy = Real(final quantity = \"Energy\",final unit = \"J\");
  type Modelica.SIunits.LinearTemperatureCoefficient = Real(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\");
  type Modelica.Blocks.Interfaces.RealInput = Real;
@@ -791,7 +791,7 @@ fclass StreamTests.StreamExample.Examples.Systems.HeatedGas_SimpleWrap
  Modelica.SIunits.Pressure reservoir.flowPort.p(nominal = 100000,start = 100000);
  Modelica.SIunits.SpecificEnthalpy reservoir.flowPort.h_outflow(nominal = 400000,start = 400000);
  parameter Real ramp.height = 10000.0 \"Height of ramps\" /* 10000.0 */;
- parameter Modelica.SIunits.Time ramp.duration(min = 1.0E-60,start = 2) = 1 \"Durations of ramp\" /* 1 */;
+ parameter Modelica.SIunits.Time ramp.duration(min = 0.0,start = 2) = 1 \"Duration of ramp (= 0.0 gives a Step)\" /* 1 */;
  parameter Real ramp.offset = 10000.0 \"Offset of output signal\" /* 10000.0 */;
  parameter Modelica.SIunits.Time ramp.startTime = 5 \"Output = offset for time < startTime\" /* 5 */;
  Modelica.Blocks.Interfaces.RealOutput ramp.y \"Connector of Real output signal\";
@@ -840,9 +840,9 @@ equation
 public
  type Modelica.SIunits.SpecificHeatCapacity = Real(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
  type Modelica.SIunits.MassFlowRate = Real(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 1,max = 6000,start = 288.15,nominal = 300,displayUnit = \"degC\");
- type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\",nominal = 1000000.0);
- type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",min =  - ( 1.0E9 ),max = 1.0E9,nominal = 100000.0,start = 100000.0,displayUnit = \"bar\");
+ type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0.0,start = 288.15,nominal = 300,displayUnit = \"degC\");
+ type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
+ type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
  type Modelica.SIunits.Time = Real(final quantity = \"Time\",final unit = \"s\");
  type Modelica.Blocks.Interfaces.RealOutput = Real;
  type Modelica.Blocks.Interfaces.RealInput = Real;
