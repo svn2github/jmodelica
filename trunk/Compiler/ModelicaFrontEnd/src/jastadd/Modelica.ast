@@ -363,6 +363,7 @@ BooleanLitExpTrue  : BooleanLitExp;
 BooleanLitExpFalse : BooleanLitExp;
 
 FunctionCall : Exp ::= Name:Access [FunctionArguments];
+PartialFunctionCall : FunctionCall;
 
 FunctionArguments : SourceBaseNode::= Exp* NamedArgument*;
 NamedArgument     : SourceBaseNode::= Name:Access Exp;

@@ -1096,6 +1096,11 @@ FVectorFunctionCall : FFunctionCall ::= <VectorSize:Size> <Vectorized:boolean[]>
 InstFunctionCall : FAbstractFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument*;
 
 /**
+ * \brief Partial function call expression in instance trees.
+ */
+InstPartialFunctionCall : InstFunctionCall;
+
+/**
  * Generic vectorized function call expression in instance trees.
  */
 InstVectorFunctionCall : InstFunctionCall ::= <Dims:int>;

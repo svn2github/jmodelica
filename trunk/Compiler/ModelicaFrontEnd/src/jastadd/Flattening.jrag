@@ -2379,6 +2379,14 @@ aspect InstantiatedExpressions {
 		return copyLocationTo(new InstNamedArgument(getName().instantiate(), getExp().instantiate()));
 	}
 	
+	protected FAbstractFunctionCall FunctionCall.createInstNode(InstAccess name, List<InstFunctionArgument> args) {
+		return new InstFunctionCall(name, args);
+	}
+	
+	protected FAbstractFunctionCall PartialFunctionCall.createInstNode(InstAccess name, List<InstFunctionArgument> args) {
+		return new InstPartialFunctionCall(name, args);
+	}
+	
 	public FAbstractFunctionCall FunctionCall.instantiate() {
 		// Instantiate arguments
 		List<InstFunctionArgument> args = new List<InstFunctionArgument>();
@@ -2394,7 +2402,7 @@ aspect InstantiatedExpressions {
 		}
 		
 		// Create InstFunctionCall
-		return copyLocationTo(new InstFunctionCall(getName().newInstAccess(), args));
+		return copyLocationTo(createInstNode(getName().newInstAccess(), args));
 	}
   
 	public InstForIndex ForIndex.instantiate() {
