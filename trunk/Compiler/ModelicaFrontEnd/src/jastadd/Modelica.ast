@@ -200,11 +200,12 @@ ExternalLanguage : SourceBaseNode ::= <Language>;
 
 abstract Clause : SourceBaseNode;
 
-abstract ElementList : Clause ::= Element*;
-PublicElementList    : ElementList;
-ProtectedElementList : ElementList;
-EquationClause       : Clause ::= AbstractEquation*;
-Algorithm            : Clause ::= [Initial] Statement*;
+abstract ElementList  : Clause ::= Element*;
+PublicElementList     : ElementList;
+ProtectedElementList  : ElementList;
+EquationClause        : Clause ::= AbstractEquation*;
+InitialEquationClause : EquationClause;
+Algorithm             : Clause ::= [Initial] Statement*;
 
 abstract Element : Clause;
 ElementAnnotation       : Element ::= Annotation;
@@ -329,8 +330,9 @@ FunctionCallStmt    : Statement ::= Left:FunctionCallLeft* FunctionCall;
 BreakStmt           : Statement;
 ReturnStmt          : Statement;
 abstract IfWhenStmt   : Statement ::= IfWhenClause*;
-IfStmt              : IfWhenStmt ::= ElseStmt:Statement*;
+IfStmt              : IfWhenStmt ::= [ElseStmt];
 WhenStmt            : IfWhenStmt;
+ElseStmt            : SourceBaseNode ::= ElseStmt:Statement*;
 abstract IfWhenClause : SourceBaseNode  ::= Test:Exp Statement*;
 IfClause            : IfWhenClause;
 WhenClause          : IfWhenClause;

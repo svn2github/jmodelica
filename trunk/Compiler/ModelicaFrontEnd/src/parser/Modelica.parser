@@ -578,7 +578,7 @@ EquationClause equation_clause =
   | INITIAL_EQUATION abstract_equation*  {:  //System.out.println("equation_clause"); 
   					     for (int i=0;i<abstract_equation.getNumChild();i++)
   					     	((AbstractEquation)abstract_equation.getChild(i)).setAbstractEquationModifier(new Initial()); 
-                                                 return new EquationClause(abstract_equation); :}
+  					     return new InitialEquationClause(abstract_equation); :}
   ;  
 
 Algorithm algorithm =
@@ -940,7 +940,8 @@ FunctionCallLeft function_call_stmt_left =
   ;
 
 IfStmt if_stmt =
-  IF if_clause_list else_stmts END_IF comment {: return new IfStmt(comment, if_clause_list, else_stmts); :}
+    IF if_clause_list else_stmts END_IF comment {: return new IfStmt(comment, if_clause_list, new Opt(else_stmts)); :}
+  | IF if_clause_list END_IF comment {: return new IfStmt(comment, if_clause_list, new Opt()); :}
   ;  
 
 List if_clause_list =
@@ -952,9 +953,8 @@ IfClause if_clause =
   exp THEN statement_list  {: return new IfClause(exp, statement_list); :}
   ;
 
-List else_stmts =
-                         {: return new List(); :}
-  | ELSE statement_list  {: return statement_list; :}
+ElseStmt else_stmts =
+  ELSE statement_list  {: return new ElseStmt(statement_list); :}
   ;
 
 WhenStmt when_stmt =

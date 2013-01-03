@@ -2142,7 +2142,10 @@ aspect InstantiatedExpressions {
 	protected abstract FIfWhenStmt IfWhenStmt.instantiateIfWhenStmt(List l);
 	
 	protected FIfStmt IfStmt.instantiateIfWhenStmt(List icl) {
-		List esl = Statement.instantiateStatementList(getElseStmts());
+		List esl = new List();
+		if (hasElseStmt()) {
+			esl = Statement.instantiateStatementList(getElseStmt().getElseStmts());
+		}
 		return new FIfStmt(icl, esl);
 	}
 	

@@ -130,8 +130,12 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 	}
 
 	protected void addFormattingInformation(FormattingItem.Type type, String data, int numberOfLineBreaks) {
-		formattingInfo.addItem(type, data, matchLine() + 1, matchColumn() + 1, matchLine() + numberOfLineBreaks + 1,
-				matchColumn() + matchLength());
+		int endColumn;
+		if (numberOfLineBreaks > 0)
+			endColumn = data.length() - Math.max(data.lastIndexOf('\n'), data.lastIndexOf('\r')) - 1;
+		else
+			endColumn = matchColumn() + matchLength();
+		formattingInfo.addItem(type, data, matchLine() + 1, matchColumn() + 1, matchLine() + numberOfLineBreaks + 1, endColumn);
 	}
 
 	public FormattingInfo getFormattingInfo() {

@@ -298,7 +298,7 @@ aspect FormattedPrint {
 	}
 
 	@Override
-	public boolean EquationClause.matchInsideFormatting(ScannedFormattingItem formattingItem) {
+	public boolean InitialEquationClause.matchInsideFormatting(ScannedFormattingItem formattingItem) {
 		return (formattingItem.getStartLine() == getLine(getStart()) && formattingItem.getStartColumn() == getColumn(getStart()) + 7);
 	}
 
@@ -736,10 +736,6 @@ aspect FormattedPrint {
 	@Override
 	protected boolean IfStmt.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		insideFormatting = new DefaultFormattingItem(" ");
-		if (getNumElseStmt() > 0) {
-			getElseStmt(0).preFormatting = new DefaultFormattingItem("\n");
-			getElseStmt(getNumElseStmt() - 1).postFormatting = new DefaultFormattingItem(indentation.toString());
-		}
 		super.setDefaultFormattingHelper(indentation);
 		indentation.stepIn();
 		return true;
@@ -1487,15 +1483,17 @@ aspect FormattedPrint {
 	}
 
 	void EquationClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-		if (getNumAbstractEquation() > 0 && getAbstractEquation(0).isInitial()) {
-			printStream.print("initial");
-			printStream.print(insideFormatting);
-		}
 		printStream.print("equation");
 
 		for (AbstractEquation abstractEquation : getAbstractEquations()) {
 			abstractEquation.doPrettyPrintFormatted(printer, printStream);
 		}
+	}
+	
+	void InitialEquationClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("initial");
+		printStream.print(insideFormatting);
+		super.prettyPrintFormattedHelper(printer, printStream);
 	}
 
 	void Algorithm.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1567,16 +1565,21 @@ aspect FormattedPrint {
 				printStream.print("elseif");
 			}
 		}
-		if (getNumElseStmt() > 0) {
-			printStream.print("else");
-			for (Statement elseStatement : getElseStmts()) {
-				elseStatement.doPrettyPrintFormatted(printer, printStream);
-			}
+		if (hasElseStmt()) {
+			getElseStmt().doPrettyPrintFormatted(printer, printStream);
 		}
 		printStream.print("end" + insideFormatting + "if");
 		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
+	
+	void ElseStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("else");
+		for (Statement elseStatement : getElseStmts()) {
+			elseStatement.doPrettyPrintFormatted(printer, printStream);
+		}
+	}
 
+	
 	void IfWhenClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getTest().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("then");

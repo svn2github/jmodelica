@@ -387,6 +387,13 @@ aspect PrettyPrint {
 			first = false;
 			p.print(iwc, str, indent);
 		}
+		if (hasElseStmt())
+			p.print(getElseStmt(), str, indent);
+		str.print(indent);
+		str.println("end if;");
+	}
+	
+	public void ElseStmt.prettyPrint(Printer p, PrintStream str, String indent) {
 		if (getNumElseStmt() > 0) {
 			str.print(indent);
 			str.println("else");
@@ -394,9 +401,8 @@ aspect PrettyPrint {
 				p.print(s, str, indent + "  ");
 			}
 		}
-		str.print(indent);
-		str.println("end if;");
 	}
+	
 	
 	public void WhenStmt.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(indent);
