@@ -735,22 +735,22 @@ equation
 			template="$XML_variables$",
 			generatedCode="
 		<ScalarVariable name=\"u[1]\" valueReference=\"6\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>algebraic</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"u[2]\" valueReference=\"7\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
+			<Real relativeQuantity=\"false\" start=\"0.0\"/>
 			<isLinear>true</isLinear>
 			<VariableCategory>algebraic</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"u[3]\" valueReference=\"8\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
+			<Real relativeQuantity=\"false\" start=\"0.0\"/>
 			<isLinear>true</isLinear>
 			<VariableCategory>algebraic</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"u[4]\" valueReference=\"9\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
+			<Real relativeQuantity=\"false\" start=\"0.0\"/>
 			<isLinear>true</isLinear>
 			<VariableCategory>algebraic</VariableCategory>
 		</ScalarVariable>
