@@ -478,7 +478,7 @@
     }
     
     rewrite PN_Dot {
-    	to Dot buildDot(new Dot());
+    	to Dot copyLocationTo(buildDot(new Dot()));
     }
 
     public Dot Access.buildDot(Dot dot) {

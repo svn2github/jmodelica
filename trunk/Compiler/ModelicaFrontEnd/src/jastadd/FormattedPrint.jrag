@@ -156,6 +156,7 @@ aspect FormattedPrint {
 	eq ComponentRedeclare.getName().shouldBeFormatted() = false;
 	eq ClassRedeclare.getName().shouldBeFormatted() = false;
 	eq SourceRoot.getChild().shouldBeFormatted() = true;
+	eq EnumClassDecl.getComponentDecl(int i).shouldBeFormatted() = getComponentDecl(i).isEnumLiteral();
 	
 	protected void SourceBaseNode.addFormattingInformation(FormattingInfo formattingInfo) {
 		if (!shouldBeFormatted() || hasCachedFormatting()) {
@@ -1712,7 +1713,7 @@ aspect FormattedPrint {
 	}
 
 	eq ExpandableConnector.toString() = "expandable" + insideFormatting + "connector";
-
+	
 	void FunctionCall.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("(");
@@ -1720,6 +1721,11 @@ aspect FormattedPrint {
 			getFunctionArguments().doPrettyPrintFormatted(printer, printStream);
 		}
 		printStream.print(")");
+	}
+
+	void PartialFunctionCall.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+		printStream.print("function");
+		super.prettyPrintFormattedHelper(printer, printStream);
 	}
 
 	void FunctionArguments.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {

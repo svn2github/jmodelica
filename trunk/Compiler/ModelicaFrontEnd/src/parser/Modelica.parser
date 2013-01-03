@@ -1089,6 +1089,11 @@ Exp primary =
                                       {: return new FunctionCall(parse_access, function_arguments); :}
   ;  
   
+ PartialFunctionCall partial_function_call =
+    FUNCTION parse_access LPAREN function_arguments? RPAREN 
+                                      {: return new PartialFunctionCall(parse_access, function_arguments); :}
+  ;  
+  
 FunctionArguments function_arguments =
     exp FOR for_indices               {: List arg_list_f = new List().add(new IterExp(exp, for_indices));
                                          return new FunctionArguments(arg_list_f, new List()); :} 
@@ -1104,7 +1109,7 @@ List named_arguments =
   
 Exp function_argument_exp =
  exp                               {: return exp; :}
- | FUNCTION function_call          {: return function_call; :}  
+ | partial_function_call          {: return partial_function_call; :}  
  ;
   
 NamedArgument named_argument =
