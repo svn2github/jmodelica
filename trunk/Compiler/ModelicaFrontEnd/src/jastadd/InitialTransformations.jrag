@@ -81,7 +81,22 @@
             	fc.addAnnotation(getAnnotation());
             getComposition().extractElementsTo(fc);
             
-            fc.setLocationNoTree(this);
+            if (hasRedeclare())
+            	fc.setLocationNoTree(getRedeclare(), this);
+            else if (hasFinal())
+            	fc.setLocationNoTree(getFinal(), this);
+            else if (hasInner())
+            	fc.setLocationNoTree(getInner(), this);
+            else if (hasOuter())
+            	fc.setLocationNoTree(getOuter(), this);
+            else if (hasReplaceable())
+            	fc.setLocationNoTree(getReplaceable(), this);
+            else if (hasEncapsulated())
+            	fc.setLocationNoTree(getEncapsulated(), this);
+            else if (hasPartial())
+            	fc.setLocationNoTree(getPartial(), this);
+            else
+            	fc.setLocationNoTree(getRestriction(), this);
             return fc;
         }
     }

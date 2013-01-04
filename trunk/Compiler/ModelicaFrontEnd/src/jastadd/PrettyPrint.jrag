@@ -387,18 +387,18 @@ aspect PrettyPrint {
 			first = false;
 			p.print(iwc, str, indent);
 		}
-		if (hasElseStmt())
-			p.print(getElseStmt(), str, indent);
+		if (hasElseClause())
+			p.print(getElseClause(), str, indent);
 		str.print(indent);
 		str.println("end if;");
 	}
 	
-	public void ElseStmt.prettyPrint(Printer p, PrintStream str, String indent) {
-		if (getNumElseStmt() > 0) {
+	public void ElseClause.prettyPrint(Printer p, PrintStream str, String indent) {
+		if (getNumStmt() > 0) {
 			str.print(indent);
 			str.println("else");
-			for (Statement s : getElseStmts()) {
-				p.print(s, str, indent + "  ");
+			for (Statement stmt : getStmts()) {
+				p.print(stmt, str, indent + "  ");
 			}
 		}
 	}
@@ -439,10 +439,13 @@ aspect PrettyPrint {
 			p.print(fi, str, indent);
 		}
 		str.println(" loop");
-		for (Statement s : getForStmts())
-			p.print(s, str, indent + "  ");
+		p.print(getForStmtList(), str, indent + "  ");
 		str.print(indent);
 		str.println("end for;");
+	}
+	public void ForStmtList.prettyPrint(Printer p, PrintStream str, String indent) {
+		for (Statement stmt : getStmts())
+			p.print(stmt, str, indent);
 	}
 	
 	public void WhileStmt.prettyPrint(Printer p, PrintStream str, String indent) {

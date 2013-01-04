@@ -2143,8 +2143,8 @@ aspect InstantiatedExpressions {
 	
 	protected FIfStmt IfStmt.instantiateIfWhenStmt(List icl) {
 		List esl = new List();
-		if (hasElseStmt()) {
-			esl = Statement.instantiateStatementList(getElseStmt().getElseStmts());
+		if (hasElseClause()) {
+			esl = Statement.instantiateStatementList(getElseClause().getStmts());
 		}
 		return new FIfStmt(icl, esl);
 	}
@@ -2176,7 +2176,7 @@ aspect InstantiatedExpressions {
 		List il = new List();
 		for (ForIndex i : getForIndexList()) 
 			il.add(i.instantiate());
-		List sl = Statement.instantiateStatementList(getForStmts());
+		List sl = Statement.instantiateStatementList(getForStmtList().getStmts());
 		return new InstForStmt(il, sl);
 	}
 	

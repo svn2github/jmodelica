@@ -330,13 +330,14 @@ FunctionCallStmt    : Statement ::= Left:FunctionCallLeft* FunctionCall;
 BreakStmt           : Statement;
 ReturnStmt          : Statement;
 abstract IfWhenStmt   : Statement ::= IfWhenClause*;
-IfStmt              : IfWhenStmt ::= [ElseStmt];
+IfStmt              : IfWhenStmt ::= [ElseClause];
 WhenStmt            : IfWhenStmt;
-ElseStmt            : SourceBaseNode ::= ElseStmt:Statement*;
+ElseClause          : SourceBaseNode ::= Stmt:Statement*;
 abstract IfWhenClause : SourceBaseNode  ::= Test:Exp Statement*;
 IfClause            : IfWhenClause;
 WhenClause          : IfWhenClause;
-ForStmt             : Statement ::= ForIndex* ForStmt:Statement*;
+ForStmt             : Statement ::= ForIndex* ForStmtList;
+ForStmtList         : SourceBaseNode ::= Stmt:Statement*;
 WhileStmt           : Statement ::= Test:Exp WhileStmt:Statement*;
 AlgorithmAnnotation : Statement ::= Annotation;
 

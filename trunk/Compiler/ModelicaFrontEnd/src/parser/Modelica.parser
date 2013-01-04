@@ -743,6 +743,7 @@ Argument argument =
    base_class_decl 
    constraining_clause? {:  base_class_decl.setConstrainingClauseOpt(constraining_clause);
                             base_class_decl.setReplaceable(replaceable);
+                            base_class_decl.setRedeclare(new Redeclare());
                             ClassAccess ca = new ClassAccess(base_class_decl.getName().getID());
                             ca.setLocationNoTree(base_class_decl.getName());
                              return new  ClassRedeclare(each,
@@ -953,8 +954,8 @@ IfClause if_clause =
   exp THEN statement_list  {: return new IfClause(exp, statement_list); :}
   ;
 
-ElseStmt else_stmts =
-  ELSE statement_list  {: return new ElseStmt(statement_list); :}
+ElseClause else_stmts =
+  ELSE statement_list  {: return new ElseClause(statement_list); :}
   ;
 
 WhenStmt when_stmt =
@@ -971,8 +972,12 @@ WhenClause when_clause =
   ;
 
 ForStmt for_stmt =
-  FOR for_indices LOOP statement_list END_FOR comment  
-                         {: return new ForStmt(comment, for_indices, statement_list); :}
+  FOR for_indices LOOP for_stmt_list END_FOR comment  
+                         {: return new ForStmt(comment, for_indices, for_stmt_list); :}
+  ;
+  
+ForStmtList for_stmt_list =
+  statement_list {: return new ForStmtList(statement_list); :}
   ;
 
 WhileStmt while_stmt = 
@@ -996,25 +1001,20 @@ Exp else_if_exp =
   ;
 
 Exp simple_expression = 
-  log_exp
-  range.r1? 
-  range.r2? {:        if (r1.getNumChild()==0 && r2.getNumChild()==0)
-                      	return log_exp;
-                      else {
-                      	RangeExp r = new RangeExp();
-                      	r.addExp(log_exp);
-                      	if (r1.getNumChild()>0)
-                      		r.addExp((Exp)r1.getChildNoTransform(0));
-                      	if (r2.getNumChild()>0)
-                      		r.addExp((Exp)r2.getChildNoTransform(0));	
-                      	return r;
-                      }    
-                      :}
+    log_exp 
+        {: return log_exp; :}
+  | log_exp.l1 COLON log_exp.l2
+        {: RangeExp r = new RangeExp();
+           r.addExp(l1);
+           r.addExp(l2);
+           return r; :}
+  | log_exp.l1 COLON log_exp.l2 COLON log_exp.l3
+        {: RangeExp r = new RangeExp();
+           r.addExp(l1);
+           r.addExp(l2);
+           r.addExp(l3);
+           return r; :}
   ;
-
-Exp range =
-  COLON log_exp {: return log_exp; :}
-  ;  
 
 Exp log_exp = 
   log_exp.a OR log_exp.b {: return new OrExp(a,b); :}  
