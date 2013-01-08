@@ -8195,6 +8195,37 @@ $C_destruct_external_object$
 end TestExtObject3;
 
 
+model TestExtObject4
+	constant Integer N = 3;
+	ExtObject myEOs[N] = fill(ExtObject(), N);
+	Real y[N];
+equation
+	for i in 1:N loop
+		y[i] = useMyEO(myEOs[i]);
+	end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestExtObject4",
+			description="Arrays of external objects",
+			template="$C_destruct_external_object$",
+			generatedCode="
+    if (_myEOs_1_1 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_myEOs_1_1);
+        _myEOs_1_1 = NULL;
+    }
+    if (_myEOs_2_2 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_myEOs_2_2);
+        _myEOs_2_2 = NULL;
+    }
+    if (_myEOs_3_3 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_myEOs_3_3);
+        _myEOs_3_3 = NULL;
+    }
+")})));
+end TestExtObject4;
+
+
 model TestRuntimeOptions1
     Real x = 1;
 
