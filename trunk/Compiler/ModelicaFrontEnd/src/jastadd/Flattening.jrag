@@ -178,7 +178,7 @@ aspect Flattening {
 	   		FFunctionDecl ffd = new FFunctionDecl();
 	   		ffd.setFQName(new FQNameString(qualifiedName()));
 	   		
-	   		flattenComponentsInFunction(ffd, fc);
+	   		flattenComponentsInFunction(ffd, fc, new HashSet<String>());
 			
 	   		FAlgorithmBlock fab = findFunctionAlgorithm();
 	   		fab = (fab == null) ? new FAlgorithmBlock(new List()) : fab.flattenEqn(new FQNameEmpty(), fc);
@@ -280,11 +280,12 @@ aspect Flattening {
 			comp.getFType().updateRecordArraySizes(rfrom.componentType(comp.getName()));
 	}
 	
-	public void InstNode.flattenComponentsInFunction(FFunctionDecl ffd, FClass fc) {
+	public void InstNode.flattenComponentsInFunction(FFunctionDecl ffd, FClass fc, Set<String> added) {
    		for (InstExtends ie : getInstExtendss())
-   	   		ie.flattenComponentsInFunction(ffd, fc);
+   	   		ie.flattenComponentsInFunction(ffd, fc, added);
    		for (InstComponentDecl icd : getInstComponentDecls())
-			icd.flattenInFunction(ffd, fc, false, null);
+   			if (added.add(icd.name()))
+   				icd.flattenInFunction(ffd, fc, false, null);
 	}
 	
 	syn FAlgorithmBlock InstNode.findFunctionAlgorithm() {

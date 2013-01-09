@@ -931,6 +931,47 @@ model FunctionBinding18
 end FunctionBinding18;
 
 
+model FunctionBinding19
+	function a
+        input Real x; 
+        output Real y;
+    end a;
+	
+    function b
+        extends a;
+    end b;
+	
+    function c
+        extends a;
+        extends b;
+    algorithm
+        y := x;
+    end c;
+
+    Real w = c(1.0);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionBinding19",
+			description="",
+			flatModel="
+fclass FunctionTests.FunctionBinding19
+ Real w = FunctionTests.FunctionBinding19.c(1.0);
+
+public
+ function FunctionTests.FunctionBinding19.c
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ end FunctionTests.FunctionBinding19.c;
+
+end FunctionTests.FunctionBinding19;
+")})));
+end FunctionBinding19;
+
+
 
 model BadFunctionCall1
   Real x = NonExistingFunction(1, 2);

@@ -1896,10 +1896,13 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+         Set<String> names = new HashSet<String>();
          for (InstExtends ie : getInstExtendss())
-        	 l.addAll(ie.myInputs());
+        	 for (InstComponentDecl icd : ie.myInputs())
+        		 if (names.add(icd.name()))
+                     l.add(icd);
          for (InstComponentDecl icd : getInstComponentDecls())
-             if (icd.isInput())
+             if (icd.isInput() && names.add(icd.name()))
                  l.add(icd);
          return l;
      }
@@ -1909,10 +1912,13 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myNonInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+         Set<String> names = new HashSet<String>();
          for (InstExtends ie : getInstExtendss())
-        	 l.addAll(ie.myNonInputs());
+        	 for (InstComponentDecl icd : ie.myNonInputs())
+        		 if (names.add(icd.name()))
+                     l.add(icd);
          for (InstComponentDecl icd : getInstComponentDecls())
-             if (!icd.isInput())
+             if (!icd.isInput() && names.add(icd.name()))
                  l.add(icd);
          return l;
      }
@@ -1922,10 +1928,13 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myOutputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+         Set<String> names = new HashSet<String>();
          for (InstExtends ie : getInstExtendss())
-        	 l.addAll(ie.myOutputs());
+        	 for (InstComponentDecl icd : ie.myOutputs())
+        		 if (names.add(icd.name()))
+                     l.add(icd);
          for (InstComponentDecl icd : getInstComponentDecls())
-             if (icd.isOutput())
+             if (icd.isOutput() && names.add(icd.name()))
                  l.add(icd);
          return l;
      }
