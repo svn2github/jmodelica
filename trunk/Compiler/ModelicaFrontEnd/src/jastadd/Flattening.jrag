@@ -1192,8 +1192,11 @@ aspect FlatExpressions {
 			else
 				flattened.setName(prefix.copyAndAppend(getName()));
 		}
-		if (hasResidual())
-			flattened.setResidual(getResidual().flatten(prefix));
+		if (hasResidual()) {
+			FResidual flatten = getResidual().flatten(prefix);
+			if (flatten != null)
+				flattened.setResidual(flatten);
+		}
 		return flattened;
 	}
 
