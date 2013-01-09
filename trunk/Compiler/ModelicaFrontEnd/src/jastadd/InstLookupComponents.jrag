@@ -36,6 +36,7 @@ aspect InstLookupComponents {
 	eq InstReplacingPrimitive.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstNormalExtends.getInstClassModification().lookupInstComponent(String name)      = lookupInstComponent(name);
 	eq InstShortClassDecl.getChild().lookupInstComponent(String name)                     = lookupInstComponent(name);
+    eq InstExternalObject.getDestructorCall().lookupInstComponent(String name)            = lookupInstComponent(name);
 	
 	eq InstDot.getInstAccess(int i).lookupInstComponent(String name)            = 
 			(i == 0) ? lookupInstComponent(name) : getInstAccessNoListTrans(i - 1).qualifiedLookupInstComponent(name);

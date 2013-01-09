@@ -9270,7 +9270,7 @@ model TestExternalObj2
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="TestExternalObj2",
-			description="",
+			description="Extending from external object",
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
@@ -9278,6 +9278,114 @@ Semantic error at line 9268, column 2:
   Classed derived from ExternalObject can neither be used in an extends-clause nor in a short class defenition
 ")})));
 end TestExternalObj2;
+
+
+model TestExternalObj3
+    class NoConstructor
+        extends ExternalObject;
+     
+        function destructor
+            input NoConstructor eo;
+            external "C" destroy_myEO(eo);
+        end destructor;
+    end NoConstructor;
+    
+    NoConstructor eo = NoConstructor();
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj3",
+			description="Non-complete external object",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9293, column 24:
+  The function NoConstructor.constructor() is undeclared
+")})));
+end TestExternalObj3;
+
+
+model TestExternalObj4
+    class NoDestructor
+        extends ExternalObject;
+     
+        function constructor
+            output NoDestructor eo;
+            external "C" init_myEO();
+        end constructor;
+    end NoDestructor;
+    
+    NoDestructor eo = NoDestructor();
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj4",
+			description="Non-complete external object",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9316, column 21:
+  The function NoDestructor.destructor() is undeclared
+")})));
+end TestExternalObj4;
+
+
+model TestExternalObj5
+    class BadConstructor
+        extends ExternalObject;
+		
+		record constructor
+			Real x;
+		end constructor;
+     
+        function destructor
+            input BadConstructor eo;
+            external "C" destroy_myEO(eo);
+        end destructor;
+    end BadConstructor;
+    
+    BadConstructor eo = BadConstructor();
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj5",
+			description="Non-complete external object",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9347, column 25:
+  The class BadConstructor.constructor is not a function
+")})));
+end TestExternalObj5;
+
+
+model TestExternalObj6
+    class BadDestructor
+        extends ExternalObject;
+     
+        function constructor
+            output BadDestructor eo;
+            external "C" init_myEO();
+        end constructor;
+        
+        model destructor
+            Real x;
+        end destructor;
+     end BadDestructor;
+    
+    BadDestructor eo = BadDestructor();
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj6",
+			description="Non-complete external object",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9374, column 23:
+  The class BadDestructor.destructor is not a function
+")})));
+end TestExternalObj6;
 
 
 model TestRuntimeOptions1

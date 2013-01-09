@@ -972,6 +972,15 @@ aspect InstanceErrorCheck {
 		return n;
 	}
 	
+	public void InstExternalObject.collectErrors() {
+	    if (!errorChecked) {
+			super.collectErrors();
+	    	errorChecked = true;
+	    	if (!inFunction())
+	    		getDestructorCall().collectErrors();
+	    }
+	}
+	
 	public void InstFunctionCall.collectErrors() {
 	    if (!errorChecked) {
 	    	errorChecked = true;
@@ -980,7 +989,11 @@ aspect InstanceErrorCheck {
 	    	if (!func.isCallable()) {
 	    		// Report that function does not exist
 		    	String name = getName().name();
-	    		if (func.isUnknown()) 
+		    	if (func.isExternalObject()) {
+		    		name += ".constructor";
+		    		func = func.myConstructor();
+		    	}
+		    	if (func.isUnknown()) 
 	    			error("The function " + name + "() is undeclared");
 	    		else
 	    			error("The class " + name + " is not a function");

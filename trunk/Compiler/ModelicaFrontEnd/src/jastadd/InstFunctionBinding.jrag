@@ -432,7 +432,7 @@ aspect InstFunctionBinding {
 					target = icd;
 		    } if (target.isExternalObject()) {
 		    	InstClassDecl icd = target.myConstructor();
-				if (icd != null)
+				if (icd.isFunction())
 					target = icd;
 		    	externalObject = true;
 		    }
@@ -610,7 +610,10 @@ aspect InstFunctionBinding {
 	/**
 	 * Extract constructor function for external object class.
 	 */
-	syn InstClassDecl InstClassDecl.myConstructor() = memberInstClass("constructor");
+	syn InstClassDecl InstClassDecl.myConstructor() {
+		InstClassDecl icd = memberInstClass("constructor");
+		return (icd == null) ? unknownInstClassDecl() : icd;
+	}
 	
 	/**
 	 * Extract constructor function for external object class.
@@ -620,7 +623,10 @@ aspect InstFunctionBinding {
 	/**
 	 * Extract destructor function for external object class.
 	 */
-	syn InstClassDecl InstClassDecl.myDestructor() = memberInstClass("destructor");
+	syn InstClassDecl InstClassDecl.myDestructor() {
+		InstClassDecl icd = memberInstClass("destructor");
+		return (icd == null) ? unknownInstClassDecl() : icd;
+	}
 		
 	/**
 	 * Extract destructor function for external object class.

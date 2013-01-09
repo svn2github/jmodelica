@@ -532,6 +532,8 @@ aspect FlatTypeCheck {
 			  if (!boundType.isUnknown()) {
 				  if (isVectorized()) 
 					  boundType = boundType.sizedType(boundType.size().expand(vectorizedSize()));
+				  else if (isDestructorArgument())
+					  boundType = boundType.sizedType(type.size());
 				  typeOk = boundType.typeCompatible(type, true);
 			  }
 		  } else {
@@ -554,6 +556,15 @@ aspect FlatTypeCheck {
   public void InstMultipleBoundArgument.typeCheck() {
 	  error(functionCallDecription() + ": multiple arguments matches input " + getBoundInput().name());
   }
+  
+  inh boolean InstFunctionArgument.isDestructorArgument();
+  eq InstFunctionCall.getArg().isDestructorArgument() = getName().myInstClassDecl().isDestructor();
+  eq BaseNode.getChild().isDestructorArgument()       = false;
+  
+  syn boolean InstClassDecl.isDestructor() = name().equals("destructor") && inExternalObject();
+  
+  inh boolean InstClassDecl.inExternalObject();
+  eq InstNode.getChild().inExternalObject() = isExternalObject();
   
   public void InstDefaultArgument.typeCheck() {}
   
