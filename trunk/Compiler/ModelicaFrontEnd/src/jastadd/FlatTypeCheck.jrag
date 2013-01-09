@@ -550,7 +550,8 @@ aspect FlatTypeCheck {
   }
   
   public void InstMissingArgument.typeCheck() {
-	  error(functionCallDecription() + ": missing argument for required input " + getBoundInput().name());
+	  if (!isDestructorArgument())
+		  error(functionCallDecription() + ": missing argument for required input " + getBoundInput().name());
   }
   
   public void InstMultipleBoundArgument.typeCheck() {

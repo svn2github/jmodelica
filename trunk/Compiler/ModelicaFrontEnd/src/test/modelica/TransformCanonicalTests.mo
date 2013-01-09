@@ -9351,7 +9351,10 @@ model TestExternalObj5
 			name="TestExternalObj5",
 			description="Non-complete external object",
 			errorMessage="
-1 errors found:
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9337, column 3:
+  An external object constructor must have exactly one output of the same type as the constructor
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 9347, column 25:
   The class BadConstructor.constructor is not a function
@@ -9380,13 +9383,120 @@ model TestExternalObj6
 			name="TestExternalObj6",
 			description="Non-complete external object",
 			errorMessage="
-1 errors found:
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9374, column 23:
+Semantic error at line 9374, column 9:
+  An external object destructor must have exactly one input of the same type as the constructor, and no outputs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9377, column 23:
   The class BadDestructor.destructor is not a function
 ")})));
 end TestExternalObj6;
 
+
+model TestExternalObj7
+    class ExtraContent
+        extends ExternalObject;
+        
+        function constructor
+            output ExtraContent eo;
+            external "C" init_myEO();
+        end constructor;
+     
+        function destructor
+            input ExtraContent eo;
+            external "C" destroy_myEO(eo);
+        end destructor;
+		
+		function extra
+			input Real x;
+			output Real y;
+		algorithm
+			y := x;
+		end extra;
+    end ExtraContent;
+    
+    ExtraContent eo = ExtraContent();
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj7",
+			description="External object with extra elements",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9392, column 5:
+  External object classes may not contain any elements except the constructor and destructor
+")})));
+end TestExternalObj7;
+
+
+model TestExternalObj8
+    class ExtraContent
+        extends ExternalObject;
+        
+        function constructor
+            output ExtraContent eo;
+            external "C" init_myEO();
+        end constructor;
+     
+        function destructor
+            input ExtraContent eo;
+            external "C" destroy_myEO(eo);
+        end destructor;
+		
+		Real x;
+    end ExtraContent;
+    
+    ExtraContent eo = ExtraContent();
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj8",
+			description="External object with extra elements",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9418, column 5:
+  External object classes may not contain any elements except the constructor and destructor
+")})));
+end TestExternalObj8;
+
+
+model TestExternalObj9
+    class BadArgs
+        extends ExternalObject;
+        
+        function constructor
+            output BadArgs eo;
+			output Real x;
+            external "C" init_myEO();
+        end constructor;
+     
+        function destructor
+            input BadArgs eo;
+			input Real y;
+            external "C" destroy_myEO(eo);
+        end destructor;
+    end BadArgs;
+    
+    BadArgs eo = BadArgs();
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj9",
+			description="Extra inputs/outputs to constructor/destructor",
+			errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9464, column 9:
+  An external object constructor must have exactly one output of the same type as the constructor
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9470, column 9:
+  An external object destructor must have exactly one input of the same type as the constructor, and no outputs
+")})));
+end TestExternalObj9;
+	
 
 model TestRuntimeOptions1
 	Real x = 1;

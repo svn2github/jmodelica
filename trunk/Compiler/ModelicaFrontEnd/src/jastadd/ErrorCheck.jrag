@@ -976,8 +976,10 @@ aspect InstanceErrorCheck {
 	    if (!errorChecked) {
 			super.collectErrors();
 	    	errorChecked = true;
-	    	if (!inFunction())
+	    	if (!inFunction()) {
 	    		getDestructorCall().collectErrors();
+	    		myInstClass().collectErrors();
+	    	}
 	    }
 	}
 	
