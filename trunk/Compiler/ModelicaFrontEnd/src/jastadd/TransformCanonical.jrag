@@ -4444,11 +4444,10 @@ aspect FunctionInlining {
 		 */
 		public void inline(List<FAbstractEquation> eqns) {
 			for (FAbstractEquation eqn : eqns) {
-				while (eqn.hasInlinableFunctions(this)) {
+				while (eqn != null && eqn.hasInlinableFunctions(this)) {
 					// Note that this will add new equations to eqns, so we depend on
 					// List.iterator() to handle that correctly.
 					eqn = eqn.inlineFunctions(this);
-//					fc.clearFlatNameBinding();
 				}
 			}
 		}
