@@ -9216,6 +9216,7 @@ end TransformCanonicalTests.StringFuncTest;
 
 end StringFuncTest;
 
+
 class MyExternalObject
  extends ExternalObject;
  
@@ -9230,9 +9231,9 @@ class MyExternalObject
  end destructor;
 end MyExternalObject;
 
+
 model TestExternalObj1
  MyExternalObject myEO = MyExternalObject();
-
 
 	annotation(__JModelica(UnitTesting(tests={ 
 		TransformCanonicalTestCase(
@@ -9261,6 +9262,22 @@ public
 end TransformCanonicalTests.TestExternalObj1;
 ")})));
 end TestExternalObj1;
+
+
+model TestExternalObj2
+	extends MyExternalObject;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj2",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9268, column 2:
+  Classed derived from ExternalObject can neither be used in an extends-clause nor in a short class defenition
+")})));
+end TestExternalObj2;
 
 
 model TestRuntimeOptions1
