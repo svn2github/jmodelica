@@ -145,10 +145,11 @@ aspect ComplianceCheck {
 			compliance("Modifiers of specific array elements are not supported");
 	}
 	
+	// This can be removed when a real name collision check is added
 	public void FClass.checkDuplicateVariables() {
-		for (String name : nonUniqueVars.keySet()) {
-			compliance("The variable " + name + " is declared multiple times and is not " +
-			            "identical to other declaration(s) with the same name.");
+		for (String name : nonUniqueVars) {
+			warning("The variable " + name + " is declared multiple times and can not " +
+			        "be verified to be identical to other declaration(s) with the same name.");
 		}
 
 	}

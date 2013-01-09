@@ -82,6 +82,7 @@ aspect Flattening {
 		}
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
+		fc.removeUniqueFVariableSet();
 		createAndFlattenResidualPairs(fc);
 		flattenUsedFuncsAndEnums(fc);
 		flattenInstClassDeclExtra(fc);
@@ -1145,17 +1146,23 @@ aspect InstNodeInterface {
 
 aspect UniqueVariables {
 
-	public HashMap<String,FVariable> FClass.uniqueVars = new HashMap<String,FVariable>();
-	public HashMap<String,FVariable> FClass.nonUniqueVars = new HashMap<String,FVariable>();	
+	public Set<String> FClass.uniqueVars = new HashSet<String>();
+	// This can be removed when a real name collision check is added
+	public Set<String> FClass.nonUniqueVars = new HashSet<String>();
 	
 	public void FClass.addUniqueFVariable(FVariable fv) {
-		if (!uniqueVars.containsKey(fv.name())) {
-			uniqueVars.put(fv.name(),fv);
+		if (uniqueVars.add(fv.name())) {
 			addFVariableNoTransform(fv);
-		} else if (!uniqueVars.get(fv.name()).prettyPrint("").equals(fv.prettyPrint(""))) {
-			nonUniqueVars.put(fv.name(),fv);
+		} else {
+			// This can be removed when a real name collision check is added
+			nonUniqueVars.add(fv.name());
 		}
 	}
+	
+	public void FClass.removeUniqueFVariableSet() {
+		uniqueVars = null;
+	}
+	
 }
 
 aspect FlatExpressions {

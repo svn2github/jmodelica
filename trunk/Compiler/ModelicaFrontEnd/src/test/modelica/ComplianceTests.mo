@@ -377,24 +377,23 @@ Compliance error at line 364, column 14:
 ")})));
 end ArrayCellMod_ComplErr;
 
-model DuplicateVariables_ComplErr
+
+model DuplicateVariables_Warn
   Real x(start=1) = 1;
   Real x = 1;
 
-
 	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="DuplicateVariables_ComplErr",
-			enable_structural_diagnosis=false,
-			description="Compliance error test checking for duplicate variables",
+		WarningTestCase(
+			name="DuplicateVariables_Warn",
+			description="",
 			errorMessage="
-0 error(s), 1 compliance error(s) and 0 warning(s) found:
-
-Error: in file 'ComplianceTests.DuplicateVariables_ComplErr.mof':
-Compliance error at line 0, column 0:
-  The variable x is declared multiple times and is not identical to other declaration(s) with the same name.
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+At line 0, column 0:
+  The variable x is declared multiple times and can not be verified to be identical to other declaration(s) with the same name.
 ")})));
-end DuplicateVariables_ComplErr;
+end DuplicateVariables_Warn;
+
 
 model HybridNonFMU1
 Real xx(start=2);
