@@ -148,6 +148,7 @@ abstract public class TestAnnotationizerHelper {
 		System.out.println("    -w           write result to file instead of stdout");
 		System.out.println("    -m/-o        create annotation for Modelica/Optimica (default is infer from file path)");
 		System.out.println("    -r           regenerate an already present annotation");
+		System.out.println("    -e           repeat process until an empty classname is given, incompatible with -c");
 		System.out.println("    -t=<type>    set type of test, a unique prefix is enough, e.g. Err for ErrorTestCase");
 		System.out.println("    -c=<class>   set name of class to generate annotation for, if name ");
 		System.out.println("                 does not contain a dot, base name of .mo file is prepended");

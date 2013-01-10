@@ -72,6 +72,7 @@ public class TestAnnotationizer {
 		String data = null;
 		boolean write = false;
 		boolean regenerate = false;
+		boolean repeat = false;
 		Lang lang = Lang.none;
 		String opts = null;
 		
@@ -89,6 +90,8 @@ public class TestAnnotationizer {
 				write = true;
 			else if (arg.equals("-r")) 
 				regenerate = true;
+			else if (arg.equals("-e")) 
+				repeat = true;
 			else if (arg.equals("-h")) 
 				usageError(0);
 			else if (arg.equals("-o")) 
@@ -103,28 +106,48 @@ public class TestAnnotationizer {
 				description += " " + arg;
 		}
 		
+		if (repeat && modelName != null) {
+			System.err.println("Cannot use -e when giving classname on command line.");
+			System.exit(1);
+		}
+		
 		description = description.trim();
-		modelName = composeModelName(getPackageName(filePath), modelName);
+		String packageName = getPackageName(filePath);
+		modelName = composeModelName(packageName, modelName);
 		if (lang == Lang.none)
 			lang = filePath.contains("Optimica") ? Lang.optimica : Lang.modelica;
 		boolean optimica = lang == Lang.optimica;
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-		if (!modelName.contains(".")) {
-			System.out.print("Enter class name: ");
-			System.out.flush();
-			modelName = composeModelName(modelName, in.readLine().trim());
-		}
 		
-		if (regenerate) {
-			doRegenerate(optimica, filePath, modelName, write);
-		} else {
-			if (testType == null) {
-				System.out.print("Enter type of test: ");
+		boolean cont = true;
+		while (cont) {
+			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+			if (!modelName.contains(".")) {
+				System.out.print("Enter class name: ");
 				System.out.flush();
-				testType = in.readLine().trim();			
+				String given = in.readLine().trim();
+				if (given.isEmpty()) {
+					System.out.println("Empty modelname given, exiting.");
+					System.exit(0);
+				}
+				modelName = composeModelName(modelName, given);
 			}
 			
-			doAnnotation(optimica, filePath, testType, modelName, description, opts, data, write);
+			if (regenerate) {
+				doRegenerate(optimica, filePath, modelName, write);
+			} else {
+				if (testType == null) {
+					System.out.print("Enter type of test: ");
+					System.out.flush();
+					testType = in.readLine().trim();			
+				}
+				
+				doAnnotation(optimica, filePath, testType, modelName, description, opts, data, write);
+			}
+			
+			if (repeat) 
+				modelName = packageName;
+			else
+				cont = false;
 		}
 	}
 
