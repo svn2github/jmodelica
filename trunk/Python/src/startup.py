@@ -107,3 +107,143 @@ for _e in _defaults:
                 logging.warning('%s=%s path does not exist. An SUNDIALS installation could not be found, some modules and examples will therefore not work properly.\0' % (_e[0],environ[_e[0]]))
             else:
                 logging.warning('%s=%s path does not exist. Environment may be corrupt.' % (_e[0],environ[_e[0]]))
+
+def check_packages():
+    import sys, time
+    import pymodelica, pyjmi
+    
+    le=30
+    le_short=15
+    startstr = "Performing pymodelica/pyjmi package check"
+    sys.stdout.write("\n")
+    sys.stdout.write(startstr+" \n")
+    sys.stdout.write("="*len(startstr))
+    sys.stdout.write("\n\n")
+    sys.stdout.flush()
+    time.sleep(0.25)
+
+    # check os
+    platform = sys.platform
+    sys.stdout.write(
+        "%s %s" %("Platform".ljust(le,'.'),(str(platform)).ljust(le)+"\n\n"))
+    sys.stdout.flush()
+    time.sleep(0.25)
+    
+    #check python version
+    pyversion = sys.version.partition(" ")[0]
+    sys.stdout.write(
+        "%s %s" % ("Python version:".ljust(le,'.'),pyversion.ljust(le)))
+    sys.stdout.write("\n\n")
+    sys.stdout.flush()
+    time.sleep(0.25)
+    
+    #check pyjmi version
+    pyjmiversion = pyjmi.__version__
+    sys.stdout.write(
+        "%s %s" % ("pymodelica/pyjmi version:".ljust(le,'.'),pyjmiversion.ljust(le)))
+    sys.stdout.write("\n")
+    sys.stdout.flush()
+    time.sleep(0.25)
+    
+    import imp
+    # Test dependencies
+    sys.stdout.write("\n\n")
+    sys.stdout.write("Dependencies: \n\n".rjust(0))
+    modstr="Package"
+    verstr="Version"
+    sys.stdout.write("%s %s" % (modstr.ljust(le), verstr.ljust(le)))
+    sys.stdout.write("\n")
+    sys.stdout.write(
+        "%s %s" % (("-"*len(modstr)).ljust(le), ("-"*len(verstr)).ljust(le)))
+    sys.stdout.write("\n")
+
+    packages=["assimulo", "casadi", "Cython", "jpype", "lxml", "matplotlib", "nose", "numpy", "scipy", "wxPython"]
+    assimulo_path=os.path.join(pyjmi.environ['JMODELICA_HOME'],'Python', 'assimulo')
+    
+    if platform == "win32":
+        packages.append("pyreadline")
+        packages.append("setuptools")
+    
+    error_packages=[]
+    warning_packages=[]
+    fp = None
+    for package in packages:
+        try:
+            vers="--"
+            if package=='assimulo':
+                fp, path, desc = imp.find_module('problem', [assimulo_path])
+                mod = imp.load_module('problem', fp, path, desc)
+            else:    
+                fp, path, desc = imp.find_module(package)
+                mod = imp.load_module(package, fp, path, desc)
+                
+            try:
+                if package == "pyreadline":
+                    vers = mod.release.version
+                elif package == "lxml":
+                    from lxml import etree
+                    vers = etree.__version__
+                else:
+                    vers = mod.__version__
+            except AttributeError as e:
+                pass
+            sys.stdout.write("%s %s" %(package.ljust(le,'.'), vers.ljust(le)))
+        except ImportError as e:
+            if package == "nose" or package == "assimulo" or package == "casadi" or package == "wxPython":
+                sys.stdout.write("%s %s %s" % (package.ljust(le,'.'), vers.ljust(le_short), "Package missing - Warning issued, see details below".ljust(le_short)))
+                warning_packages.append(package)
+            else:
+                sys.stdout.write("%s %s %s " % (package.ljust(le,'.'), vers.ljust(le_short), "Package missing - Error issued, see details below.".ljust(le_short)))
+                error_packages.append(package)
+            pass
+        finally:
+            if fp:
+                fp.close()
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+        time.sleep(0.25)
+
+        
+    # Write errors and warnings
+    # are there any errors?
+    if len(error_packages) > 0:
+        sys.stdout.write("\n")
+        errtitle = "Errors"
+        sys.stdout.write("\n")
+        sys.stdout.write(errtitle+" \n")
+        sys.stdout.write("-"*len(errtitle))
+        sys.stdout.write("\n\n")
+        sys.stdout.write("The package(s): \n\n")
+        
+        for er in error_packages:
+            sys.stdout.write("   - "+str(er))
+            sys.stdout.write("\n")
+        sys.stdout.write("\n")
+        sys.stdout.write("could not be found. It is not possible to run \
+the pymodelica/pyjmi package without it/them.\n")
+    
+    if len(warning_packages) > 0:
+        sys.stdout.write("\n")
+        wartitle = "Warnings"
+        sys.stdout.write("\n")
+        sys.stdout.write(wartitle+" \n")
+        sys.stdout.write("-"*len(wartitle))
+        sys.stdout.write("\n\n")
+        
+        for w in warning_packages:
+            if w == 'assimulo':
+                sys.stdout.write("-- The package assimulo could not be found. \
+This package is needed to be able to simulate FMUs. Also, some of the examples \
+in pyfmi.examples will not work.")
+            elif w == 'wxPython':
+                sys.stdout.write("-- The package wxPython could not be found. \
+This package is needed to be able to use the plot-GUI.")
+            elif w == 'nose':
+                sys.stdout.write("-- The package nose could not be found. You will not be able \
+to run any tests in the tests_jmodelica package.")
+            elif w == 'casadi':
+                sys.stdout.write("-- The package casadi could not be found. This package is needed \
+to be able to use the casadi_interface module and run some of the examples \
+in the pyjmi.examples package")
+
+            sys.stdout.write("\n\n")
