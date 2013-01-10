@@ -1094,8 +1094,10 @@ aspect ConstantEvaluation {
 	  if (i == Index.NULL)
 		  for (Index j : arr.indices())
 			  res.setCell(j, arr.get(j).cevalCalc());
-	  else
+	  else if (size().isOKIndex(i))
 		  res.setCell(i, arr.get(i).cevalCalc());
+	  else
+		  throw new ConstantEvaluationException();
 	  return res;
   }
   // Bypass for nodes with inherent support for constant evaluation of arrays.

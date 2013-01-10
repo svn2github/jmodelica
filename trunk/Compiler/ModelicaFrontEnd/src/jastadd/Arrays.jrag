@@ -2220,6 +2220,24 @@ aspect ArrayHelpers {
 		}
 		
 		/**
+		 * Check if a given index fits within this size.
+		 * 
+		 * Unknown lengths are assumed to be long enough.
+		 */
+		public boolean isOKIndex(Index i) {
+			int[] ind = i.index();
+			if (size.length != ind.length)
+				return false;
+			for (int j = 0; j < size.length; j++) {
+				int a = ind[j];
+				int b = get(j);
+				if (a < 1 || (a > b && b != UNKNOWN))
+					return false;
+			}
+			return true;
+		}
+		
+		/**
 		 * \brief Check if the lengths in the given dimension has a value (fix length or integer).
 		 */
 		protected boolean hasValue(int dim) {
