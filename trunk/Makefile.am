@@ -39,13 +39,13 @@ install_casadi: casadi
 build-python-packages:
 if WITH_SUNDIALS
 if WITH_SUPERLU
-	cd $(abs_top_srcdir)/External/Assimulo; \
+	cd $(abs_top_srcdir)/external/Assimulo; \
 	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --lapack-home=$(abs_builddir)/ThirdParty/Lapack/ --prefix=$(assimulo_install_dir)
 endif
 endif
 if WITH_SUNDIALS
 if !WITH_SUPERLU
-	cd $(abs_top_srcdir)/External/Assimulo; \
+	cd $(abs_top_srcdir)/external/Assimulo; \
 	python setup.py install --sundials-home=$(SUNDIALS_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --lapack-home=$(abs_builddir)/ThirdParty/Lapack/ --prefix=$(assimulo_install_dir)
 endif
 endif
@@ -227,7 +227,7 @@ clean-local: clean-frontends clean-python-packages
 
 clean-python-packages:
 if WITH_SUNDIALS
-	cd $(abs_top_srcdir)/External/Assimulo; \
+	cd $(abs_top_srcdir)/external/Assimulo; \
 	python setup.py clean --all --sundials-home=$(SUNDIALS_HOME) 
 	rm -rf $(assimulo_install_dir) || echo  Could not remove $(assimulo_install_dir)
 endif
