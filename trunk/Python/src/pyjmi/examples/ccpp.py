@@ -182,6 +182,7 @@ def run_demo(with_plots=True):
         plt.plot(sim_time, sim_plant_p * 1e-6, lw=2)
         plt.ylabel('evaporator pressure [MPa]')
         plt.grid(True)
+        plt.legend(('optimized', 'simulated'), loc='lower right')
         plt.title('Verification')
         
         plt.subplot(3, 1, 2)
