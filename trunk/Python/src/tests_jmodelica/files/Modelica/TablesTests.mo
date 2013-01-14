@@ -40,4 +40,26 @@ package TablesTest
   connect(src1.y, modelicaTable2D.u1);
   connect(src2.y, modelicaTable2D.u2);
  end Table2DfromArray;
+ 
+ model Table1DfromFile
+  Modelica.Blocks.Sources.Sine sine(freqHz=1, amplitude=2);
+  Modelica.Blocks.Tables.CombiTable1D modelicaTable1D(
+    tableOnFile=true,
+    tableName="spring_data",
+    fileName="../Data/spring.tab");
+ equation
+  connect(sine.y, modelicaTable1D.u[1]);
+ end Table1DfromFile;
+ 
+ model Table2DfromFile
+  Modelica.Blocks.Sources.Sine sine(freqHz=1, amplitude=2);
+  Modelica.Blocks.Sources.Constant const(k=0.25);
+  Modelica.Blocks.Tables.CombiTable2D modelicaTable2D(
+    tableOnFile=true,
+    tableName="table2D",
+    fileName="../Data/table2.txt");
+ equation 
+  connect(sine.y, modelicaTable2D.u1);
+  connect(const.y, modelicaTable2D.u2);
+ end Table2DfromFile;
 end TablesTest;
