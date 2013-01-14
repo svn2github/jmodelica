@@ -500,6 +500,7 @@ aspect InstFunctionBinding {
 					if (externalObject)
 						accessName = accessName.copyAndAppend("constructor");
 					InstFunctionCall ifc = new InstFunctionCall(accessName, new List());
+					ifc.generated = externalObject || generated;
 					ifc.unbindableArgs = unbindableArgs;
 					ifc.bound = true;
 					n = ifc;
@@ -513,6 +514,7 @@ aspect InstFunctionBinding {
     	}
   	}
 	private boolean InstFunctionCall.bound = false;
+	public boolean InstFunctionCall.generated = false;
 	
 	
 	/**
@@ -537,6 +539,7 @@ aspect InstFunctionBinding {
     		
     		InstFunctionCall res = new InstVectorFunctionCall(getName(), getArgs(), dims);
     		res.vectorizationChecked = res.bound = true;
+    		res.generated = generated;
     		res.setLocation(this);
     		return res;
     	}

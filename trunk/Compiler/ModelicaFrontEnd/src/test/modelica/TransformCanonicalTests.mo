@@ -9471,6 +9471,31 @@ Semantic error at line 9470, column 9:
   An external object destructor must have exactly one input of the same type as the constructor, and no outputs
 ")})));
 end TestExternalObj9;
+
+
+model TestExternalObj10
+	MyExternalObject myEO = MyExternalObject.constructor();
+equation
+	MyExternalObject.constructor();
+	MyExternalObject.destructor(myEO);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj10",
+			description="",
+			errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9477, column 26:
+  Constructors and destructors for ExternalObjects can not be used directly
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9479, column 2:
+  Constructors and destructors for ExternalObjects can not be used directly
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 9480, column 2:
+  Constructors and destructors for ExternalObjects can not be used directly
+")})));
+end TestExternalObj10;
 	
 
 model TestRuntimeOptions1

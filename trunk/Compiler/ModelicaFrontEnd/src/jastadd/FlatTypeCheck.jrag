@@ -562,7 +562,8 @@ aspect FlatTypeCheck {
   eq InstFunctionCall.getArg().isDestructorArgument() = getName().myInstClassDecl().isDestructor();
   eq BaseNode.getChild().isDestructorArgument()       = false;
   
-  syn boolean InstClassDecl.isDestructor() = name().equals("destructor") && inExternalObject();
+  syn boolean InstClassDecl.isDestructor()  = name().equals("destructor") && inExternalObject();
+  syn boolean InstClassDecl.isConstructor() = name().equals("constructor") && inExternalObject();
   
   inh boolean InstClassDecl.inExternalObject();
   eq InstNode.getChild().inExternalObject() = isExternalObject();

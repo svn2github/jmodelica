@@ -86,6 +86,14 @@ aspect ContentCheck {
 			error("Classed derived from ExternalObject can neither be used in an extends-clause nor in a short class defenition");
 	}
 	
+	public void InstFunctionCall.contentCheck() {
+		if (!generated) {
+			InstClassDecl target = getName().myInstClassDecl();
+			if (target.isConstructor() || target.isDestructor())
+				error("Constructors and destructors for ExternalObjects can not be used directly");
+		}
+	}
+	
 	public void InstClassDecl.contentCheck() {
 		if (isExternalObject()) {
 			checkContentsOKInExternalObject();

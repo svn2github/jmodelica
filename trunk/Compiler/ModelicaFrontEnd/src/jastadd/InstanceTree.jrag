@@ -1205,7 +1205,9 @@ aspect InstanceTreeConstruction {
 		InstAccess name = getClassName().copyAndAppend("destructor");
 		List<InstFunctionArgument> args = new List<InstFunctionArgument>();
 		args.add(new InstPositionalArgument(0, createUseExp()));
-		FFunctionCallStmt stmt = new FFunctionCallStmt(new List(), new InstFunctionCall(name, args));
+		InstFunctionCall ifc = new InstFunctionCall(name, args);
+		ifc.generated = true;
+		FFunctionCallStmt stmt = new FFunctionCallStmt(new List(), ifc);
 		return stmt;
 	}
 
