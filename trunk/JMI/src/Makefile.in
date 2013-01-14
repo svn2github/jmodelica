@@ -102,11 +102,16 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libModelicaExternalC_la_LIBADD =
 am__libModelicaExternalC_la_SOURCES_DIST = ModelicaUtilities.h \
-	ModelicaUtilities.c ModelicaTables_JM.c jmtables.h jmtables.c
+	ModelicaUtilities.c \
+	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c \
+	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c \
+	ModelicaTables_JM.c jmtables.h jmtables.c
 @WITH_TABLES_TRUE@am__objects_1 = libModelicaExternalC_la-ModelicaTables_JM.lo \
 @WITH_TABLES_TRUE@	libModelicaExternalC_la-jmtables.lo
 am_libModelicaExternalC_la_OBJECTS =  \
-	libModelicaExternalC_la-ModelicaUtilities.lo $(am__objects_1)
+	libModelicaExternalC_la-ModelicaUtilities.lo \
+	libModelicaExternalC_la-ModelicaInternal.lo \
+	libModelicaExternalC_la-ModelicaStrings.lo $(am__objects_1)
 libModelicaExternalC_la_OBJECTS =  \
 	$(am_libModelicaExternalC_la_OBJECTS)
 libModelicaExternalC_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -480,7 +485,10 @@ libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
 #                                   ModelicaUtilities.h \
 #                                   ModelicaUtilities.c
 libModelicaExternalC_la_SOURCES = ModelicaUtilities.h \
-	ModelicaUtilities.c $(am__append_4)
+	ModelicaUtilities.c \
+	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c \
+	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c \
+	$(am__append_4)
 libModelicaExternalC_la_CFLAGS = -Wall -g -std=c89 -pedantic \
 	-I$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ \
 	$(am__append_5)
@@ -641,6 +649,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libModelicaExternalC_la-ModelicaInternal.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libModelicaExternalC_la-ModelicaStrings.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libModelicaExternalC_la-ModelicaTables_JM.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libModelicaExternalC_la-ModelicaUtilities.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libModelicaExternalC_la-jmtables.Plo@am__quote@
@@ -709,6 +719,20 @@ libModelicaExternalC_la-ModelicaUtilities.lo: ModelicaUtilities.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ModelicaUtilities.c' object='libModelicaExternalC_la-ModelicaUtilities.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libModelicaExternalC_la_CFLAGS) $(CFLAGS) -c -o libModelicaExternalC_la-ModelicaUtilities.lo `test -f 'ModelicaUtilities.c' || echo '$(srcdir)/'`ModelicaUtilities.c
+
+libModelicaExternalC_la-ModelicaInternal.lo: $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libModelicaExternalC_la_CFLAGS) $(CFLAGS) -MT libModelicaExternalC_la-ModelicaInternal.lo -MD -MP -MF $(DEPDIR)/libModelicaExternalC_la-ModelicaInternal.Tpo -c -o libModelicaExternalC_la-ModelicaInternal.lo `test -f '$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libModelicaExternalC_la-ModelicaInternal.Tpo $(DEPDIR)/libModelicaExternalC_la-ModelicaInternal.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c' object='libModelicaExternalC_la-ModelicaInternal.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libModelicaExternalC_la_CFLAGS) $(CFLAGS) -c -o libModelicaExternalC_la-ModelicaInternal.lo `test -f '$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c
+
+libModelicaExternalC_la-ModelicaStrings.lo: $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libModelicaExternalC_la_CFLAGS) $(CFLAGS) -MT libModelicaExternalC_la-ModelicaStrings.lo -MD -MP -MF $(DEPDIR)/libModelicaExternalC_la-ModelicaStrings.Tpo -c -o libModelicaExternalC_la-ModelicaStrings.lo `test -f '$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libModelicaExternalC_la-ModelicaStrings.Tpo $(DEPDIR)/libModelicaExternalC_la-ModelicaStrings.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c' object='libModelicaExternalC_la-ModelicaStrings.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libModelicaExternalC_la_CFLAGS) $(CFLAGS) -c -o libModelicaExternalC_la-ModelicaStrings.lo `test -f '$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c
 
 libModelicaExternalC_la-ModelicaTables_JM.lo: ModelicaTables_JM.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libModelicaExternalC_la_CFLAGS) $(CFLAGS) -MT libModelicaExternalC_la-ModelicaTables_JM.lo -MD -MP -MF $(DEPDIR)/libModelicaExternalC_la-ModelicaTables_JM.Tpo -c -o libModelicaExternalC_la-ModelicaTables_JM.lo `test -f 'ModelicaTables_JM.c' || echo '$(srcdir)/'`ModelicaTables_JM.c

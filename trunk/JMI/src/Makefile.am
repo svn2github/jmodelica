@@ -126,7 +126,9 @@ libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
 #                                   ModelicaUtilities.c
 
 libModelicaExternalC_la_SOURCES =  ModelicaUtilities.h \
-                                   ModelicaUtilities.c
+                                   ModelicaUtilities.c \
+                                   $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c \
+	                           $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c
 
 libModelicaExternalC_la_CFLAGS = -Wall -g -std=c89 -pedantic -I$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/
 if WITH_TABLES
