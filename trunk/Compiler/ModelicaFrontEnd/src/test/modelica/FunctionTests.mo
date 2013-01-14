@@ -225,7 +225,7 @@ fclass FunctionTests.FunctionFlatten3
  Real x;
  Real y = FunctionTests.TestFunction2(2, 3);
 equation
- x = FunctionTests.TestFunction1(( y ) * ( 2 ));
+ x = FunctionTests.TestFunction1(y * 2);
 
 public
  function FunctionTests.TestFunction2
@@ -1215,7 +1215,7 @@ public
   if i1 < 3 then
    o1 := 1;
   else
-   o1 := FunctionTests.TestFunctionRecursive(i1 - ( 1 )) + FunctionTests.TestFunctionRecursive(i1 - ( 2 ));
+   o1 := FunctionTests.TestFunctionRecursive(i1 - 1) + FunctionTests.TestFunctionRecursive(i1 - 2);
   end if;
   return;
  end FunctionTests.TestFunctionRecursive;
@@ -1900,11 +1900,10 @@ algorithm
  while x < 1 loop
   while x < 2 loop
    while x < 3 loop
-    x := x - ( 1 );
+    x := x - 1;
    end while;
   end while;
  end while;
-
 end FunctionTests.AlgorithmFlatten5;
 ")})));
 end AlgorithmFlatten5;
@@ -1924,12 +1923,11 @@ algorithm
 fclass FunctionTests.AlgorithmFlatten6
  Real x;
 algorithm
- for i in {1,2,4} loop
+ for i in {1, 2, 4} loop
   for j in 1:3 loop
-   x := x + ( i ) * ( j );
+   x := x + i * j;
   end for;
  end for;
-
 end FunctionTests.AlgorithmFlatten6;
 ")})));
 end AlgorithmFlatten6;
@@ -1953,7 +1951,7 @@ algorithm
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1363, column 5:
+Semantic error at line 1944, column 5:
   Type of test expression of if statement is not Boolean
 ")})));
 end AlgorithmTypeIf1;
@@ -2645,7 +2643,7 @@ public
   input Real i;
   output Real o;
  algorithm
-  o := ( i ) * ( 2 );
+  o := i * 2;
   return;
  end FunctionTests.AlgorithmTransformation7.algorithm_1;
 
@@ -3065,10 +3063,10 @@ public
   Real[2, 2] x;
  algorithm
   o := 1.0;
-  x[1,1] := ( 1 ) * ( 1 ) + ( 2 ) * ( 3 );
-  x[1,2] := ( 1 ) * ( 2 ) + ( 2 ) * ( 4 );
-  x[2,1] := ( 3 ) * ( 1 ) + ( 4 ) * ( 3 );
-  x[2,2] := ( 3 ) * ( 2 ) + ( 4 ) * ( 4 );
+  x[1,1] := 1 * 1 + 2 * 3;
+  x[1,2] := 1 * 2 + 2 * 4;
+  x[2,1] := 3 * 1 + 4 * 3;
+  x[2,2] := 3 * 2 + 4 * 4;
   return;
  end FunctionTests.ArrayExpInFunc2.f;
 
@@ -3141,10 +3139,10 @@ public
   Real[2, 2] x;
  algorithm
   o := 1.0;
-  x[1,1] := ( 1 ) * ( 1 ) + ( 2 ) * ( 3 );
-  x[1,2] := ( 1 ) * ( 2 ) + ( 2 ) * ( 4 );
-  x[2,1] := ( 3 ) * ( 1 ) + ( 4 ) * ( 3 );
-  x[2,2] := ( 3 ) * ( 2 ) + ( 4 ) * ( 4 );
+  x[1,1] := 1 * 1 + 2 * 3;
+  x[1,2] := 1 * 2 + 2 * 4;
+  x[2,1] := 3 * 1 + 4 * 3;
+  x[2,2] := 3 * 2 + 4 * 4;
   return;
  end FunctionTests.ArrayExpInFunc4.f;
 
@@ -3181,7 +3179,7 @@ model ArrayExpInFunc5
 fclass FunctionTests.ArrayExpInFunc5
  Real x;
 equation
- x = FunctionTests.ArrayExpInFunc5.f(( 1 ) * ( 1 ) + ( 2 ) * ( 2 ) + ( 3 ) * ( 3 ));
+ x = FunctionTests.ArrayExpInFunc5.f(1 * 1 + 2 * 2 + 3 * 3);
 
 public
  function FunctionTests.ArrayExpInFunc5.f
@@ -3190,7 +3188,7 @@ public
   Real x;
   Real y;
  algorithm
-  (x, y) := FunctionTests.ArrayExpInFunc5.f2(( 1 ) * ( 1 ) + ( 2 ) * ( 2 ) + ( 3 ) * ( 3 ));
+  (x, y) := FunctionTests.ArrayExpInFunc5.f2(1 * 1 + 2 * 2 + 3 * 3);
   o := a + x + y;
   return;
  end FunctionTests.ArrayExpInFunc5.f;
@@ -3342,9 +3340,9 @@ public
   o := 1.0;
   for i in 1:3 loop
    x[i] := i;
-   y[1] := ( 1 ) * ( 1 );
-   y[2] := ( 2 ) * ( 2 );
-   y[3] := ( 3 ) * ( 3 );
+   y[1] := 1 * 1;
+   y[2] := 2 * 2;
+   y[3] := 3 * 3;
   end for;
   return;
  end FunctionTests.ArrayExpInFunc8.f;
@@ -3392,7 +3390,7 @@ public
    x[2] := 2;
    x[3] := 3;
    x[y] := y;
-   y := y - ( 1 );
+   y := y - 1;
   end while;
   return;
  end FunctionTests.ArrayExpInFunc9.f;
@@ -3426,7 +3424,7 @@ fclass FunctionTests.ArrayOutputScalarization1
  Real y[1];
  Real y[2];
 equation
- ({x[1],x[2]}, {y[1],y[2]}) = FunctionTests.ArrayOutputScalarization1.f();
+ ({x[1], x[2]}, {y[1], y[2]}) = FunctionTests.ArrayOutputScalarization1.f();
 
 public
  function FunctionTests.ArrayOutputScalarization1.f
@@ -4081,8 +4079,8 @@ fclass FunctionTests.ArrayOutputScalarization14
  Real temp_1[1];
  Real temp_1[2];
 equation
- ({temp_1[1],temp_1[2]}) = FunctionTests.ArrayOutputScalarization14.f();
- x = ( temp_1[1] ) * ( 3 ) + ( temp_1[2] ) * ( 4 );
+ ({temp_1[1], temp_1[2]}) = FunctionTests.ArrayOutputScalarization14.f();
+ x = temp_1[1] * 3 + temp_1[2] * 4;
 
 public
  function FunctionTests.ArrayOutputScalarization14.f
@@ -4116,7 +4114,7 @@ equation
 			description="Scalarization of array function outputs: number of equations",
 			template="$n_equations$",
 			generatedCode="3"
-)})));
+ )})));
 end ArrayOutputScalarization15;
 
 
@@ -4252,7 +4250,7 @@ model ArrayOutputScalarization18
 fclass FunctionTests.ArrayOutputScalarization18
  Real x;
 equation
- x = FunctionTests.ArrayOutputScalarization18.f1({1,2});
+ x = FunctionTests.ArrayOutputScalarization18.f1({1, 2});
 
 public
  function FunctionTests.ArrayOutputScalarization18.f2
@@ -4260,7 +4258,7 @@ public
   output Real[size(a2, 1)] x2;
  algorithm
   for i1 in 1:size(x2, 1) loop
-   x2[i1] := ( 2 ) * ( a2[i1] );
+   x2[i1] := 2 * a2[i1];
   end for;
   return;
  end FunctionTests.ArrayOutputScalarization18.f2;
@@ -4275,7 +4273,7 @@ public
   (b1) := FunctionTests.ArrayOutputScalarization18.f2(a1);
   temp_1 := 0.0;
   for i1 in 1:size(a1, 1) loop
-   temp_1 := temp_1 + ( a1[i1] ) * ( b1[i1] );
+   temp_1 := temp_1 + a1[i1] * b1[i1];
   end for;
   x1 := temp_1;
   return;
@@ -4312,7 +4310,7 @@ model ArrayOutputScalarization19
 fclass FunctionTests.ArrayOutputScalarization19
  Real x;
 equation
- x = FunctionTests.ArrayOutputScalarization19.f1({1,2});
+ x = FunctionTests.ArrayOutputScalarization19.f1({1, 2});
 
 public
  function FunctionTests.ArrayOutputScalarization19.f2
@@ -4320,7 +4318,7 @@ public
   output Real[size(a2, 1)] x2;
  algorithm
   for i1 in 1:size(x2, 1) loop
-   x2[i1] := ( 2 ) * ( a2[i1] );
+   x2[i1] := 2 * a2[i1];
   end for;
   return;
  end FunctionTests.ArrayOutputScalarization19.f2;
@@ -4372,7 +4370,7 @@ fclass FunctionTests.ArrayOutputScalarization20
  Real x.b[1];
  Real x.b[2];
 equation
- (FunctionTests.ArrayOutputScalarization20.R(x.a, {x.b[1],x.b[2]})) = FunctionTests.ArrayOutputScalarization20.f1(1);
+ (FunctionTests.ArrayOutputScalarization20.R(x.a, {x.b[1], x.b[2]})) = FunctionTests.ArrayOutputScalarization20.f1(1);
 
 public
  function FunctionTests.ArrayOutputScalarization20.f1
@@ -4785,7 +4783,7 @@ fclass FunctionTests.UnknownArray12
  Real x[1];
  Real x[2];
 equation
- ({x[1],x[2]}) = FunctionTests.UnknownArray12.f({1,2}, {3,4}, 5);
+ ({x[1], x[2]}) = FunctionTests.UnknownArray12.f({1, 2}, {3, 4}, 5);
 
 public
  function FunctionTests.UnknownArray12.f
@@ -4795,7 +4793,7 @@ public
   output Real[size(a, 1)] o;
  algorithm
   for i1 in 1:size(o, 1) loop
-   o[i1] := ( c ) * ( a[i1] ) + ( 2 ) * ( b[i1] );
+   o[i1] := c * a[i1] + 2 * b[i1];
   end for;
   return;
  end FunctionTests.UnknownArray12.f;
@@ -4825,7 +4823,7 @@ fclass FunctionTests.UnknownArray13
  Real x[1];
  Real x[2];
 equation
- ({x[1],x[2]}) = FunctionTests.UnknownArray13.f({1,2}, {3,4}, 5);
+ ({x[1], x[2]}) = FunctionTests.UnknownArray13.f({1, 2}, {3, 4}, 5);
 
 public
  function FunctionTests.UnknownArray13.f
@@ -4835,7 +4833,7 @@ public
   output Real[size(a, 1)] o;
  algorithm
   for i1 in 1:size(o, 1) loop
-   o[i1] := ( c ) * ( a[i1] ) + ( 2 ) * ( b[i1] );
+   o[i1] := c * a[i1] + 2 * b[i1];
   end for;
   return;
  end FunctionTests.UnknownArray13.f;
@@ -4866,7 +4864,7 @@ fclass FunctionTests.UnknownArray14
  Real x[2,1];
  Real x[2,2];
 equation
- ({{x[1,1],x[1,2]},{x[2,1],x[2,2]}}) = FunctionTests.UnknownArray14.f({{1,2},{3,4}}, {{5,6},{7,8}});
+ ({{x[1,1], x[1,2]}, {x[2,1], x[2,2]}}) = FunctionTests.UnknownArray14.f({{1, 2}, {3, 4}}, {{5, 6}, {7, 8}});
 
 public
  function FunctionTests.UnknownArray14.f
@@ -4879,7 +4877,7 @@ public
    for i2 in 1:size(o, 2) loop
     temp_1 := 0.0;
     for i3 in 1:size(a, 2) loop
-     temp_1 := temp_1 + ( a[i1,i3] ) * ( b[i3,i2] );
+     temp_1 := temp_1 + a[i1,i3] * b[i3,i2];
     end for;
     o[i1,i2] := temp_1;
    end for;
@@ -4910,7 +4908,7 @@ model UnknownArray15
 fclass FunctionTests.UnknownArray15
  Real x;
 equation
- x = FunctionTests.UnknownArray15.f({1,2}, {3,4});
+ x = FunctionTests.UnknownArray15.f({1, 2}, {3, 4});
 
 public
  function FunctionTests.UnknownArray15.f
@@ -4921,7 +4919,7 @@ public
  algorithm
   temp_1 := 0.0;
   for i1 in 1:size(a, 1) loop
-   temp_1 := temp_1 + ( a[i1] ) * ( b[i1] );
+   temp_1 := temp_1 + a[i1] * b[i1];
   end for;
   o := temp_1;
   return;
@@ -4953,7 +4951,7 @@ model UnknownArray16
 fclass FunctionTests.UnknownArray16
  Real x;
 equation
- x = FunctionTests.UnknownArray16.f({1,2}, {3,4});
+ x = FunctionTests.UnknownArray16.f({1, 2}, {3, 4});
 
 public
  function FunctionTests.UnknownArray16.f
@@ -4965,7 +4963,7 @@ public
   o := 1;
   temp_1 := 0.0;
   for i1 in 1:size(a, 1) loop
-   temp_1 := temp_1 + ( a[i1] ) * ( b[i1] );
+   temp_1 := temp_1 + a[i1] * b[i1];
   end for;
   if temp_1 < 4 then
    o := 2;
@@ -5009,7 +5007,7 @@ equation
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
- ({{x[1,1],x[1,2]},{x[2,1],x[2,2]}}) = FunctionTests.UnknownArray17.f({{y[1,1],y[1,2]},{y[2,1],y[2,2]}}, {{y[1,1],y[1,2]},{y[2,1],y[2,2]}}, {{y[1,1],y[1,2]},{y[2,1],y[2,2]}});
+ ({{x[1,1], x[1,2]}, {x[2,1], x[2,2]}}) = FunctionTests.UnknownArray17.f({{y[1,1], y[1,2]}, {y[2,1], y[2,2]}}, {{y[1,1], y[1,2]}, {y[2,1], y[2,2]}}, {{y[1,1], y[1,2]}, {y[2,1], y[2,2]}});
 
 public
  function FunctionTests.UnknownArray17.f
@@ -5026,9 +5024,9 @@ public
     for i3 in 1:size(b, 2) loop
      temp_2 := 0.0;
      for i4 in 1:size(a, 2) loop
-      temp_2 := temp_2 + ( a[i1,i4] ) * ( b[i4,i3] );
+      temp_2 := temp_2 + a[i1,i4] * b[i4,i3];
      end for;
-     temp_1 := temp_1 + ( temp_2 ) * ( c[i3,i2] );
+     temp_1 := temp_1 + temp_2 * c[i3,i2];
     end for;
     o[i1,i2] := temp_1;
    end for;
@@ -5062,7 +5060,7 @@ fclass FunctionTests.UnknownArray18
  Real x[1];
  Real x[2];
 equation
- ({x[1],x[2]}) = FunctionTests.UnknownArray18.f({1,2});
+ ({x[1], x[2]}) = FunctionTests.UnknownArray18.f({1, 2});
 
 public
  function FunctionTests.UnknownArray18.f
@@ -5163,7 +5161,7 @@ model UnknownArray21
 fclass FunctionTests.UnknownArray21
  Real x;
 equation
- x = FunctionTests.UnknownArray21.f({1,2}, {3,4});
+ x = FunctionTests.UnknownArray21.f({1, 2}, {3, 4});
 
 public
  function FunctionTests.UnknownArray21.f
@@ -5174,7 +5172,7 @@ public
  algorithm
   temp_1 := 0.0;
   for i1 in 1:size(b, 1) loop
-   temp_1 := temp_1 + ( a[i1] ) * ( b[i1] );
+   temp_1 := temp_1 + a[i1] * b[i1];
   end for;
   c := temp_1;
   return;
@@ -5203,7 +5201,7 @@ model UnknownArray22
 fclass FunctionTests.UnknownArray22
  Real x;
 equation
- x = FunctionTests.UnknownArray22.f({1,2}, {3,4});
+ x = FunctionTests.UnknownArray22.f({1, 2}, {3, 4});
 
 public
  function FunctionTests.UnknownArray22.f
@@ -5214,7 +5212,7 @@ public
  algorithm
   temp_1 := 0.0;
   for i1 in 1:size(b, 1) loop
-   temp_1 := temp_1 + ( a[i1] ) * ( b[i1] );
+   temp_1 := temp_1 + a[i1] * b[i1];
   end for;
   c := temp_1;
   return;
@@ -5243,7 +5241,7 @@ model UnknownArray23
 fclass FunctionTests.UnknownArray23
  Real x;
 equation
- x = FunctionTests.UnknownArray23.f({1,2,3});
+ x = FunctionTests.UnknownArray23.f({1, 2, 3});
 
 public
  function FunctionTests.UnknownArray23.f
@@ -5257,7 +5255,7 @@ public
    temp_2[1] := 1;
    temp_2[2] := 2;
    temp_2[3] := 3;
-   temp_1 := temp_1 + ( a[i1] ) * ( temp_2[i1] );
+   temp_1 := temp_1 + a[i1] * temp_2[i1];
   end for;
   c := temp_1;
   return;
@@ -5292,7 +5290,7 @@ fclass FunctionTests.UnknownArray24
  Real x[3,1];
  Real x[3,2];
 equation
- ({{x[1,1],x[1,2]},{x[2,1],x[2,2]},{x[3,1],x[3,2]}}) = FunctionTests.UnknownArray24.f({{5,6},{7,8},{9,0}});
+ ({{x[1,1], x[1,2]}, {x[2,1], x[2,2]}, {x[3,1], x[3,2]}}) = FunctionTests.UnknownArray24.f({{5, 6}, {7, 8}, {9, 0}});
 
 public
  function FunctionTests.UnknownArray24.f
@@ -5303,15 +5301,15 @@ public
  algorithm
   for i1 in 1:size(y, 1) loop
    for i2 in 1:size(y, 2) loop
-	temp_1 := 0.0;
-	for i3 in 1:2 loop
-	 temp_2[1,1] := 1;
-	 temp_2[1,2] := 2;
-	 temp_2[2,1] := 3;
-	 temp_2[2,2] := 4;
-	 temp_1 := temp_1 + ( x[i1,i3] ) * ( temp_2[i3,i2] );
-	end for;
-	y[i1,i2] := temp_1;
+    temp_1 := 0.0;
+    for i3 in 1:2 loop
+     temp_2[1,1] := 1;
+     temp_2[1,2] := 2;
+     temp_2[2,1] := 3;
+     temp_2[2,2] := 4;
+     temp_1 := temp_1 + x[i1,i3] * temp_2[i3,i2];
+    end for;
+    y[i1,i2] := temp_1;
    end for;
   end for;
   return;
@@ -5379,7 +5377,7 @@ model UnknownArray26
 fclass FunctionTests.UnknownArray26
  Real x;
 equation
- x = FunctionTests.UnknownArray26.f({1,2});
+ x = FunctionTests.UnknownArray26.f({1, 2});
 
 public
  function FunctionTests.UnknownArray26.f
@@ -5389,7 +5387,7 @@ public
  algorithm
   temp_1 := 0.0;
   for i1 in 1:size(y, 1) loop
-   temp_1 := temp_1 + ( y[i1] ) * ( y[i1] );
+   temp_1 := temp_1 + y[i1] * y[i1];
   end for;
   x := temp_1;
   return;
@@ -5419,7 +5417,7 @@ model UnknownArray27
 fclass FunctionTests.UnknownArray27
  Real x;
 equation
- x = FunctionTests.UnknownArray27.f({1,2}, {{1,2},{3,4}});
+ x = FunctionTests.UnknownArray27.f({1, 2}, {{1, 2}, {3, 4}});
 
 public
  function FunctionTests.UnknownArray27.f
@@ -5433,9 +5431,9 @@ public
   for i1 in 1:size(y, 1) loop
    temp_2 := 0.0;
    for i2 in 1:size(y, 1) loop
-    temp_2 := temp_2 + ( y[i2] ) * ( z[i1,i2] );
+    temp_2 := temp_2 + y[i2] * z[i1,i2];
    end for;
-   temp_1 := temp_1 + ( ( y[i1] ) * ( y[i1] ) ) / ( temp_2 );
+   temp_1 := temp_1 + y[i1] * y[i1] / temp_2;
   end for;
   x := temp_1;
   return;
@@ -5541,7 +5539,7 @@ model UnknownArray30
 fclass FunctionTests.UnknownArray30
  Real x;
 equation
- x = FunctionTests.UnknownArray30.f({1,2,3});
+ x = FunctionTests.UnknownArray30.f({1, 2, 3});
 
 public
  function FunctionTests.UnknownArray30.f
@@ -5552,11 +5550,11 @@ public
  algorithm
   temp_1 := 0.0;
   for i1 in 1:size(a, 1) loop
-   temp_1 := temp_1 + ( a[i1] ) * ( 1 );
+   temp_1 := temp_1 + a[i1] * 1;
   end for;
   temp_2 := 0.0;
   for i1 in 1:size(a, 1) loop
-   temp_2 := temp_2 + ( 0 ) * ( a[1] );
+   temp_2 := temp_2 + 0 * a[1];
   end for;
   b := temp_1 + temp_2;
   return;
@@ -5592,7 +5590,7 @@ fclass FunctionTests.UnknownArray31
  Real x[1];
  Real x[2];
 equation
- ({x[1],x[2]}) = FunctionTests.UnknownArray31.f2({1,2});
+ ({x[1], x[2]}) = FunctionTests.UnknownArray31.f2({1, 2});
 
 public
  function FunctionTests.UnknownArray31.f2
@@ -5608,7 +5606,7 @@ public
   output Real[size(a, 1)] b;
  algorithm
   for i1 in 1:size(b, 1) loop
-   b[i1] := ( 2 ) * ( a[i1] );
+   b[i1] := 2 * a[i1];
   end for;
   return;
  end FunctionTests.UnknownArray31.f1;
@@ -5650,7 +5648,7 @@ public
   size(c) := {1, size(a, 1)};
   for i1 in 1:size(c, 1) loop
    for i2 in 1:size(c, 2) loop
-    c[i1,i2] := ( 2 ) * ( a[i1,i2] );
+    c[i1,i2] := 2 * a[i1,i2];
    end for;
   end for;
   temp_1 := 0.0;
@@ -6715,7 +6713,7 @@ public
   input Real x;
   output Real y;
  algorithm
-  y := ( 2 ) * ( x );
+  y := 2 * x;
   return;
  end FunctionTests.VectorizedCall1.f;
 
@@ -6759,7 +6757,7 @@ public
   input Real x3;
   output Real y;
  algorithm
-  y := ( 2 ) * ( x1 ) + x2 + x3;
+  y := 2 * x1 + x2 + x3;
   return;
  end FunctionTests.VectorizedCall2.f;
 
@@ -6787,15 +6785,15 @@ model VectorizedCall3
 			description="Vectorization: vectorised array arg, constant",
 			flatModel="
 fclass FunctionTests.VectorizedCall3
- constant Real v[1,1] = (  - ( 1 ) ) * ( 1 );
- constant Real v[1,2] = (  - ( 1 ) ) * ( 2 );
- constant Real v[1,3] = (  - ( 1 ) ) * ( 3 );
- constant Real v[2,1] = (  - ( 1 ) ) * ( 4 );
- constant Real v[2,2] = (  - ( 1 ) ) * ( 5 );
- constant Real v[2,3] = (  - ( 1 ) ) * ( 6 );
- constant Real v[3,1] = (  - ( 1 ) ) * ( 7 );
- constant Real v[3,2] = (  - ( 1 ) ) * ( 8 );
- constant Real v[3,3] = (  - ( 1 ) ) * ( 9 );
+ constant Real v[1,1] = (- 1) * 1;
+ constant Real v[1,2] = (- 1) * 2;
+ constant Real v[1,3] = (- 1) * 3;
+ constant Real v[2,1] = (- 1) * 4;
+ constant Real v[2,2] = (- 1) * 5;
+ constant Real v[2,3] = (- 1) * 6;
+ constant Real v[3,1] = (- 1) * 7;
+ constant Real v[3,2] = (- 1) * 8;
+ constant Real v[3,3] = (- 1) * 9;
  constant Real w[1,1] = 1;
  constant Real w[1,2] = 2;
  constant Real w[1,3] = 3;
@@ -6810,10 +6808,10 @@ fclass FunctionTests.VectorizedCall3
  Real z[2,1];
  Real z[2,2];
 equation
- z[1,1] = FunctionTests.VectorizedCall3.f({{1.0,2.0,3.0},{4.0,5.0,6.0},{7.0,8.0,9.0}}, {{-1.0,-2.0,-3.0},{-4.0,-5.0,-6.0},{-7.0,-8.0,-9.0}});
- z[1,2] = FunctionTests.VectorizedCall3.f({{( 2 ) * ( 1.0 ),( 2 ) * ( 2.0 ),( 2 ) * ( 3.0 )},{( 2 ) * ( 4.0 ),( 2 ) * ( 5.0 ),( 2 ) * ( 6.0 )},{( 2 ) * ( 7.0 ),( 2 ) * ( 8.0 ),( 2 ) * ( 9.0 )}}, {{( 2 ) * ( -1.0 ),( 2 ) * ( -2.0 ),( 2 ) * ( -3.0 )},{( 2 ) * ( -4.0 ),( 2 ) * ( -5.0 ),( 2 ) * ( -6.0 )},{( 2 ) * ( -7.0 ),( 2 ) * ( -8.0 ),( 2 ) * ( -9.0 )}});
- z[2,1] = FunctionTests.VectorizedCall3.f({{( 3 ) * ( 1.0 ),( 3 ) * ( 2.0 ),( 3 ) * ( 3.0 )},{( 3 ) * ( 4.0 ),( 3 ) * ( 5.0 ),( 3 ) * ( 6.0 )},{( 3 ) * ( 7.0 ),( 3 ) * ( 8.0 ),( 3 ) * ( 9.0 )}}, {{( 3 ) * ( -1.0 ),( 3 ) * ( -2.0 ),( 3 ) * ( -3.0 )},{( 3 ) * ( -4.0 ),( 3 ) * ( -5.0 ),( 3 ) * ( -6.0 )},{( 3 ) * ( -7.0 ),( 3 ) * ( -8.0 ),( 3 ) * ( -9.0 )}});
- z[2,2] = FunctionTests.VectorizedCall3.f({{( 4 ) * ( 1.0 ),( 4 ) * ( 2.0 ),( 4 ) * ( 3.0 )},{( 4 ) * ( 4.0 ),( 4 ) * ( 5.0 ),( 4 ) * ( 6.0 )},{( 4 ) * ( 7.0 ),( 4 ) * ( 8.0 ),( 4 ) * ( 9.0 )}}, {{( 4 ) * ( -1.0 ),( 4 ) * ( -2.0 ),( 4 ) * ( -3.0 )},{( 4 ) * ( -4.0 ),( 4 ) * ( -5.0 ),( 4 ) * ( -6.0 )},{( 4 ) * ( -7.0 ),( 4 ) * ( -8.0 ),( 4 ) * ( -9.0 )}});
+ z[1,1] = FunctionTests.VectorizedCall3.f({{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}}, {{-1.0, -2.0, -3.0}, {-4.0, -5.0, -6.0}, {-7.0, -8.0, -9.0}});
+ z[1,2] = FunctionTests.VectorizedCall3.f({{2 * 1.0, 2 * 2.0, 2 * 3.0}, {2 * 4.0, 2 * 5.0, 2 * 6.0}, {2 * 7.0, 2 * 8.0, 2 * 9.0}}, {{2 * -1.0, 2 * -2.0, 2 * -3.0}, {2 * -4.0, 2 * -5.0, 2 * -6.0}, {2 * -7.0, 2 * -8.0, 2 * -9.0}});
+ z[2,1] = FunctionTests.VectorizedCall3.f({{3 * 1.0, 3 * 2.0, 3 * 3.0}, {3 * 4.0, 3 * 5.0, 3 * 6.0}, {3 * 7.0, 3 * 8.0, 3 * 9.0}}, {{3 * -1.0, 3 * -2.0, 3 * -3.0}, {3 * -4.0, 3 * -5.0, 3 * -6.0}, {3 * -7.0, 3 * -8.0, 3 * -9.0}});
+ z[2,2] = FunctionTests.VectorizedCall3.f({{4 * 1.0, 4 * 2.0, 4 * 3.0}, {4 * 4.0, 4 * 5.0, 4 * 6.0}, {4 * 7.0, 4 * 8.0, 4 * 9.0}}, {{4 * -1.0, 4 * -2.0, 4 * -3.0}, {4 * -4.0, 4 * -5.0, 4 * -6.0}, {4 * -7.0, 4 * -8.0, 4 * -9.0}});
 
 public
  function FunctionTests.VectorizedCall3.f
@@ -6828,7 +6826,7 @@ public
    for i2 in 1:size(x2, 2) loop
     temp_2 := 0.0;
     for i3 in 1:size(x2, 1) loop
-     temp_2 := temp_2 + ( x1[i1,i3] ) * ( x2[i3,i2] );
+     temp_2 := temp_2 + x1[i1,i3] * x2[i3,i2];
     end for;
     temp_1 := temp_1 + temp_2;
    end for;
@@ -6940,15 +6938,15 @@ fclass FunctionTests.VectorizedCall4
  Real z[2,1];
  Real z[2,2];
 equation
- v2[1,1,1,1] = (  - ( 1 ) ) * ( 1 );
- v2[1,1,1,2] = (  - ( 1 ) ) * ( 2 );
- v2[1,1,1,3] = (  - ( 1 ) ) * ( 3 );
- v2[1,1,2,1] = (  - ( 1 ) ) * ( 4 );
- v2[1,1,2,2] = (  - ( 1 ) ) * ( 5 );
- v2[1,1,2,3] = (  - ( 1 ) ) * ( 6 );
- v2[1,1,3,1] = (  - ( 1 ) ) * ( 7 );
- v2[1,1,3,2] = (  - ( 1 ) ) * ( 8 );
- v2[1,1,3,3] = (  - ( 1 ) ) * ( 9 );
+ v2[1,1,1,1] = (- 1) * 1;
+ v2[1,1,1,2] = (- 1) * 2;
+ v2[1,1,1,3] = (- 1) * 3;
+ v2[1,1,2,1] = (- 1) * 4;
+ v2[1,1,2,2] = (- 1) * 5;
+ v2[1,1,2,3] = (- 1) * 6;
+ v2[1,1,3,1] = (- 1) * 7;
+ v2[1,1,3,2] = (- 1) * 8;
+ v2[1,1,3,3] = (- 1) * 9;
  w2[1,1,1,1] = 1;
  w2[1,1,1,2] = 2;
  w2[1,1,1,3] = 3;
@@ -6958,64 +6956,64 @@ equation
  w2[1,1,3,1] = 7;
  w2[1,1,3,2] = 8;
  w2[1,1,3,3] = 9;
- v2[1,2,1,1] = ( 2 ) * ( v2[1,1,1,1] );
- v2[1,2,1,2] = ( 2 ) * ( v2[1,1,1,2] );
- v2[1,2,1,3] = ( 2 ) * ( v2[1,1,1,3] );
- v2[1,2,2,1] = ( 2 ) * ( v2[1,1,2,1] );
- v2[1,2,2,2] = ( 2 ) * ( v2[1,1,2,2] );
- v2[1,2,2,3] = ( 2 ) * ( v2[1,1,2,3] );
- v2[1,2,3,1] = ( 2 ) * ( v2[1,1,3,1] );
- v2[1,2,3,2] = ( 2 ) * ( v2[1,1,3,2] );
- v2[1,2,3,3] = ( 2 ) * ( v2[1,1,3,3] );
- v2[2,1,1,1] = ( 3 ) * ( v2[1,1,1,1] );
- v2[2,1,1,2] = ( 3 ) * ( v2[1,1,1,2] );
- v2[2,1,1,3] = ( 3 ) * ( v2[1,1,1,3] );
- v2[2,1,2,1] = ( 3 ) * ( v2[1,1,2,1] );
- v2[2,1,2,2] = ( 3 ) * ( v2[1,1,2,2] );
- v2[2,1,2,3] = ( 3 ) * ( v2[1,1,2,3] );
- v2[2,1,3,1] = ( 3 ) * ( v2[1,1,3,1] );
- v2[2,1,3,2] = ( 3 ) * ( v2[1,1,3,2] );
- v2[2,1,3,3] = ( 3 ) * ( v2[1,1,3,3] );
- v2[2,2,1,1] = ( 4 ) * ( v2[1,1,1,1] );
- v2[2,2,1,2] = ( 4 ) * ( v2[1,1,1,2] );
- v2[2,2,1,3] = ( 4 ) * ( v2[1,1,1,3] );
- v2[2,2,2,1] = ( 4 ) * ( v2[1,1,2,1] );
- v2[2,2,2,2] = ( 4 ) * ( v2[1,1,2,2] );
- v2[2,2,2,3] = ( 4 ) * ( v2[1,1,2,3] );
- v2[2,2,3,1] = ( 4 ) * ( v2[1,1,3,1] );
- v2[2,2,3,2] = ( 4 ) * ( v2[1,1,3,2] );
- v2[2,2,3,3] = ( 4 ) * ( v2[1,1,3,3] );
- w2[1,2,1,1] = ( 2 ) * ( w2[1,1,1,1] );
- w2[1,2,1,2] = ( 2 ) * ( w2[1,1,1,2] );
- w2[1,2,1,3] = ( 2 ) * ( w2[1,1,1,3] );
- w2[1,2,2,1] = ( 2 ) * ( w2[1,1,2,1] );
- w2[1,2,2,2] = ( 2 ) * ( w2[1,1,2,2] );
- w2[1,2,2,3] = ( 2 ) * ( w2[1,1,2,3] );
- w2[1,2,3,1] = ( 2 ) * ( w2[1,1,3,1] );
- w2[1,2,3,2] = ( 2 ) * ( w2[1,1,3,2] );
- w2[1,2,3,3] = ( 2 ) * ( w2[1,1,3,3] );
- w2[2,1,1,1] = ( 3 ) * ( w2[1,1,1,1] );
- w2[2,1,1,2] = ( 3 ) * ( w2[1,1,1,2] );
- w2[2,1,1,3] = ( 3 ) * ( w2[1,1,1,3] );
- w2[2,1,2,1] = ( 3 ) * ( w2[1,1,2,1] );
- w2[2,1,2,2] = ( 3 ) * ( w2[1,1,2,2] );
- w2[2,1,2,3] = ( 3 ) * ( w2[1,1,2,3] );
- w2[2,1,3,1] = ( 3 ) * ( w2[1,1,3,1] );
- w2[2,1,3,2] = ( 3 ) * ( w2[1,1,3,2] );
- w2[2,1,3,3] = ( 3 ) * ( w2[1,1,3,3] );
- w2[2,2,1,1] = ( 4 ) * ( w2[1,1,1,1] );
- w2[2,2,1,2] = ( 4 ) * ( w2[1,1,1,2] );
- w2[2,2,1,3] = ( 4 ) * ( w2[1,1,1,3] );
- w2[2,2,2,1] = ( 4 ) * ( w2[1,1,2,1] );
- w2[2,2,2,2] = ( 4 ) * ( w2[1,1,2,2] );
- w2[2,2,2,3] = ( 4 ) * ( w2[1,1,2,3] );
- w2[2,2,3,1] = ( 4 ) * ( w2[1,1,3,1] );
- w2[2,2,3,2] = ( 4 ) * ( w2[1,1,3,2] );
- w2[2,2,3,3] = ( 4 ) * ( w2[1,1,3,3] );
- z[1,1] = FunctionTests.VectorizedCall4.f({{w2[1,1,1,1],w2[1,1,1,2],w2[1,1,1,3]},{w2[1,1,2,1],w2[1,1,2,2],w2[1,1,2,3]},{w2[1,1,3,1],w2[1,1,3,2],w2[1,1,3,3]}}, {{v2[1,1,1,1],v2[1,1,1,2],v2[1,1,1,3]},{v2[1,1,2,1],v2[1,1,2,2],v2[1,1,2,3]},{v2[1,1,3,1],v2[1,1,3,2],v2[1,1,3,3]}});
- z[1,2] = FunctionTests.VectorizedCall4.f({{w2[1,2,1,1],w2[1,2,1,2],w2[1,2,1,3]},{w2[1,2,2,1],w2[1,2,2,2],w2[1,2,2,3]},{w2[1,2,3,1],w2[1,2,3,2],w2[1,2,3,3]}}, {{v2[1,2,1,1],v2[1,2,1,2],v2[1,2,1,3]},{v2[1,2,2,1],v2[1,2,2,2],v2[1,2,2,3]},{v2[1,2,3,1],v2[1,2,3,2],v2[1,2,3,3]}});
- z[2,1] = FunctionTests.VectorizedCall4.f({{w2[2,1,1,1],w2[2,1,1,2],w2[2,1,1,3]},{w2[2,1,2,1],w2[2,1,2,2],w2[2,1,2,3]},{w2[2,1,3,1],w2[2,1,3,2],w2[2,1,3,3]}}, {{v2[2,1,1,1],v2[2,1,1,2],v2[2,1,1,3]},{v2[2,1,2,1],v2[2,1,2,2],v2[2,1,2,3]},{v2[2,1,3,1],v2[2,1,3,2],v2[2,1,3,3]}});
- z[2,2] = FunctionTests.VectorizedCall4.f({{w2[2,2,1,1],w2[2,2,1,2],w2[2,2,1,3]},{w2[2,2,2,1],w2[2,2,2,2],w2[2,2,2,3]},{w2[2,2,3,1],w2[2,2,3,2],w2[2,2,3,3]}}, {{v2[2,2,1,1],v2[2,2,1,2],v2[2,2,1,3]},{v2[2,2,2,1],v2[2,2,2,2],v2[2,2,2,3]},{v2[2,2,3,1],v2[2,2,3,2],v2[2,2,3,3]}});
+ v2[1,2,1,1] = 2 * v2[1,1,1,1];
+ v2[1,2,1,2] = 2 * v2[1,1,1,2];
+ v2[1,2,1,3] = 2 * v2[1,1,1,3];
+ v2[1,2,2,1] = 2 * v2[1,1,2,1];
+ v2[1,2,2,2] = 2 * v2[1,1,2,2];
+ v2[1,2,2,3] = 2 * v2[1,1,2,3];
+ v2[1,2,3,1] = 2 * v2[1,1,3,1];
+ v2[1,2,3,2] = 2 * v2[1,1,3,2];
+ v2[1,2,3,3] = 2 * v2[1,1,3,3];
+ v2[2,1,1,1] = 3 * v2[1,1,1,1];
+ v2[2,1,1,2] = 3 * v2[1,1,1,2];
+ v2[2,1,1,3] = 3 * v2[1,1,1,3];
+ v2[2,1,2,1] = 3 * v2[1,1,2,1];
+ v2[2,1,2,2] = 3 * v2[1,1,2,2];
+ v2[2,1,2,3] = 3 * v2[1,1,2,3];
+ v2[2,1,3,1] = 3 * v2[1,1,3,1];
+ v2[2,1,3,2] = 3 * v2[1,1,3,2];
+ v2[2,1,3,3] = 3 * v2[1,1,3,3];
+ v2[2,2,1,1] = 4 * v2[1,1,1,1];
+ v2[2,2,1,2] = 4 * v2[1,1,1,2];
+ v2[2,2,1,3] = 4 * v2[1,1,1,3];
+ v2[2,2,2,1] = 4 * v2[1,1,2,1];
+ v2[2,2,2,2] = 4 * v2[1,1,2,2];
+ v2[2,2,2,3] = 4 * v2[1,1,2,3];
+ v2[2,2,3,1] = 4 * v2[1,1,3,1];
+ v2[2,2,3,2] = 4 * v2[1,1,3,2];
+ v2[2,2,3,3] = 4 * v2[1,1,3,3];
+ w2[1,2,1,1] = 2 * w2[1,1,1,1];
+ w2[1,2,1,2] = 2 * w2[1,1,1,2];
+ w2[1,2,1,3] = 2 * w2[1,1,1,3];
+ w2[1,2,2,1] = 2 * w2[1,1,2,1];
+ w2[1,2,2,2] = 2 * w2[1,1,2,2];
+ w2[1,2,2,3] = 2 * w2[1,1,2,3];
+ w2[1,2,3,1] = 2 * w2[1,1,3,1];
+ w2[1,2,3,2] = 2 * w2[1,1,3,2];
+ w2[1,2,3,3] = 2 * w2[1,1,3,3];
+ w2[2,1,1,1] = 3 * w2[1,1,1,1];
+ w2[2,1,1,2] = 3 * w2[1,1,1,2];
+ w2[2,1,1,3] = 3 * w2[1,1,1,3];
+ w2[2,1,2,1] = 3 * w2[1,1,2,1];
+ w2[2,1,2,2] = 3 * w2[1,1,2,2];
+ w2[2,1,2,3] = 3 * w2[1,1,2,3];
+ w2[2,1,3,1] = 3 * w2[1,1,3,1];
+ w2[2,1,3,2] = 3 * w2[1,1,3,2];
+ w2[2,1,3,3] = 3 * w2[1,1,3,3];
+ w2[2,2,1,1] = 4 * w2[1,1,1,1];
+ w2[2,2,1,2] = 4 * w2[1,1,1,2];
+ w2[2,2,1,3] = 4 * w2[1,1,1,3];
+ w2[2,2,2,1] = 4 * w2[1,1,2,1];
+ w2[2,2,2,2] = 4 * w2[1,1,2,2];
+ w2[2,2,2,3] = 4 * w2[1,1,2,3];
+ w2[2,2,3,1] = 4 * w2[1,1,3,1];
+ w2[2,2,3,2] = 4 * w2[1,1,3,2];
+ w2[2,2,3,3] = 4 * w2[1,1,3,3];
+ z[1,1] = FunctionTests.VectorizedCall4.f({{w2[1,1,1,1], w2[1,1,1,2], w2[1,1,1,3]}, {w2[1,1,2,1], w2[1,1,2,2], w2[1,1,2,3]}, {w2[1,1,3,1], w2[1,1,3,2], w2[1,1,3,3]}}, {{v2[1,1,1,1], v2[1,1,1,2], v2[1,1,1,3]}, {v2[1,1,2,1], v2[1,1,2,2], v2[1,1,2,3]}, {v2[1,1,3,1], v2[1,1,3,2], v2[1,1,3,3]}});
+ z[1,2] = FunctionTests.VectorizedCall4.f({{w2[1,2,1,1], w2[1,2,1,2], w2[1,2,1,3]}, {w2[1,2,2,1], w2[1,2,2,2], w2[1,2,2,3]}, {w2[1,2,3,1], w2[1,2,3,2], w2[1,2,3,3]}}, {{v2[1,2,1,1], v2[1,2,1,2], v2[1,2,1,3]}, {v2[1,2,2,1], v2[1,2,2,2], v2[1,2,2,3]}, {v2[1,2,3,1], v2[1,2,3,2], v2[1,2,3,3]}});
+ z[2,1] = FunctionTests.VectorizedCall4.f({{w2[2,1,1,1], w2[2,1,1,2], w2[2,1,1,3]}, {w2[2,1,2,1], w2[2,1,2,2], w2[2,1,2,3]}, {w2[2,1,3,1], w2[2,1,3,2], w2[2,1,3,3]}}, {{v2[2,1,1,1], v2[2,1,1,2], v2[2,1,1,3]}, {v2[2,1,2,1], v2[2,1,2,2], v2[2,1,2,3]}, {v2[2,1,3,1], v2[2,1,3,2], v2[2,1,3,3]}});
+ z[2,2] = FunctionTests.VectorizedCall4.f({{w2[2,2,1,1], w2[2,2,1,2], w2[2,2,1,3]}, {w2[2,2,2,1], w2[2,2,2,2], w2[2,2,2,3]}, {w2[2,2,3,1], w2[2,2,3,2], w2[2,2,3,3]}}, {{v2[2,2,1,1], v2[2,2,1,2], v2[2,2,1,3]}, {v2[2,2,2,1], v2[2,2,2,2], v2[2,2,2,3]}, {v2[2,2,3,1], v2[2,2,3,2], v2[2,2,3,3]}});
 
 public
  function FunctionTests.VectorizedCall4.f
@@ -7030,7 +7028,7 @@ public
    for i2 in 1:size(x2, 2) loop
     temp_2 := 0.0;
     for i3 in 1:size(x2, 1) loop
-     temp_2 := temp_2 + ( x1[i1,i3] ) * ( x2[i3,i2] );
+     temp_2 := temp_2 + x1[i1,i3] * x2[i3,i2];
     end for;
     temp_1 := temp_1 + temp_2;
    end for;
@@ -7085,7 +7083,7 @@ public
   input FunctionTests.VectorizedCall5.R x;
   output Real y;
  algorithm
-  y := ( 2 ) * ( x.a ) + x.b;
+  y := 2 * x.a + x.b;
   return;
  end FunctionTests.VectorizedCall5.f;
 
@@ -7123,7 +7121,7 @@ fclass FunctionTests.Lapack_dgeqpf
  Real tau[1];
  Real tau[2];
 equation
- ({{QR[1,1],QR[1,2]},{QR[2,1],QR[2,2]}}, {tau[1],tau[2]}, ) = Modelica.Math.Matrices.LAPACK.dgeqpf({{A[1,1],A[1,2]},{A[2,1],A[2,2]}});
+ ({{QR[1,1], QR[1,2]}, {QR[2,1], QR[2,2]}}, {tau[1], tau[2]}, ) = Modelica.Math.Matrices.LAPACK.dgeqpf({{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
  A[1,1] = 1;
  A[1,2] = 2;
  A[2,1] = 3;
@@ -7140,7 +7138,7 @@ public
   Integer ncol;
   Real[:] work;
  algorithm
-  size(work) := {( 3 ) * ( size(A, 2) )};
+  size(work) := {3 * size(A, 2)};
   for i1 in 1:size(QR, 1) loop
    for i2 in 1:size(QR, 2) loop
     QR[i1,i2] := A[i1,i2];
@@ -7186,7 +7184,7 @@ fclass FunctionTests.Lapack_QR
  Real R[2,1];
  Real R[2,2];
 equation
- ({{Q[1,1],Q[1,2]},{Q[2,1],Q[2,2]}}, {{R[1,1],R[1,2]},{R[2,1],R[2,2]}}, ) = Modelica.Math.Matrices.QR({{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, true);
+ ({{Q[1,1], Q[1,2]}, {Q[2,1], Q[2,2]}}, {{R[1,1], R[1,2]}, {R[2,1], R[2,2]}}, ) = Modelica.Math.Matrices.QR({{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, true);
  A[1,1] = 5;
  A[1,2] = 6;
  A[2,1] = 7;
@@ -7239,7 +7237,7 @@ public
   Integer ncol;
   Real[:] work;
  algorithm
-  size(work) := {( 3 ) * ( size(A, 2) )};
+  size(work) := {3 * size(A, 2)};
   for i1 in 1:size(QR, 1) loop
    for i2 in 1:size(QR, 2) loop
     QR[i1,i2] := A[i1,i2];
@@ -7259,7 +7257,7 @@ public
   output Real[size(A, 1), size(A, 2)] Aout;
   output Real[min(size(A, 1), size(A, 2))] tau;
   output Integer info;
-  output Real[( 3 ) * ( max(1, size(A, 2)) )] work;
+  output Real[3 * max(1, size(A, 2))] work;
   Integer m;
   Integer n;
   Integer lda;
@@ -7273,7 +7271,7 @@ public
   m := size(A, 1);
   n := size(A, 2);
   lda := max(1, m);
-  lwork := ( 3 ) * ( max(1, n) );
+  lwork := 3 * max(1, n);
   external \"FORTRAN 77\" dgeqrf(m, n, Aout, lda, tau, work, lwork, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgeqrf;
@@ -7287,14 +7285,14 @@ public
   Integer lwork;
   Real[:] work;
  algorithm
-  size(work) := {max(1, ( min(10, size(QR, 2)) ) * ( size(QR, 2) ))};
+  size(work) := {max(1, min(10, size(QR, 2)) * size(QR, 2))};
   for i1 in 1:size(Q, 1) loop
    for i2 in 1:size(Q, 2) loop
     Q[i1,i2] := QR[i1,i2];
    end for;
   end for;
   lda := max(1, size(Q, 1));
-  lwork := max(1, ( min(10, size(QR, 2)) ) * ( size(QR, 2) ));
+  lwork := max(1, min(10, size(QR, 2)) * size(QR, 2));
   external \"FORTRAN 77\" dorgqr(size(QR, 1), size(QR, 2), size(tau, 1), Q, lda, tau, work, lwork, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dorgqr;
@@ -7381,7 +7379,7 @@ equation
 	 result = Interpolate.interp(i);
 
 
-	annotation(__JModelica(UnitTesting(tests={ 
+	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="UseInterpolate",
 			description="",
@@ -7398,7 +7396,7 @@ public
   input Real u;
   output Real value;
  algorithm
-  value := ( u ) * ( 2 );
+  value := u * 2;
   return;
  end FunctionTests.Interpolate.interp;
 

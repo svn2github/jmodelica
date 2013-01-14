@@ -26,11 +26,10 @@ initial equation
  x = 1;
  y = 3;
 equation
- der(x) =  - ( x );
+ der(x) = - x;
  der(v) = 4;
  y + v = 1;
  w = 2;
-
 end TransformCanonicalTests.TransformCanonicalTest1;
 ")})));
 	end TransformCanonicalTest1;
@@ -50,17 +49,16 @@ end TransformCanonicalTests.TransformCanonicalTest1;
 			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest2
  parameter Real p6;
- parameter Real p5 = 5 /* 5.0 */;
+ parameter Real p5 = 5 /* 5 */;
  parameter Real p2;
  parameter Real p3;
  parameter Real p4;
- parameter Real p1 = 4 /* 4.0 */;
+ parameter Real p1 = 4 /* 4 */;
 parameter equation
  p6 = p5;
- p2 = ( p1 ) * ( p1 );
+ p2 = p1 * p1;
  p3 = p2 + p1;
- p4 = ( p3 ) * ( p3 );
-
+ p4 = p3 * p3;
 end TransformCanonicalTests.TransformCanonicalTest2;
 ")})));
   end TransformCanonicalTest2;
@@ -78,16 +76,16 @@ end TransformCanonicalTests.TransformCanonicalTest2;
 			name="TransformCanonical3_Err",
 			description="Test parameter sorting.",
 			errorMessage="
-3 errors found...
-Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 86, column 24:
-  Circularity in binding expression of parameter: p4 = ( p3 ) * ( p3 )
-Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 87, column 24:
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 69, column 24:
+  Circularity in binding expression of parameter: p4 = p3 * p3
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 70, column 24:
   Circularity in binding expression of parameter: p3 = p2 + p1
-Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 88, column 24:
-  Circularity in binding expression of parameter: p2 = ( p4 ) * ( p1 )
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 71, column 24:
+  Circularity in binding expression of parameter: p2 = p4 * p1
 ")})));
   end TransformCanonicalTest3_Err;
 
@@ -103,16 +101,17 @@ Semantic error at line 88, column 24:
 		ErrorTestCase(
 			name="TransformCanonical4_Err",
 			description="Test parameter sorting.",
-			errorMessage=" 3 errors found...
-Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 112, column 24:
-  Circularity in binding expression of parameter: p4 = ( p3 ) * ( p3 )
-Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 113, column 24:
+			errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 95, column 24:
+  Circularity in binding expression of parameter: p4 = p3 * p3
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 96, column 24:
   Circularity in binding expression of parameter: p3 = p2 + p1
-Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 114, column 24:
-  Circularity in binding expression of parameter: p2 = ( p1 ) * ( p2 )
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 97, column 24:
+  Circularity in binding expression of parameter: p2 = p1 * p2
 ")})));
   end TransformCanonicalTest4_Err;
 
@@ -138,16 +137,15 @@ fclass TransformCanonicalTests.TransformCanonicalTest5
  parameter Real p10;
  parameter Real p2;
  parameter Real p9;
- parameter Real p7 = 1 /* 1.0 */;
- parameter Real p5 = 1 /* 1.0 */;
- parameter Real p3 = 1 /* 1.0 */;
+ parameter Real p7 = 1 /* 1 */;
+ parameter Real p5 = 1 /* 1 */;
+ parameter Real p3 = 1 /* 1 */;
 parameter equation
- p11 = ( p7 ) * ( p5 );
- p8 = ( p7 ) * ( p3 );
- p10 = ( p11 ) * ( p3 );
+ p11 = p7 * p5;
+ p8 = p7 * p3;
+ p10 = p11 * p3;
  p2 = p11;
- p9 = ( p11 ) * ( p8 );
-
+ p9 = p11 * p8;
 end TransformCanonicalTests.TransformCanonicalTest5;
 ")})));
   end TransformCanonicalTest5;
@@ -252,10 +250,10 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="TransformCanonicalTest8",
-			generate_ode_jacobian=true,
 			description="Test that derivative functions are included in the flattened model if Jacobians are to be generated.",
+			generate_ode_jacobian=true,
 			flatModel="
-		 fclass TransformCanonicalTests.TransformCanonicalTest8
+fclass TransformCanonicalTests.TransformCanonicalTest8
  Real x1;
  Real x2;
 equation
@@ -267,7 +265,7 @@ public
   input Real x;
   output Real y;
  algorithm
-  y := ( TransformCanonicalTests.TransformCanonicalTest8.f1(x) ) * ( 2 );
+  y := TransformCanonicalTests.TransformCanonicalTest8.f1(x) * 2;
   return;
  end TransformCanonicalTests.TransformCanonicalTest8.f;
 
@@ -276,7 +274,7 @@ public
   input Real der_x;
   output Real der_y;
  algorithm
-  der_y := ( ( 2 ) * ( x ) ) * ( der_x );
+  der_y := 2 * x * der_x;
   return;
  end TransformCanonicalTests.TransformCanonicalTest8.f_der;
 
@@ -894,10 +892,9 @@ Alias sets:
 fclass TransformCanonicalTests.AliasTest22
  Real x1;
  Real x3;
-equation 
+equation
  x1 = 1;
- x3 = (  - ( x1 ) ) ^ 2;
-
+ x3 = (- x1) ^ 2;
 end TransformCanonicalTests.AliasTest22;
 ")})));
   end AliasTest22;
@@ -917,9 +914,8 @@ end TransformCanonicalTests.AliasTest22;
 			flatModel="
 fclass TransformCanonicalTests.AliasTest23
  Real x1;
-equation 
-  - ( der(x1) ) = 0;
-
+equation
+ - der(x1) = 0;
 end TransformCanonicalTests.AliasTest23;
 ")})));
   end AliasTest23;
@@ -1037,10 +1033,9 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.AliasTest28
  Real y;
- parameter Real p = 1 /* 1.0 */;
+ parameter Real p = 1 /* 1 */;
 equation
- y =  - ( p ) + 1;
-
+ y = - p + 1;
 end TransformCanonicalTests.AliasTest28;
 ")})));
 end AliasTest28;
@@ -1108,19 +1103,18 @@ fclass TransformCanonicalTests.AliasTest29
  Real mmr1;
  Real mmr3;
 equation
- pml3 + ( pml1 ) * ( pml1 ) = 0;
- cos(pml1) + ( pml3 ) * ( pml3 ) = 0;
- mpl3 + ( mpl1 ) * ( mpl1 ) = 0;
- cos(mpl1) + ( mpl3 ) * ( mpl3 ) = 0;
- mml3 + (  - ( mml1 ) ) * (  - ( mml1 ) ) = 0;
- cos(mml1) + ( mml3 ) * ( mml3 ) = 0;
- pmr3 + ( pmr1 ) * ( pmr1 ) = 0;
- cos(pmr1) + ( pmr3 ) * ( pmr3 ) = 0;
- mpr3 + ( mpr1 ) * ( mpr1 ) = 0;
- cos(mpr1) + ( mpr3 ) * ( mpr3 ) = 0;
- mmr3 + (  - ( mmr1 ) ) * (  - ( mmr1 ) ) = 0;
- cos(mmr1) + ( mmr3 ) * ( mmr3 ) = 0;
-
+ pml3 + pml1 * pml1 = 0;
+ cos(pml1) + pml3 * pml3 = 0;
+ mpl3 + mpl1 * mpl1 = 0;
+ cos(mpl1) + mpl3 * mpl3 = 0;
+ mml3 + (- mml1) * (- mml1) = 0;
+ cos(mml1) + mml3 * mml3 = 0;
+ pmr3 + pmr1 * pmr1 = 0;
+ cos(pmr1) + pmr3 * pmr3 = 0;
+ mpr3 + mpr1 * mpr1 = 0;
+ cos(mpr1) + mpr3 * mpr3 = 0;
+ mmr3 + (- mmr1) * (- mmr1) = 0;
+ cos(mmr1) + mmr3 * mmr3 = 0;
 end TransformCanonicalTests.AliasTest29;
 ")})));
 end AliasTest29;
@@ -1140,12 +1134,11 @@ equation
 			description="",
 			flatModel="
 fclass TransformCanonicalTests.AliasTest30
- parameter Boolean f = true;
+ parameter Boolean f = true /* true */;
  Real y;
- parameter Real p = 5;
+ parameter Real p = 5 /* 5 */;
 equation
- 0.0 =  - ( y );
-
+ 0.0 = - y;
 end TransformCanonicalTests.AliasTest30;
 ")})));
 end AliasTest30;
@@ -1477,10 +1470,9 @@ initial equation
  x2 = 2;
 equation
  der(x1) = x1 + x2 + y1;
- der(x2) = x1 - ( x2 ) + y2;
- y1 = ( 3 ) * ( x1 );
- y2 = ( 4 ) * ( x2 );
-
+ der(x2) = x1 - x2 + y2;
+ y1 = 3 * x1;
+ y2 = 4 * x2;
 end TransformCanonicalTests.InitialEqTest1;
 ")})));
   end InitialEqTest1;
@@ -1568,10 +1560,9 @@ initial equation
  x2 = 2;
 equation
  der(x1) = x1 + x2 + y1;
- der(x2) = x1 - ( x2 ) + y2;
- y1 = ( 3 ) * ( x1 );
- y2 = ( 4 ) * ( x2 );
-
+ der(x2) = x1 - x2 + y2;
+ y1 = 3 * x1;
+ y2 = 4 * x2;
 end TransformCanonicalTests.InitialEqTest3;
 ")})));
   end InitialEqTest3;
@@ -1602,10 +1593,9 @@ initial equation
  x2 = 2;
 equation
  der(x1) = x1 + x2 + y1;
- der(x2) = x1 - ( x2 ) + y2;
- y1 = ( 3 ) * ( x1 );
- y2 = ( 4 ) * ( x2 );
-
+ der(x2) = x1 - x2 + y2;
+ y1 = 3 * x1;
+ y2 = 4 * x2;
 end TransformCanonicalTests.InitialEqTest4;
 ")})));
   end InitialEqTest4;
@@ -1638,10 +1628,9 @@ initial equation
  x2 = 2;
 equation
  der(x1) = x1 + x2 + y1;
- der(x2) = x1 - ( x2 ) + y2;
- y1 = ( 3 ) * ( x1 );
- y2 = ( 4 ) * ( x2 );
-
+ der(x2) = x1 - x2 + y2;
+ y1 = 3 * x1;
+ y2 = 4 * x2;
 end TransformCanonicalTests.InitialEqTest5;
 ")})));
   end InitialEqTest5;
@@ -1675,10 +1664,9 @@ initial equation
  y2 = 0;
 equation
  der(x1) = x1 + x2 + y1;
- der(x2) = x1 - ( x2 ) + y2;
- y1 = ( 3 ) * ( x1 );
- y2 = ( 4 ) * ( x2 );
-
+ der(x2) = x1 - x2 + y2;
+ y1 = 3 * x1;
+ y2 = 4 * x2;
 end TransformCanonicalTests.InitialEqTest6;
 ")})));
   end InitialEqTest6;
@@ -1744,8 +1732,8 @@ fclass TransformCanonicalTests.InitialEqTest8
 initial equation 
  (x, y) = TransformCanonicalTests.f1(1, 2);
 equation
- der(x) =  - ( x );
- der(y) =  - ( y );
+ der(x) = - x;
+ der(y) = - y;
 
 public
  function TransformCanonicalTests.f1
@@ -1837,15 +1825,15 @@ fclass TransformCanonicalTests.InitialEqTest10
  Real y[3];
  Real y[4];
 initial equation 
- ({x[1],x[2],x[3]}, {y[1],y[2],y[3],y[4]}) = TransformCanonicalTests.f2({1,1,1}, {1,1,1,1});
+ ({x[1], x[2], x[3]}, {y[1], y[2], y[3], y[4]}) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
 equation
- der(x[1]) =  - ( x[1] );
- der(x[2]) =  - ( x[2] );
- der(x[3]) =  - ( x[3] );
- der(y[1]) =  - ( y[1] );
- der(y[2]) =  - ( y[2] );
- der(y[3]) =  - ( y[3] );
- der(y[4]) =  - ( y[4] );
+ der(x[1]) = - x[1];
+ der(x[2]) = - x[2];
+ der(x[3]) = - x[3];
+ der(y[1]) = - y[1];
+ der(y[2]) = - y[2];
+ der(y[3]) = - y[3];
+ der(y[4]) = - y[4];
 
 public
  function TransformCanonicalTests.f2
@@ -1890,12 +1878,12 @@ fclass TransformCanonicalTests.InitialEqTest11
  Real y[3];
  Real y[4];
 initial equation 
- ({x[1],x[2],x[3]}, ) = TransformCanonicalTests.f2({1,1,1}, {1,1,1,1});
+ ({x[1], x[2], x[3]}, ) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
 equation
- der(x[1]) =  - ( x[1] );
- der(x[2]) =  - ( x[2] );
- der(x[3]) =  - ( x[3] );
- (, {y[1],y[2],y[3],y[4]}) = TransformCanonicalTests.f2({1,1,1}, {1,1,1,1});
+ der(x[1]) = - x[1];
+ der(x[2]) = - x[2];
+ der(x[3]) = - x[3];
+ (, {y[1], y[2], y[3], y[4]}) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
 
 public
  function TransformCanonicalTests.f2
@@ -1942,10 +1930,10 @@ initial equation
  x[2] = 3;
  x[3] = 3;
 equation
- der(x[1]) =  - ( x[1] );
- der(x[2]) =  - ( x[2] );
- der(x[3]) =  - ( x[3] );
- (, {y[1],y[2],y[3],y[4]}) = TransformCanonicalTests.f2({1,1,1}, {1,1,1,1});
+ der(x[1]) = - x[1];
+ der(x[2]) = - x[2];
+ der(x[3]) = - x[3];
+ (, {y[1], y[2], y[3], y[4]}) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
 
 public
  function TransformCanonicalTests.f2
@@ -1987,9 +1975,8 @@ initial equation
  x1 = 1;
  x2 = 2;
 equation
- der(x1) =  - ( x1 );
+ der(x1) = - x1;
  der(x2) = x1;
-
 end TransformCanonicalTests.InitialEqTest13;
 ")})));
   end InitialEqTest13;
@@ -2261,7 +2248,7 @@ fclass TransformCanonicalTests.WhenEqu15
  discrete Real x[3];
  Real z[3];
 equation
- der(z[1:3]) = ( z[1:3] ) .* ( {0.1,0.2,0.3} );
+ der(z[1:3]) = z[1:3] .* {0.1, 0.2, 0.3};
  when {z[i] > 2 for i in 1:3} then
   x[1:3] = 1:3;
  elsewhen {z[i] < 0 for i in 1:3} then
@@ -2269,7 +2256,6 @@ equation
  elsewhen sum(z[1:3]) > 4.5 then
   x[1:3] = 7:9;
  end when;
-
 end TransformCanonicalTests.WhenEqu15;
 ")})));
 end WhenEqu15;
@@ -2308,9 +2294,9 @@ initial equation
  pre(x[2]) = 0.0;
  pre(x[3]) = 0.0;
 equation
- der(z[1]) = ( z[1] ) .* ( 0.1 );
- der(z[2]) = ( z[2] ) .* ( 0.2 );
- der(z[3]) = ( z[3] ) .* ( 0.3 );
+ der(z[1]) = z[1] .* 0.1;
+ der(z[2]) = z[2] .* 0.2;
+ der(z[3]) = z[3] .* 0.3;
  when {z[1] > 2, z[2] > 2, z[3] > 2} then
   x[1] = 1;
  elsewhen {z[1] < 0, z[2] < 0, z[3] < 0} then
@@ -2320,19 +2306,18 @@ equation
  end when;
  when {z[1] > 2, z[2] > 2, z[3] > 2} then
   x[2] = 2;
- elsewhen {z[1] < 0,z[2] < 0, z[3] < 0} then
+ elsewhen {z[1] < 0, z[2] < 0, z[3] < 0} then
   x[2] = 5;
  elsewhen z[1] + z[2] + z[3] > 4.5 then
   x[2] = 8;
  end when;
  when {z[1] > 2, z[2] > 2, z[3] > 2} then
   x[3] = 3;
- elsewhen {z[1] < 0,z[2] < 0, z[3] < 0} then
+ elsewhen {z[1] < 0, z[2] < 0, z[3] < 0} then
   x[3] = 6;
  elsewhen z[1] + z[2] + z[3] > 4.5 then
   x[3] = 9;
  end when;
-
 end TransformCanonicalTests.WhenEqu1;
 ")})));
 end WhenEqu1;
@@ -2381,7 +2366,7 @@ initial equation
  pre(v) = true;
  pre(z) = true;
 equation
- der(xx) =  - ( x );
+ der(xx) = - x;
  when y > 2 and pre(z) then
   w = false;
  end when;
@@ -2397,7 +2382,6 @@ equation
  when time > 1 and time < 1.1 or time > 2 and time < 2.1 or time > 3 and time < 3.1 then
   y = pre(y) + 1.1;
  end when;
-
 end TransformCanonicalTests.WhenEqu2;
 ")})));
 end WhenEqu2;
@@ -2450,7 +2434,7 @@ initial equation
  pre(z) = true;
  pre(b1) = false;
 equation
- der(xx) =  - ( x );
+ der(xx) = - x;
  when b1 and pre(z) then
   w = false;
  end when;
@@ -2467,7 +2451,6 @@ equation
   y = pre(y) + 1.1;
  end when;
  b1 = y > 2;
-
 end TransformCanonicalTests.WhenEqu3;
 ")})));
 end WhenEqu3;
@@ -2600,33 +2583,32 @@ end when;
 			description="Basic test of when equations",
 			flatModel="
 fclass TransformCanonicalTests.WhenEqu5
-Real x(start = 1);
-discrete Real a(start = 1.0);
-discrete Boolean z(start = false);
-discrete Boolean y(start = false);
-discrete Boolean h1;
-discrete Boolean h2;
+ Real x(start = 1);
+ discrete Real a(start = 1.0);
+ discrete Boolean z(start = false);
+ discrete Boolean y(start = false);
+ discrete Boolean h1;
+ discrete Boolean h2;
 initial equation 
-x = 1;
-pre(a) = 1.0;
-pre(z) = false;
-pre(y) = false;
-pre(h1) = false;
-pre(h2) = false;
+ x = 1;
+ pre(a) = 1.0;
+ pre(z) = false;
+ pre(y) = false;
+ pre(h1) = false;
+ pre(h2) = false;
 equation
-der(x) = ( a ) * ( x );
-h1 = x >= 2;
-h2 = der(x) >= 4;
-when h1 then
-y = true;
-end when;
-when y then
-a = 2;
-end when;
-when h2 then
-z = true;
-end when;
-
+ der(x) = a * x;
+ h1 = x >= 2;
+ h2 = der(x) >= 4;
+ when h1 then
+  y = true;
+ end when;
+ when y then
+  a = 2;
+ end when;
+ when h2 then
+  z = true;
+ end when;
 end TransformCanonicalTests.WhenEqu5;
 ")})));
 end WhenEqu5; 
@@ -2655,10 +2637,9 @@ initial equation
  pre(x) = 0;
 equation
  der(dummy) = 0;
- when dummy >  - ( 1 ) then
+ when dummy > - 1 then
   x = pre(x) + 1;
  end when;
-
 end TransformCanonicalTests.WhenEqu7;
 ")})));
 end WhenEqu7; 
@@ -2692,13 +2673,12 @@ initial equation
  pre(y) = 0.0;
 equation
  der(dummy) = 0;
- when sample(0, ( 1 ) / ( 3 )) then
+ when sample(0, 1 / 3) then
   x = pre(x) + 1;
  end when;
- when sample(0, ( 2 ) / ( 3 )) then
+ when sample(0, 2 / 3) then
   y = pre(y) + 1;
  end when;
-
 end TransformCanonicalTests.WhenEqu8;
 ")})));
 end WhenEqu8; 
@@ -2739,15 +2719,14 @@ initial equation
  pre(I) = 0.0;
  pre(u) = 0.0;
 equation
- der(x) =  - ( x ) + u;
+ der(x) = - x + u;
  when sample(0, h) then
-  I = pre(I) + ( h ) * ( ref - ( x ) );
+  I = pre(I) + h * (ref - x);
  end when;
  when sample(0, h) then
-  u = ( K ) * ( ref - ( x ) ) + ( ( 1 ) / ( Ti ) ) * ( I );
+  u = K * (ref - x) + 1 / Ti * I;
  end when;
- ref = (if time < 1 then 0 else 1);
-
+ ref = if time < 1 then 0 else 1;
 end TransformCanonicalTests.WhenEqu9;
 ")})));
 end WhenEqu9; 
@@ -2784,11 +2763,11 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.WhenEqu10
  discrete Boolean sampleTrigger;
- Real x_p(start = 1, fixed=true);
+ Real x_p(start = 1,fixed = true);
  Real u_p;
  discrete Real x_c;
  discrete Real u_c;
- parameter Real a_p =  - ( 1 ) /* -1 */;
+ parameter Real a_p = - 1 /* -1 */;
  parameter Real b_p = 1 /* 1 */;
  parameter Real c_p = 1 /* 1 */;
  parameter Real a_c = 0.8 /* 0.8 */;
@@ -2801,16 +2780,15 @@ initial equation
  pre(sampleTrigger) = false;
  pre(u_c) = 0.0;
 equation
- der(x_p) = ( a_p ) * ( x_p ) + ( b_p ) * ( u_p );
- u_p = ( c_c ) * ( x_c );
+ der(x_p) = a_p * x_p + b_p * u_p;
+ u_p = c_c * x_c;
  sampleTrigger = sample(0, h);
- when {initial(),sampleTrigger} then
-  u_c = ( c_p ) * ( x_p );
+ when {initial(), sampleTrigger} then
+  u_c = c_p * x_p;
  end when;
- when {initial(),sampleTrigger} then
-  x_c = ( a_c ) * ( pre(x_c) ) + ( b_c ) * ( u_c );
+ when {initial(), sampleTrigger} then
+  x_c = a_c * pre(x_c) + b_c * u_c;
  end when;
-
 end TransformCanonicalTests.WhenEqu10;
 ")})));
 end WhenEqu10;
@@ -2852,7 +2830,7 @@ fclass TransformCanonicalTests.WhenEqu11
  Real u_p;
  discrete Real x_c;
  discrete Real u_c;
- parameter Real a_p =  - ( 1 ) /* -1 */;
+ parameter Real a_p = - 1 /* -1 */;
  parameter Real b_p = 1 /* 1 */;
  parameter Real c_p = 1 /* 1 */;
  parameter Real a_c = 0.8 /* 0.8 */;
@@ -2867,17 +2845,16 @@ initial equation
  pre(u_c) = 0.0;
  pre(atInit) = false;
 equation
- der(x_p) = ( a_p ) * ( x_p ) + ( b_p ) * ( u_p );
- u_p = ( c_c ) * ( x_c );
+ der(x_p) = a_p * x_p + b_p * u_p;
+ u_p = c_c * x_c;
  sampleTrigger = sample(0, h);
- when {atInit,sampleTrigger} then
-  u_c = ( c_p ) * ( x_p );
+ when {atInit, sampleTrigger} then
+  u_c = c_p * x_p;
  end when;
- when {atInit,sampleTrigger} then
-  x_c = ( a_c ) * ( pre(x_c) ) + ( b_c ) * ( u_c );
+ when {atInit, sampleTrigger} then
+  x_c = a_c * pre(x_c) + b_c * u_c;
  end when;
  atInit = true and initial();
-
 end TransformCanonicalTests.WhenEqu11;
 ")})));
 end WhenEqu11;
@@ -3100,9 +3077,9 @@ initial equation
  pre(y[1]) = false;
  pre(y[2]) = false;
 equation
- x[1] = (if y[1] then 1 elseif y[2] then 4 else 7);
- x[2] = (if y[1] then 2 elseif y[2] then 5 else 8);
- x[3] = (if y[1] then 3 elseif y[2] then 6 else 9);
+ x[1] = if y[1] then 1 elseif y[2] then 4 else 7;
+ x[2] = if y[1] then 2 elseif y[2] then 5 else 8;
+ x[3] = if y[1] then 3 elseif y[2] then 6 else 9;
  y[1] = false;
  y[2] = true;
 end TransformCanonicalTests.IfEqu6;
@@ -3137,9 +3114,9 @@ initial equation
  pre(y[1]) = false;
  pre(y[2]) = false;
 equation
- x[1] = (if y[1] then 1 elseif y[2] then 4 else 7);
- x[2] = (if y[1] then 2 elseif y[2] then 5 else 8);
- x[3] = (if y[1] then 3 elseif y[2] then 6 else 9);
+ x[1] = if y[1] then 1 elseif y[2] then 4 else 7;
+ x[2] = if y[1] then 2 elseif y[2] then 5 else 8;
+ x[3] = if y[1] then 3 elseif y[2] then 6 else 9;
  y[1] = false;
  y[2] = true;
 end TransformCanonicalTests.IfEqu7;
@@ -3206,8 +3183,8 @@ fclass TransformCanonicalTests.IfEqu9
 initial equation 
  pre(y) = false;
 equation
- x[1] = (if y then 3 else 7);
- x[2] = (if y then 4 else 8);
+ x[1] = if y then 3 else 7;
+ x[2] = if y then 4 else 8;
  y = true;
 end TransformCanonicalTests.IfEqu9;
 ")})));
@@ -3240,8 +3217,8 @@ fclass TransformCanonicalTests.IfEqu10
 initial equation 
  pre(y) = false;
 equation
- x[1] = (if y then 3 else 5);
- x[2] = (if y then 4 else 6);
+ x[1] = if y then 3 else 5;
+ x[2] = if y then 4 else 6;
  y = true;
 end TransformCanonicalTests.IfEqu10;
 ")})));
@@ -3303,8 +3280,8 @@ fclass TransformCanonicalTests.IfEqu12
 initial equation 
  x = 1;
 equation
- u = (if time >= 1 then  - ( 1 ) else 1);
- der(x) =  - ( x ) + u;
+ u = if time >= 1 then - 1 else 1;
+ der(x) = - x + u;
 end TransformCanonicalTests.IfEqu12;
 ")})));
   end IfEqu12;
@@ -3329,11 +3306,11 @@ end TransformCanonicalTests.IfEqu12;
 fclass TransformCanonicalTests.IfEqu13
  Real x(start = 1);
  Real u;
-initial equation
+initial equation 
  x = 1;
 equation
- der(x) = (if time >= 1 then (  - ( 3 ) ) * ( x ) + u else ( 3 ) * ( x ) + u);
- u = (if time >= 1 then  - ( 1 ) else 1);
+ der(x) = if time >= 1 then (- 3) * x + u else 3 * x + u;
+ u = if time >= 1 then - 1 else 1;
 end TransformCanonicalTests.IfEqu13;
 ")})));
   end IfEqu13;
@@ -3366,8 +3343,8 @@ fclass TransformCanonicalTests.IfEqu14
 initial equation 
  x = 1;
 equation
- der(x) = (if time >= 1 then (if time >= 3 then (  - ( 3 ) ) * ( x ) + u else 0) else ( 3 ) * ( x ) + u);
- u = (if time >= 1 then (if time >= 3 then  - ( 1 ) else 4) else 1);
+ der(x) = if time >= 1 then if time >= 3 then (- 3) * x + u else 0 else 3 * x + u;
+ u = if time >= 1 then if time >= 3 then - 1 else 4 else 1;
 end TransformCanonicalTests.IfEqu14;
 ")})));
   end IfEqu14;
@@ -3407,10 +3384,10 @@ fclass TransformCanonicalTests.IfEqu15
  Real z1;
  Real z2;
 equation
- x = (if time < 1 then ( y ) * ( y ) elseif time < 3 then y + 4 else 4);
- y = (if time < 1 then z2 - ( 1 ) elseif time < 3 then 2 else x + 2);
- 0.0 = (if time < 1 then z1 - ( 2 ) else z2 - ( (if time < 3 then ( y ) * ( x ) else ( 4 ) * ( x )) ));
- 0.0 = (if time < 1 then z1 + z2 - ( x + y ) elseif time < 3 then z1 - ( z2 ) - ( x + y ) else z1 + z2 - ( x - ( y ) ));
+ x = if time < 1 then y * y elseif time < 3 then y + 4 else 4;
+ y = if time < 1 then z2 - 1 elseif time < 3 then 2 else x + 2;
+ 0.0 = if time < 1 then z1 - 2 else z2 - (if time < 3 then y * x else 4 * x);
+ 0.0 = if time < 1 then z1 + z2 - (x + y) elseif time < 3 then z1 - z2 - (x + y) else z1 + z2 - (x - y);
 end TransformCanonicalTests.IfEqu15;
 ")})));
   end IfEqu15;
@@ -3450,10 +3427,10 @@ fclass TransformCanonicalTests.IfEqu16
  Real z1;
  Real z2;
 equation
- x = (if time < 1 then ( y ) * ( y ) else 4);
- y = (if time < 1 then z2 - ( 1 ) elseif time < 3 then 2 else x + 2);
- 0.0 = (if time < 1 then z1 - ( 2 ) elseif time < 3 then z1 - ( ( y ) * ( x ) ) else z2 - ( ( 4 ) * ( x ) ));
- 0.0 = (if time < 1 then z1 + z2 - ( x + y ) else z1 + z2 - ( x - ( y ) ));
+ x = if time < 1 then y * y else 4;
+ y = if time < 1 then z2 - 1 elseif time < 3 then 2 else x + 2;
+ 0.0 = if time < 1 then z1 - 2 elseif time < 3 then z1 - y * x else z2 - 4 * x;
+ 0.0 = if time < 1 then z1 + z2 - (x + y) else z1 + z2 - (x - y);
 end TransformCanonicalTests.IfEqu16;
 ")})));
   end IfEqu16;
@@ -3559,11 +3536,10 @@ initial equation
  pre(x) = 0.0;
 equation
  when sample(1, 0) then
-  x = (if time >= 3 then pre(x) + 1 else pre(x) + 5);
+  x = if time >= 3 then pre(x) + 1 else pre(x) + 5;
  end when;
 end TransformCanonicalTests.IfEqu19;
-		 
-		 ")})));
+")})));
   end IfEqu19;
 
 model IfEqu20
@@ -3580,14 +3556,14 @@ equation
 			name="IfEqu20",
 			description="Check that parameter if equations are rewritten in initial equation sections.",
 			flatModel="
-		 fclass TransformCanonicalTests.IfEqu20
+fclass TransformCanonicalTests.IfEqu20
  Real x;
 initial equation 
  x = 3;
 equation
- der(x) =  - ( x );
+ der(x) = - x;
 end TransformCanonicalTests.IfEqu20;
-		 ")})));	
+")})));
 end IfEqu20;
 
 model IfEqu21
@@ -3606,14 +3582,14 @@ equation
 			name="IfEqu21",
 			description="Check that variable if equations are rewritten in initial equation sections.",
 			flatModel="
-		 fclass TransformCanonicalTests.IfEqu21
+fclass TransformCanonicalTests.IfEqu21
  Real x;
 initial equation 
- x = (if time >= 3 then 3 else 4);
+ x = if time >= 3 then 3 else 4;
 equation
- der(x) =  - ( x );
+ der(x) = - x;
 end TransformCanonicalTests.IfEqu21;
-		 ")})));	
+")})));
 end IfEqu21;
 
 
@@ -3652,9 +3628,9 @@ fclass TransformCanonicalTests.IfEqu22
 initial equation 
  pre(b) = false;
 equation
- x[1] = (if b then temp_1[1] else 0);
- x[2] = (if b then temp_1[2] else 0);
- ({temp_1[1],temp_1[2]}) = TransformCanonicalTests.IfEqu22.f({1,2});
+ x[1] = if b then temp_1[1] else 0;
+ x[2] = if b then temp_1[2] else 0;
+ ({temp_1[1], temp_1[2]}) = TransformCanonicalTests.IfEqu22.f({1, 2});
  b = true;
 
 public
@@ -3662,8 +3638,8 @@ public
   input Real[2] u;
   output Real[2] y;
  algorithm
-  u[1] := ( 2 ) * ( y[1] );
-  u[2] := ( 2 ) * ( y[2] );
+  u[1] := 2 * y[1];
+  u[2] := 2 * y[2];
   return;
  end TransformCanonicalTests.IfEqu22.f;
 
@@ -3712,8 +3688,8 @@ fclass TransformCanonicalTests.IfEqu23
  Real temp_2.x;
  Real temp_2.y;
 equation
- r.x = (if time > 1 then temp_1.x else temp_2.x);
- r.y = (if time > 1 then temp_1.y else temp_2.y);
+ r.x = if time > 1 then temp_1.x else temp_2.x;
+ r.y = if time > 1 then temp_1.y else temp_2.y;
  (TransformCanonicalTests.IfEqu23.R(temp_1.x, temp_1.y)) = TransformCanonicalTests.IfEqu23.F(x, y);
  (TransformCanonicalTests.IfEqu23.R(temp_2.x, temp_2.y)) = TransformCanonicalTests.IfEqu23.F(x + y, y);
  x = 1;
@@ -3764,7 +3740,7 @@ initial equation
  x1 = 1;
 equation
  der(x1) = sin(time);
- 0 = x1 - ( x2 ) + 2;
+ 0 = x1 - x2 + 2;
 end TransformCanonicalTests.IfEqu24;
 ")})));
 end IfEqu24;
@@ -3782,7 +3758,7 @@ equation
 fclass TransformCanonicalTests.IfExpLeft1
  Real x;
 equation
- (if time >= 1 then 1 else 0) = x;
+ if time >= 1 then 1 else 0 = x;
 end TransformCanonicalTests.IfExpLeft1;
 ")})));
 end IfExpLeft1;
@@ -3834,28 +3810,28 @@ end WhenVariability1;
 			description="Test of index reduction",
 			flatModel="
 fclass TransformCanonicalTests.IndexReduction1a_PlanarPendulum
-parameter Real L = 1 \"Pendulum length\" /* 1 */;
-parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
-Real x \"Cartesian x coordinate\";
-Real y \"Cartesian x coordinate\";
-Real vx \"Velocity in x coordinate\";
-Real lambda \"Lagrange multiplier\";
-Real der_y;
-Real der_vx;
-Real _der_x;
-Real der_2_y;
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x \"Cartesian x coordinate\";
+ Real y \"Cartesian x coordinate\";
+ Real vx \"Velocity in x coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ Real der_y;
+ Real der_vx;
+ Real _der_x;
+ Real der_2_y;
 initial equation 
-x = 0.0;
-_der_x = 0.0;
+ x = 0.0;
+ _der_x = 0.0;
 equation
-der(x) = vx;
-der_vx = ( lambda ) * ( x );
-der_2_y = ( lambda ) * ( y ) - ( g );
-x ^ 2 + y ^ 2 = L;
-( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
-der(_der_x) = der_vx;
-( ( 2 ) * ( x ) ) * ( der(_der_x) ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
-_der_x = der(x);
+ der(x) = vx;
+ der_vx = lambda * x;
+ der_2_y = lambda * y - g;
+ x ^ 2 + y ^ 2 = L;
+ 2 * x * der(x) + 2 * y * der_y = 0.0;
+ der(_der_x) = der_vx;
+ 2 * x * der(_der_x) + 2 * der(x) * der(x) + 2 * y * der_2_y + 2 * der_y * der_y = 0.0;
+ _der_x = der(x);
 end TransformCanonicalTests.IndexReduction1a_PlanarPendulum;
 ")})));
   end IndexReduction1a_PlanarPendulum;
@@ -3896,12 +3872,12 @@ initial equation
  _der_x = 0.0;
 equation
  der(x) = vx;
- der_vx = ( lambda ) * ( x );
- der_2_y + 0 = ( lambda ) * ( y ) - ( g );
+ der_vx = lambda * x;
+ der_2_y + 0 = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
- ( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
+ 2 * x * der(x) + 2 * y * der_y = 0.0;
  der(_der_x) = der_vx;
- ( ( 2 ) * ( x ) ) * ( der(_der_x) ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
+ 2 * x * der(_der_x) + 2 * der(x) * der(x) + 2 * y * der_2_y + 2 * der_y * der_y = 0.0;
  _der_x = der(x);
 end TransformCanonicalTests.IndexReduction1b_PlanarPendulum;
 ")})));
@@ -3958,7 +3934,7 @@ fclass TransformCanonicalTests.IndexReduction2_Mechanical
  Modelica.SIunits.AngularVelocity inertia3.w(fixed = true,start = 0,stateSelect = inertia3.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
  Modelica.SIunits.AngularAcceleration inertia3.a \"Absolute angular acceleration of component (= der(w))\";
  parameter Modelica.SIunits.RotationalDampingConstant damper.d(final min = 0,start = 0) \"Damping constant\";
- Modelica.SIunits.Angle damper.phi_rel(stateSelect = StateSelect.always,start = 0,nominal = (if damper.phi_nominal >= 1.0E-15 then damper.phi_nominal else 1)) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
+ Modelica.SIunits.Angle damper.phi_rel(stateSelect = StateSelect.always,start = 0,nominal = if damper.phi_nominal >= 1.0E-15 then damper.phi_nominal else 1) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
  Modelica.SIunits.AngularVelocity damper.w_rel(stateSelect = StateSelect.always,start = 0) \"Relative angular velocity (= der(phi_rel))\";
  Modelica.SIunits.AngularAcceleration damper.a_rel(start = 0) \"Relative angular acceleration (= der(w_rel))\";
  Modelica.SIunits.Torque damper.flange_b.tau \"Cut torque in the flange\";
@@ -3985,31 +3961,31 @@ parameter equation
  sine.amplitude = amplitude;
  sine.freqHz = freqHz;
 equation
- ( inertia1.J ) * ( inertia1.a ) =  - ( torque.flange.tau ) - ( idealGear.flange_a.tau );
- idealGear.phi_a = inertia1.phi - ( fixed.phi0 );
- idealGear.phi_b = inertia2.phi - ( fixed.phi0 );
- idealGear.phi_a = ( idealGear.ratio ) * ( idealGear.phi_b );
- 0 = ( idealGear.ratio ) * ( idealGear.flange_a.tau ) + idealGear.flange_b.tau;
- ( inertia2.J ) * ( inertia2.a ) =  - ( idealGear.flange_b.tau ) + inertia2.flange_b.tau;
- spring.flange_b.tau = ( spring.c ) * ( spring.phi_rel - ( spring.phi_rel0 ) );
- spring.phi_rel = inertia3.phi - ( inertia2.phi );
+ inertia1.J * inertia1.a = - torque.flange.tau- idealGear.flange_a.tau;
+ idealGear.phi_a = inertia1.phi - fixed.phi0;
+ idealGear.phi_b = inertia2.phi - fixed.phi0;
+ idealGear.phi_a = idealGear.ratio * idealGear.phi_b;
+ 0 = idealGear.ratio * idealGear.flange_a.tau + idealGear.flange_b.tau;
+ inertia2.J * inertia2.a = - idealGear.flange_b.tau + inertia2.flange_b.tau;
+ spring.flange_b.tau = spring.c * (spring.phi_rel - spring.phi_rel0);
+ spring.phi_rel = inertia3.phi - inertia2.phi;
  inertia3.w = inertia3.der(phi);
  inertia3.a = inertia3.der(w);
- ( inertia3.J ) * ( inertia3.a ) =  - ( spring.flange_b.tau ) + inertia3.flange_b.tau;
- damper.flange_b.tau = ( damper.d ) * ( damper.w_rel );
- damper.lossPower = ( damper.flange_b.tau ) * ( damper.w_rel );
- damper.phi_rel = fixed.phi0 - ( inertia2.phi );
+ inertia3.J * inertia3.a = - spring.flange_b.tau + inertia3.flange_b.tau;
+ damper.flange_b.tau = damper.d * damper.w_rel;
+ damper.lossPower = damper.flange_b.tau * damper.w_rel;
+ damper.phi_rel = fixed.phi0 - inertia2.phi;
  damper.w_rel = damper.der(phi_rel);
  damper.a_rel = damper.der(w_rel);
-  - ( torque.flange.tau ) = sine.offset + (if time < sine.startTime then 0 else ( sine.amplitude ) * ( sin(( ( ( 2 ) * ( 3.141592653589793 ) ) * ( sine.freqHz ) ) * ( time - ( sine.startTime ) ) + sine.phase) ));
-  - ( damper.flange_b.tau ) + inertia2.flange_b.tau - ( spring.flange_b.tau ) = 0;
- damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau - ( torque.flange.tau ) = 0;
+ - torque.flange.tau = sine.offset + (if time < sine.startTime then 0 else sine.amplitude * sin(2 * 3.141592653589793 * sine.freqHz * (time - sine.startTime) + sine.phase));
+ - damper.flange_b.tau + inertia2.flange_b.tau- spring.flange_b.tau = 0;
+ damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau- torque.flange.tau = 0;
  inertia3.flange_b.tau = 0;
- idealGear.support.tau =  - ( idealGear.flange_a.tau ) - ( idealGear.flange_b.tau );
- inertia1.w = ( idealGear.ratio ) * ( inertia2.w );
- inertia1.a = ( idealGear.ratio ) * ( inertia2.a );
- damper.der(phi_rel) =  - ( inertia2.w );
- damper.der(w_rel) =  - ( inertia2.a );
+ idealGear.support.tau = - idealGear.flange_a.tau - idealGear.flange_b.tau;
+ inertia1.w = idealGear.ratio * inertia2.w;
+ inertia1.a = idealGear.ratio * inertia2.a;
+ damper.der(phi_rel) = - inertia2.w;
+ damper.der(w_rel) = - inertia2.a;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -4080,23 +4056,22 @@ fclass TransformCanonicalTests.IndexReduction3_Electrical
 initial equation 
  iL = 1;
 equation
- u0 = ( 220 ) * ( sin(( time ) * ( omega )) );
- u1 = ( R[1] ) * ( i1 );
- uL = ( R[2] ) * ( i2 );
- uL = ( L ) * ( der(iL) );
- iC = ( C ) * ( der_uC );
+ u0 = 220 * sin(time * omega);
+ u1 = R[1] * i1;
+ uL = R[2] * i2;
+ uL = L * der(iL);
+ iC = C * der_uC;
  u0 = u1 + uL;
  uC = u1 + uL;
  i0 = i1 + iC;
  i1 = i2 + iL;
- der_u0 = ( 220 ) * ( ( cos(( time ) * ( omega )) ) * ( ( 1.0 ) * ( omega ) ) );
- der_u1 = ( R[1] ) * ( der_i1 );
- der_uL = ( R[2] ) * ( der_i2 );
+ der_u0 = 220 * cos(time * omega) * 1.0 * omega;
+ der_u1 = R[1] * der_i1;
+ der_uL = R[2] * der_i2;
  der_u0 = der_u1 + der_uL;
  der_uC = der_u1 + der_uL;
  der_i1 = der_i2 + der(iL);
 end TransformCanonicalTests.IndexReduction3_Electrical;
-		  
 ")})));
   end IndexReduction3_Electrical;
 
@@ -4197,7 +4172,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + cos(x2) = 0;
- der_x1 - ( ( sin(x2) ) * ( der(x2) ) ) = 0.0;
+ der_x1- sin(x2) * der(x2) = 0.0;
 end TransformCanonicalTests.IndexReduction6_Cos;
 ")})));
   end IndexReduction6_Cos;
@@ -4222,7 +4197,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + sin(x2) = 0;
- der_x1 + ( cos(x2) ) * ( der(x2) ) = 0.0;
+ der_x1 + cos(x2) * der(x2) = 0.0;
 end TransformCanonicalTests.IndexReduction7_Sin;
 ")})));
   end IndexReduction7_Sin;
@@ -4238,16 +4213,16 @@ equation
 			name="IndexReduction8_Neg",
 			description="Test of index reduction",
 			flatModel="
-fclass TransformCanonicalTests.IndexReduction8_Neg		 
-Real x1;
-Real x2(stateSelect=StateSelect.prefer);
-Real der_x1;
+fclass TransformCanonicalTests.IndexReduction8_Neg
+ Real x1;
+ Real x2(stateSelect = StateSelect.prefer);
+ Real der_x1;
 initial equation 
-x2 = 0.0;
+ x2 = 0.0;
 equation
-der_x1 + der(x2) = 1;
-- ( x1 ) + ( 2 ) * ( x2 ) = 0;
-- ( der_x1 ) + ( 2 ) * ( der(x2) ) = 0.0;
+ der_x1 + der(x2) = 1;
+ - x1 + 2 * x2 = 0;
+ - der_x1 + 2 * der(x2) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -4269,19 +4244,19 @@ equation
 			description="Test of index reduction",
 			flatModel="
 fclass TransformCanonicalTests.IndexReduction9_Exp
-Real x1;
-Real x2(stateSelect=StateSelect.prefer);
-parameter Real p = 2 /* 2 */;
-Real der_x1;
+ Real x1;
+ Real x2(stateSelect = StateSelect.prefer);
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
 initial equation 
-x2 = 0.0;
+ x2 = 0.0;
 equation
-der_x1 + der(x2) = 1;
-x1 + exp(( ( x2 ) * ( p ) ) * ( time )) = 0;
-der_x1 + ( exp(( ( x2 ) * ( p ) ) * ( time )) ) * ( ( ( x2 ) * ( p ) ) * ( 1.0 ) + ( ( der(x2) ) * ( p ) ) * ( time ) ) = 0.0;
+ der_x1 + der(x2) = 1;
+ x1 + exp(x2 * p * time) = 0;
+ der_x1 + exp(x2 * p * time) * (x2 * p * 1.0 + der(x2) * p * time) = 0.0;
 
 public
-type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end TransformCanonicalTests.IndexReduction9_Exp;
 ")})));
@@ -4309,7 +4284,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + tan(x2) = 0;
- der_x1 + ( der(x2) ) / ( ( cos(x2) ) ^ 2 ) = 0.0;
+ der_x1 + der(x2) / cos(x2) ^ 2 = 0.0;
 end TransformCanonicalTests.IndexReduction10_Tan;
 ")})));
   end IndexReduction10_Tan;
@@ -4336,7 +4311,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + asin(x2) = 0;
- der_x1 + ( der(x2) ) / ( sqrt(1 - ( x2 ^ 2 )) ) = 0.0;
+ der_x1 + der(x2) / sqrt(1 - x2 ^ 2) = 0.0;
 end TransformCanonicalTests.IndexReduction11_Asin;
 ")})));
   end IndexReduction11_Asin;
@@ -4363,7 +4338,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + acos(x2) = 0;
- der_x1 + (  - ( der(x2) ) ) / ( sqrt(1 - ( x2 ^ 2 )) ) = 0.0;
+ der_x1 + (- der(x2)) / sqrt(1 - x2 ^ 2) = 0.0;
 end TransformCanonicalTests.IndexReduction12_Acos;
 ")})));
   end IndexReduction12_Acos;
@@ -4390,7 +4365,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + atan(x2) = 0;
- der_x1 + ( der(x2) ) / ( 1 + x2 ^ 2 ) = 0.0;
+ der_x1 + der(x2) / (1 + x2 ^ 2) = 0.0;
 end TransformCanonicalTests.IndexReduction13_Atan;
 ")})));
   end IndexReduction13_Atan;
@@ -4433,7 +4408,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + sinh(x2) = 0;
- der_x1 + ( cosh(x2) ) * ( der(x2) ) = 0.0;
+ der_x1 + cosh(x2) * der(x2) = 0.0;
 end TransformCanonicalTests.IndexReduction15_Sinh;
 ")})));
   end IndexReduction15_Sinh;
@@ -4460,7 +4435,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + cosh(x2) = 0;
- der_x1 + ( sinh(x2) ) * ( der(x2) ) = 0.0;
+ der_x1 + sinh(x2) * der(x2) = 0.0;
 end TransformCanonicalTests.IndexReduction16_Cosh;
 ")})));
   end IndexReduction16_Cosh;
@@ -4487,7 +4462,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + tanh(x2) = 0;
- der_x1 + ( der(x2) ) / ( ( cosh(x2) ) ^ 2 ) = 0.0;
+ der_x1 + der(x2) / cosh(x2) ^ 2 = 0.0;
 end TransformCanonicalTests.IndexReduction17_Tanh;
 ")})));
   end IndexReduction17_Tanh;
@@ -4514,7 +4489,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + log(x2) = 0;
- der_x1 + ( der(x2) ) / ( x2 ) = 0.0;
+ der_x1 + der(x2) / x2 = 0.0;
 end TransformCanonicalTests.IndexReduction18_Log;
 ")})));
   end IndexReduction18_Log;
@@ -4541,7 +4516,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + log10(x2) = 0;
- der_x1 + ( der(x2) ) / ( ( x2 ) * ( log(10) ) ) = 0.0;
+ der_x1 + der(x2) / (x2 * log(10)) = 0.0;
 end TransformCanonicalTests.IndexReduction19_Log10;
 ")})));
   end IndexReduction19_Log10;
@@ -4568,7 +4543,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + sqrt(x2) = 0;
- der_x1 + ( der(x2) ) / ( ( 2 ) * ( sqrt(x2) ) ) = 0.0;
+ der_x1 + der(x2) / (2 * sqrt(x2)) = 0.0;
 end TransformCanonicalTests.IndexReduction20_Sqrt;
 ")})));
   end IndexReduction20_Sqrt;
@@ -4586,19 +4561,19 @@ equation
 			description="Test of index reduction",
 			flatModel="
 fclass TransformCanonicalTests.IndexReduction21_If
-Real x1;
-Real x2(stateSelect=StateSelect.prefer);
-parameter Real p = 2 /* 2 */;
-Real der_x1;
+ Real x1;
+ Real x2(stateSelect = StateSelect.prefer);
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
 initial equation 
-x2 = 0.0;
+ x2 = 0.0;
 equation
-der_x1 + der(x2) = 1;
-x1 + (if p > 3 then ( 3 ) * ( x2 ) elseif p <= 3 then sin(x2) else ( 2 ) * ( x2 )) = 0;
-der_x1 + (if p > 3 then ( 3 ) * ( der(x2) ) elseif p <= 3 then ( cos(x2) ) * ( der(x2) ) else ( 2 ) * ( der(x2) )) = 0.0;
+ der_x1 + der(x2) = 1;
+ x1 + (if p > 3 then 3 * x2 elseif p <= 3 then sin(x2) else 2 * x2) = 0;
+ der_x1 + (if p > 3 then 3 * der(x2) elseif p <= 3 then cos(x2) * der(x2) else 2 * der(x2)) = 0.0;
 
 public
-type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end TransformCanonicalTests.IndexReduction21_If;
 ")})));
@@ -4626,7 +4601,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + x2 ^ p + x2 ^ 1.4 = 0;
- der_x1 + ( ( p ) * ( x2 ^ ( p - ( 1 ) ) ) ) * ( der(x2) ) + ( ( 1.4 ) * ( x2 ^ 0.3999999999999999 ) ) * ( der(x2) ) = 0.0;
+ der_x1 + p * x2 ^ (p - 1) * der(x2) + 1.4 * x2 ^ 0.3999999999999999 * der(x2) = 0.0;
 end TransformCanonicalTests.IndexReduction22_Pow;
 ")})));
   end IndexReduction22_Pow;
@@ -4737,7 +4712,7 @@ public
   input Real der_x;
   output Real der_y;
  algorithm
-  der_y := ( ( 2 ) * ( x ) ) * ( der_x );
+  der_y := 2 * x * der_x;
   return;
  end TransformCanonicalTests.IndexReduction24_DerFunc.f_der;
 
@@ -4801,9 +4776,9 @@ initial equation
 equation
  der_x1_1 + der(x2[1]) = 1;
  der_x1_2 + der(x2[2]) = 2;
- x1[1] + TransformCanonicalTests.IndexReduction25_DerFunc.f({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}) = 0;
+ x1[1] + TransformCanonicalTests.IndexReduction25_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}) = 0;
  x1[2] = 0;
- der_x1_1 + TransformCanonicalTests.IndexReduction25_DerFunc.f_der({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {der(x2[1]),der(x2[2])}, {{0.0,0.0},{0.0,0.0}}) = 0.0;
+ der_x1_1 + TransformCanonicalTests.IndexReduction25_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}}) = 0.0;
  der_x1_2 = 0.0;
 
 public
@@ -4814,7 +4789,7 @@ public
   input Real[2, 2] der_A;
   output Real der_y;
  algorithm
-  der_y := ( ( ( 2 ) * ( x[1] ) ) * ( A[1,1] ) + ( ( 2 ) * ( x[2] ) ) * ( A[2,1] ) ) * ( der_x[1] ) + ( ( ( 2 ) * ( x[1] ) ) * ( A[1,2] ) + ( ( 2 ) * ( x[2] ) ) * ( A[2,2] ) ) * ( der_x[2] ) + ( ( x[1] ) * ( der_A[1,1] ) + ( x[2] ) * ( der_A[2,1] ) ) * ( x[1] ) + ( ( x[1] ) * ( der_A[1,2] ) + ( x[2] ) * ( der_A[2,2] ) ) * ( x[2] );
+  der_y := (2 * x[1] * A[1,1] + 2 * x[2] * A[2,1]) * der_x[1] + (2 * x[1] * A[1,2] + 2 * x[2] * A[2,2]) * der_x[2] + (x[1] * der_A[1,1] + x[2] * der_A[2,1]) * x[1] + (x[1] * der_A[1,2] + x[2] * der_A[2,2]) * x[2];
   return;
  end TransformCanonicalTests.IndexReduction25_DerFunc.f_der;
 
@@ -4823,7 +4798,7 @@ public
   input Real[2, 2] A;
   output Real y;
  algorithm
-  y := ( ( x[1] ) * ( A[1,1] ) + ( x[2] ) * ( A[2,1] ) ) * ( x[1] ) + ( ( x[1] ) * ( A[1,2] ) + ( x[2] ) * ( A[2,2] ) ) * ( x[2] );
+  y := (x[1] * A[1,1] + x[2] * A[2,1]) * x[1] + (x[1] * A[1,2] + x[2] * A[2,2]) * x[2];
   return;
  end TransformCanonicalTests.IndexReduction25_DerFunc.f;
 
@@ -4872,9 +4847,9 @@ initial equation
 equation
  der_x1_1 + der(x2[1]) = 1;
  der_x1_2 + der(x2[2]) = 2;
- x1[1] + TransformCanonicalTests.IndexReduction26_DerFunc.f({x2[1],x2[2]}) = 0;
+ x1[1] + TransformCanonicalTests.IndexReduction26_DerFunc.f({x2[1], x2[2]}) = 0;
  x1[2] = 0;
- der_x1_1 + TransformCanonicalTests.IndexReduction26_DerFunc.f_der({x2[1],x2[2]}, {der(x2[1]),der(x2[2])}) = 0.0;
+ der_x1_1 + TransformCanonicalTests.IndexReduction26_DerFunc.f_der({x2[1], x2[2]}, {der(x2[1]), der(x2[2])}) = 0.0;
  der_x1_2 = 0.0;
 
 public
@@ -4883,7 +4858,7 @@ public
   input Real[2] der_x;
   output Real der_y;
  algorithm
-  der_y := ( ( 2 ) * ( x[1] ) ) * ( der_x[1] ) + ( ( 3 ) * ( x[2] ^ 2 ) ) * ( der_x[2] );
+  der_y := 2 * x[1] * der_x[1] + 3 * x[2] ^ 2 * der_x[2];
   return;
  end TransformCanonicalTests.IndexReduction26_DerFunc.f_der;
 
@@ -4937,8 +4912,8 @@ fclass TransformCanonicalTests.IndexReduction27_DerFunc
  parameter Real A[2,2] = 4 /* 4 */;
  Real x1[1];
  Real x1[2];
- Real x2[1](stateSelect=StateSelect.prefer);
- Real x2[2](stateSelect=StateSelect.prefer);
+ Real x2[1](stateSelect = StateSelect.prefer);
+ Real x2[2](stateSelect = StateSelect.prefer);
  Real der_x1_1;
  Real der_x1_2;
 initial equation 
@@ -4947,8 +4922,8 @@ initial equation
 equation
  der_x1_1 + der(x2[1]) = 2;
  der_x1_2 + der(x2[2]) = 3;
- ({ - ( x1[1] ), - ( x1[2] )}) = TransformCanonicalTests.IndexReduction27_DerFunc.f({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}});
- ({ - ( der_x1_1 ), - ( der_x1_2 )}) = TransformCanonicalTests.IndexReduction27_DerFunc.f_der({x2[1],x2[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {der(x2[1]),der(x2[2])}, {{0.0,0.0},{0.0,0.0}});
+ ({- x1[1], - x1[2]}) = TransformCanonicalTests.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ ({- der_x1_1, - der_x1_2}) = TransformCanonicalTests.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
 
 public
  function TransformCanonicalTests.IndexReduction27_DerFunc.f_der
@@ -4958,8 +4933,8 @@ public
   input Real[2, 2] der_A;
   output Real[2] der_y;
  algorithm
-  der_y[1] := ( A[1,1] ) * ( der_x[1] ) + ( A[1,2] ) * ( der_x[2] );
-  der_y[2] := ( A[2,1] ) * ( der_x[1] ) + ( A[2,2] ) * ( der_x[2] );
+  der_y[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
+  der_y[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
   return;
  end TransformCanonicalTests.IndexReduction27_DerFunc.f_der;
 
@@ -4968,11 +4943,11 @@ public
   input Real[2, 2] A;
   output Real[2] y;
  algorithm
-  y[1] := ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] );
-  y[2] := ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] );
+  y[1] := A[1,1] * x[1] + A[1,2] * x[2];
+  y[2] := A[2,1] * x[1] + A[2,2] * x[2];
   return;
  end TransformCanonicalTests.IndexReduction27_DerFunc.f;
- 
+
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end TransformCanonicalTests.IndexReduction27_DerFunc;
@@ -5017,24 +4992,24 @@ equation
 			description="Index reduction: function with record input & output",
 			flatModel="
 fclass TransformCanonicalTests.IndexReduction28_Record
-parameter Real A[1,1] = 1 /* 1 */;
-parameter Real A[1,2] = 2 /* 2 */;
-parameter Real A[2,1] = 3 /* 3 */;
-parameter Real A[2,2] = 4 /* 4 */;
-Real x1.a[1](stateSelect = StateSelect.prefer);
-Real x1.a[2](stateSelect = StateSelect.default);
-Real x2.a[1](stateSelect = StateSelect.prefer);
-Real x2.a[2](stateSelect = StateSelect.default);
-Real der_x1_a_2;
-Real der_x2_a_2;
+ parameter Real A[1,1] = 1 /* 1 */;
+ parameter Real A[1,2] = 2 /* 2 */;
+ parameter Real A[2,1] = 3 /* 3 */;
+ parameter Real A[2,2] = 4 /* 4 */;
+ Real x1.a[1](stateSelect = StateSelect.prefer);
+ Real x1.a[2](stateSelect = StateSelect.default);
+ Real x2.a[1](stateSelect = StateSelect.prefer);
+ Real x2.a[2](stateSelect = StateSelect.default);
+ Real der_x1_a_2;
+ Real der_x2_a_2;
 initial equation 
-x1.a[1] = 0.0;
-x2.a[1] = 0.0;
+ x1.a[1] = 0.0;
+ x2.a[1] = 0.0;
 equation
-x1.der(a[1]) + x2.der(a[1]) = 2;
-der_x1_a_2 + der_x2_a_2 = 3;
-(TransformCanonicalTests.IndexReduction28_Record.R({ - ( x1.a[1] ), - ( x1.a[2] )})) = TransformCanonicalTests.IndexReduction28_Record.f({x2.a[1],x2.a[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}});
-(TransformCanonicalTests.IndexReduction28_Record.R({ - ( x1.der(a[1]) ), - ( der_x1_a_2 )})) = TransformCanonicalTests.IndexReduction28_Record.f_der({x2.a[1],x2.a[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {x2.der(a[1]),der_x2_a_2}, {{0.0,0.0},{0.0,0.0}});
+ x1.der(a[1]) + x2.der(a[1]) = 2;
+ der_x1_a_2 + der_x2_a_2 = 3;
+ (TransformCanonicalTests.IndexReduction28_Record.R({- x1.a[1], - x1.a[2]})) = TransformCanonicalTests.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ (TransformCanonicalTests.IndexReduction28_Record.R({- x1.der(a[1]), - der_x1_a_2})) = TransformCanonicalTests.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {x2.der(a[1]), der_x2_a_2}, {{0.0, 0.0}, {0.0, 0.0}});
 
 public
  function TransformCanonicalTests.IndexReduction28_Record.f_der
@@ -5044,8 +5019,8 @@ public
   input Real[2, 2] der_A;
   output TransformCanonicalTests.IndexReduction28_Record.R der_y;
  algorithm
-  der_y.a[1] := ( A[1,1] ) * ( der_x[1] ) + ( A[1,2] ) * ( der_x[2] );
-  der_y.a[2] := ( A[2,1] ) * ( der_x[1] ) + ( A[2,2] ) * ( der_x[2] );
+  der_y.a[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
+  der_y.a[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
   return;
  end TransformCanonicalTests.IndexReduction28_Record.f_der;
 
@@ -5054,8 +5029,8 @@ public
   input Real[2, 2] A;
   output TransformCanonicalTests.IndexReduction28_Record.R y;
  algorithm
-  y.a[1] := ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] );
-  y.a[2] := ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] );
+  y.a[1] := A[1,1] * x[1] + A[1,2] * x[2];
+  y.a[2] := A[2,1] * x[1] + A[2,2] * x[2];
   return;
  end TransformCanonicalTests.IndexReduction28_Record.f;
 
@@ -5065,7 +5040,7 @@ public
 
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
- end TransformCanonicalTests.IndexReduction28_Record;
+end TransformCanonicalTests.IndexReduction28_Record;
 ")})));
 end IndexReduction28_Record;
 
@@ -5171,31 +5146,31 @@ end IndexReduction29_FunctionNoDerivative;
 			description="Test of index reduction",
 			flatModel="
 fclass TransformCanonicalTests.IndexReduction30_PlanarPendulum_StatePrefer
-parameter Real L = 1 \"Pendulum length\" /* 1 */;
-parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
-Real x(stateSelect = StateSelect.prefer) \"Cartesian x coordinate\";
-Real y \"Cartesian x coordinate\";
-Real vx(stateSelect = StateSelect.prefer) \"Velocity in x coordinate\";
-Real lambda \"Lagrange multiplier\";
-Real der_y;
-Real der_2_x;
-Real der_2_y;
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x(stateSelect = StateSelect.prefer) \"Cartesian x coordinate\";
+ Real y \"Cartesian x coordinate\";
+ Real vx(stateSelect = StateSelect.prefer) \"Velocity in x coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ Real der_y;
+ Real der_2_x;
+ Real der_2_y;
 initial equation 
-x = 0.0;
-vx = 0.0;
+ x = 0.0;
+ vx = 0.0;
 equation
-der(x) = vx;
-der(vx) = ( lambda ) * ( x );
-der_2_y = ( lambda ) * ( y ) - ( g );
-x ^ 2 + y ^ 2 = L;
-( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
-der_2_x = der(vx);
-( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
+ der(x) = vx;
+ der(vx) = lambda * x;
+ der_2_y = lambda * y - g;
+ x ^ 2 + y ^ 2 = L;
+ 2 * x * der(x) + 2 * y * der_y = 0.0;
+ der_2_x = der(vx);
+ 2 * x * der_2_x + 2 * der(x) * der(x) + 2 * y * der_2_y + 2 * der_y * der_y = 0.0;
 
 public
-type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
-end TransformCanonicalTests.IndexReduction30_PlanarPendulum_StatePrefer; 		 
+end TransformCanonicalTests.IndexReduction30_PlanarPendulum_StatePrefer;
 ")})));
   end IndexReduction30_PlanarPendulum_StatePrefer;
 
@@ -5221,31 +5196,31 @@ model IndexReduction31_PlanarPendulum_StateAlways
 			description="Test of index reduction",
 			flatModel="
 fclass TransformCanonicalTests.IndexReduction31_PlanarPendulum_StateAlways
-parameter Real L = 1 \"Pendulum length\" /* 1 */;
-parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
-Real x(stateSelect = StateSelect.always) \"Cartesian x coordinate\";
-Real y \"Cartesian x coordinate\";
-Real vx(stateSelect = StateSelect.always) \"Velocity in x coordinate\";
-Real lambda \"Lagrange multiplier\";
-Real der_y;
-Real der_2_x;
-Real der_2_y;
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x(stateSelect = StateSelect.always) \"Cartesian x coordinate\";
+ Real y \"Cartesian x coordinate\";
+ Real vx(stateSelect = StateSelect.always) \"Velocity in x coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ Real der_y;
+ Real der_2_x;
+ Real der_2_y;
 initial equation 
-x = 0.0;
-vx = 0.0;
+ x = 0.0;
+ vx = 0.0;
 equation
-der(x) = vx;
-der(vx) = ( lambda ) * ( x );
-der_2_y = ( lambda ) * ( y ) - ( g );
-x ^ 2 + y ^ 2 = L;
-( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
-der_2_x = der(vx);
-( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der(x) ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) ) * ( der_y ) = 0.0;
+ der(x) = vx;
+ der(vx) = lambda * x;
+ der_2_y = lambda * y - g;
+ x ^ 2 + y ^ 2 = L;
+ 2 * x * der(x) + 2 * y * der_y = 0.0;
+ der_2_x = der(vx);
+ 2 * x * der_2_x + 2 * der(x) * der(x) + 2 * y * der_2_y + 2 * der_y * der_y = 0.0;
 
 public
-type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
-end TransformCanonicalTests.IndexReduction31_PlanarPendulum_StateAlways;	
+end TransformCanonicalTests.IndexReduction31_PlanarPendulum_StateAlways;
 ")})));
   end IndexReduction31_PlanarPendulum_StateAlways;
 
@@ -5270,26 +5245,26 @@ end TransformCanonicalTests.IndexReduction31_PlanarPendulum_StateAlways;
 			description="Test of index reduction",
 			flatModel="
 fclass TransformCanonicalTests.IndexReduction32_PlanarPendulum_StatePreferAlways
-parameter Real L = 1 \"Pendulum length\" /* 1 */;
-parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
-Real x(stateSelect = StateSelect.prefer) \"Cartesian x coordinate\";
-Real y(stateSelect = StateSelect.always) \"Cartesian x coordinate\";
-Real vx(stateSelect = StateSelect.prefer) \"Velocity in x coordinate\";
-Real vy(stateSelect = StateSelect.always) \"Velocity in y coordinate\";
-Real lambda \"Lagrange multiplier\";
-Real der_2_x;
-Real der_2_y;
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x(stateSelect = StateSelect.prefer) \"Cartesian x coordinate\";
+ Real y(stateSelect = StateSelect.always) \"Cartesian x coordinate\";
+ Real vx(stateSelect = StateSelect.prefer) \"Velocity in x coordinate\";
+ Real vy(stateSelect = StateSelect.always) \"Velocity in y coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ Real der_2_x;
+ Real der_2_y;
 initial equation 
-y = 0.0;
-vy = 0.0;
+ y = 0.0;
+ vy = 0.0;
 equation
-der(y) = vy;
-der_2_x = ( lambda ) * ( x );
-der(vy) = ( lambda ) * ( y ) - ( g );
-x ^ 2 + y ^ 2 = L;
-( ( 2 ) * ( x ) ) * ( vx ) + ( ( 2 ) * ( y ) ) * ( der(y) ) = 0.0;
-der_2_y = der(vy);
-( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( vx ) ) * ( vx ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der(y) ) ) * ( der(y) ) = 0.0;
+ der(y) = vy;
+ der_2_x = lambda * x;
+ der(vy) = lambda * y - g;
+ x ^ 2 + y ^ 2 = L;
+ 2 * x * vx + 2 * y * der(y) = 0.0;
+ der_2_y = der(vy);
+ 2 * x * der_2_x + 2 * vx * vx + 2 * y * der_2_y + 2 * der(y) * der(y) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -5319,10 +5294,10 @@ initial equation
  x2 = 0.0;
 equation
  der_x1 + der(x2) = 1;
- ( x1 + x2 ) / ( x1 + p ) = 0;
- ( ( der_x1 + der(x2) ) * ( x1 + p ) - ( ( x1 + x2 ) * ( der_x1 ) ) ) / ( ( x1 + p ) ^ 2 ) = 0.0;
+ (x1 + x2) / (x1 + p) = 0;
+ ((der_x1 + der(x2)) * (x1 + p) - (x1 + x2) * der_x1) / (x1 + p) ^ 2 = 0.0;
 end TransformCanonicalTests.IndexReduction33_Div;
-		 ")})));
+")})));
   end IndexReduction33_Div;
 
  model IndexReduction34_Div
@@ -5348,10 +5323,10 @@ initial equation
  x2 = 0.0;
 equation
  der_x1 + der(x2) = 1;
- ( x1 + x2 ) / ( ( p1 ) * ( p2 ) ) = 0;
- ( der_x1 + der(x2) ) / ( ( p1 ) * ( p2 ) ) = 0.0;
+ (x1 + x2) / (p1 * p2) = 0;
+ (der_x1 + der(x2)) / (p1 * p2) = 0.0;
 end TransformCanonicalTests.IndexReduction34_Div;
-		 ")})));
+")})));
   end IndexReduction34_Div;
 
 model IndexReduction35_Boolean
@@ -5375,12 +5350,12 @@ initial equation
  y = 0.0;
  pre(b) = false;
 equation
- x = (if b then 1 else 2 + y);
+ x = if b then 1 else 2 + y;
  der_x + der(y) = 0;
  b = false;
- der_x = (if b then 0.0 else der(y));
+ der_x = if b then 0.0 else der(y);
 end TransformCanonicalTests.IndexReduction35_Boolean;
-		 ")})));	
+")})));
 end IndexReduction35_Boolean;
 
 model IndexReduction36_Integer
@@ -5404,12 +5379,12 @@ initial equation
  y = 0.0;
  pre(b) = 0;
 equation
- x = (if b == 2 then 1 else 2 + y);
+ x = if b == 2 then 1 else 2 + y;
  der_x + der(y) = 0;
  b = 2;
- der_x = (if b == 2 then 0.0 else der(y));
+ der_x = if b == 2 then 0.0 else der(y);
 end TransformCanonicalTests.IndexReduction36_Integer;
-		 ")})));		
+")})));
 end IndexReduction36_Integer;
 
 model IndexReduction37_noEvent
@@ -5434,7 +5409,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  noEvent(x1 + sin(x2)) = 0;
- noEvent(der_x1 + ( cos(x2) ) * ( der(x2) )) = 0.0;
+ noEvent(der_x1 + cos(x2) * der(x2)) = 0.0;
 end TransformCanonicalTests.IndexReduction37_noEvent;
 ")})));
   end IndexReduction37_noEvent;
@@ -5450,14 +5425,14 @@ equation
 			description="Test the state initial equations option",
 			state_initial_equations=true,
 			flatModel="
-		 fclass TransformCanonicalTests.StateInitialPars1
+fclass TransformCanonicalTests.StateInitialPars1
  Real x(start = 3);
  parameter Real _start_x = 3 /* 3 */;
 initial equation 
  x = _start_x;
 equation
- der(x) =  - ( x );
-end TransformCanonicalTests.StateInitialPars1; 
+ der(x) = - x;
+end TransformCanonicalTests.StateInitialPars1;
 ")})));
 end StateInitialPars1;
 
@@ -5472,13 +5447,13 @@ equation
 			description="Test the state initial equations option",
 			state_initial_equations=true,
 			flatModel="
-		 fclass TransformCanonicalTests.StateInitialPars2
+fclass TransformCanonicalTests.StateInitialPars2
  Real x(start = 3,fixed = true);
  parameter Real _start_x = 3 /* 3 */;
 initial equation 
  x = _start_x;
 equation
- der(x) =  - ( x );
+ der(x) = - x;
 end TransformCanonicalTests.StateInitialPars2;
 ")})));
 end StateInitialPars2;
@@ -5508,9 +5483,9 @@ initial equation
  x = _start_x;
  y = _start_y;
 equation
- der(x) =  - ( x );
- der(y) =  - ( y ) + z;
- z + ( 2 ) * ( y ) = 0;
+ der(x) = - x;
+ der(y) = - y + z;
+ z + 2 * y = 0;
 end TransformCanonicalTests.StateInitialPars3;
 ")})));
 end StateInitialPars3;	
@@ -5543,9 +5518,9 @@ initial equation
  x = _start_x;
  y = _start_y;
 equation
- der(x) =  - ( x );
- der(y) =  - ( y ) + z;
- z + ( 2 ) * ( y ) = 0;
+ der(x) = - x;
+ der(y) = - y + z;
+ z + 2 * y = 0;
 end TransformCanonicalTests.StateInitialPars4;
 ")})));
 end StateInitialPars4;		
@@ -5582,11 +5557,10 @@ end DuplicateVariables1;
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="SolveEqTest1",
-			methodName="printDAEBLT",
+			description="Test solution of equations",
 			equation_sorting=true,
-			description="
-Test solution of equations", methodResult=
-        "
+			methodName="printDAEBLT",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -5604,7 +5578,7 @@ Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  x - ( y )
+  x- y
 -------------------------------
 ")})));
   end SolveEqTest1;
@@ -5619,11 +5593,10 @@ Solution:
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="SolveEqTest2",
-			methodName="printDAEBLT",
+			description="Test solution of equations",
 			equation_sorting=true,
-			description="
-Test solution of equations", methodResult=
-        "
+			methodName="printDAEBLT",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -5635,13 +5608,13 @@ Solved block of 1 variables:
 Computed variable:
   y
 Solution:
-  ( x + 3 ) / (  - ( 1.0 ) )
+  (x + 3) / (- 1.0)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  ( x - ( y ) ) / (  - ( 1.0 ) )
+  (x- y) / (- 1.0)
 -------------------------------
 ")})));
   end SolveEqTest2;
@@ -5656,12 +5629,11 @@ Solution:
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="SolveEqTest3",
-			methodName="printDAEBLT",
+			description="Test solution of equations",
 			equation_sorting=true,
-			description="
-Test solution of equations", methodResult=
-        "
-        -------------------------------
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
 Solved block of 1 variables:
 Computed variable:
   x
@@ -5672,13 +5644,13 @@ Solved block of 1 variables:
 Computed variable:
   y
 Solution:
-  ( x + 3 ) / ( 2 )
+  (x + 3) / 2
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  ( x - ( y ) ) / ( x )
+  (x- y) / x
 -------------------------------
 ")})));
   end SolveEqTest3;
@@ -5693,11 +5665,10 @@ Solution:
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="SolveEqTest4",
-			methodName="printDAEBLT",
+			description="Test solution of equations",
 			equation_sorting=true,
-			description="
-Test solution of equations", methodResult=
-        "
+			methodName="printDAEBLT",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -5709,13 +5680,13 @@ Solved block of 1 variables:
 Computed variable:
   y
 Solution:
-  ( x + 3 ) / ( ( 1.0 ) / ( 2 ) )
+  (x + 3) / (1.0 / 2)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  ( x - ( y ) ) / ( ( 1.0 ) / ( x ) )
+  (x- y) / (1.0 / x)
 -------------------------------
 ")})));
   end SolveEqTest4;
@@ -5730,11 +5701,10 @@ Solution:
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="SolveEqTest5",
-			methodName="printDAEBLT",
+			description="Test solution of equations",
 			equation_sorting=true,
-			description="
-Test solution of equations", methodResult=
-"
+			methodName="printDAEBLT",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -5746,13 +5716,13 @@ Solved block of 1 variables:
 Computed variable:
   y
 Solution:
-  ( x + 3 ) / ( 1.0 - ( 3 ) )
+  (x + 3) / (1.0 - 3)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  ( x - ( y ) ) / ( 1.0 - ( x + 3 ) )
+  (x- y) / (1.0 - (x + 3))
 -------------------------------
 ")})));
   end SolveEqTest5;
@@ -5768,12 +5738,11 @@ Solution:
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="SolveEqTest6",
-			methodName="printDAEBLT",
+			description="Test solution of equations",
 			equation_sorting=true,
-			description="
-Test solution of equations", methodResult=
-        "
-        -------------------------------
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
 Solved block of 1 variables:
 Computed variable:
   x
@@ -5784,15 +5753,14 @@ Non-solved block of 1 variables:
 Unknown variables:
   y
 Equations:
-  ( 2 ) / ( y ) = x + 3
+  2 / y = x + 3
 -------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
   z
 Equations:
-  ( x ) / ( z ) = x - ( y )
+  x / z = x - y
 -------------------------------
-        
 ")})));
   end SolveEqTest6;
 
@@ -5807,12 +5775,11 @@ Equations:
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="SolveEqTest7",
-			methodName="printDAEBLT",
+			description="Test solution of equations",
 			equation_sorting=true,
-			description="
-Test solution of equations", methodResult=
-        "
-        -------------------------------
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
 Solved block of 1 variables:
 Computed variable:
   x
@@ -5823,15 +5790,15 @@ Solved block of 1 variables:
 Computed variable:
   y
 Solution:
-  ( x + 3 ) / (  - ( 1.0 ) + 1.0 - ( 4 ) )
+  (x + 3) / (- 1.0 + 1.0 - 4)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  ( x - ( y ) ) / (  - ( 1.0 ) + 1.0 + 5 )
+  (x- y) / (- 1.0 + 1.0 + 5)
 -------------------------------
-        ")})));
+")})));
   end SolveEqTest7;
   
 
@@ -5843,19 +5810,18 @@ Solution:
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="SolveEqTest8",
-			methodName="printDAEBLT",
+			description="Test solution of equations",
 			equation_sorting=true,
-			description="
-Test solution of equations", methodResult=
-        "
+			methodName="printDAEBLT",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   der(x)
 Solution:
-  (  - ( x ) ) / (  - ( 1.0 ) - (  - ( 1.0 ) ) + ( (  - ( 1.0 ) ) * (  - ( 1.0 ) ) ) * (  - ( 1.0 ) ) )
+  (- x) / (- 1.0 - (- 1.0) + (- 1.0) * (- 1.0) * (- 1.0))
 -------------------------------
-        ")})));
+")})));
  end SolveEqTest8;
   
  model TearingTest1
@@ -5880,10 +5846,10 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="TearingTest1",
-			methodName="printDAEBLT",
+			description="Test of tearing",
 			equation_sorting=true,
 			enable_tearing=true,
-			description="Test of tearing",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Solved block of 1 variables:
@@ -5902,13 +5868,13 @@ Iteration variables:
   i3()
 Solved equations:
   i1 = i2 + i3
-  u1 = ( R1 ) * ( i1 )
+  u1 = R1 * i1
   u0 = u1 + u2
 Residual equations:
  Iteration variables: i2
-  u2 = ( R3 ) * ( i3 )
+  u2 = R3 * i3
  Iteration variables: i3
-  u2 = ( R2 ) * ( i2 )
+  u2 = R2 * i2
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -5920,7 +5886,7 @@ Solved block of 1 variables:
 Computed variable:
   der(iL)
 Solution:
-  (  - ( uL ) ) / (  - ( L ) )
+  (- uL) / (- L)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -5928,7 +5894,7 @@ Computed variable:
 Solution:
   i1 + iL
 -------------------------------
-        ")})));
+")})));
   end TearingTest1;
 
 model TearingWarningTest1
@@ -6255,11 +6221,11 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing1",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
-			description="Test of hand guided tearing",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Solved block of 1 variables:
@@ -6277,14 +6243,14 @@ Iteration variables:
   i3()
   i2()
 Solved equations:
-  u2 = ( R3 ) * ( i3 )
+  u2 = R3 * i3
   u0 = u1 + u2
   i1 = i2 + i3
 Residual equations:
  Iteration variables: i3
-  u1 = ( R1 ) * ( i1 )
+  u1 = R1 * i1
  Iteration variables: i2
-  u2 = ( R2 ) * ( i2 )
+  u2 = R2 * i2
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6296,7 +6262,7 @@ Solved block of 1 variables:
 Computed variable:
   der(iL)
 Solution:
-  (  - ( uL ) ) / (  - ( L ) )
+  (- uL) / (- L)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6304,7 +6270,7 @@ Computed variable:
 Solution:
   i1 + iL
 -------------------------------
-      ")})));
+")})));
 end HandGuidedTearing1;
 
 model HandGuidedTearing2
@@ -6329,11 +6295,11 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing2",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
-			description="Test of hand guided tearing",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Solved block of 1 variables:
@@ -6351,15 +6317,15 @@ Iteration variables:
   i1()
   i3()
 Solved equations:
-  u2 = ( R2 ) * ( i2 )
-  u1 = ( R1 ) * ( i1 )
+  u2 = R2 * i2
+  u1 = R1 * i1
 Residual equations:
  Iteration variables: i2
   u0 = u1 + u2
  Iteration variables: i1
   i1 = i2 + i3
  Iteration variables: i3
-  u2 = ( R3 ) * ( i3 )
+  u2 = R3 * i3
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6371,7 +6337,7 @@ Solved block of 1 variables:
 Computed variable:
   der(iL)
 Solution:
-  (  - ( uL ) ) / (  - ( L ) )
+  (- uL) / (- L)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6379,7 +6345,7 @@ Computed variable:
 Solution:
   i1 + iL
 -------------------------------
-      ")})));
+")})));
 end HandGuidedTearing2;
 
 model HandGuidedTearing3
@@ -6401,14 +6367,14 @@ equation
   i0 = i1 + iL;
   i1 = i2 + i3 annotation(__Modelon(ResidualEquation(iterationVariable=i3)));
 
-	annotation(__JModelica(UnitTesting(tests={ 
+	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing3",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
-			description="Test of hand guided tearing",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Solved block of 1 variables:
@@ -6426,15 +6392,15 @@ Iteration variables:
   i3()
   i1()
 Solved equations:
-  u2 = ( R3 ) * ( i3 )
-  u1 = ( R1 ) * ( i1 )
+  u2 = R3 * i3
+  u1 = R1 * i1
 Residual equations:
  Iteration variables: i2
   u0 = u1 + u2
  Iteration variables: i3
   i1 = i2 + i3
  Iteration variables: i1
-  u2 = ( R2 ) * ( i2 )
+  u2 = R2 * i2
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -6446,7 +6412,7 @@ Solved block of 1 variables:
 Computed variable:
   der(iL)
 Solution:
-  (  - ( uL ) ) / (  - ( L ) )
+  (- uL) / (- L)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -7314,14 +7280,15 @@ equation
 		a[i]=b[i] + 2;
 		c[i]=b[i] - 3;
 	end for;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing15",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing of vectors and indices whit no annotation, base case.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
-			description="Test of hand guided tearing of vectors and indices whit no annotation, base case.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
@@ -7331,7 +7298,7 @@ Solved variables:
 Iteration variables:
   b[1]()
 Solved equations:
-  c[1] = b[1] - ( 3 )
+  c[1] = b[1] - 3
   a[1] = c[1] + 1
 Residual equations:
  Iteration variables: b[1]
@@ -7344,7 +7311,7 @@ Solved variables:
 Iteration variables:
   b[2]()
 Solved equations:
-  c[2] = b[2] - ( 3 )
+  c[2] = b[2] - 3
   a[2] = c[2] + 1
 Residual equations:
  Iteration variables: b[2]
@@ -7357,7 +7324,7 @@ Solved variables:
 Iteration variables:
   b[3]()
 Solved equations:
-  c[3] = b[3] - ( 3 )
+  c[3] = b[3] - 3
   a[3] = c[3] + 1
 Residual equations:
  Iteration variables: b[3]
@@ -7370,7 +7337,7 @@ Solved variables:
 Iteration variables:
   b[4]()
 Solved equations:
-  c[4] = b[4] - ( 3 )
+  c[4] = b[4] - 3
   a[4] = c[4] + 1
 Residual equations:
  Iteration variables: b[4]
@@ -7383,13 +7350,13 @@ Solved variables:
 Iteration variables:
   b[5]()
 Solved equations:
-  c[5] = b[5] - ( 3 )
+  c[5] = b[5] - 3
   a[5] = c[5] + 1
 Residual equations:
  Iteration variables: b[5]
   a[5] = b[5] + 2
 -------------------------------
-      ")})));
+")})));
 end HandGuidedTearing15;
 
 model HandGuidedTearing16
@@ -7405,14 +7372,15 @@ equation
 		a[i]=b[i] + 2;
 		c[i]=b[i] - 3 annotation(__Modelon(ResidualEquation(enabled=true,iterationVariable=c[i])));
 	end for;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing16",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
@@ -7426,7 +7394,7 @@ Solved equations:
   a[1] = b[1] + 2
 Residual equations:
  Iteration variables: c[1]
-  c[1] = b[1] - ( 3 )
+  c[1] = b[1] - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -7439,7 +7407,7 @@ Solved equations:
   a[2] = b[2] + 2
 Residual equations:
  Iteration variables: c[2]
-  c[2] = b[2] - ( 3 )
+  c[2] = b[2] - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -7452,7 +7420,7 @@ Solved equations:
   a[3] = b[3] + 2
 Residual equations:
  Iteration variables: c[3]
-  c[3] = b[3] - ( 3 )
+  c[3] = b[3] - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -7465,7 +7433,7 @@ Solved equations:
   a[4] = b[4] + 2
 Residual equations:
  Iteration variables: c[4]
-  c[4] = b[4] - ( 3 )
+  c[4] = b[4] - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -7478,9 +7446,9 @@ Solved equations:
   a[5] = b[5] + 2
 Residual equations:
  Iteration variables: c[5]
-  c[5] = b[5] - ( 3 )
+  c[5] = b[5] - 3
 -------------------------------
-      ")})));
+")})));
 end HandGuidedTearing16;
 
 model HandGuidedTearing17
@@ -7496,15 +7464,16 @@ equation
 		a[i]=b[i] + 2;
 		c[i]=b[i] - 3 annotation(__Modelon(ResidualEquation(enabled=true,iterationVariable=c[i])));
 	end for;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing17",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing of vectors and indices with handguided annotation and blt merge.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
 			merge_blt_blocks=true,
-			description="Test of hand guided tearing of vectors and indices with handguided annotation and blt merge.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 5 iteration variables and 10 solved variables.
@@ -7538,17 +7507,17 @@ Solved equations:
   a[5] = b[5] + 2
 Residual equations:
  Iteration variables: c[5]
-  c[5] = b[5] - ( 3 )
+  c[5] = b[5] - 3
  Iteration variables: c[4]
-  c[4] = b[4] - ( 3 )
+  c[4] = b[4] - 3
  Iteration variables: c[3]
-  c[3] = b[3] - ( 3 )
+  c[3] = b[3] - 3
  Iteration variables: c[2]
-  c[2] = b[2] - ( 3 )
+  c[2] = b[2] - 3
  Iteration variables: c[1]
-  c[1] = b[1] - ( 3 )
+  c[1] = b[1] - 3
 -------------------------------
-      ")})));
+")})));
 end HandGuidedTearing17;
 
 model HandGuidedTearing18
@@ -7577,12 +7546,12 @@ equation
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing18",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing with pairs defiend on system level.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
 			merge_blt_blocks=true,
-			description="Test of hand guided tearing with pairs defiend on system level.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 3 solved variables.
@@ -7593,7 +7562,7 @@ Solved variables:
 Iteration variables:
   b.x()
 Solved equations:
-  a.y = b.x - ( 3 )
+  a.y = b.x - 3
   b.x = b.y + 2
   a.x = b.y + 2
 Residual equations:
@@ -7629,15 +7598,16 @@ model HandGuidedTearing19
 		}));
 	end C;
 	C c;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing19",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing with pairs defiend on system level, but in sub class.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
 			merge_blt_blocks=true,
-			description="Test of hand guided tearing with pairs defiend on system level, but in sub class.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 3 solved variables.
@@ -7648,7 +7618,7 @@ Solved variables:
 Iteration variables:
   c.b.x()
 Solved equations:
-  c.a.y = c.b.x - ( 3 )
+  c.a.y = c.b.x - 3
   c.b.x = c.b.y + 2
   c.a.x = c.b.y + 2
 Residual equations:
@@ -7684,15 +7654,16 @@ model HandGuidedTearing20
 		}));
 	end C;
 	C c;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing20",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing with pairs defiend on system level and in sub class.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
 			merge_blt_blocks=true,
-			description="Test of hand guided tearing with pairs defiend on system level and in sub class.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 3 solved variables.
@@ -7703,7 +7674,7 @@ Solved variables:
 Iteration variables:
   c.b.x()
 Solved equations:
-  c.a.y = c.b.x - ( 3 )
+  c.a.y = c.b.x - 3
   c.b.x = c.b.y + 2
   c.a.x = c.b.y + 2
 Residual equations:
@@ -7742,15 +7713,16 @@ model HandGuidedTearing21
 		}));
 	end C;
 	C c;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing21",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing with pairs defiend on system level and sub class.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
 			merge_blt_blocks=true,
-			description="Test of hand guided tearing with pairs defiend on system level and sub class.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 3 solved variables.
@@ -7761,7 +7733,7 @@ Solved variables:
 Iteration variables:
   c.b.x()
 Solved equations:
-  c.a.y = c.b.x - ( 3 )
+  c.a.y = c.b.x - 3
   c.b.x = c.b.y + 2
   c.a.x = c.b.y + 2
 Residual equations:
@@ -7800,15 +7772,16 @@ model HandGuidedTearing22
 		}));
 	end C;
 	C c;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing22",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing with pairs defiend on system level.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
 			merge_blt_blocks=true,
-			description="Test of hand guided tearing with pairs defiend on system level.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 3 solved variables.
@@ -7819,7 +7792,7 @@ Solved variables:
 Iteration variables:
   c.b.x()
 Solved equations:
-  c.a.y = c.b.x - ( 3 )
+  c.a.y = c.b.x - 3
   c.b.x = c.b.y + 2
   c.a.x = c.b.y + 2
 Residual equations:
@@ -7858,15 +7831,16 @@ model HandGuidedTearing23
 		}));
 	end C;
 	C c;
+
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing23",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing with pairs defiend on system level.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
 			merge_blt_blocks=true,
-			description="Test of hand guided tearing with pairs defiend on system level.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 3 solved variables.
@@ -7878,7 +7852,7 @@ Iteration variables:
   c.b.y()
 Solved equations:
   c.b.x = c.b.y + 2
-  c.a.y = c.b.x - ( 3 )
+  c.a.y = c.b.x - 3
   c.a.x = c.b.y + 2
 Residual equations:
  Iteration variables: c.b.y
@@ -7898,14 +7872,15 @@ equation
 	a=c .+ 1;
 	a=b .+ 2;
 	c=b .- 3 annotation(__Modelon(ResidualEquation(enabled=true,iterationVariable=c)));
+
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing24",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
@@ -7919,7 +7894,7 @@ Solved equations:
   a[1] = b[1] .+ 2
 Residual equations:
  Iteration variables: c[1]
-  c[1] = b[1] .- ( 3 )
+  c[1] = b[1] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -7932,7 +7907,7 @@ Solved equations:
   a[2] = b[2] .+ 2
 Residual equations:
  Iteration variables: c[2]
-  c[2] = b[2] .- ( 3 )
+  c[2] = b[2] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -7945,7 +7920,7 @@ Solved equations:
   a[3] = b[3] .+ 2
 Residual equations:
  Iteration variables: c[3]
-  c[3] = b[3] .- ( 3 )
+  c[3] = b[3] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -7958,7 +7933,7 @@ Solved equations:
   a[4] = b[4] .+ 2
 Residual equations:
  Iteration variables: c[4]
-  c[4] = b[4] .- ( 3 )
+  c[4] = b[4] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -7971,9 +7946,9 @@ Solved equations:
   a[5] = b[5] .+ 2
 Residual equations:
  Iteration variables: c[5]
-  c[5] = b[5] .- ( 3 )
+  c[5] = b[5] .- 3
 -------------------------------
-      ")})));
+")})));
 end HandGuidedTearing24;
 
 model HandGuidedTearing25
@@ -7992,11 +7967,11 @@ equation
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing25",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
@@ -8010,7 +7985,7 @@ Solved equations:
   a[1] = b[1] .+ 2
 Residual equations:
  Iteration variables: c[1]
-  c[1] = b[1] .- ( 3 )
+  c[1] = b[1] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8023,7 +7998,7 @@ Solved equations:
   a[2] = b[2] .+ 2
 Residual equations:
  Iteration variables: c[2]
-  c[2] = b[2] .- ( 3 )
+  c[2] = b[2] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8036,7 +8011,7 @@ Solved equations:
   a[3] = b[3] .+ 2
 Residual equations:
  Iteration variables: c[3]
-  c[3] = b[3] .- ( 3 )
+  c[3] = b[3] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8049,7 +8024,7 @@ Solved equations:
   a[4] = b[4] .+ 2
 Residual equations:
  Iteration variables: c[4]
-  c[4] = b[4] .- ( 3 )
+  c[4] = b[4] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8062,9 +8037,9 @@ Solved equations:
   a[5] = b[5] .+ 2
 Residual equations:
  Iteration variables: c[5]
-  c[5] = b[5] .- ( 3 )
+  c[5] = b[5] .- 3
 -------------------------------
-      ")})));
+")})));
 end HandGuidedTearing25;
 
 model HandGuidedTearing26
@@ -8085,11 +8060,11 @@ equation
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing26",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
@@ -8103,7 +8078,7 @@ Solved equations:
   a[1] = b[1] .+ 2
 Residual equations:
  Iteration variables: c[1]
-  c[1] = b[1] .- ( 3 )
+  c[1] = b[1] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8116,7 +8091,7 @@ Solved equations:
   a[2] = c[2] .+ 1
 Residual equations:
  Iteration variables: b[2]
-  c[2] = b[2] .- ( 3 )
+  c[2] = b[2] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8129,7 +8104,7 @@ Solved equations:
   a[3] = c[3] .+ 1
 Residual equations:
  Iteration variables: b[3]
-  c[3] = b[3] .- ( 3 )
+  c[3] = b[3] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8142,7 +8117,7 @@ Solved equations:
   a[4] = c[4] .+ 1
 Residual equations:
  Iteration variables: a[4]
-  c[4] = b[4] .- ( 3 )
+  c[4] = b[4] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8155,9 +8130,9 @@ Solved equations:
   a[5] = c[5] .+ 1
 Residual equations:
  Iteration variables: a[5]
-  c[5] = b[5] .- ( 3 )
+  c[5] = b[5] .- 3
 -------------------------------
-      ")})));
+")})));
 end HandGuidedTearing26;
 
 model HandGuidedTearing27
@@ -8183,11 +8158,11 @@ equation
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing27",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
@@ -8201,7 +8176,7 @@ Solved equations:
   a[1] = b[1] + 2
 Residual equations:
  Iteration variables: c[1]
-  c[1] = b[1] - ( 3 )
+  c[1] = b[1] - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8214,7 +8189,7 @@ Solved equations:
   a[2] = c[2] + 1
 Residual equations:
  Iteration variables: b[2]
-  c[2] = b[2] - ( 3 )
+  c[2] = b[2] - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8227,7 +8202,7 @@ Solved equations:
   a[3] = c[3] + 1
 Residual equations:
  Iteration variables: b[3]
-  c[3] = b[3] - ( 3 )
+  c[3] = b[3] - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8240,7 +8215,7 @@ Solved equations:
   a[4] = c[4] + 1
 Residual equations:
  Iteration variables: a[4]
-  c[4] = b[4] - ( 3 )
+  c[4] = b[4] - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8253,9 +8228,9 @@ Solved equations:
   a[5] = c[5] + 1
 Residual equations:
  Iteration variables: a[5]
-  c[5] = b[5] - ( 3 )
+  c[5] = b[5] - 3
 -------------------------------
-      ")})));
+")})));
 end HandGuidedTearing27;
 
 model HandGuidedTearing28
@@ -8282,11 +8257,11 @@ model HandGuidedTearing28
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing28",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
@@ -8300,7 +8275,7 @@ Solved equations:
   a.a[1] = a.b[1] + 2
 Residual equations:
  Iteration variables: a.c[1]
-  a.c[1] = a.b[1] - ( 3 )
+  a.c[1] = a.b[1] - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8313,7 +8288,7 @@ Solved equations:
   a.a[2] = a.b[2] + 2
 Residual equations:
  Iteration variables: a.c[2]
-  a.c[2] = a.b[2] - ( 3 )
+  a.c[2] = a.b[2] - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8326,7 +8301,7 @@ Solved equations:
   a.a[3] = a.b[3] + 2
 Residual equations:
  Iteration variables: a.c[3]
-  a.c[3] = a.b[3] - ( 3 )
+  a.c[3] = a.b[3] - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8339,7 +8314,7 @@ Solved equations:
   a.a[4] = a.b[4] + 2
 Residual equations:
  Iteration variables: a.c[4]
-  a.c[4] = a.b[4] - ( 3 )
+  a.c[4] = a.b[4] - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8352,9 +8327,9 @@ Solved equations:
   a.a[5] = a.b[5] + 2
 Residual equations:
  Iteration variables: a.c[5]
-  a.c[5] = a.b[5] - ( 3 )
+  a.c[5] = a.b[5] - 3
 -------------------------------
-      ")})));
+")})));
 end HandGuidedTearing28;
 
 model HandGuidedTearing29
@@ -8390,11 +8365,11 @@ model HandGuidedTearing29
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing29",
-			methodName="printDAEBLT",
+			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
 			equation_sorting=true,
 			enable_tearing=true,
 			enable_hand_guided_tearing=true,
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
@@ -8408,7 +8383,7 @@ Solved equations:
   a.b.x[1] = a.b.z[1] .+ 1
 Residual equations:
  Iteration variables: a.b.y[1]
-  a.b.z[1] = a.b.y[1] .- ( 3 )
+  a.b.z[1] = a.b.y[1] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8421,7 +8396,7 @@ Solved equations:
   a.b.x[2] = a.b.y[2] .+ 2
 Residual equations:
  Iteration variables: a.b.z[2]
-  a.b.z[2] = a.b.y[2] .- ( 3 )
+  a.b.z[2] = a.b.y[2] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8434,7 +8409,7 @@ Solved equations:
   a.b.x[3] = a.b.z[3] .+ 1
 Residual equations:
  Iteration variables: a.b.y[3]
-  a.b.z[3] = a.b.y[3] .- ( 3 )
+  a.b.z[3] = a.b.y[3] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8447,7 +8422,7 @@ Solved equations:
   a.b.x[4] = a.b.z[4] .+ 1
 Residual equations:
  Iteration variables: a.b.x[4]
-  a.b.z[4] = a.b.y[4] .- ( 3 )
+  a.b.z[4] = a.b.y[4] .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -8460,9 +8435,9 @@ Solved equations:
   a.b.x[5] = a.b.z[5] .+ 1
 Residual equations:
  Iteration variables: a.b.x[5]
-  a.b.z[5] = a.b.y[5] .- ( 3 )
+  a.b.z[5] = a.b.y[5] .- 3
 -------------------------------
-      ")})));
+")})));
 end HandGuidedTearing29;
 
 model HandGuidedTearingError1
@@ -8964,10 +8939,10 @@ x1 - x2 = z*w;
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="BlockTest4",
-			methodName="printDAEBLT",
+			description="Test of linear systems of equations",
 			equation_sorting=true,
-			description="
-Test of linear systems of equations", methodResult="
+			methodName="printDAEBLT",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -8983,12 +8958,12 @@ Unknown variables:
   x2
 Equations:
   x1 + x2 = z + sin(w)
-  x1 - ( x2 ) = ( z ) * ( w )
-  x2 = ( w ) * ( z ) + 1 + w
+  x1 - x2 = z * w
+  x2 = w * z + 1 + w
 Jacobian:
-|1.0, - ( 1.0 ), 1.0|
-|1.0, - ( ( 1.0 ) * ( w ) ), - ( 1.0 )|
-|0.0, - ( ( w ) * ( 1.0 ) ), 1.0|
+  |1.0, - 1.0, 1.0|
+  |1.0, (- 1.0 * w), - 1.0|
+  |0.0, - w * 1.0, 1.0|
 -------------------------------
 ")})));
 end BlockTest4;
@@ -9003,10 +8978,10 @@ x1 - x2 = z;
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="BlockTest5",
-			methodName="printDAEBLT",
+			description="Test of linear systems of equations",
 			equation_sorting=true,
-			description="
-Test of linear systems of equations", methodResult="
+			methodName="printDAEBLT",
+			methodResult="
 -------------------------------
 Non-solved linear block of 3 variables:
 Coefficient variability: Constant
@@ -9016,12 +8991,12 @@ Unknown variables:
   x2
 Equations:
   x1 + x2 = z
-  x1 - ( x2 ) = z
+  x1 - x2 = z
   x2 = z + 1
 Jacobian:
-|1.0, - ( 1.0 ), 1.0|
-|1.0, - ( 1.0 ), - ( 1.0 )|
-|0.0, - ( 1.0 ), 1.0|
+  |1.0, - 1.0, 1.0|
+  |1.0, - 1.0, - 1.0|
+  |0.0, - 1.0, 1.0|
 -------------------------------
 ")})));
 end BlockTest5;
@@ -9037,10 +9012,10 @@ x1 - x2 = z*p;
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="BlockTest6",
-			methodName="printDAEBLT",
+			description="Test of linear systems of equations",
 			equation_sorting=true,
-			description="
-Test of linear systems of equations", methodResult="
+			methodName="printDAEBLT",
+			methodResult="
 -------------------------------
 Non-solved linear block of 3 variables:
 Coefficient variability: Parameter
@@ -9050,12 +9025,12 @@ Unknown variables:
   x2
 Equations:
   x1 + x2 = z
-  x1 - ( x2 ) = ( z ) * ( p )
+  x1 - x2 = z * p
   x2 = z + p
 Jacobian:
-|1.0, - ( 1.0 ), 1.0|
-|1.0, - ( ( 1.0 ) * ( p ) ), - ( 1.0 )|
-|0.0, - ( 1.0 ), 1.0|
+  |1.0, - 1.0, 1.0|
+  |1.0, (- 1.0 * p), - 1.0|
+  |0.0, - 1.0, 1.0|
 -------------------------------
 ")})));
 end BlockTest6;

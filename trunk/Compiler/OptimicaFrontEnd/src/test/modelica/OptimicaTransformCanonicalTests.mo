@@ -190,21 +190,21 @@ finalTime:
 		TransformCanonicalTestCase(
 			name="ArrayTest1",
 			description="Test arrays in Optimica",
-			flatModel="optimization OptimicaTransformCanonicalTests.ArrayTest1(objective = cost(finalTime),startTime = 0,
-			finalTime=2)
+			flatModel="
+optimization OptimicaTransformCanonicalTests.ArrayTest1(objective = cost(finalTime),startTime = 0,finalTime = 2)
  Real cost(start = 0,fixed = true);
  Real x[1](start = 1,fixed = true);
  Real x[2](start = 1,fixed = true);
  Real y;
  input Real u;
- parameter Real A[1,1] =  - ( 1 ) ;
- parameter Real A[1,2] = 0;
- parameter Real A[2,1] = 1 ;
- parameter Real A[2,2] =  - ( 1 );
- parameter Real B[1] = 1;
- parameter Real B[2] = 2;
- parameter Real C[1] = 1;
- parameter Real C[2] = 1;
+ parameter Real A[1,1] = - 1 /* -1 */;
+ parameter Real A[1,2] = 0 /* 0 */;
+ parameter Real A[2,1] = 1 /* 1 */;
+ parameter Real A[2,2] = - 1 /* -1 */;
+ parameter Real B[1] = 1 /* 1 */;
+ parameter Real B[2] = 2 /* 2 */;
+ parameter Real C[1] = 1 /* 1 */;
+ parameter Real C[2] = 1 /* 1 */;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
  Real der(x[1]);
@@ -214,20 +214,20 @@ initial equation
  x[1] = 1;
  x[2] = 1;
  cost = 0;
-equation 
- der(x[1]) = ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] ) + ( B[1] ) * ( u );
- der(x[2]) = ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] ) + ( B[2] ) * ( u );
- y = ( C[1] ) * ( x[1] ) + ( C[2] ) * ( x[2] );
+equation
+ der(x[1]) = A[1,1] * x[1] + A[1,2] * x[2] + B[1] * u;
+ der(x[2]) = A[2,1] * x[1] + A[2,2] * x[2] + B[2] * u;
+ y = C[1] * x[1] + C[2] * x[2];
  der(cost) = y ^ 2 + u ^ 2;
 constraint 
- u >= - ( 1 );
+ u >= - 1;
  u <= 1;
  x[1](finalTime) = 0;
  x[2](finalTime) = 0;
  x[1] <= 1;
  x[2] <= 1;
- x[1] >= - ( 1 );
- x[2] >= - ( 1 );
+ x[1] >= - 1;
+ x[2] >= - 1;
 end OptimicaTransformCanonicalTests.ArrayTest1;
 ")})));
   end ArrayTest1;
@@ -254,20 +254,20 @@ end OptimicaTransformCanonicalTests.ArrayTest1;
 			name="ArrayTest2",
 			description="Test arrays in Optimica",
 			flatModel="
-optimization OptimicaTransformCanonicalTests.ArrayTest2(objective = cost(finalTime) + ( x[1](finalTime) ) ^ 2 + ( x[2](finalTime) ) ^ 2,startTime = 0,finalTime = 2)
+optimization OptimicaTransformCanonicalTests.ArrayTest2(objective = cost(finalTime) + x[1](finalTime) ^ 2 + x[2](finalTime) ^ 2,startTime = 0,finalTime = 2)
  Real cost(start = 0,fixed = true);
  Real x[1](start = 1,fixed = true);
  Real x[2](start = 1,fixed = true);
  Real y;
  input Real u;
- parameter Real A[1,1] =  - ( 1 );
- parameter Real A[1,2] = 0;
- parameter Real A[2,1] = 1;
- parameter Real A[2,2] =  - ( 1 );
- parameter Real B[1] = 1 ;
- parameter Real B[2] = 2 ;
- parameter Real C[1] = 1 ;
- parameter Real C[2] = 1 ;
+ parameter Real A[1,1] = - 1 /* -1 */;
+ parameter Real A[1,2] = 0 /* 0 */;
+ parameter Real A[2,1] = 1 /* 1 */;
+ parameter Real A[2,2] = - 1 /* -1 */;
+ parameter Real B[1] = 1 /* 1 */;
+ parameter Real B[2] = 2 /* 2 */;
+ parameter Real C[1] = 1 /* 1 */;
+ parameter Real C[2] = 1 /* 1 */;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
  Real der(x[1]);
@@ -277,13 +277,13 @@ initial equation
  x[1] = 1;
  x[2] = 1;
  cost = 0;
-equation 
- der(x[1]) = ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] ) + ( B[1] ) * ( u );
- der(x[2]) = ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] ) + ( B[2] ) * ( u );
- y = ( C[1] ) * ( x[1] ) + ( C[2] ) * ( x[2] );
+equation
+ der(x[1]) = A[1,1] * x[1] + A[1,2] * x[2] + B[1] * u;
+ der(x[2]) = A[2,1] * x[1] + A[2,2] * x[2] + B[2] * u;
+ y = C[1] * x[1] + C[2] * x[2];
  der(cost) = y ^ 2 + u ^ 2;
 constraint 
- u >= - ( 1 );
+ u >= - 1;
  u <= 1;
 end OptimicaTransformCanonicalTests.ArrayTest2;
 ")})));
@@ -352,12 +352,12 @@ optimization OptimicaTransformCanonicalTests.TimedArrayTest2(objective = y(final
  Real y;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
-equation 
+equation
  x[1] = 1;
  x[2] = 2;
  y = x[1] + 3;
 constraint 
- y <= ( x[1](0) ) * ( 2 ) + ( x[2](0) ) * ( 3 );
+ y <= x[1](0) * 2 + x[2](0) * 3;
 end OptimicaTransformCanonicalTests.TimedArrayTest2;
 ")})));
 end TimedArrayTest2;
@@ -463,12 +463,12 @@ optimization OptimicaTransformCanonicalTests.MinTimeTest1(objective = finalTime,
 initial equation 
  x = 1;
  dx = 0;
-equation 
- ( der(x) ) / ( finalTime - ( startTime ) ) = dx;
- ( der(dx) ) / ( finalTime - ( startTime ) ) = u;
+equation
+ der(x) / (finalTime - startTime) = dx;
+ der(dx) / (finalTime - startTime) = u;
 constraint 
  u <= 1;
- u >=  - ( 1 );
+ u >= - 1;
  x(finalTime) = 0;
  dx(finalTime) = 0;
 end OptimicaTransformCanonicalTests.MinTimeTest1;
@@ -493,23 +493,23 @@ constraint
 			name="MinTimeTest2",
 			description="Test normalization of minimum time problems",
 			flatModel="
-optimization OptimicaTransformCanonicalTests.MinTimeTest2(objective =  - ( startTime ),startTime = 0.0)
+optimization OptimicaTransformCanonicalTests.MinTimeTest2(objective = - startTime,startTime = 0.0)
  Real x(start = 1,fixed = true);
  Real dx(start = 0,fixed = true);
  input Real u;
- parameter Real startTime(free = true,initialGuess =  - ( 1 ),start =  - ( 1 ));
+ parameter Real startTime(free = true,initialGuess = - 1,start = - 1);
  parameter Real finalTime = 1.0 /* 1.0 */;
  Real der(x);
  Real der(dx);
 initial equation 
  x = 1;
  dx = 0;
-equation 
- ( der(x) ) / ( finalTime - ( startTime ) ) = dx;
- ( der(dx) ) / ( finalTime - ( startTime ) ) = u;
+equation
+ der(x) / (finalTime - startTime) = dx;
+ der(dx) / (finalTime - startTime) = u;
 constraint 
  u <= 1;
- u >=  - ( 1 );
+ u >= - 1;
  x(finalTime) = 0;
  dx(finalTime) = 0;
 end OptimicaTransformCanonicalTests.MinTimeTest2;
@@ -538,20 +538,20 @@ optimization OptimicaTransformCanonicalTests.MinTimeTest3(objective = finalTime,
  Real x(start = 1,fixed = true);
  Real dx(start = 0,fixed = true);
  input Real u;
- parameter Real startTime(free = true,initialGuess =  - ( 1 ),start =  - ( 1 ));
+ parameter Real startTime(free = true,initialGuess = - 1,start = - 1);
  parameter Real finalTime(free = true,initialGuess = 2,start = 2);
  Real der(x);
  Real der(dx);
 initial equation 
  x = 1;
  dx = 0;
-equation 
- ( der(x) ) / ( finalTime - ( startTime ) ) = dx;
- ( der(dx) ) / ( finalTime - ( startTime ) ) = u;
+equation
+ der(x) / (finalTime - startTime) = dx;
+ der(dx) / (finalTime - startTime) = u;
 constraint 
- startTime =  - ( 1 );
+ startTime = - 1;
  u <= 1;
- u >=  - ( 1 );
+ u >= - 1;
  x(finalTime) = 0;
  dx(finalTime) = 0;
 end OptimicaTransformCanonicalTests.MinTimeTest3;
@@ -608,17 +608,17 @@ initial equation
  x[2] = 3;
  x[3] = 3;
 parameter equation
- dynamic[1] = (if 1 <= N_states then true else false);
- dynamic[2] = (if 2 <= N_states then true else false);
- dynamic[3] = (if 3 <= N_states then true else false);
- dynamic[4] = (if 4 <= N_states then true else false);
- dynamic[5] = (if 5 <= N_states then true else false);
+ dynamic[1] = if 1 <= N_states then true else false;
+ dynamic[2] = if 2 <= N_states then true else false;
+ dynamic[3] = if 3 <= N_states then true else false;
+ dynamic[4] = if 4 <= N_states then true else false;
+ dynamic[5] = if 5 <= N_states then true else false;
 equation
- der(x[1]) = (  - ( a[1] ) ) * ( x[1] ) + ( a[1] ) * ( x[2] );
- der(x[2]) = (  - ( a[2] ) ) * ( x[2] ) + ( a[2] ) * ( x[3] );
- der(x[3]) = (  - ( a[3] ) ) * ( x[3] ) + ( a[3] ) * ( x[4] );
- 0 = (  - ( a[4] ) ) * ( x[4] ) + ( a[4] ) * ( x[5] );
- 0 = (  - ( a[5] ) ) * ( x[5] ) + ( a[5] ) * ( u );
+ der(x[1]) = (- a[1]) * x[1] + a[1] * x[2];
+ der(x[2]) = (- a[2]) * x[2] + a[2] * x[3];
+ der(x[3]) = (- a[3]) * x[3] + a[3] * x[4];
+ 0 = (- a[4]) * x[4] + a[4] * x[5];
+ 0 = (- a[5]) * x[5] + a[5] * u;
 end OptimicaTransformCanonicalTests.DAETest1;
 ")})));
   end DAETest1;
