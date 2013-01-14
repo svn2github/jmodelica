@@ -1416,11 +1416,12 @@ aspect FlatPrettyPrint {
 	 * Used if precedence is equal for node and its parent.
 	 */
 	inh boolean FExp.shouldhaveParenthesis();
-	eq BaseNode.getChild().shouldhaveParenthesis() =   false;
+	eq BaseNode.getChild().shouldhaveParenthesis()   = false;
 	eq FDotDivExp.getRight().shouldhaveParenthesis() = true;
 	eq FDotPowExp.getLeft().shouldhaveParenthesis()  = true;
 	eq FDotSubExp.getRight().shouldhaveParenthesis() = true;
 	eq FRelExp.getRight().shouldhaveParenthesis()    = true;
+	eq FNegExp.getFExp().shouldhaveParenthesis()      = true;
 	
 	public final void FExp.prettyPrint(Printer p, PrintStream str, String indent) {
 		int myPrecedence = precedence();

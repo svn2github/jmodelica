@@ -5047,7 +5047,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     x[1] = _x_0;
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
     residual[0] = - 3 * 1.0;
-    residual[1] = - - 1.0;
+    residual[1] = - (- 1.0);
     residual[2] = - 1.0;
     residual[3] = - 1.0;
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
@@ -5073,7 +5073,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     x[1] = _x_0;
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
     residual[0] = - 3 * 1.0;
-    residual[1] = - - 1.0;
+    residual[1] = - (- 1.0);
     residual[2] = - 1.0;
     residual[3] = - 1.0;
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
@@ -5300,7 +5300,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     residual[8] = 0.0;
     residual[9] = AD_WRAP_LITERAL(0.0);
     residual[10] = 1.0;
-    residual[11] = - - 1.0;
+    residual[11] = - (- 1.0);
     residual[12] = 1.0;
     residual[13] = AD_WRAP_LITERAL(0.0);
     residual[14] = AD_WRAP_LITERAL(0.0);
@@ -5349,7 +5349,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     residual[8] = 0.0;
     residual[9] = AD_WRAP_LITERAL(0.0);
     residual[10] = 1.0;
-    residual[11] = - - 1.0;
+    residual[11] = - (- 1.0);
     residual[12] = 1.0;
     residual[13] = AD_WRAP_LITERAL(0.0);
     residual[14] = AD_WRAP_LITERAL(0.0);
@@ -5436,7 +5436,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     init_with_bounds(x[2],4.0, 5.0, \"Resetting initial value for z\");
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
     residual[0] = - 3 * 1.0;
-    residual[1] = - - 1.0;
+    residual[1] = - (- 1.0);
     residual[2] = - 1.0;
     residual[3] = - 1.0;
     residual[4] = - 1.0;
@@ -5506,7 +5506,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     residual[2] = - 1.0;
     residual[3] = - 1.0;
     residual[4] = - 3 * 1.0;
-    residual[5] = - - 1.0;
+    residual[5] = - (- 1.0);
     residual[6] = - 1.0;
     residual[7] = - 1.0;
     residual[8] = - 1.0;
@@ -5591,7 +5591,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     residual[2] = - 1.0;
     residual[3] = - 1.0;
     residual[4] = - 3 * 1.0;
-    residual[5] = - - 1.0;
+    residual[5] = - (- 1.0);
     residual[6] = - 1.0;
     residual[7] = - 1.0;
     residual[8] = - 1.0;

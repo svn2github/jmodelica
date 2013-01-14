@@ -5135,7 +5135,7 @@ initial equation
 equation
  x[1] = - 1;
  x[2] = - 0;
- x[3] = - - 1;
+ x[3] = - (- 1);
 end ArrayTests.Algebra.Neg.ArrayNeg1;
 ")})));
 end ArrayNeg1;
@@ -5192,7 +5192,7 @@ fclass ArrayTests.Algebra.Neg.ArrayNeg3
  discrete Integer x[3];
  constant Integer y[1] = - 1;
  constant Integer y[2] = - 0;
- constant Integer y[3] = - - 1;
+ constant Integer y[3] = - (- 1);
 initial equation 
  pre(x[1]) = 0;
  pre(x[2]) = 0;
