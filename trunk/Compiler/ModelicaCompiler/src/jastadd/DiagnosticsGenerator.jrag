@@ -182,7 +182,7 @@ public class DiagnosticsGenerator {
 				out.print("<h2>BLT for initialization system </h2>\n");
 				for (AbstractEquationBlock eb : fc.getDAEInitBLT()) {
 					out.print("<pre>\n");
-					out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + ind + "\">Block " + ind + (eb.isSolvable() ? "" : (" (Unsolvable block " + unSInd++ +")")) + "</a> ---\n");
+					out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + ind + "\">Block " + ind + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + "</a> ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 					ind++;
@@ -194,28 +194,28 @@ public class DiagnosticsGenerator {
 				// Loop over all derivatives
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOdeBlocks()) {
 					out.print("<pre>\n");
-					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolvable block " + unSInd++ +")")) + " ---\n");
+					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + " ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 				}
 				out.print("<h3> Real output blocks </h3>\n");
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getRealOutputBlocks()) {
 					out.print("<pre>\n");
-					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolvable block " + unSInd++ +")")) + " ---\n");
+					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + " ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 				}
 				out.print("<h3> Integer and boolean output blocks </h3>\n");	
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getIntegerBooleanOutputBlocks()) {
 					out.print("<pre>\n");
-					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolvable block " + unSInd++ +")")) + " ---\n");
+					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + " ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 				}
 				out.print("<h3> Other output blocks </h3>\n");
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOtherBlocks()) {
 					out.print("<pre>\n");
-					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolvable block " + unSInd++ +")")) + " ---\n");
+					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + " ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 				}		
@@ -353,7 +353,7 @@ public class DiagnosticsGenerator {
 		// Diagnostics about model sizes
 		out.print(modelDiagnosticsBeforeTransform);
 		out.println("</pre></p>");	
-		out.println("<p><a href=\"" + rawFlattenedModelAbsFileName + "\">Flattened model</a></p>"); 
+		out.println("<p><a href=\"" + rawFlattenedModelFileName + "\">Flattened model</a></p>"); 
 		out.println("<p><a href=\"" + connectionsFileName + "\">Connection sets</a></p>"); 
 		
 		
@@ -363,7 +363,7 @@ public class DiagnosticsGenerator {
 		out.print(fc.modelDiagnostics());
 		out.println("</pre></p>");	
 		// Model name and links to the flattened models
-		out.println("<p><a href=\"" + transformedModelAbsFileName + "\">Transformed model</a></p>"); 
+		out.println("<p><a href=\"" + transformedModelFileName + "\">Transformed model</a></p>"); 
 		out.println("<p><a href=\"" + aliasFileName + "\"> Alias sets</a> (" + fc.aliasDiagnosticsShort()  + ")</p>"); 
 		out.println("<p><a href=\"" + bltFileName + "\">BLT diagnostics</a><br />"); 
 		out.println("<a href=\"" + bltTableFileName + "\">BLT diagnostics table</a></p>"); 
