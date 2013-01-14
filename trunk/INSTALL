@@ -24,18 +24,8 @@ The following tools need to be installed:
  - Java development kit
  - Python 2.7 (with development headers)
 
-The following Python packages are needed: 
- - JPype 0.5.4.2 (http://jpype.sourceforge.net/) 
- - lxml 2.3 (http://codespeak.net/lxml/) 
- - NumPy 1.6.2 (http://numpy.scipy.org/)
- - SciPy 0.10.1 (http://www.scipy.org/)
- - Cython 0.15 (http://www.cython.org/)
- - Matplotlib 1.1.0 (http://matplotlib.sourceforge.net/)
- - wxPython 2.8 <http://www.wxpython.org/>
- - IPython 0.13 <http://ipython.org/>
- - Nose 1.1.2 <http://readthedocs.org/docs/nose/en/latest/> (Only needed to run
-   the test suits.)
- - Setuptools 0.6c11 <http://pypi.python.org/pypi/setuptools>
+The list of required Python packages can be found in the User's Guide. 
+It is available at http://www.jmodelica.org/page/236.
 
 Note that some of the Python packages are needed also to build JModelica.org. Note that
 on Ubuntu it is required to install Python with headers (python-dev) while the headers
@@ -86,7 +76,8 @@ In order to build, type
  > make 
 
 which will build the JModelica.org software components and in addition build
-the SUNDIALS integrator suite. In order to install, type 
+the SUNDIALS integrator suite. Note that you may need to set JAVA_HOME to the 
+path of a Java development kit installation. In order to install, type 
 
  > make install 
 
@@ -171,4 +162,4 @@ packages required by JModelica. Type
 This will list all required packages, if they are installed and package version
 (if available). Compare your status output to the list of required packages
 which can be found in this file under: 'Running JModelica.org from Python' or
-on the homepage www.jmodelica.org.
+on the web site www.jmodelica.org.
