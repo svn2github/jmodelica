@@ -60,13 +60,16 @@ void ModelicaVFormatError(const char* string, va_list arg_ptr)
 
 char* ModelicaAllocateString(size_t len) 
 {
-    ModelicaError("Function not implemented. Strings are not yet supported\n");
-    return NULL;
+    char* c = ModelicaAllocateStringWithErrorReturn(len);
+    if (c == NULL) {
+        ModelicaFormatError("Could not allocate memory for string with length %d.", len);
+    }
+    return c;
+
 }
 
 char* ModelicaAllocateStringWithErrorReturn(size_t len) 
 {
-    ModelicaError("Function not implemented. Strings are not yet supported\n");
-    return NULL;
+    return (char*) calloc(len + 1, sizeof(char));
 }
 
