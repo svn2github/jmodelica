@@ -8266,4 +8266,31 @@ const int fmi_runtime_options_map_length = 14;
 end TestRuntimeOptions1;
 
 
+model TestEmptyArray1
+	function f
+		input Real d[:,:];
+		output Real e;
+	algorithm
+		e := sum(size(d));
+	end f;
+	
+	parameter Real a[:, :] = fill(0.0,0,2);
+	parameter Integer b[:] = 2:size(a, 2);
+	parameter Boolean c = false;
+	Real x = f(a);
+	Real y = if c then a[1, b[1]] else 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestEmptyArray1",
+			description="",
+			template="$C_DAE_equation_residuals$",
+			generatedCode="
+    JMI_ARRAY_STATIC(tmp_1, 0, 2)
+    JMI_ARRAY_STATIC_INIT_2(tmp_1, 0, 2)
+    (*res)[0] = func_CCodeGenTests_TestEmptyArray1_f_exp(tmp_1) - (_x_2);
+    (*res)[1] = 1 - (_y_3);
+")})));
+end TestEmptyArray1;
+
 end CCodeGenTests;

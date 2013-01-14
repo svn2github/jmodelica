@@ -1414,23 +1414,21 @@ aspect FlatExpressions {
 					// In this case, simply don't inline value if we aren't in a function
 					// TODO: Really? isn't this an error?
 				}
-				if (inFunction()) {
+				if (inFunction() && ia.isAssignable()) {
 					// TODO: possible name conflict
 					// Add the constant array to the function and keep the access
-					if (ia.isAssignable()) {
-						var = ia.topInstAssignable();
-						functionConstantList().add(var);
-						FQName name = var.getFQName();
-						FQName use = ia.flattenAssignablePart(prefix);
-						InstComponentDecl found = ia.localLookupInstComponent(name.name());
-						if (name.numParts() > 1 || (found != null && found != var)) {
-							// TODO: this should probably be a helper function on FQName
-							FQNameFull fullUse = use.isSimple() ? use.copyAsFQNameFull() : (FQNameFull) use;
-							fullUse.getFQNamePart(0).setName(ia.findTempVarName(var));
-							use = fullUse;
-						}
-						return new FIdUseExp(use);
+					var = ia.topInstAssignable();
+					functionConstantList().add(var);
+					FQName name = var.getFQName();
+					FQName use = ia.flattenAssignablePart(prefix);
+					InstComponentDecl found = ia.localLookupInstComponent(name.name());
+					if (name.numParts() > 1 || (found != null && found != var)) {
+						// TODO: this should probably be a helper function on FQName
+						FQNameFull fullUse = use.isSimple() ? use.copyAsFQNameFull() : (FQNameFull) use;
+						fullUse.getFQNamePart(0).setName(ia.findTempVarName(var));
+						use = fullUse;
 					}
+					return new FIdUseExp(use);
 				}
 			}
 		} 

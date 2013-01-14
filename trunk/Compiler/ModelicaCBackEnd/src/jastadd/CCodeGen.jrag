@@ -1485,6 +1485,10 @@ aspect CCodeGen {
 	
 	public void FExp.genTempOutput_C(Printer p, PrintStream str, String indent) {}
 	
+	public void FFillExp.genTempOutput_C(Printer p, PrintStream str, String indent) {
+		type().printInit_C(p, str, indent, tempName_C(), this);
+	}
+	
 	public void FArray.genTempOutput_C(Printer p, PrintStream str, String indent) {
 		type().printInit_C(p, str, indent, tempName_C(), this);
 	}

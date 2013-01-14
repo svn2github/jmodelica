@@ -7374,10 +7374,8 @@ end Interpolate;
 model UseInterpolate	
  Real result;
  Real i = 1.0;
- 
 equation
 	 result = Interpolate.interp(i);
-
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -7403,5 +7401,17 @@ public
 end FunctionTests.UseInterpolate;
 ")})));
 end UseInterpolate;
+
+
+model Table1DfromFile
+  Modelica.Blocks.Sources.Sine sine(freqHz=1, amplitude=2);
+  Modelica.Blocks.Tables.CombiTable1D modelicaTable1D(
+    tableOnFile=true,
+    tableName="spring_data",
+    fileName="lr_spring.tab");
+equation
+  connect(sine.y, modelicaTable1D.u[1]);
+end Table1DfromFile;
+
 
 end FunctionTests;
