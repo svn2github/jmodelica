@@ -2307,9 +2307,7 @@ end RedeclareTests.RedeclareTest176;
 end RedeclareTest176;
 
 
-class RedeclareTest18 "Test of merging of modifications in parametrized classes"
- 
-  
+model RedeclareTest18 "Test of merging of modifications in parametrized classes"
   model A
     Real x=1;
   end A;
@@ -2348,7 +2346,6 @@ class RedeclareTest18 "Test of merging of modifications in parametrized classes"
    end G;
     
    G g(redeclare model myC = D(z=6,w=5));
-
 
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
@@ -4445,17 +4442,17 @@ fclass RedeclareTests.RedeclareFunction3
  Real z.x;
  Real z.y;
 equation
- z.x = RedeclareTests.RedeclareFunction3.z.D.f(z.y);
+ z.x = RedeclareTests.RedeclareFunction3.E.f(z.y);
  z.y = 1;
 
 public
- function RedeclareTests.RedeclareFunction3.z.D.f
+ function RedeclareTests.RedeclareFunction3.E.f
   input Real i;
   output Real o;
  algorithm
   o := i * 2;
   return;
- end RedeclareTests.RedeclareFunction3.z.D.f;
+ end RedeclareTests.RedeclareFunction3.E.f;
 
 end RedeclareTests.RedeclareFunction3;
 ")})));
@@ -4493,17 +4490,17 @@ fclass RedeclareTests.RedeclareFunction4
  Real b.x;
  Real b.y;
 equation
- b.x = RedeclareTests.RedeclareFunction4.b.A2.f({1, 2});
+ b.x = RedeclareTests.RedeclareFunction4.A.f({1, 2});
  b.y = RedeclareTests.RedeclareFunction4.b.A3.f({1, 2, 3});
 
 public
- function RedeclareTests.RedeclareFunction4.b.A2.f
+ function RedeclareTests.RedeclareFunction4.A.f
   input Real[2] a;
   output Real b;
  algorithm
   b := a[1] * 1 + a[2] * 2;
   return;
- end RedeclareTests.RedeclareFunction4.b.A2.f;
+ end RedeclareTests.RedeclareFunction4.A.f;
 
  function RedeclareTests.RedeclareFunction4.b.A3.f
   input Real[3] a;
@@ -4736,5 +4733,68 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
 Semantic error at line 4724, column 9:
   Cannot find class or component declaration for y
 ")})));
+
+
+model ShortClassDeclClass1
+	model A
+		replaceable function B = C;
+		
+		Real x = B(y);
+		Real y = 1;
+	end A;
+	
+	partial function C
+		input Real z;
+		output Real w;
+	end C;
+	
+	model D
+		replaceable function E = C;
+		
+		A a(redeclare function B = E);
+	end D;
+	
+	model F
+	    replaceable record G
+			replaceable function H = C;
+	    end G;
+		replaceable function I = G.H;
+		
+		D d(redeclare function E = I);
+	end F;
+	
+	function J
+        extends C;
+    algorithm
+        w := z;
+	end J;
+	
+	record K
+		function H = J;
+	end K;
+	
+	F f(redeclare record G = K);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ShortClassDeclClass1",
+			description="Lookup through short class decl with replacing short class decls above and below",
+			flatModel="
+fclass RedeclareTests.ShortClassDeclClass1
+ Real f.d.a.x = RedeclareTests.ShortClassDeclClass1.J(f.d.a.y);
+ Real f.d.a.y = 1;
+
+public
+ function RedeclareTests.ShortClassDeclClass1.J
+  input Real z;
+  output Real w;
+ algorithm
+  w := z;
+  return;
+ end RedeclareTests.ShortClassDeclClass1.J;
+
+end RedeclareTests.ShortClassDeclClass1;
+")})));
+end ShortClassDeclClass1;
 
 end RedeclareTests;

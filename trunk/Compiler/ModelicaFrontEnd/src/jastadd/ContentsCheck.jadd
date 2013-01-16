@@ -317,6 +317,7 @@ aspect ContentCheck {
 				return false;
 		return getNumFAbstractEquation() == 0;
 	}
+	eq InstSimpleShortClassDecl.isOkPackage() = actualInstClass().isOkPackage();
 	
 }
 

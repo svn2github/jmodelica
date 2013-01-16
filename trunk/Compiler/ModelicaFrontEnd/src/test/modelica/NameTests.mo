@@ -1636,17 +1636,13 @@ fclass NameTests.ConstantLookup33
 
 public
  function NameTests.ConstantLookup33.f
-  NameTests.ConstantLookup33.D.A[2] d := {NameTests.ConstantLookup33.C.E.A(3),NameTests.ConstantLookup33.C.E.A(4)};
+  NameTests.ConstantLookup33.D.A[2] d := {NameTests.ConstantLookup33.D.A(3),NameTests.ConstantLookup33.D.A(4)};
   input Integer i;
   output Real x;
  algorithm
   x := d[i].b;
   return;
  end NameTests.ConstantLookup33.f;
-
- record NameTests.ConstantLookup33.C.E.A
-  Real b;
- end NameTests.ConstantLookup33.C.E.A;
 
  record NameTests.ConstantLookup33.D.A
   Real b;
@@ -1769,21 +1765,21 @@ fclass NameTests.ConstantLookup35
  parameter Integer b.j = 1 /* 1 */;
  Real b.z;
 equation
- b.z = NameTests.ConstantLookup35.b.C.F.f1(b.j);
+ b.z = NameTests.ConstantLookup35.J.f1(b.j);
 
 public
- function NameTests.ConstantLookup35.b.C.F.f1
-  Real[2] temp_1;
+ function NameTests.ConstantLookup35.J.f1
+  Real[2] a;
   input Integer i;
   output Real x;
   Real y;
  algorithm
-  temp_1[1] := 1;
-  temp_1[2] := 2;
-  y := temp_1[i];
+  a[1] := 1;
+  a[2] := 2;
+  y := a[i];
   x := y;
   return;
- end NameTests.ConstantLookup35.b.C.F.f1;
+ end NameTests.ConstantLookup35.J.f1;
 
 end NameTests.ConstantLookup35;
 ")})));

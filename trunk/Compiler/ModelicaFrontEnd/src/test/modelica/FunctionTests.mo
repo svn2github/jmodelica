@@ -550,33 +550,25 @@ model FunctionFlatten11
 	B b;
 	C c;
 
-	annotation(__JModelica(UnitTesting(tests={ 
+	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionFlatten11",
 			description="Using redeclared function in model",
 			flatModel="
 fclass FunctionTests.FunctionFlatten11
  Real b.x = 1;
- Real b.y = FunctionTests.FunctionFlatten11.b.f3(b.x);
+ Real b.y = FunctionTests.FunctionFlatten11.f2(b.x);
  Real c.x = 1;
- Real c.y = FunctionTests.FunctionFlatten11.c.f3(c.x);
+ Real c.y = FunctionTests.FunctionFlatten11.f2(c.x);
 
 public
- function FunctionTests.FunctionFlatten11.b.f3
+ function FunctionTests.FunctionFlatten11.f2
   input Real x;
   output Real y;
  algorithm
   y := x + 1;
   return;
- end FunctionTests.FunctionFlatten11.b.f3;
-
- function FunctionTests.FunctionFlatten11.c.f3
-  input Real x;
-  output Real y;
- algorithm
-  y := x + 1;
-  return;
- end FunctionTests.FunctionFlatten11.c.f3;
+ end FunctionTests.FunctionFlatten11.f2;
 
 end FunctionTests.FunctionFlatten11;
 ")})));

@@ -1128,5 +1128,6 @@ aspect InstClassRestriction {
 		}
 		return false;	
 	}
+	eq InstSimpleShortClassDecl.isExternalObject() = false;
 	
 }

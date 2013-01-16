@@ -679,6 +679,14 @@ aspect InstanceErrorCheck {
             getInstExternalOpt().collectErrors();
     	}
   	}
+    
+    public void InstSimpleShortClassDecl.collectErrors() {
+        if (!errorChecked) {
+        	errorChecked = true;
+        	getTarget().collectErrors();
+        	actualInstClass().collectErrors();
+        }    	
+    }
 
 //  	public void InstEnumClassDecl.collectErrors() {  		
 //  		// TODO: Error checking of enumeration declarations
@@ -961,6 +969,7 @@ aspect InstanceErrorCheck {
 			n += ie.myInstClass().numInstExternal();
 		return n;
 	}
+	eq InstSimpleShortClassDecl.numInstExternal() = actualInstClass().numInstExternal();
 	
 	syn int InstClassDecl.numFAlgorithmBlock() {
 		int n = 0;
@@ -971,6 +980,7 @@ aspect InstanceErrorCheck {
 			n += ie.myInstClass().numFAlgorithmBlock();
 		return n;
 	}
+	eq InstSimpleShortClassDecl.numFAlgorithmBlock() = actualInstClass().numFAlgorithmBlock();
 	
 	public void InstExternalObject.collectErrors() {
 	    if (!errorChecked) {
@@ -1085,7 +1095,7 @@ aspect InstanceErrorCheck {
 		recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
 		visited.add(this);
 		if (recursiveCache == RECURSIVE_NO) 
-			for (InstExtends ie : myInstClass().getInstExtendss())
+			for (InstExtends ie : myInstClass().actualInstClass().getInstExtendss())
 				ie.calcIsRecursive(visited);
 	}
 	

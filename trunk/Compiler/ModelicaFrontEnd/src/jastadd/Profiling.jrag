@@ -788,6 +788,22 @@ aspect MemoryUse {
 			return mem;
 		}
 		
+		public static void printObjectParts(Object o) {
+			printObjectParts(o, o.getClass());
+		}
+		
+		private static void printObjectParts(Object o, Class type) {
+			if (type != Object.class)
+				printObjectParts(o, type.getSuperclass());
+			
+			for (Field f : getFields.perform(type)) {
+				if ((f.getModifiers() & Modifier.STATIC) == 0) {
+					long mem = getFieldSize(f.getType()) + getObjectFieldSize(f, o);
+					System.out.format("%6d : %s\n", mem, f.getName());
+				}
+			}
+		}
+		
 		private static long getObjectFieldSize(Field f, Object o) {
 			Class type = f.getType();
 			if (type.isPrimitive())
