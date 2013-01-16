@@ -17,475 +17,248 @@
     Vista, 7) with 32-bit or 64-bit architectures.</para>
   </section>
 
-  <section xml:id="inst_sec_prerequisites">
-    <title>Prerequisites</title>
+  <section xml:id="inst_sec_win">
+    <title>Installation on Windows</title>
 
-    <para>Make sure to install the required software components listed in this
-    section before installing JModelica.org.</para>
+    <para>Pre-built binary distributions for Windows are available in the
+    Download section of <link
+    xlink:href="www.jmodelica.org">www.jmodelica.org</link>.</para>
 
-    <section>
-      <title>Java</title>
+    <para>The Windows installer contains a binary distribution of
+    JModelica.org, bundled with all required third-party software components.
+    A list of the third-party dependencies can be found in <xref
+    linkend="inst_sec_win_deps"/>. The installer sets up a pre-configured
+    complete environment with convenient start menu shortcuts. Installation
+    instructions are found in <xref linkend="inst_sec_win_inst"/>.</para>
 
-      <para>It is required to have a Java Runtime Environment (JRE) version 6
-      installed on your computer.</para>
+    <section xml:id="inst_sec_win_deps">
+      <title>Dependencies</title>
 
-      <para><emphasis role="bold">Install a JRE</emphasis></para>
-
-      <procedure>
-        <step>
-          <para>Get a 32-bit / 64-bit <link
-          xlink:href="http://www.java.com/en/download/manual.jsp">JRE</link>
-          installer suitable for your platform. For Windows users the 32-bit
-          JRE must be installed, even for 64-bit computers.</para>
-        </step>
-
-        <step>
-          <para>Run the installer and follow the instructions to install the
-          JRE on your computer.</para>
-        </step>
-      </procedure>
-    </section>
-
-    <section xml:id="inst_sec_prereq_python">
-      <title>Python</title>
-
-      <para>Python 2.7 (including development headers) with the following
-      additional packages are required.</para>
-
-      <para><emphasis role="bold">Install Python 2.7</emphasis></para>
-
-      <procedure>
-        <step>
-          <para>Get a <link
-          xlink:href="http://www.python.org/download/releases/">Python
-          2.7</link> installer suitable for your platform. Note that for
-          Windows users, the 32-bit version must be chosen, even for 64-bit
-          computers.</para>
-        </step>
-
-        <step>
-          <para>Install the additional Python packages listed in the tables
-          below. Make sure that you pick the distribution suitable for Python
-          2.7.<table>
-              <title>Required Python packages</title>
-
-              <tgroup cols="3">
-                <colspec align="left" colname="col–para" colwidth="2*"/>
-
-                <colspec align="left" colname="col–def" colwidth="2*"/>
-
-                <colspec align="left" colname="col–descr" colwidth="3*"/>
-
-                <thead>
-                  <row>
-                    <entry align="center">Package</entry>
-
-                    <entry align="center">Recommended version</entry>
-
-                    <entry align="center">Description</entry>
-                  </row>
-                </thead>
-
-                <tbody>
-                  <row>
-                    <entry><link
-                    xlink:href="http://sourceforge.net/projects/numpy/files/NumPy/">NumPy</link></entry>
-
-                    <entry>1.6.2</entry>
-
-                    <entry>The fundamental package needed for scientific
-                    computing with Python.</entry>
-                  </row>
-
-                  <row>
-                    <entry><link
-                    xlink:href="http://sourceforge.net/projects/scipy/files/scipy/">SciPy</link></entry>
-
-                    <entry>0.10.1</entry>
-
-                    <entry>A library of algorithms and mathematical tools for
-                    Python.</entry>
-                  </row>
-
-                  <row>
-                    <entry><link
-                    xlink:href="http://sourceforge.net/projects/matplotlib/files/matplotlib/">matplotlib</link></entry>
-
-                    <entry>1.1.0</entry>
-
-                    <entry>A plotting library for Python, with a MATLAB like
-                    interface.</entry>
-                  </row>
-
-                  <row>
-                    <entry><link
-                    xlink:href="http://ipython.org/download.html">IPython</link></entry>
-
-                    <entry>0.13</entry>
-
-                    <entry>An interactive shell for Python with additional
-                    shell syntax, code highlighting, tab completion, string
-                    completion, and rich history.</entry>
-                  </row>
-                </tbody>
-              </tgroup>
-            </table></para>
-
-          <para>IPython has extra dependencies on Windows, in this case these
-          extra Python packages must be installed:</para>
-
-          <table>
-            <title>IPython dependencies on Windows</title>
-
-            <tgroup cols="3">
-              <colspec align="left" colname="col–para" colwidth="2*"/>
-
-              <colspec align="left" colname="col–def" colwidth="2*"/>
-
-              <colspec align="left" colname="col–descr" colwidth="3*"/>
-
-              <thead>
-                <row>
-                  <entry align="center">Package</entry>
-
-                  <entry align="center">Recommended version</entry>
-
-                  <entry align="center">Description</entry>
-                </row>
-              </thead>
-
-              <tbody>
-                <row>
-                  <entry><link
-                  xlink:href="http://pypi.python.org/pypi/pyreadline">Pyreadline</link></entry>
-
-                  <entry>1.7.1</entry>
-
-                  <entry>A Python implmementation of GNU readline.</entry>
-                </row>
-
-                <row>
-                  <entry><link
-                  xlink:href="http://pypi.python.org/pypi/distribute/">distribute</link></entry>
-
-                  <entry>0.6.27</entry>
-
-                  <entry>A package for downloading, building, installing,
-                  upgrading, and uninstalling Python packages.</entry>
-                </row>
-              </tbody>
-            </tgroup>
-          </table>
-
-          <para>Please note that the recommended version of a package is not
-          always the same as the latest version available. It is the package
-          version that JModelica.org has been tested and verified to be
-          working with.</para>
-        </step>
-      </procedure>
-    </section>
-  </section>
-
-  <section xml:id="inst_sec_binary_dist">
-    <title>Binary distribution</title>
-
-    <section>
-      <title>Windows</title>
-
-      <para>Pre-built binary distributions for Windows are available in the
-      Download section of <link
-      xlink:href="www.jmodelica.org">www.jmodelica.org</link>.</para>
-
-      <para>The JModelica.org Windows installer contains a binary distribution
-      of JModelica.org built using the JModelica.org-SDK, bundled with
-      required third-party software components. The installer sets up a
-      pre-configured complete environment with convenient start menu
-      shortcuts.</para>
-
-      <section xml:id="inst_subsec_bundles">
-        <title>Bundled tools, libraries and Python packages</title>
-
-        <para>The following tools, libraries and Python packages are bundled
-        with the binary distribution of JModelica.org.</para>
-
-        <itemizedlist>
+      <para>As of JModelica.org version 1.9, all dependencies are bundled in
+      the installer. They are listed below, each with version number and link
+      to corresponding web site.<itemizedlist>
           <listitem>
-            <para><link xlink:href="http://www.mingw.org">MingGW</link></para>
+            <para><emphasis role="bold">Applications</emphasis><itemizedlist>
+                <listitem>
+                  <para><link
+                  xlink:href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Java
+                  1.6</link> (JRE)</para>
+                </listitem>
+
+                <listitem>
+                  <para><link
+                  xlink:href="http://www.mingw.org">MinGW</link></para>
+                </listitem>
+
+                <listitem>
+                  <para><link xlink:href="http://www.python.org/">Python
+                  2.7</link></para>
+                </listitem>
+              </itemizedlist></para>
           </listitem>
 
           <listitem>
-            <para><link
-            xlink:href="https://projects.coin-or.org/Ipopt">Ipopt</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="http://jpype.sourceforge.net">JPype</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="http://codespeak.net/lxml">lxml</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="http://readthedocs.org/docs/nose/en/latest/">nose</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="http://www.wxpython.org">wxPython</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="https://computation.llnl.gov/casc/sundials/main.html">SUNDIALS</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="http://www.cython.org/">Cython</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="http://crd.lbl.gov/~xiaoye/SuperLU/">SuperLU</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="http://sourceforge.net/apps/trac/casadi/">CasADi</link></para>
-          </listitem>
-        </itemizedlist>
-      </section>
-
-      <section>
-        <title>Running the Windows installer</title>
-
-        <para>Make sure that all prerequisite components described in <xref
-        linkend="inst_sec_prerequisites"/> are installed before
-        continuing.</para>
-
-        <procedure>
-          <step>
-            <para>Download a <link
-            xlink:href="http://www.jmodelica.org/page/12">JModelica.org
-            Windows binary installer</link> and save the executable file
-            somewhere on your computer.</para>
-          </step>
-
-          <step>
-            <para>Run the file by double-clicking and selecting "Run" if
-            prompted with a security warning. This will launch an installer
-            which should be self-explanatory.</para>
+            <para><emphasis role="bold">Libraries</emphasis></para>
 
             <itemizedlist>
               <listitem>
-                <para>In the <emphasis>Choose Components</emphasis> window,
-                select which of the bundled Python packages that should be
-                installed. Make sure that any package not already installed on
-                your computer is checked.</para>
+                <para><link
+                xlink:href="https://projects.coin-or.org/Ipopt">Ipopt
+                3.10.0</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link
+                xlink:href="http://crd.lbl.gov/~xiaoye/SuperLU/">SuperLU
+                4.1</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link xlink:href="http://beaver.sourceforge.net/">Beaver
+                0.9.6.1</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link
+                xlink:href="http://www.coin-or.org/CppAD/">CppAD</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link xlink:href="http://expat.sourceforge.net/">eXpat
+                2.1.0</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link
+                xlink:href="http://www.winimage.com/zLibDll/minizip.html">Minizip</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link
+                xlink:href="https://www.modelica.org/libraries/Modelica">MSL
+                (Modelica Standard Library) 3.2</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link
+                xlink:href="https://computation.llnl.gov/casc/sundials">SUNDIALS
+                2.4.0</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link xlink:href="http://www.zlib.net/">Zlib
+                1.2.6</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link
+                xlink:href="http://sourceforge.net/apps/trac/casadi/">CasADi</link></para>
               </listitem>
             </itemizedlist>
-          </step>
-        </procedure>
-
-        <figure>
-          <title>Selecting Python packages in the <emphasis>Choose
-          components</emphasis> window.</title>
-
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" fileref="images/Setup_components.png"
-                         scalefit="1" width="50%"/>
-            </imageobject>
-          </mediaobject>
-        </figure>
-      </section>
-    </section>
-
-    <section>
-      <title>Linux</title>
-
-      <para>Currently, no pre-built binary distributions are provided for
-      Linux.</para>
-    </section>
-
-    <section>
-      <title>Mac OS X</title>
-
-      <para>Currently, no pre-built binary distributions are provided for Mac
-      OS X.</para>
-    </section>
-  </section>
-
-  <section xml:id="inst_sec_sdk">
-    <title>Compilation on MS Windows systems</title>
-
-    <para>The JModelica.org Software Development Kit (SDK) is a bundle of
-    tools needed to build the JModelica.org sources on Windows. The SDK is
-    intended for those of you who want to do some developement work on the
-    platform or if you want to be able to continuously build new versions to
-    be updated with the latest code changes. For a well documented, tested and
-    stable version of JModelica.org, we refer to our binary distribution which
-    is built (for Windows) with every release.</para>
-
-    <para>The JModelica.org SDK Windows installer sets up a complete
-    pre-configured development environment with convenient start menu
-    shortcuts.</para>
-
-    <section xml:id="inst_sec_sdk_prereq">
-      <title>Prerequisites</title>
-
-      <para>The Python prerequisites for installing the JModelica.org SDK are
-      the same as listed in <xref linkend="inst_sec_prereq_python"/>. For Java
-      however it is required to have a 32-bit JDK installed, not only a 32-bit
-      JRE as for the binary installation.</para>
-
-      <para><emphasis role="bold">Install a JDK</emphasis><procedure>
-          <step>
-            <para>Get a 32-bit <link
-            xlink:href="http://java.sun.com/javase/downloads/">JDK</link>.</para>
-          </step>
-
-          <step>
-            <para>Run the installer and follow the instructions to install the
-            JDK on your computer.</para>
-          </step>
-        </procedure></para>
-    </section>
-
-    <section>
-      <title>Installing the JModelica.org SDK</title>
-
-      <para>Make sure that the prerequisites listed in <xref
-      linkend="inst_sec_sdk_prereq"/> are installed before starting the
-      JModelica.org SDK installation.</para>
-
-      <section>
-        <title>Bundled tools, libraries and Python packages</title>
-
-        <para>All tools, libraries and Python packages included in the binary
-        distribution, see <xref linkend="inst_subsec_bundles"/>, are also
-        included in the SDK. The SDK also includes a few extra tools:</para>
-
-        <itemizedlist>
-          <listitem>
-            <para><link xlink:href="http://www.mingw.org">MinGW,
-            MSYS</link></para>
           </listitem>
 
           <listitem>
-            <para><link xlink:href="http://www.open.collab.net/">CollabNet
-            Subversion Client</link></para>
+            <para><emphasis role="bold">Python packages</emphasis></para>
+
+            <itemizedlist>
+              <listitem>
+                <para><link xlink:href="http://www.cython.org/">Cython
+                0.17.2</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link
+                xlink:href="http://packages.python.org/distribute/">Distribute
+                0.6.32</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link xlink:href="http://ipython.org/">IPython
+                0.13.1</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link xlink:href="http://jpype.sourceforge.net">JPype
+                0.5.4.2</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link xlink:href="http://lxml.de/">lxml
+                3.0.1</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link xlink:href="http://matplotlib.org/">matplotlib
+                1.2.0</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link
+                xlink:href="https://nose.readthedocs.org/en/latest/">nose
+                1.2.1</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link xlink:href="http://www.numpy.org/">NumPy
+                1.6.2</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link
+                xlink:href="http://packages.python.org/pyreadline/">Pyreadline
+                1.7.1</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link xlink:href="http://www.scipy.org/">SciPy
+                0.11.0</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link xlink:href="http://www.wxpython.org">wxPython
+                2..8</link></para>
+              </listitem>
+            </itemizedlist>
           </listitem>
+        </itemizedlist></para>
+    </section>
 
-          <listitem>
-            <para><link xlink:href="http://ant.apache.org">Apache
-            Ant</link></para>
-          </listitem>
-        </itemizedlist>
-      </section>
+    <section xml:id="inst_sec_win_inst">
+      <title>Installation</title>
 
-      <section>
-        <title>Step-by-step instructions</title>
+      <para>The following step-by-step instructions describe how to install
+      JModelica.org using the Windows binary distribution.</para>
 
-        <para><orderedlist>
+      <procedure>
+        <step>
+          <para>Download a <link
+          xlink:href="http://www.jmodelica.org/page/12">JModelica.org Windows
+          binary installer</link> and save the executable file somewhere on
+          your computer.</para>
+        </step>
+
+        <step>
+          <para>Run the file by double-clicking and selecting "Run" if
+          prompted with a security warning. This will launch an installer
+          which should be self-explanatory.</para>
+
+          <itemizedlist>
             <listitem>
-              <para>Download the <link
-              xlink:href="http://www.jmodelica.org/sdk">JModelica.org
-              SDK</link> and save the executable file somewhere on your
-              computer.</para>
+              <para>In the <emphasis>Choose Components</emphasis> window,
+              select which of the bundled Python packages that should be
+              installed. Make sure that any package not already installed on
+              your computer is checked.<figure>
+                  <title>Selecting Python packages in the <emphasis>Choose
+                  components</emphasis> window.</title>
+
+                  <mediaobject>
+                    <imageobject>
+                      <imagedata align="center"
+                                 fileref="images/Setup_components.png"
+                                 scalefit="1" width="50%"/>
+                    </imageobject>
+                  </mediaobject>
+                </figure></para>
             </listitem>
+          </itemizedlist>
+        </step>
+      </procedure>
+    </section>
 
-            <listitem>
-              <para>Run the file by double-clicking and selecting "Run" if
-              prompted with a security warning. This will launch an installer
-              which should be self-explanatory. Select "Yes" at the end when
-              asked if the source code should be checked out from
-              JModelica.org as this is needed in the next step.</para>
-            </listitem>
+    <section>
+      <title>Verifying the installation</title>
 
-            <listitem>
-              <para>Build the sources:<orderedlist>
-                  <listitem>
-                    <para>Start the msys shell from the JModelica.org start
-                    menu.</para>
-                  </listitem>
-
-                  <listitem>
-                    <para>Configure the sources for build and installation
-                    (this will create the subdirectories
-                    <filename>build</filename> and
-                    <filename>install</filename>) with:<programlisting>./configure.sh</programlisting></para>
-                  </listitem>
-
-                  <listitem>
-                    <para>Compile the sources with <literal>make</literal>
-                    from the <filename>build</filename>
-                    folder:<programlisting>cd build
-make &amp;&amp; make install &amp;&amp; make install_casadi </programlisting></para>
-                  </listitem>
-                </orderedlist></para>
-            </listitem>
-
-            <listitem>
-              <para>Test the installation by starting a Python shell from the
-              JModelica.org start menu and running an example. Starting the
-              Python session from this start menu will set all the environment
-              variables required to run the JModelica.org Python
-              interface.<programlisting language="python"># Import the vdp example
+      <para>Test the installation by starting a Python shell from the
+      JModelica.org start menu and run a few examples. Starting the Python
+      session from the start menu will set all the environment variables
+      required to run the JModelica.org Python interface.<programlisting
+      language="python"># Run the VDP example and plot results
 from pyjmi.examples import vdp
+vdp.run_demo()
 
-# Run the vdp example and plot results
-vdp.run_demo()</programlisting></para>
-            </listitem>
-          </orderedlist></para>
-      </section>
+# Run the CSTR example and plot results
+from pyjmi.examples import cstr
+cstr.run_demo()
+
+# Run the CSTR example using CasADi and plot results
+from pyjmi.examples import cstr_casadi
+cstr_casadi.run_demo()</programlisting></para>
     </section>
 
     <section>
-      <title>Changing Ipopt solver</title>
+      <title>Compilation from sources</title>
 
-      <para>The solver bundled in JModelica.org is Ipopt-MUMPS. However, it is
-      possible to use other Ipopt solvers instead. This requires a few changes
-      in the setup and rebuilding JModelica.org. The procedure is:</para>
-
-      <orderedlist>
-        <listitem>
-          <para>Open the script file <filename>configure.sh,</filename> which
-          is located in the SDK root folder, in a text editor.</para>
-        </listitem>
-
-        <listitem>
-          <para>Search for the line <emphasis>--with-ipopt</emphasis> and
-          exchange the default Ipopt solver path with the path to the solver
-          that you want to use. Save and close.</para>
-        </listitem>
-
-        <listitem>
-          <para>Do the whole installation procedure again, that is: run
-          <literal>configure</literal>, <literal>make</literal>, <literal>make
-          install</literal> and <literal>make install_casadi</literal>.</para>
-        </listitem>
-
-        <listitem>
-          <para>Open the file <filename>setenv.bat,</filename> which is also
-          found in the SDK root folder, in a text editor.</para>
-        </listitem>
-
-        <listitem>
-          <para>Look for the line which sets the <literal>IPOPT_HOME</literal>
-          environment variable and exchange the default path with the path to
-          your solver.</para>
-        </listitem>
-      </orderedlist>
+      <para>For compiling JModelica.org from sources on Windows there is a
+      <link xlink:href="http://www.jmodelica.org/sdk">Software Development
+      Kit</link> (SDK) available for download. The SDK is a bundle of tools
+      used to build JModelica.org from source code on Windows, please see the
+      SDK User's guide, which can be reached from the download site, for more
+      information.</para>
     </section>
   </section>
 
   <section xml:id="inst_sec_sdk">
-    <title>Compilation on Linux systems</title>
+    <title>Installation on Linux systems</title>
 
     <para>This section describes a procedure for compiling JModelica.org from
     sources on Linux. The instructions have been verified to work on Ubuntu
