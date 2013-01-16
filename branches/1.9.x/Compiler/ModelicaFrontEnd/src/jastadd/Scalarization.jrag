@@ -234,9 +234,13 @@ aspect Scalarization {
 	}
 	
 	protected FVariable FExternalObjectVariable.createScalarFVariable(Index i) {
+		Map<String, FExp> EMPTY = Collections.<String, FExp>emptyMap();
 		FExternalObjectVariable fex = (FExternalObjectVariable) super.createScalarFVariable(i);
-		FFunctionCall call = (FFunctionCall) getDestructorCall().getCall().scalarize(Collections.<String, FExp>emptyMap());
-		fex.setDestructorCall(new FFunctionCallStmt(new List(), call));
+		FFunctionCall call = (FFunctionCall) getDestructorCall().getCall();
+		FFunctionCall scalarCall = (FFunctionCall) call.scalarize(EMPTY);
+		if (i != Index.NULL)
+			scalarCall.setArg(call.getArg(0).getArray().get(i).scalarize(EMPTY), 0);
+		fex.setDestructorCall(new FFunctionCallStmt(new List(), scalarCall));
 		return fex;
 	}
 	
@@ -1726,7 +1730,15 @@ aspect Scalarization {
 	 * \brief Create an FArray containing scalarized subexpressions.
 	 */
 	public FExp Array.buildScalarized(Map<String,FExp> indexMap, FExp context) {
-    	return buildFArray(new ScalarizedBuilder(indexMap, context));
+		Size s = size();
+		if (s.isEmpty()) {
+			List<FExp> dims = new List<FExp>();
+			for (int i = 0, n = s.ndims(); i < n ; i++)
+				dims.add(s.createFExp(i));
+			return new FFillExp(dims, type().zeroLiteral());
+		} else {
+	    	return buildFArray(new ScalarizedBuilder(indexMap, context));
+		}
     }
     
 	public static class Array {

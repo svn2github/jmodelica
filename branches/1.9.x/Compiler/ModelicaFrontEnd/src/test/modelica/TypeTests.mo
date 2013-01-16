@@ -317,8 +317,7 @@ model AbsType1
 			flatModel="
 fclass TypeTests.AbsType1
  Real x = abs(y);
- Real y =  - ( 2.0 );
-
+ Real y = - 2.0;
 end TypeTests.AbsType1;
 ")})));
 end AbsType1;
@@ -336,11 +335,10 @@ model AbsType2
 			description="abs() operator: Real constant",
 			flatModel="
 fclass TypeTests.AbsType2
- constant Real x1 = abs( - ( 2.0 ));
+ constant Real x1 = abs(- 2.0);
  constant Real x2 = abs(2.0);
  Real y1 = 2.0;
  Real y2 = 2.0;
-
 end TypeTests.AbsType2;
 ")})));
 end AbsType2;
@@ -357,8 +355,7 @@ model AbsType3
 			flatModel="
 fclass TypeTests.AbsType3
  discrete Integer x = abs(y);
- discrete Integer y =  - ( 2 );
-
+ discrete Integer y = - 2;
 end TypeTests.AbsType3;
 ")})));
 end AbsType3;
@@ -376,11 +373,10 @@ model AbsType4
 			description="abs() operator: Integer constant",
 			flatModel="
 fclass TypeTests.AbsType4
- constant Integer x1 = abs( - ( 2 ));
+ constant Integer x1 = abs(- 2);
  constant Integer x2 = abs(2);
  discrete Integer y1 = 2;
  discrete Integer y2 = 2;
-
 end TypeTests.AbsType4;
 ")})));
 end AbsType4;
@@ -411,8 +407,7 @@ model AbsType6
 			description="abs() operator: array arg",
 			flatModel="
 fclass TypeTests.AbsType6
- Real x[2] = abs({1, - ( 1 )});
-
+ Real x[2] = abs({1, - 1});
 end TypeTests.AbsType6;
 ")})));
 end AbsType6;

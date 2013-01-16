@@ -167,25 +167,27 @@
 		<!-- collect class files for org.jmodelica.ide -->
 		<copy todir="${bin_dir}/bundles/${ide.project}">
 			<fileset dir="${bin_dir}/classes">
-				<include name="org/jmodelica/generated/**/*" />
-				<include name="org/jmodelica/icons/**/*" />
-				<include name="org/jmodelica/ide/**/*" />
-				<include name="org/jmodelica/modelica/**/*" />
-				<include name="org/jmodelica/util/**/*" />
+				<include name="org/jmodelica/generated/**" />
+				<include name="org/jmodelica/icons/**" />
+				<include name="org/jmodelica/ide/**" />
+				<include name="org/jmodelica/modelica/**" />
+				<include name="org/jmodelica/util/**" />
+				<exclude name="org/jmodelica/ide/graphical/**" />
+				<exclude name="org/jmodelica/ide/documentation/**" />
 			</fileset>
 		</copy>
 
 		<!-- collect class files for org.jmodelica.graphical -->
 		<copy todir="${bin_dir}/bundles/${graphical.project}">
 			<fileset dir="${bin_dir}/classes">
-				<include name="org/jmodelica/graphical/**/*" />
+				<include name="org/jmodelica/ide/graphical/**" />
 			</fileset>
 		</copy>
 
 		<!-- collect class files for org.jmodelica.documentation -->
 		<copy todir="${bin_dir}/bundles/${documentation.project}">
 			<fileset dir="${bin_dir}/classes">
-				<include name="org/jmodelica/documentation/**/*" />
+				<include name="org/jmodelica/ide/documentation/**" />
 			</fileset>
 		</copy>
 

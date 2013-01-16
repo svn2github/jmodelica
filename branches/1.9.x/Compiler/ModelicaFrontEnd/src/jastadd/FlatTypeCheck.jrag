@@ -159,7 +159,7 @@ aspect FlatTypeCheck {
   protected void InstAccess.typeError(InstAccess top) {}
   
   protected void InstDot.typeError(InstAccess top) {
-	  getInstAccess(getNumInstAccess() - 1).typeError(top);
+	  getLastInstAccess().typeError(top);
   }
   
   protected void InstGlobalAccess.typeError(InstAccess top) {
@@ -167,7 +167,7 @@ aspect FlatTypeCheck {
   }
   
   protected void InstComponentAccess.typeError(InstAccess top) {
-	  if (!myInstComponentDecl().isUnknown())
+	  if (!myInstComponentDecl().isUnknown() && !myInstComponentDecl().myInstClass().isUnknown())
 		  top.error("Accesses to composite components other than records are not allowed: " + top.name());
   }
   
@@ -532,6 +532,8 @@ aspect FlatTypeCheck {
 			  if (!boundType.isUnknown()) {
 				  if (isVectorized()) 
 					  boundType = boundType.sizedType(boundType.size().expand(vectorizedSize()));
+				  else if (isDestructorArgument())
+					  boundType = boundType.sizedType(type.size());
 				  typeOk = boundType.typeCompatible(type, true);
 			  }
 		  } else {
@@ -548,12 +550,23 @@ aspect FlatTypeCheck {
   }
   
   public void InstMissingArgument.typeCheck() {
-	  error(functionCallDecription() + ": missing argument for required input " + getBoundInput().name());
+	  if (!isDestructorArgument())
+		  error(functionCallDecription() + ": missing argument for required input " + getBoundInput().name());
   }
   
   public void InstMultipleBoundArgument.typeCheck() {
 	  error(functionCallDecription() + ": multiple arguments matches input " + getBoundInput().name());
   }
+  
+  inh boolean InstFunctionArgument.isDestructorArgument();
+  eq InstFunctionCall.getArg().isDestructorArgument() = getName().myInstClassDecl().isDestructor();
+  eq BaseNode.getChild().isDestructorArgument()       = false;
+  
+  syn boolean InstClassDecl.isDestructor()  = name().equals("destructor") && inExternalObject();
+  syn boolean InstClassDecl.isConstructor() = name().equals("constructor") && inExternalObject();
+  
+  inh boolean InstClassDecl.inExternalObject();
+  eq InstNode.getChild().inExternalObject() = isExternalObject();
   
   public void InstDefaultArgument.typeCheck() {}
   

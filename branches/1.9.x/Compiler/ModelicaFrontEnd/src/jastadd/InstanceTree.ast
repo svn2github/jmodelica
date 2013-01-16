@@ -37,19 +37,25 @@ InstProgramRoot : InstRoot ::= <Program:Program>
 
 abstract InstClassDecl: InstNode ::= <ClassDecl:ClassDecl>;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstraining] InstRestriction;
-InstFullClassDecl      : InstBaseClassDecl ::= [InstExternal];
-InstExtendClassDecl    : InstFullClassDecl ::= ;
-InstShortClassDecl     : InstBaseClassDecl ::= [FArraySubscripts];
-InstPrimitiveClassDecl : InstFullClassDecl;
-InstEnumClassDecl      : InstPrimitiveClassDecl;
-InstBuiltInClassDecl   : InstClassDecl;
-UnknownInstClassDecl   : InstFullClassDecl;
+InstFullClassDecl        : InstBaseClassDecl ::= [InstExternal];
+InstExtendClassDecl      : InstFullClassDecl;
+abstract InstAbstractShortClassDecl : InstBaseClassDecl;
+InstSimpleShortClassDecl : InstAbstractShortClassDecl ::= /Target:InstAccess/;
+InstShortClassDecl       : InstAbstractShortClassDecl ::= [FArraySubscripts];
+InstPrimitiveClassDecl   : InstFullClassDecl;
+InstEnumClassDecl        : InstPrimitiveClassDecl;
+InstBuiltInClassDecl     : InstClassDecl;
+UnknownInstClassDecl     : InstFullClassDecl;
 
-InstReplacingFullClassDecl      : InstFullClassDecl  ::= 
+InstReplacingFullClassDecl        : InstFullClassDecl  ::= 
 	                                 <OriginalClassDecl:ClassDecl> 
                                      /OriginalInstClass:InstClassDecl/ 
                                      <InstClassRedeclare:InstRedeclareClassNode>;
-InstReplacingShortClassDecl     : InstShortClassDecl ::= 
+InstReplacingShortClassDecl       : InstShortClassDecl ::= 
+	                                 <OriginalClassDecl:ClassDecl> 
+                                     /OriginalInstClass:InstClassDecl/ 
+                                     <InstClassRedeclare:InstRedeclareClassNode>;
+InstReplacingSimpleShortClassDecl : InstSimpleShortClassDecl ::=
 	                                 <OriginalClassDecl:ClassDecl> 
                                      /OriginalInstClass:InstClassDecl/ 
                                      <InstClassRedeclare:InstRedeclareClassNode>;

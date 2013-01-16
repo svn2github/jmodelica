@@ -432,7 +432,7 @@ aspect InstFunctionBinding {
 					target = icd;
 		    } if (target.isExternalObject()) {
 		    	InstClassDecl icd = target.myConstructor();
-				if (icd != null)
+				if (icd.isFunction())
 					target = icd;
 		    	externalObject = true;
 		    }
@@ -500,6 +500,7 @@ aspect InstFunctionBinding {
 					if (externalObject)
 						accessName = accessName.copyAndAppend("constructor");
 					InstFunctionCall ifc = new InstFunctionCall(accessName, new List());
+					ifc.generated = externalObject || generated;
 					ifc.unbindableArgs = unbindableArgs;
 					ifc.bound = true;
 					n = ifc;
@@ -513,6 +514,7 @@ aspect InstFunctionBinding {
     	}
   	}
 	private boolean InstFunctionCall.bound = false;
+	public boolean InstFunctionCall.generated = false;
 	
 	
 	/**
@@ -537,6 +539,7 @@ aspect InstFunctionBinding {
     		
     		InstFunctionCall res = new InstVectorFunctionCall(getName(), getArgs(), dims);
     		res.vectorizationChecked = res.bound = true;
+    		res.generated = generated;
     		res.setLocation(this);
     		return res;
     	}
@@ -610,7 +613,10 @@ aspect InstFunctionBinding {
 	/**
 	 * Extract constructor function for external object class.
 	 */
-	syn InstClassDecl InstClassDecl.myConstructor() = memberInstClass("constructor");
+	syn InstClassDecl InstClassDecl.myConstructor() {
+		InstClassDecl icd = memberInstClass("constructor");
+		return (icd == null) ? unknownInstClassDecl() : icd;
+	}
 	
 	/**
 	 * Extract constructor function for external object class.
@@ -620,7 +626,10 @@ aspect InstFunctionBinding {
 	/**
 	 * Extract destructor function for external object class.
 	 */
-	syn InstClassDecl InstClassDecl.myDestructor() = memberInstClass("destructor");
+	syn InstClassDecl InstClassDecl.myDestructor() {
+		InstClassDecl icd = memberInstClass("destructor");
+		return (icd == null) ? unknownInstClassDecl() : icd;
+	}
 		
 	/**
 	 * Extract destructor function for external object class.

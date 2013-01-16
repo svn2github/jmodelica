@@ -63,13 +63,13 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_array_none.c \
                     jmi_util.h \
                     jmi_util.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.c \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.h \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.c \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.h \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod_impl.h 
 
-libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -I$(abs_top_srcdir)/Assimulo/src/lib -std=c89 -pedantic
+libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -I$(abs_top_srcdir)/external/Assimulo/src/lib -std=c89 -pedantic
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -92,22 +92,22 @@ libfmi_la_SOURCES = fmi.h \
                     fmiModelTypes.h \
                     jmi.h \
                     fmi.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.c \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.h \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.c \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.h \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod_impl.h 
 
 libfmi_cs_la_SOURCES = fmi_cs.h \
                     fmiCSModelFunctions.h \
                     fmiCSPlatformTypes.h \
                     jmi.h \
                     fmi_cs.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.c \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.h \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.c \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.h \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod_impl.h 
 
 
 libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
@@ -126,7 +126,9 @@ libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
 #                                   ModelicaUtilities.c
 
 libModelicaExternalC_la_SOURCES =  ModelicaUtilities.h \
-                                   ModelicaUtilities.c
+                                   ModelicaUtilities.c \
+                                   $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c \
+	                           $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c
 
 libModelicaExternalC_la_CFLAGS = -Wall -g -std=c89 -pedantic -I$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/
 if WITH_TABLES
@@ -164,11 +166,11 @@ libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_array_cppad.h \
                     jmi_util.h \
                     jmi_util.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
-                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.c \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.h \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.c \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.h \
+                    $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod_impl.h 
                    
 libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g -I$(SUNDIALS_HOME)/include
 libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g -I$(SUNDIALS_HOME)/include
@@ -216,9 +218,9 @@ include_HEADERS = jmi.h \
                   jmi_array_cppad.h \
                   jmi_util.h \
                   $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaTables.h \
-                  $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
-                  $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
-                  $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
+                  $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.h \
+                  $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.h \
+                  $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod_impl.h 
 
 if COMPILE_WITH_IPOPT
 include_HEADERS += jmi_opt_coll_ipopt.h

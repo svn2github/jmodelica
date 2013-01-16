@@ -36,6 +36,8 @@ aspect InstLookupComponents {
 	eq InstReplacingPrimitive.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstNormalExtends.getInstClassModification().lookupInstComponent(String name)      = lookupInstComponent(name);
 	eq InstShortClassDecl.getChild().lookupInstComponent(String name)                     = lookupInstComponent(name);
+	eq InstSimpleShortClassDecl.getChild().lookupInstComponent(String name)               = lookupInstComponent(name);
+    eq InstExternalObject.getDestructorCall().lookupInstComponent(String name)            = lookupInstComponent(name);
 	
 	eq InstDot.getInstAccess(int i).lookupInstComponent(String name)            = 
 			(i == 0) ? lookupInstComponent(name) : getInstAccessNoListTrans(i - 1).qualifiedLookupInstComponent(name);
@@ -57,7 +59,10 @@ aspect InstLookupComponents {
 	eq FlatRoot.getChild().localLookupInstComponent(String name)          = null;
 	eq InstClassDecl.getChild().localLookupInstComponent(String name)     = memberInstComponent(name);
 	eq InstComponentDecl.getChild().localLookupInstComponent(String name) = memberInstComponent(name);
-	
+
+	/**
+	 * Get a specific child access, triggering transformations on that child, but *not* on the entire list.
+	 */
 	syn InstAccess InstDot.getInstAccessNoListTrans(int i) = (InstAccess) getInstAccessListNoTransform().getChild(i);
 
 	/**
@@ -151,7 +156,8 @@ aspect InstLookupComponents {
 				return icd;
 		}
 		return genericLookupInstConstant(name);
-	 }
+	}
+	eq InstSimpleShortClassDecl.genericLookupInstComponent(String name) = actualInstClass().genericLookupInstComponent(name);
 	
 	syn InstComponentDecl InstNode.genericLookupInstConstant(String name) = lookupInstConstant(name);
 	eq InstComponentDecl.genericLookupInstConstant(String name)           = myInstClass().lookupInstConstant(name);
@@ -173,6 +179,7 @@ aspect InstLookupComponents {
 			return emptyArrayMemberInstComponent(name);
 		return getInstComponentDecl(0).arrayMemberInstComponent(name, ndims - 1);
 	}
+	eq InstSimpleShortClassDecl.arrayMemberInstComponent(String name, int ndims) = actualInstClass().arrayMemberInstComponent(name, ndims);
 	
 	syn InstComponentDecl InstNode.emptyArrayMemberInstComponent(String name) = null;
 	eq InstComponentDecl.emptyArrayMemberInstComponent(String name)           = 
@@ -195,6 +202,7 @@ aspect InstLookupComponents {
 			return null;
 		}
 	}
+	eq InstSimpleShortClassDecl.memberInstComponent(String name) = actualInstClass().memberInstComponent(name);
 	
 	syn InstComponentDecl InstNode.memberInstComponentConstrained(String name)  {
 		if (isArray() || constrainMemberInstComponent(name)) 
@@ -204,8 +212,10 @@ aspect InstLookupComponents {
 	}
 	
 	inh lazy InstComponentDecl InstNode.lookupInstConstant(String name);
-	eq Root.getChild().lookupInstConstant(String name) = null;
-	eq InstNode.getChild().lookupInstConstant(String name) {
+	eq Root.getChild().lookupInstConstant(String name)     = null;
+	eq InstNode.getChild().lookupInstConstant(String name) = memberInstConstantFirst(name);
+	
+	syn InstComponentDecl InstNode.memberInstConstantFirst(String name) {
 		InstComponentDecl icd = memberInstConstantWithExtends(name);
 		if (icd != null)
 			return icd;
@@ -219,6 +229,7 @@ aspect InstLookupComponents {
 
 		return lookupInstConstant(name);
 	}
+	eq InstSimpleShortClassDecl.memberInstConstantFirst(String name) = actualInstClass().memberInstConstantFirst(name);
 	
 	syn lazy InstComponentDecl InstNode.memberInstConstantWithExtends(String name) {
 		InstComponentDecl icd = memberInstConstant(name);
@@ -233,6 +244,7 @@ aspect InstLookupComponents {
 
 		return null;
 	}
+	eq InstSimpleShortClassDecl.memberInstConstantWithExtends(String name) = actualInstClass().memberInstConstantWithExtends(name);
 	
 	syn lazy InstComponentDecl InstNode.memberInstConstant(String name) {
 		if (!constrainMemberInstComponent(name)) 
@@ -244,6 +256,8 @@ aspect InstLookupComponents {
 
 		return null;
 	}
+	eq InstSimpleShortClassDecl.memberInstConstant(String name) = 
+		constrainMemberInstComponent(name) ? actualInstClass().memberInstConstant(name) : null;
 
 	syn InstComponentDecl InstImport.lookupInstConstantInImport(String name) {
 		// Assume import points to a single (constant) component

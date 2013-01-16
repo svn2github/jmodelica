@@ -3220,7 +3220,7 @@ class PseudoSpectral(CasadiCollocator):
         _x_min = md.get_x_min(include_alias = False)
         _u_min = md.get_u_min(include_alias = False)
         _p_min = [(p.getValueReference(), p.getMin()) for p in ocp.pf]
-        _x_start = md.get_x_start(include_alias = False)
+        _x_start = md.get_x_initial_guess(include_alias = False)
         #_u_start = md.get_u_start(include_alias = False)
         _u_start = md.get_u_initial_guess(include_alias = False)
         _p_start = []

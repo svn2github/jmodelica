@@ -137,6 +137,13 @@ class Test_FMUModelME1:
         self.dep = load_fmu("DepParTests_DepPar1.fmu")
         self.dep.initialize()
     
+    @testattr(stddist = True)
+    def test_get_variable_by_valueref(self):
+        assert "der(v)" == self._bounce.get_variable_by_valueref(3)
+        assert "v" == self._bounce.get_variable_by_valueref(2)
+        
+        nose.tools.assert_raises(FMUException, self._bounce.get_variable_by_valueref,7)
+    
     @testattr(assimulo = True)
     def test_multiple_loadings_and_simulations(self):
         model = load_fmu("bouncingBall.fmu",path_to_fmus,enable_logging=False)

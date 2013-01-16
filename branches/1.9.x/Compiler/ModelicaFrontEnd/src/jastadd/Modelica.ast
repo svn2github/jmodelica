@@ -124,7 +124,6 @@ FullClassDecl : BaseClassDecl ::= [StringComment]
 LibClassDecl : FullClassDecl ::= LibNode*;
 LibNode : SourceBaseNode ::= <FileName:String> <Name:String> <Structured:boolean> <Version:String> /StoredDefinition/;
 
-// TODO: Why does ShortClassDecl have type_prefix:es?
 PN_ShortClassDecl : BaseClassDecl ::= [TypePrefixFlow] 
                                       [TypePrefixVariability]
                                       [TypePrefixInputOutput] 
@@ -200,11 +199,12 @@ ExternalLanguage : SourceBaseNode ::= <Language>;
 
 abstract Clause : SourceBaseNode;
 
-abstract ElementList : Clause ::= Element*;
-PublicElementList    : ElementList;
-ProtectedElementList : ElementList;
-EquationClause       : Clause ::= AbstractEquation*;
-Algorithm            : Clause ::= [Initial] Statement*;
+abstract ElementList  : Clause ::= Element*;
+PublicElementList     : ElementList;
+ProtectedElementList  : ElementList;
+EquationClause        : Clause ::= AbstractEquation*;
+InitialEquationClause : EquationClause;
+Algorithm             : Clause ::= [Initial] Statement*;
 
 abstract Element : Clause;
 ElementAnnotation       : Element ::= Annotation;
@@ -329,12 +329,14 @@ FunctionCallStmt    : Statement ::= Left:FunctionCallLeft* FunctionCall;
 BreakStmt           : Statement;
 ReturnStmt          : Statement;
 abstract IfWhenStmt   : Statement ::= IfWhenClause*;
-IfStmt              : IfWhenStmt ::= ElseStmt:Statement*;
+IfStmt              : IfWhenStmt ::= [ElseClause];
 WhenStmt            : IfWhenStmt;
+ElseClause          : SourceBaseNode ::= Stmt:Statement*;
 abstract IfWhenClause : SourceBaseNode  ::= Test:Exp Statement*;
 IfClause            : IfWhenClause;
 WhenClause          : IfWhenClause;
-ForStmt             : Statement ::= ForIndex* ForStmt:Statement*;
+ForStmt             : Statement ::= ForIndex* ForStmtList;
+ForStmtList         : SourceBaseNode ::= Stmt:Statement*;
 WhileStmt           : Statement ::= Test:Exp WhileStmt:Statement*;
 AlgorithmAnnotation : Statement ::= Annotation;
 
@@ -363,6 +365,7 @@ BooleanLitExpTrue  : BooleanLitExp;
 BooleanLitExpFalse : BooleanLitExp;
 
 FunctionCall : Exp ::= Name:Access [FunctionArguments];
+PartialFunctionCall : FunctionCall;
 
 FunctionArguments : SourceBaseNode::= Exp* NamedArgument*;
 NamedArgument     : SourceBaseNode::= Name:Access Exp;

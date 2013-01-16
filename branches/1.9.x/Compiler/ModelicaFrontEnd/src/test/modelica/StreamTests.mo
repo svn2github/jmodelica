@@ -74,10 +74,8 @@ equation
  r.fluidPort.p = r.p0;
  r.fluidPort.h_outflow = r.h0;
  r.fluidPort.m_flow = 0;
- h = noEvent((if r.fluidPort.m_flow > 0.0 then r.fluidPort.h_outflow else r.fluidPort.h_outflow));
-
+ h = noEvent(if r.fluidPort.m_flow > 0.0 then r.fluidPort.h_outflow else r.fluidPort.h_outflow);
 end StreamTests.StreamTest2;
-
 ")})));
   end StreamTest2;
 
@@ -117,7 +115,7 @@ equation
  r1.fluidPort.h_outflow = r1.h0;
  r2.fluidPort.p = r2.p0;
  r2.fluidPort.h_outflow = r2.h0;
- res.port_a.m_flow = res.port_a.p - ( res.port_b.p );
+ res.port_a.m_flow = res.port_a.p - res.port_b.p;
  res.port_a.m_flow + res.port_b.m_flow = 0;
  res.port_a.h_outflow = r2.fluidPort.h_outflow;
  res.port_b.h_outflow = r1.fluidPort.h_outflow;
@@ -125,9 +123,7 @@ equation
  r1.fluidPort.p = res.port_a.p;
  r2.fluidPort.m_flow + res.port_b.m_flow = 0;
  r2.fluidPort.p = res.port_b.p;
-
 end StreamTests.StreamTest3;
-
 ")})));
   end StreamTest3;
   
@@ -198,9 +194,8 @@ equation
  r[2].fluidPort.h_outflow = r[2].h0;
  r[1].fluidPort.m_flow = 0;
  r[2].fluidPort.m_flow = 0;
- h[1] = noEvent((if r[1].fluidPort.m_flow > 0.0 then r[1].fluidPort.h_outflow else r[1].fluidPort.h_outflow));
- h[2] = noEvent((if r[2].fluidPort.m_flow > 0.0 then r[2].fluidPort.h_outflow else r[2].fluidPort.h_outflow));
-
+ h[1] = noEvent(if r[1].fluidPort.m_flow > 0.0 then r[1].fluidPort.h_outflow else r[1].fluidPort.h_outflow);
+ h[2] = noEvent(if r[2].fluidPort.m_flow > 0.0 then r[2].fluidPort.h_outflow else r[2].fluidPort.h_outflow);
 end StreamTests.StreamTest5;
 ")})));
   end StreamTest5;
@@ -233,13 +228,12 @@ fclass StreamTests.StreamTest6
  Real f[1];
  Real f[2];
 equation
- f[1] = noEvent((if d.a > 0.0 then d.b[1] else d.b[1]));
- f[2] = noEvent((if d.a > 0.0 then d.b[2] else d.b[2]));
+ f[1] = noEvent(if d.a > 0.0 then d.b[1] else d.b[1]);
+ f[2] = noEvent(if d.a > 0.0 then d.b[2] else d.b[2]);
  f[1] = 1;
  f[2] = 2;
  d.c = 0;
  d.a = 0;
-
 end StreamTests.StreamTest6;
 ")})));
   end StreamTest6;
@@ -548,14 +542,14 @@ package StreamExample
            color={0,0,127},
            smooth=Smooth.None));
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="StreamExample_Examples_Systems_HeatedGas",
-            description="Test of stream connectors",
-            eliminate_alias_variables=false,
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StreamExample_Examples_Systems_HeatedGas",
+			description="Test of stream connectors",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass StreamTests.StreamExample.Examples.Systems.HeatedGas
- parameter Modelica.SIunits.SpecificHeatCapacity R_gas = ( 8.314472 ) / ( 0.0289651159 ) /* 287.0512249529787 */;
+ parameter Modelica.SIunits.SpecificHeatCapacity R_gas = 8.314472 / 0.0289651159 /* 287.0512249529787 */;
  parameter Modelica.SIunits.SpecificHeatCapacity cp = 1000 /* 1000 */;
  parameter Modelica.SIunits.MassFlowRate flowSource.mflow0 = 1 /* 1 */;
  parameter Modelica.SIunits.Temperature flowSource.T0 = 303.15 /* 303.15 */;
@@ -610,7 +604,7 @@ fclass StreamTests.StreamExample.Examples.Systems.HeatedGas
  Modelica.SIunits.Pressure reservoir.flowPort.p(nominal = 100000,start = 100000);
  Modelica.SIunits.SpecificEnthalpy reservoir.flowPort.h_outflow(nominal = 400000,start = 400000);
  parameter Real ramp.height = 10000.0 \"Height of ramps\" /* 10000.0 */;
- parameter Modelica.SIunits.Time ramp.duration(min = 1.0E-60,start = 2) = 1 \"Durations of ramp\" /* 1 */;
+ parameter Modelica.SIunits.Time ramp.duration(min = 0.0,start = 2) = 1 \"Duration of ramp (= 0.0 gives a Step)\" /* 1 */;
  parameter Real ramp.offset = 10000.0 \"Offset of output signal\" /* 10000.0 */;
  parameter Modelica.SIunits.Time ramp.startTime = 5 \"Output = offset for time < startTime\" /* 5 */;
  Modelica.Blocks.Interfaces.RealOutput ramp.y \"Connector of Real output signal\";
@@ -622,36 +616,36 @@ parameter equation
  multiPortVolume.cp = cp;
  multiPortVolume.R = R_gas;
  reservoir.cp = cp;
- reservoir.h0 = ( reservoir.cp ) * ( reservoir.T0 );
+ reservoir.h0 = reservoir.cp * reservoir.T0;
 equation
- flowSource.h = ( flowSource.cp ) * ( flowSource.T0 );
- flowSource.flowPort.m_flow =  - ( flowSource.mflow0 );
+ flowSource.h = flowSource.cp * flowSource.T0;
+ flowSource.flowPort.m_flow = - flowSource.mflow0;
  flowSource.flowPort.h_outflow = flowSource.h;
  multiPortVolume.dU = multiPortVolume.H_flow[1] + multiPortVolume.H_flow[2] + multiPortVolume.heatPort.Q_flow;
  multiPortVolume.dM = multiPortVolume.flowPort[1].m_flow + multiPortVolume.flowPort[2].m_flow;
- multiPortVolume.dM = ( ( ( ( (  - ( multiPortVolume.p ) ) / ( multiPortVolume.R ) ) / ( multiPortVolume.T ) ) / ( multiPortVolume.T ) ) * ( multiPortVolume.der(T) ) + ( ( ( 1 ) / ( multiPortVolume.R ) ) / ( multiPortVolume.T ) ) * ( multiPortVolume.der(p) ) ) * ( multiPortVolume.V );
- multiPortVolume.M = ( multiPortVolume.rho ) * ( multiPortVolume.V );
- multiPortVolume.U = ( multiPortVolume.u ) * ( multiPortVolume.M );
- multiPortVolume.dU = ( multiPortVolume.dM ) * ( multiPortVolume.u ) + ( multiPortVolume.du ) * ( multiPortVolume.M );
- multiPortVolume.du = ( multiPortVolume.cp - ( multiPortVolume.R ) ) * ( multiPortVolume.der(T) );
- multiPortVolume.u = multiPortVolume.h - ( ( multiPortVolume.R ) * ( multiPortVolume.T ) );
- multiPortVolume.h = ( multiPortVolume.cp ) * ( multiPortVolume.T );
- multiPortVolume.p = ( ( multiPortVolume.rho ) * ( multiPortVolume.R ) ) * ( multiPortVolume.T );
- multiPortVolume.H_flow[1] = ( multiPortVolume.flowPort[1].m_flow ) * ( noEvent((if multiPortVolume.flowPort[1].m_flow > 0.0 then flowSource.flowPort.h_outflow else multiPortVolume.flowPort[1].h_outflow)) );
+ multiPortVolume.dM = ((- multiPortVolume.p) / multiPortVolume.R / multiPortVolume.T / multiPortVolume.T * multiPortVolume.der(T) + 1 / multiPortVolume.R / multiPortVolume.T * multiPortVolume.der(p)) * multiPortVolume.V;
+ multiPortVolume.M = multiPortVolume.rho * multiPortVolume.V;
+ multiPortVolume.U = multiPortVolume.u * multiPortVolume.M;
+ multiPortVolume.dU = multiPortVolume.dM * multiPortVolume.u + multiPortVolume.du * multiPortVolume.M;
+ multiPortVolume.du = (multiPortVolume.cp - multiPortVolume.R) * multiPortVolume.der(T);
+ multiPortVolume.u = multiPortVolume.h - multiPortVolume.R * multiPortVolume.T;
+ multiPortVolume.h = multiPortVolume.cp * multiPortVolume.T;
+ multiPortVolume.p = multiPortVolume.rho * multiPortVolume.R * multiPortVolume.T;
+ multiPortVolume.H_flow[1] = multiPortVolume.flowPort[1].m_flow * noEvent(if multiPortVolume.flowPort[1].m_flow > 0.0 then flowSource.flowPort.h_outflow else multiPortVolume.flowPort[1].h_outflow);
  multiPortVolume.flowPort[1].p = multiPortVolume.p;
  multiPortVolume.flowPort[1].h_outflow = multiPortVolume.h;
- multiPortVolume.H_flow[2] = ( multiPortVolume.flowPort[2].m_flow ) * ( noEvent((if multiPortVolume.flowPort[2].m_flow > 0.0 then linearResistance.port_a.h_outflow else multiPortVolume.flowPort[2].h_outflow)) );
+ multiPortVolume.H_flow[2] = multiPortVolume.flowPort[2].m_flow * noEvent(if multiPortVolume.flowPort[2].m_flow > 0.0 then linearResistance.port_a.h_outflow else multiPortVolume.flowPort[2].h_outflow);
  multiPortVolume.flowPort[2].p = multiPortVolume.p;
  multiPortVolume.flowPort[2].h_outflow = multiPortVolume.h;
  multiPortVolume.heatPort.T = multiPortVolume.T;
- heatSource.port.Q_flow = (  - ( heatSource.Q_flow ) ) * ( 1 + ( heatSource.alpha ) * ( heatSource.port.T - ( heatSource.T_ref ) ) );
- linearResistance.port_a.m_flow = ( linearResistance.port_a.p - ( linearResistance.port_b.p ) ) / ( linearResistance.u );
+ heatSource.port.Q_flow = (- heatSource.Q_flow) * (1 + heatSource.alpha * (heatSource.port.T - heatSource.T_ref));
+ linearResistance.port_a.m_flow = (linearResistance.port_a.p - linearResistance.port_b.p) / linearResistance.u;
  linearResistance.port_a.m_flow + linearResistance.port_b.m_flow = 0;
  linearResistance.port_a.h_outflow = reservoir.flowPort.h_outflow;
  linearResistance.port_b.h_outflow = multiPortVolume.flowPort[2].h_outflow;
  reservoir.flowPort.p = reservoir.p0;
  reservoir.flowPort.h_outflow = reservoir.h0;
- ramp.y = ramp.offset + (if time < ramp.startTime then 0 elseif time < ramp.startTime + ramp.duration then ( ( time - ( ramp.startTime ) ) * ( ramp.height ) ) / ( ramp.duration ) else ramp.height);
+ ramp.y = ramp.offset + (if time < ramp.startTime then 0 elseif time < ramp.startTime + ramp.duration then (time - ramp.startTime) * ramp.height / ramp.duration else ramp.height);
  heatSource.port.Q_flow + multiPortVolume.heatPort.Q_flow = 0;
  heatSource.port.T = multiPortVolume.heatPort.T;
  flowSource.flowPort.m_flow + multiPortVolume.flowPort[1].m_flow = 0;
@@ -665,16 +659,16 @@ equation
 public
  type Modelica.SIunits.SpecificHeatCapacity = Real(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
  type Modelica.SIunits.MassFlowRate = Real(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 1,max = 6000,start = 288.15,nominal = 300,displayUnit = \"degC\");
- type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\",nominal = 1000000.0);
- type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",min =  - ( 1.0E9 ),max = 1.0E9,nominal = 100000.0,start = 100000.0,displayUnit = \"bar\");
+ type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0.0,start = 288.15,nominal = 300,displayUnit = \"degC\");
+ type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
+ type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
  type Modelica.SIunits.Volume = Real(final quantity = \"Volume\",final unit = \"m3\");
  type Modelica.SIunits.HeatFlowRate = Real(final quantity = \"Power\",final unit = \"W\");
  type Modelica.SIunits.EnthalpyFlowRate = Real(final quantity = \"EnthalpyFlowRate\",final unit = \"W\");
  type Modelica.SIunits.EnergyFlowRate = Real(final quantity = \"Power\",final unit = \"W\");
  type Modelica.SIunits.Mass = Real(quantity = \"Mass\",final unit = \"kg\",min = 0);
- type Modelica.SIunits.SpecificInternalEnergy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\",nominal = 1000000.0);
- type Modelica.SIunits.Density = Real(final quantity = \"Density\",final unit = \"kg/m3\",displayUnit = \"g/cm3\",min = 1.0E-6,max = 30000.0);
+ type Modelica.SIunits.SpecificInternalEnergy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
+ type Modelica.SIunits.Density = Real(final quantity = \"Density\",final unit = \"kg/m3\",displayUnit = \"g/cm3\",min = 0.0);
  type Modelica.SIunits.InternalEnergy = Real(final quantity = \"Energy\",final unit = \"J\");
  type Modelica.SIunits.LinearTemperatureCoefficient = Real(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\");
  type Modelica.Blocks.Interfaces.RealInput = Real;
@@ -774,7 +768,7 @@ end StreamTests.StreamExample.Examples.Systems.HeatedGas;
 			eliminate_alias_variables=false,
 			flatModel="
 fclass StreamTests.StreamExample.Examples.Systems.HeatedGas_SimpleWrap
- parameter Modelica.SIunits.SpecificHeatCapacity R_gas = ( 8.314472 ) / ( 0.0289651159 ) /* 287.0512249529787 */;
+ parameter Modelica.SIunits.SpecificHeatCapacity R_gas = 8.314472 / 0.0289651159 /* 287.0512249529787 */;
  parameter Modelica.SIunits.SpecificHeatCapacity cp = 1000 /* 1000 */;
  parameter Modelica.SIunits.MassFlowRate flowSource.mflow0 = 1 /* 1 */;
  parameter Modelica.SIunits.Temperature flowSource.T0 = 303.15 /* 303.15 */;
@@ -791,7 +785,7 @@ fclass StreamTests.StreamExample.Examples.Systems.HeatedGas_SimpleWrap
  Modelica.SIunits.Pressure reservoir.flowPort.p(nominal = 100000,start = 100000);
  Modelica.SIunits.SpecificEnthalpy reservoir.flowPort.h_outflow(nominal = 400000,start = 400000);
  parameter Real ramp.height = 10000.0 \"Height of ramps\" /* 10000.0 */;
- parameter Modelica.SIunits.Time ramp.duration(min = 1.0E-60,start = 2) = 1 \"Durations of ramp\" /* 1 */;
+ parameter Modelica.SIunits.Time ramp.duration(min = 0.0,start = 2) = 1 \"Duration of ramp (= 0.0 gives a Step)\" /* 1 */;
  parameter Real ramp.offset = 10000.0 \"Offset of output signal\" /* 10000.0 */;
  parameter Modelica.SIunits.Time ramp.startTime = 5 \"Output = offset for time < startTime\" /* 5 */;
  Modelica.Blocks.Interfaces.RealOutput ramp.y \"Connector of Real output signal\";
@@ -812,15 +806,15 @@ fclass StreamTests.StreamExample.Examples.Systems.HeatedGas_SimpleWrap
 parameter equation
  flowSource.cp = cp;
  reservoir.cp = cp;
- reservoir.h0 = ( reservoir.cp ) * ( reservoir.T0 );
+ reservoir.h0 = reservoir.cp * reservoir.T0;
 equation
- flowSource.h = ( flowSource.cp ) * ( flowSource.T0 );
- flowSource.flowPort.m_flow =  - ( flowSource.mflow0 );
+ flowSource.h = flowSource.cp * flowSource.T0;
+ flowSource.flowPort.m_flow = - flowSource.mflow0;
  flowSource.flowPort.h_outflow = flowSource.h;
  reservoir.flowPort.p = reservoir.p0;
  reservoir.flowPort.h_outflow = reservoir.h0;
- ramp.y = ramp.offset + (if time < ramp.startTime then 0 elseif time < ramp.startTime + ramp.duration then ( ( time - ( ramp.startTime ) ) * ( ramp.height ) ) / ( ramp.duration ) else ramp.height);
- linearResistanceWrap.linearResistance.port_a.m_flow = ( linearResistanceWrap.linearResistance.port_a.p - ( linearResistanceWrap.linearResistance.port_b.p ) ) / ( linearResistanceWrap.linearResistance.u );
+ ramp.y = ramp.offset + (if time < ramp.startTime then 0 elseif time < ramp.startTime + ramp.duration then (time - ramp.startTime) * ramp.height / ramp.duration else ramp.height);
+ linearResistanceWrap.linearResistance.port_a.m_flow = (linearResistanceWrap.linearResistance.port_a.p - linearResistanceWrap.linearResistance.port_b.p) / linearResistanceWrap.linearResistance.u;
  linearResistanceWrap.linearResistance.port_a.m_flow + linearResistanceWrap.linearResistance.port_b.m_flow = 0;
  linearResistanceWrap.linearResistance.port_a.h_outflow = reservoir.flowPort.h_outflow;
  linearResistanceWrap.linearResistance.port_b.h_outflow = flowSource.flowPort.h_outflow;
@@ -830,19 +824,19 @@ equation
  flowSource.flowPort.m_flow + linearResistanceWrap.port_a.m_flow = 0;
  flowSource.flowPort.p = linearResistanceWrap.port_a.p;
  linearResistanceWrap.linearResistance.port_b.h_outflow = linearResistanceWrap.port_b.h_outflow;
- linearResistanceWrap.linearResistance.port_b.m_flow - ( linearResistanceWrap.port_b.m_flow ) = 0;
+ linearResistanceWrap.linearResistance.port_b.m_flow - linearResistanceWrap.port_b.m_flow = 0;
  linearResistanceWrap.linearResistance.port_b.p = linearResistanceWrap.port_b.p;
  linearResistanceWrap.linearResistance.port_a.h_outflow = linearResistanceWrap.port_a.h_outflow;
- linearResistanceWrap.linearResistance.port_a.m_flow - ( linearResistanceWrap.port_a.m_flow ) = 0;
+ linearResistanceWrap.linearResistance.port_a.m_flow - linearResistanceWrap.port_a.m_flow = 0;
  linearResistanceWrap.linearResistance.port_a.p = linearResistanceWrap.port_a.p;
  linearResistanceWrap.linearResistance.u = linearResistanceWrap.u;
 
 public
  type Modelica.SIunits.SpecificHeatCapacity = Real(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
  type Modelica.SIunits.MassFlowRate = Real(quantity = \"MassFlowRate\",final unit = \"kg/s\");
- type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 1,max = 6000,start = 288.15,nominal = 300,displayUnit = \"degC\");
- type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\",nominal = 1000000.0);
- type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",min =  - ( 1.0E9 ),max = 1.0E9,nominal = 100000.0,start = 100000.0,displayUnit = \"bar\");
+ type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0.0,start = 288.15,nominal = 300,displayUnit = \"degC\");
+ type Modelica.SIunits.SpecificEnthalpy = Real(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
+ type Modelica.SIunits.Pressure = Real(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
  type Modelica.SIunits.Time = Real(final quantity = \"Time\",final unit = \"s\");
  type Modelica.Blocks.Interfaces.RealOutput = Real;
  type Modelica.Blocks.Interfaces.RealInput = Real;

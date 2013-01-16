@@ -706,6 +706,7 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
+
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 
@@ -779,8 +780,8 @@ v_13 = sin(v_14);
 d_13 = d_14 * cos(v_14);
  v_9 = COND_EXP_EQ(COND_EXP_LE(_time, AD_WRAP_LITERAL(3.141592653589793), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(1), v_13);
  d_9 = COND_EXP_EQ(COND_EXP_LE(_time, AD_WRAP_LITERAL(3.141592653589793), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(0), d_13);
- v_3 = COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, v_7, v_9);
- d_3 = COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, d_7, d_9);
+ v_3 = COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, v_7, v_9);
+ d_3 = COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, d_7, d_9);
 v_2 = v_3;
 d_2 = d_3;
 v_19 = AD_WRAP_LITERAL(3) * _x_0;
@@ -792,9 +793,9 @@ d_17 = d_18;
  v_0 = COND_EXP_EQ(_sw(0), JMI_TRUE, v_2, v_17);
  d_0 = COND_EXP_EQ(_sw(0), JMI_TRUE, d_2, d_17);
 (*res)[0] = v_0 - _u_1;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+(*dF)[0]  = d_0 - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 (*res)[1] = _u_1 - _der_x_2;
-(*dF)[1] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+(*dF)[1]  = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 ")})));
 end IfExpExample1;
 
@@ -2005,7 +2006,7 @@ return;
 ,void func_CADCodeGenTests_CADDerAnno2_f_der_def(jmi_ad_var_t x1_v, jmi_ad_var_t i1_v, jmi_ad_var_t b1_v, jmi_ad_var_t der_x1_v, jmi_ad_var_t* der_y1_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t der_y1_v;
-    der_y1_v = COND_EXP_EQ(b1_v, JMI_TRUE, ( ( AD_WRAP_LITERAL(2) ) * ( x1_v ) ) * ( der_x1_v ), ( ( AD_WRAP_LITERAL(3) ) * ( (1.0 * (x1_v) * (x1_v)) ) ) * ( der_x1_v ));
+    der_y1_v = COND_EXP_EQ(b1_v, JMI_TRUE, AD_WRAP_LITERAL(2) * x1_v * der_x1_v, AD_WRAP_LITERAL(3) * (1.0 * (x1_v) * (x1_v)) * der_x1_v);
     if (der_y1_o != NULL) *der_y1_o = der_y1_v;
     JMI_DYNAMIC_FREE()
     return;

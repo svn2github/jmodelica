@@ -6,12 +6,11 @@ import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.navigator.ICommonViewerSite;
 import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
 import org.jmodelica.ide.graphical.actions.EditDiagramAction;
-import org.jmodelica.ide.graphical.actions.EditIconAction;
 
 public class ExplorerActionProvider extends CommonActionProvider {
 	
 	private EditDiagramAction editDiagramAction;
-	private EditIconAction editIconAction;
+//	private EditIconAction editIconAction;
 	
 	@Override
 	public void init(org.eclipse.ui.navigator.ICommonActionExtensionSite site) {
@@ -20,7 +19,7 @@ public class ExplorerActionProvider extends CommonActionProvider {
 		if (viewSite instanceof ICommonViewerWorkbenchSite) {
 			ICommonViewerWorkbenchSite wbs = (ICommonViewerWorkbenchSite) viewSite;
 			editDiagramAction = new EditDiagramAction(wbs.getPage(), wbs.getSelectionProvider());
-			editIconAction  = new EditIconAction(wbs.getPage(), wbs.getSelectionProvider());
+//			editIconAction  = new EditIconAction(wbs.getPage(), wbs.getSelectionProvider());
 		}
 	}
 	
@@ -28,8 +27,8 @@ public class ExplorerActionProvider extends CommonActionProvider {
 	public void fillContextMenu(IMenuManager menu) {
 		if (editDiagramAction.isEnabled())
 			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN, editDiagramAction);
-		if (editIconAction.isEnabled())
-			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN, editIconAction);
+//		if (editIconAction.isEnabled())
+//			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN, editIconAction);
 	}
 	
 }

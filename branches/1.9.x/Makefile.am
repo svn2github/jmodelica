@@ -39,13 +39,13 @@ install_casadi: casadi
 build-python-packages:
 if WITH_SUNDIALS
 if WITH_SUPERLU
-	cd $(abs_top_srcdir)/Assimulo; \
+	cd $(abs_top_srcdir)/external/Assimulo; \
 	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --lapack-home=$(abs_builddir)/ThirdParty/Lapack/ --prefix=$(assimulo_install_dir)
 endif
 endif
 if WITH_SUNDIALS
 if !WITH_SUPERLU
-	cd $(abs_top_srcdir)/Assimulo; \
+	cd $(abs_top_srcdir)/external/Assimulo; \
 	python setup.py install --sundials-home=$(SUNDIALS_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --lapack-home=$(abs_builddir)/ThirdParty/Lapack/ --prefix=$(assimulo_install_dir)
 endif
 endif
@@ -147,7 +147,7 @@ endif
   	*-apple*) \
 	cp $(abs_top_srcdir)/ThirdParty/Tables/lib/darwin64/libtblAccess.a $(DESTDIR)$(prefix)/ThirdParty/Tables/lib/  ;; \
   	*) \
-	cp $(abs_top_srcdir)/ThirdParty/Tables/lib/linux$(getconf LONG_BIT)/libtblAccess.a $(DESTDIR)$(prefix)/ThirdParty/Tables/lib/  ;; \
+	cp $(abs_top_srcdir)/ThirdParty/Tables/lib/linux$(shell getconf LONG_BIT)/libtblAccess.a $(DESTDIR)$(prefix)/ThirdParty/Tables/lib/  ;; \
 	esac
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Tables/include
 	cp $(abs_top_srcdir)/ThirdParty/Tables/include/tblAccess.h $(DESTDIR)$(prefix)/ThirdParty/Tables/include
@@ -227,7 +227,7 @@ clean-local: clean-frontends clean-python-packages
 
 clean-python-packages:
 if WITH_SUNDIALS
-	cd $(abs_top_srcdir)/Assimulo; \
+	cd $(abs_top_srcdir)/external/Assimulo; \
 	python setup.py clean --all --sundials-home=$(SUNDIALS_HOME) 
 	rm -rf $(assimulo_install_dir) || echo  Could not remove $(assimulo_install_dir)
 endif

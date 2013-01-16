@@ -789,9 +789,9 @@ install_casadi: casadi
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/
 
 build-python-packages:
-@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	cd $(abs_top_srcdir)/Assimulo; \
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	cd $(abs_top_srcdir)/external/Assimulo; \
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --lapack-home=$(abs_builddir)/ThirdParty/Lapack/ --prefix=$(assimulo_install_dir)
-@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	cd $(abs_top_srcdir)/Assimulo; \
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	cd $(abs_top_srcdir)/external/Assimulo; \
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	python setup.py install --sundials-home=$(SUNDIALS_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --lapack-home=$(abs_builddir)/ThirdParty/Lapack/ --prefix=$(assimulo_install_dir)
 	cd $(abs_top_srcdir)/Python/src; \
 	python setup_pymodelica.py install --prefix=$(pymodelica_install_dir); \
@@ -885,7 +885,7 @@ install-exec-local: install-python-packages
   	*-apple*) \
 	cp $(abs_top_srcdir)/ThirdParty/Tables/lib/darwin64/libtblAccess.a $(DESTDIR)$(prefix)/ThirdParty/Tables/lib/  ;; \
   	*) \
-	cp $(abs_top_srcdir)/ThirdParty/Tables/lib/linux$(getconf LONG_BIT)/libtblAccess.a $(DESTDIR)$(prefix)/ThirdParty/Tables/lib/  ;; \
+	cp $(abs_top_srcdir)/ThirdParty/Tables/lib/linux$(shell getconf LONG_BIT)/libtblAccess.a $(DESTDIR)$(prefix)/ThirdParty/Tables/lib/  ;; \
 	esac
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Tables/include
 	cp $(abs_top_srcdir)/ThirdParty/Tables/include/tblAccess.h $(DESTDIR)$(prefix)/ThirdParty/Tables/include
@@ -960,7 +960,7 @@ test: install
 clean-local: clean-frontends clean-python-packages
 
 clean-python-packages:
-@WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/Assimulo; \
+@WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/external/Assimulo; \
 @WITH_SUNDIALS_TRUE@	python setup.py clean --all --sundials-home=$(SUNDIALS_HOME) 
 @WITH_SUNDIALS_TRUE@	rm -rf $(assimulo_install_dir) || echo  Could not remove $(assimulo_install_dir)
 	-cd $(abs_top_srcdir)/Python/src; \

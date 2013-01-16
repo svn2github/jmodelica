@@ -19,24 +19,6 @@ model ConnectTests
 
   class ConnectTest1
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ConnectTest1",
-			description="Test of generation of connection equations.",
-			flatModel="
-fclass ConnectTests.ConnectTest1
- Real c2.ca.x;
- Real c2.ca.y;
- Real c2.cb.x;
- Real c2.cb.y;
-equation
-  - ( c2.ca.x ) - ( c2.cb.x ) = 0;
- c2.ca.y = c2.cb.y;
- c2.ca.x = 0;
- c2.cb.x = 0;
-end ConnectTests.ConnectTest1;
-")})));
-
 	connector Ca
 		flow Real x;
 		Real y;
@@ -56,6 +38,23 @@ end ConnectTests.ConnectTest1;
     
     C2 c2;  
       
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest1",
+			description="Test of generation of connection equations.",
+			flatModel="
+fclass ConnectTests.ConnectTest1
+ Real c2.ca.x;
+ Real c2.ca.y;
+ Real c2.cb.x;
+ Real c2.cb.y;
+equation
+ - c2.ca.x - c2.cb.x = 0;
+ c2.ca.y = c2.cb.y;
+ c2.ca.x = 0;
+ c2.cb.x = 0;
+end ConnectTests.ConnectTest1;
+")})));
    end ConnectTest1;
 
     class ConnectTest2_Err
@@ -148,7 +147,7 @@ fclass ConnectTests.ConnectTest3
  parameter Real const.k = 1 \"Constant output value\" /* 1 */;
  ConnectTests.ConnectTest3.RealOutput const.y \"Connector of Real output signal\";
 equation
- gain.y = ( gain.k ) * ( gain.u );
+ gain.y = gain.k * gain.u;
  const.y = const.k;
  const.y = gain.u;
 
@@ -197,12 +196,11 @@ fclass ConnectTests.ConnectTest4
  Real c2.ca2.y;
 equation
  c2.ca2.x = 3;
-  - ( c2.ca.x ) - ( c2.cb.x ) = 0;
+ - c2.ca.x - c2.cb.x = 0;
  c2.ca.y = c2.cb.y;
  c2.ca.x = 0;
  c2.cb.x = 0;
  c2.ca2.x = 0;
-
 end ConnectTests.ConnectTest4;
 ")})));
    end ConnectTest4;
@@ -273,13 +271,12 @@ fclass ConnectTests.ConnectTest6
 equation
  b1.a1.x[1:2] + b2.a2.x[1:2] = zeros(2);
  b1.a1.y[1:2] = b2.a2.y[1:2];
-  - ( b1.a1.x[1:2] ) - ( b1.a2.x[1:2] ) = zeros(2);
+ - b1.a1.x[1:2] - b1.a2.x[1:2] = zeros(2);
  b1.a1.y[1:2] = b1.a2.y[1:2];
  b1.a2.x[1:2] = zeros(2);
-  - ( b2.a1.x[1:2] ) - ( b2.a2.x[1:2] ) = zeros(2);
+ - b2.a1.x[1:2] - b2.a2.x[1:2] = zeros(2);
  b2.a1.y[1:2] = b2.a2.y[1:2];
  b2.a1.x[1:2] = zeros(2);
-
 end ConnectTests.ConnectTest6;
 ")})));
 end ConnectTest6;
@@ -314,14 +311,13 @@ fclass ConnectTests.ConnectTest7
 equation
  a1[1:2].x = ones(2);
  a1[1].x = a2[1].x;
-  - ( a1[1].y ) - ( a2[1].y ) = 0;
+ - a1[1].y - a2[1].y = 0;
  a1[2].x = a2[2].x;
-  - ( a1[2].y ) - ( a2[2].y ) = 0;
+ - a1[2].y - a2[2].y = 0;
  a1[1].y = 0;
  a1[2].y = 0;
  a2[1].y = 0;
  a2[2].y = 0;
-
 end ConnectTests.ConnectTest7;
 ")})));
 end ConnectTest7;
@@ -359,12 +355,11 @@ equation
  a[1].x = a[2].x;
  a[2].x = a[3].x;
  a[3].x = a[4].x;
-  - ( a[1].y ) - ( a[2].y ) - ( a[3].y ) - ( a[4].y ) = 0;
+ - a[1].y - a[2].y - a[3].y - a[4].y = 0;
  a[1].y = 0;
  a[2].y = 0;
  a[3].y = 0;
  a[4].y = 0;
-
 end ConnectTests.ConnectTest8;
 ")})));
 end ConnectTest8;
@@ -392,10 +387,9 @@ fclass ConnectTests.ConnectTest9
  Real a[2].y;
 equation
  a[1].x = a[2].x;
-  - ( a[1].y ) - ( a[2].y ) = 0;
+ - a[1].y - a[2].y = 0;
  a[1].y = 0;
  a[2].y = 0;
-
 end ConnectTests.ConnectTest9;
 ")})));
 end ConnectTest9;
@@ -468,14 +462,13 @@ fclass ConnectTests.ConnectTest11
  Real c2.b2.y;
 equation
  c1.b1.x = c2.b1.x;
-  - ( c1.b1.y ) - ( c2.b1.y ) = 0;
+ - c1.b1.y - c2.b1.y = 0;
  c1.b2.x = c2.b2.x;
-  - ( c1.b2.y ) - ( c2.b2.y ) = 0;
+ - c1.b2.y - c2.b2.y = 0;
  c1.b1.y = 0;
  c1.b2.y = 0;
  c2.b1.y = 0;
  c2.b2.y = 0;
-
 end ConnectTests.ConnectTest11;
 ")})));
 end ConnectTest11;
@@ -572,7 +565,7 @@ equation
  b[2,4].a[1].x = b[3,1].a[2].x;
  b[3,1].a[2].x = b[3,2].a[2].x;
  b[3,2].a[2].x = b[3,3].a[2].x;
-  - ( b[1,1].a[1].y ) - ( b[1,1].a[2].y ) - ( b[1,2].a[1].y ) - ( b[1,2].a[2].y ) - ( b[1,3].a[1].y ) - ( b[1,3].a[2].y ) - ( b[1,4].a[1].y ) - ( b[2,1].a[1].y ) - ( b[2,1].a[2].y ) - ( b[2,2].a[1].y ) - ( b[2,2].a[2].y ) - ( b[2,3].a[1].y ) - ( b[2,3].a[2].y ) - ( b[2,4].a[1].y ) - ( b[3,1].a[2].y ) - ( b[3,2].a[2].y ) - ( b[3,3].a[2].y ) = 0;
+ - b[1,1].a[1].y - b[1,1].a[2].y - b[1,2].a[1].y - b[1,2].a[2].y - b[1,3].a[1].y - b[1,3].a[2].y - b[1,4].a[1].y - b[2,1].a[1].y - b[2,1].a[2].y - b[2,2].a[1].y - b[2,2].a[2].y - b[2,3].a[1].y - b[2,3].a[2].y - b[2,4].a[1].y - b[3,1].a[2].y - b[3,2].a[2].y - b[3,3].a[2].y = 0;
  b[1,1].a[1].y = 0;
  b[1,1].a[2].y = 0;
  b[1,2].a[1].y = 0;
@@ -597,7 +590,6 @@ equation
  b[3,3].a[2].y = 0;
  b[3,4].a[1].y = 0;
  b[3,4].a[2].y = 0;
-
 end ConnectTests.ConnectTest12;
 ")})));
 end ConnectTest12;
@@ -642,17 +634,16 @@ equation
  end for;
  b[1].a[1].x = b[2].a[1].x;
  b[2].a[1].x = b[3].a[1].x;
-  - ( b[1].a[1].y ) - ( b[2].a[1].y ) - ( b[3].a[1].y ) = 0;
+ - b[1].a[1].y - b[2].a[1].y - b[3].a[1].y = 0;
  b[1].a[2].x = b[2].a[2].x;
  b[2].a[2].x = b[3].a[2].x;
-  - ( b[1].a[2].y ) - ( b[2].a[2].y ) - ( b[3].a[2].y ) = 0;
+ - b[1].a[2].y - b[2].a[2].y - b[3].a[2].y = 0;
  b[1].a[1].y = 0;
  b[1].a[2].y = 0;
  b[2].a[1].y = 0;
  b[2].a[2].y = 0;
  b[3].a[1].y = 0;
  b[3].a[2].y = 0;
-
 end ConnectTests.ConnectTest13;
 ")})));
 end ConnectTest13;
@@ -713,21 +704,21 @@ fclass ConnectTests.ConnectTest14
  Real b2[2,2].a[2].y;
 equation
  b1[1,1].a[1].x = b2[1,1].a[1].x;
-  - ( b1[1,1].a[1].y ) - ( b2[1,1].a[1].y ) = 0;
+ - b1[1,1].a[1].y - b2[1,1].a[1].y = 0;
  b1[1,1].a[2].x = b2[1,1].a[2].x;
-  - ( b1[1,1].a[2].y ) - ( b2[1,1].a[2].y ) = 0;
+ - b1[1,1].a[2].y - b2[1,1].a[2].y = 0;
  b1[1,2].a[1].x = b2[1,2].a[1].x;
-  - ( b1[1,2].a[1].y ) - ( b2[1,2].a[1].y ) = 0;
+ - b1[1,2].a[1].y - b2[1,2].a[1].y = 0;
  b1[1,2].a[2].x = b2[1,2].a[2].x;
-  - ( b1[1,2].a[2].y ) - ( b2[1,2].a[2].y ) = 0;
+ - b1[1,2].a[2].y - b2[1,2].a[2].y = 0;
  b1[2,1].a[1].x = b2[2,1].a[1].x;
-  - ( b1[2,1].a[1].y ) - ( b2[2,1].a[1].y ) = 0;
+ - b1[2,1].a[1].y - b2[2,1].a[1].y = 0;
  b1[2,1].a[2].x = b2[2,1].a[2].x;
-  - ( b1[2,1].a[2].y ) - ( b2[2,1].a[2].y ) = 0;
+ - b1[2,1].a[2].y - b2[2,1].a[2].y = 0;
  b1[2,2].a[1].x = b2[2,2].a[1].x;
-  - ( b1[2,2].a[1].y ) - ( b2[2,2].a[1].y ) = 0;
+ - b1[2,2].a[1].y - b2[2,2].a[1].y = 0;
  b1[2,2].a[2].x = b2[2,2].a[2].x;
-  - ( b1[2,2].a[2].y ) - ( b2[2,2].a[2].y ) = 0;
+ - b1[2,2].a[2].y - b2[2,2].a[2].y = 0;
  b1[1,1].a[1].y = 0;
  b1[1,1].a[2].y = 0;
  b1[1,2].a[1].y = 0;
@@ -744,7 +735,6 @@ equation
  b2[2,1].a[2].y = 0;
  b2[2,2].a[1].y = 0;
  b2[2,2].a[2].y = 0;
-
 end ConnectTests.ConnectTest14;
 ")})));
 end ConnectTest14;
@@ -804,21 +794,21 @@ fclass ConnectTests.ConnectTest15
  Real b[2,2,2].a[2].y;
 equation
  b[1,1,1].a[1].x = b[2,1,1].a[1].x;
-  - ( b[1,1,1].a[1].y ) - ( b[2,1,1].a[1].y ) = 0;
+ - b[1,1,1].a[1].y - b[2,1,1].a[1].y = 0;
  b[1,1,1].a[2].x = b[2,1,1].a[2].x;
-  - ( b[1,1,1].a[2].y ) - ( b[2,1,1].a[2].y ) = 0;
+ - b[1,1,1].a[2].y - b[2,1,1].a[2].y = 0;
  b[1,1,2].a[1].x = b[2,1,2].a[1].x;
-  - ( b[1,1,2].a[1].y ) - ( b[2,1,2].a[1].y ) = 0;
+ - b[1,1,2].a[1].y - b[2,1,2].a[1].y = 0;
  b[1,1,2].a[2].x = b[2,1,2].a[2].x;
-  - ( b[1,1,2].a[2].y ) - ( b[2,1,2].a[2].y ) = 0;
+ - b[1,1,2].a[2].y - b[2,1,2].a[2].y = 0;
  b[1,2,1].a[1].x = b[2,2,1].a[1].x;
-  - ( b[1,2,1].a[1].y ) - ( b[2,2,1].a[1].y ) = 0;
+ - b[1,2,1].a[1].y - b[2,2,1].a[1].y = 0;
  b[1,2,1].a[2].x = b[2,2,1].a[2].x;
-  - ( b[1,2,1].a[2].y ) - ( b[2,2,1].a[2].y ) = 0;
+ - b[1,2,1].a[2].y - b[2,2,1].a[2].y = 0;
  b[1,2,2].a[1].x = b[2,2,2].a[1].x;
-  - ( b[1,2,2].a[1].y ) - ( b[2,2,2].a[1].y ) = 0;
+ - b[1,2,2].a[1].y - b[2,2,2].a[1].y = 0;
  b[1,2,2].a[2].x = b[2,2,2].a[2].x;
-  - ( b[1,2,2].a[2].y ) - ( b[2,2,2].a[2].y ) = 0;
+ - b[1,2,2].a[2].y - b[2,2,2].a[2].y = 0;
  b[1,1,1].a[1].y = 0;
  b[1,1,1].a[2].y = 0;
  b[1,1,2].a[1].y = 0;
@@ -835,7 +825,6 @@ equation
  b[2,2,1].a[2].y = 0;
  b[2,2,2].a[1].y = 0;
  b[2,2,2].a[2].y = 0;
-
 end ConnectTests.ConnectTest15;
 ")})));
 end ConnectTest15;
@@ -1219,16 +1208,16 @@ fclass ConnectTests.CircuitTest1
  Real c.n.i \"Current flowing into the pin\";
 equation
  cv.v = cv.V;
- cv.v = cv.p.v - ( cv.n.v );
+ cv.v = cv.p.v - cv.n.v;
  0 = cv.p.i + cv.n.i;
  cv.i = cv.p.i;
  g.p.v = 0;
- ( r.R ) * ( r.i ) = r.v;
- r.v = r.p.v - ( r.n.v );
+ r.R * r.i = r.v;
+ r.v = r.p.v - r.n.v;
  0 = r.p.i + r.n.i;
  r.i = r.p.i;
- c.i = ( c.C ) * ( c.der(v) );
- c.v = c.p.v - ( c.n.v );
+ c.i = c.C * c.der(v);
+ c.v = c.p.v - c.n.v;
  0 = c.p.i + c.n.i;
  c.i = c.p.i;
  c.p.i + cv.p.i + r.p.i = 0;
@@ -1238,7 +1227,6 @@ equation
  c.n.v = cv.n.v;
  cv.n.v = g.p.v;
  g.p.v = r.n.v;
-
 end ConnectTests.CircuitTest1;
 ")})));
   end CircuitTest1;
@@ -1320,23 +1308,23 @@ fclass ConnectTests.CircuitTest2
  Real f.n.i \"Current flowing into the pin\";
 equation
  cv.v = cv.V;
- cv.v = cv.p.v - ( cv.n.v );
+ cv.v = cv.p.v - cv.n.v;
  0 = cv.p.i + cv.n.i;
  cv.i = cv.p.i;
  g.p.v = 0;
- ( r.R ) * ( r.i ) = r.v;
- r.v = r.p.v - ( r.n.v );
+ r.R * r.i = r.v;
+ r.v = r.p.v - r.n.v;
  0 = r.p.i + r.n.i;
  r.i = r.p.i;
- ( f.r.R ) * ( f.r.i ) = f.r.v;
- f.r.v = f.r.p.v - ( f.r.n.v );
+ f.r.R * f.r.i = f.r.v;
+ f.r.v = f.r.p.v - f.r.n.v;
  0 = f.r.p.i + f.r.n.i;
  f.r.i = f.r.p.i;
- f.c.i = ( f.c.C ) * ( f.c.der(v) );
- f.c.v = f.c.p.v - ( f.c.n.v );
+ f.c.i = f.c.C * f.c.der(v);
+ f.c.v = f.c.p.v - f.c.n.v;
  0 = f.c.p.i + f.c.n.i;
  f.c.i = f.c.p.i;
- f.v = f.p.v - ( f.n.v );
+ f.v = f.p.v - f.n.v;
  cv.p.i + f.p.i + r.p.i = 0;
  cv.p.v = f.p.v;
  f.p.v = r.p.v;
@@ -1344,13 +1332,12 @@ equation
  cv.n.v = f.n.v;
  f.n.v = g.p.v;
  g.p.v = r.n.v;
- f.c.p.i - ( f.p.i ) + f.r.p.i = 0;
+ f.c.p.i - f.p.i + f.r.p.i = 0;
  f.c.p.v = f.p.v;
  f.p.v = f.r.p.v;
- f.c.n.i - ( f.n.i ) + f.r.n.i = 0;
+ f.c.n.i - f.n.i + f.r.n.i = 0;
  f.c.n.v = f.n.v;
  f.n.v = f.r.n.v;
-
 end ConnectTests.CircuitTest2;
 ")})));
   end CircuitTest2;
@@ -1488,8 +1475,8 @@ fclass ConnectTests.ConnectorTest
 initial equation 
  c.b.firstOrder.y = c.b.firstOrder.y_start;
 equation
- c.b.firstOrder.der(y) = ( ( c.b.firstOrder.k ) * ( c.b.firstOrder.u ) - ( c.b.firstOrder.y ) ) / ( c.b.firstOrder.T );
- c.b.feedback.y = c.b.feedback.u1 - ( c.b.feedback.u2 );
+ c.b.firstOrder.der(y) = (c.b.firstOrder.k * c.b.firstOrder.u - c.b.firstOrder.y) / c.b.firstOrder.T;
+ c.b.feedback.y = c.b.feedback.u1 - c.b.feedback.u2;
  c.const.y = c.const.k;
  c.b.u = c.const.y;
  c.b.feedback.y = c.b.firstOrder.u;
@@ -1516,9 +1503,9 @@ fclass ConnectTests.CauerLowPassAnalog
  parameter Modelica.SIunits.Inductance l1 = 1.304 \"filter coefficient I1\" /* 1.304 */;
  parameter Modelica.SIunits.Inductance l2 = 0.8586 \"filter coefficient I2\" /* 0.8586 */;
  parameter Modelica.SIunits.Capacitance c1 = 1.072 \"filter coefficient c1\" /* 1.072 */;
- parameter Modelica.SIunits.Capacitance c2 = ( 1 ) / ( ( 1.704992 ^ 2 ) * ( l1 ) ) \"filter coefficient c2\";
+ parameter Modelica.SIunits.Capacitance c2 = 1 / (1.704992 ^ 2 * l1) \"filter coefficient c2\";
  parameter Modelica.SIunits.Capacitance c3 = 1.682 \"filter coefficient c3\" /* 1.682 */;
- parameter Modelica.SIunits.Capacitance c4 = ( 1 ) / ( ( 1.179945 ^ 2 ) * ( l2 ) ) \"filter coefficient c4\";
+ parameter Modelica.SIunits.Capacitance c4 = 1 / (1.179945 ^ 2 * l2) \"filter coefficient c4\";
  parameter Modelica.SIunits.Capacitance c5 = 0.7262 \"filter coefficient c5\" /* 0.7262 */;
  Modelica.SIunits.Voltage G.p.v \"Potential at the pin\";
  Modelica.SIunits.Current G.p.i \"Current flowing into the pin\";
@@ -1650,47 +1637,47 @@ initial equation
  end if;
 equation
  G.p.v = 0;
- C1.i = ( C1.C ) * ( C1.der(v) );
- C1.v = C1.p.v - ( C1.n.v );
+ C1.i = C1.C * C1.der(v);
+ C1.v = C1.p.v - C1.n.v;
  0 = C1.p.i + C1.n.i;
  C1.i = C1.p.i;
- C2.i = ( C2.C ) * ( C2.der(v) );
- C2.v = C2.p.v - ( C2.n.v );
+ C2.i = C2.C * C2.der(v);
+ C2.v = C2.p.v - C2.n.v;
  0 = C2.p.i + C2.n.i;
  C2.i = C2.p.i;
- C3.i = ( C3.C ) * ( C3.der(v) );
- C3.v = C3.p.v - ( C3.n.v );
+ C3.i = C3.C * C3.der(v);
+ C3.v = C3.p.v - C3.n.v;
  0 = C3.p.i + C3.n.i;
  C3.i = C3.p.i;
- C4.i = ( C4.C ) * ( C4.der(v) );
- C4.v = C4.p.v - ( C4.n.v );
+ C4.i = C4.C * C4.der(v);
+ C4.v = C4.p.v - C4.n.v;
  0 = C4.p.i + C4.n.i;
  C4.i = C4.p.i;
- C5.i = ( C5.C ) * ( C5.der(v) );
- C5.v = C5.p.v - ( C5.n.v );
+ C5.i = C5.C * C5.der(v);
+ C5.v = C5.p.v - C5.n.v;
  0 = C5.p.i + C5.n.i;
  C5.i = C5.p.i;
- ( L1.L ) * ( L1.der(i) ) = L1.v;
- L1.v = L1.p.v - ( L1.n.v );
+ L1.L * L1.der(i) = L1.v;
+ L1.v = L1.p.v - L1.n.v;
  0 = L1.p.i + L1.n.i;
  L1.i = L1.p.i;
- ( L2.L ) * ( L2.der(i) ) = L2.v;
- L2.v = L2.p.v - ( L2.n.v );
+ L2.L * L2.der(i) = L2.v;
+ L2.v = L2.p.v - L2.n.v;
  0 = L2.p.i + L2.n.i;
  L2.i = L2.p.i;
- R1.R_actual = ( R1.R ) * ( 1 + ( R1.alpha ) * ( R1.T_heatPort - ( R1.T_ref ) ) );
- R1.v = ( R1.R_actual ) * ( R1.i );
- R1.LossPower = ( R1.v ) * ( R1.i );
- R1.v = R1.p.v - ( R1.n.v );
+ R1.R_actual = R1.R * (1 + R1.alpha * (R1.T_heatPort - R1.T_ref));
+ R1.v = R1.R_actual * R1.i;
+ R1.LossPower = R1.v * R1.i;
+ R1.v = R1.p.v - R1.n.v;
  0 = R1.p.i + R1.n.i;
  R1.i = R1.p.i;
  if not false then
   R1.T_heatPort = R1.T;
  end if;
- R2.R_actual = ( R2.R ) * ( 1 + ( R2.alpha ) * ( R2.T_heatPort - ( R2.T_ref ) ) );
- R2.v = ( R2.R_actual ) * ( R2.i );
- R2.LossPower = ( R2.v ) * ( R2.i );
- R2.v = R2.p.v - ( R2.n.v );
+ R2.R_actual = R2.R * (1 + R2.alpha * (R2.T_heatPort - R2.T_ref));
+ R2.v = R2.R_actual * R2.i;
+ R2.LossPower = R2.v * R2.i;
+ R2.v = R2.p.v - R2.n.v;
  0 = R2.p.i + R2.n.i;
  R2.i = R2.p.i;
  if not false then
@@ -1698,7 +1685,7 @@ equation
  end if;
  V.v = V.signalSource.y;
  V.signalSource.y = V.signalSource.offset + (if time < V.signalSource.startTime then 0 else V.signalSource.height);
- V.v = V.p.v - ( V.n.v );
+ V.v = V.p.v - V.n.v;
  0 = V.p.i + V.n.i;
  V.i = V.p.i;
  C1.p.i + C2.p.i + L1.p.i + R1.n.i = 0;
@@ -1729,7 +1716,7 @@ public
  type Modelica.SIunits.Voltage = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
  type Modelica.SIunits.Current = Real(final quantity = \"ElectricCurrent\",final unit = \"A\");
  type Modelica.SIunits.Resistance = Real(final quantity = \"Resistance\",final unit = \"Ohm\");
- type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 1,max = 6000,start = 288.15,nominal = 300,displayUnit = \"degC\");
+ type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0.0,start = 288.15,nominal = 300,displayUnit = \"degC\");
  type Modelica.SIunits.LinearTemperatureCoefficient = Real(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\");
  type Modelica.SIunits.Power = Real(final quantity = \"Power\",final unit = \"W\");
  type Modelica.SIunits.Time = Real(final quantity = \"Time\",final unit = \"s\");
@@ -1772,10 +1759,9 @@ fclass ConnectTests.StreamTest1
  Real g.f.d;
 equation
  g.e.a = g.f.a;
-  - ( g.e.b ) - ( g.f.b ) = 0;
+ - g.e.b - g.f.b = 0;
  g.e.b = 0;
  g.f.b = 0;
-
 end ConnectTests.StreamTest1;
 ")})));
 end StreamTest1;
@@ -1823,10 +1809,9 @@ equation
  g.x = inStream(g.e.c);
  g.y = actualStream(g.e.c);
  g.e.a = g.f.a;
-  - ( g.e.b ) - ( g.f.b ) = 0;
+ - g.e.b - g.f.b = 0;
  g.e.b = 0;
  g.f.b = 0;
-
 end ConnectTests.StreamTest2;
 ")})));
 end StreamTest2;

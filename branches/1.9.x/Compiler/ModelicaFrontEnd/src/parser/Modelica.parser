@@ -578,7 +578,7 @@ EquationClause equation_clause =
   | INITIAL_EQUATION abstract_equation*  {:  //System.out.println("equation_clause"); 
   					     for (int i=0;i<abstract_equation.getNumChild();i++)
   					     	((AbstractEquation)abstract_equation.getChild(i)).setAbstractEquationModifier(new Initial()); 
-                                                 return new EquationClause(abstract_equation); :}
+  					     return new InitialEquationClause(abstract_equation); :}
   ;  
 
 Algorithm algorithm =
@@ -743,6 +743,7 @@ Argument argument =
    base_class_decl 
    constraining_clause? {:  base_class_decl.setConstrainingClauseOpt(constraining_clause);
                             base_class_decl.setReplaceable(replaceable);
+                            base_class_decl.setRedeclare(new Redeclare());
                             ClassAccess ca = new ClassAccess(base_class_decl.getName().getID());
                             ca.setLocationNoTree(base_class_decl.getName());
                              return new  ClassRedeclare(each,
@@ -940,7 +941,8 @@ FunctionCallLeft function_call_stmt_left =
   ;
 
 IfStmt if_stmt =
-  IF if_clause_list else_stmts END_IF comment {: return new IfStmt(comment, if_clause_list, else_stmts); :}
+    IF if_clause_list else_stmts END_IF comment {: return new IfStmt(comment, if_clause_list, new Opt(else_stmts)); :}
+  | IF if_clause_list END_IF comment {: return new IfStmt(comment, if_clause_list, new Opt()); :}
   ;  
 
 List if_clause_list =
@@ -952,9 +954,8 @@ IfClause if_clause =
   exp THEN statement_list  {: return new IfClause(exp, statement_list); :}
   ;
 
-List else_stmts =
-                         {: return new List(); :}
-  | ELSE statement_list  {: return statement_list; :}
+ElseClause else_stmts =
+  ELSE statement_list  {: return new ElseClause(statement_list); :}
   ;
 
 WhenStmt when_stmt =
@@ -971,8 +972,12 @@ WhenClause when_clause =
   ;
 
 ForStmt for_stmt =
-  FOR for_indices LOOP statement_list END_FOR comment  
-                         {: return new ForStmt(comment, for_indices, statement_list); :}
+  FOR for_indices LOOP for_stmt_list END_FOR comment  
+                         {: return new ForStmt(comment, for_indices, for_stmt_list); :}
+  ;
+  
+ForStmtList for_stmt_list =
+  statement_list {: return new ForStmtList(statement_list); :}
   ;
 
 WhileStmt while_stmt = 
@@ -996,25 +1001,20 @@ Exp else_if_exp =
   ;
 
 Exp simple_expression = 
-  log_exp
-  range.r1? 
-  range.r2? {:        if (r1.getNumChild()==0 && r2.getNumChild()==0)
-                      	return log_exp;
-                      else {
-                      	RangeExp r = new RangeExp();
-                      	r.addExp(log_exp);
-                      	if (r1.getNumChild()>0)
-                      		r.addExp((Exp)r1.getChildNoTransform(0));
-                      	if (r2.getNumChild()>0)
-                      		r.addExp((Exp)r2.getChildNoTransform(0));	
-                      	return r;
-                      }    
-                      :}
+    log_exp 
+        {: return log_exp; :}
+  | log_exp.l1 COLON log_exp.l2
+        {: RangeExp r = new RangeExp();
+           r.addExp(l1);
+           r.addExp(l2);
+           return r; :}
+  | log_exp.l1 COLON log_exp.l2 COLON log_exp.l3
+        {: RangeExp r = new RangeExp();
+           r.addExp(l1);
+           r.addExp(l2);
+           r.addExp(l3);
+           return r; :}
   ;
-
-Exp range =
-  COLON log_exp {: return log_exp; :}
-  ;  
 
 Exp log_exp = 
   log_exp.a OR log_exp.b {: return new OrExp(a,b); :}  
@@ -1089,6 +1089,11 @@ Exp primary =
                                       {: return new FunctionCall(parse_access, function_arguments); :}
   ;  
   
+ PartialFunctionCall partial_function_call =
+    FUNCTION parse_access LPAREN function_arguments? RPAREN 
+                                      {: return new PartialFunctionCall(parse_access, function_arguments); :}
+  ;  
+  
 FunctionArguments function_arguments =
     exp FOR for_indices               {: List arg_list_f = new List().add(new IterExp(exp, for_indices));
                                          return new FunctionArguments(arg_list_f, new List()); :} 
@@ -1104,11 +1109,15 @@ List named_arguments =
   
 Exp function_argument_exp =
  exp                               {: return exp; :}
- | FUNCTION function_call          {: return function_call; :}  
+ | partial_function_call          {: return partial_function_call; :}  
  ;
   
 NamedArgument named_argument =
-  ID.id EQUALS function_argument_exp {: return new NamedArgument(new ParseAccess(id,new Opt()),function_argument_exp); :}
+  named_argument_id EQUALS function_argument_exp {: return new NamedArgument(named_argument_id,function_argument_exp); :}
+  ;
+
+Access named_argument_id = 
+  ID.id {: return new ParseAccess(id, new Opt()); :}
   ;
 
 Matrix matrix = 

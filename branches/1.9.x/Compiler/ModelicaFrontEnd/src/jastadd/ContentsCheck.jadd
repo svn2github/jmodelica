@@ -81,6 +81,58 @@ aspect ContentCheck {
 		}
 	}
 	
+	public void InstExtends.contentCheck() {
+		if (myInstClass().isExternalObject())
+			error("Classed derived from ExternalObject can neither be used in an extends-clause nor in a short class defenition");
+	}
+	
+	public void InstFunctionCall.contentCheck() {
+		if (!generated) {
+			InstClassDecl target = getName().myInstClassDecl();
+			if (target.isConstructor() || target.isDestructor())
+				error("Constructors and destructors for ExternalObjects can not be used directly");
+		}
+	}
+	
+	public void InstClassDecl.contentCheck() {
+		if (isExternalObject()) {
+			checkContentsOKInExternalObject();
+			myConstructor().checkConstructor(primitiveScalarType());
+			myDestructor().checkDestructor(primitiveScalarType());
+		}
+	}
+	
+	public void InstNode.checkContentsOKInExternalObject() {
+		for (InstExtends ie : getInstExtendss())
+			ie.checkContentsOKInExternalObject();
+		boolean ok = true;
+		for (InstClassDecl icd : getInstClassDecls())
+			if (!icd.name().equals("constructor") && !icd.name().equals("destructor"))
+				ok = false;
+		if (getNumInstComponentDecl() > 0)
+			ok = false;
+		if (getNumRedeclaredInstClassDecl() > 0)
+			ok = false;
+		if (getNumFAbstractEquation() > 0)
+			ok = false;
+		if (!ok)
+			error("External object classes may not contain any elements except the constructor and destructor");
+	}
+	
+	public void InstClassDecl.checkDestructor(FType eoType) {
+		if (isUnknown())
+			return;
+		if (myOutputs().size() != 0 || myInputs().size() != 1 || !myInputs().get(0).type().typeCompatible(eoType))
+			error("An external object destructor must have exactly one input of the same type as the constructor, and no outputs");
+	}
+	
+	public void InstClassDecl.checkConstructor(FType eoType) {
+		if (isUnknown())
+			return;
+		if (myOutputs().size() != 1 || !myOutputs().get(0).type().typeCompatible(eoType))
+			error("An external object constructor must have exactly one output of the same type as the constructor");
+	}
+	
 	// TODO: check if this is a builtin function (with bad arguments), error otherwise
 //	public void FBuiltinExternalLanguage.contentCheck() {
 //		error("The \"builtin\" external language specitication may only be used for functions that are a part of the Modelica specification");
@@ -265,6 +317,7 @@ aspect ContentCheck {
 				return false;
 		return getNumFAbstractEquation() == 0;
 	}
+	eq InstSimpleShortClassDecl.isOkPackage() = actualInstClass().isOkPackage();
 	
 }
 

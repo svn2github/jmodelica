@@ -84,23 +84,26 @@ public class ScannedFormattingItem extends FormattingItem implements Comparable<
 
 	@Override
 	public RelativePosition getFrontRelativePosition(int line, int column) {
-		if ((endLine == line && endColumn + 1 == column) || (column == 1 && endLine + 1 == line && endsWithLineBreak())) {
+		if ((endLine == line && endColumn + 1 == column) || (column == 1 && endLine + 1 == line && endsWithLineBreak()))
 			return RelativePosition.FRONT_ADJACENT;
-		} else if (endLine > line || (endLine == line && endColumn + 1 > column)) {
+		else if (endLine < line || (endLine == line && endColumn < column))
+			return RelativePosition.BEFORE;
+		else if (startLine > line || (startLine == line && startColumn > column))
 			return RelativePosition.AFTER;
-		}
-		
-		return RelativePosition.BEFORE;
+		else
+			return RelativePosition.INSIDE;
 	}
 	
 	@Override
 	public RelativePosition getBackRelativePosition(int line, int column) {
-		if (startLine < line || (startLine == line && startColumn < column + 1)) {
-			return RelativePosition.BEFORE;
-		} else if (startLine == line && startColumn == column + 1) {
+		if (startLine == line && startColumn - 1 == column)
 			return RelativePosition.BACK_ADJACENT;
-		}
-		return RelativePosition.AFTER;
+		else if (startLine < line || (startLine == line && startColumn < column))
+			return RelativePosition.BEFORE;
+		else if (startLine > line || (startLine == line && startColumn > column))
+			return RelativePosition.AFTER;
+		else
+			return RelativePosition.INSIDE;
 	}
 	
 	@Override
