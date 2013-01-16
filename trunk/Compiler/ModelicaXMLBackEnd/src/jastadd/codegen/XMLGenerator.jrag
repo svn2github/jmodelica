@@ -505,18 +505,37 @@ public class XMLGenerator extends GenericGenerator {
 		genPrinter.print("\n\t\t\t<isLinear>"+variable.isLinear()+"</isLinear>");
 	}
 	
-	protected void addStartAttribute(PrintStream genPrinter, FVariable var) {
-		FExp e = null;
-		if (var.useBindingExpAsStart()) 
-			e = var.getBindingExp();
-		else if (var.startAttributeSet())
-			e = var.startAttributeExp();
-		else if (var.isInput())
-			e = var.createStartAttributeExp();
-		if (!var.root().options.getBooleanOption("generate_xml_equations") && e != null && !e.isConstantExp())
-			e = null;
-		if (e != null)
-			genPrinter.print("start=\"" + var.type().convert(e.ceval()).xmlValue() + "\" ");
+	protected void addStartAndFixedAttribute(PrintStream genPrinter, FVariable var) {
+		FExp e_start = null;
+		FExp e_fixed = null;
+		Boolean isFixed = null; // null = fixed is not set
+		
+		if (var.fixedAttributeSet()) {
+		    e_fixed = var.fixedAttributeExp();
+		    isFixed = e_fixed.ceval().booleanValue();
+		}
+		
+		if (isFixed == null || (isFixed != null && !isFixed)) {
+		    boolean startGenerated = false;
+		    if (var.useBindingExpAsStart()) 
+		        e_start = var.getBindingExp();
+		    else if (var.startAttributeSet())
+		        e_start = var.startAttributeExp();
+		    else if (var.isInput())
+		        e_start = var.createStartAttributeExp();
+		    
+		    if (!var.root().options.getBooleanOption("generate_xml_equations") && e_start != null && !e_start.isConstantExp())
+		        e_start = null;
+		    if (e_start != null) {
+		        genPrinter.print("start=\"" + var.type().convert(e_start.ceval()).xmlValue() + "\" ");
+		        startGenerated = true;
+		    }
+		    
+		    if (isFixed != null && startGenerated) {
+		        // fixed is set and start is generated (i.e. fixed is false)
+		        genPrinter.print("fixed=\"" + e_fixed.type().convert(e_fixed.ceval()).xmlValue() + "\" ");
+		    }
+		}
 	}
 
 	/*
@@ -552,12 +571,12 @@ public class XMLGenerator extends GenericGenerator {
 		if(realvariable.nominalAttributeSet()) {
 			genPrinter.print("nominal=\""+realvariable.nominalAttribute()+"\" ");
 		}
-		//start
-		addStartAttribute(genPrinter, realvariable);
+		//start and fixed
+		addStartAndFixedAttribute(genPrinter, realvariable);
 		// fixed
-		if (realvariable.fixedAttributeSet()) {
-			genPrinter.print("fixed=\""+realvariable.fixedAttribute()+"\" ");
-		}
+		//if (realvariable.fixedAttributeSet()) {
+		//	genPrinter.print("fixed=\""+realvariable.fixedAttribute()+"\" ");
+		//}
 	}
 	
 	/*
@@ -579,11 +598,11 @@ public class XMLGenerator extends GenericGenerator {
 			genPrinter.print("max=\""+integervariable.maxAttribute()+"\" ");
 		}
 		//start
-		addStartAttribute(genPrinter, integervariable);
+		addStartAndFixedAttribute(genPrinter, integervariable);
 		// fixed
-		if (integervariable.fixedAttributeSet()) {
-			genPrinter.print("fixed=\""+integervariable.fixedAttribute()+"\" ");
-		}
+		//if (integervariable.fixedAttributeSet()) {
+		//	genPrinter.print("fixed=\""+integervariable.fixedAttribute()+"\" ");
+		//}
 	}
 
 	/*
@@ -605,12 +624,12 @@ public class XMLGenerator extends GenericGenerator {
 		if(enumvariable.maxAttributeSet()) {
 			genPrinter.print("max=\""+enumvariable.maxAttribute()+"\" ");
 		}
-		//start
-		addStartAttribute(genPrinter, enumvariable);
+		//start and fixed
+		addStartAndFixedAttribute(genPrinter, enumvariable);
 		// fixed
-		if (enumvariable.fixedAttributeSet()) {
-			genPrinter.print("fixed=\""+enumvariable.fixedAttribute()+"\" ");
-		}
+		//if (enumvariable.fixedAttributeSet()) {
+		//	genPrinter.print("fixed=\""+enumvariable.fixedAttribute()+"\" ");
+		//}
 	}
 
 	
@@ -620,12 +639,12 @@ public class XMLGenerator extends GenericGenerator {
 	protected void addBooleanAttributes(PrintStream genPrinter, FBooleanVariable booleanvariable) {
 		//declaredType
 		//genPrinter.print("declaredType=\"String\" ");
-		//start attribute
-		addStartAttribute(genPrinter, booleanvariable);
+		//start and fixed attribute
+	    addStartAndFixedAttribute(genPrinter, booleanvariable);
 		// fixed
-		if (booleanvariable.fixedAttributeSet()) {
-			genPrinter.print("fixed=\""+booleanvariable.fixedAttribute()+"\" ");
-		}
+		//if (booleanvariable.fixedAttributeSet()) {
+		//	genPrinter.print("fixed=\""+booleanvariable.fixedAttribute()+"\" ");
+		//}
 	}
 	
 	/*
@@ -635,7 +654,7 @@ public class XMLGenerator extends GenericGenerator {
 		//declaredType
 		//genPrinter.print("declaredType=\"String\" ");
 		//start attribute
-		addStartAttribute(genPrinter, stringvariable);
+		addStartAndFixedAttribute(genPrinter, stringvariable);
 		// fixed - not supported
 		//if (stringvariable.fixedAttributeSet()) {
 		//	genPrinter.print("fixed=\""+stringvariable.fixedAttribute()+"\" ");
