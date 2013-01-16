@@ -291,6 +291,154 @@ sudo apt-get -y install python-lxml
 sudo apt-get -y install python-nose
 sudo apt-get -y install python-jpype
 </programlisting>
+
+        <para>The following versions of each package have been tested and
+        verified to work. Please note that in some cases, a minimum version is
+        required.</para>
+
+        <table xml:id="inst_tab_versions_ubuntu">
+          <title>Package versions for Ubuntu</title>
+
+          <tgroup cols="3">
+            <colspec align="left" colname="col–package" colwidth="3*"/>
+
+            <colspec align="left" colname="col–version" colwidth="1*"/>
+
+            <colspec align="left" colname="col–note" colwidth="2*"/>
+
+            <thead>
+              <row>
+                <entry align="center">Package</entry>
+
+                <entry align="center">Version</entry>
+
+                <entry align="center">Note</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><literal>g++</literal></entry>
+
+                <entry><literal>4.6.3</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>subversion</literal></entry>
+
+                <entry><literal>1.6.17</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>gfortran</literal></entry>
+
+                <entry><literal>4.6.3</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>ipython</literal></entry>
+
+                <entry><literal>0.12.1</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>cmake</literal></entry>
+
+                <entry><literal>2.8.6</literal></entry>
+
+                <entry>Minimum version</entry>
+              </row>
+
+              <row>
+                <entry><literal>swig</literal></entry>
+
+                <entry><literal>2.0.4</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>ant</literal></entry>
+
+                <entry><literal>1.8.2</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>python-dev</literal></entry>
+
+                <entry><literal>2.7.3</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>python-numpy</literal></entry>
+
+                <entry><literal>1.6.1</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>python-scipy</literal></entry>
+
+                <entry><literal>0.9.0</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>python-matplotlib</literal></entry>
+
+                <entry><literal>1.1.1</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>cython</literal></entry>
+
+                <entry><literal>0.15</literal></entry>
+
+                <entry>Minimum version</entry>
+              </row>
+
+              <row>
+                <entry><literal>python-lxml</literal></entry>
+
+                <entry><literal>2.3.2</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>python-nose</literal></entry>
+
+                <entry><literal>1.1.2</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>python-jpype</literal></entry>
+
+                <entry><literal>0.5.4.2</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
       </section>
 
       <section>
