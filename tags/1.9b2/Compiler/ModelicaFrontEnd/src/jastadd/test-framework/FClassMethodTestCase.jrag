@@ -1,0 +1,102 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.Collection;
+import java.lang.reflect.Method;
+import org.jmodelica.util.*;
+
+public class FClassMethodTestCase extends TestCase {
+	private String output = "";
+    private String methodName = "";
+	    
+	public FClassMethodTestCase() {}
+    
+	/**
+	 * @param name
+	 * @param description
+	 * @param sourceFileName
+	 * @param className
+	 * @param output
+	 * @oaram methodName
+	 * @param outputFileName
+	 * @param resultOnFile
+	 */
+	public FClassMethodTestCase(String name, 
+			                  String description,
+			                  String sourceFileName, 
+			                  String className, 
+			                  String result,
+			                  String methodName) {
+		super(name, description, sourceFileName, className);
+		this.methodName = methodName;
+		this.output = result;
+		
+	}
+
+	/**
+	 * \brief Perform tests on flat class after transform canonical step.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
+	 */
+	protected boolean testTransformed(FClass fc) {
+	    try {
+	    	Method method = fc.getClass().getMethod(getMethodName());
+	    		    	
+	    	String test = method.invoke(fc).toString();
+	    	String correct = filter(getOutput());
+
+	    	if (!removeWhitespace(test).equals(removeWhitespace(correct)))
+	    		assertEquals("Method result does not match expected.", correct, test);
+	    } catch (Exception e) {
+	    }
+    	return true;
+	}
+	
+	/**
+	 * @return the output
+	 */
+	public String getOutput() {
+		return output;
+	}
+	
+	/**
+	 * @param output the output to set
+	 */
+	public void setOutput(String output) {
+		this.output = output;
+	}
+	
+	/**
+	 * @param output the output to set
+	 */
+	public void setMethodResult(String output) {
+		setOutput(output);
+	}
+	
+	/**
+	 * @return the methodName
+	 */
+	public String getMethodName() {
+		return methodName;
+	}
+	/**
+	 * @param methodName the methodName to set
+	 */
+	public void setMethodName(String methodName) {
+		this.methodName = methodName;
+	}
+	
+}

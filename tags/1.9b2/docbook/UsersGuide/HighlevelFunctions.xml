@@ -1,0 +1,700 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>High-level functions: initialize, simulate and optimize</title>
+
+  <para>The purpose of the high-level functions is to provide a flexible user
+  interface to initializing, simulating and optimizing a model. In its
+  simplest form, the functions can be used with all arguments set to default
+  values requiring very few user inputs. For more complex usage there are a
+  number of options that can be set which enables more user control over the
+  course of events.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>This section will give a brief overview to the high-level functions,
+    which algorithms are available at the moment, how to change settings and
+    how the return argument is composed. The section ends with a short
+    simulation example, but the general principle of the example also applies
+    for the <literal>initialize</literal> and <literal>optimize</literal>
+    functions.</para>
+
+    <section>
+      <title>Importing the high-level functions</title>
+
+      <para>The <literal>initialize</literal>, <literal>simulate</literal> and
+      <literal>optimize</literal> functions are all located in the package
+      <literal>jmodelica</literal>. There are two main ways of making them
+      available in the Python shell or in a script</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><emphasis role="bold">Import the package jmodelica.</emphasis>
+          This will create a new namespace with all attributes from the
+          <literal>jmodelica</literal> package. To use any of the functions,
+          the package name must then be used as a prefix.</para>
+
+          <programlisting># import the optimize function by importing jmodelica
+import jmodelica
+
+# optimize is now available
+jmodelica.optimize
+&lt;function optimize at 0x05FE8970&gt;
+
+# so is simulate and initialize
+jmodelica.simulate
+&lt;function simulate at 0x05FF4FB0&gt;
+jmodelica.initialize
+&lt;function initialize at 0x05FF6030&gt;</programlisting>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Import a specific function.</emphasis>
+          Using the <literal>from</literal> statement a specific function will
+          be imported in the current namespace.</para>
+
+          <programlisting># import the simulate function from jmodelica
+from jmodelica import simulate
+
+# type simulate and hit enter
+simulate
+&lt;function simulate at 0x05FF8170&gt;</programlisting>
+
+          <para>Note that neither <literal>optimize</literal> nor
+          <literal>initialize</literal> is available now, they must also be
+          imported explicitly.</para>
+
+          <programlisting># type optimize and hit enter
+NameError: name 'optimize' is not defined
+
+# import optimize
+from jmodelica import optimize
+optimize
+&lt;function optimize at 0x05FEDAF0&gt;</programlisting>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Default arguments</title>
+
+      <section>
+        <title>Function arguments</title>
+
+        <para>The only required input to any of the high-level functions is
+        the model object, the rest of the arguments all have default values.
+        The default values are listed in the docstring of the function. Using
+        the interactive help in the Python shell or looking at the <link
+        xlink:href="www.jmodelica.org">API documentation</link> will display
+        the docstring for a certain function. It is then possible to see what
+        arguments are available and their default values.</para>
+
+        <programlisting># docstring for simulate
+Docstring:
+    Compact function for model simulation.
+
+The intention with this function is to wrap model compilation, creation of
+a model object and simulation in one function call. The simulation
+method depends on which algorithm is used, this can be set with the
+function argument 'algorithm'. Arguments for the algorithm and solver are
+passed as dicts. Which arguments that are valid depends on which algorithm
+is used, see the algorithm implementation in algorithm_drivers.py for details.
+
+The default algorithm for this function is AssimuloAlg.
+
+The simplest way of using the function is to pass the model name and path
+to the model file (a jmi.Model is enough if model is already compiled) and
+use the default values for all other arguments.
+
+Parameters::
+
+    model --
+        Model object or model name (supply model name if model should be
+        (re)compiled, then mo-file must also be provided)
+    file_name --
+        Path to model file or list of paths to model files.
+        Default: empty string (no compilation)
+    compiler --
+        Set compiler that model should be compiled with, 'modelica' or
+        'optimica'.
+        Default: 'modelica'
+    compiler_target --
+        Target argument to compiler.
+        Default: 'ipopt'
+    compiler_options --
+        Dict with options for the compiler (see options.xml for possible
+        values).
+        Default: empty dict
+    algorithm --
+        The algorithm which will be used for the simulation is
+        specified by passing the algorithm class in this argument. The
+        algorithm class can be any class which implements the abstract
+        class AlgorithmBase (found in algorithm_drivers.py). In this way
+        it is possible to write own algorithms and use them with this
+        function.
+        Default: AssimuloAlg
+    alg_args --
+        All arguments for the chosen algorithm should be listed in this dict.
+        Valid arguments depend on the algorithm chosen, see algorithm
+        implementation in algorithm_drivers.py for details.
+        Default: empty dict
+    solver_args --
+        All arguments for the chosen solver should be listed in this dict.
+        Valid arguments depend on the chosen algorithm and possibly which
+        solver has been selected for the algorithm. See algorithm
+        implementation in algorithm_drivers.py for details.
+        Default: empty dict
+
+Returns::
+
+    Result object, subclass of algorithm_drivers.ResultBase.</programlisting>
+
+        <para>The <literal>alg_args</literal> and
+        <literal>solver_args</literal> are arguments for the algorithm and
+        solver chosen, they will be passed on to the algorithm in the
+        high-level function call. The next section will list the
+        <literal>alg_args</literal> options for all algorithms and their
+        default values. The <literal>solver_args</literal> argument will be
+        explained in the section after that.</para>
+      </section>
+
+      <section>
+        <title>Algorithm argument <literal>alg_args</literal></title>
+
+        <para>The content of the <literal>alg_args</literal> argument is
+        different depending on which algorithm is used. The argument is a dict
+        with default values for all options. The following tables will list
+        the options available in the <literal>alg_args</literal> argument for
+        each algorithm.</para>
+
+        <table>
+          <title><literal>alg_args</literal> options for
+          <literal>AssimuloAlg</literal></title>
+
+          <tgroup cols="3">
+            <colspec align="left" colname="col–opt" colwidth="2*" />
+
+            <colspec align="left" colname="col–desc" colwidth="2*" />
+
+            <colspec align="left" colname="col–def" colwidth="1*" />
+
+            <thead>
+              <row>
+                <entry align="center">Option</entry>
+
+                <entry align="center">Description</entry>
+
+                <entry align="center">Default value</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><literal>start_time</literal></entry>
+
+                <entry>Simulation start time.</entry>
+
+                <entry>0.0</entry>
+              </row>
+
+              <row>
+                <entry><literal>final_time</literal></entry>
+
+                <entry>Simulation stop time.</entry>
+
+                <entry>1.0</entry>
+              </row>
+
+              <row>
+                <entry><literal>num_communication_points</literal></entry>
+
+                <entry>Number of points where the solution is returned. If set
+                to 0 the integrator will return at it's internal
+                steps.</entry>
+
+                <entry>500</entry>
+              </row>
+
+              <row>
+                <entry><literal>solver</literal></entry>
+
+                <entry>Set which solver to use with class name as string. This
+                determines whether a DAE or ODE problem will be
+                created.</entry>
+
+                <entry>'IDA'</entry>
+              </row>
+
+              <row>
+                <entry><literal>input_trajectory</literal></entry>
+
+                <entry>Trajectory data for model inputs. The argument should
+                be a matrix where the first column represents time and the
+                following columns represents input trajectory data.</entry>
+
+                <entry>An empty matrix, i.e., no input trajectories.</entry>
+              </row>
+
+              <row>
+                <entry><literal>initialize</literal></entry>
+
+                <entry>Do initialization if True, skip initialization if
+                False.</entry>
+
+                <entry>True</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+
+        <table>
+          <title><literal>alg_args</literal> options for
+          <literal>AssimuloFMIAlg</literal></title>
+
+          <tgroup cols="3">
+            <colspec align="left" colname="col–opt" colwidth="2*" />
+
+            <colspec align="left" colname="col–desc" colwidth="2*" />
+
+            <colspec align="left" colname="col–def" colwidth="1*" />
+
+            <thead>
+              <row>
+                <entry align="center">Option</entry>
+
+                <entry align="center">Description</entry>
+
+                <entry align="center">Default value</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><literal>start_time</literal></entry>
+
+                <entry>Simulation start time.</entry>
+
+                <entry>0.0</entry>
+              </row>
+
+              <row>
+                <entry><literal>final_time</literal></entry>
+
+                <entry>Simulation stop time.</entry>
+
+                <entry>1.0</entry>
+              </row>
+
+              <row>
+                <entry><literal>num_communication_points</literal></entry>
+
+                <entry>Number of points where the solution is returned. If set
+                to 0 the integrator will return at it's internal
+                steps.</entry>
+
+                <entry>500</entry>
+              </row>
+
+              <row>
+                <entry><literal>solver</literal></entry>
+
+                <entry>Set which solver to use with class name as
+                string.</entry>
+
+                <entry>'CVode'</entry>
+              </row>
+
+              <row>
+                <entry><literal>input_trajectory</literal></entry>
+
+                <entry>Trajectory data for model inputs. The argument should
+                be a matrix where the first column represents time and the
+                following columns represents input trajectory data. If the
+                <literal>input_trajectory</literal> is set the property
+                <literal>input_names</literal> in
+                <literal>solver_args</literal> must be set and reflect the
+                variables for which the input is going to be adjusted.</entry>
+
+                <entry>An empty matrix, i.e., no input trajectories.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+
+        <para><table>
+            <title><literal>alg_args</literal> options for
+            <literal>CollocationLagrangePolynomialsAlg</literal></title>
+
+            <tgroup cols="3">
+              <colspec align="left" colname="col–opt" colwidth="2*" />
+
+              <colspec align="left" colname="col–desc" colwidth="2*" />
+
+              <colspec align="left" colname="col–def" colwidth="1*" />
+
+              <thead>
+                <row>
+                  <entry align="center">Option</entry>
+
+                  <entry align="center">Description</entry>
+
+                  <entry align="center">Default value</entry>
+                </row>
+              </thead>
+
+              <tbody>
+                <row>
+                  <entry><literal>n_e</literal></entry>
+
+                  <entry>Number of finite elements.</entry>
+
+                  <entry>50</entry>
+                </row>
+
+                <row>
+                  <entry><literal>n_cp</literal></entry>
+
+                  <entry>Number of collocation points.</entry>
+
+                  <entry>3</entry>
+                </row>
+
+                <row>
+                  <entry><literal>hs</literal></entry>
+
+                  <entry>Vector containing the normalized element
+                  lengths.</entry>
+
+                  <entry>Equidistant points using default n_e.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>blocking_factors</literal></entry>
+
+                  <entry>Blocking factor vector.</entry>
+
+                  <entry>None (not used)</entry>
+                </row>
+
+                <row>
+                  <entry><literal>init_traj</literal></entry>
+
+                  <entry>A reference to an object of type
+                  <literal>ResultDymolaTextual</literal> or
+                  <literal>ResultDymolaBinary</literal> containing variable
+                  trajectories used to initialize the optimization
+                  problem.</entry>
+
+                  <entry>None (i.e. not used, set this argument to activate
+                  initialization)</entry>
+                </row>
+
+                <row>
+                  <entry><literal>result_mesh</literal></entry>
+
+                  <entry>Determines which function will be used to get the
+                  solution trajectories. Possible values are,
+                  '<literal>element_interpolation</literal>',
+                  '<literal>mesh_interpolation</literal>' or
+                  '<literal>default</literal>'. See
+                  <literal>optimization.ipopt</literal> for more info.</entry>
+
+                  <entry>'default'</entry>
+                </row>
+
+                <row>
+                  <entry><literal>result_file_name</literal></entry>
+
+                  <entry>Name of result file.</entry>
+
+                  <entry>Empty string (default generated file name will be
+                  used)</entry>
+                </row>
+
+                <row>
+                  <entry><literal>result_format</literal></entry>
+
+                  <entry>Format of result file.</entry>
+
+                  <entry>'txt'</entry>
+                </row>
+
+                <row>
+                  <entry><literal>n_interpolation_points</literal></entry>
+
+                  <entry>The number of points in each finite element at which
+                  the result is returned. Only available for
+                  <literal>result_mesh =
+                  'element_interpolation'</literal>.</entry>
+
+                  <entry>None</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </table></para>
+      </section>
+
+      <section>
+        <title>Algorithm argument <literal>solver_args</literal></title>
+
+        <para>The solver_args argument is a dict of options for the solver
+        selected for the algorithm. The options depend on which solver has
+        been chosen and the best way to find what options are available is to
+        check the documentation for the specific solver. One limitation is
+        that the options in the solver must be implemented as Python
+        properties.</para>
+
+        <para>The solvers and corresponding options available in the Assimulo
+        package can be found on the <link
+        xlink:href="www.jmodelica.org/page/199">Assimulo web
+        page</link>.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Result object</title>
+
+      <para>Every algorithm returns its own result object and all result
+      objects have a common base class
+      <literal>jmodelica.algorithm_drivers.ResultBase</literal>. This means
+      that no matter which algorithm is used in the high-level function, the
+      function will always return an object which can be manipulated with the
+      methods and properties of the <literal>ResultBase</literal>
+      class.</para>
+
+      <table>
+        <title>The <literal>jmodelica.algorithm_drivers.ResultBase</literal>
+        class</title>
+
+        <tgroup cols="3">
+          <colspec align="left" colname="col–meth" colwidth="1*" />
+
+          <colspec align="left" colname="col–prop" colwidth="1*" />
+
+          <colspec align="left" colname="col–desc" colwidth="2*" />
+
+          <thead>
+            <row>
+              <entry align="center">Method</entry>
+
+              <entry align="center">Property</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><literal>get_model()</literal></entry>
+
+              <entry><literal>model</literal></entry>
+
+              <entry>The <literal>jmodelica.jmi.Model</literal> object that
+              was used in the algorithm.</entry>
+            </row>
+
+            <row>
+              <entry><literal>get_result_file_name()</literal></entry>
+
+              <entry><literal>result_file_name</literal></entry>
+
+              <entry>The name of the result file created on the file
+              system.</entry>
+            </row>
+
+            <row>
+              <entry><literal>get_solver()</literal></entry>
+
+              <entry><literal>solver</literal></entry>
+
+              <entry>The solver used in the algorithm.</entry>
+            </row>
+
+            <row>
+              <entry><literal>get_result_data()</literal></entry>
+
+              <entry><literal>result_data</literal></entry>
+
+              <entry>The result data object containing the whole
+              initialization, simulation or optimization result
+              matrix.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Algorithms</title>
+
+      <para>The algorithms that are used in the high-level functions are
+      implemented as classes in the module
+      <literal>jmodelica.algorithm_drivers</literal>. They are all subclasses
+      of the base algorithm class
+      <literal>jmodelica.algorithm_drivers.AlgorithmBase</literal> which
+      contains methods that all algorithm classes must implement. The
+      currently available algorithms are displayed in the table below.</para>
+
+      <para><table colsep="1" pgwide="0">
+          <title>Algorithms accessible from high-level functions</title>
+
+          <tgroup cols="4">
+            <colspec align="left" colname="col–alg" colwidth="4*" />
+
+            <colspec align="left" colname="col–use" colwidth="2*" />
+
+            <colspec align="left" colname="col–def" colwidth="1*" />
+
+            <colspec align="left" colname="col–ret" colwidth="4*" />
+
+            <thead>
+              <row>
+                <entry align="center">Algorithm</entry>
+
+                <entry align="center">Use in</entry>
+
+                <entry align="center">Default</entry>
+
+                <entry align="center">Returns</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row rowsep="1">
+                <entry><literal>AssimuloAlg</literal></entry>
+
+                <entry><literal>simulate</literal></entry>
+
+                <entry>yes</entry>
+
+                <entry><literal>AssimuloSimResult</literal></entry>
+              </row>
+
+              <row rowsep="1">
+                <entry><literal>AssimuloFMIAlg</literal></entry>
+
+                <entry><literal>simulate</literal></entry>
+
+                <entry>no</entry>
+
+                <entry><literal>AssimuloSimResult</literal></entry>
+              </row>
+
+              <row rowsep="1">
+                <entry><literal>CollocationLagrangePolynomialsAlg</literal></entry>
+
+                <entry><literal>optimize</literal></entry>
+
+                <entry>yes</entry>
+
+                <entry><literal>CollocationLagrangePolynomialsResult</literal></entry>
+              </row>
+
+              <row rowsep="1">
+                <entry><literal>IpoptInitializationAlg</literal></entry>
+
+                <entry><literal>initialize</literal></entry>
+
+                <entry>yes</entry>
+
+                <entry><literal>IpoptInitResult</literal></entry>
+              </row>
+
+              <row rowsep="0">
+                <entry><literal>JFSInitAlg</literal></entry>
+
+                <entry><literal>initialize</literal></entry>
+
+                <entry>no</entry>
+
+                <entry><literal>JFSInitResult</literal></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table></para>
+    </section>
+
+    <section>
+      <title>Short simulation example</title>
+
+      <para>Here is a short example which will demonstrate how to use the
+      high-level function <literal>simulate</literal>. The RLC circuit model
+      will be used in the example. This model and a Python script which runs
+      the example can be found in the <literal>jmodelica.examples</literal>
+      package.</para>
+
+      <para>Start by creating the model object:</para>
+
+      <programlisting># The model name and mo-file
+model_name = 'RLC_Circuit'
+mo_file = 'RLC_Circuit.mo'
+
+# Create jmi.Model object
+from jmodelica import jmi
+rlc_model = jmi.Model(model_name, mo_file)
+</programlisting>
+
+      <para>Then import the <literal>simulate</literal> function and simulate
+      using all default arguments, this means that the
+      <literal>AssimuloAlg</literal> algorithm will be used. Save the result
+      object in a variable.</para>
+
+      <programlisting># Import simulate
+from jmodelica import simulate
+
+# Simulate with default arguments and save the result object in a variable 
+sim_res = simulate(model_name, mofile)
+</programlisting>
+
+      <para>The result data can then be extracted from the result object and
+      plotted.</para>
+
+      <programlisting># Get the result data and plot some signals
+res = sim_res.result_data
+sine_y = res.get_variable_data('sine.y')
+resistor_v = res.get_variable_data('resistor.v')
+inductor1_i = res.get_variable_data('inductor1.i')
+</programlisting>
+
+      <figure>
+        <title>Result data from a simulation of s of the RLC Circuit</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="images/RLC_resultplot_short.png" scalefit="1"
+                       valign="middle" width="60%"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <para>The default simulation time for the <literal>AssimuloAlg</literal>
+      algorithm is 1s. This can be changed by altering the algorithm argument
+      '<literal>final_time</literal>'</para>
+
+      <programlisting># Simulate again, this time with 'final_time' set to 30s
+sim_res = simulate(model_name, mofile), alg_args={'final_time':30})
+</programlisting>
+
+      <para>Plotting with the same commands gives the result which can be seen
+      in the figure below.</para>
+
+      <figure>
+        <title>Result data from a simulation of 30s of the RLC Circuit</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" fileref="images/RLC_resultplot.png"
+                       format="png" scalefit="1" valign="middle" width="60%"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </section>
+  </section>
+</chapter>
