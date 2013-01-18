@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JastAdd Editor Core
+Bundle-SymbolicName: org.jastadd.ed.core2;singleton:=true
+Bundle-Version: 1.0.0.0
+Bundle-Activator: org.jastadd.ed.core.Activator
+Bundle-Vendor: jastadd.org
+Require-Bundle: org.eclipse.jface.text;bundle-version="3.6.1",
+ org.eclipse.core.resources;bundle-version="3.6.0",
+ org.eclipse.ui,
+ org.eclipse.ui.views;bundle-version="3.5.0",
+ org.eclipse.ui.editors;bundle-version="3.6.1",
+ org.eclipse.ui.ide;bundle-version="3.6.1",
+ org.eclipse.core.runtime;bundle-version="3.6.0",
+ org.eclipse.search;bundle-version="3.6.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Export-Package: org.jastadd.ed.core,
+ org.jastadd.ed.core.model,
+ org.jastadd.ed.core.model.node,
+ org.jastadd.ed.core.search,
+ org.jastadd.ed.core.service.browsing,
+ org.jastadd.ed.core.service.completion,
+ org.jastadd.ed.core.service.errors,
+ org.jastadd.ed.core.service.view.outline,
+ org.jastadd.ed.core.service.view.typehierarchy,
+ org.jastadd.ed.core.util
