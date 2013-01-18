@@ -8440,6 +8440,42 @@ Residual equations:
 ")})));
 end HandGuidedTearing29;
 
+model HandGuidedTearing30
+	model B
+		Real x, y;
+	equation
+		x = y + 1 annotation(__Modelon(name=res));
+		y = x - 1;
+	end B;
+	extends B;
+annotation(
+	__Modelon(tearingPairs={
+		Pair(residualEquation=res, iterationVariable=x)
+	}),
+	__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="HandGuidedTearing30",
+			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  y
+Iteration variables:
+  x()
+Solved equations:
+  y = x - 1
+Residual equations:
+ Iteration variables: x
+  x = y + 1
+-------------------------------
+")})));
+end HandGuidedTearing30;
+
 model HandGuidedTearingError1
 	Real x;
 	Real y;
