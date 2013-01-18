@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+	<!-- Search -->
+	<extension point="org.eclipse.search.searchResultViewPages">
+		<viewPage
+			id 					= "org.jastadd.ed.core.search.result.page"
+			icon				= "icons/puzzle_icon_green_16x16.png"
+			searchResultClass 	= "org.jastadd.ed.core.search.SearchResult"
+			class 				= "org.jastadd.ed.core.search.SearchResultPage">
+		</viewPage>
+	</extension>
+	
+	
+	    <!-- Markers -->
+    <extension 
+		point = "org.eclipse.core.resources.markers"
+		id    = "org.jastadd.ed.marker"
+		name  = "JastAdd Marker" >
+		<super type = "org.eclipse.core.resources.problemmarker" />
+		<persistent value = "true" />
+	</extension>
+	<extension 
+		point = "org.eclipse.core.resources.markers"
+		id    = "org.jastadd.ed.marker.syntax"
+		name  = "JastAdd Syntax Marker" >
+		<super type = "org.eclipse.core.resources.problemmarker" />
+		<persistent value = "true" />
+	</extension> 
+	 
+ 
+ 	<!-- Marker annotations -->
+	<extension point = "org.eclipse.ui.editors.annotationTypes">
+		<type
+         name			= "org.jastadd.ed.jastadd.error"
+         super			= "org.eclipse.ui.workbench.texteditor.error"
+         markerType		= "org.jastadd.ed.marker"
+         markerSeverity	= "2" >
+      	</type>
+      	<type
+         name			= "org.jastadd.ed.jastadd.warning"
+         super			= "org.eclipse.ui.workbench.texteditor.warning"
+         markerType		= "org.jastadd.ed.marker"
+         markerSeverity	= "1" >
+      	</type>
+      	<type
+         name			= "org.jastadd.ed.jastadd.info"
+         super			= "org.eclipse.ui.workbench.texteditor.info"
+         markerType		= "org.jastadd.ed.marker"
+         markerSeverity	= "0" >
+      	</type>
+      	<type
+         name			= "org.jastadd.ed.jastadd.error.syntax"
+         super			= "org.eclipse.ui.workbench.texteditor.error"
+         markerType		= "org.jastadd.ed.marker.syntax"
+         markerSeverity	= "2" >
+      	</type>
+  	</extension>
+
+	<!-- marker annotation specification -->
+	<extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
+    	<specification
+        	annotationType	= "org.jastadd.ed.jastadd.error"
+        	icon			= "icons/marker_error_12x12.png"
+        	symbolicIcon	= "error" />
+    	<specification
+        	annotationType	= "org.jastadd.ed.jastadd.warning"
+        	icon			= "icons/marker_warning_12x12.png"
+        	symbolicIcon	= "warning" />
+    	<specification
+        	annotationType	= "org.jastadd.ed.jastadd.info"
+        	icon			= "icons/marker_info_12x12.png"
+        	symbolicIcon	= "info" />
+        <specification
+        	annotationType	= "org.jastadd.ed.jastadd.error.syntax"
+        	icon			= "icons/marker_error_12x12.png"
+        	symbolicIcon	= "error" />	  	
+  	</extension>
+	
+</plugin>
