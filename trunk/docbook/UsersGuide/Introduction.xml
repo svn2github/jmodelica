@@ -36,7 +36,7 @@
     supporting major platforms.</para>
   </section>
 
-  <section>
+  <section xml:id="intr_sec_tech">
     <title>Technology</title>
 
     <para>JModelica.org relies on the modeling language <link
@@ -167,8 +167,8 @@
         Finally, PyJMI contains drivers for the optimization algorithms. All
         packages are available as part of JModelica.org, and Assimulo and
         PyFMI are also available as stand alone Python packages from <link
-        xlink:href="https://www.assimulo.org">www.assimulo.org</link> and
-        <link xlink:href="http://www.pyfmi.org">www.pyfmi.org</link>.</para>
+        xlink:href="http://www.assimulo.org">www.assimulo.org</link> and <link
+        xlink:href="http://www.pyfmi.org">www.pyfmi.org</link>.</para>
       </listitem>
     </itemizedlist>
   </section>

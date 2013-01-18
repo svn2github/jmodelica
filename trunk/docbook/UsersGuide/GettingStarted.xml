@@ -126,33 +126,32 @@ RLC.run_demo()</programlisting></para>
     your computer. Missing or having the wrong version of a package can be a
     source of errors. Therefore it can be useful to run
     <literal>&lt;package&gt;.check_packages()</literal> after installation or
-    when trouble-shooting.<programlisting language="python"># Import the function from pyfmi
-from pyfmi import check_packages
-
-# Run check_packages
-check_packages()
-
-Performing pyfmi package check
-==============================
+    when trouble-shooting.<programlisting language="python">Performing pymodelica/pyjmi package check
+=========================================
 
 Platform...................... win32
 
-Python version:............... 2.7.2
+Python version:............... 2.7.3
+
+pymodelica/pyjmi version:..... 1.9
 
 
 Dependencies:
 
 Package                        Version
 -------                        -------
-numpy......................... 1.6.1                          Ok
-scipy......................... 0.9.0                          Ok
-matplotlib.................... 1.0.1                          Ok
-lxml.......................... 2.3.0                          Ok
-assimulo...................... n/a                            Ok
-wxPython...................... 2.8.12.1                       Ok
-pyreadline.................... 1.7                            Ok
-setuptools.................... 0.6c11                         Ok
-
+assimulo...................... --
+casadi........................ latest
+Cython........................ 0.17.2
+jpype......................... --
+lxml.......................... 2.3.0
+matplotlib.................... 1.1.0
+nose.......................... 1.2.1
+numpy......................... 1.6.2
+scipy......................... 0.10.1
+wxPython...................... 2.8.12.1
+pyreadline.................... 1.7.1
+setuptools.................... 0.6
 </programlisting></para>
   </section>
 

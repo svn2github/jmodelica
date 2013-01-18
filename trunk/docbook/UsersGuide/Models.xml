@@ -14,13 +14,13 @@
   <section xml:id="models_sec_introduction">
     <title>Introduction to models</title>
 
-    <para>Modelica and Optimica models can be compiled and then loaded as
-    model objects using the JModelica.org Python interface. These model
-    objects can be used for both simulation and optimization purposes. This
-    chapter will cover how to compile Modelica and Optimica models, set
-    compiler options, load the compiled model in a Python model object and use
-    the model object to perform model manipulations such as setting and
-    getting parameters.</para>
+    <para>Modelica and Optimica models can be compiled and loaded as model
+    objects using the JModelica.org Python interface. These model objects can
+    be used for both simulation and optimization purposes. This chapter will
+    cover how to compile Modelica and Optimica models, set compiler options,
+    load the compiled model in a Python model object and use the model object
+    to perform model manipulations such as setting and getting
+    parameters.</para>
 
     <section>
       <title>The different model objects in JModelica.org</title>
@@ -37,7 +37,7 @@
       standard. The <literal>CasadiModel</literal> is created by loading an
       <emphasis>FMUX</emphasis> which is a compressed file containing the XML
       file needed to work with <link
-      xlink:href="http://sourceforge.net/apps/trac/casadi/">CasADI</link>.</para>
+      xlink:href="http://casadi.org">CasADI</link>.</para>
 
       <para>JMUs are created by compiling Modelica or Optimica models with
       JModelica.org. The JMU can then be loaded in a
@@ -83,59 +83,10 @@
     steps one by one.</para>
 
     <section xml:id="models_sec_simple_jmu_compilation">
-      <title>Simple JMU compilation example</title>
-
-      <para>The following steps compiles a model to a JMU in the JModelica.org
-      Python interface:<procedure>
-          <step>
-            <para>Import the JModelica.org compiler function
-            <literal>compile_jmu</literal> from the package
-            <literal>pymodelica</literal>.</para>
-          </step>
-
-          <step>
-            <para>Specify the model and model file.</para>
-          </step>
-
-          <step>
-            <para>Perform the compilation.</para>
-          </step>
-        </procedure></para>
-
-      <para>This is demonstrated in the following code example.<programlisting
-      language="python"># Import the compiler function
-from pymodelica import compile_jmu
-
-# Specify Modelica or Optimica model and model file (.mo or .mop)
-model_name = 'myPackage.myModel'
-mo_file = 'myModelFile.mo'
-
-# Compile the model and save the return argument, which is the file name of the JMU
-jmu_file = compile_jmu(model_name, mo_file)
-</programlisting></para>
-
-      <para>Once compilation has completed successfully, a JMU file will have
-      been created on the file system. The JMU file is essentially a
-      compressed file archive containing the files created during compilation
-      that are needed when instantiating a model object. Return argument for
-      <literal>compile_jmu</literal> is the full file path of the JMU that has
-      just been created, this will be useful later when we want to create
-      model objects. More about the JMU file and loading models can be found
-      in <xref linkend="models_sec_loading_models"/>.</para>
-
-      <para>In the above example, compilation has been performed using default
-      parameters and options. The only parameters set are the model class and
-      file name, which always have to be set. <literal>compile_jmu</literal>
-      has several other parameters which can be modified. The different
-      parameters, their default values and interpretation will be explained in
-      <xref linkend="models_sec_compiler_settings"/>.</para>
-    </section>
-
-    <section xml:id="models_sec_simple_fmu_compilation">
       <title>Simple FMU compilation example</title>
 
-      <para>The steps required to compile a model to an FMU is very similar to
-      compiling a model to a JMU:<procedure>
+      <para>The following steps compiles a model to an FMU in the
+      JModelica.org Python interface:<procedure>
           <step>
             <para>Import the JModelica.org compiler function
             <literal>compile_fmu</literal> from the package
@@ -151,9 +102,8 @@ jmu_file = compile_jmu(model_name, mo_file)
           </step>
         </procedure></para>
 
-      <para>The only difference is really the requirement on the model, it
-      must be a pure Modelica model. The following code example demonstrates
-      how to compile an FMU.<programlisting language="python"># Import the compiler function
+      <para>This is demonstrated in the following code example.<programlisting
+      language="python"># Import the compiler function
 from pymodelica import compile_fmu
 
 # Specify Modelica model and model file (.mo or .mop)
@@ -164,19 +114,70 @@ mo_file = 'myModelFile.mo'
 fmu_file = compile_fmu(model_name, mo_file)
 </programlisting></para>
 
-      <para>As in the JMU case, when the compilation has completed
-      successfully an FMU file will have been created on the file system. The
-      return argument is also the full file path of the FMU that has just been
+      <para>Once compilation has completed successfully, an FMU file will have
+      been created on the file system. The FMU file is essentially a
+      compressed file archive containing the files created during compilation
+      that are needed when instantiating a model object. Return argument for
+      <literal>compile_fmu</literal> is the full file path of the FMU that has
+      just been created, this will be useful later when we want to create
+      model objects. More about the FMU file and loading models can be found
+      in <xref linkend="models_sec_loading_models"/>.</para>
+
+      <para>In the above example, compilation has been performed using default
+      parameters and options. The only parameters set are the model class and
+      file name, which always have to be set. <literal>compile_fmu</literal>
+      has several other parameters which can be modified. The different
+      parameters, their default values and interpretation will be explained in
+      <xref linkend="models_sec_compiler_settings"/>.</para>
+    </section>
+
+    <section xml:id="models_sec_simple_fmu_compilation">
+      <title>Simple JMU compilation example</title>
+
+      <para>The steps required to compile a model to a JMU is very similar to
+      compiling a model to an FMU:<procedure>
+          <step>
+            <para>Import the JModelica.org compiler function
+            <literal>compile_jmu</literal> from the package
+            <literal>pymodelica</literal>.</para>
+          </step>
+
+          <step>
+            <para>Specify the model and model file.</para>
+          </step>
+
+          <step>
+            <para>Perform the compilation.</para>
+          </step>
+        </procedure></para>
+
+      <para>The only difference is really the requirement on the model, the
+      FMU must be a pure Modelica model whilst a JMU can also be an Optimica
+      model. The following code example demonstrates how to compile an
+      JMU.<programlisting language="python"># Import the compiler function
+from pymodelica import compile_jmu
+
+# Specify Modelica or Optimica model and model file (.mo or .mop)
+model_name = 'myPackage.myModel'
+mo_file = 'myModelFile.mo'
+
+# Compile the model and save the return argument, which is the file name of the FMU
+jmu_file = compile_jmu(model_name, mo_file)
+</programlisting></para>
+
+      <para>As in the FMU case, when the compilation has completed
+      successfully an JMU file will have been created on the file system. The
+      return argument is also the full file path of the JMU that has just been
       created, which will be useful later when we want to create model
-      objects. More about the FMU file and loading models can be found in
+      objects. More about the JMU file and loading models can be found in
       <xref linkend="models_sec_loading_models"/>.</para>
     </section>
 
     <section xml:id="models_sec_simple_fmux_compilation">
       <title>Simple FMUX compilation example</title>
 
-      <para>Compiling an FMUX follows the same principle as compiling a JMU
-      and an FMU.</para>
+      <para>Compiling an FMUX follows the same principle as compiling an FMU
+      and a JMU.</para>
 
       <procedure>
         <step>
@@ -274,103 +275,10 @@ fmu3 = compile_fmu('MyLibrary.MyModel', 'C:\MyLibs\MyLibrary')
       <para>The compiler function parameters can be listed with the
       interactive help in Python. The parameters are explained in the
       corresponding Python <emphasis>docstring</emphasis> which is visualized
-      with the interactive help. This is demonstrated in the code examples
-      below.</para>
-
-      <para>The parameter <literal>target</literal>, is further explained in
-      <xref linkend="models_sec_compiler_targets_jmu"/>, <xref
-      linkend="models_sec_compiler_targets_fmu"/> and <xref
-      linkend="models_sec_compiler_targets_fmux"/>.</para>
-
-      <section xml:id="models_sec_compile_jmu_parameters">
-        <title>compile_jmu parameters</title>
-
-        <para>The <literal>compile_jmu</literal> parameters can be listed with
-        the interactive help.<programlisting language="python"># Display the docstring for compile_jmu with the Python command 'help'
-from pymodelica import compile_jmu
-help(compile_jmu)
-Help on function compile_jmu in module pymodelica.compiler:
-
-compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt', compiler_options={}, 
-            compile_to='.', compiler_log_level='warning')
-    Compile a Modelica or Optimica model to a JMU.
-
-    A model class name must be passed, all other arguments have default values.
-    The different scenarios are:
-
-    * Only class_name is passed:
-        - Class is assumed to be in MODELICAPATH.
-        - Default compiler is ModelicaCompiler.
-    
-    * class_name and file_name is passed:
-        - file_name can be a single path as a string or a list of paths 
-          (strings). The paths can be for files or libraries
-        - Default compiler setting is 'auto' which means that the appropriate
-          compiler will be selected based on model file ending, i.e.
-          ModelicaCompiler if .mo file and OptimicaCompiler if a .mop file is
-          found in file_name list.
-
-    Library directories can be added to MODELICAPATH by listing them in a
-    special compiler option 'extra_lib_dirs', for example:
-
-        compiler_options =
-            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
-
-    Other options for the compiler should also be listed in the compiler_options
-    dict.
-
-    The compiler target is 'ipopt' by default which means that libraries for AD
-    and optimization/initialization algortihms will be available as well as the
-    JMI. The other targets are:
-
-        'model' --
-            AD and JMI is included.
-        'algorithm' --
-            AD and algorithm but no Ipopt linking.
-        'model_noad' --
-            Only JMI, that is no AD interface. (Must currently be used when
-            model includes external functions.)
-
-    Parameters::
-
-        class_name --
-            The name of the model class.
-
-        file_name --
-            A path (string) or paths (list of strings) to model files and/or 
-            libraries. Supports both be .mo and .mop files.
-            Default: Empty list.
-
-        compiler --
-            'auto' if a compiler should be selected automatically depending on
-            file ending, 'modelica' if a ModelicaCompiler should be used or
-            'optimica' if a OptimicaCompiler should be used.
-            Default: 'auto' (i.e. depends on argument file_name)
-
-        target --
-            Compiler target. 'model', 'algorithm', 'ipopt' or 'model_noad'.
-            Default: 'ipopt'
-
-        compiler_options --
-            Options for the compiler.
-            Default: Empty dict.
-
-        compile_to --
-            Specify location of the compiled JMU. Directory will be created if
-            it does not exist.
-            Default: Current directory.
-
-        compiler_log_level --
-            Set the log level for the compiler. Valid options are 'warning'/'w',
-            'error'/'e' or 'info'/'i'.
-            Default: 'warning'
-
-    Returns::
-
-        Name of the JMU which has been created.
-
-</programlisting></para>
-      </section>
+      with the interactive help. This is demonstrated for compile_fmu below.
+      The parameters for compile_jmu and compile_fmux (and for any other
+      Python function for that matter) can be displayed in the same way.
+      </para>
 
       <section>
         <title>compile_fmu parameters</title>
@@ -383,8 +291,9 @@ from pymodelica import compile_fmu
 help(compile_fmu)
 Help on function compile_fmu in module pymodelica.compiler:
 
-compile_fmu(class_name, file_name=[], compiler='modelica', target='model_fmume', 
-            compiler_options={}, compile_to='.', compiler_log_level='warning')
+compile_fmu(class_name, file_name=[], compiler='auto', target='fmume', 
+            compiler_options={}, compile_to='.', compiler_log_level='warning', 
+            separate_process=False, jvm_args='')
     Compile a Modelica model to an FMU.
 
     A model class name must be passed, all other arguments have default values.
@@ -394,22 +303,26 @@ compile_fmu(class_name, file_name=[], compiler='modelica', target='model_fmume',
         - Class is assumed to be in MODELICAPATH.
 
     * class_name and file_name is passed:
-        - file_name can be a single path as a string or a list of paths 
-          (strings). The paths can be to files or libraries
-    
-    Library directories can be added to MODELICAPATH by listing them in a 
+        - file_name can be a single path as a string or a list of paths
+          (strings). The paths can be file or library paths.
+        - Default compiler setting is 'auto' which means that the appropriate
+          compiler will be selected based on model file ending, i.e.
+          ModelicaCompiler if a .mo file and OptimicaCompiler if a .mop file is
+          found in file_name list.
+
+    Library directories can be added to MODELICAPATH by listing them in a
     special compiler option 'extra_lib_dirs', for example:
-    
-        compiler_options = 
+
+        compiler_options =
             {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
-        
-    Other options for the compiler should also be listed in the compiler_options 
+
+    Other options for the compiler should also be listed in the compiler_options
     dict.
-    
-    The compiler target is 'model_fmume' by default which means that the shared 
-    file contains the FMI for Model Exchange API. This is currently the only 
+
+    The compiler target is 'fmume' by default which means that the shared
+    file contains the FMI for Model Exchange API. This is currently the only
     target that is possible to use.
-    
+
     Parameters::
     
         class_name -- 
@@ -421,100 +334,50 @@ compile_fmu(class_name, file_name=[], compiler='modelica', target='model_fmume',
             Default: Empty list.
             
         compiler -- 
-            The compiler used to compile the model. Currently, only ModelicaCompiler 
-            can be used.
-            Default: 'modelica'
-
+            The compiler used to compile the model. The different options are:
+              - 'auto': the compiler is selected automatically depending on 
+                 file ending
+              - 'modelica': the ModelicaCompiler is used
+              - 'optimica': the OptimicaCompiler is used
+            Default: 'auto'
+            
         target --
             Compiler target.
-            Default: 'model_fmume'
-
-        compiler_options --
-            Options for the compiler.
-            Default: Empty dict.
-
-        compile_to --
-            Specify location of the compiled FMU. Directory will be created if
-            it does not exist.
-            Default: Current directory.
-
-        compiler_log_level --
-            Set the log level for the compiler. Valid options are 'warning'/'w',
-            'error'/'e' or 'info'/'i'.
-            Default: 'warning'
-
-    Returns::
-
-        Name of the FMU which has been created.
-</programlisting>
-      </section>
-
-      <section>
-        <title>compile_fmux parameters</title>
-
-        <para>The <literal>compile_fmux</literal> parameters can be listed
-        with the interactive help.</para>
-
-        <programlisting language="python"># Display the docstring for compile_fmux with the Python command 'help'
-from pymodelica import compile_fmux
-help(compile_fmux)
-Help on function compile_fmux in module pymodelica.compiler:
-
-compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={}, compile_to='.', 
-             compiler_log_level='warning')
-    Compile a Modelica model to an FMUX.
-
-    A model class name must be passed, all other arguments have default values.
-    The different scenarios are:
-
-    * Only class_name is passed:
-        - Class is assumed to be in MODELICAPATH.
-
-    * class_name and file_name is passed:
-        - file_name can be a single path as a string or a list of paths 
-          (strings). The paths can be to files or libraries
-    
-    Library directories can be added to MODELICAPATH by listing them in a 
-    special compiler option 'extra_lib_dirs', for example:
-    
-        compiler_options = 
-            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
-        
-    Other options for the compiler should also be listed in the compiler_options 
-    dict.
-    
-    
-    Parameters::
-    
-        class_name -- 
-            The name of the model class.
+            Default: 'fmume'
             
-        file_name -- 
-            A path (string) or paths (list of strings) to model files and/or 
-            libraries. Supports both be .mo and .mop files.
-            Default: Empty list.
-
-        compiler --
-            The compiler used to compile the model.
-            Default: 'auto'
-
         compiler_options --
             Options for the compiler.
             Default: Empty dict.
-
+            
         compile_to --
-            Specify location of the compiled FMUX. Directory will be created if
+            Specify location of the compiled FMU. Directory will be created if 
             it does not exist.
             Default: Current directory.
 
         compiler_log_level --
-            Set the log level for the compiler. Valid options are 'warning'/'w',
+            Set the log level for the compiler. Valid options are 'warning'/'w', 
             'error'/'e' or 'info'/'i'.
             Default: 'warning'
-
+        
+        separate_process --
+            Run the compilation of the model in a separate process. 
+            Checks the environment variables (in this order):
+                1. SEPARATE_PROCESS_JVM
+                2. JAVA_HOME
+            to locate the Java installation to use. 
+            For example (on Windows) this could be:
+                SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
+            Default: False
+            
+        jvm_args --
+            String of arguments to be passed to the JVM when compiling in a 
+            separate process.
+            Default: Empty string
+            
+            
     Returns::
-
-        Name of the FMUX which has been created.
+    
+        Name of the FMU which has been created.
 </programlisting>
       </section>
 
@@ -546,7 +409,8 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
         <literal>real</literal>, <literal>integer</literal> and
         <literal>boolean</literal>. The available options, default values and
         description are listed in <xref
-        linkend="models_tab_compiler_options"/>.<table
+        linkend="models_tab_compiler_options"/>, as well as in the
+        <filename>options.xml</filename> file.<table
             xml:id="models_tab_compiler_options">
             <title>Compiler options</title>
 
@@ -852,71 +716,15 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
             </tgroup>
           </table></para>
       </section>
-
-      <section xml:id="models_sec_compiler_targets_jmu">
-        <title>Compiler targets for <literal>compile_jmu</literal></title>
-
-        <para>There are four compiler targets available for
-        <literal>compile_jmu</literal>:<itemizedlist>
-            <listitem>
-              <para><literal>ipopt</literal>: Compiled model will include JMI
-              interface, AD and linking to Ipopt libraries. There is support
-              for optimization and initialization algorithm.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>model</literal>: Compiled model will include
-              support for JMI interface and AD.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>algorithm</literal>: Compiled model will include
-              support for JMI interface. AD and algorithm but not link with
-              the Ipopt libraries.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>model_noad</literal>: Compiled model will only
-              include the JMI interface.</para>
-            </listitem>
-          </itemizedlist></para>
-
-        <para>The compiler target is '<literal>ipopt</literal>' by default
-        which will work for most cases. However, if JModelica.org has been
-        built without Ipopt libraries the target would have to be changed to
-        any other suitable target that does not include the Ipopt
-        libraries.</para>
-
-        <para>The target <literal>model_noad</literal> must be used if the
-        model contains external equations since external equations do not work
-        with the AD interface at the moment.</para>
-      </section>
-
-      <section xml:id="models_sec_compiler_targets_fmu">
-        <title>Compiler targets for <literal>compile_fmu</literal></title>
-
-        <para>Currently, the only possible target available for
-        <literal>compile_fmu</literal> is '<literal>model_fmume</literal>'.
-        With this target the compiled model will be compliant with the FMI for
-        Model Exchange API.</para>
-      </section>
-
-      <section xml:id="models_sec_compiler_targets_fmux">
-        <title>Compiler targets for <literal>compile_fmux</literal></title>
-
-        <para>Compiler targets are not relevant for
-        <literal>compile_fmux</literal> since no binary file is
-        compiled.</para>
-      </section>
     </section>
 
     <section xml:id="models_sec_compilation_in_more_detail">
       <title>Compilation in more detail</title>
 
-      <para>Compiling with <literal>compile_jmu</literal>,
-      <literal>compile_fmu</literal> or <literal>compile_fmux</literal>
+      <para>Compiling with <literal>compile_fmu</literal>,
+      <literal>compile_jmu</literal> or <literal>compile_fmux</literal>
       bundles quite a few steps required for the compilation from model file
-      to JMU, FMU or FMUX. Some of these steps will be described briefly here,
+      to FMU, JMU or FMUX. Some of these steps will be described briefly here,
       for a more detailed review on the compilation steps see <xref
       linkend="intro_sec_architecture"/> in <xref linkend="ch_intro"/>.</para>
 
@@ -969,14 +777,14 @@ mc.generate_code(flat_rep)
   <section xml:id="models_sec_loading_models">
     <title>Loading models</title>
 
-    <para>Compiled models, JMUs, FMUs and FMUXes, are loaded in the
-    JModelica.org Python interface with the <literal>JMUModel</literal> class
-    from the <literal>pyjmi</literal> module, the
-    <literal>FMUModel(ME/CS)1</literal> class from the
-    <literal>pyfmi</literal> module and the <literal>CasadiModel</literal>
-    class from the <literal>pyjmi</literal> module respectively. This will be
-    demonstrated in <xref linkend="models_sec_loading_a_jmu"/>, <xref
-    linkend="models_sec_loading_an_fmu"/> and <xref
+    <para>Compiled models, FMUs, JMUs and FMUXes, are loaded in the
+    JModelica.org Python interface with the <literal>FMUModel(ME/CS)</literal>
+    class from the <literal>pyfmi</literal> module, the
+    <literal>JMUModel</literal> class from the <literal>pyjmi</literal> module
+    and the <literal>CasadiModel</literal> class from the
+    <literal>pyjmi</literal> module respectively. This will be demonstrated in
+    <xref linkend="models_sec_loading_an_fmu"/>, <xref
+    linkend="models_sec_loading_a_jmu"/> and <xref
     linkend="models_sec_loading_an_fmux"/>.</para>
 
     <para>The model classes contain many methods with which models can be
@@ -991,6 +799,15 @@ mc.generate_code(flat_rep)
     The more basic methods for variable and parameter manipulation are
     explained in <xref
     linkend="models_sec_variable_and_parameter_manipulation"/>.</para>
+
+    <section>
+      <title>The FMU</title>
+
+      <para>The FMU (Functional Mock-up Unit) is a compressed file which
+      follows the FMI (Functional Mock-up Interface) standard. An FMU is
+      created when compiling a Modelica model with
+      <literal>pymodelica.compile_fmu</literal>.</para>
+    </section>
 
     <section xml:id="models_sec_the_jmu_file">
       <title>The JMU</title>
@@ -1007,18 +824,6 @@ mc.generate_code(flat_rep)
     </section>
 
     <section>
-      <title>The FMU</title>
-
-      <para>The FMU (Functional Mock-up Unit) is a compressed file which
-      follows the FMI (Functional Mock-up Interface) standard. An FMU is
-      created when compiling a Modelica model with
-      <literal>pymodelica.compile_fmu</literal>.</para>
-
-      <para>Read more about the FMI/FMU standard in <xref
-      linkend="ch_fmi"/>.</para>
-    </section>
-
-    <section>
       <title>The FMUX</title>
 
       <para>The FMUX is a compressed file which only contains an XML file and
@@ -1028,6 +833,22 @@ mc.generate_code(flat_rep)
       all equations used in the model. The FMUX is created when compiling a
       Modelica or Optimica model with
       <literal>pymodelica.compile_fmux</literal>.</para>
+    </section>
+
+    <section xml:id="models_sec_loading_an_fmu">
+      <title>Loading an FMU</title>
+
+      <para>The FMU file can be loaded in JModelica.org with the method
+      <literal>load_fmu</literal> in the <literal>pyfmi</literal> module. The
+      following short example demonstrates how to do this in a Python shell or
+      script.<programlisting language="python"># Import load_fmu from pyfmi
+from pyfmi import load_fmu
+myModel = load_fmu('myFMU.fmu')
+</programlisting></para>
+
+      <para><literal>load_fmu</literal> returns a class instance of the
+      appropriate FMU type which then can be used to set parameters and used
+      for simulations.</para>
     </section>
 
     <section xml:id="models_sec_loading_a_jmu">
@@ -1054,22 +875,6 @@ from pyjmi import JMUModel
 jmu_name = compile_jmu('myPackage.myModel','myModelFile.mo')
 myModel = JMUModel(jmu_name)
 </programlisting></para>
-    </section>
-
-    <section xml:id="models_sec_loading_an_fmu">
-      <title>Loading an FMU</title>
-
-      <para>The FMU file can be loaded in JModelica.org with the method
-      <literal>load_fmu</literal> in the <literal>pyfmi</literal> module. The
-      following short example demonstrates how to do this in a Python shell or
-      script.<programlisting language="python"># Import load_fmu from pyfmi
-from pyfmi import load_fmu
-myModel = load_fmu('myFMU.fmu')
-</programlisting></para>
-
-      <para><literal>load_fmu</literal> returns a class instance of the
-      appropriate FMU type which then can be used to set parameters and used
-      for simulations.</para>
     </section>
 
     <section xml:id="models_sec_loading_an_fmux">
@@ -1138,7 +943,7 @@ rlc_circuit.set(vars, values)
     order to facilitate localization of errors. There are three mechanisms for
     generating such diagnostics: dumping of debug information to the system
     output, generation of HTML code that can be viewed with a standard web
-    browser or logs in .csv format form the non-linear solver.</para>
+    browser or logs in .csv format from the non-linear solver.</para>
 
     <section>
       <title>Compiler info in system output</title>
