@@ -275,10 +275,11 @@ fmu3 = compile_fmu('MyLibrary.MyModel', 'C:\MyLibs\MyLibrary')
       <para>The compiler function parameters can be listed with the
       interactive help in Python. The parameters are explained in the
       corresponding Python <emphasis>docstring</emphasis> which is visualized
-      with the interactive help. This is demonstrated for compile_fmu below.
-      The parameters for compile_jmu and compile_fmux (and for any other
-      Python function for that matter) can be displayed in the same
-      way.</para>
+      with the interactive help. This is demonstrated for
+      <literal>compile_fmu</literal> below. The parameters for
+      <literal>compile_jmu</literal> and <literal>compile_fmux</literal> (and
+      for any other Python function for that matter) can be displayed in the
+      same way.</para>
 
       <section>
         <title>compile_fmu parameters</title>
@@ -855,6 +856,52 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
             </tgroup>
           </table></para>
       </section>
+    </section>
+
+    <section>
+      <title>Compile in separate process</title>
+
+      <para>In JModelica.org, the compilers
+      (<literal>ModelicaCompiler</literal> and
+      <literal>OptimicaCompiler</literal>) are written in Java. To compile a
+      model from the Python interface, with e.g.
+      <literal>compile_fmu</literal>, the Python package
+      <emphasis>JPype</emphasis> is used to access the compilers from Python
+      (this is the default behavior).</para>
+
+      <para>Another option is to compile the model in a separate process, that
+      is not via JPype. This means that a specific JRE (Java Runtime
+      Environment) can be used. For those on a 64 bit Windows this is can be
+      very useful as the default JRE used is 32 bit. Also, in most cases, the
+      JVM (Java Virtual Machine) can be given a larger heap space (especially
+      when using a 64 bit JRE instead of a 32 bit) which enables compilation
+      of larger models.</para>
+
+      <para>Set the environment variable
+      <literal>SEPARATE_PROCESS_JVM</literal> to point at a specific Java
+      installation (JRE or JDK) for the compilation. For Windows users, the
+      environment variable can be found (and set) in the file
+      <filename>setenv.bat</filename> which is located in the JModelica.org
+      installation folder. It can also be set locally in the Python shell. If
+      <literal>SEPARATE_PROCESS_JVM</literal> is not set,
+      <literal>JAVA_HOME</literal> will be used instead.</para>
+
+      <para>It is also possible to pass arguments to the JVM with the
+      <literal>compile_fmu</literal> parameter
+      '<literal>jvm_args</literal>'.</para>
+
+      <para>The following example demonstrates how to compile an FMU in a
+      separate process, setting the maximum heap space for the JVM to one
+      gigabyte:<programlisting># Specify Modelica model and model file
+model_name = 'myPackage.myModel'
+mo_file = 'myModelFile.mo'
+# Compile in separate process
+compile_fmu(model_name, mo_file, separate_process=True, jvm_args='-Xmx1g')</programlisting>If
+      the compilation fails, there will be a Python exception thrown, more
+      specifically a <literal>subprocess.CalledProcessError</literal>. Note
+      that the actual error messages from the compiler are output before the
+      exception from Python, so it might be necessary to scroll up a bit in
+      the Python shell to see these. </para>
     </section>
 
     <section xml:id="models_sec_compilation_in_more_detail">
