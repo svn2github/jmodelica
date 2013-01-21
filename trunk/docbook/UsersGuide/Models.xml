@@ -277,8 +277,8 @@ fmu3 = compile_fmu('MyLibrary.MyModel', 'C:\MyLibs\MyLibrary')
       corresponding Python <emphasis>docstring</emphasis> which is visualized
       with the interactive help. This is demonstrated for compile_fmu below.
       The parameters for compile_jmu and compile_fmux (and for any other
-      Python function for that matter) can be displayed in the same way.
-      </para>
+      Python function for that matter) can be displayed in the same
+      way.</para>
 
       <section>
         <title>compile_fmu parameters</title>
@@ -407,10 +407,10 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
 
         <para>There are four type categories: <literal>string</literal>,
         <literal>real</literal>, <literal>integer</literal> and
-        <literal>boolean</literal>. The available options, default values and
-        description are listed in <xref
-        linkend="models_tab_compiler_options"/>, as well as in the
-        <filename>options.xml</filename> file.<table
+        <literal>boolean</literal>. The most relevant options for users are
+        listed with default values and description in <xref
+        linkend="models_tab_compiler_options"/>. The complete list of options
+        can be found in the <filename>options.xml</filename> file.<table
             xml:id="models_tab_compiler_options">
             <title>Compiler options</title>
 
@@ -425,7 +425,7 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 <row>
                   <entry align="center">Option</entry>
 
-                  <entry align="center">Default</entry>
+                  <entry align="center">Option type / Default value</entry>
 
                   <entry align="center">Description</entry>
                 </row>
@@ -433,231 +433,32 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
 
               <tbody>
                 <row>
-                  <entry><literal>normalize_minimum_time_problems</literal></entry>
-
-                  <entry><literal>true</literal></entry>
-
-                  <entry>When this option is set to <literal>true</literal>
-                  then minimum time optimal control problems encoded in
-                  Optimica are converted to fixed interval problems by scaling
-                  of the derivative variables. (Boolean option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>enable_variable_scaling</literal></entry>
-
-                  <entry><literal>false</literal></entry>
-
-                  <entry>If this option is <literal>true</literal>, then the
-                  "nominal" attribute will be used to scale variables in the
-                  model. (Boolean option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>halt_on_warning</literal></entry>
-
-                  <entry><literal>false</literal></entry>
-
-                  <entry>If this option is set to <literal>false</literal> one
-                  or more compiler warnings will not stop compilation of the
-                  model. (Boolean option.)</entry>
-                </row>
-
-                <row>
                   <entry><literal>automatic_add_initial_equations</literal></entry>
 
-                  <entry><literal>true</literal></entry>
+                  <entry><literal>boolean / true</literal></entry>
 
                   <entry>When this option is set to <literal>true</literal>,
                   then additional initial equations are added to the model
                   based on a the result of a matching algorithm. Initial
                   equations are added for states that are not matched to an
-                  equation. (Boolean option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>generate_ode_jacobian</literal></entry>
-
-                  <entry><literal>false</literal></entry>
-
-                  <entry>If this option is set to <literal>true</literal>,
-                  code for computing ODE Jacobians are generated. (Boolean
-                  option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>eliminate_alias_variables</literal></entry>
-
-                  <entry><literal>true</literal></entry>
-
-                  <entry>If this option is <literal>true</literal>, then alias
-                  variables are eliminated from the model. (Boolean
-                  option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>extra_lib_dirs</literal></entry>
-
-                  <entry><literal>""</literal></entry>
-
-                  <entry>The value of this option is appended to the value of
-                  the <literal>MODELICAPATH</literal> environment variable for
-                  determining in what directories to search for libraries.
-                  (String option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>generate_xml_equations</literal></entry>
-
-                  <entry><literal>false</literal></entry>
-
-                  <entry>If this option is <literal>true</literal>, then model
-                  equations are generated in XML format. (Boolean
-                  option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>state_start_values_fixed</literal></entry>
-
-                  <entry><literal>false</literal></entry>
-
-                  <entry>This option enables the user to specify if initial
-                  equations should be generated automatically for
-                  differentiated variables even though the fixed attribute is
-                  equal to fixed. Setting this option to
-                  <literal>true</literal> is, however, often practical in
-                  optimization problems. (Boolean option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>equation_sorting</literal></entry>
-
-                  <entry><literal>false</literal></entry>
-
-                  <entry>If this option is <literal>true</literal>, equations
-                  are sorted using the BLT algorithm. (Boolean
-                  option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>index_reduction</literal></entry>
-
-                  <entry><literal>true</literal></entry>
-
-                  <entry>If this option is <literal>true</literal>, index
-                  reduction is performed. (Boolean option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>enable_structural_diagnosis</literal></entry>
-
-                  <entry><literal>true</literal></entry>
-
-                  <entry>Enable this option to invoke the structural error
-                  diagnosis based on the matching algorithm. (Boolean
-                  option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>compliance_as_warning</literal></entry>
-
-                  <entry><literal>false</literal></entry>
-
-                  <entry>When this option is set to <literal>true</literal>,
-                  then compliance errors are treated as warnings instead. This
-                  can lead to the compiler or solver crashing. Use with
-                  caution! (Boolean option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>generate_html_diagnostics</literal></entry>
-
-                  <entry><literal>false</literal></entry>
-
-                  <entry>When this option is set to <literal>true</literal>
-                  model diagnostics is generated in HTML format. This includes
-                  the flattened model, connection sets, alias sets and BLT
-                  form. (Boolean option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>generate_ode</literal></entry>
-
-                  <entry><literal>false</literal></entry>
-
-                  <entry>If this option is set to <literal>true</literal>,
-                  code for solving ODEs is generated. (Boolean
-                  option.)</entry>
+                  equation.</entry>
                 </row>
 
                 <row>
                   <entry><literal>convert_free_dependent_
                   parameters_to_algebraics</literal></entry>
 
-                  <entry><literal>true</literal></entry>
+                  <entry><literal>boolean / true</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, free
-                  dependent parameters are converted to algebraic variables.
-                  (Boolean option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>generate_dae</literal></entry>
-
-                  <entry><literal>true</literal></entry>
-
-                  <entry>If this option is <literal>true</literal>, code for
-                  solving DAEs is generated. (Boolean option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>generate_dae_jacobian</literal></entry>
-
-                  <entry><literal>false</literal></entry>
-
-                  <entry>If this option is <literal>true</literal>, code for
-                  computing DAE Jacobians is generated. (Boolean
-                  option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>export_functions</literal></entry>
-
-                  <entry><literal>false</literal></entry>
-
-                  <entry>Export used Modelica functions to generated C code in
-                  a manner that is compatible with the external C interface in
-                  the Modelica Language Specification. (Boolean
-                  option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>export_functions_vba</literal></entry>
-
-                  <entry><literal>false</literal></entry>
-
-                  <entry>If this option is <literal>true</literal>, then
-                  VBA-compatible wrappers for exported functions are created.
-                  Requires <literal>export_functions = true</literal>.
-                  (Boolean option.)</entry>
-                </row>
-
-                <row>
-                  <entry><literal>generate_fmi_cs_xml</literal></entry>
-
-                  <entry><literal>false</literal></entry>
-
-                  <entry>If this option is <literal>true</literal> the model
-                  description part of the XML variables file will be FMI for
-                  co simulation compliant. To generate an XML which will
-                  validate with FMI schema the option generate_xml_equations
-                  must also be false.</entry>
+                  <entry>If this option is set to <literal>true</literal>,
+                  free dependent parameters are converted to algebraic
+                  variables.</entry>
                 </row>
 
                 <row>
                   <entry><literal>divide_by_vars_in_tearing</literal></entry>
 
-                  <entry><literal>false</literal></entry>
+                  <entry><literal>boolean / false</literal></entry>
 
                   <entry>If this option is set to <literal>true</literal>, a
                   less restrictive strategy is used for solving equations in
@@ -667,50 +468,388 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 </row>
 
                 <row>
+                  <entry><literal>eliminate_alias_variables</literal></entry>
+
+                  <entry><literal>boolean / true</literal></entry>
+
+                  <entry>If this option is <literal>true</literal>, then alias
+                  variables are eliminated from the model.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>enable_hand_guided_tearing</literal></entry>
+
+                  <entry><literal>boolean / true</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>,
+                  hand guided tearing annotations are parsed and will have
+                  precedence during tearing..</entry>
+                </row>
+
+                <row>
+                  <entry><literal>enable_structural_diagnosis</literal></entry>
+
+                  <entry><literal>boolean / true</literal></entry>
+
+                  <entry>Enable this option to invoke the structural error
+                  diagnosis based on the matching algorithm.</entry>
+                </row>
+
+                <row>
                   <entry><literal>enable_tearing</literal></entry>
 
-                  <entry><literal>false</literal></entry>
+                  <entry><literal>boolean / false</literal></entry>
 
                   <entry>If this option is set to <literal>true</literal>,
                   tearing of equation systems is enabled.</entry>
                 </row>
 
                 <row>
-                  <entry><literal>generate_fmi_me_xml</literal></entry>
+                  <entry><literal>enable_variable_scaling</literal></entry>
 
-                  <entry><literal>false</literal></entry>
+                  <entry><literal>boolean / false</literal></entry>
 
-                  <entry>If this option is <literal>true</literal> the model
-                  description part of the XML variables file will be FMI for
-                  model exchange compliant. To generate an XML which will
-                  validate with FMI schema the option generate_xml_equations
-                  must also be false.</entry>
+                  <entry>If this option is <literal>true</literal>, then the
+                  "nominal" attribute will be used to scale variables in the
+                  model.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>enforce_bounds</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>Enforce min-max bounds on variables in the equation
+                  blocks.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>equation_sorting</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If this option is <literal>true</literal>, equations
+                  are sorted using the BLT algorithm. Note: When compiling an
+                  FMU, this option is set to <literal>true</literal> by
+                  default and can not be changed.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>events_default_tol</literal></entry>
+
+                  <entry><literal>real / 1.0E-10</literal></entry>
+
+                  <entry>Default tolerance for the event iterations.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>events_tol_factor</literal></entry>
+
+                  <entry><literal>real / 1.0E-4</literal></entry>
+
+                  <entry>Tolerance safety factor for the event iterations.
+                  Used when external solver specifies relative
+                  tolerance.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>export_functions</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>Export used Modelica functions to generated C code in
+                  a manner that is compatible with the external C interface in
+                  the Modelica Language Specification.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>export_functions_vba</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If this option is <literal>true</literal>, then
+                  VBA-compatible wrappers for exported functions are created.
+                  Requires <literal>export_functions = true</literal>.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>extra_lib_dirs</literal></entry>
+
+                  <entry><literal>string / ""</literal></entry>
+
+                  <entry>The value of this option is appended to the value of
+                  the <literal>MODELICAPATH</literal> environment variable for
+                  determining in what directories to search for
+                  libraries.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>generate_block_jacobian</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>,
+                  code for computing block Jacobians is generated. If blocks
+                  are needed to compute ODE jacobians they will be generated
+                  anyway.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>generate_dae</literal></entry>
+
+                  <entry><literal>boolean / true</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>,
+                  code for solving DAEs is generated. Note: When compiling an
+                  FMU, this option is set to <literal>false</literal> by
+                  default and can not be changed.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>generate_dae_jacobian</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If this option is <literal>true</literal>, code for
+                  computing DAE Jacobians is generated.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>generate_html_diagnostics</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>When this option is set to <literal>true</literal>
+                  model diagnostics is generated in HTML format. This includes
+                  the flattened model, connection sets, alias sets and BLT
+                  form.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>generate_ode</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>,
+                  code for solving ODEs is generated. Note: When compiling an
+                  FMU, this option is set to <literal>true</literal> by
+                  default and can not be changed.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>generate_ode_jacobian</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>,
+                  code for computing ODE Jacobians are generated.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>generate_only_initial_system</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>,
+                  only the initial equation system will be generated.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>halt_on_warning</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If this option is set to <literal>false</literal> one
+                  or more compiler warnings will not stop compilation of the
+                  model.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>index_reduction</literal></entry>
+
+                  <entry><literal>boolean / true</literal></entry>
+
+                  <entry>If this option is <literal>true</literal>, index
+                  reduction is performed.</entry>
                 </row>
 
                 <row>
                   <entry><literal>inline_functions</literal></entry>
 
-                  <entry><literal>false</literal></entry>
+                  <entry><literal>string / "none"</literal></entry>
 
-                  <entry>Perform function inlining on model after
-                  flattening.</entry>
+                  <entry>Perform function inlining on model after flattening
+                  (allowed values are "<literal>none</literal>",
+                  "<literal>trivial</literal>" or
+                  "<literal>all</literal>").</entry>
+                </row>
+
+                <row>
+                  <entry><literal>log_level</literal></entry>
+
+                  <entry><literal>integer / 3</literal></entry>
+
+                  <entry>Log level for the runtime: <literal>0</literal> -
+                  none, <literal>1</literal> - fatal error,
+                  <literal>2</literal> - error, <literal>3</literal> -
+                  warning, <literal>4</literal> - info, <literal>5</literal>
+                  -verbose, <literal>6</literal> - debug.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>merge_blt_blocks</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>, BLT
+                  blocks will be merged so that all hand guided tearing
+                  equations and variables reside inside the same BLT
+                  block.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>nle_solver_check_jac_cond</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>, the
+                  NLE solver should check Jacobian condition number and log
+                  it.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>nle_solver_default_tol</literal></entry>
+
+                  <entry><literal>real / 1.0E-10</literal></entry>
+
+                  <entry>Default tolerance for the equation block
+                  solver.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>nle_solver_log_level</literal></entry>
+
+                  <entry><literal>integer / 0</literal></entry>
+
+                  <entry>Log level for non-linear equation solver:
+                  <literal>0</literal> - no progress messages,
+                  <literal>1</literal>,<literal>2</literal>,<literal>3</literal>
+                  - different levels of verbosity.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>nle_solver_min_tol</literal></entry>
+
+                  <entry><literal>real / 1.0E-12</literal></entry>
+
+                  <entry>Minimum tolerance for the equation block solver. Note
+                  that, for instance, default Kinsol tolerance is machine
+                  precision pwr 1/3, i.e., 1e-6. Tighter tolerance is default
+                  in JModelica.org.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>nle_solver_tol_factor</literal></entry>
+
+                  <entry><literal>real / 1.0E-4</literal></entry>
+
+                  <entry>Tolerance safety factor for the non-linear equation
+                  block solver. Used when external solver specifies relative
+                  tolerance.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>normalize_minimum_time_problems</literal></entry>
+
+                  <entry><literal>boolean / true</literal></entry>
+
+                  <entry>When this option is set to <literal>true</literal>
+                  then minimum time optimal control problems encoded in
+                  Optimica are converted to fixed interval problems by scaling
+                  of the derivative variables.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>rescale_after_singular_jac</literal></entry>
+
+                  <entry><literal>boolean / true</literal></entry>
+
+                  <entry>When this option is set to <literal>true</literal>,
+                  scaling should be updated after singular jac was detected
+                  (only active if <literal>use_automatic_scaling</literal> is
+                  set).</entry>
+                </row>
+
+                <row>
+                  <entry><literal>rescale_each_step</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>When this option is set to <literal>true</literal>,
+                  scaling should be updated at every step (only active if
+                  <literal>use_automatic_scaling</literal> is set).</entry>
                 </row>
 
                 <row>
                   <entry><literal>state_initial_equations</literal></entry>
 
-                  <entry><literal>false</literal></entry>
+                  <entry><literal>boolean / false</literal></entry>
 
                   <entry>Neglect initial equations in the model and add
                   initial equations, and parameters, for the states.</entry>
                 </row>
 
                 <row>
-                  <entry><literal>fmi_version</literal></entry>
+                  <entry><literal>state_start_values_fixed</literal></entry>
 
-                  <entry><literal>1.0</literal></entry>
+                  <entry><literal>boolean / false</literal></entry>
 
-                  <entry>FMI version to use in compilation.</entry>
+                  <entry>This option enables the user to specify if initial
+                  equations should be generated automatically for
+                  differentiated variables even though the fixed attribute is
+                  equal to fixed. Setting this option to
+                  <literal>true</literal> is, however, often practical in
+                  optimization problems.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>use_automatic_scaling</literal></entry>
+
+                  <entry><literal>boolean / true</literal></entry>
+
+                  <entry>Setting this option to <literal>true</literal> is,
+                  however, often practical in optimization problems.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>use_Brent_in_1d</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>Use Brent search to improve accuracy in solution of
+                  1D non-linear equations.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>use_jacobian_scaling</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>Set to <literal>true</literal> if jacobian
+                  rows/columns should be automatically scaled in equation
+                  block solvers.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>write_iteration_variables_to_file</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If the option is set to <literal>true</literal>, two
+                  text files containing one iteration variablename per row is
+                  written to disk. The files contain the iteration variables
+                  for the DAE and the DAE initialization system respectively.
+                  The files are output to the resource directory.</entry>
                 </row>
               </tbody>
             </tgroup>
