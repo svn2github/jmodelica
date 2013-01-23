@@ -1,4 +1,4 @@
-package org.jmodelica.util;
+package org.jmodelica.util.formattedPrint;
 
 /**
  * An empty <code>FormattingItem</code> used when there is no formatting.

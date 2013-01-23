@@ -21,6 +21,7 @@
 %header {:
  package org.jmodelica.optimica.parser;
  import org.jmodelica.optimica.compiler.*;
+ import org.jmodelica.util.formattedPrint.FormattingInfo;
  import java.io.*;
  import java.util.Collection;
  import java.util.Map;

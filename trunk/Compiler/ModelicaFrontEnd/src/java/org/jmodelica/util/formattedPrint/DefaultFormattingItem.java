@@ -1,4 +1,4 @@
-package org.jmodelica.util;
+package org.jmodelica.util.formattedPrint;
 
 /**
  * An object that is used to set some sort of default formatting, which has not come from a scanned text and

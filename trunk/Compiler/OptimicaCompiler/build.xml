@@ -96,6 +96,7 @@
 		<jar destfile="${jar_output_dir}/util.jar">
 			<fileset dir="bin">
 				<include name="org/jmodelica/util/*.class" />
+				<include name="org/jmodelica/util/formattedPrint/*.class" />
 			</fileset>
 		</jar>
 		<jar destfile="${jar_output_dir}/graphs.jar">
@@ -377,7 +378,7 @@
 			</path>
 			<sequential>
 				<java classname="org.jmodelica.optimica.compiler.JunitGenerator" 
-						classpath=".:bin/OptimicaCompiler.jar:bin/util.jar:bin/graphs.jar:${beaver_dir}/lib/beaver.jar:bin/util.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
+						classpath=".:bin/OptimicaCompiler.jar:bin/util.jar:bin/graphs.jar:${beaver_dir}/lib/beaver.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
 						fork="true" failonerror="true" dir="." maxmemory="768M">
 					<arg value="@{gen-test.path}" />
 					<arg value="${test_junit-gen_dir}/org/jmodelica/test/optimica/junitgenerated" />

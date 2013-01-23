@@ -61,6 +61,7 @@ aspect RootAccess {
     	org.jmodelica.modelica.parser.ModelicaParser parser = 
     		new org.jmodelica.modelica.parser.ModelicaParser();
         parser.setLineBreakMap(scanner.getLineBreakMap());
+        parser.setFormattingInfo(scanner.getFormattingInfo());
 		return parser;
     }
     
@@ -99,7 +100,6 @@ aspect RootAccess {
         beaver.Parser parser = createModelicaParser(scanner);
         sr = (SourceRoot) parser.parse(scanner);
         sr.setFileName(fileName);
-        sr.setFormatting(scanner.getFormattingInfo());
         reader.close();
         return sr;
     }
@@ -111,7 +111,6 @@ aspect RootAccess {
         beaver.Parser parser = createModelicaParser(scanner);
         sr = (SourceRoot) parser.parse(scanner);
         sr.setFileName(fileName);
-        sr.setFormatting(scanner.getFormattingInfo());
         return sr;
     }
     
