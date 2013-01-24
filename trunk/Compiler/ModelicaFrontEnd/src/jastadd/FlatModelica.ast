@@ -52,6 +52,16 @@ FFunctionDecl : BaseNode ::= FQName
                              /DummyExp:FExp/;
 
 /**
+ * A function that is the constructor of an external object.
+ */
+FConstructorDecl : FFunctionDecl;
+
+/**
+ * A function that is the destructor of an external object.
+ */
+FDestructorDecl : FFunctionDecl;
+
+/**
  * \brief A derivative function reference.
  * 
  * The information in this node is extracted from the derivative 
@@ -213,7 +223,7 @@ FEnumVariable : FVariable ::= Enum:FQName /Type:FType/;
 /**
  * \brief An external object variable.
  */
-FExternalObjectVariable : FVariable ::= DestructorCall:FFunctionCallStmt;
+FExternalObjectVariable : FVariable ::= [DestructorCall:FFunctionCallStmt];
 
 /**
  * \brief Pre FVariable of type Real.

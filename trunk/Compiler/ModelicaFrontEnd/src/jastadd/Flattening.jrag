@@ -183,7 +183,7 @@ aspect Flattening {
 	
 	public void InstBaseClassDecl.flattenThisFunction(FClass fc) {
 		if (fc.lookupFunc(qualifiedName()) == null) {	
-	   		FFunctionDecl ffd = new FFunctionDecl();
+	   		FFunctionDecl ffd = createFFunctionDecl();
 	   		ffd.setFQName(new FQNameString(qualifiedName()));
 	   		
 	   		flattenComponentsInFunction(ffd, fc, new HashSet<String>());
@@ -206,6 +206,14 @@ aspect Flattening {
 			flattenUsedFuncsAndEnums(fc);
 			ffd.updateRecordArraySizes();
 		}
+	}
+	
+	private FFunctionDecl InstBaseClassDecl.createFFunctionDecl() {
+        if (isConstructor())
+            return new FConstructorDecl();
+        if (isDestructor())
+            return new FDestructorDecl();
+	    return new FFunctionDecl();
 	}
 	
 	private FDerivativeFunction InstBaseClassDecl.createFDerivativeFunction(FClass fc, InstExternal ie) {

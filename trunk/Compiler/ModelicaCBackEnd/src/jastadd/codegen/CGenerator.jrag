@@ -939,9 +939,11 @@ public class CGenerator extends GenericGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			for (FExternalObjectVariable eo : fclass.externalObjectVariables()) {
-				genPrinter.printf("    if (%s != NULL) {\n", eo.name_C());
-				eo.getDestructorCall().prettyPrint_C(genPrinter, "        ");
-				genPrinter.printf("        %s = NULL;\n    }\n", eo.name_C());
+			    if (eo.hasDestructorCall()) {
+    				genPrinter.printf("    if (%s != NULL) {\n", eo.name_C());
+    				eo.getDestructorCall().prettyPrint_C(genPrinter, "        ");
+    				genPrinter.printf("        %s = NULL;\n    }\n", eo.name_C());
+			    }
 			}
 		}
 	}
