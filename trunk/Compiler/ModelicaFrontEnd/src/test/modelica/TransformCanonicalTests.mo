@@ -8476,6 +8476,48 @@ Residual equations:
 ")})));
 end HandGuidedTearing30;
 
+model HandGuidedTearing31
+	Real x[2](each start=1), y[2](each start=2), z[2];
+equation
+	x = -y;
+	y = z .+ 1 annotation(__Modelon(ResidualEquation(iterationVariable=y)));
+	z = x .- 1;
+annotation(
+	__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="HandGuidedTearing31",
+			description="Test of hand guided tearing and alias elimination.",
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  z[1]
+Iteration variables:
+  y[1](start=2)
+Solved equations:
+  z[1] = - y[1] .- 1
+Residual equations:
+ Iteration variables: y[1]
+  y[1] = z[1] .+ 1
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  z[2]
+Iteration variables:
+  y[2](start=2)
+Solved equations:
+  z[2] = - y[2] .- 1
+Residual equations:
+ Iteration variables: y[2]
+  y[2] = z[2] .+ 1
+-------------------------------
+")})));
+end HandGuidedTearing31;
+
 model HandGuidedTearingError1
 	Real x;
 	Real y;
@@ -8771,6 +8813,33 @@ Semantic error at line 8708, column 53:
   Array index out of bounds: 3, index expression: 3
 ")})));
 end HandGuidedTearingError8;
+
+model HandGuidedTearingWarning1
+	Real x(start=1), y(start=2), z;
+equation
+	x = -y;
+	y = z + 1 annotation(__Modelon(ResidualEquation(iterationVariable=y)));
+	z = x - 1 annotation(__Modelon(ResidualEquation(iterationVariable=x)));
+	annotation(
+	__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			name="HandGuidedTearingWarning1",
+			description="Test hand guided tearing warnings",
+			errorMessage="
+2 warnings found:
+
+Warning: in file '':
+At line 0, column 0:
+  Can not use hand guided tearing pair, equation and variable resides in different blocks. Variable: x. Equation: - x = z + 1
+
+Warning: in file '':
+At line 0, column 0:
+  Hand guided tearing variable 'y' has been alias eliminated
+")})));
+end HandGuidedTearingWarning1;
 
 model BlockTest1
 record R

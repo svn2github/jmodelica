@@ -2867,6 +2867,7 @@ aspect TransformCanonical {
 			beginStep("aliasEliminationIfSet()");
 			genAlias();
 			eliminateAliasVariables();
+			checkForEliminatedHGTVars();
 			removeUnusedTemporaries();
 			mergeEquivalentRecords();
 			endStep("aliasEliminationIfSet()");
@@ -3075,6 +3076,13 @@ aspect TransformCanonical {
 		enableAliasRewrite();
 		
 		flush();
+	}
+	
+	public void FClass.checkForEliminatedHGTVars() {
+		for (FVariable var : getAliasVariables()) {
+			if (var.getHGTType() == FClass.HGTVariableType.COMPONENT || var.getHGTType() == FClass.HGTVariableType.PAIR)
+				var.warning("Hand guided tearing variable '%s' has been alias eliminated", var.name());
+		}
 	}
 	
 	public void ASTNode.enableAliasRewrite() {
@@ -5719,7 +5727,22 @@ aspect RuntimeOptions {
 
 aspect ResidualPairPropagation{
 	
+	public class FClass {
+		public enum HGTVariableType{
+			NONE,
+			COMPONENT,
+			PAIR
+		}
+	}
+	
+	public void FAbstractVariable.setHGTType(FClass.HGTVariableType type) {}
+	
 	private void FClass.propagateResidualPairs() {
+		for (FAbstractEquation eqn : getFEquationBlock(0).getFAbstractEquations()) {
+			if (eqn.hasResidual() && eqn.getResidual().hasIterationVariable())
+				eqn.getResidual().getIterationVariable().myFV().setHGTType(FClass.HGTVariableType.PAIR);
+				
+		}
 		for (FResidualPair pair : getFResidualPairs()) {
 			pair.propagate();
 		}
@@ -5728,16 +5751,18 @@ aspect ResidualPairPropagation{
 	protected void FResidualPair.propagate() {
 		FAbstractEquation fae = getResidualEquation().myFEquation();
 		if (fae == null) {
-			error("Unable to find fae");
+			error("Internal HGT Error, unable to find fae");
 			return;
 		}
 		FAbstractVariable fv = getIterationVariable().myFV();
 		int otherLevel = fae.hasResidual() ? fae.getResidual().getLevel() : Integer.MAX_VALUE;
 		if (otherLevel == getLevel()) {
-			error("Same level, decalred twise?");
+			error("Internal HGT Error, same level, decalred twise?");
 			return;
 		}
-		if (otherLevel > getLevel())
+		if (otherLevel > getLevel()) {
 			fae.setResidual(new FResidual(new Opt<FIdUse>(getIterationVariable().fullCopy()), getLevel()));
+			getIterationVariable().myFV().setHGTType(FClass.HGTVariableType.PAIR);
+		}
 	}
 }
