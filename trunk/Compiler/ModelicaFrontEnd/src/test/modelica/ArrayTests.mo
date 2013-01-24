@@ -1089,6 +1089,28 @@ end ArrayTests.General.ArrayTest35;
 ")})));
 end ArrayTest35;
 
+
+model ArrayTest36
+	model A
+		Real x = b;
+		parameter Real b = 1;
+	end A;
+	
+	A[3] c(b = { j*j for j in 1:3 });
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="General_ArrayTest36",
+			description="",
+			flatModel="
+fclass ArrayTests.General.ArrayTest36
+ parameter Real c[1].b = 1 * 1 /* 1 */;
+ parameter Real c[2].b = 2 * 2 /* 4 */;
+ parameter Real c[3].b = 3 * 3 /* 9 */;
+end ArrayTests.General.ArrayTest36;
+")})));
+end ArrayTest36;
+
 end General;
 
 
