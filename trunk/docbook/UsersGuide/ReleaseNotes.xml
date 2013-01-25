@@ -40,6 +40,12 @@
           <listitem>
             <para>Support for MSL CombiTables</para>
           </listitem>
+
+          <listitem>
+            <para>Improvements to the CasADi-based collocation optimization
+            algorithm, including support for non-fixed time horizons and
+            supplying nominal trajectories for scaling purposes</para>
+          </listitem>
         </itemizedlist></para>
     </section>
 
@@ -49,25 +55,25 @@
       <section>
         <title>Improved Modelica compliance</title>
 
-        <para/>
+        <para></para>
       </section>
 
       <section>
         <title>Support for external objects</title>
 
-        <para/>
+        <para></para>
       </section>
 
       <section>
         <title>Support for MSL CombiTables</title>
 
-        <para/>
+        <para></para>
       </section>
 
       <section>
         <title>Support for hand guided tearing</title>
 
-        <para/>
+        <para></para>
       </section>
     </section>
 
@@ -77,7 +83,7 @@
       <section>
         <title>Compile in separate process</title>
 
-        <para/>
+        <para></para>
       </section>
     </section>
 
@@ -87,14 +93,44 @@
       <section>
         <title>Simulation of co-simulation FMUs</title>
 
-        <para/>
+        <para></para>
       </section>
     </section>
 
     <section>
       <title>Optimization</title>
 
-      <para/>
+      <section>
+        <title>Improvements to CasADi-based collocation algorithm</title>
+
+        <para>The following features have been added to the CasADi-based
+        collocation algorithm<itemizedlist>
+            <listitem>
+              <para>Support for non-fixed time horizons, allowing the
+              formulation of, for example, minimum-time problems</para>
+            </listitem>
+
+            <listitem>
+              <para>Possibility to supply nominal trajectories based on
+              simulation results, which are used to compute (possibly
+              time-variant) scaling factors. This makes it possible to
+              conveniently obtain good scaling for all variables in a
+              model.</para>
+            </listitem>
+
+            <listitem>
+              <para>Possibility to use more advanced interpolation of
+              optimized inputs based on collocation polynomials, instead of
+              linear interpolation, providing higher accuracy when simulating
+              a system using optimized inputs</para>
+            </listitem>
+
+            <listitem>
+              <para>Setting of nominal attributes from Python in loaded
+              models</para>
+            </listitem>
+          </itemizedlist></para>
+      </section>
     </section>
 
     <section>
@@ -1277,7 +1313,7 @@ yres = res['y']
                     </m:mfenced>
                   </m:mrow>
 
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
 
                   <m:mtext>dt</m:mtext>
                 </m:mrow>
