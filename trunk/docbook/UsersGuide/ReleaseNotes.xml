@@ -18,7 +18,12 @@
 
       <para><itemizedlist>
           <listitem>
-            <para>Improved inlining</para>
+            <para>Improved function in-lining</para>
+          </listitem>
+
+          <listitem>
+            <para>Manual selection of iteration variables in tearing algorithm
+            - Hand Guided Tearing (HGT)</para>
           </listitem>
 
           <listitem>
@@ -46,6 +51,10 @@
             algorithm, including support for non-fixed time horizons and
             supplying nominal trajectories for scaling purposes</para>
           </listitem>
+
+          <listitem>
+            <para>Updated to MSL 3.2</para>
+          </listitem>
         </itemizedlist></para>
     </section>
 
@@ -55,25 +64,52 @@
       <section>
         <title>Improved Modelica compliance</title>
 
-        <para/>
-      </section>
+        <para>The following compliance improvements have been
+        made:<itemizedlist>
+            <listitem>
+              <para>Support for external objects (classes extending the
+              predefined partial class ExternalObject)</para>
+            </listitem>
 
-      <section>
-        <title>Support for external objects</title>
-
-        <para/>
+            <listitem>
+              <para>Compliance improvements - JM</para>
+            </listitem>
+          </itemizedlist></para>
       </section>
 
       <section>
         <title>Support for MSL CombiTables</title>
 
-        <para/>
+        <para>There is now support for MSL CombiTables, both 1D and 2D. The
+        table can be either read from file or explicitly supplied as a
+        parameter matrix.</para>
       </section>
 
       <section>
         <title>Support for hand guided tearing</title>
 
-        <para/>
+        <para>The tearing algorithm in the compiler can now be influenced by
+        user selected residuals and iteration variables, in order to make such
+        selections explicit, e.g., to exploit physical insight in the choice
+        of iteration variables. The selections are made by means of vendor
+        specific annotations and can be done at the component level and at the
+        system level.</para>
+      </section>
+
+      <section>
+        <title>Improved function in-lining</title>
+
+        <para>JM</para>
+      </section>
+
+      <section>
+        <title>Memory and execution time improvements in the compiler</title>
+
+        <para>The compilation times for large simulation models has been
+        reduced by a more than two orders of magnitudes. Also, the memory
+        required to compile large models has been decreased by two orders of
+        magnitude. As a consequence, larger models up to 100.000 equations can
+        be comfortably compiled on a standard computer.</para>
       </section>
     </section>
 
@@ -83,7 +119,13 @@
       <section>
         <title>Compile in separate process</title>
 
-        <para/>
+        <para>The possibility to compile in a separate process from the Python
+        interface has been added. This is enabled with an argument to
+        <literal>compile_fmu</literal>, <literal>compile_jmu</literal> or
+        <literal>compile_fmux</literal> which is <literal>False</literal> by
+        default. It is also possible to pass arguments to the JVM. This
+        enables, among other things, users on 64 bit Windows to use a 64 bit
+        JRE (Java Runtime Environment) for compiling a model.</para>
       </section>
     </section>
 
@@ -1292,12 +1334,41 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
-            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
-            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
-            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
-            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
-            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
+            <m:math display="block">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>0</m:mi>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>f</m:mi>
+                  </m:msub>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>L</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>.</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
+
+                  <m:mtext>dt</m:mtext>
+                </m:mrow>
+              </m:mrow>
+            </m:math>
           </informalequation>
 
           <para>the Optimica class attribute
