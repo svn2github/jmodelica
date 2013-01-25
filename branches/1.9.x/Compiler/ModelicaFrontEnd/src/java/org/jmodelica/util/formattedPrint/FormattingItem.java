@@ -1,4 +1,4 @@
-package org.jmodelica.util;
+package org.jmodelica.util.formattedPrint;
 
 import beaver.Symbol;
 
@@ -33,6 +33,9 @@ public abstract class FormattingItem {
 		AFTER
 	}
 	
+	public static final FormattingItem NO_FORMATTING = new EmptyFormattingItem();
+	public static final FormattingItem NOT_FORMATTED = new EmptyFormattingItem();
+	
 	protected Type type;
 	protected String data;
 
@@ -59,6 +62,7 @@ public abstract class FormattingItem {
 	public abstract Adjacency getAdjacency(FormattingItem otherItem);
 
 	/**
+	 * TODO: This javadoc is outdated
 	 * Gets the position this formatting item's end relative to a symbol's starting position. It can either be
 	 * before this symbol's start, front adjacent to it, after it or the result can be undefined. The latter
 	 * happens if this formatting item is not a <code>ScannedFormattingItem</code> and thus doesn't have a valid
@@ -76,6 +80,42 @@ public abstract class FormattingItem {
 	}
 
 	/**
+	 * TODO: This javadoc is outdated
+	 * Gets the position this formatting item's start relative to a item's ending position. It can either be
+	 * before this symbol's end, back adjacent to it, after it or the result can be undefined. The latter happens
+	 * if this formatting item is not a <code>ScannedFormattingItem</code> and thus doesn't have a valid position.
+	 * @param item the <code>ScannedFormattingItem</code>, from which to get the ending position and compare to the starting
+	 * position of this <code>FormattingItem</code>. 
+	 * @return if this <code>FormattingItem</code> is not a <code>ScannedFormattingItem</code>, then
+	 * <code>RelativePosition.UNDEFINED</code> is returned. Otherwise, if it starts just one column after
+	 * <code>item</code> ends, then <code>RelativePosition.BACK_ADJACENT</code> is returned. If it starts after
+	 * that then <code>RelativePosition.AFTER</code> is returned. Otherwise <code>RelativePosition.BEFORE</code> is
+	 * returned.
+	 */
+	public RelativePosition getBackRelativePosition(ScannedFormattingItem item) {
+		return getBackRelativePosition(item.endLine, item.endColumn);
+	}
+
+	/**
+	 * TODO: This javadoc is outdated
+	 * Gets the position this formatting item's end relative to a item's starting position. It can either be
+	 * before this symbol's start, front adjacent to it, after it or the result can be undefined. The latter
+	 * happens if this formatting item is not a <code>ScannedFormattingItem</code> and thus doesn't have a valid
+	 * position.
+	 * @param item the <code>ScannedFormattingItem</code>, from which to get the starting position and compare to the ending
+	 * position of this <code>FormattingItem</code>. 
+	 * @return if this <code>FormattingItem</code> is not a <code>ScannedFormattingItem</code>, then
+	 * <code>RelativePosition.UNDEFINED</code> is returned. Otherwise, if it ends just one column before
+	 * <code>item</code> starts, then <code>RelativePosition.FRONT_ADJACENT</code> is returned. If it ends before
+	 * that then <code>RelativePosition.BEFORE</code> is returned. Otherwise <code>RelativePosition.AFTER</code> is
+	 * returned.
+	 */
+	public RelativePosition getFrontRelativePosition(ScannedFormattingItem item) {
+		return getFrontRelativePosition(item.startLine, item.startColumn);
+	}
+
+	/**
+	 * TODO: This javadoc is outdated
 	 * Gets the position this formatting item's start relative to a symbol's ending position. It can either be
 	 * before this symbol's end, back adjacent to it, after it or the result can be undefined. The latter happens
 	 * if this formatting item is not a <code>ScannedFormattingItem</code> and thus doesn't have a valid position.
@@ -92,6 +132,7 @@ public abstract class FormattingItem {
 	}
 
 	/**
+	 * TODO: This javadoc is outdated
 	 * Gets the position this formatting item's end relative to something starting at (<code>line</code>,
 	 * <code>column</code>). This item can either be before this position, front adjacent to it, after it or the
 	 * result can be undefined. The latter happens if this formatting item is not a
@@ -107,6 +148,7 @@ public abstract class FormattingItem {
 	public abstract RelativePosition getFrontRelativePosition(int line, int column);
 	
 	/**
+	 * TODO: This javadoc is outdated
 	 * Gets the position this formatting item's start relative to something ending at (<code>line</code>,
 	 * <code>column</code>). This item can either be before this position, back adjacent to it, after it or the
 	 * result can be undefined. The latter happens if this formatting item is not a

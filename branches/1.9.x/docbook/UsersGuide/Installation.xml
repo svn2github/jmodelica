@@ -35,8 +35,8 @@
       <title>Dependencies</title>
 
       <para>As of JModelica.org version 1.9, all dependencies are bundled in
-      the installer. They are listed below, each with version number and link
-      to corresponding web site.<itemizedlist>
+      the installer. They are listed below, each with version number (where
+      applicable) and link to corresponding web site.<itemizedlist>
           <listitem>
             <para><emphasis role="bold">Applications</emphasis><itemizedlist>
                 <listitem>
@@ -112,7 +112,7 @@
 
               <listitem>
                 <para><link
-                xlink:href="http://sourceforge.net/apps/trac/casadi/">CasADi</link></para>
+                xlink:href="http://casadi.org">CasADi</link></para>
               </listitem>
             </itemizedlist>
           </listitem>
@@ -228,8 +228,8 @@
     <section>
       <title>Verifying the installation</title>
 
-      <para>Test the installation by starting a Python shell from the
-      JModelica.org start menu and run a few examples. Starting the Python
+      <para>Test the installation by starting a IPython or pylab shell from
+      the JModelica.org start menu and run a few examples. Starting the Python
       session from the start menu will set all the environment variables
       required to run the JModelica.org Python interface.<programlisting
       language="python"># Run the VDP example and plot results
@@ -491,8 +491,8 @@ make install
     <section>
       <title>Compiling</title>
 
-      <para>Make sure that all prerequisite are installed before compiling the
-      JModelica.org platform. First, check out the JModelica.org
+      <para>Make sure that all prerequisites are installed before compiling
+      the JModelica.org platform. First, check out the JModelica.org
       sources:</para>
 
       <programlisting>svn co https://svn.jmodelica.org/trunk JModelica.org

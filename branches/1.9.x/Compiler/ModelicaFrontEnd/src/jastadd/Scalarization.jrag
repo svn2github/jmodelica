@@ -228,7 +228,7 @@ aspect Scalarization {
 		name.scalarized = true;
 		fv.setFQName(name);
 
-		fv.setManualIterationVariable(getManualIterationVariable());
+		fv.setHGTType(getHGTType());
 		
 		return fv;
 	}
@@ -240,7 +240,8 @@ aspect Scalarization {
 		FFunctionCall scalarCall = (FFunctionCall) call.scalarize(EMPTY);
 		if (i != Index.NULL)
 			scalarCall.setArg(call.getArg(0).getArray().get(i).scalarize(EMPTY), 0);
-		fex.setDestructorCall(new FFunctionCallStmt(new List(), scalarCall));
+		if (hasConstructorCall(i))
+		    fex.setDestructorCall(new FFunctionCallStmt(new List(), scalarCall));
 		return fex;
 	}
 	

@@ -2172,7 +2172,7 @@ public class Var implements Comparable<Var> {
 	}
 	
 	public boolean markedAsIterationVariable() {
-		return getVariable().getManualIterationVariable();
+		return getVariable().getHGTType() == FClass.HGTVariableType.COMPONENT;
 	}
 	
 	/**

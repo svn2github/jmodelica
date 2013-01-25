@@ -486,7 +486,7 @@ public class DiagnosticsGenerator {
 			out.print(html_header.replaceFirst("</head>", "<style type=\"text/css\">" + BLT_style + "</style></head>"));
 			if (fc.root().options.getBooleanOption("equation_sorting")) {
 				if (fc.numEquations() > 250) {
-					out.println("<p>System is to big</p>");
+					out.println("<p>The system is too big</p>");
 				} else {
 					out.println("<h1>BLT for Init DAE System</h1>");
 					fc.getDAEInitBLT().diagnostics_generateBLTTable(out, true);

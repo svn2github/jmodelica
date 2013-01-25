@@ -15,9 +15,9 @@
     <title>Introduction</title>
 
     <para>JModelica.org supports simulation of models described in the
-    Modelica language and models following the FMI standard see <xref
-    linkend="ch_fmi"/>. The simulation environment uses <link
-    linkend="???"><link
+    Modelica language and models following the FMI standard, see <xref
+    linkend="intr_sec_tech"/> in <xref linkend="ch_intro"/>. The simulation
+    environment uses <link linkend="???"><link
     xlink:href="http://www.jmodelica.org/assimulo">Assimulo</link></link> as
     standard which is a standalone Python package for solving ordinary
     differential and differential algebraic equations.</para>
@@ -1790,7 +1790,7 @@ plt.show()
       the JModelica.org installation,
       <literal>pyfmi/examples/files/CS1.0/</literal>. The FMU is a
       Co-simulation FMU and in order to simulate it, we start by importing the
-      necessary methods and packages into Python: </para>
+      necessary methods and packages into Python:</para>
 
       <programlisting>import pylab as P #For plotting
 from pyfmi import load_fmu #For loading the FMU </programlisting>

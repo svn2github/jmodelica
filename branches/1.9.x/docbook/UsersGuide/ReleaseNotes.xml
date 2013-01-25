@@ -11,6 +11,239 @@
   <title>Release notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 1.9</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <para><itemizedlist>
+          <listitem>
+            <para>Improved function inlining</para>
+          </listitem>
+
+          <listitem>
+            <para>Manual selection of iteration variables in tearing algorithm
+            - Hand Guided Tearing (HGT)</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for external objects</para>
+          </listitem>
+
+          <listitem>
+            <para>Simulation of Co-simulation FMUs in Python</para>
+          </listitem>
+
+          <listitem>
+            <para>Improved compiler execution speed</para>
+          </listitem>
+
+          <listitem>
+            <para>Improved compiler memory efficiency</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for MSL CombiTables</para>
+          </listitem>
+
+          <listitem>
+            <para>Improvements to the CasADi-based collocation optimization
+            algorithm, including support for non-fixed time horizons and
+            supplying nominal trajectories for scaling purposes</para>
+          </listitem>
+
+          <listitem>
+            <para>Updated to MSL 3.2</para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <section>
+      <title>Compilers</title>
+
+      <section>
+        <title>Improved Modelica compliance</title>
+
+        <para>The following compliance improvements have been
+        made:<itemizedlist>
+            <listitem>
+              <para>Support for external objects (classes extending the
+              predefined partial class ExternalObject)</para>
+            </listitem>
+
+            <listitem>
+              <para>Support for the same component being added from more than
+              one extends clause.</para>
+            </listitem>
+
+            <listitem>
+              <para>Many bug fixes, notably concerning inheritance and
+              redeclares.</para>
+            </listitem>
+          </itemizedlist></para>
+      </section>
+
+      <section>
+        <title>Support for MSL CombiTables</title>
+
+        <para>There is now support for MSL CombiTables, both 1D and 2D. The
+        table can be either read from file or explicitly supplied as a
+        parameter matrix.</para>
+      </section>
+
+      <section>
+        <title>Support for hand guided tearing</title>
+
+        <para>The tearing algorithm in the compiler can now be influenced by
+        user selected residuals and iteration variables, in order to make such
+        selections explicit, e.g., to exploit physical insight in the choice
+        of iteration variables. The selections are made by means of vendor
+        specific annotations and can be done at the component level and at the
+        system level.</para>
+      </section>
+
+      <section>
+        <title>Improved function inlining</title>
+
+        <para>Improved support for inlining of functions. Notably a new
+        in-lining mode has been added, where functions that can be inlined
+        without introducing additional variables to the model. The inlining
+        algorithm has also been expanded to handle more situations.</para>
+      </section>
+
+      <section>
+        <title>Memory and execution time improvements in the compiler</title>
+
+        <para>The compilation times for large simulation models has been
+        reduced by more than two orders of magnitudes. Also, the memory
+        required to compile large models has been decreased by two orders of
+        magnitude. As a consequence, larger models up to 100.000 equations can
+        be comfortably compiled on a standard computer.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Python</title>
+
+      <section>
+        <title>Compile in separate process</title>
+
+        <para>The possibility to compile in a separate process from the Python
+        interface has been added. This is enabled with an argument to
+        <literal>compile_fmu</literal>, <literal>compile_jmu</literal> or
+        <literal>compile_fmux</literal> which is <literal>False</literal> by
+        default. It is also possible to pass arguments to the JVM. This
+        enables, among other things, users on 64 bit Windows to use a 64 bit
+        JRE (Java Runtime Environment) for compiling a model.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Simulation</title>
+
+      <section>
+        <title>Simulation of co-simulation FMUs</title>
+
+        <para>Support for simulation of co-simulation FMUs following the FMI
+        version 1.0 has been implemented and follows the same work-flow as for
+        loading and simulating an model exchange FMU, i.e:</para>
+
+        <programlisting>from pyfmi import load_fmu
+model = load_fmu("CS_Model.fmu")
+res = model.simulate(final_time=1.0)
+...
+</programlisting>
+      </section>
+    </section>
+
+    <section>
+      <title>Optimization</title>
+
+      <section>
+        <title>Improvements to CasADi-based collocation algorithm</title>
+
+        <para>The following features have been added to the CasADi-based
+        collocation algorithm<itemizedlist>
+            <listitem>
+              <para>Support for non-fixed time horizons, allowing the
+              formulation of, for example, minimum-time problems</para>
+            </listitem>
+
+            <listitem>
+              <para>Possibility to supply nominal trajectories based on
+              simulation results, which are used to compute (possibly
+              time-variant) scaling factors. This makes it possible to
+              conveniently obtain good scaling for all variables in a
+              model.</para>
+            </listitem>
+
+            <listitem>
+              <para>Possibility to use more advanced interpolation of
+              optimized inputs based on collocation polynomials, instead of
+              linear interpolation, providing higher accuracy when simulating
+              a system using optimized inputs</para>
+            </listitem>
+
+            <listitem>
+              <para>Setting of nominal attributes from Python in loaded
+              models</para>
+            </listitem>
+          </itemizedlist></para>
+      </section>
+    </section>
+
+    <section>
+      <title>Contributors</title>
+
+      <para>Bengt-Arne Andersson</para>
+
+      <para>Christian Andersson</para>
+
+      <para>Tove Bergdahl</para>
+
+      <para>Magnus Gäfvert</para>
+
+      <para>Fredrik Magnusson</para>
+
+      <para>Jesper Mattsson</para>
+
+      <para>Iakov Nakhimovski</para>
+
+      <para>Jonas Rosenqvist</para>
+
+      <para>Jon Sten</para>
+
+      <para>Johan Ylikiiskilä</para>
+
+      <para>Johan Åkesson</para>
+
+      <section>
+        <title>Previous contributors</title>
+
+        <para>Sofia Gedda</para>
+
+        <para>Petter Lindgren</para>
+
+        <para>Tobias Mattsson</para>
+
+        <para>Lennart Moraeus</para>
+
+        <para>Philip Nilsson</para>
+
+        <para>Patrik Meijer</para>
+
+        <para>Kristina Olsson</para>
+
+        <para>Roberto Parrotto</para>
+
+        <para>Jens Rantil</para>
+
+        <para>Philip Reuterswärd</para>
+      </section>
+    </section>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 1.8.1</title>
 
     <para>This release is identical to JModelica.org version 1.8 apart from

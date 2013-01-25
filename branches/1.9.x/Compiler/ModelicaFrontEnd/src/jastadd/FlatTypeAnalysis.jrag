@@ -842,6 +842,8 @@ aspect FTypeEquivalent {
 		typeMatches(type, false, allowUnknown);
 	eq FEnumType.equivalentTo(FType type, boolean allowUnknown) = 
 		typeMatches(type, false, allowUnknown);
+    eq FExternalObjectType.equivalentTo(FType type, boolean allowUnknown) = 
+            type.isExternalObject() && dimensionCompatible(type, allowUnknown);
  
 }
 
@@ -1130,4 +1132,38 @@ aspect InstClassRestriction {
 	}
 	eq InstSimpleShortClassDecl.isExternalObject() = false;
 	
+}
+
+aspect ExternalObjectTypes {
+    
+    syn boolean FExp.isConstructorCall()    = false;
+    eq InstFunctionCall.isConstructorCall() = getName().myInstClassDecl().isConstructor();
+    eq FFunctionCall.isConstructorCall()    = myFFunctionDecl().isConstructor();
+    syn boolean FExp.isDestructorCall()     = false;
+    eq InstFunctionCall.isDestructorCall()  = getName().myInstClassDecl().isDestructor();
+    eq FFunctionCall.isDestructorCall()     = myFFunctionDecl().isDestructor();
+    
+    syn boolean InstClassDecl.isDestructor()  = name().equals("destructor") && inExternalObject();
+    syn boolean FFunctionDecl.isDestructor()  = false;
+    eq FDestructorDecl.isDestructor()         = true;
+    syn boolean InstClassDecl.isConstructor() = name().equals("constructor") && inExternalObject();
+    syn boolean FFunctionDecl.isConstructor() = false;
+    eq FConstructorDecl.isConstructor()       = true;
+
+    syn boolean FExternalObjectVariable.hasConstructorCall(Index i) {
+        if (hasBindingExp()) {
+            FExp exp = (i == Index.NULL) ? getBindingExp() : getBindingExp().getArray().get(i);
+            return exp.isConstructorCall();
+        } else {
+            return hasParameterEquation() && parameterEquation().hasConstructorCall(i);
+        }
+        
+    }
+    syn boolean FAbstractEquation.hasConstructorCall(Index i) = false;
+    eq FEquation.hasConstructorCall(Index i) {
+        FExp exp = getRight();
+        if (i != Index.NULL)
+            exp = exp.getArray().get(i);
+        return exp.isConstructorCall();
+    }
 }

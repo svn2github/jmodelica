@@ -1,10 +1,29 @@
-package org.jmodelica.util;
+package org.jmodelica.util.formattedPrint;
+
+import beaver.Symbol;
 
 /**
  * An object that holds the value and position of some sort of formatting. It can, for example, hold the position,
  * extent and actual string representation of a comment or white spaces forming indentation.
  */
 public class ScannedFormattingItem extends FormattingItem implements Comparable<ScannedFormattingItem> {
+	
+	private static ScannedFormattingItem compareItem = new ScannedFormattingItem(Type.DEFAULT, "", 0, 0, 0, 0);
+	
+	protected static ScannedFormattingItem getStartCompareItem(Symbol forNode) {
+		return getCompareItem(Symbol.getLine(forNode.getStart()), Symbol.getColumn(forNode.getStart()));
+	}
+	
+	protected static ScannedFormattingItem getEndCompareItem(Symbol forNode) {
+		return getCompareItem(Symbol.getLine(forNode.getEnd()), Symbol.getColumn(forNode.getEnd()));
+	}
+	
+	protected static ScannedFormattingItem getCompareItem(int line, int col) {
+		compareItem.startLine = compareItem.endLine = line;
+		compareItem.startColumn = compareItem.endColumn = col;
+		return compareItem;
+	}
+	
 	protected int startLine;
 	protected int startColumn;
 	protected int endLine;

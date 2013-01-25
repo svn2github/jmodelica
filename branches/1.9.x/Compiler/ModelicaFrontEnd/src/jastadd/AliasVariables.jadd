@@ -321,13 +321,13 @@ aspect AliasVariables {
 			 * @param newAlias Alias variable to add
 			 */
 			private void add(AliasVariable newAlias) {
-				boolean newAliasIsManualIteration = newAlias.getFVariable().getManualIterationVariable();
+				boolean newAliasIsManualIteration = newAlias.getFVariable().getHGTType() == FClass.HGTVariableType.COMPONENT;
 				if (isManualIteration && !newAliasIsManualIteration) {
-					newAlias.getFVariable().setManualIterationVariable(true);
+					newAlias.getFVariable().setHGTType(FClass.HGTVariableType.COMPONENT);
 				} else if (!isManualIteration && newAliasIsManualIteration) {
 					isManualIteration = true;
 					for (AliasVariable alias : aliases)
-						alias.getFVariable().setManualIterationVariable(true);
+						alias.getFVariable().setHGTType(FClass.HGTVariableType.COMPONENT);
 				}
 				newAlias.setSet(this);
 				aliases.add(newAlias);
@@ -514,8 +514,12 @@ aspect AliasVariables {
 		// 4. Variables with StateSelect-information
 		if (isReal() && ((FRealVariable)this).stateSelectAttributeSet()) 
 			return score;
-		score--;		
-				
+		score--;
+		
+		if (getHGTType() == FClass.HGTVariableType.PAIR || getHGTType() == FClass.HGTVariableType.COMPONENT)
+			return score;
+		score--;
+		
 		// 5. start attribute set
 		if (startAttributeSet())
 			return score;

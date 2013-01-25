@@ -16,7 +16,7 @@
 
 
 import org.jmodelica.util.AbstractModelicaScanner;
-import org.jmodelica.util.FormattingItem;
+import org.jmodelica.util.formattedPrint.FormattingItem;
 import beaver.Scanner;
 
 

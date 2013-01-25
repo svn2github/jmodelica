@@ -8225,6 +8225,51 @@ equation
     }
 ")})));
 end TestExtObject4;
+    
+
+model TestExtObject5
+    ExtObject a = ExtObject();
+    ExtObject b = a; 
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestExtObject5",
+			description="Test that destructor calls are only generated for external objects with constructor calls",
+			template="$C_destruct_external_object$",
+			generatedCode="
+    if (_a_0 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_a_0);
+        _a_0 = NULL;
+    }
+")})));
+end TestExtObject5;
+
+
+model TestExtObject6
+    ExtObject eo1 = ExtObject();
+    ExtObject myEOs[2] = { ExtObject(), eo1 };
+    Real y[2];
+equation
+    for i in 1:2 loop
+        y[i] = useMyEO(myEOs[i]);
+    end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestExtObject6",
+			description="Test that destructor calls are only generated for external objects with constructor calls",
+			template="$C_destruct_external_object$",
+			generatedCode="
+    if (_eo1_0 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_eo1_0);
+        _eo1_0 = NULL;
+    }
+    if (_myEOs_1_1 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_myEOs_1_1);
+        _myEOs_1_1 = NULL;
+    }
+")})));
+end TestExtObject6;
 
 
 model TestRuntimeOptions1

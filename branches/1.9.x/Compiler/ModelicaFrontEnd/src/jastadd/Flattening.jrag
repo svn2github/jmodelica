@@ -183,7 +183,7 @@ aspect Flattening {
 	
 	public void InstBaseClassDecl.flattenThisFunction(FClass fc) {
 		if (fc.lookupFunc(qualifiedName()) == null) {	
-	   		FFunctionDecl ffd = new FFunctionDecl();
+	   		FFunctionDecl ffd = createFFunctionDecl();
 	   		ffd.setFQName(new FQNameString(qualifiedName()));
 	   		
 	   		flattenComponentsInFunction(ffd, fc, new HashSet<String>());
@@ -206,6 +206,14 @@ aspect Flattening {
 			flattenUsedFuncsAndEnums(fc);
 			ffd.updateRecordArraySizes();
 		}
+	}
+	
+	private FFunctionDecl InstBaseClassDecl.createFFunctionDecl() {
+        if (isConstructor())
+            return new FConstructorDecl();
+        if (isDestructor())
+            return new FDestructorDecl();
+	    return new FFunctionDecl();
 	}
 	
 	private FDerivativeFunction InstBaseClassDecl.createFDerivativeFunction(FClass fc, InstExternal ie) {
@@ -766,10 +774,8 @@ aspect Flattening {
 		AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
 		if (root().options.getBooleanOption("enable_hand_guided_tearing") && iterationNode.exists()) {
 			AnnotationNode enabledNode = iterationNode.forPath("enabled");
-			if (enabledNode.exists()) {
-				fv.setManualIterationVariable(containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).ceval().booleanValue());
-			} else {
-				fv.setManualIterationVariable(true);
+			if (!enabledNode.exists() || containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).ceval().booleanValue()) {
+				fv.setHGTType(FClass.HGTVariableType.COMPONENT);
 			}
 		}
 		
@@ -852,7 +858,7 @@ aspect Flattening {
 	 * Will not create new nodes unless necessary.
 	 */
 	syn FExp FExp.splitArrayExp(int index)     = new FSubscriptedExp(unboundCopy(), index, ndims());
-	eq FArray.splitArrayExp(int index)         = getFExp(index - 1);
+	eq FArray.splitArrayExp(int index)         = isIterArray() ? super.splitArrayExp(index) : getFExp(index - 1);
 	eq FIdUseExp.splitArrayExp(int index)      = createNode(getFIdUse().splitArrayAccess(index));
 	eq FInstAccessExp.splitArrayExp(int index) = new FInstAccessExp(getInstAccess().splitArrayAccess(index));
 	eq InstDerExp.splitArrayExp(int index)     = new InstDerExp(getFExp().splitArrayExp(index));

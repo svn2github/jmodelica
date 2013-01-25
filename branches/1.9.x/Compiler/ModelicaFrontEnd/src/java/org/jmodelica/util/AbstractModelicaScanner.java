@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jmodelica.util.formattedPrint.FormattingInfo;
+import org.jmodelica.util.formattedPrint.FormattingItem;
+
 public abstract class AbstractModelicaScanner extends beaver.Scanner {
 
 	private static final int INITIAL_LINEBREAK_MAP_SIZE = 64;

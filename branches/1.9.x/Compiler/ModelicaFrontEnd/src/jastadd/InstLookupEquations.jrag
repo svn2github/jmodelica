@@ -37,6 +37,11 @@ aspect InstLookupEquations{
 			if (match != null)
 				return match;
 		}
+		for (InstExtends node : getInstExtendss()) {
+			FAbstractEquation match = node.memberEquation(name);
+			if (match != null)
+				return match;
+		}
 		return null;
 	}
 	

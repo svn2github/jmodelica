@@ -89,7 +89,7 @@
     </sect2>
   </sect1>
 
-  <sect1>
+  <sect1 xml:id="hgt_sec_bias">
     <title>Specification of hand guided tearing</title>
 
     <para>There are two ways to use hand guided tearing in
@@ -203,7 +203,7 @@ end IterationVariable;</programlisting>
       becomes unnecessarily complex If the final system is unsolvable after
       all pairs are torn, the automatic algorithm will kick in and finalize
       the tearing. During automatic tearing it is still possible to bias the
-      algorithm as specified in section xxx.</para>
+      algorithm as specified in <xref linkend="hgt_sec_bias"/>.</para>
 
       <para>There are two ways to specify hand guided tearing pairs.</para>
 

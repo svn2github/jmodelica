@@ -61,7 +61,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
     Other options for the compiler should also be listed in the compiler_options 
     dict.
     
-    The compiler target is 'model_fmume' by default which means that the shared 
+    The compiler target is 'fmume' by default which means that the shared 
     file contains the FMI for Model Exchange API. This is currently the only 
     target that is possible to use.
     
@@ -102,8 +102,13 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
             Default: 'warning'
         
         separate_process --
-            Run the compilation of the model in a separate proecss. Requires 
-            the environment variable SEPARATE_PROCESS_JVM to be set.
+            Run the compilation of the model in a separate process. 
+            Checks the environment variables (in this order):
+                1. SEPARATE_PROCESS_JVM
+                2. JAVA_HOME
+            to locate the Java installation to use. 
+            For example (on Windows) this could be:
+                SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
             Default: False
             
         jvm_args --
@@ -175,8 +180,13 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
             Default: 'warning'
         
         separate_process --
-            Run the compilation of the model in a separate proecss. Requires 
-            the environment variable SEPARATE_PROCESS_JVM to be set.
+            Run the compilation of the model in a separate process. 
+            Checks the environment variables (in this order):
+                1. SEPARATE_PROCESS_JVM
+                2. JAVA_HOME
+            to locate the Java installation to use. 
+            For example (on Windows) this could be:
+                SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
             Default: False
             
         jvm_args --
@@ -253,8 +263,13 @@ def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={},
             Default: 'warning'
         
         separate_process --
-            Run the compilation of the model in a separate proecss. Requires 
-            the environment variable SEPARATE_PROCESS_JVM to be set.
+            Run the compilation of the model in a separate process. 
+            Checks the environment variables (in this order):
+                1. SEPARATE_PROCESS_JVM
+                2. JAVA_HOME
+            to locate the Java installation to use. 
+            For example (on Windows) this could be:
+                SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
             Default: False
             
         jvm_args --
