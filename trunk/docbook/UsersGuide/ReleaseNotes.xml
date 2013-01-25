@@ -46,19 +46,49 @@
     <section>
       <title>Compilers</title>
 
-      <para/>
+      <section>
+        <title>Improved Modelica compliance</title>
+
+        <para/>
+      </section>
+
+      <section>
+        <title>Support for external objects</title>
+
+        <para/>
+      </section>
+
+      <section>
+        <title>Support for MSL CombiTables</title>
+
+        <para/>
+      </section>
+
+      <section>
+        <title>Support for hand guided tearing</title>
+
+        <para/>
+      </section>
     </section>
 
     <section>
       <title>Python</title>
 
-      <para/>
+      <section>
+        <title>Compile in separate process</title>
+
+        <para/>
+      </section>
     </section>
 
     <section>
       <title>Simulation</title>
 
-      <para/>
+      <section>
+        <title>Simulation of co-simulation FMUs</title>
+
+        <para/>
+      </section>
     </section>
 
     <section>
