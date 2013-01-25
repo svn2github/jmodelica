@@ -55,25 +55,25 @@
       <section>
         <title>Improved Modelica compliance</title>
 
-        <para></para>
+        <para/>
       </section>
 
       <section>
         <title>Support for external objects</title>
 
-        <para></para>
+        <para/>
       </section>
 
       <section>
         <title>Support for MSL CombiTables</title>
 
-        <para></para>
+        <para/>
       </section>
 
       <section>
         <title>Support for hand guided tearing</title>
 
-        <para></para>
+        <para/>
       </section>
     </section>
 
@@ -83,7 +83,7 @@
       <section>
         <title>Compile in separate process</title>
 
-        <para></para>
+        <para/>
       </section>
     </section>
 
@@ -93,7 +93,15 @@
       <section>
         <title>Simulation of co-simulation FMUs</title>
 
-        <para></para>
+        <para>Support for simulation of co-simulation FMUs following the FMI
+        version 1.0 has been implemented and follows the same work-flow as for
+        loading and simulating an model exchange FMU, i.e:</para>
+
+        <programlisting>from pyfmi import load_fmu
+model = load_fmu("CS_Model.fmu")
+res = model.simulate(final_time=1.0)
+...
+</programlisting>
       </section>
     </section>
 
@@ -1284,41 +1292,12 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block">
-              <m:mrow>
-                <m:munderover>
-                  <m:mo>∫</m:mo>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>0</m:mi>
-                  </m:msub>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>f</m:mi>
-                  </m:msub>
-                </m:munderover>
-
-                <m:mrow>
-                  <m:mrow>
-                    <m:mi>L</m:mi>
-
-                    <m:mo>⁡</m:mo>
-
-                    <m:mfenced>
-                      <m:mi>.</m:mi>
-                    </m:mfenced>
-                  </m:mrow>
-
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
-
-                  <m:mtext>dt</m:mtext>
-                </m:mrow>
-              </m:mrow>
-            </m:math>
+            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
+            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
+            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
+            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
+            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
+            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
           </informalequation>
 
           <para>the Optimica class attribute
