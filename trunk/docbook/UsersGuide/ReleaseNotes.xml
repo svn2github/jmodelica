@@ -18,7 +18,7 @@
 
       <para><itemizedlist>
           <listitem>
-            <para>Improved function in-lining</para>
+            <para>Improved function inlining</para>
           </listitem>
 
           <listitem>
@@ -72,7 +72,13 @@
             </listitem>
 
             <listitem>
-              <para>Compliance improvements - JM</para>
+              <para>Support for the same component being added from more than
+              one extends clause.</para>
+            </listitem>
+
+            <listitem>
+              <para>Many bug fixes, notably concerning inheritance and
+              redeclares.</para>
             </listitem>
           </itemizedlist></para>
       </section>
@@ -97,16 +103,19 @@
       </section>
 
       <section>
-        <title>Improved function in-lining</title>
+        <title>Improved function inlining</title>
 
-        <para>JM</para>
+        <para>Improved support for inlining of functions. Notably a new
+        in-lining mode has been added, where functions that can be inlined
+        without introducing additional variables to the model. The inlining
+        algorithm has also been expanded to handle more situations.</para>
       </section>
 
       <section>
         <title>Memory and execution time improvements in the compiler</title>
 
         <para>The compilation times for large simulation models has been
-        reduced by a more than two orders of magnitudes. Also, the memory
+        reduced by more than two orders of magnitudes. Also, the memory
         required to compile large models has been decreased by two orders of
         magnitude. As a consequence, larger models up to 100.000 equations can
         be comfortably compiled on a standard computer.</para>
@@ -1363,7 +1372,7 @@ yres = res['y']
                     </m:mfenced>
                   </m:mrow>
 
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
 
                   <m:mtext>dt</m:mtext>
                 </m:mrow>
