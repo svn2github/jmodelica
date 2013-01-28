@@ -8700,11 +8700,11 @@ equation
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 8566, column 2:
-  Iteration variable needs to have continuous variability, p1 has parameter variability
+  Iteration variable should have continuous variability, p1 has parameter variability
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 8569, column 26:
-  Iteration variable needs to have continuous variability, p2 has parameter variability
+  Iteration variable should have continuous variability, p2 has parameter variability
 ")})));
 end HandGuidedTearingError5;
 

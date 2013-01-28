@@ -699,11 +699,30 @@ aspect FlatTypeCheck {
 			FIdUse var = getIterationVariable();
 			FTypePrefixVariability variability = var.variability();
 			if (!variability.continuousVariability())
-				var.error("Iteration variable needs to have continuous variability, %s has %svariability", var, variability);
+				var.error("Iteration variable should have continuous variability, %s has %svariability", var, variability);
 			Size size = size();
 			Size varSize = var.size();
 			if (!size.equals(varSize))
 				var.error("Size of iteration variable %s is not the same size as the surrounding equation, size of variable %s, size of equation %s", var, varSize, size);
 		}
+	}
+	
+	public void InstNominal.typeCheck() {
+		if (hasEnabled()) {
+			FExp enabledExp = getEnabled();
+			try {
+				enabledExp.ceval().booleanValue();
+			} catch (ConstantEvaluationException e) {
+				enabledExp.error("Cannot evaluate boolean enabled expression: " + enabledExp);
+			}
+		}
+		FExp exp = getValue();
+		FTypePrefixVariability variability = exp.variability();
+		if (!variability.parameterOrLess())
+			exp.error("Nominal expression should have parameter variability or less, %s has %svariability", exp, variability);
+		Size size = size();
+		Size expSize = exp.size();
+		if (!size.equals(expSize))
+			exp.error("Size of nominal expression %s is not the same size as the surrounding equation, size of expression %s, size of equation %s", exp, expSize, size);
 	}
 }

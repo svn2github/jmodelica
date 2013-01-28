@@ -1108,6 +1108,17 @@ aspect Flattening {
 		return flattened;
 	}
 	
+	syn FNominal FNominal.flatten(FQName prefix) {
+		throw new UnsupportedOperationException();
+	}
+	eq InstNominal.flatten(FQName prefix) {  
+		if (hasEnabled()) {
+			if (!getEnabled().ceval().booleanValue())
+				return null;
+		}
+		return new FNominal(getValue().flatten(prefix));
+	}
+	
     /**
      * \brief Find functions, record and enumeration declarations that need to be flattened.
      */
@@ -1219,6 +1230,11 @@ aspect FlatExpressions {
 			FResidual flatten = getResidual().flatten(prefix);
 			if (flatten != null)
 				flattened.setResidual(flatten);
+		}
+		if (hasNominal()) {
+			FNominal flatten = getNominal().flatten(prefix);
+			if (flatten != null)
+				flattened.setNominal(flatten);
 		}
 		return flattened;
 	}
@@ -1973,7 +1989,7 @@ aspect InstantiatedExpressions {
 
 	public FAbstractEquation Equation.instantiate() {
 		return copyLocationTo(new FEquation(equationType(), buildNameOpt(), buildResidualOpt(), 
-				getLeft().instantiate(), getRight().instantiate()));
+				buildNominalOpt(), getLeft().instantiate(), getRight().instantiate()));
 	}
 	
 	private Opt<FQName> Equation.buildNameOpt() {
@@ -2012,6 +2028,24 @@ aspect InstantiatedExpressions {
 				residual.setIterationVariable(new FIdUseInstAccess(iterationVariableExp.asAccess().instantiate()));
 		}
 		return new Opt<FResidual>(residual);
+	}
+	
+	/**
+	 * Builds a FNominal instance for "this" equation.  
+	 */
+	private Opt<FNominal> Equation.buildNominalOpt() {
+		AnnotationNode nominalNode = annotation().vendorNode().forPath("nominal");
+		if (!nominalNode.exists())
+			return new Opt<FNominal>();
+		InstNominal nominal = new InstNominal();
+		Exp enabledExp = nominalNode.forPath("enabled").exp();
+		if (enabledExp != null)
+			nominal.setEnabled(enabledExp.instantiate());
+		Exp valueExp = nominalNode.exp();
+		if (valueExp == null)
+			nominal.error("Nominal value is missing from nominal annotation");
+		nominal.setValue(valueExp.instantiate());
+		return new Opt<FNominal>(nominal);
 	}
 	
 	public FAbstractEquation ConnectClause.instantiate() {
