@@ -1714,8 +1714,8 @@ initial equation
  a1.x[1] = 1;
  a1.x[2] = 2;
 equation
- a1.der(x[1]) = - a1.x[1];
- a1.der(x[2]) = - a1.x[2];
+ a1.der(x[1]) =  - ( a1.x[1] );
+ a1.der(x[2]) =  - ( a1.x[2] );
 
 public
  record RecordTests.RecordScalarize19.A
@@ -1750,12 +1750,12 @@ initial equation
  a1.x[1] = 1;
  a1.x[2] = 2;
 equation
- a1.der(x[1]) = - a1.x[1];
- a1.der(x[2]) = - a1.x[2];
+ a1.der(x[1]) =  - ( a1.x[1] );
+ a1.der(x[2]) =  - ( a1.x[2] );
 
 public
  record RecordTests.RecordScalarize20.A
-  Real x[2](stateSelect = {StateSelect.default, StateSelect.default},start = {1, 2});
+  Real x[2](stateSelect = {StateSelect.default,StateSelect.default},start = {1,2});
  end RecordTests.RecordScalarize20.A;
 
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -1936,7 +1936,7 @@ public
  algorithm
   z.x := ix;
   z.y := iy;
-  o := z.x * z.y;
+  o := ( z.x ) * ( z.y );
   return;
  end RecordTests.RecordFunc1.f;
 
@@ -1993,7 +1993,7 @@ public
   z.y := iy;
   w.x := z.x;
   w.y := z.y;
-  o := w.x * w.y;
+  o := ( w.x ) * ( w.y );
   return;
  end RecordTests.RecordFunc2.f;
 
@@ -2044,7 +2044,7 @@ public
  algorithm
   z.x := ix;
   z.y := iy;
-  o := z.x * z.y;
+  o := ( z.x ) * ( z.y );
   return;
  end RecordTests.RecordFunc3.f;
 
@@ -2100,7 +2100,7 @@ public
  algorithm
   z.x := ix;
   z.y := iy;
-  o := z.x * z.y;
+  o := ( z.x ) * ( z.y );
   return;
  end RecordTests.RecordFunc3b.f;
 
@@ -2151,7 +2151,7 @@ public
  algorithm
   z.x[1] := ix;
   z.x[2] := iy;
-  o := z.x[1] * z.x[2];
+  o := ( z.x[1] ) * ( z.x[2] );
   return;
  end RecordTests.RecordFunc4.f;
 
@@ -2206,7 +2206,7 @@ public
   z.x[2] := iy;
   w.x[1] := z.x[1];
   w.x[2] := z.x[2];
-  o := w.x[1] * w.x[2];
+  o := ( w.x[1] ) * ( w.x[2] );
   return;
  end RecordTests.RecordFunc5.f;
 
@@ -2255,7 +2255,7 @@ public
  algorithm
   z.x[1] := ix;
   z.x[2] := iy;
-  o := z.x[1] * z.x[2];
+  o := ( z.x[1] ) * ( z.x[2] );
   return;
  end RecordTests.RecordFunc6.f;
 
@@ -2305,7 +2305,7 @@ public
  algorithm
   z[1].x := ix;
   z[2].x := iy;
-  o := z[1].x * z[2].x;
+  o := ( z[1].x ) * ( z[2].x );
   return;
  end RecordTests.RecordFunc7.f;
 
@@ -2367,7 +2367,7 @@ public
   w[1].y := z[1].y;
   w[2].x := z[2].x;
   w[2].y := z[2].y;
-  o := w[1].x * w[2].x;
+  o := ( w[1].x ) * ( w[2].x );
   return;
  end RecordTests.RecordFunc8.f;
 
@@ -2420,7 +2420,7 @@ public
   z[1].y := iy;
   z[2].x := ix + 2;
   z[2].y := iy + 2;
-  o := z[1].x * z[2].x;
+  o := ( z[1].x ) * ( z[2].x );
   return;
  end RecordTests.RecordFunc9.f;
 
@@ -2764,7 +2764,7 @@ model RecordInput1
 fclass RecordTests.RecordInput1
  Real x;
 equation
- x = RecordTests.RecordInput1.f(RecordTests.RecordInput1.A(1, 2 * 4 + 3 * 5));
+ x = RecordTests.RecordInput1.f(RecordTests.RecordInput1.A(1, ( 2 ) * ( 4 ) + ( 3 ) * ( 5 )));
 
 public
  function RecordTests.RecordInput1.f
@@ -3368,8 +3368,8 @@ initial equation
  a.x = 1;
  a.y = 0;
 equation
- a.der(x) = - a.y;
- a.der(y) = - a.x;
+ a.der(x) =  - ( a.y );
+ a.der(y) =  - ( a.x );
 
 public
  record RecordTests.RecordDer1.A
@@ -3469,7 +3469,7 @@ fclass RecordTests.RecordParam3
  parameter Real a1.x[1];
  parameter Real a1.x[2];
 parameter equation
- ({temp_1[1], temp_1[2]}) = RecordTests.RecordParam3.f(1);
+ ({temp_1[1],temp_1[2]}) = RecordTests.RecordParam3.f(1);
  a1.x[1] = temp_1[1];
  a1.x[2] = temp_1[2];
 equation
@@ -3481,7 +3481,7 @@ public
   output Real[2] o;
  algorithm
   o[1] := i;
-  o[2] := - i;
+  o[2] :=  - ( i );
   return;
  end RecordTests.RecordParam3.f;
 

@@ -320,7 +320,7 @@ public
   x := 2;
   o := 1;
   while x <= i loop
-   o := o * x;
+   o := ( o ) * ( x );
    x := x + 1;
   end while;
   return;
@@ -405,7 +405,7 @@ public
   input Real a;
   output EvaluationTests.FunctionEval12.R x;
  algorithm
-  x := EvaluationTests.FunctionEval12.R(a, 2 * a);
+  x := EvaluationTests.FunctionEval12.R(a, ( 2 ) * ( a ));
   return;
  end EvaluationTests.FunctionEval12.f1;
 
@@ -449,7 +449,7 @@ public
   input Real a;
   output EvaluationTests.FunctionEval13.R x;
  algorithm
-  x := EvaluationTests.FunctionEval13.R(a, 2 * a);
+  x := EvaluationTests.FunctionEval13.R(a, ( 2 ) * ( a ));
   return;
  end EvaluationTests.FunctionEval13.f;
 

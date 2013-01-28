@@ -118,7 +118,7 @@ aspect OptimicaPrettyPrint {
 		str.print(")");
 	}
 
-	protected void InstTimedVariable.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	public void InstTimedVariable.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(getName().name());
 		str.print("(");
 		p.print(getArg(), str, indent);
@@ -208,18 +208,18 @@ aspect FlatOptimicaPrettyPrint {
 	eq FConstraintLeq.op() = " <= ";
 	eq FConstraintGeq.op() = " >= ";
 	
-	protected void FTimedVariable.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	public void FTimedVariable.prettyPrint(Printer p, PrintStream str, String indent) {
 		p.print(getName(), str, indent);
 		str.print("(");
 		p.print(getArg(), str, indent);
 		str.print(")");
 	}
 
-	protected void FStartTimeExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	public void FStartTimeExp.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.append("startTime");
 	}
 	
-	protected void FFinalTimeExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	public void FFinalTimeExp.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.append("finalTime");
 	}
 	

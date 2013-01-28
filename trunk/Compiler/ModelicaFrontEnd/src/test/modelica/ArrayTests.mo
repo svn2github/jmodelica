@@ -909,12 +909,13 @@ fclass ArrayTests.General.ArrayTest30
  Real x[3,1](start = 5);
  Real x[3,2](start = 6);
 equation
- der(x[1,1]) = - 1;
- der(x[1,2]) = - 2;
- der(x[2,1]) = - 3;
- der(x[2,2]) = - 4;
- der(x[3,1]) = - 5;
- der(x[3,2]) = - 6;
+ der(x[1,1]) =  - ( 1 );
+ der(x[1,2]) =  - ( 2 );
+ der(x[2,1]) =  - ( 3 );
+ der(x[2,2]) =  - ( 4 );
+ der(x[3,1]) =  - ( 5 );
+ der(x[3,2]) =  - ( 6 );
+
 end ArrayTests.General.ArrayTest30;
 ")})));
 end ArrayTest30;
@@ -956,10 +957,11 @@ fclass ArrayTests.General.ArrayTest32
  Real x[2];
 initial equation 
  x[1] = 1;
- x[2] = - 2;
+ x[2] =  - ( 2 );
 equation
- der(x[1]) = - x[1];
- der(x[2]) = - x[2];
+ der(x[1]) =  - ( x[1] );
+ der(x[2]) =  - ( x[2] );
+
 end ArrayTests.General.ArrayTest32;
 ")})));
 end ArrayTest32;
@@ -1072,12 +1074,12 @@ fclass ArrayTests.General.ArrayTest35
  Real z[4];
  Real z[5];
 equation
- ({z[1], z[2], z[3], z[4], z[5]}) = ArrayTests.General.ArrayTest35.f({1, 2});
+ ({z[1],z[2],z[3],z[4],z[5]}) = ArrayTests.General.ArrayTest35.f({1,2});
 
 public
  function ArrayTests.General.ArrayTest35.f
   input Real[:] x;
-  output Real[2 * size(x, 1) + 1] y;
+  output Real[( 2 ) * ( size(x, 1) ) + 1] y;
  algorithm
   for i1 in 1:size(y, 1) loop
    y[i1] := cat(1, x, zeros(size(x, 1) + 1));
@@ -1104,9 +1106,9 @@ model ArrayTest36
 			description="",
 			flatModel="
 fclass ArrayTests.General.ArrayTest36
- parameter Real c[1].b = 1 * 1 /* 1 */;
- parameter Real c[2].b = 2 * 2 /* 4 */;
- parameter Real c[3].b = 3 * 3 /* 9 */;
+ parameter Real c[1].b = ( 1 ) * ( 1 ) /* 1 */;
+ parameter Real c[2].b = ( 2 ) * ( 2 ) /* 4 */;
+ parameter Real c[3].b = ( 3 ) * ( 3 ) /* 9 */;
 end ArrayTests.General.ArrayTest36;
 ")})));
 end ArrayTest36;
@@ -1278,9 +1280,10 @@ fclass ArrayTests.Subscripts.SubscriptExpression1
  Real x[4];
 equation
  x[1] = 1;
- x[2] = x[1] * 2;
- x[3] = x[2] * 2;
- x[4] = x[3] * 2;
+ x[2] = ( x[1] ) * ( 2 );
+ x[3] = ( x[2] ) * ( 2 );
+ x[4] = ( x[3] ) * ( 2 );
+
 end ArrayTests.Subscripts.SubscriptExpression1;
 ")})));
 end SubscriptExpression1;
@@ -1336,8 +1339,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1307, column 12:
-  Array index out of bounds: 0, index expression: i - 1
+Semantic error at line 750, column 12:
+  Array index out of bounds: 0, index expression: i - ( 1 )
 ")})));
 end SubscriptExpression4;
 
@@ -1392,22 +1395,23 @@ fclass ArrayTests.Subscripts.SubscriptExpression6
  Real x[15];
  Real x[16];
 equation
- x[1] = 1 + 1 * 2;
- x[2] = 1 + 2 * 2;
- x[3] = 1 + 3 * 2;
- x[4] = 1 + 4 * 2;
- x[5] = 2 + 1 * 2;
- x[6] = 2 + 2 * 2;
- x[7] = 2 + 3 * 2;
- x[8] = 2 + 4 * 2;
- x[9] = 3 + 1 * 2;
- x[10] = 3 + 2 * 2;
- x[11] = 3 + 3 * 2;
- x[12] = 3 + 4 * 2;
- x[13] = 4 + 1 * 2;
- x[14] = 4 + 2 * 2;
- x[15] = 4 + 3 * 2;
- x[16] = 4 + 4 * 2;
+ x[1] = 1 + ( 1 ) * ( 2 );
+ x[2] = 1 + ( 2 ) * ( 2 );
+ x[3] = 1 + ( 3 ) * ( 2 );
+ x[4] = 1 + ( 4 ) * ( 2 );
+ x[5] = 2 + ( 1 ) * ( 2 );
+ x[6] = 2 + ( 2 ) * ( 2 );
+ x[7] = 2 + ( 3 ) * ( 2 );
+ x[8] = 2 + ( 4 ) * ( 2 );
+ x[9] = 3 + ( 1 ) * ( 2 );
+ x[10] = 3 + ( 2 ) * ( 2 );
+ x[11] = 3 + ( 3 ) * ( 2 );
+ x[12] = 3 + ( 4 ) * ( 2 );
+ x[13] = 4 + ( 1 ) * ( 2 );
+ x[14] = 4 + ( 2 ) * ( 2 );
+ x[15] = 4 + ( 3 ) * ( 2 );
+ x[16] = 4 + ( 4 ) * ( 2 );
+
 end ArrayTests.Subscripts.SubscriptExpression6;
 ")})));
 end SubscriptExpression6;
@@ -1445,22 +1449,23 @@ fclass ArrayTests.Subscripts.SubscriptExpression7
  Real x[4,3];
  Real x[4,4];
 equation
- x[1,1] = 1 + 1 * 2;
- x[1,2] = 1 + 2 * 2;
- x[1,3] = 1 + 3 * 2;
- x[1,4] = 1 + 4 * 2;
- x[2,2] = 2 + 1 * 2;
- x[2,2] = 2 + 2 * 2;
- x[2,3] = 2 + 3 * 2;
- x[2,4] = 2 + 4 * 2;
- x[3,3] = 3 + 1 * 2;
- x[3,3] = 3 + 2 * 2;
- x[3,3] = 3 + 3 * 2;
- x[3,4] = 3 + 4 * 2;
- x[4,4] = 4 + 1 * 2;
- x[4,4] = 4 + 2 * 2;
- x[4,4] = 4 + 3 * 2;
- x[4,4] = 4 + 4 * 2;
+ x[1,1] = 1 + ( 1 ) * ( 2 );
+ x[1,2] = 1 + ( 2 ) * ( 2 );
+ x[1,3] = 1 + ( 3 ) * ( 2 );
+ x[1,4] = 1 + ( 4 ) * ( 2 );
+ x[2,2] = 2 + ( 1 ) * ( 2 );
+ x[2,2] = 2 + ( 2 ) * ( 2 );
+ x[2,3] = 2 + ( 3 ) * ( 2 );
+ x[2,4] = 2 + ( 4 ) * ( 2 );
+ x[3,3] = 3 + ( 1 ) * ( 2 );
+ x[3,3] = 3 + ( 2 ) * ( 2 );
+ x[3,3] = 3 + ( 3 ) * ( 2 );
+ x[3,4] = 3 + ( 4 ) * ( 2 );
+ x[4,4] = 4 + ( 1 ) * ( 2 );
+ x[4,4] = 4 + ( 2 ) * ( 2 );
+ x[4,4] = 4 + ( 3 ) * ( 2 );
+ x[4,4] = 4 + ( 4 ) * ( 2 );
+
 end ArrayTests.Subscripts.SubscriptExpression7;
 ")})));
 end SubscriptExpression7;
@@ -1480,8 +1485,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1451, column 5:
-  Array index out of bounds: 5, index expression: i + j * max(i * (1:4))
+Semantic error at line 1499, column 5:
+  Array index out of bounds: 5, index expression: i + ( j ) * ( max(( i ) * ( 1:4 )) )
 ")})));
 end SubscriptExpression8;
 
@@ -2209,10 +2214,11 @@ fclass ArrayTests.Algebra.Sub.ArraySub1
  Real y[1];
  Real y[2];
 equation
- x[1] = y[1] - 10;
- x[2] = y[2] - 20;
+ x[1] = y[1] - ( 10 );
+ x[2] = y[2] - ( 20 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Sub.ArraySub1;
 ")})));
 end ArraySub1;
@@ -2239,14 +2245,15 @@ fclass ArrayTests.Algebra.Sub.ArraySub2
  Real y[2,1];
  Real y[2,2];
 equation
- x[1,1] = y[1,1] - 10;
- x[1,2] = y[1,2] - 20;
- x[2,1] = y[2,1] - 30;
- x[2,2] = y[2,2] - 40;
+ x[1,1] = y[1,1] - ( 10 );
+ x[1,2] = y[1,2] - ( 20 );
+ x[2,1] = y[2,1] - ( 30 );
+ x[2,2] = y[2,2] - ( 40 );
  y[1,1] = 1;
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Sub.ArraySub2;
 ")})));
 end ArraySub2;
@@ -2281,14 +2288,14 @@ fclass ArrayTests.Algebra.Sub.ArraySub3
  Real y[2,2,1];
  Real y[2,2,2];
 equation
- x[1,1,1] = y[1,1,1] - 10;
- x[1,1,2] = y[1,1,2] - 20;
- x[1,2,1] = y[1,2,1] - 30;
- x[1,2,2] = y[1,2,2] - 40;
- x[2,1,1] = y[2,1,1] - 50;
- x[2,1,2] = y[2,1,2] - 60;
- x[2,2,1] = y[2,2,1] - 70;
- x[2,2,2] = y[2,2,2] - 80;
+ x[1,1,1] = y[1,1,1] - ( 10 );
+ x[1,1,2] = y[1,1,2] - ( 20 );
+ x[1,2,1] = y[1,2,1] - ( 30 );
+ x[1,2,2] = y[1,2,2] - ( 40 );
+ x[2,1,1] = y[2,1,1] - ( 50 );
+ x[2,1,2] = y[2,1,2] - ( 60 );
+ x[2,2,1] = y[2,2,1] - ( 70 );
+ x[2,2,2] = y[2,2,2] - ( 80 );
  y[1,1,1] = 1;
  y[1,1,2] = 2;
  y[1,2,1] = 3;
@@ -2297,6 +2304,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Sub.ArraySub3;
 ")})));
 end ArraySub3;
@@ -2315,8 +2323,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 2290, column 6:
-  Type error in expression: y - 10
+Semantic error at line 1078, column 6:
+  Type error in expression: y - ( 10 )
 ")})));
 end ArraySub4;
 
@@ -2334,8 +2342,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 2309, column 6:
-  Type error in expression: y - 10
+Semantic error at line 1097, column 6:
+  Type error in expression: y - ( 10 )
 ")})));
 end ArraySub5;
 
@@ -2353,8 +2361,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 2328, column 6:
-  Type error in expression: y - 10
+Semantic error at line 1116, column 6:
+  Type error in expression: y - ( 10 )
 ")})));
 end ArraySub6;
 
@@ -2372,8 +2380,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 2347, column 6:
-  Type error in expression: y - {10, 20}
+Semantic error at line 1135, column 6:
+  Type error in expression: y - ( {10, 20} )
 ")})));
 end ArraySub7;
 
@@ -2391,8 +2399,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 2366, column 6:
-  Type error in expression: y - {{10, 20}, {30, 40}}
+Semantic error at line 1154, column 6:
+  Type error in expression: y - ( {{10, 20}, {30, 40}} )
 ")})));
 end ArraySub8;
 
@@ -2410,8 +2418,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 2385, column 6:
-  Type error in expression: y - {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}
+Semantic error at line 1173, column 6:
+  Type error in expression: y - ( {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}} )
 ")})));
 end ArraySub9;
 
@@ -2429,8 +2437,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 2404, column 6:
-  Type error in expression: y - {10, 20, 30}
+Semantic error at line 1192, column 6:
+  Type error in expression: y - ( {10, 20, 30} )
 ")})));
 end ArraySub10;
 
@@ -2448,8 +2456,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 2423, column 6:
-  Type error in expression: y - {{10, 20}, {30, 40}}
+Semantic error at line 1211, column 6:
+  Type error in expression: y - ( {{10, 20}, {30, 40}} )
 ")})));
 end ArraySub11;
 
@@ -2467,8 +2475,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 2442, column 6:
-  Type error in expression: y - {\"1\", \"2\"}
+Semantic error at line 1230, column 6:
+  Type error in expression: y - ( {\"1\", \"2\"} )
 ")})));
 end ArraySub12;
 
@@ -2491,10 +2499,11 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub1
  Real y[1];
  Real y[2];
 equation
- x[1] = y[1] .- 10;
- x[2] = y[2] .- 20;
+ x[1] = y[1] .- ( 10 );
+ x[2] = y[2] .- ( 20 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub1;
 ")})));
 end ArrayDotSub1;
@@ -2521,14 +2530,15 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub2
  Real y[2,1];
  Real y[2,2];
 equation
- x[1,1] = y[1,1] .- 10;
- x[1,2] = y[1,2] .- 20;
- x[2,1] = y[2,1] .- 30;
- x[2,2] = y[2,2] .- 40;
+ x[1,1] = y[1,1] .- ( 10 );
+ x[1,2] = y[1,2] .- ( 20 );
+ x[2,1] = y[2,1] .- ( 30 );
+ x[2,2] = y[2,2] .- ( 40 );
  y[1,1] = 1;
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub2;
 ")})));
 end ArrayDotSub2;
@@ -2563,14 +2573,14 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub3
  Real y[2,2,1];
  Real y[2,2,2];
 equation
- x[1,1,1] = y[1,1,1] .- 10;
- x[1,1,2] = y[1,1,2] .- 20;
- x[1,2,1] = y[1,2,1] .- 30;
- x[1,2,2] = y[1,2,2] .- 40;
- x[2,1,1] = y[2,1,1] .- 50;
- x[2,1,2] = y[2,1,2] .- 60;
- x[2,2,1] = y[2,2,1] .- 70;
- x[2,2,2] = y[2,2,2] .- 80;
+ x[1,1,1] = y[1,1,1] .- ( 10 );
+ x[1,1,2] = y[1,1,2] .- ( 20 );
+ x[1,2,1] = y[1,2,1] .- ( 30 );
+ x[1,2,2] = y[1,2,2] .- ( 40 );
+ x[2,1,1] = y[2,1,1] .- ( 50 );
+ x[2,1,2] = y[2,1,2] .- ( 60 );
+ x[2,2,1] = y[2,2,1] .- ( 70 );
+ x[2,2,2] = y[2,2,2] .- ( 80 );
  y[1,1,1] = 1;
  y[1,1,2] = 2;
  y[1,2,1] = 3;
@@ -2579,6 +2589,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub3;
 ")})));
 end ArrayDotSub3;
@@ -2601,10 +2612,11 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub4
  Real y[1];
  Real y[2];
 equation
- x[1] = y[1] .- 10;
- x[2] = y[2] .- 10;
+ x[1] = y[1] .- ( 10 );
+ x[2] = y[2] .- ( 10 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub4;
 ")})));
 end ArrayDotSub4;
@@ -2631,14 +2643,15 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub5
  Real y[2,1];
  Real y[2,2];
 equation
- x[1,1] = y[1,1] .- 10;
- x[1,2] = y[1,2] .- 10;
- x[2,1] = y[2,1] .- 10;
- x[2,2] = y[2,2] .- 10;
+ x[1,1] = y[1,1] .- ( 10 );
+ x[1,2] = y[1,2] .- ( 10 );
+ x[2,1] = y[2,1] .- ( 10 );
+ x[2,2] = y[2,2] .- ( 10 );
  y[1,1] = 1;
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub5;
 ")})));
 end ArrayDotSub5;
@@ -2673,14 +2686,14 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub6
  Real y[2,2,1];
  Real y[2,2,2];
 equation
- x[1,1,1] = y[1,1,1] .- 10;
- x[1,1,2] = y[1,1,2] .- 10;
- x[1,2,1] = y[1,2,1] .- 10;
- x[1,2,2] = y[1,2,2] .- 10;
- x[2,1,1] = y[2,1,1] .- 10;
- x[2,1,2] = y[2,1,2] .- 10;
- x[2,2,1] = y[2,2,1] .- 10;
- x[2,2,2] = y[2,2,2] .- 10;
+ x[1,1,1] = y[1,1,1] .- ( 10 );
+ x[1,1,2] = y[1,1,2] .- ( 10 );
+ x[1,2,1] = y[1,2,1] .- ( 10 );
+ x[1,2,2] = y[1,2,2] .- ( 10 );
+ x[2,1,1] = y[2,1,1] .- ( 10 );
+ x[2,1,2] = y[2,1,2] .- ( 10 );
+ x[2,2,1] = y[2,2,1] .- ( 10 );
+ x[2,2,2] = y[2,2,2] .- ( 10 );
  y[1,1,1] = 1;
  y[1,1,2] = 2;
  y[1,2,1] = 3;
@@ -2689,6 +2702,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub6;
 ")})));
 end ArrayDotSub6;
@@ -2710,9 +2724,10 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub7
  Real x[2];
  Real y;
 equation
- x[1] = y .- 10;
- x[2] = y .- 20;
+ x[1] = y .- ( 10 );
+ x[2] = y .- ( 20 );
  y = 1;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub7;
 ")})));
 end ArrayDotSub7;
@@ -2736,11 +2751,12 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub8
  Real x[2,2];
  Real y;
 equation
- x[1,1] = y .- 10;
- x[1,2] = y .- 20;
- x[2,1] = y .- 30;
- x[2,2] = y .- 40;
+ x[1,1] = y .- ( 10 );
+ x[1,2] = y .- ( 20 );
+ x[2,1] = y .- ( 30 );
+ x[2,2] = y .- ( 40 );
  y = 1;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub8;
 ")})));
 end ArrayDotSub8;
@@ -2768,15 +2784,16 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub9
  Real x[2,2,2];
  Real y;
 equation
- x[1,1,1] = y .- 10;
- x[1,1,2] = y .- 20;
- x[1,2,1] = y .- 30;
- x[1,2,2] = y .- 40;
- x[2,1,1] = y .- 50;
- x[2,1,2] = y .- 60;
- x[2,2,1] = y .- 70;
- x[2,2,2] = y .- 80;
+ x[1,1,1] = y .- ( 10 );
+ x[1,1,2] = y .- ( 20 );
+ x[1,2,1] = y .- ( 30 );
+ x[1,2,2] = y .- ( 40 );
+ x[2,1,1] = y .- ( 50 );
+ x[2,1,2] = y .- ( 60 );
+ x[2,2,1] = y .- ( 70 );
+ x[2,2,2] = y .- ( 80 );
  y = 1;
+
 end ArrayTests.Algebra.Sub.ArrayDotSub9;
 ")})));
 end ArrayDotSub9;
@@ -2795,8 +2812,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 2767, column 6:
-  Type error in expression: y .- {10, 20, 30}
+Semantic error at line 2638, column 6:
+  Type error in expression: y .- ( {10, 20, 30} )
 ")})));
 end ArrayDotSub10;
 
@@ -2814,8 +2831,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 2786, column 6:
-  Type error in expression: y .- {{10, 20}, {30, 40}}
+Semantic error at line 2657, column 6:
+  Type error in expression: y .- ( {{10, 20}, {30, 40}} )
 ")})));
 end ArrayDotSub11;
 
@@ -2833,8 +2850,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 2805, column 6:
-  Type error in expression: y .- {\"1\", \"2\"}
+Semantic error at line 2676, column 6:
+  Type error in expression: y .- ( {\"1\", \"2\"} )
 ")})));
 end ArrayDotSub12;
 
@@ -2860,10 +2877,11 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK1
  Real y[2];
  Real y[3];
 equation
- x = y[1] * 10 + y[2] * 20 + y[3] * 30;
+ x = ( y[1] ) * ( 10 ) + ( y[2] ) * ( 20 ) + ( y[3] ) * ( 30 );
  y[1] = 1;
  y[2] = 2;
  y[3] = 3;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK1;
 ")})));
 end ArrayMulOK1;
@@ -2890,14 +2908,15 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK2
  Real y[2,1];
  Real y[2,2];
 equation
- x[1,1] = y[1,1] * 10 + y[1,2] * 30;
- x[1,2] = y[1,1] * 20 + y[1,2] * 40;
- x[2,1] = y[2,1] * 10 + y[2,2] * 30;
- x[2,2] = y[2,1] * 20 + y[2,2] * 40;
+ x[1,1] = ( y[1,1] ) * ( 10 ) + ( y[1,2] ) * ( 30 );
+ x[1,2] = ( y[1,1] ) * ( 20 ) + ( y[1,2] ) * ( 40 );
+ x[2,1] = ( y[2,1] ) * ( 10 ) + ( y[2,2] ) * ( 30 );
+ x[2,2] = ( y[2,1] ) * ( 20 ) + ( y[2,2] ) * ( 40 );
  y[1,1] = 1;
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK2;
 ")})));
 end ArrayMulOK2;
@@ -2936,18 +2955,18 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK3
  Real y[2,3];
  Real y[2,4];
 equation
- x[1,1] = 10 * y[1,1] + 20 * y[2,1];
- x[1,2] = 10 * y[1,2] + 20 * y[2,2];
- x[1,3] = 10 * y[1,3] + 20 * y[2,3];
- x[1,4] = 10 * y[1,4] + 20 * y[2,4];
- x[2,1] = 30 * y[1,1] + 40 * y[2,1];
- x[2,2] = 30 * y[1,2] + 40 * y[2,2];
- x[2,3] = 30 * y[1,3] + 40 * y[2,3];
- x[2,4] = 30 * y[1,4] + 40 * y[2,4];
- x[3,1] = 50 * y[1,1] + 60 * y[2,1];
- x[3,2] = 50 * y[1,2] + 60 * y[2,2];
- x[3,3] = 50 * y[1,3] + 60 * y[2,3];
- x[3,4] = 50 * y[1,4] + 60 * y[2,4];
+ x[1,1] = ( 10 ) * ( y[1,1] ) + ( 20 ) * ( y[2,1] );
+ x[1,2] = ( 10 ) * ( y[1,2] ) + ( 20 ) * ( y[2,2] );
+ x[1,3] = ( 10 ) * ( y[1,3] ) + ( 20 ) * ( y[2,3] );
+ x[1,4] = ( 10 ) * ( y[1,4] ) + ( 20 ) * ( y[2,4] );
+ x[2,1] = ( 30 ) * ( y[1,1] ) + ( 40 ) * ( y[2,1] );
+ x[2,2] = ( 30 ) * ( y[1,2] ) + ( 40 ) * ( y[2,2] );
+ x[2,3] = ( 30 ) * ( y[1,3] ) + ( 40 ) * ( y[2,3] );
+ x[2,4] = ( 30 ) * ( y[1,4] ) + ( 40 ) * ( y[2,4] );
+ x[3,1] = ( 50 ) * ( y[1,1] ) + ( 60 ) * ( y[2,1] );
+ x[3,2] = ( 50 ) * ( y[1,2] ) + ( 60 ) * ( y[2,2] );
+ x[3,3] = ( 50 ) * ( y[1,3] ) + ( 60 ) * ( y[2,3] );
+ x[3,4] = ( 50 ) * ( y[1,4] ) + ( 60 ) * ( y[2,4] );
  y[1,1] = 1;
  y[1,2] = 2;
  y[1,3] = 3;
@@ -2956,6 +2975,7 @@ equation
  y[2,2] = 6;
  y[2,3] = 7;
  y[2,4] = 8;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK3;
 ")})));
 end ArrayMulOK3;
@@ -2978,10 +2998,11 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK4
  Real y[1];
  Real y[2];
 equation
- x[1] = y[1] * 10 + y[2] * 30;
- x[2] = y[1] * 20 + y[2] * 40;
+ x[1] = ( y[1] ) * ( 10 ) + ( y[2] ) * ( 30 );
+ x[2] = ( y[1] ) * ( 20 ) + ( y[2] ) * ( 40 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK4;
 ")})));
 end ArrayMulOK4;
@@ -3006,12 +3027,13 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK5
  Real y[2,1];
  Real y[2,2];
 equation
- x[1] = y[1,1] * 10 + y[1,2] * 20;
- x[2] = y[2,1] * 10 + y[2,2] * 20;
+ x[1] = ( y[1,1] ) * ( 10 ) + ( y[1,2] ) * ( 20 );
+ x[2] = ( y[2,1] ) * ( 10 ) + ( y[2,2] ) * ( 20 );
  y[1,1] = 1;
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK5;
 ")})));
 end ArrayMulOK5;
@@ -3034,10 +3056,11 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK6
  Real y[1];
  Real y[2];
 equation
- x[1] = y[1] * 10;
- x[2] = y[2] * 10;
+ x[1] = ( y[1] ) * ( 10 );
+ x[2] = ( y[2] ) * ( 10 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK6;
 ")})));
 end ArrayMulOK6;
@@ -3064,14 +3087,15 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK7
  Real y[2,1];
  Real y[2,2];
 equation
- x[1,1] = y[1,1] * 10;
- x[1,2] = y[1,2] * 10;
- x[2,1] = y[2,1] * 10;
- x[2,2] = y[2,2] * 10;
+ x[1,1] = ( y[1,1] ) * ( 10 );
+ x[1,2] = ( y[1,2] ) * ( 10 );
+ x[2,1] = ( y[2,1] ) * ( 10 );
+ x[2,2] = ( y[2,2] ) * ( 10 );
  y[1,1] = 1;
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK7;
 ")})));
 end ArrayMulOK7;
@@ -3106,14 +3130,14 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK8
  Real y[2,2,1];
  Real y[2,2,2];
 equation
- x[1,1,1] = y[1,1,1] * 10;
- x[1,1,2] = y[1,1,2] * 10;
- x[1,2,1] = y[1,2,1] * 10;
- x[1,2,2] = y[1,2,2] * 10;
- x[2,1,1] = y[2,1,1] * 10;
- x[2,1,2] = y[2,1,2] * 10;
- x[2,2,1] = y[2,2,1] * 10;
- x[2,2,2] = y[2,2,2] * 10;
+ x[1,1,1] = ( y[1,1,1] ) * ( 10 );
+ x[1,1,2] = ( y[1,1,2] ) * ( 10 );
+ x[1,2,1] = ( y[1,2,1] ) * ( 10 );
+ x[1,2,2] = ( y[1,2,2] ) * ( 10 );
+ x[2,1,1] = ( y[2,1,1] ) * ( 10 );
+ x[2,1,2] = ( y[2,1,2] ) * ( 10 );
+ x[2,2,1] = ( y[2,2,1] ) * ( 10 );
+ x[2,2,2] = ( y[2,2,2] ) * ( 10 );
  y[1,1,1] = 1;
  y[1,1,2] = 2;
  y[1,2,1] = 3;
@@ -3122,6 +3146,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK8;
 ")})));
 end ArrayMulOK8;
@@ -3143,9 +3168,10 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK9
  Real x[2];
  Real y;
 equation
- x[1] = y * 10;
- x[2] = y * 20;
+ x[1] = ( y ) * ( 10 );
+ x[2] = ( y ) * ( 20 );
  y = 1;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK9;
 ")})));
 end ArrayMulOK9;
@@ -3169,11 +3195,12 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK10
  Real x[2,2];
  Real y;
 equation
- x[1,1] = y * 10;
- x[1,2] = y * 20;
- x[2,1] = y * 30;
- x[2,2] = y * 40;
+ x[1,1] = ( y ) * ( 10 );
+ x[1,2] = ( y ) * ( 20 );
+ x[2,1] = ( y ) * ( 30 );
+ x[2,2] = ( y ) * ( 40 );
  y = 1;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK10;
 ")})));
 end ArrayMulOK10;
@@ -3201,15 +3228,16 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK11
  Real x[2,2,2];
  Real y;
 equation
- x[1,1,1] = y * 10;
- x[1,1,2] = y * 20;
- x[1,2,1] = y * 30;
- x[1,2,2] = y * 40;
- x[2,1,1] = y * 50;
- x[2,1,2] = y * 60;
- x[2,2,1] = y * 70;
- x[2,2,2] = y * 80;
+ x[1,1,1] = ( y ) * ( 10 );
+ x[1,1,2] = ( y ) * ( 20 );
+ x[1,2,1] = ( y ) * ( 30 );
+ x[1,2,2] = ( y ) * ( 40 );
+ x[2,1,1] = ( y ) * ( 50 );
+ x[2,1,2] = ( y ) * ( 60 );
+ x[2,2,1] = ( y ) * ( 70 );
+ x[2,2,2] = ( y ) * ( 80 );
  y = 1;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK11;
 ")})));
 end ArrayMulOK11;
@@ -3234,12 +3262,13 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK12
  Real y[2,1];
  Real y[2,2];
 equation
- x[1,1] = y[1,1] * 10 + y[1,2] * 20;
- x[2,1] = y[2,1] * 10 + y[2,2] * 20;
+ x[1,1] = ( y[1,1] ) * ( 10 ) + ( y[1,2] ) * ( 20 );
+ x[2,1] = ( y[2,1] ) * ( 10 ) + ( y[2,2] ) * ( 20 );
  y[1,1] = 1;
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Mul.ArrayMulOK12;
 ")})));
 end ArrayMulOK12;
@@ -3265,9 +3294,10 @@ equation
  x[1] = 1;
  x[2] = 2;
  x[3] = 3;
- y[1] = (x[1] * x[1] + x[2] * x[2] + x[3] * x[3]) * x[1];
- y[2] = (x[1] * x[1] + x[2] * x[2] + x[3] * x[3]) * x[2];
- y[3] = (x[1] * x[1] + x[2] * x[2] + x[3] * x[3]) * x[3];
+ y[1] = ( ( x[1] ) * ( x[1] ) + ( x[2] ) * ( x[2] ) + ( x[3] ) * ( x[3] ) ) * ( x[1] );
+ y[2] = ( ( x[1] ) * ( x[1] ) + ( x[2] ) * ( x[2] ) + ( x[3] ) * ( x[3] ) ) * ( x[2] );
+ y[3] = ( ( x[1] ) * ( x[1] ) + ( x[2] ) * ( x[2] ) + ( x[3] ) * ( x[3] ) ) * ( x[3] );
+
 end ArrayTests.Algebra.Mul.ArrayMulOK13;
 ")})));
 end ArrayMulOK13;
@@ -3286,8 +3316,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3261, column 6:
-  Type error in expression: y * {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}
+Semantic error at line 1602, column 6:
+  Type error in expression: ( y ) * ( {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}} )
 ")})));
 end ArrayMulErr1;
 
@@ -3305,8 +3335,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3280, column 6:
-  Type error in expression: y * {10, 20, 30}
+Semantic error at line 1621, column 6:
+  Type error in expression: ( y ) * ( {10, 20, 30} )
 ")})));
 end ArrayMulErr2;
 
@@ -3324,8 +3354,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3299, column 6:
-  Type error in expression: y * {\"1\", \"2\"}
+Semantic error at line 1640, column 6:
+  Type error in expression: ( y ) * ( {\"1\", \"2\"} )
 ")})));
 end ArrayMulErr3;
 
@@ -3343,8 +3373,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3318, column 6:
-  Type error in expression: y * {{10, 20}, {30, 40}, {50, 60}}
+Semantic error at line 1659, column 6:
+  Type error in expression: ( y ) * ( {{10, 20}, {30, 40}, {50, 60}} )
 ")})));
 end ArrayMulErr4;
 
@@ -3362,8 +3392,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3337, column 6:
-  Type error in expression: y * {{10, 20}, {30, 40}}
+Semantic error at line 1678, column 6:
+  Type error in expression: ( y ) * ( {{10, 20}, {30, 40}} )
 ")})));
 end ArrayMulErr5;
 
@@ -3381,8 +3411,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3356, column 6:
-  Type error in expression: y * {{10, 20, 30}, {40, 50, 60}}
+Semantic error at line 1697, column 6:
+  Type error in expression: ( y ) * ( {{10, 20, 30}, {40, 50, 60}} )
 ")})));
 end ArrayMulErr6;
 
@@ -3400,8 +3430,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3375, column 6:
-  Type error in expression: y * {10, 20, 30}
+Semantic error at line 1716, column 6:
+  Type error in expression: ( y ) * ( {10, 20, 30} )
 ")})));
 end ArrayMulErr7;
 
@@ -3419,8 +3449,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3394, column 6:
-  Type error in expression: y * {{10, 20}, {30, 40}}
+Semantic error at line 1735, column 6:
+  Type error in expression: ( y ) * ( {{10, 20}, {30, 40}} )
 ")})));
 end ArrayMulErr8;
 
@@ -3438,8 +3468,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3413, column 6:
-  Type error in expression: y * {{10, 20}}
+Semantic error at line 1754, column 6:
+  Type error in expression: ( y ) * ( {{10, 20}} )
 ")})));
 end ArrayMulErr9;
 
@@ -3462,10 +3492,11 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul1
  Real y[1];
  Real y[2];
 equation
- x[1] = y[1] .* 10;
- x[2] = y[2] .* 20;
+ x[1] = ( y[1] ) .* ( 10 );
+ x[2] = ( y[2] ) .* ( 20 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul1;
 ")})));
 end ArrayDotMul1;
@@ -3492,14 +3523,15 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul2
  Real y[2,1];
  Real y[2,2];
 equation
- x[1,1] = y[1,1] .* 10;
- x[1,2] = y[1,2] .* 20;
- x[2,1] = y[2,1] .* 30;
- x[2,2] = y[2,2] .* 40;
+ x[1,1] = ( y[1,1] ) .* ( 10 );
+ x[1,2] = ( y[1,2] ) .* ( 20 );
+ x[2,1] = ( y[2,1] ) .* ( 30 );
+ x[2,2] = ( y[2,2] ) .* ( 40 );
  y[1,1] = 1;
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul2;
 ")})));
 end ArrayDotMul2;
@@ -3534,14 +3566,14 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul3
  Real y[2,2,1];
  Real y[2,2,2];
 equation
- x[1,1,1] = y[1,1,1] .* 10;
- x[1,1,2] = y[1,1,2] .* 20;
- x[1,2,1] = y[1,2,1] .* 30;
- x[1,2,2] = y[1,2,2] .* 40;
- x[2,1,1] = y[2,1,1] .* 50;
- x[2,1,2] = y[2,1,2] .* 60;
- x[2,2,1] = y[2,2,1] .* 70;
- x[2,2,2] = y[2,2,2] .* 80;
+ x[1,1,1] = ( y[1,1,1] ) .* ( 10 );
+ x[1,1,2] = ( y[1,1,2] ) .* ( 20 );
+ x[1,2,1] = ( y[1,2,1] ) .* ( 30 );
+ x[1,2,2] = ( y[1,2,2] ) .* ( 40 );
+ x[2,1,1] = ( y[2,1,1] ) .* ( 50 );
+ x[2,1,2] = ( y[2,1,2] ) .* ( 60 );
+ x[2,2,1] = ( y[2,2,1] ) .* ( 70 );
+ x[2,2,2] = ( y[2,2,2] ) .* ( 80 );
  y[1,1,1] = 1;
  y[1,1,2] = 2;
  y[1,2,1] = 3;
@@ -3550,6 +3582,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul3;
 ")})));
 end ArrayDotMul3;
@@ -3572,10 +3605,11 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul4
  Real y[1];
  Real y[2];
 equation
- x[1] = y[1] .* 10;
- x[2] = y[2] .* 10;
+ x[1] = ( y[1] ) .* ( 10 );
+ x[2] = ( y[2] ) .* ( 10 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul4;
 ")})));
 end ArrayDotMul4;
@@ -3602,14 +3636,15 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul5
  Real y[2,1];
  Real y[2,2];
 equation
- x[1,1] = y[1,1] .* 10;
- x[1,2] = y[1,2] .* 10;
- x[2,1] = y[2,1] .* 10;
- x[2,2] = y[2,2] .* 10;
+ x[1,1] = ( y[1,1] ) .* ( 10 );
+ x[1,2] = ( y[1,2] ) .* ( 10 );
+ x[2,1] = ( y[2,1] ) .* ( 10 );
+ x[2,2] = ( y[2,2] ) .* ( 10 );
  y[1,1] = 1;
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul5;
 ")})));
 end ArrayDotMul5;
@@ -3644,14 +3679,14 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul6
  Real y[2,2,1];
  Real y[2,2,2];
 equation
- x[1,1,1] = y[1,1,1] .* 10;
- x[1,1,2] = y[1,1,2] .* 10;
- x[1,2,1] = y[1,2,1] .* 10;
- x[1,2,2] = y[1,2,2] .* 10;
- x[2,1,1] = y[2,1,1] .* 10;
- x[2,1,2] = y[2,1,2] .* 10;
- x[2,2,1] = y[2,2,1] .* 10;
- x[2,2,2] = y[2,2,2] .* 10;
+ x[1,1,1] = ( y[1,1,1] ) .* ( 10 );
+ x[1,1,2] = ( y[1,1,2] ) .* ( 10 );
+ x[1,2,1] = ( y[1,2,1] ) .* ( 10 );
+ x[1,2,2] = ( y[1,2,2] ) .* ( 10 );
+ x[2,1,1] = ( y[2,1,1] ) .* ( 10 );
+ x[2,1,2] = ( y[2,1,2] ) .* ( 10 );
+ x[2,2,1] = ( y[2,2,1] ) .* ( 10 );
+ x[2,2,2] = ( y[2,2,2] ) .* ( 10 );
  y[1,1,1] = 1;
  y[1,1,2] = 2;
  y[1,2,1] = 3;
@@ -3660,6 +3695,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul6;
 ")})));
 end ArrayDotMul6;
@@ -3681,9 +3717,10 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul7
  Real x[2];
  Real y;
 equation
- x[1] = y .* 10;
- x[2] = y .* 20;
+ x[1] = ( y ) .* ( 10 );
+ x[2] = ( y ) .* ( 20 );
  y = 1;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul7;
 ")})));
 end ArrayDotMul7;
@@ -3707,11 +3744,12 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul8
  Real x[2,2];
  Real y;
 equation
- x[1,1] = y .* 10;
- x[1,2] = y .* 20;
- x[2,1] = y .* 30;
- x[2,2] = y .* 40;
+ x[1,1] = ( y ) .* ( 10 );
+ x[1,2] = ( y ) .* ( 20 );
+ x[2,1] = ( y ) .* ( 30 );
+ x[2,2] = ( y ) .* ( 40 );
  y = 1;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul8;
 ")})));
 end ArrayDotMul8;
@@ -3739,15 +3777,16 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul9
  Real x[2,2,2];
  Real y;
 equation
- x[1,1,1] = y .* 10;
- x[1,1,2] = y .* 20;
- x[1,2,1] = y .* 30;
- x[1,2,2] = y .* 40;
- x[2,1,1] = y .* 50;
- x[2,1,2] = y .* 60;
- x[2,2,1] = y .* 70;
- x[2,2,2] = y .* 80;
+ x[1,1,1] = ( y ) .* ( 10 );
+ x[1,1,2] = ( y ) .* ( 20 );
+ x[1,2,1] = ( y ) .* ( 30 );
+ x[1,2,2] = ( y ) .* ( 40 );
+ x[2,1,1] = ( y ) .* ( 50 );
+ x[2,1,2] = ( y ) .* ( 60 );
+ x[2,2,1] = ( y ) .* ( 70 );
+ x[2,2,2] = ( y ) .* ( 80 );
  y = 1;
+
 end ArrayTests.Algebra.Mul.ArrayDotMul9;
 ")})));
 end ArrayDotMul9;
@@ -3766,8 +3805,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3738, column 6:
-  Type error in expression: y .* {10, 20, 30}
+Semantic error at line 2638, column 6:
+  Type error in expression: ( y ) .* ( {10, 20, 30} )
 ")})));
 end ArrayDotMul10;
 
@@ -3785,8 +3824,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3757, column 6:
-  Type error in expression: y .* {{10, 20}, {30, 40}}
+Semantic error at line 2657, column 6:
+  Type error in expression: ( y ) .* ( {{10, 20}, {30, 40}} )
 ")})));
 end ArrayDotMul11;
 
@@ -3804,8 +3843,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3776, column 6:
-  Type error in expression: y .* {\"1\", \"2\"}
+Semantic error at line 2676, column 6:
+  Type error in expression: ( y ) .* ( {\"1\", \"2\"} )
 ")})));
 end ArrayDotMul12;
 
@@ -3827,8 +3866,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3802, column 6:
-  Type error in expression: y / {10, 20}
+Semantic error at line 1994, column 6:
+  Type error in expression: ( y ) / ( {10, 20} )
 ")})));
 end ArrayDiv1;
 
@@ -3846,8 +3885,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3821, column 6:
-  Type error in expression: y / {{10, 20}, {30, 40}}
+Semantic error at line 2013, column 6:
+  Type error in expression: ( y ) / ( {{10, 20}, {30, 40}} )
 ")})));
 end ArrayDiv2;
 
@@ -3869,10 +3908,11 @@ fclass ArrayTests.Algebra.Div.ArrayDiv3
  Real y[1];
  Real y[2];
 equation
- x[1] = y[1] / 10;
- x[2] = y[2] / 10;
+ x[1] = ( y[1] ) / ( 10 );
+ x[2] = ( y[2] ) / ( 10 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Div.ArrayDiv3;
 ")})));
 end ArrayDiv3;
@@ -3899,14 +3939,15 @@ fclass ArrayTests.Algebra.Div.ArrayDiv4
  Real y[2,1];
  Real y[2,2];
 equation
- x[1,1] = y[1,1] / 10;
- x[1,2] = y[1,2] / 10;
- x[2,1] = y[2,1] / 10;
- x[2,2] = y[2,2] / 10;
+ x[1,1] = ( y[1,1] ) / ( 10 );
+ x[1,2] = ( y[1,2] ) / ( 10 );
+ x[2,1] = ( y[2,1] ) / ( 10 );
+ x[2,2] = ( y[2,2] ) / ( 10 );
  y[1,1] = 1;
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Div.ArrayDiv4;
 ")})));
 end ArrayDiv4;
@@ -3941,14 +3982,14 @@ fclass ArrayTests.Algebra.Div.ArrayDiv5
  Real y[2,2,1];
  Real y[2,2,2];
 equation
- x[1,1,1] = y[1,1,1] / 10;
- x[1,1,2] = y[1,1,2] / 10;
- x[1,2,1] = y[1,2,1] / 10;
- x[1,2,2] = y[1,2,2] / 10;
- x[2,1,1] = y[2,1,1] / 10;
- x[2,1,2] = y[2,1,2] / 10;
- x[2,2,1] = y[2,2,1] / 10;
- x[2,2,2] = y[2,2,2] / 10;
+ x[1,1,1] = ( y[1,1,1] ) / ( 10 );
+ x[1,1,2] = ( y[1,1,2] ) / ( 10 );
+ x[1,2,1] = ( y[1,2,1] ) / ( 10 );
+ x[1,2,2] = ( y[1,2,2] ) / ( 10 );
+ x[2,1,1] = ( y[2,1,1] ) / ( 10 );
+ x[2,1,2] = ( y[2,1,2] ) / ( 10 );
+ x[2,2,1] = ( y[2,2,1] ) / ( 10 );
+ x[2,2,2] = ( y[2,2,2] ) / ( 10 );
  y[1,1,1] = 1;
  y[1,1,2] = 2;
  y[1,2,1] = 3;
@@ -3957,6 +3998,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Div.ArrayDiv5;
 ")})));
 end ArrayDiv5;
@@ -3975,8 +4017,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3950, column 6:
-  Type error in expression: y / {10, 20}
+Semantic error at line 2056, column 6:
+  Type error in expression: ( y ) / ( {10, 20} )
 ")})));
 end ArrayDiv6;
 
@@ -3994,8 +4036,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3969, column 6:
-  Type error in expression: y / {{10, 20}, {30, 40}}
+Semantic error at line 2075, column 6:
+  Type error in expression: ( y ) / ( {{10, 20}, {30, 40}} )
 ")})));
 end ArrayDiv7;
 
@@ -4013,8 +4055,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 3988, column 6:
-  Type error in expression: y / {\"1\", \"2\"}
+Semantic error at line 2094, column 6:
+  Type error in expression: ( y ) / ( {\"1\", \"2\"} )
 ")})));
 end ArrayDiv8;
 
@@ -4037,10 +4079,11 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv1
  Real y[1];
  Real y[2];
 equation
- x[1] = y[1] ./ 10;
- x[2] = y[2] ./ 20;
+ x[1] = ( y[1] ) ./ ( 10 );
+ x[2] = ( y[2] ) ./ ( 20 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv1;
 ")})));
 end ArrayDotDiv1;
@@ -4067,14 +4110,15 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv2
  Real y[2,1];
  Real y[2,2];
 equation
- x[1,1] = y[1,1] ./ 10;
- x[1,2] = y[1,2] ./ 20;
- x[2,1] = y[2,1] ./ 30;
- x[2,2] = y[2,2] ./ 40;
+ x[1,1] = ( y[1,1] ) ./ ( 10 );
+ x[1,2] = ( y[1,2] ) ./ ( 20 );
+ x[2,1] = ( y[2,1] ) ./ ( 30 );
+ x[2,2] = ( y[2,2] ) ./ ( 40 );
  y[1,1] = 1;
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv2;
 ")})));
 end ArrayDotDiv2;
@@ -4109,14 +4153,14 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv3
  Real y[2,2,1];
  Real y[2,2,2];
 equation
- x[1,1,1] = y[1,1,1] ./ 10;
- x[1,1,2] = y[1,1,2] ./ 20;
- x[1,2,1] = y[1,2,1] ./ 30;
- x[1,2,2] = y[1,2,2] ./ 40;
- x[2,1,1] = y[2,1,1] ./ 50;
- x[2,1,2] = y[2,1,2] ./ 60;
- x[2,2,1] = y[2,2,1] ./ 70;
- x[2,2,2] = y[2,2,2] ./ 80;
+ x[1,1,1] = ( y[1,1,1] ) ./ ( 10 );
+ x[1,1,2] = ( y[1,1,2] ) ./ ( 20 );
+ x[1,2,1] = ( y[1,2,1] ) ./ ( 30 );
+ x[1,2,2] = ( y[1,2,2] ) ./ ( 40 );
+ x[2,1,1] = ( y[2,1,1] ) ./ ( 50 );
+ x[2,1,2] = ( y[2,1,2] ) ./ ( 60 );
+ x[2,2,1] = ( y[2,2,1] ) ./ ( 70 );
+ x[2,2,2] = ( y[2,2,2] ) ./ ( 80 );
  y[1,1,1] = 1;
  y[1,1,2] = 2;
  y[1,2,1] = 3;
@@ -4125,6 +4169,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv3;
 ")})));
 end ArrayDotDiv3;
@@ -4147,10 +4192,11 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv4
  Real y[1];
  Real y[2];
 equation
- x[1] = y[1] ./ 10;
- x[2] = y[2] ./ 10;
+ x[1] = ( y[1] ) ./ ( 10 );
+ x[2] = ( y[2] ) ./ ( 10 );
  y[1] = 1;
  y[2] = 2;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv4;
 ")})));
 end ArrayDotDiv4;
@@ -4177,14 +4223,15 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv5
  Real y[2,1];
  Real y[2,2];
 equation
- x[1,1] = y[1,1] ./ 10;
- x[1,2] = y[1,2] ./ 10;
- x[2,1] = y[2,1] ./ 10;
- x[2,2] = y[2,2] ./ 10;
+ x[1,1] = ( y[1,1] ) ./ ( 10 );
+ x[1,2] = ( y[1,2] ) ./ ( 10 );
+ x[2,1] = ( y[2,1] ) ./ ( 10 );
+ x[2,2] = ( y[2,2] ) ./ ( 10 );
  y[1,1] = 1;
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv5;
 ")})));
 end ArrayDotDiv5;
@@ -4219,14 +4266,14 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv6
  Real y[2,2,1];
  Real y[2,2,2];
 equation
- x[1,1,1] = y[1,1,1] ./ 10;
- x[1,1,2] = y[1,1,2] ./ 10;
- x[1,2,1] = y[1,2,1] ./ 10;
- x[1,2,2] = y[1,2,2] ./ 10;
- x[2,1,1] = y[2,1,1] ./ 10;
- x[2,1,2] = y[2,1,2] ./ 10;
- x[2,2,1] = y[2,2,1] ./ 10;
- x[2,2,2] = y[2,2,2] ./ 10;
+ x[1,1,1] = ( y[1,1,1] ) ./ ( 10 );
+ x[1,1,2] = ( y[1,1,2] ) ./ ( 10 );
+ x[1,2,1] = ( y[1,2,1] ) ./ ( 10 );
+ x[1,2,2] = ( y[1,2,2] ) ./ ( 10 );
+ x[2,1,1] = ( y[2,1,1] ) ./ ( 10 );
+ x[2,1,2] = ( y[2,1,2] ) ./ ( 10 );
+ x[2,2,1] = ( y[2,2,1] ) ./ ( 10 );
+ x[2,2,2] = ( y[2,2,2] ) ./ ( 10 );
  y[1,1,1] = 1;
  y[1,1,2] = 2;
  y[1,2,1] = 3;
@@ -4235,6 +4282,7 @@ equation
  y[2,1,2] = 6;
  y[2,2,1] = 7;
  y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv6;
 ")})));
 end ArrayDotDiv6;
@@ -4256,9 +4304,10 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv7
  Real x[2];
  Real y;
 equation
- x[1] = y ./ 10;
- x[2] = y ./ 20;
+ x[1] = ( y ) ./ ( 10 );
+ x[2] = ( y ) ./ ( 20 );
  y = 1;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv7;
 ")})));
 end ArrayDotDiv7;
@@ -4282,11 +4331,12 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv8
  Real x[2,2];
  Real y;
 equation
- x[1,1] = y ./ 10;
- x[1,2] = y ./ 20;
- x[2,1] = y ./ 30;
- x[2,2] = y ./ 40;
+ x[1,1] = ( y ) ./ ( 10 );
+ x[1,2] = ( y ) ./ ( 20 );
+ x[2,1] = ( y ) ./ ( 30 );
+ x[2,2] = ( y ) ./ ( 40 );
  y = 1;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv8;
 ")})));
 end ArrayDotDiv8;
@@ -4314,15 +4364,16 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv9
  Real x[2,2,2];
  Real y;
 equation
- x[1,1,1] = y ./ 10;
- x[1,1,2] = y ./ 20;
- x[1,2,1] = y ./ 30;
- x[1,2,2] = y ./ 40;
- x[2,1,1] = y ./ 50;
- x[2,1,2] = y ./ 60;
- x[2,2,1] = y ./ 70;
- x[2,2,2] = y ./ 80;
+ x[1,1,1] = ( y ) ./ ( 10 );
+ x[1,1,2] = ( y ) ./ ( 20 );
+ x[1,2,1] = ( y ) ./ ( 30 );
+ x[1,2,2] = ( y ) ./ ( 40 );
+ x[2,1,1] = ( y ) ./ ( 50 );
+ x[2,1,2] = ( y ) ./ ( 60 );
+ x[2,2,1] = ( y ) ./ ( 70 );
+ x[2,2,2] = ( y ) ./ ( 80 );
  y = 1;
+
 end ArrayTests.Algebra.Div.ArrayDotDiv9;
 ")})));
 end ArrayDotDiv9;
@@ -4341,8 +4392,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 4313, column 6:
-  Type error in expression: y ./ {10, 20, 30}
+Semantic error at line 2638, column 6:
+  Type error in expression: ( y ) ./ ( {10, 20, 30} )
 ")})));
 end ArrayDotDiv10;
 
@@ -4360,8 +4411,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 4332, column 6:
-  Type error in expression: y ./ {{10, 20}, {30, 40}}
+Semantic error at line 2657, column 6:
+  Type error in expression: ( y ) ./ ( {{10, 20}, {30, 40}} )
 ")})));
 end ArrayDotDiv11;
 
@@ -4379,8 +4430,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 4351, column 6:
-  Type error in expression: y ./ {\"1\", \"2\"}
+Semantic error at line 2676, column 6:
+  Type error in expression: ( y ) ./ ( {\"1\", \"2\"} )
 ")})));
 end ArrayDotDiv12;
 
@@ -4719,8 +4770,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 4691, column 6:
-  Type error in expression: y .^ {10, 20, 30}
+Semantic error at line 3972, column 6:
+  Type error in expression: ( y ) .^ ( {10, 20, 30} )
 ")})));
 end ArrayDotPow10;
 
@@ -4738,8 +4789,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 4710, column 6:
-  Type error in expression: y .^ {{10, 20}, {30, 40}}
+Semantic error at line 3991, column 6:
+  Type error in expression: ( y ) .^ ( {{10, 20}, {30, 40}} )
 ")})));
 end ArrayDotPow11;
 
@@ -4757,8 +4808,8 @@ equation
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 4729, column 6:
-  Type error in expression: y .^ {\"1\", \"2\"}
+Semantic error at line 4010, column 6:
+  Type error in expression: ( y ) .^ ( {\"1\", \"2\"} )
 ")})));
 end ArrayDotPow12;
 
@@ -4826,10 +4877,11 @@ fclass ArrayTests.Algebra.Pow.ArrayPow3
  Real x[2,1];
  Real x[2,2];
 equation
- x[1,1] = 1 * 1 + 2 * 3;
- x[1,2] = 1 * 2 + 2 * 4;
- x[2,1] = 3 * 1 + 4 * 3;
- x[2,2] = 3 * 2 + 4 * 4;
+ x[1,1] = ( 1 ) * ( 1 ) + ( 2 ) * ( 3 );
+ x[1,2] = ( 1 ) * ( 2 ) + ( 2 ) * ( 4 );
+ x[2,1] = ( 3 ) * ( 1 ) + ( 4 ) * ( 3 );
+ x[2,2] = ( 3 ) * ( 2 ) + ( 4 ) * ( 4 );
+
 end ArrayTests.Algebra.Pow.ArrayPow3;
 ")})));
 end ArrayPow3;
@@ -4849,10 +4901,11 @@ fclass ArrayTests.Algebra.Pow.ArrayPow4
  Real x[2,1];
  Real x[2,2];
 equation
- x[1,1] = (1 * 1 + 2 * 3) * 1 + (1 * 2 + 2 * 4) * 3;
- x[1,2] = (1 * 1 + 2 * 3) * 2 + (1 * 2 + 2 * 4) * 4;
- x[2,1] = (3 * 1 + 4 * 3) * 1 + (3 * 2 + 4 * 4) * 3;
- x[2,2] = (3 * 1 + 4 * 3) * 2 + (3 * 2 + 4 * 4) * 4;
+ x[1,1] = ( ( 1 ) * ( 1 ) + ( 2 ) * ( 3 ) ) * ( 1 ) + ( ( 1 ) * ( 2 ) + ( 2 ) * ( 4 ) ) * ( 3 );
+ x[1,2] = ( ( 1 ) * ( 1 ) + ( 2 ) * ( 3 ) ) * ( 2 ) + ( ( 1 ) * ( 2 ) + ( 2 ) * ( 4 ) ) * ( 4 );
+ x[2,1] = ( ( 3 ) * ( 1 ) + ( 4 ) * ( 3 ) ) * ( 1 ) + ( ( 3 ) * ( 2 ) + ( 4 ) * ( 4 ) ) * ( 3 );
+ x[2,2] = ( ( 3 ) * ( 1 ) + ( 4 ) * ( 3 ) ) * ( 2 ) + ( ( 3 ) * ( 2 ) + ( 4 ) * ( 4 ) ) * ( 4 );
+
 end ArrayTests.Algebra.Pow.ArrayPow4;
 ")})));
 end ArrayPow4;
@@ -4877,15 +4930,16 @@ fclass ArrayTests.Algebra.Pow.ArrayPow5
  Real x[3,2];
  Real x[3,3];
 equation
- x[1,1] = 1 * 1 + 2 * 4 + 3 * 7;
- x[1,2] = 1 * 2 + 2 * 5 + 3 * 8;
- x[1,3] = 1 * 3 + 2 * 6 + 3 * 9;
- x[2,1] = 4 * 1 + 5 * 4 + 6 * 7;
- x[2,2] = 4 * 2 + 5 * 5 + 6 * 8;
- x[2,3] = 4 * 3 + 5 * 6 + 6 * 9;
- x[3,1] = 7 * 1 + 8 * 4 + 9 * 7;
- x[3,2] = 7 * 2 + 8 * 5 + 9 * 8;
- x[3,3] = 7 * 3 + 8 * 6 + 9 * 9;
+ x[1,1] = ( 1 ) * ( 1 ) + ( 2 ) * ( 4 ) + ( 3 ) * ( 7 );
+ x[1,2] = ( 1 ) * ( 2 ) + ( 2 ) * ( 5 ) + ( 3 ) * ( 8 );
+ x[1,3] = ( 1 ) * ( 3 ) + ( 2 ) * ( 6 ) + ( 3 ) * ( 9 );
+ x[2,1] = ( 4 ) * ( 1 ) + ( 5 ) * ( 4 ) + ( 6 ) * ( 7 );
+ x[2,2] = ( 4 ) * ( 2 ) + ( 5 ) * ( 5 ) + ( 6 ) * ( 8 );
+ x[2,3] = ( 4 ) * ( 3 ) + ( 5 ) * ( 6 ) + ( 6 ) * ( 9 );
+ x[3,1] = ( 7 ) * ( 1 ) + ( 8 ) * ( 4 ) + ( 9 ) * ( 7 );
+ x[3,2] = ( 7 ) * ( 2 ) + ( 8 ) * ( 5 ) + ( 9 ) * ( 8 );
+ x[3,3] = ( 7 ) * ( 3 ) + ( 8 ) * ( 6 ) + ( 9 ) * ( 9 );
+
 end ArrayTests.Algebra.Pow.ArrayPow5;
 ")})));
 end ArrayPow5;
@@ -4912,14 +4966,15 @@ fclass ArrayTests.Algebra.Pow.ArrayPow6
  Real y[2,1];
  Real y[2,2];
 equation
- x[1,1] = y[1,1] * y[1,1] + y[1,2] * y[2,1];
- x[1,2] = y[1,1] * y[1,2] + y[1,2] * y[2,2];
- x[2,1] = y[2,1] * y[1,1] + y[2,2] * y[2,1];
- x[2,2] = y[2,1] * y[1,2] + y[2,2] * y[2,2];
+ x[1,1] = ( y[1,1] ) * ( y[1,1] ) + ( y[1,2] ) * ( y[2,1] );
+ x[1,2] = ( y[1,1] ) * ( y[1,2] ) + ( y[1,2] ) * ( y[2,2] );
+ x[2,1] = ( y[2,1] ) * ( y[1,1] ) + ( y[2,2] ) * ( y[2,1] );
+ x[2,2] = ( y[2,1] ) * ( y[1,2] ) + ( y[2,2] ) * ( y[2,2] );
  y[1,1] = 1;
  y[1,2] = 2;
  y[2,1] = 3;
  y[2,2] = 4;
+
 end ArrayTests.Algebra.Pow.ArrayPow6;
 ")})));
 end ArrayPow6;
@@ -4970,8 +5025,8 @@ model ArrayPow8
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 4945, column 16:
-  Type error in expression: {{1, 2}, {3, 4}} ^ (- 1)
+Semantic error at line 4068, column 16:
+  Type error in expression: ( {{1, 2}, {3, 4}} ) ^ (  - ( 1 ) )
 ")})));
 end ArrayPow8;
 
@@ -4986,8 +5041,8 @@ model ArrayPow9
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 4961, column 16:
-  Type error in expression: {{1, 2}, {3, 4}} ^ 1.0
+Semantic error at line 4084, column 16:
+  Type error in expression: ( {{1, 2}, {3, 4}} ) ^ 1.0
 ")})));
 end ArrayPow9;
 
@@ -5002,8 +5057,8 @@ model ArrayPow10
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 4977, column 16:
-  Type error in expression: {{1, 2}, {3, 4}} ^ {{1, 2}, {3, 4}}
+Semantic error at line 4100, column 16:
+  Type error in expression: ( {{1, 2}, {3, 4}} ) ^ ( {{1, 2}, {3, 4}} )
 ")})));
 end ArrayPow10;
 
@@ -5018,8 +5073,8 @@ model ArrayPow11
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 4993, column 16:
-  Type error in expression: {{1, 2}, {3, 4}, {5, 6}} ^ 2
+Semantic error at line 4116, column 16:
+  Type error in expression: ( {{1, 2}, {3, 4}, {5, 6}} ) ^ 2
 ")})));
 end ArrayPow11;
 
@@ -5035,8 +5090,8 @@ model ArrayPow12
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 5009, column 16:
-  Type error in expression: {{1, 2}, {3, 4}} ^ y
+Semantic error at line 4286, column 16:
+  Type error in expression: ( {{1, 2}, {3, 4}} ) ^ ( y )
 ")})));
 end ArrayPow12;
 
@@ -5057,10 +5112,11 @@ fclass ArrayTests.Algebra.Pow.ArrayPow13
  Real x[2,2];
  constant Integer y = 2;
 equation
- x[1,1] = 1 * 1 + 2 * 3;
- x[1,2] = 1 * 2 + 2 * 4;
- x[2,1] = 3 * 1 + 4 * 3;
- x[2,2] = 3 * 2 + 4 * 4;
+ x[1,1] = ( 1 ) * ( 1 ) + ( 2 ) * ( 3 );
+ x[1,2] = ( 1 ) * ( 2 ) + ( 2 ) * ( 4 );
+ x[2,1] = ( 3 ) * ( 1 ) + ( 4 ) * ( 3 );
+ x[2,2] = ( 3 ) * ( 2 ) + ( 4 ) * ( 4 );
+
 end ArrayTests.Algebra.Pow.ArrayPow13;
 ")})));
 end ArrayPow13;
@@ -5077,8 +5133,8 @@ model ArrayPow14
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 5051, column 16:
-  Type error in expression: {{1, 2}, {3, 4}} ^ y
+Semantic error at line 4326, column 16:
+  Type error in expression: ( {{1, 2}, {3, 4}} ) ^ ( y )
 ")})));
 end ArrayPow14;
 
@@ -5094,7 +5150,8 @@ model ArrayPow15
 fclass ArrayTests.Algebra.Pow.ArrayPow15
  Real x[1,1];
 equation
- x[1,1] = 1 * 1;
+ x[1,1] = ( 1 ) * ( 1 );
+
 end ArrayTests.Algebra.Pow.ArrayPow15;
 ")})));
 end ArrayPow15;
@@ -5110,8 +5167,8 @@ model ArrayPow16
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 5085, column 14:
-  Type error in expression: {1} ^ 2
+Semantic error at line 4177, column 16:
+  Type error in expression: ( {1} ) ^ 2
 ")})));
 end ArrayPow16;
 
@@ -5155,9 +5212,10 @@ initial equation
  pre(x[2]) = 0;
  pre(x[3]) = 0;
 equation
- x[1] = - 1;
- x[2] = - 0;
- x[3] = - (- 1);
+ x[1] =  - ( 1 );
+ x[2] =  - ( 0 );
+ x[3] =  - (  - ( 1 ) );
+
 end ArrayTests.Algebra.Neg.ArrayNeg1;
 ")})));
 end ArrayNeg1;
@@ -5180,7 +5238,7 @@ fclass ArrayTests.Algebra.Neg.ArrayNeg2
  discrete Integer y[1];
  discrete Integer y[2];
  discrete Integer y[3];
-initial equation 
+initial equation  
  pre(x[1]) = 0;
  pre(x[2]) = 0;
  pre(x[3]) = 0;
@@ -5188,12 +5246,13 @@ initial equation
  pre(y[2]) = 0;
  pre(y[3]) = 0;
 equation
- x[1] = - y[1];
- x[2] = - y[2];
- x[3] = - y[3];
+ x[1] =  - ( y[1] );
+ x[2] =  - ( y[2] );
+ x[3] =  - ( y[3] );
  y[1] = 1;
  y[2] = 0;
- y[3] = - 1;
+ y[3] =  - ( 1 );
+
 end ArrayTests.Algebra.Neg.ArrayNeg2;
 ")})));
 end ArrayNeg2;
@@ -5212,9 +5271,9 @@ fclass ArrayTests.Algebra.Neg.ArrayNeg3
  discrete Integer x[1];
  discrete Integer x[2];
  discrete Integer x[3];
- constant Integer y[1] = - 1;
- constant Integer y[2] = - 0;
- constant Integer y[3] = - (- 1);
+ constant Integer y[1] =  - ( 1 );
+ constant Integer y[2] =  - ( 0 );
+ constant Integer y[3] =  - (  - ( 1 ) );
 initial equation 
  pre(x[1]) = 0;
  pre(x[2]) = 0;
@@ -5223,6 +5282,7 @@ equation
  x[1] = -1;
  x[2] = 0;
  x[3] = 1;
+
 end ArrayTests.Algebra.Neg.ArrayNeg3;
 ")})));
 end ArrayNeg3;
@@ -5238,8 +5298,8 @@ model ArrayNeg4
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 5213, column 17:
-  Type error in expression: - {true, false}
+Semantic error at line 6029, column 17:
+  Type error in expression:  - ( {true, false} )
 ")})));
 end ArrayNeg4;
 
@@ -5255,8 +5315,8 @@ model ArrayNeg5
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 5229, column 17:
-  Type error in expression: - y
+Semantic error at line 6045, column 17:
+  Type error in expression:  - ( y )
 ")})));
 end ArrayNeg5;
 
@@ -5975,13 +6035,14 @@ fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
  input Real u[2];
  Real y[1];
  Real y[2];
- parameter Real D[1,1] = 1 * 1 /* 1 */;
- parameter Real D[1,2] = 2 * 1 /* 2 */;
- parameter Real D[2,1] = 1 * 2 /* 2 */;
- parameter Real D[2,2] = 2 * 2 /* 4 */;
+ parameter Real D[1,1] = ( 1 ) * ( 1 ) /* 1 */;
+ parameter Real D[1,2] = ( 2 ) * ( 1 ) /* 2 */;
+ parameter Real D[2,1] = ( 1 ) * ( 2 ) /* 2 */;
+ parameter Real D[2,2] = ( 2 ) * ( 2 ) /* 4 */;
 equation
- y[1] = 0.0 + D[1,1] * u[1] + D[1,2] * u[2];
- y[2] = 0.0 + D[2,1] * u[1] + D[2,2] * u[2];
+ y[1] = 0.0 + ( D[1,1] ) * ( u[1] ) + ( D[1,2] ) * ( u[2] );
+ y[2] = 0.0 + ( D[2,1] ) * ( u[1] ) + ( D[2,2] ) * ( u[2] );
+
 end ArrayTests.Constructors.EmptyArray.EmptyArray5;
 ")})));
 end EmptyArray5;
@@ -6010,15 +6071,16 @@ fclass ArrayTests.Constructors.Iterators.ArrayIterTest1
  Real x[3,2];
  Real x[3,3];
 equation
- x[1,1] = 1 * 2;
- x[1,2] = 2 * 2;
- x[1,3] = 3 * 2;
- x[2,1] = 1 * 3;
- x[2,2] = 2 * 3;
- x[2,3] = 3 * 3;
- x[3,1] = 1 * 5;
- x[3,2] = 2 * 5;
- x[3,3] = 3 * 5;
+ x[1,1] = ( 1 ) * ( 2 );
+ x[1,2] = ( 2 ) * ( 2 );
+ x[1,3] = ( 3 ) * ( 2 );
+ x[2,1] = ( 1 ) * ( 3 );
+ x[2,2] = ( 2 ) * ( 3 );
+ x[2,3] = ( 3 ) * ( 3 );
+ x[3,1] = ( 1 ) * ( 5 );
+ x[3,2] = ( 2 ) * ( 5 );
+ x[3,3] = ( 3 ) * ( 5 );
+
 end ArrayTests.Constructors.Iterators.ArrayIterTest1;
 ")})));
 end ArrayIterTest1;
@@ -6042,14 +6104,15 @@ fclass ArrayTests.Constructors.Iterators.ArrayIterTest2
  Real x[2,2,1];
  Real x[2,2,2];
 equation
- x[1,1,1] = 1 * 1;
+ x[1,1,1] = ( 1 ) * ( 1 );
  x[1,1,2] = 2;
- x[1,2,1] = 2 * 2;
+ x[1,2,1] = ( 2 ) * ( 2 );
  x[1,2,2] = 2;
- x[2,1,1] = 1 * 1;
+ x[2,1,1] = ( 1 ) * ( 1 );
  x[2,1,2] = 5;
- x[2,2,1] = 2 * 2;
+ x[2,2,1] = ( 2 ) * ( 2 );
  x[2,2,2] = 5;
+
 end ArrayTests.Constructors.Iterators.ArrayIterTest2;
 ")})));
 end ArrayIterTest2;
@@ -6193,8 +6256,9 @@ fclass ArrayTests.For.ForEquation1
  Real y.x[3];
 equation
  for i in 1:3 loop
-  y.x[i] = i * i;
+  y.x[i] = ( i ) * ( i );
  end for;
+
 end ArrayTests.For.ForEquation1;
 ")})));
 end ForEquation1;
@@ -6306,9 +6370,10 @@ initial equation
  der(x[2]) = 0;
  der(x[3]) = 0;
 equation
- der(x[1]) = - x[1];
- der(x[2]) = - x[2];
- der(x[3]) = - x[3];
+ der(x[1]) =  - ( x[1] );
+ der(x[2]) =  - ( x[2] );
+ der(x[3]) =  - ( x[3] );
+
 end ArrayTests.For.ForInitial1;
 ")})));
 end ForInitial1;
@@ -6528,18 +6593,19 @@ fclass ArrayTests.Slices.MixedIndices2
  Real z[2,1];
  Real z[2,2];
 equation
- y[1,1] = z[1,1] * 2;
- y[1,2] = z[1,2] * 2;
- y[2,1] = z[2,1] * 2;
- y[2,2] = z[2,2] * 2;
- y[3,1] = z[1,1] * 2;
- y[3,2] = z[1,2] * 2;
- y[4,1] = z[2,1] * 2;
- y[4,2] = z[2,2] * 2;
+ y[1,1] = ( z[1,1] ) * ( 2 );
+ y[1,2] = ( z[1,2] ) * ( 2 );
+ y[2,1] = ( z[2,1] ) * ( 2 );
+ y[2,2] = ( z[2,2] ) * ( 2 );
+ y[3,1] = ( z[1,1] ) * ( 2 );
+ y[3,2] = ( z[1,2] ) * ( 2 );
+ y[4,1] = ( z[2,1] ) * ( 2 );
+ y[4,2] = ( z[2,2] ) * ( 2 );
  z[1,1] = 1;
  z[1,2] = 0;
  z[2,1] = 0;
  z[2,2] = 1;
+
 end ArrayTests.Slices.MixedIndices2;
 ")})));
 end MixedIndices2;
@@ -6592,8 +6658,9 @@ fclass ArrayTests.Other.ArrayConst1
  Real x[1];
  Real x[2];
 equation
- x[1] = 1 / 1.0;
- x[2] = 1 / 2.0;
+ x[1] = ( 1 ) / ( 1.0 );
+ x[2] = ( 1 ) / ( 2.0 );
+
 end ArrayTests.Other.ArrayConst1;
 ")})));
 end ArrayConst1;

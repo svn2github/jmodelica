@@ -46,10 +46,10 @@ model OptimicaTests
 			name="ClassAttrTest1",
 			description="Variability of objective class attribute: timed",
 			flatModel="
-optimization OptimicaTests.ClassAttrTest1(objective = x(finalTime) ^ 2,startTime = 3,finalTime = 4)
+optimization OptimicaTests.ClassAttrTest1(objective = ( x(finalTime) ) ^ 2,startTime = 3,finalTime = 4)
  Real x;
  Real y;
-equation
+equation 
  x = 2;
  y = 4;
 constraint 

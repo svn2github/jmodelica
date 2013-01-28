@@ -512,7 +512,7 @@ initial equation
 parameter equation
  p2 = floor(p1);
 equation
- der(xx) = - x;
+ der(xx) =  - ( x );
  when y > 2 and pre(z) then
   w = false;
  end when;
@@ -606,12 +606,13 @@ initial equation
  pre(y) = 0.0;
 equation
  der(dummy) = 0;
- when sample(0, 1 / 3) then
+ when sample(0, ( 1 ) / ( 3 )) then
   x = pre(x) + 1;
  end when;
  when initial() then
   y = pre(y) + 1;
  end when;
+
 end ComplianceTests.HybridFMU2;
 ")})));
 end HybridFMU2;
