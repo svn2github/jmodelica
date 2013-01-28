@@ -1,0 +1,39 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect ConstantPropagation {
+	
+
+	public boolean ASTNode.constantPropagation = false;
+	
+	public void ASTNode.enableConstantPropagation() {
+		for (ASTNode n : this) {
+			n.enableConstantPropagation();
+		}
+	}
+	
+	public void FExp.enableConstantPropagation() {
+		constantPropagation = true;
+		is$Final = false;
+		super.enableConstantPropagation();
+	}
+	
+	rewrite FExp {
+		when (constantPropagation && isConstantExp()) to FExp {
+			return ceval().buildLiteral();
+		}
+	}
+}
