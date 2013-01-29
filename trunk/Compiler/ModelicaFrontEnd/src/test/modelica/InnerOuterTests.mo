@@ -91,19 +91,18 @@ fclass InnerOuterTests.InnerOuterTest2
  Real i.a.b.c.TI;
  Real i.a.b.c.d.x;
 equation
- i.TI = ( 2 ) * ( time );
- i.e.TI = ( 4 ) * ( time );
- i.e.f.TI = ( 5 ) * ( time );
+ i.TI = 2 * time;
+ i.e.TI = 4 * time;
+ i.e.f.TI = 5 * time;
  i.e.f.g.TI = 5;
- i.e.f.g.h.a.x = ( i.e.f.TI ) * ( 2 );
+ i.e.f.g.h.a.x = i.e.f.TI * 2;
  i.e.f.g.h.a.b.TI = 1;
  i.e.f.g.h.a.b.c.TI = 2;
- i.e.f.g.h.a.b.c.d.x = ( 3 ) * ( i.e.f.TI );
- i.a.x = ( i.TI ) * ( 2 );
+ i.e.f.g.h.a.b.c.d.x = 3 * i.e.f.TI;
+ i.a.x = i.TI * 2;
  i.a.b.TI = 1;
  i.a.b.c.TI = 2;
- i.a.b.c.d.x = ( 3 ) * ( i.TI );
-
+ i.a.b.c.d.x = 3 * i.TI;
 end InnerOuterTests.InnerOuterTest2;
 ")})));
 end InnerOuterTest2;
@@ -141,8 +140,7 @@ fclass InnerOuterTests.InnerOuterTest4
  Real c.b.x;
 equation
  c.a.x = sin(time);
- c.b.x = ( 2 ) * ( c.a.x );
-
+ c.b.x = 2 * c.a.x;
 end InnerOuterTests.InnerOuterTest4;
 ")})));
 end InnerOuterTest4;
@@ -192,12 +190,12 @@ initial equation
  sys.subSystem.pre(isEnabled) = false;
  sys.pre(isEnabled) = false;
 equation
- sys.subSystem.conditionalIntegrator.der(x) = (if sys.subSystem.isEnabled then  - ( sys.subSystem.conditionalIntegrator.x ) else 0);
- sys.subSystem.conditionalIntegrator2.der(x) = (if sys.subSystem.isEnabled then  - ( sys.subSystem.conditionalIntegrator2.x ) else 0);
+ sys.subSystem.conditionalIntegrator.der(x) = if sys.subSystem.isEnabled then - sys.subSystem.conditionalIntegrator.x else 0;
+ sys.subSystem.conditionalIntegrator2.der(x) = if sys.subSystem.isEnabled then - sys.subSystem.conditionalIntegrator2.x else 0;
  sys.subSystem.enableMe = time <= 1;
  sys.subSystem.isEnabled = sys.isEnabled and sys.subSystem.enableMe;
  sys.isEnabled = time >= 0.5;
-end InnerOuterTests.InnerOuterTest5;	 
+end InnerOuterTests.InnerOuterTest5;
 ")})));
 end InnerOuterTest5;
 

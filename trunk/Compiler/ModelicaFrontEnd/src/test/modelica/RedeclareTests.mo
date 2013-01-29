@@ -3671,9 +3671,10 @@ public
   input Real i;
   output Real o;
  algorithm
-  o := ( i ) * ( 2 );
+  o := i * 2;
   return;
  end RedeclareTests.RedeclareElement15.C.f;
+
 end RedeclareTests.RedeclareElement15;
 ")})));
 end RedeclareElement15;
@@ -3725,7 +3726,7 @@ public
   input Real i;
   output Real o;
  algorithm
-  o := ( i ) * ( 2 );
+  o := i * 2;
   return;
  end RedeclareTests.RedeclareElement16.D.f;
 
@@ -3778,7 +3779,7 @@ public
   input Real i;
   output Real o;
  algorithm
-  o := ( i ) * ( 2 );
+  o := i * 2;
   return;
  end RedeclareTests.RedeclareElement17.D.f;
 
@@ -4449,7 +4450,7 @@ public
   input Real i;
   output Real o;
  algorithm
-  o := ( i ) * ( 2 );
+  o := i * 2;
   return;
  end RedeclareTests.RedeclareFunction3.E.f;
 
@@ -4497,7 +4498,7 @@ public
   input Real[2] a;
   output Real b;
  algorithm
-  b := ( a[1] ) * ( 1 ) + ( a[2] ) * ( 2 );
+  b := a[1] * 1 + a[2] * 2;
   return;
  end RedeclareTests.RedeclareFunction4.A.f;
 
@@ -4505,7 +4506,7 @@ public
   input Real[3] a;
   output Real b;
  algorithm
-  b := ( a[1] ) * ( 1 ) + ( a[2] ) * ( 2 ) + ( a[3] ) * ( 3 );
+  b := a[1] * 1 + a[2] * 2 + a[3] * 3;
   return;
  end RedeclareTests.RedeclareFunction4.b.A3.f;
 

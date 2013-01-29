@@ -62,15 +62,14 @@ fclass NameTests.NameTest2
  Real a.c.y;
  Real a.y;
  Real a.x;
-equation 
- a.x=(-((1)/(1)))*((1)*(1))-((2+1)^3)+a.x^(-(3)+2);
- a.b.c.y+1=a.b.c.y;
- a.c.y=0;
- a.b.x=a.b.c.y;
- a.b.c.y=2;
- a.b1.c.y=2;
- a.c.y=2;
-
+equation
+ a.x = (- 1 / 1) * (1 * 1) - (2 + 1) ^ 3 + a.x ^ (- 3 + 2);
+ a.b.c.y + 1 = a.b.c.y;
+ a.c.y = 0;
+ a.b.x = a.b.c.y;
+ a.b.c.y = 2;
+ a.b1.c.y = 2;
+ a.c.y = 2;
 end NameTests.NameTest2;
 ")})));
   end NameTest2;
@@ -2284,10 +2283,10 @@ fclass NameTests.ImportTest8
  Modelica.SIunits.Power r.LossPower \"Loss power leaving component via HeatPort\";
  Modelica.SIunits.Temperature r.T_heatPort \"Temperature of HeatPort\";
 equation
- r.R_actual = ( r.R ) * ( 1 + ( r.alpha ) * ( r.T_heatPort - ( r.T_ref ) ) );
- r.v = ( r.R_actual ) * ( r.i );
- r.LossPower = ( r.v ) * ( r.i );
- r.v = r.p.v - ( r.n.v );
+ r.R_actual = r.R * (1 + r.alpha * (r.T_heatPort - r.T_ref));
+ r.v = r.R_actual * r.i;
+ r.LossPower = r.v * r.i;
+ r.v = r.p.v - r.n.v;
  0 = r.p.i + r.n.i;
  r.i = r.p.i;
  if not false then
@@ -2431,7 +2430,7 @@ fclass NameTests.ShortClassDeclTest3
  NameTests.ShortClassDeclTest3.MyReal x(start = 3);
 
 public
- type NameTests.ShortClassDeclTest3.MyReal = Real(min =  - ( 3 ));
+ type NameTests.ShortClassDeclTest3.MyReal = Real(min = - 3);
 end NameTests.ShortClassDeclTest3;
 ")})));
 end ShortClassDeclTest3;
@@ -3147,8 +3146,7 @@ fclass NameTests.ComplexExpInDer1
  Real x;
  Real y;
 equation
- ( x ) * ( der(y) ) + ( der(x) ) * ( y ) = 0;
-
+ x * der(y) + der(x) * y = 0;
 end NameTests.ComplexExpInDer1;
 ")})));
 end ComplexExpInDer1;
@@ -3166,10 +3164,10 @@ equation
 			description="",
 			flatModel="
 fclass NameTests.ComplexExpInDer2
-Real x;
-Real y;
+ Real x;
+ Real y;
 equation
-der(x,2) - ( der(y) ) = 0;
+ der(x,2) - der(y) = 0;
 end NameTests.ComplexExpInDer2;
 ")})));
 end ComplexExpInDer2;
@@ -3240,7 +3238,7 @@ model FunctionCallLeftTest
   algorithm
    (x) := f(1);
 	
-annotation(__JModelica(UnitTesting(tests={
+	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionCallLeftTest",
 			description="Test so that it is ok to have only one output argument in a function call left statement.",
@@ -3255,7 +3253,7 @@ public
   input Real x1;
   output Real y1;
  algorithm
-  y1 := ( 2 ) * ( x1 );
+  y1 := 2 * x1;
   return;
  end NameTests.FunctionCallLeftTest.f;
 

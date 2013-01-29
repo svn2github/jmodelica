@@ -616,8 +616,7 @@ model MinExp9
 fclass ArrayBuiltins.Min.MinExp9
  Real x;
 equation
- x = min(min(min(min(min(min(min(min(( 1 ) * ( 2 ), ( 2 ) * ( 2 )), ( 3 ) * ( 2 )), ( 1 ) * ( 3 )), ( 2 ) * ( 3 )), ( 3 ) * ( 3 )), ( 1 ) * ( 5 )), ( 2 ) * ( 5 )), ( 3 ) * ( 5 ));
-
+ x = min(min(min(min(min(min(min(min(1 * 2, 2 * 2), 3 * 2), 1 * 3), 2 * 3), 3 * 3), 1 * 5), 2 * 5), 3 * 5);
 end ArrayBuiltins.Min.MinExp9;
 ")})));
 end MinExp9;
@@ -652,8 +651,8 @@ model MinExp11
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1188, column 11:
-  The expression of a reduction-expression must be scalar, except for sum(): {( i ) * ( j ), 2} has 1 dimension(s)
+Semantic error at line 645, column 11:
+  The expression of a reduction-expression must be scalar, except for sum(): {i * j, 2} has 1 dimension(s)
 ")})));
 end MinExp11;
 
@@ -833,15 +832,14 @@ model MaxExp9
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="MaxExp9",
+			name="Max_MaxExp9",
 			description="Reduction-expression with max(): basic test",
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp9
- constant Real x = max(max(max(max(max(max(max(max(max(max(max(( 1 ) * ( 2 ), ( 2 ) * ( 2 )), ( 3 ) * ( 2 )), ( 4 ) * ( 2 )), ( 1 ) * ( 3 )), ( 2 ) * ( 3 )), ( 3 ) * ( 3 )), ( 4 ) * ( 3 )), ( 1 ) * ( 5 )), ( 2 ) * ( 5 )), ( 3 ) * ( 5 )), ( 4 ) * ( 5 ));
+ constant Real x = max(max(max(max(max(max(max(max(max(max(max(1 * 2, 2 * 2), 3 * 2), 4 * 2), 1 * 3), 2 * 3), 3 * 3), 4 * 3), 1 * 5), 2 * 5), 3 * 5), 4 * 5);
  Real y;
 equation
  y = 20.0;
-
 end ArrayBuiltins.Max.MaxExp9;
 ")})));
 end MaxExp9;
@@ -922,11 +920,10 @@ model SumExp2
 			description="sum() expressions: reduction-expression",
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp2
- constant Real x = ( 1 ) * ( 1 ) + ( 2 ) * ( 1 ) + ( 3 ) * ( 1 ) + ( 1 ) * ( 2 ) + ( 2 ) * ( 2 ) + ( 3 ) * ( 2 ) + ( 1 ) * ( 3 ) + ( 2 ) * ( 3 ) + ( 3 ) * ( 3 );
+ constant Real x = 1 * 1 + 2 * 1 + 3 * 1 + 1 * 2 + 2 * 2 + 3 * 2 + 1 * 3 + 2 * 3 + 3 * 3;
  Real y;
 equation
  y = 36.0;
-
 end ArrayBuiltins.Sum.SumExp2;
 ")})));
 end SumExp2;
@@ -1259,10 +1256,9 @@ fclass ArrayBuiltins.Cross.Cross1
  Real x[2];
  Real x[3];
 equation
- x[1] = ( 2 ) * ( 6 ) - ( ( 3 ) * ( 5 ) );
- x[2] = ( 3 ) * ( 4 ) - ( ( 1.0 ) * ( 6 ) );
- x[3] = ( 1.0 ) * ( 5 ) - ( ( 2 ) * ( 4 ) );
-
+ x[1] = 2 * 6 - 3 * 5;
+ x[2] = 3 * 4 - 1.0 * 6;
+ x[3] = 1.0 * 5 - 2 * 4;
 end ArrayBuiltins.Cross.Cross1;
 ")})));
 end Cross1; 
@@ -1386,9 +1382,9 @@ package OuterProduct
 model OuterProduct1
  Real x[3,2] = outerProduct({1.0,2,3}, {4,5});
 
-	annotation(__JModelica(UnitTesting(tests={ 
+	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="OuterProduct_OuterProduct1",
+			name="OuterProduct1",
 			description="outerProduct() operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.OuterProduct.OuterProduct1
@@ -1399,12 +1395,12 @@ fclass ArrayBuiltins.OuterProduct.OuterProduct1
  Real x[3,1];
  Real x[3,2];
 equation
- x[1,1] = ( 1.0 ) * ( 4 );
- x[1,2] = ( 1.0 ) * ( 5 );
- x[2,1] = ( 2 ) * ( 4 );
- x[2,2] = ( 2 ) * ( 5 );
- x[3,1] = ( 3 ) * ( 4 );
- x[3,2] = ( 3 ) * ( 5 );
+ x[1,1] = 1.0 * 4;
+ x[1,2] = 1.0 * 5;
+ x[2,1] = 2 * 4;
+ x[2,2] = 2 * 5;
+ x[3,1] = 3 * 4;
+ x[3,2] = 3 * 5;
 end ArrayBuiltins.OuterProduct.OuterProduct1;
 ")})));
 end OuterProduct1; 
@@ -1413,9 +1409,9 @@ end OuterProduct1;
 model OuterProduct2
  Integer x[3,3] = outerProduct({1,2,3}, {4,5,6});
 
-	annotation(__JModelica(UnitTesting(tests={ 
+	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="OuterProduct_OuterProduct2",
+			name="OuterProduct2",
 			description="outerProduct() operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.OuterProduct.OuterProduct2
@@ -1439,15 +1435,15 @@ initial equation
  pre(x[3,2]) = 0;
  pre(x[3,3]) = 0;
 equation
- x[1,1] = ( 1 ) * ( 4 );
- x[1,2] = ( 1 ) * ( 5 );
- x[1,3] = ( 1 ) * ( 6 );
- x[2,1] = ( 2 ) * ( 4 );
- x[2,2] = ( 2 ) * ( 5 );
- x[2,3] = ( 2 ) * ( 6 );
- x[3,1] = ( 3 ) * ( 4 );
- x[3,2] = ( 3 ) * ( 5 );
- x[3,3] = ( 3 ) * ( 6 );
+ x[1,1] = 1 * 4;
+ x[1,2] = 1 * 5;
+ x[1,3] = 1 * 6;
+ x[2,1] = 2 * 4;
+ x[2,2] = 2 * 5;
+ x[2,3] = 2 * 6;
+ x[3,1] = 3 * 4;
+ x[3,2] = 3 * 5;
+ x[3,3] = 3 * 6;
 end ArrayBuiltins.OuterProduct.OuterProduct2;
 ")})));
 end OuterProduct2; 
@@ -1458,7 +1454,7 @@ model OuterProduct3
 
 	annotation(__JModelica(UnitTesting(tests={ 
 		ErrorTestCase(
-			name="OuterProduct_OuterProduct3",
+			name="OuterProduct3",
 			description="outerProduct() operator: wrong numeric type",
 			errorMessage="
 1 errors found:
@@ -1474,7 +1470,7 @@ model OuterProduct4
 
 	annotation(__JModelica(UnitTesting(tests={ 
 		ErrorTestCase(
-			name="OuterProduct_OuterProduct4",
+			name="OuterProduct4",
 			description="outerProduct() operator: scalar arguments",
 			errorMessage="
 2 errors found:
@@ -1493,7 +1489,7 @@ model OuterProduct5
 
 	annotation(__JModelica(UnitTesting(tests={ 
 		ErrorTestCase(
-			name="OuterProduct_OuterProduct5",
+			name="OuterProduct5",
 			description="outerProduct() operator: wrong type",
 			errorMessage="
 2 errors found:
@@ -1512,7 +1508,7 @@ model OuterProduct6
 
 	annotation(__JModelica(UnitTesting(tests={ 
 		ErrorTestCase(
-			name="OuterProduct_OuterProduct6",
+			name="OuterProduct6",
 			description="outerProduct() operator: too many dims",
 			errorMessage="
 2 errors found:
@@ -1905,9 +1901,8 @@ equation
  x[2] = 2;
  x[3] = 3;
  x[4] = 4;
- y[1] = ( x[2] ) * ( 2 );
- y[2] = ( x[3] ) * ( 2 );
-
+ y[1] = x[2] * 2;
+ y[2] = x[3] * 2;
 end ArrayBuiltins.End.ArrayEnd1;
 ")})));
 end ArrayEnd1;
@@ -1983,11 +1978,10 @@ fclass ArrayBuiltins.Linspace1
  Real x[3];
  Real x[4];
 equation
- x[1] = 1 + ( 0 ) * ( ( 3 - ( 1 ) ) / ( 3 ) );
- x[2] = 1 + ( 1 ) * ( ( 3 - ( 1 ) ) / ( 3 ) );
- x[3] = 1 + ( 2 ) * ( ( 3 - ( 1 ) ) / ( 3 ) );
- x[4] = 1 + ( 3 ) * ( ( 3 - ( 1 ) ) / ( 3 ) );
-
+ x[1] = 1 + 0 * ((3 - 1) / 3);
+ x[2] = 1 + 1 * ((3 - 1) / 3);
+ x[3] = 1 + 2 * ((3 - 1) / 3);
+ x[4] = 1 + 3 * ((3 - 1) / 3);
 end ArrayBuiltins.Linspace1;
 ")})));
 end Linspace1;
@@ -2014,10 +2008,9 @@ fclass ArrayBuiltins.Linspace2
 equation
  a = 1;
  b = 2;
- x[1] = a + ( 0 ) * ( ( b - ( a ) ) / ( 2 ) );
- x[2] = a + ( 1 ) * ( ( b - ( a ) ) / ( 2 ) );
- x[3] = a + ( 2 ) * ( ( b - ( a ) ) / ( 2 ) );
-
+ x[1] = a + 0 * ((b - a) / 2);
+ x[2] = a + 1 * ((b - a) / 2);
+ x[3] = a + 2 * ((b - a) / 2);
 end ArrayBuiltins.Linspace2;
 ")})));
 end Linspace2;
@@ -2101,10 +2094,9 @@ fclass ArrayBuiltins.Linspace6
  parameter Real a[2].x;
  parameter Real a[3].x;
 parameter equation
- a[1].x = b + ( 0 ) * ( ( c - ( b ) ) / ( 2 ) );
- a[2].x = b + ( 1 ) * ( ( c - ( b ) ) / ( 2 ) );
- a[3].x = b + ( 2 ) * ( ( c - ( b ) ) / ( 2 ) );
-
+ a[1].x = b + 0 * ((c - b) / 2);
+ a[2].x = b + 1 * ((c - b) / 2);
+ a[3].x = b + 2 * ((c - b) / 2);
 end ArrayBuiltins.Linspace6;
 ")})));
 end Linspace6;
@@ -2126,8 +2118,7 @@ fclass ArrayBuiltins.NdimsExp1
 initial equation 
  pre(x) = 0;
 equation
- x = ( 2 ) * ( 2 );
-
+ x = 2 * 2;
 end ArrayBuiltins.NdimsExp1;
 ")})));
 end NdimsExp1;
@@ -2147,23 +2138,22 @@ equation
 			flatModel="
 fclass ArrayBuiltins.ArrayIfExp1
  parameter Integer N = 3 /* 3 */;
- parameter Real A[1,1] = 1 /* 1.0 */;
- parameter Real A[1,2] = 0 /* 0.0 */;
- parameter Real A[1,3] = 0 /* 0.0 */;
- parameter Real A[2,1] = 0 /* 0.0 */;
- parameter Real A[2,2] = 1 /* 1.0 */;
- parameter Real A[2,3] = 0 /* 0.0 */;
- parameter Real A[3,1] = 0 /* 0.0 */;
- parameter Real A[3,2] = 0 /* 0.0 */;
- parameter Real A[3,3] = 1 /* 1.0 */;
+ parameter Real A[1,1] = 1 /* 1 */;
+ parameter Real A[1,2] = 0 /* 0 */;
+ parameter Real A[1,3] = 0 /* 0 */;
+ parameter Real A[2,1] = 0 /* 0 */;
+ parameter Real A[2,2] = 1 /* 1 */;
+ parameter Real A[2,3] = 0 /* 0 */;
+ parameter Real A[3,1] = 0 /* 0 */;
+ parameter Real A[3,2] = 0 /* 0 */;
+ parameter Real A[3,3] = 1 /* 1 */;
  Real x[1](start = 1);
  Real x[2](start = 1);
  Real x[3](start = 1);
 equation
- der(x[1]) = (if time >= 3 then ( ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] ) + ( A[1,3] ) * ( x[3] ) ) / ( N ) else ( (  - ( A[1,1] ) ) * ( x[1] ) + (  - ( A[1,2] ) ) * ( x[2] ) + (  - ( A[1,3] ) ) * ( x[3] ) ) / ( N ));
- der(x[2]) = (if time >= 3 then ( ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] ) + ( A[2,3] ) * ( x[3] ) ) / ( N ) else ( (  - ( A[2,1] ) ) * ( x[1] ) + (  - ( A[2,2] ) ) * ( x[2] ) + (  - ( A[2,3] ) ) * ( x[3] ) ) / ( N ));
- der(x[3]) = (if time >= 3 then ( ( A[3,1] ) * ( x[1] ) + ( A[3,2] ) * ( x[2] ) + ( A[3,3] ) * ( x[3] ) ) / ( N ) else ( (  - ( A[3,1] ) ) * ( x[1] ) + (  - ( A[3,2] ) ) * ( x[2] ) + (  - ( A[3,3] ) ) * ( x[3] ) ) / ( N ));
-
+ der(x[1]) = if time >= 3 then (A[1,1] * x[1] + A[1,2] * x[2] + A[1,3] * x[3]) / N else ((- A[1,1]) * x[1] + (- A[1,2]) * x[2] + (- A[1,3]) * x[3]) / N;
+ der(x[2]) = if time >= 3 then (A[2,1] * x[1] + A[2,2] * x[2] + A[2,3] * x[3]) / N else ((- A[2,1]) * x[1] + (- A[2,2]) * x[2] + (- A[2,3]) * x[3]) / N;
+ der(x[3]) = if time >= 3 then (A[3,1] * x[1] + A[3,2] * x[2] + A[3,3] * x[3]) / N else ((- A[3,1]) * x[1] + (- A[3,2]) * x[2] + (- A[3,3]) * x[3]) / N;
 end ArrayBuiltins.ArrayIfExp1;
 ")})));
 end ArrayIfExp1;
@@ -2481,10 +2471,10 @@ model VectorizedAbsTest
 			description="Test of vectorized abs()",
 			flatModel="
 fclass ArrayBuiltins.VectorizedAbsTest
- constant Real c[1,1] =  - ( 1 );
+ constant Real c[1,1] = - 1;
  constant Real c[1,2] = 2;
  constant Real c[2,1] = 3;
- constant Real c[2,2] =  - ( 4 );
+ constant Real c[2,2] = - 4;
  constant Real d[1,1] = abs(-1.0);
  constant Real d[1,2] = abs(2.0);
  constant Real d[2,1] = abs(3.0);
@@ -2514,7 +2504,6 @@ equation
  z[1,2] = abs(x[1,2]);
  z[2,1] = abs(x[2,1]);
  z[2,2] = abs(x[2,2]);
-
 end ArrayBuiltins.VectorizedAbsTest;
 ")})));
 end VectorizedAbsTest;
@@ -2584,16 +2573,16 @@ equation
  x[1] = 1;
  x[2] = 2;
  x[3] = 3;
- ({y[1],y[2],y[3]}) = ArrayBuiltins.NonVectorizedSalarization1.f1({x[1],x[2],x[3]});
+ ({y[1], y[2], y[3]}) = ArrayBuiltins.NonVectorizedSalarization1.f1({x[1], x[2], x[3]});
 
 public
  function ArrayBuiltins.NonVectorizedSalarization1.f1
   input Real[3] x1;
   output Real[3] y1;
  algorithm
-  y1[1] := ( ArrayBuiltins.NonVectorizedSalarization1.f2(x1) ) * ( x1[1] );
-  y1[2] := ( ArrayBuiltins.NonVectorizedSalarization1.f2(x1) ) * ( x1[2] );
-  y1[3] := ( ArrayBuiltins.NonVectorizedSalarization1.f2(x1) ) * ( x1[3] );
+  y1[1] := ArrayBuiltins.NonVectorizedSalarization1.f2(x1) * x1[1];
+  y1[2] := ArrayBuiltins.NonVectorizedSalarization1.f2(x1) * x1[2];
+  y1[3] := ArrayBuiltins.NonVectorizedSalarization1.f2(x1) * x1[3];
   return;
  end ArrayBuiltins.NonVectorizedSalarization1.f1;
 
@@ -2644,7 +2633,7 @@ equation
  x[1] = 1;
  x[2] = 2;
  x[3] = 3;
- ({y[1],y[2],y[3]}) = ArrayBuiltins.NonVectorizedSalarization2.f1({x[1],x[2],x[3]});
+ ({y[1], y[2], y[3]}) = ArrayBuiltins.NonVectorizedSalarization2.f1({x[1], x[2], x[3]});
 
 public
  function ArrayBuiltins.NonVectorizedSalarization2.f1
@@ -2652,7 +2641,7 @@ public
   output Real[size(x1, 1)] y1;
  algorithm
   for i1 in 1:size(y1, 1) loop
-   y1[i1] := ( ArrayBuiltins.NonVectorizedSalarization2.f2(x1) ) * ( x1[i1] );
+   y1[i1] := ArrayBuiltins.NonVectorizedSalarization2.f2(x1) * x1[i1];
   end for;
   return;
  end ArrayBuiltins.NonVectorizedSalarization2.f1;
@@ -2695,7 +2684,7 @@ equation
  x[1] = 1;
  x[2] = 2;
  x[3] = 3;
- ({y[1],y[2],y[3]}) = Modelica.Math.Vectors.normalize({x[1],x[2],x[3]}, ( 100 ) * ( 1.0E-15 ));
+ ({y[1], y[2], y[3]}) = Modelica.Math.Vectors.normalize({x[1], x[2], x[3]}, 100 * 1.0E-15);
 
 public
  function Modelica.Math.Vectors.normalize
@@ -2704,7 +2693,7 @@ public
   output Real[size(v, 1)] result;
  algorithm
   for i1 in 1:size(result, 1) loop
-   result[i1] := smooth(0, noEvent((if Modelica.Math.Vectors.length(v) >= eps then ( v[i1] ) / ( Modelica.Math.Vectors.length(v) ) else ( v[i1] ) / ( eps ))));
+   result[i1] := smooth(0, noEvent(if Modelica.Math.Vectors.length(v) >= eps then v[i1] / Modelica.Math.Vectors.length(v) else v[i1] / eps));
   end for;
   return;
  end Modelica.Math.Vectors.normalize;
@@ -2716,7 +2705,7 @@ public
  algorithm
   temp_1 := 0.0;
   for i1 in 1:size(v, 1) loop
-   temp_1 := temp_1 + ( v[i1] ) * ( v[i1] );
+   temp_1 := temp_1 + v[i1] * v[i1];
   end for;
   result := sqrt(temp_1);
   return;

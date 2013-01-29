@@ -1528,7 +1528,7 @@ aspect FlatExpressions {
 	 * The list will be populated when expressions in the function are flattened.
 	 */
 	syn lazy Set<InstAssignable> InstClassDecl.localFunctionConstantList() = 
-		new HashSet<InstAssignable>();
+		new LinkedHashSet<InstAssignable>();
 	
 	syn boolean InstAccess.hasUnknownIndices() = 
 		hasFArraySubscripts() && getFArraySubscripts().hasUnknownIndices();
