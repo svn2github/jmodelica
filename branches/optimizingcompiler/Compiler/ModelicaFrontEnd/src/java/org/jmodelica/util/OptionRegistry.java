@@ -154,6 +154,12 @@ public class OptionRegistry {
 			 true, 
 			 "If this option is set to true (default), then alias variables are " +
              "eliminated from the model."),
+        CONST_PROP
+ 			("constant_propagation", 
+ 			 compiler, 
+ 			 false, 
+ 			 "If this option is set to true, then constants are " +
+              "propagated through the model."),
 		HALT_WARN
 			("halt_on_warning", 
 			 compiler, 

@@ -19,19 +19,25 @@ aspect ConstantPropagation {
 
 	public boolean ASTNode.constantPropagation = false;
 	
+	public void FClass.enableConstantPropagationIfSet() {
+		if (root().options.getBooleanOption("constant_propagation")) {
+			enableConstantPropagation();
+		}
+	}
+	
 	public void ASTNode.enableConstantPropagation() {
 		for (ASTNode n : this) {
 			n.enableConstantPropagation();
 		}
 	}
 	
-	public void FExp.enableConstantPropagation() {
+	public void FBinExp.enableConstantPropagation() {
 		constantPropagation = true;
 		is$Final = false;
 		super.enableConstantPropagation();
 	}
 	
-	rewrite FExp {
+	rewrite FBinExp {
 		when (constantPropagation && isConstantExp()) to FExp {
 			return ceval().buildLiteral();
 		}
