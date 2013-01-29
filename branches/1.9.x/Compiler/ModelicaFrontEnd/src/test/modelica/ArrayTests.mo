@@ -5980,8 +5980,8 @@ fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
  parameter Real D[2,1] = 1 * 2 /* 2 */;
  parameter Real D[2,2] = 2 * 2 /* 4 */;
 equation
- y[1] = 0.0 + D[1,1] * u[1] + D[1,2] * u[2];
- y[2] = 0.0 + D[2,1] * u[1] + D[2,2] * u[2];
+ y[1] = 0.0 + (D[1,1] * u[1] + D[1,2] * u[2]);
+ y[2] = 0.0 + (D[2,1] * u[1] + D[2,2] * u[2]);
 end ArrayTests.Constructors.EmptyArray.EmptyArray5;
 ")})));
 end EmptyArray5;

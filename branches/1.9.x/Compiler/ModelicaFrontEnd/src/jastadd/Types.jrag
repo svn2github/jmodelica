@@ -227,7 +227,7 @@ aspect Types {
 				} else {
 					FTypePrefixVariability variability = iterationVariable.myInstComponentDecl().variability();
 					if (!variability.continuousVariability()) {
-						iterationVariable.error("Iteration variable needs to have continuous variability, %s has %svariability", iterationVariable.qualifiedName(), variability);
+						iterationVariable.error("Iteration variable should have continuous variability, %s has %svariability", iterationVariable.qualifiedName(), variability);
 						iterationVariable = null;
 					}
 				}

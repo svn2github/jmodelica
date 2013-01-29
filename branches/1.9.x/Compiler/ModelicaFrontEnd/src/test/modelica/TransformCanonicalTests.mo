@@ -3830,7 +3830,7 @@ equation
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * der_y = 0.0;
  der(_der_x) = der_vx;
- 2 * x * der(_der_x) + 2 * der(x) * der(x) + 2 * y * der_2_y + 2 * der_y * der_y = 0.0;
+ 2 * x * der(_der_x) + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * der_y * der_y) = 0.0;
  _der_x = der(x);
 end TransformCanonicalTests.IndexReduction1a_PlanarPendulum;
 ")})));
@@ -3877,7 +3877,7 @@ equation
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * der_y = 0.0;
  der(_der_x) = der_vx;
- 2 * x * der(_der_x) + 2 * der(x) * der(x) + 2 * y * der_2_y + 2 * der_y * der_y = 0.0;
+ 2 * x * der(_der_x) + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * der_y * der_y) = 0.0;
  _der_x = der(x);
 end TransformCanonicalTests.IndexReduction1b_PlanarPendulum;
 ")})));
@@ -3961,7 +3961,7 @@ parameter equation
  sine.amplitude = amplitude;
  sine.freqHz = freqHz;
 equation
- inertia1.J * inertia1.a = - torque.flange.tau- idealGear.flange_a.tau;
+ inertia1.J * inertia1.a = - torque.flange.tau + (- idealGear.flange_a.tau);
  idealGear.phi_a = inertia1.phi - fixed.phi0;
  idealGear.phi_b = inertia2.phi - fixed.phi0;
  idealGear.phi_a = idealGear.ratio * idealGear.phi_b;
@@ -3978,8 +3978,8 @@ equation
  damper.w_rel = damper.der(phi_rel);
  damper.a_rel = damper.der(w_rel);
  - torque.flange.tau = sine.offset + (if time < sine.startTime then 0 else sine.amplitude * sin(2 * 3.141592653589793 * sine.freqHz * (time - sine.startTime) + sine.phase));
- - damper.flange_b.tau + inertia2.flange_b.tau- spring.flange_b.tau = 0;
- damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau- torque.flange.tau = 0;
+ - damper.flange_b.tau + inertia2.flange_b.tau + (- spring.flange_b.tau) = 0;
+ damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau + (- torque.flange.tau) = 0;
  inertia3.flange_b.tau = 0;
  idealGear.support.tau = - idealGear.flange_a.tau - idealGear.flange_b.tau;
  inertia1.w = idealGear.ratio * inertia2.w;
@@ -4065,7 +4065,7 @@ equation
  uC = u1 + uL;
  i0 = i1 + iC;
  i1 = i2 + iL;
- der_u0 = 220 * cos(time * omega) * 1.0 * omega;
+ der_u0 = 220 * (cos(time * omega) * (1.0 * omega));
  der_u1 = R[1] * der_i1;
  der_uL = R[2] * der_i2;
  der_u0 = der_u1 + der_uL;
@@ -4172,7 +4172,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + cos(x2) = 0;
- der_x1- sin(x2) * der(x2) = 0.0;
+ der_x1 + (- sin(x2) * der(x2)) = 0.0;
 end TransformCanonicalTests.IndexReduction6_Cos;
 ")})));
   end IndexReduction6_Cos;
@@ -4789,7 +4789,7 @@ public
   input Real[2, 2] der_A;
   output Real der_y;
  algorithm
-  der_y := (2 * x[1] * A[1,1] + 2 * x[2] * A[2,1]) * der_x[1] + (2 * x[1] * A[1,2] + 2 * x[2] * A[2,2]) * der_x[2] + (x[1] * der_A[1,1] + x[2] * der_A[2,1]) * x[1] + (x[1] * der_A[1,2] + x[2] * der_A[2,2]) * x[2];
+  der_y := (2 * x[1] * A[1,1] + 2 * x[2] * A[2,1]) * der_x[1] + (2 * x[1] * A[1,2] + 2 * x[2] * A[2,2]) * der_x[2] + ((x[1] * der_A[1,1] + x[2] * der_A[2,1]) * x[1] + (x[1] * der_A[1,2] + x[2] * der_A[2,2]) * x[2]);
   return;
  end TransformCanonicalTests.IndexReduction25_DerFunc.f_der;
 
@@ -5165,7 +5165,7 @@ equation
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * der_y = 0.0;
  der_2_x = der(vx);
- 2 * x * der_2_x + 2 * der(x) * der(x) + 2 * y * der_2_y + 2 * der_y * der_y = 0.0;
+ 2 * x * der_2_x + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * der_y * der_y) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -5215,7 +5215,7 @@ equation
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * der_y = 0.0;
  der_2_x = der(vx);
- 2 * x * der_2_x + 2 * der(x) * der(x) + 2 * y * der_2_y + 2 * der_y * der_y = 0.0;
+ 2 * x * der_2_x + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * der_y * der_y) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -5264,7 +5264,7 @@ equation
  x ^ 2 + y ^ 2 = L;
  2 * x * vx + 2 * y * der(y) = 0.0;
  der_2_y = der(vy);
- 2 * x * der_2_x + 2 * vx * vx + 2 * y * der_2_y + 2 * der(y) * der(y) = 0.0;
+ 2 * x * der_2_x + 2 * vx * vx + (2 * y * der_2_y + 2 * der(y) * der(y)) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -5578,7 +5578,7 @@ Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  x- y
+  x + (- y)
 -------------------------------
 ")})));
   end SolveEqTest1;
@@ -5614,7 +5614,7 @@ Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  (x- y) / (- 1.0)
+  (x + (- y)) / (- 1.0)
 -------------------------------
 ")})));
   end SolveEqTest2;
@@ -5650,7 +5650,7 @@ Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  (x- y) / x
+  (x + (- y)) /x
 -------------------------------
 ")})));
   end SolveEqTest3;
@@ -5686,7 +5686,7 @@ Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  (x- y) / (1.0 / x)
+  (x + (- y)) / (1.0 / x)
 -------------------------------
 ")})));
   end SolveEqTest4;
@@ -5722,7 +5722,7 @@ Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  (x- y) / (1.0 - (x + 3))
+  (x + (- y)) / (1.0 - (x + 3))
 -------------------------------
 ")})));
   end SolveEqTest5;
@@ -5796,7 +5796,7 @@ Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  (x- y) / (- 1.0 + 1.0 + 5)
+  (x + (- y)) / (- 1.0 + 1.0 + 5)
 -------------------------------
 ")})));
   end SolveEqTest7;
@@ -8700,11 +8700,11 @@ equation
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 8566, column 2:
-  Iteration variable needs to have continuous variability, p1 has parameter variability
+  Iteration variable should have continuous variability, p1 has parameter variability
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 8569, column 26:
-  Iteration variable needs to have continuous variability, p2 has parameter variability
+  Iteration variable should have continuous variability, p2 has parameter variability
 ")})));
 end HandGuidedTearingError5;
 

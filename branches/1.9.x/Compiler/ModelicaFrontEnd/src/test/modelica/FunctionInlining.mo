@@ -249,7 +249,7 @@ fclass FunctionInlining.BasicInline7
  Real temp_4;
  Real temp_7;
 equation
- x = temp_4 + temp_4 * 2 + temp_7 + temp_7 * 2;
+ x = temp_4 + temp_4 * 2 + (temp_7 + temp_7 * 2);
  y = 1;
  temp_1 = y;
  temp_4 = temp_1;
@@ -658,7 +658,7 @@ equation
  y[2] = 2;
  y[3] = 3;
  y[4] = 4;
- x = integer(y[4]) + y[1] + y[2] + y[3];
+ x = integer(y[4]) + (y[1] + y[2] + y[3]);
 
 public
  record FunctionInlining.RecordInline4.R
@@ -812,7 +812,7 @@ equation
  x.a[1] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[1] + y[1]) - y[1];
  x.a[2] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[2] + y[2]) - y[2];
  x.a[3] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[3] + y[3]) - y[3];
- x.b = 3 + temp_5 - temp_5;
+ x.b = 3 + (temp_5 - temp_5);
  temp_5 = integer(y[4]);
 
 public
@@ -1318,10 +1318,10 @@ equation
  v = 3;
  z = 0 + temp_3 * temp_3 + temp_5 * temp_5 + temp_7 * temp_7 + temp_9 * temp_9;
  temp_1 = v;
- temp_3 = 1 + 0 * (temp_1 - 1) / 3;
- temp_5 = 1 + 1 * (temp_1 - 1) / 3;
- temp_7 = 1 + 2 * (temp_1 - 1) / 3;
- temp_9 = 1 + 3 * (temp_1 - 1) / 3;
+ temp_3 = 1 + 0 * ((temp_1 - 1) / 3);
+ temp_5 = 1 + 1 * ((temp_1 - 1) / 3);
+ temp_7 = 1 + 2 * ((temp_1 - 1) / 3);
+ temp_9 = 1 + 3 * ((temp_1 - 1) / 3);
 end FunctionInlining.ForStatementInline1;
 ")})));
     end ForStatementInline1;

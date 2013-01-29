@@ -1349,4 +1349,32 @@ end TypeTests.IfExpType5;
 ")})));
 end IfExpType5;
 
+model EquationNominalTypeTest1
+	Real x, y;
+	parameter Real pEnabled = 1;
+	Real pValues[2] = {2,3};
+equation
+	x = y + 1;
+	y = x - 1 annotation(__Modelon(nominal(enabled=pEnabled)=pValues));
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="EquationNominalTypeTest1",
+			description="If expression errors: non-parameter test expression",
+			errorMessage="
+3 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1358, column 49:
+  Cannot evaluate boolean enabled expression: pEnabled
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1358, column 59:
+  Nominal expression should have parameter variability or less, pValues has variability
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1358, column 59:
+  Size of nominal expression pValues is not the same size as the surrounding equation, size of expression [2], size of equation scalar
+")})));
+end EquationNominalTypeTest1;
+
 end TypeTests;

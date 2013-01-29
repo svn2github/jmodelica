@@ -2157,6 +2157,7 @@ class LocalDAECollocator(CasadiCollocator):
         if self.init_traj is not None:
             n = len(self.init_traj.get_data_matrix()[:, 0])
             traj = {}
+            traj["dx"] = {}
             for vt in var_vectors.keys():
                 traj[vt] = {}
                 for var in var_vectors[vt]:
@@ -2176,6 +2177,27 @@ class LocalDAECollocator(CasadiCollocator):
                         ordinates = data.x.reshape([-1, 1])
                     traj[vt][var_index] = \
                             TrajectoryLinearInterpolation(abscissae, ordinates)
+                    
+                    # Treat derivatives separately
+                    if vt == "x":
+                        name = convert_casadi_der_name(str(var.der()))
+                        vr = self.model.xmldoc.get_value_reference(name)
+                        data_matrix = N.empty([n, len(var_vectors[vt])])
+                        (var_index, _) = vr_map[vr]
+                        try:
+                            data = self.init_traj.get_variable_data(name)
+                        except VariableNotFoundError:
+                            print("Warning: Could not find initial " + \
+                                  "trajectory for variable " + name + ". " + 
+                                  "Using 0 as initial guess instead.")
+                            abscissae = N.array([0])
+                            ordinates = N.array([[0]])
+                        else:
+                            abscissae = data.t
+                            ordinates = data.x.reshape([-1, 1])
+                        traj["dx"][var_index] = \
+                                TrajectoryLinearInterpolation(abscissae,
+                                                              ordinates)
         
         # Denormalize time for minimum time problems
         if self._normalize_min_time:
@@ -2192,6 +2214,8 @@ class LocalDAECollocator(CasadiCollocator):
                     var_min = N.empty(len(var_vectors[vt]))
                     var_max = N.empty(len(var_vectors[vt]))
                     var_init = N.empty(len(var_vectors[vt]))
+                    if (not self.eliminate_der_var and vt == "x"):
+                        var_init_der = N.empty(len(var_vectors[vt]))
                     for var in var_vectors[vt]:
                         vr = var.getValueReference()
                         (var_index, _) = vr_map[vr]
@@ -2214,12 +2238,35 @@ class LocalDAECollocator(CasadiCollocator):
                         else:
                             var_initial = traj[vt][var_index].eval(time)
                         var_init[var_index] = (var_initial - e) / d
+                        
+                        # Treat derivatives separately
+                        if (not self.eliminate_der_var and vt == "x"):
+                            name = convert_casadi_der_name(str(var.der()))
+                            vr = self.model.xmldoc.get_value_reference(name)
+                            (var_index, _) = vr_map[vr]
+                            d = 1
+                            e = 0
+                            if self.variable_scaling:
+                                if self.nominal_traj is None:
+                                    d = sfs["dx"][var_index]
+                                else:
+                                    sf_index = vr_sf_map[vr]
+                                    if is_variant[vr]:
+                                        d = variant_sf[i][k][sf_index]
+                                    else:
+                                        d = invariant_d[sf_index]
+                                        e = invariant_e[sf_index]
+                            if self.init_traj is None:
+                                var_initial = 0
+                            else:
+                                var_initial = traj["dx"][var_index].eval(time)
+                            var_init_der[var_index] = (var_initial - e) / d
+                    
                     xx_lb[var_indices[i][k][vt]] = var_min
                     xx_ub[var_indices[i][k][vt]] = var_max
                     xx_init[var_indices[i][k][vt]] = var_init
-                    # Inappropriate treatment of derivatives!
                     if (not self.eliminate_der_var and vt == "x"):
-                        xx_init[var_indices[i][k]["dx"]] = 0 * var_init
+                        xx_init[var_indices[i][k]["dx"]] = var_init_der
         
         # Set bounds and initial guesses for continuity variables
         if not self.eliminate_cont_var:

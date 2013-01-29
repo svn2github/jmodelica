@@ -90,14 +90,14 @@ aspect Constructors {
 	 * \brief Construcs a connect clause without any residual.
 	 */
 	public FConnectClause.FConnectClause(FEquationType type, Opt<FStringComment> comment, ConnectClause connectClause, FIdUseInstAccess left, FIdUseInstAccess right) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), comment, connectClause, left, right);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), comment, connectClause, left, right);
 	}
 	
 	/**
 	 * \brief Construcs a else equation without any residual.
 	 */
 	public FElseEquation.FElseEquation(FEquationType type, List<FAbstractEquation> eqns) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), eqns);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), eqns);
 	}
 	
 	/**
@@ -105,39 +105,41 @@ aspect Constructors {
 	 * residual.
 	 */
 	public FEquation.FEquation(FExp left, FExp right) {
-		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), left, right);
+		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), left, right);
 	}
 	
 	/**
 	 * \brief Constructs an equation that is not marked as residual.
 	 */
 	public FEquation.FEquation(FEquationType type, FExp left, FExp right) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), left, right);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), left, right);
 	}
 	
 	/**
 	 * \brief Constructs an equation that is not initial
 	 */
-	public FEquation.FEquation(FQName name, FResidual residual, FExp left, FExp right) {
-		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), left, right);
+	public FEquation.FEquation(FQName name, FResidual residual, FNominal nominal, FExp left, FExp right) {
+		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), left, right);
 		if (name != null)
 			setName(name);
 		if (residual != null)
 			setResidual(residual);
+		if (nominal != null)
+			setNominal(nominal);
 	}
 	
 	/**
 	 * \brief Constructs a function call equation that is not initial.
 	 */
 	public FFunctionCallEquation.FFunctionCallEquation(List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
-		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), left, call);
+		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), left, call);
 	}
 	
 	/**
 	 * \brief Constructs a function call equation.
 	 */
 	public FFunctionCallEquation.FFunctionCallEquation(FEquationType type, List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), left, call);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), left, call);
 	}
 	
 	/**
@@ -151,21 +153,21 @@ aspect Constructors {
 	 * \brief Constructs a for clause equation that is not initial.
 	 */
 	public FForClauseE.FForClauseE(List<FForIndex> indices, List<FAbstractEquation> eqns) {
-		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), indices, eqns);
+		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), indices, eqns);
 	}
 	
 	/**
 	 * \brief Constructs a for clause equation that is not initial.
 	 */
 	public InstForClauseE.InstForClauseE(List<InstForIndex> indices, List<FAbstractEquation> eqns) {
-		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), indices, eqns);
+		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), indices, eqns);
 	}
 	
 	/**
 	 * \brief Constructs a for clause equation.
 	 */
 	public InstForClauseE.InstForClauseE(FEquationType type, List<InstForIndex> indices, List<FAbstractEquation> eqns) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), indices, eqns);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), indices, eqns);
 	}
 	
 	/**
@@ -197,14 +199,14 @@ aspect Constructors {
 	 * \brief Constructs an algorithm block that is not initial.
 	 */
 	public FAlgorithmBlock.FAlgorithmBlock(List<FStatement> stmts) {
-		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), stmts);
+		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), stmts);
 	}
 	
 	/**
 	 * \brief Constructs an algorithm block.
 	 */
 	public FAlgorithmBlock.FAlgorithmBlock(FEquationType type, List<FStatement> stmts) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), stmts);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), stmts);
 	}
 	
 	/**
@@ -255,7 +257,7 @@ aspect Constructors {
 	 * \brief Constructs an if equation.
 	 */
 	public FIfEquation.FIfEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), eqns, guard, elseClause);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), eqns, guard, elseClause);
 	}
     
 	/**
@@ -340,14 +342,14 @@ aspect Constructors {
 	 * \brief Constructs an unsuported equation.
 	 */
 	public FUnsupportedEquation.FUnsupportedEquation(FEquationType type) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>());
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>());
 	}
 	
 	/**
 	 * \brief Constructs a when equation.
 	 */
 	public FWhenEquation.FWhenEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), eqns, guard, elseClause);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), eqns, guard, elseClause);
 	}
 	
 	/**

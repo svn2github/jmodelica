@@ -1538,6 +1538,10 @@ aspect CCodeGen {
 			var_counter++;
 		}
 
+		// Equation nominal values
+		str.print("  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {\n");
+		genBlockResidualFunctionEqnNominals_C(new Enumerator(), ASTNode.printer_C.indent(indent), str);
+		
 		str.print("  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {\n");
 		var_counter = 0;
 		// Loop over all active variables and write their value to x	
@@ -1733,6 +1737,21 @@ aspect CCodeGen {
 		equation().genAssignment_C(indent, str, visited, new HashSet<FVariable>(activeVars));
 	}
 	
+	public void AbstractEquationBlock.genBlockResidualFunctionEqnNominals_C(Enumerator enumerator, String indent, PrintStream str) {
+		for (FAbstractEquation e : blockResidualEquations_C()) {
+			e.genNominal_C(enumerator, indent, str, null);
+		}
+	}
+	
+	public void TornEquationBlock.genBlockResidualFunctionEqnNominals_C(Enumerator enumerator, String indent, PrintStream str) {
+		for (SimpleEquationBlock block : getUnsolvedBlocks())
+			block.genBlockResidualFunctionEqnNominals_C(enumerator, indent, str);
+	}
+	
+	public void UnsolvedFunctionCallEquationBlock.genBlockResidualFunctionEqnNominals_C(Enumerator enumerator, String indent, PrintStream str) {
+		equation().genNominal_C(enumerator, indent, str, new HashSet<FVariable>(activeVars));
+	}
+	
 	public void AbstractEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {}
 
 	public void LinearEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
@@ -1925,6 +1944,65 @@ aspect CCodeGen {
 		}
 	}
 
+	public void FAbstractEquation.genNominal_C(Enumerator enumerator, String indent, PrintStream str, Set<FVariable> forVariables) {}
+	
+	public void FEquation.genNominal_C(Enumerator enumerator, String indent, PrintStream str, Set<FVariable> forVariables) {
+		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
+		if (hasNominal())
+			str.print(getNominal().getValue().ceval().realValue());
+		else
+			str.print('1');
+		str.print(";\n");
+	}
+	
+	public void FFunctionCallEquation.genNominal_C(Enumerator enumerator, String indent, PrintStream str, Set<FVariable> forVariables) {
+		if (!getCall().isIgnored()) {
+			for (FFunctionCallLeft l : getLefts()) {
+				boolean generate = true;
+				if (forVariables != null) {
+					generate = false;
+					for (FVariable var : l.referencedFVariables()) {
+						if (forVariables.contains(var)) {
+							generate = true;
+							break;
+						}
+					}
+				}
+				if (generate)
+					l.genWriteNominal_C(str, indent, enumerator);
+			}
+		}
+	}
+	
+	public void FFunctionCallLeft.genWriteNominal_C(PrintStream str, String indent, Enumerator enumerator) {
+		if (hasFExp()) 
+			getFExp().type().genWriteNominal_C(str, indent, getFExp(), enumerator);
+	}
+	
+	public void FType.genWriteNominal_C(PrintStream str, String indent, FExp exp, Enumerator enumerator) {
+		if (isArray()) {
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				genCellWriteNominal_C(str, indent, arr.get(i), enumerator);
+			}
+		} else {
+			genCellWriteNominal_C(str, indent, exp, enumerator);
+		}
+	}
+	
+	public void FType.genCellWriteNominal_C(PrintStream str, String indent, FExp exp, Enumerator enumerator) {
+		str.print(indent + "(*res)[");
+		str.print(enumerator.next());
+		str.print("] = 1;\n");
+	}
+	
+	public void FRecordType.genCellWriteNominal_C(PrintStream str, String indent, FExp exp, Enumerator enumerator) {
+		for (FRecordComponentType comp : getComponents()) {
+			FExp compExp = exp.extractRecordComponentExp(comp.getName());
+			comp.getFType().genWriteNominal_C(str, indent, compExp, enumerator);
+		}
+	}
+	
 	public void FAbstractEquation.genAssignment_C(String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {}
 	
 	public void FEquation.genAssignment_C(String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {

@@ -1155,9 +1155,12 @@ aspect Scalarization {
 				name = name.scalarize(indexMap);
 			}
 			FResidual residual = null;
+			FNominal nominal = null;
 			if (hasResidual())
 				residual = getResidual().scalarize(indexMap, null);
-			createScalarFEquations(eqns, indexMap, name, residual, getLeft(), getRight());
+			if (hasNominal())
+				nominal = getNominal().scalarize(indexMap, null);
+			createScalarFEquations(eqns, indexMap, name, residual, nominal, getLeft(), getRight());
 		} else if (ndims() > 0) {
 			/*
 			 * If the expression is an array expression, then the FExp.getArray()
@@ -1169,9 +1172,12 @@ aspect Scalarization {
 				if (hasName())
 					name = getName().specify(i, true);
 				FResidual residual = null;
+				FNominal nominal = null;
 				if (hasResidual())
 					residual = getResidual().scalarize(indexMap, i);
-				createScalarFEquations(eqns, indexMap, name, residual, getLeft().getArray().get(i), getRight().getArray().get(i));
+				if (hasNominal())
+					nominal = getNominal().scalarize(indexMap, i);
+				createScalarFEquations(eqns, indexMap, name, residual, nominal, getLeft().getArray().get(i), getRight().getArray().get(i));
 			}
 		} else {
 			throw new UnsupportedOperationException("Bad equation: ndims() for equation '" + 
@@ -1204,11 +1210,11 @@ aspect Scalarization {
 	 * \brief Scalarize left and right expressions and create new scalar equations.
 	 */
 	public void FEquation.createScalarFEquations(
-			List<FAbstractEquation> eqns, Map<String,FExp> indexMap, FQName name, FResidual residual, FExp left, FExp right) {
+			List<FAbstractEquation> eqns, Map<String,FExp> indexMap, FQName name, FResidual residual, FNominal nominal, FExp left, FExp right) {
 		if (left.inferType().isRecord()) 
 			left.inferType().scalarRecordFEquations(eqns, new FQNameEmpty(), indexMap, left, right);
 		else
-			eqns.add(new FEquation(name, residual, left.scalarize(indexMap), right.scalarize(indexMap)));
+			eqns.add(new FEquation(name, residual, nominal, left.scalarize(indexMap), right.scalarize(indexMap)));
 	}
 	
 	public FResidual FResidual.scalarize(Map<String,FExp> indexMap, Index i) {
@@ -1220,6 +1226,15 @@ aspect Scalarization {
 				iterationVariable = iterationVariable.specify(i, false);
 			scalarized.setIterationVariable(iterationVariable.scalarize(indexMap));
 		}
+		return scalarized;
+	}
+	
+	public FNominal FNominal.scalarize(Map<String,FExp> indexMap, Index i) {
+		FNominal scalarized = new FNominal();
+		FExp value = getValue();
+		if (i != null)
+			value = value.getArray().get(i);
+		scalarized.setValue(value.scalarize(indexMap));
 		return scalarized;
 	}
 	

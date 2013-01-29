@@ -946,7 +946,10 @@ aspect TransformCanonical {
 		}
 		
 		public void prettyPrintEquation(PrintStream str) {
-			str.println("  " + equation());
+			str.print("  " + equation());
+			if (equation().hasNominal())
+				str.print("    (Nominal=" + equation().getNominal().getValue() + ")");
+			str.println();
 		}
 		
 		

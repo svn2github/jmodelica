@@ -1416,12 +1416,10 @@ aspect FlatPrettyPrint {
 	 * Used if precedence is equal for node and its parent.
 	 */
 	inh boolean FExp.shouldhaveParenthesis();
-	eq BaseNode.getChild().shouldhaveParenthesis()   = false;
-	eq FDotDivExp.getRight().shouldhaveParenthesis() = true;
+	eq BaseNode.getChild().shouldhaveParenthesis() =   false;
+	eq FBinExp.getRight().shouldhaveParenthesis() = true;
 	eq FDotPowExp.getLeft().shouldhaveParenthesis()  = true;
-	eq FDotSubExp.getRight().shouldhaveParenthesis() = true;
-	eq FRelExp.getRight().shouldhaveParenthesis()    = true;
-	eq FNegExp.getFExp().shouldhaveParenthesis()      = true;
+	eq FNegExp.getFExp().shouldhaveParenthesis()     = true;
 	
 	public final void FExp.prettyPrint(Printer p, PrintStream str, String indent) {
 		int myPrecedence = precedence();
@@ -1444,37 +1442,6 @@ aspect FlatPrettyPrint {
 		str.print(":");
 	}
 	
-	protected void FDotAddExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
-		p.print(getLeft(),str,indent);
-		if(!(getRight() instanceof FNegExp))
-			str.print(p.op(this));
-		p.print(getRight(),str,indent);
-	}
-		
-	protected void FDotSubExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
-		p.print(getLeft(),str,indent);
-		str.print(p.op(this));
-		p.print(getRight(),str,indent);
-	}
-		
-	protected void FDotMulExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
-		p.print(getLeft(),str,indent);
-		str.print(p.op(this));
-		p.print(getRight(),str,indent);
-	}
-		
-	protected void FDotDivExp.prettyPrintExp(Printer p, PrintStream str, String indent){
-		p.print(getLeft(),str,indent);
-		str.print(p.op(this));	
-		p.print(getRight(),str,indent);
-	}
-		
-	protected void FDotPowExp.prettyPrintExp(Printer p, PrintStream str, String indent){
-		p.print(getLeft(),str,indent);
-		str.print(p.op(this));
-		p.print(getRight(),str,indent);
-	}
-		
 	protected void FNegExp.prettyPrintExp(Printer p,PrintStream str, String indent){
 		str.print("- ");
 		p.print(getFExp(),str,indent);
@@ -1490,9 +1457,9 @@ aspect FlatPrettyPrint {
 		getFExps().prettyPrintWithSep(p, str, indent, ", ");
 	}
 	
-	protected void FBoolBinExp.prettyPrintExp(Printer p,PrintStream str, String indent) {
+	protected void FBinExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
 		p.print(getLeft(),str,indent);
-		str.print(op());
+		str.print(p.op(this));
 		p.print(getRight(),str,indent);
 	}
 	
