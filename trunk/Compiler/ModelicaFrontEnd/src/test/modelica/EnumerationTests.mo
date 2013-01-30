@@ -395,6 +395,31 @@ Incidence:
 Connection sets: 0 sets
 ")})));
   end FlatAPIEnum1;
+  
+  
+  model ShortEnumDecl
+	  type A = enumeration( one, two );
+	  type B = A;
+	  parameter B b = B.one;
+	  Real x = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ShortEnumDecl",
+			description="Short class decl of enumeration",
+			flatModel="
+fclass EnumerationTests.ShortEnumDecl
+ parameter EnumerationTests.ShortEnumDecl.A b = EnumerationTests.ShortEnumDecl.A.one /* EnumerationTests.ShortEnumDecl.A.one */;
+ Real x;
+equation
+ x = 1;
+
+public
+ type EnumerationTests.ShortEnumDecl.A = enumeration(one, two);
+
+end EnumerationTests.ShortEnumDecl;
+")})));
+  end ShortEnumDecl;
 
 
 

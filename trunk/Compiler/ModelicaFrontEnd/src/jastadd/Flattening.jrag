@@ -651,6 +651,10 @@ aspect Flattening {
 		}
 	}
 	
+	public void InstSimpleShortClassDecl.flattenEnum(FClass fc) {
+		actualInstClass().flattenEnum(fc);
+	}
+	
 	public abstract FVariable InstAssignable.createEmptyFVariable();
 	
 	public FVariable InstPrimitive.createEmptyFVariable() {
@@ -667,7 +671,7 @@ aspect Flattening {
 
 	public FEnumVariable InstEnum.createEmptyFVariable() {
 		FEnumVariable fv = new FEnumVariable();
-		fv.setEnum(new FQNameString(myInstClass().qualifiedName()));
+		fv.setEnum(new FQNameString(myInstClass().actualInstClass().qualifiedName()));
 		return fv;
 	}	
 	
@@ -743,6 +747,10 @@ aspect Flattening {
 		}
 	}
 	
+	public void InstSimpleShortClassDecl.addFDerivedType(FClass fc) {
+		actualInstClass().addFDerivedType(fc);
+	}
+	
 	public FVariable InstAssignable.createFVariable() {
 		FVariable fv = createEmptyFVariable();
 		
@@ -760,7 +768,7 @@ aspect Flattening {
 		
 		addAttributesToFV(fv.getFAttributes());
 		if (myInstClass().extendsPrimitive())
-			fv.setDerivedType(myInstClass().qualifiedName());
+			fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
 		
 		FExp e = flattenBindingFExp();
 		if (e != null)

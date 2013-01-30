@@ -1477,6 +1477,7 @@ aspect InstanceAST_API {
 
 	syn ArrayList<InstEnumLiteral> InstClassDecl.enumLiterals() =
 		extendsEnum() ? getInstExtends(0).myInstClass().enumLiterals() : new ArrayList<InstEnumLiteral>();
+	eq InstSimpleShortClassDecl.enumLiterals()                  = actualInstClass().enumLiterals();
 	syn lazy ArrayList<InstEnumLiteral> InstEnumClassDecl.enumLiterals() {
 		ArrayList<InstEnumLiteral> l = new ArrayList<InstEnumLiteral>();
 		for (InstComponentDecl icd : getInstComponentDecls()) {

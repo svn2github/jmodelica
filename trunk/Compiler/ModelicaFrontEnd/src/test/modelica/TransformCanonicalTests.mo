@@ -3897,15 +3897,15 @@ end TransformCanonicalTests.IndexReduction1b_PlanarPendulum;
 fclass TransformCanonicalTests.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Torque amplitude = 10 \"Amplitude of driving torque\" /* 10 */;
  parameter Modelica.SIunits.Frequency freqHz = 5 \"Frequency of driving torque\" /* 5 */;
- parameter Modelica.SIunits.Inertia Jmotor(min = 0) = 0.1 \"Motor inertia\" /* 0.1 */;
- parameter Modelica.SIunits.Inertia Jload(min = 0) = 2 \"Load inertia\" /* 2 */;
+ parameter Modelica.SIunits.MomentOfInertia Jmotor(min = 0) = 0.1 \"Motor inertia\" /* 0.1 */;
+ parameter Modelica.SIunits.MomentOfInertia Jload(min = 0) = 2 \"Load inertia\" /* 2 */;
  parameter Real ratio = 10 \"Gear ratio\" /* 10 */;
  parameter Real damping = 10 \"Damping in bearing of gear\" /* 10 */;
  parameter Modelica.SIunits.Angle fixed.phi0 = 0 \"Fixed offset angle of housing\" /* 0 */;
  Modelica.SIunits.Torque fixed.flange.tau \"Cut torque in the flange\";
  parameter Boolean torque.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
  Modelica.SIunits.Torque torque.flange.tau \"Cut torque in the flange\";
- parameter Modelica.SIunits.Inertia inertia1.J(min = 0,start = 1) \"Moment of inertia\";
+ parameter Modelica.SIunits.MomentOfInertia inertia1.J(min = 0,start = 1) \"Moment of inertia\";
  parameter StateSelect inertia1.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia1.phi(stateSelect = inertia1.stateSelect) \"Absolute rotation angle of component\";
  Modelica.SIunits.AngularVelocity inertia1.w(stateSelect = inertia1.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
@@ -3918,7 +3918,7 @@ fclass TransformCanonicalTests.IndexReduction2_Mechanical
  Modelica.SIunits.Torque idealGear.flange_b.tau \"Cut torque in the flange\";
  Modelica.SIunits.Torque idealGear.support.tau \"Reaction torque in the support/housing\";
  Modelica.SIunits.Torque inertia2.flange_b.tau \"Cut torque in the flange\";
- parameter Modelica.SIunits.Inertia inertia2.J(min = 0,start = 1) = 2 \"Moment of inertia\" /* 2 */;
+ parameter Modelica.SIunits.MomentOfInertia inertia2.J(min = 0,start = 1) = 2 \"Moment of inertia\" /* 2 */;
  parameter StateSelect inertia2.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia2.phi(fixed = true,start = 0,stateSelect = inertia2.stateSelect) \"Absolute rotation angle of component\";
  Modelica.SIunits.AngularVelocity inertia2.w(fixed = true,start = 0,stateSelect = inertia2.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
@@ -3928,7 +3928,7 @@ fclass TransformCanonicalTests.IndexReduction2_Mechanical
  Modelica.SIunits.Angle spring.phi_rel(fixed = true,start = 0) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
  Modelica.SIunits.Torque spring.flange_b.tau \"Cut torque in the flange\";
  Modelica.SIunits.Torque inertia3.flange_b.tau \"Cut torque in the flange\";
- parameter Modelica.SIunits.Inertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
+ parameter Modelica.SIunits.MomentOfInertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
  parameter StateSelect inertia3.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia3.phi(stateSelect = inertia3.stateSelect) \"Absolute rotation angle of component\";
  Modelica.SIunits.AngularVelocity inertia3.w(fixed = true,start = 0,stateSelect = inertia3.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
@@ -3992,7 +3992,7 @@ public
 
  type Modelica.SIunits.Torque = Real(final quantity = \"Torque\",final unit = \"N.m\");
  type Modelica.SIunits.Frequency = Real(final quantity = \"Frequency\",final unit = \"Hz\");
- type Modelica.SIunits.Inertia = Real(final quantity = \"MomentOfInertia\",final unit = \"kg.m2\");
+ type Modelica.SIunits.MomentOfInertia = Real(final quantity = \"MomentOfInertia\",final unit = \"kg.m2\");
  type Modelica.SIunits.Angle = Real(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\");
  type Modelica.Blocks.Interfaces.RealInput = Real;
  type Modelica.SIunits.AngularVelocity = Real(final quantity = \"AngularVelocity\",final unit = \"rad/s\");

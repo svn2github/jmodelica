@@ -2269,19 +2269,19 @@ model ImportTest8
 			flatModel="
 fclass NameTests.ImportTest8
  parameter Modelica.SIunits.Resistance r.R(start = 1) \"Resistance at temperature T_ref\";
- parameter Modelica.SIunits.Temperature r.T_ref = 300.15 \"Reference temperature\" /* 300.15 */;
+ parameter Modelica.SIunits.ThermodynamicTemperature r.T_ref = 300.15 \"Reference temperature\" /* 300.15 */;
  parameter Modelica.SIunits.LinearTemperatureCoefficient r.alpha = 0 \"Temperature coefficient of resistance (R_actual = R*(1 + alpha*(T_heatPort - T_ref))\" /* 0 */;
  Modelica.SIunits.Resistance r.R_actual \"Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))\";
- Modelica.SIunits.Voltage r.v \"Voltage drop between the two pins (= p.v - n.v)\";
- Modelica.SIunits.Current r.i \"Current flowing from pin p to pin n\";
- Modelica.SIunits.Voltage r.p.v \"Potential at the pin\";
- Modelica.SIunits.Current r.p.i \"Current flowing into the pin\";
- Modelica.SIunits.Voltage r.n.v \"Potential at the pin\";
- Modelica.SIunits.Current r.n.i \"Current flowing into the pin\";
+ Modelica.SIunits.ElectricPotential r.v \"Voltage drop between the two pins (= p.v - n.v)\";
+ Modelica.SIunits.ElectricCurrent r.i \"Current flowing from pin p to pin n\";
+ Modelica.SIunits.ElectricPotential r.p.v \"Potential at the pin\";
+ Modelica.SIunits.ElectricCurrent r.p.i \"Current flowing into the pin\";
+ Modelica.SIunits.ElectricPotential r.n.v \"Potential at the pin\";
+ Modelica.SIunits.ElectricCurrent r.n.i \"Current flowing into the pin\";
  parameter Boolean r.useHeatPort = false \"=true, if HeatPort is enabled\" /* false */;
- parameter Modelica.SIunits.Temperature r.T = r.T_ref \"Fixed device temperature if useHeatPort = false\";
+ parameter Modelica.SIunits.ThermodynamicTemperature r.T = r.T_ref \"Fixed device temperature if useHeatPort = false\";
  Modelica.SIunits.Power r.LossPower \"Loss power leaving component via HeatPort\";
- Modelica.SIunits.Temperature r.T_heatPort \"Temperature of HeatPort\";
+ Modelica.SIunits.ThermodynamicTemperature r.T_heatPort \"Temperature of HeatPort\";
 equation
  r.R_actual = r.R * (1 + r.alpha * (r.T_heatPort - r.T_ref));
  r.v = r.R_actual * r.i;
@@ -2297,10 +2297,10 @@ equation
 
 public
  type Modelica.SIunits.Resistance = Real(final quantity = \"Resistance\",final unit = \"Ohm\");
- type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0.0,start = 288.15,nominal = 300,displayUnit = \"degC\");
+ type Modelica.SIunits.ThermodynamicTemperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0.0,start = 288.15,nominal = 300,displayUnit = \"degC\");
  type Modelica.SIunits.LinearTemperatureCoefficient = Real(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\");
- type Modelica.SIunits.Voltage = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
- type Modelica.SIunits.Current = Real(final quantity = \"ElectricCurrent\",final unit = \"A\");
+ type Modelica.SIunits.ElectricPotential = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
+ type Modelica.SIunits.ElectricCurrent = Real(final quantity = \"ElectricCurrent\",final unit = \"A\");
  type Modelica.SIunits.Power = Real(final quantity = \"Power\",final unit = \"W\");
 end NameTests.ImportTest8;
 ")})));
@@ -2361,11 +2361,11 @@ model ImportTest11
 			description="Using constant from imported package.",
 			flatModel="
 fclass NameTests.ImportTest11
- Modelica.SIunits.Voltage m.v = 0;
+ Modelica.SIunits.ElectricPotential m.v = 0;
  Real m.x = 1.2566370614359173E-6;
 
 public
- type Modelica.SIunits.Voltage = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
+ type Modelica.SIunits.ElectricPotential = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
 end NameTests.ImportTest11;
 ")})));
 end ImportTest11;
