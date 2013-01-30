@@ -1662,7 +1662,7 @@ aspect TransformCanonical {
 			g.addEquations(newEquations_, BiPGraph.DERIVATIVE_VARIABLES | 
 		                                   BiPGraph.ALGEBRAIC_VARIABLES | 
 		                                   BiPGraph.DIFFERENTIATED_VARIABLES | 
-		                                   BiPGraph.DISCRETE_PRE_VARIABLES, eq_list.get(0).getName(),
+		                                   BiPGraph.DISCRETE_PRE_VARIABLES, eq_list.get(0).getName() + "_",
 		                                   1);
 		}		
 	

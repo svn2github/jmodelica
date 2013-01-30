@@ -2905,6 +2905,69 @@ public
 ")})));		
 end WhenEqu12;
 
+model WhenEqu13
+Real v1(start=-1);
+Real v2(start=-1);
+Real v3(start=-1);
+Real v4(start=-1);
+Real y(start=1);
+Integer i(start=0);
+Boolean up(start=true);
+initial equation
+ v1 = if 0<=0 then 0 else 1;
+ v2 = if 0<0 then 0 else 1;
+ v3 = if 0>=0 then 0 else 1;
+ v4 = if 0>0 then 0 else 1;
+equation
+when sample(0.1,1) then
+  i = if up then pre(i) + 1 else pre(i) - 1;
+  up = if pre(i)==2 then false else if pre(i)==-2 then true else pre(up);
+  y = i;
+end when;
+ der(v1) = if y<=0 then 0 else 1;
+ der(v2) = if y<0 then 0 else 1;
+ der(v3) = if y>=0 then 0 else 1;
+ der(v4) = if y>0 then 0 else 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu13",
+			description="Basic test of when equations",
+			flatModel="
+fclass TransformCanonicalTests.WhenEqu13
+ Real v1(start = - 1);
+ Real v2(start = - 1);
+ Real v3(start = - 1);
+ Real v4(start = - 1);
+ discrete Real y(start = 1);
+ discrete Integer i(start = 0);
+ discrete Boolean up(start = true);
+initial equation 
+ v1 = 0;
+ v2 = 1;
+ v3 = 0;
+ v4 = 1;
+ pre(y) = 1;
+ pre(i) = 0;
+ pre(up) = true;
+equation
+ when sample(0.1, 1) then
+  i = if up then pre(i) + 1 else pre(i) - 1;
+ end when;
+ when sample(0.1, 1) then
+  up = if pre(i) == 2 then false elseif pre(i) == - 2 then true else pre(up);
+ end when;
+ when sample(0.1, 1) then
+  y = i;
+ end when;
+ der(v1) = if y <= 0 then 0 else 1;
+ der(v2) = if y < 0 then 0 else 1;
+ der(v3) = if y >= 0 then 0 else 1;
+ der(v4) = if y > 0 then 0 else 1;
+end TransformCanonicalTests.WhenEqu13;
+")})));		
+end WhenEqu13;
+
 model IfEqu1
 	Real x[3];
 equation
