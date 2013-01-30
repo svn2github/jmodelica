@@ -148,7 +148,7 @@ public class ModelicaCompiler {
 	
 	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
 	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
-	protected static CCompilerDelegator cCompiler = new MSVSCompilerDelegator();
+	protected static CCompilerDelegator cCompiler = new GccSCompilerDelegator();
 	protected IErrorHandler errorHandler = null;
 	
 	protected static String jmodelicaHome = System.getenv("JMODELICA_HOME");
