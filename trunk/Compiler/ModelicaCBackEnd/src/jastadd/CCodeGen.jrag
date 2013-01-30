@@ -2241,7 +2241,26 @@ aspect CCodeGen {
 		}
 	}
 	
+    public void FRelExp.genRelExpKind(PrintStream genPrinter) {
+    	genPrinter.print("-1");
+    }
     
+    public void FLtExp.genRelExpKind(PrintStream genPrinter) {
+    	genPrinter.print("JMI_REL_LT");
+    }
+
+    public void FLeqExp.genRelExpKind(PrintStream genPrinter) {
+    	genPrinter.print("JMI_REL_LEQ");
+    }
+
+    public void FGtExp.genRelExpKind(PrintStream genPrinter) {
+    	genPrinter.print("JMI_REL_GT");
+    }
+    
+    public void FGeqExp.genRelExpKind(PrintStream genPrinter) {
+    	genPrinter.print("JMI_REL_GEQ");
+    }
+    	
     /**
      * Convert to a string represenation to use in C source files.
      * 

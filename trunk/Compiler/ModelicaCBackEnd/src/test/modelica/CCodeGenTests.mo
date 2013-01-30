@@ -8475,4 +8475,116 @@ model TestEmptyArray1
 ")})));
 end TestEmptyArray1;
 
+model TestRelationalOp1
+Real v1(start=-1);
+Real v2(start=-1);
+Real v3(start=-1);
+Real v4(start=-1);
+Real y(start=1);
+Integer i(start=0);
+Boolean up(start=true);
+initial equation
+ v1 = if time>=0 and time<=3 then 0 else 0;
+ v2 = if time>0 then 0 else 0;
+ v3 = if time<=0 and time <= 2 then 0 else 0;
+ v4 = if time<0 then 0 else 0;
+equation
+when sample(0.1,1) then
+  i = if up then pre(i) + 1 else pre(i) - 1;
+  up = if pre(i)==2 then false else if pre(i)==-2 then true else pre(up);
+  y = i;
+end when;
+ der(v1) = if y<=0 then 0 else 1;
+ der(v2) = if y<0 then 0 else 1;
+ der(v3) = if y>=0 then 0 else 1;
+ der(v4) = if y>0 then 0 else 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp1",
+			description="",
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$",
+			generatedCode="
+static const int N_initial_relations = 6;
+static const int DAE_initial_relations[6]= {JMI_REL_GEQ, JMI_REL_LEQ, JMI_REL_GT, JMI_REL_LEQ, JMI_REL_LEQ, JMI_REL_LT};
+
+static const int N_relations = 4;
+static const int DAE_relations[4]= {JMI_REL_LEQ, JMI_REL_LT, JMI_REL_GEQ, JMI_REL_GT};
+")})));
+end TestRelationalOp1;
+
+model TestRelationalOp2
+
+Real v1(start=-1);
+Real v2(start=-1);
+Real v3(start=-1);
+Real v4(start=-1);
+Real y(start=1);
+Integer i(start=0);
+Boolean up(start=true);
+equation
+when sample(0.1,1) then
+  i = if up then pre(i) + 1 else pre(i) - 1;
+  up = if pre(i)==2 then false else if pre(i)==-2 then true else pre(up);
+  y = i;
+end when;
+ der(v1) = if y<=0 then 0 else 1;
+ der(v2) = if y<0 then 0 else 1;
+ der(v3) = if y>=0 then 0 else 1;
+ der(v4) = if y>0 then 0 else 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp2",
+			description="",
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$",
+			generatedCode="
+static const int N_initial_relations = 0;
+static const int DAE_initial_relations[1]= {-1};
+
+static const int N_relations = 4;
+static const int DAE_relations[4]= {JMI_REL_LEQ, JMI_REL_LT, JMI_REL_GEQ, JMI_REL_GT};
+")})));
+end TestRelationalOp2;
+
+model TestRelationalOp3
+Real v1(start=-1);
+Real v2(start=-1);
+Real v3(start=-1);
+Real v4(start=-1);
+Real y(start=1);
+Integer i(start=0);
+Boolean up(start=true);
+initial equation
+ v1 = if time>=0 and time<=3 then 0 else 0;
+ v2 = if time>0 then 0 else 0;
+ v3 = if time<=0 and time <= 2 then 0 else 0;
+ v4 = if time<0 then 0 else 0;
+equation
+when sample(0.1,1) then
+  i = if up then pre(i) + 1 else pre(i) - 1;
+  up = if pre(i)==2 then false else if pre(i)==-2 then true else pre(up);
+  y = i;
+end when;
+ der(v1) = y;
+ der(v2) = y;
+ der(v3) = y;
+ der(v4) = y;
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp3",
+			description="",
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$",
+			generatedCode="
+static const int N_initial_relations = 6;
+static const int DAE_initial_relations[6]= {JMI_REL_GEQ, JMI_REL_LEQ, JMI_REL_GT, JMI_REL_LEQ, JMI_REL_LEQ, JMI_REL_LT};
+
+static const int N_relations = 0;
+static const int DAE_relations[1]= {-1};
+")})));
+end TestRelationalOp3;
+
 end CCodeGenTests;
