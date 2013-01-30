@@ -135,7 +135,9 @@ aspect CCodeGen {
 	}
 	
 	public void FEnumIntegerExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print('(');
 		p.print(getFExp(), str, indent);
+		str.print(')');
 	}
 	
 	public void FEnumLitExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
@@ -1041,11 +1043,15 @@ aspect CCodeGen {
 	}
 
 	public void FNoEventExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print('(');
 		p.print(getFExp(), str, indent);
+		str.print(')');
 	}
 
 	public void FSmoothExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print('(');
 		p.print(getFExp(), str, indent);
+		str.print(')');
 	}
 
 	public void FInitialExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
