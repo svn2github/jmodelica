@@ -8443,7 +8443,7 @@ const int fmi_runtime_options_map_vrefs[] = {
     536870922, 536870923, 536870924, 536870925, 0
 };
 
-const int fmi_runtime_options_map_length = 14;
+const int fmi_runtime_options_map_length = 15;
 ")})));
 end TestRuntimeOptions1;
 
