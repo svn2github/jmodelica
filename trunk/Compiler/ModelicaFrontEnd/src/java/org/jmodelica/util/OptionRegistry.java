@@ -358,7 +358,12 @@ public class OptionRegistry {
                 runtime,
               0.0001,
               "Tolerance safety factor for the event iterations. Used when external solver specifies relative tolerance.",
-              1e-6,1.0);
+              1e-6,1.0),        
+        USE_MANUAL_EQUATION_SCALING
+              ("use_manual_equation_scaling",
+                runtime,
+                false,
+                "Enable equations scaling using manula values from annotations in equation block solvers.");
     
     		
 					

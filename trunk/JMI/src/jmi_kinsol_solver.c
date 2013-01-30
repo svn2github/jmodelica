@@ -709,6 +709,8 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     Store result in solver->kin_f_scale.
 */
 static void jmi_update_f_scale(jmi_block_residual_t *block) {
+	int k;
+	realtype* dummy = 0 ;
     jmi_kinsol_solver_t* solver = block->solver; 
     jmi_t* jmi = block->jmi;
     int i, N = block->n;
@@ -718,41 +720,70 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
     realtype* col_ptr;
     realtype* scaled_col_ptr;
     solver->kin_scale_update_time = curtime;  
-    
-    if(!block->jmi->options.use_automatic_scaling_flag) return;
-   
-    /* Scale equations by Jacobian rows. */
-    N_VConst_Serial(0,solver->kin_f_scale);
-    for(i = 0; i < N; i++){
-        int j;
-        realtype xscale = RAbs(block->nominal[i]);
-        realtype x = RAbs(block->x[i]);
-        if(x < xscale) x = xscale;
-        if(x < tol) x = tol;
-        col_ptr = DENSE_COL(solver->J, i);
-        scaled_col_ptr = DENSE_COL(solver->J_scale, i);
 
-        for(j = 0; j < N; j++){
-            realtype dres = col_ptr[j];
-            realtype fscale;
-            fscale = dres * x;
-            scaled_col_ptr[j] = fscale;
-            scale_ptr[j] = MAX(scale_ptr[j], RAbs(fscale));
+	/* Determine what kind of scaling to use */
+    if(block->jmi->options.use_manual_scaling_flag){
+		/* Read manual scaling from annotations and put them in scale_ptr*/		
+		block->F(jmi,dummy,scale_ptr,JMI_BLOCK_EQUATION_NOMINAL) ;
+
+	}else{
+		/* Automatic scaling, if any*/
+		if(!block->jmi->options.use_automatic_scaling_flag) return;
+
+		/* Scale equations by Jacobian rows. */
+		N_VConst_Serial(0,solver->kin_f_scale);
+		for(i = 0; i < N; i++){
+			int j;
+			realtype xscale = RAbs(block->nominal[i]);
+			realtype x = RAbs(block->x[i]);
+			if(x < xscale) x = xscale;
+			if(x < tol) x = tol;
+			col_ptr = DENSE_COL(solver->J, i);
+			scaled_col_ptr = DENSE_COL(solver->J_scale, i);
+
+			for(j = 0; j < N; j++){
+				realtype dres = col_ptr[j];
+				realtype fscale;
+				fscale = dres * x;
+				scaled_col_ptr[j] = fscale;
+				scale_ptr[j] = MAX(scale_ptr[j], RAbs(fscale));
+			}
 		}
 	}
-    for(i = 0; i < N; i++) {
-        if(scale_ptr[i] < tol) {
-            scale_ptr[i] = 1/tol; /* Singular Jacobian? */
+	for(i = 0; i < N; i++) {
+		if(scale_ptr[i] < tol) {
+			scale_ptr[i] = 1/tol; /* Singular Jacobian? */
 			jmi_log_warning(block->jmi, "Using maximum scaling factor in block %d, equation %d. Consider rescaling in the model or tighter tolerance.", block->index, i);
 		}
-        else
-            scale_ptr[i] = 1/scale_ptr[i];
-    }
-    solver->kin_ftol = tol;
-    
+		else
+			scale_ptr[i] = 1/scale_ptr[i];
+	}
+	solver->kin_ftol = tol;
+	
+	/* Print scaling factors to log */
+	if((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log)) {
+		char* buf = block->message_buffer ;
+		sprintf(buf,"Block:;%d;Updating;Res;Scaling:;",block->index);
+		k = strlen(buf);
+		for (i=0;i<N;i++){
+			realtype* res = scale_ptr;
+			int len;
+			char cur[20];
+			sprintf(cur, "%8.2E;",1/res[i]);
+			len = strlen(cur);
+			memcpy(buf + k, cur, len);
+			k += len;
+		}
+		buf[k]=0;
+		/* jmi_log(block->jmi, logInfo, buf); */
+		fprintf(block->jmi->options.debug_log, "%s\n",buf);
+		fflush(block->jmi->options.debug_log);
+		/* printf( "%s\n",buf); */
+	}
+
     KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
     KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
-
+	
     /* estimate condition number of the scaled jacobian 
         and scale function tolerance with it. */
     if((N > 1) && block->jmi->options.nle_solver_check_jac_cond_flag){

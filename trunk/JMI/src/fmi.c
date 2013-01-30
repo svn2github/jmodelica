@@ -1539,5 +1539,9 @@ void fmi_update_runtime_options(fmi_t* fmi) {
 		op->events_default_tol = z[index]; 
 	index = get_option_index("_events_tol_factor");
 	if(index)
-		op->events_tol_factor = z[index]; 
+		op->events_tol_factor = z[index];
+	index = get_option_index("_use_manual_equation_scaling");
+	if(index)
+		op->use_manual_scaling_flag = z[index]; 
+	
 }

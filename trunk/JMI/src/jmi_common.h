@@ -696,7 +696,8 @@ typedef struct jmi_options_t {
     double nle_solver_min_tol;  /**< \brief Minimum tolerance for the equation block solver */
     double nle_solver_tol_factor;   /**< \brief Tolerance safety factor for the non-linear equation block solver. */
     double events_default_tol;  /**< \brief Default tolerance for the event iterations. */        
-    double events_tol_factor;   /**< \brief Tolerance safety factor for the event iterations. */ 
+    double events_tol_factor;   /**< \brief Tolerance safety factor for the event iterations. */
+	int use_manual_scaling_flag; /**< \brief If equations should be scaled using annotations in equation block solvers */
 
 	FILE* debug_log;
 } jmi_options_t;

@@ -9630,6 +9630,7 @@ fclass TransformCanonicalTests.TestRuntimeOptions1
  parameter Boolean _use_Brent_in_1d = false /* false */;
  parameter Boolean _use_automatic_scaling = true /* true */;
  parameter Boolean _use_jacobian_scaling = false /* false */;
+ parameter Boolean _use_manual_equation_scaling = false /* false */;
 equation
  x = 1;
 end TransformCanonicalTests.TestRuntimeOptions1;
