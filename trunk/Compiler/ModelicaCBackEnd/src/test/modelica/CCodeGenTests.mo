@@ -8440,7 +8440,7 @@ const char *fmi_runtime_options_map_names[] = {
 
 const int fmi_runtime_options_map_vrefs[] = {
     536870919, 0, 1, 268435461, 536870920, 2, 268435462, 3, 4, 536870921,
-    536870922, 536870923, 536870924, 536870925, 0
+    536870922, 536870923, 536870924, 536870925, 536870926, 0
 };
 
 const int fmi_runtime_options_map_length = 15;

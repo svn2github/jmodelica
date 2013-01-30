@@ -905,6 +905,38 @@ Semantic error at line 808, column 25:
 end RecordConstructor6;
 
 
+model RecordConstructor7
+    record A
+        Real x;
+    end A;
+    
+    record B
+        extends A;
+        Real y;
+    end B;
+    
+    constant B b = B(y=2, x=1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordConstructor7",
+			description="Constant evaluation of record constructors for records with inherited components",
+			flatModel="
+fclass RecordTests.RecordConstructor7
+ constant Real b.y = 2;
+ constant Real b.x = 1;
+
+public
+ record RecordTests.RecordConstructor7.B
+  Real y;
+  Real x;
+ end RecordTests.RecordConstructor7.B;
+
+end RecordTests.RecordConstructor7;
+")})));
+end RecordConstructor7;
+
+
 
 model RecordScalarize1
  record A
