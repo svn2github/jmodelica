@@ -61,7 +61,7 @@ aspect Flattening {
 	 */
     public InstNode InstProgramRoot.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
     	
-    	InstClassDecl icd = simpleLookupInstClassDecl(className);
+    	InstClassDecl icd = lookupInstClassQualified(className);
     	if (!icd.isUnknown()) {
     		icd.flattenInstClassDecl(fc);
     	} else {

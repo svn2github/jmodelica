@@ -582,7 +582,7 @@ aspect InstanceErrorCheck {
 	// We don't want to error check an entire model, just the classes
 	//   that are used. 
 	public Collection<Problem> InstProgramRoot.checkErrorsInInstClass(String className) throws ModelicaClassNotFoundException{
-		InstClassDecl icd = simpleLookupInstClassDecl(className);
+		InstClassDecl icd = lookupInstClassQualified(className);
 		if (icd.isUnknown()) 
 			throw new ModelicaClassNotFoundException(className);
 		else

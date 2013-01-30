@@ -1246,7 +1246,7 @@ public class ModelicaCompiler {
 			handleCompilerProblems(problems);
 		}
 		
-		InstClassDecl icd = ipr.simpleLookupInstClassDecl(cl);
+		InstClassDecl icd = ipr.lookupInstClassQualified(cl);
 		
 		hookModelInstantiatied(icd);
 		ASTNode.endStep("instantiateModel()");
