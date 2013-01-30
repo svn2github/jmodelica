@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import org.jmodelica.util.NotNullPrintStream;
 
+aspect BasePrinter {
 
 	// superclass to all classes that perform the dispatch
 	class Printer {
@@ -45,6 +46,10 @@ import org.jmodelica.util.NotNullPrintStream;
   		public String op(FBinExp e) { return e.op(); }
   		
 	}
+	
+}
+
+aspect PrettyPrint {
 
 	// select first variant
 	class PrettyPrinter extends Printer {
@@ -67,8 +72,8 @@ import org.jmodelica.util.NotNullPrintStream;
  			node._dumpTree(this, str, indent); 
  		}
 	}
-
-aspect PrettyPrint {
+	
+	static PrettyPrinter ASTNode.prettyPrinter = new PrettyPrinter();
 	
 	public void ASTNode._dumpTree(PrintStream str, String indent) {
  		_dumpTree(new DumpTreePrinter(),str,indent);
@@ -94,7 +99,7 @@ aspect PrettyPrint {
 	}
 
 	public void ASTNode.prettyPrint(PrintStream str,String indent) {
- 		prettyPrint(new PrettyPrinter(),str,indent);
+ 		prettyPrint(prettyPrinter,str,indent);
 	}
 	
 	
@@ -121,7 +126,7 @@ aspect PrettyPrint {
 	public String List.toString() {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		PrintStream str = new PrintStream(os);
-		prettyPrintWithSep(new PrettyPrinter(), str, "", ", ");
+		prettyPrintWithSep(prettyPrinter, str, "", ", ");
 		return os.toString();
 	}
 	

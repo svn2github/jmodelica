@@ -1148,10 +1148,16 @@ aspect FlatNames {
     eq FPreBooleanVariable.name()  = getFQNameNoTransform().preName();
     eq FPreStringVariable.name()   = getFQNameNoTransform().preName();
     eq FPreEnumVariable.name()     = getFQNameNoTransform().preName();
-    syn String FIdUse.preName()    = getFQNameNoTransform().preName();
-    syn String FPreExp.preName() {
-     	return ((FIdUseExp)getFExpNoTransform()).getFIdUse().preName();
-	}
+
+    syn String FPreExp.preName() = getFExpNoTransform().accessPreName();
+    
+    // Perhaps berrer to do like with der() and add InstPreExp?
+    syn String FExp.accessPreName() {
+    	throw new UnsupportedOperationException();
+    }
+    eq FIdUseExp.accessPreName()      = getFIdUse().getFQNameNoTransform().preName();
+    eq FInstAccessExp.accessPreName() = "pre(" + name() + ')';
+
     syn String FIdUse.scalarName()    = getFQName().scalarName();
     syn String FIdUseExp.scalarName() = getFIdUse().scalarName();
 
