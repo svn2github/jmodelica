@@ -452,6 +452,26 @@ end RecordTests.RecordType6;
 end RecordType6;
 
 
+model RecordType7
+	record A 
+		Real x;
+	end A;
+	
+	A a[:];
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RecordType7",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 458, column 7:
+  Can not infer array size of the variable a
+")})));
+end RecordType7;
+
+
 
 model RecordBinding1
  record A
