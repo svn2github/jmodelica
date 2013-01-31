@@ -16,7 +16,26 @@
 
 package ConstantPropagationTests
 
-model SimplifyLitExps1
+model VariabilityInference
+	Real x1;
+	Boolean x2;
+equation
+	x1 = 1;
+	x2 = true;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="VariabilityInference",
+			description="",
+			constant_propagation=true,
+			flatModel="
+fclass ConstantPropagationTests.VariabilityInference
+ constant Real x1 = 1;
+ constant Boolean x2 = true;
+end ConstantPropagationTests.VariabilityInference;
+")})));
+end VariabilityInference;
+
+model SimplifyLitExps
 	Real x1;
 	Boolean x2;
 equation
@@ -25,20 +44,37 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="SimplifyLitExps1",
+			name="SimplifyLitExps",
 			description="",
 			constant_propagation=true,
 			flatModel="
-fclass ConstantPropagationTests.SimplifyLitExps1
- Real x1;
- discrete Boolean x2;
-initial equation 
- pre(x2) = false;
-equation
- x1 = -23.5;
- x2 = true;
-end ConstantPropagationTests.SimplifyLitExps1;
+fclass ConstantPropagationTests.SimplifyLitExps
+ constant Real x1 = -23.5;
+ constant Boolean x2 = true;
+end ConstantPropagationTests.SimplifyLitExps;
 ")})));
-end SimplifyLitExps1;
+end SimplifyLitExps;
+
+model ConstantSubstitution
+	Real x1,x2,x3,x4;
+equation
+	x1 = 1;
+	x2 = x3;
+	x3 = x1;
+	x4 = x2;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantSubstitution",
+			description="",
+			constant_propagation=true,
+			flatModel="
+fclass ConstantPropagationTests.ConstantSubstitution
+ constant Real x1 = 1;
+ constant Real x2 = 1;
+ constant Real x3 = 1;
+ constant Real x4 = 1;
+end ConstantPropagationTests.ConstantSubstitution;
+")})));
+end ConstantSubstitution;
 
 end ConstantPropagationTests;
