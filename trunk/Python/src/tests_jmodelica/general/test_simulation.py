@@ -265,7 +265,7 @@ class TestHybrid5(SimulationTest):
 
     @testattr(assimulo = True)
     def test_trajectories(self):
-        self.assert_all_trajectories(['x','u','ref','I'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
+        self.assert_all_trajectories(['x','I'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
 
 class TestHybrid6(SimulationTest):
     

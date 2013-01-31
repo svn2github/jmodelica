@@ -117,12 +117,39 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 	return flag;
 }
 
+int jmi_print_array(fmi_t* fmi, jmi_real_t* x, fmiInteger size_x){
+    int SIZE_BUFFER = 1000;
+    int i, len=0;
+    char* buffer = (char*)fmi->fmi_functions.allocateMemory(SIZE_BUFFER, sizeof(char));
+    
+    for (i=0; i<size_x;i++){
+        len += snprintf(buffer+len,SIZE_BUFFER-len, "%g ",x[i]);
+    }
+    
+    fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", buffer);
+    fmi->fmi_functions.freeMemory(buffer);
+    
+    return 0;
+}
+
 int jmi_solve_block_residual(jmi_block_residual_t * block) {
     int ef;    
     clock_t c0,c1; /*timers*/
     jmi_t* jmi = block->jmi;
+    fmi_t* fmi = jmi->fmi;
+    jmi_real_t* switches;
+    jmi_real_t* sw_old;
+    jmi_real_t* x_new;
+    jmi_real_t* x;
+    jmi_real_t* booleans;
+    jmi_real_t* bool_old;
+    fmiInteger nF0,nF1,nFp,nR0;
+    fmiInteger nF,nR,nbr_sw,mode_sw,nbr_bool;
+	fmiInteger iter,converged,nbr_allocated_iterations;
+    jmi_real_t h;
+
     c0 = clock();
-     
+    
     if(block->init) {
         int i;
         /* Initialize the work vectors */
@@ -190,12 +217,171 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
      * A proper local even iteration should problably be done here.
      * Right now event handling at top level will iterate.
      */
-    
-    if (jmi->atEvent != 0) {
-        block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
+    if (jmi->atInitial == JMI_TRUE || jmi->atEvent == JMI_TRUE) {
+        /*ITERATION */
+        nbr_allocated_iterations = 30;
+        switches = jmi_get_sw(jmi); /* Get the switches */
+        
+        if (jmi->atInitial == JMI_TRUE){
+            /* switches = jmi_get_sw_init(jmi); */ /* Get the switches */
+            jmi_init_get_sizes(jmi,&nF0,&nF1,&nFp,&nR0);
+            nbr_sw = nR0;
+            mode_sw = 0; /* INITIALIZE MODE */
+        }else{
+            jmi_dae_get_sizes(jmi, &nF, &nR);
+            nbr_sw = nR;
+            mode_sw = 1; /* NOT INITIALIZE MODE */
+        }
+        nbr_bool = jmi->n_boolean_d;
+        booleans = jmi_get_boolean_d(jmi);
+        
+        bool_old = (jmi_real_t*)fmi->fmi_functions.allocateMemory(nbr_allocated_iterations*nbr_bool, sizeof(jmi_real_t));
+        memcpy(bool_old,booleans,nbr_bool*sizeof(jmi_real_t)); /* Store the current booleans */
+        
+        sw_old = (jmi_real_t*)fmi->fmi_functions.allocateMemory(nbr_allocated_iterations*nbr_sw, sizeof(jmi_real_t));
+        memcpy(sw_old,switches,nbr_sw*sizeof(jmi_real_t)); /* Store the current switches */
+        
+        fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Starting local (block) event iteration at t=%g.",jmi_get_t(jmi)[0]);
+        jmi_print_array(fmi,block->x,block->n);
+        jmi_print_array(fmi,switches,nbr_sw);
+        jmi_print_array(fmi,booleans,jmi->n_boolean_d);
+        
+        iter = 0;
+        converged = 0;
+        ef = 0;
+        while (1){
+            iter += 1;
+            
+            /* Solve block */
+            ef = block->solve(block); if (ef!=0){ break; }
+            jmi_write_back_to_z_val(jmi);
+            
+            jmi_evaluate_switches(jmi,switches,mode_sw);
+            jmi_write_back_to_z(jmi);
+        
+            block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
+            jmi_write_back_to_z_val(jmi);
+            
+            fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Local iteration %d at t=%g.",iter,jmi_get_t(jmi)[0]);
+            jmi_print_array(fmi,block->x,block->n);
+            jmi_print_array(fmi,switches,nbr_sw);
+            jmi_print_array(fmi,booleans,jmi->n_boolean_d);
+            
+            /* Check for consistency */
+            if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
+                fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Found consistent solution using fixed point iteration at t=%g.",jmi_get_t(jmi)[0]);
+                converged = 1;
+                break;
+            }
+            
+            /* Check for infinite loop */
+            if (jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
+                fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiWarning, "INFO", "Detected infinite loop in fixed point iteration at t=%g, switching to enchanced fixed point iteration...",jmi_get_t(jmi)[0]);
+                break;
+            }
+
+            /* Store the new switches */
+            if(iter >= nbr_allocated_iterations){
+                fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiWarning, "INFO", "Failed to converged during fixed point iteration due to too many iterations at t=%g, switching to enhanced fixed point iteration...",jmi_get_t(jmi)[0]);
+                break;
+            }
+            memcpy(&sw_old[iter*nbr_sw],switches,nbr_sw*sizeof(jmi_real_t));
+            memcpy(&bool_old[iter*nbr_bool],booleans,nbr_bool*sizeof(jmi_real_t));
+            
+        }
+        
+        fmi->fmi_functions.freeMemory(sw_old);
+        fmi->fmi_functions.freeMemory(bool_old);
+        
+        /* ENHANCED FIXED POINT ITERATION */
+        if (converged==0 && ef==0){
+            
+            fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Starting enhanced block iteration at t=%g.",jmi_get_t(jmi)[0]);
+            
+            bool_old = (jmi_real_t*)fmi->fmi_functions.allocateMemory(nbr_allocated_iterations*nbr_bool, sizeof(jmi_real_t));
+            sw_old = (jmi_real_t*)fmi->fmi_functions.allocateMemory(nbr_allocated_iterations*nbr_sw, sizeof(jmi_real_t));
+            x_new = (jmi_real_t*)fmi->fmi_functions.allocateMemory(block->n, sizeof(jmi_real_t));
+            x = (jmi_real_t*)fmi->fmi_functions.allocateMemory(block->n, sizeof(jmi_real_t));
+            
+            memcpy(bool_old,booleans,nbr_bool*sizeof(jmi_real_t)); /* Store the current booleans */
+            memcpy(sw_old,switches,nbr_sw*sizeof(jmi_real_t)); /* Store the current switches */
+            memcpy(x,block->x,block->n*sizeof(jmi_real_t));
+            
+            /* Solve block */
+            ef = block->solve(block);
+            jmi_write_back_to_z_val(jmi);
+            
+            memcpy(x_new,block->x,block->n*sizeof(jmi_real_t));
+            
+            jmi_evaluate_switches(jmi,switches,mode_sw);
+            jmi_write_back_to_z(jmi);
+            
+            block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
+            jmi_write_back_to_z_val(jmi);
+
+        
+            iter = 0;
+            while (1 && ef==0){
+                iter += 1;
+                
+                h = jmi_compute_minimal_step(block, x, x_new, &sw_old[(iter-1)*nbr_sw], &bool_old[(iter-1)*nbr_bool],nbr_sw, 1e-4);
+                jmi_compute_reduced_step(h,x_new,x,x,block->n);
+                
+                block->F(jmi,x,NULL,JMI_BLOCK_WRITE_BACK);
+                jmi_write_back_to_z_val(jmi);
+                
+                jmi_evaluate_switches(jmi,switches,mode_sw);
+                jmi_write_back_to_z(jmi);
+            
+                block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
+                jmi_write_back_to_z_val(jmi);
+                
+                ef = block->solve(block); if (ef!=0){ break; }
+                jmi_write_back_to_z_val(jmi);
+                
+                memcpy(x_new, block->x, block->n*sizeof(jmi_real_t));
+                
+                fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Iteration %d at t=%g.",iter,jmi_get_t(jmi)[0]);
+                jmi_print_array(fmi,block->x,block->n);
+                jmi_print_array(fmi,switches,nbr_sw);
+                jmi_print_array(fmi,booleans,jmi->n_boolean_d);
+                
+                /* Check for consistency */
+                if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
+                    fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Found consistent solution using enhanced fixed point iteration at t=%g.",jmi_get_t(jmi)[0]);
+                    converged = 1;
+                    break;
+                }
+                
+                /* Check for infinite loop */
+                if (jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
+                    fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiError, "ERROR", "Detected infinite loop in enhanced fixed point iteration at t=%g.",jmi_get_t(jmi)[0]);
+                    break;
+                }
+                
+                /* Store the new switches */
+                if(iter >= nbr_allocated_iterations){
+                    fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiError, "ERROR", "Failed to converged during enhanced fixed point iteration due to too many iterations at t=%g.",jmi_get_t(jmi)[0]);
+                    break;
+                }
+                memcpy(&sw_old[iter*nbr_sw],switches,nbr_sw*sizeof(jmi_real_t));
+                memcpy(&bool_old[iter*nbr_bool],booleans,nbr_bool*sizeof(jmi_real_t));
+            }
+            
+            fmi->fmi_functions.freeMemory(sw_old);
+            fmi->fmi_functions.freeMemory(bool_old);
+            fmi->fmi_functions.freeMemory(x_new);
+            fmi->fmi_functions.freeMemory(x);
+        }
+        
+        if(converged==0){
+            fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiError, "ERROR", "Failed to find an consistent solution in event iteration at t=%g.",jmi_get_t(jmi)[0]);
+            ef = 1; /* Return flag */
+        }
+        
+    }else{
+        ef = block->solve(block);
     }
-    
-    ef = block->solve(block);
 
     if(block->init) {
         /* 
@@ -204,11 +390,134 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         */
         block->init = 0;
     }
+    
     c1 = clock();
     /* Make information available for logger */
     block->nb_calls++;
 	block->time_spent += ((double)(c1-c0))/(CLOCKS_PER_SEC);
     return ef;
+}
+
+fmiInteger jmi_check_infinite_loop(jmi_real_t* sw_old,jmi_real_t *sw, fmiInteger nR, fmiInteger iter){
+    fmiInteger i,infinite_loop = 0;
+    
+    for(i=0;i<iter;i++){
+        if(jmi_compare_switches(&sw_old[i*nR],sw,nR)){
+            infinite_loop = 1;
+            break;
+        }
+    }
+    if (infinite_loop){
+        return 1;
+    }else{
+        return 0;
+    }
+}
+
+jmi_int_t jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size){
+    int i;
+    for (i=0;i<size;i++){
+        if (sw_pre[i]!=sw_post[i]){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, fmiInteger mode){
+    fmiInteger nF,nR;
+    fmiInteger nF0,nF1,nFp,nR0,retval;
+	fmiInteger i,size_switches;
+    jmi_real_t *event_indicators;
+    fmi_t* fmi = jmi->fmi;
+    
+    jmi_init_get_sizes(jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
+    jmi_dae_get_sizes(jmi, &nF, &nR);
+    
+    if (mode==1) { 
+        size_switches = nR;
+        /* Allocate memory */
+        event_indicators = (jmi_real_t*)fmi->fmi_functions.allocateMemory(size_switches, sizeof(jmi_real_t));
+        retval = jmi_dae_R(jmi,event_indicators);
+    }else{ /* INITIALIZE */
+        size_switches = nR0;
+        /* Allocate memory */
+        event_indicators = (jmi_real_t*)fmi->fmi_functions.allocateMemory(size_switches, sizeof(jmi_real_t));
+        retval = jmi_init_R0(jmi, event_indicators);
+    }
+
+    for (i=0; i < size_switches; i=i+1){
+        if (switches[i] == 1.0){
+            if (event_indicators[i] <= -1*fmi->fmi_epsilon){
+                switches[i] = 0.0;
+            }
+        }else{
+            if (event_indicators[i] >= fmi->fmi_epsilon){
+                switches[i] = 1.0;
+            }
+        }
+    }
+    fmi->fmi_functions.freeMemory(event_indicators);
+}
+
+jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, jmi_real_t* x_new, jmi_real_t* sw_init, jmi_real_t* bool_init, fmiInteger nR, jmi_real_t tolerance){
+    jmi_real_t a = 0.0;
+    jmi_real_t b = 1.0;
+    jmi_real_t h;
+    jmi_real_t *sw;
+    jmi_real_t *booleans;
+    jmi_real_t *x_temp;
+    jmi_t* jmi = block->jmi;
+    fmi_t* fmi = jmi->fmi;
+    
+    sw = (jmi_real_t*)fmi->fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
+    x_temp = (jmi_real_t*)fmi->fmi_functions.allocateMemory(block->n, sizeof(jmi_real_t));
+    memcpy(sw,sw_init,nR*sizeof(jmi_real_t));
+    booleans = jmi_get_boolean_d(jmi);
+    
+    while (1){
+        h = (b-a)/2.0;
+        
+        jmi_compute_reduced_step(a+h,x_new,x,x_temp,block->n);
+        
+        /*jmi_write_block_x(block,x);*/
+        block->F(jmi,x_temp,NULL,JMI_BLOCK_WRITE_BACK);
+        jmi_write_back_to_z_val(jmi);
+        
+        jmi_evaluate_switches(jmi,sw,1);
+        jmi_write_back_to_z(jmi);
+        
+        /*
+        block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
+        jmi_write_back_to_z_val(jmi);
+        */
+        
+        if (jmi_compare_switches(sw,sw_init,nR)){
+            a = a+h;
+        }else{
+            b = b-h;
+        }
+        /* RESET Z DUE TO THE COUPLING BETWEEN BOOLEANS */
+        /*
+        memcpy(booleans,bool_init,(jmi->n_boolean_d)*sizeof(jmi_real_t));
+        jmi_write_back_to_z(jmi);
+        */
+        if ( b-a < tolerance){
+            break;
+        }
+    }
+    
+    fmi->fmi_functions.freeMemory(sw);
+    fmi->fmi_functions.freeMemory(x_temp);
+    
+    return b;
+}
+
+void jmi_compute_reduced_step(jmi_real_t h, jmi_real_t* x_new, jmi_real_t* x, jmi_real_t* x_target, fmiInteger size){
+    int i;
+    for (i=0;i<size;i++){
+        x_target[i] = x[i]+(h)*(x_new[i]-x[i]);
+    }
 }
 
 int jmi_block_jacobian_fd(jmi_block_residual_t* b, jmi_real_t* x, jmi_real_t delta_rel, jmi_real_t delta_abs) {
@@ -267,6 +576,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
 	free(b->max);
 	free(b->nominal);
 	free(b->message_buffer);
+    free(b->initial);
 	/* clean up the solver.*/
     b->delete_solver(b);
 
@@ -323,4 +633,3 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
 
   	return ef;
 }
-

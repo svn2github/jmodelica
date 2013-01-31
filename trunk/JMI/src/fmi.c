@@ -1206,7 +1206,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
 	fmiInteger nF;
 	fmiInteger nR;
 	fmiInteger retval;
-	fmiInteger i;
+	fmiInteger i,iter;
     jmi_real_t nextTimeEvent;
 	fmi_t* fmi = ((fmi_t *)c);
 	jmi_t* jmi = fmi->jmi;
@@ -1240,20 +1240,26 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     /* We are at an event -> set atEvent to true. */
     jmi->atEvent = JMI_TRUE;
 
-    /* Iterate */
-    while ((eventInfo->iterationConverged)==fmiFalse){
+    fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Starting global event iteration at t=%g.",jmi_get_t(jmi)[0]);
 
+    /* Iterate */
+    iter = 0;
+    while ((eventInfo->iterationConverged)==fmiFalse){
+        iter += 1;
+        
+        fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Global iteration %d at t=%g.",iter,jmi_get_t(jmi)[0]);
+        
     	/* Set switches according to the event indicators*/
         retval = jmi_dae_R(jmi,event_indicators);
 
         /* Turn the switches */
         for (i=0; i < nR; i=i+1){
             if (switches[i] == 1.0){
-                if (event_indicators[i] <= 0.0){
+                if (event_indicators[i] <= -1*fmi->fmi_epsilon){
                     switches[i] = 0.0;
                 }
             }else{
-                if (event_indicators[i] > 0.0){
+                if (event_indicators[i] > fmi->fmi_epsilon){
                     switches[i] = 1.0;
                 }
             }

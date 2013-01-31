@@ -2207,6 +2207,9 @@ int jmi_with_cad_derivatives(jmi_t* jmi);
  */
 int jmi_set_start_values(jmi_t *jmi);
 
+int jmi_write_back_to_z_val(jmi_t* jmi);
+int jmi_write_back_to_z(jmi_t* jmi);
+
 /* @} */
 
 #ifdef __cplusplus

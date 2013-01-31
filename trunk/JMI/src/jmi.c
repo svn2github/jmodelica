@@ -895,6 +895,22 @@ int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 	}
 }
 
+int jmi_write_back_to_z_val(jmi_t* jmi) {
+    int i;
+    for (i=0;i<jmi->n_z;i++) {
+        (*(jmi->z_val))[i] = (*(jmi->z))[i];
+    }
+    return 1;
+}
+
+int jmi_write_back_to_z(jmi_t* jmi) {
+    int i;
+    for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+    return 1;
+}
+
 int jmi_init_eval_parameters(jmi_t* jmi) {
 
 	int i, return_status;
