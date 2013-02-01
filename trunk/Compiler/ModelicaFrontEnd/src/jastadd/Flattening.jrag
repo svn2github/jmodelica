@@ -942,8 +942,8 @@ aspect Flattening {
 	
 	eq InstDot.splitArrayAccess(int index) {
 		InstDot res = fullCopy();
-		for (int i = 0, n = res.getNumInstAccess(); i < n; i++) {
-			InstAccess ia = res.getInstAccess(i);
+		for (int i = 0, n = getNumInstAccess(); i < n; i++) {
+			InstAccess ia = getInstAccess(i);
 			if (ia.isArray()) {
 				res.setInstAccess(ia.splitArrayAccess(index), i);
 				i = n;
