@@ -19,9 +19,15 @@ package ConstantPropagationTests
 model VariabilityInference
 	Real x1;
 	Boolean x2;
+	
+	parameter Real p1 = 4;
+	Real r1;
+	Real r2;
 equation
 	x1 = 1;
 	x2 = true;
+	r1 = p1;
+	r2 = p1 + x1;
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="VariabilityInference",
@@ -31,6 +37,9 @@ equation
 fclass ConstantPropagationTests.VariabilityInference
  constant Real x1 = 1;
  constant Boolean x2 = true;
+ parameter Real p1 = 4 /* 4 */;
+ parameter Real r1 = p1;
+ parameter Real r2 = p1 + 1;
 end ConstantPropagationTests.VariabilityInference;
 ")})));
 end VariabilityInference;
