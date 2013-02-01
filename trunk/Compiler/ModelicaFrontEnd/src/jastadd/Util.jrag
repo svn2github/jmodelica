@@ -2801,6 +2801,12 @@ aspect GeneralHelpers {
 		
 	}
 	
+	/**
+	 * Is this class partial?
+	 */
+	syn boolean ClassDecl.isPartial() = false;
+	eq BaseClassDecl.isPartial()      = hasPartial();
+	
 	syn boolean Restriction.isModel() = false;
 	eq Model.isModel() = true;
 	syn boolean ClassDecl.isModel() = false;
