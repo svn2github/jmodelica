@@ -226,7 +226,7 @@ jmi_int_t jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_
 void jmi_compute_reduced_step(jmi_real_t h, jmi_real_t* x_new, jmi_real_t* x, jmi_real_t* x_target, fmiInteger size);
 fmiInteger jmi_check_infinite_loop(jmi_real_t* sw_old,jmi_real_t *sw, fmiInteger nR, fmiInteger iter);
 jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, jmi_real_t* x_new, jmi_real_t* sw_init, jmi_real_t* bool_init, fmiInteger nR, jmi_real_t tolerance);
-int jmi_print_array(fmi_t* fmi, jmi_real_t* x, fmiInteger size_x);
+int jmi_print_array(fmi_t* fmi, jmi_real_t* x, fmiInteger size_x, char* array_info);
 
 #ifdef JMI_AD_NONE_AND_CPP
 }

@@ -117,11 +117,12 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 	return flag;
 }
 
-int jmi_print_array(fmi_t* fmi, jmi_real_t* x, fmiInteger size_x){
+int jmi_print_array(fmi_t* fmi, jmi_real_t* x, fmiInteger size_x, char* array_info){
     int SIZE_BUFFER = 1000;
     int i, len=0;
     char* buffer = (char*)fmi->fmi_functions.allocateMemory(SIZE_BUFFER, sizeof(char));
     
+    len += snprintf(buffer+len,SIZE_BUFFER-len, "%s ",array_info);
     for (i=0; i<size_x;i++){
         len += snprintf(buffer+len,SIZE_BUFFER-len, "%g ",x[i]);
     }
@@ -242,9 +243,9 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         memcpy(sw_old,switches,nbr_sw*sizeof(jmi_real_t)); /* Store the current switches */
         
         fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Starting local (block) event iteration at t=%g.",jmi_get_t(jmi)[0]);
-        jmi_print_array(fmi,block->x,block->n);
-        jmi_print_array(fmi,switches,nbr_sw);
-        jmi_print_array(fmi,booleans,jmi->n_boolean_d);
+        jmi_print_array(fmi,block->x,block->n, (char *)"Block states:");
+        jmi_print_array(fmi,switches,nbr_sw, (char *)"Switches:");
+        jmi_print_array(fmi,booleans,jmi->n_boolean_d, (char *)"Booleans:");
         
         iter = 0;
         converged = 0;
@@ -263,9 +264,9 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             jmi_write_back_to_z_val(jmi);
             
             fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Local iteration %d at t=%g.",iter,jmi_get_t(jmi)[0]);
-            jmi_print_array(fmi,block->x,block->n);
-            jmi_print_array(fmi,switches,nbr_sw);
-            jmi_print_array(fmi,booleans,jmi->n_boolean_d);
+            jmi_print_array(fmi,block->x,block->n, (char *)"Block states:");
+            jmi_print_array(fmi,switches,nbr_sw,(char *)"Switches:");
+            jmi_print_array(fmi,booleans,jmi->n_boolean_d,(char *)"Booleans:");
             
             /* Check for consistency */
             if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
@@ -342,9 +343,9 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 memcpy(x_new, block->x, block->n*sizeof(jmi_real_t));
                 
                 fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Iteration %d at t=%g.",iter,jmi_get_t(jmi)[0]);
-                jmi_print_array(fmi,block->x,block->n);
-                jmi_print_array(fmi,switches,nbr_sw);
-                jmi_print_array(fmi,booleans,jmi->n_boolean_d);
+                jmi_print_array(fmi,block->x,block->n,(char *)"Block states:");
+                jmi_print_array(fmi,switches,nbr_sw,(char *)"Switches:");
+                jmi_print_array(fmi,booleans,jmi->n_boolean_d,(char *)"Booleans:");
                 
                 /* Check for consistency */
                 if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
