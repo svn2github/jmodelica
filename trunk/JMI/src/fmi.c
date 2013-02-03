@@ -1206,7 +1206,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
 	fmiInteger nF;
 	fmiInteger nR;
 	fmiInteger retval;
-	fmiInteger i,iter;
+	fmiInteger i,iter, max_iterations;
     jmi_real_t nextTimeEvent;
 	fmi_t* fmi = ((fmi_t *)c);
 	jmi_t* jmi = fmi->jmi;
@@ -1226,6 +1226,8 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     eventInfo->stateValueReferencesChanged = fmiFalse;  /* No support for dynamic state selection */
     eventInfo->terminateSimulation = fmiFalse;          /* Don't terminate the simulation */
     eventInfo->iterationConverged = fmiFalse;           /* The iteration have not converged */
+    
+    max_iterations = 30; /* Maximum number of event iterations */
 
     retval = jmi_ode_derivatives(jmi);
 
@@ -1320,6 +1322,12 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     	if (intermediateResults){
     		break;
     	}
+        
+        /* No convergence under the allowed number of iterations. */
+        if(iter >= max_iterations){
+            fmi->fmi_functions.logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Failed to converged during global fixed point iteration due to too many iterations at t=%g",jmi_get_t(jmi)[0]);
+            return fmiError;
+        }
 
     }
 
