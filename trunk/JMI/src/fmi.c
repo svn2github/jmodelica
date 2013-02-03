@@ -277,6 +277,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     fmiInteger nR0, nR;             /* Number of R-equations */
     fmiInteger initComplete = 0;    /* If the initialization are complete */
     jmi_real_t nextTimeEvent;       /* Next time event instant */
+    fmiInteger iter, max_iterations;
     
     jmi_real_t* switchesR;   /* Switches */
     jmi_real_t* switchesR0;  /* Initial Switches */
@@ -298,6 +299,8 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     eventInfo->stateValueReferencesChanged = fmiFalse;  /* No support for dynamic state selection */
     eventInfo->terminateSimulation = fmiFalse;          /* Don't terminate the simulation */
     eventInfo->iterationConverged = fmiTrue;            /* The iteration has converged */
+    
+    max_iterations = 30;
     
     /* Evaluate parameters */
     jmi_init_eval_parameters(jmi);
@@ -364,9 +367,11 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
         (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed.");
         return fmiError;
     }
-
+    
+    iter = 0;
     while (initComplete == 0){                            /* Loop during event iteration */
-
+        iter += 1;
+        
         if (nR0 > 0){                                     /* Specify the switches if any */
             b_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR0, sizeof(jmi_real_t));
             retval = jmi_init_R0(((fmi_t *)c)->jmi, b_mode);
@@ -443,6 +448,12 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
             
         }else{ /* No event functions, initialization is complete. */
             initComplete = 1;
+        }
+        
+        /* No convergence under the allowed number of iterations. */
+        if(iter >= max_iterations){
+            fmi->fmi_functions.logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Failed to converged during global fixed point iteration due to too many iterations at t=%g (initialization).",jmi_get_t(jmi)[0]);
+            return fmiError;
         }
     }
 
