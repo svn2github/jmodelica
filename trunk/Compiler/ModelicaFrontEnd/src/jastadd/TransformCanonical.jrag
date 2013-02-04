@@ -157,6 +157,14 @@ aspect TransformCanonical {
 			out.close();
 		}
 		
+		public void writeTearingPairsToFile(File file) throws FileNotFoundException {
+			PrintStream out = new PrintStream(file);
+			int count = 0;
+			for (AbstractEquationBlock block : this)
+				block.printTearingPairs(out, count++);
+			out.close();
+		}
+		
 	}
 	
 	public class StructuredBLT extends BLT {
@@ -572,7 +580,9 @@ aspect TransformCanonical {
 		}
 		
 		protected void printIterationVariables(PrintStream str) {}
-	
+		
+		protected void printTearingPairs(PrintStream str, int blockNumber) {}
+		
 	}
 
 	/**
@@ -1324,6 +1334,32 @@ aspect TransformCanonical {
 				for (FVariable var : block.activeVariables())
 					str.println(var.name());
 		}
+		
+		protected void printTearingPairs(PrintStream str, int blockNumber) {
+			int counter = 0;
+			str.println("In block #" + blockNumber);
+			for (SimpleEquationBlock block : unsolvedBlocks) {
+				boolean equationHasHGT = block.equation().hasResidual();
+				boolean variableHasHGT = equationHasHGT && block.equation().getResidual().hasIterationVariable();
+				for (FVariable var : block.activeVariables()) {
+					variableHasHGT |= var.getHGTType() == FClass.HGTVariableType.COMPONENT || var.getHGTType() == FClass.HGTVariableType.PAIR;
+					str.print(" (");
+					str.print(variableHasHGT ? 'M' : 'A');
+					str.print(") " + (counter++) + " " + var.name() + " (");
+					var.printFAttributes(str, FAttribute.MIN, FAttribute.MAX, FAttribute.START, FAttribute.NOMINAL);
+					str.println(")");
+					str.print("   (");
+					str.print(equationHasHGT ? 'M' : 'A');
+					str.print(") " + block.equation().toString()); 
+					if (block.equation().hasNominal())
+						str.print("    (Nominal=" + block.equation().getNominal().getValue() + ")");
+					str.println();
+				}
+				str.println();
+			}
+			str.println();
+		}
+		
 	}
 
 	syn lazy Set<FVariable> FVariable.dependsOn() {

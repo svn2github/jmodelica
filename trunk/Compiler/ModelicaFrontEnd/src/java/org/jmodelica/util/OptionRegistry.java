@@ -275,6 +275,13 @@ public class OptionRegistry {
 			 "If the option is set to true (default is false), two text files containing one iteration variable" +
 			 "name per row is written to disk. The files contains the iteration variables for the DAE and the" +
 			 "DAE initialization system respectively. The files are outputed to the resource directory"),
+		WRITE_TEARING_PAIRS
+			("write_tearing_paris_to_file",
+			 compiler,
+			 false,
+			 "If the option is set to true (default is false), two text files containing tearing pairs" +
+			 " is written to disk. The files contains the tearing pairs for the DAE and the" +
+			 "DAE initialization system respectively. The files are outputed to the working directory"),
 		
 		// Runtime options
         /*
