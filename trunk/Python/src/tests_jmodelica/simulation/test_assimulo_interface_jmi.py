@@ -222,15 +222,18 @@ class Test_JMI_DAE:
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.g
         """
-        temp_g = self.DISC.g(2.,[1.,2.],[2.,0],[0,0])
+        pass #DEPRECATED
         
-        nose.tools.assert_almost_equal(temp_g[0], -0.429203, 5)
-        nose.tools.assert_almost_equal(temp_g[1], 1.141592, 5)
+        #temp_g = self.DISC.g(2.,[1.,2.],[2.,0],[0,0])
+        #nose.tools.assert_almost_equal(temp_g[0], -0.429203, 5)
+        #nose.tools.assert_almost_equal(temp_g[1], 1.141592, 5)
     
     @testattr(assimulo = True) 
     def test_g_adjust(self):
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.g
+        """
+        pass #DEPRECATED
         """
         self.DISC.eps = 2.0
 
@@ -243,6 +246,7 @@ class Test_JMI_DAE:
         
         nose.tools.assert_almost_equal(temp_g_adjust[0], -2.429203, 5)
         nose.tools.assert_almost_equal(temp_g_adjust[1], 3.141592, 5)
+        """
         
     @testattr(assimulo = True) 
     def test_init(self):
@@ -293,6 +297,9 @@ class Test_JMI_DAE:
         """
         This tests JMUs with event iteration (JModelica.org).
         """
+        #DEPRECATED!
+        pass
+        """
         jmu_name = compile_jmu('EventIter.EventMiddleIter', os.path.join(path_to_mos,'EventIter.mo'))
 
         model = JMUModel(jmu_name)
@@ -324,6 +331,7 @@ class Test_JMI_DAE:
         nose.tools.assert_almost_equal(x[-1], -2.000000, 4)
         nose.tools.assert_almost_equal(y[-1], -1.0000000, 4)
         nose.tools.assert_almost_equal(z[-1], 4.0000000, 4)
+        """
 
     @testattr(assimulo = True) 
     def test_j(self):

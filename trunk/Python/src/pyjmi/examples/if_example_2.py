@@ -20,8 +20,8 @@ import os
 import numpy as N
 import pylab as p
 
-from pymodelica import compile_jmu
-from pyjmi import JMUModel
+from pymodelica import compile_fmu
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """
@@ -35,10 +35,10 @@ def run_demo(with_plots=True):
     class_name = 'IfExpExamples.IfExpExample2'
     mofile = curr_dir+'/files/IfExpExamples.mo'
 
-    jmu_name = compile_jmu(class_name, mofile)
+    jmu_name = compile_fmu(class_name, mofile)
 
     # Load the dynamic library and XML data
-    model = JMUModel(jmu_name)
+    model = load_fmu(jmu_name)
 
     #Simulate
     res = model.simulate(final_time=5.0)

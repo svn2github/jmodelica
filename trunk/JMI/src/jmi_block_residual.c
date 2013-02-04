@@ -117,21 +117,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 	return flag;
 }
 
-int jmi_print_array(fmi_t* fmi, jmi_real_t* x, fmiInteger size_x, char* array_info){
-    int SIZE_BUFFER = 1000;
-    int i, len=0;
-    char* buffer = (char*)fmi->fmi_functions.allocateMemory(SIZE_BUFFER, sizeof(char));
-    
-    len += snprintf(buffer+len,SIZE_BUFFER-len, "%s ",array_info);
-    for (i=0; i<size_x;i++){
-        len += snprintf(buffer+len,SIZE_BUFFER-len, "%g ",x[i]);
-    }
-    
-    fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", buffer);
-    fmi->fmi_functions.freeMemory(buffer);
-    
-    return 0;
-}
+
 
 int jmi_solve_block_residual(jmi_block_residual_t * block) {
     int ef;    
@@ -415,51 +401,7 @@ fmiInteger jmi_check_infinite_loop(jmi_real_t* sw_old,jmi_real_t *sw, fmiInteger
     }
 }
 
-jmi_int_t jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size){
-    int i;
-    for (i=0;i<size;i++){
-        if (sw_pre[i]!=sw_post[i]){
-            return 0;
-        }
-    }
-    return 1;
-}
 
-void jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, fmiInteger mode){
-    fmiInteger nF,nR;
-    fmiInteger nF0,nF1,nFp,nR0,retval;
-	fmiInteger i,size_switches;
-    jmi_real_t *event_indicators;
-    fmi_t* fmi = jmi->fmi;
-    
-    jmi_init_get_sizes(jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
-    jmi_dae_get_sizes(jmi, &nF, &nR);
-    
-    if (mode==1) { 
-        size_switches = nR;
-        /* Allocate memory */
-        event_indicators = (jmi_real_t*)fmi->fmi_functions.allocateMemory(size_switches, sizeof(jmi_real_t));
-        retval = jmi_dae_R(jmi,event_indicators);
-    }else{ /* INITIALIZE */
-        size_switches = nR0;
-        /* Allocate memory */
-        event_indicators = (jmi_real_t*)fmi->fmi_functions.allocateMemory(size_switches, sizeof(jmi_real_t));
-        retval = jmi_init_R0(jmi, event_indicators);
-    }
-
-    for (i=0; i < size_switches; i=i+1){
-        if (switches[i] == 1.0){
-            if (event_indicators[i] <= -1*fmi->fmi_epsilon){
-                switches[i] = 0.0;
-            }
-        }else{
-            if (event_indicators[i] >= fmi->fmi_epsilon){
-                switches[i] = 1.0;
-            }
-        }
-    }
-    fmi->fmi_functions.freeMemory(event_indicators);
-}
 
 jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, jmi_real_t* x_new, jmi_real_t* sw_init, jmi_real_t* bool_init, fmiInteger nR, jmi_real_t tolerance){
     jmi_real_t a = 0.0;
