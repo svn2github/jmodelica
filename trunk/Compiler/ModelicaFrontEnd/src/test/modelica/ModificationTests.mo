@@ -372,7 +372,7 @@ model ModTest13_Err
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 351, column 7:
-  The component y is undeclared
+  Cannot find component declaration for y
 
 ")})));
 end ModTest13_Err;
@@ -393,7 +393,7 @@ model ModTest14_Err
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 351, column 7:
-  The component y is undeclared
+  Cannot find component declaration for y
 
 ")})));
 end ModTest14_Err;
@@ -423,7 +423,7 @@ model ModTest15_Err
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 404, column 7:
-  The component z is undeclared
+  Cannot find component declaration for z
 
 ")})));
 end ModTest15_Err;

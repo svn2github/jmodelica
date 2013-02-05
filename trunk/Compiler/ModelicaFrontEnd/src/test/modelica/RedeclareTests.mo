@@ -1454,7 +1454,7 @@ model RedeclareTest65_Err
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 404, column 7:
-  The component w is undeclared
+  Cannot find component declaration for w
 
 ")})));
 end RedeclareTest65_Err;
@@ -1617,7 +1617,7 @@ model RedeclareTest95_Err
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 1609, column 7:
-  The component w is undeclared
+  Cannot find component declaration for w
 
 ")})));
 end RedeclareTest95_Err;
@@ -1662,7 +1662,7 @@ model RedeclareTest96_Err
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 1659, column 7:
-  The component w is undeclared
+  Cannot find component declaration for w
 
 ")})));
 end RedeclareTest96_Err;
@@ -1707,7 +1707,7 @@ model RedeclareTest97_Err
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 1659, column 7:
-  The component w is undeclared
+  Cannot find component declaration for w
 
 ")})));
 end RedeclareTest97_Err;

@@ -90,7 +90,7 @@ A a;
 1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 90, column 1:
-  The class A is undeclared
+  Cannot find class declaration for A
   
 ")})));
   end NameTest3_Err;
@@ -118,7 +118,7 @@ model NameTest4_Err
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 100, column 4:
-  The class B is undeclared
+  Cannot find class declaration for B
 
 ")})));
   end NameTest4_Err;
@@ -213,7 +213,7 @@ model NameTest7_Err
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 196, column 4:
-  The class B is undeclared
+  Cannot find class declaration for B
 
 ")})));
 end NameTest7_Err;
@@ -233,7 +233,7 @@ model NameTest8_Err
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 196, column 4:
-  The class D is undeclared
+  Cannot find class declaration for D
 
 ")})));
 end NameTest8_Err;
@@ -264,7 +264,7 @@ model NameTest9_Err
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 196, column 4:
-  The component y is undeclared
+  Cannot find component declaration for y
 
 ")})));
   end NameTest9_Err;
@@ -303,7 +303,7 @@ model NameTest10_Err
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 297, column 4:
-  The class B is undeclared
+  Cannot find class declaration for B
 
 ")})));
   end NameTest10_Err;
@@ -360,7 +360,7 @@ M m(redeclare B a);
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 346, column 15:
-  The class B is undeclared
+  Cannot find class declaration for B
 ")})));
 end NameTest12_Err;
   
@@ -402,10 +402,10 @@ end NameTest12_Err;
  2 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 37:
-  The class C is undeclared
+  Cannot find class declaration for C
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 39:
-  The component y is undeclared
+  Cannot find component declaration for y
 ")})));
 end NameTest13_Err;
   
@@ -447,7 +447,7 @@ end NameTest13_Err;
  2 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 461, column 18:
-  The component z is undeclared
+  Cannot find component declaration for z
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 461, column 20:
   Cannot find class or component declaration for pp
@@ -2005,7 +2005,7 @@ class ExtendsTest3
 1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 164, column 11:
-  The class D is undeclared
+  Cannot find class declaration for D
   
 ")})));
 end ExtendsTest3;
@@ -2131,7 +2131,7 @@ model ImportTest3
 1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 253, column 3:
-  The class B is undeclared
+  Cannot find class declaration for B
   "
   )})));
 end ImportTest3;
@@ -2467,10 +2467,10 @@ model ShortClassDeclTest35_Err
   2 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 549, column 4:
-  The component q is undeclared
+  Cannot find component declaration for q
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 550, column 4:
-  The component t is undeclared
+  Cannot find component declaration for t
 
 ")})));
 end ShortClassDeclTest35_Err;
@@ -2587,7 +2587,7 @@ end ShortClassDeclTest6;
 //  1 error(s) found...
 //In file 'src/test/modelica/NameTests.mo':
 //Semantic error at line 834, column 14:
-//  The component y is undeclared
+//  Cannot find component declaration for y
 //")})));
 //end ShortClassDeclTest7_Err;
 //
@@ -2615,7 +2615,7 @@ end ShortClassDeclTest6;
 //1 errors found:
 //Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 //Semantic error at line 2625, column 15:
-//  The component y is undeclared
+//  Cannot find component declaration for y
 //")})));
 //end ShortClassDeclTest75_Err;
 
