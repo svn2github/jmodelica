@@ -175,11 +175,11 @@ $C_DAE_event_indicator_residuals$
 $C_DAE_initial_event_indicator_residuals$
 ",
          generatedCode="
-    (*res)[0] = _one_1 - (_time);
-    (*res)[1] = _two_2 - (_time);
+    (*res)[0] = _time - (_one_1);
+    (*res)[1] = _time - (_two_2);
 
-    (*res)[0] = _one_1 - (_time);
-    (*res)[1] = _two_2 - (_time);
+    (*res)[0] = _time - (_one_1);
+    (*res)[1] = _time - (_two_2);
     (*res)[2] = _p_0 - (_one_1);
 ")})));
 end CCodeGenTest6;
