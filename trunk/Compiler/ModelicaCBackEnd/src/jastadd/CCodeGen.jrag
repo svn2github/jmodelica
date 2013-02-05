@@ -2202,23 +2202,6 @@ aspect CCodeGen {
 		str.print(");\n");
 	}	
 
-	/*
-	public void FGtExp.genResidual_C(Enumerator enumerator, String indent, PrintStream str) {
-		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
-		getLeft().prettyPrint_C(str,"");
-		str.print(" - (");
-		getRight().prettyPrint_C(str,"");
-		str.print(");\n");
-	}	
-
-	public void FGeqExp.genResidual_C(Enumerator enumerator, String indent, PrintStream str) {
-		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
-		getLeft().prettyPrint_C(str,"");
-		str.print(" - (");
-		getRight().prettyPrint_C(str,"");
-		str.print(");\n");
-	}	
-	*/
 	public void FRealVariable.genStartAttributeResidual_C(Enumerator enumerator, String indent, PrintStream str) {
 		if (!(this instanceof FDerivativeVariable)) {
 			str.print(indent + "(*res)[" + enumerator.next() + "] = ");

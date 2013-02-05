@@ -157,6 +157,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
     
+    /* Printouts for iterations should not be here - to be added is the Jacobian output
 	if((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log)) {
 		char* buf = block->message_buffer ;
 
@@ -172,10 +173,8 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
 			j += len;
 		}
 		buf[j]=0;
-		/* jmi_log(block->jmi, logInfo, buf); */
 		fprintf(block->jmi->options.debug_log, "%s\n",buf);
 		fflush(block->jmi->options.debug_log);
-		/* printf( "%s\n",buf); */
 
 		buf = block->message_buffer ;
 		sprintf(buf,"Block:;%d;Norm:;%g;Residuals:;",block->index, kin_mem->kin_fnorm);
@@ -190,12 +189,10 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
 			j += len;
 		}
 		buf[j]=0;
-		/* jmi_log(block->jmi, logInfo, buf); */
 		fprintf(block->jmi->options.debug_log, "%s\n",buf);
 		fflush(block->jmi->options.debug_log);
-		/* printf( "%s\n",buf); */
 	}
-
+*/
     if(!block->dF) {
         /* Use (almost) standard finite differences */
         realtype inc, inc_inv, ujsaved, ujscale, sign;
@@ -351,8 +348,58 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
 }
 
 void kin_info(const char *module, const char *function, char *msg, void *eh_data){
-        char buffer[400];
+        int i,j;
+	    long int nniters;
+	    char buffer[400];
         jmi_block_residual_t *block = eh_data;
+        char* buf = block->message_buffer ;
+    	jmi_kinsol_solver_t* solver = block->solver;
+        struct KINMemRec* kin_mem = solver->kin_mem;
+
+        /* Get the number of iterations */
+    	KINGetNumNonlinSolvIters(kin_mem, &nniters);
+
+    	/* Only output an iteration under certain conditions:
+    	 *  1. nle_solver_log > 2
+    	 *  2. The calling function is either KINSolInit or KINSol
+    	 *  3. The message string starts with "nni"
+    	 *
+    	 *  This approach gives one printout per iteration
+    	 */
+    	if ((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log) &&
+    			(((strcmp("KINSolInit",function)==0) | (strcmp("KINSol",function)==0)) & (strncmp("nni",msg,3)==0))) {
+    		sprintf(buf,"Block:;%d;Iteration:;%d;IVs:;",block->index,nniters);
+    		j = strlen(buf);
+    		for (i=0;i<block->n;i++){
+    			realtype* u = N_VGetArrayPointer(kin_mem->kin_uu);
+    			int len;
+    			char cur[60];
+    			sprintf(cur, "%30.16E;",u[i]);
+    			len = strlen(cur);
+    			memcpy(buf + j, cur, len);
+    			j += len;
+    		}
+    		buf[j]=0;
+    		/* jmi_log(block->jmi, logInfo, buf); */
+    		fprintf(block->jmi->options.debug_log, "%s\n",buf);
+    		fflush(block->jmi->options.debug_log);
+
+    		sprintf(buf,"Block:;%d;Scaled norm:;%30.16E;Residuals:;",block->index, kin_mem->kin_fnorm);
+    		j = strlen(buf);
+    		for (i=0;i<block->n;i++){
+    			realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
+    			int len;
+    			char cur[60];
+    			sprintf(cur, "%30.16E;",f[i]);
+    			len = strlen(cur);
+    			memcpy(buf + j, cur, len);
+    			j += len;
+    		}
+    		buf[j]=0;
+    		/* jmi_log(block->jmi, logInfo, buf); */
+    		fprintf(block->jmi->options.debug_log, "%s\n",buf);
+    		fflush(block->jmi->options.debug_log);
+    	}
         sprintf(buffer, "[KINSOL] %s", msg);
         jmi_log(block->jmi, logInfo, buffer);
 }
@@ -768,8 +815,8 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
 		for (i=0;i<N;i++){
 			realtype* res = scale_ptr;
 			int len;
-			char cur[20];
-			sprintf(cur, "%8.2E;",1/res[i]);
+			char cur[60];
+			sprintf(cur, "%30.16E;",1/res[i]);
 			len = strlen(cur);
 			memcpy(buf + k, cur, len);
 			k += len;
