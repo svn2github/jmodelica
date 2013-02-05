@@ -102,9 +102,12 @@ aspect FlatTypeAnalysis {
 	
 	eq InstRecord.type() {
 		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
-		if (isArray() && getNumInstComponentDecl() == 0)
-			return myInstClass().recordType().sizedType(size());
-		InstComponentDecl root = isArray() ? getInstComponentDecl(0) : this;
+		InstComponentDecl root = this;
+		for (int i = 0; i < ndims(); i++) {
+			if (root.getNumInstComponentDecl() == 0)
+				return myInstClass().recordType().sizedType(size());
+			root = root.getInstComponentDecl(0);
+		}
 		for (InstComponentDecl icd : root.allInstComponentDecls()) 
 			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
 		FRecordType type = new FRecordType(size(), myInstClass().qualifiedName(), new List(), null);

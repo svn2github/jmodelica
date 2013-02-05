@@ -1474,25 +1474,18 @@ aspect ConstantEvaluation {
 	/**
 	 * \brief Find and evaluate the "start" attribute. If it is not found, use default value.
 	 */
-	syn lazy CValue InstAssignable.startAttributeCValue() = CValue.UNKNOWN;
+	syn CValue InstComponentDecl.startAttributeCValue()  = CValue.UNKNOWN;
+	syn lazy CValue InstPrimitive.startAttributeCValue() = startAttributeCValueGeneric();
+	syn lazy CValue InstRecord.startAttributeCValue()    = startAttributeCValueGeneric();
 	
-	eq InstPrimitive.startAttributeCValue() {
+	protected CValue InstAssignable.startAttributeCValueGeneric() {
 		for (InstModification im : totalMergedEnvironment()) {
 			FExp exp = im.findStartAttribute();
 			if (exp != null)
 				return exp.ceval();
 		}
 		
-		// Default value
-		CValue res = CValue.UNKNOWN;
-		if (isReal())
-			res = new CValueReal(0.0);
-		else if (isInteger())
-			res = new CValueInteger(0);
-		else if (isBoolean())
-			res = new CValueBoolean(false);
-		else if (isString())
-			res = new CValueString("");
+		CValue res = startAttributeCValueDefault();
 		if (isArray()) {
 			CValueArray array = new CValueArray(size());
 			for (Index i : indices())
@@ -1502,13 +1495,24 @@ aspect ConstantEvaluation {
 		return res;
 	}
 	
-	eq InstRecord.startAttributeCValue() {
-		// TODO: perhaps this breakup should be done in ceval()?
-		// Assume an InstRecord can't be an array
+	syn CValue InstAssignable.startAttributeCValueDefault() = CValue.UNKNOWN;
+	eq InstPrimitive.startAttributeCValueDefault() {
+		CValue res = CValue.UNKNOWN;
+		if (isReal())
+			res = new CValueReal(0.0);
+		else if (isInteger())
+			res = new CValueInteger(0);
+		else if (isBoolean())
+			res = new CValueBoolean(false);
+		else if (isString())
+			res = new CValueString("");
+		return res;
+	}
+	eq InstRecord.startAttributeCValueDefault() {
 		CValueRecord res = new CValueRecord((FRecordType) type());
 		int i = 0;
-		for (InstComponentDecl var : getInstComponentDecls())
-			res.setMember(i++, var.ceval());
+		for (InstComponentDecl var : myInstClass().getInstComponentDecls())
+			res.setMember(i++, var.startAttributeCValue());
 		return res;
 	}
 	
@@ -1516,7 +1520,7 @@ aspect ConstantEvaluation {
 	 * \brief Find the expression for the start attribute.
 	 */
 	public FExp InstModification.findStartAttribute() { 
-		return null; 
+		return null;
 	}
 	
 	public FExp InstComponentModification.findStartAttribute() {

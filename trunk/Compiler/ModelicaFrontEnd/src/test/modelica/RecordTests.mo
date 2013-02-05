@@ -771,6 +771,37 @@ end RecordTests.RecordArray5;
 end RecordArray5;
 
 
+model RecordArray6
+    record A
+        Real x;
+        Real y;
+        Real z;
+    end A;
+    
+    constant A b[2,2];
+    constant A c[2,2] = b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RecordArray6",
+			description="Constant array of records with missing binding expression",
+			flatModel="
+fclass RecordTests.RecordArray6
+ constant RecordTests.RecordArray6.A b[2,2];
+ constant RecordTests.RecordArray6.A c[2,2] = {{RecordTests.RecordArray6.A(0.0, 0.0, 0.0), RecordTests.RecordArray6.A(0.0, 0.0, 0.0)}, {RecordTests.RecordArray6.A(0.0, 0.0, 0.0), RecordTests.RecordArray6.A(0.0, 0.0, 0.0)}};
+
+public
+ record RecordTests.RecordArray6.A
+  Real x;
+  Real y;
+  Real z;
+ end RecordTests.RecordArray6.A;
+
+end RecordTests.RecordArray6;
+")})));
+end RecordArray6;
+
+
 
 model RecordConstructor1
  record A
