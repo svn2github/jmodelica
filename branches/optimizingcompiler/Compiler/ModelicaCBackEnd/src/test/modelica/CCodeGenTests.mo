@@ -129,7 +129,7 @@ equation
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = _y_1 - (_der_x_2);
-    (*res)[1] = COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, sin(_time), _x_0) - (_y_1);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, sin(_time), _x_0)) - (_y_1);
 ")})));
 end CCodeGenTest4;
 
@@ -149,7 +149,7 @@ equation
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = _y_3 - (_der_x_4);
-    (*res)[1] = COND_EXP_EQ(COND_EXP_LE(_time, _one_0, JMI_TRUE, JMI_FALSE), JMI_TRUE, _x_2, COND_EXP_EQ(COND_EXP_LE(_time, _two_1, JMI_TRUE, JMI_FALSE), JMI_TRUE, (- AD_WRAP_LITERAL(2)) * _x_2, AD_WRAP_LITERAL(3) * _x_2)) - (_y_3);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time, _one_0, JMI_TRUE, JMI_FALSE), JMI_TRUE, _x_2, COND_EXP_EQ(COND_EXP_LE(_time, _two_1, JMI_TRUE, JMI_FALSE), JMI_TRUE, (- AD_WRAP_LITERAL(2)) * _x_2, AD_WRAP_LITERAL(3) * _x_2))) - (_y_3);
 ")})));
 end CCodeGenTest5;
 
@@ -203,7 +203,7 @@ $C_DAE_event_indicator_residuals$
 ",
 			generatedCode="
     (*res)[0] = _y_2 - (_der_x_3);
-    (*res)[1] = COND_EXP_EQ(COND_EXP_LE(_time, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(0), COND_EXP_EQ(COND_EXP_GE(_time, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(COND_EXP_LT(_x_1, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(2), COND_EXP_EQ(COND_EXP_GT(_x_1, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(4), COND_EXP_EQ(COND_EXP_EQ(_z_0, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(7)))))) - (_y_2);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(0), COND_EXP_EQ(COND_EXP_GE(_time, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(COND_EXP_LT(_x_1, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(2), COND_EXP_EQ(COND_EXP_GT(_x_1, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(4), COND_EXP_EQ(COND_EXP_EQ(_z_0, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(7))))))) - (_y_2);
 
 ")})));
 end CCodeGenTest7;
@@ -236,7 +236,7 @@ model CCodeGenTest9
   Real z(start=0);
 initial equation
    x = noEvent(if time>=1 then (-1 + y) else  (- y));
-   y = noEvent(z + x +(if z>=-1.5 then -3 else 3));
+   y = 2 * noEvent(z + x +(if z>=-1.5 then -3 else 3));
    z = -y  - x + (if y>=0.5 then -1 else 1);
 equation
    der(x) = -x;
@@ -255,8 +255,8 @@ $C_DAE_initial_event_indicator_residuals$
     (*res)[0] = - _x_0 - (_der_x_3);
     (*res)[1] = - _y_1 - (_der_y_4);
     (*res)[2] = - _z_2 - (_der_z_5);
-    (*res)[3] = COND_EXP_EQ(COND_EXP_GE(_time, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), JMI_TRUE, - AD_WRAP_LITERAL(1) + _y_1, - _y_1) - (_x_0);
-    (*res)[4] = _z_2 + _x_0 + COND_EXP_EQ(COND_EXP_GE(_z_2, - AD_WRAP_LITERAL(1.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, - AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(3)) - (_y_1);
+    (*res)[3] = (COND_EXP_EQ(COND_EXP_GE(_time, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), JMI_TRUE, - AD_WRAP_LITERAL(1) + _y_1, - _y_1)) - (_x_0);
+    (*res)[4] = 2 * (_z_2 + _x_0 + COND_EXP_EQ(COND_EXP_GE(_z_2, - AD_WRAP_LITERAL(1.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, - AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(3))) - (_y_1);
     (*res)[5] = - _y_1 - _x_0 + COND_EXP_EQ(_sw_init(0), JMI_TRUE, - AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(1)) - (_z_2);
 
     (*res)[0] = _y_1 - (AD_WRAP_LITERAL(0.5));
@@ -311,7 +311,7 @@ model CCodeGenTest11
 			generatedCode="
     (*res)[0] = 1 - (_x_0);
     (*res)[1] = 2 - (_y_1);
-    (*res)[2] = COND_EXP_EQ(COND_EXP_EQ(_x_0, _y_1, JMI_FALSE, JMI_TRUE),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_z_2);
+    (*res)[2] = (COND_EXP_EQ(COND_EXP_EQ(_x_0, _y_1, JMI_FALSE, JMI_TRUE),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0))) - (_z_2);
 ")})));
 end CCodeGenTest11;
 
@@ -454,7 +454,7 @@ $C_ode_initialization$
     model_ode_guards(jmi);
   _x2_1 = 1;
   _x1_0 = 0;
-  _der_x1_5 = (1 - (1.0 * (_x2_1) * (_x2_1))) * _x1_0- _x2_1 + _p_3 * _u_2;
+  _der_x1_5 = (1 - (1.0 * (_x2_1) * (_x2_1))) * _x1_0 + (- _x2_1) + _p_3 * _u_2;
   _der_x2_6 = _x1_0;
   _w_4 = _x1_0 + _x2_1;
 ")})));
@@ -532,7 +532,7 @@ model CLogExp1
 			generatedCode="
     (*res)[0] = JMI_TRUE - (_x_0);
     (*res)[1] = JMI_FALSE - (_y_1);
-    (*res)[2] = COND_EXP_EQ(LOG_EXP_AND(_x_0, _y_1),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_z_2);
+    (*res)[2] = (COND_EXP_EQ(LOG_EXP_AND(_x_0, _y_1),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0))) - (_z_2);
 ")})));
 end CLogExp1;
 
@@ -550,7 +550,7 @@ model CLogExp2
 			generatedCode="
     (*res)[0] = JMI_TRUE - (_x_0);
     (*res)[1] = JMI_FALSE - (_y_1);
-    (*res)[2] = COND_EXP_EQ(LOG_EXP_OR(_x_0, _y_1),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_z_2);
+    (*res)[2] = (COND_EXP_EQ(LOG_EXP_OR(_x_0, _y_1),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0))) - (_z_2);
 ")})));
 end CLogExp2;
 
@@ -566,7 +566,7 @@ model CLogExp3
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = JMI_TRUE - (_x_0);
-    (*res)[1] = COND_EXP_EQ(LOG_EXP_NOT(_x_0),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_y_1);
+    (*res)[1] = (COND_EXP_EQ(LOG_EXP_NOT(_x_0),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0))) - (_y_1);
 ")})));
 end CLogExp3;
 
@@ -5418,7 +5418,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /**** Other variables ***/
   _mode_10 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), _sw(2)), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), _sw(3)), JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(2)));
 
-    model_ode_guards(jmi);
+      model_ode_guards(jmi);
   _der_dummy_12 = 1;
   _u_6 = 2 * sin(_time);
   pre_mode_10 = 2;
@@ -5428,6 +5428,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   _dummy_11 = 0.0;
   pre_startFor_8 = JMI_FALSE;
   pre_startBack_9 = JMI_FALSE;
+
 ")})));
 end BlockTest3;
 
@@ -5713,8 +5714,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _x_2_5 = x[0];
     _x_1_4 = x[1];
-  (*res)[0] = 4 - (3 * _x_1_4 + 4 * _x_2_5);
-  (*res)[1] = 3 - (1 * _x_1_4 + 2 * _x_2_5);
+    (*res)[0] = 4 - (3 * _x_1_4 + 4 * _x_2_5);
+    (*res)[1] = 3 - (1 * _x_1_4 + 2 * _x_2_5);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _x_2_5 = x[0];
     _x_1_4 = x[1];
@@ -5741,8 +5742,8 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _y_2_7 = x[0];
     _y_1_6 = x[1];
-  (*res)[0] = _y_2_7 - (_p_12 * _A_2_1_2 * _y_1_6 + _p_12 * _A_2_2_3 * _y_2_7);
-  (*res)[1] = _y_1_6 - (_p_12 * _A_1_1_0 * _y_1_6 + _p_12 * _A_1_2_1 * _y_2_7);
+    (*res)[0] = _y_2_7 - (_p_12 * _A_2_1_2 * _y_1_6 + _p_12 * _A_2_2_3 * _y_2_7);
+    (*res)[1] = _y_1_6 - (_p_12 * _A_1_1_0 * _y_1_6 + _p_12 * _A_1_2_1 * _y_2_7);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _y_2_7 = x[0];
     _y_1_6 = x[1];
@@ -5769,8 +5770,8 @@ static int dae_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _z_2_9 = x[0];
     _z_1_8 = x[1];
-  (*res)[0] = _z_2_9 + 2 - ((_d_13 + 1) * _A_2_1_2 * _z_1_8 + (_d_13 + 1) * _A_2_2_3 * _z_2_9);
-  (*res)[1] = _z_1_8 + 2 - ((_d_13 + 1) * _A_1_1_0 * _z_1_8 + (_d_13 + 1) * _A_1_2_1 * _z_2_9);
+    (*res)[0] = _z_2_9 + 2 - ((_d_13 + 1) * _A_2_1_2 * _z_1_8 + (_d_13 + 1) * _A_2_2_3 * _z_2_9);
+    (*res)[1] = _z_1_8 + 2 - ((_d_13 + 1) * _A_1_1_0 * _z_1_8 + (_d_13 + 1) * _A_1_2_1 * _z_2_9);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _z_2_9 = x[0];
     _z_1_8 = x[1];
@@ -5797,8 +5798,8 @@ static int dae_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _w_2_11 = x[0];
     _w_1_10 = x[1];
-  (*res)[0] = _w_2_11 + 3 - ((_x_1_4 + 1) * _A_2_1_2 * _w_1_10 + (_x_1_4 + 1) * _A_2_2_3 * _w_2_11);
-  (*res)[1] = _w_1_10 + 3 - ((_x_1_4 + 1) * _A_1_1_0 * _w_1_10 + (_x_1_4 + 1) * _A_1_2_1 * _w_2_11);
+    (*res)[0] = _w_2_11 + 3 - ((_x_1_4 + 1) * _A_2_1_2 * _w_1_10 + (_x_1_4 + 1) * _A_2_2_3 * _w_2_11);
+    (*res)[1] = _w_1_10 + 3 - ((_x_1_4 + 1) * _A_1_1_0 * _w_1_10 + (_x_1_4 + 1) * _A_1_2_1 * _w_2_11);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _w_2_11 = x[0];
     _w_1_10 = x[1];
@@ -5826,8 +5827,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _x_2_5 = x[0];
     _x_1_4 = x[1];
-  (*res)[0] = 4 - (3 * _x_1_4 + 4 * _x_2_5);
-  (*res)[1] = 3 - (1 * _x_1_4 + 2 * _x_2_5);
+    (*res)[0] = 4 - (3 * _x_1_4 + 4 * _x_2_5);
+    (*res)[1] = 3 - (1 * _x_1_4 + 2 * _x_2_5);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _x_2_5 = x[0];
     _x_1_4 = x[1];
@@ -5854,8 +5855,8 @@ static int dae_init_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _y_2_7 = x[0];
     _y_1_6 = x[1];
-  (*res)[0] = _y_2_7 - (_p_12 * _A_2_1_2 * _y_1_6 + _p_12 * _A_2_2_3 * _y_2_7);
-  (*res)[1] = _y_1_6 - (_p_12 * _A_1_1_0 * _y_1_6 + _p_12 * _A_1_2_1 * _y_2_7);
+    (*res)[0] = _y_2_7 - (_p_12 * _A_2_1_2 * _y_1_6 + _p_12 * _A_2_2_3 * _y_2_7);
+    (*res)[1] = _y_1_6 - (_p_12 * _A_1_1_0 * _y_1_6 + _p_12 * _A_1_2_1 * _y_2_7);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _y_2_7 = x[0];
     _y_1_6 = x[1];
@@ -5882,8 +5883,8 @@ static int dae_init_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _z_2_9 = x[0];
     _z_1_8 = x[1];
-  (*res)[0] = _z_2_9 + 2 - ((_d_13 + 1) * _A_2_1_2 * _z_1_8 + (_d_13 + 1) * _A_2_2_3 * _z_2_9);
-  (*res)[1] = _z_1_8 + 2 - ((_d_13 + 1) * _A_1_1_0 * _z_1_8 + (_d_13 + 1) * _A_1_2_1 * _z_2_9);
+    (*res)[0] = _z_2_9 + 2 - ((_d_13 + 1) * _A_2_1_2 * _z_1_8 + (_d_13 + 1) * _A_2_2_3 * _z_2_9);
+    (*res)[1] = _z_1_8 + 2 - ((_d_13 + 1) * _A_1_1_0 * _z_1_8 + (_d_13 + 1) * _A_1_2_1 * _z_2_9);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _z_2_9 = x[0];
     _z_1_8 = x[1];
@@ -5910,8 +5911,8 @@ static int dae_init_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _w_2_11 = x[0];
     _w_1_10 = x[1];
-  (*res)[0] = _w_2_11 + 3 - ((_x_1_4 + 1) * _A_2_1_2 * _w_1_10 + (_x_1_4 + 1) * _A_2_2_3 * _w_2_11);
-  (*res)[1] = _w_1_10 + 3 - ((_x_1_4 + 1) * _A_1_1_0 * _w_1_10 + (_x_1_4 + 1) * _A_1_2_1 * _w_2_11);
+    (*res)[0] = _w_2_11 + 3 - ((_x_1_4 + 1) * _A_2_1_2 * _w_1_10 + (_x_1_4 + 1) * _A_2_2_3 * _w_2_11);
+    (*res)[1] = _w_1_10 + 3 - ((_x_1_4 + 1) * _A_1_1_0 * _w_1_10 + (_x_1_4 + 1) * _A_1_2_1 * _w_2_11);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _w_2_11 = x[0];
     _w_1_10 = x[1];
@@ -7625,7 +7626,7 @@ model Smooth1
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = _time - 2 - (_y_0);
-    (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(0), (1.0 * (_y_0) * (_y_0) * (_y_0))) - (_x_1);
+    (*res)[1] = (COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(0), (1.0 * (_y_0) * (_y_0) * (_y_0)))) - (_x_1);
 ")})));
 end Smooth1;
 
@@ -7867,7 +7868,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
   } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
-    (*res)[0] = 3.0;
+      (*res)[0] = 3.0;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _y_2_3;
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
@@ -7879,6 +7880,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   }
   return 0;
 }
+
 ")})));
 end NominalTest1;
 
@@ -8432,15 +8434,16 @@ const char *fmi_runtime_options_map_names[] = {
     \"_use_Brent_in_1d\",
     \"_use_automatic_scaling\",
     \"_use_jacobian_scaling\",
+    \"_use_manual_equation_scaling\",
     NULL
 };
 
 const int fmi_runtime_options_map_vrefs[] = {
     536870919, 0, 1, 268435461, 536870920, 2, 268435462, 3, 4, 536870921,
-    536870922, 536870923, 536870924, 536870925, 0
+    536870922, 536870923, 536870924, 536870925, 536870926, 0
 };
 
-const int fmi_runtime_options_map_length = 14;
+const int fmi_runtime_options_map_length = 15;
 ")})));
 end TestRuntimeOptions1;
 
@@ -8471,5 +8474,117 @@ model TestEmptyArray1
     (*res)[1] = 1 - (_y_3);
 ")})));
 end TestEmptyArray1;
+
+model TestRelationalOp1
+Real v1(start=-1);
+Real v2(start=-1);
+Real v3(start=-1);
+Real v4(start=-1);
+Real y(start=1);
+Integer i(start=0);
+Boolean up(start=true);
+initial equation
+ v1 = if time>=0 and time<=3 then 0 else 0;
+ v2 = if time>0 then 0 else 0;
+ v3 = if time<=0 and time <= 2 then 0 else 0;
+ v4 = if time<0 then 0 else 0;
+equation
+when sample(0.1,1) then
+  i = if up then pre(i) + 1 else pre(i) - 1;
+  up = if pre(i)==2 then false else if pre(i)==-2 then true else pre(up);
+  y = i;
+end when;
+ der(v1) = if y<=0 then 0 else 1;
+ der(v2) = if y<0 then 0 else 1;
+ der(v3) = if y>=0 then 0 else 1;
+ der(v4) = if y>0 then 0 else 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp1",
+			description="",
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$",
+			generatedCode="
+static const int N_initial_relations = 6;
+static const int DAE_initial_relations[6]= {JMI_REL_GEQ, JMI_REL_LEQ, JMI_REL_GT, JMI_REL_LEQ, JMI_REL_LEQ, JMI_REL_LT};
+
+static const int N_relations = 4;
+static const int DAE_relations[4]= {JMI_REL_LEQ, JMI_REL_LT, JMI_REL_GEQ, JMI_REL_GT};
+")})));
+end TestRelationalOp1;
+
+model TestRelationalOp2
+
+Real v1(start=-1);
+Real v2(start=-1);
+Real v3(start=-1);
+Real v4(start=-1);
+Real y(start=1);
+Integer i(start=0);
+Boolean up(start=true);
+equation
+when sample(0.1,1) then
+  i = if up then pre(i) + 1 else pre(i) - 1;
+  up = if pre(i)==2 then false else if pre(i)==-2 then true else pre(up);
+  y = i;
+end when;
+ der(v1) = if y<=0 then 0 else 1;
+ der(v2) = if y<0 then 0 else 1;
+ der(v3) = if y>=0 then 0 else 1;
+ der(v4) = if y>0 then 0 else 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp2",
+			description="",
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$",
+			generatedCode="
+static const int N_initial_relations = 0;
+static const int DAE_initial_relations[1]= {-1};
+
+static const int N_relations = 4;
+static const int DAE_relations[4]= {JMI_REL_LEQ, JMI_REL_LT, JMI_REL_GEQ, JMI_REL_GT};
+")})));
+end TestRelationalOp2;
+
+model TestRelationalOp3
+Real v1(start=-1);
+Real v2(start=-1);
+Real v3(start=-1);
+Real v4(start=-1);
+Real y(start=1);
+Integer i(start=0);
+Boolean up(start=true);
+initial equation
+ v1 = if time>=0 and time<=3 then 0 else 0;
+ v2 = if time>0 then 0 else 0;
+ v3 = if time<=0 and time <= 2 then 0 else 0;
+ v4 = if time<0 then 0 else 0;
+equation
+when sample(0.1,1) then
+  i = if up then pre(i) + 1 else pre(i) - 1;
+  up = if pre(i)==2 then false else if pre(i)==-2 then true else pre(up);
+  y = i;
+end when;
+ der(v1) = y;
+ der(v2) = y;
+ der(v3) = y;
+ der(v4) = y;
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp3",
+			description="",
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$",
+			generatedCode="
+static const int N_initial_relations = 6;
+static const int DAE_initial_relations[6]= {JMI_REL_GEQ, JMI_REL_LEQ, JMI_REL_GT, JMI_REL_LEQ, JMI_REL_LEQ, JMI_REL_LT};
+
+static const int N_relations = 0;
+static const int DAE_relations[1]= {-1};
+")})));
+end TestRelationalOp3;
 
 end CCodeGenTests;

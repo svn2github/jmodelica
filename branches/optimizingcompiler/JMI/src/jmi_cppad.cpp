@@ -57,6 +57,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_sw, int n_sw_init,
 		int n_guards, int n_guards_init,
 		int n_dae_blocks, int n_dae_init_blocks,
+        int n_initial_relations, int* initial_relations,
+        int n_relations, int* relations,
 		int scaling_method, int n_ext_objs) {
 
 	// Create jmi struct
@@ -211,6 +213,19 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 	jmi_->tp = (jmi_real_t*)calloc(jmi_->n_tp,sizeof(jmi_real_t));
 
 	jmi_->scaling_method = scaling_method;
+
+	jmi_->n_initial_relations = n_initial_relations;
+    jmi_->n_relations = n_relations;
+    jmi_->initial_relations = (jmi_int_t*)calloc(n_initial_relations,sizeof(jmi_int_t));
+    jmi_->relations = (jmi_int_t*)calloc(n_relations,sizeof(jmi_int_t));
+
+    for (i=0;i<n_initial_relations;i++) {
+        jmi_->initial_relations[i] = initial_relations[i];
+    }
+
+    for (i=0;i<n_relations;i++) {
+        jmi_->relations[i] = relations[i];
+    }
 
 	jmi_->atEvent = JMI_FALSE;
 	jmi_->atInitial = JMI_FALSE;
@@ -779,6 +794,8 @@ int jmi_delete(jmi_t* jmi){
 	//free(jmi->pre_z);
 	free(jmi->tp);
 	free(jmi->variable_scaling_factors);
+	free(jmi->initial_relations);
+	free(jmi->relations);
 	free(jmi);
 
 	return 0;

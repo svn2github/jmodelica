@@ -281,6 +281,13 @@ public class OptionRegistry {
 			 "If the option is set to true (default is false), two text files containing one iteration variable" +
 			 "name per row is written to disk. The files contains the iteration variables for the DAE and the" +
 			 "DAE initialization system respectively. The files are outputed to the resource directory"),
+		WRITE_TEARING_PAIRS
+			("write_tearing_paris_to_file",
+			 compiler,
+			 false,
+			 "If the option is set to true (default is false), two text files containing tearing pairs" +
+			 " is written to disk. The files contains the tearing pairs for the DAE and the" +
+			 "DAE initialization system respectively. The files are outputed to the working directory"),
 		
 		// Runtime options
         /*
@@ -364,7 +371,12 @@ public class OptionRegistry {
                 runtime,
               0.0001,
               "Tolerance safety factor for the event iterations. Used when external solver specifies relative tolerance.",
-              1e-6,1.0);
+              1e-6,1.0),        
+        USE_MANUAL_EQUATION_SCALING
+              ("use_manual_equation_scaling",
+                runtime,
+                false,
+                "Enable equations scaling using manula values from annotations in equation block solvers.");
     
     		
 					

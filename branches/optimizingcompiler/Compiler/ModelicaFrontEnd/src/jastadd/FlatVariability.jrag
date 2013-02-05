@@ -178,7 +178,12 @@ aspect FlatVariability {
 			return fDiscrete();
 	}
 	eq InstRecord.defaultVariability() {
-		InstComponentDecl rec = isArray() ? getInstComponentDecl(0) : this;
+		InstComponentDecl rec = this;
+		if (isArray()) {
+			if (getNumInstComponentDecl() == 0)
+				return fConstant();
+			rec = getInstComponentDecl(0);
+		}
 		FTypePrefixVariability var = fConstant();
 		for (InstComponentDecl icd : rec.allInstComponentDecls()) 
 			var = var.combine(icd.variability());

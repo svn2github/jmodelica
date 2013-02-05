@@ -41,6 +41,132 @@ except (NameError, ImportError):
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_mos  = os.path.join(get_files_path(), 'Modelica')
 
+
+def input_linear(t):
+    if t < 0.5:
+        return t
+    elif t < 1.0:
+        return 0.5
+    elif t < 1.5:
+        return t-0.5
+    elif t < 2.0:
+        return 2.5-t
+    elif t < 2.5:
+        return 0.5
+    else:
+        return 3.0-t
+        
+input_object = (["u"],input_linear)
+
+class Test_Relations:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'RelationTests.mo')
+
+        compile_fmu("RelationTests.RelationLE", file_name)
+        compile_fmu("RelationTests.RelationGE", file_name)
+        compile_fmu("RelationTests.RelationLEInv", file_name)
+        compile_fmu("RelationTests.RelationGEInv", file_name)
+        compile_fmu("RelationTests.RelationLEInit", file_name)
+        compile_fmu("RelationTests.RelationGEInit", file_name)
+        compile_fmu("RelationTests.TestRelationalOp1", file_name)
+        
+    @testattr(assimulo = True)
+    def test_relation_le(self):
+        model = load_fmu("RelationTests_RelationLE.fmu")
+        opts = model.simulate_options()
+        opts["CVode_options"]["maxh"] = 0.001
+        res = model.simulate(final_time=3.5, input=input_object,options=opts)
+        
+        nose.tools.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
+        
+    @testattr(assimulo = True)
+    def test_relation_leinv(self):
+        model = load_fmu("RelationTests_RelationLEInv.fmu")
+        opts = model.simulate_options()
+        opts["CVode_options"]["maxh"] = 0.001
+        res = model.simulate(final_time=3.5, input=input_object,options=opts)
+        
+        nose.tools.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
+        
+    @testattr(assimulo = True)
+    def test_relation_ge(self):
+        model = load_fmu("RelationTests_RelationGE.fmu")
+        opts = model.simulate_options()
+        opts["CVode_options"]["maxh"] = 0.001
+        res = model.simulate(final_time=3.5, input=input_object,options=opts)
+        
+        nose.tools.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
+        
+    @testattr(assimulo = True)
+    def test_relation_geinv(self):
+        model = load_fmu("RelationTests_RelationGEInv.fmu")
+        opts = model.simulate_options()
+        opts["CVode_options"]["maxh"] = 0.001
+        res = model.simulate(final_time=3.5, input=input_object,options=opts)
+        
+        nose.tools.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
+        
+    @testattr(assimulo = True)
+    def test_relation_leinit(self):
+        model = load_fmu("RelationTests_RelationLEInit.fmu")
+        
+        res = model.simulate(final_time=0.1)
+        
+        nose.tools.assert_almost_equal(res["x"][0],1.0,places=3)
+        nose.tools.assert_almost_equal(res["y"][0],0.0,places=3)
+        
+    @testattr(assimulo = True)
+    def test_relation_geinit(self):
+        model = load_fmu("RelationTests_RelationGEInit.fmu")
+        
+        res = model.simulate(final_time=0.1)
+        
+        nose.tools.assert_almost_equal(res["x"][0],0.0,places=3)
+        nose.tools.assert_almost_equal(res["y"][0],1.0,places=3)
+
+    @testattr(assimulo = True)
+    def test_relation_op_1(self):
+        model = load_fmu("RelationTests_TestRelationalOp1.fmu")
+        
+        res = model.simulate(final_time=10)
+        
+        nose.tools.assert_almost_equal(N.interp(3.00,res["time"],res["der(v1)"]),1.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(3.40,res["time"],res["der(v1)"]),0.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(8.00,res["time"],res["der(v1)"]),0.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(8.25,res["time"],res["der(v1)"]),1.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(4.00,res["time"],res["der(v2)"]),1.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(4.20,res["time"],res["der(v2)"]),0.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(7.00,res["time"],res["der(v2)"]),0.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(7.20,res["time"],res["der(v2)"]),1.0,places=3)
+
 class Test_FMI_ODE:
     """
     This class tests pyfmi.simulation.assimulo.FMIODE and together

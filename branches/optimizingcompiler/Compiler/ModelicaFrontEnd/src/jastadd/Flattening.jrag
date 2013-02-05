@@ -61,7 +61,7 @@ aspect Flattening {
 	 */
     public InstNode InstProgramRoot.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
     	
-    	InstClassDecl icd = simpleLookupInstClassDecl(className);
+    	InstClassDecl icd = lookupInstClassQualified(className);
     	if (!icd.isUnknown()) {
     		icd.flattenInstClassDecl(fc);
     	} else {
@@ -651,6 +651,10 @@ aspect Flattening {
 		}
 	}
 	
+	public void InstSimpleShortClassDecl.flattenEnum(FClass fc) {
+		actualInstClass().flattenEnum(fc);
+	}
+	
 	public abstract FVariable InstAssignable.createEmptyFVariable();
 	
 	public FVariable InstPrimitive.createEmptyFVariable() {
@@ -667,7 +671,7 @@ aspect Flattening {
 
 	public FEnumVariable InstEnum.createEmptyFVariable() {
 		FEnumVariable fv = new FEnumVariable();
-		fv.setEnum(new FQNameString(myInstClass().qualifiedName()));
+		fv.setEnum(new FQNameString(myInstClass().actualInstClass().qualifiedName()));
 		return fv;
 	}	
 	
@@ -743,6 +747,10 @@ aspect Flattening {
 		}
 	}
 	
+	public void InstSimpleShortClassDecl.addFDerivedType(FClass fc) {
+		actualInstClass().addFDerivedType(fc);
+	}
+	
 	public FVariable InstAssignable.createFVariable() {
 		FVariable fv = createEmptyFVariable();
 		
@@ -760,7 +768,7 @@ aspect Flattening {
 		
 		addAttributesToFV(fv.getFAttributes());
 		if (myInstClass().extendsPrimitive())
-			fv.setDerivedType(myInstClass().qualifiedName());
+			fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
 		
 		FExp e = flattenBindingFExp();
 		if (e != null)
@@ -934,8 +942,8 @@ aspect Flattening {
 	
 	eq InstDot.splitArrayAccess(int index) {
 		InstDot res = fullCopy();
-		for (int i = 0, n = res.getNumInstAccess(); i < n; i++) {
-			InstAccess ia = res.getInstAccess(i);
+		for (int i = 0, n = getNumInstAccess(); i < n; i++) {
+			InstAccess ia = getInstAccess(i);
 			if (ia.isArray()) {
 				res.setInstAccess(ia.splitArrayAccess(index), i);
 				i = n;
@@ -1528,7 +1536,7 @@ aspect FlatExpressions {
 	 * The list will be populated when expressions in the function are flattened.
 	 */
 	syn lazy Set<InstAssignable> InstClassDecl.localFunctionConstantList() = 
-		new HashSet<InstAssignable>();
+		new LinkedHashSet<InstAssignable>();
 	
 	syn boolean InstAccess.hasUnknownIndices() = 
 		hasFArraySubscripts() && getFArraySubscripts().hasUnknownIndices();

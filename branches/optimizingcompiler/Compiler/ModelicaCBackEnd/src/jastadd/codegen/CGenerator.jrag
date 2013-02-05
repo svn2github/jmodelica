@@ -56,6 +56,73 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 	}
+
+	class DAETag_C_initial_relations extends DAETag {
+		
+		public DAETag_C_initial_relations(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_initial_relations","C: relational operator kind, <, >, <=, <=",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			int n_rels = fclass.relExpInInitialEquations().size();
+			genPrinter.print("static const int N_initial_relations = ");
+			genPrinter.print(n_rels);
+			genPrinter.print(";\n");
+			genPrinter.print("static const int DAE_initial_relations[");
+			genPrinter.print(n_rels==0? 1: n_rels);
+			genPrinter.print("]= {");
+			if (n_rels==0) {
+				genPrinter.print("-1");
+			} else {
+				int i = 0;
+				for (FRelExp e : fclass.relExpInInitialEquations()) {
+					e.genRelExpKind(genPrinter);
+					if (i<n_rels-1) {
+						genPrinter.print(", ");
+					}
+					i++;
+				}
+			}
+			genPrinter.print("};");
+		}
+	
+	}
+
+	class DAETag_C_relations extends DAETag {
+		
+		public DAETag_C_relations(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_relations","C: relational operator kind, <, >, <=, <=",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			int n_rels = fclass.relExpInEquations().size();
+			genPrinter.print("static const int N_relations = ");
+			genPrinter.print(n_rels);
+			genPrinter.print(";\n");
+			genPrinter.print("static const int DAE_relations[");
+			genPrinter.print(n_rels==0? 1: n_rels);
+			genPrinter.print("]= {");
+			if (n_rels==0) {
+				genPrinter.print("-1");
+			} else {
+				int i = 0;
+				for (FRelExp e : fclass.relExpInEquations()) {
+					e.genRelExpKind(genPrinter);
+					if (i<n_rels-1) {
+						genPrinter.print(", ");
+					}
+					i++;
+				}
+			}
+			genPrinter.print("};");
+		}
+	
+	}
+
 	
 	class DAETag_C_equationResiduals extends DAETag {
 		

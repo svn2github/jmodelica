@@ -2905,6 +2905,69 @@ public
 ")})));		
 end WhenEqu12;
 
+model WhenEqu13
+Real v1(start=-1);
+Real v2(start=-1);
+Real v3(start=-1);
+Real v4(start=-1);
+Real y(start=1);
+Integer i(start=0);
+Boolean up(start=true);
+initial equation
+ v1 = if 0<=0 then 0 else 1;
+ v2 = if 0<0 then 0 else 1;
+ v3 = if 0>=0 then 0 else 1;
+ v4 = if 0>0 then 0 else 1;
+equation
+when sample(0.1,1) then
+  i = if up then pre(i) + 1 else pre(i) - 1;
+  up = if pre(i)==2 then false else if pre(i)==-2 then true else pre(up);
+  y = i;
+end when;
+ der(v1) = if y<=0 then 0 else 1;
+ der(v2) = if y<0 then 0 else 1;
+ der(v3) = if y>=0 then 0 else 1;
+ der(v4) = if y>0 then 0 else 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu13",
+			description="Basic test of when equations",
+			flatModel="
+fclass TransformCanonicalTests.WhenEqu13
+ Real v1(start = - 1);
+ Real v2(start = - 1);
+ Real v3(start = - 1);
+ Real v4(start = - 1);
+ discrete Real y(start = 1);
+ discrete Integer i(start = 0);
+ discrete Boolean up(start = true);
+initial equation 
+ v1 = 0;
+ v2 = 1;
+ v3 = 0;
+ v4 = 1;
+ pre(y) = 1;
+ pre(i) = 0;
+ pre(up) = true;
+equation
+ when sample(0.1, 1) then
+  i = if up then pre(i) + 1 else pre(i) - 1;
+ end when;
+ when sample(0.1, 1) then
+  up = if pre(i) == 2 then false elseif pre(i) == - 2 then true else pre(up);
+ end when;
+ when sample(0.1, 1) then
+  y = i;
+ end when;
+ der(v1) = if y <= 0 then 0 else 1;
+ der(v2) = if y < 0 then 0 else 1;
+ der(v3) = if y >= 0 then 0 else 1;
+ der(v4) = if y > 0 then 0 else 1;
+end TransformCanonicalTests.WhenEqu13;
+")})));		
+end WhenEqu13;
+
 model IfEqu1
 	Real x[3];
 equation
@@ -3830,7 +3893,7 @@ equation
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * der_y = 0.0;
  der(_der_x) = der_vx;
- 2 * x * der(_der_x) + 2 * der(x) * der(x) + 2 * y * der_2_y + 2 * der_y * der_y = 0.0;
+ 2 * x * der(_der_x) + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * der_y * der_y) = 0.0;
  _der_x = der(x);
 end TransformCanonicalTests.IndexReduction1a_PlanarPendulum;
 ")})));
@@ -3877,7 +3940,7 @@ equation
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * der_y = 0.0;
  der(_der_x) = der_vx;
- 2 * x * der(_der_x) + 2 * der(x) * der(x) + 2 * y * der_2_y + 2 * der_y * der_y = 0.0;
+ 2 * x * der(_der_x) + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * der_y * der_y) = 0.0;
  _der_x = der(x);
 end TransformCanonicalTests.IndexReduction1b_PlanarPendulum;
 ")})));
@@ -3897,15 +3960,15 @@ end TransformCanonicalTests.IndexReduction1b_PlanarPendulum;
 fclass TransformCanonicalTests.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Torque amplitude = 10 \"Amplitude of driving torque\" /* 10 */;
  parameter Modelica.SIunits.Frequency freqHz = 5 \"Frequency of driving torque\" /* 5 */;
- parameter Modelica.SIunits.Inertia Jmotor(min = 0) = 0.1 \"Motor inertia\" /* 0.1 */;
- parameter Modelica.SIunits.Inertia Jload(min = 0) = 2 \"Load inertia\" /* 2 */;
+ parameter Modelica.SIunits.MomentOfInertia Jmotor(min = 0) = 0.1 \"Motor inertia\" /* 0.1 */;
+ parameter Modelica.SIunits.MomentOfInertia Jload(min = 0) = 2 \"Load inertia\" /* 2 */;
  parameter Real ratio = 10 \"Gear ratio\" /* 10 */;
  parameter Real damping = 10 \"Damping in bearing of gear\" /* 10 */;
  parameter Modelica.SIunits.Angle fixed.phi0 = 0 \"Fixed offset angle of housing\" /* 0 */;
  Modelica.SIunits.Torque fixed.flange.tau \"Cut torque in the flange\";
  parameter Boolean torque.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
  Modelica.SIunits.Torque torque.flange.tau \"Cut torque in the flange\";
- parameter Modelica.SIunits.Inertia inertia1.J(min = 0,start = 1) \"Moment of inertia\";
+ parameter Modelica.SIunits.MomentOfInertia inertia1.J(min = 0,start = 1) \"Moment of inertia\";
  parameter StateSelect inertia1.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia1.phi(stateSelect = inertia1.stateSelect) \"Absolute rotation angle of component\";
  Modelica.SIunits.AngularVelocity inertia1.w(stateSelect = inertia1.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
@@ -3918,7 +3981,7 @@ fclass TransformCanonicalTests.IndexReduction2_Mechanical
  Modelica.SIunits.Torque idealGear.flange_b.tau \"Cut torque in the flange\";
  Modelica.SIunits.Torque idealGear.support.tau \"Reaction torque in the support/housing\";
  Modelica.SIunits.Torque inertia2.flange_b.tau \"Cut torque in the flange\";
- parameter Modelica.SIunits.Inertia inertia2.J(min = 0,start = 1) = 2 \"Moment of inertia\" /* 2 */;
+ parameter Modelica.SIunits.MomentOfInertia inertia2.J(min = 0,start = 1) = 2 \"Moment of inertia\" /* 2 */;
  parameter StateSelect inertia2.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia2.phi(fixed = true,start = 0,stateSelect = inertia2.stateSelect) \"Absolute rotation angle of component\";
  Modelica.SIunits.AngularVelocity inertia2.w(fixed = true,start = 0,stateSelect = inertia2.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
@@ -3928,7 +3991,7 @@ fclass TransformCanonicalTests.IndexReduction2_Mechanical
  Modelica.SIunits.Angle spring.phi_rel(fixed = true,start = 0) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
  Modelica.SIunits.Torque spring.flange_b.tau \"Cut torque in the flange\";
  Modelica.SIunits.Torque inertia3.flange_b.tau \"Cut torque in the flange\";
- parameter Modelica.SIunits.Inertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
+ parameter Modelica.SIunits.MomentOfInertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
  parameter StateSelect inertia3.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia3.phi(stateSelect = inertia3.stateSelect) \"Absolute rotation angle of component\";
  Modelica.SIunits.AngularVelocity inertia3.w(fixed = true,start = 0,stateSelect = inertia3.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
@@ -3961,7 +4024,7 @@ parameter equation
  sine.amplitude = amplitude;
  sine.freqHz = freqHz;
 equation
- inertia1.J * inertia1.a = - torque.flange.tau- idealGear.flange_a.tau;
+ inertia1.J * inertia1.a = - torque.flange.tau + (- idealGear.flange_a.tau);
  idealGear.phi_a = inertia1.phi - fixed.phi0;
  idealGear.phi_b = inertia2.phi - fixed.phi0;
  idealGear.phi_a = idealGear.ratio * idealGear.phi_b;
@@ -3978,8 +4041,8 @@ equation
  damper.w_rel = damper.der(phi_rel);
  damper.a_rel = damper.der(w_rel);
  - torque.flange.tau = sine.offset + (if time < sine.startTime then 0 else sine.amplitude * sin(2 * 3.141592653589793 * sine.freqHz * (time - sine.startTime) + sine.phase));
- - damper.flange_b.tau + inertia2.flange_b.tau- spring.flange_b.tau = 0;
- damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau- torque.flange.tau = 0;
+ - damper.flange_b.tau + inertia2.flange_b.tau + (- spring.flange_b.tau) = 0;
+ damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau + (- torque.flange.tau) = 0;
  inertia3.flange_b.tau = 0;
  idealGear.support.tau = - idealGear.flange_a.tau - idealGear.flange_b.tau;
  inertia1.w = idealGear.ratio * inertia2.w;
@@ -3992,7 +4055,7 @@ public
 
  type Modelica.SIunits.Torque = Real(final quantity = \"Torque\",final unit = \"N.m\");
  type Modelica.SIunits.Frequency = Real(final quantity = \"Frequency\",final unit = \"Hz\");
- type Modelica.SIunits.Inertia = Real(final quantity = \"MomentOfInertia\",final unit = \"kg.m2\");
+ type Modelica.SIunits.MomentOfInertia = Real(final quantity = \"MomentOfInertia\",final unit = \"kg.m2\");
  type Modelica.SIunits.Angle = Real(final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\");
  type Modelica.Blocks.Interfaces.RealInput = Real;
  type Modelica.SIunits.AngularVelocity = Real(final quantity = \"AngularVelocity\",final unit = \"rad/s\");
@@ -4065,7 +4128,7 @@ equation
  uC = u1 + uL;
  i0 = i1 + iC;
  i1 = i2 + iL;
- der_u0 = 220 * cos(time * omega) * 1.0 * omega;
+ der_u0 = 220 * (cos(time * omega) * (1.0 * omega));
  der_u1 = R[1] * der_i1;
  der_uL = R[2] * der_i2;
  der_u0 = der_u1 + der_uL;
@@ -4172,7 +4235,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + cos(x2) = 0;
- der_x1- sin(x2) * der(x2) = 0.0;
+ der_x1 + (- sin(x2) * der(x2)) = 0.0;
 end TransformCanonicalTests.IndexReduction6_Cos;
 ")})));
   end IndexReduction6_Cos;
@@ -4789,7 +4852,7 @@ public
   input Real[2, 2] der_A;
   output Real der_y;
  algorithm
-  der_y := (2 * x[1] * A[1,1] + 2 * x[2] * A[2,1]) * der_x[1] + (2 * x[1] * A[1,2] + 2 * x[2] * A[2,2]) * der_x[2] + (x[1] * der_A[1,1] + x[2] * der_A[2,1]) * x[1] + (x[1] * der_A[1,2] + x[2] * der_A[2,2]) * x[2];
+  der_y := (2 * x[1] * A[1,1] + 2 * x[2] * A[2,1]) * der_x[1] + (2 * x[1] * A[1,2] + 2 * x[2] * A[2,2]) * der_x[2] + ((x[1] * der_A[1,1] + x[2] * der_A[2,1]) * x[1] + (x[1] * der_A[1,2] + x[2] * der_A[2,2]) * x[2]);
   return;
  end TransformCanonicalTests.IndexReduction25_DerFunc.f_der;
 
@@ -5165,7 +5228,7 @@ equation
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * der_y = 0.0;
  der_2_x = der(vx);
- 2 * x * der_2_x + 2 * der(x) * der(x) + 2 * y * der_2_y + 2 * der_y * der_y = 0.0;
+ 2 * x * der_2_x + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * der_y * der_y) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -5215,7 +5278,7 @@ equation
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * der_y = 0.0;
  der_2_x = der(vx);
- 2 * x * der_2_x + 2 * der(x) * der(x) + 2 * y * der_2_y + 2 * der_y * der_y = 0.0;
+ 2 * x * der_2_x + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * der_y * der_y) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -5264,7 +5327,7 @@ equation
  x ^ 2 + y ^ 2 = L;
  2 * x * vx + 2 * y * der(y) = 0.0;
  der_2_y = der(vy);
- 2 * x * der_2_x + 2 * vx * vx + 2 * y * der_2_y + 2 * der(y) * der(y) = 0.0;
+ 2 * x * der_2_x + 2 * vx * vx + (2 * y * der_2_y + 2 * der(y) * der(y)) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -5578,7 +5641,7 @@ Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  x- y
+  x + (- y)
 -------------------------------
 ")})));
   end SolveEqTest1;
@@ -5614,7 +5677,7 @@ Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  (x- y) / (- 1.0)
+  (x + (- y)) / (- 1.0)
 -------------------------------
 ")})));
   end SolveEqTest2;
@@ -5650,7 +5713,7 @@ Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  (x- y) / x
+  (x + (- y)) /x
 -------------------------------
 ")})));
   end SolveEqTest3;
@@ -5686,7 +5749,7 @@ Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  (x- y) / (1.0 / x)
+  (x + (- y)) / (1.0 / x)
 -------------------------------
 ")})));
   end SolveEqTest4;
@@ -5722,7 +5785,7 @@ Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  (x- y) / (1.0 - (x + 3))
+  (x + (- y)) / (1.0 - (x + 3))
 -------------------------------
 ")})));
   end SolveEqTest5;
@@ -5796,7 +5859,7 @@ Solved block of 1 variables:
 Computed variable:
   z
 Solution:
-  (x- y) / (- 1.0 + 1.0 + 5)
+  (x + (- y)) / (- 1.0 + 1.0 + 5)
 -------------------------------
 ")})));
   end SolveEqTest7;
@@ -9630,6 +9693,7 @@ fclass TransformCanonicalTests.TestRuntimeOptions1
  parameter Boolean _use_Brent_in_1d = false /* false */;
  parameter Boolean _use_automatic_scaling = true /* true */;
  parameter Boolean _use_jacobian_scaling = false /* false */;
+ parameter Boolean _use_manual_equation_scaling = false /* false */;
 equation
  x = 1;
 end TransformCanonicalTests.TestRuntimeOptions1;

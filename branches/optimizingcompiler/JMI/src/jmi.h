@@ -373,6 +373,11 @@ extern "C" {
 #define JMI_BLOCK_EVALUATE_JACOBIAN 128
 #define JMI_BLOCK_EQUATION_NOMINAL 256
 
+#define JMI_REL_GT 0
+#define JMI_REL_GEQ 2
+#define JMI_REL_LT 4
+#define JMI_REL_LEQ 8
+
 #define JMI_CONSTANT_VARIABILITY 0
 #define JMI_PARAMETER_VARIABILITY 1
 #define JMI_DISCRETE_VARIABILITY 2
@@ -2201,6 +2206,9 @@ int jmi_with_cad_derivatives(jmi_t* jmi);
  * @param jmi A jmi_t struct.
  */
 int jmi_set_start_values(jmi_t *jmi);
+
+int jmi_write_back_to_z_val(jmi_t* jmi);
+int jmi_write_back_to_z(jmi_t* jmi);
 
 /* @} */
 

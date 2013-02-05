@@ -1978,10 +1978,10 @@ fclass ArrayBuiltins.Linspace1
  Real x[3];
  Real x[4];
 equation
- x[1] = 1 + 0 * (3 - 1) / 3;
- x[2] = 1 + 1 * (3 - 1) / 3;
- x[3] = 1 + 2 * (3 - 1) / 3;
- x[4] = 1 + 3 * (3 - 1) / 3;
+ x[1] = 1 + 0 * ((3 - 1) / 3);
+ x[2] = 1 + 1 * ((3 - 1) / 3);
+ x[3] = 1 + 2 * ((3 - 1) / 3);
+ x[4] = 1 + 3 * ((3 - 1) / 3);
 end ArrayBuiltins.Linspace1;
 ")})));
 end Linspace1;
@@ -2008,9 +2008,9 @@ fclass ArrayBuiltins.Linspace2
 equation
  a = 1;
  b = 2;
- x[1] = a + 0 * (b - a) / 2;
- x[2] = a + 1 * (b - a) / 2;
- x[3] = a + 2 * (b - a) / 2;
+ x[1] = a + 0 * ((b - a) / 2);
+ x[2] = a + 1 * ((b - a) / 2);
+ x[3] = a + 2 * ((b - a) / 2);
 end ArrayBuiltins.Linspace2;
 ")})));
 end Linspace2;
@@ -2094,9 +2094,9 @@ fclass ArrayBuiltins.Linspace6
  parameter Real a[2].x;
  parameter Real a[3].x;
 parameter equation
- a[1].x = b + 0 * (c - b) / 2;
- a[2].x = b + 1 * (c - b) / 2;
- a[3].x = b + 2 * (c - b) / 2;
+ a[1].x = b + 0 * ((c - b) / 2);
+ a[2].x = b + 1 * ((c - b) / 2);
+ a[3].x = b + 2 * ((c - b) / 2);
 end ArrayBuiltins.Linspace6;
 ")})));
 end Linspace6;
@@ -2714,6 +2714,24 @@ public
 end ArrayBuiltins.NonVectorizedSalarization3;
 ")})));
 end NonVectorizedSalarization3;
+
+
+model InfArgsWithNamed
+	Real x[2,2] = ones(2, 2, xxx = 3);
+equation
+	assert(false, "qwerty", yyy = 3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InfArgsWithNamed",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2720, column 27:
+  Calling function ones(): no input matching named argument xxx found
+")})));
+end InfArgsWithNamed;
 
 
 end ArrayBuiltins;

@@ -105,6 +105,10 @@ $C_DAE_equation_sparsity$
 
 $C_DAE_ODE_jacobian_sparsity$
 
+$C_DAE_initial_relations$
+
+$C_DAE_relations$
+
 $C_variable_aliases$
 
 $C_runtime_option_map$
@@ -313,6 +317,8 @@ int jmi_new(jmi_t** jmi) {
 	   N_string_d,N_string_u, N_outputs,(int (*))Output_vrefs,
            N_sw,N_sw_init,N_guards,N_guards_init,
 	   N_dae_blocks,N_dae_init_blocks,
+	   N_initial_relations, (int (*))DAE_initial_relations,
+	   N_relations, (int (*))DAE_relations,
 	   Scaling_method, N_ext_objs);
 
   $C_dae_add_blocks_residual_functions$

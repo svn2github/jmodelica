@@ -2651,11 +2651,18 @@ aspect CircularExpressions {
 		return res;
 	}
 	
-	syn boolean FExp.isUnknownSizeVarUse() = false;
-	eq FIdUseExp.isUnknownSizeVarUse()     = getFIdUse().myFV().isUnknownSizeVar();
+	syn boolean FExp.isUnknownSizeVarUse()  = false;
+	eq FIdUseExp.isUnknownSizeVarUse()      = getFIdUse().isUnknownSizeVarUse();
+	eq FInstAccessExp.isUnknownSizeVarUse() = getInstAccess().isUnknownSizeVarUse();
+	
+	syn boolean FIdUse.isUnknownSizeVarUse()  = myFV().isUnknownSizeVar();
+	eq FIdUseInstAccess.isUnknownSizeVarUse() = getInstAccess().isUnknownSizeVarUse();
+	
+	syn boolean InstAccess.isUnknownSizeVarUse() = myInstComponentDecl().isUnknownSizeVar();
 	
 	syn boolean FAbstractVariable.isUnknownSizeVar() = false;
 	eq FFunctionArray.isUnknownSizeVar()             = getType().size().isUnknown();
+	syn boolean InstComponentDecl.isUnknownSizeVar() = type().size().isUnknown();
 	
 	public boolean Size.isCircular() {
 		for (int d = 0; d < size.length; d++)

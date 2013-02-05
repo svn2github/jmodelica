@@ -575,6 +575,42 @@ end FunctionTests.FunctionFlatten11;
 end FunctionFlatten11;
 
 
+model FunctionFlatten12
+	function f
+		input Real[:] x;
+		output Real y;
+	algorithm
+		y := min(size(x));
+	end f;
+	
+	constant Real z = f({1,2,3});
+	Real w = z;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionFlatten12",
+			description="Size of function input with unknown size as argument to min",
+			flatModel="
+fclass FunctionTests.FunctionFlatten12
+ constant Real z = FunctionTests.FunctionFlatten12.f({1, 2, 3});
+ Real w;
+equation
+ w = 3.0;
+
+public
+ function FunctionTests.FunctionFlatten12.f
+  input Real[:] x;
+  output Real y;
+ algorithm
+  y := size(x, 1);
+  return;
+ end FunctionTests.FunctionFlatten12.f;
+
+end FunctionTests.FunctionFlatten12;
+")})));
+end FunctionFlatten12;
+
+
 
 /* ====================== Function calls ====================== */
 

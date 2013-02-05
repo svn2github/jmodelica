@@ -135,7 +135,9 @@ aspect CCodeGen {
 	}
 	
 	public void FEnumIntegerExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print('(');
 		p.print(getFExp(), str, indent);
+		str.print(')');
 	}
 	
 	public void FEnumLitExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
@@ -1041,11 +1043,15 @@ aspect CCodeGen {
 	}
 
 	public void FNoEventExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print('(');
 		p.print(getFExp(), str, indent);
+		str.print(')');
 	}
 
 	public void FSmoothExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print('(');
 		p.print(getFExp(), str, indent);
+		str.print(')');
 	}
 
 	public void FInitialExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
@@ -2190,12 +2196,13 @@ aspect CCodeGen {
 
 	public void FRelExp.genResidual_C(Enumerator enumerator, String indent, PrintStream str) {
 		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
-		getRight().prettyPrint_C(str,"");
-		str.print(" - (");
 		getLeft().prettyPrint_C(str,"");
+		str.print(" - (");
+		getRight().prettyPrint_C(str,"");
 		str.print(");\n");
 	}	
 
+	/*
 	public void FGtExp.genResidual_C(Enumerator enumerator, String indent, PrintStream str) {
 		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
 		getLeft().prettyPrint_C(str,"");
@@ -2211,7 +2218,7 @@ aspect CCodeGen {
 		getRight().prettyPrint_C(str,"");
 		str.print(");\n");
 	}	
-	
+	*/
 	public void FRealVariable.genStartAttributeResidual_C(Enumerator enumerator, String indent, PrintStream str) {
 		if (!(this instanceof FDerivativeVariable)) {
 			str.print(indent + "(*res)[" + enumerator.next() + "] = ");
@@ -2235,7 +2242,26 @@ aspect CCodeGen {
 		}
 	}
 	
+    public void FRelExp.genRelExpKind(PrintStream genPrinter) {
+    	genPrinter.print("-1");
+    }
     
+    public void FLtExp.genRelExpKind(PrintStream genPrinter) {
+    	genPrinter.print("JMI_REL_LT");
+    }
+
+    public void FLeqExp.genRelExpKind(PrintStream genPrinter) {
+    	genPrinter.print("JMI_REL_LEQ");
+    }
+
+    public void FGtExp.genRelExpKind(PrintStream genPrinter) {
+    	genPrinter.print("JMI_REL_GT");
+    }
+    
+    public void FGeqExp.genRelExpKind(PrintStream genPrinter) {
+    	genPrinter.print("JMI_REL_GEQ");
+    }
+    	
     /**
      * Convert to a string represenation to use in C source files.
      * 

@@ -115,7 +115,7 @@ aspect FlatTypeAnalysis {
 	
 	syn lazy FRecordType InstClassDecl.recordType() {
 		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
-		for (InstComponentDecl icd : getInstComponentDecls()) 
+		for (InstComponentDecl icd : allInstComponentDecls()) 
 			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
 		FRecordType type = new FRecordType(Size.SCALAR, qualifiedName(), new List(), null);
 		for (FRecordComponentType comp : comps)

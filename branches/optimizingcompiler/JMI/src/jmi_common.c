@@ -963,6 +963,8 @@ int jmi_dae_init(jmi_t* jmi,
         jmi_generic_func_t ode_guards_init,
         jmi_next_time_event_func_t ode_next_time_event) {
 	
+	int i;
+
 	jmi_func_t* jf_F;
 	jmi_func_t* jf_R;
 	

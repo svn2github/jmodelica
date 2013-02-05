@@ -1904,6 +1904,33 @@ end ModificationTests.ArrayModifications46;
 end ArrayModifications46;
 
 
+model ArrayModifications47
+    model A
+        Real x;
+    end A;
+    
+    model B
+        Real y;
+    end B;
+    
+    A a[2](x = b.y);
+    B b[2](y = {1, 2});
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ArrayModifications47",
+			description="Dotted name as modifier to array of components",
+			flatModel="
+fclass ModificationTests.ArrayModifications47
+ Real a[1].x = b[1].y;
+ Real a[2].x = b[2].y;
+ Real b[1].y = 1;
+ Real b[2].y = 2;
+end ModificationTests.ArrayModifications47;
+")})));
+end ArrayModifications47;
+
+
 
 /* ========= Modifications on type declarations ========= */
 

@@ -696,7 +696,8 @@ typedef struct jmi_options_t {
     double nle_solver_min_tol;  /**< \brief Minimum tolerance for the equation block solver */
     double nle_solver_tol_factor;   /**< \brief Tolerance safety factor for the non-linear equation block solver. */
     double events_default_tol;  /**< \brief Default tolerance for the event iterations. */        
-    double events_tol_factor;   /**< \brief Tolerance safety factor for the event iterations. */ 
+    double events_tol_factor;   /**< \brief Tolerance safety factor for the event iterations. */
+	int use_manual_scaling_flag; /**< \brief If equations should be scaled using annotations in equation block solvers */
 
 	FILE* debug_log;
 } jmi_options_t;
@@ -871,6 +872,10 @@ struct jmi_func_ad_t{
  * @param n_guards_init Number of guards in DAE initialization system \$fF_0\$f.
  * @param n_dae_blocks Number of DAE blocks.
  * @param n_dae_init_blocks Number of DAE initialization blocks.
+ * @param n_initial_relations Number of relational operators in the initial equations.
+ * @param initial_relations Kind of relational operators in the initial equations. One of JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ.
+ * @param n_relations Number of relational operators in the DAE equations.
+ * @param relations Kind of relational operators in the DAE equations. One of: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ.
  * @param scaling_method Scaling method. Options are JMI_SCALING_NONE or JMI_SCALING_VARIABLES.
  * @return Error code.
  */
@@ -888,6 +893,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_sw, int n_sw_init,
 		int n_guards, int n_guards_init,
 		int n_dae_blocks, int n_dae_init_blocks,
+        int n_initial_relations, int* initial_relations,
+        int n_relations, int* relations,
 		int scaling_method, int n_ext_objs);
 
 /**
@@ -1310,6 +1317,11 @@ struct jmi_t{
 	jmi_block_residual_t** dae_block_residuals;       /**< \brief A vector of function pointers to DAE equation blocks */
 	jmi_block_residual_t** dae_init_block_residuals;  /**< \brief A vector of function pointers to DAE initialization equation blocks */
     int cached_block_jacobians;          /**< \brief This flag indicates weather the Jacobian needs to be refactorized */
+
+    jmi_int_t n_initial_relations; /** \brief Number of relational operators used in the event indicators for the initialization system. There should be the same number of initial relations as there are event indicators */
+    jmi_int_t* initial_relations; /** \brief Kind of relational operators used in the event indicators for the initialization system: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ */
+    jmi_int_t n_relations; /** \brief Number of relational operators used in the event indicators for the DAE system */
+    jmi_int_t* relations; /** \brief Kind of relational operators used in the event indicators for the DAE system: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ */
 
 	jmi_ad_var_t atEvent;                                      /** \brief A boolean variable indicating if the model equations are evaluated at an event.*/
 	jmi_ad_var_t atInitial;                                    /** \brief A boolean variable indicating if the model equations are evaluated at the initial time */
