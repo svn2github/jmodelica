@@ -22,52 +22,60 @@ aspect ConstantPropagation {
 	//
 	
 	public boolean ASTNode.constantPropagation = false;
+	public boolean FAbstractEquation.taggedForRemoval = false;
 	
 	public void FClass.constantPropagationIfSet() {
 		if (root().options.getBooleanOption("constant_propagation")) {
 			
 			LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>(equations());
-			List<FAbstractEquation> allEquations = this.getFEquationBlock(0).getFAbstractEquations();
+			List<FAbstractEquation> parameterEquations = getFParameterEquations();
 
 			while(!worklist.isEmpty()) {
 				FAbstractEquation equation = worklist.iterator().next();
-				equation.constantPropagation(allEquations, worklist);
+				equation.constantPropagation(worklist,parameterEquations);
 				worklist.remove(equation);
 			}
 			
+			// Remove tagged equations
+			for (FEquationBlock block : getFEquationBlocks()) {
+				for (int i = 0; i < block.getNumFAbstractEquation(); i++) {
+					if (block.getFAbstractEquations().getChild(i).taggedForRemoval) {
+						block.getFAbstractEquations().removeChild(i);
+						i--;
+					}
+				}
+			}
+		
 			flushAllRecursive();
 		}
 	}
 
 	public void FAbstractEquation.constantPropagation(
-			List<FAbstractEquation> allEquations,
-			LinkedHashSet<FAbstractEquation> worklist) {
+			LinkedHashSet<FAbstractEquation> worklist,
+			List<FAbstractEquation> parameterEquations) {
 		
 
 	}
 	
 	public void FEquation.constantPropagation(
-			List<FAbstractEquation> allEquations,
-			LinkedHashSet<FAbstractEquation> worklist) {
+			LinkedHashSet<FAbstractEquation> worklist,
+			List<FAbstractEquation> parameterEquations) {
 		
 		getLeft().simplify();
 		getRight().simplify();
 		
 		FTypePrefixVariability leftVariability = getLeft().variability();
 		FTypePrefixVariability rightVariability = getRight().variability();
-		
-		int index = -1;
+				
 		
 		if (!leftVariability.lessOrEqual(rightVariability)
-				&& getLeft().constantPropagationGoDown(allEquations, worklist, getRight()))
-			index = allEquations.getIndexOfChild(this);
+				&& getLeft().constantPropagationGoDown(worklist, parameterEquations, getRight()))
+			this.taggedForRemoval = true;
 			
 		if (!rightVariability.lessOrEqual(leftVariability)
-				&& getRight().constantPropagationGoDown(allEquations, worklist, getLeft()))
-			index = allEquations.getIndexOfChild(this);
+				&& getRight().constantPropagationGoDown(worklist, parameterEquations, getLeft()))
+			this.taggedForRemoval = true;
 		
-		if (index >= 0)
-			allEquations.removeChild(index);
 	}
 	
 	public void FExp.simplify() {
@@ -81,29 +89,29 @@ aspect ConstantPropagation {
 	
 	
 	public boolean FExp.constantPropagationGoDown(
-			List<FAbstractEquation> allEquations,
 			LinkedHashSet<FAbstractEquation> worklist,
+			List<FAbstractEquation> parameterEquations,
 			FExp exp) {
 
 		return false;
 	}
 	public boolean FIdUseExp.constantPropagationGoDown(
-			List<FAbstractEquation> allEquations,
 			LinkedHashSet<FAbstractEquation> worklist,
+			List<FAbstractEquation> parameterEquations,
 			FExp exp) {
 		
-		return myFV().constantPropagationGoDown(allEquations,worklist,exp);
+		return myFV().constantPropagationGoDown(worklist, parameterEquations,exp);
 	}
 	public boolean FAbstractVariable.constantPropagationGoDown(
-			List<FAbstractEquation> allEquations,
 			LinkedHashSet<FAbstractEquation> worklist,
+			List<FAbstractEquation> parameterEquations,
 			FExp exp) {
 		
 		return false;
 	}
 	public boolean FVariable.constantPropagationGoDown(
-			List<FAbstractEquation> allEquations,
 			LinkedHashSet<FAbstractEquation> worklist,
+			List<FAbstractEquation> parameterEquations,
 			FExp exp) {
 		
 		setFTypePrefixVariability(exp.variability());
@@ -114,7 +122,7 @@ aspect ConstantPropagation {
 		}
 		
 		if (exp.isParameterExp()) {
-			setChild(new Opt<FExp>(exp), 4); // TODO: parameterEquationsMap ?
+			parameterEquations.add(new FEquation(createUseExp(),exp));
 			return true;
 		} 
 		
@@ -123,8 +131,6 @@ aspect ConstantPropagation {
 			return true;
 		}
 		
-		
-
 		return false;
 	}
 	
