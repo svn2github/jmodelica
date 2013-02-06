@@ -1538,10 +1538,9 @@ jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int
 }
 
 int jmi_print_array(fmi_t* fmi, jmi_real_t* x, fmiInteger size_x, char* array_info){
-    int SIZE_BUFFER = 3000;
     int i, len=0;
     int max_output_variables=100;
-    char buffer[SIZE_BUFFER];
+    char buffer[3000];
     
     len += sprintf(buffer+len, "%s ",array_info);
     for (i=0; i<size_x && i<max_output_variables;i++){
