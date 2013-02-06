@@ -1538,21 +1538,23 @@ jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int
 }
 
 int jmi_print_array(fmi_t* fmi, jmi_real_t* x, fmiInteger size_x, char* array_info){
-    int SIZE_BUFFER = 1000;
+    int SIZE_BUFFER = 3000;
     int i, len=0;
-    char* buffer = (char*)fmi->fmi_functions.allocateMemory(SIZE_BUFFER, sizeof(char));
+    int max_output_variables=100;
+    char buffer[SIZE_BUFFER];
     
-    len += snprintf(buffer+len,SIZE_BUFFER-len, "%s ",array_info);
-    for (i=0; i<size_x;i++){
-        len += snprintf(buffer+len,SIZE_BUFFER-len, "%g ",x[i]);
+    len += sprintf(buffer+len, "%s ",array_info);
+    for (i=0; i<size_x && i<max_output_variables;i++){
+        len += sprintf(buffer+len, "%g ",x[i]);
     }
     
     fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", buffer);
-    fmi->fmi_functions.freeMemory(buffer);
+    if (i==max_output_variables){
+        fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Maximum number of output variables reached, printing the first hundred...");
+    }
     
     return 0;
 }
-
 
 extern const char *fmi_runtime_options_map_names[];
 extern const int fmi_runtime_options_map_vrefs[];
