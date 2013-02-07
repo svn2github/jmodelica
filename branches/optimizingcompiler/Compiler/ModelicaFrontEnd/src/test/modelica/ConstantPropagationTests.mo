@@ -89,4 +89,115 @@ end ConstantPropagationTests.ConstantSubstitution;
 ")})));
 end ConstantSubstitution;
 
+model WhenEq1
+	parameter Real p1 = 4;
+	Real x1,x2;
+equation
+	when p1 > 3 then
+		x1 = x2;
+	end when;
+	x2 = 3;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEq1",
+			description="",
+			constant_propagation=true,
+			flatModel="
+fclass ConstantPropagationTests.WhenEq1
+ parameter Real p1 = 4;
+ discrete Real x1;
+ constant Real x2 = 3;
+initial equation
+ pre(x1) = 0.0;
+equation
+ when p1 > 3 then
+  x1 = 3;
+ end when;
+end ConstantPropagationTests.WhenEq1;
+")})));
+end WhenEq1;
+
+model WhenEq2
+	Real x1,x2;
+equation
+	when false then
+		x1 = x2 + 1;
+	end when;
+	x2 = 3;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEq2",
+			description="",
+			constant_propagation=true,
+			flatModel="
+fclass ConstantPropagationTests.WhenEq2
+ discrete Real x1;
+ constant Real x2 = 3;
+initial equation
+ pre(x1) = 0.0;
+equation
+ when false then
+  x1 = 4;
+ end when;
+end ConstantPropagationTests.WhenEq2;
+")})));
+end WhenEq2;
+
+model WhenEq3
+	constant Real p1 = 4;
+	Real x1,x2;
+equation
+	when 3 <= p1 then
+		x1 = x2 + 1;
+	end when;
+	x2 = 3;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEq3",
+			description="",
+			constant_propagation=true,
+			flatModel="
+fclass ConstantPropagationTests.WhenEq3
+ constant Real p1 = 4;
+ discrete Real x1;
+ constant Real x2 = 3;
+initial equation
+ pre(x1) = 0.0;
+equation
+ when 3 <= 4.0 then
+  x1 = 4;
+ end when;
+end ConstantPropagationTests.WhenEq3;
+")})));
+end WhenEq3;
+
+model IfEq1
+	constant Real p1 = 4;
+	Real x1,x2;
+equation
+	if 3 > p1 then
+		x1 = x2 + 1;
+	elseif 3 < p1 then
+		x1 = x2;
+	else
+		x1 = x2 - 1;		
+	end if;
+	x2 = 3;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEq1",
+			description="",
+			constant_propagation=true,
+			flatModel="
+fclass ConstantPropagationTests.IfEq1
+ constant Real p1 = 4;
+ Real x1;
+ constant Real x2 = 3;
+equation
+ x1 = 3;
+end ConstantPropagationTests.IfEq1;
+")})));
+end IfEq1;
+
+
 end ConstantPropagationTests;

@@ -20,6 +20,9 @@ aspect ConstantPropagation {
 	syn FExp FAbstractVariable.CPROP_getBindingExp() = null;
 	eq FVariable.CPROP_getBindingExp() = getBindingExp();
 	//
+	syn boolean ASTNode.isIfWhen() = false;
+	eq FIfWhenElseEquation.isIfWhen() = true;
+	//
 	
 	public boolean ASTNode.constantPropagation = false;
 	public boolean FAbstractEquation.taggedForRemoval = false;
@@ -50,6 +53,7 @@ aspect ConstantPropagation {
 		}
 	}
 
+	
 	public void FAbstractEquation.constantPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
 			List<FAbstractEquation> parameterEquations) {
@@ -63,11 +67,15 @@ aspect ConstantPropagation {
 		getLeft().simplify();
 		getRight().simplify();
 		
+		
+		if (getParent().getParent().isIfWhen())
+			return;
+		
 		FTypePrefixVariability leftVariability = getLeft().variability();
 		FTypePrefixVariability rightVariability = getRight().variability();
 				
-		if (!leftVariability.lessOrEqual(rightVariability)) {
-			getLeft().constantPropagationGoDown(worklist, getRight());
+		if (!leftVariability.lessOrEqual(rightVariability) &&
+			getLeft().constantPropagationGoDown(worklist, getRight())) {
 			if (rightVariability.parameterOrLess()) {
 				taggedForRemoval = true;
 			}
@@ -76,8 +84,8 @@ aspect ConstantPropagation {
 			}
 		}
 			
-		if (!rightVariability.lessOrEqual(leftVariability)) {
-			getRight().constantPropagationGoDown(worklist, getLeft());
+		if (!rightVariability.lessOrEqual(leftVariability) &&
+			getRight().constantPropagationGoDown(worklist, getLeft())) {
 			if (leftVariability.parameterOrLess()) {
 				taggedForRemoval = true;
 			}
@@ -87,6 +95,8 @@ aspect ConstantPropagation {
 		}
 		
 	}
+	
+	
 	
 	public void FExp.simplify() {
 		constantPropagation = true;
@@ -98,23 +108,25 @@ aspect ConstantPropagation {
 	}
 	
 	
-	public void FExp.constantPropagationGoDown(
+	public boolean FExp.constantPropagationGoDown(
 			LinkedHashSet<FAbstractEquation> worklist,
 			FExp exp) {
 
+		return false;
 	}
-	public void FIdUseExp.constantPropagationGoDown(
+	public boolean FIdUseExp.constantPropagationGoDown(
 			LinkedHashSet<FAbstractEquation> worklist,
 			FExp exp) {
 		
-		myFV().constantPropagationGoDown(worklist, exp);
+		return myFV().constantPropagationGoDown(worklist, exp);
 	}
-	public void FAbstractVariable.constantPropagationGoDown(
+	public boolean FAbstractVariable.constantPropagationGoDown(
 			LinkedHashSet<FAbstractEquation> worklist,
 			FExp exp) {
 		
+		return false;
 	}
-	public void FVariable.constantPropagationGoDown(
+	public boolean FVariable.constantPropagationGoDown(
 			LinkedHashSet<FAbstractEquation> worklist,
 			FExp exp) {
 		
@@ -128,6 +140,8 @@ aspect ConstantPropagation {
 		if (exp.isConstantExp()) {
 			setBindingExp(exp);	
 		}
+		
+		return true;
 		
 	}
 	
