@@ -132,6 +132,8 @@ struct jmi_block_residual_t {
     int jacobian_variability;      /**< \brief Variability of Jacobian coefficients: JMI_CONSTANT_VARIABILITY
                                          JMI_PARAMETER_VARIABILITY, JMI_DISCRETE_VARIABILITY, JMI_CONTINUOUS_VARIABILITY */
 
+    int* value_references; /**< \brief Iteration variable value references. **/
+
     void * solver;
     jmi_block_residual_solve_func_t solve;
     jmi_block_residual_delete_func_t delete_solver;

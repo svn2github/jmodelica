@@ -450,11 +450,31 @@ int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 int jmi_ode_derivatives(jmi_t* jmi) {
 
 	int i, return_status;
+    jmi_real_t *t = jmi_get_t(jmi);
+
+	if((jmi->options.nle_solver_log_level > 2) && (jmi->options.debug_log)) {
+		fprintf(jmi->options.debug_log, "Model equations evaluation invoked at time:; %30.16E\n",t[0]);
+		fflush(jmi->options.debug_log);
+	}
+
+	if((jmi->options.log_level >= 5)) {
+		jmi_log_info(jmi,"[NLE_ITERS]Model equations evaluation invoked at time:; %30.16E",t[0]);
+	}
+
 	for (i=0;i<jmi->n_z;i++) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
 	return_status = jmi->dae->ode_derivatives(jmi);
+
+	if((jmi->options.nle_solver_log_level > 2) && (jmi->options.debug_log)) {
+		fprintf(jmi->options.debug_log, "Model equations evaluation finished\n");
+		fflush(jmi->options.debug_log);
+	}
+
+	if((jmi->options.log_level >= 5)) {
+		jmi_log_info(jmi,"[NLE_ITERS]Model equations evaluation finished");
+	}
 
 	/* Write back evaluation result */
 	if (return_status==0) {
@@ -500,11 +520,32 @@ int jmi_ode_outputs(jmi_t* jmi) {
 int jmi_ode_initialize(jmi_t* jmi) {
 
 	int i, return_status;
+	jmi_real_t* t = jmi_get_t(jmi);
+
 	for (i=0;i<jmi->n_z;i++) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
+	if((jmi->options.nle_solver_log_level > 2) && (jmi->options.debug_log)) {
+		fprintf(jmi->options.debug_log, "Model equations evaluation invoked at time:; %30.16E\n",t[0]);
+		fflush(jmi->options.debug_log);
+	}
+
+	if((jmi->options.log_level >= 5)) {
+		jmi_log_info(jmi,"[NLE_ITERS]Model equations evaluation invoked at time:; %30.16E",t[0]);
+	}
+
 	return_status = jmi->dae->ode_initialize(jmi);
+
+	if((jmi->options.nle_solver_log_level > 2) && (jmi->options.debug_log)) {
+		fprintf(jmi->options.debug_log, "Model equations evaluation finished\n");
+		fflush(jmi->options.debug_log);
+	}
+
+	if((jmi->options.log_level >= 5)) {
+		jmi_log_info(jmi,"[NLE_ITERS]Model equations evaluation finished");
+	}
+
 
 	/* Write back evaluation result */
 	if (return_status==0) {
