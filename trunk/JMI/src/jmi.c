@@ -458,7 +458,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
 	}
 
 	if((jmi->options.log_level >= 5)) {
-		jmi_log_info(jmi,"[NLE_ITERS]Model equations evaluation invoked at time:; %30.16E",t[0]);
+		jmi_log_info(jmi, "[NLE_ITERS]Model equations evaluation invoked at time:; %30.16E",t[0]);
 	}
 
 	for (i=0;i<jmi->n_z;i++) {
@@ -473,7 +473,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
 	}
 
 	if((jmi->options.log_level >= 5)) {
-		jmi_log_info(jmi,"[NLE_ITERS]Model equations evaluation finished");
+		jmi_log(jmi, logInfo, "[NLE_ITERS]Model equations evaluation finished");
 	}
 
 	/* Write back evaluation result */
@@ -532,7 +532,7 @@ int jmi_ode_initialize(jmi_t* jmi) {
 	}
 
 	if((jmi->options.log_level >= 5)) {
-		jmi_log_info(jmi,"[NLE_ITERS]Model equations evaluation invoked at time:; %30.16E",t[0]);
+		jmi_log_info(jmi, "[NLE_ITERS]Model equations evaluation invoked at time:; %30.16E",t[0]);
 	}
 
 	return_status = jmi->dae->ode_initialize(jmi);
@@ -543,9 +543,8 @@ int jmi_ode_initialize(jmi_t* jmi) {
 	}
 
 	if((jmi->options.log_level >= 5)) {
-		jmi_log_info(jmi,"[NLE_ITERS]Model equations evaluation finished");
+		jmi_log(jmi, logInfo, "[NLE_ITERS]Model equations evaluation finished");
 	}
-
 
 	/* Write back evaluation result */
 	if (return_status==0) {

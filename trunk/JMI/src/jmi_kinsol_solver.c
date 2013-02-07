@@ -414,7 +414,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
     			j += len;
     		}
     		buf[j]=0;
-            jmi_log_info(block->jmi, buf);
+            jmi_log(block->jmi, logInfo, buf);
 
             sprintf(buf,"[NLE_ITERS]Block:;%d;Scaled norm:;%30.16E;Residuals:;",block->index, kin_mem->kin_fnorm);
     		j = strlen(buf);
@@ -428,10 +428,10 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
     			j += len;
     		}
     		buf[j]=0;
-            jmi_log_info(block->jmi, buf);
+            jmi_log(block->jmi, logInfo, buf);
     	}
     	sprintf(buf,"[KINSOL_INFO]%s",msg);
-        jmi_log_info(block->jmi, buf);
+        jmi_log(block->jmi, logInfo, buf);
 }
 
 void jmi_kinsol_error_handling(jmi_t* jmi, int flag){
@@ -872,7 +872,7 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
 			k += len;
 		}
 		buf[k]=0;
-		jmi_log_info(block->jmi, buf);
+		jmi_log(block->jmi, logInfo, buf);
 	}
 
     KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
@@ -1060,7 +1060,7 @@ void jmi_kinsol_solver_print_solve_start(jmi_block_residual_t * block) {
 		for (j=0;j<block->n;j++) {
 			sprintf(buf+strlen(buf),"#r%d#;",block->value_references[j]);
 		}
-		jmi_log_info(block->jmi, buf);
+		jmi_log(block->jmi, logInfo, buf);
 	}
 }
 
@@ -1082,7 +1082,7 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_residual_t * block, int flag) {
 	if((block->jmi->options.log_level >= 5)) {
 		char* buf = block->message_buffer ;
 		sprintf(buf,"[NLE_ITERS]Block:;%d;Newton solver finished;",block->index);
-		jmi_log_info(block->jmi, buf);
+		jmi_log(block->jmi, logInfo, buf);
 	}
 
 }

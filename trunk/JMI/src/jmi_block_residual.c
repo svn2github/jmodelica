@@ -152,9 +152,13 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         block->F(jmi,block->max,block->res,JMI_BLOCK_MAX);
         block->F(jmi,block->initial,block->res,JMI_BLOCK_INITIALIZE);
         block->F(jmi,real_vrs,block->res,JMI_BLOCK_VALUE_REFERENCE);
+
+        for (i=0;i<block->n;i++) {
+        	block->value_references[i] = (int)real_vrs[i];
+        }
+
         /* if the nominal is outside min-max -> fix it! */
         for(i=0; i < block->n; ++i) {
-        	block->value_references[i] = (int)real_vrs[i];
             realtype maxi = block->max[i];
             realtype mini = block->min[i];
             realtype nomi = block->nominal[i];
