@@ -87,7 +87,14 @@ class Test_FMUModelCS1:
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
         res = model.simulate(final_time=1.5)
         assert (res["J1.w"][-1] - 3.245091100366517) < 1e-4
+    
+    @testattr(windows = True)
+    def test_default_experiment(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
         
+        assert N.abs(model.get_default_experiment_start_time()) < 1e-4
+        assert N.abs(model.get_default_experiment_stop_time()-1.5) < 1e-4
+    
     @testattr(windows = True)
     def test_types_platform(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
@@ -136,6 +143,13 @@ class Test_FMUModelME1:
         self._dq.initialize()
         self.dep = load_fmu("DepParTests_DepPar1.fmu")
         self.dep.initialize()
+    
+    @testattr(windows = True)
+    def test_default_experiment(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus)
+        
+        assert N.abs(model.get_default_experiment_start_time()) < 1e-4
+        assert N.abs(model.get_default_experiment_stop_time()-1.5) < 1e-4
     
     @testattr(stddist = True)
     def test_get_variable_by_valueref(self):
