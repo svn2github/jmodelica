@@ -162,8 +162,8 @@ aspect FlatVariability {
 	
 	syn lazy FTypePrefixVariability InstComponentDecl.variability() {
 		FTypePrefixVariability var = combinedVariability();
-		if (isAssignedInWhen())
-			var = var.combineDown(fDiscrete());
+		if (!var.discreteOrLess() && isAssignedInWhen())
+			var = fDiscrete();
 		return var;
 	}
 	eq InstEnumLiteral.variability() = fConstant();
