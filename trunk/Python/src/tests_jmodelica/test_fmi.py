@@ -143,6 +143,11 @@ class Test_FMUModelME1:
         self._dq.initialize()
         self.dep = load_fmu("DepParTests_DepPar1.fmu")
         self.dep.initialize()
+        
+    @testattr(stddist = True)
+    def test_error_xml(self):
+        nose.tools.assert_raises(FMUException,load_fmu,"bouncingBall_modified_xml.fmu",path_to_fmus)
+        nose.tools.assert_raises(FMUException,FMUModelME1,"bouncingBall_modified_xml.fmu",path_to_fmus)
     
     @testattr(windows = True)
     def test_default_experiment(self):
