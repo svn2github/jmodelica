@@ -1059,4 +1059,34 @@ equation
 ")})));
 end FixedAndStart3;
 
+
+model Experiment1
+    Real x = 1;
+    
+    annotation(
+        experiment(StartTime=1, StopTime=2, Tolerance=1e-7),
+        __JModelica(UnitTesting(tests={XMLCodeGenTestCase(
+            name="Experiment1",
+            description="Full experiment annotation",
+            template="$XML_defaultExperiment$",
+            generatedCode="
+<DefaultExperiment startTime=\"1.0\" stopTime=\"2.0\" tolerance=\"1.0E-7\" />
+")})));
+end Experiment1;
+
+
+model Experiment2
+    Real x = 1;
+    
+    annotation(
+        experiment(StopTime=5),
+        __JModelica(UnitTesting(tests={XMLCodeGenTestCase(
+            name="Experiment2",
+            description="Partial experiment annotation",
+            template="$XML_defaultExperiment$",
+            generatedCode="
+<DefaultExperiment stopTime=\"5.0\" />
+")})));
+end Experiment2;
+
 end XMLCodeGenTests;
