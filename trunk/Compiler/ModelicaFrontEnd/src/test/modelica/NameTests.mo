@@ -3285,4 +3285,19 @@ Semantic error at line 3271, column 9:
 end PreErrorTest;
 
 
+model AssignedInWhenRecursion
+    model A
+        parameter Boolean x = true;
+    end A;
+    
+    model B
+        Real y = 2;
+    end B;
+    
+    parameter Integer n = if a.x then 2 else 3;
+    A a;
+    B b[n];
+end AssignedInWhenRecursion;
+
+
 end NameTests;

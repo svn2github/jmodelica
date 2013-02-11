@@ -270,7 +270,7 @@ equation
  d.c.a.y = 9;
  d.c.z = d.c.a.x;
 end InnerOuterTests.InnerOuterTest7;
-	")})));
+")})));
 end InnerOuterTest7;
 	
 model InnerOuterTest8
@@ -311,8 +311,64 @@ equation
  d.c.a.x = 6;
  d.c.a.y = 9;
  d.c.z = d.c.a.x;
-end InnerOuterTests.InnerOuterTest8;	 
-	")})));
+end InnerOuterTests.InnerOuterTest8;
+")})));
 end InnerOuterTest8;
+
+
+model InnerOuterTest9
+    outer parameter Real T = 5;
+    Real x = T * 23;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InnerOuterTest9",
+			description="Missing inner declaration",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/InnerOuterTests.mo':
+Semantic error at line 319, column 21:
+  Cannot find inner declaration for outer T
+")})));
+end InnerOuterTest9;
+
+
+model InnerOuterTest10
+    outer constant Real T = 5;
+    constant Real x = T * 23;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InnerOuterTest10",
+			description="Missing inner declaration",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/InnerOuterTests.mo':
+Semantic error at line 336, column 22:
+  Cannot find inner declaration for outer T
+")})));
+end InnerOuterTest10;
+
+
+model InnerOuterTest11
+    model B
+        Real x;
+    end B;
+    
+    outer B b;
+    
+    Real y = b.x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InnerOuterTest11",
+			description="Missing inner declaration",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/InnerOuterTests.mo':
+Semantic error at line 356, column 10:
+  Cannot find inner declaration for outer b
+")})));
+end InnerOuterTest11;
 
 end InnerOuterTests;
