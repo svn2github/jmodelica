@@ -69,7 +69,7 @@ int brentf(realtype y, realtype* f, void* problem_data) {
         realtype v = *f;
         if (v- v != 0) {
            jmi_log_warning(block->jmi, "Not a number in output from equation block %d", block->index);
-           ret = -1;
+           ret = 1;
         }
 	}
 	return ret;
