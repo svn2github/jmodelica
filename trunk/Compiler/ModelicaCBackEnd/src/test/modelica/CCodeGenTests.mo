@@ -444,7 +444,7 @@ $C_DAE_event_indicator_residuals$
 $C_ode_initialization$
 ",
 			generatedCode="
-  model_ode_initialize(jmi);
+  ef=model_ode_initialize(jmi);
 
   model_ode_guards_init(jmi);
 
