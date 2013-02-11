@@ -69,7 +69,7 @@ int brentf(realtype y, realtype* f, void* problem_data) {
         realtype v = *f;
         if (v- v != 0) {
            jmi_log_warning(block->jmi, "Not a number in output from equation block %d", block->index);
-           ret = 1;
+           ret = -1;
         }
 	}
 	return ret;
@@ -1127,12 +1127,20 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     if(flag != KIN_SUCCESS) {
     	if(flag == KIN_INITIAL_GUESS_OK) {
             flag = KIN_SUCCESS;
-        } else {
-            realtype fnorm;
+        } /* If the evaluation of the residuals fails, e.g. due to NaN in the residuals, the Kinsol exits, but the old fnorm
+    	     from a previous solve, possibly converged, is still stored. In such cases Kinsol reports success based on a fnorm
+    	     value from a previous solve - if the previous solve was converged, then also a following faulty solve will be reproted
+    	     as a success. Commenting out this code since it causes problems.*/
+    	else {
+    		jmi_log_error(block->jmi, "Could not converge equations in block %d", block->index);
+    	    return flag;
+    	    /*
+    	    realtype fnorm;
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm < solver->kin_stol) {
                 flag = KIN_SUCCESS;
             }
+            */
         }
     }
     /* TODO: Is Brent called even if Kinsol succeeded? Shouldn't this be in an else if?*/
@@ -1170,10 +1178,13 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
         if(flag == KIN_INITIAL_GUESS_OK) {
         	flag = KIN_SUCCESS;
         } else if(flag != KIN_SUCCESS) {
+        	jmi_log_error(block->jmi, "Could not converge equations in block %d after rescaling", block->index);
+        	return flag;
+        	/*
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm <= solver->kin_stol) {
                 flag = KIN_SUCCESS;
-            }
+            }*/
         }
         if(flag != KIN_SUCCESS) {
             if(flagNonscaled == 0)
