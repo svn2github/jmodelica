@@ -94,6 +94,7 @@ class Test_FMUModelCS1:
         
         assert N.abs(model.get_default_experiment_start_time()) < 1e-4
         assert N.abs(model.get_default_experiment_stop_time()-1.5) < 1e-4
+        assert N.abs(model.get_default_experiment_tolerance()-0.0001) < 1e-4
     
     @testattr(windows = True)
     def test_types_platform(self):
@@ -155,6 +156,7 @@ class Test_FMUModelME1:
         
         assert N.abs(model.get_default_experiment_start_time()) < 1e-4
         assert N.abs(model.get_default_experiment_stop_time()-1.5) < 1e-4
+        assert N.abs(model.get_default_experiment_tolerance()-0.0001) < 1e-4
     
     @testattr(stddist = True)
     def test_get_variable_by_valueref(self):
