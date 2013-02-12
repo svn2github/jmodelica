@@ -728,11 +728,6 @@ aspect Names {
 
     
     /**
-     * Get number of InstAccesses without triggering rewrites.
-     */
-    syn int InstDot.getNumInstAccessNoTransform() = getInstAccessListNoTransform().getNumChildNoTransform();
-    
-    /**
      * stripFirstAccess removes the first access in a qualified
      * name. If the name is not qualified, null is returned. 
      */
