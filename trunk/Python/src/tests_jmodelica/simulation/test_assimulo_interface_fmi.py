@@ -58,6 +58,33 @@ def input_linear(t):
         
 input_object = (["u"],input_linear)
 
+class Test_Events:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'EventIter.mo')
+
+        compile_fmu("EventIter.EventInfiniteIteration1", file_name)
+        compile_fmu("EventIter.EventInfiniteIteration2", file_name)
+        compile_fmu("EventIter.EventInfiniteIteration3", file_name)
+    
+    @testattr(stddist = True)
+    def test_event_infinite_iteration_1(self):
+        model = load_fmu("EventIter_EventInfiniteIteration1.fmu")
+        nose.tools.assert_raises(FMUException, model.initialize)
+        
+    @testattr(stddist = True)
+    def test_event_infinite_iteration_2(self):
+        model = load_fmu("EventIter_EventInfiniteIteration2.fmu")
+        nose.tools.assert_raises(FMUException, model.initialize)
+        
+    @testattr(assimulo = True)
+    def test_event_infinite_iteration_3(self):
+        model = load_fmu("EventIter_EventInfiniteIteration3.fmu")
+        nose.tools.assert_raises(FMUException, model.simulate)
+
 class Test_Relations:
     @classmethod
     def setUpClass(cls):
