@@ -1131,17 +1131,17 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     	     from a previous solve, possibly converged, is still stored. In such cases Kinsol reports success based on a fnorm
     	     value from a previous solve - if the previous solve was converged, then also a following faulty solve will be reproted
     	     as a success. Commenting out this code since it causes problems.*/
-    	else {
+    	/*else {
     		jmi_log_error(block->jmi, "Could not converge equations in block %d", block->index);
     	    return flag;
-    	    /*
+
     	    realtype fnorm;
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm < solver->kin_stol) {
                 flag = KIN_SUCCESS;
             }
-            */
-        }
+
+        }*/
     }
     /* TODO: Is Brent called even if Kinsol succeeded? Shouldn't this be in an else if?*/
     if((block->n == 1) && block->jmi->options.use_Brent_in_1d_flag) {
@@ -1177,15 +1177,15 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
         jmi_kinsol_solver_print_solve_end(block,flag);
         if(flag == KIN_INITIAL_GUESS_OK) {
         	flag = KIN_SUCCESS;
-        } else if(flag != KIN_SUCCESS) {
+        } /*else if(flag != KIN_SUCCESS) {
         	jmi_log_error(block->jmi, "Could not converge equations in block %d after rescaling", block->index);
         	return flag;
-        	/*
+
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm <= solver->kin_stol) {
                 flag = KIN_SUCCESS;
-            }*/
-        }
+            }
+        }*/
         if(flag != KIN_SUCCESS) {
             if(flagNonscaled == 0)
                 jmi_log_error(block->jmi, "The equations with initial scaling solved fine, re-scaled equations failed in block %d", block->index);
