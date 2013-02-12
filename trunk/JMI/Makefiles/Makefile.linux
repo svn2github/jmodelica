@@ -106,11 +106,11 @@ CC = gcc
 JMI_AD=JMI_AD_CPPAD
 
 # C++ Compiler options
-CXXFLAGS = -g -O2
+CXXFLAGS = -g
 CXXFLAGS += -DJMI_AD=${JMI_AD} -fPIC
 
 # C Compiler options
-CFLAGS = -g -O2
+CFLAGS = -g
 CFLAGS += -std=c89 -pedantic -DJMI_AD=$(JMI_AD) -fPIC
 
 SHARED_LDFLAGS = -shared -Wl,-rpath,'$$ORIGIN',--no-undefined
