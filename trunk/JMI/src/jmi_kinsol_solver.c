@@ -1064,6 +1064,8 @@ void jmi_kinsol_solver_print_solve_start(jmi_block_residual_t * block) {
 	}
 }
 
+
+
 void jmi_kinsol_solver_print_solve_end(jmi_block_residual_t * block, int flag) {
 	long int nniters;
 	int j;
@@ -1072,7 +1074,66 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_residual_t * block, int flag) {
 
 	if((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log)) {
 		char* buf = block->message_buffer ;
-		sprintf(buf,"Block:;%d;Newton solver finished;",block->index);
+		sprintf(buf,"Block:;%d;Newton solver finished with exit flag;",block->index);
+                switch (flag)
+		{
+		case KIN_SUCCESS:
+		  sprintf(buf + strlen(buf), "KIN_SUCCESS;");
+		  break;
+		case KIN_INITIAL_GUESS_OK:
+		  sprintf(buf + strlen(buf), "KIN_INITIAL_GUESS_OK;");
+		  break;
+		case KIN_STEP_LT_STPTOL:
+		  sprintf(buf + strlen(buf), "KIN_STEP_LT_STPTOL;");
+		  break;
+		case KIN_WARNING:
+		  sprintf(buf + strlen(buf), "KIN_WARNING;");
+		  break;
+		case KIN_MEM_NULL:
+		  sprintf(buf + strlen(buf), "KIN_MEM_NULL;");
+		  break;
+		case KIN_ILL_INPUT:
+		  sprintf(buf + strlen(buf), "KIN_ILL_INPUT;");
+		  break;
+		case KIN_NO_MALLOC:
+		  sprintf(buf + strlen(buf), "KIN_NO_MALLOC;");
+		  break;
+		case KIN_MEM_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_MEM_FAIL;");
+		  break;
+		case KIN_LINESEARCH_NONCONV:
+		  sprintf(buf + strlen(buf), "KIN_LINESEARCH_NONCONV;");
+		  break;
+		case KIN_MAXITER_REACHED:
+		  sprintf(buf + strlen(buf), "KIN_MAXITER_REACHED;");
+		  break;
+		case KIN_MXNEWT_5X_EXCEEDED:
+		  sprintf(buf + strlen(buf), "KIN_MXNEWT_5X_EXCEEDED;");
+		  break;
+		case KIN_LINESEARCH_BCFAIL:
+		  sprintf(buf + strlen(buf), "KIN_LINESEARCH_BCFAIL;");
+		  break;
+		case KIN_LINSOLV_NO_RECOVERY:
+		  sprintf(buf + strlen(buf), "KIN_LINSOLV_NO_RECOVERY;");
+		  break;
+		case KIN_LINIT_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_LINIT_FAIL;");
+		  break;
+		case KIN_LSETUP_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_LSETUP_FAIL;");
+		  break;
+		case KIN_LSOLVE_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_LSOLVE_FAIL;");
+		  break;
+		case KIN_SYSFUNC_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_SYSFUNC_FAIL;");
+		  break;
+		case KIN_FIRST_SYSFUNC_ERR:
+		  sprintf(buf + strlen(buf), "KIN_FIRST_SYSFUNC_ERR;");
+		  break;
+		default:
+		  sprintf(buf + strlen(buf), "Unknown return flag from Kinsol: %d;",flag);
+                }
 		j = strlen(buf);
 		buf[j]=0;
 		fprintf(block->jmi->options.debug_log, "%s\n",buf);
@@ -1081,7 +1142,66 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_residual_t * block, int flag) {
 
 	if((block->jmi->options.log_level >= 5)) {
 		char* buf = block->message_buffer ;
-		sprintf(buf,"[NLE_ITERS]Block:;%d;Newton solver finished;",block->index);
+		sprintf(buf,"[NLE_ITERS]Block:;%d;Newton solver finished with exit flag;",block->index);
+                switch (flag)
+		{
+		case KIN_SUCCESS:
+		  sprintf(buf + strlen(buf), "KIN_SUCCESS;");
+		  break;
+		case KIN_INITIAL_GUESS_OK:
+		  sprintf(buf + strlen(buf), "KIN_INITIAL_GUESS_OK;");
+		  break;
+		case KIN_STEP_LT_STPTOL:
+		  sprintf(buf + strlen(buf), "KIN_STEP_LT_STPTOL;");
+		  break;
+		case KIN_WARNING:
+		  sprintf(buf + strlen(buf), "KIN_WARNING;");
+		  break;
+		case KIN_MEM_NULL:
+		  sprintf(buf + strlen(buf), "KIN_MEM_NULL;");
+		  break;
+		case KIN_ILL_INPUT:
+		  sprintf(buf + strlen(buf), "KIN_ILL_INPUT;");
+		  break;
+		case KIN_NO_MALLOC:
+		  sprintf(buf + strlen(buf), "KIN_NO_MALLOC;");
+		  break;
+		case KIN_MEM_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_MEM_FAIL;");
+		  break;
+		case KIN_LINESEARCH_NONCONV:
+		  sprintf(buf + strlen(buf), "KIN_LINESEARCH_NONCONV;");
+		  break;
+		case KIN_MAXITER_REACHED:
+		  sprintf(buf + strlen(buf), "KIN_MAXITER_REACHED;");
+		  break;
+		case KIN_MXNEWT_5X_EXCEEDED:
+		  sprintf(buf + strlen(buf), "KIN_MXNEWT_5X_EXCEEDED;");
+		  break;
+		case KIN_LINESEARCH_BCFAIL:
+		  sprintf(buf + strlen(buf), "KIN_LINESEARCH_BCFAIL;");
+		  break;
+		case KIN_LINSOLV_NO_RECOVERY:
+		  sprintf(buf + strlen(buf), "KIN_LINSOLV_NO_RECOVERY;");
+		  break;
+		case KIN_LINIT_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_LINIT_FAIL;");
+		  break;
+		case KIN_LSETUP_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_LSETUP_FAIL;");
+		  break;
+		case KIN_LSOLVE_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_LSOLVE_FAIL;");
+		  break;
+		case KIN_SYSFUNC_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_SYSFUNC_FAIL;");
+		  break;
+		case KIN_FIRST_SYSFUNC_ERR:
+		  sprintf(buf + strlen(buf), "KIN_FIRST_SYSFUNC_ERR;");
+		  break;
+		default:
+		  sprintf(buf + strlen(buf), "Unknown return flag from Kinsol: %d;",flag);
+                }
 		jmi_log(block->jmi, logInfo, buf);
 	}
 
@@ -1131,17 +1251,15 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     	     from a previous solve, possibly converged, is still stored. In such cases Kinsol reports success based on a fnorm
     	     value from a previous solve - if the previous solve was converged, then also a following faulty solve will be reproted
     	     as a success. Commenting out this code since it causes problems.*/
-    	/*else {
-    		jmi_log_error(block->jmi, "Could not converge equations in block %d", block->index);
-    	    return flag;
-
+    	else if (flag == KIN_LINESEARCH_NONCONV) {
     	    realtype fnorm;
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm < solver->kin_stol) {
                 flag = KIN_SUCCESS;
+                /*jmi_log_warning(block->jmi, "Kinsol returned with the flag KIN_LINESEARCH_NONCONV but the residuals are converged in block %d, continuing", block->index);*/
             }
 
-        }*/
+        }
     }
     /* TODO: Is Brent called even if Kinsol succeeded? Shouldn't this be in an else if?*/
     if((block->n == 1) && block->jmi->options.use_Brent_in_1d_flag) {
@@ -1177,15 +1295,13 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
         jmi_kinsol_solver_print_solve_end(block,flag);
         if(flag == KIN_INITIAL_GUESS_OK) {
         	flag = KIN_SUCCESS;
-        } /*else if(flag != KIN_SUCCESS) {
-        	jmi_log_error(block->jmi, "Could not converge equations in block %d after rescaling", block->index);
-        	return flag;
-
+        } else if (flag == KIN_LINESEARCH_NONCONV) {
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm <= solver->kin_stol) {
                 flag = KIN_SUCCESS;
+                /*jmi_log_warning(block->jmi, "Kinsol returned with the flag KIN_LINESEARCH_NONCONV but the residuals are converged in block %d, continuing", block->index);*/
             }
-        }*/
+        }
         if(flag != KIN_SUCCESS) {
             if(flagNonscaled == 0)
                 jmi_log_error(block->jmi, "The equations with initial scaling solved fine, re-scaled equations failed in block %d", block->index);
