@@ -4,17 +4,21 @@ aspect InnerOuterComponents {
 	eq InstRoot.getChild().inOuter()          = false;
 	eq SourceRoot.getChild().inOuter()        = false;
 	eq InstComponentDecl.getChild().inOuter() = inOrIsOuter();
+	
+	inh InstComponentDecl InstComponentDecl.surroundingOuterComponentDecl();
+	eq InstRoot.getChild().surroundingOuterComponentDecl()          = null;
+	eq SourceRoot.getChild().surroundingOuterComponentDecl()        = null;
+	eq InstComponentDecl.getChild().surroundingOuterComponentDecl() = isOuter() ? this : surroundingOuterComponentDecl();
 			
 	syn boolean InstComponentDecl.inOrIsOuter() = isOuter() || inOuter();	
 			
 	syn lazy InstComponentDecl InstComponentDecl.myInnerInstComponentDecl() {
-		if (isOuter()) {
-			return lookupInnerInstComponent(name(), true);
-		} else if (inOuter()) {
-			return lookupInInnerInstComponent(name());
-		} else {	
-			return null;
-		}
+		InstComponentDecl res = null;
+		if (isOuter()) 
+			res = lookupInnerInstComponent(name(), true);
+		else if (inOuter())
+			res = lookupInInnerInstComponent(name());
+		return (res == null) ? unknownInstComponentDecl() : res;
 	}
 	
 	inh InstComponentDecl InstNode.lookupInnerInstComponent(String name, boolean firstScope);

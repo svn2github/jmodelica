@@ -87,9 +87,16 @@ aspect Flattening {
 		flattenUsedFuncsAndEnums(fc);
 		flattenInstClassDeclExtra(fc);
 		fc.genConnectionEquations();
+		fc.createExperiment(annotation("experiment"));
     	endStep("flattenInstClassDecl()");
     }
     
+
+	public void InstSimpleShortClassDecl.flattenInstClassDecl(FClass fc) {
+		actualInstClass().flattenInstClassDecl(fc);
+		fc.setFQName(new FQNameString(qualifiedName()));
+	}
+
     /**
      * Delegate for adding extra flattening code to top-level model.
      */

@@ -157,6 +157,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
     
+    /* Printouts for iterations should not be here - to be added is the Jacobian output
 	if((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log)) {
 		char* buf = block->message_buffer ;
 
@@ -172,10 +173,8 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
 			j += len;
 		}
 		buf[j]=0;
-		/* jmi_log(block->jmi, logInfo, buf); */
 		fprintf(block->jmi->options.debug_log, "%s\n",buf);
 		fflush(block->jmi->options.debug_log);
-		/* printf( "%s\n",buf); */
 
 		buf = block->message_buffer ;
 		sprintf(buf,"Block:;%d;Norm:;%g;Residuals:;",block->index, kin_mem->kin_fnorm);
@@ -190,12 +189,10 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
 			j += len;
 		}
 		buf[j]=0;
-		/* jmi_log(block->jmi, logInfo, buf); */
 		fprintf(block->jmi->options.debug_log, "%s\n",buf);
 		fflush(block->jmi->options.debug_log);
-		/* printf( "%s\n",buf); */
 	}
-
+*/
     if(!block->dF) {
         /* Use (almost) standard finite differences */
         realtype inc, inc_inv, ujsaved, ujscale, sign;
@@ -311,10 +308,10 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
             category = logError;
         }
 
-        sprintf(buffer, "[KINSOL] Error occured in %s at time %3.2fs when solving block %d: ", function, *(jmi_get_t(jmi)), block->index);
+        sprintf(buffer, "[KINSOL_ERROR]Error occured in %s at time %3.2fs when solving block %d: ", function, *(jmi_get_t(jmi)), block->index);
         jmi_log(block->jmi, category, buffer);
         jmi_log(block->jmi, category, msg);
-        sprintf(buffer, "Current function norm: %g, scaled step length: %g, tolerance: %g", fnorm, snorm, solver->kin_stol);
+        sprintf(buffer, "[KINSOL_ERROR]Current function norm: %g, scaled step length: %g, tolerance: %g", fnorm, snorm, solver->kin_stol);
         jmi_log(block->jmi, category, buffer);
         
 /*
@@ -351,10 +348,90 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
 }
 
 void kin_info(const char *module, const char *function, char *msg, void *eh_data){
-        char buffer[400];
+        int i,j;
+	    long int nniters;
         jmi_block_residual_t *block = eh_data;
-        sprintf(buffer, "[KINSOL] %s", msg);
-        jmi_log(block->jmi, logInfo, buffer);
+        char* buf = block->message_buffer ;
+    	jmi_kinsol_solver_t* solver = block->solver;
+        struct KINMemRec* kin_mem = solver->kin_mem;
+
+        /* Get the number of iterations */
+    	KINGetNumNonlinSolvIters(kin_mem, &nniters);
+
+    	/* Only output an iteration under certain conditions:
+    	 *  1. nle_solver_log > 2
+    	 *  2. The calling function is either KINSolInit or KINSol
+    	 *  3. The message string starts with "nni"
+    	 *
+    	 *  This approach gives one printout per iteration
+    	 */
+    	if ((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log) &&
+    			(((strcmp("KINSolInit",function)==0) | (strcmp("KINSol",function)==0)) & (strncmp("nni",msg,3)==0))) {
+    		sprintf(buf,"Block:;%d;Iteration:;%d;IVs:;",block->index,nniters);
+    		j = strlen(buf);
+    		for (i=0;i<block->n;i++){
+    			realtype* u = N_VGetArrayPointer(kin_mem->kin_uu);
+    			int len;
+    			char cur[60];
+    			sprintf(cur, "%30.16E;",u[i]);
+    			len = strlen(cur);
+    			memcpy(buf + j, cur, len);
+    			j += len;
+    		}
+    		buf[j]=0;
+    		/* jmi_log(block->jmi, logInfo, buf); */
+    		fprintf(block->jmi->options.debug_log, "%s\n",buf);
+    		fflush(block->jmi->options.debug_log);
+
+    		sprintf(buf,"Block:;%d;Scaled norm:;%30.16E;Residuals:;",block->index, kin_mem->kin_fnorm);
+    		j = strlen(buf);
+    		for (i=0;i<block->n;i++){
+    			realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
+    			int len;
+    			char cur[60];
+    			sprintf(cur, "%30.16E;",f[i]);
+    			len = strlen(cur);
+    			memcpy(buf + j, cur, len);
+    			j += len;
+    		}
+    		buf[j]=0;
+    		fprintf(block->jmi->options.debug_log, "%s\n",buf);
+    		fflush(block->jmi->options.debug_log);
+    	}
+
+    	if ((block->jmi->options.log_level >= 5) &&
+    			(((strcmp("KINSolInit",function)==0) |
+    					(strcmp("KINSol",function)==0)) & (strncmp("nni",msg,3)==0))) {
+    		sprintf(buf,"[NLE_ITERS]Block:;%d;Iteration:;%d;IVs:;",block->index,nniters);
+    		j = strlen(buf);
+    		for (i=0;i<block->n;i++){
+    			realtype* u = N_VGetArrayPointer(kin_mem->kin_uu);
+    			int len;
+    			char cur[60];
+    			sprintf(cur, "%30.16E;",u[i]);
+    			len = strlen(cur);
+    			memcpy(buf + j, cur, len);
+    			j += len;
+    		}
+    		buf[j]=0;
+            jmi_log(block->jmi, logInfo, buf);
+
+            sprintf(buf,"[NLE_ITERS]Block:;%d;Scaled norm:;%30.16E;Residuals:;",block->index, kin_mem->kin_fnorm);
+    		j = strlen(buf);
+    		for (i=0;i<block->n;i++){
+    			realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
+    			int len;
+    			char cur[60];
+    			sprintf(cur, "%30.16E;",f[i]);
+    			len = strlen(cur);
+    			memcpy(buf + j, cur, len);
+    			j += len;
+    		}
+    		buf[j]=0;
+            jmi_log(block->jmi, logInfo, buf);
+    	}
+    	sprintf(buf,"[KINSOL_INFO]%s",msg);
+        jmi_log(block->jmi, logInfo, buf);
 }
 
 void jmi_kinsol_error_handling(jmi_t* jmi, int flag){
@@ -768,8 +845,8 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
 		for (i=0;i<N;i++){
 			realtype* res = scale_ptr;
 			int len;
-			char cur[20];
-			sprintf(cur, "%8.2E;",1/res[i]);
+			char cur[60];
+			sprintf(cur, "%30.16E;",1/res[i]);
 			len = strlen(cur);
 			memcpy(buf + k, cur, len);
 			k += len;
@@ -779,6 +856,23 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
 		fprintf(block->jmi->options.debug_log, "%s\n",buf);
 		fflush(block->jmi->options.debug_log);
 		/* printf( "%s\n",buf); */
+	}
+
+	if (block->jmi->options.log_level >= 5) {
+		char* buf = block->message_buffer ;
+		sprintf(buf,"[NLE_SCALING]Block:;%d;Updating;Res;Scaling:;",block->index);
+		k = strlen(buf);
+		for (i=0;i<N;i++){
+			realtype* res = scale_ptr;
+			int len;
+			char cur[60];
+			sprintf(cur, "%30.16E;",1/res[i]);
+			len = strlen(cur);
+			memcpy(buf + k, cur, len);
+			k += len;
+		}
+		buf[k]=0;
+		jmi_log(block->jmi, logInfo, buf);
 	}
 
     KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
@@ -947,16 +1041,30 @@ void jmi_kinsol_solver_delete(jmi_block_residual_t* block) {
 
 void jmi_kinsol_solver_print_solve_start(jmi_block_residual_t * block) {
     int j;
-	jmi_log_info(block->jmi,"Non-linear solver invoked for block %d",block->index);
-	if((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log)) {
+
+    if((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log)) {
 		char* buf = block->message_buffer ;
-		sprintf(buf,"Block:;%d;Solve invoked;",block->index);
+		sprintf(buf,"Block:;%d;Newton solver invoked;;;",block->index);
+		for (j=0;j<block->n;j++) {
+			sprintf(buf+strlen(buf),"#r%d#;",block->value_references[j]);
+		}
 		j = strlen(buf);
 		buf[j]=0;
 		fprintf(block->jmi->options.debug_log, "%s\n",buf);
 		fflush(block->jmi->options.debug_log);
 	}
+
+	if((block->jmi->options.log_level >= 5)) {
+		char* buf = block->message_buffer ;
+		sprintf(buf,"[NLE_ITERS]Block:;%d;Newton solver invoked;;;",block->index);
+		for (j=0;j<block->n;j++) {
+			sprintf(buf+strlen(buf),"#r%d#;",block->value_references[j]);
+		}
+		jmi_log(block->jmi, logInfo, buf);
+	}
 }
+
+
 
 void jmi_kinsol_solver_print_solve_end(jmi_block_residual_t * block, int flag) {
 	long int nniters;
@@ -964,16 +1072,139 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_residual_t * block, int flag) {
 	jmi_kinsol_solver_t* solver = block->solver;
 	KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);
 
-    jmi_log_info(block->jmi,"Non-linear solver returned for block %d - return flag: %d, number of iterations: %d", block->index, flag, nniters);
-
 	if((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log)) {
 		char* buf = block->message_buffer ;
-		sprintf(buf,"Block:;%d;Solve finished;",block->index);
+		sprintf(buf,"Block:;%d;Newton solver finished with exit flag;",block->index);
+                switch (flag)
+		{
+		case KIN_SUCCESS:
+		  sprintf(buf + strlen(buf), "KIN_SUCCESS;");
+		  break;
+		case KIN_INITIAL_GUESS_OK:
+		  sprintf(buf + strlen(buf), "KIN_INITIAL_GUESS_OK;");
+		  break;
+		case KIN_STEP_LT_STPTOL:
+		  sprintf(buf + strlen(buf), "KIN_STEP_LT_STPTOL;");
+		  break;
+		case KIN_WARNING:
+		  sprintf(buf + strlen(buf), "KIN_WARNING;");
+		  break;
+		case KIN_MEM_NULL:
+		  sprintf(buf + strlen(buf), "KIN_MEM_NULL;");
+		  break;
+		case KIN_ILL_INPUT:
+		  sprintf(buf + strlen(buf), "KIN_ILL_INPUT;");
+		  break;
+		case KIN_NO_MALLOC:
+		  sprintf(buf + strlen(buf), "KIN_NO_MALLOC;");
+		  break;
+		case KIN_MEM_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_MEM_FAIL;");
+		  break;
+		case KIN_LINESEARCH_NONCONV:
+		  sprintf(buf + strlen(buf), "KIN_LINESEARCH_NONCONV;");
+		  break;
+		case KIN_MAXITER_REACHED:
+		  sprintf(buf + strlen(buf), "KIN_MAXITER_REACHED;");
+		  break;
+		case KIN_MXNEWT_5X_EXCEEDED:
+		  sprintf(buf + strlen(buf), "KIN_MXNEWT_5X_EXCEEDED;");
+		  break;
+		case KIN_LINESEARCH_BCFAIL:
+		  sprintf(buf + strlen(buf), "KIN_LINESEARCH_BCFAIL;");
+		  break;
+		case KIN_LINSOLV_NO_RECOVERY:
+		  sprintf(buf + strlen(buf), "KIN_LINSOLV_NO_RECOVERY;");
+		  break;
+		case KIN_LINIT_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_LINIT_FAIL;");
+		  break;
+		case KIN_LSETUP_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_LSETUP_FAIL;");
+		  break;
+		case KIN_LSOLVE_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_LSOLVE_FAIL;");
+		  break;
+		case KIN_SYSFUNC_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_SYSFUNC_FAIL;");
+		  break;
+		case KIN_FIRST_SYSFUNC_ERR:
+		  sprintf(buf + strlen(buf), "KIN_FIRST_SYSFUNC_ERR;");
+		  break;
+		default:
+		  sprintf(buf + strlen(buf), "Unknown return flag from Kinsol: %d;",flag);
+                }
 		j = strlen(buf);
 		buf[j]=0;
 		fprintf(block->jmi->options.debug_log, "%s\n",buf);
 		fflush(block->jmi->options.debug_log);
 	}
+
+	if((block->jmi->options.log_level >= 5)) {
+		char* buf = block->message_buffer ;
+		sprintf(buf,"[NLE_ITERS]Block:;%d;Newton solver finished with exit flag;",block->index);
+                switch (flag)
+		{
+		case KIN_SUCCESS:
+		  sprintf(buf + strlen(buf), "KIN_SUCCESS;");
+		  break;
+		case KIN_INITIAL_GUESS_OK:
+		  sprintf(buf + strlen(buf), "KIN_INITIAL_GUESS_OK;");
+		  break;
+		case KIN_STEP_LT_STPTOL:
+		  sprintf(buf + strlen(buf), "KIN_STEP_LT_STPTOL;");
+		  break;
+		case KIN_WARNING:
+		  sprintf(buf + strlen(buf), "KIN_WARNING;");
+		  break;
+		case KIN_MEM_NULL:
+		  sprintf(buf + strlen(buf), "KIN_MEM_NULL;");
+		  break;
+		case KIN_ILL_INPUT:
+		  sprintf(buf + strlen(buf), "KIN_ILL_INPUT;");
+		  break;
+		case KIN_NO_MALLOC:
+		  sprintf(buf + strlen(buf), "KIN_NO_MALLOC;");
+		  break;
+		case KIN_MEM_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_MEM_FAIL;");
+		  break;
+		case KIN_LINESEARCH_NONCONV:
+		  sprintf(buf + strlen(buf), "KIN_LINESEARCH_NONCONV;");
+		  break;
+		case KIN_MAXITER_REACHED:
+		  sprintf(buf + strlen(buf), "KIN_MAXITER_REACHED;");
+		  break;
+		case KIN_MXNEWT_5X_EXCEEDED:
+		  sprintf(buf + strlen(buf), "KIN_MXNEWT_5X_EXCEEDED;");
+		  break;
+		case KIN_LINESEARCH_BCFAIL:
+		  sprintf(buf + strlen(buf), "KIN_LINESEARCH_BCFAIL;");
+		  break;
+		case KIN_LINSOLV_NO_RECOVERY:
+		  sprintf(buf + strlen(buf), "KIN_LINSOLV_NO_RECOVERY;");
+		  break;
+		case KIN_LINIT_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_LINIT_FAIL;");
+		  break;
+		case KIN_LSETUP_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_LSETUP_FAIL;");
+		  break;
+		case KIN_LSOLVE_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_LSOLVE_FAIL;");
+		  break;
+		case KIN_SYSFUNC_FAIL:
+		  sprintf(buf + strlen(buf), "KIN_SYSFUNC_FAIL;");
+		  break;
+		case KIN_FIRST_SYSFUNC_ERR:
+		  sprintf(buf + strlen(buf), "KIN_FIRST_SYSFUNC_ERR;");
+		  break;
+		default:
+		  sprintf(buf + strlen(buf), "Unknown return flag from Kinsol: %d;",flag);
+                }
+		jmi_log(block->jmi, logInfo, buf);
+	}
+
 }
 
 
@@ -1016,12 +1247,18 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     if(flag != KIN_SUCCESS) {
     	if(flag == KIN_INITIAL_GUESS_OK) {
             flag = KIN_SUCCESS;
-        } else {
-            realtype fnorm;
+        } /* If the evaluation of the residuals fails, e.g. due to NaN in the residuals, the Kinsol exits, but the old fnorm
+    	     from a previous solve, possibly converged, is still stored. In such cases Kinsol reports success based on a fnorm
+    	     value from a previous solve - if the previous solve was converged, then also a following faulty solve will be reproted
+    	     as a success. Commenting out this code since it causes problems.*/
+    	else if (flag == KIN_LINESEARCH_NONCONV) {
+    	    realtype fnorm;
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm < solver->kin_stol) {
                 flag = KIN_SUCCESS;
+                /*jmi_log_warning(block->jmi, "Kinsol returned with the flag KIN_LINESEARCH_NONCONV but the residuals are converged in block %d, continuing", block->index);*/
             }
+
         }
     }
     /* TODO: Is Brent called even if Kinsol succeeded? Shouldn't this be in an else if?*/
@@ -1058,10 +1295,11 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
         jmi_kinsol_solver_print_solve_end(block,flag);
         if(flag == KIN_INITIAL_GUESS_OK) {
         	flag = KIN_SUCCESS;
-        } else if(flag != KIN_SUCCESS) {
+        } else if (flag == KIN_LINESEARCH_NONCONV) {
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm <= solver->kin_stol) {
                 flag = KIN_SUCCESS;
+                /*jmi_log_warning(block->jmi, "Kinsol returned with the flag KIN_LINESEARCH_NONCONV but the residuals are converged in block %d, continuing", block->index);*/
             }
         }
         if(flag != KIN_SUCCESS) {

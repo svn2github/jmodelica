@@ -9443,7 +9443,7 @@ model TestExternalObj3
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 9293, column 24:
-  The function NoConstructor.constructor() is undeclared
+  Cannot find function declaration for NoConstructor.constructor()
 ")})));
 end TestExternalObj3;
 
@@ -9468,7 +9468,7 @@ model TestExternalObj4
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 9316, column 21:
-  The function NoDestructor.destructor() is undeclared
+  Cannot find function declaration for NoDestructor.destructor()
 ")})));
 end TestExternalObj4;
 

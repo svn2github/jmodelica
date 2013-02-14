@@ -36,5 +36,36 @@ equation
    der(w) = -w;
 end EventStartIter;
 
+model EventInfiniteIteration1
+    Real x;
+    Real y;
+equation
+    x = if y >= 1 then 1 else 0;
+    y = if x >= 1 then 0 else 1;
+end EventInfiniteIteration1;
+
+model EventInfiniteIteration2
+    Real x;
+    Real y;
+    Real z;
+initial equation
+    x = if y >= 1 then 1 else 0;
+    y = if x >= 1 then 0 else 1;
+equation
+    der(x) = -1;
+    der(y) = -1;
+    der(z) = -1;
+end EventInfiniteIteration2;
+
+model EventInfiniteIteration3
+    Real x;
+    Real y;
+    Real z(start=1);
+equation
+    der(z) = -1;
+    x = if (y >= 1 and time > 0.5) then 1 else 0;
+    y = if x >= 1 then 0 else 1;
+end EventInfiniteIteration3;
+
 end EventIter;
 

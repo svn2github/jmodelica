@@ -701,7 +701,7 @@ public class CGenerator extends GenericGenerator {
 				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");						
 				fclass.getDAEStructuredBLT().genOdeDerivativeBlocks(genPrinter);
 			} else if (fclass.root().options.getBooleanOption("generate_only_initial_system") && fclass.root().options.getBooleanOption("generate_ode")) {
-				genPrinter.print("  model_ode_initialize(jmi);\n");
+				genPrinter.print("  ef = model_ode_initialize(jmi);\n");
 			}
 		}
 	}

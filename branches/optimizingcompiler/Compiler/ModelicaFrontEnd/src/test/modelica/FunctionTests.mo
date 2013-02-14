@@ -1013,10 +1013,10 @@ model BadFunctionCall1
 2 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  The function NonExistingFunction() is undeclared
+  Cannot find function declaration for NonExistingFunction()
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  The function NonExistingFunction() is undeclared
+  Cannot find function declaration for NonExistingFunction()
 ")})));
 end BadFunctionCall1;
 
@@ -1033,10 +1033,10 @@ model BadFunctionCall2
 2 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  The function notAFunction() is undeclared
+  Cannot find function declaration for notAFunction()
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  The function notAFunction() is undeclared
+  Cannot find function declaration for notAFunction()
 ")})));
 end BadFunctionCall2;
 

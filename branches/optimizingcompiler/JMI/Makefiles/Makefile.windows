@@ -119,10 +119,10 @@ RM = del
 JMI_AD=JMI_AD_CPPAD
 
 # C++ Compiler options
-CXXFLAGS = -g -O2 -DJMI_AD=${JMI_AD}
+CXXFLAGS = -g -DJMI_AD=${JMI_AD}
 
 # C Compiler options
-CFLAGS = -g -O2 -std=c89 -pedantic -DJMI_AD=$(JMI_AD)
+CFLAGS = -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD)
 
 SHARED_LDFLAGS = -shared 
 

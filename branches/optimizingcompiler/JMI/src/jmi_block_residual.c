@@ -78,7 +78,8 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 	b->max = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->nominal = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     b->initial = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-	b->message_buffer = (char*)calloc(n*20+200,sizeof(char));
+    b->value_references = (jmi_int_t*)calloc(n,sizeof(jmi_int_t));
+	b->message_buffer = (char*)calloc(n*500+2000,sizeof(char));
 
     switch(solver) {
     case JMI_KINSOL_SOLVER: {
@@ -139,6 +140,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
     
     if(block->init) {
         int i;
+        jmi_real_t* real_vrs = (jmi_real_t*)calloc(block->n,sizeof(jmi_real_t));
         /* Initialize the work vectors */
         for(i=0; i < block->n; ++i) {
             block->nominal[i] = BIG_REAL;
@@ -149,6 +151,12 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         block->F(jmi,block->min,block->res,JMI_BLOCK_MIN);
         block->F(jmi,block->max,block->res,JMI_BLOCK_MAX);
         block->F(jmi,block->initial,block->res,JMI_BLOCK_INITIALIZE);
+        block->F(jmi,real_vrs,block->res,JMI_BLOCK_VALUE_REFERENCE);
+
+        for (i=0;i<block->n;i++) {
+        	block->value_references[i] = (int)real_vrs[i];
+        }
+
         /* if the nominal is outside min-max -> fix it! */
         for(i=0; i < block->n; ++i) {
             realtype maxi = block->max[i];

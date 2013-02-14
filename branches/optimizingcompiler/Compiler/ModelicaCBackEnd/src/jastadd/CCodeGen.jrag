@@ -1543,7 +1543,23 @@ aspect CCodeGen {
 			} 
 			var_counter++;
 		}
-
+		
+		// Variable value references
+		var_counter = 0;
+		str.print("  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {\n");
+		String ifIndent = ASTNode.printer_C.indent(indent);
+		for (FVariable var: blockResidualVariables_C()) {
+			if (var.valueReference() != -1) {
+				str.print(ifIndent);
+				str.print("x[");
+				str.print(var_counter);
+				str.print("] = ");
+				str.print(var.valueReference());
+				str.println(";");
+			}
+			var_counter++;
+		}
+		
 		// Equation nominal values
 		str.print("  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {\n");
 		genBlockResidualFunctionEqnNominals_C(new Enumerator(), ASTNode.printer_C.indent(indent), str);
@@ -2202,23 +2218,6 @@ aspect CCodeGen {
 		str.print(");\n");
 	}	
 
-	/*
-	public void FGtExp.genResidual_C(Enumerator enumerator, String indent, PrintStream str) {
-		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
-		getLeft().prettyPrint_C(str,"");
-		str.print(" - (");
-		getRight().prettyPrint_C(str,"");
-		str.print(");\n");
-	}	
-
-	public void FGeqExp.genResidual_C(Enumerator enumerator, String indent, PrintStream str) {
-		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
-		getLeft().prettyPrint_C(str,"");
-		str.print(" - (");
-		getRight().prettyPrint_C(str,"");
-		str.print(");\n");
-	}	
-	*/
 	public void FRealVariable.genStartAttributeResidual_C(Enumerator enumerator, String indent, PrintStream str) {
 		if (!(this instanceof FDerivativeVariable)) {
 			str.print(indent + "(*res)[" + enumerator.next() + "] = ");

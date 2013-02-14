@@ -293,9 +293,17 @@ public class XMLGenerator extends GenericGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
-//				genPrinter.print("<DefaultExperiment>");
-//				genPrinter.print("\n\t\t TODO (optional element)");
-//				genPrinter.print("\n\t </DefaultExperiment>");
+			FClass.Experiment e = fclass.experiment;
+			if (e != null) {
+				genPrinter.print("<DefaultExperiment");
+				if (e.hasStart)
+					genPrinter.format(" startTime=\"%s\"", Double.toString(e.start));
+				if (e.hasStop)
+					genPrinter.format(" stopTime=\"%s\"", Double.toString(e.stop));
+				if (e.hasTolerance)
+					genPrinter.format(" tolerance=\"%s\"", Double.toString(e.tolerance));
+				genPrinter.print(" />\n");
+			}
 		}
 	}
 
