@@ -14,28 +14,38 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-aspect ConstantPropagation {
-	
-	// TODO: from id use get a fvariables binding exp 
-	syn FExp FAbstractVariable.CPROP_getBindingExp() = null;
-	eq FVariable.CPROP_getBindingExp() = getBindingExp();
+
+aspect VariabilityPropagation {
+
+	// TODO: move
+	syn boolean FTypePrefixVariability.lessThan(FTypePrefixVariability other) =
+			variabilityLevel() < other.variabilityLevel();
 	//
-	syn boolean ASTNode.isIfWhen() = false;
-	eq FIfWhenElseEquation.isIfWhen() = true;
-	//
-	
-	public boolean ASTNode.constantPropagation = false;
+
 	public boolean FAbstractEquation.taggedForRemoval = false;
+	public boolean FAbstractEquation.variabilityPropagationEnabled = false;
 	
-	public void FClass.constantPropagationIfSet() {
+	public void FAbstractEquation.enableVariabilityPropagation() {}
+	public void FEquation.enableVariabilityPropagation() { variabilityPropagationEnabled = true; }
+	public void FIfWhenElseEquation.enableVariabilityPropagation() { variabilityPropagationEnabled = true; }
+	public void FWhenEquation.enableVariabilityPropagation() { }
+	
+	public void FClass.variabilityPropagationIfSet() {
 		if (root().options.getBooleanOption("constant_propagation")) {
 			
+			enableConstantFolding();
+		
 			LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>(equations());
 			List<FAbstractEquation> parameterEquations = getFParameterEquations();
+			for (FAbstractEquation equation: worklist) {
+				equation.enableVariabilityPropagation();
+			}
 
 			while(!worklist.isEmpty()) {
 				FAbstractEquation equation = worklist.iterator().next();
-				equation.constantPropagation(worklist,parameterEquations);
+				if (equation.variabilityPropagationEnabled) {
+					equation.variabilityPropagation(worklist,parameterEquations);					
+				}
 				worklist.remove(equation);
 			}
 			
@@ -45,6 +55,8 @@ aspect ConstantPropagation {
 					if (block.getFAbstractEquations().getChild(i).taggedForRemoval) {
 						block.getFAbstractEquations().removeChild(i);
 						i--;
+					} else {
+						block.getFAbstractEquations().getChild(i).cleanEquations();
 					}
 				}
 			}
@@ -52,128 +64,188 @@ aspect ConstantPropagation {
 			flushAllRecursive();
 		}
 	}
+	
+	public void FAbstractEquation.cleanEquations() {}
+	public void FIfWhenElseEquation.cleanEquations() {
+		for (int i = 0; i < getNumFAbstractEquation(); i++) {
+			if (getFAbstractEquations().getChild(i).taggedForRemoval) {
+				getFAbstractEquations().removeChild(i);
+				i--;
+			}
+		}
+	}
+	public void FIfWhenEquation.cleanEquations() {
+		super.cleanEquations();
+		if (hasElse()) {
+			getElse().cleanEquations();			
+		}
+	}
 
 	
-	public void FAbstractEquation.constantPropagation(
+	public void FAbstractEquation.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
 			List<FAbstractEquation> parameterEquations) {
 		
 	}
 	
-	public void FEquation.constantPropagation(
+	public void FEquation.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
 			List<FAbstractEquation> parameterEquations) {
 		
-		getLeft().simplify();
-		getRight().simplify();
+		tryPropagate(getLeft(),getRight(),worklist,parameterEquations);
+		tryPropagate(getRight(),getLeft(),worklist,parameterEquations);
+	}
+	
+	public void FEquation.tryPropagate(
+			FExp toExp, FExp fromExp,
+			LinkedHashSet<FAbstractEquation> worklist,
+			List<FAbstractEquation> parameterEquations) {
 		
-		
-		if (getParent().getParent().isIfWhen())
-			return;
-		
-		FTypePrefixVariability leftVariability = getLeft().variability();
-		FTypePrefixVariability rightVariability = getRight().variability();
-				
-		if (!leftVariability.lessOrEqual(rightVariability) &&
-			getLeft().constantPropagationGoDown(worklist, getRight())) {
-			if (rightVariability.parameterOrLess()) {
+		if (fromExp.variability().lessThan(toExp.variability()) &&
+			toExp.variabilityPropagationGoDown(worklist,fromExp)) {
+			if (fromExp.variability().parameterOrLess()) {
 				taggedForRemoval = true;
 			}
-			if (rightVariability.parameterVariability()) {
-				parameterEquations.add(new FEquation(getLeft(),getRight()));		
+			if (fromExp.variability().parameterVariability()) {
+				parameterEquations.add(new FEquation(toExp,fromExp));
 			}
 		}
-			
-		if (!rightVariability.lessOrEqual(leftVariability) &&
-			getRight().constantPropagationGoDown(worklist, getLeft())) {
-			if (leftVariability.parameterOrLess()) {
-				taggedForRemoval = true;
-			}
-			if (leftVariability.parameterVariability()) {
-				parameterEquations.add(new FEquation(getRight(),getLeft()));
+	}
+	
+	public void FIfEquation.variabilityPropagation(
+			LinkedHashSet<FAbstractEquation> worklist,
+			List<FAbstractEquation> parameterEquations) {
+		
+		if (getTest().isConstantExp() && !getTest().ceval().isUnknown()) {
+			if (getTest().ceval().booleanValue()) {
+				for (FAbstractEquation equation: getFAbstractEquations()) {
+					equation.enableVariabilityPropagation();
+					worklist.add(equation);
+				}
+			} else if (hasElse()) {
+				getElse().enableVariabilityPropagation();
+				worklist.add(getElse());
 			}
 		}
-		
 	}
 	
-	
-	
-	public void FExp.simplify() {
-		constantPropagation = true;
-		is$Final = false;
-
-		for (FExp fe: this.childFExps())
-			fe.simplify();
-		
-	}
-	
-	
-	public boolean FExp.constantPropagationGoDown(
+	public void FElseEquation.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
-			FExp exp) {
-
-		return false;
-	}
-	public boolean FIdUseExp.constantPropagationGoDown(
-			LinkedHashSet<FAbstractEquation> worklist,
-			FExp exp) {
+			List<FAbstractEquation> parameterEquations) {
 		
-		return myFV().constantPropagationGoDown(worklist, exp);
+		for (FAbstractEquation equation: getFAbstractEquations()) {
+			equation.enableVariabilityPropagation();
+			worklist.add(equation);
+		}
 	}
-	public boolean FAbstractVariable.constantPropagationGoDown(
+	
+	
+	public boolean FExp.variabilityPropagationGoDown(
 			LinkedHashSet<FAbstractEquation> worklist,
 			FExp exp) {
 		
 		return false;
 	}
-	public boolean FVariable.constantPropagationGoDown(
+	public boolean FIdUseExp.variabilityPropagationGoDown(
 			LinkedHashSet<FAbstractEquation> worklist,
 			FExp exp) {
+		
+		return myFV().variabilityPropagationGoDown(worklist, exp);
+	}
+	public boolean FAbstractVariable.variabilityPropagationGoDown(
+			LinkedHashSet<FAbstractEquation> worklist,
+			FExp exp) {
+		
+		return false;
+	}
+	public boolean FVariable.variabilityPropagationGoDown(
+			LinkedHashSet<FAbstractEquation> worklist,
+			FExp exp) {
+		
+		if (exp.isConstantExp()) {
+			try { // TODO: this should not give exception
+				if (exp.ceval().isUnknown()) {
+					return false;
+				}				
+			} catch (ConstantEvaluationException e) { 
+				return false;
+			}
+			setBindingExp(exp.ceval().buildLiteral());	
+		}
 		
 		setFTypePrefixVariability(exp.variability());
 		
 		for (FIdUseExp use: uses()) {
+			use.variability_computed = false;
 			use.is$Final = false;
-			use.getParent().constantPropagationGoUp(worklist);
+			use.getParent().variabilityPropagationGoUp(worklist);
 		} 
-		
-		if (exp.isConstantExp()) {
-			setBindingExp(exp);	
-		}
-		
+
 		return true;
 		
 	}
 	
 	
-	// TODO: use inh instead of getParent
-	public void ASTNode.constantPropagationGoUp(
+	public void ASTNode.variabilityPropagationGoUp(
 			LinkedHashSet<FAbstractEquation> worklist) {
 		
 	}
-	public void FExp.constantPropagationGoUp(
+	public void FExp.variabilityPropagationGoUp(
 			LinkedHashSet<FAbstractEquation> worklist) {
 		
 		flushAll();
-		getParent().constantPropagationGoUp(worklist);
+		is$Final = false;
+		getParent().variabilityPropagationGoUp(worklist);
 	}
-	public void FEquation.constantPropagationGoUp(
+	public void FAbstractEquation.variabilityPropagationGoUp(
 			LinkedHashSet<FAbstractEquation> worklist) {
 		
 		flushAll();
 		worklist.add(this);
 	}
-	
-	
-	rewrite FIdUseExp {
-		when (constantPropagation && myFV().isConstant()) to FExp {
-			return myFV().CPROP_getBindingExp().ceval().buildLiteral();
-		}
+}
+
+
+
+aspect ConstantFolding {
+	public boolean FExp.constantFoldingEnabled = false;
+	syn boolean FExp.constantFolding() = constantFoldingEnabled && isConstantExp() && !ceval().isUnknown();		
+		
+	public void FClass.enableConstantFolding() {
+		super.enableConstantFolding();
 	}
-	rewrite FBinExp {
-		when (constantPropagation && isConstantExp()) to FExp {
+	
+	public void ASTNode.enableConstantFolding() {
+		for (ASTNode n: this)
+			n.enableConstantFolding();
+	}
+
+	public void FFunctionDecl.enableConstantFolding() {} /* Gives exceptions during function ceval */
+	
+	public void FExp.enableConstantFolding() {
+		constantFoldingEnabled = true;
+		is$Final = false;
+		super.enableConstantFolding();
+	}
+
+	rewrite FIdUseExp {
+		when (constantFolding()) to FExp {
 			return ceval().buildLiteral();
 		}
 	}
-
+	rewrite FUnaryExp {
+		when (constantFolding()) to FExp {
+			return ceval().buildLiteral();
+		}
+	}
+	rewrite FBinExp {
+		when (constantFolding()) to FExp {
+			return ceval().buildLiteral();
+		}
+	}
+	rewrite FIfExp {
+		when (constantFolding()) to FExp {
+			return ceval().buildLiteral();
+		}
+	}	
 }

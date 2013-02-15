@@ -79,7 +79,7 @@ aspect TransformCanonical {
 		scalarize();
 		propagateResidualPairs();
 		genInitArrayStatements();
-		constantPropagationIfSet();
+		variabilityPropagationIfSet();
         enableIfEquationElimination();
 		functionInliningIfSet();
 		aliasEliminationIfSet();

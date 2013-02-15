@@ -42,7 +42,7 @@ fclass ConstantPropagationTests.VariabilityInference
  parameter Real r2;
 parameter equation
  r1 = p1;
- r2 = p1 + 1;
+ r2 = p1 + 1.0;
 end ConstantPropagationTests.VariabilityInference;
 ")})));
 end VariabilityInference;
@@ -71,7 +71,7 @@ model ConstantSubstitution
 	Real x1,x2,x3,x4;
 equation
 	x1 = 1;
-	x2 = x3;
+	x2 = x3 + x1;
 	x3 = x1;
 	x4 = x2;
 	annotation(__JModelica(UnitTesting(tests={
@@ -82,9 +82,9 @@ equation
 			flatModel="
 fclass ConstantPropagationTests.ConstantSubstitution
  constant Real x1 = 1;
- constant Real x2 = 1;
- constant Real x3 = 1;
- constant Real x4 = 1;
+ constant Real x2 = 2.0;
+ constant Real x3 = 1.0;
+ constant Real x4 = 2.0;
 end ConstantPropagationTests.ConstantSubstitution;
 ")})));
 end ConstantSubstitution;
@@ -94,7 +94,7 @@ model WhenEq1
 	Real x1,x2;
 equation
 	when p1 > 3 then
-		x1 = x2;
+		x1 = x2 + 1;
 	end when;
 	x2 = 3;
 	annotation(__JModelica(UnitTesting(tests={
@@ -104,14 +104,14 @@ equation
 			constant_propagation=true,
 			flatModel="
 fclass ConstantPropagationTests.WhenEq1
- parameter Real p1 = 4;
+ parameter Real p1 = 4 /* 4 */;
  discrete Real x1;
  constant Real x2 = 3;
 initial equation
  pre(x1) = 0.0;
 equation
  when p1 > 3 then
-  x1 = 3;
+  x1 = 4.0;
  end when;
 end ConstantPropagationTests.WhenEq1;
 ")})));
@@ -137,7 +137,7 @@ initial equation
  pre(x1) = 0.0;
 equation
  when false then
-  x1 = 4;
+  x1 = 4.0;
  end when;
 end ConstantPropagationTests.WhenEq2;
 ")})));
@@ -164,8 +164,8 @@ fclass ConstantPropagationTests.WhenEq3
 initial equation
  pre(x1) = 0.0;
 equation
- when 3 <= 4.0 then
-  x1 = 4;
+ when true then
+  x1 = 4.0;
  end when;
 end ConstantPropagationTests.WhenEq3;
 ")})));
@@ -191,13 +191,127 @@ equation
 			flatModel="
 fclass ConstantPropagationTests.IfEq1
  constant Real p1 = 4;
- Real x1;
+ constant Real x1 = 3.0;
  constant Real x2 = 3;
-equation
- x1 = 3;
 end ConstantPropagationTests.IfEq1;
 ")})));
 end IfEq1;
 
+model IfEq2
+	constant Real c1 = 4;
+	parameter Real p1 = 1;
+	Real x1,x2,x3;
+equation
+	if (x3 < c1) then
+		x1 = 1;
+		x2 = p1 + 1;
+	else
+		x1 = 2;
+		x2 = 3;
+	end if;
+	x3 = 3;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEq2",
+			description="",
+			constant_propagation=true,
+			flatModel="
+fclass ConstantPropagationTests.IfEq2
+ constant Real c1 = 4;
+ parameter Real p1 = 1 /* 1 */;
+ constant Real x1 = 1;
+ parameter Real x2;
+ constant Real x3 = 3;
+parameter equation
+ x2 = p1 + 1;
+end ConstantPropagationTests.IfEq2;
+")})));
+end IfEq2;
+
+model IfEq3
+	constant Real c1 = 4;
+	parameter Real p1 = 1;
+	Real x1,x2;
+equation
+	if false then
+		x1 = 1;
+		x2 = p1;
+	else
+		x1 = p1;
+		x2 = 3;
+	end if;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEq3",
+			description="",
+			constant_propagation=true,
+			flatModel="
+fclass ConstantPropagationTests.IfEq3
+ constant Real c1 = 4;
+ parameter Real p1 = 1 /* 1 */;
+ parameter Real x1;
+ constant Real x2 = 3;
+parameter equation
+ x1 = p1;
+end ConstantPropagationTests.IfEq3;
+")})));
+end IfEq3;
+
+model IfEq4
+	constant Real c1 = 4;
+	parameter Real p1 = 1;
+	Real x1,x2,x3,x4;
+equation
+	x3 = 3;
+	if (x3 > c1) then
+		x1 = 1;
+		x2 = p1 + 1;
+	elseif (x4 < c1) then
+		x1 = 2;
+		x2 = p1 + 2;
+	else
+		x1 = 3;
+		x2 = 4;
+	end if;
+	x4 = 3;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEq4",
+			description="",
+			constant_propagation=true,
+			flatModel="
+fclass ConstantPropagationTests.IfEq4
+ constant Real c1 = 4;
+ parameter Real p1 = 1 /* 1 */;
+ constant Real x1 = 2;
+ parameter Real x2;
+ constant Real x3 = 3;
+ constant Real x4 = 3;
+parameter equation
+ x2 = p1 + 2;
+end ConstantPropagationTests.IfEq4;
+")})));
+end IfEq4;
+
+model Func1
+	Real c_out;
+    function f
+        output Real c;
+    algorithm
+    	c := 1;
+    end f;
+equation
+    c_out = f();
+    annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Func1",
+			description="",
+			constant_propagation=true,
+			flatModel="
+fclass ConstantPropagationTests.Func1
+ constant Real c_out = 1;
+end ConstantPropagationTests.Func1;
+")})));
+end Func1;
 
 end ConstantPropagationTests;
