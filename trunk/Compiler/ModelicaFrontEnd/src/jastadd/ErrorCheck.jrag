@@ -1020,6 +1020,11 @@ aspect InstanceErrorCheck {
 	    		// TODO: add check if function is partial?
 	    		error("Calling function " + getName().name() + 
 	    				"(): can only call functions that have one algorithm section or external function specification");
+			} else if ((root().options.getBooleanOption("generate_block_jacobian") ||
+				        root().options.getBooleanOption("generate_dae_jacobian")) &&
+				        func.numInstExternal() == 1 &&
+				        !func.derivativeAnnotation(func.findFunctionExternal()).exists()) {
+				error("No derivative annotation is specified for external function " + getName().name());
 	    	} else {
 	    		// Function exists, check everything
 	    		super.collectErrors();

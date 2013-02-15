@@ -251,6 +251,7 @@ equation
 		TransformCanonicalTestCase(
 			name="TransformCanonicalTest8",
 			description="Test that derivative functions are included in the flattened model if Jacobians are to be generated.",
+			generate_block_jacobian=true,
 			generate_ode_jacobian=true,
 			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest8
@@ -9664,7 +9665,6 @@ Semantic error at line 9480, column 2:
   Constructors and destructors for ExternalObjects can not be used directly
 ")})));
 end TestExternalObj10;
-	
 
 model TestRuntimeOptions1
 	Real x = 1;

@@ -6274,6 +6274,28 @@ model ExternalFuncLibs8
  )})));
 end ExternalFuncLibs8;
 
+model ExternalFuncError1
+	function f
+		output Real y;
+		external;
+	end f;
+	Real x;
+equation
+	x = f(x);
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExternalFuncError1",
+			description="",
+			generate_block_jacobian=true,
+			errorMessage="
+ 1 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 38, column 6:
+  No derivative annotation is specified for external function f
+")})));
+end ExternalFuncError1;
+
 
 
 model ExtendFunc1

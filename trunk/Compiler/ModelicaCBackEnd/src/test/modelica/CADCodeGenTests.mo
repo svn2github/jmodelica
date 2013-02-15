@@ -2124,6 +2124,7 @@ model CADDerAnno2
 			name="CADDerAnno2",
 			description="",
 			generate_ode_jacobian=true,
+			generate_block_jacobian=true,
 			template="$CAD_function_headers$,$CAD_functions$,$C_functions$",
 			generatedCode="
 void func_CADCodeGenTests_CADDerAnno2_f_der_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t i1_v, jmi_ad_var_t b1_v, jmi_ad_var_t der_x1_var_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t der_x1_der_v, jmi_ad_var_t* der_y1_var_o, jmi_ad_var_t* der_y1_der_o);

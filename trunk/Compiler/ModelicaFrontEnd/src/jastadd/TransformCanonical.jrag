@@ -5644,10 +5644,10 @@ aspect FunctionInlining {
 	public void FFunctionDecl.markUsedFunctions() {
 		if (!functionUsed) {
 			functionUsed = true;
-			if (hasFDerivativeFunction() && 
-			    (root().options.getBooleanOption("generate_ode_jacobian") || 
-			     root().options.getBooleanOption("generate_dae_jacobian"))) {
-				  getFDerivativeFunction().myFFunctionDecl().markUsedFunctions();	
+			if (hasFDerivativeFunction() &&
+			   (root().options.getBooleanOption("generate_block_jacobian") ||
+			    root().options.getBooleanOption("generate_dae_jacobian"))) {
+				getFDerivativeFunction().myFFunctionDecl().markUsedFunctions();
 			}
 			super.markUsedFunctions();
 		}

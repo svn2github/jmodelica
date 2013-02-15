@@ -223,10 +223,15 @@ aspect Flattening {
 	    return new FFunctionDecl();
 	}
 	
-	private FDerivativeFunction InstBaseClassDecl.createFDerivativeFunction(FClass fc, InstExternal ie) {
+	public AnnotationNode InstClassDecl.derivativeAnnotation(InstExternal ie) {
 		AnnotationNode functionDer = annotation("derivative");
 		if (!functionDer.exists() && ie != null) 
 			functionDer = ie.annotation("derivative");
+		return functionDer;
+	}
+	
+	private FDerivativeFunction InstBaseClassDecl.createFDerivativeFunction(FClass fc, InstExternal ie) {
+		AnnotationNode functionDer = derivativeAnnotation(ie);
 		
 		if (functionDer.exists()) {
 			String functionDerName = functionDer.string();
