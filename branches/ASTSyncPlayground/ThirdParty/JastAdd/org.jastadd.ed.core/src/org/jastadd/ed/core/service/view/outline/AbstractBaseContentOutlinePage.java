@@ -1,4 +1,4 @@
-package org.jastadd.plugin.ui.view;
+package org.jastadd.ed.core.service.view.outline;
 
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -10,8 +10,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
-import org.jastadd.plugin.compiler.ast.IASTNode;
-import org.jastadd.plugin.compiler.ast.IJastAddNode;
+import org.jastadd.ed.core.model.node.IASTNode;
+import org.jastadd.ed.core.model.node.IJastAddNode;
+import org.jastadd.ed.core.service.view.JastAddContentProvider;
+import org.jastadd.ed.core.service.view.JastAddLabelProvider;
 
 public abstract class AbstractBaseContentOutlinePage extends ContentOutlinePage {
 	
