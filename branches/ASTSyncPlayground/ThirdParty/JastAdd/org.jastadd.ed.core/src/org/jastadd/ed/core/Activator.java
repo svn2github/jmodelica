@@ -18,6 +18,7 @@ public class Activator extends AbstractUIPlugin {
 	 * The constructor
 	 */
 	public Activator() {
+		System.out.println("org.jastadd.ed.core ACTIVATOR");
 	}
 
 	/*

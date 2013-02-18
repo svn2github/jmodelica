@@ -25,11 +25,12 @@ public abstract class Builder extends IncrementalProjectBuilder {
 
 	private final IGlobalRootRegistry fRegistry;
 	private final ICompiler fCompiler;
-
+	//public static final String BUILDER_ID = "org.jastadd.core.ed.Builder";
 	public Builder() {
 		super();
 		fRegistry = createRegistry();
 		fCompiler = createCompiler();
+		System.out.println("BUILDER jastadd.ed.core");
 	}
 
 	protected abstract IGlobalRootRegistry createRegistry();
@@ -39,6 +40,7 @@ public abstract class Builder extends IncrementalProjectBuilder {
 	@Override
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 	throws CoreException {
+		System.out.println("BUILDER build(int kind, Map args, IProgressMonitor monitor)");
 		switch (kind) {
 		case IncrementalProjectBuilder.AUTO_BUILD :
 			autoBuild(args, monitor);
@@ -58,6 +60,7 @@ public abstract class Builder extends IncrementalProjectBuilder {
 	}
 
 	private void incrementalBuild(Map args, IProgressMonitor monitor) {
+		System.out.println("BUILDER incrementalBuild(Map args, IProgressMonitor monitor)");
 		IResourceDelta delta = getDelta(getProject());
 		if (delta == null) {
 			// No delta available, do a full build
@@ -77,6 +80,7 @@ public abstract class Builder extends IncrementalProjectBuilder {
 	}
 
 	private void fullBuild(Map args, IProgressMonitor monitor) {
+		System.out.println("BUILDER fullBuild(Map args, IProgressMonitor monitor)");
 		ResourceVisitor visitor = new ResourceVisitor();
 		try {
 			getProject().accept(visitor);

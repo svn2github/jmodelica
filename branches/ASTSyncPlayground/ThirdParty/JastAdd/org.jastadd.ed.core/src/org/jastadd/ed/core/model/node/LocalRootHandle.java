@@ -44,7 +44,7 @@ public class LocalRootHandle implements ILocalRootHandle {
 		this(registry);
 		setFile(file);
 	}
-	
+	/*
 	public LocalRootHandle(IGlobalRootRegistry registry, IFile file, ILocalRootNode node) {
 		this(registry);
 		fFile = file;

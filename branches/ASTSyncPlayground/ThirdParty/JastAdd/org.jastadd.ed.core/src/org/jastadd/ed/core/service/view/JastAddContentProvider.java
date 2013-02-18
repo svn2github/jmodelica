@@ -82,9 +82,9 @@ public class JastAddContentProvider implements ITreeContentProvider {
 	 */
 	public boolean hasChildren(Object element) {
 		if(element instanceof IOutlineNode) {
-			synchronized (((IASTNode)element).treeLockObject()) {
+			//synchronized (((IASTNode)element).treeLockObject()) { TODO need sync fix?
 				return !((IOutlineNode)element).outlineChildren().isEmpty();
-			}
+			//}
 		}
 		/*
 			else if(element instanceof IFile) {

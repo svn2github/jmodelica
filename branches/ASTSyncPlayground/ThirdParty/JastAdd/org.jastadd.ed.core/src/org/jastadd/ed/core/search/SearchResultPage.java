@@ -12,14 +12,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.jastadd.ed.core.model.node.IASTNode;
 import org.jastadd.ed.core.model.node.ITextViewNode;
 import org.jastadd.ed.core.service.view.ITreeNode;
-import org.jastadd.ed.core.service.view.TreeViewContentProvider;
-import org.jastadd.ed.core.service.view.TreeViewLabelProvider;
+import org.jastadd.ed.core.service.view.JastAddContentProvider;
+import org.jastadd.ed.core.service.view.JastAddLabelProvider;
 import org.jastadd.ed.core.util.EditorUtil;
 
 public class SearchResultPage extends AbstractTextSearchViewPage implements ISearchResultPage {
 	
 	private SearchViewContentProvider fContentProvider;
-	private TreeViewLabelProvider fLabelProvider;
+	private JastAddLabelProvider fLabelProvider;
 	private IDoubleClickListener fDoubleClickListener;
 	
 	//private JastAddSearchResult fInput;
@@ -29,15 +29,15 @@ public class SearchResultPage extends AbstractTextSearchViewPage implements ISea
 	public SearchResultPage() {
 		//super(AbstractTextSearchViewPage.FLAG_LAYOUT_TREE);
 		fContentProvider = new SearchViewContentProvider();
-		fLabelProvider = new TreeViewLabelProvider();
+		fLabelProvider = new JastAddLabelProvider();
 		fDoubleClickListener = new DoubleClickListener();
 	}
 	
 	
 	@Override
 	protected void clear() {
-		if (fContentProvider != null)
-			fContentProvider.clear();
+	/*	if (fContentProvider != null)
+			fContentProvider.clear(); TODO not working? */
 	}
 
 
@@ -80,13 +80,13 @@ public class SearchResultPage extends AbstractTextSearchViewPage implements ISea
 	@Override
 	protected void elementsChanged(Object[] objects) {
 		if (fContentProvider != null) {
-			fContentProvider.elementsChanged(objects);
+			//fContentProvider.elementsChanged(objects);//TODO not working?
 			fViewer.getControl().setRedraw(true);
 		}
 	}
 
 	
-	protected class SearchViewContentProvider extends TreeViewContentProvider {
+	protected class SearchViewContentProvider extends JastAddContentProvider {
 
 		@Override
 		public Object[] getElements(Object inputElement) {

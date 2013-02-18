@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
+   <extension-point id="org.jastadd.ed.core.compilers" name="JastAdd Compiler" schema="schema/org.jastadd.ed.core.compiler.exsd"/>
 	<!-- Search -->
 	<extension point="org.eclipse.search.searchResultViewPages">
 		<viewPage
