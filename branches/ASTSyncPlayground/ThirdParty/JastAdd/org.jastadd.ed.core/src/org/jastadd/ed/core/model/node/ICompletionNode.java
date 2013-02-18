@@ -1,4 +1,4 @@
-package org.jastadd.plugin.compiler.ast;
+package org.jastadd.ed.core.model.node;
 
 import java.util.Collection;
 

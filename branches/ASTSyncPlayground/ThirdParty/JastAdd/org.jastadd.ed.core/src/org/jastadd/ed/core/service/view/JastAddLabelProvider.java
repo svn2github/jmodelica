@@ -1,8 +1,8 @@
-package org.jastadd.plugin.ui.view;
+package org.jastadd.ed.core.service.view;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.jastadd.plugin.compiler.ast.IOutlineNode;
+import org.jastadd.ed.core.model.node.IOutlineNode;
 
 public class JastAddLabelProvider extends LabelProvider {
 	

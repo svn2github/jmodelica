@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.jastadd.plugin.search;
+package org.jastadd.ed.core.search;
 
 import java.util.Collection;
 

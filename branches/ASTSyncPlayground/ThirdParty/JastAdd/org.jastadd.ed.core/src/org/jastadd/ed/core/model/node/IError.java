@@ -1,4 +1,4 @@
-package org.jastadd.plugin.compiler.ast;
+package org.jastadd.ed.core.model.node;
 
 /**
  * Error object should implement this interface to communicate errors to

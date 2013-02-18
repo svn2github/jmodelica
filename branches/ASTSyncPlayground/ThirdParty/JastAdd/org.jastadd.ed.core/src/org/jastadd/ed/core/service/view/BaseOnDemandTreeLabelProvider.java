@@ -1,11 +1,11 @@
 /**
  * 
  */
-package org.jastadd.plugin.ui.view;
+package org.jastadd.ed.core.service.view;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.jastadd.plugin.search.JastAddOnDemandTreeItem;
+import org.jastadd.ed.core.search.JastAddOnDemandTreeItem;
 
 public abstract class BaseOnDemandTreeLabelProvider<T> extends LabelProvider {
 	@SuppressWarnings("unchecked")

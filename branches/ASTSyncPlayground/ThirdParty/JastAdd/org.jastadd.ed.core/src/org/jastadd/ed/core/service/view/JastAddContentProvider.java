@@ -1,10 +1,10 @@
-package org.jastadd.plugin.ui.view;
+package org.jastadd.ed.core.service.view;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.jastadd.plugin.compiler.ast.IASTNode;
-import org.jastadd.plugin.compiler.ast.IJastAddNode;
-import org.jastadd.plugin.compiler.ast.IOutlineNode;
+import org.jastadd.ed.core.model.node.IASTNode;
+import org.jastadd.ed.core.model.node.IJastAddNode;
+import org.jastadd.ed.core.model.node.IOutlineNode;
 
 public class JastAddContentProvider implements ITreeContentProvider {
 	
