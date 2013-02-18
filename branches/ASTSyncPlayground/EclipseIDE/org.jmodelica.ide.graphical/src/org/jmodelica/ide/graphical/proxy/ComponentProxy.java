@@ -34,7 +34,7 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	protected AbstractNodeProxy getParent() {
 		return parent;
 	}
-	
+
 	@Override
 	protected String buildDiagramName() {
 		String parentName = parent.buildDiagramName();
@@ -66,29 +66,36 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 
 	@Override
 	protected InstComponentDecl getInstComponentDecl(String componentName) {
-		return getComponentDecl().syncSimpleLookupInstComponentDecl(componentName);
+		return getComponentDecl().syncSimpleLookupInstComponentDecl(
+				componentName);
 	}
 
-	public Transform calculateTransform(Transform parent) { //TODO:refactor
-		// Based on org.jmodelica.icons.drawing.AWTIconDrawer.setTransformation()
+	public Transform calculateTransform(Transform parent) { // TODO:refactor
+		// Based on
+		// org.jmodelica.icons.drawing.AWTIconDrawer.setTransformation()
 		Transformation compTransformation = getPlacement().getTransformation();
 		Extent transformationExtent = compTransformation.getExtent();
 		Extent componentExtent = getLayer().getCoordinateSystem().getExtent();
 		Transform t = parent.clone();
-		t.translate(Transform.yInverter.transform(compTransformation.getOrigin()));
-		t.translate(Transform.yInverter.transform(transformationExtent.getMiddle()));
+		t.translate(Transform.yInverter.transform(compTransformation
+				.getOrigin()));
+		t.translate(Transform.yInverter.transform(transformationExtent
+				.getMiddle()));
 
-		if (transformationExtent.getP2().getX() < transformationExtent.getP1().getX()) {
+		if (transformationExtent.getP2().getX() < transformationExtent.getP1()
+				.getX()) {
 			t.scale(-1.0, 1.0);
 		}
-		if (transformationExtent.getP2().getY() < transformationExtent.getP1().getY()) {
+		if (transformationExtent.getP2().getY() < transformationExtent.getP1()
+				.getY()) {
 			t.scale(1.0, -1.0);
 		}
 
 		double angle = -compTransformation.getRotation() * Math.PI / 180;
 		t.rotate(angle);
 
-		t.scale(transformationExtent.getWidth() / componentExtent.getWidth(), transformationExtent.getHeight() / componentExtent.getHeight());
+		t.scale(transformationExtent.getWidth() / componentExtent.getWidth(),
+				transformationExtent.getHeight() / componentExtent.getHeight());
 
 		return t;
 	}
@@ -106,16 +113,17 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	public Placement getPlacement() {
 		return getComponentDecl().syncGetPlacement();
 	}
-	
+
 	@Override
 	public Layer getLayer() {
 		return getComponentDecl().syncGetIconLayer();
 	}
-	
+
 	public String getMapName() {
-		return buildMapName(getQualifiedComponentName(), isConnector(), isConnector());
+		return buildMapName(getQualifiedComponentName(), isConnector(),
+				isConnector());
 	}
-	
+
 	public boolean isConnector() {
 		return false;
 	}
@@ -138,7 +146,7 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 		else
 			return false;
 	}
-	
+
 	@Override
 	public String toString() {
 		return buildDiagramName();
@@ -149,8 +157,9 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 		collectParameters(getComponentDecl(), parameters);
 		return parameters;
 	}
-	
-	private void collectParameters(InstNode node, List<ParameterProxy> parameters) {
+
+	private void collectParameters(InstNode node,
+			List<ParameterProxy> parameters) {
 		for (InstExtends ie : node.syncGetInstExtendss()) {
 			collectParameters(ie, parameters);
 		}
@@ -166,6 +175,10 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	protected void setParameterValue(Stack<String> path, String value) {
 		path.push(componentName);
 		getParent().setParameterValue(path, value);
+	}
+
+	public void setComponentName(String newName) {
+		componentName = newName;
 	}
 
 }

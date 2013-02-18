@@ -3,9 +3,12 @@ package org.jmodelica.ide.graphical.proxy;
 import java.io.ByteArrayInputStream;
 import java.util.Stack;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jmodelica.icons.coord.Placement;
+import org.jmodelica.ide.compiler.JobObject;
+import org.jmodelica.ide.compiler.ModelicaASTRegistryJobBucket;
 import org.jmodelica.modelica.compiler.ConnectClause;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
@@ -18,8 +21,10 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	public static final Object FLUSH_CONTENTS = new String("Flush contents now");
 
 	private InstClassDecl instClassDecl;
+	private IFile theFile;
 
-	public ClassDiagramProxy(InstClassDecl instClassDecl) {
+	public ClassDiagramProxy(IFile theFile, InstClassDecl instClassDecl) {
+		this.theFile = theFile;
 		this.instClassDecl = instClassDecl;
 	}
 
@@ -41,7 +46,7 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	protected InstClassDecl getClassDecl() {
 		return getASTNode();
 	}
-	
+
 	public String getDefinitionKey() {
 		synchronized (instClassDecl.state()) {
 			return instClassDecl.getDefinition().lookupKey();
@@ -49,10 +54,14 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	}
 
 	@Override
-	public ComponentProxy addComponent(String className, String componentName, Placement placement) {
+	public ComponentProxy addComponent(String className, String componentName,
+			Placement placement) {
 		String mapName;
-		InstComponentDecl icd = getASTNode().syncAddComponent(className, componentName, placement);
-		mapName = buildMapName(icd.syncQualifiedName(), icd.syncIsConnector(), icd.syncIsConnector());
+		System.out.println("GRAPHICAL: adding node to component "+getASTNode().getNodeName());
+		InstComponentDecl icd = getASTNode().syncAddComponent(className,
+				componentName, placement);
+		mapName = buildMapName(icd.syncQualifiedName(), icd.syncIsConnector(),
+				icd.syncIsConnector());
 		ComponentProxy component = getComponentMap().get(mapName);
 		if (component == null) {
 			if (icd.isConnector()) {
@@ -63,6 +72,9 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 			getComponentMap().put(mapName, component);
 		}
 		notifyObservers(COMPONENT_ADDED);
+		JobObject job = new JobObject(JobObject.ADD_NODE, theFile,
+				icd);
+		ModelicaASTRegistryJobBucket.getInstance().addJob(job);
 		return component;
 	}
 
@@ -70,12 +82,18 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	public void removeComponent(ComponentProxy component) {
 		getASTNode().syncRemoveComponent(component.getComponentDecl());
 		notifyObservers(COMPONENT_REMOVED);
+		JobObject job = new JobObject(JobObject.REMOVE_INSTNODE, theFile,
+				component.getASTNode());
+		ModelicaASTRegistryJobBucket.getInstance().addJob(job);
 	}
 
 	@Override
-	public ConnectionProxy addConnection(ConnectorProxy source, ConnectorProxy target) {
-		ConnectClause connectClause = getASTNode().syncAddConnection(source.buildDiagramName(), target.buildDiagramName());
-		ConnectionProxy connection = new ConnectionProxy(source, target, connectClause, this);
+	public ConnectionProxy addConnection(ConnectorProxy source,
+			ConnectorProxy target) {
+		ConnectClause connectClause = getASTNode().syncAddConnection(
+				source.buildDiagramName(), target.buildDiagramName());
+		ConnectionProxy connection = new ConnectionProxy(source, target,
+				connectClause, this);
 		getConnectionMap().put(connectClause, connection);
 		return connection;
 	}
@@ -87,23 +105,26 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 
 	@Override
 	protected boolean removeConnection(ConnectionProxy connection) {
-		getASTNode().syncRemoveConnection(getConnection(connection.getConnectClause()));
+		getASTNode().syncRemoveConnection(
+				getConnection(connection.getConnectClause()));
 		return true;
 	}
 
 	public void saveModelicaFile(IProgressMonitor monitor) throws CoreException {
 		synchronized (instClassDecl.state()) {
 			StoredDefinition definition = instClassDecl.getDefinition();
-			definition.getFile().setContents(new ByteArrayInputStream(definition.prettyPrintFormatted().getBytes()), false, true, monitor);
+			definition.getFile().setContents(
+					new ByteArrayInputStream(definition.prettyPrintFormatted()
+							.getBytes()), false, true, monitor);
 		}
 	}
-	
+
 	@Override
 	protected void setParameterValue(Stack<String> path, String value) {
 		instClassDecl.syncSetParameterValue(path, value);
 		notifyObservers(FLUSH_CONTENTS);
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof ClassDiagramProxy) {
