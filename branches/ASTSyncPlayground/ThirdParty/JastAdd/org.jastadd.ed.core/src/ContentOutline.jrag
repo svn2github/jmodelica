@@ -1,4 +1,4 @@
-import org.jastadd.plugin.compiler.ast.IOutlineNode;
+import org.jastadd.ed.core.model.node.IOutlineNode;
 import org.eclipse.swt.graphics.Image;
 import java.util.ArrayList;
 

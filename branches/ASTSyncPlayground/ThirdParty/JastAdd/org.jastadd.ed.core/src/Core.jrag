@@ -1,5 +1,5 @@
-import org.jastadd.plugin.compiler.ast.IJastAddNode;
-import org.jastadd.plugin.compiler.ast.IASTNode;
+import org.jastadd.ed.core.model.node.IJastAddNode;
+import org.jastadd.ed.core.model.node.IASTNode;
 
 aspect Core {
 

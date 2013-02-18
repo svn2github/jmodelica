@@ -1,4 +1,4 @@
-import org.jastadd.plugin.compiler.ast.IFoldingNode;
+import org.jastadd.ed.core.model.node.IFoldingNode;
 
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.IDocument;

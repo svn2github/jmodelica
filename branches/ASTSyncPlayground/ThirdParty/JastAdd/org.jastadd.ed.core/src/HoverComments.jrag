@@ -1,4 +1,4 @@
-import org.jastadd.plugin.compiler.ast.IHoverNode;
+import org.jastadd.ed.core.model.node.IHoverNode;
 
 aspect HoverComments {
 
