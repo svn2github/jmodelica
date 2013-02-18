@@ -22,7 +22,7 @@
 <!--	<property name="folding.project" value="org.jmodelica.folding" /> -->
 	<!-- Project name for the project checked out from 
 	     https://svn.jastadd.org/projects/trunk/JastAddExtensions/org.jastadd.plugin -->
-	<property name="jastadd.project" value="org.jastadd.plugin" />
+	<property name="jastadd.project" value="org.jastadd.ed.core" />
 	<!-- Project name for the project checked out from 
 	     https://svn.jmodelica.org/trunk/EclipseIDE/org.jmodelica.ide.feature -->
 	<property name="ide.feature.project" value="org.jmodelica.ide.feature" />
@@ -31,7 +31,7 @@
 <!-- 	<property name="folding.feature.project" value="org.jmodelica.folding.feature" /> -->
 	<!-- Project name for the project checked out from 
 	     https://svn.jmodelica.org/trunk/EclipseIDE/org.jastadd.plugin.feature -->
-	<property name="jastadd.feature.project" value="org.jastadd.plugin.feature" />
+	<property name="jastadd.feature.project" value="org.jastadd.ed.core.feature" />
 
 	<condition property="jmodelica_root" value="../.." else="../${trunk.project}">
 		<available file="../../Compiler/ModelicaFrontEnd/src" type="dir" property="" />
@@ -58,9 +58,10 @@
 	<property name="modelica_cbackend_dir" value="${compiler_dir}/ModelicaCBackEnd/src" />
 	<property name="modelica_xmlbackend_dir" value="${compiler_dir}/ModelicaXMLBackEnd/src" />
     <property name="modelica_icons_dir" value="${compiler_dir}/Icons/src" />
-	<condition property="core_dir" value="../${jastadd.project}" else="${jastadd_dir}/org.jastadd.plugin">
+	<condition property="core_dir" value="../${jastadd.project}" else="${jastadd_dir}/org.jastadd.ed.core">
 		<available file="../${jastadd.project}" type="dir" property="" />
 	</condition>
+	<echo message="COREEE: ${core_dir}"/>
 	<property name="site_dir" value="../site" />
 
 	<property name="core_java_dir" value="${core_dir}/src" />
@@ -92,6 +93,7 @@
 
 	<property name="ide_aspects" value="aspects" />
 	<property name="ide_core_aspects" value="${core_dir}/src" />
+	<echo message="COREASPECTS: ${ide_core_aspects}$"/>
 	<property name="modelica_frontend_aspects" value="${modelica_frontend_dir}/jastadd" />
 	<property name="modelica_compiler_aspects" value="${modelica_compiler_dir}/jastadd" />
 	<property name="modelica_cbackend_aspects" value="${modelica_cbackend_dir}/jastadd" />
@@ -277,7 +279,17 @@
 			</fileset>
 		</jastadd>
 	</target>
-
+	
+	<target name="printit">
+		<fileset dir="${ide_core_aspects}" id="xyz">
+			<include name="**/*.ast" />
+			<include name="**/*.jrag" />
+			<include name="**/*.jadd" />
+		</fileset>
+		<pathconvert property="mypath" refid="xyz" targetos="unix"/>
+		<echo message="${mypath}"/>
+	</target>
+	
 	<!-- Copy required files from JModelica -->
 	<target name="copy">
         <copy todir="${java_dir}">

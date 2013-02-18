@@ -15,7 +15,6 @@
 */
 package org.jmodelica.ide.error;
 
-import org.eclipse.core.resources.IMarker;
 import org.jmodelica.modelica.compiler.ASTNode;
 
 public class InstanceError extends InstanceProblem {
@@ -24,8 +23,8 @@ public class InstanceError extends InstanceProblem {
 		super(msg, n);
 	}
 
-	public int getSeverity() {
-		return IMarker.SEVERITY_ERROR;
+	public Severity getSeverity() {
+		return Severity.ERROR;
 	}
 
 	public boolean isError() {
@@ -34,6 +33,12 @@ public class InstanceError extends InstanceProblem {
 
 	public String getSeverityString() {
 		return "Error";
+	}
+
+	@Override
+	public int getStartLine() {
+		// TODO Auto-generated method stub
+		return start;
 	}
 
 }

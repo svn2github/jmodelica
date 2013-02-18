@@ -3,10 +3,9 @@ package org.jmodelica.ide.editor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
+import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.BaseClassDecl;
 
 /**
  * Represents the result of a compilation.
@@ -15,9 +14,9 @@ import org.jmodelica.modelica.compiler.BaseClassDecl;
  */
 public abstract class CompilationResult {
 
-protected ASTNode root;
+protected ASTNode<?> root;
 
-public ASTNode root() {
+public ASTNode<?> root() {
     return root;
 }
 
@@ -60,6 +59,8 @@ public abstract void dispose(Editor editor);
  * @param file input file
  */
 public abstract void recompileLocal(IDocument doc, IFile file);
+
+public abstract void update(IASTChangeEvent e);
 
 
 }

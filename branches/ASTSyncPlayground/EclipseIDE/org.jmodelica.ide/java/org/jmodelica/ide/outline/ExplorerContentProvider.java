@@ -12,7 +12,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.outline;
 
 import java.util.ArrayList;
@@ -39,10 +39,11 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.progress.UIJob;
-import org.jastadd.plugin.compiler.ast.IASTNode;
-import org.jastadd.plugin.compiler.ast.IOutlineNode;
-import org.jastadd.plugin.registry.ASTRegistry;
+import org.jastadd.ed.core.model.node.IASTNode;
+import org.jastadd.ed.core.model.node.IOutlineNode;
 import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.compiler.LocalRootNode;
+import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.ClassDecl;
@@ -50,20 +51,22 @@ import org.jmodelica.modelica.compiler.Element;
 import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
-public class ExplorerContentProvider implements ITreeContentProvider, IResourceChangeListener, IResourceDeltaVisitor {
+public class ExplorerContentProvider implements ITreeContentProvider,
+		IResourceChangeListener, IResourceDeltaVisitor {
 
-	private ASTRegistry registry;
+	private ModelicaASTRegistry registry;
 	private ModelicaEclipseCompiler cmp;
 	private StructuredViewer viewer;
-	private Map<IFile,IASTNode> localCompiles;
+	private Map<IFile, IASTNode> localCompiles;
 	private Set<IASTNode> outdatedLocalCompiles;
 
 	public ExplorerContentProvider() {
-		registry = org.jastadd.plugin.Activator.getASTRegistry();
+		registry = ModelicaASTRegistry.getASTRegistry();
 		cmp = new ModelicaEclipseCompiler();
 		localCompiles = new HashMap<IFile, IASTNode>();
 		outdatedLocalCompiles = new HashSet<IASTNode>();
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_CHANGE);
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(this,
+				IResourceChangeEvent.POST_CHANGE);
 	}
 
 	public Object[] getChildren(Object parentElement) {
@@ -71,9 +74,10 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		if (parentElement instanceof IFile) {
 			IOutlineNode root = (IOutlineNode) getRoot((IFile) parentElement);
 			children = root.outlineChildren().toArray();
-//		} else if (parentElement instanceof IProject) {
-//			LibrariesList libList = new LibrariesList((IProject) parentElement, viewer);
-//			return libList.hasChildren() ? new Object[] { libList } : null;
+			// } else if (parentElement instanceof IProject) {
+			// LibrariesList libList = new LibrariesList((IProject)
+			// parentElement, viewer);
+			// return libList.hasChildren() ? new Object[] { libList } : null;
 		} else if (parentElement instanceof ClassDecl) {
 			children = getVisible(((ClassDecl) parentElement).classes());
 		}
@@ -83,11 +87,11 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 	public Object getParent(Object element) {
 		if (element instanceof ClassDecl) {
 			ASTNode<?> parent = getParentClass((ClassDecl) element);
-			if (parent instanceof StoredDefinition) 
+			if (parent instanceof StoredDefinition)
 				return ((StoredDefinition) parent).getFile();
 		} else if (element instanceof LoadedLibraries) {
 			return ((LoadedLibraries) element).getParent();
-		} 
+		}
 		return null;
 	}
 
@@ -106,11 +110,14 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 	private IASTNode getRoot(IFile file) {
 		IProject project = file.getProject();
 		String path = file.getRawLocation().toOSString();
-		IASTNode ast = registry.lookupAST(path, project);
+		// IASTNode ast = registry.lookupAST(path, project);
+		LocalRootNode fileNode = (LocalRootNode) registry.doLookup(file)[0];
+		IASTNode ast = fileNode.getDef();
 		// TODO: Need to save in registry even if we have to build ourselves
 		if (ast == null) {
 			ast = localCompiles.get(file);
-			if (localCompiles.containsKey(file) || outdatedLocalCompiles.contains(ast)) {
+			if (localCompiles.containsKey(file)
+					|| outdatedLocalCompiles.contains(ast)) {
 				outdatedLocalCompiles.remove(ast);
 				new CompileJob(file).schedule();
 			}
@@ -120,7 +127,7 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		}
 		return ast;
 	}
-	
+
 	private ASTNode<?> getParentClass(ASTNode<?> node) {
 		while (!(node instanceof ClassDecl || node instanceof StoredDefinition))
 			node = node.getParent();
@@ -130,7 +137,8 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 	private ASTNode[] getVisible(Iterable<? extends ASTNode> objs) {
 		ArrayList<ASTNode> list = new ArrayList<ASTNode>();
 		for (ASTNode e : objs) {
-			if (e instanceof IOutlineNode && ((IOutlineNode) e).showInContentOutline())
+			if (e instanceof IOutlineNode
+					&& ((IOutlineNode) e).showInContentOutline())
 				list.add(e);
 		}
 		return list.toArray(new ASTNode[list.size()]);
@@ -150,21 +158,25 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(org.eclipse.core.resources.IResourceChangeEvent)
+	 * @see
+	 * org.eclipse.core.resources.IResourceChangeListener#resourceChanged(org
+	 * .eclipse.core.resources.IResourceChangeEvent)
 	 */
 	public void resourceChanged(IResourceChangeEvent event) {
 		IResourceDelta delta = event.getDelta();
 		try {
 			delta.accept(this);
-		} catch (CoreException e) { 
+		} catch (CoreException e) {
 			e.printStackTrace();
-		} 
+		}
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.core.resources.IResourceDeltaVisitor#visit(org.eclipse.core.resources.IResourceDelta)
+	 * @see
+	 * org.eclipse.core.resources.IResourceDeltaVisitor#visit(org.eclipse.core
+	 * .resources.IResourceDelta)
 	 */
 	public boolean visit(IResourceDelta delta) {
 		IResource source = delta.getResource();
@@ -217,7 +229,7 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		public IStatus runInUIThread(IProgressMonitor monitor) {
 			if (viewer != null && !viewer.getControl().isDisposed())
 				viewer.refresh(file);
-			return Status.OK_STATUS;						
+			return Status.OK_STATUS;
 		}
 	}
 

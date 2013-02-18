@@ -50,9 +50,8 @@ import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
-import org.jastadd.plugin.Builder;
+import org.jmodelica.ide.ModelicaBuilder;
 import org.jmodelica.ide.Nature;
-import org.jmodelica.ide.helpers.Util;
 
 public class NewProjectWizard extends Wizard implements INewWizard, IExecutableExtension {
 
@@ -166,14 +165,14 @@ public class NewProjectWizard extends Wizard implements INewWizard, IExecutableE
 			ICommand[] commands = desc.getBuildSpec();
 			boolean found  = false;
 			for(int i = 0; i < commands.length; i++) {
-				if(commands[i].getBuilderName().equals(Builder.BUILDER_ID)) {
+				if(commands[i].getBuilderName().equals(ModelicaBuilder.BUILDER_ID)) {
 					found = true;
 					break;
 				}
 			}
 			if(!found) {
 				ICommand command = desc.newCommand();
-				command.setBuilderName(Builder.BUILDER_ID);
+				command.setBuilderName(ModelicaBuilder.BUILDER_ID);
 				ICommand[] newCommands = new ICommand[commands.length + 1];
 				System.arraycopy(commands, 0, newCommands, 1, commands.length);
 				newCommands[0] = command;

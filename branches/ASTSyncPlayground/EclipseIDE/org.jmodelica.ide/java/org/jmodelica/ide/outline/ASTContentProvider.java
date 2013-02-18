@@ -1,6 +1,6 @@
 package org.jmodelica.ide.outline;
 
-import org.jastadd.plugin.ui.view.JastAddContentProvider;
+import org.jastadd.ed.core.service.view.JastAddContentProvider;
 import org.jmodelica.modelica.compiler.ASTNode;
 
 public class ASTContentProvider extends JastAddContentProvider {

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.jastadd.plugin.compiler.ast.IOutlineNode;
+import org.jastadd.ed.core.model.node.IOutlineNode;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.StoredDefinition;

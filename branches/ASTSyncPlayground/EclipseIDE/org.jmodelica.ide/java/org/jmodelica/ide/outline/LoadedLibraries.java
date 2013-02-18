@@ -3,20 +3,11 @@ package org.jmodelica.ide.outline;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.swt.graphics.Image;
-import org.jastadd.plugin.compiler.ast.IASTNode;
-import org.jastadd.plugin.registry.ASTRegistry;
-import org.jastadd.plugin.registry.IASTRegistryListener;
 import org.jmodelica.ide.ui.ImageLoader;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.LibNode;
-import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
 public class LoadedLibraries implements IOutlineAware {

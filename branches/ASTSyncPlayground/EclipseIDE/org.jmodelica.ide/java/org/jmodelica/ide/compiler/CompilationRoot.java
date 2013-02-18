@@ -33,12 +33,13 @@ import beaver.Parser;
 public class CompilationRoot {
 
 	private final ModelicaParser parser = new ModelicaParser();
-	private final ModelicaScanner scanner = new ModelicaScanner(System.in); // Dummy stream
+	private final ModelicaScanner scanner = new ModelicaScanner(System.in); // Dummy
+																			// stream
 	private final CompileErrorReport errorReport = new CompileErrorReport();
 
 	private final SourceRoot root;
 	private final List<StoredDefinition> list;
-	
+
 	private boolean rewritten;
 
 	/**
@@ -54,16 +55,20 @@ public class CompilationRoot {
 		root.options = new IDEOptions(project);
 		root.setProject(project);
 		root.setErrorHandler(new InstanceErrorHandler());
-		
+
 		prog.setLibraryList(new IDELibraryList(root.options, project));
 		prog.getInstProgramRoot().options = root.options;
 
 		rewritten = false;
 	}
 
+	public List<StoredDefinition> getFiles() {
+		return list;
+	}
+
 	/**
-	 * Returns the StoredDefinition for the first compilation. 
-	 * Use when you want to only compile a single file.
+	 * Returns the StoredDefinition for the first compilation. Use when you want
+	 * to only compile a single file.
 	 * 
 	 * @return StoredDefinition from the first compilation, or null if no
 	 *         successful compilation has been performed.
@@ -72,18 +77,20 @@ public class CompilationRoot {
 		forceRewrites();
 		return list.getNumChild() > 0 ? list.getChild(0) : null;
 	}
-	
+
 	protected void forceRewrites() {
 		if (!rewritten) {
 			synchronized (root.state()) {
-				// Depends on ASTNode.state being static (if it isn't, this probably doesn't need synchronization) 
+				// Depends on ASTNode.state being static (if it isn't, this
+				// probably doesn't need synchronization)
 				root.forceRewrites();
 			}
 		}
 		rewritten = true;
 	}
 
-	protected StoredDefinition annotatedDefinition(StoredDefinition def, IFile file) {
+	protected StoredDefinition annotatedDefinition(StoredDefinition def,
+			IFile file) {
 		def.setFile(file);
 		def.setFileName(file.getRawLocation().toOSString());
 		def.setLineBreakMap(scanner.getLineBreakMap());
@@ -141,7 +148,8 @@ public class CompilationRoot {
 			synchronized (localRoot.state()) {
 				localRoot.setFormatting(scanner.getFormattingInfo());
 			}
-			for (StoredDefinition def : localRoot.getProgram().getUnstructuredEntitys()) 
+			for (StoredDefinition def : localRoot.getProgram()
+					.getUnstructuredEntitys())
 				list.add(annotatedDefinition(def, file));
 		} catch (Parser.Exception e) {
 			addBadDef(file);
@@ -162,9 +170,12 @@ public class CompilationRoot {
 
 	public void addPackageDirectory(File dir) {
 		try {
-			String path = root.options.getStringOption(IDEConstants.PACKAGES_IN_WORKSPACE_OPTION);
-			path += (path.equals("") ? "" : File.pathSeparator) + dir.getAbsolutePath();
-			root.options.setStringOption(IDEConstants.PACKAGES_IN_WORKSPACE_OPTION, path);
+			String path = root.options
+					.getStringOption(IDEConstants.PACKAGES_IN_WORKSPACE_OPTION);
+			path += (path.equals("") ? "" : File.pathSeparator)
+					+ dir.getAbsolutePath();
+			root.options.setStringOption(
+					IDEConstants.PACKAGES_IN_WORKSPACE_OPTION, path);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -174,5 +185,4 @@ public class CompilationRoot {
 		list.add(annotatedDefinition(new BadDefinition(), file));
 		rewritten = false;
 	}
-
 }

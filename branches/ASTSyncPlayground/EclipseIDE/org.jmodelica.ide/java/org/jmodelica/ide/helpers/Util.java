@@ -48,7 +48,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ISetSelectionTarget;
-import org.jastadd.plugin.compiler.ast.IError;
+import org.jastadd.ed.core.service.errors.IError;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.preferences.Preferences;
@@ -132,9 +132,9 @@ public class Util {
 	public static void addErrorMarker(IResource resource, IError error) {
 		try {
 			String type = IDEConstants.ERROR_MARKER_SYNTACTIC_ID;
-			if (error.getKind() == IError.SEMANTIC)  
+			if (error.getKind() == IError.Kind.SEMANTIC)  
 				type = IDEConstants.ERROR_MARKER_SEMANTIC_ID;
-			if (error.getSeverity() == IMarker.SEVERITY_WARNING)
+			if (error.getSeverity() == IError.Severity.WARNING)
 				type = IDEConstants.ERROR_MARKER_WARNING_ID;
 			IMarker marker = resource.createMarker(type);
 			
@@ -142,8 +142,8 @@ public class Util {
 			    return;
 			
 			String message = error.getMessage();
-			Integer severity = error.getSeverity();
-			Integer line = error.getLine();
+			Integer severity = error.getSeverity().value;
+			Integer line = error.getStartLine();
 			Integer startOffset = error.getStartOffset();
 			Integer endOffset = error.getEndOffset();
 			if (line < 0)

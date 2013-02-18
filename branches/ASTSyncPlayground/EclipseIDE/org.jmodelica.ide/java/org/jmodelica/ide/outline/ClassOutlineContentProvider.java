@@ -15,20 +15,7 @@
 */
 package org.jmodelica.ide.outline;
 
-import java.util.ArrayList;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.viewers.StructuredViewer;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.jastadd.plugin.registry.IASTRegistryListener;
-import org.jastadd.plugin.ui.view.JastAddContentProvider;
 import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.Element;
-import org.jmodelica.modelica.compiler.InstClassDecl;
-import org.jmodelica.modelica.compiler.InstProgramRoot;
-import org.jmodelica.modelica.compiler.List;
-import org.jmodelica.modelica.compiler.SourceRoot;
-import org.jmodelica.modelica.compiler.StoredDefinition;
 
 
 public class ClassOutlineContentProvider extends OutlineAwareContentProvider {

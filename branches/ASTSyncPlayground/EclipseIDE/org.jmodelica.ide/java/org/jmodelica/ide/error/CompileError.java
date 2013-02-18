@@ -15,12 +15,11 @@
 */
 package org.jmodelica.ide.error;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.jastadd.plugin.compiler.ast.IError;
+import org.jastadd.ed.core.service.errors.IError;
 
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.modelica.parser.ModelicaScanner; 
+import org.jmodelica.modelica.parser.ModelicaScanner;
 import org.jmodelica.modelica.parser.ModelicaScanner.Symbol;
 
 public class CompileError implements IError {
@@ -28,10 +27,10 @@ public class CompileError implements IError {
 	private int line;
 	private int start;
 	private int end;
-	private int kind;
+	private Kind kind;
 	private String msg;
 	
-	public CompileError(String msg, int kind, Symbol sym) {
+	public CompileError(String msg, Kind kind, Symbol sym) {
 		this.msg = msg;
 		this.kind = kind;
 		line = Symbol.getLine(sym.getStart());
@@ -41,7 +40,7 @@ public class CompileError implements IError {
 	
 	public CompileError(ModelicaScanner.Exception e) {
 		msg = e.getMessage();
-		kind = IError.LEXICAL;
+		kind = IError.Kind.LEXICAL;
 		line = e.line;
 		start = e.offset;
 		end = start + 1;
@@ -51,7 +50,7 @@ public class CompileError implements IError {
 		return end;
 	}
 
-	public int getKind() {
+	public Kind getKind() {
 		return kind;
 	}
 
@@ -63,8 +62,8 @@ public class CompileError implements IError {
 		return msg;
 	}
 
-	public int getSeverity() {
-		return IMarker.SEVERITY_ERROR;
+	public Severity getSeverity() {
+		return IError.Severity.ERROR;
 	}
 
 	public int getStartOffset() {
@@ -73,5 +72,11 @@ public class CompileError implements IError {
 
 	public void addAsMarkerTo(IResource res) {
 		Util.addErrorMarker(res, this);
+	}
+
+	@Override
+	public int getStartLine() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

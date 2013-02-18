@@ -4,6 +4,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
+import org.jastadd.ed.core.model.IASTChangeEvent;
+import org.jmodelica.ide.compiler.LocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 
 
@@ -15,7 +17,7 @@ private final ModelicaEclipseCompiler compiler;
 public LocalCompilationResult(EditorFile ef, Editor ed) {
 
     compiler = new ModelicaEclipseCompiler();
-    root = compiler.compileFile(ef.iFile());
+    root = ((LocalRootNode)compiler.compileFile(ef.iFile())).getDef();
     editor = ed;
     
 }
@@ -31,6 +33,11 @@ public void recompileLocal(IDocument doc, IFile file) {
 @Override
 public IReconcilingStrategy compilationStrategy() {
     return new LocalReconcilingStrategy(editor);
+}
+
+@Override
+public void update(IASTChangeEvent e) {
+	System.out.println("LOCALCOMPILATIONRESUT --> ERROR: Not implemented update...");
 }
 
 }

@@ -12,18 +12,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.outline;
 
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
+import java.util.ArrayList;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
-import org.jmodelica.ide.helpers.Util;
+import org.jastadd.ed.core.model.IASTChangeEvent;
+import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jmodelica.ide.actions.TestRenameAction;
+import org.jmodelica.ide.actions.TestRemoveAction;
+import org.jmodelica.ide.compiler.ModelicaASTRegistry;
+import org.jmodelica.modelica.compiler.ASTNode;
 
-public class InstanceOutlinePage extends OutlinePage {
+public class InstanceOutlinePage extends OutlinePage implements
+		IASTChangeListener {
 
 	public InstanceOutlinePage(AbstractTextEditor editor) {
 		super(editor);
@@ -41,6 +53,37 @@ public class InstanceOutlinePage extends OutlinePage {
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-	    setDoubleClickHandling(true);
+		setDoubleClickHandling(true);
+
+		TreeViewer viewer = getTreeViewer();
+		ToolBarManager tbm = new ToolBarManager(SWT.FLAT | SWT.RIGHT);
+		tbm.createControl(parent);
+
+		MenuManager mm = new MenuManager("Test Menu");
+		IFile file = ((IFileEditorInput) this.fTextEditor.getEditorInput())
+				.getFile();
+		mm.add(new TestRenameAction(viewer, file));
+		mm.add(new TestRemoveAction(viewer, file));
+		tbm.setContextMenuManager(mm);
+		Menu menu = mm.createContextMenu(viewer.getTree());
+		viewer.getTree().setMenu(menu);
+		ModelicaASTRegistry.getASTRegistry().addListener(
+				((IFileEditorInput) fTextEditor.getEditorInput()).getFile(),
+				new ArrayList<String>(), this);
+	}
+
+	public void astChanged(IASTChangeEvent e) {
+		// new InstanceOutlineASTVisitor(test,(ASTNode<?>) fRoot, e,
+		// getTreeViewer());
+		update();
+		System.out.println("instoutlien event!!!");
+	}
+
+	//DEBUG TODO remove
+	private void printTree(ASTNode<?> root, String indent) {
+		for (int i = 0; i < root.getNumChild(); i++) {
+			System.out.println(indent + root.getChild(i).getNodeName());
+			printTree(root.getChild(i), indent + "  ");
+		}
 	}
 }

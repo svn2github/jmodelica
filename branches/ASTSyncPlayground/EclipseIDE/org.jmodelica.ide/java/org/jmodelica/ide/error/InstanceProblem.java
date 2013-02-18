@@ -1,8 +1,7 @@
 package org.jmodelica.ide.error;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.jastadd.plugin.compiler.ast.IError;
+import org.jastadd.ed.core.service.errors.IError;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.ASTNode;
 
@@ -57,8 +56,8 @@ public abstract class InstanceProblem implements IError {
 	
 	public abstract boolean isError();
 
-	public int getKind() {
-		return IError.SEMANTIC;
+	public Kind getKind() {
+		return IError.Kind.SEMANTIC;
 	}
 
 	public int getLine() {
@@ -69,7 +68,7 @@ public abstract class InstanceProblem implements IError {
 		return msg;
 	}
 
-	public abstract int getSeverity();
+	public abstract Severity getSeverity();
 
 	public abstract String getSeverityString();
 

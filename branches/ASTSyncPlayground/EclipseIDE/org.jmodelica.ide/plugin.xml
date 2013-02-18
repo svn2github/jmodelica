@@ -2,6 +2,16 @@
 <?eclipse version="3.2"?>
 <plugin>
    <extension
+         id="org.jmodelica.ide.ModelicaBuilder"
+         name="ModelicaBuilder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="false"
+            isConfigurable="false">
+         <run class="org.jmodelica.ide.ModelicaBuilder"/>
+      </builder>
+   </extension>
+   <extension
          id="org.jmodelica.ide.nature"
          name="Modelica Nature"
          point="org.eclipse.core.resources.natures">
@@ -11,7 +21,7 @@
          </run>
       </runtime>
       <builder
-            id="org.jastadd.plugin.Builder">
+            id="org.jmodelica.ide.ModelicaBuilder">
       </builder>
    </extension>
    <extension
@@ -134,7 +144,7 @@
    <extension
          id="org.jmodelica.ide.compiler"
          name="JModelica Compiler"
-         point="org.jastadd.plugin.compilers">
+         point="org.jastadd.ed.core.compilers">
       <compiler
             class="org.jmodelica.ide.compiler.ModelicaEclipseCompiler">
       </compiler>
@@ -264,6 +274,16 @@
             name="Instance Outline">
          <description>
             Shows an outline of the instance trees for all classes in the current file.
+         </description>
+      </view>
+            <view
+            category="org.jmodelica.ide.view.category"
+            class="org.jmodelica.ide.outline.InstanceOutlineView"
+            icon="resources/icons/modelica_perspective.png"
+            id="org.jmodelica.ide.view.outline.instance2"
+            name="Instance Outline2">
+         <description>
+            Shows a second outline of the instance trees for all classes in the current file.
          </description>
       </view>
       <view

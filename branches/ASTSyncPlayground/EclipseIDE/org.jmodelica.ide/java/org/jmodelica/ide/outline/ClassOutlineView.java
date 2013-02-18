@@ -33,10 +33,11 @@ import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.jastadd.plugin.compiler.ast.IASTNode;
+import org.jastadd.ed.core.model.node.IASTNode;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.editor.ICurrentClassListener;
 import org.jmodelica.ide.helpers.EclipseUtil;
+import org.jmodelica.modelica.compiler.ASTNode;
 
 public class ClassOutlineView extends OutlineView {
 	
@@ -55,6 +56,8 @@ public class ClassOutlineView extends OutlineView {
 					mapProjToPage.put(project, page);
 					initPage(page);
 					page.createControl(getPageBook());
+				}else{
+					System.out.println("CLASSOUTLINE PAGE FAILED!!!!!!!!!!!!!");
 				}
 				if (editor instanceof ICurrentClassListener) 
 					page.addCurrentClassListener((ICurrentClassListener) editor);
@@ -163,7 +166,7 @@ public class ClassOutlineView extends OutlineView {
 				root = ((OutlinePage) page).getRoot();
 		}
 		if (root != null && path != null)
-			return root.lookupChildAST(path);
+			return ((ASTNode)root).lookupChildAST(path);
 		else
 			return root;
 	}

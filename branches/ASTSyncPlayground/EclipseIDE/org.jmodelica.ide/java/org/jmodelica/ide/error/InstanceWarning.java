@@ -1,6 +1,5 @@
 package org.jmodelica.ide.error;
 
-import org.eclipse.core.resources.IMarker;
 import org.jmodelica.modelica.compiler.ASTNode;
 
 public class InstanceWarning extends InstanceProblem {
@@ -9,8 +8,8 @@ public class InstanceWarning extends InstanceProblem {
 		super(msg, n);
 	}
 
-	public int getSeverity() {
-		return IMarker.SEVERITY_WARNING;
+	public Severity getSeverity() {
+		return Severity.WARNING;
 	}
 
 	public boolean isError() {
@@ -19,6 +18,12 @@ public class InstanceWarning extends InstanceProblem {
 
 	public String getSeverityString() {
 		return "Warning";
+	}
+
+	@Override
+	public int getStartLine() {
+		// TODO Auto-generated method stub
+		return start;
 	}
 
 }

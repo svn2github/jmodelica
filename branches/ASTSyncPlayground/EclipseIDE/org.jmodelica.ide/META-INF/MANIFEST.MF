@@ -15,11 +15,12 @@ Require-Bundle: org.eclipse.jface.text,
  org.eclipse.ui.ide,
  org.eclipse.ui.editors,
  org.eclipse.ui.views,
- org.jastadd.plugin;bundle-version="1.0.8",
  org.eclipse.ui.navigator.resources,
- org.eclipse.ui.console
+ org.eclipse.ui.console,
+ org.jastadd.ed.core;bundle-version="1.0.0"
 Import-Package: junit.framework,
- org.eclipse.ui.navigator
+ org.eclipse.ui.navigator,
+ org.jastadd.ed.core
 Export-Package: org.jmodelica.icons,
  org.jmodelica.icons.coord,
  org.jmodelica.icons.drawing,

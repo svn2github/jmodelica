@@ -1,0 +1,29 @@
+package org.jmodelica.ide;
+
+import org.jastadd.ed.core.Builder;
+import org.jastadd.ed.core.ICompiler;
+import org.jastadd.ed.core.model.IGlobalRootRegistry;
+import org.jmodelica.ide.compiler.ModelicaASTRegistry;
+import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
+
+public class ModelicaBuilder extends Builder {
+	public static final String BUILDER_ID = "org.jmodelica.ide.ModelicaBuilder";
+
+	public ModelicaBuilder() {
+		super();
+		System.out.println("CREATED MODELICABUILDER");
+	}
+
+	@Override
+	protected IGlobalRootRegistry createRegistry() {
+		System.out.println("MODELICABUILDER createRegistry()");
+		return ModelicaASTRegistry.getASTRegistry();
+	}
+
+	@Override
+	protected ICompiler createCompiler() {
+		System.out.println("MODELICABUILDER createCompiler()");
+		return new ModelicaEclipseCompiler();
+	}
+
+}

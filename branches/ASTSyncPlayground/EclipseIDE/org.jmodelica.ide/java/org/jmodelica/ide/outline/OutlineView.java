@@ -15,8 +15,6 @@
 */
 package org.jmodelica.ide.outline;
 
-import java.util.List;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.ITextSelection;
@@ -27,8 +25,6 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.IPage;
@@ -40,10 +36,10 @@ import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.PageBookView;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.jastadd.plugin.compiler.ast.IASTNode;
-import org.jastadd.plugin.registry.ASTRegistry;
+import org.jastadd.ed.core.model.node.IASTNode;
+import org.jmodelica.ide.compiler.LocalRootNode;
+import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.editor.Editor;
-import org.jmodelica.ide.helpers.EclipseUtil;
 import org.jmodelica.modelica.compiler.ASTNode;
 
 public abstract class OutlineView extends PageBookView 
@@ -200,7 +196,9 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 	private IASTNode lookupASTForFile(IFile file) {
 		IProject project = file.getProject();
 		String path = file.getRawLocation().toOSString();
-		return org.jastadd.plugin.Activator.getASTRegistry().lookupAST(path, project);
+		//return ModelicaASTRegistry.getASTRegistry().lookupAST(path, project);
+		LocalRootNode fileNode = (LocalRootNode)ModelicaASTRegistry.getASTRegistry().doLookup(file)[0];
+		return fileNode.getDef();
 	}
 
 	/**

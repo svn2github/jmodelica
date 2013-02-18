@@ -22,7 +22,6 @@ import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -41,16 +40,15 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
-import org.jastadd.plugin.compiler.ast.IASTNode;
-import org.jastadd.plugin.compiler.ast.IJastAddNode;
-import org.jastadd.plugin.ui.view.AbstractBaseContentOutlinePage;
-import org.jastadd.plugin.ui.view.JastAddLabelProvider;
+import org.jastadd.ed.core.model.node.IASTNode;
+import org.jastadd.ed.core.model.node.IJastAddNode;
+import org.jastadd.ed.core.service.view.JastAddLabelProvider;
+import org.jastadd.ed.core.service.view.outline.AbstractBaseContentOutlinePage;
 import org.jmodelica.ide.actions.CopyClassAction;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BaseNode;
-import org.jmodelica.modelica.compiler.ClassDecl;
 
 public abstract class OutlinePage extends AbstractBaseContentOutlinePage implements IDoubleClickListener {
 	
@@ -170,6 +168,7 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage impleme
 	 * @param node  the node to update, or <code>null</code> to update entire tree
 	 */
 	public void update(Object node) {
+		System.out.println("Running outline update()");
         TreeViewer viewer = getTreeViewer();
 		if (viewer != null) {
 			Control control= viewer.getControl();
@@ -191,8 +190,28 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage impleme
 				control.setRedraw(true);
 			}
 		}
+//		System.out.println("OutlinePage: update()");
+//		TreeViewer viewer = getTreeViewer();
+//		if (viewer != null) {
+//			Control control= viewer.getControl();
+//			if (control != null && !control.isDisposed()) {
+//				control.setRedraw(false);
+//				viewer.setInput(fRoot);
+//				System.out.println("¤¤¤¤¤¤¤¤¤¤");
+//				//printTree((ASTNode<?>)fRoot,"");
+//				viewer.expandToLevel(1);
+//				control.setRedraw(true);
+//			}
+//		}
 	}
-	
+	// DEBUG TODO remove
+	private void printTree(ASTNode<?> node, String indent) {
+		System.out
+				.println(indent + node.getNodeName() + " " + node.outlineId());
+		for (int i = 0; i < node.getNumChild(); i++) {
+			printTree(node.getChild(i), indent+"  ");
+		}
+	}
 	public void updateAST(IASTNode ast) {
 		// Copy cached outline children to new root
 		if (ast instanceof BaseNode && fRoot instanceof BaseNode)

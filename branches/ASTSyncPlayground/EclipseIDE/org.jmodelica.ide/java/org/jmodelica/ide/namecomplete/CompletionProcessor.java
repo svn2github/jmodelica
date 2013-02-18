@@ -10,8 +10,8 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.jastadd.plugin.registry.ASTRegistry;
 import org.jmodelica.ide.OffsetDocument;
+import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.ide.editor.EditorWithFile;
 import org.jmodelica.ide.helpers.Maybe;
@@ -84,8 +84,8 @@ protected IFile getFile() {
  */
 protected Maybe<SourceRoot> projectRoot() {
 
-    ASTRegistry reg = 
-        org.jastadd.plugin.Activator.getASTRegistry();
+    ModelicaASTRegistry reg = 
+        ModelicaASTRegistry.getASTRegistry();
     
     if (getFile() == null)
         return Maybe.Nothing();
@@ -93,8 +93,7 @@ protected Maybe<SourceRoot> projectRoot() {
     return 
         new Maybe<SourceRoot>(
             (SourceRoot) 
-            reg.lookupAST(
-                null,
+            reg.doLookup(
                 getFile().getProject()));
 }
 

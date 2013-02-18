@@ -16,7 +16,7 @@
 package org.jmodelica.ide.error;
 
 import org.eclipse.core.resources.IFile;
-import org.jastadd.plugin.compiler.ast.IError;
+import org.jastadd.ed.core.service.errors.IError;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.parser.ModelicaScanner;
 import org.jmodelica.modelica.parser.ModelicaParser.Terminals;
@@ -86,7 +86,7 @@ public class CompileErrorReport extends Events {
 	}
 
 	private void report(StringBuilder msg) {
-		report(new CompileError(msg.toString(), IError.SYNTACTIC, lastSyntaxError));
+		report(new CompileError(msg.toString(), IError.Kind.SYNTACTIC, lastSyntaxError));
 		lastSyntaxError = null;
 	}
 
