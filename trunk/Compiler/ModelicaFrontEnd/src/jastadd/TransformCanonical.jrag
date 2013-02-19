@@ -1340,9 +1340,9 @@ aspect TransformCanonical {
 			str.println("In block #" + blockNumber);
 			for (SimpleEquationBlock block : unsolvedBlocks) {
 				boolean equationHasHGT = block.equation().hasResidual();
-				boolean variableHasHGT = equationHasHGT && block.equation().getResidual().hasIterationVariable();
+				FVariable iterVar = (equationHasHGT) ? block.equation().getResidual().iterationVariable() : null;
 				for (FVariable var : block.activeVariables()) {
-					variableHasHGT |= var.getHGTType() == FClass.HGTVariableType.COMPONENT || var.getHGTType() == FClass.HGTVariableType.PAIR;
+					boolean variableHasHGT = var.getHGTType() == FClass.HGTVariableType.COMPONENT || var == iterVar;
 					str.print(" (");
 					str.print(variableHasHGT ? 'M' : 'A');
 					str.print(") " + (counter++) + " " + var.name() + " (");
