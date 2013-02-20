@@ -15,6 +15,7 @@
 */
 
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -2795,6 +2796,14 @@ aspect GeneralHelpers {
 			
 		}
 		
+	}
+		
+	/**
+	 * Adds all children to a Collection.
+	 */
+	public void ASTNode.addAllTo(Collection<? super T> col) {
+		for (T n : this)
+			col.add(n);
 	}
 	
 	/**

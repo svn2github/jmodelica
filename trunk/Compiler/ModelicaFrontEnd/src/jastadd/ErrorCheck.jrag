@@ -1106,25 +1106,49 @@ aspect InstanceErrorCheck {
 	 */
 	public boolean InstExtends.isRecursive() {
 		if (recursiveCache == RECURSIVE_UNKNOWN)
-			calcIsRecursive(new HashSet<InstExtends>());
+			calcIsRecursive(new HashSet<InstNode>());
+		return recursiveCache == RECURSIVE_YES;
+	}
+	
+	/**
+	 * \brief Check if extends tree is recursive.
+	 */
+	public boolean InstSimpleShortClassDecl.isRecursive() {
+		if (recursiveCache == RECURSIVE_UNKNOWN)
+			calcIsRecursive(new HashSet<InstNode>());
 		return recursiveCache == RECURSIVE_YES;
 	}
 	
 	/**
 	 * \brief Examine extends tree to find recursive extends nodes.
 	 */
-	private void InstExtends.calcIsRecursive(HashSet<InstExtends> visited) {
+	public void InstExtends.calcIsRecursive(HashSet<InstNode> visited) {
 		recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
 		visited.add(this);
 		if (recursiveCache == RECURSIVE_NO) 
-			for (InstExtends ie : myInstClass().actualInstClass().getInstExtendss())
-				ie.calcIsRecursive(visited);
+			myInstClass().calcIsRecursive(visited);
 	}
 	
-	private byte InstExtends.recursiveCache = RECURSIVE_UNKNOWN;
-	private static final byte InstExtends.RECURSIVE_UNKNOWN = 0;
-	private static final byte InstExtends.RECURSIVE_YES     = 1;
-	private static final byte InstExtends.RECURSIVE_NO      = 2;
+	/**
+	 * \brief Examine extends tree to find recursive extends nodes.
+	 */
+	public void InstClassDecl.calcIsRecursive(HashSet<InstNode> visited) {
+		for (InstExtends ie : getInstExtendss())
+			ie.calcIsRecursive(visited);
+	}
+	
+	public void InstSimpleShortClassDecl.calcIsRecursive(HashSet<InstNode> visited) {
+		recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
+		visited.add(this);
+		if (recursiveCache == RECURSIVE_NO) 
+			getTarget().myInstClassDecl().calcIsRecursive(visited);
+	}
+	
+	private byte InstExtends.recursiveCache              = RECURSIVE_UNKNOWN;
+	private byte InstSimpleShortClassDecl.recursiveCache = RECURSIVE_UNKNOWN;
+	protected static final byte InstNode.RECURSIVE_UNKNOWN = 0;
+	protected static final byte InstNode.RECURSIVE_YES     = 1;
+	protected static final byte InstNode.RECURSIVE_NO      = 2;
 	
 	/**
 	 * \brief Check if <code>icd</code> is an ancestor of this node or any ancestor is an 

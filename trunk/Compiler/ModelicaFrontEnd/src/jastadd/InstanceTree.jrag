@@ -1803,27 +1803,24 @@ aspect InstArrays {
 	syn boolean InstComponentDecl.isArrayDecl() = hasFArraySubscripts() && 
 		getFArraySubscripts().getNumFSubscript()>0;
 	
-	syn lazy ArrayList<FSubscript> InstClassDecl.myFSubscripts() {
-		return new ArrayList<FSubscript>();
-	}
-	eq InstShortClassDecl.myFSubscripts() {
-		ArrayList<FSubscript> l = new ArrayList<FSubscript>();
-		if (hasFArraySubscripts()) {
-			for (FSubscript fs : getFArraySubscripts().getFSubscripts()) {
-				l.add(fs);
-			}
-		}
-		l.addAll(getInstExtends(0).myInstClass().myFSubscripts());
+	syn java.util.List<FSubscript> InstClassDecl.myFSubscripts() = Collections.emptyList();
+	eq InstSimpleShortClassDecl.myFSubscripts()                  = actualInstClass().myFSubscripts();
+	eq InstFullClassDecl.myFSubscripts()                         = 
+		(getNumInstExtends() == 1) ? getInstExtends(0).myFSubscripts() : super.myFSubscripts();
+	syn java.util.List<FSubscript> InstExtends.myFSubscripts()   = 
+		isRecursive() ? Collections.<FSubscript>emptyList() : myInstClass().myFSubscripts();
+	syn lazy java.util.List<FSubscript> InstShortClassDecl.myFSubscripts() {
+		java.util.List<FSubscript> l = new ArrayList<FSubscript>();
+		if (hasFArraySubscripts()) 
+			getFArraySubscripts().getFSubscripts().addAllTo(l);
+		if (getNumInstExtends() == 1)
+			l.addAll(getInstExtends(0).myFSubscripts());
 		return l;
 	}
-	
-	syn lazy ArrayList<FSubscript> InstComponentDecl.myFSubscripts() {
-		ArrayList<FSubscript> l = new ArrayList<FSubscript>();
-		if (hasLocalFArraySubscripts()) {
-			for (FSubscript fs : getLocalFArraySubscripts().getFSubscripts()) {
-				l.add(fs);
-			}
-		}
+	syn lazy java.util.List<FSubscript> InstComponentDecl.myFSubscripts() {
+		java.util.List<FSubscript> l = new ArrayList<FSubscript>();
+		if (hasLocalFArraySubscripts())
+			getLocalFArraySubscripts().getFSubscripts().addAllTo(l);
 		l.addAll(myInstClass().myFSubscripts());
 		return l;
 	}
