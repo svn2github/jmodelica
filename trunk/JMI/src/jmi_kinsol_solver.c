@@ -386,9 +386,9 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
     			j += len;
     		}
     		buf[j]=0;
-            jmi_log(block->jmi, logInfo, buf);
+    		jmi_log(block->jmi, logInfo, buf);
 
-            sprintf(buf,"[NLE_ITERS]Block:;%d;Scaled norm:;%30.16E;Residuals:;",block->index, kin_mem->kin_fnorm);
+    		sprintf(buf,"[NLE_ITERS]Block:;%d;Scaled norm:;%30.16E;Residuals:;",block->index, kin_mem->kin_fnorm);
     		j = strlen(buf);
     		for (i=0;i<block->n;i++){
     			realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
@@ -400,10 +400,10 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
     			j += len;
     		}
     		buf[j]=0;
-            jmi_log(block->jmi, logInfo, buf);
+    		jmi_log(block->jmi, logInfo, buf);
     	}
-    	sprintf(buf,"[KINSOL_INFO]%s",msg);
-        jmi_log(block->jmi, logInfo, buf);
+    	sprintf(buf,"[KINSOL_INFO]Calling function: %s, Message: %s",function,msg);
+    	jmi_log(block->jmi, logInfo, buf);
 }
 
 void jmi_kinsol_error_handling(jmi_t* jmi, int flag){
@@ -458,7 +458,7 @@ static int jmi_kinsol_init(jmi_block_residual_t * block) {
     int ef;
     struct KINMemRec * kin_mem = solver->kin_mem; 
 
-    KINSetPrintLevel(solver->kin_mem, jmi->options.nle_solver_log_level);
+    KINSetPrintLevel(solver->kin_mem, (jmi->options.log_level<=3)? jmi->options.log_level: 3);
     
     /* set tolerances */
     if((block->n > 1) || !jmi->options.use_Brent_in_1d_flag) {
