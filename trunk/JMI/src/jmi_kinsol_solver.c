@@ -231,16 +231,15 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
 
 	if((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log)) {
 		char* buf = block->message_buffer ;
-		buf[0] = 0;
 		for(i = 0; i < N; i++){
+			buf[0] = 0;
 			sprintf(buf+strlen(buf),"Block:;%d;;;Jacobian:;",block->index);
 			for(j = 0; j < N; j++){
 				sprintf(buf+strlen(buf),"%30.16e;",(J->data)[i+j*N]);
 			}
-			sprintf(buf+strlen(buf),"\n");
+			fprintf(block->jmi->options.debug_log, "%s\n",buf);
+			fflush(block->jmi->options.debug_log);
 		}
-		fprintf(block->jmi->options.debug_log, "%s",buf);
-		fflush(block->jmi->options.debug_log);
 	}
 
 	if((block->jmi->options.log_level >= 6)) {
@@ -256,27 +255,6 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
 
 	}
 
-
-
-/*
-	printf("Q=N.array([");
-	for(i = 0; i < N; i++){
-		printf("[");
-		for(j = 0; j < N; j++){
-			printf("%12.12e",(J->data)[i+j*N]);
-			if (j<N-1) {
-				printf(", ");
-			}
-		}
-		printf("]");
-		if (i<N-1) {
-			printf(",\n");
-		}
-	}
-	printf("])\n");
-	printf("print N.linalg.cond(Q)\n");
-*/
-	/*printf("\n");*/
 	return ret;
 }
 
