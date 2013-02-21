@@ -24,8 +24,6 @@ def get_structured_fmu_log(log_file):
 
     l = f.readline()
 
-    #print l
-
     d = []
 
     jacs = {}
@@ -51,7 +49,7 @@ def get_structured_fmu_log(log_file):
         if l.find('[NLE_JAC]')==-1:
             jac_parsing_in_progress = False
 
-        if l.find('[NLE_SCALING]')>=0:
+        if l.find('[NLE_SCALING]')>=0 and l.find('Updating')>=0:
             ll = l.split(';')
             scalings[int(ll[1])] = []
             scalings_updated[int(ll[1])] = True
@@ -132,19 +130,25 @@ def get_structured_fmu_log(log_file):
         l = f.readline()
 
     return d
-        
-
-def FMU_write_log_to_file(model, tags=[], file_name='fmu_log.txt'):
-    f = open(file_name,'w')
+       
+def FMU_write_log_to_file(log_file, tags=[], file_name='fmu_log.txt'):
+    
+    fi = open(log_file)
+    fo = open(file_name,'w')
 
     if len(tags)==0:
-        for msg in model.get_log():
-            f.write("FMIL: module = " + msg[0] + " log level = " + str(msg[1]) + ": " + msg[2] + "\n")
+    	l = fi.readline()
+    	while l != '':
+            fo.write(l)
+            l = fi.readline()
+			    
     else:
-        for msg in model.get_log():
+    	l = fi.readline()
+    	while l != '':
             for tag in tags:
-            	if msg[2].find(tag)>=0:
-                    f.write(msg[2].split(tag)[1] + "\n")
+            	if l.find(tag)>=0:
+                    fo.write(l.split(tag)[1])
+            l = fi.readline()
 
-    f.close()
-    
+    fo.close()       
+       

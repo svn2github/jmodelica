@@ -322,7 +322,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
         int i,j;
 	    long int nniters;
         jmi_block_residual_t *block = eh_data;
-        char* buf = block->message_buffer ;
+        char* buf = block->message_buffer;
     	jmi_kinsol_solver_t* solver = block->solver;
         struct KINMemRec* kin_mem = solver->kin_mem;
         realtype* residual_scaling_factors = N_VGetArrayPointer(solver->kin_f_scale);
@@ -512,6 +512,7 @@ static int jmi_kinsol_init(jmi_block_residual_t * block) {
 static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vector b) {
     jmi_block_residual_t *block = (jmi_block_residual_t *)kin_mem->kin_user_data;
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;	
+    char* buf = block->message_buffer;
     realtype xnorm;        /* step norm */
     realtype min_step_ratio; /* fraction of the Newton step that is still over minimal step*/
     realtype max_step_ratio; /* maximum step length ratio limited by bounds */
