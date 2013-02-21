@@ -435,6 +435,7 @@ static int jmi_kinsol_init_bounds(jmi_block_residual_t * block) {
     solver->bounds = (realtype*)calloc(num_bounds, sizeof(realtype));
     solver->active_bounds = (realtype*)calloc(block->n, sizeof(realtype));
     num_bounds = 0;
+
     for(i=0; i < block->n; ++i) {
         if(block->max[i] != BIG_REAL) {
             solver->bound_vindex[num_bounds] = i;
@@ -449,6 +450,7 @@ static int jmi_kinsol_init_bounds(jmi_block_residual_t * block) {
             num_bounds++;
         }
     }
+	
     return 0;
 }
 
@@ -506,6 +508,8 @@ static int jmi_kinsol_init(jmi_block_residual_t * block) {
         jmi_log_error(jmi, "Jacobian evaluation failed at initial point for non-linear block %d", block->index);
     }
     return ef;
+
+
 }
 
 /* Limit the maximum step to be within bounds. Do projection if needed. */
@@ -555,17 +559,38 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         if(    ((kind == 1)&& (pbi >= pi))
 			|| ((kind == -1)&& (pbi <= pi)))
             continue; /* will not cross the bound */
+
         step_ratio_i =pbi/pi;   /* step ration to bound */
         if(step_ratio_i < min_step_ratio) {
 			/* this bound is active (we need to follow it) */
             activeBounds = TRUE;
             xxd[index] = 0;
             solver->active_bounds[index] = (kind == 1)? pbi:-pbi ; /* distance to the bound */
+
         }
         else
             max_step_ratio = MIN(max_step_ratio, step_ratio_i);          /* reduce the step */
     }
     
+	if (block->jmi->options.log_level >= 5 && activeBounds) {
+		/* Print min values */
+		char* buf = block->message_buffer ;
+		sprintf(buf,"[NLE_BOUNDS]Block:;%d;Active;Bounds:;;",block->index);
+		for (i=0; i < solver->num_bounds; i++) {
+			int index = solver->bound_vindex[i]; /* variable index */
+			if (solver->active_bounds[index] != 0) {
+				if (solver->bound_kind[i] == 1) {
+					sprintf(buf+strlen(buf),"max ");
+				} else {
+					sprintf(buf+strlen(buf),"min ");
+				}
+				sprintf(buf+strlen(buf),"#r%d#;",block->value_references[index]);
+			}
+		}
+		jmi_log(block->jmi, logInfo, buf);
+		
+	}
+
 	max_step_ratio *= MAX_NETON_STEP_RATIO * (1 - UNIT_ROUNDOFF);
     
     if((max_step_ratio < 1) || activeBounds) {
