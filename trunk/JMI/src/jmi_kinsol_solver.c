@@ -1082,6 +1082,12 @@ void jmi_kinsol_solver_print_solve_start(jmi_block_residual_t * block) {
 			sprintf(buf+strlen(buf),"%30.16E;",block->min[j]);
 		}
 		jmi_log(block->jmi, logInfo, buf);
+		block->F(block->jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
+		sprintf(buf,"[NLE_ITERS]Block:;%d;Initial guess;;;",block->index);
+		for (j=0;j<block->n;j++) {
+			sprintf(buf+strlen(buf),"%30.16E;",block->x[j]);
+		}
+		jmi_log(block->jmi, logInfo, buf);
 	}
 }
 

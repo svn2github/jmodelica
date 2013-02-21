@@ -109,6 +109,12 @@ def get_structured_fmu_log(log_file):
                 for i in range(5,len(ll)-1):
                     bl['max'].append(float(ll[i]))
 
+            if l.find('Initial guess')>=0:
+                bl['initial_guess'] = []
+                ll = l.split(';')
+                for i in range(5,len(ll)-1):
+                    bl['initial_guess'].append(float(ll[i]))
+
             if l.find('Min')>=0:
                 bl['min'] = []
                 ll = l.split(';')
