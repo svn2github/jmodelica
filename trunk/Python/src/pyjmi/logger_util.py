@@ -62,7 +62,7 @@ def get_structured_fmu_log(log_file):
                 s = {}
                 ll = l.split(';')
                 s['time'] = float(ll[-1])
-                s['solves'] = [] 
+                s['block_solves'] = [] 
 
             if l.find('Newton solver invoked')>=0:
                 bl = {}
@@ -121,7 +121,7 @@ def get_structured_fmu_log(log_file):
 
 
             if l.find('Newton solver finished')>=0:
-                s['solves'].append(bl)
+                s['block_solves'].append(bl)
 
             # Detect a solve has ended
             if l.find('Model equations evaluation finished')>=0:
