@@ -251,7 +251,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             ef = block->solve(block); if (ef!=0){ break; }
             jmi_write_back_to_z_val(jmi);
             
-            jmi_evaluate_switches(jmi,switches,mode_sw);
+            retval = jmi_evaluate_switches(jmi,switches,mode_sw);
             jmi_write_back_to_z(jmi);
         
             block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
@@ -308,7 +308,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             
             memcpy(x_new,block->x,block->n*sizeof(jmi_real_t));
             
-            jmi_evaluate_switches(jmi,switches,mode_sw);
+            retval = jmi_evaluate_switches(jmi,switches,mode_sw);
             jmi_write_back_to_z(jmi);
             
             block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
@@ -325,7 +325,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 block->F(jmi,x,NULL,JMI_BLOCK_WRITE_BACK);
                 jmi_write_back_to_z_val(jmi);
                 
-                jmi_evaluate_switches(jmi,switches,mode_sw);
+                retval = jmi_evaluate_switches(jmi,switches,mode_sw);
                 jmi_write_back_to_z(jmi);
             
                 block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
@@ -436,7 +436,7 @@ jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, 
         block->F(jmi,x_temp,NULL,JMI_BLOCK_WRITE_BACK);
         jmi_write_back_to_z_val(jmi);
         
-        jmi_evaluate_switches(jmi,sw,1);
+        retval = jmi_evaluate_switches(jmi,sw,1);
         jmi_write_back_to_z(jmi);
         
         /*

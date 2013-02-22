@@ -420,7 +420,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
         iter += 1;
         
         if (iter > 1){
-            jmi_evaluate_switches(jmi,switches,0);
+            retval = jmi_evaluate_switches(jmi,switches,0);
         }
         
         retval = jmi_ode_initialize(((fmi_t *)c)->jmi);
@@ -432,7 +432,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
         
         /* Evaluate the switches */
         memcpy(sw_temp,switches,nR0*sizeof(jmi_real_t));
-        jmi_evaluate_switches(jmi,sw_temp,0);
+        retval = jmi_evaluate_switches(jmi,sw_temp,0);
         
         if (jmi_compare_switches(switches,sw_temp,nR0)){
             initComplete = 1;
@@ -1274,7 +1274,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
         fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Global iteration %d at t=%g.",iter,jmi_get_t(jmi)[0]);
         
         /* Evaluate and turn the switches */
-        jmi_evaluate_switches(jmi,switches,1);
+        retval = jmi_evaluate_switches(jmi,switches,1);
 
     	/* Evaluate the ODE again */
         retval = jmi_ode_derivatives(jmi);
@@ -1309,7 +1309,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
         
         /* Evaluate the switches */
         memcpy(sw_temp,switches,nR*sizeof(jmi_real_t));
-        jmi_evaluate_switches(jmi,sw_temp,1);
+        retval = jmi_evaluate_switches(jmi,sw_temp,1);
         
         if (jmi_compare_switches(switches,sw_temp,nR) == 0){
             eventInfo->iterationConverged = fmiFalse;
@@ -1479,7 +1479,7 @@ jmi_int_t jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_
     return 1;
 }
 
-void jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, fmiInteger mode){
+int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, fmiInteger mode){
     fmiInteger nF,nR;
     fmiInteger nF0,nF1,nFp,nR0,retval;
 	fmiInteger i,size_switches;
@@ -1517,6 +1517,7 @@ void jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, fmiInteger mode){
         }
     }
     fmi->fmi_functions.freeMemory(event_indicators);
+    return 0;
 }
 
 jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel){
