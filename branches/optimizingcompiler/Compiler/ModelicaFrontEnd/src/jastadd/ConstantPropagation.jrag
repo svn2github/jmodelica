@@ -21,31 +21,24 @@ aspect VariabilityPropagation {
 	syn boolean FTypePrefixVariability.lessThan(FTypePrefixVariability other) =
 			variabilityLevel() < other.variabilityLevel();
 	//
-
-	public boolean FAbstractEquation.taggedForRemoval = false;
-	public boolean FAbstractEquation.variabilityPropagationEnabled = false;
+	syn boolean ASTNode.isWhen() = false;
+	eq FWhenEquation.isWhen() = true;
+	//
 	
-	public void FAbstractEquation.enableVariabilityPropagation() {}
-	public void FEquation.enableVariabilityPropagation() { variabilityPropagationEnabled = true; }
-	public void FIfWhenElseEquation.enableVariabilityPropagation() { variabilityPropagationEnabled = true; }
-	public void FWhenEquation.enableVariabilityPropagation() { }
+	public boolean FAbstractEquation.taggedForRemoval = false;
 	
 	public void FClass.variabilityPropagationIfSet() {
 		if (root().options.getBooleanOption("constant_propagation")) {
+			beginStep("variabilityPropagationIfSet()");
 			
 			enableConstantFolding();
 		
 			LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>(equations());
 			List<FAbstractEquation> parameterEquations = getFParameterEquations();
-			for (FAbstractEquation equation: worklist) {
-				equation.enableVariabilityPropagation();
-			}
 
 			while(!worklist.isEmpty()) {
 				FAbstractEquation equation = worklist.iterator().next();
-				if (equation.variabilityPropagationEnabled) {
-					equation.variabilityPropagation(worklist,parameterEquations);					
-				}
+				equation.variabilityPropagation(worklist,parameterEquations);		
 				worklist.remove(equation);
 			}
 			
@@ -55,29 +48,11 @@ aspect VariabilityPropagation {
 					if (block.getFAbstractEquations().getChild(i).taggedForRemoval) {
 						block.getFAbstractEquations().removeChild(i);
 						i--;
-					} else {
-						block.getFAbstractEquations().getChild(i).cleanEquations();
 					}
 				}
 			}
 			
-			flushAllRecursive();
-		}
-	}
-	
-	public void FAbstractEquation.cleanEquations() {}
-	public void FIfWhenElseEquation.cleanEquations() {
-		for (int i = 0; i < getNumFAbstractEquation(); i++) {
-			if (getFAbstractEquations().getChild(i).taggedForRemoval) {
-				getFAbstractEquations().removeChild(i);
-				i--;
-			}
-		}
-	}
-	public void FIfWhenEquation.cleanEquations() {
-		super.cleanEquations();
-		if (hasElse()) {
-			getElse().cleanEquations();			
+			endStep("variabilityPropagationIfSet()");
 		}
 	}
 
@@ -92,6 +67,10 @@ aspect VariabilityPropagation {
 			LinkedHashSet<FAbstractEquation> worklist,
 			List<FAbstractEquation> parameterEquations) {
 		
+		if (getParent().isWhen()) {
+			return;
+		}
+		
 		tryPropagate(getLeft(),getRight(),worklist,parameterEquations);
 		tryPropagate(getRight(),getLeft(),worklist,parameterEquations);
 	}
@@ -102,40 +81,14 @@ aspect VariabilityPropagation {
 			List<FAbstractEquation> parameterEquations) {
 		
 		if (fromExp.variability().lessThan(toExp.variability()) &&
-			toExp.variabilityPropagationGoDown(worklist,fromExp)) {
+			!fromExp.isDiscreteExp() && toExp.variabilityPropagationGoDown(worklist,fromExp)) {
+			
 			if (fromExp.variability().parameterOrLess()) {
 				taggedForRemoval = true;
 			}
 			if (fromExp.variability().parameterVariability()) {
 				parameterEquations.add(new FEquation(toExp,fromExp));
 			}
-		}
-	}
-	
-	public void FIfEquation.variabilityPropagation(
-			LinkedHashSet<FAbstractEquation> worklist,
-			List<FAbstractEquation> parameterEquations) {
-		
-		if (getTest().isConstantExp() && !getTest().ceval().isUnknown()) {
-			if (getTest().ceval().booleanValue()) {
-				for (FAbstractEquation equation: getFAbstractEquations()) {
-					equation.enableVariabilityPropagation();
-					worklist.add(equation);
-				}
-			} else if (hasElse()) {
-				getElse().enableVariabilityPropagation();
-				worklist.add(getElse());
-			}
-		}
-	}
-	
-	public void FElseEquation.variabilityPropagation(
-			LinkedHashSet<FAbstractEquation> worklist,
-			List<FAbstractEquation> parameterEquations) {
-		
-		for (FAbstractEquation equation: getFAbstractEquations()) {
-			equation.enableVariabilityPropagation();
-			worklist.add(equation);
 		}
 	}
 	
@@ -209,7 +162,12 @@ aspect VariabilityPropagation {
 
 aspect ConstantFolding {
 	public boolean FExp.constantFoldingEnabled = false;
-	syn boolean FExp.constantFolding() = constantFoldingEnabled && isConstantExp() && !ceval().isUnknown();		
+	
+	syn boolean FExp.constantFoldingEligible() = false;
+	eq FIdUseExp.constantFoldingEligible() =  true;
+	eq FUnaryExp.constantFoldingEligible() = true;
+	eq FBinExp.constantFoldingEligible() = true;
+	eq FIfExp.constantFoldingEligible() = true;
 		
 	public void FClass.enableConstantFolding() {
 		super.enableConstantFolding();
@@ -220,32 +178,24 @@ aspect ConstantFolding {
 			n.enableConstantFolding();
 	}
 
-	public void FFunctionDecl.enableConstantFolding() {} /* Gives exceptions during function ceval */
+//	public void FFunctionDecl.enableConstantFolding() {} /* Gives exceptions during function ceval */
 	
 	public void FExp.enableConstantFolding() {
 		constantFoldingEnabled = true;
 		is$Final = false;
 		super.enableConstantFolding();
 	}
-
-	rewrite FIdUseExp {
-		when (constantFolding()) to FExp {
-			return ceval().buildLiteral();
-		}
-	}
-	rewrite FUnaryExp {
-		when (constantFolding()) to FExp {
-			return ceval().buildLiteral();
-		}
-	}
-	rewrite FBinExp {
-		when (constantFolding()) to FExp {
-			return ceval().buildLiteral();
-		}
-	}
+	
 	rewrite FIfExp {
-		when (constantFolding()) to FExp {
+		when (constantFoldingEnabled && getIfExp().isConstantExp() && !getIfExp().ceval().isUnknown()) to FExp {
+			return getIfExp().ceval().booleanValue() ? getThenExp() : getElseExp();
+		}
+	}
+
+	rewrite FExp {
+		when (constantFoldingEnabled && constantFoldingEligible() && isConstantExp() && !ceval().isUnknown()) to FExp {
 			return ceval().buildLiteral();
 		}
-	}	
+	}
+
 }

@@ -38,10 +38,8 @@ fclass ConstantPropagationTests.VariabilityInference
  constant Real x1 = 1;
  constant Boolean x2 = true;
  parameter Real p1 = 4 /* 4 */;
- parameter Real r1;
  parameter Real r2;
 parameter equation
- r1 = p1;
  r2 = p1 + 1.0;
 end ConstantPropagationTests.VariabilityInference;
 ")})));
@@ -81,9 +79,7 @@ equation
 			constant_propagation=true,
 			flatModel="
 fclass ConstantPropagationTests.ConstantSubstitution
- constant Real x1 = 1;
- constant Real x2 = 2.0;
- constant Real x3 = 1.0;
+ constant Real x3 = 1;
  constant Real x4 = 2.0;
 end ConstantPropagationTests.ConstantSubstitution;
 ")})));
@@ -191,8 +187,7 @@ equation
 			flatModel="
 fclass ConstantPropagationTests.IfEq1
  constant Real p1 = 4;
- constant Real x1 = 3.0;
- constant Real x2 = 3;
+ constant Real x1 = 3;
 end ConstantPropagationTests.IfEq1;
 ")})));
 end IfEq1;
@@ -249,10 +244,7 @@ equation
 fclass ConstantPropagationTests.IfEq3
  constant Real c1 = 4;
  parameter Real p1 = 1 /* 1 */;
- parameter Real x1;
  constant Real x2 = 3;
-parameter equation
- x1 = p1;
 end ConstantPropagationTests.IfEq3;
 ")})));
 end IfEq3;

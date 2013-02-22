@@ -72,14 +72,18 @@ aspect TransformCanonical {
 	  *  transformCanonicalBase contains all transformation that should be
 	  *  done by both the Modelica and the Optimica compilers.
 	  */
-	public void FClass.transformCanonicalBase() {
+	public void FClass.transformCanonicalBase(BufferedWriter out) throws IOException{
+		
+		out.write("Step, Var total, Var const, Var param, Var disc, Var cont, Equ total, ");
+		out.write("Inci total, Inci 1_0, Inci 1_1, Inci 2_0, Inci 2_1, Inci 2_2, ");
+		out.write("Exps total, Exps artm, Exps bool\n");
+		
 		addStateInitialEquationsIfSet();
 		genAlgorithmFunctions();
 		genBindingEquations();
 		scalarize();
 		propagateResidualPairs();
 		genInitArrayStatements();
-		variabilityPropagationIfSet();
         enableIfEquationElimination();
 		functionInliningIfSet();
 		aliasEliminationIfSet();
@@ -87,11 +91,93 @@ aspect TransformCanonical {
 		addFPreVariables();
         enableIfEquationRewrite();
 		enableWhenEquationRewrite();
+		if (root().options.getBooleanOption("constant_propagation")) {
+			printStats("Before cprop",out);
+			variabilityPropagationIfSet();
+			root().flushAllRecursive();
+			printStats("After cprop",out);
+		}
 		root().flushAllRecursive();
 		genInitialEquations();
 		sortDependentParameters();
 		addRuntimeOptionParameters();
 	}
+	
+	public void FClass.printStats(String title, BufferedWriter out) throws IOException {
+		out.write(title + ", " + count(10) + ", " + count(11) + ", " + count(12) + ", " + count(13) + ", " + count(14) + ", ");
+		out.write(numEquations() + ", " + countInEquations(30) + ", ");
+		countEqsWithVars(1,out);
+		countEqsWithVars(2,out);
+		out.write(count(20) + ", " + countInEquations(21) + ", " + countInEquations(22) + "\n");
+	}
+	
+	public int FClass.countEqsWithVars(int vs, BufferedWriter out) throws IOException {
+		int count = 0;
+		int[] t = new int[vs+1];
+		for (FAbstractEquation e : equations()) {
+			if (e.variables().size() == vs) {
+				int v_solve_count = 0;
+				for (FVariable v : e.variables()) {
+					if (e.isSolved(v.name()))
+						v_solve_count++;
+				}
+				t[v_solve_count]++;
+				count++;
+			}
+		}
+		
+		for (int i = 0; i < vs+1; i++) {
+			out.write(t[i] + ", ");
+		}
+		return count;
+	}
+	
+	// 11 = constant
+	// 12 = parameter
+	// 13 = discrete
+	// 14 = continuous
+	
+	// 20 = Unary/Bin Exp
+	// 21 = Unary/Bin ArtmExp
+	// 22 = Unary/Bin BoolExp
+	
+	// 30 = FIdUseExp
+	
+	public int FClass.countInEquations(int type) {
+		int sum = 0;
+		for (FAbstractEquation e : equations()) 
+			sum += e.count(type);
+		return sum;
+	}
+	
+	public int ASTNode.count(int type) {
+		int sum = 0;
+		for (ASTNode n : this)
+			sum += n.count(type);
+		return sum;
+	}
+	
+	public int FVariable.count(int type) {
+		return type == 10 || 
+				type == 11 && this.variability().constantVariability() ||
+				type == 12 && this.variability().parameterVariability() ||
+				type == 13 && this.variability().discreteVariability() ||
+				type == 14 && this.variability().continuousVariability()
+				? 1 : 0;
+	}
+	
+	syn int FExp.count(int type);
+	eq FExp.count(int type)          = super.count(type);
+	
+	eq FBinExp.count(int type)       = (type == 20 ? 1 : 0) + super.count(type);
+	eq FArtmBinExp.count(int type)   = (type == 21 ? 1 : 0) + super.count(type);
+	eq FBoolBinExp.count(int type)   = (type == 22 ? 1 : 0) + super.count(type);
+	
+	eq FUnaryExp.count(int type)     = (type == 20 ? 1 : 0) + super.count(type);
+	eq FNegExp.count(int type)       = (type == 21 ? 1 : 0) + super.count(type);
+	eq FNotExp.count(int type)       = (type == 22 ? 1 : 0) + super.count(type);
+	
+	eq FIdUseExp.count(int type)     = (type == 30 ? 1 : 0);
 	
 	public void FClass.transformCanonicalCleanup() {
 		removeUnusedFunctions();
@@ -100,16 +186,24 @@ aspect TransformCanonical {
 
 	public void FClass.transformCanonical() {
 		beginStep("transformCanonical()");
-
-		transformCanonicalBase();
-
-		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
-			// Equations are added as part of this this method
-			computeMatchingsAndBLT();
+		try {
+			FileWriter fstream = new FileWriter("transformcounts.txt");
+			BufferedWriter out = new BufferedWriter(fstream);
+	
+			transformCanonicalBase(out);
+	
+			if (root().options.getBooleanOption("automatic_add_initial_equations")) {
+				// Equations are added as part of this this method
+				computeMatchingsAndBLT();
+			}
+	
+			root().flushAllRecursive();	
+			transformCanonicalCleanup();
+			printStats("End",out);
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-
-		root().flushAllRecursive();	
-		transformCanonicalCleanup();
 		endStep("transformCanonical()");
 	}
 		

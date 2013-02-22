@@ -119,7 +119,7 @@ aspect OptimicaTransformCanonical {
 			// Flush to reset cashes
 			root().flushAllRecursive();
 		}
-		transformCanonicalBase();		
+		try { transformCanonicalBase(null); } catch (IOException e) { e.printStackTrace(); }		
 	    transformCanonicalCleanup();
 
     	endStep("transformCanonical()");
