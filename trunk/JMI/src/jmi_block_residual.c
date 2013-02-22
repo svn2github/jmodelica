@@ -121,7 +121,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 
 
 int jmi_solve_block_residual(jmi_block_residual_t * block) {
-    int ef;    
+    int ef,retval;    
     clock_t c0,c1; /*timers*/
     jmi_t* jmi = block->jmi;
     fmi_t* fmi = jmi->fmi;
@@ -320,7 +320,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 iter += 1;
                 
                 h = jmi_compute_minimal_step(block, x, x_new, &sw_old[(iter-1)*nbr_sw], &bool_old[(iter-1)*nbr_bool],nbr_sw, 1e-4);
-                jmi_compute_reduced_step(h,x_new,x,x,block->n);
+                retval = jmi_compute_reduced_step(h,x_new,x,x,block->n);
                 
                 block->F(jmi,x,NULL,JMI_BLOCK_WRITE_BACK);
                 jmi_write_back_to_z_val(jmi);
@@ -420,6 +420,7 @@ jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, 
     jmi_real_t *x_temp;
     jmi_t* jmi = block->jmi;
     fmi_t* fmi = jmi->fmi;
+    int retval;
     
     sw = (jmi_real_t*)fmi->fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
     x_temp = (jmi_real_t*)fmi->fmi_functions.allocateMemory(block->n, sizeof(jmi_real_t));
@@ -429,7 +430,7 @@ jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, 
     while (1){
         h = (b-a)/2.0;
         
-        jmi_compute_reduced_step(a+h,x_new,x,x_temp,block->n);
+        retval = jmi_compute_reduced_step(a+h,x_new,x,x_temp,block->n);
         
         /*jmi_write_block_x(block,x);*/
         block->F(jmi,x_temp,NULL,JMI_BLOCK_WRITE_BACK);
@@ -464,11 +465,12 @@ jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, 
     return b;
 }
 
-void jmi_compute_reduced_step(jmi_real_t h, jmi_real_t* x_new, jmi_real_t* x, jmi_real_t* x_target, fmiInteger size){
+int jmi_compute_reduced_step(jmi_real_t h, jmi_real_t* x_new, jmi_real_t* x, jmi_real_t* x_target, fmiInteger size){
     int i;
     for (i=0;i<size;i++){
         x_target[i] = x[i]+(h)*(x_new[i]-x[i]);
     }
+    return 0;
 }
 
 int jmi_block_jacobian_fd(jmi_block_residual_t* b, jmi_real_t* x, jmi_real_t delta_rel, jmi_real_t delta_abs) {
