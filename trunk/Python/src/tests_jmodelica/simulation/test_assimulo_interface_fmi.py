@@ -39,6 +39,8 @@ except (NameError, ImportError):
     logging.warning('Could not load Assimulo module. Check pyfmi.check_packages()')
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
+path_to_fmus_me1 = os.path.join(path_to_fmus,"ME1.0")
+path_to_fmus_cs1 = os.path.join(path_to_fmus,"CS1.0")
 path_to_mos  = os.path.join(get_files_path(), 'Modelica')
 
 
@@ -214,8 +216,8 @@ class Test_FMI_ODE:
         """
         Load the test model.
         """
-        self._bounce  = load_fmu('bouncingBall.fmu',path_to_fmus)
-        self._dq = load_fmu('dq.fmu',path_to_fmus)
+        self._bounce  = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        self._dq = load_fmu('dq.fmu',path_to_fmus_me1)
         self._bounce.initialize()
         self._dq.initialize()
         self._bounceSim = FMIODE(self._bounce)
@@ -401,7 +403,7 @@ class Test_FMI_ODE:
         """
         This tests a simulation of a Pendulum with dynamic state selection.
         """
-        model = load_fmu('Pendulum_0Dynamic.fmu', path_to_fmus)
+        model = load_fmu('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         
         res = model.simulate(final_time=10)
     
@@ -413,7 +415,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(x1_sim[-1], 0.290109468, 4)
         nose.tools.assert_almost_equal(x2_sim[-1], -0.956993467, 4)
         
-        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus)
+        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         
         res = model.simulate(final_time=10, options={'ncp':1000})
     
@@ -430,7 +432,7 @@ class Test_FMI_ODE:
         """
         This tests a simulation with an event of terminate simulation.
         """
-        model = load_fmu('Robot.fmu', path_to_fmus)
+        model = load_fmu('Robot.fmu', path_to_fmus_me1)
         
         res = model.simulate(final_time=2.0)
         solver = res.solver
@@ -442,7 +444,7 @@ class Test_FMI_ODE:
         """
         This tests a FMU with typeDefinitions including StringType and BooleanType
         """
-        model = load_fmu('Robot_Dym74FD01.fmu', path_to_fmus)
+        model = load_fmu('Robot_Dym74FD01.fmu', path_to_fmus_me1)
         
         res = model.simulate(final_time=2.0)
         solver = res.solver
@@ -505,7 +507,7 @@ class Test_FMI_ODE:
         """
         This tests a simulation with different start time.
         """
-        bounce = FMUModel('bouncingBall.fmu', path_to_fmus)
+        bounce = FMUModel('bouncingBall.fmu', path_to_fmus_me1)
         #bounce.initialize()
         opts = bounce.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-4
@@ -525,7 +527,7 @@ class Test_FMI_ODE:
         This tests the basic simulation and writing.
         """
         #Writing continuous
-        bounce = load_fmu('bouncingBall.fmu', path_to_fmus)
+        bounce = load_fmu('bouncingBall.fmu', path_to_fmus_me1)
         #bounce.initialize()
         opts = bounce.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-4
@@ -539,7 +541,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(time[-1],3.000000,5)
         
         #Writing after
-        bounce = load_fmu('bouncingBall.fmu', path_to_fmus)
+        bounce = load_fmu('bouncingBall.fmu', path_to_fmus_me1)
         bounce.initialize()
         opt = bounce.simulate_options()
         opt['continuous_output'] = False
@@ -556,7 +558,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(time[-1],3.000000,5)
         
         #Test with predefined FMUModel
-        model = load_fmu(os.path.join(path_to_fmus,'bouncingBall.fmu'))
+        model = load_fmu(os.path.join(path_to_fmus_me1,'bouncingBall.fmu'))
         #model.initialize()
         res = model.simulate(final_time=3.,options=opts)
 
@@ -574,7 +576,7 @@ class Test_FMI_ODE:
         This test the default values of the simulation using simulate.
         """
         #Writing continuous
-        bounce = load_fmu('bouncingBall.fmu', path_to_fmus)
+        bounce = load_fmu('bouncingBall.fmu', path_to_fmus_me1)
         opts = bounce.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-4
         opts["CVode_options"]["atol"] = 1e-6
@@ -591,7 +593,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(time[-1],3.000000,5)
         
         #Writing continuous
-        bounce = load_fmu('bouncingBall.fmu', path_to_fmus)
+        bounce = load_fmu('bouncingBall.fmu', path_to_fmus_me1)
         #bounce.initialize(options={'initialize':False})
         res = bounce.simulate(final_time=3.,
             options={'initialize':True,'CVode_options':{'iter':'FixedPoint','rtol':1e-6,'atol':1e-6}})
@@ -612,7 +614,7 @@ class Test_FMI_ODE:
         FMUs)
         """
         #Writing continuous
-        bounce = load_fmu('bouncingBall.fmu', path_to_fmus)
+        bounce = load_fmu('bouncingBall.fmu', path_to_fmus_me1)
         opts = bounce.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-4
         opts["CVode_options"]["atol"] = 1e-6
