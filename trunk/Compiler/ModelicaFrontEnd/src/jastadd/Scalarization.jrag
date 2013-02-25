@@ -1107,11 +1107,25 @@ aspect Scalarization {
 		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
 			stmt.scalarizeStmt(vars, stmts, emptyIndexMap);
 		
-		FQName name = (FQName) getFQName().fullCopy();
-	
-	    FFunctionDecl fd = new FFunctionDecl(name, vars, new FAlgorithmBlock(stmts), getFDerivativeFunctionOpt());
-	
+		FFunctionDecl fd = createDecl();
+		fd.setFQName(getFQName().fullCopy());
+		fd.setFFunctionVariableList(vars);
+		fd.setFAlgorithmBlock(new FAlgorithmBlock(stmts));
+		if (hasFDerivativeFunction())
+			fd.setFDerivativeFunction(getFDerivativeFunction().fullCopy());
 		return fd;
+	}
+	
+	public FFunctionDecl FFunctionDecl.createDecl() {
+		return new FFunctionDecl();
+	}
+	
+	public FFunctionDecl FConstructorDecl.createDecl() {
+		return new FConstructorDecl();
+	}
+	
+	public FFunctionDecl FDestructorDecl.createDecl() {
+		return new FDestructorDecl();
 	}
 	
 	/**

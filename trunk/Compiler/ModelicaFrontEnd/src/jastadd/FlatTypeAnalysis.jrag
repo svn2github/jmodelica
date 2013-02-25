@@ -930,6 +930,43 @@ aspect BuiltInFlatTypes {
 	syn boolean FType.isPrimitiveScalar() = isPrimitive() && isScalar();
 	syn boolean FType.isPrimitiveArray()  = isPrimitive() && isArray();
 	
+	syn boolean FType.containsReal() = isReal();
+	eq FRecordType.containsReal() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsReal())
+				return true;
+		return false;
+	}
+	syn boolean FType.containsInteger() = isInteger();
+	eq FRecordType.containsInteger() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsInteger())
+				return true;
+		return false;
+	}
+	syn boolean FType.containsBoolean() = isBoolean();
+	eq FRecordType.containsBoolean() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsBoolean())
+				return true;
+		return false;
+	}
+	syn boolean FType.containsRecord() = isRecord();
+	syn boolean FType.containsEnum() = isEnum();
+	eq FRecordType.containsEnum() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsEnum())
+				return true;
+		return false;
+	}
+	syn boolean FType.containsExternalObject() = isExternalObject();
+	eq FRecordType.containsExternalObject() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsExternalObject())
+				return true;
+		return false;
+	}
+	
 	// For type comparisons ending with "or records of such types"
 	public abstract class FType {
 		protected static interface TypeChecker {

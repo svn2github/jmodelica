@@ -2053,6 +2053,43 @@ aspect FlatFunctionUtils {
       */
      syn boolean FFunctionDecl.isComposite() = hasOutputs() ? expOutput().isComposite() : false;
      
+	syn boolean FFunctionDecl.containsRealInputs() {
+		for (FFunctionVariable var : myInputs())
+			if (var.type().containsReal())
+				return true;
+		return false;
+	}
+	syn boolean FFunctionDecl.containsRealOutputs() {
+		for (FFunctionVariable var : myOutputs())
+			if (var.type().containsReal())
+				return true;
+		return false;
+	}
+	
+	syn boolean FFunctionDecl.requiresDerivative() = true;
+	eq FConstructorDecl.requiresDerivative()       = false;
+	eq FDestructorDecl.requiresDerivative()        = false;
+	
+	syn boolean FFunctionDecl.derivativEqualsZero() = !containsRealInputs() || !containsRealOutputs();
+	
+	/**
+	 * Determines if the compiler is able to differentiate this function declaration
+	 */
+	syn boolean FFunctionDecl.canDifferentiate() {
+		if (hasFDerivativeFunction())
+			return true;
+		if (derivativEqualsZero())
+			return true;
+		for (FStatement statement : getFAlgorithmBlock().getFStatements())
+			if (!statement.canDifferentiate())
+				return false;
+		return true;
+	}
+	
+	syn boolean FStatement.canDifferentiate() = true;
+	eq FExternalStmt.canDifferentiate()       = false;
+	
+     
      /**
       * Returns a string (tersely) describing the signature of the function.
       * 

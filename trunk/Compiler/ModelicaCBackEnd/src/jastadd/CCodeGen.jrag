@@ -256,6 +256,8 @@ aspect CCodeGen {
 			}
 		}
 		str.print(")");
+		if (!exp)
+			str.print(";\n");
 	}
 	
 	public String FunctionReturnDefinition.getDeclaredType_C() {
@@ -831,9 +833,7 @@ aspect CCodeGen {
 	public void FFunctionCallStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		if (!getCall().isIgnored()) {
 			genTempVars_C(p, str, indent);
-			str.print(indent);
 			p.print(getCall(), str, "");
-			str.print(";\n");
 		}
 	}
 
@@ -1522,7 +1522,7 @@ aspect CCodeGen {
 		
 		// Min values
 		var_counter = 0;
-		str.print("  } else  if (evaluation_mode==JMI_BLOCK_MIN) {\n");
+		str.print("  } else if (evaluation_mode==JMI_BLOCK_MIN) {\n");
 		for (FVariable fv : blockResidualVariables_C()) {
 			if(((FRealVariable)fv).minAttributeSet()) {
 				str.print("    x["+var_counter+"] = ");
@@ -1865,7 +1865,6 @@ aspect CCodeGen {
 	 	if (!equation().getCall().isIgnored()) {
 			equation().genTempVars_C(ASTNode.printer_C, str, indent);
 			equation().getCall().prettyPrint_C(str, indent);
-			str.print(";\n");
 			for (FFunctionCallLeft l : equation().getLefts()) 
 				l.genWriteBackAssignment_C(str, indent, null);
 		}
@@ -1944,25 +1943,12 @@ aspect CCodeGen {
 	public void FFunctionCallEquation.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {
 		boolean firstVisit = visited == null ? true : visited.add(this);
 		if (!getCall().isIgnored()) {
-			genTempVars_C(printer_C, str, indent);
 			if (firstVisit) {
+				genTempVars_C(printer_C, str, indent);
 				getCall().prettyPrint_C(str, indent);
-				str.print(";\n");
 			}
-			for (FFunctionCallLeft l : getLefts()) {
-				boolean generate = true;
-				if (forVariables != null) {
-					generate = false;
-					for (FVariable var : l.referencedFVariables()) {
-						if (forVariables.contains(var)) {
-							generate = true;
-							break;
-						}
-					}
-				}
-				if (generate)
-					l.genWriteBack_C(str, indent, enumerator);
-			}
+			for (FFunctionCallLeft l : getLefts())
+				l.genWriteBack_C(str, indent, enumerator, forVariables);
 		}
 	}
 
@@ -1979,49 +1965,49 @@ aspect CCodeGen {
 	
 	public void FFunctionCallEquation.genNominal_C(Enumerator enumerator, String indent, PrintStream str, Set<FVariable> forVariables) {
 		if (!getCall().isIgnored()) {
-			for (FFunctionCallLeft l : getLefts()) {
-				boolean generate = true;
-				if (forVariables != null) {
-					generate = false;
-					for (FVariable var : l.referencedFVariables()) {
-						if (forVariables.contains(var)) {
-							generate = true;
-							break;
-						}
-					}
-				}
-				if (generate)
-					l.genWriteNominal_C(str, indent, enumerator);
-			}
+			for (FFunctionCallLeft l : getLefts())
+				l.genWriteNominal_C(str, indent, enumerator, forVariables);
 		}
 	}
 	
-	public void FFunctionCallLeft.genWriteNominal_C(PrintStream str, String indent, Enumerator enumerator) {
+	public void FFunctionCallLeft.genWriteNominal_C(PrintStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
 		if (hasFExp()) 
-			getFExp().type().genWriteNominal_C(str, indent, getFExp(), enumerator);
+			getFExp().type().genWriteNominal_C(str, indent, getFExp(), enumerator, forVariables);
 	}
 	
-	public void FType.genWriteNominal_C(PrintStream str, String indent, FExp exp, Enumerator enumerator) {
+	public void FType.genWriteNominal_C(PrintStream str, String indent, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
 		if (isArray()) {
 			Array arr = exp.getArray();
 			for (Index i : arr.indices()) {
-				genCellWriteNominal_C(str, indent, arr.get(i), enumerator);
+				genCellWriteNominal_C(str, indent, arr.get(i), enumerator, forVariables);
 			}
 		} else {
-			genCellWriteNominal_C(str, indent, exp, enumerator);
+			genCellWriteNominal_C(str, indent, exp, enumerator, forVariables);
 		}
 	}
 	
-	public void FType.genCellWriteNominal_C(PrintStream str, String indent, FExp exp, Enumerator enumerator) {
+	public void FType.genCellWriteNominal_C(PrintStream str, String indent, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
+		exp.genCellWriteNominal_C(str, indent, enumerator, forVariables);
+	}
+	
+	public void FExp.genCellWriteNominal_C(PrintStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public void FIdUseExp.genCellWriteNominal_C(PrintStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
+		if (forVariables != null && !forVariables.contains(myFV()))
+			return; // This variable is not in the set of variables to generate code for.
 		str.print(indent + "(*res)[");
 		str.print(enumerator.next());
 		str.print("] = 1;\n");
 	}
 	
-	public void FRecordType.genCellWriteNominal_C(PrintStream str, String indent, FExp exp, Enumerator enumerator) {
+	@Override
+	public void FRecordType.genCellWriteNominal_C(PrintStream str, String indent, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
 		for (FRecordComponentType comp : getComponents()) {
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
-			comp.getFType().genWriteNominal_C(str, indent, compExp, enumerator);
+			comp.getFType().genWriteNominal_C(str, indent, compExp, enumerator, forVariables);
 		}
 	}
 	
@@ -2056,27 +2042,26 @@ aspect CCodeGen {
 	public void FFunctionCallEquation.genAssignment_C(String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {
 		boolean firstVisit = visited == null ? true : visited.add(this);
 		if (!getCall().isIgnored()) {
-			genTempVars_C(printer_C, str, indent);
 			if (firstVisit) {
+				genTempVars_C(printer_C, str, indent);
 				getCall().prettyPrint_C(str, indent);
-				str.print(";\n");
 			}
 			int i = 0;
 			for (FFunctionCallLeft l : getLefts()) {
-				boolean generate = true;
-				if (forVariables != null) {
-					generate = false;
-					for (FVariable var : l.referencedFVariables()) {
-						if (forVariables.contains(var)) {
-							generate = true;
-							break;
-						}
-					}
-				}
-				if (generate) {
+//				boolean generate = true;
+//				if (forVariables != null) {
+//					generate = false;
+//					for (FVariable var : l.referencedFVariables()) {
+//						if (forVariables.contains(var)) {
+//							generate = true;
+//							break;
+//						}
+//					}
+//				}
+//				if (generate) {
 					l.setEquationIndex(i++);
-					l.genWriteBackAssignment_C(str, indent, null);
-				}
+					l.genWriteBackAssignment_C(str, indent, forVariables);
+//				}
 			}
 		}
 	}
@@ -2108,38 +2093,43 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void FFunctionCallLeft.genWriteBack_C(PrintStream str, String indent, Enumerator enumerator) {
+	public void FFunctionCallLeft.genWriteBack_C(PrintStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
 		if (hasFExp()) 
-			getFExp().type().genWriteBack_C(str, indent, name_C(), getFExp(), enumerator);
+			getFExp().type().genWriteBack_C(str, indent, name_C(), getFExp(), enumerator, forVariables);
 	}
 	
-	public void FType.genWriteBack_C(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator) {
+	public void FType.genWriteBack_C(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
 			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
 			Array arr = exp.getArray();
 			for (Index i : arr.indices()) {
 				String cellName = pre + i.toUnclosedString() + ")";
-				genCellWriteBack_C(str, indent, cellName, arr.get(i), enumerator);
+				genCellWriteBack_C(str, indent, cellName, arr.get(i), enumerator, forVariables);
 			}
 		} else {
-			genCellWriteBack_C(str, indent, name, exp, enumerator);
+			genCellWriteBack_C(str, indent, name, exp, enumerator, forVariables);
 		}
 	}
 	
-	public void FType.genCellWriteBack_C(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator) {
-		exp.genWriteBack_C(str, indent, name, enumerator);
+	public void FType.genCellWriteBack_C(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
+		exp.genWriteBack_C(str, indent, name, enumerator, forVariables);
 	}
 	
-	public void FRecordType.genCellWriteBack_C(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator) {
+	public void FRecordType.genCellWriteBack_C(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
-			comp.getFType().genWriteBack_C(str, indent, compName, compExp, enumerator);
+			comp.getFType().genWriteBack_C(str, indent, compName, compExp, enumerator, forVariables);
 		}
 	}
 	
-	public void FExp.genWriteBack_C(PrintStream str, String indent, String name, Enumerator enumerator) {
+	public void FExp.genWriteBack_C(PrintStream str, String indent, String name, Enumerator enumerator, Set<FVariable> forVariables) {
+		throw new UnsupportedOperationException();
+	}
+	public void FIdUseExp.genWriteBack_C(PrintStream str, String indent, String name, Enumerator enumerator, Set<FVariable> forVariables) {
+		if (forVariables != null && !forVariables.contains(myFV()))
+			return; // This variable is not in the set of variables to generate code for.
 		str.print(indent);
 		str.print("(*res)[");
 		str.print(enumerator.next());
@@ -2150,48 +2140,46 @@ aspect CCodeGen {
 		str.print(");\n");
 	}
 	
-	public void FFunctionCallLeft.genWriteBackAssignment_C(PrintStream str, String indent, Set<FVariable> vars) {
+	public void FFunctionCallLeft.genWriteBackAssignment_C(PrintStream str, String indent, Set<FVariable> forVariables) {
 		if (hasFExp()) 
-			getFExp().type().genWriteBackAssignment_C(str, indent, name_C(), getFExp(), vars);
+			getFExp().type().genWriteBackAssignment_C(str, indent, name_C(), getFExp(), forVariables);
 	}
 	
-	public void FType.genWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp, Set<FVariable> vars) {
+	public void FType.genWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp, Set<FVariable> forVariables) {
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
 			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
 			Array arr = exp.getArray();
 			for (Index i : arr.indices()) {
 				String cellName = pre + i.toUnclosedString() + ")";
-				genCellWriteBackAssignment_C(str, indent, cellName, arr.get(i), vars);
+				genCellWriteBackAssignment_C(str, indent, cellName, arr.get(i), forVariables);
 			}
 		} else {
-			genCellWriteBackAssignment_C(str, indent, name, exp, vars);
+			genCellWriteBackAssignment_C(str, indent, name, exp, forVariables);
 		}
 	}
 	
-	public void FType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp, Set<FVariable> vars) {
-		exp.genWriteBackAssignment_C(str, indent, name, vars);
+	public void FType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp, Set<FVariable> forVariables) {
+		exp.genWriteBackAssignment_C(str, indent, name, forVariables);
 	}
 	
-	public void FRecordType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp, Set<FVariable> vars) {
+	public void FRecordType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp, Set<FVariable> forVariables) {
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
-			comp.getFType().genWriteBackAssignment_C(str, indent, compName, compExp, vars);
+			comp.getFType().genWriteBackAssignment_C(str, indent, compName, compExp, forVariables);
 		}
 	}
 
-	public void FExp.genWriteBackAssignment_C(PrintStream str, String indent, String name, Set<FVariable> vars) {
+	public void FExp.genWriteBackAssignment_C(PrintStream str, String indent, String name, Set<FVariable> forVariables) {
 		throw new UnsupportedOperationException();
 	}
 	
-	public void FIdUseExp.genWriteBackAssignment_C(PrintStream str, String indent, String name, Set<FVariable> vars) {
-		str.print(indent);
-		if (vars != null && !vars.contains(myFV()))
+	public void FIdUseExp.genWriteBackAssignment_C(PrintStream str, String indent, String name, Set<FVariable> forVariables) {
+		if (forVariables != null && !forVariables.contains(myFV()))
 			return; // This variable is not in the set of variables to generate code for.
-		
+		str.print(indent);
 		getFIdUse().prettyPrint_C(str,"");
-//		prettyPrint_C(str, "");
 		str.print(" = (");
 		str.print(name);
 		str.print(")");

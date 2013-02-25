@@ -6276,6 +6276,7 @@ end ExternalFuncLibs8;
 
 model ExternalFuncError1
 	function f
+		input Real x;
 		output Real y;
 		external;
 	end f;
@@ -6288,11 +6289,11 @@ equation
 			description="",
 			generate_block_jacobian=true,
 			errorMessage="
- 1 errors found:
+1 errors found:
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 38, column 6:
-  No derivative annotation is specified for external function f
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 0, column 0:
+  Unable to determine derivative function for function 'FunctionTests.ExternalFuncError1.f'
 ")})));
 end ExternalFuncError1;
 

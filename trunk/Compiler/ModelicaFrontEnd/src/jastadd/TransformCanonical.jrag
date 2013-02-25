@@ -5621,12 +5621,38 @@ aspect FunctionInlining {
 		endStep("removeUnusedFunctions()");
 	}
 	
-	private boolean FFunctionDecl.functionUsed = false;
+	class FFunctionDecl {
+		private enum UseType{
+			NONE(false, false),
+			ANNOTATION_DERIVATIVE(true, false),
+			DIRECT(true, true);
+			
+			private final boolean normalUse;
+			private final boolean derivativeUse;
+			UseType(boolean normalUse, boolean derivativeUse) {
+				this.normalUse = normalUse;
+				this.derivativeUse = derivativeUse;
+			}
+			public boolean normalUse() {
+				return normalUse;
+			}
+			public boolean derivativeUse() {
+				return derivativeUse;
+			}
+		}
+	}
+	
+	private UseType FFunctionDecl.functionUsed = UseType.NONE;
 	
 	/**
 	 * Has this function been marked as used?
 	 */
-	syn boolean FFunctionDecl.functionIsUsed() = functionUsed;
+	syn boolean FFunctionDecl.functionIsUsed() = functionUsed.normalUse();
+	
+	/**
+	 * Has this function been marked as used?
+	 */
+	syn boolean FFunctionDecl.functionIsUsedAsDerivative() = functionUsed.derivativeUse();
 	
 	/**
 	 * Mark all called functions as used.
@@ -5637,17 +5663,26 @@ aspect FunctionInlining {
 	}
 	
 	public void FFunctionCall.markUsedFunctions() {
-		myFFunctionDecl().markUsedFunctions();
+		myFFunctionDecl().markUsedFunctions(true);
 		super.markUsedFunctions();
 	}
 	
-	public void FFunctionDecl.markUsedFunctions() {
-		if (!functionUsed) {
-			functionUsed = true;
-			if (hasFDerivativeFunction() &&
+	public void FFunctionDecl.markUsedFunctions(boolean direct) {
+		boolean useChanged = false;
+		if (functionUsed == UseType.NONE)
+			useChanged = true;
+		else if (functionUsed == UseType.ANNOTATION_DERIVATIVE && direct == true)
+			useChanged = true;
+		if (useChanged) {
+			functionUsed = direct ? UseType.DIRECT : UseType.ANNOTATION_DERIVATIVE;
+			if (direct &&
 			   (root().options.getBooleanOption("generate_block_jacobian") ||
 			    root().options.getBooleanOption("generate_dae_jacobian"))) {
-				getFDerivativeFunction().myFFunctionDecl().markUsedFunctions();
+				if (requiresDerivative() && !canDifferentiate()) {
+					error("Unable to determine derivative function for function '" + name() + "'");
+				} else if (hasFDerivativeFunction()) {
+					getFDerivativeFunction().myFFunctionDecl().markUsedFunctions(false);
+				}
 			}
 			super.markUsedFunctions();
 		}
@@ -5664,14 +5699,13 @@ aspect StateInitialEquations {
 			setFInitialEquationList(new List());
 			
 			for (FRealVariable fv : differentiatedRealVariables()) {
-	            
 				FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
 				FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), new FParameter(), nameToAdd);
 				fvToAdd.setBindingExp(fv.startAttributeExp().fullCopy());
-				addFVariable(fvToAdd);                
+				addFVariable(fvToAdd);
 				FEquation eqnToAdd = new FEquation(fv.createUseExp(), fvToAdd.createUseExp());
-				addFInitialEquation(eqnToAdd);    
-				flushAllRecursive();               
+				addFInitialEquation(eqnToAdd);
+				flushAllRecursive();
 			}
 		
 			endStep("addStateInitialEquationsIfSet()");
