@@ -1838,6 +1838,8 @@ aspect TransformCanonical {
 			for (Collection<Eq> block : blt) { // Iterate over all (global) BLT-blocks
 				SimpleEquationBlock seb = EquationBlockFactory.createSimpleEquationBlock(block, true);
 				if (seb != null && seb.isSolvable()) {
+					if (seb.equation().hasResidual() && seb.equation().getResidual().hasIterationVariable())
+						seb.equation().getResidual().warning("Can not use hand guided tearing pair, equation and variable resides in solved block. Variable: " + seb.equation().getResidual().getIterationVariable().name() + ". Equation: " + seb.equation());
 					log.info("Found solved block");
 					tearBLT.add(seb);
 				} else {
