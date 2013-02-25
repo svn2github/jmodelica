@@ -268,13 +268,18 @@ public class OptionRegistry {
 			 compiler,
 			 true,
 			 "Generate parameters for runtime options. For internal use, should always be true for normal compilation."),
-		WRITE_ITERATION_VARIABLES
+		WRITE_ITER_VARS
 			("write_iteration_variables_to_file",
 			 compiler,
 			 false,
 			 "If the option is set to true (default is false), two text files containing one iteration variable" +
 			 "name per row is written to disk. The files contains the iteration variables for the DAE and the" +
 			 "DAE initialization system respectively. The files are outputed to the resource directory"),
+		ALG_FUNCS
+			 ("algorithms_as_functions",
+			  compiler,
+			  true,
+			  "Convert algorithm sections to function calls"),
 		WRITE_TEARING_PAIRS
 			("write_tearing_pairs_to_file",
 			 compiler,

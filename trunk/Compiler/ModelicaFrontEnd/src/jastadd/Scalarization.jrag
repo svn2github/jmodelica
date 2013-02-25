@@ -652,10 +652,10 @@ aspect Scalarization {
 	 * \brief Scalarize an assignment to an array of unknown size and put the resulting statements in 
 	 *        the list of statements.
 	 */
-	public void FAbstractVariable.scalarizeUnknownArrayAssignment(List<FFunctionVariable> vars, 
+	public void FAbstractVariable.scalarizeUnknownArrayAssignment(List<? extends FAbstractVariable> vars, 
 			List<FStatement> stmts, Map<String,FExp> indexMap, FExp exp) {}
 
-	public void FFunctionArray.scalarizeUnknownArrayAssignment(List<FFunctionVariable> vars, 
+	public void FFunctionArray.scalarizeUnknownArrayAssignment(List<? extends FAbstractVariable> vars, 
 			List<FStatement> stmts, Map<String,FExp> indexMap, FExp exp) {
 		ForNames names = new ForNames(ndims());
 		names.fillLayer(this);
@@ -875,7 +875,7 @@ aspect Scalarization {
 	 * or for the entire scalar expression.
 	 */
 	public void FType.scalarizeArrayAssignment(
-			List<FFunctionVariable> vars, List<FStatement> stmts, 
+			List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap, FQName left, FExp right) {
 		if (isArray()) {
 			if (size().isUnknown() && right.size().isUnknown()) {
@@ -904,7 +904,7 @@ aspect Scalarization {
 	 * Scalarize an assignment and put the resulting statements in the list of statements.
 	 */
 	public void FType.scalarizeAssignment(
-			List<FFunctionVariable> vars, List<FStatement> stmts, 
+			List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap, FQName left, FExp right) {
 		stmts.add(new FAssignStmt(new FIdUse(left.fullCopy()), right.unboundCopy()));
 	}
@@ -913,7 +913,7 @@ aspect Scalarization {
 	 * Scalarize an assignment and put the resulting statements in the list of statements.
 	 */
 	public void FRecordType.scalarizeAssignment(
-			List<FFunctionVariable> vars, List<FStatement> stmts, 
+			List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap, FQName left, FExp right) {
 		for (FRecordComponentType comp : getComponents()) {
 			FQName fqn = left.copyAsFQNameFull().append(comp.getName());
@@ -976,7 +976,7 @@ aspect Scalarization {
 		return new FIdUseExp(getFIdUse().getFQName().copyAndAddFas(fas));
 	}
 	
-	public void FStatement.scalarizeStmt(List<FFunctionVariable> vars, List<FStatement> stmts, 
+	public void FStatement.scalarizeStmt(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap) {
 		int n1 = stmts.getNumChild();
 		scalarize(vars, stmts, indexMap);
@@ -991,12 +991,12 @@ aspect Scalarization {
 	 * \brief Scalarize the statement and put all resulting statements in the
 	 *        list of statements.
 	 */
-	public void FStatement.scalarize(List<FFunctionVariable> vars, List<FStatement> stmts, 
+	public void FStatement.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap) {
 		stmts.add((FStatement) fullCopy());
 	}
 	
-	public void FAssignStmt.scalarize(List<FFunctionVariable> vars, List<FStatement> stmts, 
+	public void FAssignStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap) {
 		FIdUse left = getLeft();
 		FExp right = getRight();
@@ -1027,7 +1027,7 @@ aspect Scalarization {
 		}
 	}
 	
-	public void FFunctionCallStmt.scalarize(List<FFunctionVariable> vars, List<FStatement> stmts, 
+	public void FFunctionCallStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap) {
 		getCall().createArrayTemporaries(stmts, vars, indexMap, true);
 		FFunctionCallStmt stmt = new FFunctionCallStmt();
@@ -1037,7 +1037,7 @@ aspect Scalarization {
 		stmts.add(stmt);
 	}
 	
-	public void FIfWhenStmt.scalarize(List<FFunctionVariable> vars, List<FStatement> stmts, 
+	public void FIfWhenStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap) {
 		for (FIfWhenClause cl : getFIfWhenClauses())
 			cl.getTest().createArrayTemporaries(stmts, vars, indexMap, true);
@@ -1051,10 +1051,10 @@ aspect Scalarization {
 	/**
 	 * \brief Scalarize the else part of an if statement. Does nothing for when statements.
 	 */
-	public void FIfWhenStmt.scalarizeElse(List<FFunctionVariable> vars, FIfWhenStmt stmt, 
+	public void FIfWhenStmt.scalarizeElse(List<? extends FAbstractVariable> vars, FIfWhenStmt stmt, 
 			Map<String,FExp> indexMap) {}
 	
-	public void FIfStmt.scalarizeElse(List<FFunctionVariable> vars, FIfWhenStmt stmt, 
+	public void FIfStmt.scalarizeElse(List<? extends FAbstractVariable> vars, FIfWhenStmt stmt, 
 			Map<String,FExp> indexMap) {
 		FIfStmt ifstmt = (FIfStmt) stmt;
 		for (FStatement es : getElseStmts())
@@ -1064,15 +1064,15 @@ aspect Scalarization {
 	/**
 	 * \brief Scalarize the if or when clause.
 	 */
-	public FIfWhenClause FIfWhenClause.scalarize(List<FFunctionVariable> vars, Map<String,FExp> indexMap) {
-		FExp test = getTest().reduceToScalarized(new FOrExp(), indexMap);
+	public FIfWhenClause FIfWhenClause.scalarize(List<? extends FAbstractVariable> vars, Map<String,FExp> indexMap) {
+		FExp test = getTest().scalarize(indexMap);
 		List<FStatement> stmts = new List<FStatement>();
 		for (FStatement stmt : getFStatements())
 			stmt.scalarize(vars, stmts, indexMap);
 		return createNode(test, stmts);
 	}
 	
-	public void FForStmt.scalarize(List<FFunctionVariable> vars, List<FStatement> stmts, 
+	public void FForStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap) {
 		getIndex().createArrayTemporaries(stmts, vars, indexMap, true);
 		FForStmt stmt = new FForStmt();
@@ -1082,7 +1082,7 @@ aspect Scalarization {
 		stmts.add(stmt);
 	}
 	
-	public void FWhileStmt.scalarize(List<FFunctionVariable> vars, List<FStatement> stmts, 
+	public void FWhileStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap) {
 		getTest().createArrayTemporaries(stmts, vars, indexMap, true);
 		FWhileStmt stmt = new FWhileStmt();
@@ -1211,13 +1211,10 @@ aspect Scalarization {
 	
 	public void FAlgorithmBlock.scalarize(List<FAbstractEquation> eqns,
 			List<FVariable> vars, Map<String,FExp> indexMap) {		
-		/*
 		List<FStatement> stmts = new List<FStatement>();
 		for (FStatement stmt : getFStatements())
 			stmt.scalarizeStmt(vars, stmts, indexMap);	
 	    eqns.add(new FAlgorithmBlock(stmts));	
-	    */
-		eqns.add(this);
 	}
 	
 	/**

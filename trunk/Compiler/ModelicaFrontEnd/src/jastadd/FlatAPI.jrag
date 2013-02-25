@@ -963,8 +963,9 @@ aspect FlatAPI {
 	eq Root.getChild().inFEquation()=false;
 	
 	inh FAbstractEquation FExp.myFEquation();
+	inh FAbstractEquation FStatement.myFEquation();
 	eq FAbstractEquation.getChild().myFEquation() = this;
-	eq Root.getChild().myFEquation()=null;
+	eq Root.getChild().myFEquation()              = null;
 	
 	inh FClass FAbstractVariable.myFClass();
 	inh FClass FExp.myFClass();
@@ -1666,20 +1667,23 @@ aspect FVariableUses {
 	coll LinkedHashSet<FVariable> FAbstractEquation.retrieveAlgebraicVariables() 
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
-		isAlgebraicVariableAccess() && myFV().isAlgebraicVariable() to 
+	FIdUseExp contributes (FVariable) myFV() when isAlgebraicVariableAccess() to 
+		FAbstractEquation.retrieveAlgebraicVariables() for myFEquation();
+	FAssignStmt contributes (FVariable) getLeft().myFV() when getLeft().myFV().isAlgebraicVariable() to 
 		FAbstractEquation.retrieveAlgebraicVariables() for myFEquation();
 
-	inh boolean FIdUseExp.isAlgebraicVariableAccess();
-	eq BaseNode.getChild().isAlgebraicVariableAccess() = true;
-	eq FDerExp.getChild().isAlgebraicVariableAccess() = false;
-	eq FPreExp.getChild().isAlgebraicVariableAccess() = false;
-	eq FResidual.getIterationVariable().isAlgebraicVariableAccess() = false;
+	syn boolean FIdUseExp.isAlgebraicVariableAccess() = inAlgebraicAccessLocation() && myFV().isAlgebraicVariable();
+
+	inh boolean FIdUseExp.inAlgebraicAccessLocation();
+	eq BaseNode.getChild().inAlgebraicAccessLocation()   = true;
+	eq FDerExp.getChild().inAlgebraicAccessLocation()    = false;
+	eq FPreExp.getChild().inAlgebraicAccessLocation()    = false;
+	eq FResidual.getIterationVariable().inAlgebraicAccessLocation() = false;
 	
-	syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() = 
+	syn LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() = 
 	    retrieveAlgebraicVariables();
 	
-	eq FWhenEquation.algebraicVariables()  {
+	syn lazy LinkedHashSet<FVariable> FWhenEquation.algebraicVariables() {
 		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
 		s.addAll(retrieveAlgebraicVariables());
 		for (FAbstractEquation e : getFAbstractEquations()) {

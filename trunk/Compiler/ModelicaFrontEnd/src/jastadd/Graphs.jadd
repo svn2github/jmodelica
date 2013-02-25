@@ -34,7 +34,7 @@ public class EquationBlockFactory {
 	 * This method groups the Eq objects in a BLT block so that Eqs that
 	 * originates from the same FAbstractEquation are grouped together.
 	 */
-	static Collection<Collection<Eq>> groupComponent(Collection<Eq> component) {
+	public static Collection<Collection<Eq>> groupComponent(Collection<Eq> component) {
 	
 		Eq previous = null;
 		Eq current = null;
@@ -55,16 +55,16 @@ public class EquationBlockFactory {
 		return l;
 	}
 
-	static SimpleEquationBlock createSimpleEquationBlock(Collection<FAbstractEquation> eqns, Collection<FVariable> fvs, boolean solve) {
+	public static SimpleEquationBlock createSimpleEquationBlock(Collection<FAbstractEquation> eqns, Collection<FVariable> fvs, boolean solve) {
 		return createSimpleEquationBlock(eqns, fvs, solve, false);
 	}
 
-	static SimpleEquationBlock createSimpleEquationBlock(Collection<FAbstractEquation> eqns, Collection<FVariable> fvs, boolean solve, boolean duringTearing) {
-		if (eqns.size()==1 ) {
+	public static SimpleEquationBlock createSimpleEquationBlock(Collection<FAbstractEquation> eqns, Collection<FVariable> fvs, boolean solve, boolean duringTearing) {
+		if (eqns.size() == 1) {
 			FAbstractEquation e = eqns.iterator().next();
 			FVariable fv = fvs.iterator().next();
 			if (e instanceof FEquation) {
-				FEquation ee = (FEquation)e;
+				FEquation ee = (FEquation) e;
 				if (solve && ee.isSolved(fv.name(), duringTearing)) { // Solved scalar equation
 					return new SolvedScalarEquationBlock(ee,fv);
 				} else { // Unsolved scalar equation
@@ -88,14 +88,14 @@ public class EquationBlockFactory {
 
 		// When Equation
 		if (e instanceof FWhenEquation && one_equation) {
-			FWhenEquation ee = (FWhenEquation)e;
-				return new WhenEquationBlock(ee);
+			FWhenEquation ee = (FWhenEquation) e;
+			return new WhenEquationBlock(ee);
 		}
 
 		// Algorithm
 		if (e instanceof FAlgorithmBlock && one_equation) {
-			FAlgorithmBlock ee = (FAlgorithmBlock)e;
-				return new AlgorithmBlock(ee);
+			FAlgorithmBlock ee = (FAlgorithmBlock) e;
+			return new AlgorithmBlock(ee);
 		}
 		
 		// Check if the component contains a single function call equation
@@ -134,7 +134,7 @@ public class EquationBlockFactory {
 	 * This method takes a list of Eq objects and create equation blocks
 	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
 	 */
-	static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> component, boolean solve) {
+	public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> component, boolean solve) {
 		return createSimpleEquationBlock(component, solve, false);
 	}
 	
@@ -142,7 +142,7 @@ public class EquationBlockFactory {
 	 * This method takes a list of Eq objects and create equation blocks
 	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
 	 */
-	static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> component, boolean solve, boolean duringTearing) {
+	public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> component, boolean solve, boolean duringTearing) {
 		Collection<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
 		Collection<FVariable> fvs = new ArrayList<FVariable>();
 		
@@ -162,7 +162,7 @@ public class EquationBlockFactory {
 	 * only one Eq, a SimpleEquationBlock is created, if possible. Otherwise
 	 * a real or mixed equation block is created.
 	 */
-	static AbstractEquationBlock createEquationBlock(Collection<Eq> component) {
+	public static AbstractEquationBlock createEquationBlock(Collection<Eq> component) {
 		
 		// System of equations
 		Collection<Collection<Eq>> l = EquationBlockFactory.groupComponent(component);

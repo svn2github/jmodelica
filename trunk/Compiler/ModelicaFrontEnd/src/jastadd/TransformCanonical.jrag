@@ -2596,8 +2596,11 @@ aspect TransformCanonical {
 	 * \brief Generate functions from algorithms.
 	 */
 	public void FClass.genAlgorithmFunctions() {
-		beginStep("genAlgorithmFunctions()");
+		if (!root().options.getBooleanOption("algorithms_as_functions"))
+			return;
 
+		beginStep("genAlgorithmFunctions()");
+		
 		for (FAlgorithmBlock alg : myAlgorithms()) {
 			// Create function declaration
 			List<FFunctionVariable> vars = new List<FFunctionVariable>();
@@ -3137,10 +3140,17 @@ aspect TransformCanonical {
 		is$Final = false;
 	}
 	
+	public void FAssignStmt.enableAliasRewrite() {
+		super.enableAliasRewrite();
+		rewriteAlias = true;
+		is$Final = false;
+	}
+	
 	public void FFunctionDecl.enableAliasRewrite() {
 	}
 	
 	boolean FIdUseExp.rewriteAlias = false;
+	boolean FAssignStmt.rewriteAlias = false;
 	
 	/**
 	 * \brief FIdUses referring to alias variables need to be changed to 
@@ -3152,12 +3162,22 @@ aspect TransformCanonical {
 	 * method ASTNode.flushAllRecursiveClearFinal. 
 	 */
 	rewrite FIdUseExp {
-		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
+		when (rewriteAlias && myFV().isAlias()) to FExp {
 			FVariable fv = (FVariable) myFV();
 			FExp new_exp = fv.alias().createUseExp();
 			if (fv.isNegated()) 
 				new_exp = new FNegExp(new_exp);
 			return new_exp;
+		}
+	}
+	
+	rewrite FAssignStmt {
+		when (rewriteAlias && getLeft().myFV().isAlias()) to FAssignStmt {
+			FVariable fv = (FVariable) getLeft().myFV();
+			setLeft(fv.alias().createFIdUse());
+			if (fv.isNegated()) 
+				setRight(new FNegExp(getRight()));
+			return this;
 		}
 	}
 	

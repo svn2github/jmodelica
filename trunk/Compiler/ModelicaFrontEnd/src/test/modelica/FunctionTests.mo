@@ -1790,39 +1790,44 @@ algorithm
  x := 5;
  x := x + 2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="AlgorithmFlatten1",
-			description="Flattening algorithms: assign stmts",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmFlatten1",
+            description="Flattening algorithms: assign stmts",
+            algorithms_as_functions=false,
+            flatModel="
 fclass FunctionTests.AlgorithmFlatten1
  Real x;
 algorithm
  x := 5;
  x := x + 2;
-
 end FunctionTests.AlgorithmFlatten1;
 ")})));
 end AlgorithmFlatten1;
 
+
 model AlgorithmFlatten2
  Real x;
+ Real y = x;
 algorithm
- break;
+ x := 5;
+ x := x + 2;
 
 	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
+		TransformCanonicalTestCase(
 			name="AlgorithmFlatten2",
-			description="Flattening algorithms: break stmts",
+			description="Alias elimination in algorithm",
+			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten2
- Real x;
+ Real y;
 algorithm
- break;
-
+ y := 5;
+ y := y + 2;
 end FunctionTests.AlgorithmFlatten2;
 ")})));
 end AlgorithmFlatten2;
+
 
 model AlgorithmFlatten3
  Integer x;
@@ -1842,13 +1847,17 @@ algorithm
  end if;
 
 	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
+		TransformCanonicalTestCase(
 			name="AlgorithmFlatten3",
 			description="Flattening algorithms: if stmts",
+			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten3
  discrete Integer x;
  discrete Integer y;
+initial equation 
+ pre(x) = 0;
+ pre(y) = 0;
 algorithm
  if x == 4 then
   x := 1;
@@ -1862,10 +1871,10 @@ algorithm
  else
   x := 3;
  end if;
-
 end FunctionTests.AlgorithmFlatten3;
 ")})));
 end AlgorithmFlatten3;
+
 
 model AlgorithmFlatten4
  Integer x;
@@ -1883,13 +1892,17 @@ algorithm
  end when;
 
 	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
+		TransformCanonicalTestCase(
 			name="AlgorithmFlatten4",
 			description="Flattening algorithms: when stmts",
+			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten4
  discrete Integer x;
  discrete Integer y;
+initial equation 
+ pre(x) = 0;
+ pre(y) = 0;
 algorithm
  when x == 4 then
   x := 1;
@@ -1901,10 +1914,10 @@ algorithm
    x := 3;
   end if;
  end when;
-
 end FunctionTests.AlgorithmFlatten4;
 ")})));
 end AlgorithmFlatten4;
+
 
 model AlgorithmFlatten5
  Real x;
@@ -1912,15 +1925,16 @@ algorithm
  while x < 1 loop
   while x < 2 loop
    while x < 3 loop
-    x := x - 1;
+    x := x + 1;
    end while;
   end while;
  end while;
 
 	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
+		TransformCanonicalTestCase(
 			name="AlgorithmFlatten5",
 			description="Flattening algorithms: while stmts",
+			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten5
  Real x;
@@ -1928,13 +1942,14 @@ algorithm
  while x < 1 loop
   while x < 2 loop
    while x < 3 loop
-    x := x - 1;
+    x := x + 1;
    end while;
   end while;
  end while;
 end FunctionTests.AlgorithmFlatten5;
 ")})));
 end AlgorithmFlatten5;
+
 
 model AlgorithmFlatten6
  Real x;
@@ -1944,9 +1959,10 @@ algorithm
  end for;
 
 	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
+		TransformCanonicalTestCase(
 			name="AlgorithmFlatten6",
 			description="Flattening algorithms: for stmts",
+			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten6
  Real x;
@@ -3290,10 +3306,12 @@ end ArrayExpInFunc6;
 
 
 model ArrayExpInFunc7
- Real o = 1.0;
+ Real o;
  Real x[3];
+equation
+ der(o) = time;
 algorithm
- when {o < 2.0, o > 3.0} then
+ when {o > 2.0, o > 3.0} then
   x := { 1, 2, 3 };
  elsewhen o < 1.5 then
   x := { 4, 5, 6 };
@@ -3309,16 +3327,18 @@ fclass FunctionTests.ArrayExpInFunc7
  Real x[1];
  Real x[2];
  Real x[3];
+initial equation 
+ o = 0.0;
 equation
+ der(o) = time;
  ({x[1], x[2], x[3]}) = FunctionTests.ArrayExpInFunc7.algorithm_1(o);
- o = 1.0;
 
 public
  function FunctionTests.ArrayExpInFunc7.algorithm_1
   output Real[3] x;
   input Real o;
  algorithm
-  when o < 2.0 or o > 3.0 then
+  when {o > 2.0, o > 3.0} then
    x[1] := 1;
    x[2] := 2;
    x[3] := 3;
