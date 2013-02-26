@@ -1131,12 +1131,26 @@ aspect FlatAPI {
 	syn Set<FVariable> FAbstractEquation.referencedFVariablesInRHS() = Collections.emptySet();
 	eq FEquation.referencedFVariablesInRHS()             = getRight().referencedFVariablesInFExp();
 	eq FFunctionCallEquation.referencedFVariablesInRHS() = getCall().referencedFVariablesInFExp();
+	eq FAlgorithmBlock.referencedFVariablesInRHS() {
+		Set<FVariable> res = new LinkedHashSet<FVariable>();
+		for (FIdUse use : containedFIdUses()) 
+			if (!use.useIsAssignment() && !use.myFV().isForIndex())
+				res.add((FVariable) use.myFV());
+		return res;
+	}
 	
 	syn Set<FVariable> FAbstractEquation.referencedFVariablesInLHS() = Collections.emptySet();
 	eq FEquation.referencedFVariablesInLHS()             = getLeft().referencedFVariablesInFExp();
 	syn lazy Set<FVariable> FFunctionCallEquation.referencedFVariablesInLHS() {
 		Set<FVariable> res = new LinkedHashSet<FVariable>();
 		getLefts().findReferencedFVariablesInTree(res);
+		return res;
+	}
+	eq FAlgorithmBlock.referencedFVariablesInLHS() {
+		Set<FVariable> res = new LinkedHashSet<FVariable>();
+		for (FIdUse use : containedFIdUses()) 
+			if (use.useIsAssignment() && !use.myFV().isForIndex())
+				res.add((FVariable) use.myFV());
 		return res;
 	}
 	
@@ -1871,10 +1885,9 @@ aspect LinearFVariables {
     }
     
     syn boolean FAbstractEquation.checkLinearity(Set<FVariable> vars) {
-    	HashSet<FIdUseExp> set = new HashSet<FIdUseExp>();
     	for (FIdUseExp e : collectUses(vars)) {
     		if (!e.isLinear(vars)) {
-    			return false;			
+    			return false;
     		}
     	}
     	return true;
@@ -1886,16 +1899,10 @@ aspect LinearFVariables {
 	
 	eq FAbstractEquation.getChild().isLinear(Set<FVariable> vars) = true;
 	
-	eq FMulExp.getLeft().isLinear(Set<FVariable> vars) =
-		(getRight().isIndependent(vars))?
-				isLinear(vars) : false;
-	eq FMulExp.getRight().isLinear(Set<FVariable> vars) =
-		(getLeft().isIndependent(vars))?
-				isLinear(vars) : false;
-	eq FDivExp.getLeft().isLinear(Set<FVariable> vars) =
-		(getRight().isIndependent(vars))?
-				isLinear(vars) : false;			
-	eq FDivExp.getRight().isLinear(Set<FVariable> vars) = false;		
+	eq FMulExp.getLeft().isLinear(Set<FVariable> vars)  = getRight().isIndependent(vars) && isLinear(vars);
+	eq FMulExp.getRight().isLinear(Set<FVariable> vars) = getLeft().isIndependent(vars) && isLinear(vars);
+	eq FDivExp.getLeft().isLinear(Set<FVariable> vars)  = getRight().isIndependent(vars) && isLinear(vars);			
+	eq FDivExp.getRight().isLinear(Set<FVariable> vars) = false;
     eq FPowExp.getChild().isLinear(Set<FVariable> vars) = false;
     eq FFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
     eq FMathematicalFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
@@ -2337,7 +2344,6 @@ aspect FlatAlgorithmAPI {
 
 	coll ArrayList<FIdUse> FAlgorithmBlock.containedFIdUses() 
     	[new ArrayList<FIdUse>()] with add root FAlgorithmBlock;
-	// TODO: need to check for *ForIndex?
 	FIdUse contributes this to FAlgorithmBlock.containedFIdUses() for myFAlgorithm();
 	
 	syn lazy ArrayList<FIdUse> FAlgorithmBlock.assignedFIdUses() {

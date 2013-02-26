@@ -30,27 +30,23 @@ aspect Graphs {
 
 public class EquationBlockFactory {
 
-	/*
+	/**
 	 * This method groups the Eq objects in a BLT block so that Eqs that
 	 * originates from the same FAbstractEquation are grouped together.
 	 */
 	public static Collection<Collection<Eq>> groupComponent(Collection<Eq> component) {
 	
 		Eq previous = null;
-		Eq current = null;
 		Collection<Eq> group = null;
 		Collection<Collection<Eq>> l = new ArrayList<Collection<Eq>>();
 
-		for (Eq e : component) {
-			previous = current;
-			current = e;
-			if (previous==null || (previous.getEquation() != current.getEquation())) {
+		for (Eq current : component) {
+			if (previous == null || (previous.getEquation() != current.getEquation())) {
 				group = new ArrayList<Eq>();
 				l.add(group);
-				group.add(current);	
-			} else {
-				group.add(current);
 			}
+			group.add(current);	
+			previous = current;
 		}	
 		return l;
 	}
@@ -60,66 +56,18 @@ public class EquationBlockFactory {
 	}
 
 	public static SimpleEquationBlock createSimpleEquationBlock(Collection<FAbstractEquation> eqns, Collection<FVariable> fvs, boolean solve, boolean duringTearing) {
-		if (eqns.size() == 1) {
-			FAbstractEquation e = eqns.iterator().next();
-			FVariable fv = fvs.iterator().next();
-			if (e instanceof FEquation) {
-				FEquation ee = (FEquation) e;
-				if (solve && ee.isSolved(fv.name(), duringTearing)) { // Solved scalar equation
-					return new SolvedScalarEquationBlock(ee,fv);
-				} else { // Unsolved scalar equation
-					return new UnsolvedScalarEquationBlock(ee,fv);
-				}
-			}
-
-			// If equation TODO
-		}
-		
-		// Check if if the component corresponds to one single function 
-		// call equation or when equation or algorithm block
+		// Check that the component corresponds to a single equation
 		FAbstractEquation e = eqns.iterator().next();
-		boolean one_equation = true;
-		for (FAbstractEquation eqn : eqns) {
-			if (eqn != e) {
-				one_equation = false;
-				break;
-			}
-		}
+		for (FAbstractEquation eqn : eqns) 
+			if (eqn != e) 
+				return null;
 
-		// When Equation
-		if (e instanceof FWhenEquation && one_equation) {
-			FWhenEquation ee = (FWhenEquation) e;
-			return new WhenEquationBlock(ee);
-		}
-
-		// Algorithm
-		if (e instanceof FAlgorithmBlock && one_equation) {
-			FAlgorithmBlock ee = (FAlgorithmBlock) e;
-			return new AlgorithmBlock(ee);
-		}
+		// Check if equation is solvable for all active variables (only if we want a solved block)
+		boolean solvedBlock = solve;
+		for (Iterator<FVariable> it = fvs.iterator(); solvedBlock && it.hasNext(); )
+			solvedBlock = e.isSolved(it.next().name(), duringTearing);
 		
-		// Check if the component contains a single function call equation
-		if (e instanceof FFunctionCallEquation && one_equation) {
-			FFunctionCallEquation fce = (FFunctionCallEquation)e;
-			// Loop over all unknowns in the component
-			boolean isSolvable = true;
-			java.util.List<FVariable> l = new ArrayList<FVariable>();
-			Iterator<FAbstractEquation> eqIt = eqns.iterator();
-			Iterator<FVariable> varIt = fvs.iterator();
-			while (eqIt.hasNext() && varIt.hasNext()) {
-				FAbstractEquation ae = eqIt.next();
-				FVariable fv = varIt.next();
-				l.add(fv);
-				if (!ae.isSolved(fv.name(), duringTearing))
-					isSolvable = false;
-			}
-			if (isSolvable && solve) {
-				return new SolvedFunctionCallEquationBlock(fce,l);
-			} else {
-				return new UnsolvedFunctionCallEquationBlock(fce,l);
-			}
-		}
-		return null;
+		return e.createSimpleEquationBlock(fvs, solvedBlock);
 	}
 	
 	/**
@@ -130,7 +78,7 @@ public class EquationBlockFactory {
 		return createSimpleEquationBlock(Arrays.asList(equation), Arrays.asList(variable), solve);
 	}
 
-	/*
+	/**
 	 * This method takes a list of Eq objects and create equation blocks
 	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
 	 */
@@ -138,7 +86,7 @@ public class EquationBlockFactory {
 		return createSimpleEquationBlock(component, solve, false);
 	}
 	
-	/*
+	/**
 	 * This method takes a list of Eq objects and create equation blocks
 	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
 	 */
@@ -151,11 +99,11 @@ public class EquationBlockFactory {
 			eqns.add(eqn.getEquation());
 		} 
 
-		return createSimpleEquationBlock(eqns,fvs,solve, duringTearing);
+		return createSimpleEquationBlock(eqns, fvs, solve, duringTearing);
 		
 	}
 
-	/*
+	/**
 	 * This method takes as input a set of Eq objects corresponeing to
 	 * a BLT block. First the, the Eq objects are grouped using
 	 * groupComponent to simplify the analysis. Then, if there is
@@ -167,46 +115,38 @@ public class EquationBlockFactory {
 		// System of equations
 		Collection<Collection<Eq>> l = EquationBlockFactory.groupComponent(component);
 
-		if (l.size()==1) {
-			SimpleEquationBlock seb = createSimpleEquationBlock(l.iterator().next(),true);
-			if (seb!=null && seb.isSolvable()) {
+		if (l.size() == 1) {
+			SimpleEquationBlock seb = createSimpleEquationBlock(l.iterator().next(), true);
+			if (seb != null && seb.isSolvable()) {
 				return seb;
 			}	
 		}
 
 		Collection<SimpleEquationBlock> ls = new ArrayList<SimpleEquationBlock>();	
-			
 		for (Collection<Eq> s : l) {
-			ls.add(createSimpleEquationBlock(s,false));	
+			ls.add(createSimpleEquationBlock(s, false));	
 		}	
 
 		// Check if an equation block is mixed, i.e., contains both continous
-		// and discrete variables			
-		EquationBlock b = null;
+		// and discrete variables, and if it is linear in the unknowns
+		Set<FVariable> activeVariables = new HashSet<FVariable>();
+		for (SimpleEquationBlock sb : ls) {
+			activeVariables.addAll(sb.activeVariables());
+		}
 		boolean isMixed = false;
+		boolean isLinear = true;
 		for (SimpleEquationBlock seb : ls) {
 			for (FAbstractEquation e : seb.equations()) {
-				if (!e.isReal()) {
+				if (e.isReal()) {
+					if (!e.checkLinearity(activeVariables))
+						isLinear = false;
+				} else {
 					isMixed = true;
 				}
 			}
 		}
 		
-		// Check if an equation block is linear in the unknowns
-		boolean isLinear = true;
-		Collection<FVariable> activeVariables = new ArrayList<FVariable>();
-		for (SimpleEquationBlock sb : ls) {
-			activeVariables.addAll(sb.activeVariables());
-		}
-		
-		for (SimpleEquationBlock seb : ls) {
-			for (FAbstractEquation e : seb.equations()) {
-				if (e.isReal() && !e.checkLinearity(new HashSet(activeVariables))) {
-					isLinear = false;
-				}
-			}
-		}
-		
+		EquationBlock b = null;
 		if (isMixed && isLinear) {
 			b = new MixedLinearEquationBlock(ls);		
 		} else if (isMixed) {
@@ -216,10 +156,44 @@ public class EquationBlockFactory {
 		} else {
 			b = new EquationBlock(ls);	
 		}
-
 		return b;
 	}	
 }
+
+/**
+ * Create a simple equation block from a single equation. 
+ */
+public SimpleEquationBlock FAbstractEquation.createSimpleEquationBlock(Collection<FVariable> fvs, boolean solved) { 
+	return null;
+}
+
+public SimpleEquationBlock FEquation.createSimpleEquationBlock(Collection<FVariable> fvs, boolean solved) { 
+	FVariable fv = fvs.iterator().next();
+	if (solved) { // Solved scalar equation
+		return new SolvedScalarEquationBlock(this, fv);
+	} else { // Unsolved scalar equation
+		return new UnsolvedScalarEquationBlock(this, fv);
+	}
+}
+
+// If equation TODO
+
+public SimpleEquationBlock FWhenEquation.createSimpleEquationBlock(Collection<FVariable> fvs, boolean solved) { 
+	return new WhenEquationBlock(this);
+}
+
+public SimpleEquationBlock FAlgorithmBlock.createSimpleEquationBlock(Collection<FVariable> fvs, boolean solved) { 
+	return new AlgorithmBlock(this);
+}
+
+public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, boolean solved) { 
+	if (solved) {
+		return new SolvedFunctionCallEquationBlock(this, fvs);
+	} else {
+		return new UnsolvedFunctionCallEquationBlock(this, fvs);
+	}
+}
+
 
 public class MunkresProblem {
 
@@ -816,12 +790,10 @@ public class BiPGraph {
 			if (e instanceof FFunctionCallEquation) {
 				int i = 0;
 				ffceLeftVarMap = new HashMap<FVariable, Integer>();
-				for (FVariable fv : e.referencedFVariablesInLHS()) {
+				for (FVariable fv : e.referencedFVariablesInLHS()) 
 					ffceLeftVarMap.put(fv,i++);
-				}
-				for (FVariable fv : e.referencedFVariablesInRHS()) {
+				for (FVariable fv : e.referencedFVariablesInRHS()) 
 					ffceLeftVarMap.remove(fv);
-				}
 			}
 			for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
 				                                  // need to reverse here to preserve the initial order.
