@@ -551,7 +551,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
 	if (block->jmi->options.log_level >= 5) {
 		/* With logging */
 		char* buf = block->message_buffer ;
-		sprintf(buf,"[NLE_BOUNDS]Block:;%d;Limitation;Bounds:;;",block->index);
+		sprintf(buf,"[NLE_ITERS]Block:;%d;Limitation;Bounds:;;",block->index);
 		
 		for(i = 0; i < solver->num_bounds; ++i) {
 			int index = solver->bound_vindex[i]; /* variable index */
@@ -616,7 +616,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
 	if (block->jmi->options.log_level >= 5 && activeBounds) {
 		/* Print min values */
 		char* buf = block->message_buffer ;
-		sprintf(buf,"[NLE_BOUNDS]Block:;%d;Active;Bounds:;;",block->index);
+		sprintf(buf,"[NLE_ITERS]Block:;%d;Active;Bounds:;;",block->index);
 		for (i=0; i < solver->num_bounds; i++) {
 			int index = solver->bound_vindex[i]; /* variable index */
 			if (solver->active_bounds[index] != 0) {

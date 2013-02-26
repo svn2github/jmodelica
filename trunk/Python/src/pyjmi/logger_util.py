@@ -76,7 +76,7 @@ def get_structured_fmu_log(log_file):
                 bl['initial_residual_scaling_updated'] = scalings_updated[int(ll[1])]
                 if scalings_updated[int(ll[1])]:
                     scalings_updated[int(ll[1])] = False
-
+				
             if l.find('Iteration')>=0:
                 iteration = {}
                 iteration['iteration_variables'] = []
@@ -101,8 +101,15 @@ def get_structured_fmu_log(log_file):
                 for i in range(5,len(ll)-1):
                     iteration['residuals'].append(float(ll[i]))
                 iteration['scaled_residual_norm'] = float(ll[3])
+                
+            if l.find('Limitation')>=0:
+                iteration['at_bound'] = []
+                l2 = l.split(';')
+                for i in range(5,len(l2)-1):
+                    iteration['at_bound'].append(tuple(l2[i].split()))
+                    
                 bl['iterations'].append(iteration)
-
+                
             if l.find('Max')>=0:
                 bl['max'] = []
                 ll = l.split(';')
