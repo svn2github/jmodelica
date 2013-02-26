@@ -2585,29 +2585,29 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
   jmi_real_t** dF = &dRes;
   jmi_real_t** dz;
   if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-    x[0] = _x1_0;
-    x[1] = _x2_1;
-    x[2] = _x3_2;
-    x[3] = _x4_3;
+    x[0] = _x4_3;
+    x[1] = _x3_2;
+    x[2] = _x2_1;
+    x[3] = _x1_0;
     return 0;
   } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
     dz = jmi->dz_active_variables;
-    (*dz)[ jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = dx[0];
-    _x1_0 = x[0];
-    (*dz)[ jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = dx[1];
-    _x2_1 = x[1];
-    (*dz)[ jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = dx[2];
-    _x3_2 = x[2];
-    (*dz)[ jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] = dx[3];
-    _x4_3 = x[3];
+    (*dz)[ jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] = dx[0];
+    _x4_3 = x[0];
+    (*dz)[ jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = dx[1];
+    _x3_2 = x[1];
+    (*dz)[ jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = dx[2];
+    _x2_1 = x[2];
+    (*dz)[ jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = dx[3];
+    _x1_0 = x[3];
   } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
     dz = jmi->dz;
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     dz = jmi->dz;
-    (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = -(*dF)[0];
-    (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = -(*dF)[1];
-    (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = -(*dF)[2];
-    (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] = -(*dF)[3];
+    (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] = -(*dF)[0];
+    (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = -(*dF)[1];
+    (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = -(*dF)[2];
+    (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = -(*dF)[3];
   } else {
     return -1;
   }
@@ -2621,10 +2621,10 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     (*dF)[2] = tmp_der_2 - ((*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx]);
     (*res)[3] = tmp_var_3 - (_x4_3);
     (*dF)[3] = tmp_der_3 - ((*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx]);
-    (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = 0;
-    (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = 0;
-    (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = 0;
     (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] = 0;
+    (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = 0;
+    (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = 0;
+    (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = 0;
   }
   return 0;
 }

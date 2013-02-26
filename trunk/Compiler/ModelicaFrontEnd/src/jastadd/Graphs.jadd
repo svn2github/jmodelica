@@ -833,14 +833,14 @@ public class BiPGraph {
 					for (FDerivativeVariable dx : e.derivativeVariables()) {
 						v = getVariable(dx.name());
 						addEdge(eqn,v);
-					} 
+					}
 				}
 
 				if ((variableMask & DIFFERENTIATED_VARIABLES) != 0) {
 					for (FVariable x : e.differentiatedVariables()) {
 						v = getVariable(x.name());
 						addEdge(eqn,v);
-					} 			
+					}
 				}
 
 				if ((variableMask & ALGEBRAIC_VARIABLES) != 0) {
@@ -850,45 +850,45 @@ public class BiPGraph {
 							v = getVariable(y.name());
 							addEdge(eqn,v);
 						}
-					} 
+					}
 				}
-				
+
 				if ((variableMask & CONTINUOUS_ALGEBRAIC_VARIABLES) != 0) {
-					for (FVariable y : e.algebraicRealVariables()) { 
-						v = getVariable(y.name()); 
-						addEdge(eqn,v); 
-					} 
+					for (FVariable y : e.algebraicRealVariables()) {
+						v = getVariable(y.name());
+						addEdge(eqn,v);
+					}
 				}
-	
+
 				if ((variableMask & DISCRETE_ALGEBRAIC_VARIABLES) != 0) {
 					for (FVariable y : e.discreteRealVariables()) {
 						v = getVariable(y.name());
 						addEdge(eqn,v);
-					} 
-			
+					}
+
 					for (FVariable y : e.discreteIntegerVariables()) {
 						v = getVariable(y.name());
 						addEdge(eqn,v);
-					} 
+					}
 
-					for (FVariable y : e.discreteBooleanVaribles()) {
+					for (FVariable y : e.discreteBooleanVariables()) {
 						v = getVariable(y.name()); 
 						addEdge(eqn,v);
-					} 
+					}
 
 					for (FVariable y : e.discreteStringVariables()) {
 						v = getVariable(y.name());
 						addEdge(eqn,v);
-					} 
+					}
 
 					for (FVariable y : e.discreteEnumVariables()) {
 						v = getVariable(y.name());
 						addEdge(eqn,v);
-					} 
+					}
 				}
-				
+
 				if ((variableMask & DISCRETE_PRE_VARIABLES) != 0) {
-					for (FVariable x : e.discretePreVariables()) { 
+					for (FVariable x : e.discretePreVariables()) {
 						v = getVariable(x.name());
 						addEdge(eqn,v);
 					}

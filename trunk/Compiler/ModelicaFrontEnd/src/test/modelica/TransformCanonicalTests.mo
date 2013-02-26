@@ -4552,12 +4552,12 @@ equation
 Torn block of 2 iteration variables and 0 solved variables.
 Solved variables:
 Iteration variables:
-  x()
   y()
+  x()
 Solved equations:
 Residual equations:
- Iteration variables: x
-                      y
+ Iteration variables: y
+                      x
   (x, y) = TransformCanonicalTests.RecordTearingTest3.F(y, x)
 -------------------------------
       ")})));
@@ -7428,8 +7428,8 @@ Equations:
 -------------------------------
 Non-solved block of 3 variables:
 Unknown variables:
-  r2.x
   r2.r.x
+  r2.x
   r2.r.y
 Equations:
   (TransformCanonicalTests.BlockTest2.R2(r2.x, TransformCanonicalTests.BlockTest2.R(r2.r.x, r2.r.y))) = TransformCanonicalTests.BlockTest2.f3(x + r2.x)
