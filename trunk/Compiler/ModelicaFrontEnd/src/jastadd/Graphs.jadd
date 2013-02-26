@@ -804,10 +804,10 @@ public class BiPGraph {
 	
 	}	
 		
-	public void addEquations(java.util.List<FAbstractEquation> eqns, int variableMask, String eqNamePrefix, int startIndex) {	
-    	int k = startIndex;
-    	Eq eqn = null;
-    	Var v = null;
+	public void addEquations(java.util.List<FAbstractEquation> eqns, int variableMask, String eqNamePrefix, int startIndex) {
+		int k = startIndex;
+		Eq eqn = null;
+		Var v = null;
 		Map<FVariable, Integer> emptyMap = Collections.emptyMap();
 		for (FAbstractEquation e : eqns) {
 			int n_eq = e.numScalarEquations();
@@ -819,33 +819,36 @@ public class BiPGraph {
 				for (FVariable fv : e.referencedFVariablesInLHS()) {
 					ffceLeftVarMap.put(fv,i++);
 				}
+				for (FVariable fv : e.referencedFVariablesInRHS()) {
+					ffceLeftVarMap.remove(fv);
+				}
 			}
 			for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
-												  // need to reverse here to preserve the initial order.
+				                                  // need to reverse here to preserve the initial order.
 				eqn = addEquation(eqNamePrefix+k,e);
 				groupMembers.add(eqn);
 				k++;
 
 				if ((variableMask & DERIVATIVE_VARIABLES) != 0) {
-					for (FDerivativeVariable dx : e.derivativeVariables()) { 
-						v = getVariable(dx.name());     
-						addEdge(eqn,v); 
+					for (FDerivativeVariable dx : e.derivativeVariables()) {
+						v = getVariable(dx.name());
+						addEdge(eqn,v);
 					} 
 				}
 
 				if ((variableMask & DIFFERENTIATED_VARIABLES) != 0) {
-					for (FVariable x : e.differentiatedVariables()) { 
-						v = getVariable(x.name());     
-						addEdge(eqn,v); 
+					for (FVariable x : e.differentiatedVariables()) {
+						v = getVariable(x.name());
+						addEdge(eqn,v);
 					} 			
 				}
 
 				if ((variableMask & ALGEBRAIC_VARIABLES) != 0) {
-					for (FVariable y : e.algebraicVariables()) { 
+					for (FVariable y : e.algebraicVariables()) {
 						Integer pos = ffceLeftVarMap.get(y);
 						if (pos == null || pos == i) {
-							v = getVariable(y.name()); 
-							addEdge(eqn,v); 
+							v = getVariable(y.name());
+							addEdge(eqn,v);
 						}
 					} 
 				}
@@ -858,45 +861,45 @@ public class BiPGraph {
 				}
 	
 				if ((variableMask & DISCRETE_ALGEBRAIC_VARIABLES) != 0) {
-					for (FVariable y : e.discreteRealVariables()) { 
-						v = getVariable(y.name()); 
-						addEdge(eqn,v); 
+					for (FVariable y : e.discreteRealVariables()) {
+						v = getVariable(y.name());
+						addEdge(eqn,v);
 					} 
 			
-					for (FVariable y : e.discreteIntegerVariables()) { 
-						v = getVariable(y.name()); 
-						addEdge(eqn,v); 
+					for (FVariable y : e.discreteIntegerVariables()) {
+						v = getVariable(y.name());
+						addEdge(eqn,v);
 					} 
 
-					for (FVariable y : e.discreteBooleanVariables()) { 
+					for (FVariable y : e.discreteBooleanVaribles()) {
 						v = getVariable(y.name()); 
-						addEdge(eqn,v); 
+						addEdge(eqn,v);
 					} 
 
-					for (FVariable y : e.discreteStringVariables()) { 
-						v = getVariable(y.name()); 
-						addEdge(eqn,v); 
+					for (FVariable y : e.discreteStringVariables()) {
+						v = getVariable(y.name());
+						addEdge(eqn,v);
 					} 
 
-					for (FVariable y : e.discreteEnumVariables()) { 
-						v = getVariable(y.name()); 
-						addEdge(eqn,v); 
+					for (FVariable y : e.discreteEnumVariables()) {
+						v = getVariable(y.name());
+						addEdge(eqn,v);
 					} 
 				}
 				
 				if ((variableMask & DISCRETE_PRE_VARIABLES) != 0) {
 					for (FVariable x : e.discretePreVariables()) { 
-						v = getVariable(x.name());     
+						v = getVariable(x.name());
 						addEdge(eqn,v);
-					} 			
-				}			
+					}
+				}
 			}
 			for (Eq ee : groupMembers) {
 				for (Eq eee : groupMembers) {
 					ee.addGroupMember(eee);
-				}	
+				}
 			}
-		}			
+		}
 	}
 	
 	public boolean match(Eq e, Var v) {

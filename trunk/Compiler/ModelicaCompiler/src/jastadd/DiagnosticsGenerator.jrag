@@ -774,10 +774,12 @@ public class DiagnosticsGenerator {
 		for (FVariable var : equation().referencedFVariablesInLHS()) {
 			varFilter.put(var, -1);
 		}
-		
 		for (FVariable var : activeVars) {
 			varFilter.put(var, index);
 			index++;
+		}
+		for (FVariable var : equation().referencedFVariablesInRHS()) {
+			varFilter.remove(var);
 		}
 		super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
 	}
