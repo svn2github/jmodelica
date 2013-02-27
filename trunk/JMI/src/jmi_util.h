@@ -169,6 +169,10 @@ int jmi_util_dae_derivative_checker(jmi_t *jmi,jmi_func_t *func, int sparsity, i
 int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int independent_vars, int *col_independent_ind);
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \brief Types of log messages.
  */
@@ -209,4 +213,9 @@ void jmi_log_warning(jmi_t *jmi, char* fmt,...);
  * @param fmt       Format string used for printf. Note that a trailing '\n' is always added to the message when printing.
  */
 void jmi_log_info(jmi_t *jmi, char* fmt,...);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

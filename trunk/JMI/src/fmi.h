@@ -496,7 +496,18 @@ int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, fmiInteger mode);
  * @return 1 if equal, 0 if not
  */
 jmi_int_t jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size);
-int jmi_print_array(fmi_t* fmi, jmi_real_t* x, fmiInteger size_x, char* array_info);
+
+/**
+ * \brief Prints an array to the logger as information
+ * 
+ * @param jmi jmi_t struct
+ * @param x The array to be printed
+ * @param size_x The size of the array
+ * @param category The log category, for example [EVENT_ITERATION]
+ * @param array_info Array information to be printed after category and before x
+ * @return Error code
+ */
+int jmi_print_array(jmi_t* jmi, jmi_real_t* x, fmiInteger size_x, char* category, char* array_info);
 
 /* @} */
 

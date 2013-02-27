@@ -1254,7 +1254,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     retval = jmi_ode_derivatives(jmi);
 
     if(retval != 0) {
-        fmi->fmi_functions.logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Initialize during event iteration failed.");
+        jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Initial evaluation of the model equations during event iteration failed.");
         return fmiError;
     }
 
@@ -1264,14 +1264,14 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     /* We are at an event -> set atEvent to true. */
     jmi->atEvent = JMI_TRUE;
 
-    fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Starting global event iteration at t=%g.",jmi_get_t(jmi)[0]);
+    jmi_log_info(jmi, "[GLOBAL_EVENT_ITERATION] Starting global event iteration at t=%g.",jmi_get_t(jmi)[0]);
 
     /* Iterate */
     iter = 0;
     while ((eventInfo->iterationConverged)==fmiFalse){
         iter += 1;
         
-        fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Global iteration %d at t=%g.",iter,jmi_get_t(jmi)[0]);
+        jmi_log_info(jmi, "[GLOBAL_EVENT_ITERATION] Global iteration %d at t=%g.",iter,jmi_get_t(jmi)[0]);
         
         /* Evaluate and turn the switches */
         retval = jmi_evaluate_switches(jmi,switches,1);
@@ -1280,7 +1280,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
         retval = jmi_ode_derivatives(jmi);
 
         if(retval != 0) {
-            (fmi->fmi_functions).logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Evaluation of model equations during event iteration failed.");
+            jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Evaluation of model equations during event iteration failed.");
             return fmiError;
         }
 
@@ -1324,7 +1324,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
         
         /* No convergence under the allowed number of iterations. */
         if(iter >= max_iterations){
-            fmi->fmi_functions.logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Failed to converged during global fixed point iteration due to too many iterations at t=%g",jmi_get_t(jmi)[0]);
+            jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Failed to converged during global fixed point iteration due to too many iterations at t=%g",jmi_get_t(jmi)[0]);
             return fmiError;
         }
 
@@ -1337,7 +1337,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     	retval = jmi_ode_next_time_event(jmi,&nextTimeEvent);
 
     	if(retval != 0) { /* Error check */
-    		(fmi -> fmi_functions).logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Computation of next time event failed.");
+            jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Computation of next time event failed.");
     		return fmiError;
     	}
 
@@ -1363,7 +1363,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     	retval = jmi_ode_guards(jmi);
 
     	if(retval != 0) { /* Error check */
-    		(fmi->fmi_functions).logger(c,fmi->fmi_instance_name, fmiError, "ERROR", "Computation of guard expressions failed.");
+            jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Computation of guard expressions failed.");
     		return fmiError;
     	}
 
@@ -1538,19 +1538,23 @@ jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int
     return sw;
 }
 
-int jmi_print_array(fmi_t* fmi, jmi_real_t* x, fmiInteger size_x, char* array_info){
+int jmi_print_array(jmi_t* jmi, jmi_real_t* x, fmiInteger size_x, char* category, char* array_info){
     int i, len=0;
     int max_output_variables=100;
     char buffer[3000];
     
+    len += sprintf(buffer+len, "%s ",category);
     len += sprintf(buffer+len, "%s ",array_info);
     for (i=0; i<size_x && i<max_output_variables;i++){
-        len += sprintf(buffer+len, "%g ",x[i]);
+        len += sprintf(buffer+len, "%g; ",x[i]);
     }
     
-    fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", buffer);
+    jmi_log_info(jmi,buffer);
     if (i==max_output_variables){
-        fmi->fmi_functions.logger((fmiComponent)fmi, fmi->fmi_instance_name, fmiOK, "INFO", "Maximum number of output variables reached, printing the first hundred...");
+        len = 0;
+        len += sprintf(buffer+len, "%s ",category);
+        len += sprintf(buffer+len, "Maximum number of output variables reached, printing the first hundred...");
+        jmi_log_info(jmi, buffer);
     }
     
     return 0;

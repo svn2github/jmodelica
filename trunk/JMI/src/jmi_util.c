@@ -752,7 +752,7 @@ void jmi_log_error(jmi_t *jmi, char* fmt,...) {
     
     if(jmi->fmi) {
         fmi_t* fmi = jmi->fmi;
-        char buf[1000];
+        char buf[10000];
         if(!fmi->fmi_logging_on) return;
         vsprintf(buf, fmt, ap);
         fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
@@ -772,7 +772,7 @@ void jmi_log_warning(jmi_t *jmi, char* fmt,...) {
     
     if(jmi->fmi) {
         fmi_t* fmi = jmi->fmi;
-        char buf[1000];
+        char buf[10000];
         if(!fmi->fmi_logging_on) return;
         vsprintf(buf, fmt, ap);
         fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
@@ -793,7 +793,7 @@ void jmi_log_info(jmi_t *jmi, char* fmt,...) {
     
     if(jmi->fmi) {
         fmi_t* fmi = jmi->fmi;
-        char buf[1000];
+        char buf[10000];
         if(!fmi->fmi_logging_on) return;
         vsprintf(buf, fmt, ap);
         fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
