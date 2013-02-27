@@ -2671,7 +2671,7 @@ class LocalDAECollocator(CasadiCollocator):
         # Return results
         return (t_opt, var_opt['dx'], var_opt['x'], var_opt['u'], var_opt['w'],
                 var_opt['p_opt'])
-                
+    
     def get_h_opt(self):
         if self.hs == "free":
             return self.h_opt
