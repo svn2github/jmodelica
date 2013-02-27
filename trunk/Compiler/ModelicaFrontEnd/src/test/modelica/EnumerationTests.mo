@@ -332,7 +332,7 @@ Number of variables :                         2
   Number of String variables:                 0
 Number of Real differentiated variables:      0
 Number of Real derivative variables:          0
-Number of Real algebraic variables:           0
+Number of Real continous algebraic variables: 0
 Number of inputs:                             0
   Number of Real inputs:                      0
   Number of Integer inputs:                   0

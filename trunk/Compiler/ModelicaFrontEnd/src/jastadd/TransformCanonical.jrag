@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.Queue;
 import java.util.Set;
 import java.util.HashSet;
@@ -464,7 +465,7 @@ aspect TransformCanonical {
 			java.util.List<FVariable> s = new ArrayList<FVariable>();
 			for (FAbstractEquation e : equations()) {
 				s.addAll(e.inputs());
-				s.addAll(e.differentiatedVariables());	
+				s.addAll(e.differentiatedRealVariables());	
 				s.addAll(e.discretePreVariables());	
 			}
 			return s;
@@ -1487,6 +1488,24 @@ aspect TransformCanonical {
 		endStep("computeMatchingsAndBLT()");
 	}
 	
+	private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_NORMAL = 
+			EnumSet.of(BiPGraph.VarType.DERIVATIVE_VARIABLES, 
+					   BiPGraph.VarType.ALGEBRAIC_VARIABLES);
+	
+	private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_REAL = 
+			EnumSet.of(BiPGraph.VarType.DERIVATIVE_VARIABLES, 
+					   BiPGraph.VarType.CONTINUOUS_ALGEBRAIC_VARIABLES);
+	
+	private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_INIT = 
+			EnumSet.of(BiPGraph.VarType.DIFFERENTIATED_VARIABLES, 
+					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES);
+	
+	private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_ALL = 
+			EnumSet.of(BiPGraph.VarType.DERIVATIVE_VARIABLES, 
+					   BiPGraph.VarType.ALGEBRAIC_VARIABLES, 
+					   BiPGraph.VarType.DIFFERENTIATED_VARIABLES, 
+					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES);
+	
 	private void FClass.computeMatchingsAndBLTWrapped() {
 		daeBLT = new BLT();
 		daeStructuredBLT = new StructuredBLT(this);
@@ -1504,8 +1523,8 @@ aspect TransformCanonical {
 		Var v = null;		
 		
 		// First try a global matching with all variables
-		g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
-		g.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
+		g.addVariables(this, VAR_TYPES_NORMAL);
+		g.addEquations(equations(), VAR_TYPES_NORMAL,"eq_",1);
 		
 		log.info(g);
 		g.maximumMatching(true);
@@ -1521,12 +1540,12 @@ aspect TransformCanonical {
 		}
 	
 		// If no complete matching found, then try index reduction
-		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
+		if (g.getUnmatchedVariables().size() > 0 || g.getUnmatchedEquations().size() > 0) {
 			if (root().options.getBooleanOption("index_reduction")) {
 				// Only do index reduction based on real variables and equations
 				g = new BiPGraph();
-				g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.CONTINUOUS_ALGEBRAIC_VARIABLES);
-				g.addEquations(continuousEquations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.CONTINUOUS_ALGEBRAIC_VARIABLES,"eq_",1);
+				g.addVariables(this, VAR_TYPES_REAL);
+				g.addEquations(continuousEquations(), VAR_TYPES_REAL, "eq_", 1);
 				log.info("Index reduction starts");
 				log.info(g);
 				g.maximumMatching(true);	
@@ -1609,8 +1628,8 @@ aspect TransformCanonical {
 				}
 				
 				g = new BiPGraph();
-				g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
-				g.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
+				g.addVariables(this, VAR_TYPES_NORMAL);
+				g.addEquations(equations(), VAR_TYPES_NORMAL, "eq_", 1);
 
 				log.info(g);
 				g.maximumMatching(true);	
@@ -1661,8 +1680,8 @@ aspect TransformCanonical {
 		}
 						
 		// Find matching for the initialization system	
-		g.addVariables(this, BiPGraph.DIFFERENTIATED_VARIABLES | BiPGraph.DISCRETE_PRE_VARIABLES);
-		g.addEquations(equations(), BiPGraph.DIFFERENTIATED_VARIABLES | BiPGraph.DISCRETE_PRE_VARIABLES, "eq_",1);
+		g.addVariables(this, VAR_TYPES_INIT);
+		g.addEquations(equations(), VAR_TYPES_INIT, "eq_",1);
 
 	    // Replace when equations	
 		java.util.List<FAbstractEquation> equationsToReplace = new ArrayList<FAbstractEquation>();
@@ -1695,21 +1714,13 @@ aspect TransformCanonical {
 				g.removeEquation(eqq);	
 			}
 			
-			g.addEquations(newEquations_, BiPGraph.DERIVATIVE_VARIABLES | 
-		                                   BiPGraph.ALGEBRAIC_VARIABLES | 
-		                                   BiPGraph.DIFFERENTIATED_VARIABLES | 
-		                                   BiPGraph.DISCRETE_PRE_VARIABLES, eq_list.get(0).getName() + "_",
-		                                   1);
+			g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName() + "_", 1);
 		}		
 	
 		log.info(g);
 		
 
-		g.addEquations(initialEquations(), BiPGraph.DERIVATIVE_VARIABLES | 
-		                                   BiPGraph.ALGEBRAIC_VARIABLES | 
-		                                   BiPGraph.DIFFERENTIATED_VARIABLES | 
-		                                   BiPGraph.DISCRETE_PRE_VARIABLES, "eq_",
-		                                   g.getEquations().size() + 1);
+		g.addEquations(initialEquations(), VAR_TYPES_ALL, "eq_", g.getEquations().size() + 1);
 
 		log.info(g);
 		g.maximumMatching(false);	
@@ -2859,7 +2870,7 @@ aspect TransformCanonical {
 							fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp(0.0)));
 				}	
 			}
-			for (FRealVariable fv : algebraicRealVariables()) {
+			for (FRealVariable fv : algebraicContinousRealVariables()) {
 				if (fv.fixedAttribute()) {
 					addFInitialEquation(new FEquation(new FIdUseExp(
 							new FIdUse(fv.getFQName().fullCopy())),
@@ -4311,7 +4322,7 @@ aspect TransformCanonicalErrorCheck {
 	 * plus the number of discrete variables.
 	 */
 	syn int FClass.numDAEVariables() = 
-		numAlgebraicRealVariables() + 
+		numAlgebraicContinousRealVariables() + 
 		numDifferentiatedRealVariables() + numDiscreteVariables();
 	
 	/**

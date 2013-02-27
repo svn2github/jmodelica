@@ -422,16 +422,16 @@ public class GenericGenerator extends AbstractGenerator {
 	}
 
 	
-	class DAETag_numAlgebraicRealVariables extends DAETag {
+	class DAETag_numAlgebraicContinousRealVariables extends DAETag {
 		
-		public DAETag_numAlgebraicRealVariables(AbstractGenerator myGenerator, 
+		public DAETag_numAlgebraicContinousRealVariables(AbstractGenerator myGenerator, 
 		  FClass fclass) {
-			super("n_real_w","Number of algebraic real variables",
+			super("n_real_w","Number of continous algebraic real variables",
 			  myGenerator,fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			genPrinter.print(fclass.numAlgebraicRealVariables());
+			genPrinter.print(fclass.numAlgebraicContinousRealVariables());
 		}
 	
 	}

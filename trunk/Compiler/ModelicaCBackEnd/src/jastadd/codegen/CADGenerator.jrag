@@ -553,7 +553,7 @@ public class CADGenerator extends CGenerator {
 				}
 
 				col_offs += fclass.numRealInputs();
-				for (int j=0; j<fclass.numAlgebraicRealVariables(); j++) {
+				for (int j=0; j<fclass.numAlgebraicContinousRealVariables(); j++) {
 					for (int k=0; k<sp_w[j].size(); k++) {
 						str_row.append(sp_w[j].get(k).intValue());
 						str_col.append(j + col_offs);

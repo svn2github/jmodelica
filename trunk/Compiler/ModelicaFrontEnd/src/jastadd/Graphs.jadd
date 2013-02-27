@@ -25,6 +25,7 @@ import java.util.ListIterator;
 import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
+import java.util.EnumSet;
 
 aspect Graphs {
 
@@ -577,14 +578,10 @@ public class MunkresProblem {
 	
 }
 
-public class BiPGraph {
+FClass implements BiPGraph.VarSource;
+FAbstractEquation implements BiPGraph.VarSource;
 
-	public static final int DERIVATIVE_VARIABLES = 1;
-	public static final int DIFFERENTIATED_VARIABLES = 2;
-	public static final int ALGEBRAIC_VARIABLES = 4;
-	public static final int CONTINUOUS_ALGEBRAIC_VARIABLES = 8;
-	public static final int DISCRETE_ALGEBRAIC_VARIABLES = 16;
-	public static final int DISCRETE_PRE_VARIABLES = 32;
+public class BiPGraph {
 
 	public static final int MAX_N_EQ_DIFFS = 5;
 
@@ -707,78 +704,47 @@ public class BiPGraph {
 	public boolean addEdge(Eq e, Var v) {
 		return addEdge(e.getName(),v.getName());
 	}
-		
-		
-	public void addVariables(FClass fclass, int variableMask) {
 	
-		if ((variableMask & DERIVATIVE_VARIABLES) != 0) {
-			for (FVariable fv : fclass.derivativeVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-		}
-
-		if ((variableMask & DIFFERENTIATED_VARIABLES) != 0) {
-			for (FVariable fv : fclass.differentiatedRealVariables()) {
-				addVariable(fv.name(),fv);     
-			}	
-		}
-		
-		if ((variableMask & ALGEBRAIC_VARIABLES) != 0) {
-			for (FVariable fv : fclass.algebraicRealVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-		
-			for (FVariable fv : fclass.discreteRealVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-			for (FVariable fv : fclass.discreteIntegerVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-			for (FVariable fv : fclass.discreteBooleanVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-			for (FVariable fv : fclass.discreteStringVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-			for (FVariable fv : fclass.discreteEnumVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-		}
 	
-		if ((variableMask & CONTINUOUS_ALGEBRAIC_VARIABLES) != 0) {
-			for (FVariable fv : fclass.algebraicRealVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-		}
-	
-		if ((variableMask & DISCRETE_ALGEBRAIC_VARIABLES) != 0) {
+	public enum VarType {
+		DERIVATIVE_VARIABLES { 
+			public Collection<? extends FVariable> variables(VarSource s) { return s.derivativeVariables(); }
+		},
+		DIFFERENTIATED_VARIABLES { 
+			public Collection<? extends FVariable> variables(VarSource s) { return s.differentiatedRealVariables(); }
+		}, 
+		ALGEBRAIC_VARIABLES { 
+			public Collection<? extends FVariable> variables(VarSource s) { return s.algebraicVariables(); }
+		}, 
+		CONTINUOUS_ALGEBRAIC_VARIABLES { 
+			public Collection<? extends FVariable> variables(VarSource s) { return s.algebraicContinousRealVariables(); }
+		}, 
+		DISCRETE_ALGEBRAIC_VARIABLES { 
+			public Collection<? extends FVariable> variables(VarSource s) { return s.discreteVariables(); }
+		}, 
+		DISCRETE_PRE_VARIABLES { 
+			public Collection<? extends FVariable> variables(VarSource s) { return s.discretePreVariables(); }
+		};
 		
-			for (FVariable fv : fclass.discreteRealVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-			for (FVariable fv : fclass.discreteIntegerVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-			for (FVariable fv : fclass.discreteBooleanVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-			for (FVariable fv : fclass.discreteStringVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-			for (FVariable fv : fclass.discreteEnumVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-		}
+		public abstract Collection<? extends FVariable> variables(VarSource s);
+	}
 	
-		if ((variableMask & DISCRETE_PRE_VARIABLES) != 0) {
-			for (FVariable fv : fclass.discretePreVariables()) {
-				addVariable(fv.name(),fv);     
-			}
-		}
-	
-	}	
+	public interface VarSource {
+		public Collection<? extends FVariable> derivativeVariables();
+		public Collection<? extends FVariable> differentiatedRealVariables();
+		public Collection<? extends FVariable> algebraicVariables();
+		public Collection<? extends FVariable> algebraicContinousRealVariables();
+		public Collection<? extends FVariable> discreteVariables();
+		public Collection<? extends FVariable> discretePreVariables();
+	}
 		
-	public void addEquations(java.util.List<FAbstractEquation> eqns, int variableMask, String eqNamePrefix, int startIndex) {
+	public void addVariables(FClass fclass, EnumSet<VarType> variableTypes) {
+		for (VarType t : variableTypes)
+			for (FVariable fv : t.variables(fclass))
+				addVariable(fv.name(), fv);
+	}
+		
+	public void addEquations(java.util.List<FAbstractEquation> eqns, EnumSet<VarType> variableTypes, String eqNamePrefix, int startIndex) {
 		int k = startIndex;
 		Eq eqn = null;
 		Var v = null;
@@ -786,83 +752,31 @@ public class BiPGraph {
 		for (FAbstractEquation e : eqns) {
 			int n_eq = e.numScalarEquations();
 			LinkedHashSet<Eq> groupMembers = new LinkedHashSet<Eq>();
-			Map<FVariable, Integer> ffceLeftVarMap = emptyMap;
-			if (e instanceof FFunctionCallEquation) {
+			// For equations that counts as several scalar equations (function calls, algorithms), 
+			// the left hand side variables depends on all the right-hand side ones, 
+			// but not on the other left-hand side ones
+			Map<FVariable, Integer> blockEqLeftVarMap = emptyMap;
+			if (n_eq > 1) {
 				int i = 0;
-				ffceLeftVarMap = new HashMap<FVariable, Integer>();
+				blockEqLeftVarMap = new HashMap<FVariable, Integer>();
 				for (FVariable fv : e.referencedFVariablesInLHS()) 
-					ffceLeftVarMap.put(fv,i++);
+					blockEqLeftVarMap.put(fv,i++);
 				for (FVariable fv : e.referencedFVariablesInRHS()) 
-					ffceLeftVarMap.remove(fv);
+					blockEqLeftVarMap.remove(fv);
 			}
 			for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
 				                                  // need to reverse here to preserve the initial order.
-				eqn = addEquation(eqNamePrefix+k,e);
+				eqn = addEquation(eqNamePrefix+k, e);
 				groupMembers.add(eqn);
 				k++;
 
-				if ((variableMask & DERIVATIVE_VARIABLES) != 0) {
-					for (FDerivativeVariable dx : e.derivativeVariables()) {
-						v = getVariable(dx.name());
-						addEdge(eqn,v);
-					}
-				}
-
-				if ((variableMask & DIFFERENTIATED_VARIABLES) != 0) {
-					for (FVariable x : e.differentiatedVariables()) {
-						v = getVariable(x.name());
-						addEdge(eqn,v);
-					}
-				}
-
-				if ((variableMask & ALGEBRAIC_VARIABLES) != 0) {
-					for (FVariable y : e.algebraicVariables()) {
-						Integer pos = ffceLeftVarMap.get(y);
+				for (VarType t : variableTypes) {
+					for (FVariable y : t.variables(e)) {
+						Integer pos = blockEqLeftVarMap.get(y);
 						if (pos == null || pos == i) {
 							v = getVariable(y.name());
-							addEdge(eqn,v);
+							addEdge(eqn, v);
 						}
-					}
-				}
-
-				if ((variableMask & CONTINUOUS_ALGEBRAIC_VARIABLES) != 0) {
-					for (FVariable y : e.algebraicRealVariables()) {
-						v = getVariable(y.name());
-						addEdge(eqn,v);
-					}
-				}
-
-				if ((variableMask & DISCRETE_ALGEBRAIC_VARIABLES) != 0) {
-					for (FVariable y : e.discreteRealVariables()) {
-						v = getVariable(y.name());
-						addEdge(eqn,v);
-					}
-
-					for (FVariable y : e.discreteIntegerVariables()) {
-						v = getVariable(y.name());
-						addEdge(eqn,v);
-					}
-
-					for (FVariable y : e.discreteBooleanVariables()) {
-						v = getVariable(y.name()); 
-						addEdge(eqn,v);
-					}
-
-					for (FVariable y : e.discreteStringVariables()) {
-						v = getVariable(y.name());
-						addEdge(eqn,v);
-					}
-
-					for (FVariable y : e.discreteEnumVariables()) {
-						v = getVariable(y.name());
-						addEdge(eqn,v);
-					}
-				}
-
-				if ((variableMask & DISCRETE_PRE_VARIABLES) != 0) {
-					for (FVariable x : e.discretePreVariables()) {
-						v = getVariable(x.name());
-						addEdge(eqn,v);
 					}
 				}
 			}

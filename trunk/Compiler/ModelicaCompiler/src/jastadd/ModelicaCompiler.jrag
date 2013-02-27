@@ -1785,11 +1785,14 @@ public class ModelicaCompiler {
 			    compileFMUX(cl, name);
 			else
 				compileJMU(cl, name);
-		} catch  (ModelicaClassNotFoundException e){
-			log.error("Could not find the class "+ cl);
-			System.exit(1);
 		} catch (CompilerException ce) {
 			log.error(ce.getMessage());
+			System.exit(1);
+		} catch (CcodeCompilationException ce) {
+			log.error(ce.getMessage());
+			System.exit(1);
+		} catch (ModelicaClassNotFoundException e){
+			log.error("Could not find the class "+ cl);
 			System.exit(1);
 		} catch (FileNotFoundException e) {
 			log.error("Could not find file: " + e.getMessage());

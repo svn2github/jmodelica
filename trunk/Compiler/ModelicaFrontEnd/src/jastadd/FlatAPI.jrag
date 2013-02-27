@@ -120,7 +120,7 @@ aspect FlatAPI {
 		map.add(derivativeVariables());
 		map.add(differentiatedRealVariables());
 		map.add(realInputs());
-		map.add(algebraicRealVariables());
+		map.add(algebraicContinousRealVariables());
 		
 		// Need to increase the index counter by one since the
 		// 'time' variable is stored in this position
@@ -269,13 +269,13 @@ aspect FlatAPI {
 	syn int FClass.realInputsOffset() = 
 		differentiatedRealVariablesOffset() + 
 		numDifferentiatedRealVariables();
-	syn int FClass.algebraicRealVariablesOffset() = 
+	syn int FClass.algebraicContinousRealVariablesOffset() = 
 		realInputsOffset() + 
 		numRealInputs();
 
 	syn int FClass.timeOffset() =
-	    algebraicRealVariablesOffset() + 
-	    numAlgebraicRealVariables();
+	    algebraicContinousRealVariablesOffset() + 
+	    numAlgebraicContinousRealVariables();
 
 	syn int FClass.discreteRealVariablesOffset() = 
 		timeOffset() + 1;
@@ -586,8 +586,8 @@ aspect FlatAPI {
 	syn lazy ArrayList<FStringVariable> FClass.stringVariables() =
       intersectFVColl(strings(), variables());
 	
-    syn int FClass.numAlgebraicRealVariables() = algebraicRealVariables().size();
-	syn lazy ArrayList<FRealVariable> FClass.algebraicRealVariables() { 
+    syn int FClass.numAlgebraicContinousRealVariables() = algebraicContinousRealVariables().size();
+	syn lazy ArrayList<FRealVariable> FClass.algebraicContinousRealVariables() { 
 	  ArrayList<FRealVariable> set = intersectFVColl(reals(),variables());
   	  set.removeAll(differentiatedRealVariables());
   	  set.removeAll(derivativeVariables());
@@ -595,8 +595,15 @@ aspect FlatAPI {
   	  set.removeAll(inputs());
       return set;
 	}
-	syn int FVariable.algebraicRealVariableIndex() =
-		myFClass().algebraicRealVariables().indexOf(this);
+	syn int FVariable.algebraicContinousRealVariableIndex() =
+		myFClass().algebraicContinousRealVariables().indexOf(this);
+	
+	syn lazy ArrayList<FVariable> FClass.algebraicVariables() {
+		ArrayList<FVariable> set = new ArrayList<FVariable>();
+		set.addAll(algebraicContinousRealVariables());
+		set.addAll(discreteVariables());
+		return set;
+	}
 
 	// There are no free parameters in the Modelica compiler
 	// but these attributes are refined in the Optimica compiler
@@ -606,8 +613,8 @@ aspect FlatAPI {
 
 
 	/*
-    syn int FClass.numAlgebraicRealVariables() = algebraicRealVariables().size();
-	syn lazy ArrayList<FVariable> FClass.algebraicRealVariables() { 
+    syn int FClass.numAlgebraicContinousRealVariables() = algebraicContinousRealVariables().size();
+	syn lazy ArrayList<FVariable> FClass.algebraicContinousRealVariables() { 
 	  ArrayList<FVariable> set = new ArrayList<FVariable>();
 	  set.addAll(algebraicVariables());
 	  set.retainAll(reals());
@@ -1072,17 +1079,10 @@ aspect FlatAPI {
 	eq FPreEnumVariable.isPreVariable() = true;
 	
 	syn boolean FAbstractVariable.isAlgebraicVariable() = false;
-	syn lazy boolean FVariable.isAlgebraicVariable() = 
-		  myFClass().algebraicRealVariables().contains(this) ||
-		  myFClass().discreteRealVariables().contains(this) ||
-		  myFClass().discreteEnumVariables().contains(this) ||
-		  myFClass().discreteIntegerVariables().contains(this) || 
-		  myFClass().discreteBooleanVariables().contains(this) ||
-		  myFClass().discreteStringVariables().contains(this);
+	syn lazy boolean FVariable.isAlgebraicVariable()    = myFClass().algebraicVariables().contains(this);
 
 	syn boolean FAbstractVariable.isDiscreteVariable() = false;
-	syn lazy boolean FVariable.isDiscreteVariable() = 
-		  myFClass().discreteVariables().contains(this);
+	syn lazy boolean FVariable.isDiscreteVariable()    = myFClass().discreteVariables().contains(this);
 
 	inh FVariable FExp.inBindingExp();
 	eq FVariable.getBindingExp().inBindingExp() = this;
@@ -1706,8 +1706,8 @@ aspect FVariableUses {
 		return s;
 	}
 
-	syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicRealVariables() = 
-		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().algebraicRealVariables(),algebraicVariables()));
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicContinousRealVariables() = 
+		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().algebraicContinousRealVariables(),algebraicVariables()));
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.discreteRealVariables() = 
 		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().discreteRealVariables(),algebraicVariables()));
@@ -1741,12 +1741,12 @@ aspect FVariableUses {
 	 * \brief Collection attribute returning all differentiated variables (FVariables)
 	 * referenced in an equation.
 	 */
-	coll LinkedHashSet<FVariable> FAbstractEquation.differentiatedVariables() 
+	coll LinkedHashSet<FVariable> FAbstractEquation.differentiatedRealVariables() 
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
 	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
 	    !(getParent() instanceof FDerExp) && myFV().isDifferentiatedVariable() to 
-		FAbstractEquation.differentiatedVariables() for myFEquation();
+		FAbstractEquation.differentiatedRealVariables() for myFEquation();
 
 	/**
 	 * \brief Collection attribute returning all discrete variables (FVariables)
@@ -1773,7 +1773,7 @@ aspect FVariableUses {
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.variables() {
 		LinkedHashSet<FVariable> l = new LinkedHashSet<FVariable>();
-		l.addAll(differentiatedVariables());
+		l.addAll(differentiatedRealVariables());
 		l.addAll(derivativeVariables());
 		l.addAll(algebraicVariables());
 		l.addAll(discreteVariables());
@@ -2028,8 +2028,8 @@ aspect FlatDiagnostics {
 				numDifferentiatedRealVariables() + "\n"); 
 		str.append("Number of Real derivative variables:          " + 
 				numDerivativeVariables() + "\n"); 
-		str.append("Number of Real algebraic variables:           " + 
-				numAlgebraicRealVariables() + "\n");
+		str.append("Number of Real continous algebraic variables: " + 
+				numAlgebraicContinousRealVariables() + "\n");
 
 		str.append("Number of inputs:                             " + 
 				numInputs() + "\n");
@@ -2207,7 +2207,7 @@ aspect FlatDiagnostics {
 		str.append("\n");
 		
 		str.append("Algebraic real variables: \n");
-		for (FVariable fv : algebraicRealVariables()) {
+		for (FVariable fv : algebraicContinousRealVariables()) {
 			str.append(" " + fv.name());
 			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
 					+ fv.isLinear());
@@ -2261,7 +2261,7 @@ aspect FlatDiagnostics {
 			}
 			str.append("\n");
 			str.append("Algebraic real variables: \n");
-			for (FVariable fv : algebraicRealVariables()) {
+			for (FVariable fv : algebraicContinousRealVariables()) {
 				str.append(" " + fv.name() + "\n");
 				for (FVariable d : fv.dependsOn()) {
 					str.append("    " + d.name() + "\n");
@@ -2615,7 +2615,7 @@ aspect Sparsity {
 	}
 
 	public void FAbstractEquation.differentiatedRealVariablesEquationSparsity(ArrayList<Integer>[] sp, int i) {
-		calculateEquationSparsity(sp, i, differentiatedVariables(), myFClass().differentiatedRealVariablesOffset());
+		calculateEquationSparsity(sp, i, differentiatedRealVariables(), myFClass().differentiatedRealVariablesOffset());
 	}
 	
 	syn lazy int FClass.realInputsEquationSparsity_n_nz() {
@@ -2650,7 +2650,7 @@ aspect Sparsity {
 	syn lazy int FClass.algebraicRealVariablesEquationSparsity_n_nz() {
 		int n_nz = 0;
 		ArrayList<Integer>[] sp = algebraicRealVariablesEquationSparsity();
-		for (int j=0; j<numAlgebraicRealVariables(); j++) {
+		for (int j=0; j<numAlgebraicContinousRealVariables(); j++) {
 			n_nz += sp[j].size();
 		}
 		return n_nz;		
@@ -2658,9 +2658,9 @@ aspect Sparsity {
 
 	syn lazy ArrayList<Integer>[] FClass.algebraicRealVariablesEquationSparsity() {
 		
-		ArrayList<Integer>[] sp = (ArrayList<Integer>[]) new ArrayList[numAlgebraicRealVariables()];
+		ArrayList<Integer>[] sp = (ArrayList<Integer>[]) new ArrayList[numAlgebraicContinousRealVariables()];
 		
-		for (int i=0; i<numAlgebraicRealVariables(); i++) {
+		for (int i=0; i<numAlgebraicContinousRealVariables(); i++) {
 			sp[i] = new ArrayList<Integer>();
 		}
 		
@@ -2673,7 +2673,7 @@ aspect Sparsity {
 	}
 
 	public void FAbstractEquation.algebraicRealVariablesEquationSparsity(ArrayList<Integer>[] sp, int i) {
-		calculateEquationSparsity(sp, i, algebraicRealVariables(), myFClass().algebraicRealVariablesOffset());
+		calculateEquationSparsity(sp, i, algebraicContinousRealVariables(), myFClass().algebraicContinousRealVariablesOffset());
 	}
 
 }
