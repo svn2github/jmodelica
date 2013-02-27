@@ -206,6 +206,10 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
           N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, jthCol);      
         }
       
+		/* Evaluate the residual with the original u vector to avoid that the initial guess 
+		   for the final IV is pertubated when the iterations start*/
+		ret = kin_f(u, ftemp, block);
+
         /* Restore original array pointer in tmp2 */
         N_VSetArrayPointer(tmp2_data, tmp2);      
     }
@@ -1083,7 +1087,8 @@ void jmi_kinsol_solver_delete(jmi_block_residual_t* block) {
 
 void jmi_kinsol_solver_print_solve_start(jmi_block_residual_t * block) {
     int j;
-
+	jmi_kinsol_solver_t* solver = block->solver;
+    
     if((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log)) {
 		char* buf = block->message_buffer ;
 		sprintf(buf,"Block:;%d;Newton solver invoked;;;",block->index);
@@ -1123,7 +1128,11 @@ void jmi_kinsol_solver_print_solve_start(jmi_block_residual_t * block) {
 			sprintf(buf+strlen(buf),"%30.16E;",block->min[j]);
 		}
 		jmi_log(block->jmi, logInfo, buf);
-		block->F(block->jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
+    	sprintf(buf,"[NLE_ITERS]Block:;%d;Variable nominal;;;",block->index);
+		for (j=0;j<block->n;j++) {
+			sprintf(buf+strlen(buf),"%30.16E;",block->nominal[j]);
+		}
+		jmi_log(block->jmi, logInfo, buf);		
 		sprintf(buf,"[NLE_ITERS]Block:;%d;Initial guess;;;",block->index);
 		for (j=0;j<block->n;j++) {
 			sprintf(buf+strlen(buf),"%30.16E;",block->x[j]);
