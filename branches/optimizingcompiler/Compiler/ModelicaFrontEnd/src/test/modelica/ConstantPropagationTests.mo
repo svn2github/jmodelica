@@ -306,4 +306,41 @@ end ConstantPropagationTests.Func1;
 ")})));
 end Func1;
 
+model Der1
+	Real x1,x2;
+	Real x3,x4;
+	Real x5,x6;
+	parameter Real p1 = 4;
+equation
+    x2 = der(x1);
+    x1 = 3;
+    x3 = der(x4);
+    der(x4) = 3;
+    x5 = der(x6);
+    x6 = p1 + 1;
+    annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Der1",
+			description="",
+			constant_propagation=true,
+			flatModel="
+fclass ConstantPropagationTests.Der1
+ constant Real x1 = 3;
+ constant Real x2 = 0.0;
+ Real x3;
+ Real x4;
+ constant Real x5 = 0.0;
+ parameter Real x6;
+ parameter Real p1 = 4 /* 4 */;
+initial equation 
+ x4 = 0.0;
+parameter equation
+ x6 = p1 + 1;
+equation
+ x3 = der(x4);
+ der(x4) = 3;
+end ConstantPropagationTests.Der1;
+")})));
+end Der1;
+
 end ConstantPropagationTests;
