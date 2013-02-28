@@ -436,6 +436,7 @@ static int jmi_kinsol_init_bounds(jmi_block_residual_t * block) {
     if(!num_bounds) return 0;
     solver->bound_vindex = (int*)calloc(num_bounds, sizeof(int));
     solver->bound_kind  = (int*)calloc(num_bounds, sizeof(int));
+	solver->bound_limiting  = (int*)calloc(num_bounds, sizeof(int));
     solver->bounds = (realtype*)calloc(num_bounds, sizeof(realtype));
     solver->active_bounds = (realtype*)calloc(block->n, sizeof(realtype));
     num_bounds = 0;
@@ -528,6 +529,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     realtype* xxd = N_VGetArrayPointer(x);
     realtype* xd = N_VGetArrayPointer(b);
     booleantype activeBounds = FALSE;
+	booleantype limitingBounds = FALSE;
     int i;
 
 #define MAX_NETON_STEP_RATIO 10.0
@@ -552,73 +554,56 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
 	max_step_ratio = 1.0;
     min_step_ratio = 0.01; /* solver->kin_stol / xnorm; */
 
-	if (block->jmi->options.log_level >= 5) {
-		/* With logging */
+	/* Without logging */
+	for(i = 0; i < solver->num_bounds; ++i) {
+		int index = solver->bound_vindex[i]; /* variable index */
+		int kind = solver->bound_kind[i];   /* min or max */
+		realtype ui =  NV_Ith_S(kin_mem->kin_uu,index);  /* current variable value */
+		realtype pi = xd[index];            /* solved step length for the variable*/
+		realtype bound = solver->bounds[i]; 
+		realtype pbi = (bound - ui)*(1 - UNIT_ROUNDOFF);  /* distance to the bound */
+		realtype step_ratio_i;
+		if(    ((kind == 1)&& (pbi >= pi))
+			|| ((kind == -1)&& (pbi <= pi)))
+			continue; /* will not cross the bound */
+
+		solver->bound_limiting[i] = 1 ;
+		limitingBounds = TRUE ;
+		step_ratio_i =pbi/pi;   /* step ration to bound */
+		if(step_ratio_i < min_step_ratio) {
+			/* this bound is active (we need to follow it) */
+			activeBounds = TRUE;
+			xxd[index] = 0;
+			solver->active_bounds[index] = (kind == 1)? pbi:-pbi ; /* distance to the bound */
+
+		}
+		else
+			max_step_ratio = MIN(max_step_ratio, step_ratio_i);          /* reduce the step */
+	}
+
+
+	if (block->jmi->options.log_level >= 5 && limitingBounds) {
+
+		/* Print limiting bounds */
 		char* buf = block->message_buffer ;
 		sprintf(buf,"[NLE_ITERS]Block:;%d;Limitation;Bounds:;;",block->index);
-		
-		for(i = 0; i < solver->num_bounds; ++i) {
+		for (i=0; i < solver->num_bounds; i++) {
 			int index = solver->bound_vindex[i]; /* variable index */
-			int kind = solver->bound_kind[i];   /* min or max */
-			realtype ui =  NV_Ith_S(kin_mem->kin_uu,index);  /* current variable value */
-			realtype pi = xd[index];            /* solved step length for the variable*/
-			realtype bound = solver->bounds[i]; 
-			realtype pbi = (bound - ui)*(1 - UNIT_ROUNDOFF);  /* distance to the bound */
-			realtype step_ratio_i;
-			if(    ((kind == 1)&& (pbi >= pi))
-				|| ((kind == -1)&& (pbi <= pi)))
-				continue; /* will not cross the bound */
-
-			/* Print information*/
-			if (kind == 1) {
-				sprintf(buf+strlen(buf),"max ");
-			} else {
-				sprintf(buf+strlen(buf),"min ");
+			if (solver->bound_limiting[index] != 0) {
+				if (solver->bound_kind[i] == 1) {
+					sprintf(buf+strlen(buf),"max ");
+				} else {
+					sprintf(buf+strlen(buf),"min ");
+				}
+				sprintf(buf+strlen(buf),"#r%d#;",block->value_references[index]);
 			}
-			sprintf(buf+strlen(buf),"#r%d#;",block->value_references[index]);
-
-			step_ratio_i =pbi/pi;   /* step ration to bound */
-			if(step_ratio_i < min_step_ratio) {
-				/* this bound is active (we need to follow it) */
-				activeBounds = TRUE;
-				xxd[index] = 0;
-				solver->active_bounds[index] = (kind == 1)? pbi:-pbi ; /* distance to the bound */
-
-			}
-			else
-				max_step_ratio = MIN(max_step_ratio, step_ratio_i);          /* reduce the step */
 		}
-		/* Flush buffer to log */
 		jmi_log(block->jmi, logInfo, buf);
-
-	} else {
-		/* Without logging */
-		for(i = 0; i < solver->num_bounds; ++i) {
-			int index = solver->bound_vindex[i]; /* variable index */
-			int kind = solver->bound_kind[i];   /* min or max */
-			realtype ui =  NV_Ith_S(kin_mem->kin_uu,index);  /* current variable value */
-			realtype pi = xd[index];            /* solved step length for the variable*/
-			realtype bound = solver->bounds[i]; 
-			realtype pbi = (bound - ui)*(1 - UNIT_ROUNDOFF);  /* distance to the bound */
-			realtype step_ratio_i;
-			if(    ((kind == 1)&& (pbi >= pi))
-				|| ((kind == -1)&& (pbi <= pi)))
-				continue; /* will not cross the bound */
-
-			step_ratio_i =pbi/pi;   /* step ration to bound */
-			if(step_ratio_i < min_step_ratio) {
-				/* this bound is active (we need to follow it) */
-				activeBounds = TRUE;
-				xxd[index] = 0;
-				solver->active_bounds[index] = (kind == 1)? pbi:-pbi ; /* distance to the bound */
-
-			}
-			else
-				max_step_ratio = MIN(max_step_ratio, step_ratio_i);          /* reduce the step */
-		}
+		
 	}
 	if (block->jmi->options.log_level >= 5 && activeBounds) {
-		/* Print min values */
+
+		/* Print active bounds*/
 		char* buf = block->message_buffer ;
 		sprintf(buf,"[NLE_ITERS]Block:;%d;Active;Bounds:;;",block->index);
 		for (i=0; i < solver->num_bounds; i++) {
