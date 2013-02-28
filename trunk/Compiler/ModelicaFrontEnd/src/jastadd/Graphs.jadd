@@ -64,11 +64,11 @@ public class EquationBlockFactory {
 				return null;
 
 		// Check if equation is solvable for all active variables (only if we want a solved block)
-		boolean solvedBlock = solve;
-		for (Iterator<FVariable> it = fvs.iterator(); solvedBlock && it.hasNext(); )
-			solvedBlock = e.isSolved(it.next().name(), duringTearing);
+		Solvability solvability = solve ? Solvability.ANALYTICALLY_SOLVABLE : Solvability.UNSOLVABLE;
+		for (Iterator<FVariable> it = fvs.iterator(); solvability.isSolvable() && it.hasNext(); )
+			solvability = e.isSolved(it.next().name(), duringTearing);
 		
-		return e.createSimpleEquationBlock(fvs, solvedBlock);
+		return e.createSimpleEquationBlock(fvs, solvability);
 	}
 	
 	/**
@@ -164,14 +164,16 @@ public class EquationBlockFactory {
 /**
  * Create a simple equation block from a single equation. 
  */
-public SimpleEquationBlock FAbstractEquation.createSimpleEquationBlock(Collection<FVariable> fvs, boolean solved) { 
+public SimpleEquationBlock FAbstractEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) { 
 	return null;
 }
 
-public SimpleEquationBlock FEquation.createSimpleEquationBlock(Collection<FVariable> fvs, boolean solved) { 
+public SimpleEquationBlock FEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) { 
 	FVariable fv = fvs.iterator().next();
-	if (solved) { // Solved scalar equation
+	if (solvability.isAnalyticallySolvable()) { // Solved scalar equation
 		return new SolvedScalarEquationBlock(this, fv);
+	} else if(solvability.isSolvable()) { // Numerically solvable scalar equation
+		return new NumericallySolvedScalarEquationBlock(this, fv);
 	} else { // Unsolved scalar equation
 		return new UnsolvedScalarEquationBlock(this, fv);
 	}
@@ -179,16 +181,16 @@ public SimpleEquationBlock FEquation.createSimpleEquationBlock(Collection<FVaria
 
 // If equation TODO
 
-public SimpleEquationBlock FWhenEquation.createSimpleEquationBlock(Collection<FVariable> fvs, boolean solved) { 
+public SimpleEquationBlock FWhenEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) { 
 	return new WhenEquationBlock(this);
 }
 
-public SimpleEquationBlock FAlgorithmBlock.createSimpleEquationBlock(Collection<FVariable> fvs, boolean solved) { 
+public SimpleEquationBlock FAlgorithmBlock.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) { 
 	return new AlgorithmBlock(this);
 }
 
-public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, boolean solved) { 
-	if (solved) {
+public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) { 
+	if (solvability.isAnalyticallySolvable()) {
 		return new SolvedFunctionCallEquationBlock(this, fvs);
 	} else {
 		return new UnsolvedFunctionCallEquationBlock(this, fvs);
@@ -1719,15 +1721,26 @@ public class SolvingBiPGraph extends BiPGraph {
 	
 	@Override
 	public boolean canMatch(Eq e, Var v) {
+		return isSolved(e, v).isSolvable();
+	}
+	
+	public Solvability isSolved(Eq e, Var v) {
 		return e.getEquation().isSolved(v.getName(), true);
 	}
 	
 	@Override
 	public void addInsidence(Eq e, Var v) {
 		super.addInsidence(e, v);
-		if (canMatch(e, v)) {
-			e.addSolvableVariable(v);
-			v.solvableOccurrence();
+		Solvability solvability = isSolved(e, v);
+		switch (solvability) {
+		case ANALYTICALLY_SOLVABLE:
+			e.addAnalyticallySolvableVariable(v);
+			v.analyticallySolvableOccurrence();
+			break;
+		case NUMERICALLY_SOLVABLE:
+			e.addNumericallySolvableVariable(v);
+			v.numericallySolvableOccurrence();
+			break;
 		}
 	}
 	
@@ -1738,6 +1751,8 @@ public class Eq implements Comparable<Eq> {
 	private String name;
 	private java.util.List<Var> variables = new ArrayList<Var>();
 	private java.util.List<Var> solvableVariables = new ArrayList<Var>();
+	private int analyticallySolvableOccurrences = 0;
+	private int numericallySolvableOccurrences = 0;
 	private Var matching = null;
 	private boolean visited = false;
 	private int layer = 1000000;
@@ -1874,8 +1889,14 @@ public class Eq implements Comparable<Eq> {
 		this.eqn = eqn;
 	}
 	
-	public void addSolvableVariable(Var v) {
+	public void addAnalyticallySolvableVariable(Var v) {
 		solvableVariables.add(v);
+		analyticallySolvableOccurrences++;
+	}
+	
+	public void addNumericallySolvableVariable(Var v) {
+		solvableVariables.add(v);
+		numericallySolvableOccurrences++;
 	}
 	
 	public java.util.List<Var> getSolvableVariables() {
@@ -1932,7 +1953,10 @@ public class Eq implements Comparable<Eq> {
 		diff = getVariables().size() - other.getVariables().size();
 		if (diff != 0)
 			return diff;
-		diff = other.getSolvableVariables().size() - getSolvableVariables().size();
+		diff = numericallySolvableOccurrences - other.numericallySolvableOccurrences;
+		if (diff != 0)
+			return diff;
+		diff = other.analyticallySolvableOccurrences - analyticallySolvableOccurrences;
 		if (diff != 0)
 			return diff;
 		diff = (getEquation().hasNominal() ? 1 : 0) - (other.getEquation().hasNominal() ? 1 : 0);
@@ -1953,8 +1977,9 @@ public class Var implements Comparable<Var> {
 	private FVariable v;
 	private Var meDifferentiated = null; // A reference to this variable differentiated once
 	private Var meIntegrated = null;
-	private int nbrV = 0;
-	private int nbrSV = 0;
+	private int occurrences = 0;
+	private int analyticallySolvableOccurrences = 0;
+	private int numericallySolvableOccurrences = 0;
 	private boolean isIter=false;
 	
 	public Var(String name, FVariable v) {
@@ -2032,19 +2057,27 @@ public class Var implements Comparable<Var> {
 	}
 	
 	public void occurrence(){
-		this.nbrV++;
+		occurrences++;
 	}
 	
-	public void solvableOccurrence(){
-		this.nbrSV++;
+	public void analyticallySolvableOccurrence(){
+		analyticallySolvableOccurrences++;
 	}
 	
-	public int getNbrV(){
-		return nbrV;
+	public void numericallySolvableOccurrence(){
+		numericallySolvableOccurrences++;
 	}
 	
-	public int getNbrSV(){
-		return nbrSV;
+	public int getNbrOccurrences(){
+		return occurrences;
+	}
+	
+	public int getNbrAnalyticallySolvableOccurrences(){
+		return analyticallySolvableOccurrences;
+	}
+	
+	public int getNbrNumericallySolvableOccurrences(){
+		return numericallySolvableOccurrences;
 	}
 	
 	public String toString() {
@@ -2080,10 +2113,13 @@ public class Var implements Comparable<Var> {
 		diff = (markedAsIterationVariable() ? 1 : 0) - (other.markedAsIterationVariable() ? 1 : 0);
 		if (diff != 0)
 			return diff;
-		diff = getNbrV() - other.getNbrV();
+		diff = getNbrOccurrences() - other.getNbrOccurrences();
 		if (diff != 0)
 			return diff;
-		diff = other.getNbrSV() - getNbrSV();
+		diff = getNbrNumericallySolvableOccurrences() - other.getNbrNumericallySolvableOccurrences();
+		if (diff != 0)
+			return diff;
+		diff = other.getNbrAnalyticallySolvableOccurrences() - getNbrAnalyticallySolvableOccurrences();
 		if (diff != 0)
 			return diff;
 		diff = (getVariable().attributeSet(FAttribute.START) ? 1 : 0) - (other.getVariable().attributeSet(FAttribute.START) ? 1 : 0);

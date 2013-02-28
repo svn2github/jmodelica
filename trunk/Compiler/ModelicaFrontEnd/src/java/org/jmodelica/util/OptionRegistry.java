@@ -79,6 +79,12 @@ public class OptionRegistry {
 			 "If this option is set to true (default is false), a less restrictive strategy is used for solving equations " +
 			 "in the tearing algorithm. Specifically, division by parameters and variables is permitted, by default no " +
 			 "such divisions are made during tearing."),
+		LOCAL_ITERATION_IN_TEARING 
+			("local_iteration_in_tearing", 
+			 compiler, 
+			 false, 
+			 "If this option is set to true (default is false), equations that can be solved with local fixed" +
+			 "point iteration will be considered solved."),
 		ENABLE_TEARING
 			("enable_tearing", 
 			 compiler, 

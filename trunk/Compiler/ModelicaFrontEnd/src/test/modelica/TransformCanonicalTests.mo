@@ -7297,6 +7297,38 @@ At line 0, column 0:
 ")})));
 end HandGuidedTearingWarning1;
 
+model TearingLocalLoopTest1
+	Real a, b, c;
+equation
+	20 = c * a;
+	23 = c * b;
+	c = a + b;
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			local_iteration_in_tearing=true,
+			name="TearingLocalLoopTest1",
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Torn block of 1 iteration variables and 2 solved variables.
+Solved variables:
+  b
+  a
+Iteration variables:
+  c()
+Solved equations:
+  23 = c * b
+  c = a + b
+Residual equations:
+ Iteration variables: c
+  20 = c * a
+-------------------------------
+")})));
+end TearingLocalLoopTest1;
+
 model BlockTest1
 record R
   Real x,y;

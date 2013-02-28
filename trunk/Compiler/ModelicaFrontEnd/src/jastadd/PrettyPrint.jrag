@@ -1797,6 +1797,12 @@ aspect FlatPrettyPrint {
 	eq FConstant.toString() = "constant ";
 	eq FContinuous.toString() = "";	
 	
+	syn String FTypePrefixVariability.toStringLiteral();
+	eq FParameter.toStringLiteral() = "Parameter";
+	eq FDiscrete.toStringLiteral() = "Discrete";
+	eq FConstant.toStringLiteral() = "Constant";
+	eq FContinuous.toStringLiteral() = "Continuous";
+	
 	syn String Restriction.toString();
 	eq Model.toString() = "model";
 	eq Block.toString() = "block";
