@@ -1,4 +1,5 @@
 CASADI_BUILD_DIR=$(abs_builddir)/../../casadi_build
+CASADI_SRC_DIR=$(abs_top_srcdir)/ThirdParty/CasADi/CasADi/
 
 # This is to ensure that the install target of the Sundials
 # make system is run whenever make all is run. This is needed
@@ -9,17 +10,20 @@ CASADI_BUILD_DIR=$(abs_builddir)/../../casadi_build
 
 
 $(CASADI_BUILD_DIR):
+	grep -q "#include <cmath>" $(CASADI_SRC_DIR)/swig/casadi.i || \
+	( sed -f $(CASADI_SRC_DIR)../cmath.sed $(CASADI_SRC_DIR)/swig/casadi.i > casadi.i.temp && \
+	mv casadi.i.temp $(CASADI_SRC_DIR)/swig/casadi.i )
 	mkdir -p $(CASADI_BUILD_DIR) && \
 	cd $(CASADI_BUILD_DIR) && \
 	case $(build) in \
 	*-cygwin*) \
-	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles" $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
-  	*-mingw*) \
-	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles" $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
-  	*-apple*) \
-	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
-  	*) \
-	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake $(abs_top_srcdir)/ThirdParty/CasADi/CasADi/ ;; \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles" $(CASADI_SRC_DIR) ;; \
+	*-mingw*) \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles" $(CASADI_SRC_DIR) ;; \
+	*-apple*) \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake $(CASADI_SRC_DIR) ;; \
+	*) \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake $(CASADI_SRC_DIR) ;; \
 	esac
 
 
