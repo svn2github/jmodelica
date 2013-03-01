@@ -53,8 +53,6 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 	jmi_->dae = NULL;
 	jmi_->init = NULL;
 	jmi_->opt = NULL;
-	jmi_->info = NULL;
-        jmi_->sim = NULL;
         /* jmi_->user_func = NULL; */
         jmi_->fmi = NULL;
 
@@ -280,14 +278,6 @@ int jmi_delete(jmi_t* jmi){
 		jmi_func_delete(jmi->opt->Heq);
 		jmi_func_delete(jmi->opt->Hineq);
 		free(jmi->opt);
-	}
-	if(jmi->info != NULL) {
-		free((void*)jmi->info->guid);
-		free((void*)jmi->info->instance_name);
-		free(jmi->info);
-	}
-	if(jmi->sim != NULL) {
-		free(jmi->sim);
 	}
 	for (i=0; i < jmi->n_dae_init_blocks;i=i+1){ /*Deallocate init BLT blocks.*/
 		jmi_delete_block_residual(jmi->dae_init_block_residuals[i]);

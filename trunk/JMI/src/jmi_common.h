@@ -32,9 +32,6 @@
 #include <math.h>
 #include <sundials/sundials_types.h>
 
-#include <fmiModelTypes.h>
-#include <fmiModelFunctions.h>
-
 /**
  * \defgroup Jmi_internal Internal functions of the JMI Model \
  * interface.
@@ -155,8 +152,6 @@ typedef struct jmi_opt_t jmi_opt_t;                       /**< \brief Forward de
 typedef struct jmi_func_t jmi_func_t;                     /**< \brief Forward declaration of struct. */
 typedef struct jmi_func_ad_t jmi_func_ad_t;               /**< \brief Forward declaration of struct. */
 typedef struct jmi_block_residual_t jmi_block_residual_t; /**< \brief Forward declaration of struct. */
-typedef struct jmi_info_t jmi_info_t;                     /**< \brief Forward declaration of struct. */
-typedef struct jmi_sim_t jmi_sim_t;                       /**< \brief Forward declaration of struct. */
 typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward declaration of struct. */
 typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief Forward declaration of struct. */
 
@@ -1176,8 +1171,6 @@ struct jmi_t{
   jmi_dae_t* dae;                        /**< \brief A jmi_dae_t struct pointer. */
 	jmi_init_t* init;                    /**< \brief A jmi_init_t struct pointer. */
 	jmi_opt_t* opt;                      /**< \brief A jmi_opt_t struct pointer. */
-	jmi_info_t* info;                    /**< \brief A jmi_info_t struct pointer. */
-	jmi_sim_t*  sim;                     /**< \brief A jmi_sim_t struct pointer. */
         /* never used: fmiCallbackFunctions* user_func;*/     /**< \brief fmiCallbackFunctions, user provided. */
         fmi_t*      fmi;                     /**< \brief A pointer to the FMI interface (NULL in JMI mode). */
 
@@ -1336,31 +1329,6 @@ struct jmi_t{
     jmi_options_t options; /** \brief Runtime options */
 
     jmi_int_t recomputeVariables; /** \brief Dirty flag indicating when equations should be resolved. */
-};
-
-/**
- * \brief Struct containing Model information.
- * 
- * Contains information about instance name GUID and logging.
- */
-struct jmi_info_t{
-    fmiString instance_name; /**< \brief A fmiString containing the name of the instance. */
-    fmiString guid; /**< \brief A fmiString containing the GUID identifier. */
-    fmiBoolean logging_on; /**< \brief  A fmiBoolean turning on or off the logging. */
-};
-
-/**
- * \brief Struct containing Simulation information.
- * 
- * Contains information useful during a simulation, such as tolerances and 
- * epsilons.
- */
-struct jmi_sim_t{
-    fmiReal event_epsilon; /**< \brief A fmiReal for modifying the event indicators. */
-    fmiReal newton_tolerance; /**< \brief A fmiReal for the Newton tolerance. */
-    fmiReal relative_tolerance; /**< \brief A fmiReal for the relative tolerance. */
-    fmiReal sfac_events; /**< \brief A fmiReal for the safety factor in the event indicators. */
-    fmiReal sfac_newton; /**< \brief A fmiReal for the safety factor in the Newton iteration. */
 };
 
 /**
