@@ -7315,11 +7315,12 @@ equation
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
-  b
+  b()
   a
 Iteration variables:
   c()
 Solved equations:
+ Iteration variables: b
   23 = c * b
   c = a + b
 Residual equations:

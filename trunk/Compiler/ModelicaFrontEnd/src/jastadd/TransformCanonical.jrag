@@ -953,6 +953,11 @@ aspect TransformCanonical {
 		
 		
 		public void prettyPrintIterationVariables(PrintStream str) {
+			if (!isSolvable())
+				doPrettyPrintIterationVariables(str);
+		}
+		
+		public void doPrettyPrintIterationVariables(PrintStream str) {
 			boolean first = true;
 			for (FVariable var : activeVariables()) {
 				if (first)
@@ -1028,7 +1033,8 @@ aspect TransformCanonical {
 		
 		public UnsolvedScalarEquationBlock(FEquation eqn, FVariable fv) {
 			super(eqn, fv);
-		}	
+			fv.warnStartAttributeNotSet();
+		}
 		
 		@Override
 		public boolean isSolvable() {
@@ -1053,13 +1059,24 @@ aspect TransformCanonical {
 		
 		public NumericallySolvedScalarEquationBlock(FEquation eqn, FVariable fv) {
 			super(eqn, fv);
-		}	
+			fv.warnStartAttributeNotSet();
+		}
 
 		@Override
 		public boolean isSolvable() {
 			return true;
 		}
 
+		@Override
+		public void prettyPrintActiveVariables(PrintStream str, boolean printAttributes) {
+			super.prettyPrintActiveVariables(str, true);
+		}
+		
+		@Override
+		public void prettyPrintIterationVariables(PrintStream str) {
+			doPrettyPrintIterationVariables(str);
+		}
+		
 		@Override
 		public void prettyPrint(PrintStream str) {
 			str.println("Numerically solved block of 1 variables:");
@@ -1139,6 +1156,8 @@ aspect TransformCanonical {
 		
 		public UnsolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVariables) {
 			super(eqn, activeVariables);
+			for (FVariable var : activeVariables)
+				var.warnStartAttributeNotSet();
 		}
 
 		@Override
@@ -1261,10 +1280,6 @@ aspect TransformCanonical {
 		}
 		
 		public void addUnsolvedBlock(SimpleEquationBlock aeb) {
-			for (FVariable var : aeb.activeVariables()) {
-				if (!var.startAttributeSet())
-					var.warning("Iteration variable \"" + var.name() + "\" is missing start value!");
-			}
 			if (!unsolvedBlocks.isEmpty() && unsolvedBlocks.get(unsolvedBlocks.size() - 1).mergeBlock(aeb))
 				return;
 			unsolvedBlocks.add(aeb);
@@ -1344,8 +1359,10 @@ aspect TransformCanonical {
 			for (SimpleEquationBlock seb : unsolvedBlocks)
 				seb.prettyPrintActiveVariables(str, true);
 			str.println("Solved equations:");
-			for (SimpleEquationBlock seb : solvedBlocks)
+			for (SimpleEquationBlock seb : solvedBlocks) {
+				seb.prettyPrintIterationVariables(str);
 				seb.prettyPrintEquation(str);
+			}
 			str.println("Residual equations:");
 			for (SimpleEquationBlock seb : unsolvedBlocks) {
 				seb.prettyPrintIterationVariables(str);

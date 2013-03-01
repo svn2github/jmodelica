@@ -1528,6 +1528,11 @@ aspect Attributes {
 		}
 	}
 	
+	public void FVariable.warnStartAttributeNotSet() {
+		if (!startAttributeSet())
+			warning("Iteration variable \"" + name() + "\" is missing start value!");
+	}
+	
 }
 
 aspect FVariableUses {
