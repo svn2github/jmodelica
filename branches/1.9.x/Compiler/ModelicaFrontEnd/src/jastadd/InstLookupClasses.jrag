@@ -150,7 +150,8 @@ aspect InstLookupClasses {
 	 * Resolve classes that are just references to other classes.
 	 */
 	syn InstClassDecl InstClassDecl.actualInstClass() = this;
-	eq InstSimpleShortClassDecl.actualInstClass()     = getTarget().myInstClassDecl().actualInstClass();
+	eq InstSimpleShortClassDecl.actualInstClass()     = 
+		isRecursive() ? unknownInstClassDecl() : getTarget().myInstClassDecl().actualInstClass();
 	
 	/**
 	 * Lookup the class being redeclared & extended in the last step of a chain 
@@ -617,20 +618,23 @@ aspect SimpleInstClassLookup {
 	 * 
 	 * @param name A string containing a qualified name, for example 'A.B.C'.
 	 */
-	public InstClassDecl InstNode.lookupInstClassQualified(String name) {
-		return lookupInstClassQualified(name, true);
-	}
+	syn InstClassDecl InstNode.lookupInstClassQualified(String name) = lookupInstClassQualified(name, true);
 
-	private InstClassDecl InstNode.lookupInstClassQualified(String name, boolean first) {
+	syn InstClassDecl InstNode.lookupInstClassQualified(String name, boolean first) {
 		String[] parts = name.split("\\.", 2);
-		InstClassDecl icd = first ? lookupInstClass(parts[0]) : memberInstClass(parts[0]);
+		InstClassDecl icd = lookupInstClassQualifiedPart(parts[0], first);
 		if (icd == null)
 			return unknownInstClassDecl();
 		if (parts.length > 1)
-			return icd.lookupInstClassQualified(parts[1]);
+			return icd.lookupInstClassQualified(parts[1], false);
 		else
 			return icd;
 	}
+	
+	syn InstClassDecl InstNode.lookupInstClassQualifiedPart(String name, boolean first) = 
+		first ? lookupInstClass(name) : memberInstClass(name);
+	eq InstProgramRoot.lookupInstClassQualifiedPart(String name, boolean first)         = 
+		genericLookupInstClass(name);
 	
 }
 

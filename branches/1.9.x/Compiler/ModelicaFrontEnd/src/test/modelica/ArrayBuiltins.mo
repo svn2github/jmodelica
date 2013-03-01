@@ -2716,4 +2716,22 @@ end ArrayBuiltins.NonVectorizedSalarization3;
 end NonVectorizedSalarization3;
 
 
+model InfArgsWithNamed
+	Real x[2,2] = ones(2, 2, xxx = 3);
+equation
+	assert(false, "qwerty", yyy = 3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InfArgsWithNamed",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2720, column 27:
+  Calling function ones(): no input matching named argument xxx found
+")})));
+end InfArgsWithNamed;
+
+
 end ArrayBuiltins;

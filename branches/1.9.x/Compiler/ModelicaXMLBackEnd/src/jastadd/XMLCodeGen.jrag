@@ -488,10 +488,12 @@ aspect XMLCodeGen {
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
 		
-		for (FSubscript s : this.getFSubscriptList())
+		for (FSubscript s : this.getFSubscriptList()) {
 			s.prettyPrint_XML(str,p.indent(indent+"\t"));
+		}
 		
 		str.println(indent + "</" + namespace + ":" + tag + ">");
+		
 	}
     
 	public void FSubscript.prettyPrint_XML(Printer p, PrintStream str, String indent){
@@ -514,6 +516,19 @@ aspect XMLCodeGen {
 		str.println(indent + "</" + namespace + ":" + tag +  ">");
 			
 	}
+
+	public void FIntegerSubscript.prettyPrint_XML(Printer p, PrintStream str, String indent){
+		String namespace = "exp";
+		String tag = this.xmlTag();
+		
+		str.println(indent + "<" + namespace + ":" + tag +  ">");
+		
+		FIntegerLitExp fi = new FIntegerLitExp(getValue());
+		fi.prettyPrint_XML(str,p.indent(indent));
+		str.println(indent + "</" + namespace + ":" + tag +  ">");
+			
+	}
+
 	
 }//aspect end
 
@@ -605,6 +620,7 @@ aspect XMLTagBinding{
         eq FArraySubscripts.xmlTag() = "ArraySubscripts";
         eq FColonSubscript.xmlTag() = "UndefinedDimension";
         eq FExpSubscript.xmlTag() = "IndexExpression";
+        eq FIntegerSubscript.xmlTag() = "IndexExpression";
         
         eq InstForStmt.xmlTag() = "For";
         eq InstAssignStmt.xmlTag() = "Assign";

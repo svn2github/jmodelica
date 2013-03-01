@@ -303,8 +303,10 @@ class TestLocalDAECollocator:
                   "cstr_nom_traj_result.txt")
         
         # Optimize using only initial trajectories
-        opts['n_e'] = 75
-        opts['n_cp'] = 4
+        n_e = 75
+        n_cp = 4
+        opts['n_e'] = n_e
+        opts['n_cp'] = n_cp
         opts['init_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
@@ -315,9 +317,8 @@ class TestLocalDAECollocator:
         assert_results(res, cost_ref, u_norm_ref)
         col = res.solver
         xx_init = col.get_xx_init()
-        N.testing.assert_allclose(
-                xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
-                [1., 1.])
+        N.testing.assert_equal(sum(xx_init == 1.),
+                               (n_e * n_cp + 1) * 3 + 2 * n_e)
         
         # Test with eliminated continuity variables
         opts['eliminate_cont_var'] = True
@@ -950,7 +951,7 @@ class TestLocalDAECollocator:
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
-        nose.tools.assert_true(sol_with < 0.8 * sol_without)
+        nose.tools.assert_true(sol_with < 0.9 * sol_without)
         assert_results(res, cost_ref, u_norm_ref)
         
         # Expanded MX with exact Hessian and eliminated variables
@@ -970,7 +971,7 @@ class TestLocalDAECollocator:
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
-        nose.tools.assert_true(sol_with < 0.8 * sol_without)
+        nose.tools.assert_true(sol_with < 0.9 * sol_without)
         assert_results(res, cost_ref, u_norm_ref)
         
         # MX with exact Hessian and eliminated variables

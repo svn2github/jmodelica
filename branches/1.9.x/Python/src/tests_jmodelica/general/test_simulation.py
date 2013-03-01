@@ -265,7 +265,7 @@ class TestHybrid5(SimulationTest):
 
     @testattr(assimulo = True)
     def test_trajectories(self):
-        self.assert_all_trajectories(['x','u','ref','I'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
+        self.assert_all_trajectories(['x','I'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
 
 class TestHybrid6(SimulationTest):
     
@@ -525,6 +525,27 @@ class TestTearing2(SimulationTest):
 #    def test_trajectories(self):
 #        self.assert_all_trajectories(['R1.v','R1.i'],rel_tol=1e-4, abs_tol=1e-4)
 #
+
+class TestLocalLoop1(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'TearingTests.mo',
+            'TearingTests.TearingTest1',
+            format='fmu',
+            options={"enable_tearing":True,"local_iteration_in_tearing":True})
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=20,time_step=0.05,rel_tol=1e-6)
+        self.run()
+        self.load_expected_data(
+            'TearingTests_TearingTest1_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['iL','u1'],rel_tol=1e-4, abs_tol=1e-4)
 
 class TestQR1(SimulationTest):
     

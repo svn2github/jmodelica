@@ -98,6 +98,10 @@ $C_DAE_ODE_jacobian_sparsity$
 
 $C_DAE_equation_sparsity$
 
+$C_DAE_initial_relations$
+
+$C_DAE_relations$
+
 $C_variable_aliases$
 
 const char *fmi_runtime_options_map_names[] = { NULL };
@@ -280,16 +284,18 @@ static int model_opt_Hineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
 
 int jmi_new(jmi_t** jmi) {
 
-  jmi_init(jmi, N_real_ci, N_real_cd, N_real_pi, N_real_pd,
-	   N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pd,
-	   N_boolean_ci, N_boolean_cd, N_boolean_pi, N_boolean_pd,
-	   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
-	   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p,
-	   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
-	   N_string_d,N_string_u,N_outputs,(int (*))Output_vrefs,
-	   N_sw,N_sw_init,N_guards,N_guards_init,
-	   N_dae_blocks,N_dae_init_blocks,
-	   Scaling_method, -1);
+	  jmi_init(jmi, N_real_ci, N_real_cd, N_real_pi, N_real_pd,
+		   N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pd,
+		   N_boolean_ci, N_boolean_cd, N_boolean_pi, N_boolean_pd,
+		   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
+		   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p,
+		   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
+		   N_string_d,N_string_u, N_outputs,(int (*))Output_vrefs,
+	           N_sw,N_sw_init,N_guards,N_guards_init,
+		   N_dae_blocks,N_dae_init_blocks,
+		   N_initial_relations, (int (*))DAE_initial_relations,
+		   N_relations, (int (*))DAE_relations,
+		   Scaling_method, -1);
 
   $C_dae_add_blocks_residual_functions$
 

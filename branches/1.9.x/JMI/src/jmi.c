@@ -40,6 +40,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_sw, int n_sw_init,
 		int n_guards, int n_guards_init,
 		int n_dae_blocks, int n_dae_init_blocks,
+        int n_initial_relations, int* initial_relations,
+        int n_relations, int* relations,
 		int scaling_method, int n_ext_objs) {
 	jmi_t* jmi_ ;
 	int i;
@@ -51,8 +53,6 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 	jmi_->dae = NULL;
 	jmi_->init = NULL;
 	jmi_->opt = NULL;
-	jmi_->info = NULL;
-        jmi_->sim = NULL;
         /* jmi_->user_func = NULL; */
         jmi_->fmi = NULL;
 
@@ -217,6 +217,19 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
 	jmi_->scaling_method = scaling_method;
 
+	jmi_->n_initial_relations = n_initial_relations;
+    jmi_->n_relations = n_relations;
+    jmi_->initial_relations = (jmi_int_t*)calloc(n_initial_relations,sizeof(jmi_int_t));
+    jmi_->relations = (jmi_int_t*)calloc(n_relations,sizeof(jmi_int_t));
+
+    for (i=0;i<n_initial_relations;i++) {
+        jmi_->initial_relations[i] = initial_relations[i];
+    }
+
+    for (i=0;i<n_relations;i++) {
+        jmi_->relations[i] = relations[i];
+    }
+
 	jmi_->dae_block_residuals = (jmi_block_residual_t**)calloc(n_dae_blocks,
 			sizeof(jmi_block_residual_t*));
 
@@ -266,14 +279,6 @@ int jmi_delete(jmi_t* jmi){
 		jmi_func_delete(jmi->opt->Hineq);
 		free(jmi->opt);
 	}
-	if(jmi->info != NULL) {
-		free((void*)jmi->info->guid);
-		free((void*)jmi->info->instance_name);
-		free(jmi->info);
-	}
-	if(jmi->sim != NULL) {
-		free(jmi->sim);
-	}
 	for (i=0; i < jmi->n_dae_init_blocks;i=i+1){ /*Deallocate init BLT blocks.*/
 		jmi_delete_block_residual(jmi->dae_init_block_residuals[i]);
 	}
@@ -291,7 +296,8 @@ int jmi_delete(jmi_t* jmi){
 	free(jmi->z_val);
 	free(*(jmi->dz));
 	free(jmi->dz);
-
+	free(jmi->initial_relations);
+	free(jmi->relations);
 	free(*(jmi->dz_active_variables));
 	free(jmi->dz_active_variables);
 	free(jmi->variable_scaling_factors);
@@ -434,11 +440,31 @@ int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 int jmi_ode_derivatives(jmi_t* jmi) {
 
 	int i, return_status;
+    jmi_real_t *t = jmi_get_t(jmi);
+
+	if((jmi->options.nle_solver_log_level > 2) && (jmi->options.debug_log)) {
+		fprintf(jmi->options.debug_log, "Model equations evaluation invoked at time:; %30.16E\n",t[0]);
+		fflush(jmi->options.debug_log);
+	}
+
+	if((jmi->options.log_level >= 5)) {
+		jmi_log_info(jmi, "[NLE_ITERS]Model equations evaluation invoked at time:; %30.16E",t[0]);
+	}
+
 	for (i=0;i<jmi->n_z;i++) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
 	return_status = jmi->dae->ode_derivatives(jmi);
+
+	if((jmi->options.nle_solver_log_level > 2) && (jmi->options.debug_log)) {
+		fprintf(jmi->options.debug_log, "Model equations evaluation finished\n");
+		fflush(jmi->options.debug_log);
+	}
+
+	if((jmi->options.log_level >= 5)) {
+		jmi_log(jmi, logInfo, "[NLE_ITERS]Model equations evaluation finished");
+	}
 
 	/* Write back evaluation result */
 	if (return_status==0) {
@@ -484,11 +510,31 @@ int jmi_ode_outputs(jmi_t* jmi) {
 int jmi_ode_initialize(jmi_t* jmi) {
 
 	int i, return_status;
+	jmi_real_t* t = jmi_get_t(jmi);
+
 	for (i=0;i<jmi->n_z;i++) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
+	if((jmi->options.nle_solver_log_level > 2) && (jmi->options.debug_log)) {
+		fprintf(jmi->options.debug_log, "Model equations evaluation invoked at time:; %30.16E\n",t[0]);
+		fflush(jmi->options.debug_log);
+	}
+
+	if((jmi->options.log_level >= 5)) {
+		jmi_log_info(jmi, "[NLE_ITERS]Model equations evaluation invoked at time:; %30.16E",t[0]);
+	}
+
 	return_status = jmi->dae->ode_initialize(jmi);
+
+	if((jmi->options.nle_solver_log_level > 2) && (jmi->options.debug_log)) {
+		fprintf(jmi->options.debug_log, "Model equations evaluation finished\n");
+		fflush(jmi->options.debug_log);
+	}
+
+	if((jmi->options.log_level >= 5)) {
+		jmi_log(jmi, logInfo, "[NLE_ITERS]Model equations evaluation finished");
+	}
 
 	/* Write back evaluation result */
 	if (return_status==0) {
@@ -877,6 +923,22 @@ int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 	} else {
 		return -1;
 	}
+}
+
+int jmi_write_back_to_z_val(jmi_t* jmi) {
+    int i;
+    for (i=0;i<jmi->n_z;i++) {
+        (*(jmi->z_val))[i] = (*(jmi->z))[i];
+    }
+    return 1;
+}
+
+int jmi_write_back_to_z(jmi_t* jmi) {
+    int i;
+    for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+    return 1;
 }
 
 int jmi_init_eval_parameters(jmi_t* jmi) {

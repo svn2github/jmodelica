@@ -90,7 +90,7 @@ A a;
 1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 90, column 1:
-  The class A is undeclared
+  Cannot find class declaration for A
   
 ")})));
   end NameTest3_Err;
@@ -118,7 +118,7 @@ model NameTest4_Err
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 100, column 4:
-  The class B is undeclared
+  Cannot find class declaration for B
 
 ")})));
   end NameTest4_Err;
@@ -213,7 +213,7 @@ model NameTest7_Err
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 196, column 4:
-  The class B is undeclared
+  Cannot find class declaration for B
 
 ")})));
 end NameTest7_Err;
@@ -233,7 +233,7 @@ model NameTest8_Err
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 196, column 4:
-  The class D is undeclared
+  Cannot find class declaration for D
 
 ")})));
 end NameTest8_Err;
@@ -264,7 +264,7 @@ model NameTest9_Err
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 196, column 4:
-  The component y is undeclared
+  Cannot find component declaration for y
 
 ")})));
   end NameTest9_Err;
@@ -303,7 +303,7 @@ model NameTest10_Err
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 297, column 4:
-  The class B is undeclared
+  Cannot find class declaration for B
 
 ")})));
   end NameTest10_Err;
@@ -360,7 +360,7 @@ M m(redeclare B a);
   1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 346, column 15:
-  The class B is undeclared
+  Cannot find class declaration for B
 ")})));
 end NameTest12_Err;
   
@@ -402,10 +402,10 @@ end NameTest12_Err;
  2 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 37:
-  The class C is undeclared
+  Cannot find class declaration for C
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 39:
-  The component y is undeclared
+  Cannot find component declaration for y
 ")})));
 end NameTest13_Err;
   
@@ -447,7 +447,7 @@ end NameTest13_Err;
  2 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 461, column 18:
-  The component z is undeclared
+  Cannot find component declaration for z
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 461, column 20:
   Cannot find class or component declaration for pp
@@ -2005,7 +2005,7 @@ class ExtendsTest3
 1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 164, column 11:
-  The class D is undeclared
+  Cannot find class declaration for D
   
 ")})));
 end ExtendsTest3;
@@ -2131,7 +2131,7 @@ model ImportTest3
 1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 253, column 3:
-  The class B is undeclared
+  Cannot find class declaration for B
   "
   )})));
 end ImportTest3;
@@ -2269,19 +2269,19 @@ model ImportTest8
 			flatModel="
 fclass NameTests.ImportTest8
  parameter Modelica.SIunits.Resistance r.R(start = 1) \"Resistance at temperature T_ref\";
- parameter Modelica.SIunits.Temperature r.T_ref = 300.15 \"Reference temperature\" /* 300.15 */;
+ parameter Modelica.SIunits.ThermodynamicTemperature r.T_ref = 300.15 \"Reference temperature\" /* 300.15 */;
  parameter Modelica.SIunits.LinearTemperatureCoefficient r.alpha = 0 \"Temperature coefficient of resistance (R_actual = R*(1 + alpha*(T_heatPort - T_ref))\" /* 0 */;
  Modelica.SIunits.Resistance r.R_actual \"Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))\";
- Modelica.SIunits.Voltage r.v \"Voltage drop between the two pins (= p.v - n.v)\";
- Modelica.SIunits.Current r.i \"Current flowing from pin p to pin n\";
- Modelica.SIunits.Voltage r.p.v \"Potential at the pin\";
- Modelica.SIunits.Current r.p.i \"Current flowing into the pin\";
- Modelica.SIunits.Voltage r.n.v \"Potential at the pin\";
- Modelica.SIunits.Current r.n.i \"Current flowing into the pin\";
+ Modelica.SIunits.ElectricPotential r.v \"Voltage drop between the two pins (= p.v - n.v)\";
+ Modelica.SIunits.ElectricCurrent r.i \"Current flowing from pin p to pin n\";
+ Modelica.SIunits.ElectricPotential r.p.v \"Potential at the pin\";
+ Modelica.SIunits.ElectricCurrent r.p.i \"Current flowing into the pin\";
+ Modelica.SIunits.ElectricPotential r.n.v \"Potential at the pin\";
+ Modelica.SIunits.ElectricCurrent r.n.i \"Current flowing into the pin\";
  parameter Boolean r.useHeatPort = false \"=true, if HeatPort is enabled\" /* false */;
- parameter Modelica.SIunits.Temperature r.T = r.T_ref \"Fixed device temperature if useHeatPort = false\";
+ parameter Modelica.SIunits.ThermodynamicTemperature r.T = r.T_ref \"Fixed device temperature if useHeatPort = false\";
  Modelica.SIunits.Power r.LossPower \"Loss power leaving component via HeatPort\";
- Modelica.SIunits.Temperature r.T_heatPort \"Temperature of HeatPort\";
+ Modelica.SIunits.ThermodynamicTemperature r.T_heatPort \"Temperature of HeatPort\";
 equation
  r.R_actual = r.R * (1 + r.alpha * (r.T_heatPort - r.T_ref));
  r.v = r.R_actual * r.i;
@@ -2297,10 +2297,10 @@ equation
 
 public
  type Modelica.SIunits.Resistance = Real(final quantity = \"Resistance\",final unit = \"Ohm\");
- type Modelica.SIunits.Temperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0.0,start = 288.15,nominal = 300,displayUnit = \"degC\");
+ type Modelica.SIunits.ThermodynamicTemperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0.0,start = 288.15,nominal = 300,displayUnit = \"degC\");
  type Modelica.SIunits.LinearTemperatureCoefficient = Real(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\");
- type Modelica.SIunits.Voltage = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
- type Modelica.SIunits.Current = Real(final quantity = \"ElectricCurrent\",final unit = \"A\");
+ type Modelica.SIunits.ElectricPotential = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
+ type Modelica.SIunits.ElectricCurrent = Real(final quantity = \"ElectricCurrent\",final unit = \"A\");
  type Modelica.SIunits.Power = Real(final quantity = \"Power\",final unit = \"W\");
 end NameTests.ImportTest8;
 ")})));
@@ -2361,11 +2361,11 @@ model ImportTest11
 			description="Using constant from imported package.",
 			flatModel="
 fclass NameTests.ImportTest11
- Modelica.SIunits.Voltage m.v = 0;
+ Modelica.SIunits.ElectricPotential m.v = 0;
  Real m.x = 1.2566370614359173E-6;
 
 public
- type Modelica.SIunits.Voltage = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
+ type Modelica.SIunits.ElectricPotential = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
 end NameTests.ImportTest11;
 ")})));
 end ImportTest11;
@@ -2467,10 +2467,10 @@ model ShortClassDeclTest35_Err
   2 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 549, column 4:
-  The component q is undeclared
+  Cannot find component declaration for q
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 550, column 4:
-  The component t is undeclared
+  Cannot find component declaration for t
 
 ")})));
 end ShortClassDeclTest35_Err;
@@ -2587,7 +2587,7 @@ end ShortClassDeclTest6;
 //  1 error(s) found...
 //In file 'src/test/modelica/NameTests.mo':
 //Semantic error at line 834, column 14:
-//  The component y is undeclared
+//  Cannot find component declaration for y
 //")})));
 //end ShortClassDeclTest7_Err;
 //
@@ -2615,7 +2615,7 @@ end ShortClassDeclTest6;
 //1 errors found:
 //Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 //Semantic error at line 2625, column 15:
-//  The component y is undeclared
+//  Cannot find component declaration for y
 //")})));
 //end ShortClassDeclTest75_Err;
 
@@ -3260,6 +3260,44 @@ public
 end NameTests.FunctionCallLeftTest;
 ")})));
 end FunctionCallLeftTest;
+
+
+model PreErrorTest
+	Real x[3] = (1:3) .* time;
+	discrete Real y(start = 0);
+	Integer i(start = 1);
+equation
+	when { time > 1, time > 2, time > 3 } then
+		y = x[pre(i)];
+		i = pre(i) + 1;
+	end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="PreErrorTest",
+			description="Provoking toString() of pre() in in stance tree - caused crash",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 3271, column 9:
+  Array index in equation must be constant, parameter or loop index: pre(i)
+")})));
+end PreErrorTest;
+
+
+model AssignedInWhenRecursion
+    model A
+        parameter Boolean x = true;
+    end A;
+    
+    model B
+        Real y = 2;
+    end B;
+    
+    parameter Integer n = if a.x then 2 else 3;
+    A a;
+    B b[n];
+end AssignedInWhenRecursion;
 
 
 end NameTests;

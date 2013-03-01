@@ -61,7 +61,7 @@ aspect Flattening {
 	 */
     public InstNode InstProgramRoot.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
     	
-    	InstClassDecl icd = simpleLookupInstClassDecl(className);
+    	InstClassDecl icd = lookupInstClassQualified(className);
     	if (!icd.isUnknown()) {
     		icd.flattenInstClassDecl(fc);
     	} else {
@@ -87,9 +87,16 @@ aspect Flattening {
 		flattenUsedFuncsAndEnums(fc);
 		flattenInstClassDeclExtra(fc);
 		fc.genConnectionEquations();
+		fc.createExperiment(annotation("experiment"));
     	endStep("flattenInstClassDecl()");
     }
     
+
+	public void InstSimpleShortClassDecl.flattenInstClassDecl(FClass fc) {
+		actualInstClass().flattenInstClassDecl(fc);
+		fc.setFQName(new FQNameString(qualifiedName()));
+	}
+
     /**
      * Delegate for adding extra flattening code to top-level model.
      */
@@ -216,10 +223,15 @@ aspect Flattening {
 	    return new FFunctionDecl();
 	}
 	
-	private FDerivativeFunction InstBaseClassDecl.createFDerivativeFunction(FClass fc, InstExternal ie) {
+	public AnnotationNode InstClassDecl.derivativeAnnotation(InstExternal ie) {
 		AnnotationNode functionDer = annotation("derivative");
 		if (!functionDer.exists() && ie != null) 
 			functionDer = ie.annotation("derivative");
+		return functionDer;
+	}
+	
+	private FDerivativeFunction InstBaseClassDecl.createFDerivativeFunction(FClass fc, InstExternal ie) {
+		AnnotationNode functionDer = derivativeAnnotation(ie);
 		
 		if (functionDer.exists()) {
 			String functionDerName = functionDer.string();
@@ -651,6 +663,10 @@ aspect Flattening {
 		}
 	}
 	
+	public void InstSimpleShortClassDecl.flattenEnum(FClass fc) {
+		actualInstClass().flattenEnum(fc);
+	}
+	
 	public abstract FVariable InstAssignable.createEmptyFVariable();
 	
 	public FVariable InstPrimitive.createEmptyFVariable() {
@@ -667,7 +683,7 @@ aspect Flattening {
 
 	public FEnumVariable InstEnum.createEmptyFVariable() {
 		FEnumVariable fv = new FEnumVariable();
-		fv.setEnum(new FQNameString(myInstClass().qualifiedName()));
+		fv.setEnum(new FQNameString(myInstClass().actualInstClass().qualifiedName()));
 		return fv;
 	}	
 	
@@ -743,6 +759,10 @@ aspect Flattening {
 		}
 	}
 	
+	public void InstSimpleShortClassDecl.addFDerivedType(FClass fc) {
+		actualInstClass().addFDerivedType(fc);
+	}
+	
 	public FVariable InstAssignable.createFVariable() {
 		FVariable fv = createEmptyFVariable();
 		
@@ -760,7 +780,7 @@ aspect Flattening {
 		
 		addAttributesToFV(fv.getFAttributes());
 		if (myInstClass().extendsPrimitive())
-			fv.setDerivedType(myInstClass().qualifiedName());
+			fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
 		
 		FExp e = flattenBindingFExp();
 		if (e != null)
@@ -934,8 +954,8 @@ aspect Flattening {
 	
 	eq InstDot.splitArrayAccess(int index) {
 		InstDot res = fullCopy();
-		for (int i = 0, n = res.getNumInstAccess(); i < n; i++) {
-			InstAccess ia = res.getInstAccess(i);
+		for (int i = 0, n = getNumInstAccess(); i < n; i++) {
+			InstAccess ia = getInstAccess(i);
 			if (ia.isArray()) {
 				res.setInstAccess(ia.splitArrayAccess(index), i);
 				i = n;

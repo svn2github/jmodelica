@@ -1246,7 +1246,7 @@ public class ModelicaCompiler {
 			handleCompilerProblems(problems);
 		}
 		
-		InstClassDecl icd = ipr.simpleLookupInstClassDecl(cl);
+		InstClassDecl icd = ipr.lookupInstClassQualified(cl);
 		
 		hookModelInstantiatied(icd);
 		ASTNode.endStep("instantiateModel()");
@@ -1364,6 +1364,13 @@ public class ModelicaCompiler {
 			ASTNode.beginStep("writeIterationVariables()");
 			fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
 			fc.getDAEInitBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_initial_system_iteration_variables.txt"));
+			ASTNode.endStep("writeIterationVariables()");
+		}
+		
+		if (fc.root().options.getBooleanOption("write_tearing_pairs_to_file")) {
+			ASTNode.beginStep("writeIterationVariables()");
+			fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
+			fc.getDAEInitBLT().writeTearingPairsToFile(new File(instName + "_initial_system_tearing_pairs.txt"));
 			ASTNode.endStep("writeIterationVariables()");
 		}
 		
@@ -1778,11 +1785,14 @@ public class ModelicaCompiler {
 			    compileFMUX(cl, name);
 			else
 				compileJMU(cl, name);
-		} catch  (ModelicaClassNotFoundException e){
-			log.error("Could not find the class "+ cl);
-			System.exit(1);
 		} catch (CompilerException ce) {
 			log.error(ce.getMessage());
+			System.exit(1);
+		} catch (CcodeCompilationException ce) {
+			log.error(ce.getMessage());
+			System.exit(1);
+		} catch (ModelicaClassNotFoundException e){
+			log.error("Could not find the class "+ cl);
 			System.exit(1);
 		} catch (FileNotFoundException e) {
 			log.error("Could not find file: " + e.getMessage());

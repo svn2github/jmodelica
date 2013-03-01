@@ -88,6 +88,7 @@ struct jmi_kinsol_solver_t {
     int num_bounds;
     int* bound_vindex;             /**< \brief variable index for a bound */
     int* bound_kind;               /**< \brief +1 for max, -1 for min */    
+	int* bound_limiting;           /**< \brief 1 if bound is limitng stepsize, 0 otherwise*/    
     realtype* bounds;              /**< \brief bound vals */
     realtype* active_bounds;
     

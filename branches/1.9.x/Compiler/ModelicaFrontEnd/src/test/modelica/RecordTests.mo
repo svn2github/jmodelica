@@ -452,6 +452,26 @@ end RecordTests.RecordType6;
 end RecordType6;
 
 
+model RecordType7
+	record A 
+		Real x;
+	end A;
+	
+	A a[:];
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RecordType7",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 458, column 7:
+  Can not infer array size of the variable a
+")})));
+end RecordType7;
+
+
 
 model RecordBinding1
  record A
@@ -751,6 +771,37 @@ end RecordTests.RecordArray5;
 end RecordArray5;
 
 
+model RecordArray6
+    record A
+        Real x;
+        Real y;
+        Real z;
+    end A;
+    
+    constant A b[2,2];
+    constant A c[2,2] = b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RecordArray6",
+			description="Constant array of records with missing binding expression",
+			flatModel="
+fclass RecordTests.RecordArray6
+ constant RecordTests.RecordArray6.A b[2,2];
+ constant RecordTests.RecordArray6.A c[2,2] = {{RecordTests.RecordArray6.A(0.0, 0.0, 0.0), RecordTests.RecordArray6.A(0.0, 0.0, 0.0)}, {RecordTests.RecordArray6.A(0.0, 0.0, 0.0), RecordTests.RecordArray6.A(0.0, 0.0, 0.0)}};
+
+public
+ record RecordTests.RecordArray6.A
+  Real x;
+  Real y;
+  Real z;
+ end RecordTests.RecordArray6.A;
+
+end RecordTests.RecordArray6;
+")})));
+end RecordArray6;
+
+
 
 model RecordConstructor1
  record A
@@ -903,6 +954,38 @@ Semantic error at line 808, column 25:
   Record constructor for A: too many positional arguments
 ")})));
 end RecordConstructor6;
+
+
+model RecordConstructor7
+    record A
+        Real x;
+    end A;
+    
+    record B
+        extends A;
+        Real y;
+    end B;
+    
+    constant B b = B(y=2, x=1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordConstructor7",
+			description="Constant evaluation of record constructors for records with inherited components",
+			flatModel="
+fclass RecordTests.RecordConstructor7
+ constant Real b.y = 2;
+ constant Real b.x = 1;
+
+public
+ record RecordTests.RecordConstructor7.B
+  Real y;
+  Real x;
+ end RecordTests.RecordConstructor7.B;
+
+end RecordTests.RecordConstructor7;
+")})));
+end RecordConstructor7;
 
 
 

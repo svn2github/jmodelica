@@ -135,6 +135,16 @@ aspect InstFunctionBinding {
 	 */
 	private ArrayList<InstFunctionArgument> InstFunctionCall.unbindableArgs = 
 		new ArrayList<InstFunctionArgument>();
+	private ArrayList<InstFunctionArgument> FInfArgsFunctionCall.unbindableArgs = null;
+	
+	public void FAbstractFunctionCall.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
+		throw new UnsupportedOperationException();
+	}
+	public void FInfArgsFunctionCall.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
+		unbindableArgs = list;
+	}
+	public void FUnsupportedBuiltIn.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
+	}
 	
 	private ArrayList<InstFunctionArgument> FBuiltInFunctionCall.originalArgs = 
 		new ArrayList<InstFunctionArgument>();
@@ -281,7 +291,7 @@ aspect InstFunctionBinding {
 						"scalar", "vector", "matrix", "diagonal", "product", "symmetric", "skew", 
 						// Ticket 664: Support all function-like operators
 						"sign", "String", "div", "mod", "rem", "ceil", "delay", "cardinality", 
-						"semiLinear", "terminal", "smooth", "edge", "reinit", "terminate"
+						"semiLinear", "terminal", "smooth", "edge", "change", "reinit", "terminate"
 					};
 				for (String name : unsupported)
 					if (!map.containsKey(name))
@@ -446,7 +456,8 @@ aspect InstFunctionBinding {
 	    	// Check if we should try to bind arguments
 	    	InstFunctionArgument[] temp;
 	    	boolean argsOK = true;
-	    	if (builtInTranslator.isInfArgs(name)) {
+	    	boolean infArgs = builtInTranslator.isInfArgs(name);
+	    	if (infArgs) {
 	    		
 	    		// Just collect all positional arguments
 	    		ArrayList<InstFunctionArgument> args = new ArrayList<InstFunctionArgument>();
@@ -484,8 +495,8 @@ aspect InstFunctionBinding {
 	    			argsOK = argsOK && temp[i].isOKArg();
 	    		}
 		
+		    	argsOK = argsOK && unbindableArgs.isEmpty();
 	    	}
-	    	argsOK = argsOK && unbindableArgs.isEmpty();
 	    		
     		// Create replacement node.
 		    FAbstractFunctionCall n = null;
@@ -507,6 +518,8 @@ aspect InstFunctionBinding {
 				}
 				for (InstFunctionArgument arg : temp)
 					n.addArgument(arg);
+			} else if (infArgs) {
+				n.setUnbindableArgsList(unbindableArgs);
 			}
 			n.setLocation(this);
 			

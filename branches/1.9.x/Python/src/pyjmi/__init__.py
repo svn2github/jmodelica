@@ -19,7 +19,7 @@ The JModelica.org Python package for working with simulation and optimization of
 JMUs <http:/www.jmodelica.org/>
 """
 
-__all__ = ['common', 'initialization', 'optimization', 'simulation', 'examples', 'casadi_interface', 'linearization', 'jmi', 'jmi_algorithm_drivers']
+__all__ = ['common', 'initialization', 'optimization', 'simulation', 'examples', 'casadi_interface', 'linearization', 'jmi', 'jmi_algorithm_drivers', 'logger_util']
 
 __version__=''
 

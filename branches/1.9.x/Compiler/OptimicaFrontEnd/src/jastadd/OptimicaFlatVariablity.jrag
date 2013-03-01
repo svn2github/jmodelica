@@ -55,6 +55,8 @@ aspect OptimicaFlatVariability {
 	
    	eq FTimed.toString() = "timed";
    	eq FOptParameter.toString() = "opt_parameter";
+   	eq FTimed.toStringLiteral() = "timed";
+   	eq FOptParameter.toStringLiteral() = "opt_parameter";
 	
    	// TODO: Perhaps FTypePrefixVariability.lessOrEqual() should be used here?
 	syn boolean FConstraint.isTimed();

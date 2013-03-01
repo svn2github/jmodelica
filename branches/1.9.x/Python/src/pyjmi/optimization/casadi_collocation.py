@@ -1278,11 +1278,9 @@ class LocalDAECollocator(CasadiCollocator):
             self._denorm_t0 = t0
             self._denorm_tf = tf
         
-        # Analyze nominal trajectories
+        # Create nominal trajectories
         if self.nominal_traj is not None:
-            # Create nominal trajectories
-            # State derivatives are treated inappropriately, see #2157!
-            nom_traj = {}
+            nom_traj = {"dx": {}}
             sf = self.model.get_sf(False)
             vr_map = self.model.get_vr_map()
             n = len(self.nominal_traj.get_data_matrix()[:, 0])
@@ -1312,7 +1310,36 @@ class LocalDAECollocator(CasadiCollocator):
                         ordinates = data.x.reshape([-1, 1])
                     nom_traj[vt][var_index] = \
                             TrajectoryLinearInterpolation(abscissae, ordinates)
-        
+                    
+                    # Treat derivatives separately
+                    if vt == "x":
+                        data_matrix = N.empty([n, len(var_vectors[vt])])
+                        name = convert_casadi_der_name(str(var.der()))
+                        vr = self.model.xmldoc.get_value_reference(name)
+                        (var_index, _) = vr_map[vr]
+                        try:
+                            data = self.nominal_traj.get_variable_data(name)
+                        except VariableNotFoundError:
+                            # It is possibly to treat missing variable 
+                            # trajectories more efficiently, especially in the
+                            # case of MX
+                            print("Warning: Could not find nominal " +
+                                  "trajectory for variable " + name + ". " +
+                                  "Using nominal attribute value instead.")
+                            abscissae = N.array([0])
+                            nom_val = var.getNominal()
+                            if nom_val is None:
+                                constant_sf = 1
+                            else:
+                                constant_sf = N.abs(nom_val)
+                            ordinates = N.array([[constant_sf]])
+                        else:
+                            abscissae = data.t
+                            ordinates = data.x.reshape([-1, 1])
+                        nom_traj["dx"][var_index] = \
+                                TrajectoryLinearInterpolation(abscissae,
+                                                              ordinates)
+            
             # Create storage for scaling factors
             time_points = self.get_time_points()
             n_var = copy.copy(self._n_var)
@@ -1368,24 +1395,14 @@ class LocalDAECollocator(CasadiCollocator):
                         if abs_min < 1e-3 and abs_max / abs_min < 1e6:
                             variant = False
                     if variant:
-                        is_variant[vr] = True
-                        if vt == "x": # Inappropriate treatment of derivatives!
-                            name = convert_casadi_der_name(str(var.der()))
-                            vr = self.model.xmldoc.get_value_reference(name)
-                            is_variant[vr] = True
-                            vr_sf_map[vr] = variant_var.numel()
-                            variant_var.append(var.der())
+                        if vt == "x":
                             n_variant_x += 1
-                            n_variant_dx += 1
-                        vr = var.getValueReference()
+                        is_variant[vr] = True
                         vr_sf_map[vr] = variant_var.numel()
                         variant_var.append(var.var())
                         for i in xrange(1, self.n_e + 1):
                             for k in time_points[i]:
-                                # Inappropriate treatment of derivatives!
-                                for j in xrange(1 + (vt == "x")): 
-                                    variant_sf[i][k].append(
-                                            N.abs(values[i][k]))
+                                variant_sf[i][k].append(N.abs(values[i][k]))
                         for l in xrange(len(self.ocp.tp)):
                             tp = self.ocp.tp[l]
                             (i, k) = collocation_constraint_points[l]
@@ -1402,15 +1419,6 @@ class LocalDAECollocator(CasadiCollocator):
                         else:
                             d = traj_max - traj_min
                             e = traj_min
-                        if vt == "x": # Inappropriate treatment of derivatives!
-                            name = convert_casadi_der_name(str(var.der()))
-                            vr = self.model.xmldoc.get_value_reference(name)
-                            is_variant[vr] = False
-                            vr_sf_map[vr] = invariant_var.numel()
-                            invariant_var.append(var.der())
-                            invariant_d.append(d)
-                            invariant_e.append(e)
-                        vr = var.getValueReference()
                         vr_sf_map[vr] = invariant_var.numel()
                         invariant_var.append(var.var())
                         invariant_d.append(d)
@@ -1419,6 +1427,61 @@ class LocalDAECollocator(CasadiCollocator):
                             invariant_var.append(var.atTime(tp))
                             invariant_d.append(d)
                             invariant_e.append(e)
+            
+            # Evaluate trajectories for state derivatives
+            # Heavy code duplication from above
+            for var in var_vectors["x"]:
+                name = convert_casadi_der_name(str(var.der()))
+                vr = self.model.xmldoc.get_value_reference(name)
+                (var_index, _) = vr_map[vr]
+                values = {}
+                traj_min = N.inf
+                traj_max = -N.inf
+                for i in xrange(1, self.n_e + 1):
+                    values[i] = {}
+                    for k in time_points[i]:
+                        tp = time_points[i][k]
+                        if self._normalize_min_time:
+                            tp = t0 + (tf - t0) * tp
+                        val = float(nom_traj["dx"][var_index].eval(tp))
+                        values[i][k] = val
+                        if val < traj_min:
+                            traj_min = val
+                        if val > traj_max:
+                            traj_max = val
+                variant = True
+                if (traj_min < 0 and traj_max > 0 or
+                    traj_min == 0 or traj_max == 0):
+                    variant = False
+                if variant:
+                    traj_abs = N.abs([traj_min, traj_max])
+                    abs_min = traj_abs.min()
+                    abs_max = traj_abs.max()
+                    if abs_min < 1e-3 and abs_max / abs_min < 1e6:
+                        variant = False
+                if variant:
+                    n_variant_dx += 1
+                    is_variant[vr] = True
+                    vr_sf_map[vr] = variant_var.numel()
+                    variant_var.append(var.der())
+                    for i in xrange(1, self.n_e + 1):
+                        for k in time_points[i]:
+                            variant_sf[i][k].append(N.abs(values[i][k]))
+                else:
+                    is_variant[vr] = False
+                    if N.allclose(traj_max, traj_min):
+                        if N.allclose(traj_max, 0.):
+                            d = 1.
+                        else:
+                            d = traj_max
+                        e = 0.
+                    else:
+                        d = traj_max - traj_min
+                        e = traj_min
+                    vr_sf_map[vr] = invariant_var.numel()
+                    invariant_var.append(var.der())
+                    invariant_d.append(d)
+                    invariant_e.append(e)
             
             # Handle free parameters
             for var in self.ocp.pf:
@@ -1490,29 +1553,28 @@ class LocalDAECollocator(CasadiCollocator):
                 invariant_dx_i_k_e = []
             for var in var_vectors['x']:
                 x_vr = var.getValueReference()
-                
-                # Inappropriate treatment of derivatives!
                 dx_name = convert_casadi_der_name(str(var.der()))
                 dx_vr = self.model.xmldoc.get_value_reference(dx_name)
                 
                 (ind, _) = vr_map[x_vr]
+                x_i_temp = x_i[ind, :].reshape([self.n_cp + 1, 1])
                 if is_variant[x_vr]:
-                    x_i_temp = x_i[ind, :].reshape([self.n_cp + 1, 1])
                     variant_x_i.append(x_i_temp)
-                    if not self.eliminate_der_var:
-                        variant_dx_i_k.append(dx_i_k[ind])
                 else:
-                    x_i_temp = x_i[ind, :].reshape([self.n_cp + 1, 1])
                     invariant_x_i.append(x_i_temp)
                     x_sf_index = vr_sf_map[x_vr]
                     for k in xrange(self.n_cp + 1):
                         invariant_x_i_d.append(invariant_d[x_sf_index])
                         invariant_x_i_e.append(invariant_e[x_sf_index])
-                    if not self.eliminate_der_var:
+                if not self.eliminate_der_var:
+                    if is_variant[dx_vr]:
+                        variant_dx_i_k.append(dx_i_k[ind])
+                    else:
                         invariant_dx_i_k.append(dx_i_k[ind])
                         dx_sf_index = vr_sf_map[dx_vr]
                         invariant_dx_i_k_d.append(invariant_d[dx_sf_index])
                         invariant_dx_i_k_e.append(invariant_e[dx_sf_index])
+            
             invariant_x_i_d = N.array(invariant_x_i_d)
             invariant_x_i_e = N.array(invariant_x_i_e)
             unscaled_var = casadi.SXMatrix(0, 1)
@@ -1692,14 +1754,13 @@ class LocalDAECollocator(CasadiCollocator):
                     coll_sf[i]['dx'][k] = []
             for var in var_vectors['x']:
                 x_vr = var.getValueReference()
-                
-                # Inappropriate treatment of derivatives!
                 dx_name = convert_casadi_der_name(str(var.der()))
                 dx_vr = self.model.xmldoc.get_value_reference(dx_name)
                 
                 x_sf_index = vr_sf_map[x_vr]
                 dx_sf_index = vr_sf_map[dx_vr]
                 
+                # States
                 if is_variant[x_vr]:
                     # First element
                     i = 1
@@ -1707,8 +1768,6 @@ class LocalDAECollocator(CasadiCollocator):
                     for k in xrange(1, self.n_cp + 1):
                         coll_sf[i]['x'].append(
                                 variant_sf[i][k][x_sf_index])
-                        coll_sf[i]['dx'][k].append(
-                                variant_sf[i][k][dx_sf_index])
                     
                     # Suceeding elements
                     for i in xrange(2, self.n_e + 1):
@@ -1717,6 +1776,11 @@ class LocalDAECollocator(CasadiCollocator):
                         for k in xrange(1, self.n_cp + 1):
                             coll_sf[i]['x'].append(
                                     variant_sf[i][k][x_sf_index])
+                
+                # State derivatives
+                if is_variant[dx_vr]:
+                    for i in xrange(1, self.n_e + 1):
+                        for k in xrange(1, self.n_cp + 1):
                             coll_sf[i]['dx'][k].append(
                                     variant_sf[i][k][dx_sf_index])
         
@@ -2406,7 +2470,7 @@ class LocalDAECollocator(CasadiCollocator):
                                     xx_i_k = d * xx_i_k + e
                             self.nlp_opt[global_ind] = xx_i_k
                     
-                    # Inappropriate treatment of derivatives!
+                    # Treat state derivatives separately
                     if not self.eliminate_der_var:
                         dx_names = self.model.xmldoc.get_dx_variable_names(
                                 False)
@@ -2607,7 +2671,7 @@ class LocalDAECollocator(CasadiCollocator):
         # Return results
         return (t_opt, var_opt['dx'], var_opt['x'], var_opt['u'], var_opt['w'],
                 var_opt['p_opt'])
-                
+    
     def get_h_opt(self):
         if self.hs == "free":
             return self.h_opt

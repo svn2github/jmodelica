@@ -72,7 +72,7 @@ aspect OptimicaErrorCheck {
   	}
 	
 	eq FOptClass.numDAEEquations() = numScalarEquations() + numPathEqConstraints();
-	eq FOptClass.numDAEVariables() = numAlgebraicRealVariables() + numDifferentiatedRealVariables();
+	eq FOptClass.numDAEVariables() = numAlgebraicContinousRealVariables() + numDifferentiatedRealVariables();
 
 	eq FOptClass.structuralErrors() {
 		/* This check needs to be updated to take constraints into account */
