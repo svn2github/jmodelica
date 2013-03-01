@@ -208,7 +208,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
       
 		/* Evaluate the residual with the original u vector to avoid that the initial guess 
 		   for the final IV is pertubated when the iterations start*/
-		ret = kin_f(u, ftemp, block);
+		/*ret = kin_f(u, ftemp, block);*/
 
         /* Restore original array pointer in tmp2 */
         N_VSetArrayPointer(tmp2_data, tmp2);      
