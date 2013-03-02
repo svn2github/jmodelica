@@ -745,6 +745,97 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
 	return 0;
 }
 
+int jmi_print_array(jmi_t* jmi, jmi_real_t* x, jmi_int_t size_x, char* category, char* array_info){
+    int i, len=0;
+    int max_output_variables=100;
+    char buffer[3000];
+    
+    len += sprintf(buffer+len, "%s ",category);
+    len += sprintf(buffer+len, "%s ",array_info);
+    for (i=0; i<size_x && i<max_output_variables;i++){
+        len += sprintf(buffer+len, "%g; ",x[i]);
+    }
+    
+    jmi_log_info(jmi,buffer);
+    if (i==max_output_variables){
+        len = 0;
+        len += sprintf(buffer+len, "%s ",category);
+        len += sprintf(buffer+len, "Maximum number of output variables reached, printing the first hundred...");
+        jmi_log_info(jmi, buffer);
+    }
+    
+    return 0;
+}
+
+int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size){
+    int i;
+    for (i=0;i<size;i++){
+        if (sw_pre[i]!=sw_post[i]){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel){
+    /* x >= 0
+     * x >  0
+     * x <= 0
+     * x <  0
+     */
+    if (sw == 1.0){
+        if ((ev_ind <= -1*eps && rel == JMI_REL_GEQ) || (ev_ind <= 0.0 && rel == JMI_REL_GT) || (ev_ind >= eps && rel == JMI_REL_LEQ) || (ev_ind >= 0.0 && rel == JMI_REL_LT)){
+            sw = 0.0;
+        }
+    }else{
+        if ((ev_ind >= 0.0 && rel == JMI_REL_GEQ) || (ev_ind >= eps && rel == JMI_REL_GT) || (ev_ind <= 0.0 && rel == JMI_REL_LEQ) || (ev_ind <= -1*eps && rel == JMI_REL_LT)){
+            sw = 1.0;
+        }
+    }
+    return sw;
+}
+
+int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, jmi_int_t mode){
+    jmi_int_t nF,nR;
+    jmi_int_t nF0,nF1,nFp,nR0,retval;
+	jmi_int_t i,size_switches;
+    jmi_real_t *event_indicators;
+    jmi_real_t eps = jmi->fmi->fmi_epsilon;
+    
+    jmi_init_get_sizes(jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
+    jmi_dae_get_sizes(jmi, &nF, &nR);
+    
+    if (mode==1) { 
+        size_switches = nR;
+        /* Allocate memory */
+        event_indicators = (jmi_real_t*)calloc(size_switches, sizeof(jmi_real_t));
+        retval = jmi_dae_R(jmi,event_indicators);
+    }else{ /* INITIALIZE */
+        size_switches = nR0;
+        /* Allocate memory */
+        event_indicators = (jmi_real_t*)calloc(size_switches, sizeof(jmi_real_t));
+        retval = jmi_init_R0(jmi, event_indicators);
+    }
+
+    if (mode==1){
+        for (i=0; i < size_switches; i=i+1){
+            switches[i] = jmi_turn_switch(event_indicators[i], switches[i], eps, jmi->relations[i]);
+        }
+    }else{ /* INITIALIZE */
+        for (i=0; i < size_switches; i=i+1){
+            if (i < nR){
+                /* NORMAL SWITCHES FIRST */
+                switches[i] = jmi_turn_switch(event_indicators[i], switches[i], eps, jmi->relations[i]);
+            }else{
+                /* INITIALIZATION SWITCHES NEXT */
+                switches[i] = jmi_turn_switch(event_indicators[i], switches[i], eps, jmi->initial_relations[i-nR]);
+            }
+        }
+    }
+    free(event_indicators);
+    return 0;
+}
+
 void jmi_log_error(jmi_t *jmi, char* fmt,...) {
     va_list ap;
     if(jmi->options.log_level < 1) return;

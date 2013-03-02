@@ -26,7 +26,6 @@
 #define _JMI_BLOCK_RESIDUAL_H
 
 #include "jmi_common.h"
-#include "fmi.h"
 
 #ifdef JMI_AD_NONE_AND_CPP
 extern "C" {
@@ -233,7 +232,7 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
  * @param size The size of the vectors x,x_new and x_target
  * @return Error code.
  */
-int jmi_compute_reduced_step(jmi_real_t h, jmi_real_t* x_new, jmi_real_t* x, jmi_real_t* x_target, fmiInteger size);
+int jmi_compute_reduced_step(jmi_real_t h, jmi_real_t* x_new, jmi_real_t* x, jmi_real_t* x_target, jmi_int_t size);
 
 /**
  * \brief Determines if the current switches has already been tried.
@@ -247,7 +246,7 @@ int jmi_compute_reduced_step(jmi_real_t h, jmi_real_t* x_new, jmi_real_t* x, jmi
  * @param nR The size of the switches
  * @param iter The number of already tried states of the model
  */
-fmiInteger jmi_check_infinite_loop(jmi_real_t* sw_old,jmi_real_t *sw, fmiInteger nR, fmiInteger iter);
+jmi_int_t jmi_check_infinite_loop(jmi_real_t* sw_old,jmi_real_t *sw, jmi_int_t nR, jmi_int_t iter);
 
 /**
  * \brief Computes the minial step for changing the relations, i.e. switches or booleans.
@@ -266,7 +265,7 @@ fmiInteger jmi_check_infinite_loop(jmi_real_t* sw_old,jmi_real_t *sw, fmiInteger
  * @param tolerance The tolerance in the bi-section algorithm.
  * @return The minimal step-size.
  */
-jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, jmi_real_t* x_new, jmi_real_t* sw_init, jmi_real_t* bool_init, fmiInteger nR, jmi_real_t tolerance);
+jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, jmi_real_t* x_new, jmi_real_t* sw_init, jmi_real_t* bool_init, jmi_int_t nR, jmi_real_t tolerance);
 
 
 
