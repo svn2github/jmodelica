@@ -25,6 +25,9 @@ import scipy as S
 import scipy.linalg
 import matplotlib.pyplot as plt
 import time
+import multiprocessing
+import logging
+import os
 
 import thread_feval as tf
 
@@ -33,6 +36,391 @@ try:
 except ImportError:
     pass
     #print "Could not load OpenOpt package."
+
+def cost_evaluater_test(func, x, process="thread_0"):
+    logging.basicConfig(level=logging.ERROR)
+    try:
+        os.mkdir(process)
+    except OSError:
+        pass
+    os.chdir(process)
+    ret = func(x)
+    os.chdir("..")
+    return ret
+
+def nelme_modified(func,xstart,lb=None,ub=None,h=0.3,x_tol=1e-3,f_tol=1e-6,
+          max_iters=500,max_fevals=5000, disp=True,nbr_cores=None, debug=False):
+    """
+    Minimize a function of one or more variables using the 
+    Nelder-Mead simplex method. Handles box bound constraints rather well 
+    but it cannot be guaranteed that it works well for all situations.
+    
+    If desired, all function evaluations in the algorithm can be performed 
+    in separate processes (multiprocessing) to save memory. For example, 
+    when the function evaluation involves the loading of an FMU, there is 
+    a risk of running out of memory after a number of function evaluations.
+    In that case, this feature is quite useful. The feature is applied if the
+    user provides the objective function (func) as a file name (of a file 
+    containing the definition of the function) instead of a function.
+    
+    NB: If the function is provided this way and an FMU is loaded inside the
+        function, then the FMU file name must be preceded by "../" when
+        using FMUModel(), like this: 
+        
+            model = FMUModel('../fmu_name.fmu')
+        
+        The reason for this is that the function evaluations are performed
+        in sub-directories to the working directory when multiprocessing 
+        is used.
+    
+    Parameters::
+    
+        func -- 
+            callable func(x) or string
+            The objective function OR the name of a python file 
+            containing the definition of the objective function. In case 
+            of a file name, the objective function in the file must 
+            have the same name as the file itself (without '.py').  
+            
+        xstart -- 
+            ndarray or scalar
+            The initial guess for x. 
+            
+        lb -- 
+            ndarray or scalar
+            The lower bound on x.
+            Default: None
+        
+        ub --
+            ndarray or scalar
+            The upper bound on x.
+            Default: None
+        
+        h -- 
+            float
+            The side length of the initial simplex.
+            NB: 0 < h < 1 should be fulfilled.
+            Default: 0.3    
+        
+        x_tol --
+            float
+            The tolerance for the termination criteria for x. 
+            Termination when at least one side length in the simplex have 
+            reached this value.
+            NB: x_tol < h must be fulfilled.
+            Default: 1e-3
+        
+        f_tol --
+            float
+            The tolerance for the termination criteria for the objective 
+            function. Termination when at least two vertix function values 
+            in the simplex are this close to each other.
+            Default: 1e-6
+        
+        max_iters --
+            int
+            The maximum number of iterations allowed.
+            Default: 500
+            
+        max_fevals --
+            int
+            The maximum number of function evaluations allowed. 
+            Default: 5000
+            
+        disp --
+            bool
+            Set to True to print convergence messages.
+            Default: True
+            
+        nbr_cores --
+            int
+            The number of processor cores used.
+            Default: Maximum Number of cores
+            
+        debug --
+            bool
+            Set to True to get separate error and output files for each
+            separate process when using multiprocessing.
+            Default: False
+            
+    Returns::
+    
+        x_opt --
+            ndarray or scalar
+            The optimal point which minimizes the objective function.
+            
+        f_opt --
+            float
+            The minimal value of the objective function.
+        
+        nbr_iters --
+            int
+            The number of iterations performed.
+        
+        nbr_fevals --
+            int
+            The number of function evaluations made. Evaluations due to 
+            generation of contour plot are not included.    
+        
+        solve_time --
+            float
+            The execution time for the solver in seconds.
+    """
+    t0 = time.clock()
+    
+    # Check that lb < ub
+    if ub is not None:  # "None" < everything
+        if N.any(lb >= ub):
+            raise ValueError, 'Lower bound must be smaller than upper bound.'
+    
+    # Check that lb < xstart < ub 
+    if N.any(xstart <= lb):
+        raise ValueError, 'xstart must be larger than lb.'
+    if ub is not None:  # "None" < everything
+        if N.any(xstart >= ub):
+            raise ValueError, 'xstart must be smaller than ub.'
+    
+    if nbr_cores is None:
+        nbr_cores = multiprocessing.cpu_count()
+    
+    # Convert xstart to float type array and flatten it so that 
+    # len(xstart) can be used even if xstart is a scalar
+    xstart = N.asfarray(xstart).flatten()   
+    
+    # Do the same with lb and ub
+    if lb is not None:
+        lb = N.asfarray(lb).flatten()
+    if ub is not None:
+        ub = N.asfarray(ub).flatten()
+    
+    # Number of dimensions
+    n = len(xstart)
+    
+    # Scale h such that it has the appropriate size compared to xstart
+    scale = S.linalg.norm(xstart)
+    if scale > 1:
+        h = h*scale
+    
+    # Initial simplex
+    X = N.zeros((n+1,n))
+    X[0] = xstart
+    for i in range(1,n+1):
+        X[i] = xstart
+        X[i,i-1] = xstart[i-1] + h
+        
+    # If the initial simplex has vertices outside the feasible region it 
+    # must be shrunk s.t all vertices are inside this region
+    if ub is not None:
+        for i in range(1,n+1):
+            v = X[i]
+            if N.any(v >= ub):
+                ind = v >= ub
+                v[ind] = ub[ind] - 1e-6
+                X[i] = v
+    
+    # Number of function evaluations
+    nbr_fevals = 0
+    
+    # Start iterations
+    k = 1
+    F_val = []
+    Shiftfv = []
+    Ssize = []
+    
+    print ' '
+    print 'Running solver Nelder-Mead...'
+    print ' Initial parameters: ', xstart
+    print ' '
+    
+    if debug:    
+        multiprocessing.log_to_stderr()
+        logger = multiprocessing.get_logger()
+        logger.setLevel(logging.INFO)
+        
+    
+    while k < max_iters and nbr_fevals < max_fevals:
+        
+        
+        f_val = N.zeros(n+1)
+        
+        vertice_calculations = []
+        pool = multiprocessing.Pool(nbr_cores if nbr_cores < n+1 else n+1) #Not needed more cores than parameters + 1 
+        for i in range(n+1):
+            vertice_calculations.append(pool.apply_async(cost_evaluater_test, args=(func,X[i],"thread_"+str(i))))
+            nbr_fevals += 1
+        pool.close()
+        pool.join()
+        for j in range(n+1):
+            #if not vertice_calculations[j].successful():
+            #    raise Exception("An error occurred...")
+            f_val[j] = vertice_calculations[j].get()
+        
+        # Order all vertices s.t f(x0) <= f(x1) <= ... <= f(xn)
+        ind = N.argsort(f_val)
+        X = X[ind]
+        f_val = f_val[ind]
+        
+        # Save vertex function values for each iteration
+        F_val.append(f_val)
+        
+        t_temp = time.clock()
+        t_now = t_temp - t0
+        
+        # CONVERGENCE TESTS
+        
+        # Domain convergence test
+        #lengths = N.zeros(n)
+        #for i in range(n):
+        #    lengths[i] = S.linalg.norm(X[0]-X[i+1])
+        #ssize = N.max(lengths)
+        #Ssize.append(ssize)
+        #term_x = ssize < x_tol
+        
+        wi = 1.0/(x_tol*X[0]+x_tol) #1/(ATOL+RTOL*y_i)
+        lengths = N.zeros(n)
+        for i in range(n):
+            lengths[i] = S.linalg.norm(wi*(X[0]-X[i+1]))
+        ssize = N.max(lengths)
+        Ssize.append(ssize)
+        term_x = ssize < 1.0
+        
+        # Function value convergence test
+        shiftfv = N.abs(f_val[0]-f_val[-1]) #n or n+1 ?
+        Shiftfv.append(shiftfv)
+        term_f = shiftfv < f_tol
+        
+        if k%10 == 1:
+            print '  %s  %s        %s            %s          %s'%("iter", "fevals", "obj", "term_x", "term_f")
+        print ' {:>5d} {:>7d} {:>15e} {:>15e} {:>15e}'.format(k, nbr_fevals, f_val[0], ssize, shiftfv)
+        
+        if term_x or term_f:
+            break
+        
+        # Centroid of the side opposite the worst vertex
+        c = 1.0/n*N.sum(X[0:n],0)
+        
+        # Transformation parameters
+        alfa = 1    # 0 < alfa
+        beta = 0.5  # 0 < beta < 1
+        gamma = 2   # 1 < gamma
+        delta = 0.5 # 0 < delta < 1
+        
+        # Reflection-, Expansion- and Contraction points
+        xr = c + alfa*(c-X[n])
+        xe = c + gamma*(xr-c)
+        xc1 = c + beta*(xr-c)
+        xc2 = c - beta*(xr-c)
+        
+        # If any point ends up outside the feasible region we must move 
+        # it inside of the region (xc2 cannot end up outside)
+        if ub is not None:
+            if N.any(xr >= ub):
+                ind = xr >= ub
+                xr[ind] = ub[ind] - 1e-6
+            if N.any(xe >= ub):
+                ind = xe >= ub
+                xe[ind] = ub[ind] - 1e-6
+            if N.any(xc1 >= ub):
+                ind = xc1 >= ub
+                xc1[ind] = ub[ind] - 1e-6
+        if lb is not None:
+            if N.any(xr <= lb):
+                ind = xr <= lb
+                xr[ind] = lb[ind] + 1e-6
+            if N.any(xe <= lb):
+                ind = xe <= lb
+                xe[ind] = lb[ind] + 1e-6
+            if N.any(xc1 <= lb):
+                ind = xc1 <= lb
+                xc1[ind] = lb[ind] + 1e-6
+        
+        # Evaluate function in the four points
+        vertice_calculations = []
+        pool = multiprocessing.Pool(nbr_cores if nbr_cores < 4 else 4) #Not needed more than 4 cores
+        for i,f in enumerate([xr,xe,xc1,xc2]):
+            vertice_calculations.append(pool.apply_async(cost_evaluater_test, args=(func,f,"thread_"+str(i))))
+        pool.close()
+        pool.join()
+
+        fr = vertice_calculations[0].get()
+        fe = vertice_calculations[1].get()
+        fc1 = vertice_calculations[2].get()
+        fc2 = vertice_calculations[3].get()
+        nbr_fevals += 4
+        
+        # Reflection
+        if f_val[0] <= fr and fr < f_val[n-1]:
+            X[n] = xr
+            # Go to next iteration
+            k += 1
+            continue
+        
+        # Expansion 
+        elif fr < f_val[0]:
+            if fe < fr:
+                X[n] = xe
+                # Go to next iteration
+                k += 1
+                continue
+            else:
+                X[n] = xr
+                # Go to next iteration
+                k += 1
+                continue
+                
+        # Contraction       
+        elif f_val[n-1] <= fr:
+            # Outside contraction
+            if fr < f_val[n]:
+                if fc1 <= fr:
+                    X[n] = xc1
+                    # Go to next iteration
+                    k += 1
+                    continue
+            # Inside contraction
+            else:
+                if fc2 < f_val[n]:
+                    X[n] = xc2
+                    # Go to next iteration
+                    k += 1
+                    continue
+            # Shrink simplex toward x0
+            for i in range(1,n+1):
+                X[i] = X[0] + delta*(X[i]-X[0])
+            k += 1
+            
+    # Optimal point and objective function value        
+    x_opt = X[0]
+    f_opt = f_val[0]
+    
+    # Number of iterations
+    nbr_iters = k
+
+    t1 = time.clock()
+    solve_time = t1 - t0
+    
+    # Print convergence results
+    if disp:
+        print " "
+        if nbr_iters >= max_iters:
+            print 'Warning: Maximum number of iterations has been exceeded.'
+        elif nbr_fevals >= max_fevals:
+            print 'Warning: Maximum number of function evaluations has been exceeded.'
+        else:
+            print 'Optimization terminated successfully.'
+            if term_x:
+                print 'Terminated due to sufficiently small simplex.'
+            else:
+                print 'Terminated due to sufficiently close function values at the vertices of the simplex.'
+            print 'Found parameters: ', x_opt
+        print ' '
+        print 'Total number of iterations: ' + str(nbr_iters)
+        print 'Total number of function evaluations: ' + str(nbr_fevals)
+        print 'Total execution time: ' + str(solve_time) + ' s'
+        print ' '
+
+    # Return results
+    return x_opt, f_opt, nbr_iters, nbr_fevals, solve_time
 
 
 def nelme(func,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
@@ -1317,7 +1705,47 @@ def fmin(func,xstart=None,lb=None,ub=None,alg=None,plot=False,plot_conv=False,
     
     # Return results
     return x_opt, f_opt, nbr_iters, nbr_fevals, solve_time
+
+def quad_err_simple(t_meas,y_meas,t_sim,y_sim, w=None):
+    # The number of dimensions of y_meas
+    dim1 = N.ndim(y_meas)
     
+    # The number of rows and columns in y_meas
+    if dim1 == 1:
+        m1 = 1
+        n1 = len(y_meas)
+    else:
+        m1 = N.size(y_meas,0)
+        n1 = N.size(y_meas,1)
+    
+    if w is None:
+        if dim1 == 1:
+            w = 1
+        else:
+            w = N.ones(m1)
+    
+    # The number of measurement points
+    n = n1
+    
+    # The number of rows in y_meas and y_sim
+    m = m1
+    
+    # Interpolate to get the simulated values in the measurement points
+    if m == 1:
+        Y_sim = N.interp(t_meas,t_sim,y_sim)
+    else:
+        Y_sim = N.zeros([m,n])
+        for i in range(m):
+            Y_sim[i] = N.interp(t_meas,t_sim,y_sim[i])
+
+    # Evaluate the error
+    X = Y_sim - y_meas
+    if m == 1:
+        err = N.sum(X**2,0)
+    else:
+        qX2 = N.dot(w,X**2)
+        err = sum(qX2)
+    return err
 
 def quad_err(t_meas,y_meas,t_sim,y_sim,w=None):
     """
