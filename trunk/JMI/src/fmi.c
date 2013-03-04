@@ -536,7 +536,7 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
 	if (((fmi_t *)c)->jmi->recomputeVariables==1) {
 		fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
 		if(retval != 0) {
-			(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+			(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed at time %gs.",jmi_get_t(((fmi_t *)c)->jmi)[0]);
 			return fmiError;
 		}
 		((fmi_t *)c)->jmi->recomputeVariables = 0;
