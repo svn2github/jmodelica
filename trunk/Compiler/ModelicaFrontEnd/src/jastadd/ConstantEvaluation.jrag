@@ -1806,7 +1806,7 @@ aspect ConstantEvaluation {
    *                Should be filled with the values of the inputs.
    */
   public void FFunctionDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
- 	  FAlgorithmBlock fab = getFAlgorithmBlock();
+ 	  FAlgorithm fab = getFAlgorithm();
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
 	  for (FFunctionVariable var : getFFunctionVariables())
@@ -1840,7 +1840,7 @@ aspect ConstantEvaluation {
   public void InstFullClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  // We assume this class is a function
 	  
- 	  FAlgorithmBlock fab = findFunctionAlgorithm();
+ 	  FAlgorithm fab = findFunctionAlgorithm();
    	  if (fab == null || hasInstExternal()) {
 		  values.clear();
 		  return;

@@ -67,8 +67,17 @@ aspect CADCodeGen {
 	syn String FIdUseExp.adVarName() = 
 		inFunction() ? getFIdUse().toString_var_CAD(printer_CAD) : prettyPrint_C("");
 	
-	syn String FIdUseExp.adDerName() =
-		inFunction() ? getFIdUse().toString_der_CAD(printer_CAD) : (variability().lessOrEqual(fParameter()) || !type().isReal()) ? "AD_WRAP_LITERAL(0)" :  getSeedName() + "[jmi_get_index_from_value_ref(" + myFV().valueReference() + ")-jmi->offs_real_dx]";
+	syn String FIdUseExp.adDerName() {
+		if (inFunction()) {
+			return getFIdUse().toString_der_CAD(printer_CAD);
+		} else {
+			if (variability().lessOrEqual(fParameter()) || !type().isReal()) {
+				return "AD_WRAP_LITERAL(0)";
+			} else {
+				return String.format("%s[jmi_get_index_from_value_ref(%d)-jmi->offs_real_dx]", getSeedName(), myFV().valueReference());
+			}
+		}
+	}
 		
 	//functions.. modified and added
 	public void FIdUseExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {}
@@ -2275,7 +2284,7 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 * @param PrintStream str, the c-code is written to this stream 
 	 */
-	public void FAlgorithmBlock.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FAlgorithm.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 		p.print(getFStatements(), str, indent);
 	}
 	
@@ -2408,7 +2417,7 @@ aspect CADCodeGen {
 				p.print(ffv, str, indent);
 			for (FFunctionVariable ffv : myOutputs())
 				ffv.printNullOutputReplacement_CAD(p, str, indent);
-			p.print(getFAlgorithmBlock(), str, indent);
+			p.print(getFAlgorithm(), str, indent);
 		}
 		returnDefinition().printReturnWrite_CAD(str, indent);
 		// TODO: Check if there are any dynamic declarations first

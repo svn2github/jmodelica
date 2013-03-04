@@ -768,7 +768,7 @@ aspect FlatAPI {
 	syn int FAbstractEquation.numScalarEquations() = 1;
 	eq FEquation.numScalarEquations()           = getLeft().size().numElements();
 	eq FConnectClause.numScalarEquations()      = getConnector1().size().numElements();
-	eq FAlgorithmBlock.numScalarEquations() {
+	eq FAlgorithm.numScalarEquations() {
 		ArrayList<FVariable> assignedVars = new ArrayList<FVariable>();
 		for (FIdUse use : assignedFIdUses()) {
 			if (!use.myFV().isUnknown() && !assignedVars.contains(use.myFV())) {
@@ -980,7 +980,7 @@ aspect FlatAPI {
 	inh FClass FQName.myFClass();
 	inh FClass FFunctionDecl.myFClass();
 	inh FClass FRecordDecl.myFClass();
-	inh FClass FAlgorithmBlock.myFClass();
+	inh FClass FAlgorithm.myFClass();
 	inh FClass FAbstractEquation.myFClass();	
 	inh lazy FClass FExternalStmt.myFClass();
 	eq FClass.getChild().myFClass() = this;
@@ -1131,11 +1131,12 @@ aspect FlatAPI {
 	syn Set<FVariable> FAbstractEquation.referencedFVariablesInRHS() = Collections.emptySet();
 	eq FEquation.referencedFVariablesInRHS()             = getRight().referencedFVariablesInFExp();
 	eq FFunctionCallEquation.referencedFVariablesInRHS() = getCall().referencedFVariablesInFExp();
-	eq FAlgorithmBlock.referencedFVariablesInRHS() {
+	eq FAlgorithm.referencedFVariablesInRHS() {
 		Set<FVariable> res = new LinkedHashSet<FVariable>();
 		for (FIdUse use : containedFIdUses()) 
 			if (!use.useIsAssignment() && !use.myFV().isForIndex())
 				res.add((FVariable) use.myFV());
+		res.removeAll(referencedFVariablesInLHS());
 		return res;
 	}
 	
@@ -1146,7 +1147,7 @@ aspect FlatAPI {
 		getLefts().findReferencedFVariablesInTree(res);
 		return res;
 	}
-	eq FAlgorithmBlock.referencedFVariablesInLHS() {
+	eq FAlgorithm.referencedFVariablesInLHS() {
 		Set<FVariable> res = new LinkedHashSet<FVariable>();
 		for (FIdUse use : containedFIdUses()) 
 			if (use.useIsAssignment() && !use.myFV().isForIndex())
@@ -1897,12 +1898,14 @@ aspect LinearFVariables {
     	}
     	return true;
     }
+    eq FAlgorithm.checkLinearity(Set<FVariable> vars) = false;
     
     inh boolean FExp.isLinear(Set<FVariable> vars);
-	eq FlatRoot.getChild().isLinear(Set<FVariable> vars) = true;
+	eq FlatRoot.getChild().isLinear(Set<FVariable> vars)   = true;
 	eq SourceRoot.getChild().isLinear(Set<FVariable> vars) = true;
 	
 	eq FAbstractEquation.getChild().isLinear(Set<FVariable> vars) = true;
+	eq FStatement.getChild().isLinear(Set<FVariable> vars)        = false;
 	
 	eq FMulExp.getLeft().isLinear(Set<FVariable> vars)  = getRight().isIndependent(vars) && isLinear(vars);
 	eq FMulExp.getRight().isLinear(Set<FVariable> vars) = getLeft().isIndependent(vars) && isLinear(vars);
@@ -2338,20 +2341,20 @@ aspect FlatAlgorithmAPI {
 	
 	syn boolean FIdUse.inFAlgorithm() = myFAlgorithm() != null;
 	
-	inh lazy FAlgorithmBlock FIdUse.myFAlgorithm();
-	eq FAlgorithmBlock.getChild().myFAlgorithm() = this;
+	inh lazy FAlgorithm FIdUse.myFAlgorithm();
+	eq FAlgorithm.getChild().myFAlgorithm() = this;
 	eq Root.getChild().myFAlgorithm() = null;
 	
-	coll ArrayList<FAlgorithmBlock> FClass.myAlgorithms()
-	    [new ArrayList<FAlgorithmBlock>()] with add root FClass;
-	FAlgorithmBlock contributes this when !inFunction()
+	coll ArrayList<FAlgorithm> FClass.myAlgorithms()
+	    [new ArrayList<FAlgorithm>()] with add root FClass;
+	FAlgorithm contributes this when !inFunction()
 	    to FClass.myAlgorithms() for myFClass();
 
-	coll ArrayList<FIdUse> FAlgorithmBlock.containedFIdUses() 
-    	[new ArrayList<FIdUse>()] with add root FAlgorithmBlock;
-	FIdUse contributes this to FAlgorithmBlock.containedFIdUses() for myFAlgorithm();
+	coll ArrayList<FIdUse> FAlgorithm.containedFIdUses() 
+    	[new ArrayList<FIdUse>()] with add root FAlgorithm;
+	FIdUse contributes this to FAlgorithm.containedFIdUses() for myFAlgorithm();
 	
-	syn lazy ArrayList<FIdUse> FAlgorithmBlock.assignedFIdUses() {
+	syn lazy ArrayList<FIdUse> FAlgorithm.assignedFIdUses() {
 		ArrayList<FIdUse> res = new ArrayList<FIdUse>();
 		for (FIdUse use : containedFIdUses())
 			if (use.useIsAssignment())
@@ -2359,7 +2362,7 @@ aspect FlatAlgorithmAPI {
 		return res;
 	}
 	
-	syn lazy ArrayList<FIdUse> FAlgorithmBlock.usedFIdUses() {
+	syn lazy ArrayList<FIdUse> FAlgorithm.usedFIdUses() {
 		ArrayList<FIdUse> res = new ArrayList<FIdUse>();
 		for (FIdUse use : containedFIdUses())
 			if (!use.useIsAssignment())
@@ -2374,11 +2377,11 @@ aspect FlatAlgorithmAPI {
 	eq FIdUseExp.getFIdUse().useIsAssignment()       = useIsAssignment();
 	eq FExp.getChild().useIsAssignment()             = false;
 	eq FStatement.getChild().useIsAssignment()       = false;
-	eq FAlgorithmBlock.getChild().useIsAssignment()  = false;
+	eq FAlgorithm.getChild().useIsAssignment()  = false;
 	eq Root.getChild().useIsAssignment()             = false;
 	
-	private String FAlgorithmBlock.functionName = null;
-	public String FAlgorithmBlock.generateFunctionName() {
+	private String FAlgorithm.functionName = null;
+	public String FAlgorithm.generateFunctionName() {
 		if (functionName == null)
 			functionName = myFClass().generateFunctionName();
 		return functionName;

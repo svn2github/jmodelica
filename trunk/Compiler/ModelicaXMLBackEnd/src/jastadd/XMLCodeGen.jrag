@@ -261,7 +261,7 @@ aspect XMLCodeGen {
 		p.print(myOutputs(), str, indent2);
 		p.print(myInputs(), str, indent2);
 		p.print(myProtected(), str, indent2);
-		p.print(getFAlgorithmBlock(), str, indent2);
+		p.print(getFAlgorithm(), str, indent2);
 		close_XML(str, indent);
     }
     
@@ -297,7 +297,7 @@ aspect XMLCodeGen {
 
 	
     //-------------------- Algorithms ---------------------------
-    public void FAlgorithmBlock.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+    public void FAlgorithm.prettyPrint_XML(Printer p, PrintStream str, String indent) {
 		open_XML(str, indent);
 		p.print(getFStatements(), str, p.indent(indent));
 		close_XML(str, indent);
@@ -603,7 +603,7 @@ aspect XMLTagBinding{
         //functions
         eq FFunctionDecl.xmlTag() = "Function";
         eq FFunctionCallLeft.xmlTag() = "OutputArgument";
-        eq FAlgorithmBlock.xmlTag() = "Algorithm";
+        eq FAlgorithm.xmlTag() = "Algorithm";
         eq FBreakStmt.xmlTag() = "Break";
         eq FReturnStmt.xmlTag() = "Return";
         eq FAssignStmt.xmlTag() = "Assign";
@@ -634,7 +634,7 @@ aspect XMLTagBinding{
     	eq FAbstractEquation.xmlNamespace() = "equ";
     	eq FFunctionVariable.xmlNamespace() = "fun";
     	eq FFunctionDecl.xmlNamespace()     = "fun";
-    	eq FAlgorithmBlock.xmlNamespace()   = "fun";
+    	eq FAlgorithm.xmlNamespace()        = "fun";
     	eq FStatement.xmlNamespace()        = "fun";
     	eq FFunctionCallLeft.xmlNamespace() = parentXmlNamespace();
     	

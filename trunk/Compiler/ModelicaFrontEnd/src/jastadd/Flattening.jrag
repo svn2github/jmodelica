@@ -195,13 +195,13 @@ aspect Flattening {
 	   		
 	   		flattenComponentsInFunction(ffd, fc, new HashSet<String>());
 			
-	   		FAlgorithmBlock fab = findFunctionAlgorithm();
-	   		fab = (fab == null) ? new FAlgorithmBlock(new List()) : fab.flattenEqn(new FQNameEmpty(), fc);
+	   		FAlgorithm fab = findFunctionAlgorithm();
+	   		fab = (fab == null) ? new FAlgorithm(new List()) : fab.flattenEqn(new FQNameEmpty(), fc);
 			InstExternal ie = findFunctionExternal();
 			if (ie != null)
 				fab.addFStatement(ie.flatten(this, new FQNameEmpty()));
 			fab.ensureReturn();
-			ffd.setFAlgorithmBlock(fab);
+			ffd.setFAlgorithm(fab);
 			
 			FDerivativeFunction der = createFDerivativeFunction(fc, ie);
 			if (der != null)
@@ -316,14 +316,14 @@ aspect Flattening {
    				icd.flattenInFunction(ffd, fc, false, null);
 	}
 	
-	syn FAlgorithmBlock InstNode.findFunctionAlgorithm() {
+	syn FAlgorithm InstNode.findFunctionAlgorithm() {
 		if (getNumFAbstractEquation() > 0) {
 			FAbstractEquation equ = getFAbstractEquation(0);
-			if (equ instanceof FAlgorithmBlock)
-				return (FAlgorithmBlock) equ;
+			if (equ instanceof FAlgorithm)
+				return (FAlgorithm) equ;
 		} else {
 			for (InstExtends ie : getInstExtendss()) {
-				FAlgorithmBlock tmp = ie.findFunctionAlgorithm();
+				FAlgorithm tmp = ie.findFunctionAlgorithm();
 				if (tmp != null) 
 					return tmp;
 			}
@@ -421,7 +421,7 @@ aspect Flattening {
 		return fullCopy();
 	}
 	
-	public void FAlgorithmBlock.ensureReturn() {
+	public void FAlgorithm.ensureReturn() {
 		int num = getNumFStatement();
 		if (num == 0 || !(getFStatement(num - 1) instanceof FReturnStmt)) 
 			addFStatement(new FReturnStmt());
@@ -1307,9 +1307,9 @@ aspect FlatExpressions {
 		return new FFunctionCallLeft(hasFExp() ? new Opt(getFExp().flatten(prefix)) : new Opt());
 	}
 
-	public FAlgorithmBlock FAlgorithmBlock.flattenEqn(FQName prefix, FClass fc) {
+	public FAlgorithm FAlgorithm.flattenEqn(FQName prefix, FClass fc) {
 		List l = FStatement.flattenFStatementList(prefix, getFStatements());
-		return new FAlgorithmBlock(l);
+		return new FAlgorithm(l);
 	}
 	
 	public static List<FStatement> FStatement.flattenFStatementList(FQName prefix, List<FStatement> l) {
@@ -2125,9 +2125,9 @@ aspect InstantiatedExpressions {
 		return new FFunctionCallLeft(id);
 	}
 	
-	public FAlgorithmBlock Algorithm.instantiate() {
+	public FAlgorithm Algorithm.instantiate() {
 		List l = Statement.instantiateStatementList(getStatements());
-		return copyLocationTo(new FAlgorithmBlock(equationType(), l));
+		return copyLocationTo(new FAlgorithm(equationType(), l));
 	}
 	
 	public InstExternal ExternalClause.instantiate() {

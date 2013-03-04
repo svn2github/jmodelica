@@ -638,7 +638,10 @@ aspect TransformCanonical {
 			return l;
 		}		
 
-		@Override
+		public Collection<SimpleEquationBlock> subBlocks() {
+			return blocks;
+		}
+
 		public Collection<FAbstractEquation> equations() {
 			Collection<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
 			for (SimpleEquationBlock sb : blocks)
@@ -1215,32 +1218,25 @@ aspect TransformCanonical {
 		
 	}
 
-	public class AlgorithmBlock extends SimpleEquationBlock {
+	/**
+	 * Base class for blocks representing an algorithm block.
+	 */
+	public abstract class AlgorithmBlock extends SimpleEquationBlock {
 		
-		public AlgorithmBlock(FAlgorithmBlock alg) {
+		protected Collection<FVariable> activeVars;
+		
+		public AlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables) {
 			super(alg);
+			activeVars = activeVariables;
 		}
 	
-		public FAlgorithmBlock equation() {
-			return (FAlgorithmBlock) super.equation();
+		public FAlgorithm equation() {
+			return (FAlgorithm) super.equation();
 		}
 		
-		/*
-		 * The active variables are assigned their values when the block is solved.
-		 */
 		public Collection<FVariable> activeVariables() {
-			// - Find assigned variables
-			Collection<FVariable> assignedVars = new ArrayList<FVariable>();
-			for (FIdUse use : equation().assignedFIdUses()) {
-				if (!use.myFV().isUnknown() && !assignedVars.contains(use.myFV()))
-					assignedVars.add((FVariable) use.myFV());
-			}
-			return assignedVars;
+			return activeVars;
 		}	
-		
-		public boolean isSolvable() {
-			return true;
-		}
 				
 		public boolean isMixed() {
 			return false;
@@ -1251,12 +1247,44 @@ aspect TransformCanonical {
 		}
 		
 		public void prettyPrint(PrintStream str) {
-			str.println("Algorithm block of " + activeVariables().size() + " variables:");
+			String prefix = isSolvable() ? "Solved" : "Non-solved";
+			str.format("%s algorithm block of %d variables:", prefix, activeVariables().size());
 			str.println("Unknown variables:");
 			prettyPrintActiveVariables(str);
 			str.println("Algorithm:");
 			prettyPrintEquation(str);
 		}
+		
+	}
+
+	/**
+	 * An algorithm block that is solved in its active variables.
+	 */
+	public class SolvedAlgorithmBlock extends AlgorithmBlock {
+		
+		public SolvedAlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables) {
+			super(alg, activeVariables);
+		}
+		
+		public boolean isSolvable() {
+			return true;
+		}
+		
+	}
+
+	/** 
+	 * An algorithm block that isn't solved in its active variables.
+	 */
+	public class UnsolvedAlgorithmBlock extends AlgorithmBlock {
+		
+		public UnsolvedAlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables) {
+			super(alg, activeVariables);
+		}
+
+		public boolean isSolvable() {
+			return false;
+		}
+
 	}
 	
 	/**
@@ -2206,9 +2234,9 @@ aspect TransformCanonical {
 		List<FStatement> stmts = new List<FStatement>();
 		for (FFunctionVariable ffv : getFFunctionVariables())
 			ffv.genInitArrayStatements(stmts);
-		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
+		for (FStatement stmt : getFAlgorithm().getFStatements())
 			stmts.add(stmt);
-		getFAlgorithmBlock().setFStatementList(stmts);
+		getFAlgorithm().setFStatementList(stmts);
 	}
 
 	protected boolean FFunctionVariable.hasInitArrayStmt = false;
@@ -2227,17 +2255,17 @@ aspect TransformCanonical {
 	
 	public void FFunctionDecl.sortBindingAssignments() {
 		Map<String,FStatement> map = new LinkedHashMap<String,FStatement>();
-		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
+		for (FStatement stmt : getFAlgorithm().getFStatements())
 			stmt.addToSortingMap(map);
 		
 		List<FStatement> stmts = new List<FStatement>();
 		while (!map.isEmpty()) 
 			map.values().iterator().next().addSortedByAssignmentOrder(stmts, map);
 		
-		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
+		for (FStatement stmt : getFAlgorithm().getFStatements())
 			if (!stmt.shouldBeSorted)
 				stmts.add(stmt);
-		getFAlgorithmBlock().setFStatementList(stmts);
+		getFAlgorithm().setFStatementList(stmts);
 	}
 	
 	public void FStatement.addToSortingMap(Map<String,FStatement> map) {
@@ -2419,9 +2447,9 @@ aspect TransformCanonical {
 		List<FStatement> stmts = new List<FStatement>();
 		for (FFunctionVariable ffv : getFFunctionVariables())
 			ffv.genBindingAssignments(stmts);
-		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
+		for (FStatement stmt : getFAlgorithm().getFStatements())
 			stmts.add(stmt);
-		getFAlgorithmBlock().setFStatementList(stmts);
+		getFAlgorithm().setFStatementList(stmts);
 	}
 	
 	/**
@@ -2655,7 +2683,7 @@ aspect TransformCanonical {
 
 		beginStep("genAlgorithmFunctions()");
 		
-		for (FAlgorithmBlock alg : myAlgorithms()) {
+		for (FAlgorithm alg : myAlgorithms()) {
 			// Create function declaration
 			List<FFunctionVariable> vars = new List<FFunctionVariable>();
 			FQName funcName = new FQNameString(alg.generateFunctionName());
@@ -5109,7 +5137,7 @@ aspect FunctionInlining {
 	 * Check if we can inline this function.
 	 */
 	syn lazy boolean FFunctionDecl.isInlinable() =
-		isAllInlinable(getFAlgorithmBlock().getFStatements());
+		isAllInlinable(getFAlgorithm().getFStatements());
 	
 	/**
 	 * Check if this function falls under the "trivial" inlining category.
@@ -5117,7 +5145,7 @@ aspect FunctionInlining {
 	syn lazy boolean FFunctionDecl.isTrivialInlinable() {
 		if (myProtected().size() > 0)
 			return false;
-		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
+		for (FStatement stmt : getFAlgorithm().getFStatements())
 			if (!stmt.isOkTrivialInline())
 				return false;
 		for (FFunctionVariable out : myOutputs()) {
@@ -5243,7 +5271,7 @@ aspect FunctionInlining {
 	
 	inh boolean FIdUse.inForLoop();
 	eq FForStmt.getForStmt().inForLoop()      = true;
-	eq FAlgorithmBlock.getChild().inForLoop() = false;
+	eq FAlgorithm.getChild().inForLoop() = false;
 	eq FlatRoot.getChild().inForLoop()        = false;
 	eq InstRoot.getChild().inForLoop()        = false;
 	
@@ -5309,7 +5337,7 @@ aspect FunctionInlining {
 			if (fv.isArray())
 				fi.setSizeOf(fv.name(), fv.size().copyAndReplaceReferences(fi, getDummyExp()));
 		
-		for (FStatement stmt : getFAlgorithmBlock().getFStatements()) 
+		for (FStatement stmt : getFAlgorithm().getFStatements()) 
 			stmt.inline(fi);
 		
 		for (FFunctionVariable var : getFFunctionVariables())

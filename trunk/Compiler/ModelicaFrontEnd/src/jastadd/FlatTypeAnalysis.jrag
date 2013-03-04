@@ -167,10 +167,12 @@ aspect FlatTypeAnalysis {
 	syn lazy FType FAbstractEquation.type() = fUnknownType();
 	eq FEquation.type() = getRight().type().numericPromotion(getLeft().type());
 	
-	syn boolean FAbstractEquation.isReal() = type().isReal();
+	// TODO: Role of attribute is unclear - used to find blocks that contain equations 
+	//       over *any* reals. Probably needs refactoring.
+	syn boolean FAbstractEquation.isReal()    = type().isReal();
 	syn boolean FAbstractEquation.isInteger() = type().isInteger();
 	syn boolean FAbstractEquation.isBoolean() = type().isBoolean();
-	syn boolean FAbstractEquation.isString() = type().isString();
+	syn boolean FAbstractEquation.isString()  = type().isString();
 
 	eq FFunctionCallEquation.isReal() {
 		for (FFunctionCallLeft l : getLefts()) {
@@ -213,6 +215,38 @@ aspect FlatTypeAnalysis {
 				}
 			}	
 		}	
+		return true;
+	}
+	
+	eq FAlgorithm.isReal() = FStatement.statementsAssignsOnlyReals(getFStatements());
+	// TODO: isInteger(), etc. for algorithm
+	
+	syn boolean FStatement.assignsOnlyReals() = true;
+	eq FAssignStmt.assignsOnlyReals()         = getRight().type().onlyContainsReal();
+	eq FForStmt.assignsOnlyReals()            = statementsAssignsOnlyReals(getForStmts());
+	eq FWhileStmt.assignsOnlyReals()          = statementsAssignsOnlyReals(getWhileStmts());
+	eq FIfStmt.assignsOnlyReals()             = 
+		super.assignsOnlyReals() && statementsAssignsOnlyReals(getElseStmts());
+	eq FIfWhenStmt.assignsOnlyReals() {
+		for (FIfWhenClause s : getFIfWhenClauses())
+			if (!s.assignsOnlyReals())
+				return false;
+		return true;
+	}
+	eq FFunctionCallStmt.assignsOnlyReals() {
+		for (FFunctionCallLeft l : getLefts()) 
+			if (l.hasFExp()) 
+				if (!l.getFExp().type().onlyContainsReal()) 
+					return false;
+		return true;
+	}
+	
+	syn boolean FIfWhenClause.assignsOnlyReals() = FStatement.statementsAssignsOnlyReals(getFStatements());
+	
+	public static boolean FStatement.statementsAssignsOnlyReals(Iterable<? extends FStatement> stmts) {
+		for (FStatement s : stmts)
+			if (!s.assignsOnlyReals())
+				return false;
 		return true;
 	}
 	

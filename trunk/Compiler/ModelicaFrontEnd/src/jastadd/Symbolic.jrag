@@ -63,6 +63,13 @@ aspect EquationSolve {
 		else
 			return Solvability.UNSOLVABLE;
 	}
+	
+	eq FAlgorithm.isSolved(String name, boolean duringTearing) {
+		for (FVariable fv : referencedFVariablesInLHS())
+			if (fv.name().equals(name))
+				return Solvability.ANALYTICALLY_SOLVABLE;
+		return Solvability.UNSOLVABLE;
+	}
 
 	syn nta FExp FEquation.solution(String name) {
 		return solution(name, false);

@@ -66,7 +66,7 @@ public class EquationBlockFactory {
 		// Check if equation is solvable for all active variables (only if we want a solved block)
 		Solvability solvability = solve ? Solvability.ANALYTICALLY_SOLVABLE : Solvability.UNSOLVABLE;
 		for (Iterator<FVariable> it = fvs.iterator(); solvability.isSolvable() && it.hasNext(); )
-			solvability = e.isSolved(it.next().name(), duringTearing);
+			solvability = Solvability.least(solvability, e.isSolved(it.next().name(), duringTearing));
 		
 		return e.createSimpleEquationBlock(fvs, solvability);
 	}
@@ -185,8 +185,12 @@ public SimpleEquationBlock FWhenEquation.createSimpleEquationBlock(Collection<FV
 	return new WhenEquationBlock(this);
 }
 
-public SimpleEquationBlock FAlgorithmBlock.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) { 
-	return new AlgorithmBlock(this);
+public SimpleEquationBlock FAlgorithm.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) { 
+	if (solvability.isAnalyticallySolvable()) {
+		return new SolvedAlgorithmBlock(this, fvs);
+	} else {
+		return new UnsolvedAlgorithmBlock(this, fvs);
+	}
 }
 
 public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) { 
@@ -580,9 +584,6 @@ public class MunkresProblem {
 	
 }
 
-FClass implements BiPGraph.VarSource;
-FAbstractEquation implements BiPGraph.VarSource;
-
 public class BiPGraph {
 
 	public static final int MAX_N_EQ_DIFFS = 5;
@@ -710,34 +711,32 @@ public class BiPGraph {
 	
 	public enum VarType {
 		DERIVATIVE_VARIABLES { 
-			public Collection<? extends FVariable> variables(VarSource s) { return s.derivativeVariables(); }
+			public Collection<? extends FVariable> variables(FClass c)            { return c.derivativeVariables(); }
+			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.derivativeVariables(); }
 		},
 		DIFFERENTIATED_VARIABLES { 
-			public Collection<? extends FVariable> variables(VarSource s) { return s.differentiatedRealVariables(); }
+			public Collection<? extends FVariable> variables(FClass c)            { return c.differentiatedRealVariables(); }
+			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.differentiatedRealVariables(); }
 		}, 
 		ALGEBRAIC_VARIABLES { 
-			public Collection<? extends FVariable> variables(VarSource s) { return s.algebraicVariables(); }
+			public Collection<? extends FVariable> variables(FClass c)            { return c.algebraicVariables(); }
+			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.algebraicVariables(); }
 		}, 
 		CONTINUOUS_ALGEBRAIC_VARIABLES { 
-			public Collection<? extends FVariable> variables(VarSource s) { return s.algebraicContinousRealVariables(); }
+			public Collection<? extends FVariable> variables(FClass c)            { return c.algebraicContinousRealVariables(); }
+			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.algebraicContinousRealVariables(); }
 		}, 
 		DISCRETE_ALGEBRAIC_VARIABLES { 
-			public Collection<? extends FVariable> variables(VarSource s) { return s.discreteVariables(); }
+			public Collection<? extends FVariable> variables(FClass c)            { return c.discreteVariables(); }
+			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discreteVariables(); }
 		}, 
 		DISCRETE_PRE_VARIABLES { 
-			public Collection<? extends FVariable> variables(VarSource s) { return s.discretePreVariables(); }
+			public Collection<? extends FVariable> variables(FClass c)            { return c.discretePreVariables(); }
+			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discretePreVariables(); }
 		};
 		
-		public abstract Collection<? extends FVariable> variables(VarSource s);
-	}
-	
-	public interface VarSource {
-		public Collection<? extends FVariable> derivativeVariables();
-		public Collection<? extends FVariable> differentiatedRealVariables();
-		public Collection<? extends FVariable> algebraicVariables();
-		public Collection<? extends FVariable> algebraicContinousRealVariables();
-		public Collection<? extends FVariable> discreteVariables();
-		public Collection<? extends FVariable> discretePreVariables();
+		public abstract Collection<? extends FVariable> variables(FClass c);
+		public abstract Collection<? extends FVariable> variables(FAbstractEquation e);
 	}
 		
 	public void addVariables(FClass fclass, EnumSet<VarType> variableTypes) {

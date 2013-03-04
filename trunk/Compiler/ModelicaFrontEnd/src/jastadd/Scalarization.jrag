@@ -1104,13 +1104,13 @@ aspect Scalarization {
 		
 		for (FFunctionVariable var : getFFunctionVariables())
 			var.scalarize(vars, stmts, emptyIndexMap);
-		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
+		for (FStatement stmt : getFAlgorithm().getFStatements())
 			stmt.scalarizeStmt(vars, stmts, emptyIndexMap);
 		
 		FFunctionDecl fd = createDecl();
 		fd.setFQName(getFQName().fullCopy());
 		fd.setFFunctionVariableList(vars);
-		fd.setFAlgorithmBlock(new FAlgorithmBlock(stmts));
+		fd.setFAlgorithm(new FAlgorithm(stmts));
 		if (hasFDerivativeFunction())
 			fd.setFDerivativeFunction(getFDerivativeFunction().fullCopy());
 		return fd;
@@ -1209,12 +1209,12 @@ aspect Scalarization {
 	eq FlatRoot.getChild().extendedNameSubscript() = new List<FSubscript>();
 	eq InstRoot.getChild().extendedNameSubscript() = new List<FSubscript>();
 	
-	public void FAlgorithmBlock.scalarize(List<FAbstractEquation> eqns,
+	public void FAlgorithm.scalarize(List<FAbstractEquation> eqns,
 			List<FVariable> vars, Map<String,FExp> indexMap) {		
 		List<FStatement> stmts = new List<FStatement>();
 		for (FStatement stmt : getFStatements())
 			stmt.scalarizeStmt(vars, stmts, indexMap);	
-	    eqns.add(new FAlgorithmBlock(stmts));	
+	    eqns.add(new FAlgorithm(stmts));	
 	}
 	
 	/**

@@ -870,7 +870,7 @@ aspect FlatPrettyPrint {
 	    boolean wroteEquation = false;
 	    for (FEquationBlock b : getFEquationBlocks()) {
 	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
-	    		if (e instanceof FAlgorithmBlock) {
+	    		if (e instanceof FAlgorithm) {
 	    			p.print(e, str, indent);
 	    			wroteEquation = false;
 	    		} else {
@@ -1026,7 +1026,7 @@ aspect FlatPrettyPrint {
     public void FFunctionDecl.prettyPrint(Printer p, PrintStream str, String indent) {
     	str.print(indent + "function " + name() + "\n");
     	getFFunctionVariables().prettyPrintWithIndent(p, str, p.indent(indent), ";");
-    	p.print(getFAlgorithmBlock(), str, indent);
+    	p.print(getFAlgorithm(), str, indent);
     	str.print(indent + "end " + name() + ";\n\n");
     }
 
@@ -1223,7 +1223,7 @@ aspect FlatPrettyPrint {
    		p.print(getCall(), str, indent);
 	}
 	
-	public void FAlgorithmBlock.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FAlgorithm.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(indent);
 		str.print("algorithm\n");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";");
@@ -1940,7 +1940,7 @@ aspect PrettyPrint_MC {
 	    boolean wroteEquation = false;
 	    for (FEquationBlock b : getFEquationBlocks()) {
 	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
-	    		if (e instanceof FAlgorithmBlock) {
+	    		if (e instanceof FAlgorithm) {
 	    			p.print(e, str, indent);
 	    			wroteEquation = false;
 	    		} else {
