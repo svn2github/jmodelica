@@ -6269,6 +6269,35 @@ algorithm
    end while;
   end while;
  end while;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm5",
+			description="C code generation of algorithm with while loops",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    while (COND_EXP_LT(_x_0, 1, JMI_TRUE, JMI_FALSE)) {
+        while (COND_EXP_LT(_x_0, 2, JMI_TRUE, JMI_FALSE)) {
+            while (COND_EXP_LT(_x_0, 3, JMI_TRUE, JMI_FALSE)) {
+                _x_0 = _x_0 + 1;
+            }
+        }
+    }
+")})));
 end Algorithm5;
 
 
