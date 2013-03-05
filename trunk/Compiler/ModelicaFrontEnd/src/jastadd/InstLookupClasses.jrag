@@ -289,6 +289,7 @@ aspect InstLookupClasses {
 	
 	syn InstClassDecl InstAccess.qualifiedLookupInstClass(String name) = null;	
 	eq InstClassAccess.qualifiedLookupInstClass(String name)           = myInstClassDecl().memberInstClass(name);
+	eq InstComponentAccess.qualifiedLookupInstClass(String name)       = myInstComponentDecl().memberInstClass(name);
 	
 	syn InstClassDecl InstNode.lookupInstClassInSurrounding(String name)     = lookupInstClass(name);
 	eq InstReplacingFullClassDecl.lookupInstClassInSurrounding(String name)  = 

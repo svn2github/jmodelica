@@ -7485,4 +7485,78 @@ equation
 end Table1DfromFile;
 
 
+model ComponentFunc1
+	model A
+		partial function f
+			input Real x;
+			output Real y;
+		end f;
+		
+		Real z(start = 2);
+	equation
+		der(z) = -z;
+	end A;
+	
+	model B
+		extends A;
+		redeclare function extends f
+		algorithm
+			y := 2 * x;
+		end f;
+	end B;
+	
+	model C
+        extends A;
+        redeclare function extends f
+        algorithm
+            y := x * x;
+        end f;
+	end C;
+	
+	B b1;
+	C c1;
+	Real w = b1.f(v) + c1.f(v);
+	Real v = 3;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ComponentFunc1",
+			description="Calling functions in components",
+			flatModel="
+fclass FunctionTests.ComponentFunc1
+ Real b1.z(start = 2);
+ Real c1.z(start = 2);
+ Real w;
+ Real v;
+initial equation 
+ b1.z = 2;
+ c1.z = 2;
+equation
+ b1.der(z) = - b1.z;
+ c1.der(z) = - c1.z;
+ w = FunctionTests.ComponentFunc1.b1.f(v) + FunctionTests.ComponentFunc1.c1.f(v);
+ v = 3;
+
+public
+ function FunctionTests.ComponentFunc1.b1.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := 2 * x;
+  return;
+ end FunctionTests.ComponentFunc1.b1.f;
+
+ function FunctionTests.ComponentFunc1.c1.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x * x;
+  return;
+ end FunctionTests.ComponentFunc1.c1.f;
+
+end FunctionTests.ComponentFunc1;
+")})));
+end ComponentFunc1;
+
+
 end FunctionTests;
