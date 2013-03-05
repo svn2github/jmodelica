@@ -2556,11 +2556,10 @@ aspect FlatExpressions {
     
     inh boolean InstAccess.inConnectClause();
     inh boolean FExp.inConnectClause();
-    eq FConnectClause.getChild().inConnectClause() = true;
-    eq FAlgorithm.getChild().inConnectClause() = false;
+    eq FConnectClause.getChild().inConnectClause()    = true;
     eq FAbstractEquation.getChild().inConnectClause() = false;
-    eq SourceRoot.getChild().inConnectClause() = false;
-    eq FlatRoot.getChild().inConnectClause() = false;
+    eq SourceRoot.getChild().inConnectClause()        = false;
+    eq FlatRoot.getChild().inConnectClause()          = false;
 
     inh boolean FExp.inIfCondition();
     eq FIfExp.getChild().inIfCondition() = true;
