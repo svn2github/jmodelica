@@ -1406,6 +1406,8 @@ aspect ConstantEvaluation {
   eq FSqrtExp.cevalCalc()  = new CValueReal(Math.sqrt(getFExp().ceval().realValue()));
   
   eq FAbsExp.cevalCalc() = type().abs(getFExp().ceval());
+  
+  eq FVectorExp.cevalCalc() = getFExp().getArray().getFExp(0).ceval();
 
 	syn CValue FSubscript.ceval() = CValue.UNSUPPORTED;
 	eq FExpSubscript.ceval()      = getFExp().ceval();

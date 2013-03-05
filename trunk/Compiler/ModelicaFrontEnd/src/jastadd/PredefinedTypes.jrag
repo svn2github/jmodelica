@@ -313,9 +313,18 @@ aspect PredefinedTypes {
 +"  input Real d = 0;\n"  // Default value not used
 +"  output Integer s;\n"
 +"end size;\n"
-+"function scalar end scalar;\n"
-+"function vector end vector;\n"
-+"function matrix end matrix;\n"
++"function scalar"
++"  input Real A;\n"      // Type not used
++"  output Real y;\n"     // Type not used
++"end scalar;\n"
++"function vector"
++"  input Real A;\n"      // Type not used
++"  output Real B;\n"     // Type not used
++"end vector;\n"
++"function matrix"
++"  input Real A;\n"      // Type not used
++"  output Real B;\n"     // Type not used
++"end matrix;\n"
 +"function transpose\n"
 +"  input Real A;\n"    // Type not used
 +"  output Real B;\n"   // Type not used

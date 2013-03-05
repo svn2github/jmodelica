@@ -1964,6 +1964,189 @@ end ArrayEnd3;
 end End;
 
 
+
+package DimensionConvert
+
+model Scalar1
+	Real[1,1,1] x = {{{1}}};
+	Real y = scalar(x) + 1;
+	Real z = scalar({{{{2}}}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="DimensionConvert_Scalar1",
+			description="Scalar operator: basic test",
+			flatModel="
+fclass ArrayBuiltins.DimensionConvert.Scalar1
+ Real x[1,1,1];
+ Real y;
+ Real z;
+equation
+ x[1,1,1] = 1;
+ y = x[1,1,1] + 1;
+ z = 2;
+end ArrayBuiltins.DimensionConvert.Scalar1;
+")})));
+end Scalar1;
+
+model Scalar2
+    Real[1,1,2] x = {{{1,2}}};
+    Real y = scalar(x) + 1;
+    Real z = scalar({{{{3},{4}}}});
+	Real w = scalar(1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="DimensionConvert_Scalar2",
+			description="Scalar operator: bad size",
+			errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1994, column 21:
+  Calling function scalar(): types of positional argument 1 and input A are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1995, column 21:
+  Calling function scalar(): types of positional argument 1 and input A are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1996, column 18:
+  Calling function scalar(): types of positional argument 1 and input A are not compatible
+")})));
+end Scalar2;
+
+
+model Vector1
+    Real[1,1,1] x = {{{1}}};
+    Real[1] y = vector(x) .+ 1;
+    Real[1] z = vector(2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="DimensionConvert_Vector1",
+			description="Vector operator: scalar arg",
+			flatModel="
+fclass ArrayBuiltins.DimensionConvert.Vector1
+ Real x[1,1,1];
+ Real y[1];
+ Real z[1];
+equation
+ x[1,1,1] = 1;
+ y[1] = x[1,1,1] .+ 1;
+ z[1] = 2;
+end ArrayBuiltins.DimensionConvert.Vector1;
+")})));
+end Vector1;
+
+model Vector2
+    Real[2] x = vector({1,2});
+    Real[2] y = vector({{1},{2}});
+    Real[2] z = vector({{1,2}});
+    Real[2] w = vector({{{{1}},{{2}}}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="DimensionConvert_Vector2",
+			description="Vector operator: basic test",
+			flatModel="
+fclass ArrayBuiltins.DimensionConvert.Vector2
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+ Real z[1];
+ Real z[2];
+ Real w[1];
+ Real w[2];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ y[1] = 1;
+ y[2] = 2;
+ z[1] = 1;
+ z[2] = 2;
+ w[1] = 1;
+ w[2] = 2;
+end ArrayBuiltins.DimensionConvert.Vector2;
+")})));
+end Vector2;
+
+model Vector3
+    Real[2] x = vector({{1,2},{3,4}});
+    Real[2] y = vector({{{{{1},{2}}},{{{3},{4}}}}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="DimensionConvert_Vector3",
+			description="Vector operator: bad size",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2069, column 24:
+  Calling function vector(): types of positional argument 1 and input A are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2070, column 24:
+  Calling function vector(): types of positional argument 1 and input A are not compatible
+")})));
+end Vector3;
+
+
+model Matrix1
+	Real[1,1] x = matrix(1);
+    Real[2,1] y = matrix({1,2});
+    Real[2,2] z = matrix({{1,2},{3,4}});
+    Real[2,2] w = matrix({{{1},{2}},{{3},{4}}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="DimensionConvert_Matrix1",
+			description="Matrix operator: basic test",
+			flatModel="
+fclass ArrayBuiltins.DimensionConvert.Matrix1
+ Real x[1,1];
+ Real y[1,1];
+ Real y[2,1];
+ Real z[1,1];
+ Real z[1,2];
+ Real z[2,1];
+ Real z[2,2];
+ Real w[1,1];
+ Real w[1,2];
+ Real w[2,1];
+ Real w[2,2];
+equation
+ x[1,1] = 1;
+ y[1,1] = 1;
+ y[2,1] = 2;
+ z[1,1] = 1;
+ z[1,2] = 2;
+ z[2,1] = 3;
+ z[2,2] = 4;
+ w[1,1] = 1;
+ w[1,2] = 2;
+ w[2,1] = 3;
+ w[2,2] = 4;
+end ArrayBuiltins.DimensionConvert.Matrix1;
+")})));
+end Matrix1;
+
+model Matrix2
+    Real[1,2] z = matrix({{{1,2},{3,4}}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="DimensionConvert_Matrix2",
+			description="Matrix operator: bad size",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2132, column 26:
+  Calling function matrix(): types of positional argument 1 and input A are not compatible
+")})));
+end Matrix2;
+
+end DimensionConvert;
+
+
+
 model Linspace1
  Real x[4] = linspace(1, 3, 4);
 

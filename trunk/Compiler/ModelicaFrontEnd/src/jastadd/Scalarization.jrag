@@ -2052,6 +2052,10 @@ aspect Scalarization {
 		return new FIntegerLitExp(1);
 	}
 	
+	public FExp FScalarExp.scalarizeExp(Map<String,FExp> indexMap) {
+		return getFExp().getArray().getFExp(0).scalarize(indexMap);
+	}
+	
 	public FExp FFillExp.scalarizeExp(Map<String,FExp> indexMap) {
 		return getFillExp().fullCopy();
 	}

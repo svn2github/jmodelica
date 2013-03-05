@@ -162,9 +162,6 @@ end ElseWhenEq_ComplErr;
 
 model UnsupportedBuiltins1_ComplErr
  equation
-  scalar(1);
-  vector(1);
-  matrix(1);
   diagonal(1 + "2");
   product(1);
   symmetric(1);
@@ -175,16 +172,7 @@ model UnsupportedBuiltins1_ComplErr
 			name="UnsupportedBuiltins1_ComplErr",
 			description="Compliance error for unsupported builtins",
 			errorMessage="
-7 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 165, column 3:
-  The scalar() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 166, column 3:
-  The vector() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 167, column 3:
-  The matrix() function-like operator is not supported
+4 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 168, column 3:
   The diagonal() function-like operator is not supported

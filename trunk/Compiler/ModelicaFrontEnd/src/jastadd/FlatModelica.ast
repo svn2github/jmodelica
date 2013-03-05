@@ -1325,9 +1325,24 @@ FEnumIntegerExp : FUnaryBuiltIn;
 FFloorExp : FUnaryBuiltIn;
 
 /**
- * \brief Scalar built-in function.
+ * Abstract base class for dimension conversion operators (scalar(), vector(), matrix()).
  */
-FScalar : FUnaryBuiltIn;
+abstract FDimensionConvert : FUnaryBuiltIn;
+
+/**
+ * Scalar built-in function.
+ */
+FScalarExp : FDimensionConvert;
+
+/**
+ * Vector built-in function.
+ */
+FVectorExp : FDimensionConvert;
+
+/**
+ * Vector built-in function.
+ */
+FMatrixExp : FDimensionConvert;
 
 /**
  * \brief Transpose built-in function.

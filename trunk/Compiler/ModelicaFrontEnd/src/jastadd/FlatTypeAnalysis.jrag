@@ -274,6 +274,8 @@ aspect FlatTypeAnalysis {
 	
 	eq FUnaryBuiltIn.type() = getFExp().type();
 	
+	eq FDimensionConvert.type() = getFExp().type().sizedType(size());
+	
 	eq FDotDivExp.type() {
 		FType t = super.type();
 		if (t.isInteger())

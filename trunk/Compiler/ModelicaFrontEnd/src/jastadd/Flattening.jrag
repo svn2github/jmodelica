@@ -1842,9 +1842,6 @@ aspect FlatExpressions {
 	
 	public FUnsupportedBuiltIn FUnsupportedBuiltIn.flatten(FQName prefix) { return null; }
 	
-	// These used to delegate to standard implementation for FExp.flatten(FQName).
-	public FScalar FScalar.flatten(FQName prefix) { return null; }
-	
 	public FCross        FCross.flatten(FQName prefix)        { return new FCross(getX().flatten(prefix), getY().flatten(prefix)); }
 	public FOuterProduct FOuterProduct.flatten(FQName prefix) { return new FOuterProduct(getX().flatten(prefix), getY().flatten(prefix)); }
 	public FSampleExp    FSampleExp.flatten(FQName prefix)    { return new FSampleExp(getOffset().flatten(prefix), getInterval().flatten(prefix)); }
