@@ -339,7 +339,10 @@ aspect PredefinedTypes {
 +"  input Real y[:];\n"
 +"  output Real z[:,:];\n"   // Type not used
 +"end outerProduct;\n"
-+"function diagonal end diagonal;\n"
++"function diagonal\n"
++"  input Real v[:];\n"
++"  output Real z[:,:];\n"   // Type not used
++"end diagonal;\n"
 +"function identity\n"
 +"  input Integer n;\n"
 +"  output Integer a[n, n];\n"

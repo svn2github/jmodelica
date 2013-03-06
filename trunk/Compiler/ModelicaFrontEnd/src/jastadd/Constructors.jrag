@@ -882,6 +882,7 @@ aspect InheritedFactoryMethods {
 	public FCross          FCross.createEmptyNode()          { return new FCross();          }
 	public FOuterProduct   FOuterProduct.createEmptyNode()   { return new FOuterProduct();   }
 	public FIdentity       FIdentity.createEmptyNode()       { return new FIdentity();       }
+	public FDiagonal       FDiagonal.createEmptyNode()       { return new FDiagonal();       }
 	public FOnes           FOnes.createEmptyNode()           { return new FOnes();           }
 	public FZeros          FZeros.createEmptyNode()          { return new FZeros();          }
 	public FFillExp        FFillExp.createEmptyNode()        { return new FFillExp();        }

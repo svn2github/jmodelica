@@ -558,6 +558,7 @@ aspect FlatTypeAnalysis {
 			return fUnknownType();
 		return fIntegerArrayType(size());
 	}
+	eq FDiagonal.type() = getFExp().type().arrayType(size());
 	
 	eq FSubscriptedExp.type() = getFExp().type().sizedType(size());
 

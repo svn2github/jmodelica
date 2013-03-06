@@ -208,6 +208,7 @@ aspect Arrays {
 	eq FCross.ndims()        = 1;
 	eq FOuterProduct.ndims() = 2;
 	eq FIdentity.ndims()     = 2;
+	eq FDiagonal.ndims()     = 2;
 	
 	eq FDimensionConvert.ndims() = dimensionsToKeep().length;
 	
@@ -833,6 +834,16 @@ aspect Arrays {
 		MutableSize s = new MutableSize(2);
 		s.append(getFExp());
 		s.append(getFExp());
+		return s;
+	}
+	
+	eq FDiagonal.size() {
+		MutableSize s = new MutableSize(2);
+		Size s2 = getFExp().size();
+		if (s2 != Size.SCALAR) { 
+			s.append(s2, 0);
+			s.append(s2, 0);
+		}
 		return s;
 	}
 	
@@ -1470,6 +1481,14 @@ aspect Arrays {
 		Array arr = new Array(indices());
 		for (Index i : arr.indices())
 			arr.set(i, new FIntegerLitExp((i.get(0) == i.get(1)) ? 1 : 0));
+		return arr;
+	}
+	
+	eq FDiagonal.getArray() {
+		Array arr = new Array(indices());
+		Array inner = getFExp().getArray();
+		for (Index i : arr.indices())
+			arr.set(i, (i.get(0) == i.get(1)) ? inner.get(i.subIndex(1)) : new FIntegerLitExp(0));
 		return arr;
 	}
 	

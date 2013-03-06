@@ -261,6 +261,7 @@ aspect InstFunctionBinding {
 				map.put("initial",      new BuiltInCreator(false, new FInitialExp(),     0));
 				map.put("terminal",     new BuiltInCreator(false, new FTerminalExp(),    0));
 				map.put("identity",     new BuiltInCreator(false, new FIdentity(),       1));
+				map.put("diagonal",     new BuiltInCreator(false, new FDiagonal(),       1));
 				map.put("scalar",       new BuiltInCreator(false, new FScalarExp(),      1));
 				map.put("vector",       new BuiltInCreator(false, new FVectorExp(),      1));
 				map.put("matrix",       new BuiltInCreator(false, new FMatrixExp(),      1));
@@ -291,7 +292,7 @@ aspect InstFunctionBinding {
 				
 				String[] unsupported = new String[] { 
 						// Ticket 678: Support for array related functions
-						"diagonal", "product", "symmetric", "skew", 
+						"product", "symmetric", "skew", 
 						// Ticket 664: Support all function-like operators
 						"sign", "String", "div", "mod", "rem", "ceil", "delay", "cardinality", 
 						"semiLinear", "terminal", "smooth", "edge", "change", "reinit", "terminate"

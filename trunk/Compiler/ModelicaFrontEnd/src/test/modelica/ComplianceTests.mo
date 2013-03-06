@@ -162,9 +162,8 @@ end ElseWhenEq_ComplErr;
 
 model UnsupportedBuiltins1_ComplErr
  equation
-  diagonal(1 + "2");
   product(1);
-  symmetric(1);
+  symmetric(1 + "2");
   skew(1);
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -172,10 +171,7 @@ model UnsupportedBuiltins1_ComplErr
 			name="UnsupportedBuiltins1_ComplErr",
 			description="Compliance error for unsupported builtins",
 			errorMessage="
-4 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 168, column 3:
-  The diagonal() function-like operator is not supported
+3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 169, column 3:
   The product() function-like operator is not supported

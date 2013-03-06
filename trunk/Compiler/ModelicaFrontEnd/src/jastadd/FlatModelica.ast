@@ -1360,6 +1360,11 @@ FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
 FIdentity : FUnaryBuiltIn;
 
 /**
+ * Diagonal built-in function.
+ */
+FDiagonal : FUnaryBuiltIn;
+
+/**
  * Outer product built-in function.
  */
 FOuterProduct : FBuiltInFunctionCall ::= X:FExp Y:FExp;

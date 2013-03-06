@@ -2462,6 +2462,83 @@ end Identity4;
 
 
 
+model Diagonal1
+	Real x[2,2] = diagonal({1,2});
+    Integer y[3,3] = diagonal({1,2,3});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Diagonal1",
+			description="diagonal() operator: basic test",
+			flatModel="
+fclass ArrayBuiltins.Diagonal1
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ discrete Integer y[1,1];
+ discrete Integer y[1,2];
+ discrete Integer y[1,3];
+ discrete Integer y[2,1];
+ discrete Integer y[2,2];
+ discrete Integer y[2,3];
+ discrete Integer y[3,1];
+ discrete Integer y[3,2];
+ discrete Integer y[3,3];
+initial equation 
+ pre(y[1,1]) = 0;
+ pre(y[1,2]) = 0;
+ pre(y[1,3]) = 0;
+ pre(y[2,1]) = 0;
+ pre(y[2,2]) = 0;
+ pre(y[2,3]) = 0;
+ pre(y[3,1]) = 0;
+ pre(y[3,2]) = 0;
+ pre(y[3,3]) = 0;
+equation
+ x[1,1] = 1;
+ x[1,2] = 0;
+ x[2,1] = 0;
+ x[2,2] = 2;
+ y[1,1] = 1;
+ y[1,2] = 0;
+ y[1,3] = 0;
+ y[2,1] = 0;
+ y[2,2] = 2;
+ y[2,3] = 0;
+ y[3,1] = 0;
+ y[3,2] = 0;
+ y[3,3] = 3;
+end ArrayBuiltins.Diagonal1;
+")})));
+end Diagonal1;
+
+
+model Diagonal2
+    Real x[2,2] = diagonal({{1,2},{3,4}});
+    Real y[:,:] = diagonal(1);
+    Boolean z[2,2] = diagonal({true,true});
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Diagonal2",
+			description="diagonal() operator: wrong type of arg",
+			errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2508, column 28:
+  Calling function diagonal(): types of positional argument 1 and input v are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2509, column 28:
+  Calling function diagonal(): types of positional argument 1 and input v are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2510, column 31:
+  Calling function diagonal(): types of positional argument 1 and input v are not compatible
+")})));
+end Diagonal2;
+
+
+
 model ScalarSize1
   Real x[1] = cat(1, {1}, size(Modelica.Constants.pi));
 
