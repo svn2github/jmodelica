@@ -711,7 +711,23 @@ equation
 	der(v2) = u2;
   end JacTestExpInFuncArg1;
   
-  
+model JacTestDiscreteFunction1
+	function F
+		input Integer f;
+		input Real x;
+		output Real a;
+	algorithm
+		a := x ^ f;
+	end F;
+	Real x(start=5);
+	Real y(start=10);
+	Real a(start=15);
+equation
+	x = F(2, x);
+	der(y) = x*a;
+	der(a) = x*y;
+end JacTestDiscreteFunction1;
+
  model Unsolved_blocks1
 	Real x(start=.5);
 	Real y(start=10);
@@ -920,6 +936,5 @@ equation
 	der(A)  = -f(A,X);
 	der(dx) = -dx*A;
   end  JacTestArray1;
-  
   
 end JacGenTests;

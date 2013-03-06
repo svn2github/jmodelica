@@ -235,7 +235,7 @@ aspect CCodeGen {
 		boolean exp = functionCallIsExp();
 		if (!exp)
 			str.print(indent);
-		str.print(getName().funcNameUnderscore(exp ? C_SUFFIX_EXP : C_SUFFIX_DEF));
+		str.print(funcNameUnderscore(exp ? C_SUFFIX_EXP : C_SUFFIX_DEF));
 		str.print("(");
 		String sep = "";
 		for (FExp arg : getArgs()) {
@@ -292,7 +292,7 @@ aspect CCodeGen {
 		str.print(indent);
 		str.print(type);
 		str.print(" ");
-		str.print(getFQName().funcNameUnderscore(suffix));
+		str.print(funcNameUnderscore(suffix));
 		str.print("(");
 		String sep = "";
 		for (FFunctionVariable v : myInputs()) {
@@ -312,7 +312,7 @@ aspect CCodeGen {
 	
 	private void FFunctionDecl.prettyPrintWrappedCall_C(PrintStream str, String indent) {
 		str.print(indent);
-		str.print(getFQName().funcNameUnderscore(C_SUFFIX_DEF));
+		str.print(funcNameUnderscore(C_SUFFIX_DEF));
 		str.print("(");
 		String sep = "";
 		for (FFunctionVariable v : myInputs()) {

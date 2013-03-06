@@ -2129,14 +2129,12 @@ $CAD_function_headers$
 $CAD_functions$
 $C_functions$",
 			generatedCode="
-void func_CADCodeGenTests_CADDerAnno2_f2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* y_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o, jmi_ad_var_t* y_der_o);
+void func_CADCodeGenTests_CADDerAnno2_f2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_o, jmi_ad_var_t* b1_o, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
 
-void func_CADCodeGenTests_CADDerAnno2_f2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* y_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o, jmi_ad_var_t* y_der_o) {
+void func_CADCodeGenTests_CADDerAnno2_f2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_o, jmi_ad_var_t* b1_o, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t i1_var_v;
-    jmi_ad_var_t i1_der_v;
-    jmi_ad_var_t b1_var_v;
-    jmi_ad_var_t b1_der_v;
+    jmi_ad_var_t i1_v;
+    jmi_ad_var_t b1_v;
     jmi_ad_var_t y_var_v;
     jmi_ad_var_t y_der_v;
     jmi_ad_var_t v_0;
@@ -2146,12 +2144,10 @@ void func_CADCodeGenTests_CADDerAnno2_f2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_va
     jmi_ad_var_t v_2;
     jmi_ad_var_t d_2;
     /*Using specified derivative annotation instead of AD*/
-    func_CADCodeGenTests_CADDerAnno2_f2_def(x1_var_v, i_v, b_v,  &i1_var_v,  &b1_var_v,  &y_var_v);
-    func_CADCodeGenTests_CADDerAnno2_f_der_def(x1_var_v, i_v, b_v, x1_der_v,  &y_der_v);
-    if (i1_var_o != NULL) *i1_var_o = i1_var_v;
-    if (i1_der_o != NULL) *i1_der_o = i1_der_v;
-    if (b1_var_o != NULL) *b1_var_o = b1_var_v;
-    if (b1_der_o != NULL) *b1_der_o = b1_der_v;
+    func_CADCodeGenTests_CADDerAnno2_f2_def(x1_var_v, i_v, b_v, &i1_v, &b1_v, &y_var_v);
+    func_CADCodeGenTests_CADDerAnno2_f_der_def(x1_var_v, i_v, b_v, x1_der_v, &y_der_v);
+    if (i1_o != NULL) *i1_o = i1_v;
+    if (b1_o != NULL) *b1_o = b1_v;
     if (y_var_o != NULL) *y_var_o = y_var_v;
     if (y_der_o != NULL) *y_der_o = y_der_v;
     JMI_DYNAMIC_FREE()
@@ -3474,48 +3470,90 @@ model CADDiscreteFuncArg1
 $CAD_function_headers$
 $CAD_functions$",
 			generatedCode="
-void func_CADCodeGenTests_CADDiscreteFuncArg1_f1_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o);
-void func_CADCodeGenTests_CADDiscreteFuncArg1_f2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o);
-void func_CADCodeGenTests_CADDiscreteFuncArg1_f1_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o) {
+void func_CADCodeGenTests_CADDiscreteFuncArg1_f1_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_o, jmi_ad_var_t* b1_o);
+void func_CADCodeGenTests_CADDiscreteFuncArg1_f2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_o, jmi_ad_var_t* b1_o);
+
+void func_CADCodeGenTests_CADDiscreteFuncArg1_f1_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_o, jmi_ad_var_t* b1_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t i1_var_v;
-    jmi_ad_var_t i1_der_v;
-    jmi_ad_var_t b1_var_v;
-    jmi_ad_var_t b1_der_v;
+    jmi_ad_var_t i1_v;
+    jmi_ad_var_t b1_v;
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    func_CADCodeGenTests_CADDiscreteFuncArg1_f2_der_AD(x1_var_v, b1_v, x1_der_v, &i1_v, &b1_v);
 
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-    func_CADCodeGenTests_CADDiscreteFuncArg1_f2_der_AD(x1_var_v, b1_var_v, x1_der_v, &i1_var_v, &b1_var_v, NULL, NULL);
-
-if (i1_var_o != NULL) *i1_var_o = i1_var_v;
-if (i1_der_o != NULL) *i1_der_o = i1_der_v;
-if (b1_var_o != NULL) *b1_var_o = b1_var_v;
-if (b1_der_o != NULL) *b1_der_o = b1_der_v;
-JMI_DYNAMIC_FREE()
-return;
+    if (i1_o != NULL) *i1_o = i1_v;
+    if (b1_o != NULL) *b1_o = b1_v;
+    JMI_DYNAMIC_FREE()
+    return;
 }
 
-void func_CADCodeGenTests_CADDiscreteFuncArg1_f2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_var_o, jmi_ad_var_t* b1_var_o, jmi_ad_var_t* i1_der_o, jmi_ad_var_t* b1_der_o) {
+void func_CADCodeGenTests_CADDiscreteFuncArg1_f2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_o, jmi_ad_var_t* b1_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t i1_var_v;
-    jmi_ad_var_t i1_der_v;
-    jmi_ad_var_t b1_var_v;
-    jmi_ad_var_t b1_der_v;
-i1_var_v = 1;
-i1_der_v = AD_WRAP_LITERAL(0);
-b1_var_v = JMI_TRUE;
-b1_der_v = AD_WRAP_LITERAL(0);
+    jmi_ad_var_t i1_v;
+    jmi_ad_var_t b1_v;
+    i1_v = 1;
+    b1_v = JMI_TRUE;
 
-if (i1_var_o != NULL) *i1_var_o = i1_var_v;
-if (i1_der_o != NULL) *i1_der_o = i1_der_v;
-if (b1_var_o != NULL) *b1_var_o = b1_var_v;
-if (b1_der_o != NULL) *b1_der_o = b1_der_v;
-JMI_DYNAMIC_FREE()
-return;
+    if (i1_o != NULL) *i1_o = i1_v;
+    if (b1_o != NULL) *b1_o = b1_v;
+    JMI_DYNAMIC_FREE()
+    return;
 }
 
 ")})));
 end CADDiscreteFuncArg1;
+
+model TestLiteralFuncArg1
+	function F
+		input Real x;
+		input Real y;
+		input Integer i;
+		output Real z;
+	algorithm
+		z := x ^ y + i;
+	end F;
+	Real x;
+	Integer i=2;
+equation
+	der(x) = F(x, 2.0, 1);
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="TestLiteralFuncArg1",
+			description="",
+			generate_ode_jacobian=true,
+			template="
+$CAD_function_headers$
+$CAD_functions$",
+			generatedCode="
+void func_CADCodeGenTests_TestLiteralFuncArg1_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t y_var_v, jmi_ad_var_t i_v, jmi_ad_var_t x_der_v, jmi_ad_var_t y_der_v, jmi_ad_var_t* z_var_o, jmi_ad_var_t* z_der_o);
+
+void func_CADCodeGenTests_TestLiteralFuncArg1_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t y_var_v, jmi_ad_var_t i_v, jmi_ad_var_t x_der_v, jmi_ad_var_t y_der_v, jmi_ad_var_t* z_var_o, jmi_ad_var_t* z_der_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t z_var_v;
+    jmi_ad_var_t z_der_v;
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
+    v_1 = pow(x_var_v , y_var_v);
+    if(x_var_v== 0){
+        d_1=0;
+    } else{
+        d_1 = v_1 * (y_der_v * log(jmi_abs(x_var_v)) + y_var_v * x_der_v / x_var_v);
+    }
+    v_0 = v_1 + i_v;
+    d_0 = d_1 + AD_WRAP_LITERAL(0);
+    z_var_v = v_0;
+    z_der_v = d_0;
+
+    if (z_var_o != NULL) *z_var_o = z_var_v;
+    if (z_der_o != NULL) *z_der_o = z_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+end TestLiteralFuncArg1;
 
 model CADRecord1
 	record Complex 
