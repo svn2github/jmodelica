@@ -2648,7 +2648,10 @@ aspect CircularExpressions {
 		if (getFExp().isUnknownSizeVarUse() && !duringFunctionEval() && !duringFunctionInlining()) {
 			res = true;
 		} else {
+			ASTNode$State state = state();
+			boolean savedChange = state.CHANGE;
 			Size s = getFExp().size();
+			state.CHANGE = savedChange;
 			res = hasDim() ? s.isCircular(dimension()) : s.isCircular();
 		}
 		inIsCircular = false;

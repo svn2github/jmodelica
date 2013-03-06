@@ -1,0 +1,327 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+aspect VariabilityPropagation {
+	
+	//
+	syn FExp FEquation.solution(FVariable fVariable) = solution(fVariable.name());
+	//
+	public boolean FVariable.hasFDerivativeVariable() {
+		try { 
+			myDerivativeVariable();
+			return true;
+		} catch (ClassCastException e) {
+			return false;
+		}
+	}
+	public FDerivativeVariable FVariable.myFDerivativeVariable() {
+		return myDerivativeVariable();
+	}
+	//
+	syn FTypePrefixVariability FDerExp.expVariability() = 
+			getFIdUse().variability().parameterOrLess() ? fConstant() : getFIdUse().variability();
+	syn CValue FDerExp.cevalCalc() = 
+			getFIdUse().variability().parameterOrLess() ? new CValueInteger(0) : getFIdUse().ceval();
+	//
+	
+	public boolean FAbstractEquation.taggedForRemoval = false;
+	public boolean FVariable.taggedForRemoval = false;
+	
+	inh boolean FAbstractEquation.variabilityPropagationEnabled();
+	eq Root.getChild().variabilityPropagationEnabled() = false;
+	eq FClass.getChild().variabilityPropagationEnabled() = true;
+	eq FIfWhenElseEquation.getChild().variabilityPropagationEnabled() = false;
+	syn boolean FEquation.variabilityPropagationEnabled() =
+			super.variabilityPropagationEnabled() && variables().size() == 1;
+	syn boolean FFunctionCallEquation.variabilityPropagationEnabled() =
+			super.variabilityPropagationEnabled() && variables().size() == numScalarEquations();
+	
+	
+	
+	
+	public void FClass.variabilityPropagationIfSet() {
+		if (root().options.getBooleanOption("variability_propagation")) {
+			beginStep("variabilityPropagationIfSet()");
+			variabilityPropagation();
+			endStep("variabilityPropagationIfSet()");
+		}
+	}
+	
+	public void FClass.variabilityPropagation() {
+
+		List<FAbstractEquation> parameterEquations = getFParameterEquations();
+		LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>();
+		List<FAbstractEquation> equations = getFEquationBlock(0).getFAbstractEquations();
+
+		// Build worklist
+		for (FAbstractEquation equation: equations) {
+			if (equation.variabilityPropagationEnabled()) {
+				worklist.add(equation);
+			}
+		}
+
+		// Work
+		while(!worklist.isEmpty()) {
+			FAbstractEquation equation = worklist.iterator().next();
+			equation.variabilityPropagation(worklist,parameterEquations);
+			worklist.remove(equation);
+		}
+
+		// Clean variables
+		ArrayList<FVariable> newVariables = new ArrayList<FVariable>();
+		for (FVariable fVariable: getFVariables()) {
+			if (!fVariable.taggedForRemoval) {
+				newVariables.add(fVariable);
+			}
+		}
+		setFVariableList(new List<FVariable>(newVariables));
+
+		// Clean equations
+		ArrayList<FAbstractEquation> newEquations = new ArrayList<FAbstractEquation>();
+		for (FAbstractEquation equation: equations) {
+			if (!equation.taggedForRemoval) {
+				newEquations.add(equation);
+			}
+		}
+		getFEquationBlock(0).setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
+
+		
+		enableConstantFolding();
+	}
+	
+	public void FAbstractEquation.variabilityPropagation(
+			LinkedHashSet<FAbstractEquation> worklist,
+			List<FAbstractEquation> parameterEquations) {
+		
+	}
+		
+	public void FEquation.variabilityPropagation(
+			LinkedHashSet<FAbstractEquation> worklist,
+			List<FAbstractEquation> parameterEquations) {
+		
+		FVariable fVariable;
+		FExp solution;
+		FTypePrefixVariability solutionVariability;
+
+		try { // assumes exactly one variable in variables()
+			fVariable = variables().iterator().next();
+		} catch (NoSuchElementException e) {
+			return; // TODO: log/why are we here?
+		}
+		
+		if (fVariable.isDerivativeVariable()) {
+			return;
+		}		
+
+		solution = solution(fVariable);
+		solutionVariability = solution.variability();
+
+		if (!solutionVariability.constantVariability() && !solutionVariability.parameterVariability()) {
+			// TODO: log/why are we here?
+			return;
+		}
+
+		if (solutionVariability.constantVariability()) {
+			if (!solution.canCeval()) {
+				return;
+			}
+			solution = solution.ceval().buildLiteral();
+		}
+
+		if (solutionVariability.parameterVariability()) {
+			parameterEquations.add(new FEquation(fVariable.createUseExp(), solution));
+		}
+
+		this.taggedForRemoval = true;
+		fVariable.variabilityPropagation(worklist, solutionVariability, solution);
+	
+	}
+	
+	public void FFunctionCallEquation.variabilityPropagation(
+			LinkedHashSet<FAbstractEquation> worklist,
+			List<FAbstractEquation> parameterEquations) {
+		
+		
+		FTypePrefixVariability callVariability = getCall().variability();
+		CValue val[] = null;
+		FExp leftExp;
+
+		if (!callVariability.constantVariability() && !callVariability.parameterVariability()) {
+			return;
+		}
+		
+		if (callVariability.constantVariability()) {
+			if (!getCall().canCeval()) {
+				return;
+			}
+			val = getCall().cevalFunction();
+		}
+
+		if (callVariability.parameterVariability()) {
+			parameterEquations.add(this);
+		}
+		
+		for (int i = 0; i < getNumLeft(); i++) {
+			leftExp = getLeft(i).getFExp();
+			if (leftExp != null) {
+				leftExp.variabilityPropagation(worklist,callVariability, 
+						callVariability.constantVariability() ? val[i].buildLiteral() : null);				
+			}
+		}
+		
+		this.taggedForRemoval = true;
+	}
+	
+	public void FExp.variabilityPropagation(
+			LinkedHashSet<FAbstractEquation> worklist,
+			FTypePrefixVariability variability,
+			FExp bindingExp) {
+		
+		System.err.println("UNSUPPORTEDLEFTHANDFCEQ");
+		System.exit(1); // TODO: log/throw exception
+	}
+	
+	public void FRecordConstructor.variabilityPropagation(
+			LinkedHashSet<FAbstractEquation> worklist,
+			FTypePrefixVariability variability,
+			FExp bindingExp) {
+
+		FRecordConstructor frc = null;
+		if (variability.constantVariability()) {
+			frc = (FRecordConstructor) bindingExp;
+		}
+
+		for (int i = 0; i < getNumArg(); i++) {
+			getArg(i).variabilityPropagation(worklist, variability, 
+					variability.constantVariability() ? frc.getArg(i) : null);
+		}
+	}
+	
+	public void FArray.variabilityPropagation(
+			LinkedHashSet<FAbstractEquation> worklist,
+			FTypePrefixVariability variability,
+			FExp bindingExp) {
+		
+		FArray a = null;
+		if (variability.constantVariability()) {
+			a = (FArray) bindingExp;
+		}
+		
+		for (int i = 0; i < getNumFExp(); i++) {
+			getFExp(i).variabilityPropagation(worklist, variability, 
+					variability.constantVariability() ? a.getFExp(i) : null);
+		}
+	}
+	
+	
+	public void FIdUseExp.variabilityPropagation(
+			LinkedHashSet<FAbstractEquation> worklist,
+			FTypePrefixVariability variability,
+			FExp bindingExp) {
+		
+		myFV().variabilityPropagation(worklist, variability, bindingExp);
+	}
+	
+	
+	public void FAbstractVariable.variabilityPropagation(
+			LinkedHashSet<FAbstractEquation> worklist,
+			FTypePrefixVariability variability,
+			FExp bindingExp) {
+		
+	}
+	
+	public void FVariable.variabilityPropagation(
+			LinkedHashSet<FAbstractEquation> worklist,
+			FTypePrefixVariability variability,
+			FExp bindingExp) {
+		
+		FAbstractEquation equation;
+		
+		setFTypePrefixVariability(variability);
+		if (variability.constantVariability()) {
+			setBindingExp(bindingExp);
+		}
+		
+		for (FIdUseExp use: uses()) {
+			if (use.inFEquation()) {
+				equation = use.myFEquation();
+				equation.variables().remove(this);
+				if (equation.variabilityPropagationEnabled()) {
+					worklist.add(equation);
+				}
+			}
+		}
+		
+		if (hasFDerivativeVariable()) {
+			FDerivativeVariable fDerivativeVariable = myFDerivativeVariable();
+			if (fDerivativeVariable != this) {
+				fDerivativeVariable.taggedForRemoval = true;
+				fDerivativeVariable.variabilityPropagation(worklist,FTypePrefixVariability.fConstant(),new FIntegerLitExp(0));				
+			}
+		}
+	}
+}
+
+aspect ConstantFolding {
+	public boolean FExp.constantFoldingEnabled = false;
+	
+	syn boolean FExp.constantFoldingEligible() = false;
+	eq FIdUseExp.constantFoldingEligible() =  true;
+	eq FUnaryExp.constantFoldingEligible() = true;
+	eq FBinExp.constantFoldingEligible() = true;
+	eq FIfExp.constantFoldingEligible() = true;
+		
+	public void FClass.enableConstantFolding() {
+		super.enableConstantFolding();
+	}
+	
+	public void ASTNode.enableConstantFolding() {
+		for (ASTNode n: this)
+			n.enableConstantFolding();
+	}
+	
+	public void FRecordDecl.enableConstantFolding() {
+		
+	}
+	
+	public void FExp.enableConstantFolding() {
+		
+		constantFoldingEnabled = true;
+		is$Final = false;
+		
+		if (isConstantExp()) {
+			return;
+		}
+
+		for (FExp exp: childFExps()) {
+			exp.enableConstantFolding();
+		}
+	}
+	
+	rewrite FIfExp {
+		when (constantFoldingEnabled && getIfExp().isConstantExp() && !getIfExp().ceval().isUnknown()) to FExp {
+			return getIfExp().ceval().booleanValue() ? getThenExp() : getElseExp();
+		}
+	}
+
+	rewrite FExp {
+		when (constantFoldingEnabled && constantFoldingEligible() && isConstantExp() && !ceval().isUnknown()) to FExp {
+			return ceval().buildLiteral();
+		}
+	}
+
+}

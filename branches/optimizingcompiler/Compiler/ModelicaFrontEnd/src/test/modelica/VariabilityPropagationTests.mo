@@ -14,7 +14,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package ConstantPropagationTests
+package VariabilityPropagationTests
 
 model VariabilityInference
 	Real x1;
@@ -32,16 +32,16 @@ equation
 		TransformCanonicalTestCase(
 			name="VariabilityInference",
 			description="",
-			constant_propagation=true,
+			variability_propagation=true,
 			flatModel="
-fclass ConstantPropagationTests.VariabilityInference
+fclass VariabilityPropagationTests.VariabilityInference
  constant Real x1 = 1;
  constant Boolean x2 = true;
  parameter Real p1 = 4 /* 4 */;
  parameter Real r2;
 parameter equation
  r2 = p1 + 1.0;
-end ConstantPropagationTests.VariabilityInference;
+end VariabilityPropagationTests.VariabilityInference;
 ")})));
 end VariabilityInference;
 
@@ -56,12 +56,12 @@ equation
 		TransformCanonicalTestCase(
 			name="SimplifyLitExps",
 			description="",
-			constant_propagation=true,
+			variability_propagation=true,
 			flatModel="
-fclass ConstantPropagationTests.SimplifyLitExps
+fclass VariabilityPropagationTests.SimplifyLitExps
  constant Real x1 = -23.5;
  constant Boolean x2 = true;
-end ConstantPropagationTests.SimplifyLitExps;
+end VariabilityPropagationTests.SimplifyLitExps;
 ")})));
 end SimplifyLitExps;
 
@@ -76,12 +76,12 @@ equation
 		TransformCanonicalTestCase(
 			name="ConstantSubstitution",
 			description="",
-			constant_propagation=true,
+			variability_propagation=true,
 			flatModel="
-fclass ConstantPropagationTests.ConstantSubstitution
+fclass VariabilityPropagationTests.ConstantSubstitution
  constant Real x3 = 1;
  constant Real x4 = 2.0;
-end ConstantPropagationTests.ConstantSubstitution;
+end VariabilityPropagationTests.ConstantSubstitution;
 ")})));
 end ConstantSubstitution;
 
@@ -97,9 +97,9 @@ equation
 		TransformCanonicalTestCase(
 			name="WhenEq1",
 			description="",
-			constant_propagation=true,
+			variability_propagation=true,
 			flatModel="
-fclass ConstantPropagationTests.WhenEq1
+fclass VariabilityPropagationTests.WhenEq1
  parameter Real p1 = 4 /* 4 */;
  discrete Real x1;
  constant Real x2 = 3;
@@ -109,7 +109,7 @@ equation
  when p1 > 3 then
   x1 = 4.0;
  end when;
-end ConstantPropagationTests.WhenEq1;
+end VariabilityPropagationTests.WhenEq1;
 ")})));
 end WhenEq1;
 
@@ -124,9 +124,9 @@ equation
 		TransformCanonicalTestCase(
 			name="WhenEq2",
 			description="",
-			constant_propagation=true,
+			variability_propagation=true,
 			flatModel="
-fclass ConstantPropagationTests.WhenEq2
+fclass VariabilityPropagationTests.WhenEq2
  discrete Real x1;
  constant Real x2 = 3;
 initial equation
@@ -135,7 +135,7 @@ equation
  when false then
   x1 = 4.0;
  end when;
-end ConstantPropagationTests.WhenEq2;
+end VariabilityPropagationTests.WhenEq2;
 ")})));
 end WhenEq2;
 
@@ -151,9 +151,9 @@ equation
 		TransformCanonicalTestCase(
 			name="WhenEq3",
 			description="",
-			constant_propagation=true,
+			variability_propagation=true,
 			flatModel="
-fclass ConstantPropagationTests.WhenEq3
+fclass VariabilityPropagationTests.WhenEq3
  constant Real p1 = 4;
  discrete Real x1;
  constant Real x2 = 3;
@@ -163,7 +163,7 @@ equation
  when true then
   x1 = 4.0;
  end when;
-end ConstantPropagationTests.WhenEq3;
+end VariabilityPropagationTests.WhenEq3;
 ")})));
 end WhenEq3;
 
@@ -183,12 +183,12 @@ equation
 		TransformCanonicalTestCase(
 			name="IfEq1",
 			description="",
-			constant_propagation=true,
+			variability_propagation=true,
 			flatModel="
-fclass ConstantPropagationTests.IfEq1
+fclass VariabilityPropagationTests.IfEq1
  constant Real p1 = 4;
  constant Real x1 = 3;
-end ConstantPropagationTests.IfEq1;
+end VariabilityPropagationTests.IfEq1;
 ")})));
 end IfEq1;
 
@@ -209,9 +209,9 @@ equation
 		TransformCanonicalTestCase(
 			name="IfEq2",
 			description="",
-			constant_propagation=true,
+			variability_propagation=true,
 			flatModel="
-fclass ConstantPropagationTests.IfEq2
+fclass VariabilityPropagationTests.IfEq2
  constant Real c1 = 4;
  parameter Real p1 = 1 /* 1 */;
  constant Real x1 = 1;
@@ -219,7 +219,7 @@ fclass ConstantPropagationTests.IfEq2
  constant Real x3 = 3;
 parameter equation
  x2 = p1 + 1;
-end ConstantPropagationTests.IfEq2;
+end VariabilityPropagationTests.IfEq2;
 ")})));
 end IfEq2;
 
@@ -239,13 +239,13 @@ equation
 		TransformCanonicalTestCase(
 			name="IfEq3",
 			description="",
-			constant_propagation=true,
+			variability_propagation=true,
 			flatModel="
-fclass ConstantPropagationTests.IfEq3
+fclass VariabilityPropagationTests.IfEq3
  constant Real c1 = 4;
  parameter Real p1 = 1 /* 1 */;
  constant Real x2 = 3;
-end ConstantPropagationTests.IfEq3;
+end VariabilityPropagationTests.IfEq3;
 ")})));
 end IfEq3;
 
@@ -270,9 +270,9 @@ equation
 		TransformCanonicalTestCase(
 			name="IfEq4",
 			description="",
-			constant_propagation=true,
+			variability_propagation=true,
 			flatModel="
-fclass ConstantPropagationTests.IfEq4
+fclass VariabilityPropagationTests.IfEq4
  constant Real c1 = 4;
  parameter Real p1 = 1 /* 1 */;
  constant Real x1 = 2;
@@ -281,7 +281,7 @@ fclass ConstantPropagationTests.IfEq4
  constant Real x4 = 3;
 parameter equation
  x2 = p1 + 2;
-end ConstantPropagationTests.IfEq4;
+end VariabilityPropagationTests.IfEq4;
 ")})));
 end IfEq4;
 
@@ -298,13 +298,158 @@ equation
 		TransformCanonicalTestCase(
 			name="Func1",
 			description="",
-			constant_propagation=true,
+			variability_propagation=true,
 			flatModel="
-fclass ConstantPropagationTests.Func1
+fclass VariabilityPropagationTests.Func1
  constant Real c_out = 1;
-end ConstantPropagationTests.Func1;
+end VariabilityPropagationTests.Func1;
 ")})));
 end Func1;
+
+model FunctionCallEquation1
+	Real x1,x2;
+	Real x3,x4;
+	Real x5;
+	parameter Real p = 3;
+	
+    function f
+    	input Real i1;
+        output Real c1;
+        output Real c2;
+    algorithm
+    	c1 := 1*i1;
+    	c2 := 2*i1;
+    end f;
+equation
+    (x1,x2) = f(x5);
+    (x3,x4) = f(p);
+    x5 = 5;
+    annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionCallEquation1",
+			description="",
+			variability_propagation=true,
+			flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquation1
+ constant Real x1 = 5.0;
+ constant Real x2 = 10.0;
+ parameter Real x3;
+ parameter Real x4;
+ constant Real x5 = 5;
+ parameter Real p = 3 /* 3 */;
+parameter equation
+ (x3, x4) = VariabilityPropagationTests.FunctionCallEquation1.f(p);
+
+public
+ function VariabilityPropagationTests.FunctionCallEquation1.f
+  input Real i1;
+  output Real c1;
+  output Real c2;
+ algorithm
+  c1 := 1 * i1;
+  c2 := 2 * i1;
+  return;
+ end VariabilityPropagationTests.FunctionCallEquation1.f;
+end VariabilityPropagationTests.FunctionCallEquation1;
+")})));
+end FunctionCallEquation1;
+
+model FunctionCallEquation2
+	Real z1[2];
+	Real z2[2];
+	parameter Real p = 3;
+	
+    function f
+    	input Real i1;
+        output Real c[2];
+    algorithm
+    	c[1] := 1*i1;
+    	c[2] := 2*i1;
+    end f;
+equation
+    (z1) = f(1);
+    (z2) = f(p);
+    annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionCallEquation2",
+			description="",
+			variability_propagation=true,
+			flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquation2
+ constant Real z1[1] = 1.0;
+ constant Real z1[2] = 2.0;
+ parameter Real z2[1];
+ parameter Real z2[2];
+ parameter Real p = 3 /* 3 */;
+parameter equation
+ ({z2[1], z2[2]}) = VariabilityPropagationTests.FunctionCallEquation2.f(p);
+
+public
+ function VariabilityPropagationTests.FunctionCallEquation2.f
+  input Real i1;
+  output Real[2] c;
+ algorithm
+  c[1] := 1 * i1;
+  c[2] := 2 * i1;
+  return;
+ end VariabilityPropagationTests.FunctionCallEquation2.f;
+end VariabilityPropagationTests.FunctionCallEquation2;
+")})));
+end FunctionCallEquation2;
+
+model FunctionCallEquation3
+	A a;
+	A b;
+	parameter Real p = 3;
+	
+    function f
+    	input Real i;
+        output A o;
+    algorithm
+    	o := A(i*1,i*2);
+    end f;
+    
+	record A
+		Real a;
+		Real b;
+	end A;
+equation
+    a = f(3);
+    b = f(p);
+    annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionCallEquation3",
+			description="",
+			variability_propagation=true,
+			flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquation3
+ constant Real a.a = 3.0;
+ constant Real a.b = 6.0;
+ parameter Real b.a;
+ parameter Real b.b;
+ parameter Real p = 3 /* 3 */;
+parameter equation
+ (VariabilityPropagationTests.FunctionCallEquation3.A(b.a, b.b)) = VariabilityPropagationTests.FunctionCallEquation3.f(p);
+
+public
+ function VariabilityPropagationTests.FunctionCallEquation3.f
+  input Real i;
+  output VariabilityPropagationTests.FunctionCallEquation3.A o;
+ algorithm
+  o.a := i * 1;
+  o.b := i * 2;
+  return;
+ end VariabilityPropagationTests.FunctionCallEquation3.f;
+
+ record VariabilityPropagationTests.FunctionCallEquation3.A
+  Real a;
+  Real b;
+ end VariabilityPropagationTests.FunctionCallEquation3.A;
+
+end VariabilityPropagationTests.FunctionCallEquation3;
+")})));
+end FunctionCallEquation3;
+
 
 model Der1
 	Real x1,x2;
@@ -322,9 +467,9 @@ equation
 		TransformCanonicalTestCase(
 			name="Der1",
 			description="",
-			constant_propagation=true,
+			variability_propagation=true,
 			flatModel="
-fclass ConstantPropagationTests.Der1
+fclass VariabilityPropagationTests.Der1
  constant Real x1 = 3;
  constant Real x2 = 0;
  Real x3;
@@ -332,15 +477,15 @@ fclass ConstantPropagationTests.Der1
  constant Real x5 = 0;
  parameter Real x6;
  parameter Real p1 = 4 /* 4 */;
-initial equation
+initial equation 
  x4 = 0.0;
 parameter equation
  x6 = p1 + 1;
 equation
  x3 = der(x4);
  der(x4) = 3;
-end ConstantPropagationTests.Der1;
+end VariabilityPropagationTests.Der1;
 ")})));
 end Der1;
 
-end ConstantPropagationTests;
+end VariabilityPropagationTests;
