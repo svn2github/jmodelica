@@ -1355,6 +1355,11 @@ FTranspose : FUnaryBuiltIn;
 FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
 
 /**
+ * \brief Skew built-in function.
+ */
+FSkew : FUnaryBuiltIn;
+
+/**
  * \brief Identity built-in function.
  */
 FIdentity : FUnaryBuiltIn;

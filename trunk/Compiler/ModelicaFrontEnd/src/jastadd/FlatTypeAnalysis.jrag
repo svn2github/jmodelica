@@ -355,6 +355,7 @@ aspect FlatTypeAnalysis {
 			getFExp().type().arrayType(size());
 	
 	eq FCross.type() = getX().type().numericPromotion(getY().type());
+	eq FSkew.type()  = getFExp().type().arrayType(size());
 
 	eq FOuterProduct.type() { 
 		if (getX().ndims() != 1 || getY().ndims() != 1)

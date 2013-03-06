@@ -206,6 +206,7 @@ aspect Arrays {
 	
 	eq FTranspose.ndims()    = getFExp().ndims();
 	eq FCross.ndims()        = 1;
+	eq FSkew.ndims()         = 2;
 	eq FOuterProduct.ndims() = 2;
 	eq FIdentity.ndims()     = 2;
 	eq FDiagonal.ndims()     = 2;
@@ -822,6 +823,7 @@ aspect Arrays {
 	}
 	
 	eq FCross.size() = new Size(3);
+	eq FSkew.size() = new Size(3, 3);
 	
 	eq FOuterProduct.size() {
 		MutableSize s = new MutableSize(2);
@@ -1464,6 +1466,34 @@ aspect Arrays {
 			FExp m1 = new FMulExp(x.get(j).fullCopy(), y.get(k).fullCopy());
 			FExp m2 = new FMulExp(x.get(k).fullCopy(), y.get(j).fullCopy());
 			res.set(i, new FSubExp(m1, m2));
+		}
+		return res;
+	}
+	
+	eq FSkew.getArray() {
+		Array res = new Array(indices());
+		Array inner = getFExp().getArray();
+		Index j = new Index(new int[1]);
+		for (Index i : res.indices()) {
+			/* Result is:
+			 * [    0, -x[3],  x[2];
+			 *   x[3],     0, -x[1];
+			 *  -x[2],  x[1],     0 ]
+			 */
+			FExp cell = null;
+			j.set(0, 6 - i.get(0) - i.get(1));
+			switch ((i.get(0) - i.get(1) + 2) % 3) {
+			case 0:
+				cell = inner.get(j);
+				break;
+			case 1:
+				cell = new FNegExp(inner.get(j).fullCopy());
+				break;
+			case 2:
+				cell = new FIntegerLitExp(0);
+				break;
+			}
+			res.set(i, cell);
 		}
 		return res;
 	}

@@ -1709,6 +1709,7 @@ aspect FlatPrettyPrint {
 	eq FMatrixExp.builtInName()      = "matrix";
 	eq FTranspose.builtInName()      = "transpose";
 	eq FCross.builtInName()          = "cross";
+	eq FSkew.builtInName()           = "skew";
 	eq FOuterProduct.builtInName()   = "outerProduct";
 	eq FNdimsExp.builtInName()       = "ndims";
 	eq FSizeExp.builtInName()        = "size";

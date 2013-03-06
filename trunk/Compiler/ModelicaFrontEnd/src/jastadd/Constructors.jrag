@@ -880,6 +880,7 @@ aspect InheritedFactoryMethods {
 	public FMatrixExp      FMatrixExp.createEmptyNode()      { return new FMatrixExp();      }
 	public FTranspose      FTranspose.createEmptyNode()      { return new FTranspose();      }
 	public FCross          FCross.createEmptyNode()          { return new FCross();          }
+	public FSkew           FSkew.createEmptyNode()           { return new FSkew();           }
 	public FOuterProduct   FOuterProduct.createEmptyNode()   { return new FOuterProduct();   }
 	public FIdentity       FIdentity.createEmptyNode()       { return new FIdentity();       }
 	public FDiagonal       FDiagonal.createEmptyNode()       { return new FDiagonal();       }

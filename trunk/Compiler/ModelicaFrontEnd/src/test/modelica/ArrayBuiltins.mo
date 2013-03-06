@@ -1377,6 +1377,68 @@ end Cross7;
 end Cross;
 
 
+
+package Skew
+
+model Skew1
+	Real x[3] = {1,2,3};
+    Real y[3,3] = skew(x);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Skew_Skew1",
+			description="skew() operator: basic test",
+			eliminate_alias_variables=false,
+			flatModel="
+fclass ArrayBuiltins.Skew.Skew1
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[1,3];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[2,3];
+ Real y[3,1];
+ Real y[3,2];
+ Real y[3,3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+ y[1,1] = 0;
+ y[1,2] = - x[3];
+ y[1,3] = x[2];
+ y[2,1] = x[3];
+ y[2,2] = 0;
+ y[2,3] = - x[1];
+ y[3,1] = - x[2];
+ y[3,2] = x[1];
+ y[3,3] = 0;
+end ArrayBuiltins.Skew.Skew1;
+")})));
+end Skew1;
+
+
+model Skew2
+	
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Skew_Skew2",
+			description="skew() operator: bad arg",
+			eliminate_alias_variables=false,
+			flatModel="
+fclass ArrayBuiltins.Skew.Skew2
+end ArrayBuiltins.Skew.Skew2;
+")})));
+end Skew2;
+    Real x[3,3] = skew({1,2,3,4});
+    Real y[3,3] = skew({"1","2","3"});
+end Skew;
+
+
+
 package OuterProduct
 	
 model OuterProduct1
