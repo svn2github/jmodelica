@@ -1422,19 +1422,24 @@ end Skew1;
 
 
 model Skew2
+    Real x[3,3] = skew({1,2,3,4});
+    String y[3,3] = skew({"1","2","3"});
 	
 	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
+		ErrorTestCase(
 			name="Skew_Skew2",
 			description="skew() operator: bad arg",
-			eliminate_alias_variables=false,
-			flatModel="
-fclass ArrayBuiltins.Skew.Skew2
-end ArrayBuiltins.Skew.Skew2;
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1425, column 24:
+  Calling function skew(): types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1426, column 26:
+  Calling function skew(): types of positional argument 1 and input x are not compatible
 ")})));
 end Skew2;
-    Real x[3,3] = skew({1,2,3,4});
-    Real y[3,3] = skew({"1","2","3"});
+
 end Skew;
 
 

@@ -164,23 +164,19 @@ model UnsupportedBuiltins1_ComplErr
  equation
   product(1);
   symmetric(1 + "2");
-  skew(1);
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="UnsupportedBuiltins1_ComplErr",
 			description="Compliance error for unsupported builtins",
 			errorMessage="
-3 errors found:
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 169, column 3:
   The product() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 171, column 3:
   The symmetric() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 172, column 3:
-  The skew() function-like operator is not supported
 ")})));
 end UnsupportedBuiltins1_ComplErr;
 
