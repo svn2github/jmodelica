@@ -494,7 +494,7 @@ aspect FlatTypeCheck {
   public void InstFunctionCall.typeCheck() {
 	  if (!isFunctionCallClause() && !getName().myInstClassDecl().isRecord() && !hasOutputs())
 		  error("Function " + getName().name() + "() has no outputs, but is used in expression");
-	  else if (!isFunctionCallClause() && !inFunction() && size().isUnknown())
+	  else if (!isFunctionCallClause() && !inFunction() && !size().isDefined())
 		  error("Could not evaluate array size of output " + expOutput().name());
 	  if (myOutputs().size() < myLefts().size())
 		  error("Too many components assigned from function call: " + getName().name() + 

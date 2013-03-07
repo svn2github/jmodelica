@@ -2521,10 +2521,11 @@ end AlgorithmTransformation3;
 
 model AlgorithmTransformation4
  Real a = 1;
- Real b = 2;
+ Real b;
  Real x;
  Real y;
 algorithm
+ b := 2;
  while b > 1 loop
   x := a;
   if a < 2 then
@@ -2532,6 +2533,7 @@ algorithm
   else
    y := a + 2;
   end if;
+  b := b - 0.1;
  end while;
 
 	annotation(__JModelica(UnitTesting(tests={

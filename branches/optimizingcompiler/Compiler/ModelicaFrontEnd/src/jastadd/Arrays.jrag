@@ -2202,6 +2202,16 @@ aspect ArrayHelpers {
 		}
 		
 		/**
+		 * \brief Check if all lengths can be calculated.
+		 */
+		public boolean isDefined() {
+			for (int i = 0; i < size.length; i++)
+				if (get(i) == UNKNOWN)
+					return false;
+			return true;
+		}
+		
+		/**
 		 * \brief Check if all lengths have a value (fix length or expression).
 		 */
 		public boolean isComplete() {
@@ -2389,10 +2399,12 @@ aspect ArrayHelpers {
 		 * @param itsDim        the dimension in the other Size to compare
 		 */
 		public boolean equivalentDim(Size s, boolean allowUnknown, int myDim, int itsDim) {
-			boolean same = size[myDim] == s.size[itsDim];
+			int myLen = get(myDim);
+			int itsLen = s.get(itsDim);
+			boolean same = myLen == itsLen;
 			if (same || !allowUnknown)
 				return same;
-			return size[myDim] == UNKNOWN || s.size[itsDim] == UNKNOWN;
+			return myLen == UNKNOWN || itsLen == UNKNOWN;
 		}
 		
 		private static final String SEP = ", ";
@@ -2675,7 +2687,7 @@ aspect ArrayHelpers {
 		 */
 		public void set(int d, FExp e) {
 			int s = UNKNOWN;
-			if (okExp(e)) {
+			if (okExp(e) && e.hasOnlyLiterals()) {
 				try {
 					s = e.ceval().intValue();
 				} catch (ConstantEvaluationException uoe) {
