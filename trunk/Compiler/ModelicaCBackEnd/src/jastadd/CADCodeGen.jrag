@@ -873,18 +873,19 @@ aspect CADCodeGen {
 	public void FIfExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 		
 		//Print AD-code for the then resp. else expressions
-		p.print(getThenExp(),str,indent);
-		p.print(getElseExp(),str,indent);
+		p.print(getIfExp(), str, indent);
+		p.print(getThenExp(), str, indent);
+		p.print(getElseExp(), str, indent);
 		
 		//Couple the print AD-code to the conditions
 		str.print(indent);
 		str.format("%s = COND_EXP_EQ(", adVarName());
-		getIfExp().prettyPrint_C(str, indent);
+		str.print(getIfExp().adVarName());
 		str.format(", JMI_TRUE, %s, %s);\n", getThenExp().adVarName(), getElseExp().adVarName());
 		
 		str.print(indent);
 		str.format("%s = COND_EXP_EQ(", adDerName());
-		getIfExp().prettyPrint_C(str, indent);
+		str.print(getIfExp().adDerName());
 		str.format(", JMI_TRUE, %s, %s);\n", getThenExp().adDerName(), getElseExp().adDerName());
 	}
 	
@@ -904,18 +905,21 @@ aspect CADCodeGen {
 	}
 	
 	public void FRelExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
-		p.print(getLeft(), str, indent);
-		p.print(getRight(), str, indent);
-		str.print(indent);
-		str.print(adVarName());
-		str.print(" = ");
 		if (inNoEventExp()) {
+			p.print(getLeft(), str, indent);
+			p.print(getRight(), str, indent);
+			str.print(indent);
+			str.print(adVarName());
+			str.print(" = ");
 			str.print(macro_C() + "(");
 			str.print(getLeft().adVarName());
 			str.print(", ");
 			str.print(getRight().adVarName());
 			str.print(relIsInverted_C() ? ", JMI_FALSE, JMI_TRUE)" : ", JMI_TRUE, JMI_FALSE)");
 		} else {
+			str.print(indent);
+			str.print(adVarName());
+			str.print(" = ");
 			if (inEquationSection())
 				str.print("_sw(" + relExpInEquationsIndex() + ")");
 			else
@@ -957,6 +961,10 @@ aspect CADCodeGen {
 		str.print(indent);
 		str.print(adDerName());
 		str.print(" = JMI_FALSE;\n");
+	}
+	
+	public void FRangeExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		getFExps().prettyPrint_CAD(p, str, indent);
 	}
 	
 	/*-------------------------------------------------------------------------
@@ -1712,6 +1720,19 @@ aspect CADCodeGen {
 			printDeclOrInit_C(p, str, indent, name_der_CAD() + suffix, true);
 		}
 	}
+	
+	public void FForIndex.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+		super.genVarDecls_CAD(p, str, indent);
+		String name = getFVariable().name_C();
+		str.format("%sjmi_ad_var_t %s;\n", indent, name);
+		if (needsForArray()) {
+			str.format("%sint %si;\n", indent, name);
+			str.format("%sjmi_ad_var_t %sa[%d];\n", indent, name, getFExp().size().numElements());
+		} else {
+			str.format("%sjmi_ad_var_t %se;\n", indent, name);
+		}
+	}
+
 
 	/* Generates temporary output declarations. Other types suchs as arrays may override
 	 * this empty implementation. 
@@ -1971,19 +1992,29 @@ aspect CADCodeGen {
 					str.print("NULL");
 				sep = ", ";
 			}
-			str.print(");\n");
 		} else {
-			if (outputs.get(0).needDerVar_CAD())
-				str.print(", &" + adVarName());
-			for (int i = 1; i < outputs.size(); i++)
-				str.print(", NULL");
-			if (outputs.get(0).needDerVar_CAD())
-				str.print(", &" + adDerName());
-			for (int i = 1; i < outputs.size(); i++)
-				if (outputs.get(i).needDerVar_CAD())
-					str.print(", NULL");
-			str.print(");\n");
+			boolean first = true;
+			for (FFunctionVariable output : outputs) {
+				str.print(sep);
+				sep = ", ";
+				if (first)
+					str.print("&" + adVarName());
+				else
+					str.print("NULL");
+				first = false;
+			}
+			first = true;
+			for (FFunctionVariable output : outputs) {
+				str.print(sep);
+				sep = ", ";
+				if (first && output.needDerVar_CAD())
+					str.print("&" + adDerName());
+				else
+					str.print("NULL");
+				first = false;
+			}
 		}
+		str.print(");\n");
 	}
 	
 	/* Used when function calls are printed. It is used to  generate outputs for the function call and the  
@@ -2241,26 +2272,100 @@ aspect CADCodeGen {
 	//Methods to handle while loops starts here
 	public void FWhileStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 		getTest().genTempVars_CAD(p, str, indent);
+		p.print(getTest(), str, indent);
 		str.print(indent);
 		str.print("while (");
-		getTest().adVarName();
+		str.print(getTest().adVarName());
 		str.print(") {\n");
 		p.print(getWhileStmts(), str, p.indent(indent));
-		str.print("}\n");		
+		p.print(getTest(), str, p.indent(indent));
+		str.print(indent);
+		str.print("}\n");
 	}
 	
 	//Methods to handle for-loops in functions starts here
 	public void FForStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
-		getIndex().genTempVars_CAD(p, str, indent);
-		getIndex().printForArrayInit_C(p, str, indent);
+		getIndex().genTempVars_CAD(printer_C, str, indent);
+		getIndex().printForArrayInit_CAD(p, str, indent);
 		str.print(indent);
 		str.print("for (");
 		p.print(getIndex(), str, indent);
 		str.print(") {\n");
-		getIndex().printForArrayNext_C(p, str, p.indent(indent));
+		getIndex().printForArrayNext_CAD(p, str, p.indent(indent));
 		p.print(getForStmts(), str, p.indent(indent));
 		str.print(indent);
 		str.print("}\n");
+	}
+	
+	public void FForIndex.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		getFExp().printForIndex_CAD(p, str, indent, getFVariable().name_C());
+	}
+	
+	public void FForIndex.printForArrayInit_CAD(Printer p, PrintStream str, String indent) {
+		if (needsForArray()) {
+			int i = 0;
+			for (FExp e : getFExp().getArray().iterable()) {
+				p.print(e, str, indent);
+				str.format("%s%sa[%d] = ", indent, getFVariable().name_C(), i++);
+				str.print(e.adVarName());
+				str.print(";\n");
+			}
+		} else {
+			p.print(getFExp(), str, indent);
+			str.format("%s%se = ", indent, getFVariable().name_C());
+			getFExp().printForEnd_CAD(p, str, indent);
+			str.print(";\n");
+		}
+	}
+	
+	public void FForIndex.printForArrayNext_CAD(Printer p, PrintStream str, String indent) {
+		if (needsForArray()) {
+			String name = getFVariable().name_C();
+			str.print(indent);
+			str.print(name);
+			str.print(" = ");
+			str.print(name);
+			str.print("a[");
+			str.print(name);
+			str.print("i];\n");
+		}
+	}
+	
+	public void FExp.printForEnd_CAD(Printer p, PrintStream str, String indent) {
+		throw new UnsupportedOperationException(
+				"Must override printForEnd_C() if needsForArray() returns false");
+	}
+	
+	public void FRangeExp.printForEnd_CAD(Printer p, PrintStream str, String indent) {
+		str.print(getFExp(hasStep() ? 2 : 1).adVarName());
+		str.print(" + ");
+		printForStep_CAD(p, str, indent);
+		str.print(" / 2.0");
+	}
+	
+	public void FRangeExp.printForIndex_CAD(Printer p, PrintStream str, String indent, String name) {
+		str.format("%s = ", name);
+		str.print(getFExp(0).adVarName());
+		str.format("; %s < %se; %s += ", name, name, name);
+		printForStep_CAD(p, str, indent);
+	}
+	
+	protected void FRangeExp.printForStep_CAD(Printer p, PrintStream str, String indent) {
+		if (hasStep()) 
+			str.print(getFExp(1).adVarName());
+		else
+			str.print("1");
+	}
+	
+	public void FExp.printForIndex_CAD(Printer p, PrintStream str, String indent, String name) {
+		str.print(name);
+		str.print("i = 0; ");
+		str.print(name);
+		str.print("i < ");
+		str.print(size().numElements());
+		str.print("; ");
+		str.print(name);
+		str.print("i++");
 	}
 	
 	//Methods to handle functions starts here.
