@@ -39,6 +39,7 @@ lexer_pattern = re.compile(lexer_re)
 whitespace_pattern = re.compile(r'\s+')
 symbol_pattern = re.compile(r'[=()}]')
 string_escaped_quote_pattern = re.compile(r'""')
+identifier_re = r'[^=(){}"\s]+'
 
 
 def lex(text):
