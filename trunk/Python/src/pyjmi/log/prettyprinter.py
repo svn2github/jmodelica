@@ -24,12 +24,19 @@ import lexer
 from tree import Node, Comment
 
 indent_width = 2
+nodename_padding = 14
 
 quote_pattern = re.compile('"')
 identifier_pattern = re.compile('^' + lexer.identifier_re + '\Z')
 
+def prettyprint(out, named_nodes):
+    """Pretty print the top level list named_nodes of Node:s to the output stream out."""
+    pprint(out, named_nodes, wrapped=False)
 
-def pprint(out, node, indent=0):
+def is_vertical(nodes):
+    return any(isinstance(node, (Node, list)) for node in nodes)
+
+def pprint(out, node, indent=0, wrapped=True):
     """Pretty print the log node node to the output stream out.
 
     node may be a Node, Comment, string, or list.
@@ -37,21 +44,26 @@ def pprint(out, node, indent=0):
     if isinstance(node, Node):
         ## Node ##
         if isinstance(node.value, list):
-            # name( nodes )name
-            out.write(node.name + '(')
-            pprint(out, node.value, indent=indent + indent_width)
-            out.write(')' + node.name)
+            # name( named-nodes )name or name[ nodes ]name
+            out.write(node.name if is_vertical(node.value) else node.name.ljust(nodename_padding))
+            pprint(out, node.value, indent=indent)
+            out.write(node.name)
         else:
             # name=value            
-            out.write(node.name + '=')
+            out.write(node.name.ljust(nodename_padding-2) + ' = ')
             pprint(out, node.value, indent=indent)
     elif isinstance(node, list):
         ## list ##
-        vertically = any(isinstance(child, Node) for child in node)
-        delim, post = ('\n' + ' '*indent, '\n' + ' '*(indent-indent_width)) if vertically else (' ', ' ')
+        child_indent = indent + indent_width if wrapped else indent
+        named    = any(isinstance(child, Node) for child in node)
+        vertical = is_vertical(node)
+        delim, post = (('\n' + ' '*child_indent, '\n' + ' '*indent) if vertical else (' ', ' '))        
+        if wrapped:
+            pre, post = ('(', post + ')') if named else ('[', post + ']')
+            out.write(pre)
         for child in node:
             out.write(delim)
-            pprint(out, child, indent=indent)
+            pprint(out, child, indent=child_indent)
         out.write(post)
     elif isinstance(node, Comment):
         ## Comment ##
