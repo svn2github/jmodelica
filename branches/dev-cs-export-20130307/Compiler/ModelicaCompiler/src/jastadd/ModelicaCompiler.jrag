@@ -211,7 +211,7 @@ public class ModelicaCompiler {
 
 	public void defaultTemplatePathsFMUCS() {
 		File dir = getTemplatesDir();
-		xmlTpl = (xmlTpl == null) ? new File(dir, "fmi_model_description.tpl").getPath() : xmlTpl;
+		xmlTpl = (xmlTpl == null) ? new File(dir, "fmi1_cs_model_description.tpl").getPath() : xmlTpl;
 		cTemplatefile = (cTemplatefile == null) ? new File(dir, "fmi_cs_modelica_template.c").getPath() : cTemplatefile;
 	}
 	
