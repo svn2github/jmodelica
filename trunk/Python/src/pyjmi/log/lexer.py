@@ -27,9 +27,9 @@ SYMBOL, IDENTIFIER, COMMENT, STRING, EOF = range(5)
 # Token patterns
 lexer_re = r"""(?x)
 (
-    [=()}]          # special symbols
+    [=()\[\]}]          # special symbols
     | \s+           # whitespace
-    | [^=(){}"\s]+  # identifier
+    | [^=()\[\]{}"\s]+  # identifier
     | \{  [^}]*           (?: \}|\Z )  # comment, possibly ending at the end of input and containing extra {
     | "   (?: [^"]|"" )*  (?: " |\Z )  # string, possibly ending at the end of input and containing a number of ""
 )
@@ -37,9 +37,9 @@ lexer_re = r"""(?x)
 
 lexer_pattern = re.compile(lexer_re)
 whitespace_pattern = re.compile(r'\s+')
-symbol_pattern = re.compile(r'[=()}]')
+symbol_pattern = re.compile(r'[=()\[\]}]')
 string_escaped_quote_pattern = re.compile(r'""')
-identifier_re = r'[^=(){}"\s]+'
+identifier_re = r'[^=()\[\]{}"\s]+'
 
 
 def lex(text):

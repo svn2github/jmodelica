@@ -29,7 +29,7 @@ from tree import Node, Comment
 
 def parse(text):
     """Parse the string text and return a list of nodes in the format of tree.py."""
-    return parse_nodes(Peeker(lexer.lex(text)+[(EOF, '')]))
+    return parse_named_nodes(Peeker(lexer.lex(text)+[(EOF, '')]))
 
 ## Helpers ##
 
@@ -47,46 +47,77 @@ def asnode(token):
     else:
         raise Exception("asnode: don't know how to make a node from token " + repr(token))
 
+def is_closing(token):
+    kind, text = token
+    return (kind == SYMBOL and text in ')]') or (kind == EOF)
+
 ## Nonterminals ##
     
+def parse_named_nodes(tokens):
+    """Parse and return a list of named nodes."""
+    nodes = []
+    while not is_closing(tokens.peek()):
+        nodes.append(parse_named_node(tokens))
+    return nodes
+
 def parse_nodes(tokens):
     """Parse and return a list of nodes."""
     nodes = []
-    while tokens.peek() != (SYMBOL, ')') and tokens.peek()[0] != EOF:
+    while not is_closing(tokens.peek()):
         nodes.append(parse_node(tokens))
     return nodes
 
-def parse_node(tokens):
-    """Parse and return a node."""
+def parse_named_node(tokens):
+    """Parse and return a named node.
+
+    Returns a Node or Comment.
+    """
     kind, text = token = tokens.peek()
-    if kind in (COMMENT, STRING):
+    if kind == COMMENT:
         return asnode(tokens.next())
     elif kind == IDENTIFIER:
-        identifier = text
+        name = text
         tokens.next()
-        
-        # Possible continuations:
-        #   identifier (  nodes  ) identifier
-        #   identifier = value
-        #   identifier  # acts as a value otherwise
-        
-        peek = tokens.peek()
-        if peek == (SYMBOL, '('):
-            # identifier (  nodes  ) identifier
-            tokens.next()
-            nodes = parse_nodes(tokens)
-            expect(tokens, (SYMBOL, ')'))
-            expect(tokens, (IDENTIFIER, identifier))
-            return Node(identifier, nodes)
-        elif peek == (SYMBOL, '='):
+        kind, text = tokens.peek()
+        if kind != SYMBOL:
+            raise Exception("parse_named_node: unexpected token: " + repr(tokens.peek()) + " after node name")
+        if text == '=':
             # identifier = value
             tokens.next()
-            return Node(identifier, parse_value(tokens))
+            return Node(name, parse_value(tokens))
         else:
-            # identifier  # acts as a value otherwise
-            return asnode(token)
+            # identifier (  nodes  ) identifier
+            nodes = parse_sequence(tokens)
+            expect(tokens, (IDENTIFIER, name))
+            return Node(name, nodes)
+    else:
+        raise Exception("parse_named_node: unexpected token: " + repr(tokens.peek()))
+
+def parse_node(tokens):
+    """Parse and return an (unnamed) node.
+
+    Returns a list, string, or Comment.
+    """
+    kind, text = token = tokens.peek()
+    if kind in (COMMENT, IDENTIFIER):
+        return asnode(tokens.next())
+    elif kind == SYMBOL:
+        return parse_sequence(tokens)
     else:
         raise Exception("parse_node: unexpected token: " + repr(tokens.peek()))
+
+def parse_sequence(tokens):
+    """Parse a ( named-nodes ) or [ nodes ] sequence, return a list of the nodes."""
+    token = tokens.next()
+    if token == (SYMBOL, '('):
+        nodes = parse_named_nodes(tokens)
+        expect(tokens, (SYMBOL, ')'))
+    elif token == (SYMBOL, '['):
+        nodes = parse_nodes(tokens)
+        expect(tokens, (SYMBOL, ']'))
+    else:
+        raise Exception("parse_sequence: unexpected token: " + repr(token))
+    return nodes
 
 def parse_value(tokens):
     """Parse and return a value node."""
