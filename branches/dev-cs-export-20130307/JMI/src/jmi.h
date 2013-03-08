@@ -390,6 +390,10 @@ extern "C" {
      JMI_LINEAR_SOLVER
  } jmi_block_solvers_t;
 
+ typedef enum {
+	 JMI_ODE_CVODE
+ } jmi_ode_solvers_t;
+
 /* @} */
 
 /*

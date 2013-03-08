@@ -46,6 +46,7 @@ struct fmi_t {
     fmiString fmi_instance_name;
     fmiString fmi_GUID;
     fmiCallbackFunctions fmi_functions;
+    fmiEventInfo event_info;
     fmiBoolean fmi_logging_on;
     fmiReal fmi_newton_tolerance;
     fmiReal fmi_epsilon;

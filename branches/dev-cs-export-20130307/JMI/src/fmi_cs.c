@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "fmi_cs.h" 
+#include "fmi.h"
+#include "jmi_ode_solver.h"
 
 const char* fmi_get_types_platform() {
     return fmiPlatform;
@@ -30,27 +32,56 @@ fmiStatus fmi_do_step(fmiComponent c,
 						 fmiReal currentCommunicationPoint,
                          fmiReal communicationStepSize,
                          fmiBoolean   newStep) {
-	return fmiError;
+    fmi_t* fmi = (fmi_t *)c;
+    jmi_t* jmi = fmi->jmi;
+    int retval;
+    
+    retval = jmi->ode_solver->solve(jmi->ode_solver, currentCommunicationPoint+communicationStepSize);
+    if (retval!=0){
+        jmi_log_error(jmi, "Failed to perform a step.");
+        return fmiError;
+    }
+    
+    return fmiOK;
 }
 
 void fmi_free_slave_instance(fmiComponent c) {
+    fmi_t* fmi = (fmi_t *)c;
+    jmi_t* jmi = fmi->jmi;
+    
+    if (jmi->ode_solver){
+        jmi_delete_ode_solver(jmi);
+    }
+    fmi_free_model_instance(c);
     return;
 }
 
 fmiComponent fmi_instantiate_slave(fmiString instanceName, fmiString GUID, fmiString fmuLocation, fmiString mimeType, 
                                    fmiReal timeout, fmiBoolean visible, fmiBoolean interactive, fmiCallbackFunctions functions, 
                                    fmiBoolean loggingOn) {
-    return NULL;
+    return fmi_instantiate_model(instanceName, GUID, functions, loggingOn);
 }
 
 
 fmiStatus fmi_terminate_slave(fmiComponent c) {
-    return fmiError;
+    return fmi_terminate(c);
 }
 
 fmiStatus fmi_initialize_slave(fmiComponent c, fmiReal tStart,
                                     fmiBoolean StopTimeDefined, fmiReal tStop){
-    return fmiError;
+    fmi_t* fmi = (fmi_t *)c;
+    fmiBoolean toleranceControlled = fmiTrue;
+    fmiReal relativeTolerance = 1e-6;
+    jmi_ode_solvers_t solver = JMI_ODE_CVODE;
+    fmiStatus retval;
+                                        
+    retval = fmi_initialize(c, toleranceControlled, relativeTolerance, &(fmi->event_info));
+    if (retval != fmiOK){ return fmiError; }
+    
+    /* Create solver */
+    jmi_new_ode_solver(fmi->jmi, solver);
+    
+    return fmiOK;
 }
 
 fmiStatus fmi_cancel_step(fmiComponent c){
