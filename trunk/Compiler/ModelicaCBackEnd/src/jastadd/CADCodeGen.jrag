@@ -871,22 +871,17 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	public void FIfExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
-		
-		//Print AD-code for the then resp. else expressions
+		String innerIndent = p.indent(indent);
 		p.print(getIfExp(), str, indent);
-		p.print(getThenExp(), str, indent);
-		p.print(getElseExp(), str, indent);
-		
-		//Couple the print AD-code to the conditions
-		str.print(indent);
-		str.format("%s = COND_EXP_EQ(", adVarName());
-		str.print(getIfExp().adVarName());
-		str.format(", JMI_TRUE, %s, %s);\n", getThenExp().adVarName(), getElseExp().adVarName());
-		
-		str.print(indent);
-		str.format("%s = COND_EXP_EQ(", adDerName());
-		str.print(getIfExp().adDerName());
-		str.format(", JMI_TRUE, %s, %s);\n", getThenExp().adDerName(), getElseExp().adDerName());
+		str.format("%sif (%s) {\n", indent, getIfExp().adVarName());
+		p.print(getThenExp(), str, innerIndent);
+		str.format("%s%s = %s;\n", innerIndent, adVarName(), getThenExp().adVarName());
+		str.format("%s%s = %s;\n", innerIndent, adDerName(), getThenExp().adDerName());
+		str.format("%s} else {\n", indent);
+		p.print(getElseExp(), str, innerIndent);
+		str.format("%s%s = %s;\n", innerIndent, adVarName(), getElseExp().adVarName());
+		str.format("%s%s = %s;\n", innerIndent, adDerName(), getElseExp().adDerName());
+		str.format("%s}\n", indent);
 	}
 	
 	/* Prints AD code for time expression.
