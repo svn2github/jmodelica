@@ -2547,17 +2547,19 @@ fclass FunctionTests.AlgorithmTransformation4
  Real x;
  Real y;
 equation
- (x, y) = FunctionTests.AlgorithmTransformation4.algorithm_1(b, a);
+ (b, x, y) = FunctionTests.AlgorithmTransformation4.algorithm_1(0.0, a);
  a = 1;
- b = 2;
 
 public
  function FunctionTests.AlgorithmTransformation4.algorithm_1
+  output Real b;
   output Real x;
   output Real y;
-  input Real b;
+  input Real b_0;
   input Real a;
  algorithm
+  b := b_0;
+  b := 2;
   while b > 1 loop
    x := a;
    if a < 2 then
@@ -2565,6 +2567,7 @@ public
    else
     y := a + 2;
    end if;
+   b := b - 0.1;
   end while;
   return;
  end FunctionTests.AlgorithmTransformation4.algorithm_1;

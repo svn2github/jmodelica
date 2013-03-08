@@ -1790,10 +1790,10 @@ aspect ConstantEvaluation {
 //	  // Flush getArray() - NB: uses internal JastAdd implementation details
 //	  if (size().isUnknown())
 //		  getArray_computed = false;
-	  // Flush so that getArray() is cleared for unknown sizes, and then recaclculate size
+	  // Flush so that getArray() is cleared for unknown sizes, and then recaclculate size and make sure it is evaluated
 	  if (size().isUnknown()) {
 		  flushCache();
-		  size();
+		  size().isUnknown();
 	  }
   }
   

@@ -660,7 +660,7 @@ aspect TransformCanonical {
 			jacobian = new FExp[equations().size()][equations().size()];
 			int row = 0;
 			int col = 0;
-			blockVariability = activeVariables().iterator().next().fConstant();
+			blockVariability = ASTNode.fConstant();
 			for (FAbstractEquation fe : equations()) {
 				col = 0;
 				for (FVariable fv : activeVariables()) {
@@ -830,7 +830,7 @@ aspect TransformCanonical {
 			jacobian = new FExp[continuousEquations().size()][continuousEquations().size()];
 			int row = 0;
 			int col = 0;
-			blockVariability = activeContinuousVariables().iterator().next().fConstant();
+			blockVariability = ASTNode.fConstant();
 			for (FAbstractEquation fe : continuousEquations()) {
 				col = 0;
 				for (FVariable fv : activeContinuousVariables()) {
