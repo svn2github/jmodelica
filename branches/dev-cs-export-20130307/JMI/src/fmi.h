@@ -24,7 +24,7 @@
 #ifndef fmi_h
 #define fmi_h
 
-#include "fmiModelFunctions.h"
+#include "fmi1_functions.h"
 #include "jmi.h"
 
 /**

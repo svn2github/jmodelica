@@ -19,15 +19,82 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "fmi_cs.h"
-#include "fmiCSFunctions.h"
-#include "fmiCSPlatformTypes.h"
+#include "fmi_cs.h" 
 
-fmiStatus fmi_cs_do_step(fmiComponent c,
+const char* fmi_get_types_platform() {
+    return fmiPlatform;
+}
+
+
+fmiStatus fmi_do_step(fmiComponent c,
 						 fmiReal currentCommunicationPoint,
                          fmiReal communicationStepSize,
                          fmiBoolean   newStep) {
-  /* Add implementation */
-	return fmiOK;
-
+	return fmiError;
 }
+
+void fmi_free_slave_instance(fmiComponent c) {
+    return;
+}
+
+fmiComponent fmi_instantiate_slave(fmiString instanceName, fmiString GUID, fmiString fmuLocation, fmiString mimeType, 
+                                   fmiReal timeout, fmiBoolean visible, fmiBoolean interactive, fmiCallbackFunctions functions, 
+                                   fmiBoolean loggingOn) {
+    return NULL;
+}
+
+
+fmiStatus fmi_terminate_slave(fmiComponent c) {
+    return fmiError;
+}
+
+fmiStatus fmi_initialize_slave(fmiComponent c, fmiReal tStart,
+                                    fmiBoolean StopTimeDefined, fmiReal tStop){
+    return fmiError;
+}
+
+fmiStatus fmi_cancel_step(fmiComponent c){
+    return fmiError;
+}
+
+fmiStatus fmi_reset_slave(fmiComponent c) {
+    return fmiError;
+}
+
+fmiStatus fmi_get_real_output_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], fmiReal value[]){
+    return fmiError;
+}
+
+fmiStatus fmi_set_real_input_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], const fmiReal value[]){
+    return fmiError;
+}
+
+fmiStatus fmi_get_status(fmiComponent c, const fmiStatusKind s, fmiStatus* value){
+    return fmiError;
+}
+
+fmiStatus fmi_get_real_status(fmiComponent c, const fmiStatusKind s, fmiReal* value){
+    return fmiError;
+}
+
+fmiStatus fmi_get_integer_status(fmiComponent c, const fmiStatusKind s, fmiInteger* value){
+    return fmiError;
+}
+
+fmiStatus fmi_get_boolean_status(fmiComponent c, const fmiStatusKind s, fmiBoolean* value){
+    return fmiError;
+}
+
+fmiStatus fmi_get_string_status(fmiComponent c, const fmiStatusKind s, fmiString* value){
+    return fmiError;
+}
+
+/*
+fmiStatus fmi_save_state(fmiComponent c, size_t index){
+    return fmiError;
+}
+
+fmiStatus fmi_restore_state(fmiComponent c, size_t index){
+    return fmiError;
+}
+*/

@@ -42,10 +42,8 @@ endif
 endif
 
 libjmi_la_SOURCES = jmi.h \
-                    fmiModelFunctions.h \
-                    fmiModelTypes.h \
-                    fmiCSFunctions.h \
-                    fmiCSPlatformTypes.h \
+                    fmi1_functions.h \
+                    fmi1_types.h \
                     jmi_common.h \
                     jmi.c \
                     jmi_common.c \

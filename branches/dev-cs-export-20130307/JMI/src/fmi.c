@@ -22,8 +22,6 @@
 #include <time.h>
 
 #include "fmi.h"
-#include "fmiModelFunctions.h"
-#include "fmiModelTypes.h"
 #include "jmi.h"
 #include "jmi_block_residual.h"
 
