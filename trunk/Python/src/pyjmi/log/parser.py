@@ -24,7 +24,7 @@ Parser for the new FMU log file format
 
 import lexer
 from lexer import SYMBOL, IDENTIFIER, COMMENT, STRING, EOF
-from tree import Node, Comment
+from tree import NamedNode, Comment, NamedNodeList
 
 
 def parse(text):
@@ -58,7 +58,7 @@ def parse_named_nodes(tokens):
     nodes = []
     while not is_closing(tokens.peek()):
         nodes.append(parse_named_node(tokens))
-    return nodes
+    return NamedNodeList(nodes)
 
 def parse_nodes(tokens):
     """Parse and return a list of nodes."""
@@ -70,7 +70,7 @@ def parse_nodes(tokens):
 def parse_named_node(tokens):
     """Parse and return a named node.
 
-    Returns a Node or Comment.
+    Returns a NamedNode or Comment.
     """
     kind, text = token = tokens.peek()
     if kind == COMMENT:
@@ -84,12 +84,12 @@ def parse_named_node(tokens):
         if text == '=':
             # identifier = value
             tokens.next()
-            return Node(name, parse_value(tokens))
+            return NamedNode(name, parse_value(tokens))
         else:
             # identifier (  nodes  ) identifier
             nodes = parse_sequence(tokens)
             expect(tokens, (IDENTIFIER, name))
-            return Node(name, nodes)
+            return NamedNode(name, nodes)
     else:
         raise Exception("parse_named_node: unexpected token: " + repr(tokens.peek()))
 

@@ -21,7 +21,7 @@ Pretty printer/unparser for the new FMU log format
 import re
 
 import lexer
-from tree import Node, Comment
+from tree import NamedNode, Comment, NamedNodeList
 
 indent_width = 2
 nodename_padding = 14
@@ -30,20 +30,20 @@ quote_pattern = re.compile('"')
 identifier_pattern = re.compile('^' + lexer.identifier_re + '\Z')
 
 def prettyprint(out, named_nodes):
-    """Pretty print the top level list named_nodes of Node:s to the output stream out."""
+    """Pretty print the top level list named_nodes of NamedNode:s to the output stream out."""
     pprint(out, named_nodes, wrapped=False)
 
 def is_vertical(nodes):
-    return any(isinstance(node, (Node, list)) for node in nodes)
+    return any(isinstance(node, (NamedNode, list)) for node in nodes)
 
 def pprint(out, node, indent=0, wrapped=True):
     """Pretty print the log node node to the output stream out.
 
-    node may be a Node, Comment, string, or list.
+    node may be a NamedNode, Comment, string, list, or NamedNodeList.
     """    
-    if isinstance(node, Node):
-        ## Node ##
-        if isinstance(node.value, list):
+    if isinstance(node, NamedNode):
+        ## NamedNode ##
+        if isinstance(node.value, (list, NamedNodeList)):
             # name( named-nodes )name or name[ nodes ]name
             out.write(node.name if is_vertical(node.value) else node.name.ljust(nodename_padding))
             pprint(out, node.value, indent=indent)
@@ -52,14 +52,13 @@ def pprint(out, node, indent=0, wrapped=True):
             # name=value            
             out.write(node.name.ljust(nodename_padding-2) + ' = ')
             pprint(out, node.value, indent=indent)
-    elif isinstance(node, list):
-        ## list ##
+    elif isinstance(node, (list, NamedNodeList)):
+        ## list, NamedNodeList ##
         child_indent = indent + indent_width if wrapped else indent
-        named    = any(isinstance(child, Node) for child in node)
         vertical = is_vertical(node)
         delim, post = (('\n' + ' '*child_indent, '\n' + ' '*indent) if vertical else (' ', ' '))        
         if wrapped:
-            pre, post = ('(', post + ')') if named else ('[', post + ']')
+            pre, post = ('(', post + ')') if isinstance(node, NamedNodeList) else ('[', post + ']')
             out.write(pre)
         for child in node:
             out.write(delim)
