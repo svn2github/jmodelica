@@ -2634,14 +2634,26 @@ aspect CircularExpressions {
 	 * is circular.
 	 */
 	syn boolean FExp.isCircular() = false;
-	syn lazy boolean FAbstractExp.isCircular()  {
-		if (inIsCircular)
-			return true;
-		inIsCircular = true;
-		boolean res = isCircularCalc();
-		inIsCircular = false;
-		return res;
+	eq FAbstractExp.isCircular() {
+		if (isCircularValue == CIRCULAR_CALCULATING) {
+			isCircularValue = CIRCULAR_TRUE;
+		} else if (isCircularValue == CIRCULAR_NOT_CALCULATED) {
+			isCircularValue = CIRCULAR_CALCULATING;
+			try {
+				isCircularValue = isCircularCalc() ? CIRCULAR_TRUE : CIRCULAR_FALSE;
+			} catch (Exception e) {
+				isCircularValue = CIRCULAR_NOT_CALCULATED;
+				throw e;
+			}
+		}
+		return isCircularValue == CIRCULAR_TRUE;
 	}
+	
+	private static final FAbstractExp.CIRCULAR_NOT_CALCULATED = 0;
+	private static final FAbstractExp.CIRCULAR_CALCULATING    = 1;
+	private static final FAbstractExp.CIRCULAR_TRUE           = 2;
+	private static final FAbstractExp.CIRCULAR_FALSE          = 3;
+	private byte FAbstractExp.isCircularValue = CIRCULAR_NOT_CALCULATED;
 	
 	syn boolean FExp.isCircularCalc() = false;
 	eq FAbstractExp.isCircularCalc() {
@@ -2650,8 +2662,6 @@ aspect CircularExpressions {
 				return true;
 		return false;
 	}
-
-	private boolean FAbstractExp.inIsCircular = false;
 	
 	eq FIdUseExp.isCircularCalc() = getFIdUse().isCircular();
 	eq FInstAccessExp.isCircularCalc() = getInstAccess().myInstComponentDecl().isCircular();
@@ -2662,20 +2672,13 @@ aspect CircularExpressions {
 	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp() && getFExp().isCircular();
 	
 	eq FSizeExp.isCircularCalc() { 
-//		if (inIsCircular)
-//			return true;
-//		inIsCircular = true;
 		boolean res;
 		if (getFExp().isUnknownSizeVarUse() && !duringFunctionEval() && !duringFunctionInlining()) {
 			res = true;
 		} else {
-//			ASTNode$State state = state();
-//			boolean savedChange = state.CHANGE;
 			Size s = getFExp().size();
-//			state.CHANGE = savedChange;
 			res = hasDim() ? s.isCircular(dimension()) : s.isCircular();
 		}
-//		inIsCircular = false;
 		return res;
 	}
 	
