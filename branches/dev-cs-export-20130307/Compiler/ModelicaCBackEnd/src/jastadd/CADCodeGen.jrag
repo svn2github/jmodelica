@@ -871,22 +871,17 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	public void FIfExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
-		
-		//Print AD-code for the then resp. else expressions
+		String innerIndent = p.indent(indent);
 		p.print(getIfExp(), str, indent);
-		p.print(getThenExp(), str, indent);
-		p.print(getElseExp(), str, indent);
-		
-		//Couple the print AD-code to the conditions
-		str.print(indent);
-		str.format("%s = COND_EXP_EQ(", adVarName());
-		str.print(getIfExp().adVarName());
-		str.format(", JMI_TRUE, %s, %s);\n", getThenExp().adVarName(), getElseExp().adVarName());
-		
-		str.print(indent);
-		str.format("%s = COND_EXP_EQ(", adDerName());
-		str.print(getIfExp().adDerName());
-		str.format(", JMI_TRUE, %s, %s);\n", getThenExp().adDerName(), getElseExp().adDerName());
+		str.format("%sif (%s) {\n", indent, getIfExp().adVarName());
+		p.print(getThenExp(), str, innerIndent);
+		str.format("%s%s = %s;\n", innerIndent, adVarName(), getThenExp().adVarName());
+		str.format("%s%s = %s;\n", innerIndent, adDerName(), getThenExp().adDerName());
+		str.format("%s} else {\n", indent);
+		p.print(getElseExp(), str, innerIndent);
+		str.format("%s%s = %s;\n", innerIndent, adVarName(), getElseExp().adVarName());
+		str.format("%s%s = %s;\n", innerIndent, adDerName(), getElseExp().adDerName());
+		str.format("%s}\n", indent);
 	}
 	
 	/* Prints AD code for time expression.
@@ -965,6 +960,10 @@ aspect CADCodeGen {
 	
 	public void FRangeExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 		getFExps().prettyPrint_CAD(p, str, indent);
+	}
+	
+	public void FSizeExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		
 	}
 	
 	/*-------------------------------------------------------------------------
@@ -2433,36 +2432,16 @@ aspect CADCodeGen {
 	 * type real they are omitted in the printed call.  
 	 * @param PrintStream str, the c-code is written to this stream 
 	 */
-	public void FFunctionDecl.printFuncAnnotation_CAD(Printer p, PrintStream str, String indent){
+	public void FFunctionDecl.genFuncAnnotation_CAD(Printer p, PrintStream str, String indent){
 		str.print(indent);
 		str.print("/*Using specified derivative annotation instead of AD*/\n");
 		
-		//  Print the normal function call, to set the variables
-		str.print(indent);
-		str.print(funcNameUnderscore("def") + "(");
-		String sep = "";
-		for (FFunctionVariable ffv : myInputs()){
-			str.print(sep);
-			sep = ", ";
-			if(ffv.needDerVar_CAD())
-				str.print(ffv.name_var_CAD());
-			else
-				str.print(ffv.name_C());
-		}
-		for (FFunctionVariable ffv : myOutputs()){
-			str.print(sep);
-			sep = ", ";
-			if(ffv.needDerVar_CAD())
-				str.print("&" + ffv.name_var_CAD());
-			else
-				str.print("&" + ffv.name_C());
-		}
-		str.print(");\n");
+		genNonADFunctionCall_CAD(p, str, indent);
 		
 		// Print the call to the specified derivative function
 		str.print(indent);
 		str.print(getFDerivativeFunction().funcNameUnderscore("def") + "(");
-		sep = "";
+		String sep = "";
 		for (FFunctionVariable ffv : myInputs()){
 			str.print(sep);
 			sep = ", ";
@@ -2488,6 +2467,47 @@ aspect CADCodeGen {
 		str.print(");\n");
 	}
 	
+	/**
+	 * Function for generating a dummy function that only calls the normal function and also
+	 * set output derivatives to zero. 
+	 */
+	public void FFunctionDecl.genZeroDerivativeFunction_CAD(Printer p, PrintStream str, String indent) {
+		str.print(indent);
+		str.print("/*Zero derivative function*/\n");
+		
+		genNonADFunctionCall_CAD(p, str, indent);
+		
+		for (FFunctionVariable ffv : myOutputs())
+			if(ffv.needDerVar_CAD())
+				str.format("%s%s = 0;\n", indent, ffv.name_der_CAD());
+	}
+	
+	/**
+	 * Generates a function call to the non AD function.
+	 */
+	public void FFunctionDecl.genNonADFunctionCall_CAD(Printer p, PrintStream str, String indent) {
+		str.print(indent);
+		str.print(funcNameUnderscore("def") + "(");
+		String sep = "";
+		for (FFunctionVariable ffv : myInputs()){
+			str.print(sep);
+			sep = ", ";
+			if(ffv.needDerVar_CAD())
+				str.print(ffv.name_var_CAD());
+			else
+				str.print(ffv.name_C());
+		}
+		for (FFunctionVariable ffv : myOutputs()){
+			str.print(sep);
+			sep = ", ";
+			if(ffv.needDerVar_CAD())
+				str.print("&" + ffv.name_var_CAD());
+			else
+				str.print("&" + ffv.name_C());
+		}
+		str.print(");\n");
+	}
+	
 	syn boolean FFunctionDecl.shouldPrintFuncDecl_CAD() = requiresDerivative() && functionIsUsedAsDerivative();
 	
 	/* Prints a function, the header and body. A check is made whether the function
@@ -2509,8 +2529,10 @@ aspect CADCodeGen {
 		str.print(" {\n");
 		str.print(indent + "JMI_DYNAMIC_INIT()\n");
 		genVarDecls_CAD(p, str, indent);
-		if(hasFDerivativeFunction()){
-			printFuncAnnotation_CAD(p, str, indent);
+		if (hasFDerivativeFunction()){
+			genFuncAnnotation_CAD(p, str, indent);
+		} else if (derivativEqualsZero()){
+			genZeroDerivativeFunction_CAD(p, str, indent);
 		} else {
 			for (FFunctionVariable ffv : myNonInputs())
 				p.print(ffv, str, indent);

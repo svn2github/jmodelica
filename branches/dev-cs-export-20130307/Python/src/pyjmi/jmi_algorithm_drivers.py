@@ -1523,6 +1523,23 @@ class LocalDAECollocationAlg(AlgorithmBase):
             raise ValueError("The sum of all elements in blocking factors " +
                              "must be the same as the number of elements.")
         
+        # Check validity of parameter_estimation_data and input
+        if self.input is not None:
+            if isinstance(self.input[0], basestring):
+                self.input = ([self.input[0]], self.input[1])
+                self.options['input'] = self.input
+            if len(self.input[0]) != self.input[1].shape[1] - 1:
+                raise ValueError("The number of specified input names does " +
+                                 "not coincide with the number of specified " +
+                                 "input trajectories.")
+            if self.parameter_estimation_data is not None:
+                for input_name in self.input[0]:
+                    if (input_name in
+                        self.parameter_estimation_data.measured_variables):
+                        raise NotImplementedError(
+                                "Input " + input_name + " can not be both " +
+                                "specified and measured.")
+        
         # Solver options
         self.solver_options = self.IPOPT_options
         
@@ -1641,6 +1658,29 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: str
             Default: "LGR"
+        
+        input --
+            Pre-specified input variables. This should be a tuple, where the
+            first element is the list of names for the input variables whose
+            values are known, and the second element is the data for the
+            specified values, given either as a function or a matrix, as
+            described below.
+            
+            If the data is given as a function, it should take a time point as
+            its argument and return an array of the same length as the number
+            of pre-specified inputs which gives the pre-specified values of all
+            the inputs at the given time point.
+            
+            If data is a matrix, it specifies the inputs at a finite number of
+            time points, given by the number of rows in the matrix, as follows:
+            
+                data[i][0] should contain time point i
+            
+                data[i][1:] should contain the pre-specified values at time
+                point data[i][0] of all the pre-specified inputs.
+            
+            Type: ([str], function or rank 2 ndarray)
+            Default: None
         
         graph --
             CasADi graph type. Possible values are "SX" and "MX".
@@ -1833,6 +1873,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'h_bounds': (0.7, 1.3),
                 'n_cp': 3,
                 'discr': "LGR",
+                'input': None,
                 'graph': 'SX',
                 'rename_vars': False,
                 'init_traj': None,

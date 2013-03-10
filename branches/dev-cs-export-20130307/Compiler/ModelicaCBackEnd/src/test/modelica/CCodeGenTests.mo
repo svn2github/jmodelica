@@ -180,7 +180,6 @@ $C_DAE_initial_event_indicator_residuals$
 
     (*res)[0] = _time - (_one_1);
     (*res)[1] = _time - (_two_2);
-    (*res)[2] = _p_0 - (_one_1);
 ")})));
 end CCodeGenTest6;
 
@@ -8976,5 +8975,45 @@ static const int N_relations = 0;
 static const int DAE_relations[1]= {-1};
 ")})));
 end TestRelationalOp3;
+
+model TestRelationalOp4
+  parameter Real p1 = 1;
+  parameter Real p2 = if p1 >=1 then 1 else 2; //no, correct
+  Real x;
+  Real y;
+  Real z;
+  Real w;
+  Real r;
+  discrete Real q1;
+  discrete Real q2;
+initial equation
+  x = if time>=4 then 1 else 2;
+  y = if noEvent(time>=2) then 2 else 5;
+  z = if p1<=5 then 1 else 6;
+equation
+  der(x) = if time>=1 then 1 else 0; // yes, correct
+  der(y) = if noEvent(time>=1) then 1 else 0; // no, correct
+  der(z) = if p1>=1 then 1 else 0; // yes, not correct?
+  der(w) = if 2>=1 then 1 else 0; // no, correct
+  der(r) = smooth(0,if y>=3 then 1.0 else 0.0); // yes, due to lack of support for smooth
+  when x>=0.1 then // yes, correct
+    q1 = if pre(q1)>=0.5 then pre(q1) else 2*pre(q1); // no, correct, q1 is discrete
+    q2 = if w>=0.5 then pre(q2) else 2*pre(q2); // yes, not correct?
+  end when;
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp4",
+			description="",
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$",
+			generatedCode="
+static const int N_initial_relations = 1;
+static const int DAE_initial_relations[1]= {JMI_REL_GEQ};
+
+static const int N_relations = 3;
+static const int DAE_relations[3]= {JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ};
+")})));
+
+end TestRelationalOp4;
 
 end CCodeGenTests;

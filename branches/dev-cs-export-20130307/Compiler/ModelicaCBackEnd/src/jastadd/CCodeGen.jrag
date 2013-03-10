@@ -1090,7 +1090,7 @@ aspect CCodeGen {
 	eq FNeqExp.relIsInverted_C() = true;
 	
 	public void FRelExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		if (inNoEventExp() || !isRealComparison()) {
+		if (!generatesEvent()) {
 			str.print(macro_C()+"(");
 			p.print(getLeft(), str, indent);
 			str.print(", ");

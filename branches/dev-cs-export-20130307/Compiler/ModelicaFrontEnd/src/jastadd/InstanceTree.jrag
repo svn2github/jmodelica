@@ -1803,11 +1803,11 @@ aspect InstArrays {
 	syn boolean InstComponentDecl.isArrayDecl() = hasFArraySubscripts() && 
 		getFArraySubscripts().getNumFSubscript()>0;
 	
-	syn java.util.List<FSubscript> InstClassDecl.myFSubscripts() = Collections.emptyList();
+	syn java.util.List<FSubscript> InstNode.myFSubscripts() = Collections.emptyList();
 	eq InstSimpleShortClassDecl.myFSubscripts()                  = actualInstClass().myFSubscripts();
 	eq InstFullClassDecl.myFSubscripts()                         = 
 		(getNumInstExtends() == 1) ? getInstExtends(0).myFSubscripts() : super.myFSubscripts();
-	syn java.util.List<FSubscript> InstExtends.myFSubscripts()   = 
+	eq InstExtends.myFSubscripts()                               = 
 		isRecursive() ? Collections.<FSubscript>emptyList() : myInstClass().myFSubscripts();
 	syn lazy java.util.List<FSubscript> InstShortClassDecl.myFSubscripts() {
 		java.util.List<FSubscript> l = new ArrayList<FSubscript>();
@@ -1834,7 +1834,7 @@ aspect InstArrays {
 	syn lazy FArraySubscripts InstComponentDecl.getFArraySubscripts() {
 		FArraySubscripts fas = new FArraySubscripts();
 		for (FSubscript fs : myFSubscripts()) 
-			fas.addFSubscript((FSubscript)fs.fullCopy());
+			fas.addFSubscript(fs.fullCopy());
 		return (fas.getNumChild() > 0) ? fas : null;
 	}
 	

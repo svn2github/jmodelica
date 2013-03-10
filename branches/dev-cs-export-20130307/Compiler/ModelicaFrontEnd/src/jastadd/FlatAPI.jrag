@@ -848,15 +848,19 @@ aspect FlatAPI {
 			indexOf(this);
 	}
 
+	syn boolean FRelExp.generatesEvent() =
+			!inNoEventExp() && 
+			isRealComparison() &&
+			!inWhen() &&
+			!variability().lessOrEqual(fParameter());
+	
 	syn int FClass.numEventIndicators() = numRelExpInEquations();
 	
     syn int FClass.numRelExpInEquations() = relExpInEquations().size();
 	coll ArrayList<FRelExp> FClass.relExpInEquations() 
 	  [new ArrayList<FRelExp>()] with add root FlatRoot;
 	FRelExp contributes
-    // Only include relational in the equation section which are 
-    // not inside a noEvent operator
- 		this when inEquationSection() && !inNoEventExp() && originalFRelExp==null && isRealComparison()
+ 		this when inEquationSection() && originalFRelExp==null && generatesEvent() 
 	to FClass.relExpInEquations() for myFClass();	
 		
 	public int FRelExp.relExpInEquationsIndex() {
@@ -895,9 +899,7 @@ aspect FlatAPI {
 	coll ArrayList<FRelExp> FClass.relExpInInitialEquations() 
 	    [new ArrayList<FRelExp>()] with add root FlatRoot;
 	FRelExp contributes
-	    // Only include relational in the initial equation section which are 
-	    // not inside a noEvent operator
- 		this when inInitialEquationSection() && !inNoEventExp() && originalFRelExp==null && isRealComparison()
+ 		this when inInitialEquationSection() && originalFRelExp==null && generatesEvent()
 	    to FClass.relExpInInitialEquations() for myFClass();	
 
 	public int FRelExp.relExpInInitialEquationsIndex() {

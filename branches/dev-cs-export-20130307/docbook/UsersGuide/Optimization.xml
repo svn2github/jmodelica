@@ -3220,6 +3220,26 @@ opts? #View the help text</programlisting>
             </row>
 
             <row>
+              <entry>input</entry>
+
+              <entry>None</entry>
+
+              <entry>Pre-specified input variables. This should be a tuple,
+              where the first element is the list of names for the input
+              variables whose values are known, and the second element is the
+              data for the specified values, given either as a function or a
+              matrix, as described below. If the data is given as a function,
+              it should take a time point as its argument and return an array
+              of the same length as the number of pre-specified inputs which
+              gives the pre-specified values of all the inputs at the given
+              time point. If data is a matrix, it specifies the inputs at a
+              finite number of time points, given by the number of rows in the
+              matrix, as follows: data[i][0] should contain time point i
+              data[i][1:] should contain the pre-specified values at time
+              point data[i][0] of all the pre-specified inputs.</entry>
+            </row>
+
+            <row>
               <entry><literal>graph</literal></entry>
 
               <entry>'SX'</entry>

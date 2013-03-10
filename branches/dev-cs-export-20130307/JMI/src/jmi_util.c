@@ -800,7 +800,7 @@ int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, jmi_int_t mode){
     jmi_int_t nF0,nF1,nFp,nR0,retval;
 	jmi_int_t i,size_switches;
     jmi_real_t *event_indicators;
-    jmi_real_t eps = jmi->fmi->fmi_epsilon;
+    jmi_real_t eps = jmi->events_epsilon;
     
     jmi_init_get_sizes(jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
     jmi_dae_get_sizes(jmi, &nF, &nR);
