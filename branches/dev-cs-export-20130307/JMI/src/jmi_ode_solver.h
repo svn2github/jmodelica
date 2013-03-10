@@ -42,7 +42,7 @@ void jmi_delete_ode_solver(jmi_t* jmi);
  * @param block A jmi_block_residual_t struct.
  * @return Error code.
  */
-typedef int (*jmi_ode_solve_func_t)(jmi_ode_solver_t* block, double t_stop);
+typedef int (*jmi_ode_solve_func_t)(jmi_ode_solver_t* block, double t_stop, int initialize);
 
 /**
  * \brief A ode solver destructor signature.

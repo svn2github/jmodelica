@@ -36,7 +36,7 @@ typedef struct jmi_ode_cvode_t jmi_ode_cvode_t;
 
 int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver);
 
-int jmi_ode_cvode_solve(jmi_ode_solver_t* solver,realtype t_stop);
+int jmi_ode_cvode_solve(jmi_ode_solver_t* solver,realtype t_stop, int initialize);
 
 void jmi_ode_cvode_delete(jmi_ode_solver_t* solver);
 

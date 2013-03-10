@@ -384,6 +384,10 @@ extern "C" {
 #define JMI_DISCRETE_VARIABILITY 2
 #define JMI_CONTINUOUS_VARIABILITY 4
 
+#define JMI_ODE_OK 0
+#define JMI_ODE_EVENT 1
+#define JMI_ODE_ERROR -1
+
  typedef enum {
      JMI_SIMPLE_NEWTON_SOLVER,
      JMI_KINSOL_SOLVER,

@@ -34,12 +34,28 @@ fmiStatus fmi_do_step(fmiComponent c,
                          fmiBoolean   newStep) {
     fmi_t* fmi = (fmi_t *)c;
     jmi_t* jmi = fmi->jmi;
-    int retval;
+    int flag, retval = JMI_ODE_EVENT;
+    int reInitialize = JMI_FALSE;
     
-    retval = jmi->ode_solver->solve(jmi->ode_solver, currentCommunicationPoint+communicationStepSize);
-    if (retval!=0){
-        jmi_log_error(jmi, "Failed to perform a step.");
-        return fmiError;
+    /* NEED TO HANDLE TIME EVENTS */
+    
+    while (retval == JMI_ODE_EVENT){
+    
+        retval = jmi->ode_solver->solve(jmi->ode_solver, currentCommunicationPoint+communicationStepSize,reInitialize);
+        if (retval==JMI_ODE_OK) {break;}
+        if (retval<JMI_ODE_OK){
+            jmi_log_error(jmi, "DO STEP failed to perform a step.");
+            return fmiError;
+        }
+        
+        flag = fmi_event_update(c, fmiFalse, &(fmi->event_info));
+        if (flag != fmiOK){
+            jmi_log_error(jmi, "Failed to handle the event.");
+            return fmiError;
+        }
+        
+        /* EVENT HANDLED, REINITIALIZE */
+        reInitialize = JMI_TRUE;
     }
     
     return fmiOK;

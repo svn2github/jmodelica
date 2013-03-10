@@ -45,36 +45,79 @@ int cv_rhs(realtype t, N_Vector yy, N_Vector yydot, void *problem_data){
     
 	if(flag != 0) {
 		jmi_log_warning(jmi, "[CVODE] Evaluating the derivatives failed (recoverable error).");
-		return 1; /* Recoverable failiure */
+		return 1; /* Recoverable failure */
 	}
 	memcpy(ydot, jmi_get_real_dx(jmi), nbr_y*sizeof(realtype));
 
     return CV_SUCCESS;
 }
 
-int cv_root(realtype t, N_Vector yv, realtype *gout,  void* problem_data){
+int cv_root(realtype t, N_Vector yy, realtype *gout,  void* problem_data){
+    realtype *y;
+	int nbr_y,flag;
+	jmi_ode_solver_t *solver = (jmi_ode_solver_t*)problem_data;
+	jmi_t* jmi = solver->jmi;
+
+	nbr_y = jmi->n_real_x;
+	y = NV_DATA_S(yy); /*y is now a vector of realtype*/
+
+	/* Set time */
+    *(jmi_get_t(jmi)) = t;
+    /* Set states */
+	memcpy(jmi_get_real_x(jmi), y, nbr_y*sizeof(realtype));
+
+	/* Calculate the derivative */
+    flag = jmi_dae_R_perturbed(jmi,(jmi_real_t*)gout);
+    
+	if(flag != 0) {
+		jmi_log_error(jmi, "[CVODE] Evaluating the event indicators failed.");
+		return -1; /* Failure */
+	}
+    
     return CV_SUCCESS;
 }
 
-int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype t_stop){
+int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype t_stop, int initialize){
 	int flag = 0;
 	jmi_ode_cvode_t* integrator = (jmi_ode_cvode_t*)solver->integrator;
 	realtype tret,*y;
-	
+    
+    y = NV_DATA_S(integrator->y_work);
+    memcpy(y, jmi_get_real_x(solver->jmi), (solver->jmi->n_real_x)*sizeof(realtype));
+    
+    if (initialize==JMI_TRUE){
+        flag = CVodeReInit(integrator->cvode_mem, *(jmi_get_t(solver->jmi)), integrator->y_work);
+        if (flag<0){
+            jmi_log_error(solver->jmi,"[CVODE] Failed to re-initialize the solver.");
+            return JMI_ODE_ERROR;
+        }
+    }
+    
+    /* Dont integrate past t_stop */
+    flag = CVodeSetStopTime(integrator->cvode_mem, t_stop);
+    if (flag < 0){
+        jmi_log_error(solver->jmi, "[CVODE] Failed to specify the stop time");
+        return JMI_ODE_ERROR;
+    }
 
 	flag = CVode(integrator->cvode_mem, t_stop, integrator->y_work,&tret,CV_NORMAL);
 	if(flag<0){
 		jmi_log_error(solver->jmi,"[CVODE] CVode failed to calculate the next step.");
-		return -1;
+		return JMI_ODE_ERROR;
 	}
-
-	/* Set time */
+    
+    /* Set time */
     *(jmi_get_t(solver->jmi)) = tret;
     /* Set states */
 	y = NV_DATA_S(integrator->y_work);
 	memcpy(jmi_get_real_x(solver->jmi), y, (solver->jmi->n_real_x)*sizeof(realtype));
-
-	return flag;
+    
+    
+    if (flag == CV_ROOT_RETURN){
+        jmi_log_info(solver->jmi, "[CVODE] An event was detected at t=%g",tret);
+        return JMI_ODE_EVENT;
+    }
+	return JMI_ODE_OK;
 }
 
 int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver) {
@@ -106,6 +149,7 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
 	integrator->y0 = N_VNew_Serial(jmi->n_real_x);
 	integrator->y_work = N_VNew_Serial(jmi->n_real_x);
 	memcpy(NV_DATA_S(integrator->y_work), jmi_get_real_x(jmi), (jmi->n_real_x)*sizeof(realtype));
+    memcpy(NV_DATA_S(integrator->y0), jmi_get_real_x(jmi), (jmi->n_real_x)*sizeof(realtype));
 
 	flag = CVodeInit(cvode_mem, cv_rhs, t0, integrator->y0);
     if(flag != 0) {
@@ -130,6 +174,14 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
 		jmi_log_error(jmi, "[CVODE] Failed to specify the user data to CVODE.");
 		return -1;
 	}
+    
+    if (jmi->n_sw > 0){
+        flag = CVodeRootInit(cvode_mem, jmi->n_sw, cv_root);
+        if(flag!=0){
+            jmi_log_error(jmi, "[CVODE] Failed to specify the event indicator function to CVODE.");
+            return -1;
+        }
+    }
 
     integrator->cvode_mem = cvode_mem;    
       
