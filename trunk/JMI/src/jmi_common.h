@@ -1327,7 +1327,7 @@ struct jmi_t{
 	jmi_simple_color_info_t* color_info_D; /** \brief CPR coloring info for the ODE Jacobian D */
 
     jmi_options_t options; /** \brief Runtime options */
-
+    jmi_real_t events_epsilon; /** \brief Value used to adjust the event indicator functions */
     jmi_int_t recomputeVariables; /** \brief Dirty flag indicating when equations should be resolved. */
 };
 

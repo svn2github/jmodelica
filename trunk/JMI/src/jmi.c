@@ -241,6 +241,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     
     jmi_init_runtime_options(jmi_, &jmi_->options);
 
+    jmi_->events_epsilon = jmi_->options.events_default_tol;
     jmi_->recomputeVariables = 1;
 
     jmi_->is_initialized = 0;

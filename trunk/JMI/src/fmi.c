@@ -324,11 +324,11 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     /* Sets the relative tolerance to a default value for use in Kinsol when tolerance controlled is false */
     if (toleranceControlled == fmiFalse){
         relativeTolerance = jmi->options.nle_solver_default_tol;
-        ((fmi_t *)c) -> fmi_epsilon= jmi->options.events_default_tol; /* Used in the event detection */
+        jmi->events_epsilon = jmi->options.events_default_tol; /* Used in the event detection */
         ((fmi_t *)c) -> fmi_newton_tolerance=jmi->options.nle_solver_default_tol; /* Used in the Newton iteration */
     }
     else {
-        ((fmi_t *)c) -> fmi_epsilon= jmi->options.events_tol_factor*relativeTolerance; /* Used in the event detection */
+        jmi->events_epsilon = jmi->options.events_tol_factor*relativeTolerance; /* Used in the event detection */
         ((fmi_t *)c) -> fmi_newton_tolerance=jmi->options.nle_solver_tol_factor*relativeTolerance; /* Used in the Newton iteration */
     }
     
@@ -575,17 +575,17 @@ fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], si
          */
         if (switches[i] == 1.0){
             if (jmi->relations[i] == JMI_REL_GEQ){
-                eventIndicators[i] = eventIndicators[i]/1.0+((fmi_t *)c)->fmi_epsilon; /* MISSING DIVIDING WITH NOMINAL */
+                eventIndicators[i] = eventIndicators[i]/1.0+jmi->events_epsilon; /* MISSING DIVIDING WITH NOMINAL */
             }else if (jmi->relations[i] == JMI_REL_LEQ){
-                eventIndicators[i] = eventIndicators[i]/1.0-((fmi_t *)c)->fmi_epsilon; /* MISSING DIVIDING WITH NOMINAL */
+                eventIndicators[i] = eventIndicators[i]/1.0-jmi->events_epsilon; /* MISSING DIVIDING WITH NOMINAL */
             }else{
                 eventIndicators[i] = eventIndicators[i]/1.0; /* MISSING DIVIDING WITH NOMINAL */
             }
         }else{
             if (jmi->relations[i] == JMI_REL_GT){
-                eventIndicators[i] = eventIndicators[i]/1.0-((fmi_t *)c)->fmi_epsilon; /* MISSING DIVIDING WITH NOMINAL */
+                eventIndicators[i] = eventIndicators[i]/1.0-jmi->events_epsilon; /* MISSING DIVIDING WITH NOMINAL */
             }else if (jmi->relations[i] == JMI_REL_LT){
-                eventIndicators[i] = eventIndicators[i]/1.0+((fmi_t *)c)->fmi_epsilon; /* MISSING DIVIDING WITH NOMINAL */
+                eventIndicators[i] = eventIndicators[i]/1.0+jmi->events_epsilon; /* MISSING DIVIDING WITH NOMINAL */
             }else{
                 eventIndicators[i] = eventIndicators[i]/1.0; /* MISSING DIVIDING WITH NOMINAL */
             }

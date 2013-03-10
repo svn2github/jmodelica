@@ -48,7 +48,6 @@ struct fmi_t {
     fmiCallbackFunctions fmi_functions;
     fmiBoolean fmi_logging_on;
     fmiReal fmi_newton_tolerance;
-    fmiReal fmi_epsilon;
     jmi_t* jmi;
 };
 
