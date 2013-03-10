@@ -849,7 +849,8 @@ aspect FlatAPI {
 	}
 
 	syn boolean FRelExp.generatesEvent() =
-			!inNoEventExp() && 
+			!inNoEventExp() &&
+			!inSmoothExp(1) &&
 			isRealComparison() &&
 			!inWhen() &&
 			!variability().lessOrEqual(fParameter());
@@ -2110,10 +2111,10 @@ aspect FlatDiagnostics {
 		str.append("Number of initial equations:                  " + 
 				numInitialEquations() + "\n");
 
-		str.append("Number of relational exps in equations:       " + 
+		str.append("Number of event indicators in equations:      " + 
 				numRelExpInEquations() + "\n");
 
-		str.append("Number of relational exps in init equations:  " + 
+		str.append("Number of event indicators in init equations: " + 
 				numRelExpInInitialEquations() + "\n");
 
 

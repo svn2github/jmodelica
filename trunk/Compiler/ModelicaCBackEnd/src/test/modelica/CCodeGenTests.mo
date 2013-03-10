@@ -7993,7 +7993,7 @@ end IntegerExternalArrayFortran4;
 
 model Smooth1
   Real y = time - 2;
-  Real x = smooth(2, if y < 0 then 0 else y ^ 3);
+  Real x = smooth(0, if y < 0 then 0 else y ^ 3);
 
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
@@ -8891,7 +8891,7 @@ end when;
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestRelationalOp1",
-			description="",
+			description="Test correct generation of all four relational operators",
 			template="$C_DAE_initial_relations$
                                   $C_DAE_relations$",
 			generatedCode="
@@ -8926,7 +8926,7 @@ end when;
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestRelationalOp2",
-			description="",
+			description="Test correct generation of all four relational operators",
 			template="$C_DAE_initial_relations$
                                   $C_DAE_relations$",
 			generatedCode="
@@ -8964,7 +8964,7 @@ end when;
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestRelationalOp3",
-			description="",
+			description="Test generation of all four relational operators.",
 			template="$C_DAE_initial_relations$
                                   $C_DAE_relations$",
 			generatedCode="
@@ -8978,7 +8978,7 @@ end TestRelationalOp3;
 
 model TestRelationalOp4
   parameter Real p1 = 1;
-  parameter Real p2 = if p1 >=1 then 1 else 2; //no, correct
+  parameter Real p2 = if p1 >=1 then 1 else 2;
   Real x;
   Real y;
   Real z;
@@ -8991,19 +8991,19 @@ initial equation
   y = if noEvent(time>=2) then 2 else 5;
   z = if p1<=5 then 1 else 6;
 equation
-  der(x) = if time>=1 then 1 else 0; // yes, correct
-  der(y) = if noEvent(time>=1) then 1 else 0; // no, correct
-  der(z) = if p1>=1 then 1 else 0; // yes, not correct?
-  der(w) = if 2>=1 then 1 else 0; // no, correct
-  der(r) = smooth(0,if y>=3 then 1.0 else 0.0); // yes, due to lack of support for smooth
-  when x>=0.1 then // yes, correct
-    q1 = if pre(q1)>=0.5 then pre(q1) else 2*pre(q1); // no, correct, q1 is discrete
-    q2 = if w>=0.5 then pre(q2) else 2*pre(q2); // yes, not correct?
+  der(x) = if time>=1 then 1 else 0; 
+  der(y) = if noEvent(time>=1) then 1 else 0; 
+  der(z) = if p1>=1 then 1 else 0; 
+  der(w) = if 2>=1 then 1 else 0; 
+  der(r) = if y>=3 then 1.0 else 0.0; 
+  when x>=0.1 then 
+    q1 = if pre(q1)>=0.5 then pre(q1) else 2*pre(q1);
+    q2 = if w>=0.5 then pre(q2) else 2*pre(q2); 
   end when;
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestRelationalOp4",
-			description="",
+			description="Test correct event generation.",
 			template="$C_DAE_initial_relations$
                                   $C_DAE_relations$",
 			generatedCode="
@@ -9015,5 +9015,43 @@ static const int DAE_relations[3]= {JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ};
 ")})));
 
 end TestRelationalOp4;
+
+model TestRelationalOp5
+  Real x;
+  Real y;
+  Real z;
+equation
+  der(x) = smooth(0,if x>=0 then x else 0); 
+  der(y) = smooth(1,if y>=0 then y^2 else 0); 
+  der(z) = smooth(2,if z>=0 then z^3 else 0); 
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp5",
+			description="Test correct event generation in smooth operators.",
+			generate_ode=true,
+			equation_sorting=true,
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$
+                                  $C_ode_derivatives$",
+			generatedCode="
+static const int N_initial_relations = 0;
+static const int DAE_initial_relations[1]= {-1};
+
+static const int N_relations = 1;
+static const int DAE_relations[1]= {JMI_REL_GEQ};
+
+      model_ode_guards(jmi);
+/************* ODE section *********/
+    _der_x_3 = (COND_EXP_EQ(_sw(0), JMI_TRUE, _x_0, AD_WRAP_LITERAL(0)));
+    _der_y_4 = (COND_EXP_EQ(COND_EXP_GE(_y_1, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE), JMI_TRUE, (1.0 * (_y_1) * (_y_1)), AD_WRAP_LITERAL(0)));
+    _der_z_5 = (COND_EXP_EQ(COND_EXP_GE(_z_2, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE), JMI_TRUE, (1.0 * (_z_2) * (_z_2) * (_z_2)), AD_WRAP_LITERAL(0)));
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+")})));
+
+end TestRelationalOp5;
+
 
 end CCodeGenTests;

@@ -2563,6 +2563,11 @@ aspect FlatExpressions {
     eq SourceRoot.getChild().inNoEventExp() = false;
     eq FlatRoot.getChild().inNoEventExp() = false;
     eq FClass.getFParameterEquation().inNoEventExp() = true;
+
+    inh boolean FExp.inSmoothExp(int order);
+    eq FSmoothExp.getChild().inSmoothExp(int order) = getOrder().ceval().intValue() >= order;
+    eq SourceRoot.getChild().inSmoothExp(int order) = false;
+    eq FlatRoot.getChild().inSmoothExp(int order) = false;
     
     inh boolean InstAccess.inConnectClause();
     inh boolean FExp.inConnectClause();
