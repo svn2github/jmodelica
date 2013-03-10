@@ -724,6 +724,37 @@ int jmi_dae_R(jmi_t* jmi, jmi_real_t* res) {
 	return 0;
 }
 
+int jmi_dae_R_perturbed(jmi_t* jmi, jmi_real_t* res){
+    int retval,i;
+    jmi_real_t *switches;
+    
+    retval = jmi_dae_R(jmi,res);
+    if (retval!=0){return -1;}
+    
+    switches = jmi_get_sw(jmi);
+    
+    for (i = 0; i < jmi->n_sw; i=i+1){
+        if (switches[i] == 1.0){
+            if (jmi->relations[i] == JMI_REL_GEQ){
+                res[i] = res[i]+jmi->events_epsilon;
+            }else if (jmi->relations[i] == JMI_REL_LEQ){
+                res[i] = res[i]-jmi->events_epsilon;
+            }else{
+                res[i] = res[i];
+            }
+        }else{
+            if (jmi->relations[i] == JMI_REL_GT){
+                res[i] = res[i]-jmi->events_epsilon;
+            }else if (jmi->relations[i] == JMI_REL_LT){
+                res[i] = res[i]+jmi->events_epsilon;
+            }else{
+                res[i] = res[i];
+            }
+        }
+    }
+    return 0;
+}
+
 int jmi_init_F0(jmi_t* jmi, jmi_real_t* res) {
 
 	int i;

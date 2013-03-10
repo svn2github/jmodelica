@@ -546,7 +546,6 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
 }
 
 fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
-	jmi_real_t *switches;
     jmi_t* jmi = ((fmi_t *)c)->jmi;
 	fmiValueReference i;
 	fmiInteger retval;
@@ -558,39 +557,13 @@ fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], si
 		}
 		((fmi_t *)c)->jmi->recomputeVariables = 0;
 	}
-	retval = jmi_dae_R(((fmi_t *)c)->jmi,eventIndicators);
-	switches = jmi_get_sw(((fmi_t *)c)->jmi);
+	retval = jmi_dae_R_perturbed(((fmi_t *)c)->jmi,eventIndicators);
     
 	if(retval != 0) {
 		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
 		return fmiError;
 	}
 
-    for (i = 0; i < ni; i=i+1){
-        /* x >= 0
-         * x >  0
-         * x <= 0
-         * x <  0
-         * 
-         */
-        if (switches[i] == 1.0){
-            if (jmi->relations[i] == JMI_REL_GEQ){
-                eventIndicators[i] = eventIndicators[i]/1.0+jmi->events_epsilon; /* MISSING DIVIDING WITH NOMINAL */
-            }else if (jmi->relations[i] == JMI_REL_LEQ){
-                eventIndicators[i] = eventIndicators[i]/1.0-jmi->events_epsilon; /* MISSING DIVIDING WITH NOMINAL */
-            }else{
-                eventIndicators[i] = eventIndicators[i]/1.0; /* MISSING DIVIDING WITH NOMINAL */
-            }
-        }else{
-            if (jmi->relations[i] == JMI_REL_GT){
-                eventIndicators[i] = eventIndicators[i]/1.0-jmi->events_epsilon; /* MISSING DIVIDING WITH NOMINAL */
-            }else if (jmi->relations[i] == JMI_REL_LT){
-                eventIndicators[i] = eventIndicators[i]/1.0+jmi->events_epsilon; /* MISSING DIVIDING WITH NOMINAL */
-            }else{
-                eventIndicators[i] = eventIndicators[i]/1.0; /* MISSING DIVIDING WITH NOMINAL */
-            }
-        }
-    }
     return fmiOK;
 }
 
