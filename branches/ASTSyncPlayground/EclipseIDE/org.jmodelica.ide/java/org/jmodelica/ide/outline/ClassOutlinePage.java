@@ -15,7 +15,6 @@
  */
 package org.jmodelica.ide.outline;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,9 +31,11 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jmodelica.ide.compiler.ChangePropagationController;
 import org.jmodelica.ide.compiler.LocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.editor.ICurrentClassListener;
+import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
@@ -45,7 +46,6 @@ public class ClassOutlinePage extends OutlinePage implements
 	private static final OutlineAwareLabelProvider OUTLINE_AWARE_LABEL = new OutlineAwareLabelProvider(
 			JASTADD_LABEL);
 
-	private ModelicaASTRegistry registry;
 	private ClassOutlineContentProvider content;
 	private IProject project;
 	private Set<ICurrentClassListener> currentClassListeners;
@@ -59,13 +59,15 @@ public class ClassOutlinePage extends OutlinePage implements
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		registry = ModelicaASTRegistry.getASTRegistry();
-		registry.addListener(this);// , project, null);
+		ModelicaASTRegistry.getASTRegistry().addListener(this);// , project,
+																// null);
 		IFileEditorInput fInput = (IFileEditorInput) fTextEditor
 				.getEditorInput();
 		IFile file = fInput.getFile();
-		registry.addListener(file, new ArrayList<String>(), this);
-		SourceRoot root = ((LocalRootNode)registry.doLookup(file)[0]).getSourceRoot();
+		SourceRoot root = ((LocalRootNode) ModelicaASTRegistry.getASTRegistry()
+				.doLookup(file)[0]).getSourceRoot();
+		ChangePropagationController.getInstance().addListener(file, null, this,
+				IASTChangeListener.OUTLINE_LISTENER);
 		updateAST(root);
 		setDoubleClickHandling(true);
 	}
@@ -76,7 +78,7 @@ public class ClassOutlinePage extends OutlinePage implements
 
 	public void dispose() {
 		super.dispose();
-		registry.removeListener(this);
+		ModelicaASTRegistry.getASTRegistry().removeListener(this);
 		currentClassListeners.clear();
 	}
 
@@ -125,14 +127,8 @@ public class ClassOutlinePage extends OutlinePage implements
 	@Override
 	public void astChanged(IASTChangeEvent e) {
 		System.out.println("CLASSOUTLINEPAGE RECIEVED ASTEVENT, UPDATING...");
-		/*
-		 * GlobalRootNode groot = (GlobalRootNode) registry.doLookup(project);
-		 * System
-		 * .out.println("ClassOutlinePage working on project: "+groot.getSourceRoot
-		 * ().getProject().getName()); update(groot.getSourceRoot());
-		 * updateAST(groot.getSourceRoot());
-		 */
-		updateAST(fRoot);
+		synchronized (((ASTNode<?>) fRoot).state()) {
+			updateAST(fRoot);
+		}
 	}
-
 }

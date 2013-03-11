@@ -7,8 +7,9 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.TreeItem;
 import org.jastadd.ed.core.model.node.IASTNode;
-import org.jmodelica.ide.compiler.JobObject;
+import org.jmodelica.ide.compiler.IJobObject;
 import org.jmodelica.ide.compiler.ModelicaASTRegistryJobBucket;
+import org.jmodelica.ide.compiler.ModificationJob;
 import org.jmodelica.modelica.compiler.ASTNode;
 
 public class TestRenameAction extends Action {
@@ -33,7 +34,7 @@ public class TestRenameAction extends Action {
 			printNodePathToRoot((ASTNode<?>) selection[i].getData());
 		}
 		ASTNode<?> selectedInstNode = (ASTNode<?>) selection[0].getData();
-		JobObject job = new JobObject(JobObject.RENAME_NODE, file,
+		IJobObject job = new ModificationJob(IJobObject.RENAME_NODE, file,
 				selectedInstNode);
 		ModelicaASTRegistryJobBucket.getInstance().addJob(job);
 	}

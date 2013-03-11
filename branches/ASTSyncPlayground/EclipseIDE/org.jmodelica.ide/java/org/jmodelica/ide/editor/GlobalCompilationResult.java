@@ -8,8 +8,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.jastadd.ed.core.ReconcilingStrategy;
 import org.jastadd.ed.core.model.IASTChangeEvent;
+import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jastadd.ed.core.model.node.ILocalRootHandle;
 import org.jastadd.ed.core.model.node.LocalRootHandle;
+import org.jmodelica.ide.compiler.ChangePropagationController;
 import org.jmodelica.ide.compiler.LocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
@@ -17,7 +19,6 @@ import org.jmodelica.modelica.compiler.ASTNode;
 
 public class GlobalCompilationResult extends CompilationResult {
 
-	private final ModelicaASTRegistry registry;
 	private final String key;
 	private final IProject project;
 	private final EditorFile editorFile;
@@ -26,7 +27,7 @@ public class GlobalCompilationResult extends CompilationResult {
 
 		editorFile = ef;
 
-		registry = ModelicaASTRegistry.getASTRegistry();
+		ModelicaASTRegistry registry = ModelicaASTRegistry.getASTRegistry();
 		key = ef.toRegistryKey();
 		project = ef.iFile().getProject();
 
@@ -37,13 +38,13 @@ public class GlobalCompilationResult extends CompilationResult {
 
 		// registry.addListener(editor); // TODO JL listen against files, not
 		// against all...
-		registry.addListener(editorFile.iFile(), new ArrayList<String>(),
-				editor);
+		ChangePropagationController.getInstance().addListener(editorFile.iFile(), null,
+				editor, IASTChangeListener.TEXTEDITOR_LISTENER);
 	}
 
 	public void update(IProject projChanged, String keyChanged) {
 		if (project == projChanged && keyChanged.equals(key)) {
-			LocalRootNode fileNode = (LocalRootNode) registry
+			LocalRootNode fileNode = (LocalRootNode) ModelicaASTRegistry.getASTRegistry()
 					.doLookup(editorFile.iFile())[0];
 			root = (ASTNode<?>) fileNode.getDef();
 		}
@@ -54,7 +55,7 @@ public class GlobalCompilationResult extends CompilationResult {
 	}
 
 	public void dispose(Editor editor) {
-		registry.removeListener(editor);
+		ModelicaASTRegistry.getASTRegistry().removeListener(editor);
 	}
 
 	public void recompileLocal(IDocument doc, IFile file) {

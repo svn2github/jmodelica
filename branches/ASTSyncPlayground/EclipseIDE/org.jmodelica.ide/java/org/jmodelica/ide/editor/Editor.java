@@ -492,5 +492,4 @@ public class Editor extends AbstractDecoratedTextEditor implements
 		compResult.update(e);
 		update();
 	}
-
 }

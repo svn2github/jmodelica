@@ -1,14 +1,18 @@
 package org.jmodelica.ide.compiler;
 
-import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
 import org.eclipse.swt.widgets.Display;
 
 public class ModelicaASTRegistryJobBucket {
 	private static ModelicaASTRegistryJobBucket jobBucket;
-	private ArrayList<JobObject> availableJobs = new ArrayList<JobObject>();
+	private PriorityQueue<IJobObject> availableJobs;
 
 	private ModelicaASTRegistryJobBucket() {
+		Comparator<IJobObject> comparator = new JobObjectComparator();
+		availableJobs = new PriorityQueue<IJobObject>(5, comparator);
+		// TODO larger initial capacity?
 	}
 
 	public static synchronized ModelicaASTRegistryJobBucket getInstance() {
@@ -21,7 +25,7 @@ public class ModelicaASTRegistryJobBucket {
 	 * Add a job to the queue. A new background thread to handle one job from
 	 * the queue will also automatically be created.
 	 */
-	public synchronized void addJob(JobObject job) {
+	public synchronized void addJob(IJobObject job) {
 		availableJobs.add(job);
 		createNewJobHandlerThread();
 	}
@@ -29,13 +33,19 @@ public class ModelicaASTRegistryJobBucket {
 	/**
 	 * Get a job from the queue.
 	 * 
-	 * @return JobObject or NULL.
+	 * @return JobObject or NULL if no job available.
 	 */
-	public synchronized JobObject getJob() {
-		JobObject job = null;
-		if (availableJobs.size() > 0) {
-			job = availableJobs.remove(0);
+	protected synchronized IJobObject getJob() {
+		while (availableJobs.size() == 0) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
+		IJobObject job = null;
+		if (availableJobs.size() > 0)
+			job = availableJobs.poll();
 		return job;
 	}
 
@@ -43,8 +53,23 @@ public class ModelicaASTRegistryJobBucket {
 		// Since we might make changes to SWT, we need this kind of thread
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				new ModelicaASTRegistryVisitor();
+				IJobObject job = getJob();
+				if (job != null)
+					job.doJob(); // TODO not display exec?
 			}
 		});
+	}
+
+	private class JobObjectComparator implements Comparator<IJobObject> {
+		@Override
+		public int compare(IJobObject x, IJobObject y) {
+			if (x.getPriority() < y.getPriority()) {
+				return -1;
+			}
+			if (x.getPriority() > y.getPriority()) {
+				return 1;
+			}
+			return 0;
+		}
 	}
 }

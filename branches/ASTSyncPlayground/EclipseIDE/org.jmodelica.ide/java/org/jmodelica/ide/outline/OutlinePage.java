@@ -12,7 +12,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.outline;
 
 import java.util.ArrayList;
@@ -50,8 +50,9 @@ import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BaseNode;
 
-public abstract class OutlinePage extends AbstractBaseContentOutlinePage implements IDoubleClickListener {
-	
+public abstract class OutlinePage extends AbstractBaseContentOutlinePage
+		implements IDoubleClickListener {
+
 	public static final JastAddLabelProvider JASTADD_LABEL = new JastAddLabelProvider();
 	public static final ASTContentProvider JASTADD_CONTENT = new ASTContentProvider();
 
@@ -70,18 +71,19 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage impleme
 
 	@Override
 	protected void openFileForNode(IJastAddNode node) {
-		// This method is never called, and there seems to be 
-	    // no situation that it should be.
+		// This method is never called, and there seems to be
+		// no situation that it should be.
 	}
 
 	@Override
 	public void highlightNodeInEditor(IJastAddNode node) {
 		if (!selecting) {
-			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+			IWorkbenchWindow window = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow();
 			IWorkbenchPage page = window.getActivePage();
 			IEditorPart editor = page.getActiveEditor();
-			if (editor instanceof Editor && node instanceof ASTNode<?>) 
-				((Editor) editor).selectNode((ASTNode) node);
+			if (editor instanceof Editor && node instanceof ASTNode<?>)
+				((Editor) editor).selectNode((ASTNode<?>) node);
 		}
 	}
 
@@ -91,22 +93,21 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage impleme
 		TreeViewer viewer = getTreeViewer();
 		viewer.setComparator(getComparator());
 		viewer.setComparer(getComparer());
-		
+
 		// Set up drag & drop
 		ClassCopySource copySource = new ClassCopySource(viewer);
 		int ops = DND.DROP_COPY | DND.DROP_MOVE;
 		Transfer[] transfers = new Transfer[] { TextTransfer.getInstance() };
 		viewer.addDragSupport(ops, transfers, new ClassDragListener(copySource));
-		
+
 		// Set up copy/paste
-	    Clipboard clipboard = new Clipboard(getSite().getShell().getDisplay());
-	    IActionBars bars = getSite().getActionBars();
-	    bars.setGlobalActionHandler(
-	    		ActionFactory.COPY.getId(), 
-	    		new CopyClassAction(copySource, clipboard));
+		Clipboard clipboard = new Clipboard(getSite().getShell().getDisplay());
+		IActionBars bars = getSite().getActionBars();
+		bars.setGlobalActionHandler(ActionFactory.COPY.getId(),
+				new CopyClassAction(copySource, clipboard));
 		update();
 	}
-	
+
 	protected void setDoubleClickHandling(boolean active) {
 		handleDoubleClick = active;
 		if (active)
@@ -114,7 +115,7 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage impleme
 		else
 			getTreeViewer().removeDoubleClickListener(this);
 	}
-	
+
 	public void doubleClick(DoubleClickEvent event) {
 		if (handleDoubleClick) {
 			Object elem = Util.getSelected(event.getSelection());
@@ -147,7 +148,8 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage impleme
 
 	protected ITreeContentProvider getContentProvider() {
 		if (contentProvider == null)
-			contentProvider = new UpdatingContentProvider(createContentProvider());
+			contentProvider = new UpdatingContentProvider(
+					createContentProvider());
 		return contentProvider;
 	}
 
@@ -165,53 +167,32 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage impleme
 	/**
 	 * Updates a part of the tree, keeping selection and open branches.
 	 * 
-	 * @param node  the node to update, or <code>null</code> to update entire tree
+	 * @param node
+	 *            the node to update, or <code>null</code> to update entire tree
 	 */
 	public void update(Object node) {
 		System.out.println("Running outline update()");
-        TreeViewer viewer = getTreeViewer();
+		TreeViewer viewer = getTreeViewer();
 		if (viewer != null) {
-			Control control= viewer.getControl();
+			Control control = viewer.getControl();
 			if (control != null && !control.isDisposed()) {
 				control.setRedraw(false);
 				ISelection selection = viewer.getSelection();
 				TreePath[] paths = viewer.getExpandedTreePaths();
-				
 				if (node == null) {
-					viewer.setInput(fRoot); 
+					viewer.setInput(fRoot);
 					rootChanged(viewer);
 				} else {
 					viewer.refresh(node);
 				}
-				
 				if (paths.length > 0)
 					viewer.setExpandedTreePaths(paths);
 				select(selection);
 				control.setRedraw(true);
 			}
 		}
-//		System.out.println("OutlinePage: update()");
-//		TreeViewer viewer = getTreeViewer();
-//		if (viewer != null) {
-//			Control control= viewer.getControl();
-//			if (control != null && !control.isDisposed()) {
-//				control.setRedraw(false);
-//				viewer.setInput(fRoot);
-//				System.out.println("¤¤¤¤¤¤¤¤¤¤");
-//				//printTree((ASTNode<?>)fRoot,"");
-//				viewer.expandToLevel(1);
-//				control.setRedraw(true);
-//			}
-//		}
 	}
-	// DEBUG TODO remove
-	private void printTree(ASTNode<?> node, String indent) {
-		System.out
-				.println(indent + node.getNodeName() + " " + node.outlineId());
-		for (int i = 0; i < node.getNumChild(); i++) {
-			printTree(node.getChild(i), indent+"  ");
-		}
-	}
+
 	public void updateAST(IASTNode ast) {
 		// Copy cached outline children to new root
 		if (ast instanceof BaseNode && fRoot instanceof BaseNode)
@@ -228,7 +209,8 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage impleme
 			TreePath path = pathFromNode(node);
 			TreeViewer viewer = getTreeViewer();
 			if (viewer != null && viewer.testFindItem(node) == null)
-				OutlineUpdateWorker.expandAndSelect(this, getTreeViewer(), path);
+				OutlineUpdateWorker
+						.expandAndSelect(this, getTreeViewer(), path);
 			else
 				select(new TreeSelection(path));
 		}
@@ -237,21 +219,21 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage impleme
 	protected void select(ISelection sel) {
 		selecting = true;
 		TreeViewer viewer = getTreeViewer();
-		if (viewer != null) 
+		if (viewer != null)
 			viewer.setSelection(sel, true);
 		selecting = false;
 	}
-	
+
 	/**
 	 * Check if the given node is in the tree of this page.
 	 */
 	public boolean contains(Object node) {
 		ITreeContentProvider provider = getContentProvider();
-		while (node != null && node != fRoot) 
+		while (node != null && node != fRoot)
 			node = provider.getParent(node);
 		return node == fRoot;
 	}
-	
+
 	/**
 	 * Get the root of the AST shown in this page.
 	 */
@@ -291,7 +273,7 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage impleme
 			if (element == null)
 				return "";
 			if (element instanceof ASTNode)
-				return ((ASTNode) element).outlineId();
+				return ((ASTNode<?>) element).outlineId();
 			return element.toString();
 		}
 

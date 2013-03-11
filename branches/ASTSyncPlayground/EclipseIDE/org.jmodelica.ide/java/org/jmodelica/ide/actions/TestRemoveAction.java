@@ -5,8 +5,9 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.TreeItem;
 import org.jastadd.ed.core.model.node.IASTNode;
-import org.jmodelica.ide.compiler.JobObject;
+import org.jmodelica.ide.compiler.IJobObject;
 import org.jmodelica.ide.compiler.ModelicaASTRegistryJobBucket;
+import org.jmodelica.ide.compiler.ModificationJob;
 import org.jmodelica.modelica.compiler.ASTNode;
 
 public class TestRemoveAction extends Action {
@@ -29,7 +30,7 @@ public class TestRemoveAction extends Action {
 			System.out.println("TestRemoveAction: Selection contains node: "
 					+ s);
 			ASTNode<?> selectedInstNode = (ASTNode<?>) selection[i].getData();
-			JobObject job = new JobObject(JobObject.REMOVE_INSTNODE, file,
+			IJobObject job = new ModificationJob(IJobObject.REMOVE_NODE, file,
 					selectedInstNode);
 			ModelicaASTRegistryJobBucket.getInstance().addJob(job);
 		}

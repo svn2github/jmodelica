@@ -18,9 +18,9 @@ package org.jmodelica.ide.outline;
 import java.util.ArrayList;
 
 import org.jastadd.ed.core.service.view.JastAddContentProvider;
-import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
+import org.jmodelica.modelica.compiler.Program;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
@@ -35,39 +35,23 @@ public class InstanceOutlineContentProvider extends JastAddContentProvider {
 		try {
 			System.out.println("INSTANCEOUTLINECONTENTPROVIDER getElements()");
 			StoredDefinition def = (StoredDefinition) element;
-			InstProgramRoot iRoot = ((SourceRoot) (def.root())).getProgram()
-					.getInstProgramRoot();
-			ArrayList<?> classes = def.getElements().toArrayList();
-
-			ArrayList<InstClassDecl> result = new ArrayList<InstClassDecl>();
-
-			for (InstClassDecl inst : iRoot.instClassDecls()) {
-				if (classes.contains(inst.getClassDecl()))
-					result.add(inst);
-				System.out.println("OUTLINE inst class: " + inst.getNodeName()
-						+ " " + inst.outlineId());
-				// printTree(inst, "");
-				// System.out.println("DUMP instclass: ");
-				if (inst.outlineId().equals("ModelB")) {
-					//result.add(inst.getClassDecl().newInstReplacingClass(
-						//	inst.getClassDecl(), inst));
-				} else if (inst.outlineId().equals("ModelA")) {
-
+			synchronized (def.state()) {
+				SourceRoot sr = (SourceRoot) def.root();
+				Program pr = sr.getProgram();
+				InstProgramRoot iRoot = pr.getInstProgramRoot();
+				ArrayList<?> classes = def.getElements().toArrayList();
+				ArrayList<InstClassDecl> result = new ArrayList<InstClassDecl>();
+				for (InstClassDecl inst : iRoot.instClassDecls()) {
+					if (classes.contains(inst.getClassDecl()))
+						result.add(inst);
 				}
+				return result.toArray();
 			}
-			return result.toArray();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new Object[0];
 		}
-	}
-
-	//DEBUG TODO remove
-	private void printTree(ASTNode<?> node, String indent) {
-		System.out.println("%% " + node.getNodeName() + " " + node.outlineId());
-		for (int i = 0; i < node.getNumChild(); i++)
-			printTree(node.getChild(i), " " + indent);
 	}
 
 	@Override

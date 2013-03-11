@@ -1,6 +1,6 @@
 package org.jastadd.ed.core.model;
 
-import java.util.ArrayList;
+import java.util.Stack;
 
 import org.jastadd.ed.core.model.node.IASTNode;
 import org.jastadd.ed.core.model.IASTDelta;
@@ -17,13 +17,13 @@ import org.jastadd.ed.core.model.IASTDelta;
 public class ASTChangeEvent implements IASTChangeEvent {
 
 	protected IASTDelta delta;
-	protected ArrayList<String> changedPath;
+	protected Stack<Integer> changedPath;
 	protected IASTNode changedNode;
 	protected int type;
 	protected int level;
 
 	public ASTChangeEvent(int type, int level, IASTNode changedNode,
-			ArrayList<String> changedPath, IASTDelta delta) {
+			Stack<Integer> changedPath, IASTDelta delta) {
 		this.type = type;
 		this.level = level;
 		this.changedNode = changedNode;
@@ -56,7 +56,7 @@ public class ASTChangeEvent implements IASTChangeEvent {
 	}
 
 	@Override
-	public ArrayList<String> getChangedPath() {
+	public Stack<Integer> getChangedPath() {
 		return changedPath;
 	}
 

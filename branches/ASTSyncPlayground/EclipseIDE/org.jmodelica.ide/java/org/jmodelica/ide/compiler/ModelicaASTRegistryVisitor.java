@@ -1,22 +1,20 @@
 package org.jmodelica.ide.compiler;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.ASTChangeEvent;
 import org.jastadd.ed.core.model.node.IASTNode;
 import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.Access;
-import org.jmodelica.modelica.compiler.ClassAccess;
-import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.ComponentDecl;
 import org.jmodelica.modelica.compiler.FullClassDecl;
-import org.jmodelica.modelica.compiler.InstAccess;
-import org.jmodelica.modelica.compiler.InstClassAccess;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
 import org.jmodelica.modelica.compiler.List;
+import org.jmodelica.modelica.compiler.Program;
+import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class ModelicaASTRegistryVisitor {
@@ -27,23 +25,14 @@ public class ModelicaASTRegistryVisitor {
 	 * automatically retrieve and process one job, if an available job exist at
 	 * the {@link ModelicaASTRegistryJobBucket}.
 	 */
-	public ModelicaASTRegistryVisitor() {
-		doOneJob();
-	}
-
-	/**
-	 * Retrieves and processes one job, if an available job exist at the
-	 * {@link ModelicaASTRegistryJobBucket}.
-	 */
-	private void doOneJob() {
-		JobObject job = ModelicaASTRegistryJobBucket.getInstance().getJob();
+	public ModelicaASTRegistryVisitor(ModificationJob job) {
 		if (job != null) {
 			int jobType = job.getJobType();
-			if (jobType == JobObject.REMOVE_INSTNODE) {
+			if (jobType == IJobObject.REMOVE_NODE) {
 				removeNode(job.getFile(), job.getNode());
-			} else if (jobType == JobObject.ADD_NODE) {
-				addNode(job.getFile(), job.getNode());
-			} else if (jobType == JobObject.RENAME_NODE) {
+			} else if (jobType == IJobObject.ADD_NODE) {
+				addNode(job);
+			} else if (jobType == IJobObject.RENAME_NODE) {
 				renameNode(job.getFile(), job.getNode());
 			}
 		}
@@ -56,76 +45,35 @@ public class ModelicaASTRegistryVisitor {
 	 * @param instNode
 	 */
 	private void renameNode(IFile file, ASTNode<?> instNode) {
-		System.out.println("MODELICAASTREGVISITOR renamenode ist...: "
-				+ getNodeName(instNode));
-		ASTNode<?> srcNode = getCorrespondingSrcNode(instNode);
-
-		if (srcNode instanceof FullClassDecl) {
-			FullClassDecl decl = (FullClassDecl) srcNode;
-			String soughtName = "ClassAccess: '" + srcNode.outlineId() + "'";
-			decl.getName().setID("CHANGEDNAME");
-			IASTNode root = decl;
-			while (root.getParent() != null)
-				root = root.getParent();
-			ArrayList<ComponentDecl> foundAccesses = new ArrayList<ComponentDecl>();
-			findAllClassUsesInSrcAST(root, soughtName, foundAccesses);
-			renameFoundClassAccesses(foundAccesses);
-		} else if (srcNode instanceof ComponentDecl) {
-			ComponentDecl compdecl = (ComponentDecl) srcNode;
-			compdecl.getName().setID("CHANGEDNAME");// TODO fix hardcoded
-													// name...
-		}
-		ASTNode<?> root = srcNode;
-		while (root.getParent() != null)
-			root = root.getParent();
-		printSubTree(root, "");
-		ArrayList<String> nodePath = getNodePathToRoot(srcNode);
-		LibraryVisitor visitor = new LibraryVisitor();
-		LibraryNode libroot = registry.getListenerTree(file);
-		visitor.handleChangedNode(ASTChangeEvent.POST_RENAME, libroot,
-				nodePath, srcNode);
-	}
-
-	/**
-	 * Find all class uses within the src AST.
-	 * 
-	 * @param root
-	 * @param className
-	 * @param foundAccesses
-	 */
-	private void findAllClassUsesInSrcAST(IASTNode root, String className,
-			ArrayList<ComponentDecl> foundAccesses) {
-		for (int i = 0; i < root.getNumChild(); i++) {
-			IASTNode child = root.getChild(i);
-			if (child instanceof FullClassDecl) {
-				FullClassDecl fcd = (FullClassDecl) child;
-				for (ComponentDecl decl : fcd.getComponentDeclList()) {
-					Access access = decl.getClassName();
-					if (access instanceof ClassAccess) {
-						ClassAccess ca = (ClassAccess) access;
-						if (ca.getID().equals(className)) {
-							System.out.println("Found SrcClassAccess: "
-									+ ca.getNodeName());
-							foundAccesses.add(decl);
-						}
-					}
-				}
-			} else {
-				findAllClassUsesInSrcAST(child, className, foundAccesses);
+		synchronized (instNode.state()) {
+			System.out.println("MODELICAASTREGVISITOR renamenode ist...: "
+					+ getNodeName(instNode));
+			ASTNode<?> srcNode = getCorrespondingSrcNode(instNode);
+			Stack<Integer> nodePath = new Stack<Integer>();
+			createPath(nodePath, srcNode);
+			if (srcNode instanceof FullClassDecl) {
+				FullClassDecl decl = (FullClassDecl) srcNode;
+				String soughtName = "ClassAccess: '" + srcNode.outlineId()
+						+ "'";
+				decl.getName().setID("CHANGEDNAME");
+				IASTNode root = decl;
+				while (root.getParent() != null)
+					root = root.getParent();
+				// ArrayList<ComponentDecl> foundAccesses = new
+				// ArrayList<ComponentDecl>();
+				// findAllClassUsesInSrcAST(root, soughtName, foundAccesses);
+				// renameFoundClassAccesses(foundAccesses);
+			} else if (srcNode instanceof ComponentDecl) {
+				ComponentDecl compdecl = (ComponentDecl) srcNode;
+				// TODO fix hardcoded name...
+				compdecl.getName().setID("CHANGEDNAME");
+				ASTNode<?> parent = srcNode;
+				while (parent.getParent() != null)
+					parent = parent.getParent();
+				printSubTree(parent, " ");
 			}
-		}
-	}
-
-	/**
-	 * Rename all the found class accesses.
-	 * 
-	 * @param foundAccesses
-	 */
-	private void renameFoundClassAccesses(ArrayList<ComponentDecl> foundAccesses) {
-		for (ComponentDecl decl : foundAccesses) {
-			Access ca = decl.getClassName();
-			ClassAccess theaccess = (ClassAccess) ca;
-			theaccess.setID("CHANGEDNAME");
+			ChangePropagationController.getInstance().handleNotifications(
+					ASTChangeEvent.POST_RENAME, file, srcNode, nodePath);
 		}
 	}
 
@@ -135,83 +83,53 @@ public class ModelicaASTRegistryVisitor {
 	 * @param file
 	 * @param node
 	 */
-	private void addNode(IFile file, ASTNode<?> instNode) {
-		System.out.println("MODELICAASTREGVISITOR addnode ist...: "
-				+ getNodeName(instNode));
-		printSubTree(instNode, "");
-		ASTNode<?> srcNode = getCorrespondingSrcNode(instNode);
-		if (instNode instanceof InstComponentDecl) {
-			InstComponentDecl icd = (InstComponentDecl) instNode;
-			String surroundingClassName = getFullClassDeclName(srcNode);
+	private void addNode(ModificationJob job) {
+		synchronized (job.getNode().state()) {
+			IFile file = job.getFile();
+			ASTNode<?> classDeclNode = job.getNode();
+			// InstNode tmp = (InstNode) instNode;
+			// tmp.getInstClassDeclList();
+			// InstNode tmp2 = (InstNode)tmp.getParent().getParent();
+			// tmp2.getInstClassDeclList();
+			System.out.println("MODELICAASTREGVISITOR addnode ist...: "
+					+ getNodeName(classDeclNode));
+			// printSubTree(instNode, "");
+			ASTNode<?> srcNode = getCorrespondingSrcNode(classDeclNode);
+			// ASTNode<?> test = srcNode;
+			// while (!(test instanceof FullClassDecl)) {
+			// test = test.getParent();
+			// }
+			// synchronized () {
+			FullClassDecl fcd = (FullClassDecl) srcNode;
+			System.out.println("ADDNODE: className:"+job.getClassName()+" componentname:"+job.getComponentName());
+			fcd.syncAddComponent(job.getClassName(), job.getComponentName(),
+					job.getPlacement());
+	
+			LocalRootNode lr = (LocalRootNode) registry.doLookup(file)[0];
+			StoredDefinition def = lr.getDef();
 
-			addNodeToSrcClassUses(srcNode, surroundingClassName);
-			addNodeToInstClassUses(file, icd, surroundingClassName);
-		} // TODO can we add other stuff?
-		ArrayList<String> srcNodePath = getNodePathToRoot(srcNode);
-		System.out.println("TestADDAction: PATH OF SRCNODE WAS: "
-				+ makeStringOfArrayPath(srcNodePath));
-		LibraryVisitor visitor = new LibraryVisitor();
-		LibraryNode libroot = registry.getListenerTree(file);
-		visitor.handleChangedNode(ASTChangeEvent.POST_ADDED, libroot,
-				srcNodePath, instNode);
-	}
-
-	/**
-	 * Add instcomponent to all instclass uses in instAST.
-	 * 
-	 * @param srcNode
-	 * @param surroundingClassName
-	 */
-	private void addNodeToSrcClassUses(ASTNode<?> srcNode,
-			String surroundingClassName) {
-		ArrayList<ComponentDecl> srcUses = new ArrayList<ComponentDecl>();
-		ASTNode<?> root = srcNode;
-		while (root.getParent() != null)
-			root = root.getParent(); // TODO might need to keep track of visited
-										// nodes so not infinite loop, maybe
-										// better to get root via lookup(file)
-		findAllClassUsesInSrcAST(root, surroundingClassName, srcUses);
-		for (ComponentDecl decl : srcUses) {
-			decl.addChild(srcNode); //TODO addComponent, addchild is prob very bad way to add?
-		}
-	}
-
-	/**
-	 * Add the new component to all class uses within the instance tree. TODO
-	 * probably needs refactoring, complexity > 1000
-	 * 
-	 * @param file
-	 * @param instNode
-	 * @param className
-	 */
-	private void addNodeToInstClassUses(IFile file, InstComponentDecl instNode,
-			String className) {
-		LocalRootNode lroot = (LocalRootNode) ModelicaASTRegistry
-				.getASTRegistry().doLookup(file)[0];
-		StoredDefinition def = lroot.getDef();
-		InstProgramRoot iRoot = lroot.getSourceRoot().getProgram()
-				.getInstProgramRoot();
-		ArrayList<?> classes = def.getElements().toArrayList();
-		for (InstClassDecl inst : iRoot.instClassDecls()) {
-			if (classes.contains(inst.getClassDecl())) {
-				// No accesses within declaring class, would give infinite loop
-				// (?)
-				if (!(inst.outlineId().equals(className))) {
-					List<InstComponentDecl> complist = inst
-							.getInstComponentDecls();
-					for (InstComponentDecl idecl : complist) {
-						InstAccess ia = idecl.getClassName();
-						if (ia instanceof InstClassAccess) {
-							InstClassAccess ica = (InstClassAccess) ia;
-							if (ica.getID().equals(className)) {
-								idecl.addInstComponentDecl(instNode);
-								System.out
-										.println("ooooOOO added instNode to instcompdecl");
-							}
-						}
-					}
-				}
-			}
+			SourceRoot sr = (SourceRoot) def.root();
+			Program pr = sr.getProgram();
+			InstProgramRoot iRoot = pr.getInstProgramRoot();
+			iRoot.flushCache();
+			iRoot.classes();
+			iRoot.components();
+			
+			/*for (InstClassDecl icd : iRoot.instClassDecls()){
+				icd.getClassDecl();
+			}*/
+			/*
+			 * if (instNode instanceof InstComponentDecl) { InstComponentDecl
+			 * icd = (InstComponentDecl) instNode; String surroundingClassName =
+			 * getFullClassDeclName(srcNode); //addNodeToSrcClassUses(srcNode,
+			 * surroundingClassName); // addNodeToInstClassUses(file, icd,
+			 * surroundingClassName); TODO // REMOVE } // TODO can we add other
+			 * stuff?
+			 */
+			Stack<Integer> nodePath = new Stack<Integer>();
+			createPath(nodePath, srcNode);
+			ChangePropagationController.getInstance().handleNotifications(
+					ASTChangeEvent.POST_ADDED, file, classDeclNode, nodePath);
 		}
 	}
 
@@ -222,11 +140,13 @@ public class ModelicaASTRegistryVisitor {
 	 * @return
 	 */
 	private String getFullClassDeclName(ASTNode<?> srcNode) {
-		srcNode = srcNode.getParent();
+		String toReturn = "";
 		while (srcNode != null && !(srcNode instanceof FullClassDecl)) {
 			srcNode = srcNode.getParent();
 		}
-		return srcNode.outlineId();
+		if (srcNode != null)
+			toReturn = srcNode.outlineId();
+		return toReturn;
 	}
 
 	/**
@@ -237,52 +157,40 @@ public class ModelicaASTRegistryVisitor {
 	 * @param instNode
 	 */
 	private void removeNode(IFile file, ASTNode<?> instNode) {
-		ASTNode<?> srcNode = getCorrespondingSrcNode(instNode);
-		ArrayList<String> nodePath = getNodePathToRoot(srcNode);
+		synchronized (instNode.state()) {
+			System.out.println("ModelicaASTRegVISITOR: recieved remove job!");
 
-		ArrayList<String> instNodePath = getNodePathToRoot(instNode);
-		System.out.println("TestRemoveAction: PATH OF INSTNODE WAS: "
-				+ makeStringOfArrayPath(instNodePath));
-		ASTNode<?> selectedSrcNode = getCorrespondingSrcNode(instNode);
-		ArrayList<String> srcNodePath = getNodePathToRoot(selectedSrcNode);
-		System.out.println("TestRemoveAction: PATH OF SRCNODE WAS: "
-				+ makeStringOfArrayPath(srcNodePath));
+			ASTNode<?> srcNode = getCorrespondingSrcNode(instNode);
+			String className = getFullClassDeclName(srcNode);
+			Stack<Integer> nodePath = new Stack<Integer>();
+			createPath(nodePath, srcNode);
 
-		removeInstNode(instNode);
-		removeSrcNode(srcNode);
-		System.out.println("ModelicaASTRegVISITOR: recieved remove job!");
-		System.out.println("ModelicaASTRegVISITOR: nodePath was: "
-				+ printPath(nodePath));
-
-		// TODO probably need project as identifier also?
-		// TODO removeListenerPath(file, nodePath);
-		LibraryVisitor visitor = new LibraryVisitor();
-		LibraryNode libroot = registry.getListenerTree(file);
-		visitor.handleChangedNode(ASTChangeEvent.POST_REMOVE, libroot,
-				nodePath, instNode);
-	}
-
-	/**
-	 * Removes a node from the instance AST.
-	 * 
-	 * @param instNode
-	 */
-	private void removeInstNode(ASTNode<?> instNode) {
-		if (instNode instanceof InstComponentDecl) {
-			System.out
-					.println("ModelicaASTRegVISITOR: REMOVENODE was instcompdecl");
-			InstComponentDecl decl = (InstComponentDecl) instNode;
-			ASTNode<?> parent = decl.getParent();
-			while (parent != null && !(parent instanceof InstClassDecl)) {
-				parent = parent.getParent();
+			ArrayList<String> instNodePath = getNodePathToRoot(instNode);
+			System.out.println("ModelicaASTREGVisitor: PATH OF INSTNODE WAS: "
+					+ makeStringOfArrayPath(instNodePath));
+			ArrayList<String> srcNodePath = getNodePathToRoot(srcNode);
+			System.out.println("ModelicaASTREGVisitor: PATH OF SRCNODE WAS: "
+					+ makeStringOfArrayPath(srcNodePath));
+			if (instNode instanceof InstComponentDecl) {// TODO other types?
+				InstComponentDecl icd = (InstComponentDecl) instNode;
+				// removeNodeFromSrcClassUses(srcNode, className);
+				// removeNodeFromInstClassUses(file, className, icd);
 			}
-			if (parent instanceof InstClassDecl) {
-				InstClassDecl classdecl = (InstClassDecl) parent;
-				classdecl.removeInstComponentDecl(decl);
-				System.out
-						.println("ModelicaASTRegVISITOR: succ removed instcompdecl from instclass");
-			}
-		}// TODO only support remove components? (class, model, eg...)
+			// removeInstNode(instNode);
+			removeSrcNode(srcNode);
+			LocalRootNode lr = (LocalRootNode) registry.doLookup(file)[0];
+			StoredDefinition def = lr.getDef();
+
+			SourceRoot sr = (SourceRoot) def.root();
+			Program pr = sr.getProgram();
+			InstProgramRoot iRoot = pr.getInstProgramRoot();
+			iRoot.flushCache();
+
+			// TODO probably need project as identifier also?
+			// TODO removeListenerPath(file, nodePath);
+			ChangePropagationController.getInstance().handleNotifications(
+					ASTChangeEvent.POST_REMOVE, file, null, nodePath);
+		}
 	}
 
 	/**
@@ -300,6 +208,9 @@ public class ModelicaASTRegistryVisitor {
 		} else if (selectedInstNode instanceof InstComponentDecl) {
 			InstComponentDecl decl = (InstComponentDecl) selectedInstNode;
 			result = decl.getComponentDecl();
+		}
+		if (result == null) {
+			System.err.println("getCorrespondingSrcnode failed...");
 		}
 		return result;
 		// return selectedInstNode.getSelectionNode();
@@ -353,12 +264,16 @@ public class ModelicaASTRegistryVisitor {
 		if (theNode instanceof ComponentDecl) {
 			ComponentDecl comp = (ComponentDecl) theNode;
 			ASTNode<?> parent = comp.getParent();
-			while (parent.getParent() != null && !(parent instanceof ClassDecl)) {
+			while (parent.getParent() != null
+					&& !(parent instanceof FullClassDecl)) {
 				parent = parent.getParent();
 			}
 			if (parent instanceof FullClassDecl) {
 				FullClassDecl decl = (FullClassDecl) parent;
 				decl.removeComponentDecl(comp);
+				decl.flushCache();
+				decl.components();
+
 				System.out
 						.println("SUCCESSFULLY REMOVED COMPONENTDECL FROM FULLCLASSDECL");
 			}
@@ -369,27 +284,41 @@ public class ModelicaASTRegistryVisitor {
 		 */
 	}
 
+	/*
+	 * private void removeNodeFromSrcClassUses(ASTNode<?> component, String
+	 * className) { ASTNode<?> root = component; while (root.getParent() !=
+	 * null) root = root.getParent(); ArrayList<ComponentDecl> foundAccesses =
+	 * new ArrayList<ComponentDecl>(); findAllClassUsesInSrcAST(root, className,
+	 * foundAccesses); System.out.println("REMOVE FOUND nbr srcclassaccesses: "
+	 * + foundAccesses.size()); for (ComponentDecl classAccess : foundAccesses)
+	 * { removeSrcChild(component, classAccess); } }
+	 */
+
+	/**
+	 * Remove the component from the classAccess
+	 * 
+	 * @param component
+	 *            child
+	 * @param classAccess
+	 *            parent
+	 */
+	/*
+	 * private void removeSrcChild(ASTNode<?> component, ComponentDecl
+	 * classAccess) { // TODO make this work }
+	 */
+
 	// DEBUG TODO remove
-	private void debugPrintFullAST(ASTNode<?> root, String indent,
-			ArrayList<ASTNode<?>> visited) {
-		if (indent.equals("")) {
-			System.out.println(root.getNodeName() + " " + root.outlineId());
-			visited.add(root);
-		} else {
-			for (int i = 0; i < root.getNumChild(); i++) {
-				ASTNode<?> child = root.getChild(i);
-				System.out.println(indent + child.getNodeName() + " "
-						+ child.outlineId());
-			}
-		}
-		for (int i = 0; i < root.getNumChild(); i++) {
-			ASTNode<?> child = root.getChild(i);
-			if (!visited.contains(child)) {
-				visited.add(child);
-				debugPrintFullAST(child, indent + "  ", visited);
-			}
-		}
-	}
+	/*
+	 * private void debugPrintFullAST(ASTNode<?> root, String indent,
+	 * ArrayList<ASTNode<?>> visited) { if (indent.equals("")) {
+	 * System.out.println(root.getNodeName() + " " + root.outlineId());
+	 * visited.add(root); } else { for (int i = 0; i < root.getNumChild(); i++)
+	 * { ASTNode<?> child = root.getChild(i); System.out.println(indent +
+	 * child.getNodeName() + " " + child.outlineId()); } } for (int i = 0; i <
+	 * root.getNumChild(); i++) { ASTNode<?> child = root.getChild(i); if
+	 * (!visited.contains(child)) { visited.add(child); debugPrintFullAST(child,
+	 * indent + "  ", visited); } } }
+	 */
 
 	// DEBUG TODO remove
 	private void printSubTree(ASTNode<?> node, String indent) {
@@ -401,17 +330,153 @@ public class ModelicaASTRegistryVisitor {
 	}
 
 	// DEBUG TODO remove
-	private String printPath(ArrayList<String> list) {
-		String res = "";
-		for (int i = 0; i < list.size(); i++) {
-			if (res.equals("")) {
-				res = list.get(i);
-			} else {
-				res = res + " /// " + list.get(i);
-			}
-		}
-		return res;
-	}
+	/*
+	 * private String printPath(ArrayList<String> list) { String res = ""; for
+	 * (int i = 0; i < list.size(); i++) { if (res.equals("")) { res =
+	 * list.get(i); } else { res = res + " /// " + list.get(i); } } return res;
+	 * }
+	 */
+	/**
+	 * Add instcomponent to all instclass uses in instAST.
+	 * 
+	 * @param srcNode
+	 * @param surroundingClassName
+	 */
+	/*
+	 * private void addNodeToSrcClassUses(ASTNode<?> srcNode, String
+	 * surroundingClassName) { ArrayList<ComponentDecl> srcUses = new
+	 * ArrayList<ComponentDecl>(); ASTNode<?> root = srcNode; while
+	 * (root.getParent() != null) root = root.getParent(); // TODO might need to
+	 * keep track of visited // nodes so not infinite loop, maybe // better to
+	 * get root via lookup(file) findAllClassUsesInSrcAST(root,
+	 * surroundingClassName, srcUses); System.out
+	 * .println("addnode findAllClassUsesInInstAST() found nbr uses: " +
+	 * srcUses.size()); for (ComponentDecl decl : srcUses) { //
+	 * decl.addChild(srcNode); ASTNode<?> tmp = decl; while (!(tmp instanceof
+	 * FullClassDecl)) { tmp = tmp.getParent(); } FullClassDecl fcd =
+	 * (FullClassDecl) tmp; // fcd.flushCache(); //TODO we need? //
+	 * fcd.classes(); //TODO we need? fcd.components(); // TODO addComponent,
+	 * addchild is prob very // bad way to add? } }
+	 */
+
+	/**
+	 * Add the new component to all class uses within the instance tree.
+	 * 
+	 * @param file
+	 * @param instNode
+	 * @param className
+	 */
+	/*
+	 * private void addNodeToInstClassUses(IFile file, InstComponentDecl
+	 * instNode, String className) { ArrayList<InstComponentDecl> foundAccesses
+	 * = findAllClassUsesInInstAST( file, className); for (InstComponentDecl icd
+	 * : foundAccesses) { icd.addInstComponentDecl(instNode); } }
+	 */
+
+	/**
+	 * Removes a node from the instance AST.
+	 * 
+	 * @param instNode
+	 */
+	/*
+	 * private void removeInstNode(ASTNode<?> instNode) { if (instNode
+	 * instanceof InstComponentDecl) { System.out
+	 * .println("ModelicaASTRegVISITOR: REMOVENODE was instcompdecl");
+	 * InstComponentDecl decl = (InstComponentDecl) instNode; ASTNode<?> parent
+	 * = decl.getParent(); while (parent != null && !(parent instanceof
+	 * InstClassDecl)) { parent = parent.getParent(); } if (parent instanceof
+	 * InstClassDecl) { InstClassDecl classdecl = (InstClassDecl) parent;
+	 * classdecl.removeInstComponentDecl(decl); System.out
+	 * .println("ModelicaASTRegVISITOR: succ removed instcompdecl from instclass"
+	 * ); } }// TODO only support remove components? (class, model, eg...) }
+	 */
+
+	/*
+	 * private void removeNodeFromInstClassUses(IFile file, String className,
+	 * InstComponentDecl component) { ArrayList<InstComponentDecl> foundAccesses
+	 * = findAllClassUsesInInstAST( file, className);
+	 * System.out.println("REMOVE FOUND nbr instclassaccesses: " +
+	 * foundAccesses.size()); for (InstComponentDecl classAccess :
+	 * foundAccesses) { removeInstChild(component, classAccess); } }
+	 */
+
+	/**
+	 * Remove the component from the classAccess.
+	 * 
+	 * @param component
+	 *            child
+	 * @param classAccess
+	 *            parent
+	 */
+	/*
+	 * private void removeInstChild(InstComponentDecl component,
+	 * InstComponentDecl classAccess) { List<InstComponentDecl> classComponents
+	 * = classAccess .getInstComponentDecls(); for (int i = 0; i <
+	 * classComponents.getNumChild(); i++) { if
+	 * (classComponents.getChild(i).equals(component)) {
+	 * classAccess.removeChild(i); break; } } }
+	 */
+
+	/**
+	 * TODO probably needs refactoring, complexity > 1000
+	 * 
+	 * @param file
+	 * @param className
+	 * @return
+	 */
+	/*
+	 * private ArrayList<InstComponentDecl> findAllClassUsesInInstAST(IFile
+	 * file, String className) { ArrayList<InstComponentDecl> foundAccesses =
+	 * new ArrayList<InstComponentDecl>(); LocalRootNode lroot = (LocalRootNode)
+	 * ModelicaASTRegistry .getASTRegistry().doLookup(file)[0]; StoredDefinition
+	 * def = lroot.getDef(); InstProgramRoot iRoot =
+	 * lroot.getSourceRoot().getProgram() .getInstProgramRoot(); ArrayList<?>
+	 * classes = def.getElements().toArrayList(); for (InstClassDecl inst :
+	 * iRoot.instClassDecls()) { if (classes.contains(inst.getClassDecl())) { //
+	 * No accesses within declaring class, would give infinite loop // (?) if
+	 * (!(inst.outlineId().equals(className))) { List<InstComponentDecl>
+	 * complist = inst .getInstComponentDecls(); for (InstComponentDecl idecl :
+	 * complist) { InstAccess ia = idecl.getClassName(); if (ia instanceof
+	 * InstClassAccess) { InstClassAccess ica = (InstClassAccess) ia; if
+	 * (ica.getID().equals(className)) { //
+	 * idecl.addInstComponentDecl(instNode); foundAccesses.add(idecl);
+	 * System.out .println("ooooOOO found instclassacccess"); } } } } } }
+	 * System.out.println("findAllClassUsesInInstAST() found nbr uses: " +
+	 * foundAccesses.size()); return foundAccesses; }
+	 */
+
+	/**
+	 * Rename all the found class accesses. Renaming is properly propagated to
+	 * all class accesses automagically.
+	 * 
+	 * @param foundAccesses
+	 */
+	/*
+	 * private void renameFoundClassAccesses(ArrayList<ComponentDecl>
+	 * foundAccesses) { for (ComponentDecl decl : foundAccesses) { Access ca =
+	 * decl.getClassName(); ClassAccess theaccess = (ClassAccess) ca;
+	 * theaccess.setID("CHANGEDNAME"); } }
+	 */
+
+	/**
+	 * Find all class uses within the src AST.
+	 * 
+	 * @param root
+	 * @param className
+	 * @param foundAccesses
+	 */
+	/*
+	 * private void findAllClassUsesInSrcAST(IASTNode root, String className,
+	 * ArrayList<ComponentDecl> foundAccesses) { for (int i = 0; i <
+	 * root.getNumChild(); i++) { IASTNode child = root.getChild(i); if (child
+	 * instanceof FullClassDecl) { FullClassDecl fcd = (FullClassDecl) child;
+	 * for (ComponentDecl decl : fcd.getComponentDeclList()) { Access access =
+	 * decl.getClassName(); if (access instanceof ClassAccess) { ClassAccess ca
+	 * = (ClassAccess) access; if (ca.getID().equals(className)) {
+	 * System.out.println("Found SrcClassAccess: " + ca.getNodeName());
+	 * foundAccesses.add(decl); } } } } else { findAllClassUsesInSrcAST(child,
+	 * className, foundAccesses); } } }
+	 */
 
 	// DEBUG TODO remove
 	private String makeStringOfArrayPath(ArrayList<String> list) {
@@ -424,5 +489,19 @@ public class ModelicaASTRegistryVisitor {
 			}
 		}
 		return res;
+	}
+	
+	public void createPath(Stack<Integer> nodePath, ASTNode<?> node) {
+		if (node != null && !(node instanceof StoredDefinition)) {
+			ASTNode<?> parent = node.getParent();
+			for (int i = 0; i < parent.getNumChild(); i++) {
+				if (parent.getChild(i).equals(node)) {
+					System.out.println("YEAH, found CHILD creating PATH..."
+							+ node.getNodeName());
+					nodePath.add(i);
+					createPath(nodePath, parent);
+				}
+			}
+		}
 	}
 }

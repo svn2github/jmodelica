@@ -86,4 +86,26 @@ aspect Core {
         	}
         }
 	}
+	
+	/*
+	 * JL_ADDED
+	 * Synchronized method for adding a new component to a fullclassdecl.
+	 */
+	public void FullClassDecl.syncAddComponent(String className, String componentName, Placement placement) {
+		synchronized (state()) {
+			ComponentDecl componentDecl = new ComponentDecl();
+			componentDecl.setClassName(Access.fromClassName(className));
+			componentDecl.setVisibilityType(new PublicVisibilityType());
+			componentDecl.setName(new IdDecl(componentName));
+			componentDecl.setComment(new Comment());
+			componentDecl.setCCComment(new Comment());
+			componentDecl.annotation().savePlacement(placement);
+			
+			addNewComponentDecl(componentDecl);
+			flushCache();
+			classes(); //TODO prob dont need?
+			components();
+		}
+	}
+	
 }

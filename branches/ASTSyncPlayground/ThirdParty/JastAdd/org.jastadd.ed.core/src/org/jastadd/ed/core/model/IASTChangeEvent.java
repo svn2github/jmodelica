@@ -1,6 +1,6 @@
 package org.jastadd.ed.core.model;
 
-import java.util.ArrayList;
+import java.util.Stack;
 
 import org.jastadd.ed.core.model.node.IASTNode;
 
@@ -48,5 +48,5 @@ public interface IASTChangeEvent {
 	 */
 	public int getLevel();
 
-	public ArrayList<String> getChangedPath();
+	public Stack<Integer> getChangedPath();
 }

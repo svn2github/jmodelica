@@ -15,8 +15,6 @@
  */
 package org.jmodelica.ide.outline;
 
-import java.util.ArrayList;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
@@ -31,8 +29,7 @@ import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.ide.actions.TestRenameAction;
 import org.jmodelica.ide.actions.TestRemoveAction;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
-import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.ide.compiler.ChangePropagationController;
 
 public class InstanceOutlinePage extends OutlinePage implements
 		IASTChangeListener {
@@ -67,23 +64,13 @@ public class InstanceOutlinePage extends OutlinePage implements
 		tbm.setContextMenuManager(mm);
 		Menu menu = mm.createContextMenu(viewer.getTree());
 		viewer.getTree().setMenu(menu);
-		ModelicaASTRegistry.getASTRegistry().addListener(
+		ChangePropagationController.getInstance().addListener(
 				((IFileEditorInput) fTextEditor.getEditorInput()).getFile(),
-				new ArrayList<String>(), this);
+				null, this, IASTChangeListener.OUTLINE_LISTENER);
 	}
 
 	public void astChanged(IASTChangeEvent e) {
-		// new InstanceOutlineASTVisitor(test,(ASTNode<?>) fRoot, e,
-		// getTreeViewer());
+		// Synconization is done in contentprovider.
 		update();
-		System.out.println("instoutlien event!!!");
-	}
-
-	//DEBUG TODO remove
-	private void printTree(ASTNode<?> root, String indent) {
-		for (int i = 0; i < root.getNumChild(); i++) {
-			System.out.println(indent + root.getChild(i).getNodeName());
-			printTree(root.getChild(i), indent + "  ");
-		}
 	}
 }

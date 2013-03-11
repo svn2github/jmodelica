@@ -13,7 +13,7 @@ import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class GlobalRootNode implements IGlobalRootNode {
-	private ILocalRootNode[] files;;
+	private ILocalRootNode[] files;
 	private SourceRoot sourceRoot;
 
 	public GlobalRootNode(SourceRoot sroot) {
