@@ -16,9 +16,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "fmiCSFunctions.h"
+#include "fmi1_functions.h"
 #include <jmi.h>
 #include <jmi_block_residual.h>
-#include "fmi_cs.h"
+#include <fmi.h>
+#include <fmi_cs.h>
 #include "ModelicaUtilities.h"
 #include "ModelicaTables.h"
 
@@ -26,7 +29,6 @@ $external_func_includes$
 
 #define MODEL_IDENTIFIER $C_model_id$
 #define C_GUID $C_guid$
-#include "fmiCSFunctions.h"
 
 static int model_ode_guards_init(jmi_t* jmi);
 static int model_init_R0(jmi_t* jmi, jmi_ad_var_vec_p res);
@@ -418,7 +420,7 @@ DllExport fmiStatus fmiDoStep(fmiComponent c,
 			      fmiReal      currentCommunicationPoint,
 			      fmiReal      communicationStepSize,
 			      fmiBoolean   newStep) {
-  return fmi_cs_do_step(c, currentCommunicationPoint, communicationStepSize, newStep);
+  return fmi_do_step(c, currentCommunicationPoint, communicationStepSize, newStep);
 }
 
 DllExport fmiStatus fmiCancelStep(fmiComponent c){
@@ -489,6 +491,8 @@ DllExport fmiStatus fmiGetStringStatus(fmiComponent c, const fmiStatusKind s, fm
     return fmi_get_string_status(c,s,value);
 }
 
+/* NOTE IN THE FILE FMICSFUNCTIONS.H WHY? */
+/*
 DLLExport fmiStatus fmiSaveState(fmiComponent c, size_t index){
     return fmi_save_state(c,index);
 }
@@ -496,6 +500,7 @@ DLLExport fmiStatus fmiSaveState(fmiComponent c, size_t index){
 DLLExport fmiStatus fmiRestoreState(fmiComponent c, size_t index){
     return fmi_restore_state(c,index);
 }
+*/
 
 #ifdef __cplusplus
 }
