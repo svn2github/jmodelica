@@ -589,19 +589,11 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes. 
 	 */
-	syn lazy Size FArraySubscripts.declarationSize() = declarationSize(getFSubscripts());
-	
-	/**
-	 * Get the array size for a collection of FSubscripts.
-	 */
-	public static Size FArraySubscripts.declarationSize(Iterable<? extends FSubscript> subs) {
-		int ndims = 0;
-		for (FSubscript fs : subs)
-			ndims++;
-		if (ndims == 0)
+	syn lazy Size FArraySubscripts.declarationSize() {
+		if (ndims() == 0)
 			return Size.SCALAR;
-		MutableSize s = new MutableSize(ndims);
-		for (FSubscript fs : subs)
+		MutableSize s = new MutableSize(ndims());
+		for (FSubscript fs : getFSubscripts())
 			fs.addDeclarationSize(s);
 		return s;
 	}
@@ -1047,7 +1039,6 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes. 
 	 */
-	syn Size InstNode.size()               = FArraySubscripts.declarationSize(myFSubscripts());	
 	syn lazy Size InstComponentDecl.size() = declaredSize();
 
 	/**

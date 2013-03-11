@@ -636,11 +636,9 @@ aspect InstBindingType {
 		FType res = icm.type();
 		InstNode decl = icm.myInstNode();
 		if (decl == this)
-			return res.sizedType(size());
-		if (icm.getEach()) 
+			return res.arrayType(size());  // TODO: Take care of scalars as well
+		if (icm.getEach() || !enclosedBy(decl)) 
 			return res;
-		else if (!enclosedBy(decl))
-			return res.sizedType(res.size().expand(decl.size()));
 		else
 			return expandBindingType(res.arrayType(size()), decl);
 	}

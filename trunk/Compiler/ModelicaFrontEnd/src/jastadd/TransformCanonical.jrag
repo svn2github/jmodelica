@@ -1689,7 +1689,7 @@ aspect TransformCanonical {
 	
 					log.info("States:");
 					for (FVariable fv : differentiatedRealVariables()) {
-						log.info(new PrettyPrintDelegate(fv, "  "));
+						log.info(fv.prettyPrint("  ")); //TODO: fix so no call is made if log level < info
 					}
 				} else {
 					return;
