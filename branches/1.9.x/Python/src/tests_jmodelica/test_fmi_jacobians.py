@@ -504,8 +504,6 @@ class Test_FMI_Jaobians_Functions:
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0
 
-
-
     @testattr(stddist = True)
     def test_Function7(self):
         cname = "JacGenTests.JacTestFunction7"
@@ -523,6 +521,17 @@ class Test_FMI_Jaobians_Functions:
         'eliminate_alias_variables':False,'fmi_version':2.0})
         m = FMUModel2(fn)
         m.set_debug_logging(True)
+        Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+        assert n_errs ==0
+
+    @testattr(stddist = True)
+    def test_DiscreteFunction1(self):
+        cname = "JacGenTests.JacTestDiscreteFunction1"
+        fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
+        'eliminate_alias_variables':False,'fmi_version':2.0})
+        m = FMUModel2(fn)
+        m.set_debug_logging(True)
+        m.initialize(relativeTolerance=1e-11)
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0
 

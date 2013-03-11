@@ -536,7 +536,7 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
 	if (((fmi_t *)c)->jmi->recomputeVariables==1) {
 		fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
 		if(retval != 0) {
-			(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+			(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed at time %gs.",jmi_get_t(((fmi_t *)c)->jmi)[0]);
 			return fmiError;
 		}
 		((fmi_t *)c)->jmi->recomputeVariables = 0;
@@ -1467,97 +1467,6 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
             jmi_delete_block_residual(jmi->dae_block_residuals[i]);
     }*/
     return fmiOK;
-}
-
-jmi_int_t jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size){
-    int i;
-    for (i=0;i<size;i++){
-        if (sw_pre[i]!=sw_post[i]){
-            return 0;
-        }
-    }
-    return 1;
-}
-
-int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, fmiInteger mode){
-    fmiInteger nF,nR;
-    fmiInteger nF0,nF1,nFp,nR0,retval;
-	fmiInteger i,size_switches;
-    jmi_real_t *event_indicators;
-    fmi_t* fmi = jmi->fmi;
-    
-    jmi_init_get_sizes(jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
-    jmi_dae_get_sizes(jmi, &nF, &nR);
-    
-    if (mode==1) { 
-        size_switches = nR;
-        /* Allocate memory */
-        event_indicators = (jmi_real_t*)fmi->fmi_functions.allocateMemory(size_switches, sizeof(jmi_real_t));
-        retval = jmi_dae_R(jmi,event_indicators);
-    }else{ /* INITIALIZE */
-        size_switches = nR0;
-        /* Allocate memory */
-        event_indicators = (jmi_real_t*)fmi->fmi_functions.allocateMemory(size_switches, sizeof(jmi_real_t));
-        retval = jmi_init_R0(jmi, event_indicators);
-    }
-
-    if (mode==1){
-        for (i=0; i < size_switches; i=i+1){
-            switches[i] = jmi_turn_switch(event_indicators[i], switches[i], fmi->fmi_epsilon, jmi->relations[i]);
-        }
-    }else{ /* INITIALIZE */
-        for (i=0; i < size_switches; i=i+1){
-            if (i < nR){
-                /* NORMAL SWITCHES FIRST */
-                switches[i] = jmi_turn_switch(event_indicators[i], switches[i], fmi->fmi_epsilon, jmi->relations[i]);
-            }else{
-                /* INITIALIZATION SWITCHES NEXT */
-                switches[i] = jmi_turn_switch(event_indicators[i], switches[i], fmi->fmi_epsilon, jmi->initial_relations[i-nR]);
-            }
-        }
-    }
-    fmi->fmi_functions.freeMemory(event_indicators);
-    return 0;
-}
-
-jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel){
-    /* x >= 0
-     * x >  0
-     * x <= 0
-     * x <  0
-     */
-    if (sw == 1.0){
-        if ((ev_ind <= -1*eps && rel == JMI_REL_GEQ) || (ev_ind <= 0.0 && rel == JMI_REL_GT) || (ev_ind >= eps && rel == JMI_REL_LEQ) || (ev_ind >= 0.0 && rel == JMI_REL_LT)){
-            sw = 0.0;
-        }
-    }else{
-        if ((ev_ind >= 0.0 && rel == JMI_REL_GEQ) || (ev_ind >= eps && rel == JMI_REL_GT) || (ev_ind <= 0.0 && rel == JMI_REL_LEQ) || (ev_ind <= -1*eps && rel == JMI_REL_LT)){
-            sw = 1.0;
-        }
-    }
-    return sw;
-}
-
-int jmi_print_array(jmi_t* jmi, jmi_real_t* x, fmiInteger size_x, char* category, char* array_info){
-    int i, len=0;
-    int max_output_variables=100;
-    char buffer[3000];
-    
-    len += sprintf(buffer+len, "%s ",category);
-    len += sprintf(buffer+len, "%s ",array_info);
-    for (i=0; i<size_x && i<max_output_variables;i++){
-        len += sprintf(buffer+len, "%g; ",x[i]);
-    }
-    
-    jmi_log_info(jmi,buffer);
-    if (i==max_output_variables){
-        len = 0;
-        len += sprintf(buffer+len, "%s ",category);
-        len += sprintf(buffer+len, "Maximum number of output variables reached, printing the first hundred...");
-        jmi_log_info(jmi, buffer);
-    }
-    
-    return 0;
 }
 
 extern const char *fmi_runtime_options_map_names[];

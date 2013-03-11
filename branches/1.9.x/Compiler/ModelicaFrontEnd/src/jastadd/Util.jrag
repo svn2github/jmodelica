@@ -1129,6 +1129,8 @@ aspect FlatNames {
     syn String FEnumDecl.name() = getName().name();
     
     syn String FEnumLiteral.name() = getName().name();
+    
+    syn String FDerivativeFunction.name() = getNameNoTransform().name();
       
     eq FDerivativeVariable.name()  = getFQNameNoTransform().derName();
     eq FHDerivativeVariable.name()  = getFQNameNoTransform().hDerName(getOrder());
@@ -1211,6 +1213,9 @@ aspect FlatNames {
     
     syn String FQName.funcNameUnderscore(String suffix) = "func_" + nameUnderscore() + "_" + suffix;
     syn String FIdUse.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
+    syn String FFunctionCall.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix);
+    syn String FFunctionDecl.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
+    syn String FDerivativeFunction.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix);
 
     syn int FAbstractVariable.variableIndex() = findVariableIndex();
     eq FPreBooleanVariable.variableIndex()    = myNonPreVariable().variableIndex();
@@ -1974,6 +1979,11 @@ aspect FlatFunctionUtils {
                  l.add(var);
          return l;
      }
+     
+	/**
+	 * \brief Returns the i:th FFunctionVariable that is  declared as "input".
+	 */
+	syn FFunctionVariable FFunctionDecl.myInput(int i) = myInputs().get(i);
      
      /**
       * \brief Returns a list of all FFunctionVariables not declared as "input" or "output".

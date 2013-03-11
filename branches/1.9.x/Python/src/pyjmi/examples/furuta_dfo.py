@@ -125,7 +125,7 @@ def run_demo(with_plots=True):
 	print ' '
 	
 	# Load model
-	model = FMUModel(curr_dir+'/files/FMUs/Furuta.fmu')
+	model = load_fmu(curr_dir+'/files/FMUs/Furuta.fmu')
 	
 	# Set optimal parameter values into the model
 	model.set('armFriction',armFrictionCoefficient_opt)

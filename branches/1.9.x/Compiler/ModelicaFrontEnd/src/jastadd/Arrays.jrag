@@ -2135,7 +2135,7 @@ aspect ArrayHelpers {
 		 * \brief Get length in the last dimension.
 		 */
 		public int last() {
-			return size[size.length - 1];
+			return get(size.length - 1);
 		}
 		
 		/**
@@ -2389,10 +2389,19 @@ aspect ArrayHelpers {
 		 * @param itsDim        the dimension in the other Size to compare
 		 */
 		public boolean equivalentDim(Size s, boolean allowUnknown, int myDim, int itsDim) {
-			boolean same = size[myDim] == s.size[itsDim];
+			int myLen = read(myDim);
+			int itsLen = s.read(itsDim);
+			boolean same = myLen == itsLen;
 			if (same || !allowUnknown)
 				return same;
-			return size[myDim] == UNKNOWN || s.size[itsDim] == UNKNOWN;
+			return myLen == UNKNOWN || itsLen == UNKNOWN;
+		}
+		
+		/**
+		 * Make sure that size is final, then get value of size[i].
+		 */
+		protected int read(int i) {
+			return size[i];
 		}
 		
 		private static final String SEP = ", ";
@@ -2594,6 +2603,7 @@ aspect ArrayHelpers {
 		
 		private int i;
 		private FExp[] exps;
+		private boolean[] evaluated;
 		
 		/**
 		 * \brief Constructs a new mutable Size of <code>ndims</code> dimensions.
@@ -2603,6 +2613,7 @@ aspect ArrayHelpers {
 			Arrays.fill(size, UNKNOWN);
 			exps = new FExp[ndims];
 			i = 0;
+			evaluated = new boolean[ndims];
 		}
 		
 		/**
@@ -2675,7 +2686,7 @@ aspect ArrayHelpers {
 		 */
 		public void set(int d, FExp e) {
 			int s = UNKNOWN;
-			if (okExp(e)) {
+			if (okExp(e) && e.hasOnlyLiterals()) {
 				try {
 					s = e.ceval().intValue();
 				} catch (ConstantEvaluationException uoe) {
@@ -2694,6 +2705,30 @@ aspect ArrayHelpers {
 		public void set(int d1, Size s, int d2) {
 			size[d1] = s.size[d2];
 			exps[d1] = (s instanceof MutableSize) ? ((MutableSize) s).exps[d2] : null;
+		}
+		
+		/**
+		 * Make sure dimension i of size is ready to use.
+		 */
+		private void evaluate(int i) {
+			if (i >= 0 && i < evaluated.length && !evaluated[i]) {
+				evaluated[i] = true;
+				if (exps[i] != null) {
+					try {
+						size[i] = exps[i].ceval().intValue();
+						exps[i] = null;
+					} catch (ConstantEvaluationException e) {
+					}
+				}
+			}
+		}
+		
+		/**
+		 * Make sure size is ready to use.
+		 */
+		private void evaluate() {
+			for (int i = 0; i < size.length; i++) 
+				evaluate(i);
 		}
 		
 		/**
@@ -2739,6 +2774,7 @@ aspect ArrayHelpers {
 		 * \brief Get length in the <code>i</code>th dimension.
 		 */
 		public int get(int i) {
+			evaluate(i);
 			if (i < 0 || i >= size.length)
 				return UNKNOWN;
 			if (exps[i] == null) // We want to evaluate FUnknownSizeExps as well
@@ -2802,6 +2838,7 @@ aspect ArrayHelpers {
 		 * @param s  the length of the new dimension
 		 */
 		public Size expand(int s) {
+			evaluate();
 			MutableSize ns = new MutableSize(size.length + 1);
 			ns.size[0] = s;
 			ns.exps[0] = null;
@@ -2816,6 +2853,7 @@ aspect ArrayHelpers {
 		 * <code>s</code> is added on the left side.
 		 */
 		public Size expand(Size s) {
+			evaluate();
 			int ndims = size.length + s.size.length;
 			if (ndims == 0)
 				return Size.SCALAR;
@@ -2835,6 +2873,7 @@ aspect ArrayHelpers {
 		 * @param varMap  a map of variables to replace and expressions to replace them with
 		 */
 		public FExp createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
+			evaluate(d);
 			return (okExp(exps[d])) ? 
 					exps[d].createSizeFExp(varMap) : 
 					super.createSizeFExp(d, varMap);
@@ -2846,6 +2885,7 @@ aspect ArrayHelpers {
 		 * the resulting expression is not expanded like createSizeFExp().
 		 */
 		public FExp createFExp(int d) {
+			evaluate(d);
 			return (exps[d] != null) ? 
 					exps[d].createSizeFExp() : 
 					super.createFExp(d);
@@ -2855,6 +2895,7 @@ aspect ArrayHelpers {
 		 * \brief Create an FExp that describes the number of elements of this size.
 		 */
 		public FExp createNumElementsFExp() {
+			evaluate();
 			int known = 1;
 			FExp res = null;
 			for (int i = 0; i < size.length; i++) {
@@ -2886,6 +2927,7 @@ aspect ArrayHelpers {
 		 * \brief Create a new flattened FSubscript for dimension <code>i</code>.
 		 */
 		protected FSubscript flattenFSubscript(int i, FQName prefix) {
+			evaluate(i);
 			return exps[i] == null ? super.flattenFSubscript(i, prefix) : 
 				new FExpSubscript(exps[i].flatten(prefix));
 		}
@@ -2894,6 +2936,7 @@ aspect ArrayHelpers {
 		 * \brief Create a new FSubscript with a range spanning dimension <code>i</code>.
 		 */
 		protected FSubscript rangeFSubscript(int i) {
+			evaluate(i);
 			return !okExp(exps[i]) ? super.rangeFSubscript(i) : 
 				new FExpSubscript(new FRangeExp(new FIntegerLitExp(1), exps[i].fullCopy()));
 		}
@@ -2902,6 +2945,7 @@ aspect ArrayHelpers {
 		 * \brief Returns a string representation of a single length.
 		 */
 		protected String toString(int i) {
+			evaluate(i);
 			// TODO: use okExp() instead of "== null"?
 			return exps[i] == null ? super.toString(i) : exps[i].prettyPrint("");
 		}
@@ -2913,6 +2957,7 @@ aspect ArrayHelpers {
 			MutableSize ms = new MutableSize(size.length);
 			System.arraycopy(size, 0, ms.size, 0, size.length);
 			System.arraycopy(exps, 0, ms.exps, 0, exps.length);
+			ms.evaluated = evaluated;
 			return ms;
 		}
 		
@@ -2929,6 +2974,7 @@ aspect ArrayHelpers {
 		 *        from the left side.
 		 */
 		public Size promote(int dim) {
+			evaluate();
 			if (dim == size.length) 
 				return this;
 			if (dim == 0)
@@ -2939,6 +2985,19 @@ aspect ArrayHelpers {
 			System.arraycopy(exps, exps.length - old, ns.exps, 0, old);
 			Arrays.fill(ns.size, old, dim, 1);
 			return ns;
+		}
+		
+		/**
+		 * Make sure that size is final, then get value of size[i].
+		 */
+		protected int read(int i) {
+			evaluate(i);
+			return size[i];
+		}
+		
+		public boolean isUnknown() {
+			evaluate();
+			return super.isUnknown();
 		}
 		
 	}

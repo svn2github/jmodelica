@@ -454,60 +454,6 @@ const char* fmi_get_version();
  */
 fmiStatus fmi_set_debug_logging(fmiComponent c, fmiBoolean loggingOn);
 
-/**
- * \brief Turns a switch.
- * 
- * Turns a switch depending on the indicator value and the relation 
- * expression. The relation expression can either be >, >=, <, <=. An
- * Example is if ev_ind is postive and the relation is > then a switch
- * occurs if ev_ind is <= 0.0. If on the other hand the relation is >=
- * , then the switch occurs if ev_ind < -eps.
- * 
- * @param ev_ind The indicator value.
- * @param sw The switch value
- * @param eps The epsilon used for "moving" the zero.
- * @param rel The relation expression
- * @return The new switch value
- */
-jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
-
-/**
- * \brief Evaluates the switches.
- * 
- * Evaluates the switches. Depending on the mode, it either evaluates
- * all the switches at initial time (mode=0) or otherwise (mode=1).
- * 
- * @param jmi The jmi_t struct
- * @param switches The switches (Input, Output)
- * @param mode Determine if we are evaluating initial switches or not.
- * @return Error code.
- */
-int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, fmiInteger mode);
-
-/**
- * \brief Compares two sets of switches.
- * 
- * Compares two sets of switches and returns (1) if they are equal and
- * (0) if not.
- * 
- * @param sw_pre The first set of switches
- * @param sw_post The second set of switches
- * @param size The size of the switches
- * @return 1 if equal, 0 if not
- */
-jmi_int_t jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size);
-
-/**
- * \brief Prints an array to the logger as information
- * 
- * @param jmi jmi_t struct
- * @param x The array to be printed
- * @param size_x The size of the array
- * @param category The log category, for example [EVENT_ITERATION]
- * @param array_info Array information to be printed after category and before x
- * @return Error code
- */
-int jmi_print_array(jmi_t* jmi, jmi_real_t* x, fmiInteger size_x, char* category, char* array_info);
 
 /* @} */
 

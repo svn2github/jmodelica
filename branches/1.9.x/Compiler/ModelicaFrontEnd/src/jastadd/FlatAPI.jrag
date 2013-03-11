@@ -1590,6 +1590,27 @@ aspect FVariableUses {
 	eq InstRoot.getChild().inFunctionCallLeft()          = false;
 	
 	/**
+	 * Checks if this expression is used in a function call
+	 */
+	inh boolean FExp.inFunctionCall();
+	eq FFunctionCall.getChild().inFunctionCall() = true;
+	eq FClass.getChild().inFunctionCall()        = false;
+	eq InstRoot.getChild().inFunctionCall()      = false;
+	
+	/**
+	 * Returnes the function input that this expressions corresponds to.
+	 * NOTICE, this method will throw exception if this exp does not reside in a function call.
+	 */
+	inh FFunctionVariable FExp.myCorrespondingInput();
+	eq FFunctionCall.getArg(int i).myCorrespondingInput() = myFFunctionDecl().myInput(i);
+	eq FClass.getChild().myCorrespondingInput() {
+		throw new UnsupportedOperationException();
+	}
+	eq InstRoot.getChild().myCorrespondingInput() {
+		throw new UnsupportedOperationException();
+	}
+	
+	/**
 	 * All uses of this variable that are the left-hand side of an assignment or 
 	 * function call statement. 
 	 */
