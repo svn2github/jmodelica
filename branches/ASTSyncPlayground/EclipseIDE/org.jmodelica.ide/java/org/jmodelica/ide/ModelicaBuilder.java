@@ -17,7 +17,7 @@ public class ModelicaBuilder extends Builder {
 	@Override
 	protected IGlobalRootRegistry createRegistry() {
 		System.out.println("MODELICABUILDER createRegistry()");
-		return ModelicaASTRegistry.getASTRegistry();
+		return ModelicaASTRegistry.getInstance();
 	}
 
 	@Override

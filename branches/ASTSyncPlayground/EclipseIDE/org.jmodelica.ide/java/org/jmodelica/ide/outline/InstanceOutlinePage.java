@@ -29,7 +29,7 @@ import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.ide.actions.TestRenameAction;
 import org.jmodelica.ide.actions.TestRemoveAction;
-import org.jmodelica.ide.compiler.ChangePropagationController;
+import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 
 public class InstanceOutlinePage extends OutlinePage implements
 		IASTChangeListener {
@@ -64,13 +64,16 @@ public class InstanceOutlinePage extends OutlinePage implements
 		tbm.setContextMenuManager(mm);
 		Menu menu = mm.createContextMenu(viewer.getTree());
 		viewer.getTree().setMenu(menu);
-		ChangePropagationController.getInstance().addListener(
+		ModelicaASTRegistry.getInstance().addListener(
 				((IFileEditorInput) fTextEditor.getEditorInput()).getFile(),
 				null, this, IASTChangeListener.OUTLINE_LISTENER);
 	}
 
 	public void astChanged(IASTChangeEvent e) {
 		// Synconization is done in contentprovider.
+		long time = System.currentTimeMillis();
 		update();
+		System.out.println("InstanceOutline update took: "
+				+ (System.currentTimeMillis() - time) + "ms");
 	}
 }

@@ -33,7 +33,7 @@ public class InstanceOutlineContentProvider extends JastAddContentProvider {
 			return super.getElements(element);
 
 		try {
-			System.out.println("INSTANCEOUTLINECONTENTPROVIDER getElements()");
+			// System.out.println("INSTANCEOUTLINECONTENTPROVIDER getElements()");
 			StoredDefinition def = (StoredDefinition) element;
 			synchronized (def.state()) {
 				SourceRoot sr = (SourceRoot) def.root();
@@ -47,7 +47,6 @@ public class InstanceOutlineContentProvider extends JastAddContentProvider {
 				}
 				return result.toArray();
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new Object[0];

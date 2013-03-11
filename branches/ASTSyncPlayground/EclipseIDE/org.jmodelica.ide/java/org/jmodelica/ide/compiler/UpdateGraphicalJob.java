@@ -5,11 +5,11 @@ import java.util.Stack;
 import org.jastadd.ed.core.model.IASTChangeListener;
 
 public class UpdateGraphicalJob implements IJobObject {
-	private Stack<Integer> changedPath;
+	private Stack<String> changedPath;
 	private IASTChangeListener listener;
 
 	public UpdateGraphicalJob(IASTChangeListener listener,
-			Stack<Integer> changedPath) {
+			Stack<String> changedPath) {
 		this.changedPath = changedPath;
 		this.listener = listener;
 	}
@@ -24,7 +24,7 @@ public class UpdateGraphicalJob implements IJobObject {
 		listener.astChanged(null);
 	}
 
-	public Stack<Integer> getChangedPath() {
+	public Stack<String> getChangedPath() {
 		return changedPath;
 	}
 }

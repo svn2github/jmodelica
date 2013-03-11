@@ -13,7 +13,7 @@ public class ListenerObject {
 		this.listenerType = listenerType;
 	}
 
-	public void doUpdate(Stack<Integer> changedPath) {
+	public void doUpdate(Stack<String> changedPath) {
 		if (listenerType == IASTChangeListener.GRAPHICAL_LISTENER) {
 			UpdateGraphicalJob ug = new UpdateGraphicalJob(listener,
 					changedPath);

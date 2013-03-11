@@ -196,8 +196,7 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 	private IASTNode lookupASTForFile(IFile file) {
 		IProject project = file.getProject();
 		String path = file.getRawLocation().toOSString();
-		//return ModelicaASTRegistry.getASTRegistry().lookupAST(path, project);
-		LocalRootNode fileNode = (LocalRootNode)ModelicaASTRegistry.getASTRegistry().doLookup(file)[0];
+		LocalRootNode fileNode = (LocalRootNode)ModelicaASTRegistry.getInstance().doLookup(file)[0];
 		return fileNode.getDef();
 	}
 

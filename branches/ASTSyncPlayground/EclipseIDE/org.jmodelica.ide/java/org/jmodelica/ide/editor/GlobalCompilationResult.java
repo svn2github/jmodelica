@@ -1,7 +1,5 @@
 package org.jmodelica.ide.editor;
 
-import java.util.ArrayList;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.IDocument;
@@ -9,9 +7,7 @@ import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.jastadd.ed.core.ReconcilingStrategy;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jastadd.ed.core.model.node.ILocalRootHandle;
 import org.jastadd.ed.core.model.node.LocalRootHandle;
-import org.jmodelica.ide.compiler.ChangePropagationController;
 import org.jmodelica.ide.compiler.LocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
@@ -27,7 +23,7 @@ public class GlobalCompilationResult extends CompilationResult {
 
 		editorFile = ef;
 
-		ModelicaASTRegistry registry = ModelicaASTRegistry.getASTRegistry();
+		ModelicaASTRegistry registry = ModelicaASTRegistry.getInstance();
 		key = ef.toRegistryKey();
 		project = ef.iFile().getProject();
 
@@ -38,13 +34,13 @@ public class GlobalCompilationResult extends CompilationResult {
 
 		// registry.addListener(editor); // TODO JL listen against files, not
 		// against all...
-		ChangePropagationController.getInstance().addListener(editorFile.iFile(), null,
+		ModelicaASTRegistry.getInstance().addListener(editorFile.iFile(), null,
 				editor, IASTChangeListener.TEXTEDITOR_LISTENER);
 	}
 
 	public void update(IProject projChanged, String keyChanged) {
 		if (project == projChanged && keyChanged.equals(key)) {
-			LocalRootNode fileNode = (LocalRootNode) ModelicaASTRegistry.getASTRegistry()
+			LocalRootNode fileNode = (LocalRootNode) ModelicaASTRegistry.getInstance()
 					.doLookup(editorFile.iFile())[0];
 			root = (ASTNode<?>) fileNode.getDef();
 		}
@@ -55,7 +51,7 @@ public class GlobalCompilationResult extends CompilationResult {
 	}
 
 	public void dispose(Editor editor) {
-		ModelicaASTRegistry.getASTRegistry().removeListener(editor);
+		ModelicaASTRegistry.getInstance().removeListener(editor);
 	}
 
 	public void recompileLocal(IDocument doc, IFile file) {
@@ -63,7 +59,7 @@ public class GlobalCompilationResult extends CompilationResult {
 
 	public IReconcilingStrategy compilationStrategy() {
 		LocalRootHandle handle = new LocalRootHandle(
-				ModelicaASTRegistry.getASTRegistry());
+				ModelicaASTRegistry.getInstance());
 		handle.setFile(editorFile.iFile(), true);
 		ReconcilingStrategy strategy = new ReconcilingStrategy(handle,
 				new ModelicaEclipseCompiler());

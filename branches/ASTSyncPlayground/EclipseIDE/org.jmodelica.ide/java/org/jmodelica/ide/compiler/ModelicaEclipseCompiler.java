@@ -133,7 +133,7 @@ public class ModelicaEclipseCompiler implements ICompiler {
 		GlobalRootNode groot = new GlobalRootNode(sroot);
 		groot.addFiles(compilationRoot.getFiles());
 		System.out.println("ADDED NEW PROJECT");
-		ModelicaASTRegistry.getASTRegistry().doUpdate(file.getProject(), groot);
+		ModelicaASTRegistry.getInstance().doUpdate(file.getProject(), groot);
 		return new LocalRootNode(sroot, compilationRoot.getStoredDefinition());
 	}
 
@@ -145,7 +145,7 @@ public class ModelicaEclipseCompiler implements ICompiler {
 
 		ASTNode<?> node = (ASTNode<?>) compileToAST(document, dirtyRegion,
 				region, file);
-		ModelicaASTRegistry reg = ModelicaASTRegistry.getASTRegistry();
+		ModelicaASTRegistry reg = ModelicaASTRegistry.getInstance();
 		if (reg != null && node != null && node.hasLookupKey()) {
 			synchronized (node.state()) {
 				// Depends on ASTNode.state being static (if it isn't, use an

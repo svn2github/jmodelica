@@ -31,7 +31,6 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.compiler.ChangePropagationController;
 import org.jmodelica.ide.compiler.LocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.editor.ICurrentClassListener;
@@ -59,14 +58,14 @@ public class ClassOutlinePage extends OutlinePage implements
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		ModelicaASTRegistry.getASTRegistry().addListener(this);// , project,
+		ModelicaASTRegistry.getInstance().addListener(this);// , project,
 																// null);
 		IFileEditorInput fInput = (IFileEditorInput) fTextEditor
 				.getEditorInput();
 		IFile file = fInput.getFile();
-		SourceRoot root = ((LocalRootNode) ModelicaASTRegistry.getASTRegistry()
+		SourceRoot root = ((LocalRootNode) ModelicaASTRegistry.getInstance()
 				.doLookup(file)[0]).getSourceRoot();
-		ChangePropagationController.getInstance().addListener(file, null, this,
+		ModelicaASTRegistry.getInstance().addListener(file, null, this,
 				IASTChangeListener.OUTLINE_LISTENER);
 		updateAST(root);
 		setDoubleClickHandling(true);
@@ -78,7 +77,7 @@ public class ClassOutlinePage extends OutlinePage implements
 
 	public void dispose() {
 		super.dispose();
-		ModelicaASTRegistry.getASTRegistry().removeListener(this);
+		ModelicaASTRegistry.getInstance().removeListener(this);
 		currentClassListeners.clear();
 	}
 
@@ -126,7 +125,7 @@ public class ClassOutlinePage extends OutlinePage implements
 
 	@Override
 	public void astChanged(IASTChangeEvent e) {
-		System.out.println("CLASSOUTLINEPAGE RECIEVED ASTEVENT, UPDATING...");
+		//System.out.println("CLASSOUTLINEPAGE RECIEVED ASTEVENT, UPDATING...");
 		synchronized (((ASTNode<?>) fRoot).state()) {
 			updateAST(fRoot);
 		}

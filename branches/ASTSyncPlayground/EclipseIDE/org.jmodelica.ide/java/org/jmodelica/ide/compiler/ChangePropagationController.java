@@ -6,9 +6,6 @@ import java.util.Stack;
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.StoredDefinition;
-
-import com.sun.xml.internal.bind.v2.runtime.reflect.Lister;
 
 public class ChangePropagationController {
 	private static ChangePropagationController controller;
@@ -27,7 +24,7 @@ public class ChangePropagationController {
 	}
 
 	public void addListener(IFile file, ASTNode<?> node,
-			IASTChangeListener listener, int listenerType) {
+			IASTChangeListener listener, int listenerType, Stack<String> nodePath) {
 
 		System.out.println("MODELICAASTREGISTRY: Added listener to file "
 				+ file.getName());
@@ -36,24 +33,8 @@ public class ChangePropagationController {
 			root = new LibraryNode(null);
 			listenerTrees.put(file, root);
 		}
-		Stack<Integer> nodePath = new Stack<Integer>();
-		createPath(nodePath, node);
 		LibraryVisitor visitor = new LibraryVisitor();
 		visitor.addListener(root, nodePath, listener, listenerType);
-	}
-
-	public void createPath(Stack<Integer> nodePath, ASTNode<?> node) {
-		if (node != null && !(node instanceof StoredDefinition)) {
-			ASTNode<?> parent = node.getParent();
-			for (int i = 0; i < parent.getNumChild(); i++) {
-				if (parent.getChild(i).equals(node)) {
-					System.out.println("YEAH, found CHILD creating PATH..."
-							+ node.getNodeName());
-					nodePath.add(i);
-					createPath(nodePath, parent);
-				}
-			}
-		}
 	}
 
 	/**
@@ -65,7 +46,7 @@ public class ChangePropagationController {
 	 * @param nodePath
 	 */
 	public synchronized void handleNotifications(int changeType, IFile file,
-			ASTNode<?> srcNode, Stack<Integer> nodePath) {
+			ASTNode<?> srcNode, Stack<String> nodePath) {
 		LibraryVisitor visitor = new LibraryVisitor();
 		LibraryNode libroot = listenerTrees.get(file);
 		visitor.handleChangedNode(changeType, libroot, nodePath, srcNode);

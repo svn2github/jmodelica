@@ -3,15 +3,21 @@ package org.jmodelica.ide.compiler;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 
 public class ModelicaASTRegistryJobBucket {
 	private static ModelicaASTRegistryJobBucket jobBucket;
-	private PriorityQueue<IJobObject> availableJobs;
+	private PriorityQueue<IJobObject> availableGraphicalJobs;
+	private PriorityQueue<IJobObject> availableNonGraphicalJobs;
 
 	private ModelicaASTRegistryJobBucket() {
 		Comparator<IJobObject> comparator = new JobObjectComparator();
-		availableJobs = new PriorityQueue<IJobObject>(5, comparator);
+		availableGraphicalJobs = new PriorityQueue<IJobObject>(5, comparator);
+		availableNonGraphicalJobs = new PriorityQueue<IJobObject>(5, comparator);
 		// TODO larger initial capacity?
 	}
 
@@ -26,8 +32,52 @@ public class ModelicaASTRegistryJobBucket {
 	 * the queue will also automatically be created.
 	 */
 	public synchronized void addJob(IJobObject job) {
-		availableJobs.add(job);
-		createNewJobHandlerThread();
+		if (job instanceof UpdateGraphicalJob) {
+			// NOT a graphical job, does not need to run in U thread (maybe
+			// misleading, refactor name?)
+			availableNonGraphicalJobs.add(job);
+			createNewNonGraphicalJobHandlerThread(Job.SHORT);
+		} else if (job instanceof UpdateOutlineJob) {
+			availableGraphicalJobs.add(job);
+			createNewGraphicalJobHandlerThread(Job.DECORATE);
+		} else if (job instanceof ModificationJob) {
+			availableNonGraphicalJobs.add(job);
+			createNewNonGraphicalJobHandlerThread(Job.SHORT);
+		} // TODO texteditor
+	}
+
+	private void createNewNonGraphicalJobHandlerThread(int jobPriority) {
+		Job job = new Job("NonGraphicalJob") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				if (availableNonGraphicalJobs.size() > 0) {
+					availableNonGraphicalJobs.poll().doJob();
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setPriority(jobPriority);
+		job.schedule();
+	}
+
+	private void createNewGraphicalJobHandlerThread(int jobPriority) {
+		Job job = new Job("GraphicalJob") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				// Since we make changes to SWT/UI, we need this kind of
+				// thread
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						if (availableGraphicalJobs.size() > 0) {
+							availableGraphicalJobs.poll().doJob();
+						}
+					}
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		job.setPriority(jobPriority);
+		job.schedule();
 	}
 
 	/**
@@ -36,7 +86,7 @@ public class ModelicaASTRegistryJobBucket {
 	 * @return JobObject or NULL if no job available.
 	 */
 	protected synchronized IJobObject getJob() {
-		while (availableJobs.size() == 0) {
+		while (availableGraphicalJobs.size() == 0) {
 			try {
 				wait();
 			} catch (InterruptedException e) {
@@ -44,20 +94,9 @@ public class ModelicaASTRegistryJobBucket {
 			}
 		}
 		IJobObject job = null;
-		if (availableJobs.size() > 0)
-			job = availableJobs.poll();
+		if (availableGraphicalJobs.size() > 0)
+			job = availableGraphicalJobs.poll();
 		return job;
-	}
-
-	private void createNewJobHandlerThread() {
-		// Since we might make changes to SWT, we need this kind of thread
-		Display.getDefault().syncExec(new Runnable() {
-			public void run() {
-				IJobObject job = getJob();
-				if (job != null)
-					job.doJob(); // TODO not display exec?
-			}
-		});
 	}
 
 	private class JobObjectComparator implements Comparator<IJobObject> {

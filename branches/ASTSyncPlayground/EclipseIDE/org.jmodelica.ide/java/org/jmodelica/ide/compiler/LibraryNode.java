@@ -6,20 +6,19 @@ import org.jastadd.ed.core.model.IASTChangeListener;
 
 public class LibraryNode {
 	private ArrayList<LibraryNode> children = new ArrayList<LibraryNode>();
-	// Represents the index of this node at its parent in source AST.
-	private Integer index;
+	private String id;
 	private ArrayList<ListenerObject> listeners = new ArrayList<ListenerObject>();
 
-	public LibraryNode(Integer index) {
-		this.index = index;
+	public LibraryNode(String id) {
+		this.id = id;
 	}
 
 	public void addChild(LibraryNode node) {
 		this.children.add(node);
 	}
 
-	public Integer getId() {
-		return index;
+	public String getId() {
+		return id;
 	}
 
 	public ArrayList<LibraryNode> getChildren() {
@@ -33,9 +32,5 @@ public class LibraryNode {
 	public void addListener(IASTChangeListener listener, int listenerType) {
 		listeners.add(new ListenerObject(listener, listenerType));// TODO
 																	// synchronize
-	}
-
-	public void decreaseIndex() {
-		this.index--;
 	}
 }

@@ -18,12 +18,10 @@ package org.jmodelica.ide.outline;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -47,21 +45,17 @@ import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.ClassDecl;
-import org.jmodelica.modelica.compiler.Element;
-import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class ExplorerContentProvider implements ITreeContentProvider,
 		IResourceChangeListener, IResourceDeltaVisitor {
 
-	private ModelicaASTRegistry registry;
 	private ModelicaEclipseCompiler cmp;
 	private StructuredViewer viewer;
 	private Map<IFile, IASTNode> localCompiles;
 	private Set<IASTNode> outdatedLocalCompiles;
 
 	public ExplorerContentProvider() {
-		registry = ModelicaASTRegistry.getASTRegistry();
 		cmp = new ModelicaEclipseCompiler();
 		localCompiles = new HashMap<IFile, IASTNode>();
 		outdatedLocalCompiles = new HashSet<IASTNode>();
@@ -108,10 +102,8 @@ public class ExplorerContentProvider implements ITreeContentProvider,
 	}
 
 	private IASTNode getRoot(IFile file) {
-		IProject project = file.getProject();
-		String path = file.getRawLocation().toOSString();
-		// IASTNode ast = registry.lookupAST(path, project);
-		LocalRootNode fileNode = (LocalRootNode) registry.doLookup(file)[0];
+		LocalRootNode fileNode = (LocalRootNode) ModelicaASTRegistry
+				.getInstance().doLookup(file)[0];
 		IASTNode ast = fileNode.getDef();
 		// TODO: Need to save in registry even if we have to build ourselves
 		if (ast == null) {

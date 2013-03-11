@@ -85,7 +85,7 @@ protected IFile getFile() {
 protected Maybe<SourceRoot> projectRoot() {
 
     ModelicaASTRegistry reg = 
-        ModelicaASTRegistry.getASTRegistry();
+        ModelicaASTRegistry.getInstance();
     
     if (getFile() == null)
         return Maybe.Nothing();

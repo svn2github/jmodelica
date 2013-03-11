@@ -4,7 +4,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.compiler.ChangePropagationController;
 import org.jmodelica.ide.compiler.GlobalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.graphical.GraphicalEditorInput;
@@ -40,18 +39,18 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 	}
 
 	private void removeAsListener() {
-		ModelicaASTRegistry.getASTRegistry().removeListener(this);
+		ModelicaASTRegistry.getInstance().removeListener(this);
 	}
 
 	public void setInput(GraphicalEditorInput input) {
 		if (this.input != null)
 			removeAsListener();
 		this.input = input;
-		IFile theFile = ModelicaASTRegistry.getASTRegistry()
+		IFile theFile = ModelicaASTRegistry.getInstance()
 				.doLookup(input.getProject()).lookupAllFileNodes()[0].getFile();
 		// TODO hardcoded only works if one file in project, fixxx
 		SourceRoot sroot = ((GlobalRootNode) ModelicaASTRegistry
-				.getASTRegistry().doLookup(input.getProject())).getSourceRoot();
+				.getInstance().doLookup(input.getProject())).getSourceRoot();
 		ASTNode<?> classDecl;
 		synchronized (sroot.state()) {
 			root = sroot.getProgram().getInstProgramRoot();
@@ -69,7 +68,7 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 	}
 
 	private void registerAsListener(IFile theFile, ASTNode<?> classDecl) {
-		ChangePropagationController.getInstance().addListener(theFile,
+		ModelicaASTRegistry.getInstance().addListener(theFile,
 				classDecl, this, IASTChangeListener.GRAPHICAL_LISTENER);
 	}
 

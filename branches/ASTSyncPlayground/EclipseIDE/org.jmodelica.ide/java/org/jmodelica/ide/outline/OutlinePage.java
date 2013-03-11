@@ -49,6 +49,7 @@ import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BaseNode;
+import org.jmodelica.modelica.compiler.Dot;
 
 public abstract class OutlinePage extends AbstractBaseContentOutlinePage
 		implements IDoubleClickListener {
@@ -171,7 +172,7 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage
 	 *            the node to update, or <code>null</code> to update entire tree
 	 */
 	public void update(Object node) {
-		System.out.println("Running outline update()");
+		long time = System.currentTimeMillis();
 		TreeViewer viewer = getTreeViewer();
 		if (viewer != null) {
 			Control control = viewer.getControl();
@@ -179,11 +180,15 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage
 				control.setRedraw(false);
 				ISelection selection = viewer.getSelection();
 				TreePath[] paths = viewer.getExpandedTreePaths();
-				if (node == null) {
-					viewer.setInput(fRoot);
-					rootChanged(viewer);
-				} else {
-					viewer.refresh(node);
+				// Ugly, but fRoot is sometimes null...
+				Dot d = new Dot();
+				synchronized (d.state()) {
+					if (node == null) {
+						viewer.setInput(fRoot);
+						rootChanged(viewer);
+					} else {
+						viewer.refresh(node);
+					}
 				}
 				if (paths.length > 0)
 					viewer.setExpandedTreePaths(paths);
@@ -191,6 +196,8 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage
 				control.setRedraw(true);
 			}
 		}
+		System.out.println("Outline update took: "
+				+ (System.currentTimeMillis() - time) + "ms");
 	}
 
 	public void updateAST(IASTNode ast) {

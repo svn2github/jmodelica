@@ -15,7 +15,7 @@ public class LibraryVisitor {
 	 * @param nodePath
 	 */
 	public void handleChangedNode(int astChangeEventType, LibraryNode root,
-			Stack<Integer> nodePath, IASTNode changedInstNode) {
+			Stack<String> nodePath, IASTNode changedInstNode) {
 		ArrayList<ListenerObject> affectedListeners = new ArrayList<ListenerObject>();
 		getAllAffectedListeners(root, nodePath, affectedListeners);
 		System.out
@@ -23,10 +23,10 @@ public class LibraryVisitor {
 						+ affectedListeners.size());
 		if (astChangeEventType == IASTChangeEvent.POST_REMOVE) {
 			removeLibraryPath(root, nodePath);
-		}
+		} //TODO rename
 		for (ListenerObject obj : affectedListeners) {
 			obj.doUpdate(nodePath);
-		}// TODO change stack<integer> back to string...
+		}
 	}
 
 	/**
@@ -35,21 +35,16 @@ public class LibraryVisitor {
 	 * @param root
 	 * @param nodePath
 	 */
-	private void removeLibraryPath(LibraryNode root, Stack<Integer> nodePath) {
+	private void removeLibraryPath(LibraryNode root, Stack<String> nodePath) {
 		int pathSize = nodePath.size();
 		if (pathSize > 0) {
 			while (nodePath.size() > 0) {
-				Integer sought = nodePath.pop();
+				String sought = nodePath.pop();
 				for (LibraryNode node : root.getChildren()) {
-					if (node.getId() == sought) {
+					if (node.getId().equals(sought)) {
 						if (nodePath.size() == 0) {
-							int nodeIndex = node.getId();
 							root.getChildren().remove(node);
 							node = null;
-							for (LibraryNode other : root.getChildren()) {
-								if (other.getId() > nodeIndex)
-									other.decreaseIndex();
-							}
 							break;
 						} else {
 							root = node;
@@ -71,7 +66,7 @@ public class LibraryVisitor {
 	 * @param listener
 	 * @param astChangeListenerType
 	 */
-	public void addListener(LibraryNode node, Stack<Integer> nodePath,
+	public void addListener(LibraryNode node, Stack<String> nodePath,
 			IASTChangeListener listener, int listenerType) {
 		if (nodePath.size() == 0) {
 			node.addListener(listener, listenerType);
@@ -81,11 +76,11 @@ public class LibraryVisitor {
 				System.out.println(nodePath.get(i) + "/");
 			}
 		} else if (nodePath.size() > 0) {
-			Integer index = nodePath.pop();
+			String id = nodePath.pop();
 			boolean found = false;
 			for (LibraryNode child : node.getChildren()) {
 				// Check if any child is along path.
-				if (index == child.getId()) {
+				if (id.equals(child.getId())) {
 					found = true;
 					addListener(child, nodePath, listener, listenerType);
 					break;
@@ -93,7 +88,7 @@ public class LibraryVisitor {
 			}
 			if (!found) { // No previous listeners along this path, create a new
 							// child node and move on to that node.
-				LibraryNode newNode = new LibraryNode(index);
+				LibraryNode newNode = new LibraryNode(id);
 				node.addChild(newNode);
 				addListener(newNode, nodePath, listener, listenerType);
 			}
@@ -110,7 +105,7 @@ public class LibraryVisitor {
 	 * @return
 	 */
 	public void getAllAffectedListeners(LibraryNode node,
-			Stack<Integer> nodePath, ArrayList<ListenerObject> listenerlist) {
+			Stack<String> nodePath, ArrayList<ListenerObject> listenerlist) {
 		if (nodePath.size() > 0) { // Collect listeners of nodes along path
 			collectVisitorsAndMoveOn(node, nodePath, listenerlist);
 		} else if (nodePath.size() == 0) { // Collect listeners in subtree under
@@ -129,9 +124,9 @@ public class LibraryVisitor {
 	 * @return
 	 */
 	private void collectVisitorsAndMoveOn(LibraryNode node,
-			Stack<Integer> nodePath, ArrayList<ListenerObject> listenerlist) {
+			Stack<String> nodePath, ArrayList<ListenerObject> listenerlist) {
 		listenerlist.addAll(node.getListeners());
-		Integer soughtNodeId = nodePath.pop();
+		String soughtNodeId = nodePath.pop();
 		for (LibraryNode child : node.getChildren()) {
 			if (child.getId().equals(soughtNodeId)) {
 				getAllAffectedListeners(child, nodePath, listenerlist);

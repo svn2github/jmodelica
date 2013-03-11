@@ -62,7 +62,8 @@ import org.jmodelica.ide.graphical.proxy.ComponentDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentProxy;
 import org.jmodelica.ide.graphical.proxy.cache.GraphicalCacheRegistry;
 
-public class Editor extends GraphicalEditor implements IASTChangeListener, IPartListener2, Observer {
+public class Editor extends GraphicalEditor implements IASTChangeListener,
+		IPartListener2, Observer {
 
 	public static final String DIAGRAM_READ_ONLY = "diagramIsReadOnly";
 
@@ -71,7 +72,7 @@ public class Editor extends GraphicalEditor implements IASTChangeListener, IPart
 	private Stack<ComponentDiagramProxy> openComponentStack;
 	private Composite breadcrumbsBar;
 	private boolean ASTDirty;
-	private GraphicalCacheRegistry cacheRegistry  = new GraphicalCacheRegistry();
+	private GraphicalCacheRegistry cacheRegistry = new GraphicalCacheRegistry();
 
 	public Editor() {
 		setEditDomain(new DefaultEditDomain(this));
@@ -201,7 +202,7 @@ public class Editor extends GraphicalEditor implements IASTChangeListener, IPart
 	}
 
 	private void setContent() {
-		System.out.println("GRAPH->setContent()");
+		//System.out.println("GRAPH->setContent()");
 		if (input.editIcon()) {
 			getGraphicalViewer().setContents(dp);
 		} else {
@@ -339,19 +340,13 @@ public class Editor extends GraphicalEditor implements IASTChangeListener, IPart
 				.getSelectedEditParts()) {
 			selectedModels.add(o.getModel());
 		}
-		System.out.println("copy selection, t+"
-				+ (System.currentTimeMillis() - start));
-		/*
-		 * synchronized (getProgramRoot().state()) { //
-		 * getProgramRoot().flushAll(); //TODO only flush once in astreg?
-		 * dp.setInstClassDecl(getProgramRoot().simpleLookupInstClassDecl(
-		 * input.getClassName())); }
-		 */
+		//System.out.println("copy selection, t+"
+		//		+ (System.currentTimeMillis() - start));
 		dp.setInstClassDeclCached(cacheRegistry.getCache());
-		System.out.println("flush, t+" + (System.currentTimeMillis() - start));
+		//System.out.println("flush, t+" + (System.currentTimeMillis() - start));
 		setContent();
-		System.out.println("set content, t+"
-				+ (System.currentTimeMillis() - start));
+		//System.out.println("set content, t+"
+		//		+ (System.currentTimeMillis() - start));
 		for (Object selectedModel : selectedModels) {
 			EditPart part = (EditPart) getGraphicalViewer()
 					.getEditPartRegistry().get(selectedModel);
@@ -359,8 +354,8 @@ public class Editor extends GraphicalEditor implements IASTChangeListener, IPart
 				getGraphicalViewer().getSelectionManager()
 						.appendSelection(part);
 		}
-		System.out.println("restore selection, t+"
-				+ (System.currentTimeMillis() - start));
+		System.out.println("Graphical editor flush took: "
+				+ (System.currentTimeMillis() - start)+"ms");
 	}
 
 	public void refreshInst() {
@@ -460,6 +455,13 @@ public class Editor extends GraphicalEditor implements IASTChangeListener, IPart
 
 	@Override
 	public void astChanged(IASTChangeEvent e) {
-		flushInst();
+		Control c = this.getGraphicalViewer().getControl();
+		if (c == null) {
+			System.err.print("Graphical control == null\n");
+		} else if (c.isDisposed()) {
+			System.err.print("Graphical control is disposed\n");
+		} else {
+			flushInst();
+		}
 	}
 }
