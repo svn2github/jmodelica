@@ -4,31 +4,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jmodelica.icons.Observable;
-
+import org.jmodelica.ide.graphical.proxy.cache.CachedInstComponentDecl;
 
 public abstract class ConnectorProxy extends ComponentProxy {
-	
+
 	public static final Object SOURCE_CONNECTIONS_HAS_CHANGED = "Source connections has changed";
 	public static final Object TARGET_CONNECTIONS_HAS_CHANGED = "Target connections has changed";
 	protected static final Object COLLECTING_SOURCE = new Object();
 	protected static final Object COLLECTING_TARGET = new Object();
-	
-	public ConnectorProxy(String componentName, AbstractNodeProxy parent) {
-		super(componentName, parent);
+
+	public ConnectorProxy(CachedInstComponentDecl icdc, String componentName,
+			AbstractNodeProxy parent) {
+		super(icdc, componentName, parent);
 	}
-	
+
 	public List<ConnectionProxy> getSourceConnections() {
 		List<ConnectionProxy> connections = new ArrayList<ConnectionProxy>();
 		notifyObservers(COLLECTING_SOURCE, connections);
 		return connections;
 	}
-	
+
 	public List<ConnectionProxy> getTargetConnections() {
 		List<ConnectionProxy> connections = new ArrayList<ConnectionProxy>();
 		notifyObservers(COLLECTING_TARGET, connections);
 		return connections;
 	}
-	
+
 	@Override
 	public void update(Observable o, Object flag, Object additionalInfo) {
 		if (o == getParent() && flag == COLLECT_CONNECTIONS) {

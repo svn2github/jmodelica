@@ -11,11 +11,12 @@ import org.jmodelica.icons.Observer;
 import org.jmodelica.icons.coord.Extent;
 import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.icons.coord.Transformation;
+import org.jmodelica.ide.graphical.proxy.cache.CachedInstClassDecl;
+import org.jmodelica.ide.graphical.proxy.cache.CachedInstComponentDecl;
+import org.jmodelica.ide.graphical.proxy.cache.CachedInstExtends;
+import org.jmodelica.ide.graphical.proxy.cache.CachedInstNode;
 import org.jmodelica.ide.graphical.util.Transform;
-import org.jmodelica.modelica.compiler.InstClassDecl;
-import org.jmodelica.modelica.compiler.InstComponentDecl;
-import org.jmodelica.modelica.compiler.InstExtends;
-import org.jmodelica.modelica.compiler.InstNode;
+import org.jmodelica.modelica.compiler.ASTNode;
 
 public class ComponentProxy extends AbstractNodeProxy implements Observer {
 
@@ -24,10 +25,13 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 
 	private String componentName;
 	private AbstractNodeProxy parent;
+	private CachedInstComponentDecl myInstCompDeclCached;
 
-	public ComponentProxy(String componentName, AbstractNodeProxy parent) {
+	public ComponentProxy(CachedInstComponentDecl icdc, String componentName,
+			AbstractNodeProxy parent) {
 		this.componentName = componentName;
 		this.parent = parent;
+		this.myInstCompDeclCached = icdc;
 		parent.addObserver(this);
 	}
 
@@ -45,17 +49,18 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	}
 
 	@Override
-	protected InstComponentDecl getComponentDecl() {
-		return parent.getInstComponentDecl(componentName);
+	protected CachedInstComponentDecl getComponentDecl() {
+		return myInstCompDeclCached;
 	}
 
 	@Override
-	protected InstClassDecl getClassDecl() {
-		return getComponentDecl().syncMyInstClass();
+	protected CachedInstClassDecl getClassDecl() {
+		return null; // TODO fail
+		// return getComponentDecl().syncMyInstClass();
 	}
 
 	@Override
-	protected InstNode getASTNode() {
+	protected CachedInstNode getASTNode() {
 		return getComponentDecl();
 	}
 
@@ -65,9 +70,21 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	}
 
 	@Override
-	protected InstComponentDecl getInstComponentDecl(String componentName) {
-		return getComponentDecl().syncSimpleLookupInstComponentDecl(
-				componentName);
+	protected CachedInstComponentDecl getInstComponentDecl(String componentName) {
+		for (CachedInstComponentDecl icdc : getComponentDecl()
+				.syncGetInstComponentDecls()) {
+			if (icdc.syncName().equalsIgnoreCase(componentName)) {
+				return icdc;
+			}
+		}
+		for (CachedInstExtends iec : getComponentDecl().syncGetInstExtendss()) {
+			for (CachedInstComponentDecl icdc : iec.syncGetInstComponentDecls()) {
+				if (icdc.syncName().equalsIgnoreCase(componentName)) {
+					return icdc;
+				}
+			}
+		}
+		return null;
 	}
 
 	public Transform calculateTransform(Transform parent) { // TODO:refactor
@@ -158,12 +175,12 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 		return parameters;
 	}
 
-	private void collectParameters(InstNode node,
+	private void collectParameters(CachedInstNode node,
 			List<ParameterProxy> parameters) {
-		for (InstExtends ie : node.syncGetInstExtendss()) {
+		for (CachedInstExtends ie : node.syncGetInstExtendss()) {
 			collectParameters(ie, parameters);
 		}
-		for (InstComponentDecl icd : node.syncGetInstComponentDecls()) {
+		for (CachedInstComponentDecl icd : node.syncGetInstComponentDecls()) {
 			if (icd.syncIsPrimitive() && icd.syncIsParameter()) {
 				parameters.add(new ParameterProxy(icd.syncName(), this));
 			}
@@ -179,6 +196,11 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 
 	public void setComponentName(String newName) {
 		componentName = newName;
+	}
+
+	public ASTNode<?> getRealASTNode() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

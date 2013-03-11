@@ -3,8 +3,8 @@ package org.jmodelica.ide.graphical.proxy;
 import java.util.Stack;
 
 import org.jmodelica.icons.coord.Placement;
-import org.jmodelica.modelica.compiler.InstClassDecl;
-import org.jmodelica.modelica.compiler.InstComponentDecl;
+import org.jmodelica.ide.graphical.proxy.cache.CachedInstClassDecl;
+import org.jmodelica.ide.graphical.proxy.cache.CachedInstComponentDecl;
 
 public class ComponentDiagramProxy extends AbstractDiagramProxy {
 
@@ -15,17 +15,17 @@ public class ComponentDiagramProxy extends AbstractDiagramProxy {
 	}
 
 	@Override
-	protected InstComponentDecl getASTNode() {
+	protected CachedInstComponentDecl getASTNode() {
 		return component.getComponentDecl();
 	}
 
 	@Override
-	protected InstClassDecl getClassDecl() {
-		return getASTNode().myInstClass();
+	protected CachedInstClassDecl getClassDecl() {
+		return null;
 	}
 
 	@Override
-	protected InstComponentDecl getComponentDecl() {
+	protected CachedInstComponentDecl getComponentDecl() {
 		return getASTNode();
 	}
 

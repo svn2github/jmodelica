@@ -7,23 +7,23 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.jmodelica.modelica.compiler.InstPrimitive;
 
 public class ParameterProxy implements IPropertyDescriptor {
-	
+
 	private static final String CATEGORY = "Parameters";
-	
+
 	private ComponentProxy owner;
 	private String name;
-	
+
 	public ParameterProxy(String name, ComponentProxy owner) {
 		this.name = name;
 		this.owner = owner;
 	}
-	
-	protected InstPrimitive getInstPrimitive() {
-		return (InstPrimitive) owner.getInstComponentDecl(name);
-	}
+
+	/*
+	 * protected InstPrimitive getInstPrimitive() { return (InstPrimitive)
+	 * owner.getInstComponentDecl(name); }
+	 */// TODO NOT NEEDED, DUNNO?
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent) {
@@ -74,15 +74,18 @@ public class ParameterProxy implements IPropertyDescriptor {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
+
 	public void setValue(String value) {
 		Stack<String> path = new Stack<String>();
 		path.push(name);
 		owner.setParameterValue(path, value);
 	}
-	
+
 	public String getValue() {
-		return owner.getComponentDecl().syncLookupParameterValue(name);
+		//InstComponentDecl icd;
+		//icd.syncLookupParameterValue(parameter)
+		//return owner.getComponentDecl().syncLookupParameterValue(name);
+		return "777";
 	}
 
 }

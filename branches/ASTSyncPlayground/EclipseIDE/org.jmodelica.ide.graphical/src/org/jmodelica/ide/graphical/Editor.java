@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -43,7 +42,6 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
@@ -52,8 +50,6 @@ import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.Observer;
-import org.jmodelica.ide.compiler.GlobalRootNode;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.graphical.actions.OpenComponentAction;
 import org.jmodelica.ide.graphical.actions.RotateAction;
 import org.jmodelica.ide.graphical.actions.ShowGridAction;
@@ -64,14 +60,9 @@ import org.jmodelica.ide.graphical.proxy.AbstractNodeProxy;
 import org.jmodelica.ide.graphical.proxy.ClassDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentProxy;
-import org.jmodelica.modelica.compiler.ComponentDecl;
-import org.jmodelica.modelica.compiler.InstClassDecl;
-import org.jmodelica.modelica.compiler.InstComponentDecl;
-import org.jmodelica.modelica.compiler.InstProgramRoot;
-import org.jmodelica.modelica.compiler.SourceRoot;
+import org.jmodelica.ide.graphical.proxy.cache.GraphicalCacheRegistry;
 
-public class Editor extends GraphicalEditor implements IASTChangeListener,
-		IPartListener2, Observer {
+public class Editor extends GraphicalEditor implements IASTChangeListener, IPartListener2, Observer {
 
 	public static final String DIAGRAM_READ_ONLY = "diagramIsReadOnly";
 
@@ -80,7 +71,7 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 	private Stack<ComponentDiagramProxy> openComponentStack;
 	private Composite breadcrumbsBar;
 	private boolean ASTDirty;
-	private IFile theFile;
+	private GraphicalCacheRegistry cacheRegistry  = new GraphicalCacheRegistry();
 
 	public Editor() {
 		setEditDomain(new DefaultEditDomain(this));
@@ -196,8 +187,7 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 
 	@Override
 	protected void initializeGraphicalViewer() {
-		dp = new ClassDiagramProxy(theFile, getProgramRoot()
-				.syncSimpleLookupInstClassDecl(input.getClassName()));
+		dp = cacheRegistry.getClassDiagramProxy();
 		dp.addObserver(this);
 		openComponentStack = new Stack<ComponentDiagramProxy>();
 		setContent();
@@ -210,22 +200,17 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 		super.commandStackChanged(event);
 	}
 
-	private InstProgramRoot getProgramRoot() {
-		SourceRoot root = ((GlobalRootNode) ModelicaASTRegistry
-				.getASTRegistry().doLookup(input.getProject())).getSourceRoot();
-		return root.getProgram().getInstProgramRoot();
-	}
-
 	private void setContent() {
+		System.out.println("GRAPH->setContent()");
 		if (input.editIcon()) {
 			getGraphicalViewer().setContents(dp);
 		} else {
 			refreshBreadcrumbsBar();
 
 			AbstractDiagramProxy adp;
-			if (openComponentStack.isEmpty())
+			if (openComponentStack.isEmpty()) {
 				adp = dp;
-			else
+			} else
 				adp = openComponentStack.peek();
 			getGraphicalViewer().setContents(adp);
 			adp.constructConnections();
@@ -251,15 +236,9 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 		super.setInput(input);
 		Assert.isLegal(input instanceof GraphicalEditorInput,
 				"The editor only support opening Modelica classes.");
-		if (this.input != null)
-			ModelicaASTRegistry.getASTRegistry().removeListener(this);
 		this.input = (GraphicalEditorInput) input;
-		this.theFile = ModelicaASTRegistry.getASTRegistry()
-				.doLookup(this.input.getProject()).lookupAllFileNodes()[0]
-				.getFile();// TODO hardcoded only works if one file in project
-		ModelicaASTRegistry.getASTRegistry().addListener(this.theFile,
-				new ArrayList<String>(), this);// TODO fix path to only model
-												// not whole file
+		cacheRegistry.addGraphEditorListener(this);
+		cacheRegistry.setInput(this.input);
 		setPartName(input.getName());
 	}
 
@@ -362,11 +341,13 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 		}
 		System.out.println("copy selection, t+"
 				+ (System.currentTimeMillis() - start));
-		synchronized (getProgramRoot().state()) {
-			getProgramRoot().flushAll();
-			dp.setInstClassDecl(getProgramRoot().simpleLookupInstClassDecl(
-					input.getClassName()));
-		}
+		/*
+		 * synchronized (getProgramRoot().state()) { //
+		 * getProgramRoot().flushAll(); //TODO only flush once in astreg?
+		 * dp.setInstClassDecl(getProgramRoot().simpleLookupInstClassDecl(
+		 * input.getClassName())); }
+		 */
+		dp.setInstClassDeclCached(cacheRegistry.getCache());
 		System.out.println("flush, t+" + (System.currentTimeMillis() - start));
 		setContent();
 		System.out.println("set content, t+"
@@ -387,8 +368,8 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				InstClassDecl icd = getProgramRoot()
-						.syncSimpleLookupInstClassDecl(input.getClassName());
+				// InstClassDecl icd = getProgramRoot()
+				// .syncSimpleLookupInstClassDecl(input.getClassName());
 				/*
 				 * if (dp.equals(icd)) { // TODO wont notice changes from event
 				 * via // compare??? System.out.println("NODIFF!!!!!!!!!!");
@@ -402,6 +383,7 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
+						System.out.println("Refresh diagram job");
 						getCommandStack().markSaveLocation();
 						ASTDirty = false;
 						setContent();
@@ -478,35 +460,6 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 
 	@Override
 	public void astChanged(IASTChangeEvent e) {
-		System.out.println("Graphical recieved IASTChangeEvent");
-		if (e.getType() == IASTChangeEvent.POST_RENAME) {
-			System.out.println("renamed node:" + e.getChangedPath());
-			String newName = "";
-			if (e.getChangedNode() instanceof ComponentDecl) {
-				ComponentDecl icd = (ComponentDecl) e.getChangedNode();
-				newName = "CHANGEDNAME";// TODO hardcoded, find way to get new
-										// name...
-			}
-			for (ComponentProxy cdp : dp.getComponents()) {
-				if (cdp.getComponentName() == null) {
-					cdp.setComponentName(newName);
-					System.out
-							.println("Found a component without name and changed it according to changednodename ("
-									+ newName + ")...");
-				}
-			}
-		}
-		new Job("Check for updates") {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				// if (dp != null && dp.getDefinitionKey().equals(key)) //we
-				// only get notify when interested, no need to check
-				refreshInst();
-				// setContent(); //TODO fix so only refresh some?
-				return Status.OK_STATUS;
-			}
-		}.schedule();
+		flushInst();
 	}
-
 }

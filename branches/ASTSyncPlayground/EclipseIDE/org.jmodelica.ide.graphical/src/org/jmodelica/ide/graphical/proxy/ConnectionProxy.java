@@ -6,17 +6,17 @@ import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.Observer;
 import org.jmodelica.icons.primitives.Color;
 import org.jmodelica.icons.primitives.Line;
-import org.jmodelica.modelica.compiler.ConnectClause;
+import org.jmodelica.ide.graphical.proxy.cache.CachedConnectClause;
 
 public class ConnectionProxy extends Observable implements Observer {
 
 	private AbstractDiagramProxy diagram;
 	private ConnectorProxy source;
 	private ConnectorProxy target;
-	private ConnectClause connectClause;
+	private CachedConnectClause connectClause;
 	private boolean connected = true;
 
-	public ConnectionProxy(ConnectorProxy source, ConnectorProxy target, ConnectClause connectClause, AbstractDiagramProxy diagram) {
+	public ConnectionProxy(ConnectorProxy source, ConnectorProxy target, CachedConnectClause connectClause, AbstractDiagramProxy diagram) {
 		this.source = source;
 		this.target = target;
 		this.connectClause = connectClause;
@@ -79,7 +79,7 @@ public class ConnectionProxy extends Observable implements Observer {
 		}
 	}
 
-	protected ConnectClause getConnectClause() {
+	protected CachedConnectClause getConnectClause() {
 		return connectClause;
 	}
 	

@@ -7,11 +7,12 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jmodelica.icons.coord.Placement;
-import org.jmodelica.ide.compiler.JobObject;
+import org.jmodelica.ide.compiler.IJobObject;
 import org.jmodelica.ide.compiler.ModelicaASTRegistryJobBucket;
-import org.jmodelica.modelica.compiler.ConnectClause;
+import org.jmodelica.ide.compiler.ModificationJob;
+import org.jmodelica.ide.graphical.proxy.cache.CachedInstClassDecl;
+import org.jmodelica.ide.graphical.proxy.cache.CachedInstComponentDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
-import org.jmodelica.modelica.compiler.InstComponentDecl;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class ClassDiagramProxy extends AbstractDiagramProxy {
@@ -20,99 +21,114 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	public static final Object COMPONENT_REMOVED = new Object();
 	public static final Object FLUSH_CONTENTS = new String("Flush contents now");
 
-	private InstClassDecl instClassDecl;
+	private InstClassDecl realInstClassDecl;
+	private CachedInstClassDecl instClassDecl;
 	private IFile theFile;
 
-	public ClassDiagramProxy(IFile theFile, InstClassDecl instClassDecl) {
+	public ClassDiagramProxy(IFile theFile, InstClassDecl icd) {
 		this.theFile = theFile;
-		this.instClassDecl = instClassDecl;
+		realInstClassDecl = icd;
+		instClassDecl = new CachedInstClassDecl(realInstClassDecl);
+	}
+
+	protected InstClassDecl getRealASTNode() {
+		return realInstClassDecl;
 	}
 
 	@Override
-	protected InstClassDecl getASTNode() {
+	protected CachedInstClassDecl getASTNode() {
 		return instClassDecl;
 	}
 
-	public void setInstClassDecl(InstClassDecl instClassDecl) {
-		this.instClassDecl = instClassDecl;
+	public void setInstClassDeclCached(CachedInstClassDecl icdc) {
+		this.instClassDecl = icdc;
 	}
 
 	@Override
-	protected InstComponentDecl getComponentDecl() {
+	protected CachedInstComponentDecl getComponentDecl() {
 		return null;
 	}
 
 	@Override
-	protected InstClassDecl getClassDecl() {
+	protected CachedInstClassDecl getClassDecl() {
 		return getASTNode();
 	}
 
 	public String getDefinitionKey() {
-		synchronized (instClassDecl.state()) {
-			return instClassDecl.getDefinition().lookupKey();
-		}
+		// synchronized (instClassDecl.state()) {//TODO remove
+		return instClassDecl.getDefinitionKey();
+		// }
 	}
 
 	@Override
 	public ComponentProxy addComponent(String className, String componentName,
 			Placement placement) {
-		String mapName;
-		System.out.println("GRAPHICAL: adding node to component "+getASTNode().getNodeName());
-		InstComponentDecl icd = getASTNode().syncAddComponent(className,
-				componentName, placement);
-		mapName = buildMapName(icd.syncQualifiedName(), icd.syncIsConnector(),
-				icd.syncIsConnector());
-		ComponentProxy component = getComponentMap().get(mapName);
-		if (component == null) {
-			if (icd.isConnector()) {
-				component = new DiagramConnectorProxy(componentName, this);
-			} else {
-				component = new ComponentProxy(componentName, this);
-			}
-			getComponentMap().put(mapName, component);
-		}
-		notifyObservers(COMPONENT_ADDED);
-		JobObject job = new JobObject(JobObject.ADD_NODE, theFile,
-				icd);
+		System.out.println("GRAPHICAL: adding node to component "
+				+ getRealASTNode().getNodeName());
+		/*
+		 * String mapName; InstComponentDeclCached icd =
+		 * getASTNode().syncAddComponent(className, componentName, placement);
+		 * mapName = buildMapName(icd.syncQualifiedName(),
+		 * icd.syncIsConnector(), icd.syncIsConnector()); ComponentProxy
+		 * component = getComponentMap().get(mapName); if (component == null) {
+		 * if (icd.isConnector()) { component = new
+		 * DiagramConnectorProxy(componentName, this); } else { component = new
+		 * ComponentProxy(componentName, this); } getComponentMap().put(mapName,
+		 * component); } notifyObservers(COMPONENT_ADDED);
+		 */
+		ModificationJob job = new ModificationJob(IJobObject.ADD_NODE, theFile,
+				getRealASTNode(), className, componentName, placement);
 		ModelicaASTRegistryJobBucket.getInstance().addJob(job);
-		return component;
+		return null;
 	}
 
 	@Override
 	public void removeComponent(ComponentProxy component) {
-		getASTNode().syncRemoveComponent(component.getComponentDecl());
-		notifyObservers(COMPONENT_REMOVED);
-		JobObject job = new JobObject(JobObject.REMOVE_INSTNODE, theFile,
-				component.getASTNode());
+		/*
+		 * getASTNode().syncRemoveComponent(component.getComponentDecl());
+		 * notifyObservers(COMPONENT_REMOVED);
+		 */
+		ModificationJob job = new ModificationJob(IJobObject.REMOVE_NODE,
+				theFile, component.getRealASTNode());
 		ModelicaASTRegistryJobBucket.getInstance().addJob(job);
 	}
 
 	@Override
+	// TODO FIX SYNCH ASTREG
 	public ConnectionProxy addConnection(ConnectorProxy source,
-			ConnectorProxy target) {
-		ConnectClause connectClause = getASTNode().syncAddConnection(
-				source.buildDiagramName(), target.buildDiagramName());
-		ConnectionProxy connection = new ConnectionProxy(source, target,
-				connectClause, this);
-		getConnectionMap().put(connectClause, connection);
-		return connection;
+			ConnectorProxy target) {/*
+									 * ConnectClause connectClause =
+									 * getASTNode().syncAddConnection(
+									 * source.buildDiagramName(),
+									 * target.buildDiagramName());
+									 * ConnectionProxy connection = new
+									 * ConnectionProxy(source, target,
+									 * connectClause, this);
+									 * getConnectionMap().put(connectClause,
+									 * connection); return connection;
+									 */
+		return null;
 	}
 
 	@Override
+	// TODO FIX SYNCH ASTREG
 	protected void addConnection(ConnectionProxy connection) {
-		getASTNode().syncAddConnection(connection.getConnectClause());
+		// getASTNode().syncAddConnection(connection.getConnectClause());
 	}
 
 	@Override
+	// TODO FIX SYNCH ASTREG
 	protected boolean removeConnection(ConnectionProxy connection) {
-		getASTNode().syncRemoveConnection(
-				getConnection(connection.getConnectClause()));
+		/*
+		 * getASTNode().syncRemoveConnection(
+		 * getConnection(connection.getConnectClause()));
+		 */
 		return true;
 	}
 
 	public void saveModelicaFile(IProgressMonitor monitor) throws CoreException {
-		synchronized (instClassDecl.state()) {
-			StoredDefinition definition = instClassDecl.getDefinition();
+		synchronized (realInstClassDecl.state()) {
+			StoredDefinition definition = realInstClassDecl.getDefinition();
 			definition.getFile().setContents(
 					new ByteArrayInputStream(definition.prettyPrintFormatted()
 							.getBytes()), false, true, monitor);
@@ -120,8 +136,9 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	}
 
 	@Override
+	// TODO FIX SYNCH ASTREG
 	protected void setParameterValue(Stack<String> path, String value) {
-		instClassDecl.syncSetParameterValue(path, value);
+		// instClassDecl.syncSetParameterValue(path, value);
 		notifyObservers(FLUSH_CONTENTS);
 	}
 
