@@ -44,7 +44,7 @@ int cv_rhs(realtype t, N_Vector yy, N_Vector yydot, void *problem_data){
     flag = jmi_ode_derivatives(jmi);
     
 	if(flag != 0) {
-		jmi_log_warning(jmi, "[CVODE] Evaluating the derivatives failed (recoverable error).");
+		jmi_log_warning(jmi, "[CVODE] Evaluating the derivatives failed (recoverable error). Returned with warning flag: %d",flag);
 		return 1; /* Recoverable failure */
 	}
 	memcpy(ydot, jmi_get_real_dx(jmi), nbr_y*sizeof(realtype));
@@ -70,11 +70,23 @@ int cv_root(realtype t, N_Vector yy, realtype *gout,  void* problem_data){
     flag = jmi_dae_R_perturbed(jmi,(jmi_real_t*)gout);
     
 	if(flag != 0) {
-		jmi_log_error(jmi, "[CVODE] Evaluating the event indicators failed.");
+		jmi_log_error(jmi, "[CVODE] Evaluating the event indicators failed. Returned with error flag: %d",flag);
 		return -1; /* Failure */
 	}
     
     return CV_SUCCESS;
+}
+
+void cv_err(int error_code, const char *module,const char *function, char *msg, void *problem_data){
+    jmi_ode_solver_t *solver = (jmi_ode_solver_t*)problem_data;
+	jmi_t* jmi = solver->jmi;
+    
+    if (error_code == CV_WARNING){
+        jmi_log_warning(jmi, "[CVODE] Warning from function %s: %s",function,msg);
+    }else{
+        jmi_log_error(jmi, "[CVODE] Error from function %s: %s",function,msg);
+    }
+        
 }
 
 int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype t_stop, int initialize){
@@ -88,7 +100,7 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype t_stop, int initializ
     if (initialize==JMI_TRUE){
         flag = CVodeReInit(integrator->cvode_mem, *(jmi_get_t(solver->jmi)), integrator->y_work);
         if (flag<0){
-            jmi_log_error(solver->jmi,"[CVODE] Failed to re-initialize the solver.");
+            jmi_log_error(solver->jmi,"[CVODE] Failed to re-initialize the solver. Returned with error flag: %d",flag);
             return JMI_ODE_ERROR;
         }
     }
@@ -96,13 +108,13 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype t_stop, int initializ
     /* Dont integrate past t_stop */
     flag = CVodeSetStopTime(integrator->cvode_mem, t_stop);
     if (flag < 0){
-        jmi_log_error(solver->jmi, "[CVODE] Failed to specify the stop time");
+        jmi_log_error(solver->jmi, "[CVODE] Failed to specify the stop time. Returned with error flag: %d",flag);
         return JMI_ODE_ERROR;
     }
 
 	flag = CVode(integrator->cvode_mem, t_stop, integrator->y_work,&tret,CV_NORMAL);
 	if(flag<0){
-		jmi_log_error(solver->jmi,"[CVODE] CVode failed to calculate the next step.");
+		jmi_log_error(solver->jmi,"[CVODE] Failed to calculate the next step. Returned with error flag: %d",flag);
 		return JMI_ODE_ERROR;
 	}
     
@@ -153,35 +165,41 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
 
 	flag = CVodeInit(cvode_mem, cv_rhs, t0, integrator->y0);
     if(flag != 0) {
-		jmi_log_error(jmi, "[CVODE] Failed to initialize CVODE.");
+		jmi_log_error(jmi, "[CVODE] Failed to initialize CVODE. Returned with error flag: %d",flag);
         return -1;
     }
 
 	flag = CVodeSStolerances(cvode_mem, integrator->rtol, integrator->atol);
 	if(flag!=0){
-		jmi_log_error(jmi, "[CVODE] Failed to specify the tolerances to CVODE.");
+		jmi_log_error(jmi, "[CVODE] Failed to specify the tolerances. Returned with error flag: %d",flag);
         return -1;
 	}
 
 	flag = CVDense(cvode_mem, jmi->n_real_x);
 	if(flag!=0){
-		jmi_log_error(jmi, "[CVODE] Failed to specify the linear solver to CVODE.");
+		jmi_log_error(jmi, "[CVODE] Failed to specify the linear solver. Returned with error flag: %d",flag);
 		return -1;
 	}
 
 	flag = CVodeSetUserData(cvode_mem, (void*)solver);
 	if(flag!=0){
-		jmi_log_error(jmi, "[CVODE] Failed to specify the user data to CVODE.");
+		jmi_log_error(jmi, "[CVODE] Failed to specify the user data. Returned with error flag: %d",flag);
 		return -1;
 	}
     
     if (jmi->n_sw > 0){
         flag = CVodeRootInit(cvode_mem, jmi->n_sw, cv_root);
         if(flag!=0){
-            jmi_log_error(jmi, "[CVODE] Failed to specify the event indicator function to CVODE.");
+            jmi_log_error(jmi, "[CVODE] Failed to specify the event indicator function. Returned with error flag: %d",flag);
             return -1;
         }
     }
+    
+    flag = CVodeSetErrHandlerFn(cvode_mem, cv_err, (void*)solver);
+    if(flag!=0){
+		jmi_log_error(jmi, "[CVODE] Failed to specify the error handling function . Returned with error flag: %d",flag);
+		return -1;
+	}
 
     integrator->cvode_mem = cvode_mem;    
       
