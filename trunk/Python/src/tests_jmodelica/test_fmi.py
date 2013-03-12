@@ -82,7 +82,7 @@ class Test_FMUModelCS1:
     """
     This class tests pyfmi.fmi.FMUModelCS1
     """
-    
+
     @testattr(windows = True)
     def test_simulation_cs(self):
         
@@ -137,6 +137,26 @@ class Test_FMUModelCS1:
         assert os.path.exists("bouncingBall_log.txt")
         model = FMUModelCS1("bouncingBall.fmu",os.path.join(path_to_fmus,"CS1.0"),log_file_name="Test_log.txt")
         assert os.path.exists("Test_log.txt")
+        
+    @testattr(stddist = True)
+    def test_result_name_file(self):
+        
+        rlc_name = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="fmucs")
+        rlc = FMUModelCS1(rlc_name)
+        
+        res = rlc.simulate()
+        
+        #Default name
+        assert res.result_file == "RLC_Circuit_result.txt"
+        assert os.path.exists(res.result_file)
+        
+        rlc = FMUModelCS1(rlc_name)
+        res = rlc.simulate(options={"result_file_name":
+                                    "RLC_Circuit_result_test.txt"})
+                                    
+        #User defined name
+        assert res.result_file == "RLC_Circuit_result_test.txt"
+        assert os.path.exists(res.result_file)
     
 class Test_FMUModelME1:
     """
