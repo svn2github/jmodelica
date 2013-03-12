@@ -57,7 +57,7 @@ struct jmi_ode_solver_t {
     void *integrator;
     jmi_ode_solve_func_t solve;
     jmi_ode_delete_func_t delete_solver;
-    
+    jmi_real_t tout;  /**< \brief Value indicating which time the integrator integrated up to*/
 };
 
 

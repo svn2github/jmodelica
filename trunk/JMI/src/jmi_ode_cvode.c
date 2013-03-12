@@ -120,6 +120,7 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype t_stop, int initializ
     
     /* Set time */
     *(jmi_get_t(solver->jmi)) = tret;
+    solver->tout = tret;
     /* Set states */
 	y = NV_DATA_S(integrator->y_work);
 	memcpy(jmi_get_real_x(solver->jmi), y, (solver->jmi->n_real_x)*sizeof(realtype));
