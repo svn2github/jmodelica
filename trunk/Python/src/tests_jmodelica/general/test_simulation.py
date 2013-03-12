@@ -40,6 +40,40 @@ class TestNominal(SimulationTest):
     @testattr(assimulo = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'y', 'z', 'der(x)', 'der(y)'])
+        
+class TestRLCSquareCS(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+                'RLC_Circuit.mo', 'RLC_Circuit_Square',format='fmu',target="fmucs")
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10.0, 
+            time_step = 0.01)
+        self.run()
+        self.load_expected_data('RLC_Circuit_Square_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['capacitor.v'])
+        
+class TestRLCCS(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+                'RLC_Circuit.mo', 'RLC_Circuit',format='fmu',target="fmucs")
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10.0, 
+            time_step = 0.01)
+        self.run()
+        self.load_expected_data('RLC_Circuit_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['capacitor.v'])
 
 class TestWriteScaledResult(SimulationTest):
 
