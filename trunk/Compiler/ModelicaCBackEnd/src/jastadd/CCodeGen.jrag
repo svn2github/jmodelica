@@ -712,7 +712,7 @@ aspect CCodeGen {
 	public void MutableSize.printNumElements_C(Printer p, PrintStream str, String indent, FExp src) {
 		if (isUnknown()) {
 			FExp numElem = src.dynamicFExp(createNumElementsFExp());
-			p.print(numElem, str, indent);
+			numElem.prettyPrint_C(p, str, indent); // TODO: This is a hack to get CAD gen to work!
 		} else {
 			super.printNumElements_C(p, str, indent, src);
 		}
@@ -727,7 +727,7 @@ aspect CCodeGen {
 					str.print(size[i]);
 				} else {
 					FExp exp = src.dynamicFExp(exps[i]);
-					p.print(exp, str, indent);
+					exp.prettyPrint_C(p, str, indent); // TODO: This is a hack to get CAD gen to work!
 				}
 			}
 		} else {

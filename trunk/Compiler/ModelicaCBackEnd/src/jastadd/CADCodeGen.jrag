@@ -90,10 +90,10 @@ aspect CADCodeGen {
 	syn String FLitExp.adDerName() = "AD_WRAP_LITERAL(0)";
 	
 	syn String FIdUseExp.adVarName() = 
-			inFunction() && needDerVar_CAD() ? getFIdUse().name_var_CAD() : prettyPrint_C("");
+			inFunction() ? getFIdUse().name_var_CAD() : prettyPrint_C("");
 		
 	syn String FIdUseExp.adDerName() {
-		if (inFunction() && needDerVar_CAD()) {
+		if (inFunction()) {
 			return getFIdUse().name_der_CAD();
 		} else {
 			if (variability().lessOrEqual(fParameter()) || !needDerVar_CAD()) {
@@ -116,7 +116,7 @@ aspect CADCodeGen {
 		str.print(name_var_CAD());
 	}
 	
-	syn String FIdUse.name_var_CAD() = needDerVar_CAD() ? toString_var_CAD(printer_CAD) : name_C();
+	syn String FIdUse.name_var_CAD() = toString_var_CAD(printer_CAD);
 	
 	syn String FIdUse.name_der_CAD() = needDerVar_CAD() ? toString_der_CAD(printer_CAD) : "AD_WRAP_LITERAL(0)";
 	
@@ -183,7 +183,10 @@ aspect CADCodeGen {
 	}
 	
 	public String FAbstractVariable.genUse_var_CAD(Printer p, FArraySubscripts fas, String type) {
-		return name_var_CAD();
+		if (needDerVar_CAD())
+			return name_var_CAD();
+		else
+			return name_C();
 	}
 	
 	public String FAbstractVariable.genUse_der_CAD(Printer p, FArraySubscripts fas, String type) {
@@ -2315,7 +2318,7 @@ aspect CADCodeGen {
 	
 	//Methods to handle for-loops in functions starts here
 	public void FForStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
-		getIndex().genTempVars_CAD(printer_C, str, indent);
+		getIndex().genTempVars_CAD(p, str, indent);
 		getIndex().printForArrayInit_CAD(p, str, indent);
 		str.print(indent);
 		str.print("for (");
@@ -2433,6 +2436,19 @@ aspect CADCodeGen {
 			str.print(";\n");
 		}
 	}
+	
+	public void FInitArrayStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		FIdUseExp fexp = getFIdUseExp();
+		FType type = fexp.type();
+		// I know that myFV is an ffunctionvariable
+		FFunctionVariable fv = (FFunctionVariable) fexp.myFV();
+		fv.setDummyExp();
+		FExp bindingExp = fv.getBindingExp();
+		type.printInit_C(p, str, indent, fv.name_var_CAD(), bindingExp);
+		type.printInit_C(p, str, indent, fv.name_der_CAD(), bindingExp);
+		fv.resetDummyExp();
+	}
+
 	
 	/*-------------------------------------------------------------------------
 	 * END CAD code for statements

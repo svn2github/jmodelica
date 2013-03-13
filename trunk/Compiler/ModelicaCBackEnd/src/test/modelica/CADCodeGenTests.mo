@@ -2383,6 +2383,140 @@ void func_CADCodeGenTests_FunctionDiscreteOutputTest1_f_der_AD(jmi_ad_var_t x_va
 ")})));
 end FunctionDiscreteOutputTest1;
 
+model FunctionMixedRecordInputTest1
+	record R
+		Real X[2];
+		Integer i;
+	end R;
+	function F
+		input R r;
+		output Real y;
+	algorithm
+		y := sum(r.X) + r.i;
+	end F;
+	R r;
+	Real y;
+equation
+	r.X[2] = 3;
+	r.i = 1;
+	y = F(R({r.X[1], 1 - r.X[2]}, r.i));
+	r.X[1] = y + 2;
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="FunctionMixedRecordInputTest1",
+			description="",
+			generate_ode_jacobian=true,
+			template="
+$CAD_function_headers$
+$CAD_functions$",
+			generatedCode="
+void func_CADCodeGenTests_FunctionMixedRecordInputTest1_F_der_AD(R_0_r* r_var_v, R_0_r* r_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
+
+void func_CADCodeGenTests_FunctionMixedRecordInputTest1_F_der_AD(R_0_r* r_var_v, R_0_r* r_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_var_v;
+    jmi_ad_var_t y_der_v;
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
+    v_1 = jmi_array_val_1(r_var_v->X, 1) + jmi_array_val_1(r_var_v->X, 2);
+    d_1 = jmi_array_val_1(r_der_v->X, 1) + jmi_array_val_1(r_der_v->X, 2);
+    v_0 = v_1 + r_var_v->i;
+    d_0 = d_1 + AD_WRAP_LITERAL(0);
+    y_var_v = v_0;
+    y_der_v = d_0;
+
+    if (y_var_o != NULL) *y_var_o = y_var_v;
+    if (y_der_o != NULL) *y_der_o = y_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+end FunctionMixedRecordInputTest1;
+
+model FunctionUnknownArraySizeTest1
+	function F
+		input Real x[:];
+		output Real y;
+		Real t[size(x, 1)];
+	algorithm
+		t := x .* 23;
+		y := sum(t);
+	end F;
+	Real x[4] = {1,2,3,4};
+	Real y;
+equation
+	y = F(x);
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="FunctionUnknownArraySizeTest1",
+			description="",
+			generate_ode_jacobian=true,
+			template="
+$CAD_function_headers$
+$CAD_functions$",
+			generatedCode="
+void func_CADCodeGenTests_FunctionUnknownArraySizeTest1_F_der_AD(jmi_array_t* x_var_a, jmi_array_t* x_der_a, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
+
+void func_CADCodeGenTests_FunctionUnknownArraySizeTest1_F_der_AD(jmi_array_t* x_var_a, jmi_array_t* x_der_a, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_var_v;
+    jmi_ad_var_t y_der_v;
+    JMI_ARRAY_DYNAMIC(t_var_a, 1)
+    JMI_ARRAY_DYNAMIC(t_der_a, 1)
+    jmi_ad_var_t temp_1_var_v;
+    jmi_ad_var_t temp_1_der_v;
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
+    jmi_ad_var_t i1_0i;
+    jmi_ad_var_t i1_0ie;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t d_2;
+    jmi_ad_var_t v_3;
+    jmi_ad_var_t d_3;
+    jmi_ad_var_t v_4;
+    jmi_ad_var_t d_4;
+    jmi_ad_var_t i1_1i;
+    jmi_ad_var_t i1_1ie;
+    jmi_ad_var_t v_5;
+    jmi_ad_var_t d_5;
+    JMI_ARRAY_DYNAMIC_INIT_1(t_var_a, jmi_array_size(x_var_a, 0), jmi_array_size(x_var_a, 0))
+    JMI_ARRAY_DYNAMIC_INIT_1(t_der_a, jmi_array_size(x_var_a, 0), jmi_array_size(x_var_a, 0))
+    v_1 = jmi_array_size(t_var_a, 0);
+    d_1 = 0;
+    i1_0ie = v_1 + 1 / 2.0;
+    for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
+        v_2 = jmi_array_val_1(x_var_a, i1_0i) * 23;
+        d_2 = 0;
+        jmi_array_ref_1(t_var_a, i1_0i) = v_2;
+        jmi_array_ref_1(t_der_a, i1_0i) = d_2;
+    }
+    temp_1_var_v = 0.0;
+    temp_1_der_v = AD_WRAP_LITERAL(0);
+    v_4 = jmi_array_size(x_var_a, 0);
+    d_4 = 0;
+    i1_1ie = v_4 + 1 / 2.0;
+    for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
+        v_5 = temp_1_var_v + jmi_array_val_1(t_var_a, i1_1i);
+        d_5 = temp_1_der_v + jmi_array_val_1(t_der_a, i1_1i);
+        temp_1_var_v = v_5;
+        temp_1_der_v = d_5;
+    }
+    y_var_v = temp_1_var_v;
+    y_der_v = temp_1_der_v;
+
+    if (y_var_o != NULL) *y_var_o = y_var_v;
+    if (y_der_o != NULL) *y_der_o = y_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+end FunctionUnknownArraySizeTest1;
 
 model CADDerAnno1
 		function f
