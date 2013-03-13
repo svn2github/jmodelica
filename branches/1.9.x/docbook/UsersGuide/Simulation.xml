@@ -17,10 +17,10 @@
     <para>JModelica.org supports simulation of models described in the
     Modelica language and models following the FMI standard, see <xref
     linkend="intr_sec_tech"/> in <xref linkend="ch_intro"/>. The simulation
-    environment uses <link linkend="???"><link
-    xlink:href="http://www.jmodelica.org/assimulo">Assimulo</link></link> as
-    standard which is a standalone Python package for solving ordinary
-    differential and differential algebraic equations.</para>
+    environment uses <link
+    xlink:href="http://www.jmodelica.org/assimulo">Assimulo</link> as standard
+    which is a standalone Python package for solving ordinary differential and
+    differential algebraic equations.</para>
 
     <para>There are two different means to simulate a Modelica model in
     JModelica.org: either as a Functional Mock-Up Unit (FMU) or as a
@@ -410,7 +410,7 @@ opts['ncp'] = 1000       # Changing the number of communication points.
         <table xml:id="sim_table_cvode">
           <title>Selection of solver arguments for CVode</title>
 
-          <tgroup cols="3" xml:id="sim_table_cvode">
+          <tgroup cols="3">
             <thead>
               <row>
                 <entry align="center">Option</entry>
@@ -683,7 +683,7 @@ opts['ncp'] = 1000        # Changing the number of communication points.
         <table xml:id="sim_table_cvodeFMI">
           <title>Selection of solver arguments for CVode</title>
 
-          <tgroup cols="3" xml:id="sim_table_cvode">
+          <tgroup cols="3">
             <thead>
               <row>
                 <entry align="center">Option</entry>
