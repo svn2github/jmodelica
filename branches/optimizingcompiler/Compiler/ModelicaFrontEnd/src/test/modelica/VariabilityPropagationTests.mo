@@ -85,6 +85,46 @@ end VariabilityPropagationTests.ConstantSubstitution;
 ")})));
 end ConstantSubstitution;
 
+
+
+
+model Der1
+	Real x1,x2;
+	Real x3,x4;
+	Real x5,x6;
+	parameter Real p1 = 4;
+equation
+    x2 = der(x1);
+    x1 = 3;
+    x3 = der(x4);
+    der(x4) = 3;
+    x5 = der(x6);
+    x6 = p1 + 1;
+    annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Der1",
+			description="",
+			variability_propagation=true,
+			flatModel="
+fclass VariabilityPropagationTests.Der1
+ constant Real x1 = 3;
+ constant Real x2 = 0;
+ Real x3;
+ Real x4;
+ constant Real x5 = 0;
+ parameter Real x6;
+ parameter Real p1 = 4 /* 4 */;
+initial equation 
+ x4 = 0.0;
+parameter equation
+ x6 = p1 + 1;
+equation
+ x3 = der(x4);
+ der(x4) = 3;
+end VariabilityPropagationTests.Der1;
+")})));
+end Der1;
+
 model WhenEq1
 	parameter Real p1 = 4;
 	Real x1,x2;
@@ -112,60 +152,6 @@ equation
 end VariabilityPropagationTests.WhenEq1;
 ")})));
 end WhenEq1;
-
-model WhenEq2
-	Real x1,x2;
-equation
-	when false then
-		x1 = x2 + 1;
-	end when;
-	x2 = 3;
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEq2",
-			description="",
-			variability_propagation=true,
-			flatModel="
-fclass VariabilityPropagationTests.WhenEq2
- discrete Real x1;
- constant Real x2 = 3;
-initial equation
- pre(x1) = 0.0;
-equation
- when false then
-  x1 = 4.0;
- end when;
-end VariabilityPropagationTests.WhenEq2;
-")})));
-end WhenEq2;
-
-model WhenEq3
-	constant Real p1 = 4;
-	Real x1,x2;
-equation
-	when 3 <= p1 then
-		x1 = x2 + 1;
-	end when;
-	x2 = 3;
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEq3",
-			description="",
-			variability_propagation=true,
-			flatModel="
-fclass VariabilityPropagationTests.WhenEq3
- constant Real p1 = 4;
- discrete Real x1;
- constant Real x2 = 3;
-initial equation
- pre(x1) = 0.0;
-equation
- when true then
-  x1 = 4.0;
- end when;
-end VariabilityPropagationTests.WhenEq3;
-")})));
-end WhenEq3;
 
 model IfEq1
 	constant Real p1 = 4;
@@ -285,7 +271,7 @@ end VariabilityPropagationTests.IfEq4;
 ")})));
 end IfEq4;
 
-model Func1
+model FunctionCall1
 	Real c_out;
     function f
         output Real c;
@@ -293,23 +279,24 @@ model Func1
     	c := 1;
     end f;
 equation
-    c_out = f();
+    c_out = f() * 5;
     annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Func1",
+			name="FunctionCall1",
 			description="",
 			variability_propagation=true,
 			flatModel="
-fclass VariabilityPropagationTests.Func1
- constant Real c_out = 1;
-end VariabilityPropagationTests.Func1;
+fclass VariabilityPropagationTests.FunctionCall1
+ constant Real c_out = 5.0;
+end VariabilityPropagationTests.FunctionCall1;
 ")})));
-end Func1;
+end FunctionCall1;
 
 model FunctionCallEquation1
 	Real x1,x2;
 	Real x3,x4;
 	Real x5;
+	Real x6,x7;
 	parameter Real p = 3;
 	
     function f
@@ -320,10 +307,16 @@ model FunctionCallEquation1
     	c1 := 1*i1;
     	c2 := 2*i1;
     end f;
+    function e
+    	input Real i1;
+    	output Real o1,o2;
+    	external "C";
+    end e;
 equation
     (x1,x2) = f(x5);
     (x3,x4) = f(p);
     x5 = 5;
+    (x6,x7) = e(1);
     annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="FunctionCallEquation1",
@@ -336,9 +329,12 @@ fclass VariabilityPropagationTests.FunctionCallEquation1
  parameter Real x3;
  parameter Real x4;
  constant Real x5 = 5;
+ parameter Real x6;
+ parameter Real x7;
  parameter Real p = 3 /* 3 */;
 parameter equation
  (x3, x4) = VariabilityPropagationTests.FunctionCallEquation1.f(p);
+ (x6, x7) = VariabilityPropagationTests.FunctionCallEquation1.e(1);
 
 public
  function VariabilityPropagationTests.FunctionCallEquation1.f
@@ -350,6 +346,16 @@ public
   c2 := 2 * i1;
   return;
  end VariabilityPropagationTests.FunctionCallEquation1.f;
+
+ function VariabilityPropagationTests.FunctionCallEquation1.e
+  input Real i1;
+  output Real o1;
+  output Real o2;
+ algorithm
+  external \"C\" e(i1, o1, o2);
+  return;
+ end VariabilityPropagationTests.FunctionCallEquation1.e;
+ 
 end VariabilityPropagationTests.FunctionCallEquation1;
 ")})));
 end FunctionCallEquation1;
@@ -357,6 +363,7 @@ end FunctionCallEquation1;
 model FunctionCallEquation2
 	Real z1[2];
 	Real z2[2];
+	Real z3[2];
 	parameter Real p = 3;
 	
     function f
@@ -366,9 +373,15 @@ model FunctionCallEquation2
     	c[1] := 1*i1;
     	c[2] := 2*i1;
     end f;
+    function e
+    	input Real i1;
+        output Real c[2];
+    	external "C";
+    end e;
 equation
     (z1) = f(1);
     (z2) = f(p);
+    (z3) = e(1);
     annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="FunctionCallEquation2",
@@ -380,9 +393,12 @@ fclass VariabilityPropagationTests.FunctionCallEquation2
  constant Real z1[2] = 2.0;
  parameter Real z2[1];
  parameter Real z2[2];
+ parameter Real z3[1];
+ parameter Real z3[2];
  parameter Real p = 3 /* 3 */;
 parameter equation
  ({z2[1], z2[2]}) = VariabilityPropagationTests.FunctionCallEquation2.f(p);
+ ({z3[1], z3[2]}) = VariabilityPropagationTests.FunctionCallEquation2.e(1);
 
 public
  function VariabilityPropagationTests.FunctionCallEquation2.f
@@ -393,6 +409,15 @@ public
   c[2] := 2 * i1;
   return;
  end VariabilityPropagationTests.FunctionCallEquation2.f;
+ 
+ function VariabilityPropagationTests.FunctionCallEquation2.e
+  input Real i1;
+  output Real[2] c;
+ algorithm
+  external \"C\" e(i1, c, size(c, 1));
+  return;
+ end VariabilityPropagationTests.FunctionCallEquation2.e;
+ 
 end VariabilityPropagationTests.FunctionCallEquation2;
 ")})));
 end FunctionCallEquation2;
@@ -450,42 +475,104 @@ end VariabilityPropagationTests.FunctionCallEquation3;
 ")})));
 end FunctionCallEquation3;
 
-
-model Der1
-	Real x1,x2;
-	Real x3,x4;
-	Real x5,x6;
-	parameter Real p1 = 4;
+model FunctionCallEquation4
+	constant Real a[2,2] = {{1,2},{3,4}};
+	constant Real b[2] = {1,2};
+	Real x1[2];
 equation
-    x2 = der(x1);
-    x1 = 3;
-    x3 = der(x4);
-    der(x4) = 3;
-    x5 = der(x6);
-    x6 = p1 + 1;
+	x1 = Modelica.Math.Matrices.solve(a, b);
+	
     annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Der1",
+			name="FunctionCallEquation4",
 			description="",
 			variability_propagation=true,
 			flatModel="
-fclass VariabilityPropagationTests.Der1
- constant Real x1 = 3;
- constant Real x2 = 0;
- Real x3;
- Real x4;
- constant Real x5 = 0;
- parameter Real x6;
- parameter Real p1 = 4 /* 4 */;
-initial equation 
- x4 = 0.0;
+fclass VariabilityPropagationTests.FunctionCallEquation4
+ constant Real a[1,1] = 1;
+ constant Real a[1,2] = 2;
+ constant Real a[2,1] = 3;
+ constant Real a[2,2] = 4;
+ constant Real b[1] = 1;
+ constant Real b[2] = 2;
+ parameter Real x1[1];
+ parameter Real x1[2];
 parameter equation
- x6 = p1 + 1;
-equation
- x3 = der(x4);
- der(x4) = 3;
-end VariabilityPropagationTests.Der1;
+ ({x1[1], x1[2]}) = Modelica.Math.Matrices.solve({{1.0, 2.0}, {3.0, 4.0}}, {1.0, 2.0});
+
+public
+ function Modelica.Math.Matrices.solve
+  input Real[:, size(A, 1)] A;
+  input Real[size(A, 1)] b;
+  output Real[size(b, 1)] x;
+  Integer info;
+ algorithm
+  (x, info) := Modelica.Math.Matrices.LAPACK.dgesv_vec(A, b);
+  ();
+  return;
+ end Modelica.Math.Matrices.solve;
+
+ function Modelica.Math.Matrices.LAPACK.dgesv_vec
+  input Real[:, size(A, 1)] A;
+  input Real[size(A, 1)] b;
+  output Real[size(A, 1)] x;
+  output Integer info;
+  Real[:,:] Awork;
+  Integer lda;
+  Integer ldb;
+  Integer[:] ipiv;
+ algorithm
+  size(Awork) := {size(A, 1), size(A, 1)};
+  size(ipiv) := {size(A, 1)};
+  for i1 in 1:size(x, 1) loop
+   x[i1] := b[i1];
+  end for;
+  for i1 in 1:size(Awork, 1) loop
+   for i2 in 1:size(Awork, 2) loop
+    Awork[i1,i2] := A[i1,i2];
+   end for;
+  end for;
+  lda := max(1, size(A, 1));
+  ldb := max(1, size(b, 1));
+  external \"FORTRAN 77\" dgesv(size(A, 1), 1, Awork, lda, ipiv, x, ldb, info);
+  return;
+ end Modelica.Math.Matrices.LAPACK.dgesv_vec;
+
+end VariabilityPropagationTests.FunctionCallEquation4;
 ")})));
-end Der1;
+end FunctionCallEquation4;
+
+model FunctionCallEquation5
+	constant Real a[2,2] = {{1,2},{3,4}};
+	Real x1[2,2];
+	
+	function f
+		input Real a[:,:];
+		input Real b[size(a,2),:];
+		output Real o[size(a,1),size(b,2)];
+	algorithm
+		o := a * b;
+	end f;
+equation
+	x1 = f(a,a);
+	
+    annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionCallEquation5",
+			description="",
+			variability_propagation=true,
+			flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquation5
+ constant Real a[1,1] = 1;
+ constant Real a[1,2] = 2;
+ constant Real a[2,1] = 3;
+ constant Real a[2,2] = 4;
+ constant Real x1[1,1] = 7.0;
+ constant Real x1[1,2] = 10.0;
+ constant Real x1[2,1] = 15.0;
+ constant Real x1[2,2] = 22.0;
+end VariabilityPropagationTests.FunctionCallEquation5;
+")})));
+end FunctionCallEquation5;
 
 end VariabilityPropagationTests;

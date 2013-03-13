@@ -17,27 +17,6 @@
 
 aspect VariabilityPropagation {
 	
-	//
-	syn FExp FEquation.solution(FVariable fVariable) = solution(fVariable.name());
-	//
-	public boolean FVariable.hasFDerivativeVariable() {
-		try { 
-			myDerivativeVariable();
-			return true;
-		} catch (ClassCastException e) {
-			return false;
-		}
-	}
-	public FDerivativeVariable FVariable.myFDerivativeVariable() {
-		return myDerivativeVariable();
-	}
-	//
-	syn FTypePrefixVariability FDerExp.expVariability() = 
-			getFIdUse().variability().parameterOrLess() ? fConstant() : getFIdUse().variability();
-	syn CValue FDerExp.cevalCalc() = 
-			getFIdUse().variability().parameterOrLess() ? new CValueInteger(0) : getFIdUse().ceval();
-	//
-	
 	public boolean FAbstractEquation.taggedForRemoval = false;
 	public boolean FVariable.taggedForRemoval = false;
 	
@@ -117,29 +96,33 @@ aspect VariabilityPropagation {
 		FExp solution;
 		FTypePrefixVariability solutionVariability;
 
-		try { // assumes exactly one variable in variables()
-			fVariable = variables().iterator().next();
-		} catch (NoSuchElementException e) {
-			return; // TODO: log/why are we here?
-		}
-		
-		if (fVariable.isDerivativeVariable()) {
+		if (!variabilityPropagationEnabled()) {
 			return;
-		}		
+		}
 
-		solution = solution(fVariable);
+		fVariable = variables().iterator().next();
+
+		if (fVariable.isDerivativeVariable()) {
+			// Do not propagate through der(x) = solution
+			return;
+		}
+
+		solution = solution(fVariable.name());
 		solutionVariability = solution.variability();
 
-		if (!solutionVariability.constantVariability() && !solutionVariability.parameterVariability()) {
-			// TODO: log/why are we here?
+		if (!solutionVariability.parameterOrLess()) {
+			// Sometimes combinations of parameters and constants yield 
+			// discrete variability. IfExpr. etc.
 			return;
 		}
 
 		if (solutionVariability.constantVariability()) {
-			if (!solution.canCeval()) {
-				return;
+			if (solution.canCeval()) {
+				solution = solution.ceval().buildLiteral();
+			} else {
+				// If we can't evaluate right now, set it as parameter
+				solutionVariability = fParameter();
 			}
-			solution = solution.ceval().buildLiteral();
 		}
 
 		if (solutionVariability.parameterVariability()) {
@@ -148,7 +131,7 @@ aspect VariabilityPropagation {
 
 		this.taggedForRemoval = true;
 		fVariable.variabilityPropagation(worklist, solutionVariability, solution);
-	
+
 	}
 	
 	public void FFunctionCallEquation.variabilityPropagation(
@@ -159,31 +142,35 @@ aspect VariabilityPropagation {
 		FTypePrefixVariability callVariability = getCall().variability();
 		CValue val[] = null;
 		FExp leftExp;
+		
+		if (!variabilityPropagationEnabled()) {
+			return;
+		}
 
-		if (!callVariability.constantVariability() && !callVariability.parameterVariability()) {
+		if (!callVariability.parameterOrLess()) {
 			return;
 		}
 		
 		if (callVariability.constantVariability()) {
-			if (!getCall().canCeval()) {
-				return;
+			if (getCall().canCeval()) {
+				val = getCall().cevalFunction();
+			} else {
+				callVariability = fParameter();
 			}
-			val = getCall().cevalFunction();
 		}
 
 		if (callVariability.parameterVariability()) {
 			parameterEquations.add(this);
 		}
 		
+		this.taggedForRemoval = true;
 		for (int i = 0; i < getNumLeft(); i++) {
 			leftExp = getLeft(i).getFExp();
 			if (leftExp != null) {
 				leftExp.variabilityPropagation(worklist,callVariability, 
 						callVariability.constantVariability() ? val[i].buildLiteral() : null);				
 			}
-		}
-		
-		this.taggedForRemoval = true;
+		}		
 	}
 	
 	public void FExp.variabilityPropagation(
@@ -191,8 +178,7 @@ aspect VariabilityPropagation {
 			FTypePrefixVariability variability,
 			FExp bindingExp) {
 		
-		System.err.println("UNSUPPORTEDLEFTHANDFCEQ");
-		System.exit(1); // TODO: log/throw exception
+		throw new UnsupportedOperationException();
 	}
 	
 	public void FRecordConstructor.variabilityPropagation(
@@ -242,6 +228,7 @@ aspect VariabilityPropagation {
 			FTypePrefixVariability variability,
 			FExp bindingExp) {
 		
+		throw new UnsupportedOperationException();
 	}
 	
 	public void FVariable.variabilityPropagation(
@@ -266,12 +253,10 @@ aspect VariabilityPropagation {
 			}
 		}
 		
-		if (hasFDerivativeVariable()) {
-			FDerivativeVariable fDerivativeVariable = myFDerivativeVariable();
-			if (fDerivativeVariable != this) {
-				fDerivativeVariable.taggedForRemoval = true;
-				fDerivativeVariable.variabilityPropagation(worklist,FTypePrefixVariability.fConstant(),new FIntegerLitExp(0));				
-			}
+		if (isDifferentiatedVariable()) {
+			FDerivativeVariable fDerivativeVariable = myDerivativeVariable();
+			fDerivativeVariable.taggedForRemoval = true;
+			fDerivativeVariable.variabilityPropagation(worklist,FTypePrefixVariability.fConstant(),new FIntegerLitExp(0));				
 		}
 	}
 }
@@ -284,6 +269,7 @@ aspect ConstantFolding {
 	eq FUnaryExp.constantFoldingEligible() = true;
 	eq FBinExp.constantFoldingEligible() = true;
 	eq FIfExp.constantFoldingEligible() = true;
+	eq FPreExp.constantFoldingEligible() = true;
 		
 	public void FClass.enableConstantFolding() {
 		super.enableConstantFolding();

@@ -157,8 +157,8 @@ public class OptionRegistry {
         VPROP
  			("variability_propagation", 
  			 compiler, 
- 			 false, 
- 			 "If this option is set to true, then constants are " +
+ 			 false,
+ 			 "If this option is set to true, then variabilities are " +
               "propagated through the model."),
 		HALT_WARN
 			("halt_on_warning", 

@@ -1215,7 +1215,7 @@ aspect ConstantEvaluation {
   eq FNoEventExp.cevalCalc() = getFExp().ceval();
   eq FSmoothExp.cevalCalc()  = getFExp().ceval();
   
-  eq FPreExp.cevalCalc()     = CValue.UNKNOWN;
+  eq FPreExp.cevalCalc()     = variability().constantVariability() ? getFExp().ceval() : CValue.UNKNOWN;
   eq FSampleExp.cevalCalc()  = CValue.UNKNOWN;
   
   /** Decides what initial() is currently evaluated to. */
@@ -1334,6 +1334,8 @@ aspect ConstantEvaluation {
   }
  
   eq FIdUseExp.cevalCalc()      = getFIdUse().ceval();
+  eq FDerExp.cevalCalc() = 
+			getFIdUse().variability().parameterOrLess() ? new CValueInteger(0) : getFIdUse().ceval();
   eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
   
   syn CValue InstAccess.ceval()        = ceval(Index.NULL);
