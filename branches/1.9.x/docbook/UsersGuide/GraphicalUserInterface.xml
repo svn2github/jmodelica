@@ -25,18 +25,19 @@
     start-menu under JModelica.org. The GUI can also be started by typing the
     following commands in a Python shell:</para>
 
-    <programlisting language="python">from pyjmi.common.plotting import plot_gui #or pyfmi.common.plotting import plot_gui
+    <programlisting language="python">from pyjmi.common.plotting import plot_gui   # or pyfmi.common.plotting import plot_gui
 plot_gui.startGUI()
 </programlisting>
 
-    <para>Note that the GUI requires the Python package wxPython.</para>
+    <para>Note that the GUI requires the Python package <link
+    xlink:href="http://www.wxpython.org/">wxPython</link>.</para>
 
     <figure xml:id="fig_gui_overview">
       <title>Overview of JModelica.org Plot GUI</title>
 
       <mediaobject>
         <imageobject>
-          <imagedata fileref="images/overview.png" scalefit="1" width="60%"></imagedata>
+          <imagedata fileref="images/overview.png" scalefit="1" width="60%"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -45,18 +46,18 @@ plot_gui.startGUI()
       <title>Introduction</title>
 
       <para>An overview of the GUI is shown in <xref
-      linkend="fig_gui_overview" />. As can be seen, the plot figures are
+      linkend="fig_gui_overview"/>. As can be seen, the plot figures are
       located to the right and can contain multiple figures in various
       configurations. The left is dedicated to show the loaded result file(s)
-      and its(theirs) variables together with options for filtering
+      and corresponding variables together with options for filtering
       time-varying variables and parameters/constants.</para>
 
       <para>Loading a result file is done using the <literal>File</literal>
       menu selection <literal>Open</literal> which opens a file dialog where
       either textual (.txt) results or binary (.mat) results can be chosen.
-      The result is then loaded into a tree structure which enables a user to
-      easily browse between components in a model, see <xref
-      linkend="fig_gui_first" /> . Multiple results can be loaded either
+      The result is then loaded into a tree structure which enables the user
+      to easily browse between components in a model, see <xref
+      linkend="fig_gui_first"/> . Multiple results can be loaded either
       simultaneously or separately by using the <literal>File</literal> menu
       option <literal>Open</literal> repeatedly.</para>
 
@@ -65,14 +66,14 @@ plot_gui.startGUI()
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/FirstLook.png" scalefit="1" width="60%"></imagedata>
+            <imagedata fileref="images/FirstLook.png" scalefit="1" width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
 
       <para>Displaying trajectories is done by simply checking the box
       associated with the variable of interest, see <xref
-      linkend="fig_gui_first" />. Removing a trajectory follows the same
+      linkend="fig_gui_traj"/>. Removing a trajectory follows the same
       principle.</para>
 
       <figure xml:id="fig_gui_traj">
@@ -81,7 +82,7 @@ plot_gui.startGUI()
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/FirstTrajectory.png" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -93,45 +94,46 @@ plot_gui.startGUI()
     <section>
       <title>Edit Options</title>
 
-      <para>The GUI allows a range of options related to how the trajectories
-      are displayed such as line width, color and draw style. Information
-      about a plot can in addition be defined by setting titles and labels.
-      Options related to the figure can be found under the <literal>Edit
+      <para>The GUI allows a range of options, see <xref
+      linkend="fig_gui_options"/>, related to how the trajectories are
+      displayed such as line width, color and draw style. Information about a
+      plot can in addition be defined by setting titles and labels. Options
+      related to the figure can be found under the <literal>Edit
       </literal>menu as well as adding more plot figures.</para>
 
-      <figure>
+      <figure xml:id="fig_gui_options">
         <title>Figure Options.</title>
 
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/FigureOptions.png" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
 
-      <para>Under <literal>Axis/Labels</literal>, options such as defining
-      titles and labels in both X and Y direction can be found together with
-      axis options.</para>
+      <para>Under <literal>Axis/Labels</literal>, see <xref
+      linkend="fig_gui_axis"/>, options such as defining titles and labels in
+      both X and Y direction can be found together with axis options.</para>
 
-      <figure>
+      <figure xml:id="fig_gui_axis">
         <title>Figure Axis and Labels Options.</title>
 
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/FigureAxis.png" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
 
       <para>Under <literal>Lines/Legends</literal>, options for specifying
       specific line labels and line styles can be found, see <xref
-      linkend="fig_gui_lines" />. The top drop-down list contains all
-      variables related to the highlighted figure and the following input
-      fields down to <literal>Legend</literal> are related to the chosen
-      variable. The changes take effect after the button <literal>OK</literal>
-      have been pressed. For changing multiple lines in the same session, the
+      linkend="fig_gui_lines"/>. The top drop-down list contains all variables
+      related to the highlighted figure and the following input fields down to
+      <literal>Legend</literal> are related to the chosen variable. The
+      changes take effect after the button <literal>OK</literal> has been
+      pressed. For changing multiple lines in the same session, the
       <literal>Apply</literal> button should be used.</para>
 
       <figure xml:id="fig_gui_lines">
@@ -140,14 +142,14 @@ plot_gui.startGUI()
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/FigureLines.png" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
 
       <para>Additional figures can be added from the <literal>Add
       Plot</literal> command in the <literal>Edit</literal> menu. In <xref
-      linkend="fig_gui_additional" /> an additional figure have been
+      linkend="fig_gui_additional"/> an additional figure have been
       added.</para>
 
       <figure xml:id="fig_gui_additional">
@@ -156,16 +158,16 @@ plot_gui.startGUI()
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/FigurePlot.png" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
 
       <para>The figures can be positioned by choosing a figure tab and moving
-      it to one of the borders of the GUI. In <xref
-      linkend="fig_gui_moving" /> "Plot 1" have been dragged to the left side
-      of the figure and a highlighted area has emerged which shows where "Plot
-      1" will be positioned. In <xref linkend="fig_gui_moved" /> the result is
+      it to one of the borders of the GUI. In <xref linkend="fig_gui_moving"/>
+      "Plot 1" have been dragged to the left side of the figure and a
+      highlighted area has emerged which shows where "Plot 1" will be
+      positioned. In <xref linkend="fig_gui_moved"/> the result is
       shown.</para>
 
       <figure xml:id="fig_gui_moving">
@@ -174,7 +176,7 @@ plot_gui.startGUI()
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/FigureMoving.png" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -185,13 +187,13 @@ plot_gui.startGUI()
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/FigureMoved.png" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
 
       <para>If we are to add more figures, an increasingly complex figure
-      layout can be created as is shown in <xref linkend="fig_gui_complex" />
+      layout can be created as is shown in <xref linkend="fig_gui_complex"/>
       where figures also have been dragged to other figure headers.</para>
 
       <figure xml:id="fig_gui_complex">
@@ -200,7 +202,7 @@ plot_gui.startGUI()
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/FigureComplex.png" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -210,9 +212,10 @@ plot_gui.startGUI()
       <title>View Options</title>
 
       <para>Options for interacting with a figure and changing the display can
-      be found under the View menu. The options are to show/hide a grid,
-      either to use the mouse to move the plot or to use the mouse for zooming
-      and finally to resize the plot to fit the selected variables.</para>
+      be found under the <literal>View</literal> menu. The options are to
+      show/hide a grid, either to use the mouse to move the plot or to use the
+      mouse for zooming and finally to resize the plot to fit the selected
+      variables.</para>
 
       <figure>
         <title>Figure View Options.</title>
@@ -220,7 +223,7 @@ plot_gui.startGUI()
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/FigureView.png" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -234,10 +237,10 @@ plot_gui.startGUI()
     <section>
       <title>Example</title>
 
-      <para>In <xref linkend="fig_gui_example" /> an example showing how the
-      GUI can be used to plot four different plots with different labels. Some
-      of the lines have also been modified in width and in line style. A grid
-      is also shown.</para>
+      <para><xref linkend="fig_gui_example"/> shows an example of how the GUI
+      can be used to plot four different plots with different labels. Some of
+      the lines have also been modified in width and in line style. A grid is
+      also shown.</para>
 
       <figure xml:id="fig_gui_example">
         <title>Multiple figure example.</title>
@@ -245,7 +248,7 @@ plot_gui.startGUI()
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/MultipleExample.png" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>

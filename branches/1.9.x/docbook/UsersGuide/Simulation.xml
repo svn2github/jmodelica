@@ -30,7 +30,7 @@
     default, and recommended, means to simulate models is to use FMUs, since
     this approach provides better performance, more a more robust
     initialization mechanism, and significantly better support for hybrid
-    systems. Simulation of JMU's may still be useful, however, in some
+    systems. Simulation of JMUs may still be useful, however, in some
     optimization applications where simulation of the model as a DAE/JMU, is
     an important prerequisite for optimization by means of the collocation
     algorithms.</para>
@@ -45,7 +45,7 @@
     <para>This example focuses on how to use JModelica.org's simulation
     functionality in the most basic way. The model which is to be simulated is
     the Van der Pol problem described in the code below. The model is also
-    available from the examples in JModelica.org in the file VDP.mop.</para>
+    available from the examples in JModelica.org in the file VDP.mo.</para>
 
     <programlisting language="modelica" xml:id="sim_list_vdp">model VDP
     // State start values
@@ -107,7 +107,7 @@ x2 = res['x2']
 t  = res['time']
 </programlisting>
 
-    <para>The variable trajectories are returned as numpy arrays and can be
+    <para>The variable trajectories are returned as NumPy arrays and can be
     used for further analysis of the simulation result or for
     visualization:</para>
 
@@ -137,7 +137,7 @@ plt.show()
   <section>
     <title>Simulation of Models</title>
 
-    <para>Simulation of models in JModelica.org is preformed via the simulate
+    <para>Simulation of models in JModelica.org is performed via the simulate
     method of a model object. The model objects in JModelica.org are:</para>
 
     <itemizedlist>
@@ -177,20 +177,20 @@ plt.show()
 
     <para>And used in the following way:</para>
 
-    <programlisting language="python">res = FMUModel(ME/CS)1.simulate() #Using default values
+    <programlisting language="python">res = FMUModel(ME/CS)1.simulate() # Using default values
 </programlisting>
 
     <para>The only difference between the simulation method in
     <literal>JMUModel</literal> compared to <literal>FMUModelME1</literal> is
     that the algorithm is <literal>AssimuloAlg</literal>. They are although
     both connected to the Assimulo package and able to use its solvers. For
-    <literal>FMUModelCS1</literal>, the FMU contain the solver and is thus
+    <literal>FMUModelCS1</literal>, the FMU contains the solver and is thus
     used (although using the same interface).</para>
 
     <section>
       <title>Convenience method, load_fmu</title>
 
-      <para>As that the FMI standard contain different specifications for
+      <para>As that the FMI standard contains different specifications for
       Model exchange and Co-Simulation and will also differ between its own
       version, a convenience method, <literal>load_fmu</literal> has been
       created. This method is the preferred access point for loading an FMU
@@ -230,10 +230,11 @@ plt.show()
         a sinus wave as input. Also we are interested in the interval 0 to
         10.</para>
 
-        <programlisting language="python">t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
-u = N.sin(t) #Create the input vector
-u_traj = N.transpose(N.vstack((t,u))) #Create the data matrix and transpose 
-                                      #it to the correct form
+        <programlisting language="python">import numpy as N
+t = N.linspace(0.,10.,100)            # Create one hundred evenly spaced points
+u = N.sin(t)                          # Create the input vector
+u_traj = N.transpose(N.vstack((t,u))) # Create the data matrix and transpose 
+                                      # it to the correct form
 </programlisting>
 
         <para>The above code have created the data matrix that we are
@@ -252,21 +253,20 @@ u_traj = N.transpose(N.vstack((t,u))) #Create the data matrix and transpose
         <para>If we on the other hand would have two input variables, u1 and
         u2 the script would instead look like:</para>
 
-        <programlisting language="python">t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
-u1 = N.sin(t) #Create the first input vector
-u2 = N.cos(t) #Create the second input vector
-u_traj = N.transpose(N.vstack((t,u1,u2))) #Create the data matrix and 
-                                          #transpose it to the correct form
-
+        <programlisting language="python">import numpy as N
+t = N.linspace(0.,10.,100)                     # Create one hundred evenly spaced points
+u1 = N.sin(t)                                  # Create the first input vector
+u2 = N.cos(t)                                  # Create the second input vector
+u_traj = N.transpose(N.vstack((t,u1,u2)))      # Create the data matrix and 
+                                               # transpose it to the correct form
 input_object = (['u1','u2'], u_traj)
-
 res = model.simulate(final_time=10, input=input_object)
 </programlisting>
 
         <para>Note that the variables are now a List of variables.</para>
 
         <para>If we were to do the same example using input functions instead,
-        the code would like for the single input case:</para>
+        the code would look like for the single input case:</para>
 
         <programlisting language="python">input_object = ('u1', N.sin)</programlisting>
 
@@ -384,13 +384,10 @@ input_object = (['u1','u2'],input_function)
         discretization method (discr) from BDF to Adams:</para>
 
         <programlisting language="python">...
-opts = model.simulate_options() #Retrieve the default options
-
-opts['solver'] = 'CVode' #Change the solver from IDA to CVode
-
-opts['CVode_options']['discr'] = 'Adams' #Change from using BDF to Adams
-
-model.simulate(options=opts) #Pass in the options to simulate and simulate
+opts = model.simulate_options()          # Retrieve the default options
+opts['solver'] = 'CVode'                 # Change the solver from IDA to CVode
+opts['CVode_options']['discr'] = 'Adams' # Change from using BDF to Adams
+model.simulate(options=opts)             # Pass in the options to simulate and simulate
 </programlisting>
 
         <para>It should also be noted from the above example the options
@@ -399,18 +396,15 @@ model.simulate(options=opts) #Pass in the options to simulate and simulate
         in a double dictionary where the first is named after the solver
         concatenated with <literal>_options</literal>:</para>
 
-        <programlisting language="python">opts['CVode_options']['atol'] = 1.0e-6 #Options specific for CVode
-
-#or
-
-opts['IDA_options']['atol']  = 1.0e-6 #Options specific for IDA
+        <programlisting language="python">opts['CVode_options']['atol'] = 1.0e-6 # Options specific for CVode
+opts['IDA_options']['atol'] = 1.0e-6   # Options specific for IDA
 </programlisting>
 
         <para>For the general options, as changing the solver, they are
         accessed as a single dictionary:</para>
 
-        <programlisting language="python">opts['solver'] = 'CVode' #Changing the solver
-opts['ncp'] = 1000 #Changing the number of communication points.
+        <programlisting language="python">opts['solver'] = 'CVode' # Changing the solver
+opts['ncp'] = 1000       # Changing the number of communication points.
 </programlisting>
 
         <table xml:id="sim_table_cvode">
@@ -663,15 +657,11 @@ opts['ncp'] = 1000 #Changing the number of communication points.
         Adams:</para>
 
         <programlisting language="python">...
-opts = model.simulate_options() #Retrieve the default options
-
-#opts['solver'] = 'CVode' #Not necessary, default solver is CVode
-
-opts['CVode_options']['discr'] = 'Adams' #Change from using BDF to Adams
-
-opts['initialize'] = False #Dont initialize the model
-
-model.simulate(options=opts) #Pass in the options to simulate and simulate
+opts = model.simulate_options()          # Retrieve the default options
+#opts['solver'] = 'CVode'                # Not necessary, default solver is CVode
+opts['CVode_options']['discr'] = 'Adams' # Change from using BDF to Adams
+opts['initialize'] = False               # Don't initialize the model
+model.simulate(options=opts)             # Pass in the options to simulate and simulate
 </programlisting>
 
         <para>It should also be noted from the above example the options
@@ -680,14 +670,14 @@ model.simulate(options=opts) #Pass in the options to simulate and simulate
         where the first is named after the solver concatenated with
         <literal>_options</literal>:</para>
 
-        <programlisting language="python">opts['CVode_options']['atol'] = 1.0e-6 #Options specific for CVode
+        <programlisting language="python">opts['CVode_options']['atol'] = 1.0e-6   # Options specific for CVode
 </programlisting>
 
         <para>For the general options, as changing the solver, they are
         accessed as a single dictionary:</para>
 
-        <programlisting language="python">opts['solver'] = 'CVode' #Changing the solver
-opts['ncp'] = 1000 #Changing the number of communication points.
+        <programlisting language="python">opts['solver'] = 'CVode'  # Changing the solver
+opts['ncp'] = 1000        # Changing the number of communication points.
 </programlisting>
 
         <table xml:id="sim_table_cvodeFMI">
@@ -852,15 +842,14 @@ opts['ncp'] = 1000 #Changing the number of communication points.
 
       <para>The return argument from the simulate method is an object derived
       from a common result object <literal>ResultBase</literal> in
-      algorithm_drivers.py with a few extra convenience methods for retrieving
-      the result of a variable. The result object can be accessed in the same
-      way as a dictionary type in Python with the name of the variable as
-      key.</para>
+      <filename>algorithm_drivers.py</filename> with a few extra convenience
+      methods for retrieving the result of a variable. The result object can
+      be accessed in the same way as a dictionary type in Python with the name
+      of the variable as key.</para>
 
       <programlisting language="python">res = model.simulate()
-
-y = res['y'] #Return the result for the variable/parameter/constant y
-dery = res['der(y)'] #Return the result for the variable/parameter/constant der(y)
+y = res['y']           # Return the result for the variable/parameter/constant y
+dery = res['der(y)']   # Return the result for the variable/parameter/constant der(y)
 </programlisting>
 
       <para>This can be done for all the variables, parameters and constants
@@ -965,7 +954,7 @@ dery = res['der(y)'] #Return the result for the variable/parameter/constant der(
 
       <para>This example will demonstrate how a model with two inputs with
       data from a matlab-file can be simulated. The model to be simulated is a
-      quadruple tank connected to two pumps, which is also the inputs to the
+      quadruple tank connected to two pumps, which also are the inputs to the
       model. The model is depicted in <xref linkend="sim_fig_quadtank"/> and
       in the code below the corresponding Modelica code is listed.</para>
 
@@ -1028,9 +1017,9 @@ from pyjmi import JMUModel
 </programlisting>
 
       <para>The input data is stored in <literal>qt_par_est_data.mat</literal>
-      which can be found in the <literal>examples/files</literal> catalogue in
-      JModelica.org. Copy it into your working directory and paste the
-      following commands to load the data-file and extract the data
+      which can be found in the <literal>Python/pyjmi/examples/files</literal>
+      catalogue in JModelica.org. Copy it into your working directory and
+      paste the following commands to load the data-file and extract the data
       trajectories:</para>
 
       <programlisting language="python">data = loadmat('qt_par_est_data.mat',appendmat=False)
@@ -1054,7 +1043,7 @@ input_object = (['u1','u2'], u_data)
 
       <para>Next, we compile and load the model:</para>
 
-      <programlisting language="python"># compile JMU
+      <programlisting language="python"># Compile JMU
 jmu_name = compile_jmu('QuadTank', 'QuadTank.mo')
 
 # Load model
@@ -1160,7 +1149,7 @@ plt.show()
       <literal>RLC_Circuit.mo</literal> is located in the working
       directory.</para>
 
-      <para>Start by creating a Python script file and write or (copy paste)
+      <para>Start by creating a Python script file and write (or copy paste)
       the command for importing the model object and for compiling a model
       together with the library used for plotting:</para>
 
@@ -1186,7 +1175,7 @@ rlc = JMUModel(jmu_name)
       to 0.0 so no need to change that, but the final time needs to be
       changed:</para>
 
-      <programlisting language="python">res = rlc.simulate(final_time=20.0) #Simulate the model from 0.0 to 20.0 seconds
+      <programlisting language="python">res = rlc.simulate(final_time=20.0)   # Simulate the model from 0.0 to 20.0 seconds
 </programlisting>
 
       <para>After a successful simulation the statistics are printed in the
@@ -1232,10 +1221,10 @@ plt.show()
       employs an index reduction scheme, where some equations are
       differentiated, and dummy derivatives are selected. In order to
       demonstrate this feature, we consider the model
-      Modelica.Mechanics.Rotational.Examples.First from the Modelica Standard
-      library, see <xref linkend="rotational_first_diagram"/>. The model is of
-      high index since there are two rotating inertias connected with a rigid
-      gear.</para>
+      <filename>Modelica.Mechanics.Rotational.Examples.First</filename> from
+      the Modelica Standard library, see <xref
+      linkend="rotational_first_diagram"/>. The model is of high index since
+      there are two rotating inertias connected with a rigid gear.</para>
 
       <figure xml:id="rotational_first_diagram">
         <title>Modelica.Mechanics.Rotational.First connection diagram</title>
@@ -1340,9 +1329,10 @@ plt.show()
 
       <para>Notice that the initial values of the states are parametrized by
       the parameters <literal>x1_0</literal> and <literal>x2_0</literal>.
-      Next, copy the Modelica code above into a file VDP.mo and save it in
-      your working directory. Also, create a Python script file and name it
-      vdp_pp.py. Start by copying the commands:</para>
+      Next, copy the Modelica code above into a file
+      <filename>VDP.mo</filename> and save it in your working directory. Also,
+      create a Python script file and name it <filename>vdp_pp.py</filename>.
+      Start by copying the commands:</para>
 
       <programlisting language="python">import numpy as N
 import pylab as P
@@ -1474,10 +1464,10 @@ model = JMUModel(jmu_name)
       tolerances:</para>
 
       <programlisting language="python"># Get and set the options
-opts = model.simulate_options() #Get the options
-opts['IDA_options']['atol'] = [1.0e-8, 1.0e-14, 1.0e-6] #Change the tolerance
-opts['IDA_options']['sensitivity'] = True #Activate the sensitivity calculations
-opts['ncp'] = 400 #Change the number of communication points
+opts = model.simulate_options()                         # Get the options
+opts['IDA_options']['atol'] = [1.0e-8, 1.0e-14, 1.0e-6] # Change the tolerance
+opts['IDA_options']['sensitivity'] = True               # Activate the sensitivity calculations
+opts['ncp'] = 400                                       # Change the number of communication points
 </programlisting>
 
       <para>Now lets simulate the model:</para>
@@ -1526,9 +1516,8 @@ plt.show()
       SDK (http://www.qtronic.de/en/fmusdk.html). This example is written
       similar to the example in the documentation of the 'Functional Mock-up
       Interface for Model Exchange' version 1.0
-      (http://www.functional-mockup-interface.org/). The bouncing ball model
-      is to be simulated using the explicit Euler method with event
-      detection.</para>
+      (https://www.fmi-standard.org/). The bouncing ball model is to be
+      simulated using the explicit Euler method with event detection.</para>
 
       <para>The example can also be found in the Python examples catalog in
       the JModelica.org platform.</para>
@@ -1568,24 +1557,22 @@ plt.show()
 
         <para>Start by importing the necessary modules,</para>
 
-        <programlisting language="python">        import numpy as N 
-        import pylab as P #Used for plotting
-        from pyfmi import FMUModelME1 #The FMI Interface for Model Exchange
+        <programlisting language="python">import numpy as N 
+import pylab as P                  # Used for plotting
+from pyfmi.fmi import FMUModelME1  # The FMI Interface for Model Exchange
 </programlisting>
 
-        <para>Next, the FMU is to be loaded and initialized,</para>
+        <para>Next, the FMU is to be loaded and initialized</para>
 
-        <programlisting language="python">        #Load the FMU by specifying the fmu together with the path.
-        bouncing_fmu = FMUModelME1('/path/to/FMU/bouncingBall.fmu')
+        <programlisting language="python"># Load the FMU by specifying the fmu together with the path.
+bouncing_fmu = FMUModelME1('/path/to/FMU/bouncingBall.fmu')
 
-        Tstart = 0.5 #The start time.
-        Tend   = 3.0 #The final simulation time.
-        
-        bouncing_fmu.time = Tstart #Set the start time before the initialization.
-                                   #(Defaults to 0.0)
-        
-        bouncing_fmu.initialize() #Initialize the model. Also sets all the start 
-                                  #attributes defined in the XML file.
+Tstart = 0.5                 # The start time.
+Tend   = 3.0                 # The final simulation time.  
+bouncing_fmu.time = Tstart   # Set the start time before the initialization.
+                             # (Defaults to 0.0)
+bouncing_fmu.initialize()    # Initialize the model. Also sets all the start 
+                             # attributes defined in the XML file.
 </programlisting>
 
         <para>The first line loads the FMU and connects the C-functions of the
@@ -1595,7 +1582,7 @@ plt.show()
         must be done before the simulation is started.</para>
 
         <para>Note that if the start time is not specified,
-        <literal>FMUModel</literal> tries to find the starting time in the
+        <literal>FMUModelME1</literal> tries to find the starting time in the
         XML-file structure 'default experiment' and if successful starts the
         simulation from that time. Also if the XML-file does not contain any
         information about the default experiment the simulation is started
@@ -1604,18 +1591,19 @@ plt.show()
         <para>Then information about the first step is retrieved and stored
         for later use.</para>
 
-        <programlisting language="python">        #Get Continuous States
-        x = bouncing_fmu.continuous_states
-        #Get the Nominal Values
-        x_nominal = bouncing_fmu.nominal_continuous_states
-        #Get the Event Indicators
-        event_ind = bouncing_fmu.get_event_indicators()
+        <programlisting language="python"># Get Continuous States
+x = bouncing_fmu.continuous_states
+# Get the Nominal Values
+x_nominal = bouncing_fmu.nominal_continuous_states
+# Get the Event Indicators
+event_ind = bouncing_fmu.get_event_indicators()
         
-        #Values for the solution
-        vref  = [bouncing_fmu.get_valueref('h')] + \
-                [bouncing_fmu.get_valueref('v')] #Retrieve the valureferences for the
-                                                 #values 'h' and 'v't_sol = [Tstart]
-        sol = [bouncing_fmu.get_real(vref)]
+# Values for the solution
+vref  = [bouncing_fmu.get_variable_valueref('h')] + \
+        [bouncing_fmu.get_variable_valueref('v')]        # Retrieve the valureferences for the
+                                                         # values 'h' and 'v'
+t_sol = [Tstart]
+sol = [bouncing_fmu.get_real(vref)]
 </programlisting>
 
         <para>Here the continuous states together with the nominal values and
@@ -1625,32 +1613,32 @@ plt.show()
         storing the result. The final step before the integration is started
         is to define the step-size.</para>
 
-        <programlisting language="python">        time = Tstart
-        Tnext = Tend #Used for time events
-        dt = 0.01 #Step-size
+        <programlisting language="python">time = Tstart
+Tnext = Tend   # Used for time events
+dt = 0.01      # Step-size
 </programlisting>
 
         <para>We are now ready to create our main integration loop where the
         solution is advanced using the explicit Euler method.</para>
 
-        <programlisting language="python">        #Main integration loop.
-        while time &lt; Tend and not bouncing_fmu.get_event_info().terminateSimulation:
-            #Compute the derivative of the previous step f(x(n), t(n))
-            dx = bouncing_fmu.get_derivatives()
+        <programlisting language="python"># Main integration loop.
+while time &lt; Tend and not bouncing_fmu.get_event_info().terminateSimulation:
+    #Compute the derivative of the previous step f(x(n), t(n))
+    dx = bouncing_fmu.get_derivatives()
+    
+    # Advance
+    h = min(dt, Tnext-time)
+    time = time + h
             
-            #Advance
-            h = min(dt, Tnext-time)
-            time = time + h
+    # Set the time
+    bouncing_fmu.time = time
             
-            #Set the time
-            bouncing_fmu.time = time
+    # Set the inputs at the current time (if any)
+    # bouncing_fmu.set_real,set_integer,set_boolean,set_string (valueref, values)
             
-            #Set the inputs at the current time (if any)
-            #bouncing_fmu.set_real,set_integer,set_boolean,set_string (valueref, values)
-            
-            #Set the states at t = time (Perform the step using x(n+1)=x(n)+hf(x(n), t(n))
-            x = x + h*dx 
-            bouncing_fmu.continuous_states = x
+    # Set the states at t = time (Perform the step using x(n+1)=x(n)+hf(x(n), t(n))
+    x = x + h*dx 
+    bouncing_fmu.continuous_states = x
 </programlisting>
 
         <para>This is the integration loop for advancing the solution one
@@ -1672,55 +1660,53 @@ plt.show()
         simulation, we have to check the indicators which is done
         below.</para>
 
-        <programlisting language="python">            #Get the event indicators at t = time
-            event_ind_new = bouncing_fmu.get_event_indicators()
+        <programlisting language="python">    # Get the event indicators at t = time
+    event_ind_new = bouncing_fmu.get_event_indicators()
             
-            #Inform the model about an accepted step and check for step events
-            step_event = bouncing_fmu.completed_integrator_step()
+    # Inform the model about an accepted step and check for step events
+    step_event = bouncing_fmu.completed_integrator_step()
             
-            #Check for time and state events
-            time_event  = abs(time-Tnext) &lt;= 1.e-10
-            state_event = True if True in ((event_ind_new&gt;0.0) != (event_ind&gt;0.0))\
-                          else False
+    # Check for time and state events
+    time_event  = abs(time-Tnext) &lt;= 1.e-10
+    state_event = True if True in ((event_ind_new&gt;0.0) != (event_ind&gt;0.0)) else False
 </programlisting>
 
         <para>Events can be, time, state or step events. The time events are
         checked by continuously monitor the current time and the next time
-        event (Tnext). State events are checked against sign changes of the
-        event functions. Step events are monitored in the FMU, in the method
-        <literal>completed_integrator_step()</literal> and return True if any
-        event handling is necessary. If an event have occurred, it needs to be
-        handled, see below.</para>
+        event (<literal>Tnext</literal>). State events are checked against
+        sign changes of the event functions. Step events are monitored in the
+        FMU, in the method <literal>completed_integrator_step()</literal> and
+        return <literal>True</literal> if any event handling is necessary. If
+        an event have occurred, it needs to be handled, see below.</para>
 
-        <programlisting language="python">            #Event handling
-            if step_event or time_event or state_event:
+        <programlisting language="python">    # Event handling
+    if step_event or time_event or state_event:
+        eInfo = bouncing_fmu.get_event_info()
+        eInfo.iterationConverged = False
                 
-                eInfo = bouncing_fmu.get_event_info()
-                eInfo.iterationConverged = False
-                
-                #Event iteration
-                while eInfo.iterationConverged == False:
-                    bouncing_fmu.event_update('0') #Stops at each event iteration
-                    eInfo = bouncing_fmu.get_event_info()
+        # Event iteration
+        while eInfo.iterationConverged == False:
+            bouncing_fmu.event_update('0')       # Stops at each event iteration
+            eInfo = bouncing_fmu.get_event_info()
 
-                    #Retrieve solutions (if needed)
-                    if eInfo.iterationConverged == False:
-                        #bouncing_fmu.get_real,get_integer,get_boolean,get_string(valueref)
-                        pass
+            # Retrieve solutions (if needed)
+            if eInfo.iterationConverged == False:
+                # bouncing_fmu.get_real,get_integer,get_boolean,get_string(valueref)
+                pass
                 
-                #Check if the event affected the state values and if so sets them
-                if eInfo.stateValuesChanged:
-                    x = bouncing_fmu.continuous_states
+        # Check if the event affected the state values and if so sets them
+        if eInfo.stateValuesChanged:
+            x = bouncing_fmu.continuous_states
             
-                #Get new nominal values.
-                if eInfo.stateValueReferencesChanged:
-                    atol = 0.01*rtol*bouncing_fmu.nominal_continuous_states
+        # Get new nominal values.
+        if eInfo.stateValueReferencesChanged:
+            atol = 0.01*rtol*bouncing_fmu.nominal_continuous_states
                     
-                #Check for new time event
-                if eInfo.upcomingTimeEvent:
-                    Tnext = min(eInfo.nextEventTime, Tend)
-                else:
-                    Tnext = Tend
+        # Check for new time event
+        if eInfo.upcomingTimeEvent:
+            Tnext = min(eInfo.nextEventTime, Tend)
+        else:
+            Tnext = Tend
 </programlisting>
 
         <para>If an event occurred, we enter the iteration loop where we loop
@@ -1735,13 +1721,13 @@ plt.show()
         new absolute tolerances are calculated with the new nominal values.
         Finally the model is checked for a new time event.</para>
 
-        <programlisting language="python">            event_ind = event_ind_new
+        <programlisting language="python">    event_ind = event_ind_new
         
-            #Retrieve solutions at t=time for outputs
-            #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
+    # Retrieve solutions at t=time for outputs
+    # bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
             
-            t_sol += [time]
-            sol += [bouncing_fmu.get_real(vref)]
+    t_sol += [time]
+    sol += [bouncing_fmu.get_real(vref)]
 </programlisting>
 
         <para>In the end of the loop, the solution is stored and the old event
@@ -1750,19 +1736,19 @@ plt.show()
         <para>After the loop have finished, by reaching the final time, we
         plot the simulation results</para>
 
-        <programlisting language="python">        #Plot the height
-        P.figure(1)
-        P.plot(t_sol,N.array(sol)[:,0])
-        P.title(bouncing_fmu.get_name())
-        P.ylabel('Height (m)')
-        P.xlabel('Time (s)')
-        #Plot the velocity
-        P.figure(2)
-        P.plot(t_sol,N.array(sol)[:,1])
-        P.title(bouncing_fmu.get_name())
-        P.ylabel('Velocity (m/s)')
-        P.xlabel('Time (s)')
-        P.show()
+        <programlisting language="python"># Plot the height
+P.figure(1)
+P.plot(t_sol,N.array(sol)[:,0])
+P.title(bouncing_fmu.get_name())
+P.ylabel('Height (m)')
+P.xlabel('Time (s)')
+# Plot the velocity
+P.figure(2)
+P.plot(t_sol,N.array(sol)[:,1])
+P.title(bouncing_fmu.get_name())
+P.ylabel('Velocity (m/s)')
+P.xlabel('Time (s)')
+P.show()
 </programlisting>
 
         <para>and the figure below shows the results.</para>
@@ -1792,8 +1778,8 @@ plt.show()
       Co-simulation FMU and in order to simulate it, we start by importing the
       necessary methods and packages into Python:</para>
 
-      <programlisting>import pylab as P #For plotting
-from pyfmi import load_fmu #For loading the FMU </programlisting>
+      <programlisting>import pylab as P           # For plotting
+from pyfmi import load_fmu  # For loading the FMU </programlisting>
 
       <para>Here, we have imported packages for plotting and the method
       <literal>load_fmu</literal> which takes as input an FMU and then
@@ -1808,24 +1794,23 @@ from pyfmi import load_fmu #For loading the FMU </programlisting>
 
       <programlisting>res = model.simulate(final_time=2.)</programlisting>
 
-      <para>As a Co-Simulation FMU contains it's own integrator, the method
+      <para>As a Co-Simulation FMU contains its own integrator, the method
       simulate calls this integrator. Finally, plotting the result is done as
       before:</para>
 
-      <programlisting>#Retrieve the result for the variables
+      <programlisting># Retrieve the result for the variables
 h_res = res['h']
 v_res = res['v']
-t     = res['time']
-    
-#Plot the solution
-#Plot the height
+t     = res['time'] 
+# Plot the solution
+# Plot the height
 fig = P.figure()
 P.clf()
 P.subplot(2,1,1)
 P.plot(t, h_res)
 P.ylabel('Height (m)')
 P.xlabel('Time (s)')
-#Plot the velocity
+# Plot the velocity
 P.subplot(2,1,2)
 P.plot(t, v_res)
 P.ylabel('Velocity (m/s)')

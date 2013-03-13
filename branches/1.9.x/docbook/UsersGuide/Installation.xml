@@ -42,12 +42,12 @@
                 <listitem>
                   <para><link
                   xlink:href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Java
-                  1.6</link> (JRE)</para>
+                  1.7</link> (JRE)</para>
                 </listitem>
 
                 <listitem>
-                  <para><link
-                  xlink:href="http://www.mingw.org">MinGW</link></para>
+                  <para><link xlink:href="http://www.mingw.org">MinGW</link>
+                  (gcc 4.7.2)</para>
                 </listitem>
 
                 <listitem>
@@ -64,7 +64,7 @@
               <listitem>
                 <para><link
                 xlink:href="https://projects.coin-or.org/Ipopt">Ipopt
-                3.10.0</link></para>
+                3.10.3</link></para>
               </listitem>
 
               <listitem>
@@ -96,7 +96,7 @@
               <listitem>
                 <para><link
                 xlink:href="https://www.modelica.org/libraries/Modelica">MSL
-                (Modelica Standard Library) 3.2</link></para>
+                (Modelica Standard Library)</link></para>
               </listitem>
 
               <listitem>
@@ -123,13 +123,13 @@
             <itemizedlist>
               <listitem>
                 <para><link xlink:href="http://www.cython.org/">Cython
-                0.17.2</link></para>
+                0.18</link></para>
               </listitem>
 
               <listitem>
                 <para><link
                 xlink:href="http://packages.python.org/distribute/">Distribute
-                0.6.32</link></para>
+                0.6.35</link></para>
               </listitem>
 
               <listitem>
@@ -144,7 +144,7 @@
 
               <listitem>
                 <para><link xlink:href="http://lxml.de/">lxml
-                3.0.1</link></para>
+                3.1.0</link></para>
               </listitem>
 
               <listitem>
@@ -176,7 +176,7 @@
 
               <listitem>
                 <para><link xlink:href="http://www.wxpython.org">wxPython
-                2..8</link></para>
+                2.8</link></para>
               </listitem>
             </itemizedlist>
           </listitem>
@@ -518,7 +518,7 @@ make install_casadi
       <title>Testing JModelica.org</title>
 
       <para>In order to verify that JModelica.org has been installed
-      correctly, start an Ipython shell using the command
+      correctly, start an IPython shell using the command
       <literal>/home/&lt;user_name&gt;/&lt;jmodelica_install_location&gt;/bin/jm_ipython</literal>
       and enter the the commands:</para>
 
