@@ -284,8 +284,8 @@ y = init_result['y']
       <para>The options providable are summarized in <xref
       linkend="tab_options"/>.</para>
 
-      <table>
-        <title xml:id="tab_options">Options for KInitSolveAlg</title>
+      <table xml:id="tab_options">
+        <title>Options for KInitSolveAlg</title>
 
         <tgroup cols="3" colsep="1">
           <thead>

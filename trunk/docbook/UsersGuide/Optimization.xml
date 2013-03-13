@@ -1439,8 +1439,7 @@ plt.show()
 
             <mediaobject>
               <imageobject>
-                <imagedata fileref="images/cstr.svg" scalefit="1" width="60%"
-                           xml:id="opt-fig-cstr-opt1"/>
+                <imagedata fileref="images/cstr.svg" scalefit="1" width="60%"/>
               </imageobject>
             </mediaobject>
           </figure>
