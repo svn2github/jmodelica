@@ -42,10 +42,8 @@ endif
 endif
 
 libjmi_la_SOURCES = jmi.h \
-                    fmiModelFunctions.h \
-                    fmiModelTypes.h \
-                    fmiCSFunctions.h \
-                    fmiCSPlatformTypes.h \
+                    fmi1_functions.h \
+                    fmi1_types.h \
                     jmi_common.h \
                     jmi.c \
                     jmi_common.c \
@@ -57,6 +55,10 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_kinsol_solver.c \
                     jmi_linear_solver.h \
                     jmi_linear_solver.c \
+                    jmi_ode_solver.c \
+                    jmi_ode_solver.h \
+                    jmi_ode_cvode.h \
+                    jmi_ode_cvode.c \
                     jmi_opt_coll.h \
                     jmi_array_common.h \
                     jmi_array_none.h \
@@ -217,6 +219,10 @@ include_HEADERS = jmi.h \
                   jmi_array_none.h \
                   jmi_array_cppad.h \
                   jmi_util.h \
+                  jmi_ode_solver.h \
+                  jmi_ode_cvode.h \
+                  fmi1_functions.h \
+                  fmi1_types.h \
                   $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaTables.h \
                   $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.h \
                   $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.h \

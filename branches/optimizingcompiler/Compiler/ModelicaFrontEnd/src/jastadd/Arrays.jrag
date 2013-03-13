@@ -82,6 +82,19 @@ aspect Arrays {
 			i[j++] = s.value();
 		return new Index(i);
 	}
+	
+	/**
+	 * Get the dimensions to use in dimension conversion.
+	 */
+	syn lazy int[] FDimensionConvert.dimensionsToKeep();
+	eq FScalarExp.dimensionsToKeep() = new int[] {};
+	eq FVectorExp.dimensionsToKeep() {
+		Size s = getFExp().size();
+		int i = getFExp().ndims();
+		for (i = (i > 0) ? i - 1 : 0; i > 0 && s.get(i) == 1; i--);
+		return new int[] { i };
+	}
+	eq FMatrixExp.dimensionsToKeep() = new int[] { 0, 1 };
 
 	/**
 	 * \brief Get array dimensions.
@@ -193,8 +206,12 @@ aspect Arrays {
 	
 	eq FTranspose.ndims()    = getFExp().ndims();
 	eq FCross.ndims()        = 1;
+	eq FSkew.ndims()         = 2;
 	eq FOuterProduct.ndims() = 2;
 	eq FIdentity.ndims()     = 2;
+	eq FDiagonal.ndims()     = 2;
+	
+	eq FDimensionConvert.ndims() = dimensionsToKeep().length;
 	
 	eq FUnaryBuiltIn.ndims() = getFExp().ndims();
 	
@@ -806,6 +823,7 @@ aspect Arrays {
 	}
 	
 	eq FCross.size() = new Size(3);
+	eq FSkew.size() = new Size(3, 3);
 	
 	eq FOuterProduct.size() {
 		MutableSize s = new MutableSize(2);
@@ -820,6 +838,37 @@ aspect Arrays {
 		s.append(getFExp());
 		return s;
 	}
+	
+	eq FDiagonal.size() {
+		MutableSize s = new MutableSize(2);
+		Size s2 = getFExp().size();
+		if (s2 != Size.SCALAR) { 
+			s.append(s2, 0);
+			s.append(s2, 0);
+		}
+		return s;
+	}
+	
+	eq FDimensionConvert.size() {
+		if (getFExp().isArray() && isArray()) {
+			MutableSize s = new MutableSize(ndims());
+			Size s2 = getFExp().size(); 
+			for (int d : dimensionsToKeep()) {
+				if (d < s2.ndims())
+					s.append(s2, d);
+				else
+					s.append(1);
+			}
+			return s;
+		} else {
+			return sizeForScalarArg();
+		}
+	}
+	
+	syn Size FDimensionConvert.sizeForScalarArg();
+	eq FScalarExp.sizeForScalarArg() = Size.SCALAR;
+	eq FVectorExp.sizeForScalarArg() = new Size(1);
+	eq FMatrixExp.sizeForScalarArg() = new Size(1, 1);
 	
 	eq FSizeExp.size()  = hasDim() ? Size.SCALAR : new Size(getFExp().ndims());
 	eq FNdimsExp.size() = Size.SCALAR;
@@ -1421,6 +1470,34 @@ aspect Arrays {
 		return res;
 	}
 	
+	eq FSkew.getArray() {
+		Array res = new Array(indices());
+		Array inner = getFExp().getArray();
+		Index j = new Index(new int[1]);
+		for (Index i : res.indices()) {
+			/* Result is:
+			 * [    0, -x[3],  x[2];
+			 *   x[3],     0, -x[1];
+			 *  -x[2],  x[1],     0 ]
+			 */
+			FExp cell = null;
+			j.set(0, 6 - i.get(0) - i.get(1));
+			switch ((i.get(0) - i.get(1) + 2) % 3) {
+			case 0:
+				cell = inner.get(j);
+				break;
+			case 1:
+				cell = new FNegExp(inner.get(j).fullCopy());
+				break;
+			case 2:
+				cell = new FIntegerLitExp(0);
+				break;
+			}
+			res.set(i, cell);
+		}
+		return res;
+	}
+	
 	eq FOuterProduct.getArray() {
 		Array res = new Array(indices());
 		Array x = getX().getArray();
@@ -1434,6 +1511,28 @@ aspect Arrays {
 		Array arr = new Array(indices());
 		for (Index i : arr.indices())
 			arr.set(i, new FIntegerLitExp((i.get(0) == i.get(1)) ? 1 : 0));
+		return arr;
+	}
+	
+	eq FDiagonal.getArray() {
+		Array arr = new Array(indices());
+		Array inner = getFExp().getArray();
+		for (Index i : arr.indices())
+			arr.set(i, (i.get(0) == i.get(1)) ? inner.get(i.subIndex(1)) : new FIntegerLitExp(0));
+		return arr;
+	}
+	
+	eq FDimensionConvert.getArray() {
+		Indices ind = indices();
+		Array arr = new Array(ind);
+		if (getFExp().isArray()) {
+			Array x = getFExp().getArray();
+			for (Index i : ind)
+				arr.set(i, x.get(ind.translate(i)));
+		} else {
+			Index i = ind.iterator().next();
+			arr.set(i, getFExp());
+		}
 		return arr;
 	}
 	
@@ -1873,14 +1972,19 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn Indices FExp.indices() = Indices.create(size());
-	
-	/**
-	 * \brief Get the set of all array indices of an array access. 
-	 * 
-	 * @return An Indices object containing all indices in each array dimension.
-	 */
+	syn Indices FExp.indices()                   = Indices.create(size());
 	syn lazy Indices FAbstractArrayExp.indices() = super.indices();
+	eq FIdUseExp.indices()                       = getFIdUse().indices();
+	eq FInstAccessExp.indices()                  = getInstAccess().indices();
+	eq FDimensionConvert.indices() {
+		int n = getFExp().ndims();
+		if (n == 0) {
+			return Indices.create(size());
+		} else {
+			int extra = Math.max(ndims() - n, 0);
+			return NonConsecutiveIndices.create(getFExp().size(), dimensionsToKeep(), extra);
+		}
+	}
 	
 	/**
 	 * \brief Get the set of all array indices of an array access. 
@@ -1909,13 +2013,6 @@ aspect Arrays {
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn Indices FExpSubscript.indices() = getFExp().indices();
-	
-	/**
-	 * \brief Get the set of all array indices of an array access. 
-	 * 
-	 * @return An Indices object containing all indices in each array dimension.
-	 */
-	eq FIdUseExp.indices() = getFIdUse().indices();
 
 	/**
 	 * \brief Get the set of all array indices of an array access. 
@@ -1924,13 +2021,6 @@ aspect Arrays {
 	 */
 	syn Indices FIdUse.indices() = Indices.createFromFas(allFArraySubscripts());
 	syn Indices FIdUseInstAccess.indices() = getInstAccess().indices();
-
-	/**
-	 * \brief Get the set of all array indices of an instance array access. 
-	 * 
-	 * @return An Indices object containing all indices in each array dimension.
-	 */
-	eq FInstAccessExp.indices() = getInstAccess().indices();
 
 	/**
 	 * \brief Get the set of all array indices of an instance array access. 
@@ -2104,17 +2194,10 @@ aspect ArrayHelpers {
 		/**
 		 * \brief Constructs a Size with the given lengths.
 		 */
-		public Size(int[] size) {
+		public Size(int... size) {
 			if (size.length == 0)
 				throw new IllegalArgumentException();
 			this.size = size;
-		}
-		
-		/**
-		 * \brief Convenience constructor to create a on-dimensional size with the given length.
-		 */
-		public Size(int s) {
-			size = new int[] { s };
 		}
 		
 		/**
@@ -3773,7 +3856,7 @@ aspect ArrayHelpers {
 				ind.add(fs.myIndices());
 				trim[i++] = fs.ndims() == 0;
 			}
-			return new NonConsecutiveIndices(ind, trim);
+			return new NonConsecutiveIndices(ind, trim, 0);
 		}
 		
 		/**
@@ -3794,7 +3877,7 @@ aspect ArrayHelpers {
 					trim[i++] = fs.ndims() == 0;
 				} 
 			}
-			return new NonConsecutiveIndices(ind, trim);
+			return new NonConsecutiveIndices(ind, trim, 0);
 		}
 		
 		/**
@@ -3807,17 +3890,43 @@ aspect ArrayHelpers {
 			boolean[] trims = new boolean[ind.size()];
 			for (int i = 0; i < trims.length; i++)
 				trims[i] = trim && ind.get(i).length == 1;
-			return new NonConsecutiveIndices(ind, trims);
+			return new NonConsecutiveIndices(ind, trims, 0);
 		}
 		
 		/**
-		 * \brief Translates an Index to the corresponding Index in the underlying 
-		 *        expression.
+		 * Create a NonConsecutiveIndices object based on a Size, an array of dimensions to trim, 
+		 * and a number of extra dimensions to add to the end.
+		 * 
+		 * @param trim  remove dimensions that only span one index.
+		 */
+		public static NonConsecutiveIndices create(Size s, int[] dim, int extra) {
+			int n = s.ndims();
+			ArrayList<int[]> ind = new ArrayList<int[]>(n);
+			boolean[] trims = new boolean[n];
+			for (int i = 0; i < n; i++) {
+				ind.add(new int[] { 1 });
+				trims[i] = true;
+			}
+			for (int d : dim) {
+				if (d < n) {
+					int[] ii = new int[s.get(d)];
+					for (int i = 0; i < ii.length; i++)
+						ii[i] = i + 1;
+					ind.set(d, ii);
+					trims[d] = false;
+				}
+			}
+			return new NonConsecutiveIndices(ind, trims, extra);
+		}
+		
+		/**
+		 * Translates an Index to the corresponding Index in the underlying 
+		 * expression.
 		 */
 		public Index translate(Index i) {
 			int[] ii = i.index();
 			int[] ti = trans.index();
-			for (int ji = 0, jt = 0; ji < ndims; ji++, jt++) {
+			for (int ji = 0, jt = 0; ji < ndims && jt < ti.length; ji++, jt++) {
 				while (trim[jt]) 
 					jt++;
 				ti[jt] = indices.get(jt)[ii[ji] - 1];
@@ -3827,13 +3936,14 @@ aspect ArrayHelpers {
 
 		
 		/**
-		 * \brief Internal constructor to create a NonConsecutiveIndices object based on a 
-		 *        list of int arrays containing the used indexes on the underlying array.
+		 * Internal constructor to create a NonConsecutiveIndices object based on a 
+		 * list of int arrays containing the used indexes on the underlying array.
 		 * 
-		 * @param trim  the dimensions to remove.
+		 * @param trim   the dimensions to remove
+		 * @param extra  number of extra dimensions of length 1 to add
 		 */
-		protected NonConsecutiveIndices(ArrayList<int[]> ind, boolean[] trim) {
-			super(getSize(ind, trim));
+		protected NonConsecutiveIndices(ArrayList<int[]> ind, boolean[] trim, int extra) {
+			super(getSize(ind, trim, extra));
 			this.trim = trim;
 			indices = ind;
 			trans = new Index(ind.size());
@@ -3843,18 +3953,20 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Calculate size for this indices from a list of int arrays containing the 
-		 *        used indexes on the underlying array
+		 * Calculate size for this indices from a list of int arrays containing the 
+		 * used indexes on the underlying array.
 		 */
-		protected static Size getSize(ArrayList<int[]> ind, boolean[] trim) {
+		protected static Size getSize(ArrayList<int[]> ind, boolean[] trim, int extra) {
 			int n = 0;
 			for (boolean tr : trim)
 				if (!tr)
 					n++;
-			MutableSize size = new MutableSize(n);
+			MutableSize size = new MutableSize(n + extra);
 			for (int i = 0; i < trim.length; i++)
 				if (!trim[i])
 					size.append(ind.get(i).length);
+			for (int i = 0; i < extra; i++)
+				size.append(1);
 			return size;
 		}
 		

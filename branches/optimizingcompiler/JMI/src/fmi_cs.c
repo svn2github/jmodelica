@@ -19,15 +19,131 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "fmi_cs.h"
-#include "fmiCSFunctions.h"
-#include "fmiCSPlatformTypes.h"
+#include "fmi_cs.h" 
+#include "fmi.h"
+#include "jmi_ode_solver.h"
 
-fmiStatus fmi_cs_do_step(fmiComponent c,
+const char* fmi_get_types_platform() {
+    return fmiPlatform;
+}
+
+
+fmiStatus fmi_do_step(fmiComponent c,
 						 fmiReal currentCommunicationPoint,
                          fmiReal communicationStepSize,
                          fmiBoolean   newStep) {
-  /* Add implementation */
-	return fmiOK;
-
+    fmi_t* fmi = (fmi_t *)c;
+    jmi_t* jmi = fmi->jmi;
+    int flag, retval = JMI_ODE_EVENT;
+    int reInitialize = JMI_FALSE;
+    fmiReal ttarget = currentCommunicationPoint+communicationStepSize;
+    jmi->ode_solver->tout = currentCommunicationPoint;
+    
+    /* NEED TO HANDLE TIME EVENTS */
+    
+    while (retval == JMI_ODE_EVENT && jmi->ode_solver->tout < ttarget){
+    
+        retval = jmi->ode_solver->solve(jmi->ode_solver, ttarget,reInitialize);
+        if (retval==JMI_ODE_OK) {break;}
+        if (retval<JMI_ODE_OK){
+            jmi_log_error(jmi, "DO STEP failed to perform a step.");
+            return fmiError;
+        }
+        
+        flag = fmi_event_update(c, fmiFalse, &(fmi->event_info));
+        if (flag != fmiOK){
+            jmi_log_error(jmi, "Failed to handle the event.");
+            return fmiError;
+        }
+        
+        /* EVENT HANDLED, REINITIALIZE */
+        reInitialize = JMI_TRUE;
+    }
+    
+    return fmiOK;
 }
+
+void fmi_free_slave_instance(fmiComponent c) {
+    fmi_t* fmi = (fmi_t *)c;
+    jmi_t* jmi = fmi->jmi;
+    
+    if (jmi->ode_solver){
+        jmi_delete_ode_solver(jmi);
+    }
+    fmi_free_model_instance(c);
+    return;
+}
+
+fmiComponent fmi_instantiate_slave(fmiString instanceName, fmiString GUID, fmiString fmuLocation, fmiString mimeType, 
+                                   fmiReal timeout, fmiBoolean visible, fmiBoolean interactive, fmiCallbackFunctions functions, 
+                                   fmiBoolean loggingOn) {
+    return fmi_instantiate_model(instanceName, GUID, functions, loggingOn);
+}
+
+
+fmiStatus fmi_terminate_slave(fmiComponent c) {
+    return fmi_terminate(c);
+}
+
+fmiStatus fmi_initialize_slave(fmiComponent c, fmiReal tStart,
+                                    fmiBoolean StopTimeDefined, fmiReal tStop){
+    fmi_t* fmi = (fmi_t *)c;
+    fmiBoolean toleranceControlled = fmiTrue;
+    fmiReal relativeTolerance = 1e-6;
+    jmi_ode_solvers_t solver = JMI_ODE_CVODE;
+    fmiStatus retval;
+                                        
+    retval = fmi_initialize(c, toleranceControlled, relativeTolerance, &(fmi->event_info));
+    if (retval != fmiOK){ return fmiError; }
+    
+    /* Create solver */
+    jmi_new_ode_solver(fmi->jmi, solver);
+    
+    return fmiOK;
+}
+
+fmiStatus fmi_cancel_step(fmiComponent c){
+    return fmiError;
+}
+
+fmiStatus fmi_reset_slave(fmiComponent c) {
+    return fmiError;
+}
+
+fmiStatus fmi_get_real_output_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], fmiReal value[]){
+    return fmiError;
+}
+
+fmiStatus fmi_set_real_input_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], const fmiReal value[]){
+    return fmiError;
+}
+
+fmiStatus fmi_get_status(fmiComponent c, const fmiStatusKind s, fmiStatus* value){
+    return fmiError;
+}
+
+fmiStatus fmi_get_real_status(fmiComponent c, const fmiStatusKind s, fmiReal* value){
+    return fmiError;
+}
+
+fmiStatus fmi_get_integer_status(fmiComponent c, const fmiStatusKind s, fmiInteger* value){
+    return fmiError;
+}
+
+fmiStatus fmi_get_boolean_status(fmiComponent c, const fmiStatusKind s, fmiBoolean* value){
+    return fmiError;
+}
+
+fmiStatus fmi_get_string_status(fmiComponent c, const fmiStatusKind s, fmiString* value){
+    return fmiError;
+}
+
+/*
+fmiStatus fmi_save_state(fmiComponent c, size_t index){
+    return fmiError;
+}
+
+fmiStatus fmi_restore_state(fmiComponent c, size_t index){
+    return fmiError;
+}
+*/

@@ -15,6 +15,7 @@
 */
 
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1128,6 +1129,8 @@ aspect FlatNames {
     syn String FEnumDecl.name() = getName().name();
     
     syn String FEnumLiteral.name() = getName().name();
+    
+    syn String FDerivativeFunction.name() = getNameNoTransform().name();
       
     eq FDerivativeVariable.name()  = getFQNameNoTransform().derName();
     eq FHDerivativeVariable.name()  = getFQNameNoTransform().hDerName(getOrder());
@@ -1210,6 +1213,9 @@ aspect FlatNames {
     
     syn String FQName.funcNameUnderscore(String suffix) = "func_" + nameUnderscore() + "_" + suffix;
     syn String FIdUse.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
+    syn String FFunctionCall.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix);
+    syn String FFunctionDecl.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
+    syn String FDerivativeFunction.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix);
 
     syn int FAbstractVariable.variableIndex() = findVariableIndex();
     eq FPreBooleanVariable.variableIndex()    = myNonPreVariable().variableIndex();
@@ -1974,6 +1980,11 @@ aspect FlatFunctionUtils {
          return l;
      }
      
+	/**
+	 * \brief Returns the i:th FFunctionVariable that is  declared as "input".
+	 */
+	syn FFunctionVariable FFunctionDecl.myInput(int i) = myInputs().get(i);
+     
      /**
       * \brief Returns a list of all FFunctionVariables not declared as "input" or "output".
       */
@@ -2027,7 +2038,7 @@ aspect FlatFunctionUtils {
     
      syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
      inh FunctionReturnDefinition FReturnStmt.returnDefinition();
-     eq FFunctionDecl.getFAlgorithmBlock().returnDefinition() = returnDefinition();
+     eq FFunctionDecl.getFAlgorithm().returnDefinition() = returnDefinition();
      eq InstProgramRoot.getChild().returnDefinition()         = null;
      eq FClass.getChild().returnDefinition()                  = null;
      
@@ -2051,6 +2062,43 @@ aspect FlatFunctionUtils {
       * \brief Check if this function returns a non-primitive when used as an expression.
       */
      syn boolean FFunctionDecl.isComposite() = hasOutputs() ? expOutput().isComposite() : false;
+     
+	syn boolean FFunctionDecl.containsRealInputs() {
+		for (FFunctionVariable var : myInputs())
+			if (var.type().containsReal())
+				return true;
+		return false;
+	}
+	syn boolean FFunctionDecl.containsRealOutputs() {
+		for (FFunctionVariable var : myOutputs())
+			if (var.type().containsReal())
+				return true;
+		return false;
+	}
+	
+	syn boolean FFunctionDecl.requiresDerivative() = true;
+	eq FConstructorDecl.requiresDerivative()       = false;
+	eq FDestructorDecl.requiresDerivative()        = false;
+	
+	syn boolean FFunctionDecl.derivativEqualsZero() = !containsRealInputs() || !containsRealOutputs();
+	
+	/**
+	 * Determines if the compiler is able to differentiate this function declaration
+	 */
+	syn boolean FFunctionDecl.canDifferentiate() {
+		if (hasFDerivativeFunction())
+			return true;
+		if (derivativEqualsZero())
+			return true;
+		for (FStatement statement : getFAlgorithm().getFStatements())
+			if (!statement.canDifferentiate())
+				return false;
+		return true;
+	}
+	
+	syn boolean FStatement.canDifferentiate() = true;
+	eq FExternalStmt.canDifferentiate()       = false;
+	
      
      /**
       * Returns a string (tersely) describing the signature of the function.
@@ -2117,7 +2165,7 @@ aspect FlatFunctionUtils {
       * \brief Check is this node is in a non-function algorithm.
       */
      inh boolean FSubscript.inAlgorithm();
-     eq FAlgorithmBlock.getChild().inAlgorithm()   = !inFunction();
+     eq FAlgorithm.getChild().inAlgorithm()   = !inFunction();
      eq InstNode.getChild().inAlgorithm()          = false;
      eq FAbstractEquation.getChild().inAlgorithm() = false;
      eq FClass.getChild().inAlgorithm()            = false;
@@ -2137,14 +2185,14 @@ aspect FlatFunctionUtils {
      eq FFunctionCallStmt.getCall().isFunctionCallClause()     = true;
      
      inh boolean FStatement.insideBlockStmt();
-     eq FAlgorithmBlock.getChild().insideBlockStmt() = false;
+     eq FAlgorithm.getChild().insideBlockStmt() = false;
      eq FIfWhenStmt.getChild().insideBlockStmt()     = true;
      eq FWhileStmt.getChild().insideBlockStmt()      = true;
      eq FForStmt.getChild().insideBlockStmt()        = true;
      eq InstForStmt.getChild().insideBlockStmt()     = true;
      
      inh boolean FStatement.insideBranchedStmt();
-     eq FAlgorithmBlock.getChild().insideBranchedStmt() = false;
+     eq FAlgorithm.getChild().insideBranchedStmt() = false;
      eq FIfWhenStmt.getChild().insideBranchedStmt()     = true;
      
      /**
@@ -2511,18 +2559,22 @@ aspect FlatExpressions {
     
     inh boolean FExp.inNoEventExp();
     eq FNoEventExp.getChild().inNoEventExp() = true;
-    eq FAlgorithmBlock.getChild().inNoEventExp() = true;
+    eq FAlgorithm.getChild().inNoEventExp() = true;
     eq SourceRoot.getChild().inNoEventExp() = false;
     eq FlatRoot.getChild().inNoEventExp() = false;
     eq FClass.getFParameterEquation().inNoEventExp() = true;
+
+    inh boolean FExp.inSmoothExp(int order);
+    eq FSmoothExp.getChild().inSmoothExp(int order) = getOrder().ceval().intValue() >= order;
+    eq SourceRoot.getChild().inSmoothExp(int order) = false;
+    eq FlatRoot.getChild().inSmoothExp(int order) = false;
     
     inh boolean InstAccess.inConnectClause();
     inh boolean FExp.inConnectClause();
-    eq FConnectClause.getChild().inConnectClause() = true;
-    eq FAlgorithmBlock.getChild().inConnectClause() = false;
+    eq FConnectClause.getChild().inConnectClause()    = true;
     eq FAbstractEquation.getChild().inConnectClause() = false;
-    eq SourceRoot.getChild().inConnectClause() = false;
-    eq FlatRoot.getChild().inConnectClause() = false;
+    eq SourceRoot.getChild().inConnectClause()        = false;
+    eq FlatRoot.getChild().inConnectClause()          = false;
 
     inh boolean FExp.inIfCondition();
     eq FIfExp.getChild().inIfCondition() = true;
@@ -2795,6 +2847,14 @@ aspect GeneralHelpers {
 			
 		}
 		
+	}
+		
+	/**
+	 * Adds all children to a Collection.
+	 */
+	public void ASTNode.addAllTo(Collection<? super T> col) {
+		for (T n : this)
+			col.add(n);
 	}
 	
 	/**

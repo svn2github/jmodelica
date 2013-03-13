@@ -384,11 +384,19 @@ extern "C" {
 #define JMI_DISCRETE_VARIABILITY 2
 #define JMI_CONTINUOUS_VARIABILITY 4
 
+#define JMI_ODE_OK 0
+#define JMI_ODE_EVENT 1
+#define JMI_ODE_ERROR -1
+
  typedef enum {
      JMI_SIMPLE_NEWTON_SOLVER,
      JMI_KINSOL_SOLVER,
      JMI_LINEAR_SOLVER
  } jmi_block_solvers_t;
+
+ typedef enum {
+	 JMI_ODE_CVODE
+ } jmi_ode_solvers_t;
 
 /* @} */
 
@@ -1226,6 +1234,20 @@ int jmi_dae_directional_dF(jmi_t* jmi, int eval_alg, jmi_real_t* res, jmi_real_t
  *
  */
 int jmi_dae_R(jmi_t* jmi, jmi_real_t* res);
+
+/**
+ * \brief Evaluate the adjusted DAE event indicator residuals.
+ *
+ * This method perturbes the event indicator functions based on the
+ * relation operator (>,>=,<,<=) and the current value of the event
+ * indicator with an epsilon (jmi->events_epsilon)
+ *
+ * @param jmi A jmi_t struct.
+ * @param res (Output) The event indicator residuals.
+ * @return Error code.
+ *
+ */
+int jmi_dae_R_perturbed(jmi_t* jmi, jmi_real_t* res);
 
 /**
  * \brief Compare the evaluated CAD derivative with the FD evaluation

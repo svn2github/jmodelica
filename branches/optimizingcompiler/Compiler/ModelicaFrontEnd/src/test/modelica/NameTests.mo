@@ -3112,6 +3112,68 @@ end NameTests.ConditionalComponentTest11;
 end ConditionalComponentTest11;
 
 
+model ConditionalComponentTest12
+	model A
+		parameter Boolean flag = true;
+		B b1 if flag;
+		B b2 if not flag;
+		Real z1 if flag;
+		Real z2 if not flag;
+	end A;
+	
+	model B
+		Real x;
+	end B;
+	
+	Real y = 1;
+	A a(b1(x = y), b2(x = y), z1 = y, z2 = y);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalComponentTest12",
+			description="Modifying conditional component",
+			flatModel="
+fclass NameTests.ConditionalComponentTest12
+ Real y = 1;
+ parameter Boolean a.flag = true /* true */;
+ Real a.b1.x = y;
+ Real a.z1 = y;
+end NameTests.ConditionalComponentTest12;
+")})));
+end ConditionalComponentTest12;
+
+
+model ConditionalComponentTest13_Err
+	model A
+		Real x;
+	end A;
+	
+	model B
+        parameter Boolean flag = true;
+        A a1 if flag;
+        A a2 if not flag;
+	end B;
+	
+    Real y1 if b.flag;
+    Real y2 if not b.flag;
+	B b(a1(x = y1), a2(x = y2));
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConditionalComponentTest13_Err",
+			description="Using value of conditional component in modification for other conditional component",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 3159, column 13:
+  The component y1 is conditional: Access of conditional components is only valid in connect statements
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 3159, column 25:
+  The component y2 is conditional: Access of conditional components is only valid in connect statements
+")})));
+end ConditionalComponentTest13_Err;
+
+
 
 model AttributeDot1
   Real x=1;

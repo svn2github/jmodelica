@@ -371,4 +371,33 @@ Semantic error at line 356, column 10:
 ")})));
 end InnerOuterTest11;
 
+
+model InnerOuterTest12
+    model A
+        parameter Integer b = 2;
+    end A;
+    
+    inner A c(b = 1);
+    
+    model D
+        outer A c;
+        parameter Integer e = c.b;
+        Real x[e] = zeros(e);
+    end D;
+    
+    D f;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InnerOuterTest12",
+			description="Constant evaluation of inner/outer",
+			flatModel="
+fclass InnerOuterTests.InnerOuterTest12
+ parameter Integer c.b = 1 /* 1 */;
+ parameter Integer f.e = c.b;
+ Real f.x[1] = zeros(f.e);
+end InnerOuterTests.InnerOuterTest12;
+")})));
+end InnerOuterTest12;
+
 end InnerOuterTests;

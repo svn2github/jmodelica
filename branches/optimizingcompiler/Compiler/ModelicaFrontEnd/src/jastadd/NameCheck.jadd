@@ -34,7 +34,7 @@ aspect InstanceNameCheck {
     	//log.debug("InstComponentAccess.nameCheck(): " + name() + " " + myInstComponentDecl().name());
 		if (myInstComponentDecl().isUnknown()) 
        		error("Cannot find component declaration for "+qualifiedName());
-		if (!inConnectClause() && myInstComponentDecl().hasConditionalAttribute()) {
+		if (!inConnectClause() && !isModificationName() && myInstComponentDecl().hasConditionalAttribute()) {
 			error("The component "+qualifiedName()+" is conditional: Access of conditional components is only valid in connect statements");
 		}
     }
@@ -43,7 +43,7 @@ aspect InstanceNameCheck {
     	//log.debug("InstComponentAccess.nameCheck(): " + name() + " " + myInstComponentDecl().name());
 		if (myInstComponentDecl().isUnknown()) 
        		error("Cannot find component declaration for "+qualifiedName());
-		if (!inConnectClause() && myInstComponentDecl().hasConditionalAttribute()) {
+		if (!inConnectClause() && !isModificationName() && myInstComponentDecl().hasConditionalAttribute()) {
 			error("The component "+qualifiedName()+" is conditional: Access of conditional components is only valid in connect statements");
 		}
     }

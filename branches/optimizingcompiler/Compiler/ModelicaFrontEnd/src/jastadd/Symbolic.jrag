@@ -14,22 +14,29 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import org.jmodelica.util.Solvability;
+
 aspect EquationSolve {
 
-	syn boolean FAbstractEquation.isSolved(String name) = isSolved(name, false);
+	syn Solvability FAbstractEquation.isSolved(String name) = isSolved(name, false);
 	
-	syn boolean FAbstractEquation.isSolved(String name, boolean duringTearing) = false;
+	syn Solvability FAbstractEquation.isSolved(String name, boolean duringTearing) = Solvability.UNSOLVABLE;
 
 	eq FWhenEquation.isSolved(String name, boolean duringTearing) {
-		if (getNumFAbstractEquation()>1) {
-			return false;
-		} else {
+		if (getNumFAbstractEquation()>1)
+			return Solvability.UNSOLVABLE;
+		else
 			return getFAbstractEquation(0).isSolved(name);
-		}
 	}
 
 	eq FEquation.isSolved(String name, boolean duringTearing) {
-		return !(solution(name, duringTearing) instanceof FNoExp);
+		boolean solvable = !(solution(name, duringTearing) instanceof FNoExp);
+		if (solvable)
+			return Solvability.ANALYTICALLY_SOLVABLE;
+		else if (duringTearing && root().options.getBooleanOption("local_iteration_in_tearing"))
+			return Solvability.NUMERICALLY_SOLVABLE;
+		else
+			return Solvability.UNSOLVABLE;
 	}
 
 	eq FFunctionCallEquation.isSolved(String name, boolean duringTearing) {
@@ -37,29 +44,31 @@ aspect EquationSolve {
 		
 		boolean inLeft = false;
 		for (FVariable fv : leftVars) {
-			if (fv.name().equals(name)) {
-				inLeft = true;	
-			}	
-		}
-		if (!inLeft) {
-			return false;
+			if (fv.name().equals(name))
+				inLeft = true;
 		}
 		
 		Set<FVariable> argVars = referencedFVariablesInRHS();
 
 		boolean inArgs = false;
 		for (FVariable fv : argVars) {
-			if (fv.name().equals(name)) {
-				inArgs = true;	
-			}	
+			if (fv.name().equals(name))
+				inArgs = true;
 		}
 
-		if (inArgs) {
-			return false;
-		} else {
-			return true;
-		}
-				
+		if (inLeft && !inArgs)
+			return Solvability.ANALYTICALLY_SOLVABLE;
+		else if (leftVars.size() == 1 && duringTearing && root().options.getBooleanOption("local_iteration_in_tearing"))
+			return Solvability.NUMERICALLY_SOLVABLE;
+		else
+			return Solvability.UNSOLVABLE;
+	}
+	
+	eq FAlgorithm.isSolved(String name, boolean duringTearing) {
+		for (FVariable fv : referencedFVariablesInLHS())
+			if (fv.name().equals(name))
+				return Solvability.ANALYTICALLY_SOLVABLE;
+		return Solvability.UNSOLVABLE;
 	}
 
 	syn nta FExp FEquation.solution(String name) {

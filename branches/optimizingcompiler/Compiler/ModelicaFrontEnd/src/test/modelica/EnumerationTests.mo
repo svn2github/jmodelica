@@ -1,6 +1,20 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package EnumerationTests
-
-
 
   model EnumerationTest1
     type Size = enumeration(small "1st", medium, large, xlarge); 
@@ -332,7 +346,7 @@ Number of variables :                         2
   Number of String variables:                 0
 Number of Real differentiated variables:      0
 Number of Real derivative variables:          0
-Number of Real algebraic variables:           0
+Number of Real continous algebraic variables: 0
 Number of inputs:                             0
   Number of Real inputs:                      0
   Number of Integer inputs:                   0
@@ -354,8 +368,8 @@ Number of variables with binding expression:  0
   Number of String variables binding exp:     0
 Total number of equations:                    2
 Number of initial equations:                  2
-Number of relational exps in equations:       0
-Number of relational exps in init equations:  0
+Number of event indicators in equations:      0
+Number of event indicators in init equations: 0
 
 Independent constants: 
  aic: number of uses: 0, isLinear: true

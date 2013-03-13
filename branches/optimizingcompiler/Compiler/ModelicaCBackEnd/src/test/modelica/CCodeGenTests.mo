@@ -180,7 +180,6 @@ $C_DAE_initial_event_indicator_residuals$
 
     (*res)[0] = _time - (_one_1);
     (*res)[1] = _time - (_two_2);
-    (*res)[2] = _p_0 - (_one_1);
 ")})));
 end CCodeGenTest6;
 
@@ -5480,57 +5479,57 @@ equation
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-    x[0] = 5.0;
-    x[2] = 8.0;
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-    x[1] = 3.0;
-    x[2] = 4.0;
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-    x[0] = -2.0;
-    x[2] = 5.0;
-  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
-    x[0] = 1;
-    x[1] = 0;
-    x[2] = 2;
-  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
-    (*res)[0] = 1;
-    (*res)[1] = 1;
-    (*res)[2] = 1;
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _y_1;
-    init_with_ubound(x[0],-2.0, \"Resetting initial value for y\");
-    x[1] = _x_0;
-    init_with_lbound(x[1],3.0, \"Resetting initial value for x\");
-    x[2] = _z_2;
-    init_with_bounds(x[2],4.0, 5.0, \"Resetting initial value for z\");
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-    residual[0] = - 3 * 1.0;
-    residual[1] = - (- 1.0);
-    residual[2] = - 1.0;
-    residual[3] = - 1.0;
-    residual[4] = - 1.0;
-    residual[5] = - 1.0;
-    residual[6] = - 1.0;
-    residual[7] = 0.0;
-    residual[8] = 1.0;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    check_ubound(x[0],-2.0, \"Out of bounds for variable y\");
-    check_lbound(x[1],3.0, \"Out of bound for variable x\");
-    check_bounds(x[2],4.0, 5.0, \"Out of bounds for variable z\");
-    _y_1 = x[0];
-    _x_0 = x[1];
-    _z_2 = x[2];
-  (*res)[0] = _x_0 + 3 * _y_1 + _z_2 - (5);
-  (*res)[1] = _x_0 - _y_1 - (3);
-  (*res)[2] = _x_0 + _y_1 - (_z_2);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _y_1 = x[0];
-    _x_0 = x[1];
-    _z_2 = x[2];
-  }
-  return 0;
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+        x[0] = 5;
+        x[2] = 8;
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+        x[1] = 3;
+        x[2] = 4;
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+        x[0] = -2;
+        x[2] = 5;
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+        x[1] = 0;
+        x[2] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
+        (*res)[2] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1;
+        init_with_ubound(x[0], -2, \"Resetting initial value for variable y\");
+        x[1] = _x_0;
+        init_with_lbound(x[1], 3, \"Resetting initial value for variable x\");
+        x[2] = _z_2;
+        init_with_bounds(x[2], 4, 5, \"Resetting initial value for variable z\");
+    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
+        residual[0] = - 3 * 1.0;
+        residual[1] = - (- 1.0);
+        residual[2] = - 1.0;
+        residual[3] = - 1.0;
+        residual[4] = - 1.0;
+        residual[5] = - 1.0;
+        residual[6] = - 1.0;
+        residual[7] = 0.0;
+        residual[8] = 1.0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        check_ubound(x[0], -2, \"Out of bounds for variable y\");
+        _y_1 = x[0];
+        check_lbound(x[1], 3, \"Out of bounds for variable x\");
+        _x_0 = x[1];
+        check_bounds(x[2], 4, 5, \"Out of bounds for variable z\");
+        _z_2 = x[2];
+        (*res)[0] = _x_0 + 3 * _y_1 + _z_2 - (5);
+        (*res)[1] = _x_0 - _y_1 - (3);
+        (*res)[2] = _x_0 + _y_1 - (_z_2);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _y_1 = x[0];
+        _x_0 = x[1];
+        _z_2 = x[2];
+    }
+    return 0;
 }
 
 ")})));
@@ -5556,63 +5555,61 @@ model BlockTest5
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-    x[1] = 5.0;
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-    x[0] = 16.0;
-    x[2] = 1.0;
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-    x[1] = -2.0;
-  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
-    x[0] = 2;
-    x[1] = 3;
-    x[2] = 1;
-  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
-    (*res)[0] = 1;
-    (*res)[1] = 1;
-    (*res)[2] = 1;
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _x_2_2;
-    init_with_lbound(x[0],16.0, \"Resetting initial value for x[2]\");
-    x[1] = _y_3;
-    init_with_ubound(x[1],-2.0, \"Resetting initial value for y\");
-    x[2] = _x_1_1;
-    init_with_lbound(x[2],1.0, \"Resetting initial value for x[1]\");
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-    residual[0] = - 1.0;
-    residual[1] = 0.0;
-    residual[2] = - 1.0;
-    residual[3] = - 1.0;
-    residual[4] = - 3 * 1.0;
-    residual[5] = - (- 1.0);
-    residual[6] = - 1.0;
-    residual[7] = - 1.0;
-    residual[8] = - 1.0;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    check_lbound(x[0],16.0, \"Out of bound for variable x[2]\");
-    check_ubound(x[1],-2.0, \"Out of bounds for variable y\");
-    check_lbound(x[2],1.0, \"Out of bound for variable x[1]\");
-    _x_2_2 = x[0];
-    _y_3 = x[1];
-    _x_1_1 = x[2];
-  (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
-  (*res)[1] = _x_1_1 + 3 * _y_3 - (5);
-  (*res)[2] = _x_1_1 - _y_3 + _x_2_2 - (3);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _x_2_2 = x[0];
-    _y_3 = x[1];
-    _x_1_1 = x[2];
-  }
-  return 0;
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+        x[1] = 5;
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+        x[0] = 16.0;
+        x[2] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+        x[1] = -2;
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 2;
+        x[1] = 3;
+        x[2] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
+        (*res)[2] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_2_2;
+        init_with_lbound(x[0], 16.0, \"Resetting initial value for variable x[2]\");
+        x[1] = _y_3;
+        init_with_ubound(x[1], -2, \"Resetting initial value for variable y\");
+        x[2] = _x_1_1;
+        init_with_lbound(x[2], 1, \"Resetting initial value for variable x[1]\");
+    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
+        residual[0] = - 1.0;
+        residual[1] = 0.0;
+        residual[2] = - 1.0;
+        residual[3] = - 1.0;
+        residual[4] = - 3 * 1.0;
+        residual[5] = - (- 1.0);
+        residual[6] = - 1.0;
+        residual[7] = - 1.0;
+        residual[8] = - 1.0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        check_lbound(x[0], 16.0, \"Out of bounds for variable x[2]\");
+        _x_2_2 = x[0];
+        check_ubound(x[1], -2, \"Out of bounds for variable y\");
+        _y_3 = x[1];
+        check_lbound(x[2], 1, \"Out of bounds for variable x[1]\");
+        _x_1_1 = x[2];
+        (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
+        (*res)[1] = _x_1_1 + 3 * _y_3 - (5);
+        (*res)[2] = _x_1_1 - _y_3 + _x_2_2 - (3);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_2_2 = x[0];
+        _y_3 = x[1];
+        _x_1_1 = x[2];
+    }
+    return 0;
 }
 
 ")})));
 end BlockTest5;
 
 model BlockTest6
- 
-
   function f1
     input Real x;
 	output Real y=0;
@@ -5649,55 +5646,55 @@ model BlockTest6
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-    x[1] = 5.0;
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-    x[0] = 12.0;
-    x[2] = 6.0;
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-    x[1] = -6.0;
-  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
-    x[0] = 4;
-    x[1] = 5;
-    x[2] = 3;
-  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
-    (*res)[0] = 1;
-    (*res)[1] = 1;
-    (*res)[2] = 1;
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _x_2_2;
-    init_with_lbound(x[0],12.0, \"Resetting initial value for x[2]\");
-    x[1] = _y_3;
-    init_with_ubound(x[1],-6.0, \"Resetting initial value for y\");
-    x[2] = _x_1_1;
-    init_with_lbound(x[2],6.0, \"Resetting initial value for x[1]\");
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-    residual[0] = - 1.0;
-    residual[1] = 0.0;
-    residual[2] = - 1.0;
-    residual[3] = - 1.0;
-    residual[4] = - 3 * 1.0;
-    residual[5] = - (- 1.0);
-    residual[6] = - 1.0;
-    residual[7] = - 1.0;
-    residual[8] = - 1.0;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    check_lbound(x[0],12.0, \"Out of bound for variable x[2]\");
-    check_ubound(x[1],-6.0, \"Out of bounds for variable y\");
-    check_lbound(x[2],6.0, \"Out of bound for variable x[1]\");
-    _x_2_2 = x[0];
-    _y_3 = x[1];
-    _x_1_1 = x[2];
-  (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
-  (*res)[1] = _x_1_1 + 3 * _y_3 - (5);
-  (*res)[2] = _x_1_1 - _y_3 + _x_2_2 - (3);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _x_2_2 = x[0];
-    _y_3 = x[1];
-    _x_1_1 = x[2];
-  }
-  return 0;
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+        x[1] = 5;
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+        x[0] = 12.0;
+        x[2] = 6.0;
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+        x[1] = -6.0;
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 4;
+        x[1] = 5;
+        x[2] = 3;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
+        (*res)[2] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_2_2;
+        init_with_lbound(x[0], 12.0, \"Resetting initial value for variable x[2]\");
+        x[1] = _y_3;
+        init_with_ubound(x[1], -6.0, \"Resetting initial value for variable y\");
+        x[2] = _x_1_1;
+        init_with_lbound(x[2], 6.0, \"Resetting initial value for variable x[1]\");
+    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
+        residual[0] = - 1.0;
+        residual[1] = 0.0;
+        residual[2] = - 1.0;
+        residual[3] = - 1.0;
+        residual[4] = - 3 * 1.0;
+        residual[5] = - (- 1.0);
+        residual[6] = - 1.0;
+        residual[7] = - 1.0;
+        residual[8] = - 1.0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        check_lbound(x[0], 12.0, \"Out of bounds for variable x[2]\");
+        _x_2_2 = x[0];
+        check_ubound(x[1], -6.0, \"Out of bounds for variable y\");
+        _y_3 = x[1];
+        check_lbound(x[2], 6.0, \"Out of bounds for variable x[1]\");
+        _x_1_1 = x[2];
+        (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
+        (*res)[1] = _x_1_1 + 3 * _y_3 - (5);
+        (*res)[2] = _x_1_1 - _y_3 + _x_2_2 - (3);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_2_2 = x[0];
+        _y_3 = x[1];
+        _x_1_1 = x[2];
+    }
+    return 0;
 }
 
 ")})));
@@ -5998,6 +5995,319 @@ static int dae_init_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
  jmi_dae_init_add_equation_block(*jmi,dae_init_block_3,NULL,2,0,JMI_CONTINUOUS_VARIABILITY,JMI_LINEAR_SOLVER,3 );
 ")})));
 end BlockTest7;
+
+
+model Algorithm1
+ Real x;
+ Real y;
+equation
+ y = x + 2;
+algorithm
+ x := 5;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm1",
+			description="C code generation of algorithms",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x_0 = 5;
+    _y_1 = _x_0 + 2;
+")})));
+end Algorithm1;
+
+
+model Algorithm2
+ Real x;
+ Real y;
+equation
+ y = x + 2;
+algorithm
+ x := 5;
+ x := x + 2;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm2",
+			description="C code generation of algorithms",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x_0 = 5;
+    _x_0 = _x_0 + 2;
+    _y_1 = _x_0 + 2;
+")})));
+end Algorithm2;
+
+
+model Algorithm3
+ Real x;
+ Real y;
+equation
+ y = x + 2;
+algorithm
+ x := y;
+ x := x * 2;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm3",
+			description="C code generation of algorithms - in block",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+        x[1] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+        x[1] = _y_1;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+        _x_0 = _y_1;
+        _x_0 = _x_0 * 2;
+        (*res)[0] = _x_0 - x[0];
+        _x_0 = x[0];
+        (*res)[1] = _x_0 + 2 - (_y_1);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+    }
+    return 0;
+}
+
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+        x[1] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+        x[1] = _y_1;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+        _x_0 = _y_1;
+        _x_0 = _x_0 * 2;
+        (*res)[0] = _x_0 - x[0];
+        _x_0 = x[0];
+        (*res)[1] = _x_0 + 2 - (_y_1);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+    }
+    return 0;
+}
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+")})));
+end Algorithm3;
+
+
+model Algorithm4
+    Real x, y, z;
+equation
+    y + x + z = 3;
+algorithm
+    y:= x*2 + 2;
+    z:= y + x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm4",
+			description="C code generation of algorithms - in block",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+        x[1] = 1;
+        x[2] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+        x[1] = _y_1;
+        x[2] = _z_2;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+        _z_2 = x[2];
+        _y_1 = _x_0 * 2 + 2;
+        _z_2 = _y_1 + _x_0;
+        (*res)[0] = _x_0 - x[0];
+        _x_0 = x[0];
+        (*res)[1] = _y_1 - x[1];
+        _y_1 = x[1];
+        (*res)[2] = 3 - (_y_1 + _x_0 + _z_2);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+        _z_2 = x[2];
+    }
+    return 0;
+}
+
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+        x[1] = 1;
+        x[2] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+        x[1] = _y_1;
+        x[2] = _z_2;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+        _z_2 = x[2];
+        _y_1 = _x_0 * 2 + 2;
+        _z_2 = _y_1 + _x_0;
+        (*res)[0] = _x_0 - x[0];
+        _x_0 = x[0];
+        (*res)[1] = _y_1 - x[1];
+        _y_1 = x[1];
+        (*res)[2] = 3 - (_y_1 + _x_0 + _z_2);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+        _z_2 = x[2];
+    }
+    return 0;
+}
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+")})));
+end Algorithm4;
+
+
+model Algorithm5
+ Real x;
+algorithm
+ while x < 1 loop
+  while x < 2 loop
+   while x < 3 loop
+    x := x + 1;
+   end while;
+  end while;
+ end while;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm5",
+			description="C code generation of algorithm with while loops",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    while (COND_EXP_LT(_x_0, 1, JMI_TRUE, JMI_FALSE)) {
+        while (COND_EXP_LT(_x_0, 2, JMI_TRUE, JMI_FALSE)) {
+            while (COND_EXP_LT(_x_0, 3, JMI_TRUE, JMI_FALSE)) {
+                _x_0 = _x_0 + 1;
+            }
+        }
+    }
+")})));
+end Algorithm5;
+
+
+model Algorithm6
+ Real x;
+algorithm
+ for i in {1, 2, 4}, j in 1:3 loop
+  x := x + i * j;
+ end for;
+end Algorithm6;
+
 
 model OutputTest1
 
@@ -7683,7 +7993,7 @@ end IntegerExternalArrayFortran4;
 
 model Smooth1
   Real y = time - 2;
-  Real x = smooth(2, if y < 0 then 0 else y ^ 3);
+  Real x = smooth(0, if y < 0 then 0 else y ^ 3);
 
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
@@ -8581,7 +8891,7 @@ end when;
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestRelationalOp1",
-			description="",
+			description="Test correct generation of all four relational operators",
 			template="$C_DAE_initial_relations$
                                   $C_DAE_relations$",
 			generatedCode="
@@ -8616,7 +8926,7 @@ end when;
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestRelationalOp2",
-			description="",
+			description="Test correct generation of all four relational operators",
 			template="$C_DAE_initial_relations$
                                   $C_DAE_relations$",
 			generatedCode="
@@ -8654,7 +8964,7 @@ end when;
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestRelationalOp3",
-			description="",
+			description="Test generation of all four relational operators.",
 			template="$C_DAE_initial_relations$
                                   $C_DAE_relations$",
 			generatedCode="
@@ -8665,5 +8975,83 @@ static const int N_relations = 0;
 static const int DAE_relations[1]= {-1};
 ")})));
 end TestRelationalOp3;
+
+model TestRelationalOp4
+  parameter Real p1 = 1;
+  parameter Real p2 = if p1 >=1 then 1 else 2;
+  Real x;
+  Real y;
+  Real z;
+  Real w;
+  Real r;
+  discrete Real q1;
+  discrete Real q2;
+initial equation
+  x = if time>=4 then 1 else 2;
+  y = if noEvent(time>=2) then 2 else 5;
+  z = if p1<=5 then 1 else 6;
+equation
+  der(x) = if time>=1 then 1 else 0; 
+  der(y) = if noEvent(time>=1) then 1 else 0; 
+  der(z) = if p1>=1 then 1 else 0; 
+  der(w) = if 2>=1 then 1 else 0; 
+  der(r) = if y>=3 then 1.0 else 0.0; 
+  when x>=0.1 then 
+    q1 = if pre(q1)>=0.5 then pre(q1) else 2*pre(q1);
+    q2 = if w>=0.5 then pre(q2) else 2*pre(q2); 
+  end when;
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp4",
+			description="Test correct event generation.",
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$",
+			generatedCode="
+static const int N_initial_relations = 1;
+static const int DAE_initial_relations[1]= {JMI_REL_GEQ};
+
+static const int N_relations = 3;
+static const int DAE_relations[3]= {JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ};
+")})));
+
+end TestRelationalOp4;
+
+model TestRelationalOp5
+  Real x;
+  Real y;
+  Real z;
+equation
+  der(x) = smooth(0,if x>=0 then x else 0); 
+  der(y) = smooth(1,if y>=0 then y^2 else 0); 
+  der(z) = smooth(2,if z>=0 then z^3 else 0); 
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp5",
+			description="Test correct event generation in smooth operators.",
+			generate_ode=true,
+			equation_sorting=true,
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$
+                                  $C_ode_derivatives$",
+			generatedCode="
+static const int N_initial_relations = 0;
+static const int DAE_initial_relations[1]= {-1};
+
+static const int N_relations = 1;
+static const int DAE_relations[1]= {JMI_REL_GEQ};
+
+      model_ode_guards(jmi);
+/************* ODE section *********/
+    _der_x_3 = (COND_EXP_EQ(_sw(0), JMI_TRUE, _x_0, AD_WRAP_LITERAL(0)));
+    _der_y_4 = (COND_EXP_EQ(COND_EXP_GE(_y_1, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE), JMI_TRUE, (1.0 * (_y_1) * (_y_1)), AD_WRAP_LITERAL(0)));
+    _der_z_5 = (COND_EXP_EQ(COND_EXP_GE(_z_2, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE), JMI_TRUE, (1.0 * (_z_2) * (_z_2) * (_z_2)), AD_WRAP_LITERAL(0)));
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+")})));
+
+end TestRelationalOp5;
+
 
 end CCodeGenTests;

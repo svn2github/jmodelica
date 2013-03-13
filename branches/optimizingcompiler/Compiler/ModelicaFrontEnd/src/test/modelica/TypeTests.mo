@@ -1137,6 +1137,24 @@ Semantic error at line 1071, column 3:
 end RecursiveStructure3;
 
 
+model RecursiveStructure4
+	model A = B;
+	model B = A;
+	
+	A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RecursiveStructure4",
+			description="Detect recursive class structures",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1141, column 13:
+  Recursive class structure
+")})));
+end RecursiveStructure4;
+
 
 model WhenType1
 	Real x = 1;
@@ -1376,5 +1394,161 @@ Semantic error at line 1358, column 59:
   Size of nominal expression pValues is not the same size as the surrounding equation, size of expression [2], size of equation scalar
 ")})));
 end EquationNominalTypeTest1;
+
+
+
+model Primitive1
+    type T2 = Real[3];
+    type T = T2;
+    
+    Real[3] x = {1,2,3};
+    T y = x;
+	T z;
+	T2 w = x;
+equation
+	z = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Primitive1",
+			description="Short class decl of type that is array of Real",
+			flatModel="
+fclass TypeTests.Primitive1
+ Real x[3] = {1, 2, 3};
+ TypeTests.Primitive1.T2 y[3] = x[1:3];
+ TypeTests.Primitive1.T2 z[3];
+ TypeTests.Primitive1.T2 w[3] = x[1:3];
+equation
+ z[1:3] = x[1:3];
+
+public
+ type TypeTests.Primitive1.T2 = Real;
+end TypeTests.Primitive1;
+")})));
+end Primitive1;
+
+
+model Primitive2
+    type T2 = Real[3];
+    type T
+		extends T2;
+	end T;
+        
+    Real[3] x = {1,2,3};
+    T y = x;
+    T z;
+    T2 w = x;
+equation
+    z = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Primitive2",
+			description="Class decl extending type that is array of Real",
+			flatModel="
+fclass TypeTests.Primitive2
+ Real x[3] = {1, 2, 3};
+ TypeTests.Primitive2.T y[3] = x[1:3];
+ TypeTests.Primitive2.T z[3];
+ TypeTests.Primitive2.T2 w[3] = x[1:3];
+equation
+ z[1:3] = x[1:3];
+
+public
+ type TypeTests.Primitive2.T = Real;
+ type TypeTests.Primitive2.T2 = Real;
+end TypeTests.Primitive2;
+")})));
+end Primitive2;
+
+
+model Primitive3
+    type T1 = Real;
+    type T2 = T1[2];
+	type T3 = T2;
+	type T4 = T3[3];
+	type T5 = T4;
+    
+    Real[3,2] x = {{1,2},{3,4},{5,6}};
+    Real[2] y = {7,8};
+    T5 z1 = x;
+    T5 z2;
+	T3 z3 = y;
+	T3 z4;
+equation
+    z2 = x;
+	z4 = y;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Primitive3",
+			description="Short class decl of type that is array of Real, adding dimensions in several levels",
+			flatModel="
+fclass TypeTests.Primitive3
+ Real x[3,2] = {{1, 2}, {3, 4}, {5, 6}};
+ Real y[2] = {7, 8};
+ TypeTests.Primitive3.T4 z1[3,2] = x[1:3,1:2];
+ TypeTests.Primitive3.T4 z2[3,2];
+ TypeTests.Primitive3.T2 z3[2] = y[1:2];
+ TypeTests.Primitive3.T2 z4[2];
+equation
+ z2[1:3,1:2] = x[1:3,1:2];
+ z4[1:2] = y[1:2];
+
+public
+ type TypeTests.Primitive3.T4 = Real;
+ type TypeTests.Primitive3.T2 = Real;
+end TypeTests.Primitive3;
+")})));
+end Primitive3;
+
+
+model Primitive4
+    type T2 = Real[3,3];
+    type T = T2;
+        
+    function f
+        input Real[3] x;
+        input Real[3] y;
+        output T z;
+    algorithm
+        z := {x, cross(x,y), y};
+    end f;
+    
+    Real[3] x = {1,2,3};
+    Real[3] y = {4,5,6};
+    T z1 = f(x,y);
+    T z2;
+equation
+    z2 = transpose(z1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Primitive4",
+			description="",
+			flatModel="
+fclass TypeTests.Primitive4
+ Real x[3] = {1, 2, 3};
+ Real y[3] = {4, 5, 6};
+ TypeTests.Primitive4.T2 z1[3,3] = TypeTests.Primitive4.f(x[1:3], y[1:3]);
+ TypeTests.Primitive4.T2 z2[3,3];
+equation
+ z2[1:3,1:3] = transpose(z1[1:3,1:3]);
+
+public
+ function TypeTests.Primitive4.f
+  input Real[3] x;
+  input Real[3] y;
+  output Real[3, 3] z;
+ algorithm
+  z := {x, cross(x, y), y};
+  return;
+ end TypeTests.Primitive4.f;
+
+ type TypeTests.Primitive4.T2 = Real;
+end TypeTests.Primitive4;
+")})));
+end Primitive4;
+
 
 end TypeTests;

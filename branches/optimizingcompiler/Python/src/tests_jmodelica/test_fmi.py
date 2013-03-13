@@ -31,6 +31,8 @@ import pyfmi.fmi_algorithm_drivers as ad
 from pyfmi.common.core import get_platform_dir
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
+path_to_fmus_me1 = os.path.join(path_to_fmus,"ME1.0")
+path_to_fmus_cs1 = os.path.join(path_to_fmus,"CS1.0")
 path_to_mofiles = os.path.join(get_files_path(), 'Modelica')
 
 #THIS IS NOW DONE BY FMIL
@@ -63,16 +65,16 @@ class Test_load_fmu:
     def test_raise_exception(self):
         
         nose.tools.assert_raises(FMUException, load_fmu, "test.fmu")
-        nose.tools.assert_raises(FMUException, FMUModelCS1, "Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus)
-        nose.tools.assert_raises(FMUException, FMUModelME1, "Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
+        nose.tools.assert_raises(FMUException, FMUModelCS1, "Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus_me1)
+        nose.tools.assert_raises(FMUException, FMUModelME1, "Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
     
     @testattr(windows = True)
     def test_correct_loading(self):
         
-        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus)
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus_me1)
         assert isinstance(model, FMUModelME1)
         
-        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
         assert isinstance(model, FMUModelCS1)
         
 
@@ -80,17 +82,17 @@ class Test_FMUModelCS1:
     """
     This class tests pyfmi.fmi.FMUModelCS1
     """
-    
+
     @testattr(windows = True)
     def test_simulation_cs(self):
         
-        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
         res = model.simulate(final_time=1.5)
         assert (res["J1.w"][-1] - 3.245091100366517) < 1e-4
     
     @testattr(windows = True)
     def test_default_experiment(self):
-        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
         
         assert N.abs(model.get_default_experiment_start_time()) < 1e-4
         assert N.abs(model.get_default_experiment_stop_time()-1.5) < 1e-4
@@ -100,22 +102,22 @@ class Test_FMUModelCS1:
     
     @testattr(windows = True)
     def test_types_platform(self):
-        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
         assert model.types_platform == "standard32"
         
     @testattr(windows = True)
     def test_exception_input_derivatives(self):
-        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
         nose.tools.assert_raises(FMUException, model.set_input_derivatives, "u",1.0,1)
         
     @testattr(windows = True)
     def test_exception_output_derivatives(self):
-        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus)
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
         nose.tools.assert_raises(FMUException, model.get_output_derivatives, "u",1)
         
     @testattr(assimulo = True)
     def test_multiple_loadings_and_simulations(self):
-        model = load_fmu("bouncingBall.fmu",os.path.join(path_to_fmus,"CS1.0"),enable_logging=False)
+        model = load_fmu("bouncingBall.fmu",path_to_fmus_cs1,enable_logging=False)
         res = model.simulate(final_time=1.0)
         h_res = res['h']
         
@@ -135,6 +137,26 @@ class Test_FMUModelCS1:
         assert os.path.exists("bouncingBall_log.txt")
         model = FMUModelCS1("bouncingBall.fmu",os.path.join(path_to_fmus,"CS1.0"),log_file_name="Test_log.txt")
         assert os.path.exists("Test_log.txt")
+        
+    @testattr(stddist = True)
+    def test_result_name_file(self):
+        
+        rlc_name = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="fmucs")
+        rlc = FMUModelCS1(rlc_name)
+        
+        res = rlc.simulate()
+        
+        #Default name
+        assert res.result_file == "RLC_Circuit_result.txt"
+        assert os.path.exists(res.result_file)
+        
+        rlc = FMUModelCS1(rlc_name)
+        res = rlc.simulate(options={"result_file_name":
+                                    "RLC_Circuit_result_test.txt"})
+                                    
+        #User defined name
+        assert res.result_file == "RLC_Circuit_result_test.txt"
+        assert os.path.exists(res.result_file)
     
 class Test_FMUModelME1:
     """
@@ -152,8 +174,8 @@ class Test_FMUModelME1:
         """
         Sets up the test case.
         """
-        self._bounce  = load_fmu('bouncingBall.fmu',path_to_fmus)
-        self._dq = load_fmu('dq.fmu',path_to_fmus)
+        self._bounce  = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        self._dq = load_fmu('dq.fmu',path_to_fmus_me1)
         self._bounce.initialize()
         self._dq.initialize()
         self.dep = load_fmu("DepParTests_DepPar1.fmu")
@@ -161,23 +183,23 @@ class Test_FMUModelME1:
     
     @testattr(assimulo = True)
     def test_log_file_name(self):
-        model = load_fmu("bouncingBall.fmu",path_to_fmus)
+        model = load_fmu("bouncingBall.fmu",path_to_fmus_me1)
         assert os.path.exists("bouncingBall_log.txt")
-        model = load_fmu("bouncingBall.fmu",path_to_fmus,log_file_name="Test_log.txt")
+        model = load_fmu("bouncingBall.fmu",path_to_fmus_me1,log_file_name="Test_log.txt")
         assert os.path.exists("Test_log.txt")
-        model = FMUModelME1("bouncingBall.fmu",path_to_fmus)
+        model = FMUModelME1("bouncingBall.fmu",path_to_fmus_me1)
         assert os.path.exists("bouncingBall_log.txt")
-        model = FMUModelME1("bouncingBall.fmu",path_to_fmus,log_file_name="Test_log.txt")
+        model = FMUModelME1("bouncingBall.fmu",path_to_fmus_me1,log_file_name="Test_log.txt")
         assert os.path.exists("Test_log.txt")
     
     @testattr(stddist = True)
     def test_error_xml(self):
-        nose.tools.assert_raises(FMUException,load_fmu,"bouncingBall_modified_xml.fmu",path_to_fmus)
-        nose.tools.assert_raises(FMUException,FMUModelME1,"bouncingBall_modified_xml.fmu",path_to_fmus)
+        nose.tools.assert_raises(FMUException,load_fmu,"bouncingBall_modified_xml.fmu",path_to_fmus_me1)
+        nose.tools.assert_raises(FMUException,FMUModelME1,"bouncingBall_modified_xml.fmu",path_to_fmus_me1)
     
     @testattr(windows = True)
     def test_default_experiment(self):
-        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus)
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus_me1)
         
         assert N.abs(model.get_default_experiment_start_time()) < 1e-4
         assert N.abs(model.get_default_experiment_stop_time()-1.5) < 1e-4
@@ -192,12 +214,12 @@ class Test_FMUModelME1:
     
     @testattr(assimulo = True)
     def test_multiple_loadings_and_simulations(self):
-        model = load_fmu("bouncingBall.fmu",path_to_fmus,enable_logging=False)
+        model = load_fmu("bouncingBall.fmu",path_to_fmus_me1,enable_logging=False)
         res = model.simulate(final_time=1.0)
         h_res = res['h']
         
         for i in range(40):
-            model = load_fmu("bouncingBall.fmu",path_to_fmus,enable_logging=False)
+            model = load_fmu("bouncingBall.fmu",path_to_fmus_me1,enable_logging=False)
             res = model.simulate(final_time=1.0)
         assert N.abs(h_res[-1] - res['h'][-1]) < 1e-4
     
@@ -460,14 +482,14 @@ class Test_FMUModelME1:
         """
         This test the attribute debugging.
         """
-        model = FMUModelME1('bouncingBall.fmu',path_to_fmus,enable_logging=False)
+        model = FMUModelME1('bouncingBall.fmu',path_to_fmus_me1,enable_logging=False)
         model.initialize()
         try:
             model.initialize()
         except FMUException:
             pass
         assert len(model.get_log()) == 0 #Get the current log (empty)
-        model = FMUModelME1('bouncingBall.fmu',path_to_fmus,enable_logging=False)
+        model = FMUModelME1('bouncingBall.fmu',path_to_fmus_me1,enable_logging=False)
         model.initialize()
         model.set_debug_logging(True) #Activates the logging
         try:
@@ -475,7 +497,7 @@ class Test_FMUModelME1:
         except FMUException:
             pass
         assert len(model.get_log()) > 0 #Get the current log (empty)
-        model = FMUModelME1('bouncingBall.fmu',path_to_fmus,enable_logging=True)
+        model = FMUModelME1('bouncingBall.fmu',path_to_fmus_me1,enable_logging=True)
         model.initialize()
         try:
             model.initialize()

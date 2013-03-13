@@ -870,7 +870,7 @@ aspect FlatPrettyPrint {
 	    boolean wroteEquation = false;
 	    for (FEquationBlock b : getFEquationBlocks()) {
 	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
-	    		if (e instanceof FAlgorithmBlock) {
+	    		if (e instanceof FAlgorithm) {
 	    			p.print(e, str, indent);
 	    			wroteEquation = false;
 	    		} else {
@@ -1026,7 +1026,7 @@ aspect FlatPrettyPrint {
     public void FFunctionDecl.prettyPrint(Printer p, PrintStream str, String indent) {
     	str.print(indent + "function " + name() + "\n");
     	getFFunctionVariables().prettyPrintWithIndent(p, str, p.indent(indent), ";");
-    	p.print(getFAlgorithmBlock(), str, indent);
+    	p.print(getFAlgorithm(), str, indent);
     	str.print(indent + "end " + name() + ";\n\n");
     }
 
@@ -1223,7 +1223,7 @@ aspect FlatPrettyPrint {
    		p.print(getCall(), str, indent);
 	}
 	
-	public void FAlgorithmBlock.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FAlgorithm.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(indent);
 		str.print("algorithm\n");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";");
@@ -1704,9 +1704,12 @@ aspect FlatPrettyPrint {
 	eq FEnumIntegerExp.builtInName() = "Integer";
 	eq FFloorExp.builtInName()       = "floor";
 	eq FStringExp.builtInName()      = "String";
-	eq FScalar.builtInName()         = "scalar";
+	eq FScalarExp.builtInName()      = "scalar";
+	eq FVectorExp.builtInName()      = "vector";
+	eq FMatrixExp.builtInName()      = "matrix";
 	eq FTranspose.builtInName()      = "transpose";
 	eq FCross.builtInName()          = "cross";
+	eq FSkew.builtInName()           = "skew";
 	eq FOuterProduct.builtInName()   = "outerProduct";
 	eq FNdimsExp.builtInName()       = "ndims";
 	eq FSizeExp.builtInName()        = "size";
@@ -1717,6 +1720,7 @@ aspect FlatPrettyPrint {
 	eq FInitialExp.builtInName()     = "initial";
 	eq FTerminalExp.builtInName()    = "terminal";
 	eq FIdentity.builtInName()       = "identity";
+	eq FDiagonal.builtInName()       = "diagonal";
 	eq FOnes.builtInName()           = "ones";
 	eq FZeros.builtInName()          = "zeros";
 	eq FFillExp.builtInName()        = "fill";
@@ -1796,6 +1800,12 @@ aspect FlatPrettyPrint {
 	eq FDiscrete.toString() = "discrete ";
 	eq FConstant.toString() = "constant ";
 	eq FContinuous.toString() = "";	
+	
+	syn String FTypePrefixVariability.toStringLiteral();
+	eq FParameter.toStringLiteral() = "Parameter";
+	eq FDiscrete.toStringLiteral() = "Discrete";
+	eq FConstant.toStringLiteral() = "Constant";
+	eq FContinuous.toStringLiteral() = "Continuous";
 	
 	syn String Restriction.toString();
 	eq Model.toString() = "model";
@@ -1934,7 +1944,7 @@ aspect PrettyPrint_MC {
 	    boolean wroteEquation = false;
 	    for (FEquationBlock b : getFEquationBlocks()) {
 	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
-	    		if (e instanceof FAlgorithmBlock) {
+	    		if (e instanceof FAlgorithm) {
 	    			p.print(e, str, indent);
 	    			wroteEquation = false;
 	    		} else {

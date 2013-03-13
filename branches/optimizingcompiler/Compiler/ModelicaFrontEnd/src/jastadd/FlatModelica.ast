@@ -47,7 +47,7 @@ FClass : BaseNode ::= FQName
  */
 FFunctionDecl : BaseNode ::= FQName 
                              FFunctionVariable* 
-                             FAlgorithmBlock 
+                             FAlgorithm 
                              [FDerivativeFunction] 
                              /DummyExp:FExp/;
 
@@ -591,7 +591,7 @@ FElseEquation : FIfWhenElseEquation;
 /**
  * \brief A flattened algorithm clause.
  */
-FAlgorithmBlock : FAbstractEquation ::= FStatement*;
+FAlgorithm : FAbstractEquation ::= FStatement*;
 
 
 /**
@@ -1325,9 +1325,24 @@ FEnumIntegerExp : FUnaryBuiltIn;
 FFloorExp : FUnaryBuiltIn;
 
 /**
- * \brief Scalar built-in function.
+ * Abstract base class for dimension conversion operators (scalar(), vector(), matrix()).
  */
-FScalar : FUnaryBuiltIn;
+abstract FDimensionConvert : FUnaryBuiltIn;
+
+/**
+ * Scalar built-in function.
+ */
+FScalarExp : FDimensionConvert;
+
+/**
+ * Vector built-in function.
+ */
+FVectorExp : FDimensionConvert;
+
+/**
+ * Vector built-in function.
+ */
+FMatrixExp : FDimensionConvert;
 
 /**
  * \brief Transpose built-in function.
@@ -1340,9 +1355,19 @@ FTranspose : FUnaryBuiltIn;
 FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
 
 /**
+ * \brief Skew built-in function.
+ */
+FSkew : FUnaryBuiltIn;
+
+/**
  * \brief Identity built-in function.
  */
 FIdentity : FUnaryBuiltIn;
+
+/**
+ * Diagonal built-in function.
+ */
+FDiagonal : FUnaryBuiltIn;
 
 /**
  * Outer product built-in function.

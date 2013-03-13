@@ -34,6 +34,8 @@ from pyjmi.optimization import ipopt
 from pyfmi.fmi import FMUModel, load_fmu
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
+path_to_fmus_me1 = os.path.join(path_to_fmus,"ME1.0")
+path_to_fmus_cs1 = os.path.join(path_to_fmus,"CS1.0")
 path_to_results = os.path.join(get_files_path(), 'Results')
 
 class TestIO:
@@ -195,8 +197,8 @@ class test_ResultWriterDymola:
         """
         Sets up the test case.
         """
-        self._bounce  = FMUModel('bouncingBall.fmu',path_to_fmus)
-        self._dq = FMUModel('dq.fmu',path_to_fmus)
+        self._bounce  = FMUModel('bouncingBall.fmu',path_to_fmus_me1)
+        self._dq = FMUModel('dq.fmu',path_to_fmus_me1)
         self._bounce.initialize()
         self._dq.initialize()
         
@@ -227,7 +229,7 @@ class test_ResultWriterDymola:
         Tests the variable with parameter alias is presented as variable in the 
         result.
         """
-        simple_alias = load_fmu('SimpleAlias.fmu',path_to_fmus)
+        simple_alias = load_fmu('SimpleAlias.fmu',path_to_fmus_me1)
         res = simple_alias.simulate()
         
         # test that res['y'] returns a vector of the same length as the time

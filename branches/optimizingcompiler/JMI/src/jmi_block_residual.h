@@ -26,7 +26,6 @@
 #define _JMI_BLOCK_RESIDUAL_H
 
 #include "jmi_common.h"
-#include "fmi.h"
 
 #ifdef JMI_AD_NONE_AND_CPP
 extern "C" {
@@ -223,10 +222,50 @@ int jmi_delete_block_residual(jmi_block_residual_t* b);
  */
 int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_block);
 
+/**
+ * \brief Computes an reduced step (x+h*(x_new-x)).
+ * 
+ * @param h The "step-size"
+ * @param x_new The states corresponding to the new state
+ * @param x  The states corresponding to the old state
+ * @param x_target The result (output)
+ * @param size The size of the vectors x,x_new and x_target
+ * @return Error code.
+ */
+int jmi_compute_reduced_step(jmi_real_t h, jmi_real_t* x_new, jmi_real_t* x, jmi_real_t* x_target, jmi_int_t size);
 
-void jmi_compute_reduced_step(jmi_real_t h, jmi_real_t* x_new, jmi_real_t* x, jmi_real_t* x_target, fmiInteger size);
-fmiInteger jmi_check_infinite_loop(jmi_real_t* sw_old,jmi_real_t *sw, fmiInteger nR, fmiInteger iter);
-jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, jmi_real_t* x_new, jmi_real_t* sw_init, jmi_real_t* bool_init, fmiInteger nR, jmi_real_t tolerance);
+/**
+ * \brief Determines if the current switches has already been tried.
+ * 
+ * This method loops over all the already tried states of the model
+ * i.e. the tried set of the switches and determines if the one 
+ * currently being tried has already been checked.
+ * 
+ * @param sw_old A list of all the switches with lenght (nR*iter)
+ * @param sw The current switches
+ * @param nR The size of the switches
+ * @param iter The number of already tried states of the model
+ */
+jmi_int_t jmi_check_infinite_loop(jmi_real_t* sw_old,jmi_real_t *sw, jmi_int_t nR, jmi_int_t iter);
+
+/**
+ * \brief Computes the minial step for changing the relations, i.e. switches or booleans.
+ * 
+ * This method computess the minial step (h) such that x + h*(x_new - x)
+ * does not change the relations, i.e. so that it does not changes the
+ * sign on any switch or any boolean. The returned minimal step is then
+ * h+eps. The step is computed using a bi-section algorithm.
+ * 
+ * @param block The current block being solved for.
+ * @param x The old state values
+ * @param x_new The new state values that has changed a relation
+ * @param sw_init The switches corresponding to x
+ * @param bool_init The booleans corresponding to x
+ * @param nR The number of switches
+ * @param tolerance The tolerance in the bi-section algorithm.
+ * @return The minimal step-size.
+ */
+jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, jmi_real_t* x_new, jmi_real_t* sw_init, jmi_real_t* bool_init, jmi_int_t nR, jmi_real_t tolerance);
 
 
 

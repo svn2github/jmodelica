@@ -53,8 +53,6 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 	jmi_->dae = NULL;
 	jmi_->init = NULL;
 	jmi_->opt = NULL;
-	jmi_->info = NULL;
-        jmi_->sim = NULL;
         /* jmi_->user_func = NULL; */
         jmi_->fmi = NULL;
 
@@ -243,6 +241,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     
     jmi_init_runtime_options(jmi_, &jmi_->options);
 
+    jmi_->events_epsilon = jmi_->options.events_default_tol;
     jmi_->recomputeVariables = 1;
 
     jmi_->is_initialized = 0;
@@ -280,14 +279,6 @@ int jmi_delete(jmi_t* jmi){
 		jmi_func_delete(jmi->opt->Heq);
 		jmi_func_delete(jmi->opt->Hineq);
 		free(jmi->opt);
-	}
-	if(jmi->info != NULL) {
-		free((void*)jmi->info->guid);
-		free((void*)jmi->info->instance_name);
-		free(jmi->info);
-	}
-	if(jmi->sim != NULL) {
-		free(jmi->sim);
 	}
 	for (i=0; i < jmi->n_dae_init_blocks;i=i+1){ /*Deallocate init BLT blocks.*/
 		jmi_delete_block_residual(jmi->dae_init_block_residuals[i]);
@@ -731,6 +722,37 @@ int jmi_dae_R(jmi_t* jmi, jmi_real_t* res) {
 	jmi_func_F(jmi,jmi->dae->R,res);
 
 	return 0;
+}
+
+int jmi_dae_R_perturbed(jmi_t* jmi, jmi_real_t* res){
+    int retval,i;
+    jmi_real_t *switches;
+    
+    retval = jmi_dae_R(jmi,res);
+    if (retval!=0){return -1;}
+    
+    switches = jmi_get_sw(jmi);
+    
+    for (i = 0; i < jmi->n_sw; i=i+1){
+        if (switches[i] == 1.0){
+            if (jmi->relations[i] == JMI_REL_GEQ){
+                res[i] = res[i]+jmi->events_epsilon;
+            }else if (jmi->relations[i] == JMI_REL_LEQ){
+                res[i] = res[i]-jmi->events_epsilon;
+            }else{
+                res[i] = res[i];
+            }
+        }else{
+            if (jmi->relations[i] == JMI_REL_GT){
+                res[i] = res[i]-jmi->events_epsilon;
+            }else if (jmi->relations[i] == JMI_REL_LT){
+                res[i] = res[i]+jmi->events_epsilon;
+            }else{
+                res[i] = res[i];
+            }
+        }
+    }
+    return 0;
 }
 
 int jmi_init_F0(jmi_t* jmi, jmi_real_t* res) {

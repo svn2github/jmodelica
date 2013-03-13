@@ -664,6 +664,7 @@ aspect FlatTypeCheck {
   eq FEnumIntegerExp.getChild().argumentDefinedTypeValid()       = false;
   eq FVectUnaryBuiltIn.getChild().argumentDefinedTypeValid()     = false;
   eq FPreExp.getChild().argumentDefinedTypeValid()               = false;
+  eq FDimensionConvert.getChild().argumentDefinedTypeValid()     = false;
   eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()   = i != 0;
   eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid() = i == 0;
 
@@ -685,6 +686,23 @@ aspect FlatTypeCheck {
   eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type) = 
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();
+  eq FScalarExp.getChild().argumentTypeValid(FType type)            = type.isArray() && argumentSizeValid(type.size());
+  eq FDimensionConvert.getChild().argumentTypeValid(FType type)     = argumentSizeValid(type.size());
+
+
+  /**
+   * Check if the given Size is valid for the argument of the operator.
+   */
+  syn boolean FDimensionConvert.argumentSizeValid(Size s) {
+	  boolean[] useDim = new boolean[s.ndims()];
+	  for (int d : dimensionsToKeep())
+		  if (d < useDim.length)
+			  useDim[d] = true;
+	  for (int i = 0; i < s.ndims(); i++)
+		  if (!useDim[i] && s.get(i) != 1)
+			  return false;
+	  return true;
+  }
 	
 	public void InstResidual.typeCheck() {
 		if (hasEnabled()) {

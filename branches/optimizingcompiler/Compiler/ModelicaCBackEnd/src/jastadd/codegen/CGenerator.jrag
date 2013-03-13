@@ -153,15 +153,15 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-		    if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
-		        for (FRelExp e : fclass.relExpInEquations()) 
-		            e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-		        Enumerator enumerator = new Enumerator();
-		        for (FRelExp e : fclass.relExpInEquations())
-		            e.genResidual_C(enumerator,INDENT,genPrinter);
-		    } else {
-		    	genPrinter.print("  model_init_R0(jmi, res);\n");
-		    }
+			if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
+				for (FRelExp e : fclass.relExpInEquations()) 
+					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+				Enumerator enumerator = new Enumerator();
+				for (FRelExp e : fclass.relExpInEquations())
+					e.genResidual_C(enumerator,INDENT,genPrinter);
+			} else {
+				genPrinter.print("  model_init_R0(jmi, res);\n");
+			}
 		}
 	
 	}
@@ -328,42 +328,42 @@ public class CGenerator extends GenericGenerator {
 			generateVarList(genPrinter, fclass.independentRealParameters(),    "real_pi");
 			generateVarList(genPrinter, fclass.dependentRealParameters(),      "real_pd");
 			// Handle enums as Integers
-			generateVarList(genPrinter, fclass.independentIntegerConstants(),  "integer_ci");
-			generateVarList(genPrinter, fclass.independentEnumConstants(),     "integer_ci", fclass.numIndependentIntegerConstants());
-			generateVarList(genPrinter, fclass.dependentIntegerConstants(),    "integer_cd");
-			generateVarList(genPrinter, fclass.dependentEnumConstants(),       "integer_cd", fclass.numDependentIntegerConstants());
-			generateVarList(genPrinter, fclass.independentIntegerParameters(), "integer_pi");
-			generateVarList(genPrinter, fclass.independentEnumParameters(),    "integer_pi", fclass.numIndependentIntegerParameters());
-			generateVarList(genPrinter, fclass.dependentIntegerParameters(),   "integer_pd");
-			generateVarList(genPrinter, fclass.dependentEnumParameters(),      "integer_pd", fclass.numDependentIntegerParameters());
-			generateVarList(genPrinter, fclass.independentBooleanConstants(),  "boolean_ci");
-			generateVarList(genPrinter, fclass.dependentBooleanConstants(),    "boolean_cd");
-			generateVarList(genPrinter, fclass.independentBooleanParameters(), "boolean_pi");
-			generateVarList(genPrinter, fclass.dependentBooleanParameters(),   "boolean_pd");
-			generateVarList(genPrinter, fclass.derivativeVariables(),          "real_dx");
-			generateVarList(genPrinter, fclass.differentiatedRealVariables(),  "real_x");
-			generateVarList(genPrinter, fclass.realInputs(),                   "real_u");
-			generateVarList(genPrinter, fclass.algebraicRealVariables(),       "real_w");
+			generateVarList(genPrinter, fclass.independentIntegerConstants(),     "integer_ci");
+			generateVarList(genPrinter, fclass.independentEnumConstants(),        "integer_ci", fclass.numIndependentIntegerConstants());
+			generateVarList(genPrinter, fclass.dependentIntegerConstants(),       "integer_cd");
+			generateVarList(genPrinter, fclass.dependentEnumConstants(),          "integer_cd", fclass.numDependentIntegerConstants());
+			generateVarList(genPrinter, fclass.independentIntegerParameters(),    "integer_pi");
+			generateVarList(genPrinter, fclass.independentEnumParameters(),       "integer_pi", fclass.numIndependentIntegerParameters());
+			generateVarList(genPrinter, fclass.dependentIntegerParameters(),      "integer_pd");
+			generateVarList(genPrinter, fclass.dependentEnumParameters(),         "integer_pd", fclass.numDependentIntegerParameters());
+			generateVarList(genPrinter, fclass.independentBooleanConstants(),     "boolean_ci");
+			generateVarList(genPrinter, fclass.dependentBooleanConstants(),       "boolean_cd");
+			generateVarList(genPrinter, fclass.independentBooleanParameters(),    "boolean_pi");
+			generateVarList(genPrinter, fclass.dependentBooleanParameters(),      "boolean_pd");
+			generateVarList(genPrinter, fclass.derivativeVariables(),             "real_dx");
+			generateVarList(genPrinter, fclass.differentiatedRealVariables(),     "real_x");
+			generateVarList(genPrinter, fclass.realInputs(),                      "real_u");
+			generateVarList(genPrinter, fclass.algebraicContinousRealVariables(), "real_w");
 			genPrinter.print("#define _time ((*(jmi->z))[jmi->offs_t])\n"); 
-			generateVarList(genPrinter, fclass.discreteRealVariables(),        "real_d");
-			generateVarList(genPrinter, fclass.discreteIntegerVariables(),     "integer_d");
-			generateVarList(genPrinter, fclass.discreteEnumVariables(),        "integer_d");
-			generateVarList(genPrinter, fclass.integerInputs(),                "integer_u");
-			generateVarList(genPrinter, fclass.enumInputs(),                   "integer_u");
-			generateVarList(genPrinter, fclass.discreteBooleanVariables(),     "boolean_d");
-			generateVarList(genPrinter, fclass.booleanInputs(),                "boolean_u");
+			generateVarList(genPrinter, fclass.discreteRealVariables(),           "real_d");
+			generateVarList(genPrinter, fclass.discreteIntegerVariables(),        "integer_d");
+			generateVarList(genPrinter, fclass.discreteEnumVariables(),           "integer_d");
+			generateVarList(genPrinter, fclass.integerInputs(),                   "integer_u");
+			generateVarList(genPrinter, fclass.enumInputs(),                      "integer_u");
+			generateVarList(genPrinter, fclass.discreteBooleanVariables(),        "boolean_d");
+			generateVarList(genPrinter, fclass.booleanInputs(),                   "boolean_u");
 			if (fclass.root().options.getBooleanOption("generate_ode")) {
-				generatePreVarList(genPrinter, fclass.derivativeVariables(),          "real_dx");
-				generatePreVarList(genPrinter, fclass.differentiatedRealVariables(),  "real_x");
-				generatePreVarList(genPrinter, fclass.realInputs(),                   "real_u");
-				generatePreVarList(genPrinter, fclass.algebraicRealVariables(),       "real_w");
-				generatePreVarList(genPrinter, fclass.discreteRealVariables(),        "real_d");
-				generatePreVarList(genPrinter, fclass.discreteIntegerVariables(),     "integer_d");
-				generatePreVarList(genPrinter, fclass.discreteEnumVariables(),        "integer_d");
-				generatePreVarList(genPrinter, fclass.integerInputs(),                "integer_u");
-				generatePreVarList(genPrinter, fclass.enumInputs(),                   "integer_u");
-				generatePreVarList(genPrinter, fclass.discreteBooleanVariables(),     "boolean_d");
-				generatePreVarList(genPrinter, fclass.booleanInputs(),                "boolean_u");
+				generatePreVarList(genPrinter, fclass.derivativeVariables(),             "real_dx");
+				generatePreVarList(genPrinter, fclass.differentiatedRealVariables(),     "real_x");
+				generatePreVarList(genPrinter, fclass.realInputs(),                      "real_u");
+				generatePreVarList(genPrinter, fclass.algebraicContinousRealVariables(), "real_w");
+				generatePreVarList(genPrinter, fclass.discreteRealVariables(),           "real_d");
+				generatePreVarList(genPrinter, fclass.discreteIntegerVariables(),        "integer_d");
+				generatePreVarList(genPrinter, fclass.discreteEnumVariables(),           "integer_d");
+				generatePreVarList(genPrinter, fclass.integerInputs(),                   "integer_u");
+				generatePreVarList(genPrinter, fclass.enumInputs(),                      "integer_u");
+				generatePreVarList(genPrinter, fclass.discreteBooleanVariables(),        "boolean_d");
+				generatePreVarList(genPrinter, fclass.booleanInputs(),                   "boolean_u");
 			}
 			generateExtObjectList(genPrinter, fclass.externalObjectVariables());
 
@@ -382,14 +382,9 @@ public class CGenerator extends GenericGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode")) {
-				int block_counter = 0;
-
-				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
-				 	block.genBlockResidualFunction_C(block_counter,false,"  ",genPrinter); 
-				  	if (!block.isSolvable()) {
-				  		block_counter++;
-				  	}				  
-				}
+				fclass.getDAEStructuredBLT().genEnumerateResidualBlocks_C();
+				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
+					block.genBlockResidualFunction_C(false, "", genPrinter);
 			}
 		}
 	}
@@ -406,15 +401,9 @@ public class CGenerator extends GenericGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode") && !fclass.root().options.getBooleanOption("generate_ode_jacobian")) {
-			
-				int block_counter = 0;
-
-				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
-					if (!block.isSolvable()) {
-						block.genBlockAddCall_C(block_counter,false, false," ",genPrinter);
-						block_counter++;
-					}
-				}
+				fclass.getDAEStructuredBLT().genEnumerateResidualBlocks_C();
+				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
+					block.genBlockAddCall_C(false, false, ASTNode.printer_C.indent(""), genPrinter);
 			}
 		}
 	}
@@ -430,18 +419,11 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode")) {
-		
-				int block_counter = 0;	
-				for (AbstractEquationBlock block : fclass.getDAEBLT()) {
-				    if (!block.isSolvable()) {
-						block_counter++;
-					}
-				}
-				genPrinter.print(block_counter);
-			} else {
-				genPrinter.print("0");
-			}
+			Enumerator enumerator = new Enumerator();
+			if (fclass.root().options.getBooleanOption("generate_ode"))
+				for (AbstractEquationBlock block : fclass.getDAEBLT())
+					block.genEnumerateResidualBlocks_C(enumerator);
+			genPrinter.print(enumerator.peek());
 		}
 	}
 
@@ -457,14 +439,9 @@ public class CGenerator extends GenericGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode")) {
-				int block_counter = 0;
-				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
-					block.genBlockResidualFunction_C(block_counter, true,"  ",genPrinter); 
-				  	if (!block.isSolvable()) {
-				  		block_counter++;
-				  	}
-				}
-				
+				fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
+				for (AbstractEquationBlock block : fclass.getDAEInitBLT())
+					block.genBlockResidualFunction_C(true, "", genPrinter); 
 			}
 		}
 	}
@@ -481,13 +458,9 @@ public class CGenerator extends GenericGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode") && !fclass.root().options.getBooleanOption("generate_ode_jacobian")) {
-				int block_counter = 0;
-				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
-				    if (!block.isSolvable()) {
-				    	block.genBlockAddCall_C(block_counter,false, true," ",genPrinter);
-						block_counter++;
-					}
-				}
+				fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
+				for (AbstractEquationBlock block : fclass.getDAEInitBLT())
+					block.genBlockAddCall_C(false, true, ASTNode.printer_C.indent(""), genPrinter);
 			}
 		}
 	}
@@ -503,17 +476,11 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode")) {
-				int block_counter = 0;	
-				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
-				    if (!block.isSolvable()) {
-						block_counter++;
-					}
-				}
-				genPrinter.print(block_counter);
-			} else {
-				genPrinter.print("0");
-			}
+			Enumerator enumerator = new Enumerator();
+			if (fclass.root().options.getBooleanOption("generate_ode"))
+				for (AbstractEquationBlock block : fclass.getDAEInitBLT())
+					block.genEnumerateResidualBlocks_C(enumerator);
+			genPrinter.print(enumerator.peek());
 		}
 	}
 
@@ -696,12 +663,14 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (!fclass.root().options.getBooleanOption("generate_only_initial_system") && fclass.root().options.getBooleanOption("generate_ode")) {
-				fclass.getDAEStructuredBLT().genVarDecls_C(genPrinter, INDENT);
-				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");						
-				fclass.getDAEStructuredBLT().genOdeDerivativeBlocks(genPrinter);
-			} else if (fclass.root().options.getBooleanOption("generate_only_initial_system") && fclass.root().options.getBooleanOption("generate_ode")) {
-				genPrinter.print("  ef = model_ode_initialize(jmi);\n");
+			if (fclass.root().options.getBooleanOption("generate_ode")) {
+				if (fclass.root().options.getBooleanOption("generate_only_initial_system")) {
+					genPrinter.print("  ef = model_ode_initialize(jmi);\n");
+				} else {
+					fclass.getDAEStructuredBLT().genVarDecls_C(genPrinter, INDENT);
+					genPrinter.print(INDENT + "model_ode_guards(jmi);\n");						
+					fclass.getDAEStructuredBLT().genOdeDerivativeBlocks(genPrinter);
+				}
 			}
 		}
 	}
@@ -718,12 +687,11 @@ public class CGenerator extends GenericGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode")) {
+				fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
 				fclass.getDAEInitBLT().genVarDecls_C(genPrinter, INDENT);
-				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");						
-				Enumerator enumerator = new Enumerator();
-				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
-					block.genBlock_C(enumerator,true,"  ",genPrinter);                                        
-				}
+				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");
+				for (AbstractEquationBlock block : fclass.getDAEInitBLT())
+					block.genBlock_C(true, ASTNode.printer_C.indent(""), genPrinter);
 			}
 		}
 	}

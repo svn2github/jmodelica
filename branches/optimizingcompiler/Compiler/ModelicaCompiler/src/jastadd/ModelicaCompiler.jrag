@@ -211,7 +211,7 @@ public class ModelicaCompiler {
 
 	public void defaultTemplatePathsFMUCS() {
 		File dir = getTemplatesDir();
-		xmlTpl = (xmlTpl == null) ? new File(dir, "fmi_model_description.tpl").getPath() : xmlTpl;
+		xmlTpl = (xmlTpl == null) ? new File(dir, "fmi1_cs_model_description.tpl").getPath() : xmlTpl;
 		cTemplatefile = (cTemplatefile == null) ? new File(dir, "fmi_cs_modelica_template.c").getPath() : cTemplatefile;
 	}
 	
@@ -704,7 +704,7 @@ public class ModelicaCompiler {
 	 * @param fileName Array of model file or library paths.
 	 */
 	public void compileJMU(String className, String fileName[]) 
-		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		compileJMU(className, fileName, ".");
 	}
 	
@@ -719,7 +719,7 @@ public class ModelicaCompiler {
 	 * @param compileTo Specify location of the compiled JMU. Directory will be created if it does not exist.
 	 */
 	public void compileJMU(String className, String fileName[], String compileTo) 
-		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		defaultTemplatePathsJMU();
 		compileUnit(className, fileName, "jmu", compileTo, "JMU");
 	}
@@ -736,7 +736,7 @@ public class ModelicaCompiler {
 	 * @param fileName Array of model file or library paths.
 	 */
 	public void compileFMUME(String className, String fileName[]) 
-		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		compileFMU(className, fileName, "fmume", ".");
 	}
 
@@ -752,7 +752,7 @@ public class ModelicaCompiler {
 	 * @param fileName Array of model file or library paths.
 	 */
 	public void compileFMUCS(String className, String fileName[]) 
-		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		compileFMU(className, fileName, "fmucs", ".");
 	}
 
@@ -767,7 +767,7 @@ public class ModelicaCompiler {
 	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
 	 */
 	public void compileFMUME(String className, String fileName[], String compileTo) 
-		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		compileFMU(className, fileName, "fmume", compileTo);
 	}
 
@@ -782,7 +782,7 @@ public class ModelicaCompiler {
 	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
 	 */
 	public void compileFMUCS(String className, String fileName[], String compileTo) 
-		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		compileFMU(className, fileName, "fmucs", compileTo);
 	}
 
@@ -798,7 +798,7 @@ public class ModelicaCompiler {
 	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
 	 */
 	public void compileFMU(String className, String fileName[], String target, String compileTo) 
-		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		// Always set certain options when compiling an FMU
 		// First save these options in temp options registry to reset when compiling has finished
 		OptionRegistry tempOptions = new OptionRegistry(options);
@@ -829,7 +829,7 @@ public class ModelicaCompiler {
 	 * @param compileTo Specify location of the compiled FMUX. Directory will be created if it does not exist.
 	 */
 	public void compileFMUX(String className, String fileName[], String compileTo) 
-		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		// Always set certain options when compiling an FMUX
 		// First save these options in temp options registry to reset when compiling has finished
 		OptionRegistry tempOptions = new OptionRegistry(options);
@@ -855,7 +855,7 @@ public class ModelicaCompiler {
      * @param fileName Array of model file or library paths.
      */
     public void compileFMUX(String className, String fileName[]) 
-        throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         compileFMUX(className, fileName, ".");
     }
 
@@ -865,7 +865,7 @@ public class ModelicaCompiler {
 	 * @param unitType "JMU", "FMUME", "FMUCS" or "FMUX".
 	 */
 	private void compileUnit(String className, String fileName[], String makeTarget, String compileTo, String unitType) 
-		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		try {
 			// Set output dir
 			if (outDir == null)
@@ -907,7 +907,7 @@ public class ModelicaCompiler {
 	 * @param path Location on file system where the packed file should be saved (created if does not exist).
 	 * @param unitType "JMU" or "FMU".
 	 */
-	protected void packUnit(String className, String path, String unitType) {
+	protected void packUnit(String className, String path, String unitType) throws PackingFailedException {
 		File dirPath = new File(path);
 		if (!dirPath.isDirectory()) 
 			dirPath.mkdirs();
@@ -916,24 +916,23 @@ public class ModelicaCompiler {
 		
 		// Create the new archive
 		int BUFFER_SIZE = 2048;
+        File unitFile = new File(dirPath, mMangledName + "." + getUnitSuffix(unitType));
 		try {
 			hookCheckAbort();
-			File unitFile = new File(dirPath, mMangledName + "." + getUnitSuffix(unitType));
 			FileOutputStream dest = new FileOutputStream(unitFile);
 			ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
 			out.setMethod(ZipOutputStream.DEFLATED);
 			zipDir(outDir, out);
 			out.close();
-			hookFmuPacked(unitFile.getAbsoluteFile());
-		} catch(CompilationAbortedException e) {
-			deleteOutDir();
+		} catch (CompilationAbortedException e) {
 			throw e;
-		} catch(Exception e) {
-			// TODO: Make sure this is logged or reported properly
-		}
-		
-		// remove files
-		deleteOutDir();
+		} catch (Exception e) {
+			throw new PackingFailedException(String.format("Could not write %s to '%s'", unitType, unitFile));
+		} finally {
+		    // remove files
+		    deleteOutDir();
+		}		
+        hookFmuPacked(unitFile.getAbsoluteFile());
 	}
 	
 	protected void parseFiles(String[] paths) {
@@ -1067,7 +1066,7 @@ public class ModelicaCompiler {
 	 * 
 	 */
 	public FClass compileModel(String name[], String cl)
-	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+	  throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		log.info("======= Compiling model =======");
 		resetCompilationInfo();
 		
@@ -1367,7 +1366,7 @@ public class ModelicaCompiler {
 			ASTNode.endStep("writeIterationVariables()");
 		}
 		
-		if (fc.root().options.getBooleanOption("write_tearing_paris_to_file")) {
+		if (fc.root().options.getBooleanOption("write_tearing_pairs_to_file")) {
 			ASTNode.beginStep("writeIterationVariables()");
 			fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
 			fc.getDAEInitBLT().writeTearingPairsToFile(new File(instName + "_initial_system_tearing_pairs.txt"));
@@ -1785,10 +1784,13 @@ public class ModelicaCompiler {
 			    compileFMUX(cl, name);
 			else
 				compileJMU(cl, name);
-		} catch  (ModelicaClassNotFoundException e){
+		} catch (CcodeCompilationException ce) {
+			log.error(ce.getMessage());
+			System.exit(1);
+		} catch (ModelicaClassNotFoundException e){
 			log.error("Could not find the class "+ cl);
 			System.exit(1);
-		} catch (CompilerException ce) {
+		} catch (ModelicaException ce) {
 			log.error(ce.getMessage());
 			System.exit(1);
 		} catch (FileNotFoundException e) {
@@ -2118,6 +2120,14 @@ public class CcodeCompilationException extends RuntimeException {
 	public CcodeCompilationException(String msg) {
 		super(msg);
 	}
+}
+
+public class PackingFailedException extends ModelicaException {
+    public PackingFailedException() {
+    }
+    public PackingFailedException(String msg) {
+        super(msg);
+    }
 }
 
 /**

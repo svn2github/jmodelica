@@ -21,34 +21,39 @@ aspect InstNameClassification {
 	 * \brief Helper class for definition of kinds.
 	 */
     abstract public class Kind {
-    	static Kind CLASS_ACCESS          = new ClassAccess();
-    	static Kind COMPONENT_ACCESS      = new ComponentAccess();
-    	static Kind AMBIGUOUS_ACCESS      = new AmbigousAccess();
-    	static Kind LAST_AMBIGUOUS_ACCESS = new LastAmbigousAccess();
+    	static Kind CLASS_ACCESS           = new ClassAccess();
+    	static Kind COMPONENT_ACCESS       = new ComponentAccess();
+    	static Kind AMBIGUOUS_ACCESS       = new AmbigousAccess();
+    	static Kind LAST_AMBIGUOUS_ACCESS  = new LastAmbigousAccess();
+    	static Kind FIRST_AMBIGUOUS_ACCESS = new FirstAmbigousAccess();
     	
     	public boolean isClassAccess()     { return false; }
     	public boolean isComponentAccess() { return false; }
     	public boolean isAmbigousAccess()  { return false; }
     	
-    	public abstract Kind predKind();
+    	public abstract Kind predKind(int i);
     	
     	static protected class ClassAccess extends Kind {
-    		public Kind    predKind()      { return CLASS_ACCESS; }
+    		public Kind    predKind(int i) { return CLASS_ACCESS; }
     		public boolean isClassAccess() { return true; }
     	}
     	
     	static protected class ComponentAccess extends Kind {
-    		public Kind    predKind()          { return AMBIGUOUS_ACCESS; }
+    		public Kind    predKind(int i)     { return AMBIGUOUS_ACCESS; }
     		public boolean isComponentAccess() { return true; }
     	}
     	
     	static protected class AmbigousAccess extends Kind {
-    		public Kind    predKind()         { return AMBIGUOUS_ACCESS; }
+    		public Kind    predKind(int i)    { return AMBIGUOUS_ACCESS; }
     		public boolean isAmbigousAccess() { return true; }
     	}
     	
     	static protected class LastAmbigousAccess extends AmbigousAccess {
-    		public Kind predKind() { return CLASS_ACCESS; }
+    		public Kind predKind(int i) { return CLASS_ACCESS; }
+    	}
+    	
+    	static protected class FirstAmbigousAccess extends ClassAccess {
+    		public Kind predKind(int i) { return (i == 0) ? AMBIGUOUS_ACCESS : FIRST_AMBIGUOUS_ACCESS; }
     	}
     }
 	
@@ -95,7 +100,7 @@ aspect InstNameClassification {
 		if (i >= accesses.getNumChildNoTransform() - 1)
 			return kind();
 		else
-			return accesses.getChildNoTransform(i + 1).predKind();
+			return accesses.getChildNoTransform(i + 1).kind().predKind(i);
 	}
 
 	eq InstExtends.getClassName().kind()          = Kind.CLASS_ACCESS;
@@ -104,19 +109,12 @@ aspect InstNameClassification {
 	eq InstComponentModification.getName().kind() = hasValue() ? Kind.COMPONENT_ACCESS : Kind.AMBIGUOUS_ACCESS;
 	eq InstClassRedeclare.getName().kind()        = Kind.CLASS_ACCESS;
 	eq InstComponentRedeclare.getName().kind()    = Kind.COMPONENT_ACCESS;
-	eq InstFunctionCall.getName().kind()          = Kind.CLASS_ACCESS;
+	eq InstFunctionCall.getName().kind()          = Kind.FIRST_AMBIGUOUS_ACCESS;
 	
 	eq InstConstraining.getClassName().kind()             = Kind.CLASS_ACCESS;
 	eq InstComponentDecl.getConditionalAttribute().kind() = Kind.AMBIGUOUS_ACCESS;
 	eq InstBaseClassDecl.getFAbstractEquation().kind()    = Kind.AMBIGUOUS_ACCESS;	
 	eq InstSimpleShortClassDecl.getTarget().kind()        = Kind.CLASS_ACCESS;	
-
-	/**
-	 * The attribute predKind defines the kind for the previous part of a 
-	 * qualified name.
-	 */
-	syn Kind InstAccess.predKind() = kind().predKind();
-	eq InstDot.predKind()          = getInstAccessListNoTransform().getChild(0).predKind();
 
 	/**
 	 * Check if this modification has a value modification.

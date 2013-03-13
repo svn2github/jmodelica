@@ -27,6 +27,14 @@ public class Enumerator {
 	}
 	
 	/**
+	 * Produces a copy of this enumerator, current index is preserved.
+	 * @return A copy of this enumerator
+	 */
+	public Enumerator copy() {
+		return new Enumerator(count);
+	}
+	
+	/**
 	 * Returns the current index and increments it.
 	 * @return current index
 	 */

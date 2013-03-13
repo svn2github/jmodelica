@@ -162,41 +162,21 @@ end ElseWhenEq_ComplErr;
 
 model UnsupportedBuiltins1_ComplErr
  equation
-  scalar(1);
-  vector(1);
-  matrix(1);
-  diagonal(1 + "2");
   product(1);
-  symmetric(1);
-  skew(1);
+  symmetric(1 + "2");
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="UnsupportedBuiltins1_ComplErr",
 			description="Compliance error for unsupported builtins",
 			errorMessage="
-7 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 165, column 3:
-  The scalar() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 166, column 3:
-  The vector() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 167, column 3:
-  The matrix() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 168, column 3:
-  The diagonal() function-like operator is not supported
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 169, column 3:
   The product() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 171, column 3:
   The symmetric() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 172, column 3:
-  The skew() function-like operator is not supported
 ")})));
 end UnsupportedBuiltins1_ComplErr;
 

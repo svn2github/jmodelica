@@ -24,7 +24,7 @@
 #ifndef fmi_h
 #define fmi_h
 
-#include "fmiModelFunctions.h"
+#include "fmi1_functions.h"
 #include "jmi.h"
 
 /**
@@ -46,9 +46,9 @@ struct fmi_t {
     fmiString fmi_instance_name;
     fmiString fmi_GUID;
     fmiCallbackFunctions fmi_functions;
+    fmiEventInfo event_info;
     fmiBoolean fmi_logging_on;
     fmiReal fmi_newton_tolerance;
-    fmiReal fmi_epsilon;
     jmi_t* jmi;
 };
 
@@ -454,10 +454,6 @@ const char* fmi_get_version();
  */
 fmiStatus fmi_set_debug_logging(fmiComponent c, fmiBoolean loggingOn);
 
-jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
-void jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, fmiInteger mode);
-jmi_int_t jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size);
-int jmi_print_array(fmi_t* fmi, jmi_real_t* x, fmiInteger size_x, char* array_info);
 
 /* @} */
 

@@ -137,7 +137,7 @@ LIB_EXTRA_AD = -ljmi_algorithm_cppad -ljmi_solver_cppad
 LIB_IPOPT    = `PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig pkg-config --libs ipopt`
 # For different targets
 LIBS_FMUME   = $(LIB_JMIC)  -lfmi  -ltblAccess  $(LIB_COMMON) -L$(TABLES_LIB_DIR)
-LIBS_FMUCS   = $(LIB_JMIC)  -lfmi_cs $(LIB_COMMON)
+LIBS_FMUCS   = -lfmi_cs $(LIB_JMIC)  -lfmi -ltblAccess  $(LIB_COMMON) -l:libsundials_cvode.a -L$(TABLES_LIB_DIR)
 LIBS_IPOPT   = $(LIB_JMIAD) -lfmi    $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
 
 # Include paths for compilation
@@ -152,7 +152,7 @@ fmume:
 
 fmume_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)  $(LIBS_FMUME)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUME)
 	$(RM) $(OBJS)
 
 fmucs:
@@ -160,7 +160,7 @@ fmucs:
 
 fmucs_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMICS) 
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUCS) 
 	$(RM) $(OBJS)
 
 jmu: $(OBJS)

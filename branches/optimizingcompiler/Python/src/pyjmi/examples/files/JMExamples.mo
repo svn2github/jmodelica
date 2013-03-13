@@ -2337,12 +2337,25 @@ Simulation time: 7200s
       Distillation4 d;
       
       constant Real time_constant = 35;
+      
+      Real cost(start=0, fixed=true);
+      Real Q_elec;
+      Real Vdot_L1;
+    
     equation
-      d.Q_elec = d.Q_elec_ref;
-      d.Vdot_L1 = (1 - time_constant / 2 / (time_constant + 5000)) *
-                  d.Vdot_L1_ref +
-                  time_constant / 2 * d.Vdot_L1_ref / (time_constant + time);
-      // d.Vdot_L1 = d.Vdot_L1_ref;
+      
+      der(cost) = (d.Temp[28] - d.T_14_ref)^2 +
+                (d.Temp[14] - d.T_28_ref)^2 +
+                (0.05 * (d.Q_elec - d.Q_elec_ref))^2 +
+                (0.05 * (d.Vdot_L1 - d.Vdot_L1_ref))^2;
+      Q_elec = d.Q_elec_ref;
+      Vdot_L1 = (1 - time_constant / 2 / (time_constant + 5000)) *
+                d.Vdot_L1_ref +
+                time_constant / 2 * d.Vdot_L1_ref / (time_constant + time);
+      
+      connect(Q_elec, d.Q_elec);
+      connect(Vdot_L1, d.Vdot_L1);
+    
     end Distillation4Reference;
 
     package Examples

@@ -21,7 +21,7 @@ import os
 import nose
 
 import numpy as N
-import pylab as P
+from scipy.io.matlab.mio import loadmat
 
 from tests_jmodelica import testattr, get_files_path
 from pyjmi.common.io import ResultDymolaTextual
@@ -35,6 +35,7 @@ except (NameError, ImportError):
     pass
 
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
+path_to_data = os.path.join(get_files_path(), 'Data')
 
 def assert_results(res, cost_ref, u_norm_ref,
                    cost_rtol=1e-3, u_norm_rtol=1e-4, input_name="u"):
@@ -102,12 +103,23 @@ class TestLocalDAECollocator:
         compile_fmux(class_path, cstr_file_path)
         
         pe_file_path = os.path.join(get_files_path(), 'Modelica',
-                                 'ParameterEstimation_1.mop')
+                                    'ParameterEstimation_1.mop')
         class_path = "ParEst.SecondOrder"
         compile_fmu(class_path, pe_file_path)
         
         class_path = "ParEst.ParEstCasADi"
         compile_fmux(class_path, pe_file_path)
+        
+        qt_file_path = os.path.join(get_files_path(), 'Modelica',
+                                    'QuadTankPack.mop')
+        class_path = "QuadTankPack.Sim_QuadTank"
+        compile_fmu(class_path, qt_file_path)
+        
+        class_path = "QuadTankPack.QuadTank_ParEstCasADi"
+        compile_fmux(class_path, qt_file_path)
+        
+        class_path = "QuadTankPack.QuadTank_ParEstCasADi_Degenerate"
+        compile_fmux(class_path, qt_file_path)
     
     def setUp(self):
         """Load the test models."""
@@ -173,6 +185,17 @@ class TestLocalDAECollocator:
         fmux_second_order_par_est = "ParEst_ParEstCasADi.fmux"
         self.model_second_order_par_est = CasadiModel(
             fmux_second_order_par_est, verbose=False)
+        
+        fmu_qt_sim = "QuadTankPack_Sim_QuadTank.fmu"
+        self.model_qt_sim = load_fmu(fmu_qt_sim)
+        
+        fmux_qt_par_est = "QuadTankPack_QuadTank_ParEstCasADi.fmux"
+        self.model_qt_par_est = CasadiModel(fmux_qt_par_est, verbose=False)
+        
+        fmux_qt_par_est_degenerate = \
+                "QuadTankPack_QuadTank_ParEstCasADi_Degenerate.fmux"
+        self.model_qt_par_est_degenerate = CasadiModel(
+                fmux_qt_par_est_degenerate, verbose=False)
         
         self.algorithm = "LocalDAECollocationAlg"
     
@@ -303,8 +326,10 @@ class TestLocalDAECollocator:
                   "cstr_nom_traj_result.txt")
         
         # Optimize using only initial trajectories
-        opts['n_e'] = 75
-        opts['n_cp'] = 4
+        n_e = 75
+        n_cp = 4
+        opts['n_e'] = n_e
+        opts['n_cp'] = n_cp
         opts['init_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
@@ -315,9 +340,8 @@ class TestLocalDAECollocator:
         assert_results(res, cost_ref, u_norm_ref)
         col = res.solver
         xx_init = col.get_xx_init()
-        N.testing.assert_allclose(
-                xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
-                [1., 1.])
+        N.testing.assert_equal(sum(xx_init == 1.),
+                               (n_e * n_cp + 1) * 3 + 2 * n_e)
         
         # Test with eliminated continuity variables
         opts['eliminate_cont_var'] = True
@@ -450,6 +474,80 @@ class TestLocalDAECollocator:
         z_traj = traj_res['z']
         N.testing.assert_allclose(w_traj, w_ref, 1e-2)
         N.testing.assert_allclose(z_traj, z_ref, 1e-2)
+    
+    @testattr(casadi = True)
+    def test_qt_par_est(self):
+        """
+        Test parameter estimation for the quad tank, with and without
+        eliminated inputs.
+        """
+        data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
+        sim_model = self.model_qt_sim
+        opt_model = self.model_qt_par_est
+        opt_model_2 = self.model_qt_par_est_degenerate
+        
+        # Extract data series
+        t_meas = data['t'][6000::100,0]-60
+        y1_meas = data['y1_f'][6000::100,0]/100
+        y2_meas = data['y2_f'][6000::100,0]/100
+        y3_meas = data['y3_d'][6000::100,0]/100
+        y4_meas = data['y4_d'][6000::100,0]/100
+        u1 = data['u1_d'][6000::100,0]
+        u2 = data['u2_d'][6000::100,0]
+        
+        # Simulate
+        u = N.transpose(N.vstack((t_meas, u1, u2)))
+        sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
+                                     final_time=60.)
+        
+        # Create parameter estimation data without input
+        Q = N.array([[1., 0., 0., 0.], [0., 1., 0., 0.],
+                     [0., 0., 10., 0.], [0., 0., 0., 10.]])
+        measured_variables = ['qt.x1', 'qt.x2', 'u1', 'u2']
+        data = N.transpose(N.vstack((t_meas, y1_meas, y2_meas, u1, u2)))
+        par_est_data = ParameterEstimationData(Q, measured_variables, data)
+        
+        # Create parameter estimation data with input
+        Q = N.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 10.]])
+        measured_variables = ['qt.x1', 'qt.x2', 'u1']
+        data = N.transpose(N.vstack((t_meas, y1_meas, y2_meas, u1)))
+        par_est_data_input = ParameterEstimationData(Q, measured_variables,
+                                                     data)
+        
+        #~ # Optimize without input
+        opts = opt_model.optimize_options()
+        opts['n_e'] = 60
+        opts['init_traj'] = sim_res.result_data
+        opts['parameter_estimation_data'] = par_est_data
+        opt_res = opt_model.optimize(self.algorithm, options=opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res["qt.a1"],
+                                                 opt_res["qt.a2"]]),
+                                  [0.02656702, 0.02713898])
+        
+        # Optimize with input
+        opts['parameter_estimation_data'] = par_est_data_input
+        u2_input = N.transpose(N.vstack((t_meas, u2)))
+        opts['input'] = ('u2', u2_input)
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res["qt.a1"],
+                                                 opt_res["qt.a2"]]),
+                                  [0.02656702, 0.02713898])
+        
+        # Optimize with input and nominal trajectories
+        opts['nominal_traj'] = sim_res.result_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res["qt.a1"],
+                                                 opt_res["qt.a2"]]),
+                                  [0.02656702, 0.02713898], 1e-4)
+        
+        # Point constraint on specified input
+        opts = opt_model_2.optimize_options()
+        opts['n_e'] = 60
+        opts['init_traj'] = sim_res.result_data
+        opts['parameter_estimation_data'] = par_est_data_input
+        opts['input'] = ('u2', u2_input)
+        N.testing.assert_raises(CasadiCollocatorException,
+                                opt_model_2.optimize, self.algorithm, opts)
     
     @testattr(casadi = True)
     def test_vdp_minimum_time(self):
@@ -950,7 +1048,7 @@ class TestLocalDAECollocator:
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
-        nose.tools.assert_true(sol_with < 0.8 * sol_without)
+        nose.tools.assert_true(sol_with < 0.9 * sol_without)
         assert_results(res, cost_ref, u_norm_ref)
         
         # Expanded MX with exact Hessian and eliminated variables
@@ -970,7 +1068,7 @@ class TestLocalDAECollocator:
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
-        nose.tools.assert_true(sol_with < 0.8 * sol_without)
+        nose.tools.assert_true(sol_with < 0.9 * sol_without)
         assert_results(res, cost_ref, u_norm_ref)
         
         # MX with exact Hessian and eliminated variables

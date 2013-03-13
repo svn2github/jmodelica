@@ -18,7 +18,6 @@
 */
 
 #include "jmi.h"
-/*#include "fmi.h"*/
 #include "jmi_linear_solver.h"
 #include "jmi_block_residual.h"
 #include "jmi_util.h"

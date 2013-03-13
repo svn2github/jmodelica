@@ -79,6 +79,12 @@ public class OptionRegistry {
 			 "If this option is set to true (default is false), a less restrictive strategy is used for solving equations " +
 			 "in the tearing algorithm. Specifically, division by parameters and variables is permitted, by default no " +
 			 "such divisions are made during tearing."),
+		LOCAL_ITERATION_IN_TEARING 
+			("local_iteration_in_tearing", 
+			 compiler, 
+			 false, 
+			 "If this option is set to true (default is false), equations that can be solved with local fixed" +
+			 "point iteration will be considered solved."),
 		ENABLE_TEARING
 			("enable_tearing", 
 			 compiler, 
@@ -274,15 +280,20 @@ public class OptionRegistry {
 			 compiler,
 			 true,
 			 "Generate parameters for runtime options. For internal use, should always be true for normal compilation."),
-		WRITE_ITERATION_VARIABLES
+		WRITE_ITER_VARS
 			("write_iteration_variables_to_file",
 			 compiler,
 			 false,
 			 "If the option is set to true (default is false), two text files containing one iteration variable" +
 			 "name per row is written to disk. The files contains the iteration variables for the DAE and the" +
 			 "DAE initialization system respectively. The files are outputed to the resource directory"),
+		ALG_FUNCS
+			 ("algorithms_as_functions",
+			  compiler,
+			  true,
+			  "Convert algorithm sections to function calls"),
 		WRITE_TEARING_PAIRS
-			("write_tearing_paris_to_file",
+			("write_tearing_pairs_to_file",
 			 compiler,
 			 false,
 			 "If the option is set to true (default is false), two text files containing tearing pairs" +
