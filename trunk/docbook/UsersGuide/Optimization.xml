@@ -19,17 +19,17 @@
     including optimal control, minimum time problems, optimal design, and
     model calibration. These different types of problems will be illustrated
     and it will be shown how they can be formulated and solved. The chapter
-    starts with an introductory example in <xref linkend="opt-sec-first" />
-    and in <xref linkend="opt-sec-solve" />, the details of how the
-    optimization algorithms are invoked are explained. The following sections
-    contain tutorial exercises that illustrates how to set up and solve
-    different kinds of optimization problems.</para>
+    starts with an introductory example in <xref linkend="opt-sec-first"/> and
+    in <xref linkend="opt-sec-solve"/>, the details of how the optimization
+    algorithms are invoked are explained. The following sections contain
+    tutorial exercises that illustrates how to set up and solve different
+    kinds of optimization problems.</para>
 
     <para>When formulating optimization problems, models are expressed in the
     Modelica language, whereas optimization specifications are given in the
-    Optimica extension which is described in Section 9. The tutorial exercises
-    in this chapter assumes that the reader is familiar with the basics of
-    Modelica and Optimica.</para>
+    Optimica extension which is described in <xref linkend="chap-optimica"/>.
+    The tutorial exercises in this chapter assumes that the reader is familiar
+    with the basics of Modelica and Optimica.</para>
   </section>
 
   <section xml:id="opt-sec-first">
@@ -61,13 +61,13 @@ constraint
 end VDP_Opt;
 </programlisting>
 
-    <para>Create a new file named VDP_Opt.mop and save it in you working
-    directory. Notice that this model contains both the dynamic system to be
-    optimized and the optimization specification. This is possible since
-    Optimica is an extension of Modelica and thereby supports also Modelica
-    constructs such as variable declarations and equations. In most cases,
-    however, Modelica models are stored separately from the Optimica
-    specifications.</para>
+    <para>Create a new file named <filename>VDP_Opt.mop</filename> and save it
+    in you working directory. Notice that this model contains both the dynamic
+    system to be optimized and the optimization specification. This is
+    possible since Optimica is an extension of Modelica and thereby supports
+    also Modelica constructs such as variable declarations and equations. In
+    most cases, however, Modelica models are stored separately from the
+    Optimica specifications.</para>
 
     <para>Next, create a Python script file and a write (or copy paste) the
     following commands:</para>
@@ -132,7 +132,7 @@ plt.show()
 </programlisting>
 
     <para>You should now see the optimization result as shown in <xref
-    linkend="fig-vdp-opt" />.</para>
+    linkend="fig-vdp-opt"/>.</para>
 
     <figure floatstyle="top" xml:id="fig-vdp-opt">
       <title>Optimal profiles for the VDP oscillator</title>
@@ -140,7 +140,7 @@ plt.show()
       <mediaobject>
         <imageobject>
           <imagedata align="left" fileref="images/vdp.svg" scalefit="1"
-                     width="60%"></imagedata>
+                     width="60%"/>
         </imageobject>
       </mediaobject>
 
@@ -210,7 +210,7 @@ plt.show()
     problem presented above is used. First, the model is compiled and
     loaded:</para>
 
-    <programlisting language="python">model_name = compile_jmu("VDP_Opt","VDP.mo")
+    <programlisting language="python">model_name = compile_jmu("VDP_Opt","VDP_Opt.mop")
 model = JMUModel(model_name)
 </programlisting>
 
@@ -320,7 +320,7 @@ model = JMUModel(model_name)
     <para>The option object is essentially a Python dictionary and options are
     set simply by using standard dictionary syntax:</para>
 
-    <programlisting language="python">opts = vpd.optimize_options()
+    <programlisting language="python">opts = vdp.optimize_options()
 opts['n_e'] = 5
 </programlisting>
 
@@ -370,7 +370,8 @@ x1 = res['x1']
     that the variable pressure takes on values which are about 1e5. In order
     to use <literal>nominal</literal> attributes for scaling with JMUs, the
     compiler option <literal>enable_variable_scaling</literal> is set to
-    <literal>True</literal>, see Section 2.2.2. For CasADi-based algorithms,
+    <literal>True</literal>, see <xref
+    linkend="models_sec_compiler_options"/>. For CasADi-based algorithms,
     scaling is instead enabled by setting the algorithm option
     <literal>variable_scaling</literal> to <literal>True</literal>, and is
     enabled by default . In both cases, all variables with a set nominal
@@ -390,9 +391,9 @@ x1 = res['x1']
     <programlisting language="python">T_scaled*T_nom = f(p_scaled*p_nom)
 </programlisting>
 
-    <para>when <literal>variable scaling is enabled. The algorithm in <xref
-    linkend="opt-sec-dae-casadi" /> also has support for time-varying scale
-    factors.</literal></para>
+    <para>when <literal>variable scaling</literal> is enabled. The algorithm
+    in <xref linkend="opt-sec-dae-casadi"/> also has support for time-varying
+    scale factors.</para>
 
     <para>For debugging purposes, is is sometimes useful to write a
     simulation/optimization/initialization result to file in scaled format, in
@@ -435,18 +436,18 @@ x1 = res['x1']
     API documentation</link>.</para>
 
     <para>The collocation algorithm provides a number of options, summarized
-    in <xref linkend="opt-tab-collopts" />.</para>
+    in <xref linkend="opt-tab-collopts"/>.</para>
 
     <table xml:id="opt-tab-collopts">
       <title>Options for the JMU and collocation-based optimization
       algorithm</title>
 
       <tgroup cols="3">
-        <colspec align="left" colname="col–opt" colwidth="1*" />
+        <colspec align="left" colname="col–opt" colwidth="1*"/>
 
-        <colspec align="left" colname="col–desc" colwidth="1*" />
+        <colspec align="left" colname="col–desc" colwidth="1*"/>
 
-        <colspec align="left" colname="col–def" colwidth="2*" />
+        <colspec align="left" colname="col–def" colwidth="2*"/>
 
         <thead>
           <row>
@@ -609,28 +610,28 @@ x1 = res['x1']
     <para>Some statistics from IPOPT can be obtained by issuing the
     command:</para>
 
-    <programlisting>&gt;&gt;&gt; res_opt.solver.opt_coll_ipopt_get_statistics()
+    <programlisting>res_opt.solver.opt_coll_ipopt_get_statistics()
 </programlisting>
 
     <para>The return argument of this function can be found by using the
     interactive help:</para>
 
-    <programlisting>&gt;&gt;&gt; help(res.solver.opt_coll_ipopt_get_statistics)
-    Get statistics from the last optimization run.
+    <programlisting>help(res.solver.opt_coll_ipopt_get_statistics)
+Get statistics from the last optimization run.
     
-    Returns::
+Returns::
     
-        return_status -- 
-            Return status from IPOPT.
+    return_status -- 
+        Return status from IPOPT.
             
-        nbr_iter -- 
-            Number of iterations.
+    nbr_iter -- 
+        Number of iterations.
             
-        objective -- 
-            Final value of objective function.
+    objective -- 
+       Final value of objective function.
             
-        total_exec_time -- 
-            Execution time.
+    total_exec_time -- 
+        Execution time.
 </programlisting>
 
     <section>
@@ -884,7 +885,7 @@ x1 = res['x1']
               </m:mtr>
             </m:mtable>
 
-            <m:mspace linebreak="newline" />
+            <m:mspace linebreak="newline"/>
           </m:math>
         </informalequation>
 
@@ -924,12 +925,13 @@ x1 = res['x1']
         <para>The Python commands in this tutorial may be copied and pasted
         directely into a Python shell, in some cases with minor modifications.
         Alternatively, you may copy the commands into a text file, e.g.,
-        cstr.py.</para>
+        <filename>cstr.py</filename>.</para>
 
         <para>Start the tutorial by creating a working directory and copy the
-        file $JMODELICA_HOME/Python/pyjmi/examples/files/CSTR.mop to your
-        working directory. An on-line version of <link
-        xlink:href="https://svn.jmodelica.org/trunk/Python/src/jmodelica/examples/files/CSTR.mo">CSTR.mop</link>
+        file
+        <filename>$JMODELICA_HOME/Python/pyjmi/examples/files/CSTR.mop</filename>
+        to your working directory. An on-line version of <link
+        xlink:href="https://svn.jmodelica.org/trunk/Python/src/pyjmi/examples/files/CSTR.mop"><filename>CSTR.mop</filename></link>
         is also available (depending on which browser you use, you may have to
         accept the site certificate by clicking through a few steps). If you
         choose to create Python script file, save it to the working
@@ -966,9 +968,10 @@ init_model = JMUModel(jmu_name)
           <para>Notice that automatic scaling of the model is enabled by
           setting the compiler option
           <literal>enable_variable_scaling</literal> to true. At this point,
-          you may open the file CSTR.mop, containing the CSTR model and the
-          static initialization model used in this section. Study the classes
-          CSTR.CSTR and CSTR.CSTR_Init and make sure you understand the
+          you may open the file <filename>CSTR.mop</filename>, containing the
+          CSTR model and the static initialization model used in this section.
+          Study the classes <literal>CSTR.CSTR</literal> and
+          <literal>CSTR.CSTR_Init</literal> and make sure you understand the
           models. Before proceeding, have a look at the interactive help for
           one of the functions you used:</para>
 
@@ -1048,7 +1051,7 @@ print('T = %f' % T_0_B)
             <m:math display="block" overflow="scroll">
               <m:mtable>
                 <m:mtr>
-                  <m:mtd columnalign="right"></m:mtd>
+                  <m:mtd columnalign="right"/>
 
                   <m:mtd columnalign="left">
                     <m:msub>
@@ -1174,7 +1177,7 @@ print('T = %f' % T_0_B)
                 </m:mtr>
 
                 <m:mtr>
-                  <m:mtd columnalign="right"></m:mtd>
+                  <m:mtd columnalign="right"/>
 
                   <m:mtd columnalign="left">
                     <m:mstyle mathvariant="normal">
@@ -1190,7 +1193,7 @@ print('T = %f' % T_0_B)
                 </m:mtr>
 
                 <m:mtr>
-                  <m:mtd columnalign="right"></m:mtd>
+                  <m:mtd columnalign="right"/>
 
                   <m:mtd columnalign="left">
                     <m:mn>230</m:mn>
@@ -1212,7 +1215,7 @@ print('T = %f' % T_0_B)
                 </m:mtr>
 
                 <m:mtr>
-                  <m:mtd columnalign="right"></m:mtd>
+                  <m:mtd columnalign="right"/>
 
                   <m:mtd columnalign="left">
                     <m:mi>T</m:mi>
@@ -1230,14 +1233,15 @@ print('T = %f' % T_0_B)
                 </m:mtr>
               </m:mtable>
 
-              <m:mspace linebreak="newline" />
+              <m:mspace linebreak="newline"/>
             </m:math>
           </informalequation>
 
-          <para>and is expressed in Optimica format in the class CSTR.CSTR_Opt
-          in the CSTR.mop file above. Have a look at this class and make sure
-          that you understand how the optimization problem is formulated and
-          what the objective is.</para>
+          <para>and is expressed in Optimica format in the class
+          <literal>CSTR.CSTR_Opt</literal> in the
+          <filename>CSTR.mop</filename> file above. Have a look at this class
+          and make sure that you understand how the optimization problem is
+          formulated and what the objective is.</para>
 
           <para>Direct collocation methods often require good initial guesses
           in order to ensure robust convergence. Since initial guesses are
@@ -1246,11 +1250,12 @@ print('T = %f' % T_0_B)
           and derivative profiles given an initial guess for the control
           input(s). It is then convenient to set up a dedicated model for
           computation of initial trajectories. In the model
-          CSTR.CSTR_Init_Optimization in the CSTR.mop file, a step input is
-          applied to the system in order obtain an initial guess. Notice that
-          the variable names in the initialization model must match those in
-          the optimal control model. Therefore, also the cost function is
-          included in the initialization model.</para>
+          <literal>CSTR.CSTR_Init_Optimization</literal> in the
+          <filename>CSTR.mop</filename> file, a step input is applied to the
+          system in order obtain an initial guess. Notice that the variable
+          names in the initialization model must match those in the optimal
+          control model. Therefore, also the cost function is included in the
+          initialization model.</para>
 
           <para>First, compile the model and set model parameters:</para>
 
@@ -1269,7 +1274,7 @@ init_sim_model.set('Tc_ref',Tc_0_B)
 </programlisting>
 
           <para>Having initialized the model parameters, we can simulate the
-          model using the 'simulate' function.</para>
+          model using the <literal>simulate</literal> function.</para>
 
           <programlisting language="python">res = init_sim_model.simulate(start_time=0.,final_time=150.)
 </programlisting>
@@ -1345,11 +1350,12 @@ cstr.set('cstr.T_init',T_0_A)
           initial guess in order to achieve fast convergence. Also, if the
           problem is non-convex, initialization is even more critical. Initial
           guesses can be provided in Optimica by the
-          <literal>initialGuess</literal> attribute, see the CSTR.mop file for
-          an example for this. Notice that initialization in the case of
-          collocation-based optimization methods means initialization of all
-          the control and state profiles as a function of time. In some cases,
-          it is sufficient to use constant profiles. For this purpose, the
+          <literal>initialGuess</literal> attribute, see the
+          <filename>CSTR.mop</filename> file for an example for this. Notice
+          that initialization in the case of collocation-based optimization
+          methods means initialization of all the control and state profiles
+          as a function of time. In some cases, it is sufficient to use
+          constant profiles. For this purpose, the
           <literal>initialGuess</literal> attribute works well. In more
           difficult cases, however, it may be necessary to initialize the
           profiles using simulation data, where an initial guess for the
@@ -1426,7 +1432,7 @@ plt.show()
           <para>Notice that parameters are returned as scalar values whereas
           variables are returned as vectors and that this must be taken into
           account when plotting. You should now see the plot shown in <xref
-          linkend="opt-fig-cstr-opt1" />.</para>
+          linkend="opt-fig-cstr-opt1"/>.</para>
 
           <figure xml:id="opt-fig-cstr-opt1">
             <title>Optimal profiles for the CSTR problem.</title>
@@ -1434,7 +1440,7 @@ plt.show()
             <mediaobject>
               <imageobject>
                 <imagedata fileref="images/cstr.svg" scalefit="1" width="60%"
-                           xml:id="opt-fig-cstr-opt1"></imagedata>
+                           xml:id="opt-fig-cstr-opt1"/>
               </imageobject>
             </mediaobject>
           </figure>
@@ -1532,7 +1538,7 @@ plt.show()
 </programlisting>
 
           <para>You should now see the plot shown in <xref
-          linkend="opt-fig-cstr-opt2" />.</para>
+          linkend="opt-fig-cstr-opt2"/>.</para>
 
           <figure xml:id="opt-fig-cstr-opt2">
             <title>Optimal control profiles and simulated trajectories
@@ -1541,7 +1547,7 @@ plt.show()
             <mediaobject>
               <imageobject>
                 <imagedata fileref="images/cstr_opt_cmp.svg" scalefit="1"
-                           width="60%"></imagedata>
+                           width="60%"/>
               </imageobject>
             </mediaobject>
           </figure>
@@ -1632,7 +1638,7 @@ plt.show()
               <m:mi>f</m:mi>
             </m:msub>
 
-            <m:mspace linebreak="newline" />
+            <m:mspace linebreak="newline"/>
           </m:math>
         </informalequation>
 
@@ -1691,7 +1697,7 @@ plt.show()
 
                   <m:mi>,</m:mi>
 
-                  <m:mspace width="1em" />
+                  <m:mspace width="1em"/>
 
                   <m:msub>
                     <m:mi>x</m:mi>
@@ -1733,7 +1739,7 @@ plt.show()
 
                   <m:mi>,</m:mi>
 
-                  <m:mspace width="1em" />
+                  <m:mspace width="1em"/>
 
                   <m:msub>
                     <m:mi>x</m:mi>
@@ -1752,7 +1758,7 @@ plt.show()
               </m:mtr>
             </m:mtable>
 
-            <m:mspace linebreak="newline" />
+            <m:mspace linebreak="newline"/>
           </m:math>
         </informalequation>
 
@@ -1783,7 +1789,7 @@ plt.show()
 
                   <m:mi>,</m:mi>
 
-                  <m:mspace width="1em" />
+                  <m:mspace width="1em"/>
 
                   <m:mi>v</m:mi>
 
@@ -1821,7 +1827,7 @@ plt.show()
 
                   <m:mi>,</m:mi>
 
-                  <m:mspace width="1em" />
+                  <m:mspace width="1em"/>
 
                   <m:mo>-</m:mo>
 
@@ -1844,7 +1850,7 @@ plt.show()
               </m:mtr>
             </m:mtable>
 
-            <m:mspace linebreak="newline" />
+            <m:mspace linebreak="newline"/>
           </m:math>
         </informalequation>
 
@@ -1921,10 +1927,9 @@ plt.show()
 </programlisting>
 
         <para>The resulting control and state profiles are shown in <xref
-        linkend="opt-fig-vdp-min-time" />. Notice the difference as compared
-        to Figure <xref linkend="fig-vdp-opt" />, where the Van der Pol
-        oscillator system is optimized using a quadratic objective
-        function.</para>
+        linkend="opt-fig-vdp-min-time"/>. Notice the difference as compared to
+        Figure <xref linkend="fig-vdp-opt"/>, where the Van der Pol oscillator
+        system is optimized using a quadratic objective function.</para>
 
         <figure xml:id="opt-fig-vdp-min-time">
           <title>Minimum time profiles for the Van der Pol Oscillator.</title>
@@ -1932,7 +1937,7 @@ plt.show()
           <mediaobject>
             <imageobject>
               <imagedata fileref="images/vdp_min_time.svg" scalefit="1"
-                         width="60%"></imagedata>
+                         width="60%"/>
             </imageobject>
           </mediaobject>
         </figure>
@@ -1943,7 +1948,7 @@ plt.show()
 
         <para>In this tutorial it will be demonstrated how to solve parameter
         estimation problems. We consider a quadruple tank system depicted in
-        <xref linkend="opt-fig-quadtank" />.</para>
+        <xref linkend="opt-fig-quadtank"/>.</para>
 
         <figure xml:id="opt-fig-quadtank">
           <title>A schematic picture of the quadruple tank process.</title>
@@ -1951,7 +1956,7 @@ plt.show()
           <mediaobject>
             <imageobject>
               <imagedata fileref="images/qt_schematic.png" scalefit="1"
-                         width="40%"></imagedata>
+                         width="40%"/>
             </imageobject>
           </mediaobject>
         </figure>
@@ -2347,22 +2352,22 @@ plt.show()
               </m:mtr>
             </m:mtable>
 
-            <m:mspace linebreak="newline" />
+            <m:mspace linebreak="newline"/>
           </m:math>
         </informalequation>
 
         <para>Where the parameter values are given in <xref
-        linkend="opt-tab-qtpars" />.</para>
+        linkend="opt-tab-qtpars"/>.</para>
 
         <table xml:id="opt-tab-qtpars">
           <title>Parameters for the quadruple tank process.</title>
 
           <tgroup cols="3">
-            <colspec align="left" colname="col–opt" colwidth="1*" />
+            <colspec align="left" colname="col–opt" colwidth="1*"/>
 
-            <colspec align="left" colname="col–desc" colwidth="2*" />
+            <colspec align="left" colname="col–desc" colwidth="2*"/>
 
-            <colspec align="left" colname="col–def" colwidth="1*" />
+            <colspec align="left" colname="col–def" colwidth="1*"/>
 
             <thead>
               <row>
@@ -2415,19 +2420,19 @@ plt.show()
         two pumps.</para>
 
         <para>The Modelica model for the system is located in <link
-        xlink:href="https://svn.jmodelica.org/tags/1.3b1/Python/src/jmodelica/examples/files/QuadTankPack.mo">QuadTankPack.mop</link>.
+        xlink:href="https://svn.jmodelica.org/trunk/Python/src/pyjmi/examples/files/QuadTankPack.mop">QuadTankPack.mop</link>.
         Download the file to your working directory and open it in a text
         editor. Locate the class <literal>QuadTankPack.QuadTank</literal> and
         make sure you understand the model. In particular, notice that all
         model variables and parameters are expressed in SI units.</para>
 
         <para>Measurement data, available in <link
-        xlink:href="https://svn.jmodelica.org/tags/1.3b1/Python/src/jmodelica/examples/files/qt_par_est_data.mat">qt_par_est_data.mat</link>,
+        xlink:href="https://svn.jmodelica.org/trunk/Python/src/pyjmi/examples/files/qt_par_est_data.mat">qt_par_est_data.mat</link>,
         has been logged in an identification experiment. Download also this
         file to your working directory.</para>
 
-        <para>Open a text file and name it qt_par_est.py. Then enter the
-        imports:</para>
+        <para>Open a text file and name it <filename>qt_par_est.py</filename>.
+        Then enter the imports:</para>
 
         <programlisting language="python">from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
@@ -2493,15 +2498,15 @@ plt.show()
 
         <para>You should now see two plots showing the measurement state
         profiles and the control input profiles similar to <xref
-        linkend="opt-fig-qt_data" /> and <xref
-        linkend="opt-fig-qtinput" />.</para>
+        linkend="opt-fig-qt_data"/> and <xref
+        linkend="opt-fig-qtinput"/>.</para>
 
         <figure xml:id="opt-fig-qt_data">
           <title>Measured state profiles.</title>
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/qt_x.svg" scalefit="1" width="60%"></imagedata>
+              <imagedata fileref="images/qt_x.svg" scalefit="1" width="60%"/>
             </imageobject>
           </mediaobject>
         </figure>
@@ -2511,7 +2516,7 @@ plt.show()
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/qt_u.svg" scalefit="1" width="60%"></imagedata>
+              <imagedata fileref="images/qt_u.svg" scalefit="1" width="60%"/>
             </imageobject>
           </mediaobject>
         </figure>
@@ -2587,7 +2592,7 @@ plt.plot(t_sim,u2_sim,'r')
 plt.show()
 </programlisting>
 
-        <para><xref linkend="opt-fig-sim-nom" /> shows the result of the
+        <para><xref linkend="opt-fig-sim-nom"/> shows the result of the
         simulation.</para>
 
         <figure xml:id="opt-fig-sim-nom">
@@ -2595,7 +2600,7 @@ plt.show()
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/qt_sim.svg" scalefit="1" width="60%"></imagedata>
+              <imagedata fileref="images/qt_sim.svg" scalefit="1" width="60%"/>
             </imageobject>
           </mediaobject>
         </figure>
@@ -2660,8 +2665,9 @@ end QuadTank_ParEst;
         data is provided in the model - the actual data values will be set
         from the Python script. Also, the input profiles are connected to
         signal generators that outputs the same input profiles as those used
-        in the experiment. Take some time to look at QuadTankPack.mo and
-        locate the classes used above.</para>
+        in the experiment. Take some time to look at
+        <filename>QuadTankPack.mop</filename> and locate the classes used
+        above.</para>
 
         <para>Before the optimization problem can be solved, the Optimica
         specification needs to be compiled:</para>
@@ -2748,7 +2754,7 @@ plt.show()
 </programlisting>
 
         <para>You will see the plot shown in <xref
-        linkend="opt-fig-par-est1" />.</para>
+        linkend="opt-fig-par-est1"/>.</para>
 
         <figure xml:id="opt-fig-par-est1">
           <title>State profiles corresponding to estimated values of a1 and
@@ -2756,7 +2762,7 @@ plt.show()
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/qt_est1.svg" scalefit="1" width="60%"></imagedata>
+              <imagedata fileref="images/qt_est1.svg" scalefit="1" width="60%"/>
             </imageobject>
           </mediaobject>
         </figure>
@@ -2847,7 +2853,7 @@ plt.show()
 </programlisting>
 
         <para>The resulting plot is shown in <xref
-        linkend="opt-fig-par-est2" />.</para>
+        linkend="opt-fig-par-est2"/>.</para>
 
         <figure xml:id="opt-fig-par-est2">
           <title>State profiles corresponding to estimated values of a1, a2,
@@ -2855,7 +2861,7 @@ plt.show()
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/qt_est2.svg" scalefit="1" width="60%"></imagedata>
+              <imagedata fileref="images/qt_est2.svg" scalefit="1" width="60%"/>
             </imageobject>
           </mediaobject>
         </figure>
@@ -2926,7 +2932,7 @@ plt.show()
               </m:mrow>
             </m:msup>
 
-            <m:mspace linebreak="newline" />
+            <m:mspace linebreak="newline"/>
           </m:math>
         </informalequation>
 
@@ -3086,7 +3092,7 @@ print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
       <title>Algorithm overview</title>
 
       <para>The default algorithm described in <xref
-      linkend="opt-sec-dae-jmu" /> is well tested, robust and has been used in
+      linkend="opt-sec-dae-jmu"/> is well tested, robust and has been used in
       several large-scale industrial projects. Due to its implementation in C,
       however, its flexibility is limited and extension requires significant
       efforts. Therefore, a new algorithm for optimal control and parameter
@@ -3133,7 +3139,7 @@ res = model.optimize()
 
       <programlisting language="python">opts = model.optimize_options()
 
-opts? #View the help text</programlisting>
+opts? # View the help text</programlisting>
 
       <para>Options are set in the same way as for the other simulation and
       optimization algorithms, and the options object can then be propagated
@@ -3141,7 +3147,7 @@ opts? #View the help text</programlisting>
 
       <programlisting language="python">res = model.optimize(options=opts)</programlisting>
 
-      <para>In <xref linkend="opt-tab-casadi-dae-opts" /> the options for the
+      <para>In <xref linkend="opt-tab-casadi-dae-opts"/> the options for the
       algorithm are shown. Additional documentation is available in the Python
       class documentation.</para>
 
@@ -3150,11 +3156,11 @@ opts? #View the help text</programlisting>
         algorithm</title>
 
         <tgroup cols="3">
-          <colspec align="left" colname="col–opt" colwidth="1*" />
+          <colspec align="left" colname="col–opt" colwidth="1*"/>
 
-          <colspec align="left" colname="col–desc" colwidth="1*" />
+          <colspec align="left" colname="col–desc" colwidth="1*"/>
 
-          <colspec align="left" colname="col–def" colwidth="2*" />
+          <colspec align="left" colname="col–def" colwidth="2*"/>
 
           <thead>
             <row>
@@ -3455,7 +3461,7 @@ opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
         <title>Optimal control</title>
 
         <para>This example is based on the CSTR example presented in <xref
-        linkend="opt-sec-dae-c-cstr" />. It is shown how to perform the same
+        linkend="opt-sec-dae-c-cstr"/>. It is shown how to perform the same
         steps using the new CasADi-based algorithm instead of the default JMI
         algorithm. It is thus recommended that the user is familiar with the
         steps performed in the previous example. A complete script for this
@@ -3475,7 +3481,7 @@ import numpy as N
 
 # Import the needed JModelica.org Python methods 
 from pymodelica import compile_fmu, compile_fmux
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 from pyjmi import CasadiModel
 </programlisting>The next step is to compile initialization model and load the
           resulting FMU.</para>
@@ -3484,7 +3490,7 @@ from pyjmi import CasadiModel
 init_fmu = compile_fmu("CSTR.CSTR_Init", "CSTR.mop")
 
 # Load the FMU
-init_model = FMUModel(init_fmu)</programlisting>
+init_model = load_fmu(init_fmu)</programlisting>
 
           <para>We find the first stationary point by specifying the desired
           input and then solving the initialization problem.</para>
@@ -3525,9 +3531,8 @@ print('T = %f' % T_0_B)
 </programlisting>
         </section>
 
-        <section>
-          <title xml:id="opt-sec-dae-casadi-cstr-guess">Find initial guess by
-          simulation</title>
+        <section xml:id="opt-sec-dae-casadi-cstr-guess">
+          <title>Find initial guess by simulation</title>
 
           <para>In order to find decent initial guesses for the NLP variables,
           we simulate the system with the initial values given by stationary
@@ -3539,7 +3544,7 @@ print('T = %f' % T_0_B)
 init_sim_fmu = compile_fmu("CSTR.CSTR_Init_Optimization", "CSTR.mop")
 
 # Load the model
-init_sim_model = FMUModel(init_sim_fmu)
+init_sim_model = load_fmu(init_sim_fmu)
 </programlisting>
 
           <para>Next we provide the initial values and reference values. The
@@ -3610,7 +3615,7 @@ cstr = CasadiModel(fmux)
 
           <para>Next, we specify the initial and reference values, according
           to the two stationary points computed in <xref
-          linkend="opt-sec-dae-casadi-cstr-init" />.</para>
+          linkend="opt-sec-dae-casadi-cstr-init"/>.</para>
 
           <programlisting># Set reference values
 cstr.set('Tc_ref', Tc_0_B)
@@ -3626,8 +3631,8 @@ cstr.set('cstr.T_init', T_0_A)
           We first obtain an options object, containing all the default
           options. We then change number of finite elements from the default
           value of 50 to 100. We also specify that the trajectories computed
-          in <xref linkend="opt-sec-dae-casadi-cstr-guess" /> are to be used
-          as initial guesses for the NLP variables.</para>
+          in <xref linkend="opt-sec-dae-casadi-cstr-guess"/> are to be used as
+          initial guesses for the NLP variables.</para>
 
           <programlisting># Set options
 opt_opts = cstr.optimize_options()
@@ -3654,7 +3659,7 @@ Tc_ref = res['Tc_ref']
 
           <para>Finally, we plot the obtained solution. The results should be
           very similar to those shown in <xref
-          linkend="opt-fig-cstr-opt1" />.</para>
+          linkend="opt-fig-cstr-opt1"/>.</para>
 
           <programlisting># Plot the results
 plt.close(2)
@@ -3697,7 +3702,7 @@ plt.show()
 sim_fmu = compile_fmu("CSTR.CSTR", "CSTR.mop")
 
 # Load model
-sim_model = FMUModel(sim_fmu)
+sim_model = load_fmu(sim_fmu)
 </programlisting>
 
           <para>The solution obtained from the optimization are values at a
@@ -3727,7 +3732,7 @@ res = sim_model.simulate(start_time=0., final_time=150.,
 
           <para>Finally, we extract the simulation results and plot them. They
           should be similar to those shown in <xref
-          linkend="opt-fig-cstr-opt2" />.</para>
+          linkend="opt-fig-cstr-opt2"/>.</para>
 
           <programlisting># Extract variable profiles
 c_sim=res['c']
@@ -3809,12 +3814,13 @@ res = model.optimize(algorithm="CasadiPseudoSpectral")
     <section>
       <title>CasADi</title>
 
-      <para>CasADi is a "minimalistic computer algebra system implementing
-      automatic differentiation". It is used here to discretize the problem
-      and to provide the necessary derivations, while also provide a direct
-      connection to IPOPT. CasADi can be found here, <link linkend="???"><link
-      linkend="www.casadi.org">http://www.casadi.org</link></link> and is
-      required in order to use these optimization methods.</para>
+      <para><link
+      xlink:href="https://github.com/casadi/casadi/wiki">CasADi</link> is a
+      "minimalistic computer algebra system implementing automatic
+      differentiation". It is used here to discretize the problem and to
+      provide the necessary derivations, while also provide a direct
+      connection to IPOPT and is required in order to use these optimization
+      methods.</para>
     </section>
 
     <section>
@@ -3835,17 +3841,17 @@ opts? #View the help text</programlisting>
 
       <programlisting language="python">res = model.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)</programlisting>
 
-      <para>In <xref linkend="opt-tab-pseudo-opts" /> the options for the
+      <para>In <xref linkend="opt-tab-pseudo-opts"/> the options for the
       PseudoSpectral methods are shown.<table xml:id="opt-tab-pseudo-opts">
           <title>Options for the Pseudospectral optimization
           algorithms.</title>
 
           <tgroup cols="3">
-            <colspec align="left" colname="col–opt" colwidth="1*" />
+            <colspec align="left" colname="col–opt" colwidth="1*"/>
 
-            <colspec align="left" colname="col–desc" colwidth="1*" />
+            <colspec align="left" colname="col–desc" colwidth="1*"/>
 
-            <colspec align="left" colname="col–def" colwidth="2*" />
+            <colspec align="left" colname="col–def" colwidth="2*"/>
 
             <thead>
               <row>
@@ -3964,14 +3970,14 @@ opts? #View the help text</programlisting>
       problem involving discontinuities. As an example, say that in a model a
       state is allowed to be changed discontinuous at an arbitrary time point,
       <literal>tp</literal>, with the parameter <literal>dv</literal>. See
-      <xref linkend="opt-fig-disc" />.</para>
+      <xref linkend="opt-fig-disc"/>.</para>
 
       <figure xml:id="opt-fig-disc">
         <title>Handling of discontinuities.</title>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/phase.png"></imagedata>
+            <imagedata fileref="images/phase.png"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -3984,10 +3990,10 @@ opts? #View the help text</programlisting>
       <programlisting language="python">opts = model.optimize_options(algorithm="CasadiPseudoSpectralAlg")
 
 opts["n_e"]=2 #Two elements
-opts["link_options"] = [(1,"v","dv")] #The parameter dv should be connected
-                                      #between phase 1 and 2 to variable v
-opts["phase_options"] = ["t1"] #The parameter t1 connects phase 1 and 2
-opts["free_phases"] = True #The phase boundary is allowed to be changed.
+opts["link_options"] = [(1,"v","dv")]   # The parameter dv should be connected
+                                        # between phase 1 and 2 to variable v
+opts["phase_options"] = ["t1"]          # The parameter t1 connects phase 1 and 2
+opts["free_phases"] = True              # The phase boundary is allowed to be changed.
 </programlisting>
 
       <para>Note that the parameters <literal>dv</literal> and
@@ -4033,12 +4039,12 @@ opts["free_phases"] = True #The phase boundary is allowed to be changed.
     der(x2) = x1;
   end VDP_Opt;</programlisting>
 
-        <para>To compile and load the VDP model into JModelica we first import
-        the necessary Python modules. Then we call the compiler method and we
-        load it into our model class. Finally the optimization is performed by
-        a call to the optimize method. An extra note in this example is that
-        we change the number of collocation points from the default 20 to 40
-        via the options dictionary.</para>
+        <para>To compile and load the VDP model into JModelica.org we first
+        import the necessary Python modules. Then we call the compiler method
+        and we load it into our model class. Finally the optimization is
+        performed by a call to the optimize method. An extra note in this
+        example is that we change the number of collocation points from the
+        default 20 to 40 via the options dictionary.</para>
 
         <programlisting language="python">from pymodelica import compile_fmux
 from pyjmi import CasadiModel
@@ -4046,9 +4052,9 @@ from pyjmi import CasadiModel
 casadi_name = compile_fmux("VDP_Opt", "VDP.mop")
 model = CasadiModel(casadi_name)
 
-#Get the options dictionary
+# Get the options dictionary
 opts = model.optimize_options(algorithm="CasadiPseudoSpectralAlg")
-opts["n_cp"] = 40 #Number of collocation points
+opts["n_cp"] = 40 # Number of collocation points
 
 res = model.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
 
@@ -4056,7 +4062,7 @@ res = model.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
 
         <para>The result can then be used to visualize the result and a
         resulting figure is shown in <xref
-        linkend="opt-fig-vdp-casadi" />.</para>
+        linkend="opt-fig-vdp-casadi"/>.</para>
 
         <figure xml:id="opt-fig-vdp-casadi">
           <title>The Van der Pol oscillator optimized using Gauss
@@ -4065,7 +4071,7 @@ res = model.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
           <mediaobject>
             <imageobject>
               <imagedata fileref="images/vdp_casadi.svg" scalefit="1"
-                         width="60%"></imagedata>
+                         width="60%"/>
             </imageobject>
           </mediaobject>
         </figure>
@@ -4086,7 +4092,7 @@ res = model.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
         <para>We will solve this problem using the gauss pseudo-spectral
         method with two phases. The phases will be connected in such a way
         that the velocities are allowed to be discontinuous, see <xref
-        linkend="opt-fig-disc" /> . The magnitude of the discontinuity will
+        linkend="opt-fig-disc"/> . The magnitude of the discontinuity will
         correspond to the first rocket burn. The second rocket burn are
         connected as constraints at the final time.</para>
 
@@ -4164,7 +4170,7 @@ end HohmannTransfer;</programlisting>
 
         <para>We start our script by importing the necessary modules and
         methods for compiling the two different models and also for loading
-        the compiled models into JModelica.orgs framework. Note that it is
+        the compiled models into the JModelica.org framework. Note that it is
         necessary to disable the compiler option
         <literal>normalize_minimum_time_problems</literal> when solving
         problems with free start or final time using this algorithm.</para>
@@ -4186,17 +4192,17 @@ fmux_name = compile_fmux("HohmannTransfer", "Hohmann.mop", compiler_options=comp
         <para>Next, the optimization model needs to be loaded and options
         specified.</para>
 
-        <programlisting language="python">#Optimization
+        <programlisting language="python"># Optimization
 model = CasadiModel(fmux_name)
     
 opts = model.optimize_options(algorithm="CasadiPseudoSpectralAlg")
 
-opts["n_cp"] = 40 #Number of collocation points
-opts["n_e"] = 2   #Number of phases
-opts["free_phases"] = True #The phase boundary is allowed to be changed in time
-opts["phase_options"] = ["t1"] #The phase boundary is connected to variable t1
-opts["link_options"] = [(1,"vy","dy1"),(1,"vx","dx1")] #Allow for discontinuities between phase 1 and 2 for vy and vx.
-                                                       #The discontinuities are connected by dy1 and dx1</programlisting>
+opts["n_cp"] = 40                                      # Number of collocation points
+opts["n_e"] = 2                                        # Number of phases
+opts["free_phases"] = True                             # The phase boundary is allowed to be changed in time
+opts["phase_options"] = ["t1"]                         # The phase boundary is connected to variable t1
+opts["link_options"] = [(1,"vy","dy1"),(1,"vx","dx1")] # Allow for discontinuities between phase 1 and 2 for vy and vx.
+                                                       # The discontinuities are connected by dy1 and dx1</programlisting>
 
         <para>In the above code we have loaded our optimization model
         <literal>fmux_name</literal> into a class,
@@ -4215,10 +4221,10 @@ opts["link_options"] = [(1,"vy","dy1"),(1,"vx","dx1")] #Allow for discontinuitie
 
         <para>Now we are ready to optimize our problem.</para>
 
-        <programlisting language="python">#Optimize
+        <programlisting language="python"># Optimize
 res_opt = model.optimize(algorithm="CasadiPseudoSpectralAlg",options=opts)
     
-#Get results
+# Get results
 dx1,dy1,dx2,dy2 = res_opt["dx1"],      res_opt["dy1"],    res_opt["dx2"],res_opt["dy2"]
 r1,r2,my        = res_opt["rStart"],   res_opt["rFinal"], res_opt["my"]
 tf,t1           = res_opt["time"][-1], res_opt["t1"]</programlisting>
@@ -4230,15 +4236,15 @@ tf,t1           = res_opt["time"][-1], res_opt["t1"]</programlisting>
         resulting rocket burns and even simulate further in time to verify
         that we are staying in the targeted orbit.</para>
 
-        <programlisting language="python">#Verify solution by simulation
+        <programlisting language="python"># Verify solution by simulation
 model = JMUModel(jmu_name)
     
-#Simulation of Phase 1
+# Simulation of Phase 1
 res = model.simulate(final_time=t1,options={'ncp':100,'solver':"CVode"})
 
 x_phase_1,y_phase_1 = res["x"], res["y"]
     
-#Simulation of Phase 2
+# Simulation of Phase 2
 model.set("vx",dx1+res["vx"][-1])
 model.set("vy",dy1+res["vy"][-1])
 
@@ -4246,7 +4252,7 @@ res = model.simulate(start_time=t1,final_time=tf,options={'ncp':100,'solver':"CV
 
 x_phase_2,y_phase_2 = res["x"], res["y"]
 
-#Simulation of Phase 3 (verify that we are still in orbit)
+# Simulation of Phase 3 (verify that we are still in orbit)
 model.set("vx",dx2+res["vx"][-1])
 model.set("vy",dy2+res["vy"][-1])
 
@@ -4265,13 +4271,13 @@ x_phase_3,y_phase_3 = res["x"], res["y"]</programlisting>
         target orbit together with the earth and the satellite trajectory. We
         also plot the rocket burns.</para>
 
-        <programlisting language="python">#Plot Earth
+        <programlisting language="python"># Plot Earth
 r = 1.0
 xE = r*N.cos(N.linspace(0,2*N.pi,200))
 yE = r*N.sin(N.linspace(0,2*N.pi,200))
 plt.plot(xE,yE,label="Earth")
 
-#Plot Orbits
+# Plot Orbits
 r = res["rStart"]
 xS = r*N.cos(N.linspace(0,2*N.pi,200))
 yS = r*N.sin(N.linspace(0,2*N.pi,200))
@@ -4282,20 +4288,20 @@ xSE = r*N.cos(N.linspace(0,2*N.pi,200))
 ySE = r*N.sin(N.linspace(0,2*N.pi,200))
 plt.plot(xSE,ySE,label="High Orbit")
         
-#Plot Satellite trajectory
+# Plot Satellite trajectory
 x_sim=N.hstack((N.hstack((x_phase_1,x_phase_2)),x_phase_3))
 y_sim=N.hstack((N.hstack((y_phase_1,y_phase_2)),y_phase_3))
 
 plt.plot(x_sim,y_sim,"-",label="Satellite")
         
-#Plot Rocket Burns
+# Plot Rocket Burns
 plt.arrow(x_phase_1[-1],y_phase_1[-1],0.5*dx1,0.5*dy1, width=0.01,label="dv1")
 plt.arrow(x_phase_2[-1],y_phase_2[-1],0.5*dx2,0.5*dy2, width=0.01,label="dv2")
         
 plt.legend()
 plt.show()</programlisting>
 
-        <para>In <xref linkend="fig-opt-satellite-final" /> the result is
+        <para>In <xref linkend="fig-opt-satellite-final"/> the result is
         visualized. The arrows represents the rocket burns.</para>
 
         <figure xml:id="fig-opt-satellite-final">
@@ -4304,7 +4310,7 @@ plt.show()</programlisting>
           <mediaobject>
             <imageobject>
               <imagedata fileref="images/satellite_final.png" scalefit="1"
-                         width="60%"></imagedata>
+                         width="60%"/>
             </imageobject>
           </mediaobject>
         </figure>
@@ -4356,13 +4362,13 @@ plt.show()</programlisting>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/furuta-image.png" scale="50"></imagedata>
+            <imagedata fileref="images/furuta-image.png" scale="50"/>
           </imageobject>
         </mediaobject>
       </figure>This tutorial demonstrates how to solve a model calibration
     problem using an algorithm that can be applied to Functional Mock-up
     Units. The model to be calibrated is the Furuta pendulum shown in <xref
-    linkend="opt-fig-furuta" />. The Furuta pendulum consists of an arm
+    linkend="opt-fig-furuta"/>. The Furuta pendulum consists of an arm
     rotating in the horizontal plane and a pendulum which is free to rotate in
     the vertical plane. The construction has two degrees of freedom, the angle
     of the arm, <inlineequation>
@@ -4374,10 +4380,10 @@ plt.show()</programlisting>
           <m:mi>θ</m:mi>
         </m:math>
       </inlineequation>. Copy the file
-    $JMODELICA_HOME/Python/pyfmi/examples/files/FMUs/Furuta.fmu to your
-    working directory. <emphasis role="bold">Notice that this the Furuta.fmu
-    file currently only supports Windows.</emphasis> Measurement data for
-    <inlineequation>
+    <filename>$JMODELICA_HOME/Python/pyjmi/examples/files/FMUs/Furuta.fmu</filename>
+    to your working directory. <emphasis role="bold">Note that this the
+    Furuta.fmu file is currently only supported on Windows.</emphasis>
+    Measurement data for <inlineequation>
         <m:math display="inline">
           <m:mi>φ</m:mi>
         </m:math>
@@ -4386,15 +4392,16 @@ plt.show()</programlisting>
           <m:mi>θ</m:mi>
         </m:math>
       </inlineequation> is available in the file
-    $JMODELICA_HOME/Python/pyjmi/examples/files/FurutaData.mat. Copy this file
-    to your working directory as well. These measurements will be used for the
-    calibration. Open a text file, name it furuta_par_est.py and enter the
-    following imports:</para>
+    <filename>$JMODELICA_HOME/Python/pyjmi/examples/files/FurutaData.mat</filename>.
+    Copy this file to your working directory as well. These measurements will
+    be used for the calibration. Open a text file, name it
+    <filename>furuta_par_est.py</filename> and enter the following
+    imports:</para>
 
     <programlisting language="python">from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
 import numpy as N
-from pyfmi import FMUModel
+from pyfmi import load_fmu
 from pyjmi.optimization import dfo
 </programlisting>
 
@@ -4427,7 +4434,7 @@ plt.grid ()
 plt.show ()
 </programlisting>
 
-    <para>This code should generate <xref linkend="opt-fig-furuta-meas" />
+    <para>This code should generate <xref linkend="opt-fig-furuta-meas"/>
     showing the measurements of <inlineequation>
         <m:math display="inline">
           <m:mi>θ</m:mi>
@@ -4451,7 +4458,7 @@ plt.show ()
 
       <mediaobject>
         <imageobject>
-          <imagedata fileref="images/furuta_meas.svg" scalefit="1" width="60%"></imagedata>
+          <imagedata fileref="images/furuta_meas.svg" scalefit="1" width="60%"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -4460,7 +4467,7 @@ plt.show ()
     model, we shall now simulate the model:</para>
 
     <programlisting language="python"># Load model
-model = FMUModel("Furuta.fmu")
+model = load_fmu("Furuta.fmu")
 # Simulate model response with nominal parameters
 res = model.simulate(start_time=0.,final_time=40)
 # Load simulation result
@@ -4483,7 +4490,7 @@ plt.legend(loc=1)
 plt.show ()
 </programlisting>
 
-    <para><xref linkend="opt-fig-furuta-meas-nomsim" /> shows the simulation
+    <para><xref linkend="opt-fig-furuta-meas-nomsim"/> shows the simulation
     result together with the measurements.</para>
 
     <figure xml:id="opt-fig-furuta-meas-nomsim">
@@ -4501,7 +4508,7 @@ plt.show ()
       <mediaobject>
         <imageobject>
           <imagedata fileref="images/furuta_meas_nomsim.svg" scalefit="1"
-                     width="60%"></imagedata>
+                     width="60%"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -4544,7 +4551,7 @@ plt.show ()
 
     <para><inlinemediaobject>
         <imageobject>
-          <imagedata fileref="images/furuta-cost.png" scale="30"></imagedata>
+          <imagedata fileref="images/furuta-cost.png" scale="30"/>
         </imageobject>
       </inlinemediaobject></para>
 
@@ -4653,10 +4660,10 @@ ub = (x0 + 1e-2)*1e3
     performed in separate processes in order to save memory and time. To be
     able to do this we need to define the objective function in a separate
     Python file and provide the optimization algorithm with the file name.
-    Open a new text file, name it furuta_cost.py and enter the following
-    imports:</para>
+    Open a new text file, name it <filename>furuta_cost.py</filename> and
+    enter the following imports:</para>
 
-    <programlisting language="python">from pyfmi import FMUModel
+    <programlisting language="python">from pyfmi import load_fmu
 from pyjmi.optimization import dfo
 from scipy.io.matlab.mio import loadmat
 import numpy as N
@@ -4684,7 +4691,7 @@ def furuta_cost(x):
     armFrictionCoefficient = x[0]/1e3
     pendulumFrictionCoefficient = x[1]/1e3
     # Load model
-    model = FMUModel('../Furuta.fmu')
+    model = load_fmu('../Furuta.fmu')
     # Set new parameter values into the model
     model.set('armFriction',armFrictionCoefficient)
     model.set('pendulumFriction',pendulumFrictionCoefficient)
@@ -4704,19 +4711,21 @@ def furuta_cost(x):
     <para>This function will later be evaluated in temporary sub-directories
     to your working directory which is why the string '../' is added to the
     FMU name, it means that the FMU is located in the parent directory. The
-    Python function dfo.quad_err evaluates the objective function. Now we can
-    finally perform the actual calibration. Solve the optimization problem by
-    calling the Python function dfo.fmin in the file named
-    furuta_par_est.py:</para>
+    Python function <literal>dfo.quad_err</literal> evaluates the objective
+    function. Now we can finally perform the actual calibration. Solve the
+    optimization problem by calling the Python function
+    <literal>dfo.fmin</literal> in the file named
+    <filename>furuta_par_est.py</filename>:</para>
 
     <programlisting language="python"># Solve the problem using the Nelder-Mead simplex algorithm
 x_opt,f_opt,nbr_iters,nbr_fevals,solve_time = dfo.fmin("furuta_cost.py",
 xstart=x0,lb=lb,ub=ub,alg=1,nbr_cores=4,x_tol=1e-3,f_tol=1e-2)
 </programlisting>
 
-    <para>The input argument alg specifies which algorithm to be used, alg=1
-    means that the Nelder-Mead simplex algo- rithm is used. The number of
-    processor cores (nbr_cores) on the computer used must also be provided
+    <para>The input argument <literal>alg</literal> specifies which algorithm
+    to be used, <literal>alg=1</literal> means that the Nelder-Mead simplex
+    algorithm is used. The number of processor cores
+    (<literal>nbr_cores</literal>) on the computer used must also be provided
     when multiprocessing is applied. Now print the optimal parameter values
     and the optimal function value:</para>
 
@@ -4741,7 +4750,7 @@ Optimal function value: 1.09943830585
     simulate it:</para>
 
     <programlisting language="python"># Load model
-model = FMUModel("Furuta.fmu")
+model = load_fmu("Furuta.fmu")
 # Set optimal parameter values into the model
 model.set('armFriction',armFrictionCoefficient_opt)
 model.set('pendulumFriction',pendulumFrictionCoefficient_opt)
@@ -4768,7 +4777,7 @@ plt.legend(loc=1)
 plt.show ()
 </programlisting>
 
-    <para>This should generate the <xref linkend="opt-fig-furuta-opt" />. As
+    <para>This should generate the <xref linkend="opt-fig-furuta-opt"/>. As
     can be seen, the agreement between the measurements and the simulation
     result has improved considerably. The model has been successfully
     calibrated.</para>
@@ -4788,7 +4797,7 @@ plt.show ()
       <mediaobject>
         <imageobject>
           <imagedata fileref="images/furuta_optsim_dashed.svg" scalefit="1"
-                     width="60%"></imagedata>
+                     width="60%"/>
         </imageobject>
       </mediaobject>
     </figure>

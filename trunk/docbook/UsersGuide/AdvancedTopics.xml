@@ -105,13 +105,15 @@
 
       <para>Start the tutorial by creating a working directory and copy the
       file
-      $JMODELICA_HOME/Python/jmodelica/examples/files/CauerLowPassAnalog.mo to
-      your working directory. An on-line version of CauerLowPassAnalog.mo is
-      also available (depending on which browser you use, you may have to
+      <filename>$JMODELICA_HOME/Python/pyjmi/examples/files/CauerLowPassAnalog.mo</filename>
+      to your working directory. An on-line version of <filename
+      xlink:href=""><link
+      xlink:href="https://svn.jmodelica.org/trunk/Python/src/pyjmi/examples/files/CauerLowPassAnalog.mo">CauerLowPassAnalog.mo</link></filename>
+      is also available (depending on which browser you use, you may have to
       accept the site certificate by clicking through a few steps). If you
       choose to create Python script file, save it to the working directory.
       The tutorial is based on a model from the Modelica Standard Library:
-      Modelica.Electrical.Analog.Basic.Examples.CauerLowPassAnalog.</para>
+      <literal>Modelica.Electrical.Analog.Basic.Examples.CauerLowPassAnalog</literal>.</para>
     </section>
 
     <section>
@@ -124,8 +126,8 @@
 import os.path
 
 # Import the JModelica.org Python packages
-import jmodelica
-from jmodelica.compiler import ModelicaCompiler
+import pymodelica
+from pymodelica.compiler_wrappers import ModelicaCompiler
 
 # Import numerical libraries
 import numpy as N
@@ -148,10 +150,10 @@ mc = ModelicaCompiler()
 
       <para>In order to avoid parsing the same file multiple times (we will
       not change the Modelica file in this tutorial), we will check the
-      variable 'source_root' exists in the shell before we parse the file
-      CauerLowPassAnalog.mo:</para>
+      variable <literal>source_root</literal> exists in the shell before we
+      parse the file <filename>CauerLowPassAnalog.mo</filename>:</para>
 
-      <programlisting language="python"># Don't parse the file if it har already been parsed.
+      <programlisting language="python"># Don't parse the file if it has already been parsed.
 try:
     source_root.getProgramRoot()
 except:
@@ -178,7 +180,7 @@ except NameError, e:
     # Load the Modelica standard library and get the class
     # declaration AST node corresponding to the Modelica
     # package.
-    modelica = source_root.getProgram().getLibNode(1). \
+    modelica = source_root.getProgram().getLibNode(0). \
                getStoredDefinition().getElement(0)
 </programlisting>
 
@@ -196,9 +198,10 @@ except NameError, e:
       analysis by traversing the tree. Say that we are interested in counting
       the number of classes (packages, models, blocks, functions etc.) in the
       Modelica standard library. As the basis for traversing the AST, we may
-      use the method ClassDecl.classes() that returns a list of local classes
-      contained in a class. Based on this method, a Python function for
-      traversing the class hierarchy of the source AST can be defined:</para>
+      use the method <literal>ClassDecl.classes()</literal> that returns a
+      list of local classes contained in a class. Based on this method, a
+      Python function for traversing the class hierarchy of the source AST can
+      be defined:</para>
 
       <programlisting language="python">def count_classes(class_decl,depth):
     """ Count the number of classes hierarchically contained
@@ -235,31 +238,36 @@ num_classes = count_classes(modelica,0)
 </programlisting>
 
       <para>Now run the script and study the printouts in the Python shell.
-      The first time the script is run, you will se printouts corresponding
+      The first time the script is run, you will see printouts corresponding
       also to the compiler accessing individual files of the Modelica standard
       library; the loading of the library is done on demand as the library
       classes are actually accessed. Run the script once again (using the '-i'
       switch), to get a cleaner output, which should now look similar
       to:</para>
 
-      <programlisting>The package Modelica.UsersGuide has 16 hierachically contained classes
+      <programlisting>The package Modelica.UsersGuide has 39 hierachically contained classes
+The package Modelica.Blocks has 345 hierachically contained classes
+The package Modelica.ComplexBlocks has 44 hierachically contained classes
+The package Modelica.StateGraph has 66 hierachically contained classes
+The package Modelica.Electrical has 981 hierachically contained classes
+The package Modelica.Magnetic has 167 hierachically contained classes
+The package Modelica.Mechanics has 546 hierachically contained classes
+The package Modelica.Fluid has 694 hierachically contained classes
+The package Modelica.Media has 1110 hierachically contained classes
+The package Modelica.Thermal has 95 hierachically contained classes
+The package Modelica.Math has 162 hierachically contained classes
+The package Modelica.ComplexMath has 31 hierachically contained classes
+The package Modelica.Utilities has 97 hierachically contained classes
 The package Modelica.Constants has 0 hierachically contained classes
-The package Modelica.Icons has 16 hierachically contained classes
-The package Modelica.SIunits has 532 hierachically contained classes
-The package Modelica.StateGraph has 64 hierachically contained classes
-The package Modelica.Blocks has 258 hierachically contained classes
-The package Modelica.Electrical has 361 hierachically contained classes
-The package Modelica.Math has 74 hierachically contained classes
-The package Modelica.Mechanics has 474 hierachically contained classes
-The package Modelica.Media has 1064 hierachically contained classes
-The package Modelica.Thermal has 88 hierachically contained classes
-The package Modelica.Utilities has 86 hierachically contained classes
-The package Modelica has 3045 hierachically contained classes
+The package Modelica.Icons has 32 hierachically contained classes
+The package Modelica.SIunits has 580 hierachically contained classes
+The package Modelica has 5005 hierachically contained classes
 </programlisting>
 
       <para>Take some time to ponder the results and make sure that you
-      understand how the Python function 'count_classes' works and which
-      Python variables corresponds to references into the source AST.</para>
+      understand how the Python function <literal>count_classes</literal>
+      works and which Python variables corresponds to references into the
+      source AST.</para>
     </section>
 
     <section>
@@ -288,20 +296,23 @@ except:
       <para>Next we define a Python function for traversing the instance AST
       and printing each node in the shell. We also print the merged
       modification environment for each instance node. In order to traverse
-      the AST, we use the methods InstNode.instComponentDeclList() and
-      InstNode.instExtendsList(), which both return an object of the class
-      List, which in turn contain instantiated component declarations and
-      instantiated extends clauses. By invoking the 'dump_inst_ast' function
-      recursively for each element in these lists, the instance AST is in
-      effect traversed. Due to the internal representation of the instance
-      AST, nodes of type InstPrimitive, corresponding to primitive variables,
+      the AST, we use the methods
+      <literal>InstNode.instComponentDeclList()</literal> and
+      <literal>InstNode.instExtendsList()</literal>, which both return an
+      object of the class <literal>List</literal>, which in turn contain
+      instantiated component declarations and instantiated extends clauses. By
+      invoking the <literal>dump_inst_ast</literal> function recursively for
+      each element in these lists, the instance AST is in effect traversed.
+      Due to the internal representation of the instance AST, nodes of type
+      <literal>InstPrimitive</literal>, corresponding to primitive variables,
       are not leaves in the AST as would be expected. To overcome this
-      complication, we simply check if a node is of type InstPrimitive, and if
-      this is the case, the recursion stops.</para>
+      complication, we simply check if a node is of type
+      <literal>InstPrimitive</literal>, and if this is the case, the recursion
+      stops.</para>
 
       <para>The environment of an instance node is accessed by calling the
-      method InstNode.getMergedEnvrionment(), which returns a list of
-      modifications. According to the Modelica specification, outer
+      method <literal>InstNode.getMergedEnvrionment()</literal>, which returns
+      a list of modifications. According to the Modelica specification, outer
       modifications overrides inner modifications, and accordingly,
       modifications in the beginning of the list has precedence over later
       modifications.</para>
@@ -347,8 +358,8 @@ except:
       <para>Take a minute and make sure that you understand the essential
       parts of the function.</para>
 
-      <para>Having defined the function 'dump_inst_ast', we call it with the
-      CauerLowPassAnalog instance as an argument.</para>
+      <para>Having defined the function <literal>dump_inst_ast</literal>, we
+      call it with the CauerLowPassAnalog instance as an argument.</para>
 
       <programlisting language="python"># Dump the filter instance
 dump_inst_ast(filter_instance,"")
@@ -372,21 +383,22 @@ dump_inst_ast(filter_instance,"")
           InstPrimitive: SI.Current i {final quantity="ElectricCurrent", final unit="A"}
 </programlisting>
 
-      <para>The model instance if of type InstComposite, and contains two
-      elements, one primitive variable, R, and one extends clause. The
-      modification environment for the resistor contains a value modification
-      '=1' and some modifications of the built in attributes for the type
-      Real. The InstExtends node contains a number of child nodes, which
-      corresponds to the content of the class Interfaces.OnePort. Notice the
-      difference between the source AST, where an extends node is essentially
-      a leaf in the tree, whereas in the instance tree, the extends clause is
+      <para>The model instance if of type <literal>InstComposite</literal>,
+      and contains two elements, one primitive variable, <literal>R</literal>,
+      and one extends clause. The modification environment for the resistor
+      contains a value modification '=1' and some modifications of the built
+      in attributes for the type Real. The <literal>InstExtends</literal> node
+      contains a number of child nodes, which corresponds to the content of
+      the class <literal>Interfaces.OnePort</literal>. Notice the difference
+      between the source AST, where an extends node is essentially a leaf in
+      the tree, whereas in the instance tree, the extends clause is
       expanded.</para>
 
       <para>Let us have a look at the effects of redeclarations in the
       instance AST. In the CauerLowPassAnalog model, a step voltage signal
       source is used, which in turn relies on redeclaration of a generic
       signal source to a step. The instance node for the step voltage source
-      'V' is given below:</para>
+      <emphasis>V</emphasis> is given below:</para>
 
       <programlisting>    InstComposite: Modelica.Electrical.Analog.Sources.StepVoltage V {V=0, startTime=1, \
                                                                      offset=0}
@@ -411,20 +423,21 @@ dump_inst_ast(filter_instance,"")
                                       final startTime=startTime}
 </programlisting>
 
-      <para>Here we see how the modification "redeclare
-      Modelica.Blocks.Sources.Step signalSource(height=V)" affects the
-      instance AST. The node InstReplacingComposite represents the component
-      instance, instantiated from the class Modelica.Blocks.Sources.Step,
-      resulting from the redeclaration. As a consequence, this branch of the
-      instance AST is significantly altered by the redeclare
-      modification.</para>
+      <para>Here we see how the modification <emphasis>redeclare
+      Modelica.Blocks.Sources.Step signalSource(height=V)</emphasis> affects
+      the instance AST. The node <literal>InstReplacingComposite</literal>
+      represents the component instance, instantiated from the class
+      <literal>Modelica.Blocks.Sources.Step</literal>, resulting from the
+      redeclaration. As a consequence, this branch of the instance AST is
+      significantly altered by the redeclare modification.</para>
 
       <para>Now look at the modification environment for the component
-      instance startTime. The environment contains two value modifications:
-      '=1' and '=0'. As noted above, the first modification in the list
-      corresponds to the outermost modification and have precedence over the
-      following modifications. Take a minute to figure out the origin of the
-      modifications by looking upwards in the instance AST.</para>
+      instance <literal>startTime</literal>. The environment contains two
+      value modifications: '=1' and '=0'. As noted above, the first
+      modification in the list corresponds to the outermost modification and
+      have precedence over the following modifications. Take a minute to
+      figure out the origin of the modifications by looking upwards in the
+      instance AST.</para>
     </section>
 
     <section>
@@ -465,10 +478,11 @@ print("Number of initial equations:        %d" \
       <para>How many variables and equations is the model composed of? Does
       the model seem to be well posed?</para>
 
-      <para>At this point, take some time to explore the 'filter_flat_model'
-      object by typing 'filter_flat_model.&lt;tab&gt;' in the Python shell to
-      see what methods are available. You may also have a look in the Modelica
-      compiler API.</para>
+      <para>At this point, take some time to explore the
+      <literal>filter_flat_model</literal> object by typing
+      'filter_flat_model.&lt;tab&gt;' in the Python shell to see what methods
+      are available. You may also have a look in the Modelica compiler
+      API.</para>
     </section>
   </section>
 </chapter>
