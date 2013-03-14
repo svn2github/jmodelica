@@ -2383,6 +2383,69 @@ void func_CADCodeGenTests_FunctionDiscreteOutputTest1_f_der_AD(jmi_ad_var_t x_va
 ")})));
 end FunctionDiscreteOutputTest1;
 
+model FunctionDiscreteOutputTest2
+	function F1
+		output Integer y;
+	algorithm
+		y := 42;
+	end F1;
+	function F2
+		input Real x;
+		output Real y;
+		Integer i;
+	algorithm
+		y := F1() + x;
+	end F2;
+	Real x = 3;
+	Real y;
+equation
+	y = F2(x);
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="FunctionDiscreteOutputTest2",
+			description="",
+			generate_ode_jacobian=true,
+			template="
+$CAD_function_headers$
+$CAD_functions$",
+			generatedCode="
+void func_CADCodeGenTests_FunctionDiscreteOutputTest2_F2_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
+void func_CADCodeGenTests_FunctionDiscreteOutputTest2_F1_der_AD(jmi_ad_var_t* y_o);
+
+void func_CADCodeGenTests_FunctionDiscreteOutputTest2_F2_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_var_v;
+    jmi_ad_var_t y_der_v;
+    jmi_ad_var_t i_v;
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
+    func_CADCodeGenTests_FunctionDiscreteOutputTest2_F1_der_AD(&v_1);
+    v_0 = v_1 + x_var_v;
+    d_0 = d_1 + x_der_v;
+    y_var_v = v_0;
+    y_der_v = d_0;
+
+    if (y_var_o != NULL) *y_var_o = y_var_v;
+    if (y_der_o != NULL) *y_der_o = y_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CADCodeGenTests_FunctionDiscreteOutputTest2_F1_der_AD(jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    /*Zero derivative function*/
+    func_CADCodeGenTests_FunctionDiscreteOutputTest2_F1_def(&y_v);
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+end FunctionDiscreteOutputTest2;
+
 model FunctionMixedRecordInputTest1
 	record R
 		Real X[2];

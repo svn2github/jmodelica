@@ -312,20 +312,16 @@ aspect CADCodeGen {
 		str.print(getY().adVarName());
 		str.print(");\n");
 		
-		if(builtInName()=="max"){
-			str.print(indent+"if(" + getX().adVarName() + " > " + getY().adVarName()+ ") {\n");
-			str.print(p.indent(indent) + adDerName()+" = " + getX().adDerName()+";\n");
-			str.print(indent+"} else {\n");
-			str.print(p.indent(indent) + adDerName()+" = " + getY().adDerName()+";\n");
-			str.print(indent+"}\n");
-		} else {
-			str.print(indent+"if(" + getX().adVarName() + " < " + getY().adVarName()+ ") {\n");
-			str.print(p.indent(indent) + adDerName()+" = " + getX().adDerName()+";\n");
-			str.print(indent+"} else {\n");
-			str.print(p.indent(indent) + adDerName()+" = " + getY().adDerName()+";\n");
-			str.print(indent+"}\n");
-		}
+		str.print(indent + "if (" + getX().adVarName() + " " + compareSign_CAD() + " " + getY().adVarName() + ") {\n");
+		str.print(p.indent(indent) + adDerName() + " = " + getX().adDerName() + ";\n");
+		str.print(indent + "} else {\n");
+		str.print(p.indent(indent) + adDerName() + " = " + getY().adDerName() + ";\n");
+		str.print(indent + "}\n");
 	}
+	
+	syn String FMinMaxExp.compareSign_CAD();
+	eq FMinExp.compareSign_CAD() = "<";
+	eq FMaxExp.compareSign_CAD() = ">";
 
 	//Elementary functions
 	/* Generate AD-code for every elementary function, adVarName()  
@@ -1044,7 +1040,7 @@ aspect CADCodeGen {
 	 */
 	public void FEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {
 		boolean firstVisit = visited == null ? true : visited.add(this);
-		if(!type().needDerVar_CAD()){
+		if(!needDerVar_CAD()){
 			genResidual_C(enumerator, indent, str, null, null);
 			return;
 		}
@@ -2041,9 +2037,11 @@ aspect CADCodeGen {
 			}
 			first = true;
 			for (FFunctionVariable output : outputs) {
+				if (!output.needDerVar_CAD())
+					continue;
 				str.print(sep);
 				sep = ", ";
-				if (first && output.needDerVar_CAD())
+				if (first)
 					str.print("&" + adDerName());
 				else
 					str.print("NULL");
