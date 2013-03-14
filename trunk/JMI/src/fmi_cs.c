@@ -36,17 +36,27 @@ fmiStatus fmi_do_step(fmiComponent c,
     jmi_t* jmi = fmi->jmi;
     int flag, retval = JMI_ODE_EVENT;
     int reInitialize = JMI_FALSE;
-    fmiReal ttarget = currentCommunicationPoint+communicationStepSize;
+    fmiReal tfinal = currentCommunicationPoint+communicationStepSize;
+    fmiReal ttarget;
     jmi->ode_solver->tout = currentCommunicationPoint;
     
-    /* NEED TO HANDLE TIME EVENTS */
+    /* Check if there are upcoming time events. */
+    if (fmi->event_info.upcomingTimeEvent == fmiTrue){
+        if(fmi->event_info.nextEventTime < tfinal){
+            ttarget = fmi->event_info.nextEventTime;
+        }else{
+            ttarget = tfinal;
+        }
+    }else{
+        ttarget = tfinal;
+    }
     
-    while (retval == JMI_ODE_EVENT && jmi->ode_solver->tout < ttarget){
+    while (retval == JMI_ODE_EVENT && jmi->ode_solver->tout < tfinal){
     
         retval = jmi->ode_solver->solve(jmi->ode_solver, ttarget,reInitialize);
-        if (retval==JMI_ODE_OK) {break;}
+        if (retval==JMI_ODE_OK && ttarget == tfinal) {break;}
         if (retval<JMI_ODE_OK){
-            jmi_log_error(jmi, "DO STEP failed to perform a step.");
+            jmi_log_error(jmi, "Failed to perform a step.");
             return fmiError;
         }
         
@@ -54,6 +64,17 @@ fmiStatus fmi_do_step(fmiComponent c,
         if (flag != fmiOK){
             jmi_log_error(jmi, "Failed to handle the event.");
             return fmiError;
+        }
+        
+        /* Check if there are upcoming time events. */
+        if (fmi->event_info.upcomingTimeEvent == fmiTrue){
+            if(fmi->event_info.nextEventTime < tfinal){
+                ttarget = fmi->event_info.nextEventTime;
+            }else{
+                ttarget = tfinal;
+            }
+        }else{
+            ttarget = tfinal;
         }
         
         /* EVENT HANDLED, REINITIALIZE */
