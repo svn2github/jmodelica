@@ -414,7 +414,7 @@ public
   input Real i1;
   output Real[2] c;
  algorithm
-  external \"C\" e(i1, c, size(c, 1));
+  external \"C\" e(i1, c, 2);
   return;
  end VariabilityPropagationTests.FunctionCallEquation2.e;
  
@@ -544,7 +544,6 @@ end FunctionCallEquation4;
 
 model FunctionCallEquation5
 	constant Real a[2,2] = {{1,2},{3,4}};
-	Real x1[2,2];
 	
 	function f
 		input Real a[:,:];
@@ -553,8 +552,8 @@ model FunctionCallEquation5
 	algorithm
 		o := a * b;
 	end f;
-equation
-	x1 = f(a,a);
+
+	Real x1[2,2] = f(a,a);
 	
     annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -574,5 +573,71 @@ fclass VariabilityPropagationTests.FunctionCallEquation5
 end VariabilityPropagationTests.FunctionCallEquation5;
 ")})));
 end FunctionCallEquation5;
+
+model ConstantRecord1
+	record A
+		Real a[:];
+		Real b;
+	end A;
+
+	A c = A({1, 2, 3}, 4);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantRecord1",
+			description="Variable with : size in record",
+			variability_propagation=true,
+			flatModel="
+fclass VariabilityPropagationTests.ConstantRecord1
+ constant Real c.a[1] = 1;
+ constant Real c.a[2] = 2;
+ constant Real c.a[3] = 3;
+ constant Real c.b = 4;
+
+public
+ record VariabilityPropagationTests.ConstantRecord1.A
+  Real a[:];
+  Real b;
+ end VariabilityPropagationTests.ConstantRecord1.A;
+
+end VariabilityPropagationTests.ConstantRecord1;
+")})));
+end ConstantRecord1;
+
+model ConstantStartFunc1
+	function f
+		output Real o[2] = {1, 2};
+	algorithm
+	end f;
+	
+	Real x[2](start = f()) = {3,4};
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantStartFunc1",
+			description="Temporary variable for attribute",
+			variability_propagation=true,
+			flatModel="
+fclass VariabilityPropagationTests.ConstantStartFunc1
+ constant Real x[1](start = temp_1[1]) = 3;
+ constant Real x[2](start = temp_1[2]) = 4;
+ parameter Real temp_1[1];
+ parameter Real temp_1[2];
+parameter equation
+ ({temp_1[1],temp_1[2]}) = VariabilityPropagationTests.ConstantStartFunc1.f();
+
+public
+ function VariabilityPropagationTests.ConstantStartFunc1.f
+  output Real[2] o;
+ algorithm
+  o[1] := 1;
+  o[2] := 2;
+  return;
+ end VariabilityPropagationTests.ConstantStartFunc1.f;
+
+end VariabilityPropagationTests.ConstantStartFunc1;
+")})));
+end ConstantStartFunc1;
+
 
 end VariabilityPropagationTests;

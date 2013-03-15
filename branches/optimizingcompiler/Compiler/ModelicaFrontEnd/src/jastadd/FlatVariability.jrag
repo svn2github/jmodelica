@@ -340,7 +340,7 @@ aspect FlatVariability {
 	
 	eq FIdUseExp.expVariability() = getFIdUse().variability();
 	eq FDerExp.expVariability() = 
-			getFIdUse().variability().parameterOrLess() ? fConstant() : getFIdUse().variability();
+			getFIdUse().variability().discreteOrLess() ? fConstant() : getFIdUse().variability();
 	
 	syn FTypePrefixVariability FIdUse.variability() {
 		FAbstractVariable variable = myFV();

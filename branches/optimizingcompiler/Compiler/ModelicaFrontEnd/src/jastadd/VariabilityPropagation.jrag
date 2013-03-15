@@ -24,6 +24,7 @@ aspect VariabilityPropagation {
 	eq Root.getChild().variabilityPropagationEnabled() = false;
 	eq FClass.getChild().variabilityPropagationEnabled() = true;
 	eq FIfWhenElseEquation.getChild().variabilityPropagationEnabled() = false;
+	
 	syn boolean FEquation.variabilityPropagationEnabled() =
 			super.variabilityPropagationEnabled() && variables().size() == 1;
 	syn boolean FFunctionCallEquation.variabilityPropagationEnabled() =
@@ -262,50 +263,45 @@ aspect VariabilityPropagation {
 }
 
 aspect ConstantFolding {
-	public boolean FExp.constantFoldingEnabled = false;
+	public boolean FAbstractExp.constantFoldingEnabled = false;
 	
-	syn boolean FExp.constantFoldingEligible() = false;
-	eq FIdUseExp.constantFoldingEligible() =  true;
-	eq FUnaryExp.constantFoldingEligible() = true;
-	eq FBinExp.constantFoldingEligible() = true;
-	eq FIfExp.constantFoldingEligible() = true;
-	eq FPreExp.constantFoldingEligible() = true;
-		
-	public void FClass.enableConstantFolding() {
-		super.enableConstantFolding();
+	public void FRangeExp.enableConstantFolding() {
+
+	}
+	public void FRecordDecl.enableConstantFolding() {
+
+	}
+	public void FFunctionCallEquation.enableConstantFolding() {
+
 	}
 	
-	public void ASTNode.enableConstantFolding() {
+	
+	public void ASTNode.enableConstantFolding() {	
 		for (ASTNode n: this)
 			n.enableConstantFolding();
 	}
 	
-	public void FRecordDecl.enableConstantFolding() {
-		
+	public void FIfExp.enableConstantFolding() {
+		super.enableConstantFolding();
+		if (!constantFoldingEnabled && getIfExp().isConstantExp()) {
+			eliminateIfEquation = true;
+			is$Final = false;
+		}
 	}
 	
-	public void FExp.enableConstantFolding() {
-		
-		constantFoldingEnabled = true;
-		is$Final = false;
-		
+	public void FAbstractExp.enableConstantFolding() {
+				
 		if (isConstantExp()) {
+			constantFoldingEnabled = true;
+			is$Final = false;
 			return;
 		}
 
-		for (FExp exp: childFExps()) {
-			exp.enableConstantFolding();
-		}
-	}
-	
-	rewrite FIfExp {
-		when (constantFoldingEnabled && getIfExp().isConstantExp() && !getIfExp().ceval().isUnknown()) to FExp {
-			return getIfExp().ceval().booleanValue() ? getThenExp() : getElseExp();
-		}
+		super.enableConstantFolding();
 	}
 
-	rewrite FExp {
-		when (constantFoldingEnabled && constantFoldingEligible() && isConstantExp() && !ceval().isUnknown()) to FExp {
+	rewrite FAbstractExp {
+		when (constantFoldingEnabled && isConstantExp() && canCeval()) to FExp {
 			return ceval().buildLiteral();
 		}
 	}

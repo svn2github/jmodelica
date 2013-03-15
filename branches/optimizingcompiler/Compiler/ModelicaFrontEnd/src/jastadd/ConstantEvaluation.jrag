@@ -1335,7 +1335,7 @@ aspect ConstantEvaluation {
  
   eq FIdUseExp.cevalCalc()      = getFIdUse().ceval();
   eq FDerExp.cevalCalc() = 
-			getFIdUse().variability().parameterOrLess() ? new CValueInteger(0) : getFIdUse().ceval();
+			getFIdUse().variability().discreteOrLess() ? new CValueInteger(0) : CValue.UNKNOWN;
   eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
   
   syn CValue InstAccess.ceval()        = ceval(Index.NULL);
