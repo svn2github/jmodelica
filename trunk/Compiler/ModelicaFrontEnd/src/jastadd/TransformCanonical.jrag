@@ -1921,9 +1921,9 @@ aspect TransformCanonical {
 						seb.equation().getResidual().warning("Can not use hand guided tearing pair, equation and variable resides in solved block. Variable: " + seb.equation().getResidual().getIterationVariable().name() + ". Equation: " + seb.equation());
 					log.info("Found solved block");
 					tearBLT.add(seb);
-//				} else if (seb != null && seb.isSimple()) {
-//					log.info("Found simple unsolved block");
-//					tearBLT.add(seb);
+				} else if (seb != null && block.size() == 1) {
+					log.info("Found simple unsolved block");
+					tearBLT.add(seb);
 				} else {
 					log.info("Found tearing block, tearing...");
 					TornEquationBlock eb = new TornEquationBlock();
