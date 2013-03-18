@@ -962,7 +962,7 @@ aspect CADCodeGen {
 	
 	@Override
 	public void FRelExp.genADStatement_CAD(Printer p, PrintStream str, String indent) {
-		if (inNoEventExp()) {
+		if (!generatesEvent()) {
 			getLeft().genTempVars_CAD(p, str, indent);
 			getRight().genTempVars_CAD(p, str, indent);
 			str.print(indent);
