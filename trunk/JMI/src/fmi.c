@@ -1527,5 +1527,11 @@ void fmi_update_runtime_options(fmi_t* fmi) {
 	index = get_option_index("_use_manual_equation_scaling");
 	if(index)
 		op->use_manual_scaling_flag = z[index]; 
+	index = get_option_index("_block_jacobian_check");
+	if(index)
+		op->block_jacobian_check = z[index]; 
+	index = get_option_index("_block_jacobian_check_tol");
+	if(index)
+		op->block_jacobian_check_tol = z[index]; 
 	
 }
