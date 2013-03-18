@@ -7,14 +7,17 @@
 	<property name="jastadd.feature.project" value="org.jastadd.plugin.feature" />
 	<property name="graphical.project" value="org.jmodelica.ide.graphical" />
 	<property name="graphical.feature.project" value="org.jmodelica.ide.graphical.feature" />
-	<property name="documentation.project" value="org.jmodelica.ide.documentation" />
-	<property name="documentation.feature.project" value="org.jmodelica.ide.documentation.feature" />
+    <property name="documentation.project" value="org.jmodelica.ide.documentation" />
+    <property name="documentation.feature.project" value="org.jmodelica.ide.documentation.feature" />
+    <property name="devel.project" value="org.jmodelica.devel" />
+    <property name="devel.feature.project" value="org.jmodelica.devel.feature" />
 	
 	<property name="jmodelica_root" value="../${trunk.project}" />
 	<property name="jastadd_root" value="../${jastadd.project}" />
 	<property name="ide_root" value="../${ide.project}" />
 	<property name="graphical_root" value="../${graphical.project}" />
 	<property name="documentation_root" value="../${documentation.project}" />
+    <property name="devel_root" value="../${devel.project}" />
 	
 	<property name="site_dir" value="site" />
 	<property name="bin_dir" value="bin" />
@@ -152,6 +155,7 @@
 			<src path="${ide_root}/ant" />
 			<src path="${graphical_root}/src" />
 			<src path="${documentation_root}/src" />
+            <src path="${devel_root}/src" />
 			<include name="**/*.java" />
 		</javac>
 	</target>
@@ -174,6 +178,7 @@
 				<include name="org/jmodelica/util/**" />
 				<exclude name="org/jmodelica/ide/graphical/**" />
 				<exclude name="org/jmodelica/ide/documentation/**" />
+                <exclude name="org/jmodelica/devel/**" />
 			</fileset>
 		</copy>
 
@@ -191,6 +196,13 @@
 			</fileset>
 		</copy>
 
+        <!-- collect class files for org.jmodelica.devel -->
+        <copy todir="${bin_dir}/bundles/${devel.project}">
+            <fileset dir="${bin_dir}/classes">
+                <include name="org/jmodelica/devel/**" />
+            </fileset>
+        </copy>
+
 		<!-- build jars for plugins -->
 		<delete file="${bin_dir}/plugin.versions" quiet="true" />
 		<emptyDir dir="${bin_dir}/plugins" />
@@ -198,6 +210,7 @@
 		<jm_buildPlugin projectName="${ide.project}" revpath="${jmodelica_root}" />
 		<jm_buildPlugin projectName="${graphical.project}" path="${graphical_root}" />
 		<jm_buildPlugin projectName="${documentation.project}" path="${documentation_root}" />
+        <jm_buildPlugin projectName="${devel.project}" path="${devel_root}" />
 
 		<!-- build jars for features -->
 		<emptyDir dir="${bin_dir}/features" />
@@ -205,6 +218,7 @@
 		<jm_buildFeature projectName="${ide.feature.project}" />
 		<jm_buildFeature projectName="${graphical.feature.project}" />
 		<jm_buildFeature projectName="${documentation.feature.project}" />
+        <jm_buildFeature projectName="${devel.feature.project}" />
 
 		<!-- build update site -->
 		<emptyDir dir="${output_dir}" />
@@ -215,7 +229,7 @@
 			</fileset>
 			<fileset file="${site_file}" />
 		</copy>
-		<jm_buildSite dir="${output_dir}" name="JModelica" />
+		<jm_buildSite dir="${output_dir}" name="JModelica.org" />
 	</target>
 	
 </project>
