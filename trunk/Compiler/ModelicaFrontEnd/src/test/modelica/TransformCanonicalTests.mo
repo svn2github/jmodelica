@@ -8104,6 +8104,8 @@ model TestRuntimeOptions1
 			flatModel="
 fclass TransformCanonicalTests.TestRuntimeOptions1
  Real x;
+ parameter Boolean _block_jacobian_check = false /* false */;
+ parameter Real _block_jacobian_check_tol = 1.0E-6 /* 1.0E-6 */;
  parameter Boolean _enforce_bounds = false /* false */;
  parameter Real _events_default_tol = 1.0E-10 /* 1.0E-10 */;
  parameter Real _events_tol_factor = 1.0E-4 /* 1.0E-4 */;
