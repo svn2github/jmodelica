@@ -2103,6 +2103,34 @@ end TransformCanonicalTests.InitialEqTest14;
   end InitialEqTest15;
 */
 
+
+model InitialEqTest16
+    parameter Boolean a = false;
+    Real b(start = 1);
+equation
+    if a then
+        der(b) = 2;
+    else
+        b = 1;
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest16",
+			description="When adding initial equations for states, discount der() in dead branches",
+			state_initial_equations=true,
+			flatModel="
+fclass TransformCanonicalTests.InitialEqTest16
+ parameter Boolean a = false /* false */;
+ Real b(start = 1);
+equation
+ b = 1;
+end TransformCanonicalTests.InitialEqTest16;
+")})));
+end InitialEqTest16;
+
+
+
 model ParameterDerivativeTest
  Real x(start=1);
  Real y;
