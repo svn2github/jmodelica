@@ -85,7 +85,24 @@ end VariabilityPropagationTests.ConstantSubstitution;
 ")})));
 end ConstantSubstitution;
 
-
+model NoExp
+	Real x(start=.5);
+equation
+	x-0.1 = cos(x);
+	
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="NoExp",
+			description="",
+			variability_propagation=true,
+			flatModel="
+fclass VariabilityPropagationTests.NoExp
+ Real x(start = 0.5);
+equation
+ x - 0.1 = cos(x);
+end VariabilityPropagationTests.NoExp;
+")})));
+end NoExp;
 
 
 model Der1

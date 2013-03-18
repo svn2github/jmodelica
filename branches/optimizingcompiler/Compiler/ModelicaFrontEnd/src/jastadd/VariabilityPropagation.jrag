@@ -28,7 +28,7 @@ aspect VariabilityPropagation {
 	syn boolean FEquation.variabilityPropagationEnabled() =
 			super.variabilityPropagationEnabled() && variables().size() == 1;
 	syn boolean FFunctionCallEquation.variabilityPropagationEnabled() =
-			super.variabilityPropagationEnabled() && variables().size() == numScalarEquations();
+			super.variabilityPropagationEnabled() && variables().size() > 0 && variables().size() == numScalarEquations();
 	
 	
 	
@@ -109,6 +109,11 @@ aspect VariabilityPropagation {
 		}
 
 		solution = solution(fVariable.name());
+		
+		if (!solution.isValidExp()) {
+			return;
+		}
+		
 		solutionVariability = solution.variability();
 
 		if (!solutionVariability.parameterOrLess()) {
