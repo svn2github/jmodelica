@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JModelica Development Support
 Bundle-SymbolicName: org.jmodelica.devel;singleton:=true
-Bundle-Version: 0.1.0.a1
+Bundle-Version: 0.1.0
 Bundle-Activator: org.jmodelica.devel.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
