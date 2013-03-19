@@ -1532,8 +1532,11 @@ class LocalDAECollocationAlg(AlgorithmBase):
                 raise ValueError("The number of specified input names does " +
                                  "not coincide with the number of specified " +
                                  "input trajectories.")
+            input_aliases = [self.model.xmldoc.get_aliases_for_variable(u)[0] +
+                             [u] for u in self.input[0]]
+            input_aliases = reduce(list.__add__, input_aliases)
             if self.parameter_estimation_data is not None:
-                for input_name in self.input[0]:
+                for input_name in input_aliases:
                     if (input_name in
                         self.parameter_estimation_data.measured_variables):
                         raise NotImplementedError(
