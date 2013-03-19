@@ -878,6 +878,21 @@ class CasadiModel(BaseModel):
                 i = i + 1
         self.vr_map = vr_map
         
+        # Read integer parameter values separately (circumvent SymbolicOCP bug)
+        integer_vars = self.xmldoc.get_all_integer_variables()
+        if len(integer_vars) > 0:
+            [int_vr, int_names] = \
+                    zip(*[(var.get_value_reference(), var.get_name()) for
+                          var in integer_vars])
+            for (vr, start) in self.xmldoc.get_variable_start_attributes():
+                try:
+                    index = int_vr.index(vr)
+                except ValueError:
+                    pass
+                else:
+                    var = self.ocp.variable(int_names[index])
+                    var.setStart(start)
+        
         # Count variables
         self.n_x = self.x.numel()
         self.n_u = self.u.numel()
