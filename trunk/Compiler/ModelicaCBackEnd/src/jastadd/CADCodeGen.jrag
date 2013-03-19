@@ -63,11 +63,12 @@ aspect CADCodeGen {
  		prettyPrint_C(p, str, indent);
 	}
 	
-	syn boolean FType.needDerVar_CAD() = isReal() || isComposite();
+	syn boolean FType.needDerVar_CAD() =             isReal() || isComposite();
 	syn boolean FAbstractVariable.needDerVar_CAD() = type().needDerVar_CAD();
-	syn boolean FIdUse.needDerVar_CAD() = type().needDerVar_CAD();
-	syn boolean FExp.needDerVar_CAD() = type().needDerVar_CAD();
-	syn boolean FStatement.needDerVar_CAD() = type().needDerVar_CAD();
+	eq FFunctionVariable.needDerVar_CAD() =          !isNoDerivative() && super.needDerVar_CAD();
+	syn boolean FIdUse.needDerVar_CAD() =            type().needDerVar_CAD();
+	syn boolean FExp.needDerVar_CAD() =              type().needDerVar_CAD();
+	syn boolean FStatement.needDerVar_CAD() =        type().needDerVar_CAD();
 	syn boolean FAbstractEquation.needDerVar_CAD() = type().needDerVar_CAD();
 	
 	private int FClass.adIndex = 0;

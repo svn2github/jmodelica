@@ -5781,7 +5781,8 @@ aspect FunctionInlining {
 			functionUsed = direct ? UseType.DIRECT : UseType.ANNOTATION_DERIVATIVE;
 			if (direct &&
 			   (root().options.getBooleanOption("generate_block_jacobian") ||
-			    root().options.getBooleanOption("generate_dae_jacobian"))) {
+			    root().options.getBooleanOption("generate_dae_jacobian") ||
+			    root().options.getBooleanOption("generate_ode_jacobian"))) {
 				if (requiresDerivative() && !canDifferentiate()) {
 					error("Unable to determine derivative function for function '" + name() + "'");
 				} else if (hasFDerivativeFunction()) {
