@@ -2,7 +2,7 @@
 <feature
       id="org.jmodelica.devel.feature"
       label="JModelica Developers&apos; Plugin"
-      version="0.1.0.a1">
+      version="0.1.0">
 
    <description url="http://www.example.com/description">
       [Enter Feature Description here.]
