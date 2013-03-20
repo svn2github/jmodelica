@@ -118,7 +118,7 @@ fmiStatus fmi_initialize_slave(fmiComponent c, fmiReal tStart,
     if (retval != fmiOK){ return fmiError; }
     
     /* Create solver */
-    jmi_new_ode_solver(fmi->jmi, solver);
+    jmi_new_ode_solver(fmi->jmi, solver, rhs_fcn, root_fcn);
     
     return fmiOK;
 }
@@ -157,6 +157,38 @@ fmiStatus fmi_get_boolean_status(fmiComponent c, const fmiStatusKind s, fmiBoole
 
 fmiStatus fmi_get_string_status(fmiComponent c, const fmiStatusKind s, fmiString* value){
     return fmiError;
+}
+
+int rhs_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs){
+    fmiStatus retval;
+    fmi_t* fmi = (fmi_t *)c;
+    
+    retval = fmi_set_continuous_states((fmiComponent)c, (fmiReal*)y, fmi->jmi->n_real_x);
+    if (retval != fmiOK){return -1;}
+    
+    retval = fmi_set_time((fmiComponent)c, t);
+    if (retval != fmiOK){return -1;}
+    
+    retval = fmi_get_derivatives((fmiComponent)c, (fmiReal*)rhs , fmi->jmi->n_real_x);
+    if (retval != fmiOK){return -1;}
+    
+    return 0;
+}
+
+int root_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *root){
+    fmiStatus retval;
+    fmi_t* fmi = (fmi_t *)c;
+    
+    retval = fmi_set_continuous_states((fmiComponent)c, (fmiReal*)y, fmi->jmi->n_real_x);
+    if (retval != fmiOK){return -1;}
+    
+    retval = fmi_set_time((fmiComponent)c, t);
+    if (retval != fmiOK){return -1;}
+    
+    retval = fmi_get_event_indicators((fmiComponent)c, (fmiReal*)root , fmi->jmi->n_sw);
+    if (retval != fmiOK){return -1;}
+    
+    return 0;
 }
 
 /*

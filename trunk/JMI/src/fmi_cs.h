@@ -62,6 +62,9 @@ fmiStatus fmi_get_integer_status(fmiComponent c, const fmiStatusKind s, fmiInteg
 fmiStatus fmi_get_boolean_status(fmiComponent c, const fmiStatusKind s, fmiBoolean* value);
 fmiStatus fmi_get_string_status(fmiComponent c, const fmiStatusKind s, fmiString* value);
 
+int root_fcn(void* c, jmi_real_t t, jmi_real_t *x, jmi_real_t *root);
+int rhs_fcn(void* c, jmi_real_t t, jmi_real_t *x, jmi_real_t *rhs);
+
 /* Note in fmiCSFunctions.h
 fmiStatus fmi_save_state(fmiComponent c, size_t index);
 fmiStatus fmi_restore_state(fmiComponent c, size_t index);

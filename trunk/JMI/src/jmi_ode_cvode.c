@@ -27,47 +27,32 @@
 
 int cv_rhs(realtype t, N_Vector yy, N_Vector yydot, void *problem_data){
 	realtype *y, *ydot;
-	int nbr_y,flag;
+	int flag;
 	jmi_ode_solver_t *solver = (jmi_ode_solver_t*)problem_data;
 	jmi_t* jmi = solver->jmi;
 
-	nbr_y = jmi->n_real_x;
 	y = NV_DATA_S(yy); /*y is now a vector of realtype*/
 	ydot = NV_DATA_S(yydot); /*ydot is now a vector of realtype*/
 
-	/* Set time */
-    *(jmi_get_t(jmi)) = t;
-    /* Set states */
-	memcpy(jmi_get_real_x(jmi), y, nbr_y*sizeof(realtype));
-
-	/* Calculate the derivative */
-    flag = jmi_ode_derivatives(jmi);
+    flag = solver->rhs_fcn((void*)jmi->fmi, t, y, ydot);
     
 	if(flag != 0) {
 		jmi_log_warning(jmi, "[CVODE] Evaluating the derivatives failed (recoverable error). Returned with warning flag: %d",flag);
 		return 1; /* Recoverable failure */
 	}
-	memcpy(ydot, jmi_get_real_dx(jmi), nbr_y*sizeof(realtype));
 
     return CV_SUCCESS;
 }
 
 int cv_root(realtype t, N_Vector yy, realtype *gout,  void* problem_data){
     realtype *y;
-	int nbr_y,flag;
+	int flag;
 	jmi_ode_solver_t *solver = (jmi_ode_solver_t*)problem_data;
 	jmi_t* jmi = solver->jmi;
 
-	nbr_y = jmi->n_real_x;
 	y = NV_DATA_S(yy); /*y is now a vector of realtype*/
 
-	/* Set time */
-    *(jmi_get_t(jmi)) = t;
-    /* Set states */
-	memcpy(jmi_get_real_x(jmi), y, nbr_y*sizeof(realtype));
-
-	/* Calculate the derivative */
-    flag = jmi_dae_R_perturbed(jmi,(jmi_real_t*)gout);
+    flag = solver->root_fcn((void*)jmi->fmi, t, y, gout);
     
 	if(flag != 0) {
 		jmi_log_error(jmi, "[CVODE] Evaluating the event indicators failed. Returned with error flag: %d",flag);
@@ -138,6 +123,7 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
     jmi_t* jmi = solver->jmi;
 	realtype t0;
     int flag = 0;
+    void* cvode_mem;
     
 	integrator = (jmi_ode_cvode_t*)calloc(1,sizeof(jmi_ode_cvode_t));
     if(!integrator){
@@ -151,7 +137,7 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
 	integrator->rtol = 1e-4;
 	integrator->atol = 1e-6;
 
-    void* cvode_mem = CVodeCreate(integrator->lmm,integrator->iter);
+    cvode_mem = CVodeCreate(integrator->lmm,integrator->iter);
     if(!cvode_mem){
 		jmi_log_error(jmi, "[CVODE] Failed to allocate the CVODE struct.");
 		return -1;
