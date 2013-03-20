@@ -735,8 +735,8 @@ abstract FExp : BaseNode ::= /Array/;
 /**
  * \brief Abstract base class for all flattened expressions that is not literal or unsupported.
  */
-abstract FAbstractExp : FExp;
 
+abstract FAbstractExp : FExp;
 /**
  * \brief Abstract base class for all flattened scalar expressions.
  */
