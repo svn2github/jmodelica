@@ -65,7 +65,7 @@ end VariabilityPropagationTests.SimplifyLitExps;
 ")})));
 end SimplifyLitExps;
 
-model ConstantSubstitution
+model ConstantFolding1
 	Real x1,x2,x3,x4;
 equation
 	x1 = 1;
@@ -74,16 +74,68 @@ equation
 	x4 = x2;
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="ConstantSubstitution",
+			name="ConstantFolding1",
 			description="",
 			variability_propagation=true,
 			flatModel="
-fclass VariabilityPropagationTests.ConstantSubstitution
+fclass VariabilityPropagationTests.ConstantFolding1
  constant Real x3 = 1;
  constant Real x4 = 2.0;
-end VariabilityPropagationTests.ConstantSubstitution;
+end VariabilityPropagationTests.ConstantFolding1;
 ")})));
-end ConstantSubstitution;
+end ConstantFolding1;
+
+model ConstantFolding2
+function f
+	input Real ii;
+	input Real i[:,:];
+	output Real o;
+algorithm
+	o := i[1,1];
+end f;	
+
+	input Real i;
+	Real x;
+	Real y;
+
+equation
+	x = f(i,fill(1,2,3));
+	when (x >1) then
+		y = f(i,fill(1,0,2));
+	end when;
+	
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantFolding2",
+			description="",
+			variability_propagation=true,
+			flatModel="
+fclass VariabilityPropagationTests.ConstantFolding2
+ input Real i;
+ Real x;
+ discrete Real y;
+initial equation 
+ pre(y) = 0.0;
+equation
+ x = VariabilityPropagationTests.ConstantFolding2.f(i, {{1, 1, 1}, {1, 1, 1}});
+ when x > 1 then
+  y = VariabilityPropagationTests.ConstantFolding2.f(i, fill(0, 0, 2));
+ end when;
+
+public
+ function VariabilityPropagationTests.ConstantFolding2.f
+  input Real ii;
+  input Real[:, :] i;
+  output Real o;
+ algorithm
+  o := i[1,1];
+  return;
+ end VariabilityPropagationTests.ConstantFolding2.f;
+ 
+end VariabilityPropagationTests.ConstantFolding2;
+")})));
+end ConstantFolding2;
 
 model NoExp
 	Real x(start=.5);

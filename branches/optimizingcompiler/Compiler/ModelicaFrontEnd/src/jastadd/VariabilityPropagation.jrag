@@ -244,11 +244,13 @@ aspect VariabilityPropagation {
 		
 		FAbstractEquation equation;
 		
+		// Declaration
 		setFTypePrefixVariability(variability);
 		if (variability.constantVariability()) {
 			setBindingExp(bindingExp);
 		}
 		
+		// Uses
 		for (FIdUseExp use: uses()) {
 			if (use.inFEquation()) {
 				equation = use.myFEquation();
@@ -259,6 +261,7 @@ aspect VariabilityPropagation {
 			}
 		}
 		
+		// Derivative
 		if (isDifferentiatedVariable()) {
 			FDerivativeVariable fDerivativeVariable = myDerivativeVariable();
 			fDerivativeVariable.taggedForRemoval = true;
@@ -307,7 +310,12 @@ aspect ConstantFolding {
 
 	rewrite FAbstractExp {
 		when (constantFoldingEnabled && isConstantExp() && canCeval()) to FExp {
-			return ceval().buildLiteral();
+			CValue value = ceval();
+			if (value.size().isEmpty()) {
+				constantFoldingEnabled = false;
+				return this;
+			}
+			return value.buildLiteral();
 		}
 	}
 
