@@ -3265,6 +3265,51 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
+              <entry>init_traj</entry>
+
+              <entry>None</entry>
+
+              <entry>Variable trajectory data used for initialization of the
+              NLP variables.</entry>
+            </row>
+
+            <row>
+              <entry>variable_scaling</entry>
+
+              <entry>True</entry>
+
+              <entry>Whether to scale the variables according to their nominal
+              values or the trajectories provided with the nominal_traj
+              option.</entry>
+            </row>
+
+            <row>
+              <entry>nominal_traj</entry>
+
+              <entry>None</entry>
+
+              <entry>Variable trajectory data used for scaling of the NLP
+              variables. This option is only applicable if variable scaling is
+              enabled.</entry>
+            </row>
+
+            <row>
+              <entry>nominal_traj_mode</entry>
+
+              <entry>{"_default_mode": "linear"}</entry>
+
+              <entry>Mode for computing scaling factors based on nominal
+              trajectories. Four possible modes: "attribute": Time-invariant,
+              linear scaling based on Nominal attribute "linear":
+              Time-invariant, linear scaling "affine": Time-invariant, affine
+              scaling "time-variant": Time-variant, linear scaling Option is a
+              dictionary with variable names as keys and corresponding scaling
+              modes as values. For all variables not occuring in the keys of
+              the dictionary, the mode specified by the "_default_mode" entry
+              will be used, which by default is "linear".</entry>
+            </row>
+
+            <row>
               <entry><literal>write_scaled_result</literal></entry>
 
               <entry>False</entry>
@@ -3364,18 +3409,6 @@ opts? # View the help text</programlisting>
               are created and then constrained to be equal to the
               corresponding variable at the start of the succeeding element
               for continuity.</entry>
-            </row>
-
-            <row>
-              <entry><literal>init_traj</literal></entry>
-
-              <entry>None (i.e. not used, set this argument to activate
-              initialization)</entry>
-
-              <entry>Variable trajectory data used for initialization of the
-              optimization problem. The data is represented by an object of
-              the type
-              <literal>pyjmi.common.io.ResultDymolaTextual.</literal></entry>
             </row>
 
             <row>
