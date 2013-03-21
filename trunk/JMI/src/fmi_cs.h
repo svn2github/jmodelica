@@ -40,27 +40,125 @@
 extern "C" {
 #endif
 
-const char* fmi_get_types_platform();
+const char* fmi1_cs_get_types_platform();
+const char* fmi1_cs_get_version();
 
-fmiStatus fmi_do_step(fmiComponent c,
+fmiStatus fmi1_cs_do_step(fmiComponent c,
 						 fmiReal currentCommunicationPoint,
                          fmiReal communicationStepSize,
                          fmiBoolean   newStep);
-void fmi_free_slave_instance(fmiComponent c);
-fmiComponent fmi_instantiate_slave(fmiString instanceName, fmiString GUID, fmiString fmuLocation, fmiString mimeType, 
+void fmi1_cs_free_slave_instance(fmiComponent c);
+fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, fmiString fmuLocation, fmiString mimeType, 
                                    fmiReal timeout, fmiBoolean visible, fmiBoolean interactive, fmiCallbackFunctions functions, 
                                    fmiBoolean loggingOn);
-fmiStatus fmi_terminate_slave(fmiComponent c);
-fmiStatus fmi_initialize_slave(fmiComponent c, fmiReal tStart,fmiBoolean StopTimeDefined, fmiReal tStop);
-fmiStatus fmi_cancel_step(fmiComponent c);
-fmiStatus fmi_reset_slave(fmiComponent c) ;
-fmiStatus fmi_get_real_output_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], fmiReal value[]);
-fmiStatus fmi_set_real_input_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], const fmiReal value[]);
-fmiStatus fmi_get_status(fmiComponent c, const fmiStatusKind s, fmiStatus* value);
-fmiStatus fmi_get_real_status(fmiComponent c, const fmiStatusKind s, fmiReal* value);
-fmiStatus fmi_get_integer_status(fmiComponent c, const fmiStatusKind s, fmiInteger* value);
-fmiStatus fmi_get_boolean_status(fmiComponent c, const fmiStatusKind s, fmiBoolean* value);
-fmiStatus fmi_get_string_status(fmiComponent c, const fmiStatusKind s, fmiString* value);
+fmiStatus fmi1_cs_terminate_slave(fmiComponent c);
+fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,fmiBoolean StopTimeDefined, fmiReal tStop);
+fmiStatus fmi1_cs_cancel_step(fmiComponent c);
+fmiStatus fmi1_cs_reset_slave(fmiComponent c) ;
+fmiStatus fmi1_cs_get_real_output_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], fmiReal value[]);
+fmiStatus fmi1_cs_set_real_input_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], const fmiReal value[]);
+fmiStatus fmi1_cs_get_status(fmiComponent c, const fmiStatusKind s, fmiStatus* value);
+fmiStatus fmi1_cs_get_real_status(fmiComponent c, const fmiStatusKind s, fmiReal* value);
+fmiStatus fmi1_cs_get_integer_status(fmiComponent c, const fmiStatusKind s, fmiInteger* value);
+fmiStatus fmi1_cs_get_boolean_status(fmiComponent c, const fmiStatusKind s, fmiBoolean* value);
+fmiStatus fmi1_cs_get_string_status(fmiComponent c, const fmiStatusKind s, fmiString* value);
+
+/**
+ * \brief Set Real values.
+ * 
+ * @param c The FMU struct.
+ * @param vr Array of value-references.
+ * @param nvr Number of array elements.
+ * @param value Array of variable values.
+ * @return Error code.
+ */
+fmiStatus fmi1_cs_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]);
+
+/**
+ * \brief Set Integer values.
+ * 
+ * @param c The FMU struct.
+ * @param vr Array of value-references.
+ * @param nvr Number of array elements.
+ * @param value Array of variable values.
+ * @return Error code.
+ */
+fmiStatus fmi1_cs_set_integer (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]);
+
+/**
+ * \brief Set Boolean values.
+ * 
+ * @param c The FMU struct.
+ * @param vr Array of value-references.
+ * @param nvr Number of array elements.
+ * @param value Array of variable values.
+ * @return Error code.
+ */
+fmiStatus fmi1_cs_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]);
+
+/**
+ * \brief Set String values.
+ * 
+ * @param c The FMU struct.
+ * @param vr Array of value-references.
+ * @param nvr Number of array elements.
+ * @param value Array of variable values.
+ * @return Error code.
+ */
+fmiStatus fmi1_cs_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]);
+
+/**
+ * \brief Get Real values.
+ * 
+ * @param c The FMU struct.
+ * @param vr Array of value-references.
+ * @param nvr Number of array elements.
+ * @param value (Output) Array of variable values.
+ * @return Error code.
+ */
+fmiStatus fmi1_cs_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]);
+
+/**
+ * \brief Get Integer values.
+ * 
+ * @param c The FMU struct.
+ * @param vr Array of value-references.
+ * @param nvr Number of array elements.
+ * @param value (Output) Array of variable values.
+ * @return Error code.
+ */
+fmiStatus fmi1_cs_get_integer(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]);
+
+/**
+ * \brief Get Boolean values.
+ * 
+ * @param c The FMU struct.
+ * @param vr Array of value-references.
+ * @param nvr Number of array elements.
+ * @param value (Output) Array of variable values.
+ * @return Error code.
+ */
+fmiStatus fmi1_cs_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]);
+
+/**
+ * \brief Get String values.
+ * 
+ * @param c The FMU struct.
+ * @param vr Array of value-references.
+ * @param nvr Number of array elements.
+ * @param value (Output) Array of variable values.
+ * @return Error code.
+ */
+fmiStatus fmi1_cs_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]);
+
+/**
+ * \brief Turns on or off debugging.
+ * 
+ * @param c The FMU struct.
+ * @param loggingOn A fmiBoolean.
+ * @return Error code.
+ */
+fmiStatus fmi1_cs_set_debug_logging(fmiComponent c, fmiBoolean loggingOn);
 
 int root_fcn(void* c, jmi_real_t t, jmi_real_t *x, jmi_real_t *root);
 int rhs_fcn(void* c, jmi_real_t t, jmi_real_t *x, jmi_real_t *rhs);

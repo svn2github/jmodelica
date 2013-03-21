@@ -23,12 +23,20 @@
 #include "fmi.h"
 #include "jmi_ode_solver.h"
 
-const char* fmi_get_types_platform() {
+const char* fmi1_cs_get_types_platform() {
     return fmiPlatform;
 }
 
+const char* fmi1_cs_get_version() {
+    return fmi_get_version();
+}
 
-fmiStatus fmi_do_step(fmiComponent c,
+fmiStatus fmi1_cs_set_debug_logging(fmiComponent c, fmiBoolean loggingOn){
+    return fmi_set_debug_logging(c,loggingOn);
+}
+
+
+fmiStatus fmi1_cs_do_step(fmiComponent c,
 						 fmiReal currentCommunicationPoint,
                          fmiReal communicationStepSize,
                          fmiBoolean   newStep) {
@@ -84,7 +92,7 @@ fmiStatus fmi_do_step(fmiComponent c,
     return fmiOK;
 }
 
-void fmi_free_slave_instance(fmiComponent c) {
+void fmi1_cs_free_slave_instance(fmiComponent c) {
     fmi_t* fmi = (fmi_t *)c;
     jmi_t* jmi = fmi->jmi;
     
@@ -95,18 +103,18 @@ void fmi_free_slave_instance(fmiComponent c) {
     return;
 }
 
-fmiComponent fmi_instantiate_slave(fmiString instanceName, fmiString GUID, fmiString fmuLocation, fmiString mimeType, 
+fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, fmiString fmuLocation, fmiString mimeType, 
                                    fmiReal timeout, fmiBoolean visible, fmiBoolean interactive, fmiCallbackFunctions functions, 
                                    fmiBoolean loggingOn) {
     return fmi_instantiate_model(instanceName, GUID, functions, loggingOn);
 }
 
 
-fmiStatus fmi_terminate_slave(fmiComponent c) {
+fmiStatus fmi1_cs_terminate_slave(fmiComponent c) {
     return fmi_terminate(c);
 }
 
-fmiStatus fmi_initialize_slave(fmiComponent c, fmiReal tStart,
+fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
                                     fmiBoolean StopTimeDefined, fmiReal tStop){
     fmi_t* fmi = (fmi_t *)c;
     fmiBoolean toleranceControlled = fmiTrue;
@@ -123,39 +131,71 @@ fmiStatus fmi_initialize_slave(fmiComponent c, fmiReal tStart,
     return fmiOK;
 }
 
-fmiStatus fmi_cancel_step(fmiComponent c){
+fmiStatus fmi1_cs_cancel_step(fmiComponent c){
     return fmiError;
 }
 
-fmiStatus fmi_reset_slave(fmiComponent c) {
+fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
     return fmiError;
 }
 
-fmiStatus fmi_get_real_output_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], fmiReal value[]){
+fmiStatus fmi1_cs_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]){
+    return fmi_set_real(c,vr,nvr,value);
+}
+
+fmiStatus fmi1_cs_set_integer (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]){
+    return fmi_set_integer(c,vr,nvr,value);
+}
+
+fmiStatus fmi1_cs_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]){
+    return fmi_set_boolean(c,vr,nvr,value);
+}
+
+fmiStatus fmi1_cs_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]){
+    return fmi_set_string(c,vr,nvr,value);
+}
+
+fmiStatus fmi1_cs_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]){
+    return fmi_get_real(c,vr,nvr,value);
+}
+
+fmiStatus fmi1_cs_get_integer(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]){
+    return fmi_get_integer(c,vr,nvr,value);
+}
+
+fmiStatus fmi1_cs_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]){
+    return fmi_get_boolean(c,vr,nvr,value);
+}
+
+fmiStatus fmi1_cs_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]){
+    return fmi_get_string(c,vr,nvr,value);
+}
+
+fmiStatus fmi1_cs_get_real_output_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], fmiReal value[]){
     return fmiError;
 }
 
-fmiStatus fmi_set_real_input_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], const fmiReal value[]){
+fmiStatus fmi1_cs_set_real_input_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], const fmiReal value[]){
     return fmiError;
 }
 
-fmiStatus fmi_get_status(fmiComponent c, const fmiStatusKind s, fmiStatus* value){
+fmiStatus fmi1_cs_get_status(fmiComponent c, const fmiStatusKind s, fmiStatus* value){
     return fmiError;
 }
 
-fmiStatus fmi_get_real_status(fmiComponent c, const fmiStatusKind s, fmiReal* value){
+fmiStatus fmi1_cs_get_real_status(fmiComponent c, const fmiStatusKind s, fmiReal* value){
     return fmiError;
 }
 
-fmiStatus fmi_get_integer_status(fmiComponent c, const fmiStatusKind s, fmiInteger* value){
+fmiStatus fmi1_cs_get_integer_status(fmiComponent c, const fmiStatusKind s, fmiInteger* value){
     return fmiError;
 }
 
-fmiStatus fmi_get_boolean_status(fmiComponent c, const fmiStatusKind s, fmiBoolean* value){
+fmiStatus fmi1_cs_get_boolean_status(fmiComponent c, const fmiStatusKind s, fmiBoolean* value){
     return fmiError;
 }
 
-fmiStatus fmi_get_string_status(fmiComponent c, const fmiStatusKind s, fmiString* value){
+fmiStatus fmi1_cs_get_string_status(fmiComponent c, const fmiStatusKind s, fmiString* value){
     return fmiError;
 }
 
