@@ -545,11 +545,12 @@ end VariabilityPropagationTests.FunctionCallEquation3;
 end FunctionCallEquation3;
 
 model FunctionCallEquation4
-	constant Real a[2,2] = {{1,2},{3,4}};
+	Real a[2,2];
 	constant Real b[2] = {1,2};
 	Real x1[2];
 equation
 	x1 = Modelica.Math.Matrices.solve(a, b);
+	a = {{1,2},{3,4}};
 	
     annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(

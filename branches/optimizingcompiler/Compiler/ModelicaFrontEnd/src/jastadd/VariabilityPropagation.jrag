@@ -280,7 +280,9 @@ aspect ConstantFolding {
 
 	}
 	public void FFunctionCallEquation.enableConstantFolding() {
-
+		for (ASTNode n: getCall()) {
+			n.enableConstantFolding();
+		}
 	}
 	
 	
