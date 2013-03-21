@@ -241,50 +241,49 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         jmi_print_array(jmi,switches,nbr_sw, (char *)"[BLOCK_EVENT_ITERATION]", (char *)"Switches:;");
         jmi_print_array(jmi,booleans,jmi->n_boolean_d, (char *)"[BLOCK_EVENT_ITERATION]", (char *)"Booleans:;");
         
-		if (jmi->atInitial == JMI_TRUE) {
-	        iter = 0;
-		    converged = 0;
-			ef = 0;
-			/* converge the switches first to a consisten state*/
-			while (1){
-				iter += 1;
+        iter = 0;
+        converged = 0;
+        ef = 0;
+		/* converge the switches first to a consisten state*/
+		while (1){
+            iter += 1;
             
-				/* Evaluate the block to update dependent variables if any */
-				block->F(jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
+            /* Evaluate the block to update dependent variables if any */
+			block->F(jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
 
-				jmi_write_back_to_z_val(jmi); 
+            jmi_write_back_to_z_val(jmi); 
             
-				retval = jmi_evaluate_switches(jmi,switches,mode_sw);
-				jmi_write_back_to_z(jmi);
+            retval = jmi_evaluate_switches(jmi,switches,mode_sw);
+            jmi_write_back_to_z(jmi);
         
-				block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
-				jmi_write_back_to_z_val(jmi);
+            block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
+            jmi_write_back_to_z_val(jmi);
             
-				jmi_log_info(jmi, "[BLOCK_EVENT_ITERATION] Initial iteration %d at t=%g.",iter,jmi_get_t(jmi)[0]);
-				jmi_print_array(jmi,block->x,block->n, (char *)"[BLOCK_EVENT_ITERATION]", (char *)"Block IVs:;");
-				jmi_print_array(jmi,switches,nbr_sw, (char *)"[BLOCK_EVENT_ITERATION]",(char *)"Switches:;");
-				jmi_print_array(jmi,booleans,jmi->n_boolean_d, (char *)"[BLOCK_EVENT_ITERATION]",(char *)"Booleans:;");
+            jmi_log_info(jmi, "[BLOCK_EVENT_ITERATION] Initial iteration %d at t=%g.",iter,jmi_get_t(jmi)[0]);
+            jmi_print_array(jmi,block->x,block->n, (char *)"[BLOCK_EVENT_ITERATION]", (char *)"Block IVs:;");
+            jmi_print_array(jmi,switches,nbr_sw, (char *)"[BLOCK_EVENT_ITERATION]",(char *)"Switches:;");
+            jmi_print_array(jmi,booleans,jmi->n_boolean_d, (char *)"[BLOCK_EVENT_ITERATION]",(char *)"Booleans:;");
             
-				/* Check for consistency */
-				if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
-					jmi_log_info(jmi, "[BLOCK_EVENT_ITERATION] Found consistent switched state using fixed point iteration at t=%g.",jmi_get_t(jmi)[0]);
-					converged = 1;
-					break;
-				}
-				/* Check for infinite loop */
-			    if((iter >= nbr_allocated_iterations/2) &&  jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
-				    jmi_log_warning(jmi, "[BLOCK_EVENT_ITERATION] Detected infinite loop in fixed point iteration at t=%g, switching to enchanced fixed point iteration...",jmi_get_t(jmi)[0]);
-					break;
-				}
+            /* Check for consistency */
+            if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
+                jmi_log_info(jmi, "[BLOCK_EVENT_ITERATION] Found consistent switched state using fixed point iteration at t=%g.",jmi_get_t(jmi)[0]);
+                converged = 1;
+                break;
+            }
+            /* Check for infinite loop */
+            if(0) if (jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
+                jmi_log_warning(jmi, "[BLOCK_EVENT_ITERATION] Detected infinite loop in fixed point iteration at t=%g, switching to enchanced fixed point iteration...",jmi_get_t(jmi)[0]);
+                break;
+            }
 
-				if(iter >= nbr_allocated_iterations){
-					jmi_log_warning(jmi, "[BLOCK_EVENT_ITERATION] Failed to converged during initialfixed point iteration due to too many iterations at t=%g, switching to enhanced fixed point iteration...",jmi_get_t(jmi)[0]);
-					break;
-	            }
-				/* Store the new switches */
-				memcpy(&sw_old[iter*nbr_sw],switches,nbr_sw*sizeof(jmi_real_t));
-				memcpy(&bool_old[iter*nbr_bool],booleans,nbr_bool*sizeof(jmi_real_t));            
-			}
+            if(iter >= nbr_allocated_iterations){
+                jmi_log_warning(jmi, "[BLOCK_EVENT_ITERATION] Failed to converged during initialfixed point iteration due to too many iterations at t=%g, switching to enhanced fixed point iteration...",jmi_get_t(jmi)[0]);
+                break;
+            }
+
+			/* Store the new switches */
+            memcpy(&sw_old[iter*nbr_sw],switches,nbr_sw*sizeof(jmi_real_t));
+            memcpy(&bool_old[iter*nbr_bool],booleans,nbr_bool*sizeof(jmi_real_t));            
         }
 
 		iter = 0;
@@ -310,21 +309,19 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             jmi_print_array(jmi,switches,nbr_sw, (char *)"[BLOCK_EVENT_ITERATION]",(char *)"Switches:;");
             jmi_print_array(jmi,booleans,jmi->n_boolean_d, (char *)"[BLOCK_EVENT_ITERATION]",(char *)"Booleans:;");
             
-			if(!block->break_on_crossing) {
-	            /* Check for consistency */
-		        if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
-			        jmi_log_info(jmi, "[BLOCK_EVENT_ITERATION] Found consistent solution using fixed point iteration at t=%g.",jmi_get_t(jmi)[0]);
-				    converged = 1;
-					break;
-				}
-			}
-            if(iter > nbr_allocated_iterations/2) {
-	            /* Check for infinite loop */
-		        if (jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
-			        jmi_log_warning(jmi, "[BLOCK_EVENT_ITERATION] Detected infinite loop in fixed point iteration at t=%g, switching to enchanced fixed point iteration...",jmi_get_t(jmi)[0]);
-				    break;
-				}
-			}
+            /* Check for consistency */
+            if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
+                jmi_log_info(jmi, "[BLOCK_EVENT_ITERATION] Found consistent solution using fixed point iteration at t=%g.",jmi_get_t(jmi)[0]);
+                converged = 1;
+                break;
+            }
+            
+            /* Check for infinite loop */
+            if (jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
+                jmi_log_warning(jmi, "[BLOCK_EVENT_ITERATION] Detected infinite loop in fixed point iteration at t=%g, switching to enchanced fixed point iteration...",jmi_get_t(jmi)[0]);
+                break;
+            }
+
             /* Store the new switches */
             if(iter >= nbr_allocated_iterations){
                 jmi_log_warning(jmi, "[BLOCK_EVENT_ITERATION] Failed to converged during fixed point iteration due to too many iterations at t=%g, switching to enhanced fixed point iteration...",jmi_get_t(jmi)[0]);
