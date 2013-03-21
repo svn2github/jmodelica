@@ -157,6 +157,8 @@ class CasadiModel(BaseModel):
             New parameter values only affect equations. Attributes like min and
             nominal that depend on parameters are not updated. These instead
             use the parameter values set at compile time.
+            
+            Alias variables may be reported as not being found.
         """
         if isinstance(names, basestring):
             self._set(names, values)
@@ -222,6 +224,10 @@ class CasadiModel(BaseModel):
             
             CasadiModel.get('damper.d')
             CasadiModel.get(['damper.d', 'gear.a'])
+        
+        Limitations::
+            
+            Alias variables may be reported as not being found.
         """
         if isinstance(names, basestring):
             return self._get(names)
@@ -388,6 +394,10 @@ class CasadiModel(BaseModel):
         Raises::
             
             XMLException if name not present in model.
+        
+        Limitations::
+            
+            Alias variables may be reported as not being found.
         """
         if isinstance(names, basestring):
             self._set_min(names, values)
@@ -436,6 +446,10 @@ class CasadiModel(BaseModel):
         Raises::
             
             XMLException if name not present in model.
+        
+        Limitations::
+            
+            Alias variables may be reported as not being found.
         """
         if isinstance(names, basestring):
             self._set_max(names, values)
@@ -484,6 +498,10 @@ class CasadiModel(BaseModel):
         Raises::
             
             XMLException if name not present in model.
+        
+        Limitations::
+            
+            Alias variables may be reported as not being found.
         """
         if isinstance(names, basestring):
             self._set_nominal(names, values)

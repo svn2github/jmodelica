@@ -283,6 +283,7 @@ class TestLocalDAECollocator:
         
         # Optimize using nominal and initial trajectories
         opts['nominal_traj'] = ResultDymolaTextual("vdp_nom_traj_result.txt")
+        opts['nominal_traj_mode'] = {'_default_mode': "affine"}
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         col = res.solver
@@ -336,6 +337,7 @@ class TestLocalDAECollocator:
         
         # Optimize using nominal and initial trajectories
         opts['nominal_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
+        opts['nominal_traj_mode'] = {'_default_mode': 'time-variant'}
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         col = res.solver
@@ -352,6 +354,75 @@ class TestLocalDAECollocator:
         opts['eliminate_der_var'] = True
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
+    
+    @testattr(casadi = True)
+    def test_nominal_traj_mode(self):
+        """Test nominal_traj_mode on the CSTR."""
+        model = self.model_cstr_lagrange
+        
+        # References values
+        cost_ref = 1.8549259545339369e3
+        u_norm_ref = 3.0455503580669716e2
+        
+        # Get nominal and initial trajectories
+        opts = model.optimize_options(self.algorithm)
+        opts['n_e'] = 40
+        opts['n_cp'] = 2
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        try:
+            os.remove("cstr_nom_traj_result.txt")
+        except OSError:
+            pass
+        os.rename("CSTR_CSTR_Opt_Bounds_Lagrange_result.txt",
+                  "cstr_nom_traj_result.txt")
+        
+        # Time-variant
+        opts['nominal_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
+        opts['nominal_traj_mode'] = {'_default_mode': 'time-variant'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Affine
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Linear
+        opts['nominal_traj_mode'] = {'_default_mode': 'linear'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Attribute
+        opts['nominal_traj_mode'] = {'_default_mode': 'attribute'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Check impossible time-variant scaling
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'cstr.der(c)': 'time-variant'}
+        N.testing.assert_raises(CasadiCollocatorException, model.optimize,
+                                self.algorithm, opts)
+        
+        # Check changing one variable
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'cstr.c': 'time-variant'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Check alias variables
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'cstr.Tc': 'time-variant'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'u': 'time-variant'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'asdf': 'time-variant'}
+        N.testing.assert_raises(XMLException, model.optimize, self.algorithm,
+                                opts)
     
     @testattr(casadi = True)
     def test_cstr(self):

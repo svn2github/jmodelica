@@ -1414,6 +1414,11 @@ class LocalDAECollocator(CasadiCollocator):
                 for var in var_vectors[vt]:
                     vr = var.getValueReference()
                     (var_index, _) = vr_map[vr]
+                    name = var.getName()
+                    try:
+                        mode = self.nominal_traj_mode[name]
+                    except KeyError:
+                        mode = self.nominal_traj_mode["_default_mode"]
                     values = {}
                     traj_min = N.inf
                     traj_max = -N.inf
@@ -1429,16 +1434,34 @@ class LocalDAECollocator(CasadiCollocator):
                                 traj_min = val
                             if val > traj_max:
                                 traj_max = val
-                    variant = True
-                    if (traj_min < 0 and traj_max > 0 or
-                        traj_min == 0 or traj_max == 0):
+                    if mode in ["attribute", "linear", "affine"]:
                         variant = False
-                    if variant:
-                        traj_abs = N.abs([traj_min, traj_max])
-                        abs_min = traj_abs.min()
-                        abs_max = traj_abs.max()
-                        if abs_min < 1e-3 and abs_max / abs_min > 1e6:
+                    elif mode == "time-variant":
+                        variant = True
+                        if (traj_min < 0 and traj_max > 0 or
+                            traj_min == 0 or traj_max == 0):
                             variant = False
+                        if variant:
+                            traj_abs = N.abs([traj_min, traj_max])
+                            abs_min = traj_abs.min()
+                            abs_max = traj_abs.max()
+                            if abs_min < 1e-3 and abs_max / abs_min > 1e6:
+                                variant = False
+                        if not variant:
+                            if (self.nominal_traj_mode["_default_mode"] == 
+                                "time-variant"):
+                                variant = False
+                                print("Warning: Could not do time-variant " + 
+                                      "scaling for variable %s. " % name +
+                                      "Doing time-invariant affine scaling " +
+                                      "instead.")
+                            else:
+                                raise CasadiCollocatorException(
+                                    "Could not do time-variant scaling for " +
+                                    "variable %s." % name)
+                    else:
+                        raise ValueError("Unknown scaling mode %s " % mode +
+                                         "for variable %s." % name)
                     if variant:
                         if vt == "x":
                             n_variant_x += 1
@@ -1455,15 +1478,31 @@ class LocalDAECollocator(CasadiCollocator):
                             variant_timed_sf.append(N.abs(values[i][k]))
                     else:
                         is_variant[vr] = False
-                        if N.allclose(traj_max, traj_min):
-                            if N.allclose(traj_max, 0.):
-                                d = 1.
-                            else:
-                                d = traj_max
+                        if mode == "attribute":
+                            d = var.getNominal()
                             e = 0.
-                        else:
-                            d = traj_max - traj_min
-                            e = traj_min
+                        elif mode == "linear":
+                            d = max([abs(traj_max), abs(traj_min)])
+                            e = 0.
+                        elif mode in ["affine", "time-variant"]:
+                            if N.allclose(traj_max, traj_min):
+                                if (self.nominal_traj_mode["_default_mode"] in 
+                                    ["affine", "time-variant"]):
+                                    print("Warning: Could not do affine " +
+                                          "scaling for variable %s. " % name + 
+                                          "Doing linear scaling instead.")
+                                else:
+                                    raise CasadiCollocatorException(
+                                            "Could not do affine scaling " +
+                                            "for variable %s." % name)
+                                if N.allclose(traj_max, 0.):
+                                    d = 1.
+                                else:
+                                    d = traj_max
+                                e = 0.
+                            else:
+                                d = traj_max - traj_min
+                                e = traj_min
                         vr_sf_map[vr] = invariant_var.numel()
                         invariant_var.append(var.var())
                         invariant_d.append(d)
@@ -1489,6 +1528,10 @@ class LocalDAECollocator(CasadiCollocator):
             # Heavy code duplication from above
             for var in var_vectors["x"]:
                 name = convert_casadi_der_name(str(var.der()))
+                try:
+                    mode = self.nominal_traj_mode[name]
+                except KeyError:
+                    mode = self.nominal_traj_mode["_default_mode"]
                 vr = self.model.xmldoc.get_value_reference(name)
                 (var_index, _) = vr_map[vr]
                 values = {}
@@ -1506,16 +1549,34 @@ class LocalDAECollocator(CasadiCollocator):
                             traj_min = val
                         if val > traj_max:
                             traj_max = val
-                variant = True
-                if (traj_min < 0 and traj_max > 0 or
-                    traj_min == 0 or traj_max == 0):
+                if mode in ["attribute", "linear", "affine"]:
                     variant = False
-                if variant:
-                    traj_abs = N.abs([traj_min, traj_max])
-                    abs_min = traj_abs.min()
-                    abs_max = traj_abs.max()
-                    if abs_min < 1e-3 and abs_max / abs_min < 1e6:
+                elif mode == "time-variant":
+                    variant = True
+                    if (traj_min < 0 and traj_max > 0 or
+                        traj_min == 0 or traj_max == 0):
                         variant = False
+                    if variant:
+                        traj_abs = N.abs([traj_min, traj_max])
+                        abs_min = traj_abs.min()
+                        abs_max = traj_abs.max()
+                        if abs_min < 1e-3 and abs_max / abs_min > 1e6:
+                            variant = False
+                    if not variant:
+                        if (self.nominal_traj_mode["_default_mode"] == 
+                            "time-variant"):
+                            variant = False
+                            print("Warning: Could not do time-variant " + 
+                                  "scaling for variable %s. " % name +
+                                  "Doing time-invariant affine scaling " +
+                                  "instead.")
+                        else:
+                            raise CasadiCollocatorException(
+                                "Could not do time-variant scaling for " +
+                                "variable %s." % name)
+                else:
+                    raise ValueError("Unknown scaling mode %s " % mode +
+                                     "for variable %s." % name)
                 if variant:
                     n_variant_dx += 1
                     is_variant[vr] = True
@@ -1526,15 +1587,31 @@ class LocalDAECollocator(CasadiCollocator):
                             variant_sf[i][k].append(N.abs(values[i][k]))
                 else:
                     is_variant[vr] = False
-                    if N.allclose(traj_max, traj_min):
-                        if N.allclose(traj_max, 0.):
-                            d = 1.
-                        else:
-                            d = traj_max
+                    if mode == "attribute":
+                        d = var.getNominal()
                         e = 0.
-                    else:
-                        d = traj_max - traj_min
-                        e = traj_min
+                    elif mode == "linear":
+                        d = max([abs(traj_max), abs(traj_min)])
+                        e = 0.
+                    elif mode in ["affine", "time-variant"]:
+                        if N.allclose(traj_max, traj_min):
+                            if (self.nominal_traj_mode["_default_mode"] in 
+                                ["affine", "time-variant"]):
+                                print("Warning: Could not do affine " +
+                                      "scaling for variable %s. " % name + 
+                                      "Doing linear scaling instead.")
+                            else:
+                                raise CasadiCollocatorException(
+                                        "Could not do affine scaling " +
+                                        "for variable %s." % name)
+                            if N.allclose(traj_max, 0.):
+                                d = 1.
+                            else:
+                                d = traj_max
+                            e = 0.
+                        else:
+                            d = traj_max - traj_min
+                            e = traj_min
                     vr_sf_map[vr] = invariant_var.numel()
                     invariant_var.append(var.der())
                     invariant_d.append(d)

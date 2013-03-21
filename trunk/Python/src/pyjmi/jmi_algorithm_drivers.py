@@ -70,6 +70,7 @@ except:
 if casadi_present:
     from pyjmi.optimization.casadi_collocation import *
     from pyjmi.optimization.polynomial import *
+    from pyjmi.common.xmlparser import XMLException
 
 default_int = int
 int = N.int32
@@ -1543,6 +1544,29 @@ class LocalDAECollocationAlg(AlgorithmBase):
                                 "Input " + input_name + " can not be both " +
                                 "specified and measured.")
         
+        # Check validity of nominal_traj_mode
+        var_vectors = self.model._var_vectors
+        ocp_names = [[var.getName() for var in var_vectors[vt]] for vt in ['x', 'u', 'w']]
+        ocp_names = reduce(list.__add__, ocp_names)
+        ocp_names += [convert_casadi_der_name(str(var.der())) for var in var_vectors['x']]
+        for name in self.nominal_traj_mode.keys():
+            if name not in ocp_names:
+                if name != "_default_mode":
+                    aliases = self.model.xmldoc.get_aliases_for_variable(name)
+                    found_alias = False
+                    if aliases is not None:
+                        for alias in aliases[0]:
+                            if alias in ocp_names:
+                                self.nominal_traj_mode[alias] = \
+                                        self.nominal_traj_mode[name]
+                                del self.nominal_traj_mode[name]
+                                found_alias = True
+                                break
+                    if not found_alias:
+                        raise XMLException("Could not find variable " + name +
+                                           ", as referenced by " +
+                                           "nominal_traj_mode.")
+        
         # Solver options
         self.solver_options = self.IPOPT_options
         
@@ -1721,6 +1745,28 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: None or pyjmi.common.io.ResultDymolaTextual
             Default: None
         
+        nominal_traj_mode --
+            Mode for computing scaling factors based on nominal trajectories.
+            Four possible modes:
+            
+            "attribute": Time-invariant, linear scaling based on Nominal
+            attribute
+            
+            "linear": Time-invariant, linear scaling
+            
+            "affine": Time-invariant, affine scaling
+            
+            "time-variant": Time-variant, linear scaling
+            
+            Option is a dictionary with variable names as keys and
+            corresponding scaling modes as values. For all variables
+            not occuring in the keys of the dictionary, the mode specified by
+            the "_default_mode" entry will be used, which by default is
+            "linear".
+            
+            Type: {str: str}
+            Default: {"_default_mode": "linear"}
+        
         write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
             return the unscaled optimization result. This option is 
@@ -1882,6 +1928,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'init_traj': None,
                 'variable_scaling': True,
                 'nominal_traj': None,
+                'nominal_traj_mode': {"_default_mode": "linear"},
                 'write_scaled_result': False,
                 'result_mode': "collocation_points",
                 'n_eval_points': 20,
