@@ -140,9 +140,7 @@ struct jmi_block_residual_t {
     jmi_block_residual_jacobian_factorization_func_t evaluate_jacobian_factorization;
     
     int init;			   /**< \brief A flag for initialization */
-	int inside_finite_diffs_dF;			/**< \brief A flag indicating that we're inside dF and so no interations in kin_f */
-   	int break_on_crossing;
-
+    
     long int nb_calls;                    /**< \brief Nb of times the block has been solved */
     long int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */
     long int nb_jevals ;
