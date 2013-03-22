@@ -275,14 +275,14 @@ aspect AliasVariables {
 		}
 		
 		/**
-		 * \brief Print the alias sets.
+		 * \brief Print the alias sets, with start attributes.
 		 * 
 		 * @return A string containing the alias sets.
 		 */
 		public String printAliasSets() {
 			StringBuilder str = new StringBuilder();
 			for (AliasSet aliasSet : aliasSets) {
-				str.append(aliasSet +"\n");
+				str.append(aliasSet.toStringWithStart() +"\n");
 			}
 			return str.toString();		
 		}
@@ -363,6 +363,15 @@ aspect AliasVariables {
 			
 			@Override
 			public String toString() {
+				return toString(false);
+			}
+			
+			public String toStringWithStart() {
+				return toString(true);
+			}
+			
+			private String toString(boolean withStart) {
+				String sep = withStart ? ", " : ",";
 				StringBuilder str = new StringBuilder();
 				str.append("{");
 				
@@ -372,8 +381,8 @@ aspect AliasVariables {
 				for (AliasVariable alias : aliases) {
 					if (alias == iterationAlias)
 						continue;
-					str.append(',');
-					str.append(alias);
+					str.append(sep);
+					str.append(alias.toString(withStart));
 				}
 				str.append("}");
 				return str.toString();
@@ -469,10 +478,21 @@ aspect AliasVariables {
 			
 			@Override
 			public String toString() {
+				return toString(false);
+			}
+			
+			protected String toString(boolean withStart) {
+				StringBuilder buf = new StringBuilder();
 				if (isNegated())
-					return '-' + getFVariable().name();
-				else
-					return getFVariable().name();
+					buf.append('-');
+				FVariable fv = getFVariable();
+				buf.append(fv.name());
+				if (withStart && fv.startAttributeSet()) {
+					buf.append("(start=");
+					buf.append(fv.startAttributeCValue());
+					buf.append(")");
+				}
+				return buf.toString();
 			}
 			
 		}
