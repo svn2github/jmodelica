@@ -59,6 +59,8 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_ode_solver.h \
                     jmi_ode_cvode.h \
                     jmi_ode_cvode.c \
+                    jmi_ode_euler.h \
+                    jmi_ode_euler.c \
                     jmi_opt_coll.h \
                     jmi_array_common.h \
                     jmi_array_none.h \
@@ -221,6 +223,7 @@ include_HEADERS = jmi.h \
                   jmi_util.h \
                   jmi_ode_solver.h \
                   jmi_ode_cvode.h \
+                  jmi_ode_euler.h \
                   fmi1_functions.h \
                   fmi1_types.h \
                   $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaTables.h \

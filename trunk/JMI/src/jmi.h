@@ -395,7 +395,8 @@ extern "C" {
  } jmi_block_solvers_t;
 
  typedef enum {
-	 JMI_ODE_CVODE
+	 JMI_ODE_CVODE,
+     JMI_ODE_EULER
  } jmi_ode_solvers_t;
 
 /* @} */
