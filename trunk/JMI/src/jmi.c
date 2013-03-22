@@ -303,6 +303,7 @@ int jmi_delete(jmi_t* jmi){
 	free(jmi->dz_active_variables);
 	free(jmi->variable_scaling_factors);
 	free(jmi->tp);
+    free(jmi->ext_objs);
 	free(jmi);
 
 	return 0;
