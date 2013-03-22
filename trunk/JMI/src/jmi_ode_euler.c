@@ -177,5 +177,7 @@ void jmi_ode_euler_delete(jmi_ode_solver_t* solver) {
         free((((jmi_ode_euler_t*)(solver->integrator))->ydot_work));
 		free((((jmi_ode_euler_t*)(solver->integrator))->event_indicators));
         free((((jmi_ode_euler_t*)(solver->integrator))->event_indicators_pre));
+        
+        free((jmi_ode_euler_t*)(solver->integrator));
     }
 }

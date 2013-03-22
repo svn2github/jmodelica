@@ -201,6 +201,8 @@ void jmi_ode_cvode_delete(jmi_ode_solver_t* solver) {
         N_VDestroy_Serial((((jmi_ode_cvode_t*)(solver->integrator))->y_work));
 		N_VDestroy_Serial((((jmi_ode_cvode_t*)(solver->integrator))->y0));
         /*Deallocate CVode */
-        CVodeFree(&(((jmi_ode_cvode_t*)(solver->integrator))->cvode_mem));        
+        CVodeFree(&(((jmi_ode_cvode_t*)(solver->integrator))->cvode_mem));
+        
+        free((jmi_ode_cvode_t*)(solver->integrator));     
     }
 }
