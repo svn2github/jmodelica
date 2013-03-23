@@ -245,7 +245,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         ef = 0;
         while (1){
             iter += 1;
-            
+#if 0            
 			/* Evaluate the block to update dependent variables if any */
 			block->F(jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
 
@@ -282,7 +282,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
 				memcpy(&bool_old[iter*nbr_bool],booleans,nbr_bool*sizeof(jmi_real_t));        
 				continue;
 			}
-            
+#endif            
             /* Solve block */
             ef = block->solve(block); if (ef!=0){ break; }
             jmi_write_back_to_z_val(jmi);
