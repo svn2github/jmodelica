@@ -103,8 +103,7 @@ aspect VariabilityPropagation {
 
 		fVariable = variables().iterator().next();
 
-		if (fVariable.isDerivativeVariable()) {
-			// Do not propagate through der(x) = solution
+		if (!fVariable.canPropagate()) {
 			return;
 		}
 
@@ -147,12 +146,17 @@ aspect VariabilityPropagation {
 		
 		FTypePrefixVariability callVariability = getCall().variability();
 		CValue val[] = null;
-		FExp leftExp;
 		
 		if (!variabilityPropagationEnabled()) {
 			return;
 		}
-
+		
+		for (FFunctionCallLeft left: getLefts()) {
+			if (left.hasFExp() && !left.getFExp().canPropagate()) {
+				return;
+			}
+		}
+		
 		if (!callVariability.parameterOrLess()) {
 			return;
 		}
@@ -170,12 +174,13 @@ aspect VariabilityPropagation {
 		}
 		
 		this.taggedForRemoval = true;
-		for (int i = 0; i < getNumLeft(); i++) {
-			leftExp = getLeft(i).getFExp();
-			if (leftExp != null) {
-				leftExp.variabilityPropagation(worklist,callVariability, 
+		int i = 0;
+		for (FFunctionCallLeft left: getLefts()) {
+			if (left.hasFExp()) {
+				left.getFExp().variabilityPropagation(worklist,callVariability, 
 						callVariability.constantVariability() ? val[i].buildLiteral() : null);				
 			}
+			i++;
 		}		
 	}
 	
@@ -268,6 +273,32 @@ aspect VariabilityPropagation {
 			fDerivativeVariable.variabilityPropagation(worklist,FTypePrefixVariability.fConstant(),new FIntegerLitExp(0));				
 		}
 	}
+	
+	syn boolean FExp.canPropagate() {
+		throw new UnsupportedOperationException();
+	}
+	eq FRecordConstructor.canPropagate() {
+		for (FExp exp: getArgs()) {
+			if (!exp.canPropagate()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	eq FArray.canPropagate() {
+		for (FExp exp: getFExps()) {
+			if (!exp.canPropagate()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	eq FIdUseExp.canPropagate() {
+		return myFV().canPropagate();
+	}
+	syn boolean FAbstractVariable.canPropagate() = false;
+	eq FVariable.canPropagate() = !isOutput();
+	eq FDerivativeVariable.canPropagate() = false;
 }
 
 aspect ConstantFolding {
