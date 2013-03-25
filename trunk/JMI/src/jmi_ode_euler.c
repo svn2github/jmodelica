@@ -88,30 +88,13 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
 		hcur = tnext - tcur;
 		tcur = tnext;
         
-        /*
-        flag = fmi1_import_set_time(fmu, tcur)
-        if (flag != 0){
-            jmi_log_error(solver->jmi, "[EULER] Could not set the time");
-            return -1;
-        }
-        */
+        /* set solver tout */
+        solver->tout = tcur;
         
 		/* integrate */
 		for (k = 0; k < n_states; k++) {
 			y[k] = y[k] + hcur*ydot[k];	
 		}
-
-		/* Set states */
-		/*
-        if( (n_states > 0){
-            flag = fmi1_import_set_continuous_states(fmu, states, n_states)
-            
-            if (flag != 0){
-                jmi_log_error(solver->jmi, "[EULER] Could not set continuous states");
-                return -1;
-            }
-		}
-		*/
         
 		/* Check if an event indicator has triggered */
 		if(n_event_indicators > 0){
