@@ -40,6 +40,18 @@
 extern "C" {
 #endif
 
+typedef struct fmi1_cs_t fmi1_cs_t;
+
+struct fmi1_cs_t {
+    fmiComponent fmi1_me;
+    fmiString instance_name;
+    fmiString GUID;
+    fmiCallbackFunctions callback_functions;
+    fmiEventInfo event_info;
+    fmiBoolean logging_on;
+    /* jmi_ode_solver_t *ode_solver; */ /** \brief Struct containing the ODE solver. */
+};
+
 /**
  * \brief Returns the compatible platforms.
  *
