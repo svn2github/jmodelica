@@ -8,6 +8,7 @@ import org.eclipse.swt.widgets.Display;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.ide.compiler.IJobObject;
+import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.outline.OutlineUpdateWorker;
 
 public abstract class AbstractOutlineCache implements IASTChangeListener {
@@ -24,6 +25,8 @@ public abstract class AbstractOutlineCache implements IASTChangeListener {
 	public void setFile(IFile file) {
 		myFile = file;
 		createInitialCache();
+		ModelicaASTRegistry.getInstance().addListener(file, null, this,
+				IASTChangeListener.OUTLINE_LISTENER);
 	}
 
 	protected void handleCachedChildrenEvent() {
@@ -43,6 +46,11 @@ public abstract class AbstractOutlineCache implements IASTChangeListener {
 			myCache = event.getCachedRoot();
 			myOutline.astChanged(null);
 		}
+	}
+
+	public void dispose() {
+		ModelicaASTRegistry.getInstance().removeListener(myFile,
+				null, this);
 	}
 
 	/**
@@ -70,12 +78,7 @@ public abstract class AbstractOutlineCache implements IASTChangeListener {
 				}
 			});
 		} else {
-			// We need the GUI thread when updating graphical content.
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					myOutline.astChanged(null);
-				}
-			});
+			createInitialCache();
 		}
 	}
 

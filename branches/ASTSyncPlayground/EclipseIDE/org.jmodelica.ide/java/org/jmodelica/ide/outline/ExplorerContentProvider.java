@@ -152,6 +152,7 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 			return true;
 		case IResource.FILE:
 			final IFile file = (IFile) source;
+			System.out.println("explorercontentprovider recieved file resource changed:"+file.getName());
 			String ext = file.getFileExtension();
 			if (ext != null && ext.equals(IDEConstants.MODELICA_FILE_EXT)) {
 				ICachedOutlineNode ast = astCacheMap.get(file);

@@ -47,11 +47,22 @@ public class ChangePropagationController {
 	 */
 	public synchronized void handleNotifications(int changeType, IFile file,
 			Stack<String> nodePath) {
-		LibraryVisitor visitor = new LibraryVisitor();
 		LibraryNode libroot = listenerTrees.get(file);
-		Stack<String> copy = new Stack<String>();
-		copy.setSize(nodePath.size());
-		Collections.copy(copy, nodePath);
-		visitor.handleChangedNode(changeType, libroot, copy);
+		if (libroot != null) {
+			LibraryVisitor visitor = new LibraryVisitor();
+			Stack<String> copy = new Stack<String>();
+			copy.setSize(nodePath.size());
+			Collections.copy(copy, nodePath);
+			visitor.handleChangedNode(changeType, libroot, copy);
+		}
+	}
+
+	public void removeListener(IASTChangeListener listener, IFile file,
+			Stack<String> nodePath) {
+		LibraryNode root = listenerTrees.get(file);
+		if (root != null) {
+			LibraryVisitor visitor = new LibraryVisitor();
+			visitor.removeListener(root, nodePath, listener);
+		}
 	}
 }

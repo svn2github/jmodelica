@@ -29,7 +29,6 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.editor.ICurrentClassListener;
 import org.jmodelica.ide.outline.cache.CachedClassDecl;
 import org.jmodelica.ide.outline.cache.CachedOutlinePage;
@@ -48,14 +47,10 @@ public class ClassOutlinePage extends CachedOutlinePage implements
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		ModelicaASTRegistry.getInstance().addListener(this);// , project,
-															// null);
 		IFileEditorInput fInput = (IFileEditorInput) fTextEditor
 				.getEditorInput();
 		IFile file = fInput.getFile();
 		cache.setFile(file);
-		ModelicaASTRegistry.getInstance().addListener(file, null, this,
-				IASTChangeListener.OUTLINE_LISTENER);
 		setDoubleClickHandling(true);
 	}
 
@@ -65,7 +60,7 @@ public class ClassOutlinePage extends CachedOutlinePage implements
 
 	public void dispose() {
 		super.dispose();
-		ModelicaASTRegistry.getInstance().removeListener(this);
+		cache.dispose();
 		currentClassListeners.clear();
 	}
 
@@ -86,7 +81,7 @@ public class ClassOutlinePage extends CachedOutlinePage implements
 
 	public void addCurrentClassListener(ICurrentClassListener listener) {
 		currentClassListeners.add(listener);
-		// listener.setCurrentClass(getSelectedNode(getSelection())); TODO
+		listener.setCurrentClass(getSelectedNode(getSelection()));
 	}
 
 	public void removeCurrentClassListener(ICurrentClassListener listener) {

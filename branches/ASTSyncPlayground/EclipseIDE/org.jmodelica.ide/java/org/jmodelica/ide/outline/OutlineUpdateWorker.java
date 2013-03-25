@@ -214,7 +214,7 @@ public class OutlineUpdateWorker {
 
 		public IStatus runInUIThread(IProgressMonitor monitor) {
 			Object node = task.node;
-			// task.viewer.refresh(node);
+			task.viewer.refresh(node);
 			task.viewer.expandToLevel(node, task.expandDepth);
 			Set<ChildrenUpdatedListener> listeners = childrenUpdatedListenerMap
 					.get(node);

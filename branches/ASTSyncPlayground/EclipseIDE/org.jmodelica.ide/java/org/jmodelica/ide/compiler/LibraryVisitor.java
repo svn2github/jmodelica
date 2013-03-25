@@ -22,7 +22,7 @@ public class LibraryVisitor {
 						+ affectedListeners.size());
 		if (astChangeEventType == IASTChangeEvent.POST_REMOVE) {
 			removeLibraryPath(root, nodePath);
-		} //TODO rename
+		} // TODO rename
 		for (ListenerObject obj : affectedListeners) {
 			obj.doUpdate(nodePath);
 		}
@@ -148,5 +148,20 @@ public class LibraryVisitor {
 		for (LibraryNode child : node.getChildren())
 			collectAllListenersInSubtree(child, listenerlist);
 		return listenerlist;
+	}
+
+	public void removeListener(LibraryNode root, Stack<String> nodePath,
+			IASTChangeListener listener) {
+		String soughtNodeId = nodePath.pop();
+		for (LibraryNode child : root.getChildren()) {
+			if (child.getId().equals(soughtNodeId)) {
+				if (nodePath.size() == 0) {
+					child.removeListener(listener);
+				} else {
+					removeListener(child, nodePath, listener);
+				}
+				break;
+			}
+		}
 	}
 }

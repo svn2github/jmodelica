@@ -333,6 +333,7 @@ public class Editor extends AbstractDecoratedTextEditor implements
 	 * Updates the outline and the view
 	 */
 	protected void update() {
+		System.out.println("recompiled docu");
 		if (document() == null)
 			return;
 

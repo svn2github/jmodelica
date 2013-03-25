@@ -47,6 +47,10 @@ public class InstanceOutlinePage extends CachedOutlinePage implements
 	protected void rootChanged(TreeViewer viewer) {
 	}
 
+	public void dispose() {
+		cache.dispose();
+	}
+
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);

@@ -44,10 +44,6 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 		return getCachedASTNode();
 	}
 
-	public String getDefinitionKey() {
-		return instClassDecl.getDefinitionKey();
-	}
-
 	@Override
 	public void addComponent(String className, String componentName,
 			Placement placement) {

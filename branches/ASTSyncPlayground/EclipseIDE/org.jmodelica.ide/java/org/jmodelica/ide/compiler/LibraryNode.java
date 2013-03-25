@@ -33,4 +33,8 @@ public class LibraryNode {
 		listeners.add(new ListenerObject(listener, listenerType));// TODO
 																	// synchronize
 	}
+
+	public void removeListener(IASTChangeListener listener) {
+		listeners.remove(listener);
+	}
 }

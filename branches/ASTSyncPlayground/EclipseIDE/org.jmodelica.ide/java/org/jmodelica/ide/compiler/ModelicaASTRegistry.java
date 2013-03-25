@@ -6,6 +6,7 @@ import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.jastadd.ed.core.model.ASTChangeEvent;
 import org.jastadd.ed.core.model.GlobalRootRegistry;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jastadd.ed.core.model.node.IGlobalRootNode;
@@ -42,6 +43,14 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 		}
 		System.out.println("...fail!!!");
 		return null;
+	}
+
+	@Override
+	public boolean doUpdate(IFile file, ILocalRootNode newNode) {
+		boolean res = super.doUpdate(file, newNode);
+		ChangePropagationController.getInstance().handleNotifications(
+				ASTChangeEvent.POST_UPDATE, file, new Stack<String>());
+		return res;
 	}
 
 	@Override
@@ -86,6 +95,18 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 		}
 		ChangePropagationController.getInstance().addListener(listener,
 				listenerType, file, nodePath);
+	}
+
+	public void removeListener(IFile file, ASTNode<?> node,
+			IASTChangeListener listener) {
+		Stack<String> nodePath = new Stack<String>();
+		if (node != null) {
+			synchronized (node.state()) {
+				nodePath = createPath(node);
+			}
+		}
+		ChangePropagationController.getInstance().removeListener(listener,
+				file, nodePath);
 	}
 
 	/**

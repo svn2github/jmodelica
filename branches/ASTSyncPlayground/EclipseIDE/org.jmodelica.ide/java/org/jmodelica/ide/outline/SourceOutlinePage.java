@@ -35,6 +35,9 @@ public class SourceOutlinePage extends CachedOutlinePage implements
 	public void setFile(IFile file) {
 		cache.setFile(file);
 	}
+	public void dispose(){
+		cache.dispose();
+	}
 
 	@Override
 	protected void rootChanged(TreeViewer viewer) {

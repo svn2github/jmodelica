@@ -65,6 +65,8 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 		synchronized (root.state()) {
 			InstClassDecl icd = root.getProgram().getInstProgramRoot()
 					.syncSimpleLookupInstClassDecl(input.getClassName());
+			if (icd == null)
+				System.err.println("Graphical Editor could not find input class\n");
 			createClassDiagramProxyCache(theFile, icd);
 			classDecl = icd.getClassDecl();
 		}
