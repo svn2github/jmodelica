@@ -26,6 +26,7 @@ aspect FlatNameBinding {
 	inh FAbstractVariable FAbstractVariable.lookupFV(FQName fqn);
 	inh FAbstractVariable FAbstractVariable.lookupDerFV(FQName fqn);
 	inh FAbstractVariable FRecordDecl.lookupFV(FQName fqn);
+	inh FAbstractVariable FActualStream.lookupFV(FQName fqn);
 	
 	syn FAbstractVariable FIdUse.myFV() = lookupFV(getFQName());
 	syn lazy FAbstractVariable FIdUseExp.myFV() = getFIdUse().myFV();
