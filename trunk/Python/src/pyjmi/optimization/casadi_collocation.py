@@ -1491,6 +1491,12 @@ class LocalDAECollocator(CasadiCollocator):
                             e = 0.
                         elif mode == "linear":
                             d = max([abs(traj_max), abs(traj_min)])
+                            if d == 0.0:
+                                d = 1.
+                                print("Warning: Nominal trajectory for " +
+                                      "variable %s is identically " % name + 
+                                      "zero.")
+                                print(vt)
                             e = 0.
                         elif mode in ["affine", "time-variant"]:
                             if N.allclose(traj_max, traj_min):
@@ -1503,7 +1509,11 @@ class LocalDAECollocator(CasadiCollocator):
                                     raise CasadiCollocatorException(
                                             "Could not do affine scaling " +
                                             "for variable %s." % name)
-                                if N.allclose(traj_max, 0.):
+                                if traj_max == 0.0:
+                                    print("Warning: Nominal trajectory for " +
+                                          "variable %s is " % name + 
+                                          "identically zero.")
+                                    print(vt)
                                     d = 1.
                                 else:
                                     d = traj_max
