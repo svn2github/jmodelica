@@ -882,6 +882,31 @@ class TestLocalDAECollocator:
                                   rtol=0, atol=1e-5)
     
     @testattr(casadi = True)
+    def test_result_file_name(self):
+        """
+        Test different result file names.
+        """
+        model = self.model_vdp_bounds_lagrange
+        
+        # Default file name
+        try:
+            os.remove("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt")
+        except OSError:
+            pass
+        model.optimize(self.algorithm)
+        assert(os.path.exists("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt"))
+        
+        # Custom file name
+        opts = model.optimize_options(self.algorithm)
+        opts['result_file_name'] = "vdp_custom_file_name.txt"
+        try:
+            os.remove("vdp_custom_file_name.txt")
+        except OSError:
+            pass
+        model.optimize(self.algorithm, opts)
+        assert(os.path.exists("vdp_custom_file_name.txt"))
+    
+    @testattr(casadi = True)
     def test_result_mode(self):
         """
         Test the two different result modes.
