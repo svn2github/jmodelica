@@ -1184,6 +1184,14 @@ class LocalDAECollocator(CasadiCollocator):
         del var_vectors['u']
         self._var_vectors = var_vectors
         
+        # Update inputs in vr_map
+        vr_map = copy.copy(self.model.get_vr_map())
+        for vt in ['spec_u', 'unspec_u']:
+            for ind in xrange(len(var_vectors[vt])):
+                vr = var_vectors[vt][ind].getValueReference()
+                vr_map[vr] = (ind, vt)
+        self._vr_map = vr_map
+        
         # Broadcast self.pol.der_vals
         # Note that der_vals is quite different from self.pol.der_vals
         der_vals = []
@@ -1327,7 +1335,7 @@ class LocalDAECollocator(CasadiCollocator):
         # Create nominal trajectories
         if self.nominal_traj is not None:
             nom_traj = {"dx": {}}
-            vr_map = self.model.get_vr_map()
+            vr_map = self._vr_map
             n = len(self.nominal_traj.get_data_matrix()[:, 0])
             for vt in ['x', 'unspec_u', 'w']:
                 nom_traj[vt] = {}
@@ -1515,7 +1523,6 @@ class LocalDAECollocator(CasadiCollocator):
             # Do not scaled specified inputs
             for var in var_vectors['spec_u']:
                 vr = var.getValueReference()
-                (var_index, _) = vr_map[vr]
                 is_variant[vr] = False
                 d = 1.
                 e = 0.
@@ -2276,7 +2283,7 @@ class LocalDAECollocator(CasadiCollocator):
                         y_ref[i][k] = data.eval(self.time_points[i][k])[0, :]
                 
                 # Calculate errors
-                vr_map = self.model.get_vr_map()
+                vr_map = self._vr_map
                 if self.variable_scaling and self.nominal_traj is None:
                     sfs = self._sf
                 measured_variables = \
@@ -2287,8 +2294,6 @@ class LocalDAECollocator(CasadiCollocator):
                     for i in range(1, self.n_e + 1):
                         for k in range(1, self.n_cp + 1):
                             (ind, vt) = vr_map[vr]
-                            if vt == 'u':
-                                vt = 'unspec_u'
                             val = self.var_map[i][k][vt][ind]
                             ref_val = y_ref[i][k][j]
                             if self.variable_scaling:
@@ -2360,7 +2365,7 @@ class LocalDAECollocator(CasadiCollocator):
         var_indices = self.get_var_indices()
         ocp = self.ocp
         var_types = ['x', 'unspec_u', 'w', 'p_opt']
-        vr_map = self.model.get_vr_map()
+        vr_map = self._vr_map
         var_vectors = self._var_vectors
         time_points = self.get_time_points()
         if self.variable_scaling:
@@ -2567,7 +2572,7 @@ class LocalDAECollocator(CasadiCollocator):
         var_types = ['x', 'unspec_u', 'w']
         if not self.eliminate_der_var:
             var_types = ['dx'] + var_types
-        vr_map = self.model.get_vr_map()
+        vr_map = self._vr_map
         var_map = self.var_map
         var_opt = {}
         var_indices = self.get_var_indices()
@@ -2878,7 +2883,6 @@ class LocalDAECollocator(CasadiCollocator):
         
         # Denormalize minimum time problem
         if self._normalize_min_time:
-            vr_map = self.model.get_vr_map()
             if self.ocp.variable('startTime').getFree():
                 vr = self.ocp.variable('startTime').getValueReference()
                 (ind, _) = vr_map[vr]

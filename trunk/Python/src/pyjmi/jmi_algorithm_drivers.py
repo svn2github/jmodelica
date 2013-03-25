@@ -1746,8 +1746,8 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Default: None
         
         nominal_traj_mode --
-            Mode for computing scaling factors based on nominal trajectories.
-            Four possible modes:
+            Mode for computing scaling factors for each variable based on
+            nominal trajectories. Four possible modes:
             
             "attribute": Time-invariant, linear scaling based on Nominal
             attribute
