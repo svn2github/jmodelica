@@ -11,26 +11,24 @@ import org.jmodelica.modelica.compiler.InstExtends;
 import org.jmodelica.modelica.compiler.InstNode;
 
 public abstract class CachedInstNode {
-	private InstNode realInstNode;
 	private List<CachedInstExtends> syncGetInstExtendss = new ArrayList<CachedInstExtends>();
 	private Layer syncGetDiagramLayer;
 	private Layer syncGetIconLayer;
 	private List<CachedInstComponentDecl> syncGetInstComponentDecls = new ArrayList<CachedInstComponentDecl>();
-	//private String syncLookupParameterValue; // TODO fix these
+	// private String syncLookupParameterValue; // TODO fix these
 	protected List<CachedConnectClause> connectionClauses = new ArrayList<CachedConnectClause>();
 
 	public CachedInstNode(InstNode node) {
-		realInstNode = node;
-		setSyncGetInstExtendss();
-		syncGetDiagramLayer = node.syncGetDiagramLayer();
-		syncGetIconLayer = node.syncGetIconLayer();
-		setSyncGetInstComponentDecls();
-		setConnectionClauses();
-		// node.syncLookupParameterValue(parameter);
+		setSyncGetInstExtendss(node);
+		syncGetDiagramLayer = node.syncGetDiagramLayer(); //TODO
+		syncGetIconLayer = node.syncGetIconLayer(); //TODO
+		setSyncGetInstComponentDecls(node);
+		setConnectionClauses(node);
+		//node.syncLookupParameterValue(node.syncName());
 	}
 
-	private void setConnectionClauses() {
-		for (FAbstractEquation fae : realInstNode.syncGetFAbstractEquations()) {
+	private void setConnectionClauses(InstNode node) {
+		for (FAbstractEquation fae : node.syncGetFAbstractEquations()) {
 			if (fae instanceof FConnectClause) {
 				FConnectClause fcc = (FConnectClause) fae;
 				ConnectClause connectClause = fcc.syncGetConnectClause();
@@ -45,14 +43,14 @@ public abstract class CachedInstNode {
 		}
 	}
 
-	private void setSyncGetInstComponentDecls() {
-		for (InstComponentDecl icd : realInstNode.syncGetInstComponentDecls()) {
+	private void setSyncGetInstComponentDecls(InstNode node) {
+		for (InstComponentDecl icd : node.syncGetInstComponentDecls()) {
 			syncGetInstComponentDecls.add(new CachedInstComponentDecl(icd));
 		}
 	}
 
-	private void setSyncGetInstExtendss() {
-		for (InstExtends ie : realInstNode.syncGetInstExtendss()) {
+	private void setSyncGetInstExtendss(InstNode node) {
+		for (InstExtends ie : node.syncGetInstExtendss()) {
 			syncGetInstExtendss.add(new CachedInstExtends(ie));
 		}
 	}

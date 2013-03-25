@@ -226,7 +226,7 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 		SafeRunner.run(new SafeRunnable() {
 			@Override
 			public void run() throws Exception {
-				dp.saveModelicaFile(monitor);
+				cacheRegistry.saveModelicaFile(monitor);
 				getCommandStack().markSaveLocation();
 			}
 		});
@@ -342,7 +342,7 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 		}
 		//System.out.println("copy selection, t+"
 		//		+ (System.currentTimeMillis() - start));
-		dp.setInstClassDeclCached(cacheRegistry.getCache());
+		dp.setCachedInstClassDeclRoot(cacheRegistry.getCache());
 		//System.out.println("flush, t+" + (System.currentTimeMillis() - start));
 		setContent();
 		//System.out.println("set content, t+"

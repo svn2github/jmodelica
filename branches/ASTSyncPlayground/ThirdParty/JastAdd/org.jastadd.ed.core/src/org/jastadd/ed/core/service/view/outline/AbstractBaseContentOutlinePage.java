@@ -10,15 +10,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
-import org.jastadd.ed.core.model.node.IASTNode;
 import org.jastadd.ed.core.model.node.IJastAddNode;
 import org.jastadd.ed.core.service.view.JastAddContentProvider;
 import org.jastadd.ed.core.service.view.JastAddLabelProvider;
+import org.jastadd.ed.core.model.node.IOutlineNode;
 
 public abstract class AbstractBaseContentOutlinePage extends ContentOutlinePage {
 	
 	protected AbstractTextEditor fTextEditor;
-	protected IASTNode fRoot;
+	protected IOutlineNode fRoot;
 	private ITreeContentProvider fContentProvider;
 	private IBaseLabelProvider fLabelProvider;
 
@@ -106,7 +106,7 @@ public abstract class AbstractBaseContentOutlinePage extends ContentOutlinePage 
 	 * Updates the AST shown by this outline page
 	 * @param ast The AST to show
 	 */
-	public void updateAST(IASTNode ast) {
+	public void updateAST(IOutlineNode ast) {
 		fRoot = ast;
 		update();
 	}

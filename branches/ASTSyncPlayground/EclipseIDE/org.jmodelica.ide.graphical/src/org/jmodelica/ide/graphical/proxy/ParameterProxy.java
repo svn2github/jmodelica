@@ -15,9 +15,12 @@ public class ParameterProxy implements IPropertyDescriptor {
 	private ComponentProxy owner;
 	private String name;
 
-	public ParameterProxy(String name, ComponentProxy owner) {
+	private String value;
+
+	public ParameterProxy(String name, ComponentProxy owner,String value) {
 		this.name = name;
 		this.owner = owner;
+		this.value=value;
 	}
 
 	/*
@@ -85,7 +88,7 @@ public class ParameterProxy implements IPropertyDescriptor {
 		//InstComponentDecl icd;
 		//icd.syncLookupParameterValue(parameter)
 		//return owner.getComponentDecl().syncLookupParameterValue(name);
-		return "777";
+		return value;
 	}
 
 }

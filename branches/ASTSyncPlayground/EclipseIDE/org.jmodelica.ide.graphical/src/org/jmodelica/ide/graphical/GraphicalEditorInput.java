@@ -9,54 +9,57 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
-import org.jmodelica.modelica.compiler.ClassDecl;
+import org.jmodelica.ide.outline.cache.CachedClassDecl;
 
 public class GraphicalEditorInput implements IEditorInput, IPersistableElement {
-	
+
 	private static final boolean DEFAULT_EDIT_ICON = false;
-	
+
 	private String className;
 	private IProject project;
 	private boolean editIcon;
-	
+
 	public GraphicalEditorInput(String className, IProject project) {
 		this(className, project, DEFAULT_EDIT_ICON);
 	}
-	
-	public GraphicalEditorInput(String className, IProject project, boolean editIcon) {
+
+	public GraphicalEditorInput(String className, IProject project,
+			boolean editIcon) {
 		this.className = className;
 		this.project = project;
 		this.editIcon = editIcon;
 	}
-	
+
 	public GraphicalEditorInput(String className, File sourceFile) {
 		this(className, sourceFile, DEFAULT_EDIT_ICON);
 	}
-	
-	public GraphicalEditorInput(String className, File sourceFile, boolean editIcon) {
+
+	public GraphicalEditorInput(String className, File sourceFile,
+			boolean editIcon) {
 		this(className, lookupIProject(sourceFile), editIcon);
 	}
-	
-	public GraphicalEditorInput(ClassDecl classDecl) {
+
+	public GraphicalEditorInput(CachedClassDecl classDecl) {
 		this(classDecl, DEFAULT_EDIT_ICON);
 	}
-	
-	public GraphicalEditorInput(ClassDecl classDecl, boolean editIcon) {
-		this(classDecl.name(), new File(classDecl.containingFileName()), editIcon);
+
+	public GraphicalEditorInput(CachedClassDecl classDecl, boolean editIcon) {
+		this(classDecl.name(), new File(classDecl.containingFileName()),
+				editIcon);
 	}
-	
+
 	public String getClassName() {
 		return className;
 	}
-	
+
 	public IProject getProject() {
 		return project;
 	}
-	
+
 	public boolean editIcon() {
 		return editIcon;
 	}
-	
+
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
 		return null;
@@ -86,14 +89,15 @@ public class GraphicalEditorInput implements IEditorInput, IPersistableElement {
 	public String getToolTipText() {
 		return project.getFullPath() + ":" + getName();
 	}
-	
+
 	private static IProject lookupIProject(File file) {
-		IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(file.toURI());
-		
+		IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+				.findFilesForLocationURI(file.toURI());
+
 		for (IFile f : files) {
 			return f.getProject();
 		}
-		
+
 		return null;
 	}
 

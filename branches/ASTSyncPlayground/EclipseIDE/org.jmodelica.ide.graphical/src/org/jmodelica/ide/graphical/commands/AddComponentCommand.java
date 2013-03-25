@@ -27,7 +27,9 @@ public class AddComponentCommand extends Command {
 
 	@Override
 	public void redo() {
-		component = diagram.addComponent(className, placement);
+		//component = diagram.addComponent(className, placement);
+		diagram.addComponent(className, placement);
+		System.out.println("ADD classname:"+className);
 	}
 
 	@Override

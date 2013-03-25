@@ -43,8 +43,10 @@ public abstract class CreateConnectionCommand extends Command {
 
 	@Override
 	public void execute() {
-		connection = source.getDiagram().addConnection(source, target);
-		initConnection(connection);
+		source.getDiagram().addConnection(source.buildDiagramName(), target.buildDiagramName());
+		//connection = source.getDiagram().addConnection(source, target);
+		//initConnection(connection);
+		//TODO fix UNDO/REDO
 	}
 
 	@Override

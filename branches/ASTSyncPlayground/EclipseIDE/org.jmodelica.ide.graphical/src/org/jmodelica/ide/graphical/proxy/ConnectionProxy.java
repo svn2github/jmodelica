@@ -16,7 +16,8 @@ public class ConnectionProxy extends Observable implements Observer {
 	private CachedConnectClause connectClause;
 	private boolean connected = true;
 
-	public ConnectionProxy(ConnectorProxy source, ConnectorProxy target, CachedConnectClause connectClause, AbstractDiagramProxy diagram) {
+	public ConnectionProxy(ConnectorProxy source, ConnectorProxy target,
+			CachedConnectClause connectClause, AbstractDiagramProxy diagram) {
 		this.source = source;
 		this.target = target;
 		this.connectClause = connectClause;
@@ -29,7 +30,8 @@ public class ConnectionProxy extends Observable implements Observer {
 
 	public Line getLine() {
 		if (connectClause == null) {
-			ConnectionProxy newConnection = diagram.getConnection(source, target);
+			ConnectionProxy newConnection = diagram.getConnection(source,
+					target);
 			if (newConnection == null)
 				return null;
 			else
@@ -45,6 +47,10 @@ public class ConnectionProxy extends Observable implements Observer {
 		connected = false;
 		source.sourceConnectionsHasChanged();
 		target.targetConnectionsHasChanged();
+	}
+
+	public AbstractDiagramProxy getProxy() {
+		return diagram;
 	}
 
 	public void connect() {
@@ -71,23 +77,25 @@ public class ConnectionProxy extends Observable implements Observer {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (o == source && flag == ConnectorProxy.COLLECTING_SOURCE && connected) {
+		if (o == source && flag == ConnectorProxy.COLLECTING_SOURCE
+				&& connected) {
 			((List<ConnectionProxy>) additionalInfo).add(this);
 		}
-		if (o == target && flag == ConnectorProxy.COLLECTING_TARGET && connected) {
+		if (o == target && flag == ConnectorProxy.COLLECTING_TARGET
+				&& connected) {
 			((List<ConnectionProxy>) additionalInfo).add(this);
 		}
 	}
 
-	protected CachedConnectClause getConnectClause() {
+	public CachedConnectClause getConnectClause() {
 		return connectClause;
 	}
-	
+
 	@Override
 	public String toString() {
 		return source.buildDiagramName() + " -- " + target.buildDiagramName();
 	}
-	
+
 	protected void dispose() {
 		source.removeObserver(this);
 		target.removeObserver(this);

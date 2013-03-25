@@ -5,6 +5,7 @@ import java.util.Stack;
 import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.ide.graphical.proxy.cache.CachedInstClassDecl;
 import org.jmodelica.ide.graphical.proxy.cache.CachedInstComponentDecl;
+import org.jmodelica.ide.graphical.proxy.cache.CachedInstNode;
 
 public class ComponentDiagramProxy extends AbstractDiagramProxy {
 
@@ -13,9 +14,13 @@ public class ComponentDiagramProxy extends AbstractDiagramProxy {
 	public ComponentDiagramProxy(ComponentProxy component) {
 		this.component = component;
 	}
+	@Override
+	public String getQualifiedClassName() {
+		return component.getQualifiedClassName();
+	}
 
 	@Override
-	protected CachedInstComponentDecl getASTNode() {
+	protected CachedInstNode getCachedASTNode() {
 		return component.getComponentDecl();
 	}
 
@@ -26,11 +31,11 @@ public class ComponentDiagramProxy extends AbstractDiagramProxy {
 
 	@Override
 	protected CachedInstComponentDecl getComponentDecl() {
-		return getASTNode();
+		return component.getComponentDecl();
 	}
 
 	@Override
-	public ComponentProxy addComponent(String className, String componentName, Placement placement) {
+	public void addComponent(String className, String componentName, Placement placement) {
 		throw new UnsupportedOperationException("It is not possible to alter component definition!");
 	}
 
@@ -40,7 +45,7 @@ public class ComponentDiagramProxy extends AbstractDiagramProxy {
 	}
 
 	@Override
-	public ConnectionProxy addConnection(ConnectorProxy source, ConnectorProxy target) {
+	public void addConnection(String sourceDiagramName, String targetDiagramName) {
 		throw new UnsupportedOperationException("It is not possible to alter component definition!");
 	}
 
@@ -50,7 +55,7 @@ public class ComponentDiagramProxy extends AbstractDiagramProxy {
 	}
 
 	@Override
-	protected boolean removeConnection(ConnectionProxy connection) {
+	public void removeConnection(ConnectionProxy connection) {
 		throw new UnsupportedOperationException("It is not possible to alter component definition!");
 	}
 	

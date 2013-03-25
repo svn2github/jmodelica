@@ -151,7 +151,7 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 		}
 	}
 
-	//DEBUG TODO remove
+	// DEBUG TODO remove
 	private void printFiles(IGlobalRootNode node) {
 		ILocalRootNode[] nodes = node.lookupAllFileNodes();
 		if (nodes != null)
@@ -195,6 +195,7 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 	 * (global root node) for a matching file node (local root node).
 	 */
 	protected ILocalRootNode[] lookupFile(IFile file) {
+		System.out.println("LOOOOOKUP OF FILE:"+file.getName());
 		List<ILocalRootNode> nodeList = new ArrayList<ILocalRootNode>();
 		IProject project = file.getProject();
 		ILock lock = getGlobalLock(project);
@@ -202,6 +203,7 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 			lock.acquire();
 			for (IProject p : fProjectASTMap.keySet()) {
 				if (project.equals(p)) {
+					System.out.println("Found PROJECT OF FILE, P:"+p.getName());
 					IGlobalRootNode projectNode = fProjectASTMap.get(project);
 					nodeList = projectNode.lookupFileNode(file);
 					break;
@@ -214,8 +216,8 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 		int i = 0;
 		for (ILocalRootNode node : nodeList)
 			result[i++] = node;
-		System.out.println("GRR returning lookupfile() array of size: "
-				+ result.length);
+		if (result == null) //TODO remove print
+			System.err.println("lookupfile returned NULL, should never do that");
 		return result;
 	}
 
@@ -269,8 +271,8 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 							| IASTDelta.CHILD_CHANGED);
 					ASTChangeEvent evt = new ASTChangeEvent(
 							ASTChangeEvent.POST_REMOVE,
-							ASTChangeEvent.FILE_LEVEL, projectNode,
-							null,projectDelta);//TODO fix null
+							ASTChangeEvent.FILE_LEVEL, projectNode, null,
+							projectDelta);// TODO fix null
 					notifyListeners(evt);
 					result = true;
 				}
@@ -305,7 +307,8 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 			ASTDelta projectDelta = new ASTDelta(projectNode, childDelta);
 			projectDelta.setStatus(IASTDelta.REMOVED);
 			ASTChangeEvent evt = new ASTChangeEvent(ASTChangeEvent.POST_REMOVE,
-					ASTChangeEvent.PROJECT_LEVEL, projectNode,null, projectDelta);//TODO fix null
+					ASTChangeEvent.PROJECT_LEVEL, projectNode, null,
+					projectDelta);// TODO fix null
 			notifyListeners(evt);
 			result = true;
 		}
@@ -353,7 +356,9 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 								ASTChangeEvent evt = new ASTChangeEvent(
 										ASTChangeEvent.POST_UPDATE,
 										ASTChangeEvent.PROJECT_LEVEL,
-										projectNode,null, projectDelta);//TODO fix null
+										projectNode, null, projectDelta);// TODO
+																			// fix
+																			// null
 								notifyListeners(evt);
 								result = true;
 							}
@@ -372,8 +377,8 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 								| IASTDelta.CHILD_CHANGED);
 						ASTChangeEvent evt = new ASTChangeEvent(
 								ASTChangeEvent.POST_UPDATE,
-								ASTChangeEvent.PROJECT_LEVEL, newNode,null,
-								projectDelta);//TODO fix null
+								ASTChangeEvent.PROJECT_LEVEL, newNode, null,
+								projectDelta);// TODO fix null
 						notifyListeners(evt);
 						result = true;
 					}
@@ -411,7 +416,8 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 				fProjectASTMap.put(project, newNode);
 				ASTChangeEvent evt = new ASTChangeEvent(
 						ASTChangeEvent.POST_UPDATE,
-						ASTChangeEvent.PROJECT_LEVEL, projectNode,null, projectDelta);//TODO fix null
+						ASTChangeEvent.PROJECT_LEVEL, projectNode, null,
+						projectDelta);// TODO fix null
 				notifyListeners(evt);
 			} finally {
 				lock.release();
@@ -504,8 +510,9 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 		 * projectDelta.setStatus(IASTDelta.ADDED);
 		 */
 		ASTChangeEvent evt = new ASTChangeEvent(ASTChangeEvent.POST_ADDED,
-				ASTChangeEvent.PROJECT_LEVEL, newNode,null, null);// projectDelta);
-																// TODO fix null
+				ASTChangeEvent.PROJECT_LEVEL, newNode, null, null);// projectDelta);
+																	// TODO fix
+																	// null
 
 		notifyListeners(evt);
 	}

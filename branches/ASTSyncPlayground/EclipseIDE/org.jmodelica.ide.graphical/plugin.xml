@@ -19,7 +19,7 @@
             priority="highest">
          <enablement>
             <instanceof
-                  value="org.jmodelica.modelica.compiler.ASTNode">
+                  value="org.jmodelica.ide.outline.cache.CachedASTNode">
             </instanceof></enablement>
       </actionProvider>
    </extension>

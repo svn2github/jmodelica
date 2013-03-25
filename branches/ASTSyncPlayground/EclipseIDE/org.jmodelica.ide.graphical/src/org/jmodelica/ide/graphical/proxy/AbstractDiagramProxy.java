@@ -10,15 +10,8 @@ import java.util.Set;
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.ide.graphical.proxy.cache.CachedConnectClause;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstComponentDecl;
 import org.jmodelica.ide.graphical.proxy.cache.CachedInstExtends;
 import org.jmodelica.ide.graphical.proxy.cache.CachedInstNode;
-import org.jmodelica.modelica.compiler.ConnectClause;
-import org.jmodelica.modelica.compiler.FAbstractEquation;
-import org.jmodelica.modelica.compiler.FConnectClause;
-import org.jmodelica.modelica.compiler.InstComponentDecl;
-import org.jmodelica.modelica.compiler.InstExtends;
-import org.jmodelica.modelica.compiler.InstNode;
 
 public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 
@@ -26,7 +19,7 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 	private Map<String, ComponentProxy> componentMap = new HashMap<String, ComponentProxy>();
 
 	@Override
-	protected abstract CachedInstNode getASTNode();
+	protected abstract CachedInstNode getCachedASTNode();
 
 	@Override
 	protected String buildDiagramName() {
@@ -35,7 +28,7 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 
 	@Override
 	public Layer getLayer() {
-		return getASTNode().syncGetDiagramLayer();
+		return getCachedASTNode().syncGetDiagramLayer();
 	}
 
 	@Override
@@ -54,7 +47,7 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 			it.next().getValue().dispose();
 			it.remove();
 		}
-		constructConnections(getASTNode());
+		constructConnections(getCachedASTNode());
 	}
 
 	public void constructConnections(CachedInstNode node) {
@@ -109,10 +102,9 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 
 	protected CachedConnectClause getConnection(
 			CachedConnectClause connectClause) {
-		return searchForConnection(getASTNode(), connectClause);
+		return searchForConnection(getCachedASTNode(), connectClause);
 	}
 
-	// TODO this works?
 	private static CachedConnectClause searchForConnection(CachedInstNode node,
 			CachedConnectClause connectClause) {
 		for (CachedConnectClause ccc : node.getConnections()) {
@@ -129,39 +121,27 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 		return null;
 	}
 
-	@Override //TODO works?
-	protected CachedInstComponentDecl getInstComponentDecl(String componentName) {
-		// return getASTNode().syncSimpleLookupInstComponentDecl(componentName);
-		for (CachedInstComponentDecl icdc : getASTNode()
-				.syncGetInstComponentDecls()) {
-			if (icdc.syncName().equalsIgnoreCase(componentName)) {
-				return icdc;
-			}
-		}
-		return null;
-	}
-
 	@Override
 	public AbstractDiagramProxy getDiagram() {
 		return this;
 	}
 
-	public ComponentProxy addComponent(String className, Placement placement) {
+	public void addComponent(String className, Placement placement) {
 		String componentName = generateUniqueName(className);
-		return addComponent(className, componentName, placement);
+		addComponent(className, componentName, placement);
 	}
 
-	public abstract ComponentProxy addComponent(String className,
-			String componentName, Placement placement);
+	public abstract void addComponent(String className, String componentName,
+			Placement placement);
 
 	public abstract void removeComponent(ComponentProxy component);
 
-	public abstract ConnectionProxy addConnection(ConnectorProxy source,
-			ConnectorProxy target);
+	public abstract void addConnection(String sourceDiagramName,
+			String targetDiagramName);
 
 	protected abstract void addConnection(ConnectionProxy connection);
 
-	protected abstract boolean removeConnection(ConnectionProxy connection);
+	public abstract void removeConnection(ConnectionProxy connection);
 
 	private String generateUniqueName(String className) {
 		String baseAutoName = className;

@@ -12,18 +12,14 @@ import org.jmodelica.ide.graphical.proxy.cache.CachedInstClassDecl;
 import org.jmodelica.ide.graphical.proxy.cache.CachedInstComponentDecl;
 import org.jmodelica.ide.graphical.proxy.cache.CachedInstExtends;
 import org.jmodelica.ide.graphical.proxy.cache.CachedInstNode;
-import org.jmodelica.modelica.compiler.InstNode;
 
 public abstract class AbstractNodeProxy extends Observable {
-
-	protected abstract CachedInstComponentDecl getInstComponentDecl(
-			String componentName);
 
 	protected abstract CachedInstClassDecl getClassDecl();
 
 	protected abstract CachedInstComponentDecl getComponentDecl();
 
-	protected abstract CachedInstNode getASTNode();
+	protected abstract CachedInstNode getCachedASTNode();
 
 	abstract protected Map<String, ComponentProxy> getComponentMap();
 
@@ -36,17 +32,17 @@ public abstract class AbstractNodeProxy extends Observable {
 	public abstract Layer getLayer();
 
 	public String getClassName() {
-		return "booo";// TODO return getClassDecl().syncGetClassIconName();
+		return getClassDecl().syncGetClassIconName();
 	}
 
 	public String getQualifiedClassName() {
-		return "fooo";// TODO getClassDecl().syncQualifiedName();
+		return getClassDecl().syncQualifiedName();
 	}
 
 	public String getComponentName() {
 		CachedInstComponentDecl componentDecl = getComponentDecl();
 		if (componentDecl != null)
-			return componentDecl.syncName();
+			return componentDecl.syncQualifiedName();
 		else
 			return null;
 	}
@@ -63,7 +59,7 @@ public abstract class AbstractNodeProxy extends Observable {
 
 	public List<GraphicItem> getGraphics() {
 		List<GraphicItem> graphics = new ArrayList<GraphicItem>();
-		collectGraphics(getASTNode(), graphics, inDiagram());
+		collectGraphics(getCachedASTNode(), graphics, inDiagram());
 		return graphics;
 	}
 
@@ -80,7 +76,7 @@ public abstract class AbstractNodeProxy extends Observable {
 
 	public List<ComponentProxy> getComponents() {
 		List<ComponentProxy> components = new ArrayList<ComponentProxy>();
-		collectComponents(getASTNode(), components);
+		collectComponents(getCachedASTNode(), components);
 		return components;
 	}
 
@@ -115,8 +111,10 @@ public abstract class AbstractNodeProxy extends Observable {
 	}
 
 	public String getParameterValue(String parameter) {
-		// return getASTNode().syncLookupParameterValue(parameter); //TODO
-		return "666";
+		for (String[] s : getComponentDecl().getParams())
+			if (s[0].equals(parameter))
+				return s[1];
+		return "";
 	}
 
 	protected static String buildMapName(String qualifiedName,
