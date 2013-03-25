@@ -1496,7 +1496,6 @@ class LocalDAECollocator(CasadiCollocator):
                                 print("Warning: Nominal trajectory for " +
                                       "variable %s is identically " % name + 
                                       "zero.")
-                                print(vt)
                             e = 0.
                         elif mode in ["affine", "time-variant"]:
                             if N.allclose(traj_max, traj_min):
@@ -1513,7 +1512,6 @@ class LocalDAECollocator(CasadiCollocator):
                                     print("Warning: Nominal trajectory for " +
                                           "variable %s is " % name + 
                                           "identically zero.")
-                                    print(vt)
                                     d = 1.
                                 else:
                                     d = traj_max
