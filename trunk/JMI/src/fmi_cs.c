@@ -180,23 +180,23 @@ fmiStatus fmi1_cs_set_real_input_derivatives(fmiComponent c, const fmiValueRefer
 }
 
 fmiStatus fmi1_cs_get_status(fmiComponent c, const fmiStatusKind s, fmiStatus* value){
-    return fmiError;
+    return fmiDiscard;
 }
 
 fmiStatus fmi1_cs_get_real_status(fmiComponent c, const fmiStatusKind s, fmiReal* value){
-    return fmiError;
+    return fmiDiscard;
 }
 
 fmiStatus fmi1_cs_get_integer_status(fmiComponent c, const fmiStatusKind s, fmiInteger* value){
-    return fmiError;
+    return fmiDiscard;
 }
 
 fmiStatus fmi1_cs_get_boolean_status(fmiComponent c, const fmiStatusKind s, fmiBoolean* value){
-    return fmiError;
+    return fmiDiscard;
 }
 
 fmiStatus fmi1_cs_get_string_status(fmiComponent c, const fmiStatusKind s, fmiString* value){
-    return fmiError;
+    return fmiDiscard;
 }
 
 int rhs_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs){
