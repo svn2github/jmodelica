@@ -18,7 +18,6 @@ package org.jmodelica.ide.outline;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -29,22 +28,23 @@ import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.ide.actions.TestRenameAction;
 import org.jmodelica.ide.actions.TestRemoveAction;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
+import org.jmodelica.ide.outline.cache.CachedOutlinePage;
 
-public class InstanceOutlinePage extends OutlinePage implements
+public class InstanceOutlinePage extends CachedOutlinePage implements
 		IASTChangeListener {
+	private InstanceOutlineCache cache;
 
 	public InstanceOutlinePage(AbstractTextEditor editor) {
 		super(editor);
+		cache = new InstanceOutlineCache(this);
+	}
+
+	public void setFile(IFile file) {
+		cache.setFile(file);
 	}
 
 	@Override
 	protected void rootChanged(TreeViewer viewer) {
-	}
-
-	@Override
-	protected ITreeContentProvider createContentProvider() {
-		return new InstanceOutlineContentProvider();
 	}
 
 	@Override
@@ -64,15 +64,11 @@ public class InstanceOutlinePage extends OutlinePage implements
 		tbm.setContextMenuManager(mm);
 		Menu menu = mm.createContextMenu(viewer.getTree());
 		viewer.getTree().setMenu(menu);
-		ModelicaASTRegistry.getInstance().addListener(
-				((IFileEditorInput) fTextEditor.getEditorInput()).getFile(),
-				null, this, IASTChangeListener.OUTLINE_LISTENER);
 	}
 
 	public void astChanged(IASTChangeEvent e) {
-		// Synconization is done in contentprovider.
 		long time = System.currentTimeMillis();
-		update();
+		updateAST(cache.getCache());
 		System.out.println("InstanceOutline update took: "
 				+ (System.currentTimeMillis() - time) + "ms");
 	}

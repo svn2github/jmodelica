@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
-import org.jmodelica.modelica.compiler.ClassDecl;
+import org.jmodelica.ide.outline.cache.CachedClassDecl;
 
 public class ClassCopySource {
 
@@ -22,7 +22,7 @@ public class ClassCopySource {
 		if (!selection.isEmpty()) {
 			Iterator<Object> it = selection.iterator();
 			while (it.hasNext())
-				if (!(it.next() instanceof ClassDecl))
+				if (!(it.next() instanceof CachedClassDecl))
 					return false;
 			return true;
 		}
@@ -35,13 +35,13 @@ public class ClassCopySource {
 
 	public static String getStringData(IStructuredSelection selection) {
 		Object[] elems = selection.toArray();
-		if (elems.length == 1 && elems[0] instanceof ClassDecl) { 
-			return ((ClassDecl) elems[0]).qualifiedName();
+		if (elems.length == 1 && elems[0] instanceof CachedClassDecl) { 
+			return ((CachedClassDecl) elems[0]).qualifiedName();
 		} else {
 			StringBuilder buf = new StringBuilder();
 			for (Object elem : elems) {
-				if (elem instanceof ClassDecl) {
-					buf.append(((ClassDecl) elem).qualifiedName());
+				if (elem instanceof CachedClassDecl) {
+					buf.append(((CachedClassDecl) elem).qualifiedName());
 					buf.append('\n');
 				}
 			}

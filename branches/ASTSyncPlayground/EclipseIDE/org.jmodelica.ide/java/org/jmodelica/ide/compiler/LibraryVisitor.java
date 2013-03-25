@@ -5,7 +5,6 @@ import java.util.Stack;
 
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jastadd.ed.core.model.node.IASTNode;
 
 public class LibraryVisitor {
 	/**
@@ -15,7 +14,7 @@ public class LibraryVisitor {
 	 * @param nodePath
 	 */
 	public void handleChangedNode(int astChangeEventType, LibraryNode root,
-			Stack<String> nodePath, IASTNode changedInstNode) {
+			Stack<String> nodePath) {
 		ArrayList<ListenerObject> affectedListeners = new ArrayList<ListenerObject>();
 		getAllAffectedListeners(root, nodePath, affectedListeners);
 		System.out

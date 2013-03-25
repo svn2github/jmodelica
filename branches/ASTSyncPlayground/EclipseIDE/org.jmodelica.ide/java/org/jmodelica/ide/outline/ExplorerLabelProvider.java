@@ -17,16 +17,19 @@ package org.jmodelica.ide.outline;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.jmodelica.ide.outline.cache.CachedLabelProvider;
 import org.jmodelica.ide.ui.ImageLoader;
 
-public class ExplorerLabelProvider extends OutlineAwareLabelProvider {
-	
+public class ExplorerLabelProvider extends CachedLabelProvider {
+
 	private static final int SIZE = 16;
-	private final Image DEFAULT_LARGE = ImageLoader.getFrequentImage(ImageLoader.GENERIC_CLASS_IMAGE);
-	private final Image DEFAULT_SMALL = ImageLoader.getFrequentImage(ImageLoader.GENERIC_CLASS_SMALL_IMAGE);
+	private final Image DEFAULT_LARGE = ImageLoader
+			.getFrequentImage(ImageLoader.GENERIC_CLASS_IMAGE);
+	private final Image DEFAULT_SMALL = ImageLoader
+			.getFrequentImage(ImageLoader.GENERIC_CLASS_SMALL_IMAGE);
 
 	public ExplorerLabelProvider() {
-		super(OutlinePage.JASTADD_LABEL);
+		super();
 	}
 
 	public Image getImage(Object element) {
@@ -34,12 +37,12 @@ public class ExplorerLabelProvider extends OutlineAwareLabelProvider {
 		if (image == DEFAULT_LARGE) {
 			image = DEFAULT_SMALL;
 		} else if (image != null && image.getBounds().width != SIZE) {
-			// Alternate method that might be faster exists, 
-			// see http://www.eclipse.org/articles/Article-SWT-images/graphics-resources.html
+			// Alternate method that might be faster exists,
+			// see
+			// http://www.eclipse.org/articles/Article-SWT-images/graphics-resources.html
 			ImageData data = image.getImageData().scaledTo(SIZE, SIZE);
 			image = new Image(image.getDevice(), data);
 		}
 		return image;
 	}
-
 }

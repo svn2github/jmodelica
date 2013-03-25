@@ -15,7 +15,6 @@
 */
 package org.jmodelica.ide.outline;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,10 +23,9 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChange
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.outline.cache.CachedASTNode;
+import org.jmodelica.ide.outline.cache.CachedClassDecl;
 import org.jmodelica.ide.preferences.Preferences;
-import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.BaseClassDecl;
-import org.jmodelica.modelica.compiler.InstClassDecl;
 
 public class OutlineItemComparator extends ViewerSorter implements IPreferenceChangeListener {
 
@@ -45,14 +43,13 @@ public class OutlineItemComparator extends ViewerSorter implements IPreferenceCh
 	}
 	
 	public int category(Object element) {
-		if (element instanceof ASTNode<?>)
-			return ((ASTNode<?>) element).outlineCategory();
+		if (element instanceof CachedASTNode)
+			return ((CachedASTNode) element).outlineCategory();
 		if (element instanceof LoadedLibraries) 
 			return -5;
 		return super.category(element);
 	}
 
-	@SuppressWarnings("unchecked")
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		int cat1 = category(e1);
         int cat2 = category(e2);
@@ -75,13 +72,9 @@ public class OutlineItemComparator extends ViewerSorter implements IPreferenceCh
 
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			// TODO: Move to an attribute
-			if (e1 instanceof InstClassDecl)
-				e1 = ((InstClassDecl) e1).getClassDecl();
-			if (e2 instanceof InstClassDecl)
-				e2 = ((InstClassDecl) e2).getClassDecl();
-			if (e1 instanceof BaseClassDecl && e2 instanceof BaseClassDecl) {
-				String id1 = ((BaseClassDecl) e1).getName().getID();
-				String id2 = ((BaseClassDecl) e2).getName().getID();
+			if (e1 instanceof CachedClassDecl && e2 instanceof CachedClassDecl) {
+				String id1 = ((CachedClassDecl) e1).getText();
+				String id2 = ((CachedClassDecl) e2).getText();
 				return getComparator().compare(id1, id2);
 			}
 			return super.compare(viewer, e1, e2);
@@ -92,8 +85,8 @@ public class OutlineItemComparator extends ViewerSorter implements IPreferenceCh
 	public static class CompDeclared extends ViewerSorter {
 
 		public int compare(Viewer viewer, Object e1, Object e2) {
-			if (e1 instanceof ASTNode && e2 instanceof ASTNode) 
-				return ((ASTNode) e1).declareOrder() - ((ASTNode) e2).declareOrder();
+			if (e1 instanceof CachedASTNode && e2 instanceof CachedASTNode) 
+				return ((CachedASTNode) e1).declareOrder() - ((CachedASTNode) e2).declareOrder();
 			return super.compare(viewer, e1, e2);
 		}
 

@@ -20,8 +20,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.viewers.IBaseLabelProvider;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -31,27 +29,19 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.compiler.LocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.editor.ICurrentClassListener;
-import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.BaseClassDecl;
-import org.jmodelica.modelica.compiler.SourceRoot;
+import org.jmodelica.ide.outline.cache.CachedClassDecl;
+import org.jmodelica.ide.outline.cache.CachedOutlinePage;
 
-public class ClassOutlinePage extends OutlinePage implements
-		IDoubleClickListener, IASTChangeListener {
+public class ClassOutlinePage extends CachedOutlinePage implements
+		IASTChangeListener {
 
-	private static final ClassOutlineContentProvider CLASS_OUTLINE_CONTENT = new ClassOutlineContentProvider();
-	private static final OutlineAwareLabelProvider OUTLINE_AWARE_LABEL = new OutlineAwareLabelProvider(
-			JASTADD_LABEL);
-
-	private ClassOutlineContentProvider content;
-	private IProject project;
 	private Set<ICurrentClassListener> currentClassListeners;
+	private ClassOutlineCache cache = new ClassOutlineCache(this);
 
 	public ClassOutlinePage(IProject project, AbstractTextEditor editor) {
 		super(editor);
-		this.project = project;
 		currentClassListeners = new HashSet<ICurrentClassListener>();
 	}
 
@@ -59,15 +49,13 @@ public class ClassOutlinePage extends OutlinePage implements
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		ModelicaASTRegistry.getInstance().addListener(this);// , project,
-																// null);
+															// null);
 		IFileEditorInput fInput = (IFileEditorInput) fTextEditor
 				.getEditorInput();
 		IFile file = fInput.getFile();
-		SourceRoot root = ((LocalRootNode) ModelicaASTRegistry.getInstance()
-				.doLookup(file)[0]).getSourceRoot();
+		cache.setFile(file);
 		ModelicaASTRegistry.getInstance().addListener(file, null, this,
 				IASTChangeListener.OUTLINE_LISTENER);
-		updateAST(root);
 		setDoubleClickHandling(true);
 	}
 
@@ -81,42 +69,24 @@ public class ClassOutlinePage extends OutlinePage implements
 		currentClassListeners.clear();
 	}
 
-	@Override
-	protected ClassOutlineContentProvider createContentProvider() {
-		return CLASS_OUTLINE_CONTENT;
-	}
-
-	protected IBaseLabelProvider getLabelProvider() {
-		return OUTLINE_AWARE_LABEL;
-	}
-
-	/*
-	 * public void projectASTChanged(IProject project) {
-	 * updateAST(registry.doLookup(project)); }
-	 * 
-	 * public void childASTChanged(IProject project, String key) { ASTNode node
-	 * = (ASTNode) registry.doLookup()(key, project); if (node != null &&
-	 * !node.isError()) update(getContentProvider().getParent(node)); }
-	 */
-
 	public void selectionChanged(SelectionChangedEvent event) {
-		BaseClassDecl node = getSelectedNode(event.getSelection());
+		CachedClassDecl node = getSelectedNode(event.getSelection());
 		for (ICurrentClassListener listener : currentClassListeners)
-			listener.setCurrentClass(node);
+			listener.setCurrentClass(node); // todo used to be BaseClassDecl
 		super.selectionChanged(event);
 	}
 
-	public BaseClassDecl getSelectedNode(ISelection selection) {
+	public CachedClassDecl getSelectedNode(ISelection selection) {
 		Object selected = null;
 		if (selection instanceof IStructuredSelection)
 			selected = ((IStructuredSelection) selection).getFirstElement();
-		return (selected instanceof BaseClassDecl) ? (BaseClassDecl) selected
+		return (selected instanceof CachedClassDecl) ? (CachedClassDecl) selected
 				: null;
 	}
 
 	public void addCurrentClassListener(ICurrentClassListener listener) {
 		currentClassListeners.add(listener);
-		listener.setCurrentClass(getSelectedNode(getSelection()));
+		// listener.setCurrentClass(getSelectedNode(getSelection())); TODO
 	}
 
 	public void removeCurrentClassListener(ICurrentClassListener listener) {
@@ -125,9 +95,7 @@ public class ClassOutlinePage extends OutlinePage implements
 
 	@Override
 	public void astChanged(IASTChangeEvent e) {
-		//System.out.println("CLASSOUTLINEPAGE RECIEVED ASTEVENT, UPDATING...");
-		synchronized (((ASTNode<?>) fRoot).state()) {
-			updateAST(fRoot);
-		}
+		fRoot = cache.getCache();
+		updateAST(fRoot);
 	}
 }

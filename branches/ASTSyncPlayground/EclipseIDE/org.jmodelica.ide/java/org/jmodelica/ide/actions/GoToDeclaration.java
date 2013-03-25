@@ -10,57 +10,53 @@ import org.jmodelica.ide.namecomplete.Lookup;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.InstNode;
 
-
 public class GoToDeclaration extends Action {
 
-protected final Editor editor;
+	protected final Editor editor;
 
-protected ASTNode<?> fRoot;
+	protected ASTNode<?> fRoot;
 
-public GoToDeclaration(Editor editor) {
-    
-    super();
-    super.setActionDefinitionId("JModelicaIDE.GoToDeclarationCommand");
-    super.setId(IDEConstants.ACTION_FOLLOW_REFERENCE_ID);
-    this.editor = editor;
-    this.fRoot = null;
-}
+	public GoToDeclaration(Editor editor) {
 
-public void run() {
-    
-    // not initialised, or not able to create AST.
+		super();
+		super.setActionDefinitionId("JModelicaIDE.GoToDeclarationCommand");
+		super.setId(IDEConstants.ACTION_FOLLOW_REFERENCE_ID);
+		this.editor = editor;
+		this.fRoot = null;
+	}
 
-    if (fRoot == null) 
-        return;
-    
-    Maybe<InstNode> iNode = new Lookup(fRoot).declarationFromAccessAt(
-            new OffsetDocument(
-                editor.document(),
-                editor.selection().getOffset()));
+	public void run() {
 
-    if (iNode.isNothing()) 
-        return;
- 
-    String pathToDecl = iNode.value().retrieveFileName(); 
-    
-    try {
-        
-        Editor ed = 
-            EclipseUtil.getModelicaEditorForFile(
-                EclipseUtil
-                    .getFileForPath(pathToDecl)
-                    .value())
-            .value();
-        ed.selectNode(iNode.value());
+		// not initialised, or not able to create AST.
 
-    } catch (Exception e) { 
-        e.printStackTrace(); 
-    }
-    
-}
+		if (fRoot == null)
+			return;
 
-public void updateAST(ASTNode<?> root) {
-    this.fRoot = root;
-}
+		Maybe<InstNode> iNode = new Lookup(fRoot)
+				.declarationFromAccessAt(new OffsetDocument(editor.document(),
+						editor.selection().getOffset()));
+
+		if (iNode.isNothing())
+			return;
+
+		String pathToDecl = iNode.value().retrieveFileName();
+
+		try {
+
+			Editor ed = EclipseUtil.getModelicaEditorForFile(
+					EclipseUtil.getFileForPath(pathToDecl).value()).value();
+			ed.selectNode(iNode.value() != null, iNode.value()
+					.containingFileName(), iNode.value().getSelectionNode()
+					.offset(), iNode.value().getSelectionNode().length());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void updateAST(ASTNode<?> root) {
+		this.fRoot = root;
+	}
 
 }

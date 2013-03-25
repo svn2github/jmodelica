@@ -27,7 +27,7 @@ import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.navigator.ICommonViewerSite;
 import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.ide.outline.cache.CachedASTNode;
 
 public class ExplorerActionProvider extends CommonActionProvider {
 
@@ -70,7 +70,7 @@ public class ExplorerActionProvider extends CommonActionProvider {
 		@Override
 		public boolean isEnabled() {
 			Object elem = Util.getSelected(provider.getSelection());
-			return elem instanceof ASTNode<?>;
+			return elem instanceof CachedASTNode;
 		}
 
 		@Override

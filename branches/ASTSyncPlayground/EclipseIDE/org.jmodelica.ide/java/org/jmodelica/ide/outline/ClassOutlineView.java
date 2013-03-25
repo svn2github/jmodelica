@@ -12,39 +12,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.outline;
 
-import java.io.File;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.IPage;
-import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.jastadd.ed.core.model.node.IASTNode;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.editor.ICurrentClassListener;
 import org.jmodelica.ide.helpers.EclipseUtil;
-import org.jmodelica.modelica.compiler.ASTNode;
 
 public class ClassOutlineView extends OutlineView {
-	
+
 	private Map<IProject, ClassOutlinePage> mapProjToPage = new HashMap<IProject, ClassOutlinePage>();
 	private ICurrentClassListener tempPagePart = null;
 	private ClassOutlinePage tempPage = null;
-	
+
 	protected IContentOutlinePage setupOutlinePage(IWorkbenchPart part) {
 		if (part instanceof AbstractTextEditor) {
 			AbstractTextEditor editor = (AbstractTextEditor) part;
@@ -56,10 +47,10 @@ public class ClassOutlineView extends OutlineView {
 					mapProjToPage.put(project, page);
 					initPage(page);
 					page.createControl(getPageBook());
-				}else{
-					System.out.println("CLASSOUTLINE PAGE FAILED!!!!!!!!!!!!!");
+				} else {
+					System.out.println("CLASSOUTLINE PAGE FAILED!");
 				}
-				if (editor instanceof ICurrentClassListener) 
+				if (editor instanceof ICurrentClassListener)
 					page.addCurrentClassListener((ICurrentClassListener) editor);
 				return page;
 			}
@@ -68,11 +59,11 @@ public class ClassOutlineView extends OutlineView {
 	}
 
 	protected void doDestroyPage(IWorkbenchPart part, PageRec rec) {
-		if (part instanceof AbstractTextEditor) 
+		if (part instanceof AbstractTextEditor)
 			mapProjToPage.remove(getProjectOfEditor((AbstractTextEditor) part));
 		super.doDestroyPage(part, rec);
 	}
-	
+
 	public void partClosed(IWorkbenchPart part) {
 		if (part instanceof ICurrentClassListener) {
 			PageRec rec = getPageRec(part);
@@ -142,33 +133,4 @@ public class ClassOutlineView extends OutlineView {
 	protected IContentOutlinePage getOutlinePage(Editor part) {
 		return null;
 	}
-
-	protected IASTNode rootASTOfInput(IEditorInput input) {
-		// Get the file connected to the input.
-		IFile file = null;
-		String path = null;
-		// TODO: This should probably be a util func.
-		if (input instanceof IFileEditorInput) {
-			file = ((IFileEditorInput) input).getFile();
-			path = file.getLocation().toOSString();
-		} else if (input instanceof IURIEditorInput) {
-			path = new File(((IURIEditorInput) input).getURI().getPath()).getAbsolutePath();
-			file = EclipseUtil.getFileForPath(path).value();
-		}
-		IProject proj = (file == null) ? null : file.getProject();
-		IASTNode root = null;
-		if (proj != null) {
-			// TODO: This might not be the current page, in that case we will need to show the page before selecting node.
-			root = mapProjToPage.get(proj).getRoot();
-		} else {
-			IPage page = getCurrentPage();
-			if (page instanceof OutlinePage)
-				root = ((OutlinePage) page).getRoot();
-		}
-		if (root != null && path != null)
-			return ((ASTNode)root).lookupChildAST(path);
-		else
-			return root;
-	}
-
 }

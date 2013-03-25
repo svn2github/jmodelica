@@ -12,28 +12,37 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.outline;
 
-import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.jastadd.ed.core.model.IASTChangeEvent;
+import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jmodelica.ide.outline.cache.CachedOutlinePage;
 
-public class SourceOutlinePage extends OutlinePage {
+public class SourceOutlinePage extends CachedOutlinePage implements
+		IASTChangeListener {
 
-	private SourceOutlineContentProvider contentProvider;
+	private SourceOutlineCache cache;
 
 	public SourceOutlinePage(AbstractTextEditor editor) {
 		super(editor);
+		cache = new SourceOutlineCache(this);
 	}
 
-	@Override
-	protected ITreeContentProvider createContentProvider() {
-		return new SourceOutlineContentProvider();
+	public void setFile(IFile file) {
+		cache.setFile(file);
 	}
 
 	@Override
 	protected void rootChanged(TreeViewer viewer) {
-		viewer.expandToLevel(2);
+		viewer.expandToLevel(1);
+	}
+
+	@Override
+	public void astChanged(IASTChangeEvent e) {
+		updateAST(cache.getCache());
 	}
 }

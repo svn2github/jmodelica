@@ -1,11 +1,11 @@
 package org.jmodelica.ide.compiler;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.modelica.compiler.ASTNode;
 
 public class ChangePropagationController {
 	private static ChangePropagationController controller;
@@ -23,8 +23,8 @@ public class ChangePropagationController {
 		return controller;
 	}
 
-	public void addListener(IFile file, ASTNode<?> node,
-			IASTChangeListener listener, int listenerType, Stack<String> nodePath) {
+	public void addListener(IASTChangeListener listener, int listenerType,
+			IFile file, Stack<String> nodePath) {
 
 		System.out.println("MODELICAASTREGISTRY: Added listener to file "
 				+ file.getName());
@@ -46,9 +46,12 @@ public class ChangePropagationController {
 	 * @param nodePath
 	 */
 	public synchronized void handleNotifications(int changeType, IFile file,
-			ASTNode<?> srcNode, Stack<String> nodePath) {
+			Stack<String> nodePath) {
 		LibraryVisitor visitor = new LibraryVisitor();
 		LibraryNode libroot = listenerTrees.get(file);
-		visitor.handleChangedNode(changeType, libroot, nodePath, srcNode);
+		Stack<String> copy = new Stack<String>();
+		copy.setSize(nodePath.size());
+		Collections.copy(copy, nodePath);
+		visitor.handleChangedNode(changeType, libroot, copy);
 	}
 }

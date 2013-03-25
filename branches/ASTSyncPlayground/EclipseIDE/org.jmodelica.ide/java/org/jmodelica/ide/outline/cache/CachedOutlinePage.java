@@ -1,97 +1,98 @@
 /*
-    Copyright (C) 2009 Modelon AB
+Copyright (C) 2009 Modelon AB
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 3 of the License.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jmodelica.ide.outline;
+
+package org.jmodelica.ide.outline.cache;
 
 import java.util.ArrayList;
 
-import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
+import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IElementComparer;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
-import org.jastadd.ed.core.model.node.IASTNode;
-import org.jastadd.ed.core.model.node.IJastAddNode;
-import org.jastadd.ed.core.service.view.JastAddLabelProvider;
-import org.jastadd.ed.core.service.view.outline.AbstractBaseContentOutlinePage;
 import org.jmodelica.ide.actions.CopyClassAction;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.BaseNode;
-import org.jmodelica.modelica.compiler.Dot;
+import org.jmodelica.ide.outline.ClassCopySource;
+import org.jmodelica.ide.outline.ClassDragListener;
+import org.jmodelica.ide.outline.OutlineItemComparator;
+import org.jmodelica.ide.outline.OutlineUpdateWorker;
+import org.jmodelica.ide.outline.cache.CachedASTNode;
 
-public abstract class OutlinePage extends AbstractBaseContentOutlinePage
-		implements IDoubleClickListener {
+public abstract class CachedOutlinePage extends ContentOutlinePage implements
+		IDoubleClickListener {
 
-	public static final JastAddLabelProvider JASTADD_LABEL = new JastAddLabelProvider();
-	public static final ASTContentProvider JASTADD_CONTENT = new ASTContentProvider();
-
+	protected AbstractTextEditor fTextEditor;
+	protected CachedASTNode fRoot;
+	private ITreeContentProvider fContentProvider;
+	private IBaseLabelProvider fLabelProvider;
 	private OutlineItemComparator comparator;
 	private IElementComparer comparer;
 	protected boolean selecting;
-	private IBaseLabelProvider labelProvider;
-	private UpdatingContentProvider contentProvider;
 	private boolean handleDoubleClick;
 
-	public OutlinePage(AbstractTextEditor editor) {
-		super(editor);
+	public CachedOutlinePage(AbstractTextEditor editor) {
+		super();
+		fTextEditor = editor;
+		fContentProvider = getContentProvider();
+		fLabelProvider = getLabelProvider();
 		selecting = false;
 		handleDoubleClick = false;
 	}
 
-	@Override
-	protected void openFileForNode(IJastAddNode node) {
-		// This method is never called, and there seems to be
-		// no situation that it should be.
+	protected ITreeContentProvider getContentProvider() {
+		if (fContentProvider == null)
+			fContentProvider = new CachedContentProvider();
+		return fContentProvider;
 	}
 
-	@Override
-	public void highlightNodeInEditor(IJastAddNode node) {
-		if (!selecting) {
-			IWorkbenchWindow window = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow();
-			IWorkbenchPage page = window.getActivePage();
-			IEditorPart editor = page.getActiveEditor();
-			if (editor instanceof Editor && node instanceof ASTNode<?>)
-				((Editor) editor).selectNode((ASTNode<?>) node);
-		}
+	protected IBaseLabelProvider getLabelProvider() {
+		if (fLabelProvider == null)
+			fLabelProvider = new CachedLabelProvider();
+		return fLabelProvider;
 	}
 
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		TreeViewer viewer = getTreeViewer();
+		viewer.setContentProvider(fContentProvider);
+		viewer.setLabelProvider(fLabelProvider);
+		viewer.addSelectionChangedListener(this);
 		viewer.setComparator(getComparator());
 		viewer.setComparer(getComparer());
 
@@ -106,7 +107,84 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage
 		IActionBars bars = getSite().getActionBars();
 		bars.setGlobalActionHandler(ActionFactory.COPY.getId(),
 				new CopyClassAction(copySource, clipboard));
+
+		// if (fInput != null)
+		// viewer.setInput(fInput);
 		update();
+	}
+
+	@Override
+	public void selectionChanged(SelectionChangedEvent event) {
+		super.selectionChanged(event);
+		ISelection selection = event.getSelection();
+		if (selection.isEmpty() && fTextEditor != null)
+			fTextEditor.resetHighlightRange();
+		else {
+			IStructuredSelection structSelect = (IStructuredSelection) selection;
+			Object obj = structSelect.getFirstElement();
+			if (obj instanceof CachedASTNode) {
+				CachedASTNode node = (CachedASTNode) obj;
+
+				highlightNodeInEditor(node);
+
+				// openFileForNode(node);
+			}
+		}
+	}
+
+	/**
+	 * Opens the file containing the given node
+	 * 
+	 * @param node
+	 *            The node
+	 */
+	// protected abstract void openFileForNode(IJastAddNode node);
+
+	/**
+	 * @Override protected void openFileForNode(IJastAddNode node) { // This
+	 *           method is never called, and there seems to be // no situation
+	 *           that it should be. }
+	 */
+
+	/**
+	 * Highlights the text corresponding to the given node
+	 * 
+	 * @param node
+	 *            The node
+	 */
+	// protected abstract void highlightNodeInEditor(IJastAddNode node);
+
+	/**
+	 * Updates the AST shown by this outline page
+	 * 
+	 * @param ast
+	 *            The AST to show
+	 */
+	public void updateAST(CachedASTNode ast) {
+		// Copy cached outline children to new root
+		// if (ast instanceof BaseNode && fRoot instanceof BaseNode)
+		// ((BaseNode) ast).copyCachedOutlineFrom((BaseNode) fRoot);
+		fRoot = ast;
+		update();
+	}
+
+	/**
+	 * Highlights the text corresponding to the given node
+	 * 
+	 * @param node
+	 *            The node
+	 */
+	public void highlightNodeInEditor(CachedASTNode node) {
+		if (!selecting) {
+			IWorkbenchWindow window = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow();
+			IWorkbenchPage page = window.getActivePage();
+			IEditorPart editor = page.getActiveEditor();
+			if (editor instanceof Editor)
+				((Editor) editor).selectNode(true, node.containingFileName(),
+						node.getSelectionNodeOffset(),
+						node.getSelectionNodeLength());
+		}
 	}
 
 	protected void setDoubleClickHandling(boolean active) {
@@ -137,27 +215,6 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage
 		return comparator;
 	}
 
-	protected IBaseLabelProvider getLabelProvider() {
-		if (labelProvider == null)
-			labelProvider = createLabelProvider();
-		return labelProvider;
-	}
-
-	protected IBaseLabelProvider createLabelProvider() {
-		return JASTADD_LABEL;
-	}
-
-	protected ITreeContentProvider getContentProvider() {
-		if (contentProvider == null)
-			contentProvider = new UpdatingContentProvider(
-					createContentProvider());
-		return contentProvider;
-	}
-
-	protected ITreeContentProvider createContentProvider() {
-		return JASTADD_CONTENT;
-	}
-
 	/**
 	 * Updates the entire tree, keeping selection and open branches.
 	 */
@@ -172,7 +229,6 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage
 	 *            the node to update, or <code>null</code> to update entire tree
 	 */
 	public void update(Object node) {
-		long time = System.currentTimeMillis();
 		TreeViewer viewer = getTreeViewer();
 		if (viewer != null) {
 			Control control = viewer.getControl();
@@ -180,15 +236,11 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage
 				control.setRedraw(false);
 				ISelection selection = viewer.getSelection();
 				TreePath[] paths = viewer.getExpandedTreePaths();
-				// Ugly, but fRoot is sometimes null...
-				Dot d = new Dot();
-				synchronized (d.state()) {
-					if (node == null) {
-						viewer.setInput(fRoot);
-						rootChanged(viewer);
-					} else {
-						viewer.refresh(node);
-					}
+				if (node == null) {
+					viewer.setInput(fRoot);
+					rootChanged(viewer);
+				} else {
+					viewer.refresh(node);
 				}
 				if (paths.length > 0)
 					viewer.setExpandedTreePaths(paths);
@@ -196,20 +248,11 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage
 				control.setRedraw(true);
 			}
 		}
-		System.out.println("Outline update took: "
-				+ (System.currentTimeMillis() - time) + "ms");
-	}
-
-	public void updateAST(IASTNode ast) {
-		// Copy cached outline children to new root
-		if (ast instanceof BaseNode && fRoot instanceof BaseNode)
-			((BaseNode) ast).copyCachedOutlineFrom((BaseNode) fRoot);
-		super.updateAST(ast);
 	}
 
 	protected abstract void rootChanged(TreeViewer viewer);
 
-	public void select(ASTNode<?> node) {
+	public void select(CachedASTNode node) {
 		if (node == null) {
 			select(new TreeSelection());
 		} else {
@@ -223,7 +266,7 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage
 		}
 	}
 
-	protected void select(ISelection sel) {
+	public void select(ISelection sel) {
 		selecting = true;
 		TreeViewer viewer = getTreeViewer();
 		if (viewer != null)
@@ -244,7 +287,7 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage
 	/**
 	 * Get the root of the AST shown in this page.
 	 */
-	protected IASTNode getRoot() {
+	public CachedASTNode getRoot() {
 		return fRoot;
 	}
 
@@ -279,8 +322,8 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage
 		private String name(Object element) {
 			if (element == null)
 				return "";
-			if (element instanceof ASTNode)
-				return ((ASTNode<?>) element).outlineId();
+			if (element instanceof CachedASTNode)
+				return ((CachedASTNode) element).getText();
 			return element.toString();
 		}
 

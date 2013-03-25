@@ -1,17 +1,22 @@
 package org.jmodelica.ide.compiler;
 
+import java.util.Stack;
+
 import org.eclipse.core.resources.IFile;
 import org.jmodelica.icons.coord.Placement;
-import org.jmodelica.modelica.compiler.ASTNode;
 
 public class ModificationJob implements IJobObject {
 
 	private int jobType;
 	private IFile file;
-	private ASTNode<?> instNode;
 	private String className;
 	private String componentName;
 	private Placement placement;
+	private String sourceDiagramName;
+	private String targetDiagramName;
+	private Stack<String> classASTPath;
+	private Stack<String> modifyNodeASTPath;
+	private String renameName;
 
 	/**
 	 * node = the node in src tree to remove
@@ -20,20 +25,58 @@ public class ModificationJob implements IJobObject {
 	 * @param file
 	 * @param node
 	 */
-	public ModificationJob(int jobType, IFile file, ASTNode<?> node) {
+	public ModificationJob(int jobType, IFile file,
+			Stack<String> modifyNodeASTPath) {
 		this.jobType = jobType;
 		this.file = file;
-		this.instNode = node;
+		this.modifyNodeASTPath = modifyNodeASTPath;
 	}
 
-	public ModificationJob(int jobType, IFile file, ASTNode<?> node,
+	public ModificationJob(int jobType, IFile file,
+			Stack<String> modifyNodeASTPath, String renameName) {
+		this(jobType, file, modifyNodeASTPath);
+		this.renameName = renameName;
+	}
+
+	public ModificationJob(int jobType, IFile file,
+			Stack<String> modifyNodeASTPath, Stack<String> classASTPath) {
+		this(jobType, file, modifyNodeASTPath);
+		this.classASTPath = classASTPath;
+	}
+
+	public ModificationJob(int jobType, IFile file, Stack<String> classASTPath,
 			String className, String componentName, Placement placement) {
 		this.jobType = jobType;
 		this.file = file;
-		this.instNode = node;
+		this.classASTPath = classASTPath;
 		this.className = className;
 		this.componentName = componentName;
 		this.placement = placement;
+	}
+
+	public ModificationJob(int jobType, IFile file, String sourceDiagramName,
+			String targetdiagramName, Stack<String> classASTPath) {
+		this.jobType = jobType;
+		this.file = file;
+		this.sourceDiagramName = sourceDiagramName;
+		this.targetDiagramName = targetdiagramName;
+		this.classASTPath = classASTPath;
+	}
+
+	public Stack<String> getModifyNodeASTPath() {
+		return modifyNodeASTPath;
+	}
+
+	public Stack<String> getClassASTPath() {
+		return classASTPath;
+	}
+
+	public String getSourceDiagramName() {
+		return sourceDiagramName;
+	}
+
+	public String getTargetDiagramName() {
+		return targetDiagramName;
 	}
 
 	public Placement getPlacement() {
@@ -56,18 +99,19 @@ public class ModificationJob implements IJobObject {
 		return file;
 	}
 
-	public ASTNode<?> getNode() {
-		return instNode;
-	}
-
 	@Override
 	public void doJob() {
+		System.out.println("ModificationJob->doJob()");
 		new ModelicaASTRegistryVisitor(this);
 	}
 
 	@Override
 	public int getPriority() {
 		return IJobObject.PRIORITY_HIGH;
+	}
+
+	public String getRenameName() {
+		return renameName;
 	}
 
 }

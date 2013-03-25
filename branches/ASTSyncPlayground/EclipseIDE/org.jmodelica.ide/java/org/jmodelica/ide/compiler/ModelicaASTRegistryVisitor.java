@@ -1,18 +1,16 @@
 package org.jmodelica.ide.compiler;
 
-import java.util.ArrayList;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.ASTChangeEvent;
-import org.jastadd.ed.core.model.node.IASTNode;
 import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.Access;
+import org.jmodelica.modelica.compiler.Comment;
 import org.jmodelica.modelica.compiler.ComponentDecl;
+import org.jmodelica.modelica.compiler.ConnectClause;
 import org.jmodelica.modelica.compiler.FullClassDecl;
-import org.jmodelica.modelica.compiler.InstClassDecl;
-import org.jmodelica.modelica.compiler.InstComponentDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
-import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.Program;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
@@ -21,21 +19,81 @@ public class ModelicaASTRegistryVisitor {
 	private ModelicaASTRegistry registry = ModelicaASTRegistry.getInstance();
 
 	/**
-	 * Default constructor. The {@link ModelicaASTRegistryVisitor} will
-	 * automatically retrieve and process one job, if an available job exist at
-	 * the {@link ModelicaASTRegistryJobBucket}.
+	 * Default constructor. The {@link ModelicaASTRegistryVisitor} is
+	 * instantiated by a job handler thread started by the
+	 * {@link ModelicaASTRegistryJobBucket}, and will perform one
+	 * {@link ModificationJob}.
 	 */
 	public ModelicaASTRegistryVisitor(ModificationJob job) {
 		if (job != null) {
 			int jobType = job.getJobType();
 			if (jobType == IJobObject.REMOVE_NODE) {
-				removeNode(job.getFile(), job.getNode());
-			} else if (jobType == IJobObject.ADD_NODE) {
+				removeNode(job.getFile(), job.getModifyNodeASTPath());
+			} else if (jobType == IJobObject.ADD_COMPONENT) {
 				addNode(job);
 			} else if (jobType == IJobObject.RENAME_NODE) {
-				renameNode(job.getFile(), job.getNode());
+				renameNode(job.getFile(), job.getModifyNodeASTPath(), job.getRenameName());
+			} else if (jobType == IJobObject.ADD_CONNECTCLAUSE) {
+				addConnectClause(job);
+			} else if (jobType == IJobObject.REMOVE_CONNECTCLAUSE) {
+				removeConnectClause(job);
 			}
 		}
+	}
+
+	private void removeConnectClause(ModificationJob job) {
+		long time = System.currentTimeMillis();
+		SourceRoot root = ((LocalRootNode) registry.doLookup(job.getFile())[0])
+				.getSourceRoot();
+		synchronized (root.state()) {
+			FullClassDecl fcd = (FullClassDecl) registry.resolveSourceASTPath(
+					job.getClassASTPath(), root);
+			ConnectClause connectClause = (ConnectClause) registry
+					.resolveSourceASTPath(job.getModifyNodeASTPath(), root);
+			fcd.removeEquation(connectClause);
+			fcd.flushCache();
+			fcd.components();
+			fcd.classes();
+			InstProgramRoot iRoot = root.getProgram().getInstProgramRoot();
+			iRoot.flushCache();
+			iRoot.classes(); // needed?
+			iRoot.components();
+		}
+		ChangePropagationController.getInstance()
+				.handleNotifications(ASTChangeEvent.POST_ADDED, job.getFile(),
+						job.getClassASTPath());
+		System.out
+				.println("ModelicaASTRegVisitor: removing connectclause took: "
+						+ (System.currentTimeMillis() - time) + "ms");
+	}
+
+	private void addConnectClause(ModificationJob job) {
+		long time = System.currentTimeMillis();
+		SourceRoot root = ((LocalRootNode) registry.doLookup(job.getFile())[0])
+				.getSourceRoot();
+		synchronized (root.state()) {
+			FullClassDecl fcd = (FullClassDecl) registry.resolveSourceASTPath(
+					job.getClassASTPath(), root);
+			ConnectClause connectClause = new ConnectClause();
+			connectClause.setComment(new Comment());
+			connectClause.setConnector1(Access.fromClassName(job
+					.getSourceDiagramName()));
+			connectClause.setConnector2(Access.fromClassName(job
+					.getTargetDiagramName()));
+			fcd.addNewEquation(connectClause);
+			fcd.flushCache();
+			fcd.components();
+			fcd.classes();
+			InstProgramRoot iRoot = root.getProgram().getInstProgramRoot();
+			iRoot.flushCache();
+			iRoot.classes(); // needed?
+			iRoot.components();
+		}
+		ChangePropagationController.getInstance()
+				.handleNotifications(ASTChangeEvent.POST_ADDED, job.getFile(),
+						job.getClassASTPath());
+		System.out.println("ModelicaASTRegVisitor: adding connectclause took: "
+				+ (System.currentTimeMillis() - time) + "ms");
 	}
 
 	/**
@@ -44,33 +102,22 @@ public class ModelicaASTRegistryVisitor {
 	 * @param file
 	 * @param instNode
 	 */
-	private void renameNode(IFile file, ASTNode<?> instNode) {
+	private void renameNode(IFile file, Stack<String> renameNodePath, String newName) {
 		long time = System.currentTimeMillis();
-		synchronized (instNode.state()) {
-			// System.out.println("MODELICAASTREGVISITOR renamenode ist...: "
-			// + getNodeName(instNode));
-			ASTNode<?> srcNode = getCorrespondingSrcNode(instNode);
-			// Create path before rename!
-			Stack<String> nodePath = new Stack<String>();
-			registry.createPath(nodePath, srcNode);
-
+		SourceRoot root = ((LocalRootNode) registry.doLookup(file)[0])
+				.getSourceRoot();
+		synchronized (root.state()) {
+			ASTNode<?> srcNode = registry.resolveSourceASTPath(renameNodePath,
+					root);
 			if (srcNode instanceof FullClassDecl) {
 				FullClassDecl decl = (FullClassDecl) srcNode;
-				decl.getName().setID("CHANGEDNAME");
-				IASTNode root = decl;
-				while (root.getParent() != null)
-					root = root.getParent();
-				// ArrayList<ComponentDecl> foundAccesses = new
-				// ArrayList<ComponentDecl>();
-				// findAllClassUsesInSrcAST(root, soughtName, foundAccesses);
-				// renameFoundClassAccesses(foundAccesses);
+				decl.getName().setID(newName);
 			} else if (srcNode instanceof ComponentDecl) {
 				ComponentDecl compdecl = (ComponentDecl) srcNode;
-				// TODO fix hardcoded name...
-				compdecl.getName().setID("CHANGEDNAME");
+				compdecl.getName().setID(newName);
 			}
 			ChangePropagationController.getInstance().handleNotifications(
-					ASTChangeEvent.POST_RENAME, file, srcNode, nodePath);
+					ASTChangeEvent.POST_RENAME, file, renameNodePath);
 		}
 		System.out
 				.println("ModelicaAstReg: RenameJob+handling/starting notification threads took: "
@@ -85,15 +132,17 @@ public class ModelicaASTRegistryVisitor {
 	 */
 	private void addNode(ModificationJob job) {
 		long time = System.currentTimeMillis();
-		synchronized (job.getNode().state()) {
+		SourceRoot root = ((LocalRootNode) registry.doLookup(job.getFile())[0])
+				.getSourceRoot();
+		synchronized (root.state()) {
 			IFile file = job.getFile();
-			//System.out.println("MODELICAASTREGVISITOR addnode ist...: "
-			//		+ getNodeName(classDeclNode));
-			ASTNode<?> srcNode = getCorrespondingSrcNode(job.getNode());
+			// System.out.println("MODELICAASTREGVISITOR addnode ist...: "
+			// + getNodeName(classDeclNode));
+			FullClassDecl fcd = (FullClassDecl) registry.resolveSourceASTPath(
+					job.getClassASTPath(), root);
 
-			FullClassDecl fcd = (FullClassDecl) srcNode;
-			//System.out.println("ADDNODE: className:" + job.getClassName()
-			//		+ " componentname:" + job.getComponentName());
+			// System.out.println("ADDNODE: className:" + job.getClassName()
+			// + " componentname:" + job.getComponentName());
 			fcd.syncAddComponent(job.getClassName(), job.getComponentName(),
 					job.getPlacement());
 
@@ -106,14 +155,12 @@ public class ModelicaASTRegistryVisitor {
 			iRoot.flushCache();
 			iRoot.classes(); // needed?
 			iRoot.components();
-			Stack<String> nodePath = new Stack<String>();
-			registry.createPath(nodePath, srcNode);
 			ChangePropagationController.getInstance().handleNotifications(
-					ASTChangeEvent.POST_ADDED, file, srcNode, nodePath);
+					ASTChangeEvent.POST_ADDED, file, job.getClassASTPath());
 		}
 		System.out
-		.println("ModelicaAstReg: AddJob+handling/starting notification threads took: "
-				+ (System.currentTimeMillis() - time) + "ms");
+				.println("ModelicaAstReg: AddJob+handling/starting notification threads took: "
+						+ (System.currentTimeMillis() - time) + "ms");
 	}
 
 	/**
@@ -123,21 +170,22 @@ public class ModelicaASTRegistryVisitor {
 	 * @param file
 	 * @param instNode
 	 */
-	private void removeNode(IFile file, ASTNode<?> instNode) {
+	private void removeNode(IFile file, Stack<String> removeNodePath) {
 		long time = System.currentTimeMillis();
-		synchronized (instNode.state()) {
-			//System.out.println("ModelicaASTRegVISITOR: recieved remove job!");
-			ASTNode<?> srcNode = getCorrespondingSrcNode(instNode);
-			//ArrayList<String> instNodePath = getNodePathToRoot(instNode);
-			//System.out.println("ModelicaASTREGVisitor: PATH OF INSTNODE WAS: "
-			//		+ makeStringOfArrayPath(instNodePath));
-			//ArrayList<String> srcNodePath = getNodePathToRoot(srcNode);
-			//System.out.println("ModelicaASTREGVisitor: PATH OF SRCNODE WAS: "
-			//		+ makeStringOfArrayPath(srcNodePath));
+		// System.out.println("ModelicaASTRegVISITOR: recieved remove job!");
+		SourceRoot root = ((LocalRootNode) registry.doLookup(file)[0])
+				.getSourceRoot();
+		synchronized (root.state()) {
+			ASTNode<?> srcNode = registry.resolveSourceASTPath(removeNodePath,
+					root);
+			// ArrayList<String> instNodePath = getNodePathToRoot(instNode);
+			// System.out.println("ModelicaASTREGVisitor: PATH OF INSTNODE WAS: "
+			// + makeStringOfArrayPath(instNodePath));
+			// ArrayList<String> srcNodePath = getNodePathToRoot(srcNode);
+			// System.out.println("ModelicaASTREGVisitor: PATH OF SRCNODE WAS: "
+			// + makeStringOfArrayPath(srcNodePath));
 
 			// Create path before removal!
-			Stack<String> nodePath = new Stack<String>();
-			registry.createPath(nodePath, srcNode);
 			removeSrcNode(srcNode);
 			LocalRootNode lr = (LocalRootNode) registry.doLookup(file)[0];
 			StoredDefinition def = lr.getDef();
@@ -151,11 +199,11 @@ public class ModelicaASTRegistryVisitor {
 			// TODO removeListenerPath(file, nodePath);
 
 			ChangePropagationController.getInstance().handleNotifications(
-					ASTChangeEvent.POST_REMOVE, file, srcNode, nodePath);
+					ASTChangeEvent.POST_REMOVE, file, removeNodePath);
 		}
 		System.out
-		.println("ModelicaAstReg: RemoveJob+handling/starting notification threads took: "
-				+ (System.currentTimeMillis() - time) + "ms");
+				.println("ModelicaAstReg: RemoveJob+handling/starting notification threads took: "
+						+ (System.currentTimeMillis() - time) + "ms");
 	}
 
 	/**
@@ -165,21 +213,16 @@ public class ModelicaASTRegistryVisitor {
 	 * @param selectedInstNode
 	 * @return
 	 */
-	private ASTNode<?> getCorrespondingSrcNode(ASTNode<?> selectedInstNode) {
-		ASTNode<?> result = null;
-		if (selectedInstNode instanceof InstClassDecl) {
-			InstClassDecl decl = (InstClassDecl) selectedInstNode;
-			result = decl.getClassDecl();
-		} else if (selectedInstNode instanceof InstComponentDecl) {
-			InstComponentDecl decl = (InstComponentDecl) selectedInstNode;
-			result = decl.getComponentDecl();
-		}
-		if (result == null) {
-			System.err.println("getCorrespondingSrcnode failed...");
-		}
-		return result;
-		// return selectedInstNode.getSelectionNode();
-	}
+	/**
+	 * private ASTNode<?> getCorrespondingSrcNode(ASTNode<?> selectedInstNode) {
+	 * ASTNode<?> result = null; if (selectedInstNode instanceof InstClassDecl)
+	 * { InstClassDecl decl = (InstClassDecl) selectedInstNode; result =
+	 * decl.getClassDecl(); } else if (selectedInstNode instanceof
+	 * InstComponentDecl) { InstComponentDecl decl = (InstComponentDecl)
+	 * selectedInstNode; result = decl.getComponentDecl(); } if (result == null)
+	 * { System.err.println("getCorrespondingSrcnode failed..."); } return
+	 * result; // return selectedInstNode.getSelectionNode(); }
+	 */
 
 	/**
 	 * Returns an arraylist with the path from given node to root. Each node has
@@ -189,25 +232,17 @@ public class ModelicaASTRegistryVisitor {
 	 * @param node
 	 * @return
 	 */
-	private ArrayList<String> getNodePathToRoot(ASTNode<?> node) {
-		ArrayList<String> nodePath = new ArrayList<String>();
-		ArrayList<ASTNode<?>> visited = new ArrayList<ASTNode<?>>();
-		ASTNode<?> previousNode = null;
-		while (node != null && !visited.contains(node)) {
-			visited.add(node);
-			String newPath = "";
-			if (node instanceof List && previousNode != null) {
-				int index = node.getIndexOfChild(previousNode);
-				newPath = node.getNodeName() + " " + index;
-			} else {
-				newPath = getNodeName(node);
-			}
-			nodePath.add(newPath);
-			previousNode = node;
-			node = node.getParent();
-		}
-		return nodePath;
-	}
+	/**
+	 * private ArrayList<String> getNodePathToRoot(ASTNode<?> node) {
+	 * ArrayList<String> nodePath = new ArrayList<String>();
+	 * ArrayList<ASTNode<?>> visited = new ArrayList<ASTNode<?>>(); ASTNode<?>
+	 * previousNode = null; while (node != null && !visited.contains(node)) {
+	 * visited.add(node); String newPath = ""; if (node instanceof List &&
+	 * previousNode != null) { int index = node.getIndexOfChild(previousNode);
+	 * newPath = node.getNodeName() + " " + index; } else { newPath =
+	 * getNodeName(node); } nodePath.add(newPath); previousNode = node; node =
+	 * node.getParent(); } return nodePath; }
+	 */
 
 	/**
 	 * Returns the node type and id used as unique identifier.
@@ -215,10 +250,10 @@ public class ModelicaASTRegistryVisitor {
 	 * @param node
 	 * @return
 	 */
-	private String getNodeName(ASTNode<?> node) {
-		String name = node.getNodeName() + " " + node.outlineId();
-		return name;
-	}
+	/**
+	 * private String getNodeName(ASTNode<?> node) { String name =
+	 * node.getNodeName() + " " + node.outlineId(); return name; }
+	 */
 
 	/**
 	 * Removes a node from the source AST.
@@ -286,13 +321,12 @@ public class ModelicaASTRegistryVisitor {
 	 */
 
 	// DEBUG TODO remove
-	private void printSubTree(ASTNode<?> node, String indent) {
-		System.out
-				.println(indent + node.getNodeName() + " " + node.outlineId());
-		for (int i = 0; i < node.getNumChild(); i++) {
-			printSubTree(node.getChild(i), indent + "  ");
-		}
-	}
+	/*
+	 * private void printSubTree(ASTNode<?> node, String indent) { System.out
+	 * .println(indent + node.getNodeName() + " " + node.outlineId()); for (int
+	 * i = 0; i < node.getNumChild(); i++) { printSubTree(node.getChild(i),
+	 * indent + "  "); } }
+	 */
 
 	// DEBUG TODO remove
 	/*
@@ -444,15 +478,10 @@ public class ModelicaASTRegistryVisitor {
 	 */
 
 	// DEBUG TODO remove
-	private String makeStringOfArrayPath(ArrayList<String> list) {
-		String res = "";
-		for (int i = 0; i < list.size(); i++) {
-			if (res.equals("")) {
-				res = list.get(i);
-			} else {
-				res = res + " /// " + list.get(i);
-			}
-		}
-		return res;
-	}
+	/*
+	 * private String makeStringOfArrayPath(ArrayList<String> list) { String res
+	 * = ""; for (int i = 0; i < list.size(); i++) { if (res.equals("")) { res =
+	 * list.get(i); } else { res = res + " /// " + list.get(i); } } return res;
+	 * }
+	 */
 }

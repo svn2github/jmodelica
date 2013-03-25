@@ -1,14 +1,12 @@
 package org.jmodelica.ide.actions;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import javax.imageio.ImageIO;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -18,11 +16,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
@@ -31,32 +26,30 @@ import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.progress.IProgressConstants2;
 import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.compiler.LocalRootNode;
+import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.editor.Editor;
-import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.ide.helpers.ShowMessageJob;
+import org.jmodelica.ide.outline.cache.CachedClassDecl;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.AbstractGenerator;
-import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.CompilationAbortedException;
 import org.jmodelica.modelica.compiler.CompilationHooks;
-import org.jmodelica.modelica.compiler.CompilerException;
 import org.jmodelica.modelica.compiler.FClass;
 import org.jmodelica.modelica.compiler.InstClassDecl;
-import org.jmodelica.modelica.compiler.ModelicaClassNotFoundException;
 import org.jmodelica.modelica.compiler.ModelicaCompiler;
 import org.jmodelica.modelica.compiler.SourceRoot;
-import org.jmodelica.util.DummyOutputStream;
 import org.jmodelica.util.OptionRegistry;
 
-public class CompileFMUAction extends CurrentClassAction implements IJobChangeListener {
-	
+public class CompileFMUAction extends CurrentClassAction implements
+		IJobChangeListener {
+
 	protected Editor editor;
 	protected DirectoryDialog outputDirDlg;
-	
+
 	public CompileFMUAction(Editor editor) {
 		super();
 		super.setActionDefinitionId(IDEConstants.COMMAND_COMPILE_FMU_ID);
@@ -65,13 +58,13 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 	}
 
 	@Override
-	protected String getNewText(BaseClassDecl currentClass) {
-        if (currentClass != null) 
-            return "Compile '" + currentClass.getName().getID() + "' to FMU";
-        else
-        	return IDEConstants.ACTION_COMPILE_FMU_TEXT;
+	protected String getNewText(CachedClassDecl currentClass) {
+		if (currentClass != null)
+			return "Compile '" + currentClass.qualifiedName() + "' to FMU";
+		else
+			return IDEConstants.ACTION_COMPILE_FMU_TEXT;
 	}
-	
+
 	@Override
 	public boolean isEnabled() {
 		if (!super.isEnabled())
@@ -97,21 +90,33 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 		if (dir != null) {
 			if (!PlatformUI.getWorkbench().saveAllEditors(true))
 				return;
-			
+
 			showConsole();
-			OptionRegistry opt = new OptionRegistry(currentClass.root().options);
-			String className = currentClass.qualifiedName();
-			String[] paths = editor.editorFile().getPaths();
-			Job job = new CompileJob(className, paths, dir, proj, opt);
-			job.setUser(true);
-			job.addJobChangeListener(this);
-			job.schedule();
+			String fileName[] = currentClass.containingFileName().split("/");
+			String theName = fileName[fileName.length-1];
+			LocalRootNode ln = (LocalRootNode) ModelicaASTRegistry
+					.getInstance()
+					.lookupFile(theName);
+			if (ln != null) {
+				SourceRoot sr = ln.getSourceRoot();
+				synchronized (sr.state()) {
+					OptionRegistry opt = new OptionRegistry(sr.options);
+
+					String className = currentClass.qualifiedName();
+					String[] paths = editor.editorFile().getPaths();
+					Job job = new CompileJob(className, paths, dir, proj, opt);
+					job.setUser(true);
+					job.addJobChangeListener(this);
+					job.schedule();
+				}
+			}
 		}
 	}
 
 	public void showConsole() {
-		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-		 try {
+		IWorkbenchPage page = PlatformUI.getWorkbench()
+				.getActiveWorkbenchWindow().getActivePage();
+		try {
 			page.showView(IConsoleConstants.ID_CONSOLE_VIEW);
 		} catch (PartInitException e) {
 		}
@@ -119,7 +124,8 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 
 	protected String askForDir() {
 		if (outputDirDlg == null || outputDirDlg.getParent().isDisposed()) {
-			Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+			Shell shell = PlatformUI.getWorkbench().getDisplay()
+					.getActiveShell();
 			outputDirDlg = new DirectoryDialog(shell);
 			outputDirDlg.setMessage("Select output directory for FMU");
 			outputDirDlg.setText("Select output directory");
@@ -152,22 +158,22 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 
 	public void sleeping(IJobChangeEvent event) {
 	}
-	
+
 	protected static class CompileJob extends Job implements CompilationHooks {
 
-		private static final int WORK_PARSE       = 1;
+		private static final int WORK_PARSE = 1;
 		private static final int WORK_INSTANTIATE = 12;
-		private static final int WORK_FLATTEN     = 4;
-		private static final int WORK_TRANSFORM   = 3;
-		private static final int WORK_FLAT_CHECK  = 2;
-		private static final int WORK_GENERATE    = 3;
-		private static final int WORK_COMPILE_C   = 5;
-		private static final int WORK_PACK        = 1;
-		
-		private static final int WORK_TOTAL = 
-			WORK_PARSE + WORK_INSTANTIATE + WORK_FLATTEN + WORK_TRANSFORM + 
-			WORK_FLAT_CHECK + WORK_GENERATE + WORK_COMPILE_C + WORK_PACK;
-		
+		private static final int WORK_FLATTEN = 4;
+		private static final int WORK_TRANSFORM = 3;
+		private static final int WORK_FLAT_CHECK = 2;
+		private static final int WORK_GENERATE = 3;
+		private static final int WORK_COMPILE_C = 5;
+		private static final int WORK_PACK = 1;
+
+		private static final int WORK_TOTAL = WORK_PARSE + WORK_INSTANTIATE
+				+ WORK_FLATTEN + WORK_TRANSFORM + WORK_FLAT_CHECK
+				+ WORK_GENERATE + WORK_COMPILE_C + WORK_PACK;
+
 		private IProgressMonitor mon;
 		private String className;
 		private String[] paths;
@@ -177,7 +183,8 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 		private IProject proj;
 		private ClassDecl targetClass;
 
-		public CompileJob(String className, String[] paths, String dir, IProject proj, OptionRegistry opt) {
+		public CompileJob(String className, String[] paths, String dir,
+				IProject proj, OptionRegistry opt) {
 			super("Compiling " + className + " to FMU");
 			this.className = className;
 			this.paths = paths;
@@ -213,7 +220,7 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 				msg.append(" to FMU");
 				if (e.getMessage() != null) {
 					msg.append(":\n");
-					if (e.getMessage().contains("\n\n")) 
+					if (e.getMessage().contains("\n\n"))
 						sev = IStatus.WARNING;
 					msg.append(e.getMessage());
 				} else {
@@ -221,7 +228,8 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 					msg.append(e);
 					msg.append(")");
 				}
-				status = new Status(sev, IDEConstants.PLUGIN_ID, msg.toString(), e); 
+				status = new Status(sev, IDEConstants.PLUGIN_ID,
+						msg.toString(), e);
 			} finally {
 				mc.removeCompilationHooks(this);
 			}
@@ -250,14 +258,16 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 			}
 			return new File(System.getProperty("java.io.tmpdir"));
 		}
-		  
-		 private OutputStream newConsoleStream() {
-			 if (messageConsole == null) 
-				 messageConsole = new MessageConsole("Modelica Compilation", null);  
-			 ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[] { messageConsole });
-			 
-			 return messageConsole.newMessageStream();
-		 }  
+
+		private OutputStream newConsoleStream() {
+			if (messageConsole == null)
+				messageConsole = new MessageConsole("Modelica Compilation",
+						null);
+			ConsolePlugin.getDefault().getConsoleManager()
+					.addConsoles(new IConsole[] { messageConsole });
+
+			return messageConsole.newMessageStream();
+		}
 
 		@Override
 		public boolean shouldAbort() {
@@ -320,7 +330,7 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 		public void fmuPacked(File path) {
 			mon.worked(WORK_PACK);
 		}
-		
+
 	}
 
 }

@@ -241,7 +241,7 @@ aspect Outline {
 
 
 	public Object[] ASTNode.cachedOutlineChildren() {
-		return outlineChildren().toArray();
+		return outlineChildren().toArray(); 
 	}
 
 	public void ASTNode.updateOutlineCachedChildren() {}

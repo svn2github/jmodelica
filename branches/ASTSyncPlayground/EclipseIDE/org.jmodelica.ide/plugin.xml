@@ -180,7 +180,7 @@
          </triggerPoints>
          <possibleChildren>
             <instanceof
-                  value="org.jmodelica.modelica.compiler.ASTNode">
+                  value="org.jmodelica.ide.outline.cache.CachedASTNode">
             </instanceof>
          </possibleChildren>
          <commonSorter
@@ -189,7 +189,7 @@
             <parentExpression>
                <or>
                   <instanceof
-                        value="org.jmodelica.modelica.compiler.ASTNode">
+                        value="org.jmodelica.ide.outline.cache.CachedASTNode">
                   </instanceof>
                   <and>
                      <adapt
@@ -274,16 +274,6 @@
             name="Instance Outline">
          <description>
             Shows an outline of the instance trees for all classes in the current file.
-         </description>
-      </view>
-            <view
-            category="org.jmodelica.ide.view.category"
-            class="org.jmodelica.ide.outline.InstanceOutlineView"
-            icon="resources/icons/modelica_perspective.png"
-            id="org.jmodelica.ide.view.outline.instance2"
-            name="Instance Outline2">
-         <description>
-            Shows a second outline of the instance trees for all classes in the current file.
          </description>
       </view>
       <view

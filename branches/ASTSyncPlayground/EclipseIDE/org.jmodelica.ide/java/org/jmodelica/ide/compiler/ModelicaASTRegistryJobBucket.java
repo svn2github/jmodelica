@@ -8,17 +8,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.jmodelica.ide.outline.cache.OutlineCacheJob;
 
 public class ModelicaASTRegistryJobBucket {
 	private static ModelicaASTRegistryJobBucket jobBucket;
-	private PriorityQueue<IJobObject> availableGraphicalJobs;
-	private PriorityQueue<IJobObject> availableNonGraphicalJobs;
+	private PriorityQueue<IJobObject> availableJobs;
+	private boolean threadRunning = false;
+	private IJobObject nextJob = null;
 
 	private ModelicaASTRegistryJobBucket() {
 		Comparator<IJobObject> comparator = new JobObjectComparator();
-		availableGraphicalJobs = new PriorityQueue<IJobObject>(5, comparator);
-		availableNonGraphicalJobs = new PriorityQueue<IJobObject>(5, comparator);
-		// TODO larger initial capacity?
+		availableJobs = new PriorityQueue<IJobObject>(5, comparator);
 	}
 
 	public static synchronized ModelicaASTRegistryJobBucket getInstance() {
@@ -28,31 +28,45 @@ public class ModelicaASTRegistryJobBucket {
 	}
 
 	/**
-	 * Add a job to the queue. A new background thread to handle one job from
-	 * the queue will also automatically be created.
+	 * Add a job to the queue. A new jobhandler thread to handle one job from
+	 * the queue will also automatically be created, if necessary.
 	 */
 	public synchronized void addJob(IJobObject job) {
-		if (job instanceof UpdateGraphicalJob) {
-			// NOT a graphical job, does not need to run in U thread (maybe
-			// misleading, refactor name?)
-			availableNonGraphicalJobs.add(job);
+		availableJobs.add(job);
+		if (!threadRunning)
+			startNewThread();
+	}
+
+	private void startNewThread() {
+		System.out.println("Starting new thread! Jobs available: "
+				+ availableJobs.size());
+		threadRunning = true;
+		nextJob = availableJobs.poll();
+		if (nextJob instanceof UpdateGraphicalJob) {
 			createNewNonGraphicalJobHandlerThread(Job.SHORT);
-		} else if (job instanceof UpdateOutlineJob) {
-			availableGraphicalJobs.add(job);
-			createNewGraphicalJobHandlerThread(Job.DECORATE);
-		} else if (job instanceof ModificationJob) {
-			availableNonGraphicalJobs.add(job);
+		} else if (nextJob instanceof UpdateOutlineJob) {
+			createNewGraphicalJobHandlerThread(Job.SHORT);
+		} else if (nextJob instanceof ModificationJob) {
 			createNewNonGraphicalJobHandlerThread(Job.SHORT);
-		} // TODO texteditor
+		} else if (nextJob instanceof OutlineCacheJob) {
+			createNewNonGraphicalJobHandlerThread(Job.SHORT);
+		}
+	}
+
+	protected synchronized void attendOwnFuneral() {
+		if (availableJobs.size() > 0) {
+			startNewThread();
+		} else {
+			threadRunning = false;
+		}
 	}
 
 	private void createNewNonGraphicalJobHandlerThread(int jobPriority) {
 		Job job = new Job("NonGraphicalJob") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				if (availableNonGraphicalJobs.size() > 0) {
-					availableNonGraphicalJobs.poll().doJob();
-				}
+				nextJob.doJob();
+				attendOwnFuneral();
 				return Status.OK_STATUS;
 			}
 		};
@@ -68,9 +82,8 @@ public class ModelicaASTRegistryJobBucket {
 				// thread
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
-						if (availableGraphicalJobs.size() > 0) {
-							availableGraphicalJobs.poll().doJob();
-						}
+						nextJob.doJob();
+						attendOwnFuneral();
 					}
 				});
 				return Status.OK_STATUS;
@@ -80,33 +93,14 @@ public class ModelicaASTRegistryJobBucket {
 		job.schedule();
 	}
 
-	/**
-	 * Get a job from the queue.
-	 * 
-	 * @return JobObject or NULL if no job available.
-	 */
-	protected synchronized IJobObject getJob() {
-		while (availableGraphicalJobs.size() == 0) {
-			try {
-				wait();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		IJobObject job = null;
-		if (availableGraphicalJobs.size() > 0)
-			job = availableGraphicalJobs.poll();
-		return job;
-	}
-
 	private class JobObjectComparator implements Comparator<IJobObject> {
 		@Override
 		public int compare(IJobObject x, IJobObject y) {
 			if (x.getPriority() < y.getPriority()) {
-				return -1;
+				return 1;
 			}
 			if (x.getPriority() > y.getPriority()) {
-				return 1;
+				return -1;
 			}
 			return 0;
 		}

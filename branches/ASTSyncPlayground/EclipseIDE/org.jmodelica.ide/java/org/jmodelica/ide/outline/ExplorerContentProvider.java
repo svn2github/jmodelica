@@ -15,11 +15,9 @@
  */
 package org.jmodelica.ide.outline;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -29,36 +27,26 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.ui.progress.UIJob;
-import org.jastadd.ed.core.model.node.IASTNode;
-import org.jastadd.ed.core.model.node.IOutlineNode;
+import org.jastadd.ed.core.model.IASTChangeEvent;
+import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.compiler.LocalRootNode;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
-import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
-import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.ClassDecl;
-import org.jmodelica.modelica.compiler.StoredDefinition;
+import org.jmodelica.ide.outline.cache.CachedContentProvider;
+import org.jmodelica.ide.outline.cache.EventCachedFileChildren;
+import org.jmodelica.ide.outline.cache.ICachedOutlineNode;
 
-public class ExplorerContentProvider implements ITreeContentProvider,
-		IResourceChangeListener, IResourceDeltaVisitor {
+//TODO handle file changes comp added etc...
+public class ExplorerContentProvider extends CachedContentProvider implements
+		IResourceChangeListener, IResourceDeltaVisitor, IASTChangeListener {
 
-	private ModelicaEclipseCompiler cmp;
-	private StructuredViewer viewer;
-	private Map<IFile, IASTNode> localCompiles;
-	private Set<IASTNode> outdatedLocalCompiles;
+	private TreeViewer viewer;
+	private Map<IFile, ICachedOutlineNode> astCacheMap;
+	private ExplorerOutlineCache cache;
 
 	public ExplorerContentProvider() {
-		cmp = new ModelicaEclipseCompiler();
-		localCompiles = new HashMap<IFile, IASTNode>();
-		outdatedLocalCompiles = new HashSet<IASTNode>();
+		cache = new ExplorerOutlineCache(this);
+		astCacheMap = new HashMap<IFile, ICachedOutlineNode>();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this,
 				IResourceChangeEvent.POST_CHANGE);
 	}
@@ -66,74 +54,59 @@ public class ExplorerContentProvider implements ITreeContentProvider,
 	public Object[] getChildren(Object parentElement) {
 		Object[] children = null;
 		if (parentElement instanceof IFile) {
-			IOutlineNode root = (IOutlineNode) getRoot((IFile) parentElement);
-			children = root.outlineChildren().toArray();
-			// } else if (parentElement instanceof IProject) {
-			// LibrariesList libList = new LibrariesList((IProject)
-			// parentElement, viewer);
-			// return libList.hasChildren() ? new Object[] { libList } : null;
-		} else if (parentElement instanceof ClassDecl) {
-			children = getVisible(((ClassDecl) parentElement).classes());
+			IFile file = (IFile) parentElement;
+			if (!astCacheMap.containsKey((IFile) parentElement)) {
+				cache.fetchFileChildren(file, viewer);
+			} else {
+				children = super.getChildren(astCacheMap
+						.get((IFile) parentElement));
+			}
+		} else {
+			children = super.getChildren(parentElement);
 		}
-		return OutlineUpdateWorker.addIcons(viewer, children);
+		// ICachedOutlineNode root = astCache.get((IFile) parentElement);
+		// children = root.outlineChildren().toArray();
+		// } else if (parentElement instanceof IProject) {
+		// LibrariesList libList = new LibrariesList((IProject)
+		// parentElement, viewer);
+		// return libList.hasChildren() ? new Object[] { libList } : null;
+		// } else if (parentElement instanceof ClassDecl) {
+		// children = getVisible(((ClassDecl) parentElement).classes());
+		// }
+		// return OutlineUpdateWorker.addIcons(viewer, children);
+		return children;
 	}
 
 	public Object getParent(Object element) {
-		if (element instanceof ClassDecl) {
-			ASTNode<?> parent = getParentClass((ClassDecl) element);
-			if (parent instanceof StoredDefinition)
-				return ((StoredDefinition) parent).getFile();
-		} else if (element instanceof LoadedLibraries) {
-			return ((LoadedLibraries) element).getParent();
+		if (element instanceof ICachedOutlineNode) {
+			Object parent = super.getParent(element);
+			if (parent == null) {
+				ICachedOutlineNode sought = (ICachedOutlineNode) element;
+				for (Entry<IFile, ICachedOutlineNode> entry : astCacheMap
+						.entrySet())
+					if (entry.getValue().equals(sought))
+						return entry.getKey();
+			}
 		}
 		return null;
 	}
 
 	public boolean hasChildren(Object element) {
 		if (element instanceof IFile) {
-			IOutlineNode root = (IOutlineNode) getRoot((IFile) element);
-			return (root != null) && root.hasVisibleChildren();
-		} else if (element instanceof LoadedLibraries) {
-			return ((LoadedLibraries) element).hasChildren();
-		} else if (element instanceof ClassDecl) {
-			return ((ClassDecl) element).hasClasses();
-		}
-		return false;
-	}
-
-	private IASTNode getRoot(IFile file) {
-		LocalRootNode fileNode = (LocalRootNode) ModelicaASTRegistry
-				.getInstance().doLookup(file)[0];
-		IASTNode ast = fileNode.getDef();
-		// TODO: Need to save in registry even if we have to build ourselves
-		if (ast == null) {
-			ast = localCompiles.get(file);
-			if (localCompiles.containsKey(file)
-					|| outdatedLocalCompiles.contains(ast)) {
-				outdatedLocalCompiles.remove(ast);
-				new CompileJob(file).schedule();
+			IFile file = (IFile) element;
+			System.out.println(">>>Haschildren file:" + file.getName());
+			if (!astCacheMap.containsKey(file)) {
+				System.out.println(">>>didnt have file is astmap, fetching children");
+				cache.fetchFileChildren(file, viewer);
+				return true;
 			}
-		} else {
-			outdatedLocalCompiles.remove(localCompiles.get(file));
-			localCompiles.remove(file);
+			ICachedOutlineNode root = astCacheMap.get(file);
+			boolean hasc = (root != null && root.hasVisibleChildren());
+			System.out
+					.println(">>>we had file in astmap, haschildren?=" + hasc);
+			return hasc;
 		}
-		return ast;
-	}
-
-	private ASTNode<?> getParentClass(ASTNode<?> node) {
-		while (!(node instanceof ClassDecl || node instanceof StoredDefinition))
-			node = node.getParent();
-		return node;
-	}
-
-	private ASTNode[] getVisible(Iterable<? extends ASTNode> objs) {
-		ArrayList<ASTNode> list = new ArrayList<ASTNode>();
-		for (ASTNode e : objs) {
-			if (e instanceof IOutlineNode
-					&& ((IOutlineNode) e).showInContentOutline())
-				list.add(e);
-		}
-		return list.toArray(new ASTNode[list.size()]);
+		return super.hasChildren(element);
 	}
 
 	public Object[] getElements(Object inputElement) {
@@ -144,7 +117,7 @@ public class ExplorerContentProvider implements ITreeContentProvider,
 	}
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.viewer = (StructuredViewer) viewer;
+		this.viewer = (TreeViewer) viewer;
 	}
 
 	/*
@@ -181,47 +154,22 @@ public class ExplorerContentProvider implements ITreeContentProvider,
 			final IFile file = (IFile) source;
 			String ext = file.getFileExtension();
 			if (ext != null && ext.equals(IDEConstants.MODELICA_FILE_EXT)) {
-				IASTNode ast = localCompiles.get(file);
+				ICachedOutlineNode ast = astCacheMap.get(file);
 				if (ast != null)
-					outdatedLocalCompiles.add(ast);
-				new UpdateJob(file).schedule();
+					cache.fetchFileChildren(file, viewer);
+				// new UpdateJob(file).schedule();
 			}
 			return false;
 		}
 		return false;
 	}
 
-	private final class CompileJob extends Job {
-		private IFile file;
-
-		private CompileJob(IFile file) {
-			super("Local compilation of " + file);
-			setSystem(true);
-			setPriority(Job.DECORATE);
-			this.file = file;
-		}
-
-		protected IStatus run(IProgressMonitor monitor) {
-			localCompiles.put(file, cmp.compileFile(file));
-			new UpdateJob(file).schedule();
-			return Status.OK_STATUS;
-		}
-	}
-
-	private final class UpdateJob extends UIJob {
-		private final IFile file;
-
-		private UpdateJob(IFile file) {
-			super("Update Source tree in Project Explorer");
-			this.file = file;
-			setSystem(true);
-			setPriority(Job.SHORT);
-		}
-
-		public IStatus runInUIThread(IProgressMonitor monitor) {
-			if (viewer != null && !viewer.getControl().isDisposed())
-				viewer.refresh(file);
-			return Status.OK_STATUS;
+	@Override
+	public void astChanged(IASTChangeEvent e) {
+		if (e instanceof EventCachedFileChildren) {
+			EventCachedFileChildren event = (EventCachedFileChildren) e;
+			astCacheMap.put(event.getFile(), event.getRoot());
+			OutlineUpdateWorker.addChildrenTask(event.getTask());
 		}
 	}
 

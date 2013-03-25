@@ -61,10 +61,9 @@ import org.jmodelica.ide.actions.ToggleAnnotationsAction;
 import org.jmodelica.ide.actions.ToggleComment;
 import org.jmodelica.ide.helpers.hooks.IASTEditor;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
-import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
+import org.jmodelica.ide.outline.cache.CachedClassDecl;
 import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.ClassDecl;
 
 /**
@@ -73,9 +72,8 @@ import org.jmodelica.modelica.compiler.ClassDecl;
 public class Editor extends AbstractDecoratedTextEditor implements
 		IASTChangeListener, EditorWithFile, ICurrentClassListener, IASTEditor {
 
-	private final OutlinePage fSourceOutlinePage;
+	private final SourceOutlinePage fSourceOutlinePage;
 	private final InstanceOutlinePage fInstanceOutlinePage;
-	private final InstanceOutlinePage fInstanceOutlinePage2;
 
 	private IDocumentPartitioner fPartitioner;
 
@@ -103,7 +101,6 @@ public class Editor extends AbstractDecoratedTextEditor implements
 		super();
 		fSourceOutlinePage = new SourceOutlinePage(this);
 		fInstanceOutlinePage = new InstanceOutlinePage(this);
-		fInstanceOutlinePage2 = new InstanceOutlinePage(this);
 		// Commented out to disable name completion
 		// completions =
 		// new CompletionProcessor(this);
@@ -267,6 +264,10 @@ public class Editor extends AbstractDecoratedTextEditor implements
 		compResult = file.inModelicaProject() ? new GlobalCompilationResult(
 				file, this) : new LocalCompilationResult(file, this);
 		System.out.println("Editor uses compresult: " + file.toString());
+		fSourceOutlinePage.setFile(file.iFile());
+		// fnewSourceOutlinePage.setFile(file.iFile());
+		fInstanceOutlinePage.setFile(file.iFile());
+		// fInstanceOutlinePage2.setFile(file.iFile());
 		if (getSourceViewer() != null)
 			update();
 
@@ -299,8 +300,7 @@ public class Editor extends AbstractDecoratedTextEditor implements
 				toggleAnnotationsAction, goToDeclaration }) {
 			super.setAction(action.getId(), action);
 		}
-
-		selectNode(null);
+		selectNode(false, "", 0, 0);
 	}
 
 	@Override
@@ -342,9 +342,10 @@ public class Editor extends AbstractDecoratedTextEditor implements
 			return;
 
 		// Update outline
-		fSourceOutlinePage.updateAST(compResult.root());
-		fInstanceOutlinePage.updateAST(compResult.root());
-		fInstanceOutlinePage2.updateAST(compResult.root());
+		// fSourceOutlinePage.astChanged(null);
+		// fnewSourceOutlinePage.astChanged(null);
+		// fInstanceOutlinePage.astChanged(null);
+		// fInstanceOutlinePage2.astChanged(null);
 		goToDeclaration.updateAST(compResult.root());
 
 		// updateProjectionAnnotations();
@@ -410,7 +411,7 @@ public class Editor extends AbstractDecoratedTextEditor implements
 		return viewer.getProjectionAnnotationModel();
 	}
 
-	public void setCurrentClass(BaseClassDecl selected) {
+	public void setCurrentClass(CachedClassDecl selected) {
 		for (ICurrentClassListener listener : currentClassListeners)
 			listener.setCurrentClass(selected);
 	}
@@ -422,18 +423,17 @@ public class Editor extends AbstractDecoratedTextEditor implements
 	 *            node to select
 	 * @return whether file <code>node</code> is from matches file in editor
 	 */
-	public boolean selectNode(ASTNode<?> node) {
+	public boolean selectNode(boolean notNull, String containingFileName,
+			int selectionNodeOffset, int selectionNodeLength) {
 
 		boolean matchesInput = false;
-		if (node != null) {
-			File nodeFile = new File(node.containingFileName());
+		if (notNull) {
+			File nodeFile = new File(containingFileName);
 			File editorFile = new File(file.path());
 			matchesInput = editorFile.equals(nodeFile);
-
 			if (matchesInput) {
-				ASTNode<?> sel = node.getSelectionNode();
-				if (sel.offset() >= 0 && sel.length() >= 0)
-					selectAndReveal(sel.offset(), sel.length());
+				if (selectionNodeOffset >= 0 && selectionNodeLength >= 0)
+					selectAndReveal(selectionNodeOffset, selectionNodeLength);
 			}
 		}
 

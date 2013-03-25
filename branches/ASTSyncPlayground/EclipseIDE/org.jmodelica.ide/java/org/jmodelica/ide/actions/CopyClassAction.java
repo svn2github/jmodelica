@@ -1,15 +1,9 @@
 package org.jmodelica.ide.actions;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuCreator;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.HelpListener;
-import org.eclipse.swt.widgets.Event;
 import org.jmodelica.ide.outline.ClassCopySource;
 
 public class CopyClassAction extends Action {

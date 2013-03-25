@@ -16,8 +16,6 @@
 package org.jmodelica.ide.outline;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -25,6 +23,7 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.IPage;
@@ -36,11 +35,13 @@ import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.PageBookView;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.jastadd.ed.core.model.node.IASTNode;
 import org.jmodelica.ide.compiler.LocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.editor.Editor;
-import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.ide.outline.cache.ASTNodeCacheFactory;
+import org.jmodelica.ide.outline.cache.CachedASTNode;
+import org.jmodelica.ide.outline.cache.CachedOutlinePage;
+import org.jmodelica.ide.outline.cache.ICachedOutlineNode;
 
 public abstract class OutlineView extends PageBookView 
 implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
@@ -141,26 +142,28 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
     }
 
 	public boolean show(ShowInContext context) {
+		System.out.println("show!");
 		ISelection selection = context.getSelection();
 		if (selection instanceof ITreeSelection) {
 			// Pretty theoretic at this point, we don't support "show in" from any tree view
 			ITreeSelection treeSel = (ITreeSelection) selection;
 			if (treeSel.size() == 1) {
 				Object elem = treeSel.getFirstElement();
-				if (elem instanceof IASTNode)
-					return selectNode((IASTNode) elem);
+				if (elem instanceof CachedASTNode)
+					return selectNode((CachedASTNode) elem);
 				else if (elem instanceof IFile)
 					return selectNode(lookupASTForFile((IFile) elem));
 			} else {
 				// TODO: Does this work? probably not - but can't test yet
 				IPage page = getCurrentPage();
-				if (page instanceof OutlinePage) 
-					((OutlinePage) page).select(selection);
+				if (page instanceof CachedOutlinePage) 
+					((CachedOutlinePage) page).select(selection);
 			}
-		} else if (context.getInput() instanceof IEditorInput) {
-			IEditorInput input = (IEditorInput) context.getInput();
-			IASTNode root = rootASTOfInput(input);
-			if (root != null) {
+		} else if (context.getInput() instanceof IFileEditorInput) {
+			IFileEditorInput input = (IFileEditorInput) context.getInput();
+			return selectNode(ASTNodeCacheFactory.cacheNode((((LocalRootNode)ModelicaASTRegistry.getInstance().doLookup(input.getFile())[0]).getDef().firstClassDecl()),null,null));
+			//rootASTOfInput(input); //TODO wtf? TODO fix above line so cache is not null, override method in subbclasses?
+			/*if (root != null) {
 				// TODO: Add needed methods to an interface instead
 				ASTNode root2 = (ASTNode) root;
 				if (selection instanceof ITextSelection) {
@@ -171,7 +174,7 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 				} else {
 					return selectNode(root2.firstClassDecl());
 				}
-			}
+			}*/ //TODO lol...
 		}
 		return false;
 	}
@@ -179,11 +182,11 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 	/**
 	 * Get the root of the AST that this view uses for the given file.
 	 */
-	protected IASTNode rootASTOfInput(IEditorInput input) {
+	protected ICachedOutlineNode rootASTOfInput(IEditorInput input) {
 		IEditorPart editor = getSite().getPage().findEditor(input);
 		PageRec pageRec = getPageRec(editor);
-		if (pageRec != null && pageRec.page instanceof OutlinePage) 
-			return ((OutlinePage) pageRec.page).getRoot();
+		if (pageRec != null && pageRec.page instanceof CachedOutlinePage) 
+			return ((CachedOutlinePage) pageRec.page).getRoot();
 		else
 			return null;
 	}
@@ -193,11 +196,9 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 	 * @param file  the file to look up in the registry
 	 * @return
 	 */
-	private IASTNode lookupASTForFile(IFile file) {
-		IProject project = file.getProject();
-		String path = file.getRawLocation().toOSString();
+	private CachedASTNode lookupASTForFile(IFile file) {
 		LocalRootNode fileNode = (LocalRootNode)ModelicaASTRegistry.getInstance().doLookup(file)[0];
-		return fileNode.getDef();
+		return ASTNodeCacheFactory.cacheNode(fileNode.getDef(),null,null); //TODO no cache
 	}
 
 	/**
@@ -205,12 +206,12 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 	 * @param node  the node to select
 	 * @return <code>true</code> if selection was successful
 	 */
-	private boolean selectNode(IASTNode node) {
+	private boolean selectNode(CachedASTNode node) {
 		IPage page = getCurrentPage();
-		if (page instanceof OutlinePage) {
-			OutlinePage page2 = (OutlinePage) page;
+		if (page instanceof CachedOutlinePage) {
+			CachedOutlinePage page2 = (CachedOutlinePage) page;
 			if (page2.contains(node)) {
-				page2.select((ASTNode) node);
+				page2.select((CachedASTNode) node);
 				return true;
 			}
 		} 
