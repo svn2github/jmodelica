@@ -135,6 +135,9 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	 */
 	public FClass flattenModel(InstClassDecl icd) 
 			throws CompilerException, ModelicaClassNotFoundException, IOException {
+		if (icd.isOptimizationClass()) {
+			icd.root().options.setBooleanOption("variability_propagation", false);
+		}	
 		return super.flattenModel(icd);
 	}
 	

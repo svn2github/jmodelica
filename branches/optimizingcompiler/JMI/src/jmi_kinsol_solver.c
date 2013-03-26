@@ -154,10 +154,11 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
     struct KINMemRec * kin_mem = solver->kin_mem;    
 	int i, j, ret = 0;
     realtype curtime = *(jmi_get_t(block->jmi));
+    realtype *jac_fd;
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
     
-    if(!block->dF) {
+    if (!block->dF || block->jmi->options.block_jacobian_check) {
         /* Use (almost) standard finite differences */
         realtype inc, inc_inv, ujsaved, ujscale, sign;
         realtype *tmp2_data, *u_data, *uscale_data;
@@ -211,26 +212,49 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
 		/*ret = kin_f(u, ftemp, block);*/
 
         /* Restore original array pointer in tmp2 */
-        N_VSetArrayPointer(tmp2_data, tmp2);      
+        N_VSetArrayPointer(tmp2_data, tmp2);
+        if (block->jmi->options.block_jacobian_check) {
+        	jac_fd = (realtype*) calloc(N * N, sizeof(realtype));
+        	for (i = 0; i < N * N; i++) {
+        		jac_fd[i] = J->data[i];
+        	}
+        }
     }
-	else {
+    if (block->dF) {
         /* utilize directional derivatives to calculate Jacobian */
 		for(i = 0; i < N; i++){ 
  			block->x[i] = Ith(u,i);
 		}
 
-		/*printf("x[0]: %f\n Jac: ", block->x[0]);*/
 		for(i = 0; i < N; i++){
 			block->dx[i] = 1;
 			ret |= block->dF(block->jmi,block->x,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE);
 			for(j = 0; j < N; j++){
 				realtype dres = block->dres[j];
 				(J->data)[i*N+j] = dres;
-				/*printf(" %f, ", block->dres[j]);*/
 			}
 			J->cols[i] = &(J->data)[i*N];
 			block->dx[i] = 0;
 		}
+		
+	}
+	
+	if (block->jmi->options.block_jacobian_check) {
+		if (block->dF) {
+			for (i = 0; i < N; i++) {
+				for (j = 0; j < N; j++) {
+					realtype fd_val = jac_fd[i * N + j];
+					realtype a_val = J->data[i * N + j];
+					realtype rel_error = RAbs(a_val - fd_val) / (RAbs(fd_val) + 1);
+					if (rel_error >= block->jmi->options.block_jacobian_check_tol) {
+						jmi_log_error(block->jmi, "[JAC_CHECK] V_err [%d, %d] Analytic: %e, Finite difference: %e, Relative error %e", j, i, a_val, fd_val, rel_error);
+					}
+				}
+			}
+		} else {
+			jmi_log_error(block->jmi, "[JAC_CHECK] No block jacobian specified, unable to do jacobian check");
+		}
+		free(jac_fd);
 	}
 
 	if((block->jmi->options.nle_solver_log_level > 2) && (block->jmi->options.debug_log)) {

@@ -1923,9 +1923,9 @@ aspect TransformCanonical {
 						seb.equation().getResidual().warning("Can not use hand guided tearing pair, equation and variable resides in solved block. Variable: " + seb.equation().getResidual().getIterationVariable().name() + ". Equation: " + seb.equation());
 					log.info("Found solved block");
 					tearBLT.add(seb);
-//				} else if (seb != null && seb.isSimple()) {
-//					log.info("Found simple unsolved block");
-//					tearBLT.add(seb);
+				} else if (seb != null && block.size() == 1) {
+					log.info("Found simple unsolved block");
+					tearBLT.add(seb);
 				} else {
 					log.info("Found tearing block, tearing...");
 					TornEquationBlock eb = new TornEquationBlock();
@@ -3847,6 +3847,7 @@ aspect IfEquations {
 	
 	protected boolean FIfWhenElseEquation.hasEliminatedIfBranches = false;
 
+	// TODO: not needed, since structural parameters are replaced 
 	protected boolean FIfWhenElseEquation.eliminateOnParamTest = false;
 
 	protected void FIfWhenElseEquation.setEliminateOnParamTest() {}
@@ -5783,7 +5784,8 @@ aspect FunctionInlining {
 			functionUsed = direct ? UseType.DIRECT : UseType.ANNOTATION_DERIVATIVE;
 			if (direct &&
 			   (root().options.getBooleanOption("generate_block_jacobian") ||
-			    root().options.getBooleanOption("generate_dae_jacobian"))) {
+			    root().options.getBooleanOption("generate_dae_jacobian") ||
+			    root().options.getBooleanOption("generate_ode_jacobian"))) {
 				if (requiresDerivative() && !canDifferentiate()) {
 					error("Unable to determine derivative function for function '" + name() + "'");
 				} else if (hasFDerivativeFunction()) {

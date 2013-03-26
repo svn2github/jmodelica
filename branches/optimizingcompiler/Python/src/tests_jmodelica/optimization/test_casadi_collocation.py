@@ -283,6 +283,7 @@ class TestLocalDAECollocator:
         
         # Optimize using nominal and initial trajectories
         opts['nominal_traj'] = ResultDymolaTextual("vdp_nom_traj_result.txt")
+        opts['nominal_traj_mode'] = {'_default_mode': "affine"}
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         col = res.solver
@@ -336,6 +337,7 @@ class TestLocalDAECollocator:
         
         # Optimize using nominal and initial trajectories
         opts['nominal_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
+        opts['nominal_traj_mode'] = {'_default_mode': 'time-variant'}
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         col = res.solver
@@ -352,6 +354,75 @@ class TestLocalDAECollocator:
         opts['eliminate_der_var'] = True
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
+    
+    @testattr(casadi = True)
+    def test_nominal_traj_mode(self):
+        """Test nominal_traj_mode on the CSTR."""
+        model = self.model_cstr_lagrange
+        
+        # References values
+        cost_ref = 1.8549259545339369e3
+        u_norm_ref = 3.0455503580669716e2
+        
+        # Get nominal and initial trajectories
+        opts = model.optimize_options(self.algorithm)
+        opts['n_e'] = 40
+        opts['n_cp'] = 2
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        try:
+            os.remove("cstr_nom_traj_result.txt")
+        except OSError:
+            pass
+        os.rename("CSTR_CSTR_Opt_Bounds_Lagrange_result.txt",
+                  "cstr_nom_traj_result.txt")
+        
+        # Time-variant
+        opts['nominal_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
+        opts['nominal_traj_mode'] = {'_default_mode': 'time-variant'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Affine
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Linear
+        opts['nominal_traj_mode'] = {'_default_mode': 'linear'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Attribute
+        opts['nominal_traj_mode'] = {'_default_mode': 'attribute'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Check impossible time-variant scaling
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'cstr.der(c)': 'time-variant'}
+        N.testing.assert_raises(CasadiCollocatorException, model.optimize,
+                                self.algorithm, opts)
+        
+        # Check changing one variable
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'cstr.c': 'time-variant'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Check alias variables
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'cstr.Tc': 'time-variant'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'u': 'time-variant'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'asdf': 'time-variant'}
+        N.testing.assert_raises(XMLException, model.optimize, self.algorithm,
+                                opts)
     
     @testattr(casadi = True)
     def test_cstr(self):
@@ -485,6 +556,7 @@ class TestLocalDAECollocator:
         sim_model = self.model_qt_sim
         opt_model = self.model_qt_par_est
         opt_model_2 = self.model_qt_par_est_degenerate
+        a_ref = [0.02656702, 0.02713898]
         
         # Extract data series
         t_meas = data['t'][6000::100,0]-60
@@ -514,31 +586,45 @@ class TestLocalDAECollocator:
         par_est_data_input = ParameterEstimationData(Q, measured_variables,
                                                      data)
         
-        #~ # Optimize without input
+        # Create parameter estimation data with input
+        Q = N.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 10.]])
+        measured_variables = ['qt.x1', 'qt.x2', 'u2']
+        data = N.transpose(N.vstack((t_meas, y1_meas, y2_meas, u2)))
+        par_est_data_input2 = ParameterEstimationData(Q, measured_variables,
+                                                      data)
+        
+        # Optimize without input
         opts = opt_model.optimize_options()
         opts['n_e'] = 60
         opts['init_traj'] = sim_res.result_data
         opts['parameter_estimation_data'] = par_est_data
         opt_res = opt_model.optimize(self.algorithm, options=opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res["qt.a1"],
-                                                 opt_res["qt.a2"]]),
-                                  [0.02656702, 0.02713898])
+                                                 opt_res["qt.a2"]]), a_ref)
         
-        # Optimize with input
+        # Optimize with second input eliminated
         opts['parameter_estimation_data'] = par_est_data_input
         u2_input = N.transpose(N.vstack((t_meas, u2)))
         opts['input'] = ('u2', u2_input)
         opt_res = opt_model.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res["qt.a1"],
-                                                 opt_res["qt.a2"]]),
-                                  [0.02656702, 0.02713898])
+                                                 opt_res["qt.a2"]]), a_ref)
         
-        # Optimize with input and nominal trajectories
+        # Optimize with second input eliminated and nominal trajectories
         opts['nominal_traj'] = sim_res.result_data
         opt_res = opt_model.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res["qt.a1"],
                                                  opt_res["qt.a2"]]),
-                                  [0.02656702, 0.02713898], 1e-4)
+                                  a_ref, 1e-4)
+        
+        # Optimize with first input eliminated
+        opts['parameter_estimation_data'] = par_est_data_input2
+        u1_input = N.transpose(N.vstack((t_meas, u1)))
+        opts['input'] = ('u1', u1_input)
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res["qt.a1"],
+                                                 opt_res["qt.a2"]]),
+                                  a_ref, 1e-4)
         
         # Point constraint on specified input
         opts = opt_model_2.optimize_options()

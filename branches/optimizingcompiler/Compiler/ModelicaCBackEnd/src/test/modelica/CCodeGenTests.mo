@@ -8809,6 +8809,8 @@ model TestRuntimeOptions1
 			template="$C_runtime_option_map$",
 			generatedCode="
 const char *fmi_runtime_options_map_names[] = {
+    \"_block_jacobian_check\",
+    \"_block_jacobian_check_tol\",
     \"_enforce_bounds\",
     \"_events_default_tol\",
     \"_events_tol_factor\",
@@ -8828,11 +8830,11 @@ const char *fmi_runtime_options_map_names[] = {
 };
 
 const int fmi_runtime_options_map_vrefs[] = {
-    536870919, 0, 1, 268435461, 536870920, 2, 268435462, 3, 4, 536870921,
-    536870922, 536870923, 536870924, 536870925, 536870926, 0
+    536870920, 0, 536870921, 1, 2, 268435462, 536870922, 3, 268435463, 4,
+    5, 536870923, 536870924, 536870925, 536870926, 536870927, 536870928, 0
 };
 
-const int fmi_runtime_options_map_length = 15;
+const int fmi_runtime_options_map_length = 17;
 ")})));
 end TestRuntimeOptions1;
 

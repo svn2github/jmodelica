@@ -16,14 +16,16 @@
 
     <para>Before a model can be simulated it must be initialized, i.e.
     consistent initial values must be computed. To do this, JModelica.org
-    supplies the JMUmodel member function <literal>initialize</literal>, which
-    initializes the JMUmodel. The function is called after compiling and
+    supplies the JMUModel member function <literal>initialize</literal>, which
+    initializes the JMUModel. The function is called after compiling and
     creating a JMUModel:</para>
 
     <programlisting language="python"># Compile the stationary initialization model into a DLL
+from pymodelica import compile_jmu
 model_name = compile_jmu("My.Model", "/path/to/MyModel.mo")
 
 # Load a model instance into Python
+from pyjmi import JMUModel
 init_model = JMUModel(model_name)
     
 # Solve the DAE initialization system
@@ -147,10 +149,10 @@ y = init_result['y']
       <para>JModelica.org provides a method for DAE initialization that is
       based on IPOPT, the mathematical formulation of the algorithm can be
       found in the <link
-      xlink:href="http://www.jmodelica.org/api-docs/jmi/group__jmi__opt__sim__lp.html">JMI
-      API documentation</link>. Notice that this algorithm does not rely on
-      the causalization procedure (in particular the BLT transformation) which
-      is common. Instead, the DAE residual is introduced as an equality
+      xlink:href="http://www.jmodelica.org/api-docs/jmi/">JMI API
+      documentation</link>. Notice that this algorithm does not rely on the
+      causalization procedure (in particular the BLT transformation) which is
+      common. Instead, the DAE residual is introduced as an equality
       constraint when solving an optimization problem where the squared
       difference between the non-fixed start values and their corresponding
       variables are minimized. As a consequence, the algorithm relies on
@@ -159,18 +161,18 @@ y = init_result['y']
       start values than are algorithms based on causalization.</para>
 
       <para>The algorithm provides the options summarized in <xref
-      linkend="init-tab-collopts" />.</para>
+      linkend="init-tab-collopts"/>.</para>
 
       <table xml:id="init-tab-collopts">
         <title>Options for the collocation-based optimization
         algorithm</title>
 
         <tgroup cols="3">
-          <colspec align="left" colname="col–opt" colwidth="1*" />
+          <colspec align="left" colname="col–opt" colwidth="1*"/>
 
-          <colspec align="left" colname="col–desc" colwidth="1*" />
+          <colspec align="left" colname="col–desc" colwidth="1*"/>
 
-          <colspec align="left" colname="col–def" colwidth="2*" />
+          <colspec align="left" colname="col–def" colwidth="2*"/>
 
           <thead>
             <row>
@@ -260,10 +262,10 @@ y = init_result['y']
     </section>
 
     <section>
-      <title>Initilization using KInitSolveAlg</title>
+      <title>Initialization using KInitSolveAlg</title>
 
       <para>JModelica.org also provides a method for DAE initialization based
-      on the non-linear equaion solver KINSOL from the SUNDIALS suite. KINSOL
+      on the non-linear equation solver KINSOL from the SUNDIALS suite. KINSOL
       is currently comprised in the <link
       xlink:href="http://www.jmodelica.org/page/199">Assimulo</link> package,
       included when installing JModelica.org. KINSOL is based on Newtons
@@ -276,14 +278,14 @@ y = init_result['y']
 
       <para>KInitSolveAlg also implements an improved linear solver connected
       to KINSOL. This linear solver implements Tikhonov regularization to
-      handle the problems of singular Jacobiansas well as support for SuperLU,
-      an efficient sparse linear solver.</para>
+      handle the problems of singular Jacobians as well as support for
+      SuperLU, an efficient sparse linear solver.</para>
 
       <para>The options providable are summarized in <xref
-      linkend="tab_options" />.</para>
+      linkend="tab_options"/>.</para>
 
-      <table>
-        <title xml:id="tab_options">Options for KInitSolveAlg</title>
+      <table xml:id="tab_options">
+        <title>Options for KInitSolveAlg</title>
 
         <tgroup cols="3" colsep="1">
           <thead>
@@ -304,7 +306,7 @@ y = init_result['y']
 
               <entry>A flag indicating whether constraints are to be used
               <emphasis>during</emphasis> initialization. Further explained in
-              <xref linkend="sec_const_usage" />.</entry>
+              <xref linkend="sec_const_usage"/>.</entry>
             </row>
 
             <row>
@@ -314,7 +316,7 @@ y = init_result['y']
 
               <entry>A <literal>numpy.array</literal> containing floats that,
               when supplied, defines the constraints on the variables. Further
-              explained in <xref linkend="sec_const_usage" />.</entry>
+              explained in <xref linkend="sec_const_usage"/>.</entry>
             </row>
 
             <row>
@@ -345,7 +347,7 @@ y = init_result['y']
 
               <entry>These are the options sent to the KINSOL solver. These
               are reviewed in detail in <xref
-              linkend="kinsol_options" />.</entry>
+              linkend="kinsol_options"/>.</entry>
             </row>
           </tbody>
         </tgroup>
@@ -393,7 +395,7 @@ y = init_result['y']
               <entry>0</entry>
 
               <entry>An integer regulating the level of output from KINSOL.
-              Further explained in <xref linkend="sec_verbosity" />.</entry>
+              Further explained in <xref linkend="sec_verbosity"/>.</entry>
             </row>
           </tbody>
         </tgroup>
@@ -404,13 +406,13 @@ y = init_result['y']
 
         <para>KINSOL, and hence also KInitSolvAlg, only support simple
         unilateral constraints, that is constraining a variable to being
-        positive or negative. If the option use_constraints is set to True,
-        constraints are use. What constraints that are used depends on whether
-        or not the user has supplied constraints with the
+        positive or negative. If the option <literal>use_constraints</literal>
+        is set to True, constraints are use. What constraints that are used
+        depends on whether or not the user has supplied constraints with the
         <literal>constraints</literal> option. If set, these will be used
         otherwise constraints will be computed by reading the min and max
         attributes from the Modelica file. How the constraint array is written
-        is summarized in <xref linkend="constraints_array" />.</para>
+        is summarized in <xref linkend="constraints_array"/>.</para>
 
         <table pgwide="0" xml:id="constraints_array">
           <title>Values allowed in the <literal>constraints</literal>
@@ -460,7 +462,7 @@ y = init_result['y']
         </table>
 
         <para>When the constraints are read from the Modelica file the value
-        from <xref linkend="constraints_array" /> most fitting to the min and
+        from <xref linkend="constraints_array"/> most fitting to the min and
         max values is chosen. For example a variable with min set to 3.2 and
         max set to 5.6 is constrained to be greater than zero. When the
         algorithm is finished however the result will be compared with the min
@@ -473,7 +475,7 @@ y = init_result['y']
 
         <para>There are four different levels of verbosity in KINSOL with 0
         being "silent" and 3 being the "loudest". What is output is reviewed
-        in <xref linkend="verbosity" />.</para>
+        in <xref linkend="verbosity"/>.</para>
 
         <table xml:id="verbosity">
           <title>Verbosity levels in KINSOL</title>

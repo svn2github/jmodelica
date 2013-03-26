@@ -157,6 +157,8 @@ class CasadiModel(BaseModel):
             New parameter values only affect equations. Attributes like min and
             nominal that depend on parameters are not updated. These instead
             use the parameter values set at compile time.
+            
+            Alias variables may be reported as not being found.
         """
         if isinstance(names, basestring):
             self._set(names, values)
@@ -222,6 +224,10 @@ class CasadiModel(BaseModel):
             
             CasadiModel.get('damper.d')
             CasadiModel.get(['damper.d', 'gear.a'])
+        
+        Limitations::
+            
+            Alias variables may be reported as not being found.
         """
         if isinstance(names, basestring):
             return self._get(names)
@@ -388,6 +394,10 @@ class CasadiModel(BaseModel):
         Raises::
             
             XMLException if name not present in model.
+        
+        Limitations::
+            
+            Alias variables may be reported as not being found.
         """
         if isinstance(names, basestring):
             self._set_min(names, values)
@@ -436,6 +446,10 @@ class CasadiModel(BaseModel):
         Raises::
             
             XMLException if name not present in model.
+        
+        Limitations::
+            
+            Alias variables may be reported as not being found.
         """
         if isinstance(names, basestring):
             self._set_max(names, values)
@@ -484,6 +498,10 @@ class CasadiModel(BaseModel):
         Raises::
             
             XMLException if name not present in model.
+        
+        Limitations::
+            
+            Alias variables may be reported as not being found.
         """
         if isinstance(names, basestring):
             self._set_nominal(names, values)
@@ -877,6 +895,21 @@ class CasadiModel(BaseModel):
                 vr_map[get_vr(var_name)] = (i, vt)
                 i = i + 1
         self.vr_map = vr_map
+        
+        # Read integer parameter values separately (circumvent SymbolicOCP bug)
+        integer_vars = self.xmldoc.get_all_integer_variables()
+        if len(integer_vars) > 0:
+            [int_vr, int_names] = \
+                    zip(*[(var.get_value_reference(), var.get_name()) for
+                          var in integer_vars])
+            for (vr, start) in self.xmldoc.get_variable_start_attributes():
+                try:
+                    index = int_vr.index(vr)
+                except ValueError:
+                    pass
+                else:
+                    var = self.ocp.variable(int_names[index])
+                    var.setStart(start)
         
         # Count variables
         self.n_x = self.x.numel()

@@ -382,14 +382,24 @@ public class OptionRegistry {
                 runtime,
               0.0001,
               "Tolerance safety factor for the event iterations. Used when external solver specifies relative tolerance.",
-              1e-6,1.0),        
+              1e-6,1.0),
         USE_MANUAL_EQUATION_SCALING
               ("use_manual_equation_scaling",
                 runtime,
                 false,
-                "Enable equations scaling using manula values from annotations in equation block solvers.");
-    
-    		
+                "Enable equations scaling using manula values from annotations in equation block solvers."),
+		BLOCK_JACOBIAN_CHECK
+			("block_jacobian_check",
+			 runtime,
+			 false,
+			 "Compares the analytic block jacobians with the finite difference block jacobians during block evaluation. An error is given if the relative error is to big."),
+		BLOCK_JACOBIAN_CHECK_TOL
+			("block_jacobian_check_tol",
+			 runtime,
+			 1e-6,
+			 "Specifies the relative tolerance for block jacobian check.",
+			 1e-12,1.0),
+		;
 					
 		public String key;
 		public OptionType type;
