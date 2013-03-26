@@ -49,6 +49,8 @@ struct fmi1_cs_t {
     fmiCallbackFunctions callback_functions;
     fmiEventInfo event_info;
     fmiBoolean logging_on;
+    fmiInteger n_real_x;
+    fmiInteger n_sw;
     /* jmi_ode_solver_t *ode_solver; */ /** \brief Struct containing the ODE solver. */
 };
 

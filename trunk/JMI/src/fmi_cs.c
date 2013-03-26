@@ -149,6 +149,10 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
         return NULL;
     }
     
+    /* NEEDS TO COME FROM OUTSIDE, FROM THE XML FILE*/
+    component -> n_real_x = ((fmi_t*)component->fmi1_me)->jmi->n_real_x;
+    component -> n_sw = ((fmi_t*)component->fmi1_me)->jmi->n_sw;
+    
     return (fmiComponent)component;
 }
 
@@ -173,7 +177,7 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     if (retval != fmiOK){ return fmiError; }
     
     /* Create solver */
-    jmi_new_ode_solver(fmi1_me->jmi, solver, rhs_fcn, root_fcn);
+    jmi_new_ode_solver(fmi1_me->jmi, solver, rhs_fcn, root_fcn, fmi1_cs->n_real_x, fmi1_cs->n_sw, tStart, (void*)fmi1_cs);
     
     return fmiOK;
 }
@@ -248,15 +252,15 @@ fmiStatus fmi1_cs_get_string_status(fmiComponent c, const fmiStatusKind s, fmiSt
 
 int rhs_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs){
     fmiStatus retval;
-    fmi_t* fmi1_me = (fmi_t*)(c);
+    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
     
-    retval = fmi_set_continuous_states((fmiComponent)fmi1_me, (fmiReal*)y, fmi1_me->jmi->n_real_x);
+    retval = fmi_set_continuous_states(fmi1_cs->fmi1_me, (fmiReal*)y, fmi1_cs->n_real_x);
     if (retval != fmiOK){return -1;}
     
-    retval = fmi_set_time((fmiComponent)fmi1_me, t);
+    retval = fmi_set_time(fmi1_cs->fmi1_me, t);
     if (retval != fmiOK){return -1;}
     
-    retval = fmi_get_derivatives((fmiComponent)fmi1_me, (fmiReal*)rhs , fmi1_me->jmi->n_real_x);
+    retval = fmi_get_derivatives(fmi1_cs->fmi1_me, (fmiReal*)rhs , fmi1_cs->n_real_x);
     if (retval != fmiOK){return -1;}
     
     return 0;
@@ -264,15 +268,15 @@ int rhs_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs){
 
 int root_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *root){
     fmiStatus retval;
-    fmi_t* fmi1_me = (fmi_t*)(c);
+    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
     
-    retval = fmi_set_continuous_states((fmiComponent)fmi1_me, (fmiReal*)y, fmi1_me->jmi->n_real_x);
+    retval = fmi_set_continuous_states(fmi1_cs->fmi1_me, (fmiReal*)y, fmi1_cs->n_real_x);
     if (retval != fmiOK){return -1;}
     
-    retval = fmi_set_time((fmiComponent)fmi1_me, t);
+    retval = fmi_set_time(fmi1_cs->fmi1_me, t);
     if (retval != fmiOK){return -1;}
     
-    retval = fmi_get_event_indicators((fmiComponent)fmi1_me, (fmiReal*)root , fmi1_me->jmi->n_sw);
+    retval = fmi_get_event_indicators(fmi1_cs->fmi1_me, (fmiReal*)root , fmi1_cs->n_sw);
     if (retval != fmiOK){return -1;}
     
     return 0;
