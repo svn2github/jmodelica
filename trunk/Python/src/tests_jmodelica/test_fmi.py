@@ -89,6 +89,16 @@ class Test_FMUModelCS1:
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
         res = model.simulate(final_time=1.5)
         assert (res["J1.w"][-1] - 3.245091100366517) < 1e-4
+        
+    @testattr(windows = True)
+    def test_simulation_with_reset_cs(self):
+        
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
+        res1 = model.simulate(final_time=1.5)
+        assert (res1["J1.w"][-1] - 3.245091100366517) < 1e-4
+        model.reset()
+        res2 = model.simulate(final_time=1.5)
+        assert (res2["J1.w"][-1] - 3.245091100366517) < 1e-4
     
     @testattr(windows = True)
     def test_default_experiment(self):
