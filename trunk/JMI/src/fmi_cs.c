@@ -187,7 +187,26 @@ fmiStatus fmi1_cs_cancel_step(fmiComponent c){
 }
 
 fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
-    return fmiError;
+    fmiStatus retval;
+    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
+    fmi_t* fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
+    jmi_t* jmi = fmi1_me->jmi;
+    
+    retval = fmi1_cs_terminate_slave(c);
+    if (retval != fmiOK){ return fmiError; }
+    
+    if (jmi->ode_solver){
+        jmi_delete_ode_solver(jmi);
+    }
+    
+    fmi_free_model_instance(fmi1_cs->fmi1_me);
+    fmi1_cs->fmi1_me = NULL;
+    
+    fmi1_cs -> fmi1_me = fmi_instantiate_model(fmi1_cs->instance_name, fmi1_cs->GUID, fmi1_cs->callback_functions, fmi1_cs->logging_on);
+    
+    if (fmi1_cs->fmi1_me == NULL){ return fmiError; }
+    
+    return fmiOK;
 }
 
 fmiStatus fmi1_cs_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]){
