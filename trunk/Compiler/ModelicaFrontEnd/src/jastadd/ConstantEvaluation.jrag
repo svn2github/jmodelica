@@ -2762,3 +2762,18 @@ aspect CircularExpressions {
 	eq FExpSubscript.isCircular() = getFExp().isCircular();
 
 }
+
+aspect AritmeticTransformations {
+	
+	/**
+	 * Create a negated copy of this expression.
+	 */
+	public FExp FExp.createNegated() {
+		return new FNegExp(fullCopy());
+	}
+	
+	public FExp FNegExp.createNegated() {
+		return getFExp().fullCopy();
+	}
+	
+}

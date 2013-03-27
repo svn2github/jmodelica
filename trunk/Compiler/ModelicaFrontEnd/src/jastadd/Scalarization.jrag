@@ -437,7 +437,7 @@ aspect Scalarization {
 		for (FAttribute a : getFAttributes())  // TODO: can they be nestled at this point?
 			la.add(a.scalarize(i));            // TODO: really send i here?
 		FAttribute res = new FAttribute(getType().fullCopy(), getName().fullCopy(), 
-				new Opt(), getAttributeSet(), new Opt(), getFFinalOpt().fullCopy(), la);
+				new Opt(), getAttributeSet(), getLevel(), new Opt(), getFFinalOpt().fullCopy(), la);
 		if (hasValue()) {
 			FExp v = getValue();
 			if (v.isArray())

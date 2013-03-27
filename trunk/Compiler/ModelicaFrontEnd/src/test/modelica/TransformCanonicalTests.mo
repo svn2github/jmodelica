@@ -1153,7 +1153,7 @@ equation
 fclass TransformCanonicalTests.AliasTest30
  parameter Boolean f = true /* true */;
  Real y;
- parameter Real p = 5 /* 5 */;
+ parameter Real p(start = 3) = 5 /* 5 */;
 equation
  0.0 = - y;
 end TransformCanonicalTests.AliasTest30;
@@ -2118,10 +2118,9 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.ParameterDerivativeTest
  Real y;
- parameter Real p = 2 /* 2 */;
+ parameter Real p(start = 1) = 2 /* 2 */;
 equation
  y = 0.0 + 0.0;
-
 end TransformCanonicalTests.ParameterDerivativeTest;
 ")})));
 end ParameterDerivativeTest;

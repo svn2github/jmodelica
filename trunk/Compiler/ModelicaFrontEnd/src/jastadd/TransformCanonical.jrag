@@ -3186,6 +3186,7 @@ aspect TransformCanonical {
 				aliasVars.add(fv);
 			} else { 
 				nonAliasVars.add(fv);
+				fv.propagateAttributesFromAlias();
 			}
 		}
 		

@@ -179,6 +179,15 @@ aspect InstModifications{
 	syn ClassRedeclare InstClassRedeclare.getClassRedeclare() = (ClassRedeclare)getModification();
 	syn ComponentRedeclare InstComponentRedeclare.getComponentRedeclare() = (ComponentRedeclare)getModification();
 
+	
+	/**
+	 * At what level from the top model is this modification set?
+	 */
+	inh int InstModification.modificationLevel();
+	inh int InstNode.modificationLevel();
+	eq InstNode.getChild().modificationLevel()           = modificationLevel() + 1;
+	eq InstRoot.getChild().modificationLevel()           = 0;
+	eq InstShortClassDecl.getChild().modificationLevel() = modificationLevel();
 
 }
 

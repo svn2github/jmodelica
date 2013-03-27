@@ -426,6 +426,7 @@ FAttribute : BaseNode ::= Type:FIdUse
                           Name:FIdDecl 			   
                           [Value:FExp]
                           <AttributeSet:boolean>
+                          <Level:int>
                           [FEach]
                           [FFinal]
                           FAttribute*;
