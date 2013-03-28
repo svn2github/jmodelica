@@ -82,7 +82,66 @@ class Test_FMUModelCS1:
     """
     This class tests pyfmi.fmi.FMUModelCS1
     """
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="fmucs")
+        rlc_circuit_square = compile_fmu("RLC_Circuit_Square",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="fmucs")
 
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.rlc  = load_fmu('RLC_Circuit.fmu')
+        self.rlc.initialize()
+        self.rlc_square  = load_fmu('RLC_Circuit_Square.fmu')
+        self.rlc_square.initialize()
+
+    @testattr(fmi = True)
+    def test_version(self):
+        """
+        This tests the (get)-property of version.
+        """
+        assert self.rlc._get_version() == '1.0'
+        
+    @testattr(fmi = True)
+    def test_valid_platforms(self):
+        """
+        This tests the (get)-property of types platform
+        """
+        assert self.rlc._get_types_platform() == 'standard32'
+        
+    @testattr(fmi = True)
+    def test_simulation_with_reset_cs_2(self):
+        """
+        Tests a simulation with reset of an JModelica generated CS FMU.
+        """
+        res1 = self.rlc.simulate(final_time=30)
+        resistor_v = res1['resistor.v']
+        assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3
+        self.rlc.reset()
+        res2 = self.rlc.simulate(final_time=30)        
+        resistor_v = res2['resistor.v']
+        assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3
+        
+    @testattr(fmi = True)
+    def test_simulation_with_reset_cs_3(self):
+        """
+        Tests a simulation with reset of an JModelica generated CS FMU
+        with events.
+        """
+        res1 = self.rlc_square.simulate()
+        resistor_v = res1['resistor.v']
+        print resistor_v[-1]
+        assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
+        self.rlc_square.reset()
+        res2 = self.rlc_square.simulate()        
+        resistor_v = res2['resistor.v']
+        assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
+    
     @testattr(windows = True)
     def test_simulation_cs(self):
         
@@ -138,7 +197,6 @@ class Test_FMUModelCS1:
     
     @testattr(assimulo = True)
     def test_log_file_name(self):
-        print os.path.abspath(".")
         model = load_fmu("bouncingBall.fmu",os.path.join(path_to_fmus,"CS1.0"))
         assert os.path.exists("bouncingBall_log.txt")
         model = load_fmu("bouncingBall.fmu",os.path.join(path_to_fmus,"CS1.0"),log_file_name="Test_log.txt")
@@ -151,8 +209,8 @@ class Test_FMUModelCS1:
     @testattr(stddist = True)
     def test_result_name_file(self):
         
-        rlc_name = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="fmucs")
-        rlc = FMUModelCS1(rlc_name)
+        #rlc_name = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="fmucs")
+        rlc = FMUModelCS1("RLC_Circuit.fmu")
         
         res = rlc.simulate()
         
@@ -160,7 +218,7 @@ class Test_FMUModelCS1:
         assert res.result_file == "RLC_Circuit_result.txt"
         assert os.path.exists(res.result_file)
         
-        rlc = FMUModelCS1(rlc_name)
+        rlc = FMUModelCS1("RLC_Circuit.fmu")
         res = rlc.simulate(options={"result_file_name":
                                     "RLC_Circuit_result_test.txt"})
                                     
