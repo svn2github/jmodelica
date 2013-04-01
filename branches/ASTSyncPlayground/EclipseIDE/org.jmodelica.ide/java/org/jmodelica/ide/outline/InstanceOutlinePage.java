@@ -26,8 +26,8 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.actions.TestRenameAction;
-import org.jmodelica.ide.actions.TestRemoveAction;
+import org.jmodelica.ide.outline.cache.TestRenameAction;
+import org.jmodelica.ide.outline.cache.TestRemoveAction;
 import org.jmodelica.ide.outline.cache.CachedOutlinePage;
 
 public class InstanceOutlinePage extends CachedOutlinePage implements

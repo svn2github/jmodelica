@@ -44,9 +44,9 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
-import org.jmodelica.ide.actions.CopyClassAction;
-import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.ide.outline.CopyClassAction;
 import org.jmodelica.ide.helpers.Util;
+import org.jmodelica.ide.helpers.hooks.IASTEditor;
 import org.jmodelica.ide.outline.ClassCopySource;
 import org.jmodelica.ide.outline.ClassDragListener;
 import org.jmodelica.ide.outline.OutlineItemComparator;
@@ -180,8 +180,8 @@ public abstract class CachedOutlinePage extends ContentOutlinePage implements
 					.getActiveWorkbenchWindow();
 			IWorkbenchPage page = window.getActivePage();
 			IEditorPart editor = page.getActiveEditor();
-			if (editor instanceof Editor)
-				((Editor) editor).selectNode(true, node.containingFileName(),
+			if (editor instanceof IASTEditor)
+				((IASTEditor) editor).selectNode(true, node.containingFileName(),
 						node.getSelectionNodeOffset(),
 						node.getSelectionNodeLength());
 		}

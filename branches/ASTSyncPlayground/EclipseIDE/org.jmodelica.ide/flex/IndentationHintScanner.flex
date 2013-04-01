@@ -19,8 +19,8 @@ package org.jmodelica.generated.scanners;
 import java.util.*;
 import java.io.StringReader;
 import java.io.IOException;
-import org.jmodelica.ide.editor.ModelicaAnchorList;
-import org.jmodelica.ide.editor.Indent;
+import org.jmodelica.ide.helpers.ModelicaAnchorList;
+import org.jmodelica.ide.indent.Indent;
 
 
 /**

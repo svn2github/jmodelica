@@ -37,7 +37,7 @@ import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.jmodelica.ide.compiler.LocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
-import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.ide.helpers.hooks.IASTEditor;
 import org.jmodelica.ide.outline.cache.ASTNodeCacheFactory;
 import org.jmodelica.ide.outline.cache.CachedASTNode;
 import org.jmodelica.ide.outline.cache.CachedOutlinePage;
@@ -48,7 +48,7 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 
     private String defaultText = "An outline is not available."; 
 
-	protected abstract IContentOutlinePage getOutlinePage(Editor part);
+	protected abstract IContentOutlinePage getOutlinePage(IASTEditor part);
 
 	@Override
 	protected IPage createDefaultPage(PageBook book) {
@@ -69,8 +69,8 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 	}
 	
 	protected IContentOutlinePage setupOutlinePage(IWorkbenchPart part) {
-		if (part instanceof Editor) {
-			IContentOutlinePage page = getOutlinePage((Editor) part);
+		if (part instanceof IASTEditor) {
+			IContentOutlinePage page = getOutlinePage((IASTEditor) part);
 			if (page instanceof IPageBookViewPage) 
 				initPage((IPageBookViewPage) page);
 			page.createControl(getPageBook());
@@ -96,7 +96,7 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 
 	@Override
 	protected boolean isImportant(IWorkbenchPart part) {
-		return part instanceof Editor;
+		return part instanceof IASTEditor;
 	}
 
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {

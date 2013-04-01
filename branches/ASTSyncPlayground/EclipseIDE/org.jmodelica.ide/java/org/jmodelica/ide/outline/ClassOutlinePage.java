@@ -29,7 +29,7 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.editor.ICurrentClassListener;
+import org.jmodelica.ide.helpers.ICurrentClassListener;
 import org.jmodelica.ide.outline.cache.CachedClassDecl;
 import org.jmodelica.ide.outline.cache.CachedOutlinePage;
 

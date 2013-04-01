@@ -26,9 +26,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.jmodelica.ide.editor.Editor;
-import org.jmodelica.ide.editor.ICurrentClassListener;
+import org.jmodelica.ide.helpers.ICurrentClassListener;
 import org.jmodelica.ide.helpers.EclipseUtil;
+import org.jmodelica.ide.helpers.hooks.IASTEditor;
 
 public class ClassOutlineView extends OutlineView {
 
@@ -130,7 +130,7 @@ public class ClassOutlineView extends OutlineView {
 		disconnectTempPage();
 	}
 
-	protected IContentOutlinePage getOutlinePage(Editor part) {
+	protected IContentOutlinePage getOutlinePage(IASTEditor part) {
 		return null;
 	}
 }

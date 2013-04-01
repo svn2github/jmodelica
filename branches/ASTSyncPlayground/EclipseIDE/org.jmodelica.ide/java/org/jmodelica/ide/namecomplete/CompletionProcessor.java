@@ -13,7 +13,7 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.jmodelica.ide.OffsetDocument;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
-import org.jmodelica.ide.editor.EditorWithFile;
+import org.jmodelica.ide.helpers.EditorWithFile;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.modelica.compiler.InstNode;
 import org.jmodelica.modelica.compiler.SourceRoot;

@@ -23,7 +23,7 @@ import java.io.StringReader;
 import org.eclipse.jface.text.IDocument;
 import org.jmodelica.ide.helpers.BackwardsDocumentReader;
 import org.jmodelica.ide.scanners.IndentationScanner;
-import org.jmodelica.ide.editor.editingstrategies.IndentationStrategy.Indent;
+import org.jmodelica.ide.indent.IndentationStrategy.Indent;
 
 /**
  * Scanner for determining the current and wanted indentation of the current line.

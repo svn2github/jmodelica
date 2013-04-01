@@ -117,31 +117,6 @@
       </wizard>
    </extension>
    <extension
-         point="org.eclipse.ui.editors">
-      <editor
-            class="org.jmodelica.ide.editor.Editor"
-            contributorClass="org.jmodelica.ide.editor.EditorContributor"
-            default="true"
-            extensions="mo"
-            icon="resources/icons/outline/modelica_file.png"
-            id="org.jmodelica.ide.editor"
-            name="Modelica Editor">
-         <contentTypeBinding
-               contentTypeId="org.jmodelica.ide.content.modelica">
-         </contentTypeBinding>
-      </editor>
-      <editor
-            default="false"
-            extensions="fmu"
-            id="org.jmodelica.ide.editor.redirect"
-            launcher="org.jmodelica.ide.ui.RedirectLauncher"
-            name="Redirect to System Editor (if any)">
-         <contentTypeBinding
-               contentTypeId="org.jmodelica.ide.content.fmu">
-         </contentTypeBinding>
-      </editor>
-   </extension>
-   <extension
          id="org.jmodelica.ide.compiler"
          name="JModelica Compiler"
          point="org.jastadd.ed.core.compilers">

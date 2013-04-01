@@ -152,16 +152,20 @@ public class LibraryVisitor {
 
 	public void removeListener(LibraryNode root, Stack<String> nodePath,
 			IASTChangeListener listener) {
-		String soughtNodeId = nodePath.pop();
-		for (LibraryNode child : root.getChildren()) {
-			if (child.getId().equals(soughtNodeId)) {
-				if (nodePath.size() == 0) {
-					child.removeListener(listener);
-				} else {
-					removeListener(child, nodePath, listener);
+		if (!nodePath.isEmpty()) {
+			String soughtNodeId = nodePath.pop();
+			for (LibraryNode child : root.getChildren()) {
+				if (child.getId().equals(soughtNodeId)) {
+					if (nodePath.size() == 0) {
+						child.removeListener(listener);
+					} else {
+						removeListener(child, nodePath, listener);
+					}
+					break;
 				}
-				break;
 			}
+		} else {
+			root.removeListener(listener);
 		}
 	}
 }

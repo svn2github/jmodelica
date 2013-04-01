@@ -20,11 +20,11 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.ide.helpers.hooks.IASTEditor;
 
 public class EclipseUtil {
 
-	public static Maybe<Editor> getModelicaEditorForFile(IFile file) {
+	public static Maybe<IASTEditor> getModelicaEditorForFile(IFile file) {
 
 		// cuteness overload
 
@@ -36,12 +36,12 @@ public class EclipseUtil {
 
 		try {
 
-			return Maybe.Just((Editor) page.openEditor(
+			return Maybe.Just((IASTEditor) page.openEditor(
 					new FileEditorInput(file), desc.getId()));
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			return Maybe.<Editor> Nothing();
+			return Maybe.<IASTEditor> Nothing();
 		}
 	}
 

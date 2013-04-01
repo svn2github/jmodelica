@@ -16,12 +16,12 @@
 package org.jmodelica.ide.outline;
 
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.ide.helpers.hooks.IASTEditor;
 
 public class SourceOutlineView extends OutlineView {
 
 	@Override
-	protected IContentOutlinePage getOutlinePage(Editor part) {
+	protected IContentOutlinePage getOutlinePage(IASTEditor part) {
 		return part.getSourceOutlinePage();
 	}
 

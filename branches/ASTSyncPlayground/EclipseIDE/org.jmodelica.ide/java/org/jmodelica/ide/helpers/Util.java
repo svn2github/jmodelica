@@ -50,7 +50,7 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.jastadd.ed.core.service.errors.IError;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.ide.helpers.hooks.IASTEditor;
 import org.jmodelica.ide.outline.cache.CachedASTNode;
 import org.jmodelica.ide.preferences.Preferences;
 import org.jmodelica.modelica.compiler.Access;
@@ -100,7 +100,7 @@ public class Util {
 		return elem;
 	}
 
-	public static void openAndSelect(IWorkbenchPage page, Object elem) {
+	/**public static void openAndSelect(IWorkbenchPage page, Object elem) {
 		if (elem instanceof CachedASTNode) {
 			CachedASTNode node = (CachedASTNode) elem;
 			IEditorPart editor = null;
@@ -117,8 +117,33 @@ public class Util {
 						node.getSelectionNodeOffset(),
 						node.getSelectionNodeLength());
 		}
+	}*/
+
+	private static boolean ISNEXTREADONLY = false;
+
+	public static boolean nextReadOnly() {
+		return ISNEXTREADONLY;
 	}
 
+	public static void openAndSelect(IWorkbenchPage page, Object elem) {
+		if (elem instanceof CachedASTNode) {
+			CachedASTNode node = (CachedASTNode) elem;
+			IEditorPart editor = null;
+			try {
+				URI uri = new File(node.containingFileName()).toURI();
+				ISNEXTREADONLY = node.isInLibrary();
+				editor = IDE
+						.openEditor(page, uri, IDEConstants.PLUGIN_ID, true);
+				ISNEXTREADONLY = false;
+			} catch (PartInitException e) {
+			}
+			if (editor instanceof IASTEditor && node != null)
+				((IASTEditor) editor).selectNode(true,
+						node.containingFileName(),
+						node.getSelectionNodeOffset(),
+						node.getSelectionNodeLength());
+		}
+	}
 	public static void deleteErrorMarkers(IResource res, boolean clearSemantic) {
 		try {
 			if (clearSemantic)
