@@ -544,10 +544,6 @@ Program, unless a warranty or assumption of liability accompanies a
 copy of the Program in return for a fee.  END OF TERMS AND CONDITIONS
    </license>
 
-   <includes
-         id="org.jastadd.plugin"
-         version="0.0.0"/>
-
    <requires>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.core.resources"/>
@@ -556,11 +552,11 @@ copy of the Program in return for a fee.  END OF TERMS AND CONDITIONS
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.ui.views"/>
-      <import plugin="org.jastadd.plugin" version="1.0.8" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ui.navigator"/>
       <import plugin="org.eclipse.ui.navigator.resources"/>
       <import plugin="org.eclipse.ui.console"/>
+      <import plugin="org.jastadd.ed.core" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.junit"/>
+      <import plugin="org.eclipse.ui.navigator"/>
    </requires>
 
    <plugin

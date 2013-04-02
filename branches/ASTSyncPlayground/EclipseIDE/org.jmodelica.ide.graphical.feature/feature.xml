@@ -545,10 +545,6 @@ Program, unless a warranty or assumption of liability accompanies a
 copy of the Program in return for a fee.  END OF TERMS AND CONDITIONS
    </license>
 
-   <includes
-         id="org.jmodelica.ide"
-         version="0.0.0"/>
-
    <requires>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
@@ -556,9 +552,9 @@ copy of the Program in return for a fee.  END OF TERMS AND CONDITIONS
       <import plugin="org.eclipse.ui.ide" version="3.6.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.resources" version="3.6.0" match="greaterOrEqual"/>
       <import plugin="org.jmodelica.ide"/>
-      <import plugin="org.jastadd.plugin" version="1.0.9" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.navigator"/>
       <import plugin="org.eclipse.ui.navigator.resources" version="3.4.0" match="greaterOrEqual"/>
+      <import plugin="org.jastadd.ed.core" version="1.0.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
