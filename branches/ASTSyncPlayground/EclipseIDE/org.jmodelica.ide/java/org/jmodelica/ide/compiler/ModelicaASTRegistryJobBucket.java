@@ -8,7 +8,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
-import org.jmodelica.ide.outline.cache.OutlineCacheJob;
+import org.jmodelica.ide.helpers.OutlineCacheJob;
 
 public class ModelicaASTRegistryJobBucket {
 	private static ModelicaASTRegistryJobBucket jobBucket;

@@ -7,7 +7,8 @@ Bundle-Activator: org.jmodelica.ide.textual.Activator
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface,
  org.jmodelica.ide;bundle-version="0.4.0",
- org.jastadd.ed.core;bundle-version="1.0.0"
+ org.jastadd.ed.core;bundle-version="1.0.0",
+ org.jmodelica.ide.outline;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.core.resources,

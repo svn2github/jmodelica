@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
-import org.jmodelica.ide.outline.cache.ASTNodeCacheFactory;
-import org.jmodelica.ide.outline.cache.ICachedOutlineNode;
+import org.jmodelica.ide.helpers.ASTNodeCacheFactory;
+import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.SourceRoot;
 

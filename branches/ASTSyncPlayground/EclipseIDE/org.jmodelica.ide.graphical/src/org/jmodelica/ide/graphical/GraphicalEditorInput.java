@@ -9,7 +9,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
-import org.jmodelica.ide.outline.cache.CachedClassDecl;
+import org.jmodelica.ide.helpers.CachedClassDecl;
 
 public class GraphicalEditorInput implements IEditorInput, IPersistableElement {
 

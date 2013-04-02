@@ -12,7 +12,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.ide.preferences.Preferences;
 import org.jmodelica.modelica.compiler.ModelicaCompiler;
 import org.jmodelica.util.OptionRegistry;
 import org.xml.sax.SAXException;

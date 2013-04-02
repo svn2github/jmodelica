@@ -30,11 +30,11 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.preferences.Preferences;
-import org.jmodelica.ide.preferences.Preferences.NormalSyntaxColorPref;
-import org.jmodelica.ide.preferences.Preferences.ReferenceSyntaxColorPref;
-import org.jmodelica.ide.preferences.Preferences.DisabledSyntaxColorPref;
-import org.jmodelica.ide.preferences.Preferences.SyntaxColorPref;
+import org.jmodelica.ide.compiler.Preferences;
+import org.jmodelica.ide.compiler.Preferences.DisabledSyntaxColorPref;
+import org.jmodelica.ide.compiler.Preferences.NormalSyntaxColorPref;
+import org.jmodelica.ide.compiler.Preferences.ReferenceSyntaxColorPref;
+import org.jmodelica.ide.compiler.Preferences.SyntaxColorPref;
 
 public abstract class HilightScanner extends DocumentScanner implements ITokenScanner {
 	protected static Token NORMAL;

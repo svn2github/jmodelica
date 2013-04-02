@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.preferences.Preferences;
 import org.jmodelica.modelica.compiler.DefaultLibraryList;
 import org.jmodelica.util.ModelicaLogger;
 import org.jmodelica.util.OptionRegistry;

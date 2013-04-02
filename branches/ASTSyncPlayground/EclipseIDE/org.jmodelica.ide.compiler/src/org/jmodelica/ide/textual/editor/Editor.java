@@ -51,13 +51,13 @@ import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jastadd.ed.core.model.node.IASTNode;
 import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.helpers.CachedClassDecl;
 import org.jmodelica.ide.helpers.EditorFile;
 import org.jmodelica.ide.helpers.EditorWithFile;
 import org.jmodelica.ide.helpers.ICurrentClassListener;
 import org.jmodelica.ide.helpers.hooks.IASTEditor;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
-import org.jmodelica.ide.outline.cache.CachedClassDecl;
 import org.jmodelica.ide.textual.actions.CollapseAllAction;
 import org.jmodelica.ide.textual.actions.CompileFMUAction;
 import org.jmodelica.ide.textual.actions.ErrorCheckAction;
@@ -324,6 +324,7 @@ public class Editor extends AbstractDecoratedTextEditor implements
 
 		IFile iFile = file.iFile();
 		compResult.recompileLocal(document(), iFile);
+		System.out.println("recompiled docu");
 
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
@@ -336,7 +337,6 @@ public class Editor extends AbstractDecoratedTextEditor implements
 	 * Updates the outline and the view
 	 */
 	protected void update() {
-		System.out.println("recompiled docu");
 		if (document() == null)
 			return;
 

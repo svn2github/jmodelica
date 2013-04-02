@@ -15,7 +15,7 @@
 */
 import java.util.Arrays;
 import java.util.Collections;
-//import org.jmodelica.ide.ui.ImageLoader;
+//import org.jmodelica.ide.helpers.ImageLoader;
 
 aspect Outline {
 	/*
@@ -158,19 +158,19 @@ aspect Outline {
     eq InstComponentDecl.outlineId() = qualifiedName();
 
     
-	syn lazy org.jmodelica.ide.outline.LoadedLibraries SourceRoot.loadedLibraries() = 
-		new org.jmodelica.ide.outline.LoadedLibraries(this);
+	syn lazy org.jmodelica.ide.helpers.LoadedLibraries SourceRoot.loadedLibraries() = 
+		new org.jmodelica.ide.helpers.LoadedLibraries(this);
 	
-	private org.jmodelica.ide.outline.LoadedLibraries ClassDecl.loadedLibraries;
-	public org.jmodelica.ide.outline.LoadedLibraries ASTNode.getLoadedLibraries() {
+	private org.jmodelica.ide.helpers.LoadedLibraries ClassDecl.loadedLibraries;
+	public org.jmodelica.ide.helpers.LoadedLibraries ASTNode.getLoadedLibraries() {
 		return null;
 	}
-	public org.jmodelica.ide.outline.LoadedLibraries ClassDecl.getLoadedLibraries() {
+	public org.jmodelica.ide.helpers.LoadedLibraries ClassDecl.getLoadedLibraries() {
 		return loadedLibraries;
 	}
-	public void ASTNode.setLoadedLibraries(org.jmodelica.ide.outline.LoadedLibraries loadedLibraries) {
+	public void ASTNode.setLoadedLibraries(org.jmodelica.ide.helpers.LoadedLibraries loadedLibraries) {
 	}
-	public void ClassDecl.setLoadedLibraries(org.jmodelica.ide.outline.LoadedLibraries loadedLibraries) {
+	public void ClassDecl.setLoadedLibraries(org.jmodelica.ide.helpers.LoadedLibraries loadedLibraries) {
 		this.loadedLibraries = loadedLibraries;
 	}
 	
@@ -207,7 +207,7 @@ aspect Outline {
 	}
 	eq SourceRoot.outlineChildren() {
     	ArrayList list = new ArrayList();
-    	org.jmodelica.ide.outline.LoadedLibraries libs = loadedLibraries();
+    	org.jmodelica.ide.helpers.LoadedLibraries libs = loadedLibraries();
     	list.add(libs);
     	list.addAll(getProgram().getUnstructuredEntitys().outlineChildren());
     	if (libs.hasFiltered())
@@ -331,8 +331,8 @@ aspect Outline {
 		}
 	}
 	
-	private org.jmodelica.ide.outline.LoadedLibraries SourceRoot.oldLoadedLibraries;
-	public void SourceRoot.setOldLoadedLibraries(org.jmodelica.ide.outline.LoadedLibraries oldLoadedLibraries) {
+	private org.jmodelica.ide.helpers.LoadedLibraries SourceRoot.oldLoadedLibraries;
+	public void SourceRoot.setOldLoadedLibraries(org.jmodelica.ide.helpers.LoadedLibraries oldLoadedLibraries) {
 		this.oldLoadedLibraries = oldLoadedLibraries;
 	}
 	

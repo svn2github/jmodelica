@@ -30,7 +30,7 @@ import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.ui.ImageLoader;
+import org.jmodelica.ide.helpers.ImageLoader;
 
 
 /**
