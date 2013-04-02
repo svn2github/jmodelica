@@ -164,10 +164,13 @@ aspect InstFunctionBinding {
 	 * if the input has a default value and an InstMissingArgument otherwise.
 	 */
 	public InstFunctionArgument InstComponentDecl.createInstDefaultArgument() {
+		throw new UnsupportedOperationException();
+	}
+	
+	public InstFunctionArgument InstAssignable.createInstDefaultArgument() {
 		InstFunctionArgument arg = null;
-		if (hasInstModification() && getInstModification() instanceof InstValueModification) {
-			InstValueModification mod = (InstValueModification) getInstModification();
-			FExp exp = mod.getFExp();
+		if (hasBindingFExp()) {
+			FExp exp = myBindingInstExp();
 			arg = new InstDefaultArgument(exp);
 		} else {
 			arg = new InstMissingArgument();
