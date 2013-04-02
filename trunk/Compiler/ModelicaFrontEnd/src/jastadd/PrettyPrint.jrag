@@ -73,6 +73,27 @@ aspect PrettyPrint {
  		}
 	}
 	
+	/**
+	 * Wraps a prettyPrint() call to be deferred until the sting is needed.
+	 */
+	public class PrettyPrintDelegate {
+		private ASTNode n;
+		private String i;
+		
+		public PrettyPrintDelegate(ASTNode node) {
+			this(node, "");
+		}
+		
+		public PrettyPrintDelegate(ASTNode node, String indent) {
+			n = node;
+			i = indent;
+		}
+		
+		public String toString() {
+			return n.prettyPrint(i);
+		}
+	}
+	
 	static PrettyPrinter ASTNode.prettyPrinter = new PrettyPrinter();
 	
 	public void ASTNode._dumpTree(PrintStream str, String indent) {
