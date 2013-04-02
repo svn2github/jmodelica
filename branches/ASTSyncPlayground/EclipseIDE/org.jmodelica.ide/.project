@@ -3,7 +3,7 @@
 	<name>org.jmodelica.ide</name>
 	<comment></comment>
 	<projects>
-		<project>org.jastadd.plugin</project>
+		<project>org.jastadd.ed.core</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
