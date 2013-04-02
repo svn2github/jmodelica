@@ -24,8 +24,8 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
     int flag = 0;
 	jmi_ode_euler_t* integrator = (jmi_ode_euler_t*)solver->integrator;
     jmi_t* jmi = solver->jmi;
-    int n_states = solver->jmi->n_real_x;
-	int n_event_indicators = solver->jmi->n_sw;
+    int n_states = solver->n_real_x;
+	int n_event_indicators = solver->n_sw;
 
 	jmi_real_t tcur, tnext;
 	jmi_real_t hcur;
@@ -49,12 +49,12 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
 
 	}
 
-	tcur = *(jmi_get_t(solver->jmi));;
+	tcur = *(jmi_get_t(solver->jmi));
 	hcur = hdef;
     
     /* Get the first event indicators */
     if(n_event_indicators > 0){
-        flag = solver->root_fcn((void*)jmi->fmi, tcur, y, event_indicators_pre);
+        flag = solver->root_fcn(solver->user_data, tcur, y, event_indicators_pre);
             
         if (flag != 0){
             jmi_log_error(solver->jmi, "[EULER] Could not retrieve event indicators");
@@ -69,7 +69,7 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
 
 		/* Get derivatives */
 		if(n_states > 0) {
-            flag = solver->rhs_fcn((void*)jmi->fmi, tcur, y, ydot);
+            flag = solver->rhs_fcn(solver->user_data, tcur, y, ydot);
             
             if (flag != 0){
                 jmi_log_error(solver->jmi, "[EULER] Could not retrieve time derivatives");
@@ -88,30 +88,13 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
 		hcur = tnext - tcur;
 		tcur = tnext;
         
-        /*
-        flag = fmi1_import_set_time(fmu, tcur)
-        if (flag != 0){
-            jmi_log_error(solver->jmi, "[EULER] Could not set the time");
-            return -1;
-        }
-        */
+        /* set solver tout */
+        solver->tout = tcur;
         
 		/* integrate */
 		for (k = 0; k < n_states; k++) {
 			y[k] = y[k] + hcur*ydot[k];	
 		}
-
-		/* Set states */
-		/*
-        if( (n_states > 0){
-            flag = fmi1_import_set_continuous_states(fmu, states, n_states)
-            
-            if (flag != 0){
-                jmi_log_error(solver->jmi, "[EULER] Could not set continuous states");
-                return -1;
-            }
-		}
-		*/
         
 		/* Check if an event indicator has triggered */
 		if(n_event_indicators > 0){
@@ -129,7 +112,7 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
 				break;
 			}
 		}
-        memcpy(event_indicators_pre, event_indicators, (solver->jmi->n_sw)*sizeof(jmi_real_t));
+        memcpy(event_indicators_pre, event_indicators, (solver->n_sw)*sizeof(jmi_real_t));
         
 		/* Handle events */
 		if (zero_crossning_event) {
@@ -158,12 +141,12 @@ int jmi_ode_euler_new(jmi_ode_euler_t** integrator_ptr, jmi_ode_solver_t* solver
 	integrator->step_size = 0.001;
 
 	/* Allocate work vectors */
-	integrator->y_work = calloc(jmi->n_real_x,sizeof(jmi_real_t));
-    integrator->ydot_work = calloc(jmi->n_real_x,sizeof(jmi_real_t));
-    integrator->event_indicators = calloc(jmi->n_sw,sizeof(jmi_real_t));
-    integrator->event_indicators_pre = calloc(jmi->n_sw,sizeof(jmi_real_t));
+	integrator->y_work = calloc(solver->n_real_x,sizeof(jmi_real_t));
+    integrator->ydot_work = calloc(solver->n_real_x,sizeof(jmi_real_t));
+    integrator->event_indicators = calloc(solver->n_sw,sizeof(jmi_real_t));
+    integrator->event_indicators_pre = calloc(solver->n_sw,sizeof(jmi_real_t));
     
-    memcpy(integrator->y_work, jmi_get_real_x(jmi), (jmi->n_real_x)*sizeof(jmi_real_t));
+    memcpy(integrator->y_work, jmi_get_real_x(jmi), (solver->n_real_x)*sizeof(jmi_real_t));
       
     *integrator_ptr = integrator;
     return 0;

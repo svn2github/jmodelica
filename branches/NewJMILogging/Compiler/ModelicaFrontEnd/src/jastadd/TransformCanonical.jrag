@@ -74,13 +74,13 @@ aspect TransformCanonical {
 	  *  done by both the Modelica and the Optimica compilers.
 	  */
 	public void FClass.transformCanonicalBase() {
+        enableIfEquationElimination();
 		addStateInitialEquationsIfSet();
 		genAlgorithmFunctions();
 		genBindingEquations();
 		scalarize();
 		propagateResidualPairs();
 		genInitArrayStatements();
-        enableIfEquationElimination();
 		functionInliningIfSet();
 		aliasEliminationIfSet();
 		addFDerivativeVariables();
@@ -3186,6 +3186,7 @@ aspect TransformCanonical {
 				aliasVars.add(fv);
 			} else { 
 				nonAliasVars.add(fv);
+				fv.propagateAttributesFromAlias();
 			}
 		}
 		

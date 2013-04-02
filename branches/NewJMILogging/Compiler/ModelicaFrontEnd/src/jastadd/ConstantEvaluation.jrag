@@ -1516,7 +1516,7 @@ aspect ConstantEvaluation {
 	eq InstRecord.startAttributeCValueDefault() {
 		CValueRecord res = new CValueRecord((FRecordType) type());
 		int i = 0;
-		for (InstComponentDecl var : myInstClass().getInstComponentDecls())
+		for (InstComponentDecl var : myInstClass().actualInstClass().getInstComponentDecls())
 			res.setMember(i++, var.startAttributeCValue());
 		return res;
 	}
@@ -2761,4 +2761,19 @@ aspect CircularExpressions {
 	syn boolean FSubscript.isCircular() = false;
 	eq FExpSubscript.isCircular() = getFExp().isCircular();
 
+}
+
+aspect AritmeticTransformations {
+	
+	/**
+	 * Create a negated copy of this expression.
+	 */
+	public FExp FExp.createNegated() {
+		return new FNegExp(fullCopy());
+	}
+	
+	public FExp FNegExp.createNegated() {
+		return getFExp().fullCopy();
+	}
+	
 }

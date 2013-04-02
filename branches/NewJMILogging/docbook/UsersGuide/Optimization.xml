@@ -19,15 +19,15 @@
     including optimal control, minimum time problems, optimal design, and
     model calibration. These different types of problems will be illustrated
     and it will be shown how they can be formulated and solved. The chapter
-    starts with an introductory example in <xref linkend="opt-sec-first"/> and
-    in <xref linkend="opt-sec-solve"/>, the details of how the optimization
-    algorithms are invoked are explained. The following sections contain
-    tutorial exercises that illustrates how to set up and solve different
-    kinds of optimization problems.</para>
+    starts with an introductory example in <xref linkend="opt-sec-first" />
+    and in <xref linkend="opt-sec-solve" />, the details of how the
+    optimization algorithms are invoked are explained. The following sections
+    contain tutorial exercises that illustrates how to set up and solve
+    different kinds of optimization problems.</para>
 
     <para>When formulating optimization problems, models are expressed in the
     Modelica language, whereas optimization specifications are given in the
-    Optimica extension which is described in <xref linkend="chap-optimica"/>.
+    Optimica extension which is described in <xref linkend="chap-optimica" />.
     The tutorial exercises in this chapter assumes that the reader is familiar
     with the basics of Modelica and Optimica.</para>
   </section>
@@ -132,7 +132,7 @@ plt.show()
 </programlisting>
 
     <para>You should now see the optimization result as shown in <xref
-    linkend="fig-vdp-opt"/>.</para>
+    linkend="fig-vdp-opt" />.</para>
 
     <figure floatstyle="top" xml:id="fig-vdp-opt">
       <title>Optimal profiles for the VDP oscillator</title>
@@ -140,7 +140,7 @@ plt.show()
       <mediaobject>
         <imageobject>
           <imagedata align="left" fileref="images/vdp.svg" scalefit="1"
-                     width="60%"/>
+                     width="60%"></imagedata>
         </imageobject>
       </mediaobject>
 
@@ -371,7 +371,7 @@ x1 = res['x1']
     to use <literal>nominal</literal> attributes for scaling with JMUs, the
     compiler option <literal>enable_variable_scaling</literal> is set to
     <literal>True</literal>, see <xref
-    linkend="models_sec_compiler_options"/>. For CasADi-based algorithms,
+    linkend="models_sec_compiler_options" />. For CasADi-based algorithms,
     scaling is instead enabled by setting the algorithm option
     <literal>variable_scaling</literal> to <literal>True</literal>, and is
     enabled by default . In both cases, all variables with a set nominal
@@ -392,7 +392,7 @@ x1 = res['x1']
 </programlisting>
 
     <para>when <literal>variable scaling</literal> is enabled. The algorithm
-    in <xref linkend="opt-sec-dae-casadi"/> also has support for time-varying
+    in <xref linkend="opt-sec-dae-casadi" /> also has support for time-varying
     scale factors.</para>
 
     <para>For debugging purposes, is is sometimes useful to write a
@@ -436,18 +436,18 @@ x1 = res['x1']
     API documentation</link>.</para>
 
     <para>The collocation algorithm provides a number of options, summarized
-    in <xref linkend="opt-tab-collopts"/>.</para>
+    in <xref linkend="opt-tab-collopts" />.</para>
 
     <table xml:id="opt-tab-collopts">
       <title>Options for the JMU and collocation-based optimization
       algorithm</title>
 
       <tgroup cols="3">
-        <colspec align="left" colname="col–opt" colwidth="1*"/>
+        <colspec align="left" colname="col–opt" colwidth="1*" />
 
-        <colspec align="left" colname="col–desc" colwidth="1*"/>
+        <colspec align="left" colname="col–desc" colwidth="1*" />
 
-        <colspec align="left" colname="col–def" colwidth="2*"/>
+        <colspec align="left" colname="col–def" colwidth="2*" />
 
         <thead>
           <row>
@@ -885,7 +885,7 @@ Returns::
               </m:mtr>
             </m:mtable>
 
-            <m:mspace linebreak="newline"/>
+            <m:mspace linebreak="newline" />
           </m:math>
         </informalequation>
 
@@ -1051,7 +1051,7 @@ print('T = %f' % T_0_B)
             <m:math display="block" overflow="scroll">
               <m:mtable>
                 <m:mtr>
-                  <m:mtd columnalign="right"/>
+                  <m:mtd columnalign="right"></m:mtd>
 
                   <m:mtd columnalign="left">
                     <m:msub>
@@ -1177,7 +1177,7 @@ print('T = %f' % T_0_B)
                 </m:mtr>
 
                 <m:mtr>
-                  <m:mtd columnalign="right"/>
+                  <m:mtd columnalign="right"></m:mtd>
 
                   <m:mtd columnalign="left">
                     <m:mstyle mathvariant="normal">
@@ -1193,7 +1193,7 @@ print('T = %f' % T_0_B)
                 </m:mtr>
 
                 <m:mtr>
-                  <m:mtd columnalign="right"/>
+                  <m:mtd columnalign="right"></m:mtd>
 
                   <m:mtd columnalign="left">
                     <m:mn>230</m:mn>
@@ -1215,7 +1215,7 @@ print('T = %f' % T_0_B)
                 </m:mtr>
 
                 <m:mtr>
-                  <m:mtd columnalign="right"/>
+                  <m:mtd columnalign="right"></m:mtd>
 
                   <m:mtd columnalign="left">
                     <m:mi>T</m:mi>
@@ -1233,7 +1233,7 @@ print('T = %f' % T_0_B)
                 </m:mtr>
               </m:mtable>
 
-              <m:mspace linebreak="newline"/>
+              <m:mspace linebreak="newline" />
             </m:math>
           </informalequation>
 
@@ -1432,14 +1432,14 @@ plt.show()
           <para>Notice that parameters are returned as scalar values whereas
           variables are returned as vectors and that this must be taken into
           account when plotting. You should now see the plot shown in <xref
-          linkend="opt-fig-cstr-opt1"/>.</para>
+          linkend="opt-fig-cstr-opt1" />.</para>
 
           <figure xml:id="opt-fig-cstr-opt1">
             <title>Optimal profiles for the CSTR problem.</title>
 
             <mediaobject>
               <imageobject>
-                <imagedata fileref="images/cstr.svg" scalefit="1" width="60%"/>
+                <imagedata fileref="images/cstr.svg" scalefit="1" width="60%"></imagedata>
               </imageobject>
             </mediaobject>
           </figure>
@@ -1537,7 +1537,7 @@ plt.show()
 </programlisting>
 
           <para>You should now see the plot shown in <xref
-          linkend="opt-fig-cstr-opt2"/>.</para>
+          linkend="opt-fig-cstr-opt2" />.</para>
 
           <figure xml:id="opt-fig-cstr-opt2">
             <title>Optimal control profiles and simulated trajectories
@@ -1546,7 +1546,7 @@ plt.show()
             <mediaobject>
               <imageobject>
                 <imagedata fileref="images/cstr_opt_cmp.svg" scalefit="1"
-                           width="60%"/>
+                           width="60%"></imagedata>
               </imageobject>
             </mediaobject>
           </figure>
@@ -1637,7 +1637,7 @@ plt.show()
               <m:mi>f</m:mi>
             </m:msub>
 
-            <m:mspace linebreak="newline"/>
+            <m:mspace linebreak="newline" />
           </m:math>
         </informalequation>
 
@@ -1696,7 +1696,7 @@ plt.show()
 
                   <m:mi>,</m:mi>
 
-                  <m:mspace width="1em"/>
+                  <m:mspace width="1em" />
 
                   <m:msub>
                     <m:mi>x</m:mi>
@@ -1738,7 +1738,7 @@ plt.show()
 
                   <m:mi>,</m:mi>
 
-                  <m:mspace width="1em"/>
+                  <m:mspace width="1em" />
 
                   <m:msub>
                     <m:mi>x</m:mi>
@@ -1757,7 +1757,7 @@ plt.show()
               </m:mtr>
             </m:mtable>
 
-            <m:mspace linebreak="newline"/>
+            <m:mspace linebreak="newline" />
           </m:math>
         </informalequation>
 
@@ -1788,7 +1788,7 @@ plt.show()
 
                   <m:mi>,</m:mi>
 
-                  <m:mspace width="1em"/>
+                  <m:mspace width="1em" />
 
                   <m:mi>v</m:mi>
 
@@ -1826,7 +1826,7 @@ plt.show()
 
                   <m:mi>,</m:mi>
 
-                  <m:mspace width="1em"/>
+                  <m:mspace width="1em" />
 
                   <m:mo>-</m:mo>
 
@@ -1849,7 +1849,7 @@ plt.show()
               </m:mtr>
             </m:mtable>
 
-            <m:mspace linebreak="newline"/>
+            <m:mspace linebreak="newline" />
           </m:math>
         </informalequation>
 
@@ -1926,9 +1926,10 @@ plt.show()
 </programlisting>
 
         <para>The resulting control and state profiles are shown in <xref
-        linkend="opt-fig-vdp-min-time"/>. Notice the difference as compared to
-        Figure <xref linkend="fig-vdp-opt"/>, where the Van der Pol oscillator
-        system is optimized using a quadratic objective function.</para>
+        linkend="opt-fig-vdp-min-time" />. Notice the difference as compared
+        to Figure <xref linkend="fig-vdp-opt" />, where the Van der Pol
+        oscillator system is optimized using a quadratic objective
+        function.</para>
 
         <figure xml:id="opt-fig-vdp-min-time">
           <title>Minimum time profiles for the Van der Pol Oscillator.</title>
@@ -1936,7 +1937,7 @@ plt.show()
           <mediaobject>
             <imageobject>
               <imagedata fileref="images/vdp_min_time.svg" scalefit="1"
-                         width="60%"/>
+                         width="60%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
@@ -1947,7 +1948,7 @@ plt.show()
 
         <para>In this tutorial it will be demonstrated how to solve parameter
         estimation problems. We consider a quadruple tank system depicted in
-        <xref linkend="opt-fig-quadtank"/>.</para>
+        <xref linkend="opt-fig-quadtank" />.</para>
 
         <figure xml:id="opt-fig-quadtank">
           <title>A schematic picture of the quadruple tank process.</title>
@@ -1955,7 +1956,7 @@ plt.show()
           <mediaobject>
             <imageobject>
               <imagedata fileref="images/qt_schematic.png" scalefit="1"
-                         width="40%"/>
+                         width="40%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
@@ -2351,22 +2352,22 @@ plt.show()
               </m:mtr>
             </m:mtable>
 
-            <m:mspace linebreak="newline"/>
+            <m:mspace linebreak="newline" />
           </m:math>
         </informalequation>
 
         <para>Where the parameter values are given in <xref
-        linkend="opt-tab-qtpars"/>.</para>
+        linkend="opt-tab-qtpars" />.</para>
 
         <table xml:id="opt-tab-qtpars">
           <title>Parameters for the quadruple tank process.</title>
 
           <tgroup cols="3">
-            <colspec align="left" colname="col–opt" colwidth="1*"/>
+            <colspec align="left" colname="col–opt" colwidth="1*" />
 
-            <colspec align="left" colname="col–desc" colwidth="2*"/>
+            <colspec align="left" colname="col–desc" colwidth="2*" />
 
-            <colspec align="left" colname="col–def" colwidth="1*"/>
+            <colspec align="left" colname="col–def" colwidth="1*" />
 
             <thead>
               <row>
@@ -2497,15 +2498,15 @@ plt.show()
 
         <para>You should now see two plots showing the measurement state
         profiles and the control input profiles similar to <xref
-        linkend="opt-fig-qt_data"/> and <xref
-        linkend="opt-fig-qtinput"/>.</para>
+        linkend="opt-fig-qt_data" /> and <xref
+        linkend="opt-fig-qtinput" />.</para>
 
         <figure xml:id="opt-fig-qt_data">
           <title>Measured state profiles.</title>
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/qt_x.svg" scalefit="1" width="60%"/>
+              <imagedata fileref="images/qt_x.svg" scalefit="1" width="60%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
@@ -2515,7 +2516,7 @@ plt.show()
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/qt_u.svg" scalefit="1" width="60%"/>
+              <imagedata fileref="images/qt_u.svg" scalefit="1" width="60%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
@@ -2591,7 +2592,7 @@ plt.plot(t_sim,u2_sim,'r')
 plt.show()
 </programlisting>
 
-        <para><xref linkend="opt-fig-sim-nom"/> shows the result of the
+        <para><xref linkend="opt-fig-sim-nom" /> shows the result of the
         simulation.</para>
 
         <figure xml:id="opt-fig-sim-nom">
@@ -2599,7 +2600,7 @@ plt.show()
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/qt_sim.svg" scalefit="1" width="60%"/>
+              <imagedata fileref="images/qt_sim.svg" scalefit="1" width="60%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
@@ -2753,7 +2754,7 @@ plt.show()
 </programlisting>
 
         <para>You will see the plot shown in <xref
-        linkend="opt-fig-par-est1"/>.</para>
+        linkend="opt-fig-par-est1" />.</para>
 
         <figure xml:id="opt-fig-par-est1">
           <title>State profiles corresponding to estimated values of a1 and
@@ -2761,7 +2762,7 @@ plt.show()
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/qt_est1.svg" scalefit="1" width="60%"/>
+              <imagedata fileref="images/qt_est1.svg" scalefit="1" width="60%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
@@ -2852,7 +2853,7 @@ plt.show()
 </programlisting>
 
         <para>The resulting plot is shown in <xref
-        linkend="opt-fig-par-est2"/>.</para>
+        linkend="opt-fig-par-est2" />.</para>
 
         <figure xml:id="opt-fig-par-est2">
           <title>State profiles corresponding to estimated values of a1, a2,
@@ -2860,7 +2861,7 @@ plt.show()
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/qt_est2.svg" scalefit="1" width="60%"/>
+              <imagedata fileref="images/qt_est2.svg" scalefit="1" width="60%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
@@ -2931,7 +2932,7 @@ plt.show()
               </m:mrow>
             </m:msup>
 
-            <m:mspace linebreak="newline"/>
+            <m:mspace linebreak="newline" />
           </m:math>
         </informalequation>
 
@@ -3091,7 +3092,7 @@ print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
       <title>Algorithm overview</title>
 
       <para>The default algorithm described in <xref
-      linkend="opt-sec-dae-jmu"/> is well tested, robust and has been used in
+      linkend="opt-sec-dae-jmu" /> is well tested, robust and has been used in
       several large-scale industrial projects. Due to its implementation in C,
       however, its flexibility is limited and extension requires significant
       efforts. Therefore, a new algorithm for optimal control and parameter
@@ -3146,7 +3147,7 @@ opts? # View the help text</programlisting>
 
       <programlisting language="python">res = model.optimize(options=opts)</programlisting>
 
-      <para>In <xref linkend="opt-tab-casadi-dae-opts"/> the options for the
+      <para>In <xref linkend="opt-tab-casadi-dae-opts" /> the options for the
       algorithm are shown. Additional documentation is available in the Python
       class documentation.</para>
 
@@ -3155,11 +3156,11 @@ opts? # View the help text</programlisting>
         algorithm</title>
 
         <tgroup cols="3">
-          <colspec align="left" colname="col–opt" colwidth="1*"/>
+          <colspec align="left" colname="col–opt" colwidth="1*" />
 
-          <colspec align="left" colname="col–desc" colwidth="1*"/>
+          <colspec align="left" colname="col–desc" colwidth="1*" />
 
-          <colspec align="left" colname="col–def" colwidth="2*"/>
+          <colspec align="left" colname="col–def" colwidth="2*" />
 
           <thead>
             <row>
@@ -3307,6 +3308,17 @@ opts? # View the help text</programlisting>
               modes as values. For all variables not occuring in the keys of
               the dictionary, the mode specified by the "_default_mode" entry
               will be used, which by default is "linear".</entry>
+            </row>
+
+            <row>
+              <entry>result_file_name</entry>
+
+              <entry>""</entry>
+
+              <entry>Specifies the name of the file where the result is
+              written. Setting this option to an empty string results in a
+              default file name that is based on the name of the model
+              class.</entry>
             </row>
 
             <row>
@@ -3493,7 +3505,7 @@ opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
         <title>Optimal control</title>
 
         <para>This example is based on the CSTR example presented in <xref
-        linkend="opt-sec-dae-c-cstr"/>. It is shown how to perform the same
+        linkend="opt-sec-dae-c-cstr" />. It is shown how to perform the same
         steps using the new CasADi-based algorithm instead of the default JMI
         algorithm. It is thus recommended that the user is familiar with the
         steps performed in the previous example. A complete script for this
@@ -3647,7 +3659,7 @@ cstr = CasadiModel(fmux)
 
           <para>Next, we specify the initial and reference values, according
           to the two stationary points computed in <xref
-          linkend="opt-sec-dae-casadi-cstr-init"/>.</para>
+          linkend="opt-sec-dae-casadi-cstr-init" />.</para>
 
           <programlisting># Set reference values
 cstr.set('Tc_ref', Tc_0_B)
@@ -3663,8 +3675,8 @@ cstr.set('cstr.T_init', T_0_A)
           We first obtain an options object, containing all the default
           options. We then change number of finite elements from the default
           value of 50 to 100. We also specify that the trajectories computed
-          in <xref linkend="opt-sec-dae-casadi-cstr-guess"/> are to be used as
-          initial guesses for the NLP variables.</para>
+          in <xref linkend="opt-sec-dae-casadi-cstr-guess" /> are to be used
+          as initial guesses for the NLP variables.</para>
 
           <programlisting># Set options
 opt_opts = cstr.optimize_options()
@@ -3691,7 +3703,7 @@ Tc_ref = res['Tc_ref']
 
           <para>Finally, we plot the obtained solution. The results should be
           very similar to those shown in <xref
-          linkend="opt-fig-cstr-opt1"/>.</para>
+          linkend="opt-fig-cstr-opt1" />.</para>
 
           <programlisting># Plot the results
 plt.close(2)
@@ -3764,7 +3776,7 @@ res = sim_model.simulate(start_time=0., final_time=150.,
 
           <para>Finally, we extract the simulation results and plot them. They
           should be similar to those shown in <xref
-          linkend="opt-fig-cstr-opt2"/>.</para>
+          linkend="opt-fig-cstr-opt2" />.</para>
 
           <programlisting># Extract variable profiles
 c_sim=res['c']
@@ -3873,17 +3885,17 @@ opts? #View the help text</programlisting>
 
       <programlisting language="python">res = model.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)</programlisting>
 
-      <para>In <xref linkend="opt-tab-pseudo-opts"/> the options for the
+      <para>In <xref linkend="opt-tab-pseudo-opts" /> the options for the
       PseudoSpectral methods are shown.<table xml:id="opt-tab-pseudo-opts">
           <title>Options for the Pseudospectral optimization
           algorithms.</title>
 
           <tgroup cols="3">
-            <colspec align="left" colname="col–opt" colwidth="1*"/>
+            <colspec align="left" colname="col–opt" colwidth="1*" />
 
-            <colspec align="left" colname="col–desc" colwidth="1*"/>
+            <colspec align="left" colname="col–desc" colwidth="1*" />
 
-            <colspec align="left" colname="col–def" colwidth="2*"/>
+            <colspec align="left" colname="col–def" colwidth="2*" />
 
             <thead>
               <row>
@@ -4002,14 +4014,14 @@ opts? #View the help text</programlisting>
       problem involving discontinuities. As an example, say that in a model a
       state is allowed to be changed discontinuous at an arbitrary time point,
       <literal>tp</literal>, with the parameter <literal>dv</literal>. See
-      <xref linkend="opt-fig-disc"/>.</para>
+      <xref linkend="opt-fig-disc" />.</para>
 
       <figure xml:id="opt-fig-disc">
         <title>Handling of discontinuities.</title>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/phase.png"/>
+            <imagedata fileref="images/phase.png"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>
@@ -4094,7 +4106,7 @@ res = model.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
 
         <para>The result can then be used to visualize the result and a
         resulting figure is shown in <xref
-        linkend="opt-fig-vdp-casadi"/>.</para>
+        linkend="opt-fig-vdp-casadi" />.</para>
 
         <figure xml:id="opt-fig-vdp-casadi">
           <title>The Van der Pol oscillator optimized using Gauss
@@ -4103,7 +4115,7 @@ res = model.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
           <mediaobject>
             <imageobject>
               <imagedata fileref="images/vdp_casadi.svg" scalefit="1"
-                         width="60%"/>
+                         width="60%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
@@ -4124,7 +4136,7 @@ res = model.optimize(algorithm="CasadiPseudoSpectralAlg", options=opts)
         <para>We will solve this problem using the gauss pseudo-spectral
         method with two phases. The phases will be connected in such a way
         that the velocities are allowed to be discontinuous, see <xref
-        linkend="opt-fig-disc"/> . The magnitude of the discontinuity will
+        linkend="opt-fig-disc" /> . The magnitude of the discontinuity will
         correspond to the first rocket burn. The second rocket burn are
         connected as constraints at the final time.</para>
 
@@ -4333,7 +4345,7 @@ plt.arrow(x_phase_2[-1],y_phase_2[-1],0.5*dx2,0.5*dy2, width=0.01,label="dv2")
 plt.legend()
 plt.show()</programlisting>
 
-        <para>In <xref linkend="fig-opt-satellite-final"/> the result is
+        <para>In <xref linkend="fig-opt-satellite-final" /> the result is
         visualized. The arrows represents the rocket burns.</para>
 
         <figure xml:id="fig-opt-satellite-final">
@@ -4342,7 +4354,7 @@ plt.show()</programlisting>
           <mediaobject>
             <imageobject>
               <imagedata fileref="images/satellite_final.png" scalefit="1"
-                         width="60%"/>
+                         width="60%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
@@ -4394,13 +4406,13 @@ plt.show()</programlisting>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/furuta-image.png" scale="50"/>
+            <imagedata fileref="images/furuta-image.png" scale="50"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>This tutorial demonstrates how to solve a model calibration
     problem using an algorithm that can be applied to Functional Mock-up
     Units. The model to be calibrated is the Furuta pendulum shown in <xref
-    linkend="opt-fig-furuta"/>. The Furuta pendulum consists of an arm
+    linkend="opt-fig-furuta" />. The Furuta pendulum consists of an arm
     rotating in the horizontal plane and a pendulum which is free to rotate in
     the vertical plane. The construction has two degrees of freedom, the angle
     of the arm, <inlineequation>
@@ -4466,7 +4478,7 @@ plt.grid ()
 plt.show ()
 </programlisting>
 
-    <para>This code should generate <xref linkend="opt-fig-furuta-meas"/>
+    <para>This code should generate <xref linkend="opt-fig-furuta-meas" />
     showing the measurements of <inlineequation>
         <m:math display="inline">
           <m:mi>θ</m:mi>
@@ -4490,7 +4502,7 @@ plt.show ()
 
       <mediaobject>
         <imageobject>
-          <imagedata fileref="images/furuta_meas.svg" scalefit="1" width="60%"/>
+          <imagedata fileref="images/furuta_meas.svg" scalefit="1" width="60%"></imagedata>
         </imageobject>
       </mediaobject>
     </figure>
@@ -4522,7 +4534,7 @@ plt.legend(loc=1)
 plt.show ()
 </programlisting>
 
-    <para><xref linkend="opt-fig-furuta-meas-nomsim"/> shows the simulation
+    <para><xref linkend="opt-fig-furuta-meas-nomsim" /> shows the simulation
     result together with the measurements.</para>
 
     <figure xml:id="opt-fig-furuta-meas-nomsim">
@@ -4540,7 +4552,7 @@ plt.show ()
       <mediaobject>
         <imageobject>
           <imagedata fileref="images/furuta_meas_nomsim.svg" scalefit="1"
-                     width="60%"/>
+                     width="60%"></imagedata>
         </imageobject>
       </mediaobject>
     </figure>
@@ -4583,7 +4595,7 @@ plt.show ()
 
     <para><inlinemediaobject>
         <imageobject>
-          <imagedata fileref="images/furuta-cost.png" scale="30"/>
+          <imagedata fileref="images/furuta-cost.png" scale="30"></imagedata>
         </imageobject>
       </inlinemediaobject></para>
 
@@ -4809,7 +4821,7 @@ plt.legend(loc=1)
 plt.show ()
 </programlisting>
 
-    <para>This should generate the <xref linkend="opt-fig-furuta-opt"/>. As
+    <para>This should generate the <xref linkend="opt-fig-furuta-opt" />. As
     can be seen, the agreement between the measurements and the simulation
     result has improved considerably. The model has been successfully
     calibrated.</para>
@@ -4829,7 +4841,7 @@ plt.show ()
       <mediaobject>
         <imageobject>
           <imagedata fileref="images/furuta_optsim_dashed.svg" scalefit="1"
-                     width="60%"/>
+                     width="60%"></imagedata>
         </imageobject>
       </mediaobject>
     </figure>

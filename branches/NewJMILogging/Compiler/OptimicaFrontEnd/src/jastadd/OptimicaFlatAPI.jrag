@@ -464,6 +464,14 @@ aspect OptimicaFlatAPI {
 	 */	
 	syn double FOptClass.finalTimeInitialGuessAttribute() = 
 		finalTimeInitialGuessAttributeCValue().realValue();
+	
+	
+	eq FOptClass.getChild().isInFV()                        = false;
+	eq FOptClass.getChild().isInFV(FVariable fv)            = false;
+	eq FOptClass.getChild().isInDerivedType()               = false;
+	eq FOptClass.getChild().isInDerivedType(FDerivedType t) = false;
+	
+	
 
 	/**
 	 * \brief Get the number of Constraints.

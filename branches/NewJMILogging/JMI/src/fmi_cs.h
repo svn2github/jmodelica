@@ -40,27 +40,183 @@
 extern "C" {
 #endif
 
+typedef struct fmi1_cs_t fmi1_cs_t;
+
+struct fmi1_cs_t {
+    fmiComponent fmi1_me;
+    fmiString instance_name;
+    fmiString GUID;
+    fmiCallbackFunctions callback_functions;
+    fmiEventInfo event_info;
+    fmiBoolean logging_on;
+    fmiInteger n_real_x;
+    fmiInteger n_sw;
+    /* jmi_ode_solver_t *ode_solver; */ /** \brief Struct containing the ODE solver. */
+};
+
+/**
+ * \brief Returns the compatible platforms.
+ *
+ * This methods returns the set of compatible platforms for which the FMU was
+ * compiled for.
+ * 
+ * @return The set of compatible platforms.
+ */
 const char* fmi1_cs_get_types_platform();
+
+/**
+ * \brief Returns the version of the header file.
+ * 
+ * @return The version of fmiModelFunctions.h.
+ */
 const char* fmi1_cs_get_version();
 
+/**
+ * \brief Performs a time-step.
+ * 
+ * @param c The FMU struct.
+ * @param currentCommunicationPoint The current communication point.
+ * @param communicationStepSize The length of the step to perform.
+ * @param newStep If the last step was accepted.
+ * @return Error code.
+ */
 fmiStatus fmi1_cs_do_step(fmiComponent c,
 						 fmiReal currentCommunicationPoint,
                          fmiReal communicationStepSize,
                          fmiBoolean   newStep);
+                         
+/**
+ * \brief Dispose of the slave instance.
+ * 
+ * @param c The FMU struct.
+ */
 void fmi1_cs_free_slave_instance(fmiComponent c);
+
+/**
+ * \brief Instantiates the slave FMU.
+ * 
+ * @param instanceName The name of the instance.
+ * @param GUID The GUID identifier.
+ * @param fmuLocation Access path to the FMU.
+ * @param mimeType The mime type of the simulator.
+ * @param timeout The communucation time-out interval.
+ * @param visible Indicates if the simulator application windows should be visible.
+ * @param interactive If the simulation needs to be manually started.
+ * @param functions Callback functions for logging, allocation and deallocation.
+ * @param loggingOn Turn of or on logging, fmiBoolean.
+ * @return An instance of a model.
+ */
 fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, fmiString fmuLocation, fmiString mimeType, 
                                    fmiReal timeout, fmiBoolean visible, fmiBoolean interactive, fmiCallbackFunctions functions, 
                                    fmiBoolean loggingOn);
+
+/**
+ * \brief Dellocates all memory since the call to the initialization method.
+ * 
+ * @param c The FMU struct.
+ * @return Error code.
+ */
 fmiStatus fmi1_cs_terminate_slave(fmiComponent c);
+
+/**
+ * \brief Initialize the slave FMU.
+ * 
+ * @param c The FMU struct.
+ * @param tStart Start-time of the simulation.
+ * @param StopTimeDefined If tStop is defined.
+ * @param tStop Stop-time of the simulation.
+ * @return Error code.
+ */
 fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,fmiBoolean StopTimeDefined, fmiReal tStop);
+
+/**
+ * \brief Cancel a pending step.
+ * 
+ * @param c The FMU struct.
+ * @return Error code.
+ */
 fmiStatus fmi1_cs_cancel_step(fmiComponent c);
-fmiStatus fmi1_cs_reset_slave(fmiComponent c) ;
+
+/**
+ * \brief Resets the slave FMU.
+ * 
+ * @param c The FMU struct.
+ * @return Error code.
+ */
+fmiStatus fmi1_cs_reset_slave(fmiComponent c);
+
+/**
+ * \brief Gets the derivative of the outputs
+ * 
+ * @param c The FMU struct.
+ * @param vr The value reference(s)
+ * @param nvr The length of vr
+ * @param order The order of the output derivative
+ * @param value The value(s) to set.
+ * @return Error code.
+ */
 fmiStatus fmi1_cs_get_real_output_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], fmiReal value[]);
+
+/**
+ * \brief Sets the derivative of the outputs
+ * 
+ * @param c The FMU struct.
+ * @param vr The value reference(s)
+ * @param nvr The length of vr
+ * @param order The derivative order
+ * @param value The value(s) to set.
+ * @return Error code.
+ */
 fmiStatus fmi1_cs_set_real_input_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], const fmiReal value[]);
+
+/**
+ * \brief Retrieve status information from the FMU
+ * 
+ * @param c The FMU struct.
+ * @param s The kind of status information.
+ * @param value The output information
+ * @return Error code.
+ */
 fmiStatus fmi1_cs_get_status(fmiComponent c, const fmiStatusKind s, fmiStatus* value);
+
+/**
+ * \brief Retrieve (real) status information from the FMU
+ * 
+ * @param c The FMU struct.
+ * @param s The kind of status information.
+ * @param value The output information
+ * @return Error code.
+ */
 fmiStatus fmi1_cs_get_real_status(fmiComponent c, const fmiStatusKind s, fmiReal* value);
+
+/**
+ * \brief Retrieve (integer) status information from the FMU
+ * 
+ * @param c The FMU struct.
+ * @param s The kind of status information.
+ * @param value The output information
+ * @return Error code.
+ */
 fmiStatus fmi1_cs_get_integer_status(fmiComponent c, const fmiStatusKind s, fmiInteger* value);
+
+/**
+ * \brief Retrieve (boolean) status information from the FMU
+ * 
+ * @param c The FMU struct.
+ * @param s The kind of status information.
+ * @param value The output information
+ * @return Error code.
+ */
 fmiStatus fmi1_cs_get_boolean_status(fmiComponent c, const fmiStatusKind s, fmiBoolean* value);
+
+/**
+ * \brief Retrieve (string) status information from the FMU
+ * 
+ * @param c The FMU struct.
+ * @param s The kind of status information.
+ * @param value The output information
+ * @return Error code.
+ */
 fmiStatus fmi1_cs_get_string_status(fmiComponent c, const fmiStatusKind s, fmiString* value);
 
 /**

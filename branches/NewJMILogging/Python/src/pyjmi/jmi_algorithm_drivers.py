@@ -1600,10 +1600,13 @@ class LocalDAECollocationAlg(AlgorithmBase):
         
             The LocalDAECollocationAlgResult object.
         """
-        self.nlp.export_result_dymola()
+        self.nlp.export_result_dymola(self.result_file_name)
         
         # Load result file
-        resultfile = self.model.get_identifier() + '_result.txt'
+        if self.result_file_name == "":
+            resultfile = self.model.get_identifier() + '_result.txt'
+        else:
+            resultfile = self.result_file_name
         res = ResultDymolaTextual(resultfile)
         
         # Get optimized element lengths
@@ -1618,7 +1621,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
         return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp,
                                             res, self.options, self.times,
                                             h_opt)
-        
+    
     @classmethod
     def get_default_options(cls):
         """ 
@@ -1746,8 +1749,8 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Default: None
         
         nominal_traj_mode --
-            Mode for computing scaling factors based on nominal trajectories.
-            Four possible modes:
+            Mode for computing scaling factors for each variable based on
+            nominal trajectories. Four possible modes:
             
             "attribute": Time-invariant, linear scaling based on Nominal
             attribute
@@ -1766,6 +1769,12 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: {str: str}
             Default: {"_default_mode": "linear"}
+        
+        result_file_name --
+            Specifies the name of the file where the result is written. Setting
+            this option to an empty string results in a default file name that
+            is based on the name of the model class.
+            Default: ""
         
         write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
@@ -1929,6 +1938,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'variable_scaling': True,
                 'nominal_traj': None,
                 'nominal_traj_mode': {"_default_mode": "linear"},
+                'result_file_name': "",
                 'write_scaled_result': False,
                 'result_mode': "collocation_points",
                 'n_eval_points': 20,

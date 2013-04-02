@@ -665,14 +665,25 @@ aspect Constructors {
 	 */
 	public FInternalAttribute.FInternalAttribute(String name, FExp value) {
 		this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt(value), 
-				true, new Opt(), new Opt(), new List());
+				true, 0, new Opt(), new Opt(), new List());
 	}
 	
 	/**
-	 * \brief Create an attribute with only the required children.
+	 * Create an attribute with only the required children.
 	 */
-	public FAttribute.FAttribute(FIdUse typeName, FIdDecl name, boolean isSet) {
-		this(typeName, name, new Opt(), isSet, new Opt(), new Opt(), new List());
+	public FAttribute.FAttribute(FIdUse typeName, FIdDecl name, boolean isSet, int level) {
+		this(typeName, name, new Opt(), isSet, level, new Opt(), new Opt(), new List());
+	}
+	
+	/**
+	 * Create an attribute with only the required children and a value.
+	 * 
+	 * The value may be <code>null</code>, then no value is set.
+	 */
+	public FAttribute.FAttribute(FIdUse typeName, FIdDecl name, FExp value, boolean isSet, int level) {
+		this(typeName, name, 
+				(value == null ? new Opt() : new Opt(value)), 
+				isSet, level, new Opt(), new Opt(), new List());
 	}
 	
 	/**

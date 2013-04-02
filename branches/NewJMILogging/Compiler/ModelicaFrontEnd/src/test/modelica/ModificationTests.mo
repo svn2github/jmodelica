@@ -2043,4 +2043,332 @@ end ConstMod1;
 
 
 
+model ModificationLevel1
+	model A
+		Real x(start = 0.1) = 0;
+		Real y = 0;
+	end A;
+	
+	model B = A(y(start = 0.2));
+	
+	model C
+		A a(y(start = 0.3));
+		B b;
+	end C;
+	
+	model D
+		C c1;
+		C c2(b(x(start = 0.4)));
+	end D;
+	
+	A a(y(start = 0.5));
+	B b;
+	C c;
+	D d(c1(a(x(start = 0.6))));
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="ModificationLevel1",
+			description="Test calculation of modification levels",
+			methodName="attributeLevels",
+			methodResult="
+Variables:
+  a.x(start:4=0.1)
+  a.y(start:3=0.5)
+  b.x(start:5=0.1)
+  b.y(start:3=0.2)
+  c.a.x(start:5=0.1)
+  c.a.y(start:4=0.3)
+  c.b.x(start:6=0.1)
+  c.b.y(start:3=0.2)
+  d.c1.a.x(start:3=0.6)
+  d.c1.a.y(start:5=0.3)
+  d.c1.b.x(start:7=0.1)
+  d.c1.b.y(start:3=0.2)
+  d.c2.a.x(start:6=0.1)
+  d.c2.a.y(start:5=0.3)
+  d.c2.b.x(start:4=0.4)
+  d.c2.b.y(start:3=0.2)
+")})));
+end ModificationLevel1;
+
+
+model ModificationLevel2
+    model A
+        Real x(start = 0.1) = 0;
+        Real y = 0;
+    end A;
+    
+    model B = A;
+	
+	model C
+		B b;
+	end C;
+	
+	model D
+		C c;
+	end D;
+
+    A a(y(start = 0.5));
+    D d;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="ModificationLevel2",
+			description="Test calculation of modification levels for simple short class decl",
+			methodName="attributeLevels",
+			methodResult="
+Variables:
+  a.x(start:4=0.1)
+  a.y(start:3=0.5)
+  d.c.b.x(start:7=0.1)
+  d.c.b.y
+")})));
+end ModificationLevel2;
+
+
+model StartPropagation1
+    Real x(start = 1);
+    Real y(stateSelect = StateSelect.prefer);
+equation
+    x = y;
+    der(y) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation1",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation1
+ Real y(stateSelect = StateSelect.prefer,start = 1);
+initial equation 
+ y = 1;
+equation
+ der(y) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end ModificationTests.StartPropagation1;
+")})));
+end StartPropagation1;
+
+
+model StartPropagation2
+    Real x(start = 1);
+    Real y(start = 2, stateSelect = StateSelect.prefer);
+equation
+    x = y;
+    der(y) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation2",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation2
+ Real y(start = 2,stateSelect = StateSelect.prefer);
+initial equation 
+ y = 2;
+equation
+ der(y) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end ModificationTests.StartPropagation2;
+")})));
+end StartPropagation2;
+
+
+model StartPropagation3
+	model A
+		Real x(start = 1);
+	end A;
+	
+    A a1(x(start = 2));
+    A a2(x(stateSelect = StateSelect.prefer));
+equation
+    a1.x = a2.x;
+    der(a2.x) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation3",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation3
+ Real a2.x(stateSelect = StateSelect.prefer,start = 2);
+initial equation 
+ a2.x = 2;
+equation
+ a2.der(x) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end ModificationTests.StartPropagation3;
+")})));
+end StartPropagation3;
+
+
+model StartPropagation4
+    Real x(stateSelect = StateSelect.prefer);
+    Real y(start = 1);
+    Real z(start = 2);
+equation
+    x = y;
+    z = y;
+    der(x) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation4",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation4
+ Real x(stateSelect = StateSelect.prefer,start = 1);
+initial equation 
+ x = 1;
+equation
+ der(x) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end ModificationTests.StartPropagation4;
+")})));
+end StartPropagation4;
+
+
+model StartPropagation5
+    model A
+        Real x(start = 1);
+    end A;
+    
+	type B = Real(start = 2);
+	
+	A a;
+	B b(stateSelect = StateSelect.prefer);
+equation
+    a.x = b;
+    der(b) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation5",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation5
+ ModificationTests.StartPropagation5.B b(stateSelect = StateSelect.prefer,start = 1);
+initial equation 
+ b = 1;
+equation
+ der(b) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ type ModificationTests.StartPropagation5.B = Real(start = 2);
+end ModificationTests.StartPropagation5;
+")})));
+end StartPropagation5;
+
+
+model StartPropagation6
+    type A = Real(start = 1);
+    
+    Real x(stateSelect = StateSelect.prefer);
+    A a;
+equation
+    x = a;
+    der(x) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation6",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation6
+ Real x(stateSelect = StateSelect.prefer,start = 1);
+initial equation 
+ x = 1;
+equation
+ der(x) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ type ModificationTests.StartPropagation6.A = Real(start = 1);
+end ModificationTests.StartPropagation6;
+")})));
+end StartPropagation6;
+
+
+model StartPropagation7
+    type A = Real(start = 1);
+	type B = Real(start = 2);
+	    
+    A a(stateSelect = StateSelect.prefer);
+    B b;
+equation
+    a = b;
+    der(a) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation7",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation7
+ ModificationTests.StartPropagation7.A a(stateSelect = StateSelect.prefer);
+initial equation 
+ a = 1;
+equation
+ der(a) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ type ModificationTests.StartPropagation7.A = Real(start = 1);
+ type ModificationTests.StartPropagation7.B = Real(start = 2);
+end ModificationTests.StartPropagation7;
+")})));
+end StartPropagation7;
+
+
+model StartPropagation8
+    model A
+        Real x(start = 1);
+    end A;
+    
+    type B = Real(start = 2);
+    
+    A a;
+    B b(stateSelect = StateSelect.prefer);
+equation
+    a.x = -b;
+    der(b) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation8",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation8
+ ModificationTests.StartPropagation8.B b(stateSelect = StateSelect.prefer,start = - 1);
+initial equation 
+ b = - 1;
+equation
+ der(b) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ type ModificationTests.StartPropagation8.B = Real(start = 2);
+end ModificationTests.StartPropagation8;
+")})));
+end StartPropagation8;
+
+
 end ModificationTests;
