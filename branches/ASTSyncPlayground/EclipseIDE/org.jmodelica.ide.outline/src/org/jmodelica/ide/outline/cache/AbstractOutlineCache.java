@@ -1,8 +1,6 @@
 package org.jmodelica.ide.outline.cache;
 
 import java.util.ArrayList;
-import java.util.Stack;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.jastadd.ed.core.model.IASTChangeEvent;

@@ -97,7 +97,11 @@ public class ModelicaEclipseCompiler implements ICompiler {
 		if (file == null)
 			return null;
 		CompilationRoot compilationRoot = new CompilationRoot(file.getProject());
+		GlobalRootNode groot = new GlobalRootNode(compilationRoot.root());
+		groot.setCompilationRoot(compilationRoot);
+		ModelicaASTRegistry.getInstance().doUpdate(file.getProject(), groot);
 		compilationRoot.parseFile(new DocumentReader(document), file, false);
+		groot.addFile(compilationRoot.getStoredDefinition());
 		return new LocalRootNode(compilationRoot.root(),
 				compilationRoot.getStoredDefinition());
 	}
@@ -120,21 +124,32 @@ public class ModelicaEclipseCompiler implements ICompiler {
 	}
 
 	public ILocalRootNode compileFile(IFile file) {
-		System.out.println("MODELICACOMPILER compileFile(IFile file)");
-		if (file == null) {
-			System.out.println("compileFile() file was NULL...");
-			CompilationRoot croot = new CompilationRoot(null);
-			return new LocalRootNode(croot.root(), croot.getStoredDefinition());
-		}
-		CompilationRoot compilationRoot = new CompilationRoot(file.getProject());
+		System.out.println("MODELICACOMPILER compileFile(IFile file)"
+				+ file.getName());
 
+		LocalRootNode toReturn = null;
+		CompilationRoot compilationRoot;
+		GlobalRootNode groot;
+		IGlobalRootNode igroot = ModelicaASTRegistry.getInstance().doLookup(
+				file.getProject());
+		if (igroot == null) {
+			compilationRoot = new CompilationRoot(file.getProject());
+			groot = new GlobalRootNode(compilationRoot.root());
+			groot.setCompilationRoot(compilationRoot);
+			System.out.println("COMPILER ADDING NEW PROJECT");
+			ModelicaASTRegistry.getInstance()
+					.doUpdate(file.getProject(), groot);
+		} else {
+			groot = (GlobalRootNode) igroot;
+			compilationRoot = groot.getCompilationRoot();
+		}
 		compilationRoot.parseFile(file);
-		SourceRoot sroot = compilationRoot.root();
-		GlobalRootNode groot = new GlobalRootNode(sroot);
-		groot.addFiles(compilationRoot.getFiles());
-		System.out.println("ADDED NEW PROJECT");
-		ModelicaASTRegistry.getInstance().doUpdate(file.getProject(), groot);
-		return new LocalRootNode(sroot, compilationRoot.getStoredDefinition());
+		System.out.println("COMPILER ADDING NEW FILE TO GLOBALROOTNODE");
+		groot.addFile(compilationRoot.getStoredDefinition());
+		toReturn = new LocalRootNode(groot.getSourceRoot(),
+				compilationRoot.getStoredDefinition());
+
+		return toReturn;
 	}
 
 	// Overridden to add synchronization
@@ -150,7 +165,7 @@ public class ModelicaEclipseCompiler implements ICompiler {
 			synchronized (node.state()) {
 				// Depends on ASTNode.state being static (if it isn't, use an
 				// object that is unique to the tree)
-				reg.doUpdate(file, (ILocalRootNode) node);// , node.lookupKey(),
+		//reg.doUpdate(file, (ILocalRootNode) node);// , node.lookupKey(),
 															// file);
 			}
 		}
@@ -196,17 +211,24 @@ public class ModelicaEclipseCompiler implements ICompiler {
 
 	@Override
 	public IGlobalRootNode compile(IProject project) {
-		CompilationRoot croot = recursiveCompile(new CompilationRoot(project),
+		IGlobalRootNode toReturn = ModelicaASTRegistry.getInstance().doLookup(
 				project);
-		GlobalRootNode newRoot = new GlobalRootNode(croot.root());
-		newRoot.addFiles(croot.getFiles());
-		return newRoot;
+		CompilationRoot croot;
+		if (toReturn == null) {
+			croot = recursiveCompile(new CompilationRoot(project), project);
+			toReturn = new GlobalRootNode(croot.root());
+			((GlobalRootNode) toReturn).setCompilationRoot(croot);
+		} else {
+			croot = recursiveCompile(
+					((GlobalRootNode) toReturn).getCompilationRoot(), project);
+		}
+		((GlobalRootNode) toReturn).addFiles(croot.getFiles());
+		return toReturn;
 	}
 
 	@Override
 	public ILocalRootNode compile(IFile file, IDocument document) {
-		return compileToAST(document,
-				null, null, file);
+		return compileToAST(document, null, null, file);
 	}
 
 	@Override

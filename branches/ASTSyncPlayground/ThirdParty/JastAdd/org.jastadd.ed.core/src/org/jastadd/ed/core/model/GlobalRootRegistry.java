@@ -216,8 +216,6 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 		int i = 0;
 		for (ILocalRootNode node : nodeList)
 			result[i++] = node;
-		if (result == null) //TODO remove print
-			System.err.println("lookupfile returned NULL, should never do that");
 		return result;
 	}
 

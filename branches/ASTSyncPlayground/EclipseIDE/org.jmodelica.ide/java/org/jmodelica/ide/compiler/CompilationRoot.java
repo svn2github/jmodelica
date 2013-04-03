@@ -39,7 +39,7 @@ public class CompilationRoot {
 
 	private final SourceRoot root;
 	private final List<StoredDefinition> list;
-
+	private StoredDefinition latest;
 	private boolean rewritten;
 
 	/**
@@ -70,12 +70,13 @@ public class CompilationRoot {
 	 * Returns the StoredDefinition for the first compilation. Use when you want
 	 * to only compile a single file.
 	 * 
-	 * @return StoredDefinition from the first compilation, or null if no
+	 * @return StoredDefinition from the latest compilation, or null if no
 	 *         successful compilation has been performed.
 	 */
 	public StoredDefinition getStoredDefinition() {
 		forceRewrites();
-		return list.getNumChild() > 0 ? list.getChild(0) : null;
+		//return list.getNumChild() > 0 ? list.getChild(0) : null;
+		return list.getNumChild() > 0 ? latest : null;
 	}
 
 	protected void forceRewrites() {
@@ -148,9 +149,17 @@ public class CompilationRoot {
 			synchronized (localRoot.state()) {
 				localRoot.setFormatting(scanner.getFormattingInfo());
 			}
+			int i = 0;
 			for (StoredDefinition def : localRoot.getProgram()
-					.getUnstructuredEntitys())
-				list.add(annotatedDefinition(def, file));
+					.getUnstructuredEntitys()) {
+				System.out.println("CompilationRoot added Storeddef to itself");
+				StoredDefinition sd = annotatedDefinition(def, file);
+				list.add(sd);
+				latest = sd;
+				i++;
+			}
+			if (i == 0) // for empty file
+				addBadDef(file);
 		} catch (Parser.Exception e) {
 			addBadDef(file);
 		} catch (ParserException e) {
@@ -182,7 +191,10 @@ public class CompilationRoot {
 	}
 
 	private void addBadDef(IFile file) {
-		list.add(annotatedDefinition(new BadDefinition(), file));
+		System.out.println("CompilationRoot added badstoreddef to itself");
+		StoredDefinition def = annotatedDefinition(new BadDefinition(), file);
+		list.add(def);
+		latest = def;
 		rewritten = false;
 	}
 }

@@ -6,7 +6,6 @@ import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.ide.compiler.ModelicaASTRegistryJobBucket;
 import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.ide.helpers.OutlineCacheJob;
-import org.jmodelica.ide.outline.OutlineUpdateWorker.ChildrenTask;
 import org.jmodelica.ide.outline.cache.AbstractOutlineCache;
 import org.jmodelica.ide.outline.cache.JobClassOutlineCacheChildren;
 import org.jmodelica.ide.outline.cache.JobClassOutlineCacheInitial;

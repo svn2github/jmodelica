@@ -19,9 +19,11 @@ package org.jmodelica.ide.textual.editor;
 //import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
 
 import java.io.File;
+import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -51,6 +53,8 @@ import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jastadd.ed.core.model.node.IASTNode;
 import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.compiler.ChangePropagationController;
+import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.helpers.CachedClassDecl;
 import org.jmodelica.ide.helpers.EditorFile;
 import org.jmodelica.ide.helpers.EditorWithFile;
@@ -304,6 +308,14 @@ public class Editor extends AbstractDecoratedTextEditor implements
 			super.setAction(action.getId(), action);
 		}
 		selectNode(false, "", 0, 0);
+	}
+
+	@Override
+	public void doSave(IProgressMonitor progressMonitor) {
+		super.doSave(progressMonitor);
+		System.err.println("SAAAAAAAAAAAVED");
+		ChangePropagationController.getInstance().handleNotifications(
+				IASTChangeEvent.POST_UPDATE, file.iFile(), new Stack<String>());
 	}
 
 	@Override

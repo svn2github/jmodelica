@@ -45,13 +45,13 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 		return null;
 	}
 
-	@Override
+	/**@Override
 	public boolean doUpdate(IFile file, ILocalRootNode newNode) {
 		boolean res = super.doUpdate(file, newNode);
 		ChangePropagationController.getInstance().handleNotifications(
 				ASTChangeEvent.POST_UPDATE, file, new Stack<String>());
 		return res;
-	}
+	}*/
 
 	@Override
 	public ILocalRootNode[] doLookup(IFile file) { // TODO FIX initial BUILD,
@@ -68,14 +68,15 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 				System.out
 						.println("Compiler compiling file: " + file.getName());
 				ILocalRootNode root = compiler.compile(file);
-				doUpdate(file, root);
-				IGlobalRootNode grn = lookupProject(file.getProject());
-				grn.addFileNode(root);
+//				doUpdate(file, root);
+//				IGlobalRootNode grn = lookupProject(file.getProject());
+//				grn.addFileNode(root);
 			} else {
 				System.out.println("Compiler could NOT compile file: "
 						+ file.getName());
 			}
 		}
+		System.out.println("RETURNING lookup of file:"+file.getName());
 		return lookupFile(file);
 	}
 
@@ -160,6 +161,7 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	 */
 	public ASTNode<?> resolveSourceASTPath(Stack<String> nodePath,
 			SourceRoot root) {
+		System.out.println("ModelicaASTReg: resolve src nodepath, nodepathsize:"+nodePath.size());
 		Stack<String> copy = new Stack<String>();
 		copy.setSize(nodePath.size());
 		Collections.copy(copy, nodePath);

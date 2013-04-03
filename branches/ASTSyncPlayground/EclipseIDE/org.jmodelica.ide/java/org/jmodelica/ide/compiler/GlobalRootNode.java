@@ -14,6 +14,7 @@ import org.jmodelica.modelica.compiler.StoredDefinition;
 public class GlobalRootNode implements IGlobalRootNode {
 	private ArrayList<ILocalRootNode> files = new ArrayList<ILocalRootNode>();
 	private SourceRoot sourceRoot;
+	private CompilationRoot compilationRoot;
 
 	public GlobalRootNode(SourceRoot sroot) {
 		this.sourceRoot = sroot;
@@ -28,6 +29,7 @@ public class GlobalRootNode implements IGlobalRootNode {
 		System.out.println("GLOBALROOTNOBE looking for file:" + file.getName());
 		ArrayList<ILocalRootNode> newList = new ArrayList<ILocalRootNode>();
 		for (ILocalRootNode node : this.files) {
+			System.out.println("GRN: searching for: "+file.getName()+" current is:"+node.getFile().getName());
 			if (node.getFile().equals(file)) {
 				System.out.println("YEAH, found file in globalrootnode:"
 						+ node.getFile().getName());
@@ -85,6 +87,12 @@ public class GlobalRootNode implements IGlobalRootNode {
 		}
 	}
 
+	public void addFile(StoredDefinition def) {
+		System.out.println("GLOBALROOTNODE ADDED FILE:" +def.getFile().getName());
+		LocalRootNode fileNode = new LocalRootNode(sourceRoot, def);
+		addOrUpdate(fileNode);
+	}
+
 	@Override
 	public IASTNode getChild(int i) {
 		// TODO Auto-generated method stub
@@ -107,5 +115,13 @@ public class GlobalRootNode implements IGlobalRootNode {
 	public IProject getProject() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public void setCompilationRoot(CompilationRoot compilationRoot) {
+		this.compilationRoot = compilationRoot;
+	}
+
+	public CompilationRoot getCompilationRoot() {
+		return compilationRoot;
 	}
 }

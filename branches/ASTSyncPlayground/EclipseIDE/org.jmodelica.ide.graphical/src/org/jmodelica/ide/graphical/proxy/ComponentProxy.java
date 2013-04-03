@@ -13,7 +13,6 @@ import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.icons.coord.Transformation;
 import org.jmodelica.ide.graphical.proxy.cache.CachedInstClassDecl;
 import org.jmodelica.ide.graphical.proxy.cache.CachedInstComponentDecl;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstExtends;
 import org.jmodelica.ide.graphical.proxy.cache.CachedInstNode;
 import org.jmodelica.ide.graphical.util.Transform;
 
