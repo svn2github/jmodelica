@@ -3,16 +3,19 @@
    <description url=".">
       JModelica Update Site
    </description>
-   <feature url="features/org.jastadd.plugin_1.0.8.r1618.jar" id="org.jastadd.plugin" version="1.0.8.r1618">
+   <feature url="features/org.jmodelica.ide.feature_0.4.0.201304031441.jar" id="org.jmodelica.ide.feature" version="0.4.0.201304031441">
       <category name="org.jmodelica.ide.category"/>
    </feature>
-   <feature url="features/org.jmodelica.ide_0.3.5.r1618.jar" id="org.jmodelica.ide" version="0.3.5.r1618">
+   <feature url="features/org.jmodelica.ide.graphical.feature_0.0.1.201304031441.jar" id="org.jmodelica.ide.graphical.feature" version="0.0.1.201304031441">
       <category name="org.jmodelica.ide.category"/>
    </feature>
-   <feature url="features/org.jmodelica.ide.graphical_1.0.0.r3695.jar" id="org.jmodelica.ide.graphical" version="1.0.0.r3695">
+   <feature url="features/org.jmodelica.ide.outline.feature_1.0.0.201304031441.jar" id="org.jmodelica.ide.outline.feature" version="1.0.0.201304031441">
       <category name="org.jmodelica.ide.category"/>
    </feature>
-   <feature url="features/org.jmodelica.ide.documentation_1.0.0.r3695.jar" id="org.jmodelica.ide.documentation" version="1.0.0.r3695">
+   <feature url="features/org.jmodelica.ide.textual.feature_1.0.0.201304031441.jar" id="org.jmodelica.ide.textual.feature" version="1.0.0.201304031441">
+      <category name="org.jmodelica.ide.category"/>
+   </feature>
+   <feature url="features/org.jastadd.ed.core.feature_1.0.0.201304031441.jar" id="org.jastadd.ed.core.feature" version="1.0.0.201304031441">
       <category name="org.jmodelica.ide.category"/>
    </feature>
    <category-def name="org.jmodelica.ide.category" label="JModelica">
