@@ -79,7 +79,6 @@ def run_demo(with_plots=True):
     xx_meas = integr.odeint(F,xx0,t_meas)
 
     # Add measurement noice
-    #noice = N.random.random(N_points_meas)*0.2-0.1
     noice = [0.01463904, 0.0139424, 0.09834249, 0.0768069, 0.01971631, 
         -0.03827911, 0.05266659, -0.02608245, 0.05270525, 0.04717024, 0.0779514,]
     xx_meas[:,0] = xx_meas[:,0] + noice
@@ -112,13 +111,10 @@ def run_demo(with_plots=True):
     # Extract variable profiles
     x1 = res['sys.x1']
     u = res['u']
-    w = res['sys.w']
-    z = res['sys.z']
     t = res['time']
     
-    assert N.abs(w - 1.053339) < 1e-3
-      
-    assert N.abs(z - 0.449854 ) < 1e-3  
+    assert N.abs(res.final('sys.w') - 1.053339) < 1e-3
+    assert N.abs(res.final('sys.z') - 0.449854 ) < 1e-3  
     
     if with_plots:
         # Plot optimization result

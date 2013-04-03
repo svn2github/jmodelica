@@ -46,17 +46,15 @@ def run_demo(with_plots=True):
     res = model.simulate(final_time=400, options=opts)
 
     # Extract variable profiles
-    y1,y2,y3=res['y1'],res["y2"],res["y3"]
-    dy1p1,dy2p1,dy3p1=res['dy1/dp1'],res['dy2/dp1'],res['dy3/dp1']
-    dy1p2,dy2p2,dy3p2=res['dy1/dp2'],res['dy2/dp2'],res['dy3/dp2']
-    dy1p3,dy2p3,dy3p3=res['dy1/dp3'],res['dy2/dp3'],res['dy3/dp3']
+    y1,y2,y3 = res['y1'], res["y2"], res["y3"]
+    dy1p1,dy2p1,dy3p1 = res['dy1/dp1'], res['dy2/dp1'], res['dy3/dp1']
+    dy1p2,dy2p2,dy3p2 = res['dy1/dp2'], res['dy2/dp2'], res['dy3/dp2']
+    dy1p3,dy2p3,dy3p3 = res['dy1/dp3'], res['dy2/dp3'], res['dy3/dp3']
     t=res['time']
     
-    assert N.abs(dy1p1[0] - 1.000) < 1e-3
-    
-    assert N.abs(dy1p2[0] - 1.000) < 1e-3
-      
-    assert N.abs(dy2p2[0] - 1.000) < 1e-3 
+    assert N.abs(res.initial('dy1/dp1') - 1.000) < 1e-3
+    assert N.abs(res.initial('dy1/dp2') - 1.000) < 1e-3
+    assert N.abs(res.initial('dy2/dp2') - 1.000) < 1e-3 
 
     if with_plots:
         # Plot

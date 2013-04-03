@@ -20,8 +20,8 @@ import os
 import numpy as N
 import pylab as p
 
-from pymodelica import compile_jmu
-from pyjmi import JMUModel
+from pymodelica import compile_fmu
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """
@@ -34,10 +34,10 @@ def run_demo(with_plots=True):
     mofile = curr_dir+'/files/SecondOrder.mo'
 
     # Compile the Modelica model to JMU
-    jmu_name = compile_jmu(model_name,mofile)
+    fmu_name = compile_fmu(model_name,mofile)
 
     # Load the dynamic library and XML data
-    model=JMUModel(jmu_name)
+    model = load_fmu(fmu_name)
 
     res = model.simulate(final_time=30, input=('u',N.cos),
         options={'ncp':3000})
@@ -47,14 +47,9 @@ def run_demo(with_plots=True):
     u_sim = res['u']
     t_sim = res['time']
     
-    assert N.abs(x1_sim[-1] - (-1.64664055)) < 1e-3
-
-    assert N.abs(x2_sim[-1]*1.e1 - (-7.3072646)) < 1e-3
-
-    assert N.abs(u_sim[-1]*1.e1 - (1.54251449888)) < 1e-3
-
-#    assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3
-
+    assert N.abs(res.final('x1') - (-1.64664055))       < 1e-3
+    assert N.abs(res.final('x2')*1.e1 - (-7.3072646))   < 1e-3
+    assert N.abs(res.final('u')*1.e1 - (1.54251449888)) < 1e-3
 
     if with_plots:
         fig = p.figure()

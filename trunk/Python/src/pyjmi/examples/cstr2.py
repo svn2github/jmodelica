@@ -26,7 +26,6 @@ import matplotlib.pyplot as plt
 from pymodelica import compile_jmu
 from pyjmi import JMUModel
 
-
 def run_demo(with_plots=True):
     """
     This example is based on a system composed of two Continously Stirred Tank 
@@ -53,7 +52,7 @@ def run_demo(with_plots=True):
     
     # Compile the stationary initialization model into a DLL
     jmu_name = compile_jmu("CSTRLib.Components.Two_CSTRs_stat_init", 
-        curr_dir+"/files/CSTRLib.mo")
+        os.path.join(curr_dir, "files", "CSTRLib.mo"))
 
     # Load a JMU model instance
     init_model = JMUModel(jmu_name)
@@ -104,9 +103,8 @@ def run_demo(with_plots=True):
 
     # Compile the Model
     jmu_name = compile_jmu("CSTR2_Opt", 
-        [curr_dir+"/files/CSTRLib.mo", curr_dir+"/files/CSTR2_Opt.mop"],
-        compiler_options={'enable_variable_scaling':True,
-            'index_reduction':True})
+        [os.path.join(curr_dir, "files", "CSTRLib.mo"), os.path.join(curr_dir, "files", "CSTR2_Opt.mop")],
+        compiler_options={'enable_variable_scaling':True, 'index_reduction':True})
 
     # Load the dynamic library and XML data
     model = JMUModel(jmu_name)
@@ -126,9 +124,9 @@ def run_demo(with_plots=True):
     model.set('CA2_ref',CA2_0_B)
     
     # Initialize the optimization mesh
-    n_e = 50 # Number of elements 
-    hs = N.ones(n_e)*1./n_e # Equidistant points
-    n_cp = 3; # Number of collocation points in each element
+    n_e = 50                 # Number of elements 
+    hs = N.ones(n_e)*1./n_e  # Equidistant points
+    n_cp = 3;                # Number of collocation points in each element
     
     res = model.optimize(
         options={'n_e':n_e, 'hs':hs, 'n_cp':n_cp, 
@@ -153,7 +151,7 @@ def run_demo(with_plots=True):
     cost=res['cost']
     time=res['time']
 
-    assert N.abs(cost[-1] - 1.4745648e+01) < 1e-3
+    assert N.abs(res.final('cost') - 1.4745648e+01) < 1e-3
     
     # Plot the results
     if with_plots:

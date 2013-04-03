@@ -20,8 +20,8 @@ import os
 import numpy as N
 import pylab as p
 
-from pymodelica import compile_jmu
-from pyjmi import JMUModel
+from pymodelica import compile_fmu
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """
@@ -39,10 +39,10 @@ def run_demo(with_plots=True):
     u_traj = N.transpose(N.vstack((t,u)))
     
     # Compile the Modelica model to JMU
-    jmu_name = compile_jmu(model_name,mofile)
+    fmu_name = compile_fmu(model_name,mofile)
 
     # Load the dynamic library and XML data
-    model=JMUModel(jmu_name)
+    model = load_fmu(fmu_name)
 
     model.set('u',u[0])
     
@@ -54,13 +54,9 @@ def run_demo(with_plots=True):
     u_sim = res['u']
     t_sim = res['time']
     
-    assert N.abs(x1_sim[-1]*1.e1 - (-8.3999640)) < 1e-3
-
-    assert N.abs(x2_sim[-1]*1.e1 - (-5.0691179)) < 1e-3
-
-    assert N.abs(u_sim[-1]*1.e1 - (-8.3907153)) < 1e-3
-
-#    assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3
+    assert N.abs(res.final('x1')*1.e1 - (-8.3999640)) < 1e-3
+    assert N.abs(res.final('x2')*1.e1 - (-5.0691179)) < 1e-3
+    assert N.abs(res.final('u')*1.e1 - (-8.3907153))  < 1e-3
 
     if with_plots:
         fig = p.figure()
@@ -69,7 +65,6 @@ def run_demo(with_plots=True):
         p.plot(t_sim, x1_sim, t_sim, x2_sim)
         p.subplot(2,1,2)
         p.plot(t_sim, u_sim,'x-',t, u[:],'x-')
-
         p.show()
 
 

@@ -35,12 +35,12 @@ def run_demo(with_plots=True):
     class_name = 'IfExpExamples.IfExpExample2'
     mofile = curr_dir+'/files/IfExpExamples.mo'
 
-    jmu_name = compile_fmu(class_name, mofile)
+    fmu_name = compile_fmu(class_name, mofile)
 
     # Load the dynamic library and XML data
-    model = load_fmu(jmu_name)
+    model = load_fmu(fmu_name)
 
-    #Simulate
+    # Simulate
     res = model.simulate(final_time=5.0)
     
     # Get results
@@ -48,17 +48,15 @@ def run_demo(with_plots=True):
     u = res['u']
     t = res['time']
     
-    assert N.abs(x[-1] - 3.5297217) < 1e-3
-
-    assert N.abs(u[-1] - (-0.2836621)) < 1e-3        
+    assert N.abs(res.final('x') - 3.5297217)    < 1e-3
+    assert N.abs(res.final('u') - (-0.2836621)) < 1e-3
 
     if with_plots:
-        #Plot
         fig = p.figure()
         p.plot(t, x, t, u)
         p.legend(('x','u'))
         p.show()
 
-if __name__=="__main__":
+if __name__== "__main__":
     run_demo()
 

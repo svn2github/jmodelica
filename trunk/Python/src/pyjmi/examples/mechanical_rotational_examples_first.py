@@ -51,7 +51,7 @@ def run_demo(with_plots=True):
     tau = res['torque.tau']
     t = res['time']
 
-    assert N.abs(w3[-1] - (-0.27404370774029602)) < 1e-2
+    assert N.abs(res.final('inertia3.w') - (-0.27404370774029602)) < 1e-2
 
     if with_plots:
         plt.figure(1)
@@ -65,3 +65,6 @@ def run_demo(with_plots=True):
         plt.legend(['tau'])
         plt.xlabel('time [s]')
         plt.show()
+
+if __name__=="__main__":
+    run_demo()

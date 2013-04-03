@@ -20,13 +20,14 @@ import os
 from scipy.io.matlab.mio import loadmat
 import numpy as N
 import matplotlib.pyplot as plt
+
 from pyfmi.fmi import FMUModelME1
 from pyjmi.optimization import dfo
 
 curr_dir = os.path.dirname(os.path.abspath(__file__));
 
 # Load measurement data from file
-data = loadmat(curr_dir + '/files/FurutaData.mat',appendmat=False)
+data = loadmat(os.path.join(curr_dir, 'files', 'FurutaData.mat'), appendmat=False)
 
 # Extract data series
 t_meas = data['time'][:,0]
@@ -41,19 +42,19 @@ def furuta_dfo_cost(x):
     armFrictionCoefficient = x[0]/1e3
     pendulumFrictionCoefficient = x[1]/1e3
     
-    model = FMUModelME1(curr_dir + '/files/FMUs/Furuta.fmu',enable_logging=False)
+    model = FMUModelME1(os.path.join(curr_dir, 'files', 'FMUs', 'Furuta.fmu'), enable_logging=False)
 
     # Set new parameter values into the model 
-    model.set('armFriction',armFrictionCoefficient)
-    model.set('pendulumFriction',pendulumFrictionCoefficient)
+    model.set('armFriction', armFrictionCoefficient)
+    model.set('pendulumFriction', pendulumFrictionCoefficient)
     
     # Create options object and set verbosity to zero to disable printouts
     opts = model.simulate_options()
     opts['CVode_options']['verbosity'] = 50
-    opts["ncp"] = 800
+    opts['ncp'] = 800
     
     # Simulate model response with new parameter values
-    res = model.simulate(start_time=0.,final_time=40,options=opts)
+    res = model.simulate(start_time=0., final_time=40, options=opts)
 
     # Load simulation result
     phi_sim = res['armJoint.phi']
@@ -61,17 +62,14 @@ def furuta_dfo_cost(x):
     t_sim  = res['time']
     
     # Evaluate the objective function
-    y_meas = N.vstack((phi_meas,theta_meas))
-    y_sim = N.vstack((phi_sim,theta_sim))
+    y_meas = N.vstack((phi_meas, theta_meas))
+    y_sim = N.vstack((phi_sim, theta_sim))
 
-    #obj = dfo.quad_err(t_meas,y_meas,t_sim,y_sim)
-    obj = dfo.quad_err_simple(t_meas,y_meas,t_sim,y_sim)
+    obj = dfo.quad_err_simple(t_meas, y_meas, t_sim, y_sim)
 
     return obj
 
-
-#if __name__=="__main__":
-def run_demo():
+def run_demo(with_plots=True):
     
     # Choose starting point (initial estimation)
     x0 = N.array([0.012,0.002])
@@ -86,32 +84,35 @@ def run_demo():
     [armFrictionCoefficient_opt,pendulumFrictionCoefficient_opt] = x_opt/1e3
     
     # Load model
-    model = FMUModelME1(curr_dir+'/files/FMUs/Furuta.fmu',enable_logging=False)
+    model = FMUModelME1(os.path.join(curr_dir, 'files', 'FMUs', 'Furuta.fmu'), enable_logging=False)
     
     # Set optimal parameter values into the model
-    model.set('armFriction',armFrictionCoefficient_opt)
-    model.set('pendulumFriction',pendulumFrictionCoefficient_opt)
+    model.set('armFriction', armFrictionCoefficient_opt)
+    model.set('pendulumFriction', pendulumFrictionCoefficient_opt)
     
     # Simulate model response with optimal parameter values
-    res = model.simulate(start_time=0.,final_time=40)
+    res = model.simulate(start_time=0., final_time=40)
     
     # Load optimal simulation result
     phi_opt = res['armJoint.phi']
     theta_opt = res['pendulumJoint.phi']
     t_opt  = res['time']
     
-    # Plot
-    plt.figure(1)
-    plt.subplot(2,1,1)
-    plt.plot(t_opt,theta_opt,linewidth=1,label='Simulation optimal parameters')
-    plt.plot(t_meas,theta_meas,linewidth=1,label='Physical data')
-    plt.legend()
-    plt.subplot(2,1,2)
-    plt.plot(t_opt,phi_opt,linewidth=1,label='Simulation optimal parameters')
-    plt.plot(t_meas,phi_meas,linewidth=1,label='Physical data')
-    plt.legend()
-    plt.show()
-
+    assert N.abs(res.final('armJoint.phi') + 0.3114)      < 1e-3
+    assert N.abs(res.final('pendulumJoint.phi') - 3.1324) < 1e-3
+    assert N.abs(res.final('time') - 40.0)                < 1e-3
+    
+    if with_plots:
+        plt.figure(1)
+        plt.subplot(2,1,1)
+        plt.plot(t_opt, theta_opt, linewidth=1, label='Simulation optimal parameters')
+        plt.plot(t_meas, theta_meas, linewidth=1, label='Physical data')
+        plt.legend()
+        plt.subplot(2,1,2)
+        plt.plot(t_opt, phi_opt, linewidth=1, label='Simulation optimal parameters')
+        plt.plot(t_meas, phi_meas, linewidth=1, label='Physical data')
+        plt.legend()
+        plt.show()
 
 if __name__=="__main__":
     run_demo()

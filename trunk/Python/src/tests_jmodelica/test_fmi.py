@@ -147,7 +147,7 @@ class Test_FMUModelCS1:
         
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
         res = model.simulate(final_time=1.5)
-        assert (res["J1.w"][-1] - 3.245091100366517) < 1e-4
+        assert (res.final("J1.w") - 3.245091100366517) < 1e-4
         
     @testattr(windows = True)
     def test_simulation_with_reset_cs(self):
@@ -188,12 +188,12 @@ class Test_FMUModelCS1:
     def test_multiple_loadings_and_simulations(self):
         model = load_fmu("bouncingBall.fmu",path_to_fmus_cs1,enable_logging=False)
         res = model.simulate(final_time=1.0)
-        h_res = res['h']
+        h_res = res.final('h')
         
         for i in range(40):
             model = load_fmu("bouncingBall.fmu",os.path.join(path_to_fmus,"CS1.0"),enable_logging=False)
             res = model.simulate(final_time=1.0)
-        assert N.abs(h_res[-1] - res['h'][-1]) < 1e-4
+        assert N.abs(h_res - res.final('h')) < 1e-4
     
     @testattr(assimulo = True)
     def test_log_file_name(self):
@@ -284,12 +284,12 @@ class Test_FMUModelME1:
     def test_multiple_loadings_and_simulations(self):
         model = load_fmu("bouncingBall.fmu",path_to_fmus_me1,enable_logging=False)
         res = model.simulate(final_time=1.0)
-        h_res = res['h']
+        h_res = res.final('h')
         
         for i in range(40):
             model = load_fmu("bouncingBall.fmu",path_to_fmus_me1,enable_logging=False)
             res = model.simulate(final_time=1.0)
-        assert N.abs(h_res[-1] - res['h'][-1]) < 1e-4
+        assert N.abs(h_res - res.final('h')) < 1e-4
     
     @testattr(fmi = True)
     def test_init(self):

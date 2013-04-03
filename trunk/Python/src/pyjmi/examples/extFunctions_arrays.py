@@ -26,18 +26,19 @@ def run_demo(with_plots=True):
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     class_name = 'ExtFunctions.sumArray'
-    mofile = curr_dir+'/files/ExtFunctions.mo'
+    mofile = os.path.join(curr_dir, 'files', 'ExtFunctions.mo')
     
+    # Compile and load model
     fmu_name = compile_fmu(class_name, mofile)
     model = load_fmu(fmu_name)
 
-    #simulate
+    # Simulate
     res = model.simulate(final_time=10.0)
     
     res_sum = res['sum']
     t = res['time']
 
-    assert N.abs(res_sum[-1] - 55) < 1e-6 
+    assert N.abs(res.final('sum') - 55) < 1e-6 
 
     if with_plots:
         fig = p.figure()
