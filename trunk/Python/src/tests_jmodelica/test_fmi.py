@@ -29,6 +29,7 @@ from pymodelica.compiler import compile_fmu
 from pyfmi.fmi import FMUModel, FMUException, FMUModelME1, FMUModelCS1, load_fmu
 import pyfmi.fmi_algorithm_drivers as ad
 from pyfmi.common.core import get_platform_dir
+from pyjmi.logger_util import get_structured_fmu_log
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_fmus_me1 = os.path.join(path_to_fmus,"ME1.0")
@@ -683,3 +684,49 @@ class TestDependentParameters(object):
        nose.tools.assert_almost_equal(p2,4)
        nose.tools.assert_almost_equal(p3,12)
 
+class Test_Logger:
+    """
+    This class tests the Python interface to the FMI runtime log
+    """
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        m =  compile_fmu('LoggerTest',os.path.join(path_to_mofiles,'LoggerTest.mo'),compiler_log_level='i',
+                compiler_options={'generate_only_initial_system':True})
+
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.m = load_fmu('LoggerTest.fmu')
+        self.m.set_debug_logging(True)
+        self.m.set('_log_level',6)
+        self.m.set_fmil_log_level(5)
+
+    @testattr(fmi = True)
+    def test_log_file(self):
+        """
+        Test that the log file is parsable
+        """
+
+        self.m.set('u1',3)
+
+        self.m.get('u1')
+        self.m.set('y1',0.)
+        self.m.initialize()
+        self.m.get('u1')
+        self.m.set('u1',4)
+        self.m.get('u1')    
+        self.m.get_derivatives()
+        self.m.set('y1',0.5)
+        self.m.get('x1')
+        self.m.set('p',0.5)
+        self.m.get('x1')
+
+        d = get_structured_fmu_log('LoggerTest_log.txt')
+        
+        assert len(d)==8, "Unexpected number of solver invocations"
+        assert len(d[0]['block_solves'])==4, "Unexpected number of block solves in first iteration"

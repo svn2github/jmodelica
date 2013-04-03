@@ -79,6 +79,7 @@ def get_structured_fmu_log(log_file):
 				
             if l.find('Iteration')>=0:
                 iteration = {}
+                bl['iterations'].append(iteration)
                 iteration['iteration_variables'] = []
                 ll = l.split(';')
                 for i in range(5,len(ll)-1):
@@ -107,8 +108,6 @@ def get_structured_fmu_log(log_file):
                 l2 = l.split(';')
                 for i in range(5,len(l2)-1):
                     iteration['at_bound'].append(tuple(l2[i].split()))
-                    
-                bl['iterations'].append(iteration)
                 
             if l.find('Max')>=0:
                 bl['max'] = []
