@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.jastadd.ed.core.feature"
+      label="JastAdd support plugin"
+      version="1.0.0.qualifier"
+      provider-name="jastadd.org">
+
+   <description url="http://www.jastadd.org">
+      [Enter Feature Description here.]
+   </description>
+
+   <copyright url="http://www.jastadd.org">
+      [Enter Copyright Description here.]
+   </copyright>
+
+   <license url="http://www.jastadd.org">
+      [Enter License Description here.]
+   </license>
+
+   <requires>
+      <import plugin="org.eclipse.jface.text" version="3.6.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.resources" version="3.6.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.ui.views" version="3.5.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.editors" version="3.6.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.ide" version="3.6.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.runtime" version="3.6.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.search" version="3.6.0" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin
+         id="org.jastadd.ed.core"
+         download-size="0"
+         install-size="0"
+         version="1.0.0.qualifier"
+         unpack="false"/>
+
+</feature>

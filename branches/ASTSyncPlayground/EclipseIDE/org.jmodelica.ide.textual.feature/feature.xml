@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.jmodelica.ide.feature"
-      label="JModelica.org IDE"
-      version="0.4.0.qualifier"
+      id="org.jmodelica.ide.textual.feature"
+      label="JModelica.org Textual"
+      version="1.0.0.qualifier"
       provider-name="JModelica.org">
 
-   <description url="http://www.jmodelica.org/page/4314">
-      The JModelica.org Eclipse plugin allows textual editing of Modelica
-code, error checking of models and browsing of the class structure
-of loaded libraries (e.g. MSL).
+   <description>
+      This is a preview of the textual editor plugin for JModelica.org.
    </description>
 
    <copyright>
       Copyright (C) 2008-2011 Modelon AB
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
+This program is free software: you can redistribute it and/or
+modify
+it under the terms of the GNU General Public License as published
+by
 the Free Software Foundation, version 3 of the License.
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -545,25 +545,26 @@ copy of the Program in return for a fee.  END OF TERMS AND CONDITIONS
    </license>
 
    <requires>
-      <import plugin="org.eclipse.jface.text"/>
-      <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.jmodelica.ide" version="0.4.0" match="greaterOrEqual"/>
+      <import plugin="org.jastadd.ed.core" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.jmodelica.ide.outline" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.swt"/>
       <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.ui.console"/>
+      <import plugin="org.eclipse.ui.workbench"/>
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.ui.views"/>
-      <import plugin="org.eclipse.ui.navigator.resources"/>
-      <import plugin="org.eclipse.ui.console"/>
-      <import plugin="org.jastadd.ed.core" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.junit"/>
-      <import plugin="org.eclipse.ui.navigator"/>
    </requires>
 
    <plugin
-         id="org.jmodelica.ide"
+         id="org.jmodelica.ide.textual"
          download-size="0"
          install-size="0"
-         version="0.4.0.qualifier"
+         version="1.0.0.qualifier"
          unpack="false"/>
 
 </feature>

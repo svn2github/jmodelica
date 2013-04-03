@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.jmodelica.ide.graphical"
+      id="org.jmodelica.ide.graphical.feature"
       label="JModelica.org Graphical Editor"
-      version="0.0.1"
+      version="0.0.1.qualifier"
       provider-name="JModelica.org">
 
    <description>
@@ -561,7 +561,7 @@ copy of the Program in return for a fee.  END OF TERMS AND CONDITIONS
          id="org.jmodelica.ide.graphical"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="0.0.1.qualifier"
          unpack="false"/>
 
 </feature>
