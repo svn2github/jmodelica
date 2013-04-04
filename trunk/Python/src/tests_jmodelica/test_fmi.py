@@ -79,6 +79,57 @@ class Test_load_fmu:
         assert isinstance(model, FMUModelCS1)
         
 
+class Test_FMUModelBase:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        name = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"))
+        
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.negated_alias  = load_fmu('NegatedAlias.fmu')
+        
+    @testattr(fmi = True)
+    def test_set_get_negated_real(self):
+        x,y = self.negated_alias.get("x"),self.negated_alias.get("y")
+        nose.tools.assert_almost_equal(x,1.0)
+        nose.tools.assert_almost_equal(y,-1.0)
+        
+        self.negated_alias.set("y",2)
+        
+        x,y = self.negated_alias.get("x"),self.negated_alias.get("y")
+        nose.tools.assert_almost_equal(x,-2.0)
+        nose.tools.assert_almost_equal(y,2.0)
+        
+        self.negated_alias.set("x",3)
+        
+        x,y = self.negated_alias.get("x"),self.negated_alias.get("y")
+        nose.tools.assert_almost_equal(x,3.0)
+        nose.tools.assert_almost_equal(y,-3.0)
+        
+    @testattr(fmi = True)
+    def test_set_get_negated_integer(self):
+        x,y = self.negated_alias.get("ix"),self.negated_alias.get("iy")
+        nose.tools.assert_almost_equal(x,1.0)
+        nose.tools.assert_almost_equal(y,-1.0)
+        
+        self.negated_alias.set("iy",2)
+        
+        x,y = self.negated_alias.get("ix"),self.negated_alias.get("iy")
+        nose.tools.assert_almost_equal(x,-2.0)
+        nose.tools.assert_almost_equal(y,2.0)
+        
+        self.negated_alias.set("ix",3)
+        
+        x,y = self.negated_alias.get("ix"),self.negated_alias.get("iy")
+        nose.tools.assert_almost_equal(x,3.0)
+        nose.tools.assert_almost_equal(y,-3.0)
+    
+
 class Test_FMUModelCS1:
     """
     This class tests pyfmi.fmi.FMUModelCS1
