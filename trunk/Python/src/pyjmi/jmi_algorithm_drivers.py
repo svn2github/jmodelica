@@ -232,23 +232,31 @@ class IpoptInitializationAlg(AlgorithmBase):
         """ 
         Solve the initialization problem using ipopt solver. 
         """
-        self.nlp_ipopt.init_opt_ipopt_solve()
+        try:
+            self.nlp_ipopt.init_opt_ipopt_solve()
+        finally:
+            self._write_result()
+        
+    def _write_result(self):
+        """
+        Helper method. Write result to file.
+        """
+        self.nlp.export_result_dymola(**self.result_args)
+        
+        # Set result file name
+        if not self.result_args['file_name']:
+            self.result_args['file_name'] = self.model.get_identifier()+'_result.txt'
         
     def get_result(self):
         """ 
-        Write result to file, load result data and create an IpoptInitResult 
-        object.
+        Load result data and create an IpoptInitResult object.
         
         Returns::
         
             The IpoptInitResult object.
         """
-        self.nlp.export_result_dymola(**self.result_args)
-        # result file name
-        resultfile = self.result_args['file_name']
-        if not resultfile:
-            resultfile=self.model.get_identifier()+'_result.txt'
         # load result file
+        resultfile = self.result_args['file_name']
         res = ResultDymolaTextual(resultfile)
         
         # create and return result object
@@ -883,7 +891,10 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         """
         times = {}
         solve_t0 = time.clock() - self._t0
-        self.nlp_ipopt.opt_coll_ipopt_solve()
+        try:
+            self.nlp_ipopt.opt_coll_ipopt_solve()
+        finally:
+            self._write_result()
         times['sol'] = time.clock() - self._t0 - solve_t0
         
         # Calculate times
@@ -893,14 +904,9 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         # Store times as data attribute
         self.times = times
         
-    def get_result(self):
-        """ 
-        Write result to file, load result data and create an 
-        CollocationLagrangePolynomialsResult object.
-        
-        Returns::
-        
-            The CollocationLagrangePolynomialsResult object.
+    def _write_result(self):
+        """
+        Helper method. Write result to file.
         """
         if self.result_mode=='element_interpolation':
             self.nlp.export_result_dymola_element_interpolation(
@@ -910,14 +916,23 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         elif self.result_mode=='default':
             self.nlp.export_result_dymola(**self.result_args)
         else:
-             raise InvalidAlgorithmArgumentException(self.resul_mode)
+             raise InvalidAlgorithmArgumentException(self.result_mode)
             
-        # result file name
-        resultfile = self.result_args['file_name']
-        if not resultfile:
-            resultfile=self.model.get_identifier()+'_result.txt'
+        # Set result file name
+        if not self.result_args['file_name']:
+            self.result_args['file_name'] = self.model.get_identifier()+'_result.txt'
         
+    def get_result(self):
+        """ 
+        Load result data and create a CollocationLagrangePolynomialsResult 
+        object.
+        
+        Returns::
+        
+            The CollocationLagrangePolynomialsResult object.
+        """
         # load result file
+        resultfile = self.result_args['file_name']
         res = ResultDymolaTextual(resultfile)
         
         # Calculate post-processing and total time
@@ -1109,7 +1124,10 @@ class KInitSolveAlg(AlgorithmBase):
         """
         Functions calling the solver to solve the problem
         """
-        res = self.solver.solve()
+        try:
+            res = self.solver.solve()
+        finally:
+            self._write_result()
         
         dx = res[0:self.problem._dx_size]
         x = res[self.problem._dx_size:self.problem._mark]
@@ -1118,23 +1136,27 @@ class KInitSolveAlg(AlgorithmBase):
         self.model.real_dx = dx
         self.model.real_x = x
         self.model.real_w = w
+        
+    def _write_result(self):
+        """
+        Helper method. Write result to file.
+        """
+        write_resdata(self.problem)
+        
+        # Set result file name
+        if not self.result_args['file_name']:
+            self.result_args['file_name'] = self.model.get_identifier()+'_result.txt'
 
     def get_result(self):
         """ 
-        Write result to file, load result data and create an NLSInitResult 
-        object.
+        Load result data and create an NLSInitResult object.
         
         Returns::
         
             The NLSInitResult object.
         """
-        #self.solver.export_result_dymola(**self.result_args)
-        write_resdata(self.problem)
-        # result file name
-        resultfile = self.result_args['file_name']
-        if not resultfile:
-            resultfile=self.model.get_identifier()+'_result.txt'
         # load result file
+        resultfile = self.result_args['file_name']
         res = ResultDymolaTextual(resultfile)
         
         # create and return result object
@@ -1242,28 +1264,34 @@ class CasadiPseudoSpectralAlg(AlgorithmBase):
         """ 
         Solve the optimization problem using ipopt solver. 
         """
-        self.nlp.ipopt_solve()
+        try:
+            self.nlp.ipopt_solve()
+        finally:
+            self._write_result()
         
+    def _write_result(self):
+        """
+        Helper method. Write result data to file.
+        """
+        if self.result_mode=='default':
+            self.nlp.export_result_dymola(**self.result_args)
+        else:
+             raise InvalidAlgorithmArgumentException(self.result_mode)
+
+        # Set result file name
+        if not self.result_args['file_name']:
+            self.result_args['file_name'] = self.model.get_identifier()+'_result.txt'
+                    
     def get_result(self):
         """ 
-        Write result to file, load result data and create an 
-        CasadiPseudoSpectralAlgResult object.
+        Load result data and create a CasadiPseudoSpectralAlgResult object.
         
         Returns::
         
             The CasadiPseudoSpectralAlgResult object.
         """
-        if self.result_mode=='default':
-            self.nlp.export_result_dymola(**self.result_args)
-        else:
-             raise InvalidAlgorithmArgumentException(self.resul_mode)
-            
-        # result file name
-        resultfile = self.result_args['file_name']
-        if not resultfile:
-            resultfile=self.model.get_identifier()+'_result.txt'
-        
         # load result file
+        resultfile = self.result_args['file_name']
         res = ResultDymolaTextual(resultfile)
         
         # create and return result object
@@ -1582,7 +1610,10 @@ class LocalDAECollocationAlg(AlgorithmBase):
         Solve the optimization problem using ipopt solver. 
         """
         times = {}
-        times['sol'] = self.nlp.ipopt_solve()
+        try:
+            times['sol'] = self.nlp.ipopt_solve()
+        finally:
+            self._write_result()
         
         # Calculate times
         times['tot'] = time.clock() - self._t0
@@ -1591,22 +1622,25 @@ class LocalDAECollocationAlg(AlgorithmBase):
         # Store times as data attribute
         self.times = times
         
+    def _write_result(self):
+        """
+        Helper method. Write result to file.
+        """
+        self.nlp.export_result_dymola(self.result_file_name)
+        
+        # Set result file name
+        if not self.result_file_name:
+            self.result_file_name = self.model.get_identifier()+'_result.txt'
+        
     def get_result(self):
         """ 
-        Write result to file, load result data and create a 
-        LocalDAECollocationAlgResult object.
+        Load result data and create a LocalDAECollocationAlgResult object.
         
         Returns::
         
             The LocalDAECollocationAlgResult object.
         """
-        self.nlp.export_result_dymola(self.result_file_name)
-        
-        # Load result file
-        if self.result_file_name == "":
-            resultfile = self.model.get_identifier() + '_result.txt'
-        else:
-            resultfile = self.result_file_name
+        resultfile = self.result_file_name
         res = ResultDymolaTextual(resultfile)
         
         # Get optimized element lengths
