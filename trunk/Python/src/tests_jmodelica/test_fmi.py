@@ -389,10 +389,7 @@ class Test_FMUModelME1:
 
         nose.tools.assert_almost_equal(const[0],-9.81000000)
         nose.tools.assert_almost_equal(const[1],0.70000000)
-    
-        self.dep.set("r[1]",1)
-        nose.tools.assert_almost_equal(self.dep.get("r[1]"),1.00000)
-    
+        
     @testattr(fmi = True)
     def test_integer(self):
         """
@@ -781,3 +778,38 @@ class Test_Logger:
         
         assert len(d)==8, "Unexpected number of solver invocations"
         assert len(d[0]['block_solves'])==4, "Unexpected number of block solves in first iteration"
+
+        
+class Test_SetDependentParameterError:
+    """
+    Test that setting dependent parameters results in exception
+    """
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        m =  compile_fmu('DependentParameterTest2',os.path.join(path_to_mofiles,'DependentParameterTest.mo'))
+
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.m = load_fmu('DependentParameterTest2.fmu')
+
+    @testattr(fmi = True)
+    def test_dependent_parameter_setting(self):
+        """
+        Test that expeptions are thrown when dependent parameters are set.
+        """
+
+        self.m.set('pri',3)
+        nose.tools.assert_raises(FMUException,self.m.set, 'prd', 5)
+        nose.tools.assert_raises(FMUException,self.m.set, 'cr', 5)
+        self.m.set('pii',3)
+        nose.tools.assert_raises(FMUException,self.m.set, 'pid', 5)
+        nose.tools.assert_raises(FMUException,self.m.set, 'ci', 5)
+        self.m.set('pbi',True)
+        nose.tools.assert_raises(FMUException,self.m.set, 'pbd', True)
+        nose.tools.assert_raises(FMUException,self.m.set, 'cb', True)
