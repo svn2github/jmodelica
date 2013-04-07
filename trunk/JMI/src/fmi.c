@@ -1134,8 +1134,21 @@ fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     fmiValueReference i;
     fmiValueReference index;
     jmi_real_t* z;
+    int isParameterOrConstant = 1;
 
-    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1) {
+    /* This is to make sure that if all variables that are inquired
+     * are parameters or constants, then the solver should not be invoked.
+     */
+    for (i = 0; i <nvr; i = i + 1) {
+        index = get_index_from_value_ref(vr[i]);
+
+        if (index>=((fmi_t *)c)->jmi->offs_real_dx) {
+        	isParameterOrConstant = 0;
+        	break;
+        }
+    }
+
+    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
@@ -1163,8 +1176,21 @@ fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t n
     jmi_real_t* z;
     fmiValueReference i;
     fmiValueReference index;
+    int isParameterOrConstant = 1;
 
-    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1) {
+    /* This is to make sure that if all variables that are inquired
+     * are parameters or constants, then the solver should not be invoked.
+     */
+    for (i = 0; i <nvr; i = i + 1) {
+        index = get_index_from_value_ref(vr[i]);
+
+        if (index>=((fmi_t *)c)->jmi->offs_real_dx) {
+        	isParameterOrConstant = 0;
+        	break;
+        }
+    }
+
+    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
@@ -1191,8 +1217,21 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
     jmi_real_t* z;
     fmiValueReference i;
     fmiValueReference index;
+    int isParameterOrConstant = 1;
 
-    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1) {
+    /* This is to make sure that if all variables that are inquired
+     * are parameters or constants, then the solver should not be invoked.
+     */
+    for (i = 0; i <nvr; i = i + 1) {
+        index = get_index_from_value_ref(vr[i]);
+
+        if (index>=((fmi_t *)c)->jmi->offs_real_dx) {
+        	isParameterOrConstant = 0;
+        	break;
+        }
+    }
+
+    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
@@ -1217,8 +1256,22 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
 fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
     fmiInteger retval;
     int i;
+    int index;
+    int isParameterOrConstant = 1;
 
-    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1) {
+    /* This is to make sure that if all variables that are inquired
+     * are parameters or constants, then the solver should not be invoked.
+     */
+    for (i = 0; i <nvr; i = i + 1) {
+        index = get_index_from_value_ref(vr[i]);
+
+        if (index>=((fmi_t *)c)->jmi->offs_real_dx) {
+        	isParameterOrConstant = 0;
+        	break;
+        }
+    }
+
+    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
