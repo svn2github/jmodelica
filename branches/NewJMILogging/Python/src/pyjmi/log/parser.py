@@ -23,15 +23,37 @@ Parser for the new FMU log file format
 #from pyjmi.log.tree import Node, Comment
 
 import lexer
-from lexer import SYMBOL, IDENTIFIER, COMMENT, STRING, EOF
+from lexer import SYMBOL, IDENTIFIER, COMMENT, STRING, EOF, kindof, textof
 from tree import NamedNode, Comment, NamedNodeList
 
 
 def parse(text):
     """Parse the string text and return a list of nodes in the format of tree.py."""
-    return parse_named_nodes(Peeker(lexer.lex(text)+[(EOF, '')]))
+    return parse_nodes(Peeker(lexer.lex(text)+[(EOF, '')]))
+
+
+## Symbols ##
+
+DICT_BEGIN     = (SYMBOL, '(')
+DICT_END       = (SYMBOL, ')')
+LIST_BEGIN     = (SYMBOL, '[')
+LIST_END       = (SYMBOL, ']')
+TYPE_BEGIN     = (SYMBOL, '{')
+TYPE_END       = (SYMBOL, '}')
+ATTRIBUTE_MARK = (SYMBOL, ':')
+NODE_SEPARATOR = (SYMBOL, ',')
+
+def closes_node(token):
+    kind, text = token
+    return (kind == SYMBOL and text in ')]}') or (kind == EOF)
+
+def ends_node(token):
+    return (token == NODE_SEPARATOR) or closes_node(token)
+
 
 ## Helpers ##
+
+DICT_TYPE = "dict"
 
 def expect(tokens, token):
     actual = tokens.next()
@@ -47,85 +69,91 @@ def asnode(token):
     else:
         raise Exception("asnode: don't know how to make a node from token " + repr(token))
 
-def is_closing(token):
-    kind, text = token
-    return (kind == SYMBOL and text in ')]') or (kind == EOF)
 
 ## Nonterminals ##
-    
-def parse_named_nodes(tokens):
-    """Parse and return a list of named nodes."""
-    nodes = []
-    while not is_closing(tokens.peek()):
-        nodes.append(parse_named_node(tokens))
-    return NamedNodeList(nodes)
 
 def parse_nodes(tokens):
     """Parse and return a list of nodes."""
     nodes = []
-    while not is_closing(tokens.peek()):
-        nodes.append(parse_node(tokens))
+    while not closes_node(tokens.peek()):
+        token = tokens.peek()
+        if kindof(token) == COMMENT:
+            nodes.append(asnode(tokens.next()))
+        else:        
+            nodes.append(parse_node(tokens))
+            if not closes_node(tokens.peek()):
+                expect(tokens, NODE_SEPARATOR)
     return nodes
-
-def parse_named_node(tokens):
-    """Parse and return a named node.
-
-    Returns a NamedNode or Comment.
-    """
-    kind, text = token = tokens.peek()
-    if kind == COMMENT:
-        return asnode(tokens.next())
-    elif kind == IDENTIFIER:
-        name = text
-        tokens.next()
-        kind, text = tokens.peek()
-        if kind != SYMBOL:
-            raise Exception("parse_named_node: unexpected token: " + repr(tokens.peek()) + " after node name")
-        if text == '=':
-            # identifier = value
-            tokens.next()
-            return NamedNode(name, parse_value(tokens))
-        else:
-            # identifier (  nodes  ) identifier
-            nodes = parse_sequence(tokens)
-            expect(tokens, (IDENTIFIER, name))
-            return NamedNode(name, nodes)
-    else:
-        raise Exception("parse_named_node: unexpected token: " + repr(tokens.peek()))
 
 def parse_node(tokens):
-    """Parse and return an (unnamed) node.
+    """Parse and return a node."""
+    token = tokens.peek()
+    if kindof(token) == IDENTIFIER:
+        name_token = token
+        tokens.next()
+        if ends_node(tokens.peek()):
+            return asnode(name_token)  # ident
 
-    Returns a list, string, or Comment.
-    """
-    kind, text = token = tokens.peek()
-    if kind in (COMMENT, IDENTIFIER):
-        return asnode(tokens.next())
-    elif kind == SYMBOL:
-        return parse_sequence(tokens)
+        node_type = parse_type(tokens)
+        token = tokens.peek()
+        if token == ATTRIBUTE_MARK:
+            tokens.next()
+            return NamedNode(textof(name_token), parse_value(tokens, node_type))
+        else:
+            node = NamedNode(textof(name_token), parse_list(tokens, node_type))
+            token = tokens.peek()
+            if kindof(token) == IDENTIFIER: # ident list ident                
+                if not token == name_token:
+                    raise Exception("parse_named_node: " + textof(name_token) + " node closed as " + textof(token))
+                tokens.next()
+            return node
     else:
-        raise Exception("parse_node: unexpected token: " + repr(tokens.peek()))
+        return parse_unnamed(tokens)
+    
+def parse_unnamed(tokens):
+    """Parse and return an unnamed node."""
+    node_type = parse_type(tokens)
+    token = tokens.peek()
+    if kindof(token) in (IDENTIFIER, STRING):
+        return parse_value(tokens, node_type)
+    else:
+        return parse_list(tokens, node_type)
 
-def parse_sequence(tokens):
-    """Parse a ( named-nodes ) or [ nodes ] sequence, return a list of the nodes."""
+def parse_type(tokens):
+    """Parse and return a type annotation.
+
+    Returns None if the next token is not TYPE_BEGIN."""
+    if not tokens.peek() == TYPE_BEGIN:
+        return None
+    tokens.next()
+    node = parse_node(tokens)
+    expect(tokens, TYPE_END)
+    return node
+
+def parse_value(tokens, node_type):
+    """Parse and return a value."""
     token = tokens.next()
-    if token == (SYMBOL, '('):
-        nodes = parse_named_nodes(tokens)
-        expect(tokens, (SYMBOL, ')'))
-    elif token == (SYMBOL, '['):
-        nodes = parse_nodes(tokens)
-        expect(tokens, (SYMBOL, ']'))
-    else:
-        raise Exception("parse_sequence: unexpected token: " + repr(token))
-    return nodes
-
-def parse_value(tokens):
-    """Parse and return a value node."""
-    kind, text = token = tokens.next()
-    if kind in (IDENTIFIER, STRING):
+    if kindof(token) in (IDENTIFIER, STRING):
         return asnode(token)
     else:
-        raise Exception("parse_value: unexpected token: " + repr(token))
+        raise Exception("parse_value: unexpected token " + token)    
+
+def parse_list(tokens, node_type):
+    """Parse and return a list with already parsed type node_type (may be None)."""
+    opener = tokens.peek()
+    if opener == LIST_BEGIN:
+        closer = LIST_END
+    elif opener == DICT_BEGIN:
+        closer = DICT_END
+        if node_type != None:
+            raise Exception("parse_list_pretyped: Dict lists may not have type annotations!")
+        node_type = DICT_TYPE
+    else:
+        raise Exception("parse_list_pretyped: Expected list begin, got " + repr(opener))
+    tokens.next()
+    nodes = parse_nodes(tokens)
+    expect(tokens, closer)
+    return nodes
 
 
 ## Helper class ##

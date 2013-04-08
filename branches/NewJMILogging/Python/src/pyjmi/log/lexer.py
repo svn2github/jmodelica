@@ -24,22 +24,33 @@ import re
 # Token kinds
 SYMBOL, IDENTIFIER, COMMENT, STRING, EOF = range(5)
 
+# Token format
+def kindof(token):
+    return token[0]
+def textof(token):
+    return token[1]
+
+
 # Token patterns
+
+symbol_chars = r'>()\[\]{}:,'
+identifier_re = '[^\s"<' + symbol_chars + ']+'
+
 lexer_re = r"""(?x)
 (
-    [=()\[\]}]          # special symbols
-    | \s+           # whitespace
-    | [^=()\[\]{}"\s]+  # identifier
-    | \{  [^}]*           (?: \}|\Z )  # comment, possibly ending at the end of input and containing extra {
-    | "   (?: [^"]|"" )*  (?: " |\Z )  # string, possibly ending at the end of input and containing a number of ""
+    [""" + symbol_chars + """]   # special symbols
+    | \s+                        # whitespace
+    |""" + identifier_re + """   # identifier
+    | <  [^>]*           (?: >|\Z )    # comment, possibly ending at the end of input and containing extra <
+    | "  (?: [^"]|"" )*  (?: "|\Z )    # string, possibly ending at the end of input and containing a number of ""
 )
 """
+""" " """  # get syntax highlighting back on track
 
 lexer_pattern = re.compile(lexer_re)
 whitespace_pattern = re.compile(r'\s+')
-symbol_pattern = re.compile(r'[=()\[\]}]')
+symbol_pattern = re.compile('[' + symbol_chars + ']')
 string_escaped_quote_pattern = re.compile(r'""')
-identifier_re = r'[^=()\[\]{}"\s]+'
 
 
 def lex(text):
@@ -79,22 +90,19 @@ def make_token(part):
     assert part != ''  # '' should never match lexer_pattern
 
     if symbol_pattern.match(part):
-        if part == '}':
-            raise Error("} not allowed outside of comments")
+        if part == '>':
+            raise Exception("> not allowed outside of comments")
         return (SYMBOL, part)
-    elif part[0] == '{':
-        if part[-1] != '}':
-            raise Error("Unterminated comment: " + repr(part))
-        if "{" in part[1:]:
-            raise Error("Nested '{' in comment: "+ repr(part))
+    elif part[0] == '<':
+        if part[-1] != '>':
+            raise Exception("Unterminated comment: " + repr(part))
+        if "<" in part[1:]:
+            raise Exception("Nested '<' in comment: "+ repr(part))
         return (COMMENT, part[1:-1])
     elif part[0] == '"':
         if part[-1] != '"':
-            raise Error("Unterminated string: " + repr(part))
+            raise Exception("Unterminated string: " + repr(part))
         return (STRING, string_escaped_quote_pattern.sub('"', part[1:-1]))
     else:
         return (IDENTIFIER, part)
 
-
-if __name__ == '__main__':
-    print lex('x=5 node( {values:} 0.25 0.11 "x*y + 1" {message} "string with "" in it" )node')
