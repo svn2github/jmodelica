@@ -38,16 +38,15 @@ def run_demo(with_plots=True):
     (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
     vdp = JMUModel(jmu_name)
     res = vdp.optimize()
-
+    
     # Extract variable profiles
     x1=res['x1']
     x2=res['x2']
     u=res['u']
-    tf=res['finalTime']
     t=res['time']
 
-    assert N.abs(tf - 2.2811587) < 1e-3
-    
+    assert N.abs(res.final('finalTime') - 2.2811587) < 1e-3
+
     if with_plots:
         # Plot
         plt.figure(1)

@@ -1246,6 +1246,7 @@ struct jmi_t{
 	int offs_integer_cd;                 /**< \brief  Offset of the dependent integer constant vector in \f$z\f$. */
 	int offs_integer_pi;                 /**< \brief  Offset of the independent integer parameter vector in \f$z\f$. */
 	int offs_integer_pd;                 /**< \brief  Offset of the dependent integer parameter vector in \f$z\f$. */
+
 	int offs_boolean_ci;                 /**< \brief  Offset of the independent boolean constant vector in \f$z\f$. */
 	int offs_boolean_cd;                 /**< \brief  Offset of the dependent boolean constant vector in \f$z\f$. */
 	int offs_boolean_pi;                 /**< \brief  Offset of the independent boolean parameter vector in \f$z\f$. */

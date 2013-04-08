@@ -41,18 +41,13 @@ def run_demo(with_plots=True):
     res = vdp.optimize()
 
     # Extract variable profiles
-    x1=res['x1']
-    x2=res['x2']
-    u=res['u']
-    t=res['time']
-    cost=res['cost']
+    x1 = res['x1']
+    x2 = res['x2']
+    u = res['u']
+    t = res['time']
+    cost = res['cost']
     
-    assert N.abs(cost[-1] - 2.3469089e+01) < 1e-3
-
-    print "t = ", repr(N.array(t))
-    print "x1 = ", repr(N.array(x1))
-    print "x2 = ", repr(N.array(x2))
-    print "u = ", repr(N.array(u))
+    assert N.abs(res.final('cost') - 2.3469089e+01) < 1e-3
 
     if with_plots:
         # Plot

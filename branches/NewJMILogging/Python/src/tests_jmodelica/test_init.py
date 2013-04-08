@@ -113,23 +113,14 @@ class Test_init_ipopt:
         
         res = pend.initialize()
 
-        theta=res['theta']
-        dtheta=res['dtheta']
-        x=res['x']
-        dx=res['dx']
-        _dtheta=res['der(theta)']
-        ddtheta=res['der(dtheta)']
-        _dx=res['der(x)']
-        ddx=res['der(dx)']
-    
-        assert N.abs(theta[-1] - 0.1) < 1e-3
-        assert N.abs(dtheta[-1] - 0.) < 1e-3
-        assert N.abs(x[-1] - 0) < 1e-3
-        assert N.abs(dx[-1] - 0) < 1e-3
-        assert N.abs(_dtheta[-1] - 0) < 1e-3
-        assert N.abs(ddtheta[-1] - 0.09983341) < 1e-3
-        assert N.abs(_dx[-1] - 0) < 1e-3
-        assert N.abs(ddx[-1] - 0) < 1e-3
+        assert N.abs(res.final('theta') - 0.1)              < 1e-3
+        assert N.abs(res.final('dtheta') - 0.)              < 1e-3
+        assert N.abs(res.final('x') - 0)                    < 1e-3
+        assert N.abs(res.final('dx') - 0)                   < 1e-3
+        assert N.abs(res.final('der(theta)') - 0)           < 1e-3
+        assert N.abs(res.final('der(dtheta)') - 0.09983341) < 1e-3
+        assert N.abs(res.final('der(x)') - 0)               < 1e-3
+        assert N.abs(res.final('der(dx)') - 0)              < 1e-3
         
     @testattr(ipopt = True)
     def test_initialize_with_solverargs(self):
@@ -142,23 +133,14 @@ class Test_init_ipopt:
         
         res = pend.initialize(options={'IPOPT_options':{'max_iter':1000}})
 
-        theta=res['theta']
-        dtheta=res['dtheta']
-        x=res['x']
-        dx=res['dx']
-        _dtheta=res['der(theta)']
-        ddtheta=res['der(dtheta)']
-        _dx=res['der(x)']
-        ddx=res['der(dx)']
-    
-        assert N.abs(theta[-1] - 0.1) < 1e-3
-        assert N.abs(dtheta[-1] - 0.) < 1e-3
-        assert N.abs(x[-1] - 0) < 1e-3
-        assert N.abs(dx[-1] - 0) < 1e-3
-        assert N.abs(_dtheta[-1] - 0) < 1e-3
-        assert N.abs(ddtheta[-1] - 0.09983341) < 1e-3
-        assert N.abs(_dx[-1] - 0) < 1e-3
-        assert N.abs(ddx[-1] - 0) < 1e-3
+        assert N.abs(res.final('theta') - 0.1)              < 1e-3
+        assert N.abs(res.final('dtheta') - 0.)              < 1e-3
+        assert N.abs(res.final('x') - 0)                    < 1e-3
+        assert N.abs(res.final('dx') - 0)                   < 1e-3
+        assert N.abs(res.final('der(theta)') - 0)           < 1e-3
+        assert N.abs(res.final('der(dtheta)') - 0.09983341) < 1e-3
+        assert N.abs(res.final('der(x)') - 0)               < 1e-3
+        assert N.abs(res.final('der(dx)') - 0)              < 1e-3
 
     @testattr(ipopt = True)
     def test_optimize(self):
@@ -169,9 +151,8 @@ class Test_init_ipopt:
         pend = JMUModel(jmu_pend)
         
         res = pend.optimize()
-        cost=res['cost']
         
-        assert N.abs(cost[-1] - 1.2921683e-01) < 1e-3
+        assert N.abs(res.final('cost') - 1.2921683e-01) < 1e-3
    
 
     @testattr(ipopt = True)
@@ -179,9 +160,8 @@ class Test_init_ipopt:
         """ Test the pyjmi.JMUModel.optimize function and setting n_cp in alg_args.
         """
         res = self.model_vdp.optimize(options={'n_cp':10})
-        cost=res['cost']
         
-        assert N.abs(cost[-1] - 2.34602647e+01 ) < 1e-3
+        assert N.abs(res.final('cost') - 2.34602647e+01 ) < 1e-3
             
     @testattr(ipopt = True)
     def test_optimize_set_args(self):
@@ -193,9 +173,8 @@ class Test_init_ipopt:
             options={'result_mesh':'element_interpolation', 
                      'result_file_name':res_file_name,
                      'IPOPT_options':{'max_iter':100}})
-        cost=res['cost']
         
-        assert N.abs(cost[-1] - 2.3469089e+01) < 1e-3
+        assert N.abs(res.final('cost') - 2.3469089e+01) < 1e-3
 
 
     @testattr(ipopt = True)
@@ -237,9 +216,8 @@ class Test_init_assimulo:
     def test_simulate(self):
         """ Test the pyjmi.JMUModel.simulate function using all default parameters."""
         sim_res = self.model_rlc.simulate()
-        resistor_v = sim_res['resistor.v']
         
-        assert N.abs(resistor_v[-1] - 0.138037041741) < 1e-3
+        assert N.abs(sim_res.final('resistor.v') - 0.138037041741) < 1e-3
         
     @testattr(assimulo = True)
     def test_simulate_set_argument(self):
@@ -247,9 +225,8 @@ class Test_init_assimulo:
         algorithm argument.
         """
         sim_res = self.model_rlc.simulate(final_time=30.0)
-        resistor_v = sim_res['resistor.v']
         
-        assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3
+        assert N.abs(sim_res.final('resistor.v') - 0.159255008028) < 1e-3
         
     @testattr(assimulo = True)
     def test_simulate_set_probl_arg(self):

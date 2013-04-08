@@ -38,7 +38,7 @@ def run_demo(with_plots=True):
 
     # Compile model
     fmu_name = compile_fmu("PyMBSModels.CraneCrab_recursive_der_state_Test", 
-        curr_dir + "/files/PyMBSModels.mo")
+        os.path.join(curr_dir, "files", "PyMBSModels.mo"))
 
     # Load model
     model = load_fmu(fmu_name)
@@ -52,7 +52,7 @@ def run_demo(with_plots=True):
     qd2 = res['crane.qd[2]']
     t = res['time']
 
-    assert N.abs(q1[-1] - 0.99373831) < 1e-1  
+    assert N.abs(res.final('crane.q[1]') - 0.99373831) < 1e-1  
 
     if with_plots:
         plt.figure(1)

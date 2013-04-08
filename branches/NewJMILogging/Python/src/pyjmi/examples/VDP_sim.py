@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os.path
+
 import numpy as N
 import matplotlib.pyplot as plt
 
@@ -36,17 +37,17 @@ def run_demo(with_plots=True):
     
     res = model.simulate(final_time=10, options={'solver':'CVode'})
 
+    assert N.abs(res.final('x1') - 7.34186386e-01) < 1e-3
+    assert N.abs(res.final('x2') + 1.58202722)    < 1e-3
+    
     x1 = res['x1']
     x2 = res['x2']
-    t  = res['time']
     
     if with_plots:
         plt.figure()
         plt.plot(x2, x1)
         plt.legend(('x1(x2)'))
         plt.show()
-
-        
 
 if __name__=="__main__":
     run_demo()

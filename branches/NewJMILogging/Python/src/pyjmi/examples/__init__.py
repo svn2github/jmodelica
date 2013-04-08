@@ -34,7 +34,7 @@ __all__ = ['ast_example', 'bang_control', 'blood_glucose', 'blood_glucose_opt',
            'penicillin_plant', 'penicillin_plant_time',
            'planar_pendulum', 'QR', 'qt_par_est', 'qt_par_est_casadi',
            'qt_par_est_dfo', 'quadtank', 'quadtank_static_opt', 'RLC',
-           'RLC_linearization', 'robertson', 'simulation_with_input',
+           'RLC_linearization', 'simulation_with_input',
            'simulation_with_input_function', 'SolAng', 'vdp', 'vdp_casadi',
            'vdp_casadi_ps', 'vdp_minimum_time', 'vdp_pp', 'VDP_sim',
            'vdp_minimum_time_interpolation','robertson_fmu','SEIRS','furuta_modified']

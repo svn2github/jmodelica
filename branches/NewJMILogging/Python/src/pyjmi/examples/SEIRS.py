@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 import nose
 
 from pymodelica import compile_fmu
-from pyfmi import FMUModel,load_fmu
+from pyfmi import load_fmu
 from pyfmi.common.core import TrajectoryLinearInterpolation
 
 def objectfun_fmu(theta,fmu_name,parnames,t0,tf,opts,times):
@@ -103,7 +103,6 @@ def run_demo(with_plots=True):
     for ii,sp in enumerate(senspars):
         err = N.max(N.abs(dEdpt_fmu[:,ii]-dEdpt_findiff_fmu[:,ii])/N.max(dEdpt_fmu[:,ii]))
         assert err < 1.0, str(err) + " not less than " + str(1.0)
-        #print "Error: ", parnames[ii], err
         
     #Plotting
     if with_plots:
@@ -122,7 +121,6 @@ def run_demo(with_plots=True):
             plt.xlabel("Time [s]")
             plt.title("Comparison of sensitivities calculated by CVodes and by Finite differences")
         plt.show()
-
 
 if __name__=="__main__":
     run_demo()

@@ -29,6 +29,7 @@ from pymodelica.compiler import compile_fmu
 from pyfmi.fmi import FMUModel, FMUException, FMUModelME1, FMUModelCS1, load_fmu
 import pyfmi.fmi_algorithm_drivers as ad
 from pyfmi.common.core import get_platform_dir
+from pyjmi.logger_util import get_structured_fmu_log
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_fmus_me1 = os.path.join(path_to_fmus,"ME1.0")
@@ -78,6 +79,62 @@ class Test_load_fmu:
         assert isinstance(model, FMUModelCS1)
         
 
+class Test_FMUModelBase:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        name = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"))
+        
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.negated_alias  = load_fmu('NegatedAlias.fmu')
+        
+    @testattr(fmi = True)
+    def test_initialize_once(self):
+        self.negated_alias.initialize()
+        nose.tools.assert_raises(FMUException, self.negated_alias.initialize)
+        
+    @testattr(fmi = True)
+    def test_set_get_negated_real(self):
+        x,y = self.negated_alias.get("x"),self.negated_alias.get("y")
+        nose.tools.assert_almost_equal(x,1.0)
+        nose.tools.assert_almost_equal(y,-1.0)
+        
+        self.negated_alias.set("y",2)
+        
+        x,y = self.negated_alias.get("x"),self.negated_alias.get("y")
+        nose.tools.assert_almost_equal(x,-2.0)
+        nose.tools.assert_almost_equal(y,2.0)
+        
+        self.negated_alias.set("x",3)
+        
+        x,y = self.negated_alias.get("x"),self.negated_alias.get("y")
+        nose.tools.assert_almost_equal(x,3.0)
+        nose.tools.assert_almost_equal(y,-3.0)
+        
+    @testattr(fmi = True)
+    def test_set_get_negated_integer(self):
+        x,y = self.negated_alias.get("ix"),self.negated_alias.get("iy")
+        nose.tools.assert_almost_equal(x,1.0)
+        nose.tools.assert_almost_equal(y,-1.0)
+        
+        self.negated_alias.set("iy",2)
+        
+        x,y = self.negated_alias.get("ix"),self.negated_alias.get("iy")
+        nose.tools.assert_almost_equal(x,-2.0)
+        nose.tools.assert_almost_equal(y,2.0)
+        
+        self.negated_alias.set("ix",3)
+        
+        x,y = self.negated_alias.get("ix"),self.negated_alias.get("iy")
+        nose.tools.assert_almost_equal(x,3.0)
+        nose.tools.assert_almost_equal(y,-3.0)
+    
+
 class Test_FMUModelCS1:
     """
     This class tests pyfmi.fmi.FMUModelCS1
@@ -96,9 +153,9 @@ class Test_FMUModelCS1:
         Sets up the test case.
         """
         self.rlc  = load_fmu('RLC_Circuit.fmu')
-        self.rlc.initialize()
+        #self.rlc.initialize()
         self.rlc_square  = load_fmu('RLC_Circuit_Square.fmu')
-        self.rlc_square.initialize()
+        #self.rlc_square.initialize()
 
     @testattr(fmi = True)
     def test_version(self):
@@ -147,7 +204,7 @@ class Test_FMUModelCS1:
         
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
         res = model.simulate(final_time=1.5)
-        assert (res["J1.w"][-1] - 3.245091100366517) < 1e-4
+        assert (res.final("J1.w") - 3.245091100366517) < 1e-4
         
     @testattr(windows = True)
     def test_simulation_with_reset_cs(self):
@@ -188,12 +245,12 @@ class Test_FMUModelCS1:
     def test_multiple_loadings_and_simulations(self):
         model = load_fmu("bouncingBall.fmu",path_to_fmus_cs1,enable_logging=False)
         res = model.simulate(final_time=1.0)
-        h_res = res['h']
+        h_res = res.final('h')
         
         for i in range(40):
             model = load_fmu("bouncingBall.fmu",os.path.join(path_to_fmus,"CS1.0"),enable_logging=False)
             res = model.simulate(final_time=1.0)
-        assert N.abs(h_res[-1] - res['h'][-1]) < 1e-4
+        assert N.abs(h_res - res.final('h')) < 1e-4
     
     @testattr(assimulo = True)
     def test_log_file_name(self):
@@ -284,12 +341,12 @@ class Test_FMUModelME1:
     def test_multiple_loadings_and_simulations(self):
         model = load_fmu("bouncingBall.fmu",path_to_fmus_me1,enable_logging=False)
         res = model.simulate(final_time=1.0)
-        h_res = res['h']
+        h_res = res.final('h')
         
         for i in range(40):
             model = load_fmu("bouncingBall.fmu",path_to_fmus_me1,enable_logging=False)
             res = model.simulate(final_time=1.0)
-        assert N.abs(h_res[-1] - res['h'][-1]) < 1e-4
+        assert N.abs(h_res - res.final('h')) < 1e-4
     
     @testattr(fmi = True)
     def test_init(self):
@@ -337,10 +394,7 @@ class Test_FMUModelME1:
 
         nose.tools.assert_almost_equal(const[0],-9.81000000)
         nose.tools.assert_almost_equal(const[1],0.70000000)
-    
-        self.dep.set("r[1]",1)
-        nose.tools.assert_almost_equal(self.dep.get("r[1]"),1.00000)
-    
+        
     @testattr(fmi = True)
     def test_integer(self):
         """
@@ -683,3 +737,84 @@ class TestDependentParameters(object):
        nose.tools.assert_almost_equal(p2,4)
        nose.tools.assert_almost_equal(p3,12)
 
+class Test_Logger:
+    """
+    This class tests the Python interface to the FMI runtime log
+    """
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        m =  compile_fmu('LoggerTest',os.path.join(path_to_mofiles,'LoggerTest.mo'),compiler_log_level='e',
+                compiler_options={'generate_only_initial_system':True})
+
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.m = load_fmu('LoggerTest.fmu')
+        self.m.set_debug_logging(True)
+        self.m.set('_log_level',6)
+        self.m.set_fmil_log_level(5)
+
+    @testattr(fmi = True)
+    def test_log_file(self):
+        """
+        Test that the log file is parsable
+        """
+
+        self.m.set('u1',3)
+
+        self.m.get('u1')
+        self.m.set('y1',0.)
+        self.m.initialize()
+        self.m.get('u1')
+        self.m.set('u1',4)
+        self.m.get('u1')    
+        self.m.get_derivatives()
+        self.m.set('y1',0.5)
+        self.m.get('x1')
+        self.m.set('p',0.5)
+        self.m.get('x1')
+
+        d = get_structured_fmu_log('LoggerTest_log.txt')
+        
+        assert len(d)==8, "Unexpected number of solver invocations"
+        assert len(d[0]['block_solves'])==4, "Unexpected number of block solves in first iteration"
+
+        
+class Test_SetDependentParameterError:
+    """
+    Test that setting dependent parameters results in exception
+    """
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        m =  compile_fmu('DependentParameterTest2',os.path.join(path_to_mofiles,'DependentParameterTest.mo'))
+
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.m = load_fmu('DependentParameterTest2.fmu')
+
+    @testattr(fmi = True)
+    def test_dependent_parameter_setting(self):
+        """
+        Test that expeptions are thrown when dependent parameters are set.
+        """
+
+        self.m.set('pri',3)
+        nose.tools.assert_raises(FMUException,self.m.set, 'prd', 5)
+        nose.tools.assert_raises(FMUException,self.m.set, 'cr', 5)
+        self.m.set('pii',3)
+        nose.tools.assert_raises(FMUException,self.m.set, 'pid', 5)
+        nose.tools.assert_raises(FMUException,self.m.set, 'ci', 5)
+        self.m.set('pbi',True)
+        nose.tools.assert_raises(FMUException,self.m.set, 'pbd', True)
+        nose.tools.assert_raises(FMUException,self.m.set, 'cb', True)

@@ -224,7 +224,7 @@ class TestNLPInit:
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
 
         # Test init_opt_df
-        res_df = N.array([0.,0,0,0,0,0,0,0])
+        res_df = N.zeros(n_x)
         df = N.ones(n_x)
         self.init_nlp.init_opt_df(df)
         #print df

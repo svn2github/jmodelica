@@ -49,11 +49,19 @@ def run_demo(with_plots=True):
     vx = res['vx']
     vy = res['vy']
     t = res['time']
-    maxerr = N.max(err)    
+    maxerr = N.max(err)
 
     if maxerr > 1e-6:
         print "Maximum error: ", maxerr 
         assert maxerr < 1e-4
+    
+    assert N.abs(res.final('x') - 0.38735171)       < 1e-3
+    assert N.abs(res.final('st') - 0.38733358)      < 1e-3
+    assert N.abs(res.final('ct') + 0.92193964)      < 1e-3
+    assert N.abs(res.final('err') - 1.96716163e-05) < 1e-3
+    assert N.abs(res.final('y') + 0.92193202)       < 1e-3
+    assert N.abs(res.final('vx') - 6.04839823e-01)  < 1e-3
+    assert N.abs(res.final('vy') - 2.54124747e-01)  < 1e-3
 
     if with_plots:
         plt.figure(1)

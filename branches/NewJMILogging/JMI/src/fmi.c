@@ -194,6 +194,22 @@ fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     fmiValueReference index;
     jmi_real_t* z;
 
+    for (i = 0; i <nvr; i = i + 1) {
+        /* Get index in z vector from value reference. */
+        index = get_index_from_value_ref(vr[i]);
+
+        if (index>=((fmi_t *)c)->jmi->offs_real_pd && index<((fmi_t *)c)->jmi->offs_integer_ci) {
+        	jmi_log_error(((fmi_t *)c)->jmi,"Cannot set Real dependent parameter #r%d#",vr[i]);
+        	return fmiError;
+        }
+
+        if (index>=((fmi_t *)c)->jmi->offs_real_ci && index<((fmi_t *)c)->jmi->offs_real_pi) {
+        	jmi_log_error(((fmi_t *)c)->jmi,"Cannot set Real constant #r%d#",vr[i]);
+        	return fmiError;
+        }
+
+    }
+
     ((fmi_t *)c)->jmi->recomputeVariables = 1;
     z = jmi_get_z(((fmi_t *)c)->jmi);
     
@@ -217,6 +233,22 @@ fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t 
     fmiValueReference i;
     fmiValueReference index;
     jmi_real_t* z;
+
+    for (i = 0; i <nvr; i = i + 1) {
+        /* Get index in z vector from value reference. */
+        index = get_index_from_value_ref(vr[i]);
+
+        if (index>=((fmi_t *)c)->jmi->offs_integer_pd && index<((fmi_t *)c)->jmi->offs_boolean_ci) {
+        	jmi_log_error(((fmi_t *)c)->jmi,"Cannot set Integer dependent parameter #i%d#",vr[i]);
+        	return fmiError;
+        }
+
+        if (index>=((fmi_t *)c)->jmi->offs_integer_ci && index<((fmi_t *)c)->jmi->offs_integer_pi) {
+        	jmi_log_error(((fmi_t *)c)->jmi,"Cannot set Integer constant #i%d#",vr[i]);
+        	return fmiError;
+        }
+
+    }
 
     ((fmi_t *)c)->jmi->recomputeVariables = 1;
     z = jmi_get_z(((fmi_t *)c)->jmi);
@@ -242,6 +274,22 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
     fmiValueReference index;
     jmi_real_t* z;
     
+    for (i = 0; i <nvr; i = i + 1) {
+        /* Get index in z vector from value reference. */
+        index = get_index_from_value_ref(vr[i]);
+
+        if (index>=((fmi_t *)c)->jmi->offs_boolean_pd && index<((fmi_t *)c)->jmi->offs_real_dx) {
+        	jmi_log_error(((fmi_t *)c)->jmi,"Cannot set Boolean dependent parameter #b%d#",vr[i]);
+        	return fmiError;
+        }
+
+        if (index>=((fmi_t *)c)->jmi->offs_boolean_ci && index<((fmi_t *)c)->jmi->offs_boolean_pi) {
+        	jmi_log_error(((fmi_t *)c)->jmi,"Cannot set Boolean constant #b%d#",vr[i]);
+        	return fmiError;
+        }
+
+    }
+
     ((fmi_t *)c)->jmi->recomputeVariables = 1;
     z = jmi_get_z(((fmi_t *)c)->jmi);
 
@@ -285,6 +333,11 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     jmi_real_t* b_mode;
 	fmi_t* fmi = (fmi_t *)c;
     jmi_t* jmi =fmi->jmi;
+
+    if (((fmi_t*)c)->jmi->is_initialized==1) {
+        jmi_log_error(jmi, "FMU is already initialized: only one call to fmiInitialize is allowed");
+        return fmiError;
+    }
 
     /* For debugging Jacobians */
 /*
@@ -1087,8 +1140,21 @@ fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     fmiValueReference i;
     fmiValueReference index;
     jmi_real_t* z;
+    int isParameterOrConstant = 1;
 
-    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1) {
+    /* This is to make sure that if all variables that are inquired
+     * are parameters or constants, then the solver should not be invoked.
+     */
+    for (i = 0; i <nvr; i = i + 1) {
+        index = get_index_from_value_ref(vr[i]);
+
+        if (index>=((fmi_t *)c)->jmi->offs_real_dx) {
+        	isParameterOrConstant = 0;
+        	break;
+        }
+    }
+
+    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
@@ -1116,8 +1182,21 @@ fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t n
     jmi_real_t* z;
     fmiValueReference i;
     fmiValueReference index;
+    int isParameterOrConstant = 1;
 
-    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1) {
+    /* This is to make sure that if all variables that are inquired
+     * are parameters or constants, then the solver should not be invoked.
+     */
+    for (i = 0; i <nvr; i = i + 1) {
+        index = get_index_from_value_ref(vr[i]);
+
+        if (index>=((fmi_t *)c)->jmi->offs_real_dx) {
+        	isParameterOrConstant = 0;
+        	break;
+        }
+    }
+
+    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
@@ -1144,8 +1223,21 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
     jmi_real_t* z;
     fmiValueReference i;
     fmiValueReference index;
+    int isParameterOrConstant = 1;
 
-    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1) {
+    /* This is to make sure that if all variables that are inquired
+     * are parameters or constants, then the solver should not be invoked.
+     */
+    for (i = 0; i <nvr; i = i + 1) {
+        index = get_index_from_value_ref(vr[i]);
+
+        if (index>=((fmi_t *)c)->jmi->offs_real_dx) {
+        	isParameterOrConstant = 0;
+        	break;
+        }
+    }
+
+    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
@@ -1170,8 +1262,22 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
 fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
     fmiInteger retval;
     int i;
+    int index;
+    int isParameterOrConstant = 1;
 
-    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1) {
+    /* This is to make sure that if all variables that are inquired
+     * are parameters or constants, then the solver should not be invoked.
+     */
+    for (i = 0; i <nvr; i = i + 1) {
+        index = get_index_from_value_ref(vr[i]);
+
+        if (index>=((fmi_t *)c)->jmi->offs_real_dx) {
+        	isParameterOrConstant = 0;
+        	break;
+        }
+    }
+
+    if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
