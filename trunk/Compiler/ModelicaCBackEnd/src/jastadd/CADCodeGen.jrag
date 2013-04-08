@@ -1020,6 +1020,21 @@ aspect CADCodeGen {
 		str.print(" = JMI_FALSE;\n");
 	}
 	
+	@Override
+	public void FSmoothExp.genADStatement_CAD(Printer p, PrintStream str, String indent) {
+		str.print(indent);
+		str.print(adVarName());
+		str.print(" = ");
+		str.print(getFExp().adVarName());
+		str.print(";\n");
+		
+		str.print(indent);
+		str.print(adDerName());
+		str.print(" = ");
+		str.print(getFExp().adDerName());
+		str.print(";\n");
+	}
+	
 	/*-------------------------------------------------------------------------
 	 * CAD code for Equations and blocks resides bellow
 	 *-----------------------------------------------------------------------*/

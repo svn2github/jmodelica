@@ -696,6 +696,84 @@ if(_x1_1 >= 0){
 ")})));
 end CADabs;
 
+model smoothTest1
+	Real x;
+equation
+	der(x) = smooth(0, if x >= 0 then x else 0); 
+
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="smoothTest1",
+			description="Tests cad generation for the smooth operator",
+			generate_dae_jacobian=true,
+			template="
+$C_DAE_equation_directional_derivative$
+",
+			generatedCode="
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t d_2;
+    v_2 = _sw(0);
+    d_2 = JMI_FALSE;
+    if (v_2) {
+        v_1 = _x_0;
+        d_1 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+    } else {
+        v_1 = AD_WRAP_LITERAL(0);
+        d_1 = AD_WRAP_LITERAL(0);
+    }
+    v_0 = v_1;
+    d_0 = d_1;
+    (*res)[0] = v_0 - _der_x_1;
+    (*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+
+")})));
+end smoothTest1;
+
+model notTest1
+	Real x;
+equation
+	der(x) = noEvent(if not x >= 0 then x else 0); 
+
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="notTest1",
+			description="Tests cad generation for the not operator",
+			generate_dae_jacobian=true,
+			template="
+$C_DAE_equation_directional_derivative$
+",
+			generatedCode="
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t d_2;
+    jmi_ad_var_t v_3;
+    jmi_ad_var_t d_3;
+    v_3 = COND_EXP_GE(_x_0, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE);
+    d_3 = JMI_FALSE;
+    v_2 = LOG_EXP_NOT(v_3);
+    d_2 = JMI_FALSE;
+    if (v_2) {
+        v_1 = _x_0;
+        d_1 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+    } else {
+        v_1 = AD_WRAP_LITERAL(0);
+        d_1 = AD_WRAP_LITERAL(0);
+    }
+    v_0 = v_1;
+    d_0 = d_1;
+    (*res)[0] = v_0 - _der_x_1;
+    (*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+
+")})));
+end notTest1;
+
 model IfExpExample1
     Real x,u;
 equation

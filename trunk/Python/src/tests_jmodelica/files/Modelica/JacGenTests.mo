@@ -321,6 +321,22 @@ package JacGenTests
     y =   x2;
   end JacTestLog10;
   
+	model SmoothTest1
+		Real x;
+		Real y;
+	equation
+		x = time;
+		y = smooth(1, if x <= 0 then 0 else x ^ 2);
+	end SmoothTest1;
+	
+	model NotTest1
+		Real x;
+		Real y;
+	equation
+		x = time;
+		y = noEvent(if not x < 0 then 0 else x ^ 2);
+	end NotTest1;
+  
   
   // Models for testing Jacobian generation for harder case involving if, when etc. follows
   model JacTestWhenElse
@@ -505,6 +521,15 @@ package JacGenTests
 				if(x > 1) then 0.8 else 2*u;
 	y = x;
   end JacTestIfEquation3;
+  
+  model JacTestIfEquation4
+	Real x(start=1);
+	Real u(start=2);
+  equation
+    u = if(x > 3) then noEvent(if time<=Modelica.Constants.pi/2 then sin(time) elseif 
+              noEvent(time<=Modelica.Constants.pi) then 1 else sin(time-Modelica.Constants.pi/2)) else noEvent(sin(3*x));
+    der(x) = u;
+  end JacTestIfEquation4;
   
   
   model JacTestIfFunctionRecord
