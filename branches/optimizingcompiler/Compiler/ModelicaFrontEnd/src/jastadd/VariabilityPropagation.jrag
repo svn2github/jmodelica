@@ -26,9 +26,9 @@ aspect VariabilityPropagation {
 	eq FIfWhenElseEquation.getChild().variabilityPropagationEnabled() = false;
 	
 	syn boolean FEquation.variabilityPropagationEnabled() =
-			super.variabilityPropagationEnabled() && variables().size() == 1;
+			super.variabilityPropagationEnabled() && variables().size() == 1 && !hasResidual();
 	syn boolean FFunctionCallEquation.variabilityPropagationEnabled() =
-			super.variabilityPropagationEnabled() && variables().size() > 0 && variables().size() == numScalarEquations();
+			super.variabilityPropagationEnabled() && variables().size() > 0 && variables().size() == numScalarEquations() && !hasResidual();
 	
 	
 	
@@ -296,7 +296,7 @@ aspect VariabilityPropagation {
 		return myFV().canPropagate();
 	}
 	syn boolean FAbstractVariable.canPropagate() = false;
-	eq FVariable.canPropagate() = !isOutput();
+	eq FVariable.canPropagate() = !isOutput() && getHGTType() != FClass.HGTVariableType.COMPONENT;
 	eq FDerivativeVariable.canPropagate() = false;
 }
 
