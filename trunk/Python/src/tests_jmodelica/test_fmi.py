@@ -153,9 +153,9 @@ class Test_FMUModelCS1:
         Sets up the test case.
         """
         self.rlc  = load_fmu('RLC_Circuit.fmu')
-        self.rlc.initialize()
+        #self.rlc.initialize()
         self.rlc_square  = load_fmu('RLC_Circuit_Square.fmu')
-        self.rlc_square.initialize()
+        #self.rlc_square.initialize()
 
     @testattr(fmi = True)
     def test_version(self):
