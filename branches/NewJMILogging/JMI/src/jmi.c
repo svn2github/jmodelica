@@ -245,7 +245,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->events_epsilon = jmi_->options.events_default_tol;
     jmi_->recomputeVariables = 1;
 
-    jmi_->log = jmi_log_init();
+    jmi_->log = jmi_log_init(jmi_);
 
     jmi_->is_initialized = 0;
 
@@ -455,7 +455,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
 	}
 
     if((jmi->options.log_level >= 5)) {
-        node = jmi_log_enter_fmt(jmi, logInfo, "equationSolve", 
+        node = jmi_log_enter_fmt(jmi->log, logInfo, "equationSolve", 
                                  "<Model equations evaluation invoked at> t:%E", t[0]);
     }
 
@@ -471,8 +471,8 @@ int jmi_ode_derivatives(jmi_t* jmi) {
 	}
 
     if((jmi->options.log_level >= 5)) {
-        jmi_log_fmt(jmi, logInfo, "<Model equations evaluation finished>");
-        jmi_log_leave(jmi, node);
+        jmi_log_fmt(jmi->log, logInfo, "<Model equations evaluation finished>");
+        jmi_log_leave(jmi->log, node);
 /*        jmi_log_leave_fmt(jmi, node, "<Model equations evaluation finished>");*/
     }
 
@@ -533,7 +533,7 @@ int jmi_ode_initialize(jmi_t* jmi) {
 	}
 
     if((jmi->options.log_level >= 5)) {
-        node = jmi_log_enter_fmt(jmi, logInfo, "equationSolve", 
+        node = jmi_log_enter_fmt(jmi->log, logInfo, "equationSolve", 
                                  "<Model equations evaluation invoked at> t:%E", t[0]);
     }
 
@@ -545,8 +545,8 @@ int jmi_ode_initialize(jmi_t* jmi) {
 	}
 
     if((jmi->options.log_level >= 5)) {
-        jmi_log_fmt(jmi, logInfo, "<Model equations evaluation finished>");
-        jmi_log_leave(jmi, node);
+        jmi_log_fmt(jmi->log, logInfo, "<Model equations evaluation finished>");
+        jmi_log_leave(jmi->log, node);
 /*        jmi_log_leave_fmt(jmi, node, "<Model equations evaluation finished>");*/
     }
 

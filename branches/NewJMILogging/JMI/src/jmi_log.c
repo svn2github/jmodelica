@@ -33,6 +33,8 @@ typedef jmi_log_node_t     node_t;
 typedef jmi_log_category_t category_t;
 typedef jmi_log_type_t     base_type_t;
 
+typedef jmi_log_t log_t;
+
 
 /** ***************************************************************************
  * \brief Raw character buffer used by jmi_log_t.
@@ -203,10 +205,10 @@ typedef struct {
     const char *name;
 } frame_t;
 
-static void logging_error(jmi_t *jmi, const char *msg);
-static node_t merge_nodes(jmi_t *jmi, node_t outer, node_t inner) {
+static void logging_error(log_t *log, const char *msg);
+static node_t merge_nodes(log_t *log, node_t outer, node_t inner) {
     node_t result;
-    if (outer.inner_id != inner.outer_id) logging_error(jmi, "merge_nodes: nodes do not fit.");
+    if (outer.inner_id != inner.outer_id) logging_error(log, "merge_nodes: nodes do not fit.");
     result.outer_id = outer.outer_id;
     result.inner_id = inner.inner_id;
     return result;
@@ -218,6 +220,7 @@ static node_t merge_nodes(jmi_t *jmi, node_t outer, node_t inner) {
  */ 
 
 struct jmi_log_t {
+    jmi_t *jmi;
     buf_t buf;
     category_t c;
 
@@ -232,33 +235,29 @@ struct jmi_log_t {
 };
 
 /* convenience typedef and functions */
-typedef jmi_log_t log_t;
-static INLINE log_t *logof(jmi_t *jmi)    { return jmi->log; }
 static INLINE buf_t *bufof(log_t *log)    { return &(log->buf); }
-static INLINE buf_t *bufofjmi(jmi_t *jmi) { return bufof(logof(jmi)); }
 
 
 /* constructor */
-static void init_log(log_t *);
+static void init_log(log_t *log, jmi_t *jmi);
 
 /* logging primitives */
-static void emit(jmi_t *jmi);
-static node_t enter_named_(jmi_t *jmi, category_t c, const char *name);
-static node_t enter_list_(jmi_t *jmi, type_t type);
-static void leave_(jmi_t *jmi, node_t node);
-static void log_value_(jmi_t *jmi, base_type_t type, const char *value);
-static void log_indented_value_(jmi_t *jmi, base_type_t type, const char *value, int nspaces);
-static void log_comment_(jmi_t *jmi, category_t c, const char *msg);
-static void log_vref_(jmi_t *jmi, char t, int vref);
-static void log_fmt_(jmi_t *jmi, category_t c, const char *fmt, va_list ap);
+static void emit(log_t *log);
+static node_t enter_named_(log_t *log, category_t c, const char *name);
+static node_t enter_list_(log_t *log, type_t type);
+static void leave_(log_t *log, node_t node);
+static void log_value_(log_t *log, base_type_t type, const char *value);
+static void log_indented_value_(log_t *log, base_type_t type, const char *value, int nspaces);
+static void log_comment_(log_t *log, category_t c, const char *msg);
+static void log_vref_(log_t *log, char t, int vref);
+static void log_fmt_(log_t *log, category_t c, const char *fmt, va_list ap);
 
 
-static void defer_comma(  jmi_t *jmi) { logof(jmi)->outstanding_comma = TRUE; }
-static void cancel_commas(jmi_t *jmi) { logof(jmi)->outstanding_comma = FALSE; }
+static void defer_comma(  log_t *log) { log->outstanding_comma = TRUE; }
+static void cancel_commas(log_t *log) { log->outstanding_comma = FALSE; }
 
-static void force_commas(jmi_t *jmi) {
-    log_t *log = logof(jmi);
-    if (log->outstanding_comma) buffer(bufofjmi(jmi), ", ");
+static void force_commas(log_t *log) {
+    if (log->outstanding_comma) buffer(bufof(log), ", ");
     log->outstanding_comma = FALSE;
 }
 
@@ -266,18 +265,17 @@ static INLINE int current_indent_of(log_t *log) { return log->topindex; }
 
 
 /** \brief Emit the currently buffered log message, if one exists. */
-static void emit(jmi_t *jmi) {
-    log_t *log = logof(jmi); /* todo: collapse? Will this ensure the right order of initialization? */
+static void emit(log_t *log) {
     buf_t *buf = bufof(log);
-    force_commas(jmi);
+    force_commas(log);
     if (!isempty(buf)) {
         /* todo: don't alloc/free each time! */
         char *msg2 = (char *)malloc(buf->len + log->indent + 1);
         memset(msg2, ' ', log->indent);
         strcpy(msg2+log->indent, buf->msg);
 
-        /* jmi_log(jmi, log->c, buf->msg); */
-        jmi_log(jmi, log->c, msg2);
+        /* jmi_log(log, log->c, buf->msg); */
+        jmi_log(log->jmi, log->c, msg2);
         clear(buf);
 
         free(msg2);
@@ -287,10 +285,9 @@ static void emit(jmi_t *jmi) {
 }
 
 /** \brief Set the current logging category; emit a log message if it was changed. */
-void set_category(jmi_t *jmi, category_t c) {
-    log_t *log = logof(jmi);
-    force_commas(jmi);
-    if (log->c != c) emit(jmi);
+void set_category(log_t *log, category_t c) {
+    force_commas(log);
+    if (log->c != c) emit(log);
     log->c = c;
 }
 
@@ -345,7 +342,8 @@ static INLINE frame_t *push_named(log_t *log, category_t c, const char *name) {
 
 
 /** log_t constructor. */
-static void init_log(log_t *log) {
+static void init_log(log_t *log, jmi_t *jmi) {
+    log->jmi = jmi;
     init_buffer(bufof(log));
     log->c = logInfo;
     log->alloced_frames = 32;
@@ -367,106 +365,106 @@ static void delete_log(log_t *log) {
  /* Logging primitives */
 
 /** \brief Enter a named frame. */
-static node_t enter_named_(jmi_t *jmi, category_t c, const char *name) {
-    push_named(logof(jmi), c, name);
-    set_category(jmi, c);
-    buffer_ident(bufofjmi(jmi), name);
-    return node_from_top(logof(jmi));
+static node_t enter_named_(log_t *log, category_t c, const char *name) {
+    push_named(log, c, name);
+    set_category(log, c);
+    buffer_ident(bufof(log), name);
+    return node_from_top(log);
 }
 
 /** \brief Enter a list frame, with given type for the list. */
-static node_t enter_list_(jmi_t *jmi, type_t type) {
-    log_t *log = logof(jmi);
+static node_t enter_list_(log_t *log, type_t type) {
     buf_t *buf = bufof(log);
     BOOL is_dict = type_eq(type, dicttype);
     BOOL suppress_type = is_dict || type_eq(topof(log)->type, type);
     frame_t *top = push_list(log, type, is_dict ? ')' : ']');
 
-    set_category(jmi, top->c);
+    set_category(log, top->c);
     if (!suppress_type) buffer_type(buf, type);
     buffer_char(buf, is_dict ? '(' : '[');
-    return node_from_top(logof(jmi));
+    return node_from_top(log);
 }
 
 /** \brief Leave the top frame. */
-static void leave_frame_(jmi_t *jmi) {
+static void leave_frame_(log_t *log) {
     int indent;
-    log_t   *log = logof(jmi);
     buf_t   *buf = bufof(log);
     frame_t *top = topof(log);
     BOOL same_line = log->lineindex < log->topindex;
-    cancel_commas(jmi);
+    cancel_commas(log);
 
     if (can_pop(log)) --(log->topindex);
-    else logging_error(jmi, "leave_frame_: frame stack empty; unable to pop.");
+    else logging_error(log, "leave_frame_: frame stack empty; unable to pop.");
     indent = current_indent_of(log);
     if (log->indent > indent) log->indent = indent;
     if (top->kind == listFrame) {
-        set_category(jmi, top->c);
+        set_category(log, top->c);
         buffer_char(buf, top->closing);
         /* Note: relies on that topof(log) is the parent frame, which will name == "" if it's also a listFrame. */
         if (!same_line) buffer_ident(buf, topof(log)->name);
     }
     if (log->lineindex > log->topindex) log->lineindex = log->topindex;
-    defer_comma(jmi);    
+    defer_comma(log);    
 }
 
-/** \brief Leave the range of log nodes given by node. */
-static void leave_(jmi_t *jmi, node_t node) {
+static void _leave_(log_t *log, node_t node) {
     int k;
-    log_t *log = logof(jmi);    
-    if (topof(log)->id != node.inner_id) {
-        logging_error(jmi, "leave_: trying to leave another node than the current one.");
-    }
     
     for (k=log->topindex; k >= 0; k--) {
         if (log->frames[k].id == node.outer_id) break;
     }
-    if (k < 0) logging_error(jmi, "leave_: trying to leave into a node not on the stack.");
+    if (k < 0) logging_error(log, "leave_: trying to leave into a node not on the stack.");
     else {
         while (can_pop(log)) {
             if (topof(log)->id == node.outer_id) break;
-            leave_frame_(jmi);
+            leave_frame_(log);
         }
     }
 }
 
-static void pre_log_value_(jmi_t *jmi, base_type_t type) {
-    log_t   *log = logof(jmi);
+/** \brief Leave the range of log nodes given by node. */
+static void leave_(log_t *log, node_t node) {
+    if (topof(log)->id != node.inner_id) {
+        logging_error(log, "leave_: trying to leave another node than the current one.");
+    }
+    _leave_(log, node);
+}
+
+static void pre_log_value_(log_t *log, base_type_t type) {
     buf_t   *buf = bufof(log);
     frame_t *top = topof(log);
     type_t t = scalartype(type);
 
-    set_category(jmi, top->c);
+    set_category(log, top->c);
     if (!type_eq(top->type, t)) buffer_type(buf, t);
     if (top->kind == namedFrame) buffer_char(buf, ':');
 }
 
 /** Log a value, annotated with type type if necessary. */
-static void log_value_(jmi_t *jmi, base_type_t type, const char *value) {
-    log_indented_value_(jmi, type, value, 0);
+static void log_value_(log_t *log, base_type_t type, const char *value) {
+    log_indented_value_(log, type, value, 0);
 }
 
 /** Log a value, annotated with type type if necessary, with nspaces spaces between the type and value. */
-static void log_indented_value_(jmi_t *jmi, base_type_t type, const char *value, int nspaces) {    
-    pre_log_value_(jmi, type);
-    for (; nspaces > 0; nspaces--) buffer_char(bufofjmi(jmi), ' ');
-    buffer_value(bufofjmi(jmi), value);
-    defer_comma(jmi);
+static void log_indented_value_(log_t *log, base_type_t type, const char *value, int nspaces) {    
+    pre_log_value_(log, type);
+    for (; nspaces > 0; nspaces--) buffer_char(bufof(log), ' ');
+    buffer_value(bufof(log), value);
+    defer_comma(log);
 }
 
-static void log_comment_(jmi_t *jmi, category_t c, const char *msg) {
-    set_category(jmi, c);    
-    buffer_comment(bufofjmi(jmi), msg);
-    buffer_char(bufofjmi(jmi), ' ');
+static void log_comment_(log_t *log, category_t c, const char *msg) {
+    set_category(log, c);    
+    buffer_comment(bufof(log), msg);
+    buffer_char(bufof(log), ' ');
 }
 
 /** Log a value reference. */
-static void log_vref_(jmi_t *jmi, char t, int vref) {
-    buf_t *buf = bufofjmi(jmi);
+static void log_vref_(log_t *log, char t, int vref) {
+    buf_t *buf = bufof(log);
     char tmp[128];
 
-    pre_log_value_(jmi, jmiLogVref);
+    pre_log_value_(log, jmiLogVref);
     buffer_char(buf, '"'); buffer_raw_char(buf, '#');
 
     buffer_char(buf, t);
@@ -474,7 +472,7 @@ static void log_vref_(jmi_t *jmi, char t, int vref) {
     buffer(buf, tmp);
 
     buffer_raw_char(buf, '#'); buffer_char(buf, '"'); 
-    defer_comma(jmi);
+    defer_comma(log);
 }
 
 static BOOL contains(const char *chars, char c) {
@@ -484,15 +482,15 @@ static BOOL contains(const char *chars, char c) {
 
 static INLINE BOOL is_name_char(char c) { return isalnum(c) || c == '_'; }
 
-static void log_fmt_(jmi_t *jmi, category_t c, const char *fmt, va_list ap) {
-    buf_t *buf = bufofjmi(jmi);
+static void log_fmt_(log_t *log, category_t c, const char *fmt, va_list ap) {
+    buf_t *buf = bufof(log);
 
-    set_category(jmi, c);
+    set_category(log, c);
     while (*fmt != 0) {
         char ch = *fmt;
         if (ch == '<') {
             /* Copy comments verbatim */
-            force_commas(jmi);
+            force_commas(log);
             while ((*fmt != 0) && (*fmt != '>')) buffer_char(buf, *(fmt++));
             buffer(buf, "> "); 
             ++fmt;
@@ -506,53 +504,53 @@ static void log_fmt_(jmi_t *jmi, category_t c, const char *fmt, va_list ap) {
 
             while (is_name_char(*fmt)) ++fmt;
             name_end = fmt;
-            if (name_end == name_start) { logging_error(jmi, "jmi_log_fmt: expected attribute name."); break; }
-            if (*(fmt++) != ':') { logging_error(jmi, "jmi_log_fmt: expected ':'"); break; }
-            if (*(fmt++) != '%') { logging_error(jmi, "jmi_log_fmt: expected '%'"); break; }                 
+            if (name_end == name_start) { logging_error(log, "jmi_log_fmt: expected attribute name."); break; }
+            if (*(fmt++) != ':') { logging_error(log, "jmi_log_fmt: expected ':'"); break; }
+            if (*(fmt++) != '%') { logging_error(log, "jmi_log_fmt: expected '%'"); break; }                 
             t = *(fmt++);
-            if (!contains("diueEfFgGs", t)) { logging_error(jmi, "jmi_log_fmt: unknown format specifier"); break; }
+            if (!contains("diueEfFgGs", t)) { logging_error(log, "jmi_log_fmt: unknown format specifier"); break; }
 
             /* note: A bit of a hack to avoid extracting the name into a new string. */
-            force_commas(jmi);
+            force_commas(log);
             while (name_start != name_end) buffer_char(buf, *(name_start++));
-            node = enter_named_(jmi, c, "");
+            node = enter_named_(log, c, "");
 
             /* todo: consider: what if jmi_real_t is not double? */
-            if      (contains("diu", t))    jmi_log_int_(   jmi, va_arg(ap, int));
-            else if (contains("eEfFgG", t)) jmi_log_real_(  jmi, va_arg(ap, double));
-            else if (t == 's')              jmi_log_string_(jmi, va_arg(ap, const char *));
-            else { logging_error(jmi, "jmi_log_fmt: unknown format specifier"); break; }
+            if      (contains("diu", t))    jmi_log_int_(   log, va_arg(ap, int));
+            else if (contains("eEfFgG", t)) jmi_log_real_(  log, va_arg(ap, double));
+            else if (t == 's')              jmi_log_string_(log, va_arg(ap, const char *));
+            else { logging_error(log, "jmi_log_fmt: unknown format specifier"); break; }
 
-            leave_(jmi, node);
+            leave_(log, node);
         }
         else if (isspace(ch) || ch == ',') ++fmt;
-        else { logging_error(jmi, "jmi_log_fmt: unknown format character"); break; }
+        else { logging_error(log, "jmi_log_fmt: unknown format character"); break; }
     }
 }
 
-static void logging_error(jmi_t *jmi, const char *msg) {
+static void logging_error(log_t *log, const char *msg) {
     char buf[1024];
-    emit(jmi);
+    emit(log);
     sprintf(buf, "Logger error: %s", msg);
-    log_comment_(jmi, logInfo, buf);
-    emit(jmi);
+    log_comment_(log, logInfo, buf);
+    emit(log);
 }
 
 
  /* Helpers for user primitives */
 
-node_t enter_(jmi_t *jmi, category_t c, const char *name, type_t type) {
-    node_t node1 = enter_named_(jmi, c, name);
-    node_t node2 = enter_list_(jmi, type);
-    return merge_nodes(jmi, node1, node2);
+node_t enter_(log_t *log, category_t c, const char *name, type_t type) {
+    node_t node1 = enter_named_(log, c, name);
+    node_t node2 = enter_list_(log, type);
+    return merge_nodes(log, node1, node2);
 }
 
 
  /* User constructor, destructor */
 
-jmi_log_t *jmi_log_init() {
+jmi_log_t *jmi_log_init(jmi_t *jmi) {
     log_t *log = (log_t *)malloc(sizeof(log_t));
-    init_log(log);
+    init_log(log, jmi);
     return log;
 }
 void jmi_log_delete(log_t *log) { delete_log(log); }
@@ -561,142 +559,146 @@ void jmi_log_delete(log_t *log) { delete_log(log); }
  /* Entry/exit primitives */
 
 /** \brief Enter a named list node that contains named nodes, then emit. */
-node_t jmi_log_enter(jmi_t *jmi, category_t c, const char *name) {
-    node_t node = jmi_log_enter_(jmi, c, name);
-    emit(jmi); return node;
+node_t jmi_log_enter(log_t *log, category_t c, const char *name) {
+    node_t node = jmi_log_enter_(log, c, name);
+    emit(log); return node;
 }
-node_t jmi_log_enter_(jmi_t *jmi, category_t c, const char *name) {
-    return enter_(jmi, c, name, dicttype);
+node_t jmi_log_enter_(log_t *log, category_t c, const char *name) {
+    return enter_(log, c, name, dicttype);
 }
-node_t jmi_log_enter_vector_(jmi_t *jmi, category_t c, const char *name, base_type_t eltype) {
-    return enter_(jmi, c, name, vectortype(eltype));
+node_t jmi_log_enter_vector_(log_t *log, category_t c, const char *name, base_type_t eltype) {
+    return enter_(log, c, name, vectortype(eltype));
 }
 
 /** \brief Leave node, then emit. */
-void jmi_log_leave(jmi_t *jmi, node_t node) { jmi_log_leave_(jmi, node); emit(jmi); }
-void jmi_log_leave_(jmi_t *jmi, node_t node) { leave_(jmi, node); }
+void jmi_log_leave(log_t *log, node_t node) { jmi_log_leave_(log, node); emit(log); }
+void jmi_log_leave_(log_t *log, node_t node) { leave_(log, node); }
+
+/** \brief Like jmi_log_leave, but may doesn't need to take innermost node. */
+void jmi_log_unwind(log_t *log, node_t node) { _leave_(log, node); emit(log); }
 
 
  /* Functions that involve log_fmt */
 
-void jmi_log_fmt_(jmi_t *jmi, category_t c, const char *fmt, ...) {
+void jmi_log_fmt_(log_t *log, category_t c, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    log_fmt_(jmi, c, fmt, ap);
+    log_fmt_(log, c, fmt, ap);
     va_end(ap);
 }
 
-void jmi_log_fmt(jmi_t *jmi, category_t c, const char *fmt, ...) {
+void jmi_log_fmt(log_t *log, category_t c, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    log_fmt_(jmi, c, fmt, ap);
+    log_fmt_(log, c, fmt, ap);
     va_end(ap);
-    emit(jmi);
+    emit(log);
 }
 
-jmi_log_node_t jmi_log_enter_fmt(jmi_t *jmi, jmi_log_category_t c, const char *name, const char* fmt, ...) {
+jmi_log_node_t jmi_log_enter_fmt(log_t *log, jmi_log_category_t c, const char *name, const char* fmt, ...) {
     va_list ap;
-    node_t node = jmi_log_enter_(jmi, c, name); 
+    node_t node = jmi_log_enter_(log, c, name); 
 
     va_start(ap, fmt);
-    log_fmt_(jmi, c, fmt, ap);
+    log_fmt_(log, c, fmt, ap);
     va_end(ap);
     
-    emit(jmi);
+    emit(log);
     return node;    
 }
 
-void jmi_log_node(jmi_t *jmi, category_t c, const char *name, const char* fmt, ...) {
+void jmi_log_node(log_t *log, category_t c, const char *name, const char* fmt, ...) {
     va_list ap;
-    node_t node = jmi_log_enter_(jmi, c, name); 
+    node_t node = jmi_log_enter_(log, c, name); 
 
     va_start(ap, fmt);
-    log_fmt_(jmi, c, fmt, ap);
+    log_fmt_(log, c, fmt, ap);
     va_end(ap);
     
-    leave_(jmi, node); emit(jmi);
+    leave_(log, node); emit(log);
 }
 
 
  /* Subrow primitives */
 
-void jmi_log_emit(jmi_t *jmi) { emit(jmi); }
+void jmi_log_emit(log_t *log) { emit(log); }
 
-void jmi_log_comment_(jmi_t *jmi, category_t c, const char *msg) { log_comment_(jmi, c, msg); }
+void jmi_log_comment_(log_t *log, category_t c, const char *msg) { log_comment_(log, c, msg); }
+void jmi_log_comment(log_t *log, category_t c, const char *msg) { jmi_log_comment_(log, c, msg); emit(log); }
 
 
-void jmi_log_string_(jmi_t *jmi, const char *x) { log_value_(jmi, jmiLogString, x); }
+void jmi_log_string_(log_t *log, const char *x) { log_value_(log, jmiLogString, x); }
 
-void jmi_log_real_(jmi_t *jmi, jmi_real_t x) {
+void jmi_log_real_(log_t *log, jmi_real_t x) {
     char buf[128];
     char *rep;
 /*    sprintf(buffer, "%30.16E", x);*/
     sprintf(buf, "%8.1E", x);
 
     /* Don't put spaces in the value; it will be quoted. */
-    force_commas(jmi);
+    force_commas(log);
     rep = buf;
     while (*rep == ' ') ++rep;
 
-    log_indented_value_(jmi, jmiLogReal, rep, rep-buf);
+    log_indented_value_(log, jmiLogReal, rep, rep-buf);
 }
 
-void jmi_log_int_(jmi_t *jmi, int x) {
+void jmi_log_int_(log_t *log, int x) {
     char buf[128];
     sprintf(buf, "%d", x);
-    log_value_(jmi, jmiLogInt, buf);
+    log_value_(log, jmiLogInt, buf);
 }
 
-void jmi_log_bool_(jmi_t *jmi, BOOL x) {
+void jmi_log_bool_(log_t *log, BOOL x) {
     char buf[128];
     sprintf(buf, "%d", x);
-    log_value_(jmi, jmiLogBool, buf);
+    log_value_(log, jmiLogBool, buf);
 }
 
-void jmi_log_vref_(jmi_t *jmi, char t, int vref) { log_vref_(jmi, t, vref); }
+void jmi_log_vref_(log_t *log, char t, int vref) { log_vref_(log, t, vref); }
 
 
  /* Row primitives */
 
-void jmi_log_reals(jmi_t *jmi, category_t c, const char *name, const jmi_real_t *data, int n) {
+void jmi_log_reals(log_t *log, category_t c, const char *name, const jmi_real_t *data, int n) {
     int k;
-    jmi_log_node_t node = jmi_log_enter_vector_(jmi, logInfo, name, jmiLogReal);
-    for (k=0; k < n; k++) jmi_log_real_(jmi, data[k]);
-    jmi_log_leave(jmi, node);
+    jmi_log_node_t node = jmi_log_enter_vector_(log, logInfo, name, jmiLogReal);
+    for (k=0; k < n; k++) jmi_log_real_(log, data[k]);
+    jmi_log_leave(log, node);
 }
 
-void jmi_log_ints(jmi_t *jmi, category_t c, const char *name, const int *data, int n) {
+void jmi_log_ints(log_t *log, category_t c, const char *name, const int *data, int n) {
     int k;
-    jmi_log_node_t node = jmi_log_enter_vector_(jmi, logInfo, name, jmiLogInt);
-    for (k=0; k < n; k++) jmi_log_int_(jmi, data[k]);
-    jmi_log_leave(jmi, node);
+    jmi_log_node_t node = jmi_log_enter_vector_(log, logInfo, name, jmiLogInt);
+    for (k=0; k < n; k++) jmi_log_int_(log, data[k]);
+    jmi_log_leave(log, node);
 }
 
-void jmi_log_bools(jmi_t *jmi, category_t c, const char *name, const BOOL *data, int n) {
+void jmi_log_bools(log_t *log, category_t c, const char *name, const BOOL *data, int n) {
     int k;
-    jmi_log_node_t node = jmi_log_enter_vector_(jmi, logInfo, name, jmiLogBool);
-    for (k=0; k < n; k++) jmi_log_bool_(jmi, data[k]);
-    jmi_log_leave(jmi, node);
+    jmi_log_node_t node = jmi_log_enter_vector_(log, logInfo, name, jmiLogBool);
+    for (k=0; k < n; k++) jmi_log_bool_(log, data[k]);
+    jmi_log_leave(log, node);
 }
 
-void jmi_log_vrefs(jmi_t *jmi, jmi_log_category_t c, const char *name, char t, const int *vrefs, int n) {
+void jmi_log_vrefs(log_t *log, jmi_log_category_t c, const char *name, char t, const int *vrefs, int n) {
     int k;
-    jmi_log_node_t node = jmi_log_enter_vector_(jmi, logInfo, name, jmiLogVref);
-    for (k=0; k < n; k++) jmi_log_vref_(jmi, t, vrefs[k]);
-    jmi_log_leave(jmi, node);    
+    jmi_log_node_t node = jmi_log_enter_vector_(log, logInfo, name, jmiLogVref);
+    for (k=0; k < n; k++) jmi_log_vref_(log, t, vrefs[k]);
+    jmi_log_leave(log, node);    
 }
 
 
-void jmi_log_real_matrix(jmi_t *jmi, category_t c, const char *name, const jmi_real_t *data, int m, int n) {
+void jmi_log_real_matrix(log_t *log, category_t c, const char *name, const jmi_real_t *data, int m, int n) {
     int k, l;
-    node_t node = enter_(jmi, c, name, matrixtype(jmiLogReal));
-    emit(jmi);
+    node_t node = enter_(log, c, name, matrixtype(jmiLogReal));
+    emit(log);
     for (l=0; l < m; l++) {
-        node_t rownode = enter_list_(jmi, vectortype(jmiLogReal));
+        node_t rownode = enter_list_(log, vectortype(jmiLogReal));
         for (k=0; k < n; k++) {
-            jmi_log_real_(jmi, data[k*m + l]);
+            jmi_log_real_(log, data[k*m + l]);
         }
-        jmi_log_leave(jmi, rownode);
+        jmi_log_leave(log, rownode);
     }
-    jmi_log_leave(jmi, node);
+    jmi_log_leave(log, node);
 }

@@ -40,44 +40,47 @@ extern "C" {
 #endif
 
 
-jmi_log_t *jmi_log_init();
+jmi_log_t *jmi_log_init(jmi_t *jmi);
 void jmi_log_delete(jmi_log_t *log);
 
 
 /* Row primitives */
 
-jmi_log_node_t jmi_log_enter(    jmi_t *jmi, jmi_log_category_t c, const char *name);
-jmi_log_node_t jmi_log_enter_fmt(jmi_t *jmi, jmi_log_category_t c, const char *name, const char* fmt, ...);
-void jmi_log_node( jmi_t *jmi, jmi_log_category_t c, const char *name, const char* fmt, ...);
-void jmi_log_leave(jmi_t *jmi, jmi_log_node_t node);
+jmi_log_node_t jmi_log_enter(    jmi_log_t *log, jmi_log_category_t c, const char *name);
+jmi_log_node_t jmi_log_enter_fmt(jmi_log_t *log, jmi_log_category_t c, const char *name, const char* fmt, ...);
+void jmi_log_node( jmi_log_t *log, jmi_log_category_t c, const char *name, const char* fmt, ...);
+void jmi_log_leave(jmi_log_t *log, jmi_log_node_t node);
+/** \brief Use only upon abrupt return. Leaves any active nodes inside node, and then node. */
+void jmi_log_unwind(jmi_log_t *log, jmi_log_node_t node);
 
-void jmi_log_fmt(jmi_t *jmi, jmi_log_category_t c, const char *fmt, ...);
+void jmi_log_fmt(jmi_log_t *log, jmi_log_category_t c, const char *fmt, ...);
+void jmi_log_comment(jmi_log_t *log, jmi_log_category_t c, const char *msg);
 
-void jmi_log_reals(jmi_t *jmi, jmi_log_category_t c, const char *name, const jmi_real_t *data, int n);
-void jmi_log_ints( jmi_t *jmi, jmi_log_category_t c, const char *name, const int *data, int n);
-void jmi_log_bools(jmi_t *jmi, jmi_log_category_t c, const char *name, const BOOL *data, int n);
-void jmi_log_vrefs(jmi_t *jmi, jmi_log_category_t c, const char *name, char t, const int *vrefs, int n);
+void jmi_log_reals(jmi_log_t *log, jmi_log_category_t c, const char *name, const jmi_real_t *data, int n);
+void jmi_log_ints( jmi_log_t *log, jmi_log_category_t c, const char *name, const int *data, int n);
+void jmi_log_bools(jmi_log_t *log, jmi_log_category_t c, const char *name, const BOOL *data, int n);
+void jmi_log_vrefs(jmi_log_t *log, jmi_log_category_t c, const char *name, char t, const int *vrefs, int n);
 
-void jmi_log_real_matrix(jmi_t *jmi, jmi_log_category_t c, const char *name, const jmi_real_t *data, int m, int n);
+void jmi_log_real_matrix(jmi_log_t *log, jmi_log_category_t c, const char *name, const jmi_real_t *data, int m, int n);
 
 
-/* Subrow primitives */
+void jmi_log_emit(jmi_log_t *log);
 
-void jmi_log_emit(jmi_t *jmi);
+/* Subrow primitives. End in _ since they don't emit a log message. */
 
-jmi_log_node_t jmi_log_enter_(jmi_t *jmi, jmi_log_category_t c, const char *name);
-jmi_log_node_t jmi_log_enter_vector_(jmi_t *jmi, jmi_log_category_t c, const char *name, jmi_log_type_t eltype);
-void jmi_log_leave_(jmi_t *jmi, jmi_log_node_t node);
+jmi_log_node_t jmi_log_enter_(jmi_log_t *log, jmi_log_category_t c, const char *name);
+jmi_log_node_t jmi_log_enter_vector_(jmi_log_t *log, jmi_log_category_t c, const char *name, jmi_log_type_t eltype);
+void jmi_log_leave_(jmi_log_t *log, jmi_log_node_t node);
 
-void jmi_log_comment_(jmi_t *jmi, jmi_log_category_t c, const char *msg);
+void jmi_log_comment_(jmi_log_t *log, jmi_log_category_t c, const char *msg);
 
-void jmi_log_string_(jmi_t *jmi, const char *x);
-void jmi_log_real_(  jmi_t *jmi, jmi_real_t x);
-void jmi_log_int_(   jmi_t *jmi, int x);
-void jmi_log_bool_(  jmi_t *jmi, BOOL x);
-void jmi_log_vref_(  jmi_t *jmi, char t, int vref);
+void jmi_log_string_(jmi_log_t *log, const char *x);
+void jmi_log_real_(  jmi_log_t *log, jmi_real_t x);
+void jmi_log_int_(   jmi_log_t *log, int x);
+void jmi_log_bool_(  jmi_log_t *log, BOOL x);
+void jmi_log_vref_(  jmi_log_t *log, char t, int vref);
 
-void jmi_log_fmt_(jmi_t *jmi, jmi_log_category_t c, const char *fmt, ...);
+void jmi_log_fmt_(jmi_log_t *log, jmi_log_category_t c, const char *fmt, ...);
 
 
 #ifdef __cplusplus
