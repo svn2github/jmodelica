@@ -94,6 +94,7 @@ def run_demo(with_plots=True):
     print('T = %f' % T_0_A)
     
     # Set inputs for Stationary point B
+    init_model = load_fmu(init_fmu)
     Tc_0_B = 280
     init_model.set('Tc', Tc_0_B)
 
