@@ -150,11 +150,6 @@ void fmi_free_model_instance(fmiComponent c) {
     if (c) {
         fmi_t* component = (fmi_t*)c;
         fmiCallbackFreeMemory fmi_free = component -> fmi_functions.freeMemory;
-		jmi_options_t* op = &component->jmi->options;
-		if(op->debug_log) {
-			fclose(op->debug_log);
-			op->debug_log = 0;
-		}
 
         jmi_delete(component->jmi);
         component->jmi = 0;
@@ -1598,21 +1593,7 @@ void fmi_update_runtime_options(fmi_t* fmi) {
 		op->enforce_bounds_flag = (int)z[index]; 
 	index = get_option_index("_nle_solver_log_level");
 	if(index)
-		op->nle_solver_log_level = (int)z[index]; 
-	if(op->debug_log) {
-		fclose(op->debug_log);
-		op->debug_log = 0;
-	}
-	if(op->nle_solver_log_level > 2) {
-		op->debug_log = fopen("nle_solver_log.csv","wb");
-		if(!op->debug_log) {
-			/* To be replaced once jmi_log_warning linking issue is fixed */
-			printf("Could not open debug log file for writing");
-			/*jmi_log_warning(fmi->jmi, "Could not open debug log file for writing");*/
-			
-		}
-	}
-	
+		op->nle_solver_log_level = (int)z[index]; 	
 	index = get_option_index("_use_jacobian_scaling");
 	if(index)
 		op->use_jacobian_scaling_flag = (int)z[index]; 
