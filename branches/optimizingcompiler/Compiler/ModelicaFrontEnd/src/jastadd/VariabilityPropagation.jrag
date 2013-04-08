@@ -296,7 +296,9 @@ aspect VariabilityPropagation {
 		return myFV().canPropagate();
 	}
 	syn boolean FAbstractVariable.canPropagate() = false;
-	eq FVariable.canPropagate() = !isOutput() && getHGTType() != FClass.HGTVariableType.COMPONENT;
+	eq FVariable.canPropagate() = !isOutput() 
+			&& getHGTType() != FClass.HGTVariableType.COMPONENT 
+			&& getHGTType() != FClass.HGTVariableType.PAIR;
 	eq FDerivativeVariable.canPropagate() = false;
 }
 
