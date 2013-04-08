@@ -1641,5 +1641,57 @@ equation
 end IndexReduction.IndexReduction37_noEvent;
 ")})));
   end IndexReduction37_noEvent;
+
+
+model IndexReduction38_ComponentArray
+    model M
+        parameter Real L = 1 "Pendulum length";
+        parameter Real g =9.81 "Acceleration due to gravity";
+        Real x "Cartesian x coordinate";
+        Real y "Cartesian x coordinate";
+        Real vx "Velocity in x coordinate";
+        Real vy "Velocity in y coordinate";
+        Real lambda "Lagrange multiplier";
+    equation
+        der(x) = vx;
+        der(y) = vy;
+        der(vx) = lambda*x;
+        der(vy) = lambda*y - g;
+        x^2 + y^2 = L;
+    end M;
+
+    M m[1];
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction38_ComponentArray",
+			description="Name for der variables from FQNameString",
+			flatModel="
+fclass IndexReduction.IndexReduction38_ComponentArray
+ parameter Real m[1].L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real m[1].g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real m[1].x \"Cartesian x coordinate\";
+ Real m[1].y \"Cartesian x coordinate\";
+ Real m[1].vx \"Velocity in x coordinate\";
+ Real m[1].lambda \"Lagrange multiplier\";
+ Real der_m_1_y;
+ Real der_m_1_vx;
+ Real m[1]._der_x;
+ Real der_2_m_1_y;
+initial equation 
+ m[1].x = 0.0;
+ m[1]._der_x = 0.0;
+equation
+ m[1].der(x) = m[1].vx;
+ der_m_1_vx = m[1].lambda * m[1].x;
+ der_2_m_1_y = m[1].lambda * m[1].y - m[1].g;
+ m[1].x ^ 2 + m[1].y ^ 2 = m[1].L;
+ 2 * m[1].x * m[1].der(x) + 2 * m[1].y * der_m_1_y = 0.0;
+ m[1].der(_der_x) = der_m_1_vx;
+ 2 * m[1].x * m[1].der(_der_x) + 2 * m[1].der(x) * m[1].der(x) + (2 * m[1].y * der_2_m_1_y + 2 * der_m_1_y * der_m_1_y) = 0.0;
+ m[1]._der_x = m[1].der(x);
+end IndexReduction.IndexReduction38_ComponentArray;
+")})));
+end IndexReduction38_ComponentArray;
 	
 end IndexReduction;
