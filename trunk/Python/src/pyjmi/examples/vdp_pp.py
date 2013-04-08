@@ -34,10 +34,8 @@ def run_demo(with_plots=True):
     model_name = 'VDP_pack.VDP'
     mofile = curr_dir+'/files/VDP.mop'
 
+    # Compile model
     fmu_name = compile_fmu(model_name,mofile)
-
-    # Compile and load model
-    model = load_fmu(fmu_name)
 
     # Define initial conditions
     N_points = 11
@@ -54,6 +52,10 @@ def run_demo(with_plots=True):
 
     # Loop over initial conditions    
     for i in range(N_points):
+    
+        # Load model
+        model = load_fmu(fmu_name)
+    
         # Set initial conditions in model
         model.set('x1_0',x1_0[i])
         model.set('x2_0',x2_0[i])

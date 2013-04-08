@@ -388,7 +388,7 @@ class Test_FMI_Jaobians_Ifcases:
         m.simulate(final_time=2)
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0
-        m.simulate(final_time=4)
+        m.simulate(final_time=4, options={'initialize':False})
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0
 

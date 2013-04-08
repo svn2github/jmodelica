@@ -132,6 +132,8 @@ def run_demo(with_plots=True):
     # Define the objective function
     def f1(x):
 
+        model = load_fmu(fmu_name)
+
         # We need to scale the inputs x down since they are scaled up 
         # versions of a1 and a2 (x = scalefactor*[a1 a2])
         a1 = x[0]/1e6
@@ -185,6 +187,8 @@ def run_demo(with_plots=True):
     print 'Optimal function value: ' + str(f_opt)
     print ' '
 
+    model = load_fmu(fmu_name)
+
     # Set optimal values for a1 and a2 into the model
     model.set('qt.a1',a1_opt)
     model.set('qt.a2',a2_opt)
@@ -231,6 +235,8 @@ def run_demo(with_plots=True):
     
     # Define the objective function
     def f2(x):                
+
+        model = load_fmu(fmu_name)
 
         # We need to scale the inputs x down since they are scaled up 
         # versions of a1, a2, a3 and a4 (x = scalefactor*[a1 a2 a3 a4])
@@ -289,6 +295,8 @@ def run_demo(with_plots=True):
     print 'Optimal function value: ' + str(f_opt)
     print ' '
 
+    model = load_fmu(fmu_name)
+    
     # Set optimal values for a1, a2, a3 and a4 into the model
     model.set('qt.a1',a1_opt)
     model.set('qt.a2',a2_opt)

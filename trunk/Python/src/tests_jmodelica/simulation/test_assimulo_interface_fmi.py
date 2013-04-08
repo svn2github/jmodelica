@@ -616,7 +616,6 @@ class Test_ODE_JACOBIANS1:
         
         m_furuta = FMUModel2('Furuta.fmu')
         
-        m_furuta.initialize()
         print "Starting simulation"
         
         opts = m_furuta.simulate_options()
@@ -626,6 +625,7 @@ class Test_ODE_JACOBIANS1:
         A,B,C,D,n_err1 = m_furuta.check_jacobians()
         
         opts['with_jacobian'] = False
+        opts['initialize'] = False
         res = m_furuta.simulate(final_time=100, options=opts)
         
         A,B,C,D,n_err2 = m_furuta.check_jacobians()
@@ -671,8 +671,6 @@ class Test_ODE_JACOBIANS3:
         
         m_distlib1 = FMUModel2('DISTLib_Examples_Simulation.fmu')
         m_distlib2 = FMUModel2('DISTLib_Examples_Simulation.fmu')
-        m_distlib1.initialize()
-        m_distlib2.initialize()
         
         opts = m_distlib1.simulate_options()
         opts['with_jacobian'] = True
