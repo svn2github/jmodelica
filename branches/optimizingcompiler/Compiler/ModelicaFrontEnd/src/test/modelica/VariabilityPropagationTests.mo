@@ -513,7 +513,7 @@ public
   input Real i1;
   output Real[2] c;
  algorithm
-  external \"C\" e(i1, c, 2);
+  external \"C\" e(i1, c, size(c, 1));
   return;
  end VariabilityPropagationTests.FunctionCallEquation2.e;
  

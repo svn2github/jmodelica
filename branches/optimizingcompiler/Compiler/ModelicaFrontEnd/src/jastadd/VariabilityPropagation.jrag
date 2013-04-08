@@ -37,6 +37,7 @@ aspect VariabilityPropagation {
 		if (root().options.getBooleanOption("variability_propagation")) {
 			beginStep("variabilityPropagationIfSet()");
 			variabilityPropagation();
+			enableConstantFolding();
 			endStep("variabilityPropagationIfSet()");
 		}
 	}
@@ -79,8 +80,6 @@ aspect VariabilityPropagation {
 		}
 		getFEquationBlock(0).setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
 
-		
-		enableConstantFolding();
 	}
 	
 	public void FAbstractEquation.variabilityPropagation(
@@ -304,22 +303,41 @@ aspect VariabilityPropagation {
 aspect ConstantFolding {
 	public boolean FAbstractExp.constantFoldingEnabled = false;
 	
-	public void FRangeExp.enableConstantFolding() {
-
-	}
-	public void FRecordDecl.enableConstantFolding() {
-
-	}
-	public void FFunctionCallEquation.enableConstantFolding() {
-		for (ASTNode n: getCall()) {
-			n.enableConstantFolding();
+	
+	public void FClass.enableConstantFolding() {
+		for (FAbstractEquation equation: getFParameterEquations()) {
+			equation.enableConstantFolding();
+		}
+		for (FAbstractEquation equation: equations()) {
+			equation.enableConstantFolding();
 		}
 	}
 	
+	public void FAbstractEquation.enableConstantFolding() {	
+
+	}
 	
-	public void ASTNode.enableConstantFolding() {	
-		for (ASTNode n: this)
-			n.enableConstantFolding();
+	public void FFunctionCallEquation.enableConstantFolding() {
+		for (FExp childExp: getCall().childFExps()) {
+			childExp.enableConstantFolding();
+		}
+	}
+	
+	public void FEquation.enableConstantFolding() {	
+		getLeft().enableConstantFolding();
+		getRight().enableConstantFolding();
+	}
+	
+	public void FWhenEquation.enableConstantFolding() {
+		for (FAbstractEquation equation: getFAbstractEquations()) {
+			equation.enableConstantFolding();
+		}
+	}
+	
+	public void FExp.enableConstantFolding() {	
+		for (FExp childExp: childFExps()) {
+			childExp.enableConstantFolding();
+		}
 	}
 	
 	public void FIfExp.enableConstantFolding() {
