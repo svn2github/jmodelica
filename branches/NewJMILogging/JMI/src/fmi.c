@@ -24,6 +24,7 @@
 #include "fmi.h"
 #include "jmi.h"
 #include "jmi_block_residual.h"
+#include "jmi_log.h"
 
 #ifdef USE_FMI_ALLOC
 #include "fmi_alloc.h"
@@ -1205,6 +1206,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     jmi_real_t* event_indicators;
     jmi_real_t* switches;
     jmi_real_t* sw_temp;
+    jmi_log_node_t top_node;
 
 	/* Allocate memory */
     nGuards = jmi->n_guards;
@@ -1224,8 +1226,12 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
 
     retval = jmi_ode_derivatives(jmi);
 
+    top_node = jmi_log_enter_fmt(jmi->log, logInfo, "globalEventIteration", 
+                                 "<Starting global event iteration at> t:%E", jmi_get_t(jmi)[0]);
+
     if(retval != 0) {
-        jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Initial evaluation of the model equations during event iteration failed.");
+        jmi_log_comment(jmi->log, logError, "Initial evaluation of the model equations during event iteration failed.");
+        jmi_log_unwind(jmi->log, top_node);
         return fmiError;
     }
 
@@ -1235,14 +1241,15 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     /* We are at an event -> set atEvent to true. */
     jmi->atEvent = JMI_TRUE;
 
-    jmi_log_info(jmi, "[GLOBAL_EVENT_ITERATION] Starting global event iteration at t=%g.",jmi_get_t(jmi)[0]);
-
     /* Iterate */
     iter = 0;
     while ((eventInfo->iterationConverged)==fmiFalse){
+        jmi_log_node_t iter_node;
+
         iter += 1;
         
-        jmi_log_info(jmi, "[GLOBAL_EVENT_ITERATION] Global iteration %d at t=%g.",iter,jmi_get_t(jmi)[0]);
+        iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "iteration", 
+                                      "<Global iteration> iter:%d, <at> t:%E", iter, jmi_get_t(jmi)[0]);
         
         /* Evaluate and turn the switches */
         retval = jmi_evaluate_switches(jmi,switches,1);
@@ -1251,7 +1258,8 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
         retval = jmi_ode_derivatives(jmi);
 
         if(retval != 0) {
-            jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Evaluation of model equations during event iteration failed.");
+            jmi_log_comment(jmi->log, logError, "Evaluation of model equations during event iteration failed.");
+            jmi_log_unwind(jmi->log, top_node);
             return fmiError;
         }
 
@@ -1295,21 +1303,26 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
         
         /* No convergence under the allowed number of iterations. */
         if(iter >= max_iterations){
-            jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Failed to converged during global fixed point iteration due to too many iterations at t=%g",jmi_get_t(jmi)[0]);
+            jmi_log_node(jmi->log, logError, "failed", "<Failed to converge during global fixed point "
+                         "iteration due to too many iterations at> t:%E",jmi_get_t(jmi)[0]);
+            jmi_log_unwind(jmi->log, top_node);
             return fmiError;
         }
 
+        jmi_log_leave(jmi->log, iter_node);
     }
 
     /* Only do the final steps if the event iteration is done. */
     if (eventInfo->iterationConverged == fmiTrue) {
+        jmi_log_node_t final_node = jmi_log_enter(jmi->log, logInfo, "finalStep");
 
     	/* Compute the next time event */
     	retval = jmi_ode_next_time_event(jmi,&nextTimeEvent);
 
     	if(retval != 0) { /* Error check */
-            jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Computation of next time event failed.");
-    		return fmiError;
+            jmi_log_comment(jmi->log, logError, "Computation of next time event failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return fmiError;
     	}
 
     	/* If there is an upcoming time event, then set the event information
@@ -1334,17 +1347,20 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     	retval = jmi_ode_guards(jmi);
 
     	if(retval != 0) { /* Error check */
-            jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Computation of guard expressions failed.");
-    		return fmiError;
+            jmi_log_comment(jmi->log, logError, "Computation of guard expressions failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return fmiError;
     	}
 
+        jmi_log_leave(jmi->log, final_node);
     }
 
     fmi->fmi_functions.freeMemory(event_indicators);
     fmi->fmi_functions.freeMemory(sw_temp);
 
-    return fmiOK;
+    jmi_log_leave(jmi->log, top_node);
 
+    return fmiOK;
 }
 
 fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
