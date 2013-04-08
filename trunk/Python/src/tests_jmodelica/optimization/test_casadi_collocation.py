@@ -823,7 +823,7 @@ class TestLocalDAECollocator:
         assert_results(res_renaming, cost_ref, u_norm_ref)
 
         assert(repr(res_renaming.solver.get_equality_constraint()[10]) ==
-                "Matrix<SX>((der_x1_1_1-((((1-(x2_1_1*x2_1_1))*x1_1_1)" +
+                "Matrix<SX>((der_x1_1_1-((((1-sq(x2_1_1))*x1_1_1)" +
                 "-x2_1_1)+u_1_1)))")
         assert(repr(res_renaming.solver.get_equality_constraint()[20]) ==
                 "Matrix<SX>((((((-3*x2_1_0)+(5.53197*x2_1_1))+" +
