@@ -1019,8 +1019,17 @@ aspect CADCodeGen {
 	
 	//Methods to handle blocks starts here
 	
-	public void AbstractEquationBlock.genBlockResidualFunction_CAD(int block_counter, boolean inInit, String indent, PrintStream str) {
-		str.println(indent + "static int dae_" + (inInit ? "init_" : "") + "block_dir_der_" + block_counter + "(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {");
+	public void AbstractEquationBlock.genBlockResidualFunction_CAD(boolean inInitial, String outerIndent, PrintStream str) {
+		if (!genRequiresBlockResidualFunction_C())
+			return;
+		for (AbstractEquationBlock subBlock : genBlockResidualFunctionSubBlocks_C())
+			subBlock.genBlockResidualFunction_CAD(inInitial, outerIndent, str);
+		
+		str.format("%sstatic int dae_%sblock_dir_der_%d(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {\n",
+				outerIndent, (inInitial ? "init_" : ""), residualBlockNumber_C());
+		
+		String indent = ASTNode.printer_CAD.indent(outerIndent);
+		String innerIndent = ASTNode.printer_CAD.indent(indent);
 		
 		int i = 0;//TODO: This should be done in genVarDecls_CAD().
 		Set<ASTNode> visited = new HashSet<ASTNode>();
@@ -1029,94 +1038,91 @@ aspect CADCodeGen {
 			i += e.numScalarEquations();
 		}
 		
-		String normalIndent = ASTNode.printer_CAD.indent(indent);
-		String doubleIndent = ASTNode.printer_CAD.indent(normalIndent);
+		genVarDecls_CAD(str, indent, null);
 		
-		genVarDecls_CAD(str, normalIndent, null);
-		
-		str.print(normalIndent);
+		str.print(indent);
 		str.println("jmi_real_t** res = &residual;");
-		str.print(normalIndent);
+		str.print(indent);
 		str.println("jmi_real_t** dF = &dRes;");
-		str.print(normalIndent);
+		str.print(indent);
 		str.println("jmi_real_t** dz;");
 		
-		str.print(normalIndent);
+		str.print(indent);
 		str.println("if (evaluation_mode == JMI_BLOCK_INITIALIZE) {");
 		int var_counter = 0;
 		// Loop over all unsolved variables and write their value to x	
 		for (FVariable fv : iterationVariables()) {
-			str.print(doubleIndent);
+			str.print(innerIndent);
 			str.println("x["+var_counter+"] = " + fv.name_C() + ";");
 			var_counter++;
 		}
-		str.print(doubleIndent);
+		str.print(innerIndent);
 		str.println("return 0;");
 		
 		// If we should evaluate the block Jacobian, then use dz_active_variables as seed
-		str.print(normalIndent);
+		str.print(indent);
 		str.println("} else if (evaluation_mode == JMI_BLOCK_EVALUATE) {");
-		str.print(doubleIndent);
+		str.print(innerIndent);
 		str.println("dz = jmi->dz_active_variables;");
 		// Loop over all active variables and write the values in x to the z vector
 		var_counter = 0;
 		// Iteration is over the unsolved variables. 
 		for (FVariable fv : iterationVariables()) {
-			str.print(doubleIndent);
+			str.print(innerIndent);
 			str.println("(*dz)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];");
-			str.print(doubleIndent);
+			str.print(innerIndent);
 			str.println(fv.name_C() + " = x["+var_counter+"];");
 			var_counter++;
 		}
 		
 		// If we should evaluate the right hand side use global dz as seed
-		str.print(normalIndent);
+		str.print(indent);
 		str.println("} else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {");
-		str.print(doubleIndent);
+		str.print(innerIndent);
 		str.println("dz = jmi->dz;");
 		
 		// If we should write back directional derivatives then global use dz as seed
-		str.print(normalIndent);
+		str.print(indent);
 		str.println("} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {");
-		str.print(doubleIndent);
+		str.print(innerIndent);
 		str.println("dz = jmi->dz;");
 		// Code that stores the evaluated dz
 		// dz entries for the solved variables are updated below as well
 		var_counter = 0;
 		for (FVariable fv : iterationVariables()) {
-			str.print(doubleIndent);
+			str.print(innerIndent);
 			str.println("(*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];");
 			var_counter++;
 		}
-		str.print(normalIndent);
+		str.print(indent);
 		str.println("} else {");
-		str.print(doubleIndent);
+		str.print(innerIndent);
 		str.println("return -1;");
-		str.print(normalIndent);
+		str.print(indent);
 		str.println("}");
 		
 		Set<FAbstractEquation> visitedList = new HashSet<FAbstractEquation>();
 		// Generate dz_i seeds from solved equations and variables
-		genBlockResidualFunctionBeforeEqns_CAD(normalIndent, str, visitedList);
+		genBlockResidualFunctionBeforeEqns_CAD(indent, str, inInitial, visitedList);
 		
-		str.print(normalIndent);
+		str.print(indent);
 		str.println("if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {");
 		
 		// AD-code for residual equations
-		genBlockResidualFunctionEqns_CAD(new Enumerator(), doubleIndent, str, visitedList);
+		genBlockResidualFunctionEqns_CAD(new Enumerator(), innerIndent, str, visitedList);
 		
 		// Reset all variables. global dz is updated elsewhere and dz_active should
 		// always be reset so as not to cause incorrect seeds
 		for (FVariable fv : iterationVariables()) {
-			str.print(doubleIndent);
+			str.print(innerIndent);
 			str.println("(*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = 0;");
 		}
 		
-		str.print(normalIndent);
-		str.println("}");
-		str.print(normalIndent);
-		str.println("return 0;");
 		str.print(indent);
+		str.println("}");
+		str.print(indent);
+		str.println("return 0;");
+		str.print(outerIndent);
 		str.println("}");
 		str.println();
 	}
@@ -1205,7 +1211,7 @@ aspect CADCodeGen {
 	 * @param String indent,  used to get a consistently formated c-code
 	 * @param PrintStream str, the c-code is written to this stream
 	 */
-	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited) {
+	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
 	}
 	
 	/* Used to generate seeds w.r.t. the unsolved variables in a TornEquationBlock. 
@@ -1213,7 +1219,7 @@ aspect CADCodeGen {
 	 * @param PrintStream str, the c-code is written to this stream
 	 */
 	@Override
-	public void SolvedFunctionCallEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited) {
+	public void SolvedFunctionCallEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
 		equation().genAssignment_CAD(indent, str, visited, new HashSet<FVariable>(activeVars));
 	}
 	
@@ -1222,14 +1228,27 @@ aspect CADCodeGen {
 	 * @param PrintStream str, the c-code is written to this stream
 	 */
 	@Override
-	public void SolvedScalarEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited) {
+	public void SolvedScalarEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
 		equation().genSolvedBlock_CAD(fv,indent,str);
 	}
 	
 	@Override
-	public void TornEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited) {
+	public void TornEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
 		for (AbstractEquationBlock aeb : solvedBlocks)
-			aeb.genBlockResidualFunctionBeforeEqns_CAD(indent, str, visited);
+			aeb.genBlockResidualFunctionBeforeSubEqns_CAD(indent, str, inInitial, visited);
+	}
+	
+	/**
+	 * Prints solved equations during block printing
+	 */
+	public void AbstractEquationBlock.genBlockResidualFunctionBeforeSubEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+		genBlockResidualFunctionBeforeEqns_CAD(indent, str, inInitial, visited);
+	}
+	
+	@Override
+	public void NumericallySolvedScalarEquationBlock.genBlockResidualFunctionBeforeSubEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+		String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
+		str.format("%sjmi_ode_unsolved_block_dir_der(jmi, jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
 	}
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {

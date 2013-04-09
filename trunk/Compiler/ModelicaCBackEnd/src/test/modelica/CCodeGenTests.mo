@@ -8211,6 +8211,75 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end RecordTearingTest1;
 
+model LocalLoopTearingTest1
+	Real a, b, c;
+equation
+	20 = c * a;
+	23 = c * b;
+	c = a + b;
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="LocalLoopTearingTest1",
+			description="Tests generation of local loops in torn blocks",
+			generate_ode=true,
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			local_iteration_in_tearing=true,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_add_blocks_residual_functions$
+",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _b_1;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _b_1 = x[0];
+        (*res)[0] = _c_2 * _b_1 - (23);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _b_1 = x[0];
+    }
+    return 0;
+}
+
+static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _c_2;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _c_2 = x[0];
+        jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+        _a_0 = jmi_divide((- _c_2 + _b_1),(- 1.0),\"Divide by zero: (- c + b) / (- 1.0)\");
+        (*res)[0] = _c_2 * _a_0 - (20);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _c_2 = x[0];
+    }
+    return 0;
+}
+
+
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 1, 0, JMI_CONTINUOUS_VARIABILITY, JMI_KINSOL_SOLVER, 0);
+    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, 1, 0, JMI_CONTINUOUS_VARIABILITY, JMI_KINSOL_SOLVER, 1);
+
+")})));
+end LocalLoopTearingTest1;
+
 model NominalTest1
 	Real x[2], y[2];
 	parameter Boolean pEnabled = true;
