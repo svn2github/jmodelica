@@ -1825,12 +1825,16 @@ aspect ConstantEvaluation {
 	  for (FFunctionVariable var : myNonInputs())
 		  var.readEvaluationValue(values);
 	  
-	  fab.getFStatements().evaluateList(values);
-	  
-	  if (oldVal != null)
-		  for (CommonVariableDecl var : oldVal.keySet())
-			  var.readEvaluationValue(oldVal);
-	  currentEvaluationValues = oldVal;
+	  try {
+		  fab.getFStatements().evaluateList(values);
+	  } finally {
+		  for (FFunctionVariable var : getFFunctionVariables())
+			  var.setEvaluationValue(null);
+		  if (oldVal != null)
+			  for (CommonVariableDecl var : oldVal.keySet())
+				  var.readEvaluationValue(oldVal);
+		  currentEvaluationValues = oldVal;
+	  }
   }
   private Map<CommonVariableDecl, CValue> FFunctionDecl.currentEvaluationValues = null;
   
@@ -1855,6 +1859,8 @@ aspect ConstantEvaluation {
 	  
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
+	  for (InstComponentDecl var : getInstComponentDecls())
+		  var.setEvaluationValue(null);
 	  fab.prepareForFunctionEval();
 	  
 	  for (InstComponentDecl var : myInputs())
@@ -1862,12 +1868,16 @@ aspect ConstantEvaluation {
 	  for (InstComponentDecl var : myNonInputs())
 		  var.readEvaluationValue(values);
 	  
-	  fab.getFStatements().evaluateList(values);
-	  
-	  if (oldVal != null)
-		  for (CommonVariableDecl var : oldVal.keySet())
-			  var.readEvaluationValue(oldVal);
-	  currentEvaluationValues = oldVal;
+	  try {
+		  fab.getFStatements().evaluateList(values);
+	  } finally {
+		  for (InstComponentDecl var : getInstComponentDecls())
+			  var.setEvaluationValue(null);
+		  if (oldVal != null)
+			  for (CommonVariableDecl var : oldVal.keySet())
+				  var.readEvaluationValue(oldVal);
+		  currentEvaluationValues = oldVal;
+	  }
   }
   private Map<CommonVariableDecl, CValue> InstFullClassDecl.currentEvaluationValues = null;
   
