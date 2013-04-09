@@ -89,7 +89,6 @@ def run_demo(with_plots=True):
     xx_meas = integr.odeint(F,xx0,t_meas)
 
     # Add measurement noice
-    #noice = N.random.random(N_points_meas)*0.2-0.1
     noice = [0.01463904, 0.0139424, 0.09834249, 0.0768069, 0.01971631, 
         -0.03827911, 0.05266659, -0.02608245, 0.05270525, 0.04717024, 0.0779514,]
     xx_meas[:,0] = xx_meas[:,0] + noice
@@ -122,8 +121,6 @@ def run_demo(with_plots=True):
     opts['n_cp'] = 3
 
     opts['parameter_estimation_data'] = par_est_data
-    #opts['IPOPT_options']['derivative_test'] = 'second-order'
-    #opts['IPOPT_options']['max_iter'] = 0
 
     res_casadi = model_casadi.optimize(algorithm="LocalDAECollocationAlg", options=opts)
 
@@ -133,6 +130,10 @@ def run_demo(with_plots=True):
     w = res_casadi['sys.w']
     z = res_casadi['sys.z']
     t = res_casadi['time']
+    
+    assert N.abs(res_casadi.final('sys.x1') - 0.99953927) < 1e-3
+    assert N.abs(res_casadi.final('sys.w') - 1.04972186)  < 1e-3
+    assert N.abs(res_casadi.final('sys.z') - 0.4703822)   < 1e-3
 
     if with_plots:
         # Plot optimization result

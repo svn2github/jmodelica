@@ -54,7 +54,7 @@ def run_demo(with_plots=True):
     tau_c3 = res['clutch3.tau']
     t = res['time']
 
-    assert N.abs(w3[-1] - (2.46382546506)) < 1e-3
+    assert N.abs(res.final('J3.w') - (2.46382546506)) < 1e-3
 
     if with_plots:
         plt.figure(1)
@@ -68,3 +68,6 @@ def run_demo(with_plots=True):
         plt.legend(['clutch1.tau','clutch2.tau','clutch3.tau'])
         plt.xlabel('time [s]')
         plt.show()
+
+if __name__=="__main__":
+    run_demo()

@@ -1500,42 +1500,66 @@ aspect Attributes {
 	
 	public class FRealVariable {
 		public enum StateSelect {
-			NEVER, AVOID, DEFAULT, PREFER, ALWAYS
+			NEVER   (10L), 
+			AVOID   (10000L), 
+			DEFAULT (10000000L), 
+			PREFER  (10000000000L), 
+			ALWAYS  (10000000000000L);
+			
+			private long w;
+			
+			private StateSelect(long weight) {
+				w = weight;
+			}
+			
+			public long weight() {
+				return w;
+			}
 		}
 	}
 	
-	public static long FVariable.SS_NEVER_WEIGHT = 10L;
-	public static long FVariable.SS_AVOID_WEIGHT = 10000L;
-	public static long FVariable.SS_DEFAULT_WEIGHT = 10000000L;
-	public static long FVariable.SS_PREFER_WEIGHT = 10000000000L;
-	public static long FVariable.SS_ALWAYS_WEIGHT = 10000000000000L;
 	public static long FVariable.SS_UNMATCHED_WEIGHT = 10000000000000000L;
 	
 	syn long FVariable.stateSelectionWeight() = 0;
 	eq FRealVariable.stateSelectionWeight() {
-		FRealVariable frv = (FRealVariable)getMeIntegrated();
-		if (frv == null) {
-			return SS_DEFAULT_WEIGHT;	
-		}
-		if (frv.stateSelectAttribute() == StateSelect.NEVER) {
-			return SS_NEVER_WEIGHT;
-		} else if (frv.stateSelectAttribute() == StateSelect.AVOID) {
-			return SS_AVOID_WEIGHT;
-		} else if (frv.stateSelectAttribute() == StateSelect.DEFAULT) {
-			return SS_DEFAULT_WEIGHT;
-		} else if (frv.stateSelectAttribute() == StateSelect.PREFER) {
-			return SS_PREFER_WEIGHT;
-		} else if (frv.stateSelectAttribute() == StateSelect.ALWAYS) {
-			return SS_ALWAYS_WEIGHT;
-		} else {
-			return SS_UNMATCHED_WEIGHT;
-		}
+		FRealVariable frv = (FRealVariable) getMeIntegrated();
+		StateSelect ss = (frv == null) ? StateSelect.DEFAULT : frv.stateSelectAttribute();
+		return ss.weight();
 	}
 	
 	public void FVariable.warnStartAttributeNotSet() {
 		if (!startAttributeSet())
 			warning("Iteration variable \"" + name() + "\" is missing start value!");
 	}
+	
+	
+	/**
+	 * Check if this attribute is in an FVariable.
+	 */
+	inh boolean FAttribute.isInFV();
+	eq FVariable.getChild().isInFV()    = true;
+	eq FDerivedType.getChild().isInFV() = false;
+	
+	/**
+	 * Check if this attribute is in a specific FVariable.
+	 */
+	inh boolean FAttribute.isInFV(FVariable fv);
+	eq FVariable.getChild().isInFV(FVariable fv)    = fv == this;
+	eq FDerivedType.getChild().isInFV(FVariable fv) = false;
+	
+	/**
+	 * Check if this attribute is in an FDerivedType.
+	 */
+	inh boolean FAttribute.isInDerivedType();
+	eq FVariable.getChild().isInDerivedType()    = false;
+	eq FDerivedType.getChild().isInDerivedType() = true;
+	
+	/**
+	 * Check if this attribute is in a specific FDerivedType.
+	 */
+	inh boolean FAttribute.isInDerivedType(FDerivedType t);
+	eq FVariable.getChild().isInDerivedType(FDerivedType t)    = false;
+	eq FDerivedType.getChild().isInDerivedType(FDerivedType t) = t == this;
 	
 }
 
@@ -2351,14 +2375,69 @@ aspect FlatDiagnostics {
 		
 	}
 	
-  public String FClass.printDAEBLT() {
-  	return getDAEBLT().toString();
-  }	
+	public String FClass.printDAEBLT() {
+		return getDAEBLT().toString();
+	}
 
-  public String FClass.printDAEInitBLT() {
-  	return getDAEInitBLT().toString();
-  }	
-	
+	public String FClass.printDAEInitBLT() {
+		return getDAEInitBLT().toString();
+	}
+
+
+	syn String FClass.attributeLevels() {
+		StringBuilder str = new StringBuilder();
+		str.append("Variables:\n");
+		for (FVariable v : getFVariables())
+			v.attributeLevels(str);
+		for (FVariable v : getAliasVariables())
+			v.attributeLevels(str);
+		if (getNumFDerivedType() > 0) {
+			str.append("\nTypes:\n");
+			for (FDerivedType t : getFDerivedTypes())
+				t.attributeLevels(str);
+		}
+		return str.toString();
+	}
+
+	public void FVariable.attributeLevels(StringBuilder str) {
+		str.append("  ");
+		str.append(name());
+		attributeLevelsForList(getFAttributes(), str);
+		str.append("\n");
+	}
+
+	public void FDerivedType.attributeLevels(StringBuilder str) {
+		str.append("  ");
+		str.append(getName());
+		attributeLevelsForList(getFAttributes(), str);
+		str.append("\n");
+	}
+
+	public void FAttribute.attributeLevels(StringBuilder str) {
+		str.append(name());
+		str.append(":");
+		str.append(getLevel());
+		attributeLevelsForList(getFAttributes(), str);
+		if (hasValue()) {
+			str.append("=");
+			str.append(getValue());
+		}
+	}
+
+	public static void ASTNode.attributeLevelsForList(List<FAttribute> l, StringBuilder str) {
+		if (l.getNumChild() > 0) {
+			str.append("(");
+			String sep = ", ";
+			String pref = "";
+			for (FAttribute a : l) {
+				str.append(pref);
+				a.attributeLevels(str);
+				pref = sep;
+			}
+			str.append(")");
+		}
+	}
+
 }
 
 aspect FlatAlgorithmAPI {

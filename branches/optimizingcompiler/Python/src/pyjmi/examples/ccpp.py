@@ -203,7 +203,7 @@ def run_demo(with_plots=True):
         plt.show()
     
     # Verify solution for testing purposes
-    N.testing.assert_allclose(opt_plant_p[-1], sim_plant_p[-1], rtol=5e-3)
+    N.testing.assert_allclose(opt_res.final('plant.p'), sim_res.final('plant.p'), rtol=5e-3)
 
 if __name__=="__main__":
     run_demo()

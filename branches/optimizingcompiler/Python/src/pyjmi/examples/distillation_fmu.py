@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 # Import library for path manipulations
-import os.path
+import os
 
 # Import numerical libraries
 import numpy as N
@@ -46,12 +46,13 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
     # Compile the stationary initialization model into a JMU
-    fmu_name = compile_fmu("DISTLib.Examples.Simulation", 
-        curr_dir+"/files/DISTLib.mo")
+    fmu_name = compile_fmu('DISTLib.Examples.Simulation', 
+        os.path.join(curr_dir, 'files', 'DISTLib.mo'))
 
     # Load a model instance into Python
     model = load_fmu(fmu_name)
     
+    # Simulate
     res = model.simulate(final_time=200)
 
     x_16 = res['binary_dist_initial.x[16]']
@@ -59,11 +60,14 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     x_32 = res['binary_dist_initial.x[32]']
     y_32 = res['binary_dist_initial.y[32]']
     t = res['time']
-        
+
+    assert N.abs(res.final('binary_dist_initial.x[16]') - 0.49931368) < 1e-3
+    assert N.abs(res.final('binary_dist_initial.y[16]') - 0.61473464) < 1e-3
+    assert N.abs(res.final('binary_dist_initial.x[32]') - 0.18984724) < 1e-3
+    assert N.abs(res.final('binary_dist_initial.y[32]') - 0.27269352) < 1e-3
 
     # Plot the results
     if with_plots:
-
         plt.figure(1)
         plt.clf()
         plt.subplot(2,1,1)
@@ -79,7 +83,6 @@ def run_demo(with_plots=True,with_blocking_factors = False):
         plt.title('Vapor composition')
         plt.grid(True)
         plt.show()
-
 
 if __name__ == "__main__":
     run_demo()

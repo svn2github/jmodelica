@@ -22,8 +22,7 @@ import matplotlib.pyplot as plt
 import nose
 
 from pymodelica import compile_fmu
-from pyfmi import FMUModel,load_fmu
-
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """
@@ -32,8 +31,7 @@ def run_demo(with_plots=True):
     """
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    fmu_name = compile_fmu("Robertson",curr_dir+"/files/Robertson.mo")
-        
+    fmu_name = compile_fmu("Robertson", curr_dir+"/files/Robertson.mo")
         
     model = load_fmu(fmu_name)
         

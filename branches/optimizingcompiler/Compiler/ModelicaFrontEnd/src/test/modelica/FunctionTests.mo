@@ -7564,4 +7564,36 @@ end FunctionTests.ComponentFunc1;
 end ComponentFunc1;
 
 
+model MinOnInput1
+    function F
+        input Real x(min=0) = 3.14;
+        output Real y;
+    algorithm
+        y := x * 42;
+    end F;
+	
+    Real y = F();
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="MinOnInput1",
+			description="Test that default arguments are correctly identified with modification on input",
+			flatModel="
+fclass FunctionTests.MinOnInput1
+ Real y = FunctionTests.MinOnInput1.F(3.14);
+
+public
+ function FunctionTests.MinOnInput1.F
+  input Real x := 3.14;
+  output Real y;
+ algorithm
+  y := x * 42;
+  return;
+ end FunctionTests.MinOnInput1.F;
+
+end FunctionTests.MinOnInput1;
+")})));
+end MinOnInput1;
+
+
 end FunctionTests;

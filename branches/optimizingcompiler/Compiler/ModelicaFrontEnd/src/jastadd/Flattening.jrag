@@ -741,7 +741,7 @@ aspect Flattening {
 			if (create && list.getNumChild() > 0) {
 				a = new FAttribute(new FIdUse(icd.getClassName().flatten(new FQNameEmpty())), 
 						new FIdDecl(new FQNameString(icd.name())), 
-						new Opt(), true, new Opt(), new Opt(), list);
+						new Opt(), true, 0, new Opt(), new Opt(), list);
 				attr.add(a);
 			}
 		}
@@ -1091,7 +1091,7 @@ aspect Flattening {
 			if (!attr_set && (cls || !im.isOnPrimitiveTypeDecl())) {
 				FIdUse typeName = new FIdUse(getName().myInstComponentDecl().myInstClass().name());
 				FIdDecl name = new FIdDecl(new FQNameString(getName().name()));
-				FAttribute a = new FAttribute(typeName, name, true);
+				FAttribute a = new FAttribute(typeName, name, true, modificationLevel());
 				boolean isEach = getComponentModification().hasEach();
 				boolean isFinal = getComponentModification().hasFinal();
 				if (getInstModification().hasInstValueMod()) {

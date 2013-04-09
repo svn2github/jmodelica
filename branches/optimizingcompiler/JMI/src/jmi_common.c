@@ -1544,11 +1544,11 @@ jmi_real_t* jmi_get_integer_u(jmi_t* jmi) {
 }
 
 jmi_real_t* jmi_get_boolean_d(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_integer_d;
+	return *(jmi->z_val) + jmi->offs_boolean_d;
 }
 
 jmi_real_t* jmi_get_boolean_u(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_integer_u;
+	return *(jmi->z_val) + jmi->offs_boolean_u;
 }
 
 int jmi_get_output_vrefs(jmi_t *jmi, int *output_vrefs) {

@@ -22,13 +22,17 @@
 #include "jmi_ode_euler.h"
 
 
-int jmi_new_ode_solver(jmi_t* jmi, jmi_ode_solvers_t solver, jmi_ode_rhs_func_t rhs_fcn, jmi_ode_root_func_t root_fcn){
+int jmi_new_ode_solver(jmi_t* jmi, jmi_ode_solvers_t solver, jmi_ode_rhs_func_t rhs_fcn, jmi_ode_root_func_t root_fcn, jmi_int_t n_real_x, jmi_int_t n_sw, jmi_real_t t_start, void* user_data){
 	int flag = 0;
 	jmi_ode_solver_t* b = (jmi_ode_solver_t*)calloc(1,sizeof(jmi_ode_solver_t));
 
     if(!b) return -1;
 
 	b->jmi = jmi;
+    b->n_real_x = n_real_x;
+    b->n_sw = n_sw;
+    b->t_start = t_start;
+    b->user_data = user_data;
 	jmi->ode_solver = b;
 
     switch(solver) {

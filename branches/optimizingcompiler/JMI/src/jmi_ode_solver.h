@@ -55,16 +55,20 @@ typedef int (*jmi_ode_root_func_t)(void *, jmi_real_t t, jmi_real_t* y, jmi_real
 
 struct jmi_ode_solver_t {
 	jmi_t *jmi;                    /**< \brief A pointer to the corresponding jmi_t struct */
-
+    void *user_data;
+    
     void *integrator;
     jmi_ode_solve_func_t solve;
     jmi_ode_delete_func_t delete_solver;
     jmi_ode_rhs_func_t rhs_fcn;
     jmi_ode_root_func_t root_fcn;
     jmi_real_t tout;  /**< \brief Value indicating which time the integrator integrated up to*/
+    jmi_int_t n_real_x;
+    jmi_int_t n_sw;
+    jmi_real_t t_start;
 };
 
-int jmi_new_ode_solver(jmi_t* jmi, jmi_ode_solvers_t solver,jmi_ode_rhs_func_t rhs, jmi_ode_root_func_t root);
+int jmi_new_ode_solver(jmi_t* jmi, jmi_ode_solvers_t solver,jmi_ode_rhs_func_t rhs, jmi_ode_root_func_t root, jmi_int_t n_real_x, jmi_int_t n_sw, jmi_real_t t_start, void* user_data);
 void jmi_delete_ode_solver(jmi_t* jmi);
 
 #ifdef __cplusplus

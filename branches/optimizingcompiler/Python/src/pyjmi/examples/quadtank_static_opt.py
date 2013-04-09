@@ -55,8 +55,7 @@ def run_demo(with_plots=True):
     print "a2: %2.2e (nominal: %2.2e)" % (qt_static.get("a2"),a2_nom)
 
     assert N.abs(qt_static.get("a1") - 7.95797110936e-06) < 1e-3 
-
     assert N.abs(qt_static.get("a2") - 7.73425542448e-06) < 1e-3
 
-    if __name__ == "__main__":
-        run_demo()
+if __name__ == "__main__":
+    run_demo()

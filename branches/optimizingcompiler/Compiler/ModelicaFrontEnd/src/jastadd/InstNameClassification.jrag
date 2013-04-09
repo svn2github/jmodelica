@@ -117,16 +117,13 @@ aspect InstNameClassification {
 	eq InstSimpleShortClassDecl.getTarget().kind()        = Kind.CLASS_ACCESS;	
 
 	/**
-	 * Check if this modification has a value modification.
+	 * Check if this modification has (or is) a value modification.
 	 */
-	syn boolean InstComponentModification.hasValue() = 
-		hasInstModification() && getInstModification().isValue();
+	syn boolean InstModification.hasValue() = false;
+	eq InstValueModification.hasValue()     = true;
+	eq InstComponentModification.hasValue() = hasInstModification() && getInstModification().hasValue();
+	eq InstCompleteModification.hasValue()  = hasInstValueModification();
 	
-	/**
-	 * Check if this is a value modification.
-	 */
-	syn boolean InstModification.isValue() = false;
-	eq InstValueModification.isValue()     = true;
 }
 
 aspect InstResolveAmbiguousNames {

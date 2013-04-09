@@ -69,9 +69,9 @@ class TestExternalStatic:
         model = load_fmu(fmu_name)
         res = model.simulate()
         
-        nose.tools.assert_equals(res['myResult[1]'][-1], 2) 
-        nose.tools.assert_equals(res['myResult[2]'][-1], 4)
-        nose.tools.assert_equals(res['myResult[3]'][-1], 6)
+        nose.tools.assert_equals(res.final('myResult[1]'), 2) 
+        nose.tools.assert_equals(res.final('myResult[2]'), 4)
+        nose.tools.assert_equals(res.final('myResult[3]'), 6)
         
 class TestUtilities:
     @classmethod

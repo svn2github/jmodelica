@@ -20,8 +20,8 @@ import os
 import numpy as N
 import pylab as p
 
-from pymodelica import compile_jmu
-from pyjmi import JMUModel
+from pymodelica import compile_fmu
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """
@@ -34,10 +34,10 @@ def run_demo(with_plots=True):
     model_name = 'VDP_pack.VDP'
     mofile = curr_dir+'/files/VDP.mop'
 
-    jmu_name = compile_jmu(model_name,mofile)
+    fmu_name = compile_fmu(model_name,mofile)
 
     # Compile and load model
-    model = JMUModel(jmu_name)
+    model = load_fmu(fmu_name)
 
     # Define initial conditions
     N_points = 11
@@ -57,14 +57,20 @@ def run_demo(with_plots=True):
         # Set initial conditions in model
         model.set('x1_0',x1_0[i])
         model.set('x2_0',x2_0[i])
+        
         # Simulate 
         res = model.simulate(final_time=20)
+        
         # Get simulation result
         x1=res['x1']
         x2=res['x2']
+        
         # Plot simulation result in phase plane plot
         if with_plots:
             p.plot(x1, x2,'b')
+    
+    assert N.abs(res.final('x1') - 1.75293937)     < 1e-3
+    assert N.abs(res.final('x2') + 3.98830742e-01) < 1e-3
 
     if with_plots:
         p.grid()

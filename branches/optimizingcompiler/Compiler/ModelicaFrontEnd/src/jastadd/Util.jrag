@@ -1116,6 +1116,7 @@ aspect FlatNames {
     syn String FClass.name()        = getFQNameNoTransform().name();
     syn String FFunctionDecl.name() = getFQNameNoTransform().name();
     syn String FRecordDecl.name()   = getFQNameNoTransform().name();
+    syn String FAttribute.name()    = getName().name();
     
     syn String FAbstractFunctionCall.name();
     eq InstFunctionCall.name()     = getNameNoTransform().name();

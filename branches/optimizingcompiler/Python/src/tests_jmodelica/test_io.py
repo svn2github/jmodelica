@@ -114,7 +114,7 @@ class TestIO:
         assert max(N.abs(traj[:,3]-res.get_variable_data('x1').x))<1e-12
 
         # Check that the value of the cost function is correct
-        assert N.abs(p_opt[0]-2.2811587)<1e-5
+        assert N.abs(p_opt[0] - 2.2811587) < 1e-5
 
     @testattr(assimulo = True)
     def test_parameter_alias(self):
@@ -167,8 +167,8 @@ class TestIO:
         
         col = res.get_column('capacitor.v')
         
-        nose.tools.assert_almost_equal(dataMatrix[0,col], res['capacitor.v'][0],5)
-        nose.tools.assert_almost_equal(dataMatrix[-1,col], res['capacitor.v'][-1],5)
+        nose.tools.assert_almost_equal(dataMatrix[0,col], res.initial('capacitor.v'),5)
+        nose.tools.assert_almost_equal(dataMatrix[-1,col], res.final('capacitor.v'),5)
         
         nose.tools.assert_raises(VariableNotTimeVarying, res.get_column, 'sine.freqHz')
 
@@ -188,7 +188,7 @@ class TestIO:
 
         time_shifted = res['time']
 
-        assert max(N.abs(time_shifted_fix-time_shifted))<1e-6
+        assert max(N.abs(time_shifted_fix - time_shifted)) < 1e-6
 
 class test_ResultWriterDymola:
     """Tests the class ResultWriterDymola."""

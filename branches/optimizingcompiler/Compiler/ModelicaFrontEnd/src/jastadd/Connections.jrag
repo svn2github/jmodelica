@@ -77,27 +77,63 @@ aspect Connections {
 			}
 		}
 	}
+	
+	/**
+	 * Check if this expression is multiplied with the given variable.
+	 */
+	inh boolean FExp.isMultipliedWith(FVariable v);
+	eq BaseNode.getChild().isMultipliedWith(FVariable v)   = false;
+	eq FDotMulExp.getRight().isMultipliedWith(FVariable v) = getLeft().isMultiplicationOf(v) || isMultipliedWith(v);
+	eq FDotMulExp.getLeft().isMultipliedWith(FVariable v)  = getRight().isMultiplicationOf(v) || isMultipliedWith(v);
+	
+	/**
+	 * Check if this expression is an access to v or a multiplication where one of the 
+	 * multiplicands is an access to v.
+	 */
+	syn boolean FExp.isMultiplicationOf(FVariable v) = false;
+	eq FIdUseExp.isMultiplicationOf(FVariable v)     = v == myFV();
+	eq FDotMulExp.isMultiplicationOf(FVariable v)    = 
+		getLeft().isMultiplicationOf(v) || getRight().isMultiplicationOf(v);
 
 	rewrite FActualStream {
 		when (rewriteStreams) to FExp {
-			// 1) Get the stream variable name prefix
-			FQName var_name = ((FIdUseExp)getFExp()).getFIdUse().getFQName();
-			FQName prefix = var_name.copyPrefix();
+			// Get the stream variable name prefix
+			FQName varName = ((FIdUseExp) getFExp()).getFIdUse().getFQName();
+			FQName prefix = varName.copyPrefix();
 			ArrayList<ConnectionSetEntry> cses = 
 				myFClass().getConnectionSetManager().getFlowVariables(prefix.name());
-			if (cses.size()==1) { // This condition should be checked earlier
-				// 2) Get the name of the flow variable of the connector,
-				//    there should only be one.
-				FQName flow_var_name = cses.get(0).getFQName();
-				// 3) Generate the expression
-				FInStream then_exp = new FInStream(var_name.createFIdUseExp());
-				then_exp.rewriteStreams = true; // Enable further rewrite of the inStream operator.
-				FIdUseExp else_exp = var_name.createFIdUseExp();
-				FGtExp guard = new FGtExp(flow_var_name.createFIdUseExp(),new FRealLitExp(0));
-				FIfExp if_exp = new FIfExp(guard,then_exp,else_exp);
-				return new FNoEventExp(if_exp);
+			if (cses.size() == 1) {
+				// Get the name of the single flow variable of the connector, then get the variables.
+				FQName flowVarName = cses.get(0).getFQName();
+				FRealVariable var = (FRealVariable) lookupFV(varName);
+				FRealVariable flowVar = (FRealVariable) lookupFV(flowVarName);
+				
+				// Decide what parts are valid
+				boolean constant = flowVar.isConstant();
+				double min = constant ? flowVar.ceval().realValue() : flowVar.minAttribute();
+				double max = constant ? min : flowVar.maxAttribute();
+				boolean badMinMax = min > max;
+				boolean thenValid = badMinMax || max > 0.0;
+				boolean elseValid = badMinMax || min < 0.0 || 
+						(min == 0.0 && thenValid && !isMultipliedWith(flowVar));
+				
+				// Generate the expression
+				FExp res = null, elseExp = null;
+				FInStream thenExp = null;
+				if (thenValid) {
+					res = thenExp = new FInStream(var.createUseExp());
+					thenExp.rewriteStreams = true; // Enable further rewrite of the inStream operator.
+				}
+				if (elseValid) 
+					res = elseExp = var.createUseExp();
+				if (thenValid && elseValid) {
+					FExp guard = new FGtExp(flowVar.createUseExp(), new FRealLitExp(0.0));
+					res = new FNoEventExp(new FIfExp(guard, thenExp, elseExp));
+				}
+				return res;
 			}
-			throw new UnsupportedOperationException("Rewriting actualStream() for '" + var_name.name() + 
+			// There should already have been an error message in this case, so we should never come here.
+			throw new UnsupportedOperationException("Rewriting actualStream() for '" + varName.name() + 
 					"': found " + cses.size() + " matching flow variables");
 		}
 	}

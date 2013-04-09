@@ -599,22 +599,22 @@ class TestLocalDAECollocator:
         opts['init_traj'] = sim_res.result_data
         opts['parameter_estimation_data'] = par_est_data
         opt_res = opt_model.optimize(self.algorithm, options=opts)
-        N.testing.assert_allclose(1e4 * N.array([opt_res["qt.a1"],
-                                                 opt_res["qt.a2"]]), a_ref)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]), a_ref)
         
         # Optimize with second input eliminated
         opts['parameter_estimation_data'] = par_est_data_input
         u2_input = N.transpose(N.vstack((t_meas, u2)))
         opts['input'] = ('u2', u2_input)
         opt_res = opt_model.optimize(self.algorithm, opts)
-        N.testing.assert_allclose(1e4 * N.array([opt_res["qt.a1"],
-                                                 opt_res["qt.a2"]]), a_ref)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]), a_ref)
         
         # Optimize with second input eliminated and nominal trajectories
         opts['nominal_traj'] = sim_res.result_data
         opt_res = opt_model.optimize(self.algorithm, opts)
-        N.testing.assert_allclose(1e4 * N.array([opt_res["qt.a1"],
-                                                 opt_res["qt.a2"]]),
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
                                   a_ref, 1e-4)
         
         # Optimize with first input eliminated
@@ -622,8 +622,8 @@ class TestLocalDAECollocator:
         u1_input = N.transpose(N.vstack((t_meas, u1)))
         opts['input'] = ('u1', u1_input)
         opt_res = opt_model.optimize(self.algorithm, opts)
-        N.testing.assert_allclose(1e4 * N.array([opt_res["qt.a1"],
-                                                 opt_res["qt.a2"]]),
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
                                   a_ref, 1e-4)
         
         # Point constraint on specified input
@@ -880,6 +880,31 @@ class TestLocalDAECollocator:
         c_scaled = res['cstr.c']
         N.testing.assert_allclose(c_unscaled, 500. * c_scaled,
                                   rtol=0, atol=1e-5)
+    
+    @testattr(casadi = True)
+    def test_result_file_name(self):
+        """
+        Test different result file names.
+        """
+        model = self.model_vdp_bounds_lagrange
+        
+        # Default file name
+        try:
+            os.remove("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt")
+        except OSError:
+            pass
+        model.optimize(self.algorithm)
+        assert(os.path.exists("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt"))
+        
+        # Custom file name
+        opts = model.optimize_options(self.algorithm)
+        opts['result_file_name'] = "vdp_custom_file_name.txt"
+        try:
+            os.remove("vdp_custom_file_name.txt")
+        except OSError:
+            pass
+        model.optimize(self.algorithm, opts)
+        assert(os.path.exists("vdp_custom_file_name.txt"))
     
     @testattr(casadi = True)
     def test_result_mode(self):
@@ -1230,7 +1255,7 @@ class TestLocalDAECollocator:
         # Simulate
         opt_input = opt_res.solver.get_opt_input()
         res = model.simulate(start_time=0., final_time=150., input=opt_input)
-        N.testing.assert_allclose([res["T"][-1], res["c"][-1]],
+        N.testing.assert_allclose([res.final("T"), res.final("c")],
                                   [284.62140206, 345.22510435], rtol=1e-5)
 
 class TestPseudoSpectral:
@@ -1269,37 +1294,28 @@ class TestPseudoSpectral:
         opts['discr'] = "LG"
         res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
-        y1 = res["y1"]
-        y2 = res["y2"]
-        u = res["u"]
-        time = res["time"]
-        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
-        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
-        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+
+        nose.tools.assert_almost_equal(res.final("y1"), 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(res.final("y2"), 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(res.final("u"), 0.498341205247, places=5)
         
         #Test LGR points
         opts['discr'] = "LGR"
         res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
-        y1 = res["y1"]
-        y2 = res["y2"]
-        u = res["u"]
-        time = res["time"]
-        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
-        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
-        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+
+        nose.tools.assert_almost_equal(res.final("y1"), 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(res.final("y2"), 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(res.final("u"), 0.498341205247, places=5)
         
         #Test LGL points
         opts['discr'] = "LGL"
         res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
-        y1 = res["y1"]
-        y2 = res["y2"]
-        u = res["u"]
-        time = res["time"]
-        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
-        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
-        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+
+        nose.tools.assert_almost_equal(res.final("y1"), 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(res.final("y2"), 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(res.final("u"), 0.498341205247, places=5)
     
     @testattr(casadi = True)
     def test_two_state_init_traj(self):
@@ -1320,39 +1336,30 @@ class TestPseudoSpectral:
         opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
         res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
-        y1 = res["y1"]
-        y2 = res["y2"]
-        u = res["u"]
-        time = res["time"]
-        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
-        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
-        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+
+        nose.tools.assert_almost_equal(res.final("y1"), 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(res.final("y2"), 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(res.final("u"), 0.498341205247, places=5)
         
         #Test LGL points
         opts['discr'] = "LGL"
         opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
         res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
-        y1 = res["y1"]
-        y2 = res["y2"]
-        u = res["u"]
-        time = res["time"]
-        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
-        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
-        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+
+        nose.tools.assert_almost_equal(res.final("y1"), 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(res.final("y2"), 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(res.final("u"), 0.498341205247, places=5)
         
         #Test LGR points
         opts['discr'] = "LGR"
         opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
         res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
-        y1 = res["y1"]
-        y2 = res["y2"]
-        u = res["u"]
-        time = res["time"]
-        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
-        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
-        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+
+        nose.tools.assert_almost_equal(res.final("y1"), 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(res.final("y2"), 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(res.final("u"), 0.498341205247, places=5)
     
     @testattr(casadi = True)
     def test_doubleintegrator(self):
@@ -1413,22 +1420,19 @@ class TestPseudoSpectral:
         opts['discr'] = "LG"
         res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectralAlg",
                                       options=opts)
-        cost = res["cost"]
-        nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
+        nose.tools.assert_almost_equal(res.final("cost"), 2.3463724e1, places=1)
         
         #Test LGR points
         opts['discr'] = "LGR"
         res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectralAlg",
                                       options=opts)
-        cost = res["cost"]
-        nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
+        nose.tools.assert_almost_equal(res.final("cost"), 2.3463724e1, places=1)
         
         #Test LGL points
         opts['discr'] = "LGL"
         res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectralAlg",
                                       options=opts)
-        cost = res["cost"]
-        nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
+        nose.tools.assert_almost_equal(res.final("cost"), 2.3463724e1, places=1)
         """
         opts['n_e'] = 20
         opts['n_cp'] = 6

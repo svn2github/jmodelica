@@ -21,7 +21,8 @@ from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
 import numpy as N
 
-from pymodelica import compile_jmu
+from pymodelica import compile_jmu, compile_fmu
+from pyfmi import load_fmu
 from pyjmi import JMUModel
 from pyjmi.common.core import TrajectoryLinearInterpolation
 
@@ -87,12 +88,12 @@ def run_demo(with_plots=True):
     # Build input trajectory matrix for use in simulation
     u = N.transpose(N.vstack((t_meas,u1,u2)))
 
-    # compile JMU
-    jmu_name = compile_jmu('QuadTankPack.Sim_QuadTank', 
+    # compile FMU
+    fmu_name = compile_fmu('QuadTankPack.Sim_QuadTank', 
         curr_dir+'/files/QuadTankPack.mop')
 
     # Load model
-    model = JMUModel(jmu_name)
+    model = load_fmu(fmu_name)
     
     # Simulate model response with nominal parameters
     res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60)
@@ -154,8 +155,8 @@ def run_demo(with_plots=True):
     res = qt_par_est.optimize(options=opt_opts)
 
     # Extract optimal values of parameters
-    a1_opt = res["qt.a1"]
-    a2_opt = res["qt.a2"]
+    a1_opt = res.final("qt.a1")
+    a2_opt = res.final("qt.a2")
 
     # Print optimal parameter values
     print('a1: ' + str(a1_opt*1e4) + 'cm^2')
@@ -207,10 +208,10 @@ def run_demo(with_plots=True):
     res_opt2 = qt_par_est2.optimize(options=opt_opts)
 
     # Get optimal parameter values
-    a1_opt2 = res_opt2["qt.a1"]
-    a2_opt2 = res_opt2["qt.a2"]
-    a3_opt2 = res_opt2["qt.a3"]
-    a4_opt2 = res_opt2["qt.a4"]
+    a1_opt2 = res_opt2.final("qt.a1")
+    a2_opt2 = res_opt2.final("qt.a2")
+    a3_opt2 = res_opt2.final("qt.a3")
+    a4_opt2 = res_opt2.final("qt.a4")
 
     # Print optimal parameter values 
     print('a1:' + str(a1_opt2*1e4) + 'cm^2')
@@ -408,7 +409,6 @@ def run_demo(with_plots=True):
     print "a2: " + str(sens_res['a2']) + ", standard deviation: " + str(sigma_a2)
     print "a3: " + str(sens_res['a3']) + ", standard deviation: " + str(sigma_a3)
     print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
-
 
 
 if __name__=="__main__":

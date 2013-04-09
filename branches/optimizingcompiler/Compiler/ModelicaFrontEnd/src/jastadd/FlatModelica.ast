@@ -426,6 +426,7 @@ FAttribute : BaseNode ::= Type:FIdUse
                           Name:FIdDecl 			   
                           [Value:FExp]
                           <AttributeSet:boolean>
+                          <Level:int>
                           [FEach]
                           [FFinal]
                           FAttribute*;
@@ -735,8 +736,8 @@ abstract FExp : BaseNode ::= /Array/;
 /**
  * \brief Abstract base class for all flattened expressions that is not literal or unsupported.
  */
-
 abstract FAbstractExp : FExp;
+
 /**
  * \brief Abstract base class for all flattened scalar expressions.
  */

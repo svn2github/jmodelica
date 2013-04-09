@@ -21,13 +21,12 @@ from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
 import numpy as N
 
-from pymodelica import compile_jmu
+from pymodelica import compile_fmu
 from pymodelica import compile_fmux
-from pyjmi import JMUModel
+from pyfmi import load_fmu
 from pyjmi import CasadiModel
 from pyjmi.common.core import TrajectoryLinearInterpolation
 from pyjmi.optimization.casadi_collocation import ParameterEstimationData
-
 
 def run_demo(with_plots=True):
     """
@@ -91,12 +90,12 @@ def run_demo(with_plots=True):
     # Build input trajectory matrix for use in simulation
     u = N.transpose(N.vstack((t_meas,u1,u2)))
 
-    # compile JMU
-    jmu_name = compile_jmu('QuadTankPack.Sim_QuadTank', 
+    # compile FMU
+    fmu_name = compile_fmu('QuadTankPack.Sim_QuadTank', 
         curr_dir+'/files/QuadTankPack.mop')
 
     # Load model
-    model = JMUModel(jmu_name)
+    model = load_fmu(fmu_name)
     
     # Simulate model response with nominal parameters
     res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60)
@@ -110,6 +109,13 @@ def run_demo(with_plots=True):
     
     u1_sim = res['u1']
     u2_sim = res['u2']
+    
+    assert N.abs(res.final('qt.x1') - 0.05642485) < 1e-3
+    assert N.abs(res.final('qt.x2') - 0.05510478) < 1e-3
+    assert N.abs(res.final('qt.x3') - 0.02736532) < 1e-3
+    assert N.abs(res.final('qt.x4') - 0.02789808) < 1e-3
+    assert N.abs(res.final('u1') - 6.0)           < 1e-3
+    assert N.abs(res.final('u2') - 5.0)           < 1e-3
 
     # Plot simulation result
     if with_plots:
@@ -187,6 +193,13 @@ def run_demo(with_plots=True):
     # Print optimal parameter values
     print('a1: ' + str(a1_opt*1e4) + 'cm^2')
     print('a2: ' + str(a2_opt*1e4) + 'cm^2')
+    
+    assert N.abs(res.final('qt.x1') - 0.0707102)  < 1e-3
+    assert N.abs(res.final('qt.x2') - 0.06655758) < 1e-3
+    assert N.abs(res.final('qt.x3') - 0.02736501) < 1e-3
+    assert N.abs(res.final('qt.x4') - 0.02789977) < 1e-3
+    assert N.abs(res.final('u1') - 6.0)           < 1e-3
+    assert N.abs(res.final('u2') - 5.0)           < 1e-3
 
     # Plot
     if with_plots:
@@ -206,8 +219,6 @@ def run_demo(with_plots=True):
         plt.subplot(2,1,2)
         plt.plot(t_opt,u2_opt,'k')
         plt.show()
-
-
 
 if __name__=="__main__":
     run_demo()

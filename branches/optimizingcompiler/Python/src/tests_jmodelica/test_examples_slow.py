@@ -31,4 +31,13 @@ def test_cstr_mpc():
 def test_distillation():
     """ Test the distillation example. """  
     distillation.run_demo(False)
-	
+    
+@testattr(slow = True)
+def test_furuta_modified():
+    """ Test the furuta_modified example. """
+    furuta_modified.run_demo(False)
+
+@testattr(slow = True)
+def test_furuta_dfo():
+    """ Test the furuta_dfo example. """
+    furuta_dfo.run_demo(False)

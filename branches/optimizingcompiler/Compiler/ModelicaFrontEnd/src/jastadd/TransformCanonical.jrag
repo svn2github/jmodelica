@@ -74,13 +74,13 @@ aspect TransformCanonical {
 	  *  done by both the Modelica and the Optimica compilers.
 	  */
 	public void FClass.transformCanonicalBase() {
+        enableIfEquationElimination();
 		addStateInitialEquationsIfSet();
 		genAlgorithmFunctions();
 		genBindingEquations();
 		scalarize();
 		propagateResidualPairs();
 		genInitArrayStatements();
-        enableIfEquationElimination();
 		functionInliningIfSet();
 		aliasEliminationIfSet();
 		addFDerivativeVariables();
@@ -1691,7 +1691,7 @@ aspect TransformCanonical {
 	
 					log.info("States:");
 					for (FVariable fv : differentiatedRealVariables()) {
-						log.info(fv.prettyPrint("  ")); //TODO: fix so no call is made if log level < info
+						log.info(new PrettyPrintDelegate(fv, "  "));
 					}
 				} else {
 					return;
@@ -3188,6 +3188,7 @@ aspect TransformCanonical {
 				aliasVars.add(fv);
 			} else { 
 				nonAliasVars.add(fv);
+				fv.propagateAttributesFromAlias();
 			}
 		}
 		

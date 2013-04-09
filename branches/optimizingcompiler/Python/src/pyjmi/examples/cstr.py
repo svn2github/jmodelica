@@ -72,7 +72,7 @@ def run_demo(with_plots=True):
     curr_dir = os.path.dirname(os.path.abspath(__file__));
         
     # Compile the stationary initialization model into a JMU
-    jmu_name = compile_jmu("CSTR.CSTR_Init", curr_dir+"/files/CSTR.mop", 
+    jmu_name = compile_jmu("CSTR.CSTR_Init", os.path.join(curr_dir,"files", "CSTR.mop"), 
         compiler_options={"enable_variable_scaling":True})
     
     # load the JMU
@@ -114,7 +114,7 @@ def run_demo(with_plots=True):
     # Compute initial guess trajectories by means of simulation
     # Compile the optimization initialization model
     jmu_name = compile_jmu("CSTR.CSTR_Init_Optimization", 
-        curr_dir+"/files/CSTR.mop")
+        os.path.join(curr_dir, "files", "CSTR.mop"))
 
     # Load the model
     init_sim_model = JMUModel(jmu_name)
@@ -179,8 +179,6 @@ def run_demo(with_plots=True):
     opt_opts['n_e'] = n_e
     opt_opts['init_traj'] = res.result_data
 
-    #opt_opts['IPOPT_options']['derivative_test'] = 'first-order'
-    
     res = cstr.optimize(options=opt_opts)
 
     # Extract variable profiles
@@ -193,9 +191,7 @@ def run_demo(with_plots=True):
     T_ref=res['T_ref']
     Tc_ref=res['Tc_ref']
 
-    cost=res['cost']
-    
-    assert N.abs(cost[-1]/1.e7 - 1.8585429) < 1e-3  
+    assert N.abs(res.final('cost')/1.e7 - 1.8585429) < 1e-3  
 
     # Plot the results
     if with_plots:
@@ -274,7 +270,6 @@ def run_demo(with_plots=True):
         plt.ylabel('Cooling temperature')
         plt.xlabel('time')
         plt.show()
-
     
 if __name__ == "__main__":
     run_demo()
