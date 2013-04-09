@@ -34,6 +34,15 @@ try:
 except (NameError, ImportError):
     pass
 
+from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
+#Check to see if pyfmi is installed so that we also catch the error generated
+#from that package
+try:
+    from pyfmi.common.io import VariableNotFoundError as fmiVariableNotFoundError
+    VariableNotFoundError = (jmiVariableNotFoundError, fmiVariableNotFoundError)
+except ImportError:
+    VariableNotFoundError = jmiVariableNotFoundError
+
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
 path_to_data = os.path.join(get_files_path(), 'Data')
 
@@ -301,6 +310,11 @@ class TestLocalDAECollocator:
         opts['eliminate_der_var'] = True
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
+        
+        # Test disabling scaling
+        opts['variable_scaling'] = False
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
     
     @testattr(casadi = True)
     def test_nominal_traj_cstr(self):
@@ -352,6 +366,11 @@ class TestLocalDAECollocator:
         
         # Test with eliminated continuity and derivative variables
         opts['eliminate_der_var'] = True
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Test disabling scaling
+        opts['variable_scaling'] = False
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
@@ -469,17 +488,16 @@ class TestLocalDAECollocator:
                           1.17283905, 1.03631145, 1.0549561, 0.94827652,
                           1.0317119, 1.04010453, 1.08012155])
         t_meas = N.linspace(0., 10., num=len(y_meas))
+        data = N.vstack([t_meas, y_meas])
         
-        # Parameter estimation data
+        # Measurement data
         Q = N.array([[1.]])
-        measured_variables=['y']
-        data = N.hstack([N.transpose(N.array([t_meas])),
-                         N.transpose(N.array([y_meas]))])
-        par_est_data = ParameterEstimationData(Q, measured_variables, data)
+        unconstrained={'y': data}
+        measurement_data = MeasurementData(unconstrained=unconstrained, Q=Q)
         
         # Optimize without scaling
         opts = model.optimize_options(self.algorithm)
-        opts['parameter_estimation_data'] = par_est_data
+        opts['measurement_data'] = measurement_data
         opts['variable_scaling'] = False
         res = model.optimize(self.algorithm, opts)
         
@@ -499,7 +517,7 @@ class TestLocalDAECollocator:
     @testattr(casadi = True)
     def test_parameter_estimation_traj(self):
         """
-        Test parameter estimation with and without given trajectories.
+        Test estimation with and without initial and nominal trajectories.
         """
         sim_model = self.model_second_order
         opt_model = self.model_second_order_par_est
@@ -518,17 +536,16 @@ class TestLocalDAECollocator:
                           1.17283905, 1.03631145, 1.0549561, 0.94827652,
                           1.0317119, 1.04010453, 1.08012155])
         t_meas = N.linspace(0., 10., num=len(y_meas))
+        data = N.vstack([t_meas, y_meas])
         
-        # Parameter estimation data
+        # Measurement data
         Q = N.array([[1.]])
-        measured_variables=['y']
-        data = N.hstack([N.transpose(N.array([t_meas])),
-                         N.transpose(N.array([y_meas]))])
-        par_est_data = ParameterEstimationData(Q, measured_variables, data)
+        unconstrained={'y': data}
+        measurement_data = MeasurementData(unconstrained=unconstrained, Q=Q)
         
-        # Optimize without trajectories
+        # Optimize without scaling
         opts = opt_model.optimize_options(self.algorithm)
-        opts['parameter_estimation_data'] = par_est_data
+        opts['measurement_data'] = measurement_data
         opt_res = opt_model.optimize(self.algorithm, opts)
         
         # Assert results
@@ -547,10 +564,64 @@ class TestLocalDAECollocator:
         N.testing.assert_allclose(z_traj, z_ref, 1e-2)
     
     @testattr(casadi = True)
-    def test_qt_par_est(self):
+    def test_qt_par_est_unconstrained(self):
         """
-        Test parameter estimation for the quad tank, with and without
-        eliminated inputs.
+        Test parameter estimation for the quad tank with unconstrained inputs.
+        """
+        data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
+        sim_model = self.model_qt_sim
+        opt_model = self.model_qt_par_est
+        a_ref = [0.02656702, 0.02713898]
+        
+        # Extract data series
+        t_meas = data['t'][6000::100, 0] - 60
+        y1_meas = data['y1_f'][6000::100, 0]/100
+        y2_meas = data['y2_f'][6000::100, 0]/100
+        y3_meas = data['y3_d'][6000::100, 0]/100
+        y4_meas = data['y4_d'][6000::100, 0]/100
+        u1 = data['u1_d'][6000::100, 0]
+        u2 = data['u2_d'][6000::100, 0]
+        
+        # Simulate
+        u = N.transpose(N.vstack((t_meas, u1, u2)))
+        sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
+                                     final_time=60.)
+        
+        # Create measurement data
+        Q = N.array([[1., 0., 0., 0.], [0., 1., 0., 0.],
+                            [0., 0., 10., 0.], [0., 0., 0., 10.]])
+        data_x1 = N.vstack([t_meas, y1_meas])
+        data_x2 = N.vstack([t_meas, y2_meas])
+        data_u1 = N.vstack([t_meas, u1])
+        data_u2 = N.vstack([t_meas, u2])
+        unconstrained = {'qt.x1': data_x1,
+                         'qt.x2': data_x2,
+                         'u1': data_u1,
+                         'u2': data_u2}
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained)
+        
+        # Unconstrained
+        opts = opt_model.optimize_options()
+        opts['n_e'] = 60
+        opts['measurement_data'] = measurement_data
+        opt_res = opt_model.optimize(self.algorithm, options=opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+        
+        # Unconstrained with nominal and initial trajectories
+        opts['nominal_traj'] = sim_res.result_data
+        opts['init_traj'] = sim_res.result_data
+        opt_res = opt_model.optimize(self.algorithm, options=opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+    
+    @testattr(casadi = True)
+    def test_qt_par_est_eliminated(self):
+        """
+        Test parameter estimation for the quad tank with eliminated inputs.
         """
         data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
         sim_model = self.model_qt_sim
@@ -559,81 +630,272 @@ class TestLocalDAECollocator:
         a_ref = [0.02656702, 0.02713898]
         
         # Extract data series
-        t_meas = data['t'][6000::100,0]-60
-        y1_meas = data['y1_f'][6000::100,0]/100
-        y2_meas = data['y2_f'][6000::100,0]/100
-        y3_meas = data['y3_d'][6000::100,0]/100
-        y4_meas = data['y4_d'][6000::100,0]/100
-        u1 = data['u1_d'][6000::100,0]
-        u2 = data['u2_d'][6000::100,0]
+        t_meas = data['t'][6000::100, 0] - 60
+        y1_meas = data['y1_f'][6000::100, 0]/100
+        y2_meas = data['y2_f'][6000::100, 0]/100
+        y3_meas = data['y3_d'][6000::100, 0]/100
+        y4_meas = data['y4_d'][6000::100, 0]/100
+        u1 = data['u1_d'][6000::100, 0]
+        u2 = data['u2_d'][6000::100, 0]
         
         # Simulate
         u = N.transpose(N.vstack((t_meas, u1, u2)))
         sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
                                      final_time=60.)
         
-        # Create parameter estimation data without input
-        Q = N.array([[1., 0., 0., 0.], [0., 1., 0., 0.],
-                     [0., 0., 10., 0.], [0., 0., 0., 10.]])
-        measured_variables = ['qt.x1', 'qt.x2', 'u1', 'u2']
-        data = N.transpose(N.vstack((t_meas, y1_meas, y2_meas, u1, u2)))
-        par_est_data = ParameterEstimationData(Q, measured_variables, data)
+        # Create measurement data
+        Q = N.array([[1., 0.], [0., 1.]])
+        data_x1 = N.vstack([t_meas, y1_meas])
+        data_x2 = N.vstack([t_meas, y2_meas])
+        data_u1 = N.vstack([t_meas, u1])
+        data_u2 = N.vstack([t_meas, u2])
+        unconstrained = {'qt.x1': data_x1, 'qt.x2': data_x2}
+        eliminated = {'u1': data_u1, 'u2': data_u2}
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           eliminated=eliminated)
         
-        # Create parameter estimation data with input
-        Q = N.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 10.]])
-        measured_variables = ['qt.x1', 'qt.x2', 'u1']
-        data = N.transpose(N.vstack((t_meas, y1_meas, y2_meas, u1)))
-        par_est_data_input = ParameterEstimationData(Q, measured_variables,
-                                                     data)
-        
-        # Create parameter estimation data with input
-        Q = N.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 10.]])
-        measured_variables = ['qt.x1', 'qt.x2', 'u2']
-        data = N.transpose(N.vstack((t_meas, y1_meas, y2_meas, u2)))
-        par_est_data_input2 = ParameterEstimationData(Q, measured_variables,
-                                                      data)
-        
-        # Optimize without input
+        # Eliminated
         opts = opt_model.optimize_options()
         opts['n_e'] = 60
-        opts['init_traj'] = sim_res.result_data
-        opts['parameter_estimation_data'] = par_est_data
-        opt_res = opt_model.optimize(self.algorithm, options=opts)
-        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
-                                                 opt_res.final("qt.a2")]), a_ref)
-        
-        # Optimize with second input eliminated
-        opts['parameter_estimation_data'] = par_est_data_input
-        u2_input = N.transpose(N.vstack((t_meas, u2)))
-        opts['input'] = ('u2', u2_input)
+        opts['measurement_data'] = measurement_data
         opt_res = opt_model.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
-                                                 opt_res.final("qt.a2")]), a_ref)
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-5)
         
-        # Optimize with second input eliminated and nominal trajectories
+        # Eliminated with nominal and initial trajectories
         opts['nominal_traj'] = sim_res.result_data
-        opt_res = opt_model.optimize(self.algorithm, opts)
-        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
-                                                 opt_res.final("qt.a2")]),
-                                  a_ref, 1e-4)
-        
-        # Optimize with first input eliminated
-        opts['parameter_estimation_data'] = par_est_data_input2
-        u1_input = N.transpose(N.vstack((t_meas, u1)))
-        opts['input'] = ('u1', u1_input)
-        opt_res = opt_model.optimize(self.algorithm, opts)
-        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
-                                                 opt_res.final("qt.a2")]),
-                                  a_ref, 1e-4)
-        
-        # Point constraint on specified input
-        opts = opt_model_2.optimize_options()
-        opts['n_e'] = 60
         opts['init_traj'] = sim_res.result_data
-        opts['parameter_estimation_data'] = par_est_data_input
-        opts['input'] = ('u2', u2_input)
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-5)
+        
+        # Inconsistent bound on eliminated input
+        opt_model.set_min('u1', 5.1)
         N.testing.assert_raises(CasadiCollocatorException,
-                                opt_model_2.optimize, self.algorithm, opts)
+                                opt_model.optimize, self.algorithm, opts)
+        opt_model.set_min('u1', -N.inf)
+        
+        # Point constraint on eliminated input
+        opts2 = opt_model_2.optimize_options()
+        opts2['n_e'] = 60
+        opts2['init_traj'] = sim_res.result_data
+        opts2['measurement_data'] = measurement_data
+        N.testing.assert_raises(CasadiCollocatorException,
+                                opt_model_2.optimize, self.algorithm, opts2)
+        
+        # Eliminate state
+        Q = N.array([[1.]])
+        unconstrained = {'qt.x1': data_x1}
+        eliminated = {'u1': data_u1, 'u2': data_u2, 'qt.x2': data_x2}
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           eliminated=eliminated)
+        opts['measurement_data'] = measurement_data
+        N.testing.assert_raises(VariableNotFoundError,
+                                opt_model.optimize, self.algorithm, opts)
+    
+    @testattr(casadi = True)
+    def test_qt_par_est_constrained(self):
+        """
+        Test parameter estimation for the quad tank with constrained inputs.
+        """
+        data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
+        sim_model = self.model_qt_sim
+        opt_model = self.model_qt_par_est
+        a_ref = [0.02656702, 0.02713898]
+        
+        # Extract data series
+        t_meas = data['t'][6000::100, 0] - 60
+        y1_meas = data['y1_f'][6000::100, 0]/100
+        y2_meas = data['y2_f'][6000::100, 0]/100
+        y3_meas = data['y3_d'][6000::100, 0]/100
+        y4_meas = data['y4_d'][6000::100, 0]/100
+        u1 = data['u1_d'][6000::100, 0]
+        u2 = data['u2_d'][6000::100, 0]
+        
+        # Simulate
+        u = N.transpose(N.vstack((t_meas, u1, u2)))
+        sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
+                                     final_time=60.)
+        
+        # Create measurement data
+        Q = N.array([[1., 0., 0., 0.], [0., 1., 0., 0.],
+                     [0., 0., 10., 0.], [0., 0., 0., 10.]])
+        data_x1 = N.vstack([t_meas, y1_meas])
+        data_x2 = N.vstack([t_meas, y2_meas])
+        data_u1 = N.vstack([t_meas, u1])
+        data_u2 = N.vstack([t_meas, u2])
+        unconstrained = {'qt.x1': data_x1, 'qt.x2': data_x2}
+        constrained = {'u1': data_u1, 'u2': data_u2}
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           constrained=constrained)
+        
+        # Constrained
+        opts = opt_model.optimize_options()
+        opts['n_e'] = 60
+        opts['measurement_data'] = measurement_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+        
+        # Constrained with nominal and initial trajectories
+        opts['nominal_traj'] = sim_res.result_data
+        opts['init_traj'] = sim_res.result_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+        
+        # Inconsistent bound on constrained input
+        opt_model.set_min('u1', 5.1)
+        N.testing.assert_raises(CasadiCollocatorException,
+                                opt_model.optimize, self.algorithm, opts)
+        opt_model.set_min('u1', -N.inf)
+        
+        # Constrain state
+        unconstrained = {'qt.x1': data_x1}
+        constrained = {'u1': data_u1, 'u2': data_u2, 'qt.x2': data_x2}
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           constrained=constrained)
+        opts['measurement_data'] = measurement_data
+        N.testing.assert_raises(VariableNotFoundError,
+                                opt_model.optimize, self.algorithm, opts)
+    
+    @testattr(casadi = True)
+    def test_qt_par_est_semi_eliminated(self):
+        """
+        Test parameter estimation for the quad tank with 1 eliminated input.
+        """
+        data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
+        sim_model = self.model_qt_sim
+        opt_model = self.model_qt_par_est
+        a_ref = [0.02656702, 0.02713898]
+        
+        # Extract data series
+        t_meas = data['t'][6000::100, 0] - 60
+        y1_meas = data['y1_f'][6000::100, 0]/100
+        y2_meas = data['y2_f'][6000::100, 0]/100
+        y3_meas = data['y3_d'][6000::100, 0]/100
+        y4_meas = data['y4_d'][6000::100, 0]/100
+        u1 = data['u1_d'][6000::100, 0]
+        u2 = data['u2_d'][6000::100, 0]
+        
+        # Simulate
+        u = N.transpose(N.vstack((t_meas, u1, u2)))
+        sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
+                                     final_time=60.)
+        
+        # Create measurement data
+        Q = N.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 10.]])
+        data_x1 = N.vstack([t_meas, y1_meas])
+        data_x2 = N.vstack([t_meas, y2_meas])
+        data_u1 = N.vstack([t_meas, u1])
+        data_u2 = N.vstack([t_meas, u2])
+        unconstrained = {'qt.x1': data_x1, 'qt.x2': data_x2, 'u1': data_u1}
+        eliminated = {'u2': data_u2}
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           eliminated=eliminated)
+        
+        # Eliminate u2
+        opts = opt_model.optimize_options()
+        opts['n_e'] = 60
+        opts['measurement_data'] = measurement_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+        
+        # Eliminate u2 with nominal and initial trajectories
+        opts['nominal_traj'] = sim_res.result_data
+        opts['init_traj'] = sim_res.result_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+        
+        # Eliminate u1
+        unconstrained = {'qt.x1': data_x1, 'qt.x2': data_x2, 'u2': data_u2}
+        eliminated = {'u1': data_u1}
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           eliminated=eliminated)
+        opts['nominal_traj'] = None
+        opts['init_traj'] = None
+        opts['measurement_data'] = measurement_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+        
+        # Eliminate u1 with nominal and initial trajectories
+        opts['nominal_traj'] = sim_res.result_data
+        opts['init_traj'] = sim_res.result_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+    
+    @testattr(casadi = True)
+    def test_qt_par_est_user_interpolator(self):
+        """
+        Test parameter estimation for the quad tank with user-defined function.
+        """
+        data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
+        sim_model = self.model_qt_sim
+        opt_model = self.model_qt_par_est
+        a_ref = [0.02656702, 0.02713898]
+        
+        # Extract data series
+        t_meas = data['t'][6000::100, 0] - 60
+        y1_meas = data['y1_f'][6000::100, 0]/100
+        y2_meas = data['y2_f'][6000::100, 0]/100
+        y3_meas = data['y3_d'][6000::100, 0]/100
+        y4_meas = data['y4_d'][6000::100, 0]/100
+        u1 = data['u1_d'][6000::100, 0]
+        u2 = data['u2_d'][6000::100, 0]
+        
+        # Simulate
+        u = N.transpose(N.vstack((t_meas, u1, u2)))
+        sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
+                                     final_time=60.)
+        
+        # Create measurement data
+        Q_constr = N.array([[1., 0., 0., 0.], [0., 1., 0., 0.],
+                            [0., 0., 10., 0.], [0., 0., 0., 10.]])
+        Q_elim = N.array([[1., 0.], [0., 1.]])
+        Q_semi_elim = N.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 10.]])
+        data_x1 = N.vstack([t_meas, y1_meas])
+        data_x2 = N.vstack([t_meas, y2_meas])
+        data_u2 = N.vstack([t_meas, u2])
+        linear_u1 = TrajectoryLinearInterpolation(t_meas,
+                                                  u1.reshape([-1, 1]))
+        user_u1 = linear_u1.eval
+        unconstrained = {'qt.x1': data_x1, 'qt.x2': data_x2, 'u2': data_u2}
+        eliminated = {'u1': user_u1}
+        measurement_data = MeasurementData(Q=Q_semi_elim,
+                                           unconstrained=unconstrained,
+                                           eliminated=eliminated)
+        
+        # Semi-eliminated with user-defined interpolation function
+        opts = opt_model.optimize_options()
+        opts['n_e'] = 60
+        opts['measurement_data'] = measurement_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+        
+        # Inconsistent bounds on eliminated input with user-defined function
+        opt_model.set_min('u1', 5.1)
+        N.testing.assert_raises(CasadiCollocatorException,
+                                opt_model.optimize, self.algorithm, opts)
     
     @testattr(casadi = True)
     def test_vdp_minimum_time(self):

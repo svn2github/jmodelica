@@ -28,7 +28,7 @@ from pymodelica import compile_fmux
 from pymodelica import compile_jmu
 from pyjmi import JMUModel
 from pyjmi import CasadiModel
-from pyjmi.optimization.casadi_collocation import ParameterEstimationData
+from pyjmi.optimization.casadi_collocation import MeasurementData
 
 import scipy.integrate as integr
 
@@ -110,17 +110,16 @@ def run_demo(with_plots=True):
         plt.show()
 
     Q = N.array([[1.]])
-    measured_variables=['sys.y']
-    data = N.hstack((N.transpose(N.array([t_meas])),N.transpose(N.array([xx_meas[:,0]]))))
+    unconstrained = {'sys.y': N.vstack([t_meas, xx_meas[:, 0]])}
 
-    par_est_data = ParameterEstimationData(Q,measured_variables,data)
+    measurement_data = MeasurementData(Q=Q, unconstrained=unconstrained)
 
     opts = model_casadi.optimize_options(algorithm="LocalDAECollocationAlg")
 
     opts['n_e'] = 16
     opts['n_cp'] = 3
 
-    opts['parameter_estimation_data'] = par_est_data
+    opts['measurement_data'] = measurement_data
 
     res_casadi = model_casadi.optimize(algorithm="LocalDAECollocationAlg", options=opts)
 
