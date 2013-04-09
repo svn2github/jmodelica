@@ -605,6 +605,12 @@ class MeasurementData(object):
                 
                 Type: rank 2 ndarray
                 Default: None
+        
+        Limitations::
+            
+            Variable names for constrained and eliminated inputs do not take
+            aliases into account; these variables have to be referenced by the
+            name used in CasadiModel.
         """
         # Check dimension of Q
         Q_len = ((0 if constrained is None else len(constrained)) + 

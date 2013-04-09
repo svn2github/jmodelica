@@ -161,8 +161,7 @@ def run_demo(with_plots=True):
     """
     
     # Create measurement data
-    Q = N.array([[1., 0., 0., 0.], [0., 1., 0., 0.],
-                 [0., 0., 10., 0.], [0., 0., 0., 10.]])
+    Q = np.diag([1., 1., 10., 10.])
     data_x1 = N.vstack([t_meas, y1_meas])
     data_x2 = N.vstack([t_meas, y2_meas])
     data_u1 = N.vstack([t_meas, u1])
