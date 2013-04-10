@@ -36,7 +36,7 @@ package TransformCanonicalTests
 fclass TransformCanonicalTests.TransformCanonicalTest1
  Real x(start = 1,fixed = true);
  Real y(start = 3,fixed = true);
- Real w(start = 1);
+ constant Real w(start = 1) = 2;
  Real v;
 initial equation 
  x = 1;
@@ -45,7 +45,6 @@ equation
  der(x) = - x;
  der(v) = 4;
  y + v = 1;
- w = 2;
 end TransformCanonicalTests.TransformCanonicalTest1;
 ")})));
 	end TransformCanonicalTest1;
@@ -222,14 +221,10 @@ end TransformCanonicalTests.TransformCanonicalTest6;
 fclass TransformCanonicalTests.TransformCanonicalTest7
  parameter Integer p1 = 2 /* 2 */;
  parameter Integer p2;
- Real x[1];
- Real y;
+ constant Real x[1] = 1;
+ constant Real y = 2;
 parameter equation
  p2 = p1;
-equation
- x[1] = 1;
- y = 2;
-
 end TransformCanonicalTests.TransformCanonicalTest7;
 ")})));
   end TransformCanonicalTest7;
@@ -866,12 +861,8 @@ Semantic error at line 0, column 0:
 			description="Test elimination of alias variables",
 			flatModel="
 fclass TransformCanonicalTests.AliasTest20
- Real x1;
-equation 
- x1 = 1;
-
+ constant Real x1 = 1;
 end TransformCanonicalTests.AliasTest20;
-
 ")})));
   end AliasTest20;
 
@@ -907,11 +898,8 @@ Alias sets:
 			description="Test elimination of alias variables",
 			flatModel="
 fclass TransformCanonicalTests.AliasTest22
- Real x1;
- Real x3;
-equation
- x1 = 1;
- x3 = (- x1) ^ 2;
+ constant Real x1 = 1;
+ constant Real x3 = 1.0;
 end TransformCanonicalTests.AliasTest22;
 ")})));
   end AliasTest22;
@@ -999,11 +987,10 @@ equation
 			description="Test elimination of alias variables",
 			flatModel="
 fclass TransformCanonicalTests.AliasTest26
- parameter Real p = 1 /* 1.0 */;
- Real y;
-equation
+ parameter Real p = 1 /* 1 */;
+ parameter Real y;
+parameter equation
  y = p + 3;
-
 end TransformCanonicalTests.AliasTest26;
 ")})));
 end AliasTest26;
@@ -1028,10 +1015,7 @@ equation
 			description="Test elimination of alias variables.",
 			flatModel="
 fclass TransformCanonicalTests.AliasTest27
- Real x1;
-equation
- x1 = 1;
-
+ constant Real x1 = 1;
 end TransformCanonicalTests.AliasTest27;
 ")})));
 end AliasTest27;
@@ -1049,9 +1033,9 @@ equation
 			description="Test elimination of alias variables.",
 			flatModel="
 fclass TransformCanonicalTests.AliasTest28
- Real y;
+ parameter Real y;
  parameter Real p = 1 /* 1 */;
-equation
+parameter equation
  y = - p + 1;
 end TransformCanonicalTests.AliasTest28;
 ")})));
@@ -1152,10 +1136,8 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.AliasTest30
  parameter Boolean f = true /* true */;
- Real y;
+ constant Real y = -0.0;
  parameter Real p(start = 3) = 5 /* 5 */;
-equation
- 0.0 = - y;
 end TransformCanonicalTests.AliasTest30;
 ")})));
 end AliasTest30;
@@ -1395,13 +1377,12 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="IncidenceTest2",
-			methodName="incidence",
 			description="Test computation of incidence information",
+			methodName="incidence",
 			methodResult="
 Incidence:
- eq 0: der(x) z 
+ eq 0: der(x) 
  eq 1: y 
- eq 2: z 
 ")})));
 end IncidenceTest2;
 
@@ -1524,28 +1505,23 @@ end TransformCanonicalTests.InitialEqTest1;
 			description="Test algorithm for adding additional initial equations.",
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest2
- Real v1;
- Real v2;
+ constant Real v1 = 1;
+ constant Real v2 = 1;
  Real v3;
  Real v4;
  Real v5;
  Real v6;
  Real v7;
  Real v8;
- Real v9;
- Real v10;
+ constant Real v9 = 0.0;
+ constant Real v10 = 1;
 equation
- v1 + v2 + v3 + v4 + v5 = 1;
- v1 + v2 + v3 + v4 + v6 = 1;
- v1 + v2 + v3 + v4 = 1;
- v1 + v2 + v3 + v4 = 1;
- v5 + v6 + v8 + v7 + v9 = 1;
+ 2.0 + v3 + v4 + v5 = 1;
+ 2.0 + v3 + v4 + v6 = 1;
+ 2.0 + v3 + v4 = 1;
+ 2.0 + v3 + v4 = 1;
+ v5 + v6 + v8 + v7 + 0.0 = 1;
  v5 + v6 + v8 = 0;
- v1 = 1;
- v2 = 1;
- v9 + v10 = 1;
- v10 = 1;
-
 end TransformCanonicalTests.InitialEqTest2;
 ")})));
   end InitialEqTest2;
@@ -1709,23 +1685,8 @@ end TransformCanonicalTests.InitialEqTest6;
 			description="Test algorithm for adding additional initial equations.",
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest7
- Real x;
- Real y;
-equation
- (x, y) = TransformCanonicalTests.f1(1, 2);
-
-public
- function TransformCanonicalTests.f1
-  input Real x;
-  input Real y;
-  output Real w;
-  output Real z;
- algorithm
-  w := x;
-  z := y;
-  return;
- end TransformCanonicalTests.f1;
-
+ constant Real x = 1;
+ constant Real y = 2;
 end TransformCanonicalTests.InitialEqTest7;
 ")})));
   end InitialEqTest7;
@@ -1789,33 +1750,13 @@ end TransformCanonicalTests.InitialEqTest8;
 			description="Test algorithm for adding additional initial equations.",
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest9
- Real x[1];
- Real x[2];
- Real x[3];
- Real y[1];
- Real y[2];
- Real y[3];
- Real y[4];
-equation
- ({x[1],x[2],x[3]}, {y[1],y[2],y[3],y[4]}) = TransformCanonicalTests.f2({1,1,1}, {1,1,1,1});
-
-public
- function TransformCanonicalTests.f2
-  input Real[3] x;
-  input Real[4] y;
-  output Real[3] w;
-  output Real[4] z;
- algorithm
-  w[1] := x[1];
-  w[2] := x[2];
-  w[3] := x[3];
-  z[1] := y[1];
-  z[2] := y[2];
-  z[3] := y[3];
-  z[4] := y[4];
-  return;
- end TransformCanonicalTests.f2;
-
+ constant Real x[1] = 1;
+ constant Real x[2] = 1;
+ constant Real x[3] = 1;
+ constant Real y[1] = 1;
+ constant Real y[2] = 1;
+ constant Real y[3] = 1;
+ constant Real y[4] = 1;
 end TransformCanonicalTests.InitialEqTest9;
 ")})));
   end InitialEqTest9;
@@ -1890,17 +1831,16 @@ fclass TransformCanonicalTests.InitialEqTest11
  Real x[1];
  Real x[2];
  Real x[3];
- Real y[1];
- Real y[2];
- Real y[3];
- Real y[4];
+ constant Real y[1] = 1;
+ constant Real y[2] = 1;
+ constant Real y[3] = 1;
+ constant Real y[4] = 1;
 initial equation 
  ({x[1], x[2], x[3]}, ) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
 equation
  der(x[1]) = - x[1];
  der(x[2]) = - x[2];
  der(x[3]) = - x[3];
- (, {y[1], y[2], y[3], y[4]}) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
 
 public
  function TransformCanonicalTests.f2
@@ -1938,10 +1878,10 @@ fclass TransformCanonicalTests.InitialEqTest12
  Real x[1](start = 3);
  Real x[2](start = 3);
  Real x[3](start = 3);
- Real y[1];
- Real y[2];
- Real y[3];
- Real y[4];
+ constant Real y[1] = 1;
+ constant Real y[2] = 1;
+ constant Real y[3] = 1;
+ constant Real y[4] = 1;
 initial equation 
  x[1] = 3;
  x[2] = 3;
@@ -1950,25 +1890,6 @@ equation
  der(x[1]) = - x[1];
  der(x[2]) = - x[2];
  der(x[3]) = - x[3];
- (, {y[1], y[2], y[3], y[4]}) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
-
-public
- function TransformCanonicalTests.f2
-  input Real[3] x;
-  input Real[4] y;
-  output Real[3] w;
-  output Real[4] z;
- algorithm
-  w[1] := x[1];
-  w[2] := x[2];
-  w[3] := x[3];
-  z[1] := y[1];
-  z[2] := y[2];
-  z[3] := y[3];
-  z[4] := y[4];
-  return;
- end TransformCanonicalTests.f2;
-
 end TransformCanonicalTests.InitialEqTest12;
 ")})));
   end InitialEqTest12;
@@ -2122,9 +2043,7 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest16
  parameter Boolean a = false /* false */;
- Real b(start = 1);
-equation
- b = 1;
+ constant Real b(start = 1) = 1;
 end TransformCanonicalTests.InitialEqTest16;
 ")})));
 end InitialEqTest16;
@@ -2145,10 +2064,8 @@ equation
 			description="Test that derivatives of parameters are translated into zeros.",
 			flatModel="
 fclass TransformCanonicalTests.ParameterDerivativeTest
- Real y;
+ constant Real y = 0.0;
  parameter Real p(start = 1) = 2 /* 2 */;
-equation
- y = 0.0 + 0.0;
 end TransformCanonicalTests.ParameterDerivativeTest;
 ")})));
 end ParameterDerivativeTest;
@@ -2165,7 +2082,7 @@ model UnbalancedTest1_Err
 			errorMessage="
 Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
 Semantic error at line 0, column 0:
-  The DAE system has 1 equations and 3 free variables.
+  The DAE system has 0 equations and 2 free variables.
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
 Semantic error at line 0, column 0:
@@ -2210,16 +2127,16 @@ equation
 			errorMessage="
 Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
 Semantic error at line 0, column 0:
-  The DAE initialization system has 2 equations and 1 free variables.
+  The DAE initialization system has 1 equations and 0 free variables.
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
 Semantic error at line 0, column 0:
-  The DAE system has 2 equations and 1 free variables.
+  The DAE system has 1 equations and 0 free variables.
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following equation(s) could not be matched to any variable:
-   x = 5
+   4.0 = 5
 ")})));
 end UnbalancedTest3_Err;
 
@@ -2255,6 +2172,7 @@ equation
 		ErrorTestCase(
 			name="UnbalancedTest5_Err",
 			description="Test error messages for unbalanced systems.",
+			variability_propagation=false,
 			errorMessage="
 2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
@@ -2881,13 +2799,14 @@ fclass TransformCanonicalTests.WhenEqu11
  parameter Real b_c = 1 /* 1 */;
  parameter Real c_c = 1 /* 1 */;
  parameter Real h = 0.1 /* 0.1 */;
- discrete Boolean atInit;
+ parameter Boolean atInit;
 initial equation 
  x_c = pre(x_c);
- x_p = 1;
  pre(sampleTrigger) = false;
+ pre(x_c) = 0.0;
  pre(u_c) = 0.0;
- pre(atInit) = false;
+parameter equation
+ atInit = true and initial();
 equation
  der(x_p) = a_p * x_p + b_p * u_p;
  u_p = c_c * x_c;
@@ -2898,7 +2817,6 @@ equation
  when {atInit, sampleTrigger} then
   x_c = a_c * pre(x_c) + b_c * u_c;
  end when;
- atInit = true and initial();
 end TransformCanonicalTests.WhenEqu11;
 ")})));
 end WhenEqu11;
@@ -3060,13 +2978,9 @@ equation
 			description="If equations: branch elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu2
- Real x[1];
- Real x[2];
- Real x[3];
-equation
- x[1] = 1;
- x[2] = 2;
- x[3] = 3;
+ constant Real x[1] = 1;
+ constant Real x[2] = 2;
+ constant Real x[3] = 3;
 end TransformCanonicalTests.IfEqu2;
 ")})));
 end IfEqu2;
@@ -3089,13 +3003,9 @@ equation
 			description="If equations: branch elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu3
- Real x[1];
- Real x[2];
- Real x[3];
-equation
- x[1] = 4;
- x[2] = 5;
- x[3] = 6;
+ constant Real x[1] = 4;
+ constant Real x[2] = 5;
+ constant Real x[3] = 6;
 end TransformCanonicalTests.IfEqu3;
 ")})));
 end IfEqu3;
@@ -3118,13 +3028,9 @@ equation
 			description="If equations: branch elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu4
- Real x[1];
- Real x[2];
- Real x[3];
-equation
- x[1] = 7;
- x[2] = 8;
- x[3] = 9;
+ constant Real x[1] = 7;
+ constant Real x[2] = 8;
+ constant Real x[3] = 9;
 end TransformCanonicalTests.IfEqu4;
 ")})));
 end IfEqu4;
@@ -3145,13 +3051,9 @@ equation
 			description="If equations: branch elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu5
- Real x[1];
- Real x[2];
- Real x[3];
-equation
- x[1] = 7;
- x[2] = 8;
- x[3] = 9;
+ constant Real x[1] = 7;
+ constant Real x[2] = 8;
+ constant Real x[3] = 9;
 end TransformCanonicalTests.IfEqu5;
 ")})));
 end IfEqu5;
@@ -3175,20 +3077,11 @@ equation
 			description="If equations: scalarization without elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu6
- Real x[1];
- Real x[2];
- Real x[3];
- discrete Boolean y[1];
- discrete Boolean y[2];
-initial equation 
- pre(y[1]) = false;
- pre(y[2]) = false;
-equation
- x[1] = if y[1] then 1 elseif y[2] then 4 else 7;
- x[2] = if y[1] then 2 elseif y[2] then 5 else 8;
- x[3] = if y[1] then 3 elseif y[2] then 6 else 9;
- y[1] = false;
- y[2] = true;
+ constant Real x[1] = 4;
+ constant Real x[2] = 5;
+ constant Real x[3] = 6;
+ constant Boolean y[1] = false;
+ constant Boolean y[2] = true;
 end TransformCanonicalTests.IfEqu6;
 ")})));
 end IfEqu6;
@@ -3212,20 +3105,11 @@ equation
 			description="If equations: scalarization without elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu7
- Real x[1];
- Real x[2];
- Real x[3];
- discrete Boolean y[1];
- discrete Boolean y[2];
-initial equation 
- pre(y[1]) = false;
- pre(y[2]) = false;
-equation
- x[1] = if y[1] then 1 elseif y[2] then 4 else 7;
- x[2] = if y[1] then 2 elseif y[2] then 5 else 8;
- x[3] = if y[1] then 3 elseif y[2] then 6 else 9;
- y[1] = false;
- y[2] = true;
+ constant Real x[1] = 4;
+ constant Real x[2] = 5;
+ constant Real x[3] = 6;
+ constant Boolean y[1] = false;
+ constant Boolean y[2] = true;
 end TransformCanonicalTests.IfEqu7;
 ")})));
 end IfEqu7;
@@ -3250,15 +3134,11 @@ equation
 			description="If equations: branch elimination with parameter test expressions",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu8
- Real x[1];
- Real x[2];
- Real x[3];
- parameter Boolean y[1] = false;
- parameter Boolean y[2] = true;
-equation
- x[1] = 4;
- x[2] = 5;
- x[3] = 6;
+ constant Real x[1] = 4;
+ constant Real x[2] = 5;
+ constant Real x[3] = 6;
+ parameter Boolean y[1] = false /* false */;
+ parameter Boolean y[2] = true /* true */;
 end TransformCanonicalTests.IfEqu8;
 ")})));
 end IfEqu8;
@@ -3284,15 +3164,9 @@ equation
 			description="If equations: branch elimination with one test non-parameter",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu9
- Real x[1];
- Real x[2];
- discrete Boolean y;
-initial equation 
- pre(y) = false;
-equation
- x[1] = if y then 3 else 7;
- x[2] = if y then 4 else 8;
- y = true;
+ constant Real x[1] = 3;
+ constant Real x[2] = 4;
+ constant Boolean y = true;
 end TransformCanonicalTests.IfEqu9;
 ")})));
 end IfEqu9;
@@ -3318,15 +3192,9 @@ equation
 			description="If equations: branch elimination with one test non-parameter",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu10
- Real x[1];
- Real x[2];
- discrete Boolean y;
-initial equation 
- pre(y) = false;
-equation
- x[1] = if y then 3 else 5;
- x[2] = if y then 4 else 6;
- y = true;
+ constant Real x[1] = 3;
+ constant Real x[2] = 4;
+ constant Boolean y = true;
 end TransformCanonicalTests.IfEqu10;
 ")})));
 end IfEqu10;
@@ -3352,15 +3220,9 @@ equation
 			description="If equations: branch elimination with one test non-parameter",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu11
- Real x[1];
- Real x[2];
- discrete Boolean y;
-initial equation 
- pre(y) = false;
-equation
- x[1] = 1;
- x[2] = 2;
- y = true;
+ constant Real x[1] = 1;
+ constant Real x[2] = 2;
+ constant Boolean y = true;
 end TransformCanonicalTests.IfEqu11;
 ")})));
 end IfEqu11;
@@ -3416,8 +3278,8 @@ fclass TransformCanonicalTests.IfEqu13
 initial equation 
  x = 1;
 equation
- der(x) = if time >= 1 then (- 3) * x + u else 3 * x + u;
- u = if time >= 1 then - 1 else 1;
+ der(x) = if time >= 1 then -3 * x + u else 3 * x + u;
+ u = if time >= 1 then -1 else 1;
 end TransformCanonicalTests.IfEqu13;
 ")})));
   end IfEqu13;
@@ -3450,8 +3312,8 @@ fclass TransformCanonicalTests.IfEqu14
 initial equation 
  x = 1;
 equation
- der(x) = if time >= 1 then if time >= 3 then (- 3) * x + u else 0 else 3 * x + u;
- u = if time >= 1 then if time >= 3 then - 1 else 4 else 1;
+ der(x) = if time >= 1 then if time >= 3 then -3 * x + u else 0 else 3 * x + u;
+ u = if time >= 1 then if time >= 3 then -1 else 4 else 1;
 end TransformCanonicalTests.IfEqu14;
 ")})));
   end IfEqu14;
@@ -3567,22 +3429,9 @@ end TransformCanonicalTests.IfEqu16;
 			description="Check that if equations with function call equations are eliminated",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu17
- Real y1;
- Real y2;
+ constant Real y1 = 1;
+ constant Real y2 = 2;
  parameter Boolean p = false /* false */;
-equation
- (y1, y2) = TransformCanonicalTests.IfEqu17.f();
-
-public
- function TransformCanonicalTests.IfEqu17.f
-  output Real x1;
-  output Real x2;
- algorithm
-  x1 := 1;
-  x2 := 2;
-  return;
- end TransformCanonicalTests.IfEqu17.f;
-
 end TransformCanonicalTests.IfEqu17;
 ")})));
   end IfEqu17;
@@ -3726,19 +3575,16 @@ model IfEqu22
 			description="Function call equation generated by scalarization inside if equation",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu22
- discrete Boolean b;
+ constant Boolean b = true;
  parameter Integer nX = 2 /* 2 */;
- Real x[1];
- Real x[2];
- Real temp_1[1];
- Real temp_1[2];
-initial equation 
- pre(b) = false;
-equation
- x[1] = if b then temp_1[1] else 0;
- x[2] = if b then temp_1[2] else 0;
+ parameter Real temp_1[1];
+ parameter Real temp_1[2];
+ parameter Real x[1];
+ parameter Real x[2];
+parameter equation
  ({temp_1[1], temp_1[2]}) = TransformCanonicalTests.IfEqu22.f({1, 2});
- b = true;
+ x[1] = temp_1[1];
+ x[2] = temp_1[2];
 
 public
  function TransformCanonicalTests.IfEqu22.f
@@ -3786,33 +3632,19 @@ equation
 			description="Function call equation generated by scalarization inside else branch of if equation",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu23
- Real x;
- Real y;
+ constant Real x = 1;
+ constant Real y = 2;
  Real r.x;
  Real r.y;
- Real temp_1.x;
- Real temp_1.y;
- Real temp_2.x;
- Real temp_2.y;
+ constant Real temp_1.x = 1.0;
+ constant Real temp_1.y = 2.0;
+ constant Real temp_2.x = 3.0;
+ constant Real temp_2.y = 2.0;
 equation
- r.x = if time > 1 then temp_1.x else temp_2.x;
- r.y = if time > 1 then temp_1.y else temp_2.y;
- (TransformCanonicalTests.IfEqu23.R(temp_1.x, temp_1.y)) = TransformCanonicalTests.IfEqu23.F(x, y);
- (TransformCanonicalTests.IfEqu23.R(temp_2.x, temp_2.y)) = TransformCanonicalTests.IfEqu23.F(x + y, y);
- x = 1;
- y = 2;
+ r.x = if time > 1 then 1.0 else 3.0;
+ r.y = if time > 1 then 2.0 else 2.0;
 
 public
- function TransformCanonicalTests.IfEqu23.F
-  input Real x;
-  input Real y;
-  output TransformCanonicalTests.IfEqu23.R r;
- algorithm
-  r.x := x;
-  r.y := y;
-  return;
- end TransformCanonicalTests.IfEqu23.F;
-
  record TransformCanonicalTests.IfEqu23.R
   Real x;
   Real y;
@@ -4022,9 +3854,7 @@ model DuplicateVariables1
 			description="Test that identical variables in base classes are handled correctly.",
 			flatModel="
 fclass TransformCanonicalTests.DuplicateVariables1
- Real x(start = 1,min = 2);
-equation
- x = 3;
+ constant Real x(start = 1,min = 2) = 3;
 end TransformCanonicalTests.DuplicateVariables1;
 ")})));
 end DuplicateVariables1;
@@ -4042,6 +3872,7 @@ end DuplicateVariables1;
 			name="SolveEqTest1",
 			description="Test solution of equations",
 			equation_sorting=true,
+			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -4078,6 +3909,7 @@ Solution:
 			name="SolveEqTest2",
 			description="Test solution of equations",
 			equation_sorting=true,
+			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -4114,6 +3946,7 @@ Solution:
 			name="SolveEqTest3",
 			description="Test solution of equations",
 			equation_sorting=true,
+			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -4150,6 +3983,7 @@ Solution:
 			name="SolveEqTest4",
 			description="Test solution of equations",
 			equation_sorting=true,
+			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -4186,6 +4020,7 @@ Solution:
 			name="SolveEqTest5",
 			description="Test solution of equations",
 			equation_sorting=true,
+			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -4223,6 +4058,7 @@ Solution:
 			name="SolveEqTest6",
 			description="Test solution of equations",
 			equation_sorting=true,
+			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -4260,6 +4096,7 @@ Equations:
 			name="SolveEqTest7",
 			description="Test solution of equations",
 			equation_sorting=true,
+			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -4295,6 +4132,7 @@ Solution:
 			name="SolveEqTest8",
 			description="Test solution of equations",
 			equation_sorting=true,
+			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -4473,6 +4311,7 @@ equation
 			name="RecordTearingTest1",
 			methodName="printDAEBLT",
 			equation_sorting=true,
+			variability_propagation=false,
 			enable_tearing=true,
 			description="Test of record tearing",
 			methodResult="
@@ -4521,10 +4360,10 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="RecordTearingTest2",
-			methodName="printDAEBLT",
+			description="Test of record tearing",
 			equation_sorting=true,
 			enable_tearing=true,
-			description="Test of record tearing",
+			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Solved block of 1 variables:
@@ -4532,12 +4371,6 @@ Computed variable:
   y
 Solution:
   sin(time)
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  r.y
-Solution:
-  2
 -------------------------------
 Torn block of 1 iteration variables and 1 solved variables.
 Solved variables:
@@ -4550,7 +4383,7 @@ Residual equations:
  Iteration variables: x
   (TransformCanonicalTests.RecordTearingTest2.R(r.x, r.y)) = TransformCanonicalTests.RecordTearingTest2.F(x, y)
 -------------------------------
-      ")})));
+")})));
 end RecordTearingTest2;
 
 model RecordTearingTest3
@@ -7565,26 +7398,20 @@ x1 - x2 = z*w;
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Solved block of 1 variables:
-Computed variable:
-  w
-Solution:
-  1
--------------------------------
 Non-solved linear block of 3 variables:
-Coefficient variability: Continuous
+Coefficient variability: Constant
 Unknown variables:
   x1
   z
   x2
 Equations:
-  x1 + x2 = z + sin(w)
-  x1 - x2 = z * w
-  x2 = w * z + 1 + w
+  x1 + x2 = z + 0.8414709848078965
+  x1 - x2 = z * 1.0
+  x2 = 1.0 * z + 1 + 1.0
 Jacobian:
   |1.0, - 1.0, 1.0|
-  |1.0, (- 1.0 * w), - 1.0|
-  |0.0, - w * 1.0, 1.0|
+  |1.0, (- 1.0 * 1.0), - 1.0|
+  |0.0, - 1.0 * 1.0, 1.0|
 -------------------------------
 ")})));
 end BlockTest4;
@@ -8121,7 +7948,7 @@ end TestExternalObj10;
 model TestRuntimeOptions1
 	Real x = 1;
 
-	annotation(__JModelica(UnitTesting(tests={ 
+	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="TestRuntimeOptions1",
 			description="Test that parameters for runtime options are generated properly",
@@ -8130,7 +7957,7 @@ model TestRuntimeOptions1
 			generate_ode=true,
 			flatModel="
 fclass TransformCanonicalTests.TestRuntimeOptions1
- Real x;
+ constant Real x = 1;
  parameter Boolean _block_jacobian_check = false /* false */;
  parameter Real _block_jacobian_check_tol = 1.0E-6 /* 1.0E-6 */;
  parameter Boolean _enforce_bounds = false /* false */;
@@ -8141,15 +7968,13 @@ fclass TransformCanonicalTests.TestRuntimeOptions1
  parameter Real _nle_solver_default_tol = 1.0E-10 /* 1.0E-10 */;
  parameter Integer _nle_solver_log_level = 0 /* 0 */;
  parameter Real _nle_solver_min_tol = 1.0E-12 /* 1.0E-12 */;
- parameter Real _nle_solver_tol_factor = 1.0E-3 /* 1.0E-3 */;
+ parameter Real _nle_solver_tol_factor = 0.001 /* 0.001 */;
  parameter Boolean _rescale_after_singular_jac = true /* true */;
  parameter Boolean _rescale_each_step = false /* false */;
  parameter Boolean _use_Brent_in_1d = false /* false */;
  parameter Boolean _use_automatic_scaling = true /* true */;
  parameter Boolean _use_jacobian_scaling = false /* false */;
  parameter Boolean _use_manual_equation_scaling = false /* false */;
-equation
- x = 1;
 end TransformCanonicalTests.TestRuntimeOptions1;
 ")})));
 end TestRuntimeOptions1;

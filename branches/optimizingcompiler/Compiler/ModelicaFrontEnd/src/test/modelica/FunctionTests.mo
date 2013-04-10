@@ -158,6 +158,7 @@ equation
 		FlatteningTestCase(
 			name="FunctionFlatten1",
 			description="Flattening functions: simple function call",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionFlatten1
  Real x;
@@ -187,6 +188,7 @@ equation
 		FlatteningTestCase(
 			name="FunctionFlatten2",
 			description="Flattening functions: two calls to same function",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionFlatten2
  Real x;
@@ -220,6 +222,7 @@ equation
 		FlatteningTestCase(
 			name="FunctionFlatten3",
 			description="Flattening functions: calls to two functions",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionFlatten3
  Real x;
@@ -257,6 +260,7 @@ model FunctionFlatten4
 		FlatteningTestCase(
 			name="FunctionFlatten4",
 			description="Flattening functions: function containing constants",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionFlatten4
  Real x = FunctionTests.TestFunctionWithConst(2);
@@ -291,6 +295,7 @@ model FunctionFlatten5
 		FlatteningTestCase(
 			name="FunctionFlatten5",
 			description="Flattening functions: function called in extended class",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionFlatten5
  Real y.x;
@@ -323,6 +328,7 @@ model FunctionFlatten6
 		FlatteningTestCase(
 			name="FunctionFlatten6",
 			description="Flattening functions: function called in class modification",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionFlatten6
  Real y.x = FunctionTests.TestFunction1(1);
@@ -365,6 +371,7 @@ model FunctionFlatten7
 		FlatteningTestCase(
 			name="FunctionFlatten7",
 			description="Calling different inherited versions of same function",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionFlatten7
  Real x = FunctionTests.FunctionFlatten7.A.f();
@@ -413,6 +420,7 @@ model FunctionFlatten8
 		FlatteningTestCase(
 			name="FunctionFlatten8",
 			description="Calling function from parallel class",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionFlatten8
  Real y.x;
@@ -447,6 +455,7 @@ model FunctionFlatten9
 		TransformCanonicalTestCase(
 			name="FunctionFlatten9",
 			description="Require copying of same constant array twice",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionFlatten9
  constant Real a[1] = 1;
@@ -498,6 +507,7 @@ model FunctionFlatten10
 		FlatteningTestCase(
 			name="FunctionFlatten10",
 			description="Multi-level extending of functions",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionFlatten10
  Real z = FunctionTests.FunctionFlatten10.f3(1);
@@ -554,6 +564,7 @@ model FunctionFlatten11
 		FlatteningTestCase(
 			name="FunctionFlatten11",
 			description="Using redeclared function in model",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionFlatten11
  Real b.x = 1;
@@ -590,6 +601,7 @@ model FunctionFlatten12
 		TransformCanonicalTestCase(
 			name="FunctionFlatten12",
 			description="Size of function input with unknown size as argument to min",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionFlatten12
  constant Real z = FunctionTests.FunctionFlatten12.f({1, 2, 3});
@@ -621,6 +633,7 @@ model FunctionBinding1
 		FlatteningTestCase(
 			name="FunctionBinding1",
 			description="Binding function arguments: 1 input, use default",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionBinding1
  Real x = FunctionTests.TestFunction1(0);
@@ -644,6 +657,7 @@ model FunctionBinding2
 		FlatteningTestCase(
 			name="FunctionBinding2",
 			description="Binding function arguments: 1 input, 1 arg",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionBinding2
  Real x = FunctionTests.TestFunction1(1);
@@ -667,6 +681,7 @@ model FunctionBinding3
 		ErrorTestCase(
 			name="FunctionBinding3",
 			description="Function call with too many arguments",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -682,6 +697,7 @@ model FunctionBinding4
 		ErrorTestCase(
 			name="FunctionBinding4",
 			description="Function call with too few arguments: no arguments",
+			variability_propagation=false,
 			errorMessage="
 2 error(s) found...
 In file 'FunctionTests.mo':
@@ -700,6 +716,7 @@ model FunctionBinding5
 		ErrorTestCase(
 			name="FunctionBinding5",
 			description="Function call with too few arguments: one positional argument",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -715,6 +732,7 @@ model FunctionBinding6
 		FlatteningTestCase(
 			name="FunctionBinding6",
 			description="Binding function arguments: 3 inputs, 2 args, 1 default",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionBinding6
  Real x = FunctionTests.TestFunction3(1, 2, 0);
@@ -742,6 +760,7 @@ model FunctionBinding7
 		FlatteningTestCase(
 			name="FunctionBinding7",
 			description="Binding function arguments: 3 inputs, 2 args, 1 default",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionBinding7
  Real x = FunctionTests.TestFunction0();
@@ -764,6 +783,7 @@ model FunctionBinding8
 		FlatteningTestCase(
 			name="FunctionBinding8",
 			description="Binding function arguments: 1 input, 1 named arg",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionBinding8
  Real x = FunctionTests.TestFunction1(1);
@@ -787,6 +807,7 @@ model FunctionBinding9
 		FlatteningTestCase(
 			name="FunctionBinding9",
 			description="Binding function arguments: 2 inputs, 2 named arg (inverted order)",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionBinding9
  Real x = FunctionTests.TestFunction2(1, 2);
@@ -813,6 +834,7 @@ model FunctionBinding10
 		ErrorTestCase(
 			name="FunctionBinding10",
 			description="Function call with too few arguments: missing middle argument",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -828,6 +850,7 @@ model FunctionBinding11
 		ErrorTestCase(
 			name="FunctionBinding11",
 			description="Function call with named arguments: non-existing input",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -843,6 +866,7 @@ model FunctionBinding12
 		ErrorTestCase(
 			name="FunctionBinding12",
 			description="Function call with named arguments: using output as input",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -858,6 +882,7 @@ model FunctionBinding13
 		ErrorTestCase(
 			name="FunctionBinding13",
 			description="Function call with named arguments: giving an input value twice",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -873,6 +898,7 @@ model FunctionBinding14
 		ErrorTestCase(
 			name="FunctionBinding14",
 			description="Function call with named arguments: giving an input value four times",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -902,6 +928,7 @@ model FunctionBinding15
 		FlatteningTestCase(
 			name="FunctionBinding15",
 			description="Access to constant in default input value",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionBinding15
  Real d.c = FunctionTests.FunctionBinding15.A.f(1.0);
@@ -982,6 +1009,7 @@ model FunctionBinding19
 		FlatteningTestCase(
 			name="FunctionBinding19",
 			description="",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionBinding19
  Real w = FunctionTests.FunctionBinding19.c(1.0);
@@ -1009,6 +1037,7 @@ model BadFunctionCall1
 		ErrorTestCase(
 			name="BadFunctionCall1",
 			description="Call to non-existing function",
+			variability_propagation=false,
 			errorMessage="
 2 error(s) found...
 In file 'FunctionTests.mo':
@@ -1029,6 +1058,7 @@ model BadFunctionCall2
 		ErrorTestCase(
 			name="BadFunctionCall2",
 			description="Call to component as function",
+			variability_propagation=false,
 			errorMessage="
 2 error(s) found...
 In file 'FunctionTests.mo':
@@ -1052,6 +1082,7 @@ model BadFunctionCall3
 		ErrorTestCase(
 			name="BadFunctionCall3",
 			description="Call to non-function class as function",
+			variability_propagation=false,
 			errorMessage="
 2 error(s) found...
 In file 'FunctionTests.mo':
@@ -1073,6 +1104,7 @@ equation
 		FlatteningTestCase(
 			name="MultipleOutput1",
 			description="Functions with multiple outputs: flattening of equation",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.MultipleOutput1
  Real x;
@@ -1105,6 +1137,7 @@ equation
 		FlatteningTestCase(
 			name="MultipleOutput2",
 			description="Functions with multiple outputs: flattening, fewer components assigned than outputs",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.MultipleOutput2
  Real x;
@@ -1138,6 +1171,7 @@ equation
 		FlatteningTestCase(
 			name="MultipleOutput3",
 			description="Functions with multiple outputs: flattening, one output skipped",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.MultipleOutput3
  Real x;
@@ -1171,6 +1205,7 @@ equation
 		FlatteningTestCase(
 			name="MultipleOutput4",
 			description="Functions with multiple outputs: flattening, no components assigned",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.MultipleOutput4
  Real x;
@@ -1200,6 +1235,7 @@ model RecursionTest1
 		FlatteningTestCase(
 			name="RecursionTest1",
 			description="Flattening function calling other function",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.RecursionTest1
  Real x = FunctionTests.TestFunctionCallingFunction(1);
@@ -1231,6 +1267,7 @@ model RecursionTest2
 		FlatteningTestCase(
 			name="RecursionTest2",
 			description="Flattening function calling other function",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.RecursionTest2
  Real x = FunctionTests.TestFunctionRecursive(5);
@@ -1261,6 +1298,7 @@ model FunctionType0
 		FlatteningTestCase(
 			name="FunctionType0",
 			description="Function type checks: Real literal arg, Real input",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionType0
  Real x = FunctionTests.TestFunction1(1.0);
@@ -1284,6 +1322,7 @@ model FunctionType1
 		FlatteningTestCase(
 			name="FunctionType1",
 			description="Function type checks: Integer literal arg, Real input",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionType1
  Real x = FunctionTests.TestFunction1(1);
@@ -1307,6 +1346,7 @@ model FunctionType2
 		ErrorTestCase(
 			name="FunctionType2",
 			description="Function type checks: function with Real output as binding exp for Integer component",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1323,6 +1363,7 @@ model FunctionType3
 		FlatteningTestCase(
 			name="FunctionType3",
 			description="Function type checks: Real component arg, Real input",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionType3
  parameter Real a = 1.0 /* 1.0 */;
@@ -1348,6 +1389,7 @@ model FunctionType4
 		FlatteningTestCase(
 			name="FunctionType4",
 			description="Function type checks: Integer component arg, Real input",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionType4
  parameter Integer a = 1 /* 1 */;
@@ -1372,6 +1414,7 @@ model FunctionType5
 		ErrorTestCase(
 			name="FunctionType5",
 			description="Function type checks: Boolean literal arg, Real input",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1388,6 +1431,7 @@ model FunctionType6
 		ErrorTestCase(
 			name="FunctionType6",
 			description="Function type checks: Boolean component arg, Real input",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1404,6 +1448,7 @@ model FunctionType7
 		FlatteningTestCase(
 			name="FunctionType7",
 			description="Function type checks: nestled function calls",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionType7
  parameter Integer a = 1 /* 1 */;
@@ -1432,6 +1477,7 @@ model FunctionType8
 		ErrorTestCase(
 			name="FunctionType8",
 			description="Function type checks: nestled function calls, type mismatch in inner",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1447,6 +1493,7 @@ model FunctionType9
 		ComplianceErrorTestCase(
 			name="FunctionType9",
 			description="Function type checks: String literal arg, String input (error for now)",
+			variability_propagation=false,
 			errorMessage="
 3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -1469,6 +1516,7 @@ model FunctionType10
 		ComplianceErrorTestCase(
 			name="FunctionType10",
 			description="Function type checks: String component arg, String input (error for now)",
+			variability_propagation=false,
 			errorMessage="
 3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -1490,6 +1538,7 @@ model FunctionType11
 		ComplianceErrorTestCase(
 			name="FunctionType11",
 			description="Function type checks: Integer literal arg, String input",
+			variability_propagation=false,
 			errorMessage="
 4 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -1517,6 +1566,7 @@ equation
 		ErrorTestCase(
 			name="FunctionType12",
 			description="Function type checks: 2 outputs, 2nd wrong type",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1536,6 +1586,7 @@ equation
 		ErrorTestCase(
 			name="FunctionType13",
 			description="Function type checks: 3 outputs, 1st and 3rd wrong type",
+			variability_propagation=false,
 			errorMessage="
 2 error(s) found...
 In file 'FunctionTests.mo':
@@ -1558,6 +1609,7 @@ equation
 		ErrorTestCase(
 			name="FunctionType14",
 			description="Function type checks: 2 outputs, 3 components assigned",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1576,6 +1628,7 @@ equation
 		ErrorTestCase(
 			name="FunctionType15",
 			description="Function type checks: 3 outputs, 2nd skipped, 3rd wrong type",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1594,6 +1647,7 @@ equation
 		ErrorTestCase(
 			name="FunctionType16",
 			description="Function type checks: assigning 2 components from sin()",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1617,6 +1671,7 @@ model FunctionType17
 		ErrorTestCase(
 			name="FunctionType17",
 			description="Function type checks: combining known and unknown types",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -1633,6 +1688,7 @@ model BuiltInCallType1
 		ErrorTestCase(
 			name="BuiltInCallType1",
 			description="Built-in type checks: passing Boolean literal to sin()",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1648,6 +1704,7 @@ model BuiltInCallType2
 		ErrorTestCase(
 			name="BuiltInCallType2",
 			description="Built-in type checks: passing String literal to sqrt()",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1663,6 +1720,7 @@ model BuiltInCallType3
 		FlatteningTestCase(
 			name="BuiltInCallType3",
 			description="Built-in type checks: passing Integer literal to sqrt()",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.BuiltInCallType3
  Real x = sqrt(1);
@@ -1678,6 +1736,7 @@ model BuiltInCallType4
 		ErrorTestCase(
 			name="BuiltInCallType4",
 			description="Built-in type checks: using return value from sqrt() as Integer",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1693,6 +1752,7 @@ model BuiltInCallType5
 		ErrorTestCase(
 			name="BuiltInCallType5",
 			description="Built-in type checks: calling sin() without arguments",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1708,6 +1768,7 @@ model BuiltInCallType6
 		ErrorTestCase(
 			name="BuiltInCallType6",
 			description="Built-in type checks: calling atan2() with only one argument",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1723,6 +1784,7 @@ model BuiltInCallType7
 		ErrorTestCase(
 			name="BuiltInCallType7",
 			description="Built-in type checks: calling atan2() with String literal as second argument",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1739,6 +1801,7 @@ model BuiltInCallType8
 		FlatteningTestCase(
 			name="BuiltInCallType8",
 			description="Built-in type checks: using ones and zeros",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.BuiltInCallType8
  Real x[3] = zeros(3);
@@ -1755,6 +1818,7 @@ model BuiltInCallType9
 		ErrorTestCase(
 			name="BuiltInCallType9",
 			description="Built-in type checks: calling zeros() with Real literal as argument",
+			variability_propagation=false,
 			errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
@@ -1770,6 +1834,7 @@ model BuiltInCallType10
 		ErrorTestCase(
 			name="BuiltInCallType10",
 			description="Built-in type checks: calling ones() with String literal as second argument",
+			variability_propagation=false,
 			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -1817,6 +1882,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmFlatten2",
 			description="Alias elimination in algorithm",
+			variability_propagation=false,
 			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten2
@@ -1850,6 +1916,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmFlatten3",
 			description="Flattening algorithms: if stmts",
+			variability_propagation=false,
 			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten3
@@ -1895,6 +1962,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmFlatten4",
 			description="Flattening algorithms: when stmts",
+			variability_propagation=false,
 			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten4
@@ -1934,6 +2002,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmFlatten5",
 			description="Flattening algorithms: while stmts",
+			variability_propagation=false,
 			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten5
@@ -1962,6 +2031,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmFlatten6",
 			description="Flattening algorithms: for stmts",
+			variability_propagation=false,
 			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten6
@@ -1992,6 +2062,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeIf1",
 			description="Type checks in algorithms: Integer literal as test in if",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2012,6 +2083,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeIf2",
 			description="Type checks in algorithms: Integer component as test in if",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2032,6 +2104,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeIf3",
 			description="Type checks in algorithms: arithmetic expression as test in if",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2051,6 +2124,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeIf4",
 			description="Type checks in algorithms: Boolean vector as test in if",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2070,6 +2144,7 @@ algorithm
 		FlatteningTestCase(
 			name="AlgorithmTypeIf5",
 			description="Type checks in algorithms: Boolean literal as test in if",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTypeIf5
  Real x;
@@ -2095,6 +2170,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeWhen1",
 			description="Type checks in algorithms: Integer literal as test in when",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2115,6 +2191,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeWhen2",
 			description="Type checks in algorithms: Integer component as test in when",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2135,6 +2212,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeWhen3",
 			description="Type checks in algorithms: arithmetic expression as test in when",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2154,6 +2232,7 @@ algorithm
 		FlatteningTestCase(
 			name="AlgorithmTypeWhen4",
 			description="Type checks in algorithms: Boolean vector as test in when",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTypeWhen4
  Real x;
@@ -2177,6 +2256,7 @@ algorithm
 		FlatteningTestCase(
 			name="AlgorithmTypeWhen5",
 			description="Type checks in algorithms: Boolean literal as test in when",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTypeWhen5
  Real x;
@@ -2202,6 +2282,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeWhile1",
 			description="Type checks in algorithms: Integer literal as test in while",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2222,6 +2303,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeWhile2",
 			description="Type checks in algorithms: Integer component as test in while",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2242,6 +2324,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeWhile3",
 			description="Type checks in algorithms: arithmetic expression as test in while",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2261,6 +2344,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeWhile4",
 			description="Type checks in algorithms: Boolean vector as test in while",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2280,6 +2364,7 @@ algorithm
 		FlatteningTestCase(
 			name="AlgorithmTypeWhile5",
 			description="Type checks in algorithms: Boolean literal as test in while",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTypeWhile5
  Real x;
@@ -2301,6 +2386,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeAssign1",
 			description="Type checks in algorithms: assign Real to Integer component",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2318,6 +2404,7 @@ algorithm
 		FlatteningTestCase(
 			name="AlgorithmTypeAssign2",
 			description="Type checks in algorithms: assign Integer to Real component",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTypeAssign2
  Real x;
@@ -2337,6 +2424,7 @@ algorithm
 		FlatteningTestCase(
 			name="AlgorithmTypeAssign3",
 			description="Type checks in algorithms: assign Real to Real component",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTypeAssign3
  Real x;
@@ -2356,6 +2444,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeAssign4",
 			description="Type checks in algorithms: assign String to Real component",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2377,6 +2466,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeForIndex1",
 			description="Type checks in algorithms: assigning to for index",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2397,6 +2487,7 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmTypeForIndex2",
 			description="Type checks in algorithms: assigning to for index (FunctionCallStmt)",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -2421,6 +2512,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation1",
 			description="Generating functions from algorithms: simple algorithm",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation1
  Real a;
@@ -2463,6 +2555,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation2",
 			description="Generating functions from algorithms: vars used several times",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation2
  Real a;
@@ -2505,6 +2598,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation3",
 			description="Generating functions from algorithms: complex algorithm",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation3
  Real a;
@@ -2556,6 +2650,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation4",
 			description="Generating functions from algorithms: complex algorithm",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation4
  Real a;
@@ -2604,6 +2699,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation5",
 			description="Generating functions from algorithms: no used variables",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation5
  Real x;
@@ -2638,6 +2734,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation6",
 			description="Generating functions from algorithms: 2 algorithms",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation6
  Real x;
@@ -2681,6 +2778,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation7",
 			description="Generating functions from algorithms: generated name exists - function",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation7
  Real x;
@@ -2723,6 +2821,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation8",
 			description="Generating functions from algorithms: generated name exists - model",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation8
  Real x.a;
@@ -2757,6 +2856,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation9",
 			description="Generating functions from algorithms: generated name exists - component",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation9
  Real algorithm_1;
@@ -2799,6 +2899,7 @@ equation
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation10",
 			description="Generating functions from algorithms: generated arg name exists",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation10
  Real x;
@@ -2837,6 +2938,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation11",
 			description="Generating functions from algorithms: assigned variable used",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation11
  Real x;
@@ -2876,6 +2978,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation12",
 			description="Generating functions from algorithms: assigned variables used, different start values",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation12
  Real x0;
@@ -2921,6 +3024,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation13",
 			description="Generating functions from algorithms: no assignments",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation13
  Real x;
@@ -2963,6 +3067,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation14",
 			description="Generating functions from algorithms: using for index",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation14
  Real x;
@@ -3008,6 +3113,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmTransformation15",
 			description="Generating functions from algorithms: function call statement",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation15
  Real a_in;
@@ -3063,6 +3169,7 @@ model ArrayExpInFunc1
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc1",
 			description="Scalarization of functions: assign from array",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayExpInFunc1
  Real x;
@@ -3100,6 +3207,7 @@ model ArrayExpInFunc2
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc2",
 			description="Scalarization of functions: assign from array exp",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayExpInFunc2
  Real x;
@@ -3139,6 +3247,7 @@ model ArrayExpInFunc3
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc3",
 			description="Scalarization of functions: assign to slice",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayExpInFunc3
  Real x;
@@ -3176,6 +3285,7 @@ model ArrayExpInFunc4
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc4",
 			description="Scalarization of functions: binding exp to array var",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayExpInFunc4
  Real x;
@@ -3224,6 +3334,7 @@ model ArrayExpInFunc5
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc5",
 			description="Scalarization of functions: (x, y) := f(...) syntax",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayExpInFunc5
  Real x;
@@ -3277,6 +3388,7 @@ model ArrayExpInFunc6
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc6",
 			description="Scalarization of functions: if statements",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayExpInFunc6
  Real x;
@@ -3326,6 +3438,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc7",
 			description="Scalarization of functions: when statements",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayExpInFunc7
  Real o;
@@ -3378,6 +3491,7 @@ model ArrayExpInFunc8
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc8",
 			description="Scalarization of functions: for statements",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayExpInFunc8
  Real x;
@@ -3424,6 +3538,7 @@ model ArrayExpInFunc9
 		TransformCanonicalTestCase(
 			name="ArrayExpInFunc9",
 			description="Scalarization of functions: while statements",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayExpInFunc9
  Real x;
@@ -3470,6 +3585,7 @@ equation
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization1",
 			description="Scalarization of array function outputs: function call equation",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization1
  Real x[1];
@@ -3510,6 +3626,7 @@ equation
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization2",
 			description="Scalarization of array function outputs: expression with func call",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization2
  Real x[1];
@@ -3552,6 +3669,7 @@ equation
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization3",
 			description="Scalarization of array function outputs: finding free temp name",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization3
  Real x[1];
@@ -3605,6 +3723,7 @@ model ArrayOutputScalarization4
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization4",
 			description="Scalarization of array function outputs: function call statement",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization4
  Real x;
@@ -3658,6 +3777,7 @@ model ArrayOutputScalarization5
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization5",
 			description="Scalarization of array function outputs: assign statement with expression",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization5
  Real x;
@@ -3712,6 +3832,7 @@ model ArrayOutputScalarization6
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization6",
 			description="Scalarization of array function outputs: finding free temp name",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization6
  Real x;
@@ -3770,6 +3891,7 @@ model ArrayOutputScalarization7
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization7",
 			description="Scalarization of array function outputs: if statement",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization7
  Real x;
@@ -3838,6 +3960,7 @@ model ArrayOutputScalarization8
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization8",
 			description="Scalarization of array function outputs: for statement",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization8
  Real x;
@@ -3886,6 +4009,7 @@ equation
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization9",
 			description="Scalarization of array function outputs: equation without expression",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization9
@@ -3932,6 +4056,7 @@ model ArrayOutputScalarization10
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization10",
 			description="Scalarization of array function outputs: while statement",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization10
  Real x;
@@ -3984,6 +4109,7 @@ model ArrayOutputScalarization11
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization11",
 			description="Scalarization of array function outputs: binding expression",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization11
  Real x;
@@ -4032,6 +4158,7 @@ model ArrayOutputScalarization12
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization12",
 			description="Scalarization of array function outputs: part of binding expression",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization12
  Real x;
@@ -4083,6 +4210,7 @@ model ArrayOutputScalarization13
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization13",
 			description="Scalarization of array function outputs: part of scalar binding exp",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization13
  Real x;
@@ -4126,6 +4254,7 @@ model ArrayOutputScalarization14
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization14",
 			description="Scalarization of array function outputs: part of scalar expression",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization14
  Real x;
@@ -4165,6 +4294,7 @@ equation
 		GenericCodeGenTestCase(
 			name="ArrayOutputScalarization15",
 			description="Scalarization of array function outputs: number of equations",
+			variability_propagation=false,
 			template="$n_equations$",
 			generatedCode="3"
  )})));
@@ -4192,6 +4322,7 @@ model ArrayOutputScalarization16
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization16",
 			description="Scalarization of array function outputs: using original arrays",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization16
  Real x;
@@ -4245,6 +4376,7 @@ model ArrayOutputScalarization17
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization17",
 			description="Scalarization of array function outputs: using original arrays",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization17
  Real x;
@@ -4299,6 +4431,7 @@ model ArrayOutputScalarization18
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization18",
 			description="Scalarization of binding expression of unknown size for protected var in func",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization18
  Real x;
@@ -4359,6 +4492,7 @@ model ArrayOutputScalarization19
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization19",
 			description="Scalarization of binding expression of unknown size for protected var in func",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization19
  Real x;
@@ -4417,6 +4551,7 @@ model ArrayOutputScalarization20
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization20",
 			description="Checks for bug in #1895",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization20
  Real x.a;
@@ -4472,6 +4607,7 @@ model UnknownArray1
 		FlatteningTestCase(
 			name="UnknownArray1",
 			description="Using functions with unknown array sizes: basic type test",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray1
  Real x[3] = FunctionTests.UnknownArray1.f({1,2,3});
@@ -4505,6 +4641,7 @@ model UnknownArray2
 		FlatteningTestCase(
 			name="UnknownArray2",
 			description="Using functions with unknown array sizes: size from binding exp",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray2
  Real x[3] = FunctionTests.UnknownArray2.f({1,2,3});
@@ -4539,6 +4676,7 @@ model UnknownArray3
 		FlatteningTestCase(
 			name="UnknownArray3",
 			description="Using functions with unknown array sizes: indirect dependency",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray3
  Real x[3] = FunctionTests.UnknownArray3.f({1,2,3});
@@ -4574,6 +4712,7 @@ model UnknownArray4
 		FlatteningTestCase(
 			name="UnknownArray4",
 			description="Using functions with unknown array sizes: indirect dependency from binding exp",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray4
  Real x[3] = FunctionTests.UnknownArray4.f({1,2,3});
@@ -4610,6 +4749,7 @@ equation
 		FlatteningTestCase(
 			name="UnknownArray5",
 			description="Using functions with unknown array sizes: multiple outputs",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray5
  Real x[3];
@@ -4645,6 +4785,7 @@ model UnknownArray6
 		ErrorTestCase(
 			name="UnknownArray6",
 			description="Using functions with unknown array sizes: wrong size",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -4671,6 +4812,7 @@ equation
 		ErrorTestCase(
 			name="UnknownArray7",
 			description="Using functions with unknown array sizes: wrong size",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -4694,6 +4836,7 @@ model UnknownArray8
 		ErrorTestCase(
 			name="UnknownArray8",
 			description="Using functions with unknown array sizes: circular size",
+			variability_propagation=false,
 			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -4722,6 +4865,7 @@ model UnknownArray9
 		FlatteningTestCase(
 			name="UnknownArray9",
 			description="Unknown size calculated by adding sizes",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray9
  Real x[5,2] = FunctionTests.UnknownArray9.f({{1,2},{3,4}}, {{5,6},{7,8},{9,0}});
@@ -4756,6 +4900,7 @@ model UnknownArray10
 		TransformCanonicalTestCase(
 			name="UnknownArray10",
 			description="Scalarization of operations on arrays of unknown size: assignment",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray10
  Real x[1];
@@ -4792,6 +4937,7 @@ model UnknownArray11
 		TransformCanonicalTestCase(
 			name="UnknownArray11",
 			description="Scalarization of operations on arrays of unknown size: binding expression",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray11
  Real x[1];
@@ -4831,6 +4977,7 @@ model UnknownArray12
 		TransformCanonicalTestCase(
 			name="UnknownArray12",
 			description="Scalarization of operations on arrays of unknown size: element-wise expression",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray12
  Real x[1];
@@ -4871,6 +5018,7 @@ model UnknownArray13
 		TransformCanonicalTestCase(
 			name="UnknownArray13",
 			description="Scalarization of operations on arrays of unknown size: element-wise binding expression",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray13
  Real x[1];
@@ -4910,6 +5058,7 @@ model UnknownArray14
 		TransformCanonicalTestCase(
 			name="UnknownArray14",
 			description="Scalarization of operations on arrays of unknown size: matrix multiplication",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray14
  Real x[1,1];
@@ -4957,6 +5106,7 @@ model UnknownArray15
 		TransformCanonicalTestCase(
 			name="UnknownArray15",
 			description="Scalarization of operations on arrays of unknown size: vector multiplication",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray15
  Real x;
@@ -5000,6 +5150,7 @@ model UnknownArray16
 		TransformCanonicalTestCase(
 			name="UnknownArray16",
 			description="Scalarization of operations on arrays of unknown size: outside assignment",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray16
  Real x;
@@ -5045,6 +5196,7 @@ model UnknownArray17
 		TransformCanonicalTestCase(
 			name="UnknownArray17",
 			description="Scalarization of operations on arrays of unknown size: nestled multiplications",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray17
  Real y[1,1];
@@ -5108,6 +5260,7 @@ model UnknownArray18
 		TransformCanonicalTestCase(
 			name="UnknownArray18",
 			description="Scalarization of operations on arrays of unknown size: already expressed as loop",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray18
  Real x[1];
@@ -5144,6 +5297,7 @@ model UnknownArray19
 		ErrorTestCase(
 			name="UnknownArray19",
 			description="Function inputs of unknown size: using size() of non-existent component",
+			variability_propagation=false,
 			errorMessage="
 3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -5174,6 +5328,7 @@ model UnknownArray20
 		TransformCanonicalTestCase(
 			name="UnknownArray20",
 			description="Function inputs of unknown size: scalarizing end",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray20
  Real x[1];
@@ -5210,6 +5365,7 @@ model UnknownArray21
 		TransformCanonicalTestCase(
 			name="UnknownArray21",
 			description="Scalarizing multiplication between two inputs of unknown size",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray21
  Real x;
@@ -5250,6 +5406,7 @@ model UnknownArray22
 		TransformCanonicalTestCase(
 			name="UnknownArray22",
 			description="Scalarizing multiplication between two inputs of unknown size, with defaults",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray22
  Real x;
@@ -5290,6 +5447,7 @@ model UnknownArray23
 		TransformCanonicalTestCase(
 			name="UnknownArray23",
 			description="Using array constructors with inputs of unknown size",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray23
  Real x;
@@ -5334,6 +5492,7 @@ model UnknownArray24
 		TransformCanonicalTestCase(
 			name="UnknownArray24",
 			description="Using array constructors with inputs of unknown size",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray24
  Real x[1,1];
@@ -5387,6 +5546,7 @@ model UnknownArray25
 		TransformCanonicalTestCase(
 			name="UnknownArray25",
 			description="Taking sum of array of unknown size",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray25
  Real x;
@@ -5426,6 +5586,7 @@ model UnknownArray26
 		TransformCanonicalTestCase(
 			name="UnknownArray26",
 			description="Taking sum of iterator expression over array of unknown size",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray26
  Real x;
@@ -5466,6 +5627,7 @@ model UnknownArray27
 		TransformCanonicalTestCase(
 			name="UnknownArray27",
 			description="Nestled sums over iterator expressions over arrays of unknown size",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray27
  Real x;
@@ -5532,6 +5694,7 @@ model UnknownArray29
 		TransformCanonicalTestCase(
 			name="UnknownArray29",
 			description="Calling function from function with slice argument",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray29
  constant Real a[1] = 1;
@@ -5588,6 +5751,7 @@ model UnknownArray30
 		TransformCanonicalTestCase(
 			name="UnknownArray30",
 			description="Fill type operators with unknown arguments in functions",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray30
  Real x;
@@ -5638,6 +5802,7 @@ model UnknownArray31
 		TransformCanonicalTestCase(
 			name="UnknownArray31",
 			description="Assignstatement with right hand side function call.",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray31
  Real x[1];
@@ -5685,6 +5850,7 @@ model UnknownArray32
 		TransformCanonicalTestCase(
 			name="UnknownArray32",
 			description="Check that size assignment for protected array with some dimensions known works",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray32
  Real x;
@@ -5731,6 +5897,7 @@ model IncompleteFunc1
 		ErrorTestCase(
 			name="IncompleteFunc1",
 			description="Wrong contents of called function: neither algorithm nor external",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -5756,6 +5923,7 @@ model IncompleteFunc2
 		ErrorTestCase(
 			name="IncompleteFunc2",
 			description="Wrong contents of called function: 2 algorithm",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -5780,6 +5948,7 @@ model IncompleteFunc3
 		ErrorTestCase(
 			name="IncompleteFunc3",
 			description="Wrong contents of called function: both algorithm and external",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -5803,6 +5972,7 @@ model ExternalFunc1
 		FlatteningTestCase(
 			name="ExternalFunc1",
 			description="External functions: simple func, all default",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ExternalFunc1
  Real x = FunctionTests.ExternalFunc1.f(2);
@@ -5837,6 +6007,7 @@ model ExternalFunc2
 		FlatteningTestCase(
 			name="ExternalFunc2",
 			description="External functions: complex func, all default",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ExternalFunc2
  Real x = FunctionTests.ExternalFunc2.f({{1,2},{3,4}}, 5);
@@ -5873,6 +6044,7 @@ model ExternalFunc3
 		FlatteningTestCase(
 			name="ExternalFunc3",
 			description="External functions: complex func, call set",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ExternalFunc3
  Real x = FunctionTests.ExternalFunc3.f({{1,2},{3,4}}, 5);
@@ -5908,6 +6080,7 @@ model ExternalFunc4
 		FlatteningTestCase(
 			name="ExternalFunc4",
 			description="External functions: complex func, call and return set",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ExternalFunc4
  Real x = FunctionTests.ExternalFunc4.f({{1,2},{3,4}}, 5);
@@ -5941,6 +6114,7 @@ model ExternalFunc5
 		FlatteningTestCase(
 			name="ExternalFunc5",
 			description="External functions: simple func, language \"C\"",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ExternalFunc5
  Real x = FunctionTests.ExternalFunc5.f(2);
@@ -5972,6 +6146,7 @@ model ExternalFunc6
 		FlatteningTestCase(
 			name="ExternalFunc6",
 			description="External functions: simple func, language \"FORTRAN 77\"",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ExternalFunc6
  Real x = FunctionTests.ExternalFunc6.f(2);
@@ -6003,6 +6178,7 @@ model ExternalFunc7
 		ErrorTestCase(
 			name="ExternalFunc7",
 			description="External functions: simple func, language \"C++\"",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -6047,6 +6223,7 @@ model ExternalFuncLibs1
 		FClassMethodTestCase(
 			name="ExternalFuncLibs1",
 			description="External function annotations, Library",
+			variability_propagation=false,
 			methodName="externalLibraries",
 			methodResult="[foo, m, bar]"
  )})));
@@ -6087,6 +6264,7 @@ model ExternalFuncLibs2
 		FClassMethodTestCase(
 			name="ExternalFuncLibs2",
 			description="External function annotations, Include",
+			variability_propagation=false,
 			methodName="externalIncludes",
 			methodResult="[#include \"bar.h\", #include \"foo.h\"]"
  )})));
@@ -6121,6 +6299,7 @@ model ExternalFuncLibs3
 		FClassMethodTestCase(
 			name="ExternalFuncLibs3",
 			description="External function annotations, LibraryDirectory",
+			variability_propagation=false,
 			methodName="externalLibraryDirectories",
 			methodResult="[/c:/bar/lib, /c:/foo/lib]"
  )})));
@@ -6154,6 +6333,7 @@ model ExternalFuncLibs4
 		FClassMethodTestCase(
 			name="ExternalFuncLibs4",
 			description="External function annotations, LibraryDirectory",
+			variability_propagation=false,
 			methodName="externalLibraryDirectories",
 			filter=true,
 			methodResult="
@@ -6190,6 +6370,7 @@ model ExternalFuncLibs5
 		FClassMethodTestCase(
 			name="ExternalFuncLibs5",
 			description="External function annotations, IncludeDirectory",
+			variability_propagation=false,
 			methodName="externalIncludeDirectories",
 			filter=true,
 			methodResult="[/c:/foo/inc, /c:/bar/inc]"
@@ -6224,6 +6405,7 @@ model ExternalFuncLibs6
 		FClassMethodTestCase(
 			name="ExternalFuncLibs6",
 			description="External function annotations, IncludeDirectory",
+			variability_propagation=false,
 			methodName="externalIncludeDirectories",
 			filter=true,
 			methodResult="
@@ -6273,6 +6455,7 @@ model ExternalFuncLibs7
 		FClassMethodTestCase(
 			name="ExternalFuncLibs7",
 			description="External function annotations, compiler args",
+			variability_propagation=false,
 			methodName="externalCompilerArgs",
 			methodResult=" -lfoo -lbar -L/c:/bar/lib -L/c:/std/lib -L/c:/foo/lib -I/c:/foo/inc -I/c:/std/inc -I/c:/bar/inc"
  )})));
@@ -6293,6 +6476,7 @@ model ExternalFuncLibs8
 		FClassMethodTestCase(
 			name="ExternalFuncLibs8",
 			description="External function annotations, compiler args",
+			variability_propagation=false,
 			methodName="externalCompilerArgs",
 			filter=true,
 			methodResult=" -lfoo -L%dir%/Resources/Library -I%dir%/Resources/Include"
@@ -6312,6 +6496,7 @@ equation
 		ErrorTestCase(
 			name="ExternalFuncError1",
 			description="",
+			variability_propagation=false,
 			generate_block_jacobian=true,
 			errorMessage="
 1 errors found:
@@ -6342,6 +6527,7 @@ model ExtendFunc1
 		FlatteningTestCase(
 			name="ExtendFunc1",
 			description="Flattening of function extending other function",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ExtendFunc1
  Real x = FunctionTests.ExtendFunc1.f2(1.0);
@@ -6384,6 +6570,7 @@ model ExtendFunc2
 		FlatteningTestCase(
 			name="ExtendFunc2",
 			description="Order of variables in functions when inheriting and adding constants",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ExtendFunc2
  constant Real d[2] = {1,2};
@@ -6419,6 +6606,7 @@ model AttributeTemp1
 		TransformCanonicalTestCase(
 			name="AttributeTemp1",
 			description="Temporary variable for attribute",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AttributeTemp1
  Real x[1](start = temp_1[1]);
@@ -6460,6 +6648,7 @@ model InputAsArraySize1
 		TransformCanonicalTestCase(
 			name="InputAsArraySize1",
 			description="Input as array size of output in function: basic test",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.InputAsArraySize1
  Real x[1];
@@ -6499,6 +6688,7 @@ model InputAsArraySize2
 		TransformCanonicalTestCase(
 			name="InputAsArraySize2",
 			description="Input as array size of output in function: basic test",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.InputAsArraySize2
  parameter Integer n = 3 /* 3 */;
@@ -6539,6 +6729,7 @@ model InputAsArraySize3
 		TransformCanonicalTestCase(
 			name="InputAsArraySize3",
 			description="Input as array size of output in function: basic test",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.InputAsArraySize3
  parameter Integer n = 3 /* 3 */;
@@ -6578,6 +6769,7 @@ model InputAsArraySize4
 		TransformCanonicalTestCase(
 			name="InputAsArraySize4",
 			description="Input as array size of output in function: test using size()",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.InputAsArraySize4
  Real x[1];
@@ -6617,6 +6809,7 @@ model InputAsArraySize5
 		ErrorTestCase(
 			name="InputAsArraySize5",
 			description="Input as array size of output in function: variable passed",
+			variability_propagation=false,
 			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -6643,6 +6836,7 @@ model InputAsArraySize6
 		ErrorTestCase(
 			name="InputAsArraySize6",
 			description="Input as array size of output in function: wrong value passed",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
@@ -6667,6 +6861,7 @@ model InputAsArraySize7
 		TransformCanonicalTestCase(
 			name="InputAsArraySize7",
 			description="Input as array size of other input in function: basic test",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.InputAsArraySize7
  Real x;
@@ -6721,6 +6916,7 @@ model InputAsArraySize9
 		TransformCanonicalTestCase(
 			name="InputAsArraySize9",
 			description="Input as array size of other input in function: basic test",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.InputAsArraySize9
  Real x;
@@ -6776,6 +6972,7 @@ model VectorizedCall1
 		TransformCanonicalTestCase(
 			name="VectorizedCall1",
 			description="Vectorization: basic test",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.VectorizedCall1
  Real z[1];
@@ -6814,6 +7011,7 @@ model VectorizedCall2
 		TransformCanonicalTestCase(
 			name="VectorizedCall2",
 			description="Vectorization: one of two args vectorized",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.VectorizedCall2
  Real z[1,1];
@@ -6859,6 +7057,7 @@ model VectorizedCall3
 		TransformCanonicalTestCase(
 			name="VectorizedCall3",
 			description="Vectorization: vectorised array arg, constant",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.VectorizedCall3
  constant Real v[1,1] = (- 1) * 1;
@@ -6935,6 +7134,7 @@ model VectorizedCall4
 		TransformCanonicalTestCase(
 			name="VectorizedCall4",
 			description="Vectorization: vectorised array arg, continous",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.VectorizedCall4
  Real v2[1,1,1,1];
@@ -7138,6 +7338,7 @@ model VectorizedCall5
 		TransformCanonicalTestCase(
 			name="VectorizedCall5",
 			description="Vectorization: scalarized record arg",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.VectorizedCall5
  Real w[1].a;
@@ -7184,6 +7385,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Lapack_dgeqpf",
 			description="Test scalarization of LAPACK function that has had some issues",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.Lapack_dgeqpf
  Real A[1,1];
@@ -7245,6 +7447,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Lapack_QR",
 			description="",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.Lapack_QR
  Real A[1,1];
@@ -7398,6 +7601,7 @@ model BindingSort1
 		TransformCanonicalTestCase(
 			name="BindingSort1",
 			description="Test sorting of binding expressions",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.BindingSort1
  Real x;
@@ -7457,6 +7661,7 @@ equation
 		TransformCanonicalTestCase(
 			name="UseInterpolate",
 			description="",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UseInterpolate
  Real result;
@@ -7527,6 +7732,7 @@ model ComponentFunc1
 		TransformCanonicalTestCase(
 			name="ComponentFunc1",
 			description="Calling functions in components",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ComponentFunc1
  Real b1.z(start = 2);

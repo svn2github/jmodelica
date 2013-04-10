@@ -155,7 +155,7 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Angle spring.phi_rel0 = 0 \"Unstretched spring angle\" /* 0 */;
  Modelica.SIunits.Angle spring.phi_rel(fixed = true,start = 0) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
  Modelica.SIunits.Torque spring.flange_b.tau \"Cut torque in the flange\";
- Modelica.SIunits.Torque inertia3.flange_b.tau \"Cut torque in the flange\";
+ constant Modelica.SIunits.Torque inertia3.flange_b.tau = 0 \"Cut torque in the flange\";
  parameter Modelica.SIunits.MomentOfInertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
  parameter StateSelect inertia3.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia3.phi(stateSelect = inertia3.stateSelect) \"Absolute rotation angle of component\";
@@ -199,16 +199,15 @@ equation
  spring.phi_rel = inertia3.phi - inertia2.phi;
  inertia3.w = inertia3.der(phi);
  inertia3.a = inertia3.der(w);
- inertia3.J * inertia3.a = - spring.flange_b.tau + inertia3.flange_b.tau;
+ inertia3.J * inertia3.a = - spring.flange_b.tau + 0.0;
  damper.flange_b.tau = damper.d * damper.w_rel;
  damper.lossPower = damper.flange_b.tau * damper.w_rel;
  damper.phi_rel = fixed.phi0 - inertia2.phi;
  damper.w_rel = damper.der(phi_rel);
  damper.a_rel = damper.der(w_rel);
- - torque.flange.tau = sine.offset + (if time < sine.startTime then 0 else sine.amplitude * sin(2 * 3.141592653589793 * sine.freqHz * (time - sine.startTime) + sine.phase));
+ - torque.flange.tau = sine.offset + (if time < sine.startTime then 0 else sine.amplitude * sin(6.283185307179586 * sine.freqHz * (time - sine.startTime) + sine.phase));
  - damper.flange_b.tau + inertia2.flange_b.tau + (- spring.flange_b.tau) = 0;
  damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau + (- torque.flange.tau) = 0;
- inertia3.flange_b.tau = 0;
  idealGear.support.tau = - idealGear.flange_a.tau - idealGear.flange_b.tau;
  inertia1.w = idealGear.ratio * inertia2.w;
  inertia1.a = idealGear.ratio * inertia2.a;
@@ -231,6 +230,7 @@ public
  type Modelica.SIunits.Time = Real(final quantity = \"Time\",final unit = \"s\");
  type Modelica.Blocks.Interfaces.RealOutput = Real;
 end IndexReduction.IndexReduction2_Mechanical;
+
 ")})));
   end IndexReduction2_Mechanical;
 
@@ -883,6 +883,7 @@ P*V=m*R*T;
         ErrorTestCase(
             name="IndexReduction23_BasicVolume_Err",
             description="Test error messages for unbalanced systems.",
+            variability_propagation=false,
             errorMessage="2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc2815301804134878885out/resources/BasicVolume.mof':
@@ -993,21 +994,18 @@ fclass IndexReduction.IndexReduction25_DerFunc
  parameter Real A[2,1] = 3 /* 3 */;
  parameter Real A[2,2] = 4 /* 4 */;
  Real x1[1];
- Real x1[2];
+ constant Real x1[2] = 0;
  Real x2[1];
  Real x2[2];
  Real der_x1_1;
- Real der_x1_2;
 initial equation 
  x2[1] = 0.0;
  x2[2] = 0.0;
 equation
  der_x1_1 + der(x2[1]) = 1;
- der_x1_2 + der(x2[2]) = 2;
+ 0.0 + der(x2[2]) = 2;
  x1[1] + IndexReduction.IndexReduction25_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}) = 0;
- x1[2] = 0;
  der_x1_1 + IndexReduction.IndexReduction25_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}}) = 0.0;
- der_x1_2 = 0.0;
 
 public
  function IndexReduction.IndexReduction25_DerFunc.f_der
@@ -1031,6 +1029,7 @@ public
  end IndexReduction.IndexReduction25_DerFunc.f;
 
 end IndexReduction.IndexReduction25_DerFunc;
+
 ")})));
 end IndexReduction25_DerFunc;
 
@@ -1064,21 +1063,18 @@ equation
             flatModel="
 fclass IndexReduction.IndexReduction26_DerFunc
  Real x1[1];
- Real x1[2];
+ constant Real x1[2] = 0;
  Real x2[1];
  Real x2[2];
  Real der_x1_1;
- Real der_x1_2;
 initial equation 
  x2[1] = 0.0;
  x2[2] = 0.0;
 equation
  der_x1_1 + der(x2[1]) = 1;
- der_x1_2 + der(x2[2]) = 2;
+ 0.0 + der(x2[2]) = 2;
  x1[1] + IndexReduction.IndexReduction26_DerFunc.f({x2[1], x2[2]}) = 0;
- x1[2] = 0;
  der_x1_1 + IndexReduction.IndexReduction26_DerFunc.f_der({x2[1], x2[2]}, {der(x2[1]), der(x2[2])}) = 0.0;
- der_x1_2 = 0.0;
 
 public
  function IndexReduction.IndexReduction26_DerFunc.f_der
@@ -1099,6 +1095,7 @@ public
  end IndexReduction.IndexReduction26_DerFunc.f;
 
 end IndexReduction.IndexReduction26_DerFunc;
+
 ")})));
 end IndexReduction26_DerFunc;
 
@@ -1572,17 +1569,16 @@ equation
 fclass IndexReduction.IndexReduction35_Boolean
  Real x;
  Real y;
- discrete Boolean b;
+ constant Boolean b = false;
  Real der_x;
 initial equation 
  y = 0.0;
- pre(b) = false;
 equation
- x = if b then 1 else 2 + y;
+ x = 2 + y;
  der_x + der(y) = 0;
- b = false;
- der_x = if b then 0.0 else der(y);
+ der_x = der(y);
 end IndexReduction.IndexReduction35_Boolean;
+
 ")})));
 end IndexReduction35_Boolean;
 
@@ -1601,17 +1597,16 @@ equation
 fclass IndexReduction.IndexReduction36_Integer
  Real x;
  Real y;
- discrete Integer b;
+ constant Integer b = 2;
  Real der_x;
 initial equation 
  y = 0.0;
- pre(b) = 0;
 equation
- x = if b == 2 then 1 else 2 + y;
+ x = 1;
  der_x + der(y) = 0;
- b = 2;
- der_x = if b == 2 then 0.0 else der(y);
+ der_x = 0.0;
 end IndexReduction.IndexReduction36_Integer;
+
 ")})));
 end IndexReduction36_Integer;
 

@@ -11,6 +11,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADsin",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -36,6 +37,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADcos",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -61,6 +63,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADtan",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -87,6 +90,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADasin",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -113,6 +117,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADacos",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -139,6 +144,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADatan",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -167,6 +173,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADatan2",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -200,6 +207,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADsinh",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -226,6 +234,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADcosh",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -253,6 +262,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADtanh",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -280,6 +290,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADexp",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -307,6 +318,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADlog",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -334,6 +346,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADlog10",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -361,6 +374,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADsqrt",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -391,6 +405,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADadd",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -423,6 +438,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADsub",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -455,6 +471,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADmul",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -487,6 +504,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADdiv",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -519,6 +537,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADpow",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -551,6 +570,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADmin",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -603,6 +623,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADmax",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -658,6 +679,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADabs",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -707,6 +729,7 @@ equation
 		CADCodeGenTestCase(
 			name="IfExpExample1",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -823,6 +846,7 @@ equation
 		CADCodeGenTestCase(
 			name="IfExpExample2",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -900,6 +924,7 @@ equation
 		CADCodeGenTestCase(
 			name="IfExpExample3",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
@@ -1027,6 +1052,7 @@ model CADFunction1
 		CADCodeGenTestCase(
 			name="CADFunction1",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="
@@ -1074,6 +1100,7 @@ func_CADCodeGenTests_CADFunction1_F_der_AD(_a_0, (*dz)[jmi_get_index_from_value_
 		CADCodeGenTestCase(
 			name="CADFunction2",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
@@ -1156,6 +1183,7 @@ func_CADCodeGenTests_CADFunction2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_
 		CADCodeGenTestCase(
 			name="CADFunction3",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
@@ -1279,6 +1307,7 @@ d_5 = d_6 + d_7;
 		CADCodeGenTestCase(
 			name="CADFunction4",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
@@ -1405,6 +1434,7 @@ model CADFunction5
 		CADCodeGenTestCase(
 			name="CADFunction5",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="
@@ -1639,6 +1669,7 @@ model CADFunction6
 		CADCodeGenTestCase(
 			name="CADFunction6",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
@@ -1866,6 +1897,7 @@ model CADFunction7
 		CADCodeGenTestCase(
 			name="CADFunction7",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="$CAD_functions$,$C_DAE_equation_directional_derivative$",
@@ -1952,6 +1984,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADFunction8",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="
@@ -2158,6 +2191,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADFunction9",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -2318,6 +2352,7 @@ equation
 		CADCodeGenTestCase(
 			name="FunctionDiscreteInputTest1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -2357,6 +2392,7 @@ equation
 		CADCodeGenTestCase(
 			name="FunctionDiscreteOutputTest1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -2404,6 +2440,7 @@ equation
 		CADCodeGenTestCase(
 			name="FunctionDiscreteOutputTest2",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -2468,6 +2505,7 @@ equation
 		CADCodeGenTestCase(
 			name="FunctionMixedRecordInputTest1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -2516,6 +2554,7 @@ equation
 		CADCodeGenTestCase(
 			name="FunctionUnknownArraySizeTest1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -2607,6 +2646,7 @@ model CADDerAnno1
 		CADCodeGenTestCase(
 			name="CADDerAnno1",
 			description="",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="
@@ -2696,6 +2736,7 @@ model CADDerAnno2
 		CADCodeGenTestCase(
 			name="CADDerAnno2",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			generate_block_jacobian=true,
 			template="
@@ -2787,6 +2828,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADIfStmtTest1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -2849,6 +2891,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADForStmtTest1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -2930,6 +2973,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADWhileStmtTest1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			template="
 $CAD_ode_derivatives$
@@ -3009,6 +3053,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADRes1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -3142,6 +3187,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADRes2",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -3250,6 +3296,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADRes3",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -3445,6 +3492,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADTorn1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -3881,6 +3929,7 @@ model CADOde1
 		CADCodeGenTestCase(
 			name="CADOde1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -4018,6 +4067,7 @@ model CADOde2
 		CADCodeGenTestCase(
 			name="CADOde2",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -4077,6 +4127,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADExpInFuncArg1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -4252,6 +4303,7 @@ equation
 		CADCodeGenTestCase(
 			name="TestLiteralFuncArg1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -4312,6 +4364,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADRecord1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -4475,6 +4528,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADTornRecord1",
 			description="",
+			variability_propagation=false,
 			generate_block_jacobian=true,
 			fmi_version=2.0,
 			generate_ode=true,
@@ -4540,6 +4594,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADArray1",
 			description="",
+			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -4783,6 +4838,7 @@ equation
 		CADCodeGenTestCase(
 			name="CADTornArray1",
 			description="",
+			variability_propagation=false,
 			generate_block_jacobian=true,
 			fmi_version=2.0,
 			generate_ode=true,
@@ -4851,6 +4907,7 @@ equation
 		CADCodeGenTestCase(
 			name="SparseJacTest1",
 			description="Test that sparsity information is generated correctly",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="
 $C_DAE_equation_sparsity$
@@ -4891,6 +4948,7 @@ equation
 		CADCodeGenTestCase(
 			name="SparseJacTest2",
 			description="Test that sparsity information is generated correctly",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="
 $C_DAE_equation_sparsity$
@@ -4932,6 +4990,7 @@ equation
 		CADCodeGenTestCase(
 			name="SparseJacTest3",
 			description="Test that sparsity information is generated correctly",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="
 $C_DAE_equation_sparsity$
@@ -4971,6 +5030,7 @@ equation
 		CADCodeGenTestCase(
 			name="SparseJacTest4",
 			description="Test that sparsity information is generated correctly",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="
 $C_DAE_equation_sparsity$
@@ -5010,6 +5070,7 @@ equation
 		CADCodeGenTestCase(
 			name="SparseJacTest5",
 			description="Test that sparsity information is generated correctly",
+			variability_propagation=false,
 			generate_dae_jacobian=true,
 			template="
 $C_DAE_equation_sparsity$
@@ -5067,6 +5128,7 @@ equation
 		CADCodeGenTestCase(
 			name="TestExtObject1",
 			description="",
+			variability_propagation=false,
 			generate_block_jacobian=true,
 			template="
 $C_function_headers$

@@ -1071,14 +1071,9 @@ model ConstantLookup18
 			flatModel="
 fclass NameTests.ConstantLookup18
  parameter Integer b.n = 3 /* 3 */;
- Real b.x[1];
- Real b.x[2];
- Real b.x[3];
-equation
- b.x[1] = 1;
- b.x[2] = 1;
- b.x[3] = 1;
-
+ constant Real b.x[1] = 1;
+ constant Real b.x[2] = 1;
+ constant Real b.x[3] = 1;
 end NameTests.ConstantLookup18;
 ")})));
 end ConstantLookup18;
@@ -1149,10 +1144,7 @@ model ConstantLookup20
 			description="Member of constant record, using record constructor",
 			flatModel="
 fclass NameTests.ConstantLookup20
- Real y;
-equation
- y = 3.0;
-
+ constant Real y = 3.0;
 end NameTests.ConstantLookup20;
 ")})));
 end ConstantLookup20;
@@ -1482,10 +1474,7 @@ model ConstantLookup29
 			description="Extending class using imported constant",
 			flatModel="
 fclass NameTests.ConstantLookup29
- Real a.x(start = 1.0);
-equation
- a.x = 2;
-
+ constant Real a.x(start = 1.0) = 2;
 end NameTests.ConstantLookup29;
 ")})));
 end ConstantLookup29;
@@ -1512,9 +1501,7 @@ model ConstantLookup30
 			flatModel="
 fclass NameTests.ConstantLookup30
  parameter Real p = 3.1 /* 3.1 */;
- Modelica.SIunits.Force f;
-equation
- f = 1;
+ constant Modelica.SIunits.Force f = 1;
 
 public
  type Modelica.SIunits.Force = Real(final quantity = \"Force\",final unit = \"N\");
@@ -1679,8 +1666,8 @@ model ConstantLookup34
 			flatModel="
 fclass NameTests.ConstantLookup34
  parameter Integer j = 1 /* 1 */;
- Real z;
-equation
+ parameter Real z;
+parameter equation
  z = NameTests.ConstantLookup34.f(j);
 
 public
@@ -1763,8 +1750,8 @@ model ConstantLookup35
 			flatModel="
 fclass NameTests.ConstantLookup35
  parameter Integer b.j = 1 /* 1 */;
- Real b.z;
-equation
+ parameter Real b.z;
+parameter equation
  b.z = NameTests.ConstantLookup35.J.f1(b.j);
 
 public
@@ -1810,8 +1797,8 @@ model ConstantLookup36
 			flatModel="
 fclass NameTests.ConstantLookup36
  parameter Integer j = 1 /* 1 */;
- Real z;
-equation
+ parameter Real z;
+parameter equation
  z = NameTests.ConstantLookup36.f(j);
 
 public
