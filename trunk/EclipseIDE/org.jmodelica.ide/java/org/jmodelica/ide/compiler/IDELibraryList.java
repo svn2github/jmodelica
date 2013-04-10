@@ -6,9 +6,8 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.preferences.Preferences;
+import org.jmodelica.ide.preferences.ModelicaPreferences;
 import org.jmodelica.modelica.compiler.DefaultLibraryList;
-import org.jmodelica.util.ModelicaLogger;
 import org.jmodelica.util.OptionRegistry;
 
 public class IDELibraryList extends DefaultLibraryList {
@@ -47,7 +46,7 @@ public class IDELibraryList extends DefaultLibraryList {
 			loadAll = true;
 			addFromOption("PACKAGEPATHS", false);
 			loadAll = false;
-			String toLoadString = Preferences.get(project, IDEConstants.PREFERENCE_LIBRARIES_ID);
+			String toLoadString = ModelicaPreferences.INSTANCE.get(project, IDEConstants.PREFERENCE_LIBRARIES_ID);
 			String[] toLoad = toLoadString.split(File.pathSeparator);
 			// TODO: Load all in toLoad
 		}

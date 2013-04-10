@@ -15,26 +15,17 @@
  */
 package org.jmodelica.ide.scanners;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Display;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.preferences.Preferences;
-import org.jmodelica.ide.preferences.Preferences.NormalSyntaxColorPref;
-import org.jmodelica.ide.preferences.Preferences.ReferenceSyntaxColorPref;
-import org.jmodelica.ide.preferences.Preferences.DisabledSyntaxColorPref;
-import org.jmodelica.ide.preferences.Preferences.SyntaxColorPref;
+import org.jmodelica.ide.preferences.ModelicaPreferences;
+import org.jmodelica.ide.preferences.ModelicaPreferences.DisabledSyntaxColorPref;
+import org.jmodelica.ide.preferences.ModelicaPreferences.NormalSyntaxColorPref;
+import org.jmodelica.ide.preferences.ModelicaPreferences.ReferenceSyntaxColorPref;
+import org.jmodelica.ide.preferences.ModelicaPreferences.SyntaxColorPref;
 
 public abstract class HilightScanner extends DocumentScanner implements ITokenScanner {
 	protected static Token NORMAL;
@@ -102,40 +93,41 @@ public abstract class HilightScanner extends DocumentScanner implements ITokenSc
 	};
 
 	public static void readColors() {
-		NORMAL              = Preferences.getColorToken("normal");
-		KEYWORD             = Preferences.getColorToken("keyword");
-		EXTRA_KEYWORD       = Preferences.getColorToken("keyword.extra");
-		BUILT_IN            = Preferences.getColorToken("builtin");
-		DEPR_BUILT_IN       = Preferences.getColorToken("builtin.depr");
-		TYPE                = Preferences.getColorToken("type");
-		OPERATOR            = Preferences.getColorToken("operator");
-		BOOLEAN             = Preferences.getColorToken("boolean");
-		NUMBER              = Preferences.getColorToken("number");
-		STRING              = Preferences.getColorToken("string");
-		ID                  = Preferences.getColorToken("ident");
-		QID                 = Preferences.getColorToken("qident");
-		OPERATOR_DOT        = Preferences.getColorToken("operator.dot");
-		COMMENT             = Preferences.getColorToken("comment");
-		ANNO_COMMENT        = Preferences.getColorToken("anno.comment");
-		ANNO_NORMAL         = Preferences.getColorToken("anno.normal");
-		ANNO_KEYWORD        = Preferences.getColorToken("anno.keyword");
-		ANNO_EXTRA_KEYWORD  = Preferences.getColorToken("anno.keyword.extra");
-		ANNO_BUILT_IN       = Preferences.getColorToken("anno.builtin");
-		ANNO_DEPR_BUILT_IN  = Preferences.getColorToken("anno.builtin.depr");
-		ANNO_TYPE           = Preferences.getColorToken("anno.type");
-		ANNO_OPERATOR       = Preferences.getColorToken("anno.operator");
-		ANNO_BOOLEAN        = Preferences.getColorToken("anno.boolean");
-		ANNO_NUMBER         = Preferences.getColorToken("anno.number");
-		ANNO_STRING         = Preferences.getColorToken("anno.string");
-		ANNO_ID             = Preferences.getColorToken("anno.ident");
-		ANNO_QID            = Preferences.getColorToken("anno.qident");
-		ANNO_OPERATOR_DOT   = Preferences.getColorToken("anno.operator.dot");
-		ANNO_COMMENT        = Preferences.getColorToken("anno.comment");
+		ModelicaPreferences pref = ModelicaPreferences.INSTANCE;
+		NORMAL              = pref.getColorToken("normal");
+		KEYWORD             = pref.getColorToken("keyword");
+		EXTRA_KEYWORD       = pref.getColorToken("keyword.extra");
+		BUILT_IN            = pref.getColorToken("builtin");
+		DEPR_BUILT_IN       = pref.getColorToken("builtin.depr");
+		TYPE                = pref.getColorToken("type");
+		OPERATOR            = pref.getColorToken("operator");
+		BOOLEAN             = pref.getColorToken("boolean");
+		NUMBER              = pref.getColorToken("number");
+		STRING              = pref.getColorToken("string");
+		ID                  = pref.getColorToken("ident");
+		QID                 = pref.getColorToken("qident");
+		OPERATOR_DOT        = pref.getColorToken("operator.dot");
+		COMMENT             = pref.getColorToken("comment");
+		ANNO_COMMENT        = pref.getColorToken("anno.comment");
+		ANNO_NORMAL         = pref.getColorToken("anno.normal");
+		ANNO_KEYWORD        = pref.getColorToken("anno.keyword");
+		ANNO_EXTRA_KEYWORD  = pref.getColorToken("anno.keyword.extra");
+		ANNO_BUILT_IN       = pref.getColorToken("anno.builtin");
+		ANNO_DEPR_BUILT_IN  = pref.getColorToken("anno.builtin.depr");
+		ANNO_TYPE           = pref.getColorToken("anno.type");
+		ANNO_OPERATOR       = pref.getColorToken("anno.operator");
+		ANNO_BOOLEAN        = pref.getColorToken("anno.boolean");
+		ANNO_NUMBER         = pref.getColorToken("anno.number");
+		ANNO_STRING         = pref.getColorToken("anno.string");
+		ANNO_ID             = pref.getColorToken("anno.ident");
+		ANNO_QID            = pref.getColorToken("anno.qident");
+		ANNO_OPERATOR_DOT   = pref.getColorToken("anno.operator.dot");
+		ANNO_COMMENT        = pref.getColorToken("anno.comment");
 	}
 	
 	public HilightScanner() {
 		// Make sure preferences are initialized
-		Preferences.get(IDEConstants.PREFERENCE_ANNO_BG_ID);
+		ModelicaPreferences.INSTANCE.get(IDEConstants.PREFERENCE_ANNO_BG_ID);
 	}
 
 }
