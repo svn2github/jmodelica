@@ -189,6 +189,17 @@ class TestIO:
         time_shifted = res['time']
 
         assert max(N.abs(time_shifted_fix - time_shifted)) < 1e-6
+    
+    @testattr(stddist = True)    
+    def test_result_no_variable_data(self):
+        """
+        Test that it is possible to get time data from a result file 
+        with no variable data (no data_2 vector).
+        """
+        res_file = os.path.join(path_to_results, 'no_variables_result.txt')
+        res = ResultDymolaTextual(res_file)
+        time_traj = res.get_variable_data('time')
+        assert N.abs(time_traj.t[-1] - 1.0) < 1e-6
 
 class test_ResultWriterDymola:
     """Tests the class ResultWriterDymola."""

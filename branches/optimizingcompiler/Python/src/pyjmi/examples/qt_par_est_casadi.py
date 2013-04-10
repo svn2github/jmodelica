@@ -26,7 +26,7 @@ from pymodelica import compile_fmux
 from pyfmi import load_fmu
 from pyjmi import CasadiModel
 from pyjmi.common.core import TrajectoryLinearInterpolation
-from pyjmi.optimization.casadi_collocation import ParameterEstimationData
+from pyjmi.optimization.casadi_collocation import MeasurementData
 
 def run_demo(with_plots=True):
     """
@@ -146,7 +146,7 @@ def run_demo(with_plots=True):
     The collocation algorithm minimizes, if the parameter_estimation_data
     option is set, a quadrature approximation of the integral
 
-    \int_{t_0}^{t_f} (y(t_i)-y_i^{meas})^T Q (y(t_i)-y_i^{meas}) dt
+    \int_{t_0}^{t_f} (y(t)-y^{meas}(t))^T Q (y(t)-y^{meas}(t)) dt
 
     The measurement data is given as a matrix where the first
     column is time and the following column contains data corresponding
@@ -159,24 +159,30 @@ def run_demo(with_plots=True):
     The weighting matrix Q may be used to express that inputs are typically
     more reliable than than measured outputs.
     """
-
-    Q = N.array([[1.,0,0,0],[0,1,0,0],[0,0,10,0],[0,0,0,10]])
-    measured_variables=['qt.x1','qt.x2','qt.u1','qt.u2']
-    data = N.transpose(N.vstack((t_meas,y1_meas,y2_meas,u1,u2)))
-
-    par_est_data = ParameterEstimationData(Q,measured_variables,data)
-
+    
+    # Create measurement data
+    Q = np.diag([1., 1., 10., 10.])
+    data_x1 = N.vstack([t_meas, y1_meas])
+    data_x2 = N.vstack([t_meas, y2_meas])
+    data_u1 = N.vstack([t_meas, u1])
+    data_u2 = N.vstack([t_meas, u2])
+    unconstrained = {'qt.x1': data_x1,
+                     'qt.x2': data_x2,
+                     'u1': data_u1,
+                     'u2': data_u2}
+    measurement_data = MeasurementData(Q=Q, unconstrained=unconstrained)
+    
     opts = model_casadi.optimize_options()
-
+    
     opts['n_e'] = 60
-
-    opts['parameter_estimation_data'] = par_est_data
+    
+    opts['measurement_data'] = measurement_data
     #opts['IPOPT_options']['derivative_test'] = 'second-order'
     #opts['IPOPT_options']['max_iter'] = 0
-
+    
     res = model_casadi.optimize(algorithm="LocalDAECollocationAlg",
                                 options=opts)
-
+    
     # Load state profiles
     x1_opt = res["qt.x1"]
     x2_opt = res["qt.x2"]

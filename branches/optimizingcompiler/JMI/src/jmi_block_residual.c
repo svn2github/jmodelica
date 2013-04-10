@@ -307,13 +307,13 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             
             /* Check for infinite loop */
             if (jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
-                jmi_log_warning(jmi, "[BLOCK_EVENT_ITERATION] Detected infinite loop in fixed point iteration at t=%g, switching to enchanced fixed point iteration...",jmi_get_t(jmi)[0]);
+                jmi_log_info(jmi, "[BLOCK_EVENT_ITERATION] Detected infinite loop in fixed point iteration at t=%g, switching to enchanced fixed point iteration...",jmi_get_t(jmi)[0]);
                 break;
             }
 
             /* Store the new switches */
             if(iter >= nbr_allocated_iterations){
-                jmi_log_warning(jmi, "[BLOCK_EVENT_ITERATION] Failed to converged during fixed point iteration due to too many iterations at t=%g, switching to enhanced fixed point iteration...",jmi_get_t(jmi)[0]);
+                jmi_log_info(jmi, "[BLOCK_EVENT_ITERATION] Failed to converged during fixed point iteration due to too many iterations at t=%g, switching to enhanced fixed point iteration...",jmi_get_t(jmi)[0]);
                 break;
             }
             memcpy(&sw_old[iter*nbr_sw],switches,nbr_sw*sizeof(jmi_real_t));

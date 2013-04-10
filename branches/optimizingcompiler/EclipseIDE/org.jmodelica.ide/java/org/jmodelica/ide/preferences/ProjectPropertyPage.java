@@ -15,39 +15,13 @@
  */
 package org.jmodelica.ide.preferences;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.QualifiedName;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.helpers.Maybe;
-import org.jmodelica.ide.helpers.Util;
 
 public class ProjectPropertyPage extends PropertyPage {
 	
@@ -58,7 +32,7 @@ public class ProjectPropertyPage extends PropertyPage {
 	protected Control createContents(Composite parent) {
 		settings = new ModelicaSettingsControl();
 		IProject proj = getProject();
-		settings.setLibraryPaths(Preferences.get(proj, LIBRARIES_ID));
+		settings.setLibraryPaths(ModelicaPreferences.INSTANCE.get(proj, LIBRARIES_ID));
 		return settings.createControl(parent);
 	}
 
@@ -70,7 +44,7 @@ public class ProjectPropertyPage extends PropertyPage {
 	public boolean performOk() {
 		IProject proj = getProject();
 		try {
-			Preferences.set(proj, LIBRARIES_ID, settings.getLibraryPaths());
+			ModelicaPreferences.INSTANCE.set(proj, LIBRARIES_ID, settings.getLibraryPaths());
 			proj.build(IncrementalProjectBuilder.FULL_BUILD, null);
 		} catch (CoreException e) {
 		}
@@ -80,7 +54,7 @@ public class ProjectPropertyPage extends PropertyPage {
 	@Override
 	protected void performDefaults() {
 		// TODO: We should remember default status, and save by removing the property for this project - will cause preference to be used
-		settings.setLibraryPaths(Preferences.get(LIBRARIES_ID));
+		settings.setLibraryPaths(ModelicaPreferences.INSTANCE.get(LIBRARIES_ID));
 		super.performDefaults();
 	}
 

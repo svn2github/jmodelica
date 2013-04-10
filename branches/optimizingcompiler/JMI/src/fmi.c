@@ -333,6 +333,11 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
 	fmi_t* fmi = (fmi_t *)c;
     jmi_t* jmi =fmi->jmi;
 
+    if (((fmi_t*)c)->jmi->is_initialized==1) {
+        jmi_log_error(jmi, "FMU is already initialized: only one call to fmiInitialize is allowed");
+        return fmiError;
+    }
+
     /* For debugging Jacobians */
 /*
     int n_states;

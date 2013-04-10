@@ -1902,7 +1902,7 @@ aspect TransformCanonical {
 		FQName pref = copyPrefix();
 		while (4 * order >= derPrefixString.length())
 			derPrefixString = derPrefixString + derPrefixString;
-		String name = derPrefixString.substring(0, 4 * order + 1) + lastPartName();
+		String name = derPrefixString.substring(0, 4 * order + 1) + lastActualPartName();
 		if (hasFArraySubscripts())
 			return pref.copyAndAppend(name, getFArraySubscripts().fullCopy());
 		else

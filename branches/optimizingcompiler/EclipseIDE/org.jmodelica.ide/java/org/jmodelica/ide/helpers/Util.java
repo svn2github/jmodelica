@@ -51,7 +51,7 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 import org.jastadd.plugin.compiler.ast.IError;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
-import org.jmodelica.ide.preferences.Preferences;
+import org.jmodelica.ide.preferences.ModelicaPreferences;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.Access;
 import org.jmodelica.modelica.compiler.Dot;
@@ -350,11 +350,11 @@ public class Util {
 	}
 	
 	public static String getModelicaPath(IProject proj) {
-		return Preferences.get(proj, IDEConstants.PREFERENCE_LIBRARIES_ID);
+		return ModelicaPreferences.INSTANCE.get(proj, IDEConstants.PREFERENCE_LIBRARIES_ID);
 	}
 	
 	public static void setModelicaPath(IProject proj, String path) {
-		Preferences.set(proj, IDEConstants.PREFERENCE_LIBRARIES_ID, path);
+		ModelicaPreferences.INSTANCE.set(proj, IDEConstants.PREFERENCE_LIBRARIES_ID, path);
 	}
 
 }

@@ -94,6 +94,11 @@ class Test_FMUModelBase:
         self.negated_alias  = load_fmu('NegatedAlias.fmu')
         
     @testattr(fmi = True)
+    def test_initialize_once(self):
+        self.negated_alias.initialize()
+        nose.tools.assert_raises(FMUException, self.negated_alias.initialize)
+        
+    @testattr(fmi = True)
     def test_set_get_negated_real(self):
         x,y = self.negated_alias.get("x"),self.negated_alias.get("y")
         nose.tools.assert_almost_equal(x,1.0)
@@ -148,9 +153,9 @@ class Test_FMUModelCS1:
         Sets up the test case.
         """
         self.rlc  = load_fmu('RLC_Circuit.fmu')
-        self.rlc.initialize()
+        #self.rlc.initialize()
         self.rlc_square  = load_fmu('RLC_Circuit_Square.fmu')
-        self.rlc_square.initialize()
+        #self.rlc_square.initialize()
 
     @testattr(fmi = True)
     def test_version(self):
@@ -741,7 +746,7 @@ class Test_Logger:
         """
         Sets up the test class.
         """
-        m =  compile_fmu('LoggerTest',os.path.join(path_to_mofiles,'LoggerTest.mo'),compiler_log_level='i',
+        m =  compile_fmu('LoggerTest',os.path.join(path_to_mofiles,'LoggerTest.mo'),compiler_log_level='e',
                 compiler_options={'generate_only_initial_system':True})
 
     def setUp(self):
