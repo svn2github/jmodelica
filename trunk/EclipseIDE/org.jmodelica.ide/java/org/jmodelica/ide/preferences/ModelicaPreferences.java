@@ -29,10 +29,10 @@ public class ModelicaPreferences extends Preferences {
 	private static final int BUF_SIZE = 2048;
 	private byte buf[] = new byte[BUF_SIZE];
 
-	protected ModelicaPreferences() {
+	public ModelicaPreferences() {
 		super(IDEConstants.PLUGIN_ID);
 	}
-	
+		
 	public Token getColorToken(String key) {
 		return SyntaxColorPref.getPref(key).getToken();
 	}
