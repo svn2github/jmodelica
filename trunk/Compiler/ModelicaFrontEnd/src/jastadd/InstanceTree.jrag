@@ -1422,19 +1422,16 @@ aspect InstanceAST_API {
     eq InstRoot.getChild().instClassNamePrefix() = "";
 	
 	syn ArrayList<AbstractEquation> InstNode.equations() = new ArrayList<AbstractEquation>();
-	eq InstClassRoot.equations() = getClassDecl().equations();
 	eq InstComponentDecl.equations() = myInstClass().equations();
 	eq InstExtends.equations() = myInstClass().equations();
 	eq InstFullClassDecl.equations() = getBaseClassDecl().equations();	
 	
 	syn ArrayList<Algorithm> InstNode.algorithms() = new ArrayList<Algorithm>();
-	eq InstClassRoot.algorithms() = getClassDecl().algorithms();
 	eq InstComponentDecl.algorithms() = myInstClass().algorithms();
 	eq InstExtends.algorithms() = myInstClass().algorithms();
 	eq InstFullClassDecl.algorithms() = getBaseClassDecl().algorithms();	
 	
 	syn lazy ArrayList<ComponentDecl> InstNode.components() = new ArrayList<ComponentDecl>();
-	eq InstClassRoot.components() = getClassDecl().components();
 	eq InstComponentDecl.components() = myInstClass().components();
 	eq InstArrayComponentDecl.components() = instComponentDecl().isPrimitive()? 
 			new ArrayList<ComponentDecl>() : instComponentDecl().components();
@@ -1443,7 +1440,6 @@ aspect InstanceAST_API {
 //    eq InstPrimitiveClassDecl.components() = new ArrayList<ComponentDecl>();
 	
 	syn lazy ArrayList<ExtendsClause> InstNode.superClasses() = new ArrayList<ExtendsClause>();
-	eq InstClassRoot.superClasses() = getClassDecl().superClasses();
 	eq InstComponentDecl.superClasses() = myInstClass().superClasses();
 	eq InstArrayComponentDecl.superClasses() = instComponentDecl().isPrimitive()? 
 			new ArrayList<ExtendsClause>() : instComponentDecl().superClasses();
@@ -1451,7 +1447,6 @@ aspect InstanceAST_API {
     eq InstBaseClassDecl.superClasses() = getBaseClassDecl().superClasses();
 
 	syn lazy ArrayList<ClassDecl> InstNode.classes() = new ArrayList<ClassDecl>();
-	eq InstClassRoot.classes()          = getClassDecl().classes();
 	eq InstProgramRoot.classes()        = getProgram().classes();
 	eq InstComponentDecl.classes()      = myInstClass().classes();
 	eq InstArrayComponentDecl.classes() = instComponentDecl().isPrimitive()? 
@@ -1462,7 +1457,6 @@ aspect InstanceAST_API {
 //    eq InstShortClassDecl.classes() = getClassName().myInstClass().classes();
 
 	syn lazy ArrayList<ImportClause> InstNode.imports() = new ArrayList<ImportClause>();
-	eq InstClassRoot.imports()     = getClassDecl().imports();
 	eq InstComponentDecl.imports() = myInstClass().imports();
 	eq InstBaseClassDecl.imports() = getBaseClassDecl().imports();
 	eq InstExtends.imports()       = myInstClass().imports();
@@ -1936,16 +1930,16 @@ aspect InstanceDumpTree {
 
 	}
 	
-	public String InstNamedAccess.toString() {
-		String s = dump() +": "+name() + " at line: " + beginLine();
-        s+="\n";
-		return s;
-	}
+//	public String InstNamedAccess.toString() {
+//		String s = dump() +": "+name() + " at line: " + beginLine();
+//        s+="\n";
+//		return s;
+//	}
 
 	
- 	public String InstNode.toString() {
-		return toString("");
-    }
+// 	public String InstNode.toString() {
+//		return toString("");
+//    }
 	public String InstNode.toString(String indent) {
 	   StringBuilder str = new StringBuilder();
 	   str.append(indent + "InstNode:\n");
@@ -2055,18 +2049,39 @@ aspect InstanceDumpTree {
 	   return str.toString();	
 	}
 
-	public String InstFullClassDecl.toString() {
-		return toString("");
-    }
-
-
-
-	public String InstModification.toString() {
-		return toString("");
-    }
+//	public String InstFullClassDecl.toString() {
+//		return toString("");
+//    }
+//
+//
+//
+//	public String InstModification.toString() {
+//		return toString("");
+//    }
     public String InstModification.toString(String indent) {
     	return getModification().prettyPrint(indent);
     
+    }
+    
+    
+    public String InstClassDecl.toString() {
+    	return getClassDecl().toString();
+    }
+    
+    public String InstExternal.toString() {
+    	return getExternalClause().toString();
+    }
+    
+    public String InstComponentDecl.toString() {
+    	return getComponentDecl().toString();
+    }
+    
+    public String InstExtends.toString() {
+    	return getExtendsClause().toString();
+    }
+    
+    public String InstModification.toString() {
+    	return getModification().toString();
     }
 	
 }
