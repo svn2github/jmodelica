@@ -59,7 +59,7 @@ def run_demo(with_plots=True):
     theta2 = res['sys.theta2']
     theta3 = res['sys.theta3']
     t = res['time']
-	
+    
     y1m = [1, 0.8105, 0.6208, 0.5258, 0.4345, 0.3903,
     0.3342, 0.3034, 0.2735, 0.2405, 0.2283, 0.2071, 0.1669,
     0.1530, 0.1339, 0.1265, 0.1200, 0.0990, 0.0870, 0.077, 0.069];
@@ -78,7 +78,7 @@ def run_demo(with_plots=True):
         plt.plot(t,y1,tm,y1m,'x')
         plt.grid()
         plt.ylabel('y1')
-		
+        
         plt.subplot(212)
         plt.plot(t,y2,tm,y2m,'x')
         plt.grid()
@@ -86,9 +86,9 @@ def run_demo(with_plots=True):
         plt.show()
         
         print("** Optimal parameter values: **")
-        print("theta1 = %f"%theta1)
-        print("theta2 = %f"%theta2)
-        print("theta3 = %f"%theta3)
+        print("theta1 = %f" %res.final('sys.theta1'))
+        print("theta2 = %f" %res.final('sys.theta2'))
+        print("theta3 = %f" %res.final('sys.theta3'))
 
 if __name__ == "__main__":
     run_demo()
