@@ -314,9 +314,7 @@ aspect FlatVariability {
 	eq FNdimsExp.expVariability() = fConstant();
 	eq FEndExp.expVariability()   = fParameter();
 	eq FTimeExp.expVariability()  = fContinuous();
-	
-	eq FAbsExp.expVariability() = variabilityInNoEventExp();
-	eq FRelExp.expVariability() = variabilityInNoEventExp();
+	eq FRelExp.expVariability()   = super.expVariability().combineDown(fDiscrete());
 
 	eq FSizeExp.expVariability() = hasDim() ? getDim().variability() : fParameter();
 	
