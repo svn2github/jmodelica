@@ -64,7 +64,6 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     char* tmpguid;
     size_t inst_name_len;
     size_t guid_len;
-    char buffer[400];
 
     /* Create jmi struct -> No need  since jmi_init allocates it
      jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t)); */
@@ -73,6 +72,7 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
 
     if(!functions.allocateMemory || !functions.freeMemory || !functions.logger) {
          if(functions.logger) {
+             /* We have to use the raw logger callback here; the logger in the jmi_t struct is not yet initialized. */
              functions.logger(0, instanceName, fmiError, "ERROR", "Memory management functions allocateMemory/freeMemory are required.");
          }
          return 0;
@@ -114,31 +114,31 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     
     /* Print some info about Jacobians, if available. */
     if (jmi->color_info_A != NULL) {
-    	sprintf(buffer,"Number of non-zeros in Jacobian A: %d", jmi->color_info_A->n_nz);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    	sprintf(buffer,"Number of colors in Jacobian A: %d", jmi->color_info_A->n_groups);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "colorInfoA");
+        jmi_log_fmt(jmi->log, logInfo, "numNonzeros: %d <in Jacobian A>", jmi->color_info_A->n_nz);
+        jmi_log_fmt(jmi->log, logInfo, "numColors: %d <in Jacobian A>", jmi->color_info_A->n_groups);
+        jmi_log_leave(jmi->log, node);
     }
 
     if (jmi->color_info_B != NULL) {
-    	sprintf(buffer,"Number of non-zeros in Jacobian B: %d", jmi->color_info_B->n_nz);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    	sprintf(buffer,"Number of colors in Jacobian B: %d", jmi->color_info_B->n_groups);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "colorInfoB");
+        jmi_log_fmt(jmi->log, logInfo, "numNonzeros: %d <in Jacobian B>", jmi->color_info_B->n_nz);
+        jmi_log_fmt(jmi->log, logInfo, "numColors: %d <in Jacobian B>", jmi->color_info_B->n_groups);
+        jmi_log_leave(jmi->log, node);
     }
 
     if (jmi->color_info_C != NULL) {
-    	sprintf(buffer,"Number of non-zeros in Jacobian C: %d", jmi->color_info_C->n_nz);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    	sprintf(buffer,"Number of colors in Jacobian C: %d", jmi->color_info_C->n_groups);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "colorInfoC");
+        jmi_log_fmt(jmi->log, logInfo, "numNonzeros: %d <in Jacobian C>", jmi->color_info_C->n_nz);
+        jmi_log_fmt(jmi->log, logInfo, "numColors: %d <in Jacobian C>", jmi->color_info_C->n_groups);
+        jmi_log_leave(jmi->log, node);
     }
 
     if (jmi->color_info_D != NULL) {
-    	sprintf(buffer,"Number of non-zeros in Jacobian D: %d", jmi->color_info_D->n_nz);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    	sprintf(buffer,"Number of colors in Jacobian D: %d", jmi->color_info_D->n_groups);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "colorInfoD");
+        jmi_log_fmt(jmi->log, logInfo, "numNonzeros: %d <in Jacobian D>", jmi->color_info_D->n_nz);
+        jmi_log_fmt(jmi->log, logInfo, "numColors: %d <in Jacobian D>", jmi->color_info_D->n_groups);
+        jmi_log_leave(jmi->log, node);
     }
 
     return (fmiComponent)component;
@@ -644,8 +644,6 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 
 	int n_outputs;
 	int* output_vrefs;
-
-	char msg[100]; /* Holder for the logger function's messages */
 
 	clock_t c0, c1, d0, d1;
 	jmi_real_t setElementTime;
@@ -1504,7 +1502,6 @@ fmiStatus fmi_terminate(fmiComponent c) {
 fmiStatus fmi_extract_debug_info(fmiComponent c) {
     fmiInteger nniters;
     fmiReal avg_nniters;
-    char buf[100];
     fmi_t* fmi = ((fmi_t*)c);
     jmi_t* jmi = fmi->jmi;
     jmi_block_residual_t* block;
