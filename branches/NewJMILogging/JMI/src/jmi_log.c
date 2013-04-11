@@ -23,6 +23,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 
+#include "fmi.h"
 #include "jmi_log.h"
 
 /*#define INLINE inline */ /* not supported in c89 */
@@ -263,6 +264,47 @@ static void force_commas(log_t *log) {
 
 static INLINE int current_indent_of(log_t *log) { return log->topindex; }
 
+static void _emit(jmi_t *jmi, jmi_log_category_t category, char* message) {
+    if(jmi->fmi) {
+        fmiStatus status;
+        fmiString fmiCategory;
+        fmi_t* fmi = jmi->fmi;
+        if(!fmi->fmi_logging_on) return;
+        switch (category) {
+        case logError:
+            status = fmiError;
+            fmiCategory = "ERROR";
+            break;
+        case logWarning:
+            if(jmi->options.log_level < 3) return;
+            status = fmiWarning;
+            fmiCategory = "WARNING";
+            break;
+        case logInfo:
+            if(jmi->options.log_level < 4) return;
+            status = fmiOK;
+            fmiCategory = "INFO";
+            break;
+        }
+        fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
+                                  status, fmiCategory, message);
+    }
+    else {
+        switch (category) {
+        case logError:
+            fprintf(stderr, "ERROR: %s\n", message);
+            break;
+        case logWarning:
+            if(jmi->options.log_level < 3) return;
+            fprintf(stderr, "WARNING: %s\n", message);
+            break;
+        case logInfo:
+            if(jmi->options.log_level < 4) return;
+            fprintf(stdout, "%s\n", message);
+            break;
+        }
+    }
+}
 
 /** \brief Emit the currently buffered log message, if one exists. */
 static void emit(log_t *log) {
@@ -275,7 +317,7 @@ static void emit(log_t *log) {
         strcpy(msg2+log->indent, buf->msg);
 
         /* jmi_log(log, log->c, buf->msg); */
-        jmi_log(log->jmi, log->c, msg2);
+        _emit(log->jmi, log->c, msg2);
         clear(buf);
 
         free(msg2);
@@ -504,7 +546,6 @@ static void log_fmt_(log_t *log, category_t c, const char *fmt, va_list ap) {
         }
         else if (is_name_char(ch)) {
             /* Try to log an attribute */
-            char t;
             node_t node;
             const char *name_end;
             const char *name_start = fmt;
@@ -723,4 +764,10 @@ void jmi_log_real_matrix(log_t *log, category_t c, const char *name, const jmi_r
         jmi_log_leave(log, rownode);
     }
     jmi_log_leave(log, node);
+}
+
+
+/* Catch invocations of old logging function; something seems to require it? */
+jmi_log(jmi_t *jmi, jmi_log_category_t category, const char* message) {
+    jmi_log_node(jmi->log, category, "oldlog", "message: %s", message);
 }

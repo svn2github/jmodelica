@@ -174,18 +174,6 @@ extern "C" {
 #endif
 
 /**
- * \brief Prints an array to the logger as information
- * 
- * @param jmi jmi_t struct
- * @param x The array to be printed
- * @param size_x The size of the array
- * @param category The log category, for example [EVENT_ITERATION]
- * @param array_info Array information to be printed after category and before x
- * @return Error code
- */
-int jmi_print_array(jmi_t* jmi, jmi_real_t* x, jmi_int_t size_x, char* category, char* array_info);
-
-/**
  * \brief Evaluates the switches.
  * 
  * Evaluates the switches. Depending on the mode, it either evaluates
@@ -237,38 +225,6 @@ typedef enum {
     logWarning,
     logInfo
 } jmi_log_category_t;
-
-/**
- * \brief Log function should be used for all output in the run-time. Forwards the call to FMI logger in case of FMU.
- *  Use sprintf to form a message first.
- *
- * @param jmi       A jmi_t struct.
- * @param category  Log category. By default logError will go to stderr and other messages to stdout.
- * @param message   The message. Note that a trailing '\n' is always added to the message when printing.
- */
-void jmi_log(jmi_t *jmi, jmi_log_category_t category, char* message);
-
-/**
- * \brief Log error. Forwards the call to FMI logger in case of FMU.
- *
- * @param jmi       A jmi_t struct.
- * @param fmt       Format string used for printf. Note that a trailing '\n' is always added to the message when printing.
- */
-void jmi_log_error(jmi_t *jmi, char* fmt,...);
-/**
- * \brief Log warning. Forwards the call to FMI logger in case of FMU.
- *
- * @param jmi       A jmi_t struct.
- * @param fmt       Format string used for printf. Note that a trailing '\n' is always added to the message when printing.
- */
-void jmi_log_warning(jmi_t *jmi, char* fmt,...);
-/**
- * \brief Log info. Forwards the call to FMI logger in case of FMU.
- *
- * @param jmi       A jmi_t struct.
- * @param fmt       Format string used for printf. Note that a trailing '\n' is always added to the message when printing.
- */
-void jmi_log_info(jmi_t *jmi, char* fmt,...);
 
 #ifdef __cplusplus
 }
