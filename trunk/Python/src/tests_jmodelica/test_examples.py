@@ -87,17 +87,6 @@ def test_dist1_init_sim():
     """ Test the dist1_init_sim example. """
     dist1_init_sim.run_demo(False)
     
-#@testattr(ipopt = True)
-#def test_flight_path():
-#    """ Test the flight_path example. """    
-#    flight_path.run_demo(False)
-    
-# Optimization fails with number of iterations exceeded, but test still
-#@testattr(ipopt = True)
-#def test_helicopter_der():
-#    """ Test the helicopter_der example. """    
-#    helicopter_der.run_demo(False)    
-    
 @testattr(ipopt = True)
 def test_lagrange_cost():
     """ Test the Lagrange cost example """    
