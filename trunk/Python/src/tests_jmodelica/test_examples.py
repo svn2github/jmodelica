@@ -22,6 +22,11 @@ from tests_jmodelica import testattr
 from pyfmi.examples import *
 from pyjmi.examples import *
 
+@testattr(stddist = True)
+def test_ast_example():
+    """ Test the ast_example example."""
+    ast_example.run_demo(False)
+
 @testattr(ipopt = True)
 def test_bang_control():
     """ Test the bang_control example. """    
