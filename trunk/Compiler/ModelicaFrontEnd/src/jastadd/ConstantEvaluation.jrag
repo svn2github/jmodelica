@@ -1215,7 +1215,7 @@ aspect ConstantEvaluation {
   eq FNoEventExp.cevalCalc() = getFExp().ceval();
   eq FSmoothExp.cevalCalc()  = getFExp().ceval();
   
-  eq FPreExp.cevalCalc()     = CValue.UNKNOWN;
+  eq FPreExp.cevalCalc()     = variability().constantVariability() ? getFExp().ceval() : CValue.UNKNOWN;
   eq FSampleExp.cevalCalc()  = CValue.UNKNOWN;
   
   /** Decides what initial() is currently evaluated to. */
@@ -1334,6 +1334,8 @@ aspect ConstantEvaluation {
   }
  
   eq FIdUseExp.cevalCalc()      = getFIdUse().ceval();
+  eq FDerExp.cevalCalc() = 
+			getFIdUse().variability().discreteOrLess() ? new CValueInteger(0) : CValue.UNKNOWN;
   eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
   
   syn CValue InstAccess.ceval()        = ceval(Index.NULL);
@@ -1823,12 +1825,16 @@ aspect ConstantEvaluation {
 	  for (FFunctionVariable var : myNonInputs())
 		  var.readEvaluationValue(values);
 	  
-	  fab.getFStatements().evaluateList(values);
-	  
-	  if (oldVal != null)
-		  for (CommonVariableDecl var : oldVal.keySet())
-			  var.readEvaluationValue(oldVal);
-	  currentEvaluationValues = oldVal;
+	  try {
+		  fab.getFStatements().evaluateList(values);
+	  } finally {
+		  for (FFunctionVariable var : getFFunctionVariables())
+			  var.setEvaluationValue(null);
+		  if (oldVal != null)
+			  for (CommonVariableDecl var : oldVal.keySet())
+				  var.readEvaluationValue(oldVal);
+		  currentEvaluationValues = oldVal;
+	  }
   }
   private Map<CommonVariableDecl, CValue> FFunctionDecl.currentEvaluationValues = null;
   
@@ -1853,6 +1859,8 @@ aspect ConstantEvaluation {
 	  
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
+	  for (InstComponentDecl var : getInstComponentDecls())
+		  var.setEvaluationValue(null);
 	  fab.prepareForFunctionEval();
 	  
 	  for (InstComponentDecl var : myInputs())
@@ -1860,12 +1868,16 @@ aspect ConstantEvaluation {
 	  for (InstComponentDecl var : myNonInputs())
 		  var.readEvaluationValue(values);
 	  
-	  fab.getFStatements().evaluateList(values);
-	  
-	  if (oldVal != null)
-		  for (CommonVariableDecl var : oldVal.keySet())
-			  var.readEvaluationValue(oldVal);
-	  currentEvaluationValues = oldVal;
+	  try {
+		  fab.getFStatements().evaluateList(values);
+	  } finally {
+		  for (InstComponentDecl var : getInstComponentDecls())
+			  var.setEvaluationValue(null);
+		  if (oldVal != null)
+			  for (CommonVariableDecl var : oldVal.keySet())
+				  var.readEvaluationValue(oldVal);
+		  currentEvaluationValues = oldVal;
+	  }
   }
   private Map<CommonVariableDecl, CValue> InstFullClassDecl.currentEvaluationValues = null;
   

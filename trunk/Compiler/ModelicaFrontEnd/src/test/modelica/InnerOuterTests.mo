@@ -26,7 +26,6 @@ equation
  b.T0 = time;
  b.a1.z = sin(b.T0);
  b.a2.z = sin(b.T0);
-
 end InnerOuterTests.InnerOuterTest1;
 ")})));
 end InnerOuterTest1;
@@ -81,27 +80,22 @@ fclass InnerOuterTests.InnerOuterTest2
  Real i.TI;
  Real i.e.TI;
  Real i.e.f.TI;
- Real i.e.f.g.TI;
+ constant Real i.e.f.g.TI = 5;
  Real i.e.f.g.h.a.x;
- Real i.e.f.g.h.a.b.TI;
- Real i.e.f.g.h.a.b.c.TI;
+ constant Real i.e.f.g.h.a.b.TI = 1;
+ constant Real i.e.f.g.h.a.b.c.TI = 2;
  Real i.e.f.g.h.a.b.c.d.x;
  Real i.a.x;
- Real i.a.b.TI;
- Real i.a.b.c.TI;
+ constant Real i.a.b.TI = 1;
+ constant Real i.a.b.c.TI = 2;
  Real i.a.b.c.d.x;
 equation
  i.TI = 2 * time;
  i.e.TI = 4 * time;
  i.e.f.TI = 5 * time;
- i.e.f.g.TI = 5;
  i.e.f.g.h.a.x = i.e.f.TI * 2;
- i.e.f.g.h.a.b.TI = 1;
- i.e.f.g.h.a.b.c.TI = 2;
  i.e.f.g.h.a.b.c.d.x = 3 * i.e.f.TI;
  i.a.x = i.TI * 2;
- i.a.b.TI = 1;
- i.a.b.c.TI = 2;
  i.a.b.c.d.x = 3 * i.TI;
 end InnerOuterTests.InnerOuterTest2;
 ")})));
@@ -258,17 +252,11 @@ model InnerOuterTest7
 			eliminate_alias_variables=false,
 			flatModel="
 fclass InnerOuterTests.InnerOuterTest7
- Real d.a.x;
- Real d.a.y;
- Real d.c.a.x;
- Real d.c.a.y;
- Real d.c.z;
-equation
- d.a.x = 6;
- d.a.y = 9;
- d.c.a.x = 6;
- d.c.a.y = 9;
- d.c.z = d.c.a.x;
+ constant Real d.a.x = 6;
+ constant Real d.a.y = 9;
+ constant Real d.c.a.x = 6;
+ constant Real d.c.a.y = 9;
+ constant Real d.c.z = 6.0;
 end InnerOuterTests.InnerOuterTest7;
 ")})));
 end InnerOuterTest7;
@@ -304,13 +292,9 @@ model InnerOuterTest8
 			eliminate_alias_variables=false,
 			flatModel="
 fclass InnerOuterTests.InnerOuterTest8
- Real d.c.a.x;
- Real d.c.a.y;
- Real d.c.z;
-equation
- d.c.a.x = 6;
- d.c.a.y = 9;
- d.c.z = d.c.a.x;
+ constant Real d.c.a.x = 6;
+ constant Real d.c.a.y = 9;
+ constant Real d.c.z = 6.0;
 end InnerOuterTests.InnerOuterTest8;
 ")})));
 end InnerOuterTest8;

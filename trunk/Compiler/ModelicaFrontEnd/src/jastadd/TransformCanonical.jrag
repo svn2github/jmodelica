@@ -87,6 +87,7 @@ aspect TransformCanonical {
 		addFPreVariables();
         enableIfEquationRewrite();
 		enableWhenEquationRewrite();
+		variabilityPropagationIfSet();
 		root().flushAllRecursive();
 		genInitialEquations();
 		sortDependentParameters();
@@ -100,16 +101,17 @@ aspect TransformCanonical {
 
 	public void FClass.transformCanonical() {
 		beginStep("transformCanonical()");
-
+	
 		transformCanonicalBase();
-
+	
 		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
 			// Equations are added as part of this this method
 			computeMatchingsAndBLT();
 		}
-
+	
 		root().flushAllRecursive();	
 		transformCanonicalCleanup();
+
 		endStep("transformCanonical()");
 	}
 		

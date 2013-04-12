@@ -160,6 +160,12 @@ public class OptionRegistry {
 			 true, 
 			 "If this option is set to true (default), then alias variables are " +
              "eliminated from the model."),
+        VPROP
+ 			("variability_propagation", 
+ 			 compiler, 
+ 			 true,
+ 			 "If this option is set to true, then variabilities are " +
+              "propagated through the model."),
 		HALT_WARN
 			("halt_on_warning", 
 			 compiler, 

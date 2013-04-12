@@ -337,6 +337,8 @@ aspect FlatVariability {
 	}
 	
 	eq FIdUseExp.expVariability() = getFIdUse().variability();
+	eq FDerExp.expVariability() = 
+			getFIdUse().variability().discreteOrLess() ? fConstant() : getFIdUse().variability();
 	
 	syn FTypePrefixVariability FIdUse.variability() {
 		FAbstractVariable variable = myFV();
@@ -368,7 +370,7 @@ aspect FlatVariability {
 	eq FZeros.expVariability()     = fConstant();
 	eq FFillExp.expVariability()   = getFillExp().variability();
 	
-	eq FPreExp.expVariability()    = fDiscrete();
+	eq FPreExp.expVariability()    = getFExp().variability().parameterOrLess() ? getFExp().variability() : fDiscrete();
 	eq FSampleExp.expVariability() = fDiscrete();
 	
 	eq FSimulationStateBuiltIn.expVariability() = fParameter();

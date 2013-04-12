@@ -33,6 +33,7 @@ equation
 		FlatteningTestCase(
 			name="RecordFlat1",
 			description="Records: basic flattening test",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFlat1
  RecordTests.RecordFlat1.A x;
@@ -68,6 +69,7 @@ equation
 		FlatteningTestCase(
 			name="RecordFlat2",
 			description="Records: accessing components",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFlat2
  RecordTests.RecordFlat2.A x;
@@ -103,6 +105,7 @@ equation
 		FlatteningTestCase(
 			name="RecordFlat3",
 			description="Records: modification",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFlat3
  RecordTests.RecordFlat3.A x(a = 1,b = 2);
@@ -139,6 +142,7 @@ model RecordFlat4
 		FlatteningTestCase(
 			name="RecordFlat4",
 			description="Records: two records",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFlat4
  RecordTests.RecordFlat4.B y;
@@ -177,6 +181,7 @@ model RecordFlat5
 		FlatteningTestCase(
 			name="RecordFlat5",
 			description="Records: nestled records",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFlat5
  RecordTests.RecordFlat5.A x;
@@ -218,6 +223,7 @@ equation
 		FlatteningTestCase(
 			name="RecordType1",
 			description="Records: equivalent types",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordType1
  RecordTests.RecordType1.A x;
@@ -261,6 +267,7 @@ equation
 		ErrorTestCase(
 			name="RecordType2",
 			description="Records: non-equivalent types (component name)",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
@@ -290,6 +297,7 @@ equation
 		ErrorTestCase(
 			name="RecordType3",
 			description="Records: non-equivalent types (component type)",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
@@ -329,6 +337,7 @@ equation
 		FlatteningTestCase(
 			name="RecordType4",
 			description="Records: equivalent nested types",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordType4
  RecordTests.RecordType4.C x;
@@ -392,6 +401,7 @@ equation
 		ErrorTestCase(
 			name="RecordType5",
 			description="Records: non-equivalent nested types",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
@@ -429,6 +439,7 @@ equation
 		FlatteningTestCase(
 			name="RecordType6",
 			description="Records: Inheritance",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordType6
  RecordTests.RecordType6.A x(a = 1,b = 2);
@@ -463,6 +474,7 @@ model RecordType7
 		ErrorTestCase(
 			name="RecordType7",
 			description="",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
@@ -486,6 +498,7 @@ model RecordBinding1
 		FlatteningTestCase(
 			name="RecordBinding1",
 			description="Records: binding expression, same record type",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordBinding1
  RecordTests.RecordBinding1.A x = y;
@@ -520,6 +533,7 @@ model RecordBinding2
 		FlatteningTestCase(
 			name="RecordBinding2",
 			description="Records: binding expression, equivalent record type",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordBinding2
  RecordTests.RecordBinding2.A x = y;
@@ -559,6 +573,7 @@ model RecordBinding3
 		ErrorTestCase(
 			name="RecordBinding3",
 			description="Records: binding expression, wrong type (incompatible record)",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
@@ -581,6 +596,7 @@ model RecordBinding4
 		ErrorTestCase(
 			name="RecordBinding4",
 			description="Records: binding expression, wrong array size",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
@@ -602,6 +618,7 @@ model RecordBinding5
 		ErrorTestCase(
 			name="RecordBinding5",
 			description="Records: wrong type of binding exp of component",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
@@ -624,6 +641,7 @@ model RecordArray1
 		FlatteningTestCase(
 			name="RecordArray1",
 			description="Record containing array: modification",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordArray1
  RecordTests.RecordArray1.A x(a = {1,2},b = 1);
@@ -655,6 +673,7 @@ equation
 		FlatteningTestCase(
 			name="RecordArray2",
 			description="Record containing array: equation with access",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordArray2
  RecordTests.RecordArray2.A x;
@@ -689,6 +708,7 @@ equation
 		FlatteningTestCase(
 			name="RecordArray3",
 			description="Record containing array: equation with other record",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordArray3
  RecordTests.RecordArray3.A x;
@@ -719,6 +739,7 @@ model RecordArray4
 		FlatteningTestCase(
 			name="RecordArray4",
 			description="Array of records: modification",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordArray4
  RecordTests.RecordArray4.A x[2](each a = 1,b = {1,2});
@@ -751,6 +772,7 @@ equation
 		FlatteningTestCase(
 			name="RecordArray5",
 			description="Array of records: accesses",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordArray5
  RecordTests.RecordArray5.A x[2];
@@ -785,6 +807,7 @@ model RecordArray6
 		FlatteningTestCase(
 			name="RecordArray6",
 			description="Constant array of records with missing binding expression",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordArray6
  constant RecordTests.RecordArray6.A b[2,2];
@@ -816,6 +839,7 @@ model RecordConstructor1
 		FlatteningTestCase(
 			name="RecordConstructor1",
 			description="Record constructors: basic test",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordConstructor1
  RecordTests.RecordConstructor1.A x = RecordTests.RecordConstructor1.A(1.0, 2, \"foo\");
@@ -845,6 +869,7 @@ model RecordConstructor2
 		FlatteningTestCase(
 			name="RecordConstructor2",
 			description="Record constructors: named args",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordConstructor2
  RecordTests.RecordConstructor2.A x = RecordTests.RecordConstructor2.A(1.0, 2, \"foo\");
@@ -874,6 +899,7 @@ model RecordConstructor3
 		FlatteningTestCase(
 			name="RecordConstructor3",
 			description="Record constructors: default args",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordConstructor3
  RecordTests.RecordConstructor3.A x = RecordTests.RecordConstructor3.A(1, 2, \"foo\");
@@ -903,6 +929,7 @@ model RecordConstructor4
 		ErrorTestCase(
 			name="RecordConstructor4",
 			description="Record constructors: wrong type of arg",
+			variability_propagation=false,
 			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
@@ -925,6 +952,7 @@ model RecordConstructor5
 		ErrorTestCase(
 			name="RecordConstructor5",
 			description="Record constructors: too few args",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
@@ -947,6 +975,7 @@ model RecordConstructor6
 		ErrorTestCase(
 			name="RecordConstructor6",
 			description="Record constructors: too many args",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
@@ -972,6 +1001,7 @@ model RecordConstructor7
 		TransformCanonicalTestCase(
 			name="RecordConstructor7",
 			description="Constant evaluation of record constructors for records with inherited components",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordConstructor7
  constant Real b.y = 2;
@@ -1004,6 +1034,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordScalarize1",
 			description="Scalarization of records: modification",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordScalarize1
@@ -1045,6 +1076,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordScalarize2",
 			description="Scalarization of records: basic test",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordScalarize2
@@ -1084,6 +1116,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordScalarize3",
 			description="Scalarization of records: record constructor",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordScalarize3
@@ -1126,6 +1159,7 @@ model RecordScalarize4
 		TransformCanonicalTestCase(
 			name="RecordScalarize4",
 			description="Scalarization of records: two different records, record constructors",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordScalarize4
@@ -1174,6 +1208,7 @@ model RecordScalarize5
 		TransformCanonicalTestCase(
 			name="RecordScalarize5",
 			description="Scalarization of records: nestled records",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordScalarize5
@@ -1225,6 +1260,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordScalarize6",
 			description="Scalarization of records: equivalent records",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordScalarize6
@@ -1284,6 +1320,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordScalarize7",
 			description="Scalarization of records: equivalent nestled records",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordScalarize7
@@ -1339,6 +1376,7 @@ model RecordScalarize8
 		TransformCanonicalTestCase(
 			name="RecordScalarize8",
 			description="Scalarization of records: modification of array component",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordScalarize8
  Real x.a[1];
@@ -1376,6 +1414,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordScalarize9",
 			description="Scalarization of records: record containing array",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordScalarize9
  Real x.a[1];
@@ -1412,6 +1451,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordScalarize10",
 			description="Scalarization of records: record containing array, using record constructor",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordScalarize10
@@ -1467,6 +1507,7 @@ equation
 		FlatteningTestCase(
 			name="RecordScalarize12",
 			description="Scalarization of records: array of records",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordScalarize12
  RecordTests.RecordScalarize12.A x[2];
@@ -1502,6 +1543,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordScalarize13",
 			description="Scalarization of records: arrays of records, binding exp + record equation",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordScalarize13
@@ -1552,6 +1594,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordScalarize14",
 			description="Scalarization of records: nestled records and arrays",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordScalarize14
@@ -1619,6 +1662,7 @@ model RecordScalarize15
 		TransformCanonicalTestCase(
 			name="RecordScalarize15",
 			description="Scalarization of records: access of nestled primitive",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordScalarize15
@@ -1672,6 +1716,7 @@ model RecordScalarize16
 		TransformCanonicalTestCase(
 			name="RecordScalarize16",
 			description="Scalarization of records: access of nested record",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordScalarize16
  Real x[1].b[1].a[1];
@@ -1718,6 +1763,7 @@ model RecordScalarize17
 		TransformCanonicalTestCase(
 			name="RecordScalarize17",
 			description="Scalarization of records: attribute on primitive in record",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordScalarize17
  Real x.a;
@@ -1753,6 +1799,7 @@ model RecordScalarize18
 		TransformCanonicalTestCase(
 			name="RecordScalarize18",
 			description="Scalarization of records: attributes on primitives in nestled records",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordScalarize18
  Real x.b1.a(start = 3);
@@ -1789,6 +1836,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordScalarize19",
 			description="Scalarization of attributes of record members, from modification",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordScalarize19
  Real a1.x[1](stateSelect = StateSelect.default,start = 1);
@@ -1825,6 +1873,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordScalarize20",
 			description="Scalarization of attributes of record members, from record declaration",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordScalarize20
  Real a1.x[1](stateSelect = StateSelect.default,start = 1);
@@ -1864,6 +1913,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordScalarize21",
 			description="Modifiers on record members using parameters",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordScalarize21
  parameter Real y_start = 3 /* 3 */;
@@ -1923,6 +1973,7 @@ model RecordScalarize22
 		TransformCanonicalTestCase(
 			name="RecordScalarize22",
 			description="Array of records as argument to function",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordScalarize22
  Real x;
@@ -2004,6 +2055,7 @@ model RecordFunc1
 		TransformCanonicalTestCase(
 			name="RecordFunc1",
 			description="Scalarization of records in functions: accesses of components",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFunc1
  Real q;
@@ -2058,6 +2110,7 @@ model RecordFunc2
 		TransformCanonicalTestCase(
 			name="RecordFunc2",
 			description="Scalarization of records in functions: assignment",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFunc2
  Real q;
@@ -2112,6 +2165,7 @@ model RecordFunc3
 		TransformCanonicalTestCase(
 			name="RecordFunc3",
 			description="Scalarization of records in functions: record constructor",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFunc3
  Real q;
@@ -2168,6 +2222,7 @@ model RecordFunc3b
 		TransformCanonicalTestCase(
 			name="RecordFunc3b",
 			description="Scalarization of records in functions: record constructor for equivalent record",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFunc3b
  Real q;
@@ -2219,6 +2274,7 @@ model RecordFunc4
 		TransformCanonicalTestCase(
 			name="RecordFunc4",
 			description="Scalarization of records in functions: inner array, access",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFunc4
  Real q;
@@ -2271,6 +2327,7 @@ model RecordFunc5
 		TransformCanonicalTestCase(
 			name="RecordFunc5",
 			description="Scalarization of records in functions: inner array, assignment",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFunc5
  Real q;
@@ -2323,6 +2380,7 @@ model RecordFunc6
 		TransformCanonicalTestCase(
 			name="RecordFunc6",
 			description="Scalarization of records in functions: record constructor",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFunc6
  Real q;
@@ -2373,6 +2431,7 @@ model RecordFunc7
 		TransformCanonicalTestCase(
 			name="RecordFunc7",
 			description="Scalarization of records in functions: array of records, access",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFunc7
  Real q;
@@ -2428,6 +2487,7 @@ model RecordFunc8
 		TransformCanonicalTestCase(
 			name="RecordFunc8",
 			description="Scalarization of records in functions: array of records, assignment",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFunc8
  Real q;
@@ -2486,6 +2546,7 @@ model RecordFunc9
 		TransformCanonicalTestCase(
 			name="RecordFunc9",
 			description="Scalarization of records in functions: array of records, constructor",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordFunc9
  Real q;
@@ -2535,6 +2596,7 @@ model RecordOutput1
 		TransformCanonicalTestCase(
 			name="RecordOutput1",
 			description="Scalarization of records in functions: record output: basic test",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordOutput1
@@ -2583,6 +2645,7 @@ model RecordOutput2
 		TransformCanonicalTestCase(
 			name="RecordOutput2",
 			description="Scalarization of records in functions: record output: array of records",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordOutput2
  Real x[1].x;
@@ -2630,6 +2693,7 @@ model RecordOutput3
 		TransformCanonicalTestCase(
 			name="RecordOutput3",
 			description="Scalarization of records in functions: record output: record containing array",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordOutput3
  Real x.x[1];
@@ -2684,6 +2748,7 @@ model RecordOutput4
 		TransformCanonicalTestCase(
 			name="RecordOutput4",
 			description="Scalarization of records in functions: record output: nestled records",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordOutput4
  Real x.x.x;
@@ -2741,6 +2806,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordOutput5",
 			description="Test scalarization of function call equation left of record type",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordOutput5
  Real ry.x;
@@ -2794,6 +2860,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordOutput6",
 			description="Test that access to record member with same name as alias variable isn't changed in alias elimination",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordOutput6
  Real ry.x;
@@ -2843,6 +2910,7 @@ model RecordInput1
 		TransformCanonicalTestCase(
 			name="RecordInput1",
 			description="Scalarization of records in functions: record input: record constructor",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordInput1
  Real x;
@@ -2888,6 +2956,7 @@ model RecordInput2
 		TransformCanonicalTestCase(
 			name="RecordInput2",
 			description="Scalarization of records in functions: record input:",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordInput2
  Real a.x;
@@ -2943,6 +3012,7 @@ model RecordInput3
 		TransformCanonicalTestCase(
 			name="RecordInput3",
 			description="Scalarization of records in functions: record input: output from another function",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordInput3
  Real x;
@@ -2999,6 +3069,7 @@ model RecordInput4
 		TransformCanonicalTestCase(
 			name="RecordInput4",
 			description="Scalarization of records in functions: record input: array of records",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordInput4
  Real a[1].x;
@@ -3052,6 +3123,7 @@ model RecordInput5
 		TransformCanonicalTestCase(
 			name="RecordInput5",
 			description="Scalarization of records in functions: record input: record containing array",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordInput5
  Real a.x[1];
@@ -3107,6 +3179,7 @@ model RecordInput6
 		TransformCanonicalTestCase(
 			name="RecordInput6",
 			description="Scalarization of records in functions: record input: nestled records",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordInput6
  Real a.z.x;
@@ -3167,6 +3240,7 @@ model RecordInput7
 		TransformCanonicalTestCase(
 			name="RecordInput7",
 			description="Scalarization of records in functions: record input: in functions",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordInput7
  Real a.x;
@@ -3217,6 +3291,7 @@ model RecordParBexp1
 		TransformCanonicalTestCase(
 			name="RecordParBexp1",
 			description="Parameter with array-of-records type and literal binding expression",
+			variability_propagation=false,
 			checkAll=true,
 			flatModel="
 fclass RecordTests.RecordParBexp1
@@ -3249,6 +3324,7 @@ model RecordWithParam1
 		TransformCanonicalTestCase(
 			name="RecordWithParam1",
 			description="Record with independent parameter getting value from modification",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordWithParam1
  parameter Real c.a = 1 /* 1 */;
@@ -3280,6 +3356,7 @@ model RecordWithParam2
 		TransformCanonicalTestCase(
 			name="RecordWithParam2",
 			description="Record with dependent parameter getting value from modification",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordWithParam2
  parameter Real c.a;
@@ -3315,6 +3392,7 @@ model RecordWithColonArray1
 		TransformCanonicalTestCase(
 			name="RecordWithColonArray1",
 			description="Variable with : size in record",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordWithColonArray1
  Real c.a[1];
@@ -3356,6 +3434,7 @@ model RecordWithColonArray2
 		ErrorTestCase(
 			name="RecordWithColonArray2",
 			description="Variable with : size without binding exp",
+			variability_propagation=false,
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
@@ -3378,6 +3457,7 @@ model RecordWithColonArray3
 		TransformCanonicalTestCase(
 			name="RecordWithColonArray3",
 			description="Variable with : size in record",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordWithColonArray3
  Real c.a[1];
@@ -3442,6 +3522,7 @@ equation
 		TransformCanonicalTestCase(
 			name="RecordDer1",
 			description="der() on record members",
+			variability_propagation=false,
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordDer1
@@ -3478,6 +3559,7 @@ model RecordParam1
 		TransformCanonicalTestCase(
 			name="RecordParam1",
 			description="Parameter with default value in record",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordParam1
  parameter Real a1.x = 1 /* 1 */;
@@ -3508,6 +3590,7 @@ model RecordParam2
 		TransformCanonicalTestCase(
 			name="RecordParam2",
 			description="Parameter with default value in record",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordParam2
  parameter Real a1.x = 1 /* 1 */;
@@ -3544,6 +3627,7 @@ model RecordParam3
 		TransformCanonicalTestCase(
 			name="RecordParam3",
 			description="Parameter with default value in record",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordParam3
  parameter Real temp_1[1];
@@ -3591,6 +3675,7 @@ model RecordParam4
 		TransformCanonicalTestCase(
 			name="RecordParam4",
 			description="Parameter with default value in record",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordParam4
  parameter Real a1.x = 1 /* 1 */;
@@ -3626,6 +3711,7 @@ model RecordParam5
 		TransformCanonicalTestCase(
 			name="RecordParam5",
 			description="Parameter with default value in record",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordParam5
  parameter Real a1.x = 1 /* 1 */;
@@ -3666,6 +3752,7 @@ model RecordParam6
 		TransformCanonicalTestCase(
 			name="RecordParam6",
 			description="",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordParam6
  parameter Real temp_1[1];
@@ -3735,6 +3822,7 @@ model RecordMerge1
 		TransformCanonicalTestCase(
 			name="RecordMerge1",
 			description="",
+			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordMerge1
  Real r2.x;
