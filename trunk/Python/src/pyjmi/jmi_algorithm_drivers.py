@@ -1590,10 +1590,8 @@ class LocalDAECollocationAlg(AlgorithmBase):
         Solve the optimization problem using ipopt solver. 
         """
         times = {}
-        try:
-            times['sol'] = self.nlp.ipopt_solve()
-        finally:
-            self._write_result()
+        times['sol'] = self.nlp.ipopt_solve()
+        self._write_result()
         
         # Calculate times
         times['tot'] = time.clock() - self._t0
