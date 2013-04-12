@@ -83,12 +83,10 @@ static void buffer_raw_char(buf_t *buf, char c) {
 }
 
 static void buffer_char(buf_t *buf, char c) {
-    if (c == '#') {
-        /* escape #, used for value references */
-        buffer_raw_char(buf, '#');
-        buffer_raw_char(buf, '#');
-    }
-    else buffer_raw_char(buf, c);    
+    /* Escape #, used for value references, 
+       and %, since the logger callback takes a printf format string. */
+    if (c == '#' || c == '%') buffer_raw_char(buf, c);
+    buffer_raw_char(buf, c);    
 }
 
 static void buffer(buf_t *buf, const char *str) {
@@ -103,8 +101,8 @@ static void buffer_wrapped(buf_t *buf, char op, const char *str, char cl) {
     buffer_char(buf, op);
     while (*str != 0) {
         char c = *str;
-        if (c == '\\' || c == cl) buffer_char(buf, '\\');
         buffer_char(buf, c);
+        if (c == cl) buffer_char(buf, op); /* translates " to "" in strings, > to >< in comments */
         ++str;
     }
     buffer_char(buf, cl);
