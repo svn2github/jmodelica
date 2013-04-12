@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+from collections import OrderedDict
 
 from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
@@ -161,15 +162,16 @@ def run_demo(with_plots=True):
     """
     
     # Create measurement data
-    Q = np.diag([1., 1., 10., 10.])
+    Q = N.diag([1., 1., 10., 10.])
     data_x1 = N.vstack([t_meas, y1_meas])
     data_x2 = N.vstack([t_meas, y2_meas])
     data_u1 = N.vstack([t_meas, u1])
     data_u2 = N.vstack([t_meas, u2])
-    unconstrained = {'qt.x1': data_x1,
-                     'qt.x2': data_x2,
-                     'u1': data_u1,
-                     'u2': data_u2}
+    unconstrained = OrderedDict()
+    unconstrained['qt.x1'] = data_x1
+    unconstrained['qt.x2'] = data_x2
+    unconstrained['u1'] = data_u1
+    unconstrained['u2'] = data_u2
     measurement_data = MeasurementData(Q=Q, unconstrained=unconstrained)
     
     opts = model_casadi.optimize_options()
@@ -177,8 +179,6 @@ def run_demo(with_plots=True):
     opts['n_e'] = 60
     
     opts['measurement_data'] = measurement_data
-    #opts['IPOPT_options']['derivative_test'] = 'second-order'
-    #opts['IPOPT_options']['max_iter'] = 0
     
     res = model_casadi.optimize(algorithm="LocalDAECollocationAlg",
                                 options=opts)
@@ -193,20 +193,16 @@ def run_demo(with_plots=True):
     t_opt  = res["time"]
 
     # Extract optimal values of parameters
-    a1_opt = res["qt.a1"]
-    a2_opt = res["qt.a2"]
+    a1_opt = res.final("qt.a1")
+    a2_opt = res.final("qt.a2")
 
-    # Print optimal parameter values
+    # Print and assert optimal parameter values
     print('a1: ' + str(a1_opt*1e4) + 'cm^2')
     print('a2: ' + str(a2_opt*1e4) + 'cm^2')
+    a_ref = [0.02656702, 0.02713898]
+    N.testing.assert_allclose(1e4 * N.array([a1_opt, a2_opt]),
+                              [0.02656702, 0.02713898], rtol=1e-4)
     
-    assert N.abs(res.final('qt.x1') - 0.0707102)  < 1e-3
-    assert N.abs(res.final('qt.x2') - 0.06655758) < 1e-3
-    assert N.abs(res.final('qt.x3') - 0.02736501) < 1e-3
-    assert N.abs(res.final('qt.x4') - 0.02789977) < 1e-3
-    assert N.abs(res.final('u1') - 6.0)           < 1e-3
-    assert N.abs(res.final('u2') - 5.0)           < 1e-3
-
     # Plot
     if with_plots:
         plt.figure(1)

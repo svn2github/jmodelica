@@ -556,8 +556,8 @@ class MeasurementData(object):
     values at the collocation points.
     """
 
-    def __init__(self, eliminated={}, constrained={}, unconstrained={},
-                 Q=None):
+    def __init__(self, eliminated=OrderedDict(), constrained=OrderedDict(),
+                 unconstrained=OrderedDict(), Q=None):
         """
         The following quadratic cost is formed:
                
@@ -576,25 +576,26 @@ class MeasurementData(object):
         Parameters::
             
             eliminated --
-                Dictionary with variable names as keys and the values are the
-                corresponding data used to eliminate the inputs
+                Ordered dictionary with variable names as keys and the values
+                are the corresponding data used to eliminate the inputs.
                 
-                Type: {str: function or rank 2 ndarray}
-                Default: {}
+                Type: OrderedDict
+                Default: OrderedDict()
             
             constrained --
-                Dictionary with variable names as keys and the values are the
-                corresponding data used to constrain and penalize the inputs.
+                Ordered dictionary with variable names as keys and the values
+                are the corresponding data used to constrain and penalize the
+                inputs.
                 
-                Type: {str: function or rank 2 ndarray}
-                Default: {}
+                Type: OrderedDict
+                Default: OrderedDict()
             
             unconstrained --
                 Dictionary with variable names as keys and the values are the
                 corresponding data used to penalize the variables.
                 
-                Type: {str: function or rank 2 ndarray}
-                Default: {}
+                Type: OrderedDict
+                Default: OrderedDict()
             
             Q --
                 Weighting matrix used to form the quadratic penalty for the
@@ -619,17 +620,6 @@ class MeasurementData(object):
             raise ValueError("Weighting matrix Q must be square and have " +
                              "the same dimension as the total number of " +
                              "constrained and unconstrained variables.")
-        
-        # Sort dictionaries
-        if eliminated is not None:
-            eliminated = OrderedDict(sorted(eliminated.items(),
-                                            key=lambda t: t[0]))
-        if constrained is not None:
-            constrained = OrderedDict(sorted(constrained.items(),
-                                             key=lambda t: t[0]))
-        if unconstrained is not None:
-            unconstrained = OrderedDict(sorted(unconstrained.items(),
-                                               key=lambda t: t[0]))
         
         # Transform data into trajectories
         for variable_list in [eliminated, constrained, unconstrained]:
@@ -2417,7 +2407,7 @@ class LocalDAECollocator(CasadiCollocator):
                     err_i_k = N.array(err[i][k])
                     integrand = N.dot(N.dot(err_i_k, Q), err_i_k)
                     self.cost += (h_i * integrand * self.pol.w[k])
-        
+            
         # Add cost term for free element lengths
         if self.hs == "free":
             Q = self.free_element_lengths_data.Q

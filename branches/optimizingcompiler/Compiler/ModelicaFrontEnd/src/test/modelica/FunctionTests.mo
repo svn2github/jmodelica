@@ -7696,44 +7696,44 @@ end Table1DfromFile;
 
 
 model ComponentFunc1
-	model A
-		partial function f
-			input Real x;
-			output Real y;
-		end f;
-		
-		Real z(start = 2);
-	equation
-		der(z) = -z;
-	end A;
-	
-	model B
-		extends A;
-		redeclare function extends f
-		algorithm
-			y := 2 * x;
-		end f;
-	end B;
-	
-	model C
+    model A
+        partial function f
+            input Real x;
+            output Real y;
+        end f;
+        
+        Real z(start = 2);
+    equation
+        der(z) = -z;
+    end A;
+    
+    model B
+        extends A;
+        redeclare function extends f
+        algorithm
+            y := 2 * x;
+        end f;
+    end B;
+    
+    model C
         extends A;
         redeclare function extends f
         algorithm
             y := x * x;
         end f;
-	end C;
-	
-	B b1;
-	C c1;
-	Real w = b1.f(v) + c1.f(v);
-	Real v = 3;
+    end C;
+    
+    B b1;
+    C c1;
+    Real w = b1.f(v) + c1.f(v);
+    Real v = 3;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ComponentFunc1",
-			description="Calling functions in components",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ComponentFunc1",
+            description="Calling functions in components",
 			variability_propagation=false,
-			flatModel="
+            flatModel="
 fclass FunctionTests.ComponentFunc1
  Real b1.z(start = 2);
  Real c1.z(start = 2);
@@ -7770,6 +7770,88 @@ end FunctionTests.ComponentFunc1;
 end ComponentFunc1;
 
 
+model ComponentFunc2
+    model A
+        partial function f
+            input Real x;
+            output Real y;
+        end f;
+        
+        Real z(start = 2);
+    equation
+        der(z) = -z;
+    end A;
+    
+    model B
+        extends A;
+        redeclare function extends f
+        algorithm
+            y := 2 * x;
+        end f;
+    end B;
+    
+    model C
+        extends A;
+        redeclare function extends f
+        algorithm
+            y := x * x;
+        end f;
+    end C;
+    
+	model D
+		outer A a;
+	    Real v = 3;
+		Real w = a.f(v);
+	end D;
+	
+	model E
+		replaceable model F = A;
+		inner F a;
+		D d;
+	end E;
+	
+    E eb(redeclare model F = B);
+    E ec(redeclare model F = C);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ComponentFunc2",
+			description="",
+			variability_propagation=false,
+			flatModel="
+fclass FunctionTests.ComponentFunc2
+ Real eb.a.z(start = 2);
+ Real eb.d.v = 3;
+ Real eb.d.w = FunctionTests.ComponentFunc2.eb.a.f(eb.d.v);
+ Real ec.a.z(start = 2);
+ Real ec.d.v = 3;
+ Real ec.d.w = FunctionTests.ComponentFunc2.ec.a.f(ec.d.v);
+equation
+ eb.a.der(z) = - eb.a.z;
+ ec.a.der(z) = - ec.a.z;
+
+public
+ function FunctionTests.ComponentFunc2.eb.a.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := 2 * x;
+  return;
+ end FunctionTests.ComponentFunc2.eb.a.f;
+
+ function FunctionTests.ComponentFunc2.ec.a.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x * x;
+  return;
+ end FunctionTests.ComponentFunc2.ec.a.f;
+
+end FunctionTests.ComponentFunc2;
+")})));
+end ComponentFunc2;
+
+
 model MinOnInput1
     function F
         input Real x(min=0) = 3.14;
@@ -7784,6 +7866,7 @@ model MinOnInput1
 		FlatteningTestCase(
 			name="MinOnInput1",
 			description="Test that default arguments are correctly identified with modification on input",
+			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.MinOnInput1
  Real y = FunctionTests.MinOnInput1.F(3.14);

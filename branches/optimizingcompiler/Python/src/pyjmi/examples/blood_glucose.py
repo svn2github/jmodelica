@@ -28,48 +28,60 @@ from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """
-    Blood Glucose model
+    Simulation of a model that predicts the blood glucose levels of a type-I 
+    diabetic. The objective is to predict the relationship between insulin 
+    injection and blood glucose levels.
+    
+    Reference:
+     S. M. Lynch and B. W. Bequette, Estimation based Model Predictive Control of Blood Glucose in 
+     Type I Diabetes: A Simulation Study, Proc. 27th IEEE Northeast Bioengineering Conference, IEEE, 2001.
+     
+     S. M. Lynch and B. W. Bequette, Model Predictive Control of Blood Glucose in type I Diabetics 
+     using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002. 
     """
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
     fmu_name1 = compile_fmu("JMExamples.BloodGlucose.BloodGlucose1", 
-    curr_dir+"/files/JMExamples.mo")
+        os.path.join(curr_dir, 'files', 'JMExamples.mo'))
     bg = load_fmu(fmu_name1)
     
     res = bg.simulate(final_time=400)
 
     # Extract variable profiles
-    G	= res['G']
-    X	= res['X']
-    I	= res['I']
-    t	= res['time']
+    G = res['G']
+    X = res['X']
+    I = res['I']
+    t = res['time']
     
-    print "t = ", repr(N.array(t))
-    print "G = ", repr(N.array(G))
-    print "X = ", repr(N.array(X))
-    print "I = ", repr(N.array(I))
+    assert N.abs(res.final('G') - 19.77650) < 1e-4
+    assert N.abs(res.final('X') - 14.97815) < 1e-4
+    assert N.abs(res.final('I') - 2.7)      < 1e-4
 
     if with_plots:
-        # Plot
         plt.figure(1)
-        plt.subplot(2,2,1)
-        plt.plot(t,G)
-        plt.title('Plasma Glucose Conc.')
-        plt.grid(True)
-        plt.ylabel('G')
-        plt.subplot(2,2,2)
-        plt.plot(t,X)
-        plt.title('Plasma Glucose Conc.')
-        plt.grid(True)
-        plt.ylabel('X')
-        plt.subplot(2,2,3)
-        plt.plot(t,I)
-        plt.title('Plasma Glucose Conc.')
-        plt.grid(True)
-        plt.ylabel('I')
         
+        plt.subplot(2,2,1)
+        plt.plot(t, G)
+        plt.title('Plasma Glucose Conc')
+        plt.grid(True)
+        plt.ylabel('Plasma Glucose Conc. (mmol/L)')
         plt.xlabel('time')
+        
+        plt.subplot(2,2,2)
+        plt.plot(t, X)
+        plt.title('Plasma Insulin Conc.')
+        plt.grid(True)
+        plt.ylabel('Plasma Insulin Conc. (mu/L)')
+        plt.xlabel('time')
+        
+        plt.subplot(2,2,3)
+        plt.plot(t, I)
+        plt.title('Plasma Insulin Conc.')
+        plt.grid(True)
+        plt.ylabel('Plasma Insulin Conc. (mu/L)')
+        plt.xlabel('time')
+        
         plt.show()
 
 if __name__ == "__main__":

@@ -34,7 +34,7 @@ def run_demo(with_plots=True):
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
     jmu_name1 = compile_jmu("JMExamples_opt.ColoumbFriction_opt", 
-    (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
+        (os.path.join(curr_dir, 'files', 'JMExamples_opt.mop'), os.path.join(curr_dir, 'files', 'JMExamples.mo')))
     cf = JMUModel(jmu_name1)
     res = cf.optimize()
     
@@ -43,32 +43,32 @@ def run_demo(with_plots=True):
     dq=res['dq']
     u =res['u'] 
     t =res['time']
-	
-    print "t = ", repr(N.array(t))
-    print "q = ", repr(N.array(q))
-    print "dq = ", repr(N.array(dq))
-    print "u = ", repr(N.array(u))
-	
+
+    assert N.abs(res.final('q') + 1.0) < 1e-4
+    assert N.abs(res.final('dq') - 0.0) < 1e-4
+
     if with_plots:
-        # Plot
         plt.figure(1)
         plt.clf()
+        
         plt.subplot(311)
         plt.plot(t,q)
         plt.grid()
         plt.ylabel('q')
+        plt.xlabel('time')
 
         plt.subplot(312)
         plt.plot(t,dq)
         plt.grid()
         plt.ylabel('dq')
-		
+        plt.xlabel('time')
+
         plt.subplot(313)
         plt.plot(t,u)
         plt.grid()
         plt.ylabel('u')
-		
         plt.xlabel('time')
+        
         plt.show()
 
 if __name__ == "__main__":

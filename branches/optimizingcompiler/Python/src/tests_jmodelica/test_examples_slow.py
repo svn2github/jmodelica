@@ -27,7 +27,7 @@ def test_cstr_mpc():
     """ Test the cstr_mpc example. """    
     cstr_mpc.run_demo(False)
     
-@testattr(slow = True)
+@testattr(ma27 = True)
 def test_distillation():
     """ Test the distillation example. """  
     distillation.run_demo(False)
