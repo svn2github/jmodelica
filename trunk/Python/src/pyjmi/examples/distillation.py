@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 from pymodelica import compile_jmu
 from pyjmi import JMUModel
 
-def run_demo(with_plots=True,with_blocking_factors = False):
+def run_demo(with_plots=True, with_blocking_factors = False):
     """ 
     Load change of a distillation column. The distillation column model is 
     documented in the paper:
@@ -41,6 +41,8 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     pages={1379-1397},
     year={2002}
     }
+    
+    Note: This example requires Ipopt with MA27.
     """
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
@@ -56,11 +58,11 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     rr_0_A = 3.0
     init_model.set('rr',rr_0_A)
     init_result = init_model.initialize()
-    	
+    
     # Store stationary point A
     y_A = N.zeros(32)
     x_A = N.zeros(32)
-    # print(' *** Stationary point A ***')
+    print(' *** Stationary point A ***')
     print '(Tray index, x_i_A, y_i_A)'
     for i in range(N.size(y_A)):
         y_A[i] = init_model.get('y['+ str(i+1) +']')
@@ -75,7 +77,7 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     # Store stationary point B
     y_B = N.zeros(32)
     x_B = N.zeros(32)
-    # print(' *** Stationary point B ***')
+    print(' *** Stationary point B ***')
     print '(Tray index, x_i_B, y_i_B)'
     for i in range(N.size(y_B)):
         y_B[i] = init_model.get('y[' + str(i+1) + ']')
@@ -102,48 +104,45 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     model.set('rr_ref',rr_0_B)
     model.set('y1_ref',y_B[0])
 
-    n_e = 100 # Number of elements 
+    n_e = 100               # Number of elements 
     hs = N.ones(n_e)*1./n_e # Equidistant points
-    n_cp = 3; # Number of collocation points in each element
+    n_cp = 3;               # Number of collocation points in each element
 
     # Solve the optimization problem
-    # if with_blocking_factors:
-        # # Blocking factors for control parametrization
-        # blocking_factors=4*N.ones(n_e/4,dtype=N.int)
-
-        # opt_opts = model.optimize_options()
-
-        # opt_opts['n_e'] = n_e
-        # opt_opts['n_cp'] = n_cp
-        # opt_opts['hs'] = hs
-        # opt_opts['blocking_factors'] = blocking_factors
-        # #opt_opts['IPOPT_options']['derivative_test'] = 'first-order'
+    if with_blocking_factors:
+        # Blocking factors for control parametrization
+        blocking_factors=4*N.ones(n_e/4,dtype=N.int)
         
-        # opt_res = model.optimize(options=opt_opts)
-    # else:
-    opt_res = model.optimize(options={'n_e':n_e, 'n_cp':n_cp, 'hs':hs})
+        opt_opts = model.optimize_options()
+        opt_opts['n_e'] = n_e
+        opt_opts['n_cp'] = n_cp
+        opt_opts['hs'] = hs
+        opt_opts['blocking_factors'] = blocking_factors
+        
+        opt_res = model.optimize(options=opt_opts)
+    else:
+        opt_res = model.optimize(options={'n_e':n_e, 'n_cp':n_cp, 'hs':hs})
 
     # Extract variable profiles
-    res = opt_res.result_data
-    u1_res = res.get_variable_data('rr')
-    u1_ref_res = res.get_variable_data('rr_ref')
-    y1_ref_res = res.get_variable_data('y1_ref')
-
+    u1_res     = opt_res['rr']
+    u1_ref_res = opt_res['rr_ref']
+    y1_ref_res = opt_res['y1_ref']
+    time       = opt_res['time']
+    
     x_res = []
     x_ref_res = []
     for i in range(N.size(x_B)):
-        x_res.append(res.get_variable_data('x[' + str(i+1) + ']'))
+        x_res.append(opt_res['x[' + str(i+1) + ']'])
 
     y_res = []
     for i in range(N.size(x_B)):
-        y_res.append(res.get_variable_data('y[' + str(i+1) + ']'))
+        y_res.append(opt_res['y[' + str(i+1) + ']'])
         
-    cost=res.get_variable_data('cost')
     
-    # if with_blocking_factors:
-        # assert N.abs(cost.x[-1]/1.e1 - 2.8549683) < 1e-3
-    # else:
-        # assert N.abs(cost.x[-1]/1.e1 - 2.8527469) < 1e-3
+    if with_blocking_factors:
+        assert N.abs(opt_res.final('cost')/1.e1 - 2.8549683) < 1e-3
+    else:
+        assert N.abs(opt_res.final('cost')/1.e1 - 2.8527469) < 1e-3
 
     # Plot the results
     if with_plots:
@@ -152,15 +151,15 @@ def run_demo(with_plots=True,with_blocking_factors = False):
         plt.hold(True)
         plt.subplot(311)
         plt.title('Liquid composition')
-        plt.plot(x_res[0].t,x_res[0].x)
+        plt.plot(time, x_res[0])
         plt.ylabel('x1')
         plt.grid()
         plt.subplot(312)
-        plt.plot(x_res[16].t,x_res[16].x)
+        plt.plot(time, x_res[16])
         plt.ylabel('x17')
         plt.grid()
         plt.subplot(313)
-        plt.plot(x_res[31].t,x_res[31].x)
+        plt.plot(time, x_res[31])
         plt.ylabel('x32')
         plt.grid()
         plt.xlabel('t [s]')
@@ -172,16 +171,16 @@ def run_demo(with_plots=True,with_blocking_factors = False):
         plt.hold(True)
         plt.subplot(311)
         plt.title('Vapor composition')
-        plt.plot(y_res[0].t,y_res[0].x)
-        plt.plot(y1_ref_res.t,y1_ref_res.x,'--')
+        plt.plot(time, y_res[0])
+        plt.plot(time, y1_ref_res, '--')
         plt.ylabel('y1')
         plt.grid()
         plt.subplot(312)
-        plt.plot(y_res[16].t,y_res[16].x)
+        plt.plot(time, y_res[16])
         plt.ylabel('y17')
         plt.grid()
         plt.subplot(313)
-        plt.plot(y_res[31].t,y_res[31].x)
+        plt.plot(time, y_res[31])
         plt.ylabel('y32')
         plt.grid()
         plt.xlabel('t [s]')
@@ -191,9 +190,9 @@ def run_demo(with_plots=True,with_blocking_factors = False):
         plt.figure(3)
         plt.clf()
         plt.hold(True)
-        plt.plot(u1_res.t,u1_res.x)
+        plt.plot(time, u1_res)
         plt.ylabel('u')
-        plt.plot(u1_ref_res.t,u1_ref_res.x,'--')
+        plt.plot(time, u1_ref_res, '--')
         plt.xlabel('t [s]')
         plt.title('Reflux ratio')
         plt.grid()

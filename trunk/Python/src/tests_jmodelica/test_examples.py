@@ -86,6 +86,11 @@ def test_cstr2():
 def test_dist1_init_sim():
     """ Test the dist1_init_sim example. """
     dist1_init_sim.run_demo(False)
+
+@testattr(ma27 = True)
+def test_distillation1_opt():
+    """ Test the distillation1_opt example. """
+    distillation1_opt.run_demo(False)
     
 @testattr(ipopt = True)
 def test_lagrange_cost():
