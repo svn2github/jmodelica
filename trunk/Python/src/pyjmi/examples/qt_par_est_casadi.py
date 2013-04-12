@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+from collections import OrderedDict
 
 from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
@@ -166,10 +167,11 @@ def run_demo(with_plots=True):
     data_x2 = N.vstack([t_meas, y2_meas])
     data_u1 = N.vstack([t_meas, u1])
     data_u2 = N.vstack([t_meas, u2])
-    unconstrained = {'qt.x1': data_x1,
-                     'qt.x2': data_x2,
-                     'u1': data_u1,
-                     'u2': data_u2}
+    unconstrained = OrderedDict()
+    unconstrained['qt.x1'] = data_x1
+    unconstrained['qt.x2'] = data_x2
+    unconstrained['u1'] = data_u1
+    unconstrained['u2'] = data_u2
     measurement_data = MeasurementData(Q=Q, unconstrained=unconstrained)
     
     opts = model_casadi.optimize_options()

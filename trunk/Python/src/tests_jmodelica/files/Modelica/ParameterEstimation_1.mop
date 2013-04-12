@@ -16,7 +16,7 @@ package ParEst
     u = 1;
   end SecondOrder;
 
-  optimization ParEstCasADi(objective = 1, startTime = 0, finalTime = 15)
+  optimization ParEstCasADi(startTime=0, finalTime=15)
     // Create second order system instance,
     // Set parameters w and z free and give 
     // initial guesses

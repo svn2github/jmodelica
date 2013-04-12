@@ -20,6 +20,7 @@
 import os
 import nose
 
+from collections import OrderedDict
 import numpy as N
 from scipy.io.matlab.mio import loadmat
 
@@ -492,7 +493,8 @@ class TestLocalDAECollocator:
         
         # Measurement data
         Q = N.array([[1.]])
-        unconstrained={'y': data}
+        unconstrained=OrderedDict()
+        unconstrained['y'] = data
         measurement_data = MeasurementData(unconstrained=unconstrained, Q=Q)
         
         # Optimize without scaling
@@ -540,7 +542,8 @@ class TestLocalDAECollocator:
         
         # Measurement data
         Q = N.array([[1.]])
-        unconstrained={'y': data}
+        unconstrained = OrderedDict()
+        unconstrained['y'] = data
         measurement_data = MeasurementData(unconstrained=unconstrained, Q=Q)
         
         # Optimize without scaling
@@ -588,16 +591,16 @@ class TestLocalDAECollocator:
                                      final_time=60.)
         
         # Create measurement data
-        Q = N.array([[1., 0., 0., 0.], [0., 1., 0., 0.],
-                            [0., 0., 10., 0.], [0., 0., 0., 10.]])
+        Q = N.diag([1., 1., 10., 10.])
         data_x1 = N.vstack([t_meas, y1_meas])
         data_x2 = N.vstack([t_meas, y2_meas])
         data_u1 = N.vstack([t_meas, u1])
         data_u2 = N.vstack([t_meas, u2])
-        unconstrained = {'qt.x1': data_x1,
-                         'qt.x2': data_x2,
-                         'u1': data_u1,
-                         'u2': data_u2}
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        unconstrained['qt.x2'] = data_x2
+        unconstrained['u1'] = data_u1
+        unconstrained['u2'] = data_u2
         measurement_data = MeasurementData(Q=Q,
                                            unconstrained=unconstrained)
         
@@ -644,13 +647,17 @@ class TestLocalDAECollocator:
                                      final_time=60.)
         
         # Create measurement data
-        Q = N.array([[1., 0.], [0., 1.]])
+        Q = N.diag([1., 1.])
         data_x1 = N.vstack([t_meas, y1_meas])
         data_x2 = N.vstack([t_meas, y2_meas])
         data_u1 = N.vstack([t_meas, u1])
         data_u2 = N.vstack([t_meas, u2])
-        unconstrained = {'qt.x1': data_x1, 'qt.x2': data_x2}
-        eliminated = {'u1': data_u1, 'u2': data_u2}
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        unconstrained['qt.x2'] = data_x2
+        eliminated = OrderedDict()
+        eliminated['u1'] = data_u1
+        eliminated['u2'] = data_u2
         measurement_data = MeasurementData(Q=Q,
                                            unconstrained=unconstrained,
                                            eliminated=eliminated)
@@ -688,8 +695,12 @@ class TestLocalDAECollocator:
         
         # Eliminate state
         Q = N.array([[1.]])
-        unconstrained = {'qt.x1': data_x1}
-        eliminated = {'u1': data_u1, 'u2': data_u2, 'qt.x2': data_x2}
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        eliminated = OrderedDict()
+        eliminated['u1'] = data_u1
+        eliminated['u2'] = data_u2
+        eliminated['qt.x2'] = data_x2
         measurement_data = MeasurementData(Q=Q,
                                            unconstrained=unconstrained,
                                            eliminated=eliminated)
@@ -722,14 +733,17 @@ class TestLocalDAECollocator:
                                      final_time=60.)
         
         # Create measurement data
-        Q = N.array([[1., 0., 0., 0.], [0., 1., 0., 0.],
-                     [0., 0., 10., 0.], [0., 0., 0., 10.]])
+        Q = N.diag([1., 1., 10., 10.])
         data_x1 = N.vstack([t_meas, y1_meas])
         data_x2 = N.vstack([t_meas, y2_meas])
         data_u1 = N.vstack([t_meas, u1])
         data_u2 = N.vstack([t_meas, u2])
-        unconstrained = {'qt.x1': data_x1, 'qt.x2': data_x2}
-        constrained = {'u1': data_u1, 'u2': data_u2}
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        unconstrained['qt.x2'] = data_x2
+        constrained = OrderedDict()
+        constrained['u1'] = data_u1
+        constrained['u2'] = data_u2
         measurement_data = MeasurementData(Q=Q,
                                            unconstrained=unconstrained,
                                            constrained=constrained)
@@ -758,8 +772,12 @@ class TestLocalDAECollocator:
         opt_model.set_min('u1', -N.inf)
         
         # Constrain state
-        unconstrained = {'qt.x1': data_x1}
-        constrained = {'u1': data_u1, 'u2': data_u2, 'qt.x2': data_x2}
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        constrained = OrderedDict()
+        constrained['u1'] = data_u1
+        constrained['u2'] = data_u2
+        constrained['qt.x2'] = data_x2
         measurement_data = MeasurementData(Q=Q,
                                            unconstrained=unconstrained,
                                            constrained=constrained)
@@ -792,13 +810,17 @@ class TestLocalDAECollocator:
                                      final_time=60.)
         
         # Create measurement data
-        Q = N.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 10.]])
+        Q = N.diag([1., 1., 10.])
         data_x1 = N.vstack([t_meas, y1_meas])
         data_x2 = N.vstack([t_meas, y2_meas])
         data_u1 = N.vstack([t_meas, u1])
         data_u2 = N.vstack([t_meas, u2])
-        unconstrained = {'qt.x1': data_x1, 'qt.x2': data_x2, 'u1': data_u1}
-        eliminated = {'u2': data_u2}
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        unconstrained['qt.x2'] = data_x2
+        unconstrained['u1'] = data_u1
+        eliminated = OrderedDict()
+        eliminated['u2'] = data_u2
         measurement_data = MeasurementData(Q=Q,
                                            unconstrained=unconstrained,
                                            eliminated=eliminated)
@@ -821,8 +843,12 @@ class TestLocalDAECollocator:
                                   a_ref, rtol=1e-4)
         
         # Eliminate u1
-        unconstrained = {'qt.x1': data_x1, 'qt.x2': data_x2, 'u2': data_u2}
-        eliminated = {'u1': data_u1}
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        unconstrained['qt.x2'] = data_x2
+        unconstrained['u2'] = data_u2
+        eliminated = OrderedDict()
+        eliminated['u1'] = data_u1
         measurement_data = MeasurementData(Q=Q,
                                            unconstrained=unconstrained,
                                            eliminated=eliminated)
@@ -865,19 +891,20 @@ class TestLocalDAECollocator:
                                      final_time=60.)
         
         # Create measurement data
-        Q_constr = N.array([[1., 0., 0., 0.], [0., 1., 0., 0.],
-                            [0., 0., 10., 0.], [0., 0., 0., 10.]])
-        Q_elim = N.array([[1., 0.], [0., 1.]])
-        Q_semi_elim = N.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 10.]])
+        Q = N.diag([1., 1., 10.])
         data_x1 = N.vstack([t_meas, y1_meas])
         data_x2 = N.vstack([t_meas, y2_meas])
         data_u2 = N.vstack([t_meas, u2])
         linear_u1 = TrajectoryLinearInterpolation(t_meas,
                                                   u1.reshape([-1, 1]))
         user_u1 = linear_u1.eval
-        unconstrained = {'qt.x1': data_x1, 'qt.x2': data_x2, 'u2': data_u2}
-        eliminated = {'u1': user_u1}
-        measurement_data = MeasurementData(Q=Q_semi_elim,
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        unconstrained['qt.x2'] = data_x2
+        unconstrained['u2'] = data_u2
+        eliminated = OrderedDict()
+        eliminated['u1'] = user_u1
+        measurement_data = MeasurementData(Q=Q,
                                            unconstrained=unconstrained,
                                            eliminated=eliminated)
         

@@ -15,8 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-# Import library for path manipulations
+# Import utility libraries
 import os.path
+from collections import OrderedDict
 
 # Import numerical libraries
 import numpy as N
@@ -110,7 +111,8 @@ def run_demo(with_plots=True):
         plt.show()
 
     Q = N.array([[1.]])
-    unconstrained = {'sys.y': N.vstack([t_meas, xx_meas[:, 0]])}
+    unconstrained = OrderedDict()
+    unconstrained['sys.y'] = N.vstack([t_meas, xx_meas[:, 0]])
 
     measurement_data = MeasurementData(Q=Q, unconstrained=unconstrained)
 
@@ -126,13 +128,13 @@ def run_demo(with_plots=True):
     # Extract variable profiles
     x1 = res_casadi['sys.x1']
     u = res_casadi['u']
-    w = res_casadi['sys.w']
-    z = res_casadi['sys.z']
+    w = res_casadi.final('sys.w')
+    z = res_casadi.final('sys.z')
     t = res_casadi['time']
     
     assert N.abs(res_casadi.final('sys.x1') - 0.99953927) < 1e-3
-    assert N.abs(res_casadi.final('sys.w') - 1.04972186)  < 1e-3
-    assert N.abs(res_casadi.final('sys.z') - 0.4703822)   < 1e-3
+    assert N.abs(w - 1.04972186)  < 1e-3
+    assert N.abs(z - 0.4703822)   < 1e-3
 
     if with_plots:
         # Plot optimization result
@@ -150,8 +152,8 @@ def run_demo(with_plots=True):
         plt.show()
                 
         print("** Optimal parameter values: **")
-        print("w = %f"%w)
-        print("z = %f"%z)
+        print("w = %f" % w)
+        print("z = %f" % z)
 
 if __name__ == "__main__":
     run_demo()
