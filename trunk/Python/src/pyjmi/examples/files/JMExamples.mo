@@ -15,7 +15,7 @@ package JMExamples
     equation
       der(x1) = x2;
       der(x2) = u;
-      annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput,
+      annotation (experiment(StopTime=30),
         Documentation(info="<HTML>
   <p>
   This is a minimum-time problem with two states and one
@@ -128,7 +128,7 @@ package JMExamples
       der(I) = -n * I + D / V1;
       dist = 3*exp(-0.05*time);
       der(D) =dD
-      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
+      annotation (experiment(StopTime=400),
         Documentation(info="<HTML>
 <p>
 This is a model that predicts the blood glucose levels of a type-I diabetic. 
@@ -231,7 +231,7 @@ using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002.
       der(I) = -n * I + D / V1;
       dist = 3*exp(-0.05*time);
       der(D) =dD
-      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
+      annotation (experiment(StopTime=400),
         Documentation(info="<HTML>
 <p>
 This is a model that predicts the blood glucose levels of a type-I diabetic. 
@@ -329,7 +329,6 @@ Simulation time: 400s
       der(I) = -n * I + D / V1;
       dist = 3*exp(-0.05*time/60)/60;
       annotation (experiment(StopTime=24000),
-                                            __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
 <p>
 This is a model that predicts the blood glucose levels of a type-I diabetic. 
@@ -418,7 +417,7 @@ Simulation time: 400s
       der(X) = -P2 * (X - X_init) + P3 * (I - I_init);
       der(I) = -n * I + D / V1;
       dist = 3*exp(-0.05*time);
-      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
+      annotation (experiment(StopTime=400),
         Documentation(info="<HTML>
 <p>
 This is a model that predicts the blood glucose levels of a type-I diabetic. 
@@ -573,7 +572,6 @@ Simulation time: 400s
             smooth=Smooth.None));
         annotation (Diagram(graphics),
           experiment(StopTime=400),
-          __Dymola_experimentSetupOutput,
           Documentation(info="<HTML>
     <p>
     The model is based on BloodGlucose1 and a constant input is set.
@@ -597,8 +595,7 @@ Simulation time: 400s
             smooth=Smooth.None));
         annotation (
           Diagram(graphics),
-          experiment(StopTime=400),
-          __Dymola_experimentSetupOutput);
+          experiment(StopTime=400));
       end BloodGlucoseInputscaled;
     end Examples;
   end BloodGlucose;
@@ -618,7 +615,7 @@ Simulation time: 400s
     equation
       der(x1) = u*(10*x2-x1);
       der(x2) = u*(x1-10*x2) - (1-u)*x2;
-      annotation (experiment, __Dymola_experimentSetupOutput,
+      annotation (experiment,
       Documentation(info="<HTML>
   <p>
   This problem considers a plug-flow reactor, packed with two catalysts, involving the reactions S1 <-> S2 -> S3.
@@ -731,8 +728,7 @@ Simulation time: 1s
               color={0,0,0},
               thickness=0.5,
               smooth=Smooth.None)}),
-        experiment,
-        __Dymola_experimentSetupOutput);
+        experiment);
     end CatalyticCracking;
   end CatalyticCracking;
 
@@ -860,7 +856,6 @@ Simulation time: 150s
 
 </HTML>"),
         experiment(StopTime=150),
-        __Dymola_experimentSetupOutput,
         Diagram(graphics),
         Icon(graphics={
             Rectangle(
@@ -963,7 +958,6 @@ Simulation time: 150s
             smooth=Smooth.None));
         annotation (Diagram(graphics),
           experiment(StopTime=60),
-          __Dymola_experimentSetupOutput,
           Documentation(info="<HTML>
 <p>
 input: step function
@@ -1041,7 +1035,6 @@ Simulation time: 150s
        der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200),
-        __Dymola_experimentSetupOutput,
                     Placement(transformation(extent={{-118,0},{-78,40}})),
         Documentation(info="<HTML>
 <p>
@@ -1170,7 +1163,6 @@ Simulation time: 7200s
        FL=Feed+L;
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200),
-        __Dymola_experimentSetupOutput,
                     Placement(transformation(extent={{-118,0},{-78,40}})),
         Documentation(info="<HTML>
 <p>
@@ -1328,7 +1320,6 @@ Simulation time: 7200s
        FL=Feed+L;
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200),
-        __Dymola_experimentSetupOutput,
                     Placement(transformation(extent={{-118,0},{-78,40}})),
         Documentation(info="<HTML>
 <p>
@@ -1419,7 +1410,7 @@ Simulation time: 7200s
     initial equation
     //steady state
     der(x) = zeros(32);
-      annotation (experiment(StopTime=7200), __Dymola_experimentSetupOutput);
+      annotation (experiment(StopTime=7200));
     end Distillation1Input_init;
 
     model Distillation1Inputstep
@@ -1458,7 +1449,6 @@ Simulation time: 7200s
        FL=Feed+L;
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200),
-        __Dymola_experimentSetupOutput,
                     Placement(transformation(extent={{-118,0},{-78,40}})),
         Documentation(info="<HTML>
 <p>
@@ -1619,13 +1609,6 @@ Simulation time: 7200s
        der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=120, Algorithm="Dassl"),
-        __Dymola_experimentSetupOutput(
-          textual=true,
-          doublePrecision=true,
-          derivatives=false,
-          inputs=false,
-          outputs=false,
-          auxiliaries=false),
                     Placement(transformation(extent={{-118,0},{-78,40}})),
         Documentation(info="<HTML>
 <p>
@@ -1789,10 +1772,6 @@ Simulation time: 7200s
        end for;
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200, Algorithm="Dassl"),
-        __Dymola_experimentSetupOutput(
-          textual=true,
-          doublePrecision=true,
-          inputs=false),
                     Placement(transformation(extent={{-118,0},{-78,40}})),
         Documentation(info="<HTML>
 <p>
@@ -2147,9 +2126,7 @@ Simulation time: 7200s
     Temp_dot[1]=0;
     yA[1]=0;
       annotation (experiment(StopTime=6000, Algorithm="Dassl"),
-          __Dymola_experimentSetupOutput,
         Diagram(graphics),
-        DymolaStoredErrors,
         Documentation(info="<HTML>
 <p>
 This distillation column is a separation of cyclohexane (component A) and n-heptane (component B). 
@@ -2288,8 +2265,7 @@ Simulation time: 7200s
             smooth=Smooth.None));
         annotation (
           Diagram(graphics),
-          experiment(StopTime=7200),
-          __Dymola_experimentSetupOutput);
+          experiment(StopTime=7200));
       end Distillation1const;
 
       model Distillation1step
@@ -2306,8 +2282,7 @@ Simulation time: 7200s
             color={0,0,127},
             smooth=Smooth.None));
         annotation (Diagram(graphics),
-          experiment(StopTime=7200),
-          __Dymola_experimentSetupOutput);
+          experiment(StopTime=7200));
       end Distillation1step;
     end Examples;
   end Distillation;
@@ -2340,7 +2315,6 @@ Simulation time: 7200s
           delta = alpha*beta/A;
           der(x1) = -gamma*sqrt(x1)+delta*u;
           der(x2) = gamma*(sqrt(x1)-sqrt(x2));
-      annotation (DymolaStoredErrors);
     end DoubleTank;
   end DoubleTank;
 
@@ -2366,7 +2340,6 @@ Simulation time: 7200s
       der(v) = -1+u/m;
       der(m) = -u/2.349;
       annotation (experiment(NumberOfIntervals=1),
-          __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
 <p>
 Example about landing an object.
@@ -2439,7 +2412,6 @@ Simulation time: 1s
         annotation (
           Diagram(graphics),
           experiment(StopTime=1.5, NumberOfIntervals=1),
-          __Dymola_experimentSetupOutput,
           Documentation(info="<HTML>
     <p>
     The model is based on MoonLander and a step function is set as an input.
@@ -2528,7 +2500,6 @@ Simulation time: 1s
          der(Tg)     = Fg/Mg * (T - Tg)   + UA/(Mg * Cpg) * (Tw - Tg);
       annotation (Icon(graphics),
         experiment(StopTime=36000),
-        __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
 <p>
 reference:
@@ -2625,7 +2596,6 @@ Simulation time: 36000s
          der(Tg)     = Fg/Mg * (T - Tg) + UA/(Mg * Cpg) * (Tw - Tg);
       annotation (Icon(graphics),
         experiment(StopTime=36000),
-        __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
     <p>
     Based on the Polyeth model the Feed is defined as an input to experiment in Dymola.
@@ -2650,7 +2620,6 @@ Simulation time: 36000s
             smooth=Smooth.None));
         annotation (Diagram(graphics),
           experiment(StopTime=36000),
-          __Dymola_experimentSetupOutput,
            Documentation(info="<HTML>
     <p>
     The model is based on PolyethTest and a constant input is set.
@@ -2702,8 +2671,7 @@ Simulation time: 36000s
           der(x3) = -au/Au*sqrt(2*g*x3) + (1-gamma1)*k2/Au*u2;
           der(x4) = -au/Au*sqrt(2*g*x4) + (1-gamma2)*k1/Au*u1;
       annotation (Diagram(graphics),
-        experiment(StopTime=60),
-        __Dymola_experimentSetupOutput);
+        experiment(StopTime=60));
     end QuadrupleTank;
 
     package Examples
@@ -2760,7 +2728,6 @@ Simulation time: 10s
 
 </HTML>"),
         experiment(StopTime=10),
-        __Dymola_experimentSetupOutput,
       Icon(graphics={Line(
             points={{40,4},{40,0},{38,-4},{34,-10},{28,-16},{22,-20},{16,-24},{0,-34},
                 {-6,-36},{-10,-36},{-14,-34},{-18,-32},{-22,-28},{-26,-22},{-30,-18},
@@ -2809,7 +2776,6 @@ Simulation time: 10s
       annotation (
         Diagram(graphics),
         experiment(StopTime=10, NumberOfIntervals=50),
-        __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
 <p>
 input: ramp function

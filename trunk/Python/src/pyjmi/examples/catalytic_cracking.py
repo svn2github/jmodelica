@@ -33,7 +33,8 @@ def run_demo(with_plots=True):
     """
     Demonstrate how to solve a simple parameter estimation problem 
     in form of a model of catalytic cracking of gas oil.
-    reference:
+    
+    Reference:
     Benchmarking Optimization Software with COPS 
     Elizabeth D. Dolan and Jorge J. More ARGONNE NATIONAL LABORATORY
     """
@@ -42,10 +43,10 @@ def run_demo(with_plots=True):
 
     # Compile the Optimica model to a JMU
     jmu_name = compile_jmu("JMExamples_opt.CatalyticCracking_opt",
-    (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
+        (os.path.join(curr_dir, 'files', 'JMExamples_opt.mop'), os.path.join(curr_dir, 'files', 'JMExamples.mo')))
     
     # Load the dynamic library
-    cc=JMUModel(jmu_name)
+    cc = JMUModel(jmu_name)
     
     # optimize
     opts = cc.optimize_options()
@@ -53,12 +54,12 @@ def run_demo(with_plots=True):
     res = cc.optimize(options=opts)
     
     # Extract variable profiles
-    y1 = res['sys.y1']
-    y2 = res['sys.y2']
+    y1     = res['sys.y1']
+    y2     = res['sys.y2']
     theta1 = res['sys.theta1']
     theta2 = res['sys.theta2']
     theta3 = res['sys.theta3']
-    t = res['time']
+    t      = res['time']
     
     y1m = [1, 0.8105, 0.6208, 0.5258, 0.4345, 0.3903,
     0.3342, 0.3034, 0.2735, 0.2405, 0.2283, 0.2071, 0.1669,
@@ -70,22 +71,29 @@ def run_demo(with_plots=True):
     0.15, 0.175, 0.2, 0.225, 0.25, 0.3, 0.35, 0.4,
     0.45, 0.5, 0.55, 0.65, 0.75, 0.85, 0.95];
 
+    assert N.abs(res.final('sys.theta1') - 11.835148) < 1e-5
+    assert N.abs(res.final('sys.theta2') - 8.338887)  < 1e-5
+    assert N.abs(res.final('sys.theta3') - 1.007536)  < 1e-5
+
     if with_plots:
-        # Plot optimization result
         plt.figure(1)
         plt.clf()
+        
         plt.subplot(211)
-        plt.plot(t,y1,tm,y1m,'x')
+        plt.plot(t, y1, tm, y1m, 'x')
         plt.grid()
         plt.ylabel('y1')
+        plt.xlabel('time')
         
         plt.subplot(212)
-        plt.plot(t,y2,tm,y2m,'x')
+        plt.plot(t, y2, tm, y2m, 'x')
         plt.grid()
         plt.ylabel('y2')
+        plt.xlabel('time')
+        
         plt.show()
         
-        print("** Optimal parameter values: **")
+        print("\n** Optimal parameter values: **")
         print("theta1 = %f" %res.final('sys.theta1'))
         print("theta2 = %f" %res.final('sys.theta2'))
         print("theta3 = %f" %res.final('sys.theta3'))
