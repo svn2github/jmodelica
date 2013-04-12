@@ -555,9 +555,11 @@ model FunctionCallEquation3
 	
     function f
     	input Real i;
-        output A o;
+        output A o1;
+        output Real o2;
     algorithm
-    	o := A(i*1,i*2);
+    	o1 := A(i*1,i*2);
+    	o2 := i*3;
     end f;
     
 	record A
@@ -565,8 +567,8 @@ model FunctionCallEquation3
 		Real b;
 	end A;
 equation
-    a = f(3);
-    b = f(p);
+    (a, ) = f(3);
+    (b, ) = f(p);
     annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="FunctionCallEquation3",
@@ -580,15 +582,17 @@ fclass VariabilityPropagationTests.FunctionCallEquation3
  parameter Real b.b;
  parameter Real p = 3 /* 3 */;
 parameter equation
- (VariabilityPropagationTests.FunctionCallEquation3.A(b.a, b.b)) = VariabilityPropagationTests.FunctionCallEquation3.f(p);
+ (VariabilityPropagationTests.FunctionCallEquation3.A(b.a, b.b), ) = VariabilityPropagationTests.FunctionCallEquation3.f(p);
 
 public
  function VariabilityPropagationTests.FunctionCallEquation3.f
   input Real i;
-  output VariabilityPropagationTests.FunctionCallEquation3.A o;
+  output VariabilityPropagationTests.FunctionCallEquation3.A o1;
+  output Real o2;
  algorithm
-  o.a := i * 1;
-  o.b := i * 2;
+  o1.a := i * 1;
+  o1.b := i * 2;
+  o2 := i * 3;
   return;
  end VariabilityPropagationTests.FunctionCallEquation3.f;
 

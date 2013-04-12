@@ -20,19 +20,55 @@ aspect VariabilityPropagation {
 	public boolean FAbstractEquation.taggedForRemoval = false;
 	public boolean FVariable.taggedForRemoval = false;
 	
-	inh boolean FAbstractEquation.variabilityPropagationEnabled();
-	eq Root.getChild().variabilityPropagationEnabled() = false;
-	eq FClass.getChild().variabilityPropagationEnabled() = true;
-	eq FIfWhenElseEquation.getChild().variabilityPropagationEnabled() = false;
+	/**
+	 * Checks if equation is eligible for var. prop.
+	 */
+	inh boolean FAbstractEquation.canPropagate();
+	eq Root.getChild().canPropagate() = false;
+	eq FClass.getChild().canPropagate() = true;
+	eq FIfWhenElseEquation.getChild().canPropagate() = false;
 	
-	syn boolean FEquation.variabilityPropagationEnabled() =
-			super.variabilityPropagationEnabled() && variables().size() == 1 && !hasResidual();
-	syn boolean FFunctionCallEquation.variabilityPropagationEnabled() =
-			super.variabilityPropagationEnabled() && variables().size() > 0 && variables().size() == numScalarEquations() && !hasResidual();
+	syn boolean FEquation.canPropagate() =
+			super.canPropagate() && variables().size() == 1 && !hasResidual();
+	syn boolean FFunctionCallEquation.canPropagate() =
+			super.canPropagate() && variables().size() > 0 && variables().size() == numScalarEquations() && !hasResidual();
+	
+	/**
+	 * Checks if left hand side variable(s) is eligible for var. prop.
+	 */
+	syn boolean FExp.canPropagate() {
+		throw new UnsupportedOperationException();
+	}
+	eq FRecordConstructor.canPropagate() {
+		for (FExp exp : getArgs()) {
+			if (!exp.canPropagate()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	eq FArray.canPropagate() {
+		for (FExp exp : getFExps()) {
+			if (!exp.canPropagate()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	eq FIdUseExp.canPropagate() {
+		return myFV().canPropagate();
+	}
+	syn boolean FAbstractVariable.canPropagate() = false;
+	eq FVariable.canPropagate() = !isOutput() 
+			&& getHGTType() != FClass.HGTVariableType.COMPONENT 
+			&& getHGTType() != FClass.HGTVariableType.PAIR;
+	eq FDerivativeVariable.canPropagate() = false;
 	
 	
 	
-	
+	/**
+	 * Runs variability propagation if option is set.
+	 */
 	public void FClass.variabilityPropagationIfSet() {
 		if (root().options.getBooleanOption("variability_propagation")) {
 			beginStep("variabilityPropagationIfSet()");
@@ -42,6 +78,9 @@ aspect VariabilityPropagation {
 		}
 	}
 	
+	/**
+	 * Runs variability propagation.
+	 */
 	public void FClass.variabilityPropagation() {
 
 		List<FAbstractEquation> parameterEquations = getFParameterEquations();
@@ -50,7 +89,7 @@ aspect VariabilityPropagation {
 
 		// Build worklist
 		for (FAbstractEquation equation: equations) {
-			if (equation.variabilityPropagationEnabled()) {
+			if (equation.canPropagate()) {
 				worklist.add(equation);
 			}
 		}
@@ -58,7 +97,7 @@ aspect VariabilityPropagation {
 		// Work
 		while(!worklist.isEmpty()) {
 			FAbstractEquation equation = worklist.iterator().next();
-			equation.variabilityPropagation(worklist,parameterEquations);
+			equation.variabilityPropagation(worklist, parameterEquations);
 			worklist.remove(equation);
 		}
 
@@ -96,8 +135,8 @@ aspect VariabilityPropagation {
 		FExp solution;
 		FTypePrefixVariability solutionVariability;
 
-		if (!variabilityPropagationEnabled()) {
-			return;
+		if (!canPropagate()) {
+			return; // Unbalanced equation
 		}
 
 		fVariable = variables().iterator().next();
@@ -116,7 +155,7 @@ aspect VariabilityPropagation {
 
 		if (!solutionVariability.parameterOrLess()) {
 			// Sometimes combinations of parameters and constants yield 
-			// discrete variability. IfExpr. etc.
+			// discrete variability. IfExpr, sample() etc.
 			return;
 		}
 
@@ -145,12 +184,12 @@ aspect VariabilityPropagation {
 		
 		FTypePrefixVariability callVariability = getCall().variability();
 		CValue val[] = null;
-		
-		if (!variabilityPropagationEnabled()) {
+	
+		if (!canPropagate()) {
 			return;
 		}
 		
-		for (FFunctionCallLeft left: getLefts()) {
+		for (FFunctionCallLeft left : getLefts()) {
 			if (left.hasFExp() && !left.getFExp().canPropagate()) {
 				return;
 			}
@@ -174,7 +213,7 @@ aspect VariabilityPropagation {
 		
 		this.taggedForRemoval = true;
 		int i = 0;
-		for (FFunctionCallLeft left: getLefts()) {
+		for (FFunctionCallLeft left : getLefts()) {
 			if (left.hasFExp()) {
 				left.getFExp().variabilityPropagation(worklist,callVariability, 
 						callVariability.constantVariability() ? val[i].buildLiteral() : null);				
@@ -255,11 +294,11 @@ aspect VariabilityPropagation {
 		}
 		
 		// Uses
-		for (FIdUseExp use: uses()) {
+		for (FIdUseExp use : uses()) {
 			if (use.inFEquation()) {
 				equation = use.myFEquation();
 				equation.variables().remove(this);
-				if (equation.variabilityPropagationEnabled()) {
+				if (equation.canPropagate()) {
 					worklist.add(equation);
 				}
 			}
@@ -269,48 +308,22 @@ aspect VariabilityPropagation {
 		if (isDifferentiatedVariable()) {
 			FDerivativeVariable fDerivativeVariable = myDerivativeVariable();
 			fDerivativeVariable.taggedForRemoval = true;
-			fDerivativeVariable.variabilityPropagation(worklist,FTypePrefixVariability.fConstant(),new FIntegerLitExp(0));				
+			fDerivativeVariable.variabilityPropagation(worklist, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0));				
 		}
 	}
-	
-	syn boolean FExp.canPropagate() {
-		throw new UnsupportedOperationException();
-	}
-	eq FRecordConstructor.canPropagate() {
-		for (FExp exp: getArgs()) {
-			if (!exp.canPropagate()) {
-				return false;
-			}
-		}
-		return true;
-	}
-	eq FArray.canPropagate() {
-		for (FExp exp: getFExps()) {
-			if (!exp.canPropagate()) {
-				return false;
-			}
-		}
-		return true;
-	}
-	eq FIdUseExp.canPropagate() {
-		return myFV().canPropagate();
-	}
-	syn boolean FAbstractVariable.canPropagate() = false;
-	eq FVariable.canPropagate() = !isOutput() 
-			&& getHGTType() != FClass.HGTVariableType.COMPONENT 
-			&& getHGTType() != FClass.HGTVariableType.PAIR;
-	eq FDerivativeVariable.canPropagate() = false;
 }
 
 aspect ConstantFolding {
 	public boolean FAbstractExp.constantFoldingEnabled = false;
 	
-	
+	/**
+	 * Enables constant folding
+	 */
 	public void FClass.enableConstantFolding() {
-		for (FAbstractEquation equation: getFParameterEquations()) {
+		for (FAbstractEquation equation : getFParameterEquations()) {
 			equation.enableConstantFolding();
 		}
-		for (FAbstractEquation equation: equations()) {
+		for (FAbstractEquation equation : equations()) {
 			equation.enableConstantFolding();
 		}
 	}
@@ -320,7 +333,7 @@ aspect ConstantFolding {
 	}
 	
 	public void FFunctionCallEquation.enableConstantFolding() {
-		for (FExp childExp: getCall().childFExps()) {
+		for (FExp childExp : getCall().childFExps()) {
 			childExp.enableConstantFolding();
 		}
 	}
@@ -331,7 +344,7 @@ aspect ConstantFolding {
 	}
 	
 	public void FWhenEquation.enableConstantFolding() {
-		for (FAbstractEquation equation: getFAbstractEquations()) {
+		for (FAbstractEquation equation : getFAbstractEquations()) {
 			equation.enableConstantFolding();
 		}
 	}
@@ -351,7 +364,6 @@ aspect ConstantFolding {
 	}
 	
 	public void FAbstractExp.enableConstantFolding() {
-				
 		if (isConstantExp()) {
 			constantFoldingEnabled = true;
 			is$Final = false;
