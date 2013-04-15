@@ -100,7 +100,7 @@ aspect ComplianceCheck {
 	}
 	
 	public void FConnectionsOp.complianceCheck() {
-		warning("The " + builtInName() + "() function-like operator is not supported");
+		compliance("The " + builtInName() + "() function-like operator is not supported");
 	}
 	
 	public void FTerminalExp.complianceCheck() {
