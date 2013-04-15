@@ -69,6 +69,16 @@ def test_fmu_with_input():
     """ Run FMU with input example. """
     fmu_with_input.run_demo(False)
     
+@testattr(slow = True)
+def test_furuta_modified():
+    """ Test the furuta_modified example. """
+    furuta_modified.run_demo(False)
+
+@testattr(slow = True)
+def test_furuta_dfo():
+    """ Test the furuta_dfo example. """
+    furuta_dfo.run_demo(False)
+    
 @testattr(assimulo = True)
 def test_extfunctions():
     """ Test of simulation with external functions. """

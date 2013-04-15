@@ -19,7 +19,6 @@
 """
 
 from tests_jmodelica import testattr
-from pyfmi.examples import *
 from pyjmi.examples import *
 
 @testattr(stddist = True)
@@ -77,6 +76,11 @@ def test_cstr():
     """ Test the cstr example. """
     cstr.run_demo(False)
 
+@testattr(slow = True)
+def test_cstr_mpc():
+    """ Test the cstr_mpc example. """    
+    cstr_mpc.run_demo(False)
+
 @testattr(ipopt = True)
 def test_cstr2():
     """ Test the cstr2 example. """
@@ -86,6 +90,11 @@ def test_cstr2():
 def test_dist1_init_sim():
     """ Test the dist1_init_sim example. """
     dist1_init_sim.run_demo(False)
+    
+@testattr(ma27 = True)
+def test_distillation():
+    """ Test the distillation example. """  
+    distillation.run_demo(False)
 
 @testattr(ma27 = True)
 def test_distillation1_opt():
