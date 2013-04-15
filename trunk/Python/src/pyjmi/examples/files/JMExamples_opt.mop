@@ -338,29 +338,7 @@ package JMExamples_opt
 	  h(finalTime) = 0;
 	  v(finalTime) = 0;
    end MoonLander_opttime;
-   
-   optimization Polyeth_opt(objective = J(finalTime),
-                            startTime = 0,
-                            finalTime = 36000)
-        
-	  input Real u(start = 1/1800,initialGuess=0.0004)=poly.Fc; 
-      JMExamples.Polyeth.PolyethInput poly(In_con(fixed=true),M1_con(fixed=true),Y1(fixed=true),
-	  Y2(fixed=true),T(fixed=true),Tw(free=true),Tg(free=true),Fc(initialGuess=0.0004));
-	  Real J(fixed=true); 
-	  parameter Real Tw_ref = 295;
-	  parameter Real Tg_ref = 295;
-	  parameter Real Fc_ref = 1/2400;
-														  
-   equation 
-	  der(J) = (Tw_ref-poly.Tw)^2 + (Tg_ref-poly.Tg)^2 + (Fc_ref-u)^2;
-   constraint
-	  290  <= poly.Tg;
-	  poly.Tg <= 310;
-	  0  <= u;
-	  u <= 5;
-	end Polyeth_opt;
-	
-	
+
 	optimization Robertson
 		parameter Real p1(free=true)=0.040;
 		parameter Real p2(free=true)=1.0e4;
