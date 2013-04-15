@@ -1765,12 +1765,12 @@ aspect TransformCanonical {
 		for (FAbstractEquation equationToReplace : equationsToReplace) {
 						
 			// How many equations are there in this when clause?
-			List<FEquation> newEquations = equationToReplace.getInitialEquations();
+			List<FAbstractEquation> newEquations = equationToReplace.getInitialEquations();
 		
 		    // Put the Equations in an ArrayList rather than a List
 		    // TODO: There are probably more elegant ways to do this...
 			java.util.List<FAbstractEquation> newEquations_ = new ArrayList<FAbstractEquation>();
-			for (FEquation e : newEquations) {
+			for (FAbstractEquation e : newEquations) {
 				newEquations_.add(e);	
 			}
 

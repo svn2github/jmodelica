@@ -498,7 +498,7 @@ FInitialEquation : FEquationType;
  * when equations that are not active during initialization.
  */
 abstract FAbstractEquation : BaseNode ::= Type:FEquationType
-                                          /InitialEquation:FEquation*/
+                                          /InitialEquation:FAbstractEquation*/
                                           /[DynamicFAbstractEquation:FAbstractEquation]/
                                           [Name:FQName]
                                           [Residual:FResidual]

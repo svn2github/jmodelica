@@ -1269,6 +1269,8 @@ aspect FlatExpressions {
 			if (feqn != null)
 				eqns.add(feqn);
 		}
+		if (eqns.getNumChild() == 0)
+			return null;
 		return new FForClauseE(forIndex, eqns);
 	}
 
@@ -1281,13 +1283,21 @@ aspect FlatExpressions {
 			if (feqn != null)
 				res.addFAbstractEquation(feqn);
 		}
+		if (res.getNumFAbstractEquation() == 0)
+			return null;
 		return res;
 	}
 
 	public FIfWhenEquation FIfWhenEquation.flattenEqn(FQName prefix, FClass fc) {
 		FIfWhenEquation res = (FIfWhenEquation) super.flattenEqn(prefix, fc);
-		if (hasElse())
-			res.setElse(getElse().flattenEqn(prefix, fc));
+		if (res == null)
+			return null;
+		if (hasElse()) {
+			FIfWhenElseEquation elseRes = getElse().flattenEqn(prefix, fc);
+			if (elseRes == null)
+				return null;
+			res.setElse(elseRes);
+		}
 		res.setTest(getTest().flatten(prefix));
 		return res;
 	}
@@ -1297,6 +1307,8 @@ aspect FlatExpressions {
 	}
 	
 	public FFunctionCallEquation FFunctionCallEquation.flattenEqn(FQName prefix, FClass fc) {
+		if (isIgnored())
+			return null;
 		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 		for (FFunctionCallLeft l : getLefts()) 
 			lefts.add(l.flatten(prefix));
