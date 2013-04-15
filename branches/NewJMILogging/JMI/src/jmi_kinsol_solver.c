@@ -991,19 +991,18 @@ void jmi_kinsol_solver_delete(jmi_block_residual_t* block) {
     block->solver = 0;
 }
 
-jmi_log_node_t jmi_kinsol_solver_print_solve_start(jmi_block_residual_t * block) {
-    jmi_log_node_t node;    
+void jmi_kinsol_solver_print_solve_start(jmi_block_residual_t * block,
+                                         jmi_log_node_t *destnode) {
     if((block->jmi->options.log_level >= 5)) {
         jmi_log_t *log = block->jmi->log;
-        node = jmi_log_enter_fmt(log, logInfo, "newtonSolve", 
-                                 "<Newton solver invoked for> block:%d", block->index);
+        *destnode = jmi_log_enter_fmt(log, logInfo, "newtonSolve", 
+                                      "<Newton solver invoked for> block:%d", block->index);
         jmi_log_vrefs(log, logInfo, "variables", 'r', block->value_references, block->n);
         jmi_log_reals(log, logInfo, "max", block->max, block->n);
         jmi_log_reals(log, logInfo, "min", block->min, block->n);
         jmi_log_reals(log, logInfo, "nominal", block->nominal, block->n);
         jmi_log_reals(log, logInfo, "initialGuess", block->x, block->n);        
     }
-    return node;  /* note: returns an uninitialized node if not (block->jmi->options.log_level >= 5) */
 }
 
 const char *kinsol_flag_to_name(int flag) {
@@ -1030,17 +1029,18 @@ const char *kinsol_flag_to_name(int flag) {
     }
 }
 
-void jmi_kinsol_solver_print_solve_end(jmi_block_residual_t * block, jmi_log_node_t node, int flag) {
+void jmi_kinsol_solver_print_solve_end(jmi_block_residual_t * block, const jmi_log_node_t *node, int flag) {
     long int nniters;
     jmi_kinsol_solver_t* solver = block->solver;
     KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);
 
+    /* NB: must match the condition in jmi_kinsol_solver_print_solve_start exactly! */
     if((block->jmi->options.log_level >= 5)) {
         jmi_log_t *log = block->jmi->log;
         const char *flagname = kinsol_flag_to_name(flag);
         if (flagname != NULL) jmi_log_fmt(log, logInfo, "<Newton solver finished with> exitFlag:%s", flagname);
         else jmi_log_fmt(log, logInfo, "<Newton solver finished with> unknownExitFlag:%d", flag);
-        jmi_log_leave(log, node);
+        jmi_log_leave(log, *node);
     }
 }
 
@@ -1080,9 +1080,9 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
         jmi_update_f_scale(block);
     }
      
-    topnode = jmi_kinsol_solver_print_solve_start(block);
+    jmi_kinsol_solver_print_solve_start(block, &topnode);
     flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
-    jmi_kinsol_solver_print_solve_end(block, topnode, flag);
+    jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
     if(flag != KIN_SUCCESS) {
     	if(flag == KIN_INITIAL_GUESS_OK) {
             flag = KIN_SUCCESS;
@@ -1132,9 +1132,9 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
         /* Update the scaling  */
         jmi_update_f_scale(block);
         
-        topnode = jmi_kinsol_solver_print_solve_start(block);
+        jmi_kinsol_solver_print_solve_start(block, &topnode);
         flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
-        jmi_kinsol_solver_print_solve_end(block, topnode, flag);
+        jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
         if(flag == KIN_INITIAL_GUESS_OK) {
         	flag = KIN_SUCCESS;
         } else if (flag == KIN_LINESEARCH_NONCONV) {
