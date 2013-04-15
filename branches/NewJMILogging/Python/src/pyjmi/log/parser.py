@@ -24,7 +24,7 @@ Parser for the new FMU log file format
 
 import lexer
 from lexer import SYMBOL, IDENTIFIER, COMMENT, STRING, EOF, kindof, textof
-from tree import NamedNode, Comment, NamedNodeList
+from tree import NamedNode, Comment
 
 
 def parse(text):

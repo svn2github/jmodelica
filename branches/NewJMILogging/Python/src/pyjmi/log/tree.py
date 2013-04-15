@@ -17,7 +17,7 @@
 """
 Tree representation for the new FMU log format
 
-Each node is represented as a NamedNode, Comment, string, list, or NamedNodeList
+Each node is represented as a NamedNode, Comment, string or list
 """
 
 class NamedNode(object):
@@ -48,18 +48,3 @@ class Comment(object):
 
     def __repr__(self):
         return "{" + self.text + "}"
-
-class NamedNodeList(object):
-    """List of NamedNode and Comment objects."""
-    def __init__(self, nodes):
-        assert isinstance(nodes, list)
-        self.nodes = nodes
-
-    def __repr__(self):        
-        return repr(tuple(self.nodes))
-
-    def __iter__(self):
-        return iter(self.nodes)
-
-    def __getitem__(self, key):
-        return self.nodes[key]
