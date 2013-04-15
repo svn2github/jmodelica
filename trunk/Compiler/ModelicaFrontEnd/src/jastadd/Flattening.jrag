@@ -1294,9 +1294,8 @@ aspect FlatExpressions {
 			return null;
 		if (hasElse()) {
 			FIfWhenElseEquation elseRes = getElse().flattenEqn(prefix, fc);
-			if (elseRes == null)
-				return null;
-			res.setElse(elseRes);
+			if (elseRes != null)
+				res.setElse(elseRes);
 		}
 		res.setTest(getTest().flatten(prefix));
 		return res;
