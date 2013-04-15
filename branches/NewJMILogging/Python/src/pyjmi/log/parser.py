@@ -31,6 +31,10 @@ def parse(text):
     """Parse the string text and return a list of nodes in the format of tree.py."""
     return parse_nodes(Peeker(lexer.lex(text)+[(EOF, '')]))
 
+def parse_jmi_log(filename, modulename = 'Model'):
+    """Parse the jmi log in filename and return a list of nodes in the format of tree.py."""
+    return parse_nodes(Peeker(lexer.lex_lines(lexer.filter_fmi_log_lines(filename, modulename))))
+
 
 ## Symbols ##
 

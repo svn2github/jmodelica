@@ -67,7 +67,7 @@ def lex(text):
         COMMENT       comment text without enclosing braces {}
         STRING        string value, without enclosing quotes "",
                       and with "" replaced by literal \"
-        EOF           not produced by lex; should have text=''
+        EOF           not produced by lex (but by lex_lines); should have text=''
 
     Whitespace produces no tokens.
     """
@@ -106,3 +106,25 @@ def make_token(part):
     else:
         return (IDENTIFIER, part)
 
+
+# Support routines to lex FMI logs
+
+def filter_fmi_log_lines(filename, modulename = 'Model'):
+    """Read filename line by line, and yield in turn the payload of each line that matches the given modulename."""
+    pre_re = r'FMIL: module = ' + modulename + r', log level = ([0-9]+): \[([^]]+)\]\[FMU status:([^]]+)\]'
+    pre_pattern = re.compile(pre_re)
+
+    f = open(filename, 'r')
+
+    for line in f:
+        m = pre_pattern.match(line)
+        if m is not None:
+            # log_level, category, fmu_status = m.groups()
+            yield line[m.end():]
+
+def lex_lines(lines):
+    """Lex each line in lines sequentially, and yield the tokens."""
+    for line in lines:
+        for token in lex(line):
+            yield token
+    yield (EOF, '')
