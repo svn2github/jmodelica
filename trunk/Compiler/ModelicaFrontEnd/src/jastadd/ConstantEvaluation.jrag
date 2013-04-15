@@ -1172,7 +1172,17 @@ aspect ConstantEvaluation {
   eq FFloorExp.cevalCalc()       = getFExp().ceval().convertInteger();
   
   eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
- 
+  
+  eq FConnectionsOp.cevalCalc() {
+	  throw new ConstantEvaluationException();
+  }
+  eq FConnBoolOp.cevalCalc() = new CValueBoolean(value);
+
+  /**
+   * The calculated value of a Connections.x() operator with boolean result.
+   */
+  private boolean FConnBoolOp.value = true;
+  
   eq FSizeExp.cevalCalc() {
 	  if (!hasDim())
 		  return CValue.UNKNOWN;

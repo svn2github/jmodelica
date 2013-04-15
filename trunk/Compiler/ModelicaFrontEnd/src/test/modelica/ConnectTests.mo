@@ -273,9 +273,9 @@ equation
  b1.a1.y[1:2] = b2.a2.y[1:2];
  - b1.a1.x[1:2] - b1.a2.x[1:2] = zeros(2);
  b1.a1.y[1:2] = b1.a2.y[1:2];
- b1.a2.x[1:2] = zeros(2);
  - b2.a1.x[1:2] - b2.a2.x[1:2] = zeros(2);
  b2.a1.y[1:2] = b2.a2.y[1:2];
+ b1.a2.x[1:2] = zeros(2);
  b2.a1.x[1:2] = zeros(2);
 end ConnectTests.ConnectTest6;
 ")})));

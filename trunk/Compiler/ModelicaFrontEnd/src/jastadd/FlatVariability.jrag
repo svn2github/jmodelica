@@ -336,6 +336,11 @@ aspect FlatVariability {
 		return total;
 	}
 	
+	  
+	// TODO: Maybe there should be a special variability for "no return value"
+	eq FConnectionsOp.expVariability() = null;
+	eq FConnBoolOp.expVariability()    = fConstant();
+	
 	eq FIdUseExp.expVariability() = getFIdUse().variability();
 	eq FDerExp.expVariability() = 
 			getFIdUse().variability().discreteOrLess() ? fConstant() : getFIdUse().variability();

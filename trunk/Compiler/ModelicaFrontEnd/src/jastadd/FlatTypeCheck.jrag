@@ -477,6 +477,8 @@ aspect FlatTypeCheck {
   
   syn boolean FBuiltInFunctionCall.builtInHasOutput() = true;
   eq FIgnoredBuiltIn.builtInHasOutput() = false;
+  eq FConnectionsOp.builtInHasOutput()  = false;
+  eq FConnBoolOp.builtInHasOutput()     = true;
   
   syn boolean FBuiltInFunctionCall.checkTypeAsExpression() = false;
   eq FSizeExp.checkTypeAsExpression()     = true;
@@ -655,18 +657,20 @@ aspect FlatTypeCheck {
    *        is valid.
    */
   inh boolean InstFunctionArgument.argumentDefinedTypeValid();
-  eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid() = true;
-  eq FTranspose.getChild().argumentDefinedTypeValid()            = false;
-  eq FMinMaxExp.getChild().argumentDefinedTypeValid()            = false;
-  eq FSumExp.getChild().argumentDefinedTypeValid()               = false;
-  eq FNdimsExp.getChild().argumentDefinedTypeValid()             = false;
-  eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()  = false;
-  eq FEnumIntegerExp.getChild().argumentDefinedTypeValid()       = false;
-  eq FVectUnaryBuiltIn.getChild().argumentDefinedTypeValid()     = false;
-  eq FPreExp.getChild().argumentDefinedTypeValid()               = false;
-  eq FDimensionConvert.getChild().argumentDefinedTypeValid()     = false;
-  eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()   = i != 0;
-  eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid() = i == 0;
+  eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid()         = true;
+  eq FTranspose.getChild().argumentDefinedTypeValid()                    = false;
+  eq FMinMaxExp.getChild().argumentDefinedTypeValid()                    = false;
+  eq FSumExp.getChild().argumentDefinedTypeValid()                       = false;
+  eq FNdimsExp.getChild().argumentDefinedTypeValid()                     = false;
+  eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()          = false;
+  eq FEnumIntegerExp.getChild().argumentDefinedTypeValid()               = false;
+  eq FVectUnaryBuiltIn.getChild().argumentDefinedTypeValid()             = false;
+  eq FPreExp.getChild().argumentDefinedTypeValid()                       = false;
+  eq FDimensionConvert.getChild().argumentDefinedTypeValid()             = false;
+  eq FConnectionsOp.getChild().argumentDefinedTypeValid()                = false;
+  eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid() = i == 1;
+  eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i != 0;
+  eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()         = i == 0;
 
   /**
    * \brief Check if the type supplied is valid for this argument.
@@ -688,6 +692,7 @@ aspect FlatTypeCheck {
   eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();
   eq FScalarExp.getChild().argumentTypeValid(FType type)            = type.isArray() && argumentSizeValid(type.size());
   eq FDimensionConvert.getChild().argumentTypeValid(FType type)     = argumentSizeValid(type.size());
+  eq FConnectionsOp.getChild().argumentTypeValid(FType type)        = true;  // TODO: check that this is an overdetermined type
 
 
   /**

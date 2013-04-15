@@ -7816,7 +7816,7 @@ model ComponentFunc2
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ComponentFunc2",
-			description="",
+			description="Calling functions in inner/outer components",
 			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ComponentFunc2

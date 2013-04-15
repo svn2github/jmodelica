@@ -560,6 +560,48 @@ FConnectClause : FAbstractEquation ::= [FStringComment]
                                        Connector2:FIdUseInstAccess;
 
 /**
+ * Base class for operators concerning overconstrained connection graphs.
+ */
+abstract FConnectionsOp : FBuiltInFunctionCall ::= A:FExp;
+
+/**
+ * Connections.branch() overconstrained connection graph operator.
+ */
+FConnBranch : FConnectionsOp ::= B:FExp;
+
+/**
+ * Connections.root() overconstrained connection graph operator.
+ */
+FConnRoot : FConnectionsOp;
+
+/**
+ * Connections.potentialRoot() overconstrained connection graph operator.
+ */
+FConnPotentialRoot : FConnectionsOp ::= [Priority:FExp];
+
+/**
+ * Base class for isRoot(), Connections.rooted() & rooted().
+ */
+abstract FConnBoolOp : FConnectionsOp;
+
+/**
+ * Connections.isRoot() overconstrained connection graph operator.
+ */
+FConnIsRoot : FConnBoolOp;
+
+/**
+ * Connections.rooted() overconstrained connection graph operator.
+ */
+FConnRooted : FConnBoolOp;
+
+/**
+ * rooted() overconstrained connection graph operator.
+ *
+ * This is a deprecated variant of Connections.rooted().
+ */
+FConnRootedDep : FConnRooted;
+
+/**
  * \brief For equation clause.
  */
 FForClauseE : FAbstractEquation ::= FForIndex* FAbstractEquation*;

@@ -1704,60 +1704,74 @@ aspect FlatPrettyPrint {
 		str.print(SEP);
 		super.prettyPrintArguments(p, str, indent);
 	}
+	
+	protected void FConnPotentialRoot.prettyPrintArguments(Printer p, PrintStream str, String indent) {
+		super.prettyPrintArguments(p, str, indent);
+		if (hasPriority()) {
+			str.print(SEP);
+			str.print("priority=");
+			p.print(getPriority(), str, indent);
+		}
+	}
 
 	syn String FBuiltInFunctionCall.builtInName();
-	eq FRecordConstructor.builtInName() = getRecord().name();
-	eq FSinExp.builtInName()         = "sin";
-	eq FCosExp.builtInName()         = "cos";
-	eq FTanExp.builtInName()         = "tan";
-	eq FAsinExp.builtInName()        = "asin";
-	eq FAcosExp.builtInName()        = "acos";
-	eq FAtanExp.builtInName()        = "atan";
-	eq FAtan2Exp.builtInName()       = "atan2";
-	eq FSinhExp.builtInName()        = "sinh";
-	eq FCoshExp.builtInName()        = "cosh";
-	eq FTanhExp.builtInName()        = "tanh";
-	eq FExpExp.builtInName()         = "exp";
-	eq FLogExp.builtInName()         = "log";
-	eq FLog10Exp.builtInName()       = "log10";
-	eq FSqrtExp.builtInName()        = "sqrt";
-	eq FIntegerExp.builtInName()     = "integer";
-	eq FEnumIntegerExp.builtInName() = "Integer";
-	eq FFloorExp.builtInName()       = "floor";
-	eq FStringExp.builtInName()      = "String";
-	eq FScalarExp.builtInName()      = "scalar";
-	eq FVectorExp.builtInName()      = "vector";
-	eq FMatrixExp.builtInName()      = "matrix";
-	eq FTranspose.builtInName()      = "transpose";
-	eq FCross.builtInName()          = "cross";
-	eq FSkew.builtInName()           = "skew";
-	eq FOuterProduct.builtInName()   = "outerProduct";
-	eq FNdimsExp.builtInName()       = "ndims";
-	eq FSizeExp.builtInName()        = "size";
-	eq FNoEventExp.builtInName()     = "noEvent";
-	eq FSmoothExp.builtInName()      = "smooth";
-	eq FPreExp.builtInName()         = "pre";
-	eq FSampleExp.builtInName()      = "sample";
-	eq FInitialExp.builtInName()     = "initial";
-	eq FTerminalExp.builtInName()    = "terminal";
-	eq FIdentity.builtInName()       = "identity";
-	eq FDiagonal.builtInName()       = "diagonal";
-	eq FOnes.builtInName()           = "ones";
-	eq FZeros.builtInName()          = "zeros";
-	eq FFillExp.builtInName()        = "fill";
-	eq FAbstractCat.builtInName()    = "cat";
-	eq FParseArray.builtInName()     = "array";
-	eq FAbsExp.builtInName()         = "abs";
-	eq FMinExp.builtInName()         = "min";
-	eq FMaxExp.builtInName()         = "max";
-	eq FSumExp.builtInName()         = "sum";
-	eq FLinspace.builtInName()       = "linspace";
-	eq FInStream.builtInName()       = "inStream";
-	eq FActualStream.builtInName()   = "actualStream";
-	
+	eq FRecordConstructor.builtInName()  = getRecord().name();
 	eq FUnsupportedBuiltIn.builtInName() = getName();
-	
-	
+	eq FSinExp.builtInName()             = "sin";
+	eq FCosExp.builtInName()             = "cos";
+	eq FTanExp.builtInName()             = "tan";
+	eq FAsinExp.builtInName()            = "asin";
+	eq FAcosExp.builtInName()            = "acos";
+	eq FAtanExp.builtInName()            = "atan";
+	eq FAtan2Exp.builtInName()           = "atan2";
+	eq FSinhExp.builtInName()            = "sinh";
+	eq FCoshExp.builtInName()            = "cosh";
+	eq FTanhExp.builtInName()            = "tanh";
+	eq FExpExp.builtInName()             = "exp";
+	eq FLogExp.builtInName()             = "log";
+	eq FLog10Exp.builtInName()           = "log10";
+	eq FSqrtExp.builtInName()            = "sqrt";
+	eq FIntegerExp.builtInName()         = "integer";
+	eq FEnumIntegerExp.builtInName()     = "Integer";
+	eq FFloorExp.builtInName()           = "floor";
+	eq FStringExp.builtInName()          = "String";
+	eq FScalarExp.builtInName()          = "scalar";
+	eq FVectorExp.builtInName()          = "vector";
+	eq FMatrixExp.builtInName()          = "matrix";
+	eq FTranspose.builtInName()          = "transpose";
+	eq FCross.builtInName()              = "cross";
+	eq FSkew.builtInName()               = "skew";
+	eq FOuterProduct.builtInName()       = "outerProduct";
+	eq FNdimsExp.builtInName()           = "ndims";
+	eq FSizeExp.builtInName()            = "size";
+	eq FNoEventExp.builtInName()         = "noEvent";
+	eq FSmoothExp.builtInName()          = "smooth";
+	eq FPreExp.builtInName()             = "pre";
+	eq FSampleExp.builtInName()          = "sample";
+	eq FInitialExp.builtInName()         = "initial";
+	eq FTerminalExp.builtInName()        = "terminal";
+	eq FIdentity.builtInName()           = "identity";
+	eq FDiagonal.builtInName()           = "diagonal";
+	eq FOnes.builtInName()               = "ones";
+	eq FZeros.builtInName()              = "zeros";
+	eq FFillExp.builtInName()            = "fill";
+	eq FAbstractCat.builtInName()        = "cat";
+	eq FParseArray.builtInName()         = "array";
+	eq FAbsExp.builtInName()             = "abs";
+	eq FMinExp.builtInName()             = "min";
+	eq FMaxExp.builtInName()             = "max";
+	eq FSumExp.builtInName()             = "sum";
+	eq FLinspace.builtInName()           = "linspace";
+	eq FInStream.builtInName()           = "inStream";
+	eq FActualStream.builtInName()       = "actualStream";
+	eq FConnBranch.builtInName()         = "Connections.branch";
+	eq FConnRoot.builtInName()           = "Connections.root";
+	eq FConnPotentialRoot.builtInName()  = "Connections.potentialRoot";
+	eq FConnIsRoot.builtInName()         = "Connections.isRoot";
+	eq FConnRooted.builtInName()         = "Connections.rooted";
+	eq FConnRootedDep.builtInName()      = "rooted";
+
+
 	public void FForClauseE.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(indent+"for ");
 		getFForIndexList().prettyPrintWithSep(p, str, indent, ", ");

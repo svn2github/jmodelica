@@ -293,6 +293,14 @@ aspect InstFunctionBinding {
 				map.put("size",         new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
 				map.put("min",          new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
 				map.put("max",          new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
+				//       name                                    math       node              # args
+				map.put("Connections.branch", new BuiltInCreator(false, new FConnBranch(),    2));
+				map.put("Connections.root",   new BuiltInCreator(false, new FConnRoot(),      1));
+				map.put("Connections.isRoot", new BuiltInCreator(false, new FConnIsRoot(),    1));
+				map.put("Connections.rooted", new BuiltInCreator(false, new FConnRooted(),    1));
+				map.put("rooted",             new BuiltInCreator(false, new FConnRootedDep(), 1));
+				//       name                                                      node                  min/max # args
+				map.put("Connections.potentialRoot", new VarArgsBuiltInCreator(new FConnPotentialRoot(), 1, 2));
 				
 				String[] unsupported = new String[] { 
 						// Ticket 678: Support for array related functions
