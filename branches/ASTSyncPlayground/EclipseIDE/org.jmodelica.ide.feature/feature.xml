@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.jmodelica.ide.feature"
+      id="org.jmodelica.ide"
       label="JModelica.org IDE"
-      version="0.4.0.qualifier"
+      version="0.4.0"
       provider-name="JModelica.org">
 
    <description url="http://www.jmodelica.org/page/4314">
@@ -544,6 +544,10 @@ Program, unless a warranty or assumption of liability accompanies a
 copy of the Program in return for a fee.  END OF TERMS AND CONDITIONS
    </license>
 
+   <includes
+         id="org.jastadd.ed.core.feature"
+         version="0.0.0"/>
+
    <requires>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.core.resources"/>
@@ -563,7 +567,7 @@ copy of the Program in return for a fee.  END OF TERMS AND CONDITIONS
          id="org.jmodelica.ide"
          download-size="0"
          install-size="0"
-         version="0.4.0.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>

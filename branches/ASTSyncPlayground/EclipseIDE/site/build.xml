@@ -3,8 +3,12 @@
 	<property name="trunk.project" value="JModelica" />
 	<property name="ide.project" value="org.jmodelica.ide" />
 	<property name="ide.feature.project" value="org.jmodelica.ide.feature" />
-	<property name="jastadd.project" value="org.jastadd.plugin" />
-	<property name="jastadd.feature.project" value="org.jastadd.plugin.feature" />
+	<property name="outline.project" value="org.jmodelica.ide.outline" />
+	<property name="outline.feature.project" value="org.jmodelica.ide.outline.feature" />
+	<property name="textual.project" value="org.jmodelica.ide.textual" />
+	<property name="textual.feature.project" value="org.jmodelica.ide.textual.feature" />
+	<property name="jastadd.project" value="org.jastadd.ed.core" />
+	<property name="jastadd.feature.project" value="org.jastadd.ed.core.feature" />
 	<property name="graphical.project" value="org.jmodelica.ide.graphical" />
 	<property name="graphical.feature.project" value="org.jmodelica.ide.graphical.feature" />
 	<property name="documentation.project" value="org.jmodelica.ide.documentation" />
@@ -15,10 +19,16 @@
 	<property name="ide_root" value="../${ide.project}" />
 	<property name="graphical_root" value="../${graphical.project}" />
 	<property name="documentation_root" value="../${documentation.project}" />
-	
+	<property name="outline_root" value="../${outline.project}" />
+	<property name="textual_root" value="../${textual.project}" />
+
 	<property name="site_dir" value="site" />
 	<property name="bin_dir" value="bin" />
 	<property name="output_dir" location="site" />
+	
+	<!-- TODO! Set to your Eclipse path -->
+	<property name="eclipse_path" value="../../../../program_files/eclipse" />
+
 	
 	<property name="site_file" location="site.xml" />
 	
@@ -152,6 +162,8 @@
 			<src path="${ide_root}/ant" />
 			<src path="${graphical_root}/src" />
 			<src path="${documentation_root}/src" />
+			<src path="${outline_root}/src" />
+			<src path="${textual_root}/src" />
 			<include name="**/*.java" />
 		</javac>
 	</target>
@@ -174,6 +186,8 @@
 				<include name="org/jmodelica/util/**" />
 				<exclude name="org/jmodelica/ide/graphical/**" />
 				<exclude name="org/jmodelica/ide/documentation/**" />
+				<exclude name="org/jmodelica/ide/outline/**" />
+				<exclude name="org/jmodelica/ide/textual/**" />
 			</fileset>
 		</copy>
 
@@ -190,7 +204,21 @@
 				<include name="org/jmodelica/ide/documentation/**" />
 			</fileset>
 		</copy>
-
+			
+		<!-- collect class files for org.jmodelica.outline -->
+		<copy todir="${bin_dir}/bundles/${outline.project}">
+			<fileset dir="${bin_dir}/classes">
+				<include name="org/jmodelica/ide/outline/**" />
+			</fileset>
+		</copy>
+		
+		<!-- collect class files for org.jmodelica.textual -->
+		<copy todir="${bin_dir}/bundles/${textual.project}">
+			<fileset dir="${bin_dir}/classes">
+				<include name="org/jmodelica/ide/textual/**" />
+			</fileset>
+		</copy>
+					
 		<!-- build jars for plugins -->
 		<delete file="${bin_dir}/plugin.versions" quiet="true" />
 		<emptyDir dir="${bin_dir}/plugins" />
@@ -198,6 +226,8 @@
 		<jm_buildPlugin projectName="${ide.project}" revpath="${jmodelica_root}" />
 		<jm_buildPlugin projectName="${graphical.project}" path="${graphical_root}" />
 		<jm_buildPlugin projectName="${documentation.project}" path="${documentation_root}" />
+		<jm_buildPlugin projectName="${outline.project}" path="${outline_root}" />
+		<jm_buildPlugin projectName="${textual.project}" path="${textual_root}" />
 
 		<!-- build jars for features -->
 		<emptyDir dir="${bin_dir}/features" />
@@ -205,6 +235,8 @@
 		<jm_buildFeature projectName="${ide.feature.project}" />
 		<jm_buildFeature projectName="${graphical.feature.project}" />
 		<jm_buildFeature projectName="${documentation.feature.project}" />
+		<jm_buildFeature projectName="${outline.feature.project}" />
+		<jm_buildFeature projectName="${textual.feature.project}" />
 
 		<!-- build update site -->
 		<emptyDir dir="${output_dir}" />

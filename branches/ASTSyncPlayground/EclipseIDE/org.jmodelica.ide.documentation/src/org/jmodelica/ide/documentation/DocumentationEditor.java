@@ -18,7 +18,7 @@ import org.eclipse.ui.ISaveablePart2;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.services.ISourceProviderService;
-import org.jastadd.plugin.Activator;
+import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.documentation.commands.NavigationProvider;
 import org.jmodelica.modelica.compiler.FullClassDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
@@ -40,7 +40,7 @@ public class DocumentationEditor extends EditorPart implements ISaveablePart2 {
 	public void createPartControl(Composite parent) {
 		ISourceProviderService sourceProviderService = (ISourceProviderService)this.getSite().getWorkbenchWindow().getService(ISourceProviderService.class);
 		NavigationProvider navProv = (NavigationProvider) sourceProviderService.getSourceProvider(NavigationProvider.NAVIGATION_FORWARD);
-		sourceRoot = (SourceRoot) Activator.getASTRegistry().lookupAST(null, this.input.getProject());
+		sourceRoot = null;//TODO(SourceRoot) ModelicaASTRegistry.getInstance().doLookup(this.input.getProject());
 		icd = sourceRoot.getProgram().getInstProgramRoot().simpleLookupInstClassDecl(this.input.getClassName());
 		fullClassDecl = input.getFullClassDecl();
 		browser = new Browser(parent, SWT.NONE);

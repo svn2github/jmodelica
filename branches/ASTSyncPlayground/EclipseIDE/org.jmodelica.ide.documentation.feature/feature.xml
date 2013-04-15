@@ -550,13 +550,21 @@ copy of the Program in return for a fee.  END OF TERMS AND CONDITIONS
          id="org.jmodelica.ide"
          version="0.0.0"/>
 
+   <includes
+         id="org.jmodelica.ide.outline.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.jmodelica.ide.textual.feature"
+         version="0.0.0"/>
+
    <requires>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.ui.ide" version="3.7.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.resources" version="3.7.101" match="greaterOrEqual"/>
       <import plugin="org.jmodelica.ide" version="0.4.0" match="greaterOrEqual"/>
-      <import plugin="org.jastadd.plugin" version="1.0.9" match="greaterOrEqual"/>
+      <import plugin="org.jastadd.ed.core" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.navigator" version="3.5.101" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.navigator.resources" version="3.4.300" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.editors"/>

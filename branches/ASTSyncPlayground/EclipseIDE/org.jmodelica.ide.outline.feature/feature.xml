@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.jmodelica.ide.outline.feature"
+      id="org.jmodelica.ide.outline"
       label="JModelica.org Outline"
-      version="1.0.0.qualifier"
+      version="1.0.0"
       provider-name="JModelica.org">
 
    <description>
@@ -561,7 +561,7 @@ copy of the Program in return for a fee.  END OF TERMS AND CONDITIONS
          id="org.jmodelica.ide.outline"
          download-size="0"
          install-size="0"
-         version="1.0.0.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>

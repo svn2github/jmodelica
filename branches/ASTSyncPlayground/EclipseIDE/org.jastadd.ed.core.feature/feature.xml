@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.jastadd.ed.core.feature"
+      id="org.jastadd.ed.core"
       label="JastAdd support plugin"
-      version="1.0.0.qualifier"
+      version="1.0.0"
       provider-name="jastadd.org">
 
    <description url="http://www.jastadd.org">
@@ -32,7 +32,7 @@
          id="org.jastadd.ed.core"
          download-size="0"
          install-size="0"
-         version="1.0.0.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>

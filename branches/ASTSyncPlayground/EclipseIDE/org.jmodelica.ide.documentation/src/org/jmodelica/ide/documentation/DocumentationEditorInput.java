@@ -10,7 +10,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
-import org.jastadd.plugin.Activator;
+import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.FullClassDecl;
 import org.jmodelica.modelica.compiler.Program;
@@ -48,7 +48,7 @@ public class DocumentationEditorInput implements IEditorInput, IPersistableEleme
 	public DocumentationEditorInput(String name, IProject iProject) {
 		className = name;
 		project = iProject;
-		Program program = ((SourceRoot) Activator.getASTRegistry().lookupAST(null, project)).getProgram();
+		Program program =null;//TODO ((SourceRoot) ModelicaASTRegistry.getInstance().lookupAST(null, project)).getProgram();
 		fullClassDecl = (FullClassDecl)(program.simpleLookupClassDotted(className));
 	}
 
