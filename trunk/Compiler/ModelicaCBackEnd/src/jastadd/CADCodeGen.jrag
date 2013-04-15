@@ -108,11 +108,6 @@ aspect CADCodeGen {
 	
 	syn String FExp.getSeedName() = "(*dz)";
 	
-	//functions.. modified and added
-	public void FIdUseExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
-		str.print(adVarName());
-	}
-	
 	@Override
 	public void FIdUse.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 		str.print(name_var_CAD());
@@ -291,17 +286,27 @@ aspect CADCodeGen {
 		str.print(indent);
 		str.print(adVarName());
 		str.print(" = ");
-		prettyPrint_C(p, str, indent);
+		genVarExp_CAD(p, str, indent);
 		str.print(";\n");
 		
-		if (needDerVar_CAD())
-			genADDerStatement_CAD(p, str, indent);
+		if (needDerVar_CAD()) {
+			str.print(indent);
+			str.print(adDerName());
+			str.print(" = ");
+			genDerExp_CAD(p, str, indent);
+			str.print(";\n");
+		}
 	}
 	
-	public void FExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-			throw new UnsupportedOperationException("FExp.genADStatement_CAD() have to be overrided if type have continuous variablity, type=" + getClass().getSimpleName());
+	public void FExp.genVarExp_CAD(Printer p, PrintStream str, String indent) {
+		prettyPrint_C(p, str, indent);
 	}
 	
+	public void FExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		throw new UnsupportedOperationException("FExp.genADStatement_CAD() have to be overrided if type have continuous variablity, type=" + getClass().getSimpleName());
+	}
+	
+
 	/* Prints AD code for min and max expressions. Consistent with evaluation defined 
 	 * in jmi_common.c/h
 	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
@@ -309,12 +314,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FMinMaxExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent + "if (" + getX().adVarName() + " " + compareSign_CAD() + " " + getY().adVarName() + ") {\n");
-		str.print(p.indent(indent) + adDerName() + " = " + getX().adDerName() + ";\n");
-		str.print(indent + "} else {\n");
-		str.print(p.indent(indent) + adDerName() + " = " + getY().adDerName() + ";\n");
-		str.print(indent + "}\n");
+	public void FMinMaxExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s %s %s ? %s : %s", getX().adVarName(), compareSign_CAD(), getY().adVarName(), getX().adDerName(), getY().adDerName());
 	}
 	
 	syn String FMinMaxExp.compareSign_CAD();
@@ -338,14 +339,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FSinExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getFExp().adDerName());
-		str.print(" * cos(");
-		str.print(getFExp().adVarName());
-		str.print(");\n");
+	public void FSinExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s * cos(%s)", getFExp().adDerName(), getFExp().adVarName());
 	}
 	
 	/* Prints AD code for cos expression.
@@ -354,14 +349,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FCosExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getFExp().adDerName());
-		str.print(" * -sin(");
-		str.print(getFExp().adVarName());
-		str.print(");\n");
+	public void FCosExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s * -sin(%s)", getFExp().adDerName(), getFExp().adVarName());
 	}
 	
 	/* Prints AD code for tan expression.
@@ -370,16 +359,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FTanExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getFExp().adDerName());
-		str.print(" * 1/(cos(");
-		str.print(getFExp().adVarName());
-		str.print(")*cos(");
-		str.print(getFExp().adVarName());
-		str.print("));\n");
+	public void FTanExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s / (cos(%s) * cos(%s))", getFExp().adDerName(), getFExp().adVarName(), getFExp().adVarName());
 	}
 	
 	/* Prints AD code for asin expression.
@@ -388,16 +369,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FAsinExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getFExp().adDerName());
-		str.print(" * 1/(sqrt(1 -");
-		str.print(getFExp().adVarName());
-		str.print("*");
-		str.print(getFExp().adVarName());
-		str.print("));\n");
+	public void FAsinExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s / sqrt(1 - %s * %s)", getFExp().adDerName(), getFExp().adVarName(), getFExp().adVarName());
 	}
 	
 	/* Prints AD code for acos expression.
@@ -406,16 +379,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FAcosExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = -");
-		str.print(getFExp().adDerName());
-		str.print(" * 1/(sqrt(1 -");
-		str.print(getFExp().adVarName());
-		str.print("*");
-		str.print(getFExp().adVarName());
-		str.print("));\n");
+	public void FAcosExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("- %s / sqrt(1 - %s * %s)", getFExp().adDerName(), getFExp().adVarName(), getFExp().adVarName());
 	}
 	
 	/* Prints AD code for atan expression.
@@ -424,16 +389,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FAtanExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getFExp().adDerName());
-		str.print(" * 1/(1 +");
-		str.print(getFExp().adVarName());
-		str.print("*");
-		str.print(getFExp().adVarName());
-		str.print(");\n");
+	public void FAtanExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s / (1 + %s * %s)", getFExp().adDerName(), getFExp().adVarName(), getFExp().adVarName());
 	}
 	
 	/* Prints AD code for atan2 expression.
@@ -442,26 +399,10 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FAtan2Exp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = (");
-		str.print(getFExp().adDerName());
-		str.print(" * ");
-		str.print(getY().adVarName());
-		str.print(" - ");
-		str.print(getFExp().adVarName());
-		str.print(" * ");
-		str.print(getY().adDerName());
-		str.print(" ) / ( "); 
-		str.print(getY().adVarName());
-		str.print("*");
-		str.print(getY().adVarName());
-		str.print(" + ");
-		str.print(getFExp().adVarName());
-		str.print("*");
-		str.print(getFExp().adVarName());
-		str.print(");\n");
+	public void FAtan2Exp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("(%s * %s - %s * %s) / (%s * %s + %s * %s)",
+				getFExp().adDerName(), getY().adVarName(), getFExp().adVarName(), getY().adDerName(),
+				getY().adVarName(), getY().adVarName(), getFExp().adVarName(), getFExp().adVarName());
 		
 	}
 	
@@ -471,14 +412,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FSinhExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getFExp().adDerName());
-		str.print(" * cosh(");
-		str.print(getFExp().adVarName());
-		str.print(");\n");
+	public void FSinhExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s * cosh(%s)", getFExp().adDerName(), getFExp().adVarName());
 	}
 	
 	/* Prints AD code for cosh expression.
@@ -487,14 +422,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FCoshExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getFExp().adDerName());
-		str.print(" * sinh(");
-		str.print(getFExp().adVarName());
-		str.print(");\n");
+	public void FCoshExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s * sinh(%s)", getFExp().adDerName(), getFExp().adVarName());
 	}
 	
 	/* Prints AD code for tanh expression.
@@ -503,16 +432,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FTanhExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getFExp().adDerName());
-		str.print(" * (1 - tanh(");
-		str.print(getFExp().adVarName());
-		str.print(") * tanh(");
-		str.print(getFExp().adVarName());
-		str.print("));\n");
+	public void FTanhExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s * (1 - tanh(%s) * tanh(%s))", getFExp().adDerName(), getFExp().adVarName(), getFExp().adVarName());
 	}
 	
 	/* Prints AD code for log expression.
@@ -521,14 +442,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FLogExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getFExp().adDerName());
-		str.print(" * 1/(");
-		str.print(getFExp().adVarName());
-		str.print(");\n");
+	public void FLogExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s / %s", getFExp().adDerName(), getFExp().adVarName());
 	}
 	
 	/* Prints AD code for log10 expression.
@@ -537,14 +452,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FLog10Exp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getFExp().adDerName());
-		str.print(" * log10(exp(1))*1/(");
-		str.print(getFExp().adVarName());
-		str.print(");\n");
+	public void FLog10Exp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s * log10(exp(1)) / %s", getFExp().adDerName(), getFExp().adVarName());
 	}
 	
 	/* Prints AD code for exponential expression.
@@ -553,14 +462,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FExpExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getFExp().adDerName());
-		str.print(" * exp(");
-		str.print(getFExp().adVarName());
-		str.print(");\n");
+	public void FExpExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s * exp(%s)", getFExp().adDerName(), getFExp().adVarName());
 	}
 	
 	/* Prints AD code for power expression.
@@ -569,33 +472,10 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FDotPowExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print("if (");
-		str.print(getLeft().adVarName());
-		str.print(" == 0) {\n");
-		str.print(p.indent(indent));
-		str.print(adDerName());
-		str.print(" = 0;\n");
-		str.print(indent);
-		str.print("} else {\n");
-		str.print(p.indent(indent));
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(adVarName());
-		str.print(" * (");
-		str.print(getRight().adDerName());
-		str.print(" * log(jmi_abs(");
-		str.print(getLeft().adVarName());
-		str.print(")) + ");
-		str.print(getRight().adVarName());
-		str.print(" * ");
-		str.print(getLeft().adDerName());
-		str.print(" / ");
-		str.print(getLeft().adVarName());
-		str.print(");\n");
-		str.print(indent);
-		str.print("}\n");
+	public void FDotPowExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s == 0 ? 0 : (%s * (%s * log(jmi_abs(%s)) + %s * %s / %s))",
+				getLeft().adVarName(), adVarName(), getRight().adDerName(), getLeft().adVarName(),
+				getRight().adVarName(), getLeft().adDerName(), getLeft().adVarName());
 	}
 	
 	/* Prints AD code for square root expression.
@@ -604,14 +484,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FSqrtExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-	str.print(indent);
-	str.print(adDerName());
-	str.print(" = ");
-	str.print(getFExp().adDerName());
-	str.print(" * 1/(2*sqrt(");
-	str.print(getFExp().adVarName());
-	str.print("));\n");
+	public void FSqrtExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s / (2 * sqrt(%s))", getFExp().adDerName(), getFExp().adVarName());
 	}
 	
 	/* Prints AD code for division expression.
@@ -620,22 +494,10 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FDotDivExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = (");
-		str.print(getLeft().adDerName());
-		str.print(" * ");
-		str.print(getRight().adVarName());
-		str.print(" - ");
-		str.print(getLeft().adVarName());
-		str.print(" * ");
-		str.print(getRight().adDerName());
-		str.print(") / (");
-		str.print(getRight().adVarName());
-		str.print(" * ");
-		str.print(getRight().adVarName());
-		str.print(");\n");
+	public void FDotDivExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("(%s * %s - %s * %s) / (%s * %s)",
+				getLeft().adDerName(), getRight().adVarName(), getLeft().adVarName(), getRight().adDerName(),
+				getRight().adVarName(), getRight().adVarName());
 	}
 	
 	/* Prints AD code for multiplication expression.
@@ -644,18 +506,9 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FDotMulExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = (");
-		str.print(getLeft().adDerName());
-		str.print(" * ");
-		str.print(getRight().adVarName());
-		str.print(" + ");
-		str.print(getLeft().adVarName());
-		str.print(" * ");
-		str.print(getRight().adDerName());
-		str.print(");\n");
+	public void FDotMulExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s * %s + %s * %s",
+				getLeft().adDerName(), getRight().adVarName(), getLeft().adVarName(), getRight().adDerName());
 	}
 	
 	/* Prints AD code for addition expression.
@@ -664,14 +517,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FDotAddExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getLeft().adDerName());
-		str.print(" + ");
-		str.print(getRight().adDerName());
-		str.print(";\n");
+	public void FDotAddExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s + %s", getLeft().adDerName(), getRight().adDerName());
 	}
 	
 	/* Prints AD code for substraction expression.
@@ -680,14 +527,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FDotSubExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getLeft().adDerName());
-		str.print(" - ");
-		str.print(getRight().adDerName());
-		str.print(";\n");
+	public void FDotSubExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s - %s", getLeft().adDerName(), getRight().adDerName());
 	}
 	
 	/* Prints AD code for absolute expression.
@@ -696,25 +537,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FAbsExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print("if (");
-		str.print(getFExp().adVarName());
-		str.print(" >= 0) {\n");
-		str.print(p.indent(indent));
-		str.print(adDerName());
-		str.print(" = ");
-		str.print(getFExp().adDerName());
-		str.print(";\n");
-		str.print(indent);
-		str.print("} else {\n");
-		str.print(p.indent(indent));
-		str.print(adDerName());
-		str.print(" = -");
-		str.print(getFExp().adDerName());
-		str.print(";\n");
-		str.print(indent);
-		str.print("}\n");
+	public void FAbsExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s >= 0 ? %s : -%s", getFExp().adVarName(), getFExp().adDerName(), getFExp().adDerName());
 	}
 	
 	/* Prints AD code for negation expression.
@@ -723,12 +547,8 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FNegExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = -");
-		str.print(getFExp().adDerName());
-		str.print(";\n");
+	public void FNegExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("-%s", getFExp().adDerName());
 	}
 	
 	/* Prints AD code for No event expression.
@@ -737,32 +557,10 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FNoEventExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent){
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
+	public void FNoEventExp.genDerExp_CAD(Printer p, PrintStream str, String indent){
 		str.print(getFExp().adDerName());
-		str.print(";\n");
 	}
 	 
-//	/* Prints AD code for floor expression.
-//	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
-//	 * @param PrintStream str, the c-code is written to this stream
-//	 * @param String indent, used to get a consistently formated c-code
-//	 */
-//	@Override
-//	public void FFloorExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent){
-//		str.print(indent);
-//		str.print(adVarName());
-//		str.print(" = floor(");
-//		str.print(getFExp().adVarName());
-//		str.print(");\n");
-//		
-//		str.print(indent);
-//		str.print(adDerName());
-//		str.print(" = AD_WRAP_LITERAL(0.0);\n");
-//	}
-	
 	/* Prints AD code for if expression.
 	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
 	 * @param PrintStream str, the c-code is written to this stream
@@ -791,19 +589,13 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FTimeExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = " + getSeedName() + "[jmi->offs_t];\n");
+	public void FTimeExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+		str.format("%s[jmi->offs_t]", getSeedName());
 	}
 	
 	@Override
-	public void FSmoothExp.genADDerStatement_CAD(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print(adDerName());
-		str.print(" = ");
+	public void FSmoothExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
 		str.print(getFExp().adDerName());
-		str.print(";\n");
 	}
 	
 	/* General method used to print function calls.
@@ -955,7 +747,6 @@ aspect CADCodeGen {
 		if (!getCall().isIgnored()) {
 			if (firstVisit) {
 				genTempVars_CAD(printer_CAD, str, indent);
-//				getCall().prettyPrint_CAD(str, indent);
 			}
 			for (FFunctionCallLeft l : getLefts())
 				l.genWriteBack_CAD(str, indent, enumerator, forVariables);
@@ -1214,17 +1005,6 @@ aspect CADCodeGen {
 	public void UnsolvedFunctionCallEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {
 		equation().genResidual_CAD(enumerator,indent,str, visited, new HashSet<FVariable>(activeVars));
 	}
-	
-
-	/* Returns a list of all the active variables in this block. 
-	 * @return ArrayList<ASTNode>, a list of ASTNode for all active variables in this block.  
-	 */
-	public ArrayList<ASTNode> AbstractEquationBlock.blockResidualNodes_CAD() {
-		ArrayList<ASTNode> res = new ArrayList<ASTNode>(activeVariables());
-		res.addAll(equations());
-		return res;
-	}
-	
 	
 	public void FAbstractEquation.genAssignment_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {}
 	
@@ -2288,6 +2068,8 @@ aspect CADCodeGen {
 	 * @param PrintStream str, the c-code is written to this stream 
 	 */
 	public void FFunctionDecl.genFuncAnnotation_CAD(Printer p, PrintStream str, String indent){
+		for (FFunctionVariable ffv : myOutputs())
+			ffv.genVarDecls_CAD(p, str, indent);
 		str.print(indent);
 		str.print("/*Using specified derivative annotation instead of AD*/\n");
 		
@@ -2327,6 +2109,8 @@ aspect CADCodeGen {
 	 * set output derivatives to zero. 
 	 */
 	public void FFunctionDecl.genZeroDerivativeFunction_CAD(Printer p, PrintStream str, String indent) {
+		for (FFunctionVariable ffv : myOutputs())
+			ffv.genVarDecls_CAD(p, str, indent);
 		str.print(indent);
 		str.print("/*Zero derivative function*/\n");
 		
@@ -2383,12 +2167,12 @@ aspect CADCodeGen {
 		prettyPrintHead_CAD(p, str, outerIndent, "void", "der_AD", true);
 		str.print(" {\n");
 		str.print(indent + "JMI_DYNAMIC_INIT()\n");
-		genVarDecls_CAD(p, str, indent);
 		if (hasFDerivativeFunction()){
 			genFuncAnnotation_CAD(p, str, indent);
 		} else if (derivativEqualsZero()){
 			genZeroDerivativeFunction_CAD(p, str, indent);
 		} else {
+			genVarDecls_CAD(p, str, indent);
 			for (FFunctionVariable ffv : myNonInputs())
 				p.print(ffv, str, indent);
 			for (FFunctionVariable ffv : myOutputs())

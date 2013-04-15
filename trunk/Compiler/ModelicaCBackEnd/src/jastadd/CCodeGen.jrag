@@ -1672,7 +1672,7 @@ aspect CCodeGen {
     }
     
 	public Set<ASTNode> AbstractEquationBlock.blockResidualNodes_C() {
-	    Set<ASTNode> res = new LinkedHashSet<ASTNode>(blockResidualVariables_C());
+		Set<ASTNode> res = new LinkedHashSet<ASTNode>();
 		res.addAll(blockResidualEquations_C());
 		return res;
 	}
