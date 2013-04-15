@@ -74,6 +74,10 @@ class NodeList(object):
         else:
             self.dict[key] = node.value
 
+    def __repr__(self):
+        return '<NodeList with subnode names ' + repr(self.dict.keys()) + '>'
+
+
     # todo: remove?
     def __iter__(self):
         return iter(self.nodes)
