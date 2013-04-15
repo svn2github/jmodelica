@@ -24,15 +24,15 @@ Parser for the new FMU log file format
 
 import lexer
 from lexer import SYMBOL, IDENTIFIER, COMMENT, STRING, EOF, kindof, textof
-from tree import NamedNode, Comment
+from tree import Comment, NamedNode, NodeList
 
 
 def parse(text):
-    """Parse the string text and return a list of nodes in the format of tree.py."""
+    """Parse the string text and return a NodeList in the format of tree.py."""
     return parse_nodes(Peeker(lexer.lex(text)+[(EOF, '')]))
 
 def parse_jmi_log(filename, modulename = 'Model'):
-    """Parse the jmi log in filename and return a list of nodes in the format of tree.py."""
+    """Parse the jmi log in filename and return a NodeList in the format of tree.py."""
     return parse_nodes(Peeker(lexer.lex_lines(lexer.filter_fmi_log_lines(filename, modulename))))
 
 
@@ -77,7 +77,7 @@ def asnode(token):
 ## Nonterminals ##
 
 def parse_nodes(tokens):
-    """Parse and return a list of nodes."""
+    """Parse a node list and return as a NodeList."""
     nodes = []
     while not closes_node(tokens.peek()):
         token = tokens.peek()
@@ -87,7 +87,7 @@ def parse_nodes(tokens):
             nodes.append(parse_node(tokens))
             if not closes_node(tokens.peek()):
                 expect(tokens, NODE_SEPARATOR)
-    return nodes
+    return NodeList(nodes)
 
 def parse_node(tokens):
     """Parse and return a node."""
