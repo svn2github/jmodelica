@@ -275,6 +275,12 @@ public class OptionRegistry {
 			 compiler, 
 			 false,
 			 "Debug option, outputs a csv file containing profiling recorded during compilation. Default is false."),
+		DEBUG_INVOKE_GC 
+			("debug_invoke_gc", 
+			 compiler, 
+			 false,
+			 "Debug option, if the option is set to true (default false), gc will be invoke between the different " +
+			 "steps during model compilation. This makes it possible to output accurate memory measurements."),
 		RUNTIME_PARAM
 			("generate_runtime_option_parameters",
 			 compiler,

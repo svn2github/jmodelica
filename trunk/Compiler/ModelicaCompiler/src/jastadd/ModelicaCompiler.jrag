@@ -867,6 +867,9 @@ public class ModelicaCompiler {
 	private void compileUnit(String className, String fileName[], String makeTarget, String compileTo, String unitType) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		try {
+			// set invokegc if set
+			StepInfo.GC_BEFORE_MEM = options.getBooleanOption("debug_invoke_gc");
+			
 			// Set output dir
 			if (outDir == null)
 				setRandomOutDir();
@@ -1701,7 +1704,7 @@ public class ModelicaCompiler {
 					"  -log=<i or w or e> \n" +
 					"  -modelicapath=<path to modelica libraries> \n" +
 					"  -optfile=<path to XML options file> -opt=opt1:val1,opt2:val2\n" + 
-					"  -dumpmemuse[=<resolution>] -invokegc -findflatinst \n" + 
+					"  -dumpmemuse[=<resolution>] -findflatinst \n" + 
 					"  -platform=<win32 or win64 or linux32 or linux64 or darwin32 or darwin64>" +
 					" and templates, if given, should be (in order): \n" + 
 					"  xml model description template \n" +
@@ -1719,7 +1722,6 @@ public class ModelicaCompiler {
 		
 		setDumpMemoryUse(programarguments.containsKey("dumpmemuse"), programarguments.get("dumpmemuse"));
 		setFindFlatToInstanceLinks(programarguments.containsKey("findflatinst"));
-		StepInfo.GC_BEFORE_MEM = programarguments.containsKey("invokegc");
 		
 		arg = programarguments.size();
 		if (args.length < arg+2 && !programarguments.containsKey("parse")) {
