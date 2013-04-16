@@ -327,7 +327,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             
             /* Check for infinite loop */
             if (jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
-                jmi_log_fmt(jmi->log, logWarning, "<Detected infinite loop in fixed point iteration at> "
+                jmi_log_fmt(jmi->log, logInfo, "<Detected infinite loop in fixed point iteration at> "
                             "t:%g, <switching to enchanced fixed point iteration...>", jmi_get_t(jmi)[0]);
                 jmi_log_leave(jmi->log, iter_node);
                 break;
@@ -335,7 +335,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
 
             /* Store the new switches */
             if(iter >= nbr_allocated_iterations){
-                jmi_log_fmt(jmi->log, logWarning, "<Failed to converge during fixed point iteration due to too many "
+                jmi_log_fmt(jmi->log, logInfo, "<Failed to converge during fixed point iteration due to too many "
                             "iterations, at> t:%E, <switching to enhanced fixed point iteration...>",
                             jmi_get_t(jmi)[0]);
                 jmi_log_leave(jmi->log, iter_node);
