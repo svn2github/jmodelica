@@ -50,8 +50,6 @@ aspect OptimicaFlattening {
     protected void InstOptClassDecl.flattenInstClassDeclExtra(FClass fc) {
 		FOptClass foc = (FOptClass) fc;
 		FQName empty = new FQNameEmpty();
-		for (FConstraint c : getFConstraints()) 
-			c.flatten(empty, foc);
 		if (hasInstClassModification()) {
 			List attr = new List();
 			getInstClassModification().collectAttributes(attr, empty, AttributeExpRetriever.DEFAULT, true);
@@ -61,16 +59,25 @@ aspect OptimicaFlattening {
 	
 	refine Flattening public void InstNode.flatten(FClass fc) {
 		FQName prefix = getFQName();
-		for (FAbstractEquation ae : getFAbstractEquations()) {
+		for (FAbstractEquation ae : getFAbstractEquations()) 
 		   ae.flatten(prefix, fc);
-		   ae.buildConnectionSets(prefix, fc.getConnectionSetManager());
-		}
-        for (FConstraint c : getFConstraints()) {
+        for (FConstraint c : getFConstraints()) 
            c.flatten(prefix, fc);
-        }
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
-	}	
+	}
+	
+	refine Flattening public void InstNode.buildConnectionSets(FClass fc) {
+		FQName prefix = getFQName();
+		for (FAbstractEquation ae : getFAbstractEquations()) 
+		   ae.buildConnectionSets(prefix, fc.getConnectionSetManager());
+        for (FConstraint c : getFConstraints()) 
+           c.buildConnectionSets(prefix, fc.getConnectionSetManager());
+		getInstComponentDeclList().buildConnectionSets(fc);
+		getInstExtendsList().buildConnectionSets(fc);
+	}
+	
+	public void FConstraint.buildConnectionSets(FQName prefix, ConnectionSetManager csm) { }
 
 	syn lazy ArrayList<Constraint> ClassDecl.constraints() = new ArrayList<Constraint>();
 	eq OptClassDecl.constraints() {
