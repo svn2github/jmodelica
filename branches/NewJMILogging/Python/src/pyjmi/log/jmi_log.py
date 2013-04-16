@@ -29,7 +29,7 @@ def update_jacs_scalings(jacs, jacs_updated, scalings, scalings_updated, namedno
         scalings[block] = node.scaling
         scalings_updated[block] = True
 
-def get_solves(log):
+def gather_solves(log):
     """Attempts to emulate the old structured log.
 
     Takes a log root node and returns a list of solves, marked up with a block_solves list.
